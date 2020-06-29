@@ -15,13 +15,13 @@ hs.zIndexCounter = 1000000;
 hs.dimmingOpacity = 0.75;
 
 if (hs.registerOverlay) {
-	// The simple semitransparent close button overlay
-	hs.registerOverlay({
-		thumbnailId: 'areathumb',
-		html: '<div class="closebutton"	onclick="return hs.close(this)" title="Close"></div>',
-		position: 'top right',
-		fade: 2 // fading the semi-transparent overlay looks bad in IE
-	});
+        // The simple semitransparent close button overlay
+        hs.registerOverlay({
+                thumbnailId: 'areathumb',
+                html: '<div class="closebutton"        onclick="return hs.close(this)" title="Close"></div>',
+                position: 'top right',
+                fade: 2 // fading the semi-transparent overlay looks bad in IE
+        });
 }
 </script>
 
@@ -159,7 +159,7 @@ function guessVARIAPreset(filename) {
 
     if(match != null){
       var pS = match[2];
-      if(pS == "slowest" || pS == "slow" || pS == "medium" || pS == "fast" || pS == "fastest" || pS == "basic" || pS == "VARIAble") {
+      if(pS == "slowest" || pS == "slow" || pS == "medium" || pS == "fast" || pS == "fastest" || pS == "basic" || pS == "VARIAble" || pS == "speedrun") {
         return match[1];
       } else {
         return match[1] + '_' + match[2];
@@ -289,39 +289,35 @@ if result is not None:
         dataTable.addColumn({ type: 'date', id: 'End' });
         dataTable.addRows([
 {{
-  if result["diffPercent"] == 20 or result["diffPercent"] == 40 or result["diffPercent"] == 60 or result["diffPercent"] == 80:
+  if result["diffPercent"] in [20, 40, 60, 80]:
     result["diffPercent"] += 1
     pass
 
   if result["diffPercent"] <= 20:
-    if result["diffPercent"] < 10:
-      response.write("[ 'Difficulty', 'easy', new Date(1900, 0, 0), new Date(190{}, 0, 0) ]".format(result["diffPercent"]), escape=False)
-    else:
-      response.write("[ 'Difficulty', 'easy', new Date(1900, 0, 0), new Date(19{}, 0, 0) ]".format(result["diffPercent"]), escape=False)
-      pass
+    response.write("[ 'Difficulty', 'easy', new Date(1900, 0, 0), new Date({}, 0, 0) ]".format(1900+result["diffPercent"]), escape=False)
   else:
     response.write("[ 'Difficulty', 'easy', new Date(1900, 0, 0), new Date(1920, 0, 0) ],", escape=False)
     pass
   if result["diffPercent"] > 20 and result["diffPercent"] <= 40:
-    response.write("[ 'Difficulty', 'medium', new Date(1920, 0, 0), new Date(19{}, 0, 0) ]".format(result["diffPercent"]), escape=False)
+    response.write("[ 'Difficulty', 'medium', new Date(1920, 0, 0), new Date({}, 0, 0) ]\n".format(1900+result["diffPercent"]), escape=False)
   elif result["diffPercent"] > 40:
-    response.write("[ 'Difficulty', 'medium', new Date(1920, 0, 0), new Date(1940, 0, 0) ],", escape=False)
+    response.write("[ 'Difficulty', 'medium', new Date(1920, 0, 0), new Date(1940, 0, 0) ],\n", escape=False)
     pass
   if result["diffPercent"] > 40 and result["diffPercent"] <= 60:
-    response.write("[ 'Difficulty', 'hard', new Date(1940, 0, 0), new Date(19{}, 0, 0) ]".format(result["diffPercent"]), escape=False)
+    response.write("[ 'Difficulty', 'hard', new Date(1940, 0, 0), new Date({}, 0, 0) ]\n".format(1900+result["diffPercent"]), escape=False)
   elif result["diffPercent"] > 60:
-    response.write("[ 'Difficulty', 'hard', new Date(1940, 0, 0), new Date(1960, 0, 0) ],", escape=False)
+    response.write("[ 'Difficulty', 'hard', new Date(1940, 0, 0), new Date(1960, 0, 0) ],\n", escape=False)
     pass
   if result["diffPercent"] > 60 and result["diffPercent"] <= 80:
-    response.write("[ 'Difficulty', 'very hard', new Date(1960, 0, 0), new Date(19{}, 0, 0) ]".format(result["diffPercent"]), escape=False)
+    response.write("[ 'Difficulty', 'very hard', new Date(1960, 0, 0), new Date({}, 0, 0) ]\n".format(1900+result["diffPercent"]), escape=False)
   elif result["diffPercent"] > 80:
-    response.write("[ 'Difficulty', 'very hard', new Date(1960, 0, 0), new Date(1980, 0, 0) ],", escape=False)
+    response.write("[ 'Difficulty', 'very hard', new Date(1960, 0, 0), new Date(1980, 0, 0) ],\n", escape=False)
     pass
-  if result["diffPercent"] > 80 and result["diffPercent"] <= 100:
-    if result["diffPercent"] == 100:
-      result["diffPercent"] = 99
-      pass
-    response.write("[ 'Difficulty', 'hardcore', new Date(1980, 0, 0), new Date(19{}, 0, 0) ]".format(result["diffPercent"]), escape=False)
+  if result["diffPercent"] > 80 and result["diffPercent"] < 100:
+    response.write("[ 'Difficulty', 'hardcore', new Date(1980, 0, 0), new Date({}, 0, 0) ]\n".format(1900+result["diffPercent"]), escape=False)
+  elif result["diffPercent"] == 100:
+    response.write("[ 'Difficulty', 'hardcore', new Date(1980, 0, 0), new Date(2000, 0, 0) ],\n", escape=False)
+    response.write("[ 'Difficulty', 'mania', new Date(2000, 0, 0), new Date(2010, 0, 0) ]\n", escape=False)
     pass
 }}
           ]);
@@ -329,11 +325,11 @@ if result is not None:
         var options = {
           hAxis: {
             minValue: new Date(1900, 0, 0),
-            maxValue: new Date(2000, 0, 0)
+            maxValue: new Date(2020, 0, 0)
           },
-          timeline: { groupByRowLabel: true},
+          timeline: { groupByRowLabel: true },
           tooltip: { trigger: 'none' },
-          colors: ['#6daa53', '#C1B725', '#e69235', '#d13434', '#000000'],
+          colors: ['#6daa53', '#C1B725', '#e69235', '#d13434', '#123456', '#ffffff'],
           avoidOverlappingGridLines: false
         };
 
@@ -349,7 +345,8 @@ function allReady() {
 
       for (i = 0; i < labels.length; i++) {
         // console.log(labels[i].textContent)
-        if (labels[i].textContent.substring(0,2) == '19') {
+        var start = labels[i].textContent.substring(0,2);
+        if(start == '19' || start == '20') {
           //console.log("found")
           labels[i].parentNode.removeChild(labels[i]);
           i--;
@@ -382,10 +379,10 @@ window.onload = function(){
             var reader = new FileReader();
 
             reader.onload = function(e) {
-		// check sfc or smc extention
+                // check sfc or smc extention
                 var re = /(?:\.([^.]+))?$/;
-		var ext = re.exec(file.name)[1];
-                if( ! (ext === "sfc" || ext === "smc") ) {
+                var ext = re.exec(file.name)[1];
+                if( ! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC") ) {
                     document.getElementById("uploadFile").value = "";
                     alert("wrong extension: "+ext);
                     return false;
@@ -397,7 +394,7 @@ window.onload = function(){
                 var outFileName = file.name.replace(/\.[^/.]+$/, ".json");
 
                 var fileSize = file.size;
-		if( fileSize > 4*1024*1024 ) {
+                if( fileSize > 4*1024*1024 ) {
                     document.getElementById("uploadFile").value = "";
                     alert("Wrong ROM file size: "+fileSize.toString());
                     return false;
@@ -437,13 +434,13 @@ window.onload = function(){
                     romData[addresses[i]+3] = bytes[addresses[i]+3];
                     // screen x y
                     romData[addresses[i]+6] = bytes[addresses[i]+6];
-		    romData[addresses[i]+7] = bytes[addresses[i]+7];
+                    romData[addresses[i]+7] = bytes[addresses[i]+7];
                     // distance to spawn
                     romData[addresses[i]+8] = bytes[addresses[i]+8];
-		    romData[addresses[i]+9] = bytes[addresses[i]+9];
+                    romData[addresses[i]+9] = bytes[addresses[i]+9];
                     // asmPtr
                     romData[addresses[i]+10] = bytes[addresses[i]+10];
-		    romData[addresses[i]+11] = bytes[addresses[i]+11];
+                    romData[addresses[i]+11] = bytes[addresses[i]+11];
                 }
 
                 // misc
@@ -494,16 +491,6 @@ window.onload = function(){
         getMeta(url, ".popupRoom", setPopupXY);
         $(this).on('mouseleave', function(){
             $(".popupRoom").hide();
-        });
-    });
-
-    $('.area').on('mouseenter', function(evt){
-        var url = window.location.origin+$(this).data("thumbnail-src");
-        $(".popupArea").html('<img src="'+window.location.origin+$(this).data('thumbnail-src')+'">');
-        $(".popupArea").css({left: evt.pageX+30, top: evt.pageY});
-        getMeta(url, ".popupArea", setPopupXY);
-        $(this).on('mouseleave', function(){
-            $(".popupArea").hide();
         });
     });
 
@@ -634,15 +621,16 @@ function DoPost(){
   <div class="menu">
     <table class="full menuTable">
       <tr>
-	<td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
-	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
-	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
-	<td class="menu_selected">{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
-	<td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
-	<td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
-	<td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
-	<td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
-	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+        <td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+        <td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+        <td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+        <td class="menu_selected">{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+        <td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
+        <td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
+        <td>{{=A("Plandository", _href=URL(f="plandorepo"), _class="menu")}}</td>
+        <td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+        <td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
+        <td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
       </tr>
     </table>
   </div>
@@ -663,48 +651,48 @@ function DoPost(){
     </p>
     <form id="solverForm" class="presetform" method="post" enctype="multipart/form-data" onsubmit="doSubmit();">
       <div class="row">
-	<div class="column">
-	  <table class="full">
-	    <colgroup><col class="half" /><col class="half" /></colgroup>
-	    <tr>
-	      <td>Randomized Super Metroid ROM: </td>
-	      <td><input id="uploadFile" name="uploadFile" type="file"/></td>
-	      <td id="uploadFileStep"><button type="button" onclick="startTheTour(0)">?</button></td>
-	    </tr>
-	    <tr>
-	      <td>Already uploaded ROMs in this session: </td>
-	      <td>{{=SELECT(*roms, **dict(_name="romFile", _id="romFile", value=lastRomFile, _class="filldropdown", _onchange="lastRomFileChanged(this);"))}}</td>
-	      <td id="romFileStep"><button type="button" onclick="startTheTour(1)">?</button></td>
-	    </tr>
-	    <tr>
-	      <td>Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a></td>
-	      <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.solver["preset"], _class="filldropdown chzn-select"))}}</td>
-	      <td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
-	    </tr>
-	  </table>
-	</div>
-	<div class="column">
-	  <table class="full">
-	    <colgroup><col class="half" /><col class="half" /></colgroup>
-	  <tr>
-	    <td>Difficulty target:</td>
-	    <td>{{=SELECT("easy", "medium", "hard", "very hard", "hardcore", "mania", _id="difficultyTarget", _name="difficultyTarget", _class="full", value=difficulties[session.solver["difficultyTarget"]])}}</td>
-	    <td><button type="button" onclick="startTheTour(3)">?</button></td>
-	  </tr>
-	    <tr>
-	      <td>Pickup strategy:</td>
-	      <td>{{=SELECT("all", "minimal", "any", _id="pickupStrategy", _name="pickupStrategy", _form="solverForm", _class="full", value=session.solver["pickupStrategy"])}}</td>
-	      <td><button type="button" onclick="startTheTour(4)">?</button></td>
-	    </tr>
-	  </table>
-	</div>
+        <div class="column">
+          <table class="full">
+            <colgroup><col class="half" /><col class="half" /></colgroup>
+            <tr>
+              <td>Randomized Super Metroid ROM: </td>
+              <td><input id="uploadFile" name="uploadFile" type="file"/></td>
+              <td id="uploadFileStep"><button type="button" onclick="startTheTour(0)">?</button></td>
+            </tr>
+            <tr>
+              <td>Already uploaded ROMs in this session: </td>
+              <td>{{=SELECT(*roms, **dict(_name="romFile", _id="romFile", value=lastRomFile, _class="filldropdown", _onchange="lastRomFileChanged(this);"))}}</td>
+              <td id="romFileStep"><button type="button" onclick="startTheTour(1)">?</button></td>
+            </tr>
+            <tr>
+              <td>Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a></td>
+              <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.solver["preset"], _class="filldropdown chzn-select"))}}</td>
+              <td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
+            </tr>
+          </table>
+        </div>
+        <div class="column">
+          <table class="full">
+            <colgroup><col class="half" /><col class="half" /></colgroup>
+          <tr>
+            <td>Difficulty target:</td>
+            <td>{{=SELECT("easy", "medium", "hard", "very hard", "hardcore", "mania", _id="difficultyTarget", _name="difficultyTarget", _class="full", value=difficulties[session.solver["difficultyTarget"]])}}</td>
+            <td><button type="button" onclick="startTheTour(3)">?</button></td>
+          </tr>
+            <tr>
+              <td>Pickup strategy:</td>
+              <td>{{=SELECT("all", "minimal", "any", _id="pickupStrategy", _name="pickupStrategy", _form="solverForm", _class="full", value=session.solver["pickupStrategy"])}}</td>
+              <td><button type="button" onclick="startTheTour(4)">?</button></td>
+            </tr>
+          </table>
+        </div>
       </div>
       <input id="romJson" name="romJson" style="display:none" type="text"/>
 
       <div id="forbiddenItemsVisibility">
-	<h3>Items not picked up <button  id="forbiddenItemsStep" type="button" onclick="startTheTour(5)">?</button></h3>
-	<table class="full">
-	  <tr>
+        <h3>Items not picked up <button  id="forbiddenItemsStep" type="button" onclick="startTheTour(5)">?</button></h3>
+        <table class="full">
+          <tr>
 {{
   i = 0
   for item in ['Bomb', 'Charge', 'ETank', 'Grapple', 'Gravity', 'HiJump', 'Ice', 'Missile', 'Morph', 'Plasma', 'PowerBomb', 'Reserve', 'ScrewAttack', 'SpaceJump', 'Spazer', 'SpeedBooster', 'SpringBall', 'Super', 'Varia', 'Wave', 'XRayScope']:
@@ -720,8 +708,8 @@ function DoPost(){
 
     pass
 }}
-	  </tr>
-	</table>
+          </tr>
+        </table>
       </div>
       <input id="complexity" name="complexity" style="display:none" type="text"/>
       {{=INPUT(_type="submit", _value="Solve", _name="action", _class="btn btn-default buttonRandom")}}
@@ -789,40 +777,40 @@ if result is not None:
 
       <div class="centerTable">
       <select multiple="multiple" id="item" name="item">
-	<optgroup label="Nothing">
-	  <option data-img-src="/solver/static/images/Nothing.png" value="Nothing">Nothing</option>
-	</optgroup>
-	<optgroup label="Ammo">
-	  <option data-img-src="/solver/static/images/Missile.png" value="Missile">Missile</option>
-	  <option data-img-src="/solver/static/images/Super.png" value="Super">Super Missile</option>
-	  <option data-img-src="/solver/static/images/PowerBomb.png" value="PowerBomb">Power Bomb</option>
-	</optgroup>
-	<optgroup label="Energy">
-	  <option data-img-src="/solver/static/images/ETank.png" value="ETank">Energy Tank</option>
-	    <option data-img-src="/solver/static/images/Reserve.png" value="Reserve">Reserve Tank</option>
-	</optgroup>
-	<optgroup label="Beams">
-	  <option data-img-src="/solver/static/images/Charge.png" value="Charge">Charge Beam</option>
-	  <option data-img-src="/solver/static/images/Ice.png" value="Ice">Ice Beam</option>
-	  <option data-img-src="/solver/static/images/Wave.png" value="Wave">Wave Beam</option>
-	  <option data-img-src="/solver/static/images/Spazer.png" value="Spazer">Spazer</option>
-	  <option data-img-src="/solver/static/images/Plasma.png" value="Plasma">Plasma Beam</option>
-	</optgroup>
-	<optgroup label="Suits">
-	  <option data-img-src="/solver/static/images/Varia.png" value="Varia">Varia Suit</option>
-	  <option data-img-src="/solver/static/images/Gravity.png" value="Gravity">Gravity Suit</option>
-	</optgroup>
-	<optgroup label="Items">
-	  <option data-img-src="/solver/static/images/Morph.png" value="Morph">Morph Ball</option>
-	  <option data-img-src="/solver/static/images/Bomb.png" value="Bomb">Bomb</option>
-	  <option data-img-src="/solver/static/images/SpringBall.png" value="SpringBall">Spring Ball</option>
-	  <option data-img-src="/solver/static/images/ScrewAttack.png" value="ScrewAttack">Screw Attack</option>
-	  <option data-img-src="/solver/static/images/HiJump.png" value="HiJump">Hi-Jump Boots</option>
-	  <option data-img-src="/solver/static/images/SpaceJump.png" value="SpaceJump">Space Jump</option>
-	  <option data-img-src="/solver/static/images/SpeedBooster.png" value="SpeedBooster">Speed Booster</option>
-	  <option data-img-src="/solver/static/images/Grapple.png" value="Grapple">Grapple Beam</option>
-	  <option data-img-src="/solver/static/images/XRayScope.png" value="XRayScope">X-Ray Scope</option>
-	</optgroup>
+        <optgroup label="Nothing">
+          <option data-img-src="/solver/static/images/Nothing.png" value="Nothing">Nothing</option>
+        </optgroup>
+        <optgroup label="Ammo">
+          <option data-img-src="/solver/static/images/Missile.png" value="Missile">Missile</option>
+          <option data-img-src="/solver/static/images/Super.png" value="Super">Super Missile</option>
+          <option data-img-src="/solver/static/images/PowerBomb.png" value="PowerBomb">Power Bomb</option>
+        </optgroup>
+        <optgroup label="Energy">
+          <option data-img-src="/solver/static/images/ETank.png" value="ETank">Energy Tank</option>
+            <option data-img-src="/solver/static/images/Reserve.png" value="Reserve">Reserve Tank</option>
+        </optgroup>
+        <optgroup label="Beams">
+          <option data-img-src="/solver/static/images/Charge.png" value="Charge">Charge Beam</option>
+          <option data-img-src="/solver/static/images/Ice.png" value="Ice">Ice Beam</option>
+          <option data-img-src="/solver/static/images/Wave.png" value="Wave">Wave Beam</option>
+          <option data-img-src="/solver/static/images/Spazer.png" value="Spazer">Spazer</option>
+          <option data-img-src="/solver/static/images/Plasma.png" value="Plasma">Plasma Beam</option>
+        </optgroup>
+        <optgroup label="Suits">
+          <option data-img-src="/solver/static/images/Varia.png" value="Varia">Varia Suit</option>
+          <option data-img-src="/solver/static/images/Gravity.png" value="Gravity">Gravity Suit</option>
+        </optgroup>
+        <optgroup label="Items">
+          <option data-img-src="/solver/static/images/Morph.png" value="Morph">Morph Ball</option>
+          <option data-img-src="/solver/static/images/Bomb.png" value="Bomb">Bomb</option>
+          <option data-img-src="/solver/static/images/SpringBall.png" value="SpringBall">Spring Ball</option>
+          <option data-img-src="/solver/static/images/ScrewAttack.png" value="ScrewAttack">Screw Attack</option>
+          <option data-img-src="/solver/static/images/HiJump.png" value="HiJump">Hi-Jump Boots</option>
+          <option data-img-src="/solver/static/images/SpaceJump.png" value="SpaceJump">Space Jump</option>
+          <option data-img-src="/solver/static/images/SpeedBooster.png" value="SpeedBooster">Speed Booster</option>
+          <option data-img-src="/solver/static/images/Grapple.png" value="Grapple">Grapple Beam</option>
+          <option data-img-src="/solver/static/images/XRayScope.png" value="XRayScope">X-Ray Scope</option>
+        </optgroup>
       </select>
       </div>
       <br/>
@@ -887,9 +875,9 @@ if result is not None:
     pass
 }}
       <p>
-	Rooms from: <a href="https://wiki.supermetroid.run/">https://wiki.supermetroid.run/</a><br/>
-	Area map from: <a href="https://www.snesmaps.com/maps/SuperMetroid/SuperMetroidMapSelect.html">https://www.snesmaps.com/</a><br/>
-	Sub Areas map from: <a href="http://www.nordub.ca/Maps/SuperMetroid.png">http://www.nordub.ca/</a>
+        Rooms from: <a href="https://wiki.supermetroid.run/">https://wiki.supermetroid.run/</a><br/>
+        Area map from: <a href="https://www.snesmaps.com/maps/SuperMetroid/SuperMetroidMapSelect.html">https://www.snesmaps.com/</a><br/>
+        Sub Areas map from: <a href="http://www.nordub.ca/Maps/SuperMetroid.png">http://www.nordub.ca/</a>
       </p>
     </div>
 {{

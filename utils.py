@@ -5,7 +5,7 @@ from parameters import easy, medium, hard, harder, hardcore, mania
 from smbool import SMBool
 
 def isStdPreset(preset):
-    return preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
+    return preset in ['newbie', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
 
 def removeChars(string, toRemove):
     return re.sub('[{}]+'.format(toRemove), '', string)
@@ -301,13 +301,15 @@ def loadRandoPreset(randoPreset, args):
         else:
             args.superFun.append("SuitsRandom")
 
-    patches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed"]
-
-    for patch in patches:
+    ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "refill_before_save"]
+    for patch in ipsPatches:
         if patch in randoParams and randoParams[patch] == "on":
             args.patches.append(patch + '.ips')
-    if "No_Music" in randoParams and randoParams["No_Music"] == "on":
-        args.patches.append("No_Music")
+
+    patches = ["No_Music", "Infinite_Space_Jump"]
+    for patch in patches:
+        if patch in randoParams and randoParams[patch] == "on":
+            args.patches.append(patch)
 
     if "morphPlacement" in randoParams:
         args.morphPlacement = randoParams["morphPlacement"]
@@ -353,6 +355,7 @@ def getRandomizerDefaultParameters():
     defaultParams['complexity'] = "simple"
     defaultParams['preset'] = 'regular'
     defaultParams['randoPreset'] = ""
+    defaultParams['raceMode'] = "off"
     defaultParams['majorsSplit'] = "Full"
     defaultParams['startLocation'] = "Landing Site"
     defaultParams['maxDifficulty'] = 'hardcore'
@@ -383,7 +386,10 @@ def getRandomizerDefaultParameters():
     defaultParams['elevators_doors_speed'] = "on"
     defaultParams['spinjumprestart'] = "off"
     defaultParams['rando_speed'] = "off"
+    defaultParams['Infinite_Space_Jump'] = "off"
+    defaultParams['refill_before_save'] = "off"
     defaultParams['animals'] = "off"
     defaultParams['No_Music'] = "off"
+    defaultParams['random_music'] = "off"
 
     return defaultParams

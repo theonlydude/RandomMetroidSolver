@@ -43,6 +43,22 @@ text2diff = {
     'infinity': infinity
 }
 
+def diff4solver(difficulty):
+    if difficulty == -1:
+        return "break"
+    elif difficulty < medium:
+        return "easy"
+    elif difficulty < hard:
+        return "medium"
+    elif difficulty < harder:
+        return "hard"
+    elif difficulty < hardcore:
+        return "harder"
+    elif difficulty < mania:
+        return "hardcore"
+    else:
+        return "mania"
+
 appDir = os.path.expanduser(os.path.join("~/RandomMetroidSolver"))
 
 def isKnows(knows):
@@ -225,8 +241,6 @@ class Knows:
                                'href': 'https://www.youtube.com/watch?v=1M2TiEVwH2I',
                                'rooms': ['West Sand Hole', 'East Sand Hole',
                                          'West Sand Hall', 'East Sand Hall']}
-
-
     # Area difficulties
 
     # Brinstar
@@ -295,7 +309,7 @@ class Knows:
                               'title': 'Access Old Mother Brain Missile pack location with just the Speed Booster',
                               'href': 'https://www.youtube.com/watch?v=-SO2QykqnZw',
                               'rooms': ['Climb', 'Pit Room']}
-    
+
     Moondance = SMBool(False, mania, ['Moondance'])
     desc['Moondance'] = {'display': 'Moondance',
                          'title': 'Access Etecoons area using moonfall shenanigans',
@@ -393,6 +407,12 @@ class Knows:
                                   'href': 'https://www.youtube.com/watch?v=AYK7LREbLI8',
                                   'rooms': ['The Worst Room In The Game']}
 
+    WorstRoomWallJump = SMBool(False, 0, ['WorstRoomWallJump'])
+    desc['WorstRoomWallJump'] = {'display': 'Worst Room insane wall jump',
+                                  'title': 'Do the frame+pixel perfect wall jump to get out Worst Room without Hi-Jump',
+                                  'href': 'https://clips.twitch.tv/FuriousHeartlessArugulaStrawBeary',
+                                  'rooms': ['The Worst Room In The Game']}
+
     ScrewAttackExit = SMBool(True, medium, ['ScrewAttackExit'])
     desc['ScrewAttackExit'] = {'display': 'Screw Attack Exit',
                                'title': 'Gain momentum with Hi-Jump and Speed Booster from Golden Torizo Energy Recharge room, then Wall Jump in Screw Attack room, destroying the ceiling with Screw Attack.',
@@ -404,6 +424,18 @@ class Knows:
                                            'title': 'Destroy the ceiling, then jump from inside the door with Hi-Jump and Speed Booster to climb up in Screw Attack room',
                                            'href': 'https://youtu.be/2Ws0Zokg-SQ',
                                            'rooms': ['Screw Attack Room']}
+
+    FirefleasWalljump = SMBool(False, 0, ['FirefleasWalljump'])
+    desc['FirefleasWalljump'] = {'display': 'Firefleas Wall Jump',
+                                 'title': 'Get back up from bottom of firefleas without movement items or Ice Beam',
+                                 'href': 'https://youtu.be/tp4V9aNKp64',
+                                 'rooms': ['Lower Norfair Fireflea Room']}
+
+    DodgeLowerNorfairEnemies = SMBool(False, 0, ['DodgeLowerNorfairEnemies'])
+    desc['DodgeLowerNorfairEnemies'] = {'display': 'Dodge Lower Norfair Enemies',
+                                        'title': 'Go through hard-hitting enemies in Lower Norfair without taking damage or killing them',
+                                        'href': None, # TODO
+                                        'rooms': ["Three Musketeers' Room", "Wasteland", 'Red Kihunter Shaft', 'The Worst Room In The Game']}
 
     # wrecked ship
     ContinuousWallJump = SMBool(False, 0, ['ContinuousWallJump'])
@@ -513,6 +545,18 @@ class Knows:
                                 'href': 'https://snipaclip.com/watch/HomelyImpartialVampireFloof',
                                 'rooms': ['Pants Room']}
 
+    CrystalFlashClip = SMBool(False, 0, ['CrystalFlashClip'])
+    desc['CrystalFlashClip'] = {'display': 'Crystal Flash Clip',
+                               'title': 'Use a Crystal Flash to clip through crumble blocks to get to Botwoon or Shaktool, using Gravity and Bombs',
+                               'href': 'https://www.youtube.com/watch?v=z2c3u8ICO6A',
+                               'rooms': ['Botwoon Hallway', 'East Pants Room']}
+
+    SuitlessCrystalFlashClip = SMBool(False, 0, ['SuitlessCrystalFlashClip'])
+    desc['SuitlessCrystalFlashClip'] = {'display': 'Suitless Crystal Flash Clip',
+                               'title': 'Use a Crystal Flash to clip through crumble blocks to get to Botwoon or Shaktool',
+                               'href': 'https://www.youtube.com/watch?v=BUzmHsk0H7k',
+                               'rooms': ['Botwoon Hallway', 'East Pants Room']}
+
     # plasma room
     KillPlasmaPiratesWithSpark = SMBool(False, 0, ['KillPlasmaPiratesWithSpark'])
     desc['KillPlasmaPiratesWithSpark'] = {'display': 'Kill Plasma Pirates with Spark',
@@ -563,6 +607,12 @@ class Knows:
                                              'href': 'https://www.twitch.tv/videos/480378897',
                                              'rooms': ['Pants Room']}
 
+    AccessSpringBallWithFlatley = SMBool(False, 0, ['AccessSpringBallWithFlatley'])
+    desc['AccessSpringBallWithFlatley'] = {'display': 'Access Spring Ball location suitless with a flatley jump and Space Jump',
+                                           'title': 'Do a suitless flatley jump to get through the grapple hole, and get out of the water with Space Jump',
+                                           'href': 'https://www.youtube.com/watch?v=VWDWlJ6cjmI',
+                                           'rooms': ['Pants Room']}
+
     categories = {
         'Common': [
             {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 'CrouchJump'],
@@ -576,7 +626,7 @@ class Knows:
             {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess', 'LowGauntlet', 'OldMBWithSpeed'],
              'title': 'Crateria'},
             {'knows': ['CeilingDBoost', 'BillyMays', 'EarlyKraid',
-                       'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 
+                       'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess',
                        'RedTowerClimb', 'XrayDboost', 'XrayIce',
                        'RonPopeilScrew', 'Moondance'],
              'title': 'Brinstar'}
@@ -590,7 +640,8 @@ class Knows:
         'Maridia 1/2': [
             {'knows': ['GravLessLevel1', 'GravLessLevel2', 'GravLessLevel3'],
              'title': 'Underwater movement without Gravity Suit'},
-            {'knows': ['MochtroidClip', 'PuyoClip', 'PuyoClipXRay', 'SnailClip'],
+            {'knows': ['MochtroidClip', 'PuyoClip', 'PuyoClipXRay',
+                       'SnailClip', 'CrystalFlashClip'],
              'title': 'Clips'},
             {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
              'title': 'Plasma Room'},
@@ -600,18 +651,32 @@ class Knows:
         'Maridia 2/2': [
             {'knows': ['AccessSpringBallWithHiJump', 'AccessSpringBallWithSpringBallBombJumps',
                        'AccessSpringBallWithBombJumps', 'AccessSpringBallWithSpringBallJump',
-                       'AccessSpringBallWithXRayClimb', 'AccessSpringBallWithGravJump'],
+                       'AccessSpringBallWithGravJump', 'AccessSpringBallWithXRayClimb', 'AccessSpringBallWithFlatley'],
              'title': 'Spring Ball Access'},
             {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
              'title': 'Suitless Draygon Exit'},
-            {'knows': ['DoubleSpringBallJump', 'TediousMountEverest', 'BotwoonToDraygonWithIce', 'SuitlessPuyoClip'],
+            {'knows': ['DoubleSpringBallJump', 'TediousMountEverest',
+                       'BotwoonToDraygonWithIce', 'SuitlessCrystalFlashClip',
+                       'SuitlessPuyoClip'],
              'title': 'Obscure suitless stuff'}
         ],
-        'Norfair': [
-            {'knows': ['WallJumpCathedralExit', 'BubbleMountainWallJump', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'IceEscape', 'IceMissileFromCroc', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
-              'title': 'Upper Norfair'},
-            {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'ScrewAttackExitWithoutScrew', 'WorstRoomIceCharge'],
-             'title': 'Lower Norfair'}
+        'Upper Norfair': [
+            {'knows': ['WallJumpCathedralExit', 'IceEscape', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
+              'title': 'Main Upper Norfair'},
+            {'knows': ['BubbleMountainWallJump', 'NorfairReserveDBoost'],
+             'title': 'Bubble Mountain'},
+            {'knows': ['CrocPBsIce', 'CrocPBsDBoost', 'IceMissileFromCroc'],
+             'title': 'Crocomire'}
+        ],
+        'Lower Norfair': [
+            {'knows': ['LavaDive', 'LavaDiveNoHiJump'],
+              'title': 'Access'},
+            {'knows': ['ScrewAttackExit', 'ScrewAttackExitWithoutScrew'],
+              'title': 'Screw Attack'},
+            {'knows': ['WorstRoomIceCharge', 'WorstRoomWallJump'],
+              'title': 'Worst Room In The Game'},
+            {'knows': [ 'FirefleasWalljump', 'DodgeLowerNorfairEnemies'],
+             'title': 'Other'}
         ],
         'Bosses/End': [
             {'knows': ['DraygonGrappleKill', 'DraygonSparkKill', 'MicrowaveDraygon', 'MicrowavePhantoon'],

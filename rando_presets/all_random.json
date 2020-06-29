@@ -11,11 +11,13 @@
   "progressionSpeed": "random",
   "areaRandomization": "random",
   "bossRandomization": "random",
-  "maxDifficulty": "random",
+  "maxDifficulty": "hardcore",
   "powerBombQty": "random",
   "minorQty": "random",
   "suitsRestriction": "random",
   "superQty": "random",
   "energyQty": "random",
-  "funSuits": "random"
+  "energyQtyMultiSelect": ["sparse", "medium", "vanilla"],
+  "funSuits": "random",
+  "escapeRando": "random"
 }

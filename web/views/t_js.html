@@ -61,7 +61,7 @@ function isEscapeAP(ap) {
 
 function clickPortal(elemId) {
     if(loaded == false || webServInProgress == true) {
-	return;
+        return;
     }
 
     // console.log("clickPortal "+elemId+" is escape ? "+isEscapeAP(elemId)+" escape mode ? "+escapeRando);
@@ -70,66 +70,66 @@ function clickPortal(elemId) {
 
     // prevent clicking on escape portals
     if(isEscape == true && (escapeRando == false || mode != "plando")) {
-	return;
+        return;
     }
 
     escapeStart = "tourianEscapeRoom4TopRight"
     escapeLine = escapeStart in lines;
     if(escapeLine == true) {
-	escapeEnd = lines[escapeStart]
+        escapeEnd = lines[escapeStart]
     }
 
     if(firstClick == ""){
-	if(isEscape == true && escapeLine == true && elemId != escapeStart && elemId != escapeEnd){
-	    // escape line already there, allow only to select a portal of the escape line
-	    return;
-	}
+        if(isEscape == true && escapeLine == true && elemId != escapeStart && elemId != escapeEnd){
+            // escape line already there, allow only to select a portal of the escape line
+            return;
+        }
 
-	// highlight first element, allow highlight of already linked portals for link removal
-	firstClick = elemId;
-	$("#"+firstClick).addClass("addBorder");
+        // highlight first element, allow highlight of already linked portals for link removal
+        firstClick = elemId;
+        $("#"+firstClick).addClass("addBorder");
     } else if(firstClick == elemId){
-	// click back on same portal
-	$("#"+firstClick).removeClass("addBorder");
-	firstClick = "";
+        // click back on same portal
+        $("#"+firstClick).removeClass("addBorder");
+        firstClick = "";
     } else if(secondClick == "" && elemId != firstClick) {
-	isFirstEscape = isEscapeAP(firstClick);
+        isFirstEscape = isEscapeAP(firstClick);
 
-	if(isFirstEscape != isEscape) {
-	    // no mixing escape ap with other aps
-	    return;
-	}
+        if(isFirstEscape != isEscape) {
+            // no mixing escape ap with other aps
+            return;
+        }
 
-	if(firstClick in lines) {
-	    // first portal was an already connected one, replace the selection
-	    $("#"+firstClick).removeClass("addBorder");
-	    firstClick = elemId;
-	    $("#"+firstClick).addClass("addBorder");
-	} else {
-	    if(! ((firstClick in lines) || (elemId in lines))) {
-		// add new line
+        if(firstClick in lines) {
+            // first portal was an already connected one, replace the selection
+            $("#"+firstClick).removeClass("addBorder");
+            firstClick = elemId;
+            $("#"+firstClick).addClass("addBorder");
+        } else {
+            if(! ((firstClick in lines) || (elemId in lines))) {
+                // add new line
 
-		if(isEscape == true) {
-		    // escape aps, one must be tourian exit
-		    if(firstClick != escapeStart && elemId != escapeStart) {
-			alert("For escape one node must be Tourian escape.");
-			return;
-		    }
-		} else if(checkCompatibleAPs(firstClick, elemId) == false) {
-		    alert("Warning:\n\tYou are mixing an Areas access point and a Bosses access point.\n\tIt's an invalid transition except for Plando seeds.");
-		}
+                if(isEscape == true) {
+                    // escape aps, one must be tourian exit
+                    if(firstClick != escapeStart && elemId != escapeStart) {
+                        alert("For escape one node must be Tourian escape.");
+                        return;
+                    }
+                } else if(checkCompatibleAPs(firstClick, elemId) == false) {
+                    alert("Warning:\n\tYou are mixing an Areas access point and a Bosses access point.\n\tIt's an invalid transition except for Plando seeds.");
+                }
 
-		if(init == true) {
-		    secondClick = elemId;
-		    ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
-		    firstClick = "";
-		    secondClick = "";
-		} else {
-		    // warn the user that he have to click on '>' first
-		    alert("Please initialize the tracker/plando first by clicking on the Play button.");
-		}
-	    }
-	}
+                if(init == true) {
+                    secondClick = elemId;
+                    ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
+                    firstClick = "";
+                    secondClick = "";
+                } else {
+                    // warn the user that he have to click on '>' first
+                    alert("Please initialize the tracker/plando first by clicking on the Play button.");
+                }
+            }
+        }
     }
 }
 
@@ -147,7 +147,8 @@ function addLine(startPoint, endPoint) {
                              gradient: true,
                              outlineColor: 'rgb(255, 255, 255)',
                              outline: true,
-                             outlineSize: 0.10});
+                             outlineSize: 0.10,
+                             path: 'straight'});
 
   nextColor += 1;
   $("#"+startPoint).removeClass("addBorder");
@@ -355,6 +356,8 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       locsInfo[locName]["difficulty"] = locData["difficulty"];
       locsInfo[locName]["canHidden"] = locData["canHidden"];
       locsInfo[locName]["visibility"] = locData["visibility"];
+      locsInfo[locName]["accessPoint"] = locData["accessPoint"];
+      locsInfo[locName]["path"] = locData["path"];
 
       $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
       var tooltip = getTooltip(locName, locData, "?", false);
@@ -363,7 +366,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       // check if a boss was at that location
       if("boss" in locsInfo[locName]) {
         var bossName = locsInfo[locName]["boss"];
-        if(bossName != "Mother Brain") {
+        if(bossName != "MotherBrain") {
           document.getElementById(bossName+"G4").style.display = "none";
         }
       }
@@ -379,6 +382,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       locsInfo[locName]["canHidden"] = locData["canHidden"];
       locsInfo[locName]["visibility"] = locData["visibility"];
       locsInfo[locName]["item"] = locData["item"];
+      locsInfo[locName]["accessPoint"] = locData["accessPoint"];
 
       // keep current loc zoomed
       var base = "baseLoc";
@@ -394,7 +398,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       // check if a boss was at that location
       if("boss" in locsInfo[locName]) {
         var bossName = locsInfo[locName]["boss"];
-        if(bossName != "Mother Brain") {
+        if(bossName != "MotherBrain") {
           document.getElementById(bossName+"G4").style.display = "block";
         }
       }
@@ -414,6 +418,17 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     }
     $("#"+elem+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
   }
+
+    if(mode == "seedless") {
+        // load items as all locs contain Nothing
+        var collectedItems = jsonData["collectedItems"];
+        for(var i=0; i<collectedItems.length; i++) {
+            var item = collectedItems[i];
+            if(item != "Nothing") {
+                addItem(item);
+            }
+        }
+    }
 
   setItemCount("Missile");
   setItemCount("Super");
@@ -444,7 +459,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       // check if a boss was at that location
       if("boss" in locsInfo[locName]) {
         var bossName = locsInfo[locName]["boss"];
-        if(bossName != "Mother Brain") {
+        if(bossName != "MotherBrain") {
           document.getElementById(bossName+"G4").style.display = "none";
         }
       }
@@ -483,33 +498,40 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
 }
 
 function setActive(mode, area, boss) {
-  var itemElems = ["repeatItem", "binItem"];
-  var plandoElems = ["repeatPlando", "binPlando", "savePlando"];
-  var areaElems = ["repeatArea", "binArea"];
-  if(mode != "plando") {
-    for(var i=0; i<itemElems.length; i++) {
-      $("#"+itemElems[i]).removeClass("greyed");
+    var itemElems = ["repeatItem", "binItem"];
+    var plandoElems = ["repeatPlando", "binPlando", "savePlando"];
+    var areaElems = ["repeatArea", "binArea"];
+    if(mode != "plando") {
+        for(var i=0; i<itemElems.length; i++) {
+            $("#"+itemElems[i]).removeClass("greyed");
+        }
+        for(var i=0; i<plandoElems.length; i++) {
+            $("#"+plandoElems[i]).addClass("greyed");
+        }
+    } else {
+        for(var i=0; i<itemElems.length; i++) {
+            $("#"+itemElems[i]).addClass("greyed");
+        }
+        for(var i=0; i<plandoElems.length; i++) {
+            $("#"+plandoElems[i]).removeClass("greyed");
+        }
     }
-    for(var i=0; i<plandoElems.length; i++) {
-      $("#"+plandoElems[i]).addClass("greyed");
+    if(area == true || boss == true) {
+        for(var i=0; i<areaElems.length; i++) {
+            $("#"+areaElems[i]).removeClass("greyed");
+        }
+    } else {
+        for(var i=0; i<areaElems.length; i++) {
+            $("#"+areaElems[i]).addClass("greyed");
+        }
     }
-  } else {
-    for(var i=0; i<itemElems.length; i++) {
-      $("#"+itemElems[i]).addClass("greyed");
+    if(mode == "seedless") {
+        document.getElementById("pause_background").style.display = "none";
+        document.getElementById("pause_background_seedless").style.display = "block";
+    } else {
+        document.getElementById("pause_background").style.display = "block";
+        document.getElementById("pause_background_seedless").style.display = "none";
     }
-    for(var i=0; i<plandoElems.length; i++) {
-      $("#"+plandoElems[i]).removeClass("greyed");
-    }
-  }
-  if(area == true || boss == true) {
-    for(var i=0; i<areaElems.length; i++) {
-      $("#"+areaElems[i]).removeClass("greyed");
-    }
-  } else {
-    for(var i=0; i<areaElems.length; i++) {
-      $("#"+areaElems[i]).addClass("greyed");
-    }
-  }
 }
 
 function isActive(elemId) {
@@ -542,6 +564,7 @@ var boss = true;
 var escapeRando = true;
 var init = false;
 var webServInProgress = false;
+var race = false;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "break"]
@@ -562,9 +585,9 @@ var locsInfo = {
   EnergyTankKraid: {left: 50.97, top: 66.8},
   VariaSuit: {left: 67.6, top: 66.75},
   IceBeam: {left: 38.6, top: 73.99},
-  EnergyTankCrocomire: {left: 52, top: 86.05},
+  EnergyTankCrocomire: {left: 25.8, top: 82.5},
   HiJumpBoots: {left: 40.4, top: 80},
-  GrappleBeam: {left: 36.65, top: 95.2},
+  GrappleBeam: {left: 10.6, top: 91.65},
   ReserveTankNorfair: {left: 51.02, top: 73.99},
   SpeedBooster: {left: 69.05, top: 73.95},
   WaveBeam: {left: 61.4, top: 76.9},
@@ -575,12 +598,12 @@ var locsInfo = {
   EnergyTankWreckedShip: {left: 74.7, top: 7.3},
   RightSuperWreckedShip: {left: 77.4, top: 13.3},
   GravitySuit: {left: 66.97, top: 7.2},
-  EnergyTankMamaturtle: {left: 74.93, top: 52.3},
-  PlasmaBeam: {left: 84.2, top: 36.87},
-  ReserveTankMaridia: {left: 77.55, top: 56.85},
-  SpringBall: {left: 89.1, top: 58.4},
-  EnergyTankBotwoon: {left: 85.3, top: 46.2},
-  SpaceJump: {left: 91.1, top: 50.9},
+  EnergyTankMamaturtle: {left: 73.73, top: 52.3},
+  PlasmaBeam: {left: 85.4, top: 36.87},
+  ReserveTankMaridia: {left: 78.8, top: 56.85},
+  SpringBall: {left: 90.3, top: 58.4},
+  EnergyTankBotwoon: {left: 86.5, top: 46.2},
+  SpaceJump: {left: 92.4, top: 50.8},
   PowerBombCrateriasurface: {left: 44.5, top: 3.9},
   MissileoutsideWreckedShipbottom: {left: 61.35, top: 10.1},
   MissileoutsideWreckedShiptop: {left: 62.1, top: 2.75},
@@ -616,9 +639,9 @@ var locsInfo = {
   MissileaboveCrocomire: {left: 45.2, top: 80.1},
   MissileHiJumpBoots: {left: 41.4, top: 78.6},
   EnergyTankHiJumpBoots: {left: 42.4, top: 78.5},
-  PowerBombCrocomire: {left: 42.4, top: 86.05},
-  MissilebelowCrocomire: {left: 47, top: 93.7},
-  MissileGrappleBeam: {left: 41.3, top: 93.8},
+  PowerBombCrocomire: {left: 16.3, top: 82.5},
+  MissilebelowCrocomire: {left: 21, top: 90.15},
+  MissileGrappleBeam: {left: 15.3, top: 90.25},
   MissileNorfairReserveTank: {left: 51.9, top: 73.95},
   MissilebubbleNorfairgreendoor: {left: 53.8, top: 73.95},
   MissilebubbleNorfair: {left: 55.7, top: 78.45},
@@ -635,23 +658,23 @@ var locsInfo = {
   MissileGravitySuit: {left: 69.8, top: 7.2},
   MissileWreckedShiptop: {left: 77.4, top: 2.65},
   SuperMissileWreckedShipleft: {left: 71.8, top: 13.3},
-  MissilegreenMaridiashinespark: {left: 67.3, top: 52.2},
-  SuperMissilegreenMaridia: {left: 68.1, top: 50.75},
-  MissilegreenMaridiatatori: {left: 75.7, top: 53.7},
-  SuperMissileyellowMaridia: {left: 69.6, top: 43.1},
-  MissileyellowMaridiasupermissile: {left: 68.6, top: 43.1},
-  MissileyellowMaridiafalsewall: {left: 76.7, top: 43},
-  MissileleftMaridiasandpitroom: {left: 76.7, top: 55.4},
-  MissilerightMaridiasandpitroom: {left: 79.6, top: 55.4},
-  PowerBombrightMaridiasandpitroom: {left: 80.5, top: 56.8},
-  MissilepinkMaridia: {left: 80.5, top: 47.85},
-  SuperMissilepinkMaridia: {left: 81.5, top: 47.85},
-  MissileDraygon: {left: 97.65, top: 44.7},
+  MissilegreenMaridiashinespark: {left: 66.1, top: 52.2},
+  SuperMissilegreenMaridia: {left: 66.9, top: 50.75},
+  MissilegreenMaridiatatori: {left: 74.5, top: 53.7},
+  SuperMissileyellowMaridia: {left: 68.4, top: 43.1},
+  MissileyellowMaridiasupermissile: {left: 67.4, top: 43.1},
+  MissileyellowMaridiafalsewall: {left: 75.5, top: 43},
+  MissileleftMaridiasandpitroom: {left: 77.95, top: 55.4},
+  MissilerightMaridiasandpitroom: {left: 80.8, top: 55.4},
+  PowerBombrightMaridiasandpitroom: {left: 81.7, top: 56.8},
+  MissilepinkMaridia: {left: 81.7, top: 47.85},
+  SuperMissilepinkMaridia: {left: 82.7, top: 47.85},
+  MissileDraygon: {left: 98.85, top: 44.7},
   Kraid: {left: 66.16, top: 66, boss: "Kraid"},
   Ridley: {left: 76.6, top: 93.8, boss: "Ridley"},
   Phantoon: {left: 78.8, top: 16.3, boss: "Phantoon"},
-  Draygon: {left: 92.6, top: 50, boss: "Draygon"},
-  MotherBrain: {left: 22, top: 33.2, boss: "Mother Brain"}
+  Draygon: {left: 93.8, top: 50, boss: "Draygon"},
+  MotherBrain: {left: 22, top: 33.2, boss: "MotherBrain"}
 };
 
 window.onload = function(){
@@ -678,10 +701,10 @@ window.onload = function(){
     var reader = new FileReader();
   
     reader.onload = function(e) {
-  	// check sfc or smc extention
+          // check sfc or smc extention
         var re = /(?:\.([^.]+))?$/;
-  	var ext = re.exec(file.name)[1];
-        if( ! (ext === "sfc" || ext === "smc") ) {
+          var ext = re.exec(file.name)[1];
+        if( ! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC") ) {
             document.getElementById("uploadFile").value = "";
             alert("wrong extension: "+ext);
             return false;
@@ -694,7 +717,7 @@ window.onload = function(){
         document.getElementById("fileName").value = file.name;
 
         var fileSize = file.size;
-  	if( fileSize > 4*1024*1024 ) {
+        if( fileSize > 4*1024*1024 ) {
             document.getElementById("uploadFile").value = "";
             alert("Wrong ROM file size: "+fileSize.toString());
             return false;
@@ -702,9 +725,27 @@ window.onload = function(){
             document.getElementById("uploadFile").value = "";
             alert("headered ROM detected, please use an unheadered ROM");
             return false;
+        } else if(mode == "plando" && fileSize == 4*1024*1024) {
+            alert("Warning: You won't be able to upload a Sprite customized seed in the Plandository (hosting space constraints)");
         }
-  
+
         var bytes = new Uint8Array(e.target.result);
+
+        // detect race mode patch
+        race = false;
+        for(var addr=0x1C0200; addr<0x1C0210; addr++) {
+            if(bytes[addr] != 0xff) {
+                if(document.getElementById("mode").value == "plando") {
+                    clearInputSeed();
+                    alert("race protected seed detected");
+                    return false;
+                } else {
+                    race = true;
+                    break;
+                }
+            }
+        }
+
         var romData = {};
   
         // locations items
@@ -735,14 +776,14 @@ window.onload = function(){
             romData[addresses[i]+3] = bytes[addresses[i]+3];
             // screen x y
             romData[addresses[i]+6] = bytes[addresses[i]+6];
-	    romData[addresses[i]+7] = bytes[addresses[i]+7];
+            romData[addresses[i]+7] = bytes[addresses[i]+7];
             // distance to spawn
             romData[addresses[i]+8] = bytes[addresses[i]+8];
-	    romData[addresses[i]+9] = bytes[addresses[i]+9];
+            romData[addresses[i]+9] = bytes[addresses[i]+9];
             // asmPtr
             romData[addresses[i]+10] = bytes[addresses[i]+10];
-	    romData[addresses[i]+11] = bytes[addresses[i]+11];
-	}
+            romData[addresses[i]+11] = bytes[addresses[i]+11];
+        }
   
         // misc
         var addresses = new Array({{=", ".join(str(address) for address in addresses["misc"])}});
@@ -771,7 +812,7 @@ window.onload = function(){
 
         setGuessedPreset(file.name);
 
-	document.getElementById("startLocationVisibility").style.display = "none";
+        document.getElementById("startLocationVisibility").style.display = "none";
     }
   
     reader.readAsArrayBuffer(file);
@@ -784,7 +825,52 @@ window.onload = function(){
 
   $("#placeItemButton").keypress(onEnterKey);
 
+  addTooltipCallback();
+
   loaded = true;
+}
+
+function addTooltipCallback() {
+    // display the next ap while the tooltip is displayed
+    $("[data-toggle=tooltip]").on('show.bs.tooltip', function (callbackData) {
+        var locName = callbackData.target.id;
+        if(locName in locsInfo) {
+            var locData = locsInfo[locName];
+
+            // display next ap
+            if("accessPoint" in locData) {
+                // display path
+                if(nextAP != lastAP && "path" in locData) {
+                    var path = locData["path"];
+                    for(var i=0; i<path.length; i++) {
+                        var gps = "gps_"+(i+1);
+                        var ap = path[i];
+
+                        $("#"+gps).attr("class", "nextAP "+ap+"Gps");
+                        document.getElementById(gps).style.display = "block";
+                    }
+                    document.getElementById("lastAP").style.display = "none";
+                    document.getElementById("nextAP").style.display = "none";
+                } else {
+                    var nextAP = locData["accessPoint"];
+                    $("#nextAP").attr("class", "nextAP "+nextAP+"Gps");
+                    document.getElementById("nextAP").style.display = "block";
+                    $("#nextgps"+'[data-toggle="tooltip"]').attr("title", nextAP).tooltip('fixTitle');
+                }
+            }
+        }
+    });
+    $("[data-toggle=tooltip]").on('hide.bs.tooltip', function (a) {
+        document.getElementById("lastAP").style.display = "block";
+
+        // hide next ap
+        document.getElementById("nextAP").style.display = "none";
+
+        // hide path aps
+        for(var i=1; i<=24; i++) {
+            document.getElementById("gps_"+i).style.display = "none";
+        }
+    });
 }
 
 function onEnterKey(event) {
@@ -821,7 +907,7 @@ function guessVARIAPreset(filename) {
 
     if(match != null){
       var pS = match[2];
-      if(pS == "slowest" || pS == "slow" || pS == "medium" || pS == "fast" || pS == "fastest" || pS == "basic" || pS == "VARIAble") {
+      if(pS == "slowest" || pS == "slow" || pS == "medium" || pS == "fast" || pS == "fastest" || pS == "basic" || pS == "VARIAble" || pS == "speedrun") {
         return match[1];
       } else {
         return match[1] + '_' + match[2];
@@ -931,8 +1017,8 @@ function initSolver() {
             preset: document.getElementById("preset").value,
             fileName: document.getElementById("fileName").value,
             fill: document.getElementById("fillPlando").checked,
-	    startLocation: document.getElementById("startLocation").value,
-            mode: mode}, "download");
+            startLocation: document.getElementById("startLocation").value,
+            mode: mode, race: race}, "download");
 
   hidePopup();
   $('#hideRandoOverlay').hide();
@@ -957,12 +1043,12 @@ function clickLoc(elem) {
 
   var locName = elem.id;
 
-  if(mode != "standard") {
-    // we don't put an item in boss locations
+  if(mode == "plando") {
+    // we put an item in boss locations which is the boss' name
     if("boss" in locsInfo[locName]) {
       // check that lock is in the available list
       if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
-        ajaxCall({action: "add", scope: "item", locName: locName, itemName: "Nothing"}, "upload");
+        ajaxCall({action: "add", scope: "item", locName: locName, itemName: locsInfo[locName]["boss"]}, "upload");
 
         if(locName == "MotherBrain") {
           alert("SEE YOU NEXT MISSION");
@@ -993,14 +1079,32 @@ function clickLoc(elem) {
     // check that lock is in the available list
     if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
       // call webservice
+      console.log("add item loc: "+locName);
       ajaxCall({action: "add", scope: "item", locName: locName}, "upload");
   
       // if mother brain loc, display end message
      if(locName == "MotherBrain") {
        alert("SEE YOU NEXT MISSION");
      }
+    } else {
+        // uncollect it
+        console.log("remove item loc: "+locName);
+        ajaxCall({action: "remove", scope: "item", locName: locName}, "upload");
     }
   }
+}
+
+function actionItem(itemName, action) {
+    if(loaded == false || webServInProgress == true || init == false) {
+        return;
+    }
+
+    if(mode == "seedless") {
+        console.log("actionItem itemName: "+itemName+" action: "+action);
+
+        // call webservice
+        ajaxCall({action: action, scope: "item", itemName: itemName}, "upload");
+    }
 }
 
 function placeItem() {
@@ -1091,19 +1195,34 @@ function clearLocs(isPlando) {
 }
 
 function getTooltip(locName, locData, item, visited) {
-  var tooltip = "<center>"+locData["name"]+"</center>";
+    var tooltip = "<center>"+locData["name"]+"</center>";
 
-  if("boss" in locsInfo[locName]) {
-    tooltip += "Boss: "+locsInfo[locName]["boss"]+"<br>";
-  }
+    if("boss" in locsInfo[locName]) {
+        tooltip += "<center>Boss: "+locsInfo[locName]["boss"]+"</center>";
+        if(visited == true) {
+            return tooltip;
+        }
+    }
 
-  if(visited == true) {
-    return tooltip+"Item: "+item;
-
-  } else {
-    return tooltip+"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")+"<br>Items: "+(locData["items"].length > 0 ? locData["items"] : "None")+("path" in locData ? "<br>Path: "+locData["path"] : "")+("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "")+("difficulty" in locData ? "<br>Difficulty: "+locData["difficulty"] : "")+("distance" in locData ? "<br>Distance: "+locData["distance"] : "");
-
-  }
+    if(visited == true) {
+        return tooltip+"<center>Item: "+item+"</center>";
+    } else {
+        // sequence break
+        if(locData["knows"].length > 0 && locData["knows"][0] == "Sequence Break") {
+            return tooltip+"<center>Sequence Break</center>"
+                // debug data
+                +("path" in locData ? "<br>Path: "+locData["path"] : "")
+                +("distance" in locData ? "<br>Distance: "+locData["distance"] : "");
+        } else {
+            return tooltip
+                   +"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")
+                   +"<br>Items: "+(locData["items"].length > 0 ? locData["items"] : "None")
+                   +("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "")
+                   +("difficulty" in locData ? "<br>Difficulty: "+locData["difficulty"] : "")
+                   // debug data
+                   +("distance" in locData ? "<br>Distance: "+locData["distance"] : "");
+        }
+    }
 }
 
 var itemCount = {
@@ -1128,20 +1247,28 @@ function resetItems() {
     document.getElementById("Reserve_"+i+"_pause").style.display = "none";
   }
 
-  var items = ["Charge", "Ice", "Wave", "Spazer", "Plasma", "Varia", "Gravity", "Morph", "Bomb", "SpringBall", "ScrewAttack", "HiJump", "SpaceJump", "SpeedBooster", "Missile", "Super", "PowerBomb", "Grapple", "XRayScope"];
+  var items = ["Charge", "Ice", "Wave", "Spazer", "Plasma", "Varia", "Gravity", "Morph", "Bomb", "SpringBall", "ScrewAttack", "HiJump", "SpaceJump", "SpeedBooster", "Grapple", "XRayScope"];
   for(var item in items) {
-    document.getElementById(items[item]+"_pause").style.display = "none";
+    document.getElementById(items[item]+"_pause_img").style.display = "none";
+  }
+
+  var items = ["Missile", "Super", "PowerBomb"];
+  for(var item in items) {
+      document.getElementById(items[item]+"_pause").style.display = "none";
   }
 }
 
+var bosses = ["Kraid", "Phantoon", "Draygon", "Ridley", "MotherBrain"];
 function addItem(itemName) {
-  if(itemName == "Nothing" || itemName == "NoEnergy") {
+  if(itemName == "Nothing" || itemName == "NoEnergy" || bosses.includes(itemName)) {
     return;
   }
   if(itemName in itemCount) {
     itemCount[itemName] += 1
     if(itemName == "Missile" || itemName == "Super" || itemName == "PowerBomb") {
-      document.getElementById(itemName+"_pause").style.display = "block";
+      if(mode != "seedless") {
+        document.getElementById(itemName+"_pause").style.display = "block";
+      }
     } else {
       if(itemName == "ETank") {
         var count = Math.min(14, itemCount[itemName]);
@@ -1152,7 +1279,7 @@ function addItem(itemName) {
       }
     }
   } else {
-    document.getElementById(itemName+"_pause").style.display = "block";
+    document.getElementById(itemName+"_pause_img").style.display = "block";
   }
 }
 

@@ -30,12 +30,18 @@ class RomPatches:
     # graph blue doors
     HiJumpAreaBlueDoor        = 32
     SpeedAreaBlueDoors        = 33
+    # LN start
+    LowerNorfairPBRoomHeatDisable = 34
+    FirefleasRemoveFune       = 35
     # moat bottom block
     MoatShotBlock             = 41
-    #graph
+    #graph+forgotten hiway anti softlock
     SpongeBathBlueDoor        = 42
+    # forgotten hiway anti softlock
+    EastOceanPlatforms        = 43
     # maridia
-    MaridiaTubeOpened         = 50
+    MaridiaTubeOpened         = 51
+    MamaTurtleBlueDoor        = 52
     ## Area rando patches
     # remove crumble block for reverse lower norfair door access
     SingleChamberNoCrumble    = 101
@@ -47,6 +53,12 @@ class RomPatches:
     AreaRandoBlueDoors        = 104
     # crateria key hunter yellow, green pirates shaft red
     AreaRandoMoreBlueDoors    = 105
+    # croc green+grey doors
+    CrocBlueDoors             = 106
+    # maridia crab shaft AP door
+    CrabShaftBlueDoor         = 107
+    # wrap door from sand halls left to under botwoon
+    MaridiaSandWarp           = 108
 
     ### Other
     # Gravity no longer protects from environmental damage (heat, spikes...)
@@ -59,6 +71,8 @@ class RomPatches:
     ProgressiveSuits        = 1003
     # Nerfed charge beam available from the start
     NerfedCharge            = 1004
+    # Nerfed rainbow beam for ultra sparse energy qty
+    NerfedRainbowBeam       = 1005
 
     #### Patch sets
     # total randomizer
@@ -74,7 +88,11 @@ class RomPatches:
     TotalCasual = [ BlueBrinstarMissile ] + Total
 
     # area rando patch set
-    AreaSet = [ SingleChamberNoCrumble, AreaRandoGatesBase, AreaRandoGatesOther, AreaRandoBlueDoors, AreaRandoMoreBlueDoors ]
+    AreaBaseSet = [ SingleChamberNoCrumble, AreaRandoGatesBase,
+                    AreaRandoBlueDoors, AreaRandoMoreBlueDoors,
+                    CrocBlueDoors, CrabShaftBlueDoor, MaridiaSandWarp ]
+    AreaComfortSet = [ AreaRandoGatesOther, SpongeBathBlueDoor, EastOceanPlatforms ]
+    AreaSet = AreaBaseSet + AreaComfortSet
 
     # VARIA specific patch set
     VariaTweaks = [ WsEtankPhantoonAlive, LNChozoSJCheckDisabled ]

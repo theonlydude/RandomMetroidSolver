@@ -3,8 +3,6 @@
 create table if not exists extended_stats (
   -- uniq identifier for join with item_locs
   id int unsigned not null auto_increment,
-  -- the current version of the randomizer algorithm
-  version int unsigned not null,
   -- randomizer parameters
   preset varchar(32),
   area boolean,
@@ -24,9 +22,10 @@ create table if not exists extended_stats (
 
   -- how many seeds
   count int unsigned default 0,
-  primary key(version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP),
+  primary key(preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP),
   index(id)
 );
+-- alter table extended_stats drop version;
 
 create table if not exists item_locs (
   -- to join with extend_stats
@@ -163,3 +162,11 @@ create table if not exists difficulties (
   mania int unsigned default 0,
   primary key(ext_id)
 );
+
+create table if not exists solver_stats (
+  -- to join with extend_stats
+  ext_id int unsigned not null,
+  name varchar(8) not null,
+  value int unsigned default 0
+);
+create index solver_stats_idx01 on solver_stats(ext_id, name);

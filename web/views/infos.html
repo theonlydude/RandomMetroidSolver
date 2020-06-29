@@ -10,15 +10,16 @@
   <div class="menu">
     <table class="full menuTable">
       <tr>
-	<td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
-	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
-	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
-	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
-	<td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
-	<td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
-	<td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
-	<td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
-	<td class="menu_selected">{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+        <td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+        <td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+        <td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+        <td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+        <td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
+        <td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
+        <td>{{=A("Plandository", _href=URL(f="plandorepo"), _class="menu")}}</td>
+        <td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+        <td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
+        <td class="menu_selected">{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
       </tr>
     </table>
   </div>
@@ -47,18 +48,50 @@
   </p>
   <h2>Thanks to</h2>
   <p>
-    Web hosting is sponsored by the <a href="https://www.twitch.tv/randomizerleague" target="_blank">Super Metroid Item Randomizer League</a>.
+    Web hosting was sponsored in 2019 by the <a href="https://www.twitch.tv/randomizerleague" target="_blank">Super Metroid Item Randomizer League</a>.
   </p>
   <p>
-    Huge thanks to the people who developped Super Metroid, the previous Super Metroid Randomizers, Super Metroid patches, Metroid Construction, Super Metroid Discords.
+    Huge thanks to the people who developped Super Metroid, the previous Super Metroid Randomizers, Super Metroid patches, <a href="http://www.metroidconstruction.com/" target="_blank">Metroid Construction</a>, Super Metroid Discords.
   </p>
   <h2>Statistics</h2>
   <p>
-    You can consult the statistics on the Randomizer and Solver activity on the {{=A("statistics page", _href=URL(f="stats"))}}.
+    You can consult statistics on the Randomizer and Solver activity on the {{=A("statistics page", _href=URL(f="stats"))}}.
+  </p>
+  <p>
+    You can consult statistics on the influcence of the progression speed parameter for the Randomizer on the {{=A("progression speed statistics page", _href=URL(f="progSpeedStats"))}}.
   </p>
   <a name="latest"></a>
   <h2>Change Log</h2>
   <ul>
+
+    <li>
+      <h4>2020/04/13</h4>
+      <p>Hello @randomizer,</p>
+      <p>We've released a new version of the VARIA Randomizer, Solver, Tracker, Plandomizer and Customizer (<a href="http://varia.run">http://varia.run/</a>), introducting the new and shiny Plandository (<a href="http://varia.run/plandorepo">http://varia.run/plandorepo</a>) to easily share plandos with the community. So if you have any plandos lying around, upload them there NOW! </p>
+      New stuff:
+      <ul>
+        <li>rando: new starting locations: Mama Turtle, Aqueduct, Lower Norfair Firefleas. Thanks total for the evil ideas!</li>
+        <li>plando: Plandository to store community plandos and VARIA weekly races seeds/plandos</li>
+        <li>escape: escape randomization can now be used without Area Randomization</li>
+        <li>escape: Animals Challenges in randomized escape. Find the hidden animals, or/and cycle through possible escapes by going to vanilla animals!</li>
+        <li>preset: new techniques Crystal Flash Clip (suited and suitless variants), Firefleas Wall Jump, Dodge Lower Norfair Enemies</li>
+        <li>patches: background music randomization option, aka Super Metroid Jukebox</li>
+        <li>customizer: NES Super Mario Bros custom sprites by TarThoron</li>
+        <li>credits: display resets/deaths count, much more accurate RTA timer resistant to resets or power cycles</li>
+      </ul>
+      New minor stuff:
+      <ul>
+        <li>area: area transition doors are now blinking to help newer players to see that they are portals</li>
+        <li>area: new softlock protection in Wrecked ship</li>
+        <li>patches: max ammo display is no longer corrupted when Supers or PowerBombs total is more than 100</li>
+        <li>rando: fix checksum of randomized ROMs</li>
+        <li>rando: when settings are randomizable, you can now select the possible values to randomize from</li>
+        <li>customizer: no comfort patch on race seeds. VARIA base patches available</li>
+        <li>stats: Progression Speeds comparison statistics (<a href="http://varia.run/progSpeedStats">http://varia.run/progSpeedStats</a>), how they influence progression items placement over the run</li>
+        <li>tools: added a command line webservice client to remotely generate seeds</li>
+        <li>doc: command line usage of rando and solver is now documented in README.md on GitHub</li>
+      </ul>
+    </li>
     <li>
       <h4>2020/02/10</h4>
       <p>Hello @randomizer,</p>
@@ -69,51 +102,51 @@
       <p>In area rando, the Key Hunter Room bottom door (vanilla door to Red Brinstar Elevator) and the vanilla door to G4 are now blue, since Crateria is no longer necessarily the start area.</p>
       <p>Early morph setting had to be modified to accomodate this new feature, and this has some significant consequences on standard start seeds with Early morph (like all tournament presets, so read carefully):</p>
       <p>
-	<ul>
-	  <li>Speed or Screw attack can now be in Blue Brinstar even with Early Morph enabled</li>
-	  <li>For skill presets who don't know the Blue Brinstar Ceiling D-Boost tech, such as noob and SMRAT2020, Morph ball will always be vanilla</li>
-	</ul>
+        <ul>
+          <li>Speed or Screw attack can now be in Blue Brinstar even with Early Morph enabled</li>
+          <li>For skill presets who don't know the Blue Brinstar Ceiling D-Boost tech, such as newbie and SMRAT2020, Morph ball will always be vanilla</li>
+        </ul>
       </p>
       Other new stuff:
       <p>
-	<ul>
-	  <li>new technique to acces Spring Ball with Gravity+Grapple+HiJump: enabled by default in all presets except noob and SMRAT2020</li>
-	  <li>new rando preset: 'where_am_i', area rando with random start location</li>
-	  <li>new rando preset: 'suprise', randomize a few significant settings (like quite_random), also randomizes start location, and whether the seed will be area/boss rando</li>
-	  <li>various bugfixes on Super Fun seed generation</li>
-	</ul>
+        <ul>
+          <li>new technique to acces Spring Ball with Gravity+Grapple+HiJump: enabled by default in all presets except newbie and SMRAT2020</li>
+          <li>new rando preset: 'where_am_i', area rando with random start location</li>
+          <li>new rando preset: 'suprise', randomize a few significant settings (like quite_random), also randomizes start location, and whether the seed will be area/boss rando</li>
+          <li>various bugfixes on Super Fun seed generation</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2020/01/12</h4>
       <p>
-	Hello @randomizer,<br/><br/>
+        Hello @randomizer,<br/><br/>
 
-	We've released a new version of the VARIA Randomizer, Solver, Tracker, Plandomizer and Customizer (<a href="http://varia.run/">http://varia.run/</a>)<br/><br/>
+        We've released a new version of the VARIA Randomizer, Solver, Tracker, Plandomizer and Customizer (<a href="http://varia.run/">http://varia.run/</a>)<br/><br/>
 
-	New stuff:
-	<ul>
+        New stuff:
+        <ul>
 
-	  <li>rando: new option (enabled by default) to randomize escape sequence in Area Rando. 5 Tourian exit points possible, the vanilla one and outside map stations in Brinstar/Maridia/Wrecked Ship/Norfair</li>
-	  <li>plando: customize escape sequence Tourian exit point and timer value in Area Plandos</li>
+          <li>rando: new option (enabled by default) to randomize escape sequence in Area Rando. 5 Tourian exit points possible, the vanilla one and outside map stations in Brinstar/Maridia/Wrecked Ship/Norfair</li>
+          <li>plando: customize escape sequence Tourian exit point and timer value in Area Plandos</li>
           <li>rando: added optional Progressive Suits patch from DASH randomizer</li>
           <li>rando: added optional custom Nerfed Charge available from the start</li>
-	  <ul>
+          <ul>
             <li>does 1/3 charged shot damage (31.25% in DASH)</li>
             <li>Pseudo Screws also do 1/3 damage (100% in DASH)</li>
             <li>Special Beam Attacks do normal damage but cost 3 Power Bombs (1 in DASH)</li>
-	  </ul>
+          </ul>
           <li>logic: take into account Nerfed Charge/Progressive suits if they're enabled</li>
           <li>rando preset: new 'haste' preset inspired by the DASH randomizer with Nerfed Charge and Progressive Suits</li>
           <li>rando: allows area/boss to be randomly set for mystery seeds, and removed giveaway letters in seed file name</li>
           <li>solver: update spoiler path with items and bosses icons instead of text</li>
-	  <li>solver: display location/area/subarea picture when hovering over its name in the spoiler</li>
+          <li>solver: display location/area/subarea picture when hovering over its name in the spoiler</li>
           <li>tracker/plando: allow removal of a selected transition instead of the last one</li>
           <li>plando: add option to hide placed items</li>
           <li>customizer: added phazon hack and Luigi sprites</li>
-	</ul>
-	New minor stuff/fixes:
-	<ul>
+        </ul>
+        New minor stuff/fixes:
+        <ul>
           <li>core: python 2.7 to 3.7 migration, 20% speed increase</li>
           <li>rando: reorganise patches display</li>
           <li>preset: display bosses sprites</li>
@@ -121,24 +154,24 @@
           <li>tracker: display access point name in the GPS tooltip</li>
           <li>plando: recompute sequence break locations after placing an item to display its difficulty if it's now available</li>
           <li>rom: fix rounding error in credits %</li>
-	  <li>preset: renamed smrat to SMRAT2020</li>
-	</ul>
+          <li>preset: renamed smrat to SMRAT2020</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2019/12/02</h4>
       <p>
-	Hello @randomizer,<br/><br/>
+        Hello @randomizer,<br/><br/>
 
-	A small release for the Randomizer league season 2 playoffs (<a href="http://varia.run/">http://varia.run/</a>)<br/><br/>
+        A small release for the Randomizer league season 2 playoffs (<a href="http://varia.run/">http://varia.run/</a>)<br/><br/>
 
-	New stuff:
-	<ul>
-	  <li>presets: new league playoff presets</li>
-	  <li>customizer: custom sprites from various hacks</li>
-	</ul>
-	Bugfixes:
-	<ul>
+        New stuff:
+        <ul>
+          <li>presets: new league playoff presets</li>
+          <li>customizer: custom sprites from various hacks</li>
+        </ul>
+        Bugfixes:
+        <ul>
           <li>multiple small bugfixes</li>
         </ul>
       </p>
@@ -146,12 +179,12 @@
     <li>
       <h4>2019/11/17</h4>
       <p>
-	Hello @randomizer,<br/><br/>
+        Hello @randomizer,<br/><br/>
 
-	We've released a new version of the VARIA Randomizer, Solver, Tracker, Plandomizer and Customizer (<a href="http://varia.run/">http://varia.run/</a>)<br/><br/>
+        We've released a new version of the VARIA Randomizer, Solver, Tracker, Plandomizer and Customizer (<a href="http://varia.run/">http://varia.run/</a>)<br/><br/>
 
-	New stuff:
-	<ul>
+        New stuff:
+        <ul>
           <li>statistics: display techniques used</li>
           <li>statistics: display difficulty histogram</li>
           <li>boss rando: Ridley additional platform is gone, teleport Samus in front of Ridley instead</li>
@@ -160,11 +193,11 @@
           <li>layout: Spore Spawn save station is now available without morph or bomb</li>
           <li>layout: additional soft lock protection in Early Supers Room if you fall in the 2nd pit</li>
           <li>preset: display Lower Norfair Hellruns Energy/Crystal Flash requirements</li>
-          <li>preset: new technique for Bubble Moutain wall jump (enabled by default in all presets except noob)</li>
-          <li>preset: new technique: access Billy Mays Room without Gravity or Space Jump (enabled by default in all presets except noob)</li>
-	</ul>
-	Bugfixes:
-	<ul>
+          <li>preset: new technique for Bubble Moutain wall jump (enabled by default in all presets except newbie)</li>
+          <li>preset: new technique: access Billy Mays Room without Gravity or Space Jump (enabled by default in all presets except newbie)</li>
+        </ul>
+        Bugfixes:
+        <ul>
           <li>rando: fixed some bugs in Chozo 2nd phase fill up</li>
           <li>logic: added missing Energy requirement for Plasma Pirates with Charge and Botwoon to Draygon with ice (Mochtroid damage)</li>
           <li>web: session cookies are now kept between client browser restart</li>
@@ -176,338 +209,338 @@
     <li>
       <h4>2019/09/19</h4>
       <p>
-	Hello @randomizer,<br/><br/>
+        Hello @randomizer,<br/><br/>
 
-	A small release for the season 2 of Randomizer league.<br/></br>
+        A small release for the season 2 of Randomizer league.<br/></br>
 
-	New stuff:
-	<ul>
-	  <li>preset: display the Hard rooms and Hellruns energy requirements</li>
-	  <li>preset: new technique, Spring Ball access with Gravity jump</li>
-	  <li>preset: new technique, Botwoon to Draygon with Ice</li>
-	  <li>customizer: new Contra custom sprite by Nintoaster</li>
-	  <li>settings preset: changed hardway2hell randomizer preset to generate more evil suitless seeds (can be even harder than stupid_hard for those interested in this kind of seed)</li>
-	</ul>
-	Bugfixes:
-	<ul>
-	  <li>logic: small fixes to suitless logic</li>
-	  <li>randomizer: fix bug with Super Fun provider and Lower Norfair Hellruns</li>
-	  <li>customizer: fix palette randomization with custom sprites</li>
+        New stuff:
+        <ul>
+          <li>preset: display the Hard rooms and Hellruns energy requirements</li>
+          <li>preset: new technique, Spring Ball access with Gravity jump</li>
+          <li>preset: new technique, Botwoon to Draygon with Ice</li>
+          <li>customizer: new Contra custom sprite by Nintoaster</li>
+          <li>settings preset: changed hardway2hell randomizer preset to generate more evil suitless seeds (can be even harder than stupid_hard for those interested in this kind of seed)</li>
+        </ul>
+        Bugfixes:
+        <ul>
+          <li>logic: small fixes to suitless logic</li>
+          <li>randomizer: fix bug with Super Fun provider and Lower Norfair Hellruns</li>
+          <li>customizer: fix palette randomization with custom sprites</li>
         </ul>
       </p>
     </li>
     <li>
       <h4>2019/08/25</h4>
       <p>
-	Hello @randomizer,<br/><br/>
+        Hello @randomizer,<br/><br/>
 
-	We've released a new version of the VARIA Randomizer, Solver, Tracker, Plandomizer and Customizer (<a href="http://varia.run/">http://varia.run/</a>), dubbed "MegaSamus X"!<br/><br/>
+        We've released a new version of the VARIA Randomizer, Solver, Tracker, Plandomizer and Customizer (<a href="http://varia.run/">http://varia.run/</a>), dubbed "MegaSamus X"!<br/><br/>
 
-	You can now change Samus sprites in the customizer. All the sprite sheets created so far with SpriteSomething (<a href="https://github.com/Artheau/SpriteSomething/releases">https://github.com/Artheau/SpriteSomething/releases</a>) have been integrated, for instance Megaman X!<br/><br/>
+        You can now change Samus sprites in the customizer. All the sprite sheets created so far with SpriteSomething (<a href="https://github.com/Artheau/SpriteSomething/releases">https://github.com/Artheau/SpriteSomething/releases</a>) have been integrated, for instance Megaman X!<br/><br/>
 
-	Another cool new feature is the ability to use the Randomizer to complete your plando. This allows for fun stuff like creating your own custom map (you don't like Wrecked Ship? don't include it) for your seeds, or generate a seed after placing Varia at Ridley for example.<br/><br/>
+        Another cool new feature is the ability to use the Randomizer to complete your plando. This allows for fun stuff like creating your own custom map (you don't like Wrecked Ship? don't include it) for your seeds, or generate a seed after placing Varia at Ridley for example.<br/><br/>
 
-	Note: to remove the bloat of the randomizer page, color randomization is now only available on the customizer page, don't worry it has not gone away!<br/><br/>
+        Note: to remove the bloat of the randomizer page, color randomization is now only available on the customizer page, don't worry it has not gone away!<br/><br/>
 
-	Full changelog below.<br/>
+        Full changelog below.<br/>
 
-	New stuff:
-	<ul>
-	  <li>plandomizer: you can now use the VARIA Randomizer to complete your plando</li>
-	  <li>plandomizer: you can load the items and transitions of your base seed</li>
-	  <li>plandomizer: the item selection popup now display the items with icons</li>
-	  <li>customizer: you can now replace Samus sprite with custom ones</li>
-	  <li>randomizer: usefull tips are now displayed during randomization</li>
-	  <li>randomizer: new link "what's in the logic" next to the preset to display the techniques available for the Randomizer</li>
-	  <li>stats: the total percentage for each item is now displayed at the end (for Randomizer presets with Super Fun enabled)</li>
-	</ul>
-	Bugfixes:
-	<ul>
-	  <li>solver: handle utf8 ROM filenames</li>
-	  <li>randomizer: fixed bug on super fun movement that did not remove space jump when VARIA tweaks were disabled</li>
-	  <li>randomizer: fix no comeback bug for bosses that created some failed area rando seeds</li>
-	  <li>logic: fixed ancient endgame condition bugs</li>
+        New stuff:
+        <ul>
+          <li>plandomizer: you can now use the VARIA Randomizer to complete your plando</li>
+          <li>plandomizer: you can load the items and transitions of your base seed</li>
+          <li>plandomizer: the item selection popup now display the items with icons</li>
+          <li>customizer: you can now replace Samus sprite with custom ones</li>
+          <li>randomizer: usefull tips are now displayed during randomization</li>
+          <li>randomizer: new link "what's in the logic" next to the preset to display the techniques available for the Randomizer</li>
+          <li>stats: the total percentage for each item is now displayed at the end (for Randomizer presets with Super Fun enabled)</li>
+        </ul>
+        Bugfixes:
+        <ul>
+          <li>solver: handle utf8 ROM filenames</li>
+          <li>randomizer: fixed bug on super fun movement that did not remove space jump when VARIA tweaks were disabled</li>
+          <li>randomizer: fix no comeback bug for bosses that created some failed area rando seeds</li>
+          <li>logic: fixed ancient endgame condition bugs</li>
         </ul>
       </p>
     </li>
     <li>
       <h4>2019/07/08</h4>
       <p>
-	Hello @randomizer,<br/><br/>
-	We've released a new version of the VARIA Randomizer, Solver and Trackers (http://varia.run/).<br/>
-	New stuff:
-	<ul>
-	  <li>stats: new page with statistics for the standard skill presets and randomizer presets (up to 100000 seeds in the stats for tournament ones)</li>
-	  <li>preset: added separated technique for XRay Ice Climb w/o Hi-Jump, now disabled in noob and casual presets</li>
-	  <li>rando: Phantoon save station is now active before killing Phantoon when using area/boss randomization</li>
-	  <li>rando: new optional Speedkeep patch to keep momentum after landing</li>
-	  <li>rando: the number of uncharged shots are now displayed in the credits statistics</li>
-	  <li>rando: headered ROMs are now detected and an error message displayed</li>
-	  <li>rando: the heads at Morph Ball location are now activated with every items (like the yellow camera)</li>
-	  <li>layout: new platform in Acid Statue Room when VARIA tweaks patch is enabled</li>
-	  <li>solver: the number of ETanks/Reserves used are now displayed</li>
-	  <li>tracker: in seed-less mode the vanilla area transitions are now added by default</li>
-	</ul>
-	Bug fix:
-	<ul>
-	  <li>rando: fixed strict minors option (was not really accurate with low% minors)</li>
-	  <li>rando: fixed pregression spoiler in the credits where items were out of order sometimes</li>
-	  <li>plando: the lock button works now</li>
-	</ul>
+        Hello @randomizer,<br/><br/>
+        We've released a new version of the VARIA Randomizer, Solver and Trackers (http://varia.run/).<br/>
+        New stuff:
+        <ul>
+          <li>stats: new page with statistics for the standard skill presets and randomizer presets (up to 100000 seeds in the stats for tournament ones)</li>
+          <li>preset: added separated technique for XRay Ice Climb w/o Hi-Jump, now disabled in newbie and casual presets</li>
+          <li>rando: Phantoon save station is now active before killing Phantoon when using area/boss randomization</li>
+          <li>rando: new optional Speedkeep patch to keep momentum after landing</li>
+          <li>rando: the number of uncharged shots are now displayed in the credits statistics</li>
+          <li>rando: headered ROMs are now detected and an error message displayed</li>
+          <li>rando: the heads at Morph Ball location are now activated with every items (like the yellow camera)</li>
+          <li>layout: new platform in Acid Statue Room when VARIA tweaks patch is enabled</li>
+          <li>solver: the number of ETanks/Reserves used are now displayed</li>
+          <li>tracker: in seed-less mode the vanilla area transitions are now added by default</li>
+        </ul>
+        Bug fix:
+        <ul>
+          <li>rando: fixed strict minors option (was not really accurate with low% minors)</li>
+          <li>rando: fixed pregression spoiler in the credits where items were out of order sometimes</li>
+          <li>plando: the lock button works now</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2019/03/24</h4>
       <p>
-	Hello @randomizer,<br/><br/>
+        Hello @randomizer,<br/><br/>
 A big VARIA update and a domain name (http://varia.run/) for its first birthday!<br/><br/>
 Chozo split, G4 randomization and color randomization are now available in the rando. You can also apply color randomization or other patches on existing seeds using the new customizer. If you think slowest progression is not trolly enough, use your imagination in the new plandomizer! Also, the item tracker can now work without a seed.
 <br/>
-	New stuff :
-	<ul>
-	  <li>randomizer: new majors/minors split: Chozo: Put all the required items to finish the seed in the Chozo statues locations.</li>
-	  <li>randomizer: G4 boss doors can be randomized.</li>
-	  <li>randomizer: palette randomizer to change the colors in game.</li>
-	  <li>randomizer: credits now show the 'intended' progression items.</li>
-	  <li>tracker: unified areas/items tracker (only the locations in the connected areas are computed).</li>
-	  <li>tracker: seedless mode to use the tracker from a tablet.</li>
-	  <li>plandomizer: graphical interactive areas/items plando editor.</li>
-	  <li>settings: suits restrictions is now 'no suits in crateria/blue brinstar' for both suits (some restictions on gravity were removed)</li>
-	  <li>customizer: add palette randomization or other patches to an existing ROM.</li>
-	  <li>preset: new technique: Ice escape.</li>
-	  <li>preset: new technique: Screw Attack exit without Screw.</li>
-	  <li>preset: new technique: frog speedway without speed.</li>
-	  <li>preset: new technique: double spring ball jump.</li>
-	  <li>patches: updated anti-softlock patches, now you can get out of brinstar map room without bombs.</li>
-	  <li>web: the VARIA website is now on <a href="http://varia.run/">http://varia.run/</a></li>
-	  <li>web: the VARIA beta website is available at <a href="http://beta.varia.run/">http://beta.varia.run/</a> (updated everynight from GitHub)</li>
-	  <li>discord: you can join the VARIA discord server on <a href="http://discord.varia.run/">VARIA Randomizer Discord</a></li>
-	</ul>
+        New stuff :
+        <ul>
+          <li>randomizer: new majors/minors split: Chozo: Put all the required items to finish the seed in the Chozo statues locations.</li>
+          <li>randomizer: G4 boss doors can be randomized.</li>
+          <li>randomizer: palette randomizer to change the colors in game.</li>
+          <li>randomizer: credits now show the 'intended' progression items.</li>
+          <li>tracker: unified areas/items tracker (only the locations in the connected areas are computed).</li>
+          <li>tracker: seedless mode to use the tracker from a tablet.</li>
+          <li>plandomizer: graphical interactive areas/items plando editor.</li>
+          <li>settings: suits restrictions is now 'no suits in crateria/blue brinstar' for both suits (some restictions on gravity were removed)</li>
+          <li>customizer: add palette randomization or other patches to an existing ROM.</li>
+          <li>preset: new technique: Ice escape.</li>
+          <li>preset: new technique: Screw Attack exit without Screw.</li>
+          <li>preset: new technique: frog speedway without speed.</li>
+          <li>preset: new technique: double spring ball jump.</li>
+          <li>patches: updated anti-softlock patches, now you can get out of brinstar map room without bombs.</li>
+          <li>web: the VARIA website is now on <a href="http://varia.run/">http://varia.run/</a></li>
+          <li>web: the VARIA beta website is available at <a href="http://beta.varia.run/">http://beta.varia.run/</a> (updated everynight from GitHub)</li>
+          <li>discord: you can join the VARIA discord server on <a href="http://discord.varia.run/">VARIA Randomizer Discord</a></li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2018/12/17</h4>
       <p>
-	Hello @randomizer,<br/>
-	We've released an intermediate version of the VARIA Randomizer, Solver and Trackers (http://randommetroidsolver.pythonanywhere.com/).<br/>
-	New stuff:
-	<ul>
-	  <li>randomizer: New progression speed: VARIAble; it randomly switches the progression speed after each progression item placed</li>
-	  <li>randomizer: When randomizing the progression speed you can choose which progression speeds are available for randomization</li>
-	  <li>preset: New technique: Puyo Clip with X-Ray</li>
-	  <li>preset: Lower Norfair hellrun is now activated in the speedrunner preset</li>
-	  <li>randomizer: new preset highway2hell: favors suitless seeds</li>
-	  <li>randomizer: new preset quite random: randomizes a few significant settings to have various seeds</li>
-	</ul>
+        Hello @randomizer,<br/>
+        We've released an intermediate version of the VARIA Randomizer, Solver and Trackers (http://randommetroidsolver.pythonanywhere.com/).<br/>
+        New stuff:
+        <ul>
+          <li>randomizer: New progression speed: VARIAble; it randomly switches the progression speed after each progression item placed</li>
+          <li>randomizer: When randomizing the progression speed you can choose which progression speeds are available for randomization</li>
+          <li>preset: New technique: Puyo Clip with X-Ray</li>
+          <li>preset: Lower Norfair hellrun is now activated in the speedrunner preset</li>
+          <li>randomizer: new preset highway2hell: favors suitless seeds</li>
+          <li>randomizer: new preset quite random: randomizes a few significant settings to have various seeds</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2018/12/03</h4>
       <p>
-	Hello @randomizer,<br/>
-	We've released a new version of the VARIA Randomizer, Solver and Trackers (http://randommetroidsolver.pythonanywhere.com/) dubbed "Teenage Mutant Mama Turtle".<br/>
-	New stuff:
-	<ul>
-	  <li>preset: New technique: Mama Turtle Etank with High Jump (thanks rand(0))</li>
-	  <li>preset: New technique: 1 Etank/1 Power Bomb pack/Speed Booster access to Gauntlet minors (thanks rand(0))</li>
-	  <li>preset: New technique: Reverse Crocomire speedway</li>
-	  <li>preset: Moonwalk can now be stored in the Controller preset</li>
-	  <li>home: Display a link to the Randomizer League</li>
-	  <li>logic: Right sand pit Power Bombs in suitless level 3 can now be accessed with a Spring Ball jump (thanks rand(0))</li>
-	  <li>randomizer: fix case when Late Morph and Suits restrictions are both enabled</li>
-	</ul>
-	Bug fix:
-	<ul>
-	  <li>logic: fix Etank requirement to exit Crateria Super Missile</li>
-	  <li>logic: fix Forgotten Highway Traversal when suitless</li>
-	  <li>logic: fix Mother Brain Energy requirements when suitless</li>
-	  <li>logic: various bug fixes affecting low% / super fun seeds</li>
-	</ul>
+        Hello @randomizer,<br/>
+        We've released a new version of the VARIA Randomizer, Solver and Trackers (http://randommetroidsolver.pythonanywhere.com/) dubbed "Teenage Mutant Mama Turtle".<br/>
+        New stuff:
+        <ul>
+          <li>preset: New technique: Mama Turtle Etank with High Jump (thanks rand(0))</li>
+          <li>preset: New technique: 1 Etank/1 Power Bomb pack/Speed Booster access to Gauntlet minors (thanks rand(0))</li>
+          <li>preset: New technique: Reverse Crocomire speedway</li>
+          <li>preset: Moonwalk can now be stored in the Controller preset</li>
+          <li>home: Display a link to the Randomizer League</li>
+          <li>logic: Right sand pit Power Bombs in suitless level 3 can now be accessed with a Spring Ball jump (thanks rand(0))</li>
+          <li>randomizer: fix case when Late Morph and Suits restrictions are both enabled</li>
+        </ul>
+        Bug fix:
+        <ul>
+          <li>logic: fix Etank requirement to exit Crateria Super Missile</li>
+          <li>logic: fix Forgotten Highway Traversal when suitless</li>
+          <li>logic: fix Mother Brain Energy requirements when suitless</li>
+          <li>logic: various bug fixes affecting low% / super fun seeds</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2018/10/31</h4>
       <p>
-	Hello @randomizer,<br/>
-	We've released a new version of the VARIA Randomizer, Solver and Trackers (http://randommetroidsolver.pythonanywhere.com/) dubbed "Bite my shiny metal ass".<br/>
-	New stuff:
-	<ul>
-	  <li>randomizer: spread items parameter is gone and has been merged with progression speed</li>
-	  <li>randomizer: the first available minors are displayed in the credits</li>
-	  <li>item tracker: available locations sprite is now a shiny GIF for easier spotting</li>
-	</ul>
+        Hello @randomizer,<br/>
+        We've released a new version of the VARIA Randomizer, Solver and Trackers (http://randommetroidsolver.pythonanywhere.com/) dubbed "Bite my shiny metal ass".<br/>
+        New stuff:
+        <ul>
+          <li>randomizer: spread items parameter is gone and has been merged with progression speed</li>
+          <li>randomizer: the first available minors are displayed in the credits</li>
+          <li>item tracker: available locations sprite is now a shiny GIF for easier spotting</li>
+        </ul>
     </li>
     <li>
       <h4>2018/10/21</h4>
       <p>
-	Hello @randomizer,<br/>
-	We've released a new version of the VARIA Randomizer, Solver and Trackers (http://randommetroidsolver.pythonanywhere.com/) dubbed "Race to Twitch Mountain".<br/>
-	New stuff:
-	<ul>
-	  <li>randomizer: race mode to obfuscate item data in the seed and prevent the seed from being solved on the VARIA website until a certain customizable delay has passed</li>
-	  <li>randomizer: Randomizer presets are now available, they contain example Randomizer settings, and the settings for upcoming rando league</li>
-	  <li>randomizer: reworked Super Fun Times (TM) settings. Now:
-	    <ul>
-	      <li>Combat will always remove Plasma and Screw Attack if possible, and randomly others</li>
-	      <li>Movement will always remove Space Jump, and randomly others</li>
-	      <li>Suitless will remove at least one suit if the preset allows it</li>
-	    </ul>
-	  <li>new techniques: Norfair Reserve DBoost, Crocomire Power Bomb: DBoost or Ice, Wall Jump Cathedral Exit</li>
-	  <li>item tracker: the collected items are displayed like in the inventory menu</li>
-	  <li>item tracker: sequence breaking is now supported</li>
-	</ul>
+        Hello @randomizer,<br/>
+        We've released a new version of the VARIA Randomizer, Solver and Trackers (http://randommetroidsolver.pythonanywhere.com/) dubbed "Race to Twitch Mountain".<br/>
+        New stuff:
+        <ul>
+          <li>randomizer: race mode to obfuscate item data in the seed and prevent the seed from being solved on the VARIA website until a certain customizable delay has passed</li>
+          <li>randomizer: Randomizer presets are now available, they contain example Randomizer settings, and the settings for upcoming rando league</li>
+          <li>randomizer: reworked Super Fun Times (TM) settings. Now:
+            <ul>
+              <li>Combat will always remove Plasma and Screw Attack if possible, and randomly others</li>
+              <li>Movement will always remove Space Jump, and randomly others</li>
+              <li>Suitless will remove at least one suit if the preset allows it</li>
+            </ul>
+          <li>new techniques: Norfair Reserve DBoost, Crocomire Power Bomb: DBoost or Ice, Wall Jump Cathedral Exit</li>
+          <li>item tracker: the collected items are displayed like in the inventory menu</li>
+          <li>item tracker: sequence breaking is now supported</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2018/10/01</h4>
       <p>
-	Hello @randomizer,<br/>
-	We've released a new version of the VARIA Randomizer and Solver (http://randommetroidsolver.pythonanywhere.com/) dubbed "Dude, Where's My Next Location?".<br/>
-	New stuff:
-	<ul>
-	  <li>item tracker: an interactive Item Tracker is now available, it uses the Solver in interactive mode to show the next available locations on the map</li>
-	  <li>logo: new awesome VARIA Randomizer logo, used on the home page of the web site</li>
-	  <li>preset: nova boost technique is now available (enabled in speedrunner and master presets), it could be required to solve some Total Hard seeds</li>
-	</ul>
+        Hello @randomizer,<br/>
+        We've released a new version of the VARIA Randomizer and Solver (http://randommetroidsolver.pythonanywhere.com/) dubbed "Dude, Where's My Next Location?".<br/>
+        New stuff:
+        <ul>
+          <li>item tracker: an interactive Item Tracker is now available, it uses the Solver in interactive mode to show the next available locations on the map</li>
+          <li>logo: new awesome VARIA Randomizer logo, used on the home page of the web site</li>
+          <li>preset: nova boost technique is now available (enabled in speedrunner and master presets), it could be required to solve some Total Hard seeds</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2018/09/28</h4>
       <p>
-	Hello @randomizer,<br/>
-	We've released an intermediate version of the VARIA Randomizer and Solver (http://randommetroidsolver.pythonanywhere.com/) dubbed "Track Me If You Can".<br/>
-	New stuff:
-	<ul>
-	  <li>tracker: an area tracker is now available, it allows you to graphically link the portals between areas</li>
-	  <li>cache: new internal caching system, 25% performance gain on Randomizer and Solver</li>
-	</ul>
-	Bug fix:
-	<ul>
-	  <li>locs: fix various small bugs thanks to the new cache</li>
-	</ul>
+        Hello @randomizer,<br/>
+        We've released an intermediate version of the VARIA Randomizer and Solver (http://randommetroidsolver.pythonanywhere.com/) dubbed "Track Me If You Can".<br/>
+        New stuff:
+        <ul>
+          <li>tracker: an area tracker is now available, it allows you to graphically link the portals between areas</li>
+          <li>cache: new internal caching system, 25% performance gain on Randomizer and Solver</li>
+        </ul>
+        Bug fix:
+        <ul>
+          <li>locs: fix various small bugs thanks to the new cache</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2018/09/09</h4>
       <p>
-	Hello @randomizer,<br/>
-	We've released an intermediate version of the VARIA Randomizer and Solver (http://randommetroidsolver.pythonanywhere.com/) dubbed "Lord of Stats".<br/>
-	New stuff:
-	<ul>
-	  <li>presets: better separation of standard/community presets</li>
-	  <li>presets: presets list is now more user-friendly with the addition of a search bar</li>
-	  <li>presets: added a skill level bar and some stats about the preset</li>
-	  <li>rando: added time spent in pause menu in the credits stats</li>
-	  <li>solver: auto detect the preset when solving a VARIA seed</li>
-	</ul>
-	Bug fix:
-	<ul>
-	  <li>presets: fixed bug in the new presets preventing suitless Maridia in generated seeds</li>
-	  <li>rando: fixed the bomb counter in the credits stats (PB no longer count as bomb)</li>
-	  <li>rando: fixed SBA counter in the credits stats (a bug made it increase wildly in certain conditions) in the credits stats</li>
-	  <li>locs: fixed some locations access functions</li>
-	</ul>
+        Hello @randomizer,<br/>
+        We've released an intermediate version of the VARIA Randomizer and Solver (http://randommetroidsolver.pythonanywhere.com/) dubbed "Lord of Stats".<br/>
+        New stuff:
+        <ul>
+          <li>presets: better separation of standard/community presets</li>
+          <li>presets: presets list is now more user-friendly with the addition of a search bar</li>
+          <li>presets: added a skill level bar and some stats about the preset</li>
+          <li>rando: added time spent in pause menu in the credits stats</li>
+          <li>solver: auto detect the preset when solving a VARIA seed</li>
+        </ul>
+        Bug fix:
+        <ul>
+          <li>presets: fixed bug in the new presets preventing suitless Maridia in generated seeds</li>
+          <li>rando: fixed the bomb counter in the credits stats (PB no longer count as bomb)</li>
+          <li>rando: fixed SBA counter in the credits stats (a bug made it increase wildly in certain conditions) in the credits stats</li>
+          <li>locs: fixed some locations access functions</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2018/08/23</h4>
       <p>
-	Hello @randomizer,<br/>
-	We've released an intermediate version of the VARIA Randomizer and Solver (http://randommetroidsolver.pythonanywhere.com/) dubbed "Easy Ridley".<br/>
-	New stuff:
-	<ul>
-	  <li>rando: Now max difficulty can be upped automatically if only boss fights prevent seed generation.</li>
-	  <li>stats: new page with statistics on the Randomizer and Solver usage (accessible from the Information & Contact page).</li>
-	  <li>solver: added an item list before the spoiler, clicking on an item with highlight it in the spoiler.</li>
-	  <li>solver: simple/advanced tabs with the "items not picked up" in the advanced tab.</li>
-	</ul>
+        Hello @randomizer,<br/>
+        We've released an intermediate version of the VARIA Randomizer and Solver (http://randommetroidsolver.pythonanywhere.com/) dubbed "Easy Ridley".<br/>
+        New stuff:
+        <ul>
+          <li>rando: Now max difficulty can be upped automatically if only boss fights prevent seed generation.</li>
+          <li>stats: new page with statistics on the Randomizer and Solver usage (accessible from the Information & Contact page).</li>
+          <li>solver: added an item list before the spoiler, clicking on an item with highlight it in the spoiler.</li>
+          <li>solver: simple/advanced tabs with the "items not picked up" in the advanced tab.</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2018/08/09</h4>
       <p>
-	Hello @randomizer,<br/>
-	We've released an intermediate version of the VARIA Randomizer (http://randommetroidsolver.pythonanywhere.com/) dubbed "Finding Kraid".<br/>
-	New stuff:
-	<ul>
-	  <li>area: Kraid warehouse is now an independant area. That means there are now 4 portals leading to Norfair and...you have to find Kraid!</li>
-	  <li>presets: added a bunch of techniques to access Spring Ball location.</li>
-	  <li>rando: new option to match the requested quantities of minors instead of using probabilities.</li>
-	  <li>rando: new option for Morph placement: late, prevents Morph to be found in early game (Crateria/Blue Brinstar). Mostly relevant for area mode, to find morph in peculiar places.</li>
-	  <li>rando: new progression speed: basic, mimics Dessyreqt and Total Normal/Casual algorithm, for those who don't like getting trolled too much ;)</li>
-	  <li>rando: new optional patch: No music, disables background music while playing.</li>
-	  <li>rando: max ammo display and msu1 patchs are now compatibles and added by default. No worries if you don't have SD2SNES/MSU1 chip it falls back to vanilla music.</li>
-	</ul>
-	Bug fix:
-	<ul>
-	  <li>solver: the pickup strategies any/minimal were collecting too many minors</li>
-	</ul>
+        Hello @randomizer,<br/>
+        We've released an intermediate version of the VARIA Randomizer (http://randommetroidsolver.pythonanywhere.com/) dubbed "Finding Kraid".<br/>
+        New stuff:
+        <ul>
+          <li>area: Kraid warehouse is now an independant area. That means there are now 4 portals leading to Norfair and...you have to find Kraid!</li>
+          <li>presets: added a bunch of techniques to access Spring Ball location.</li>
+          <li>rando: new option to match the requested quantities of minors instead of using probabilities.</li>
+          <li>rando: new option for Morph placement: late, prevents Morph to be found in early game (Crateria/Blue Brinstar). Mostly relevant for area mode, to find morph in peculiar places.</li>
+          <li>rando: new progression speed: basic, mimics Dessyreqt and Total Normal/Casual algorithm, for those who don't like getting trolled too much ;)</li>
+          <li>rando: new optional patch: No music, disables background music while playing.</li>
+          <li>rando: max ammo display and msu1 patchs are now compatibles and added by default. No worries if you don't have SD2SNES/MSU1 chip it falls back to vanilla music.</li>
+        </ul>
+        Bug fix:
+        <ul>
+          <li>solver: the pickup strategies any/minimal were collecting too many minors</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2018/08/02</h4>
       <p>
-	Hello @randomizer,<br/>
-	We've released an intermediate version of the VARIA Randomizer (http://randommetroidsolver.pythonanywhere.com/) dubbed "Way of the Snail".<br/>
-	New stuff:
-	<ul>
-	  <li>preset: New technique, Snail Clip, to reach minors in Aqueduct without Speed Booster</li>
-	  <li>rando: When the Randomizer fails to generate a seed it displays an explicit message with the cause and how to fix it</li>
-	  <li>rando: Most parameters of the Randomizer can now be individually randomized</li>
-	  <li>rando: Like in Dessy's randomizer you can now randomly hide half of the items</li>
-	  <li>rando: The number of available Etank/Reserve is computed with a gaussian instead of a fixed number</li>
-	  <li>solver: When the Solver can't finish a seed with a given preset it displays which technique(s) to learn to be able to progress in the seed</li>
-	  <li>solver: Display the remaining/inaccessible major locations in the spoiler</li>
-	</ul>
+        Hello @randomizer,<br/>
+        We've released an intermediate version of the VARIA Randomizer (http://randommetroidsolver.pythonanywhere.com/) dubbed "Way of the Snail".<br/>
+        New stuff:
+        <ul>
+          <li>preset: New technique, Snail Clip, to reach minors in Aqueduct without Speed Booster</li>
+          <li>rando: When the Randomizer fails to generate a seed it displays an explicit message with the cause and how to fix it</li>
+          <li>rando: Most parameters of the Randomizer can now be individually randomized</li>
+          <li>rando: Like in Dessy's randomizer you can now randomly hide half of the items</li>
+          <li>rando: The number of available Etank/Reserve is computed with a gaussian instead of a fixed number</li>
+          <li>solver: When the Solver can't finish a seed with a given preset it displays which technique(s) to learn to be able to progress in the seed</li>
+          <li>solver: Display the remaining/inaccessible major locations in the spoiler</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2018/07/18</h4>
       <p>
-	Hello @randomizer,<br/>
-	We've released an intermediate version of the VARIA Randomizer (http://randommetroidsolver.pythonanywhere.com/) dubbed "web site redesign in progress".<br/>
-	New stuff:
-	<ul>
-	  <li>web rando: simple/medium/advanced mode for the randomizer</li>
-	  <li>web preset: new page to manage the presets, the techniques are now grouped in tabs, gamepad mapping in the preset</li>
-	  <li>new optional (activated by default) VARIA tweaks patch:
-	    <ul>
-	      <li>Bomb Torizo fight is triggered when picking up the item he's holding</li>
-	      <li>Access item at Wrecked Ship Etank location without killing Phantoon (via Forgotten Highway)</li>
-	      <li>Activate Lower Norfair Chozo (left of entrance) without Space Jump</li>
-	    </ul>
-	  </li>
-	  <li>rando: the percentage at the end is now based on the available items, not the 100 vanilla ones</li>
-	  <li>area: magic "ship like" refill when entering Tourian (most of the time the ship is not on the way to Tourian)</li>
-	  <li>new optional (activated by default in area) area patch for easier navigation: Remove Crab green gate in Marida and blue gate in Green Brinstar, add new platform in Green Hill Zone to access transition door.</li>
-	  <li>solver: the path of access points between locations is now displayed</li>
-	</ul>
+        Hello @randomizer,<br/>
+        We've released an intermediate version of the VARIA Randomizer (http://randommetroidsolver.pythonanywhere.com/) dubbed "web site redesign in progress".<br/>
+        New stuff:
+        <ul>
+          <li>web rando: simple/medium/advanced mode for the randomizer</li>
+          <li>web preset: new page to manage the presets, the techniques are now grouped in tabs, gamepad mapping in the preset</li>
+          <li>new optional (activated by default) VARIA tweaks patch:
+            <ul>
+              <li>Bomb Torizo fight is triggered when picking up the item he's holding</li>
+              <li>Access item at Wrecked Ship Etank location without killing Phantoon (via Forgotten Highway)</li>
+              <li>Activate Lower Norfair Chozo (left of entrance) without Space Jump</li>
+            </ul>
+          </li>
+          <li>rando: the percentage at the end is now based on the available items, not the 100 vanilla ones</li>
+          <li>area: magic "ship like" refill when entering Tourian (most of the time the ship is not on the way to Tourian)</li>
+          <li>new optional (activated by default in area) area patch for easier navigation: Remove Crab green gate in Marida and blue gate in Green Brinstar, add new platform in Green Hill Zone to access transition door.</li>
+          <li>solver: the path of access points between locations is now displayed</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2018/06/27</h4>
       <p>
-	Hello @randomizer !<br/>
-	We've relased the new version of the VARIA Randomizer, dubbed "feeling lost in Zebes again".<br/>
-	New stuff:
-	<ul>
-	  <li> Area randomization official release (randomization of the access points between the main Zebes areas)</li>
-	  <li> Solver: More human-like pathing</li>
-	  <li> Rando: The maximum difficulty is now set to hardcore by default (no difficulty cap was the previous default)</li>
-	  <li> Rando: The eye at Morph Ball will now open for any item, not only Morph Ball</li>
-	  <li> Presets: Updated all built-in presets for better balance between them. Added casual and master presets.</li>
-	  <li> Presets: Added new, harder settings for X-Ray room</li>
-	  <li> Presets: Short charge is now for 3 taps or stutter 3 (thanks @ponk !). Enabled by default only in speedrunner and master presets.</li>
-	</ul>
-	Bugfixes:
-	<ul>
-	  <li> Area Rando: The scrolling sky background bug has been fixed (thanks to Smiley from metconst!)</li>
-	  <li> Area Rando: The music will correctly change when entering a new area</li>
-	  <li> Area Rando: Unmorphing while passing a transition door no longer crash the game</li>
-	  <li> Lot of bugs corrected in the access condition of the items locations</li>
-	</ul>
-	For the next big release we'll do a complete redesign of the website to make it more user friendly.</br>
-	If you have some feature requests for the next release, you can create create them on github and we'll see what we can do.
+        Hello @randomizer !<br/>
+        We've relased the new version of the VARIA Randomizer, dubbed "feeling lost in Zebes again".<br/>
+        New stuff:
+        <ul>
+          <li> Area randomization official release (randomization of the access points between the main Zebes areas)</li>
+          <li> Solver: More human-like pathing</li>
+          <li> Rando: The maximum difficulty is now set to hardcore by default (no difficulty cap was the previous default)</li>
+          <li> Rando: The eye at Morph Ball will now open for any item, not only Morph Ball</li>
+          <li> Presets: Updated all built-in presets for better balance between them. Added casual and master presets.</li>
+          <li> Presets: Added new, harder settings for X-Ray room</li>
+          <li> Presets: Short charge is now for 3 taps or stutter 3 (thanks @ponk !). Enabled by default only in speedrunner and master presets.</li>
+        </ul>
+        Bugfixes:
+        <ul>
+          <li> Area Rando: The scrolling sky background bug has been fixed (thanks to Smiley from metconst!)</li>
+          <li> Area Rando: The music will correctly change when entering a new area</li>
+          <li> Area Rando: Unmorphing while passing a transition door no longer crash the game</li>
+          <li> Lot of bugs corrected in the access condition of the items locations</li>
+        </ul>
+        For the next big release we'll do a complete redesign of the website to make it more user friendly.</br>
+        If you have some feature requests for the next release, you can create create them on github and we'll see what we can do.
       </p>
     </li>
     <li>
@@ -516,11 +549,11 @@ Chozo split, G4 randomization and color randomization are now available in the r
       Hello @randomizer,</br>
       We've released a new version of the VARIA Randomizer dubbed "Randomize the Randomizer":
       <ul>
-	<li>New options to randomize the parameters used by the Randomizer</li>
-	<li>The parameters used are now displayed in the credits</li>
-	<li>As we had for Bosses and Hellruns, we now have difficulties for hard rooms: X-Ray and Gauntlet, so we've removed a few techniques for these rooms</li>
-	<li>Now there's techniques for better settings of Gravity-less movement underwater</li>
-	<li>New Randomizer's parameter to influence choice of the next location based on its difficulty</li>
+        <li>New options to randomize the parameters used by the Randomizer</li>
+        <li>The parameters used are now displayed in the credits</li>
+        <li>As we had for Bosses and Hellruns, we now have difficulties for hard rooms: X-Ray and Gauntlet, so we've removed a few techniques for these rooms</li>
+        <li>Now there's techniques for better settings of Gravity-less movement underwater</li>
+        <li>New Randomizer's parameter to influence choice of the next location based on its difficulty</li>
       </ul>
       As a result don't forget to update your presets before using the Randomizer.
     </p>
@@ -528,109 +561,109 @@ Chozo split, G4 randomization and color randomization are now available in the r
     <li>
       <h4>2018/04/21</h4>
       <p>
-	Hi @randomizer!</br>
-	We updated the VARIA (http://randommetroidsolver.pythonanywhere.com/) to fix two issues:
-	<ul>
-	  <li>1) The "too much spospo" bug. Now, the probability you would have to fight it is ~30% in slowest/slow, ~5% in medium, and ~0% in fast/fastest. All in all if you choose a random speed, there is a 1/7 chance to have to do the fight.</li>
-	  <li>2) When "start at Ceres" was selected instead of "start at landing site", the stats counters in the credits were wrong and glitched out. It is now fixed, thanks @andrew (original credits/stats patch author), Smiley and PJBoy from metconst for their help, this was a tricky one to fix.</li>
-	  </ul>
-	Enjoy!
+        Hi @randomizer!</br>
+        We updated the VARIA (http://randommetroidsolver.pythonanywhere.com/) to fix two issues:
+        <ul>
+          <li>1) The "too much spospo" bug. Now, the probability you would have to fight it is ~30% in slowest/slow, ~5% in medium, and ~0% in fast/fastest. All in all if you choose a random speed, there is a 1/7 chance to have to do the fight.</li>
+          <li>2) When "start at Ceres" was selected instead of "start at landing site", the stats counters in the credits were wrong and glitched out. It is now fixed, thanks @andrew (original credits/stats patch author), Smiley and PJBoy from metconst for their help, this was a tricky one to fix.</li>
+          </ul>
+        Enjoy!
       </p>
     </li>
     <li>
       <h4>2018/04/14</h4>
       <p>
-	Hello,</br>
-	We've made a new release for the VARIA Randomizer (http://randommetroidsolver.pythonanywhere.com/randomizer):
-	<ul>
-	  <li>the layout patches are now optional (for EasyDanger)</li>
-	  <li>the save the animals suprise patches are now available (for andrew)</li>
-	  <li>there's now a tutorial and contextual help to explain the parameters of the Randomizer and Solver in greater details</li>
-	  <li>the randomized ROMs are now generated a lot faster (between x2 and x3 gain)</li>
-	</ul>
+        Hello,</br>
+        We've made a new release for the VARIA Randomizer (http://randommetroidsolver.pythonanywhere.com/randomizer):
+        <ul>
+          <li>the layout patches are now optional (for EasyDanger)</li>
+          <li>the save the animals suprise patches are now available (for andrew)</li>
+          <li>there's now a tutorial and contextual help to explain the parameters of the Randomizer and Solver in greater details</li>
+          <li>the randomized ROMs are now generated a lot faster (between x2 and x3 gain)</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2018/04/09</h4>
       <p>
-	Hi @randomizer !<br>
-	We made an update to the VARIA randomizer and solver ( http://randommetroidsolver.pythonanywhere.com/ ). Not much in terms of new features, but lots of work behind the scenes:
-	<ul>
-	  <li> stabilized and improved randomizer algorithm: now it can be trolly with minor items as well (especially in slow/slowest speeds), be sure to try it! ;)</li>
-	  <li> fixed logic bugs affecting both rando and solver</li>
-	  <li> fixed Normal/Hard Total ROM patch set mapping for solver</li>
-	</ul>
-	This is an intermediate release, there's more in the works, namely: drastic performance improvements, a tutorial for the website explaining the plethora of settings and other surprises!
+        Hi @randomizer !<br>
+        We made an update to the VARIA randomizer and solver ( http://randommetroidsolver.pythonanywhere.com/ ). Not much in terms of new features, but lots of work behind the scenes:
+        <ul>
+          <li> stabilized and improved randomizer algorithm: now it can be trolly with minor items as well (especially in slow/slowest speeds), be sure to try it! ;)</li>
+          <li> fixed logic bugs affecting both rando and solver</li>
+          <li> fixed Normal/Hard Total ROM patch set mapping for solver</li>
+        </ul>
+        This is an intermediate release, there's more in the works, namely: drastic performance improvements, a tutorial for the website explaining the plethora of settings and other surprises!
       </p>
     </li>
     <li>
       <h4>2018/03/16</h4>
       <p>
-	Hello @randomizer !</br>
-	We updated the VARIA (http://randommetroidsolver.pythonanywhere.com/randomizer). Among the obligatory bugfixes, the following new features are available:
-	<ul>
-	  <li> Skip intro/start at Ceres option, as suggested by @Di10 and @BlackEliteJohn</li>
-	  <li> Added optional patch to speed up doors and elevators transitions</li>
-	  <li> Added a Super Fun Times feature for those who like the feeling of Dessy rando masochist seeds</li>
-	  <li> Ability to have a random progression speed instead of choosing one</li>
-	</ul>
+        Hello @randomizer !</br>
+        We updated the VARIA (http://randommetroidsolver.pythonanywhere.com/randomizer). Among the obligatory bugfixes, the following new features are available:
+        <ul>
+          <li> Skip intro/start at Ceres option, as suggested by @Di10 and @BlackEliteJohn</li>
+          <li> Added optional patch to speed up doors and elevators transitions</li>
+          <li> Added a Super Fun Times feature for those who like the feeling of Dessy rando masochist seeds</li>
+          <li> Ability to have a random progression speed instead of choosing one</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2018/03/13</h4>
       <p>
-	@randomizer Hello,</br>
-	Using the presets (for each technique you can say if you know it and your perceived difficulty for it) from the solver we've made a new randomizer: the VARIA randomizer (Very Adaptive Randomizer of Items for Anyone)</br>
-	It can be found here: http://randommetroidsolver.pythonanywhere.com/randomizer</br>
-	Its features:
-	<ul>
-	  <li>generate a randomized ROM which can be finished using the techniques of the given preset</li>
-	  <li>can limit the max difficulty for reaching a location</li>
-	  <li>can choose the probability of each minors and the percentage of minors available</li>
-	  <li>can choose the quantity of Energy/Reserve Tanks</li>
-	  <li>can do a full randomization of the majors</li>
-	  <li>can influence how fast the randomizer places the progression items</li>
-	  <li>can spread the progression items in all areas with maximum distance between them</li>
-	  <li>several optional patches are available:
-	    <ul>
-	      <li>allow the aim buttons to be assign to any button</li>
-	      <li>remove fanfare when picking up an item</li>
-	      <li>allow Samus to start spinning in mid air after jumping or falling</li>
-	      <li>play the music with MSU1 chip on SD2SNES</li>
-	    </ul>
-	</ul>
+        @randomizer Hello,</br>
+        Using the presets (for each technique you can say if you know it and your perceived difficulty for it) from the solver we've made a new randomizer: the VARIA randomizer (Very Adaptive Randomizer of Items for Anyone)</br>
+        It can be found here: http://randommetroidsolver.pythonanywhere.com/randomizer</br>
+        Its features:
+        <ul>
+          <li>generate a randomized ROM which can be finished using the techniques of the given preset</li>
+          <li>can limit the max difficulty for reaching a location</li>
+          <li>can choose the probability of each minors and the percentage of minors available</li>
+          <li>can choose the quantity of Energy/Reserve Tanks</li>
+          <li>can do a full randomization of the majors</li>
+          <li>can influence how fast the randomizer places the progression items</li>
+          <li>can spread the progression items in all areas with maximum distance between them</li>
+          <li>several optional patches are available:
+            <ul>
+              <li>allow the aim buttons to be assign to any button</li>
+              <li>remove fanfare when picking up an item</li>
+              <li>allow Samus to start spinning in mid air after jumping or falling</li>
+              <li>play the music with MSU1 chip on SD2SNES</li>
+            </ul>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2018/01/30</h4>
       <p>
-	Hello,</br>
-	We've added a few things to the randomized roms solver (http://randommetroidsolver.pythonanywhere.com/):
-	<ul>
-	  <li>display the number of techniques used to solve the rom</li>
-	  <li>in the spoiler display the techniques used for each location</li>
-	  <li>for each techniques display the rooms where it's used with links to the wiki</li>
-	  <li>update the CSS of the website</li>
-	</ul>
+        Hello,</br>
+        We've added a few things to the randomized roms solver (http://randommetroidsolver.pythonanywhere.com/):
+        <ul>
+          <li>display the number of techniques used to solve the rom</li>
+          <li>in the spoiler display the techniques used for each location</li>
+          <li>for each techniques display the rooms where it's used with links to the wiki</li>
+          <li>update the CSS of the website</li>
+        </ul>
       </p>
     </li>
     <li>
       <h4>2018/01/22</h4>
       <p>
-	Hello,</br>
-	With a friend we've developed a solver for the randomized Super Metroid roms: http://randommetroidsolver.pythonanywhere.com/</br>
-	Tell it what you know (and how hard you find particular tricks), and it'll tell you if you can finish your seed, and how hard it will be, without spoiling the seed.</br>
-	It's useful for people who hasn't yet mastered all the Super Metroid tricks required by the randomizers.</br>
-	Features:
-	<ul>
-	  <li> works with randomized roms from Dessyreqt randomizer and (Total, Foosda, Leodox) randomizer</li>
-	  <li> somewhat realistic navigation algorithm</li>
-	  <li> pretty much all tricks and difficult rooms/areas have their setting, with video explanation when we found one, so you can actually learn the tricks if you want</li>
-	  <li> website front end</li>
-	  <li> save/load your presets on the website without having to create an account</li>
-	  <li> boss difficulty is estimated as well</li>
-	  <li> hell runs are taken into account in navigation</li>
-	</ul>
+        Hello,</br>
+        With a friend we've developed a solver for the randomized Super Metroid roms: http://randommetroidsolver.pythonanywhere.com/</br>
+        Tell it what you know (and how hard you find particular tricks), and it'll tell you if you can finish your seed, and how hard it will be, without spoiling the seed.</br>
+        It's useful for people who hasn't yet mastered all the Super Metroid tricks required by the randomizers.</br>
+        Features:
+        <ul>
+          <li> works with randomized roms from Dessyreqt randomizer and (Total, Foosda, Leodox) randomizer</li>
+          <li> somewhat realistic navigation algorithm</li>
+          <li> pretty much all tricks and difficult rooms/areas have their setting, with video explanation when we found one, so you can actually learn the tricks if you want</li>
+          <li> website front end</li>
+          <li> save/load your presets on the website without having to create an account</li>
+          <li> boss difficulty is estimated as well</li>
+          <li> hell runs are taken into account in navigation</li>
+        </ul>
       </p>
     </li>
   </ul>

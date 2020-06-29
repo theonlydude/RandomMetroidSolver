@@ -1,0 +1,103 @@
+
+
+Settings :
+**********
+
+juste un wrapper simple autout du dico settings avec des helpers
+mettre les isChozo, loc match etc dedans
+
+Rando setup :
+*************
+
+== super fun provider
+Services requis :
+- accès aux restrictions pour appel hook
+- itemManager
+- locations initiales
+- graph
+- smbm
+- possibilité d'arreter tout (settings invalides)
+- éléments simples du rando pour le pré-rando
+- settings
+
+Services fournis:
+- restricted items/locs :
+    - prefill les locs inaccessibles
+    - donne la list des locs utiles: important pour le mini solver en hundo
+- check area layout
+- check start location
+- construction item pool final: à amputer des items auto fillés
+- liste de locs interdites par item type (pour random fill)
+
+Variantes rando et plando/rando?
+
+Restrictions :
+**************
+Gère suits restriction, item split, morph placement : chacun un sous objet par composition
+Services: canPlaceAtLocation, service pour rando setup (pour restricted locs)
+
+Hooks requis:
+- début (compute late)
+- reset cache?
+- pendant la boucle principale: services appelable, attention notamment à early morph
+
+State :
+*******
+
+à généraliser aux différents composants. Rando state = composition des states.
+
+Graph Builder :
+***************
+
+- utilise les options area/boss/escape créée le graphe: là aussi procéder par composition
+- escape: besoin de services rando pour calcul timer. attention au besoin item pool complet
+
+Container/Cache :
+*****************
+composé du cache des sous éléments, appel resetCache depuis le filler/rando?
+gestion accès items/locs
+
+Rando :
+*******
+
+ctor :
+- prendre le graph direct plutot que de le construire dans area rando
+- ainsi dot file géré à la création du graphe
+- prendre le smbm en argument aussi
+- startAP
+
+Utilise le filler pour générer les items/locs, gère la runtime limit
+Gestion du state global et fourniture de services associés
+
+Filler :
+********
+
+Fournit au rando la stratégie de fill (= generateItems)
+Besoin des settings, des restrictions, du graph, des locs, des items
+Filler Prog speed based :
+- helper classe type rando settings pour les choose
+- rajouter un "sous-filler" pour le chozo: attention à la gestion des items/loc pools
+- generateItem et sous fonctions sauf getPossiblePlacements
+- getItem
+- rollback at amis
+- choose*/determineParams: objet à part relié aux settings
+- fill non prog
+
+Filler Random fill
+
+Filler plando/rando?
+
+Hooks: ce qu'il faut pour permettre au random fill d'appeler le mini solver
+Ne fournit pas la boucle complète afin de garder la gestion coté rando
+
+Rando services :
+****************
+
+Services utilisables par les différents sous éléments :
+- getPossiblePlacements
+- currentLocations/getAvailLocs : appels à hooks dans l'objet de gestion de restrictions
+- currentAccessPoints
+- isSoftLockPossible
+
+Accès aux items/locs en container/cache, mais peut fonctionner avec d'autres listes
+Besoin smbm/graph aussi

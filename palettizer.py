@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import random, sys, argparse
-from itemrandomizerweb.PaletteRando import PaletteRando
+from rando.PaletteRando import PaletteRando
 from rom import RomPatcher
 import log
 
@@ -83,5 +83,5 @@ if __name__ == "__main__":
     logger.debug("settings: {}".format(settings))
 
     romPatcher = RomPatcher(args.rom)
-    paletteRando = PaletteRando(romPatcher, settings)
+    paletteRando = PaletteRando(romPatcher, settings, None)
     paletteRando.randomize()

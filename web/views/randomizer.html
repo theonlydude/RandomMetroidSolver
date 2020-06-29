@@ -22,13 +22,13 @@ hs.zIndexCounter = 1000000;
 hs.dimmingOpacity = 0.75;
 
 if (hs.registerOverlay) {
-	// The simple semitransparent close button overlay
-	hs.registerOverlay({
-		thumbnailId: 'areathumb',
-		html: '<div class="closebutton"	onclick="return hs.close(this)" title="Close"></div>',
-		position: 'top right',
-		fade: 2 // fading the semi-transparent overlay looks bad in IE
-	});
+        // The simple semitransparent close button overlay
+        hs.registerOverlay({
+                thumbnailId: 'areathumb',
+                html: '<div class="closebutton"        onclick="return hs.close(this)" title="Close"></div>',
+                position: 'top right',
+                fade: 2 // fading the semi-transparent overlay looks bad in IE
+        });
 }
 </script>
 
@@ -41,6 +41,8 @@ if (hs.registerOverlay) {
 <script type="text/javascript" src="{{=URL('static', 'js/jquery.redirect.js')}}"></script>
 
 <script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
+
+<script type="text/javascript" src="{{=URL('static', 'js/localforage.nopromises.min.js')}}"></script>
 
 <title>Super Metroid VARIA Randomizer</title>
 
@@ -57,6 +59,10 @@ if (hs.registerOverlay) {
     margin-top: 1em;
     margin-bottom: 0em;
     text-align: center;
+}
+.donate {
+    text-align: center;
+    margin-top: 1em;
 }
 .rightStep {
     float: right;
@@ -117,9 +123,6 @@ if (hs.registerOverlay) {
     height: auto;
     padding: 0.5%;
     border: 2px solid #666666;
-}
-#psMultiselectDiv {
-    display: none;
 }
 .sixty {
     width: 65%
@@ -235,21 +238,34 @@ if (hs.registerOverlay) {
 
 <script type="text/javascript">
 // https://stackoverflow.com/questions/16960690/chosen-harvesthq-resize-width-dynamically
-$(document).ready(function(){      
+$(document).ready(function(){
    jQuery(window).on('resize', resizeChosen);
 });
+
+// chosen elements need a special method to update their value
+var chosenElements = ["preset", "startLocationMultiSelect", "majorsSplitMultiSelect", "progressionSpeedMultiSelect", "progressionDifficultyMultiSelect", "morphPlacementMultiSelect", "energyQtyMultiSelect"];
+var currentMultiValues = {{response.write(currentMultiValues, escape=False)}};
+var defaultMultiValues = {{response.write(defaultMultiValues, escape=False)}};
 
 function resizeChosen() {
    $(".chosen-container").each(function() {
        $(this).attr('style', 'width: 100%');
-   });          
+   });
+}
+
+function isElemRandom(elem) {
+    return elem.className.search("active") != -1;
+}
+
+function isElemIdRandom(elemId) {
+    return isElemRandom(document.getElementById(elemId+"Random"));
 }
 
 function randomize(evt, elemId) {
   var e = document.getElementById(elemId);
 
   var isActive;
-  if(evt.currentTarget.className.search("active") != -1) {
+  if(isElemRandom(evt.currentTarget)) {
     evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
     isActive = false;
 
@@ -266,25 +282,26 @@ function randomize(evt, elemId) {
 
   disableElement(elemId, isActive);
 
-  if(elemId == "areaRandomization") {
+  // disable elements on the same line
+  var additionnal = {"areaRandomization": "areaLayout",
+                     "escapeRando": "removeEscapeEnemies"};
+  if(elemId in additionnal) {
     if(isActive == true || (isActive == false && e.checked == true)) {
-      var secondIds = ["areaLayout", "escapeRando", "removeEscapeEnemies"];
-      for(var i=0; i<secondIds.length; i++) {
-        disableElement(secondIds[i], isActive);
-      }
+        disableElement(additionnal[elemId], isActive);
     }
   }
 
-  // special case for prog speed
-  if(elemId == "progressionSpeed") {
+  // special case for multi select
+  var multi = document.getElementById(elemId+"MultiSelectDiv");
+  if(multi != null) {
     if(isActive == true) {
-      document.getElementById("progressionSpeed").style.display = "none";
-      document.getElementById("psMultiselectDiv").style.display = "block";
+      e.style.display = "none";
+      multi.style.display = "block";
       // chosen must be activated when it's visible, else it doesn't work...
-      $("#psMultiselect").chosen();
+      $("#"+elemId+"MultiSelect").chosen();
     } else {
-      document.getElementById("progressionSpeed").style.display = "block";
-      document.getElementById("psMultiselectDiv").style.display = "none";
+      e.style.display = "block";
+      multi.style.display = "none";
     }
   }
 }
@@ -321,16 +338,14 @@ function getComplexity() {
 
 function setRandom() {
 {{
-  for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed", "areaRandomization", "bossRandomization"]:
-    if id in session.randomizer and session.randomizer[id] == "random":
-      response.write("  document.getElementById(\"{}Random\").click();\n".format(id), escape=False)
+    for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed", "areaRandomization", "bossRandomization", "escapeRando", "startLocation"]:
+      if id in session.randomizer and session.randomizer[id] == "random":
+        response.write("  document.getElementById(\"{}Random\").click();\n".format(id), escape=False)
+        if "{}MultiSelect".format(id) in session.randomizer:
+          response.write("  $(\"#{}MultiSelect\").val({});\n".format(id, session.randomizer["{}MultiSelect".format(id)]), escape=False)
+          pass
+        pass
       pass
-    pass
-  if "progressionSpeed" in session.randomizer and type(session.randomizer["progressionSpeed"]) == list and len(session.randomizer["progressionSpeed"]) > 1:
-    # python2: prog speed are in utf-8 after loading from json and displayed in js like [u'slowest', u'slow']
-    response.write("  $(\"#psMultiselect\").val({});\n".format([str(ps) for ps in session.randomizer["progressionSpeed"]]), escape=False)
-    response.write("  document.getElementById(\"progressionSpeedRandom\").click();\n", escape=False)
-    pass
 }}
 }
 
@@ -347,18 +362,18 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = [];
-    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "removeEscapeEnemiesVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility"];
     showHide(show, hide);
   }
 
   else if(name == "medium") {
-    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "noMusicVisibility", "random_musicVisibility", "escapeRandoVisibility"];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "removeEscapeEnemiesVisibility"];
+    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility"];
+      var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility"];
     showHide(show, hide);
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "noMusicVisibility", "random_musicVisibility", "escapeRandoVisibility", "removeEscapeEnemiesVisibility"];
+      var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility"];
     var hide = [];
     showHide(show, hide);
   }
@@ -391,22 +406,38 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "escapeRando", "removeEscapeEnemies", "random_music"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "startLocation", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "areaRandomization", "bossRandomization"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "bossRandomization", "escapeRando"];
+    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"];
 
     for(var i=0; i<elems.length; i++) {
-       dataDict[elems[i]] = document.getElementById(elems[i]).value;
+        // if element is disabled set it to off
+        var elem = document.getElementById(elems[i]);
+        if(elem.disabled == true) {
+            dataDict[elems[i]] = "off";
+        } else {
+            dataDict[elems[i]] = elem.value;
+        }
     }
     for(var i=0; i<randomElems.length; i++) {
        // check if random dice is checked
-       if(document.getElementById(randomElems[i]+"Random").className.search("active") != -1) {
+       if(isElemIdRandom(randomElems[i])) {
          dataDict[randomElems[i]] = "random";
        } else {
          dataDict[randomElems[i]] = document.getElementById(randomElems[i]).value;
        }
     }
-
-    dataDict["progressionSpeed"] = getProgSpeed();
+    for(var i=0; i<multiElems.length; i++) {
+       // check if random dice is checked
+       var elemId = multiElems[i];
+       if(isElemIdRandom(elemId)) {
+         dataDict[elemId] = "random";
+         multiElemId = elemId+"MultiSelect";
+         dataDict[multiElemId] = $("#"+multiElemId).val().join();
+       } else {
+         dataDict[elemId] = document.getElementById(elemId).value;
+       }
+    }
 
     // call web service with parameters
     var request = $.ajax({
@@ -442,16 +473,6 @@ function ajaxFailJSON(jqXHR, textStatus) {
   cancelTip();
 }
 
-function getProgSpeed() {
-  // multi select value for random prog speed
-  console.log("psMultiselect value: "+$("#psMultiselect").val());
-  if(document.getElementById("progressionSpeedRandom").className.search("active") != -1) {
-    return $("#psMultiselect").val().join();
-  } else {
-    return document.getElementById("progressionSpeed").value;
-  }
-}
-
 function unpack_3bytes(ips, i) {
   var b1 = ips[i];
   var b2 = ips[i+1];
@@ -469,61 +490,73 @@ function AjaxRandomizerCallCompleted(data) {
     console.log("AjaxRandomizerCallCompleted");
 
     // with items/Locations patch the local rom in memory
-    var filesInput = document.getElementById("uploadFile");
-    var file = filesInput.files[0];
+    var bytes = new Uint8Array(vanillaROM);
 
-    var reader = new FileReader();
-    reader.readAsArrayBuffer(file);
+    var binary_string = atob(data["ips"]);
+    var len = binary_string.length;
+    var ips = new Uint8Array(len);
+    for(var i = 0; i < len; i++) {
+        ips[i] = binary_string.charCodeAt(i);
+    }
 
-    reader.onload = function(e) {
-        var bytes = new Uint8Array(e.target.result);
+    console.log("IPS size: "+ips.length);
+    var i = 5;
+    var offset = 0;
+    var size = 0;
+    var rle_size = 0;
 
-        if("ips" in data) {
-          var binary_string = atob(data["ips"]);
-          var len = binary_string.length;
-          var ips = new Uint8Array(len);
-          for(var i = 0; i < len; i++) {
-             ips[i] = binary_string.charCodeAt(i);
-          }
+    while(i < ips.length - 3) {
+        offset = unpack_3bytes(ips, i);
+        i += 3;
+        size = unpack_2bytes(ips, i);
+        i += 2;
 
-          console.log("IPS size: "+ips.length);
-          var i = 5;
-          var offset = 0;
-          var size = 0;
-          var rle_size = 0;
-
-          while(i < ips.length - 3) {
-             offset = unpack_3bytes(ips, i);
-             i += 3;
-             size = unpack_2bytes(ips, i);
-             i += 2;
-
-             if(size == 0) {
-               // RLE
-               rle_size = unpack_2bytes(ips, i);
-               i += 2;
-               for(j=0; j<rle_size; j++) {
-                 bytes[offset+j] = ips[i];
-               }
-               i += 1;
-             } else {
-               for(j=0; j<size; j++) {
-                 bytes[offset+j] = ips[i+j];
-               }
-               i += j;
-             }
-          }
+        if(size == 0) {
+            // RLE
+            rle_size = unpack_2bytes(ips, i);
+            i += 2;
+            for(j=0; j<rle_size; j++) {
+                bytes[offset+j] = ips[i];
+            }
+            i += 1;
+        } else {
+            for(j=0; j<size; j++) {
+                bytes[offset+j] = ips[i+j];
+            }
+            i += j;
         }
+    }
 
-        for(var key in data) {
-            if(key === "fileName" || key === "errorMsg" || key === "ips" || key === "max_size" || key == "truncate_length") { continue; }
-            bytes[key] = data[key];
+    // fix checksum
+    var sum1 = 0;
+    for(var i=0; i<0x200000; i++) { sum1 += bytes[i]; }
+    var sum2 = 0;
+    for(var i=0x200000; i<0x300000; i++) { sum2 += bytes[i]; }
+    var sum = (sum1 + (sum2 * 2)) & 0xFFFF;
+    var sumlo = sum & 0x00FF;
+    var sumhi = (sum & 0xFF00) >> 8;
+    var invSum = sum ^ 0xFFFF;
+    var invSumlo = invSum & 0x00FF;
+    var invSumhi = (invSum & 0xFF00) >> 8;
+    bytes[0x7FDC] = invSumlo;
+    bytes[0x7FDD] = invSumhi;
+    bytes[0x7FDE] = sumlo;
+    bytes[0x7FDF] = sumhi;
+
+    var blob = new Blob([bytes], {type: "octet/stream"});
+
+    var outFileName = data['fileName'];
+    saveAs(blob, outFileName);
+
+    // add permalink
+    if('seedKey' in data) {
+        var host = window.location.protocol+"//"+window.location.hostname;
+        if(window.location.port.length > 0) {
+            host = host+":"+window.location.port;
         }
-
-        var blob = new Blob([bytes], {type: "octet/stream"});
-
-        var outFileName = data['fileName'];
-        saveAs(blob, outFileName);
+        var seedKey = data['seedKey'];
+        var link = encodeURI(host+"/customizer/"+seedKey);
+        document.getElementById("permalink").innerHTML = "<a href=\""+link+"\" target=\"_blank\">"+link+"</a>";
     }
 
     // info message to display ?
@@ -537,25 +570,34 @@ function AjaxRandomizerCallCompleted(data) {
 
     // set backup button text to Randomize
     document.getElementById("submitBtn").data = "Randomize";
-    console.log("button text set back to randomize");
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "escapeRando", "removeEscapeEnemies", "random_music"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "startLocation", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "areaRandomization", "bossRandomization"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "bossRandomization", "escapeRando"];
+    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
     }
     for(var i=0; i<randomElems.length; i++) {
        // check if random dice is checked
-       if(document.getElementById(randomElems[i]+"Random").className.search("active") != -1) {
+       if(isElemIdRandom(randomElems[i])) {
          dataDict[randomElems[i]] = "random";
        } else {
          dataDict[randomElems[i]] = document.getElementById(randomElems[i]).value;
        }
     }
-
-    dataDict["progressionSpeed"] = getProgSpeed();
+    for(var i=0; i<multiElems.length; i++) {
+       // check if random dice is checked
+       var elemId = multiElems[i];
+       if(isElemIdRandom(elemId)) {
+         dataDict[elemId] = "random";
+         multiElemId = elemId+"MultiSelect";
+         dataDict[multiElemId] = $("#"+multiElemId).val().join();
+       } else {
+         dataDict[elemId] = document.getElementById(elemId).value;
+       }
+    }
 
     // call webservice to update the session
     var request = $.ajax({
@@ -579,26 +621,12 @@ function AjaxRandomizerCallCompleted(data) {
 function doSubmit() {
   if(window.File && window.FileList && window.FileReader) {
 
-    var filesInput = document.getElementById("uploadFile");
-    var file = filesInput.files[0]
-    if (file === undefined) {
-      alert("Please select a Super Metroid Vanilla ROM first")
-      btn = document.getElementById("submitBtn");
-      btn.data = "Randomize";
-      btn.disabled = false;
-
-      setTimeout(function(){ 
-          btn = document.getElementById("submitBtn");
-          btn.data = "Randomize";
-          btn.disabled = false;
-      }, 20000);
-
-      return false;
+    if(vanillaROMStored == false) {
+        alert("Please select a Super Metroid Vanilla ROM first");
+        return false;
     }
 
     var dataDict = {"preset": document.getElementById("preset").value};
-
-    console.log("before preset web service call"+dataDict["preset"]);
 
     // call preset web service with parameters
     var request = $.ajax({
@@ -649,12 +677,15 @@ var tips = [
     "The aim buttons can be assigned to any button",
     "You can save your own button layout as well as moonwalk option in your skills preset to avoid doing the setup every seed",
     "Using a non-standard or randomized start location will enable Full randomization, all anti-softlock patches and VARIA tweaks",
-    "During randomized escape sequence in area rando, your hyper beam can destroy super/bomb/PB blocks, and open all gates",
-    "During randomized escape sequence in area rando, if you 'forgot' to pick up a suit during your run and cannot escape, you can reload and exit Tourian at any time",
+    "All starting locations come with their layout changes or doors opened, be sure to check them by clicking on '?' next to the option",
+    "During randomized escape sequence, your hyper beam can destroy super/bomb/PB blocks, and open all gates",
+    "During randomized escape sequence, if you 'forgot' to pick up a suit during your run and cannot escape, you can reload and exit Tourian at any time",
+    "During randomized escape sequence, you can find the animals behind a map station door or/and try different escape by going to vanilla animals",
     "Click on the '?' buttons to get help and tutorials in all pages of the VARIA site",
     "You can alter the Suits behaviour in the Advanced tab (Patches section). Choose between Balanced (default), Progressive (like DASH randomizer), and Vanilla.",
     "Tired of looking for Charge beam? Check out the 'Nerfed Charge' patch accessible in Medium and Advanced tabs",
-    "Super Fun settings (Advanced tab) do not require any specific skill in your preset. The seeds generated will always be completable."
+    "Super Fun settings (Advanced tab) do not require any specific skill in your preset. The seeds generated will always be completable.",
+    "Check out the Plandository to play plandos published VARIA users, as well as VARIA weekly races seeds/plandos"
 ];
 
 var myTimer = null;
@@ -688,6 +719,8 @@ function cancelTip() {
   $("#loadingTips"+curLoadingTips).hide();
 }
 
+var vanillaROMStored = false;
+var vanillaROM = null;
 window.onload = function(){
     //Check File API support
     if(window.File && window.FileList && window.FileReader) {
@@ -701,18 +734,18 @@ window.onload = function(){
             var reader = new FileReader();
             reader.readAsArrayBuffer(file)
             reader.onload = function(e) {
-		// check sfc or smc extention
+                // check sfc or smc extention
                 var re = /(?:\.([^.]+))?$/;
-		var ext = re.exec(file.name)[1];
+                var ext = re.exec(file.name)[1];
                 console.log("ext: "+ext)
-                if( ! (ext === "sfc" || ext === "smc") ) {
+                if( ! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC") ) {
                     document.getElementById("uploadFile").value = "";
                     alert("wrong extension: "+ext);
                     return false;
                 }
 
                 var fileSize = file.size;
-		if( fileSize > 4*1024*1024 ) {
+                if( fileSize > 4*1024*1024 ) {
                     document.getElementById("uploadFile").value = "";
                     alert("wrong ROM file size: "+fileSize.toString());
                     return false;
@@ -726,8 +759,22 @@ window.onload = function(){
                 var digest = crc32.digest();
                 console.log("crc32: "+digest);
                 if(digest != "d63ed5f8") {
-                    alert("Non vanilla ROM detected, use at your own risk!");
+                    document.getElementById("uploadFile").value = "";
+                    alert("Non vanilla ROM detected");
+                    return false;
                 }
+
+                // store file in localforage
+                localforage.setItem('vanillaROM', e.target.result, function(err, value) {
+                    if(err != null) {
+                        clearLocalStorage();
+                    } else {
+                        console.log("vanilla ROM stored in local storage");
+                        vanillaROM = value;
+                        vanillaROMStored = true;
+                        displayROMInput(false);
+                    }
+                });
             }
         }, false);
     } else {
@@ -741,16 +788,11 @@ window.onload = function(){
         var lateMorph = document.getElementById("morphPlacement");
         var suits = document.getElementById("suitsRestriction");
         var escapeRando = document.getElementById("escapeRando");
-        var removeEscapeEnemies = document.getElementById("removeEscapeEnemies");
 
         if(area.checked){
-            var secondIds = ["areaLayout", "escapeRando", "removeEscapeEnemies"];
-            for(var i=0; i<secondIds.length; i++) {
-              disableElement(secondIds[i], false);
-            }
+            disableElement("areaLayout", false);
 
             if(! patches.checked){ patches.click(); }
-            if(! removeEscapeEnemies.checked){ removeEscapeEnemies.click(); }
             if(! escapeRando.checked){ escapeRando.click(); }
 
             // uncheck suits restrictions when late morph + area
@@ -761,24 +803,38 @@ window.onload = function(){
             }
         } else {
             if(patches.checked){ patches.click(); }
-            if(removeEscapeEnemies.checked){ removeEscapeEnemies.click(); }
             if(escapeRando.checked){ escapeRando.click(); }
 
-            var secondIds = ["areaLayout", "escapeRando", "removeEscapeEnemies"];
-            for(var i=0; i<secondIds.length; i++) {
-              disableElement(secondIds[i], true);
-            }
+            disableElement("areaLayout", true);
         }
         switchCheckbox("areaRandomization");
     };
+    if(! area.checked){
+        disableElement("areaLayout", true);
+    }
 
     var escapeRando = document.getElementById("escapeRando");
-    escapeRando.onchange = function() {
-      var escapeRando = document.getElementById("escapeRando");
+    escapeRando.onchange = function(){
+        var escapeRando = document.getElementById("escapeRando");
+        var removeEscapeEnemies = document.getElementById("removeEscapeEnemies");
 
-      disableElement("removeEscapeEnemies", ! escapeRando.checked);
-      switchCheckbox("escapeRando");
-    };
+        if(escapeRando.checked){
+            disableElement("removeEscapeEnemies", false);
+            disableElement("animals", true);
+            if(! removeEscapeEnemies.checked){ removeEscapeEnemies.click(); }
+        } else {
+            if(removeEscapeEnemies.checked){ removeEscapeEnemies.click(); }
+            disableElement("removeEscapeEnemies", true);
+            disableElement("animals", false);
+        }
+        switchCheckbox("escapeRando");
+    }
+    if(! escapeRando.checked){
+        disableElement("removeEscapeEnemies", true);
+    }
+    if(escapeRando.checked){
+        disableElement("animals", true);
+    }
 
     // uncheck suits restrictions when late morph + area
     var lateMorph = document.getElementById("morphPlacement");
@@ -822,7 +878,7 @@ window.onload = function(){
     startLocation.onchange = function(){
         var startLocation = document.getElementById("startLocation");
 
-	var selected = startLocation.value; //startLocation.options[startLocation.selectedIndex].text;
+        var selected = startLocation.value; //startLocation.options[startLocation.selectedIndex].text;
         if(selected != "Ceres" && selected != "Landing Site"){
             var morphPlacement = document.getElementById("morphPlacement");
             var majorsSplit = document.getElementById("majorsSplit");
@@ -830,31 +886,31 @@ window.onload = function(){
             var layoutPatches = document.getElementById("layoutPatches");
             var suitsRestriction = document.getElementById("suitsRestriction");
 
-	    if(morphPlacement.value != "normal") {
-		morphPlacement.value = "normal";
-	    }
-	    if(majorsSplit.value != "Full") {
-		majorsSplit.value = "Full";
-	    }
-	    if(variaTweaks.checked == false) {
-		variaTweaks.click();
+            if(morphPlacement.value != "normal") {
+                morphPlacement.value = "normal";
             }
-	    if(layoutPatches.checked == false) {
-		layoutPatches.click();
+            if(majorsSplit.value != "Full") {
+                majorsSplit.value = "Full";
             }
-	    if(suitsRestriction.checked == true) {
-		suitsRestriction.click();
+            if(variaTweaks.checked == false) {
+                variaTweaks.click();
             }
-	    if(selected == "Red Brinstar Elevator" || selected == "Golden Four") {
-		var areaRandomization = document.getElementById("areaRandomization");
-		var areaLayout = document.getElementById("areaLayout");
-		if(areaRandomization.checked == false) {
-		    areaRandomization.click();
-		}
-		if(areaLayout.checked == false) {
-		    areaLayout.click();
-		}
-	    }
+            if(layoutPatches.checked == false) {
+                layoutPatches.click();
+            }
+            if(suitsRestriction.checked == true) {
+                suitsRestriction.click();
+            }
+            if(selected == "Red Brinstar Elevator" || selected == "Golden Four") {
+                var areaRandomization = document.getElementById("areaRandomization");
+                var areaLayout = document.getElementById("areaLayout");
+                if(areaRandomization.checked == false) {
+                    areaRandomization.click();
+                }
+                if(areaLayout.checked == false) {
+                    areaLayout.click();
+                }
+            }
         }
     }
 
@@ -892,6 +948,39 @@ window.onload = function(){
     $("#preset").chosen();
     $("#randoPreset").chosen();
     resizeChosen();
+
+    // check if a vanilla ROM is already in local storage
+    localforage.getItem('vanillaROM', function(err, value) {
+        if(err != null) {
+            clearLocalStorage();
+        } else {
+            if(value != null) {
+                vanillaROMStored = true;
+                displayROMInput(false);
+                vanillaROM = value;
+                vanillaROMStored = true;
+            } else {
+                clearLocalStorage();
+            }
+        }
+    });
+}
+
+function displayROMInput(show) {
+    if(show == true) {
+        document.getElementById("uploadFileVisibility").style.display = "block";
+        document.getElementById("uploadFileOKVisibility").style.display = "none";
+    } else {
+        document.getElementById("uploadFileVisibility").style.display = "none";
+        document.getElementById("uploadFileOKVisibility").style.display = "block";
+    }
+}
+
+function clearLocalStorage() {
+    displayROMInput(true);
+    localforage.clear();
+    vanillaROMStored = false;
+    vanillaROM = null;
 }
 
 function switchCheckbox(id, elems=[]) {
@@ -929,22 +1018,16 @@ function loadRandoPresetOK(data) {
   for(var key in data) {
     value = data[key];
     var elem = document.getElementById(key);
-    // console.log("key: "+key+" value: "+value);
 
     var elemRandom = document.getElementById(key+"Random");
     if(value == "random") {
-      if(key == "progressionSpeed") {
-        $("#psMultiselect").val(["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"]).trigger("chosen:updated");
-        document.getElementById("progressionSpeedRandom").click();
-      }
-
       // if not already set as random, set it
-      if(elemRandom.className.search("active") == -1) {
+      if(! isElemRandom(elemRandom)) {
         randomize({currentTarget: elemRandom}, key);
       }
     } else {
       // check if it was random before
-      if(elemRandom != null && elemRandom.className.search("active") != -1) {
+      if(elemRandom != null && isElemRandom(elemRandom)) {
         randomize({currentTarget: elemRandom}, key);
       }
 
@@ -955,23 +1038,18 @@ function loadRandoPresetOK(data) {
         }
       }
 
-      // update element value
-      if(key == "progressionSpeed") {
-        if(typeof value == "string") {
-          // one value
-          elem.value = value;
-        } else {
-          // multiple values
-          $("#psMultiselect").val(value).trigger("chosen:updated");
-          document.getElementById("progressionSpeedRandom").click();
-        }
-      } else if(key == "preset") {
-        elem.value = value;
-        $("#preset").val(value).trigger("chosen:updated");
-      } else {
-        elem.value = value;
+      elem.value = value;
+      if(chosenElements.includes(key)) {
+        $("#"+key).val(value).trigger("chosen:updated");
       }
     }
+  }
+
+  // check if multi select has been set by the rando preset, otherwise load default values
+  for(var key in defaultMultiValues) {
+      if(! (key in data) ) {
+          $("#"+key).val(defaultMultiValues[key]).trigger("chosen:updated");
+      }
   }
 }
 
@@ -982,19 +1060,25 @@ function startTheTour(step=-1) {
     autoscroll: false,
     steps: [
     {
+      element: "#permalinkStep",
+      title: "Permanent link",
+      content: "Use this permalink to share you seed to other players.<br/><b>Note:</b> You have to click at least once on the link to activate it, else it won't work after seven days."
+    },
+    {
       element: "#romStep",
       title: "Vanilla Super Metroid ROM",
-      content: "Use an American/Japan unheadered ROM of Super Metroid.<br/>The randomized ROM is generated locally."
+      content: "<p>Use an American/Japan unheadered ROM of Super Metroid.<br/>\
+The vanilla ROM is stored in the browser local storage and is never sent to our server, all the patching is done locally in the browser.</p>"
     },
     {
       element: "#seedStep",
       title: "Randomizer seed",
-      content: "Choose a seed number between 1 and 9999999, choose 0 to generate a random one."
+      content: "Choose a seed number between 1 and {{=maxsize}}, choose 0 to generate a random one."
     },
     {
       element: "#presetStep",
       title: "Skills Preset",
-      content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\" target=\"_blank\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), tournament presets, or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p>"
+      content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\" target=\"_blank\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), tournament presets, or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p><p><b>Standard presets outlook:</b><br/><ul><li><b>newbie: </b>New to randomizers, but completed Super Metroid 100% and knows basic techniques (Wall Jump, Shinespark, Mid-air Morph)</li><li><b>casual:</b> occasional rando player. No hell runs or suitless Maridia, some easy to learn tricks in logic.</li><li><b>regular: </b>plays rando regularly. Knows tricks that are not too hard and open up the game: hell runs (generous energy requirements), suitless Maridia, lava dive, gate glitches, Alcatraz, Gauntlet...</li><li><b>veteran:</b> experienced rando player. Harder everything, some tougher tricks in logic.</li><li><b>speedrunner: </b>knows almost all tricks: full suitless Maridia, Lower Norfair hell runs, hi-jumpless Lava Dive (mania difficulty only, so not by default in most rando settings)</li><li><b>master:</b> Everything on hardest, all tricks known.</li></ul></p>"
     },
     {
       element: "#randoPresetStep",
@@ -1081,6 +1165,12 @@ Tournament presets:<ul>\
 <td><img src=\"/solver/static/images/wrecked_ship_start.png\" alt=\"Wrecked Ship Main\" title=\"Wrecked Ship Main\" class=\"full\"/></td><td><img src=\"/solver/static/images/sponge_bath_blue_door.png\" alt=\"Sponge Bath blue door\" title=\"Sponge Bath blue door\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
+<td>Firefleas Top (heat removed)</td><td>Fune removed</td><td>Shot blocks at save station</td>\
+</tr>\
+<tr>\
+<td><img src=\"/solver/static/images/firefleas_top_start.png\" alt=\"Firefleas Top\" title=\"Firefleas Top\" class=\"full\"/></td><td><img src=\"/solver/static/images/fune_removed.png\" alt=\"Fune removed\" title=\"Fune removed\" class=\"full\"/></td><td><img src=\"/solver/static/images/firefleas_shot_blocks.png\" alt=\"Firefleas shot blocks\" title=\"Firefleas shot blocks\" class=\"full\"/></td>\
+</tr>\
+<tr>\
 <td>Business Center</td><td>Hi-Jump area blue door</td><td></td>\
 </tr>\
 <tr>\
@@ -1093,10 +1183,22 @@ Tournament presets:<ul>\
 <td><img src=\"/solver/static/images/bubble_mountain_start.png\" alt=\"Bubble Mountain\" title=\"Bubble Mountain\" class=\"full\"/></td><td><img src=\"/solver/static/images/speed_blue_door1.png\" alt=\"Speed area blue door\" title=\"Speed area blue door\" class=\"full\"/></td><td><img src=\"/solver/static/images/speed_blue_door2.png\" alt=\"Speed area blue door\" title=\"Speed area blue door\" class=\"full\"/></td>\
 </tr>\
 <tr>\
+<td>Mama Turtle</td><td>Mama Turtle blue door</td><td></td>\
+</tr>\
+<tr>\
+<td><img src=\"/solver/static/images/mama_turtle_start.png\" alt=\"Mama Turtle\" title=\"Mama Turtle\" class=\"full\"/></td><td><img src=\"/solver/static/images/mama_turtle_blue_door.png\" alt=\"Mama Turtle blue door\" title=\"Mama Turtle blue door\" class=\"full\"/></td><td></td>\
+</tr>\
+<tr>\
 <td>Watering Hole</td><td>Maridia tube opened</td><td></td>\
 </tr>\
 <tr>\
 <td><img src=\"/solver/static/images/watering_hole_start.png\" alt=\"Watering Hole\" title=\"Watering Hole\" class=\"full\"/></td><td><img src=\"/solver/static/images/maridia_tube_opened.png\" alt=\"Maridia tube opened\" title=\"Maridia tube opened\" class=\"full\"/></td><td></td>\
+</tr>\
+<tr>\
+<td>Aqueduct</td><td>Aqueduct Save blue door</td><td></td>\
+</tr>\
+<tr>\
+<td><img src=\"/solver/static/images/aqueduct_start.png\" alt=\"Aqueduct\" title=\"Aqueduct\" class=\"full\"/></td><td><img src=\"/solver/static/images/aqueduct_save_blue.png\" alt=\"Aqueduct Save door\" title=\"Aqueduct Save door\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
 <td>Red Brinstar Elevator</td><td>Hellway blue door</td><td></td>\
@@ -1122,12 +1224,16 @@ Tournament presets:<ul>\
     {
       element: "#maxDifficultyStep",
       title: "Maximum difficulty for picking up an item",
-      content: "<p>Depending on the perceived difficulties of the techniques, bosses, hell runs etc. from the preset, it will prevent the Randomizer from placing an item in a location too difficult to reach with the current items.</p><p><b>Warning:</b> if too low may cause the randomizer to up the difficulty for some boss fight.</p><p>Click on the dice button to randomly set this parameter.</p>"
+      content: "<p>Depending on the perceived difficulties of the techniques, bosses, hell runs etc. from the preset, it will prevent the Randomizer from placing an item in a location too difficult to reach with the current items.</p><p><b>Warning:</b> if too low may cause the randomizer to up the difficulty for some boss fight.</p>"
     },
     {
       element: "#progSpeedStep",
       title: "Progression speed",
-      content: "<p>A progression item can be a suit, a movement item, or any item that opens up new locations. This parameter influences how fast progression items are likely to be found.<br/>Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progression items as possible, to <b>fastest</b>, where you will be able to visit Zebes pretty shortly.</p><p><b>VARIAble</b> speed will randomly change internal progression speed while placing items, creating seeds that are more unpredictable.</p><p>You can also pick <b>basic</b>, in which case VARIA will place the items exactly like Dessyreqt Randomizer, or Total Randomizer in its Normal/Casual setting.</p><p>Click on the dice button to access <b>random progression speed</b> mode where you can choose on which progression speeds the randomization will take place.</p><p><b>Note:</b> usually, slower settings will result in more difficult seeds, and faster settings in easier seeds. Basic progression speed usually results in easy/fast seeds, but not always.</p>"
+      content: "<p>A progression item can be a suit, a movement item, or any item that opens up new locations. This parameter influences how fast progression items are likely to be found.<br/>\
+Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progression items as possible, to <b>fastest</b>, where you will be able to visit Zebes pretty shortly.</p><p><b>VARIAble</b> speed will randomly change internal progression speed while placing items, creating seeds that are more unpredictable.</p><p>You can also pick <b>basic</b>, in which case VARIA will place the items exactly like Dessyreqt Randomizer, or Total Randomizer in its Normal/Casual setting (ie: front fill placement).</p>\
+<p>The <b>speedrun</b> progression speed uses a random fill placement, which allows for a more uniform placement of items. As a result you're less expected to have to hunt for items like in the slower progression speeds.</p>\
+<p>Click on the dice button to access <b>random progression speed</b> mode where you can choose on which progression speeds the randomization will take place.</p>\
+<p><b>Note:</b> usually, slower settings will result in more difficult seeds, and faster settings in easier seeds. Basic progression speed usually results in easy/fast seeds, but not always.</p>"
     },
     {
       element: "#progDiffStep",
@@ -1167,14 +1273,17 @@ Tournament presets:<ul>\
     {
       element: "#energyQtyStep",
       title: "Quantity of Energy/Reserve Tanks available",
-      content: "<p>Choose how many Energy/Reserve Tanks will be available, from 4-6 in sparse, 8-12 in medium and 18 in vanilla.</p><p>Click on the dice button to randomly set this parameter.</p>"
+      content: "<p>Choose how many Energy/Reserve Tanks will be available, from 0-1 in ultra sparse, 4-6 in sparse, 8-12 in medium and 18 in vanilla.</p><p>In ultra sparse Mother Brain's rainbow beam only do 20 damage instead of 300. Energy will always be an Energy Tank when it's available.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#areaRandomizationStep",
       title: "Areas randomization",
-      content: "<p>Randomize areas together using bidirectional access portals:</p><a href=\"/solver/static/images/area_map_20200112.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a><p>It is recommended to use the <a href=\"/solver/solver_web/tracker\" target=\"_blank\">Area Tracker</a> to find your way more easily.</p><p>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>\
-By default, the escape sequence can spawn you outside a random map station, and you have to find your way to the ship. See next option (in medium/advanced tab) for more information.<br/>\
-You can go through all portals and back, even those where you can't do that in vanilla, so some layout tweaks have been made:</p>\
+      content: "<p>Randomize areas together using bidirectional access portals:</p>\
+<a href=\"/solver/static/images/area_map_20200112.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a>\
+<p>It is recommended to use the <a href=\"/solver/solver_web/tracker\" target=\"_blank\">Area Tracker</a> to find your way more easily.</p>\
+<p>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).</p>\
+<p>By default, the escape sequence will spawn you outside a random map station, and you have to find your way to the ship. See Escape Randomization section (in medium/advanced tab) for more information.</p>\
+<p>You can go through all portals and back, even those where you can't do that in vanilla, so some layout tweaks have been made:\
 <table class=\"full\">\
 <tr>\
 <td class=\"knowsUsed\"><p class=\"top\">Remove Maridia red fish exit green gate:</td>\
@@ -1205,6 +1314,7 @@ You can go through all portals and back, even those where you can't do that in v
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/pirates_shaft_blue_door.png\" alt=\"pirates_shaft_blue_door.png\" title=\"pirates_shaft_blue_door.png\" class=\"full\"/></td>\
 </tr>\
 </table>\
+</p>\
 Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
@@ -1233,28 +1343,15 @@ Click on the dice button to randomly set this parameter.",
 <td class=\"quarter\"><img src=\"/solver/static/images/tube_access.png\" alt=\"tube_access\" title=\"tube_access\" class=\"full\"/></td>\
 <td class=\"quarter\"><img src=\"/solver/static/images/ln_access.png\" alt=\"ln_access\" title=\"ln_access\" class=\"full\"/></td>\
 </tr>\
+<td class=\"quarter\" colspan=\"3\"><p class=\"top\">Sponge Bath door is set to blue to avoid softlocking and two new platforms are added to traverse Forgotten Highway both ways with only High-Jump boots and Level 1 underwater movement in preset:</p></td>\
+<tr>\
+</tr>\
+<tr>\
+<td class=\"quarter\"><img src=\"/solver/static/images/sponge_bath_blue_door.png\" alt=\"sponge_bath_blue_door\" title=\"sponge_bath_blue_door\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/forgotten_all_the_way.png\" alt=\"forgotten_all_the_way\" title=\"forgotten_all_the_way\" class=\"full\"/></td>\
+</tr>\
 </table>\
-<p>Using a non-standard or randomized start location will force this setting on.</p>",
-      placement: "auto left"
-    },
-    {
-      element: "#escapeRandoStep",
-      title: "Escape sequence randomization",
-      content: "<p>When leaving Tourian, get teleported to one of five spawn points: either the vanilla escape (Climb room), or the exit of a random Map station (between Brinstar/Maridia/Norfair/Wrecked Ship).<br/>You then have to find your way to the ship in the remaining time. Allotted time depends on area layout, but not on skill settings and is pretty generous.</p>\
-During the escape sequence:\
-<ul>\
-<li>All doors are opened</li>\
-<li>The Hyper Beam can destroy Bomb, Power Bomb and Super Missile blocks and open blue/green gates from both sides</li>\
-<li>All mini bosses are defeated</li>\
-<li>By default, all minor enemies are removed to allow you to move faster. See next option (in advanced tab) to change this behavior</li>\
-</ul>\
-During regular game only Crateria Map station door can be opened and activating the station will act as if all map stations were activated at once.",
-      placement: "auto left"
-    },
-    {
-      element: "#removeEscapeEnemiesStep",
-      title: "Remove enemies during escape",
-      content: "<p>Remove enemies during escape sequence, disable it to blast through enemies with your Hyper Beam and cause lag.</p>",
+<p>Using Area randomization and a non-standard or randomized start location will force this setting on.</p>",
       placement: "auto left"
     },
     {
@@ -1267,6 +1364,33 @@ During regular game only Crateria Map station door can be opened and activating 
 <tr><td><img src=\"/solver/static/images/ws_save.png\" alt=\"ws_save.png\" title=\"ws_save.png\" class=\"full\"/></td></tr>\
 </table>\
 Click on the dice button to randomly set this parameter.",
+      placement: "auto left"
+    },
+    {
+      element: "#escapeRandoStep",
+      title: "Escape sequence randomization",
+      content: "<p>When leaving Tourian, get teleported to the exit of a random Map station (between Brinstar/Maridia/Norfair/Wrecked Ship).<br/>You then have to find your way to the ship in the remaining time. Allotted time depends on area layout, but not on skill settings and is pretty generous.</p>\
+During the escape sequence:\
+<ul>\
+<li>All doors are opened</li>\
+<li>The Hyper Beam can destroy Bomb, Power Bomb and Super Missile blocks and open blue/green gates from both sides</li>\
+<li>All mini bosses are defeated</li>\
+<li>All minor enemies are removed to allow you to move faster and remove lag</li>\
+</ul>\
+<p>During regular game only Crateria Map station door can be opened and activating the station will act as if all map stations were activated at once.</p>\
+<b>Animals Challenges:</b>\
+<p>You can use the extra available time to:\
+<ul>\
+<li>find the animals that are hidden behind a (now blue) map station door</li>\
+<li>go the vanilla animals door to cycle through the 4 available escapes, and complete as many escapes as you can</li>\
+</ul>\
+Pick your challenge, or try to do both, but watch your timer!</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#removeEscapeEnemiesStep",
+      title: "Remove enemies during escape",
+      content: "<p>Remove enemies during escape sequence, disable it to blast through enemies with your Hyper Beam and cause lag.</p>",
       placement: "auto left"
     },
     {
@@ -1324,28 +1448,34 @@ Click on the dice button to randomly set this parameter.",
 <td class=\"knowsUsed\"><p class=\"top\">Escape from below early Super bridge without Bombs:</p></td>\
 <td class=\"knowsUsed\"><p class=\"top\">Escape from below early Super bridge:</p></td>\
 <td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before Hi-Jump:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks at Moat:</p></td>\
 </tr>\
 <tr>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/dachora.png\" alt=\"dachora\" title=\"dachora\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/early_super.png\" alt=\"early_super\" title=\"early_super\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/early_super_bis.png\" alt=\"early_super_bis\" title=\"early_super_bis\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/high_jump.png\" alt=\"high_jump\" title=\"high_jump\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/moat.png\" alt=\"moat\" title=\"moat\" class=\"full\"/></td>\
 </tr>\
 <tr>\
+<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks at Moat:</p></td>\
 <td class=\"knowsUsed\"><p class=\"top\">First heated Norfair room without High-Jump:</p></td>\
 <td class=\"knowsUsed\"><p class=\"top\">Always be able to get back up from bottom Red Tower:</p></td>\
 <td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before Spazer:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Remove grey door at Brinstar map stations:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Spore Spawn save station is always available:</p></td>\
 </tr>\
 <tr>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/moat.png\" alt=\"moat\" title=\"moat\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/cathedral.png\" alt=\"cathedral\" title=\"cathedral\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/red_tower.png\" alt=\"red_tower\" title=\"red_tower\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/spazer_block.png\" alt=\"spazer_block\" title=\"spazer_block\" class=\"full\"/></td>\
+</tr>\
+<tr>\
+<td class=\"knowsUsed\"><p class=\"top\">Remove grey door at Brinstar map stations:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\">Spore Spawn save station is always available:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before Kraid save:</p></td>\
+</tr>\
+<tr>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/bt_map.png\" alt=\"bt_map\" title=\"bt_map\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/spore_save.png\" alt=\"spore_save\" title=\"spore_save\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/kraid_save.png\" alt=\"kraid_save\" title=\"kraid_save\" class=\"full\"/></td>\
 </tr>\
 </table>\
 <p>Using a non-standard or randomized start location will force this setting on.</p>\
@@ -1373,6 +1503,18 @@ Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
     {
+      element: "#nerfedChargeStep",
+      title: "Nerfed Charge Beam",
+      content: "<ul>\
+<li>Samus begins with a starter Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> that does one third of charged shot damage, effectively bringing a nerfed charge shot damage to a standard shot damage, but that can damage bosses.</li>\
+<li><a href=\"https://wiki.supermetroid.run/Pseudo_Screw_Attack\" target=\"_blank\">Pseudo Screws</a> also do one third damage.</li>\
+<li><a href=\"https://wiki.supermetroid.run/Charge_Beam_Combos\" target=\"_blank\">Special Beam Attacks</a> do normal damage but cost 3 Power Bombs instead of 1.</li>\
+<li>Once the Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> item has been collected, it does full damage and special attacks are back to normal.</li>\
+</ul>\
+<p>Patch developed by Smiley and Flo.</p>",
+      placement: "auto left"
+    },
+    {
       element: "#gravityBehaviourStep",
       title: "Suits Properties",
       content: "<p><ul>\
@@ -1387,18 +1529,6 @@ Click on the dice button to randomly set this parameter.",
 <li>Vanilla:<p>No change to vanilla suits properties. Most notably, Gravity <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> provides full protection against environmental damages (heat, spikes, electricity...).</p></li>\
 </ul></p>\
 <p>Patches developed by Total and Smiley.</p>",
-      placement: "auto left"
-    },
-    {
-      element: "#nerfedChargeStep",
-      title: "Nerfed Charge Beam",
-      content: "<ul>\
-<li>Samus begins with a starter Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> that does one third of charged shot damage, effectively bringing a nerfed charge shot damage to a standard shot damage, but that can damage bosses.</li>\
-<li><a href=\"https://wiki.supermetroid.run/Pseudo_Screw_Attack\" target=\"_blank\">Pseudo Screws</a> also do one third damage.</li>\
-<li><a href=\"https://wiki.supermetroid.run/Charge_Beam_Combos\" target=\"_blank\">Special Beam Attacks</a> do normal damage but cost 3 Power Bombs instead of 1.</li>\
-<li>Once the Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> item has been collected, it does full damage and special attacks are back to normal.</li>\
-</ul>\
-<p>Patch developed by Smiley and Flo.</p>",
       placement: "auto left"
     },
     {
@@ -1430,9 +1560,23 @@ Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
     {
+      element: "#Infinite_Space_JumpStep",
+      title: "Infinite Space Jump",
+      content: "<p>Space jumps can be done quicker and at any time in air, water or lava, even after falling long distances.</p>\
+<p>This patch was developed by MetConst.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#refill_before_saveStep",
+      title: "Refill before save",
+      content: "<p>Refill energy and ammo when saving.</p>\
+<p>This patch was developed by Adam.</p>",
+      placement: "auto left"
+    },
+    {
       element: "#animalsStep",
       title: "Animals surprise",
-      content: "<p>Replace saving the animals in the escape sequence by a random surprise.</p>\
+      content: "<p>Replace saving the animals in the escape sequence by a random surprise.<br/><b>Note:</b> This setting is not available when Escape Randomization is enabled, as it is replaced by Animals Challenges (see Escape Randomization help for more information).</p>\
 <p>Patch developed by Foosda.</p>",
       placement: "auto left"
     },
@@ -1481,19 +1625,7 @@ def displayCheckbox(id, defaultTrue=False):
 {{
 def displaySelect(id, values, default):
   if id in session.randomizer:
-    if id == "progressionSpeed":
-      if type(session.randomizer["progressionSpeed"]) == list:
-        if len(session.randomizer["progressionSpeed"]) == 1:
-          value = session.randomizer[id][0]
-        else:
-          value = default
-          pass
-      else:
-        value = session.randomizer[id]
-        pass
-    else:
-      value = session.randomizer[id]
-      pass
+    value = session.randomizer[id]
   else:
     value = default
     pass
@@ -1503,6 +1635,25 @@ def displaySelect(id, values, default):
            **dict(_id=id, _name=id, value=value, _class="full"))
   }}
 {{pass}}
+
+{{
+def displayMultiSelect(id, selectedValues, default, multipleValues):
+  displaySelect(id, multipleValues, default)
+
+  response.write("<div id=\"{}MultiSelectDiv\" style=\"display:none\">".format(id), escape=False)
+  response.write("<select id=\"{}MultiSelect\" class=\"filldropdown chzn-select\" multiple>".format(id), escape=False)
+  for value in multipleValues:
+    if value in selectedValues:
+      response.write("  <option value=\"{}\" selected=\"selected\">{}</option>".format(value, value), escape=False)
+    else:
+      response.write("  <option value=\"{}\">{}</option>".format(value, value), escape=False)
+      pass
+    pass
+  response.write("</select>", escape=False)
+  response.write("</div>", escape=False)
+  pass
+}}
+
 {{
 def displayNumber(id, min, max, default, step="1"):
   if id in session.randomizer:
@@ -1524,15 +1675,16 @@ def displayNumber(id, min, max, default, step="1"):
     <div class="menu">
     <table class="full menuTable">
       <tr>
-	<td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
-	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
-	<td class="menu_selected">{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
-	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
-	<td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
-	<td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
-	<td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
-	<td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
-	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+        <td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+        <td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+        <td class="menu_selected">{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+        <td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+        <td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
+        <td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
+        <td>{{=A("Plandository", _href=URL(f="plandorepo"), _class="menu")}}</td>
+        <td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+        <td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
+        <td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
       </tr>
     </table>
     </div>
@@ -1549,314 +1701,322 @@ def displayNumber(id, min, max, default, step="1"):
     <form id="mainform" name="mainform" onsubmit="doSubmit(); return false;">
       <div id="tabRando" class="tabcontent">
         <div class="row">
-	  <div class="column">
-	    <p>The Very Adaptive Randomizer of Items and Area (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset.</p>
+          <div class="column">
+            <p>The Very Adaptive Randomizer of Items and Area (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset.</p>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr>
-                <td>Vanilla Super Metroid ROM:</td>
-                <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile", _class="full")}}</td>
-                <td id="romStep"><button type="button" onclick="startTheTour(0)">?</button></td>
-              </tr>
-              <tr id="seedVisibility">
-	        <td>Randomizer seed:</td>
-	        <td>{{displayNumber("seed", "0", "9999999", "0")}}</td>
-	        <td id="seedStep"><button type="button" onclick="startTheTour(1)">?</button></td>
+              <td>Last generated seed permalink:</td><td><span id="permalink"></span></td><td id="permalinkStep"><button type="button" onclick="startTheTour(0)">?</button></td>
               </tr>
               <tr>
-		<td>Skills Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a><span></td>
-		<td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
-		<td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
+                <td>Vanilla Super Metroid ROM:</td>
+                <td>
+                   <div id="uploadFileVisibility">
+                     {{=INPUT(_type="file", _name="uploadFile", _id="uploadFile", _class="full")}}
+                   </div>
+                   <div id="uploadFileOKVisibility">
+                     Vanilla ROM already loaded
+                   </div>
+                </td>
+                <td id="romStep"><button type="button" onclick="startTheTour(1)">?</button></td>
               </tr>
-	      <tr>
-		<td>Settings Preset:</td>
-		<td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.randomizer["randoPreset"], _class="filldropdown chzn-select", _onchange="loadRandoPreset()"))}}</td>
-		<td id="randoPresetStep"><button type="button" onclick="startTheTour(3)">?</button></td>
+              <tr id="seedVisibility">
+                <td>Randomizer seed:</td>
+                <td>{{displayNumber("seed", "0", maxsize, "0")}}</td>
+                <td id="seedStep"><button type="button" onclick="startTheTour(2)">?</button></td>
               </tr>
-	      <tr id="raceModeVisibility">
-		<td>{{displayCheckbox("raceMode")}}<span id="raceModeText">Race Mode</span></td>
-		<td></td>
-		<td id="raceStep"><button type="button" onclick="startTheTour(4)">?</button></td>
-	      </tr>
+              <tr>
+                <td>Skills Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a><span></td><!-- ' -->
+                <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
+                <td id="presetStep"><button type="button" onclick="startTheTour(3)">?</button></td>
+              </tr>
+              <tr>
+                <td>Settings Preset:</td>
+                <td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.randomizer["randoPreset"], _class="filldropdown chzn-select", _onchange="loadRandoPreset()"))}}</td>
+                <td id="randoPresetStep"><button type="button" onclick="startTheTour(4)">?</button></td>
+              </tr>
+              <tr id="raceModeVisibility">
+                <td>{{displayCheckbox("raceMode")}}<span id="raceModeText">Race Mode</span></td>
+                <td></td>
+                <td id="raceStep"><button type="button" onclick="startTheTour(5)">?</button></td>
+              </tr>
             </table>
-	    <br/>
-	    <h4>Randomizer parameters</h4>
-	    <table class="full">
-	      <tr>
-		<td class="small"><div class="random"><button id="startLocationRandom" type="button" onclick="randomize(event, 'startLocation')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		<td><span id="startLocationText">Start location</span></td>
-		<td>{{displaySelect("startLocation", startAPs, "Landing Site")}}</td>
-                <td id="StartLocationStep"><button type="button" onclick="startTheTour(5)">?</button></td>
-	      </tr>
-	      <tr>
-		<td class="small"><div class="random"><button id="majorsSplitRandom" type="button" onclick="randomize(event, 'majorsSplit')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		<td><span id="majorsSplitText">Majors Split</span></td>
-	        <td>{{displaySelect("majorsSplit", ["Full", "Major", "Chozo"], "Full")}}</td>
-                <td id="majorsSplitStep"><button type="button" onclick="startTheTour(6)">?</button></td>
-	      </tr>
-              <tr id="maxDiffVisibility">
-		<td class="small"><div class="random"><button id="maxDifficultyRandom" type="button" onclick="randomize(event, 'maxDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="maxDifficultyText">Maximum difficulty for picking up an item:</span></td>
-                <td>{{displaySelect("maxDifficulty", ["no difficulty cap", "easy", "medium", "hard", "harder", "hardcore", "mania"], "no difficulty cap")}}</td>
-                <td id="maxDifficultyStep"><button type="button" onclick="startTheTour(7)">?</button></td>
+            <br/>
+            <h4>Randomizer parameters</h4>
+            <table class="full">
+              <tr>
+                <td class="small"><div class="random"><button id="startLocationRandom" type="button" onclick="randomize(event, 'startLocation')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td><span id="startLocationText">Start location</span></td>
+                <td>{{displayMultiSelect("startLocation", currentMultiValues["startLocationMultiSelect"], "Landing Site", defaultMultiValues["startLocationMultiSelect"])}}</td>
+                <td id="StartLocationStep"><button type="button" onclick="startTheTour(6)">?</button></td>
               </tr>
-	      <tr>
-		<td class="small"><div class="random"><button id="progressionSpeedRandom" type="button" onclick="randomize(event, 'progressionSpeed')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-	        <td class="half"><span id="progressionSpeedText">Progression speed:</span></td>
+              <tr>
+                <td class="small"><div class="random"><button id="majorsSplitRandom" type="button" onclick="randomize(event, 'majorsSplit')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td><span id="majorsSplitText">Majors Split</span></td>
+                <td>{{displayMultiSelect("majorsSplit", currentMultiValues["majorsSplitMultiSelect"], "Full", defaultMultiValues["majorsSplitMultiSelect"])}}</td>
+                <td id="majorsSplitStep"><button type="button" onclick="startTheTour(7)">?</button></td>
+              </tr>
+              <tr id="maxDiffVisibility">
+                <td class="small"></td>
+                <td><span id="maxDifficultyText">Maximum difficulty for picking up an item:</span></td>
+                <td>{{displaySelect("maxDifficulty", ['no difficulty cap', 'easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'], "hardcore")}}</td>
+                <td id="maxDifficultyStep"><button type="button" onclick="startTheTour(8)">?</button></td>
+              </tr>
+              <tr>
+                <td class="small"><div class="random"><button id="progressionSpeedRandom" type="button" onclick="randomize(event, 'progressionSpeed')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td class="half"><span id="progressionSpeedText">Progression speed:</span></td>
                 <td class="half">
-		  {{displaySelect("progressionSpeed", ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"], "medium")}}
-		  <div id="psMultiselectDiv">
-		    <select id="psMultiselect" data-placeholder="Speeds to randomize..." class="filldropdown chzn-select" multiple>
-		      <option value="slowest" selected="selected">slowest</option>
-		      <option value="slow" selected="selected">slow</option>
-		      <option value="medium" selected="selected">medium</option>
-		      <option value="fast" selected="selected">fast</option>
-		      <option value="fastest" selected="selected">fastest</option>
-		      <option value="basic" selected="selected">basic</option>
-		      <option value="VARIAble" selected="selected">VARIAble</option>
-		    </select>
-		  </div>
-		</td>
-                <td id="progSpeedStep"><button type="button" onclick="startTheTour(8)">?</button></td>
-	      </tr>
-	      <tr id="progDiffVisibility">
-		<td class="small"><div class="random"><button id="progressionDifficultyRandom" type="button" onclick="randomize(event, 'progressionDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-	        <td class="half"><span id="progressionDifficultyText">Progression difficulty:</span></td>
-                <td class="half">{{displaySelect("progressionDifficulty", ["easier", "normal", "harder"], "normal")}}</td>
-                <td id="progDiffStep"><button type="button" onclick="startTheTour(9)">?</button></td>
-	      </tr>
-	      <tr id="morphPlacementVisibility">
-		<td class="small"><div class="random"><button id="morphPlacementRandom" type="button" onclick="randomize(event, 'morphPlacement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-	        <td class="half"><span id="morphPlacementText">Morph Placement:</span></td>
-	        <td class="half">{{displaySelect("morphPlacement", ["early", "normal", "late"], "normal")}}</td>
-                <td id="morphPlacementStep"><button type="button" onclick="startTheTour(10)">?</button></td>
-	      </tr>
-	      <tr id="suitsRestrictionVisibility">
-		<td class="small"><div class="random"><button id="suitsRestrictionRandom" type="button" onclick="randomize(event, 'suitsRestriction')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-	        <td colspan="2">{{displayCheckbox("suitsRestriction")}}<span id="suitsRestrictionText">Suits restriction</span></td>
-                <td id="suitsRestrictionStep"><button type="button" onclick="startTheTour(11)">?</button></td>
-	      </tr>
-	      <tr id="hideItemsVisibility">
-		<td class="small"><div class="random"><button id="hideItemsRandom" type="button" onclick="randomize(event, 'hideItems')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		<td colspan="2">{{displayCheckbox("hideItems")}}<span id="hideItemsText">Hide some items</span></td>
-		<td id="hideItemsStep"><button type="button" onclick="startTheTour(12)">?</button></td>
-	      </tr>
-	    </table>
-	    <div id="ammoVisibility">
-	      <h4>Ammo and Energy</h4>
-	      <table class="full">
+                  {{displayMultiSelect("progressionSpeed", currentMultiValues["progressionSpeedMultiSelect"], "medium", defaultMultiValues["progressionSpeedMultiSelect"])}}
+                </td>
+                <td id="progSpeedStep"><button type="button" onclick="startTheTour(9)">?</button></td>
+              </tr>
+              <tr id="progDiffVisibility">
+                <td class="small"><div class="random"><button id="progressionDifficultyRandom" type="button" onclick="randomize(event, 'progressionDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td class="half"><span id="progressionDifficultyText">Progression difficulty:</span></td>
+                <td class="half">{{displayMultiSelect("progressionDifficulty", currentMultiValues["progressionDifficultyMultiSelect"], "normal", defaultMultiValues["progressionDifficultyMultiSelect"])}}</td>
+                <td id="progDiffStep"><button type="button" onclick="startTheTour(10)">?</button></td>
+              </tr>
+              <tr id="morphPlacementVisibility">
+                <td class="small"><div class="random"><button id="morphPlacementRandom" type="button" onclick="randomize(event, 'morphPlacement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td class="half"><span id="morphPlacementText">Morph Placement:</span></td>
+                <td class="half">{{displayMultiSelect("morphPlacement", currentMultiValues["morphPlacementMultiSelect"], "normal", defaultMultiValues["morphPlacementMultiSelect"])}}</td>
+                <td id="morphPlacementStep"><button type="button" onclick="startTheTour(11)">?</button></td>
+              </tr>
+              <tr id="suitsRestrictionVisibility">
+                <td class="small"><div class="random"><button id="suitsRestrictionRandom" type="button" onclick="randomize(event, 'suitsRestriction')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td colspan="2">{{displayCheckbox("suitsRestriction")}}<span id="suitsRestrictionText">Suits restriction</span></td>
+                <td id="suitsRestrictionStep"><button type="button" onclick="startTheTour(12)">?</button></td>
+              </tr>
+              <tr id="hideItemsVisibility">
+                <td class="small"><div class="random"><button id="hideItemsRandom" type="button" onclick="randomize(event, 'hideItems')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td colspan="2">{{displayCheckbox("hideItems")}}<span id="hideItemsText">Hide some items</span></td>
+                <td id="hideItemsStep"><button type="button" onclick="startTheTour(13)">?</button></td>
+              </tr>
+            </table>
+            <div id="ammoVisibility">
+              <h4>Ammo and Energy</h4>
+              <table class="full">
                 <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
                 <tr id="strictMinorsVisibility">
-		  <td class="small"><div class="random"><button id="strictMinorsRandom" type="button" onclick="randomize(event, 'strictMinors')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td colspan="2">{{displayCheckbox("strictMinors")}}<span id="strictMinorsText">Strict Minors distribution</span></td>
-		  <td id="strictMinorsStep"><button type="button" onclick="startTheTour(13)">?</button></td>
+                  <td class="small"><div class="random"><button id="strictMinorsRandom" type="button" onclick="randomize(event, 'strictMinors')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td colspan="2">{{displayCheckbox("strictMinors")}}<span id="strictMinorsText">Strict Minors distribution</span></td>
+                  <td id="strictMinorsStep"><button type="button" onclick="startTheTour(14)">?</button></td>
                 </tr>
                 <tr id="missileQtyVisibility">
-		  <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td><span id="missileQtyText">Proportion of Missiles:</span></td>
-		  <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
-		  <td id="missileQtyStep"><button type="button" onclick="startTheTour(14)">?</button></td>
+                  <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="missileQtyText">Proportion of Missiles:</span></td>
+                  <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
+                  <td id="missileQtyStep"><button type="button" onclick="startTheTour(15)">?</button></td>
                 </tr>
                 <tr id="superQtyVisibility">
-		  <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td><span id="superQtyText">Proportion of Super Missiles:</span></td>
-		  <td>{{displayNumber("superQty", "1", "9", "3", "0.1")}}</td>
+                  <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="superQtyText">Proportion of Super Missiles:</span></td>
+                  <td>{{displayNumber("superQty", "1", "9", "3", "0.1")}}</td>
                 </tr>
                 <tr id="powerBombQtyVisibility">
-		  <td class="small"><div class="random"><button id="powerBombQtyRandom" type="button" onclick="randomize(event, 'powerBombQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td><span id="powerBombQtyText">Proportion of Power Bombs:</span></td>
-		  <td>{{displayNumber("powerBombQty", "1", "9", "1", "0.1")}}</td>
+                  <td class="small"><div class="random"><button id="powerBombQtyRandom" type="button" onclick="randomize(event, 'powerBombQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="powerBombQtyText">Proportion of Power Bombs:</span></td>
+                  <td>{{displayNumber("powerBombQty", "1", "9", "1", "0.1")}}</td>
                 </tr>
                 <tr>
-		  <td class="small"><div class="random"><button id="minorQtyRandom" type="button" onclick="randomize(event, 'minorQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td><span id="minorQtyText">Percentage of minors available:</span></td>
-		  <td>{{displayNumber("minorQty", "7", "100", "100")}}</td>
-		  <td id="minorQtyStep"><button type="button" onclick="startTheTour(15)">?</button></td>
+                  <td class="small"><div class="random"><button id="minorQtyRandom" type="button" onclick="randomize(event, 'minorQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="minorQtyText">Percentage of minors available:</span></td>
+                  <td>{{displayNumber("minorQty", "7", "100", "100")}}</td>
+                  <td id="minorQtyStep"><button type="button" onclick="startTheTour(16)">?</button></td>
                 </tr>
                 <tr>
-		  <td class="small"><div class="random"><button id="energyQtyRandom" type="button" onclick="randomize(event, 'energyQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td><span id="energyQtyText">Quantity of Energy/Reserve Tanks available:</span></td>
-		  <td>{{displaySelect("energyQty", ["sparse", "medium", "vanilla"], "vanilla")}}</td>
-		  <td id="energyQtyStep"><button type="button" onclick="startTheTour(16)">?</button></td>
+                  <td class="small"><div class="random"><button id="energyQtyRandom" type="button" onclick="randomize(event, 'energyQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="energyQtyText">Quantity of Energy/Reserve Tanks available:</span></td>
+                  <td>{{displayMultiSelect("energyQty", currentMultiValues["energyQtyMultiSelect"], "vanilla", defaultMultiValues["energyQtyMultiSelect"])}}</td>
+                  <td id="energyQtyStep"><button type="button" onclick="startTheTour(17)">?</button></td>
                 </tr>
-	      </table>
-	    </div>
-	  </div>
-	  <div class="column">
+              </table>
+            </div>
+          </div>
+          <div class="column">
             <h4>Areas Randomization</h4>
             <p>
-	      Add more randomness to your seed by randomizing the access between the areas.<br/>
-	      Check the help button for the map of the areas and the access points between them.
+              Add more randomness to your seed by randomizing the access between the areas.<br/>
+              Check the help button for the map of the areas and the access points between them.
             </p>
-	    <table class="full">
-	      <tr>
-		<td class="small"><div class="random"><button id="areaRandomizationRandom" type="button" onclick="randomize(event, 'areaRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-	        <td colspan="2" class="full" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}<span id="areaRandomizationText">Areas randomization</span></td>
-                <td><button type="button" onclick="startTheTour(17)">?</button></td>
-	      </tr>
-	      <tr id="areaPatchVisibility">
-		<td class="small"></td>
-		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td><td><button type="button" onclick="startTheTour(18)">?</button></td>
-	      </tr>
-	      <tr id="escapeRandoVisibility">
-		<td class="small"></td>
-		<td colspan="2" class="full" id="escapeRandoStep">{{displayCheckbox("escapeRando", False)}}<span id="escapeRandoText">Randomize the escape sequence</span></td><td><button type="button" onclick="startTheTour(19)">?</button></td>
-	      </tr>
-	      <tr id="removeEscapeEnemiesVisibility">
-		<td class="small"></td>
-		<td colspan="2" class="full" id="removeEscapeEnemiesStep">{{displayCheckbox("removeEscapeEnemies", False)}}<span id="removeEscapeEnemiesText">Remove enemies during randomized escape sequence</span></td><td><button type="button" onclick="startTheTour(20)">?</button></td>
-	      </tr>
+            <table class="full">
+              <tr>
+                <td class="small"><div class="random"><button id="areaRandomizationRandom" type="button" onclick="randomize(event, 'areaRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td class="half" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}<span id="areaRandomizationText">Areas randomization</span></td>
+                <td><button type="button" onclick="startTheTour(18)">?</button></td>
+                <td class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td>
+                <td><button type="button" onclick="startTheTour(19)">?</button></td>
+              </tr>
             </table>
             <h4>Bosses Randomization</h4>
             <p>
-	      Randomize the access doors to the Golden 4 bosses.
+              Randomize the access doors to the Golden 4 bosses.
             </p>
-	    <table class="full">
-	      <tr>
-		<td class="small"><div class="random"><button id="bossRandomizationRandom" type="button" onclick="randomize(event, 'bossRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-	        <td colspan="2" class="full" id="bossRandomizationStep">{{displayCheckbox("bossRandomization")}}<span id="bossRandomizationText">Bosses randomization</span></td>
-                <td><button type="button" onclick="startTheTour(21)">?</button></td>
-	      </tr>
+            <table class="full">
+              <tr>
+                <td class="small"><div class="random"><button id="bossRandomizationRandom" type="button" onclick="randomize(event, 'bossRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td colspan="2" class="full" id="bossRandomizationStep">{{displayCheckbox("bossRandomization")}}<span id="bossRandomizationText">Bosses randomization</span></td>
+                <td><button type="button" onclick="startTheTour(20)">?</button></td>
+              </tr>
             </table>
-	    <div id="superFunVisibility">
-              <h4>Super Fun Times (TM)</h4>
+            <div id="escapeRandoVisibility">
+              <h4>Escape Randomization</h4>
+              <table class="full">
+                <tr>
+                  <td class="small"><div class="random"><button id="escapeRandoRandom" type="button" onclick="randomize(event, 'escapeRando')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td class="half" id="escapeRandoStep">{{displayCheckbox("escapeRando", False)}}<span id="escapeRandoText">Randomize the escape sequence</span></td>
+                  <td><button type="button" onclick="startTheTour(21)">?</button></td>
+                  <td class="half" id="removeEscapeEnemiesStep">{{displayCheckbox("removeEscapeEnemies", False)}}<span id="removeEscapeEnemiesText">Remove enemies during randomized escape sequence</span></td>
+                  <td><button type="button" onclick="startTheTour(22)">?</button></td>
+                </tr>
+              </table>
+            </div>
+            <div id="superFunVisibility">
+              <h4>Super Fun Times&trade;</h4>
               <p>
                 Have fun randomly removing major items!
               </p>
-	      <table class="full">
+              <table class="full">
                 <tr>
-		  <td class="small" id="funCombatStep"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td colspan="2" class="full">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
-		  <td><button type="button" onclick="startTheTour(22)">?</button></td>
-                </tr>
-                <tr>
-		  <td class="small" id="funMovementStep"><div class="random"><button id="funMovementRandom" type="button" onclick="randomize(event, 'funMovement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td colspan="2" class="full">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
-		  <td><button type="button" onclick="startTheTour(23)">?</button></td>
-                </tr>
-                <tr>
-		  <td class="small" id="funSuitsStep"><div class="random"><button id="funSuitsRandom" type="button" onclick="randomize(event, 'funSuits')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td colspan="2" class="full">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
-		  <td><button type="button" onclick="startTheTour(24)">?</button></td>
+                  <td class="small" id="funCombatStep"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td class="third">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
+                  <td><button type="button" onclick="startTheTour(23)">?</button></td>
+
+                  <td class="small" id="funMovementStep"><div class="random"><button id="funMovementRandom" type="button" onclick="randomize(event, 'funMovement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td class="third">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
+                  <td><button type="button" onclick="startTheTour(24)">?</button></td>
+
+                  <td class="small" id="funSuitsStep"><div class="random"><button id="funSuitsRandom" type="button" onclick="randomize(event, 'funSuits')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td class="third">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
+                  <td><button type="button" onclick="startTheTour(25)">?</button></td>
                 </tr>
               </table>
-	    </div>
-	    <div id="patchesVisibility">
-	      <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour(25)">?</button></span></h4>
-	      <p id="mainPatchesTextVisibility">
-	        The bug fix <a href="https://itemrando.supermetroid.run/information" target="_blank">patches</a> from Total Item Randomizer are included by default.
-	      </p>
-	      <table class="full">
-		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
-		<tr><td colspan="2"><h5 class="center"><b>Randomizer adaptations (logic impact)</b></h5></td><td></td></tr>
-	      </table>
-	      <table class="full" id="mainPatchesVisibility">
-		<colgroup><col class="half" /><col class="half" /></colgroup>
-	        <tr id="layoutPatchesStep">
-		  <td colspan="2">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches</td>
-		  <td><button type="button" onclick="startTheTour(26)">?</button></td>
-	        </tr>
-	        <tr>
-		  <td colspan="2" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks</td>
-		  <td><button type="button" onclick="startTheTour(27)">?</button></td>
-	        </tr>
-	        <tr id="gravityBehaviourStep">
-		  <td>Suits properties</td>
-		  <td>
-		    {{displaySelect("gravityBehaviour", ["Balanced", "Progressive", "Vanilla"], "Balanced")}}
-		  </td>
-		  <td><button type="button" onclick="startTheTour(28)">?</button></td>
-	        </tr>
-	      </table>
-	      <table class="full" id="nerfedChargeVisibility">
-		<colgroup><col class="half" /><col class="half" /></colgroup>
-		<tr id="nerfedChargeStep">
-		  <td colspan="2">
-		    {{displayCheckbox("nerfedCharge")}}
-		    Nerfed Charge Beam available from the start
-		  </td>
+            </div>
+            <div id="patchesVisibility">
+              <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour(26)">?</button></span></h4>
+              <p id="mainPatchesTextVisibility">
+                The bug fix <a href="https://itemrando.supermetroid.run/information" target="_blank">patches</a> from Total Item Randomizer are included by default.
+              </p>
+              <table class="full">
+                <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+                <tr><td colspan="2"><h5 class="center"><b>Randomizer adaptations (logic impact)</b></h5></td><td></td></tr>
+              </table>
+              <table class="full" id="mainPatchesVisibility">
+                <tr>
+                  <td id="layoutPatchesStep" class="half">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches</td>
+                  <td><button type="button" onclick="startTheTour(27)">?</button></td>
+                  <td id="variaTweaksStep" class="half">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks</td>
+                  <td><button type="button" onclick="startTheTour(28)">?</button></td>
+                </tr>
+              </table>
+              <table class="full" id="nerfedChargeVisibility">
+                <colgroup><col class="half" /><col class="half" /></colgroup>
+                <tr id="nerfedChargeStep">
+                  <td colspan="2">
+                    {{displayCheckbox("nerfedCharge")}}
+                    Nerfed Charge Beam available from the start
+                  </td>
                   <td><button type="button" onclick="startTheTour(29)">?</button></td>
-		</tr>
-	      </table>
-	      <table class="full">
-		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
-		<tr><td colspan="2"><h5 class="center"><b>Game comfort</b></h5></td><td></td></tr>
-	      </table>
-	      <table class="full">
-		<colgroup><col class="half" /><col class="half" /></colgroup>
-		<tr id="itemsoundsStep">
-		  <td colspan="2">
-		    {{displayCheckbox("itemsounds")}}
-		    Remove fanfare when picking up an item
-		  </td>
+                </tr>
+              </table>
+              <table class="full" id="gravityBehaviourVisibility">
+                <tr id="gravityBehaviourStep">
+                  <td class="half">Suits properties</td>
+                  <td class="half">
+                    {{displaySelect("gravityBehaviour", ["Balanced", "Progressive", "Vanilla"], "Balanced")}}
+                  </td>
                   <td><button type="button" onclick="startTheTour(30)">?</button></td>
-		</tr>
-		<tr id="ElevatorDoorsStep">
-		  <td colspan="2">
-		    {{displayCheckbox("elevators_doors_speed")}}
-		    Accelerate doors and elevators transitions
-		  </td>
+                </tr>
+              </table>
+              <table class="full">
+                <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+                <tr><td colspan="2"><h5 class="center"><b>Game comfort</b></h5></td><td></td></tr>
+              </table>
+              <table class="full">
+                <tr>
+                  <td id="itemsoundsStep" class="half">
+                    {{displayCheckbox("itemsounds")}}
+                    Remove fanfare when picking up an item
+                  </td>
                   <td><button type="button" onclick="startTheTour(31)">?</button></td>
-		</tr>
-	      </table>
-	      <table class="full">
-		<colgroup><col class="half" /><col class="half" /></colgroup>
-		<tr id="spinjumprestartStep">
-		  <td colspan="2">
-		    {{displayCheckbox("spinjumprestart")}}
-		    Spin jump restart (a.k.a. Respin)
-		  </td>
+                  <td id="ElevatorDoorsStep" class="half">
+                    {{displayCheckbox("elevators_doors_speed")}}
+                    Accelerate doors and elevators transitions
+                  </td>
                   <td><button type="button" onclick="startTheTour(32)">?</button></td>
-		</tr>
-		<tr id="rando_speedStep">
-		  <td colspan="2">
-		    {{displayCheckbox("rando_speed")}}
-		     Momentum conservation (a.k.a. Speedkeep)
-		  </td>
+                </tr>
+              </table>
+              <table class="full">
+                <tr>
+                  <td id="spinjumprestartStep" class="half">
+                    {{displayCheckbox("spinjumprestart")}}
+                    Spin jump restart (a.k.a. Respin)
+                  </td>
                   <td><button type="button" onclick="startTheTour(33)">?</button></td>
-		</tr>
-	      </table>
-	      <table class="full">
-		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
-		<tr><td colspan="2"><h5 class="center"><b>Miscellaneous</b></h5></td><td></td></tr>
-	      </table>
-	      <table class="full" id="miscVisibility">
-		<colgroup><col class="half" /><col class="half" /></colgroup>
-		<tr id="animalsStep">
-		  <td colspan="2">
-		    {{displayCheckbox("animals")}}
-		    Save the animals surprise
-		  </td>
+                  <td id="rando_speedStep" class="half">
+                    {{displayCheckbox("rando_speed")}}
+                     Momentum conservation (a.k.a. Speedkeep)
+                  </td>
                   <td><button type="button" onclick="startTheTour(34)">?</button></td>
-		</tr>
-	      </table>
-	      <table class="full" id="noMusicVisibility">
-		<colgroup><col class="half" /><col class="half" /></colgroup>
-		<tr id="No_MusicStep">
-		  <td colspan="2">
-		    {{displayCheckbox("No_Music")}}
-		    Disable background music
-		  </td>
+                </tr>
+              </table>
+              <table class="full" id="helperPatchesVisibility">
+                <tr>
+                  <td id="Infinite_Space_JumpStep" class="half">
+                    {{displayCheckbox("Infinite_Space_Jump")}}
+                    Infinite Space Jump
+                  </td>
                   <td><button type="button" onclick="startTheTour(35)">?</button></td>
-		</tr>
-	      </table>
-	      <table class="full" id="random_musicVisibility">
-		<colgroup><col class="half" /><col class="half" /></colgroup>
-		<tr id="random_musicStep">
-		  <td colspan="2">
-		    {{displayCheckbox("random_music")}}
-		    Randomize background music
-		  </td>
+                  <td id="refill_before_saveStep" class="half">
+                    {{displayCheckbox("refill_before_save")}}
+                     Refill energy and ammo when saving
+                  </td>
                   <td><button type="button" onclick="startTheTour(36)">?</button></td>
-		</tr>
-	      </table>
-	    </div>
-	  </div>
+                </tr>
+              </table>
+              <table class="full">
+                <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+                <tr><td colspan="2"><h5 class="center"><b>Miscellaneous</b></h5></td><td></td></tr>
+              </table>
+              <table class="full" id="miscVisibility">
+                <colgroup><col class="half" /><col class="half" /></colgroup>
+                <tr id="animalsStep">
+                  <td colspan="2">
+                    {{displayCheckbox("animals")}}
+                    <span id="animalsText">Save the animals surprise</span>
+                  </td>
+                  <td><button type="button" onclick="startTheTour(37)">?</button></td>
+                </tr>
+              </table>
+              <table class="full" id="musicVisibility">
+                <tr>
+                  <td id="No_MusicStep" class="half">
+                    {{displayCheckbox("No_Music")}}
+                    Disable background music
+                  </td>
+                  <td><button type="button" onclick="startTheTour(38)">?</button></td>
+                  <td id="random_musicStep" class="half">
+                    {{displayCheckbox("random_music")}}
+                    Randomize background music
+                  </td>
+                  <td><button type="button" onclick="startTheTour(39)">?</button></td>
+                </tr>
+              </table>
+            </div>
+          </div>
         </div>
-	<p class="customizerText">
-	  <a href="/customizer" target="_blank">You can randomize in-game colors and use a custom Samus sprite on the Customizer page</a>.
-	</p>
+        <p class="customizerText">
+          <a href="/customizer" target="_blank">You can randomize in-game colors and use a custom Samus sprite on the Customizer page</a>.
+        </p>
         {{=INPUT(_type="submit", _value="Randomize", _id="submitBtn", _class="btn btn-default buttonRandom")}}
     </form>
+    <div class="donate">
+      <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+        <input type="hidden" name="cmd" value="_s-xclick" />
+        <input type="hidden" name="hosted_button_id" value="UT94YKT25BFJC" />
+        <input class="leagueImg" type="image" src="/solver/static/images/donate_randomizer.png" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+        <img alt="" border="0" src="https://www.paypal.com/en_FR/i/scr/pixel.gif" width="1" height="1" />
+      </form>
+    </div>
   </div>
 </body>

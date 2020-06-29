@@ -6,7 +6,7 @@ import sys, os
 sys.path.append(os.path.dirname(sys.path[0]))
 
 from utils import randGaussBounds
-from itemrandomizerweb.Items import ItemManager
+from rando.Items import ItemManager
 from smboolmanager import SMBoolManager
 import random
 import log
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     logger = log.get('ItemsTest')
     sm = SMBoolManager()
     with open("itemStats.csv", "w") as csvOut:
-        csvOut.write("energyQty;minorQty;nFun;strictMinors;MissProb;SuperProb;PowerProb;nItems;nTanks;nTanksTotal;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy;AmmoAccuracy\n")
+        csvOut.write("energyQty;minorQty;nFun;strictMinors;MissProb;SuperProb;PowerProb;split;nItems;nTanks;nTanksTotal;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy;AmmoAccuracy\n")
         for i in range(10000):
             logger.debug('SEED ' + str(i))
             if (i+1) % 100 == 0:
@@ -31,10 +31,13 @@ if __name__ == "__main__":
             forbidden = []
             if not isVanilla:
                 minQty = random.randint(1, 99)
-                if random.random() < 0.5:
+                r = random.random()
+                if r < 0.33:
                     energyQty = 'medium'
-                else:
+                elif r > 0.66:
                     energyQty = 'sparse'
+                else:
+                    energyQty = 'ultra sparse'
                 funPick = fun[:]
                 for i in range(randGaussBounds(len(fun))):
                     item = random.choice(funPick)
@@ -53,11 +56,11 @@ if __name__ == "__main__":
                 },
                 'strictMinors' : strictMinors
             }
-            # write params
-            csvOut.write("%s;%d;%d;%s;%d;%d;%d;" % (energyQty, minQty, len(forbidden), str(strictMinors), missProb, superProb, pbProb))
             # get items
             splits = ['Full', 'Major', 'Chozo']
             split = random.choice(splits)
+            # write params
+            csvOut.write("%s;%d;%d;%s;%d;%d;%d;%s;" % (energyQty, minQty, len(forbidden), str(strictMinors), missProb, superProb, pbProb, split))
             itemManager = ItemManager(split, qty, sm)
             itemPool = itemManager.createItemPool()
             itemPool = itemManager.removeForbiddenItems(forbidden)
@@ -82,8 +85,10 @@ if __name__ == "__main__":
             csvOut.write("%f;%f;%f;%f\n" % (missAcc, supersAcc, pbAcc, ammoAcc))
             if len(itemPool) != 105:
                 raise ValueError("Not 105 items !!! " + str(len(itemPool)))
-            if isVanilla and nItems != 100:
-                raise ValueError("Not 100 actual items in vanilla !!! " + str(nItems))
+            if isVanilla and nItems != 105:
+                raise ValueError("Not 105 actual items in vanilla !!! " + str(nItems))
+            if energyQty == 'ultra sparse' and (nTanks > 1):
+                raise ValueError("Energy qty invalid for ultra sparse !! " + str(nTanks))
             if energyQty == 'sparse' and (nTanks < 4 or nTanks > 6):
                 raise ValueError("Energy qty invalid for sparse !! " + str(nTanks))
             if energyQty == 'medium' and (nTanks < 8 or nTanks > 12):

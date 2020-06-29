@@ -893,7 +893,7 @@ class GraphUtils:
             locList = locations
         return [loc for loc in locList if locsPredicate(loc) == True and 'Boss' not in loc['Class']]
 
-    def createMinimizerTransitionsAndLocs(startApName, escapeRando):
+    def createMinimizerTransitions(startApName, locLimit, escapeRando):
         if startApName == 'Ceres':
             startApName = 'Landing Site'
         startAp = getAccessPoint(startApName)
@@ -911,7 +911,6 @@ class GraphUtils:
         locs = []
         transitions = []
         usedAPs = []
-        locLimit = 35
         trLimit = 5
         while len(locs) < locLimit or openTransitions() < trLimit or not isShipReachable():
             fromAreas = availAreas
@@ -947,9 +946,8 @@ class GraphUtils:
         while len(targetAPs) > 0:
             transitions.append((sourceAPs.pop().Name, targetAPs.pop().Name))
         transitions += GraphUtils.createAreaTransitions(sourceAPs, lambda ap: not ap.isInternal())
-        locs += [loc for loc in locations if 'Boss' in loc['Class']] # add bosses back
 
-        return (transitions, locs)
+        return transitions
 
     def getVanillaExit(apName):
         allVanillaTransitions = vanillaTransitions + vanillaBossesTransitions + vanillaEscapeTransitions

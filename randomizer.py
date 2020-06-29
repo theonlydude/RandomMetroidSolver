@@ -75,6 +75,9 @@ if __name__ == "__main__":
                         dest='noRemoveEscapeEnemies', default=False)
     parser.add_argument('--bosses', help="randomize bosses",
                         dest='bosses', nargs='?', const=True, default=False)
+    parser.add_argument('--minimizer', help="minimizer mode: area and boss mixed together. arg is number of non boss locations",
+                        dest='minimizerN', nargs='?', const=35, default=None,
+                        choices=[str(i) for i in range(20,101)])
     parser.add_argument('--startAP', help="Name of the Access Point to start from",
                         dest='startAP', nargs='?', default="Landing Site",
                         choices=['random'] + GraphUtils.getStartAccessPointNames())
@@ -324,6 +327,11 @@ if __name__ == "__main__":
     else:
         minDifficulty = 0
 
+    if args.area == True and args.bosses == True and args.minimizerN is not None:
+        minimizerN = int(args.minimizerN)
+        print(minimizerN)
+    else:
+        minimizerN = None
     areaRandom = False
     if args.area == 'random':
         areaRandom = True
@@ -520,7 +528,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.AreaBaseSet
         if args.areaLayoutBase == False:
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
-    graphSettings = GraphSettings(args.startAP, args.area, args.bosses, args.escapeRando, dotFile,
+    graphSettings = GraphSettings(args.startAP, args.area, args.bosses, args.escapeRando, minimizerN,
+                                  dotFile,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
     if args.patchOnly == False:
         randoExec = RandoExec(seedName, args.vcr)

@@ -54,7 +54,7 @@ ${CWD}/tools/genExtStats.sh ${ROM} 900 default regular
 ${CWD}/tools/genExtStats.sh ${ROM} 900 free newbie
 ${CWD}/tools/genExtStats.sh ${ROM} 900 hardway2hell master
 ${CWD}/tools/genExtStats.sh ${ROM} 900 haste Season_Races
-${CWD}/tools/genExtStats.sh ${ROM} 900 highway2hell speedrunner
+${CWD}/tools/genExtStats.sh ${ROM} 900 highway2hell expert
 ${CWD}/tools/genExtStats.sh ${ROM} 900 stupid_hard master
 ${CWD}/tools/genExtStats.sh ${ROM} 900 way_of_chozo regular
 

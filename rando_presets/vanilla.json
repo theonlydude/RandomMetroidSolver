@@ -10,7 +10,7 @@
   "layoutPatches": "off",
   "gravityBehaviour": "Vanilla",
   "missileQty": "4.6",
-  "morphPlacement": "early",
+  "morphPlacement": "normal",
   "progressionSpeed": "speedrun",
   "No_Music": "off",
   "areaRandomization": "off",

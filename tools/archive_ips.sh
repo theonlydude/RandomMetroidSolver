@@ -40,7 +40,7 @@ git push
 
 # delete non git older than retention
 RETENTION_DAYS=7
-git status . | grep -E '[0-9]+/' | while read KEY; do
+git status . | grep -E '[0-9a-z\-]+/' | while read KEY; do
     if [ -n "$(find "${KEY}" -mtime +${RETENTION_DAYS})" ]; then
         echo "delete ${KEY}"
         rm -rf "${KEY}"

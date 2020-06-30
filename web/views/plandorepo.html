@@ -411,11 +411,13 @@ function AjaxPlandoDownloadCompleted(data) {
     var bytes = vanillaROMBytes;
 
     var maxSize = data["maxSize"]
-    if(maxSize > 3*1024*1024) {
-        var tmp = new Uint8Array(maxSize);
-        tmp.set(bytes);
-        bytes = tmp;
+    if(maxSize <= 0x300000) {
+        maxSize = 0x300000;
     }
+    // always make a copy to avoid modifying vanilla rom buffer from local storage
+    var tmp = new Uint8Array(maxSize);
+    tmp.set(bytes);
+    bytes = tmp;
 
     var binary_string = atob(data["ips"]);
     var len = binary_string.length;

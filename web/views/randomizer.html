@@ -490,6 +490,7 @@ function AjaxRandomizerCallCompleted(data) {
     console.log("AjaxRandomizerCallCompleted");
 
     // with items/Locations patch the local rom in memory
+    // always make a copy to avoid modifying vanilla rom buffer from local storage
     var bytes_temp = new Uint8Array(vanillaROM);
     var bytes = new Uint8Array(bytes_temp.length);
     bytes.set(bytes_temp);

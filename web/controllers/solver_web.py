@@ -594,7 +594,7 @@ def genPathTable(locations, displayAPs=True):
   <td></td>
   <td></td>
 </tr>
-""".format(item, getRoomLink(name, room), getAreaLink(area), getSubArea(subarea), item, getDiffImg(diff))
+""".format(item, getRoomLink(name, room), getAreaLink(area), getSubArea(subarea), item, getDiffImg(locDiff))
 
     pathTable += "</table>"
 

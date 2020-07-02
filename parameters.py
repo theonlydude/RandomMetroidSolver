@@ -610,7 +610,7 @@ class Knows:
     AccessSpringBallWithFlatley = SMBool(False, 0, ['AccessSpringBallWithFlatley'])
     desc['AccessSpringBallWithFlatley'] = {'display': 'Access Spring Ball location suitless with a flatley jump and Space Jump',
                                            'title': 'Do a suitless flatley jump to get through the grapple hole, and get out of the water with Space Jump',
-                                           'href': 'https://www.youtube.com/watch?v=VWDWlJ6cjmI',
+                                           'href': 'https://www.youtube.com/watch?v=8JHsAGeUdhQ',
                                            'rooms': ['Pants Room']}
 
     categories = {

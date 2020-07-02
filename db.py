@@ -8,8 +8,7 @@ try:
 except:
     dbAvailable = False
 
-from version import randoAlgoVersion
-from parameters import easy, medium, hard, harder, hardcore, mania
+from parameters import medium, hard, harder, hardcore, mania
 from utils import removeChars
 
 class DB:
@@ -115,39 +114,13 @@ class DB:
         if self.dbAvailable == False:
             return None
 
-        # extract the parameters for the database
-        dbParams = []
-        skipParams = ['output', 'param', 'controls', 'race']
-        superFuns = []
-        i = 2 # skip first parameters (pythonX and randomizer.py)
-        while i < len(params):
-            if params[i][0:len('--')] == '--':
-                paramName = params[i][len('--'):]
-                if i != len(params) - 1 and params[i+1][0:len('--')] not in ['--', '-c']:
-                    paramValue = params[i+1]
-                    i += 2
-                else:
-                    paramValue = None
-                    i += 1
-                if paramName in skipParams:
-                    continue
-                elif paramName == 'superFun':
-                    superFuns.append(paramValue)
-                else:
-                    dbParams.append((paramName, paramValue))
-            elif params[i][0:len('-')] == '-':
-                # patch -c, TODO: store them
-                i += 2
-            else:
-                # shouldn't happen
-                print("DB.addRandoParams unknown param: {}".format(params[i]))
-                i += 1
-        if len(superFuns) > 0:
-            dbParams.append(('superFun', " ".join(superFuns)))
+        ignoreParams = ['paramsFileTarget', 'complexity']
 
         try:
             sql = "insert into randomizer_params values (%d, '%s', '%s');"
-            for (name, value) in dbParams:
+            for (name, value) in params.items():
+                if name in ignoreParams:
+                    continue
                 self.cursor.execute(sql % (id, name, value))
         except Exception as e:
             print("DB.addRandoParams::error execute: {}".format(e))
@@ -166,6 +139,19 @@ class DB:
             self.cursor.execute(sql % (id, returnCode, duration, msg))
         except Exception as e:
             print("DB.addRandoResult::error execute \"{}\" error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def addRandoUploadResult(self, id, guid, fileName):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = """
+update randomizer set upload_status = 'local', filename = '%s', guid = '%s'
+where id = %s;"""
+            self.cursor.execute(sql % (fileName, guid, id))
+        except Exception as e:
+            print("DB.addRandoUploadResult::error execute \"{}\" error: {}".format(sql, e))
             self.dbAvailable = False
 
     def addPresetAction(self, preset, action):
@@ -381,6 +367,54 @@ order by r.id;"""
         data = data[0][0] if data[0][0] != None else 'N/A'
         return data
 
+        return self.execSelect(sql % (id,))
+
+    def getSeedInfo(self, key):
+        # key is id from randomizer table
+        if self.dbAvailable == False:
+            return None
+
+        sql = """
+select 'upload_status', upload_status
+from randomizer
+where guid = '%s'
+union all
+select 'filename', filename
+from randomizer
+where guid = '%s'
+union all
+select 'time', action_time
+from randomizer
+where guid = '%s'
+union all
+select name, value
+from randomizer_params
+where randomizer_id = (select id from randomizer where guid = '%s')
+order by 1;"""
+
+        return self.execSelect(sql % (key, key, key, key))
+
+    def getSeedIpsInfo(self, key):
+        # key is id from randomizer table
+        if self.dbAvailable == False:
+            return None
+
+        sql = """select upload_status, filename from randomizer where guid = '%s';"""
+
+        return self.execSelect(sql % (key,))
+
+    def updateSeedUploadStatus(self, key, newStatus):
+        # key is id from randomizer table
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = """update randomizer set upload_status = '%s' where guid = '%s';"""
+            self.cursor.execute(sql % (newStatus, key))
+        except Exception as e:
+            print("DB.updateSeedUploadStatus::error execute: {}".format(e))
+            self.dbAvailable = False
+
     def getISolver(self, weeks):
         if self.dbAvailable == False:
             return None
@@ -416,14 +450,14 @@ order by init_time;"""
 
     @staticmethod
     def dumpExtStatsItems(parameters, locsItems, sqlFile):
-        sql = """insert into extended_stats (version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, count)
+        sql = """insert into extended_stats (preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, count)
 values
-(%d, '%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, '%s', %s, '%s', '%s', 1)
+('%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, '%s', %s, '%s', '%s', 1)
 on duplicate key update id=LAST_INSERT_ID(id), count = count + 1;
 set @last_id = last_insert_id();
 """
 
-        sqlFile.write(sql % (randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['majorsSplit'], parameters['progSpeed'], parameters['morphPlacement'], parameters['suitsRestriction'], parameters['progDiff'], parameters['superFunMovement'], parameters['superFunCombat'], parameters['superFunSuit'], parameters['gravityBehaviour'], parameters['nerfedCharge'], parameters['maxDifficulty'], parameters['startAP']))
+        sqlFile.write(sql % (parameters['preset'], parameters['area'], parameters['boss'], parameters['majorsSplit'], parameters['progSpeed'], parameters['morphPlacement'], parameters['suitsRestriction'], parameters['progDiff'], parameters['superFunMovement'], parameters['superFunCombat'], parameters['superFunSuit'], parameters['gravityBehaviour'], parameters['nerfedCharge'], parameters['maxDifficulty'], parameters['startAP']))
 
         for (location, item) in locsItems.items():
             if item == 'Boss':
@@ -473,7 +507,7 @@ set @last_id = last_insert_id();
 
         sqlItems = """select sum(e.count), i.item, round(100*sum(i.EnergyTankGauntlet)/sum(e.count), 1), round(100*sum(i.Bomb)/sum(e.count), 1), round(100*sum(i.EnergyTankTerminator)/sum(e.count), 1), round(100*sum(i.ReserveTankBrinstar)/sum(e.count), 1), round(100*sum(i.ChargeBeam)/sum(e.count), 1), round(100*sum(i.MorphingBall)/sum(e.count), 1), round(100*sum(i.EnergyTankBrinstarCeiling)/sum(e.count), 1), round(100*sum(i.EnergyTankEtecoons)/sum(e.count), 1), round(100*sum(i.EnergyTankWaterway)/sum(e.count), 1), round(100*sum(i.EnergyTankBrinstarGate)/sum(e.count), 1), round(100*sum(i.XRayScope)/sum(e.count), 1), round(100*sum(i.Spazer)/sum(e.count), 1), round(100*sum(i.EnergyTankKraid)/sum(e.count), 1), round(100*sum(i.Kraid)/sum(e.count), 1), round(100*sum(i.VariaSuit)/sum(e.count), 1), round(100*sum(i.IceBeam)/sum(e.count), 1), round(100*sum(i.EnergyTankCrocomire)/sum(e.count), 1), round(100*sum(i.HiJumpBoots)/sum(e.count), 1), round(100*sum(i.GrappleBeam)/sum(e.count), 1), round(100*sum(i.ReserveTankNorfair)/sum(e.count), 1), round(100*sum(i.SpeedBooster)/sum(e.count), 1), round(100*sum(i.WaveBeam)/sum(e.count), 1), round(100*sum(i.Ridley)/sum(e.count), 1), round(100*sum(i.EnergyTankRidley)/sum(e.count), 1), round(100*sum(i.ScrewAttack)/sum(e.count), 1), round(100*sum(i.EnergyTankFirefleas)/sum(e.count), 1), round(100*sum(i.ReserveTankWreckedShip)/sum(e.count), 1), round(100*sum(i.EnergyTankWreckedShip)/sum(e.count), 1), round(100*sum(i.Phantoon)/sum(e.count), 1), round(100*sum(i.RightSuperWreckedShip)/sum(e.count), 1), round(100*sum(i.GravitySuit)/sum(e.count), 1), round(100*sum(i.EnergyTankMamaturtle)/sum(e.count), 1), round(100*sum(i.PlasmaBeam)/sum(e.count), 1), round(100*sum(i.ReserveTankMaridia)/sum(e.count), 1), round(100*sum(i.SpringBall)/sum(e.count), 1), round(100*sum(i.EnergyTankBotwoon)/sum(e.count), 1), round(100*sum(i.Draygon)/sum(e.count), 1), round(100*sum(i.SpaceJump)/sum(e.count), 1), round(100*sum(i.MotherBrain)/sum(e.count), 1), round(100*sum(i.PowerBombCrateriasurface)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShipbottom)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShiptop)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShipmiddle)/sum(e.count), 1), round(100*sum(i.MissileCrateriamoat)/sum(e.count), 1), round(100*sum(i.MissileCrateriabottom)/sum(e.count), 1), round(100*sum(i.MissileCrateriagauntletright)/sum(e.count), 1), round(100*sum(i.MissileCrateriagauntletleft)/sum(e.count), 1), round(100*sum(i.SuperMissileCrateria)/sum(e.count), 1), round(100*sum(i.MissileCrateriamiddle)/sum(e.count), 1), round(100*sum(i.PowerBombgreenBrinstarbottom)/sum(e.count), 1), round(100*sum(i.SuperMissilepinkBrinstar)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbelowsupermissile)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenBrinstartop)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbehindmissile)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbehindreservetank)/sum(e.count), 1), round(100*sum(i.MissilepinkBrinstartop)/sum(e.count), 1), round(100*sum(i.MissilepinkBrinstarbottom)/sum(e.count), 1), round(100*sum(i.PowerBombpinkBrinstar)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarpipe)/sum(e.count), 1), round(100*sum(i.PowerBombblueBrinstar)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarmiddle)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenBrinstarbottom)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarbottom)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstartop)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarbehindmissile)/sum(e.count), 1), round(100*sum(i.PowerBombredBrinstarsidehopperroom)/sum(e.count), 1), round(100*sum(i.PowerBombredBrinstarspikeroom)/sum(e.count), 1), round(100*sum(i.MissileredBrinstarspikeroom)/sum(e.count), 1), round(100*sum(i.MissileKraid)/sum(e.count), 1), round(100*sum(i.Missilelavaroom)/sum(e.count), 1), round(100*sum(i.MissilebelowIceBeam)/sum(e.count), 1), round(100*sum(i.MissileaboveCrocomire)/sum(e.count), 1), round(100*sum(i.MissileHiJumpBoots)/sum(e.count), 1), round(100*sum(i.EnergyTankHiJumpBoots)/sum(e.count), 1), round(100*sum(i.PowerBombCrocomire)/sum(e.count), 1), round(100*sum(i.MissilebelowCrocomire)/sum(e.count), 1), round(100*sum(i.MissileGrappleBeam)/sum(e.count), 1), round(100*sum(i.MissileNorfairReserveTank)/sum(e.count), 1), round(100*sum(i.MissilebubbleNorfairgreendoor)/sum(e.count), 1), round(100*sum(i.MissilebubbleNorfair)/sum(e.count), 1), round(100*sum(i.MissileSpeedBooster)/sum(e.count), 1), round(100*sum(i.MissileWaveBeam)/sum(e.count), 1), round(100*sum(i.MissileGoldTorizo)/sum(e.count), 1), round(100*sum(i.SuperMissileGoldTorizo)/sum(e.count), 1), round(100*sum(i.MissileMickeyMouseroom)/sum(e.count), 1), round(100*sum(i.MissilelowerNorfairabovefireflearoom)/sum(e.count), 1), round(100*sum(i.PowerBomblowerNorfairabovefireflearoom)/sum(e.count), 1), round(100*sum(i.PowerBombPowerBombsofshame)/sum(e.count), 1), round(100*sum(i.MissilelowerNorfairnearWaveBeam)/sum(e.count), 1), round(100*sum(i.MissileWreckedShipmiddle)/sum(e.count), 1), round(100*sum(i.MissileGravitySuit)/sum(e.count), 1), round(100*sum(i.MissileWreckedShiptop)/sum(e.count), 1), round(100*sum(i.SuperMissileWreckedShipleft)/sum(e.count), 1), round(100*sum(i.MissilegreenMaridiashinespark)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenMaridia)/sum(e.count), 1), round(100*sum(i.MissilegreenMaridiatatori)/sum(e.count), 1), round(100*sum(i.SuperMissileyellowMaridia)/sum(e.count), 1), round(100*sum(i.MissileyellowMaridiasupermissile)/sum(e.count), 1), round(100*sum(i.MissileyellowMaridiafalsewall)/sum(e.count), 1), round(100*sum(i.MissileleftMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.MissilerightMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.PowerBombrightMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.MissilepinkMaridia)/sum(e.count), 1), round(100*sum(i.SuperMissilepinkMaridia)/sum(e.count), 1), round(100*sum(i.MissileDraygon)/sum(e.count), 1)
 from extended_stats e join item_locs i on e.id = i.ext_id
-where item not in ('Nothing', 'NoEnergy', 'ETank', 'Reserve')
+where item not in ('Nothing', 'NoEnergy', 'ETank', 'Reserve', 'Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain')
 {}
 group by i.item
 order by i.item;"""
@@ -558,9 +592,9 @@ order by 1,2;"""
         return solverStatsOut
 
     def getWhereClause(self, parameters):
-        where = """and e.version = %d and e.preset = '%s' and e.area = %s and e.boss = %s and e.gravityBehaviour = '%s' and e.nerfedCharge = %s """
+        where = """and e.preset = '%s' and e.area = %s and e.boss = %s and e.gravityBehaviour = '%s' and e.nerfedCharge = %s """
 
-        sqlParams = [randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['gravityBehaviour'], parameters['nerfedCharge']]
+        sqlParams = [parameters['preset'], parameters['area'], parameters['boss'], parameters['gravityBehaviour'], parameters['nerfedCharge']]
 
         if parameters["maxDifficulty"] != "random":
             where += """and e.maxDifficulty = '%s' """
@@ -613,7 +647,7 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "select re.plando_name, re.init_time, re.author, re.long_desc, re.suggested_preset, re.download_count, (select sum(ra.rating)/count(1) from plando_rating ra where ra.plando_name = re.plando_name), (select count(1) from plando_rating ra where ra.plando_name = re.plando_name) from plando_repo re order by re.plando_name;"
+            sql = "select re.plando_name, re.init_time, re.author, re.long_desc, re.suggested_preset, re.download_count, (select sum(ra.rating)/count(1) from plando_rating ra where ra.plando_name = re.plando_name), (select count(1) from plando_rating ra where ra.plando_name = re.plando_name) from plando_repo re;"
             return self.execSelect(sql)
         except Exception as e:
             print("DB.getPlandos::error execute: {} error: {}".format(sql, e))
@@ -726,7 +760,10 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "insert into plando_rating (plando_name, rating, ipv4) values ('%s', %d, inet_aton('%s'));"
+            sql = """
+REPLACE INTO plando_rating
+    (plando_name, rating, ipv4)
+VALUES ('%s', %d, inet_aton('%s'));"""
             self.cursor.execute(sql % (plandoName, rating, ip))
             self.commit()
         except Exception as e:

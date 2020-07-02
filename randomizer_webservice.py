@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
     # check that we don't have errors
     if response.status_code != 200:
-        print("An error {} occured when calling the webservice. Error: {}".format(response.status_code, response.content))
+        print("An error {} occured when calling the randomizer webservice. Error: {}".format(response.status_code, response.content))
         exit(-1)
 
     # the output is a dict
@@ -93,30 +93,24 @@ if __name__ == "__main__":
     shutil.copyfile(romFileName, outFileName)
     romFile = RealROM(outFileName)
 
-    # if an ips is provided, apply it
-    if "ips" in data:
-        ipsData = data["ips"]
-        ipsData = base64.b64decode(ipsData.encode('ascii'))
+    ipsData = data["ips"]
+    ipsData = base64.b64decode(ipsData.encode('ascii'))
 
-        # our ips patcher need a file (or a dict), not the content of the ips file
-        (fd, ipsFileName) = tempfile.mkstemp()
-        os.close(fd)
+    # our ips patcher need a file (or a dict), not the content of the ips file
+    (fd, ipsFileName) = tempfile.mkstemp()
+    os.close(fd)
 
-        with open(ipsFileName, 'wb+') as ipsFile:
-            ipsFile.write(ipsData)
+    with open(ipsFileName, 'wb+') as ipsFile:
+        ipsFile.write(ipsData)
 
-        romFile.ipsPatch([IPS_Patch.load(ipsFileName)])
+    romFile.ipsPatch([IPS_Patch.load(ipsFileName)])
 
-        os.remove(ipsFileName)
+    os.remove(ipsFileName)
         
-    # loop on (address, value) to modify the rom
-    for (key, value) in data.items():
-        if key == "fileName" or key == "errorMsg" or key == "ips" or key == "max_size" or key == "truncate_length":
-            continue
-        romFile.writeByte(value, address=int(key))
-
     # write dest rom
     romFile.close()
 
-    print(data["errorMsg"])
+    print("permalink: {}/customizer/{}".format(baseUrl, data["seedKey"]))
+
+    print("additional message: {}".format(data["errorMsg"]))
     print("{} generated succesfully".format(outFileName))

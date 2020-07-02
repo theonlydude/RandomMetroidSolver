@@ -319,6 +319,14 @@
     "DodgeLowerNorfairEnemies": [
       true,
       100
+    ],
+    "WorstRoomWallJump": [
+      true,
+      100
+    ],
+    "AccessSpringBallWithFlatley": [
+      true,
+      100
     ]
   },
   "Settings": {

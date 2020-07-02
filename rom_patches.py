@@ -53,6 +53,12 @@ class RomPatches:
     AreaRandoBlueDoors        = 104
     # crateria key hunter yellow, green pirates shaft red
     AreaRandoMoreBlueDoors    = 105
+    # croc green+grey doors
+    CrocBlueDoors             = 106
+    # maridia crab shaft AP door
+    CrabShaftBlueDoor         = 107
+    # wrap door from sand halls left to under botwoon
+    MaridiaSandWarp           = 108
 
     ### Other
     # Gravity no longer protects from environmental damage (heat, spikes...)
@@ -65,6 +71,8 @@ class RomPatches:
     ProgressiveSuits        = 1003
     # Nerfed charge beam available from the start
     NerfedCharge            = 1004
+    # Nerfed rainbow beam for ultra sparse energy qty
+    NerfedRainbowBeam       = 1005
 
     #### Patch sets
     # total randomizer
@@ -80,7 +88,9 @@ class RomPatches:
     TotalCasual = [ BlueBrinstarMissile ] + Total
 
     # area rando patch set
-    AreaBaseSet = [ SingleChamberNoCrumble, AreaRandoGatesBase, AreaRandoBlueDoors, AreaRandoMoreBlueDoors ]
+    AreaBaseSet = [ SingleChamberNoCrumble, AreaRandoGatesBase,
+                    AreaRandoBlueDoors, AreaRandoMoreBlueDoors,
+                    CrocBlueDoors, CrabShaftBlueDoor, MaridiaSandWarp ]
     AreaComfortSet = [ AreaRandoGatesOther, SpongeBathBlueDoor, EastOceanPlatforms ]
     AreaSet = AreaBaseSet + AreaComfortSet
 

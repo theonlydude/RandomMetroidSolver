@@ -2,20 +2,21 @@
 
 import argparse, os.path, json, sys, shutil, random
 
-from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
-from itemrandomizerweb.AreaRandomizer import AreaRandomizer
-from itemrandomizerweb.PaletteRando import PaletteRando
-from graph_locations import locations as graphLocations
+from rando.RandoSettings import RandoSettings, GraphSettings
+from rando.RandoExec import RandoExec
+from rando.PaletteRando import PaletteRando
 from graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils
-from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
+from parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text
 from utils import PresetLoader
 from rom_patches import RomPatches
 from rom import RomPatcher, FakeROM
 from utils import loadRandoPreset
+from version import displayedVersion
+
 import log, db
 
-speeds = progSpeeds + ['VARIAble']
-energyQties = ['sparse', 'medium', 'vanilla' ]
+speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble', 'speedrun']
+energyQties = ['ultra sparse', 'sparse', 'medium', 'vanilla' ]
 progDiffs = ['easier', 'normal', 'harder']
 morphPlacements = ['early', 'late', 'normal']
 majorsSplits = ['Full', 'Major', 'Chozo']
@@ -33,7 +34,6 @@ def randomMulti(args, param, defaultMultiValues):
         else:
             # use default list
             value = random.choice(defaultMultiValues)
-    logger.debug("{}: {}".format(param, value))
 
     return (isRandom, value)
 
@@ -89,6 +89,10 @@ if __name__ == "__main__":
                         help="the maximum difficulty generated seed will be for given parameters",
                         dest='maxDifficulty', nargs='?', default=None,
                         choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random'])
+    parser.add_argument('--minDifficulty',
+                        help="the minimum difficulty generated seed will be for given parameters (speedrun prog speed required)",
+                        dest='minDifficulty', nargs='?', default=None,
+                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'])
     parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed',
                         nargs='?', default=0, type=int)
     parser.add_argument('--rom', '-r',
@@ -105,7 +109,8 @@ if __name__ == "__main__":
                         dest='patches', nargs='?', default=[], action='append',
                         choices=['itemsounds.ips', 'elevators_doors_speed.ips', 'random_music.ips',
                                  'spinjumprestart.ips', 'rando_speed.ips', 'No_Music', 'AimAnyButton.ips',
-                                 'max_ammo_display.ips', 'supermetroid_msu1.ips'])
+                                 'max_ammo_display.ips', 'supermetroid_msu1.ips', 'Infinite_Space_Jump',
+                                 'refill_before_save.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -149,7 +154,7 @@ if __name__ == "__main__":
                         dest="hideItems", nargs='?', const=True, default=False)
     parser.add_argument('--progressionSpeed', '-i',
                         help="progression speed, from " + str(speeds) + ". 'random' picks a random speed from these. Pick a random speed from a subset using comma-separated values, like 'slow,medium,fast'.",
-                        dest='progressionSpeed', nargs='?', default='medium')
+                        dest='progressionSpeed', nargs='?', default='medium', choices=speeds+['random'])
     parser.add_argument('--progressionSpeedList', help="list to choose from when random",
                         dest='progressionSpeedList', nargs='?', default=None)
     parser.add_argument('--progressionDifficulty',
@@ -224,6 +229,8 @@ if __name__ == "__main__":
     parser.add_argument('--plandoRando', help="json string with already placed items/locs", dest="plandoRando",
                         nargs='?', default=None)
     parser.add_argument('--sprite', help='use a custom sprite for Samus', dest='sprite', default=None)
+    parser.add_argument('--seedIps', help='ips generated from previous seed', dest='seedIps', default=None)
+    parser.add_argument('--jm,', help="display data used by jm for its stats", dest='jm', action='store_true', default=False)
 
     # parse args
     args = parser.parse_args()
@@ -268,7 +275,7 @@ if __name__ == "__main__":
 
     # if no seed given, choose one
     if args.seed == 0:
-        seed = random.randint(0, 9999999)
+        seed = random.randrange(sys.maxsize)
     else:
         seed = args.seed
     logger.debug("seed: {}".format(seed))
@@ -289,7 +296,7 @@ if __name__ == "__main__":
         else:
             maxDifficulty = text2diff[args.maxDifficulty]
     else:
-        maxDifficulty = float('inf')
+        maxDifficulty = infinity
     # same as solver, increase max difficulty
     threshold = maxDifficulty
     epsilon = 0.001
@@ -310,6 +317,12 @@ if __name__ == "__main__":
     (_, progSpeed) = randomMulti(args.__dict__, "progressionSpeed", speeds)
     (_, progDiff) = randomMulti(args.__dict__, "progressionDifficulty", progDiffs)
     (majorsSplitRandom, args.majorsSplit) = randomMulti(args.__dict__, "majorsSplit", majorsSplits)
+    if args.minDifficulty:
+        minDifficulty = text2diff[args.minDifficulty]
+        if progSpeed != "speedrun":
+            optErrMsg += "\nMinimum difficulty setting ignored, as prog speed is not speedrun"
+    else:
+        minDifficulty = 0
 
     areaRandom = False
     if args.area == 'random':
@@ -344,15 +357,18 @@ if __name__ == "__main__":
             if 'late' in morphPlacements:
                 morphPlacements.remove('late')
         args.morphPlacement = random.choice(morphPlacements)
-    # late + chozo will always stuck
-    if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
+    # random fill makes certain options unavailable
+    if progSpeed == 'speedrun' or (args.majorsSplit == 'Chozo' and args.morphPlacement == "late"):
         optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
-    logger.debug("morphPlacement: {}".format(args.morphPlacement))
+    if progSpeed == 'speedrun' or progSpeed == 'basic':
+        optErrMsg += forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
+        progDiff = args.progressionDifficulty
 
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.randint(0, 2))
 
-    if not GraphUtils.isStandardStart(args.startAP):
+    # in plando rando we know that the start ap is ok
+    if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando == None:
         optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
         optErrMsg += forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on")
         optErrMsg += forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on")
@@ -378,8 +394,6 @@ if __name__ == "__main__":
         # we have to get morph early at firefleas, silently force it to help
         # rando algorithm
         args.morphPlacement = "early"
-
-    print("startAP:{}".format(args.startAP))
 
     if args.patchOnly == False:
         print("SEED: " + str(seed))
@@ -441,6 +455,9 @@ if __name__ == "__main__":
         if args.energyQtyList != None:
             energyQties = args.energyQtyList.split(',')
         energyQty = random.choice(energyQties)
+    if energyQty == 'ultra sparse':
+        # add nerfed rainbow beam patch
+        RomPatches.ActivePatches.append(RomPatches.NerfedRainbowBeam)
     qty = {'energy': energyQty,
            'minors': minorQty,
            'ammo': { 'Missile': missileQty,
@@ -477,60 +494,56 @@ if __name__ == "__main__":
                 raise ValueError("Invalid button name : " + str(b))
 
     if args.plandoRando != None:
+        optErrMsg += forceArg('progressionSpeed', 'speedrun', "'Progression Speed' forced to speedrun")
+        progSpeed = 'speedrun'
+        optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
+        optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
+        optErrMsg += forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
+        progDiff = 'normal'
         args.plandoRando = json.loads(args.plandoRando)
         RomPatches.ActivePatches = args.plandoRando["patches"]
-
-    randoSettings = RandoSettings(args.startAP,
-                                  maxDifficulty, progSpeed, progDiff, qty,
+    randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty,
                                   restrictions, args.superFun, args.runtimeLimit_s,
-                                  args.escapeRando, args.vcr,
-                                  args.plandoRando["locsItems"] if args.plandoRando != None else None)
-    bossTransitions = vanillaBossesTransitions
-    if args.bosses == True:
-        bossTransitions = GraphUtils.createBossesTransitions()
+                                  args.plandoRando["locsItems"] if args.plandoRando != None else None,
+                                  minDifficulty)
+
+    # print some parameters for jm's stats
+    if args.jm == True:
+        print("startAP:{}".format(args.startAP))
+        print("progressionSpeed:{}".format(progSpeed))
+        print("majorsSplit:{}".format(args.majorsSplit))
+        print("morphPlacement:{}".format(args.morphPlacement))
+
+    dotFile = None
     if args.area == True:
         if args.dot == True:
-            dotDir = args.directory
-        else:
-            dotDir = None
+            dotFile = args.directory + '/' + seedName + '.dot'
         RomPatches.ActivePatches += RomPatches.AreaBaseSet
         if args.areaLayoutBase == False:
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
-        try:
-            randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, bossTransitions,
-                                        dotDir=dotDir)
-        except RuntimeError:
-            msg = "Cannot generate area layout. Retry, and change the super fun settings if the problem happens again."
-            dumpErrorMsg(args.output, msg)
-            sys.exit(-1)
-    else:
-        try:
-            if args.plandoRando != None:
-                transitions = args.plandoRando["transitions"]
-            else:
-                transitions = vanillaTransitions + bossTransitions
-            randomizer = Randomizer(graphLocations, randoSettings, seedName, transitions)
-        except RuntimeError:
-            msg = "Locations unreachable detected with preset/super fun/max diff. Retry, and change the Super Fun settings and/or Maximum difficulty if the problem happens again."
-            dumpErrorMsg(args.output, msg)
-            sys.exit(-1)
-        except Exception as e:
-            msg = str(e)
-            dumpErrorMsg(args.output, msg)
-            sys.exit(-1)
+    graphSettings = GraphSettings(args.startAP, args.area, args.bosses, args.escapeRando, dotFile,
+                                  args.plandoRando["transitions"] if args.plandoRando != None else None)
     if args.patchOnly == False:
-        (stuck, itemLocs, progItemLocs) = randomizer.generateItems()
-        doors = GraphUtils.getDoorConnections(randomizer.areaGraph,
-                                              args.area, args.bosses,
-                                              args.escapeRando)
-        escapeAttr = randomizer.areaGraph.EscapeAttributes if args.escapeRando else None
+        try:
+            randoExec = RandoExec(seedName, args.vcr)
+            (stuck, itemLocs, progItemLocs) = randoExec.randomize(randoSettings, graphSettings)
+            # if we couldn't find an area layout then the escape graph is not created either
+            # and getDoorConnections will crash if random escape is activated.
+            if not stuck:
+                doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
+                                                      args.area, args.bosses,
+                                                      args.escapeRando)
+                escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
+        except Exception as e:
+            dumpErrorMsg(args.output, "Error: {}".format(e))
+            sys.exit(-1)
     else:
         stuck = False
         itemLocs = []
         progItemLocs = None
     if stuck == True:
-        dumpErrorMsg(args.output, randomizer.errorMsg)
-        print("Can't generate " + fileName + " with the given parameters: {}".format(randomizer.errorMsg))
+        dumpErrorMsg(args.output, randoExec.errorMsg)
+        print("Can't generate " + fileName + " with the given parameters: {}".format(randoExec.errorMsg))
         # in vcr mode we still want the seed to be generated to analyze it
         if args.vcr == False:
             sys.exit(-1)
@@ -571,11 +584,13 @@ if __name__ == "__main__":
         # replace smbool with a dict
         for itemLoc in itemLocs:
             itemLoc["Location"]["difficulty"] = itemLoc["Location"]["difficulty"].json()
+            if "pathDifficulty" in itemLoc["Location"]:
+                del itemLoc["Location"]["pathDifficulty"]
             if "Wrapper" in itemLoc["Item"]:
                 del itemLoc["Item"]["Wrapper"]
 
         with open(args.output, 'w') as jsonFile:
-            json.dump({"itemLocs": itemLocs, "errorMsg": randomizer.errorMsg}, jsonFile, default=lambda x: x.__dict__)
+            json.dump({"itemLocs": itemLocs, "errorMsg": randoExec.errorMsg}, jsonFile, default=lambda x: x.__dict__)
         sys.exit(0)
 
     # generate extended stats
@@ -624,13 +639,20 @@ if __name__ == "__main__":
             romPatcher.applyIPSPatches(args.startAP, args.patches,
                                        args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,
-                                       args.noVariaTweaks, args.nerfedCharge,
+                                       args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
                                        escapeAttr, args.noRemoveEscapeEnemies)
         else:
+            # from customizer permalink, apply previously generated seed ips first
+            if args.seedIps != None:
+                romPatcher.applyIPSPatch(args.seedIps)
+
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:
             romPatcher.customSprite(args.sprite) # adds another IPS
-        romPatcher.commitIPS() # actually write IPS data
+        # we have to write ips to ROM before doing our direct modifications which will rewrite some parts (like in credits),
+        # but in web mode we only want to generate a global ips at the end
+        if args.rom != None:
+            romPatcher.commitIPS()
         if args.patchOnly == False:
             romPatcher.setNothingId(args.startAP, itemLocs)
             romPatcher.writeItemsLocs(itemLocs)
@@ -639,6 +661,7 @@ if __name__ == "__main__":
             romPatcher.writeSpoiler(itemLocs, progItemLocs)
             romPatcher.writeRandoSettings(randoSettings, itemLocs)
             romPatcher.writeDoorConnections(doors)
+            romPatcher.writeVersion(displayedVersion)
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
         if args.moonWalk == True:
@@ -668,11 +691,17 @@ if __name__ == "__main__":
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)
             PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
+        # web mode, generate only one ips at the end
+        if args.rom == None:
+            romPatcher.commitIPS()
         romPatcher.end()
-        if optErrMsg != "":
-            msg = optErrMsg + '\n' + randomizer.errorMsg
+        if args.patchOnly == False:
+            if optErrMsg != "":
+                msg = optErrMsg + '\n' + randoExec.errorMsg
+            else:
+                msg = randoExec.errorMsg
         else:
-            msg = randomizer.errorMsg
+            msg = ''
         if args.rom is None: # web mode
             data = romPatcher.romFile.data
             fileName = '{}.sfc'.format(fileName)

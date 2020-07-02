@@ -56,6 +56,7 @@
     text-align: left;
     white-space:nowrap;
     max-width:none;
+    opacity: 0.7;
 }
 .tooltip {
     position: fixed;
@@ -230,24 +231,32 @@ img {
     top: 85.4%;
 }
 #mainStreetBottom {
-    left: 67.65%;
+    left: 66.45%;
     top: 59.3%;
 }
 #crabHoleBottomLeft {
-    left: 71.9%;
+    left: 70.7%;
     top: 59.3%;
 }
 #leCoudeRight {
-    left: 90.65%;
+    left: 91.85%;
     top: 15.1%;
 }
 #redFishRoomLeft {
-    left: 68.2%;
+    left: 67.0%;
     top: 44%;
 }
 #redTowerTopLeft {
     left: 51.3%;
     top: 51.6%;
+}
+#crabShaftRight {
+    left: 75.08%;
+    top: 48.7%;
+}
+#aqueductTopLeft {
+    left: 77.15%;
+    top: 48.7%;
 }
 #caterpillarRoomTopRight {
     left: 58.58%;
@@ -272,6 +281,26 @@ img {
 #goldenFour {
     left: 22.9%;
     top: 17.3%;
+}
+#crocomireSpeedwayBottom {
+    left: 47.6%;
+    top: 85.7%;
+}
+#crocomireRoomTop {
+    left: 21.65%;
+    top: 81.4%;
+}
+#westSandHallLeft {
+    left: 75.4%;
+    top: 57.8%;
+}
+#belowBotwoonEnergyTankRight {
+    left: 86.9%;
+    top: 48.7%;
+}
+#westSandHallTunnelRight {
+    left: 73.35%;
+    top: 57.8%;
 }
 #phantoonRoomIn {
     left: 77.7%;
@@ -298,11 +327,11 @@ img {
     top: 66.1%;
 }
 #draygonRoomIn {
-    left: 93.7%;
+    left: 94.9%;
     top: 48.8%;
 }
 #draygonRoomOut {
-    left: 95.85%;
+    left: 97.05%;
     top: 47.2%;
 }
 #tourianEscapeRoom4TopRight {
@@ -326,7 +355,7 @@ img {
     top: 76.4%;
 }
 #crabHoleBottomRight {
-    left: 73.3%;
+    left: 72.1%;
     top: 59.3%;
 }
 
@@ -432,60 +461,72 @@ img {
     top: 83.5%;
 }
 .mainStreetBottomGps {
-    left: 67.5%;
+    left: 66.3%;
     top: 56.8%;
 }
 .crabHoleBottomLeftGps {
-    left: 71.45%;
+    left: 70.25%;
     top: 57.3%;
 }
 .leCoudeRightGps {
-    left: 90.16%;
+    left: 91.36%;
     top: 13.1%;
 }
 .redFishRoomLeftGps {
-    left: 67.7%;
+    left: 66.5%;
     top: 42.2%;
 }
 .preciousRoomTopGps {
     top: 42.2%;
-    left: 96.1%;
+    left: 97.3%;
 }
 .aqueductGps {
-    top: 48.6%;
-    left: 78%;
+    left: 80.2%;
+    top: 45.5%;
+}
+.aqueductBottomGps {
+    left: 79.2%;
+    top: 48.5%;
 }
 .beachGps {
     top: 41%;
-    left: 74.8%;
+    left: 73.6%;
 }
 .crabShaftLeftGps {
     top: 45.6%;
-    left: 74.2%;
+    left: 73%;
 }
 .leftSandpitGps {
     top: 53%;
-    left: 77.05%;
+    left: 78.25%;
 }
 .oasisBottomGps {
     top: 56%;
-    left: 78%;
+    left: 79.2%;
 }
 .postBotwoonGps {
     top: 44%;
-    left: 83%;
+    left: 84.2%;
 }
 .rightSandpitGps {
     top: 53%;
-    left: 79.95%;
+    left: 81.15%;
 }
 .toiletTopGps {
     top: 37.9%;
-    left: 78.05%;
+    left: 79.25%;
 }
 .redTowerTopLeftGps {
     left: 50.81%;
     top: 49.7%;
+}
+.crabShaftRightGps {
+    left: 74.5%;
+    top: 47%;
+}
+.aqueductTopLeftGps {
+    left: 80%;
+    top: 48.8%;
 }
 .caterpillarRoomTopRightGps {
     left: 58.1%;
@@ -547,6 +588,14 @@ img {
     left: 55.1%;
     top: 71.4%;
 }
+.crocomireSpeedwayBottomGps {
+    left: 47.4%;
+    top: 83.2%;
+}
+.crocomireRoomTopGps {
+    left: 21.45%;
+    top: 78.9%;
+}
 .phantoonRoomInGps {
     left: 77.2%;
     top: 13.8%;
@@ -579,6 +628,10 @@ img {
     left: 95.35%;
     top: 45.4%;
 }
+.draygonRoomBottomGps {
+    left: 92%;
+    top: 48.7%;
+}
 .tourianEscapeRoom4TopRightGps {
     left: 28.45%;
     top: 29.4%;
@@ -604,11 +657,11 @@ img {
     top: 57.5%;
 }
 .wateringHoleGps {
-    left: 69.4%;
+    left: 68.2%;
     top: 37.5%;
 }
 .wateringHoleBottomGps {
-    left: 68.5%;
+    left: 67.3%;
     top: 39.5%;
 }
 .gauntletTopGps {
@@ -620,16 +673,18 @@ img {
     top: 76%;
 }
 .mamaTurtleGps {
-    left: 75.15%;
+    left: 73.95%;
     top: 50%;
-}
-.aqueductGps {
-    left: 79%;
-    top: 45.5%;
 }
 .lastAP {
     position: absolute;
     width: 2.25%;
+}
+.nextAP {
+    position: absolute;
+    width: 2.25%;
+    display: none;
+    z-index: 3;
 }
 
 .marker_over_break {
@@ -1157,6 +1212,112 @@ img {
 .marker_visited_break_XRayScope {
     background-image: url("/solver/static/images/marker_visited_break_XRayScope.png");
 }
+.marker_visited_easy_Kraid {
+    background-image: url("/solver/static/images/marker_visited_easy.png");
+}
+.marker_visited_easy_Phantoon {
+    background-image: url("/solver/static/images/marker_visited_easy.png");
+}
+.marker_visited_easy_Draygon {
+    background-image: url("/solver/static/images/marker_visited_easy.png");
+}
+.marker_visited_easy_Ridley {
+    background-image: url("/solver/static/images/marker_visited_easy.png");
+}
+.marker_visited_easy_MotherBrain {
+    background-image: url("/solver/static/images/marker_visited_easy.png");
+}
+.marker_visited_medium_Kraid {
+    background-image: url("/solver/static/images/marker_visited_medium.png");
+}
+.marker_visited_medium_Phantoon {
+    background-image: url("/solver/static/images/marker_visited_medium.png");
+}
+.marker_visited_medium_Draygon {
+    background-image: url("/solver/static/images/marker_visited_medium.png");
+}
+.marker_visited_medium_Ridley {
+    background-image: url("/solver/static/images/marker_visited_medium.png");
+}
+.marker_visited_medium_MotherBrain {
+    background-image: url("/solver/static/images/marker_visited_medium.png");
+}
+.marker_visited_hard_Kraid {
+    background-image: url("/solver/static/images/marker_visited_hard.png");
+}
+.marker_visited_hard_Phantoon {
+    background-image: url("/solver/static/images/marker_visited_hard.png");
+}
+.marker_visited_hard_Draygon {
+    background-image: url("/solver/static/images/marker_visited_hard.png");
+}
+.marker_visited_hard_Ridley {
+    background-image: url("/solver/static/images/marker_visited_hard.png");
+}
+.marker_visited_hard_MotherBrain {
+    background-image: url("/solver/static/images/marker_visited_hard.png");
+}
+.marker_visited_harder_Kraid {
+    background-image: url("/solver/static/images/marker_visited_harder.png");
+}
+.marker_visited_harder_Phantoon {
+    background-image: url("/solver/static/images/marker_visited_harder.png");
+}
+.marker_visited_harder_Draygon {
+    background-image: url("/solver/static/images/marker_visited_harder.png");
+}
+.marker_visited_harder_Ridley {
+    background-image: url("/solver/static/images/marker_visited_harder.png");
+}
+.marker_visited_harder_MotherBrain {
+    background-image: url("/solver/static/images/marker_visited_harder.png");
+}
+.marker_visited_hardcore_Kraid {
+    background-image: url("/solver/static/images/marker_visited_hardcore.png");
+}
+.marker_visited_hardcore_Phantoon {
+    background-image: url("/solver/static/images/marker_visited_hardcore.png");
+}
+.marker_visited_hardcore_Draygon {
+    background-image: url("/solver/static/images/marker_visited_hardcore.png");
+}
+.marker_visited_hardcore_Ridley {
+    background-image: url("/solver/static/images/marker_visited_hardcore.png");
+}
+.marker_visited_hardcore_MotherBrain {
+    background-image: url("/solver/static/images/marker_visited_hardcore.png");
+}
+.marker_visited_mania_Kraid {
+    background-image: url("/solver/static/images/marker_visited_mania.png");
+}
+.marker_visited_mania_Phantoon {
+    background-image: url("/solver/static/images/marker_visited_mania.png");
+}
+.marker_visited_mania_Draygon {
+    background-image: url("/solver/static/images/marker_visited_mania.png");
+}
+.marker_visited_mania_Ridley {
+    background-image: url("/solver/static/images/marker_visited_mania.png");
+}
+.marker_visited_mania_MotherBrain {
+    background-image: url("/solver/static/images/marker_visited_mania.png");
+}
+.marker_visited_break_Kraid {
+    background-image: url("/solver/static/images/marker_visited_break.png");
+}
+.marker_visited_break_Phantoon {
+    background-image: url("/solver/static/images/marker_visited_break.png");
+}
+.marker_visited_break_Draygon {
+    background-image: url("/solver/static/images/marker_visited_break.png");
+}
+.marker_visited_break_Ridley {
+    background-image: url("/solver/static/images/marker_visited_break.png");
+}
+.marker_visited_break_MotherBrain {
+    background-image: url("/solver/static/images/marker_visited_break.png");
+}
+
 .baseLoc {
     cursor: pointer;
     position: absolute;
@@ -1237,16 +1398,16 @@ img {
     top: 73.99%;
 }
 #EnergyTankCrocomire {
-    left: 52%;
-    top: 86.05%;
+    left: 25.8%;
+    top: 82.5%;
 }
 #HiJumpBoots {
     left: 40.4%;
     top: 80%;
 }
 #GrappleBeam {
-    left: 36.65%;
-    top: 95.2%;
+    left: 10.6%;
+    top: 91.65%;
 }
 #ReserveTankNorfair {
     left: 51.02%;
@@ -1289,28 +1450,28 @@ img {
     top: 7.2%;
 }
 #EnergyTankMamaturtle {
-    left: 74.93%;
+    left: 73.73%;
     top: 52.3%;
 }
 #PlasmaBeam {
-    left: 84.2%;
+    left: 85.4%;
     top: 36.87%;
 }
 #ReserveTankMaridia {
-    left: 77.55%;
+    left: 78.8%;
     top: 56.85%;
 }
 #SpringBall {
-    left: 89.1%;
+    left: 90.3%;
     top: 58.4%;
 }
 #EnergyTankBotwoon {
-    left: 85.3%;
+    left: 86.5%;
     top: 46.2%;
 }
 #SpaceJump {
-    left: 91.1%;
-    top: 50.9%;
+    left: 92.4%;
+    top: 50.8%;
 }
 #PowerBombCrateriasurface {
     left: 44.5%;
@@ -1453,16 +1614,16 @@ img {
     top: 78.5%;
 }
 #PowerBombCrocomire {
-    left: 42.4%;
-    top: 86.05%;
+    left: 16.3%;
+    top: 82.5%;
 }
 #MissilebelowCrocomire {
-    left: 47%;
-    top: 93.7%;
+    left: 21%;
+    top: 90.15%;
 }
 #MissileGrappleBeam {
-    left: 41.3%;
-    top: 93.8%;
+    left: 15.3%;
+    top: 90.25%;
 }
 #MissileNorfairReserveTank {
     left: 51.9%;
@@ -1529,51 +1690,51 @@ img {
     top: 13.3%;
 }
 #MissilegreenMaridiashinespark {
-    left: 67.3%;
+    left: 66.1%;
     top: 52.2%;
 }
 #SuperMissilegreenMaridia {
-    left: 68.1%;
+    left: 66.9%;
     top: 50.75%;
 }
 #MissilegreenMaridiatatori {
-    left: 75.7%;
+    left: 74.5%;
     top: 53.7%;
 }
 #SuperMissileyellowMaridia {
-    left: 69.6%;
+    left: 68.4%;
     top: 43.1%;
 }
 #MissileyellowMaridiasupermissile {
-    left: 68.6%;
+    left: 67.4%;
     top: 43.1%;
 }
 #MissileyellowMaridiafalsewall {
-    left: 76.7%;
+    left: 75.5%;
     top: 43%;
 }
 #MissileleftMaridiasandpitroom {
-    left: 76.7%;
+    left: 77.95%;
     top: 55.4%;
 }
 #MissilerightMaridiasandpitroom {
-    left: 79.6%;
+    left: 80.8%;
     top: 55.4%;
 }
 #PowerBombrightMaridiasandpitroom {
-    left: 80.5%;
+    left: 81.7%;
     top: 56.8%;
 }
 #MissilepinkMaridia {
-    left: 80.5%;
+    left: 81.7%;
     top: 47.85%;
 }
 #SuperMissilepinkMaridia {
-    left: 81.5%;
+    left: 82.7%;
     top: 47.85%;
 }
 #MissileDraygon {
-    left: 97.65%;
+    left: 98.85%;
     top: 44.7%;
 }
 #Kraid {
@@ -1589,7 +1750,7 @@ img {
     top: 16.3%;
 }
 #Draygon {
-    left: 92.6%;
+    left: 93.8%;
     top: 50%;
 }
 #MotherBrain {
@@ -1644,176 +1805,268 @@ img {
     width: 18.8%;
 }
 .Charge_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
+    z-index: 1;
     left: 2.35%;
-    top: 21.5%;
+    top: 22.1%;
     width: 2.9375%;
+    height: 1.1%;
 }
 .Ice_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
+    z-index: 1;
     left: 2.35%;
-    top: 22.4%;
+    top: 23.0%;
     width: 2.9375%;
+    height: 1.1%;
 }
 .Wave_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
+    z-index: 1;
     left: 2.35%;
-    top: 23.3%;
+    top: 23.8%;
     width: 2.9375%;
+    height: 1.1%;
 }
 .Spazer_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
+    z-index: 1;
     left: 2.35%;
-    top: 24.1%;
+    top: 24.7%;
     width: 2.9375%;
+    height: 1.1%;
 }
 .Plasma_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
+    z-index: 1;
     left: 2.35%;
-    top: 25%;
+    top: 25.6%;
     width: 2.9375%;
+    height: 1.1%;
 }
-
 .Varia_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
-    left: 12.4%;
-    top: 15.4%;
+    z-index: 1;
+    /* left: 12.4%;
+    top: 15.4%; */
+    left: 12.35%;
+    top: 15.9%;
     width: 5.2875%;
+    height: 1.1%;
+}
+.hidden_img {
+    display: none;
 }
 .Gravity_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
-    left: 12.4%;
-    top: 16.2%;
+    z-index: 1;
+    left: 12.35%;
+    top: 16.8%;
     width: 5.2875%;
+    height: 1.1%;
 }
 .Morph_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
-    left: 12.4%;
-    top: 18.9%;
+    z-index: 1;
+    left: 12.35%;
+    top: 19.5%;
     width: 5.2875%;
+    height: 1.1%;
 }
 .Bomb_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
-    left: 12.4%;
-    top: 19.8%;
+    z-index: 1;
+    left: 12.35%;
+    top: 20.32%;
     width: 5.2875%;
+    height: 1.1%;
 }
 .SpringBall_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
-    left: 12.4%;
-    top: 20.7%;
+    z-index: 1;
+    left: 12.35%;
+    top: 21.2%;
     width: 5.2875%;
+    height: 1.1%;
 }
 .ScrewAttack_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
-    left: 12.4%;
-    top: 21.6%;
+    z-index: 1;
+    left: 12.35%;
+    top: 22.1%;
     width: 5.2875%;
+    height: 1.1%;
 }
 .HiJump_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
-    left: 12.4%;
-    top: 24.2%;
+    z-index: 1;
+    left: 12.35%;
+    top: 24.7%;
     width: 5.2875%;
+    height: 1.1%;
 }
 .SpaceJump_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
-    left: 12.4%;
-    top: 25%;
+    z-index: 1;
+    left: 12.35%;
+    top: 25.55%;
     width: 5.2875%;
+    height: 1.1%;
 }
 .SpeedBooster_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
-    left: 12.4%;
-    top: 25.9%;
+    z-index: 1;
+    left: 12.35%;
+    top: 26.45%;
     width: 5.2875%;
+    height: 1.1%;
 }
 
+.Missile_pause_increase {
+    cursor: pointer;
+    position: absolute;
+    z-index: 1;
+    left: 6%;
+    top: 8.7%;
+    width: 0.90%;
+    height: 1.75%;
+}
+.Missile_pause_decrease {
+    cursor: pointer;
+    position: absolute;
+    z-index: 1;
+    left: 6.9%;
+    top: 8.7%;
+    width: 0.85%;
+    height: 1.75%;
+}
 .Missile_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6%;
     top: 8.7%;
     width: 1.7625%;
 }
+.Super_pause_increase {
+    cursor: pointer;
+    position: absolute;
+    z-index: 1;
+    left: 8.3%;
+    top: 8.7%;
+    width: 0.70%;
+    height: 1.75%;
+}
+.Super_pause_decrease {
+    cursor: pointer;
+    position: absolute;
+    z-index: 1;
+    left: 8.9%;
+    top: 8.7%;
+    width: 0.65%;
+    height: 1.75%;
+}
 .Super_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 8.3%;
     top: 8.7%;
     width: 1.175%;
 }
+.PowerBomb_pause_increase {
+    cursor: pointer;
+    position: absolute;
+    z-index: 1;
+    left: 10.1%;
+    top: 8.7%;
+    width: 0.70%;
+    height: 1.75%;
+}
+.PowerBomb_pause_decrease {
+    cursor: pointer;
+    position: absolute;
+    z-index: 1;
+    left: 10.7%;
+    top: 8.7%;
+    width: 0.65%;
+    height: 1.75%;
+}
 .PowerBomb_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 10%;
     top: 8.7%;
     width: 1.175%;
 }
 .Grapple_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
+    z-index: 1;
     left: 11.7%;
     top: 8.7%;
     width: 1.175%;
+    height: 1.7%;
 }
 .XRayScope_pause {
+    cursor: pointer;
     position: absolute;
-    display: none;
-    z-index: 0;
+    z-index: 1;
     left: 13.4%;
     top: 8.7%;
     width: 1.175%;
+    height: 1.7%;
+}
+.Energy_pause_increase {
+    cursor: pointer;
+    position: absolute;
+    z-index: 1;
+    left: 15%;
+    top: 8.7%;
+    width: 1.8%;
+    height: 0.95%;
+}
+.Energy_pause_decrease {
+    cursor: pointer;
+    position: absolute;
+    z-index: 1;
+    left: 15%;
+    top: 9.6%;
+    width: 1.8%;
+    height: 0.9%;
 }
 .Energy_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 0.6%;
     top: 10%;
     width: 2.35%;
 }
 .Energy_90_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 3.6%;
     top: 10.04%;
     width: 0.5875%;
 }
 .Energy_9_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 4.2%;
     top: 10.04%;
     width: 0.5875%;
@@ -1821,7 +2074,7 @@ img {
 .ETank_1_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 0.6%;
     top: 9%;
     width: 0.44%;
@@ -1829,7 +2082,7 @@ img {
 .ETank_2_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 1.2%;
     top: 9%;
     width: 0.44%;
@@ -1837,7 +2090,7 @@ img {
 .ETank_3_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 1.8%;
     top: 9%;
     width: 0.44%;
@@ -1845,7 +2098,7 @@ img {
 .ETank_4_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 2.4%;
     top: 9%;
     width: 0.44%;
@@ -1853,7 +2106,7 @@ img {
 .ETank_5_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 3%;
     top: 9%;
     width: 0.44%;
@@ -1861,7 +2114,7 @@ img {
 .ETank_6_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 3.6%;
     top: 9%;
     width: 0.44%;
@@ -1869,7 +2122,7 @@ img {
 .ETank_7_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 4.2%;
     top: 9%;
     width: 0.44%;
@@ -1877,7 +2130,7 @@ img {
 .ETank_8_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 0.6%;
     top: 8.2%;
     width: 0.44%;
@@ -1885,7 +2138,7 @@ img {
 .ETank_9_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 1.2%;
     top: 8.2%;
     width: 0.44%;
@@ -1893,7 +2146,7 @@ img {
 .ETank_10_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 1.8%;
     top: 8.2%;
     width: 0.44%;
@@ -1901,7 +2154,7 @@ img {
 .ETank_11_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 2.4%;
     top: 8.2%;
     width: 0.44%;
@@ -1909,7 +2162,7 @@ img {
 .ETank_12_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 3%;
     top: 8.2%;
     width: 0.44%;
@@ -1917,7 +2170,7 @@ img {
 .ETank_13_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 3.6%;
     top: 8.2%;
     width: 0.44%;
@@ -1925,7 +2178,7 @@ img {
 .ETank_14_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 4.2%;
     top: 8.2%;
     width: 0.44%;
@@ -1933,7 +2186,7 @@ img {
 .Reserve_1_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 1.75%;
     top: 18.1%;
     width: 0.66%;
@@ -1941,7 +2194,7 @@ img {
 .Reserve_2_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 2.35%;
     top: 18.1%;
     width: 0.66%;
@@ -1949,7 +2202,7 @@ img {
 .Reserve_3_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 2.9%;
     top: 18.1%;
     width: 0.66%;
@@ -1957,7 +2210,7 @@ img {
 .Reserve_4_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 3.5%;
     top: 18.1%;
     width: 0.66%;
@@ -1965,7 +2218,7 @@ img {
 .Missile_900_0_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6%;
     top: 10.04%;
     width: 0.5875%;
@@ -1973,7 +2226,7 @@ img {
 .Missile_900_1_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6%;
     top: 10.04%;
     width: 0.5875%;
@@ -1981,7 +2234,7 @@ img {
 .Missile_900_2_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6%;
     top: 10.04%;
     width: 0.5875%;
@@ -1989,7 +2242,7 @@ img {
 .Missile_900_3_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6%;
     top: 10.04%;
     width: 0.5875%;
@@ -1997,7 +2250,7 @@ img {
 .Missile_900_4_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2005,7 +2258,7 @@ img {
 .Missile_900_5_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2013,7 +2266,7 @@ img {
 .Missile_900_6_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2021,7 +2274,7 @@ img {
 .Missile_900_7_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2029,7 +2282,7 @@ img {
 .Missile_900_8_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2037,7 +2290,7 @@ img {
 .Missile_900_9_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2045,7 +2298,7 @@ img {
 .Missile_90_0_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2053,7 +2306,7 @@ img {
 .Missile_90_1_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2061,7 +2314,7 @@ img {
 .Missile_90_2_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2069,7 +2322,7 @@ img {
 .Missile_90_3_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2077,7 +2330,7 @@ img {
 .Missile_90_4_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2085,7 +2338,7 @@ img {
 .Missile_90_5_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2093,7 +2346,7 @@ img {
 .Missile_90_6_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2101,14 +2354,14 @@ img {
 .Missile_90_7_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 6.6%;
     top: 10.04%;
     width: 0.5875%;
 }
 .Missile_90_8_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     display: none;
     left: 6.6%;
     top: 10.04%;
@@ -2116,7 +2369,7 @@ img {
 }
 .Missile_90_9_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     display: none;
     left: 6.6%;
     top: 10.04%;
@@ -2124,7 +2377,7 @@ img {
 }
 .Missile_9_0_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     display: none;
     left: 7.2%;
     top: 10.04%;
@@ -2133,7 +2386,7 @@ img {
 .Missile_9_1_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 7.2%;
     top: 10.04%;
     width: 0.5875%;
@@ -2141,7 +2394,7 @@ img {
 .Missile_9_2_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 7.2%;
     top: 10.04%;
     width: 0.5875%;
@@ -2149,7 +2402,7 @@ img {
 .Missile_9_3_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 7.2%;
     top: 10.04%;
     width: 0.5875%;
@@ -2157,7 +2410,7 @@ img {
 .Missile_9_4_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 7.2%;
     top: 10.04%;
     width: 0.5875%;
@@ -2165,7 +2418,7 @@ img {
 .Missile_9_5_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 7.2%;
     top: 10.04%;
     width: 0.5875%;
@@ -2173,7 +2426,7 @@ img {
 .Missile_9_6_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 7.2%;
     top: 10.04%;
     width: 0.5875%;
@@ -2181,7 +2434,7 @@ img {
 .Missile_9_7_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 7.2%;
     top: 10.04%;
     width: 0.5875%;
@@ -2189,7 +2442,7 @@ img {
 .Missile_9_8_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 7.2%;
     top: 10.04%;
     width: 0.5875%;
@@ -2197,7 +2450,7 @@ img {
 .Missile_9_9_pause {
     position: absolute;
     display: none;
-    z-index: 0;
+    z-index: 1;
     left: 7.2%;
     top: 10.04%;
     width: 0.5875%;
@@ -2205,7 +2458,7 @@ img {
 
 .Super_900_0_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.05%;
     top: 10.04%;
     width: 0.5875%;
@@ -2213,7 +2466,7 @@ img {
 }
 .Super_900_1_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.05%;
     top: 10.04%;
     width: 0.5875%;
@@ -2221,7 +2474,7 @@ img {
 }
 .Super_900_2_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.05%;
     top: 10.04%;
     width: 0.5875%;
@@ -2229,7 +2482,7 @@ img {
 }
 .Super_900_3_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.05%;
     top: 10.04%;
     width: 0.5875%;
@@ -2237,7 +2490,7 @@ img {
 }
 .Super_900_4_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.05%;
     top: 10.04%;
     width: 0.5875%;
@@ -2245,7 +2498,7 @@ img {
 }
 .Super_900_5_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.05%;
     top: 10.04%;
     width: 0.5875%;
@@ -2253,7 +2506,7 @@ img {
 }
 .Super_900_6_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.05%;
     top: 10.04%;
     width: 0.5875%;
@@ -2261,7 +2514,7 @@ img {
 }
 .Super_900_7_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.05%;
     top: 10.04%;
     width: 0.5875%;
@@ -2269,7 +2522,7 @@ img {
 }
 .Super_900_8_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.05%;
     top: 10.04%;
     width: 0.5875%;
@@ -2277,7 +2530,7 @@ img {
 }
 .Super_900_9_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.05%;
     top: 10.04%;
     width: 0.5875%;
@@ -2285,7 +2538,7 @@ img {
 }
 .Super_90_0_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2293,7 +2546,7 @@ img {
 }
 .Super_90_1_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2301,7 +2554,7 @@ img {
 }
 .Super_90_2_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2309,7 +2562,7 @@ img {
 }
 .Super_90_3_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2317,7 +2570,7 @@ img {
 }
 .Super_90_4_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2325,7 +2578,7 @@ img {
 }
 .Super_90_5_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2333,7 +2586,7 @@ img {
 }
 .Super_90_6_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2341,7 +2594,7 @@ img {
 }
 .Super_90_7_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2349,7 +2602,7 @@ img {
 }
 .Super_90_8_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2357,7 +2610,7 @@ img {
 }
 .Super_90_9_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 8.6%;
     top: 10.04%;
     width: 0.5875%;
@@ -2365,7 +2618,7 @@ img {
 }
 .Super_9_0_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.15%;
     top: 10.04%;
     width: 0.5875%;
@@ -2373,7 +2626,7 @@ img {
 }
 .Super_9_1_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.15%;
     top: 10.04%;
     width: 0.5875%;
@@ -2381,7 +2634,7 @@ img {
 }
 .Super_9_2_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.15%;
     top: 10.04%;
     width: 0.5875%;
@@ -2389,7 +2642,7 @@ img {
 }
 .Super_9_3_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.15%;
     top: 10.04%;
     width: 0.5875%;
@@ -2397,7 +2650,7 @@ img {
 }
 .Super_9_4_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.15%;
     top: 10.04%;
     width: 0.5875%;
@@ -2405,7 +2658,7 @@ img {
 }
 .Super_9_5_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.15%;
     top: 10.04%;
     width: 0.5875%;
@@ -2413,7 +2666,7 @@ img {
 }
 .Super_9_6_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.15%;
     top: 10.04%;
     width: 0.5875%;
@@ -2421,7 +2674,7 @@ img {
 }
 .Super_9_7_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.15%;
     top: 10.04%;
     width: 0.5875%;
@@ -2429,7 +2682,7 @@ img {
 }
 .Super_9_8_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.15%;
     top: 10.04%;
     width: 0.5875%;
@@ -2437,7 +2690,7 @@ img {
 }
 .Super_9_9_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.15%;
     top: 10.04%;
     width: 0.5875%;
@@ -2446,7 +2699,7 @@ img {
 
 .PowerBomb_900_0_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.9%;
     top: 10.04%;
     width: 0.5875%;
@@ -2454,7 +2707,7 @@ img {
 }
 .PowerBomb_900_1_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.9%;
     top: 10.04%;
     width: 0.5875%;
@@ -2462,7 +2715,7 @@ img {
 }
 .PowerBomb_900_2_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.9%;
     top: 10.04%;
     width: 0.5875%;
@@ -2470,7 +2723,7 @@ img {
 }
 .PowerBomb_900_3_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.9%;
     top: 10.04%;
     width: 0.5875%;
@@ -2478,7 +2731,7 @@ img {
 }
 .PowerBomb_900_4_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.9%;
     top: 10.04%;
     width: 0.5875%;
@@ -2486,7 +2739,7 @@ img {
 }
 .PowerBomb_900_5_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.9%;
     top: 10.04%;
     width: 0.5875%;
@@ -2494,7 +2747,7 @@ img {
 }
 .PowerBomb_900_6_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.9%;
     top: 10.04%;
     width: 0.5875%;
@@ -2502,7 +2755,7 @@ img {
 }
 .PowerBomb_900_7_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.9%;
     top: 10.04%;
     width: 0.5875%;
@@ -2510,7 +2763,7 @@ img {
 }
 .PowerBomb_900_8_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.9%;
     top: 10.04%;
     width: 0.5875%;
@@ -2518,7 +2771,7 @@ img {
 }
 .PowerBomb_900_9_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 9.9%;
     top: 10.04%;
     width: 0.5875%;
@@ -2526,7 +2779,7 @@ img {
 }
 .PowerBomb_90_0_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 10.45%;
     top: 10.04%;
     width: 0.5875%;
@@ -2534,7 +2787,7 @@ img {
 }
 .PowerBomb_90_1_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 10.45%;
     top: 10.04%;
     width: 0.5875%;
@@ -2542,7 +2795,7 @@ img {
 }
 .PowerBomb_90_2_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 10.45%;
     top: 10.04%;
     width: 0.5875%;
@@ -2550,7 +2803,7 @@ img {
 }
 .PowerBomb_90_3_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 10.45%;
     top: 10.04%;
     width: 0.5875%;
@@ -2558,7 +2811,7 @@ img {
 }
 .PowerBomb_90_4_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 10.45%;
     top: 10.04%;
     width: 0.5875%;
@@ -2566,7 +2819,7 @@ img {
 }
 .PowerBomb_90_5_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 10.45%;
     top: 10.04%;
     width: 0.5875%;
@@ -2574,7 +2827,7 @@ img {
 }
 .PowerBomb_90_6_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 10.45%;
     top: 10.04%;
     width: 0.5875%;
@@ -2582,7 +2835,7 @@ img {
 }
 .PowerBomb_90_7_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 10.45%;
     top: 10.04%;
     width: 0.5875%;
@@ -2590,7 +2843,7 @@ img {
 }
 .PowerBomb_90_8_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 10.45%;
     top: 10.04%;
     width: 0.5875%;
@@ -2598,7 +2851,7 @@ img {
 }
 .PowerBomb_90_9_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 10.45%;
     top: 10.04%;
     width: 0.5875%;
@@ -2606,7 +2859,7 @@ img {
 }
 .PowerBomb_9_0_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 11%;
     top: 10.04%;
     width: 0.5875%;
@@ -2614,7 +2867,7 @@ img {
 }
 .PowerBomb_9_1_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 11%;
     top: 10.04%;
     width: 0.5875%;
@@ -2622,7 +2875,7 @@ img {
 }
 .PowerBomb_9_2_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 11%;
     top: 10.04%;
     width: 0.5875%;
@@ -2630,7 +2883,7 @@ img {
 }
 .PowerBomb_9_3_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 11%;
     top: 10.04%;
     width: 0.5875%;
@@ -2638,7 +2891,7 @@ img {
 }
 .PowerBomb_9_4_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 11%;
     top: 10.04%;
     width: 0.5875%;
@@ -2646,7 +2899,7 @@ img {
 }
 .PowerBomb_9_5_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 11%;
     top: 10.04%;
     width: 0.5875%;
@@ -2654,7 +2907,7 @@ img {
 }
 .PowerBomb_9_6_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 11%;
     top: 10.04%;
     width: 0.5875%;
@@ -2662,7 +2915,7 @@ img {
 }
 .PowerBomb_9_7_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 11%;
     top: 10.04%;
     width: 0.5875%;
@@ -2670,7 +2923,7 @@ img {
 }
 .PowerBomb_9_8_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 11%;
     top: 10.04%;
     width: 0.5875%;
@@ -2678,16 +2931,34 @@ img {
 }
 .PowerBomb_9_9_pause {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 11%;
     top: 10.04%;
     width: 0.5875%;
     display: none;
 }
 
+.Reserve_pause_increase {
+    cursor: pointer;
+    position: absolute;
+    z-index: 1;
+    left: 16.8%;
+    top: 8.7%;
+    width: 1.8%;
+    height: 0.95%;
+}
+.Reserve_pause_decrease {
+    cursor: pointer;
+    position: absolute;
+    z-index: 1;
+    left: 16.8%;
+    top: 9.6%;
+    width: 1.8%;
+    height: 0.9%;
+}
 .auto {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 5%;
     top: 8.79%;
     width: 0.95%;
@@ -2695,7 +2966,7 @@ img {
 }
 .reserve_text {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 1.7%;
     top: 16.7%;
     width: 4.85%;
@@ -2704,7 +2975,7 @@ img {
 
 .reserve_0 {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 5.9%;
     top: 18.15%;
     width: 0.5875%;
@@ -2712,7 +2983,7 @@ img {
 }
 .reserve_00 {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 5.2%;
     top: 18.15%;
     width: 0.5875%;
@@ -2720,7 +2991,7 @@ img {
 }
 .reserve_1 {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 4.55%;
     top: 18.15%;
     width: 0.5875%;
@@ -2728,7 +2999,7 @@ img {
 }
 .reserve_2 {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 4.55%;
     top: 18.15%;
     width: 0.5875%;
@@ -2736,7 +3007,7 @@ img {
 }
 .reserve_3 {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 4.55%;
     top: 18.15%;
     width: 0.5875%;
@@ -2744,7 +3015,7 @@ img {
 }
 .reserve_4 {
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     left: 4.55%;
     top: 18.15%;
     width: 0.5875%;

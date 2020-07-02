@@ -125,12 +125,20 @@
     <div id="leCoudeRight" class="baseButton" onclick="clickPortal('leCoudeRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Le Coude Right"></div>
     <div id="redFishRoomLeft" class="baseButton" onclick="clickPortal('redFishRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Red Fish Room Left"></div>
     <div id="redTowerTopLeft" class="baseButton" onclick="clickPortal('redTowerTopLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Red Tower Top Left"></div>
+    <div id="crabShaftRight" class="baseButton" onclick="clickPortal('crabShaftRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Crab Shaft Right"></div>
+    <div id="aqueductTopLeft" class="baseButton" onclick="clickPortal('aqueductTopLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Aqueduct Top Left"></div>
     <div id="caterpillarRoomTopRight" class="baseButton" onclick="clickPortal('caterpillarRoomTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Caterpillar Room Top Right"></div>
     <div id="redBrinstarElevator" class="baseButtonRot" onclick="clickPortal('redBrinstarElevator')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Red Brinstar Elevator"></div>
     <div id="eastTunnelRight" class="baseButton" onclick="clickPortal('eastTunnelRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="East Tunnel Right"></div>
     <div id="eastTunnelTopRight" class="baseButton" onclick="clickPortal('eastTunnelTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="East Tunnel Top Right"></div>
     <div id="glassTunnelTop" class="baseButtonRot" onclick="clickPortal('glassTunnelTop')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Glass Tunnel Top"></div>
     <div id="goldenFour" class="baseButton" onclick="clickPortal('goldenFour')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Golden Four"></div>
+    <div id="crocomireSpeedwayBottom" class="baseButtonRot" onclick="clickPortal('crocomireSpeedwayBottom')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Crocomire Speedway Bottom"></div>
+    <div id="crocomireRoomTop" class="baseButtonRot" onclick="clickPortal('crocomireRoomTop')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Crocomire Room Top"></div>
+
+    <div id="westSandHallLeft" class="baseButton" data-toggle="tooltip" title="West Sand Hall Left"></div>
+    <div id="belowBotwoonEnergyTankRight" class="baseButton" data-toggle="tooltip" title="New exit from Sand Hall in area mode"></div>
+    <div id="westSandHallTunnelRight" class="baseButton" data-toggle="tooltip" title="Vanilla exit from Sand Hall"></div>
 
     <!-- bosses -->
     <div id="phantoonRoomOut" class="baseButton" onclick="clickPortal('phantoonRoomOut')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Phantoon Room Out"></div>
@@ -276,6 +284,81 @@
     <div id="lastAP">
       <img src="/solver/static/images/gps.png" alt="last access point" data-toggle="tooltip" title="Current access point" data-placement="bottom" data-container="body" data-html="true" id="gps">
     </div>
+    <div id="nextAP" class="nextAP">
+      <img src="/solver/static/images/nextgps.png" alt="next access point" data-toggle="tooltip" title="Next access point" data-placement="bottom" data-container="body" data-html="true" id="nextgps">
+    </div>
+    <div id="gps_1" class="nextAP">
+      <img src="/solver/static/images/gps_1.png" alt="path ap 1" id="gps_1">
+    </div>
+    <div id="gps_2" class="nextAP">
+      <img src="/solver/static/images/gps_2.png" alt="path ap 2" id="gps_2">
+    </div>
+    <div id="gps_3" class="nextAP">
+      <img src="/solver/static/images/gps_3.png" alt="path ap 3" id="gps_3">
+    </div>
+    <div id="gps_4" class="nextAP">
+      <img src="/solver/static/images/gps_4.png" alt="path ap 4" id="gps_4">
+    </div>
+    <div id="gps_5" class="nextAP">
+      <img src="/solver/static/images/gps_5.png" alt="path ap 5" id="gps_5">
+    </div>
+    <div id="gps_6" class="nextAP">
+      <img src="/solver/static/images/gps_6.png" alt="path ap 6" id="gps_6">
+    </div>
+    <div id="gps_7" class="nextAP">
+      <img src="/solver/static/images/gps_7.png" alt="path ap 7" id="gps_7">
+    </div>
+    <div id="gps_8" class="nextAP">
+      <img src="/solver/static/images/gps_8.png" alt="path ap 8" id="gps_8">
+    </div>
+    <div id="gps_9" class="nextAP">
+      <img src="/solver/static/images/gps_9.png" alt="path ap 9" id="gps_9">
+    </div>
+    <div id="gps_10" class="nextAP">
+      <img src="/solver/static/images/gps_10.png" alt="path ap 10" id="gps_10">
+    </div>
+    <div id="gps_11" class="nextAP">
+      <img src="/solver/static/images/gps_11.png" alt="path ap 11" id="gps_11">
+    </div>
+    <div id="gps_12" class="nextAP">
+      <img src="/solver/static/images/gps_12.png" alt="path ap 12" id="gps_12">
+    </div>
+    <div id="gps_13" class="nextAP">
+      <img src="/solver/static/images/gps_13.png" alt="path ap 13" id="gps_13">
+    </div>
+    <div id="gps_14" class="nextAP">
+      <img src="/solver/static/images/gps_14.png" alt="path ap 14" id="gps_14">
+    </div>
+    <div id="gps_15" class="nextAP">
+      <img src="/solver/static/images/gps_15.png" alt="path ap 15" id="gps_15">
+    </div>
+    <div id="gps_16" class="nextAP">
+      <img src="/solver/static/images/gps_16.png" alt="path ap 16" id="gps_16">
+    </div>
+    <div id="gps_17" class="nextAP">
+      <img src="/solver/static/images/gps_17.png" alt="path ap 17" id="gps_17">
+    </div>
+    <div id="gps_18" class="nextAP">
+      <img src="/solver/static/images/gps_18.png" alt="path ap 18" id="gps_18">
+    </div>
+    <div id="gps_19" class="nextAP">
+      <img src="/solver/static/images/gps_19.png" alt="path ap 19" id="gps_19">
+    </div>
+    <div id="gps_20" class="nextAP">
+      <img src="/solver/static/images/gps_20.png" alt="path ap 20" id="gps_20">
+    </div>
+    <div id="gps_21" class="nextAP">
+      <img src="/solver/static/images/gps_21.png" alt="path ap 21" id="gps_21">
+    </div>
+    <div id="gps_22" class="nextAP">
+      <img src="/solver/static/images/gps_22.png" alt="path ap 22" id="gps_22">
+    </div>
+    <div id="gps_23" class="nextAP">
+      <img src="/solver/static/images/gps_23.png" alt="path ap 23" id="gps_23">
+    </div>
+    <div id="gps_24" class="nextAP">
+      <img src="/solver/static/images/gps_24.png" alt="path ap 24" id="gps_24">
+    </div>
 
     <!-- g4 -->
     <div class="g4">
@@ -295,69 +378,80 @@
     </div>
 
     <!-- inventory menu -->
-    <div class="pause">
+    <div id="pause_background_seedless" class="pause">
+        <img src="/solver/static/images/background_seedless.png" class="full">
+    </div>
+    <div id="pause_background" class="pause">
         <img src="/solver/static/images/background.png" class="full">
     </div>
-    <div id="Charge_pause" class="Charge_pause">
-        <img src="/solver/static/images/charge.png" class="full">
+    <div id="Charge_pause" class="Charge_pause" onclick="actionItem('Charge', 'toggle')" title="Toggle Charge Beam">
+        <img id="Charge_pause_img" src="/solver/static/images/charge.png" class="full hidden_img">
     </div>
-    <div id="Ice_pause" class="Ice_pause">
-        <img src="/solver/static/images/ice.png" class="full">
+    <div id="Ice_pause" class="Ice_pause" onclick="actionItem('Ice', 'toggle')" title="Toggle Ice Beam">
+        <img id="Ice_pause_img" src="/solver/static/images/ice.png" class="full hidden_img">
     </div>
-    <div id="Wave_pause" class="Wave_pause">
-        <img src="/solver/static/images/wave.png" class="full">
+    <div id="Wave_pause" class="Wave_pause" onclick="actionItem('Wave', 'toggle')" title="Toggle Wave Beam">
+        <img id="Wave_pause_img" src="/solver/static/images/wave.png" class="full hidden_img">
     </div>
-    <div id="Spazer_pause" class="Spazer_pause">
-        <img src="/solver/static/images/spazer.png" class="full">
+    <div id="Spazer_pause" class="Spazer_pause" onclick="actionItem('Spazer', 'toggle')" title="Toggle Spazer Beam">
+        <img id="Spazer_pause_img" src="/solver/static/images/spazer.png" class="full hidden_img">
     </div>
-    <div id="Plasma_pause" class="Plasma_pause">
-        <img src="/solver/static/images/plasma.png" class="full">
-    </div>
-
-    <div id="Varia_pause" class="Varia_pause">
-        <img src="/solver/static/images/varia.png" class="full">
-    </div>
-    <div id="Gravity_pause" class="Gravity_pause">
-        <img src="/solver/static/images/gravity.png" class="full">
-    </div>
-    <div id="Morph_pause" class="Morph_pause">
-        <img src="/solver/static/images/morph.png" class="full">
-    </div>
-    <div id="Bomb_pause" class="Bomb_pause">
-        <img src="/solver/static/images/bomb.png" class="full">
-    </div>
-    <div id="SpringBall_pause" class="SpringBall_pause">
-        <img src="/solver/static/images/springball.png" class="full">
-    </div>
-    <div id="ScrewAttack_pause" class="ScrewAttack_pause">
-        <img src="/solver/static/images/screwattack.png" class="full">
-    </div>
-    <div id="HiJump_pause" class="HiJump_pause">
-        <img src="/solver/static/images/hijump.png" class="full">
-    </div>
-    <div id="SpaceJump_pause" class="SpaceJump_pause">
-        <img src="/solver/static/images/spacejump.png" class="full">
-    </div>
-    <div id="SpeedBooster_pause" class="SpeedBooster_pause">
-        <img src="/solver/static/images/speedbooster.png" class="full">
+    <div id="Plasma_pause" class="Plasma_pause" onclick="actionItem('Plasma', 'toggle')" title="Toggle Plasma Beam">
+        <img id="Plasma_pause_img" src="/solver/static/images/plasma.png" class="full hidden_img">
     </div>
 
+    <div id="Varia_pause" class="Varia_pause" onclick="actionItem('Varia', 'toggle')" title="Toggle Varia Suit">
+        <img id="Varia_pause_img" src="/solver/static/images/varia.png" class="full hidden_img">
+    </div>
+    <div id="Gravity_pause" class="Gravity_pause" onclick="actionItem('Gravity', 'toggle')" title="Toggle Gravity Suit">
+        <img id="Gravity_pause_img" src="/solver/static/images/gravity.png" class="full hidden_img">
+    </div>
+    <div id="Morph_pause" class="Morph_pause" onclick="actionItem('Morph', 'toggle')" title="Toggle Morph Ball">
+        <img id="Morph_pause_img" src="/solver/static/images/morph.png" class="full hidden_img">
+    </div>
+    <div id="Bomb_pause" class="Bomb_pause" onclick="actionItem('Bomb', 'toggle')" title="Toggle Bomb">
+        <img id="Bomb_pause_img" src="/solver/static/images/bomb.png" class="full hidden_img">
+    </div>
+    <div id="SpringBall_pause" class="SpringBall_pause" onclick="actionItem('SpringBall', 'toggle')" title="Toggle Spring Ball">
+        <img id="SpringBall_pause_img" src="/solver/static/images/springball.png" class="full hidden_img">
+    </div>
+    <div id="ScrewAttack_pause" class="ScrewAttack_pause" onclick="actionItem('ScrewAttack', 'toggle')" title="Toggle Screw Attack">
+        <img id="ScrewAttack_pause_img" src="/solver/static/images/screwattack.png" class="full hidden_img">
+    </div>
+    <div id="HiJump_pause" class="HiJump_pause" onclick="actionItem('HiJump', 'toggle')" title="Toggle High Jump Boots">
+        <img id="HiJump_pause_img" src="/solver/static/images/hijump.png" class="full hidden_img">
+    </div>
+    <div id="SpaceJump_pause" class="SpaceJump_pause" onclick="actionItem('SpaceJump', 'toggle')" title="Toggle Space Jump">
+        <img id="SpaceJump_pause_img" src="/solver/static/images/spacejump.png" class="full hidden_img">
+    </div>
+    <div id="SpeedBooster_pause" class="SpeedBooster_pause" onclick="actionItem('SpeedBooster', 'toggle')" title="Toggle Speed Booster">
+        <img id="SpeedBooster_pause_img" src="/solver/static/images/speedbooster.png" class="full hidden_img">
+    </div>
+
+    <div id="Missile_pause_increase" class="Missile_pause_increase" onclick="actionItem('Missile', 'add')" title="Add one Missile"></div>
+    <div id="Missile_pause_decrease" class="Missile_pause_decrease" onclick="actionItem('Missile', 'remove')" title="Remove one Missile"></div>
     <div id="Missile_pause" class="Missile_pause">
         <img src="/solver/static/images/missile.png" class="full">
     </div>
+    <div id="Super_pause_increase" class="Super_pause_increase" onclick="actionItem('Super', 'add')" title="Add one Super"></div>
+    <div id="Super_pause_decrease" class="Super_pause_decrease" onclick="actionItem('Super', 'remove')" title="Remove one Super"></div>
     <div id="Super_pause" class="Super_pause">
         <img src="/solver/static/images/super.png" class="full">
     </div>
+    <div id="PowerBomb_pause_increase" class="PowerBomb_pause_increase" onclick="actionItem('PowerBomb', 'add')" title="Add one Power Bomb"></div>
+    <div id="PowerBomb_pause_decrease" class="PowerBomb_pause_decrease" onclick="actionItem('PowerBomb', 'remove')" title="Remove one Power Bomb"></div>
     <div id="PowerBomb_pause" class="PowerBomb_pause">
         <img src="/solver/static/images/powerbomb.png" class="full">
     </div>
-    <div id="Grapple_pause" class="Grapple_pause">
-        <img src="/solver/static/images/grapple.png" class="full">
+    <div id="Grapple_pause" class="Grapple_pause" onclick="actionItem('Grapple', 'toggle')">
+        <img id="Grapple_pause_img" src="/solver/static/images/grapple.png" class="full hidden_img">
     </div>
-    <div id="XRayScope_pause" class="XRayScope_pause">
-        <img src="/solver/static/images/xray.png" class="full">
+    <div id="XRayScope_pause" class="XRayScope_pause" onclick="actionItem('XRayScope', 'toggle')">
+        <img id="XRayScope_pause_img" src="/solver/static/images/xray.png" class="full hidden_img">
     </div>
 
+    <div id="Energy_pause_increase" class="Energy_pause_increase" onclick="actionItem('ETank', 'add')" title="Add one ETank"></div>
+    <div id="Energy_pause_decrease" class="Energy_pause_decrease" onclick="actionItem('ETank', 'remove')" title="Remove one ETank"></div>
     <div id="Energy_pause" class="Energy_pause">
         <img src="/solver/static/images/energy.png" class="full">
     </div>
@@ -411,6 +505,8 @@
         <img src="/solver/static/images/etank.png" class="full">
     </div>
 
+    <div id="Reserve_pause_increase" class="Reserve_pause_increase" onclick="actionItem('Reserve', 'add')" title="Add one Reserve Tank"></div>
+    <div id="Reserve_pause_decrease" class="Reserve_pause_decrease" onclick="actionItem('Reserve', 'remove')" title="Remove one Reserve Tank"></div>
     <div id="Reserve_1_pause" class="Reserve_1_pause">
         <img src="/solver/static/images/reserve.png" class="full">
     </div>

@@ -9,6 +9,8 @@ extend 'layout.html'
 
 <script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
 
+<script type="text/javascript" src="{{=URL('static', 'js/localforage.nopromises.min.js')}}"></script>
+
 <title>Super Metroid VARIA Randomizer Plandomizer Repository</title>
 
 <style>
@@ -216,7 +218,16 @@ window.onload = function(){
                     return false;
                 }
 
-                vanillaROMBytes = new Uint8Array(e.target.result);
+                // store file in localforage
+                localforage.setItem('vanillaROM', e.target.result, function(err, value) {
+                    if(err != null) {
+                        clearLocalStorage();
+                    } else {
+                        console.log("vanilla ROM stored in local storage");
+                        vanillaROMBytes = new Uint8Array(value);
+                        displayROMInput(false);
+                    }
+                });
             }
         }, false);
 
@@ -315,6 +326,39 @@ window.onload = function(){
     dragElement(document.getElementById("updatePopup"), "updateGrab");
 
     displayMessage();
+
+    // check if a vanilla ROM is already in local storage
+    localforage.getItem('vanillaROM', function(err, value) {
+        if(err != null) {
+            clearLocalStorage();
+        } else {
+            if(value != null) {
+                displayROMInput(false);
+                vanillaROMBytes = new Uint8Array(value);
+            } else {
+                clearLocalStorage();
+            }
+        }
+    });
+
+    // mysql sort is not a natural one, so start by doing a js natural sort.
+    sortTable("plandoList", 0);
+}
+
+function displayROMInput(show) {
+    if(show == true) {
+        document.getElementById("vanillaROMVisibility").style.display = "block";
+        document.getElementById("vanillaROMOKVisibility").style.display = "none";
+    } else {
+        document.getElementById("vanillaROMVisibility").style.display = "none";
+        document.getElementById("vanillaROMOKVisibility").style.display = "block";
+    }
+}
+
+function clearLocalStorage() {
+    displayROMInput(true);
+    localforage.clear();
+    vanillaROMBytes = null;
 }
 
 // from https://stackoverflow.com/questions/22708434/restrict-characters-in-input-field
@@ -364,61 +408,55 @@ function unpack_2bytes(ips, i) {
 
 function AjaxPlandoDownloadCompleted(data) {
     // with items/Locations patch the local rom in memory
-    var filesInput = document.getElementById("vanillaROM");
-    var file = filesInput.files[0];
+    var bytes = vanillaROMBytes;
 
-    var reader = new FileReader();
-    reader.readAsArrayBuffer(file);
-
-    reader.onload = function(e) {
-        var bytes = new Uint8Array(e.target.result);
-
-        var maxSize = data["maxSize"]
-        if(maxSize > 3*1024*1024) {
-          var tmp = new Uint8Array(maxSize);
-          tmp.set(bytes);
-          bytes = tmp;
-        }
-
-        var binary_string = atob(data["ips"]);
-        var len = binary_string.length;
-        var ips = new Uint8Array(len);
-        for(var i = 0; i < len; i++) {
-           ips[i] = binary_string.charCodeAt(i);
-        }
-
-        var i = 5;
-        var offset = 0;
-        var size = 0;
-        var rle_size = 0;
-
-        while(i < ips.length - 3) {
-           offset = unpack_3bytes(ips, i);
-           i += 3;
-           size = unpack_2bytes(ips, i);
-           i += 2;
-
-           if(size == 0) {
-             // RLE
-             rle_size = unpack_2bytes(ips, i);
-             i += 2;
-             for(j=0; j<rle_size; j++) {
-               bytes[offset+j] = ips[i];
-             }
-             i += 1;
-           } else {
-             for(j=0; j<size; j++) {
-               bytes[offset+j] = ips[i+j];
-             }
-             i += j;
-           }
-        }
-
-        var blob = new Blob([bytes], {type: "octet/stream"});
-
-        var outFileName = data['fileName'];
-        saveAs(blob, outFileName);
+    var maxSize = data["maxSize"]
+    if(maxSize <= 0x300000) {
+        maxSize = 0x300000;
     }
+    // always make a copy to avoid modifying vanilla rom buffer from local storage
+    var tmp = new Uint8Array(maxSize);
+    tmp.set(bytes);
+    bytes = tmp;
+
+    var binary_string = atob(data["ips"]);
+    var len = binary_string.length;
+    var ips = new Uint8Array(len);
+    for(var i = 0; i < len; i++) {
+        ips[i] = binary_string.charCodeAt(i);
+    }
+
+    var i = 5;
+    var offset = 0;
+    var size = 0;
+    var rle_size = 0;
+
+    while(i < ips.length - 3) {
+        offset = unpack_3bytes(ips, i);
+        i += 3;
+        size = unpack_2bytes(ips, i);
+        i += 2;
+
+        if(size == 0) {
+            // RLE
+            rle_size = unpack_2bytes(ips, i);
+            i += 2;
+            for(j=0; j<rle_size; j++) {
+                bytes[offset+j] = ips[i];
+            }
+            i += 1;
+        } else {
+            for(j=0; j<size; j++) {
+                bytes[offset+j] = ips[i+j];
+            }
+            i += j;
+        }
+    }
+
+    var blob = new Blob([bytes], {type: "octet/stream"});
+
+    var outFileName = data['fileName'];
+    saveAs(blob, outFileName);
 }
 
 function generateRawData(vanillaBytes, plandoBytes) {
@@ -778,13 +816,13 @@ function sortTable(id, n) {
             /* Check if the two rows should switch place,
                based on the direction, asc or desc: */
             if (dir == "asc") {
-                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                if (x.innerHTML.toLowerCase().localeCompare(y.innerHTML.toLowerCase(), undefined, {numeric: true, sensitivity: 'base'}) > 0) {
                     // If so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;
                 }
             } else if (dir == "desc") {
-                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                if (x.innerHTML.toLowerCase().localeCompare(y.innerHTML.toLowerCase(), undefined, {numeric: true, sensitivity: 'base'}) < 0) {
                     // If so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;
@@ -825,7 +863,7 @@ function guessVARIAPreset(filename) {
 
     if(match != null){
       var pS = match[2];
-      if(pS == "slowest" || pS == "slow" || pS == "medium" || pS == "fast" || pS == "fastest" || pS == "basic" || pS == "VARIAble") {
+      if(pS == "slowest" || pS == "slow" || pS == "medium" || pS == "fast" || pS == "fastest" || pS == "basic" || pS == "VARIAble" || pS == "speedrun") {
         return match[1];
       } else {
         return match[1] + '_' + match[2];
@@ -885,7 +923,7 @@ function setGuessedPreset(romName){
         <td>Plando Name:</td><td><input class="full" id="plandoName" type="text" maxLength="32" placeholder="Only [a-zA-Z0-9 -_]"/></td>
       </tr>
       <tr>
-        <td colspan="2">Suggested preset:</td><td colspan="2"><select class="filldropdown" id="preset" name="preset"><option value="noob">noob</option><option value="casual">casual</option><option selected="selected" value="regular">regular</option><option value="veteran">veteran</option><option value="speedrunner">speedrunner</option><option value="master">master</option></select></td>
+        <td colspan="2">Suggested preset:</td><td colspan="2"><select class="filldropdown" id="preset" name="preset"><option value="newbie">newbie</option><option value="casual">casual</option><option selected="selected" value="regular">regular</option><option value="veteran">veteran</option><option value="expert">expert</option><option value="master">master</option></select></td>
       </tr>
       <tr>
         <td>Long Description:</td><td colspan="3"><textarea class="full" id="longDesc" maxLength="2048" rows="8" cols="50" placeholder="Long Description"></textarea></td>
@@ -914,7 +952,7 @@ function setGuessedPreset(romName){
       </tr>
       <tr>
         <td>Plando Key:</td><td><input class="full" id="updatePlandoKey" type="text" maxLength="8" placeholder="Only [a-zA-Z0-9]"/></td>
-        <td>Suggested preset:</td><td><select class="filldropdown" id="updatePreset"><option value="noob">noob</option><option value="casual">casual</option><option selected="selected" value="regular">regular</option><option value="veteran">veteran</option><option value="speedrunner">speedrunner</option><option value="master">master</option></select></td>
+        <td>Suggested preset:</td><td><select class="filldropdown" id="updatePreset"><option value="newbie">newbie</option><option value="casual">casual</option><option selected="selected" value="regular">regular</option><option value="veteran">veteran</option><option value="expert">expert</option><option value="master">master</option></select></td>
       </tr>
       <tr>
         <td>Long Description:</td><td colspan="3"><textarea class="full" id="updateLongDesc" maxLength="2048" rows="8" cols="50" placeholder="Long Description"></textarea></td>
@@ -962,11 +1000,23 @@ function setGuessedPreset(romName){
       </tr>
       <tr>
         <td><p>A vanilla unheadered ROM is required to upload/download a Plando seed</p></td>
-        <td><input id="vanillaROM" name="vanillaROM" type="file" /></td>
+        <td>
+          <div id="vanillaROMVisibility">
+           {{=INPUT(_type="file", _name="vanillaROM", _id="vanillaROM", _class="full")}}
+          </div>
+          <div id="vanillaROMOKVisibility">
+            Vanilla ROM already loaded
+          </div>
+        </td>
       </tr>
     </table>
     <p></p>
 {{
+    def getPresetSortId(preset):
+        # to sort preset by difficulty
+        d = {"newbie": 0, "casual": 1, "regular": 2, "veteran": 3, "expert": 4, "master": 5}
+        return d[preset]
+
     if plandos != None:
         response.write("    <table id=\"plandoList\" class=\"full\">\n", escape=False)
         response.write("      <tr>\n", escape=False)
@@ -997,7 +1047,7 @@ function setGuessedPreset(romName){
             response.write("        <td id=\"{}_author\" class=\"collapsibleTd centerCell\">{}</td>\n".format(pureName, author), escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(smallDesc), escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(time), escape=False)
-            response.write("        <td id=\"{}_preset\" class=\"collapsibleTd centerCell\">{}</td>\n".format(pureName, preset), escape=False)
+            response.write("        <td class=\"collapsibleTd centerCell\"><div style=\"display: none\">{}</div><div id=\"{}_preset\">{}</div></td>\n".format(getPresetSortId(preset), pureName, preset), escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">", escape=False)
 
             response.write("        <div style=\"display: none\">{}</div><div id=\"divrate{}\">".format(round(rating, 2) if rating != None else '0.00', pureName), escape=False)

@@ -452,7 +452,7 @@ elif itemsStats != None and len(itemsStats) > 0:
             continue
           else:
             pass
-        elif loc["GraphArea"] != area:
+        elif loc["GraphArea"] != area and not (area == "Norfair" and loc["GraphArea"] == "Crocomire") and not (area == "Maridia" and loc["GraphArea"] in ["WestMaridia", "EastMaridia"]):
           continue
 
         response.write("<tr><td><a href=\"https://wiki.supermetroid.run/{}\" target=\"_blank\">{}</a></td>".format(loc["Room"].replace(' ', '_').replace("'", '%27'), loc["Name"]), escape=False)
@@ -498,7 +498,7 @@ elif itemsStats != None and len(itemsStats) > 0:
 {{
     for (i, category) in enumerate(categories["Common"] + categories["Crateria/Brinstar"] +
                                    categories["Wrecked Ship"] + categories["Maridia 1/2"] +
-                                   categories["Maridia 2/2"] + categories["Norfair"] + categories["Bosses/End"] +
+                                   categories["Maridia 2/2"] + categories["Upper Norfair"] + categories["Lower Norfair"] + categories["Bosses/End"] +
                                    [{"knows": ["HardRoom-Gauntlet", "HardRoom-X-Ray"], "title": "Hard rooms"},
                                     {"knows": ["IceHellRun", "MainUpperNorfairHellRun", "LowerNorfairHellRun"], "title": "Hellruns"}], -1):
       if category["title"] == "Basics":

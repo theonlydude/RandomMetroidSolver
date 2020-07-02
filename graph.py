@@ -1,8 +1,7 @@
-import copy
-from smbool import SMBool
-from rom_patches import RomPatches
-from parameters import infinity
+import copy, logging
 import log
+from smbool import SMBool
+from parameters import infinity
 
 class AccessPoint(object):
     # name : AccessPoint name
@@ -86,6 +85,12 @@ class AccessGraph(object):
         if dotFile is not None:
             self.toDot(dotFile)
 
+    def printGraph(self):
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.log.debug("Area graph:")
+            for s, d in self.InterAreaTransitions:
+                self.log.debug("{} -> {}".format(s.Name, d.Name))
+
     def addAccessPoint(self, ap):
         ap.distance = 0
         self.accessPoints[ap.Name] = ap
@@ -125,7 +130,7 @@ class AccessGraph(object):
 
     # availNodes: all already available nodes
     # nodesToCheck: nodes we have to check transitions for
-    # items: collected items
+    # smbm: smbm to test logic on. if None, discard logic check, assume we can reach everything
     # maxDiff: difficulty limit
     # return newly opened access points
     def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
@@ -136,7 +141,10 @@ class AccessGraph(object):
                 dst = self.accessPoints[dstName]
                 if dst in newAvailNodes or dst in availNodes:
                     continue
-                diff = smbm.eval(tFunc)
+                if smbm is not None:
+                    diff = smbm.eval(tFunc)
+                else:
+                    diff = SMBool(True, 0)
                 if diff.bool == True and diff.difficulty <= maxDiff:
                     if src.GraphArea == dst.GraphArea:
                         dst.distance = src.distance + 0.01
@@ -148,8 +156,9 @@ class AccessGraph(object):
         return newAvailNodes
 
     # rootNode: starting AccessPoint instance
-    # items: collected items
-    # maxDiff: difficulty limit
+    # smbm: smbm to test logic on. if None, discard logic check, assume we can reach everything
+    # maxDiff: difficulty limit.
+    # noLogic: if True, discard logic check, assume we can reach everything
     # return available AccessPoint list
     def getAvailableAccessPoints(self, rootNode, smbm, maxDiff):
         availNodes = { rootNode : { 'difficulty' : SMBool(True, 0), 'from' : None } }
@@ -254,28 +263,34 @@ class AccessGraph(object):
                 #    print("{} root: {} ap: {}".format(loc['Name'], rootNode, apName))
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
-                    path = availAPPaths[apName]["path"]
-                    #if loc['Name'] == "Kraid":
-                    #    print("{} path: {}".format(loc['Name'], [a.Name for a in path]))
-                    pdiff = availAPPaths[apName]["pdiff"]
-                    locDiff = SMBool(diff.bool,
-                                     difficulty=max(tdiff.difficulty, diff.difficulty, pdiff.difficulty),
-                                     knows=list(set(tdiff.knows + diff.knows + pdiff.knows)),
-                                     items=tdiff.items + diff.items + pdiff.items)
-                    if locDiff.bool == True and locDiff.difficulty <= maxDiff:
-                        loc['distance'] = ap.distance + 1
-                        loc['accessPoint'] = apName
-                        loc['difficulty'] = locDiff
-                        loc['path'] = path
-                        availLocs.append(loc)
+                    if diff.bool == True:
+                        path = availAPPaths[apName]["path"]
                         #if loc['Name'] == "Kraid":
-                        #    print("{} diff: {} tdiff: {} pdiff: {}".format(loc['Name'], diff, tdiff, pdiff))
-                        break
+                        #    print("{} path: {}".format(loc['Name'], [a.Name for a in path]))
+                        pdiff = availAPPaths[apName]["pdiff"]
+                        (allDiff, locDiff) = self.computeLocDiff(tdiff, diff, pdiff)
+                        if allDiff.bool == True and allDiff.difficulty <= maxDiff:
+                            loc['distance'] = ap.distance + 1
+                            loc['accessPoint'] = apName
+                            loc['difficulty'] = allDiff
+                            loc['path'] = path
+                            # used only by solver
+                            loc['pathDifficulty'] = pdiff
+                            loc['locDifficulty'] = locDiff
+                            availLocs.append(loc)
+                            #if loc['Name'] == "Kraid":
+                            #    print("{} diff: {} tdiff: {} pdiff: {}".format(loc['Name'], diff, tdiff, pdiff))
+                            break
+                        else:
+                            loc['distance'] = 1000 + tdiff.difficulty
+                            loc['difficulty'] = SMBool(False)
+                            #if loc['Name'] == "Kraid":
+                            #    print("loc: {} allDiff is false".format(loc["Name"]))
                     else:
                         loc['distance'] = 1000 + tdiff.difficulty
                         loc['difficulty'] = SMBool(False)
                         #if loc['Name'] == "Kraid":
-                        #    print("loc: {} locDiff is false".format(loc["Name"]))
+                        #    print("loc: {} allDiff is false".format(loc["Name"]))
                 else:
                     loc['distance'] = 10000 + tdiff.difficulty
                     loc['difficulty'] = SMBool(False)
@@ -319,3 +334,40 @@ class AccessGraph(object):
         if destAccessPoint not in availAccessPoints:
             return None
         return self.getPath(destAccessPoint, availAccessPoints)
+
+    # gives theoretically accessible locations within a base list
+    # returns locations with accessible GraphArea in this graph (no logic considered)
+    def getAccessibleLocations(self, locations, rootNode='Landing Site'):
+        rootAp = self.accessPoints[rootNode]
+        availAccessPoints = self.getAvailableAccessPoints(rootAp, None, 0)
+        graphAreas = {ap.GraphArea for ap in availAccessPoints}
+        return [loc for loc in locations if loc['GraphArea'] in graphAreas]
+
+class AccessGraphSolver(AccessGraph):
+    def computeLocDiff(self, tdiff, diff, pdiff):
+        # tdiff: difficulty from the location's access point to the location's room
+        # diff: difficulty to reach the item in the location's room
+        # pdiff: difficulty of the path from the current access point to the location's access point
+        # in output we need the global difficulty but we also need to separate pdiff and (tdiff + diff)
+
+        # loc diff: tdiff + diff
+        locDiff = SMBool(diff.bool,
+                         difficulty=max(tdiff.difficulty, diff.difficulty),
+                         knows=list(set(tdiff.knows + diff.knows)),
+                         items=tdiff.items + diff.items)
+
+        # total diff: loc diff + pdiff
+        allDiff = SMBool(diff.bool,
+                         difficulty=max(locDiff.difficulty, pdiff.difficulty),
+                         knows=list(set(locDiff.knows + pdiff.knows)),
+                         items=locDiff.items + pdiff.items)
+
+        return (allDiff, locDiff)
+
+class AccessGraphRando(AccessGraph):
+    def computeLocDiff(self, tdiff, diff, pdiff):
+        allDiff = SMBool(diff.bool,
+                         difficulty=max(tdiff.difficulty, diff.difficulty, pdiff.difficulty),
+                         knows=list(set(tdiff.knows + diff.knows + pdiff.knows)),
+                         items=tdiff.items + diff.items + pdiff.items)
+        return (allDiff, None)

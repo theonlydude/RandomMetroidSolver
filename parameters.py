@@ -43,6 +43,22 @@ text2diff = {
     'infinity': infinity
 }
 
+def diff4solver(difficulty):
+    if difficulty == -1:
+        return "break"
+    elif difficulty < medium:
+        return "easy"
+    elif difficulty < hard:
+        return "medium"
+    elif difficulty < harder:
+        return "hard"
+    elif difficulty < hardcore:
+        return "harder"
+    elif difficulty < mania:
+        return "hardcore"
+    else:
+        return "mania"
+
 appDir = os.path.expanduser(os.path.join("~/RandomMetroidSolver"))
 
 def isKnows(knows):
@@ -391,6 +407,12 @@ class Knows:
                                   'href': 'https://www.youtube.com/watch?v=AYK7LREbLI8',
                                   'rooms': ['The Worst Room In The Game']}
 
+    WorstRoomWallJump = SMBool(False, 0, ['WorstRoomWallJump'])
+    desc['WorstRoomWallJump'] = {'display': 'Worst Room insane wall jump',
+                                  'title': 'Do the frame+pixel perfect wall jump to get out Worst Room without Hi-Jump',
+                                  'href': 'https://clips.twitch.tv/FuriousHeartlessArugulaStrawBeary',
+                                  'rooms': ['The Worst Room In The Game']}
+
     ScrewAttackExit = SMBool(True, medium, ['ScrewAttackExit'])
     desc['ScrewAttackExit'] = {'display': 'Screw Attack Exit',
                                'title': 'Gain momentum with Hi-Jump and Speed Booster from Golden Torizo Energy Recharge room, then Wall Jump in Screw Attack room, destroying the ceiling with Screw Attack.',
@@ -585,6 +607,12 @@ class Knows:
                                              'href': 'https://www.twitch.tv/videos/480378897',
                                              'rooms': ['Pants Room']}
 
+    AccessSpringBallWithFlatley = SMBool(False, 0, ['AccessSpringBallWithFlatley'])
+    desc['AccessSpringBallWithFlatley'] = {'display': 'Access Spring Ball location suitless with a flatley jump and Space Jump',
+                                           'title': 'Do a suitless flatley jump to get through the grapple hole, and get out of the water with Space Jump',
+                                           'href': 'https://www.youtube.com/watch?v=VWDWlJ6cjmI',
+                                           'rooms': ['Pants Room']}
+
     categories = {
         'Common': [
             {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 'CrouchJump'],
@@ -623,7 +651,7 @@ class Knows:
         'Maridia 2/2': [
             {'knows': ['AccessSpringBallWithHiJump', 'AccessSpringBallWithSpringBallBombJumps',
                        'AccessSpringBallWithBombJumps', 'AccessSpringBallWithSpringBallJump',
-                       'AccessSpringBallWithXRayClimb', 'AccessSpringBallWithGravJump'],
+                       'AccessSpringBallWithGravJump', 'AccessSpringBallWithXRayClimb', 'AccessSpringBallWithFlatley'],
              'title': 'Spring Ball Access'},
             {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
              'title': 'Suitless Draygon Exit'},
@@ -632,11 +660,23 @@ class Knows:
                        'SuitlessPuyoClip'],
              'title': 'Obscure suitless stuff'}
         ],
-        'Norfair': [
-            {'knows': ['WallJumpCathedralExit', 'BubbleMountainWallJump', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'IceEscape', 'IceMissileFromCroc', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
-              'title': 'Upper Norfair'},
-            {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'ScrewAttackExitWithoutScrew', 'WorstRoomIceCharge', 'FirefleasWalljump', 'DodgeLowerNorfairEnemies'],
-             'title': 'Lower Norfair'}
+        'Upper Norfair': [
+            {'knows': ['WallJumpCathedralExit', 'IceEscape', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
+              'title': 'Main Upper Norfair'},
+            {'knows': ['BubbleMountainWallJump', 'NorfairReserveDBoost'],
+             'title': 'Bubble Mountain'},
+            {'knows': ['CrocPBsIce', 'CrocPBsDBoost', 'IceMissileFromCroc'],
+             'title': 'Crocomire'}
+        ],
+        'Lower Norfair': [
+            {'knows': ['LavaDive', 'LavaDiveNoHiJump'],
+              'title': 'Access'},
+            {'knows': ['ScrewAttackExit', 'ScrewAttackExitWithoutScrew'],
+              'title': 'Screw Attack'},
+            {'knows': ['WorstRoomIceCharge', 'WorstRoomWallJump'],
+              'title': 'Worst Room In The Game'},
+            {'knows': [ 'FirefleasWalljump', 'DodgeLowerNorfairEnemies'],
+             'title': 'Other'}
         ],
         'Bosses/End': [
             {'knows': ['DraygonGrappleKill', 'DraygonSparkKill', 'MicrowaveDraygon', 'MicrowavePhantoon'],

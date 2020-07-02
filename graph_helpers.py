@@ -47,12 +47,10 @@ class HelpersGraph(Helpers):
 
     def canPassTerminatorBombWall(self, fromLandingSite=True):
         sm = self.smbm
-        return sm.wand(sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
-                                      sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
-                              sm.canDestroyBombWalls()),
-                       sm.canPassCrateriaGreenPirates())
+        return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
+                              sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
+                      sm.canDestroyBombWalls())
 
-    # mostly for going up but let's be noob friendly and add the condition for both ways
     @Cache.decorator
     def canPassCrateriaGreenPirates(self):
         sm = self.smbm
@@ -137,7 +135,7 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassBowling(self):
         sm = self.smbm
-        return sm.wand(Bosses.bossDead('Phantoon'),
+        return sm.wand(Bosses.bossDead(sm, 'Phantoon'),
                        sm.wor(sm.heatProof(),
                               sm.energyReserveCountOk(1),
                               sm.haveItem("SpaceJump"),
@@ -173,7 +171,7 @@ class HelpersGraph(Helpers):
                               sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia()), # climbing crabs
                               sm.canDoubleSpringBallJump()))
 
-    # bottom sandpits with the evirs
+    # bottom sandpits with the evirs except west sand hall left to right
     @Cache.decorator
     def canTraverseSandPits(self):
         sm = self.smbm
@@ -181,6 +179,11 @@ class HelpersGraph(Helpers):
                       sm.wand(sm.knowsGravLessLevel3(),
                               sm.haveItem('HiJump'),
                               sm.haveItem('Ice')))
+
+    @Cache.decorator
+    def canTraverseWestSandHallLeftToRight(self):
+        sm = self.smbm
+        return sm.haveItem('Gravity') # FIXME find suitless condition
 
     @Cache.decorator
     def canPassMaridiaToRedTowerNode(self):
@@ -331,7 +334,8 @@ class HelpersGraph(Helpers):
                        sm.canPassWorstRoomPirates(),
                        sm.wor(sm.canFly(),
                               sm.wand(sm.knowsWorstRoomIceCharge(), sm.haveItem('Ice'), sm.canFireChargedShots()),
-                              sm.wand(sm.knowsGetAroundWallJump(), sm.haveItem('HiJump')),
+                              sm.wor(sm.wand(sm.knowsGetAroundWallJump(), sm.haveItem('HiJump')),
+                                     sm.knowsWorstRoomWallJump()),
                               sm.wand(sm.knowsSpringBallJumpFromWall(), sm.canUseSpringBall())))
 
     # checks mix of super missiles/health
@@ -353,14 +357,13 @@ class HelpersGraph(Helpers):
 
     def canKillRedKiHunters(self, n):
         sm = self.smbm
-        return sm.wor(sm.haveItem('Plasma'),
-                      sm.haveItem('ScrewAttack'),
-                      sm.wand(sm.heatProof(), # this takes a loooong time ...
-                              sm.wor(sm.haveItem('Spazer'),
-                                     sm.haveItem('Ice'),
-                                     sm.wand(sm.haveItem('Charge'),
-                                             sm.haveItem('Wave')))))
-        destroy = sm.canKillRedKiHuntersWithScrewOrBeams()
+        destroy = sm.wor(sm.haveItem('Plasma'),
+                         sm.haveItem('ScrewAttack'),
+                         sm.wand(sm.heatProof(), # this takes a loooong time ...
+                                 sm.wor(sm.haveItem('Spazer'),
+                                        sm.haveItem('Ice'),
+                                        sm.wand(sm.haveItem('Charge'),
+                                                sm.haveItem('Wave')))))
         if destroy.bool == True:
             return destroy
         return sm.canGoThroughLowerNorfairEnemy(1800.0, float(n), 200.0)
@@ -525,7 +528,7 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassCacatacAlley(self):
         sm = self.smbm
-        return sm.wand(Bosses.bossDead('Draygon'),
+        return sm.wand(Bosses.bossDead(sm, 'Draygon'),
                        sm.wor(sm.haveItem('Gravity'),
                               sm.wand(sm.knowsGravLessLevel2(),
                                       sm.haveItem('HiJump'),
@@ -619,7 +622,9 @@ class HelpersGraph(Helpers):
                               sm.knowsDraygonRoomGrappleExit()),
                       sm.canDoubleSpringBallJump())
 
+    @Cache.decorator
     def canExitDraygon(self):
+        sm = self.smbm
         if self.isVanillaDraygon():
             return self.canExitDraygonVanilla()
         else:

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import random, sys, argparse
-from itemrandomizerweb.PaletteRando import PaletteRando
+from rando.PaletteRando import PaletteRando
 from rom import RomPatcher
 import log
 

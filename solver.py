@@ -1,25 +1,22 @@
 #!/usr/bin/python3
 
-import sys, math, argparse, re, json, os, subprocess, logging, random
-from time import gmtime, strftime
+import sys, argparse, json, os, logging
 
 # the difficulties for each technics
-from parameters import Knows, Settings, isKnows, isSettings
-from parameters import easy, medium, hard, harder, hardcore, mania, god, samus, impossibru, infinity, diff2text
+from parameters import Knows, Settings, isKnows, diff4solver
+from parameters import easy, medium, hard, harder, hardcore, mania, impossibru, infinity, diff2text
 
 # the helper functions
 from smbool import SMBool
-from smboolmanager import SMBoolManager
+from smboolmanager import SMBoolManagerPlando as SMBoolManager
 from helpers import Pickup, Bosses
-from rom import RomLoader, RomPatcher, RomReader
+from rom import RomLoader, RomPatcher
 from rom_patches import RomPatches
-from itemrandomizerweb.Items import ItemManager
 from graph_locations import locations as graphLocations
-from graph import AccessGraph
+from graph import AccessGraphSolver as AccessGraph
 from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils, getAccessPoint
 from utils import PresetLoader, removeChars
-from vcr import VCR
-import log, db
+import log
 
 class Conf:
     # keep getting majors of at most this difficulty before going for minors or changing area
@@ -75,8 +72,6 @@ class SolverState(object):
         self.state["availableLocations"] = self.getAvailableLocations(solver.majorLocations)
         # string of last access point
         self.state["lastAP"] = solver.lastAP
-        # list of killed bosses: ["boss1", "boss2"]
-        self.state["bosses"] = [boss for boss in Bosses.golden4Dead if Bosses.golden4Dead[boss] == True]
         # dict {locNameWeb: {infos}, ...}
         self.state["availableLocationsWeb"] = self.getAvailableLocationsWeb(solver.majorLocations)
         # dict {locNameWeb: {infos}, ...}
@@ -99,14 +94,7 @@ class SolverState(object):
             self.state["last"] = ""
 
     def toSolver(self, solver):
-        if 'majorsSplit' in self.state:
-            solver.majorsSplit = self.state["majorsSplit"]
-        else:
-            # compatibility with existing sessions
-            if self.state['fullRando'] == True:
-                solver.majorsSplit = 'Full'
-            else:
-                solver.majorsSplit = 'Major'
+        solver.majorsSplit = self.state["majorsSplit"]
         solver.areaRando = self.state["areaRando"]
         solver.bossRando = self.state["bossRando"]
         solver.escapeRando = self.state["escapeRando"]
@@ -126,9 +114,6 @@ class SolverState(object):
                                                                              self.state["availableLocations"],
                                                                              solver.locations)
         solver.lastAP = self.state["lastAP"]
-        Bosses.reset()
-        for boss in self.state["bosses"]:
-            Bosses.beatBoss(boss)
         solver.mode = self.state["mode"]
         solver.seed = self.state["seed"]
 
@@ -177,22 +162,6 @@ class SolverState(object):
         retVis.sort(key=lambda x: x[0])
         return ([loc for (i, loc) in retVis], retMaj)
 
-    def diff4isolver(self, difficulty):
-        if difficulty == -1:
-            return "break"
-        elif difficulty < medium:
-            return "easy"
-        elif difficulty < hard:
-            return "medium"
-        elif difficulty < harder:
-            return "hard"
-        elif difficulty < hardcore:
-            return "harder"
-        elif difficulty < mania:
-            return "hardcore"
-        else:
-            return "mania"
-
     def name4isolver(self, locName):
         # remove space and special characters
         # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
@@ -217,19 +186,29 @@ class SolverState(object):
             if "difficulty" in loc and loc["difficulty"].bool == True:
                 diff = loc["difficulty"]
                 locName = self.name4isolver(loc["Name"])
-                ret[locName] = {"difficulty": self.diff4isolver(diff.difficulty),
+                ret[locName] = {"difficulty": diff4solver(diff.difficulty),
                                 "knows": self.knows2isolver(diff.knows),
                                 "items": list(set(diff.items)),
                                 "item": loc["itemName"],
                                 "name": loc["Name"],
                                 "canHidden": loc["CanHidden"],
                                 "visibility": loc["Visibility"]}
+
+#                if "locDifficulty" in loc:
+#                    lDiff = loc["locDifficulty"]
+#                    ret[locName]["locDifficulty"] = [diff4solver(lDiff.difficulty), self.knows2isolver(lDiff.knows), list(set(lDiff.items))]
+#                if "pathDifficulty" in loc:
+#                    pDiff = loc["pathDifficulty"]
+#                    ret[locName]["pathDifficulty"] = [diff4solver(pDiff.difficulty), self.knows2isolver(pDiff.knows), list(set(pDiff.items))]
+
                 if "comeBack" in loc:
                     ret[locName]["comeBack"] = loc["comeBack"]
+                if "accessPoint" in loc:
+                    ret[locName]["accessPoint"] = self.transition2isolver(loc["accessPoint"])
+                    if "path" in loc:
+                        ret[locName]["path"] = [self.transition2isolver(a.Name) for a in loc["path"]]
                 # for debug purpose
                 if self.debug == True:
-                    if "path" in loc:
-                        ret[locName]["path"] = [a.Name for a in loc["path"]]
                     if "distance" in loc:
                         ret[locName]["distance"] = loc["distance"]
         return ret
@@ -419,10 +398,8 @@ class CommonSolver(object):
             loc["itemName"] = item
             self.collectedItems.append(item)
             # we still need the boss difficulty
-            if 'Pickup' not in loc:
+            if 'Boss' not in loc['Class']:
                 loc["difficulty"] = SMBool(False)
-        if 'Pickup' in loc:
-            loc['Pickup']()
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             print("---------------------------------------------------------------")
@@ -432,6 +409,52 @@ class CommonSolver(object):
         # last loc is used as root node for the graph
         self.lastAP = loc['accessPoint']
         self.lastArea = loc['SolveArea']
+
+    def getLocIndex(self, locName):
+        for (i, loc) in enumerate(self.visitedLocations):
+            if loc['Name'] == locName:
+                return i
+
+    def removeItemAt(self, locNameWeb):
+        locName = self.locNameWeb2Internal(locNameWeb)
+        locIndex = self.getLocIndex(locName)
+        loc = self.visitedLocations.pop(locIndex)
+        # removeItemAt is only used from the tracker, so all the locs are in majorLocations
+        self.majorLocations.append(loc)
+
+        # access point
+        if len(self.visitedLocations) == 0:
+            self.lastAP = self.startAP
+            self.lastArea = self.startArea
+        else:
+            self.lastAP = self.visitedLocations[-1]["accessPoint"]
+            self.lastArea = self.visitedLocations[-1]["SolveArea"]
+
+        # delete location params which are set when the location is available
+        if 'difficulty' in loc:
+            del loc['difficulty']
+        if 'distance' in loc:
+            del loc['distance']
+        if 'accessPoint' in loc:
+            del loc['accessPoint']
+        if 'path' in loc:
+            del loc['path']
+
+        # item
+        item = loc["itemName"]
+
+        if self.mode == 'seedless':
+            # in seedless remove the first nothing found as collectedItems is not ordered
+            self.collectedItems.remove(item)
+        else:
+            self.collectedItems.pop(locIndex)
+
+        # if multiple majors in plando mode, remove it from smbm only when it's the last occurence of it
+        if self.smbm.isCountItem(item):
+            self.smbm.removeItem(item)
+        else:
+            if item not in self.collectedItems:
+                self.smbm.removeItem(item)
 
     def cancelLastItems(self, count):
         if self.vcr != None:
@@ -452,10 +475,6 @@ class CommonSolver(object):
                     self.majorLocations.append(loc)
                 else:
                     self.minorLocations.append(loc)
-
-            # pickup func
-            if 'Unpickup' in loc:
-                loc['Unpickup']()
 
             # access point
             if len(self.visitedLocations) == 0:
@@ -514,7 +533,7 @@ class CommonSolver(object):
         around = [loc for loc in locations if( ('areaWeight' in loc and loc['areaWeight'] == 1)
                                                or ((loc['SolveArea'] == self.lastArea or loc['distance'] < 3)
                                                    and loc['difficulty'].difficulty <= threshold
-                                                   and not Bosses.areaBossDead(self.lastArea)
+                                                   and not Bosses.areaBossDead(self.smbm, self.lastArea)
                                                    and 'comeBack' in loc and loc['comeBack'] == True) )]
         outside = [loc for loc in locations if not loc in around]
 
@@ -529,7 +548,7 @@ class CommonSolver(object):
             # nearest locs
             loc['distance'],
             # beating a boss
-            0 if 'Pickup' in loc
+            0 if 'Boss' in loc['Class']
             else 1,
             # easiest first
             loc['difficulty'].difficulty
@@ -579,11 +598,11 @@ class CommonSolver(object):
                 # first nearest locs
                 loc['distance'],
                 # beating a boss
-                loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area'])
-                                                 and 'Pickup' in loc)
+                loc['difficulty'].difficulty if (not Bosses.areaBossDead(self.smbm, loc['Area'])
+                                                 and 'Boss' in loc['Class'])
                 else 100000,
                 # areas with boss still alive
-                loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area']))
+                loc['difficulty'].difficulty if (not Bosses.areaBossDead(self.smbm, loc['Area']))
                 else 100000,
                 loc['difficulty'].difficulty))
 
@@ -831,7 +850,7 @@ class CommonSolver(object):
             for loc in self.majorLocations:
                 self.log.debug("{} ({})".format(loc['Name'], loc['itemName']))
 
-            self.log.debug("bosses: {}".format(Bosses.golden4Dead))
+            self.log.debug("bosses: {}".format([(boss, Bosses.bossDead(self.smbm, boss)) for boss in Bosses.Golden4()]))
 
         return (difficulty, itemsOk)
 
@@ -906,7 +925,7 @@ class InteractiveSolver(CommonSolver):
         state.fromSolver(self)
         state.toJson(self.outputFileName)
 
-    def initialize(self, mode, rom, presetFileName, magic, debug, fill, startAP):
+    def initialize(self, mode, rom, presetFileName, magic, debug, fill, startAP, trackerRace):
         # load rom and preset, return first state
         self.debug = debug
         self.mode = mode
@@ -946,6 +965,9 @@ class InteractiveSolver(CommonSolver):
         # compute new available locations
         self.computeLocationsDifficulty(self.majorLocations)
 
+        if trackerRace == True:
+            self.mode = 'seedless'
+
         self.dumpState()
 
     def iterate(self, stateJson, scope, action, params):
@@ -967,15 +989,28 @@ class InteractiveSolver(CommonSolver):
             else:
                 if action == 'add':
                     if self.mode == 'plando' or self.mode == 'seedless':
-                        self.setItemAt(params['loc'], params['item'], params['hide'])
+                        if params['loc'] != None:
+                            if self.mode == 'plando':
+                                self.setItemAt(params['loc'], params['item'], params['hide'])
+                            else:
+                                self.setItemAt(params['loc'], params.get('item', 'Nothing'), False)
+                        else:
+                            self.increaseItem(params['item'])
                     else:
                         # pickup item at locName
                         self.pickItemAt(params['loc'])
                 elif action == 'remove':
-                    # remove last collected item
-                    self.cancelLastItems(params['count'])
+                    if 'loc' in params:
+                        self.removeItemAt(params['loc'])
+                    elif 'count' in params:
+                        # remove last collected item
+                        self.cancelLastItems(params['count'])
+                    else:
+                        self.decreaseItem(params['item'])
                 elif action == 'replace':
                     self.replaceItemAt(params['loc'], params['item'], params['hide'])
+                elif action == 'toggle':
+                    self.toggleItem(params['item'])
         elif scope == 'area':
             if action == 'clear':
                 self.clearTransitions()
@@ -1103,10 +1138,7 @@ class InteractiveSolver(CommonSolver):
 
         plandoLocsItems = {}
         for loc in self.visitedLocations:
-            if "Boss" in loc["Class"]:
-                plandoLocsItems[loc["Name"]] = "Boss"
-            else:
-                plandoLocsItems[loc["Name"]] = loc["itemName"]
+            plandoLocsItems[loc["Name"]] = loc["itemName"]
 
         plandoCurrent = {
             "locsItems": plandoLocsItems,
@@ -1123,12 +1155,14 @@ class InteractiveSolver(CommonSolver):
             '--param', self.presetFileName,
             '--output', self.outputFileName,
             '--plandoRando', plandoCurrentJson,
-            '--progressionSpeed', parameters["progressionSpeed"],
+            '--progressionSpeed', 'speedrun',
             '--minorQty', parameters["minorQty"],
             '--maxDifficulty', 'hardcore',
-            '--energyQty', parameters["energyQty"]
+            '--energyQty', parameters["energyQty"],
+            '--startAP', self.startAP
         ]
 
+        import subprocess
         subprocess.call(params)
 
         with open(self.outputFileName, 'r') as jsonFile:
@@ -1159,6 +1193,7 @@ class InteractiveSolver(CommonSolver):
 
     def savePlando(self, lock, escapeTimer):
         # store filled locations addresses in the ROM for next creating session
+        from rando.Items import ItemManager
         locsItems = {}
         itemLocs = []
         for loc in self.visitedLocations:
@@ -1172,6 +1207,7 @@ class InteractiveSolver(CommonSolver):
 
         # patch the ROM
         if lock == True:
+            import random
             magic = random.randint(1, 0xffff)
         else:
             magic = None
@@ -1221,6 +1257,7 @@ class InteractiveSolver(CommonSolver):
             seedCode = 'B'+seedCode
         if self.areaRando == True:
             seedCode = 'A'+seedCode
+        from time import gmtime, strftime
         fileName = 'VARIA_Plandomizer_{}{}_{}.sfc'.format(seedCode, strftime("%Y%m%d%H%M%S", gmtime()), preset)
         data["fileName"] = fileName
         # error msg in json to be displayed by the web site
@@ -1300,6 +1337,25 @@ class InteractiveSolver(CommonSolver):
 
         self.smbm.addItem(itemName)
 
+    def increaseItem(self, item):
+        # add item at begining of collectedItems to not mess with item removal when cancelling a location
+        self.collectedItems.insert(0, item)
+        self.smbm.addItem(item)
+
+    def decreaseItem(self, item):
+        if item in self.collectedItems:
+            self.collectedItems.remove(item)
+            self.smbm.removeItem(item)
+
+    def toggleItem(self, item):
+        # add or remove a major item
+        if item in self.collectedItems:
+            self.collectedItems.remove(item)
+            self.smbm.removeItem(item)
+        else:
+            self.collectedItems.insert(0, item)
+            self.smbm.addItem(item)
+
     def clearItems(self, reload=False):
         self.collectedItems = []
         self.visitedLocations = []
@@ -1310,7 +1366,6 @@ class InteractiveSolver(CommonSolver):
             for loc in self.majorLocations:
                 if "difficulty" in loc:
                     del loc["difficulty"]
-        Bosses.reset()
         self.smbm.resetItems()
 
     def addTransition(self, startPoint, endPoint):
@@ -1389,7 +1444,11 @@ class StandardSolver(CommonSolver):
                  outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False, plot=None):
         self.interactive = False
         self.checkDuplicateMajor = checkDuplicateMajor
-        self.vcr = VCR(rom, 'solver') if vcr == True else None
+        if vcr == True:
+            from vcr import VCR
+            self.vcr = VCR(rom, 'solver')
+        else:
+            self.vcr = None
         # for compatibility with some common methods of the interactive solver
         self.mode = 'standard'
 
@@ -1446,6 +1505,7 @@ class StandardSolver(CommonSolver):
         self.computeExtStats()
 
         if self.extStatsFilename != None:
+            import db
             with open(self.extStatsFilename, 'a') as extStatsFile:
                 db.DB.dumpExtStatsSolver(self.difficulty, knowsUsedList, self.solverStats, self.extStatsStep, extStatsFile)
 
@@ -1455,6 +1515,8 @@ class StandardSolver(CommonSolver):
                     outDataFile.write("{} {}\n".format(i, number))
 
         self.output.out()
+
+        return self.difficulty
 
     def computeExtStats(self):
         # avgLocs: avg number of available locs, the higher the value the more open is a seed
@@ -1556,6 +1618,49 @@ class StandardSolver(CommonSolver):
         self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastAP)
 
         return [loc for loc in locations if loc['difficulty'].bool == True]
+
+class RandoSolver(StandardSolver):
+    def __init__(self, majorsSplit, startAP, areaGraph, locations):
+        self.interactive = False
+        self.checkDuplicateMajor = False
+        self.vcr = None
+        # for compatibility with some common methods of the interactive solver
+        self.mode = 'standard'
+
+        self.log = log.get('Solver')
+
+        # default conf
+        self.setConf(easy, 'any', [], False)
+
+        self.firstLogFile = None
+
+        self.extStatsFilename = None
+        self.extStatsStep = None
+        self.plot = None
+
+        self.type = 'rando'
+        self.output = Out.factory(self.type, self)
+        self.outputFileName = None
+
+        self.locations = locations
+
+        self.smbm = SMBoolManager()
+
+        # preset already loaded by rando
+        self.presetFileName = None
+
+        self.pickup = Pickup(Conf.itemsPickup)
+
+        self.comeBack = ComeBack(self)
+
+        # load ROM info, patches are already loaded by the rando. get the graph from the rando too
+        self.majorsSplit = majorsSplit
+        self.startAP = startAP
+        self.startArea = getAccessPoint(startAP).Start['solveArea']
+        self.areaGraph = areaGraph
+
+        # store at each step how many locations are available
+        self.nbAvailLocs = []
 
 class ComeBack(object):
     # object to handle the decision to choose the next area when all locations have the "no comeback" flag.
@@ -1717,6 +1822,8 @@ class Out(object):
             return OutWeb(solver)
         elif output == 'console':
             return OutConsole(solver)
+        elif output == 'rando':
+            return OutRando(solver)
         else:
             raise Exception("Wrong output type for the Solver: {}".format(output))
 
@@ -1794,14 +1901,34 @@ class OutWeb(Out):
 
         out = []
         for loc in locations:
-            self.fixEnergy(loc['difficulty'].items)
+            if 'locDifficulty' in loc:
+                # draygon fight is in it's path
+                if loc['Name'] == 'Draygon':
+                    loc['locDifficulty'] = loc['pathDifficulty']
 
-            out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
-                        '{0:.2f}'.format(loc['difficulty'].difficulty),
-                        sorted(loc['difficulty'].knows),
-                        sorted(list(set(loc['difficulty'].items))),
-                        [ap.Name for ap in loc['path']] if 'path' in loc else None,
-                        loc['Class']])
+                self.fixEnergy(loc['locDifficulty'].items)
+                self.fixEnergy(loc['pathDifficulty'].items)
+
+                out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
+                            '{0:.2f}'.format(loc['locDifficulty'].difficulty),
+                            sorted(loc['locDifficulty'].knows),
+                            sorted(list(set(loc['locDifficulty'].items))),
+                            '{0:.2f}'.format(loc['pathDifficulty'].difficulty),
+                            sorted(loc['pathDifficulty'].knows),
+                            sorted(list(set(loc['pathDifficulty'].items))),
+                            [ap.Name for ap in loc['path']] if 'path' in loc else None,
+                            loc['Class']])
+
+            else:
+                self.fixEnergy(loc['difficulty'].items)
+
+                out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
+                            '{0:.2f}'.format(loc['difficulty'].difficulty),
+                            sorted(loc['difficulty'].knows),
+                            sorted(list(set(loc['difficulty'].items))),
+                            '0.00', [], [],
+                            [ap.Name for ap in loc['path']] if 'path' in loc else None,
+                            loc['Class']])
 
         return out
 
@@ -1811,6 +1938,7 @@ class OutWeb(Out):
         # dotFileName: the /directory/image.dot
         # the png and thumbnails are generated in the same directory as the dot
         # requires that graphviz is installed
+        import subprocess
 
         splited = os.path.splitext(dotFileName)
         pngFileName = splited[0] + '.png'
@@ -1860,20 +1988,44 @@ class OutConsole(Out):
                 lastAP = path[-1]
                 if not (len(path) == 1 and path[0] == lastAP):
                     path = " -> ".join(path)
-                    print('{:>50}: {}'.format('Path', path))
+                    pathDiff = loc['pathDifficulty']
+                    print('{}: {} {} {} {}'.format('Path', path, round(float(pathDiff.difficulty), 2), sorted(pathDiff.knows), sorted(list(set(pathDiff.items)))))
             line = '{} {:>48}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'
 
-            self.fixEnergy(loc['difficulty'].items)
+            if 'locDifficulty' in loc:
+                self.fixEnergy(loc['locDifficulty'].items)
 
-            print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
-                              loc['Name'],
-                              loc['Area'],
-                              loc['SolveArea'],
-                              loc['distance'] if 'distance' in loc else 'nc',
-                              loc['itemName'],
-                              round(float(loc['difficulty'].difficulty), 2) if 'difficulty' in loc else 'nc',
-                              sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',
-                              sorted(list(set(loc['difficulty'].items))) if 'difficulty' in loc else 'nc'))
+                print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
+                                  loc['Name'],
+                                  loc['Area'],
+                                  loc['SolveArea'],
+                                  loc['distance'] if 'distance' in loc else 'nc',
+                                  loc['itemName'],
+                                  round(float(loc['locDifficulty'].difficulty), 2) if 'locDifficulty' in loc else 'nc',
+                                  sorted(loc['locDifficulty'].knows) if 'locDifficulty' in loc else 'nc',
+                                  sorted(list(set(loc['locDifficulty'].items))) if 'locDifficulty' in loc else 'nc'))
+            elif 'difficulty' in loc:
+                self.fixEnergy(loc['difficulty'].items)
+
+                print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
+                                  loc['Name'],
+                                  loc['Area'],
+                                  loc['SolveArea'],
+                                  loc['distance'] if 'distance' in loc else 'nc',
+                                  loc['itemName'],
+                                  round(float(loc['difficulty'].difficulty), 2),
+                                  sorted(loc['difficulty'].knows),
+                                  sorted(list(set(loc['difficulty'].items)))))
+            else:
+                print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
+                                  loc['Name'],
+                                  loc['Area'],
+                                  loc['SolveArea'],
+                                  loc['distance'] if 'distance' in loc else 'nc',
+                                  loc['itemName'],
+                                  'nc',
+                                  'nc',
+                                  'nc'))
 
     def displayOutput(self):
         s = self.solver
@@ -1924,6 +2076,13 @@ class OutConsole(Out):
             print("Estimated difficulty: {}".format(text))
         else:
             print("Aborted run, can't finish the game with the given prerequisites")
+
+class OutRando(OutConsole):
+    def __init__(self, solver):
+        self.solver = solver
+
+    def out(self):
+        pass
 
 class DifficultyDisplayer:
     def __init__(self, difficulty):
@@ -2004,7 +2163,7 @@ def interactiveSolver(args):
             sys.exit(1)
 
         solver = InteractiveSolver(args.output)
-        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, debug=args.vcr, fill=args.fill, startAP=args.startAP)
+        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, debug=args.vcr, fill=args.fill, startAP=args.startAP, trackerRace=args.trackerRace)
     else:
         # iterate
         params = {}
@@ -2021,16 +2180,23 @@ def interactiveSolver(args):
                 print("Missing state/action/output parameter")
                 sys.exit(1)
             if args.action in ["add", "replace"]:
-                if args.loc == None:
+                if args.mode != 'seedless' and args.loc == None:
                     print("Missing loc parameter when using action add for item")
                     sys.exit(1)
-                if args.mode != 'standard':
+                if args.mode == 'plando':
                     if args.item == None:
                         print("Missing item parameter when using action add in plando/suitless mode")
                         sys.exit(1)
                 params = {'loc': args.loc, 'item': args.item, 'hide': args.hide}
             elif args.action == "remove":
-                params = {'count': args.count}
+                if args.loc != None:
+                    params = {'loc': args.loc}
+                elif args.item != None:
+                    params = {'item': args.item}
+                else:
+                    params = {'count': args.count}
+            elif args.action == "toggle":
+                params = {'item': args.item}
         elif args.scope == 'area':
             if args.state == None or args.action == None or args.output == None:
                 print("Missing state/action/output parameter")
@@ -2117,7 +2283,7 @@ if __name__ == "__main__":
     parser.add_argument('--loc', help="Name of the location to action on (used in interactive mode)",
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
-                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize'])
+                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize', 'toggle'])
     parser.add_argument('--item', help="Name of the item to place in plando mode (used in interactive mode)",
                         dest="item", nargs='?', default=None)
     parser.add_argument('--hide', help="Hide the item to place in plando mode (used in interactive mode)",
@@ -2146,6 +2312,7 @@ if __name__ == "__main__":
     parser.add_argument('--energyQty', help="rando plando  (used in interactive mode)",
                         dest="energyQty", nargs="?", default=None, choices=["sparse", "medium", "vanilla"])
     parser.add_argument('--plot', help="dump plot data in file specified", dest="plot", nargs="?", default=None)
+    parser.add_argument('--trackerRace', help="the seed is race protected, tell the solver to use seedless mode after reading the patchs from the seed", dest="trackerRace", action='store_true')
 
     args = parser.parse_args()
 

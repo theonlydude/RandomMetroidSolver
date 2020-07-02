@@ -17,6 +17,7 @@
   "gravityBehaviour": "Balanced",
   "superQty": "2",
   "energyQty": "random",
+  "energyQtyMultiSelect": ["sparse", "medium", "vanilla"],
   "funSuits": "off",
   "nerfedCharge": "off",
   "variaTweaks": "on"

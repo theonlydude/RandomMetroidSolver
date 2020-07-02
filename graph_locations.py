@@ -1,5 +1,5 @@
-from parameters import Knows, Settings, easy, medium, hard, harder, hardcore, mania
 from helpers import Bosses
+from parameters import Settings
 from rom_patches import RomPatches
 from smbool import SMBool
 
@@ -254,7 +254,7 @@ locations = [
     'AccessFrom' : {
         'Warehouse Zeela Room Left': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: Bosses.bossDead('Kraid')
+    'Available': lambda sm: Bosses.bossDead(sm, 'Kraid')
 },
 {
     'Area': "Brinstar",
@@ -269,9 +269,7 @@ locations = [
     'AccessFrom' : {
         'KraidRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.enoughStuffsKraid(),
-    'Pickup': lambda: Bosses.beatBoss('Kraid'),
-    'Unpickup': lambda: Bosses.unbeatBoss('Kraid')
+    'Available': lambda sm: sm.enoughStuffsKraid()
 },
 {
     'Area': "Brinstar",
@@ -287,7 +285,7 @@ locations = [
     'AccessFrom' : {
         'KraidRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: Bosses.bossDead('Kraid')
+    'Available': lambda sm: Bosses.bossDead(sm, 'Kraid')
 },
 {
     'Area': "Norfair",
@@ -314,7 +312,7 @@ locations = [
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",
+    'GraphArea': "Crocomire",
     'SolveArea': "Crocomire",
     'Name': "Energy Tank, Crocomire",
     'Class': ["Major"],
@@ -324,7 +322,7 @@ locations = [
     'Visibility': "Visible",
     'Room': "Crocomire's Room",
     'AccessFrom' : {
-        'Croc Zone': lambda sm: SMBool(True)
+        'Crocomire Room Top': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.haveItem('Grapple'),
@@ -351,7 +349,7 @@ locations = [
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",
+    'GraphArea': "Crocomire",
     'SolveArea': "Crocomire",
     'Name': "Grapple Beam",
     'Class': ["Major", "Chozo"],
@@ -361,7 +359,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Grapple Beam Room',
     'AccessFrom' : {
-        'Croc Zone': lambda sm: SMBool(True)
+        'Crocomire Room Top': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.wand(sm.haveItem('Morph'),
@@ -443,9 +441,7 @@ locations = [
     'AccessFrom' : {
         'RidleyRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffsRidley()),
-    'Pickup': lambda: Bosses.beatBoss('Ridley'),
-    'Unpickup': lambda: Bosses.unbeatBoss('Ridley')
+    'Available': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffsRidley())
 },
 {
     'Area': "LowerNorfair",
@@ -461,7 +457,7 @@ locations = [
     'AccessFrom' : {
         'RidleyRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: Bosses.bossDead('Ridley')
+    'Available': lambda sm: sm.haveItem('Ridley')
 },
 {
     'Area': "LowerNorfair",
@@ -537,11 +533,11 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Wrecked Ship Energy Tank Room',
     'AccessFrom' : {
-        'Wrecked Ship Back': lambda sm: sm.wor(sm.wand(sm.wnot(Bosses.bossDead('Phantoon')),
+        'Wrecked Ship Back': lambda sm: sm.wor(sm.wand(sm.wnot(Bosses.bossDead(sm, 'Phantoon')),
                                                        RomPatches.has(RomPatches.WsEtankPhantoonAlive)),
                                                sm.canOpenRedDoors())
     },
-    'Available': lambda sm: sm.wor(Bosses.bossDead('Phantoon'),
+    'Available': lambda sm: sm.wor(Bosses.bossDead(sm, 'Phantoon'),
                                    RomPatches.has(RomPatches.WsEtankPhantoonAlive))
 },
 {
@@ -557,9 +553,7 @@ locations = [
     'AccessFrom' : {
         'PhantoonRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.enoughStuffsPhantoon(),
-    'Pickup': lambda: Bosses.beatBoss('Phantoon'),
-    'Unpickup': lambda: Bosses.unbeatBoss('Phantoon')
+    'Available': lambda sm: sm.enoughStuffsPhantoon()
 },
 {
     'Area': "WreckedShip",
@@ -573,7 +567,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Wrecked Ship East Super Room',
     'AccessFrom' : {
-        'Wrecked Ship Main': lambda sm: Bosses.bossDead('Phantoon')
+        'Wrecked Ship Main': lambda sm: Bosses.bossDead(sm, 'Phantoon')
     },
     'Available': lambda sm: sm.canPassBombPassages()
 },
@@ -596,7 +590,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "WestMaridia",
     'SolveArea': "Maridia Green",
     'Name': "Energy Tank, Mama turtle",
     'Class': ["Major"],
@@ -626,7 +620,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Maridia Forgotten Highway",
     'Name': "Plasma Beam",
     'Class': ["Major", "Chozo"],
@@ -650,7 +644,7 @@ locations = [
     #  -have high jump boots
     #  -can fly (space jump or infinite bomb jump)
     #  -use short charge with speedbooster
-    'Available': lambda sm: Bosses.bossDead('Draygon'),
+    'Available': lambda sm: Bosses.bossDead(sm, 'Draygon'),
     'PostAvailable': lambda sm: sm.wand(sm.wor(sm.wand(sm.canShortCharge(),
                                                        sm.knowsKillPlasmaPiratesWithSpark()),
                                                sm.wand(sm.canFireChargedShots(),
@@ -671,7 +665,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Left Sandpit",
     'Name': "Reserve Tank, Maridia",
     'Class': ["Major"],
@@ -689,7 +683,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Maridia Sandpits",
     'Name': "Spring Ball",
     'Class': ["Major", "Chozo"],
@@ -710,15 +704,16 @@ locations = [
                                                                   sm.knowsPuyoClipXRay()),
                                                           sm.knowsSuitlessPuyoClip())),
                                            sm.wand(sm.haveItem('Grapple'), # go through grapple block
-                                                   sm.haveItem('Gravity'),
-                                                   sm.wor(sm.wor(sm.wand(sm.haveItem('HiJump'), sm.knowsAccessSpringBallWithHiJump()),
-                                                                 sm.haveItem('SpaceJump')),
-                                                          sm.knowsAccessSpringBallWithGravJump(),
-                                                          sm.wand(sm.haveItem('Bomb'),
-                                                                  sm.wor(sm.knowsAccessSpringBallWithBombJumps(),
-                                                                         sm.wand(sm.haveItem('SpringBall'),
-                                                                                 sm.knowsAccessSpringBallWithSpringBallBombJumps()))),
-                                                          sm.wand(sm.haveItem('SpringBall'), sm.knowsAccessSpringBallWithSpringBallJump()))),
+                                                   sm.wor(sm.wand(sm.haveItem('Gravity'),
+                                                                  sm.wor(sm.wor(sm.wand(sm.haveItem('HiJump'), sm.knowsAccessSpringBallWithHiJump()),
+                                                                                sm.haveItem('SpaceJump')),
+                                                                         sm.knowsAccessSpringBallWithGravJump(),
+                                                                         sm.wand(sm.haveItem('Bomb'),
+                                                                                 sm.wor(sm.knowsAccessSpringBallWithBombJumps(),
+                                                                                        sm.wand(sm.haveItem('SpringBall'),
+                                                                                                sm.knowsAccessSpringBallWithSpringBallBombJumps()))),
+                                                                         sm.wand(sm.haveItem('SpringBall'), sm.knowsAccessSpringBallWithSpringBallJump()))),
+                                                          sm.wand(sm.haveItem('SpaceJump'), sm.knowsAccessSpringBallWithFlatley()))),
                                            sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb()), # XRay climb
                                            sm.canCrystalFlashClip()),
                                     sm.wor(sm.haveItem('Gravity'), sm.canUseSpringBall())), # acess the item in spring ball room
@@ -727,7 +722,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Maridia Pink Top",
     'Name': "Energy Tank, Botwoon",
     'Class': ["Major"],
@@ -743,7 +738,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Draygon Boss",
     'Name': "Draygon",
     'Class': ["Boss"],
@@ -752,14 +747,13 @@ locations = [
     'Visibility': "Hidden",
     'Room': "Draygon's Room",
     'AccessFrom' : {
-        'DraygonRoomIn': lambda sm: sm.canFightDraygon()
+        'Draygon Room Bottom': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: Bosses.bossDead('Draygon'), # this is an evil trick, see SJ location below
-    'PostAvailable': lambda sm: sm.canExitDraygon(),
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Draygon Boss",
     'Name': "Space Jump",
     'Class': ["Major", "Chozo"],
@@ -768,18 +762,13 @@ locations = [
     'Id': 0x9a,
     'Visibility': "Chozo",
     'Room': 'Space Jump Room',
-    'AccessFrom' : {
-        'DraygonRoomIn': lambda sm: sm.canFightDraygon()
+    'AccessFrom' : {        
+        'Draygon Room Bottom': lambda sm: SMBool(True)
     },
-    # evil trick: we put the actual boss fight here instead of draygon
-    # location to open the possibility of an item unlocking draygon
-    # exit to be placed here.
-    # in other words we force space jump loc to be filled before dray
-    # loc.
-    'Available': lambda sm: sm.enoughStuffsDraygon(),
-    'PostAvailable': lambda sm: sm.canExitDraygon(),
-    'Pickup': lambda: Bosses.beatBoss('Draygon'),
-    'Unpickup': lambda: Bosses.unbeatBoss('Draygon')
+    'Available': lambda sm: SMBool(True),
+    # put dray dead condition in post available to make it a comeback check and allow
+    # rando to put stuff there to get out
+    'PostAvailable': lambda sm: Bosses.bossDead(sm, 'Draygon')
 },
 {
     'Area': "Tourian",
@@ -846,7 +835,7 @@ locations = [
     'AccessFrom' : {
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: Bosses.bossDead('Phantoon')
+    'Available': lambda sm: Bosses.bossDead(sm, 'Phantoon')
 },
 {
     'Area': "Crateria",
@@ -862,7 +851,7 @@ locations = [
     'AccessFrom' : {
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.haveItem('Super'), sm.haveItem('Morph'), Bosses.bossDead('Phantoon'))
+    'Available': lambda sm: sm.wand(sm.haveItem('Super'), sm.haveItem('Morph'), Bosses.bossDead(sm, 'Phantoon'))
 },
 {
     'Area': "Crateria",
@@ -1353,9 +1342,9 @@ locations = [
                                                       sm.wor(sm.wand(sm.haveItem('Morph'),
                                                                      sm.knowsMockball()),
                                                              sm.haveItem('SpeedBooster'))),
-        'Croc Zone': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Ice Missiles']),
-                                        sm.haveItem('SpeedBooster'),
-                                        sm.knowsIceMissileFromCroc())
+        'Crocomire Speedway Bottom': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Ice Missiles']),
+                                                        sm.haveItem('SpeedBooster'),
+                                                        sm.knowsIceMissileFromCroc())
     },
     'Available': lambda sm: SMBool(True)
 },
@@ -1371,7 +1360,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Crocomire Escape',
     'AccessFrom' : {
-        'Croc Zone': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Grapple Escape Missiles'])
+        'Crocomire Speedway Bottom': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Grapple Escape Missiles'])
     },
     'Available': lambda sm: sm.canGrappleEscape()
 },
@@ -1411,7 +1400,7 @@ locations = [
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",
+    'GraphArea': "Crocomire",
     'SolveArea': "Crocomire",
     'Name': "Power Bomb (Crocomire)",
     'Class': ["Minor"],
@@ -1421,7 +1410,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Post Crocomire Power Bomb Room',
     'AccessFrom' : {
-        'Croc Zone': lambda sm: sm.energyReserveCountOk(1)
+        'Crocomire Room Top': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.wor(sm.canFly(),
@@ -1436,7 +1425,7 @@ locations = [
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",
+    'GraphArea': "Crocomire",
     'SolveArea': "Crocomire",
     'Name': "Missile (below Crocomire)",
     'Class': ["Minor"],
@@ -1446,13 +1435,13 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Post Crocomire Missile Room',
     'AccessFrom' : {
-        'Croc Zone': lambda sm: SMBool(True)
+        'Crocomire Room Top': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canOpenRedDoors(), sm.enoughStuffCroc(), sm.haveItem('Morph'))
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",
+    'GraphArea': "Crocomire",
     'SolveArea': "Crocomire",
     'Name': "Missile (Grapple Beam)",
     'Class': ["Minor"],
@@ -1462,7 +1451,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Post Crocomire Jump Room',
     'AccessFrom' : {
-        'Croc Zone': lambda sm: SMBool(True)
+        'Crocomire Room Top': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.wor(sm.wand(sm.haveItem('Morph'), # from below
@@ -1723,7 +1712,7 @@ locations = [
     'AccessFrom' : {
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: Bosses.bossDead('Phantoon')
+    'Available': lambda sm: Bosses.bossDead(sm, 'Phantoon')
 },
 {
     'Area': "WreckedShip",
@@ -1739,11 +1728,11 @@ locations = [
     'AccessFrom' : {
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: Bosses.bossDead('Phantoon')
+    'Available': lambda sm: Bosses.bossDead(sm, 'Phantoon')
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "WestMaridia",
     'SolveArea': "Maridia Green",
     'Name': "Missile (green Maridia shinespark)",
     'Class': ["Minor"],
@@ -1763,7 +1752,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "WestMaridia",
     'SolveArea': "Maridia Green",
     'Name': "Super Missile (green Maridia)",
     'Class': ["Minor"],
@@ -1781,7 +1770,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "WestMaridia",
     'SolveArea': "Maridia Green",
     'Name': "Missile (green Maridia tatori)",
     'Class': ["Minor"],
@@ -1801,7 +1790,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "WestMaridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Super Missile (yellow Maridia)",
     'Class': ["Minor"],
@@ -1817,7 +1806,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "WestMaridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Missile (yellow Maridia super missile)",
     'Class': ["Minor"],
@@ -1833,7 +1822,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "WestMaridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Missile (yellow Maridia false wall)",
     'Class': ["Minor"],
@@ -1849,7 +1838,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Left Sandpit",
     'Name': "Missile (left Maridia sand pit room)",
     'Class': ["Minor"],
@@ -1867,7 +1856,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Right Sandpit",
     'Name': "Missile (right Maridia sand pit room)",
     'Class': ["Minor"],
@@ -1885,7 +1874,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Right Sandpit",
     'Name': "Power Bomb (right Maridia sand pit room)",
     'Class': ["Minor"],
@@ -1904,7 +1893,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Missile (pink Maridia)",
     'Address': 0x7C603,
@@ -1920,7 +1909,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Super Missile (pink Maridia)",
     'Class': ["Minor"],
@@ -1936,7 +1925,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Maridia Pink Top",
     'Name': "Missile (Draygon)",
     'Class': ["Minor"],

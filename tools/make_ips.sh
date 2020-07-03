@@ -4,7 +4,7 @@
 
 my_dir=$(dirname $(readlink -f $0))
 
-[ -z "$ASAR" ] && ASAR=asar
+[ -z "$ASAR" ] && ASAR=asar.exe
 [ -z "$VANILLA" ] && VANILLA=${my_dir}/../vanilla.sfc
 
 [ $# -lt 1 ] && {

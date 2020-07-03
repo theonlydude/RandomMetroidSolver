@@ -48,8 +48,6 @@ patches = {
         0x0134c5: [0x0c]},
     "No_Music":{
         0x278413: [0x6f]},
-    "Tourian_Refill": {
-        0x1922C: [0x47, 0xF6]},
     "Escape_Rando_Enable_Enemies":{
         0x10F000: [0x0, 0x0]},
     "Escape_Rando_Disable_Enemies":{

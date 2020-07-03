@@ -1,7 +1,6 @@
-;;; This patch handles area rando door transitions:
+;;; This patch handles area/boss/escape rando door transitions:
 ;;; - for incompatible transitions, cancel samus movement
 ;;; - for all transitions, give I-frames
-;;; - refill at Tourian elevator
 ;;;
 ;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
 ;;; or a variant of xkas that supports arch directive
@@ -19,18 +18,6 @@ arch snes.cpu
 !poses_transitions     = $0a2a
 !contact_dmg_idx       = $0a6e
 !iframes               = $18a8
-;;; For refill
-!samus_max_health      = $09c4
-!samus_reserve         = $09d6
-!samus_max_reserve     = $09d4
-!samus_missiles        = $09c6
-!samus_max_missiles    = $09c8
-!samus_supers          = $09ca
-!samus_max_supers      = $09cc
-!samus_pbs             = $09ce
-!samus_max_pbs         = $09d0
-!samus_reserve         = $09d6
-!samus_max_reserve     = $09d4
 
 ;;; hijack shinespark end check to avoid teleport transition spark bug
 org $90d2ba
@@ -100,51 +87,4 @@ giveiframes:
 	sta !iframes
 	rts
 
-print "full_refill: ", pc
-;;; "ship refill" for tourian elevator
-full_refill:
-	lda !samus_max_health
-	sta !samus_health
-	lda !samus_max_reserve
-	sta !samus_reserve
-	lda !samus_max_missiles
-	sta !samus_missiles
-	lda !samus_max_supers
-	sta !samus_supers
-	lda !samus_max_pbs
-	sta !samus_pbs
-.end:
-	rts
-
-org $8ff7ef
-
-;;; use this as croc top exit door asm :
-;;; croc draws its tilemap on BG2, and a routine to draw enemy
-;;; BG2 ($A0:9726) is ran both by Croc/MB and at the end every
-;;; door transition. It uses $0e1e as flag to know if a VRAM transfer
-;;; has to be done. If we exit during croc fight, the value can be non-0
-;;; and some garbage resulting from room tiles decompression of door transition
-;;; is copied to BG2 tilemap in the next room.
-org $8ff7f0
-croc_exit_fix:
-    stz $0e1e	; clear the flag to disable enemy BG2 tilemap routine
-    rts
-
-;;; door pointers for room below botwoon
-below_botwoon_doors:
-	dw $a7d4,$a534
-
-;;; stop before generated door asm routines start
-warnpc $8ff7ff
-
-;;; add door in room below botwoon etank (room header update)
-org $8FD706
-    dw below_botwoon_doors
-
-;; update left sand hall left door to lead to it
-org $83a63c
-	dw $D6FD
-	db $00,$05,$3E,$06,$03,$00
-	dw $8000,$0000
-
-warnpc $83ae1f
+org $8ff6ff

@@ -580,7 +580,7 @@ class RomPatcher:
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
-        'Area': ['area_rando_layout.ips', 'area_rando_door_transition.ips', 'Tourian_Refill',
+        'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips' ],
         'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips']
     }
@@ -792,7 +792,7 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
                 # handle incompatible doors transitions
                 if area == False and bosses == False:
-                    self.applyIPSPatch('area_rando_door_transition.ips')
+                    self.applyIPSPatch('door_transition.ips')
                 # animals and timer
                 self.applyEscapeAttributes(escapeAttr, plms)
 
@@ -805,7 +805,7 @@ class RomPatcher:
                 for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
             elif bosses == True:
-                self.applyIPSPatch('area_rando_door_transition.ips')
+                self.applyIPSPatch('door_transition.ips')
             self.applyStartAP(startAP, plms, area)
             self.applyPLMs(plms)
         except Exception as e:
@@ -1356,7 +1356,7 @@ class RomPatcher:
                 (X0, X1) = (conn['SamusX'] & 0x00FF, (conn['SamusX'] & 0xFF00) >> 8)
                 (Y0, Y1) = (conn['SamusY'] & 0x00FF, (conn['SamusY'] & 0xFF00) >> 8)
                 # force samus position
-                # see area_rando_door_transition.asm. assemble it to print routines SNES addresses.
+                # see door_transition.asm. assemble it to print routines SNES addresses.
                 asmPatch += [ 0x20, 0x00, 0xF6 ]    # JSR incompatible_doors
                 asmPatch += [ 0xA9, X0,   X1   ]    # LDA #$SamusX        ; fixed Samus X position
                 asmPatch += [ 0x8D, 0xF6, 0x0A ]    # STA $0AF6           ; update Samus X position in memory

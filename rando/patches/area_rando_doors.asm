@@ -70,5 +70,5 @@ org $83a63c
 	dw $8000,$0000
 
 ;;; Tourian Elevator door ASM ptr
-org $83902c
+org $83922c
 	dw full_refill

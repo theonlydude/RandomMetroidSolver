@@ -583,18 +583,6 @@ def genPathTable(locations, displayAPs=True):
                 currentSuit = 'Varia'
             elif item == 'Gravity':
                 currentSuit = 'Gravity'
-        else:
-            pathTable += """
-<tr class="{}">
-  <td>{}</td>
-  <td>{}</td>
-  <td>{}</td>
-  <td><div class="linethrough">{}</div></td>
-  <td>{}</td>
-  <td></td>
-  <td></td>
-</tr>
-""".format(item, getRoomLink(name, room), getAreaLink(area), getSubArea(subarea), item, getDiffImg(locDiff))
 
     pathTable += "</table>"
 

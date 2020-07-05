@@ -67,6 +67,8 @@ if __name__ == "__main__":
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)
+    parser.add_argument('--lightArea', help="keep number of transitions between vanilla areas", action='store_true',
+                        dest='lightArea', default=False)
     parser.add_argument('--escapeRando',
                         help="Randomize the escape sequence",
                         dest='escapeRando', nargs='?', const=True, default=False)
@@ -521,7 +523,7 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.AreaBaseSet
         if args.areaLayoutBase == False:
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
-    graphSettings = GraphSettings(args.startAP, args.area, args.bosses, args.escapeRando, dotFile,
+    graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses, args.escapeRando, dotFile,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
     if args.patchOnly == False:
         try:

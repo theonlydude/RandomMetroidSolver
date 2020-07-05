@@ -144,7 +144,7 @@ def validatePresetsParams(action):
                             return (False, "Action {} set for two buttons: {} and {}".format(value, button, map[value]))
                         map[value] = button
 
-    if request.vars.currenttab not in ['Global', 'Techniques1', 'Techniques2', 'Techniques3', 'Techniques4', 'Techniques5', 'Techniques6', 'Techniques7', 'Mapping']:
+    if request.vars.currenttab not in ['Global', 'Techniques1', 'Techniques2', 'Techniques3', 'Techniques4', 'Techniques5', 'Techniques6', 'Techniques7', 'Techniques8', 'Mapping']:
         return (False, "Wrong value for current tab: [{}]".format(request.vars.currenttab))
 
     return (True, None)

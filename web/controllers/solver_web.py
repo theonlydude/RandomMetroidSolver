@@ -1135,7 +1135,7 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
 def sessionWebService():
     # web service to update the session
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'escapeRando', 'removeEscapeEnemies',
+               'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1167,6 +1167,7 @@ def sessionWebService():
     session.randomizer['minorQty'] = request.vars.minorQty
     session.randomizer['areaRandomization'] = request.vars.areaRandomization
     session.randomizer['areaLayout'] = request.vars.areaLayout
+    session.randomizer['lightAreaRandomization'] = request.vars.lightAreaRandomization
     session.randomizer['escapeRando'] = request.vars.escapeRando
     session.randomizer['removeEscapeEnemies'] = request.vars.removeEscapeEnemies
     session.randomizer['bossRandomization'] = request.vars.bossRandomization
@@ -1219,7 +1220,7 @@ def randomizerWebService():
 
     # check validity of all parameters
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'escapeRando', 'removeEscapeEnemies',
+               'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1340,6 +1341,8 @@ def randomizerWebService():
         params.append('--area')
         if request.vars.areaLayout == 'off':
             params.append('--areaLayoutBase')
+        if request.vars.lightAreaRandomization == 'on':
+            params.append('--lightArea')
     elif request.vars.areaRandomization == 'random':
         params += ['--area', 'random']
 

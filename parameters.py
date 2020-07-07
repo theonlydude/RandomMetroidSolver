@@ -471,7 +471,7 @@ class Knows:
 
     SpongeBathSpeed = SMBool(True, medium, ['SpongeBathSpeed'])
     desc['SpongeBathSpeed'] = {'display': 'SpongeBath Speed',
-                               'title': 'Get through sponge bath room with Speed Boster and Wall-Jumps',
+                               'title': 'Get through sponge bath room with Speed Booster and Wall-Jumps',
                                'href': 'https://www.youtube.com/watch?v=8ldQUIgBavw',
                                'rooms': ['Sponge Bath']}
 

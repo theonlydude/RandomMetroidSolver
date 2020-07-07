@@ -364,18 +364,18 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = [];
-    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "lightAreaRandomizationVisibility"];
     showHide(show, hide);
   }
 
   else if(name == "medium") {
     var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility"];
-      var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility"];
+    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility", "lightAreaRandomizationVisibility"];
     showHide(show, hide);
   }
 
   else {
-      var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility"];
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "lightAreaRandomizationVisibility"];
     var hide = [];
     showHide(show, hide);
   }
@@ -1868,8 +1868,11 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td>
                 <td><button type="button" onclick="startTheTour(19)">?</button></td>
               </tr>
+            </table>
+            <table id="lightAreaRandomizationVisibility" class="full">
+              <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr>
-                <td colspan="4" id="lightAreaRandomizationStep">{{displayCheckbox("lightAreaRandomization")}}<span id="lightAreaRandomizationText">Light Areas randomization</span></td>
+                <td colspan="2" id="lightAreaRandomizationStep">{{displayCheckbox("lightAreaRandomization")}}<span id="lightAreaRandomizationText">Light Areas randomization</span></td>
                 <td><button type="button" onclick="startTheTour(20)">?</button></td>
               </tr>
             </table>

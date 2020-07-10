@@ -531,8 +531,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.AreaBaseSet
         if args.areaLayoutBase == False:
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
-    graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses, args.escapeRando, minimizerN,
-                                  dotFile,
+    graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses,
+                                  args.escapeRando, minimizerN, dotFile,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
     if args.patchOnly == False:
         try:

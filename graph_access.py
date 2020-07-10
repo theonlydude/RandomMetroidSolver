@@ -847,17 +847,17 @@ class GraphUtils:
                 transitions.append((src,dst))
         return transitions
 
-    def createAreaTransitions(lightAreaRando=False, apList=None, apPred=None):
+    def createAreaTransitions(lightAreaRando=False):
+        if lightAreaRando:
+            return GraphUtils.createLightAreaTransitions()
+        else:
+            return GraphUtils.createRegularAreaTransitions()
+
+    def createRegularAreaTransitions(apList=None, apPred=None):
         if apList is None:
             apList = accessPoints
         if apPred is None:
             apPred = lambda ap: ap.isArea()
-        if lightAreaRando:
-            return GraphUtils.createLightAreaTransitions()
-        else:
-            return GraphUtils.createRegularAreaTransitions(apList, apPred)
-
-    def createRegularAreaTransitions(apList, apPred):
         tFrom = []
         tTo = []
         apNames = [ap.Name for ap in apList if apPred(ap) == True]
@@ -951,7 +951,7 @@ class GraphUtils:
         random.shuffle(targetAPs)
         while len(targetAPs) > 0:
             transitions.append((sourceAPs.pop().Name, targetAPs.pop().Name))
-        transitions += GraphUtils.createAreaTransitions(sourceAPs, lambda ap: not ap.isInternal())
+        transitions += GraphUtils.createRegularAreaTransitions(sourceAPs, lambda ap: not ap.isInternal())
 
         return transitions
 

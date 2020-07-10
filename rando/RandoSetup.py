@@ -18,7 +18,7 @@ class RandoSetup(object):
         self.settings = services.settings
         self.graphSettings = graphSettings
         self.startAP = graphSettings.startAP
-        self.itemManager = self.settings.getItemManager(self.sm)
+        self.itemManager = self.settings.getItemManager(self.sm, graphSettings.minimizerN)
         self.superFun = self.settings.superFun
         self.container = None
         self.services = services

@@ -21,9 +21,9 @@ class RandoSettings(object):
         self.plandoRandoItemLocs = plandoRandoItemLocs
         self.minDiff = minDiff
 
-    def getItemManager(self, smbm):
+    def getItemManager(self, smbm, minimizerN):
         if self.plandoRandoItemLocs is None:
-            return ItemManager(self.restrictions['MajorMinor'], self.qty, smbm)
+            return ItemManager(self.restrictions['MajorMinor'], self.qty, smbm, minimizerN)
         else:
             return ItemManager('Plando', self.qty, smbm)
 

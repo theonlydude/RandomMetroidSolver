@@ -207,10 +207,11 @@ class ItemManager:
         itemCode = item['Code'] + modifier
         return itemCode
 
-    def __init__(self, majorsSplit, qty, sm):
+    def __init__(self, majorsSplit, qty, sm, minimizerN):
         self.qty = qty
         self.sm = sm
         self.majorsSplit = majorsSplit
+        self.minimizerN = minimizerN
         self.majorClass = 'Chozo' if majorsSplit == 'Chozo' else 'Major'
         self.itemPool = []
 
@@ -257,7 +258,7 @@ class ItemManager:
         return item
 
     def createItemPool(self, exclude=None):
-        itemPoolGenerator = ItemPoolGenerator.factory(self.majorsSplit, self, self.qty, self.sm, exclude)
+        itemPoolGenerator = ItemPoolGenerator.factory(self.majorsSplit, self, self.qty, self.sm, exclude, self.minimizerN)
         self.itemPool = itemPoolGenerator.getItemPool()
 
     @staticmethod
@@ -269,13 +270,15 @@ class ItemManager:
 
 class ItemPoolGenerator(object):
     @staticmethod
-    def factory(majorsSplit, itemManager, qty, sm, exclude):
+    def factory(majorsSplit, itemManager, qty, sm, exclude, minimizerN):
         if majorsSplit == 'Chozo':
             return ItemPoolGeneratorChozo(itemManager, qty, sm)
         elif majorsSplit == 'Plando':
             return ItemPoolGeneratorPlando(itemManager, qty, sm, exclude)
-        else:
+        elif minimizerN is None:
             return ItemPoolGeneratorMajors(itemManager, qty, sm)
+        else:
+            return ItemPoolGeneratorMinimizer(itemManager, qty, sm, minimizerN)
 
     def __init__(self, itemManager, qty, sm):
         self.itemManager = itemManager
@@ -594,3 +597,7 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
             self.log.debug("Plando: remain after nothing: {}".format(remain))
 
         return self.itemManager.getItemPool()
+
+class ItemPoolGeneratorMinimizer(ItemPoolGenerator):
+    # TODO
+    pass

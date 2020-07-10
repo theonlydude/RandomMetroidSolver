@@ -935,14 +935,16 @@ class GraphUtils:
                 fromAreas = [area for area in fromAreas if len(GraphUtils.getLocs(lambda loc: loc['GraphArea'] == area)) == minLocs]
             nextArea = random.choice(fromAreas)
             apCheck = lambda ap: not ap.isInternal() and not inBossCheck(ap) and ap not in usedAPs
-            possibleSources = GraphUtils.getAPs(lambda ap: ap.GraphArea == areas[-1] and apCheck(ap))
+            possibleSources = GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and apCheck(ap))
             possibleTargets = GraphUtils.getAPs(lambda ap: ap.GraphArea == nextArea and apCheck(ap))
             src = random.choice(possibleSources)
             dst = random.choice(possibleTargets)
             usedAPs += [src,dst]
+#            print((src.Name,dst.Name))
             transitions.append((src.Name,dst.Name))
             availAreas.remove(nextArea)
             areas.append(nextArea)
+#            print(areas)
             locs = GraphUtils.getLocs(lambda loc:loc['GraphArea'] in areas)
         # we picked the areas, add transitions (bosses and tourian first)
         sourceAPs = GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and not ap.isInternal() and not inBossCheck(ap) and not ap in usedAPs)
@@ -952,7 +954,7 @@ class GraphUtils:
         while len(targetAPs) > 0:
             transitions.append((sourceAPs.pop().Name, targetAPs.pop().Name))
         transitions += GraphUtils.createRegularAreaTransitions(sourceAPs, lambda ap: not ap.isInternal())
-
+#        print(transitions)
         return transitions
 
     def createLightAreaTransitions():

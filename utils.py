@@ -5,7 +5,7 @@ from parameters import easy, medium, hard, harder, hardcore, mania
 from smbool import SMBool
 
 def isStdPreset(preset):
-    return preset in ['newbie', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
+    return preset in ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master', 'samus', 'solution', 'Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
 
 def removeChars(string, toRemove):
     return re.sub('[{}]+'.format(toRemove), '', string)
@@ -240,29 +240,29 @@ def loadRandoPreset(randoPreset, args):
     with open(randoPreset) as randoPresetFile:
         randoParams = json.load(randoPresetFile)
 
-    if "animals" in randoParams and randoParams["animals"] == "on":
+    if randoParams.get("animals", "off") == "on":
         args.animals = True
-    if "variaTweaks" in randoParams and randoParams["variaTweaks"] == "off":
+    if randoParams.get("variaTweaks", "on") == "off":
         args.noVariaTweaks = True
-    if "maxDifficulty" in randoParams and randoParams["maxDifficulty"] != "no difficulty cap":
+    if randoParams.get("maxDifficulty", "no difficulty cap") != "no difficulty cap":
         args.maxDifficulty = randoParams["maxDifficulty"]
-    if "suitsRestriction" in randoParams and randoParams["suitsRestriction"] != "off":
+    if randoParams.get("suitsRestriction", "off") != "off":
         if randoParams["suitsRestriction"] == "on":
             args.suitsRestriction = True
         else:
             args.suitsRestriction = "random"
-    if "hideItems" in randoParams and randoParams["hideItems"] != "off":
+    if randoParams.get("hideItems", "off") != "off":
         if randoParams["hideItems"] == "on":
             args.hideItems = True
         else:
             args.hideItems = "random"
-    if "strictMinors" in randoParams and randoParams["strictMinors"] != "off":
+    if randoParams.get("strictMinors", "off") != "off":
         if randoParams["strictMinors"] == "on":
             args.strictMinors = True
         else:
             args.strictMinors = "random"
 
-    if "layoutPatches" in randoParams and randoParams["layoutPatches"] == "off":
+    if randoParams.get("layoutPatches", "on") == "off":
         args.noLayout = True
     if "gravityBehaviour" in randoParams:
         # Balanced is the default
@@ -270,32 +270,34 @@ def loadRandoPreset(randoPreset, args):
             args.noGravHeat = True
         elif randoParams["gravityBehaviour"] == "Progressive":
             args.progressiveSuits = True
-    if "nerfedCharge" in randoParams and randoParams["nerfedCharge"] == "on":
+    if randoParams.get("nerfedCharge", "off") == "on":
         args.nerfedCharge = True
 
-    if "areaRandomization" in randoParams and randoParams["areaRandomization"] == "on":
+    if randoParams.get("areaRandomization", "off") == "on":
         args.area = True
-        if "areaLayout" in randoParams and randoParams["areaLayout"] == "off":
+        if randoParams.get("areaLayout", "on") == "off":
             args.areaLayoutBase = True
-        if "escapeRando" in randoParams and randoParams["escapeRando"] == "off":
+        if randoParams.get("lightAreaRandomization", "off") == "on":
+            args.lightArea = True
+        if randoParams.get("escapeRando", "on") == "off":
             args.noEscapeRando = True
-        if "removeEscapeEnemies" in randoParams and randoParams["removeEscapeEnemies"] == "off":
+        if randoParams.get("removeEscapeEnemies", "on") == "off":
             args.noRemoveEscapeEnemies = True
 
-    if "bossRandomization" in randoParams and randoParams["bossRandomization"] == "on":
+    if randoParams.get("bossRandomization", "off") == "on":
         args.bosses = True
 
-    if "funCombat" in randoParams and randoParams["funCombat"] != "off":
+    if randoParams.get("funCombat", "off") != "off":
         if randoParams["funCombat"] == "on":
             args.superFun.append("Combat")
         else:
             args.superFun.append("CombatRandom")
-    if "funMovement" in randoParams and randoParams["funMovement"] != "off":
+    if randoParams.get("funMovement", "off") != "off":
         if randoParams["funMovement"] == "on":
             args.superFun.append("Movement")
         else:
             args.superFun.append("MovementRandom")
-    if "funSuits" in randoParams and randoParams["funSuits"] != "off":
+    if randoParams.get("funSuits", "off") != "off":
         if randoParams["funSuits"] == "on":
             args.superFun.append("Suits")
         else:
@@ -303,12 +305,12 @@ def loadRandoPreset(randoPreset, args):
 
     ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "refill_before_save"]
     for patch in ipsPatches:
-        if patch in randoParams and randoParams[patch] == "on":
+        if randoParams.get(patch, "off") == "on":
             args.patches.append(patch + '.ips')
 
     patches = ["No_Music", "Infinite_Space_Jump"]
     for patch in patches:
-        if patch in randoParams and randoParams[patch] == "on":
+        if randoParams.get(patch, "off") == "on":
             args.patches.append(patch)
 
     if "morphPlacement" in randoParams:
@@ -321,10 +323,7 @@ def loadRandoPreset(randoPreset, args):
         args.progressionDifficulty = randoParams["progressionDifficulty"]
 
     if "progressionSpeed" in randoParams:
-        if type(randoParams["progressionSpeed"]) == list:
-            args.progressionSpeed = ",".join(randoParams["progressionSpeed"])
-        else:
-            args.progressionSpeed = randoParams["progressionSpeed"]
+        args.progressionSpeed = randoParams["progressionSpeed"]
 
     if "missileQty" in randoParams:
         if randoParams["missileQty"] == "random":
@@ -349,6 +348,11 @@ def loadRandoPreset(randoPreset, args):
     if "energyQty" in randoParams:
         args.energyQty = randoParams["energyQty"]
 
+    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"]
+    for multiElem in multiElems:
+        if multiElem+'MultiSelect' in randoParams:
+            setattr(args, multiElem+'List', ','.join(randoParams[multiElem+'MultiSelect']))
+
 def getRandomizerDefaultParameters():
     defaultParams = {}
 
@@ -372,6 +376,7 @@ def getRandomizerDefaultParameters():
     defaultParams['energyQty'] = "vanilla"
     defaultParams['areaRandomization'] = "off"
     defaultParams['areaLayout'] = "off"
+    defaultParams['lightAreaRandomization'] = "off"
     defaultParams['escapeRando'] = "off"
     defaultParams['removeEscapeEnemies'] = "off"
     defaultParams['bossRandomization'] = "off"

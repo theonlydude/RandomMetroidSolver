@@ -210,12 +210,16 @@ function unpack_2bytes(ips, i) {
 function updateROM(bytes, data, filename) {
     // with custom sprites we have to create a bigger array
     var is4MB = false;
+    var size = 0x300000;
     if("ips" in data && "max_size" in data && data["max_size"] > 0x300000) {
-        var tmp = new Uint8Array(0x400000);
-        tmp.set(bytes);
-        bytes = tmp;
+        size = 0x400000;
         is4MB = true;
     }
+
+    // always make a copy to avoid modifying vanilla rom buffer from local storage
+    var tmp = new Uint8Array(size);
+    tmp.set(bytes);
+    bytes = tmp;
 
     var binary_string = atob(data["ips"]);
     var len = binary_string.length;

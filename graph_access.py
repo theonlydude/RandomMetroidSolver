@@ -847,11 +847,17 @@ class GraphUtils:
                 transitions.append((src,dst))
         return transitions
 
-    def createAreaTransitions(apList=None, apPred=None):
+    def createAreaTransitions(lightAreaRando=False, apList=None, apPred=None):
         if apList is None:
             apList = accessPoints
         if apPred is None:
             apPred = lambda ap: ap.isArea()
+        if lightAreaRando:
+            return GraphUtils.createLightAreaTransitions()
+        else:
+            return GraphUtils.createRegularAreaTransitions(apList, apPred)
+
+    def createRegularAreaTransitions(apList, apPred):
         tFrom = []
         tTo = []
         apNames = [ap.Name for ap in apList if apPred(ap) == True]
@@ -946,6 +952,56 @@ class GraphUtils:
         while len(targetAPs) > 0:
             transitions.append((sourceAPs.pop().Name, targetAPs.pop().Name))
         transitions += GraphUtils.createAreaTransitions(sourceAPs, lambda ap: not ap.isInternal())
+
+        return transitions
+
+    def createLightAreaTransitions():
+        # group APs by area
+        aps = {}
+        totalCount = 0
+        for ap in accessPoints:
+            if not ap.isArea():
+                continue
+            if not ap.GraphArea in aps:
+                aps[ap.GraphArea] = {'totalCount': 0, 'transCount': {}, 'apNames': []}
+            aps[ap.GraphArea]['apNames'].append(ap.Name)
+        # count number of vanilla transitions between each area
+        for (srcName, destName) in vanillaTransitions:
+            srcAP = getAccessPoint(srcName)
+            destAP = getAccessPoint(destName)
+            aps[srcAP.GraphArea]['transCount'][destAP.GraphArea] = aps[srcAP.GraphArea]['transCount'].get(destAP.GraphArea, 0) + 1
+            aps[srcAP.GraphArea]['totalCount'] += 1
+            aps[destAP.GraphArea]['transCount'][srcAP.GraphArea] = aps[destAP.GraphArea]['transCount'].get(srcAP.GraphArea, 0) + 1
+            aps[destAP.GraphArea]['totalCount'] += 1
+            totalCount += 1
+
+        transitions = []
+        while totalCount > 0:
+            # choose transition
+            srcArea = random.choice(list(aps.keys()))
+            srcName = random.choice(aps[srcArea]['apNames'])
+            src = getAccessPoint(srcName)
+            destArea = random.choice(list(aps[src.GraphArea]['transCount'].keys()))
+            destName = random.choice(aps[destArea]['apNames'])
+            transitions.append((srcName, destName))
+
+            # update counts
+            totalCount -= 1
+            aps[srcArea]['totalCount'] -= 1
+            aps[destArea]['totalCount'] -= 1
+            aps[srcArea]['transCount'][destArea] -= 1
+            if aps[srcArea]['transCount'][destArea] == 0:
+                del aps[srcArea]['transCount'][destArea]
+            aps[destArea]['transCount'][srcArea] -= 1
+            if aps[destArea]['transCount'][srcArea] == 0:
+                del aps[destArea]['transCount'][srcArea]
+            aps[srcArea]['apNames'].remove(srcName)
+            aps[destArea]['apNames'].remove(destName)
+
+            if aps[srcArea]['totalCount'] == 0:
+                del aps[srcArea]
+            if aps[destArea]['totalCount'] == 0:
+                del aps[destArea]
 
         return transitions
 

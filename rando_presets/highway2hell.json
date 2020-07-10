@@ -14,7 +14,7 @@
   "powerBombQty": "1",
   "minorQty": "100",
   "suitsRestriction": "on",
-  "preset": "speedrunner",
+  "preset": "expert",
   "spinjumprestart": "off",
   "gravityBehaviour": "Balanced",
   "superQty": "1",

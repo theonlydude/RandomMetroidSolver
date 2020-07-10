@@ -29,7 +29,7 @@ class GraphBuilder(object):
                 if not self.areaRando:
                     transitions += vanillaTransitions
                 else:
-                    transitions += GraphUtils.createAreaTransitions()
+                    transitions += GraphUtils.createAreaTransitions(self.graphSettings.lightAreaRando)
         return AccessGraph(accessPoints, transitions, self.graphSettings.dotFile)
 
     # fills in escape transitions if escape rando is enabled

@@ -45,10 +45,7 @@ class RandoSetup(object):
         self.okay = lambda: SMBool(True, 0)
         exclude = self.settings.getExcludeItems(self.locations)
         # we have to use item manager only once, otherwise pool will change
-        if exclude is None:
-            self.itemManager.createItemPool()
-        else:
-            self.itemManager.createItemPool(exclude)
+        self.itemManager.createItemPool(exclude)
         self.basePool = self.itemManager.getItemPool()[:]
         self.log = log.get('RandoSetup')
         if len(locations) != len(self.locations):

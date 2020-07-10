@@ -67,6 +67,8 @@ if __name__ == "__main__":
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)
+    parser.add_argument('--lightArea', help="keep number of transitions between vanilla areas", action='store_true',
+                        dest='lightArea', default=False)
     parser.add_argument('--escapeRando',
                         help="Randomize the escape sequence",
                         dest='escapeRando', nargs='?', const=True, default=False)
@@ -375,7 +377,8 @@ if __name__ == "__main__":
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.randint(0, 2))
 
-    if not GraphUtils.isStandardStart(args.startAP):
+    # in plando rando we know that the start ap is ok
+    if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando == None:
         optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
         optErrMsg += forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on")
         optErrMsg += forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on")
@@ -528,19 +531,23 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.AreaBaseSet
         if args.areaLayoutBase == False:
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
-    graphSettings = GraphSettings(args.startAP, args.area, args.bosses, args.escapeRando, minimizerN,
+    graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses, args.escapeRando, minimizerN,
                                   dotFile,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
     if args.patchOnly == False:
-        randoExec = RandoExec(seedName, args.vcr)
-        (stuck, itemLocs, progItemLocs) = randoExec.randomize(randoSettings, graphSettings)
-        # if we couldn't find an area layout then the escape graph is not created either
-        # and getDoorConnections will crash if random escape is activated.
-        if not stuck:
-            doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
-                                                  args.area, args.bosses,
-                                                  args.escapeRando)
-            escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
+        try:
+            randoExec = RandoExec(seedName, args.vcr)
+            (stuck, itemLocs, progItemLocs) = randoExec.randomize(randoSettings, graphSettings)
+            # if we couldn't find an area layout then the escape graph is not created either
+            # and getDoorConnections will crash if random escape is activated.
+            if not stuck:
+                doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
+                                                      args.area, args.bosses,
+                                                      args.escapeRando)
+                escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
+        except Exception as e:
+            dumpErrorMsg(args.output, "Error: {}".format(e))
+            sys.exit(-1)
     else:
         stuck = False
         itemLocs = []

@@ -301,7 +301,7 @@ function startTheTour(step=-1) {
     {
       element: "#presetStep",
       title: "Preset",
-      content: "The standard presets are base presets to create yours upon.<br/>Select one of the standard presets (sorted in increased difficulty), or you own from community presets, then click on the Load button.<br/>Check out what are the tricks required for popular tournaments by loading a tournament preset.<br/><br/><b>Standard presets outlook:</b><br/><ul><li><b>newbie: </b>New to randomizers, but completed Super Metroid 100% and knows basic techniques (Wall Jump, Shinespark, Mid-air Morph)</li><li><b>casual:</b> occasional rando player. No hell runs or suitless Maridia, some easy to learn tricks in logic.</li><li><b>regular: </b>plays rando regularly. Knows tricks that are not too hard and open up the game: hell runs (generous energy requirements), suitless Maridia, lava dive, gate glitches, Alcatraz, Gauntlet...</li><li><b>veteran:</b> experienced rando player. Harder everything, some tougher tricks in logic.</li><li><b>speedrunner: </b>knows almost all tricks: full suitless Maridia, Lower Norfair hell runs, hi-jumpless Lava Dive (mania difficulty only, so not by default in most rando settings)</li><li><b>master:</b> Everything on hardest, all tricks known.</li></ul>"
+      content: "The standard presets are base presets to create yours upon.<br/>Select one of the standard presets (sorted in increased difficulty), or you own from community presets, then click on the Load button.<br/>Check out what are the tricks required for popular tournaments by loading a tournament preset.<br/><br/><b>Standard presets outlook:</b><br/><ul><li><b>newbie: </b>New to randomizers, but completed Super Metroid 100% and knows basic techniques (Wall Jump, Shinespark, Mid-air Morph)</li><li><b>casual:</b> occasional rando player. No hell runs or suitless Maridia, some easy to learn tricks in logic.</li><li><b>regular: </b>plays rando regularly. Knows tricks that are not too hard and open up the game: hell runs (generous energy requirements), suitless Maridia, lava dive, gate glitches, Alcatraz, Gauntlet...</li><li><b>veteran:</b> experienced rando player. Harder everything, some tougher tricks in logic.</li><li><b>expert: </b>knows almost all tricks: full suitless Maridia, Lower Norfair hell runs, hi-jumpless Lava Dive (mania difficulty only, so not by default in most rando settings)</li><li><b>master:</b> Everything on hardest, all tricks known.</li></ul>"
     },
     {
       element: "#presetCreateStep",
@@ -388,7 +388,7 @@ if skillBarData is not None:
   previousStdScore = lower
   previousPreset = 'newbie'
   stop = False
-  for preset in ['casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus']:
+  for preset in ['casual', 'regular', 'veteran', 'expert', 'master', 'samus']:
     if stop == False:
       stdScore = 100 + skillBarData["standards"][preset]*mult
       if stdScore <= score:

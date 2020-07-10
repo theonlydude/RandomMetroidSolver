@@ -64,7 +64,7 @@ refill_run:
 
 	LDA #$0005 : STA $12      ; energy increment value per frame
 	LDX #$09C2 : JSR inc_item ; energy tanks
-	LDX #$09D4 : JSR inc_item ; reserve tanks
+	LDX #$09D4 : JSR inc_reserve ; reserve tanks
 
 	LDA #$0002 : STA $12      ; other supplies increment value per frame
 	LDX #$09C6 : JSR inc_item ; missiles
@@ -89,4 +89,19 @@ inc_item_write:
 inc_is_full:
 	RTS                ; return
 
-warnpc $a1f456
+;;; reserve current / max is inverted in RAM compared to other items
+inc_reserve:
+	LDA $0002,X        ; current value
+	CMP $0000,X        ; max value
+	BEQ inc_reserve_is_full    ; already full?  just exit out
+	INY                ; not already full: mark as such
+	CLC : ADC $12      ; add current increment value
+	CMP $0000,X        ; is it full now?
+	BCC inc_reserve_write ; less than full: only save back to current
+	LDA $0000,X        ; equal or overfull: set to full exactly
+inc_reserve_write:
+	STA $0002,X        ; write new (calculated or max) value to current
+inc_reserve_is_full:
+	RTS                ; return
+
+warnpc $a1f46e

@@ -95,7 +95,7 @@ def completePreset(params):
 
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
-    stdPresets = ['newbie', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
+    stdPresets = ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master']
     tourPresets = ['Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
     return (stdPresets, tourPresets, comPresets)
@@ -144,7 +144,7 @@ def validatePresetsParams(action):
                             return (False, "Action {} set for two buttons: {} and {}".format(value, button, map[value]))
                         map[value] = button
 
-    if request.vars.currenttab not in ['Global', 'Techniques1', 'Techniques2', 'Techniques3', 'Techniques4', 'Techniques5', 'Techniques6', 'Techniques7', 'Mapping']:
+    if request.vars.currenttab not in ['Global', 'Techniques1', 'Techniques2', 'Techniques3', 'Techniques4', 'Techniques5', 'Techniques6', 'Techniques7', 'Techniques8', 'Mapping']:
         return (False, "Wrong value for current tab: [{}]".format(request.vars.currenttab))
 
     return (True, None)
@@ -162,7 +162,7 @@ def getSkillLevelBarData(preset):
         result['knowsKnown'] = 'N/A'
 
     # get score of standard presets
-    for preset in ['newbie', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus']:
+    for preset in ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master', 'samus']:
         score = PresetLoader.factory('{}/{}.json'.format(getPresetDir(preset), preset)).params['score']
         result['standards'][preset] = score
 
@@ -583,18 +583,6 @@ def genPathTable(locations, displayAPs=True):
                 currentSuit = 'Varia'
             elif item == 'Gravity':
                 currentSuit = 'Gravity'
-        else:
-            pathTable += """
-<tr class="{}">
-  <td>{}</td>
-  <td>{}</td>
-  <td>{}</td>
-  <td><div class="linethrough">{}</div></td>
-  <td>{}</td>
-  <td></td>
-  <td></td>
-</tr>
-""".format(item, getRoomLink(name, room), getAreaLink(area), getSubArea(subarea), item, getDiffImg(diff))
 
     pathTable += "</table>"
 
@@ -1147,7 +1135,7 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
 def sessionWebService():
     # web service to update the session
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'escapeRando', 'removeEscapeEnemies',
+               'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1179,6 +1167,7 @@ def sessionWebService():
     session.randomizer['minorQty'] = request.vars.minorQty
     session.randomizer['areaRandomization'] = request.vars.areaRandomization
     session.randomizer['areaLayout'] = request.vars.areaLayout
+    session.randomizer['lightAreaRandomization'] = request.vars.lightAreaRandomization
     session.randomizer['escapeRando'] = request.vars.escapeRando
     session.randomizer['removeEscapeEnemies'] = request.vars.removeEscapeEnemies
     session.randomizer['bossRandomization'] = request.vars.bossRandomization
@@ -1231,7 +1220,7 @@ def randomizerWebService():
 
     # check validity of all parameters
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'escapeRando', 'removeEscapeEnemies',
+               'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1352,6 +1341,8 @@ def randomizerWebService():
         params.append('--area')
         if request.vars.areaLayout == 'off':
             params.append('--areaLayoutBase')
+        if request.vars.lightAreaRandomization == 'on':
+            params.append('--lightArea')
     elif request.vars.areaRandomization == 'random':
         params += ['--area', 'random']
 

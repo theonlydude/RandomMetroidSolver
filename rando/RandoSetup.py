@@ -18,13 +18,14 @@ class RandoSetup(object):
         self.settings = services.settings
         self.graphSettings = graphSettings
         self.startAP = graphSettings.startAP
-        self.itemManager = self.settings.getItemManager(self.sm, graphSettings.minimizerN)
         self.superFun = self.settings.superFun
         self.container = None
         self.services = services
         self.restrictions = services.restrictions
         self.areaGraph = services.areaGraph
         self.locations = self.areaGraph.getAccessibleLocations(locations, self.startAP)
+        print("nLocs Setup: "+str(len(self.locations)))
+        self.itemManager = self.settings.getItemManager(self.sm, len(self.locations))
         self.forbiddenItems = []
         self.restrictedLocs = []
         self.lastRestricted = []
@@ -152,11 +153,11 @@ class RandoSetup(object):
         # get restricted locs
         totalAvailLocs = []
         comeBack = {}
-        try:
-            container = ItemLocContainer(self.sm, pool, self.locations)
-        except AssertionError:
-            # invalid graph altogether
-            return False
+#        try:
+        container = ItemLocContainer(self.sm, pool, self.locations)
+        # except AssertionError:
+        #     # invalid graph altogether
+        #     return False
         # restrict item pool in chozo: game should be finishable with chozo items only
         contPool = []
         if self.restrictions.isChozo():

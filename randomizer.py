@@ -331,7 +331,6 @@ if __name__ == "__main__":
 
     if args.area == True and args.bosses == True and args.minimizerN is not None:
         minimizerN = int(args.minimizerN)
-        print(minimizerN)
     else:
         minimizerN = None
     areaRandom = False
@@ -535,19 +534,19 @@ if __name__ == "__main__":
                                   args.escapeRando, minimizerN, dotFile,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
     if args.patchOnly == False:
-        try:
-            randoExec = RandoExec(seedName, args.vcr)
-            (stuck, itemLocs, progItemLocs) = randoExec.randomize(randoSettings, graphSettings)
-            # if we couldn't find an area layout then the escape graph is not created either
-            # and getDoorConnections will crash if random escape is activated.
-            if not stuck:
-                doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
-                                                      args.area, args.bosses,
-                                                      args.escapeRando)
-                escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
-        except Exception as e:
-            dumpErrorMsg(args.output, "Error: {}".format(e))
-            sys.exit(-1)
+#        try:
+        randoExec = RandoExec(seedName, args.vcr)
+        (stuck, itemLocs, progItemLocs) = randoExec.randomize(randoSettings, graphSettings)
+        # if we couldn't find an area layout then the escape graph is not created either
+        # and getDoorConnections will crash if random escape is activated.
+        if not stuck:
+            doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
+                                                  args.area, args.bosses,
+                                                  args.escapeRando)
+            escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
+        # except Exception as e:
+        #     dumpErrorMsg(args.output, "Error: {}".format(e))
+        #     sys.exit(-1)
     else:
         stuck = False
         itemLocs = []

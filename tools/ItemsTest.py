@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys, os
 
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     logger = log.get('ItemsTest')
     sm = SMBoolManager()
     with open("itemStats.csv", "w") as csvOut:
-        csvOut.write("energyQty;minorQty;nFun;strictMinors;MissProb;SuperProb;PowerProb;split;nItems;nTanks;nTanksTotal;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy;AmmoAccuracy\n")
+        csvOut.write("nLocs;energyQty;minorQty;nFun;strictMinors;MissProb;SuperProb;PowerProb;split;nItems;nTanks;nTanksTotal;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy;AmmoAccuracy\n")
         for i in range(10000):
             logger.debug('SEED ' + str(i))
             if (i+1) % 100 == 0:
@@ -43,6 +43,9 @@ if __name__ == "__main__":
                     item = random.choice(funPick)
                     forbidden.append(item)
                     funPick.remove(item)
+            nLocs = 105
+            if random.random() < 0.25:
+                nLocs = random.randint(40, 80)
             missProb = random.randint(1, 9)
             superProb = random.randint(1, 9)
             pbProb = random.randint(1, 9)
@@ -58,10 +61,10 @@ if __name__ == "__main__":
             }
             # get items
             splits = ['Full', 'Major', 'Chozo']
-            split = random.choice(splits)
+            split = random.choice(splits) if nLocs == 105 else 'Full'
             # write params
-            csvOut.write("%s;%d;%d;%s;%d;%d;%d;%s;" % (energyQty, minQty, len(forbidden), str(strictMinors), missProb, superProb, pbProb, split))
-            itemManager = ItemManager(split, qty, sm)
+            csvOut.write("%d;%s;%d;%d;%s;%d;%d;%d;%s;" % (nLocs, energyQty, minQty, len(forbidden), str(strictMinors), missProb, superProb, pbProb, split))
+            itemManager = ItemManager(split, qty, sm, nLocs)
             itemPool = itemManager.createItemPool()
             itemPool = itemManager.removeForbiddenItems(forbidden)
             # compute stats
@@ -83,13 +86,13 @@ if __name__ == "__main__":
             pbAcc = getAccuracy(pbProb, nPowers)
             ammoAcc = (float(nMinors)/66.0) / minQty * 100
             csvOut.write("%f;%f;%f;%f\n" % (missAcc, supersAcc, pbAcc, ammoAcc))
-            if len(itemPool) != 105:
-                raise ValueError("Not 105 items !!! " + str(len(itemPool)))
-            if isVanilla and nItems != 105:
-                raise ValueError("Not 105 actual items in vanilla !!! " + str(nItems))
+            if len(itemPool) != nLocs:
+                raise ValueError("Not " + str(nLocs) + " items !!! " + str(len(itemPool)))
+            if isVanilla and nItems != nLocs:
+                raise ValueError("Not " + str(nLocs) + " actual items in vanilla !!! " + str(nItems))
             if energyQty == 'ultra sparse' and (nTanks > 1):
                 raise ValueError("Energy qty invalid for ultra sparse !! " + str(nTanks))
             if energyQty == 'sparse' and (nTanks < 4 or nTanks > 6):
                 raise ValueError("Energy qty invalid for sparse !! " + str(nTanks))
-            if energyQty == 'medium' and (nTanks < 8 or nTanks > 12):
+            if nLocs == 105 and energyQty == 'medium' and (nTanks < 8 or nTanks > 12):
                 raise ValueError("Energy qty invalid for medium !! " + str(nTanks))

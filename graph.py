@@ -342,8 +342,8 @@ class AccessGraph(object):
     def getAccessibleLocations(self, locations, rootNode='Landing Site'):
         rootAp = self.accessPoints[rootNode]
         availAccessPoints = self.getAvailableAccessPoints(rootAp, None, 0)
-        graphAreas = {ap.GraphArea for ap in availAccessPoints}
-        return [loc for loc in locations if loc['GraphArea'] in graphAreas]
+        self.log.debug("availAccessPoints="+str([ap.Name for ap in availAccessPoints]))
+        return [loc for loc in locations if any(ap.Name in loc['AccessFrom'] for ap in availAccessPoints)]
 
 class AccessGraphSolver(AccessGraph):
     def computeLocDiff(self, tdiff, diff, pdiff):

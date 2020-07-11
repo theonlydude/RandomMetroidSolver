@@ -187,7 +187,7 @@ class RandoSetup(object):
         self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 
         # check if we all inter-area APs reach each other
-        interAPs = [ap for ap in self.areaGraph.accessPoints.values() if ap.isArea()]
+        interAPs = [ap for ap in self.areaGraph.getAccessibleAccessPoints(self.startAP) if ap.isArea()]
         for startAp in interAPs:
             availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.settings.maxDiff)
             for ap in interAPs:

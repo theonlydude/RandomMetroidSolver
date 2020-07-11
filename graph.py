@@ -160,7 +160,7 @@ class AccessGraph(object):
     # rootNode: starting AccessPoint instance
     # smbm: smbm to test logic on. if None, discard logic check, assume we can reach everything
     # maxDiff: difficulty limit.
-    # noLogic: if True, discard logic check, assume we can reach everything
+    # smbm: if None, discard logic check, assume we can reach everything
     # return available AccessPoint list
     def getAvailableAccessPoints(self, rootNode, smbm, maxDiff):
         availNodes = { rootNode : { 'difficulty' : SMBool(True, 0), 'from' : None } }
@@ -169,7 +169,6 @@ class AccessGraph(object):
         while len(newAvailNodes) > 0:
             newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff)
             availNodes.update(newAvailNodes)
-
         return availNodes
 
     # gets path from the root AP used to compute availAps
@@ -337,11 +336,16 @@ class AccessGraph(object):
             return None
         return self.getPath(destAccessPoint, availAccessPoints)
 
+    # gives theoretically accessible APs in the graph (no logic check)
+    def getAccessibleAccessPoints(self, rootNode='Landing Site'):
+        rootAp = self.accessPoints[rootNode]
+        allAreas = {dst.GraphArea for (src, dst) in self.InterAreaTransitions}
+        return [ap for ap in self.getAvailableAccessPoints(rootAp, None, 0) if ap.GraphArea in allAreas]
+    
     # gives theoretically accessible locations within a base list
     # returns locations with accessible GraphArea in this graph (no logic considered)
     def getAccessibleLocations(self, locations, rootNode='Landing Site'):
-        rootAp = self.accessPoints[rootNode]
-        availAccessPoints = self.getAvailableAccessPoints(rootAp, None, 0)
+        availAccessPoints = self.getAccessibleAccessPoints(rootNode)
         self.log.debug("availAccessPoints="+str([ap.Name for ap in availAccessPoints]))
         return [loc for loc in locations if any(ap.Name in loc['AccessFrom'] for ap in availAccessPoints)]
 

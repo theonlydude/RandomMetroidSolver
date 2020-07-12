@@ -743,6 +743,9 @@ class RomPatcher:
             'marga.ips': {
                 'Morph': 'morphing doll',
                 'SpringBall': 'spring doll',
+            },
+            'super_controid.ips': {
+                'PowerBomb': 'm 80,000 helio bomb'
             }
         }
         if sprite in messageBoxes:
@@ -1521,7 +1524,8 @@ class MessageBox(object):
         self.rom = rom
 
         # in message boxes the char a is at offset 0xe0 in the tileset
-        self.char2tile = {' ': 0x4e, 'a': 0xe0, '.': 0xfa, ',': 0xfb, '`': 0xfc, "'": 0xfd, '?': 0xfe, '!': 0xff}
+        self.char2tile = {'1': 0x00, '2': 0x01, '3': 0x02, '4': 0x03, '5': 0x04, '6': 0x05, '7': 0x06, '8': 0x07, '9': 0x08, '0': 0x09,
+                          ' ': 0x4e, 'a': 0xe0, '.': 0xfa, ',': 0xfb, '`': 0xfc, "'": 0xfd, '?': 0xfe, '!': 0xff}
         for i in range(1, ord('z')-ord('a')+1):
             self.char2tile[chr(ord('a')+i)] = self.char2tile['a']+i
 

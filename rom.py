@@ -742,7 +742,7 @@ class RomPatcher:
         messageBoxes = {
             'marga.ips': {
                 'Morph': 'morphing doll',
-                'SpringBall': 'spring doll'
+                'SpringBall': 'spring doll',
             }
         }
         if sprite in messageBoxes:
@@ -1498,11 +1498,7 @@ class RomPatcher:
         # string length
         length = len(version)
         self.romFile.writeWord(length, 0x0673e9)
-
-        if length % 2 == 0:
-            middle = int(length / 2)
-        else:
-            middle = int(length / 2) + 1
+        middle = int(length / 2) + length % 2
 
         # oams
         for (i, char) in enumerate(version):
@@ -1529,23 +1525,38 @@ class MessageBox(object):
         for i in range(1, ord('z')-ord('a')+1):
             self.char2tile[chr(ord('a')+i)] = self.char2tile['a']+i
 
-        # add 0x0c to offsets as there's 12 bytes before the strings
+        # add 0x0c/0x06 to offsets as there's 12/6 bytes before the strings, string length is either 0x13/0x1a
         self.offsets = {
-            'Morph': 0x28d3f+0x0c,
-            'SpringBall': 0x28cff+0x0c
+            'ETank': (0x2877f+0x0c, 0x13),
+            'Missile': (0x287bf+0x06, 0x1a),
+            'Super': (0x288bf+0x06, 0x1a),
+            'PowerBomb': (0x289bf+0x06, 0x1a),
+            'Grapple': (0x28abf+0x06, 0x1a),
+            'XRayScope': (0x28bbf+0x06, 0x1a),
+            'Varia': (0x28cbf+0x0c, 0x13),
+            'SpringBall': (0x28cff+0x0c, 0x13),
+            'Morph': (0x28d3f+0x0c, 0x13),
+            'ScrewAttack': (0x28d7f+0x0c, 0x13),
+            'HiJump': (0x28dbf+0x0c, 0x13),
+            'SpaceJump': (0x28dff+0x0c, 0x13),
+            'SpeedBooster': (0x28e3f+0x06, 0x1a),
+            'Charge': (0x28f3f+0x0c, 0x13),
+            'Ice': (0x28f7f+0x0c, 0x13),
+            'Wave': (0x28fbf+0x0c, 0x13),
+            'Spazer': (0x28fff+0x0c, 0x13),
+            'Plasma': (0x2903f+0x0c, 0x13),
+            'Bomb': (0x2907f+0x06, 0x1a),
+            'Reserve': (0x294ff+0x0c, 0x13),
+            'Gravity': (0x2953f+0x0c, 0x13)
         }
 
-        # messages are 19 chars long
-        self.length = 19
-
     def updateMessage(self, box, message):
+        (address, oldLength) = self.offsets[box]
         newLength = len(message)
-        padding = self.length - newLength
+        padding = oldLength - newLength
         paddingLeft = int(padding / 2)
         paddingRight = int(padding / 2)
         paddingRight += padding % 2
-
-        address = self.offsets[box]
 
         # write spaces for padding left
         for i in range(paddingLeft):

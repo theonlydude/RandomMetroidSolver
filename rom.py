@@ -738,6 +738,18 @@ class RomPatcher:
     def customSprite(self, sprite):
         self.applyIPSPatch(sprite, ipsDir='rando/patches/sprites')
 
+        # custom sprite message boxes update
+        messageBoxes = {
+            'marga.ips': {
+                'Morph': 'morphing doll',
+                'SpringBall': 'spring doll'
+            }
+        }
+        if sprite in messageBoxes:
+            messageBox = MessageBox(self.romFile)
+            for (messageKey, newMessage) in messageBoxes[sprite].items():
+                messageBox.updateMessage(messageKey, newMessage)
+
     def applyIPSPatches(self, startAP="Landing Site",
                         optionalPatches=[], noLayout=False, suitsMode="Classic",
                         area=False, bosses=False, areaLayoutBase=False,
@@ -1507,6 +1519,49 @@ for i in range(1, ord('z')-ord('a')+1):
     char2tile[chr(ord('a')+i)] = char2tile['a']+i
 for i in range(1, ord('9')-ord('0')+1):
     char2tile[chr(ord('0')+i)] = char2tile['0']+i
+
+class MessageBox(object):
+    def __init__(self, rom):
+        self.rom = rom
+
+        # in message boxes the char a is at offset 0xe0 in the tileset
+        self.char2tile = {' ': 0x4e, 'a': 0xe0, '.': 0xfa, ',': 0xfb, '`': 0xfc, "'": 0xfd, '?': 0xfe, '!': 0xff}
+        for i in range(1, ord('z')-ord('a')+1):
+            self.char2tile[chr(ord('a')+i)] = self.char2tile['a']+i
+
+        # add 0x0c to offsets as there's 12 bytes before the strings
+        self.offsets = {
+            'Morph': 0x28d3f+0x0c,
+            'SpringBall': 0x28cff+0x0c
+        }
+
+        # messages are 19 chars long
+        self.length = 19
+
+    def updateMessage(self, box, message):
+        newLength = len(message)
+        padding = self.length - newLength
+        paddingLeft = int(padding / 2)
+        paddingRight = int(padding / 2)
+        paddingRight += padding % 2
+
+        address = self.offsets[box]
+
+        # write spaces for padding left
+        for i in range(paddingLeft):
+            self.writeChar(address, ' ')
+            address += 0x02
+        # write message
+        for char in message:
+            self.writeChar(address, char)
+            address += 0x02
+        # write spaces for padding right
+        for i in range(paddingRight):
+            self.writeChar(address, ' ')
+            address += 0x02
+
+    def writeChar(self, address, char):
+        self.rom.writeByte(self.char2tile[char], address)
 
 class ROM(object):
     def readWord(self, address=None):

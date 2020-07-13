@@ -2238,6 +2238,7 @@ def initCustomizerSession():
         session.customizer['globalShift'] = "on"
         session.customizer['customSpriteEnable'] = "off"
         session.customizer['customSprite'] = "samus"
+        session.customizer['customItemsEnable'] = "off"
         session.customizer['itemsounds'] = "off"
         session.customizer['spinjumprestart'] = "off"
         session.customizer['rando_speed'] = "off"
@@ -2344,11 +2345,12 @@ def customWebService():
     print("customWebService")
 
     # check validity of all parameters
-    patches = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music',
-               'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save']
+    switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music',
+               'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save',
+               'customSpriteEnable', 'customItemsEnable']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
-    validateWebServiceParams(patches, [], [], others, isJson=True)
+    validateWebServiceParams(switchs, [], [], others, isJson=True)
     if request.vars.customSpriteEnable == 'on':
         if request.vars.customSprite not in customSprites:
             raiseHttp(400, "Wrong value for customSprite", True)
@@ -2369,6 +2371,7 @@ def customWebService():
     session.customizer['globalShift'] = request.vars.globalShift
     session.customizer['customSpriteEnable'] = request.vars.customSpriteEnable
     session.customizer['customSprite'] = request.vars.customSprite
+    session.customizer['customItemsEnable'] = request.vars.customItemsEnable
     session.customizer['itemsounds'] = request.vars.itemsounds
     session.customizer['spinjumprestart'] = request.vars.spinjumprestart
     session.customizer['rando_speed'] = request.vars.rando_speed
@@ -2432,7 +2435,8 @@ def customWebService():
 
     if request.vars.customSpriteEnable == 'on':
         params += ['--sprite', "{}.ips".format(request.vars.customSprite)]
-
+        if request.vars.customItemsEnable == 'on':
+            params.append('--customItemNames')
     if request.vars.seedKey != None:
         DB = db.DB()
         seedIpsInfo = DB.getSeedIpsInfo(request.vars.seedKey)

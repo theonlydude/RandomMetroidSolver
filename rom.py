@@ -735,8 +735,11 @@ class RomPatcher:
         for patchName in patches:
             self.applyIPSPatch(patchName)
 
-    def customSprite(self, sprite):
+    def customSprite(self, sprite, customNames):
         self.applyIPSPatch(sprite, ipsDir='rando/patches/sprites')
+
+        if not customNames:
+            return
 
         # custom sprite message boxes update
         messageBoxes = {
@@ -746,6 +749,16 @@ class RomPatcher:
             },
             'super_controid.ips': {
                 'PowerBomb': 'm 80,000 helio bomb'
+            },
+            'alucard.ips': {
+                'HiJump': 'gravity boots',
+                'SpeedBooster': 'god speed shoes',
+                'Morph': 'soul of bat',
+                'XRayScope': 'holy glasses',
+                'Varia': 'fire mail',
+                'Gravity': 'holy symbol',
+                'ETank': 'life vessel',
+                'Reserve': 'heart vessel'
             }
         }
         if sprite in messageBoxes:

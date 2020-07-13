@@ -606,11 +606,9 @@ function permalinkCustomization(permalink) {
 function enableCustomSpriteDropdown() {
     var customSpriteEnable = document.getElementById("customSpriteEnable");
     var customItemsEnable = document.getElementById("customItemsEnable");
-    var customSprite = document.getElementById("customSprite");
     var text = document.getElementById("customSpriteEnableText");
     var itemsText = document.getElementById("customItemsEnableText");
     if(customSpriteEnable.checked) {
-      customSprite.disabled = false;
       customSpriteEnable.value = "on";
       text.className = "";
       itemsText.className = "";
@@ -620,7 +618,6 @@ function enableCustomSpriteDropdown() {
         customItemsEnable.click();
       }
     } else {
-      customSprite.disabled = true;
       customSpriteEnable.value = "off";
       text.className = "disabledText";
       itemsText.className = "disabledText";

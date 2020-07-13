@@ -364,18 +364,18 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = ["noPatchesVisibility"];
-    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "lightAreaRandomizationVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "areaLayoutVisibility"];
     showHide(show, hide);
   }
 
   else if(name == "medium") {
     var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility"];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility", "lightAreaRandomizationVisibility", "noPatchesVisibility"];
+    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility", "areaLayoutVisibility", "noPatchesVisibility"];
     showHide(show, hide);
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "lightAreaRandomizationVisibility"];
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "areaLayoutVisibility"];
     var hide = ["noPatchesVisibility"];
     showHide(show, hide);
   }
@@ -1331,6 +1331,15 @@ Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
     {
+      element: "#lightAreaRandomizationStep",
+      title: "Light Area Randomization",
+      content: "<p>In Light Area Randomization we keep the same number of transitions between areas as in vanilla.<br/>\
+So Crocomire area will always be connected to Upper Norfair, there'll always be two transitions between Crateria/blue Brinstar and green/pink Brinstar, ...<br/>\
+This mode can be use as an introduction before doing full Area Randomization or to get less lost when you don't use the Area Tracker.</p>\
+<p>When 'Areas randomization' dice button is on, Light Area Randomization is greyed and it's not used.</p>",
+      placement: "auto left"
+    },
+    {
       element: "#areaLayoutStep",
       title: "Areas randomization additional layout modifications",
       content: "Some layout tweaks to make your life easier in areas randomizer:\
@@ -1364,15 +1373,6 @@ Click on the dice button to randomly set this parameter.",
 </tr>\
 </table>\
 <p>Using Area randomization and a non-standard or randomized start location will force this setting on.</p>",
-      placement: "auto left"
-    },
-    {
-      element: "#lightAreaRandomizationStep",
-      title: "Light Area Randomization",
-      content: "<p>In Light Area Randomization we keep the same number of transitions between areas as in vanilla.<br/>\
-So Crocomire area will always be connected to Upper Norfair, there'll always be two transitions between Crateria/blue Brinstar and green/pink Brinstar, ...<br/>\
-This mode can be use as an introduction before doing full Area Randomization or to get less lost when you don't use the Area Tracker.</p>\
-<p>When 'Areas randomization' dice button is on, Light Area Randomization is greyed and it's not used.</p>",
       placement: "auto left"
     },
     {
@@ -1865,14 +1865,14 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="small"><div class="random"><button id="areaRandomizationRandom" type="button" onclick="randomize(event, 'areaRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}<span id="areaRandomizationText">Areas randomization</span></td>
                 <td><button type="button" onclick="startTheTour(18)">?</button></td>
-                <td class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td>
+                <td class="full" id="lightAreaRandomizationStep">{{displayCheckbox("lightAreaRandomization")}}<span id="lightAreaRandomizationText">Light Areas randomization</span></td>
                 <td><button type="button" onclick="startTheTour(19)">?</button></td>
               </tr>
             </table>
-            <table id="lightAreaRandomizationVisibility" class="full">
+            <table id="areaLayoutVisibility" class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr>
-                <td colspan="2" id="lightAreaRandomizationStep">{{displayCheckbox("lightAreaRandomization")}}<span id="lightAreaRandomizationText">Light Areas randomization</span></td>
+                <td colspan="2" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td>
                 <td><button type="button" onclick="startTheTour(20)">?</button></td>
               </tr>
             </table>

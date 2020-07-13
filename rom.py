@@ -748,7 +748,7 @@ class RomPatcher:
                 'SpringBall': 'spring doll',
             },
             'super_controid.ips': {
-                'PowerBomb': 'm 80,000 helio bomb'
+                'PowerBomb': 'm-80,000 helio bomb'
             },
             'alucard.ips': {
                 'HiJump': 'gravity boots',
@@ -759,12 +759,66 @@ class RomPatcher:
                 'Gravity': 'holy symbol',
                 'ETank': 'life vessel',
                 'Reserve': 'heart vessel'
+            },
+            'samus_backwards.ips': {
+                'ETank': 'ygrene knat',
+                'Missile': 'elissim',
+                'Super': 'repus elissim',
+                'PowerBomb': 'rewop bmob',
+                'Grapple': 'gnilpparg maeb',
+                'XRayScope': 'yar-x epocs',
+                'Varia': 'airav uius',
+                'SpringBall': 'gnirps llab',
+                'Morph': 'gnihprom llab',
+                'ScrewAttack': 'wercs kcatta',
+                'HiJump': 'pmuj-ih stoob',
+                'SpaceJump': 'ecaps pmuj',
+                'SpeedBooster': 'deeps retsoob',
+                'Charge': 'egrahc maeb',
+                'Ice': 'eci maeb',
+                'Wave': 'evaw maeb',
+                'Spazer': 'rezaps',
+                'Plasma': 'amsalp maeb',
+                'Bomb': 'bmob',
+                'Reserve': 'evreser knat',
+                'Gravity': 'ytivarg tius'
+            },
+            'vanilla':
+            {
+                'ETank': 'energy tank',
+                'Missile': 'misille',
+                'Super': 'super missile',
+                'PowerBomb': 'power bomb',
+                'Grapple': 'grappling beam',
+                'XRayScope': 'x-ray scope',
+                'Varia': 'varia suit',
+                'SpringBall': 'spring ball',
+                'Morph': 'morphing ball',
+                'ScrewAttack': 'screw attack',
+                'HiJump': 'hi-jump boots',
+                'SpaceJump': 'space jump',
+                'SpeedBooster': 'speed booster',
+                'Charge': 'charge beam',
+                'Ice': 'ice beam',
+                'Wave': 'wave beam',
+                'Spazer': 'spazer',
+                'Plasma': 'plasma beam',
+                'Bomb': 'bomb',
+                'Reserve': 'server tank',
+                'Gravity': 'gravity suit'
             }
         }
+        messageBoxes['samus_upside_down_and_backwards.ips'] = messageBoxes['samus_backwards.ips']
+        vFlip = ['samus_upside_down.ips', 'samus_upside_down_and_backwards.ips']
+        hFlip = ['samus_backwards.ips']
+        doVFlip = sprite in vFlip
+        doHFlip = sprite in hFlip
+        if (doVFlip or doHFlip) and sprite not in messageBoxes:
+            sprite = 'vanilla'
         if sprite in messageBoxes:
             messageBox = MessageBox(self.romFile)
             for (messageKey, newMessage) in messageBoxes[sprite].items():
-                messageBox.updateMessage(messageKey, newMessage)
+                messageBox.updateMessage(messageKey, newMessage, doVFlip, doHFlip)
 
     def applyIPSPatches(self, startAP="Landing Site",
                         optionalPatches=[], noLayout=False, suitsMode="Classic",
@@ -1538,7 +1592,7 @@ class MessageBox(object):
 
         # in message boxes the char a is at offset 0xe0 in the tileset
         self.char2tile = {'1': 0x00, '2': 0x01, '3': 0x02, '4': 0x03, '5': 0x04, '6': 0x05, '7': 0x06, '8': 0x07, '9': 0x08, '0': 0x09,
-                          ' ': 0x4e, 'a': 0xe0, '.': 0xfa, ',': 0xfb, '`': 0xfc, "'": 0xfd, '?': 0xfe, '!': 0xff}
+                          ' ': 0x4e, '-': 0xcf, 'a': 0xe0, '.': 0xfa, ',': 0xfb, '`': 0xfc, "'": 0xfd, '?': 0xfe, '!': 0xff}
         for i in range(1, ord('z')-ord('a')+1):
             self.char2tile[chr(ord('a')+i)] = self.char2tile['a']+i
 
@@ -1567,13 +1621,15 @@ class MessageBox(object):
             'Gravity': (0x2953f+0x0c, 0x13)
         }
 
-    def updateMessage(self, box, message):
+    def updateMessage(self, box, message, vFlip=False, hFlip=False):
         (address, oldLength) = self.offsets[box]
         newLength = len(message)
         padding = oldLength - newLength
         paddingLeft = int(padding / 2)
         paddingRight = int(padding / 2)
         paddingRight += padding % 2
+
+        attr = self.getAttr(vFlip, hFlip)
 
         # write spaces for padding left
         for i in range(paddingLeft):
@@ -1582,7 +1638,9 @@ class MessageBox(object):
         # write message
         for char in message:
             self.writeChar(address, char)
-            address += 0x02
+            address += 0x01
+            self.updateAttr(attr, address)
+            address += 0x01
         # write spaces for padding right
         for i in range(paddingRight):
             self.writeChar(address, ' ')
@@ -1590,6 +1648,18 @@ class MessageBox(object):
 
     def writeChar(self, address, char):
         self.rom.writeByte(self.char2tile[char], address)
+
+    def getAttr(self, vFlip, hFlip):
+        # vanilla is 0x28:
+        byte = 0x28
+        if vFlip:
+            byte |= 0b10000000
+        if hFlip:
+            byte |= 0b01000000
+        return byte
+
+    def updateAttr(self, byte, address):
+        self.rom.writeByte(byte, address)
 
 class ROM(object):
     def readWord(self, address=None):

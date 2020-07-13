@@ -238,7 +238,7 @@ class Knows:
     GravLessLevel3 = SMBool(False, 0, ['GravLessLevel3'])
     desc['GravLessLevel3'] = {'display': 'Level 3',
                                'title': 'Level 2 and : no problem getting out of sand suitless, traverse mini-draygons area, wall jumps to access items in the left sand pit, access missile location in the right sand pit.',
-                               'href': 'https://www.youtube.com/watch?v=1M2TiEVwH2I',
+                               'href': 'https://www.youtube.com/watch?v=fx3NScKm7Cs',
                                'rooms': ['West Sand Hole', 'East Sand Hole',
                                          'West Sand Hall', 'East Sand Hall']}
     # Area difficulties

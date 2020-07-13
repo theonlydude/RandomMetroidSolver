@@ -286,11 +286,9 @@ function randomize(evt, elemId) {
   var additionnal = {"areaRandomization": ["areaLayout", "lightAreaRandomization"],
                      "escapeRando": ["removeEscapeEnemies"]};
   if(elemId in additionnal) {
-    if(isActive == true || (isActive == false && e.checked == true)) {
-        for(var i=0; i<additionnal[elemId].length; i++) {
-            disableElement(additionnal[elemId][i], isActive);
-        }
-    }
+      for(var i=0; i<additionnal[elemId].length; i++) {
+          disableElement(additionnal[elemId][i], isActive);
+      }
   }
 
   // special case for multi select
@@ -1095,26 +1093,18 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
       element: "#randoPresetStep",
       title: "Settings Preset",
       content: "Choose from a list of typical Randomizer usages. They're independent from skills preset, and settings can still be changed after loading the preset:<ul>\
-<li>all_random: all the parameters are set to random</li>\
-<li>Chozo_Speedrun: speedrun progression speed with Chozo split</li>\
-<li>default: VARIA randomizer default settings</li>\
-<li>free: easiest possible settings</li>\
-<li>hardway2well: harder highway2hell</li>\
-<li>haste: speedrunning preset inspired by the <a href=\"https://dashrando.github.io/\" target=\"_blank\">DASH randomizer</a> with Nerfed Charge and Progressive Suits</li>\
-<li>highway2hell: favors suitless seeds</li>\
-<li>quite_random: randomizes a few significant settings to have various seeds</li>\
-<li>stupid_hard: hardest possible settings</li>\
-<li>surprise: quite_random with Area, Boss and Start Location settings randomized</li>\
-<li>vanilla: closest possible to vanilla Super Metroid</li>\
-<li>way_of_chozo: chozo split with boss randomization</li>\
-<li>where_am_i: Area mode with random start location and early morph</li>\
-<li>where_is_morph: Area mode with late Morph</li></ul>\
-Tournament presets:<ul>\
-<li>Season_Races: settings used for rando league races (Majors/Minors split)</li>\
-<li>Season_Races_Chozo: settings used for rando league races (Chozo split)</li>\
-<li>Playoff_Races: settings used for rando league races during playoff (Majors/Minors split)</li>\
-<li>Playoff_Races_Chozo: settings used for rando league races during playoff (Chozo split)</li>\
-<li>SMRAT2020: Super Metroid Randomizer Accessible Tournament 2020</li></ul>"
+{{for preset in randoPresets:
+    if preset == "":
+      continue
+    response.write("<li>{}: {}</li>\\\n".format(preset, randoPresetsDesc.get(preset, "")), escape=False)
+    pass}}\
+</ul>\
+Tournament presets:\
+<ul>\
+{{for preset in tourRandoPresets:
+    response.write("<li>{}: {}</li>\\\n".format(preset, randoPresetsDesc.get(preset, "")), escape=False)
+    pass}}\
+</ul>"
     },
     {
       element: "#raceStep",
@@ -1753,7 +1743,28 @@ def displayNumber(id, min, max, default, step="1"):
               </tr>
               <tr>
                 <td>Settings Preset:</td>
-                <td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.randomizer["randoPreset"], _class="filldropdown chzn-select", _onchange="loadRandoPreset()"))}}</td>
+                <td>
+                  <select class="filldropdown chzn-select" id="randoPreset" name="randoPreset" onchange="loadRandoPreset()">
+                    <optgroup label="Standard presets">
+{{
+  for preset in randoPresets:
+    if preset == "":
+      response.write('<option selected="selected" value="{}">{}</option>\\\n'.format(preset, preset), escape=False)
+    else:
+      response.write('<option value="{}">{}: {}</option>\\\n'.format(preset, preset, randoPresetsDesc.get(preset, "")), escape=False)
+      pass
+    pass
+}}
+                    </optgroup>
+                    <optgroup label="Tournament presets">
+{{
+  for preset in tourRandoPresets:
+    response.write('<option value="{}">{}: {}</option>\\\n'.format(preset, preset, randoPresetsDesc.get(preset, "")), escape=False)
+    pass
+}}
+                </optgroup>
+                </select>
+                </td>
                 <td id="randoPresetStep"><button type="button" onclick="startTheTour(4)">?</button></td>
               </tr>
               <tr id="raceModeVisibility">

@@ -105,6 +105,7 @@ def loadRandoPresetsList():
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
+
     return (randoPresets, tourPresets)
 
 def validatePresetsParams(action):
@@ -999,6 +1000,28 @@ def randomizer():
     # add empty entry for default value
     randoPresets.append("")
 
+    randoPresetsDesc = {
+        "all_random": "all the parameters set to random",
+        "Chozo_Speedrun": "speedrun progression speed with Chozo split",
+        "default": "VARIA randomizer default settings",
+        "free": "easiest possible settings",
+        "hardway2hell": "harder highway2hell",
+        "haste": "inspired by DASH randomizer with Nerfed Charge / Progressive Suits",
+        "highway2hell": "favors suitless seeds",
+        "quite_random": "randomizes a few significant settings to have various seeds",
+        "stupid_hard": "hardest possible settings",
+        "surprise": "quite_random with Area, Boss and Start Location randomized",
+        "vanilla": "closest possible to vanilla Super Metroid",
+        "way_of_chozo": "chozo split with boss randomization",
+        "where_am_i": "Area mode with random start location and early morph",
+        "where_is_morph": "Area mode with late Morph",
+        "Season_Races": "rando league races (Majors/Minors split)",
+        "Season_Races_Chozo": "rando league races (Chozo split)",
+        "Playoff_Races": "rando league races during playoff (Majors/Minors split)",
+        "Playoff_Races_Chozo": "rando league races during playoff (Chozo split)",
+        "SMRAT2020": "Super Metroid Randomizer Accessible Tournament 2020"
+    }
+
     startAPs = GraphUtils.getStartAccessPointNamesCategory()
     startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),
                 OPTGROUP(_label="Custom", *startAPs["custom"]),
@@ -1009,7 +1032,7 @@ def randomizer():
     defaultMultiValues = getDefaultMultiValues()
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
-                randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
+                randoPresets=randoPresets, tourRandoPresets=tourRandoPresets, randoPresetsDesc=randoPresetsDesc,
                 startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues,
                 maxsize=sys.maxsize)
 

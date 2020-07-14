@@ -419,7 +419,7 @@ google.charts.setOnLoadCallback(drawCharts);
             if param in paramDict:
               response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format('true' if paramDict[param] == 'None' else paramDict[param]), escape=False)
             else:
-              response.write("    <td>false</td>\n", escape=False)
+              response.write("    <td></td>\n", escape=False)
               pass
             pass
           # error msg

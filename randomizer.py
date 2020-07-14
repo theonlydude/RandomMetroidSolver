@@ -79,7 +79,7 @@ if __name__ == "__main__":
                         dest='bosses', nargs='?', const=True, default=False)
     parser.add_argument('--minimizer', help="minimizer mode: area and boss mixed together. arg is number of non boss locations",
                         dest='minimizerN', nargs='?', const=35, default=None,
-                        choices=[str(i) for i in range(20,101)])
+                        choices=[str(i) for i in range(30,101)])
     parser.add_argument('--startAP', help="Name of the Access Point to start from",
                         dest='startAP', nargs='?', default="Landing Site",
                         choices=['random'] + GraphUtils.getStartAccessPointNames())

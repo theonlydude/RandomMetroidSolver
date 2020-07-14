@@ -165,7 +165,7 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.haveItem('Morph'), # morph to exit the hole
                        sm.wor(sm.wand(sm.haveItem('Gravity'), # even with gravity you need some way to climb...
                                       sm.wor(sm.haveItem('Ice'), # ...on crabs...
-                                             sm.haveItem('HiJump'), # ...or by jumping
+                                             sm.wand(sm.haveItem('HiJump'), sm.knowsMaridiaWallJumps()), # ...or by jumping
                                              sm.knowsGravityJump(),
                                              sm.canFly())),
                               sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia()), # climbing crabs
@@ -550,6 +550,27 @@ class HelpersGraph(Helpers):
                                      sm.wand(sm.haveItem('Ice'),
                                              sm.energyReserveCountOk(int(7.0/sm.getDmgReduction(False)[0])), # mochtroid dmg
                                              sm.knowsBotwoonToDraygonWithIce()))))
+
+    @Cache.decorator
+    def canClimbWestSandHole(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.haveItem('HiJump'),
+                              sm.knowsGravLessLevel3(),
+                              sm.wor(sm.haveItem('SpaceJump'),
+                                     sm.canSpringBallJump(),
+                                     sm.knowsWestSandHoleSuitlessWallJumps())))
+
+    @Cache.decorator
+    def canAccessItemsInWestSandHole(self):
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.haveItem('HiJump'), # vanilla strat
+                              sm.canUseSpringBall()),
+                      sm.wand(sm.haveItem('SpaceJump'), # alternate strat with possible double bomb jump but no difficult wj
+                              sm.wor(sm.canUseSpringBall(),
+                                     sm.canUseBombs())),
+                      sm.wand(sm.canPassBombPassages(), # wjs and/or 3 tile mid air morph
+                              sm.knowsMaridiaWallJumps()))
 
     def getDraygonConnection(self):
         if self.draygonConnection is None:

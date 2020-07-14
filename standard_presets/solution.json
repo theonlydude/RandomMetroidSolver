@@ -327,7 +327,15 @@
     "AccessSpringBallWithFlatley": [
       true,
       100
-    ]
+    ],
+    "MaridiaWallJumps": [
+      true,
+      5
+    ],
+    "WestSandHoleSuitlessWallJumps": [
+      true,
+      100
+    ],
   },
   "Settings": {
     "Kraid": "Default",

@@ -675,11 +675,9 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'West Sand Hole',
     'AccessFrom' : {
-        'Left Sandpit': lambda sm: sm.haveItem('Morph')
+        'Left Sandpit': lambda sm: sm.canClimbWestSandHole()
     },
-    'Available': lambda sm: sm.wor(sm.haveItem('Gravity'), # TODO? add knows for jumping up there?
-                                   sm.wand(sm.haveItem('HiJump'),
-                                           sm.knowsGravLessLevel3()))
+    'Available': lambda sm: sm.canAccessItemsInWestSandHole()
 },
 {
     'Area': "Maridia",
@@ -717,7 +715,10 @@ locations = [
                                            sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb()), # XRay climb
                                            sm.canCrystalFlashClip()),
                                     sm.wor(sm.haveItem('Gravity'), sm.canUseSpringBall())), # acess the item in spring ball room
-    'PostAvailable': lambda sm: sm.wor(sm.haveItem('Gravity'),
+    'PostAvailable': lambda sm: sm.wor(sm.wand(sm.haveItem('Gravity'),
+                                               sm.wor(sm.haveItem('HiJump'),
+                                                      sm.canFly(),
+                                                      sm.knowsMaridiaWallJumps())),
                                        sm.canSpringBallJump())
 },
 {
@@ -1848,11 +1849,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'West Sand Hole',
     'AccessFrom' : {
-        'Left Sandpit': lambda sm: sm.haveItem('Morph')
+        'Left Sandpit': lambda sm: sm.canClimbWestSandHole()
     },
-    'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                   sm.wand(sm.haveItem('HiJump'),
-                                           sm.knowsGravLessLevel3()))
+    'Available': lambda sm: sm.canAccessItemsInWestSandHole()
 },
 {
     'Area': "Maridia",

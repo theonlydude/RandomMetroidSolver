@@ -71,6 +71,9 @@ class AccessPoint(object):
     def isInternal(self):
         return self.Internal or self.Escape
 
+    def isLoop(self):
+        return self.ConnectedTo == self.Name
+
 class AccessGraph(object):
     def __init__(self, accessPointList, transitions, dotFile=None):
         self.log = log.get('Graph')
@@ -341,7 +344,7 @@ class AccessGraph(object):
         rootAp = self.accessPoints[rootNode]
         allAreas = {dst.GraphArea for (src, dst) in self.InterAreaTransitions}
         return [ap for ap in self.getAvailableAccessPoints(rootAp, None, 0) if ap.GraphArea in allAreas]
-    
+
     # gives theoretically accessible locations within a base list
     # returns locations with accessible GraphArea in this graph (no logic considered)
     def getAccessibleLocations(self, locations, rootNode='Landing Site'):

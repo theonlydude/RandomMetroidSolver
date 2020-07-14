@@ -894,6 +894,17 @@ class GraphUtils:
             apList = accessPoints
         return [ap for ap in apList if apPredicate(ap) == True]
 
+    def loopUnusedTransitions(transitions, apList=None):
+        if apList is None:
+            apList = accessPoints
+        usedAPs = set()
+        for (src,dst) in transitions:
+            usedAPs.add(getAccessPoint(src, apList))
+            usedAPs.add(getAccessPoint(dst, apList))
+        unusedAPs = [ap for ap in apList if not ap.isInternal() and ap not in usedAPs]
+        for ap in unusedAPs:
+            transitions.append((ap.Name, ap.Name))
+
     def createMinimizerTransitions(startApName, locLimit, escapeRando):
         if startApName == 'Ceres':
             startApName = 'Landing Site'
@@ -953,6 +964,8 @@ class GraphUtils:
         while len(targetAPs) > 0:
             transitions.append((sourceAPs.pop().Name, targetAPs.pop().Name))
         transitions += GraphUtils.createRegularAreaTransitions(sourceAPs, lambda ap: not ap.isInternal())
+        print(transitions)
+        GraphUtils.loopUnusedTransitions(transitions)
         print(transitions)
         print("nLocs: "+str(nLocs))
         return transitions

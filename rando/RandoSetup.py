@@ -153,11 +153,11 @@ class RandoSetup(object):
         # get restricted locs
         totalAvailLocs = []
         comeBack = {}
-#        try:
-        container = ItemLocContainer(self.sm, pool, self.locations)
-        # except AssertionError:
-        #     # invalid graph altogether
-        #     return False
+        try:
+            container = ItemLocContainer(self.sm, pool, self.locations)
+        except AssertionError:
+            # invalid graph altogether
+            return False
         # restrict item pool in chozo: game should be finishable with chozo items only
         contPool = []
         if self.restrictions.isChozo():
@@ -187,7 +187,7 @@ class RandoSetup(object):
         self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 
         # check if we all inter-area APs reach each other
-        interAPs = [ap for ap in self.areaGraph.getAccessibleAccessPoints(self.startAP) if ap.isArea()]
+        interAPs = [ap for ap in self.areaGraph.getAccessibleAccessPoints(self.startAP) if not ap.isInternal() and not ap.isLoop()]
         for startAp in interAPs:
             availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.settings.maxDiff)
             for ap in interAPs:

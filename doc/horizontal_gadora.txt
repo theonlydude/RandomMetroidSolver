@@ -347,7 +347,7 @@ $84:DAD4 60          RTS
 
 ;;; $DB44: PLM entries ;;;
 {
-;$84:DB44             dw DB1E,DB42       ; Sets Metroids cleared states when required
+$84:DB44             dw DB1E,DB42       ; Sets Metroids cleared states when required
 $84:DB48             dw DA8C,D955       ; Eye door eye, facing right
 $84:DB4C             dw DAB9,DA20,AAE3  ; Door. Eye door, facing right
 $84:DB52             dw DAB9,DA56       ; Eye door bottom, facing right

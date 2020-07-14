@@ -966,7 +966,6 @@ class GraphUtils:
         transitions += GraphUtils.createRegularAreaTransitions(sourceAPs, lambda ap: not ap.isInternal())
         print(transitions)
         GraphUtils.loopUnusedTransitions(transitions)
-        print(transitions)
         print("nLocs: "+str(nLocs))
         return transitions
 

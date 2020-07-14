@@ -2,6 +2,7 @@ import copy, logging
 import log
 from smbool import SMBool
 from parameters import infinity
+from helpers import Bosses
 
 class AccessPoint(object):
     # name : AccessPoint name
@@ -342,8 +343,12 @@ class AccessGraph(object):
     # gives theoretically accessible APs in the graph (no logic check)
     def getAccessibleAccessPoints(self, rootNode='Landing Site'):
         rootAp = self.accessPoints[rootNode]
-        allAreas = {dst.GraphArea for (src, dst) in self.InterAreaTransitions}
-        return [ap for ap in self.getAvailableAccessPoints(rootAp, None, 0) if ap.GraphArea in allAreas]
+        inBossChk = lambda ap: ap.Boss and ap.Name.endswith("In")
+        allAreas = {dst.GraphArea for (src, dst) in self.InterAreaTransitions if not inBossChk(dst) and not dst.isLoop()}
+        self.log.debug("allAreas="+str(allAreas))
+        nonBossAPs = [ap for ap in self.getAvailableAccessPoints(rootAp, None, 0) if ap.GraphArea in allAreas]
+        bossesAPs = [self.accessPoints[boss+'RoomIn'] for boss in Bosses.Golden4()] + [self.accessPoints['Draygon Room Bottom']]
+        return nonBossAPs + bossesAPs
 
     # gives theoretically accessible locations within a base list
     # returns locations with accessible GraphArea in this graph (no logic considered)

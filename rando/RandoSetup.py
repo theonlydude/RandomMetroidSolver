@@ -209,12 +209,15 @@ class RandoSetup(object):
                 self.sm.addItems([item['Type'] for item in contPool if item['Category'] != 'Boss'])
                 maxDiff = self.settings.maxDiff
                 # see if phantoon doesn't block himself, and if we can reach draygon if she's alive
-                ret = self.areaGraph.canAccess(self.sm, 'PhantoonRoomOut', 'PhantoonRoomIn', maxDiff)\
-                      and self.areaGraph.canAccess(self.sm, 'Main Street Bottom', 'DraygonRoomIn', maxDiff)
+                ret = self.areaGraph.canAccess(self.sm, self.startAP, 'PhantoonRoomIn', maxDiff)\
+                      and self.areaGraph.canAccess(self.sm, self.startAP, 'DraygonRoomIn', maxDiff)
                 if ret:
                     # see if we can beat bosses with this equipment (infinity as max diff for a "onlyBossesLeft" type check
                     beatableBosses = sorted([loc['Name'] for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if "Boss" in loc['Class']])
+                    self.log.debug("checkPool. beatableBosses="+str(beatableBosses))
                     ret = beatableBosses == Bosses.Golden4()
+                else:
+                    self.log.debug('checkPool. locked by Phantoon or Draygon')
                 self.log.debug('checkPool. boss access sanity check: '+str(ret))
 
         if self.restrictions.isChozo():

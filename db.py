@@ -326,7 +326,7 @@ order by r.id;"""
 
         # custom sort of the params
         paramsHead = []
-        for param in ['seed', 'complexity', 'preset', 'startAP', 'area', 'bosses', 'majorsSplit', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'suitsRestriction', 'energyQty', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty']:
+        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'bossRandomization', 'majorsSplit', 'majorsSplitMultiSelect', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
             if param in paramsSet:
                 paramsHead.append(param)
                 paramsSet.remove(param)

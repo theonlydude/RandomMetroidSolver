@@ -185,7 +185,7 @@ class RandoSetup(object):
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
         self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 
-        # check if we all inter-area APs reach each other
+        # check if all inter-area APs can reach each other
         interAPs = [ap for ap in self.areaGraph.accessPoints.values() if ap.isArea()]
         for startAp in interAPs:
             availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.settings.maxDiff)
@@ -345,7 +345,7 @@ class RandoSetup(object):
             self.getForbiddenMovement()
         if 'Combat' in self.superFun:
             self.getForbiddenCombat()
-        # if no super fun, check that there's no resctricted locations (for ultra sparse)
+        # if no super fun, check that there's no restricted locations (for ultra sparse)
         if len(self.superFun) == 0:
             self.addRestricted()
         self.log.debug("forbiddenItems: {}".format(self.forbiddenItems))

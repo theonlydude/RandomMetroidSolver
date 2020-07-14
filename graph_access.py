@@ -1075,7 +1075,6 @@ class GraphUtils:
             # remove duplicates (loop transitions)
             if any(c['ID'] == conn['ID'] for c in connections):
                 continue
-            print(conn['ID'])
             # where to write
             conn['DoorPtr'] = src.ExitInfo['DoorPtr']
             # door properties

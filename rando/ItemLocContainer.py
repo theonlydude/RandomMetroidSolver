@@ -1,6 +1,7 @@
 
 import copy, log
 
+from smbool import SMBool
 from smboolmanager import SMBoolManager
 from collections import Counter
 
@@ -216,6 +217,14 @@ class ItemLocContainer(object):
             loc['itemName'] = il['Item']['Type']
             locs.append(loc)
         return locs
+
+    def cleanLocsAfterSolver(self):
+        # restricted locs can have their difficulty set, which can cause them to be reported in the
+        # post randomization warning message about locs with diff > max diff.
+        for il in self.itemLocations:
+            loc = il['Location']
+            if loc.get('restricted') == True and loc.get('difficulty', False) == True:
+                loc['difficulty'] = SMBool(False)
 
     def getDistinctItems(self):
         itemTypes = {item['Type'] for item in self.itemPool}

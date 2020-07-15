@@ -655,12 +655,14 @@ class RomPatcher:
         self.nItems = 0
         self.nothingMissile = False
         for itemLoc in itemLocs:
-            if 'Boss' in itemLoc['Location']['Class']:
+            loc = itemLoc['Location']
+            item = itemLoc['Item']
+            if 'Boss' in loc['Class']:
                 continue
-            isMorph = itemLoc['Location']['Name'] == 'Morphing Ball'
-            if itemLoc['Item']['Category'] == 'Nothing':
+            isMorph = loc['Name'] == 'Morphing Ball'
+            if item['Category'] == 'Nothing':
                 self.writeNothing(itemLoc)
-                if itemLoc['Location']['Id'] == self.nothingId:
+                if loc['Id'] == self.nothingId and ('restricted' not in loc or loc['restricted'] == False):
                     # nothing at morph gives a missile pack
                     self.nothingMissile = True
                     self.nItems += 1

@@ -558,14 +558,7 @@ if __name__ == "__main__":
         if args.vcr == False:
             sys.exit(-1)
 
-    # hide some items like in dessy's
-    if args.hideItems == True:
-        for itemLoc in itemLocs:
-            if (itemLoc['Item']['Type'] not in ['Nothing', 'NoEnergy']
-                and itemLoc['Location']['CanHidden'] == True
-                and itemLoc['Location']['Visibility'] == 'Visible'):
-                if bool(random.randint(0, 2)) == True:
-                    itemLoc['Location']['Visibility'] = 'Hidden'
+    randoExec.postProcessItemLocs(itemLocs, args.hideItems)
     # choose on animal patch
     if args.animals == True:
         animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',

@@ -913,7 +913,7 @@ class GraphUtils:
             if locList is None:
                 locList = locations
             # leave out bosses and count post boss locs systematically
-            return len([loc for loc in locList if locsPredicate(loc) == True and not loc['SolveArea'].endswith(" Boss")])
+            return len([loc for loc in locList if locsPredicate(loc) == True and not loc['SolveArea'].endswith(" Boss") and not "Boss" in loc["Class"]])
         availAreas = sorted(list(set([ap.GraphArea for ap in accessPoints if ap.GraphArea != startAp.GraphArea and getNLocs(lambda loc: loc['GraphArea'] == ap.GraphArea) > 0])))
         areas = [startAp.GraphArea]
         def isShipReachable():

@@ -84,8 +84,8 @@ class RandoExec(object):
                     if bool(random.randint(0, 2)) == True:
                         itemLoc['Location']['Visibility'] = 'Hidden'
         # put nothing in unfilled locations
-        filledLocNamess = [il['Location']['Name'] for il in itemLocs]
-        unfilledLocs = [loc for loc in graphLocations if loc['Name'] not in filledLocNamess]
+        filledLocNames = [il['Location']['Name'] for il in itemLocs]
+        unfilledLocs = [loc for loc in graphLocations if loc['Name'] not in filledLocNames]
         nothing = ItemManager.getItem('Nothing')
         for loc in unfilledLocs:
             loc['restricted'] = True

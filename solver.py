@@ -61,6 +61,8 @@ class SolverState(object):
         self.state["bossTransitions"] = solver.bossTransitions
         # list [(ap1, ap2), ...]
         self.state["curGraphTransitions"] = solver.curGraphTransitions
+        # bool
+        self.state["hasMixedTransitions"] = solver.hasMixedTransitions
         # preset file name
         self.state["presetFileName"] = solver.presetFileName
         ## items collected / locs visited / bosses killed
@@ -106,6 +108,7 @@ class SolverState(object):
         solver.areaTransitions = self.state["areaTransitions"]
         solver.bossTransitions = self.state["bossTransitions"]
         solver.curGraphTransitions = self.state["curGraphTransitions"]
+        solver.hasMixedTransitions = self.state["hasMixedTransitions"]
         # preset
         solver.presetFileName = self.state["presetFileName"]
         # items collected / locs visited / bosses killed
@@ -285,6 +288,8 @@ class CommonSolver(object):
             self.areaTransitions = vanillaTransitions[:]
             self.bossTransitions = vanillaBossesTransitions[:]
             self.escapeTransition = [vanillaEscapeTransitions[0]]
+            # in seedless we allow mixing of area and boss transitions
+            self.hasMixedTransitions = True
             self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
             for loc in self.locations:
                 loc['itemName'] = 'Nothing'
@@ -303,7 +308,7 @@ class CommonSolver(object):
             else:
                 print("majors: {} area: {} boss: {} escape: {} activepatches: {}".format(self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(RomPatches.ActivePatches)))
 
-            (self.areaTransitions, self.bossTransitions, self.escapeTransition) = self.romLoader.getTransitions()
+            (self.areaTransitions, self.bossTransitions, self.escapeTransition, self.hasMixedTransitions) = self.romLoader.getTransitions()
             if interactive == True and self.debug == False:
                 # in interactive area mode we build the graph as we play along
                 if self.areaRando == True and self.bossRando == True:

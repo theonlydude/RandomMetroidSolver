@@ -1798,6 +1798,7 @@ class WS(object):
                 "mode": state["mode"],
                 "areaRando": state["areaRando"],
                 "bossRando": state["bossRando"],
+                "hasMixedTransitions": state["hasMixedTransitions"],
                 "escapeRando": state["escapeRando"],
                 "escapeTimer": state["escapeTimer"],
                 "seed": state["seed"],

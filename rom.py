@@ -365,7 +365,10 @@ class RomReader:
         escapeDstAP = rooms[key]
         escapeTransition = [(escapeSrcAP.Name, escapeDstAP.Name)]
 
-        return (removeBiTrans(areaTransitions), removeBiTrans(bossTransitions), escapeTransition)
+        areaTransitions = removeBiTrans(areaTransitions)
+        bossTransitions = removeBiTrans(bossTransitions)
+
+        return (areaTransitions, bossTransitions, escapeTransition, GraphUtils.hasMixedTransitions(areaTransitions, bossTransitions))
 
     def getTransition(self, doorPtr):
         # room ptr is in two bytes

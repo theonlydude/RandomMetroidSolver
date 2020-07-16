@@ -1227,3 +1227,22 @@ class GraphUtils:
             transitions.append((doorsPtrs[srcDoorPtr], doorsPtrs[destDoorPtr]))
 
         return transitions
+
+    def hasMixedTransitions(areaTransitions, bossTransitions):
+        vanillaAPs = []
+        for (src, dest) in vanillaTransitions:
+            vanillaAPs += [src, dest]
+
+        vanillaBossesAPs = []
+        for (src, dest) in vanillaBossesTransitions:
+            vanillaBossesAPs += [src, dest]
+
+        for (src, dest) in areaTransitions:
+            if src in vanillaBossesAPs or dest in vanillaBossesAPs:
+                return True
+
+        for (src, dest) in bossTransitions:
+            if src in vanillaAPs or dest in vanillaAPs:
+                return True
+
+        return False

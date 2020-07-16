@@ -48,6 +48,14 @@ function checkCompatibleAPs(startAP, endAP) {
   response.write("  var vanillaBossesAPs = {};\n".format(vanillaBossesAPs), escape=False)
 }}
 
+  if(mode == "plando") {
+    return true;
+  }
+
+  if(hasMixedTransitions == true) {
+    return true;
+  }
+
   return (vanillaAPs.includes(startAP) && vanillaAPs.includes(endAP)) || (vanillaBossesAPs.includes(startAP) && vanillaBossesAPs.includes(endAP));
 }
 
@@ -330,6 +338,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
   mode = jsonData["mode"];
   area = jsonData["areaRando"];
   boss = jsonData["bossRando"];
+  hasMixedTransitions = jsonData["hasMixedTransitions"];
   escapeRando = jsonData["escapeRando"];
   seed = jsonData["seed"];
   preset = jsonData["preset"];
@@ -561,6 +570,7 @@ var lastAP = "landingSite";
 var mode = "standard";
 var area = true;
 var boss = true;
+var hasMixedTransitions = false;
 var escapeRando = true;
 var init = false;
 var webServInProgress = false;

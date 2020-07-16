@@ -133,7 +133,6 @@ class DB:
         try:
             sql = "update randomizer_params set value = '%s' where randomizer_id = %d and name = '%s';"
             for (name, value) in params.items():
-                print(sql % (value, id, name))
                 self.cursor.execute(sql % (value, id, name))
         except Exception as e:
             print("DB.updateRandoParams::error execute: {}".format(e))

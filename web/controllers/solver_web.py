@@ -1420,6 +1420,9 @@ def randomizerWebService():
 
         DB.addRandoResult(id, ret, duration, msg)
 
+        if "forcedArgs" in locsItems:
+            DB.updateRandoParams(id, locsItems["forcedArgs"])
+
         # store ips in local directory
         guid = str(uuid.uuid4())
         if storeLocalIps(guid, locsItems["fileName"], locsItems["ips"]):

@@ -126,6 +126,19 @@ class DB:
             print("DB.addRandoParams::error execute: {}".format(e))
             self.dbAvailable = False
 
+    def updateRandoParams(self, id, params):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "update randomizer_params set value = '%s' where randomizer_id = %d and name = '%s';"
+            for (name, value) in params.items():
+                print(sql % (value, id, name))
+                self.cursor.execute(sql % (value, id, name))
+        except Exception as e:
+            print("DB.updateRandoParams::error execute: {}".format(e))
+            self.dbAvailable = False
+
     def addRandoResult(self, id, returnCode, duration, msg):
         if self.dbAvailable == False:
             return None

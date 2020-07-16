@@ -254,9 +254,11 @@ if __name__ == "__main__":
     logger = log.get('Rando')
     # service to force an argument value and notify it
     argDict = vars(args)
-    def forceArg(arg, value, msg):
+    forcedArgs = {}
+    def forceArg(arg, value, msg, webArg=None, webValue=None):
         if argDict[arg] != value:
             argDict[arg] = value
+            forcedArgs[webArg if webArg != None else arg] = webValue if webValue != None else value
             print(msg)
             return '\n'+msg
         else:
@@ -374,10 +376,10 @@ if __name__ == "__main__":
     # in plando rando we know that the start ap is ok
     if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando == None:
         optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
-        optErrMsg += forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on")
-        optErrMsg += forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on")
-        optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off")
-        optErrMsg += forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on")
+        optErrMsg += forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", 'variaTweaks', 'on')
+        optErrMsg += forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
+        optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
+        optErrMsg += forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", 'areaLayout', 'on')
         possibleStartAPs = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty)
         if args.startAP == 'random':
             if args.startLocationList != None:
@@ -712,6 +714,9 @@ if __name__ == "__main__":
             data["fileName"] = fileName
             # error msg in json to be displayed by the web site
             data["errorMsg"] = msg
+            # replaced parameters to update stats in database
+            if len(forcedArgs) > 0:
+                data["forcedArgs"] = forcedArgs
             with open(outFileName, 'w') as jsonFile:
                 json.dump(data, jsonFile)
         else: # CLI mode

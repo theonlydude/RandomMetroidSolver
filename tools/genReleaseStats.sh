@@ -13,9 +13,15 @@ CWD=$(pwd)
 ROM=$1
 
 echo "checking total seeds"
-[ -d ~/download/total_seeds_major ] || exit -1
-[ -d ~/download/total_seeds_full ] || exit -1
-echo "total seeds found"
+if [ -d ~/download/sql_total ]; then
+    echo "total stats found"
+    TOTAL_ALREADY_COMPUTED=0
+else
+    [ -d ~/download/total_seeds_major ] || exit -1
+    [ -d ~/download/total_seeds_full ] || exit -1
+    echo "total seeds found"
+    TOTAL_ALREADY_COMPUTED=1
+fi
 
 function getDBParam {
     PARAM="$1"
@@ -63,9 +69,15 @@ ${CWD}/tools/genProgSpeedStats.sh ${ROM} 1000
 ${CWD}/tools/genProgSpeedStats.sh ${ROM} 1000 FULL
 
 # Stats sur l'échantillon de seeds total
-${CWD}/tools/genTotalStats.sh ~/download/total_seeds_major
-${CWD}/tools/genTotalStats.sh ~/download/total_seeds_full FULL
-
+if [ ${TOTAL_ALREADY_COMPUTED} -eq 1 ]; then
+    ${CWD}/tools/genTotalStats.sh ~/download/total_seeds_major
+    ${CWD}/tools/genTotalStats.sh ~/download/total_seeds_full FULL
+else
+    for FP in $(ls -1 ~/download/sql_total/*.sql); do
+        F=$(basename ${FP})
+        cat ${FP} >> ${CWD}/sql/${F}
+    done
+fi
 #################
 # load stats
 ${CWD}/tools/loadExtStats.sh

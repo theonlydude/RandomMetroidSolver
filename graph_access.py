@@ -926,6 +926,7 @@ class GraphUtils:
             nTransitions = len(GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and not ap.isInternal()))
             nClosedTransitions = (len(areas) - 1) * 2
             return nTransitions - nClosedTransitions
+        nLocsCrateria = getNLocs(lambda loc: loc['GraphArea'] == 'Crateria')
         inBossCheck = lambda ap: ap.Boss and ap.Name.endswith("In")
         nLocs = 0
         transitions = []
@@ -934,14 +935,11 @@ class GraphUtils:
         locLimit -= 3 # 3 "post boss" locs will always be available, and are filtered out in getNLocs
         while nLocs < locLimit or openTransitions() < trLimit or not isShipReachable():
             fromAreas = availAreas
-            if nLocs >= locLimit and not isShipReachable():
+            if nLocs >= locLimit and not isShipReachable() and 'Crateria' in areas:
                 print("ship unreachable")
-                if 'Crateria' in availAreas:
-                    fromAreas = ['Crateria']
-                else:
-                    # add an area with a map station
-                    escapeAPs = GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and ap.Name in escapeTargets)
-                    fromAreas = [area for area in availAreas if len(GraphUtils.getAPs(lambda ap: ap.GraphArea == area and ap.Name in escapeTargets and ap not in escapeAPs)) > 0]
+                # add an area with a map station
+                escapeAPs = GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and ap.Name in escapeTargets)
+                fromAreas = [area for area in availAreas if len(GraphUtils.getAPs(lambda ap: ap.GraphArea == area and ap.Name in escapeTargets and ap not in escapeAPs)) > 0]
             if nLocs >= locLimit and isShipReachable():
                 print("not enough open transitions")
                 # we just need transitions, avoid adding a huge area
@@ -952,6 +950,8 @@ class GraphUtils:
                     n -= 1
                 minLocs = min([getNLocs(lambda loc: loc['GraphArea'] == area) for area in fromAreas])
                 fromAreas = [area for area in fromAreas if getNLocs(lambda loc: loc['GraphArea'] == area) == minLocs]
+            if escapeRando == True and nLocs >= (locLimit - nLocsCrateria) and 'Crateria' not in areas:
+                fromAreas = ['Crateria']
             nextArea = random.choice(fromAreas)
             print("nextArea="+str(nextArea))
             apCheck = lambda ap: not ap.isInternal() and not inBossCheck(ap) and ap not in usedAPs

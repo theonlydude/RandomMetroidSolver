@@ -1413,7 +1413,8 @@ locations = [
     'AccessFrom' : {
         'Crocomire Room Top': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
+    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(),
+                                    sm.enoughStuffCroc(),
                                     sm.wor(sm.wor(sm.canFly(),
                                                   sm.haveItem('Grapple'),
                                                   sm.wand(sm.haveItem('SpeedBooster'),

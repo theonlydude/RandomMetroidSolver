@@ -572,14 +572,15 @@ class HelpersGraph(Helpers):
                       sm.wand(sm.canPassBombPassages(), # wjs and/or 3 tile mid air morph
                               sm.knowsMaridiaWallJumps()))
 
-    def getDraygonConnection(self):
-        if self.draygonConnection is None:
-            drayRoomOut = getAccessPoint('DraygonRoomOut')
-            self.draygonConnection = drayRoomOut.ConnectedTo
-        return self.draygonConnection
-
+    @Cache.decorator
     def isVanillaDraygon(self):
-        return self.getDraygonConnection() == 'DraygonRoomIn'
+        drayRoomOut = getAccessPoint('DraygonRoomOut')
+        return SMBool(drayRoomOut.ConnectedTo == 'DraygonRoomIn')
+
+    @Cache.decorator
+    def isVanillaCroc(self):
+        crocRoom = getAccessPoint('Crocomire Room Top')
+        return SMBool(crocRoom.ConnectedTo == 'Crocomire Speedway Bottom')
 
     @Cache.decorator
     def canFightDraygon(self):

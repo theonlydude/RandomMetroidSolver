@@ -288,21 +288,24 @@ class ItemPoolGenerator(object):
         self.maxEnergy = 18 # 14E, 4R
         self.log = log.get('ItemPool')
 
-    # add ammo given quantity settings
-    def addAmmo(self):
-        nbMinorsAlready = 5
+    def calcMaxAmmo(self):
+        self.nbMinorsAlready = 5
         # always add enough minors to pass zebetites (1100 damages) and mother brain 1 (3000 damages)
         # accounting for missile refill. so 15-10, or 10-10 if ice zeb skip is known (Ice is always in item pool)
         if not self.sm.knowsIceZebSkip():
             self.log.debug("Add missile because ice zeb skip is not known")
             self.itemManager.addMinor('Missile')
-            nbMinorsAlready += 1
-        maxMinors = 0.66*(self.maxItems - 5)
-        self.log.debug("maxMinors: "+str(maxMinors))
-        minorLocations = max(0, maxMinors*self.qty['minors']/100.0 - nbMinorsAlready)
-        self.log.debug("minorLocations: {}".format(minorLocations))
+            self.nbMinorsAlready += 1
+        self.maxMinors = 0.66*(self.maxItems - 5)
+        self.log.debug("maxMinors: "+str(self.maxMinors))
+        self.minorLocations = max(0, self.maxMinors*self.qty['minors']/100.0 - self.nbMinorsAlready)
+        self.log.debug("minorLocations: {}".format(self.minorLocations))
+
+    # add ammo given quantity settings
+    def addAmmo(self):
+        self.calcMaxAmmo()
         # we have to remove the minors already added
-        maxItems = min(len(self.itemManager.getItemPool()) + int(minorLocations), self.maxItems)
+        maxItems = min(len(self.itemManager.getItemPool()) + int(self.minorLocations), self.maxItems)
         self.log.debug("maxItems: {}".format(maxItems))
         ammoQty = self.qty['ammo']
         if not self.qty['strictMinors']:
@@ -315,7 +318,7 @@ class ItemPoolGenerator(object):
             minorsTypes = ['Missile', 'Super', 'PowerBomb']
             totalProps = sum(ammoQty[m] for m in minorsTypes)
             minorsByProp = sorted(minorsTypes, key=lambda m: ammoQty[m])
-            # in python3 the result is a float
+            maxMinors = 0.66*(maxItems - 5)
             totalMinorLocations = int(maxMinors * self.qty['minors'] / 100)
             self.log.debug("totalProps: {}".format(totalProps))
             self.log.debug("totalMinorLocations: {}".format(totalMinorLocations))
@@ -523,17 +526,26 @@ class ItemPoolGeneratorMinimizer(ItemPoolGeneratorMajors):
     def __init__(self, itemManager, qty, sm, nLocs):
         super(ItemPoolGeneratorMinimizer, self).__init__(itemManager, qty, sm)
         self.maxItems = nLocs
+        self.calcMaxAmmo()
+        nMajors = len([itemName for itemName,item in ItemManager.Items.items() if item['Class'] == 'Major' and item['Category'] != 'Energy'])
         energyQty = self.qty['energy']
         if energyQty == 'medium':
-            if nLocs < 55:
+            if nLocs < 40:
+                self.maxEnergy = 5
+            elif nLocs < 55:
                 self.maxEnergy = 6
             else:
                 self.maxEnergy = 5 + self.mediumRest
         elif energyQty == 'vanilla':
-            if nLocs < 55:
-                self.maxEnergy = 9
+            if nLocs < 40:
+                self.maxEnergy = 6
+            elif nLocs < 55:
+                self.maxEnergy = 8
             else:
-                self.maxEnergy = 9 + int(float(nLocs - 55)/50.0 * 9)
+                self.maxEnergy = 8 + int(float(nLocs - 55)/50.0 * 8)
+            self.maxEnergy = int(max(self.maxEnergy, self.maxItems - nMajors - self.minorLocations))
+            if self.maxEnergy > 18:
+                self.maxEnergy = 18
         elif energyQty == 'ultra sparse':
             self.maxEnergy = 0 if self.ultraSparseNoTanks else 1
         elif energyQty == 'sparse':

@@ -747,7 +747,7 @@ class RomPatcher:
                         optionalPatches=[], noLayout=False, suitsMode="Classic",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
-                        escapeAttr=None, noRemoveEscapeEnemies=False):
+                        escapeAttr=None, noRemoveEscapeEnemies=False, minimizerN=None):
         try:
             # apply standard patches
             stdPatches = []
@@ -811,7 +811,8 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
             elif bosses == True:
                 self.applyIPSPatch('door_transition.ips')
-            self.applyStartAP(startAP, plms, area)
+            doors = self.getStartDoors(plms, area, minimizerN)
+            self.applyStartAP(startAP, plms, doors)
             self.applyPLMs(plms)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
@@ -830,27 +831,35 @@ class RomPatcher:
                 patch = IPS_Patch.load(appDir + '/' + ipsDir + '/' + patchName)
         self.ipsPatches.append(patch)
 
-    def applyStartAP(self, apName, plms, area):
-        ap = getAccessPoint(apName)
-        if not GraphUtils.isStandardStart(apName):
-            # not Ceres or Landing Site, so Zebes will be awake
-            plms.append('Morph_Zebes_Awake')
-        (w0, w1) = getWord(ap.Start['spawn'])
+    def getStartDoors(self, plms, area, minimizerN):
         doors = [0x10] # red brin elevator
+        def addBlinking(name):
+            key = 'Blinking[{}]'.format(name)
+            if key in patches:
+                self.applyIPSPatch(key)
+            if key in additional_PLMs:
+                plms.append(key)
         if area == True:
             plms.append('Maridia Sand Hall Seal')
-            def addBlinking(name):
-                key = 'Blinking[{}]'.format(name)
-                if key in patches:
-                    self.applyIPSPatch(key)
-                if key in additional_PLMs:
-                    plms.append(key)
             for accessPoint in accessPoints:
                 if accessPoint.Internal == True or accessPoint.Boss == True:
                     continue
                 addBlinking(accessPoint.Name)
             addBlinking("West Sand Hall Left")
             addBlinking("Below Botwoon Energy Tank Right")
+        if minimizerN is not None:
+            # add blinking doors inside and outside boss rooms
+            for accessPoint in accessPoints:
+                if accessPoint.Boss == True:
+                    addBlinking(accessPoint.Name)
+        return doors
+
+    def applyStartAP(self, apName, plms, doors):
+        ap = getAccessPoint(apName)
+        if not GraphUtils.isStandardStart(apName):
+            # not Ceres or Landing Site, so Zebes will be awake
+            plms.append('Morph_Zebes_Awake')
+        (w0, w1) = getWord(ap.Start['spawn'])
         if 'doors' in ap.Start:
             doors += ap.Start['doors']
         doors.append(0x0)

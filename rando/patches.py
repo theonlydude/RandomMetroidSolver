@@ -185,6 +185,8 @@ patches = {
         0x109451: [0x0]
     },
     'Blinking[KraidRoomOut]': {
+        # removes gadora by ending PLM list
+        0x78A1A: [0x42, 0xc8, 0x1e, 0x16, 0x63, 0x8c, 0x00, 0x00],
         0x10A056: [0x0]
     },
     'Blinking[Warehouse Entrance Right]': {
@@ -207,12 +209,16 @@ patches = {
         0x10AD6B: [0x0]
     },
     'Blinking[RidleyRoomOut]': {
+        # removes gadora by ending PLM list
+        0x78EA6: [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c, 0x00, 0x00],
         0x10B81B: [0x0]
     },
     'Blinking[West Ocean Left]': {
         0x1086F6: [0x0]
     },
     'Blinking[PhantoonRoomOut]': {
+        # removes gadora by ending PLM list
+        0x7C29D: [0x42, 0xc8, 0x4e, 0x06, 0x63, 0x8c, 0x00, 0x00],
         0x10C3E5: [0x0]
     },
     'Blinking[Crab Maze Left]': {
@@ -232,6 +238,9 @@ patches = {
         0x1085DD: [0x0]
     },
     'Blinking[DraygonRoomOut]': {
+        # overwrites a gadoras PLMs and replace the rest with useless arrow PLMs
+        # (we cannot end the list because the item is after in the list)
+        0x7C73B: [0x48, 0xc8, 0x01, 0x26, 0x63, 0x8c] + [0x3b, 0xb6, 0x31, 0x26, 0x00, 0x00]*2,
         0x10D111: [0x0]
     },
     'Blinking[East Tunnel Top Right]': {
@@ -273,6 +282,22 @@ patches = {
     'Blinking[Crab Shaft Right]': {
         0x7C4FB: [0x42, 0xc8, 0x1e, 0x36, 0x8f, 0x8c],
         0x10D005: [0x0]
+    },
+    'Blinking[RidleyRoomIn]': {
+        0x78E98: [0x42, 0xc8, 0x0e, 0x06, 0x5a, 0x8c],
+        0x10A638: [0x0]
+    },
+    'Blinking[DraygonRoomIn]': {
+        0x7C7BB: [0x42, 0xc8, 0x1e, 0x06, 0x9e, 0x8c],
+        0x10D356: [0x0]
+    },
+    'Blinking[PhantoonRoomIn]': {
+        0x7C2B3: [0x48, 0xc8, 0x01, 0x06, 0x86, 0x8c],
+        0x10CD16: [0x0]
+    },
+    'Blinking[KraidRoomIn]': {
+        0x78A34: [0x48, 0xc8, 0x01, 0x16, 0x47, 0x8c],
+        0x109F37: [0x0]
     },
 }
 
@@ -389,12 +414,6 @@ additional_PLMs = {
             [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
         ]
     },
-    'Blinking[KraidRoomOut]': {
-        'room': 0xa56b,
-        'plm_bytes_list': [
-            [0x42, 0xc8, 0x1e, 0x16, 0x63, 0x8c]
-        ]
-    },
     'Blinking[Warehouse Entrance Right]': {
         'room': 0xa6a1,
         'plm_bytes_list': [
@@ -425,22 +444,10 @@ additional_PLMs = {
             [0x42, 0xc8, 0x3e, 0x06, 0x63, 0x8c]
         ]
     },
-    'Blinking[RidleyRoomOut]': {
-        'room': 0xb37a,
-        'plm_bytes_list': [
-            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
-        ]
-    },
     'Blinking[West Ocean Left]': {
         'room': 0x93fe,
         'plm_bytes_list': [
             [0x48, 0xc8, 0x01, 0x46, 0x63, 0x8c]
-        ]
-    },
-    'Blinking[PhantoonRoomOut]': {
-        'room': 0xcc6f,
-        'plm_bytes_list': [
-            [0x42, 0xc8, 0x4e, 0x06, 0x63, 0x8c]
         ]
     },
     'Blinking[Crab Maze Left]': {
@@ -465,12 +472,6 @@ additional_PLMs = {
         'room': 0xd104,
         'plm_bytes_list': [
             [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
-        ]
-    },
-    'Blinking[DraygonRoomOut]': {
-        'room': 0xd78f,
-        'plm_bytes_list': [
-            [0x48, 0xc8, 0x01, 0x26, 0x63, 0x8c]
         ]
     },
     'Blinking[East Tunnel Top Right]': {

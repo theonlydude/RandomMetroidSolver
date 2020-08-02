@@ -925,7 +925,8 @@ class GraphUtils:
         def openTransitions():
             nonlocal areas
             nTransitions = len(GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and not ap.isInternal()))
-            nClosedTransitions = (len(areas) - 1) * 2
+            nClosedTransitions = (len(areas) - 1) * 2 + 1
+            print("t=%d, c=%d" % (nTransitions, nClosedTransitions))
             return nTransitions - nClosedTransitions
         nLocsCrateria = getNLocs(lambda loc: loc['GraphArea'] == 'Crateria')
         inBossCheck = lambda ap: ap.Boss and ap.Name.endswith("In")
@@ -935,6 +936,7 @@ class GraphUtils:
         trLimit = 5
         locLimit -= 3 # 3 "post boss" locs will always be available, and are filtered out in getNLocs
         while nLocs < locLimit or openTransitions() < trLimit or not isShipReachable():
+            print("openTransitions="+str(openTransitions()))
             fromAreas = availAreas
             if nLocs >= locLimit and not isShipReachable() and 'Crateria' in areas:
                 print("ship unreachable")

@@ -38,7 +38,7 @@ full_refill:
 .end:
 	rts
 
-warnpc $8ff7ef
+warnpc $8ff72f
 
 ;;; use this as croc top exit door asm :
 ;;; croc draws its tilemap on BG2, and a routine to draw enemy

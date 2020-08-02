@@ -388,7 +388,7 @@ if __name__ == "__main__":
             if args.startLocationList != None:
                 # intersection between user whishes and reality
                 startLocationList = args.startLocationList.split(',')
-                possibleStartAPs = list(set(possibleStartAPs).intersection(set(startLocationList)))
+                possibleStartAPs = sorted(list(set(possibleStartAPs).intersection(set(startLocationList))))
                 if len(possibleStartAPs) == 0:
                     optErrMsg += '\nInvalid start locations list with your settings.'
                     dumpErrorMsg(args.output, optErrMsg)

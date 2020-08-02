@@ -641,8 +641,9 @@ class Helpers(object):
     @Cache.decorator
     def enoughStuffTourian(self):
         sm = self.smbm
-        ret = self.smbm.wand(sm.canPassMetroids(),
-                             sm.canPassZebetites(),
+        ret = self.smbm.wand(sm.wor(RomPatches.has(RomPatches.TourianSpeedup),
+                                    sm.wand(sm.canPassMetroids(),
+                                            sm.canPassZebetites())),
                              sm.enoughStuffsMotherbrain())
         return ret
 

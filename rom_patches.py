@@ -61,6 +61,7 @@ class RomPatches:
     MaridiaSandWarp           = 108
     ## Minimizer Patches
     NoGadoras                 = 200
+    TourianSpeedup            = 201
 
     ### Other
     # Gravity no longer protects from environmental damage (heat, spikes...)
@@ -98,6 +99,9 @@ class RomPatches:
 
     # VARIA specific patch set
     VariaTweaks = [ WsEtankPhantoonAlive, LNChozoSJCheckDisabled ]
+
+    # Tourian speedup in minimizer mode
+    MinimizerTourian = [ TourianSpeedup, NerfedRainbowBeam ]
 
     # dessyreqt randomizer
     Dessy = []

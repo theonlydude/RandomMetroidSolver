@@ -80,6 +80,9 @@ if __name__ == "__main__":
     parser.add_argument('--minimizer', help="minimizer mode: area and boss mixed together. arg is number of non boss locations",
                         dest='minimizerN', nargs='?', const=35, default=None,
                         choices=[str(i) for i in range(30,101)])
+    parser.add_argument('--minimizerTourian',
+                        help="Tourian speedup in minimizer mode",
+                        dest='minimizerTourian', nargs='?', const=True, default=True)
     parser.add_argument('--startAP', help="Name of the Access Point to start from",
                         dest='startAP', nargs='?', default="Landing Site",
                         choices=['random'] + GraphUtils.getStartAccessPointNames())
@@ -449,6 +452,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.VariaTweaks
     if minimizerN is not None:
         RomPatches.ActivePatches.append(RomPatches.NoGadoras)
+        if args.minimizerTourian == True:
+            RomPatches.ActivePatches += RomPatches.MinimizerTourian
     missileQty = float(args.missileQty)
     superQty = float(args.superQty)
     powerBombQty = float(args.powerBombQty)
@@ -645,7 +650,7 @@ if __name__ == "__main__":
                                        args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
-                                       escapeAttr, args.noRemoveEscapeEnemies, minimizerN)
+                                       escapeAttr, args.noRemoveEscapeEnemies, minimizerN, args.minimizerTourian)
         else:
             # from customizer permalink, apply previously generated seed ips first
             if args.seedIps != None:

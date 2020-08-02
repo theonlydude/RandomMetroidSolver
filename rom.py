@@ -585,7 +585,8 @@ class RomPatcher:
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips' ],
-        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips']
+        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips'],
+        'MinimizerTourian': ['minimizer_tourian.ips', 'nerfed_rainbow_beam.ips']
     }
 
     def __init__(self, romFileName=None, magic=None, plando=False):
@@ -747,7 +748,8 @@ class RomPatcher:
                         optionalPatches=[], noLayout=False, suitsMode="Classic",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
-                        escapeAttr=None, noRemoveEscapeEnemies=False, minimizerN=None):
+                        escapeAttr=None, noRemoveEscapeEnemies=False,
+                        minimizerN=None, minimizerTourian=True):
         try:
             # apply standard patches
             stdPatches = []
@@ -811,6 +813,9 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
             elif bosses == True:
                 self.applyIPSPatch('door_transition.ips')
+            if minimizerN is not None and minimizerTourian == True:
+                for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
+                    self.applyIPSPatch(patchName)
             doors = self.getStartDoors(plms, area, minimizerN)
             self.applyStartAP(startAP, plms, doors)
             self.applyPLMs(plms)

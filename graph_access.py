@@ -975,7 +975,7 @@ class GraphUtils:
         # we picked the areas, add transitions (bosses and tourian first)
         sourceAPs = GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and not ap.isInternal() and not inBossCheck(ap) and not ap in usedAPs)
         random.shuffle(sourceAPs)
-        targetAPs = GraphUtils.getAPs(lambda ap: inBossCheck(ap) or ap.Name == "Golden Four")
+        targetAPs = GraphUtils.getAPs(lambda ap: (inBossCheck(ap) or ap.Name == "Golden Four") and not ap in usedAPs)
         random.shuffle(targetAPs)
         while len(targetAPs) > 0:
             transitions.append((sourceAPs.pop().Name, targetAPs.pop().Name))

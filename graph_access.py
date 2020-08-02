@@ -110,7 +110,7 @@ accessPoints = [
         'Green Hill Zone Top Right': lambda sm: sm.wand(sm.haveItem('Morph'),
                                                         sm.canOpenGreenDoors()),
         'Green Brinstar Elevator': lambda sm: sm.wor(sm.haveItem('SpeedBooster'),
-                                                           sm.canDestroyBombWalls())
+                                                     sm.canDestroyBombWalls())
     }, internal=True, start={'spawn': 0x0100, 'solveArea': "Pink Brinstar"}),
     AccessPoint('Green Hill Zone Top Right', 'GreenPinkBrinstar', {
         'Noob Bridge Right': lambda sm: SMBool(True),
@@ -915,7 +915,7 @@ class GraphUtils:
                 locList = locations
             # leave out bosses and count post boss locs systematically
             return len([loc for loc in locList if locsPredicate(loc) == True and not loc['SolveArea'].endswith(" Boss") and not "Boss" in loc["Class"]])
-        availAreas = sorted(list(set([ap.GraphArea for ap in accessPoints if ap.GraphArea != startAp.GraphArea and getNLocs(lambda loc: loc['GraphArea'] == ap.GraphArea) > 0])))
+        availAreas = list(sorted({ap.GraphArea for ap in accessPoints if ap.GraphArea != startAp.GraphArea and getNLocs(lambda loc: loc['GraphArea'] == ap.GraphArea) > 0}))
         areas = [startAp.GraphArea]
         def isShipReachable():
             nonlocal areas
@@ -953,6 +953,8 @@ class GraphUtils:
                 fromAreas = [area for area in fromAreas if getNLocs(lambda loc: loc['GraphArea'] == area) == minLocs]
             if escapeRando == True and nLocs >= (locLimit - nLocsCrateria) and 'Crateria' not in areas:
                 fromAreas = ['Crateria']
+            elif openTransitions() <= 1: # dont' get stuck by adding dead ends
+                fromAreas = [area for area in fromAreas if len(GraphUtils.getAPs(lambda ap: ap.GraphArea == area and not ap.isInternal())) > 1]
             nextArea = random.choice(fromAreas)
             print("nextArea="+str(nextArea))
             apCheck = lambda ap: not ap.isInternal() and not inBossCheck(ap) and ap not in usedAPs

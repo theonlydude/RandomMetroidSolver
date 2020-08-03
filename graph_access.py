@@ -198,7 +198,8 @@ accessPoints = [
        boss = True,
        roomInfo = {'RoomPtr':0xcd13, "area": 0x3},
        exitInfo = {'DoorPtr':0xa2c4, 'direction': 0x5, "cap": (0x4e, 0x6), "bitFlag": 0x0,
-                   "screen": (0x4, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe1fe},
+                   "screen": (0x4, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe1fe,
+                   "exitAsmPtr": 0xf7f0},
        entryInfo = {'SamusX':0x2e, 'SamusY':0xb8},
        dotOrientation = 's'),
     AccessPoint('Basement Left', 'WreckedShip', {

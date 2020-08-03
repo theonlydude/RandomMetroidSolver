@@ -543,13 +543,16 @@ class ItemPoolGeneratorMinimizer(ItemPoolGeneratorMajors):
                 self.maxEnergy = 8
             else:
                 self.maxEnergy = 8 + int(float(nLocs - 55)/50.0 * 8)
-            self.maxEnergy = int(max(self.maxEnergy, self.maxItems - nMajors - self.minorLocations))
+            self.log.debug("maxEnergy: "+str(self.maxEnergy))
+            maxItems = self.maxItems - 10 # remove bosses and minimal minore
+            self.maxEnergy = int(max(self.maxEnergy, maxItems - nMajors - self.minorLocations))
             if self.maxEnergy > 18:
                 self.maxEnergy = 18
         elif energyQty == 'ultra sparse':
             self.maxEnergy = 0 if self.ultraSparseNoTanks else 1
         elif energyQty == 'sparse':
             self.maxEnergy = 3 + self.sparseRest
+        self.log.debug("maxEnergy: "+str(self.maxEnergy))
 
 class ItemPoolGeneratorPlando(ItemPoolGenerator):
     def __init__(self, itemManager, qty, sm, exclude):

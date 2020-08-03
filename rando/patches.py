@@ -219,7 +219,9 @@ patches = {
     'Blinking[PhantoonRoomOut]': {
         # removes gadora by ending PLM list
         0x7C29D: [0x42, 0xc8, 0x4e, 0x06, 0x63, 0x8c, 0x00, 0x00],
-        0x10C3E5: [0x0]
+        # zero needed enemy count for both room states
+        0x10C3E5: [0x0],
+        0x10C19B: [0x0]
     },
     'Blinking[Crab Maze Left]': {
         0x108B3A: [0x0]

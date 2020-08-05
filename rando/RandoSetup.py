@@ -24,7 +24,7 @@ class RandoSetup(object):
         self.restrictions = services.restrictions
         self.areaGraph = services.areaGraph
         self.locations = self.areaGraph.getAccessibleLocations(locations, self.startAP)
-        print("nLocs Setup: "+str(len(self.locations)))
+#        print("nLocs Setup: "+str(len(self.locations)))
         self.itemManager = self.settings.getItemManager(self.sm, len(self.locations))
         self.forbiddenItems = []
         self.restrictedLocs = []

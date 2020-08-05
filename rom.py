@@ -813,9 +813,11 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
             elif bosses == True:
                 self.applyIPSPatch('door_transition.ips')
-            if minimizerN is not None and minimizerTourian == True:
-                for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
-                    self.applyIPSPatch(patchName)
+            if minimizerN is not None:
+                self.applyIPSPatch('minimizer_bosses.ips')
+                if minimizerTourian == True:
+                    for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
+                        self.applyIPSPatch(patchName)
             doors = self.getStartDoors(plms, area, minimizerN)
             self.applyStartAP(startAP, plms, doors)
             self.applyPLMs(plms)

@@ -44,5 +44,5 @@ ridley_death:
 	LDA $7E7836		; hijacked code
 	rtl
 
-print pc
-	
+warnpc $a1f54f
+

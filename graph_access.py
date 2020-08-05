@@ -325,10 +325,14 @@ accessPoints = [
     AccessPoint('KraidRoomOut', 'Kraid', {
         'Warehouse Zeela Room Left': lambda sm: sm.canPassBombPassages()
     }, boss = True,
-       roomInfo = {'RoomPtr':0xa56b, "area": 0x1},
+       roomInfo = {'RoomPtr':0xa56b, "area": 0x1,
+                   # put red brin song in both pre-kraid rooms,
+                   # (vanilla music only makes sense if kraid is
+                   #  vanilla)
+                   "songs":[0xa57c,0xa537,0xa551]},
        exitInfo = {'DoorPtr':0x91b6, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
-       entryInfo = {'SamusX':0x1cd, 'SamusY':0x188},
+       entryInfo = {'SamusX':0x1cd, 'SamusY':0x188, 'song':0x12},
        traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.NoGadoras), sm.canOpenRedDoors()),
        dotOrientation = 'e'),
     AccessPoint('KraidRoomIn', 'Kraid', {},
@@ -637,10 +641,10 @@ accessPoints = [
     AccessPoint('DraygonRoomOut', 'EastMaridia', {
         'Precious Room Top': lambda sm: sm.canExitPreciousRoom()
     }, boss = True,
-       roomInfo = {'RoomPtr':0xd78f, "area": 0x4},
+       roomInfo = {'RoomPtr':0xd78f, "area": 0x4, "songs":[0xd7a5]},
        exitInfo = {'DoorPtr':0xa840, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
-       entryInfo = {'SamusX':0x34, 'SamusY':0x288},
+       entryInfo = {'SamusX':0x34, 'SamusY':0x288, 'song':0x1b},
        traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.NoGadoras), sm.canOpenRedDoors()),
        dotOrientation = 'e'),
     AccessPoint('DraygonRoomIn', 'EastMaridia', {

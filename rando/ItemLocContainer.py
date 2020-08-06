@@ -62,7 +62,7 @@ class ItemLocContainer(object):
         return eq
 
     def __copy__(self):
-        locs = [copy.deepcopy(loc) for loc in self.unusedLocations]
+        locs = copy.deepcopy(self.unusedLocations)
         # we don't copy restriction state on purpose: it depends on
         # outside context we don't want to bring to the copy
         ret = ItemLocContainer(SMBoolManager(),

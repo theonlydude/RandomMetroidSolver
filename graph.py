@@ -31,6 +31,7 @@ class AccessPoint(object):
         self.Start = start
         self.DotOrientation = dotOrientation
         self.transitions = transitions
+        self.sorted_transitions = sorted(self.transitions.items(), key=lambda x: x[0])
         self.traverse = traverse
         self.distance = 0
         # inter-area connection
@@ -59,6 +60,7 @@ class AccessPoint(object):
             self.ConnectedTo = destName
         else:
             raise RuntimeError("Cannot add an internal access point as inter-are transition")
+        self.sorted_transitions = sorted(self.transitions.items(), key=lambda x: x[0])
 
     # tells if this node is to connect areas together
     def isArea(self):
@@ -136,8 +138,7 @@ class AccessGraph(object):
     def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
         newAvailNodes = {}
         for src in sorted(nodesToCheck, key=lambda x: x.Name):
-            for dstName in sorted(src.transitions.keys()):
-                tFunc = src.transitions[dstName]
+            for dstName, tFunc in src.sorted_transitions:
                 dst = self.accessPoints[dstName]
                 if dst in newAvailNodes or dst in availNodes:
                     continue

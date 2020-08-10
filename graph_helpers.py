@@ -9,7 +9,6 @@ from parameters import Settings
 class HelpersGraph(Helpers):
     def __init__(self, smbm):
         self.smbm = smbm
-        self.draygonConnection = None
 
     def canEnterAndLeaveGauntletQty(self, nPB, nTanksSpark):
         sm = self.smbm
@@ -573,9 +572,12 @@ class HelpersGraph(Helpers):
                               sm.knowsMaridiaWallJumps()))
 
     @Cache.decorator
+    def getDraygonConnection(self):
+        return getAccessPoint('DraygonRoomOut').ConnectedTo
+
+    @Cache.decorator
     def isVanillaDraygon(self):
-        drayRoomOut = getAccessPoint('DraygonRoomOut')
-        return SMBool(drayRoomOut.ConnectedTo == 'DraygonRoomIn')
+        return SMBool(self.getDraygonConnection() == 'DraygonRoomIn')
 
     @Cache.decorator
     def isVanillaCroc(self):

@@ -14,7 +14,7 @@ from parameters import easy, medium, hard, harder, hardcore, mania, diff4solver
 from parameters import Knows, Settings, Controller, isKnows, isButton
 from solver import Conf
 from parameters import diff2text, text2diff
-from utils import PresetLoader, removeChars
+from utils import PresetLoader, removeChars, getDefaultMultiValues
 import db
 from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
 from utils import isStdPreset, getRandomizerDefaultParameters
@@ -967,27 +967,13 @@ def infos():
 def initRandomizerSession():
     if session.randomizer is None:
         session.randomizer = getRandomizerDefaultParameters()
-        defaultMultiValues = getDefaultMultiValues()
-        for key in defaultMultiValues:
-            if key not in session.randomizer:
-                session.randomizer.update(defaultMultiValues)
-
-def getDefaultMultiValues():
-    defaultMultiValues = {
-        'startLocationMultiSelect': GraphUtils.getStartAccessPointNames(),
-        'majorsSplitMultiSelect': majorsSplits,
-        'progressionSpeedMultiSelect': speeds,
-        'progressionDifficultyMultiSelect': progDiffs,
-        'morphPlacementMultiSelect': morphPlacements,
-        'energyQtyMultiSelect': energyQties
-    }
-    return defaultMultiValues
 
 def getCurrentMultiValues():
     defaultMultiValues = getDefaultMultiValues()
     for key in defaultMultiValues:
-        if key in session.randomizer:
-            defaultMultiValues[key] = session.randomizer[key]
+        keyMulti = key + 'MultiSelect'
+        if keyMulti in session.randomizer:
+            defaultMultiValues[key] = session.randomizer[keyMulti]
     return defaultMultiValues
 
 def randomizer():
@@ -1082,15 +1068,16 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
         paramMulti = param+"MultiSelect"
         value = request.vars[param]
         if value == 'random':
-            # get multi values
-            for value in request.vars[paramMulti].split(','):
-                # check multi values
-                if value not in defaultMultiValues[paramMulti]:
-                    raiseHttp(400, "Wrong value for {}, authorized values: {}".format(param, defaultMultiValues[param+"MultiSelect"]), isJson)
+            if request.vars[paramMulti] is not None:
+                # get multi values
+                for value in request.vars[paramMulti].split(','):
+                    # check multi values
+                    if value not in defaultMultiValues[param]:
+                        raiseHttp(400, "Wrong value for {}, authorized values: {}".format(param, defaultMultiValues[param]), isJson)
         else:
             # check value
-            if value not in defaultMultiValues[paramMulti]:
-                raiseHttp(400, "Wrong value for {}, authorized values: {}".format(param, defaultMultiValues[param+"MultiSelect"]), isJson)
+            if value not in defaultMultiValues[param]:
+                raiseHttp(400, "Wrong value for {}, authorized values: {}".format(param, defaultMultiValues[param]), isJson)
 
     # others
     if request.vars.minorQty not in ['random', None]:

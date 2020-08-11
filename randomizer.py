@@ -10,16 +10,17 @@ from parameters import Knows, easy, medium, hard, harder, hardcore, mania, infin
 from utils import PresetLoader
 from rom_patches import RomPatches
 from rom import RomPatcher, FakeROM
-from utils import loadRandoPreset
+from utils import loadRandoPreset, getDefaultMultiValues
 from version import displayedVersion
 
 import log, db
 
-speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble', 'speedrun']
-energyQties = ['ultra sparse', 'sparse', 'medium', 'vanilla' ]
-progDiffs = ['easier', 'normal', 'harder']
-morphPlacements = ['early', 'late', 'normal']
-majorsSplits = ['Full', 'Major', 'Chozo']
+defaultMultiValues = getDefaultMultiValues()
+speeds = defaultMultiValues['progressionSpeed']
+energyQties = defaultMultiValues['energyQty']
+progDiffs = defaultMultiValues['progressionDifficulty']
+morphPlacements = defaultMultiValues['morphPlacement']
+majorsSplits = defaultMultiValues['majorsSplit']
 
 def randomMulti(args, param, defaultMultiValues):
     value = args[param]

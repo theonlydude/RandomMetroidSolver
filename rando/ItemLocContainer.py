@@ -62,7 +62,16 @@ class ItemLocContainer(object):
         return eq
 
     def __copy__(self):
-        locs = copy.deepcopy(self.unusedLocations)
+        def copyLoc(loc):
+            ret = {}
+            for key, value in loc.items():
+                # create new smbool
+                if key == 'difficulty':
+                    ret[key] = SMBool(value.bool, value.difficulty, value.knows, value.items)
+                else:
+                    ret[key] = value
+            return ret
+        locs = [copyLoc(loc) for loc in self.unusedLocations]
         # we don't copy restriction state on purpose: it depends on
         # outside context we don't want to bring to the copy
         ret = ItemLocContainer(SMBoolManager(),
@@ -72,7 +81,7 @@ class ItemLocContainer(object):
         ret.unrestrictedItems = copy.copy(self.unrestrictedItems)
         ret.itemLocations = [ {
             'Item': il['Item'],
-            'Location': copy.deepcopy(il['Location'])
+            'Location': copyLoc(il['Location'])
         } for il in self.itemLocations ]
         ret.sm.addItems([item['Type'] for item in ret.currentItems])
         return ret

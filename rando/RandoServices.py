@@ -5,12 +5,6 @@ from parameters import infinity
 from rando.ItemLocContainer import getLocListStr, getItemListStr, ContainerSoftBackup
 from helpers import Bosses
 
-# hackish object to put items in dictionaries
-class ItemWrapper(object):
-    def __init__(self, item):
-        self.item = item
-        item['Wrapper'] = self
-
 # used to specify whether we want to come back from locations
 @unique
 class ComebackCheckType(Enum):
@@ -193,11 +187,11 @@ class RandoServices(object):
         morph = container.getNextItemInPool('Morph')
         if morph is not None:
             self.log.debug("processEarlyMorph. morph not placed yet")
-            morphWrapper = next((w for w in itemLocDict if w.item['Type'] == morph['Type']), None)
-            if morphWrapper is not None:
-                morphLocs = itemLocDict[morphWrapper]
+            morphLocItem = next((item for item in itemLocDict if item['Type'] == morph['Type']), None)
+            if morphLocItem is not None:
+                morphLocs = itemLocDict[morphLocItem]
                 itemLocDict.clear()
-                itemLocDict[morphWrapper] = morphLocs
+                itemLocDict[morphLocItem] = morphLocs
             elif len(curLocs) >= 2:
                 self.log.debug("processEarlyMorph. early morph placement check")
                 # we have to place morph early, it's still not placed, and not detected as placeable
@@ -217,18 +211,18 @@ class RandoServices(object):
                     if poss:
                         # it's possible, only offer morph as possibility
                         itemLocDict.clear()
-                        itemLocDict[ItemWrapper(morph)] = morphLocs
+                        itemLocDict[morph] = morphLocs
 
     def processLateMorph(self, container, itemLocDict):
-        morphWrapper = next((w for w in itemLocDict if w.item['Type'] == 'Morph'), None)
-        if morphWrapper is None or len(itemLocDict) == 1:
+        morphLocItem = next((item for item in itemLocDict if item['Type'] == 'Morph'), None)
+        if morphLocItem is None or len(itemLocDict) == 1:
             # no morph, or it is the only possibility: nothing to do
             return
-        morphLocs = self.restrictions.lateMorphCheck(container, itemLocDict[morphWrapper])
+        morphLocs = self.restrictions.lateMorphCheck(container, itemLocDict[morphLocItem])
         if morphLocs is not None:
-            itemLocDict[morphWrapper] = morphLocs
+            itemLocDict[morphLocItem] = morphLocs
         else:
-            del itemLocDict[morphWrapper]
+            del itemLocDict[morphLocItem]
 
     def processMorphPlacements(self, ap, container, comebackCheck, itemLocDict, curLocs):
         if self.restrictions.isEarlyMorph():
@@ -240,7 +234,7 @@ class RandoServices(object):
     # ap: AP to check from
     # container: our item/loc container
     # comebackCheck: how to check for comebacks (cf ComebackCheckType)
-    # return a dictionary with ItemWrapper instances as keys and locations lists as values
+    # return a dictionary with Item instances as keys and locations lists as values
     def getPossiblePlacements(self, ap, container, comebackCheck):
         curLocs = self.currentLocations(ap, container)
         self.log.debug('getPossiblePlacements. nCurLocs='+str(len(curLocs)))
@@ -270,7 +264,7 @@ class RandoServices(object):
             bosses = container.getItems(lambda item: item['Name'] == bossLoc['Name'])
             assert len(bosses) == 1
             boss = bosses[0]
-            itemLocDict[ItemWrapper(boss)] = [bossLoc]
+            itemLocDict[boss] = [bossLoc]
             self.log.debug("getPossiblePlacements. boss: "+boss['Name'])
             return (itemLocDict, False)
         for itemType,items in sorted(poolDict.items()):
@@ -294,7 +288,7 @@ class RandoServices(object):
                 itemLocDict = {} # forget all the crap ones we stored just in case
 #            self.log.debug('getPossiblePlacements. itemType=' + itemType + ', locs='+str([loc['Name'] for loc in locations]))
             for item in items:
-                itemLocDict[ItemWrapper(item)] = locations
+                itemLocDict[item] = locations
         self.processMorphPlacements(ap, container, comebackCheck, itemLocDict, curLocs)
         if self.log.getEffectiveLevel() == logging.DEBUG:
             debugDict = {}
@@ -315,7 +309,7 @@ class RandoServices(object):
             itemObj = items[0]
             locList = getLocList(itemObj, container.unusedLocations)
             for item in items:
-                itemLocDict[ItemWrapper(item)] = locList
+                itemLocDict[item] = locList
         return (itemLocDict, False)
 
     # check if bosses are blocking the last remaining locations.

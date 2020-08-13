@@ -2,7 +2,7 @@ from utils import randGaussBounds, getRangeDict, chooseFromRange
 import log, logging, copy, random
 
 class Item:
-    __slots__ = ( 'Category', 'Class', 'Name', 'Code', 'Type', 'Wrapper' )
+    __slots__ = ( 'Category', 'Class', 'Name', 'Code', 'Type' )
 
     def __init__(self, Category, Class, Name, Type, Code=None):
         self.Category = Category

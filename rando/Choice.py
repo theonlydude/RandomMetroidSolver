@@ -14,10 +14,10 @@ class Choice(object):
         return None
 
     def getItemList(self, itemLocDict):
-        return sorted([wrapper.item for wrapper in itemLocDict.keys()], key=lambda item: item['Type'])
+        return sorted([item for item in itemLocDict.keys()], key=lambda item: item['Type'])
 
     def getLocList(self, itemLocDict, item):
-        return sorted(itemLocDict[item['Wrapper']], key=lambda loc: loc['Name'])
+        return sorted(itemLocDict[item], key=lambda loc: loc['Name'])
 
 # simple random choice, that chooses an item first, then a locatio to put it in
 class ItemThenLocChoice(Choice):
@@ -92,11 +92,11 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         # only possibility since we can rollback
         canRollback = len(container.currentItems) > 0
         if self.restrictions.isLateMorph() and canRollback and len(itemLocDict) == 1:
-            itemWrapper, locList = list(itemLocDict.items())[0]
-            if itemWrapper.item['Type'] == 'Morph':
+            item, locList = list(itemLocDict.items())[0]
+            if item['Type'] == 'Morph':
                 morphLocs = self.restrictions.lateMorphCheck(container, locList)
                 if morphLocs is not None:
-                    itemLocDict[itemWrapper] = morphLocs
+                    itemLocDict[item] = morphLocs
                 else:
                     return None
         self.progressionItemLocs = progressionItemLocs

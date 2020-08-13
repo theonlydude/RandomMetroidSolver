@@ -11,11 +11,11 @@ class Item:
         self.Name = Name
         self.Type = Type
 
+    def withClass(self, Class):
+        return Item(self.Category, Class, self.Name, self.Type, self.Code)
+
     def __getitem__(self, key):
         return getattr(self, key)
-
-    def __setitem__(self, key, value):
-        setattr(self, key, value)
 
     def __repr__(self):
       return "Item({}, {}, {}, {}, {})".format(self.Category,
@@ -301,10 +301,10 @@ class ItemManager:
 
     @staticmethod
     def getItem(itemType, itemClass=None):
-        item = copy.copy(ItemManager.Items[itemType])
-        if itemClass is not None:
-            item['Class'] = itemClass
-        return item
+        if itemClass is None:
+            return copy.copy(ItemManager.Items[itemType])
+        else:
+            return ItemManager.Items[itemType].withClass(itemClass)
 
     def createItemPool(self, exclude=None):
         itemPoolGenerator = ItemPoolGenerator.factory(self.majorsSplit, self, self.qty, self.sm, exclude)

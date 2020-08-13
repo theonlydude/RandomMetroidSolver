@@ -4,7 +4,7 @@ import log, logging, copy, random
 class Item:
     __slots__ = ( 'Category', 'Class', 'Name', 'Code', 'Type', 'Wrapper' )
 
-    def __init__(self, Category, Class, Name, Type=None, Code=None):
+    def __init__(self, Category, Class, Name, Type, Code=None):
         self.Category = Category
         self.Class = Class
         self.Code = Code
@@ -17,173 +17,209 @@ class Item:
     def __setitem__(self, key, value):
         setattr(self, key, value)
 
+    def __repr__(self):
+      return "Item({}, {}, {}, {}, {})".format(self.Category,
+          self.Class, self.Code, self.Name, self.Type)
+
 class ItemManager:
     Items = {
         'ETank': Item(
             Category='Energy',
             Class='Major',
             Code=0xeed7,
-            Name="Energy Tank"
+            Name="Energy Tank",
+            Type='ETank',
         ),
         'Missile': Item(
             Category='Ammo',
             Class='Minor',
             Code=0xeedb,
-            Name="Missile"
+            Name="Missile",
+            Type='Missile',
         ),
         'Super': Item(
             Category='Ammo',
             Class='Minor',
             Code=0xeedf,
-            Name="Super Missile"
+            Name="Super Missile",
+            Type='Super',
         ),
         'PowerBomb': Item(
             Category='Ammo',
             Class='Minor',
             Code=0xeee3,
-            Name="Power Bomb"
+            Name="Power Bomb",
+            Type='PowerBomb',
         ),
         'Bomb': Item(
             Category='Progression',
             Class='Major',
             Code=0xeee7,
-            Name="Bomb"
+            Name="Bomb",
+            Type='Bomb',
         ),
         'Charge': Item(
             Category='Beam',
             Class='Major',
             Code=0xeeeb,
-            Name="Charge Beam"
+            Name="Charge Beam",
+            Type='Charge',
         ),
         'Ice': Item(
             Category='Progression',
             Class='Major',
             Code=0xeeef,
-            Name="Ice Beam"
+            Name="Ice Beam",
+            Type='Ice',
         ),
         'HiJump': Item(
             Category='Progression',
             Class='Major',
             Code=0xeef3,
-            Name="Hi-Jump Boots"
+            Name="Hi-Jump Boots",
+            Type='HiJump',
         ),
         'SpeedBooster': Item(
             Category='Progression',
             Class='Major',
             Code=0xeef7,
-            Name="Speed Booster"
+            Name="Speed Booster",
+            Type='SpeedBooster',
         ),
         'Wave': Item(
             Category='Beam',
             Class='Major',
             Code=0xeefb,
-            Name="Wave Beam"
+            Name="Wave Beam",
+            Type='Wave',
         ),
         'Spazer': Item(
             Category='Beam',
             Class='Major',
             Code=0xeeff,
-            Name="Spazer"
+            Name="Spazer",
+            Type='Spazer',
         ),
         'SpringBall': Item(
             Category='Misc',
             Class='Major',
             Code=0xef03,
-            Name="Spring Ball"
+            Name="Spring Ball",
+            Type='SpringBall',
         ),
         'Varia': Item(
             Category='Progression',
             Class='Major',
             Code=0xef07,
-            Name="Varia Suit"
+            Name="Varia Suit",
+            Type='Varia',
         ),
         'Plasma': Item(
             Category='Beam',
             Class='Major',
             Code=0xef13,
-            Name="Plasma Beam"
+            Name="Plasma Beam",
+            Type='Plasma',
 
         ),
         'Grapple': Item(
             Category='Progression',
             Class='Major',
             Code=0xef17,
-            Name="Grappling Beam"
+            Name="Grappling Beam",
+            Type='Grapple',
         ),
         'Morph': Item(
             Category='Progression',
             Class='Major',
             Code=0xef23,
-            Name="Morph Ball"
+            Name="Morph Ball",
+            Type='Morph',
         ),
         'Reserve': Item(
             Category='Energy',
             Class='Major',
             Code=0xef27,
-            Name="Reserve Tank"
+            Name="Reserve Tank",
+            Type='Reserve',
         ),
         'Gravity': Item(
             Category='Progression',
             Class='Major',
             Code=0xef0b,
-            Name="Gravity Suit"
+            Name="Gravity Suit",
+            Type='Gravity',
         ),
         'XRayScope': Item(
             Category='Misc',
             Class='Major',
             Code=0xef0f,
-            Name="X-Ray Scope"
+            Name="X-Ray Scope",
+            Type='XRayScope',
         ),
         'SpaceJump': Item(
             Category='Progression',
             Class='Major',
             Code=0xef1b,
-            Name="Space Jump"
+            Name="Space Jump",
+            Type='SpaceJump',
         ),
         'ScrewAttack': Item(
             Category='Misc',
             Class='Major',
             Code=0xef1f,
-            Name="Screw Attack"
+            Name="Screw Attack",
+            Type='ScrewAttack',
         ),
         'Nothing': Item(
             Category='Nothing',
             Class='Minor',
             Code=0xeedb,
-            Name="Nothing"
+            Name="Nothing",
+            Type='Nothing',
         ),
         'NoEnergy': Item(
             Category='Nothing',
             Class='Major',
             Code=0xeedb,
-            Name="No Energy"
+            Name="No Energy",
+            Type='NoEnergy',
         ),
         'Kraid': Item(
             Category='Boss',
             Class='Boss',
-            Name="Kraid"
+            Name="Kraid",
+            Type='Kraid',
         ),
         'Phantoon': Item(
             Category='Boss',
             Class='Boss',
-            Name="Phantoon"
+            Name="Phantoon",
+            Type='Phantoon'
         ),
         'Draygon': Item(
             Category='Boss',
             Class='Boss',
-            Name="Draygon"
+            Name="Draygon",
+            Type='Draygon',
         ),
         'Ridley': Item(
             Category='Boss',
             Class='Boss',
-            Name="Ridley"
+            Name="Ridley",
+            Type='Ridley',
         ),
         'MotherBrain': Item(
             Category='Boss',
             Class='Boss',
-            Name="Mother Brain"
+            Name="Mother Brain",
+            Type='MotherBrain',
         ),
     }
+
+    for itemType, item in Items.items():
+      if item.Type != itemType:
+        raise RuntimeError("Wrong item type for {} (expected {})".format(item, itemType))
 
     @staticmethod
     def isBeam(item):
@@ -268,7 +304,6 @@ class ItemManager:
         item = copy.copy(ItemManager.Items[itemType])
         if itemClass is not None:
             item['Class'] = itemClass
-        item['Type'] = itemType
         return item
 
     def createItemPool(self, exclude=None):

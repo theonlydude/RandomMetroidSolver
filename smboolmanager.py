@@ -122,8 +122,7 @@ class SMBoolManager(object):
     def wor(self, *args):
         if True in args:
             # return the smbool with the smallest difficulty among True smbools.
-            # return a new smbool to avoid future obscur bugs.
-            return min(args).copy()
+            return min(args)
         else:
             return SMBool(False)
 

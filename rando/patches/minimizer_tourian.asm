@@ -7,6 +7,9 @@
 ;;;
 ;;; Compiles with asar
 
+arch snes.cpu
+lorom
+
 !full_refill = $f700    ; short ptr in bank 8F (see area_rando_doors.asm)
 !mark_event  = $8081fa
 !bit_index   = $80818e  ; returns X=byte index, $05e7=bitmask

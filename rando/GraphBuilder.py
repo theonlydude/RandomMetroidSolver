@@ -49,7 +49,7 @@ class GraphBuilder(object):
         # Ice not usable because of hyper beam
         # remove energy to avoid hell runs
         # (will add bosses as well)
-        sm.addItems([item['Type'] for item in emptyContainer.itemPool if item['Type'] != 'Ice' and item['Category'] != 'Energy'])
+        sm.addItems([item.Type for item in emptyContainer.itemPool if item.Type != 'Ice' and item.Category != 'Energy'])
         possibleTargets = [target for target in escapeTargets if graph.accessPath(sm, target, 'Landing Site', maxDiff) is not None]
         # failsafe
         if len(possibleTargets) == 0:

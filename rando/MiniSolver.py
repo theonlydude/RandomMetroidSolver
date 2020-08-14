@@ -24,7 +24,7 @@ class MiniSolver(object):
             loc = il['Location']
             if loc.get('restricted') == True:
                 continue
-            loc['itemType'] = il['Item']['Type']
+            loc['itemType'] = il['Item'].Type
             loc['difficulty'] = None
             locations.append(loc)
         self.smbm.resetItems()

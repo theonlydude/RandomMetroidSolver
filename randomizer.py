@@ -558,7 +558,7 @@ if __name__ == "__main__":
     # hide some items like in dessy's
     if args.hideItems == True:
         for itemLoc in itemLocs:
-            if (itemLoc['Item']['Type'] not in ['Nothing', 'NoEnergy']
+            if (itemLoc['Item'].Type not in ['Nothing', 'NoEnergy']
                 and itemLoc['Location']['CanHidden'] == True
                 and itemLoc['Location']['Visibility'] == 'Visible'):
                 if bool(random.randint(0, 2)) == True:
@@ -577,7 +577,7 @@ if __name__ == "__main__":
     firstMinorsFound = {'Missile': False, 'Super': False, 'PowerBomb': False}
     for itemLoc in itemLocs:
         locName = itemLoc["Location"]["Name"]
-        itemType = itemLoc["Item"]["Type"]
+        itemType = itemLoc["Item"].Type
         if itemType in firstMinorsFound and firstMinorsFound[itemType] == False:
             locsItems[locName] = itemType
             firstMinorsFound[itemType] = True

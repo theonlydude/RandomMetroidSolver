@@ -635,8 +635,7 @@ class RomPatcher:
             return
 
         for addr in self.getLocAddresses(loc):
-            # missile
-            self.writeItemCode({'Code': 0xeedb}, loc['Visibility'], addr)
+            self.writeItemCode(ItemManager.Items['Missile'], loc['Visibility'], addr)
             # all Nothing not at this loc Id will disappear when loc
             # item is collected
             self.romFile.writeByte(self.nothingId, addr + 4)
@@ -645,7 +644,7 @@ class RomPatcher:
         loc = itemLoc['Location']
         if 'Boss' in loc['Class']:
             raise ValueError('Cannot write Boss location')
-        #print('write ' + itemLoc['Item']['Type'] + ' at ' + loc['Name'])
+        #print('write ' + itemLoc['Item'].Type + ' at ' + loc['Name'])
         for addr in self.getLocAddresses(loc):
             self.writeItemCode(itemLoc['Item'], loc['Visibility'], addr)
             # if nothing was written at this loc before (in plando),
@@ -659,7 +658,7 @@ class RomPatcher:
             if 'Boss' in itemLoc['Location']['Class']:
                 continue
             isMorph = itemLoc['Location']['Name'] == 'Morphing Ball'
-            if itemLoc['Item']['Category'] == 'Nothing':
+            if itemLoc['Item'].Category == 'Nothing':
                 self.writeNothing(itemLoc)
                 if itemLoc['Location']['Id'] == self.nothingId:
                     # nothing at morph gives a missile pack
@@ -674,49 +673,49 @@ class RomPatcher:
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball
     def patchMorphBallEye(self, item):
-#        print('Eye item = ' + item['Type'])
+#        print('Eye item = ' + item.Type)
         # consider Nothing as missile, because if it is at morph ball it will actually be a missile
-        if item['Category'] == 'Nothing':
+        if item.Category == 'Nothing':
             if self.nothingId == 0x1a:
                 isNothingMissile = True
             else:
                 return
         else:
             isNothingMissile = False
-        isAmmo = item['Category'] == 'Ammo' or isNothingMissile
-        isMissile = item['Type'] == 'Missile' or isNothingMissile
+        isAmmo = item.Category == 'Ammo' or isNothingMissile
+        isMissile = item.Type == 'Missile' or isNothingMissile
         # category to check
         if ItemManager.isBeam(item):
             cat = 0xA8 # collected beams
-        elif item['Type'] == 'ETank':
+        elif item.Type == 'ETank':
             cat = 0xC4 # max health
-        elif item['Type'] == 'Reserve':
+        elif item.Type == 'Reserve':
             cat = 0xD4 # max reserves
         elif isMissile:
             cat = 0xC8 # max missiles
-        elif item['Type'] == 'Super':
+        elif item.Type == 'Super':
             cat = 0xCC # max supers
-        elif item['Type'] == 'PowerBomb':
+        elif item.Type == 'PowerBomb':
             cat = 0xD0 # max PBs
         else:
             cat = 0xA4 # collected items
         # comparison/branch instruction
         # the branch is taken if we did NOT collect item yet
-        if item['Category'] == 'Energy' or isAmmo:
+        if item.Category == 'Energy' or isAmmo:
             comp = 0xC9 # CMP (immediate)
             branch = 0x30 # BMI
         else:
             comp = 0x89 # BIT (immediate)
             branch = 0xF0 # BEQ
         # what to compare to
-        if item['Type'] == 'ETank':
+        if item.Type == 'ETank':
             operand = 0x65 # < 100
-        elif item['Type'] == 'Reserve' or isAmmo:
+        elif item.Type == 'Reserve' or isAmmo:
             operand = 0x1 # < 1
         elif ItemManager.isBeam(item):
-            operand = ItemManager.BeamBits[item['Type']]
+            operand = ItemManager.BeamBits[item.Type]
         else:
-            operand = ItemManager.ItemBits[item['Type']]
+            operand = ItemManager.ItemBits[item.Type]
         self.patchMorphBallCheck(0x1410E6, cat, comp, operand, branch) # eye main AI
         self.patchMorphBallCheck(0x1468B2, cat, comp, operand, branch) # head main AI
 
@@ -1069,7 +1068,7 @@ class RomPatcher:
         self.nothingId = 0x1a
         # if not default start, use first loc with a nothing
         if not GraphUtils.isStandardStart(startAP):
-            firstNothing = next((il['Location'] for il in itemLocs if il['Item']['Category'] == 'Nothing'), None)
+            firstNothing = next((il['Location'] for il in itemLocs if il['Item'].Category == 'Nothing'), None)
             if firstNothing is not None:
                 self.nothingId = firstNothing['Id']
 
@@ -1078,7 +1077,7 @@ class RomPatcher:
         self.romFile.writeByte(self.nothingId, address)
 
     def getItemQty(self, itemLocs, itemType):
-        q = len([il for il in itemLocs if il['Item']['Type'] == itemType])
+        q = len([il for il in itemLocs if il['Item'].Type == itemType])
         if itemType == 'Missile' and self.nothingMissile == True:
             q += 1
         return q
@@ -1196,21 +1195,21 @@ class RomPatcher:
 
     def writeSpoiler(self, itemLocs, progItemLocs=None):
         # keep only majors, filter out Etanks and Reserve
-        fItemLocs = [il for il in itemLocs if il['Item']['Category'] not in ['Ammo', 'Nothing', 'Energy', 'Boss']]
+        fItemLocs = [il for il in itemLocs if il['Item'].Category not in ['Ammo', 'Nothing', 'Energy', 'Boss']]
         # add location of the first instance of each minor
         for t in ['Missile', 'Super', 'PowerBomb']:
             itLoc = None
             if progItemLocs is not None:
-                itLoc = next((il for il in progItemLocs if il['Item']['Type'] == t), None)
+                itLoc = next((il for il in progItemLocs if il['Item'].Type == t), None)
             if itLoc is None:
-                itLoc = next((il for il in itemLocs if il['Item']['Type'] == t), None)
+                itLoc = next((il for il in itemLocs if il['Item'].Type == t), None)
             if itLoc is not None: # in vcr mode if the seed has stucked we may not have these minors
                 fItemLocs.append(itLoc)
         regex = re.compile(r"[^A-Z0-9\.,'!: ]+")
 
         itemLocs = {}
         for iL in fItemLocs:
-            itemLocs[iL['Item']['Name']] = iL['Location']['Name']
+            itemLocs[iL['Item'].Name] = iL['Location']['Name']
 
         def prepareString(s, isItem=True):
             s = s.upper()
@@ -1252,7 +1251,7 @@ class RomPatcher:
             # reorder it with progression indices
             prog = ord('A')
             idx = 0
-            progNames = [il['Item']['Name'] for il in progItemLocs]
+            progNames = [il['Item'].Name for il in progItemLocs]
             for i in range(len(progNames)):
                 item = progNames[i]
                 if item in items and item not in displayNames:

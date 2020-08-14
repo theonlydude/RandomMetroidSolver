@@ -71,12 +71,12 @@ class RandoSetup(object):
             return None
         # add placement restriction helpers for random fill
         if self.settings.progSpeed == 'speedrun':
-            itemTypes = {item['Type'] for item in self.container.itemPool if item['Category'] not in ['Energy', 'Nothing', 'Boss']}
+            itemTypes = {item.Type for item in self.container.itemPool if item.Category not in ['Energy', 'Nothing', 'Boss']}
             itemTypes.remove('Missile')
             items = [self.container.getNextItemInPool(itemType) for itemType in itemTypes]
             restrictionDict = {}
             for item in items:
-                itemType = item['Type']
+                itemType = item.Type
                 poss = self.services.possibleLocations(item, self.startAP, self.container)
                 for loc in poss:
                     if loc['GraphArea'] not in restrictionDict:
@@ -95,9 +95,9 @@ class RandoSetup(object):
         majorRestrictedLocs = [loc for loc in self.restrictedLocs if self.restrictions.isLocMajor(loc)]
         otherRestrictedLocs = [loc for loc in self.restrictedLocs if loc not in majorRestrictedLocs]
         def getItemPredicateMajor(itemType):
-            return lambda item: item['Type'] == itemType and self.restrictions.isItemMajor(item)
+            return lambda item: item.Type == itemType and self.restrictions.isItemMajor(item)
         def getItemPredicateMinor(itemType):
-            return lambda item: item['Type'] == itemType and self.restrictions.isItemMinor(item)
+            return lambda item: item.Type == itemType and self.restrictions.isItemMinor(item)
         def fill(locs, getPred):
             for loc in locs:
                 loc['restricted'] = True
@@ -118,7 +118,7 @@ class RandoSetup(object):
                     itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('ETank'))
                 else:
                     raise RuntimeError("Cannot fill restricted locations")
-                self.log.debug("Fill: {} at {}".format(itemLocation['Item']['Type'], itemLocation['Location']['Name']))
+                self.log.debug("Fill: {} at {}".format(itemLocation['Item'].Type, itemLocation['Location']['Name']))
                 self.container.collect(itemLocation, False)
         fill(majorRestrictedLocs, getItemPredicateMajor)
         fill(otherRestrictedLocs, getItemPredicateMinor)
@@ -169,7 +169,7 @@ class RandoSetup(object):
         # give us everything and beat every boss to see what we can access
         self.disableBossChecks()
         self.sm.resetItems()
-        self.sm.addItems([item['Type'] for item in contPool]) # will add bosses as well
+        self.sm.addItems([item.Type for item in contPool]) # will add bosses as well
         poolDict = container.getPoolDict()
         self.log.debug('pool={}'.format(sorted([(t, len(poolDict[t])) for t in poolDict])))
         refAP = 'Landing Site'
@@ -205,7 +205,7 @@ class RandoSetup(object):
                     self.log.debug("unavail Boss: " + loc['Name'])
             if ret:
                 # revive bosses
-                self.sm.addItems([item['Type'] for item in contPool if item['Category'] != 'Boss'])
+                self.sm.addItems([item.Type for item in contPool if item.Category != 'Boss'])
                 maxDiff = self.settings.maxDiff
                 # see if phantoon doesn't block himself, and if we can reach draygon if she's alive
                 ret = self.areaGraph.canAccess(self.sm, 'PhantoonRoomOut', 'PhantoonRoomIn', maxDiff)\
@@ -222,7 +222,7 @@ class RandoSetup(object):
             # FIXME something to do there for ultra sparse, it gives us up to 3 more spots for nothing items
             restrictedLocs = self.restrictedLocs + [loc for loc in self.lastRestricted if loc not in self.restrictedLocs]
             nRestrictedChozo = sum(1 for loc in restrictedLocs if 'Chozo' in loc['Class'])
-            nNothingChozo = sum(1 for item in pool if 'Chozo' in item['Class'] and item['Category'] == 'Nothing')
+            nNothingChozo = sum(1 for item in pool if 'Chozo' in item.Class and item.Category == 'Nothing')
             ret &= nRestrictedChozo <= nNothingChozo
             self.log.debug('checkPool. nRestrictedChozo='+str(nRestrictedChozo)+', nNothingChozo='+str(nNothingChozo))
         self.log.debug('checkPool. result: '+str(ret))

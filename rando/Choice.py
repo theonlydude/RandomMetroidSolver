@@ -14,7 +14,7 @@ class Choice(object):
         return None
 
     def getItemList(self, itemLocDict):
-        return sorted([item for item in itemLocDict.keys()], key=lambda item: item['Type'])
+        return sorted([item for item in itemLocDict.keys()], key=lambda item: item.Type)
 
     def getLocList(self, itemLocDict, item):
         return sorted(itemLocDict[item], key=lambda loc: loc['Name'])
@@ -93,7 +93,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         canRollback = len(container.currentItems) > 0
         if self.restrictions.isLateMorph() and canRollback and len(itemLocDict) == 1:
             item, locList = list(itemLocDict.items())[0]
-            if item['Type'] == 'Morph':
+            if item.Type == 'Morph':
                 morphLocs = self.restrictions.lateMorphCheck(container, locList)
                 if morphLocs is not None:
                     itemLocDict[item] = morphLocs
@@ -121,7 +121,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
 
     def chooseItemProg(self, itemList):
         ret = self.getChooseFunc(self.chooseItemRanges, self.chooseItemFuncs)(itemList)
-        self.log.debug('chooseItemProg. ret='+ret['Type'])
+        self.log.debug('chooseItemProg. ret='+ret.Type)
         return ret
 
     def chooseLocationProg(self, locs, item):
@@ -182,7 +182,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
 
     def getLocsSpreadProgression(self, availableLocations):
         split = self.restrictions.split
-        cond = lambda item: ((split == 'Full' and item['Class'] == 'Major') or split == item['Class']) and item['Category'] != "Energy"
+        cond = lambda item: ((split == 'Full' and item.Class == 'Major') or split == item.Class) and item.Category != "Energy"
         progLocs = [il['Location'] for il in self.progressionItemLocs if cond(il['Item'])]
         distances = [self.areaDistance(loc, progLocs) for loc in availableLocations]
         maxDist = max(distances)

@@ -14,9 +14,6 @@ class Item:
     def withClass(self, Class):
         return Item(self.Category, Class, self.Name, self.Type, self.Code)
 
-    def __getitem__(self, key):
-        return getattr(self, key)
-
     def __repr__(self):
       return "Item({}, {}, {}, {}, {})".format(self.Category,
           self.Class, self.Code, self.Name, self.Type)
@@ -223,7 +220,7 @@ class ItemManager:
 
     @staticmethod
     def isBeam(item):
-        return item['Category'] == 'Beam' or item['Type'] == 'Ice'
+        return item.Category == 'Beam' or item.Type == 'Ice'
 
     BeamBits = {
         'Wave'   : 0x1,
@@ -256,7 +253,7 @@ class ItemManager:
         elif itemVisibility == 'Hidden':
             modifier = 168
 
-        itemCode = item['Code'] + modifier
+        itemCode = item.Code + modifier
         return itemCode
 
     def __init__(self, majorsSplit, qty, sm):
@@ -288,7 +285,7 @@ class ItemManager:
     # remove from pool an item of given type. item type has to be in original Items list.
     def removeItem(self, itemType):
         for idx, item in enumerate(self.itemPool):
-            if item["Type"] == itemType:
+            if item.Type == itemType:
                 self.itemPool = self.itemPool[0:idx] + self.itemPool[idx+1:]
                 return item
 
@@ -312,10 +309,10 @@ class ItemManager:
 
     @staticmethod
     def getProgTypes():
-        return [item for item in ItemManager.Items if ItemManager.Items[item]['Category'] == 'Progression']
+        return [item for item in ItemManager.Items if ItemManager.Items[item].Category == 'Progression']
 
     def hasItemInPoolCount(self, itemName, count):
-        return len([item for item in self.itemPool if item['Type'] == itemName]) >= count
+        return len([item for item in self.itemPool if item.Type == itemName]) >= count
 
 class ItemPoolGenerator(object):
     @staticmethod
@@ -364,7 +361,7 @@ class ItemPoolGenerator(object):
             self.log.debug("totalProps: {}".format(totalProps))
             self.log.debug("totalMinorLocations: {}".format(totalMinorLocations))
             def ammoCount(ammo):
-                return float(len([item for item in self.itemManager.getItemPool() if item['Type'] == ammo]))
+                return float(len([item for item in self.itemManager.getItemPool() if item.Type == ammo]))
             def targetRatio(ammo):
                 return round(float(ammoQty[ammo])/totalProps, 3)
             def cmpRatio(ammo, ratio):

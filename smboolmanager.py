@@ -110,49 +110,22 @@ class SMBoolManager(object):
     def haveItem(self, item):
         return getattr(self, item)
 
-    def wand2(self, a, b):
-        if a.bool is True and b.bool is True:
-            return SMBool(True, a.difficulty + b.difficulty,
-                          a.knows + b.knows, a.items + b.items)
+    def wand(self, *args):
+        if False in args:
+            return SMBool(False)
+        else:
+            return SMBool(True,
+                          sum([smb.difficulty for smb in args]),
+                          [know for smb in args for know in smb.knows],
+                          [item for smb in args for item in smb.items])
+
+    def wor(self, *args):
+        if True in args:
+            # return the smbool with the smallest difficulty among True smbools.
+            # return a new smbool to avoid future obscur bugs.
+            return min(args).copy()
         else:
             return SMBool(False)
-
-    def wand(self, a, b, c=None, d=None):
-        if c is None and d is None:
-            ret = self.wand2(a, b)
-        elif c is None:
-            ret = self.wand2(self.wand2(a, b), d)
-        elif d is None:
-            ret = self.wand2(self.wand2(a, b), c)
-        else:
-            ret = self.wand2(self.wand2(self.wand2(a, b), c), d)
-
-        return ret
-
-    def wor2(self, a, b):
-        if a.bool is True and b.bool is True:
-            if a.difficulty <= b.difficulty:
-                return SMBool(True, a.difficulty, a.knows, a.items)
-            else:
-                return SMBool(True, b.difficulty, b.knows, b.items)
-        elif a.bool is True:
-            return SMBool(True, a.difficulty, a.knows, a.items)
-        elif b.bool is True:
-            return SMBool(True, b.difficulty, b.knows, b.items)
-        else:
-            return SMBool(False)
-
-    def wor(self, a, b, c=None, d=None):
-        if c is None and d is None:
-            ret = self.wor2(a, b)
-        elif c is None:
-            ret = self.wor2(self.wor2(a, b), d)
-        elif d is None:
-            ret = self.wor2(self.wor2(a, b), c)
-        else:
-            ret = self.wor2(self.wor2(self.wor2(a, b), c), d)
-
-        return ret
 
     # negates boolean part of the SMBool
     def wnot(self, a):
@@ -212,7 +185,6 @@ class SMBoolManagerPlando(SMBoolManager):
             if getattr(self, dup, None) is None:
                 setattr(self, item, SMBool(False))
             else:
-                # TODO::check that, seems wrong (we already set it to false in addItem, shouldn't we remove it here ?
                 setattr(self, dup, False)
 
         Cache.reset()

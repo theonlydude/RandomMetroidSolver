@@ -567,7 +567,7 @@ class RomPatcher:
         'Standard': ['new_game.ips', 'plm_spawn.ips', 'load_enemies_fix.ips',
                      'credits_varia.ips', 'seed_display.ips', 'tracking.ips',
                      'wake_zebes.ips', 'g4_skip.ips', # XXX those are door ASMs
-                     'Mother_Brain_Cutscene_Edits',
+                     'Mother_Brain_Cutscene_Edits', "Allow_All_Saves",
                      'Suit_acquisition_animation_skip',
                      'Fix_heat_damage_speed_echoes_bug', 'Disable_GT_Code',
                      'Disable_Space_Time_select_in_menu', 'Fix_Morph_Ball_Hidden_Chozo_PLMs',
@@ -584,7 +584,8 @@ class RomPatcher:
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
-                 'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips' ],
+                 'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
+                 'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street' ],
         'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips'],
         'MinimizerTourian': ['minimizer_tourian.ips', 'nerfed_rainbow_beam.ips']
     }
@@ -929,7 +930,7 @@ class RomPatcher:
             if key in additional_PLMs:
                 plms.append(key)
         if area == True:
-            plms.append('Maridia Sand Hall Seal')
+            plms += ['Maridia Sand Hall Seal', "Save_Main_Street", "Save_Crab_Shaft"]
             for accessPoint in accessPoints:
                 if accessPoint.Internal == True or accessPoint.Boss == True:
                     continue

@@ -166,7 +166,7 @@ class SMBoolManagerPlando(SMBoolManager):
             setattr(self, item, SMBool(True, items=[item]))
         else:
             # handle duplicate major items (plandos)
-            setattr(self, 'dup_'+item, False)
+            setattr(self, 'dup_'+item, True)
         if isCount:
             setattr(self, item+'Count', getattr(self, item+'Count') + 1)
 
@@ -184,6 +184,6 @@ class SMBoolManagerPlando(SMBoolManager):
             if getattr(self, dup, None) is None:
                 setattr(self, item, SMBool(False))
             else:
-                setattr(self, dup, False)
+                delattr(self, dup)
 
         Cache.reset()

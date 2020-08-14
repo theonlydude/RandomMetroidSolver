@@ -741,8 +741,90 @@ class RomPatcher:
         for patchName in patches:
             self.applyIPSPatch(patchName)
 
-    def customSprite(self, sprite):
+    def customSprite(self, sprite, customNames):
         self.applyIPSPatch(sprite, ipsDir='rando/patches/sprites')
+
+        if not customNames:
+            return
+
+        # custom sprite message boxes update
+        messageBoxes = {
+            'marga.ips': {
+                'Morph': 'morphing doll',
+                'SpringBall': 'spring doll',
+            },
+            'super_controid.ips': {
+                'PowerBomb': 'm-80,000 helio bomb'
+            },
+            'alucard.ips': {
+                'HiJump': 'gravity boots',
+                'SpeedBooster': 'god speed shoes',
+                'Morph': 'soul of bat',
+                'XRayScope': 'holy glasses',
+                'Varia': 'fire mail',
+                'Gravity': 'holy symbol',
+                'ETank': 'life vessel',
+                'Reserve': 'heart vessel'
+            },
+            'samus_backwards.ips': {
+                'ETank': 'ygrene knat',
+                'Missile': 'elissim',
+                'Super': 'repus elissim',
+                'PowerBomb': 'rewop bmob',
+                'Grapple': 'gnilpparg maeb',
+                'XRayScope': 'yar-x epocs',
+                'Varia': 'airav uius',
+                'SpringBall': 'gnirps llab',
+                'Morph': 'gnihprom llab',
+                'ScrewAttack': 'wercs kcatta',
+                'HiJump': 'pmuj-ih stoob',
+                'SpaceJump': 'ecaps pmuj',
+                'SpeedBooster': 'deeps retsoob',
+                'Charge': 'egrahc maeb',
+                'Ice': 'eci maeb',
+                'Wave': 'evaw maeb',
+                'Spazer': 'rezaps',
+                'Plasma': 'amsalp maeb',
+                'Bomb': 'bmob',
+                'Reserve': 'evreser knat',
+                'Gravity': 'ytivarg tius'
+            },
+            'vanilla':
+            {
+                'ETank': 'energy tank',
+                'Missile': 'misille',
+                'Super': 'super missile',
+                'PowerBomb': 'power bomb',
+                'Grapple': 'grappling beam',
+                'XRayScope': 'x-ray scope',
+                'Varia': 'varia suit',
+                'SpringBall': 'spring ball',
+                'Morph': 'morphing ball',
+                'ScrewAttack': 'screw attack',
+                'HiJump': 'hi-jump boots',
+                'SpaceJump': 'space jump',
+                'SpeedBooster': 'speed booster',
+                'Charge': 'charge beam',
+                'Ice': 'ice beam',
+                'Wave': 'wave beam',
+                'Spazer': 'spazer',
+                'Plasma': 'plasma beam',
+                'Bomb': 'bomb',
+                'Reserve': 'server tank',
+                'Gravity': 'gravity suit'
+            }
+        }
+        messageBoxes['samus_upside_down_and_backwards.ips'] = messageBoxes['samus_backwards.ips']
+        vFlip = ['samus_upside_down.ips', 'samus_upside_down_and_backwards.ips']
+        hFlip = ['samus_backwards.ips']
+        doVFlip = sprite in vFlip
+        doHFlip = sprite in hFlip
+        if (doVFlip or doHFlip) and sprite not in messageBoxes:
+            sprite = 'vanilla'
+        if sprite in messageBoxes:
+            messageBox = MessageBox(self.romFile)
+            for (messageKey, newMessage) in messageBoxes[sprite].items():
+                messageBox.updateMessage(messageKey, newMessage, doVFlip, doHFlip)
 
     def applyIPSPatches(self, startAP="Landing Site",
                         optionalPatches=[], noLayout=False, suitsMode="Classic",
@@ -1510,11 +1592,7 @@ class RomPatcher:
         # string length
         length = len(version)
         self.romFile.writeWord(length, 0x0673e9)
-
-        if length % 2 == 0:
-            middle = int(length / 2)
-        else:
-            middle = int(length / 2) + 1
+        middle = int(length / 2) + length % 2
 
         # oams
         for (i, char) in enumerate(version):
@@ -1531,6 +1609,81 @@ for i in range(1, ord('z')-ord('a')+1):
     char2tile[chr(ord('a')+i)] = char2tile['a']+i
 for i in range(1, ord('9')-ord('0')+1):
     char2tile[chr(ord('0')+i)] = char2tile['0']+i
+
+class MessageBox(object):
+    def __init__(self, rom):
+        self.rom = rom
+
+        # in message boxes the char a is at offset 0xe0 in the tileset
+        self.char2tile = {'1': 0x00, '2': 0x01, '3': 0x02, '4': 0x03, '5': 0x04, '6': 0x05, '7': 0x06, '8': 0x07, '9': 0x08, '0': 0x09,
+                          ' ': 0x4e, '-': 0xcf, 'a': 0xe0, '.': 0xfa, ',': 0xfb, '`': 0xfc, "'": 0xfd, '?': 0xfe, '!': 0xff}
+        for i in range(1, ord('z')-ord('a')+1):
+            self.char2tile[chr(ord('a')+i)] = self.char2tile['a']+i
+
+        # add 0x0c/0x06 to offsets as there's 12/6 bytes before the strings, string length is either 0x13/0x1a
+        self.offsets = {
+            'ETank': (0x2877f+0x0c, 0x13),
+            'Missile': (0x287bf+0x06, 0x1a),
+            'Super': (0x288bf+0x06, 0x1a),
+            'PowerBomb': (0x289bf+0x06, 0x1a),
+            'Grapple': (0x28abf+0x06, 0x1a),
+            'XRayScope': (0x28bbf+0x06, 0x1a),
+            'Varia': (0x28cbf+0x0c, 0x13),
+            'SpringBall': (0x28cff+0x0c, 0x13),
+            'Morph': (0x28d3f+0x0c, 0x13),
+            'ScrewAttack': (0x28d7f+0x0c, 0x13),
+            'HiJump': (0x28dbf+0x0c, 0x13),
+            'SpaceJump': (0x28dff+0x0c, 0x13),
+            'SpeedBooster': (0x28e3f+0x06, 0x1a),
+            'Charge': (0x28f3f+0x0c, 0x13),
+            'Ice': (0x28f7f+0x0c, 0x13),
+            'Wave': (0x28fbf+0x0c, 0x13),
+            'Spazer': (0x28fff+0x0c, 0x13),
+            'Plasma': (0x2903f+0x0c, 0x13),
+            'Bomb': (0x2907f+0x06, 0x1a),
+            'Reserve': (0x294ff+0x0c, 0x13),
+            'Gravity': (0x2953f+0x0c, 0x13)
+        }
+
+    def updateMessage(self, box, message, vFlip=False, hFlip=False):
+        (address, oldLength) = self.offsets[box]
+        newLength = len(message)
+        padding = oldLength - newLength
+        paddingLeft = int(padding / 2)
+        paddingRight = int(padding / 2)
+        paddingRight += padding % 2
+
+        attr = self.getAttr(vFlip, hFlip)
+
+        # write spaces for padding left
+        for i in range(paddingLeft):
+            self.writeChar(address, ' ')
+            address += 0x02
+        # write message
+        for char in message:
+            self.writeChar(address, char)
+            address += 0x01
+            self.updateAttr(attr, address)
+            address += 0x01
+        # write spaces for padding right
+        for i in range(paddingRight):
+            self.writeChar(address, ' ')
+            address += 0x02
+
+    def writeChar(self, address, char):
+        self.rom.writeByte(self.char2tile[char], address)
+
+    def getAttr(self, vFlip, hFlip):
+        # vanilla is 0x28:
+        byte = 0x28
+        if vFlip:
+            byte |= 0b10000000
+        if hFlip:
+            byte |= 0b01000000
+        return byte
+
+    def updateAttr(self, byte, address):
+        self.rom.writeByte(byte, address)
 
 class ROM(object):
     def readWord(self, address=None):

@@ -335,6 +335,14 @@
     "AccessSpringBallWithFlatley": [
       true,
       1
+    ],
+    "MaridiaWallJumps": [
+      true,
+      1
+    ],
+    "WestSandHoleSuitlessWallJumps": [
+      true,
+      1
     ]
   },
   "Settings": {

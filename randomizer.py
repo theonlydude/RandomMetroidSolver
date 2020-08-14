@@ -10,16 +10,17 @@ from parameters import Knows, easy, medium, hard, harder, hardcore, mania, infin
 from utils import PresetLoader
 from rom_patches import RomPatches
 from rom import RomPatcher, FakeROM
-from utils import loadRandoPreset
+from utils import loadRandoPreset, getDefaultMultiValues
 from version import displayedVersion
 
 import log, db
 
-speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble', 'speedrun']
-energyQties = ['ultra sparse', 'sparse', 'medium', 'vanilla' ]
-progDiffs = ['easier', 'normal', 'harder']
-morphPlacements = ['early', 'late', 'normal']
-majorsSplits = ['Full', 'Major', 'Chozo']
+defaultMultiValues = getDefaultMultiValues()
+speeds = defaultMultiValues['progressionSpeed']
+energyQties = defaultMultiValues['energyQty']
+progDiffs = defaultMultiValues['progressionDifficulty']
+morphPlacements = defaultMultiValues['morphPlacement']
+majorsSplits = defaultMultiValues['majorsSplit']
 
 def randomMulti(args, param, defaultMultiValues):
     value = args[param]
@@ -237,6 +238,8 @@ if __name__ == "__main__":
     parser.add_argument('--plandoRando', help="json string with already placed items/locs", dest="plandoRando",
                         nargs='?', default=None)
     parser.add_argument('--sprite', help='use a custom sprite for Samus', dest='sprite', default=None)
+    parser.add_argument('--customItemNames', help='add custom item names for some of them, related to the custom sprite',
+                        dest='customItemNames', action='store_true', default=False)
     parser.add_argument('--seedIps', help='ips generated from previous seed', dest='seedIps', default=None)
     parser.add_argument('--jm,', help="display data used by jm for its stats", dest='jm', action='store_true', default=False)
 
@@ -258,9 +261,11 @@ if __name__ == "__main__":
     logger = log.get('Rando')
     # service to force an argument value and notify it
     argDict = vars(args)
-    def forceArg(arg, value, msg):
+    forcedArgs = {}
+    def forceArg(arg, value, msg, webArg=None, webValue=None):
         if argDict[arg] != value:
             argDict[arg] = value
+            forcedArgs[webArg if webArg != None else arg] = webValue if webValue != None else value
             print(msg)
             return '\n'+msg
         else:
@@ -382,10 +387,10 @@ if __name__ == "__main__":
     # in plando rando we know that the start ap is ok
     if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando == None:
         optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
-        optErrMsg += forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on")
-        optErrMsg += forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on")
-        optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off")
-        optErrMsg += forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on")
+        optErrMsg += forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", 'variaTweaks', 'on')
+        optErrMsg += forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
+        optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
+        optErrMsg += forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", 'areaLayout', 'on')
         possibleStartAPs = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty)
         if args.startAP == 'random':
             if args.startLocationList != None:
@@ -658,7 +663,7 @@ if __name__ == "__main__":
 
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:
-            romPatcher.customSprite(args.sprite) # adds another IPS
+            romPatcher.customSprite(args.sprite, args.customItemNames) # adds another IPS
         # we have to write ips to ROM before doing our direct modifications which will rewrite some parts (like in credits),
         # but in web mode we only want to generate a global ips at the end
         if args.rom != None:
@@ -718,6 +723,9 @@ if __name__ == "__main__":
             data["fileName"] = fileName
             # error msg in json to be displayed by the web site
             data["errorMsg"] = msg
+            # replaced parameters to update stats in database
+            if len(forcedArgs) > 0:
+                data["forcedArgs"] = forcedArgs
             with open(outFileName, 'w') as jsonFile:
                 json.dump(data, jsonFile)
         else: # CLI mode

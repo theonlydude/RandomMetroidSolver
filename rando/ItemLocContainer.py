@@ -1,6 +1,7 @@
 
 import copy, log
 
+from smbool import SMBool
 from smboolmanager import SMBoolManager
 from collections import Counter
 
@@ -61,7 +62,16 @@ class ItemLocContainer(object):
         return eq
 
     def __copy__(self):
-        locs = [copy.deepcopy(loc) for loc in self.unusedLocations]
+        def copyLoc(loc):
+            ret = {}
+            for key, value in loc.items():
+                # create new smbool
+                if key == 'difficulty':
+                    ret[key] = SMBool(value.bool, value.difficulty, value.knows, value.items)
+                else:
+                    ret[key] = value
+            return ret
+        locs = [copyLoc(loc) for loc in self.unusedLocations]
         # we don't copy restriction state on purpose: it depends on
         # outside context we don't want to bring to the copy
         ret = ItemLocContainer(SMBoolManager(),
@@ -69,12 +79,10 @@ class ItemLocContainer(object):
                                locs)
         ret.currentItems = self.currentItems[:]
         ret.unrestrictedItems = copy.copy(self.unrestrictedItems)
-        for il in self.itemLocations:
-            ilCpy = {
-                'Item': il['Item'],
-                'Location': copy.deepcopy(il['Location'])
-            }
-            ret.itemLocations.append(ilCpy)
+        ret.itemLocations = [ {
+            'Item': il['Item'],
+            'Location': copyLoc(il['Location'])
+        } for il in self.itemLocations ]
         ret.sm.addItems([item['Type'] for item in ret.currentItems])
         return ret
 
@@ -216,6 +224,14 @@ class ItemLocContainer(object):
             loc['itemName'] = il['Item']['Type']
             locs.append(loc)
         return locs
+
+    def cleanLocsAfterSolver(self):
+        # restricted locs can have their difficulty set, which can cause them to be reported in the
+        # post randomization warning message about locs with diff > max diff.
+        for il in self.itemLocations:
+            loc = il['Location']
+            if loc.get('restricted') == True and loc.get('difficulty', False) == True:
+                loc['difficulty'] = SMBool(False)
 
     def getDistinctItems(self):
         itemTypes = {item['Type'] for item in self.itemPool}

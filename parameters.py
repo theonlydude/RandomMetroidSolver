@@ -212,12 +212,18 @@ class Knows:
                             'title': 'Skip the Zebetites with a shinespark',
                             'href': 'https://www.youtube.com/watch?v=jEAgdWQ9kLQ',
                             'rooms': ['Mother Brain Room']}
-    # maridia mama turtle
+    # maridia WJs
     HiJumpMamaTurtle = SMBool(False, 0, ['HiJumpMamaTurtle'])
     desc['HiJumpMamaTurtle'] = {'display': 'Mama Turtle E-Tank with High-Jump+Speed',
                                 'title': 'Access Mama Turtle E-Tank with High-Jump and Speed Booster (and Morph or X-Ray to turn around without moving)',
                                 'href': 'https://www.youtube.com/watch?v=1DINqLnINc8',
                                 'rooms': ['Mama Turtle Room']}
+
+    MaridiaWallJumps = SMBool(True, medium, ['MaridiaWallJumps'])
+    desc['MaridiaWallJumps'] = {'display': 'Various Maridia wall jumps',
+                                'title': 'Kinda tricky wall jumps to: access items in West Sand Hole without Spring Ball or Bombs, exit Spring Ball area without Hi Jump, exit Crab Hole with Gravity+Hi-Jump',
+                                'href': '',
+                                'rooms': ['West Sand Hole', 'Spring Ball Room', 'Crab Hole']}
 
     # underwater grav-less
     GravLessLevel1 = SMBool(True, hardcore, ['GravLessLevel1'])
@@ -238,7 +244,7 @@ class Knows:
     GravLessLevel3 = SMBool(False, 0, ['GravLessLevel3'])
     desc['GravLessLevel3'] = {'display': 'Level 3',
                                'title': 'Level 2 and : no problem getting out of sand suitless, traverse mini-draygons area, wall jumps to access items in the left sand pit, access missile location in the right sand pit.',
-                               'href': 'https://www.youtube.com/watch?v=1M2TiEVwH2I',
+                               'href': 'https://www.youtube.com/watch?v=Fn2z0ByOcj4',
                                'rooms': ['West Sand Hole', 'East Sand Hole',
                                          'West Sand Hall', 'East Sand Hall']}
     # Area difficulties
@@ -495,6 +501,12 @@ class Knows:
                                         'href': 'https://www.twitch.tv/videos/480882188',
                                         'rooms': ['Halfie Climb Room', 'Colosseum']}
 
+    WestSandHoleSuitlessWallJumps = SMBool(False, 0, ['WestSandHoleSuitlessWallJumps'])
+    desc['WestSandHoleSuitlessWallJumps'] = {'display': 'West Sand Hole suitless Wall Jumps',
+                                     'title': 'Access items in West Sand Hole (aka Left Sand Pit) with just Hi-Jump',
+                                     'href': 'https://www.youtube.com/watch?v=Fn2z0ByOcj4',
+                                     'rooms': ['West Sand Hole']}
+
     # Suitless Draygon
     DraygonRoomGrappleExit = SMBool(False, 0, ['DraygonRoomGrappleExit'])
     desc['DraygonRoomGrappleExit'] = {'display': 'Exit Draygon room with the Grapple',
@@ -645,8 +657,8 @@ class Knows:
              'title': 'Clips'},
             {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
              'title': 'Plasma Room'},
-            {'knows': ['HiJumpMamaTurtle'],
-             'title': 'Mama Turtle'}
+            {'knows': ['HiJumpMamaTurtle', 'MaridiaWallJumps'],
+             'title': 'Wall Jumps'}
         ],
         'Maridia 2/2': [
             {'knows': ['AccessSpringBallWithHiJump', 'AccessSpringBallWithSpringBallBombJumps',
@@ -655,7 +667,7 @@ class Knows:
              'title': 'Spring Ball Access'},
             {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
              'title': 'Suitless Draygon Exit'},
-            {'knows': ['DoubleSpringBallJump', 'TediousMountEverest',
+            {'knows': ['WestSandHoleSuitlessWallJumps', 'DoubleSpringBallJump', 'TediousMountEverest',
                        'BotwoonToDraygonWithIce', 'SuitlessCrystalFlashClip',
                        'SuitlessPuyoClip'],
              'title': 'Obscure suitless stuff'}

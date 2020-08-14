@@ -113,8 +113,12 @@ function computeSeed {
 	if [ "${OLD_MD5}" = "old n/a" ] && [ "${NEW_MD5}" = "new n/a" ]; then
 	    MD5="n/a"
 	else
-	    MD5="mismatch"
-	    echo "OLD: ${OLD_MD5} NEW: ${NEW_MD5}"
+            if [ "${OLD_MD5}" = "old n/a" ]; then
+                MD5="old too slow"
+            else
+	        MD5="mismatch"
+	        echo "OLD: ${OLD_MD5} NEW: ${NEW_MD5}"
+            fi
 	fi
     else
 	MD5=${NEW_MD5}
@@ -132,6 +136,7 @@ function computeSeed {
 	if [ $? -ne 0 ]; then
             echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
+            echo "${OUT}" >> ${LOG}
             exit 0
 	    STIME_OLD="n/a"
 	else
@@ -148,6 +153,7 @@ function computeSeed {
     if [ $? -ne 0 ]; then
         echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
         echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
+        echo "${OUT}" >> ${LOG}
         exit 0
 	STIME_NEW="n/a"
     else

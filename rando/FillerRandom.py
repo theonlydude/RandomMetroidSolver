@@ -197,6 +197,7 @@ class FillerRandomSpeedrun(FillerRandom):
         graphLocations = self.container.getLocsForSolver()
         solver = RandoSolver(self.restrictions.split, self.startAP, self.graph, graphLocations)
         diff = solver.solveRom()
+        self.container.cleanLocsAfterSolver()
         if diff < minDiff: # minDiff is 0 if unspecified: that covers "unsolvable" (-1)
             sys.stdout.write('X')
             sys.stdout.flush()

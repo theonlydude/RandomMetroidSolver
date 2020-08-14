@@ -107,8 +107,8 @@ class SMBoolManager(object):
         # return integer
         return getattr(self, item+'Count')
 
-    def haveItem(self, item, difficulty=0):
-        return SMBool(getattr(self, item), difficulty, items=[item])
+    def haveItem(self, item):
+        return SMBool(getattr(self, item), items=[item])
 
     def knowsKnows(self, knows, smKnows):
         return SMBool(smKnows[0], smKnows[1], knows=[knows])

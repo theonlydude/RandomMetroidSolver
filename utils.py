@@ -235,6 +235,18 @@ class PresetLoaderDict(PresetLoader):
         self.params = params
         super(PresetLoaderDict, self).__init__()
 
+def getDefaultMultiValues():
+    from graph_access import GraphUtils
+    defaultMultiValues = {
+        'startLocation': GraphUtils.getStartAccessPointNames(),
+        'majorsSplit': ['Full', 'Major', 'Chozo'],
+        'progressionSpeed': ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble', 'speedrun'],
+        'progressionDifficulty': ['easier', 'normal', 'harder'],
+        'morphPlacement': ['early', 'late', 'normal'],
+        'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla' ]
+    }
+    return defaultMultiValues
+
 def loadRandoPreset(randoPreset, args):
     # load the rando preset json file and add the parameters inside it to the args parser
     with open(randoPreset) as randoPresetFile:
@@ -350,25 +362,33 @@ def loadRandoPreset(randoPreset, args):
 
     if randoParams.get("minimizer", "off") == "on" and "minimizerQty" in randoParams:
         args.minimizerN = randoParams["minimizerQty"]
-
+    defaultMultiValues = getDefaultMultiValues()
     multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"]
     for multiElem in multiElems:
         if multiElem+'MultiSelect' in randoParams:
             setattr(args, multiElem+'List', ','.join(randoParams[multiElem+'MultiSelect']))
+        else:
+            setattr(args, multiElem+'List', ','.join(defaultMultiValues[multiElem]))
 
 def getRandomizerDefaultParameters():
     defaultParams = {}
+    defaultMultiValues = getDefaultMultiValues()
 
     defaultParams['complexity'] = "simple"
     defaultParams['preset'] = 'regular'
     defaultParams['randoPreset'] = ""
     defaultParams['raceMode'] = "off"
     defaultParams['majorsSplit'] = "Full"
+    defaultParams['majorsSplitMultiSelect'] = defaultMultiValues['majorsSplit']
     defaultParams['startLocation'] = "Landing Site"
+    defaultParams['startLocationMultiSelect'] = defaultMultiValues['startLocation']
     defaultParams['maxDifficulty'] = 'hardcore'
     defaultParams['progressionSpeed'] = "medium"
+    defaultParams['progressionSpeedMultiSelect'] = defaultMultiValues['progressionSpeed']
     defaultParams['progressionDifficulty'] = 'normal'
+    defaultParams['progressionDifficultyMultiSelect'] = defaultMultiValues['progressionDifficulty']
     defaultParams['morphPlacement'] = "early"
+    defaultParams['morphPlacementMultiSelect'] = defaultMultiValues['morphPlacement']
     defaultParams['suitsRestriction'] = "on"
     defaultParams['hideItems'] = "off"
     defaultParams['strictMinors'] = "off"
@@ -377,6 +397,7 @@ def getRandomizerDefaultParameters():
     defaultParams['powerBombQty'] = "1"
     defaultParams['minorQty'] = "100"
     defaultParams['energyQty'] = "vanilla"
+    defaultParams['energyQtyMultiSelect'] = defaultMultiValues['energyQty']
     defaultParams['areaRandomization'] = "off"
     defaultParams['areaLayout'] = "off"
     defaultParams['lightAreaRandomization'] = "off"

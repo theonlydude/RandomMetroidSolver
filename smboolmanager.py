@@ -49,7 +49,7 @@ class SMBoolManager(object):
     def resetItems(self):
         # start without items
         for item in SMBoolManager.items:
-            setattr(self, item, False)
+            setattr(self, item, SMBool(False))
 
         for item in SMBoolManager.countItems:
             setattr(self, item+'Count', 0)
@@ -58,7 +58,7 @@ class SMBoolManager(object):
 
     def addItem(self, item):
         # a new item is available
-        setattr(self, item, True)
+        setattr(self, item, SMBool(True, items=[item]))
         if self.isCountItem(item):
             setattr(self, item+'Count', getattr(self, item+'Count') + 1)
 
@@ -68,7 +68,7 @@ class SMBoolManager(object):
         if len(items) == 0:
             return
         for item in items:
-            setattr(self, item, True)
+            setattr(self, item, SMBool(True, items=[item]))
             if self.isCountItem(item):
                 setattr(self, item+'Count', getattr(self, item+'Count') + 1)
 
@@ -80,9 +80,9 @@ class SMBoolManager(object):
             count = getattr(self, item+'Count') - 1
             setattr(self, item+'Count', count)
             if count == 0:
-                setattr(self, item, False)
+                setattr(self, item, SMBool(False))
         else:
-            setattr(self, item, False)
+            setattr(self, item, SMBool(False))
 
         Cache.reset()
 
@@ -96,9 +96,9 @@ class SMBoolManager(object):
         # take no parameter
         for knows in Knows.__dict__:
             if isKnows(knows):
-                setattr(self, 'knows'+knows, lambda knows=knows: self.knowsKnows(knows,
-                                                                                 (Knows.__dict__[knows].bool,
-                                                                                  Knows.__dict__[knows].difficulty)))
+                setattr(self, 'knows'+knows, lambda knows=knows: SMBool(Knows.__dict__[knows].bool,
+                                                                        Knows.__dict__[knows].difficulty,
+                                                                        knows=[knows]))
 
     def isCountItem(self, item):
         return item in self.countItems
@@ -108,10 +108,7 @@ class SMBoolManager(object):
         return getattr(self, item+'Count')
 
     def haveItem(self, item):
-        return SMBool(getattr(self, item), items=[item])
-
-    def knowsKnows(self, knows, smKnows):
-        return SMBool(smKnows[0], smKnows[1], knows=[knows])
+        return getattr(self, item)
 
     def wand2(self, a, b):
         if a.bool is True and b.bool is True:
@@ -194,7 +191,7 @@ class SMBoolManagerPlando(SMBoolManager):
         already = self.haveItem(item)
         isCount = self.isCountItem(item)
         if isCount or not already:
-            setattr(self, item, True)
+            setattr(self, item, SMBool(True, items=[item]))
         else:
             # handle duplicate major items (plandos)
             setattr(self, 'dup_'+item, False)
@@ -209,12 +206,13 @@ class SMBoolManagerPlando(SMBoolManager):
             count = getattr(self, item+'Count') - 1
             setattr(self, item+'Count', count)
             if count == 0:
-                setattr(self, item, False)
+                setattr(self, item, SMBool(False))
         else:
             dup = 'dup_'+item
             if getattr(self, dup, None) is None:
-                setattr(self, item, False)
+                setattr(self, item, SMBool(False))
             else:
+                # TODO::check that, seems wrong (we already set it to false in addItem, shouldn't we remove it here ?
                 setattr(self, dup, False)
 
         Cache.reset()

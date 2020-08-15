@@ -56,6 +56,7 @@ class RandoSetup(object):
     def createItemLocContainer(self):
         self.getForbidden()
         if not self.checkPool():
+            self.log.debug("createItemLocContainer: checkPool fail")
             return None
         self.container = ItemLocContainer(self.sm, self.getItemPool(), self.locations)
         if self.restrictions.isLateMorph():
@@ -65,10 +66,12 @@ class RandoSetup(object):
             # TODO::allow for custom start which doesn't require morph early
             if self.graphSettings.areaRando and isStdStart and not self.restrictions.suitsRestrictions and self.restrictions.lateMorphForbiddenArea is None:
                 self.container = None
+                self.log.debug("createItemLocContainer: checkLateMorph fail")
                 return None
         # checkStart needs the container
         if not self.checkStart():
             self.container = None
+            self.log.debug("createItemLocContainer: checkStart fail")
             return None
         # add placement restriction helpers for random fill
         if self.settings.progSpeed == 'speedrun':
@@ -155,8 +158,9 @@ class RandoSetup(object):
         comeBack = {}
         try:
             container = ItemLocContainer(self.sm, pool, self.locations)
-        except AssertionError:
+        except AssertionError as e:
             # invalid graph altogether
+            self.log.debug("checkPool: AssertionError when creating ItemLocContainer: {}".format(e))
             return False
         # restrict item pool in chozo: game should be finishable with chozo items only
         contPool = []

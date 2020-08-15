@@ -12,6 +12,7 @@ from rom_patches import RomPatches
 from rom import RomPatcher, FakeROM
 from utils import loadRandoPreset, getDefaultMultiValues
 from version import displayedVersion
+from smbool import SMBool
 
 import log, db
 
@@ -557,6 +558,8 @@ if __name__ == "__main__":
                                                       args.escapeRando)
                 escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
         except Exception as e:
+            import traceback
+            traceback.print_exc(file=sys.stdout)
             dumpErrorMsg(args.output, "Error: {}".format(e))
             sys.exit(-1)
     else:
@@ -598,7 +601,8 @@ if __name__ == "__main__":
     if args.plandoRando != None:
         # replace smbool with a dict
         for itemLoc in itemLocs:
-            itemLoc["Location"]["difficulty"] = itemLoc["Location"]["difficulty"].json()
+            if "difficulty" in itemLoc["Location"]:
+                itemLoc["Location"]["difficulty"] = itemLoc["Location"]["difficulty"].json()
             if "pathDifficulty" in itemLoc["Location"]:
                 del itemLoc["Location"]["pathDifficulty"]
             if "Wrapper" in itemLoc["Item"]:

@@ -1186,15 +1186,17 @@ class InteractiveSolver(CommonSolver):
             for itemLoc in itemsLocs:
                 locName = itemLoc["Location"]["Name"]
                 loc = self.getLoc(locName)
-                difficulty = itemLoc["Location"]["difficulty"]
-                smbool = SMBool(difficulty["bool"], difficulty["difficulty"], difficulty["knows"], difficulty["items"])
-                loc["difficulty"] = smbool
-                itemName = itemLoc["Item"]["Type"]
-                if itemName == "Boss":
-                    itemName = "Nothing"
-                loc["itemName"] = itemName
-                loc["accessPoint"] = itemLoc["Location"]["accessPoint"]
-                self.collectMajor(loc)
+                # we can have locations from non connected areas
+                if "difficulty" in itemLoc["Location"]:
+                    difficulty = itemLoc["Location"]["difficulty"]
+                    smbool = SMBool(difficulty["bool"], difficulty["difficulty"], difficulty["knows"], difficulty["items"])
+                    loc["difficulty"] = smbool
+                    itemName = itemLoc["Item"]["Type"]
+                    if itemName == "Boss":
+                        itemName = "Nothing"
+                    loc["itemName"] = itemName
+                    loc["accessPoint"] = itemLoc["Location"]["accessPoint"]
+                    self.collectMajor(loc)
 
     def savePlando(self, lock, escapeTimer):
         # store filled locations addresses in the ROM for next creating session

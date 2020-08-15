@@ -25,7 +25,7 @@ class RandoSettings(object):
         if self.plandoRandoItemLocs is None:
             return ItemManager(self.restrictions['MajorMinor'], self.qty, smbm, nLocs)
         else:
-            return ItemManager('Plando', self.qty, smbm)
+            return ItemManager('Plando', self.qty, smbm, nLocs)
 
     def getExcludeItems(self, locations):
         if self.plandoRandoItemLocs is None:

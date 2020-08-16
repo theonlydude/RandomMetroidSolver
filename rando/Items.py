@@ -14,6 +14,15 @@ class Item:
     def withClass(self, Class):
         return Item(self.Category, Class, self.Name, self.Type, self.Code)
 
+    def __eq__(self, other):
+        # used to remove an item from a list
+        return self.Type == other.Type and self.Class == other.Class
+
+    def __hash__(self):
+        # as we define __eq__ we have to also define __hash__ to use items as dictionnary keys
+        # https://docs.python.org/3/reference/datamodel.html#object.__hash__
+        return id(self)
+
     def __repr__(self):
       return "Item({}, {}, {}, {}, {})".format(self.Category,
           self.Class, self.Code, self.Name, self.Type)

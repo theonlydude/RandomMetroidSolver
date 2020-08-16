@@ -149,8 +149,8 @@ class FrontFillerKickstart(FrontFiller):
 
         # collect them
         availableLocs = pairItemLocDict[key]
-        self.collect({'Item': key[0].item, 'Location': availableLocs[0][0]})
-        self.collect({'Item': key[1].item, 'Location': availableLocs[1][0]})
+        self.collect({'Item': key[0], 'Location': availableLocs[0][0]})
+        self.collect({'Item': key[1], 'Location': availableLocs[1][0]})
 
         return True
 

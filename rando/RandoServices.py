@@ -292,9 +292,9 @@ class RandoServices(object):
         self.processMorphPlacements(ap, container, comebackCheck, itemLocDict, curLocs)
         if self.log.getEffectiveLevel() == logging.DEBUG:
             debugDict = {}
-            for w, locList in itemLocDict.items():
-                if w.item.Type not in debugDict:
-                    debugDict[w.item.Type] = [loc['Name'] for loc in locList]
+            for item, locList in itemLocDict.items():
+                if item.Type not in debugDict:
+                    debugDict[item.Type] = [loc['Name'] for loc in locList]
             self.log.debug('itemLocDict='+str(debugDict))
             self.log.debug('possibleProg='+str(possibleProg))
         return (itemLocDict, possibleProg)
@@ -373,9 +373,9 @@ class RandoServices(object):
         # keep only unique items in itemLocDict
         uniqItemLocDict = {}
         for item, locs in itemLocDict.items():
-            if item.item.Type in ['NoEnergy', 'Nothing']:
+            if item.Type in ['NoEnergy', 'Nothing']:
                 continue
-            if item.item.Type not in [it.item.Type for it in uniqItemLocDict.keys()]:
+            if item.Type not in [it.Type for it in uniqItemLocDict.keys()]:
                 uniqItemLocDict[item] = locs
         if not uniqItemLocDict:
             return None
@@ -388,7 +388,7 @@ class RandoServices(object):
         for item1, locs1 in uniqItemLocDict.items():
             # collect first item in first available location
             self.cache.reset()
-            container.collect({'Item': item1.item, 'Location': curLocsBefore[0]})
+            container.collect({'Item': item1, 'Location': curLocsBefore[0]})
             saveAfterFirst = ContainerSoftBackup(container)
 
             curLocsAfterFirst = self.currentLocations(ap, container)
@@ -397,7 +397,7 @@ class RandoServices(object):
                 continue
 
             for item2, locs2 in uniqItemLocDict.items():
-                if item1.item.Type == item2.item.Type:
+                if item1.Type == item2.Type:
                     continue
 
                 if (item1, item2) in pairItemLocDict.keys() or (item2, item1) in pairItemLocDict.keys():
@@ -405,7 +405,7 @@ class RandoServices(object):
 
                 # collect second item in first available location
                 self.cache.reset()
-                container.collect({'Item': item2.item, 'Location': curLocsAfterFirst[0]})
+                container.collect({'Item': item2, 'Location': curLocsAfterFirst[0]})
 
                 curLocsAfterSecond = self.currentLocations(ap, container)
                 if not curLocsAfterSecond:
@@ -425,6 +425,6 @@ class RandoServices(object):
             if self.log.getEffectiveLevel() == logging.DEBUG:
                 self.log.debug("pairItemLocDict:")
                 for key, locs in pairItemLocDict.items():
-                    self.log.debug("{}->{}: {}".format(key[0].item.Type, key[1].item.Type, [l['Name'] for l in locs[2]]))
+                    self.log.debug("{}->{}: {}".format(key[0].Type, key[1].Type, [l['Name'] for l in locs[2]]))
 
             return pairItemLocDict

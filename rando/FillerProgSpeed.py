@@ -82,7 +82,7 @@ class FillerProgSpeed(Filler):
     # during random fill at the end put suits first while there's still available locations which don't fall under the suits restriction
     def chooseItemLocRestrictFirst(self, itemLocDict):
         if self.settings.restrictions['Suits'] == True and self.container.hasItemInPool(lambda item: item.Type in ['Varia', 'Gravity']):
-            itemLocDict = {key: value for key, value in itemLocDict.items() if key.item.Type in ['Varia', 'Gravity']}
+            itemLocDict = {key: value for key, value in itemLocDict.items() if key.Type in ['Varia', 'Gravity']}
 
         return self.chooseItemLoc(itemLocDict, False)
 
@@ -480,6 +480,7 @@ class FillerProgSpeedChozoSecondPhase(Filler):
             self.log.debug('step. restrictedItemTypes='+str(restrictedItemTypes))
             basePool = self.container.itemPool[:]
             itemPool = []
+            self.log.debug('step. basePool: {}'.format(getItemListStr(basePool)))
             while len(itemPool) < len(curLocs):
                 item = random.choice(basePool)
                 if item.Type not in restrictedItemTypes or random.random() < self.restrictedItemProba:

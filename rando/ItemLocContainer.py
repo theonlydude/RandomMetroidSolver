@@ -51,7 +51,7 @@ class ItemLocContainer(object):
         self.checkConsistency()
 
     def checkConsistency(self):
-        assert len(self.unusedLocations) == len(self.itemPool), "Item/Locs count mismatch"
+        assert len(self.unusedLocations) == len(self.itemPool), "Item({})/Locs({}) count mismatch".format(len(self.itemPool), len(self.unusedLocations))
 
     def __eq__(self, rhs):
         eq = self.currentItems == rhs.currentItems

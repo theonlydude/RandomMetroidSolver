@@ -11,6 +11,7 @@ class SMBoolManager(object):
     countItems = ['Missile', 'Super', 'PowerBomb', 'ETank', 'Reserve']
 
     def __init__(self):
+        self.smboolFalse = SMBool(False)
         Cache.reset()
         self.helpers = HelpersGraph(self)
         self.createFacadeFunctions()
@@ -112,7 +113,7 @@ class SMBoolManager(object):
 
     def wand(self, *args):
         if False in args:
-            return SMBool(False)
+            return self.smboolFalse
         else:
             return SMBool(True,
                           sum([smb.difficulty for smb in args]),
@@ -124,7 +125,7 @@ class SMBoolManager(object):
             # return the smbool with the smallest difficulty among True smbools.
             return min(args)
         else:
-            return SMBool(False)
+            return self.smboolFalse
 
     # negates boolean part of the SMBool
     def wnot(self, a):
@@ -136,7 +137,7 @@ class SMBoolManager(object):
                 item = '{}-{}'.format(count, item)
             return SMBool(True, difficulty, items = [item])
         else:
-            return SMBool(False)
+            return self.smboolFalse
 
     def energyReserveCountOk(self, count, difficulty=0):
         if self.energyReserveCount() >= count:
@@ -152,7 +153,7 @@ class SMBoolManager(object):
                 nReserve = 0
             return SMBool(True, difficulty, items = [items])
         else:
-            return SMBool(False)
+            return self.smboolFalse
 
 class SMBoolManagerPlando(SMBoolManager):
     def __init__(self):

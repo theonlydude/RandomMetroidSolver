@@ -1,4 +1,6 @@
 #!/bin/bash
+# while true; do grep -v SOLVER test_jm.csv | wc -l ; grep -E "NOK|mismatch|Can't solve" test_jm.csv | grep -v ';speedrun;' ; grep Traceback test_jm.log ; sleep 3; done
+# grep -v SOLVER test_jm.csv | grep -v -E '^error' | grep -v '^[0-9]*;;;' | cut -d ';' -f 3,4 | sed -e 's+0:++g' | awk -F';' '{sumold+=$1; sumnew+=$2;} END{print sumold" "sumnew}'
 
 # cd to root dir
 CWD=$(dirname $0)/..

@@ -78,11 +78,13 @@ class RandoExec(object):
         # hide some items like in dessy's
         if hide == True:
             for itemLoc in itemLocs:
-                if (itemLoc['Item']['Type'] not in ['Nothing', 'NoEnergy']
-                    and itemLoc['Location']['CanHidden'] == True
-                    and itemLoc['Location']['Visibility'] == 'Visible'):
+                item = itemLoc['Item']
+                loc = itemLoc['Location']
+                if (item.Type not in ['Nothing', 'NoEnergy']
+                    and loc['CanHidden'] == True
+                    and loc['Visibility'] == 'Visible'):
                     if bool(random.randint(0, 2)) == True:
-                        itemLoc['Location']['Visibility'] = 'Hidden'
+                        loc['Visibility'] = 'Hidden'
         # put nothing in unfilled locations
         filledLocNames = [il['Location']['Name'] for il in itemLocs]
         unfilledLocs = [loc for loc in graphLocations if loc['Name'] not in filledLocNames]

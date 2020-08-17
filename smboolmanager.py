@@ -149,8 +149,6 @@ class SMBoolManager(object):
             if nEtank < count:
                 nReserve = int(count) - nEtank
                 items += ' - {}-Reserve'.format(nReserve)
-            else:
-                nReserve = 0
             return SMBool(True, difficulty, items = [items])
         else:
             return self.smboolFalse

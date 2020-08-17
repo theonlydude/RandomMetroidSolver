@@ -330,7 +330,7 @@ class ItemPoolGenerator(object):
         if majorsSplit == 'Chozo':
             return ItemPoolGeneratorChozo(itemManager, qty, sm)
         elif majorsSplit == 'Plando':
-            return ItemPoolGeneratorPlando(itemManager, qty, sm, exclude)
+            return ItemPoolGeneratorPlando(itemManager, qty, sm, exclude, nLocs)
         elif nLocs == 105:
             return ItemPoolGeneratorMajors(itemManager, qty, sm)
         else:
@@ -611,13 +611,17 @@ class ItemPoolGeneratorMinimizer(ItemPoolGeneratorMajors):
         self.log.debug("maxEnergy: "+str(self.maxEnergy))
 
 class ItemPoolGeneratorPlando(ItemPoolGenerator):
-    def __init__(self, itemManager, qty, sm, exclude):
+    def __init__(self, itemManager, qty, sm, exclude, nLocs):
         super(ItemPoolGeneratorPlando, self).__init__(itemManager, qty, sm)
         # dict of 'itemType: count' of items already added in the plando.
         # also a 'total: count' with the total number of items already added in the plando.
         self.exclude = exclude
+        self.maxItems = nLocs
+        self.log.debug("maxItems: {}".format(self.maxItems))
+        self.log.debug("exclude: {}".format(self.exclude))
 
     def getItemPool(self):
+        exceptionMessage = "Too many items already placed by the plando or not enough available locations:"
         self.itemManager.newItemPool(addBosses=False)
 
         # add the already placed items by the plando
@@ -630,7 +634,7 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
             for i in range(self.exclude[item]):
                 self.itemManager.addItem(item, itemClass)
 
-        remain = 105 - self.exclude['total']
+        remain = self.maxItems - self.exclude['total']
         self.log.debug("Plando: remain start: {}".format(remain))
         if remain > 0:
             # add missing bosses
@@ -642,7 +646,7 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
 
             self.log.debug("Plando: remain after bosses: {}".format(remain))
             if remain < 0:
-                raise Exception("Too many items already placed by the plando: can't add the remaining bosses")
+                raise Exception("{} can't add the remaining bosses".format(exceptionMessage))
 
             # add missing majors
             majors = []
@@ -655,7 +659,7 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
 
             self.log.debug("Plando: remain after majors: {}".format(remain))
             if remain < 0:
-                raise Exception("Too many items already placed by the plando: can't add the remaining majors: {}".format(', '.join(majors)))
+                raise Exception("{} can't add the remaining majors: {}".format(exceptionMessage, ', '.join(majors)))
 
             # add minimum minors to finish the game
             for (itemType, minimum) in [('Missile', 3), ('Super', 2), ('PowerBomb', 1)]:
@@ -668,7 +672,7 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
 
             self.log.debug("Plando: remain after minimum minors: {}".format(remain))
             if remain < 0:
-                raise Exception("Too many items already placed by the plando: can't add the minimum minors to finish the game")
+                raise Exception("{} can't add the minimum minors to finish the game".format(exceptionMessage))
 
             # add energy
             energyQty = self.qty['energy']
@@ -687,7 +691,7 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
 
             self.log.debug("Plando: remain after energy: {}".format(remain))
             if remain < 0:
-                raise Exception("Too many items already placed by the plando: can't add energy")
+                raise Exception("{} can't add energy".format(exceptionMessage))
 
             # add ammo
             nbMinorsAlready = self.exclude['Missile'] + self.exclude['Super'] + self.exclude['PowerBomb']

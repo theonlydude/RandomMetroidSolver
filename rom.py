@@ -101,7 +101,9 @@ class RomReader:
         'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"},
         'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"},
         'nerfedRainbowBeam': {'address': 0x14BA2E, 'value': 0x13, 'desc': 'nerfed rainbow beam'},
-        'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'desc': "Crocomire in its own area"}
+        'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'desc': "Crocomire in its own area"},
+        'minimizer_bosses': {'address': 0x10F500, 'value': 0xAD, 'desc': "Minimizer"},
+        'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'desc': "Fast Tourian"}
     }
 
     # FIXME shouldn't be here
@@ -172,7 +174,9 @@ class RomReader:
         'refill_before_save': {'address': 0x270C2, 'value': 0x98, 'vanillaValue': 0xff},
         'nerfed_rainbow_beam': {'address': 0x14BA2E, 'value': 0x13, 'vanillaValue': 0x2b},
         'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'vanillaValue': 0x4},
-        'area_rando_warp_door': {'address': 0x26425E, 'value': 0x80, 'vanillaValue': 0x70}
+        'area_rando_warp_door': {'address': 0x26425E, 'value': 0x80, 'vanillaValue': 0x70},
+        'minimizer_bosses': {'address': 0x10F500, 'value': 0xAD, 'vanillaValue': 0xff},
+        'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'vanillaValue': 0xff}
     }
 
     @staticmethod
@@ -1871,6 +1875,12 @@ class RomLoader(object):
 
         # check escape rando
         isEscape = self.hasPatch("areaEscape")
+
+        # minimizer
+        if self.hasPatch("minimizer_bosses"):
+            RomPatches.ActivePatches.append(RomPatches.NoGadoras)
+        if self.hasPatch("minimizer_tourian"):
+            RomPatches.ActivePatches.append(RomPatches.TourianSpeedup)
 
         return (isArea, isBoss, isEscape)
 

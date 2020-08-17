@@ -154,7 +154,7 @@ class AccessGraph(object):
                     diff = smbm.eval(tFunc)
                 else:
                     diff = SMBool(True)
-                if diff.bool == True and diff.difficulty <= maxDiff:
+                if diff.bool and diff.difficulty <= maxDiff:
                     if src.GraphArea == dst.GraphArea:
                         dst.distance = src.distance + 0.01
                     else:

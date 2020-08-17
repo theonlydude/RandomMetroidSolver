@@ -146,11 +146,11 @@ class AccessGraph(object):
         newAvailNodes = {}
         for src in sorted(nodesToCheck, key=attrgetter('Name')):
             for dstName in src.transitions.keys():
-                tFunc = src.transitions[dstName]
                 dst = self.accessPoints[dstName]
                 if dst in newAvailNodes or dst in availNodes:
                     continue
                 if smbm is not None:
+                    tFunc = src.transitions[dstName]
                     diff = smbm.eval(tFunc)
                 else:
                     diff = SMBool(True)

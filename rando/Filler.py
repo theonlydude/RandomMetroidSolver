@@ -90,7 +90,7 @@ class Filler(object):
         pickup &= 'restricted' not in location or location['restricted'] == False
         self.ap = self.services.collect(self.ap, container, itemLoc, pickup=pickup)
         if self.vcr is not None:
-            self.vcr.addLocation(location['Name'], item['Type'])
+            self.vcr.addLocation(location['Name'], item.Type)
 
     # called by generateItems at the end to knows which particulier
     # item/locations were progression, if the info is available

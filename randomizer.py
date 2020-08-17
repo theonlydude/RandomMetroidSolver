@@ -585,7 +585,7 @@ if __name__ == "__main__":
     firstMinorsFound = {'Missile': False, 'Super': False, 'PowerBomb': False}
     for itemLoc in itemLocs:
         locName = itemLoc["Location"]["Name"]
-        itemType = itemLoc["Item"]["Type"]
+        itemType = itemLoc["Item"].Type
         if itemType in firstMinorsFound and firstMinorsFound[itemType] == False:
             locsItems[locName] = itemType
             firstMinorsFound[itemType] = True
@@ -601,8 +601,6 @@ if __name__ == "__main__":
             itemLoc["Location"]["difficulty"] = itemLoc["Location"]["difficulty"].json()
             if "pathDifficulty" in itemLoc["Location"]:
                 del itemLoc["Location"]["pathDifficulty"]
-            if "Wrapper" in itemLoc["Item"]:
-                del itemLoc["Item"]["Wrapper"]
 
         with open(args.output, 'w') as jsonFile:
             json.dump({"itemLocs": itemLocs, "errorMsg": randoExec.errorMsg}, jsonFile, default=lambda x: x.__dict__)

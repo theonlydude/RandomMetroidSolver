@@ -32,6 +32,13 @@ class SMBool:
         # for !=
         return self.bool != other
 
+    def __lt__(self, other):
+        # for <
+        if self.bool and other.bool:
+            return self.difficulty < other.difficulty
+        else:
+            return self.bool
+
     def json(self):
         # as we have slots instead of dict
         return {key : getattr(self, key, None) for key in self.__slots__}

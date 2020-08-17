@@ -2,6 +2,7 @@ from helpers import Bosses
 from parameters import Settings
 from rom_patches import RomPatches
 from smbool import SMBool
+import copy
 
 class NotFound:
   pass
@@ -38,6 +39,16 @@ class Location:
         return "Location({})".format(
             '. '.join(
                 (repr(self[slot]) for slot in Location.__slots__ if slot in self)))
+
+    def copy(self):
+        ret = { }
+        for key, value in self.items():
+            if key == 'difficulty':
+                ret[key] = SMBool(value.bool, value.difficulty, value.knows, value.items)
+            else:
+                ret[key] = value
+
+        return ret
 
     def items(self):
         for slot in Location.__slots__:

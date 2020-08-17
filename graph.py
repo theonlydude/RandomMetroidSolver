@@ -1,4 +1,5 @@
 import copy, logging
+from operator import attrgetter
 import log
 from smbool import SMBool
 from parameters import infinity
@@ -30,7 +31,7 @@ class AccessPoint(object):
         self.Escape = escape
         self.Start = start
         self.DotOrientation = dotOrientation
-        self.transitions = transitions
+        self.transitions = self.sortTransitions(transitions)
         self.traverse = traverse
         self.distance = 0
         # inter-area connection
@@ -50,6 +51,13 @@ class AccessPoint(object):
     def __str__(self):
         return "[" + self.GraphArea + "] " + self.Name
 
+    def sortTransitions(self, transitions=None):
+        # sort transitions before the loop in getNewAvailNodes.
+        # as of python3.7 insertion order is guaranteed in dictionaires.
+        if transitions is None:
+            transitions = self.transitions
+        return { key: transitions[key] for key in sorted(transitions.keys()) }
+
     # connect to inter-area access point
     def connect(self, destName):
         if self.ConnectedTo is not None:
@@ -59,6 +67,7 @@ class AccessPoint(object):
             self.ConnectedTo = destName
         else:
             raise RuntimeError("Cannot add an internal access point as inter-are transition")
+        self.transitions = self.sortTransitions()
 
     # tells if this node is to connect areas together
     def isArea(self):
@@ -135,8 +144,8 @@ class AccessGraph(object):
     # return newly opened access points
     def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
         newAvailNodes = {}
-        for src in sorted(nodesToCheck, key=lambda x: x.Name):
-            for dstName in sorted(src.transitions.keys()):
+        for src in sorted(nodesToCheck, key=attrgetter('Name')):
+            for dstName in src.transitions.keys():
                 tFunc = src.transitions[dstName]
                 dst = self.accessPoints[dstName]
                 if dst in newAvailNodes or dst in availNodes:
@@ -144,13 +153,13 @@ class AccessGraph(object):
                 if smbm is not None:
                     diff = smbm.eval(tFunc)
                 else:
-                    diff = SMBool(True, 0)
+                    diff = SMBool(True)
                 if diff.bool == True and diff.difficulty <= maxDiff:
                     if src.GraphArea == dst.GraphArea:
                         dst.distance = src.distance + 0.01
                     else:
                         dst.distance = src.distance + 1
-                    newAvailNodes[dst] = { 'difficulty' : diff, 'from' : src }
+                    newAvailNodes[dst] = { 'difficulty': diff, 'from': src }
 
                 #self.log.debug("{} -> {}: {}".format(src.Name, dstName, diff))
         return newAvailNodes

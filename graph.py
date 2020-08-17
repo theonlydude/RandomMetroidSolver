@@ -145,7 +145,7 @@ class AccessGraph(object):
     def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
         newAvailNodes = {}
         for src in sorted(nodesToCheck, key=attrgetter('Name')):
-            for dstName in src.transitions.keys():
+            for dstName in src.transitions:
                 dst = self.accessPoints[dstName]
                 if dst in newAvailNodes or dst in availNodes:
                     continue

@@ -149,7 +149,7 @@ patches = {
         # music in room state header
         0x7b56b: [0x18, 0x05],
         # map icon X/Y
-        0x1493f: [0x38, 0x01, 0x28, 0x00]
+        0x1493f: [0x28, 0x01, 0x38, 0x00]
     },
     # custom load points for west maridia additional saves in area rando
     "Save_Crab_Shaft": {

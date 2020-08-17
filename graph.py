@@ -147,7 +147,7 @@ class AccessGraph(object):
         for src in sorted(nodesToCheck, key=attrgetter('Name')):
             for dstName in src.transitions:
                 dst = self.accessPoints[dstName]
-                if dst in newAvailNodes or dst in availNodes:
+                if dst in availNodes or dst in newAvailNodes:
                     continue
                 if smbm is not None:
                     tFunc = src.transitions[dstName]

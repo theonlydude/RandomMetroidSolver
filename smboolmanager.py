@@ -134,7 +134,7 @@ class SMBoolManager(object):
     def itemCountOk(self, item, count, difficulty=0):
         if self.itemCount(item) >= count:
             if item in ['ETank', 'Reserve']:
-                item = '{}-{}'.format(count, item)
+                item = str(count)+'-'+item
             return SMBool(True, difficulty, items = [item])
         else:
             return self.smboolFalse
@@ -144,11 +144,11 @@ class SMBoolManager(object):
             nEtank = self.itemCount('ETank')
             if nEtank > count:
                 nEtank = int(count)
-            items = '{}-ETank'.format(nEtank)
+            items = str(nEtank)+'-ETank'
             nReserve = self.itemCount('Reserve')
             if nEtank < count:
                 nReserve = int(count) - nEtank
-                items += ' - {}-Reserve'.format(nReserve)
+                items += ' - '+str(nReserve)+'-Reserve'
             return SMBool(True, difficulty, items = [items])
         else:
             return self.smboolFalse

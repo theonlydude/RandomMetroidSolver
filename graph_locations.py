@@ -6,9 +6,7 @@ import copy
 
 class Location:
     graph_slots = (
-        'Area', 'GraphArea', 'SolveArea', 'Name', 'Class', 'CanHidden',
-        'Address', 'Id', 'Visibility', 'Room', 'AccessFrom', 'Available',
-        'PostAvailable', 'distance', 'accessPoint', 'difficulty', 'path',
+        'distance', 'accessPoint', 'difficulty', 'path',
         'pathDifficulty', 'locDifficulty' )
     
     rando_slots = (
@@ -20,25 +18,10 @@ class Location:
     __slots__ = graph_slots + rando_slots + solver_slots
 
     def __init__(
-            self, Area, GraphArea, SolveArea, Name, Class, CanHidden,
-            Address, Id, Visibility, Room, AccessFrom, Available,
-            PostAvailable=None, distance=None, accessPoint=None,
+            self, distance=None, accessPoint=None,
             difficulty=None, path=None, pathDifficulty=None,
             locDifficulty=None, restricted=None, itemName=None,
             itemType=None, comeBack=None, areaWeight=None):
-        self.Area = Area
-        self.GraphArea = GraphArea
-        self.SolveArea = SolveArea
-        self.Name = Name
-        self.Class = Class
-        self.CanHidden = CanHidden
-        self.Address = Address
-        self.Id = Id
-        self.Visibility = Visibility
-        self.Room = Room
-        self.AccessFrom = AccessFrom
-        self.Available = Available
-        self.PostAvailable = PostAvailable
         self.distance = distance
         self.accessPoint = accessPoint
         self.difficulty = difficulty
@@ -50,8 +33,6 @@ class Location:
         self.itemType = itemType
         self.comeBack = comeBack
         self.areaWeight = areaWeight
-        self.comeBack = comeBack
-        self.areaWeight = areaWeight
 
     def __repr__(self):
         return "Location({})".format(
@@ -61,21 +42,39 @@ class Location:
     def copy(self):
         d = self.difficulty
         difficulty = SMBool(d.bool, d.difficulty, d.knows, d.items) if d is not None else None
-        ret = Location(
-            self.Area, self.GraphArea, self.SolveArea, self.Name,
-            self.Class, self.CanHidden, self.Address, self.Id,
-            self.Visibility, self.Room, self.AccessFrom, self.Available,
-            self.PostAvailable, self.distance, self.accessPoint,
-            difficulty, self.path, self.pathDifficulty,
-            self.locDifficulty, self.restricted, self.itemName,
-            self.itemType, self.comeBack, self.areaWeight)
+        ret = type(self)(
+            self.distance, self.accessPoint, difficulty, self.path,
+            self.pathDifficulty, self.locDifficulty, self.restricted,
+            self.itemName, self.itemType, self.comeBack,
+            self.areaWeight)
 
         return ret
+
+def define_location(
+        Area, GraphArea, SolveArea, Name, Class, CanHidden, Address, Id,
+        Visibility, Room, AccessFrom, Available, PostAvailable=None):
+    name = Name.replace(' ', '').replace(',', '') + 'Location'
+    subclass = type(name, (Location,), {
+        'Area': Area,
+        'GraphArea': GraphArea,
+        'SolveArea': SolveArea,
+        'Name': Name,
+        'Class': Class,
+        'CanHidden': CanHidden,
+        'Address': Address,
+        'Id': Id,
+        'Visibility': Visibility,
+        'Room': Room,
+        'AccessFrom': AccessFrom,
+        'Available': Available,
+        'PostAvailable': PostAvailable
+    })
+    return subclass()
 
 # all the items locations with the prerequisites to access them
 locations = [
 ###### MAJORS
-Location(
+define_location(
     Area="Crateria",
     GraphArea="Crateria",
     SolveArea="Crateria Gauntlet",
@@ -89,12 +88,12 @@ Location(
     AccessFrom={
         'Landing Site': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wor(sm.canEnterAndLeaveGauntlet(),
+    Available=lambda loc, sm: sm.wor(sm.canEnterAndLeaveGauntlet(),
                                    sm.wand(sm.canShortCharge(),
                                            sm.canEnterAndLeaveGauntletQty(1, 0)), # thanks ponk! https://youtu.be/jil5zTBCF1s
                                    sm.canDoLowGauntlet())
 ),
-Location(
+define_location(
     Area="Crateria",
     GraphArea="Crateria",
     SolveArea="Crateria Bombs",
@@ -108,12 +107,12 @@ Location(
     AccessFrom={
         'Landing Site': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.haveItem('Morph'),
+    Available=lambda loc, sm: sm.wand(sm.haveItem('Morph'),
                                     sm.canOpenRedDoors()),
-    PostAvailable=lambda sm: sm.wor(sm.knowsAlcatrazEscape(),
+    PostAvailable=lambda loc, sm: sm.wor(sm.knowsAlcatrazEscape(),
                                        sm.canPassBombPassages())
 ),
-Location(
+define_location(
     Area="Crateria",
     GraphArea="Crateria",
     SolveArea="Crateria Terminator",
@@ -129,9 +128,9 @@ Location(
         'Lower Mushrooms Left': lambda sm: sm.canPassCrateriaGreenPirates(),
         'Gauntlet Top': lambda sm: sm.haveItem('Morph')
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Green Brinstar Reserve",
@@ -145,11 +144,11 @@ Location(
     AccessFrom={
         'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.canOpenRedDoors())
     },
-    Available=lambda sm: sm.wor(sm.wand(sm.knowsMockball(),
+    Available=lambda loc, sm: sm.wor(sm.wand(sm.knowsMockball(),
                                            sm.haveItem('Morph')),
                                    sm.haveItem('SpeedBooster'))
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Pink Brinstar",
@@ -163,9 +162,9 @@ Location(
     AccessFrom={
         'Big Pink': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.canPassBombPassages()
+    Available=lambda loc, sm: sm.canPassBombPassages()
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="Crateria",
     SolveArea="Blue Brinstar",
@@ -179,9 +178,9 @@ Location(
     AccessFrom={
         'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="Crateria",
     SolveArea="Blue Brinstar",
@@ -200,7 +199,7 @@ Location(
     #  -have the high jump boots
     #  -freeze the Reo to jump on it
     #  -do a damage boost with one of the two Geemers
-    Available=lambda sm: sm.wor(sm.knowsCeilingDBoost(),
+    Available=lambda loc, sm: sm.wor(sm.knowsCeilingDBoost(),
                                    sm.canFly(),
                                    sm.wor(sm.haveItem('HiJump'),
                                           sm.haveItem('Ice'),
@@ -208,7 +207,7 @@ Location(
                                                   sm.haveItem('SpeedBooster')),
                                           sm.canSimpleShortCharge()))
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Green Brinstar",
@@ -222,9 +221,9 @@ Location(
     AccessFrom={
         'Etecoons Bottom': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Pink Brinstar",
@@ -238,13 +237,13 @@ Location(
     AccessFrom={
         'Big Pink': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canUsePowerBombs(),
+    Available=lambda loc, sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.canOpenRedDoors(),
                                     sm.haveItem('SpeedBooster'),
                                     sm.wor(sm.haveItem('Gravity'),
                                            sm.canSimpleShortCharge())) # from the blocks above the water
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Pink Brinstar",
@@ -258,7 +257,7 @@ Location(
     AccessFrom={
         'Big Pink': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canUsePowerBombs(),
+    Available=lambda loc, sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.wor(sm.haveItem('Wave'),
                                            sm.wand(sm.haveItem('Super'),
                                                    sm.haveItem('HiJump'),
@@ -266,7 +265,7 @@ Location(
                                            sm.wand(sm.haveItem('Super'),
                                                    sm.knowsReverseGateGlitchHiJumpLess())))
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="RedBrinstar",
     SolveArea="Red Brinstar",
@@ -280,7 +279,7 @@ Location(
     AccessFrom={
         'Red Tower Top Left': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canUsePowerBombs(),
+    Available=lambda loc, sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.canOpenRedDoors(),
                                     sm.wor(sm.haveItem('Grapple'),
                                            sm.haveItem('SpaceJump'),
@@ -293,7 +292,7 @@ Location(
                                                                   sm.wor(sm.haveItem('SpeedBooster'),
                                                                          sm.canSpringBallJump()))))))
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="RedBrinstar",
     SolveArea="Red Brinstar",
@@ -307,11 +306,11 @@ Location(
     AccessFrom={
         'East Tunnel Right': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canOpenGreenDoors(),
+    Available=lambda loc, sm: sm.wand(sm.canOpenGreenDoors(),
                                     sm.wor(sm.canPassBombPassages(),
                                            sm.wand(sm.haveItem('Morph'), RomPatches.has(RomPatches.SpazerShotBlock))))
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="Kraid",
     SolveArea="Kraid",
@@ -325,9 +324,9 @@ Location(
     AccessFrom={
         'Warehouse Zeela Room Left': lambda sm: SMBool(True)
     },
-    Available=lambda sm: Bosses.bossDead(sm, 'Kraid')
+    Available=lambda loc, sm: Bosses.bossDead(sm, 'Kraid')
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="Kraid",
     SolveArea="Kraid Boss",
@@ -341,9 +340,9 @@ Location(
     AccessFrom={
         'KraidRoomIn': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.enoughStuffsKraid()
+    Available=lambda loc, sm: sm.enoughStuffsKraid()
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="Kraid",
     SolveArea="Kraid Boss",
@@ -357,9 +356,9 @@ Location(
     AccessFrom={
         'KraidRoomIn': lambda sm: SMBool(True)
     },
-    Available=lambda sm: Bosses.bossDead(sm, 'Kraid')
+    Available=lambda loc, sm: Bosses.bossDead(sm, 'Kraid')
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Norfair",
     SolveArea="Norfair Ice",
@@ -373,7 +372,7 @@ Location(
     AccessFrom={
         'Business Center': lambda sm: sm.canOpenGreenDoors()
     },
-    Available=lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Ice Beam']),
+    Available=lambda loc, sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Ice Beam']),
                                     sm.wor(sm.canPassBombPassages(), # to exit, or if you fail entrance
                                            sm.wand(sm.haveItem('Ice'), # harder strat
                                                    sm.haveItem('Morph'),
@@ -382,7 +381,7 @@ Location(
                                                    sm.knowsMockball()),
                                            sm.haveItem('SpeedBooster')))
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Crocomire",
     SolveArea="Crocomire",
@@ -396,12 +395,12 @@ Location(
     AccessFrom={
         'Crocomire Room Top': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.enoughStuffCroc(),
+    Available=lambda loc, sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.haveItem('Grapple'),
                                            sm.haveItem('SpaceJump'),
                                            sm.energyReserveCountOk(3/sm.getDmgReduction()[0])))
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Norfair",
     SolveArea="Norfair Entrance",
@@ -415,11 +414,11 @@ Location(
     AccessFrom={
         'Business Center': lambda sm: sm.wor(RomPatches.has(RomPatches.HiJumpAreaBlueDoor), sm.canOpenRedDoors())
     },
-    Available=lambda sm: sm.haveItem('Morph'),
-    PostAvailable=lambda sm: sm.wor(sm.canPassBombPassages(),
+    Available=lambda loc, sm: sm.haveItem('Morph'),
+    PostAvailable=lambda loc, sm: sm.wor(sm.canPassBombPassages(),
                                        sm.wand(sm.haveItem('Morph'), RomPatches.has(RomPatches.HiJumpShotBlock)))
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Crocomire",
     SolveArea="Crocomire",
@@ -433,7 +432,7 @@ Location(
     AccessFrom={
         'Crocomire Room Top': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.enoughStuffCroc(),
+    Available=lambda loc, sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.wand(sm.haveItem('Morph'),
                                                    sm.canFly()),
                                            sm.wand(sm.haveItem('SpeedBooster'),
@@ -446,7 +445,7 @@ Location(
                                            sm.wand(sm.haveItem('Super'),
                                                    sm.knowsGreenGateGlitch())))
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Norfair",
     SolveArea="Bubble Norfair Reserve",
@@ -461,9 +460,9 @@ Location(
         'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
         'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop(),
     },
-    Available=lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
+    Available=lambda loc, sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Norfair",
     SolveArea="Bubble Norfair Speed",
@@ -477,9 +476,9 @@ Location(
     AccessFrom={
         'Bubble Mountain Top': lambda sm: sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoors), sm.canOpenGreenDoors())
     },
-    Available=lambda sm: sm.canHellRunToSpeedBooster()
+    Available=lambda loc, sm: sm.canHellRunToSpeedBooster()
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Norfair",
     SolveArea="Bubble Norfair Wave",
@@ -493,14 +492,14 @@ Location(
     AccessFrom={
         'Bubble Mountain Top': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Wave'])
     },
-    Available=lambda sm: sm.canOpenRedDoors(),
-    PostAvailable=lambda sm: sm.wor(sm.haveItem('Morph'), # exit through lower passage under the spikes
+    Available=lambda loc, sm: sm.canOpenRedDoors(),
+    PostAvailable=lambda loc, sm: sm.wor(sm.haveItem('Morph'), # exit through lower passage under the spikes
                                        sm.wand(sm.wor(sm.haveItem('SpaceJump'), # exit through blue gate
                                                       sm.haveItem('Grapple')),
                                                sm.wor(sm.wand(sm.knowsGreenGateGlitch(), sm.heatProof()), # hell run + green gate glitch is too much
                                                       sm.haveItem('Wave'))))
 ),
-Location(
+define_location(
     Area="LowerNorfair",
     GraphArea="LowerNorfair",
     SolveArea="Ridley Boss",
@@ -514,9 +513,9 @@ Location(
     AccessFrom={
         'RidleyRoomIn': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffsRidley())
+    Available=lambda loc, sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffsRidley())
 ),
-Location(
+define_location(
     Area="LowerNorfair",
     GraphArea="LowerNorfair",
     SolveArea="Ridley Boss",
@@ -530,9 +529,9 @@ Location(
     AccessFrom={
         'RidleyRoomIn': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.haveItem('Ridley')
+    Available=lambda loc, sm: sm.haveItem('Ridley')
 ),
-Location(
+define_location(
     Area="LowerNorfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Screw Attack",
@@ -547,11 +546,11 @@ Location(
     AccessFrom={
         'Screw Attack Bottom': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True),
+    Available=lambda loc, sm: SMBool(True),
     # we still put post available for easier super fun checks
-    PostAvailable=lambda sm: sm.canExitScrewAttackArea()
+    PostAvailable=lambda loc, sm: sm.canExitScrewAttackArea()
 ),
-Location(
+define_location(
     Area="LowerNorfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair After Amphitheater",
@@ -565,18 +564,18 @@ Location(
     AccessFrom={
         'Firefleas': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wor(RomPatches.has(RomPatches.FirefleasRemoveFune),
+    Available=lambda loc, sm: sm.wor(RomPatches.has(RomPatches.FirefleasRemoveFune),
                                    # get past the fune
                                    sm.canOpenGreenDoors(),
                                    sm.canPassBombPassages(),
                                    sm.canUseSpringBall()),
-    PostAvailable=lambda sm: sm.wor(sm.knowsFirefleasWalljump(),
+    PostAvailable=lambda loc, sm: sm.wor(sm.knowsFirefleasWalljump(),
                                        sm.wor(sm.haveItem('Ice'),
                                               sm.haveItem('HiJump'),
                                               sm.canFly(),
                                               sm.canSpringBallJump()))
 ),
-Location(
+define_location(
     Area="WreckedShip",
     GraphArea="WreckedShip",
     SolveArea="WreckedShip Gravity",
@@ -590,11 +589,11 @@ Location(
     AccessFrom={
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canUsePowerBombs(),
+    Available=lambda loc, sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.haveItem('SpeedBooster'),
                                     sm.canPassBowling())
 ),
-Location(
+define_location(
     Area="WreckedShip",
     GraphArea="WreckedShip",
     SolveArea="WreckedShip Back",
@@ -610,10 +609,10 @@ Location(
                                                        RomPatches.has(RomPatches.WsEtankPhantoonAlive)),
                                                sm.canOpenRedDoors())
     },
-    Available=lambda sm: sm.wor(Bosses.bossDead(sm, 'Phantoon'),
+    Available=lambda loc, sm: sm.wor(Bosses.bossDead(sm, 'Phantoon'),
                                    RomPatches.has(RomPatches.WsEtankPhantoonAlive))
 ),
-Location(
+define_location(
     Area="WreckedShip",
     GraphArea="WreckedShip",
     SolveArea="Phantoon Boss",
@@ -627,9 +626,9 @@ Location(
     AccessFrom={
         'PhantoonRoomIn': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.enoughStuffsPhantoon()
+    Available=lambda loc, sm: sm.enoughStuffsPhantoon()
 ),
-Location(
+define_location(
     Area="WreckedShip",
     GraphArea="WreckedShip",
     SolveArea="WreckedShip Main",
@@ -643,9 +642,9 @@ Location(
     AccessFrom={
         'Wrecked Ship Main': lambda sm: Bosses.bossDead(sm, 'Phantoon')
     },
-    Available=lambda sm: sm.canPassBombPassages()
+    Available=lambda loc, sm: sm.canPassBombPassages()
 ),
-Location(
+define_location(
     Area="WreckedShip",
     GraphArea="WreckedShip",
     SolveArea="WreckedShip Gravity",
@@ -659,10 +658,10 @@ Location(
     AccessFrom={
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canPassBombPassages(),
+    Available=lambda loc, sm: sm.wand(sm.canPassBombPassages(),
                                     sm.canPassBowling())
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="WestMaridia",
     SolveArea="Maridia Green",
@@ -690,9 +689,9 @@ Location(
                                                                sm.haveItem('Grapple')))),
         'Mama Turtle': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="EastMaridia",
     SolveArea="Maridia Forgotten Highway",
@@ -718,8 +717,8 @@ Location(
     #  -have high jump boots
     #  -can fly (space jump or infinite bomb jump)
     #  -use short charge with speedbooster
-    Available=lambda sm: Bosses.bossDead(sm, 'Draygon'),
-    PostAvailable=lambda sm: sm.wand(sm.wor(sm.wand(sm.canShortCharge(),
+    Available=lambda loc, sm: Bosses.bossDead(sm, 'Draygon'),
+    PostAvailable=lambda loc, sm: sm.wand(sm.wor(sm.wand(sm.canShortCharge(),
                                                        sm.knowsKillPlasmaPiratesWithSpark()),
                                                sm.wand(sm.canFireChargedShots(),
                                                        sm.knowsKillPlasmaPiratesWithCharge(),
@@ -737,7 +736,7 @@ Location(
                                                sm.wand(sm.canSpringBallJump(),
                                                        sm.knowsSpringBallJumpFromWall())))
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="EastMaridia",
     SolveArea="Left Sandpit",
@@ -751,9 +750,9 @@ Location(
     AccessFrom={
         'Left Sandpit': lambda sm: sm.canClimbWestSandHole()
     },
-    Available=lambda sm: sm.canAccessItemsInWestSandHole()
+    Available=lambda loc, sm: sm.canAccessItemsInWestSandHole()
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="EastMaridia",
     SolveArea="Maridia Sandpits",
@@ -767,7 +766,7 @@ Location(
     AccessFrom={
         'Oasis Bottom': lambda sm: sm.canTraverseSandPits()
     },
-    Available=lambda sm: sm.wand(sm.canUsePowerBombs(), # in Shaktool room to let Shaktool access the sand blocks
+    Available=lambda loc, sm: sm.wand(sm.canUsePowerBombs(), # in Shaktool room to let Shaktool access the sand blocks
                                     sm.wor(sm.wand(sm.haveItem('Ice'), # puyo clip
                                                    sm.wor(sm.wand(sm.haveItem('Gravity'),
                                                                   sm.knowsPuyoClip()),
@@ -789,13 +788,13 @@ Location(
                                            sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb()), # XRay climb
                                            sm.canCrystalFlashClip()),
                                     sm.wor(sm.haveItem('Gravity'), sm.canUseSpringBall())), # acess the item in spring ball room
-    PostAvailable=lambda sm: sm.wor(sm.wand(sm.haveItem('Gravity'),
+    PostAvailable=lambda loc, sm: sm.wor(sm.wand(sm.haveItem('Gravity'),
                                                sm.wor(sm.haveItem('HiJump'),
                                                       sm.canFly(),
                                                       sm.knowsMaridiaWallJumps())),
                                        sm.canSpringBallJump())
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="EastMaridia",
     SolveArea="Maridia Pink Top",
@@ -809,9 +808,9 @@ Location(
     AccessFrom={
         'Post Botwoon': lambda sm: sm.canJumpUnderwater()
     },
-    Available=lambda sm: sm.haveItem('Morph')
+    Available=lambda loc, sm: sm.haveItem('Morph')
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="EastMaridia",
     SolveArea="Draygon Boss",
@@ -825,9 +824,9 @@ Location(
     AccessFrom={
         'Draygon Room Bottom': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="EastMaridia",
     SolveArea="Draygon Boss",
@@ -841,12 +840,12 @@ Location(
     AccessFrom={        
         'Draygon Room Bottom': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True),
+    Available=lambda loc, sm: SMBool(True),
     # put dray dead condition in post available to make it a comeback check and allow
     # rando to put stuff there to get out
-    PostAvailable=lambda sm: Bosses.bossDead(sm, 'Draygon')
+    PostAvailable=lambda loc, sm: Bosses.bossDead(sm, 'Draygon')
 ),
-Location(
+define_location(
     Area="Tourian",
     GraphArea="Tourian",
     SolveArea="Tourian",
@@ -860,10 +859,10 @@ Location(
     AccessFrom={
         'Golden Four': lambda sm: Bosses.allBossesDead(sm)
     },
-    Available=lambda sm: sm.enoughStuffTourian(),
+    Available=lambda loc, sm: sm.enoughStuffTourian(),
 ),
 ###### MINORS
-Location(
+define_location(
     Area="Crateria",
     GraphArea="Crateria",
     SolveArea="Crateria Landing Site",
@@ -877,11 +876,11 @@ Location(
     AccessFrom={
         'Landing Site': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canUsePowerBombs(),
+    Available=lambda loc, sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.wor(sm.haveItem('SpeedBooster'),
                                            sm.canFly()))
 ),
-Location(
+define_location(
     Area="Crateria",
     GraphArea="WreckedShip",
     SolveArea="WreckedShip Bottom",
@@ -895,10 +894,10 @@ Location(
     AccessFrom={
         'West Ocean Left': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.haveItem('Morph'),
-    PostAvailable=lambda sm: sm.canPassBombPassages()
+    Available=lambda loc, sm: sm.haveItem('Morph'),
+    PostAvailable=lambda loc, sm: sm.canPassBombPassages()
 ),
-Location(
+define_location(
     Area="Crateria",
     GraphArea="WreckedShip",
     SolveArea="WreckedShip Top",
@@ -912,9 +911,9 @@ Location(
     AccessFrom={
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    Available=lambda sm: Bosses.bossDead(sm, 'Phantoon')
+    Available=lambda loc, sm: Bosses.bossDead(sm, 'Phantoon')
 ),
-Location(
+define_location(
     Area="Crateria",
     GraphArea="WreckedShip",
     SolveArea="WreckedShip Top",
@@ -928,9 +927,9 @@ Location(
     AccessFrom={
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.haveItem('Super'), sm.haveItem('Morph'), Bosses.bossDead(sm, 'Phantoon'))
+    Available=lambda loc, sm: sm.wand(sm.haveItem('Super'), sm.haveItem('Morph'), Bosses.bossDead(sm, 'Phantoon'))
 ),
-Location(
+define_location(
     Area="Crateria",
     GraphArea="Crateria",
     SolveArea="Crateria Landing Site",
@@ -945,9 +944,9 @@ Location(
         'Keyhunter Room Bottom': lambda sm: sm.canOpenYellowDoors(),
         'Moat Right': lambda sm: sm.canPassMoatReverse()
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Crateria",
     GraphArea="Crateria",
     SolveArea="Crateria Landing Site",
@@ -961,11 +960,11 @@ Location(
     AccessFrom={
         'Landing Site': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wor(sm.canDestroyBombWalls(),
+    Available=lambda loc, sm: sm.wor(sm.canDestroyBombWalls(),
                                    sm.wand(sm.haveItem('SpeedBooster'),
                                            sm.knowsOldMBWithSpeed()))
 ),
-Location(
+define_location(
     Area="Crateria",
     GraphArea="Crateria",
     SolveArea="Crateria Gauntlet",
@@ -982,9 +981,9 @@ Location(
                                           sm.canDoLowGauntlet()),
         'Gauntlet Top': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Crateria",
     GraphArea="Crateria",
     SolveArea="Crateria Gauntlet",
@@ -1001,9 +1000,9 @@ Location(
                                           sm.canDoLowGauntlet()),
         'Gauntlet Top': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Crateria",
     GraphArea="Crateria",
     SolveArea="Crateria Landing Site",
@@ -1017,7 +1016,7 @@ Location(
     AccessFrom={
         'Landing Site': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canUsePowerBombs(),
+    Available=lambda loc, sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.haveItem('SpeedBooster'),
                                     # reserves are hard to trigger midspark when not having ETanks
                                     sm.wor(sm.wand(sm.energyReserveCountOk(2), sm.itemCountOk('ETank', 1)), # need energy to get out
@@ -1028,7 +1027,7 @@ Location(
                                     sm.wor(sm.haveItem('Ice'),
                                            sm.canSimpleShortCharge())) # there's also a dboost involved in simple short charge or you have to kill the yellow enemies with some power bombs
 ),
-Location(
+define_location(
     Area="Crateria",
     GraphArea="Crateria",
     SolveArea="Crateria Landing Site",
@@ -1042,9 +1041,9 @@ Location(
     AccessFrom={
         'Landing Site': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.canPassBombPassages()
+    Available=lambda loc, sm: sm.canPassBombPassages()
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Green Brinstar",
@@ -1058,10 +1057,10 @@ Location(
     AccessFrom={
         'Etecoons Bottom': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.haveItem('Morph'),
+    Available=lambda loc, sm: sm.wand(sm.haveItem('Morph'),
                                     sm.wor(sm.canOpenRedDoors(), sm.canUsePowerBombs(), sm.haveItem('ScrewAttack'))) # beetoms
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Pink Brinstar",
@@ -1077,11 +1076,11 @@ Location(
     },
     # either you go the back way, using a super and the camera glitch,
     # or just beat spore spawn (so no sm.knows() setting needed for the glitch)
-    Available=lambda sm: sm.canOpenRedDoors(),
-    PostAvailable=lambda sm: sm.wand(sm.canOpenGreenDoors(),
+    Available=lambda loc, sm: sm.canOpenRedDoors(),
+    PostAvailable=lambda loc, sm: sm.wand(sm.canOpenGreenDoors(),
                                         sm.canPassBombPassages())
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Green Brinstar",
@@ -1095,10 +1094,10 @@ Location(
     AccessFrom={
         'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.canOpenRedDoors())
     },
-    Available=lambda sm: SMBool(True),
-    PostAvailable=lambda sm: sm.wor(RomPatches.has(RomPatches.EarlySupersShotBlock), sm.canPassBombPassages())
+    Available=lambda loc, sm: SMBool(True),
+    PostAvailable=lambda loc, sm: sm.wor(RomPatches.has(RomPatches.EarlySupersShotBlock), sm.canPassBombPassages())
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Green Brinstar Reserve",
@@ -1112,10 +1111,10 @@ Location(
     AccessFrom={
         'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.canOpenRedDoors())
     },
-    Available=lambda sm: sm.wor(sm.wand(sm.haveItem('Morph'), sm.knowsMockball()),
+    Available=lambda loc, sm: sm.wor(sm.wand(sm.haveItem('Morph'), sm.knowsMockball()),
                                            sm.haveItem('SpeedBooster'))
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Green Brinstar Reserve",
@@ -1129,7 +1128,7 @@ Location(
     AccessFrom={
         'Green Brinstar Elevator': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.haveItem('Morph'),
+    Available=lambda loc, sm: sm.wand(sm.haveItem('Morph'),
                                     sm.wor(sm.knowsMockball(),
                                            sm.haveItem('SpeedBooster')),
                                     sm.canOpenRedDoors(),
@@ -1137,7 +1136,7 @@ Location(
                                            sm.wand(sm.knowsRonPopeilScrew(),
                                                    sm.haveItem('ScrewAttack'))))
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Green Brinstar Reserve",
@@ -1151,12 +1150,12 @@ Location(
     AccessFrom={
         'Green Brinstar Elevator': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canOpenRedDoors(),
+    Available=lambda loc, sm: sm.wand(sm.canOpenRedDoors(),
                                     sm.haveItem('Morph'),
                                     sm.wor(sm.knowsMockball(),
                                            sm.haveItem('SpeedBooster')))
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Pink Brinstar",
@@ -1170,9 +1169,9 @@ Location(
     AccessFrom={
         'Big Pink': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Pink Brinstar",
@@ -1186,9 +1185,9 @@ Location(
     AccessFrom={
         'Big Pink': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Pink Brinstar",
@@ -1202,10 +1201,10 @@ Location(
     AccessFrom={
         'Big Pink': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canUsePowerBombs(),
+    Available=lambda loc, sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.haveItem('Super'))
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Brinstar Hills",
@@ -1219,9 +1218,9 @@ Location(
     AccessFrom={
         'Green Hill Zone Top Right': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.haveItem('Morph')
+    Available=lambda loc, sm: sm.haveItem('Morph')
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="Crateria",
     SolveArea="Blue Brinstar",
@@ -1235,9 +1234,9 @@ Location(
     AccessFrom={
         'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.canUsePowerBombs()
+    Available=lambda loc, sm: sm.canUsePowerBombs()
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="Crateria",
     SolveArea="Blue Brinstar",
@@ -1251,10 +1250,10 @@ Location(
     AccessFrom={
         'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.wor(RomPatches.has(RomPatches.BlueBrinstarMissile), sm.haveItem('Morph')),
+    Available=lambda loc, sm: sm.wand(sm.wor(RomPatches.has(RomPatches.BlueBrinstarMissile), sm.haveItem('Morph')),
                                     sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor), sm.canOpenRedDoors()))
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
     SolveArea="Green Brinstar",
@@ -1268,9 +1267,9 @@ Location(
     AccessFrom={
         'Etecoons Supers': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="Crateria",
     SolveArea="Blue Brinstar",
@@ -1284,9 +1283,9 @@ Location(
     AccessFrom={
         'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.haveItem('Morph')
+    Available=lambda loc, sm: sm.haveItem('Morph')
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="Crateria",
     SolveArea="Blue Brinstar",
@@ -1300,9 +1299,9 @@ Location(
     AccessFrom={
         'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.canAccessBillyMays()
+    Available=lambda loc, sm: sm.canAccessBillyMays()
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="Crateria",
     SolveArea="Blue Brinstar",
@@ -1316,9 +1315,9 @@ Location(
     AccessFrom={
         'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.canAccessBillyMays()
+    Available=lambda loc, sm: sm.canAccessBillyMays()
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="RedBrinstar",
     SolveArea="Red Brinstar Top",
@@ -1332,10 +1331,10 @@ Location(
     AccessFrom={
         'Red Brinstar Elevator': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canOpenGreenDoors(),
+    Available=lambda loc, sm: sm.wand(sm.canOpenGreenDoors(),
                                     sm.canUsePowerBombs())
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="RedBrinstar",
     SolveArea="Red Brinstar Top",
@@ -1349,9 +1348,9 @@ Location(
     AccessFrom={
         'Red Brinstar Elevator': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.canOpenGreenDoors()
+    Available=lambda loc, sm: sm.canOpenGreenDoors()
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="RedBrinstar",
     SolveArea="Red Brinstar Top",
@@ -1365,10 +1364,10 @@ Location(
     AccessFrom={
         'Red Brinstar Elevator': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canOpenGreenDoors(),
+    Available=lambda loc, sm: sm.wand(sm.canOpenGreenDoors(),
                                     sm.canUsePowerBombs())
 ),
-Location(
+define_location(
     Area="Brinstar",
     GraphArea="Kraid",
     SolveArea="Kraid",
@@ -1382,9 +1381,9 @@ Location(
     AccessFrom={
         'Warehouse Zeela Room Left': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.canUsePowerBombs()
+    Available=lambda loc, sm: sm.canUsePowerBombs()
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Norfair",
     SolveArea="Norfair Entrance",
@@ -1399,9 +1398,9 @@ Location(
         'Business Center': lambda sm: sm.canEnterCathedral(Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']['mult']),
         'Bubble Mountain': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles'])
     },
-    Available=lambda sm: sm.haveItem('Morph')
+    Available=lambda loc, sm: sm.haveItem('Morph')
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Norfair",
     SolveArea="Norfair Ice",
@@ -1424,9 +1423,9 @@ Location(
                                                         sm.haveItem('SpeedBooster'),
                                                         sm.knowsIceMissileFromCroc())
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Norfair",
     SolveArea="Norfair Grapple Escape",
@@ -1440,9 +1439,9 @@ Location(
     AccessFrom={
         'Crocomire Speedway Bottom': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Grapple Escape Missiles'])
     },
-    Available=lambda sm: sm.canGrappleEscape()
+    Available=lambda loc, sm: sm.canGrappleEscape()
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Norfair",
     SolveArea="Norfair Entrance",
@@ -1456,11 +1455,11 @@ Location(
     AccessFrom={
         'Business Center': lambda sm: sm.wor(RomPatches.has(RomPatches.HiJumpAreaBlueDoor), sm.canOpenRedDoors())
     },
-    Available=lambda sm: sm.haveItem('Morph'),
-    PostAvailable=lambda sm: sm.wor(sm.canPassBombPassages(),
+    Available=lambda loc, sm: sm.haveItem('Morph'),
+    PostAvailable=lambda loc, sm: sm.wor(sm.canPassBombPassages(),
                                        sm.wand(RomPatches.has(RomPatches.HiJumpShotBlock), sm.haveItem('Morph')))
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Norfair",
     SolveArea="Norfair Entrance",
@@ -1474,9 +1473,9 @@ Location(
     AccessFrom={
         'Business Center': lambda sm: sm.wor(RomPatches.has(RomPatches.HiJumpAreaBlueDoor), sm.canOpenRedDoors())
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Crocomire",
     SolveArea="Crocomire",
@@ -1490,7 +1489,7 @@ Location(
     AccessFrom={
         'Crocomire Room Top': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canOpenRedDoors(),
+    Available=lambda loc, sm: sm.wand(sm.canOpenRedDoors(),
                                     sm.enoughStuffCroc(),
                                     sm.wor(sm.wor(sm.canFly(),
                                                   sm.haveItem('Grapple'),
@@ -1502,7 +1501,7 @@ Location(
                                                           sm.knowsCrocPBsIce()),
                                                   sm.knowsCrocPBsDBoost())))
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Crocomire",
     SolveArea="Crocomire",
@@ -1516,9 +1515,9 @@ Location(
     AccessFrom={
         'Crocomire Room Top': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canOpenRedDoors(), sm.enoughStuffCroc(), sm.haveItem('Morph'))
+    Available=lambda loc, sm: sm.wand(sm.canOpenRedDoors(), sm.enoughStuffCroc(), sm.haveItem('Morph'))
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Crocomire",
     SolveArea="Crocomire",
@@ -1532,7 +1531,7 @@ Location(
     AccessFrom={
         'Crocomire Room Top': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.enoughStuffCroc(),
+    Available=lambda loc, sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.wor(sm.wand(sm.haveItem('Morph'), # from below
                                                           sm.canFly()),
                                                   sm.wand(sm.haveItem('SpeedBooster'),
@@ -1541,12 +1540,12 @@ Location(
                                            sm.wand(sm.haveItem('Super'), # from grapple room
                                                    sm.knowsGreenGateGlitch(),
                                                    sm.canFly()))), # TODO::test if accessible with a spark (short charge), and how many etanks required
-    PostAvailable=lambda sm: sm.wor(sm.haveItem('Morph'), # normal exit
+    PostAvailable=lambda loc, sm: sm.wor(sm.haveItem('Morph'), # normal exit
                                        sm.wand(sm.canOpenGreenDoors(), # go back to grapple room
                                                sm.wor(sm.haveItem('SpaceJump'),
                                                       sm.wand(sm.haveItem('SpeedBooster'), sm.haveItem('HiJump'))))) # jump from the yellow plateform ennemy
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Norfair",
     SolveArea="Bubble Norfair Reserve",
@@ -1561,9 +1560,9 @@ Location(
         'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
         'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop()
     },
-    Available=lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
+    Available=lambda loc, sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Norfair",
     SolveArea="Bubble Norfair Reserve",
@@ -1578,9 +1577,9 @@ Location(
         'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
         'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop()
     },
-    Available=lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve Missiles'])
+    Available=lambda loc, sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve Missiles'])
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Norfair",
     SolveArea="Bubble Norfair Bottom",
@@ -1594,9 +1593,9 @@ Location(
     AccessFrom={
         'Bubble Mountain': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Norfair",
     SolveArea="Bubble Norfair Speed",
@@ -1610,9 +1609,9 @@ Location(
     AccessFrom={
         'Bubble Mountain Top': lambda sm: sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoors), sm.canOpenGreenDoors())
     },
-    Available=lambda sm: sm.canHellRunToSpeedBooster()
+    Available=lambda loc, sm: sm.canHellRunToSpeedBooster()
 ),
-Location(
+define_location(
     Area="Norfair",
     GraphArea="Norfair",
     SolveArea="Bubble Norfair Wave",
@@ -1626,9 +1625,9 @@ Location(
     AccessFrom={
         'Bubble Mountain Top': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Wave'])
     },
-    Available=lambda sm: sm.canOpenRedDoors()
+    Available=lambda loc, sm: sm.canOpenRedDoors()
 ),
-Location(
+define_location(
     Area="LowerNorfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Screw Attack",
@@ -1642,10 +1641,10 @@ Location(
     AccessFrom={
         'LN Above GT': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
-    PostAvailable=lambda sm: sm.enoughStuffGT()
+    Available=lambda loc, sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+    PostAvailable=lambda loc, sm: sm.enoughStuffGT()
 ),
-Location(
+define_location(
     Area="LowerNorfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Screw Attack",
@@ -1659,10 +1658,10 @@ Location(
     AccessFrom={
         'Screw Attack Bottom': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True),
-    PostAvailable=lambda sm: sm.enoughStuffGT()
+    Available=lambda loc, sm: SMBool(True),
+    PostAvailable=lambda loc, sm: sm.enoughStuffGT()
 ),
-Location(
+define_location(
     Area="LowerNorfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Before Amphitheater",
@@ -1676,9 +1675,9 @@ Location(
     AccessFrom={
         'LN Entrance': lambda sm: sm.wand(sm.canUsePowerBombs(), sm.canPassWorstRoom()),
     },
-    Available=lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
+    Available=lambda loc, sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
 ),
-Location(
+define_location(
     Area="LowerNorfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair After Amphitheater",
@@ -1692,9 +1691,9 @@ Location(
     AccessFrom={
         'Firefleas': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="LowerNorfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair After Amphitheater",
@@ -1708,9 +1707,9 @@ Location(
     AccessFrom={
         'Firefleas Top': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="LowerNorfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair After Amphitheater",
@@ -1724,9 +1723,9 @@ Location(
     AccessFrom={
         'Ridley Zone': lambda sm: sm.canUsePowerBombs()
     },
-    Available=lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
+    Available=lambda loc, sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
 ),
-Location(
+define_location(
     Area="LowerNorfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair After Amphitheater",
@@ -1740,11 +1739,11 @@ Location(
     AccessFrom={
         'Firefleas': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+    Available=lambda loc, sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                     sm.canDestroyBombWalls(),
                                     sm.haveItem('Morph'))
 ),
-Location(
+define_location(
     Area="WreckedShip",
     GraphArea="WreckedShip",
     SolveArea="WreckedShip Main",
@@ -1758,9 +1757,9 @@ Location(
     AccessFrom={
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.canPassBombPassages()
+    Available=lambda loc, sm: sm.canPassBombPassages()
 ),
-Location(
+define_location(
     Area="WreckedShip",
     GraphArea="WreckedShip",
     SolveArea="WreckedShip Gravity",
@@ -1774,10 +1773,10 @@ Location(
     AccessFrom={
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.canPassBowling(),
+    Available=lambda loc, sm: sm.wand(sm.canPassBowling(),
                                     sm.canPassBombPassages())
 ),
-Location(
+define_location(
     Area="WreckedShip",
     GraphArea="WreckedShip",
     SolveArea="WreckedShip Top",
@@ -1791,9 +1790,9 @@ Location(
     AccessFrom={
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    Available=lambda sm: Bosses.bossDead(sm, 'Phantoon')
+    Available=lambda loc, sm: Bosses.bossDead(sm, 'Phantoon')
 ),
-Location(
+define_location(
     Area="WreckedShip",
     GraphArea="WreckedShip",
     SolveArea="WreckedShip Main",
@@ -1807,9 +1806,9 @@ Location(
     AccessFrom={
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    Available=lambda sm: Bosses.bossDead(sm, 'Phantoon')
+    Available=lambda loc, sm: Bosses.bossDead(sm, 'Phantoon')
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="WestMaridia",
     SolveArea="Maridia Green",
@@ -1823,13 +1822,13 @@ Location(
     AccessFrom={
         'Main Street Bottom': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wand(sm.haveItem('Gravity'),
+    Available=lambda loc, sm: sm.wand(sm.haveItem('Gravity'),
                                     sm.haveItem('SpeedBooster'),
                                     sm.wor(sm.wand(sm.canOpenGreenDoors(), # run from room on the right
                                                    sm.itemCountOk('ETank', 1)), # etank for the spark since sparking from low ground
                                            sm.canSimpleShortCharge())), # run from above
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="WestMaridia",
     SolveArea="Maridia Green",
@@ -1845,9 +1844,9 @@ Location(
                                                 sm.canDoSuitlessOuterMaridia())
         # we could add eas access from red fish room here, but if you miss it you can't retry
     },
-    Available=lambda sm: sm.haveItem('Morph')
+    Available=lambda loc, sm: sm.haveItem('Morph')
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="WestMaridia",
     SolveArea="Maridia Green",
@@ -1865,9 +1864,9 @@ Location(
                                                         sm.canDoSuitlessOuterMaridia())),
         'Mama Turtle': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="WestMaridia",
     SolveArea="Maridia Pink Bottom",
@@ -1881,9 +1880,9 @@ Location(
     AccessFrom={
         'Watering Hole Bottom': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="WestMaridia",
     SolveArea="Maridia Pink Bottom",
@@ -1897,9 +1896,9 @@ Location(
     AccessFrom={
         'Watering Hole Bottom': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="WestMaridia",
     SolveArea="Maridia Pink Bottom",
@@ -1913,9 +1912,9 @@ Location(
     AccessFrom={
         'Beach': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="EastMaridia",
     SolveArea="Left Sandpit",
@@ -1929,9 +1928,9 @@ Location(
     AccessFrom={
         'Left Sandpit': lambda sm: sm.canClimbWestSandHole()
     },
-    Available=lambda sm: sm.canAccessItemsInWestSandHole()
+    Available=lambda loc, sm: sm.canAccessItemsInWestSandHole()
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="EastMaridia",
     SolveArea="Right Sandpit",
@@ -1945,11 +1944,11 @@ Location(
     AccessFrom={
         'Right Sandpit': lambda sm: SMBool(True)
     },
-    Available=lambda sm: sm.wor(sm.haveItem('Gravity'),
+    Available=lambda loc, sm: sm.wor(sm.haveItem('Gravity'),
                                    sm.wand(sm.haveItem('HiJump'),
                                            sm.knowsGravLessLevel3()))
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="EastMaridia",
     SolveArea="Right Sandpit",
@@ -1963,12 +1962,12 @@ Location(
     AccessFrom={
         'Right Sandpit': lambda sm: sm.haveItem('Morph')
     },
-    Available=lambda sm: sm.wor(sm.haveItem('Gravity'),
+    Available=lambda loc, sm: sm.wor(sm.haveItem('Gravity'),
                                    sm.wand(sm.knowsGravLessLevel3(),
                                            sm.haveItem('HiJump'),
                                            sm.canSpringBallJump())) # https://www.youtube.com/watch?v=7LYYxphRRT0
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="EastMaridia",
     SolveArea="Maridia Pink Bottom",
@@ -1982,9 +1981,9 @@ Location(
     AccessFrom={
         'Aqueduct': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="EastMaridia",
     SolveArea="Maridia Pink Bottom",
@@ -1998,9 +1997,9 @@ Location(
     AccessFrom={
         'Aqueduct': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 ),
-Location(
+define_location(
     Area="Maridia",
     GraphArea="EastMaridia",
     SolveArea="Maridia Pink Top",
@@ -2014,6 +2013,6 @@ Location(
     AccessFrom={
         'Precious Room Top': lambda sm: SMBool(True)
     },
-    Available=lambda sm: SMBool(True)
+    Available=lambda loc, sm: SMBool(True)
 )
 ]

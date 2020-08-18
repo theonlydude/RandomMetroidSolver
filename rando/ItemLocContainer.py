@@ -126,14 +126,14 @@ class ItemLocContainer(object):
     def extractLocs(self, locs):
         ret = []
         for loc in locs:
-            ret.append(next(l for l in self.unusedLocations if l['Name'] == loc.Name))
+            ret.append(next(l for l in self.unusedLocations if l.Name == loc.Name))
         return ret
 
     def removeLocation(self, location):
         if location in self.unusedLocations:
             self.unusedLocations.remove(location)
         else:
-            self.unusedLocations.remove(next(loc for loc in self.unusedLocations if loc.Name == location['Name']))
+            self.unusedLocations.remove(next(loc for loc in self.unusedLocations if loc.Name == location.Name))
 
     def removeItem(self, item):
         self.itemPool.remove(item)

@@ -102,7 +102,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         # if a boss is available, choose it right away
         for item,locs in itemLocDict.items():
             if item.Category == 'Boss':
-                assert len(locs) == 1 and locs[0]['Name'] == item.Name
+                assert len(locs) == 1 and locs[0].Name == item.Name
                 return {'Item':item, 'Location':locs[0]}
         self.progressionItemLocs = progressionItemLocs
         self.ap = ap
@@ -167,12 +167,12 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
 
     def chooseLocationMaxDiff(self, availableLocations):
         self.log.debug("MAX")
-        self.log.debug("chooseLocationMaxDiff: {}".format([(l['Name'], l['difficulty']) for l in availableLocations]))
+        self.log.debug("chooseLocationMaxDiff: {}".format([(l.Name, l.difficulty) for l in availableLocations]))
         return max(availableLocations, key=lambda loc:loc.difficulty.difficulty)
 
     def chooseLocationMinDiff(self, availableLocations):
         self.log.debug("MIN")
-        self.log.debug("chooseLocationMinDiff: {}".format([(l['Name'], l['difficulty']) for l in availableLocations]))
+        self.log.debug("chooseLocationMinDiff: {}".format([(l.Name, l.difficulty) for l in availableLocations]))
         return min(availableLocations, key=lambda loc:loc.difficulty.difficulty)
 
     def areaDistance(self, loc, otherLocs):

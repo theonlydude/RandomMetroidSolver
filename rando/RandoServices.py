@@ -78,7 +78,7 @@ class RandoServices(object):
         return ret
 
     def locPostAvailable(self, sm, loc, item):
-        if not 'PostAvailable' in loc:
+        if loc.PostAvailable is None:
             return True
         result = sm.eval(loc.PostAvailable, item)
         return result.bool == True and result.difficulty <= self.settings.maxDiff

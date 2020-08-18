@@ -134,19 +134,19 @@ class StandardSolver(CommonSolver):
         self.solverStats['open44'] = open44
 
     def getRemainMajors(self):
-        return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+        return [loc for loc in self.majorLocations if loc.difficulty.bool == False and loc.itemName not in ['Nothing', 'NoEnergy']]
 
     def getRemainMinors(self):
         if self.majorsSplit == 'Full':
             return None
         else:
-            return [loc for loc in self.minorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+            return [loc for loc in self.minorLocations if loc.difficulty.bool == False and loc.itemName not in ['Nothing', 'NoEnergy']]
 
     def getSkippedMajors(self):
-        return [loc for loc in self.majorLocations if loc['difficulty'].bool == True and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+        return [loc for loc in self.majorLocations if loc.difficulty.bool == True and loc.itemName not in ['Nothing', 'NoEnergy']]
 
     def getUnavailMajors(self):
-        return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+        return [loc for loc in self.majorLocations if loc.difficulty.bool == False and loc.itemName not in ['Nothing', 'NoEnergy']]
 
 
     def getDiffThreshold(self):
@@ -169,7 +169,7 @@ class StandardSolver(CommonSolver):
     def getKnowsUsed(self):
         knowsUsed = []
         for loc in self.visitedLocations:
-            knowsUsed += loc['difficulty'].knows
+            knowsUsed += loc.difficulty.knows
 
         # get unique knows
         knowsUsed = list(set(knowsUsed))
@@ -195,4 +195,4 @@ class StandardSolver(CommonSolver):
 
         self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastAP)
 
-        return [loc for loc in locations if loc['difficulty'].bool == True]
+        return [loc for loc in locations if loc.difficulty.bool == True]

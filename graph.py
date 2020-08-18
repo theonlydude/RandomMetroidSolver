@@ -335,7 +335,7 @@ class AccessGraph(object):
                     #if loc.Name == "Kraid":
                     #    print("loc: {} tdiff is false".format(loc.Name))
 
-            if 'difficulty' not in loc:
+            if loc.difficulty is None:
                 #if loc.Name == "Kraid":
                 #    print("loc: {} no difficulty in loc".format(loc.Name))
                 loc.distance = 100000

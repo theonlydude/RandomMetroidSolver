@@ -40,7 +40,7 @@ class MiniSolver(object):
                 if onlyBossesLeft > 2:
                     return False
             self.areaGraph.getAvailableLocations(locations, self.smbm, maxDiff, ap)
-            post = [loc for loc in locations if 'PostAvailable' in loc and loc.difficulty.bool == True]
+            post = [loc for loc in locations if loc.PostAvailable and loc.difficulty.bool == True]
             for loc in post:
                 self.smbm.addItem(loc.itemType)
                 postAvailable = loc.PostAvailable(self.smbm)

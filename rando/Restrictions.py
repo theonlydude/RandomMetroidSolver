@@ -132,14 +132,14 @@ class Restrictions(object):
         items = container.getDistinctItems()
         for item in items:
             for location in container.unusedLocations:
-                self.static[(location['Name'], item.Type)] = self.canPlaceAtLocation(item, location, container)
+                self.static[(location.Name, item.Type)] = self.canPlaceAtLocation(item, location, container)
 
         container.unrestrictedItems = set(['Super', 'PowerBomb'])
         for item in items:
             if item.Type not in ['Super', 'PowerBomb']:
                 continue
             for location in container.unusedLocations:
-                self.dynamic[(location['Name'], item.Type)] = self.canPlaceAtLocation(item, location, container)
+                self.dynamic[(location.Name, item.Type)] = self.canPlaceAtLocation(item, location, container)
         container.unrestrictedItems = set()
 
     def canPlaceAtLocationFast(self, itemType, locName, container):

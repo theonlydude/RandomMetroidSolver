@@ -4,9 +4,6 @@ from rom_patches import RomPatches
 from smbool import SMBool
 import copy
 
-class NotFound:
-  pass
-
 class Location:
     graph_slots = (
         'Area', 'GraphArea', 'SolveArea', 'Name', 'Class', 'CanHidden',
@@ -23,13 +20,12 @@ class Location:
     __slots__ = graph_slots + rando_slots + solver_slots
 
     def __init__(
-            self, Area, GraphArea, SolveArea, Name, Class,
-            CanHidden, Address, Id, Visibility, Room, AccessFrom,
-            Available, PostAvailable=NotFound, distance=NotFound,
-            accessPoint=NotFound, difficulty=NotFound, path=NotFound,
-            pathDifficulty=NotFound, locDifficulty=NotFound,
-            restricted=NotFound, itemName=NotFound, itemType=NotFound,
-            comeBack=NotFound, areaWeight=NotFound):
+            self, Area, GraphArea, SolveArea, Name, Class, CanHidden,
+            Address, Id, Visibility, Room, AccessFrom, Available,
+            PostAvailable=None, distance=None, accessPoint=None,
+            difficulty=None, path=None, pathDifficulty=None,
+            locDifficulty=None, restricted=None, itemName=None,
+            itemType=None, comeBack=None, areaWeight=None):
         self.Area = Area
         self.GraphArea = GraphArea
         self.SolveArea = SolveArea
@@ -55,15 +51,7 @@ class Location:
         self.comeBack = comeBack
         self.areaWeight = areaWeight
         self.comeBack = comeBack
-
-    def __getitem__(self, key):
-        return getattr(self, key)
-
-    def __setitem__(self, key, value):
-        setattr(self, key, value)
-
-    def __contains__(self, key):
-        return getattr(self, key, NotFound) != NotFound
+        self.areaWeight = areaWeight
 
     def __repr__(self):
         return "Location({})".format(

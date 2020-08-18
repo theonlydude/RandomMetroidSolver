@@ -241,7 +241,7 @@ class RandoSetup(object):
                     if ret:
                         # check that we can then kill mother brain
                         self.sm.addItems(Bosses.Golden4())
-                        beatableMotherBrain = [loc['Name'] for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if loc['Name'] == 'Mother Brain']
+                        beatableMotherBrain = [loc.Name for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if loc.Name == 'Mother Brain']
                         ret = len(beatableMotherBrain) > 0
                         self.log.debug("checkPool. beatable Mother Brain={}".format(ret))
                 else:

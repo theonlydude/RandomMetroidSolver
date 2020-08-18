@@ -505,7 +505,7 @@ class FillerProgSpeedChozoSecondPhase(Filler):
                 return False
             for itemLoc in itemLocs:
                 if itemLoc['Location'] in self.container.unusedLocations:
-                    self.log.debug("step. POST COLLECT "+itemLoc['Item'].Type+" at "+itemLoc['Location']['Name'])
+                    self.log.debug("step. POST COLLECT "+itemLoc['Item'].Type+" at "+itemLoc['Location'].Name)
                     self.container.collect(itemLoc)
         else:
             # merge collected of 1st phase and 2nd phase so far for seed to be solvable by random fill

@@ -652,6 +652,7 @@ class Pickup:
         self.minorsPickupMinimal = {
             'Missile' : 10,
             'Super' : 5,
+            # to allow suitless crystal flash
             'PowerBomb' : 4
         }
     def _enoughMinorTable(self, smbm, minorType):

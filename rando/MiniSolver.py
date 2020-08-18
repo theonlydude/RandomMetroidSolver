@@ -22,7 +22,7 @@ class MiniSolver(object):
         locations = []
         for il in itemLocations:
             loc = il['Location']
-            if loc.get('restricted') == True:
+            if loc.restricted:
                 continue
             loc['itemType'] = il['Item'].Type
             loc['difficulty'] = None

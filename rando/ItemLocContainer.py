@@ -213,7 +213,7 @@ class ItemLocContainer(object):
         for il in self.itemLocations:
             loc = il['Location']
             # filter out restricted locations
-            if loc.get('restricted', False) == True:
+            if loc.restricted:
                 continue
             loc['itemName'] = il['Item'].Type
             locs.append(loc)
@@ -224,7 +224,7 @@ class ItemLocContainer(object):
         # post randomization warning message about locs with diff > max diff.
         for il in self.itemLocations:
             loc = il['Location']
-            if loc.get('restricted') == True and loc.get('difficulty', False) == True:
+            if loc.restricted and loc.difficulty == True:
                 loc['difficulty'] = SMBool(False)
 
     def getDistinctItems(self):

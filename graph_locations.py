@@ -22,9 +22,38 @@ class Location:
 
     __slots__ = graph_slots + rando_slots + solver_slots
 
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+    def __init__(
+            self, Area, GraphArea, SolveArea, Name, Class,
+            CanHidden, Address, Id, Visibility, Room, AccessFrom,
+            Available, PostAvailable=NotFound, distance=NotFound,
+            accessPoint=NotFound, difficulty=NotFound, path=NotFound,
+            pathDifficulty=NotFound, locDifficulty=NotFound,
+            restricted=NotFound, itemName=NotFound, itemType=NotFound,
+            comeBack=NotFound, areaWeight=NotFound):
+        self.Area = Area
+        self.GraphArea = GraphArea
+        self.SolveArea = SolveArea
+        self.Name = Name
+        self.Class = Class
+        self.CanHidden = CanHidden
+        self.Address = Address
+        self.Id = Id
+        self.Visibility = Visibility
+        self.Room = Room
+        self.AccessFrom = AccessFrom
+        self.Available = Available
+        self.PostAvailable = PostAvailable
+        self.distance = distance
+        self.accessPoint = accessPoint
+        self.difficulty = difficulty
+        self.path = path
+        self.pathDifficulty = pathDifficulty
+        self.locDifficulty = locDifficulty
+        self.restricted = restricted
+        self.itemName = itemName
+        self.itemType = itemType
+        self.comeBack = comeBack
+        self.areaWeight = areaWeight
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -41,19 +70,18 @@ class Location:
                 (repr(self[slot]) for slot in Location.__slots__ if slot in self)))
 
     def copy(self):
-        ret = { }
-        for key, value in self.items():
-            if key == 'difficulty':
-                ret[key] = SMBool(value.bool, value.difficulty, value.knows, value.items)
-            else:
-                ret[key] = value
+        d = self.difficulty
+        difficulty = SMBool(d.bool, d.difficulty, d.knows, d.items) if d is not None else None
+        ret = Location(
+            self.Area, self.GraphArea, self.SolveArea, self.Name,
+            self.Class, self.CanHidden, self.Address, self.Id,
+            self.Visibility, self.Room, self.AccessFrom, self.Available,
+            self.PostAvailable, self.distance, self.accessPoint,
+            difficulty, self.path, self.pathDifficulty,
+            self.locDifficulty, self.restricted, self.itemName,
+            self.itemType, self.comeBack, self.areaWeight)
 
         return ret
-
-    def items(self):
-        for slot in Location.__slots__:
-            if slot in self:
-                yield (slot, self[slot])
 
 # all the items locations with the prerequisites to access them
 locations = [
@@ -318,6 +346,7 @@ Location(
     Class=["Boss"],
     CanHidden=False,
     Address=0xB055B055,
+    Id=None,
     Visibility="Hidden",
     Room='Kraid Room',
     AccessFrom={
@@ -490,6 +519,7 @@ Location(
     Class=["Boss"],
     CanHidden=False,
     Address=0xB055B056,
+    Id=None,
     Visibility="Hidden",
     Room="Ridley's Room",
     AccessFrom={
@@ -602,6 +632,7 @@ Location(
     Class=["Boss"],
     CanHidden=False,
     Address=0xB055B057,
+    Id=None,
     Visibility="Hidden",
     Room="Phantoon's Room",
     AccessFrom={
@@ -799,6 +830,7 @@ Location(
     Class=["Boss"],
     CanHidden=False,
     Address=0xB055B058,
+    Id=None,
     Visibility="Hidden",
     Room="Draygon's Room",
     AccessFrom={
@@ -832,6 +864,7 @@ Location(
     Name="Mother Brain",
     Class=["Boss"],
     Address=0xB055B059,
+    Id=None,
     Visibility="Hidden",
     CanHidden=False,
     Room='Mother Brain Room',

@@ -652,7 +652,7 @@ class Pickup:
         self.minorsPickupMinimal = {
             'Missile' : 10,
             'Super' : 5,
-            'PowerBomb' : 2
+            'PowerBomb' : 4
         }
     def _enoughMinorTable(self, smbm, minorType):
         return smbm.haveItemCount(minorType, int(self.minorsPickupMinimal[minorType]))

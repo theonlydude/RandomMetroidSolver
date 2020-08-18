@@ -54,6 +54,7 @@ class Location:
         self.itemType = itemType
         self.comeBack = comeBack
         self.areaWeight = areaWeight
+        self.comeBack = comeBack
 
     def __getitem__(self, key):
         return getattr(self, key)

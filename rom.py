@@ -267,27 +267,27 @@ class RomReader:
             isFull = False
             chozoItems = {}
         for loc in locations:
-            if 'Boss' in loc['Class']:
+            if 'Boss' in loc.Class:
                 # the boss item has the same name as its location, except for mother brain which has a space
-                loc["itemName"] = loc["Name"].replace(' ', '')
+                loc.itemName = loc.Name.replace(' ', '')
                 continue
-            item = self.getItem(loc["Address"], loc["Visibility"])
+            item = self.getItem(loc.Address, loc.Visibility)
             try:
-                loc["itemName"] = self.items[item]["name"]
+                loc.itemName = self.items[item]["name"]
             except:
                 # race seeds
-                loc["itemName"] = "Nothing"
+                loc.itemName = "Nothing"
                 item = '0x0'
             if majorsSplit == None:
-                if 'Major' in loc['Class'] and self.items[item]['name'] in ['Missile', 'Super', 'PowerBomb']:
+                if 'Major' in loc.Class and self.items[item]['name'] in ['Missile', 'Super', 'PowerBomb']:
                     isFull = True
-                if 'Minor' in loc['Class'] and self.items[item]['name'] not in ['Missile', 'Super', 'PowerBomb']:
+                if 'Minor' in loc.Class and self.items[item]['name'] not in ['Missile', 'Super', 'PowerBomb']:
                     isFull = True
-                if 'Chozo' in loc['Class']:
-                    if loc['itemName'] in chozoItems:
-                        chozoItems[loc['itemName']] = chozoItems[loc['itemName']] + 1
+                if 'Chozo' in loc.Class:
+                    if loc.itemName in chozoItems:
+                        chozoItems[loc.itemName] = chozoItems[loc.itemName] + 1
                     else:
-                        chozoItems[loc['itemName']] = 1
+                        chozoItems[loc.itemName] = 1
 
         # if majors split is not written in the seed, use an heuristic
         if majorsSplit == None:
@@ -488,8 +488,8 @@ class RomReader:
 
         # find the associated location to get its address
         for loc in locations:
-            if 'Id' in loc and loc['Id'] == self.nothingId:
-                self.nothingAddr = 0x70000 | loc['Address']
+            if 'Id' in loc and loc.Id == self.nothingId:
+                self.nothingAddr = 0x70000 | loc.Address
                 break
 
     def getStartAP(self):
@@ -634,32 +634,32 @@ class RomPatcher:
             self.race.writeItemCode(itemCode, address)
 
     def getLocAddresses(self, loc):
-        ret = [loc['Address']]
-        if loc['Name'] in self.altLocsAddresses:
-            ret.append(self.altLocsAddresses[loc['Name']])
+        ret = [loc.Address]
+        if loc.Name in self.altLocsAddresses:
+            ret.append(self.altLocsAddresses[loc.Name])
         return ret
 
     def writeNothing(self, itemLoc):
         loc = itemLoc['Location']
-        if 'Boss' in loc['Class']:
+        if 'Boss' in loc.Class:
             return
 
         for addr in self.getLocAddresses(loc):
-            self.writeItemCode(ItemManager.Items['Missile'], loc['Visibility'], addr)
+            self.writeItemCode(ItemManager.Items['Missile'], loc.Visibility, addr)
             # all Nothing not at this loc Id will disappear when loc
             # item is collected
             self.romFile.writeByte(self.nothingId, addr + 4)
 
     def writeItem(self, itemLoc):
         loc = itemLoc['Location']
-        if 'Boss' in loc['Class']:
+        if 'Boss' in loc.Class:
             raise ValueError('Cannot write Boss location')
-        #print('write ' + itemLoc['Item'].Type + ' at ' + loc['Name'])
+        #print('write ' + itemLoc['Item'].Type + ' at ' + loc.Name)
         for addr in self.getLocAddresses(loc):
-            self.writeItemCode(itemLoc['Item'], loc['Visibility'], addr)
+            self.writeItemCode(itemLoc['Item'], loc.Visibility, addr)
             # if nothing was written at this loc before (in plando),
             # then restore the vanilla value
-            self.romFile.writeByte(loc['Id'], addr + 4)
+            self.romFile.writeByte(loc.Id, addr + 4)
 
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
@@ -667,12 +667,12 @@ class RomPatcher:
         for itemLoc in itemLocs:
             loc = itemLoc['Location']
             item = itemLoc['Item']
-            if 'Boss' in loc['Class']:
+            if 'Boss' in loc.Class:
                 continue
-            isMorph = loc['Name'] == 'Morphing Ball'
+            isMorph = loc.Name == 'Morphing Ball'
             if item.Category == 'Nothing':
                 self.writeNothing(itemLoc)
-                if loc['Id'] == self.nothingId and ('restricted' not in loc or loc['restricted'] == False):
+                if loc.Id == self.nothingId and not loc.restricted:
                     # nothing at morph gives a missile pack
                     self.nothingMissile = True
                     self.nItems += 1
@@ -1253,7 +1253,7 @@ class RomPatcher:
 
         itemLocs = {}
         for iL in fItemLocs:
-            itemLocs[iL['Item'].Name] = iL['Location']['Name']
+            itemLocs[iL['Item'].Name] = iL['Location'].Name
 
         def prepareString(s, isItem=True):
             s = s.upper()
@@ -1557,7 +1557,7 @@ class RomPatcher:
     def writePlandoAddresses(self, locations):
         self.romFile.seek(0x2F6000)
         for loc in locations:
-            self.romFile.writeWord(loc['Address'] & 0xFFFF)
+            self.romFile.writeWord(loc.Address & 0xFFFF)
 
         # fill remaining addresses with 0xFFFF
         maxLocsNumber = 128

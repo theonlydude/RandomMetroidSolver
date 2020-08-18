@@ -728,7 +728,7 @@ class Pickup:
                     # draygon access
                     and smbm.haveItem('Gravity')
                     # all boss locs collected (draygon pickup is not on draygon location)
-                    and not any('Boss' in loc['Class'] for loc in majorLocations))
+                    and not any('Boss' in loc.Class for loc in majorLocations))
         else:
             return False
 

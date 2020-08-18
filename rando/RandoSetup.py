@@ -84,11 +84,11 @@ class RandoSetup(object):
                 itemType = item.Type
                 poss = self.services.possibleLocations(item, self.startAP, self.container)
                 for loc in poss:
-                    if loc['GraphArea'] not in restrictionDict:
-                        restrictionDict[loc['GraphArea']] = {}
-                    if itemType not in restrictionDict[loc['GraphArea']]:
-                        restrictionDict[loc['GraphArea']][itemType] = set()
-                    restrictionDict[loc['GraphArea']][itemType].add(loc['Name'])
+                    if loc.GraphArea not in restrictionDict:
+                        restrictionDict[loc.GraphArea] = {}
+                    if itemType not in restrictionDict[loc.GraphArea]:
+                        restrictionDict[loc.GraphArea][itemType] = set()
+                    restrictionDict[loc.GraphArea][itemType].add(loc.Name)
             if self.restrictions.isEarlyMorph() and GraphUtils.isStandardStart(self.startAP):
                 morphLocs = ['Morphing Ball']
                 if self.restrictions.split in ['Full', 'Major']:
@@ -117,7 +117,7 @@ class RandoSetup(object):
         def fill(locs, getPred):
             self.log.debug("fillRestrictedLocations. locs="+getLocListStr(locs))
             for loc in locs:
-                loc['restricted'] = True
+                loc.restricted = True
                 itemLocation = {'Location' : loc}
                 if self.container.hasItemInPool(getPred('Nothing')):
                     itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('Nothing'))
@@ -135,7 +135,7 @@ class RandoSetup(object):
                     itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('ETank'))
                 else:
                     raise RuntimeError("Cannot fill restricted locations")
-                self.log.debug("Fill: {} at {}".format(itemLocation['Item'].Type, itemLocation['Location']['Name']))
+                self.log.debug("Fill: {} at {}".format(itemLocation['Item'].Type, itemLocation['Location'].Name))
                 self.container.collect(itemLocation, False)
         fill(majorRestrictedLocs, getItemPredicateMajor)
         fill(otherRestrictedLocs, getItemPredicateMinor)
@@ -196,7 +196,7 @@ class RandoSetup(object):
         locs = self.services.currentLocations(self.startAP, container, post=True)
         self.areaGraph.useCache(True)
         for loc in locs:
-            ap = loc['accessPoint']
+            ap = loc.accessPoint
             if ap not in comeBack:
                 # we chose Golden Four because it is always there.
                 # Start APs might not have comeback transitions
@@ -206,7 +206,7 @@ class RandoSetup(object):
                 totalAvailLocs.append(loc)
         self.areaGraph.useCache(False)
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
-        self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
+        self.log.debug("restricted=" + str([loc.Name for loc in self.lastRestricted]))
 
         # check if all inter-area APs can reach each other
         interAPs = [ap for ap in self.areaGraph.getAccessibleAccessPoints(self.startAP) if not ap.isInternal() and not ap.isLoop()]
@@ -223,9 +223,9 @@ class RandoSetup(object):
         # check if we can reach/beat all bosses
         if ret:
             for loc in self.lastRestricted:
-                if loc['Name'] in self.bossesLocs:
+                if loc.Name in self.bossesLocs:
                     ret = False
-                    self.log.debug("unavail Boss: " + loc['Name'])
+                    self.log.debug("unavail Boss: " + loc.Name)
             if ret:
                 # revive bosses
                 self.sm.addItems([item.Type for item in contPool if item.Category != 'Boss'])
@@ -235,7 +235,7 @@ class RandoSetup(object):
                       and self.areaGraph.canAccess(self.sm, self.startAP, 'DraygonRoomIn', maxDiff)
                 if ret:
                     # see if we can beat bosses with this equipment (infinity as max diff for a "onlyBossesLeft" type check
-                    beatableBosses = sorted([loc['Name'] for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if "Boss" in loc['Class']])
+                    beatableBosses = sorted([loc.Name for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if "Boss" in loc.Class])
                     self.log.debug("checkPool. beatableBosses="+str(beatableBosses))
                     ret = beatableBosses == Bosses.Golden4()
                     if ret:
@@ -253,7 +253,7 @@ class RandoSetup(object):
             # (we cannot rely on removing ammo/energy in fillRestrictedLocations since it is already the bare minimum in chozo pool)
             # FIXME something to do there for ultra sparse, it gives us up to 3 more spots for nothing items
             restrictedLocs = self.restrictedLocs + [loc for loc in self.lastRestricted if loc not in self.restrictedLocs]
-            nRestrictedChozo = sum(1 for loc in restrictedLocs if 'Chozo' in loc['Class'])
+            nRestrictedChozo = sum(1 for loc in restrictedLocs if 'Chozo' in loc.Class)
             nNothingChozo = sum(1 for item in pool if 'Chozo' in item.Class and item.Category == 'Nothing')
             ret &= nRestrictedChozo <= nNothingChozo
             self.log.debug('checkPool. nRestrictedChozo='+str(nRestrictedChozo)+', nNothingChozo='+str(nNothingChozo))
@@ -384,4 +384,4 @@ class RandoSetup(object):
         if len(self.superFun) == 0:
             self.addRestricted()
         self.log.debug("forbiddenItems: {}".format(self.forbiddenItems))
-        self.log.debug("restrictedLocs: {}".format([loc['Name'] for loc in self.restrictedLocs]))
+        self.log.debug("restrictedLocs: {}".format([loc.Name for loc in self.restrictedLocs]))

@@ -33,7 +33,7 @@ class RandoSettings(object):
         exclude = {'total':0}
         # plandoRando is a dict {'loc name': 'item type'}
         for locName,itemType in self.plandoRandoItemLocs.items():
-            if not any(loc['Name'] == locName for loc in locations):
+            if not any(loc.Name == locName for loc in locations):
                 continue
             if itemType not in exclude:
                 exclude[itemType] = 0
@@ -46,11 +46,11 @@ class RandoSettings(object):
         if self.plandoRandoItemLocs is None:
             return
         for locName,itemType in self.plandoRandoItemLocs.items():
-            if not any(loc['Name'] == locName for loc in container.unusedLocations):
+            if not any(loc.Name == locName for loc in container.unusedLocations):
                 continue
             item = container.getNextItemInPool(itemType)
             assert item is not None, "Invalid plando item pool"
-            location = container.getLocs(lambda loc: loc['Name'] == locName)[0]
+            location = container.getLocs(lambda loc: loc.Name == locName)[0]
             itemLoc = {'Item':item, 'Location':location}
             container.collect(itemLoc, pickup=False)
 

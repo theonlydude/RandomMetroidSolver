@@ -17,7 +17,7 @@ class Choice(object):
         return sorted([item for item in itemLocDict.keys()], key=lambda item: item.Type)
 
     def getLocList(self, itemLocDict, item):
-        return sorted(itemLocDict[item], key=lambda loc: loc['Name'])
+        return sorted(itemLocDict[item], key=lambda loc: loc.Name)
 
 # simple random choice, that chooses an item first, then a locatio to put it in
 class ItemThenLocChoice(Choice):
@@ -133,7 +133,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         locs = self.getLocsSpreadProgression(locs)
         random.shuffle(locs)
         ret = self.getChooseFunc(self.chooseLocRanges, self.chooseLocFuncs)(locs)
-        self.log.debug('chooseLocationProg. ret='+ret['Name'])
+        self.log.debug('chooseLocationProg. ret='+ret.Name)
         return ret
 
     # get choose function from a weighted dict
@@ -168,16 +168,16 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
     def chooseLocationMaxDiff(self, availableLocations):
         self.log.debug("MAX")
         self.log.debug("chooseLocationMaxDiff: {}".format([(l['Name'], l['difficulty']) for l in availableLocations]))
-        return max(availableLocations, key=lambda loc:loc['difficulty'].difficulty)
+        return max(availableLocations, key=lambda loc:loc.difficulty.difficulty)
 
     def chooseLocationMinDiff(self, availableLocations):
         self.log.debug("MIN")
         self.log.debug("chooseLocationMinDiff: {}".format([(l['Name'], l['difficulty']) for l in availableLocations]))
-        return min(availableLocations, key=lambda loc:loc['difficulty'].difficulty)
+        return min(availableLocations, key=lambda loc:loc.difficulty.difficulty)
 
     def areaDistance(self, loc, otherLocs):
-        areas = [l[self.distanceProp] for l in otherLocs]
-        cnt = areas.count(loc[self.distanceProp])
+        areas = [getattr(l, self.distanceProp) for l in otherLocs]
+        cnt = areas.count(getattr(loc, self.distanceProp))
         d = None
         if cnt == 0:
             d = 2

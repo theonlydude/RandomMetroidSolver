@@ -9,10 +9,10 @@ def getItemListStr(items):
     return str(dict(Counter([item.Type for item in items])))
 
 def getLocListStr(locs):
-    return str([loc['Name'] for loc in locs])
+    return str([loc.Name for loc in locs])
 
 def getItemLocStr(itemLoc):
-    return itemLoc['Item'].Type + " at " + itemLoc['Location']['Name']
+    return itemLoc['Item'].Type + " at " + itemLoc['Location'].Name
 
 def getItemLocationsStr(itemLocations):
     return str([getItemLocStr(il) for il in itemLocations])
@@ -126,14 +126,14 @@ class ItemLocContainer(object):
     def extractLocs(self, locs):
         ret = []
         for loc in locs:
-            ret.append(next(l for l in self.unusedLocations if l['Name'] == loc['Name']))
+            ret.append(next(l for l in self.unusedLocations if l['Name'] == loc.Name))
         return ret
 
     def removeLocation(self, location):
         if location in self.unusedLocations:
             self.unusedLocations.remove(location)
         else:
-            self.unusedLocations.remove(next(loc for loc in self.unusedLocations if loc['Name'] == location['Name']))
+            self.unusedLocations.remove(next(loc for loc in self.unusedLocations if loc.Name == location['Name']))
 
     def removeItem(self, item):
         self.itemPool.remove(item)
@@ -144,7 +144,7 @@ class ItemLocContainer(object):
     def collect(self, itemLocation, pickup=True):
         item = itemLocation['Item']
         location = itemLocation['Location']
-        if 'restricted' not in location or location['restricted'] == False:
+        if not location.restricted:
             self.unrestrictedItems.add(item.Type)
         if pickup == True:
             self.currentItems.append(item)
@@ -215,7 +215,7 @@ class ItemLocContainer(object):
             # filter out restricted locations
             if loc.restricted:
                 continue
-            loc['itemName'] = il['Item'].Type
+            loc.itemName = il['Item'].Type
             locs.append(loc)
         return locs
 
@@ -225,7 +225,7 @@ class ItemLocContainer(object):
         for il in self.itemLocations:
             loc = il['Location']
             if loc.restricted and loc.difficulty == True:
-                loc['difficulty'] = SMBool(False)
+                loc.difficulty = SMBool(False)
 
     def getDistinctItems(self):
         itemTypes = {item.Type for item in self.itemPool}

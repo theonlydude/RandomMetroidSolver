@@ -39,7 +39,7 @@ class Location:
             '. '.join(
                 (repr(self[slot]) for slot in Location.__slots__ if slot in self)))
 
-    def copy(self):
+    def __copy__(self):
         d = self.difficulty
         difficulty = SMBool(d.bool, d.difficulty, d.knows, d.items) if d is not None else None
         ret = type(self)(

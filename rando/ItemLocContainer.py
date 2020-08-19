@@ -62,7 +62,7 @@ class ItemLocContainer(object):
         return eq
 
     def __copy__(self):
-        locs = [loc.copy() for loc in self.unusedLocations]
+        locs = copy.copy(self.unusedLocations)
         # we don't copy restriction state on purpose: it depends on
         # outside context we don't want to bring to the copy
         ret = ItemLocContainer(SMBoolManager(),
@@ -72,7 +72,7 @@ class ItemLocContainer(object):
         ret.unrestrictedItems = copy.copy(self.unrestrictedItems)
         ret.itemLocations = [ {
             'Item': il['Item'],
-            'Location': il['Location'].copy()
+            'Location': copy.copy(il['Location'])
         } for il in self.itemLocations ]
         ret.sm.addItems([item.Type for item in ret.currentItems])
         return ret

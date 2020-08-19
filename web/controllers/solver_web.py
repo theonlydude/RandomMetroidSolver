@@ -1058,9 +1058,10 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
         if request.vars[qty] == 'random':
             continue
         if qty == 'minimizerQty':
-            qtyInt = getInt(qty, isJson)
-            if qtyInt < 30 or qtyInt > 100:
-                raiseHttp(400, "Wrong value for {}, must be between 30 and 100".format(qty), isJson)
+            if request.vars.minimizer == 'on':
+                qtyInt = getInt(qty, isJson)
+                if qtyInt < 30 or qtyInt > 100:
+                    raiseHttp(400, "Wrong value for {}, must be between 30 and 100".format(qty), isJson)
         else:
             qtyFloat = getFloat(qty, isJson)
             if qtyFloat < 1.0 or qtyFloat > 9.0:
@@ -1151,7 +1152,7 @@ def sessionWebService():
     # web service to update the session
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
                'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'escapeRando', 'removeEscapeEnemies',
-               'bossRandomization', 'minimizer',
+               'bossRandomization', 'minimizer', 'minimizerTourian',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
@@ -1188,6 +1189,7 @@ def sessionWebService():
     session.randomizer['bossRandomization'] = request.vars.bossRandomization
     session.randomizer['minimizer'] = request.vars.minimizer
     session.randomizer['minimizerQty'] = request.vars.minimizerQty
+    session.randomizer['minimizerTourian'] = request.vars.minimizerTourian
     session.randomizer['funCombat'] = request.vars.funCombat
     session.randomizer['funMovement'] = request.vars.funMovement
     session.randomizer['funSuits'] = request.vars.funSuits
@@ -1238,7 +1240,7 @@ def randomizerWebService():
     # check validity of all parameters
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
                'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'escapeRando', 'removeEscapeEnemies',
-               'bossRandomization', 'minimizer',
+               'bossRandomization', 'minimizer', 'minimizerTourian',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
@@ -1377,6 +1379,8 @@ def randomizerWebService():
 
     if request.vars.minimizer == 'on':
         params += ['--minimizer', request.vars.minimizerQty]
+    if request.vars.minimizerTourian == 'on':
+        params.append('--minimizerTourian')
 
     # load content of preset to get controller mapping
     try:

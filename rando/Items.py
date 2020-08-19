@@ -583,7 +583,7 @@ class ItemPoolGeneratorMinimizer(ItemPoolGeneratorMajors):
         super(ItemPoolGeneratorMinimizer, self).__init__(itemManager, qty, sm)
         self.maxItems = nLocs
         self.calcMaxAmmo()
-        nMajors = len([itemName for itemName,item in ItemManager.Items.items() if item['Class'] == 'Major' and item['Category'] != 'Energy'])
+        nMajors = len([itemName for itemName,item in ItemManager.Items.items() if item.Class == 'Major' and item.Category != 'Energy'])
         energyQty = self.qty['energy']
         if energyQty == 'medium':
             if nLocs < 40:

@@ -1889,8 +1889,7 @@ class OutWeb(Out):
                       knowsUsed=(s.knowsUsed, s.knowsKnown), itemsOk=s.itemsOk, patches=s.romLoader.getPatches(),
                       pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
                       remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
-                      skippedMajors=skippedMajors, unavailMajors=unavailMajors,
-                      collectedItems=collectedItems)
+                      skippedMajors=skippedMajors, unavailMajors=unavailMajors)
 
         with open(s.outputFileName, 'w') as jsonFile:
             json.dump(result, jsonFile)

@@ -30,7 +30,7 @@ class SMBoolManager(object):
     def getItems(self):
         # get a dict of collected items and how many (to be displayed on the solver spoiler)
         itemsDict = {}
-        for item in self.items[:-2]: # ignore last two items: nothing and noenergy
+        for item in self.items:
             itemsDict[item] = getattr(self, item)
         for item in self.countItems:
             itemsDict[item] = getattr(self, item+"Count")

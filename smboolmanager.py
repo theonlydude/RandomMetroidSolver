@@ -31,7 +31,7 @@ class SMBoolManager(object):
         # get a dict of collected items and how many (to be displayed on the solver spoiler)
         itemsDict = {}
         for item in self.items:
-            itemsDict[item] = getattr(self, item)
+            itemsDict[item] = 1 if getattr(self, item) == True else 0
         for item in self.countItems:
             itemsDict[item] = getattr(self, item+"Count")
         return itemsDict

@@ -1889,7 +1889,7 @@ class OutWeb(Out):
                       knowsUsed=(s.knowsUsed, s.knowsKnown), itemsOk=s.itemsOk, patches=s.romLoader.getPatches(),
                       pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
                       remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
-                      skippedMajors=skippedMajors, unavailMajors=unavailMajors)
+                      skippedMajors=skippedMajors, unavailMajors=unavailMajors, collectedItems=collectedItems)
 
         with open(s.outputFileName, 'w') as jsonFile:
             json.dump(result, jsonFile)
@@ -2064,7 +2064,7 @@ class OutConsole(Out):
 
             items = s.smbm.getItems()
             print("ETank: {}, Reserve: {}, Missile: {}, Super: {}, PowerBomb: {}".format(items['ETank'], items['Reserve'], items['Missile'], items['Super'], items['PowerBomb']))
-            print("Majors: {}".format(sorted([item for item in items if items[item] == True])))
+            print("Majors: {}".format(sorted([item for item in items if items[item] == 1])))
 
         # display difficulty scale
         self.displayDifficulty(s.difficulty)

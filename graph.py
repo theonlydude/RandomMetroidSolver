@@ -144,7 +144,9 @@ class AccessGraph(object):
     # return newly opened access points
     def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
         newAvailNodes = {}
-        for src in sorted(nodesToCheck, key=attrgetter('Name')):
+        # with python >= 3.6 the insertion order in a dict is keeps when looping on the keys,
+        # so we no longer have to sort them.
+        for src in nodesToCheck:
             for dstName in src.transitions:
                 dst = self.accessPoints[dstName]
                 if dst in availNodes or dst in newAvailNodes:

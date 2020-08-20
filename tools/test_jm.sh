@@ -51,6 +51,7 @@ TWEAKS=("" "--novariatweaks")
 LAYOUTS=("" "--nolayout")
 STARTAPS=("" "--startAP random")
 AREAS=("" "" "--area" "--area --areaLayoutBase")
+MINIMIZERS=("--bosses random" "--bosses random" "--bosses random" "--area --bosses --minimizer " "--area --bosses --minimizerTourian --minimizer ")
 
 function generate_params {
     SEED="$1"
@@ -69,8 +70,13 @@ function generate_params {
     STARTAP=${STARTAPS[$S]}
     let S=$RANDOM%${#AREAS[@]}
     AREA=${AREAS[$S]}
+    let S=$RANDOM%${#MINIMIZERS[@]}
+    MINIMIZER=${MINIMIZERS[$S]}
+    if(echo "${MINIMIZER}" | grep -q minimizer); then
+        MINIMIZER="${MINIMIZER} $(echo 35+$RANDOM%65 | bc)"
+    fi
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --bosses random --escapeRando random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${AREA} --jm"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${AREA} ${MINIMIZER} --jm"
 }
 
 function computeSeed {

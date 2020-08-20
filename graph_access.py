@@ -928,17 +928,6 @@ class GraphUtils:
         areas = [startAp.GraphArea]
         GraphUtils.log.debug("availAreas: {}".format(availAreas))
         GraphUtils.log.debug("areas: {}".format(areas))
-        def isShipReachable():
-            nonlocal areas
-            if escapeRando == False:
-                return True
-            return 'Crateria' in areas and len(GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and ap.Name in escapeTargets)) > 0
-        def openTransitions():
-            nonlocal areas
-            nTransitions = len(GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and not ap.isInternal()))
-            nClosedTransitions = (len(areas) - 1) * 2 + 1
-            GraphUtils.log.debug("nTransitions=%d, nClosedTransitions=%d" % (nTransitions, nClosedTransitions))
-            return nTransitions - nClosedTransitions
         nLocsCrateria = getNLocs(lambda loc: loc['GraphArea'] == 'Crateria')
         inBossCheck = lambda ap: ap.Boss and ap.Name.endswith("In")
         nLocs = 0
@@ -946,8 +935,16 @@ class GraphUtils:
         usedAPs = []
         trLimit = 5
         locLimit -= 3 # 3 "post boss" locs will always be available, and are filtered out in getNLocs
-        while nLocs < locLimit or openTransitions() < trLimit or not isShipReachable():
-            GraphUtils.log.debug("openTransitions="+str(openTransitions()))
+        def isShipReachable():
+            nonlocal areas
+            if escapeRando == False:
+                return True
+            return 'Crateria' in areas and len(GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and ap.Name in escapeTargets)) > 0
+        def openTransitions():
+            nonlocal areas, inBossCheck, usedAPs
+            return GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and not ap.isInternal() and not inBossCheck(ap) and not ap in usedAPs)
+        while nLocs < locLimit or len(openTransitions()) < trLimit or not isShipReachable():
+            GraphUtils.log.debug("openTransitions="+str([ap.Name for ap in openTransitions()]))
             fromAreas = availAreas
             if nLocs >= locLimit and not isShipReachable() and 'Crateria' in areas:
                 GraphUtils.log.debug("ship unreachable")
@@ -958,7 +955,7 @@ class GraphUtils:
                 GraphUtils.log.debug("not enough open transitions")
                 # we just need transitions, avoid adding a huge area
                 fromAreas = []
-                n = trLimit - openTransitions()
+                n = trLimit - len(openTransitions())
                 while len(fromAreas) == 0:
                     fromAreas = [area for area in availAreas if len(GraphUtils.getAPs(lambda ap: not ap.isInternal())) > n]
                     n -= 1
@@ -966,7 +963,7 @@ class GraphUtils:
                 fromAreas = [area for area in fromAreas if getNLocs(lambda loc: loc['GraphArea'] == area) == minLocs]
             if escapeRando == True and nLocs >= (locLimit - nLocsCrateria) and 'Crateria' not in areas:
                 fromAreas = ['Crateria']
-            elif openTransitions() <= 1: # dont' get stuck by adding dead ends
+            elif len(openTransitions()) <= 1: # dont' get stuck by adding dead ends
                 fromAreas = [area for area in fromAreas if len(GraphUtils.getAPs(lambda ap: ap.GraphArea == area and not ap.isInternal())) > 1]
             nextArea = random.choice(fromAreas)
             GraphUtils.log.debug("nextArea="+str(nextArea))
@@ -984,7 +981,7 @@ class GraphUtils:
             nLocs = getNLocs(lambda loc:loc['GraphArea'] in areas)
             GraphUtils.log.debug("nLocs: {}".format(nLocs))
         # we picked the areas, add transitions (bosses and tourian first)
-        sourceAPs = GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and not ap.isInternal() and not inBossCheck(ap) and not ap in usedAPs)
+        sourceAPs = openTransitions()
         random.shuffle(sourceAPs)
         targetAPs = GraphUtils.getAPs(lambda ap: (inBossCheck(ap) or ap.Name == "Golden Four") and not ap in usedAPs)
         random.shuffle(targetAPs)

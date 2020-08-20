@@ -220,6 +220,12 @@ class RandoSetup(object):
                     beatableBosses = sorted([loc['Name'] for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if "Boss" in loc['Class']])
                     self.log.debug("checkPool. beatableBosses="+str(beatableBosses))
                     ret = beatableBosses == Bosses.Golden4()
+                    if ret:
+                        # check that we can then kill mother brain
+                        self.sm.addItems(Bosses.Golden4())
+                        beatableMotherBrain = [loc['Name'] for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if loc['Name'] == 'Mother Brain']
+                        ret = len(beatableMotherBrain) > 0
+                        self.log.debug("checkPool. beatable Mother Brain={}".format(ret))
                 else:
                     self.log.debug('checkPool. locked by Phantoon or Draygon')
                 self.log.debug('checkPool. boss access sanity check: '+str(ret))

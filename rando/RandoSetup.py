@@ -103,6 +103,7 @@ class RandoSetup(object):
         def getItemPredicateMinor(itemType):
             return lambda item: item.Type == itemType and self.restrictions.isItemMinor(item)
         def fill(locs, getPred):
+            self.log.debug("fillRestrictedLocations. locs="+getLocListStr(locs))
             for loc in locs:
                 loc['restricted'] = True
                 itemLocation = {'Location' : loc}
@@ -315,6 +316,7 @@ class RandoSetup(object):
                 self.checkPool()
                 self.addRestricted()
         else:
+            self.superFun.remove('Suits')
             self.errorMsgs.append("Could not remove any suit")
         self.log.debug("getForbiddenSuits END. forbidden="+str(self.forbiddenItems))
 
@@ -327,6 +329,7 @@ class RandoSetup(object):
             self.forbiddenItems.append(removableMovement.pop(0))
             self.addForbidden(removableMovement + [None])
         else:
+            self.superFun.remove('Movement')
             self.errorMsgs.append('Could not remove any movement item')
         self.log.debug("getForbiddenMovement END. forbidden="+str(self.forbiddenItems))
 
@@ -346,6 +349,7 @@ class RandoSetup(object):
                 fake.append(None)
             self.addForbidden(removableCombat + fake)
         else:
+            self.superFun.remove('Combat')
             self.errorMsgs.append('Could not remove any combat item')
         self.log.debug("getForbiddenCombat END. forbidden="+str(self.forbiddenItems))
 

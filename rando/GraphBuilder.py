@@ -69,8 +69,9 @@ class GraphBuilder(object):
     def escapeTimer(self, graph, path):
         if self.areaRando == True:
             if path[0].Name == 'Climb Bottom Left':
-                self.log.debug('escapeTimer: vanilla')
-                return None
+                self.log.debug('escapeTimer: vanilla or minimizer with only vanilla available')
+                graph.EscapeAttributes['Timer'] = 180
+                return
             traversedAreas = list(set([ap.GraphArea for ap in path]))
             self.log.debug("escapeTimer path: " + str([ap.Name for ap in path]))
             self.log.debug("escapeTimer traversedAreas: " + str(traversedAreas))

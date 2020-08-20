@@ -733,6 +733,8 @@ if __name__ == "__main__":
             if msg != "":
                 print(msg)
     except Exception as e:
+        import traceback
+        traceback.print_exc(file=sys.stdout)
         msg = "Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e)
         dumpErrorMsg(args.output, msg)
         sys.exit(-1)

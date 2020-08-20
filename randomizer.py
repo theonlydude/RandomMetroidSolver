@@ -340,6 +340,7 @@ if __name__ == "__main__":
 
     if args.area == True and args.bosses == True and args.minimizerN is not None:
         minimizerN = int(args.minimizerN)
+        optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
     else:
         minimizerN = None
     areaRandom = False

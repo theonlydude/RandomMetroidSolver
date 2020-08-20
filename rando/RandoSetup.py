@@ -88,7 +88,7 @@ class RandoSetup(object):
                     if itemType not in restrictionDict[loc['GraphArea']]:
                         restrictionDict[loc['GraphArea']][itemType] = set()
                     restrictionDict[loc['GraphArea']][itemType].add(loc['Name'])
-            self.restrictions.addPlacementeRestrictions(restrictionDict)
+            self.restrictions.addPlacementRestrictions(restrictionDict)
         self.fillRestrictedLocations()
         self.settings.collectAlreadyPlacedItemLocations(self.container)
         return self.container

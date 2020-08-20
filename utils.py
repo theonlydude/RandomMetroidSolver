@@ -407,7 +407,7 @@ def getRandomizerDefaultParameters():
     defaultParams['removeEscapeEnemies'] = "off"
     defaultParams['bossRandomization'] = "off"
     defaultParams['minimizer'] = "off"
-    defaultParams['minimizerQty'] = "35"
+    defaultParams['minimizerQty'] = "45"
     defaultParams['minimizerTourian'] = "off"
     defaultParams['funCombat'] = "off"
     defaultParams['funMovement'] = "off"

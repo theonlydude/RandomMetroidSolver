@@ -977,12 +977,13 @@ class RomPatcher:
     def applyEscapeAttributes(self, escapeAttr, plms):
         # timer
         escapeTimer = escapeAttr['Timer']
-        minute = int(escapeTimer / 60)
-        second = escapeTimer % 60
-        minute = int(minute / 10) * 16 + minute % 10
-        second = int(second / 10) * 16 + second % 10
-        patchDict = {'Escape_Timer': {0x1E21:[second, minute]}}
-        self.applyIPSPatch('Escape_Timer', patchDict)
+        if escapeTimer is not None:
+            minute = int(escapeTimer / 60)
+            second = escapeTimer % 60
+            minute = int(minute / 10) * 16 + minute % 10
+            second = int(second / 10) * 16 + second % 10
+            patchDict = {'Escape_Timer': {0x1E21:[second, minute]}}
+            self.applyIPSPatch('Escape_Timer', patchDict)
         # animals door to open
         if escapeAttr['Animals'] is not None:
             escapeOpenPatches = {

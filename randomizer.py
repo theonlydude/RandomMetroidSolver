@@ -553,7 +553,7 @@ if __name__ == "__main__":
             (stuck, itemLocs, progItemLocs) = randoExec.randomize(randoSettings, graphSettings)
             # if we couldn't find an area layout then the escape graph is not created either
             # and getDoorConnections will crash if random escape is activated.
-            if not stuck:
+            if not stuck or args.vcr is not None:
                 doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
                                                       args.area, args.bosses,
                                                       args.escapeRando)

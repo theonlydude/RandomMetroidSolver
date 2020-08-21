@@ -372,7 +372,8 @@ class CommonSolver(object):
                     loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastAP, infinity, loc['itemName'])
 
             availableLocations = [loc for loc in locations if loc['difficulty']]
-            if len(availableLocations) > 0:
+            comeBackLocations = [loc for loc in availableLocations if loc['comeBack']]
+            if len(availableLocations) > 0 and len(comeBackLocations) > 0:
                 # we've found some available locations
                 break
 

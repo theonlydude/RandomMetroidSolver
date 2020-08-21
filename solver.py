@@ -342,20 +342,46 @@ class CommonSolver(object):
             if loc['Name'] == locName:
                 return loc
 
+    def getNextDifficulty(self, difficulty):
+        nextDiffs = {
+            easy: medium,
+            medium: hard,
+            hard: harder,
+            harder: hardcore,
+            hardcore: mania,
+            mania: infinity
+        }
+        return nextDiffs[difficulty]
+
     def computeLocationsDifficulty(self, locations, phase="major"):
-        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastAP)
-        # check post available functions too
-        for loc in locations:
-            if loc['difficulty'].bool == True:
-                if 'PostAvailable' in loc:
-                    self.smbm.addItem(loc['itemName'])
-                    postAvailable = loc['PostAvailable'](self.smbm)
-                    self.smbm.removeItem(loc['itemName'])
+        difficultyTarget = Conf.difficultyTarget
 
-                    loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
+        while True:
+            self.areaGraph.getAvailableLocations(locations, self.smbm, difficultyTarget, self.lastAP)
+            # check post available functions too
+            for loc in locations:
+                if loc['difficulty'].bool == True:
+                    if 'PostAvailable' in loc:
+                        self.smbm.addItem(loc['itemName'])
+                        postAvailable = loc['PostAvailable'](self.smbm)
+                        self.smbm.removeItem(loc['itemName'])
 
-                # also check if we can come back to landing site from the location
-                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastAP, infinity, loc['itemName'])
+                        loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
+
+                    # also check if we can come back to landing site from the location
+                    loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastAP, infinity, loc['itemName'])
+
+            availableLocations = [loc for loc in locations if loc['difficulty']]
+            if len(availableLocations) > 0:
+                # we've found some available locations
+                break
+
+            if difficultyTarget == infinity:
+                # we've tested all the difficulties
+                break
+
+            # start a new loop with next difficulty
+            difficultyTarget = self.getNextDifficulty(difficultyTarget)
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("available {} locs:".format(phase))
@@ -903,6 +929,8 @@ class InteractiveSolver(CommonSolver):
 
         (self.locsAddressName, self.locsWeb2Internal) = self.initLocsAddressName()
         self.transWeb2Internal = self.initTransitionsName()
+
+        Conf.difficultyTarget = infinity
 
     def initLocsAddressName(self):
         addressName = {}

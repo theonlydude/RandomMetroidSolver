@@ -71,8 +71,11 @@ class AccessPoint(object):
         self.transitions = self.sortTransitions()
 
     def disconnect(self):
-        if self.ConnectedTo is not None and self.ConnectedTo not in self.intraTransitions:
-            del self.transitions[self.ConnectedTo]
+        if self.ConnectedTo is not None:
+            if self.ConnectedTo not in self.intraTransitions:
+                del self.transitions[self.ConnectedTo]
+            else:
+                self.transitions[self.ConnectedTo] = self.intraTransitions[self.ConnectedTo]
         self.ConnectedTo = None
 
     # tells if this node is to connect areas together

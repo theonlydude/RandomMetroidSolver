@@ -150,17 +150,19 @@ class AccessGraph(object):
     # return newly opened access points
     def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
         newAvailNodes = {}
-        for src in sorted(nodesToCheck, key=attrgetter('Name')):
-            for dstName in src.transitions.keys():
-                tFunc = src.transitions[dstName]
+        # with python >= 3.6 the insertion order in a dict is keeps when looping on the keys,
+        # so we no longer have to sort them.
+        for src in nodesToCheck:
+            for dstName in src.transitions:
                 dst = self.accessPoints[dstName]
-                if dst in newAvailNodes or dst in availNodes:
+                if dst in availNodes or dst in newAvailNodes:
                     continue
                 if smbm is not None:
+                    tFunc = src.transitions[dstName]
                     diff = smbm.eval(tFunc)
                 else:
                     diff = SMBool(True)
-                if diff.bool == True and diff.difficulty <= maxDiff:
+                if diff.bool and diff.difficulty <= maxDiff:
                     if src.GraphArea == dst.GraphArea:
                         dst.distance = src.distance + 0.01
                     else:

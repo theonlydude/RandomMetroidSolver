@@ -347,20 +347,47 @@ class CommonSolver(object):
             if loc['Name'] == locName:
                 return loc
 
+    def getNextDifficulty(self, difficulty):
+        nextDiffs = {
+            easy: medium,
+            medium: hard,
+            hard: harder,
+            harder: hardcore,
+            hardcore: mania,
+            mania: infinity
+        }
+        return nextDiffs[difficulty]
+
     def computeLocationsDifficulty(self, locations, phase="major"):
-        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastAP)
-        # check post available functions too
-        for loc in locations:
-            if loc['difficulty'].bool == True:
-                if 'PostAvailable' in loc:
-                    self.smbm.addItem(loc['itemName'])
-                    postAvailable = loc['PostAvailable'](self.smbm)
-                    self.smbm.removeItem(loc['itemName'])
+        difficultyTarget = Conf.difficultyTarget
 
-                    loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
+        while True:
+            self.areaGraph.getAvailableLocations(locations, self.smbm, difficultyTarget, self.lastAP)
+            # check post available functions too
+            for loc in locations:
+                if loc['difficulty'].bool == True:
+                    if 'PostAvailable' in loc:
+                        self.smbm.addItem(loc['itemName'])
+                        postAvailable = loc['PostAvailable'](self.smbm)
+                        self.smbm.removeItem(loc['itemName'])
 
-                # also check if we can come back to landing site from the location
-                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastAP, infinity, loc['itemName'])
+                        loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
+
+                    # also check if we can come back to landing site from the location
+                    loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastAP, infinity, loc['itemName'])
+
+            availableLocations = [loc for loc in locations if loc['difficulty']]
+            comeBackLocations = [loc for loc in availableLocations if loc['comeBack']]
+            if len(availableLocations) > 0 and len(comeBackLocations) > 0:
+                # we've found some available locations
+                break
+
+            if difficultyTarget == infinity:
+                # we've tested all the difficulties
+                break
+
+            # start a new loop with next difficulty
+            difficultyTarget = self.getNextDifficulty(difficultyTarget)
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("available {} locs:".format(phase))
@@ -908,6 +935,8 @@ class InteractiveSolver(CommonSolver):
 
         (self.locsAddressName, self.locsWeb2Internal) = self.initLocsAddressName()
         self.transWeb2Internal = self.initTransitionsName()
+
+        Conf.difficultyTarget = infinity
 
     def initLocsAddressName(self):
         addressName = {}
@@ -1896,8 +1925,7 @@ class OutWeb(Out):
                       knowsUsed=(s.knowsUsed, s.knowsKnown), itemsOk=s.itemsOk, patches=s.romLoader.getPatches(),
                       pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
                       remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
-                      skippedMajors=skippedMajors, unavailMajors=unavailMajors,
-                      collectedItems=collectedItems)
+                      skippedMajors=skippedMajors, unavailMajors=unavailMajors, collectedItems=collectedItems)
 
         with open(s.outputFileName, 'w') as jsonFile:
             json.dump(result, jsonFile)
@@ -2072,7 +2100,7 @@ class OutConsole(Out):
 
             items = s.smbm.getItems()
             print("ETank: {}, Reserve: {}, Missile: {}, Super: {}, PowerBomb: {}".format(items['ETank'], items['Reserve'], items['Missile'], items['Super'], items['PowerBomb']))
-            print("Majors: {}".format(sorted([item for item in items if items[item] == True])))
+            print("Majors: {}".format(sorted([item for item in items if items[item] == 1])))
 
         # display difficulty scale
         self.displayDifficulty(s.difficulty)

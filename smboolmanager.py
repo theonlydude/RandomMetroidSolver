@@ -30,8 +30,8 @@ class SMBoolManager(object):
     def getItems(self):
         # get a dict of collected items and how many (to be displayed on the solver spoiler)
         itemsDict = {}
-        for item in self.items[:-2]: # ignore last two items: nothing and noenergy
-            itemsDict[item] = getattr(self, item)
+        for item in self.items:
+            itemsDict[item] = 1 if getattr(self, item) == True else 0
         for item in self.countItems:
             itemsDict[item] = getattr(self, item+"Count")
         return itemsDict
@@ -134,7 +134,7 @@ class SMBoolManager(object):
     def itemCountOk(self, item, count, difficulty=0):
         if self.itemCount(item) >= count:
             if item in ['ETank', 'Reserve']:
-                item = '{}-{}'.format(count, item)
+                item = str(count)+'-'+item
             return SMBool(True, difficulty, items = [item])
         else:
             return self.smboolFalse
@@ -144,13 +144,11 @@ class SMBoolManager(object):
             nEtank = self.itemCount('ETank')
             if nEtank > count:
                 nEtank = int(count)
-            items = '{}-ETank'.format(nEtank)
+            items = str(nEtank)+'-ETank'
             nReserve = self.itemCount('Reserve')
             if nEtank < count:
                 nReserve = int(count) - nEtank
-                items += ' - {}-Reserve'.format(nReserve)
-            else:
-                nReserve = 0
+                items += ' - '+str(nReserve)+'-Reserve'
             return SMBool(True, difficulty, items = [items])
         else:
             return self.smboolFalse

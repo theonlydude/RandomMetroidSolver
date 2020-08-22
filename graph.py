@@ -32,7 +32,8 @@ class AccessPoint(object):
         self.Escape = escape
         self.Start = start
         self.DotOrientation = dotOrientation
-        self.transitions = self.sortTransitions(transitions)
+        self.intraTransitions = self.sortTransitions(transitions)
+        self.transitions = copy.copy(self.intraTransitions)
         self.traverse = traverse
         self.distance = 0
         # inter-area connection
@@ -44,7 +45,7 @@ class AccessPoint(object):
         roomInfo = copy.deepcopy(self.RoomInfo) if self.RoomInfo is not None else None
         start = copy.deepcopy(self.Start) if self.Start is not None else None
         # in any case, do not copy connections
-        return AccessPoint(self.Name, self.GraphArea, self.transitions, self.traverse,
+        return AccessPoint(self.Name, self.GraphArea, self.intraTransitions, self.traverse,
                            exitInfo, entryInfo, roomInfo,
                            self.Internal, self.Boss, self.Escape,
                            start, self.DotOrientation)
@@ -70,8 +71,9 @@ class AccessPoint(object):
         self.transitions = self.sortTransitions()
 
     def disconnect(self):
-        if self.ConnectedTo is not None:
+        if self.ConnectedTo is not None and self.ConnectedTo not in self.intraTransitions:
             del self.transitions[self.ConnectedTo]
+        self.ConnectedTo = None
 
     # tells if this node is to connect areas together
     def isArea(self):

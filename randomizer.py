@@ -81,7 +81,7 @@ if __name__ == "__main__":
                         dest='bosses', nargs='?', const=True, default=False)
     parser.add_argument('--minimizer', help="minimizer mode: area and boss mixed together. arg is number of non boss locations",
                         dest='minimizerN', nargs='?', const=35, default=None,
-                        choices=[str(i) for i in range(30,101)])
+                        choices=[str(i) for i in range(30,101)]+["random"])
     parser.add_argument('--minimizerTourian',
                         help="Tourian speedup in minimizer mode",
                         dest='minimizerTourian', nargs='?', const=True, default=False)
@@ -339,7 +339,11 @@ if __name__ == "__main__":
         minDifficulty = 0
 
     if args.area == True and args.bosses == True and args.minimizerN is not None:
-        minimizerN = int(args.minimizerN)
+        if args.minimizerN == "random":
+            minimizerN = random.randint(30, 60)
+            logger.debug("minimizerN: {}".format(minimizerN))
+        else:
+            minimizerN = int(args.minimizerN)
         optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
     else:
         minimizerN = None

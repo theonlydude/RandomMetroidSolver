@@ -25,7 +25,7 @@ if __name__ == "__main__":
             if (i+1) % 100 == 0:
                 print(i+1)
             isVanilla = random.random() < 0.5
-            strictMinors = bool(random.randint(0, 2))
+            strictMinors = bool(random.getrandbits(1))
             minQty = 100
             energyQty = 'vanilla'
             forbidden = []

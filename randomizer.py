@@ -350,28 +350,28 @@ if __name__ == "__main__":
     areaRandom = False
     if args.area == 'random':
         areaRandom = True
-        args.area = bool(random.randint(0, 2))
+        args.area = bool(random.getrandbits(1))
     logger.debug("area: {}".format(args.area))
 
     bossesRandom = False
     if args.bosses == 'random':
         bossesRandom = True
-        args.bosses = bool(random.randint(0, 2))
+        args.bosses = bool(random.getrandbits(1))
     logger.debug("bosses: {}".format(args.bosses))
 
     if args.escapeRando == 'random':
-        args.escapeRando = bool(random.randint(0, 2))
+        args.escapeRando = bool(random.getrandbits(1))
     logger.debug("escapeRando: {}".format(args.escapeRando))
 
     if args.suitsRestriction == 'random':
         if args.morphPlacement == 'late' and args.area == True:
             args.suitsRestriction = False
         else:
-            args.suitsRestriction = bool(random.randint(0, 2))
+            args.suitsRestriction = bool(random.getrandbits(1))
     logger.debug("suitsRestriction: {}".format(args.suitsRestriction))
 
     if args.hideItems == 'random':
-        args.hideItems = bool(random.randint(0, 2))
+        args.hideItems = bool(random.getrandbits(1))
 
     if args.morphPlacement == 'random':
         if args.morphPlacementList != None:
@@ -388,7 +388,7 @@ if __name__ == "__main__":
         progDiff = args.progressionDifficulty
 
     if args.strictMinors == 'random':
-        args.strictMinors = bool(random.randint(0, 2))
+        args.strictMinors = bool(random.getrandbits(1))
 
     # in plando rando we know that the start ap is ok
     if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando == None:
@@ -497,7 +497,7 @@ if __name__ == "__main__":
         superFun = []
         for fun in args.superFun:
             if fun.find('Random') != -1:
-                if bool(random.randint(0, 2)) == True:
+                if bool(random.getrandbits(1)) == True:
                     superFun.append(fun[0:fun.find('Random')])
             else:
                 superFun.append(fun)

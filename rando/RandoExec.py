@@ -83,7 +83,7 @@ class RandoExec(object):
                 if (item.Type not in ['Nothing', 'NoEnergy']
                     and loc['CanHidden'] == True
                     and loc['Visibility'] == 'Visible'):
-                    if bool(random.randint(0, 2)) == True:
+                    if bool(random.getrandbits(1)) == True:
                         loc['Visibility'] = 'Hidden'
         # put nothing in unfilled locations
         filledLocNames = [il['Location']['Name'] for il in itemLocs]

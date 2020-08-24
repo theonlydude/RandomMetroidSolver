@@ -655,7 +655,8 @@ accessPoints = [
     }, boss = True,
        roomInfo = {'RoomPtr':0xda60, "area": 0x4},
        exitInfo = {'DoorPtr':0xa96c, 'direction': 0x4, "cap": (0x1, 0x26), "bitFlag": 0x0,
-                   "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe3d9},
+                   "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe3d9,
+                   "exitAsmPtr": 0xf7f0},
        entryInfo = {'SamusX':0x1c8, 'SamusY':0x88},
        dotOrientation = 'e'),
     AccessPoint('Draygon Room Bottom', 'EastMaridia', {

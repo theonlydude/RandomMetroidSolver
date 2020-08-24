@@ -265,10 +265,11 @@ class ItemManager:
         itemCode = item.Code + modifier
         return itemCode
 
-    def __init__(self, majorsSplit, qty, sm):
+    def __init__(self, majorsSplit, qty, sm, nLocs):
         self.qty = qty
         self.sm = sm
         self.majorsSplit = majorsSplit
+        self.nLocs = nLocs
         self.majorClass = 'Chozo' if majorsSplit == 'Chozo' else 'Major'
         self.itemPool = []
 
@@ -313,7 +314,7 @@ class ItemManager:
             return ItemManager.Items[itemType].withClass(itemClass)
 
     def createItemPool(self, exclude=None):
-        itemPoolGenerator = ItemPoolGenerator.factory(self.majorsSplit, self, self.qty, self.sm, exclude)
+        itemPoolGenerator = ItemPoolGenerator.factory(self.majorsSplit, self, self.qty, self.sm, exclude, self.nLocs)
         self.itemPool = itemPoolGenerator.getItemPool()
 
     @staticmethod
@@ -325,34 +326,42 @@ class ItemManager:
 
 class ItemPoolGenerator(object):
     @staticmethod
-    def factory(majorsSplit, itemManager, qty, sm, exclude):
+    def factory(majorsSplit, itemManager, qty, sm, exclude, nLocs):
         if majorsSplit == 'Chozo':
             return ItemPoolGeneratorChozo(itemManager, qty, sm)
         elif majorsSplit == 'Plando':
-            return ItemPoolGeneratorPlando(itemManager, qty, sm, exclude)
-        else:
+            return ItemPoolGeneratorPlando(itemManager, qty, sm, exclude, nLocs)
+        elif nLocs == 105:
             return ItemPoolGeneratorMajors(itemManager, qty, sm)
+        else:
+            return ItemPoolGeneratorMinimizer(itemManager, qty, sm, nLocs)
 
     def __init__(self, itemManager, qty, sm):
         self.itemManager = itemManager
         self.qty = qty
         self.sm = sm
         self.maxItems = 105 # 100 item locs and 5 bosses
+        self.maxEnergy = 18 # 14E, 4R
         self.log = log.get('ItemPool')
 
-    # add ammo given quantity settings
-    def addAmmo(self):
-        nbMinorsAlready = 5
+    def calcMaxAmmo(self):
+        self.nbMinorsAlready = 5
         # always add enough minors to pass zebetites (1100 damages) and mother brain 1 (3000 damages)
         # accounting for missile refill. so 15-10, or 10-10 if ice zeb skip is known (Ice is always in item pool)
         if not self.sm.knowsIceZebSkip():
             self.log.debug("Add missile because ice zeb skip is not known")
             self.itemManager.addMinor('Missile')
-            nbMinorsAlready += 1
-        minorLocations = max(0, 0.66*self.qty['minors'] - nbMinorsAlready) # 0.66 because of 66 minors and qty/100
-        self.log.debug("minorLocations: {}".format(minorLocations))
+            self.nbMinorsAlready += 1
+        self.maxMinors = 0.66*(self.maxItems - 5)
+        self.log.debug("maxMinors: "+str(self.maxMinors))
+        self.minorLocations = max(0, self.maxMinors*self.qty['minors']/100.0 - self.nbMinorsAlready)
+        self.log.debug("minorLocations: {}".format(self.minorLocations))
+
+    # add ammo given quantity settings
+    def addAmmo(self):
+        self.calcMaxAmmo()
         # we have to remove the minors already added
-        maxItems = len(self.itemManager.getItemPool()) + int(minorLocations)
+        maxItems = min(len(self.itemManager.getItemPool()) + int(self.minorLocations), self.maxItems)
         self.log.debug("maxItems: {}".format(maxItems))
         ammoQty = self.qty['ammo']
         if not self.qty['strictMinors']:
@@ -365,8 +374,8 @@ class ItemPoolGenerator(object):
             minorsTypes = ['Missile', 'Super', 'PowerBomb']
             totalProps = sum(ammoQty[m] for m in minorsTypes)
             minorsByProp = sorted(minorsTypes, key=lambda m: ammoQty[m])
-            # in python3 the result is a float
-            totalMinorLocations = int(66 * self.qty['minors'] / 100)
+            maxMinors = 0.66*(maxItems - 5)
+            totalMinorLocations = int(maxMinors * self.qty['minors'] / 100)
             self.log.debug("totalProps: {}".format(totalProps))
             self.log.debug("totalMinorLocations: {}".format(totalMinorLocations))
             def ammoCount(ammo):
@@ -478,15 +487,28 @@ class ItemPoolGeneratorChozo(ItemPoolGenerator):
         return self.itemManager.getItemPool()
 
 class ItemPoolGeneratorMajors(ItemPoolGenerator):
+    def __init__(self, itemManager, qty, sm):
+        super(ItemPoolGeneratorMajors, self).__init__(itemManager, qty, sm)
+        self.sparseRest = 1 + randGaussBounds(2, 5)
+        self.mediumRest = 3 + randGaussBounds(4, 3.7)
+        self.ultraSparseNoTanks = random.random() < 0.5
+
     def addEnergy(self):
-        total = 18
+        total = self.maxEnergy
+        alreadyInPool = 2
+        def getE(toAdd):
+            nonlocal total, alreadyInPool
+            d = total - alreadyInPool - toAdd
+            if d < 0:
+                toAdd += d
+            return toAdd
         energyQty = self.qty['energy']
         if energyQty == 'ultra sparse':
             # 0-1, add up to one energy (etank or reserve)
             self.itemManager.removeItem('Reserve')
             self.itemManager.removeItem('ETank')
             self.itemManager.addItem('NoEnergy')
-            if random.random() < 0.5:
+            if self.ultraSparseNoTanks:
                 # no energy at all
                 self.itemManager.addItem('NoEnergy')
             else:
@@ -495,8 +517,7 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
                 else:
                     self.itemManager.addItem('Reserve')
 
-            # complete up to 18 energies with nothing item
-            alreadyInPool = 2
+            # complete with nothing item
             for i in range(total - alreadyInPool):
                 self.itemManager.addItem('NoEnergy')
 
@@ -508,35 +529,41 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
                 self.itemManager.addItem('ETank')
             # 3 in the pool (1 E, 1 R + the previous one)
             alreadyInPool = 3
-            rest = 1 + randGaussBounds(2, 5)
+            rest = self.sparseRest
             for i in range(rest):
                 self.itemManager.addItem('ETank')
-            # complete up to 18 energies with nothing item
+            # complete with nothing item
             for i in range(total - alreadyInPool - rest):
                 self.itemManager.addItem('NoEnergy')
 
         elif energyQty == 'medium':
             # 8-12
             # add up to 3 Reserves or ETanks (cannot add more than 3 reserves)
-            for i in range(3):
+            alreadyInPool = 2
+            n = getE(3)
+            for i in range(n):
                 if random.random() < 0.5:
                     self.itemManager.addItem('Reserve')
                 else:
                     self.itemManager.addItem('ETank')
-            # 5 already in the pool (1 E, 1 R, + the previous 3)
-            alreadyInPool = 5
-            rest = 3 + randGaussBounds(4, 3.7)
+            alreadyInPool += n
+            rest = getE(self.mediumRest)
             for i in range(rest):
                 self.itemManager.addItem('ETank')
             # fill the rest with NoEnergy
             for i in range(total - alreadyInPool - rest):
                 self.itemManager.addItem('NoEnergy')
         else:
-            # add the vanilla 3 reserves and 13 Etanks
-            for i in range(3):
+            nE = getE(13)
+            alreadyInPool += nE
+            nR = getE(3)
+            alreadyInPool += nR
+            for i in range(nR):
                 self.itemManager.addItem('Reserve')
-            for i in range(13):
+            for i in range(nE):
                 self.itemManager.addItem('ETank')
+            for i in range(total - alreadyInPool):
+                self.itemManager.addItem('NoEnergy')
 
     def getItemPool(self):
         self.itemManager.newItemPool()
@@ -551,14 +578,50 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
 
         return self.itemManager.getItemPool()
 
+class ItemPoolGeneratorMinimizer(ItemPoolGeneratorMajors):
+    def __init__(self, itemManager, qty, sm, nLocs):
+        super(ItemPoolGeneratorMinimizer, self).__init__(itemManager, qty, sm)
+        self.maxItems = nLocs
+        self.calcMaxAmmo()
+        nMajors = len([itemName for itemName,item in ItemManager.Items.items() if item.Class == 'Major' and item.Category != 'Energy'])
+        energyQty = self.qty['energy']
+        if energyQty == 'medium':
+            if nLocs < 40:
+                self.maxEnergy = 5
+            elif nLocs < 55:
+                self.maxEnergy = 6
+            else:
+                self.maxEnergy = 5 + self.mediumRest
+        elif energyQty == 'vanilla':
+            if nLocs < 40:
+                self.maxEnergy = 6
+            elif nLocs < 55:
+                self.maxEnergy = 8
+            else:
+                self.maxEnergy = 8 + int(float(nLocs - 55)/50.0 * 8)
+            self.log.debug("maxEnergy: "+str(self.maxEnergy))
+            maxItems = self.maxItems - 10 # remove bosses and minimal minore
+            self.maxEnergy = int(max(self.maxEnergy, maxItems - nMajors - self.minorLocations))
+            if self.maxEnergy > 18:
+                self.maxEnergy = 18
+        elif energyQty == 'ultra sparse':
+            self.maxEnergy = 0 if self.ultraSparseNoTanks else 1
+        elif energyQty == 'sparse':
+            self.maxEnergy = 3 + self.sparseRest
+        self.log.debug("maxEnergy: "+str(self.maxEnergy))
+
 class ItemPoolGeneratorPlando(ItemPoolGenerator):
-    def __init__(self, itemManager, qty, sm, exclude):
+    def __init__(self, itemManager, qty, sm, exclude, nLocs):
         super(ItemPoolGeneratorPlando, self).__init__(itemManager, qty, sm)
         # dict of 'itemType: count' of items already added in the plando.
         # also a 'total: count' with the total number of items already added in the plando.
         self.exclude = exclude
+        self.maxItems = nLocs
+        self.log.debug("maxItems: {}".format(self.maxItems))
+        self.log.debug("exclude: {}".format(self.exclude))
 
     def getItemPool(self):
+        exceptionMessage = "Too many items already placed by the plando or not enough available locations:"
         self.itemManager.newItemPool(addBosses=False)
 
         # add the already placed items by the plando
@@ -571,7 +634,7 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
             for i in range(self.exclude[item]):
                 self.itemManager.addItem(item, itemClass)
 
-        remain = 105 - self.exclude['total']
+        remain = self.maxItems - self.exclude['total']
         self.log.debug("Plando: remain start: {}".format(remain))
         if remain > 0:
             # add missing bosses
@@ -583,7 +646,7 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
 
             self.log.debug("Plando: remain after bosses: {}".format(remain))
             if remain < 0:
-                raise Exception("Too many items already placed by the plando: can't add the remaining bosses")
+                raise Exception("{} can't add the remaining bosses".format(exceptionMessage))
 
             # add missing majors
             majors = []
@@ -596,7 +659,7 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
 
             self.log.debug("Plando: remain after majors: {}".format(remain))
             if remain < 0:
-                raise Exception("Too many items already placed by the plando: can't add the remaining majors: {}".format(', '.join(majors)))
+                raise Exception("{} can't add the remaining majors: {}".format(exceptionMessage, ', '.join(majors)))
 
             # add minimum minors to finish the game
             for (itemType, minimum) in [('Missile', 3), ('Super', 2), ('PowerBomb', 1)]:
@@ -609,7 +672,7 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
 
             self.log.debug("Plando: remain after minimum minors: {}".format(remain))
             if remain < 0:
-                raise Exception("Too many items already placed by the plando: can't add the minimum minors to finish the game")
+                raise Exception("{} can't add the minimum minors to finish the game".format(exceptionMessage))
 
             # add energy
             energyQty = self.qty['energy']
@@ -628,7 +691,7 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
 
             self.log.debug("Plando: remain after energy: {}".format(remain))
             if remain < 0:
-                raise Exception("Too many items already placed by the plando: can't add energy")
+                raise Exception("{} can't add energy".format(exceptionMessage))
 
             # add ammo
             nbMinorsAlready = self.exclude['Missile'] + self.exclude['Super'] + self.exclude['PowerBomb']

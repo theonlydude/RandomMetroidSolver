@@ -18,13 +18,14 @@ class RandoSetup(object):
         self.settings = services.settings
         self.graphSettings = graphSettings
         self.startAP = graphSettings.startAP
-        self.itemManager = self.settings.getItemManager(self.sm)
         self.superFun = self.settings.superFun
         self.container = None
         self.services = services
         self.restrictions = services.restrictions
         self.areaGraph = services.areaGraph
         self.locations = self.areaGraph.getAccessibleLocations(locations, self.startAP)
+#        print("nLocs Setup: "+str(len(self.locations)))
+        self.itemManager = self.settings.getItemManager(self.sm, len(self.locations))
         self.forbiddenItems = []
         self.restrictedLocs = []
         self.lastRestricted = []
@@ -55,6 +56,7 @@ class RandoSetup(object):
     def createItemLocContainer(self):
         self.getForbidden()
         if not self.checkPool():
+            self.log.debug("createItemLocContainer: checkPool fail")
             return None
         self.container = ItemLocContainer(self.sm, self.getItemPool(), self.locations)
         if self.restrictions.isLateMorph():
@@ -64,10 +66,12 @@ class RandoSetup(object):
             # TODO::allow for custom start which doesn't require morph early
             if self.graphSettings.areaRando and isStdStart and not self.restrictions.suitsRestrictions and self.restrictions.lateMorphForbiddenArea is None:
                 self.container = None
+                self.log.debug("createItemLocContainer: checkLateMorph fail")
                 return None
         # checkStart needs the container
         if not self.checkStart():
             self.container = None
+            self.log.debug("createItemLocContainer: checkStart fail")
             return None
         # add placement restriction helpers for random fill
         if self.settings.progSpeed == 'speedrun':
@@ -84,7 +88,7 @@ class RandoSetup(object):
                     if itemType not in restrictionDict[loc['GraphArea']]:
                         restrictionDict[loc['GraphArea']][itemType] = set()
                     restrictionDict[loc['GraphArea']][itemType].add(loc['Name'])
-            self.restrictions.addPlacementeRestrictions(restrictionDict)
+            self.restrictions.addPlacementRestrictions(restrictionDict)
         self.fillRestrictedLocations()
         self.settings.collectAlreadyPlacedItemLocations(self.container)
         return self.container
@@ -99,6 +103,7 @@ class RandoSetup(object):
         def getItemPredicateMinor(itemType):
             return lambda item: item.Type == itemType and self.restrictions.isItemMinor(item)
         def fill(locs, getPred):
+            self.log.debug("fillRestrictedLocations. locs="+getLocListStr(locs))
             for loc in locs:
                 loc['restricted'] = True
                 itemLocation = {'Location' : loc}
@@ -154,8 +159,9 @@ class RandoSetup(object):
         comeBack = {}
         try:
             container = ItemLocContainer(self.sm, pool, self.locations)
-        except AssertionError:
+        except AssertionError as e:
             # invalid graph altogether
+            self.log.debug("checkPool: AssertionError when creating ItemLocContainer: {}".format(e))
             return False
         # restrict item pool in chozo: game should be finishable with chozo items only
         contPool = []
@@ -186,7 +192,7 @@ class RandoSetup(object):
         self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 
         # check if all inter-area APs can reach each other
-        interAPs = [ap for ap in self.areaGraph.accessPoints.values() if ap.isArea()]
+        interAPs = [ap for ap in self.areaGraph.getAccessibleAccessPoints(self.startAP) if not ap.isInternal() and not ap.isLoop()]
         for startAp in interAPs:
             availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.settings.maxDiff)
             for ap in interAPs:
@@ -208,12 +214,21 @@ class RandoSetup(object):
                 self.sm.addItems([item.Type for item in contPool if item.Category != 'Boss'])
                 maxDiff = self.settings.maxDiff
                 # see if phantoon doesn't block himself, and if we can reach draygon if she's alive
-                ret = self.areaGraph.canAccess(self.sm, 'PhantoonRoomOut', 'PhantoonRoomIn', maxDiff)\
-                      and self.areaGraph.canAccess(self.sm, 'Main Street Bottom', 'DraygonRoomIn', maxDiff)
+                ret = self.areaGraph.canAccess(self.sm, self.startAP, 'PhantoonRoomIn', maxDiff)\
+                      and self.areaGraph.canAccess(self.sm, self.startAP, 'DraygonRoomIn', maxDiff)
                 if ret:
                     # see if we can beat bosses with this equipment (infinity as max diff for a "onlyBossesLeft" type check
                     beatableBosses = sorted([loc['Name'] for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if "Boss" in loc['Class']])
+                    self.log.debug("checkPool. beatableBosses="+str(beatableBosses))
                     ret = beatableBosses == Bosses.Golden4()
+                    if ret:
+                        # check that we can then kill mother brain
+                        self.sm.addItems(Bosses.Golden4())
+                        beatableMotherBrain = [loc['Name'] for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if loc['Name'] == 'Mother Brain']
+                        ret = len(beatableMotherBrain) > 0
+                        self.log.debug("checkPool. beatable Mother Brain={}".format(ret))
+                else:
+                    self.log.debug('checkPool. locked by Phantoon or Draygon')
                 self.log.debug('checkPool. boss access sanity check: '+str(ret))
 
         if self.restrictions.isChozo():
@@ -301,6 +316,7 @@ class RandoSetup(object):
                 self.checkPool()
                 self.addRestricted()
         else:
+            self.superFun.remove('Suits')
             self.errorMsgs.append("Could not remove any suit")
         self.log.debug("getForbiddenSuits END. forbidden="+str(self.forbiddenItems))
 
@@ -313,6 +329,7 @@ class RandoSetup(object):
             self.forbiddenItems.append(removableMovement.pop(0))
             self.addForbidden(removableMovement + [None])
         else:
+            self.superFun.remove('Movement')
             self.errorMsgs.append('Could not remove any movement item')
         self.log.debug("getForbiddenMovement END. forbidden="+str(self.forbiddenItems))
 
@@ -332,6 +349,7 @@ class RandoSetup(object):
                 fake.append(None)
             self.addForbidden(removableCombat + fake)
         else:
+            self.superFun.remove('Combat')
             self.errorMsgs.append('Could not remove any combat item')
         self.log.debug("getForbiddenCombat END. forbidden="+str(self.forbiddenItems))
 

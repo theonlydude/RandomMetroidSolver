@@ -360,6 +360,10 @@ def loadRandoPreset(randoPreset, args):
     if "energyQty" in randoParams:
         args.energyQty = randoParams["energyQty"]
 
+    if randoParams.get("minimizer", "off") == "on" and "minimizerQty" in randoParams:
+        args.minimizerN = randoParams["minimizerQty"]
+        if randoParams.get("minimizerTourian", "off") == "on":
+            args.minimizerTourian = True
     defaultMultiValues = getDefaultMultiValues()
     multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"]
     for multiElem in multiElems:
@@ -402,6 +406,9 @@ def getRandomizerDefaultParameters():
     defaultParams['escapeRando'] = "off"
     defaultParams['removeEscapeEnemies'] = "off"
     defaultParams['bossRandomization'] = "off"
+    defaultParams['minimizer'] = "off"
+    defaultParams['minimizerQty'] = "45"
+    defaultParams['minimizerTourian'] = "off"
     defaultParams['funCombat'] = "off"
     defaultParams['funMovement'] = "off"
     defaultParams['funSuits'] = "off"

@@ -45,7 +45,7 @@ class FillerProgSpeed(Filler):
         super(FillerProgSpeed, self).__init__(graphSettings.startAP, areaGraph, restrictions, container)
         distanceProp = 'GraphArea' if graphSettings.areaRando else 'Area'
         self.stdStart = GraphUtils.isStandardStart(self.startAP)
-        self.progSpeedParams = ProgSpeedParameters(restrictions)
+        self.progSpeedParams = ProgSpeedParameters(self.restrictions, len(container.unusedLocations))
         self.choice = ItemThenLocChoiceProgSpeed(restrictions, self.progSpeedParams, distanceProp, self.services)
 
     def initFiller(self):
@@ -424,7 +424,7 @@ class FillerProgSpeedChozoSecondPhase(Filler):
     def __init__(self, startAP, graph, restrictions, container):
         super(FillerProgSpeedChozoSecondPhase, self).__init__(startAP, graph, restrictions, container)
         self.firstPhaseItemLocs = container.itemLocations
-        self.progSpeedParams = ProgSpeedParameters(self.restrictions)
+        self.progSpeedParams = ProgSpeedParameters(self.restrictions, len(container.unusedLocations))
 
     def initContainer(self):
         self.container = self.baseContainer

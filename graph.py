@@ -3,6 +3,7 @@ from operator import attrgetter
 import log
 from smbool import SMBool
 from parameters import infinity
+from helpers import Bosses
 
 class AccessPoint(object):
     # name : AccessPoint name
@@ -31,7 +32,8 @@ class AccessPoint(object):
         self.Escape = escape
         self.Start = start
         self.DotOrientation = dotOrientation
-        self.transitions = self.sortTransitions(transitions)
+        self.intraTransitions = self.sortTransitions(transitions)
+        self.transitions = copy.copy(self.intraTransitions)
         self.traverse = traverse
         self.distance = 0
         # inter-area connection
@@ -43,7 +45,7 @@ class AccessPoint(object):
         roomInfo = copy.deepcopy(self.RoomInfo) if self.RoomInfo is not None else None
         start = copy.deepcopy(self.Start) if self.Start is not None else None
         # in any case, do not copy connections
-        return AccessPoint(self.Name, self.GraphArea, self.transitions, self.traverse,
+        return AccessPoint(self.Name, self.GraphArea, self.intraTransitions, self.traverse,
                            exitInfo, entryInfo, roomInfo,
                            self.Internal, self.Boss, self.Escape,
                            start, self.DotOrientation)
@@ -60,14 +62,21 @@ class AccessPoint(object):
 
     # connect to inter-area access point
     def connect(self, destName):
-        if self.ConnectedTo is not None:
-            del self.transitions[self.ConnectedTo]
+        self.disconnect()
         if self.Internal is False:
             self.transitions[destName] = lambda sm: self.traverse(sm)
             self.ConnectedTo = destName
         else:
             raise RuntimeError("Cannot add an internal access point as inter-are transition")
         self.transitions = self.sortTransitions()
+
+    def disconnect(self):
+        if self.ConnectedTo is not None:
+            if self.ConnectedTo not in self.intraTransitions:
+                del self.transitions[self.ConnectedTo]
+            else:
+                self.transitions[self.ConnectedTo] = self.intraTransitions[self.ConnectedTo]
+        self.ConnectedTo = None
 
     # tells if this node is to connect areas together
     def isArea(self):
@@ -77,8 +86,11 @@ class AccessPoint(object):
     def isInternal(self):
         return self.Internal or self.Escape
 
+    def isLoop(self):
+        return self.ConnectedTo == self.Name
+
 class AccessGraph(object):
-    def __init__(self, accessPointList, transitions, bidir=True, dotFile=None):
+    def __init__(self, accessPointList, transitions, dotFile=None):
         self.log = log.get('Graph')
         self.accessPoints = {}
         self.InterAreaTransitions = []
@@ -86,11 +98,10 @@ class AccessGraph(object):
             'Timer': None,
             'Animals': None
         }
-        self.bidir = bidir
         for ap in accessPointList:
             self.addAccessPoint(ap)
         for srcName, dstName in transitions:
-            self.addTransition(srcName, dstName, bidir)
+            self.addTransition(srcName, dstName)
         if dotFile is not None:
             self.toDot(dotFile)
 
@@ -122,7 +133,7 @@ class AccessGraph(object):
             drawn = []
             i = 0
             for src, dst in self.InterAreaTransitions:
-                if self.bidir is True and src.Name in drawn:
+                if src.Name in drawn:
                     continue
                 f.write('%s:%s -> %s:%s [taillabel="%s",headlabel="%s",color=%s];\n' % (src.GraphArea, src.DotOrientation, dst.GraphArea, dst.DotOrientation, src.Name, dst.Name, colors[i]))
                 drawn += [src.Name,dst.Name]
@@ -169,7 +180,7 @@ class AccessGraph(object):
     # rootNode: starting AccessPoint instance
     # smbm: smbm to test logic on. if None, discard logic check, assume we can reach everything
     # maxDiff: difficulty limit.
-    # noLogic: if True, discard logic check, assume we can reach everything
+    # smbm: if None, discard logic check, assume we can reach everything
     # return available AccessPoint list
     def getAvailableAccessPoints(self, rootNode, smbm, maxDiff):
         availNodes = { rootNode : { 'difficulty' : SMBool(True, 0), 'from' : None } }
@@ -178,7 +189,6 @@ class AccessGraph(object):
         while len(newAvailNodes) > 0:
             newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff)
             availNodes.update(newAvailNodes)
-
         return availNodes
 
     # gets path from the root AP used to compute availAps
@@ -346,13 +356,22 @@ class AccessGraph(object):
             return None
         return self.getPath(destAccessPoint, availAccessPoints)
 
+    # gives theoretically accessible APs in the graph (no logic check)
+    def getAccessibleAccessPoints(self, rootNode='Landing Site'):
+        rootAp = self.accessPoints[rootNode]
+        inBossChk = lambda ap: ap.Boss and ap.Name.endswith("In")
+        allAreas = {dst.GraphArea for (src, dst) in self.InterAreaTransitions if not inBossChk(dst) and not dst.isLoop()}
+        self.log.debug("allAreas="+str(allAreas))
+        nonBossAPs = [ap for ap in self.getAvailableAccessPoints(rootAp, None, 0) if ap.GraphArea in allAreas]
+        bossesAPs = [self.accessPoints[boss+'RoomIn'] for boss in Bosses.Golden4()] + [self.accessPoints['Draygon Room Bottom']]
+        return nonBossAPs + bossesAPs
+
     # gives theoretically accessible locations within a base list
     # returns locations with accessible GraphArea in this graph (no logic considered)
     def getAccessibleLocations(self, locations, rootNode='Landing Site'):
-        rootAp = self.accessPoints[rootNode]
-        availAccessPoints = self.getAvailableAccessPoints(rootAp, None, 0)
-        graphAreas = {ap.GraphArea for ap in availAccessPoints}
-        return [loc for loc in locations if loc['GraphArea'] in graphAreas]
+        availAccessPoints = self.getAccessibleAccessPoints(rootNode)
+        self.log.debug("availAccessPoints="+str([ap.Name for ap in availAccessPoints]))
+        return [loc for loc in locations if any(ap.Name in loc['AccessFrom'] for ap in availAccessPoints)]
 
 class AccessGraphSolver(AccessGraph):
     def computeLocDiff(self, tdiff, diff, pdiff):

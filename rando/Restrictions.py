@@ -7,6 +7,7 @@ from rando.ItemLocContainer import getLocListStr
 # canPlaceAtLocation is the main entry point here
 class Restrictions(object):
     def __init__(self, settings):
+        self.log = log.get('Restrictions')
         self.settings = settings
         # Item split : Major, Chozo or Full
         self.split = settings.restrictions['MajorMinor']
@@ -40,7 +41,8 @@ class Restrictions(object):
 
     NoCheckCat = set(['Energy', 'Nothing', 'Boss'])
 
-    def addPlacementeRestrictions(self, restrictionDict):
+    def addPlacementRestrictions(self, restrictionDict):
+        self.log.debug("add speedrun placement restrictions")
         self.checkers.append(lambda item, loc, cont:
                              item.Category in Restrictions.NoCheckCat
                              or item.Type == 'Missile'
@@ -96,10 +98,13 @@ class Restrictions(object):
     
     def getCheckers(self):
         checkers = []
+        self.log.debug("add bosses restriction")
         checkers.append(lambda item, loc, cont: (item.Category != 'Boss' and 'Boss' not in loc['Class']) or (item.Category == 'Boss' and item.Name == loc['Name']))
         if self.split != 'Full':
+            self.log.debug("add majorsSplit restriction")
             checkers.append(lambda item, loc, cont: self.isItemLocMatching(item, loc))
         if self.suitsRestrictions:
+            self.log.debug("add suits restriction")
             checkers.append(lambda item, loc, cont: not self.isSuit(item) or loc['GraphArea'] != 'Crateria')
         return checkers
 

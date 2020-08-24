@@ -12,6 +12,7 @@ from rom_patches import RomPatches
 from rom import RomPatcher, FakeROM
 from utils import loadRandoPreset, getDefaultMultiValues
 from version import displayedVersion
+from smbool import SMBool
 
 import log, db
 
@@ -78,6 +79,12 @@ if __name__ == "__main__":
                         dest='noRemoveEscapeEnemies', default=False)
     parser.add_argument('--bosses', help="randomize bosses",
                         dest='bosses', nargs='?', const=True, default=False)
+    parser.add_argument('--minimizer', help="minimizer mode: area and boss mixed together. arg is number of non boss locations",
+                        dest='minimizerN', nargs='?', const=35, default=None,
+                        choices=[str(i) for i in range(30,101)]+["random"])
+    parser.add_argument('--minimizerTourian',
+                        help="Tourian speedup in minimizer mode",
+                        dest='minimizerTourian', nargs='?', const=True, default=False)
     parser.add_argument('--startAP', help="Name of the Access Point to start from",
                         dest='startAP', nargs='?', default="Landing Site",
                         choices=['random'] + GraphUtils.getStartAccessPointNames())
@@ -331,31 +338,40 @@ if __name__ == "__main__":
     else:
         minDifficulty = 0
 
+    if args.area == True and args.bosses == True and args.minimizerN is not None:
+        if args.minimizerN == "random":
+            minimizerN = random.randint(30, 60)
+            logger.debug("minimizerN: {}".format(minimizerN))
+        else:
+            minimizerN = int(args.minimizerN)
+        optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
+    else:
+        minimizerN = None
     areaRandom = False
     if args.area == 'random':
         areaRandom = True
-        args.area = bool(random.randint(0, 2))
+        args.area = bool(random.getrandbits(1))
     logger.debug("area: {}".format(args.area))
 
     bossesRandom = False
     if args.bosses == 'random':
         bossesRandom = True
-        args.bosses = bool(random.randint(0, 2))
+        args.bosses = bool(random.getrandbits(1))
     logger.debug("bosses: {}".format(args.bosses))
 
     if args.escapeRando == 'random':
-        args.escapeRando = bool(random.randint(0, 2))
+        args.escapeRando = bool(random.getrandbits(1))
     logger.debug("escapeRando: {}".format(args.escapeRando))
 
     if args.suitsRestriction == 'random':
         if args.morphPlacement == 'late' and args.area == True:
             args.suitsRestriction = False
         else:
-            args.suitsRestriction = bool(random.randint(0, 2))
+            args.suitsRestriction = bool(random.getrandbits(1))
     logger.debug("suitsRestriction: {}".format(args.suitsRestriction))
 
     if args.hideItems == 'random':
-        args.hideItems = bool(random.randint(0, 2))
+        args.hideItems = bool(random.getrandbits(1))
 
     if args.morphPlacement == 'random':
         if args.morphPlacementList != None:
@@ -372,7 +388,7 @@ if __name__ == "__main__":
         progDiff = args.progressionDifficulty
 
     if args.strictMinors == 'random':
-        args.strictMinors = bool(random.randint(0, 2))
+        args.strictMinors = bool(random.getrandbits(1))
 
     # in plando rando we know that the start ap is ok
     if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando == None:
@@ -445,6 +461,10 @@ if __name__ == "__main__":
         RomPatches.ActivePatches.append(RomPatches.NerfedCharge)
     if args.noVariaTweaks == False:
         RomPatches.ActivePatches += RomPatches.VariaTweaks
+    if minimizerN is not None:
+        RomPatches.ActivePatches.append(RomPatches.NoGadoras)
+        if args.minimizerTourian == True:
+            RomPatches.ActivePatches += RomPatches.MinimizerTourian
     missileQty = float(args.missileQty)
     superQty = float(args.superQty)
     powerBombQty = float(args.powerBombQty)
@@ -477,7 +497,7 @@ if __name__ == "__main__":
         superFun = []
         for fun in args.superFun:
             if fun.find('Random') != -1:
-                if bool(random.randint(0, 2)) == True:
+                if bool(random.getrandbits(1)) == True:
                     superFun.append(fun[0:fun.find('Random')])
             else:
                 superFun.append(fun)
@@ -528,7 +548,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.AreaBaseSet
         if args.areaLayoutBase == False:
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
-    graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses, args.escapeRando, dotFile,
+    graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses,
+                                  args.escapeRando, minimizerN, dotFile,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
     if args.patchOnly == False:
         try:
@@ -536,12 +557,14 @@ if __name__ == "__main__":
             (stuck, itemLocs, progItemLocs) = randoExec.randomize(randoSettings, graphSettings)
             # if we couldn't find an area layout then the escape graph is not created either
             # and getDoorConnections will crash if random escape is activated.
-            if not stuck:
+            if not stuck or args.vcr == True:
                 doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
                                                       args.area, args.bosses,
                                                       args.escapeRando)
                 escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
         except Exception as e:
+            import traceback
+            traceback.print_exc(file=sys.stdout)
             dumpErrorMsg(args.output, "Error: {}".format(e))
             sys.exit(-1)
     else:
@@ -554,15 +577,7 @@ if __name__ == "__main__":
         # in vcr mode we still want the seed to be generated to analyze it
         if args.vcr == False:
             sys.exit(-1)
-
-    # hide some items like in dessy's
-    if args.hideItems == True:
-        for itemLoc in itemLocs:
-            if (itemLoc['Item'].Type not in ['Nothing', 'NoEnergy']
-                and itemLoc['Location']['CanHidden'] == True
-                and itemLoc['Location']['Visibility'] == 'Visible'):
-                if bool(random.randint(0, 2)) == True:
-                    itemLoc['Location']['Visibility'] = 'Hidden'
+    randoExec.postProcessItemLocs(itemLocs, args.hideItems)
     # choose on animal patch
     if args.animals == True:
         animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
@@ -590,7 +605,8 @@ if __name__ == "__main__":
     if args.plandoRando != None:
         # replace smbool with a dict
         for itemLoc in itemLocs:
-            itemLoc["Location"]["difficulty"] = itemLoc["Location"]["difficulty"].json()
+            if "difficulty" in itemLoc["Location"]:
+                itemLoc["Location"]["difficulty"] = itemLoc["Location"]["difficulty"].json()
             if "pathDifficulty" in itemLoc["Location"]:
                 del itemLoc["Location"]["pathDifficulty"]
 
@@ -645,7 +661,7 @@ if __name__ == "__main__":
                                        args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
-                                       escapeAttr, args.noRemoveEscapeEnemies)
+                                       escapeAttr, args.noRemoveEscapeEnemies, minimizerN, args.minimizerTourian)
         else:
             # from customizer permalink, apply previously generated seed ips first
             if args.seedIps != None:
@@ -722,6 +738,8 @@ if __name__ == "__main__":
             if msg != "":
                 print(msg)
     except Exception as e:
+        import traceback
+        traceback.print_exc(file=sys.stdout)
         msg = "Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e)
         dumpErrorMsg(args.output, msg)
         sys.exit(-1)

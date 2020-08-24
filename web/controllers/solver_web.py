@@ -855,7 +855,7 @@ def getAddressesToRead(plando=False):
     ## doorasm
     addresses["ranges"] += [0x7EB00, 0x7ee60]
     # for next release doorasm addresses will be relocated
-    addresses["ranges"] += [0x7F800, 0x7FA5F]
+    addresses["ranges"] += [0x7F800, 0x7FA71]
 
     if plando == True:
         # plando addresses
@@ -994,6 +994,9 @@ def randomizer():
         "hardway2hell": "harder highway2hell",
         "haste": "inspired by DASH randomizer with Nerfed Charge / Progressive Suits",
         "highway2hell": "favors suitless seeds",
+        "minimizer":"Typical 'boss rush' settings with random start and nerfed charge",
+        "minimizer_hardcore":"Have fun 'rushing' bosses with no equipment on a tiny map",
+        "minimizer_maximizer":"No longer a boss rush",
         "quite_random": "randomizes a few significant settings to have various seeds",
         "stupid_hard": "hardest possible settings",
         "surprise": "quite_random with Area, Boss and Start Location randomized",
@@ -1059,9 +1062,15 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
     for qty in quantities:
         if request.vars[qty] == 'random':
             continue
-        qtyFloat = getFloat(qty, isJson)
-        if qtyFloat < 1.0 or qtyFloat > 9.0:
-            raiseHttp(400, "Wrong value for {}, must be between 1 and 9".format(qty), isJson)
+        if qty == 'minimizerQty':
+            if request.vars.minimizer == 'on':
+                qtyInt = getInt(qty, isJson)
+                if qtyInt < 30 or qtyInt > 100:
+                    raiseHttp(400, "Wrong value for {}, must be between 30 and 100".format(qty), isJson)
+        else:
+            qtyFloat = getFloat(qty, isJson)
+            if qtyFloat < 1.0 or qtyFloat > 9.0:
+                raiseHttp(400, "Wrong value for {}, must be between 1 and 9".format(qty), isJson)
 
     # multis
     defaultMultiValues = getDefaultMultiValues()
@@ -1148,13 +1157,13 @@ def sessionWebService():
     # web service to update the session
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
                'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'escapeRando', 'removeEscapeEnemies',
-               'bossRandomization',
+               'bossRandomization', 'minimizer', 'minimizerTourian',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
                'rando_speed', 'animals', 'No_Music', 'random_music',
                'Infinite_Space_Jump', 'refill_before_save']
-    quantities = ['missileQty', 'superQty', 'powerBombQty']
+    quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty']
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation']
     others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'gravityBehaviour']
@@ -1183,6 +1192,9 @@ def sessionWebService():
     session.randomizer['escapeRando'] = request.vars.escapeRando
     session.randomizer['removeEscapeEnemies'] = request.vars.removeEscapeEnemies
     session.randomizer['bossRandomization'] = request.vars.bossRandomization
+    session.randomizer['minimizer'] = request.vars.minimizer
+    session.randomizer['minimizerQty'] = request.vars.minimizerQty
+    session.randomizer['minimizerTourian'] = request.vars.minimizerTourian
     session.randomizer['funCombat'] = request.vars.funCombat
     session.randomizer['funMovement'] = request.vars.funMovement
     session.randomizer['funSuits'] = request.vars.funSuits
@@ -1233,13 +1245,13 @@ def randomizerWebService():
     # check validity of all parameters
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
                'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'escapeRando', 'removeEscapeEnemies',
-               'bossRandomization',
+               'bossRandomization', 'minimizer', 'minimizerTourian',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
                'rando_speed', 'animals', 'No_Music', 'random_music',
                'Infinite_Space_Jump', 'refill_before_save']
-    quantities = ['missileQty', 'superQty', 'powerBombQty']
+    quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty']
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation']
     others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'gravityBehaviour', 'maxDifficulty']
@@ -1369,6 +1381,11 @@ def randomizerWebService():
         params.append('--bosses')
     elif request.vars.bossRandomization == 'random':
         params += ['--bosses', 'random']
+
+    if request.vars.minimizer == 'on':
+        params += ['--minimizer', request.vars.minimizerQty]
+    if request.vars.minimizerTourian == 'on':
+        params.append('--minimizerTourian')
 
     # load content of preset to get controller mapping
     try:
@@ -1803,6 +1820,7 @@ class WS(object):
                 "mode": state["mode"],
                 "areaRando": state["areaRando"],
                 "bossRando": state["bossRando"],
+                "hasMixedTransitions": state["hasMixedTransitions"],
                 "escapeRando": state["escapeRando"],
                 "escapeTimer": state["escapeTimer"],
                 "seed": state["seed"],

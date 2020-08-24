@@ -1,5 +1,5 @@
 
-import sys
+import sys, random
 
 from graph_locations import locations as graphLocations
 from rando.Restrictions import Restrictions
@@ -10,6 +10,7 @@ from rando.Filler import FrontFiller
 from rando.FillerProgSpeed import FillerProgSpeed, FillerProgSpeedChozoSecondPhase
 from rando.FillerRandom import FillerRandom, FillerRandomSpeedrun
 from rando.Chozo import ChozoFillerFactory, ChozoWrapperFiller
+from rando.Items import ItemManager
 from vcr import VCR
 
 # entry point for rando execution ("randomize" method)
@@ -72,3 +73,22 @@ class RandoExec(object):
         ret = filler.generateItems(vcr=vcr)
         self.errorMsg = filler.errorMsg
         return ret
+
+    def postProcessItemLocs(self, itemLocs, hide):
+        # hide some items like in dessy's
+        if hide == True:
+            for itemLoc in itemLocs:
+                item = itemLoc['Item']
+                loc = itemLoc['Location']
+                if (item.Type not in ['Nothing', 'NoEnergy']
+                    and loc['CanHidden'] == True
+                    and loc['Visibility'] == 'Visible'):
+                    if bool(random.getrandbits(1)) == True:
+                        loc['Visibility'] = 'Hidden'
+        # put nothing in unfilled locations
+        filledLocNames = [il['Location']['Name'] for il in itemLocs]
+        unfilledLocs = [loc for loc in graphLocations if loc['Name'] not in filledLocNames]
+        nothing = ItemManager.getItem('Nothing')
+        for loc in unfilledLocs:
+            loc['restricted'] = True
+            itemLocs.append({'Item':nothing, 'Location':loc})

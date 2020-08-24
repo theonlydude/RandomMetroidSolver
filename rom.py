@@ -101,7 +101,9 @@ class RomReader:
         'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"},
         'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"},
         'nerfedRainbowBeam': {'address': 0x14BA2E, 'value': 0x13, 'desc': 'nerfed rainbow beam'},
-        'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'desc': "Crocomire in its own area"}
+        'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'desc': "Crocomire in its own area"},
+        'minimizer_bosses': {'address': 0x10F500, 'value': 0xAD, 'desc': "Minimizer"},
+        'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'desc': "Fast Tourian"}
     }
 
     # FIXME shouldn't be here
@@ -172,7 +174,9 @@ class RomReader:
         'refill_before_save': {'address': 0x270C2, 'value': 0x98, 'vanillaValue': 0xff},
         'nerfed_rainbow_beam': {'address': 0x14BA2E, 'value': 0x13, 'vanillaValue': 0x2b},
         'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'vanillaValue': 0x4},
-        'area_rando_warp_door': {'address': 0x26425E, 'value': 0x80, 'vanillaValue': 0x70}
+        'area_rando_warp_door': {'address': 0x26425E, 'value': 0x80, 'vanillaValue': 0x70},
+        'minimizer_bosses': {'address': 0x10F500, 'value': 0xAD, 'vanillaValue': 0xff},
+        'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'vanillaValue': 0xff}
     }
 
     @staticmethod
@@ -365,7 +369,10 @@ class RomReader:
         escapeDstAP = rooms[key]
         escapeTransition = [(escapeSrcAP.Name, escapeDstAP.Name)]
 
-        return (removeBiTrans(areaTransitions), removeBiTrans(bossTransitions), escapeTransition)
+        areaTransitions = removeBiTrans(areaTransitions)
+        bossTransitions = removeBiTrans(bossTransitions)
+
+        return (areaTransitions, bossTransitions, escapeTransition, GraphUtils.hasMixedTransitions(areaTransitions, bossTransitions))
 
     def getTransition(self, doorPtr):
         # room ptr is in two bytes
@@ -582,8 +589,9 @@ class RomPatcher:
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
-                 'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street'],
-        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips']
+                 'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street' ],
+        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips'],
+        'MinimizerTourian': ['minimizer_tourian.ips', 'nerfed_rainbow_beam.ips']
     }
 
     def __init__(self, romFileName=None, magic=None, plando=False):
@@ -655,12 +663,14 @@ class RomPatcher:
         self.nItems = 0
         self.nothingMissile = False
         for itemLoc in itemLocs:
-            if 'Boss' in itemLoc['Location']['Class']:
+            loc = itemLoc['Location']
+            item = itemLoc['Item']
+            if 'Boss' in loc['Class']:
                 continue
-            isMorph = itemLoc['Location']['Name'] == 'Morphing Ball'
-            if itemLoc['Item'].Category == 'Nothing':
+            isMorph = loc['Name'] == 'Morphing Ball'
+            if item.Category == 'Nothing':
                 self.writeNothing(itemLoc)
-                if itemLoc['Location']['Id'] == self.nothingId:
+                if loc['Id'] == self.nothingId and ('restricted' not in loc or loc['restricted'] == False):
                     # nothing at morph gives a missile pack
                     self.nothingMissile = True
                     self.nItems += 1
@@ -824,7 +834,8 @@ class RomPatcher:
                         optionalPatches=[], noLayout=False, suitsMode="Classic",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
-                        escapeAttr=None, noRemoveEscapeEnemies=False):
+                        escapeAttr=None, noRemoveEscapeEnemies=False,
+                        minimizerN=None, minimizerTourian=True):
         try:
             # apply standard patches
             stdPatches = []
@@ -888,7 +899,13 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
             elif bosses == True:
                 self.applyIPSPatch('door_transition.ips')
-            self.applyStartAP(startAP, plms, area)
+            if minimizerN is not None:
+                self.applyIPSPatch('minimizer_bosses.ips')
+                if minimizerTourian == True:
+                    for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
+                        self.applyIPSPatch(patchName)
+            doors = self.getStartDoors(plms, area, minimizerN)
+            self.applyStartAP(startAP, plms, doors)
             self.applyPLMs(plms)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
@@ -907,27 +924,35 @@ class RomPatcher:
                 patch = IPS_Patch.load(appDir + '/' + ipsDir + '/' + patchName)
         self.ipsPatches.append(patch)
 
-    def applyStartAP(self, apName, plms, area):
-        ap = getAccessPoint(apName)
-        if not GraphUtils.isStandardStart(apName):
-            # not Ceres or Landing Site, so Zebes will be awake
-            plms.append('Morph_Zebes_Awake')
-        (w0, w1) = getWord(ap.Start['spawn'])
+    def getStartDoors(self, plms, area, minimizerN):
         doors = [0x10] # red brin elevator
+        def addBlinking(name):
+            key = 'Blinking[{}]'.format(name)
+            if key in patches:
+                self.applyIPSPatch(key)
+            if key in additional_PLMs:
+                plms.append(key)
         if area == True:
             plms += ['Maridia Sand Hall Seal', "Save_Main_Street", "Save_Crab_Shaft"]
-            def addBlinking(name):
-                key = 'Blinking[{}]'.format(name)
-                if key in patches:
-                    self.applyIPSPatch(key)
-                if key in additional_PLMs:
-                    plms.append(key)
             for accessPoint in accessPoints:
                 if accessPoint.Internal == True or accessPoint.Boss == True:
                     continue
                 addBlinking(accessPoint.Name)
             addBlinking("West Sand Hall Left")
             addBlinking("Below Botwoon Energy Tank Right")
+        if minimizerN is not None:
+            # add blinking doors inside and outside boss rooms
+            for accessPoint in accessPoints:
+                if accessPoint.Boss == True:
+                    addBlinking(accessPoint.Name)
+        return doors
+
+    def applyStartAP(self, apName, plms, doors):
+        ap = getAccessPoint(apName)
+        if not GraphUtils.isStandardStart(apName):
+            # not Ceres or Landing Site, so Zebes will be awake
+            plms.append('Morph_Zebes_Awake')
+        (w0, w1) = getWord(ap.Start['spawn'])
         if 'doors' in ap.Start:
             doors += ap.Start['doors']
         doors.append(0x0)
@@ -952,12 +977,13 @@ class RomPatcher:
     def applyEscapeAttributes(self, escapeAttr, plms):
         # timer
         escapeTimer = escapeAttr['Timer']
-        minute = int(escapeTimer / 60)
-        second = escapeTimer % 60
-        minute = int(minute / 10) * 16 + minute % 10
-        second = int(second / 10) * 16 + second % 10
-        patchDict = {'Escape_Timer': {0x1E21:[second, minute]}}
-        self.applyIPSPatch('Escape_Timer', patchDict)
+        if escapeTimer is not None:
+            minute = int(escapeTimer / 60)
+            second = escapeTimer % 60
+            minute = int(minute / 10) * 16 + minute % 10
+            second = int(second / 10) * 16 + second % 10
+            patchDict = {'Escape_Timer': {0x1E21:[second, minute]}}
+            self.applyIPSPatch('Escape_Timer', patchDict)
         # animals door to open
         if escapeAttr['Animals'] is not None:
             escapeOpenPatches = {
@@ -1457,6 +1483,9 @@ class RomPatcher:
 
             asmAddress += len(asmPatch)
             # update room state header with song changes
+            # TODO just do an IPS patch for this as it is completely static
+            #      this would get rid of both 'song' and 'songs' fields
+            #      as well as this code
             if 'song' in conn:
                 for addr in conn["songs"]:
                     self.romFile.seek(0x70000 + addr)
@@ -1847,6 +1876,12 @@ class RomLoader(object):
 
         # check escape rando
         isEscape = self.hasPatch("areaEscape")
+
+        # minimizer
+        if self.hasPatch("minimizer_bosses"):
+            RomPatches.ActivePatches.append(RomPatches.NoGadoras)
+        if self.hasPatch("minimizer_tourian"):
+            RomPatches.ActivePatches.append(RomPatches.TourianSpeedup)
 
         return (isArea, isBoss, isEscape)
 

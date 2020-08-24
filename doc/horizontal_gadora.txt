@@ -1,0 +1,486 @@
+
+Vanilla :
+*********
+
+Logs (bank $84):
+----------------
+
+;;; $D77A: Instruction - shoot eye door projectile with enemy projectile argument [[Y]] ;;;
+{
+$84:D77A B9 00 00    LDA $0000,y            ; A = [[Y]]
+$84:D77D 5A          PHY
+$84:D77E A0 43 B7    LDY #$B743             ;\
+$84:D781 22 97 80 86 JSL $868097[$86:8097]  ;} Spawn eye door projectile
+$84:D785 A9 4C 00    LDA #$004C             ;\
+$84:D788 22 CB 90 80 JSL $8090CB[$80:90CB]  ;} Queue sound 4Ch, sound library 2, max queued sounds allowed = 6
+$84:D78C 7A          PLY
+$84:D78D C8          INY
+$84:D78E C8          INY
+$84:D78F 60          RTS
+}
+
+;;; $D790: Instruction - spawn eye door sweat enemy projectile with argument [[Y]] ;;;
+{
+$84:D790 B9 00 00    LDA $0000,y[$84:D8B2]
+$84:D793 5A          PHY
+$84:D794 A0 51 B7    LDY #$B751
+$84:D797 22 97 80 86 JSL $868097[$86:8097]
+$84:D79B 7A          PLY
+$84:D79C C8          INY
+$84:D79D C8          INY
+$84:D79E 60          RTS
+
+
+;;; $D79F: Instruction - spawn two eye door smoke enemy projectiles ;;;
+{
+$84:D79F 5A          PHY
+$84:D7A0 A9 0A 03    LDA #$030A
+$84:D7A3 A0 17 E5    LDY #$E517
+$84:D7A6 22 97 80 86 JSL $868097[$86:8097]
+$84:D7AA A9 0A 03    LDA #$030A
+$84:D7AD A0 17 E5    LDY #$E517
+$84:D7B0 22 97 80 86 JSL $868097[$86:8097]
+$84:D7B4 7A          PLY
+$84:D7B5 60          RTS
+}
+
+;;; $D7B6: Instruction - spawn eye door smoke projectile ;;;
+{
+$84:D7B6 5A          PHY
+$84:D7B7 A9 0B 00    LDA #$000B
+$84:D7BA A0 17 E5    LDY #$E517
+$84:D7BD 22 97 80 86 JSL $868097[$86:8097]
+$84:D7C1 7A          PLY
+$84:D7C2 60          RTS
+}
+
+;;; $D7C3: Instruction - move PLM up one row and make a blue door facing right ;;;
+{
+$84:D7C3 DA          PHX
+$84:D7C4 BD 87 1C    LDA $1C87,x[$7E:1CCF]
+$84:D7C7 38          SEC
+$84:D7C8 ED A5 07    SBC $07A5  [$7E:07A5]
+$84:D7CB ED A5 07    SBC $07A5  [$7E:07A5]
+$84:D7CE 9D 87 1C    STA $1C87,x[$7E:1CCF]
+$84:D7D1 AA          TAX
+$84:D7D2 A9 41 C0    LDA #$C041
+$84:D7D5 20 B4 82    JSR $82B4  [$84:82B4]
+$84:D7D8 80 15       BRA $15    [$D7EF]
+}
+
+
+;;; $D7DA: Instruction - move PLM up one row and make a blue door facing left ;;;
+{
+$84:D7DA DA          PHX
+$84:D7DB BD 87 1C    LDA $1C87,x[$7E:1CCD]
+$84:D7DE 38          SEC
+$84:D7DF ED A5 07    SBC $07A5  [$7E:07A5]
+$84:D7E2 ED A5 07    SBC $07A5  [$7E:07A5]
+$84:D7E5 9D 87 1C    STA $1C87,x[$7E:1CCD]
+$84:D7E8 AA          TAX
+$84:D7E9 A9 40 C0    LDA #$C040
+$84:D7EC 20 B4 82    JSR $82B4  [$84:82B4]
+}
+
+
+
+;;; $D7EF: Create 3 block vertical extension ;;;
+{
+$84:D7EF 8A          TXA
+$84:D7F0 18          CLC
+$84:D7F1 6D A5 07    ADC $07A5  [$7E:07A5]
+$84:D7F4 6D A5 07    ADC $07A5  [$7E:07A5]
+$84:D7F7 AA          TAX
+$84:D7F8 A9 FF D0    LDA #$D0FF
+$84:D7FB 20 B4 82    JSR $82B4  [$84:82B4]
+$84:D7FE 8A          TXA
+$84:D7FF 18          CLC
+$84:D800 6D A5 07    ADC $07A5  [$7E:07A5]
+$84:D803 6D A5 07    ADC $07A5  [$7E:07A5]
+$84:D806 AA          TAX
+$84:D807 A9 FE D0    LDA #$D0FE
+$84:D80A 20 B4 82    JSR $82B4  [$84:82B4]
+$84:D80D 8A          TXA
+$84:D80E 18          CLC
+$84:D80F 6D A5 07    ADC $07A5  [$7E:07A5]
+$84:D812 6D A5 07    ADC $07A5  [$7E:07A5]
+$84:D815 AA          TAX
+$84:D816 A9 FD D0    LDA #$D0FD
+$84:D819 20 B4 82    JSR $82B4  [$84:82B4]
+$84:D81C FA          PLX
+$84:D81D 60          RTS
+}
+
+;;; $D81E: Instruction list - PLM $DB56 (eye door eye, facing left) ;;;
+{
+$84:D81E             dx 8A72,D8E3,      ; Go to $D8E3 if the room argument door is set
+$84:D822             dx 0004,9C03,
+                        8D41,06,04,D830,; Go to $D830 if Samus is within 06h columns and 04h rows of PLM
+                        8724,D822,      ; Go to $D822
+$84:D830             dx 8A24,D880,      ; Link instruction = $D880
+                        86C1,BD50,      ; Pre-instruction = go to link instruction if shot with a (super) missile
+                        0008,9C0B,
+$84:D83C             dx 8D41,01,04,D878,; Go to $D878 if Samus is within 01h columns and 04h rows of PLM
+                        0040,9C13,
+                        D77A,0000,      ; Shoot eye door projectile with enemy projectile argument 0000h
+                        0020,9C13,
+                        D77A,0000,      ; Shoot eye door projectile with enemy projectile argument 0000h
+                        0020,9C13,
+                        D77A,0000,      ; Shoot eye door projectile with enemy projectile argument 0000h
+                        0040,9C13,
+                        0006,9C0B,
+                        0030,9C03,
+                        0030,9C03,
+                        0006,9C0B,
+                        8D41,06,04,D83C,; Go to $D83C if Samus is within 06h columns and 04h rows of PLM
+                        8724,D822,      ; Go to $D822
+$84:D878             dx 0004,9C03,
+                        8724,D83C,      ; Go to $D83C
+$84:D880             dx 8C10,09,        ; Queue sound 9, sound library 2, max queued sounds allowed = 6
+                        D79F,           ; Spawn two eye door smoke enemy projectiles
+                        D79F,           ; Spawn two eye door smoke enemy projectiles
+                        8A91,03,D8C4,   ; Increment door hit counter; Set room argument door and go to $D8C4 if [door hit counter] >= 03h
+                        0002,9C1B,
+                        0002,9C23,
+                        D79F,           ; Spawn two eye door smoke enemy projectiles
+                        0002,9C1B,
+                        0002,9C23,
+                        0002,9C1B,
+                        D79F,           ; Spawn two eye door smoke enemy projectiles
+                        0002,9C23,
+                        0004,9C0B,
+                        0008,9C03,
+                        D790,0000,      ; Spawn eye door sweat enemy projectile with argument 0000h
+                        0038,9C03,
+                        0004,9C0B,
+                        0004,9C23,
+                        8724,D83C,      ; Go to $D83C
+$84:D8C4             dx 86CA,           ; Clear pre-instruction
+                        D7B6,           ; Spawn eye door smoke projectile
+                        D7B6,           ; Spawn eye door smoke projectile
+                        D79F,           ; Spawn two eye door smoke enemy projectiles
+                        D79F,           ; Spawn two eye door smoke enemy projectiles
+                        D7DA,           ; Move PLM up one row and make a blue door facing left
+                        874E,0A,        ; Timer = 0Ah
+$84:D8D3             dx 0003,9BF7,
+                        0004,A9A7,
+                        873F,D8D3,      ; Decrement timer and go to $D8D3 if non-zero
+                        8724,C4B1,      ; Go to $C4B1
+$84:D8E3             dx D7DA,           ; Move PLM up one row and make a blue door facing left
+                        8724,C4B1,      ; Go to $C4B1
+}
+
+
+;;; $D8E9: Instruction list - door $DB5A (eye door, facing left) ;;;
+{
+$84:D8E9             dx 8A72,D91D,      ; Go to $D91D if the room argument door is set
+$84:D8ED             dx 8D41,06,10,D8FB,; Go to $D8FB if Samus is within 06h columns and 10h rows of PLM
+                        0008,9C2B,
+                        8724,D8ED,      ; Go to $D8ED
+$84:D8FB             dx 8A24,D91D,      ; Link instruction = $D91D
+                        86C1,D753,      ; Pre-instruction = wake PLM if room argument door is set
+$84:D903             dx 0008,9C2B,
+                        0008,9C31,
+                        0008,9C37,
+                        0008,9C31,
+                        8D41,06,10,D903,; Go to $D903 if Samus is within 06h columns and 10h rows of PLM
+                        8724,D8ED,      ; Go to $D8ED
+$84:D91D             dx 86BC            ; Delete
+}
+
+
+;;; $D91F: Instruction list - PLM $DB60 (eye door bottom, facing left) ;;;
+{
+$84:D91F             dx 8A72,D953,      ; Go to $D953 if the room argument door is set
+$84:D923             dx 8D41,06,10,D931,; Go to $D931 if Samus is within 06h columns and 10h rows of PLM
+                        0008,9C3D,
+                        8724,D923,      ; Go to $D923
+$84:D931             dx 8A24,D953,      ; Link instruction = $D953
+                        86C1,D753,      ; Pre-instruction = wake PLM if room argument door is set
+$84:D939             dx 0008,9C3D,
+                        0008,9C43,
+                        0008,9C49,
+                        0008,9C43,
+                        8D41,06,10,D939,; Go to $D939 if Samus is within 06h columns and 10h rows of PLM
+                        8724,D923,      ; Go to $D923
+$84:D953             dx 86BC            ; Delete
+}
+
+
+;;; $D955: Instruction list - PLM $DB48 (eye door eye, facing right) ;;;
+{
+$84:D955             dx 8A72,DA1A,      ; Go to $DA1A if the room argument door is set
+$84:D959             dx 0004,9C5B,
+                        8D41,06,04,D967,; Go to $D967 if Samus is within 06h columns and 04h rows of PLM
+                        8724,D959,      ; Go to $D959
+$84:D967             dx 8A24,D9B7,      ; Link instruction = $D9B7
+                        86C1,BD50,      ; Pre-instruction = go to link instruction if shot with a (super) missile
+                        0008,9C63,
+$84:D973             dx 8D41,01,04,D9AF,; Go to $D9AF if Samus is within 01h columns and 04h rows of PLM
+                        0040,9C6B,
+                        D77A,0014,      ; Shoot eye door projectile with enemy projectile argument 0014h
+                        0020,9C6B,
+                        D77A,0014,      ; Shoot eye door projectile with enemy projectile argument 0014h
+                        0020,9C6B,
+                        D77A,0014,      ; Shoot eye door projectile with enemy projectile argument 0014h
+                        0040,9C6B,
+                        0006,9C63,
+                        0030,9C5B,
+                        0030,9C5B,
+                        0006,9C63,
+                        8D41,06,04,D973,; Go to $D973 if Samus is within 06h columns and 04h rows of PLM
+                        8724,D959,      ; Go to $D959
+$84:D9AF             dx 0004,9C5B,
+                        8724,D973,      ; Go to $D973
+$84:D9B7             dx 8C10,09,        ; Queue sound 9, sound library 2, max queued sounds allowed = 6
+                        D79F,           ; Spawn two eye door smoke enemy projectiles
+                        D79F,           ; Spawn two eye door smoke enemy projectiles
+                        8A91,03,D9FB,   ; Increment door hit counter; Set room argument door and go to $D9FB if [door hit counter] >= 03h
+                        0002,9C73,
+                        0002,9C7B,
+                        D79F,           ; Spawn two eye door smoke enemy projectiles
+                        0002,9C73,
+                        0002,9C7B,
+                        0002,9C73,
+                        D79F,           ; Spawn two eye door smoke enemy projectiles
+                        0002,9C7B,
+                        0004,9C63,
+                        0008,9C5B,
+                        D790,0004,      ; Spawn eye door sweat enemy projectile with argument 0004h
+                        0038,9C5B,
+                        0004,9C63,
+                        0004,9C7B,
+                        8724,D973,      ; Go to $D973
+$84:D9FB             dx 86CA,           ; Clear pre-instruction
+                        D7B6,           ; Spawn eye door smoke projectile
+                        D7B6,           ; Spawn eye door smoke projectile
+                        D79F,           ; Spawn two eye door smoke enemy projectiles
+                        D79F,           ; Spawn two eye door smoke enemy projectiles
+                        D7C3,           ; Move PLM up one row and make a blue door facing right
+                        874E,0A,        ; Timer = 0Ah
+$84:DA0A             dx 0003,9C4F,
+                        0004,A9E3,
+                        873F,DA0A,      ; Decrement timer and go to $DA0A if non-zero
+                        8724,C4E2,      ; Go to $C4E2
+$84:DA1A             dx D7C3,           ; Move PLM up one row and make a blue door facing right
+                        8724,C4E2,      ; Go to $C4E2
+}
+
+
+;;; $DA20: Instruction list - door $DB4C (eye door, facing right) ;;;
+{
+$84:DA20             dx 8A72,DA54,      ; Go to $DA54 if the room argument door is set
+$84:DA24             dx 8D41,06,10,DA32,; Go to $DA32 if Samus is within 06h columns and 10h rows of PLM
+                        0008,9C83,
+                        8724,DA24,      ; Go to $DA24
+$84:DA32             dx 8A24,DA54,      ; Link instruction = $DA54
+                        86C1,D753,      ; Pre-instruction = wake PLM if room argument door is set
+$84:DA3A             dx 0006,9C83,
+                        0006,9C89,
+                        0006,9C8F,
+                        0006,9C89,
+                        8D41,06,10,DA3A,; Go to $DA3A if Samus is within 06h columns and 10h rows of PLM
+                        8724,DA24,      ; Go to $DA24
+$84:DA54             dx 86BC            ; Delete
+}
+
+
+;;; $DA56: Instruction list - PLM $DB52 (eye door bottom, facing right) ;;;
+{
+$84:DA56             dx 8A72,DA8A,      ; Go to $DA8A if the room argument door is set
+$84:DA5A             dx 8D41,06,10,DA68,; Go to $DA68 if Samus is within 06h columns and 10h rows of PLM
+                        0008,9C95,
+                        8724,DA5A,      ; Go to $DA5A
+$84:DA68             dx 8A24,DA8A,      ; Link instruction = $DA8A
+                        86C1,D753,      ; Pre-instruction = wake PLM if room argument door is set
+$84:DA70             dx 0006,9C95,
+                        0006,9C9B,
+                        0006,9CA1,
+                        0006,9C9B,
+                        8D41,06,10,DA70,; Go to $DA70 if Samus is within 06h columns and 10h rows of PLM
+                        8724,DA5A,      ; Go to $DA5A
+$84:DA8A             dx 86BC            ; Delete
+}
+}
+
+;;; $DA8C: Setup - PLM $DB48/$DB56 (eye door eye) ;;;
+{
+$84:DA8C 5A          PHY
+$84:DA8D B9 C7 1D    LDA $1DC7,y[$7E:1E0D]
+$84:DA90 22 8E 81 80 JSL $80818E[$80:818E]
+$84:DA94 BF B0 D8 7E LDA $7ED8B0,x[$7E:D8B8]
+$84:DA98 7A          PLY
+$84:DA99 2D E7 05    AND $05E7  [$7E:05E7]
+$84:DA9C D0 1A       BNE $1A    [$DAB8]
+$84:DA9E BE 87 1C    LDX $1C87,y[$7E:1CCD]
+$84:DAA1 A9 44 C0    LDA #$C044
+$84:DAA4 20 B4 82    JSR $82B4  [$84:82B4]
+$84:DAA7 B9 87 1C    LDA $1C87,y[$7E:1CCD]
+$84:DAAA 18          CLC
+$84:DAAB 6D A5 07    ADC $07A5  [$7E:07A5]
+$84:DAAE 6D A5 07    ADC $07A5  [$7E:07A5]
+$84:DAB1 AA          TAX
+$84:DAB2 A9 FF D0    LDA #$D0FF
+$84:DAB5 20 B4 82    JSR $82B4  [$84:82B4]
+
+$84:DAB8 60          RTS
+}
+
+
+;;; $DAB9: Setup - door $DB4C/$DB5A / PLM $DB52/$DB60 (eye door) ;;;
+{
+$84:DAB9 5A          PHY
+$84:DABA B9 C7 1D    LDA $1DC7,y[$7E:1E11]
+$84:DABD 22 8E 81 80 JSL $80818E[$80:818E]
+$84:DAC1 BF B0 D8 7E LDA $7ED8B0,x[$7E:D8B8]
+$84:DAC5 7A          PLY
+$84:DAC6 2D E7 05    AND $05E7  [$7E:05E7]
+$84:DAC9 D0 09       BNE $09    [$DAD4]
+$84:DACB BE 87 1C    LDX $1C87,y[$7E:1CD1]
+$84:DACE A9 00 A0    LDA #$A000
+$84:DAD1 20 B4 82    JSR $82B4  [$84:82B4]
+
+$84:DAD4 60          RTS
+}
+
+(...)
+
+;;; $DB44: PLM entries ;;;
+{
+$84:DB44             dw DB1E,DB42       ; Sets Metroids cleared states when required
+$84:DB48             dw DA8C,D955       ; Eye door eye, facing right
+$84:DB4C             dw DAB9,DA20,AAE3  ; Door. Eye door, facing right
+$84:DB52             dw DAB9,DA56       ; Eye door bottom, facing right
+$84:DB56             dw DA8C,D81E       ; Eye door eye, facing left
+$84:DB5A             dw DAB9,D8E9,AAE3  ; Door. Eye door, facing left
+$84:DB60             dw DAB9,D91F       ; Eye door bottom, facing left
+}
+
+
+ROM:
+----
+
+0002577a  b9 00 00 5a a0 43 b7 22  97 80 86 a9 4c 00 22 cb  |...Z.C."....L.".|
+0002578a  90 80 7a c8 c8 60 b9 00  00 5a a0 51 b7 22 97 80  |..z..`...Z.Q."..|
+0002579a  86 7a c8 c8 60 5a a9 0a  03 a0 17 e5 22 97 80 86  |.z..`Z......"...|
+000257aa  a9 0a 03 a0 17 e5 22 97  80 86 7a 60 5a a9 0b 00  |......"...z`Z...|
+000257ba  a0 17 e5 22 97 80 86 7a  60 da bd 87 1c 38 ed a5  |..."...z`....8..|
+000257ca  07 ed a5 07 9d 87 1c aa  a9 41 c0 20 b4 82 80 15  |.........A. ....|
+000257da  da bd 87 1c 38 ed a5 07  ed a5 07 9d 87 1c aa a9  |....8...........|
+000257ea  40 c0 20 b4 82 8a 18 6d  a5 07 6d a5 07 aa a9 ff  |@. ....m..m.....|
+000257fa  d0 20 b4 82 8a 18 6d a5  07 6d a5 07 aa a9 fe d0  |. ....m..m......|
+0002580a  20 b4 82 8a 18 6d a5 07  6d a5 07 aa a9 fd d0 20  | ....m..m...... |
+0002581a  b4 82 fa 60 72 8a e3 d8  04 00 03 9c 41 8d 06 04  |...`r.......A...|
+0002582a  30 d8 24 87 22 d8 24 8a  80 d8 c1 86 50 bd 08 00  |0.$.".$.....P...|
+0002583a  0b 9c 41 8d 01 04 78 d8  40 00 13 9c 7a d7 00 00  |..A...x.@...z...|
+0002584a  20 00 13 9c 7a d7 00 00  20 00 13 9c 7a d7 00 00  | ...z... ...z...|
+0002585a  40 00 13 9c 06 00 0b 9c  30 00 03 9c 30 00 03 9c  |@.......0...0...|
+0002586a  06 00 0b 9c 41 8d 06 04  3c d8 24 87 22 d8 04 00  |....A...<.$."...|
+0002587a  03 9c 24 87 3c d8 10 8c  09 9f d7 9f d7 91 8a 03  |..$.<...........|
+0002588a  c4 d8 02 00 1b 9c 02 00  23 9c 9f d7 02 00 1b 9c  |........#.......|
+0002589a  02 00 23 9c 02 00 1b 9c  9f d7 02 00 23 9c 04 00  |..#.........#...|
+000258aa  0b 9c 08 00 03 9c 90 d7  00 00 38 00 03 9c 04 00  |..........8.....|
+000258ba  0b 9c 04 00 23 9c 24 87  3c d8 ca 86 b6 d7 b6 d7  |....#.$.<.......|
+000258ca  9f d7 9f d7 da d7 4e 87  0a 03 00 f7 9b 04 00 a7  |......N.........|
+000258da  a9 3f 87 d3 d8 24 87 b1  c4 da d7 24 87 b1 c4 72  |.?...$.....$...r|
+000258ea  8a 1d d9 41 8d 06 10 fb  d8 08 00 2b 9c 24 87 ed  |...A.......+.$..|
+000258fa  d8 24 8a 1d d9 c1 86 53  d7 08 00 2b 9c 08 00 31  |.$.....S...+...1|
+0002590a  9c 08 00 37 9c 08 00 31  9c 41 8d 06 10 03 d9 24  |...7...1.A.....$|
+0002591a  87 ed d8 bc 86 72 8a 53  d9 41 8d 06 10 31 d9 08  |.....r.S.A...1..|
+0002592a  00 3d 9c 24 87 23 d9 24  8a 53 d9 c1 86 53 d7 08  |.=.$.#.$.S...S..|
+0002593a  00 3d 9c 08 00 43 9c 08  00 49 9c 08 00 43 9c 41  |.=...C...I...C.A|
+0002594a  8d 06 10 39 d9 24 87 23  d9 bc 86 72 8a 1a da 04  |...9.$.#...r....|
+0002595a  00 5b 9c 41 8d 06 04 67  d9 24 87 59 d9 24 8a b7  |.[.A...g.$.Y.$..|
+0002596a  d9 c1 86 50 bd 08 00 63  9c 41 8d 01 04 af d9 40  |...P...c.A.....@|
+0002597a  00 6b 9c 7a d7 14 00 20  00 6b 9c 7a d7 14 00 20  |.k.z... .k.z... |
+0002598a  00 6b 9c 7a d7 14 00 40  00 6b 9c 06 00 63 9c 30  |.k.z...@.k...c.0|
+0002599a  00 5b 9c 30 00 5b 9c 06  00 63 9c 41 8d 06 04 73  |.[.0.[...c.A...s|
+000259aa  d9 24 87 59 d9 04 00 5b  9c 24 87 73 d9 10 8c 09  |.$.Y...[.$.s....|
+000259ba  9f d7 9f d7 91 8a 03 fb  d9 02 00 73 9c 02 00 7b  |...........s...{|
+000259ca  9c 9f d7 02 00 73 9c 02  00 7b 9c 02 00 73 9c 9f  |.....s...{...s..|
+000259da  d7 02 00 7b 9c 04 00 63  9c 08 00 5b 9c 90 d7 04  |...{...c...[....|
+000259ea  00 38 00 5b 9c 04 00 63  9c 04 00 7b 9c 24 87 73  |.8.[...c...{.$.s|
+000259fa  d9 ca 86 b6 d7 b6 d7 9f  d7 9f d7 c3 d7 4e 87 0a  |.............N..|
+00025a0a  03 00 4f 9c 04 00 e3 a9  3f 87 0a da 24 87 e2 c4  |..O.....?...$...|
+00025a1a  c3 d7 24 87 e2 c4 72 8a  54 da 41 8d 06 10 32 da  |..$...r.T.A...2.|
+00025a2a  08 00 83 9c 24 87 24 da  24 8a 54 da c1 86 53 d7  |....$.$.$.T...S.|
+00025a3a  06 00 83 9c 06 00 89 9c  06 00 8f 9c 06 00 89 9c  |................|
+00025a4a  41 8d 06 10 3a da 24 87  24 da bc 86 72 8a 8a da  |A...:.$.$...r...|
+00025a5a  41 8d 06 10 68 da 08 00  95 9c 24 87 5a da 24 8a  |A...h.....$.Z.$.|
+00025a6a  8a da c1 86 53 d7 06 00  95 9c 06 00 9b 9c 06 00  |....S...........|
+00025a7a  a1 9c 06 00 9b 9c 41 8d  06 10 70 da 24 87 5a da  |......A...p.$.Z.|
+00025a8a  bc 86 5a b9 c7 1d 22 8e  81 80 bf b0 d8 7e 7a 2d  |..Z..."......~z-|
+00025a9a  e7 05 d0 1a be 87 1c a9  44 c0 20 b4 82 b9 87 1c  |........D. .....|
+00025aaa  18 6d a5 07 6d a5 07 aa  a9 ff d0 20 b4 82 60 5a  |.m..m...... ..`Z|
+00025aba  b9 c7 1d 22 8e 81 80 bf  b0 d8 7e 7a 2d e7 05 d0  |..."......~z-...|
+00025aca  09 be 87 1c a9 00 a0 20  b4 82 60                 |....... ..`|
+00025ad5
+
+
+Rotation:
+*********
+
+ROM:
+----
+
+0002577a  b9 00 00 5a a0 43 b7 22  97 80 86 a9 4c 00 22 cb  |...Z.C."....L.".|
+0002578a  90 80 7a c8 c8 60 b9 00  00 5a a0 51 b7 22 97 80  |..z..`...Z.Q."..|
+0002579a  86 7a c8 c8 60 5a a9 0a  03 a0 17 e5 22 97 80 86  |.z..`Z......"...|
+000257aa  a9 0a 03 a0 17 e5 22 97  80 86 7a 60 5a a9 0b 00  |......"...z`Z...|
+000257ba  a0 17 e5 22 97 80 86 7a  60 da bd 87 1c 38 ed a5  |..."...z`....8..|
+000257ca  07 ed a5 07 9d 87 1c aa  a9 43 c0 20 b4 82 80 15  |.........C. ....|
+000257da  da bd 87 1c 38 3a 3a ea  ea ea ea 9d 87 1c aa a9  |....8::.........|
+000257ea  42 c0 20 b4 82 8a 18 1a  1a ea ea ea ea aa a9 ff  |B. .............|
+000257fa  50 20 b4 82 8a 18 1a 1a  ea ea ea ea aa a9 fe 50  |P .............P|
+0002580a  20 b4 82 8a 18 1a 1a ea  ea ea ea aa a9 fd 50 20  | .............P |
+0002581a  b4 82 fa 60 72 8a e3 d8  04 00 03 9c 41 8d 06 04  |...`r.......A...|
+0002582a  30 d8 24 87 22 d8 24 8a  80 d8 c1 86 50 bd 08 00  |0.$.".$.....P...|
+0002583a  0b 9c 41 8d 01 04 78 d8  40 00 13 9c d0 f4 00 00  |..A...x.@.......|
+0002584a  20 00 13 9c d0 f4 00 00  20 00 13 9c d0 f4 00 00  | ....... .......|
+0002585a  40 00 13 9c 06 00 0b 9c  30 00 03 9c 30 00 03 9c  |@.......0...0...|
+0002586a  06 00 0b 9c 41 8d 06 04  3c d8 24 87 22 d8 04 00  |....A...<.$."...|
+0002587a  03 9c 24 87 3c d8 10 8c  09 9f d7 9f d7 91 8a 03  |..$.<...........|
+0002588a  c4 d8 02 00 1b 9c 02 00  23 9c 9f d7 02 00 1b 9c  |........#.......|
+0002589a  02 00 23 9c 02 00 1b 9c  9f d7 02 00 23 9c 04 00  |..#.........#...|
+000258aa  0b 9c 08 00 03 9c 90 d7  00 00 38 00 03 9c 04 00  |..........8.....|
+000258ba  0b 9c 04 00 23 9c 24 87  3c d8 ca 86 b6 d7 b6 d7  |....#.$.<.......|
+000258ca  9f d7 9f d7 da d7 4e 87  0a 03 00 f7 9b 04 00 a7  |......N.........|
+000258da  a9 3f 87 d3 d8 24 87 b1  c4 da d7 24 87 b1 c4 72  |.?...$.....$...r|
+000258ea  8a 1d d9 41 8d 06 10 fb  d8 08 00 2b 9c 24 87 ed  |...A.......+.$..|
+000258fa  d8 24 8a 1d d9 c1 86 53  d7 08 00 2b 9c 08 00 31  |.$.....S...+...1|
+0002590a  9c 08 00 37 9c 08 00 31  9c 41 8d 06 10 03 d9 24  |...7...1.A.....$|
+0002591a  87 ed d8 bc 86 72 8a 53  d9 41 8d 06 10 31 d9 08  |.....r.S.A...1..|
+0002592a  00 3d 9c 24 87 23 d9 24  8a 53 d9 c1 86 53 d7 08  |.=.$.#.$.S...S..|
+0002593a  00 3d 9c 08 00 43 9c 08  00 49 9c 08 00 43 9c 41  |.=...C...I...C.A|
+0002594a  8d 06 10 39 d9 24 87 23  d9 bc 86 72 8a 80 f1 04  |...9.$.#...r....|
+0002595a  00 5b 9c 41 8d 06 04 67  d9 24 87 59 d9 24 8a b7  |.[.A...g.$.Y.$..|
+0002596a  d9 c1 86 50 bd 08 00 63  9c 41 8d 01 04 af d9 40  |...P...c.A.....@|
+0002597a  00 6b 9c 7a d7 14 00 20  00 6b 9c 7a d7 14 00 20  |.k.z... .k.z... |
+0002598a  00 6b 9c 7a d7 14 00 40  00 6b 9c 06 00 63 9c 30  |.k.z...@.k...c.0|
+0002599a  00 5b 9c 30 00 5b 9c 06  00 63 9c 41 8d 06 04 73  |.[.0.[...c.A...s|
+000259aa  d9 24 87 59 d9 04 00 5b  9c 24 87 73 d9 10 8c 09  |.$.Y...[.$.s....|
+000259ba  9f d7 9f d7 91 8a 03 fb  d9 02 00 73 9c 02 00 7b  |...........s...{|
+000259ca  9c 9f d7 02 00 73 9c 02  00 7b 9c 02 00 73 9c 9f  |.....s...{...s..|
+000259da  d7 02 00 7b 9c 04 00 63  9c 08 00 5b 9c 90 d7 04  |...{...c...[....|
+000259ea  00 38 00 5b 9c 04 00 63  9c 04 00 7b 9c 24 87 73  |.8.[...c...{.$.s|
+000259fa  d9 ca 86 b6 d7 b6 d7 6c  f1 6c f1 60 f1 4e 87 0a  |.......l.l.`.N..|
+00025a0a  03 00 80 f0 04 00 90 f0  3f 87 0a da 24 87 80 f1  |........?...$...|
+00025a1a  c3 d7 24 87 e2 c4 72 8a  54 da 41 8d 06 10 32 da  |..$...r.T.A...2.|
+00025a2a  08 00 83 9c 24 87 24 da  24 8a 54 da c1 86 53 d7  |....$.$.$.T...S.|
+00025a3a  06 00 83 9c 06 00 89 9c  06 00 8f 9c 06 00 89 9c  |................|
+00025a4a  41 8d 06 10 3a da 24 87  24 da bc 86 72 8a 8a da  |A...:.$.$...r...|
+00025a5a  41 8d 06 10 68 da 08 00  95 9c 24 87 5a da 24 8a  |A...h.....$.Z.$.|
+00025a6a  8a da c1 86 53 d7 06 00  95 9c 06 00 9b 9c 06 00  |....S...........|
+00025a7a  a1 9c 06 00 9b 9c 41 8d  06 10 70 da 24 87 5a da  |......A...p.$.Z.|
+00025a8a  bc 86 5a b9 c7 1d 22 8e  81 80 bf b0 d8 7e 7a 2d  |..Z..."......~z-|
+00025a9a  e7 05 d0 1a be 87 1c a9  44 c0 20 b4 82 b9 87 1c  |........D. .....|
+00025aaa  18 1a 1a ea ea ea ea aa  a9 ff 50 20 b4 82 60 5a  |..........P ..`Z|
+00025aba  b9 c7 1d 22 8e 81 80 bf  b0 d8 7e 7a 2d e7 05 d0  |..."......~z-...|
+00025aca  09 be 87 1c a9 00 a0 20  b4 82 60                 |....... ..`|
+00025ad5
+
+==================
+
+Diffs :
+-------
+

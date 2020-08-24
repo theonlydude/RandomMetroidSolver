@@ -1,10 +1,12 @@
 import copy
 import random
-from graph import AccessPoint
+from graph import AccessPoint, AccessGraph
+from graph_locations import locations
 from parameters import Knows, Settings
 from rom_patches import RomPatches
 from smbool import SMBool
 from helpers import Bosses
+import log
 
 # all access points and traverse functions
 accessPoints = [
@@ -109,7 +111,7 @@ accessPoints = [
         'Green Hill Zone Top Right': lambda sm: sm.wand(sm.haveItem('Morph'),
                                                         sm.canOpenGreenDoors()),
         'Green Brinstar Elevator': lambda sm: sm.wor(sm.haveItem('SpeedBooster'),
-                                                           sm.canDestroyBombWalls())
+                                                     sm.canDestroyBombWalls())
     }, internal=True, start={'spawn': 0x0100, 'solveArea': "Pink Brinstar"}),
     AccessPoint('Green Hill Zone Top Right', 'GreenPinkBrinstar', {
         'Noob Bridge Right': lambda sm: SMBool(True),
@@ -191,13 +193,14 @@ accessPoints = [
        exitInfo = {'DoorPtr':0xa2ac, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
        entryInfo = {'SamusX':0x49f, 'SamusY':0xb8},
-       traverse=lambda sm: sm.canOpenRedDoors(),
+       traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.NoGadoras), sm.canOpenRedDoors()),
        dotOrientation = 's'),
     AccessPoint('PhantoonRoomIn', 'WreckedShip', {},
        boss = True,
        roomInfo = {'RoomPtr':0xcd13, "area": 0x3},
        exitInfo = {'DoorPtr':0xa2c4, 'direction': 0x5, "cap": (0x4e, 0x6), "bitFlag": 0x0,
-                   "screen": (0x4, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe1fe},
+                   "screen": (0x4, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe1fe,
+                   "exitAsmPtr": 0xf7f0},
        entryInfo = {'SamusX':0x2e, 'SamusY':0xb8},
        dotOrientation = 's'),
     AccessPoint('Basement Left', 'WreckedShip', {
@@ -302,7 +305,8 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x98ca, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
        entryInfo = {'SamusX':0x2e, 'SamusY':0x98},
-       traverse=lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.canOpenRedDoors()),
+       traverse=lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+                                   sm.wor(RomPatches.has(RomPatches.NoGadoras), sm.canOpenRedDoors())),
        dotOrientation = 'e'),
     AccessPoint('RidleyRoomIn', 'LowerNorfair', {},
        boss = True,
@@ -322,11 +326,15 @@ accessPoints = [
     AccessPoint('KraidRoomOut', 'Kraid', {
         'Warehouse Zeela Room Left': lambda sm: sm.canPassBombPassages()
     }, boss = True,
-       roomInfo = {'RoomPtr':0xa56b, "area": 0x1},
+       roomInfo = {'RoomPtr':0xa56b, "area": 0x1,
+                   # put red brin song in both pre-kraid rooms,
+                   # (vanilla music only makes sense if kraid is
+                   #  vanilla)
+                   "songs":[0xa57c,0xa537,0xa551]},
        exitInfo = {'DoorPtr':0x91b6, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
-       entryInfo = {'SamusX':0x1cd, 'SamusY':0x188},
-       traverse=lambda sm: sm.canOpenRedDoors(),
+       entryInfo = {'SamusX':0x1cd, 'SamusY':0x188, 'song':0x12},
+       traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.NoGadoras), sm.canOpenRedDoors()),
        dotOrientation = 'e'),
     AccessPoint('KraidRoomIn', 'Kraid', {},
        boss = True,
@@ -634,11 +642,11 @@ accessPoints = [
     AccessPoint('DraygonRoomOut', 'EastMaridia', {
         'Precious Room Top': lambda sm: sm.canExitPreciousRoom()
     }, boss = True,
-       roomInfo = {'RoomPtr':0xd78f, "area": 0x4},
+       roomInfo = {'RoomPtr':0xd78f, "area": 0x4, "songs":[0xd7a5]},
        exitInfo = {'DoorPtr':0xa840, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
-       entryInfo = {'SamusX':0x34, 'SamusY':0x288},
-       traverse=lambda sm: sm.canOpenRedDoors(),
+       entryInfo = {'SamusX':0x34, 'SamusY':0x288, 'song':0x1b},
+       traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.NoGadoras), sm.canOpenRedDoors()),
        dotOrientation = 'e'),
     AccessPoint('DraygonRoomIn', 'EastMaridia', {
         'Draygon Room Bottom': lambda sm: sm.wor(Bosses.bossDead(sm, "Draygon"),
@@ -780,10 +788,15 @@ vanillaEscapeAnimalsTransitions = [
 escapeSource = 'Tourian Escape Room 4 Top Right'
 escapeTargets = ['Green Brinstar Main Shaft Top Left', 'Basement Left', 'Business Center Mid Left', 'Crab Hole Bottom Right']
 
-def getAccessPoint(apName):
-    return next(ap for ap in accessPoints if ap.Name == apName)
+
+def getAccessPoint(apName, apList=None):
+    if apList is None:
+        apList = accessPoints
+    return next(ap for ap in apList if ap.Name == apName)
 
 class GraphUtils:
+    log = log.get('GraphUtils')
+
     def getStartAccessPointNames():
         return [ap.Name for ap in accessPoints if ap.Start is not None]
 
@@ -844,25 +857,31 @@ class GraphUtils:
                 transitions.append((src,dst))
         return transitions
 
-    def createAreaTransitions(bidir=True, lightAreaRando=False):
+    def createAreaTransitions(lightAreaRando=False):
         if lightAreaRando:
             return GraphUtils.createLightAreaTransitions()
         else:
-            return GraphUtils.createRegularAreaTransitions(bidir)
+            return GraphUtils.createRegularAreaTransitions()
 
-    def createRegularAreaTransitions(bidir=True):
+    def createRegularAreaTransitions(apList=None, apPred=None):
+        if apList is None:
+            apList = accessPoints
+        if apPred is None:
+            apPred = lambda ap: ap.isArea()
         tFrom = []
         tTo = []
-        apNames = [ap.Name for ap in accessPoints if ap.isArea()]
+        apNames = [ap.Name for ap in apList if apPred(ap) == True]
         transitions = []
 
         def findTo(trFrom):
-            ap = getAccessPoint(trFrom)
+            ap = getAccessPoint(trFrom, apList)
             fromArea = ap.GraphArea
-            targets = [apName for apName in apNames if apName not in tTo and getAccessPoint(apName).GraphArea != fromArea]
+            targets = [apName for apName in apNames if apName not in tTo and getAccessPoint(apName, apList).GraphArea != fromArea]
             if len(targets) == 0: # fallback if no area transition is found
                 targets = [apName for apName in apNames if apName != ap.Name]
-            return targets[random.randint(0, len(targets)-1)]
+                if len(targets) == 0: # extreme fallback: loop on itself
+                    targets = [ap.Name]
+            return random.choice(targets)
 
         def addTransition(src, dst):
             tFrom.append(src)
@@ -870,15 +889,112 @@ class GraphUtils:
 
         while len(apNames) > 0:
             sources = [apName for apName in apNames if apName not in tFrom]
-            src = sources[random.randint(0, len(sources)-1)]
+            src = random.choice(sources)
             dst = findTo(src)
             transitions.append((src, dst))
             addTransition(src, dst)
-            if bidir is True:
-                addTransition(dst, src)
+            addTransition(dst, src)
             toRemove = [apName for apName in apNames if apName in tFrom and apName in tTo]
             for apName in toRemove:
                 apNames.remove(apName)
+        return transitions
+
+    def getAPs(apPredicate, apList=None):
+        if apList is None:
+            apList = accessPoints
+        return [ap for ap in apList if apPredicate(ap) == True]
+
+    def loopUnusedTransitions(transitions, apList=None):
+        if apList is None:
+            apList = accessPoints
+        usedAPs = set()
+        for (src,dst) in transitions:
+            usedAPs.add(getAccessPoint(src, apList))
+            usedAPs.add(getAccessPoint(dst, apList))
+        unusedAPs = [ap for ap in apList if not ap.isInternal() and ap not in usedAPs]
+        for ap in unusedAPs:
+            transitions.append((ap.Name, ap.Name))
+
+    def createMinimizerTransitions(startApName, locLimit, escapeRando):
+        if startApName == 'Ceres':
+            startApName = 'Landing Site'
+        startAp = getAccessPoint(startApName)
+        def getNLocs(locsPredicate, locList=None):
+            if locList is None:
+                locList = locations
+            # leave out bosses and count post boss locs systematically
+            return len([loc for loc in locList if locsPredicate(loc) == True and not loc['SolveArea'].endswith(" Boss") and not "Boss" in loc["Class"]])
+        availAreas = list(sorted({ap.GraphArea for ap in accessPoints if ap.GraphArea != startAp.GraphArea and getNLocs(lambda loc: loc['GraphArea'] == ap.GraphArea) > 0}))
+        areas = [startAp.GraphArea]
+        GraphUtils.log.debug("availAreas: {}".format(availAreas))
+        GraphUtils.log.debug("areas: {}".format(areas))
+        nLocsCrateria = getNLocs(lambda loc: loc['GraphArea'] == 'Crateria')
+        inBossCheck = lambda ap: ap.Boss and ap.Name.endswith("In")
+        nLocs = 0
+        transitions = []
+        usedAPs = []
+        trLimit = 5
+        locLimit -= 3 # 3 "post boss" locs will always be available, and are filtered out in getNLocs
+        def isShipReachable():
+            nonlocal areas
+            if escapeRando == False:
+                return True
+            return 'Crateria' in areas and len(GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and ap.Name in escapeTargets)) > 0
+        def openTransitions():
+            nonlocal areas, inBossCheck, usedAPs
+            return GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and not ap.isInternal() and not inBossCheck(ap) and not ap in usedAPs)
+        while nLocs < locLimit or len(openTransitions()) < trLimit or not isShipReachable():
+            GraphUtils.log.debug("openTransitions="+str([ap.Name for ap in openTransitions()]))
+            fromAreas = availAreas
+            if nLocs >= locLimit and not isShipReachable() and 'Crateria' in areas:
+                GraphUtils.log.debug("ship unreachable")
+                # add an area with a map station
+                escapeAPs = GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and ap.Name in escapeTargets)
+                fromAreas = [area for area in availAreas if len(GraphUtils.getAPs(lambda ap: ap.GraphArea == area and ap.Name in escapeTargets and ap not in escapeAPs)) > 0]
+            if nLocs >= locLimit and isShipReachable():
+                GraphUtils.log.debug("not enough open transitions")
+                # we just need transitions, avoid adding a huge area
+                fromAreas = []
+                n = trLimit - len(openTransitions())
+                while len(fromAreas) == 0:
+                    fromAreas = [area for area in availAreas if len(GraphUtils.getAPs(lambda ap: not ap.isInternal())) > n]
+                    n -= 1
+                minLocs = min([getNLocs(lambda loc: loc['GraphArea'] == area) for area in fromAreas])
+                fromAreas = [area for area in fromAreas if getNLocs(lambda loc: loc['GraphArea'] == area) == minLocs]
+            if escapeRando == True and nLocs >= (locLimit - nLocsCrateria) and 'Crateria' not in areas:
+                fromAreas = ['Crateria']
+            elif len(openTransitions()) <= 1: # dont' get stuck by adding dead ends
+                fromAreas = [area for area in fromAreas if len(GraphUtils.getAPs(lambda ap: ap.GraphArea == area and not ap.isInternal())) > 1]
+            nextArea = random.choice(fromAreas)
+            GraphUtils.log.debug("nextArea="+str(nextArea))
+            apCheck = lambda ap: not ap.isInternal() and not inBossCheck(ap) and ap not in usedAPs
+            possibleSources = GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and apCheck(ap))
+            possibleTargets = GraphUtils.getAPs(lambda ap: ap.GraphArea == nextArea and apCheck(ap))
+            src = random.choice(possibleSources)
+            dst = random.choice(possibleTargets)
+            usedAPs += [src,dst]
+            GraphUtils.log.debug("add transition: (src: {}, dst: {})".format(src.Name, dst.Name))
+            transitions.append((src.Name,dst.Name))
+            availAreas.remove(nextArea)
+            areas.append(nextArea)
+            GraphUtils.log.debug("areas: {}".format(areas))
+            nLocs = getNLocs(lambda loc:loc['GraphArea'] in areas)
+            GraphUtils.log.debug("nLocs: {}".format(nLocs))
+        # we picked the areas, add transitions (bosses and tourian first)
+        sourceAPs = openTransitions()
+        random.shuffle(sourceAPs)
+        targetAPs = GraphUtils.getAPs(lambda ap: (inBossCheck(ap) or ap.Name == "Golden Four") and not ap in usedAPs)
+        random.shuffle(targetAPs)
+        GraphUtils.log.debug("len(sourceAPs): {}, len(targetAPs): {}".format(len(sourceAPs), len(targetAPs)))
+        GraphUtils.log.debug("sourceAPs: {}".format([ap.Name for ap in sourceAPs]))
+        GraphUtils.log.debug("targetAPs: {}".format([ap.Name for ap in targetAPs]))
+        assert len(sourceAPs) >= len(targetAPs), "Minimizer: less source than target APs"
+        while len(targetAPs) > 0:
+            transitions.append((sourceAPs.pop().Name, targetAPs.pop().Name))
+        transitions += GraphUtils.createRegularAreaTransitions(sourceAPs, lambda ap: not ap.isInternal())
+        GraphUtils.log.debug("transitions: {}".format(transitions))
+        GraphUtils.loopUnusedTransitions(transitions)
+        GraphUtils.log.debug("nLocs: "+str(nLocs+3))
         return transitions
 
     def createLightAreaTransitions():
@@ -1075,6 +1191,7 @@ class GraphUtils:
             # remove duplicates (loop transitions)
             if any(c['ID'] == conn['ID'] for c in connections):
                 continue
+#            print(conn['ID'])
             # where to write
             conn['DoorPtr'] = src.ExitInfo['DoorPtr']
             # door properties
@@ -1127,3 +1244,22 @@ class GraphUtils:
             transitions.append((doorsPtrs[srcDoorPtr], doorsPtrs[destDoorPtr]))
 
         return transitions
+
+    def hasMixedTransitions(areaTransitions, bossTransitions):
+        vanillaAPs = []
+        for (src, dest) in vanillaTransitions:
+            vanillaAPs += [src, dest]
+
+        vanillaBossesAPs = []
+        for (src, dest) in vanillaBossesTransitions:
+            vanillaBossesAPs += [src, dest]
+
+        for (src, dest) in areaTransitions:
+            if src in vanillaBossesAPs or dest in vanillaBossesAPs:
+                return True
+
+        for (src, dest) in bossTransitions:
+            if src in vanillaAPs or dest in vanillaAPs:
+                return True
+
+        return False

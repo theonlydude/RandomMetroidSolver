@@ -21,11 +21,11 @@ class RandoSettings(object):
         self.plandoRandoItemLocs = plandoRandoItemLocs
         self.minDiff = minDiff
 
-    def getItemManager(self, smbm):
+    def getItemManager(self, smbm, nLocs):
         if self.plandoRandoItemLocs is None:
-            return ItemManager(self.restrictions['MajorMinor'], self.qty, smbm)
+            return ItemManager(self.restrictions['MajorMinor'], self.qty, smbm, nLocs)
         else:
-            return ItemManager('Plando', self.qty, smbm)
+            return ItemManager('Plando', self.qty, smbm, nLocs)
 
     def getExcludeItems(self, locations):
         if self.plandoRandoItemLocs is None:
@@ -56,13 +56,13 @@ class RandoSettings(object):
 
 # Holds settings and utiliy functions related to graph layout
 class GraphSettings(object):
-    def __init__(self, startAP, areaRando, lightAreaRando, bossRando, escapeRando, dotFile, plandoRandoTransitions):
-        self.bidir = True
+    def __init__(self, startAP, areaRando, lightAreaRando, bossRando, escapeRando, minimizerN, dotFile, plandoRandoTransitions):
         self.startAP = startAP
         self.areaRando = areaRando
         self.lightAreaRando = lightAreaRando
         self.bossRando = bossRando
         self.escapeRando = escapeRando
+        self.minimizerN = minimizerN
         self.dotFile = dotFile
         self.plandoRandoTransitions = plandoRandoTransitions
 
@@ -82,8 +82,9 @@ class GraphSettings(object):
 # algo settings depending on prog speed (slowest to fastest+variable,
 # other "speeds" are actually different algorithms)
 class ProgSpeedParameters(object):
-    def __init__(self, restrictions):
+    def __init__(self, restrictions, nLocs):
         self.restrictions = restrictions
+        self.nLocs = nLocs
 
     def getVariableSpeed(self):
         ranges = getRangeDict({
@@ -107,17 +108,15 @@ class ProgSpeedParameters(object):
         return 1
 
     def getItemLimit(self, progSpeed):
-        itemLimit = 105
+        itemLimit = self.nLocs
         if progSpeed == 'slow':
-            itemLimit = 21
+            itemLimit = int(self.nLocs*0.209) # 21 for 105
         elif progSpeed == 'medium':
-            itemLimit = 9
+            itemLimit = int(self.nLocs*0.095) # 9 for 105
         elif progSpeed == 'fast':
-            itemLimit = 5
+            itemLimit = int(self.nLocs*0.057) # 5 for 105
         elif progSpeed == 'fastest':
-            itemLimit = 1
-        if self.restrictions.split == 'Chozo':
-            itemLimit = int(itemLimit / 4)
+            itemLimit = int(self.nLocs*0.019) # 1 for 105
         minLimit = itemLimit - int(itemLimit/5)
         maxLimit = itemLimit + int(itemLimit/5)
         if minLimit == maxLimit:

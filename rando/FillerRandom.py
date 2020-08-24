@@ -19,8 +19,6 @@ class FillerRandom(Filler):
         self.beatableBackup = None
         self.nFrontFillSteps = 0
         self.stepIncr = 1
-        # based on runtime limit, help the random fill with up to three front fill steps
-        self.runtimeSteps = [self.runtimeLimit_s/4, self.runtimeLimit_s/2, self.runtimeLimit_s*3/4, sys.maxsize]
 
     def initFiller(self):
         super(FillerRandom, self).initFiller()
@@ -45,6 +43,10 @@ class FillerRandom(Filler):
 
     def getLocations(self, item):
         return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocation(item, loc, self.container)]
+
+    # implemented in the speedrun version
+    def getHelp(self):
+        pass
 
     def step(self):
         # here a step is not an item collection but a whole fill attempt
@@ -85,13 +87,8 @@ class FillerRandom(Filler):
                 sys.stdout.write('x')
                 sys.stdout.flush()
 
-            if self.runtime_s > self.runtimeSteps[self.nFrontFillSteps]:
-                # store the step for debug purpose
-                sys.stdout.write('n({})'.format(self.nSteps))
-                sys.stdout.flush()
-                # help the random fill with a bit of frontfill
-                self.nFrontFillSteps += self.stepIncr
-                self.createBaseLists(updateBase=False)
+            # help speedrun filler
+            self.getHelp()
 
         return True
 
@@ -159,6 +156,8 @@ class FillerRandomSpeedrun(FillerRandom):
     def __init__(self, graphSettings, graph, restrictions, container, diffSteps=0):
         super(FillerRandomSpeedrun, self).__init__(graphSettings.startAP, graph, restrictions, container)
         self.nFrontFillSteps = graphSettings.getRandomFillHelp()
+        # based on runtime limit, help the random fill with up to three front fill steps
+        self.runtimeSteps = [self.runtimeLimit_s/4, self.runtimeLimit_s/2, self.runtimeLimit_s*3/4, sys.maxsize]
 
     def initFiller(self):
         super(FillerRandomSpeedrun, self).initFiller()
@@ -205,3 +204,12 @@ class FillerRandomSpeedrun(FillerRandom):
         sys.stdout.write('S({}/{}ms)'.format(self.nSteps+1, int(self.runtime_s*1000)))
         sys.stdout.flush()
         return True
+
+    def getHelp(self):
+        if self.runtime_s > self.runtimeSteps[self.nFrontFillSteps]:
+            # store the step for debug purpose
+            sys.stdout.write('n({})'.format(self.nSteps))
+            sys.stdout.flush()
+            # help the random fill with a bit of frontfill
+            self.nFrontFillSteps += self.stepIncr
+            self.createBaseLists(updateBase=False)

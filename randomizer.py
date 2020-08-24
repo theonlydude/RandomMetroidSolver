@@ -577,7 +577,8 @@ if __name__ == "__main__":
         # in vcr mode we still want the seed to be generated to analyze it
         if args.vcr == False:
             sys.exit(-1)
-    randoExec.postProcessItemLocs(itemLocs, args.hideItems)
+    if args.patchOnly == False:
+        randoExec.postProcessItemLocs(itemLocs, args.hideItems)
     # choose on animal patch
     if args.animals == True:
         animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',

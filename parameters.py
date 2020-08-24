@@ -222,7 +222,7 @@ class Knows:
     MaridiaWallJumps = SMBool(True, medium, ['MaridiaWallJumps'])
     desc['MaridiaWallJumps'] = {'display': 'Various Maridia wall jumps',
                                 'title': 'Kinda tricky wall jumps to: access items in West Sand Hole without Spring Ball or Bombs, exit Spring Ball area without Hi Jump, exit Crab Hole with Gravity+Hi-Jump',
-                                'href': '',
+                                'href': None,
                                 'rooms': ['West Sand Hole', 'Spring Ball Room', 'Crab Hole']}
 
     # underwater grav-less

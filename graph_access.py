@@ -594,7 +594,8 @@ accessPoints = [
                 'doors': [0x96]}),
     AccessPoint('Post Botwoon', 'EastMaridia', {
         'Aqueduct Bottom': lambda sm: SMBool(True), # fall down the sandpit
-        'Precious Room Top': lambda sm: sm.canBotwoonExitToAndFromDraygon(),
+        'Precious Room Top': lambda sm: sm.wand(sm.canBotwoonExitToAndFromDraygon(),
+                                                sm.canOpenGreenDoors()),
         'Toilet Top': lambda sm: sm.wand(sm.canReachCacatacAlleyFromBotowoon(),
                                          sm.canPassCacatacAlley())
     }, internal=True),

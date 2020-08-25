@@ -745,6 +745,9 @@ class RomPatcher:
         for patchName in patches:
             self.applyIPSPatch(patchName)
 
+    def customShip(self, ship):
+        self.applyIPSPatch(ship, ipsDir='rando/patches/ships')
+
     def customSprite(self, sprite, customNames):
         self.applyIPSPatch(sprite, ipsDir='rando/patches/sprites')
 

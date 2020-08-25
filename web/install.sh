@@ -662,3 +662,10 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 
 [ -L ~/web2py/applications/solver/static/images/donate.png ] || ln -s ~/RandomMetroidSolver/web/static/donate.png ~/web2py/applications/solver/static/images/donate.png
 [ -L ~/web2py/applications/solver/static/images/donate_randomizer.png ] || ln -s ~/RandomMetroidSolver/web/static/donate_randomizer.png ~/web2py/applications/solver/static/images/donate_randomizer.png
+
+[ -L ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip1.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/Red-M0nk3ySMShip1.png ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip1.png
+[ -L ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip2.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/Red-M0nk3ySMShip2.png ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip2.png
+[ -L ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip3.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/Red-M0nk3ySMShip3.png ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip3.png
+[ -L ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip4.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/Red-M0nk3ySMShip4.png ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip4.png
+[ -L ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip5.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/Red-M0nk3ySMShip5.png ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip5.png
+[ -L ~/web2py/applications/solver/static/images/MFFusionship.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/MFFusionship.png ~/web2py/applications/solver/static/images/MFFusionship.png

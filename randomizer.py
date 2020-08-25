@@ -241,6 +241,7 @@ if __name__ == "__main__":
     parser.add_argument('--sprite', help='use a custom sprite for Samus', dest='sprite', default=None)
     parser.add_argument('--customItemNames', help='add custom item names for some of them, related to the custom sprite',
                         dest='customItemNames', action='store_true', default=False)
+    parser.add_argument('--ship', help='use a custom sprite for Samus ship', dest='ship', default=None)
     parser.add_argument('--seedIps', help='ips generated from previous seed', dest='seedIps', default=None)
     parser.add_argument('--jm,', help="display data used by jm for its stats", dest='jm', action='store_true', default=False)
 
@@ -671,6 +672,11 @@ if __name__ == "__main__":
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:
             romPatcher.customSprite(args.sprite, args.customItemNames) # adds another IPS
+        if args.ship is not None:
+            romPatcher.customShip(args.ship) # adds another IPS
+            # don't color randomize custom ships
+            args.shift_ship_palette = False
+
         # we have to write ips to ROM before doing our direct modifications which will rewrite some parts (like in credits),
         # but in web mode we only want to generate a global ips at the end
         if args.rom != None:

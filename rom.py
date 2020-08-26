@@ -833,6 +833,19 @@ class RomPatcher:
             for (messageKey, newMessage) in messageBoxes[sprite].items():
                 messageBox.updateMessage(messageKey, newMessage, doVFlip, doHFlip)
 
+    def writePlmTable(self, plms, area, bosses, startAP):
+        # called when saving a plando
+        try:
+            if bosses == True or area == True:
+                plms.append('WS_Save_Blinking_Door')
+
+            doors = self.getStartDoors(plms, area, None)
+            self.applyStartAP(startAP, plms, doors)
+
+            self.applyPLMs(plms)
+        except Exception as e:
+            raise Exception("Error patching {}. ({})".format(self.romFileName, e))
+
     def applyIPSPatches(self, startAP="Landing Site",
                         optionalPatches=[], noLayout=False, suitsMode="Classic",
                         area=False, bosses=False, areaLayoutBase=False,

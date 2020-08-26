@@ -1272,6 +1272,7 @@ class InteractiveSolver(CommonSolver):
             romPatcher.writeMagic()
         else:
             romPatcher.writePlandoAddresses(self.visitedLocations)
+        plms = []
         if self.areaRando == True or self.bossRando == True or self.escapeRando == True:
             doors = GraphUtils.getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando, self.escapeRando, False)
             romPatcher.writeDoorConnections(doors)
@@ -1282,7 +1283,10 @@ class InteractiveSolver(CommonSolver):
             if self.escapeRando == True and escapeTimer != None:
                 # convert from '03:00' to number of seconds
                 escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
-                romPatcher.applyEscapeAttributes({'Timer': escapeTimer, 'Animals': None}, [])
+                romPatcher.applyEscapeAttributes({'Timer': escapeTimer, 'Animals': None}, plms)
+
+        # write plm table
+        romPatcher.writePlmTable(plms, self.areaRando, self.bossRando, self.startAP)
 
         romPatcher.commitIPS()
         romPatcher.end()

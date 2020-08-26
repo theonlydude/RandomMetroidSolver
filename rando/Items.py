@@ -27,6 +27,10 @@ class Item:
       return "Item({}, {}, {}, {}, {})".format(self.Category,
           self.Class, self.Code, self.Name, self.Type)
 
+    def json(self):
+        # as we have slots instead of dict
+        return {key : getattr(self, key, None) for key in self.__slots__}
+
 class ItemManager:
     Items = {
         'ETank': Item(

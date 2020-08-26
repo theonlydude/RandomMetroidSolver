@@ -1254,6 +1254,23 @@ class InteractiveSolver(CommonSolver):
             patches.insert(0, 'race_mode.ips')
             patches.append('race_mode_credits.ips')
         romPatcher.addIPSPatches(patches)
+
+        plms = []
+        if self.areaRando == True or self.bossRando == True or self.escapeRando == True:
+            doors = GraphUtils.getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando, self.escapeRando, False)
+            romPatcher.writeDoorConnections(doors)
+            if magic == None:
+                doorsPtrs = GraphUtils.getAps2DoorsPtrs()
+                romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
+                                                  len(vanillaBossesTransitions) + len(vanillaTransitions))
+            if self.escapeRando == True and escapeTimer != None:
+                # convert from '03:00' to number of seconds
+                escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
+                romPatcher.applyEscapeAttributes({'Timer': escapeTimer, 'Animals': None}, plms)
+
+        # write plm table
+        romPatcher.writePlmTable(plms, self.areaRando, self.bossRando, self.startAP)
+
         romPatcher.setNothingId(self.startAP, itemLocs)
         romPatcher.writeItemsLocs(itemLocs)
         romPatcher.writeItemsNumber()
@@ -1272,17 +1289,6 @@ class InteractiveSolver(CommonSolver):
             romPatcher.writeMagic()
         else:
             romPatcher.writePlandoAddresses(self.visitedLocations)
-        if self.areaRando == True or self.bossRando == True or self.escapeRando == True:
-            doors = GraphUtils.getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando, self.escapeRando, False)
-            romPatcher.writeDoorConnections(doors)
-            if magic == None:
-                doorsPtrs = GraphUtils.getAps2DoorsPtrs()
-                romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
-                                                  len(vanillaBossesTransitions) + len(vanillaTransitions))
-            if self.escapeRando == True and escapeTimer != None:
-                # convert from '03:00' to number of seconds
-                escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
-                romPatcher.applyEscapeAttributes({'Timer': escapeTimer, 'Animals': None}, [])
 
         romPatcher.commitIPS()
         romPatcher.end()

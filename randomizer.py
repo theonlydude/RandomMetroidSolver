@@ -612,6 +612,7 @@ if __name__ == "__main__":
                 itemLoc["Location"]["difficulty"] = itemLoc["Location"]["difficulty"].json()
             if "pathDifficulty" in itemLoc["Location"]:
                 del itemLoc["Location"]["pathDifficulty"]
+            itemLoc["Item"] = itemLoc["Item"].json()
 
         with open(args.output, 'w') as jsonFile:
             json.dump({"itemLocs": itemLocs, "errorMsg": randoExec.errorMsg}, jsonFile, default=lambda x: x.__dict__)

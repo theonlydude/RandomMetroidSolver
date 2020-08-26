@@ -382,7 +382,7 @@ if __name__ == "__main__":
                 morphPlacements.remove('late')
         args.morphPlacement = random.choice(morphPlacements)
     # random fill makes certain options unavailable
-    if (progSpeed == 'speedrun' and (args.morphPlacement != 'early' or not GraphUtils.isStandardStart(args.startAP))) or\
+    if (progSpeed == 'speedrun' and (args.morphPlacement == 'late' or not GraphUtils.isStandardStart(args.startAP))) or\
         (args.majorsSplit == 'Chozo' and args.morphPlacement == "late"):
         optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
     if progSpeed == 'speedrun' or progSpeed == 'basic':

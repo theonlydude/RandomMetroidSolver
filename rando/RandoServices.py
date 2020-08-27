@@ -380,6 +380,7 @@ class RandoServices(object):
         if not uniqItemLocDict:
             return None
 
+        self.cache.reset()
         curLocsBefore = self.currentLocations(ap, container)
         if not curLocsBefore:
             return None

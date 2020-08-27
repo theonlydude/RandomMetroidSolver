@@ -1673,7 +1673,7 @@ class RandoSolver(StandardSolver):
         self.log = log.get('Solver')
 
         # default conf
-        self.setConf(easy, 'any', [], False)
+        self.setConf(easy, 'all', [], False)
 
         self.firstLogFile = None
 

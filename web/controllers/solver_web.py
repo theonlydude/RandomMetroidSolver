@@ -2285,6 +2285,8 @@ def initCustomizerSession():
         session.customizer['AimAnyButton'] = "off"
         session.customizer['max_ammo_display'] = "off"
         session.customizer['supermetroid_msu1'] = "off"
+        session.customizer['remove_itemsounds'] = "off"
+        session.customizer['remove_spinjumprestart'] = "off"
 
 customSprites = {
     'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh", "group": "Samus"},
@@ -2392,7 +2394,7 @@ def customWebService():
     # check validity of all parameters
     switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music',
                'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save',
-               'customSpriteEnable', 'customItemsEnable', 'customShipEnable']
+               'customSpriteEnable', 'customItemsEnable', 'customShipEnable', 'remove_itemsounds', 'remove_elevators_doors_speed']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(switchs, [], [], others, isJson=True)
@@ -2433,6 +2435,8 @@ def customWebService():
     session.customizer['AimAnyButton'] = request.vars.AimAnyButton
     session.customizer['max_ammo_display'] = request.vars.max_ammo_display
     session.customizer['supermetroid_msu1'] = request.vars.supermetroid_msu1
+    session.customizer['remove_itemsounds'] = request.vars.remove_itemsounds
+    session.customizer['remove_elevators_doors_speed'] = request.vars.remove_elevators_doors_speed
 
     # call the randomizer
     (fd, jsonFileName) = tempfile.mkstemp()
@@ -2461,6 +2465,10 @@ def customWebService():
         params += ['-c', 'Infinite_Space_Jump']
     if request.vars.refill_before_save == 'on':
         params += ['-c', 'refill_before_save.ips']
+    if request.vars.remove_itemsounds == 'on':
+        params += ['-c', 'remove_itemsounds.ips']
+    if request.vars.remove_elevators_doors_speed == 'on':
+        params += ['-c', 'remove_elevators_doors_speed.ips']
 
     if request.vars.colorsRandomization == 'on':
         params.append('--palette')

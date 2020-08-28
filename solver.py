@@ -1673,7 +1673,7 @@ class RandoSolver(StandardSolver):
         self.log = log.get('Solver')
 
         # default conf
-        self.setConf(easy, 'any', [], False)
+        self.setConf(easy, 'all', [], False)
 
         self.firstLogFile = None
 
@@ -1758,6 +1758,9 @@ class ComeBack(object):
             if lastStep.cur == cur:
                 self.log.debug("Use last step at {}".format(cur))
                 return lastStep.next(locations)
+            elif self.reuseLastStep(lastStep, solveAreas):
+                self.log.debug("Reuse last step at {}".format(lastStep.cur))
+                return lastStep.next(locations)
             else:
                 self.log.debug("cur: {}, lastStep.cur: {}, don't use lastStep.next()".format(cur, lastStep.cur))
 
@@ -1770,6 +1773,10 @@ class ComeBack(object):
         lastStep = ComeBackStep(solveAreas, cur)
         self.comeBackSteps.append(lastStep)
         return lastStep.next(locations)
+
+    def reuseLastStep(self, lastStep, solveAreas):
+        # reuse the last step if they share the same solve areas to avoid creating too many
+        return sorted(lastStep.solveAreas.keys()) == sorted(solveAreas.keys())
 
     def cleanNoComeBack(self, locations):
         for loc in locations:

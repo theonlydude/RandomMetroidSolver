@@ -120,7 +120,7 @@ if __name__ == "__main__":
                         choices=['itemsounds.ips', 'elevators_doors_speed.ips', 'random_music.ips',
                                  'spinjumprestart.ips', 'rando_speed.ips', 'No_Music', 'AimAnyButton.ips',
                                  'max_ammo_display.ips', 'supermetroid_msu1.ips', 'Infinite_Space_Jump',
-                                 'refill_before_save.ips'])
+                                 'refill_before_save.ips', 'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -382,9 +382,13 @@ if __name__ == "__main__":
                 morphPlacements.remove('late')
         args.morphPlacement = random.choice(morphPlacements)
     # random fill makes certain options unavailable
-    if (progSpeed == 'speedrun' and (args.morphPlacement == 'late' or not GraphUtils.isStandardStart(args.startAP))) or\
-        (args.majorsSplit == 'Chozo' and args.morphPlacement == "late"):
-        optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
+    if progSpeed == 'speedrun':
+        if args.morphPlacement == 'late':
+            optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
+        if (not GraphUtils.isStandardStart(args.startAP)) and args.morphPlacement != 'normal':
+            optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for custom start location")
+    if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
+        optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for Chozo")
     if progSpeed == 'speedrun' or progSpeed == 'basic':
         optErrMsg += forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = args.progressionDifficulty
@@ -400,6 +404,7 @@ if __name__ == "__main__":
         optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
         optErrMsg += forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", 'areaLayout', 'on')
         possibleStartAPs = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty)
+
         if args.startAP == 'random':
             if args.startLocationList != None:
                 # intersection between user whishes and reality
@@ -415,7 +420,7 @@ if __name__ == "__main__":
             optErrMsg += '\nPossible start locations with these settings: {}'.format(possibleStartAPs)
             dumpErrorMsg(args.output, optErrMsg)
             sys.exit(-1)
-    if args.startAP == 'Firefleas Top':
+    if args.startAP == 'Firefleas Top' and progSpeed != 'speedrun':
         # we have to get morph early at firefleas, silently force it to help
         # rando algorithm
         args.morphPlacement = "early"

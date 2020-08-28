@@ -131,13 +131,11 @@ class FrontFillerKickstart(FrontFiller):
     def initContainer(self):
         self.container = self.baseContainer
 
-    # if during first step no item is a progression item, check all two items pairs instead of just one item
+    # if during a step no item is a progression item, check all two items pairs instead of just one item
     def step(self, onlyBossCheck=False):
-        if self.nSteps > 0:
-            return super(FrontFillerKickstart, self).step(onlyBossCheck)
-
         pairItemLocDict = self.services.getStartupProgItemsPairs(self.ap, self.container)
         if pairItemLocDict == None:
+            # no pair found or prog item found
             return super(FrontFillerKickstart, self).step(onlyBossCheck)
 
         # choose a pair of items which create progression
@@ -148,6 +146,9 @@ class FrontFillerKickstart(FrontFiller):
         availableLocs = pairItemLocDict[key]
         self.collect({'Item': key[0], 'Location': availableLocs[0][0]})
         self.collect({'Item': key[1], 'Location': availableLocs[1][0]})
+
+        # we've collected two items, increase the number of steps
+        self.nSteps += 1
 
         return True
 

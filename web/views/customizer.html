@@ -346,7 +346,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "No_Music", "random_music", "Infinite_Space_Jump", "refill_before_save", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "customShipEnable", "customShip"];
+      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "No_Music", "random_music", "Infinite_Space_Jump", "refill_before_save", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_doors_speed"];
 
     for(var i=0; i<elems.length; i++) {
         var elem = document.getElementById(elems[i]);
@@ -534,6 +534,15 @@ window.onload = function(){
 
     var customShipEnable = document.getElementById("customShipEnable");
     customShipEnable.onchange = enableCustomShipDropdown;
+
+    var remove_elevators_doors_speed = document.getElementById("remove_elevators_doors_speed");
+    remove_elevators_doors_speed.onchange = switchOpposite;
+    var remove_itemsounds = document.getElementById("remove_itemsounds");
+    remove_itemsounds.onchange = switchOpposite;
+    var elevators_doors_speed = document.getElementById("elevators_doors_speed");
+    elevators_doors_speed.onchange = switchOpposite;
+    var itemsounds = document.getElementById("itemsounds");
+    itemsounds.onchange = switchOpposite;
 
     initSlider();
 
@@ -803,6 +812,27 @@ function switchCheckbox(id, elems=[]) {
   }
 }
 
+function switchOpposite() {
+    var opposites = {
+        "itemsounds": "remove_itemsounds",
+        "remove_itemsounds": "itemsounds",
+        "elevators_doors_speed": "remove_elevators_doors_speed",
+        "remove_elevators_doors_speed": "elevators_doors_speed"
+    };
+    var oppositeId = opposites[this.id];
+    var opposite = document.getElementById(oppositeId);
+
+    if(this.checked && opposite.checked) {
+        opposite.click();
+    }
+
+    if(this.checked){
+        this.value = "on";
+    } else {
+        this.value = "off";
+    }
+}
+
 function displayMessage() {
 {{
     if len(msg) > 0:
@@ -935,6 +965,16 @@ response.write('</table>', escape=False)
       title: "MSU1",
       content: "<p>Play music with MSU1 chip on SD2SNES (already applied by default on VARIA seeds).</p>\
 <p>Patch developed by DarkShock.</p>"
+    },
+    {
+      element: "#remove_itemsoundsStep",
+      title: "Restore Fanfare",
+      content: "<p>Restore vanilla fanfare played when picking up an item.</p>"
+    },
+    {
+      element: "#remove_ElevatorDoorsStep",
+      title: "Restore Transitions",
+      content: "<p>Restore vanilla doors and elevators transitions</p>"
     }
   ]});
 
@@ -1186,6 +1226,27 @@ def displayCheckbox(id, defaultTrue=False):
                     <span id="supermetroid_msu1Text">Play music with MSU1 chip on SD2SNES</span>
                   </td>
                   <td><button type="button" onclick="startTheTour(17)">?</button></td>
+                </tr>
+              </table>
+              <table class="full">
+                <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+                <tr><td colspan="2"><h5 class="center"><b>Restore vanilla behaviour</b></h5></td><td></td></tr>
+              </table>
+              <table class="full">
+                <colgroup><col class="half" /><col class="half" /></colgroup>
+                <tr id="remove_itemsoundsStep">
+                  <td colspan="2">
+                    {{displayCheckbox("remove_itemsounds")}}
+                    <span id="remove_itemsoundsText">Restore vanilla fanfare when picking up an item</span>
+                  </td>
+                  <td><button type="button" onclick="startTheTour(18)">?</button></td>
+                </tr>
+                <tr id="remove_ElevatorDoorsStep">
+                  <td colspan="2">
+                    {{displayCheckbox("remove_elevators_doors_speed")}}
+                    <span id="remove_elevators_doors_speedText">Restore vanilla doors and elevators transitions</span>
+                  </td>
+                  <td><button type="button" onclick="startTheTour(19)">?</button></td>
                 </tr>
               </table>
           </div>

@@ -183,6 +183,11 @@ function save(lock) {
     lock = g_lock;
   }
 
+  // check if escape rando is on that tourian transition is set, display an alert otherwise
+  if(escapeRando == true && !("tourianEscapeRoom4TopRight" in lines)) {
+    alert("Tourian escape transition is not set, you have to set it before playing or the game will crash during the escape sequence");
+  }
+
   var dataDict = {action: "save", scope: "common", lock: g_lock};
   var uploadFile = document.getElementById("uploadFile");
   if(uploadFile.files.length == 0) {

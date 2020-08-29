@@ -190,6 +190,10 @@ org $8f9867
 org $8F98DC
     dw flyway_escape_setup
 
+;;; overwrite WS main shaft setup asm ptr in "phantoon dead" state
+org $8fcb3a
+    dw wrecked_ship_main_setup
+
 ;; ws map door handled with PLM spawn table, as it is blue in vanilla (see plm_spawn.asm)
 
 org $8ff500
@@ -244,6 +248,15 @@ room_main:
     ;; goes back to vanilla room asm call
     ldx $07df
     rts
+
+wrecked_ship_main_setup:
+	%checkEscape() : bcc .end
+	;; call asm of door from below,
+	;; that sets the scroll properly
+	;; (needed because of the super/hyper blocks)
+	jsr $e21a
+.end:
+	rts
 
 ;;; stop before area rando door transition patch
 warnpc $8ff5ff

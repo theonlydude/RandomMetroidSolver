@@ -1759,7 +1759,11 @@ class ComeBack(object):
                 return lastStep.next(locations)
             elif self.reuseLastStep(lastStep, solveAreas):
                 self.log.debug("Reuse last step at {}".format(lastStep.cur))
-                return lastStep.next(locations)
+                if self.visitedAllLocsInArea(lastStep, locations):
+                    return lastStep.next(locations)
+                else:
+                    self.log.debug("There's still locations in the current solve area, visit them first")
+                    return False
             else:
                 self.log.debug("cur: {}, lastStep.cur: {}, don't use lastStep.next()".format(cur, lastStep.cur))
 
@@ -1776,6 +1780,12 @@ class ComeBack(object):
     def reuseLastStep(self, lastStep, solveAreas):
         # reuse the last step if they share the same solve areas to avoid creating too many
         return sorted(lastStep.solveAreas.keys()) == sorted(solveAreas.keys())
+
+    def visitedAllLocsInArea(self, lastStep, locations):
+        for loc in locations:
+            if loc['difficulty'] == True and loc['SolveArea'] == lastStep.curSolveArea:
+                return False
+        return True
 
     def cleanNoComeBack(self, locations):
         for loc in locations:
@@ -1819,6 +1829,7 @@ class ComeBackStep(object):
         self.visitedSolveAreas = []
         self.solveAreas = solveAreas
         self.cur = cur
+        self.curSolveArea = None
         self.log = log.get('RewindStep')
         self.log.debug("create rewind step: {} {}".format(cur, solveAreas))
 
@@ -1845,6 +1856,7 @@ class ComeBackStep(object):
                     maxAreaWeigth = self.solveAreas[solveArea]
                     maxAreaName = solveArea
         self.visitedSolveAreas.append(maxAreaName)
+        self.curSolveArea = maxAreaName
         self.log.debug("rewind next area: {}".format(maxAreaName))
 
         outWeight = 10000

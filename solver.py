@@ -360,11 +360,12 @@ class CommonSolver(object):
 
     def computeLocationsDifficulty(self, locations, phase="major"):
         difficultyTarget = Conf.difficultyTarget
+        nextLocations = locations
 
         while True:
-            self.areaGraph.getAvailableLocations(locations, self.smbm, difficultyTarget, self.lastAP)
+            self.areaGraph.getAvailableLocations(nextLocations, self.smbm, difficultyTarget, self.lastAP)
             # check post available functions too
-            for loc in locations:
+            for loc in nextLocations:
                 if loc['difficulty'].bool == True:
                     if 'PostAvailable' in loc:
                         self.smbm.addItem(loc['itemName'])
@@ -376,10 +377,8 @@ class CommonSolver(object):
                     # also check if we can come back to landing site from the location
                     loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastAP, infinity, loc['itemName'])
 
-            availableLocations = [loc for loc in locations if loc['difficulty']]
-            comeBackLocations = [loc for loc in availableLocations if loc['comeBack']]
-            if len(availableLocations) > 0 and len(comeBackLocations) > 0:
-                # we've found some available locations
+            nextLocations = [loc for loc in nextLocations if not loc['difficulty']]
+            if not nextLocations:
                 break
 
             if difficultyTarget == infinity:

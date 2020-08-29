@@ -855,7 +855,8 @@ def getAddressesToRead(plando=False):
     ## doorasm
     addresses["ranges"] += [0x7EB00, 0x7ee60]
     # for next release doorasm addresses will be relocated
-    addresses["ranges"] += [0x7F800, 0x7FA71]
+    maxDoorAsmPatchLen = 22
+    addresses["ranges"] += [0x7F800, 0x7F800+(maxDoorAsmPatchLen * len([ap for ap in accessPoints if ap.Internal == False]))]
 
     if plando == True:
         # plando addresses

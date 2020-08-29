@@ -100,7 +100,7 @@ class FillerProgSpeed(Filler):
     # return item/loc, or None if stuck
     def generateItem(self):
         itemLocDict, possibleProg = self.services.getPossiblePlacements(self.ap, self.container, self.getComebackCheck())
-        if self.isEarlyGame():
+        if self.isEarlyGame() and possibleProg == True:
             # cheat a little bit if non-standard start: place early
             # progression away from crateria/blue brin if possible
             startAp = getAccessPoint(self.startAP)

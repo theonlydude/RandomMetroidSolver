@@ -360,11 +360,12 @@ class CommonSolver(object):
 
     def computeLocationsDifficulty(self, locations, phase="major"):
         difficultyTarget = Conf.difficultyTarget
+        nextLocations = locations
 
         while True:
-            self.areaGraph.getAvailableLocations(locations, self.smbm, difficultyTarget, self.lastAP)
+            self.areaGraph.getAvailableLocations(nextLocations, self.smbm, difficultyTarget, self.lastAP)
             # check post available functions too
-            for loc in locations:
+            for loc in nextLocations:
                 if loc['difficulty'].bool == True:
                     if 'PostAvailable' in loc:
                         self.smbm.addItem(loc['itemName'])
@@ -376,10 +377,8 @@ class CommonSolver(object):
                     # also check if we can come back to landing site from the location
                     loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastAP, infinity, loc['itemName'])
 
-            availableLocations = [loc for loc in locations if loc['difficulty']]
-            comeBackLocations = [loc for loc in availableLocations if loc['comeBack']]
-            if len(availableLocations) > 0 and len(comeBackLocations) > 0:
-                # we've found some available locations
+            nextLocations = [loc for loc in nextLocations if not loc['difficulty']]
+            if not nextLocations:
                 break
 
             if difficultyTarget == infinity:
@@ -690,17 +689,17 @@ class CommonSolver(object):
                 self.log.debug("we have charge, no longer need minors, take major")
                 return self.collectMajor(majorsAvailable.pop(0))
             else:
-                # first take item from loc where you can come back
-                if nextMajComeBack != nextMinComeBack:
-                    self.log.debug("maj/min != combeback")
-                    if nextMajComeBack == True:
+                # respect areaweight first
+                if nextMajAreaWeight != nextMinAreaWeight:
+                    self.log.debug("maj/min != area weight")
+                    if nextMajAreaWeight < nextMinAreaWeight:
                         return self.collectMajor(majorsAvailable.pop(0))
                     else:
                         return self.collectMinor(minorsAvailable.pop(0))
-                # respect areaweight first
-                elif nextMajAreaWeight != nextMinAreaWeight:
-                    self.log.debug("maj/min != area weight")
-                    if nextMajAreaWeight < nextMinAreaWeight:
+                # then take item from loc where you can come back
+                elif nextMajComeBack != nextMinComeBack:
+                    self.log.debug("maj/min != combeback")
+                    if nextMajComeBack == True:
                         return self.collectMajor(majorsAvailable.pop(0))
                     else:
                         return self.collectMinor(minorsAvailable.pop(0))

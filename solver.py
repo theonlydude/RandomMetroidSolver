@@ -362,6 +362,11 @@ class CommonSolver(object):
         difficultyTarget = Conf.difficultyTarget
         nextLocations = locations
 
+        # before looping on all diff targets, get only the available locations with diff target infinity
+        if difficultyTarget != infinity:
+            self.areaGraph.getAvailableLocations(nextLocations, self.smbm, infinity, self.lastAP)
+            nextLocations = [loc for loc in nextLocations if loc['difficulty']]
+
         while True:
             self.areaGraph.getAvailableLocations(nextLocations, self.smbm, difficultyTarget, self.lastAP)
             # check post available functions too

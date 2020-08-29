@@ -111,12 +111,11 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassMoatReverse(self):
         sm = self.smbm
-        return sm.wor(sm.haveItem('Grapple'),
+        return sm.wor(RomPatches.has(RomPatches.MoatShotBlock),
+                      sm.haveItem('Grapple'),
                       sm.haveItem('SpaceJump'),
                       sm.haveItem('Gravity'),
-                      sm.wand(sm.haveItem('Morph'),
-                              sm.wor(RomPatches.has(RomPatches.MoatShotBlock),
-                                     sm.canPassBombPassages())))
+                      sm.canPassBombPassages())
 
     @Cache.decorator
     def canPassSpongeBath(self):

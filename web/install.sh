@@ -669,3 +669,6 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip4.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/Red-M0nk3ySMShip4.png ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip4.png
 [ -L ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip5.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/Red-M0nk3ySMShip5.png ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip5.png
 [ -L ~/web2py/applications/solver/static/images/MFFusionship.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/MFFusionship.png ~/web2py/applications/solver/static/images/MFFusionship.png
+
+[ -L ~/web2py/applications/solver/static/images/minimizer_example.png ] || ln -s ~/RandomMetroidSolver/web/static/minimizer_example.png ~/web2py/applications/solver/static/images/minimizer_example.png
+[ -L ~/web2py/applications/solver/static/images/minimizer_example_thumbnail.png ] || ln -s ~/RandomMetroidSolver/web/static/minimizer_example_thumbnail.png ~/web2py/applications/solver/static/images/minimizer_example_thumbnail.png

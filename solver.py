@@ -690,17 +690,17 @@ class CommonSolver(object):
                 self.log.debug("we have charge, no longer need minors, take major")
                 return self.collectMajor(majorsAvailable.pop(0))
             else:
-                # first take item from loc where you can come back
-                if nextMajComeBack != nextMinComeBack:
-                    self.log.debug("maj/min != combeback")
-                    if nextMajComeBack == True:
+                # respect areaweight first
+                if nextMajAreaWeight != nextMinAreaWeight:
+                    self.log.debug("maj/min != area weight")
+                    if nextMajAreaWeight < nextMinAreaWeight:
                         return self.collectMajor(majorsAvailable.pop(0))
                     else:
                         return self.collectMinor(minorsAvailable.pop(0))
-                # respect areaweight first
-                elif nextMajAreaWeight != nextMinAreaWeight:
-                    self.log.debug("maj/min != area weight")
-                    if nextMajAreaWeight < nextMinAreaWeight:
+                # then take item from loc where you can come back
+                elif nextMajComeBack != nextMinComeBack:
+                    self.log.debug("maj/min != combeback")
+                    if nextMajComeBack == True:
                         return self.collectMajor(majorsAvailable.pop(0))
                     else:
                         return self.collectMinor(minorsAvailable.pop(0))

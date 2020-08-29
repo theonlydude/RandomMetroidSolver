@@ -130,7 +130,6 @@ class ItemManager:
             Code=0xef13,
             Name="Plasma Beam",
             Type='Plasma',
-
         ),
         'Grapple': Item(
             Category='Progression',
@@ -225,6 +224,14 @@ class ItemManager:
             Name="Mother Brain",
             Type='MotherBrain',
         ),
+        # used only during escape path check
+        'Hyper': Item(
+            Category='Beam',
+            Class='Major',
+            Code=0xffff,
+            Name="Hyper Beam",
+            Type='Hyper',
+        )
     }
 
     for itemType, item in Items.items():

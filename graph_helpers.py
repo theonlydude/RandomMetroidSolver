@@ -431,11 +431,14 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canGetBackFromRidleyZone(self):
         sm = self.smbm
-        return sm.wor(sm.haveItem('SpringBall'),
-                      sm.haveItem('Bomb'),
-                      sm.haveItem('ScrewAttack'),
-                      sm.wor(sm.itemCountOk('PowerBomb', 2),
-                             sm.canShortCharge())) # speedball
+        return sm.wand(sm.wor(sm.canUseSpringBall(),
+                              sm.canUseBombs(),
+                              sm.haveItem('ScrewAttack'),
+                              sm.wand(sm.canUsePowerBombs(), sm.itemCountOk('PowerBomb', 2)),
+                              sm.wand(sm.haveItem('Morph'), sm.canShortCharge())), # speedball
+                       # in escape you don't have PBs and can't shoot bomb blocks in long tunnels
+                       # in wasteland and ki hunter room
+                       sm.wnot(sm.canUseHyperBeam()))
 
     @Cache.decorator
     def canClimbRedTower(self):

@@ -403,7 +403,7 @@ if __name__ == "__main__":
                 startLocationList = args.startLocationList.split(',')
                 possibleStartAPs = sorted(list(set(possibleStartAPs).intersection(set(startLocationList))))
                 if len(possibleStartAPs) == 0:
-                    reasonStr = '\n'.join(["%s : %s" % (apName, cause) for apName, cause in reasons.items() if apName in args.startLocationList])
+                    reasonStr = '\n'.join(["%s : %s" % (apName, cause) for apName, cause in reasons.items() if apName in startLocationList])
                     optErrMsg += '\nInvalid start locations list with your settings.\n'+reasonStr
                     dumpErrorMsg(args.output, optErrMsg)
                     sys.exit(-1)

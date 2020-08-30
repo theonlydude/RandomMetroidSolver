@@ -379,8 +379,12 @@ class CommonSolver(object):
 
                         loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
 
+            self.areaGraph.useCache(True)
+            for loc in nextLocations:
+                if loc['difficulty'].bool == True:
                     # also check if we can come back to landing site from the location
                     loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastAP, infinity, loc['itemName'])
+            self.areaGraph.useCache(False)
 
             nextLocations = [loc for loc in nextLocations if not loc['difficulty']]
             if not nextLocations:

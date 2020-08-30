@@ -104,6 +104,16 @@ class AccessGraph(object):
             self.addTransition(srcName, dstName)
         if dotFile is not None:
             self.toDot(dotFile)
+        self.apCache = {}
+        self._useCache = False
+
+    def useCache(self, use):
+        self._useCache = use
+        if self._useCache:
+            self.resetCache()
+
+    def resetCache(self):
+        self.apCache = {}
 
     def printGraph(self):
         if self.log.getEffectiveLevel() == logging.DEBUG:
@@ -153,7 +163,7 @@ class AccessGraph(object):
     # smbm: smbm to test logic on. if None, discard logic check, assume we can reach everything
     # maxDiff: difficulty limit
     # return newly opened access points
-    def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
+    def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff, item=None):
         newAvailNodes = {}
         # with python >= 3.6 the insertion order in a dict is keeps when looping on the keys,
         # so we no longer have to sort them.
@@ -163,8 +173,13 @@ class AccessGraph(object):
                 if dst in availNodes or dst in newAvailNodes:
                     continue
                 if smbm is not None:
-                    tFunc = src.transitions[dstName]
-                    diff = smbm.eval(tFunc)
+                    if self._useCache == True and (src, dst, item) in self.apCache:
+                        diff = self.apCache[(src, dst, item)]
+                    else:
+                        tFunc = src.transitions[dstName]
+                        diff = smbm.eval(tFunc)
+                        if self._useCache == True:
+                            self.apCache[(src, dst, item)] = diff
                 else:
                     diff = SMBool(True)
                 if diff.bool and diff.difficulty <= maxDiff:
@@ -182,12 +197,12 @@ class AccessGraph(object):
     # maxDiff: difficulty limit.
     # smbm: if None, discard logic check, assume we can reach everything
     # return available AccessPoint list
-    def getAvailableAccessPoints(self, rootNode, smbm, maxDiff):
+    def getAvailableAccessPoints(self, rootNode, smbm, maxDiff, item=None):
         availNodes = { rootNode : { 'difficulty' : SMBool(True, 0), 'from' : None } }
         newAvailNodes = availNodes
         rootNode.distance = 0
         while len(newAvailNodes) > 0:
-            newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff)
+            newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff, item)
             availNodes.update(newAvailNodes)
         return availNodes
 
@@ -337,7 +352,7 @@ class AccessGraph(object):
         #print("canAccess: item: {}, src: {}, dest: {}".format(item, srcAccessPointName, destAccessPointName))
         destAccessPoint = self.accessPoints[destAccessPointName]
         srcAccessPoint = self.accessPoints[srcAccessPointName]
-        availAccessPoints = self.getAvailableAccessPoints(srcAccessPoint, smbm, maxDiff)
+        availAccessPoints = self.getAvailableAccessPoints(srcAccessPoint, smbm, maxDiff, item)
         can = destAccessPoint in availAccessPoints
         #self.log.debug("canAccess: avail = {}".format([ap.Name for ap in availAccessPoints.keys()]))
         if item is not None:

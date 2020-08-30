@@ -254,19 +254,6 @@ class RandoServices(object):
                 nonProgList = [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(container, ap, None, loc, comebackCheck)]
                 self.log.debug("nonProgLocList="+str([loc['Name'] for loc in nonProgList]))
             return [loc for loc in nonProgList if self.restrictions.canPlaceAtLocation(itemObj, loc, container)]
-        # boss handling : check if we can kill a boss, if so return immediately
-        hasBoss = container.hasItemCategoryInPool('Boss')
-        comebackPred = lambda loc: self.fullComebackCheck(container, ap,
-                                                          container.getNextItemInPoolMatching(lambda item:item.Name == loc['Name']),
-                                                          loc, comebackCheck)
-        bossLoc = None if not hasBoss else next((loc for loc in curLocs if 'Boss' in loc['Class'] and comebackPred(loc)), None)
-        if bossLoc is not None:
-            bosses = container.getItems(lambda item: item.Name == bossLoc['Name'])
-            assert len(bosses) == 1
-            boss = bosses[0]
-            itemLocDict[boss] = [bossLoc]
-            self.log.debug("getPossiblePlacements. boss: "+boss.Name)
-            return (itemLocDict, False)
         for itemType,items in sorted(poolDict.items()):
             itemObj = items[0]
             cont = True

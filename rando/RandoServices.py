@@ -344,6 +344,7 @@ class RandoServices(object):
         return len(curLocs) == len(container.unusedLocations)
 
     def getStartupProgItemsPairs(self, ap, container):
+        self.cache.reset()
         (itemLocDict, isProg) = self.getPossiblePlacements(ap, container, ComebackCheckType.NoCheck)
         if isProg == True:
             self.log.debug("getStartupProgItemsPairs: found prog item")
@@ -374,9 +375,18 @@ class RandoServices(object):
 
         self.log.debug("search for progression with a second item")
         for item1, locs1 in uniqItemLocDict.items():
-            # collect first item in first available location
+            # collect first item in first available location matching restrictions
             self.cache.reset()
-            container.collect({'Item': item1, 'Location': curLocsBefore[0]})
+            firstItemPlaced = False
+            for loc in curLocsBefore:
+                if self.restrictions.canPlaceAtLocation(item1, loc, container):
+                    container.collect({'Item': item1, 'Location': loc})
+                    firstItemPlaced = True
+                    break
+            if not firstItemPlaced:
+                saveEmptyContainer.restore(container)
+                continue
+
             saveAfterFirst = ContainerSoftBackup(container)
 
             curLocsAfterFirst = self.currentLocations(ap, container)
@@ -393,7 +403,15 @@ class RandoServices(object):
 
                 # collect second item in first available location
                 self.cache.reset()
-                container.collect({'Item': item2, 'Location': curLocsAfterFirst[0]})
+                secondItemPlaced = False
+                for loc in curLocsAfterFirst:
+                    if self.restrictions.canPlaceAtLocation(item2, loc, container):
+                        container.collect({'Item': item2, 'Location': loc})
+                        secondItemPlaced = True
+                        break
+                if not secondItemPlaced:
+                    saveAfterFirst.restore(container)
+                    continue
 
                 curLocsAfterSecond = self.currentLocations(ap, container)
                 if not curLocsAfterSecond:

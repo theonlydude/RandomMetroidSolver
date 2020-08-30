@@ -5,7 +5,7 @@ import argparse, os.path, json, sys, shutil, random
 from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from rando.PaletteRando import PaletteRando
-from graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils
+from graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text
 from utils import PresetLoader
 from rom_patches import RomPatches
@@ -382,13 +382,6 @@ if __name__ == "__main__":
                 morphPlacements.remove('late')
         args.morphPlacement = random.choice(morphPlacements)
     # random fill makes certain options unavailable
-    if progSpeed == 'speedrun':
-        if args.morphPlacement == 'late':
-            optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
-        if (not GraphUtils.isStandardStart(args.startAP)) and args.morphPlacement != 'normal':
-            optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for custom start location")
-    if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
-        optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for Chozo")
     if progSpeed == 'speedrun' or progSpeed == 'basic':
         optErrMsg += forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = args.progressionDifficulty
@@ -403,27 +396,34 @@ if __name__ == "__main__":
         optErrMsg += forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
         optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
         optErrMsg += forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", 'areaLayout', 'on')
-        possibleStartAPs = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty)
-
+        possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty, args.morphPlacement)
         if args.startAP == 'random':
             if args.startLocationList != None:
                 # intersection between user whishes and reality
                 startLocationList = args.startLocationList.split(',')
                 possibleStartAPs = sorted(list(set(possibleStartAPs).intersection(set(startLocationList))))
                 if len(possibleStartAPs) == 0:
-                    optErrMsg += '\nInvalid start locations list with your settings.'
+                    reasonStr = '\n'.join(["%s : %s" % (apName, cause) for apName, cause in reasons.items() if apName in args.startLocationList])
+                    optErrMsg += '\nInvalid start locations list with your settings.\n'+reasonStr
                     dumpErrorMsg(args.output, optErrMsg)
                     sys.exit(-1)
             args.startAP = random.choice(possibleStartAPs)
         elif args.startAP not in possibleStartAPs:
-            optErrMsg += '\nInvalid start location: {}'.format(args.startAP)
+            optErrMsg += '\nInvalid start location: {}. {}'.format(args.startAP, reasons[args.startAP])
             optErrMsg += '\nPossible start locations with these settings: {}'.format(possibleStartAPs)
             dumpErrorMsg(args.output, optErrMsg)
             sys.exit(-1)
-    if args.startAP == 'Firefleas Top' and progSpeed != 'speedrun':
-        # we have to get morph early at firefleas, silently force it to help
-        # rando algorithm
-        args.morphPlacement = "early"
+    ap = getAccessPoint(args.startAP)
+    if 'forcedEarlyMorph' in ap.Start and ap.Start['forcedEarlyMorph'] == True:
+        optErrMsg += forceArg('morphPlacement', 'early', "'Morph Placement' forced to early for custom start location")
+    else:
+        if progSpeed == 'speedrun':
+            if args.morphPlacement == 'late':
+                optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
+            elif (not GraphUtils.isStandardStart(args.startAP)) and args.morphPlacement != 'normal':
+                optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for custom start location")
+        if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
+            optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for Chozo")
 
     if args.patchOnly == False:
         print("SEED: " + str(seed))

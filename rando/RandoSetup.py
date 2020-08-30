@@ -88,8 +88,7 @@ class RandoSetup(object):
                     if itemType not in restrictionDict[loc['GraphArea']]:
                         restrictionDict[loc['GraphArea']][itemType] = set()
                     restrictionDict[loc['GraphArea']][itemType].add(loc['Name'])
-            if self.restrictions.isEarlyMorph():
-                assert GraphUtils.isStandardStart(self.startAP), "Invalid settings combination for speedrun+early morph"
+            if self.restrictions.isEarlyMorph() and GraphUtils.isStandardStart(self.startAP):
                 morphLocs = ['Morphing Ball']
                 if self.restrictions.split in ['Full', 'Major']:
                     dboost = self.sm.knowsCeilingDBoost()

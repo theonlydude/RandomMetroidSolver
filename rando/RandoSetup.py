@@ -157,7 +157,7 @@ class RandoSetup(object):
         condition = filler.createStepCountCondition(4)
         (isStuck, itemLocations, progItems) = filler.generateItems(condition)
         self.log.debug("********* PRE RANDO END")
-        return not isStuck
+        return not isStuck and len(self.services.currentLocations(filler.ap, filler.container)) > 0
 
     def checkPool(self, forbidden=None):
         self.log.debug("checkPool. forbidden=" + str(forbidden) + ", self.forbiddenItems=" + str(self.forbiddenItems))

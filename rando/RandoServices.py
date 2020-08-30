@@ -157,7 +157,7 @@ class RandoServices(object):
     def isProgression(self, item, ap, container):
         sm = container.sm
         # no need to test nothing items
-        if item.Category == 'Nothing' or item.Category == 'Boss':
+        if item.Category == 'Nothing':
             return False
         if self.cache is not None:
             request = self.cache.request('isProgression', item.Type, ap, container)

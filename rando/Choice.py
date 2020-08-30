@@ -102,7 +102,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         # if a boss is available, choose it right away
         for item,locs in itemLocDict.items():
             if item.Type == 'Boss':
-                assert len(locs) == 1
+                assert len(locs) == 1 and locs[0]['Name'] == item['Name']
                 return {'Item':item, 'Location':locs[0]}
         self.progressionItemLocs = progressionItemLocs
         self.ap = ap

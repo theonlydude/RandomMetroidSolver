@@ -7,7 +7,7 @@
   "progressionSpeedMultiSelect": [
     "slow",
     "medium",
-    "fast"
+    "speedrun"
   ],
   "progressionDifficulty": "normal",
   "morphPlacement": "early",

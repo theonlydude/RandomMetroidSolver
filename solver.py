@@ -676,15 +676,16 @@ class CommonSolver(object):
             nextMinComeBack = minorsAvailable[0]['comeBack']
             nextMajDistance = majorsAvailable[0]['distance']
             nextMinDistance = minorsAvailable[0]['distance']
-            nextMajAreaWeight = majorsAvailable[0]['areaWeight'] if "areaWeight" in majorsAvailable[0] else 10000
-            nextMinAreaWeight = minorsAvailable[0]['areaWeight'] if "areaWeight" in minorsAvailable[0] else 10000
+            maxAreaWeigth = 10000
+            nextMajAreaWeight = majorsAvailable[0]['areaWeight'] if "areaWeight" in majorsAvailable[0] else maxAreaWeigth
+            nextMinAreaWeight = minorsAvailable[0]['areaWeight'] if "areaWeight" in minorsAvailable[0] else maxAreaWeigth
 
             if self.log.getEffectiveLevel() == logging.DEBUG:
                 print("     : {:>4} {:>32} {:>4} {:>4} {:>6}".format("diff", "area", "back", "dist", "weight"))
                 print("major: {:>4} {:>32} {:>4} {:>4} {:>6}".format(round(nextMajDifficulty, 2), nextMajArea, nextMajComeBack, round(nextMajDistance, 2), nextMajAreaWeight))
                 print("minor: {:>4} {:>32} {:>4} {:>4} {:>6}".format(round(nextMinDifficulty, 2), nextMinArea, nextMinComeBack, round(nextMinDistance, 2), nextMinAreaWeight))
 
-            if hasEnoughMinors == True and self.haveAllMinorTypes() == True and self.smbm.haveItem('Charge'):
+            if hasEnoughMinors == True and self.haveAllMinorTypes() == True and self.smbm.haveItem('Charge') and nextMajAreaWeight != maxAreaWeigth:
                 # we have charge, no longer need minors
                 self.log.debug("we have charge, no longer need minors, take major")
                 return self.collectMajor(majorsAvailable.pop(0))
@@ -1709,30 +1710,35 @@ class ComeBack(object):
         self.log = log.get('Rewind')
 
     def handleNoComeBack(self, locations, cur):
-        hasEnoughMinors = self.solver.pickup.enoughMinors(self.solver.smbm, self.solver.minorLocations)
-        hasAllMinorTypes = self.solver.haveAllMinorTypes()
-        hasCharge = self.solver.smbm.haveItem('Charge')
-        noNeedMinors = hasEnoughMinors and hasAllMinorTypes and hasCharge
-
         # return True if a rewind is needed. choose the next area to use
         solveAreas = {}
         locsCount = 0
+        majorNoComeBack = False
         for loc in locations:
-            # filter minors locations when the solver no longer collect minors
-            if (self.solver.majorsSplit != 'Full'
-                and self.solver.majorsSplit not in loc['Class']
-                and 'Boss' not in loc['Class']
-                and noNeedMinors == True):
-                continue
-            if "comeBack" not in loc:
-                return False
-            if loc["comeBack"] == True:
-                return False
+            if self.solver.majorsSplit != 'Full':
+                if self.solver.majorsSplit in loc['Class'] or "Boss" in loc['Class']:
+                    if "comeBack" not in loc:
+                        return False
+                    elif loc["comeBack"] == True:
+                        return False
+                    else:
+                        # when the solver decide to visit a major no come back locations
+                        # when there's minors comeback locations available.
+                        # create a rollback point just in case more minors where actually required to do a special tech.
+                        majorNoComeBack = True
+            else:
+                if "comeBack" not in loc:
+                    return False
+                if loc["comeBack"] == True:
+                    return False
             locsCount += 1
             if loc["SolveArea"] in solveAreas:
                 solveAreas[loc["SolveArea"]] += 1
             else:
                 solveAreas[loc["SolveArea"]] = 1
+
+        if majorNoComeBack == False and self.solver.majorsSplit != 'Full':
+            return False
 
         # only minors locations, or just one major, no need for a rewind step
         if locsCount < 2:

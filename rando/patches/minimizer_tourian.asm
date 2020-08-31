@@ -80,10 +80,7 @@ org $83aa66
 	dw pre_tourian_door
 	;; dw $f76e
 
-org $a9b91a
-	lda $af21 : sta $0fa8
-	rts
-
-;;; MB2 0 health: B91A
-;;; MB3 0 health: AF21, puis AFB6, B12D, B189
-;;; hyper cutscene: C18D
+;;; change MB2 main AI script pointer to MB3 death instead
+;;; of triggering baby cutscene
+org $a9b90e
+	dw $c1cf

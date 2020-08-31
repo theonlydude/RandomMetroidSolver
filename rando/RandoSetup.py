@@ -88,6 +88,17 @@ class RandoSetup(object):
                     if itemType not in restrictionDict[loc['GraphArea']]:
                         restrictionDict[loc['GraphArea']][itemType] = set()
                     restrictionDict[loc['GraphArea']][itemType].add(loc['Name'])
+            if self.restrictions.isEarlyMorph() and GraphUtils.isStandardStart(self.startAP):
+                morphLocs = ['Morphing Ball']
+                if self.restrictions.split in ['Full', 'Major']:
+                    dboost = self.sm.knowsCeilingDBoost()
+                    if dboost.bool == True and dboost.difficulty <= self.settings.maxDiff:
+                        morphLocs += ['Energy Tank, Brinstar Ceiling']
+                for area, locDict in restrictionDict.items():
+                    if area == 'Crateria':
+                        locDict['Morph'] = set(morphLocs)
+                    elif 'Morph' in locDict:
+                        del locDict['Morph']
             self.restrictions.addPlacementRestrictions(restrictionDict)
         self.fillRestrictedLocations()
         self.settings.collectAlreadyPlacedItemLocations(self.container)
@@ -145,7 +156,7 @@ class RandoSetup(object):
         condition = filler.createStepCountCondition(4)
         (isStuck, itemLocations, progItems) = filler.generateItems(condition)
         self.log.debug("********* PRE RANDO END")
-        return not isStuck
+        return not isStuck and len(self.services.currentLocations(filler.ap, filler.container)) > 0
 
     def checkPool(self, forbidden=None):
         self.log.debug("checkPool. forbidden=" + str(forbidden) + ", self.forbiddenItems=" + str(self.forbiddenItems))

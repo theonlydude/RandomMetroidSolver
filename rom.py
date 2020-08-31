@@ -586,7 +586,8 @@ class RomPatcher:
                      'spinjumprestart.ips', 'elevators_doors_speed.ips', 'No_Music', 'random_music.ips',
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
-                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
+                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips',
+                     'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips'],
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
                  'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street' ],
@@ -745,6 +746,9 @@ class RomPatcher:
         for patchName in patches:
             self.applyIPSPatch(patchName)
 
+    def customShip(self, ship):
+        self.applyIPSPatch(ship, ipsDir='rando/patches/ships')
+
     def customSprite(self, sprite, customNames):
         self.applyIPSPatch(sprite, ipsDir='rando/patches/sprites')
 
@@ -829,6 +833,19 @@ class RomPatcher:
             messageBox = MessageBox(self.romFile)
             for (messageKey, newMessage) in messageBoxes[sprite].items():
                 messageBox.updateMessage(messageKey, newMessage, doVFlip, doHFlip)
+
+    def writePlmTable(self, plms, area, bosses, startAP):
+        # called when saving a plando
+        try:
+            if bosses == True or area == True:
+                plms.append('WS_Save_Blinking_Door')
+
+            doors = self.getStartDoors(plms, area, None)
+            self.applyStartAP(startAP, plms, doors)
+
+            self.applyPLMs(plms)
+        except Exception as e:
+            raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
     def applyIPSPatches(self, startAP="Landing Site",
                         optionalPatches=[], noLayout=False, suitsMode="Classic",

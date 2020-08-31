@@ -708,6 +708,7 @@ window.onload = function(){
     var files = event.target.files; // It returns a FileList object
     var file = files[0];
   
+    var crc32 = new Crc32();
     var reader = new FileReader();
   
     reader.onload = function(e) {
@@ -727,6 +728,8 @@ window.onload = function(){
         document.getElementById("fileName").value = file.name;
 
         var fileSize = file.size;
+        crc32.update(e.target.result);
+        var digest = crc32.digest();
         if( fileSize > 4*1024*1024 ) {
             document.getElementById("uploadFile").value = "";
             alert("Wrong ROM file size: "+fileSize.toString());
@@ -737,7 +740,12 @@ window.onload = function(){
             return false;
         } else if(mode == "plando" && fileSize == 4*1024*1024) {
             alert("Warning: You won't be able to upload a Sprite customized seed in the Plandository (hosting space constraints)");
+        } else if(mode == "plando" && digest == "d63ed5f8") {
+            document.getElementById("uploadFile").value = "";
+            alert("vanilla ROM detected, use an already randomized VARIA ROM");
+            return false;
         }
+
 
         var bytes = new Uint8Array(e.target.result);
 

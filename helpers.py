@@ -262,6 +262,11 @@ class Helpers(object):
                        sm.knowsLowGauntlet())
 
     @Cache.decorator
+    def canUseHyperBeam(self):
+        sm = self.smbm
+        return sm.haveItem('Hyper')
+
+    @Cache.decorator
     def getBeamDamage(self):
         sm = self.smbm
         standardDamage = 20

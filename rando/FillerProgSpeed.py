@@ -100,7 +100,7 @@ class FillerProgSpeed(Filler):
     # return item/loc, or None if stuck
     def generateItem(self):
         itemLocDict, possibleProg = self.services.getPossiblePlacements(self.ap, self.container, self.getComebackCheck())
-        if self.isEarlyGame():
+        if self.isEarlyGame() and possibleProg == True:
             # cheat a little bit if non-standard start: place early
             # progression away from crateria/blue brin if possible
             startAp = getAccessPoint(self.startAP)
@@ -483,7 +483,9 @@ class FillerProgSpeedChozoSecondPhase(Filler):
             self.log.debug('step. basePool: {}'.format(getItemListStr(basePool)))
             while len(itemPool) < len(curLocs):
                 item = random.choice(basePool)
-                if item.Type not in restrictedItemTypes or random.random() < self.restrictedItemProba:
+                if item.Type not in restrictedItemTypes or\
+                   random.random() < self.restrictedItemProba or\
+                   self.restrictedItemProba == 0 and not any(item for item in basePool if item.Type not in restrictedItemTypes):
                     itemPool.append(item)
                     basePool.remove(item)
             self.log.debug('step. itemPool='+getItemListStr(itemPool))

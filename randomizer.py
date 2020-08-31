@@ -5,7 +5,7 @@ import argparse, os.path, json, sys, shutil, random
 from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from rando.PaletteRando import PaletteRando
-from graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils
+from graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text
 from utils import PresetLoader
 from rom_patches import RomPatches
@@ -120,7 +120,7 @@ if __name__ == "__main__":
                         choices=['itemsounds.ips', 'elevators_doors_speed.ips', 'random_music.ips',
                                  'spinjumprestart.ips', 'rando_speed.ips', 'No_Music', 'AimAnyButton.ips',
                                  'max_ammo_display.ips', 'supermetroid_msu1.ips', 'Infinite_Space_Jump',
-                                 'refill_before_save.ips'])
+                                 'refill_before_save.ips', 'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -241,6 +241,7 @@ if __name__ == "__main__":
     parser.add_argument('--sprite', help='use a custom sprite for Samus', dest='sprite', default=None)
     parser.add_argument('--customItemNames', help='add custom item names for some of them, related to the custom sprite',
                         dest='customItemNames', action='store_true', default=False)
+    parser.add_argument('--ship', help='use a custom sprite for Samus ship', dest='ship', default=None)
     parser.add_argument('--seedIps', help='ips generated from previous seed', dest='seedIps', default=None)
     parser.add_argument('--jm,', help="display data used by jm for its stats", dest='jm', action='store_true', default=False)
 
@@ -381,8 +382,6 @@ if __name__ == "__main__":
                 morphPlacements.remove('late')
         args.morphPlacement = random.choice(morphPlacements)
     # random fill makes certain options unavailable
-    if progSpeed == 'speedrun' or (args.majorsSplit == 'Chozo' and args.morphPlacement == "late"):
-        optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
     if progSpeed == 'speedrun' or progSpeed == 'basic':
         optErrMsg += forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = args.progressionDifficulty
@@ -397,26 +396,34 @@ if __name__ == "__main__":
         optErrMsg += forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
         optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
         optErrMsg += forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", 'areaLayout', 'on')
-        possibleStartAPs = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty)
+        possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty, args.morphPlacement)
         if args.startAP == 'random':
             if args.startLocationList != None:
                 # intersection between user whishes and reality
                 startLocationList = args.startLocationList.split(',')
                 possibleStartAPs = sorted(list(set(possibleStartAPs).intersection(set(startLocationList))))
                 if len(possibleStartAPs) == 0:
-                    optErrMsg += '\nInvalid start locations list with your settings.'
+                    reasonStr = '\n'.join(["%s : %s" % (apName, cause) for apName, cause in reasons.items() if apName in startLocationList])
+                    optErrMsg += '\nInvalid start locations list with your settings.\n'+reasonStr
                     dumpErrorMsg(args.output, optErrMsg)
                     sys.exit(-1)
             args.startAP = random.choice(possibleStartAPs)
         elif args.startAP not in possibleStartAPs:
-            optErrMsg += '\nInvalid start location: {}'.format(args.startAP)
+            optErrMsg += '\nInvalid start location: {}. {}'.format(args.startAP, reasons[args.startAP])
             optErrMsg += '\nPossible start locations with these settings: {}'.format(possibleStartAPs)
             dumpErrorMsg(args.output, optErrMsg)
             sys.exit(-1)
-    if args.startAP == 'Firefleas Top':
-        # we have to get morph early at firefleas, silently force it to help
-        # rando algorithm
-        args.morphPlacement = "early"
+    ap = getAccessPoint(args.startAP)
+    if 'forcedEarlyMorph' in ap.Start and ap.Start['forcedEarlyMorph'] == True:
+        optErrMsg += forceArg('morphPlacement', 'early', "'Morph Placement' forced to early for custom start location")
+    else:
+        if progSpeed == 'speedrun':
+            if args.morphPlacement == 'late':
+                optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
+            elif (not GraphUtils.isStandardStart(args.startAP)) and args.morphPlacement != 'normal':
+                optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for custom start location")
+        if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
+            optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for Chozo")
 
     if args.patchOnly == False:
         print("SEED: " + str(seed))
@@ -577,7 +584,8 @@ if __name__ == "__main__":
         # in vcr mode we still want the seed to be generated to analyze it
         if args.vcr == False:
             sys.exit(-1)
-    randoExec.postProcessItemLocs(itemLocs, args.hideItems)
+    if args.patchOnly == False:
+        randoExec.postProcessItemLocs(itemLocs, args.hideItems)
     # choose on animal patch
     if args.animals == True:
         animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
@@ -609,6 +617,7 @@ if __name__ == "__main__":
                 itemLoc["Location"]["difficulty"] = itemLoc["Location"]["difficulty"].json()
             if "pathDifficulty" in itemLoc["Location"]:
                 del itemLoc["Location"]["pathDifficulty"]
+            itemLoc["Item"] = itemLoc["Item"].json()
 
         with open(args.output, 'w') as jsonFile:
             json.dump({"itemLocs": itemLocs, "errorMsg": randoExec.errorMsg}, jsonFile, default=lambda x: x.__dict__)
@@ -670,6 +679,11 @@ if __name__ == "__main__":
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:
             romPatcher.customSprite(args.sprite, args.customItemNames) # adds another IPS
+        if args.ship is not None:
+            romPatcher.customShip(args.ship) # adds another IPS
+            # don't color randomize custom ships
+            args.shift_ship_palette = False
+
         # we have to write ips to ROM before doing our direct modifications which will rewrite some parts (like in credits),
         # but in web mode we only want to generate a global ips at the end
         if args.rom != None:

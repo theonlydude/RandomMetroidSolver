@@ -360,11 +360,17 @@ class CommonSolver(object):
 
     def computeLocationsDifficulty(self, locations, phase="major"):
         difficultyTarget = Conf.difficultyTarget
+        nextLocations = locations
+
+        # before looping on all diff targets, get only the available locations with diff target infinity
+        if difficultyTarget != infinity:
+            self.areaGraph.getAvailableLocations(nextLocations, self.smbm, infinity, self.lastAP)
+            nextLocations = [loc for loc in nextLocations if loc['difficulty']]
 
         while True:
-            self.areaGraph.getAvailableLocations(locations, self.smbm, difficultyTarget, self.lastAP)
+            self.areaGraph.getAvailableLocations(nextLocations, self.smbm, difficultyTarget, self.lastAP)
             # check post available functions too
-            for loc in locations:
+            for loc in nextLocations:
                 if loc['difficulty'].bool == True:
                     if 'PostAvailable' in loc:
                         self.smbm.addItem(loc['itemName'])
@@ -373,13 +379,15 @@ class CommonSolver(object):
 
                         loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
 
+            self.areaGraph.useCache(True)
+            for loc in nextLocations:
+                if loc['difficulty'].bool == True:
                     # also check if we can come back to landing site from the location
                     loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastAP, infinity, loc['itemName'])
+            self.areaGraph.useCache(False)
 
-            availableLocations = [loc for loc in locations if loc['difficulty']]
-            comeBackLocations = [loc for loc in availableLocations if loc['comeBack']]
-            if len(availableLocations) > 0 and len(comeBackLocations) > 0:
-                # we've found some available locations
+            nextLocations = [loc for loc in nextLocations if not loc['difficulty']]
+            if not nextLocations:
                 break
 
             if difficultyTarget == infinity:
@@ -690,17 +698,17 @@ class CommonSolver(object):
                 self.log.debug("we have charge, no longer need minors, take major")
                 return self.collectMajor(majorsAvailable.pop(0))
             else:
-                # first take item from loc where you can come back
-                if nextMajComeBack != nextMinComeBack:
-                    self.log.debug("maj/min != combeback")
-                    if nextMajComeBack == True:
+                # respect areaweight first
+                if nextMajAreaWeight != nextMinAreaWeight:
+                    self.log.debug("maj/min != area weight")
+                    if nextMajAreaWeight < nextMinAreaWeight:
                         return self.collectMajor(majorsAvailable.pop(0))
                     else:
                         return self.collectMinor(minorsAvailable.pop(0))
-                # respect areaweight first
-                elif nextMajAreaWeight != nextMinAreaWeight:
-                    self.log.debug("maj/min != area weight")
-                    if nextMajAreaWeight < nextMinAreaWeight:
+                # then take item from loc where you can come back
+                elif nextMajComeBack != nextMinComeBack:
+                    self.log.debug("maj/min != combeback")
+                    if nextMajComeBack == True:
                         return self.collectMajor(majorsAvailable.pop(0))
                     else:
                         return self.collectMinor(minorsAvailable.pop(0))
@@ -1254,6 +1262,23 @@ class InteractiveSolver(CommonSolver):
             patches.insert(0, 'race_mode.ips')
             patches.append('race_mode_credits.ips')
         romPatcher.addIPSPatches(patches)
+
+        plms = []
+        if self.areaRando == True or self.bossRando == True or self.escapeRando == True:
+            doors = GraphUtils.getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando, self.escapeRando, False)
+            romPatcher.writeDoorConnections(doors)
+            if magic == None:
+                doorsPtrs = GraphUtils.getAps2DoorsPtrs()
+                romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
+                                                  len(vanillaBossesTransitions) + len(vanillaTransitions))
+            if self.escapeRando == True and escapeTimer != None:
+                # convert from '03:00' to number of seconds
+                escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
+                romPatcher.applyEscapeAttributes({'Timer': escapeTimer, 'Animals': None}, plms)
+
+        # write plm table
+        romPatcher.writePlmTable(plms, self.areaRando, self.bossRando, self.startAP)
+
         romPatcher.setNothingId(self.startAP, itemLocs)
         romPatcher.writeItemsLocs(itemLocs)
         romPatcher.writeItemsNumber()
@@ -1272,17 +1297,6 @@ class InteractiveSolver(CommonSolver):
             romPatcher.writeMagic()
         else:
             romPatcher.writePlandoAddresses(self.visitedLocations)
-        if self.areaRando == True or self.bossRando == True or self.escapeRando == True:
-            doors = GraphUtils.getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando, self.escapeRando, False)
-            romPatcher.writeDoorConnections(doors)
-            if magic == None:
-                doorsPtrs = GraphUtils.getAps2DoorsPtrs()
-                romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
-                                                  len(vanillaBossesTransitions) + len(vanillaTransitions))
-            if self.escapeRando == True and escapeTimer != None:
-                # convert from '03:00' to number of seconds
-                escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
-                romPatcher.applyEscapeAttributes({'Timer': escapeTimer, 'Animals': None}, [])
 
         romPatcher.commitIPS()
         romPatcher.end()
@@ -1667,7 +1681,7 @@ class RandoSolver(StandardSolver):
         self.log = log.get('Solver')
 
         # default conf
-        self.setConf(easy, 'any', [], False)
+        self.setConf(easy, 'all', [], False)
 
         self.firstLogFile = None
 
@@ -1752,6 +1766,13 @@ class ComeBack(object):
             if lastStep.cur == cur:
                 self.log.debug("Use last step at {}".format(cur))
                 return lastStep.next(locations)
+            elif self.reuseLastStep(lastStep, solveAreas):
+                self.log.debug("Reuse last step at {}".format(lastStep.cur))
+                if self.visitedAllLocsInArea(lastStep, locations):
+                    return lastStep.next(locations)
+                else:
+                    self.log.debug("There's still locations in the current solve area, visit them first")
+                    return False
             else:
                 self.log.debug("cur: {}, lastStep.cur: {}, don't use lastStep.next()".format(cur, lastStep.cur))
 
@@ -1764,6 +1785,16 @@ class ComeBack(object):
         lastStep = ComeBackStep(solveAreas, cur)
         self.comeBackSteps.append(lastStep)
         return lastStep.next(locations)
+
+    def reuseLastStep(self, lastStep, solveAreas):
+        # reuse the last step if they share the same solve areas to avoid creating too many
+        return sorted(lastStep.solveAreas.keys()) == sorted(solveAreas.keys())
+
+    def visitedAllLocsInArea(self, lastStep, locations):
+        for loc in locations:
+            if loc['difficulty'] == True and loc['SolveArea'] == lastStep.curSolveArea:
+                return False
+        return True
 
     def cleanNoComeBack(self, locations):
         for loc in locations:
@@ -1807,6 +1838,7 @@ class ComeBackStep(object):
         self.visitedSolveAreas = []
         self.solveAreas = solveAreas
         self.cur = cur
+        self.curSolveArea = None
         self.log = log.get('RewindStep')
         self.log.debug("create rewind step: {} {}".format(cur, solveAreas))
 
@@ -1833,6 +1865,7 @@ class ComeBackStep(object):
                     maxAreaWeigth = self.solveAreas[solveArea]
                     maxAreaName = solveArea
         self.visitedSolveAreas.append(maxAreaName)
+        self.curSolveArea = maxAreaName
         self.log.debug("rewind next area: {}".format(maxAreaName))
 
         outWeight = 10000

@@ -89,11 +89,11 @@ function computeSeed {
 
     if [ ${COMPARE} -eq 0 ]; then
 	OLD_MD5="old n/a"
-	OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
+	RANDO_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 	if [ $? -ne 0 ]; then
-	    echo "${OUT}" >> ${LOG}
+	    echo "${RANDO_OUT}" >> ${LOG}
 	else
-	    RTIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
+	    RTIME_OLD=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
 	    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
 	    if [ $? -eq 0 ]; then
 		OLD_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
@@ -102,20 +102,20 @@ function computeSeed {
     fi
 
     NEW_MD5="new n/a"
-    OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ./randomizer.py ${PARAMS} 2>&1)
+    RANDO_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ./randomizer.py ${PARAMS} 2>&1)
     if [ $? -ne 0 ]; then
-	echo "${OUT}" >> ${LOG}
+	echo "${RANDO_OUT}" >> ${LOG}
     else
-	RTIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
+	RTIME_NEW=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
 	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
 	if [ $? -eq 0 ]; then
 	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
 	fi
     fi
-    STARTAP_NEW=$(echo "${OUT}" | grep startAP | cut -d ':' -f 2)
-    PROGSPEED_NEW=$(echo "${OUT}" | grep progressionSpeed | cut -d ':' -f 2)
-    MAJORSSPLIT_NEW=$(echo "${OUT}" | grep majorsSplit | cut -d ':' -f 2)
-    MORPH_NEW=$(echo "${OUT}" | grep morphPlacement | cut -d ':' -f 2)
+    STARTAP_NEW=$(echo "${RANDO_OUT}" | grep startAP | cut -d ':' -f 2)
+    PROGSPEED_NEW=$(echo "${RANDO_OUT}" | grep progressionSpeed | cut -d ':' -f 2)
+    MAJORSSPLIT_NEW=$(echo "${RANDO_OUT}" | grep majorsSplit | cut -d ':' -f 2)
+    MORPH_NEW=$(echo "${RANDO_OUT}" | grep morphPlacement | cut -d ':' -f 2)
 
     if [ "${OLD_MD5}" != "${NEW_MD5}" -a ${COMPARE} -eq 0 ]; then
 	if [ "${OLD_MD5}" = "old n/a" ] && [ "${NEW_MD5}" = "new n/a" ]; then
@@ -140,37 +140,39 @@ function computeSeed {
     fi
 
     if [ ${COMPARE} -eq 0 ]; then
-	OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+	SOLVER_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
 	if [ $? -ne 0 ]; then
             echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
-            echo "${OUT}" >> ${LOG}
+            echo "${RANDO_OUT}" >> ${LOG}
+            echo "${SOLVER_OUT}" >> ${LOG}
             exit 0
 	    STIME_OLD="n/a"
 	else
-	    STIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
-	    echo "${OUT}" | grep -q "has already been picked up"
+	    STIME_OLD=$(echo "${SOLVER_OUT}" | grep real | awk '{print $1}')
+	    echo "${SOLVER_OUT}" | grep -q "has already been picked up"
 	    DUP_OLD=$?
-	    echo "${OUT}" | grep -v 'real' > ${ROM_GEN}.old
+	    echo "${SOLVER_OUT}" | grep -v 'real' > ${ROM_GEN}.old
 	fi
     else
 	DUP_OLD=1
     fi
 
-    OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ~/RandomMetroidSolver/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+    SOLVER_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ~/RandomMetroidSolver/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
     if [ $? -ne 0 ]; then
         echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
         echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
-        echo "${OUT}" >> ${LOG}
+        echo "${RANDO_OUT}" >> ${LOG}
+        echo "${SOLVER_OUT}" >> ${LOG}
         exit 0
 	STIME_NEW="n/a"
     else
-	STIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
-	echo "${OUT}" | grep -q "has already been picked up"
+	STIME_NEW=$(echo "${SOLVER_OUT}" | grep real | awk '{print $1}')
+	echo "${SOLVER_OUT}" | grep -q "has already been picked up"
 	DUP_NEW=$?
 
 	if [ ${COMPARE} -eq 0 ]; then
-	    echo "${OUT}" | grep -v 'real' > ${ROM_GEN}.new
+	    echo "${SOLVER_OUT}" | grep -v 'real' > ${ROM_GEN}.new
 	fi
     fi
 

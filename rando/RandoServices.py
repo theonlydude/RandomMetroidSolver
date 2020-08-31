@@ -157,7 +157,7 @@ class RandoServices(object):
     def isProgression(self, item, ap, container):
         sm = container.sm
         # no need to test nothing items
-        if item.Category == 'Nothing' or item.Category == 'Boss':
+        if item.Category == 'Nothing':
             return False
         if self.cache is not None:
             request = self.cache.request('isProgression', item.Type, ap, container)
@@ -254,19 +254,6 @@ class RandoServices(object):
                 nonProgList = [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(container, ap, None, loc, comebackCheck)]
                 self.log.debug("nonProgLocList="+str([loc['Name'] for loc in nonProgList]))
             return [loc for loc in nonProgList if self.restrictions.canPlaceAtLocation(itemObj, loc, container)]
-        # boss handling : check if we can kill a boss, if so return immediately
-        hasBoss = container.hasItemCategoryInPool('Boss')
-        comebackPred = lambda loc: self.fullComebackCheck(container, ap,
-                                                          container.getNextItemInPoolMatching(lambda item:item.Name == loc['Name']),
-                                                          loc, comebackCheck)
-        bossLoc = None if not hasBoss else next((loc for loc in curLocs if 'Boss' in loc['Class'] and comebackPred(loc)), None)
-        if bossLoc is not None:
-            bosses = container.getItems(lambda item: item.Name == bossLoc['Name'])
-            assert len(bosses) == 1
-            boss = bosses[0]
-            itemLocDict[boss] = [bossLoc]
-            self.log.debug("getPossiblePlacements. boss: "+boss.Name)
-            return (itemLocDict, False)
         for itemType,items in sorted(poolDict.items()):
             itemObj = items[0]
             cont = True
@@ -357,6 +344,7 @@ class RandoServices(object):
         return len(curLocs) == len(container.unusedLocations)
 
     def getStartupProgItemsPairs(self, ap, container):
+        self.cache.reset()
         (itemLocDict, isProg) = self.getPossiblePlacements(ap, container, ComebackCheckType.NoCheck)
         if isProg == True:
             self.log.debug("getStartupProgItemsPairs: found prog item")
@@ -380,15 +368,25 @@ class RandoServices(object):
         if not uniqItemLocDict:
             return None
 
+        self.cache.reset()
         curLocsBefore = self.currentLocations(ap, container)
         if not curLocsBefore:
             return None
 
         self.log.debug("search for progression with a second item")
         for item1, locs1 in uniqItemLocDict.items():
-            # collect first item in first available location
+            # collect first item in first available location matching restrictions
             self.cache.reset()
-            container.collect({'Item': item1, 'Location': curLocsBefore[0]})
+            firstItemPlaced = False
+            for loc in curLocsBefore:
+                if self.restrictions.canPlaceAtLocation(item1, loc, container):
+                    container.collect({'Item': item1, 'Location': loc})
+                    firstItemPlaced = True
+                    break
+            if not firstItemPlaced:
+                saveEmptyContainer.restore(container)
+                continue
+
             saveAfterFirst = ContainerSoftBackup(container)
 
             curLocsAfterFirst = self.currentLocations(ap, container)
@@ -405,7 +403,15 @@ class RandoServices(object):
 
                 # collect second item in first available location
                 self.cache.reset()
-                container.collect({'Item': item2, 'Location': curLocsAfterFirst[0]})
+                secondItemPlaced = False
+                for loc in curLocsAfterFirst:
+                    if self.restrictions.canPlaceAtLocation(item2, loc, container):
+                        container.collect({'Item': item2, 'Location': loc})
+                        secondItemPlaced = True
+                        break
+                if not secondItemPlaced:
+                    saveAfterFirst.restore(container)
+                    continue
 
                 curLocsAfterSecond = self.currentLocations(ap, container)
                 if not curLocsAfterSecond:

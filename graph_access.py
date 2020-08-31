@@ -29,7 +29,7 @@ accessPoints = [
     AccessPoint('Gauntlet Top', 'Crateria', {
         'Green Pirates Shaft Bottom Right': lambda sm: sm.haveItem('Morph')
     }, internal=True,
-       start={'spawn': 0x0006, 'solveArea': "Crateria Gauntlet", 'save':"Save_Gauntlet"}),
+       start={'spawn': 0x0006, 'solveArea': "Crateria Gauntlet", 'save':"Save_Gauntlet", 'forcedEarlyMorph':True}),
     AccessPoint('Lower Mushrooms Left', 'Crateria', {
         'Landing Site': lambda sm: sm.wand(sm.canPassTerminatorBombWall(False), sm.canPassCrateriaGreenPirates()),
         'Green Pirates Shaft Bottom Right': lambda sm: SMBool(True)
@@ -152,7 +152,7 @@ accessPoints = [
         'Etecoons Bottom': lambda sm: sm.haveItem('Morph')
     }, internal=True,
        start={'spawn': 0x0107, 'doors':[0x34], 'patches':[RomPatches.EtecoonSupersBlueDoor],
-              'save':"Save_Etecoons" ,'solveArea': "Green Brinstar"}),
+              'save':"Save_Etecoons" ,'solveArea': "Green Brinstar", 'forcedEarlyMorph':True}),
     AccessPoint('Etecoons Bottom', 'GreenPinkBrinstar', {
         'Etecoons Supers': lambda sm: sm.wor(RomPatches.has(RomPatches.EtecoonSupersBlueDoor),
                                              sm.canOpenGreenDoors()),
@@ -280,7 +280,8 @@ accessPoints = [
               'patches':[RomPatches.LowerNorfairPBRoomHeatDisable, RomPatches.FirefleasRemoveFune],
               'knows': ["FirefleasWalljump"],
               'save': "Save_Firefleas", 'needsPreRando': True,
-              'solveArea': "Lower Norfair After Amphitheater"}),
+              'solveArea': "Lower Norfair After Amphitheater",
+              'forcedEarlyMorph':True}),
     AccessPoint('Ridley Zone', 'LowerNorfair', {
         'Firefleas': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                         sm.canUsePowerBombs(),
@@ -531,7 +532,8 @@ accessPoints = [
         'Watering Hole Bottom': lambda sm: SMBool(True)
     }, internal=True,
        start = {'spawn': 0x0407, 'solveArea': "Maridia Pink Bottom", 'save':"Save_Watering_Hole",
-                'patches':[RomPatches.MaridiaTubeOpened], 'rom_patches':['wh_open_tube.ips']}),
+                'patches':[RomPatches.MaridiaTubeOpened], 'rom_patches':['wh_open_tube.ips'],
+                'forcedEarlyMorph':True}),
     AccessPoint('Watering Hole Bottom', 'WestMaridia', {
         'Watering Hole': lambda sm: sm.canJumpUnderwater()
     }, internal=True),
@@ -594,7 +596,8 @@ accessPoints = [
                 'doors': [0x96]}),
     AccessPoint('Post Botwoon', 'EastMaridia', {
         'Aqueduct Bottom': lambda sm: SMBool(True), # fall down the sandpit
-        'Precious Room Top': lambda sm: sm.canBotwoonExitToAndFromDraygon(),
+        'Precious Room Top': lambda sm: sm.wand(sm.canBotwoonExitToAndFromDraygon(),
+                                                sm.canOpenGreenDoors()),
         'Toilet Top': lambda sm: sm.wand(sm.canReachCacatacAlleyFromBotowoon(),
                                          sm.canPassCacatacAlley())
     }, internal=True),
@@ -817,22 +820,31 @@ class GraphUtils:
     def isStandardStart(startApName):
         return startApName == 'Ceres' or startApName == 'Landing Site'
 
-    def getPossibleStartAPs(areaMode, maxDiff):
+    def getPossibleStartAPs(areaMode, maxDiff, morphPlacement):
         ret = []
+        refused = {}
         allStartAPs = GraphUtils.getStartAccessPointNames()
         for apName in allStartAPs:
             start = getAccessPoint(apName).Start
             ok = True
+            cause = ""
             if 'knows' in start:
                 for k in start['knows']:
                     if not Knows.knows(k, maxDiff):
                         ok = False
+                        cause += Knows.desc[k]['display']+" is not known. "
                         break
-            if 'areaMode' in start:
-                ok &= start['areaMode'] == areaMode
+            if 'areaMode' in start and start['areaMode'] != areaMode:
+                ok = False
+                cause += "Start location available only with area randomization enabled. "
+            if 'forcedEarlyMorph' in start and start['forcedEarlyMorph'] == True and morphPlacement == 'late':
+                ok = False
+                cause += "Start location unavailable with late morph placement. "
             if ok:
                 ret.append(apName)
-        return ret
+            else:
+                refused[apName] = cause
+        return ret, refused
 
     def getGraphPatches(startApName):
         ap = getAccessPoint(startApName)

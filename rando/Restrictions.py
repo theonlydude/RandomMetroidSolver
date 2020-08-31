@@ -43,6 +43,7 @@ class Restrictions(object):
 
     def addPlacementRestrictions(self, restrictionDict):
         self.log.debug("add speedrun placement restrictions")
+#        self.log.debug(restrictionDict)
         self.checkers.append(lambda item, loc, cont:
                              item.Category in Restrictions.NoCheckCat
                              or item.Type == 'Missile'

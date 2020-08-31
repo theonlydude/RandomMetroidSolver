@@ -855,7 +855,8 @@ def getAddressesToRead(plando=False):
     ## doorasm
     addresses["ranges"] += [0x7EB00, 0x7ee60]
     # for next release doorasm addresses will be relocated
-    addresses["ranges"] += [0x7F800, 0x7FA71]
+    maxDoorAsmPatchLen = 22
+    addresses["ranges"] += [0x7F800, 0x7F800+(maxDoorAsmPatchLen * len([ap for ap in accessPoints if ap.Internal == False]))]
 
     if plando == True:
         # plando addresses
@@ -2272,6 +2273,8 @@ def initCustomizerSession():
         session.customizer['customSpriteEnable'] = "off"
         session.customizer['customSprite'] = "samus"
         session.customizer['customItemsEnable'] = "off"
+        session.customizer['customShipEnable'] = "off"
+        session.customizer['customShip'] = "Red-M0nk3ySMShip1"
         session.customizer['itemsounds'] = "off"
         session.customizer['spinjumprestart'] = "off"
         session.customizer['rando_speed'] = "off"
@@ -2283,6 +2286,8 @@ def initCustomizerSession():
         session.customizer['AimAnyButton'] = "off"
         session.customizer['max_ammo_display'] = "off"
         session.customizer['supermetroid_msu1'] = "off"
+        session.customizer['remove_itemsounds'] = "off"
+        session.customizer['remove_spinjumprestart'] = "off"
 
 customSprites = {
     'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh", "group": "Samus"},
@@ -2312,6 +2317,15 @@ customSprites = {
     'marga': {"index":24, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
     'sprite_can': {"index":25, "name": "Sprite", "desc": "A ... Sprite ... ", "author": "TarThoron", "group": "Custom"},
     'win95_cursor': {"index":26, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
+}
+
+customShips = {
+    'Red-M0nk3ySMShip1': {"index":0, "name": "Red-M0nk3ySMShip1", "desc": "", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip2': {"index":1, "name": "Red-M0nk3ySMShip2", "desc": "", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip3': {"index":2, "name": "Red-M0nk3ySMShip3", "desc": "", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip4': {"index":3, "name": "Red-M0nk3ySMShip4", "desc": "", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip5': {"index":4, "name": "Red-M0nk3ySMShip5", "desc": "", "author": "Red-M0nk3y"},
+    'MFFusionship': {"index":5, "name": "MFFusionship", "desc": "", "author": "Crys"}
 }
 
 def customizer():
@@ -2372,7 +2386,8 @@ def customizer():
                     DB.updateSeedUploadStatus(key, 'pending')
                     DB.close()
 
-    return dict(customSprites=customSprites, seedInfo=seedInfo, seedParams=seedParams, msg=msg)
+    return dict(customSprites=customSprites, customShips=customShips,
+                seedInfo=seedInfo, seedParams=seedParams, msg=msg)
 
 def customWebService():
     print("customWebService")
@@ -2380,13 +2395,16 @@ def customWebService():
     # check validity of all parameters
     switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music',
                'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save',
-               'customSpriteEnable', 'customItemsEnable']
+               'customSpriteEnable', 'customItemsEnable', 'customShipEnable', 'remove_itemsounds', 'remove_elevators_doors_speed']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(switchs, [], [], others, isJson=True)
     if request.vars.customSpriteEnable == 'on':
         if request.vars.customSprite not in customSprites:
             raiseHttp(400, "Wrong value for customSprite", True)
+    if request.vars.customShipEnable == 'on':
+        if request.vars.customShip not in customShips:
+            raiseHttp(400, "Wrong value for customShip", True)
 
     if session.customizer == None:
         session.customizer = {}
@@ -2405,6 +2423,8 @@ def customWebService():
     session.customizer['customSpriteEnable'] = request.vars.customSpriteEnable
     session.customizer['customSprite'] = request.vars.customSprite
     session.customizer['customItemsEnable'] = request.vars.customItemsEnable
+    session.customizer['customShipEnable'] = request.vars.customShipEnable
+    session.customizer['customShip'] = request.vars.customShip
     session.customizer['itemsounds'] = request.vars.itemsounds
     session.customizer['spinjumprestart'] = request.vars.spinjumprestart
     session.customizer['rando_speed'] = request.vars.rando_speed
@@ -2416,6 +2436,8 @@ def customWebService():
     session.customizer['AimAnyButton'] = request.vars.AimAnyButton
     session.customizer['max_ammo_display'] = request.vars.max_ammo_display
     session.customizer['supermetroid_msu1'] = request.vars.supermetroid_msu1
+    session.customizer['remove_itemsounds'] = request.vars.remove_itemsounds
+    session.customizer['remove_elevators_doors_speed'] = request.vars.remove_elevators_doors_speed
 
     # call the randomizer
     (fd, jsonFileName) = tempfile.mkstemp()
@@ -2444,6 +2466,10 @@ def customWebService():
         params += ['-c', 'Infinite_Space_Jump']
     if request.vars.refill_before_save == 'on':
         params += ['-c', 'refill_before_save.ips']
+    if request.vars.remove_itemsounds == 'on':
+        params += ['-c', 'remove_itemsounds.ips']
+    if request.vars.remove_elevators_doors_speed == 'on':
+        params += ['-c', 'remove_elevators_doors_speed.ips']
 
     if request.vars.colorsRandomization == 'on':
         params.append('--palette')
@@ -2470,6 +2496,8 @@ def customWebService():
         params += ['--sprite', "{}.ips".format(request.vars.customSprite)]
         if request.vars.customItemsEnable == 'on':
             params.append('--customItemNames')
+    if request.vars.customShipEnable == 'on':
+        params += ['--ship', "{}.ips".format(request.vars.customShip)]
     if request.vars.seedKey != None:
         DB = db.DB()
         seedIpsInfo = DB.getSeedIpsInfo(request.vars.seedKey)

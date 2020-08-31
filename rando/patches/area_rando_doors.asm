@@ -40,7 +40,7 @@ full_refill:
 
 warnpc $8ff72f
 
-;;; use this as exit door asm for croc, phantoon :
+;;; use this as exit door asm for croc, phantoon, draygon :
 ;;; bosses draw their tilemap on BG2, and a routine to draw enemy
 ;;; BG2 ($A0:9726) is also ran and at the end of every
 ;;; door transition. It uses $0e1e as flag to know if a VRAM transfer

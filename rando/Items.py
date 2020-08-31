@@ -27,6 +27,10 @@ class Item:
       return "Item({}, {}, {}, {}, {})".format(self.Category,
           self.Class, self.Code, self.Name, self.Type)
 
+    def json(self):
+        # as we have slots instead of dict
+        return {key : getattr(self, key, None) for key in self.__slots__}
+
 class ItemManager:
     Items = {
         'ETank': Item(
@@ -126,7 +130,6 @@ class ItemManager:
             Code=0xef13,
             Name="Plasma Beam",
             Type='Plasma',
-
         ),
         'Grapple': Item(
             Category='Progression',
@@ -221,6 +224,14 @@ class ItemManager:
             Name="Mother Brain",
             Type='MotherBrain',
         ),
+        # used only during escape path check
+        'Hyper': Item(
+            Category='Beam',
+            Class='Major',
+            Code=0xffff,
+            Name="Hyper Beam",
+            Type='Hyper',
+        )
     }
 
     for itemType, item in Items.items():

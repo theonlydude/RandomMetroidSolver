@@ -81,6 +81,40 @@ org $83aa66
 	;; dw $f76e
 
 ;;; change MB2 main AI script pointer to MB3 death instead
-;;; of triggering baby cutscene
+;;; of triggering rainbow beam, baby cutscene etc
 org $a9b90e
 	dw $c1cf
+
+;;; hijack final MB death cutscene start (head on the floor)
+;;; and start rainbow acquisition animation
+org $a9b189
+	jsr rainbow_start
+
+;; ;;; hijack escape start and stop rainbow acquisition animation
+;; org $a9b1d5
+;; 	jsr rainbow_end
+
+org $a9fc00
+rainbow_start:
+	;; lda #$0016 : jsl $90f084 ; utility function: rainbow samus
+	lda #$8000 : sta $0a76	; set rainbow beam flag
+	lda #$0100 : sta $0b18	; set "charge beam frames"
+	dec $0fb2		; hijacked code
+	rts
+
+;; rainbow_end:
+;; 	;; lda #$0017 : jsl $90f084 ; utility function: unrainbow samus
+;; 	stz $0a4a
+;; 	ldx #$0040	  ; hijacked code
+;; 	rts
+
+;;; rainbow beam notes :
+;;; flashing effect start: A=16h, JSL 90F084
+;;; $13f frames
+;;; flashing effect end: A=17h, JSL 90F084	; probably messes with animations frames also
+;;; hyper beam flag: $0A76
+
+;;; idée: hijacker des phases de MB par lesquelles on passe pour
+;;; mettre l'effet, puis donner le hyper à la fin de l'effet
+	
+;;; flashing head: see arcade shot AI? change palette?

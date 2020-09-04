@@ -191,6 +191,7 @@ class RandoSetup(object):
         self.log.debug('pool={}'.format(sorted([(t, len(poolDict[t])) for t in poolDict])))
         refAP = 'Landing Site'
         locs = self.services.currentLocations(self.startAP, container, post=True)
+        self.areaGraph.useCache(True)
         for loc in locs:
             ap = loc['accessPoint']
             if ap not in comeBack:
@@ -199,6 +200,7 @@ class RandoSetup(object):
                 comeBack[ap] = self.areaGraph.canAccess(self.sm, ap, 'Landing Site', self.settings.maxDiff)
             if comeBack[ap]:
                 totalAvailLocs.append(loc)
+        self.areaGraph.useCache(False)
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
         self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 

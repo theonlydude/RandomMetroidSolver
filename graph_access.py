@@ -596,8 +596,7 @@ accessPoints = [
                 'doors': [0x96]}),
     AccessPoint('Post Botwoon', 'EastMaridia', {
         'Aqueduct Bottom': lambda sm: SMBool(True), # fall down the sandpit
-        'Precious Room Top': lambda sm: sm.wand(sm.canBotwoonExitToAndFromDraygon(),
-                                                sm.canOpenGreenDoors()),
+        'Colosseum Top Right': lambda sm: sm.canBotwoonExitToColosseum(),
         'Toilet Top': lambda sm: sm.wand(sm.canReachCacatacAlleyFromBotowoon(),
                                          sm.canPassCacatacAlley())
     }, internal=True),
@@ -637,8 +636,12 @@ accessPoints = [
         'Aqueduct Bottom': lambda sm: sm.wand(RomPatches.has(RomPatches.MaridiaSandWarp),
                                               sm.canTraverseSandPits())
     }, internal=True),
+    AccessPoint('Colosseum Top Right', 'EastMaridia', {
+        'Post Botwoon': lambda sm: sm.canColosseumToBotwoonExit(),
+        'Precious Room Top': lambda sm: sm.canOpenGreenDoors(), # go down
+    }, internal = True),
     AccessPoint('Precious Room Top', 'EastMaridia', {
-        'Post Botwoon': lambda sm: sm.canBotwoonExitToAndFromDraygon(),
+        'Colosseum Top Right': lambda sm: sm.canClimbColosseum(),
         'DraygonRoomOut': lambda sm: SMBool(True) # go down
     }, internal = True),
     # boss APs

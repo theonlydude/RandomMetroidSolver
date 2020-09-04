@@ -536,21 +536,44 @@ class HelpersGraph(Helpers):
                                       sm.haveItem('SpaceJump'))))
 
     @Cache.decorator
-    def canBotwoonExitToAndFromDraygon(self):
+    def canGoThroughColosseumSuitless(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Grapple'),
+                      sm.haveItem('SpaceJump'),
+                      sm.wand(sm.haveItem('Ice'),
+                              sm.energyReserveCountOk(int(7.0/sm.getDmgReduction(False)[0])), # mochtroid dmg
+                              sm.knowsBotwoonToDraygonWithIce()))
+
+    @Cache.decorator
+    def canBotwoonExitToColosseum(self):
         sm = self.smbm
         return sm.wor(sm.haveItem('Gravity'),
                       sm.wand(sm.knowsGravLessLevel2(),
                               sm.haveItem("HiJump"),
-                              # B -> D : get to top right door
-                              # D -> B : climb to room top
+                              # get to top right door
                               sm.wor(sm.haveItem('Grapple'),
-                                     sm.haveItem('Ice')), # climb mochtroids
-                              # go through Colosseum
+                                     sm.haveItem('Ice'), # climb mochtroids
+                                     sm.wand(sm.canDoubleSpringBallJump(),
+                                             sm.haveItem('SpaceJump'))),
+                              sm.canGoThroughColosseumSuitless()))
+
+    @Cache.decorator
+    def canColosseumToBotwoonExit(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.knowsGravLessLevel2(),
+                              sm.haveItem("HiJump"),
+                              sm.canGoThroughColosseumSuitless()))
+
+    @Cache.decorator
+    def canClimbColosseum(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.knowsGravLessLevel2(),
+                              sm.haveItem("HiJump"),
                               sm.wor(sm.haveItem('Grapple'),
-                                     sm.haveItem('SpaceJump'),
-                                     sm.wand(sm.haveItem('Ice'),
-                                             sm.energyReserveCountOk(int(7.0/sm.getDmgReduction(False)[0])), # mochtroid dmg
-                                             sm.knowsBotwoonToDraygonWithIce()))))
+                                     sm.haveItem('Ice'),
+                                     sm.knowsPreciousRoomGravJumpExit())))
 
     @Cache.decorator
     def canClimbWestSandHole(self):

@@ -335,6 +335,10 @@
     "WestSandHoleSuitlessWallJumps": [
       true,
       100
+    ],
+    "PreciousRoomGravJumpExit": [
+      true,
+      100
     ]
   },
   "Settings": {

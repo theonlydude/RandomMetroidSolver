@@ -7,7 +7,7 @@
     "minimizerTourian": "off",
     "minimizerQty": "100",
     "bossRandomization": "on",
-    "escapeRandomization": "random",
+    "escapeRando": "random",
   "hideItems": "off",
   "funCombat": "off",
   "majorsSplit": "Full",

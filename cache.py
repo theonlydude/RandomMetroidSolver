@@ -2,10 +2,28 @@
 
 class Cache:
     cache = {}
+    previousCache = None
+    item = None
 
     @staticmethod
     def reset():
         Cache.cache = {}
+
+    # only used by the solver
+    @staticmethod
+    def addItem(item):
+        Cache.previousCache = Cache.cache
+        Cache.item = item
+        Cache.cache = {}
+
+    @staticmethod
+    def removeItem(item):
+        if item == Cache.item:
+            Cache.cache = Cache.previousCache
+        else:
+            Cache.cache = {}
+        Cache.previousCache = None
+        Cache.item = None
 
     @staticmethod
     def decorator(func):

@@ -2323,8 +2323,7 @@ customShips = {
     'Red-M0nk3ySMShip2': {"index":1, "name": "Red-M0nk3ySMShip2", "desc": "", "author": "Red-M0nk3y"},
     'Red-M0nk3ySMShip3': {"index":2, "name": "Red-M0nk3ySMShip3", "desc": "", "author": "Red-M0nk3y"},
     'Red-M0nk3ySMShip4': {"index":3, "name": "Red-M0nk3ySMShip4", "desc": "", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip5': {"index":4, "name": "Red-M0nk3ySMShip5", "desc": "", "author": "Red-M0nk3y"},
-    'MFFusionship': {"index":5, "name": "MFFusionship", "desc": "", "author": "Crys"}
+    'Red-M0nk3ySMShip5': {"index":4, "name": "Red-M0nk3ySMShip5", "desc": "", "author": "Red-M0nk3y"}
 }
 
 def customizer():

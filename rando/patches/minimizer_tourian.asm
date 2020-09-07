@@ -86,27 +86,36 @@ org $a9b90e
 	dw $c1cf
 
 ;;; hijack final MB death cutscene start (head on the floor)
-;;; and start rainbow acquisition animation
-org $a9b189
-	jsr rainbow_start
+;;; and start hyper acquisition animation
+;;; carefully chosen because it runs only once, not every frame
+org $a9b17f
+	jsr hyper_start
 
-;; ;;; hijack escape start and stop rainbow acquisition animation
-;; org $a9b1d5
-;; 	jsr rainbow_end
+;;; hijack escape start and stop hyper acquisition animation
+;;; carefully chosen because it runs only once, not every frame
+org $a9b1be
+	jsr hyper_end
 
 org $a9fc00
-rainbow_start:
-	;; lda #$0016 : jsl $90f084 ; utility function: rainbow samus
-	lda #$8000 : sta $0a76	; set rainbow beam flag
-	lda #$0100 : sta $0b18	; set "charge beam frames"
-	dec $0fb2		; hijacked code
+hyper_start:
+	lda #$8000
+	sta $0a4a	; set rainbow samus
+	sta $0a76	; set hyper beam flag
+	jsl $90ac8d	; update beam graphics
+.end:
+	lda #$b189	; hijacked code
 	rts
 
-;; rainbow_end:
-;; 	;; lda #$0017 : jsl $90f084 ; utility function: unrainbow samus
-;; 	stz $0a4a
-;; 	ldx #$0040	  ; hijacked code
-;; 	rts
+hyper_end:
+	stz $0a4a		; unrainbow samus
+	;; reset various samus palette stuff
+	stz $0ace
+	stz $0ad0
+	stz $0b62
+	;; load samus suit palette
+	jsl $91deba
+	lda #$b1d5	  ; hijacked code
+	rts
 
 ;;; rainbow beam notes :
 ;;; flashing effect start: A=16h, JSL 90F084

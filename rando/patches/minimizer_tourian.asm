@@ -80,6 +80,13 @@ org $83aa66
 	dw pre_tourian_door
 	;; dw $f76e
 
+org $91ffee
+enable_hyper:
+	jsr $e5f0
+	rtl
+
+warnpc $91ffff
+
 ;;; change MB2 main AI script pointer to MB3 death instead
 ;;; of triggering rainbow beam, baby cutscene etc
 org $a9b90e
@@ -100,8 +107,7 @@ org $a9fc00
 hyper_start:
 	lda #$8000
 	sta $0a4a	; set rainbow samus
-	sta $0a76	; set hyper beam flag
-	jsl $90ac8d	; update beam graphics
+	jsl enable_hyper
 .end:
 	lda #$b189	; hijacked code
 	rts

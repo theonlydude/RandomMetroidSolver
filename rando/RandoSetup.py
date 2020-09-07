@@ -23,6 +23,7 @@ class RandoSetup(object):
         self.services = services
         self.restrictions = services.restrictions
         self.areaGraph = services.areaGraph
+        self.allLocations = locations
         self.locations = self.areaGraph.getAccessibleLocations(locations, self.startAP)
 #        print("nLocs Setup: "+str(len(self.locations)))
         self.itemManager = self.settings.getItemManager(self.sm, len(self.locations))
@@ -160,6 +161,9 @@ class RandoSetup(object):
 
     def checkPool(self, forbidden=None):
         self.log.debug("checkPool. forbidden=" + str(forbidden) + ", self.forbiddenItems=" + str(self.forbiddenItems))
+        if self.graphSettings.minimizerN is None and len(self.allLocations) > len(self.locations):
+            # invalid graph with looped areas
+            return False
         ret = True
         if forbidden is not None:
             pool = self.getItemPool(forbidden)
@@ -191,6 +195,7 @@ class RandoSetup(object):
         self.log.debug('pool={}'.format(sorted([(t, len(poolDict[t])) for t in poolDict])))
         refAP = 'Landing Site'
         locs = self.services.currentLocations(self.startAP, container, post=True)
+        self.areaGraph.useCache(True)
         for loc in locs:
             ap = loc['accessPoint']
             if ap not in comeBack:
@@ -199,6 +204,7 @@ class RandoSetup(object):
                 comeBack[ap] = self.areaGraph.canAccess(self.sm, ap, 'Landing Site', self.settings.maxDiff)
             if comeBack[ap]:
                 totalAvailLocs.append(loc)
+        self.areaGraph.useCache(False)
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
         self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 

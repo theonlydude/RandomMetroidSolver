@@ -10,6 +10,16 @@ def isStdPreset(preset):
 def removeChars(string, toRemove):
     return re.sub('[{}]+'.format(toRemove), '', string)
 
+def range_union(ranges):
+    ret = []
+    for rg in sorted([[r.start, r.stop] for r in ranges]):
+        begin, end = rg[0], rg[-1]
+        if ret and ret[-1][1] > begin:
+            ret[-1][1] = max(ret[-1][1], end)
+        else:
+            ret.append([begin, end])
+    return [range(r[0], r[1]) for r in ret]
+
 # https://github.com/robotools/fontParts/commit/7cb561033929cfb4a723d274672e7257f5e68237
 def normalizeRounding(n):
     # Normalizes rounding as Python 2 and Python 3 handing the rounding of halves (0.5, 1.5, etc) differently.

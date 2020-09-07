@@ -101,7 +101,7 @@ def loadPresetsList():
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList():
-    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020', 'Community_Race_Easy', 'Community_Race_Hard']
+    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020', 'VARIA_Weekly']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
@@ -1010,8 +1010,7 @@ def randomizer():
         "Playoff_Races": "rando league races during playoff (Majors/Minors split)",
         "Playoff_Races_Chozo": "rando league races during playoff (Chozo split)",
         "SMRAT2020": "Super Metroid Randomizer Accessible Tournament 2020",
-        "Community_Race_Easy": "Easy Preset for Community Race",
-        "Community_Race_Hard": "Hard Preset for Community Race"
+        "VARIA_Weekly": "Casual logic community races"
     }
 
     startAPs = GraphUtils.getStartAccessPointNamesCategory()
@@ -2324,8 +2323,7 @@ customShips = {
     'Red-M0nk3ySMShip2': {"index":1, "name": "Red-M0nk3ySMShip2", "desc": "", "author": "Red-M0nk3y"},
     'Red-M0nk3ySMShip3': {"index":2, "name": "Red-M0nk3ySMShip3", "desc": "", "author": "Red-M0nk3y"},
     'Red-M0nk3ySMShip4': {"index":3, "name": "Red-M0nk3ySMShip4", "desc": "", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip5': {"index":4, "name": "Red-M0nk3ySMShip5", "desc": "", "author": "Red-M0nk3y"},
-    'MFFusionship': {"index":5, "name": "MFFusionship", "desc": "", "author": "Crys"}
+    'Red-M0nk3ySMShip5': {"index":4, "name": "Red-M0nk3ySMShip5", "desc": "", "author": "Red-M0nk3y"}
 }
 
 def customizer():

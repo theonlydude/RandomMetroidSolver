@@ -83,13 +83,14 @@ class Filler(object):
 
     # helper method to collect in item/location with logic. updates self.ap and VCR
     def collect(self, itemLoc, container=None, pickup=True):
+        containerArg = container
         if container is None:
             container = self.container
         location = itemLoc['Location']
         item = itemLoc['Item']
         pickup &= 'restricted' not in location or location['restricted'] == False
         self.ap = self.services.collect(self.ap, container, itemLoc, pickup=pickup)
-        if self.vcr is not None:
+        if self.vcr is not None and containerArg is None:
             self.vcr.addLocation(location['Name'], item.Type)
 
     # called by generateItems at the end to knows which particulier

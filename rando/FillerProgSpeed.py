@@ -493,7 +493,10 @@ class FillerProgSpeedChozoSecondPhase(Filler):
             self.container.transferCollected(cont)
             filler = FillerRandomItems(self.ap, self.graph, self.restrictions, cont)
             (stuck, itemLocs, prog) = filler.generateItems()
-            assert not stuck
+            if stuck:
+                if len(filler.errorMsg) > 0:
+                    self.errorMsg += '\n'+filler.errorMsg
+                return False
             for itemLoc in itemLocs:
                 if itemLoc['Location'] in self.container.unusedLocations:
                     self.log.debug("step. POST COLLECT "+itemLoc['Item'].Type+" at "+itemLoc['Location']['Name'])
@@ -506,5 +509,6 @@ class FillerProgSpeedChozoSecondPhase(Filler):
             (stuck, itemLocs, prog) = filler.generateItems()
             if len(filler.errorMsg) > 0:
                 self.errorMsg += '\n'+filler.errorMsg
-            assert not stuck
+            if stuck:
+                return False
         return True

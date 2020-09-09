@@ -29,7 +29,9 @@ class RandoServices(object):
     def collect(self, ap, container, itemLoc, pickup=True):
         if pickup == True:
             # walk the graph to update AP
-            self.currentLocations(ap, container, itemLoc['Item'])
+            if self.cache:
+                self.cache.reset()
+            self.currentLocations(ap, container)
         container.collect(itemLoc, pickup=pickup)
         self.log.debug("COLLECT "+itemLoc['Item'].Type+" at "+itemLoc['Location']['Name'])
         sys.stdout.write('.')

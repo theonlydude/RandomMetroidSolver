@@ -41,6 +41,18 @@ class Cache:
                 return ret
         return _decorator
 
+    # for lambdas
+    @staticmethod
+    def ldeco(name, func):
+        def _decorator(self):
+            if name in Cache.cache:
+                return Cache.cache[name]
+            else:
+                ret = func(self)
+                Cache.cache[name] = ret
+                return ret
+        return _decorator
+
 class RequestCache(object):
     def __init__(self):
         self.results = {}

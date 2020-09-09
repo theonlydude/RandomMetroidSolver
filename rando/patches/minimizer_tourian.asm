@@ -13,7 +13,7 @@ lorom
 !full_refill = $f700    ; short ptr in bank 8F (see area_rando_doors.asm)
 !mark_event  = $8081fa
 !bit_index   = $80818e  ; returns X=byte index, $05e7=bitmask
-
+	
 org $8ff730
 ;;; gadora door asm
 tourian_door:
@@ -103,6 +103,11 @@ org $a9b17f
 org $a9b1be
 	jsr hyper_end
 
+;;; skips MB invicibility palette handling to avoid flashing bug
+;;; during death animation
+org $a9cfdb
+	bra $1f
+
 org $a9fc00
 hyper_start:
 	lda #$8000
@@ -122,14 +127,3 @@ hyper_end:
 	jsl $91deba
 	lda #$b1d5	  ; hijacked code
 	rts
-
-;;; rainbow beam notes :
-;;; flashing effect start: A=16h, JSL 90F084
-;;; $13f frames
-;;; flashing effect end: A=17h, JSL 90F084	; probably messes with animations frames also
-;;; hyper beam flag: $0A76
-
-;;; idée: hijacker des phases de MB par lesquelles on passe pour
-;;; mettre l'effet, puis donner le hyper à la fin de l'effet
-	
-;;; flashing head: see arcade shot AI? change palette?

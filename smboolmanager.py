@@ -169,7 +169,7 @@ class SMBoolManagerPlando(SMBoolManager):
         if isCount:
             setattr(self, item+'Count', getattr(self, item+'Count') + 1)
 
-        Cache.reset()
+        Cache.addItem(item)
 
     def removeItem(self, item):
         # randomizer removed an item (or the item was added to test a post available)
@@ -185,4 +185,4 @@ class SMBoolManagerPlando(SMBoolManager):
             else:
                 delattr(self, dup)
 
-        Cache.reset()
+        Cache.removeItem(item)

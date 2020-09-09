@@ -13,7 +13,7 @@ lorom
 !full_refill = $f700    ; short ptr in bank 8F (see area_rando_doors.asm)
 !mark_event  = $8081fa
 !bit_index   = $80818e  ; returns X=byte index, $05e7=bitmask
-
+	
 org $8ff730
 ;;; gadora door asm
 tourian_door:
@@ -79,3 +79,51 @@ org $83aaae
 org $83aa66
 	dw pre_tourian_door
 	;; dw $f76e
+
+org $91ffee
+enable_hyper:
+	jsr $e5f0
+	rtl
+
+warnpc $91ffff
+
+;;; change MB2 main AI script pointer to MB3 death instead
+;;; of triggering rainbow beam, baby cutscene etc
+org $a9b90e
+	dw $c1cf
+
+;;; hijack final MB death cutscene start (head on the floor)
+;;; and start hyper acquisition animation
+;;; carefully chosen because it runs only once, not every frame
+org $a9b17f
+	jsr hyper_start
+
+;;; hijack escape start and stop hyper acquisition animation
+;;; carefully chosen because it runs only once, not every frame
+org $a9b1be
+	jsr hyper_end
+
+;;; skips MB invicibility palette handling to avoid flashing bug
+;;; during death animation
+org $a9cfdb
+	bra $1f
+
+org $a9fc00
+hyper_start:
+	lda #$8000
+	sta $0a4a	; set rainbow samus
+	jsl enable_hyper
+.end:
+	lda #$b189	; hijacked code
+	rts
+
+hyper_end:
+	stz $0a4a		; unrainbow samus
+	;; reset various samus palette stuff
+	stz $0ace
+	stz $0ad0
+	stz $0b62
+	;; load samus suit palette
+	jsl $91deba
+	lda #$b1d5	  ; hijacked code
+	rts

@@ -2,28 +2,28 @@
 
 class Cache:
     cache = {}
-    previousCache = None
-    item = None
+    masterCache = {}
 
     @staticmethod
     def reset():
-        Cache.cache = {}
-
-    # only used by the solver
-    @staticmethod
-    def addItem(item):
-        Cache.previousCache = Cache.cache
-        Cache.item = item
-        Cache.cache = {}
+        # reinit the whole cache
+        key = 0
+        Cache.masterCache = {}
+        Cache.cache = {'key': key}
+        Cache.masterCache[key] = Cache.cache
 
     @staticmethod
-    def removeItem(item):
-        if item == Cache.item:
-            Cache.cache = Cache.previousCache
+    def update(newKey):
+        if newKey in Cache.masterCache:
+#            print("usek: "+format(newKey, '#067b'))
+#            if Cache.masterCache[newKey]['key'] != newKey:
+#                print("ERROR: key stored in cache is not the same as the new key !!!!")
+#                print("      "+format(Cache.masterCache[newKey]['key'], '#067b')+" key in cache")
+            Cache.cache = Cache.masterCache[newKey]
         else:
-            Cache.cache = {}
-        Cache.previousCache = None
-        Cache.item = None
+#            print("newk: "+format(newKey, '#067b'))
+            Cache.cache = {'key': newKey}
+            Cache.masterCache[newKey] = Cache.cache
 
     @staticmethod
     def decorator(func):

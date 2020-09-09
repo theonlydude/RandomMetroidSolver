@@ -1661,6 +1661,8 @@ class StandardSolver(CommonSolver):
         # find which technique could allow to continue the seed
         locations = self.majorLocations if self.majorsSplit == 'Full' else self.majorLocations + self.minorLocations
 
+        # instanciate a new smbool manager to reset the cache
+        self.smbm = SMBoolManager()
         presetFileName = os.path.expanduser('~/RandomMetroidSolver/standard_presets/solution.json')
         presetLoader = PresetLoader.factory(presetFileName)
         presetLoader.load()

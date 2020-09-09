@@ -526,6 +526,12 @@ class Knows:
                                     'href': 'https://www.youtube.com/watch?v=i2OGuFpcfiw&t=160s',
                                     'rooms': ['The Precious Room']}
 
+    PreciousRoomGravJumpExit = SMBool(False, 0, ['PreciousRoomGravJumpExit'])
+    desc['PreciousRoomGravJumpExit'] = {'display': 'Exit the Precious room with a Gravity Jump',
+                                        'title': 'Jump through the exit door into the water in the next room to climb up with a Gravity Jump',
+                                        'href': 'https://www.twitch.tv/jooniejoone/clip/StylishVainPorcupineVoHiYo',
+                                        'rooms': ['The Precious Room', 'Colosseum']}
+
     # clips
     MochtroidClip = SMBool(True, medium, ['MochtroidClip'])
     desc['MochtroidClip'] = {'display': 'Mochtroid Clip',
@@ -665,7 +671,7 @@ class Knows:
                        'AccessSpringBallWithBombJumps', 'AccessSpringBallWithSpringBallJump',
                        'AccessSpringBallWithGravJump', 'AccessSpringBallWithXRayClimb', 'AccessSpringBallWithFlatley'],
              'title': 'Spring Ball Access'},
-            {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
+            {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit', 'PreciousRoomGravJumpExit'],
              'title': 'Suitless Draygon Exit'},
             {'knows': ['WestSandHoleSuitlessWallJumps', 'DoubleSpringBallJump', 'TediousMountEverest',
                        'BotwoonToDraygonWithIce', 'SuitlessCrystalFlashClip',

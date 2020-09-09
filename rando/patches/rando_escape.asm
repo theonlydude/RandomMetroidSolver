@@ -221,6 +221,8 @@ escape_setup:
     inx : inx
     cpx #$0008
     bcc -
+    ;; open Maridia Tube
+    lda #$000b : jsl $8081fa
 .end:
     rts
 

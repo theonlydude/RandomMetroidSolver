@@ -135,6 +135,8 @@ locations = [
                                    sm.canFly(),
                                    sm.wor(sm.haveItem('HiJump'),
                                           sm.haveItem('Ice'),
+                                          sm.wand(sm.canUsePowerBombs(),
+                                                  sm.haveItem('SpeedBooster')),
                                           sm.canSimpleShortCharge()))
 },
 {

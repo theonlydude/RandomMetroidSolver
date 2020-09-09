@@ -3,6 +3,7 @@
   "funMovement": "off",
   "startLocation": "random",
   "areaRandomization": "random",
+  "escapeRando": "random",
   "bossRandomization": "random",
   "hideItems": "off",
   "funCombat": "off",

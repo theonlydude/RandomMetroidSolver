@@ -3,7 +3,7 @@ import copy, random, sys
 
 from rando.Filler import Filler
 from rando.FillerRandom import FillerRandom, FillerRandomItems
-from rando.Choice import ItemThenLocChoiceProgSpeed
+from rando.Choice import ItemThenLocChoiceProgSpeed, ItemThenLocChoice
 from rando.RandoServices import ComebackCheckType
 from rando.Items import ItemManager
 from rando.ItemLocContainer import ItemLocContainer, getLocListStr, getItemListStr, getItemLocationsStr, getItemLocStr
@@ -83,8 +83,8 @@ class FillerProgSpeed(Filler):
     def chooseItemLocRestrictFirst(self, itemLocDict):
         if self.settings.restrictions['Suits'] == True and self.container.hasItemInPool(lambda item: item.Type in ['Varia', 'Gravity']):
             itemLocDict = {key: value for key, value in itemLocDict.items() if key.Type in ['Varia', 'Gravity']}
-
-        return self.chooseItemLoc(itemLocDict, False)
+        # pure random choice instead of prog-speed specific
+        return ItemThenLocChoice.chooseItemLoc(self.choice, itemLocDict, False)
 
     def currentLocations(self, item=None):
         return self.services.currentLocations(self.ap, self.container, item=item)
@@ -403,7 +403,7 @@ class FillerProgSpeed(Filler):
                     isStuck = False
                 else:
                     isStuck = self.getItemFromStandardPool()
-        self.log.debug("step end. itemLocations="+getItemLocationsStr(self.container.itemLocations))
+#        self.log.debug("step end. itemLocations="+getItemLocationsStr(self.container.itemLocations))
         return not isStuck
 
     def getProgressionItemLocations(self):

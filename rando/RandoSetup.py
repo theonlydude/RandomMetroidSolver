@@ -23,6 +23,7 @@ class RandoSetup(object):
         self.services = services
         self.restrictions = services.restrictions
         self.areaGraph = services.areaGraph
+        self.allLocations = locations
         self.locations = self.areaGraph.getAccessibleLocations(locations, self.startAP)
 #        print("nLocs Setup: "+str(len(self.locations)))
         self.itemManager = self.settings.getItemManager(self.sm, len(self.locations))
@@ -160,6 +161,9 @@ class RandoSetup(object):
 
     def checkPool(self, forbidden=None):
         self.log.debug("checkPool. forbidden=" + str(forbidden) + ", self.forbiddenItems=" + str(self.forbiddenItems))
+        if self.graphSettings.minimizerN is None and len(self.allLocations) > len(self.locations):
+            # invalid graph with looped areas
+            return False
         ret = True
         if forbidden is not None:
             pool = self.getItemPool(forbidden)

@@ -1,5 +1,7 @@
 import itertools
 
+from utils import range_union
+
 # adapted from ips-util for python 3.2 (https://pypi.org/project/ips-util/)
 class IPS_Patch(object):
     def __init__(self, patchDict=None):
@@ -150,11 +152,8 @@ class IPS_Patch(object):
             raise RuntimeError('Record with length {0} is too large for the IPS format. Records must be less than 65536 bytes.'.format(len(data)))
         if len(data) == 0: # ignore empty records
             return
-        record = {'address': address, 'data': data}
-        sz = address + len(data)
-        if sz > self.max_size:
-            self.max_size = sz
-        self.records.append(record)
+        record = {'address': address, 'data': data, 'size':len(data)}
+        self.appendRecord(record)
 
     def add_rle_record(self, address, data, count):
         if address == int.from_bytes(b'EOF', byteorder='big'):
@@ -165,8 +164,11 @@ class IPS_Patch(object):
             raise RuntimeError('RLE record with length {0} is too large for the IPS format. RLE records must be less than 65536 bytes.'.format(count))
         if len(data) != 1:
             raise RuntimeError('Data for RLE record must be exactly one byte! Received {0}.'.format(data))
-        record = {'address': address, 'data': data, 'rle_count': count}
-        sz = address + count
+        record = {'address': address, 'data': data, 'rle_count': count, 'size': count}
+        self.appendRecord(record)
+
+    def appendRecord(self, record):
+        sz = record['address'] + record['size']
         if sz > self.max_size:
             self.max_size = sz
         self.records.append(record)
@@ -231,8 +233,12 @@ class IPS_Patch(object):
     def append(self, patch):
         if patch.truncate_length is not None and (self.truncate_length is None or patch.truncate_length > self.truncate_length):
             self.set_truncate_length(patch.truncate_length)
-        if patch.max_size > self.max_size:
-            self.max_size = patch.max_size
         for record in patch.records:
-            if len(record['data']) > 0: # ignore empty records
-                self.records.append(record)
+            if record['size'] > 0: # ignore empty records
+                self.appendRecord(record)
+
+    # gets address ranges written to by this patch
+    def getRanges(self):
+        def getRange(record):
+            return range(record['address'], record['address']+record['size'])
+        return range_union([getRange(record) for record in self.records])

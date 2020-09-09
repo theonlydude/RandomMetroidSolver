@@ -1579,3 +1579,5 @@ org $ded200
 itemlocations:
     {pink}
     dw "         ITEM LOCATIONS         " // 640
+    padbyte $ca
+    pad $dedbcf

@@ -277,14 +277,17 @@ class RandoServices(object):
             for item in items:
                 itemLocDict[item] = locations
         self.processMorphPlacements(ap, container, comebackCheck, itemLocDict, curLocs)
+        self.printItemLocDict(itemLocDict)
+        self.log.debug('possibleProg='+str(possibleProg))
+        return (itemLocDict, possibleProg)
+
+    def printItemLocDict(self, itemLocDict):
         if self.log.getEffectiveLevel() == logging.DEBUG:
             debugDict = {}
             for item, locList in itemLocDict.items():
                 if item.Type not in debugDict:
                     debugDict[item.Type] = [loc['Name'] for loc in locList]
             self.log.debug('itemLocDict='+str(debugDict))
-            self.log.debug('possibleProg='+str(possibleProg))
-        return (itemLocDict, possibleProg)
 
     # same as getPossiblePlacements, without any logic check
     def getPossiblePlacementsNoLogic(self, container):
@@ -297,6 +300,7 @@ class RandoServices(object):
             locList = getLocList(itemObj, container.unusedLocations)
             for item in items:
                 itemLocDict[item] = locList
+        self.printItemLocDict(itemLocDict)
         return (itemLocDict, False)
 
     # check if bosses are blocking the last remaining locations.
@@ -340,6 +344,8 @@ class RandoServices(object):
         return not any(loc['Name'] == 'Mother Brain' for loc in container.unusedLocations)
 
     def can100percent(self, ap, container):
+        if not self.canEndGame(container):
+            return False
         curLocs = self.currentLocations(ap, container, post=True)
         return len(curLocs) == len(container.unusedLocations)
 

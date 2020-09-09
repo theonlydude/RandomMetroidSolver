@@ -33,9 +33,10 @@ localIpsDir = 'varia_repository'
 # use the correct one
 pythonExec = "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
 
+maxPresets = 4096
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
-    return len(os.listdir('community_presets')) >= 2048
+    return len(os.listdir('community_presets')) >= maxPresets
 
 def getPresetDir(preset):
     if isStdPreset(preset):
@@ -456,7 +457,7 @@ def presets():
                     session.flash = "Error writing the preset {}: {}".format(preset, e)
                 redirect(URL(r=request, f='presets'))
             else:
-                session.flash = "Sorry, there's already 2048 presets on the website, can't add more"
+                session.flash = "Sorry, maximum number of presets reached, can't add more"
                 redirect(URL(r=request, f='presets'))
 
     # set title

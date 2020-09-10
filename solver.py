@@ -983,9 +983,8 @@ class InteractiveSolver(CommonSolver):
         self.loadPreset(self.presetFileName)
 
         self.loadRom(rom, interactive=True, magic=magic, startAP=startAP)
-        if self.mode == 'plando':
-            # in plando always consider that we're doing full
-            self.majorsSplit = 'Full'
+        # in plando/tracker always consider that we're doing full
+        self.majorsSplit = 'Full'
 
         self.clearItems()
 

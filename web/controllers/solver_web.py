@@ -1560,6 +1560,20 @@ def home():
 
     return dict()
 
+def addError(state, params, tmpErr):
+    errDir = os.path.expanduser("~/web2py/applications/solver/errors")
+    if os.path.isdir(errDir):
+        errFile = '{}.{}.{}'.format(request.client, datetime.now().strftime('%Y-%m-%d.%H-%M-%S'), str(uuid.uuid4()))
+        errFile = os.path.join(errDir, errFile)
+        with open(state) as f:
+            stateContent = f.read()
+        with open(tmpErr) as f:
+            errContent = f.read()
+        with open(errFile, 'w') as f:
+            f.write(str(params)+'\n')
+            f.write(str(stateContent)+'\n')
+            f.write(errContent)
+
 def getErrors():
     # check dir exists
     errDir = os.path.expanduser("~/web2py/applications/solver/errors")
@@ -1839,6 +1853,7 @@ class WS(object):
 
         (fd1, jsonInFileName) = tempfile.mkstemp()
         (fd2, jsonOutFileName) = tempfile.mkstemp()
+        (fd3, errFile) = tempfile.mkstemp()
         params = [
             pythonExec,  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
             '--interactive',
@@ -1890,7 +1905,7 @@ class WS(object):
 
         print("before calling isolver: {}".format(params))
         start = datetime.now()
-        ret = subprocess.call(params)
+        ret = subprocess.call(params, stderr=fd3)
         end = datetime.now()
         duration = (end - start).total_seconds()
         print("ret: {}, duration: {}s".format(ret, duration))
@@ -1902,6 +1917,8 @@ class WS(object):
             os.remove(jsonInFileName)
             os.close(fd2)
             os.remove(jsonOutFileName)
+            os.close(fd3)
+            os.remove(errFile)
             if action == 'save':
                 return json.dumps(state)
             else:
@@ -1912,19 +1929,22 @@ class WS(object):
                 self.session["state"] = state
                 return self.returnState()
         else:
-            os.close(fd1)
-            os.remove(jsonInFileName)
-
             msg = "Something wrong happened while iteratively solving the ROM"
             try:
+                addError(jsonInFileName, params, errFile)
                 with open(jsonOutFileName, 'r') as jsonFile:
                     data = json.load(jsonFile)
                     if "errorMsg" in data:
                         msg = data["errorMsg"]
             except Exception as e:
+                # happen when jsonOutFileName is empty
                 pass
+            os.close(fd1)
+            os.remove(jsonInFileName)
             os.close(fd2)
             os.remove(jsonOutFileName)
+            os.close(fd3)
+            os.remove(errFile)
             raiseHttp(400, msg, True)
 
 class WS_common_init(WS):

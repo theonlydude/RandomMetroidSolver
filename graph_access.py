@@ -974,7 +974,7 @@ class GraphUtils:
         for ap in unusedAPs:
             transitions.append((ap.Name, ap.Name))
 
-    def createMinimizerTransitions(startApName, locLimit, escapeRando):
+    def createMinimizerTransitions(startApName, locLimit):
         if startApName == 'Ceres':
             startApName = 'Landing Site'
         startAp = getAccessPoint(startApName)
@@ -987,30 +987,19 @@ class GraphUtils:
         areas = [startAp.GraphArea]
         GraphUtils.log.debug("availAreas: {}".format(availAreas))
         GraphUtils.log.debug("areas: {}".format(areas))
-        nLocsCrateria = getNLocs(lambda loc: loc['GraphArea'] == 'Crateria')
         inBossCheck = lambda ap: ap.Boss and ap.Name.endswith("In")
         nLocs = 0
         transitions = []
         usedAPs = []
         trLimit = 5
         locLimit -= 3 # 3 "post boss" locs will always be available, and are filtered out in getNLocs
-        def isShipReachable():
-            nonlocal areas
-            if escapeRando == False:
-                return True
-            return 'Crateria' in areas and len(GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and ap.Name in escapeTargets)) > 0
         def openTransitions():
             nonlocal areas, inBossCheck, usedAPs
             return GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and not ap.isInternal() and not inBossCheck(ap) and not ap in usedAPs)
-        while nLocs < locLimit or len(openTransitions()) < trLimit or not isShipReachable():
+        while nLocs < locLimit or len(openTransitions()) < trLimit:
             GraphUtils.log.debug("openTransitions="+str([ap.Name for ap in openTransitions()]))
             fromAreas = availAreas
-            if nLocs >= locLimit and not isShipReachable() and 'Crateria' in areas:
-                GraphUtils.log.debug("ship unreachable")
-                # add an area with a map station
-                escapeAPs = GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and ap.Name in escapeTargets)
-                fromAreas = [area for area in availAreas if len(GraphUtils.getAPs(lambda ap: ap.GraphArea == area and ap.Name in escapeTargets and ap not in escapeAPs)) > 0]
-            if nLocs >= locLimit and isShipReachable():
+            if nLocs >= locLimit:
                 GraphUtils.log.debug("not enough open transitions")
                 # we just need transitions, avoid adding a huge area
                 fromAreas = []
@@ -1020,8 +1009,6 @@ class GraphUtils:
                     n -= 1
                 minLocs = min([getNLocs(lambda loc: loc['GraphArea'] == area) for area in fromAreas])
                 fromAreas = [area for area in fromAreas if getNLocs(lambda loc: loc['GraphArea'] == area) == minLocs]
-            if escapeRando == True and nLocs >= (locLimit - nLocsCrateria) and 'Crateria' not in areas:
-                fromAreas = ['Crateria']
             elif len(openTransitions()) <= 1: # dont' get stuck by adding dead ends
                 fromAreas = [area for area in fromAreas if len(GraphUtils.getAPs(lambda ap: ap.GraphArea == area and not ap.isInternal())) > 1]
             nextArea = random.choice(fromAreas)
@@ -1044,16 +1031,14 @@ class GraphUtils:
         random.shuffle(sourceAPs)
         targetAPs = GraphUtils.getAPs(lambda ap: (inBossCheck(ap) or ap.Name == "Golden Four") and not ap in usedAPs)
         random.shuffle(targetAPs)
-        GraphUtils.log.debug("len(sourceAPs): {}, len(targetAPs): {}".format(len(sourceAPs), len(targetAPs)))
-        GraphUtils.log.debug("sourceAPs: {}".format([ap.Name for ap in sourceAPs]))
-        GraphUtils.log.debug("targetAPs: {}".format([ap.Name for ap in targetAPs]))
         assert len(sourceAPs) >= len(targetAPs), "Minimizer: less source than target APs"
         while len(targetAPs) > 0:
             transitions.append((sourceAPs.pop().Name, targetAPs.pop().Name))
         transitions += GraphUtils.createRegularAreaTransitions(sourceAPs, lambda ap: not ap.isInternal())
-        GraphUtils.log.debug("transitions: {}".format(transitions))
+        GraphUtils.log.debug("FINAL MINIMIZER transitions: {}".format(transitions))
         GraphUtils.loopUnusedTransitions(transitions)
-        GraphUtils.log.debug("nLocs: "+str(nLocs+3))
+        GraphUtils.log.debug("FINAL MINIMIZER nLocs: "+str(nLocs+3))
+        GraphUtils.log.debug("FINAL MINIMIZER areas: "+str(areas))
         return transitions
 
     def createLightAreaTransitions():
@@ -1151,7 +1136,7 @@ class GraphUtils:
         n = len(possibleTargets)
         assert n < 4, "Invalid possibleTargets list: " + str(possibleTargets)
         # first get our list of 4 entries for escape patch
-        if n >= 2:
+        if n >= 1:
             # get actual animals: pick one of the remaining targets
             animalsAccess = possibleTargets.pop()
             graph.EscapeAttributes['Animals'] = animalsAccess

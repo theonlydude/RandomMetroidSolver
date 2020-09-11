@@ -20,7 +20,7 @@ class GraphBuilder(object):
         if transitions is None:
             transitions = []
             if self.minimizerN is not None:
-                transitions = GraphUtils.createMinimizerTransitions(self.graphSettings.startAP, self.minimizerN, self.escapeRando)
+                transitions = GraphUtils.createMinimizerTransitions(self.graphSettings.startAP, self.minimizerN)
             else:
                 if not self.bossRando:
                     transitions += vanillaBossesTransitions

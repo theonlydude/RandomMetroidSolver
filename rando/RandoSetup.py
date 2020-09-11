@@ -193,15 +193,15 @@ class RandoSetup(object):
         self.sm.addItems([item.Type for item in contPool]) # will add bosses as well
         poolDict = container.getPoolDict()
         self.log.debug('pool={}'.format(sorted([(t, len(poolDict[t])) for t in poolDict])))
-        refAP = 'Landing Site'
         locs = self.services.currentLocations(self.startAP, container, post=True)
         self.areaGraph.useCache(True)
         for loc in locs:
             ap = loc['accessPoint']
             if ap not in comeBack:
-                # we chose Landing Site because other start APs might not have comeback transitions
+                # we chose Golden Four because it is always there.
+                # Start APs might not have comeback transitions
                 # possible start AP issues are handled in checkStart
-                comeBack[ap] = self.areaGraph.canAccess(self.sm, ap, 'Landing Site', self.settings.maxDiff)
+                comeBack[ap] = self.areaGraph.canAccess(self.sm, ap, 'Golden Four', self.settings.maxDiff)
             if comeBack[ap]:
                 totalAvailLocs.append(loc)
         self.areaGraph.useCache(False)

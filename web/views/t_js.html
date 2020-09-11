@@ -1234,13 +1234,21 @@ function getTooltip(locName, locData, item, visited) {
         } else {
             return tooltip
                    +"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")
-                   +"<br>Items: "+(locData["items"].length > 0 ? locData["items"] : "None")
+                   +"<br>Items: "+(locData["items"].length > 0 ? getItemsImages(locData["items"]) : "None")
                    +("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "")
                    +("difficulty" in locData ? "<br>Difficulty: "+locData["difficulty"] : "")
                    // debug data
                    +("distance" in locData ? "<br>Distance: "+locData["distance"] : "");
         }
     }
+}
+
+function getItemsImages(items) {
+    var out = "";
+    for(var i=0; i<items.length; i++) {
+        out += '<img class="'+items[i]+'" src="/solver/static/images/'+items[i]+'.png" />';
+    }
+    return out;
 }
 
 var itemCount = {

@@ -221,6 +221,9 @@ class ItemLocContainer(object):
         locs = []
         for il in self.itemLocations:
             loc = il['Location']
+            # filter out restricted locations
+            if loc.get('restricted', False) == True:
+                continue
             loc['itemName'] = il['Item'].Type
             locs.append(loc)
         return locs

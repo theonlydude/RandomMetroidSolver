@@ -1841,7 +1841,8 @@ class WS(object):
                 "seed": state["seed"],
                 "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0]),
                 "errorMsg": state["errorMsg"],
-                "last": state["last"]
+                "last": state["last"],
+                "innerTransitions": state["innerTransitions"]
             })
         else:
             raiseHttp(200, "OK", True)

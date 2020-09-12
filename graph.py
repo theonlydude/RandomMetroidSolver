@@ -106,6 +106,8 @@ class AccessGraph(object):
             self.toDot(dotFile)
         self.apCache = {}
         self._useCache = False
+        # store the avail access points to display in vcr
+        self.availAccessPoints = {}
 
     def useCache(self, use):
         self._useCache = use
@@ -255,8 +257,8 @@ class AccessGraph(object):
     # return available locations list, also stores difficulty in locations
     def getAvailableLocations(self, locations, smbm, maxDiff, rootNode='Landing Site'):
         rootAp = self.accessPoints[rootNode]
-        availAccessPoints = self.getAvailableAccessPoints(rootAp, smbm, maxDiff)
-        availAreas = set([ap.GraphArea for ap in availAccessPoints.keys()])
+        self.availAccessPoints = self.getAvailableAccessPoints(rootAp, smbm, maxDiff)
+        availAreas = set([ap.GraphArea for ap in self.availAccessPoints.keys()])
         availLocs = []
 
         # get all the current locations APs first to only compute these paths
@@ -266,7 +268,7 @@ class AccessGraph(object):
                 locsAPs.add(ap)
 
         # sort availAccessPoints based on difficulty to take easier paths first
-        availAPPaths = self.getAvailAPPaths(availAccessPoints, locsAPs)
+        availAPPaths = self.getAvailAPPaths(self.availAccessPoints, locsAPs)
 
         for loc in locations:
             if loc['GraphArea'] not in availAreas:

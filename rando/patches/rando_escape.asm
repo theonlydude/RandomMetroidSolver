@@ -66,7 +66,7 @@ macro FlywayDoorList()
     ;; door to parlor
     db $FD, $92, $00, $05, $3E, $26, $03, $02, $00, $80, $A2, $B9
     ;; placeholder for BT door to be filled in by randomizer
-    db $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+    db $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca
 endmacro
 
 org $83ADA0
@@ -79,8 +79,8 @@ flyway_door_lists:
 
 print "bt_door_list : ", pc
 bt_door_list:
-;; placeholder for inside BT door to get back from animals during escape
-db $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+	;; placeholder for inside BT door to get back from animals during escape
+	db $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca
 
 warnpc $83ae0f
 

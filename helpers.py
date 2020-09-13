@@ -465,7 +465,7 @@ class Helpers(object):
         (ammoMargin, secs, items) = self.canInflictEnoughDamages(5000, givesDrops=False)
         if ammoMargin == 0:
             return sm.wand(sm.knowsLowAmmoCroc(),
-                           sm.wor(SMBool(sm.haveItemCount("Missile", 2), items=['Missile']),
+                           sm.wor(sm.itemCountOk("Missile", 2),
                                   sm.wand(sm.haveItem('Missile'),
                                           sm.haveItem('Super'))))
         else:

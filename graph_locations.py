@@ -946,8 +946,8 @@ locations = [
     'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.haveItem('SpeedBooster'),
                                     # reserves are hard to trigger midspark when not having ETanks
-                                    sm.wor(sm.wand(sm.energyReserveCountOk(2), SMBool(sm.haveItemCount('ETank', 1))), # need energy to get out
-                                           sm.wand(SMBool(sm.haveItemCount('ETank', 1)),
+                                    sm.wor(sm.wand(sm.energyReserveCountOk(2), sm.itemCountOk('ETank', 1)), # need energy to get out
+                                           sm.wand(sm.itemCountOk('ETank', 1),
                                                    sm.wor(sm.haveItem('Grapple'), # use grapple/space or dmg protection to get out
                                                           sm.haveItem('SpaceJump'),
                                                           sm.heatProof()))),
@@ -1752,7 +1752,7 @@ locations = [
     'Available': lambda sm: sm.wand(sm.haveItem('Gravity'),
                                     sm.haveItem('SpeedBooster'),
                                     sm.wor(sm.wand(sm.canOpenGreenDoors(), # run from room on the right
-                                                   SMBool(sm.haveItemCount('ETank', 1))), # etank for the spark since sparking from low ground
+                                                   sm.itemCountOk('ETank', 1)), # etank for the spark since sparking from low ground
                                            sm.canSimpleShortCharge())), # run from above
 },
 {

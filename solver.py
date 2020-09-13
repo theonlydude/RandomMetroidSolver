@@ -94,6 +94,11 @@ class SolverState(object):
                                   "item": solver.visitedLocations[-1]["itemName"]}
         else:
             self.state["last"] = ""
+        # store the inner graph transitions to display in vcr
+        if self.debug == True:
+            self.state["innerTransitions"] = self.getInnerTransitions(solver.areaGraph.availAccessPoints, solver.curGraphTransitions)
+        else:
+            self.state["innerTransitions"] = []
 
     def toSolver(self, solver):
         solver.majorsSplit = self.state["majorsSplit"]
@@ -119,6 +124,20 @@ class SolverState(object):
         solver.lastAP = self.state["lastAP"]
         solver.mode = self.state["mode"]
         solver.seed = self.state["seed"]
+
+    def getInnerTransitions(self, availAccessPoints, curGraphTransitions):
+        innerTransitions = []
+        for (apDst, dataSrc) in availAccessPoints.items():
+            if dataSrc['from'] is None:
+                continue
+            src = dataSrc['from'].Name
+            dst = apDst.Name
+            if [src, dst] in curGraphTransitions or [dst, src] in curGraphTransitions:
+                continue
+            src = self.transition2isolver(src)
+            dst = self.transition2isolver(dst)
+            innerTransitions.append([src, dst, diff4solver(dataSrc['difficulty'].difficulty)])
+        return innerTransitions
 
     def getLocsData(self, locations):
         ret = {}

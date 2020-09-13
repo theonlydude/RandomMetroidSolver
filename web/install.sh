@@ -671,3 +671,5 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 
 [ -L ~/web2py/applications/solver/static/images/minimizer_example.png ] || ln -s ~/RandomMetroidSolver/web/static/minimizer_example.png ~/web2py/applications/solver/static/images/minimizer_example.png
 [ -L ~/web2py/applications/solver/static/images/minimizer_example_thumbnail.png ] || ln -s ~/RandomMetroidSolver/web/static/minimizer_example_thumbnail.png ~/web2py/applications/solver/static/images/minimizer_example_thumbnail.png
+
+[ -L ~/web2py/applications/solver/static/images/mission_impossible.png ] || ln -s ~/RandomMetroidSolver/web/static/help/mission_impossible.png ~/web2py/applications/solver/static/images/mission_impossible.png

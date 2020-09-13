@@ -23,7 +23,11 @@ var leaderLines = {};
 var nextColor = 0;
 var linesSeq = new Array();
 
+// to display inter area lines in debug mode
+var debugLines = new Array();
+
 var colors = ['grey', 'lime', 'pink',  'fuchsia', 'orange', 'yellow', 'purple', 'aqua', 'red', '#bfef45', 'white', 'cyan', 'magenta', 'olive', 'green', 'blue', 'maroon', 'teal'];
+var debugColors = {easy: '#6daa53', medium: '#C1B725', hard: '#e69235', harder: '#d13434', hardcore: '#123456', mania: '#ffffff'};
 
 function resetLines() {
   for (var startPoint in lines) {
@@ -40,6 +44,13 @@ function resetLines() {
   leaderLines = {};
   linesSeq = [];
   nextColor = 0;
+}
+
+function resetDebugLines() {
+  for(var i=0; i<debugLines.length; i++) {
+    debugLines[i].remove()
+  }
+  debugLines = new Array();
 }
 
 function checkCompatibleAPs(startAP, endAP) {
@@ -141,6 +152,27 @@ function clickPortal(elemId) {
     }
 }
 
+function addDebugLine(startPoint, endPoint, difficulty) {
+  // console.log("addDebugLine: "+startPoint+" -> "+endPoint+": "+difficulty);
+
+  var startPointElem = document.getElementById(startPoint);
+  var endPointElem = document.getElementById(endPoint);
+
+  var line = new LeaderLine(startPointElem, endPointElem,
+                            {color: debugColors[difficulty],
+                             size: 2,
+                             startPlug: 'disc',
+                             endPlug: 'disc',
+                             path: 'straight'});
+  if(! (startPoint in lines)) {
+    line.setOptions({startSocket: 'bottom'});
+  }
+  if(! (endPoint in lines)) {
+    line.setOptions({endSocket: 'bottom'});
+  }
+  debugLines.push(line);
+}
+
 function addLine(startPoint, endPoint) {
   var startPointElem = document.getElementById(startPoint);
   var endPointElem = document.getElementById(endPoint);
@@ -152,7 +184,7 @@ function addLine(startPoint, endPoint) {
                              startPlugColor: colors[nextColor],
                              endPlugColor: colors[nextColor],
                              size: 4,
-                             gradient: true,
+                             color: colors[nextColor],
                              outlineColor: 'rgb(255, 255, 255)',
                              outline: true,
                              outlineSize: 0.10,
@@ -356,6 +388,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
 
   resetItems();
   resetLines();
+  resetDebugLines();
 
   if("availableLocations" in jsonData) {
     for(var locName in jsonData["availableLocations"]) {
@@ -487,6 +520,16 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
   var arrayLength = jsonData["linesSeq"].length;
   for(var i=0; i<arrayLength; i++) {
     addLine(jsonData["linesSeq"][i][0], jsonData["linesSeq"][i][1]);
+  }
+
+  if("innerTransitions" in jsonData) {
+    var arrayLength = jsonData["innerTransitions"].length;
+    for(var i=0; i<arrayLength; i++) {
+      var start = jsonData["innerTransitions"][i][0];
+      var end = jsonData["innerTransitions"][i][1]
+      var difficulty = jsonData['innerTransitions'][i][2]
+      addDebugLine(start, end, difficulty);
+    }
   }
 
   // add timer input

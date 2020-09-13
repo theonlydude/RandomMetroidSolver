@@ -200,6 +200,25 @@ class Knows:
                                  'rooms': ["Phantoon's Room"],
                                  'boss': "Phantoon"}
 
+    # mini-bosses
+    LowAmmoCroc = SMBool(False, 0, ['LowAmmoCroc'])
+    desc['LowAmmoCroc'] = {'display': 'Low Ammo Crocomire fight',
+                           'title': 'Use drops to fight Crocomire with no charge and just 10 missiles, or 5 missiles/5 supers. With the technique disabled and no charge beam, VARIA requires 5000 damage worth of ammo.',
+                           'href': None,
+                           'rooms': ["Crocomire's Room"]}
+
+    LowAmmoBotwoon = SMBool(False, 0, ['LowAmmoBotwoon'])
+    desc['LowAmmoBotwoon'] = {'display': 'Low Ammo Botwoon fight',
+                              'title': 'Fight Botwoon with no charge and just 3500 damage worth of ammo (Botwoon has 3000 HP). With the technique disabled and no charge, VARIA requires 6000 damage worth of ammo.',
+                              'href': None,
+                              'rooms': ["Botwoon's Room"]}
+
+    CheeseGT = SMBool(True, medium, ['CheeseGT'])
+    desc['CheeseGT'] = {'display': 'Cheese Golden Torizo',
+                        'title': "Get Golden Torizo stuck in a corner to stay out of harm's way.",
+                        'href': None,
+                        'rooms': ["Golden Torizo's Room"]}
+
     # End Game
     IceZebSkip = SMBool(False, 0, ['IceZebSkip'])
     desc['IceZebSkip'] = {'display': 'Ice Zeb Skip',

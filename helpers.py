@@ -460,23 +460,29 @@ class Helpers(object):
 
     @Cache.decorator
     def enoughStuffCroc(self):
+        sm = self.smbm
         # say croc has ~5000 energy, and ignore its useless drops
         (ammoMargin, secs, items) = self.canInflictEnoughDamages(5000, givesDrops=False)
         if ammoMargin == 0:
-            return SMBool(False)
+            return sm.wand(sm.knowsLowAmmoCroc(),
+                           sm.wor(sm.haveItemCount("Missile", 2),
+                                  sm.wand(sm.haveItem('Missile'),
+                                          sm.haveItem('Super'))))
         else:
             return SMBool(True, easy, items=items)
 
     @Cache.decorator
     def enoughStuffBotwoon(self):
-        # say botwoon has 4000 energy : it is actually 3000 but account for missed shots
-        # 4000 to allow for low% botwoon without charge beam (10 - 10 | missiles - supers)
-        # there is a setup to "never" miss a shot by only shooting him when he exits through the top left hole
-        (ammoMargin, secs, items) = self.canInflictEnoughDamages(4000, givesDrops=False)
+        knows = []
+        (ammoMargin, secs, items) = self.canInflictEnoughDamages(6000, givesDrops=False)
+        if ammoMargin == 0:
+            knows = ['LowAmmoBotwoon']
+            (ammoMargin, secs, items) = self.canInflictEnoughDamages(3500, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
         else:
-            return SMBool(True, easy, items=items)
+            # TODO add actual fight
+            return SMBool(True, easy, items=items, knows=knows)
 
     @Cache.decorator
     def enoughStuffGT(self):
@@ -484,7 +490,7 @@ class Helpers(object):
         if ammoMargin == 0:
             return SMBool(False)
         else:
-            # TODO add energy check
+            # TODO add actual fight
             return SMBool(True, easy, items=items)
 
     @Cache.decorator

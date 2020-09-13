@@ -140,7 +140,9 @@ class CommonSolver(object):
             self.log.debug("available {} locs:".format(phase))
             for loc in locations:
                 if loc['difficulty'].bool == True:
-                    print("{:>48}: {:>8} {}".format(loc['Name'], round(loc['difficulty'].difficulty, 2), [ap.Name for ap in loc['path']]))
+                    print("{:>48}: {:>8}".format(loc['Name'], round(loc['difficulty'].difficulty, 2)))
+                    print("                                          smbool: {}".format(loc['difficulty']))
+                    print("                                            path: {}".format([ap.Name for ap in loc['path']]))
 
     def collectMajor(self, loc, itemName=None):
         self.majorLocations.remove(loc)

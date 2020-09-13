@@ -1,6 +1,7 @@
 import sys, json, os
 from solver.conf import Conf
 from solver.difficultyDisplayer import DifficultyDisplayer
+from utils import fixEnergy
 
 class Out(object):
     @staticmethod
@@ -13,27 +14,6 @@ class Out(object):
             return OutRando(solver)
         else:
             raise Exception("Wrong output type for the Solver: {}".format(output))
-
-    def fixEnergy(self, items):
-        # display number of energy used
-        energies = [i for i in items if i.find('ETank') != -1]
-        if len(energies) > 0:
-            (maxETank, maxReserve, maxEnergy) = (0, 0, 0)
-            for energy in energies:
-                nETank = int(energy[0:energy.find('-ETank')])
-                if energy.find('-Reserve') != -1:
-                    nReserve = int(energy[energy.find(' - ')+len(' - '):energy.find('-Reserve')])
-                else:
-                    nReserve = 0
-                nEnergy = nETank + nReserve
-                if nEnergy > maxEnergy:
-                    maxEnergy = nEnergy
-                    maxETank = nETank
-                    maxReserve = nReserve
-                items.remove(energy)
-            items.append('{}-ETank'.format(maxETank))
-            if maxReserve > 0:
-                items.append('{}-Reserve'.format(maxReserve))
 
 class OutWeb(Out):
     def __init__(self, solver):
@@ -92,8 +72,8 @@ class OutWeb(Out):
                 if loc['Name'] == 'Draygon':
                     loc['locDifficulty'] = loc['pathDifficulty']
 
-                self.fixEnergy(loc['locDifficulty'].items)
-                self.fixEnergy(loc['pathDifficulty'].items)
+                fixEnergy(loc['locDifficulty'].items)
+                fixEnergy(loc['pathDifficulty'].items)
 
                 out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
                             '{0:.2f}'.format(loc['locDifficulty'].difficulty),
@@ -106,7 +86,7 @@ class OutWeb(Out):
                             loc['Class']])
 
             else:
-                self.fixEnergy(loc['difficulty'].items)
+                fixEnergy(loc['difficulty'].items)
 
                 out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
                             '{0:.2f}'.format(loc['difficulty'].difficulty),
@@ -179,7 +159,7 @@ class OutConsole(Out):
             line = '{} {:>48}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'
 
             if 'locDifficulty' in loc:
-                self.fixEnergy(loc['locDifficulty'].items)
+                fixEnergy(loc['locDifficulty'].items)
 
                 print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
                                   loc['Name'],
@@ -191,7 +171,7 @@ class OutConsole(Out):
                                   sorted(loc['locDifficulty'].knows) if 'locDifficulty' in loc else 'nc',
                                   sorted(list(set(loc['locDifficulty'].items))) if 'locDifficulty' in loc else 'nc'))
             elif 'difficulty' in loc:
-                self.fixEnergy(loc['difficulty'].items)
+                fixEnergy(loc['difficulty'].items)
 
                 print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
                                   loc['Name'],

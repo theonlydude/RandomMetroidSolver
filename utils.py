@@ -437,3 +437,25 @@ def getRandomizerDefaultParameters():
     defaultParams['random_music'] = "off"
 
     return defaultParams
+
+def fixEnergy(items):
+    # display number of energy used
+    energies = [i for i in items if i.find('ETank') != -1]
+    if len(energies) > 0:
+        (maxETank, maxReserve, maxEnergy) = (0, 0, 0)
+        for energy in energies:
+            nETank = int(energy[0:energy.find('-ETank')])
+            if energy.find('-Reserve') != -1:
+                nReserve = int(energy[energy.find(' - ')+len(' - '):energy.find('-Reserve')])
+            else:
+                nReserve = 0
+            nEnergy = nETank + nReserve
+            if nEnergy > maxEnergy:
+                maxEnergy = nEnergy
+                maxETank = nETank
+                maxReserve = nReserve
+            items.remove(energy)
+        items.append('{}-ETank'.format(maxETank))
+        if maxReserve > 0:
+            items.append('{}-Reserve'.format(maxReserve))
+    return items

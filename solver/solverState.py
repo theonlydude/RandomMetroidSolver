@@ -2,7 +2,7 @@ import json
 
 from smbool import SMBool
 from rom_patches import RomPatches
-from utils import removeChars
+from utils import removeChars, fixEnergy
 from parameters import diff4solver, Knows
 
 class SolverState(object):
@@ -184,7 +184,7 @@ class SolverState(object):
                 locName = self.name4isolver(loc["Name"])
                 ret[locName] = {"difficulty": diff4solver(diff.difficulty),
                                 "knows": self.knows2isolver(diff.knows),
-                                "items": list(set(diff.items)),
+                                "items": fixEnergy(list(set(diff.items))),
                                 "item": loc["itemName"],
                                 "name": loc["Name"],
                                 "canHidden": loc["CanHidden"],

@@ -47,6 +47,7 @@ class RandoExec(object):
     # return (isStuck, itemLocs, progItemLocs)
     def randomize(self, randoSettings, graphSettings):
         self.restrictions = Restrictions(randoSettings)
+        self.errorMsg = ""
         graphBuilder = GraphBuilder(graphSettings)
         container = None
         i = 0
@@ -60,18 +61,20 @@ class RandoExec(object):
                 sys.stdout.write('*')
                 sys.stdout.flush()
                 i += 1
+            else:
+                self.errorMsg += '\n'.join(setup.errorMsgs)
         if container is None:
             if graphSettings.areaRando:
-                self.errorMsg = "Could not find an area layout with these settings"
+                self.errorMsg += "Could not find an area layout with these settings"
             else:
-                self.errorMsg = "Unable to process settings"
+                self.errorMsg += "Unable to process settings"
             return (True, [], [])
         graphBuilder.escapeGraph(container, self.areaGraph, randoSettings.maxDiff)
         self.areaGraph.printGraph()
         filler = self.createFiller(randoSettings, graphSettings, container)
         vcr = VCR(self.seedName, 'rando') if self.vcr == True else None
         ret = filler.generateItems(vcr=vcr)
-        self.errorMsg = filler.errorMsg
+        self.errorMsg += filler.errorMsg
         return ret
 
     def postProcessItemLocs(self, itemLocs, hide):

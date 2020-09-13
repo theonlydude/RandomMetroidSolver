@@ -1,6 +1,8 @@
 #!/bin/bash
+# this script will randomize seeds with random params and solve them to detect mismatch and bugs.
+# to monitor a running jm:
+# cd logs/
 # while true; do grep -v SOLVER test_jm.csv | wc -l ; grep -E "NOK|mismatch|Can't solve" test_jm.csv | grep -v ';speedrun;' ; grep Traceback test_jm.log ; sleep 3; done
-# grep -v SOLVER test_jm.csv | grep -v -E '^error' | grep -v '^[0-9]*;;;' | cut -d ';' -f 3,4 | sed -e 's+0:++g' | awk -F';' '{sumold+=$1; sumnew+=$2;} END{print sumold" "sumnew}'
 
 # cd to root dir
 CWD=$(dirname $0)/..
@@ -270,5 +272,21 @@ echo "total: $(wc -l ${CSV})"
 echo "errors:"
 grep -E "NOK|mismatch|Can't solve" ${CSV}
 grep Traceback ${LOG}
+
+function getTime {
+    grep -v SOLVER ${CSV} | grep -v -E '^error' | grep -v '^[0-9]*;;;' | cut -d ';' -f $1 | sed -e 's+0:++g' | awk -F';' '{sum+=$1;} END{print sum}'
+}
+
+if [ ${COMPARE} -eq 0 ]; then
+    RANDOTIME_BEFORE=$(getTime 3)
+    RANDOTIME_AFTER=$(getTime 4)
+    SOLVERTIME_BEFORE=$(getTime 5)
+    SOLVERTIME_AFTER=$(getTime 6)
+    RANDO_PERCENT=$(echo "scale=4; (${RANDOTIME_AFTER} - ${RANDOTIME_BEFORE}) / ${RANDOTIME_BEFORE} * 100" | bc -l)
+    SOLVER_PERCENT=$(echo "scale=4; (${SOLVERTIME_AFTER} - ${SOLVERTIME_BEFORE}) / ${SOLVERTIME_BEFORE} * 100" | bc -l)
+    echo "Speed increase/decrease:"
+    echo "rando:  ${RANDO_PERCENT}%"
+    echo "solver: ${SOLVER_PERCENT}%"
+fi
 
 rm -rf ${TEMP_DIR}

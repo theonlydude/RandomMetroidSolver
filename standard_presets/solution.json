@@ -344,13 +344,13 @@
       true,
       100
     ],
-    "LowAmmoBotwoon": [
+    "LowStuffBotwoon": [
       true,
       100
     ],
-    "CheeseGT": [
+    "LowStuffGT": [
       true,
-      5
+      100
     ]
   },
   "Settings": {

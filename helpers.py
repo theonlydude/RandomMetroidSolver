@@ -473,25 +473,40 @@ class Helpers(object):
 
     @Cache.decorator
     def enoughStuffBotwoon(self):
+        sm = self.smbm
         knows = []
+        diff = easy
         (ammoMargin, secs, items) = self.canInflictEnoughDamages(6000, givesDrops=False)
-        if ammoMargin == 0:
-            knows = ['LowAmmoBotwoon']
+        lowStuff = sm.knowsLowStuffBotwoon()
+        if ammoMargin == 0 and lowStuff.bool:
+            knows = ['LowStuffBotwoon']
+            diff = lowStuff.difficulty
             (ammoMargin, secs, items) = self.canInflictEnoughDamages(3500, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
         else:
-            # TODO add actual fight
-            return SMBool(True, easy, items=items, knows=knows)
+            fight = sm.wor(sm.energyReserveCountOk(math.ceil(4/sm.getDmgReduction(envDmg=False)[0])),
+                           sm.knowsLowStuffBotwoon())
+            return SMBool(fight.bool, max(diff, fight.difficulty), items=items+fight.items, knows=knows+fight.knows)
 
     @Cache.decorator
     def enoughStuffGT(self):
-        (ammoMargin, secs, items) = self.canInflictEnoughDamages(3000, ignoreMissiles=True) # requires 10 supers or charge for the fight
+        sm = self.smbm
+        knows = []
+        diff = easy
+        hasBeams = sm.wand(sm.haveItem('Charge'), sm.haveItem('Plasma')).bool
+        (ammoMargin, secs, items) = self.canInflictEnoughDamages(9000, ignoreMissiles=True, givesDrops=hasBeams)
+        lowStuff = sm.knowsLowStuffGT()
+        if ammoMargin == 0 and lowStuff.bool:
+            knows = ['LowStuffGT']
+            diff = lowStuff.difficulty
+            (ammoMargin, secs, items) = self.canInflictEnoughDamages(3000, ignoreMissiles=True)
         if ammoMargin == 0:
             return SMBool(False)
         else:
-            # TODO add actual fight
-            return SMBool(True, easy, items=items)
+            fight = sm.wor(sm.energyReserveCountOk(math.ceil(8/sm.getDmgReduction(envDmg=False)[0])),
+                           sm.knowsLowStuffGT())
+            return SMBool(fight.bool, max(diff, fight.difficulty), items=items+fight.items, knows=knows+fight.knows)
 
     @Cache.decorator
     def enoughStuffsRidley(self):

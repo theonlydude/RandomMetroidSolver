@@ -207,17 +207,17 @@ class Knows:
                            'href': None,
                            'rooms': ["Crocomire's Room"]}
 
-    LowAmmoBotwoon = SMBool(False, 0, ['LowAmmoBotwoon'])
-    desc['LowAmmoBotwoon'] = {'display': 'Low Ammo Botwoon fight',
-                              'title': 'Fight Botwoon with no charge and just 3500 damage worth of ammo (Botwoon has 3000 HP). With the technique disabled and no charge, VARIA requires 6000 damage worth of ammo.',
+    LowStuffBotwoon = SMBool(False, 0, ['LowStuffBotwoon'])
+    desc['LowStuffBotwoon'] = {'display': 'Low Ammo/Health Botwoon fight',
+                              'title': 'Fight Botwoon with no charge and just 3500 damage worth of ammo (Botwoon has 3000 HP). With the technique disabled, VARIA requires 6000 damage worth of ammo (if no charge beam) and 4 tanks of energy (with no suits).',
                               'href': None,
                               'rooms': ["Botwoon's Room"]}
 
-    CheeseGT = SMBool(True, medium, ['CheeseGT'])
-    desc['CheeseGT'] = {'display': 'Cheese Golden Torizo',
-                        'title': "Get Golden Torizo stuck in a corner to stay out of harm's way.",
-                        'href': None,
-                        'rooms': ["Golden Torizo's Room"]}
+    LowStuffGT = SMBool(False, 0, ['LowStuffGT'])
+    desc['LowStuffGT'] = {'display': 'Low Ammo/Health Golden Torizo',
+                          'title': "Fight GT with either charge beam or 10 supers and nothing else. Otherwise require either 30 supers or Charge+Plasma and 4 tanks of energy (with Varia).",
+                          'href': None,
+                          'rooms': ["Golden Torizo's Room"]}
 
     # End Game
     IceZebSkip = SMBool(False, 0, ['IceZebSkip'])
@@ -718,6 +718,8 @@ class Knows:
         'Bosses/End': [
             {'knows': ['DraygonGrappleKill', 'DraygonSparkKill', 'MicrowaveDraygon', 'MicrowavePhantoon'],
              'title': 'Bosses'},
+            {'knows': ['LowAmmoCroc', 'LowStuffBotwoon', 'LowStuffGT'],
+             'title': 'Mini-Bosses'},
             {'knows': ['IceZebSkip', 'SpeedZebSkip'],
              'title': 'End Game'}
         ]

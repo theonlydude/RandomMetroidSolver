@@ -6,7 +6,7 @@ from rando.Choice import ItemThenLocChoice
 from rando.MiniSolver import MiniSolver
 from rando.ItemLocContainer import ContainerSoftBackup
 from rando.RandoServices import ComebackCheckType
-from solver import RandoSolver
+from solver.randoSolver import RandoSolver
 from parameters import infinity
 from helpers import diffValue2txt
 

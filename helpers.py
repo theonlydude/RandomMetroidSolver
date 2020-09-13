@@ -544,14 +544,19 @@ class Helpers(object):
             fight.difficulty = self.adjustHealthDropDiff(fight.difficulty)
         else:
             fight = SMBool(False)
+        # for grapple kill considers energy drained by wall socket + 2 spankings by Dray
+        # (original 99 energy used for rounding)
+        nTanksGrapple = (240/sm.getDmgReduction(envDmg=True)[0] + 2*160/sm.getDmgReduction(envDmg=False)[0])/100
         return sm.wor(fight,
                       sm.wand(sm.knowsDraygonGrappleKill(),
-                              sm.haveItem('Grapple')),
+                              sm.haveItem('Grapple'),
+                              sm.energyReserveCountOk(nTanksGrapple)),
                       sm.wand(sm.knowsMicrowaveDraygon(),
                               sm.haveItem('Plasma'),
                               sm.canFireChargedShots(),
                               sm.haveItem('XRayScope')),
                       sm.wand(sm.haveItem('Gravity'),
+                              sm.energyReserveCountOk(3),
                               sm.knowsDraygonSparkKill(),
                               sm.haveItem('SpeedBooster')))
 

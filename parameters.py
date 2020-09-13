@@ -81,7 +81,7 @@ class Knows:
     # used across the game
     WallJump = SMBool(True, easy, ['WallJump'])
     desc['WallJump'] = {'display': 'Wall Jump',
-                        'title': 'Kick-jump from wall: wall to wall, single wall climb, wall jump to instant morph',
+                        'title': 'Kick-jump from wall: wall to wall, single wall climb',
                         'href': 'https://wiki.supermetroid.run/Walljump',
                         'rooms': [],
                         'readonly' : True}

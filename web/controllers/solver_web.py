@@ -12,7 +12,7 @@ from datetime import datetime
 # to solve the rom
 from parameters import easy, medium, hard, harder, hardcore, mania, diff4solver
 from parameters import Knows, Settings, Controller, isKnows, isButton
-from solver import Conf
+from solver.conf import Conf
 from parameters import diff2text, text2diff
 from utils import PresetLoader, removeChars, getDefaultMultiValues
 import db

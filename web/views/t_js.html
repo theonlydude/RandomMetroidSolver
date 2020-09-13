@@ -928,7 +928,7 @@ function addTooltipCallback() {
         document.getElementById("nextAP").style.display = "none";
 
         // hide path aps
-        for(var i=1; i<=24; i++) {
+        for(var i=1; i<=32; i++) {
             document.getElementById("gps_"+i).style.display = "none";
         }
     });
@@ -1289,7 +1289,19 @@ function getTooltip(locName, locData, item, visited) {
 function getItemsImages(items) {
     var out = "";
     for(var i=0; i<items.length; i++) {
-        out += '<img class="'+items[i]+'" src="/solver/static/images/'+items[i]+'.png" />';
+        if(i%8 == 0 && i > 0) {
+            out += "<br/>";
+        }
+        var item = items[i];
+        if(item[0] >= '0' && item[0] <= '9') {
+            // for etanks and reserves
+            var hyphen = item.indexOf('-');
+            var count = item.substring(0, hyphen);
+            var item = item.substring(hyphen+1, item.length);
+            out += "<span>"+count+"-"+'<img class="imageItems" src="/solver/static/images/'+item+'.png" />'+"</span>";
+        } else {
+            out += '<img class="imageItems" src="/solver/static/images/'+items[i]+'.png" />';
+        }
     }
     return out;
 }

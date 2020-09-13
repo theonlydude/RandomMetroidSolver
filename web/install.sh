@@ -650,6 +650,14 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/gps_22.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_22.png ~/web2py/applications/solver/static/images/gps_22.png
 [ -L ~/web2py/applications/solver/static/images/gps_23.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_23.png ~/web2py/applications/solver/static/images/gps_23.png
 [ -L ~/web2py/applications/solver/static/images/gps_24.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_24.png ~/web2py/applications/solver/static/images/gps_24.png
+[ -L ~/web2py/applications/solver/static/images/gps_25.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_25.png ~/web2py/applications/solver/static/images/gps_25.png
+[ -L ~/web2py/applications/solver/static/images/gps_26.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_26.png ~/web2py/applications/solver/static/images/gps_26.png
+[ -L ~/web2py/applications/solver/static/images/gps_27.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_27.png ~/web2py/applications/solver/static/images/gps_27.png
+[ -L ~/web2py/applications/solver/static/images/gps_28.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_28.png ~/web2py/applications/solver/static/images/gps_28.png
+[ -L ~/web2py/applications/solver/static/images/gps_29.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_29.png ~/web2py/applications/solver/static/images/gps_29.png
+[ -L ~/web2py/applications/solver/static/images/gps_30.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_30.png ~/web2py/applications/solver/static/images/gps_30.png
+[ -L ~/web2py/applications/solver/static/images/gps_31.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_31.png ~/web2py/applications/solver/static/images/gps_31.png
+[ -L ~/web2py/applications/solver/static/images/gps_32.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_32.png ~/web2py/applications/solver/static/images/gps_32.png
 
 [ -L ~/web2py/applications/solver/static/images/marker_easy.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_easy.png ~/web2py/applications/solver/static/images/marker_easy.png
 [ -L ~/web2py/applications/solver/static/images/marker_medium.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_medium.png ~/web2py/applications/solver/static/images/marker_medium.png

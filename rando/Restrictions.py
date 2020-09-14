@@ -18,6 +18,11 @@ class Restrictions(object):
         self.static = {}
         self.dynamic = {}
 
+    def disable(self):
+        self.split = "Full"
+        self.suitsRestrictions = False
+        self.checkers = []
+
     def isEarlyMorph(self):
         return self.settings.restrictions['Morph'] == 'early'
 

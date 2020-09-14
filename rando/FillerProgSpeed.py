@@ -80,7 +80,7 @@ class FillerProgSpeed(Filler):
         return self.choice.chooseItemLoc(itemLocDict, possibleProg, self.progressionItemLocs, self.ap, self.container)
 
     # during random fill at the end put suits first while there's still available locations which don't fall under the suits restriction
-    def chooseItemLocRestrictFirst(self, itemLocDict):
+    def chooseItemLocNoLogic(self, itemLocDict):
         if self.settings.restrictions['Suits'] == True and self.container.hasItemInPool(lambda item: item.Type in ['Varia', 'Gravity']):
             itemLocDict = {key: value for key, value in itemLocDict.items() if key.Type in ['Varia', 'Gravity']}
         # pure random choice instead of prog-speed specific
@@ -373,7 +373,13 @@ class FillerProgSpeed(Filler):
         self.cache.reset()
         if self.services.can100percent(self.ap, self.container) and self.settings.progSpeed not in ['slowest', 'slow']:
             (itemLocDict, isProg) = self.services.getPossiblePlacementsNoLogic(self.container)
-            itemLoc = self.chooseItemLocRestrictFirst(itemLocDict)
+            itemLoc = self.chooseItemLocNoLogic(itemLocDict)
+            if itemLoc is None:
+                self.restrictions.disable()
+                self.cache.reset()
+                self.errorMsg = "Restrictions disabled"
+                (itemLocDict, isProg) = self.services.getPossiblePlacementsNoLogic(self.container)
+                itemLoc = self.chooseItemLocNoLogic(itemLocDict)
             assert itemLoc is not None
             self.ap = self.services.collect(self.ap, self.container, itemLoc)
             return True

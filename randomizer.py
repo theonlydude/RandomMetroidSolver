@@ -364,9 +364,12 @@ if __name__ == "__main__":
         args.escapeRando = bool(random.getrandbits(1))
     logger.debug("escapeRando: {}".format(args.escapeRando))
 
+    if args.suitsRestriction != False and minimizerN is not None:
+        optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
+
     if args.suitsRestriction == 'random':
         if args.morphPlacement == 'late' and args.area == True:
-            args.suitsRestriction = False
+            optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
         else:
             args.suitsRestriction = bool(random.getrandbits(1))
     logger.debug("suitsRestriction: {}".format(args.suitsRestriction))

@@ -88,6 +88,7 @@ class CommonSolver(object):
 
     def getNextDifficulty(self, difficulty):
         nextDiffs = {
+            0: easy,
             easy: medium,
             medium: hard,
             hard: harder,

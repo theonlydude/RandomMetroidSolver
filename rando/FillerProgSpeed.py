@@ -398,10 +398,8 @@ class FillerProgSpeed(Filler):
                     # it was a onlyBossesLeft false positive, restore max diff
                     self.settings.maxDiff = self.maxDiff
                 # check that we're actually stuck
-                nCurLocs = len(self.currentLocations())
-                nLocsLeft = len(self.container.unusedLocations)
                 itemLoc = None
-                if nCurLocs < nLocsLeft:
+                if not self.services.can100percent(self.ap, self.container):
                     # stuck, rollback to make progress if we can't access everything yet
                     itemLoc = self.rollback()
                 if itemLoc is not None:

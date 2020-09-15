@@ -86,8 +86,9 @@ elif [ -n "${TOURNEY}" ]; then
 fi
 
 for RANDO_PRESET in ${RANDO_PRESETS}; do
-    # ignore random presets
-    if(echo "${RANDO_PRESET}" | grep -q "random"); then
+    # ignore random presets, minimizer presets, and presets not starting at landing site
+    # as their stats are useless.
+    if(echo "${RANDO_PRESET}" | grep -q -E "random|minimizer|surprise|where_am_i"); then
 	continue
     fi
 

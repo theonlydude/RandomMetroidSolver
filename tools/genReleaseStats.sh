@@ -53,7 +53,7 @@ ${CWD}/tools/genExtStats.sh ${ROM} 100
 # 900 seeds pour les skill/settings presets de tournoi
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Season_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Playoff_Races
-${CWD}/tools/genExtStats.sh ${ROM} 9900 SMRAT2020
+${CWD}/tools/genExtStats.sh ${ROM} 900 SMRAT2020
 ${CWD}/tools/genExtStats.sh ${ROM} 900 VARIA_Weekly
 
 # 900 seeds pour les skill preset inclus dans les rando presets
@@ -65,7 +65,6 @@ ${CWD}/tools/genExtStats.sh ${ROM} 900 highway2hell expert
 ${CWD}/tools/genExtStats.sh ${ROM} 900 stupid_hard master
 ${CWD}/tools/genExtStats.sh ${ROM} 900 way_of_chozo regular
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Chozo_Speedrun regular
-${CWD}/tools/genExtStats.sh ${ROM} 900 minimizer_hardcore expert
 
 # 1000 seed pour les stats de prog speed
 ${CWD}/tools/genProgSpeedStats.sh ${ROM} 1000
@@ -84,10 +83,6 @@ fi
 #################
 # load stats
 ${CWD}/tools/loadExtStats.sh
-
-# update speedrun prog speed stats to match season races preset
-SQL="update extended_stats set morphPlacement = 'early' where progSpeed = 'speedrun' and preset = 'Season_Races' and area = false and boss = false and majorsSplit in ('Full', 'Major') and morphPlacement = 'normal' and suitsRestriction = true and progDiff = 'normal' and superFunMovement = false and superFunCombat = false and superFunSuit = false and gravityBehaviour = 'Balanced' and nerfedCharge = false and maxDifficulty = 'harder' and startAP = 'Landing Site';"
-echo "${SQL}" | mysql -h ${host} -u ${user} -p${password} ${database}
 
 # dump stats
 mysqldump -h ${host} -u ${user} -p${password} ${database} difficulties extended_stats item_locs techniques solver_stats > ${CWD}/new_stats.sql

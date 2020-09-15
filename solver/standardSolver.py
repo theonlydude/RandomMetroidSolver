@@ -128,10 +128,10 @@ class StandardSolver(CommonSolver):
                 open44 = i
                 break
 
-        self.solverStats['open14'] = open14
-        self.solverStats['open24'] = open24
-        self.solverStats['open34'] = open34
-        self.solverStats['open44'] = open44
+        self.solverStats['open14'] = open14 if open14 != -1 else 0
+        self.solverStats['open24'] = open24 if open24 != -1 else 0
+        self.solverStats['open34'] = open34 if open34 != -1 else 0
+        self.solverStats['open44'] = open44 if open44 != -1 else 0
 
     def getRemainMajors(self):
         return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]

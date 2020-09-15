@@ -88,8 +88,10 @@ fi
 for RANDO_PRESET in ${RANDO_PRESETS}; do
     # ignore random presets, minimizer presets, and presets not starting at landing site
     # as their stats are useless.
-    if(echo "${RANDO_PRESET}" | grep -q -E "random|minimizer|surprise|where_am_i"); then
-	continue
+    if [ -n "${TOURNEY}" -a -n "${SKILL_PRESET}" ]; then
+        if(echo "${RANDO_PRESET}" | grep -q -E "random|minimizer|surprise|where_am_i"); then
+	    continue
+        fi
     fi
 
     info "Begin rando preset ${RANDO_PRESET}"

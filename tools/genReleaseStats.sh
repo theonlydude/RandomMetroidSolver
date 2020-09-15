@@ -54,7 +54,6 @@ ${CWD}/tools/genExtStats.sh ${ROM} 100
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Season_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Playoff_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 SMRAT2020
-${CWD}/tools/genExtStats.sh ${ROM} 900 VARIA_Weekly
 
 # 900 seeds pour les skill preset inclus dans les rando presets
 ${CWD}/tools/genExtStats.sh ${ROM} 900 default regular
@@ -65,6 +64,11 @@ ${CWD}/tools/genExtStats.sh ${ROM} 900 highway2hell expert
 ${CWD}/tools/genExtStats.sh ${ROM} 900 stupid_hard master
 ${CWD}/tools/genExtStats.sh ${ROM} 900 way_of_chozo regular
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Chozo_Speedrun regular
+${CWD}/tools/genExtStats.sh ${ROM} 900 VARIA_Weekly casual
+
+# 100 seeds pour une selection de settings presets random
+${CWD}/tools/genExtStats.sh ${ROM} 100 where_am_i regular
+${CWD}/tools/genExtStats.sh ${ROM} 100 surprise regular
 
 # 1000 seed pour les stats de prog speed
 ${CWD}/tools/genProgSpeedStats.sh ${ROM} 1000

@@ -81,7 +81,7 @@ class Knows:
     # used across the game
     WallJump = SMBool(True, easy, ['WallJump'])
     desc['WallJump'] = {'display': 'Wall Jump',
-                        'title': 'Kick-jump from wall: wall to wall, single wall climb, wall jump to instant morph',
+                        'title': 'Kick-jump from wall: wall to wall, single wall climb',
                         'href': 'https://wiki.supermetroid.run/Walljump',
                         'rooms': [],
                         'readonly' : True}
@@ -200,6 +200,25 @@ class Knows:
                                  'rooms': ["Phantoon's Room"],
                                  'boss': "Phantoon"}
 
+    # mini-bosses
+    LowAmmoCroc = SMBool(False, 0, ['LowAmmoCroc'])
+    desc['LowAmmoCroc'] = {'display': 'Low Ammo Crocomire fight',
+                           'title': 'Use drops to fight Crocomire with no charge and just 10 missiles, or 5 missiles/5 supers. With the technique disabled and no charge beam, VARIA requires 5000 damage worth of ammo.',
+                           'href': None,
+                           'rooms': ["Crocomire's Room"]}
+
+    LowStuffBotwoon = SMBool(False, 0, ['LowStuffBotwoon'])
+    desc['LowStuffBotwoon'] = {'display': 'Low Ammo/Health Botwoon fight',
+                              'title': 'Fight Botwoon with no charge and just 3500 damage worth of ammo (Botwoon has 3000 HP). With the technique disabled, VARIA requires 6000 damage worth of ammo (if no charge beam) and 4 tanks of energy (with no suits).',
+                              'href': None,
+                              'rooms': ["Botwoon's Room"]}
+
+    LowStuffGT = SMBool(False, 0, ['LowStuffGT'])
+    desc['LowStuffGT'] = {'display': 'Low Ammo/Health Golden Torizo',
+                          'title': "Fight GT with either charge beam or 10 supers and nothing else. Otherwise require either 30 supers or Charge+Plasma and 4 tanks of energy (with Varia).",
+                          'href': None,
+                          'rooms': ["Golden Torizo's Room"]}
+
     # End Game
     IceZebSkip = SMBool(False, 0, ['IceZebSkip'])
     desc['IceZebSkip'] = {'display': 'Ice Zeb Skip',
@@ -212,12 +231,18 @@ class Knows:
                             'title': 'Skip the Zebetites with a shinespark',
                             'href': 'https://www.youtube.com/watch?v=jEAgdWQ9kLQ',
                             'rooms': ['Mother Brain Room']}
-    # maridia mama turtle
+    # maridia WJs
     HiJumpMamaTurtle = SMBool(False, 0, ['HiJumpMamaTurtle'])
     desc['HiJumpMamaTurtle'] = {'display': 'Mama Turtle E-Tank with High-Jump+Speed',
                                 'title': 'Access Mama Turtle E-Tank with High-Jump and Speed Booster (and Morph or X-Ray to turn around without moving)',
                                 'href': 'https://www.youtube.com/watch?v=1DINqLnINc8',
                                 'rooms': ['Mama Turtle Room']}
+
+    MaridiaWallJumps = SMBool(True, medium, ['MaridiaWallJumps'])
+    desc['MaridiaWallJumps'] = {'display': 'Various Maridia wall jumps',
+                                'title': 'Kinda tricky wall jumps to: access items in West Sand Hole without Spring Ball or Bombs, exit Spring Ball area without Hi Jump, exit Crab Hole with Gravity+Hi-Jump',
+                                'href': 'https://youtu.be/F3xAJem6VlA',
+                                'rooms': ['West Sand Hole', 'Spring Ball Room', 'Crab Hole']}
 
     # underwater grav-less
     GravLessLevel1 = SMBool(True, hardcore, ['GravLessLevel1'])
@@ -238,7 +263,7 @@ class Knows:
     GravLessLevel3 = SMBool(False, 0, ['GravLessLevel3'])
     desc['GravLessLevel3'] = {'display': 'Level 3',
                                'title': 'Level 2 and : no problem getting out of sand suitless, traverse mini-draygons area, wall jumps to access items in the left sand pit, access missile location in the right sand pit.',
-                               'href': 'https://www.youtube.com/watch?v=1M2TiEVwH2I',
+                               'href': 'https://www.youtube.com/watch?v=Fn2z0ByOcj4',
                                'rooms': ['West Sand Hole', 'East Sand Hole',
                                          'West Sand Hall', 'East Sand Hall']}
     # Area difficulties
@@ -471,7 +496,7 @@ class Knows:
 
     SpongeBathSpeed = SMBool(True, medium, ['SpongeBathSpeed'])
     desc['SpongeBathSpeed'] = {'display': 'SpongeBath Speed',
-                               'title': 'Get through sponge bath room with Speed Boster and Wall-Jumps',
+                               'title': 'Get through sponge bath room with Speed Booster and Wall-Jumps',
                                'href': 'https://www.youtube.com/watch?v=8ldQUIgBavw',
                                'rooms': ['Sponge Bath']}
 
@@ -495,6 +520,12 @@ class Knows:
                                         'href': 'https://www.twitch.tv/videos/480882188',
                                         'rooms': ['Halfie Climb Room', 'Colosseum']}
 
+    WestSandHoleSuitlessWallJumps = SMBool(False, 0, ['WestSandHoleSuitlessWallJumps'])
+    desc['WestSandHoleSuitlessWallJumps'] = {'display': 'West Sand Hole suitless Wall Jumps',
+                                     'title': 'Access items in West Sand Hole (aka Left Sand Pit) with just Hi-Jump',
+                                     'href': 'https://www.youtube.com/watch?v=Fn2z0ByOcj4',
+                                     'rooms': ['West Sand Hole']}
+
     # Suitless Draygon
     DraygonRoomGrappleExit = SMBool(False, 0, ['DraygonRoomGrappleExit'])
     desc['DraygonRoomGrappleExit'] = {'display': 'Exit Draygon room with the Grapple',
@@ -513,6 +544,12 @@ class Knows:
                                     'title': 'Use an XrayScope glitch to climb out of the Precious room',
                                     'href': 'https://www.youtube.com/watch?v=i2OGuFpcfiw&t=160s',
                                     'rooms': ['The Precious Room']}
+
+    PreciousRoomGravJumpExit = SMBool(False, 0, ['PreciousRoomGravJumpExit'])
+    desc['PreciousRoomGravJumpExit'] = {'display': 'Exit the Precious room with a Gravity Jump',
+                                        'title': 'Jump through the exit door into the water in the next room to climb up with a Gravity Jump',
+                                        'href': 'https://www.twitch.tv/jooniejoone/clip/StylishVainPorcupineVoHiYo',
+                                        'rooms': ['The Precious Room', 'Colosseum']}
 
     # clips
     MochtroidClip = SMBool(True, medium, ['MochtroidClip'])
@@ -645,17 +682,17 @@ class Knows:
              'title': 'Clips'},
             {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
              'title': 'Plasma Room'},
-            {'knows': ['HiJumpMamaTurtle'],
-             'title': 'Mama Turtle'}
+            {'knows': ['HiJumpMamaTurtle', 'MaridiaWallJumps'],
+             'title': 'Wall Jumps'}
         ],
         'Maridia 2/2': [
             {'knows': ['AccessSpringBallWithHiJump', 'AccessSpringBallWithSpringBallBombJumps',
                        'AccessSpringBallWithBombJumps', 'AccessSpringBallWithSpringBallJump',
                        'AccessSpringBallWithGravJump', 'AccessSpringBallWithXRayClimb', 'AccessSpringBallWithFlatley'],
              'title': 'Spring Ball Access'},
-            {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
+            {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit', 'PreciousRoomGravJumpExit'],
              'title': 'Suitless Draygon Exit'},
-            {'knows': ['DoubleSpringBallJump', 'TediousMountEverest',
+            {'knows': ['WestSandHoleSuitlessWallJumps', 'DoubleSpringBallJump', 'TediousMountEverest',
                        'BotwoonToDraygonWithIce', 'SuitlessCrystalFlashClip',
                        'SuitlessPuyoClip'],
              'title': 'Obscure suitless stuff'}
@@ -681,6 +718,8 @@ class Knows:
         'Bosses/End': [
             {'knows': ['DraygonGrappleKill', 'DraygonSparkKill', 'MicrowaveDraygon', 'MicrowavePhantoon'],
              'title': 'Bosses'},
+            {'knows': ['LowAmmoCroc', 'LowStuffBotwoon', 'LowStuffGT'],
+             'title': 'Mini-Bosses'},
             {'knows': ['IceZebSkip', 'SpeedZebSkip'],
              'title': 'End Game'}
         ]

@@ -24,7 +24,7 @@ class MiniSolver(object):
             loc = il['Location']
             if loc.get('restricted') == True:
                 continue
-            loc['itemType'] = il['Item']['Type']
+            loc['itemType'] = il['Item'].Type
             loc['difficulty'] = None
             locations.append(loc)
         self.smbm.resetItems()
@@ -35,7 +35,7 @@ class MiniSolver(object):
             if not locations:
                 return hasOneLocAboveMinDiff
             # only two loops to collect all remaining locations in only bosses left mode
-            if onlyBossesLeft > 0:
+            if onlyBossesLeft >= 0:
                 onlyBossesLeft += 1
                 if onlyBossesLeft > 2:
                     return False

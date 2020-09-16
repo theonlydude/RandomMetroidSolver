@@ -11,6 +11,7 @@ class GraphBuilder(object):
         self.areaRando = graphSettings.areaRando
         self.bossRando = graphSettings.bossRando
         self.escapeRando = graphSettings.escapeRando
+        self.minimizerN = graphSettings.minimizerN
         self.log = log.get('GraphBuilder')
 
     # builds everything but escape transitions
@@ -18,16 +19,18 @@ class GraphBuilder(object):
         transitions = self.graphSettings.plandoRandoTransitions
         if transitions is None:
             transitions = []
-            if not self.bossRando:
-                transitions += vanillaBossesTransitions
+            if self.minimizerN is not None:
+                transitions = GraphUtils.createMinimizerTransitions(self.graphSettings.startAP, self.minimizerN)
             else:
-                transitions += GraphUtils.createBossesTransitions()
-            if not self.areaRando:
-                transitions += vanillaTransitions
-            else:
-                transitions += GraphUtils.createAreaTransitions(self.graphSettings.bidir)
-        return AccessGraph(accessPoints, transitions,
-                           self.graphSettings.bidir, self.graphSettings.dotFile)
+                if not self.bossRando:
+                    transitions += vanillaBossesTransitions
+                else:
+                    transitions += GraphUtils.createBossesTransitions()
+                if not self.areaRando:
+                    transitions += vanillaTransitions
+                else:
+                    transitions += GraphUtils.createAreaTransitions(self.graphSettings.lightAreaRando)
+        return AccessGraph(accessPoints, transitions, self.graphSettings.dotFile)
 
     # fills in escape transitions if escape rando is enabled
     def escapeGraph(self, emptyContainer, graph, maxDiff):
@@ -49,7 +52,8 @@ class GraphBuilder(object):
         # Ice not usable because of hyper beam
         # remove energy to avoid hell runs
         # (will add bosses as well)
-        sm.addItems([item['Type'] for item in emptyContainer.itemPool if item['Type'] != 'Ice' and item['Category'] != 'Energy'])
+        sm.addItems([item.Type for item in emptyContainer.itemPool if item.Type != 'Ice' and item.Category != 'Energy'])
+        sm.addItem('Hyper')
         possibleTargets = [target for target in escapeTargets if graph.accessPath(sm, target, 'Landing Site', maxDiff) is not None]
         # failsafe
         if len(possibleTargets) == 0:
@@ -66,8 +70,8 @@ class GraphBuilder(object):
     def escapeTimer(self, graph, path):
         if self.areaRando == True:
             if path[0].Name == 'Climb Bottom Left':
-                self.log.debug('escapeTimer: vanilla')
-                return None
+                graph.EscapeAttributes['Timer'] = None
+                return
             traversedAreas = list(set([ap.GraphArea for ap in path]))
             self.log.debug("escapeTimer path: " + str([ap.Name for ap in path]))
             self.log.debug("escapeTimer traversedAreas: " + str(traversedAreas))

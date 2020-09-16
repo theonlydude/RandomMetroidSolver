@@ -87,4 +87,8 @@ giveiframes:
 	sta !iframes
 	rts
 
-org $8ff6ff
+warnpc $8ff6ff
+
+;;; "reserve" area for generated door asm, to mark it as used
+org $8ff800
+	padbyte $ca : pad $8ffcff

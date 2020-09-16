@@ -10,6 +10,16 @@ def isStdPreset(preset):
 def removeChars(string, toRemove):
     return re.sub('[{}]+'.format(toRemove), '', string)
 
+def range_union(ranges):
+    ret = []
+    for rg in sorted([[r.start, r.stop] for r in ranges]):
+        begin, end = rg[0], rg[-1]
+        if ret and ret[-1][1] > begin:
+            ret[-1][1] = max(ret[-1][1], end)
+        else:
+            ret.append([begin, end])
+    return [range(r[0], r[1]) for r in ret]
+
 # https://github.com/robotools/fontParts/commit/7cb561033929cfb4a723d274672e7257f5e68237
 def normalizeRounding(n):
     # Normalizes rounding as Python 2 and Python 3 handing the rounding of halves (0.5, 1.5, etc) differently.
@@ -235,34 +245,46 @@ class PresetLoaderDict(PresetLoader):
         self.params = params
         super(PresetLoaderDict, self).__init__()
 
+def getDefaultMultiValues():
+    from graph_access import GraphUtils
+    defaultMultiValues = {
+        'startLocation': GraphUtils.getStartAccessPointNames(),
+        'majorsSplit': ['Full', 'Major', 'Chozo'],
+        'progressionSpeed': ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble', 'speedrun'],
+        'progressionDifficulty': ['easier', 'normal', 'harder'],
+        'morphPlacement': ['early', 'late', 'normal'],
+        'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla' ]
+    }
+    return defaultMultiValues
+
 def loadRandoPreset(randoPreset, args):
     # load the rando preset json file and add the parameters inside it to the args parser
     with open(randoPreset) as randoPresetFile:
         randoParams = json.load(randoPresetFile)
 
-    if "animals" in randoParams and randoParams["animals"] == "on":
+    if randoParams.get("animals", "off") == "on":
         args.animals = True
-    if "variaTweaks" in randoParams and randoParams["variaTweaks"] == "off":
+    if randoParams.get("variaTweaks", "on") == "off":
         args.noVariaTweaks = True
-    if "maxDifficulty" in randoParams and randoParams["maxDifficulty"] != "no difficulty cap":
+    if randoParams.get("maxDifficulty", "no difficulty cap") != "no difficulty cap":
         args.maxDifficulty = randoParams["maxDifficulty"]
-    if "suitsRestriction" in randoParams and randoParams["suitsRestriction"] != "off":
+    if randoParams.get("suitsRestriction", "off") != "off":
         if randoParams["suitsRestriction"] == "on":
             args.suitsRestriction = True
         else:
             args.suitsRestriction = "random"
-    if "hideItems" in randoParams and randoParams["hideItems"] != "off":
+    if randoParams.get("hideItems", "off") != "off":
         if randoParams["hideItems"] == "on":
             args.hideItems = True
         else:
             args.hideItems = "random"
-    if "strictMinors" in randoParams and randoParams["strictMinors"] != "off":
+    if randoParams.get("strictMinors", "off") != "off":
         if randoParams["strictMinors"] == "on":
             args.strictMinors = True
         else:
             args.strictMinors = "random"
 
-    if "layoutPatches" in randoParams and randoParams["layoutPatches"] == "off":
+    if randoParams.get("layoutPatches", "on") == "off":
         args.noLayout = True
     if "gravityBehaviour" in randoParams:
         # Balanced is the default
@@ -270,32 +292,34 @@ def loadRandoPreset(randoPreset, args):
             args.noGravHeat = True
         elif randoParams["gravityBehaviour"] == "Progressive":
             args.progressiveSuits = True
-    if "nerfedCharge" in randoParams and randoParams["nerfedCharge"] == "on":
+    if randoParams.get("nerfedCharge", "off") == "on":
         args.nerfedCharge = True
 
-    if "areaRandomization" in randoParams and randoParams["areaRandomization"] == "on":
+    if randoParams.get("areaRandomization", "off") == "on":
         args.area = True
-        if "areaLayout" in randoParams and randoParams["areaLayout"] == "off":
+        if randoParams.get("areaLayout", "on") == "off":
             args.areaLayoutBase = True
-        if "escapeRando" in randoParams and randoParams["escapeRando"] == "off":
+        if randoParams.get("lightAreaRandomization", "off") == "on":
+            args.lightArea = True
+        if randoParams.get("escapeRando", "on") == "off":
             args.noEscapeRando = True
-        if "removeEscapeEnemies" in randoParams and randoParams["removeEscapeEnemies"] == "off":
+        if randoParams.get("removeEscapeEnemies", "on") == "off":
             args.noRemoveEscapeEnemies = True
 
-    if "bossRandomization" in randoParams and randoParams["bossRandomization"] == "on":
+    if randoParams.get("bossRandomization", "off") == "on":
         args.bosses = True
 
-    if "funCombat" in randoParams and randoParams["funCombat"] != "off":
+    if randoParams.get("funCombat", "off") != "off":
         if randoParams["funCombat"] == "on":
             args.superFun.append("Combat")
         else:
             args.superFun.append("CombatRandom")
-    if "funMovement" in randoParams and randoParams["funMovement"] != "off":
+    if randoParams.get("funMovement", "off") != "off":
         if randoParams["funMovement"] == "on":
             args.superFun.append("Movement")
         else:
             args.superFun.append("MovementRandom")
-    if "funSuits" in randoParams and randoParams["funSuits"] != "off":
+    if randoParams.get("funSuits", "off") != "off":
         if randoParams["funSuits"] == "on":
             args.superFun.append("Suits")
         else:
@@ -303,12 +327,12 @@ def loadRandoPreset(randoPreset, args):
 
     ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "refill_before_save"]
     for patch in ipsPatches:
-        if patch in randoParams and randoParams[patch] == "on":
+        if randoParams.get(patch, "off") == "on":
             args.patches.append(patch + '.ips')
 
     patches = ["No_Music", "Infinite_Space_Jump"]
     for patch in patches:
-        if patch in randoParams and randoParams[patch] == "on":
+        if randoParams.get(patch, "off") == "on":
             args.patches.append(patch)
 
     if "morphPlacement" in randoParams:
@@ -321,10 +345,7 @@ def loadRandoPreset(randoPreset, args):
         args.progressionDifficulty = randoParams["progressionDifficulty"]
 
     if "progressionSpeed" in randoParams:
-        if type(randoParams["progressionSpeed"]) == list:
-            args.progressionSpeed = ",".join(randoParams["progressionSpeed"])
-        else:
-            args.progressionSpeed = randoParams["progressionSpeed"]
+        args.progressionSpeed = randoParams["progressionSpeed"]
 
     if "missileQty" in randoParams:
         if randoParams["missileQty"] == "random":
@@ -349,19 +370,37 @@ def loadRandoPreset(randoPreset, args):
     if "energyQty" in randoParams:
         args.energyQty = randoParams["energyQty"]
 
+    if randoParams.get("minimizer", "off") == "on" and "minimizerQty" in randoParams:
+        args.minimizerN = randoParams["minimizerQty"]
+        if randoParams.get("minimizerTourian", "off") == "on":
+            args.minimizerTourian = True
+    defaultMultiValues = getDefaultMultiValues()
+    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"]
+    for multiElem in multiElems:
+        if multiElem+'MultiSelect' in randoParams:
+            setattr(args, multiElem+'List', ','.join(randoParams[multiElem+'MultiSelect']))
+        else:
+            setattr(args, multiElem+'List', ','.join(defaultMultiValues[multiElem]))
+
 def getRandomizerDefaultParameters():
     defaultParams = {}
+    defaultMultiValues = getDefaultMultiValues()
 
     defaultParams['complexity'] = "simple"
     defaultParams['preset'] = 'regular'
     defaultParams['randoPreset'] = ""
     defaultParams['raceMode'] = "off"
     defaultParams['majorsSplit'] = "Full"
+    defaultParams['majorsSplitMultiSelect'] = defaultMultiValues['majorsSplit']
     defaultParams['startLocation'] = "Landing Site"
+    defaultParams['startLocationMultiSelect'] = defaultMultiValues['startLocation']
     defaultParams['maxDifficulty'] = 'hardcore'
     defaultParams['progressionSpeed'] = "medium"
+    defaultParams['progressionSpeedMultiSelect'] = defaultMultiValues['progressionSpeed']
     defaultParams['progressionDifficulty'] = 'normal'
+    defaultParams['progressionDifficultyMultiSelect'] = defaultMultiValues['progressionDifficulty']
     defaultParams['morphPlacement'] = "early"
+    defaultParams['morphPlacementMultiSelect'] = defaultMultiValues['morphPlacement']
     defaultParams['suitsRestriction'] = "on"
     defaultParams['hideItems'] = "off"
     defaultParams['strictMinors'] = "off"
@@ -370,11 +409,16 @@ def getRandomizerDefaultParameters():
     defaultParams['powerBombQty'] = "1"
     defaultParams['minorQty'] = "100"
     defaultParams['energyQty'] = "vanilla"
+    defaultParams['energyQtyMultiSelect'] = defaultMultiValues['energyQty']
     defaultParams['areaRandomization'] = "off"
     defaultParams['areaLayout'] = "off"
+    defaultParams['lightAreaRandomization'] = "off"
     defaultParams['escapeRando'] = "off"
     defaultParams['removeEscapeEnemies'] = "off"
     defaultParams['bossRandomization'] = "off"
+    defaultParams['minimizer'] = "off"
+    defaultParams['minimizerQty'] = "45"
+    defaultParams['minimizerTourian'] = "off"
     defaultParams['funCombat'] = "off"
     defaultParams['funMovement'] = "off"
     defaultParams['funSuits'] = "off"
@@ -393,3 +437,25 @@ def getRandomizerDefaultParameters():
     defaultParams['random_music'] = "off"
 
     return defaultParams
+
+def fixEnergy(items):
+    # display number of energy used
+    energies = [i for i in items if i.find('ETank') != -1]
+    if len(energies) > 0:
+        (maxETank, maxReserve, maxEnergy) = (0, 0, 0)
+        for energy in energies:
+            nETank = int(energy[0:energy.find('-ETank')])
+            if energy.find('-Reserve') != -1:
+                nReserve = int(energy[energy.find(' - ')+len(' - '):energy.find('-Reserve')])
+            else:
+                nReserve = 0
+            nEnergy = nETank + nReserve
+            if nEnergy > maxEnergy:
+                maxEnergy = nEnergy
+                maxETank = nETank
+                maxReserve = nReserve
+            items.remove(energy)
+        items.append('{}-ETank'.format(maxETank))
+        if maxReserve > 0:
+            items.append('{}-Reserve'.format(maxReserve))
+    return items

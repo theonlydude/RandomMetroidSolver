@@ -66,7 +66,7 @@ macro FlywayDoorList()
     ;; door to parlor
     db $FD, $92, $00, $05, $3E, $26, $03, $02, $00, $80, $A2, $B9
     ;; placeholder for BT door to be filled in by randomizer
-    db $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+    db $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca
 endmacro
 
 org $83ADA0
@@ -79,8 +79,8 @@ flyway_door_lists:
 
 print "bt_door_list : ", pc
 bt_door_list:
-;; placeholder for inside BT door to get back from animals during escape
-db $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+	;; placeholder for inside BT door to get back from animals during escape
+	db $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca
 
 warnpc $83ae0f
 
@@ -190,6 +190,10 @@ org $8f9867
 org $8F98DC
     dw flyway_escape_setup
 
+;;; overwrite WS main shaft setup asm ptr in "phantoon dead" state
+org $8fcb3a
+    dw wrecked_ship_main_setup
+
 ;; ws map door handled with PLM spawn table, as it is blue in vanilla (see plm_spawn.asm)
 
 org $8ff500
@@ -217,6 +221,8 @@ escape_setup:
     inx : inx
     cpx #$0008
     bcc -
+    ;; open Maridia Tube
+    lda #$000b : jsl $8081fa
 .end:
     rts
 
@@ -244,6 +250,15 @@ room_main:
     ;; goes back to vanilla room asm call
     ldx $07df
     rts
+
+wrecked_ship_main_setup:
+	%checkEscape() : bcc .end
+	;; call asm of door from below,
+	;; that sets the scroll properly
+	;; (needed because of the super/hyper blocks)
+	jsr $e21a
+.end:
+	rts
 
 ;;; stop before area rando door transition patch
 warnpc $8ff5ff

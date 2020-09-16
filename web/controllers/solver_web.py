@@ -12,9 +12,9 @@ from datetime import datetime
 # to solve the rom
 from parameters import easy, medium, hard, harder, hardcore, mania, diff4solver
 from parameters import Knows, Settings, Controller, isKnows, isButton
-from solver import Conf
+from solver.conf import Conf
 from parameters import diff2text, text2diff
-from utils import PresetLoader, removeChars
+from utils import PresetLoader, removeChars, getDefaultMultiValues
 import db
 from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
 from utils import isStdPreset, getRandomizerDefaultParameters
@@ -33,9 +33,10 @@ localIpsDir = 'varia_repository'
 # use the correct one
 pythonExec = "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
 
+maxPresets = 4096
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
-    return len(os.listdir('community_presets')) >= 2048
+    return len(os.listdir('community_presets')) >= maxPresets
 
 def getPresetDir(preset):
     if isStdPreset(preset):
@@ -101,10 +102,11 @@ def loadPresetsList():
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList():
-    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
+    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020', 'VARIA_Weekly']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
+
     return (randoPresets, tourPresets)
 
 def validatePresetsParams(action):
@@ -455,7 +457,7 @@ def presets():
                     session.flash = "Error writing the preset {}: {}".format(preset, e)
                 redirect(URL(r=request, f='presets'))
             else:
-                session.flash = "Sorry, there's already 2048 presets on the website, can't add more"
+                session.flash = "Sorry, maximum number of presets reached, can't add more"
                 redirect(URL(r=request, f='presets'))
 
     # set title
@@ -583,18 +585,6 @@ def genPathTable(locations, displayAPs=True):
                 currentSuit = 'Varia'
             elif item == 'Gravity':
                 currentSuit = 'Gravity'
-        else:
-            pathTable += """
-<tr class="{}">
-  <td>{}</td>
-  <td>{}</td>
-  <td>{}</td>
-  <td><div class="linethrough">{}</div></td>
-  <td>{}</td>
-  <td></td>
-  <td></td>
-</tr>
-""".format(item, getRoomLink(name, room), getAreaLink(area), getSubArea(subarea), item, getDiffImg(locDiff))
 
     pathTable += "</table>"
 
@@ -866,7 +856,8 @@ def getAddressesToRead(plando=False):
     ## doorasm
     addresses["ranges"] += [0x7EB00, 0x7ee60]
     # for next release doorasm addresses will be relocated
-    addresses["ranges"] += [0x7F800, 0x7FA5F]
+    maxDoorAsmPatchLen = 22
+    addresses["ranges"] += [0x7F800, 0x7F800+(maxDoorAsmPatchLen * len([ap for ap in accessPoints if ap.Internal == False]))]
 
     if plando == True:
         # plando addresses
@@ -978,27 +969,13 @@ def infos():
 def initRandomizerSession():
     if session.randomizer is None:
         session.randomizer = getRandomizerDefaultParameters()
-        defaultMultiValues = getDefaultMultiValues()
-        for key in defaultMultiValues:
-            if key not in session.randomizer:
-                session.randomizer.update(defaultMultiValues)
-
-def getDefaultMultiValues():
-    defaultMultiValues = {
-        'startLocationMultiSelect': GraphUtils.getStartAccessPointNames(),
-        'majorsSplitMultiSelect': majorsSplits,
-        'progressionSpeedMultiSelect': speeds,
-        'progressionDifficultyMultiSelect': progDiffs,
-        'morphPlacementMultiSelect': morphPlacements,
-        'energyQtyMultiSelect': energyQties
-    }
-    return defaultMultiValues
 
 def getCurrentMultiValues():
     defaultMultiValues = getDefaultMultiValues()
     for key in defaultMultiValues:
-        if key in session.randomizer:
-            defaultMultiValues[key] = session.randomizer[key]
+        keyMulti = key + 'MultiSelect'
+        if keyMulti in session.randomizer:
+            defaultMultiValues[key] = session.randomizer[keyMulti]
     return defaultMultiValues
 
 def randomizer():
@@ -1011,6 +988,32 @@ def randomizer():
     # add empty entry for default value
     randoPresets.append("")
 
+    randoPresetsDesc = {
+        "all_random": "all the parameters set to random",
+        "Chozo_Speedrun": "speedrun progression speed with Chozo split",
+        "default": "VARIA randomizer default settings",
+        "free": "easiest possible settings",
+        "hardway2hell": "harder highway2hell",
+        "haste": "inspired by DASH randomizer with Nerfed Charge / Progressive Suits",
+        "highway2hell": "favors suitless seeds",
+        "minimizer":"Typical 'boss rush' settings with random start and nerfed charge",
+        "minimizer_hardcore":"Have fun 'rushing' bosses with no equipment on a tiny map",
+        "minimizer_maximizer":"No longer a boss rush",
+        "quite_random": "randomizes a few significant settings to have various seeds",
+        "stupid_hard": "hardest possible settings",
+        "surprise": "quite_random with Area, Boss and Start Location randomized",
+        "vanilla": "closest possible to vanilla Super Metroid",
+        "way_of_chozo": "chozo split with boss randomization",
+        "where_am_i": "Area mode with random start location and early morph",
+        "where_is_morph": "Area mode with late Morph",
+        "Season_Races": "rando league races (Majors/Minors split)",
+        "Season_Races_Chozo": "rando league races (Chozo split)",
+        "Playoff_Races": "rando league races during playoff (Majors/Minors split)",
+        "Playoff_Races_Chozo": "rando league races during playoff (Chozo split)",
+        "SMRAT2020": "Super Metroid Randomizer Accessible Tournament 2020",
+        "VARIA_Weekly": "Casual logic community races"
+    }
+
     startAPs = GraphUtils.getStartAccessPointNamesCategory()
     startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),
                 OPTGROUP(_label="Custom", *startAPs["custom"]),
@@ -1021,7 +1024,7 @@ def randomizer():
     defaultMultiValues = getDefaultMultiValues()
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
-                randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
+                randoPresets=randoPresets, tourRandoPresets=tourRandoPresets, randoPresetsDesc=randoPresetsDesc,
                 startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues,
                 maxsize=sys.maxsize)
 
@@ -1060,9 +1063,15 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
     for qty in quantities:
         if request.vars[qty] == 'random':
             continue
-        qtyFloat = getFloat(qty, isJson)
-        if qtyFloat < 1.0 or qtyFloat > 9.0:
-            raiseHttp(400, "Wrong value for {}, must be between 1 and 9".format(qty), isJson)
+        if qty == 'minimizerQty':
+            if request.vars.minimizer == 'on':
+                qtyInt = getInt(qty, isJson)
+                if qtyInt < 30 or qtyInt > 100:
+                    raiseHttp(400, "Wrong value for {}, must be between 30 and 100".format(qty), isJson)
+        else:
+            qtyFloat = getFloat(qty, isJson)
+            if qtyFloat < 1.0 or qtyFloat > 9.0:
+                raiseHttp(400, "Wrong value for {}, must be between 1 and 9".format(qty), isJson)
 
     # multis
     defaultMultiValues = getDefaultMultiValues()
@@ -1071,15 +1080,16 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
         paramMulti = param+"MultiSelect"
         value = request.vars[param]
         if value == 'random':
-            # get multi values
-            for value in request.vars[paramMulti].split(','):
-                # check multi values
-                if value not in defaultMultiValues[paramMulti]:
-                    raiseHttp(400, "Wrong value for {}, authorized values: {}".format(param, defaultMultiValues[param+"MultiSelect"]), isJson)
+            if request.vars[paramMulti] is not None:
+                # get multi values
+                for value in request.vars[paramMulti].split(','):
+                    # check multi values
+                    if value not in defaultMultiValues[param]:
+                        raiseHttp(400, "Wrong value for {}, authorized values: {}".format(param, defaultMultiValues[param]), isJson)
         else:
             # check value
-            if value not in defaultMultiValues[paramMulti]:
-                raiseHttp(400, "Wrong value for {}, authorized values: {}".format(param, defaultMultiValues[param+"MultiSelect"]), isJson)
+            if value not in defaultMultiValues[param]:
+                raiseHttp(400, "Wrong value for {}, authorized values: {}".format(param, defaultMultiValues[param]), isJson)
 
     # others
     if request.vars.minorQty not in ['random', None]:
@@ -1147,14 +1157,14 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
 def sessionWebService():
     # web service to update the session
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'escapeRando', 'removeEscapeEnemies',
-               'bossRandomization',
+               'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'escapeRando', 'removeEscapeEnemies',
+               'bossRandomization', 'minimizer', 'minimizerTourian',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
                'rando_speed', 'animals', 'No_Music', 'random_music',
                'Infinite_Space_Jump', 'refill_before_save']
-    quantities = ['missileQty', 'superQty', 'powerBombQty']
+    quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty']
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation']
     others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'gravityBehaviour']
@@ -1179,9 +1189,13 @@ def sessionWebService():
     session.randomizer['minorQty'] = request.vars.minorQty
     session.randomizer['areaRandomization'] = request.vars.areaRandomization
     session.randomizer['areaLayout'] = request.vars.areaLayout
+    session.randomizer['lightAreaRandomization'] = request.vars.lightAreaRandomization
     session.randomizer['escapeRando'] = request.vars.escapeRando
     session.randomizer['removeEscapeEnemies'] = request.vars.removeEscapeEnemies
     session.randomizer['bossRandomization'] = request.vars.bossRandomization
+    session.randomizer['minimizer'] = request.vars.minimizer
+    session.randomizer['minimizerQty'] = request.vars.minimizerQty
+    session.randomizer['minimizerTourian'] = request.vars.minimizerTourian
     session.randomizer['funCombat'] = request.vars.funCombat
     session.randomizer['funMovement'] = request.vars.funMovement
     session.randomizer['funSuits'] = request.vars.funSuits
@@ -1231,14 +1245,14 @@ def randomizerWebService():
 
     # check validity of all parameters
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'escapeRando', 'removeEscapeEnemies',
-               'bossRandomization',
+               'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'escapeRando', 'removeEscapeEnemies',
+               'bossRandomization', 'minimizer', 'minimizerTourian',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
                'rando_speed', 'animals', 'No_Music', 'random_music',
                'Infinite_Space_Jump', 'refill_before_save']
-    quantities = ['missileQty', 'superQty', 'powerBombQty']
+    quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty']
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation']
     others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'gravityBehaviour', 'maxDifficulty']
@@ -1352,6 +1366,8 @@ def randomizerWebService():
         params.append('--area')
         if request.vars.areaLayout == 'off':
             params.append('--areaLayoutBase')
+        if request.vars.lightAreaRandomization == 'on':
+            params.append('--lightArea')
     elif request.vars.areaRandomization == 'random':
         params += ['--area', 'random']
 
@@ -1366,6 +1382,11 @@ def randomizerWebService():
         params.append('--bosses')
     elif request.vars.bossRandomization == 'random':
         params += ['--bosses', 'random']
+
+    if request.vars.minimizer == 'on':
+        params += ['--minimizer', request.vars.minimizerQty]
+    if request.vars.minimizerTourian == 'on':
+        params.append('--minimizerTourian')
 
     # load content of preset to get controller mapping
     try:
@@ -1405,6 +1426,9 @@ def randomizerWebService():
             locsItems['errorMsg'] = msg.replace('\n', '<br/>')
 
         DB.addRandoResult(id, ret, duration, msg)
+
+        if "forcedArgs" in locsItems:
+            DB.updateRandoParams(id, locsItems["forcedArgs"])
 
         # store ips in local directory
         guid = str(uuid.uuid4())
@@ -1535,6 +1559,20 @@ def home():
     response.title = 'Super Metroid VARIA Randomizer, Solver and Trackers'
 
     return dict()
+
+def addError(state, params, tmpErr):
+    errDir = os.path.expanduser("~/web2py/applications/solver/errors")
+    if os.path.isdir(errDir):
+        errFile = '{}.{}.{}'.format(request.client, datetime.now().strftime('%Y-%m-%d.%H-%M-%S'), str(uuid.uuid4()))
+        errFile = os.path.join(errDir, errFile)
+        with open(state) as f:
+            stateContent = f.read()
+        with open(tmpErr) as f:
+            errContent = f.read()
+        with open(errFile, 'w') as f:
+            f.write(str(params)+'\n')
+            f.write(str(stateContent)+'\n')
+            f.write(errContent)
 
 def getErrors():
     # check dir exists
@@ -1797,12 +1835,14 @@ class WS(object):
                 "mode": state["mode"],
                 "areaRando": state["areaRando"],
                 "bossRando": state["bossRando"],
+                "hasMixedTransitions": state["hasMixedTransitions"],
                 "escapeRando": state["escapeRando"],
                 "escapeTimer": state["escapeTimer"],
                 "seed": state["seed"],
                 "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0]),
                 "errorMsg": state["errorMsg"],
-                "last": state["last"]
+                "last": state["last"],
+                "innerTransitions": state["innerTransitions"]
             })
         else:
             raiseHttp(200, "OK", True)
@@ -1814,6 +1854,7 @@ class WS(object):
 
         (fd1, jsonInFileName) = tempfile.mkstemp()
         (fd2, jsonOutFileName) = tempfile.mkstemp()
+        (fd3, errFile) = tempfile.mkstemp()
         params = [
             pythonExec,  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
             '--interactive',
@@ -1865,7 +1906,7 @@ class WS(object):
 
         print("before calling isolver: {}".format(params))
         start = datetime.now()
-        ret = subprocess.call(params)
+        ret = subprocess.call(params, stderr=fd3)
         end = datetime.now()
         duration = (end - start).total_seconds()
         print("ret: {}, duration: {}s".format(ret, duration))
@@ -1877,6 +1918,8 @@ class WS(object):
             os.remove(jsonInFileName)
             os.close(fd2)
             os.remove(jsonOutFileName)
+            os.close(fd3)
+            os.remove(errFile)
             if action == 'save':
                 return json.dumps(state)
             else:
@@ -1887,19 +1930,22 @@ class WS(object):
                 self.session["state"] = state
                 return self.returnState()
         else:
-            os.close(fd1)
-            os.remove(jsonInFileName)
-
             msg = "Something wrong happened while iteratively solving the ROM"
             try:
+                addError(jsonInFileName, params, errFile)
                 with open(jsonOutFileName, 'r') as jsonFile:
                     data = json.load(jsonFile)
                     if "errorMsg" in data:
                         msg = data["errorMsg"]
             except Exception as e:
+                # happen when jsonOutFileName is empty
                 pass
+            os.close(fd1)
+            os.remove(jsonInFileName)
             os.close(fd2)
             os.remove(jsonOutFileName)
+            os.close(fd3)
+            os.remove(errFile)
             raiseHttp(400, msg, True)
 
 class WS_common_init(WS):
@@ -2247,6 +2293,9 @@ def initCustomizerSession():
         session.customizer['globalShift'] = "on"
         session.customizer['customSpriteEnable'] = "off"
         session.customizer['customSprite'] = "samus"
+        session.customizer['customItemsEnable'] = "off"
+        session.customizer['customShipEnable'] = "off"
+        session.customizer['customShip'] = "Red-M0nk3ySMShip1"
         session.customizer['itemsounds'] = "off"
         session.customizer['spinjumprestart'] = "off"
         session.customizer['rando_speed'] = "off"
@@ -2258,6 +2307,8 @@ def initCustomizerSession():
         session.customizer['AimAnyButton'] = "off"
         session.customizer['max_ammo_display'] = "off"
         session.customizer['supermetroid_msu1'] = "off"
+        session.customizer['remove_itemsounds'] = "off"
+        session.customizer['remove_spinjumprestart'] = "off"
 
 customSprites = {
     'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh", "group": "Samus"},
@@ -2287,6 +2338,14 @@ customSprites = {
     'marga': {"index":24, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
     'sprite_can': {"index":25, "name": "Sprite", "desc": "A ... Sprite ... ", "author": "TarThoron", "group": "Custom"},
     'win95_cursor': {"index":26, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
+}
+
+customShips = {
+    'Red-M0nk3ySMShip1': {"index":0, "name": "Red-M0nk3ySMShip1", "desc": "", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip2': {"index":1, "name": "Red-M0nk3ySMShip2", "desc": "", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip3': {"index":2, "name": "Red-M0nk3ySMShip3", "desc": "", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip4': {"index":3, "name": "Red-M0nk3ySMShip4", "desc": "", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip5': {"index":4, "name": "Red-M0nk3ySMShip5", "desc": "", "author": "Red-M0nk3y"}
 }
 
 def customizer():
@@ -2347,20 +2406,25 @@ def customizer():
                     DB.updateSeedUploadStatus(key, 'pending')
                     DB.close()
 
-    return dict(customSprites=customSprites, seedInfo=seedInfo, seedParams=seedParams, msg=msg)
+    return dict(customSprites=customSprites, customShips=customShips,
+                seedInfo=seedInfo, seedParams=seedParams, msg=msg)
 
 def customWebService():
     print("customWebService")
 
     # check validity of all parameters
-    patches = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music',
-               'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save']
+    switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music',
+               'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save',
+               'customSpriteEnable', 'customItemsEnable', 'customShipEnable', 'remove_itemsounds', 'remove_elevators_doors_speed']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
-    validateWebServiceParams(patches, [], [], others, isJson=True)
+    validateWebServiceParams(switchs, [], [], others, isJson=True)
     if request.vars.customSpriteEnable == 'on':
         if request.vars.customSprite not in customSprites:
             raiseHttp(400, "Wrong value for customSprite", True)
+    if request.vars.customShipEnable == 'on':
+        if request.vars.customShip not in customShips:
+            raiseHttp(400, "Wrong value for customShip", True)
 
     if session.customizer == None:
         session.customizer = {}
@@ -2378,6 +2442,9 @@ def customWebService():
     session.customizer['globalShift'] = request.vars.globalShift
     session.customizer['customSpriteEnable'] = request.vars.customSpriteEnable
     session.customizer['customSprite'] = request.vars.customSprite
+    session.customizer['customItemsEnable'] = request.vars.customItemsEnable
+    session.customizer['customShipEnable'] = request.vars.customShipEnable
+    session.customizer['customShip'] = request.vars.customShip
     session.customizer['itemsounds'] = request.vars.itemsounds
     session.customizer['spinjumprestart'] = request.vars.spinjumprestart
     session.customizer['rando_speed'] = request.vars.rando_speed
@@ -2389,6 +2456,8 @@ def customWebService():
     session.customizer['AimAnyButton'] = request.vars.AimAnyButton
     session.customizer['max_ammo_display'] = request.vars.max_ammo_display
     session.customizer['supermetroid_msu1'] = request.vars.supermetroid_msu1
+    session.customizer['remove_itemsounds'] = request.vars.remove_itemsounds
+    session.customizer['remove_elevators_doors_speed'] = request.vars.remove_elevators_doors_speed
 
     # call the randomizer
     (fd, jsonFileName) = tempfile.mkstemp()
@@ -2417,6 +2486,10 @@ def customWebService():
         params += ['-c', 'Infinite_Space_Jump']
     if request.vars.refill_before_save == 'on':
         params += ['-c', 'refill_before_save.ips']
+    if request.vars.remove_itemsounds == 'on':
+        params += ['-c', 'remove_itemsounds.ips']
+    if request.vars.remove_elevators_doors_speed == 'on':
+        params += ['-c', 'remove_elevators_doors_speed.ips']
 
     if request.vars.colorsRandomization == 'on':
         params.append('--palette')
@@ -2441,7 +2514,10 @@ def customWebService():
 
     if request.vars.customSpriteEnable == 'on':
         params += ['--sprite', "{}.ips".format(request.vars.customSprite)]
-
+        if request.vars.customItemsEnable == 'on':
+            params.append('--customItemNames')
+    if request.vars.customShipEnable == 'on':
+        params += ['--ship', "{}.ips".format(request.vars.customShip)]
     if request.vars.seedKey != None:
         DB = db.DB()
         seedIpsInfo = DB.getSeedIpsInfo(request.vars.seedKey)

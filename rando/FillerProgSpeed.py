@@ -3,7 +3,7 @@ import copy, random, sys
 
 from rando.Filler import Filler
 from rando.FillerRandom import FillerRandom, FillerRandomItems
-from rando.Choice import ItemThenLocChoiceProgSpeed
+from rando.Choice import ItemThenLocChoiceProgSpeed, ItemThenLocChoice
 from rando.RandoServices import ComebackCheckType
 from rando.Items import ItemManager
 from rando.ItemLocContainer import ItemLocContainer, getLocListStr, getItemListStr, getItemLocationsStr, getItemLocStr
@@ -45,7 +45,7 @@ class FillerProgSpeed(Filler):
         super(FillerProgSpeed, self).__init__(graphSettings.startAP, areaGraph, restrictions, container)
         distanceProp = 'GraphArea' if graphSettings.areaRando else 'Area'
         self.stdStart = GraphUtils.isStandardStart(self.startAP)
-        self.progSpeedParams = ProgSpeedParameters(restrictions)
+        self.progSpeedParams = ProgSpeedParameters(self.restrictions, len(container.unusedLocations))
         self.choice = ItemThenLocChoiceProgSpeed(restrictions, self.progSpeedParams, distanceProp, self.services)
 
     def initFiller(self):
@@ -69,8 +69,8 @@ class FillerProgSpeed(Filler):
         self.progressionItemTypes = self.progSpeedParams.getProgressionItemTypes(speed)
         if self.restrictions.isEarlyMorph() and 'Morph' in self.progressionItemTypes:
             self.progressionItemTypes.remove('Morph')
-        collectedAmmo = self.container.getCollectedItems(lambda item: item['Category'] == 'Ammo')
-        collectedAmmoTypes = set([item['Type'] for item in collectedAmmo])
+        collectedAmmo = self.container.getCollectedItems(lambda item: item.Category == 'Ammo')
+        collectedAmmoTypes = set([item.Type for item in collectedAmmo])
         ammos = ['Missile', 'Super', 'PowerBomb']
         if 'Super' in collectedAmmoTypes:
             ammos.remove('Missile')
@@ -80,11 +80,11 @@ class FillerProgSpeed(Filler):
         return self.choice.chooseItemLoc(itemLocDict, possibleProg, self.progressionItemLocs, self.ap, self.container)
 
     # during random fill at the end put suits first while there's still available locations which don't fall under the suits restriction
-    def chooseItemLocRestrictFirst(self, itemLocDict):
-        if self.settings.restrictions['Suits'] == True and self.container.hasItemInPool(lambda item: item['Type'] in ['Varia', 'Gravity']):
-            itemLocDict = {key: value for key, value in itemLocDict.items() if key.item['Type'] in ['Varia', 'Gravity']}
-
-        return self.chooseItemLoc(itemLocDict, False)
+    def chooseItemLocNoLogic(self, itemLocDict):
+        if self.settings.restrictions['Suits'] == True and self.container.hasItemInPool(lambda item: item.Type in ['Varia', 'Gravity']):
+            itemLocDict = {key: value for key, value in itemLocDict.items() if key.Type in ['Varia', 'Gravity']}
+        # pure random choice instead of prog-speed specific
+        return ItemThenLocChoice.chooseItemLoc(self.choice, itemLocDict, False)
 
     def currentLocations(self, item=None):
         return self.services.currentLocations(self.ap, self.container, item=item)
@@ -100,7 +100,7 @@ class FillerProgSpeed(Filler):
     # return item/loc, or None if stuck
     def generateItem(self):
         itemLocDict, possibleProg = self.services.getPossiblePlacements(self.ap, self.container, self.getComebackCheck())
-        if self.isEarlyGame():
+        if self.isEarlyGame() and possibleProg == True:
             # cheat a little bit if non-standard start: place early
             # progression away from crateria/blue brin if possible
             startAp = getAccessPoint(self.startAP)
@@ -137,7 +137,7 @@ class FillerProgSpeed(Filler):
         self.cache.reset()
 
     def isProgItem(self, item):
-        if item['Type'] in self.progressionItemTypes:
+        if item.Type in self.progressionItemTypes:
             return True
         return self.services.isProgression(item, self.ap, self.container)
 
@@ -148,12 +148,12 @@ class FillerProgSpeed(Filler):
     # with non-progression items
     def checkLocPool(self):
         sm = self.container.sm
- #       self.log.debug("checkLocPool {}".format([it['Name'] for it in self.itemPool]))
+ #       self.log.debug("checkLocPool {}".format([it.Name for it in self.itemPool]))
         if self.locLimit <= 0:
             return True
         progItems = self.container.getItems(self.isProgItem)
-        self.log.debug("checkLocPool. progItems {}".format([it['Name'] for it in progItems]))
- #       self.log.debug("curItems {}".format([it['Name'] for it in self.currentItems]))
+        self.log.debug("checkLocPool. progItems {}".format([it.Name for it in progItems]))
+ #       self.log.debug("curItems {}".format([it.Name for it in self.currentItems]))
         if len(progItems) == 0:
             return True
         isMinorProg = any(self.restrictions.isItemMinor(item) for item in progItems)
@@ -192,21 +192,21 @@ class FillerProgSpeed(Filler):
         return self.restrictions.split == 'Chozo'
 
     def nonProgItemCheck(self, item):
-        return (item['Category'] == 'Energy' and self.addEnergyAsNonProg()) or (not self.stdStart and item['Category'] == 'Ammo') or (self.restrictions.isEarlyMorph() and item['Type'] == 'Morph') or not self.isProgItem(item)
+        return (item.Category == 'Energy' and self.addEnergyAsNonProg()) or (not self.stdStart and item.Category == 'Ammo') or (self.restrictions.isEarlyMorph() and item.Type == 'Morph') or not self.isProgItem(item)
 
     def getNonProgItemPoolRestriction(self):
         return self.nonProgItemCheck
 
     def pickHelpfulMinor(self, item):
-        self.helpfulMinorPicked = not self.container.sm.haveItem(item['Type']).bool
+        self.helpfulMinorPicked = not self.container.sm.haveItem(item.Type).bool
         if self.helpfulMinorPicked:
-            self.log.debug('pickHelpfulMinor. pick '+item['Type'])
+            self.log.debug('pickHelpfulMinor. pick '+item.Type)
         return self.helpfulMinorPicked
 
     def getNonProgItemPoolRestrictionStart(self):
         self.helpfulMinorPicked = random.random() >= self.minorHelpProb
         self.log.debug('getNonProgItemPoolRestrictionStart. helpfulMinorPicked='+str(self.helpfulMinorPicked))
-        return lambda item: (item['Category'] == 'Ammo' and not self.helpfulMinorPicked and self.pickHelpfulMinor(item)) or self.nonProgItemCheck(item)
+        return lambda item: (item.Category == 'Ammo' and not self.helpfulMinorPicked and self.pickHelpfulMinor(item)) or self.nonProgItemCheck(item)
 
     # return True if stuck, False if not
     def fillNonProgressionItems(self):
@@ -225,7 +225,7 @@ class FillerProgSpeed(Filler):
             itemLocation = self.generateItem()
             if itemLocation is not None:
                 nItems += 1
-                self.log.debug("fillNonProgressionItems: {} at {}".format(itemLocation['Item']['Name'], itemLocation['Location']['Name']))
+                self.log.debug("fillNonProgressionItems: {} at {}".format(itemLocation['Item'].Name, itemLocation['Location']['Name']))
                 # doing this first is actually important, as state is saved in collect
                 self.container.unrestrictItemPool()
                 self.collect(itemLocation)
@@ -266,14 +266,14 @@ class FillerProgSpeed(Filler):
         self.log.debug('initRollback: progressionStatesIndices 2=' + str(self.progressionStatesIndices))
 
     def getSituationId(self):
-        progItems = str(sorted([il['Item']['Type'] for il in self.progressionItemLocs]))
+        progItems = str(sorted([il['Item'].Type for il in self.progressionItemLocs]))
         position = str(sorted([ap.Name for ap in self.services.currentAccessPoints(self.ap, self.container)]))
         return progItems+'/'+position
 
     def hasTried(self, itemLoc):
         if self.isEarlyGame():
             return False
-        itemType = itemLoc['Item']['Type']
+        itemType = itemLoc['Item'].Type
         situation = self.getSituationId()
         ret = False
         if situation in self.rollbackItemsTried:
@@ -283,7 +283,7 @@ class FillerProgSpeed(Filler):
         return ret
 
     def updateRollbackItemsTried(self, itemLoc):
-        itemType = itemLoc['Item']['Type']
+        itemType = itemLoc['Item'].Type
         situation = self.getSituationId()
         if situation not in self.rollbackItemsTried:
             self.rollbackItemsTried[situation] = []
@@ -373,7 +373,13 @@ class FillerProgSpeed(Filler):
         self.cache.reset()
         if self.services.can100percent(self.ap, self.container) and self.settings.progSpeed not in ['slowest', 'slow']:
             (itemLocDict, isProg) = self.services.getPossiblePlacementsNoLogic(self.container)
-            itemLoc = self.chooseItemLocRestrictFirst(itemLocDict)
+            itemLoc = self.chooseItemLocNoLogic(itemLocDict)
+            if itemLoc is None:
+                self.restrictions.disable()
+                self.cache.reset()
+                self.errorMsg = "Restrictions disabled"
+                (itemLocDict, isProg) = self.services.getPossiblePlacementsNoLogic(self.container)
+                itemLoc = self.chooseItemLocNoLogic(itemLocDict)
             assert itemLoc is not None
             self.ap = self.services.collect(self.ap, self.container, itemLoc)
             return True
@@ -392,10 +398,8 @@ class FillerProgSpeed(Filler):
                     # it was a onlyBossesLeft false positive, restore max diff
                     self.settings.maxDiff = self.maxDiff
                 # check that we're actually stuck
-                nCurLocs = len(self.currentLocations())
-                nLocsLeft = len(self.container.unusedLocations)
                 itemLoc = None
-                if nCurLocs < nLocsLeft:
+                if not self.services.can100percent(self.ap, self.container):
                     # stuck, rollback to make progress if we can't access everything yet
                     itemLoc = self.rollback()
                 if itemLoc is not None:
@@ -403,7 +407,7 @@ class FillerProgSpeed(Filler):
                     isStuck = False
                 else:
                     isStuck = self.getItemFromStandardPool()
-        self.log.debug("step end. itemLocations="+getItemLocationsStr(self.container.itemLocations))
+#        self.log.debug("step end. itemLocations="+getItemLocationsStr(self.container.itemLocations))
         return not isStuck
 
     def getProgressionItemLocations(self):
@@ -424,7 +428,7 @@ class FillerProgSpeedChozoSecondPhase(Filler):
     def __init__(self, startAP, graph, restrictions, container):
         super(FillerProgSpeedChozoSecondPhase, self).__init__(startAP, graph, restrictions, container)
         self.firstPhaseItemLocs = container.itemLocations
-        self.progSpeedParams = ProgSpeedParameters(self.restrictions)
+        self.progSpeedParams = ProgSpeedParameters(self.restrictions, len(container.unusedLocations))
 
     def initContainer(self):
         self.container = self.baseContainer
@@ -480,9 +484,12 @@ class FillerProgSpeedChozoSecondPhase(Filler):
             self.log.debug('step. restrictedItemTypes='+str(restrictedItemTypes))
             basePool = self.container.itemPool[:]
             itemPool = []
+            self.log.debug('step. basePool: {}'.format(getItemListStr(basePool)))
             while len(itemPool) < len(curLocs):
                 item = random.choice(basePool)
-                if item['Type'] not in restrictedItemTypes or random.random() < self.restrictedItemProba:
+                if item.Type not in restrictedItemTypes or\
+                   random.random() < self.restrictedItemProba or\
+                   self.restrictedItemProba == 0 and not any(item for item in basePool if item.Type not in restrictedItemTypes):
                     itemPool.append(item)
                     basePool.remove(item)
             self.log.debug('step. itemPool='+getItemListStr(itemPool))
@@ -490,10 +497,13 @@ class FillerProgSpeedChozoSecondPhase(Filler):
             self.container.transferCollected(cont)
             filler = FillerRandomItems(self.ap, self.graph, self.restrictions, cont)
             (stuck, itemLocs, prog) = filler.generateItems()
-            assert not stuck
+            if stuck:
+                if len(filler.errorMsg) > 0:
+                    self.errorMsg += '\n'+filler.errorMsg
+                return False
             for itemLoc in itemLocs:
                 if itemLoc['Location'] in self.container.unusedLocations:
-                    self.log.debug("step. POST COLLECT "+itemLoc['Item']['Type']+" at "+itemLoc['Location']['Name'])
+                    self.log.debug("step. POST COLLECT "+itemLoc['Item'].Type+" at "+itemLoc['Location']['Name'])
                     self.container.collect(itemLoc)
         else:
             # merge collected of 1st phase and 2nd phase so far for seed to be solvable by random fill
@@ -503,5 +513,6 @@ class FillerProgSpeedChozoSecondPhase(Filler):
             (stuck, itemLocs, prog) = filler.generateItems()
             if len(filler.errorMsg) > 0:
                 self.errorMsg += '\n'+filler.errorMsg
-            assert not stuck
+            if stuck:
+                return False
         return True

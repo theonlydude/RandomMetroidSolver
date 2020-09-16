@@ -1,4 +1,8 @@
 #!/bin/bash
+# this script will randomize seeds with random params and solve them to detect mismatch and bugs.
+# to monitor a running jm:
+# cd logs/
+# while true; do grep -v SOLVER test_jm.csv | wc -l ; grep -E "NOK|mismatch|Can't solve" test_jm.csv | grep -v ';speedrun;' ; grep Traceback test_jm.log ; sleep 3; done
 
 # cd to root dir
 CWD=$(dirname $0)/..
@@ -49,6 +53,7 @@ TWEAKS=("" "--novariatweaks")
 LAYOUTS=("" "--nolayout")
 STARTAPS=("" "--startAP random")
 AREAS=("" "" "--area" "--area --areaLayoutBase")
+MINIMIZERS=("--bosses random" "--bosses random" "--bosses random" "--area --bosses --minimizer " "--area --bosses --minimizerTourian --minimizer ")
 
 function generate_params {
     SEED="$1"
@@ -67,8 +72,13 @@ function generate_params {
     STARTAP=${STARTAPS[$S]}
     let S=$RANDOM%${#AREAS[@]}
     AREA=${AREAS[$S]}
+    let S=$RANDOM%${#MINIMIZERS[@]}
+    MINIMIZER=${MINIMIZERS[$S]}
+    if(echo "${MINIMIZER}" | grep -q minimizer); then
+        MINIMIZER="${MINIMIZER} $(echo 35+$RANDOM%65 | bc)"
+    fi
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --bosses random --escapeRando random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${AREA} --jm"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${AREA} ${MINIMIZER} --jm"
 }
 
 function computeSeed {
@@ -81,11 +91,11 @@ function computeSeed {
 
     if [ ${COMPARE} -eq 0 ]; then
 	OLD_MD5="old n/a"
-	OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
+	RANDO_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 	if [ $? -ne 0 ]; then
-	    echo "${OUT}" >> ${LOG}
+	    echo "${RANDO_OUT}" >> ${LOG}
 	else
-	    RTIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
+	    RTIME_OLD=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
 	    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
 	    if [ $? -eq 0 ]; then
 		OLD_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
@@ -94,27 +104,31 @@ function computeSeed {
     fi
 
     NEW_MD5="new n/a"
-    OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ./randomizer.py ${PARAMS} 2>&1)
+    RANDO_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ./randomizer.py ${PARAMS} 2>&1)
     if [ $? -ne 0 ]; then
-	echo "${OUT}" >> ${LOG}
+	echo "${RANDO_OUT}" >> ${LOG}
     else
-	RTIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
+	RTIME_NEW=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
 	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
 	if [ $? -eq 0 ]; then
 	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
 	fi
     fi
-    STARTAP_NEW=$(echo "${OUT}" | grep startAP | cut -d ':' -f 2)
-    PROGSPEED_NEW=$(echo "${OUT}" | grep progressionSpeed | cut -d ':' -f 2)
-    MAJORSSPLIT_NEW=$(echo "${OUT}" | grep majorsSplit | cut -d ':' -f 2)
-    MORPH_NEW=$(echo "${OUT}" | grep morphPlacement | cut -d ':' -f 2)
+    STARTAP_NEW=$(echo "${RANDO_OUT}" | grep startAP | cut -d ':' -f 2)
+    PROGSPEED_NEW=$(echo "${RANDO_OUT}" | grep progressionSpeed | cut -d ':' -f 2)
+    MAJORSSPLIT_NEW=$(echo "${RANDO_OUT}" | grep majorsSplit | cut -d ':' -f 2)
+    MORPH_NEW=$(echo "${RANDO_OUT}" | grep morphPlacement | cut -d ':' -f 2)
 
     if [ "${OLD_MD5}" != "${NEW_MD5}" -a ${COMPARE} -eq 0 ]; then
 	if [ "${OLD_MD5}" = "old n/a" ] && [ "${NEW_MD5}" = "new n/a" ]; then
 	    MD5="n/a"
 	else
-	    MD5="mismatch"
-	    echo "OLD: ${OLD_MD5} NEW: ${NEW_MD5}"
+            if [ "${OLD_MD5}" = "old n/a" ]; then
+                MD5="old too slow"
+            else
+	        MD5="mismatch"
+	        echo "OLD: ${OLD_MD5} NEW: ${NEW_MD5}"
+            fi
 	fi
     else
 	MD5=${NEW_MD5}
@@ -128,35 +142,39 @@ function computeSeed {
     fi
 
     if [ ${COMPARE} -eq 0 ]; then
-	OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+	SOLVER_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
 	if [ $? -ne 0 ]; then
             echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
+            echo "${RANDO_OUT}" >> ${LOG}
+            echo "${SOLVER_OUT}" >> ${LOG}
             exit 0
 	    STIME_OLD="n/a"
 	else
-	    STIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
-	    echo "${OUT}" | grep -q "has already been picked up"
+	    STIME_OLD=$(echo "${SOLVER_OUT}" | grep real | awk '{print $1}')
+	    echo "${SOLVER_OUT}" | grep -q "has already been picked up"
 	    DUP_OLD=$?
-	    echo "${OUT}" | grep -v 'real' > ${ROM_GEN}.old
+	    echo "${SOLVER_OUT}" | grep -v 'real' > ${ROM_GEN}.old
 	fi
     else
 	DUP_OLD=1
     fi
 
-    OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ~/RandomMetroidSolver/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+    SOLVER_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ~/RandomMetroidSolver/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
     if [ $? -ne 0 ]; then
         echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
         echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
+        echo "${RANDO_OUT}" >> ${LOG}
+        echo "${SOLVER_OUT}" >> ${LOG}
         exit 0
 	STIME_NEW="n/a"
     else
-	STIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
-	echo "${OUT}" | grep -q "has already been picked up"
+	STIME_NEW=$(echo "${SOLVER_OUT}" | grep real | awk '{print $1}')
+	echo "${SOLVER_OUT}" | grep -q "has already been picked up"
 	DUP_NEW=$?
 
 	if [ ${COMPARE} -eq 0 ]; then
-	    echo "${OUT}" | grep -v 'real' > ${ROM_GEN}.new
+	    echo "${SOLVER_OUT}" | grep -v 'real' > ${ROM_GEN}.new
 	fi
     fi
 
@@ -254,5 +272,21 @@ echo "total: $(wc -l ${CSV})"
 echo "errors:"
 grep -E "NOK|mismatch|Can't solve" ${CSV}
 grep Traceback ${LOG}
+
+function getTime {
+    grep -v SOLVER ${CSV} | grep -v -E '^error' | grep -v '^[0-9]*;;;' | cut -d ';' -f $1 | sed -e 's+0:++g' | awk -F';' '{sum+=$1;} END{print sum}'
+}
+
+if [ ${COMPARE} -eq 0 ]; then
+    RANDOTIME_BEFORE=$(getTime 3)
+    RANDOTIME_AFTER=$(getTime 4)
+    SOLVERTIME_BEFORE=$(getTime 5)
+    SOLVERTIME_AFTER=$(getTime 6)
+    RANDO_PERCENT=$(echo "scale=4; (${RANDOTIME_AFTER} - ${RANDOTIME_BEFORE}) / ${RANDOTIME_BEFORE} * 100" | bc -l)
+    SOLVER_PERCENT=$(echo "scale=4; (${SOLVERTIME_AFTER} - ${SOLVERTIME_BEFORE}) / ${SOLVERTIME_BEFORE} * 100" | bc -l)
+    echo "Speed increase/decrease:"
+    echo "rando:  ${RANDO_PERCENT}%"
+    echo "solver: ${SOLVER_PERCENT}%"
+fi
 
 rm -rf ${TEMP_DIR}

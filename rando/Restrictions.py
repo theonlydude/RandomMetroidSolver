@@ -7,6 +7,7 @@ from rando.ItemLocContainer import getLocListStr
 # canPlaceAtLocation is the main entry point here
 class Restrictions(object):
     def __init__(self, settings):
+        self.log = log.get('Restrictions')
         self.settings = settings
         # Item split : Major, Chozo or Full
         self.split = settings.restrictions['MajorMinor']
@@ -16,6 +17,11 @@ class Restrictions(object):
         self.log = log.get("Restrictions")
         self.static = {}
         self.dynamic = {}
+
+    def disable(self):
+        self.split = "Full"
+        self.suitsRestrictions = False
+        self.checkers = []
 
     def isEarlyMorph(self):
         return self.settings.restrictions['Morph'] == 'early'
@@ -40,14 +46,16 @@ class Restrictions(object):
 
     NoCheckCat = set(['Energy', 'Nothing', 'Boss'])
 
-    def addPlacementeRestrictions(self, restrictionDict):
+    def addPlacementRestrictions(self, restrictionDict):
+        self.log.debug("add speedrun placement restrictions")
+#        self.log.debug(restrictionDict)
         self.checkers.append(lambda item, loc, cont:
-                             item['Category'] in Restrictions.NoCheckCat
-                             or item['Type'] == 'Missile'
-                             or (item['Category'] == 'Ammo' and cont.hasUnrestrictedLocWithItemType(item['Type']))
+                             item.Category in Restrictions.NoCheckCat
+                             or item.Type == 'Missile'
+                             or (item.Category == 'Ammo' and cont.hasUnrestrictedLocWithItemType(item.Type))
                              or loc['GraphArea'] not in restrictionDict
-                             or item['Type'] not in restrictionDict[loc['GraphArea']]
-                             or loc['Name'] in restrictionDict[loc['GraphArea']][item['Type']])
+                             or item.Type not in restrictionDict[loc['GraphArea']]
+                             or loc['Name'] in restrictionDict[loc['GraphArea']][item.Type])
 
     def isLocMajor(self, loc):
         return 'Boss' not in loc['Class'] and (self.split == "Full" or self.split in loc['Class'])
@@ -59,21 +67,21 @@ class Restrictions(object):
         if self.split == "Full":
             return True
         else:
-            return item['Class'] == self.split
+            return item.Class == self.split
 
     def isItemMinor(self, item):
         if self.split == "Full":
             return True
         else:
-            return item['Class'] == "Minor"
+            return item.Class == "Minor"
 
     def isItemLocMatching(self, item, loc):
         if self.split == "Full":
             return True
         if self.split in loc['Class']:
-            return item['Class'] == self.split
+            return item.Class == self.split
         else:
-            return item['Class'] == "Minor"
+            return item.Class == "Minor"
 
     # return True if we can keep morph as a possibility
     def lateMorphCheck(self, container, possibleLocs):
@@ -82,7 +90,7 @@ class Restrictions(object):
         if self.split == 'Full':
             nbItems = len(container.currentItems)
         else:
-            nbItems = len([item for item in container.currentItems if self.split == item['Class']])
+            nbItems = len([item for item in container.currentItems if self.split == item.Class])
         if proba > nbItems:
             return None
         if self.lateMorphForbiddenArea is not None:
@@ -92,14 +100,17 @@ class Restrictions(object):
         return possibleLocs
 
     def isSuit(self, item):
-        return item['Type'] == 'Varia' or item['Type'] == 'Gravity'
+        return item.Type == 'Varia' or item.Type == 'Gravity'
     
     def getCheckers(self):
         checkers = []
-        checkers.append(lambda item, loc, cont: (item['Category'] != 'Boss' and 'Boss' not in loc['Class']) or (item['Category'] == 'Boss' and item['Name'] == loc['Name']))
+        self.log.debug("add bosses restriction")
+        checkers.append(lambda item, loc, cont: (item.Category != 'Boss' and 'Boss' not in loc['Class']) or (item.Category == 'Boss' and item.Name == loc['Name']))
         if self.split != 'Full':
+            self.log.debug("add majorsSplit restriction")
             checkers.append(lambda item, loc, cont: self.isItemLocMatching(item, loc))
         if self.suitsRestrictions:
+            self.log.debug("add suits restriction")
             checkers.append(lambda item, loc, cont: not self.isSuit(item) or loc['GraphArea'] != 'Crateria')
         return checkers
 
@@ -121,14 +132,14 @@ class Restrictions(object):
         items = container.getDistinctItems()
         for item in items:
             for location in container.unusedLocations:
-                self.static[(location['Name'], item['Type'])] = self.canPlaceAtLocation(item, location, container)
+                self.static[(location['Name'], item.Type)] = self.canPlaceAtLocation(item, location, container)
 
         container.unrestrictedItems = set(['Super', 'PowerBomb'])
         for item in items:
-            if item['Type'] not in ['Super', 'PowerBomb']:
+            if item.Type not in ['Super', 'PowerBomb']:
                 continue
             for location in container.unusedLocations:
-                self.dynamic[(location['Name'], item['Type'])] = self.canPlaceAtLocation(item, location, container)
+                self.dynamic[(location['Name'], item.Type)] = self.canPlaceAtLocation(item, location, container)
         container.unrestrictedItems = set()
 
     def canPlaceAtLocationFast(self, itemType, locName, container):

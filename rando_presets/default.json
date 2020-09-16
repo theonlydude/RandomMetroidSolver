@@ -13,6 +13,7 @@
   "progressionSpeed": "medium",
   "No_Music": "off",
   "areaRandomization": "off",
+  "escapeRando": "off",
   "maxDifficulty": "hardcore",
   "powerBombQty": "1",
   "minorQty": "100",

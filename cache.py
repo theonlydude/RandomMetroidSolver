@@ -2,10 +2,28 @@
 
 class Cache:
     cache = {}
+    masterCache = {}
 
     @staticmethod
     def reset():
-        Cache.cache = {}
+        # reinit the whole cache
+        key = 0
+        Cache.masterCache = {}
+        Cache.cache = {'key': key}
+        Cache.masterCache[key] = Cache.cache
+
+    @staticmethod
+    def update(newKey):
+        if newKey in Cache.masterCache:
+#            print("usek: "+format(newKey, '#067b'))
+#            if Cache.masterCache[newKey]['key'] != newKey:
+#                print("ERROR: key stored in cache is not the same as the new key !!!!")
+#                print("      "+format(Cache.masterCache[newKey]['key'], '#067b')+" key in cache")
+            Cache.cache = Cache.masterCache[newKey]
+        else:
+#            print("newk: "+format(newKey, '#067b'))
+            Cache.cache = {'key': newKey}
+            Cache.masterCache[newKey] = Cache.cache
 
     @staticmethod
     def decorator(func):
@@ -20,6 +38,18 @@ class Cache:
                 ret = func(self)
                 Cache.cache[func.__name__] = ret
 #                print("cache added for {}: {}".format(func.__name__, Cache.cache[func.__name__]))
+                return ret
+        return _decorator
+
+    # for lambdas
+    @staticmethod
+    def ldeco(name, func):
+        def _decorator(self):
+            if name in Cache.cache:
+                return Cache.cache[name]
+            else:
+                ret = func(self)
+                Cache.cache[name] = ret
                 return ret
         return _decorator
 

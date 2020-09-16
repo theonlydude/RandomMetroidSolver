@@ -6,7 +6,7 @@ from rando.Choice import ItemThenLocChoice
 from rando.MiniSolver import MiniSolver
 from rando.ItemLocContainer import ContainerSoftBackup
 from rando.RandoServices import ComebackCheckType
-from solver import RandoSolver
+from solver.randoSolver import RandoSolver
 from parameters import infinity
 from helpers import diffValue2txt
 
@@ -19,8 +19,6 @@ class FillerRandom(Filler):
         self.beatableBackup = None
         self.nFrontFillSteps = 0
         self.stepIncr = 1
-        # based on runtime limit, help the random fill with up to three front fill steps
-        self.runtimeSteps = [self.runtimeLimit_s/4, self.runtimeLimit_s/2, self.runtimeLimit_s*3/4, sys.maxsize]
 
     def initFiller(self):
         super(FillerRandom, self).initFiller()
@@ -46,13 +44,17 @@ class FillerRandom(Filler):
     def getLocations(self, item):
         return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocation(item, loc, self.container)]
 
+    # implemented in the speedrun version
+    def getHelp(self):
+        pass
+
     def step(self):
         # here a step is not an item collection but a whole fill attempt
         while not self.container.isPoolEmpty():
             item = random.choice(self.container.itemPool)
             locs = self.getLocations(item)
             if not locs:
-                self.log.debug("FillerRandom: constraint collision during step {} for item {}".format(self.nSteps, item['Type']))
+                self.log.debug("FillerRandom: constraint collision during step {} for item {}".format(self.nSteps, item.Type))
                 self.resetHelpingContainer()
                 continue
             loc = random.choice(locs)
@@ -85,13 +87,8 @@ class FillerRandom(Filler):
                 sys.stdout.write('x')
                 sys.stdout.flush()
 
-            if self.runtime_s > self.runtimeSteps[self.nFrontFillSteps]:
-                # store the step for debug purpose
-                sys.stdout.write('n({})'.format(self.nSteps))
-                sys.stdout.flush()
-                # help the random fill with a bit of frontfill
-                self.nFrontFillSteps += self.stepIncr
-                self.createBaseLists(updateBase=False)
+            # help speedrun filler
+            self.getHelp()
 
         return True
 
@@ -134,13 +131,11 @@ class FrontFillerKickstart(FrontFiller):
     def initContainer(self):
         self.container = self.baseContainer
 
-    # if during first step no item is a progression item, check all two items pairs instead of just one item
+    # if during a step no item is a progression item, check all two items pairs instead of just one item
     def step(self, onlyBossCheck=False):
-        if self.nSteps > 0:
-            return super(FrontFillerKickstart, self).step(onlyBossCheck)
-
         pairItemLocDict = self.services.getStartupProgItemsPairs(self.ap, self.container)
         if pairItemLocDict == None:
+            # no pair found or prog item found
             return super(FrontFillerKickstart, self).step(onlyBossCheck)
 
         # choose a pair of items which create progression
@@ -149,8 +144,11 @@ class FrontFillerKickstart(FrontFiller):
 
         # collect them
         availableLocs = pairItemLocDict[key]
-        self.collect({'Item': key[0].item, 'Location': availableLocs[0][0]})
-        self.collect({'Item': key[1].item, 'Location': availableLocs[1][0]})
+        self.collect({'Item': key[0], 'Location': availableLocs[0][0]})
+        self.collect({'Item': key[1], 'Location': availableLocs[1][0]})
+
+        # we've collected two items, increase the number of steps
+        self.nSteps += 1
 
         return True
 
@@ -159,6 +157,8 @@ class FillerRandomSpeedrun(FillerRandom):
     def __init__(self, graphSettings, graph, restrictions, container, diffSteps=0):
         super(FillerRandomSpeedrun, self).__init__(graphSettings.startAP, graph, restrictions, container)
         self.nFrontFillSteps = graphSettings.getRandomFillHelp()
+        # based on runtime limit, help the random fill with up to three front fill steps
+        self.runtimeSteps = [self.runtimeLimit_s/4, self.runtimeLimit_s/2, self.runtimeLimit_s*3/4, sys.maxsize]
 
     def initFiller(self):
         super(FillerRandomSpeedrun, self).initFiller()
@@ -184,7 +184,7 @@ class FillerRandomSpeedrun(FillerRandom):
             super(FillerRandomSpeedrun, self).createHelpingBaseLists()
 
     def getLocations(self, item):
-        return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocationFast(item['Type'], loc['Name'], self.container)]
+        return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocationFast(item.Type, loc['Name'], self.container)]
 
     def isBeatable(self, maxDiff=None):
         miniOk = self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)
@@ -197,6 +197,7 @@ class FillerRandomSpeedrun(FillerRandom):
         graphLocations = self.container.getLocsForSolver()
         solver = RandoSolver(self.restrictions.split, self.startAP, self.graph, graphLocations)
         diff = solver.solveRom()
+        self.container.cleanLocsAfterSolver()
         if diff < minDiff: # minDiff is 0 if unspecified: that covers "unsolvable" (-1)
             sys.stdout.write('X')
             sys.stdout.flush()
@@ -204,3 +205,12 @@ class FillerRandomSpeedrun(FillerRandom):
         sys.stdout.write('S({}/{}ms)'.format(self.nSteps+1, int(self.runtime_s*1000)))
         sys.stdout.flush()
         return True
+
+    def getHelp(self):
+        if self.runtime_s > self.runtimeSteps[self.nFrontFillSteps]:
+            # store the step for debug purpose
+            sys.stdout.write('n({})'.format(self.nSteps))
+            sys.stdout.flush()
+            # help the random fill with a bit of frontfill
+            self.nFrontFillSteps += self.stepIncr
+            self.createBaseLists(updateBase=False)

@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     randoParams["preset"] = preset
     if args.seed == 0:
-        randoParams["seed"] = random.randint(0, 9999999)
+        randoParams["seed"] = random.randrange(sys.maxsize)
     else:
         randoParams["seed"] = args.seed
 

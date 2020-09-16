@@ -13,9 +13,15 @@ CWD=$(pwd)
 ROM=$1
 
 echo "checking total seeds"
-[ -d ~/download/total_seeds_major ] || exit -1
-[ -d ~/download/total_seeds_full ] || exit -1
-echo "total seeds found"
+if [ -d ~/download/sql_total ]; then
+    echo "total stats found"
+    TOTAL_ALREADY_COMPUTED=0
+else
+    [ -d ~/download/total_seeds_major ] || exit -1
+    [ -d ~/download/total_seeds_full ] || exit -1
+    echo "total seeds found"
+    TOTAL_ALREADY_COMPUTED=1
+fi
 
 function getDBParam {
     PARAM="$1"
@@ -47,7 +53,7 @@ ${CWD}/tools/genExtStats.sh ${ROM} 100
 # 900 seeds pour les skill/settings presets de tournoi
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Season_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Playoff_Races
-${CWD}/tools/genExtStats.sh ${ROM} 9900 SMRAT2020
+${CWD}/tools/genExtStats.sh ${ROM} 900 SMRAT2020
 
 # 900 seeds pour les skill preset inclus dans les rando presets
 ${CWD}/tools/genExtStats.sh ${ROM} 900 default regular
@@ -57,22 +63,30 @@ ${CWD}/tools/genExtStats.sh ${ROM} 900 haste Season_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 highway2hell expert
 ${CWD}/tools/genExtStats.sh ${ROM} 900 stupid_hard master
 ${CWD}/tools/genExtStats.sh ${ROM} 900 way_of_chozo regular
+${CWD}/tools/genExtStats.sh ${ROM} 900 Chozo_Speedrun regular
+${CWD}/tools/genExtStats.sh ${ROM} 900 VARIA_Weekly casual
+
+# 100 seeds pour une selection de settings presets random
+${CWD}/tools/genExtStats.sh ${ROM} 100 where_am_i regular
+${CWD}/tools/genExtStats.sh ${ROM} 100 surprise regular
 
 # 1000 seed pour les stats de prog speed
 ${CWD}/tools/genProgSpeedStats.sh ${ROM} 1000
 ${CWD}/tools/genProgSpeedStats.sh ${ROM} 1000 FULL
 
 # Stats sur l'échantillon de seeds total
-${CWD}/tools/genTotalStats.sh ~/download/total_seeds_major
-${CWD}/tools/genTotalStats.sh ~/download/total_seeds_full FULL
-
+if [ ${TOTAL_ALREADY_COMPUTED} -eq 1 ]; then
+    ${CWD}/tools/genTotalStats.sh ~/download/total_seeds_major
+    ${CWD}/tools/genTotalStats.sh ~/download/total_seeds_full FULL
+else
+    for FP in $(ls -1 ~/download/sql_total/*.sql); do
+        F=$(basename ${FP})
+        cat ${FP} >> ${CWD}/sql/${F}
+    done
+fi
 #################
 # load stats
 ${CWD}/tools/loadExtStats.sh
-
-# update speedrun prog speed stats to match season races preset
-SQL="update extended_stats set morphPlacement = 'early' where progSpeed = 'speedrun' and preset = 'Season_Races' and area = false and boss = false and majorsSplit in ('Full', 'Major') and morphPlacement = 'normal' and suitsRestriction = true and progDiff = 'normal' and superFunMovement = false and superFunCombat = false and superFunSuit = false and gravityBehaviour = 'Balanced' and nerfedCharge = false and maxDifficulty = 'harder' and startAP = 'Landing Site';"
-echo "${SQL}" | mysql -h ${host} -u ${user} -p${password} ${database}
 
 # dump stats
 mysqldump -h ${host} -u ${user} -p${password} ${database} difficulties extended_stats item_locs techniques solver_stats > ${CWD}/new_stats.sql

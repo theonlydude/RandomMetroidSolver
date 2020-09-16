@@ -5,12 +5,6 @@ from parameters import infinity
 from rando.ItemLocContainer import getLocListStr, getItemListStr, ContainerSoftBackup
 from helpers import Bosses
 
-# hackish object to put items in dictionaries
-class ItemWrapper(object):
-    def __init__(self, item):
-        self.item = item
-        item['Wrapper'] = self
-
 # used to specify whether we want to come back from locations
 @unique
 class ComebackCheckType(Enum):
@@ -35,9 +29,11 @@ class RandoServices(object):
     def collect(self, ap, container, itemLoc, pickup=True):
         if pickup == True:
             # walk the graph to update AP
-            self.currentLocations(ap, container, itemLoc['Item'])
+            if self.cache:
+                self.cache.reset()
+            self.currentLocations(ap, container)
         container.collect(itemLoc, pickup=pickup)
-        self.log.debug("COLLECT "+itemLoc['Item']['Type']+" at "+itemLoc['Location']['Name'])
+        self.log.debug("COLLECT "+itemLoc['Item'].Type+" at "+itemLoc['Location']['Name'])
         sys.stdout.write('.')
         sys.stdout.flush()
         return itemLoc['Location']['accessPoint'] if pickup == True else ap
@@ -46,10 +42,10 @@ class RandoServices(object):
     def possibleLocations(self, item, ap, emptyContainer):
         assert len(emptyContainer.currentItems) == 0, "Invalid call to possibleLocations. emptyContainer had collected items"
         emptyContainer.sm.resetItems()
-        self.log.debug('possibleLocations. item='+item['Type'])
-        allBut = emptyContainer.getItems(lambda it: it['Type'] != item['Type'])
+        self.log.debug('possibleLocations. item='+item.Type)
+        allBut = emptyContainer.getItems(lambda it: it.Type != item.Type)
         self.log.debug('possibleLocations. allBut='+getItemListStr(allBut))
-        emptyContainer.sm.addItems([it['Type'] for it in allBut])
+        emptyContainer.sm.addItems([it.Type for it in allBut])
         ret = [loc for loc in self.currentLocations(ap, emptyContainer, post=True) if self.restrictions.canPlaceAtLocation(item, loc, emptyContainer)]
         self.log.debug('possibleLocations='+getLocListStr(ret))
         emptyContainer.sm.resetItems()
@@ -60,7 +56,7 @@ class RandoServices(object):
     # diff: max difficulty to use (None for max diff from settings)
     def currentLocations(self, ap, container, item=None, post=False, diff=None):
         if self.cache is not None:
-            request = self.cache.request('currentLocations', ap, container, None if item is None else item['Type'], post, diff)
+            request = self.cache.request('currentLocations', ap, container, None if item is None else item.Type, post, diff)
             ret = self.cache.get(request)
             if ret is not None:
                 return ret
@@ -69,7 +65,7 @@ class RandoServices(object):
             diff = self.settings.maxDiff
         itemType = None
         if item is not None:
-            itemType = item['Type']
+            itemType = item.Type
             sm.addItem(itemType)
         ret = sorted(self.getAvailLocs(container, ap, diff),
                      key=lambda loc: loc['Name'])
@@ -95,13 +91,13 @@ class RandoServices(object):
     # gives current accessible APs within a container from an AP, given an optional item.
     def currentAccessPoints(self, ap, container, item=None):
         if self.cache is not None:
-            request = self.cache.request('currentAccessPoints', ap, container, None if item is None else item['Type'])
+            request = self.cache.request('currentAccessPoints', ap, container, None if item is None else item.Type)
             ret = self.cache.get(request)
             if ret is not None:
                 return ret
         sm = container.sm
         if item is not None:
-            itemType = item['Type']
+            itemType = item.Type
             sm.addItem(itemType)
         nodes = sorted(self.areaGraph.getAvailableAccessPoints(self.areaGraph.accessPoints[ap],
                                                                sm, self.settings.maxDiff),
@@ -123,12 +119,12 @@ class RandoServices(object):
             return False
         # if the loc forces us to go to an area we can't come back from
         comeBack = loc['accessPoint'] == ap or \
-            self.areaGraph.canAccess(sm, loc['accessPoint'], ap, self.settings.maxDiff, item['Type'] if item is not None else None)
+            self.areaGraph.canAccess(sm, loc['accessPoint'], ap, self.settings.maxDiff, item.Type if item is not None else None)
         if not comeBack:
-            self.log.debug("KO come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + ("None" if item is None else item['Type']) + " at " + loc['Name'])
+            self.log.debug("KO come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + ("None" if item is None else item.Type) + " at " + loc['Name'])
             return True
 #        else:
-#            self.log.debug("OK come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + item['Type'] + " at " + loc['Name'])
+#            self.log.debug("OK come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + item.Type + " at " + loc['Name'])
         if item is not None and comebackCheck == ComebackCheckType.ComebackWithoutItem and self.isProgression(item, ap, container):
             # we know that loc is avail and post avail with the item
             # if it is not post avail without it, then the item prevents the
@@ -155,7 +151,7 @@ class RandoServices(object):
             # temporary kill draygon
             tmpItems.append('Draygon')
         sm.addItems(tmpItems)
-        ret = self.locPostAvailable(sm, loc, item['Type'] if item is not None else None) and not self.isSoftlockPossible(container, ap, item, loc, comebackCheck)
+        ret = self.locPostAvailable(sm, loc, item.Type if item is not None else None) and not self.isSoftlockPossible(container, ap, item, loc, comebackCheck)
         for tmp in tmpItems:
             sm.removeItem(tmp)
         return ret
@@ -163,10 +159,10 @@ class RandoServices(object):
     def isProgression(self, item, ap, container):
         sm = container.sm
         # no need to test nothing items
-        if item['Category'] == 'Nothing' or item['Category'] == 'Boss':
+        if item.Category == 'Nothing':
             return False
         if self.cache is not None:
-            request = self.cache.request('isProgression', item['Type'], ap, container)
+            request = self.cache.request('isProgression', item.Type, ap, container)
             ret = self.cache.get(request)
             if ret is not None:
                 return ret
@@ -175,7 +171,7 @@ class RandoServices(object):
         if ret == True:
             newLocations = [loc for loc in self.currentLocations(ap, container, item) if loc not in oldLocations]
             ret = len(newLocations) > 0 and any(self.restrictions.isItemLocMatching(item, loc) for loc in newLocations)
-            self.log.debug('isProgression. item=' + item['Type'] + ', newLocs=' + str([loc['Name'] for loc in newLocations]))
+            self.log.debug('isProgression. item=' + item.Type + ', newLocs=' + str([loc['Name'] for loc in newLocations]))
             if ret == False and len(newLocations) > 0 and self.restrictions.split == 'Major':
                 # in major/minor split, still consider minor locs as
                 # progression if not all types are distributed
@@ -193,11 +189,11 @@ class RandoServices(object):
         morph = container.getNextItemInPool('Morph')
         if morph is not None:
             self.log.debug("processEarlyMorph. morph not placed yet")
-            morphWrapper = next((w for w in itemLocDict if w.item['Type'] == morph['Type']), None)
-            if morphWrapper is not None:
-                morphLocs = itemLocDict[morphWrapper]
+            morphLocItem = next((item for item in itemLocDict if item.Type == morph.Type), None)
+            if morphLocItem is not None:
+                morphLocs = itemLocDict[morphLocItem]
                 itemLocDict.clear()
-                itemLocDict[morphWrapper] = morphLocs
+                itemLocDict[morphLocItem] = morphLocs
             elif len(curLocs) >= 2:
                 self.log.debug("processEarlyMorph. early morph placement check")
                 # we have to place morph early, it's still not placed, and not detected as placeable
@@ -217,18 +213,18 @@ class RandoServices(object):
                     if poss:
                         # it's possible, only offer morph as possibility
                         itemLocDict.clear()
-                        itemLocDict[ItemWrapper(morph)] = morphLocs
+                        itemLocDict[morph] = morphLocs
 
     def processLateMorph(self, container, itemLocDict):
-        morphWrapper = next((w for w in itemLocDict if w.item['Type'] == 'Morph'), None)
-        if morphWrapper is None or len(itemLocDict) == 1:
+        morphLocItem = next((item for item in itemLocDict if item.Type == 'Morph'), None)
+        if morphLocItem is None or len(itemLocDict) == 1:
             # no morph, or it is the only possibility: nothing to do
             return
-        morphLocs = self.restrictions.lateMorphCheck(container, itemLocDict[morphWrapper])
+        morphLocs = self.restrictions.lateMorphCheck(container, itemLocDict[morphLocItem])
         if morphLocs is not None:
-            itemLocDict[morphWrapper] = morphLocs
+            itemLocDict[morphLocItem] = morphLocs
         else:
-            del itemLocDict[morphWrapper]
+            del itemLocDict[morphLocItem]
 
     def processMorphPlacements(self, ap, container, comebackCheck, itemLocDict, curLocs):
         if self.restrictions.isEarlyMorph():
@@ -240,7 +236,7 @@ class RandoServices(object):
     # ap: AP to check from
     # container: our item/loc container
     # comebackCheck: how to check for comebacks (cf ComebackCheckType)
-    # return a dictionary with ItemWrapper instances as keys and locations lists as values
+    # return a dictionary with Item instances as keys and locations lists as values
     def getPossiblePlacements(self, ap, container, comebackCheck):
         curLocs = self.currentLocations(ap, container)
         self.log.debug('getPossiblePlacements. nCurLocs='+str(len(curLocs)))
@@ -260,19 +256,6 @@ class RandoServices(object):
                 nonProgList = [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(container, ap, None, loc, comebackCheck)]
                 self.log.debug("nonProgLocList="+str([loc['Name'] for loc in nonProgList]))
             return [loc for loc in nonProgList if self.restrictions.canPlaceAtLocation(itemObj, loc, container)]
-        # boss handling : check if we can kill a boss, if so return immediately
-        hasBoss = container.hasItemCategoryInPool('Boss')
-        comebackPred = lambda loc: self.fullComebackCheck(container, ap,
-                                                          container.getNextItemInPoolMatching(lambda item:item['Name'] == loc['Name']),
-                                                          loc, comebackCheck)
-        bossLoc = None if not hasBoss else next((loc for loc in curLocs if 'Boss' in loc['Class'] and comebackPred(loc)), None)
-        if bossLoc is not None:
-            bosses = container.getItems(lambda item: item['Name'] == bossLoc['Name'])
-            assert len(bosses) == 1
-            boss = bosses[0]
-            itemLocDict[ItemWrapper(boss)] = [bossLoc]
-            self.log.debug("getPossiblePlacements. boss: "+boss['Name'])
-            return (itemLocDict, False)
         for itemType,items in sorted(poolDict.items()):
             itemObj = items[0]
             cont = True
@@ -294,16 +277,19 @@ class RandoServices(object):
                 itemLocDict = {} # forget all the crap ones we stored just in case
 #            self.log.debug('getPossiblePlacements. itemType=' + itemType + ', locs='+str([loc['Name'] for loc in locations]))
             for item in items:
-                itemLocDict[ItemWrapper(item)] = locations
+                itemLocDict[item] = locations
         self.processMorphPlacements(ap, container, comebackCheck, itemLocDict, curLocs)
+        self.printItemLocDict(itemLocDict)
+        self.log.debug('possibleProg='+str(possibleProg))
+        return (itemLocDict, possibleProg)
+
+    def printItemLocDict(self, itemLocDict):
         if self.log.getEffectiveLevel() == logging.DEBUG:
             debugDict = {}
-            for w, locList in itemLocDict.items():
-                if w.item['Type'] not in debugDict:
-                    debugDict[w.item['Type']] = [loc['Name'] for loc in locList]
+            for item, locList in itemLocDict.items():
+                if item.Type not in debugDict:
+                    debugDict[item.Type] = [loc['Name'] for loc in locList]
             self.log.debug('itemLocDict='+str(debugDict))
-            self.log.debug('possibleProg='+str(possibleProg))
-        return (itemLocDict, possibleProg)
 
     # same as getPossiblePlacements, without any logic check
     def getPossiblePlacementsNoLogic(self, container):
@@ -315,7 +301,8 @@ class RandoServices(object):
             itemObj = items[0]
             locList = getLocList(itemObj, container.unusedLocations)
             for item in items:
-                itemLocDict[ItemWrapper(item)] = locList
+                itemLocDict[item] = locList
+        self.printItemLocDict(itemLocDict)
         return (itemLocDict, False)
 
     # check if bosses are blocking the last remaining locations.
@@ -338,8 +325,8 @@ class RandoServices(object):
         if self.cache is not None:
             self.cache.reset()
         for boss in bossesLeft:
-            self.log.debug('onlyBossesLeft. kill '+boss['Name'])
-            sm.addItem(boss['Type'])
+            self.log.debug('onlyBossesLeft. kill '+boss.Name)
+            sm.addItem(boss.Type)
         # get bosses locations and newly accessible locations (for bosses that open up locs)
         newLocs = getLocList()
         self.log.debug("onlyBossesLeft. newLocs="+getLocListStr(newLocs))
@@ -348,8 +335,8 @@ class RandoServices(object):
         ret = (len(locs) > len(prevLocs) and len(locs) == len(container.unusedLocations))
         # restore bosses killed state
         for boss in bossesLeft:
-            self.log.debug('onlyBossesLeft. revive '+boss['Name'])
-            sm.removeItem(boss['Type'])
+            self.log.debug('onlyBossesLeft. revive '+boss.Name)
+            sm.removeItem(boss.Type)
         if self.cache is not None:
             self.cache.reset()
         self.log.debug("onlyBossesLeft? " +str(ret))
@@ -359,10 +346,13 @@ class RandoServices(object):
         return not any(loc['Name'] == 'Mother Brain' for loc in container.unusedLocations)
 
     def can100percent(self, ap, container):
+        if not self.canEndGame(container):
+            return False
         curLocs = self.currentLocations(ap, container, post=True)
         return len(curLocs) == len(container.unusedLocations)
 
     def getStartupProgItemsPairs(self, ap, container):
+        self.cache.reset()
         (itemLocDict, isProg) = self.getPossiblePlacements(ap, container, ComebackCheckType.NoCheck)
         if isProg == True:
             self.log.debug("getStartupProgItemsPairs: found prog item")
@@ -379,22 +369,32 @@ class RandoServices(object):
         # keep only unique items in itemLocDict
         uniqItemLocDict = {}
         for item, locs in itemLocDict.items():
-            if item.item['Type'] in ['NoEnergy', 'Nothing']:
+            if item.Type in ['NoEnergy', 'Nothing']:
                 continue
-            if item.item['Type'] not in [it.item['Type'] for it in uniqItemLocDict.keys()]:
+            if item.Type not in [it.Type for it in uniqItemLocDict.keys()]:
                 uniqItemLocDict[item] = locs
         if not uniqItemLocDict:
             return None
 
+        self.cache.reset()
         curLocsBefore = self.currentLocations(ap, container)
         if not curLocsBefore:
             return None
 
         self.log.debug("search for progression with a second item")
         for item1, locs1 in uniqItemLocDict.items():
-            # collect first item in first available location
+            # collect first item in first available location matching restrictions
             self.cache.reset()
-            container.collect({'Item': item1.item, 'Location': curLocsBefore[0]})
+            firstItemPlaced = False
+            for loc in curLocsBefore:
+                if self.restrictions.canPlaceAtLocation(item1, loc, container):
+                    container.collect({'Item': item1, 'Location': loc})
+                    firstItemPlaced = True
+                    break
+            if not firstItemPlaced:
+                saveEmptyContainer.restore(container)
+                continue
+
             saveAfterFirst = ContainerSoftBackup(container)
 
             curLocsAfterFirst = self.currentLocations(ap, container)
@@ -403,7 +403,7 @@ class RandoServices(object):
                 continue
 
             for item2, locs2 in uniqItemLocDict.items():
-                if item1.item['Type'] == item2.item['Type']:
+                if item1.Type == item2.Type:
                     continue
 
                 if (item1, item2) in pairItemLocDict.keys() or (item2, item1) in pairItemLocDict.keys():
@@ -411,7 +411,15 @@ class RandoServices(object):
 
                 # collect second item in first available location
                 self.cache.reset()
-                container.collect({'Item': item2.item, 'Location': curLocsAfterFirst[0]})
+                secondItemPlaced = False
+                for loc in curLocsAfterFirst:
+                    if self.restrictions.canPlaceAtLocation(item2, loc, container):
+                        container.collect({'Item': item2, 'Location': loc})
+                        secondItemPlaced = True
+                        break
+                if not secondItemPlaced:
+                    saveAfterFirst.restore(container)
+                    continue
 
                 curLocsAfterSecond = self.currentLocations(ap, container)
                 if not curLocsAfterSecond:
@@ -431,6 +439,6 @@ class RandoServices(object):
             if self.log.getEffectiveLevel() == logging.DEBUG:
                 self.log.debug("pairItemLocDict:")
                 for key, locs in pairItemLocDict.items():
-                    self.log.debug("{}->{}: {}".format(key[0].item['Type'], key[1].item['Type'], [l['Name'] for l in locs[2]]))
+                    self.log.debug("{}->{}: {}".format(key[0].Type, key[1].Type, [l['Name'] for l in locs[2]]))
 
             return pairItemLocDict

@@ -59,11 +59,14 @@ class RomPatches:
     CrabShaftBlueDoor         = 107
     # wrap door from sand halls left to under botwoon
     MaridiaSandWarp           = 108
+    ## Minimizer Patches
+    NoGadoras                 = 200
+    TourianSpeedup            = 201
 
     ### Other
     # Gravity no longer protects from environmental damage (heat, spikes...)
     NoGravityEnvProtection  = 1000
-    # Wrecked Ship etank accessible when Phantoo is alive
+    # Wrecked Ship etank accessible when Phantoon is alive
     WsEtankPhantoonAlive    = 1001
     # Lower Norfair chozo (vanilla access to GT/Screw Area) : disable space jump check
     LNChozoSJCheckDisabled  = 1002
@@ -96,6 +99,9 @@ class RomPatches:
 
     # VARIA specific patch set
     VariaTweaks = [ WsEtankPhantoonAlive, LNChozoSJCheckDisabled ]
+
+    # Tourian speedup in minimizer mode
+    MinimizerTourian = [ TourianSpeedup, NerfedRainbowBeam ]
 
     # dessyreqt randomizer
     Dessy = []

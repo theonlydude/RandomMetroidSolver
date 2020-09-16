@@ -7,15 +7,56 @@ from smbool import SMBool
 from helpers import Bosses
 
 class SMBoolManager(object):
-    items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'MotherBrain'] + Bosses.Golden4()
+    items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'MotherBrain', 'Hyper'] + Bosses.Golden4()
     countItems = ['Missile', 'Super', 'PowerBomb', 'ETank', 'Reserve']
 
     def __init__(self):
+        self.smboolFalse = SMBool(False)
+
+        # cache related
+        self.cacheKey = 0
+        self.computeItemsPositions()
         Cache.reset()
+
         self.helpers = HelpersGraph(self)
         self.createFacadeFunctions()
         self.createKnowsFunctions()
         self.resetItems()
+
+    def computeItemsPositions(self):
+        # compute index in cache key for each items
+        self.itemsPositions = {}
+        maxBitsForCountItem = 7 # 128 values with 7 bits
+        for (i, item) in enumerate(self.countItems):
+            pos = i*maxBitsForCountItem
+            bitMask = (2<<(maxBitsForCountItem-1))-1
+            bitMask = bitMask << pos
+            self.itemsPositions[item] = (pos, bitMask)
+        for (i, item) in enumerate(self.items, (i+1)*maxBitsForCountItem+1):
+            if item in self.countItems:
+                continue
+            self.itemsPositions[item] = (i, 1<<i)
+
+    def computeNewCacheKey(self, item, value):
+        # generate an unique integer for each items combinations which is use as key in the cache.
+        if item in ['Nothing', 'NoEnergy']:
+            return
+        (pos, bitMask) = self.itemsPositions[item]
+#        print("--------------------- {} {} ----------------------------".format(item, value))
+#        print("old:  "+format(self.cacheKey, '#067b'))
+        self.cacheKey = (self.cacheKey & (~bitMask)) | (value<<pos)
+#        print("new:  "+format(self.cacheKey, '#067b'))
+#        self.printItemsInKey(self.cacheKey)
+
+    def printItemsInKey(self, key):
+        # for debug purpose
+        print("key:  "+format(key, '#067b'))
+        msg = ""
+        for (item, (pos, bitMask)) in self.itemsPositions.items():
+            value = (key & bitMask) >> pos
+            if value != 0:
+                msg += " {}: {}".format(item, value)
+        print("items:{}".format(msg))
 
     def isEmpty(self):
         for item in self.items:
@@ -29,8 +70,8 @@ class SMBoolManager(object):
     def getItems(self):
         # get a dict of collected items and how many (to be displayed on the solver spoiler)
         itemsDict = {}
-        for item in self.items[:-2]: # ignore last two items: nothing and noenergy
-            itemsDict[item] = getattr(self, item)
+        for item in self.items:
+            itemsDict[item] = 1 if getattr(self, item) == True else 0
         for item in self.countItems:
             itemsDict[item] = getattr(self, item+"Count")
         return itemsDict
@@ -49,30 +90,39 @@ class SMBoolManager(object):
     def resetItems(self):
         # start without items
         for item in SMBoolManager.items:
-            setattr(self, item, False)
+            setattr(self, item, SMBool(False))
 
         for item in SMBoolManager.countItems:
             setattr(self, item+'Count', 0)
 
-        Cache.reset()
+        self.cacheKey = 0
+        Cache.update(self.cacheKey)
 
     def addItem(self, item):
         # a new item is available
-        setattr(self, item, True)
+        setattr(self, item, SMBool(True, items=[item]))
         if self.isCountItem(item):
-            setattr(self, item+'Count', getattr(self, item+'Count') + 1)
+            count = getattr(self, item+'Count') + 1
+            setattr(self, item+'Count', count)
+            self.computeNewCacheKey(item, count)
+        else:
+            self.computeNewCacheKey(item, 1)
 
-        Cache.reset()
+        Cache.update(self.cacheKey)
 
     def addItems(self, items):
         if len(items) == 0:
             return
         for item in items:
-            setattr(self, item, True)
+            setattr(self, item, SMBool(True, items=[item]))
             if self.isCountItem(item):
-                setattr(self, item+'Count', getattr(self, item+'Count') + 1)
+                count = getattr(self, item+'Count') + 1
+                setattr(self, item+'Count', count)
+                self.computeNewCacheKey(item, count)
+            else:
+                self.computeNewCacheKey(item, 1)
 
-        Cache.reset()
+        Cache.update(self.cacheKey)
 
     def removeItem(self, item):
         # randomizer removed an item (or the item was added to test a post available)
@@ -80,11 +130,13 @@ class SMBoolManager(object):
             count = getattr(self, item+'Count') - 1
             setattr(self, item+'Count', count)
             if count == 0:
-                setattr(self, item, False)
+                setattr(self, item, SMBool(False))
+            self.computeNewCacheKey(item, count)
         else:
-            setattr(self, item, False)
+            setattr(self, item, SMBool(False))
+            self.computeNewCacheKey(item, 0)
 
-        Cache.reset()
+        Cache.update(self.cacheKey)
 
     def createFacadeFunctions(self):
         for fun in dir(self.helpers):
@@ -96,9 +148,9 @@ class SMBoolManager(object):
         # take no parameter
         for knows in Knows.__dict__:
             if isKnows(knows):
-                setattr(self, 'knows'+knows, lambda knows=knows: self.knowsKnows(knows,
-                                                                                 (Knows.__dict__[knows].bool,
-                                                                                  Knows.__dict__[knows].difficulty)))
+                setattr(self, 'knows'+knows, lambda knows=knows: SMBool(Knows.__dict__[knows].bool,
+                                                                        Knows.__dict__[knows].difficulty,
+                                                                        knows=[knows]))
 
     def isCountItem(self, item):
         return item in self.countItems
@@ -107,55 +159,24 @@ class SMBoolManager(object):
         # return integer
         return getattr(self, item+'Count')
 
-    def haveItem(self, item, difficulty=0):
-        return SMBool(getattr(self, item), difficulty, items=[item])
+    def haveItem(self, item):
+        return getattr(self, item)
 
-    def knowsKnows(self, knows, smKnows):
-        return SMBool(smKnows[0], smKnows[1], knows=[knows])
-
-    def wand2(self, a, b):
-        if a.bool is True and b.bool is True:
-            return SMBool(True, a.difficulty + b.difficulty,
-                          a.knows + b.knows, a.items + b.items)
+    def wand(self, *args):
+        if False in args:
+            return self.smboolFalse
         else:
-            return SMBool(False)
+            return SMBool(True,
+                          sum([smb.difficulty for smb in args]),
+                          [know for smb in args for know in smb.knows],
+                          [item for smb in args for item in smb.items])
 
-    def wand(self, a, b, c=None, d=None):
-        if c is None and d is None:
-            ret = self.wand2(a, b)
-        elif c is None:
-            ret = self.wand2(self.wand2(a, b), d)
-        elif d is None:
-            ret = self.wand2(self.wand2(a, b), c)
+    def wor(self, *args):
+        if True in args:
+            # return the smbool with the smallest difficulty among True smbools.
+            return min(args)
         else:
-            ret = self.wand2(self.wand2(self.wand2(a, b), c), d)
-
-        return ret
-
-    def wor2(self, a, b):
-        if a.bool is True and b.bool is True:
-            if a.difficulty <= b.difficulty:
-                return SMBool(True, a.difficulty, a.knows, a.items)
-            else:
-                return SMBool(True, b.difficulty, b.knows, b.items)
-        elif a.bool is True:
-            return SMBool(True, a.difficulty, a.knows, a.items)
-        elif b.bool is True:
-            return SMBool(True, b.difficulty, b.knows, b.items)
-        else:
-            return SMBool(False)
-
-    def wor(self, a, b, c=None, d=None):
-        if c is None and d is None:
-            ret = self.wor2(a, b)
-        elif c is None:
-            ret = self.wor2(self.wor2(a, b), d)
-        elif d is None:
-            ret = self.wor2(self.wor2(a, b), c)
-        else:
-            ret = self.wor2(self.wor2(self.wor2(a, b), c), d)
-
-        return ret
+            return self.smboolFalse
 
     # negates boolean part of the SMBool
     def wnot(self, a):
@@ -164,26 +185,24 @@ class SMBoolManager(object):
     def itemCountOk(self, item, count, difficulty=0):
         if self.itemCount(item) >= count:
             if item in ['ETank', 'Reserve']:
-                item = '{}-{}'.format(count, item)
+                item = str(count)+'-'+item
             return SMBool(True, difficulty, items = [item])
         else:
-            return SMBool(False)
+            return self.smboolFalse
 
     def energyReserveCountOk(self, count, difficulty=0):
         if self.energyReserveCount() >= count:
             nEtank = self.itemCount('ETank')
             if nEtank > count:
                 nEtank = int(count)
-            items = '{}-ETank'.format(nEtank)
+            items = str(nEtank)+'-ETank'
             nReserve = self.itemCount('Reserve')
             if nEtank < count:
                 nReserve = int(count) - nEtank
-                items += ' - {}-Reserve'.format(nReserve)
-            else:
-                nReserve = 0
+                items += ' - '+str(nReserve)+'-Reserve'
             return SMBool(True, difficulty, items = [items])
         else:
-            return SMBool(False)
+            return self.smboolFalse
 
 class SMBoolManagerPlando(SMBoolManager):
     def __init__(self):
@@ -194,14 +213,18 @@ class SMBoolManagerPlando(SMBoolManager):
         already = self.haveItem(item)
         isCount = self.isCountItem(item)
         if isCount or not already:
-            setattr(self, item, True)
+            setattr(self, item, SMBool(True, items=[item]))
         else:
             # handle duplicate major items (plandos)
-            setattr(self, 'dup_'+item, False)
+            setattr(self, 'dup_'+item, True)
         if isCount:
-            setattr(self, item+'Count', getattr(self, item+'Count') + 1)
+            count = getattr(self, item+'Count') + 1
+            setattr(self, item+'Count', count)
+            self.computeNewCacheKey(item, count)
+        else:
+            self.computeNewCacheKey(item, 1)
 
-        Cache.reset()
+        Cache.update(self.cacheKey)
 
     def removeItem(self, item):
         # randomizer removed an item (or the item was added to test a post available)
@@ -209,12 +232,15 @@ class SMBoolManagerPlando(SMBoolManager):
             count = getattr(self, item+'Count') - 1
             setattr(self, item+'Count', count)
             if count == 0:
-                setattr(self, item, False)
+                setattr(self, item, SMBool(False))
+            self.computeNewCacheKey(item, count)
         else:
             dup = 'dup_'+item
             if getattr(self, dup, None) is None:
-                setattr(self, item, False)
+                setattr(self, item, SMBool(False))
+                self.computeNewCacheKey(item, 0)
             else:
-                setattr(self, dup, False)
+                delattr(self, dup)
+                self.computeNewCacheKey(item, 1)
 
-        Cache.reset()
+        Cache.update(self.cacheKey)

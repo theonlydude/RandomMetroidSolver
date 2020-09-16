@@ -262,6 +262,11 @@ class Helpers(object):
                        sm.knowsLowGauntlet())
 
     @Cache.decorator
+    def canUseHyperBeam(self):
+        sm = self.smbm
+        return sm.haveItem('Hyper')
+
+    @Cache.decorator
     def getBeamDamage(self):
         sm = self.smbm
         standardDamage = 20
@@ -455,32 +460,53 @@ class Helpers(object):
 
     @Cache.decorator
     def enoughStuffCroc(self):
+        sm = self.smbm
         # say croc has ~5000 energy, and ignore its useless drops
         (ammoMargin, secs, items) = self.canInflictEnoughDamages(5000, givesDrops=False)
         if ammoMargin == 0:
-            return SMBool(False)
+            return sm.wand(sm.knowsLowAmmoCroc(),
+                           sm.wor(sm.itemCountOk("Missile", 2),
+                                  sm.wand(sm.haveItem('Missile'),
+                                          sm.haveItem('Super'))))
         else:
             return SMBool(True, easy, items=items)
 
     @Cache.decorator
     def enoughStuffBotwoon(self):
-        # say botwoon has 4000 energy : it is actually 3000 but account for missed shots
-        # 4000 to allow for low% botwoon without charge beam (10 - 10 | missiles - supers)
-        # there is a setup to "never" miss a shot by only shooting him when he exits through the top left hole
-        (ammoMargin, secs, items) = self.canInflictEnoughDamages(4000, givesDrops=False)
+        sm = self.smbm
+        knows = []
+        diff = easy
+        (ammoMargin, secs, items) = self.canInflictEnoughDamages(6000, givesDrops=False)
+        lowStuff = sm.knowsLowStuffBotwoon()
+        if ammoMargin == 0 and lowStuff.bool:
+            knows = ['LowStuffBotwoon']
+            diff = lowStuff.difficulty
+            (ammoMargin, secs, items) = self.canInflictEnoughDamages(3500, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
         else:
-            return SMBool(True, easy, items=items)
+            fight = sm.wor(sm.energyReserveCountOk(math.ceil(4/sm.getDmgReduction(envDmg=False)[0])),
+                           sm.knowsLowStuffBotwoon())
+            return SMBool(fight.bool, max(diff, fight.difficulty), items=items+fight.items, knows=knows+fight.knows)
 
     @Cache.decorator
     def enoughStuffGT(self):
-        (ammoMargin, secs, items) = self.canInflictEnoughDamages(3000, ignoreMissiles=True) # requires 10 supers or charge for the fight
+        sm = self.smbm
+        knows = []
+        diff = easy
+        hasBeams = sm.wand(sm.haveItem('Charge'), sm.haveItem('Plasma')).bool
+        (ammoMargin, secs, items) = self.canInflictEnoughDamages(9000, ignoreMissiles=True, givesDrops=hasBeams)
+        lowStuff = sm.knowsLowStuffGT()
+        if ammoMargin == 0 and lowStuff.bool:
+            knows = ['LowStuffGT']
+            diff = lowStuff.difficulty
+            (ammoMargin, secs, items) = self.canInflictEnoughDamages(3000, ignoreMissiles=True)
         if ammoMargin == 0:
             return SMBool(False)
         else:
-            # TODO add energy check
-            return SMBool(True, easy, items=items)
+            fight = sm.wor(sm.energyReserveCountOk(math.ceil(8/sm.getDmgReduction(envDmg=False)[0])),
+                           sm.knowsLowStuffGT())
+            return SMBool(fight.bool, max(diff, fight.difficulty), items=items+fight.items, knows=knows+fight.knows)
 
     @Cache.decorator
     def enoughStuffsRidley(self):
@@ -539,14 +565,19 @@ class Helpers(object):
             fight.difficulty = self.adjustHealthDropDiff(fight.difficulty)
         else:
             fight = SMBool(False)
+        # for grapple kill considers energy drained by wall socket + 2 spankings by Dray
+        # (original 99 energy used for rounding)
+        nTanksGrapple = (240/sm.getDmgReduction(envDmg=True)[0] + 2*160/sm.getDmgReduction(envDmg=False)[0])/100
         return sm.wor(fight,
                       sm.wand(sm.knowsDraygonGrappleKill(),
-                              sm.haveItem('Grapple')),
+                              sm.haveItem('Grapple'),
+                              sm.energyReserveCountOk(nTanksGrapple)),
                       sm.wand(sm.knowsMicrowaveDraygon(),
                               sm.haveItem('Plasma'),
                               sm.canFireChargedShots(),
                               sm.haveItem('XRayScope')),
                       sm.wand(sm.haveItem('Gravity'),
+                              sm.energyReserveCountOk(3),
                               sm.knowsDraygonSparkKill(),
                               sm.haveItem('SpeedBooster')))
 
@@ -641,8 +672,9 @@ class Helpers(object):
     @Cache.decorator
     def enoughStuffTourian(self):
         sm = self.smbm
-        ret = self.smbm.wand(sm.canPassMetroids(),
-                             sm.canPassZebetites(),
+        ret = self.smbm.wand(sm.wor(RomPatches.has(RomPatches.TourianSpeedup),
+                                    sm.wand(sm.canPassMetroids(),
+                                            sm.canPassZebetites())),
                              sm.enoughStuffsMotherbrain())
         return ret
 
@@ -652,7 +684,8 @@ class Pickup:
         self.minorsPickupMinimal = {
             'Missile' : 10,
             'Super' : 5,
-            'PowerBomb' : 2
+            # to allow suitless crystal flash
+            'PowerBomb' : 4
         }
     def _enoughMinorTable(self, smbm, minorType):
         return smbm.haveItemCount(minorType, int(self.minorsPickupMinimal[minorType]))
@@ -716,9 +749,12 @@ class Bosses:
         'Bubble Norfair Reserve': 'Ridley',
         'Bubble Norfair Speed': 'Ridley',
         'Bubble Norfair Wave': 'Ridley',
-        'Crocomire': 'Ridley',
+        'Draygon Boss': 'Draygon',
         'Green Brinstar': 'Kraid',
         'Green Brinstar Reserve': 'Kraid',
+        'Kraid': 'Kraid',
+        'Kraid Boss': 'Kraid',
+        'Left Sandpit': 'Draygon',
         'Lower Norfair After Amphitheater': 'Ridley',
         'Lower Norfair Before Amphitheater': 'Ridley',
         'Lower Norfair Screw Attack': 'Ridley',
@@ -730,9 +766,12 @@ class Bosses:
         'Norfair Entrance': 'Ridley',
         'Norfair Grapple Escape': 'Ridley',
         'Norfair Ice': 'Ridley',
+        'Phantoon Boss': 'Phantoon',
         'Pink Brinstar': 'Kraid',
         'Red Brinstar': 'Kraid',
         'Red Brinstar Top': 'Kraid',
+        'Ridley Boss': 'Ridley',
+        'Right Sandpit': 'Draygon',
         'Warehouse': 'Kraid',
         'WreckedShip': 'Phantoon',
         'WreckedShip Back': 'Phantoon',
@@ -744,7 +783,7 @@ class Bosses:
 
     @staticmethod
     def Golden4():
-        return sorted(['Kraid', 'Phantoon', 'Draygon', 'Ridley'])
+        return ['Draygon', 'Kraid', 'Phantoon', 'Ridley']
 
     @staticmethod
     def bossDead(sm, boss):

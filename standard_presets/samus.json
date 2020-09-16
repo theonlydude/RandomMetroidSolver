@@ -335,6 +335,30 @@
     "AccessSpringBallWithFlatley": [
       true,
       1
+    ],
+    "MaridiaWallJumps": [
+      true,
+      1
+    ],
+    "WestSandHoleSuitlessWallJumps": [
+      true,
+      1
+    ],
+    "PreciousRoomGravJumpExit": [
+      true,
+      1
+    ],
+    "LowAmmoCroc": [
+      true,
+      1
+    ],
+    "LowStuffBotwoon": [
+      true,
+      1
+    ],
+    "LowStuffGT": [
+      true,
+      1
     ]
   },
   "Settings": {

@@ -1,17 +1,18 @@
 
 import copy, log
 
+from smbool import SMBool
 from smboolmanager import SMBoolManager
 from collections import Counter
 
 def getItemListStr(items):
-    return str(dict(Counter([item['Type'] for item in items])))
+    return str(dict(Counter([item.Type for item in items])))
 
 def getLocListStr(locs):
     return str([loc['Name'] for loc in locs])
 
 def getItemLocStr(itemLoc):
-    return itemLoc['Item']['Type'] + " at " + itemLoc['Location']['Name']
+    return itemLoc['Item'].Type + " at " + itemLoc['Location']['Name']
 
 def getItemLocationsStr(itemLocations):
     return str([getItemLocStr(il) for il in itemLocations])
@@ -31,7 +32,7 @@ class ContainerSoftBackup(object):
         container.currentItems = self.currentItems[:]
         if resetSM:
             container.sm.resetItems()
-            container.sm.addItems([it['Type'] for it in container.currentItems])
+            container.sm.addItems([it.Type for it in container.currentItems])
 
 # Holds items yet to place (itemPool), locations yet to fill (unusedLocations),
 # placed items/locations (itemLocations).
@@ -50,7 +51,7 @@ class ItemLocContainer(object):
         self.checkConsistency()
 
     def checkConsistency(self):
-        assert len(self.unusedLocations) == len(self.itemPool), "Item/Locs count mismatch"
+        assert len(self.unusedLocations) == len(self.itemPool), "Item({})/Locs({}) count mismatch".format(len(self.itemPool), len(self.unusedLocations))
 
     def __eq__(self, rhs):
         eq = self.currentItems == rhs.currentItems
@@ -61,7 +62,16 @@ class ItemLocContainer(object):
         return eq
 
     def __copy__(self):
-        locs = [copy.deepcopy(loc) for loc in self.unusedLocations]
+        def copyLoc(loc):
+            ret = {}
+            for key, value in loc.items():
+                # create new smbool
+                if key == 'difficulty':
+                    ret[key] = SMBool(value.bool, value.difficulty, value.knows, value.items)
+                else:
+                    ret[key] = value
+            return ret
+        locs = [copyLoc(loc) for loc in self.unusedLocations]
         # we don't copy restriction state on purpose: it depends on
         # outside context we don't want to bring to the copy
         ret = ItemLocContainer(SMBoolManager(),
@@ -69,13 +79,11 @@ class ItemLocContainer(object):
                                locs)
         ret.currentItems = self.currentItems[:]
         ret.unrestrictedItems = copy.copy(self.unrestrictedItems)
-        for il in self.itemLocations:
-            ilCpy = {
-                'Item': il['Item'],
-                'Location': copy.deepcopy(il['Location'])
-            }
-            ret.itemLocations.append(ilCpy)
-        ret.sm.addItems([item['Type'] for item in ret.currentItems])
+        ret.itemLocations = [ {
+            'Item': il['Item'],
+            'Location': copyLoc(il['Location'])
+        } for il in self.itemLocations ]
+        ret.sm.addItems([item.Type for item in ret.currentItems])
         return ret
 
     # create a new container based on slice predicates on items and
@@ -94,7 +102,7 @@ class ItemLocContainer(object):
     def transferCollected(self, dest):
         dest.currentItems = self.currentItems[:]
         dest.sm = SMBoolManager()
-        dest.sm.addItems([item['Type'] for item in dest.currentItems])
+        dest.sm.addItems([item.Type for item in dest.currentItems])
         dest.itemLocations = copy.copy(self.itemLocations)
         dest.unrestrictedItems = copy.copy(self.unrestrictedItems)
 
@@ -146,10 +154,10 @@ class ItemLocContainer(object):
         item = itemLocation['Item']
         location = itemLocation['Location']
         if 'restricted' not in location or location['restricted'] == False:
-            self.unrestrictedItems.add(item['Type'])
+            self.unrestrictedItems.add(item.Type)
         if pickup == True:
             self.currentItems.append(item)
-            self.sm.addItem(item['Type'])
+            self.sm.addItem(item.Type)
         self.removeLocation(location)
         self.itemLocations.append(itemLocation)
         self.removeItem(item)
@@ -158,28 +166,28 @@ class ItemLocContainer(object):
         return len(self.itemPool) == 0
 
     def getNextItemInPool(self, t):
-        return next((item for item in self.itemPool if item['Type'] == t), None)
+        return next((item for item in self.itemPool if item.Type == t), None)
 
     def getNextItemInPoolMatching(self, predicate):
         return next((item for item in self.itemPool if predicate(item) == True), None)
 
     def hasItemTypeInPool(self, t):
-        return any(item['Type'] == t for item in self.itemPool)
+        return any(item.Type == t for item in self.itemPool)
 
     def hasItemInPool(self, predicate):
         return any(predicate(item) == True for item in self.itemPool)
 
     def hasItemCategoryInPool(self, cat):
-        return any(item['Category'] == cat for item in self.itemPool)
+        return any(item.Category == cat for item in self.itemPool)
 
     def getNextItemInPoolFromCategory(self, cat):
-        return next((item for item in self.itemPool if item['Category'] == cat), None)
+        return next((item for item in self.itemPool if item.Category == cat), None)
 
     def getAllItemsInPoolFromCategory(self, cat):
-        return [item for item in self.itemPool if item['Category'] == cat]
+        return [item for item in self.itemPool if item.Category == cat]
 
     def countItemTypeInPool(self, t):
-        return sum(1 for item in self.itemPool if item['Type'] == t)
+        return sum(1 for item in self.itemPool if item.Type == t)
 
     def countItems(self, predicate):
         return sum(1 for item in self.itemPool if predicate(item) == True)
@@ -189,9 +197,9 @@ class ItemLocContainer(object):
     def getPoolDict(self):
         poolDict = {}
         for item in self.itemPool:
-            if item['Type'] not in poolDict:
-                poolDict[item['Type']] = []
-            poolDict[item['Type']].append(item)
+            if item.Type not in poolDict:
+                poolDict[item.Type] = []
+            poolDict[item.Type].append(item)
         return poolDict
 
     def getLocs(self, predicate):
@@ -213,10 +221,21 @@ class ItemLocContainer(object):
         locs = []
         for il in self.itemLocations:
             loc = il['Location']
-            loc['itemName'] = il['Item']['Type']
+            # filter out restricted locations
+            if loc.get('restricted', False) == True:
+                continue
+            loc['itemName'] = il['Item'].Type
             locs.append(loc)
         return locs
 
+    def cleanLocsAfterSolver(self):
+        # restricted locs can have their difficulty set, which can cause them to be reported in the
+        # post randomization warning message about locs with diff > max diff.
+        for il in self.itemLocations:
+            loc = il['Location']
+            if loc.get('restricted') == True and loc.get('difficulty', False) == True:
+                loc['difficulty'] = SMBool(False)
+
     def getDistinctItems(self):
-        itemTypes = {item['Type'] for item in self.itemPool}
+        itemTypes = {item.Type for item in self.itemPool}
         return [self.getNextItemInPool(itemType) for itemType in itemTypes]

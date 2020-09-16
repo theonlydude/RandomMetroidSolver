@@ -1,3 +1,12 @@
+.imageItems {
+    width: 16px;
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: -o-crisp-edges; /* Opera */
+    image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
+    image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
+    margin-right: 0.5em;
+}
 .image_picker_image {
     width: 32px;
     image-rendering: -moz-crisp-edges; /* Firefox */
@@ -508,6 +517,10 @@ img {
     top: 44%;
     left: 84.2%;
 }
+.colosseumTopRightGps {
+    top: 40.6%;
+    left: 96.2%;
+}
 .rightSandpitGps {
     top: 53%;
     left: 81.15%;
@@ -679,6 +692,7 @@ img {
 .lastAP {
     position: absolute;
     width: 2.25%;
+    height: 3.5%;
 }
 .nextAP {
     position: absolute;

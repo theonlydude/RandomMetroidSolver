@@ -9,7 +9,6 @@ from parameters import Settings
 class HelpersGraph(Helpers):
     def __init__(self, smbm):
         self.smbm = smbm
-        self.draygonConnection = None
 
     def canEnterAndLeaveGauntletQty(self, nPB, nTanksSpark):
         sm = self.smbm
@@ -112,12 +111,11 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassMoatReverse(self):
         sm = self.smbm
-        return sm.wor(sm.haveItem('Grapple'),
+        return sm.wor(RomPatches.has(RomPatches.MoatShotBlock),
+                      sm.haveItem('Grapple'),
                       sm.haveItem('SpaceJump'),
                       sm.haveItem('Gravity'),
-                      sm.wand(sm.haveItem('Morph'),
-                              sm.wor(RomPatches.has(RomPatches.MoatShotBlock),
-                                     sm.canPassBombPassages())))
+                      sm.canPassBombPassages())
 
     @Cache.decorator
     def canPassSpongeBath(self):
@@ -165,7 +163,7 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.haveItem('Morph'), # morph to exit the hole
                        sm.wor(sm.wand(sm.haveItem('Gravity'), # even with gravity you need some way to climb...
                                       sm.wor(sm.haveItem('Ice'), # ...on crabs...
-                                             sm.haveItem('HiJump'), # ...or by jumping
+                                             sm.wand(sm.haveItem('HiJump'), sm.knowsMaridiaWallJumps()), # ...or by jumping
                                              sm.knowsGravityJump(),
                                              sm.canFly())),
                               sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia()), # climbing crabs
@@ -432,11 +430,14 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canGetBackFromRidleyZone(self):
         sm = self.smbm
-        return sm.wor(sm.haveItem('SpringBall'),
-                      sm.haveItem('Bomb'),
-                      sm.haveItem('ScrewAttack'),
-                      sm.wor(sm.itemCountOk('PowerBomb', 2),
-                             sm.canShortCharge())) # speedball
+        return sm.wand(sm.wor(sm.canUseSpringBall(),
+                              sm.canUseBombs(),
+                              sm.haveItem('ScrewAttack'),
+                              sm.wand(sm.canUsePowerBombs(), sm.itemCountOk('PowerBomb', 2)),
+                              sm.wand(sm.haveItem('Morph'), sm.canShortCharge())), # speedball
+                       # in escape you don't have PBs and can't shoot bomb blocks in long tunnels
+                       # in wasteland and ki hunter room
+                       sm.wnot(sm.canUseHyperBeam()))
 
     @Cache.decorator
     def canClimbRedTower(self):
@@ -535,30 +536,78 @@ class HelpersGraph(Helpers):
                                       sm.haveItem('SpaceJump'))))
 
     @Cache.decorator
-    def canBotwoonExitToAndFromDraygon(self):
+    def canGoThroughColosseumSuitless(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Grapple'),
+                      sm.haveItem('SpaceJump'),
+                      sm.wand(sm.haveItem('Ice'),
+                              sm.energyReserveCountOk(int(7.0/sm.getDmgReduction(False)[0])), # mochtroid dmg
+                              sm.knowsBotwoonToDraygonWithIce()))
+
+    @Cache.decorator
+    def canBotwoonExitToColosseum(self):
         sm = self.smbm
         return sm.wor(sm.haveItem('Gravity'),
                       sm.wand(sm.knowsGravLessLevel2(),
                               sm.haveItem("HiJump"),
-                              # B -> D : get to top right door
-                              # D -> B : climb to room top
+                              # get to top right door
                               sm.wor(sm.haveItem('Grapple'),
-                                     sm.haveItem('Ice')), # climb mochtroids
-                              # go through Colosseum
-                              sm.wor(sm.haveItem('Grapple'),
-                                     sm.haveItem('SpaceJump'),
-                                     sm.wand(sm.haveItem('Ice'),
-                                             sm.energyReserveCountOk(int(7.0/sm.getDmgReduction(False)[0])), # mochtroid dmg
-                                             sm.knowsBotwoonToDraygonWithIce()))))
+                                     sm.haveItem('Ice'), # climb mochtroids
+                                     sm.wand(sm.canDoubleSpringBallJump(),
+                                             sm.haveItem('SpaceJump'))),
+                              sm.canGoThroughColosseumSuitless()))
 
+    @Cache.decorator
+    def canColosseumToBotwoonExit(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.knowsGravLessLevel2(),
+                              sm.haveItem("HiJump"),
+                              sm.canGoThroughColosseumSuitless()))
+
+    @Cache.decorator
+    def canClimbColosseum(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.knowsGravLessLevel2(),
+                              sm.haveItem("HiJump"),
+                              sm.wor(sm.haveItem('Grapple'),
+                                     sm.haveItem('Ice'),
+                                     sm.knowsPreciousRoomGravJumpExit())))
+
+    @Cache.decorator
+    def canClimbWestSandHole(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.haveItem('HiJump'),
+                              sm.knowsGravLessLevel3(),
+                              sm.wor(sm.haveItem('SpaceJump'),
+                                     sm.canSpringBallJump(),
+                                     sm.knowsWestSandHoleSuitlessWallJumps())))
+
+    @Cache.decorator
+    def canAccessItemsInWestSandHole(self):
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.haveItem('HiJump'), # vanilla strat
+                              sm.canUseSpringBall()),
+                      sm.wand(sm.haveItem('SpaceJump'), # alternate strat with possible double bomb jump but no difficult wj
+                              sm.wor(sm.canUseSpringBall(),
+                                     sm.canUseBombs())),
+                      sm.wand(sm.canPassBombPassages(), # wjs and/or 3 tile mid air morph
+                              sm.knowsMaridiaWallJumps()))
+
+    @Cache.decorator
     def getDraygonConnection(self):
-        if self.draygonConnection is None:
-            drayRoomOut = getAccessPoint('DraygonRoomOut')
-            self.draygonConnection = drayRoomOut.ConnectedTo
-        return self.draygonConnection
+        return getAccessPoint('DraygonRoomOut').ConnectedTo
 
+    @Cache.decorator
     def isVanillaDraygon(self):
-        return self.getDraygonConnection() == 'DraygonRoomIn'
+        return SMBool(self.getDraygonConnection() == 'DraygonRoomIn')
+
+    @Cache.decorator
+    def isVanillaCroc(self):
+        crocRoom = getAccessPoint('Crocomire Room Top')
+        return SMBool(crocRoom.ConnectedTo == 'Crocomire Speedway Bottom')
 
     @Cache.decorator
     def canFightDraygon(self):

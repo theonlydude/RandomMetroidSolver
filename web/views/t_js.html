@@ -23,7 +23,11 @@ var leaderLines = {};
 var nextColor = 0;
 var linesSeq = new Array();
 
+// to display inter area lines in debug mode
+var debugLines = new Array();
+
 var colors = ['grey', 'lime', 'pink',  'fuchsia', 'orange', 'yellow', 'purple', 'aqua', 'red', '#bfef45', 'white', 'cyan', 'magenta', 'olive', 'green', 'blue', 'maroon', 'teal'];
+var debugColors = {easy: '#6daa53', medium: '#C1B725', hard: '#e69235', harder: '#d13434', hardcore: '#123456', mania: '#ffffff'};
 
 function resetLines() {
   for (var startPoint in lines) {
@@ -42,11 +46,26 @@ function resetLines() {
   nextColor = 0;
 }
 
+function resetDebugLines() {
+  for(var i=0; i<debugLines.length; i++) {
+    debugLines[i].remove()
+  }
+  debugLines = new Array();
+}
+
 function checkCompatibleAPs(startAP, endAP) {
 {{
   response.write("  var vanillaAPs = {};\n".format(vanillaAPs), escape=False)
   response.write("  var vanillaBossesAPs = {};\n".format(vanillaBossesAPs), escape=False)
 }}
+
+  if(mode == "plando") {
+    return true;
+  }
+
+  if(hasMixedTransitions == true) {
+    return true;
+  }
 
   return (vanillaAPs.includes(startAP) && vanillaAPs.includes(endAP)) || (vanillaBossesAPs.includes(startAP) && vanillaBossesAPs.includes(endAP));
 }
@@ -133,6 +152,27 @@ function clickPortal(elemId) {
     }
 }
 
+function addDebugLine(startPoint, endPoint, difficulty) {
+  // console.log("addDebugLine: "+startPoint+" -> "+endPoint+": "+difficulty);
+
+  var startPointElem = document.getElementById(startPoint);
+  var endPointElem = document.getElementById(endPoint);
+
+  var line = new LeaderLine(startPointElem, endPointElem,
+                            {color: debugColors[difficulty],
+                             size: 2,
+                             startPlug: 'disc',
+                             endPlug: 'disc',
+                             path: 'straight'});
+  if(! (startPoint in lines)) {
+    line.setOptions({startSocket: 'bottom'});
+  }
+  if(! (endPoint in lines)) {
+    line.setOptions({endSocket: 'bottom'});
+  }
+  debugLines.push(line);
+}
+
 function addLine(startPoint, endPoint) {
   var startPointElem = document.getElementById(startPoint);
   var endPointElem = document.getElementById(endPoint);
@@ -144,7 +184,7 @@ function addLine(startPoint, endPoint) {
                              startPlugColor: colors[nextColor],
                              endPlugColor: colors[nextColor],
                              size: 4,
-                             gradient: true,
+                             color: colors[nextColor],
                              outlineColor: 'rgb(255, 255, 255)',
                              outline: true,
                              outlineSize: 0.10,
@@ -330,6 +370,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
   mode = jsonData["mode"];
   area = jsonData["areaRando"];
   boss = jsonData["bossRando"];
+  hasMixedTransitions = jsonData["hasMixedTransitions"];
   escapeRando = jsonData["escapeRando"];
   seed = jsonData["seed"];
   preset = jsonData["preset"];
@@ -347,6 +388,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
 
   resetItems();
   resetLines();
+  resetDebugLines();
 
   if("availableLocations" in jsonData) {
     for(var locName in jsonData["availableLocations"]) {
@@ -480,6 +522,16 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     addLine(jsonData["linesSeq"][i][0], jsonData["linesSeq"][i][1]);
   }
 
+  if("innerTransitions" in jsonData) {
+    var arrayLength = jsonData["innerTransitions"].length;
+    for(var i=0; i<arrayLength; i++) {
+      var start = jsonData["innerTransitions"][i][0];
+      var end = jsonData["innerTransitions"][i][1]
+      var difficulty = jsonData['innerTransitions'][i][2]
+      addDebugLine(start, end, difficulty);
+    }
+  }
+
   // add timer input
   if(escapeRando == true && mode == "plando") {
     var timer = document.getElementById("timer");
@@ -561,6 +613,7 @@ var lastAP = "landingSite";
 var mode = "standard";
 var area = true;
 var boss = true;
+var hasMixedTransitions = false;
 var escapeRando = true;
 var init = false;
 var webServInProgress = false;
@@ -698,6 +751,7 @@ window.onload = function(){
     var files = event.target.files; // It returns a FileList object
     var file = files[0];
   
+    var crc32 = new Crc32();
     var reader = new FileReader();
   
     reader.onload = function(e) {
@@ -717,6 +771,8 @@ window.onload = function(){
         document.getElementById("fileName").value = file.name;
 
         var fileSize = file.size;
+        crc32.update(e.target.result);
+        var digest = crc32.digest();
         if( fileSize > 4*1024*1024 ) {
             document.getElementById("uploadFile").value = "";
             alert("Wrong ROM file size: "+fileSize.toString());
@@ -727,7 +783,12 @@ window.onload = function(){
             return false;
         } else if(mode == "plando" && fileSize == 4*1024*1024) {
             alert("Warning: You won't be able to upload a Sprite customized seed in the Plandository (hosting space constraints)");
+        } else if(mode == "plando" && digest == "d63ed5f8") {
+            document.getElementById("uploadFile").value = "";
+            alert("vanilla ROM detected, use an already randomized VARIA ROM");
+            return false;
         }
+
 
         var bytes = new Uint8Array(e.target.result);
 
@@ -867,7 +928,7 @@ function addTooltipCallback() {
         document.getElementById("nextAP").style.display = "none";
 
         // hide path aps
-        for(var i=1; i<=24; i++) {
+        for(var i=1; i<=32; i++) {
             document.getElementById("gps_"+i).style.display = "none";
         }
     });
@@ -1216,13 +1277,33 @@ function getTooltip(locName, locData, item, visited) {
         } else {
             return tooltip
                    +"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")
-                   +"<br>Items: "+(locData["items"].length > 0 ? locData["items"] : "None")
+                   +"<br>Items: "+(locData["items"].length > 0 ? getItemsImages(locData["items"]) : "None")
                    +("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "")
                    +("difficulty" in locData ? "<br>Difficulty: "+locData["difficulty"] : "")
                    // debug data
                    +("distance" in locData ? "<br>Distance: "+locData["distance"] : "");
         }
     }
+}
+
+function getItemsImages(items) {
+    var out = "";
+    for(var i=0; i<items.length; i++) {
+        if(i%8 == 0 && i > 0) {
+            out += "<br/>";
+        }
+        var item = items[i];
+        if(item[0] >= '0' && item[0] <= '9') {
+            // for etanks and reserves
+            var hyphen = item.indexOf('-');
+            var count = item.substring(0, hyphen);
+            var item = item.substring(hyphen+1, item.length);
+            out += "<span>"+count+"-"+'<img class="imageItems" src="/solver/static/images/'+item+'.png" />'+"</span>";
+        } else {
+            out += '<img class="imageItems" src="/solver/static/images/'+items[i]+'.png" />';
+        }
+    }
+    return out;
 }
 
 var itemCount = {

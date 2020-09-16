@@ -14,10 +14,10 @@ class Choice(object):
         return None
 
     def getItemList(self, itemLocDict):
-        return sorted([wrapper.item for wrapper in itemLocDict.keys()], key=lambda item: item['Type'])
+        return sorted([item for item in itemLocDict.keys()], key=lambda item: item.Type)
 
     def getLocList(self, itemLocDict, item):
-        return sorted(itemLocDict[item['Wrapper']], key=lambda loc: loc['Name'])
+        return sorted(itemLocDict[item], key=lambda loc: loc['Name'])
 
 # simple random choice, that chooses an item first, then a locatio to put it in
 class ItemThenLocChoice(Choice):
@@ -90,14 +90,20 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
     def chooseItemLoc(self, itemLocDict, isProg, progressionItemLocs, ap, container):
         # if late morph, redo the late morph check if morph is the
         # only possibility since we can rollback
-        if self.restrictions.isLateMorph() and len(itemLocDict) == 1:
-            itemWrapper, locList = list(itemLocDict.items())[0]
-            if itemWrapper.item['Type'] == 'Morph':
+        canRollback = len(container.currentItems) > 0
+        if self.restrictions.isLateMorph() and canRollback and len(itemLocDict) == 1:
+            item, locList = list(itemLocDict.items())[0]
+            if item.Type == 'Morph':
                 morphLocs = self.restrictions.lateMorphCheck(container, locList)
                 if morphLocs is not None:
-                    itemLocDict[itemWrapper] = morphLocs
+                    itemLocDict[item] = morphLocs
                 else:
                     return None
+        # if a boss is available, choose it right away
+        for item,locs in itemLocDict.items():
+            if item.Category == 'Boss':
+                assert len(locs) == 1 and locs[0]['Name'] == item.Name
+                return {'Item':item, 'Location':locs[0]}
         self.progressionItemLocs = progressionItemLocs
         self.ap = ap
         self.container = container
@@ -120,7 +126,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
 
     def chooseItemProg(self, itemList):
         ret = self.getChooseFunc(self.chooseItemRanges, self.chooseItemFuncs)(itemList)
-        self.log.debug('chooseItemProg. ret='+ret['Type'])
+        self.log.debug('chooseItemProg. ret='+ret.Type)
         return ret
 
     def chooseLocationProg(self, locs, item):
@@ -181,7 +187,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
 
     def getLocsSpreadProgression(self, availableLocations):
         split = self.restrictions.split
-        cond = lambda item: ((split == 'Full' and item['Class'] == 'Major') or split == item['Class']) and item['Category'] != "Energy"
+        cond = lambda item: ((split == 'Full' and item.Class == 'Major') or split == item.Class) and item.Category != "Energy"
         progLocs = [il['Location'] for il in self.progressionItemLocs if cond(il['Item'])]
         distances = [self.areaDistance(loc, progLocs) for loc in availableLocations]
         maxDist = max(distances)

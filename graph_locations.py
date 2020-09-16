@@ -135,6 +135,8 @@ locations = [
                                    sm.canFly(),
                                    sm.wor(sm.haveItem('HiJump'),
                                           sm.haveItem('Ice'),
+                                          sm.wand(sm.canUsePowerBombs(),
+                                                  sm.haveItem('SpeedBooster')),
                                           sm.canSimpleShortCharge()))
 },
 {
@@ -675,11 +677,9 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'West Sand Hole',
     'AccessFrom' : {
-        'Left Sandpit': lambda sm: sm.haveItem('Morph')
+        'Left Sandpit': lambda sm: sm.canClimbWestSandHole()
     },
-    'Available': lambda sm: sm.wor(sm.haveItem('Gravity'), # TODO? add knows for jumping up there?
-                                   sm.wand(sm.haveItem('HiJump'),
-                                           sm.knowsGravLessLevel3()))
+    'Available': lambda sm: sm.canAccessItemsInWestSandHole()
 },
 {
     'Area': "Maridia",
@@ -717,7 +717,10 @@ locations = [
                                            sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb()), # XRay climb
                                            sm.canCrystalFlashClip()),
                                     sm.wor(sm.haveItem('Gravity'), sm.canUseSpringBall())), # acess the item in spring ball room
-    'PostAvailable': lambda sm: sm.wor(sm.haveItem('Gravity'),
+    'PostAvailable': lambda sm: sm.wor(sm.wand(sm.haveItem('Gravity'),
+                                               sm.wor(sm.haveItem('HiJump'),
+                                                      sm.canFly(),
+                                                      sm.knowsMaridiaWallJumps())),
                                        sm.canSpringBallJump())
 },
 {
@@ -943,8 +946,8 @@ locations = [
     'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.haveItem('SpeedBooster'),
                                     # reserves are hard to trigger midspark when not having ETanks
-                                    sm.wor(sm.wand(sm.energyReserveCountOk(2), SMBool(sm.haveItemCount('ETank', 1))), # need energy to get out
-                                           sm.wand(SMBool(sm.haveItemCount('ETank', 1)),
+                                    sm.wor(sm.wand(sm.energyReserveCountOk(2), sm.itemCountOk('ETank', 1)), # need energy to get out
+                                           sm.wand(sm.itemCountOk('ETank', 1),
                                                    sm.wor(sm.haveItem('Grapple'), # use grapple/space or dmg protection to get out
                                                           sm.haveItem('SpaceJump'),
                                                           sm.heatProof()))),
@@ -1337,12 +1340,13 @@ locations = [
     'Room': 'Crumble Shaft',
     'AccessFrom' : {
         'Business Center': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                                      sm.canUsePowerBombs(),
-                                                      sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Ice Beam']),
-                                                      sm.wor(sm.wand(sm.haveItem('Morph'),
-                                                                     sm.knowsMockball()),
-                                                             sm.haveItem('SpeedBooster'))),
-        'Crocomire Speedway Bottom': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Ice Missiles']),
+                                              sm.canUsePowerBombs(),
+                                              sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Ice Beam']),
+                                              sm.wor(sm.wand(sm.haveItem('Morph'),
+                                                             sm.knowsMockball()),
+                                                     sm.haveItem('SpeedBooster'))),
+        'Crocomire Speedway Bottom': lambda sm: sm.wand(sm.isVanillaCroc(),
+                                                        sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Ice Missiles']),
                                                         sm.haveItem('SpeedBooster'),
                                                         sm.knowsIceMissileFromCroc())
     },
@@ -1748,7 +1752,7 @@ locations = [
     'Available': lambda sm: sm.wand(sm.haveItem('Gravity'),
                                     sm.haveItem('SpeedBooster'),
                                     sm.wor(sm.wand(sm.canOpenGreenDoors(), # run from room on the right
-                                                   SMBool(sm.haveItemCount('ETank', 1))), # etank for the spark since sparking from low ground
+                                                   sm.itemCountOk('ETank', 1)), # etank for the spark since sparking from low ground
                                            sm.canSimpleShortCharge())), # run from above
 },
 {
@@ -1849,11 +1853,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'West Sand Hole',
     'AccessFrom' : {
-        'Left Sandpit': lambda sm: sm.haveItem('Morph')
+        'Left Sandpit': lambda sm: sm.canClimbWestSandHole()
     },
-    'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                   sm.wand(sm.haveItem('HiJump'),
-                                           sm.knowsGravLessLevel3()))
+    'Available': lambda sm: sm.canAccessItemsInWestSandHole()
 },
 {
     'Area': "Maridia",

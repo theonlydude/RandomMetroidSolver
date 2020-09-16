@@ -219,15 +219,16 @@ class AccessGraph(object):
         return path
 
     def getPathDifficulty(self, path, availAps):
-        pdiff = SMBool(True, 0)
+        difficulty = 0
+        knows = set()
+        items = [ ]
         for ap in path:
             diff = availAps[ap]['difficulty']
-            pdiff = SMBool(True,
-                           difficulty=max(pdiff.difficulty, diff.difficulty),
-                           knows=list(set(pdiff.knows + diff.knows)),
-                           items=pdiff.items + diff.items)
+            difficulty = max(difficulty, diff.difficulty)
+            knows.update(diff.knows)
+            items.extend(diff.items)
 
-        return pdiff
+        return SMBool(True, difficulty, list(knows), items)
 
     def getAvailAPPaths(self, availAccessPoints, locsAPs):
         paths = {}

@@ -166,7 +166,7 @@ class InteractiveSolver(CommonSolver):
         # as it may be available with the newly placed item.
         if len(self.visitedLocations) > 0:
             lastVisited = self.visitedLocations[-1]
-            if lastVisited['difficulty'].difficulty == -1:
+            if lastVisited.difficulty.difficulty == -1:
                 self.visitedLocations.remove(lastVisited)
                 self.majorLocations.append(lastVisited)
             else:
@@ -182,9 +182,9 @@ class InteractiveSolver(CommonSolver):
         if lastVisited != None:
             self.majorLocations.remove(lastVisited)
             self.visitedLocations.append(lastVisited)
-            if lastVisited["difficulty"] == False:
+            if lastVisited.difficulty == False:
                 # if the loc is still sequence break, put it back as sequence break
-                lastVisited["difficulty"] = SMBool(True, -1)
+                lastVisited.difficulty = SMBool(True, -1)
 
         # return them
         self.dumpState()
@@ -231,7 +231,7 @@ class InteractiveSolver(CommonSolver):
             # add remaining locs as sequence break
             for loc in self.majorLocations[:]:
                 loc.difficulty = SMBool(True, -1)
-                if "accessPoint" not in loc:
+                if loc.accessPoint is not None:
                     # take first ap of the loc
                     loc.accessPoint = list(loc.AccessFrom)[0]
                 self.collectMajor(loc)
@@ -420,10 +420,10 @@ class InteractiveSolver(CommonSolver):
     def pickItemAt(self, locName):
         # collect new item at newLoc
         loc = self.getWebLoc(locName)
-        if "difficulty" not in loc or loc.difficulty == False:
+        if loc.difficulty is None or loc.difficulty == False:
             # sequence break
             loc.difficulty = SMBool(True, -1)
-        if "accessPoint" not in loc:
+        if loc.accessPoint is None:
             # take first ap of the loc
             loc.accessPoint = list(loc.AccessFrom)[0]
         self.collectMajor(loc)
@@ -435,10 +435,10 @@ class InteractiveSolver(CommonSolver):
         # plando mode
         loc.itemName = itemName
 
-        if "difficulty" not in loc:
+        if loc.difficulty is None:
             # sequence break
             loc.difficulty = SMBool(True, -1)
-        if "accessPoint" not in loc:
+        if loc.accessPoint is None:
             # take first ap of the loc
             loc.accessPoint = list(loc.AccessFrom)[0]
 
@@ -500,8 +500,7 @@ class InteractiveSolver(CommonSolver):
         self.majorLocations = self.locations
         if reload == True:
             for loc in self.majorLocations:
-                if "difficulty" in loc:
-                    del loc.difficulty
+                loc.difficulty = None
         self.smbm.resetItems()
 
     def addTransition(self, startPoint, endPoint):
@@ -564,8 +563,7 @@ class InteractiveSolver(CommonSolver):
 
     def clearLocs(self, locs):
         for loc in locs:
-            if 'difficulty' in loc:
-                del loc['difficulty']
+            loc.difficulty = None
 
     def getDiffThreshold(self):
         # in interactive solver we don't have the max difficulty parameter

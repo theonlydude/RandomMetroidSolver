@@ -64,8 +64,8 @@ class SolverState(object):
         self.state["allTransitions"] = len(solver.curGraphTransitions) == len(solver.areaTransitions) + len(solver.bossTransitions)
         self.state["errorMsg"] = solver.errorMsg
         if len(solver.visitedLocations) > 0:
-            self.state["last"] = {"loc": solver.visitedLocations[-1]["Name"],
-                                  "item": solver.visitedLocations[-1]["itemName"]}
+            self.state["last"] = {"loc": solver.visitedLocations[-1].Name,
+                                  "item": solver.visitedLocations[-1].itemName}
         else:
             self.state["last"] = ""
         # store the inner graph transitions to display in vcr
@@ -117,7 +117,7 @@ class SolverState(object):
         ret = {}
         for loc in locations:
             ret[loc.Name] = {"itemName": loc.itemName}
-            if "accessPoint" in loc:
+            if loc.accessPoint != None:
                 ret[loc.Name]["accessPoint"] = loc.accessPoint
         return ret
 
@@ -179,7 +179,7 @@ class SolverState(object):
     def getAvailableLocationsWeb(self, locations):
         ret = {}
         for loc in locations:
-            if "difficulty" in loc and loc.difficulty.bool == True:
+            if loc.difficulty is not None and loc.difficulty.bool == True:
                 diff = loc.difficulty
                 locName = self.name4isolver(loc.Name)
                 ret[locName] = {"difficulty": diff4solver(diff.difficulty),
@@ -190,29 +190,29 @@ class SolverState(object):
                                 "canHidden": loc.CanHidden,
                                 "visibility": loc.Visibility}
 
-#                if "locDifficulty" in loc:
+#                if loc.locDifficulty is not None:
 #                    lDiff = loc.locDifficulty
 #                    ret[locName]["locDifficulty"] = [diff4solver(lDiff.difficulty), self.knows2isolver(lDiff.knows), list(set(lDiff.items))]
-#                if "pathDifficulty" in loc:
+#                if loc.pathDifficulty is not None:
 #                    pDiff = loc.pathDifficulty
 #                    ret[locName]["pathDifficulty"] = [diff4solver(pDiff.difficulty), self.knows2isolver(pDiff.knows), list(set(pDiff.items))]
 
-                if "comeBack" in loc:
+                if loc.comeBack is not None:
                     ret[locName]["comeBack"] = loc.comeBack
-                if "accessPoint" in loc:
+                if loc.accessPoint is not None:
                     ret[locName]["accessPoint"] = self.transition2isolver(loc.accessPoint)
-                    if "path" in loc:
+                    if loc.path is not None:
                         ret[locName]["path"] = [self.transition2isolver(a.Name) for a in loc.path]
                 # for debug purpose
                 if self.debug == True:
-                    if "distance" in loc:
+                    if loc.distance is not None:
                         ret[locName]["distance"] = loc.distance
         return ret
 
     def getRemainLocationsWeb(self, locations):
         ret = {}
         for loc in locations:
-            if "difficulty" not in loc or ("difficulty" in loc and loc.difficulty.bool == False):
+            if loc.difficulty is None or loc.difficulty.bool == False:
                 locName = self.name4isolver(loc.Name)
                 ret[locName] = {"item": loc.itemName,
                                 "name": loc.Name,
@@ -221,9 +221,9 @@ class SolverState(object):
                                 "canHidden": loc.CanHidden,
                                 "visibility": loc.Visibility}
                 if self.debug == True:
-                    if "difficulty" in loc:
+                    if loc.difficulty is not None:
                         ret[locName]["difficulty"] = str(loc.difficulty)
-                    if "distance" in loc:
+                    if loc.distance is not None:
                         ret[locName]["distance"] = loc.distance
         return ret
 
@@ -241,7 +241,7 @@ class SolverState(object):
     def getAvailableLocations(self, locations):
         ret = {}
         for loc in locations:
-            if "difficulty" in loc and loc.difficulty.bool == True:
+            if loc.difficulty is not None and loc.difficulty.bool == True:
                 diff = loc.difficulty
                 ret[loc.Name] = (diff.bool, diff.difficulty, diff.knows, diff.items)
         return ret

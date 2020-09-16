@@ -25,7 +25,7 @@ class RandoSettings(object):
         return self.plandoRandoItemLocs is not None
 
     def getItemManager(self, smbm, nLocs):
-        if self.isPlandoRando():
+        if not self.isPlandoRando():
             return ItemManager(self.restrictions['MajorMinor'], self.qty, smbm, nLocs)
         else:
             return ItemManager('Plando', self.qty, smbm, nLocs)

@@ -161,8 +161,9 @@ class RandoSetup(object):
 
     def checkPool(self, forbidden=None):
         self.log.debug("checkPool. forbidden=" + str(forbidden) + ", self.forbiddenItems=" + str(self.forbiddenItems))
-        if self.graphSettings.minimizerN is None and len(self.allLocations) > len(self.locations):
+        if not self.graphSettings.isMinimizer() and not self.settings.isPlandoRando() and len(self.allLocations) > len(self.locations):
             # invalid graph with looped areas
+            self.log.debug("checkPool: not all areas are connected, but minimizer param is off / not a plando rando")
             return False
         ret = True
         if forbidden is not None:

@@ -116,26 +116,26 @@ class SolverState(object):
     def getLocsData(self, locations):
         ret = {}
         for loc in locations:
-            ret[loc["Name"]] = {"itemName": loc["itemName"]}
+            ret[loc.Name] = {"itemName": loc.itemName}
             if "accessPoint" in loc:
-                ret[loc["Name"]]["accessPoint"] = loc["accessPoint"]
+                ret[loc.Name]["accessPoint"] = loc.accessPoint
         return ret
 
     def setLocsData(self, locations):
         for loc in locations:
-            loc["itemName"] = self.state["locsData"][loc["Name"]]["itemName"]
-            if "accessPoint" in self.state["locsData"][loc["Name"]]:
-                loc["accessPoint"] = self.state["locsData"][loc["Name"]]["accessPoint"]
+            loc.itemName = self.state["locsData"][loc.Name]["itemName"]
+            if "accessPoint" in self.state["locsData"][loc.Name]:
+                loc.accessPoint = self.state["locsData"][loc.Name]["accessPoint"]
 
     def getVisitedLocations(self, visitedLocations):
         # need to keep the order (for cancelation)
         ret = {}
         i = 0
         for loc in visitedLocations:
-            diff = loc["difficulty"]
-            ret[loc["Name"]] = {"index": i,
+            diff = loc.difficulty
+            ret[loc.Name] = {"index": i,
                                 "difficulty": (diff.bool, diff.difficulty, diff.knows, diff.items),
-                                "Visibility": loc["Visibility"]}
+                                "Visibility": loc.Visibility}
             i += 1
         return ret
 
@@ -143,17 +143,17 @@ class SolverState(object):
         retVis = []
         retMaj = []
         for loc in locations:
-            if loc["Name"] in visitedLocations:
+            if loc.Name in visitedLocations:
                 # visitedLocations contains an index
-                diff = visitedLocations[loc["Name"]]["difficulty"]
-                loc["difficulty"] = SMBool(diff[0], diff[1], diff[2], diff[3])
-                if "Visibility" in visitedLocations[loc["Name"]]:
-                    loc["Visibility"] = visitedLocations[loc["Name"]]["Visibility"]
-                retVis.append((visitedLocations[loc["Name"]]["index"], loc))
+                diff = visitedLocations[loc.Name]["difficulty"]
+                loc.difficulty = SMBool(diff[0], diff[1], diff[2], diff[3])
+                if "Visibility" in visitedLocations[loc.Name]:
+                    loc.Visibility = visitedLocations[loc.Name]["Visibility"]
+                retVis.append((visitedLocations[loc.Name]["index"], loc))
             else:
-                if loc["Name"] in availableLocations:
-                    diff = availableLocations[loc["Name"]]
-                    loc["difficulty"] = SMBool(diff[0], diff[1], diff[2], diff[3])
+                if loc.Name in availableLocations:
+                    diff = availableLocations[loc.Name]
+                    loc.difficulty = SMBool(diff[0], diff[1], diff[2], diff[3])
                 retMaj.append(loc)
         retVis.sort(key=lambda x: x[0])
         return ([loc for (i, loc) in retVis], retMaj)
@@ -179,52 +179,52 @@ class SolverState(object):
     def getAvailableLocationsWeb(self, locations):
         ret = {}
         for loc in locations:
-            if "difficulty" in loc and loc["difficulty"].bool == True:
-                diff = loc["difficulty"]
-                locName = self.name4isolver(loc["Name"])
+            if "difficulty" in loc and loc.difficulty.bool == True:
+                diff = loc.difficulty
+                locName = self.name4isolver(loc.Name)
                 ret[locName] = {"difficulty": diff4solver(diff.difficulty),
                                 "knows": self.knows2isolver(diff.knows),
                                 "items": fixEnergy(list(set(diff.items))),
-                                "item": loc["itemName"],
-                                "name": loc["Name"],
-                                "canHidden": loc["CanHidden"],
-                                "visibility": loc["Visibility"]}
+                                "item": loc.itemName,
+                                "name": loc.Name,
+                                "canHidden": loc.CanHidden,
+                                "visibility": loc.Visibility}
 
 #                if "locDifficulty" in loc:
-#                    lDiff = loc["locDifficulty"]
+#                    lDiff = loc.locDifficulty
 #                    ret[locName]["locDifficulty"] = [diff4solver(lDiff.difficulty), self.knows2isolver(lDiff.knows), list(set(lDiff.items))]
 #                if "pathDifficulty" in loc:
-#                    pDiff = loc["pathDifficulty"]
+#                    pDiff = loc.pathDifficulty
 #                    ret[locName]["pathDifficulty"] = [diff4solver(pDiff.difficulty), self.knows2isolver(pDiff.knows), list(set(pDiff.items))]
 
                 if "comeBack" in loc:
-                    ret[locName]["comeBack"] = loc["comeBack"]
+                    ret[locName]["comeBack"] = loc.comeBack
                 if "accessPoint" in loc:
-                    ret[locName]["accessPoint"] = self.transition2isolver(loc["accessPoint"])
+                    ret[locName]["accessPoint"] = self.transition2isolver(loc.accessPoint)
                     if "path" in loc:
-                        ret[locName]["path"] = [self.transition2isolver(a.Name) for a in loc["path"]]
+                        ret[locName]["path"] = [self.transition2isolver(a.Name) for a in loc.path]
                 # for debug purpose
                 if self.debug == True:
                     if "distance" in loc:
-                        ret[locName]["distance"] = loc["distance"]
+                        ret[locName]["distance"] = loc.distance
         return ret
 
     def getRemainLocationsWeb(self, locations):
         ret = {}
         for loc in locations:
-            if "difficulty" not in loc or ("difficulty" in loc and loc["difficulty"].bool == False):
-                locName = self.name4isolver(loc["Name"])
-                ret[locName] = {"item": loc["itemName"],
-                                "name": loc["Name"],
+            if "difficulty" not in loc or ("difficulty" in loc and loc.difficulty.bool == False):
+                locName = self.name4isolver(loc.Name)
+                ret[locName] = {"item": loc.itemName,
+                                "name": loc.Name,
                                 "knows": ["Sequence Break"],
                                 "items": [],
-                                "canHidden": loc["CanHidden"],
-                                "visibility": loc["Visibility"]}
+                                "canHidden": loc.CanHidden,
+                                "visibility": loc.Visibility}
                 if self.debug == True:
                     if "difficulty" in loc:
-                        ret[locName]["difficulty"] = str(loc["difficulty"])
+                        ret[locName]["difficulty"] = str(loc.difficulty)
                     if "distance" in loc:
-                        ret[locName]["distance"] = loc["distance"]
+                        ret[locName]["distance"] = loc.distance
         return ret
 
     def getLinesWeb(self, transitions):
@@ -241,9 +241,9 @@ class SolverState(object):
     def getAvailableLocations(self, locations):
         ret = {}
         for loc in locations:
-            if "difficulty" in loc and loc["difficulty"].bool == True:
-                diff = loc["difficulty"]
-                ret[loc["Name"]] = (diff.bool, diff.difficulty, diff.knows, diff.items)
+            if "difficulty" in loc and loc.difficulty.bool == True:
+                diff = loc.difficulty
+                ret[loc.Name] = (diff.bool, diff.difficulty, diff.knows, diff.items)
         return ret
 
     def fromJson(self, stateJsonFileName):

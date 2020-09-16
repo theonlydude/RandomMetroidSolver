@@ -251,10 +251,11 @@ class AccessGraph(object):
         ret = []
 
         for apName in locAccessFrom:
-            if apName not in paths:
+            path = paths.get(apName, None)
+            if path is None:
                 continue
             difficulty = paths[apName].pdiff.difficulty
-            ret.append((difficulty if difficulty != -1 else infinity, paths[apName].distance, apName))
+            ret.append((difficulty if difficulty != -1 else infinity, path.distance, apName))
         # sort by difficulty first, then distance
         ret.sort(key=lambda x: (x[0], x[1], x[2]))
         return [apName for (diff, dist, apName) in ret]

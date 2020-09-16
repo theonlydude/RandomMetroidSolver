@@ -21,14 +21,17 @@ class RandoSettings(object):
         self.plandoRandoItemLocs = plandoRandoItemLocs
         self.minDiff = minDiff
 
+    def isPlandoRando(self):
+        return self.plandoRandoItemLocs is not None
+
     def getItemManager(self, smbm, nLocs):
-        if self.plandoRandoItemLocs is None:
+        if self.isPlandoRando():
             return ItemManager(self.restrictions['MajorMinor'], self.qty, smbm, nLocs)
         else:
             return ItemManager('Plando', self.qty, smbm, nLocs)
 
     def getExcludeItems(self, locations):
-        if self.plandoRandoItemLocs is None:
+        if not self.isPlandoRando():
             return None
         exclude = {'total':0}
         # plandoRando is a dict {'loc name': 'item type'}
@@ -43,7 +46,7 @@ class RandoSettings(object):
         return exclude
 
     def collectAlreadyPlacedItemLocations(self, container):
-        if self.plandoRandoItemLocs is None:
+        if not self.isPlandoRando():
             return
         for locName,itemType in self.plandoRandoItemLocs.items():
             if not any(loc['Name'] == locName for loc in container.unusedLocations):
@@ -65,6 +68,9 @@ class GraphSettings(object):
         self.minimizerN = minimizerN
         self.dotFile = dotFile
         self.plandoRandoTransitions = plandoRandoTransitions
+
+    def isMinimizer(self):
+        return self.minimizerN is not None
 
     # used by FillerRandom to know how many front fill steps it must perform
     def getRandomFillHelp(self):

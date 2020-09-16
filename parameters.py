@@ -244,6 +244,12 @@ class Knows:
                                 'href': 'https://youtu.be/F3xAJem6VlA',
                                 'rooms': ['West Sand Hole', 'Spring Ball Room', 'Crab Hole']}
 
+    MtEverestGravJump = SMBool(False, 0, ['MtEverestGravJump'])
+    desc['MtEverestGravJump'] = {'display': 'Mount Everest Gravity Jump',
+                                'title': 'Access Mount Everest top door by doing a crouch+gravity jump in the last couple frames possible',
+                                'href': 'https://www.youtube.com/watch?v=sZLEzdTgJbI',
+                                'rooms': ['Mt. Everest']}
+
     # underwater grav-less
     GravLessLevel1 = SMBool(True, hardcore, ['GravLessLevel1'])
     desc['GravLessLevel1'] = {'display': 'Level 1',
@@ -682,8 +688,8 @@ class Knows:
              'title': 'Clips'},
             {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
              'title': 'Plasma Room'},
-            {'knows': ['HiJumpMamaTurtle', 'MaridiaWallJumps'],
-             'title': 'Wall Jumps'}
+            {'knows': ['HiJumpMamaTurtle', 'MaridiaWallJumps', 'MtEverestGravJump'],
+             'title': 'Jumps'}
         ],
         'Maridia 2/2': [
             {'knows': ['AccessSpringBallWithHiJump', 'AccessSpringBallWithSpringBallBombJumps',

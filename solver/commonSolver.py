@@ -70,8 +70,8 @@ class CommonSolver(object):
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("Display items at locations:")
-            for location in self.locations:
-                self.log.debug('{:>50}: {:>16}'.format(location["Name"], location['itemName']))
+            for loc in self.locations:
+                self.log.debug('{:>50}: {:>16}'.format(loc.Name, loc.itemName))
 
     def loadPreset(self, presetFileName):
         presetLoader = PresetLoader.factory(presetFileName)
@@ -188,9 +188,11 @@ class CommonSolver(object):
             print("collectItem: {:<16} at {:<48}".format(item, loc.Name))
             print("---------------------------------------------------------------")
 
-        # last loc is used as root node for the graph
-        self.lastAP = loc.accessPoint
-        self.lastArea = loc.SolveArea
+        # last loc is used as root node for the graph.
+        # when loading a plando we can load locations from non connected areas, so they don't have an access point.
+        if loc.accessPoint is not None:
+            self.lastAP = loc.accessPoint
+            self.lastArea = loc.SolveArea
 
     def getLocIndex(self, locName):
         for (i, loc) in enumerate(self.visitedLocations):

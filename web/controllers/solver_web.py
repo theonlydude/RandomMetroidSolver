@@ -2028,7 +2028,7 @@ class WS_common_init(WS):
             '--action', "init",
             '--interactive',
             '--mode', mode,
-            '--scope', 'common',
+            '--scope', 'common'
         ]
 
         if mode != "seedless":

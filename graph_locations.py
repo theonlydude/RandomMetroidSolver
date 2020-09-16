@@ -34,10 +34,17 @@ class Location:
         self.comeBack = comeBack
         self.areaWeight = areaWeight
 
+    def json(self):
+        # to return after plando rando
+        ret = {'Name': self.Name, 'accessPoint': self.accessPoint}
+        if self.difficulty is not None:
+            ret['difficulty'] = self.difficulty.json()
+        return ret
+
     def __repr__(self):
-        return "Location({})".format(
+        return "Location({}: {})".format(self.Name,
             '. '.join(
-                (repr(self[slot]) for slot in Location.__slots__ if slot in self)))
+                (repr(getattr(self, slot)) for slot in Location.__slots__)))
 
     def __copy__(self):
         d = self.difficulty

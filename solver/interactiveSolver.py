@@ -307,18 +307,18 @@ class InteractiveSolver(CommonSolver):
             self.majorLocations = self.locations[:]
 
             for itemLoc in itemsLocs:
-                locName = itemloc.Location["Name"]
+                locName = itemLoc["Location"]["Name"]
                 loc = self.getLoc(locName)
                 # we can have locations from non connected areas
-                if "difficulty" in itemloc.Location:
-                    difficulty = itemloc.Location["difficulty"]
+                if "difficulty" in itemLoc["Location"]:
+                    difficulty = itemLoc["Location"]["difficulty"]
                     smbool = SMBool(difficulty["bool"], difficulty["difficulty"], difficulty["knows"], difficulty["items"])
                     loc.difficulty = smbool
-                    itemName = itemloc.Item["Type"]
+                    itemName = itemLoc["Item"]["Type"]
                     if itemName == "Boss":
                         itemName = "Nothing"
                     loc.itemName = itemName
-                    loc.accessPoint = itemloc.Location["accessPoint"]
+                    loc.accessPoint = itemLoc["Location"]["accessPoint"]
                     self.collectMajor(loc)
 
     def savePlando(self, lock, escapeTimer):
@@ -458,7 +458,7 @@ class InteractiveSolver(CommonSolver):
         isCount = self.smbm.isCountItem(oldItemName)
 
         # replace item at the old item spot in collectedItems
-        index = next(i for i, vloc in enumerate(self.visitedLocations) if vloc['Name'] == loc['Name'])
+        index = next(i for i, vloc in enumerate(self.visitedLocations) if vloc.Name == loc.Name)
         self.collectedItems[index] = itemName
 
         # update smbm if count item or major was only there once
@@ -467,7 +467,7 @@ class InteractiveSolver(CommonSolver):
 
         if hide == True:
             loc.Visibility = 'Hidden'
-        elif loc['CanHidden'] == True and loc['Visibility'] == 'Hidden':
+        elif loc.CanHidden == True and loc.Visibility == 'Hidden':
             # the loc was previously hidden, set it back to visible
             loc.Visibility = 'Visible'
 

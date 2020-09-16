@@ -13,7 +13,7 @@ class Location:
         'restricted', )
 
     solver_slots = (
-        'itemName', 'itemType', 'comeBack', 'areaWeight' )
+        'itemName', 'comeBack', 'areaWeight' )
 
     __slots__ = graph_slots + rando_slots + solver_slots
 

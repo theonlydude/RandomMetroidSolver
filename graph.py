@@ -5,6 +5,14 @@ from smbool import SMBool
 from parameters import infinity
 from helpers import Bosses
 
+class Path(object):
+    __slots__ = ( 'path', 'pdiff', 'distance' )
+
+    def __init__(self, path, pdiff, distance):
+        self.path = path
+        self.pdiff = pdiff
+        self.distance = distance
+
 class AccessPoint(object):
     # name : AccessPoint name
     # graphArea : graph area the node is located in
@@ -235,7 +243,7 @@ class AccessGraph(object):
             if ap.Name in locsAPs:
                 path = self.getPath(ap, availAccessPoints)
                 pdiff = self.getPathDifficulty(path, availAccessPoints)
-                paths[ap.Name] = {"path": path, "pdiff": pdiff, "distance": len(path)}
+                paths[ap.Name] = Path(path, pdiff, len(path))
         return paths
 
     def getSortedAPs(self, paths, locAccessFrom):
@@ -244,8 +252,8 @@ class AccessGraph(object):
         for apName in locAccessFrom:
             if apName not in paths:
                 continue
-            difficulty = paths[apName]["pdiff"].difficulty
-            ret.append((difficulty if difficulty != -1 else infinity, paths[apName]["distance"], apName))
+            difficulty = paths[apName].pdiff.difficulty
+            ret.append((difficulty if difficulty != -1 else infinity, paths[apName].distance, apName))
         # sort by difficulty first, then distance
         ret.sort(key=lambda x: (x[0], x[1], x[2]))
         return [apName for (diff, dist, apName) in ret]
@@ -302,10 +310,10 @@ class AccessGraph(object):
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc.Available)
                     if diff.bool == True:
-                        path = availAPPaths[apName]["path"]
+                        path = availAPPaths[apName].path
                         #if loc.Name == "Kraid":
                         #    print("{} path: {}".format(loc.Name, [a.Name for a in path]))
-                        pdiff = availAPPaths[apName]["pdiff"]
+                        pdiff = availAPPaths[apName].pdiff
                         (allDiff, locDiff) = self.computeLocDiff(tdiff, diff, pdiff)
                         if allDiff.bool == True and allDiff.difficulty <= maxDiff:
                             loc.distance = ap.distance + 1

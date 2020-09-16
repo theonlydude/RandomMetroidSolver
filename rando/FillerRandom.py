@@ -69,7 +69,7 @@ class FillerRandom(Filler):
                 if self.nSteps < self.diffSteps:
                     couldBeBeatable = self.isBeatable(maxDiff=infinity)
                     if couldBeBeatable:
-                        difficulty = max([il['Location']['difficulty'].difficulty for il in self.container.itemLocations])
+                        difficulty = max([il['Location'].difficulty.difficulty for il in self.container.itemLocations])
                         if self.beatableBackup is None or difficulty < self.beatableBackup[1]:
                             self.beatableBackup = (self.container.itemLocations, difficulty)
                 elif self.beatableBackup is not None:
@@ -184,7 +184,7 @@ class FillerRandomSpeedrun(FillerRandom):
             super(FillerRandomSpeedrun, self).createHelpingBaseLists()
 
     def getLocations(self, item):
-        return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocationFast(item.Type, loc['Name'], self.container)]
+        return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocationFast(item.Type, loc.Name, self.container)]
 
     def isBeatable(self, maxDiff=None):
         miniOk = self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)

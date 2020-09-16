@@ -107,7 +107,7 @@ class FillerProgSpeed(Filler):
             if startAp.GraphArea != "Crateria":
                 newItemLocDict = {}
                 for w, locs in itemLocDict.items():
-                    filtered = [loc for loc in locs if loc['GraphArea'] != 'Crateria']
+                    filtered = [loc for loc in locs if loc.GraphArea != 'Crateria']
                     if len(filtered) > 0:
                         newItemLocDict[w] = filtered
                 if len(newItemLocDict) > 0:
@@ -159,7 +159,7 @@ class FillerProgSpeed(Filler):
         isMinorProg = any(self.restrictions.isItemMinor(item) for item in progItems)
         isMajorProg = any(self.restrictions.isItemMajor(item) for item in progItems)
         accessibleLocations = []
-#        self.log.debug("unusedLocs: {}".format([loc['Name'] for loc in self.unusedLocations]))
+#        self.log.debug("unusedLocs: {}".format([loc.Name for loc in self.unusedLocations]))
         locs = self.currentLocations()
         for loc in locs:
             majAvail = self.restrictions.isLocMajor(loc)
@@ -167,7 +167,7 @@ class FillerProgSpeed(Filler):
             if ((isMajorProg and majAvail) or (isMinorProg and minAvail)) \
                and self.services.locPostAvailable(sm, loc, None):
                 accessibleLocations.append(loc)
-        self.log.debug("accesLoc {}".format([loc['Name'] for loc in accessibleLocations]))
+        self.log.debug("accesLoc {}".format([loc.Name for loc in accessibleLocations]))
         if len(accessibleLocations) <= self.locLimit:
             sys.stdout.write('|')
             sys.stdout.flush()
@@ -179,8 +179,8 @@ class FillerProgSpeed(Filler):
         for loc in self.container.unusedLocations:
             majAvail = self.restrictions.isLocMajor(loc)
             minAvail = self.restrictions.isLocMinor(loc)
-            if loc['Area'] in room and ((isMajorProg and majAvail) or (isMinorProg and minAvail)):
-                room[loc['Area']] += 1
+            if loc.Area in room and ((isMajorProg and majAvail) or (isMinorProg and minAvail)):
+                room[loc.Area] += 1
         for r in room.values():
             if r > 0 and r <= self.locLimit:
                 sys.stdout.write('|')
@@ -225,7 +225,7 @@ class FillerProgSpeed(Filler):
             itemLocation = self.generateItem()
             if itemLocation is not None:
                 nItems += 1
-                self.log.debug("fillNonProgressionItems: {} at {}".format(itemLocation['Item'].Name, itemLocation['Location']['Name']))
+                self.log.debug("fillNonProgressionItems: {} at {}".format(itemLocation['Item'].Name, itemLocation['Location'].Name))
                 # doing this first is actually important, as state is saved in collect
                 self.container.unrestrictItemPool()
                 self.collect(itemLocation)
@@ -503,7 +503,7 @@ class FillerProgSpeedChozoSecondPhase(Filler):
                 return False
             for itemLoc in itemLocs:
                 if itemLoc['Location'] in self.container.unusedLocations:
-                    self.log.debug("step. POST COLLECT "+itemLoc['Item'].Type+" at "+itemLoc['Location']['Name'])
+                    self.log.debug("step. POST COLLECT "+itemLoc['Item'].Type+" at "+itemLoc['Location'].Name)
                     self.container.collect(itemLoc)
         else:
             # merge collected of 1st phase and 2nd phase so far for seed to be solvable by random fill

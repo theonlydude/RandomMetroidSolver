@@ -9,10 +9,10 @@ def getItemListStr(items):
     return str(dict(Counter([item.Type for item in items])))
 
 def getLocListStr(locs):
-    return str([loc['Name'] for loc in locs])
+    return str([loc.Name for loc in locs])
 
 def getItemLocStr(itemLoc):
-    return itemLoc['Item'].Type + " at " + itemLoc['Location']['Name']
+    return itemLoc['Item'].Type + " at " + itemLoc['Location'].Name
 
 def getItemLocationsStr(itemLocations):
     return str([getItemLocStr(il) for il in itemLocations])
@@ -62,16 +62,7 @@ class ItemLocContainer(object):
         return eq
 
     def __copy__(self):
-        def copyLoc(loc):
-            ret = {}
-            for key, value in loc.items():
-                # create new smbool
-                if key == 'difficulty':
-                    ret[key] = SMBool(value.bool, value.difficulty, value.knows, value.items)
-                else:
-                    ret[key] = value
-            return ret
-        locs = [copyLoc(loc) for loc in self.unusedLocations]
+        locs = copy.copy(self.unusedLocations)
         # we don't copy restriction state on purpose: it depends on
         # outside context we don't want to bring to the copy
         ret = ItemLocContainer(SMBoolManager(),
@@ -81,7 +72,7 @@ class ItemLocContainer(object):
         ret.unrestrictedItems = copy.copy(self.unrestrictedItems)
         ret.itemLocations = [ {
             'Item': il['Item'],
-            'Location': copyLoc(il['Location'])
+            'Location': copy.copy(il['Location'])
         } for il in self.itemLocations ]
         ret.sm.addItems([item.Type for item in ret.currentItems])
         return ret
@@ -135,14 +126,14 @@ class ItemLocContainer(object):
     def extractLocs(self, locs):
         ret = []
         for loc in locs:
-            ret.append(next(l for l in self.unusedLocations if l['Name'] == loc['Name']))
+            ret.append(next(l for l in self.unusedLocations if l.Name == loc.Name))
         return ret
 
     def removeLocation(self, location):
         if location in self.unusedLocations:
             self.unusedLocations.remove(location)
         else:
-            self.unusedLocations.remove(next(loc for loc in self.unusedLocations if loc['Name'] == location['Name']))
+            self.unusedLocations.remove(next(loc for loc in self.unusedLocations if loc.Name == location.Name))
 
     def removeItem(self, item):
         self.itemPool.remove(item)
@@ -153,7 +144,7 @@ class ItemLocContainer(object):
     def collect(self, itemLocation, pickup=True):
         item = itemLocation['Item']
         location = itemLocation['Location']
-        if 'restricted' not in location or location['restricted'] == False:
+        if not location.restricted:
             self.unrestrictedItems.add(item.Type)
         if pickup == True:
             self.currentItems.append(item)
@@ -222,9 +213,9 @@ class ItemLocContainer(object):
         for il in self.itemLocations:
             loc = il['Location']
             # filter out restricted locations
-            if loc.get('restricted', False) == True:
+            if loc.restricted:
                 continue
-            loc['itemName'] = il['Item'].Type
+            loc.itemName = il['Item'].Type
             locs.append(loc)
         return locs
 
@@ -233,8 +224,8 @@ class ItemLocContainer(object):
         # post randomization warning message about locs with diff > max diff.
         for il in self.itemLocations:
             loc = il['Location']
-            if loc.get('restricted') == True and loc.get('difficulty', False) == True:
-                loc['difficulty'] = SMBool(False)
+            if loc.restricted and loc.difficulty == True:
+                loc.difficulty = SMBool(False)
 
     def getDistinctItems(self):
         itemTypes = {item.Type for item in self.itemPool}

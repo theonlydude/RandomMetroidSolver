@@ -828,7 +828,7 @@ def getAddressesToRead(plando=False):
 
     # locations
     for loc in locations:
-        addresses["locations"].append(loc["Address"])
+        addresses["locations"].append(loc.Address)
 
     # patches
     for (patch, values) in RomReader.patches.items():
@@ -2028,7 +2028,7 @@ class WS_common_init(WS):
             '--action', "init",
             '--interactive',
             '--mode', mode,
-            '--scope', 'common',
+            '--scope', 'common'
         ]
 
         if mode != "seedless":

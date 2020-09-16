@@ -71,8 +71,8 @@ class Filler(object):
                 self.errorMsg = "STUCK !\n"+self.container.dump()
         else:
             # check if some locations are above max diff and add relevant message
-            locs = self.container.getUsedLocs(lambda loc: loc['difficulty'].difficulty > self.maxDiff)
-            aboveMaxDiffStr = '[ ' + ' ; '.join([loc['Name'] + ': ' + diffValue2txt(loc['difficulty'].difficulty) for loc in locs]) + ' ]'
+            locs = self.container.getUsedLocs(lambda loc: loc.difficulty.difficulty > self.maxDiff)
+            aboveMaxDiffStr = '[ ' + ' ; '.join([loc.Name + ': ' + diffValue2txt(loc.difficulty.difficulty) for loc in locs]) + ' ]'
             if aboveMaxDiffStr != '[  ]':
                 self.errorMsg += "\nMaximum difficulty could not be applied everywhere. Affected locations: {}".format(aboveMaxDiffStr)
             isStuck = False
@@ -88,11 +88,11 @@ class Filler(object):
             container = self.container
         location = itemLoc['Location']
         item = itemLoc['Item']
-        pickup &= 'restricted' not in location or location['restricted'] == False
+        pickup &= location.restricted is None or location.restricted == False
         self.ap = self.services.collect(self.ap, container, itemLoc, pickup=pickup)
         self.log.debug("AP="+self.ap)
         if self.vcr is not None and containerArg is None:
-            self.vcr.addLocation(location['Name'], item.Type)
+            self.vcr.addLocation(location.Name, item.Type)
 
     # called by generateItems at the end to knows which particulier
     # item/locations were progression, if the info is available

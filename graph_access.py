@@ -982,8 +982,8 @@ class GraphUtils:
             if locList is None:
                 locList = locations
             # leave out bosses and count post boss locs systematically
-            return len([loc for loc in locList if locsPredicate(loc) == True and not loc['SolveArea'].endswith(" Boss") and not "Boss" in loc["Class"]])
-        availAreas = list(sorted({ap.GraphArea for ap in accessPoints if ap.GraphArea != startAp.GraphArea and getNLocs(lambda loc: loc['GraphArea'] == ap.GraphArea) > 0}))
+            return len([loc for loc in locList if locsPredicate(loc) == True and not loc.SolveArea.endswith(" Boss") and not "Boss" in loc.Class])
+        availAreas = list(sorted({ap.GraphArea for ap in accessPoints if ap.GraphArea != startAp.GraphArea and getNLocs(lambda loc: loc.GraphArea == ap.GraphArea) > 0}))
         areas = [startAp.GraphArea]
         GraphUtils.log.debug("availAreas: {}".format(availAreas))
         GraphUtils.log.debug("areas: {}".format(areas))
@@ -1007,8 +1007,8 @@ class GraphUtils:
                 while len(fromAreas) == 0:
                     fromAreas = [area for area in availAreas if len(GraphUtils.getAPs(lambda ap: not ap.isInternal())) > n]
                     n -= 1
-                minLocs = min([getNLocs(lambda loc: loc['GraphArea'] == area) for area in fromAreas])
-                fromAreas = [area for area in fromAreas if getNLocs(lambda loc: loc['GraphArea'] == area) == minLocs]
+                minLocs = min([getNLocs(lambda loc: loc.GraphArea == area) for area in fromAreas])
+                fromAreas = [area for area in fromAreas if getNLocs(lambda loc: loc.GraphArea == area) == minLocs]
             elif len(openTransitions()) <= 1: # dont' get stuck by adding dead ends
                 fromAreas = [area for area in fromAreas if len(GraphUtils.getAPs(lambda ap: ap.GraphArea == area and not ap.isInternal())) > 1]
             nextArea = random.choice(fromAreas)
@@ -1024,7 +1024,7 @@ class GraphUtils:
             availAreas.remove(nextArea)
             areas.append(nextArea)
             GraphUtils.log.debug("areas: {}".format(areas))
-            nLocs = getNLocs(lambda loc:loc['GraphArea'] in areas)
+            nLocs = getNLocs(lambda loc:loc.GraphArea in areas)
             GraphUtils.log.debug("nLocs: {}".format(nLocs))
         # we picked the areas, add transitions (bosses and tourian first)
         sourceAPs = openTransitions()

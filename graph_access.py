@@ -632,7 +632,10 @@ accessPoints = [
        start = {'spawn': 0x0405, 'solveArea': "Maridia Pink Bottom", 'save':"Save_Aqueduct",
                 'doors': [0x96]}),
     AccessPoint('Post Botwoon', 'EastMaridia', {
-        'Aqueduct Bottom': lambda sm: SMBool(True), # fall down the sandpit
+        'Aqueduct Bottom': lambda sm: sm.wor(sm.wand(sm.canJumpUnderwater(), # can't access the sand pits from the right side of the room
+                                                     sm.haveItem('Morph')),
+                                             sm.wand(sm.haveItem('Gravity'),
+                                                     sm.haveItem('SpeedBooster'))),
         'Colosseum Top Right': lambda sm: sm.canBotwoonExitToColosseum(),
         'Toilet Top': lambda sm: sm.wand(sm.canReachCacatacAlleyFromBotowoon(),
                                          sm.canPassCacatacAlley())

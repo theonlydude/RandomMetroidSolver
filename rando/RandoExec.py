@@ -82,15 +82,15 @@ class RandoExec(object):
         # hide some items like in dessy's
         if hide == True:
             for itemLoc in itemLocs:
-                item = itemLoc['Item']
-                loc = itemLoc['Location']
+                item = itemLoc.Item
+                loc = itemLoc.Location
                 if (item.Type not in ['Nothing', 'NoEnergy']
                     and loc.CanHidden == True
                     and loc.Visibility == 'Visible'):
                     if bool(random.getrandbits(1)) == True:
                         loc.Visibility = 'Hidden'
         # put nothing in unfilled locations
-        filledLocNames = [il['Location'].Name for il in itemLocs]
+        filledLocNames = [il.Location.Name for il in itemLocs]
         unfilledLocs = [loc for loc in graphLocations if loc.Name not in filledLocNames]
         nothing = ItemManager.getItem('Nothing')
         for loc in unfilledLocs:

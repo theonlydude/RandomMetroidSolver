@@ -602,8 +602,8 @@ if __name__ == "__main__":
     locsItems = {}
     firstMinorsFound = {'Missile': False, 'Super': False, 'PowerBomb': False}
     for itemLoc in itemLocs:
-        locName = itemLoc["Location"].Name
-        itemType = itemLoc["Item"].Type
+        locName = itemLoc.Location.Name
+        itemType = itemLoc.Item.Type
         if itemType in firstMinorsFound and firstMinorsFound[itemType] == False:
             locsItems[locName] = itemType
             firstMinorsFound[itemType] = True
@@ -616,8 +616,8 @@ if __name__ == "__main__":
     if args.plandoRando != None:
         # replace smbool with a dict
         for itemLoc in itemLocs:
-            itemLoc["Location"] = itemLoc["Location"].json()
-            itemLoc["Item"] = itemLoc["Item"].json()
+            itemLoc.Location = itemLoc.Location.json()
+            itemLoc.Item = itemLoc.Item.json()
 
         with open(args.output, 'w') as jsonFile:
             json.dump({"itemLocs": itemLocs, "errorMsg": randoExec.errorMsg}, jsonFile, default=lambda x: x.__dict__)

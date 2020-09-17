@@ -86,8 +86,8 @@ class Filler(object):
         containerArg = container
         if container is None:
             container = self.container
-        location = itemLoc['Location']
-        item = itemLoc['Item']
+        location = itemLoc.Location
+        item = itemLoc.Item
         pickup &= location.restricted is None or location.restricted == False
         self.ap = self.services.collect(self.ap, container, itemLoc, pickup=pickup)
         self.log.debug("AP="+self.ap)

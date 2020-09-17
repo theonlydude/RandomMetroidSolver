@@ -186,7 +186,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
     def getLocsSpreadProgression(self, availableLocations):
         split = self.restrictions.split
         cond = lambda item: ((split == 'Full' and item.Class == 'Major') or split == item.Class) and item.Category != "Energy"
-        progLocs = [il['Location'] for il in self.progressionItemLocs if cond(il['Item'])]
+        progLocs = [il.Location for il in self.progressionItemLocs if cond(il.Item)]
         distances = [self.areaDistance(loc, progLocs) for loc in availableLocations]
         maxDist = max(distances)
         locs = []

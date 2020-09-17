@@ -27,17 +27,19 @@ class Cache:
 
     @staticmethod
     def decorator(func):
+        name = func.__name__
         def _decorator(self):
-            if func.__name__ in Cache.cache:
-#                print("cache found for {}: {}".format(func.__name__, Cache.cache[func.__name__]))
+            ret = Cache.cache.get(name, None)
+            if ret is not None:
+#                print("cache found for {}: {}".format(name, Cache.cache[func.__name__]))
 #                ret = func(self)
-#                if ret != Cache.cache[func.__name__]:
-#                    print("ERROR: cache ({}) != current ({}) for {}".format(Cache.cache[func.__name__], ret, func.__name__))
-                return Cache.cache[func.__name__]
+#                if ret != Cache.cache[name]:
+#                    print("ERROR: cache ({}) != current ({}) for {}".format(Cache.cache[name], ret, name))
+                return ret
             else:
                 ret = func(self)
-                Cache.cache[func.__name__] = ret
-#                print("cache added for {}: {}".format(func.__name__, Cache.cache[func.__name__]))
+                Cache.cache[name] = ret
+#                print("cache added for {}: {}".format(name, Cache.cache[name]))
                 return ret
         return _decorator
 
@@ -45,8 +47,9 @@ class Cache:
     @staticmethod
     def ldeco(name, func):
         def _decorator(self):
-            if name in Cache.cache:
-                return Cache.cache[name]
+            ret = Cache.cache.get(name, None)
+            if ret is not None:
+                return ret
             else:
                 ret = func(self)
                 Cache.cache[name] = ret

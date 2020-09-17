@@ -3,7 +3,7 @@
 from cache import Cache
 from graph_helpers import HelpersGraph
 from parameters import Knows, isKnows
-from smbool import SMBool
+from smbool import SMBool, smboolFalse
 from helpers import Bosses
 
 class SMBoolManager(object):
@@ -11,8 +11,6 @@ class SMBoolManager(object):
     countItems = ['Missile', 'Super', 'PowerBomb', 'ETank', 'Reserve']
 
     def __init__(self):
-        self.smboolFalse = SMBool(False)
-
         # cache related
         self.cacheKey = 0
         self.computeItemsPositions()
@@ -162,25 +160,9 @@ class SMBoolManager(object):
     def haveItem(self, item):
         return getattr(self, item)
 
-    def wand(self, *args):
-        if False in args:
-            return self.smboolFalse
-        else:
-            return SMBool(True,
-                          sum([smb.difficulty for smb in args]),
-                          [know for smb in args for know in smb.knows],
-                          [item for smb in args for item in smb.items])
-
-    def wor(self, *args):
-        if True in args:
-            # return the smbool with the smallest difficulty among True smbools.
-            return min(args)
-        else:
-            return self.smboolFalse
-
-    # negates boolean part of the SMBool
-    def wnot(self, a):
-        return SMBool(not a.bool, a.difficulty)
+    wand = staticmethod(SMBool.wand)
+    wor = staticmethod(SMBool.wor)
+    wnot = staticmethod(SMBool.wnot)
 
     def itemCountOk(self, item, count, difficulty=0):
         if self.itemCount(item) >= count:
@@ -188,7 +170,7 @@ class SMBoolManager(object):
                 item = str(count)+'-'+item
             return SMBool(True, difficulty, items = [item])
         else:
-            return self.smboolFalse
+            return smboolFalse
 
     def energyReserveCountOk(self, count, difficulty=0):
         if self.energyReserveCount() >= count:
@@ -202,7 +184,7 @@ class SMBoolManager(object):
                 items += ' - '+str(nReserve)+'-Reserve'
             return SMBool(True, difficulty, items = [items])
         else:
-            return self.smboolFalse
+            return smboolFalse
 
 class SMBoolManagerPlando(SMBoolManager):
     def __init__(self):

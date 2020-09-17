@@ -267,7 +267,7 @@ class RomReader:
             isFull = False
             chozoItems = {}
         for loc in locations:
-            if 'Boss' in loc.Class:
+            if loc.isBoss():
                 # the boss item has the same name as its location, except for mother brain which has a space
                 loc.itemName = loc.Name.replace(' ', '')
                 continue
@@ -279,11 +279,11 @@ class RomReader:
                 loc.itemName = "Nothing"
                 item = '0x0'
             if majorsSplit == None:
-                if 'Major' in loc.Class and self.items[item]['name'] in ['Missile', 'Super', 'PowerBomb']:
+                if loc.isMajor() and self.items[item]['name'] in ['Missile', 'Super', 'PowerBomb']:
                     isFull = True
-                if 'Minor' in loc.Class and self.items[item]['name'] not in ['Missile', 'Super', 'PowerBomb']:
+                if loc.isMinor() and self.items[item]['name'] not in ['Missile', 'Super', 'PowerBomb']:
                     isFull = True
-                if 'Chozo' in loc.Class:
+                if loc.isChozo():
                     if loc.itemName in chozoItems:
                         chozoItems[loc.itemName] = chozoItems[loc.itemName] + 1
                     else:
@@ -641,7 +641,7 @@ class RomPatcher:
 
     def writeNothing(self, itemLoc):
         loc = itemLoc['Location']
-        if 'Boss' in loc.Class:
+        if loc.isBoss():
             return
 
         for addr in self.getLocAddresses(loc):
@@ -652,7 +652,7 @@ class RomPatcher:
 
     def writeItem(self, itemLoc):
         loc = itemLoc['Location']
-        if 'Boss' in loc.Class:
+        if loc.isBoss():
             raise ValueError('Cannot write Boss location')
         #print('write ' + itemLoc['Item'].Type + ' at ' + loc.Name)
         for addr in self.getLocAddresses(loc):
@@ -667,7 +667,7 @@ class RomPatcher:
         for itemLoc in itemLocs:
             loc = itemLoc['Location']
             item = itemLoc['Item']
-            if 'Boss' in loc.Class:
+            if loc.isBoss():
                 continue
             isMorph = loc.Name == 'Morphing Ball'
             if item.Category == 'Nothing':

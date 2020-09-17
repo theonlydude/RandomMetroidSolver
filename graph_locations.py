@@ -34,6 +34,26 @@ class Location:
         self.comeBack = comeBack
         self.areaWeight = areaWeight
 
+        self._isMajor = 'Major' in self.Class
+        self._isChozo = 'Chozo' in self.Class
+        self._isMinor = 'Minor' in self.Class
+        self._isBoss = 'Boss' in self.Class
+
+    def isMajor(self):
+        return self._isMajor
+
+    def isChozo(self):
+        return self._isChozo
+
+    def isMinor(self):
+        return self._isMinor
+
+    def isBoss(self):
+        return self._isBoss
+
+    def isClass(self, _class):
+        return _class in self.Class
+
     def json(self):
         # to return after plando rando
         ret = {'Name': self.Name, 'accessPoint': self.accessPoint}

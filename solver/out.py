@@ -161,7 +161,7 @@ class OutConsole(Out):
             if loc.locDifficulty is not None:
                 fixEnergy(loc.locDifficulty.items)
 
-                print(line.format('Z' if 'Chozo' in loc.Class else ' ',
+                print(line.format('Z' if loc.isChozo() else ' ',
                                   loc.Name,
                                   loc.Area,
                                   loc.SolveArea,
@@ -173,7 +173,7 @@ class OutConsole(Out):
             elif loc.difficulty is not None:
                 fixEnergy(loc.difficulty.items)
 
-                print(line.format('Z' if 'Chozo' in loc.Class else ' ',
+                print(line.format('Z' if loc.isChozo() else ' ',
                                   loc.Name,
                                   loc.Area,
                                   loc.SolveArea,
@@ -183,7 +183,7 @@ class OutConsole(Out):
                                   sorted(loc.difficulty.knows),
                                   sorted(list(set(loc.difficulty.items)))))
             else:
-                print(line.format('Z' if 'Chozo' in loc.Class else ' ',
+                print(line.format('Z' if loc.isChozo() else ' ',
                                   loc.Name,
                                   loc.Area,
                                   loc.SolveArea,

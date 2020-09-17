@@ -330,7 +330,7 @@ class RandoServices(object):
         # get bosses locations and newly accessible locations (for bosses that open up locs)
         newLocs = getLocList()
         self.log.debug("onlyBossesLeft. newLocs="+getLocListStr(newLocs))
-        locs = newLocs + container.getLocs(lambda loc: 'Boss' in loc.Class and not loc in newLocs)
+        locs = newLocs + container.getLocs(lambda loc: loc.isBoss() and not loc in newLocs)
         self.log.debug("onlyBossesLeft. locs="+getLocListStr(locs))
         ret = (len(locs) > len(prevLocs) and len(locs) == len(container.unusedLocations))
         # restore bosses killed state

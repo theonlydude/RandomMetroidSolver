@@ -58,10 +58,10 @@ class Restrictions(object):
                              or loc.Name in restrictionDict[loc.GraphArea][item.Type])
 
     def isLocMajor(self, loc):
-        return 'Boss' not in loc.Class and (self.split == "Full" or self.split in loc.Class)
+        return not loc.isBoss() and (self.split == "Full" or loc.isClass(self.split))
 
     def isLocMinor(self, loc):
-        return 'Boss' not in loc.Class and (self.split == "Full" or self.split not in loc.Class)
+        return not loc.isBoss() and (self.split == "Full" or not loc.isClass(self.split))
 
     def isItemMajor(self, item):
         if self.split == "Full":
@@ -78,7 +78,7 @@ class Restrictions(object):
     def isItemLocMatching(self, item, loc):
         if self.split == "Full":
             return True
-        if self.split in loc.Class:
+        if loc.isClass(self.split):
             return item.Class == self.split
         else:
             return item.Class == "Minor"
@@ -105,7 +105,7 @@ class Restrictions(object):
     def getCheckers(self):
         checkers = []
         self.log.debug("add bosses restriction")
-        checkers.append(lambda item, loc, cont: (item.Category != 'Boss' and 'Boss' not in loc.Class) or (item.Category == 'Boss' and item.Name == loc.Name))
+        checkers.append(lambda item, loc, cont: (item.Category != 'Boss' and not loc.isBoss()) or (item.Category == 'Boss' and item.Name == loc.Name))
         if self.split != 'Full':
             self.log.debug("add majorsSplit restriction")
             checkers.append(lambda item, loc, cont: self.isItemLocMatching(item, loc))

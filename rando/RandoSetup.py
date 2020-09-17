@@ -236,7 +236,7 @@ class RandoSetup(object):
                       and self.areaGraph.canAccess(self.sm, self.startAP, 'DraygonRoomIn', maxDiff)
                 if ret:
                     # see if we can beat bosses with this equipment (infinity as max diff for a "onlyBossesLeft" type check
-                    beatableBosses = sorted([loc.Name for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if "Boss" in loc.Class])
+                    beatableBosses = sorted([loc.Name for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if loc.isBoss()])
                     self.log.debug("checkPool. beatableBosses="+str(beatableBosses))
                     ret = beatableBosses == Bosses.Golden4()
                     if ret:
@@ -254,7 +254,7 @@ class RandoSetup(object):
             # (we cannot rely on removing ammo/energy in fillRestrictedLocations since it is already the bare minimum in chozo pool)
             # FIXME something to do there for ultra sparse, it gives us up to 3 more spots for nothing items
             restrictedLocs = self.restrictedLocs + [loc for loc in self.lastRestricted if loc not in self.restrictedLocs]
-            nRestrictedChozo = sum(1 for loc in restrictedLocs if 'Chozo' in loc.Class)
+            nRestrictedChozo = sum(1 for loc in restrictedLocs if loc.isChozo())
             nNothingChozo = sum(1 for item in pool if 'Chozo' in item.Class and item.Category == 'Nothing')
             ret &= nRestrictedChozo <= nNothingChozo
             self.log.debug('checkPool. nRestrictedChozo='+str(nRestrictedChozo)+', nNothingChozo='+str(nNothingChozo))

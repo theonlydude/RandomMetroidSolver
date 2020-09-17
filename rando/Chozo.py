@@ -54,7 +54,7 @@ class ChozoWrapperFiller(Filler):
         self.settings.maxDiff = god
         # prepare 1st phase container
         itemCond = isChozoItem
-        locCond = lambda loc: 'Chozo' in loc.Class or 'Boss' in loc.Class
+        locCond = lambda loc: loc.isChozo() or loc.isBoss()
         # this will create a new smbm with new knows functions
         cont = self.baseContainer.slice(itemCond, locCond)
         secondPhaseItems = [item for item in self.baseContainer.itemPool if item not in cont.itemPool]

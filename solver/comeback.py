@@ -17,7 +17,7 @@ class ComeBack(object):
         majorNoComeBack = False
         for loc in locations:
             if self.solver.majorsSplit != 'Full':
-                if self.solver.majorsSplit in loc.Class or "Boss" in loc.Class:
+                if loc.isClass(self.solver.majorsSplit) or loc.isBoss():
                     if loc.comeBack is None:
                         return False
                     elif loc.comeBack == True:

@@ -180,7 +180,7 @@ class CommonSolver(object):
             loc.itemName = item
             self.collectedItems.append(item)
             # we still need the boss difficulty
-            if 'Boss' not in loc.Class:
+            if not loc.isBoss():
                 loc.difficulty = SMBool(False)
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
@@ -255,7 +255,7 @@ class CommonSolver(object):
             if self.majorsSplit == 'Full':
                 self.majorLocations.append(loc)
             else:
-                if self.majorsSplit in loc.Class or 'Boss' in loc.Class:
+                if loc.isClass(self.majorsSplit) or loc.isBoss():
                     self.majorLocations.append(loc)
                 else:
                     self.minorLocations.append(loc)
@@ -332,7 +332,7 @@ class CommonSolver(object):
             # nearest locs
             loc.distance,
             # beating a boss
-            0 if 'Boss' in loc.Class
+            0 if loc.isBoss()
             else 1,
             # easiest first
             loc.difficulty.difficulty
@@ -383,7 +383,7 @@ class CommonSolver(object):
                 loc.distance,
                 # beating a boss
                 loc.difficulty.difficulty if (not Bosses.areaBossDead(self.smbm, loc.Area)
-                                                 and 'Boss' in loc.Class)
+                                              and loc.isBoss())
                 else 100000,
                 # areas with boss still alive
                 loc.difficulty.difficulty if (not Bosses.areaBossDead(self.smbm, loc.Area))
@@ -534,11 +534,11 @@ class CommonSolver(object):
         self.locations.remove(mbLoc)
 
         if self.majorsSplit == 'Major':
-            self.majorLocations = [loc for loc in self.locations if "Major" in loc.Class or "Boss" in loc.Class]
-            self.minorLocations = [loc for loc in self.locations if "Minor" in loc.Class]
+            self.majorLocations = [loc for loc in self.locations if loc.isMajor() or loc.isBoss()]
+            self.minorLocations = [loc for loc in self.locations if loc.isMinor()]
         elif self.majorsSplit == 'Chozo':
-            self.majorLocations = [loc for loc in self.locations if "Chozo" in loc.Class or "Boss" in loc.Class]
-            self.minorLocations = [loc for loc in self.locations if "Chozo" not in loc.Class and "Boss" not in loc.Class]
+            self.majorLocations = [loc for loc in self.locations if loc.isChozo() or loc.isBoss()]
+            self.minorLocations = [loc for loc in self.locations if not loc.isChozo() and not loc.isBoss()]
         else:
             # Full
             self.majorLocations = self.locations[:] # copy

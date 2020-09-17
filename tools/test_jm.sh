@@ -46,6 +46,18 @@ else
     ORIG=.
 fi
 
+function get_time {
+    case $(uname -s) in
+        "Darwin")
+            echo "gtime"
+            ;;
+        *)
+            echo "/usr/bin/time"
+            ;;
+    esac
+}
+TIME=$(get_time)
+
 PRESETS=("regular" "newbie" "master")
 SUITS=("" "--nogravheatPatch" "--progressiveSuits")
 CHARGES=("" "--nerfedCharge")
@@ -91,7 +103,7 @@ function computeSeed {
 
     if [ ${COMPARE} -eq 0 ]; then
 	OLD_MD5="old n/a"
-	RANDO_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
+	RANDO_OUT=$(${TIME} -f "\t%E real" $PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 	if [ $? -ne 0 ]; then
 	    echo "${RANDO_OUT}" >> ${LOG}
 	else
@@ -104,7 +116,7 @@ function computeSeed {
     fi
 
     NEW_MD5="new n/a"
-    RANDO_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ./randomizer.py ${PARAMS} 2>&1)
+    RANDO_OUT=$(${TIME} -f "\t%E real" $PYTHON ./randomizer.py ${PARAMS} 2>&1)
     if [ $? -ne 0 ]; then
 	echo "${RANDO_OUT}" >> ${LOG}
     else
@@ -142,7 +154,7 @@ function computeSeed {
     fi
 
     if [ ${COMPARE} -eq 0 ]; then
-	SOLVER_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+	SOLVER_OUT=$(${TIME} -f "\t%E real" $PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
 	if [ $? -ne 0 ]; then
             echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
@@ -160,7 +172,7 @@ function computeSeed {
 	DUP_OLD=1
     fi
 
-    SOLVER_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ~/RandomMetroidSolver/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+    SOLVER_OUT=$(${TIME} -f "\t%E real" $PYTHON ~/RandomMetroidSolver/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
     if [ $? -ne 0 ]; then
         echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
         echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
@@ -212,7 +224,18 @@ function wait_for_a_child {
     done
 }
 
-NB_CPU=$(cat /proc/cpuinfo  | grep 'processor' | wc -l)
+function get_cpu {
+    case $(uname -s) in
+        "Darwin")
+            sysctl -n hw.ncpu
+            ;;
+        *)
+            cat /proc/cpuinfo  | grep 'processor' | wc -l
+            ;;
+    esac
+}
+
+NB_CPU=$(get_cpu)
 CUR_JOBS=0
 CUR_LOOP=0
 PIDS=""

@@ -2,6 +2,7 @@
 import sys, random
 from rando.Items import ItemManager
 from utils import getRangeDict, chooseFromRange
+from rando.ItemLocContainer import ItemLocation
 
 # Holder for settings and a few utility functions related to them
 # (especially for plando/rando).
@@ -54,7 +55,7 @@ class RandoSettings(object):
             item = container.getNextItemInPool(itemType)
             assert item is not None, "Invalid plando item pool"
             location = container.getLocs(lambda loc: loc.Name == locName)[0]
-            itemLoc = {'Item':item, 'Location':location}
+            itemLoc = ItemLocation(item, location)
             container.collect(itemLoc, pickup=False)
 
 # Holds settings and utiliy functions related to graph layout

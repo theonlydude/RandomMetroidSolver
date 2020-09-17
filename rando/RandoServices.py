@@ -2,7 +2,7 @@
 import log, copy, random, sys, logging
 from enum import Enum, unique
 from parameters import infinity
-from rando.ItemLocContainer import getLocListStr, getItemListStr, ContainerSoftBackup
+from rando.ItemLocContainer import getLocListStr, getItemListStr, ContainerSoftBackup, ItemLocation
 from helpers import Bosses
 
 # used to specify whether we want to come back from locations
@@ -203,10 +203,10 @@ class RandoServices(object):
                     # copy our context to do some destructive checks
                     containerCpy = copy.copy(container)
                     # choose a morph item location in that context
-                    morphItemLoc = {
-                        'Item':morph,
-                        'Location':random.choice(containerCpy.extractLocs(morphLocs))
-                    }
+                    morphItemLoc = ItemLocation(
+                        morph,
+                        random.choice(containerCpy.extractLocs(morphLocs))
+                    )
                     # acquire morph in new context and see if we can still open new locs
                     newAP = self.collect(ap, containerCpy, morphItemLoc)
                     (ild, poss) = self.getPossiblePlacements(newAP, containerCpy, comebackCheck)
@@ -388,7 +388,7 @@ class RandoServices(object):
             firstItemPlaced = False
             for loc in curLocsBefore:
                 if self.restrictions.canPlaceAtLocation(item1, loc, container):
-                    container.collect({'Item': item1, 'Location': loc})
+                    container.collect(ItemLocation(item1, loc))
                     firstItemPlaced = True
                     break
             if not firstItemPlaced:
@@ -414,7 +414,7 @@ class RandoServices(object):
                 secondItemPlaced = False
                 for loc in curLocsAfterFirst:
                     if self.restrictions.canPlaceAtLocation(item2, loc, container):
-                        container.collect({'Item': item2, 'Location': loc})
+                        container.collect(ItemLocation(item2, loc))
                         secondItemPlaced = True
                         break
                 if not secondItemPlaced:

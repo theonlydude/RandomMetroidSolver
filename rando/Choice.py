@@ -1,5 +1,6 @@
 import log, random
 from utils import getRangeDict, chooseFromRange
+from rando.ItemLocContainer import ItemLocation
 
 # helper object to choose item/loc
 class Choice(object):
@@ -33,10 +34,7 @@ class ItemThenLocChoice(Choice):
         loc = self.chooseLocation(locList, item, isProg)
         if loc is None:
             return None
-        return {
-            'Item': item,
-            'Location': loc
-        }
+        return ItemLocation(item, loc)
 
     def chooseItem(self, itemList, isProg):
         if len(itemList) == 0:
@@ -103,7 +101,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         for item,locs in itemLocDict.items():
             if item.Category == 'Boss':
                 assert len(locs) == 1 and locs[0].Name == item.Name
-                return {'Item':item, 'Location':locs[0]}
+                return ItemLocation(item, locs[0])
         self.progressionItemLocs = progressionItemLocs
         self.ap = ap
         self.container = container

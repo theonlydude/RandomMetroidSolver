@@ -5,6 +5,19 @@ from smbool import SMBool
 from smboolmanager import SMBoolManager
 from collections import Counter
 
+class ItemLocation(object):
+    __slots__ = ( 'Item', 'Location' )
+
+    def __init__(self, Item=None, Location=None):
+        self.Item = Item
+        self.Location = Location
+
+    def __getitem__(self, key):
+        return getattr(self, key)
+
+    def __setitem__(self, key, value):
+        return setattr(self, key, value)
+
 def getItemListStr(items):
     return str(dict(Counter([item.Type for item in items])))
 
@@ -70,10 +83,10 @@ class ItemLocContainer(object):
                                locs)
         ret.currentItems = self.currentItems[:]
         ret.unrestrictedItems = copy.copy(self.unrestrictedItems)
-        ret.itemLocations = [ {
-            'Item': il['Item'],
-            'Location': copy.copy(il['Location'])
-        } for il in self.itemLocations ]
+        ret.itemLocations = [ ItemLocation(
+            il['Item'],
+            copy.copy(il['Location'])
+        ) for il in self.itemLocations ]
         ret.sm.addItems([item.Type for item in ret.currentItems])
         return ret
 

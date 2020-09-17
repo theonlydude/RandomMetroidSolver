@@ -11,6 +11,7 @@ from rando.FillerProgSpeed import FillerProgSpeed, FillerProgSpeedChozoSecondPha
 from rando.FillerRandom import FillerRandom, FillerRandomSpeedrun
 from rando.Chozo import ChozoFillerFactory, ChozoWrapperFiller
 from rando.Items import ItemManager
+from rando.ItemLocContainer import ItemLocation
 from vcr import VCR
 
 # entry point for rando execution ("randomize" method)
@@ -94,4 +95,4 @@ class RandoExec(object):
         nothing = ItemManager.getItem('Nothing')
         for loc in unfilledLocs:
             loc.restricted = True
-            itemLocs.append({'Item':nothing, 'Location':loc})
+            itemLocs.append(ItemLocation(nothing, loc))

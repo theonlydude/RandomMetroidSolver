@@ -6,7 +6,7 @@ from smboolmanager import SMBoolManager
 from helpers import Bosses
 from graph_access import getAccessPoint, GraphUtils
 from rando.Filler import FrontFiller
-from rando.ItemLocContainer import ItemLocContainer, getLocListStr
+from rando.ItemLocContainer import ItemLocContainer, getLocListStr, ItemLocation
 from rando.Chozo import isChozoItem
 from parameters import infinity
 
@@ -118,7 +118,7 @@ class RandoSetup(object):
             self.log.debug("fillRestrictedLocations. locs="+getLocListStr(locs))
             for loc in locs:
                 loc.restricted = True
-                itemLocation = {'Location' : loc}
+                itemLocation = ItemLocation(None, loc)
                 if self.container.hasItemInPool(getPred('Nothing')):
                     itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('Nothing'))
                 elif self.container.hasItemInPool(getPred('NoEnergy')):

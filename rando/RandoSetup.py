@@ -18,7 +18,7 @@ class RandoSetup(object):
         self.settings = services.settings
         self.graphSettings = graphSettings
         self.startAP = graphSettings.startAP
-        self.superFun = self.settings.superFun
+        self.superFun = self.settings.getSuperFun()
         self.container = None
         self.services = services
         self.restrictions = services.restrictions
@@ -56,6 +56,7 @@ class RandoSetup(object):
     # processes everything and returns an ItemLocContainer, or None if failed (invalid init conditions/settings)
     def createItemLocContainer(self):
         self.getForbidden()
+        self.log.debug("LAST CHECKPOOL")
         if not self.checkPool():
             self.log.debug("createItemLocContainer: checkPool fail")
             return None
@@ -103,6 +104,7 @@ class RandoSetup(object):
             self.restrictions.addPlacementRestrictions(restrictionDict)
         self.fillRestrictedLocations()
         self.settings.collectAlreadyPlacedItemLocations(self.container)
+        self.settings.updateSuperFun(self.superFun)
         return self.container
 
     # fill up unreachable locations with "junk" to maximize the chance of the ROM

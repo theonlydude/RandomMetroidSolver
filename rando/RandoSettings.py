@@ -21,6 +21,12 @@ class RandoSettings(object):
         self.plandoRandoItemLocs = plandoRandoItemLocs
         self.minDiff = minDiff
 
+    def getSuperFun(self):
+        return self.superFun[:]
+
+    def updateSuperFun(self, superFun):
+        self.superFun = superFun[:]
+
     def isPlandoRando(self):
         return self.plandoRandoItemLocs is not None
 

@@ -549,6 +549,8 @@ class Helpers(object):
     @Cache.decorator
     def enoughStuffsDraygon(self):
         sm = self.smbm
+        if not sm.haveItem('Morph') and not sm.haveItem('Gravity'):
+            return SMBool(False)
         (ammoMargin, secs, ammoItems) = self.canInflictEnoughDamages(6000)
         # print('DRAY', ammoMargin, secs)
         if ammoMargin > 0:
@@ -562,6 +564,10 @@ class Helpers(object):
                 fight.difficulty *= Settings.algoSettings['draygonNoGravityMalus']
             else:
                 fight.items.append('Gravity')
+            if not sm.haveItem('Morph'):
+                fight.difficulty *= Settings.algoSettings['draygonNoMorphMalus']
+            if sm.haveItem('Gravity') and sm.haveItem('ScrewAttack'):
+                fight.difficulty /= Settings.algoSettings['draygonScrewBonus']
             fight.difficulty = self.adjustHealthDropDiff(fight.difficulty)
         else:
             fight = SMBool(False)

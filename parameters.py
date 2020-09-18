@@ -1119,6 +1119,10 @@ class Settings:
         'phantoonLowMissileMalus' : 1.2,
         # multiply the difficulty by this amount if you have to fight with water physics
         'draygonNoGravityMalus' : 2.0,
+        # if gravity+no morph
+        'draygonNoMorphMalus' : 2.0,
+        # if gravity+screw
+        'draygonScrewBonus' : 2.0,
         # dmg reduction factor for bosses giving drops.
         # Varia (2) is considered "standard" dmg reduction.
         # this is to take into account the impact of health drops

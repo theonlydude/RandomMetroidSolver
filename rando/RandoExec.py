@@ -11,6 +11,7 @@ from rando.FillerProgSpeed import FillerProgSpeed, FillerProgSpeedChozoSecondPha
 from rando.FillerRandom import FillerRandom, FillerRandomSpeedrun
 from rando.Chozo import ChozoFillerFactory, ChozoWrapperFiller
 from rando.Items import ItemManager
+from rando.ItemLocContainer import ItemLocation
 from vcr import VCR
 
 # entry point for rando execution ("randomize" method)
@@ -81,17 +82,17 @@ class RandoExec(object):
         # hide some items like in dessy's
         if hide == True:
             for itemLoc in itemLocs:
-                item = itemLoc['Item']
-                loc = itemLoc['Location']
+                item = itemLoc.Item
+                loc = itemLoc.Location
                 if (item.Type not in ['Nothing', 'NoEnergy']
                     and loc.CanHidden == True
                     and loc.Visibility == 'Visible'):
                     if bool(random.getrandbits(1)) == True:
                         loc.Visibility = 'Hidden'
         # put nothing in unfilled locations
-        filledLocNames = [il['Location'].Name for il in itemLocs]
+        filledLocNames = [il.Location.Name for il in itemLocs]
         unfilledLocs = [loc for loc in graphLocations if loc.Name not in filledLocNames]
         nothing = ItemManager.getItem('Nothing')
         for loc in unfilledLocs:
             loc.restricted = True
-            itemLocs.append({'Item':nothing, 'Location':loc})
+            itemLocs.append(ItemLocation(nothing, loc))

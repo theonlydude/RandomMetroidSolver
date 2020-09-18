@@ -330,10 +330,10 @@ class InteractiveSolver(CommonSolver):
             locsItems[loc.Name] = loc.itemName
         for loc in self.locations:
             if loc.Name in locsItems:
-                itemLocs.append({'Location': loc, 'Item': ItemManager.getItem(locsItems[loc.Name])})
+                itemLocs.append(ItemLocation(ItemManager.getItem(locsItems[loc.Name])), loc)
             else:
                 # put nothing items in unused locations
-                itemLocs.append({'Location': loc, 'Item': ItemManager.getItem("Nothing")})
+                itemLocs.append(ItemManager.getItem("Nothing"), loc)
 
         # patch the ROM
         if lock == True:

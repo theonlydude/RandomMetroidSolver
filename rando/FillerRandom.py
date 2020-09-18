@@ -4,7 +4,7 @@ import random, sys, copy, logging
 from rando.Filler import Filler, FrontFiller
 from rando.Choice import ItemThenLocChoice
 from rando.MiniSolver import MiniSolver
-from rando.ItemLocContainer import ContainerSoftBackup
+from rando.ItemLocContainer import ContainerSoftBackup, ItemLocation
 from rando.RandoServices import ComebackCheckType
 from solver.randoSolver import RandoSolver
 from parameters import infinity
@@ -58,7 +58,7 @@ class FillerRandom(Filler):
                 self.resetHelpingContainer()
                 continue
             loc = random.choice(locs)
-            itemLoc = {'Item':item, 'Location':loc}
+            itemLoc = ItemLocation(item, loc)
             self.container.collect(itemLoc, pickup=False)
         # pool is exhausted, use mini solver to see if it is beatable
         if self.isBeatable():
@@ -69,7 +69,7 @@ class FillerRandom(Filler):
                 if self.nSteps < self.diffSteps:
                     couldBeBeatable = self.isBeatable(maxDiff=infinity)
                     if couldBeBeatable:
-                        difficulty = max([il['Location'].difficulty.difficulty for il in self.container.itemLocations])
+                        difficulty = max([il.Location.difficulty.difficulty for il in self.container.itemLocations])
                         if self.beatableBackup is None or difficulty < self.beatableBackup[1]:
                             self.beatableBackup = (self.container.itemLocations, difficulty)
                 elif self.beatableBackup is not None:
@@ -111,7 +111,7 @@ class FillerRandomItems(Filler):
         item = random.choice(self.container.itemPool)
         locs = [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocation(item, loc, self.container)]
         loc = random.choice(locs)
-        itemLoc = {'Item':item, 'Location':loc}
+        itemLoc = ItemLocation(item, loc)
         self.container.collect(itemLoc, pickup=False)
         sys.stdout.write('.')
         sys.stdout.flush()
@@ -144,8 +144,8 @@ class FrontFillerKickstart(FrontFiller):
 
         # collect them
         availableLocs = pairItemLocDict[key]
-        self.collect({'Item': key[0], 'Location': availableLocs[0][0]})
-        self.collect({'Item': key[1], 'Location': availableLocs[1][0]})
+        self.collect(ItemLocation(key[0], availableLocs[0][0]))
+        self.collect(ItemLocation(key[1], availableLocs[1][0]))
 
         # we've collected two items, increase the number of steps
         self.nSteps += 1

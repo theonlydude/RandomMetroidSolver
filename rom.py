@@ -640,7 +640,7 @@ class RomPatcher:
         return ret
 
     def writeNothing(self, itemLoc):
-        loc = itemLoc['Location']
+        loc = itemLoc.Location
         if loc.isBoss():
             return
 
@@ -651,12 +651,12 @@ class RomPatcher:
             self.romFile.writeByte(self.nothingId, addr + 4)
 
     def writeItem(self, itemLoc):
-        loc = itemLoc['Location']
+        loc = itemLoc.Location
         if loc.isBoss():
             raise ValueError('Cannot write Boss location')
-        #print('write ' + itemLoc['Item'].Type + ' at ' + loc.Name)
+        #print('write ' + itemLoc.Item.Type + ' at ' + loc.Name)
         for addr in self.getLocAddresses(loc):
-            self.writeItemCode(itemLoc['Item'], loc.Visibility, addr)
+            self.writeItemCode(itemLoc.Item, loc.Visibility, addr)
             # if nothing was written at this loc before (in plando),
             # then restore the vanilla value
             self.romFile.writeByte(loc.Id, addr + 4)
@@ -665,8 +665,8 @@ class RomPatcher:
         self.nItems = 0
         self.nothingMissile = False
         for itemLoc in itemLocs:
-            loc = itemLoc['Location']
-            item = itemLoc['Item']
+            loc = itemLoc.Location
+            item = itemLoc.Item
             if loc.isBoss():
                 continue
             isMorph = loc.Name == 'Morphing Ball'
@@ -680,7 +680,7 @@ class RomPatcher:
                 self.nItems += 1
                 self.writeItem(itemLoc)
             if isMorph:
-                self.patchMorphBallEye(itemLoc['Item'])
+                self.patchMorphBallEye(itemLoc.Item)
 
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball
@@ -1112,7 +1112,7 @@ class RomPatcher:
         self.nothingId = 0x1a
         # if not default start, use first loc with a nothing
         if not GraphUtils.isStandardStart(startAP):
-            firstNothing = next((il['Location'] for il in itemLocs if il['Item'].Category == 'Nothing'), None)
+            firstNothing = next((il.Location for il in itemLocs if il.Item.Category == 'Nothing'), None)
             if firstNothing is not None:
                 self.nothingId = firstNothing.Id
 
@@ -1121,7 +1121,7 @@ class RomPatcher:
         self.romFile.writeByte(self.nothingId, address)
 
     def getItemQty(self, itemLocs, itemType):
-        q = len([il for il in itemLocs if il['Item'].Type == itemType])
+        q = len([il for il in itemLocs if il.Item.Type == itemType])
         if itemType == 'Missile' and self.nothingMissile == True:
             q += 1
         return q
@@ -1239,21 +1239,21 @@ class RomPatcher:
 
     def writeSpoiler(self, itemLocs, progItemLocs=None):
         # keep only majors, filter out Etanks and Reserve
-        fItemLocs = [il for il in itemLocs if il['Item'].Category not in ['Ammo', 'Nothing', 'Energy', 'Boss']]
+        fItemLocs = [il for il in itemLocs if il.Item.Category not in ['Ammo', 'Nothing', 'Energy', 'Boss']]
         # add location of the first instance of each minor
         for t in ['Missile', 'Super', 'PowerBomb']:
             itLoc = None
             if progItemLocs is not None:
-                itLoc = next((il for il in progItemLocs if il['Item'].Type == t), None)
+                itLoc = next((il for il in progItemLocs if il.Item.Type == t), None)
             if itLoc is None:
-                itLoc = next((il for il in itemLocs if il['Item'].Type == t), None)
+                itLoc = next((il for il in itemLocs if il.Item.Type == t), None)
             if itLoc is not None: # in vcr mode if the seed has stucked we may not have these minors
                 fItemLocs.append(itLoc)
         regex = re.compile(r"[^A-Z0-9\.,'!: ]+")
 
         itemLocs = {}
         for iL in fItemLocs:
-            itemLocs[iL['Item'].Name] = iL['Location'].Name
+            itemLocs[iL.Item.Name] = iL.Location.Name
 
         def prepareString(s, isItem=True):
             s = s.upper()
@@ -1295,7 +1295,7 @@ class RomPatcher:
             # reorder it with progression indices
             prog = ord('A')
             idx = 0
-            progNames = [il['Item'].Name for il in progItemLocs]
+            progNames = [il.Item.Name for il in progItemLocs]
             for i in range(len(progNames)):
                 item = progNames[i]
                 if item in items and item not in displayNames:

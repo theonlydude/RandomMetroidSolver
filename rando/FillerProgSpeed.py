@@ -126,7 +126,7 @@ class FillerProgSpeed(Filler):
 
     # collect specialization that stores progression and state
     def collect(self, itemLoc):
-        isProg = self.services.isProgression(itemLoc['Item'], self.ap, self.container)
+        isProg = self.services.isProgression(itemLoc.Item, self.ap, self.container)
         super(FillerProgSpeed, self).collect(itemLoc)
         if isProg:
             n = len(self.states)
@@ -225,7 +225,7 @@ class FillerProgSpeed(Filler):
             itemLocation = self.generateItem()
             if itemLocation is not None:
                 nItems += 1
-                self.log.debug("fillNonProgressionItems: {} at {}".format(itemLocation['Item'].Name, itemLocation['Location'].Name))
+                self.log.debug("fillNonProgressionItems: {} at {}".format(itemLocation.Item.Name, itemLocation.Location.Name))
                 # doing this first is actually important, as state is saved in collect
                 self.container.unrestrictItemPool()
                 self.collect(itemLocation)
@@ -266,14 +266,14 @@ class FillerProgSpeed(Filler):
         self.log.debug('initRollback: progressionStatesIndices 2=' + str(self.progressionStatesIndices))
 
     def getSituationId(self):
-        progItems = str(sorted([il['Item'].Type for il in self.progressionItemLocs]))
+        progItems = str(sorted([il.Item.Type for il in self.progressionItemLocs]))
         position = str(sorted([ap.Name for ap in self.services.currentAccessPoints(self.ap, self.container)]))
         return progItems+'/'+position
 
     def hasTried(self, itemLoc):
         if self.isEarlyGame():
             return False
-        itemType = itemLoc['Item'].Type
+        itemType = itemLoc.Item.Type
         situation = self.getSituationId()
         ret = False
         if situation in self.rollbackItemsTried:
@@ -283,7 +283,7 @@ class FillerProgSpeed(Filler):
         return ret
 
     def updateRollbackItemsTried(self, itemLoc):
-        itemType = itemLoc['Item'].Type
+        itemType = itemLoc.Item.Type
         situation = self.getSituationId()
         if situation not in self.rollbackItemsTried:
             self.rollbackItemsTried[situation] = []
@@ -335,7 +335,7 @@ class FillerProgSpeed(Filler):
                 state.apply(self)
                 self.log.debug('rollback. state applied. Container=\n'+self.container.dump())
                 itemLoc = self.generateItem()
-                if itemLoc is not None and not self.hasTried(itemLoc) and self.services.isProgression(itemLoc['Item'], self.ap, self.container):
+                if itemLoc is not None and not self.hasTried(itemLoc) and self.services.isProgression(itemLoc.Item, self.ap, self.container):
                     possibleStates.append((state, itemLoc))
                 i -= 1
             # nothing, let's rollback further a progression item
@@ -442,8 +442,8 @@ class FillerProgSpeedChozoSecondPhase(Filler):
         ]
         self.container.resetCollected()
         self.firstPhaseContainer = ItemLocContainer(self.container.sm,
-                                                    [il['Item'] for il in self.firstPhaseItemLocs],
-                                                    [il['Location'] for il in self.firstPhaseItemLocs])
+                                                    [il.Item for il in self.firstPhaseItemLocs],
+                                                    [il.Location for il in self.firstPhaseItemLocs])
         self.firstPhaseIndex = 0
 
     def nextMetCondition(self):
@@ -502,8 +502,8 @@ class FillerProgSpeedChozoSecondPhase(Filler):
                     self.errorMsg += '\n'+filler.errorMsg
                 return False
             for itemLoc in itemLocs:
-                if itemLoc['Location'] in self.container.unusedLocations:
-                    self.log.debug("step. POST COLLECT "+itemLoc['Item'].Type+" at "+itemLoc['Location'].Name)
+                if itemLoc.Location in self.container.unusedLocations:
+                    self.log.debug("step. POST COLLECT "+itemLoc.Item.Type+" at "+itemLoc.Location.Name)
                     self.container.collect(itemLoc)
         else:
             # merge collected of 1st phase and 2nd phase so far for seed to be solvable by random fill

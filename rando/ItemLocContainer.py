@@ -5,6 +5,13 @@ from smbool import SMBool
 from smboolmanager import SMBoolManager
 from collections import Counter
 
+class ItemLocation(object):
+    __slots__ = ( 'Item', 'Location' )
+
+    def __init__(self, Item=None, Location=None):
+        self.Item = Item
+        self.Location = Location
+
 def getItemListStr(items):
     return str(dict(Counter([item.Type for item in items])))
 
@@ -12,7 +19,7 @@ def getLocListStr(locs):
     return str([loc.Name for loc in locs])
 
 def getItemLocStr(itemLoc):
-    return itemLoc['Item'].Type + " at " + itemLoc['Location'].Name
+    return itemLoc.Item.Type + " at " + itemLoc.Location.Name
 
 def getItemLocationsStr(itemLocations):
     return str([getItemLocStr(il) for il in itemLocations])
@@ -70,10 +77,10 @@ class ItemLocContainer(object):
                                locs)
         ret.currentItems = self.currentItems[:]
         ret.unrestrictedItems = copy.copy(self.unrestrictedItems)
-        ret.itemLocations = [ {
-            'Item': il['Item'],
-            'Location': copy.copy(il['Location'])
-        } for il in self.itemLocations ]
+        ret.itemLocations = [ ItemLocation(
+            il.Item,
+            copy.copy(il.Location)
+        ) for il in self.itemLocations ]
         ret.sm.addItems([item.Type for item in ret.currentItems])
         return ret
 
@@ -142,8 +149,8 @@ class ItemLocContainer(object):
 
     # collect an item at a location. if pickup is True, also affects logic (sm) and collectedItems
     def collect(self, itemLocation, pickup=True):
-        item = itemLocation['Item']
-        location = itemLocation['Location']
+        item = itemLocation.Item
+        location = itemLocation.Location
         if not location.restricted:
             self.unrestrictedItems.add(item.Type)
         if pickup == True:
@@ -200,7 +207,7 @@ class ItemLocContainer(object):
         return [item for item in self.itemPool if predicate(item) == True]
 
     def getUsedLocs(self, predicate):
-        return [il['Location'] for il in self.itemLocations if predicate(il['Location']) == True]
+        return [il.Location for il in self.itemLocations if predicate(il.Location) == True]
 
     def getCollectedItems(self, predicate):
         return [item for item in self.currentItems if predicate(item) == True]
@@ -211,11 +218,11 @@ class ItemLocContainer(object):
     def getLocsForSolver(self):
         locs = []
         for il in self.itemLocations:
-            loc = il['Location']
+            loc = il.Location
             # filter out restricted locations
             if loc.restricted:
                 continue
-            loc.itemName = il['Item'].Type
+            loc.itemName = il.Item.Type
             locs.append(loc)
         return locs
 
@@ -223,7 +230,7 @@ class ItemLocContainer(object):
         # restricted locs can have their difficulty set, which can cause them to be reported in the
         # post randomization warning message about locs with diff > max diff.
         for il in self.itemLocations:
-            loc = il['Location']
+            loc = il.Location
             if loc.restricted and loc.difficulty == True:
                 loc.difficulty = SMBool(False)
 

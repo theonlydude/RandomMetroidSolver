@@ -21,10 +21,10 @@ class MiniSolver(object):
         minDiff = self.settings.minDiff
         locations = []
         for il in itemLocations:
-            loc = il['Location']
+            loc = il.Location
             if loc.restricted:
                 continue
-            loc.itemName = il['Item'].Type
+            loc.itemName = il.Item.Type
             loc.difficulty = None
             locations.append(loc)
         self.smbm.resetItems()

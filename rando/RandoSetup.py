@@ -6,7 +6,7 @@ from smboolmanager import SMBoolManager
 from helpers import Bosses
 from graph_access import getAccessPoint, GraphUtils
 from rando.Filler import FrontFiller
-from rando.ItemLocContainer import ItemLocContainer, getLocListStr
+from rando.ItemLocContainer import ItemLocContainer, getLocListStr, ItemLocation
 from rando.Chozo import isChozoItem
 from parameters import infinity
 
@@ -118,24 +118,24 @@ class RandoSetup(object):
             self.log.debug("fillRestrictedLocations. locs="+getLocListStr(locs))
             for loc in locs:
                 loc.restricted = True
-                itemLocation = {'Location' : loc}
+                itemLocation = ItemLocation(None, loc)
                 if self.container.hasItemInPool(getPred('Nothing')):
-                    itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('Nothing'))
+                    itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('Nothing'))
                 elif self.container.hasItemInPool(getPred('NoEnergy')):
-                    itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('NoEnergy'))
+                    itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('NoEnergy'))
                 elif self.container.countItems(getPred('Missile')) > 3:
-                    itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('Missile'))
+                    itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('Missile'))
                 elif self.container.countItems(getPred('Super')) > 2:
-                    itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('Super'))
+                    itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('Super'))
                 elif self.container.countItems(getPred('PowerBomb')) > 1:
-                    itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('PowerBomb'))
+                    itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('PowerBomb'))
                 elif self.container.countItems(getPred('Reserve')) > 1:
-                    itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('Reserve'))
+                    itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('Reserve'))
                 elif self.container.countItems(getPred('ETank')) > 3:
-                    itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('ETank'))
+                    itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('ETank'))
                 else:
                     raise RuntimeError("Cannot fill restricted locations")
-                self.log.debug("Fill: {} at {}".format(itemLocation['Item'].Type, itemLocation['Location'].Name))
+                self.log.debug("Fill: {} at {}".format(itemLocation.Item.Type, itemLocation.Location.Name))
                 self.container.collect(itemLocation, False)
         fill(majorRestrictedLocs, getItemPredicateMajor)
         fill(otherRestrictedLocs, getItemPredicateMinor)

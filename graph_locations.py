@@ -34,11 +34,6 @@ class Location:
         self.comeBack = comeBack
         self.areaWeight = areaWeight
 
-        self._isMajor = 'Major' in self.Class
-        self._isChozo = 'Chozo' in self.Class
-        self._isMinor = 'Minor' in self.Class
-        self._isBoss = 'Boss' in self.Class
-
     def isMajor(self):
         return self._isMajor
 
@@ -94,7 +89,11 @@ def define_location(
         'Room': Room,
         'AccessFrom': AccessFrom,
         'Available': Available,
-        'PostAvailable': PostAvailable
+        'PostAvailable': PostAvailable,
+        '_isMajor': 'Major' in Class,
+        '_isChozo': 'Chozo' in Class,
+        '_isMinor': 'Minor' in Class,
+        '_isBoss': 'Boss' in Class
     })
     return subclass()
 

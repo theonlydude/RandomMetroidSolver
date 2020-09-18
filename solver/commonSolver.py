@@ -111,19 +111,12 @@ class CommonSolver(object):
             self.areaGraph.getAvailableLocations(nextLocations, self.smbm, difficultyTarget, self.lastAP)
             # check post available functions too
             for loc in nextLocations:
-                if loc.difficulty.bool == True:
-                    if loc.PostAvailable is not None:
-                        self.smbm.addItem(loc.itemName)
-                        postAvailable = loc.PostAvailable(self.smbm)
-                        self.smbm.removeItem(loc.itemName)
-
-                        loc.difficulty = self.smbm.wand(loc.difficulty, postAvailable)
+                loc.evalPostAvailable(self.smbm)
 
             self.areaGraph.useCache(True)
+            # also check if we can come back to current AP from the location
             for loc in nextLocations:
-                if loc.difficulty.bool == True:
-                    # also check if we can come back to landing site from the location
-                    loc.comeBack = self.areaGraph.canAccess(self.smbm, loc.accessPoint, self.lastAP, infinity, loc.itemName)
+                loc.evalComeBack(self.smbm, self.areaGraph, self.lastAP)
             self.areaGraph.useCache(False)
 
             nextLocations = [loc for loc in nextLocations if not loc.difficulty]

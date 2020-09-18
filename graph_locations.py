@@ -1,5 +1,5 @@
 from helpers import Bosses
-from parameters import Settings
+from parameters import Settings, infinity
 from rom_patches import RomPatches
 from smbool import SMBool
 import copy
@@ -48,6 +48,19 @@ class Location:
 
     def isClass(self, _class):
         return _class in self.Class
+
+    def evalPostAvailable(self, smbm):
+        if self.difficulty.bool == True and self.PostAvailable is not None:
+            smbm.addItem(self.itemName)
+            postAvailable = self.PostAvailable(smbm)
+            smbm.removeItem(self.itemName)
+
+            self.difficulty = self.difficulty & postAvailable
+
+    def evalComeBack(self, smbm, areaGraph, ap):
+        if self.difficulty.bool == True:
+            # check if we can come back to given ap from the location
+            self.comeBack = areaGraph.canAccess(smbm, self.accessPoint, ap, infinity, self.itemName)
 
     def json(self):
         # to return after plando rando

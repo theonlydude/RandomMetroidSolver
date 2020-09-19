@@ -1,11 +1,35 @@
+def flatten(l):
+    if type(l) is list:
+        return [ y for x in l for y in flatten(x) ]
+    else:
+        return [ l ]
+
 # super metroid boolean
 class SMBool:
-    __slots__ = ('bool', 'difficulty', 'knows', 'items')
+    __slots__ = ('bool', 'difficulty', '_knows', '_items')
     def __init__(self, boolean, difficulty=0, knows=[], items=[]):
         self.bool = boolean
         self.difficulty = difficulty
-        self.knows = knows
-        self.items = items
+        self._knows = knows
+        self._items = items
+
+    @property
+    def knows(self):
+        self._knows = flatten(self._knows)
+        return self._knows
+
+    @knows.setter
+    def knows(self, knows):
+        self._knows = knows
+
+    @property
+    def items(self):
+        self._items = flatten(self._items)
+        return self._items
+
+    @items.setter
+    def items(self, items):
+        self._items = items
 
     def __repr__(self):
         # to display the smbool as a string

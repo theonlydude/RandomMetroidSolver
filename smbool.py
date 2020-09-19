@@ -63,6 +63,9 @@ class SMBool:
         else:
             return self.bool
 
+    def __copy__(self):
+        return SMBool(self.bool, self.difficulty, self._knows, self._items)
+
     def json(self):
         # as we have slots instead of dict
         return {key : getattr(self, key, None) for key in self.__slots__}

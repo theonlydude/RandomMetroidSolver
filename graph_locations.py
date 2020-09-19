@@ -76,7 +76,7 @@ class Location:
 
     def __copy__(self):
         d = self.difficulty
-        difficulty = SMBool(d.bool, d.difficulty, d.knows, d.items) if d is not None else None
+        difficulty = SMBool(d.bool, d.difficulty, d._knows, d._items) if d is not None else None
         ret = type(self)(
             self.distance, self.accessPoint, difficulty, self.path,
             self.pathDifficulty, self.locDifficulty, self.restricted,

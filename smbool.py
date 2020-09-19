@@ -15,7 +15,7 @@ class SMBool:
 
     @property
     def knows(self):
-        self._knows = flatten(self._knows)
+        self._knows = list(set(flatten(self._knows)))
         return self._knows
 
     @knows.setter
@@ -24,7 +24,7 @@ class SMBool:
 
     @property
     def items(self):
-        self._items = flatten(self._items)
+        self._items = list(set(flatten(self._items)))
         return self._items
 
     @items.setter
@@ -73,8 +73,8 @@ class SMBool:
         else:
             return SMBool(True,
                           sum([smb.difficulty for smb in args]),
-                          [know for smb in args for know in smb.knows],
-                          [item for smb in args for item in smb.items])
+                          [ smb._knows for smb in args ],
+                          [ smb._items for smb in args ])
 
     def wor(*args):
         if True in args:

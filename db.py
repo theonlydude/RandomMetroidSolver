@@ -316,11 +316,12 @@ order by s.id;"""
 
         sql = """select rr.return_code,
 r.id, r.action_time, rr.return_code, lpad(round(rr.duration, 2), 5, '0'), rr.error_msg,
-rp.params
+group_concat("'", rp.name, "': '", rp.value, "'" order by rp.name)
 from randomizer r
-  left join (select randomizer_id, group_concat(\"'\", name, \"': '\", value, \"'\" order by name) as params from randomizer_params group by randomizer_id) rp on r.id = rp.randomizer_id
+  left join randomizer_params rp on r.id = rp.randomizer_id
   left join randomizer_result rr on r.id = rr.randomizer_id
 where r.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK)
+group by r.id
 order by r.id;"""
 
         data = self.execSelect(sql, (weeks,))

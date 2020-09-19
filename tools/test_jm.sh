@@ -293,7 +293,12 @@ done
 echo "total: $(wc -l ${CSV})"
 
 echo "errors:"
-grep -E "NOK|mismatch|Can't solve" ${CSV}
+if [ ${COMPARE} -eq 0 ]; then
+    # speedrun seeds are non deterministic, so filter them out in compare mode.
+    grep -E "NOK|mismatch|Can't solve" ${CSV} | grep -v ';speedrun;'
+else
+    grep -E "NOK|mismatch|Can't solve" ${CSV}
+fi
 grep Traceback ${LOG}
 
 function getTime {

@@ -39,6 +39,7 @@ class Helpers(object):
 
         if result == True:
             result.knows = [hellRunName+'HellRun']
+
         return result
 
     # gives damage reduction factor with the current suits
@@ -85,7 +86,7 @@ class Helpers(object):
         if result == True:
             result.knows = ['HardRoom-'+roomName]
             if dmgRed != 1.0:
-                result.items += items
+                result._items.append(items)
         return result
 
     @Cache.decorator
@@ -125,7 +126,7 @@ class Helpers(object):
             if hellRun != 'LowerNorfair':
                 ret = self.energyReserveCountOkHellRun(hellRun, mult)
                 if ret.bool == True:
-                    ret.items += items
+                    ret._items.append(items)
                 return ret
             else:
                 tanks = self.energyReserveCount()
@@ -138,10 +139,10 @@ class Helpers(object):
                 if ret.bool == True:
                     if sm.haveItem('Gravity') == True:
                         ret.difficulty *= 0.7
-                        ret.items.append('Gravity')
+                        ret._items.append('Gravity')
                     elif sm.haveItem('ScrewAttack') == True:
                         ret.difficulty *= 0.7
-                        ret.items.append('ScrewAttack')
+                        ret._items.append('ScrewAttack')
                 #nPB = self.smbm.itemCount('PowerBomb')
                 #print("canHellRun LN. tanks=" + str(tanks) + ", nCF=" + str(nCF) + ", nPB=" + str(nPB) + ", mult=" + str(mult) + ", heatProof=" + str(isHeatProof.bool) + ", ret=" + str(ret))
                 return ret
@@ -487,7 +488,7 @@ class Helpers(object):
         else:
             fight = sm.wor(sm.energyReserveCountOk(math.ceil(4/sm.getDmgReduction(envDmg=False)[0])),
                            sm.knowsLowStuffBotwoon())
-            return SMBool(fight.bool, max(diff, fight.difficulty), items=items+fight.items, knows=knows+fight.knows)
+            return SMBool(fight.bool, max(diff, fight.difficulty), items=items+fight._items, knows=knows+fight._knows)
 
     @Cache.decorator
     def enoughStuffGT(self):
@@ -506,7 +507,7 @@ class Helpers(object):
         else:
             fight = sm.wor(sm.energyReserveCountOk(math.ceil(8/sm.getDmgReduction(envDmg=False)[0])),
                            sm.knowsLowStuffGT())
-            return SMBool(fight.bool, max(diff, fight.difficulty), items=items+fight.items, knows=knows+fight.knows)
+            return SMBool(fight.bool, max(diff, fight.difficulty), items=items+fight._items, knows=knows+fight._knows)
 
     @Cache.decorator
     def enoughStuffsRidley(self):
@@ -563,7 +564,7 @@ class Helpers(object):
             if sm.haveItem('Gravity') == False:
                 fight.difficulty *= Settings.algoSettings['draygonNoGravityMalus']
             else:
-                fight.items.append('Gravity')
+                fight._items.append('Gravity')
             if not sm.haveItem('Morph'):
                 fight.difficulty *= Settings.algoSettings['draygonNoMorphMalus']
             if sm.haveItem('Gravity') and sm.haveItem('ScrewAttack'):

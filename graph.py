@@ -228,13 +228,13 @@ class AccessGraph(object):
 
     def getPathDifficulty(self, path, availAps):
         difficulty = 0
-        knows = set()
+        knows = [ ]
         items = [ ]
         for ap in path:
             diff = availAps[ap]['difficulty']
             difficulty = max(difficulty, diff.difficulty)
-            knows.update(diff.knows)
-            items.extend(diff.items)
+            knows = [ knows, diff._knows ]
+            items = [ items, diff._items ]
 
         return SMBool(True, difficulty, list(knows), items)
 
@@ -410,14 +410,14 @@ class AccessGraphSolver(AccessGraph):
         # loc diff: tdiff + diff
         locDiff = SMBool(diff.bool,
                          difficulty=max(tdiff.difficulty, diff.difficulty),
-                         knows=list(set(tdiff.knows + diff.knows)),
-                         items=tdiff.items + diff.items)
+                         knows=[tdiff._knows, diff._knows],
+                         items=[tdiff._items, diff._items])
 
         # total diff: loc diff + pdiff
         allDiff = SMBool(diff.bool,
                          difficulty=max(locDiff.difficulty, pdiff.difficulty),
-                         knows=list(set(locDiff.knows + pdiff.knows)),
-                         items=locDiff.items + pdiff.items)
+                         knows=[locDiff._knows, pdiff._knows],
+                         items=[locDiff._items, pdiff._items])
 
         return (allDiff, locDiff)
 
@@ -425,6 +425,6 @@ class AccessGraphRando(AccessGraph):
     def computeLocDiff(self, tdiff, diff, pdiff):
         allDiff = SMBool(diff.bool,
                          difficulty=max(tdiff.difficulty, diff.difficulty, pdiff.difficulty),
-                         knows=list(set(tdiff.knows + diff.knows + pdiff.knows)),
-                         items=tdiff.items + diff.items + pdiff.items)
+                         knows=[tdiff._knows, diff._knows, pdiff._knows],
+                         items=[tdiff._items, diff._items, pdiff._items])
         return (allDiff, None)

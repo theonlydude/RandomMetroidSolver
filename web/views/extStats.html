@@ -444,18 +444,18 @@ elif itemsStats != None and len(itemsStats) > 0:
       displayHeader()
 
       for locI, loc in enumerate(locations, start=2):
-        if "Boss" in loc["Class"]:
+        if loc.isBoss():
           continue
 
         if area == "Brinstar":
-          if loc["GraphArea"] not in ["GreenPinkBrinstar", "Kraid", "RedBrinstar"]:
+          if loc.GraphArea not in ["GreenPinkBrinstar", "Kraid", "RedBrinstar"]:
             continue
           else:
             pass
-        elif loc["GraphArea"] != area and not (area == "Norfair" and loc["GraphArea"] == "Crocomire") and not (area == "Maridia" and loc["GraphArea"] in ["WestMaridia", "EastMaridia"]):
+        elif loc.GraphArea != area and not (area == "Norfair" and loc.GraphArea == "Crocomire") and not (area == "Maridia" and loc.GraphArea in ["WestMaridia", "EastMaridia"]):
           continue
 
-        response.write("<tr><td><a href=\"https://wiki.supermetroid.run/{}\" target=\"_blank\">{}</a></td>".format(loc["Room"].replace(' ', '_').replace("'", '%27'), loc["Name"]), escape=False)
+        response.write("<tr><td><a href=\"https://wiki.supermetroid.run/{}\" target=\"_blank\">{}</a></td>".format(loc.Room.replace(' ', '_').replace("'", '%27'), loc.Name), escape=False)
 
         for itemI, item in enumerate(["Missile", "Super", "PowerBomb", "Morph", "Bomb", "Springball", "ScrewAttack", "Varia", "Gravity", "HiJump", "SpaceJump", "SpeedBooster", "Charge", "Ice", "Wave", "Spazer", "Plasma", "Grapple", "XRayScope"]):
           percent = itemsStats[itemsMapping[itemI]][locI]

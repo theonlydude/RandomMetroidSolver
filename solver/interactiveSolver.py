@@ -14,6 +14,7 @@ from solver.conf import Conf
 from parameters import hard, infinity
 from solver.solverState import SolverState
 from solver.comeback import ComeBack
+from rando.ItemLocContainer import ItemLocation
 import log
 
 class InteractiveSolver(CommonSolver):
@@ -330,7 +331,7 @@ class InteractiveSolver(CommonSolver):
             locsItems[loc.Name] = loc.itemName
         for loc in self.locations:
             if loc.Name in locsItems:
-                itemLocs.append(ItemLocation(ItemManager.getItem(locsItems[loc.Name])), loc)
+                itemLocs.append(ItemLocation(ItemManager.getItem(loc.itemName), loc))
             else:
                 # put nothing items in unused locations
                 itemLocs.append(ItemManager.getItem("Nothing"), loc)

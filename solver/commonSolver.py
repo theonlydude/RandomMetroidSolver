@@ -204,8 +204,8 @@ class CommonSolver(object):
             self.lastAP = self.startAP
             self.lastArea = self.startArea
         else:
-            self.lastAP = self.visitedLocations[-1]["accessPoint"]
-            self.lastArea = self.visitedLocations[-1]["SolveArea"]
+            self.lastAP = self.visitedLocations[-1].accessPoint
+            self.lastArea = self.visitedLocations[-1].SolveArea
 
         # delete location params which are set when the location is available
         if loc.difficulty is not None:

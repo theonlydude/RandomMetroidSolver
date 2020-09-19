@@ -256,9 +256,8 @@ class AccessGraph(object):
                 continue
             difficulty = paths[apName].pdiff.difficulty
             ret.append((difficulty if difficulty != -1 else infinity, path.distance, apName))
-        # sort by difficulty first, then distance
-        ret.sort(key=lambda x: (x[0], x[1], x[2]))
-        return [apName for (diff, dist, apName) in ret]
+        ret.sort()
+        return [apName for diff, dist, apName in ret]
 
     # locations: locations to check
     # items: collected items

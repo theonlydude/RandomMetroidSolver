@@ -23,10 +23,14 @@ if [ $# -ne 2 -a $# -ne 3 ]; then
 fi
 
 ROM=$1
-LOOPS=$2
 if [ -n "$3" ]; then
+    # add more loops as we filter them out afterward
+    FILTER_HEAD=32
+    FILTER_TAIL=16
+    let LOOPS=$2+${FILTER_HEAD}+${FILTER_TAIL}
     COMPARE=0
 else
+    LOOPS=$2
     COMPARE=1
 fi
 
@@ -302,7 +306,9 @@ fi
 grep Traceback ${LOG}
 
 function getTime {
-    grep -v SOLVER ${CSV} | grep -v -E '^error' | grep -v '^[0-9]*;;;' | cut -d ';' -f $1 | sed -e 's+0:++g' | awk -F';' '{sum+=$1;} END{print sum}'
+    # speedrun seeds are non deterministics, filter them out.
+    # ignore the first and last lines, as there's always a big time difference in them.
+    grep -v SOLVER ${CSV} | tail -n +${FILTER_HEAD} | head -n -${FILTER_TAIL} | grep -v -E '^error|;speedrun;' | grep -v '^[0-9]*;;;' | cut -d ';' -f $1 | sed -e 's+0:++g' | awk -F';' '{sum+=$1;} END{print sum}'
 }
 
 if [ ${COMPARE} -eq 0 ]; then

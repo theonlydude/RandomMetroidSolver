@@ -285,14 +285,15 @@ where id = %s;"""
         sql = """select sr.return_code, s.id, s.action_time,
 sp.romFileName, sp.preset, sp.difficultyTarget, sp.pickupStrategy,
 sr.return_code, lpad(round(sr.duration, 2), 5, '0'), sr.difficulty, sr.knows_used, sr.knows_known, sr.items_ok, sr.len_remainTry, sr.len_remainMajors, sr.len_remainMinors, sr.len_skippedMajors, sr.len_unavailMajors,
-sci.collected_items,
+group_concat("(", sci.item, ", ", sci.count, ")" order by sci.item),
 sif.forbidden_items
 from solver s
   left join solver_params sp on s.id = sp.solver_id
   left join solver_result sr on s.id = sr.solver_id
-  left join (select solver_id, group_concat(\"(\", item, \", \", count, \")\" order by item) as collected_items from solver_collected_items group by solver_id) sci on s.id = sci.solver_id
+  left join solver_collected_items sci on s.id = sci.solver_id
   left join (select solver_id, group_concat(item order by item) as forbidden_items from solver_items_forbidden group by solver_id) sif on s.id = sif.solver_id
 where s.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK)
+group by s.id
 order by s.id;"""
 
         header = ["id", "actionTime", "romFileName", "preset", "difficultyTarget", "pickupStrategy", "returnCode", "duration", "difficulty", "knowsUsed", "knowsKnown", "itemsOk", "remainTry", "remainMajors", "remainMinors", "skippedMajors", "unavailMajors", "collectedItems", "forbiddenItems"]

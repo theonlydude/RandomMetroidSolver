@@ -11,6 +11,9 @@ class SMBoolManager(object):
     countItems = ['Missile', 'Super', 'PowerBomb', 'ETank', 'Reserve']
 
     def __init__(self):
+        self._items = { }
+        self._counts = { }
+
         # cache related
         self.cacheKey = 0
         self.computeItemsPositions()
@@ -69,9 +72,9 @@ class SMBoolManager(object):
         # get a dict of collected items and how many (to be displayed on the solver spoiler)
         itemsDict = {}
         for item in self.items:
-            itemsDict[item] = 1 if getattr(self, item) == True else 0
+            itemsDict[item] = 1 if self._items[item] == True else 0
         for item in self.countItems:
-            itemsDict[item] = getattr(self, item+"Count")
+            itemsDict[item] = self._counts[item]
         return itemsDict
 
     def eval(self, func, item=None):
@@ -86,22 +89,18 @@ class SMBoolManager(object):
         return ret
 
     def resetItems(self):
-        # start without items
-        for item in SMBoolManager.items:
-            setattr(self, item, SMBool(False))
-
-        for item in SMBoolManager.countItems:
-            setattr(self, item+'Count', 0)
+        self._items = { item : smboolFalse for item in self.items }
+        self._counts = { item : 0 for item in self.countItems }
 
         self.cacheKey = 0
         Cache.update(self.cacheKey)
 
     def addItem(self, item):
         # a new item is available
-        setattr(self, item, SMBool(True, items=[item]))
+        self._items[item] = SMBool(True, items=[item])
         if self.isCountItem(item):
-            count = getattr(self, item+'Count') + 1
-            setattr(self, item+'Count', count)
+            count = self._counts[item] + 1
+            self._counts[item] = count
             self.computeNewCacheKey(item, count)
         else:
             self.computeNewCacheKey(item, 1)
@@ -112,10 +111,10 @@ class SMBoolManager(object):
         if len(items) == 0:
             return
         for item in items:
-            setattr(self, item, SMBool(True, items=[item]))
+            self._items[item] = SMBool(True, items=[item])
             if self.isCountItem(item):
-                count = getattr(self, item+'Count') + 1
-                setattr(self, item+'Count', count)
+                count = self._counts[item] + 1
+                self._counts[item] = count
                 self.computeNewCacheKey(item, count)
             else:
                 self.computeNewCacheKey(item, 1)
@@ -125,13 +124,13 @@ class SMBoolManager(object):
     def removeItem(self, item):
         # randomizer removed an item (or the item was added to test a post available)
         if self.isCountItem(item):
-            count = getattr(self, item+'Count') - 1
-            setattr(self, item+'Count', count)
+            count = self._counts[item] - 1
+            self._counts[item] = count
             if count == 0:
-                setattr(self, item, SMBool(False))
+                self._items[item] = smboolFalse
             self.computeNewCacheKey(item, count)
         else:
-            setattr(self, item, SMBool(False))
+            self._items[item] = smboolFalse
             self.computeNewCacheKey(item, 0)
 
         Cache.update(self.cacheKey)
@@ -155,10 +154,10 @@ class SMBoolManager(object):
 
     def itemCount(self, item):
         # return integer
-        return getattr(self, item+'Count')
+        return self._counts[item]
 
     def haveItem(self, item):
-        return getattr(self, item)
+        return self._items[item]
 
     wand = staticmethod(SMBool.wand)
     wor = staticmethod(SMBool.wor)
@@ -195,13 +194,13 @@ class SMBoolManagerPlando(SMBoolManager):
         already = self.haveItem(item)
         isCount = self.isCountItem(item)
         if isCount or not already:
-            setattr(self, item, SMBool(True, items=[item]))
+            self._items[item] = SMBool(True, items=[item])
         else:
             # handle duplicate major items (plandos)
-            setattr(self, 'dup_'+item, True)
+            self._items['dup_'+item] = True
         if isCount:
-            count = getattr(self, item+'Count') + 1
-            setattr(self, item+'Count', count)
+            count = self._counts[item] + 1
+            self._counts[item] = count
             self.computeNewCacheKey(item, count)
         else:
             self.computeNewCacheKey(item, 1)
@@ -211,18 +210,18 @@ class SMBoolManagerPlando(SMBoolManager):
     def removeItem(self, item):
         # randomizer removed an item (or the item was added to test a post available)
         if self.isCountItem(item):
-            count = getattr(self, item+'Count') - 1
-            setattr(self, item+'Count', count)
+            count = self._counts[item] - 1
+            self._counts[item] = count
             if count == 0:
-                setattr(self, item, SMBool(False))
+                self._items[item] = smboolFalse
             self.computeNewCacheKey(item, count)
         else:
             dup = 'dup_'+item
-            if getattr(self, dup, None) is None:
-                setattr(self, item, SMBool(False))
+            if self._items.get(dup, None) is None:
+                self._items[item] = smboolFalse
                 self.computeNewCacheKey(item, 0)
             else:
-                delattr(self, dup)
+                del self._items[dup]
                 self.computeNewCacheKey(item, 1)
 
         Cache.update(self.cacheKey)

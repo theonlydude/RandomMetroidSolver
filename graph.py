@@ -236,7 +236,7 @@ class AccessGraph(object):
             knows = [ knows, diff._knows ]
             items = [ items, diff._items ]
 
-        return SMBool(True, difficulty, list(knows), items)
+        return SMBool(True, difficulty, knows, items)
 
     def getAvailAPPaths(self, availAccessPoints, locsAPs):
         paths = {}

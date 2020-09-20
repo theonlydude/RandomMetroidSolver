@@ -83,9 +83,7 @@ class DoorsManager(metaclass=Singleton):
         'GreenHillZoneTopRight': Door('GreenHillZoneTopRight', 0x0, 'yellow'),
         'NoobBridgeRight': Door('NoobBridgeRight', 0x0, 'green'),
         'MainShaftRight': Door('MainShaftRight', 0x0, 'red'),
-        'MainShaftLeft': Door('MainShaftLeft', 0x0, 'red'),
         'MainShaftBottomRight': Door('MainShaftBottomRight', 0x0, 'red'),
-        'MainShaftBottomLeft': Door('MainShaftBottomLeft', 0x0, 'red'),
         'EarlySupersRight': Door('EarlySupersRight', 0x0, 'red'),
         'EtecoonEnergyTankLeft': Door('EtecoonEnergyTankLeft', 0x0, 'green'),
         # pink brinstar
@@ -95,6 +93,7 @@ class DoorsManager(metaclass=Singleton):
         'BigPinkBottomLeft': Door('BigPinkBottomLeft', 0x0, 'red'),
         # red brinstar
         'RedTowerLeft': Door('RedTowerLeft', 0x0, 'yellow'),
+        'RedBrinstarFirefleaLeft': Door('RedBrinstarFirefleaLeft', 0x0, 'red'),
         'RedTowerElevatorTopLeft': Door('RedTowerElevatorTopLeft', 0x0, 'green'),
         'RedTowerElevatorLeft': Door('RedTowerElevatorLeft', 0x0, 'yellow'),
         'RedTowerElevatorBottomLeft': Door('RedTowerElevatorBottomLeft', 0x0, 'green'),
@@ -102,6 +101,8 @@ class DoorsManager(metaclass=Singleton):
         # Wrecked ship
         'WestOceanRight': Door('WestOceanRight', 0x0, 'green'),
         'LeCoudeBottom': Door('LeCoudeBottom', 0x0, 'yellow'),
+        'WreckedShipMainShaftBottom': Door('WreckedShipMainShaftBottom', 0x0, 'green'),
+        'ElectricDeathRoomTopLeft': Door('ElectricDeathRoomTopLeft', 0x0, 'red'),
         # Upper Norfair
         'BusinessCenterTopLeft': Door('BusinessCenterTopLeft', 0x0, 'green'),
         'BusinessCenterBottomLeft': Door('BusinessCenterBottomLeft', 0x0, 'red'),

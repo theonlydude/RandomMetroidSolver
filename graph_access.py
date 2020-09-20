@@ -19,7 +19,7 @@ accessPoints = [
     ### Crateria and Blue Brinstar
     AccessPoint('Landing Site', 'Crateria', {
         'Lower Mushrooms Left': lambda sm: sm.canPassTerminatorBombWall(),
-        'Keyhunter Room Bottom': lambda sm: sm.canOpenGreenDoors(),
+        'Keyhunter Room Bottom': lambda sm: sm.traverse('LandingSiteRight'),
         'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     }, internal=True,
        start={'spawn': 0x0000, 'doors':[0x32], 'patches':[RomPatches.BlueBrinstarBlueDoor], 'solveArea': "Crateria Landing Site"}),
@@ -42,7 +42,7 @@ accessPoints = [
     AccessPoint('Green Pirates Shaft Bottom Right', 'Crateria', {
         'Lower Mushrooms Left': lambda sm: SMBool(True)
     }, traverse = lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoMoreBlueDoors),
-                                    sm.canOpenRedDoors()),
+                                    sm.traverse('GreenPiratesShaftBottomRight')),
        roomInfo = {'RoomPtr':0x99bd, "area": 0x0, 'songs':[0x99ce]},
        # the doorAsmPtr 7FE00 is set by the g4_skip.ips patch, we have to call it
        exitInfo = {'DoorPtr':0x8c52, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
@@ -57,11 +57,11 @@ accessPoints = [
        entryInfo = {'SamusX':0x1cf, 'SamusY':0x88, 'song': 0xc},
        dotOrientation = 'ne'),
     AccessPoint('Keyhunter Room Bottom', 'Crateria', {
-        'Moat Right': lambda sm: sm.wand(sm.canOpenYellowDoors(),
+        'Moat Right': lambda sm: sm.wand(sm.traverse('KihunterRight'),
                                          sm.canPassMoat()),
         'Landing Site': lambda sm: SMBool(True)
     }, traverse = lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoMoreBlueDoors),
-                                    sm.canOpenYellowDoors()),
+                                    sm.traverse('KihunterBottom')),
        roomInfo = { 'RoomPtr':0x948c, "area": 0x0, 'songs':[0x949d] },
        exitInfo = {'DoorPtr':0x8a42, 'direction': 0x6, "cap": (0x6, 0x2), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -101,7 +101,7 @@ accessPoints = [
         'Big Pink': Cache.ldeco('GBE_BP',
                                 lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
                                                           sm.canDestroyBombWalls()),
-                                                   sm.canOpenRedDoors())),
+                                                   sm.traverse('MainShaftBottomRight'))),
         'Etecoons Bottom': lambda sm: sm.canAccessEtecoons()
     }, roomInfo = {'RoomPtr':0x9938, "area": 0x0},
        exitInfo = {'DoorPtr':0x8bfe, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
@@ -111,14 +111,14 @@ accessPoints = [
        dotOrientation = 'ne'),
     AccessPoint('Big Pink', 'GreenPinkBrinstar', {
         'Green Hill Zone Top Right': lambda sm: sm.wand(sm.haveItem('Morph'),
-                                                        sm.canOpenGreenDoors()),
+                                                        sm.traverse('BigPinkBottomRight')),
         'Green Brinstar Elevator': lambda sm: sm.wor(sm.haveItem('SpeedBooster'),
                                                      sm.canDestroyBombWalls())
     }, internal=True, start={'spawn': 0x0100, 'solveArea': "Pink Brinstar"}),
     AccessPoint('Green Hill Zone Top Right', 'GreenPinkBrinstar', {
         'Noob Bridge Right': lambda sm: SMBool(True),
         'Big Pink': lambda sm: sm.haveItem('Morph')
-    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
+    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.traverse('GreenHillZoneTopRight')),
        roomInfo = {'RoomPtr':0x9e52, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8e86, 'direction': 0x4, "cap": (0x1, 0x26), "bitFlag": 0x0,
                    "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -127,10 +127,9 @@ accessPoints = [
     AccessPoint('Noob Bridge Right', 'GreenPinkBrinstar', {
         'Green Hill Zone Top Right': Cache.ldeco('NBR_GHZTR',
                                                  lambda sm: sm.wor(sm.haveItem('Wave'),
-                                                                   sm.wor(sm.wand(sm.canOpenRedDoors(), # can do the glitch with either missile or supers
-                                                                                  sm.knowsGreenGateGlitch()),
+                                                                   sm.wor(sm.canGreenGateGlitch(),
                                                                           RomPatches.has(RomPatches.AreaRandoGatesOther))))
-    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenGreenDoors()),
+    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.traverse('NoobBridgeRight')),
        roomInfo = {'RoomPtr':0x9fba, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8f0a, 'direction': 0x4, "cap": (0x1, 0x46), "bitFlag": 0x0,
                    "screen": (0x0, 0x4), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -158,12 +157,12 @@ accessPoints = [
               'save':"Save_Etecoons" ,'solveArea': "Green Brinstar", 'forcedEarlyMorph':True}),
     AccessPoint('Etecoons Bottom', 'GreenPinkBrinstar', {
         'Etecoons Supers': lambda sm: sm.wor(RomPatches.has(RomPatches.EtecoonSupersBlueDoor),
-                                             sm.canOpenGreenDoors()),
+                                             sm.traverse('EtecoonEnergyTankLeft')),
         'Green Brinstar Elevator': lambda sm: sm.canUsePowerBombs()
     }, internal=True),
     ### Wrecked Ship
     AccessPoint('West Ocean Left', 'WreckedShip', {
-        'Wrecked Ship Main': lambda sm: sm.canOpenGreenDoors()
+        'Wrecked Ship Main': lambda sm: sm.traverse('WestOceanRight')
     }, roomInfo = {'RoomPtr':0x93fe, "area": 0x0},
        exitInfo = {'DoorPtr':0x89ca, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -176,7 +175,7 @@ accessPoints = [
                                                                    sm.canPassSpongeBath()),
                                                            sm.wand(sm.wnot(Bosses.bossDead(sm, 'Phantoon')),
                                                                    RomPatches.has(RomPatches.SpongeBathBlueDoor)))),
-        'PhantoonRoomOut': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canPassBombPassages())
+        'PhantoonRoomOut': lambda sm: sm.wand(sm.traverse('WreckedShipMainShaftBottom'), sm.canPassBombPassages())
     }, internal=True,
        start={'spawn':0x0300, 'doors':[0x83], 'patches':[RomPatches.SpongeBathBlueDoor], 'solveArea': "WreckedShip Main", 'needsPreRando':True}),
     AccessPoint('Wrecked Ship Back', 'WreckedShip', {
@@ -268,8 +267,9 @@ accessPoints = [
                                                                      sm.canPassRedKiHunters())),
         'Ridley Zone': Cache.ldeco('F_RZ',
                                    lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
-                                                      sm.canOpenGreenDoors(),
-                                                      sm.canOpenYellowDoors(),
+                                                      sm.traverse('WastelandLeft'),
+                                                      sm.traverse('RedKihunterShaftBottom'),
+                                                      sm.canUsePowerBombs(),
                                                       sm.wand(sm.canGetBackFromRidleyZone(),
                                                               sm.canPassRedKiHunters(),
                                                               sm.canPassWastelandDessgeegas(),
@@ -381,16 +381,16 @@ accessPoints = [
                                        lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
                                                                  sm.canPassBombPassages()),
                                                          # go through cathedral
-                                                         sm.wand(sm.canOpenGreenDoors(),
+                                                         sm.wand(sm.traverse('CathedralRight'),
                                                                  sm.canEnterCathedral(Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Bubble']['mult'])))),
         'Crocomire Speedway Bottom': Cache.ldeco('BC_CSB',
                                                  lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
                                                                            sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Croc via Frog w/Wave' if sm.haveItem('Wave') else 'Norfair Entrance -> Croc via Frog']),
-                                                                           sm.wor(sm.wand(sm.canOpenRedDoors(),
-                                                                                          sm.knowsGreenGateGlitch()),
+                                                                           sm.wor(sm.canGreenGateGlitch(),
                                                                                   sm.haveItem('Wave'))),
                                                                    # below ice
-                                                                   sm.wand(sm.haveItem('SpeedBooster'),
+                                                                   sm.wand(sm.traverse('BusinessCenterTopLeft'),
+                                                                           sm.haveItem('SpeedBooster'),
                                                                            sm.canUsePowerBombs(),
                                                                            sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Croc via Ice'])))),
         'Warehouse Entrance Left': lambda sm: SMBool(True)
@@ -425,9 +425,8 @@ accessPoints = [
         'Crocomire Speedway Bottom': Cache.ldeco('KBRBL_CSB',
                                                  lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
                                                                     sm.wor(sm.haveItem('Wave'),
-                                                                           sm.wand(sm.canOpenRedDoors(),
-                                                                                   sm.knowsGreenGateGlitch())))),
-    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
+                                                                           sm.canGreenGateGlitch()))),
+    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.traverse('KronicBoostBottomLeft')),
        roomInfo = {'RoomPtr':0xae74, "area": 0x2, 'songs':[0xae85]},
        exitInfo = {'DoorPtr':0x967e, 'direction': 0x5, "cap": (0x3e, 0x6), "bitFlag": 0x0,
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -446,7 +445,7 @@ accessPoints = [
         'Kronic Boost Room Bottom Left': Cache.ldeco('CSB_KBRBL',
                                                      lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
                                                                         sm.haveItem('Morph')))
-    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.CrocBlueDoors), sm.canOpenGreenDoors()),
+    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.CrocBlueDoors), sm.traverse('CrocomireSpeedwayBottom')),
        roomInfo = {'RoomPtr':0xa923, "area": 0x2},
        exitInfo = {'DoorPtr':0x93d2, 'direction': 0x6, "cap": (0x36, 0x2), "bitFlag": 0x0,
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -467,8 +466,7 @@ accessPoints = [
         'Crocomire Speedway Bottom': Cache.ldeco('BM_CSB',
                                                  lambda sm: sm.wand(sm.canPassBombPassages(),
                                                                     sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Croc']),
-                                                                    sm.wor(sm.wand(sm.canOpenRedDoors(),
-                                                                                   sm.knowsGreenGateGlitch()),
+                                                                    sm.wor(sm.canGreenGateGlitch(),
                                                                            sm.haveItem('Wave'))))
     }, internal=True,
        start={'spawn':0x0201, 'doors':[0x54,0x55], 'patches':[RomPatches.SpeedAreaBlueDoors], 'knows':['BubbleMountainWallJump'], 'solveArea': "Bubble Norfair Bottom"}),
@@ -510,15 +508,15 @@ accessPoints = [
                                                  sm.haveItem('Morph')),
         'Crab Hole Bottom Left': Cache.ldeco('MSB_CHBL',
                                              lambda sm: sm.wand(sm.haveItem('Morph'),
-                                                                sm.wor(sm.canOpenGreenDoors(), # red door+green gate
-                                                                       sm.wand(sm.canOpenRedDoors(),
-                                                                               RomPatches.has(RomPatches.AreaRandoGatesOther))))),
+                                                                sm.traverse('MainStreetBottomRight'),
+                                                                sm.wor(sm.haveItem('Super'),
+                                                                       RomPatches.has(RomPatches.AreaRandoGatesOther)))),
         # this transition leads to EastMaridia directly
         'Oasis Bottom': Cache.ldeco('MSB_OB',
                                     lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
-                                                       sm.wor(sm.canOpenGreenDoors(), # red door+green gate
-                                                              sm.wand(sm.canOpenRedDoors(),
-                                                                      RomPatches.has(RomPatches.AreaRandoGatesOther))),
+                                                       sm.wor(sm.traverse('MainStreetBottomRight'),
+                                                              sm.wor(sm.haveItem('Super'),
+                                                                     RomPatches.has(RomPatches.AreaRandoGatesOther))),
                                                        sm.canTraverseWestSandHallLeftToRight())),
         'Crab Shaft Left': lambda sm: sm.canPassMtEverest()
     }, roomInfo = {'RoomPtr':0xcfc9, "area": 0x4},
@@ -583,7 +581,7 @@ accessPoints = [
     AccessPoint('Crab Shaft Right', 'WestMaridia', {
         'Crab Shaft Left': lambda sm: sm.canJumpUnderwater()
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.CrabShaftBlueDoor),
-                                  sm.canOpenGreenDoors()),
+                                  sm.traverse('CrabShaftRight')),
        roomInfo = {'RoomPtr':0xd1a3, "area": 0x4},
        exitInfo = {'DoorPtr':0xa4c8, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
@@ -648,28 +646,27 @@ accessPoints = [
     }, internal=True),
     AccessPoint('Le Coude Right', 'EastMaridia', {
         'Toilet Top': lambda sm: SMBool(True)
-    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
+    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.traverse('LeCoudeBottom')),
        roomInfo = {'RoomPtr':0x95a8, "area": 0x0},
        exitInfo = {'DoorPtr':0x8aa2, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0xd1, 'SamusY':0x88},
        dotOrientation = 'ne'),
     AccessPoint('Toilet Top', 'EastMaridia', {
-        'Oasis Bottom': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canDestroyBombWallsUnderwater()),
+        'Oasis Bottom': lambda sm: sm.wand(sm.traverse('PlasmaSparkBottom'), sm.canDestroyBombWallsUnderwater()),
         'Le Coude Right': lambda sm: SMBool(True),
         'Precious Room Top': Cache.ldeco('TT_PRT',
                                          lambda sm: sm.wand(Bosses.bossDead(sm, 'Draygon'),
                                                             # suitless could be possible with this but unreasonable: https://youtu.be/rtLwytH-u8o
                                                             sm.haveItem('Gravity'),
-                                                            sm.canOpenGreenDoors()))
+                                                            sm.traverse('ColosseumBottomRight')))
     }, internal=True),
     AccessPoint('Oasis Bottom', 'EastMaridia', {
-        'Toilet Top': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canDestroyBombWallsUnderwater()),
+        'Toilet Top': lambda sm: sm.wand(sm.traverse('OasisTop'), sm.canDestroyBombWallsUnderwater()),
         # this goes directly to WestMaridia
         'Main Street Bottom': Cache.ldeco('OB_MSB',
                                           lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
-                                                             sm.wor(sm.wand(sm.canOpenGreenDoors(),
-                                                                            sm.knowsGreenGateGlitch()),
+                                                             sm.wor(sm.canGreenGateGlitch(),
                                                                     RomPatches.has(RomPatches.AreaRandoGatesOther)),
                                                              sm.canTraverseSandPits())),
         # this goes directly to WestMaridia
@@ -682,7 +679,7 @@ accessPoints = [
     }, internal=True),
     AccessPoint('Colosseum Top Right', 'EastMaridia', {
         'Post Botwoon': lambda sm: sm.canColosseumToBotwoonExit(),
-        'Precious Room Top': lambda sm: sm.canOpenGreenDoors(), # go down
+        'Precious Room Top': lambda sm: sm.traverse('ColosseumBottomRight'), # go down
     }, internal = True),
     AccessPoint('Precious Room Top', 'EastMaridia', {
         'Colosseum Top Right': lambda sm: sm.canClimbColosseum(),
@@ -729,7 +726,7 @@ accessPoints = [
     AccessPoint('Caterpillar Room Top Right', 'RedBrinstar', {
         'Red Brinstar Elevator': lambda sm: sm.canPassMaridiaToRedTowerNode(),
         'Red Tower Top Left': lambda sm: sm.wand(sm.canPassMaridiaToRedTowerNode(),
-                                                 sm.canOpenYellowDoors())
+                                                 sm.traverse('RedTowerElevatorLeft'))
     }, roomInfo = {'RoomPtr':0xa322, "area": 0x1},
        exitInfo = {'DoorPtr':0x90c6, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x40,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbdaf},
@@ -737,8 +734,8 @@ accessPoints = [
        dotOrientation = 'ne'),
     AccessPoint('Red Brinstar Elevator', 'RedBrinstar', {
         'Caterpillar Room Top Right': lambda sm: sm.canPassRedTowerToMaridiaNode(),
-        'Red Tower Top Left': lambda sm: sm.wor(RomPatches.has(RomPatches.HellwayBlueDoor), sm.canOpenYellowDoors())
-    }, traverse=lambda sm:sm.wor(RomPatches.has(RomPatches.RedTowerBlueDoors), sm.canOpenYellowDoors()),
+        'Red Tower Top Left': lambda sm: sm.wor(RomPatches.has(RomPatches.HellwayBlueDoor), sm.traverse('RedTowerElevatorLeft'))
+    }, traverse=lambda sm:sm.wor(RomPatches.has(RomPatches.RedTowerBlueDoors), sm.traverse('RedBrinstarElevatorTop')),
        roomInfo = {'RoomPtr':0x962a, "area": 0x0},
        exitInfo = {'DoorPtr':0x8af6, 'direction': 0x7, "cap": (0x16, 0x2d), "bitFlag": 0x0,
                    "screen": (0x1, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0xb9f1},
@@ -759,7 +756,7 @@ accessPoints = [
        dotOrientation = 'se'),
     AccessPoint('East Tunnel Top Right', 'RedBrinstar', {
         'East Tunnel Right': lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoGatesBase),
-                                               sm.canOpenGreenDoors())
+                                               sm.haveItem('Super'))
     }, traverse=lambda sm: RomPatches.has(RomPatches.AreaRandoGatesBase),
        roomInfo = {'RoomPtr':0xcf80, "area": 0x4},
        exitInfo = {'DoorPtr':0xa390, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,

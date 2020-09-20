@@ -1862,10 +1862,11 @@ define_location(
         'Main Street Bottom': lambda sm: SMBool(True)
     },
     Available=lambda loc, sm: sm.wand(sm.haveItem('Gravity'),
-                                    sm.haveItem('SpeedBooster'),
-                                    sm.wor(sm.wand(sm.canOpenGreenDoors(), # run from room on the right
-                                                   sm.itemCountOk('ETank', 1)), # etank for the spark since sparking from low ground
-                                           sm.canSimpleShortCharge())), # run from above
+                                      sm.haveItem('SpeedBooster'),
+                                      sm.wor(sm.wand(sm.wor(sm.haveItem('Super'), # run from room on the right
+                                                            RomPatches.has(RomPatches.AreaRandoGatesOther)),
+                                                     sm.itemCountOk('ETank', 1)), # etank for the spark since sparking from low ground
+                                             sm.canSimpleShortCharge())), # run from above
 ),
 define_location(
     Area="Maridia",

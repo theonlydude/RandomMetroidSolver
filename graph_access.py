@@ -390,7 +390,8 @@ accessPoints = [
                                                                                           sm.knowsGreenGateGlitch()),
                                                                                   sm.haveItem('Wave'))),
                                                                    # below ice
-                                                                   sm.wand(sm.haveItem('SpeedBooster'),
+                                                                   sm.wand(sm.canOpenGreenDoors(),
+                                                                           sm.haveItem('SpeedBooster'),
                                                                            sm.canUsePowerBombs(),
                                                                            sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Croc via Ice'])))),
         'Warehouse Entrance Left': lambda sm: SMBool(True)

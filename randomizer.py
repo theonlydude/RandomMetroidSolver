@@ -13,6 +13,7 @@ from rom import RomPatcher, FakeROM
 from utils import loadRandoPreset, getDefaultMultiValues
 from version import displayedVersion
 from smbool import SMBool
+from doorsmanager import DoorsManager
 
 import log, db
 
@@ -244,6 +245,8 @@ if __name__ == "__main__":
     parser.add_argument('--ship', help='use a custom sprite for Samus ship', dest='ship', default=None)
     parser.add_argument('--seedIps', help='ips generated from previous seed', dest='seedIps', default=None)
     parser.add_argument('--jm,', help="display data used by jm for its stats", dest='jm', action='store_true', default=False)
+    parser.add_argument('--doorsColorsRando', help='randomize color of colored doors', dest='doorsColorsRando',
+                        action='store_true', default=False)
 
     # parse args
     args = parser.parse_args()
@@ -561,6 +564,12 @@ if __name__ == "__main__":
     graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses,
                                   args.escapeRando, minimizerN, dotFile,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
+
+    doorsManager = DoorsManager()
+    doorsManager.setDoorsColor()
+    if args.doorsColorsRando == True:
+        doorsManager.randomize()
+
     if args.patchOnly == False:
         try:
             randoExec = RandoExec(seedName, args.vcr)

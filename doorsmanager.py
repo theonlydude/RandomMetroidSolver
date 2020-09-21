@@ -1,11 +1,11 @@
-from enum import Enum, unique
+import random
 from smbool import SMBool
 from rom_patches import RomPatches
 
 colorsList = ['red', 'green', 'yellow']
 
-@unique
-class Facing(Enum):
+
+class Facing:
     Left = 0
     Right = 1
     Top = 2
@@ -64,7 +64,7 @@ class Door(object):
         if not self.isRandom() or self.color == 'blue':
             return
 
-        rom.writeWord(self.address, colors2plm[self.color][self.facing])
+        rom.writeWord(colors2plm[self.color][self.facing], self.address)
 
     def readColor(self, rom):
         plm = rom.readWord(self.address)
@@ -75,69 +75,70 @@ class Door(object):
         elif plm in plmYellow:
             self.setColor('yellow')
         else:
-            raise "Unknown color {} for {}".format(hex(plm), self.name)
+            raise Exception("Unknown color {} for {}".format(hex(plm), self.name))
 
 class DoorsManager():
     doors = {
         # crateria
         'LandingSiteRight': Door('LandingSiteRight', 0x78018, 'green', Facing.Left),
-        'LandingSiteTopRight': Door('LandingSiteTopRight', 0x0, 'yellow', Facing.Left),
-        'KihunterBottom': Door('KihunterBottom', 0x0, 'yellow', Facing.Top),
-        'KihunterRight': Door('KihunterRight', 0x0, 'yellow', Facing.Left),
-        'FlywayRight': Door('FlywayRight', 0x0, 'red', Facing.Left),
-        'GreenPiratesShaftBottomRight': Door('GreenPiratesShaftBottomRight', 0x0, 'red', Facing.Left),
-        'RedBrinstarElevatorTop': Door('RedBrinstarElevatorTop', 0x0, 'yellow', Facing.Bottom),
+        'LandingSiteTopRight': Door('LandingSiteTopRight', 0x07801e, 'yellow', Facing.Left),
+        'KihunterBottom': Door('KihunterBottom', 0x78228, 'yellow', Facing.Top),
+        'KihunterRight': Door('KihunterRight', 0x78222, 'yellow', Facing.Left),
+        'FlywayRight': Door('FlywayRight', 0x78420, 'red', Facing.Left),
+        'GreenPiratesShaftBottomRight': Door('GreenPiratesShaftBottomRight', 0x78470, 'red', Facing.Left),
+        'RedBrinstarElevatorTop': Door('RedBrinstarElevatorTop', 0x78256, 'yellow', Facing.Bottom),
+        'ClimbRight': Door('ClimbRight', 0x78304, 'yellow', Facing.Left),
         # blue brinstar
-        'ConstructionZoneRight': Door('ConstructionZoneRight', 0x0, 'red', Facing.Left),
+        'ConstructionZoneRight': Door('ConstructionZoneRight', 0x78784, 'red', Facing.Left),
         # green brinstar
-        'GreenHillZoneTopRight': Door('GreenHillZoneTopRight', 0x0, 'yellow', Facing.Left),
-        'NoobBridgeRight': Door('NoobBridgeRight', 0x0, 'green', Facing.Left),
-        'MainShaftRight': Door('MainShaftRight', 0x0, 'red', Facing.Left),
-        'MainShaftBottomRight': Door('MainShaftBottomRight', 0x0, 'red', Facing.Left),
-        'EarlySupersRight': Door('EarlySupersRight', 0x0, 'red', Facing.Left),
-        'EtecoonEnergyTankLeft': Door('EtecoonEnergyTankLeft', 0x0, 'green', Facing.Right),
+        'GreenHillZoneTopRight': Door('GreenHillZoneTopRight', 0x78670, 'yellow', Facing.Left),
+        'NoobBridgeRight': Door('NoobBridgeRight', 0x787a6, 'green', Facing.Left),
+        'MainShaftRight': Door('MainShaftRight', 0x784be, 'red', Facing.Left),
+        'MainShaftBottomRight': Door('MainShaftBottomRight', 0x784c4, 'red', Facing.Left),
+        'EarlySupersRight': Door('EarlySupersRight', 0x78512, 'red', Facing.Left),
+        'EtecoonEnergyTankLeft': Door('EtecoonEnergyTankLeft', 0x787c8, 'green', Facing.Right),
         # pink brinstar
-        'BigPinkTopRight': Door('BigPinkTopRight', 0x0, 'red', Facing.Left),
-        'BigPinkRight': Door('BigPinkRight', 0x0, 'yellow', Facing.Left),
-        'BigPinkBottomRight': Door('BigPinkBottomRight', 0x0, 'green', Facing.Left),
-        'BigPinkBottomLeft': Door('BigPinkBottomLeft', 0x0, 'red', Facing.Right),
+        'BigPinkTopRight': Door('BigPinkTopRight', 0x78626, 'red', Facing.Left),
+        'BigPinkRight': Door('BigPinkRight', 0x7861a, 'yellow', Facing.Left),
+        'BigPinkBottomRight': Door('BigPinkBottomRight', 0x78620, 'green', Facing.Left),
+        'BigPinkBottomLeft': Door('BigPinkBottomLeft', 0x7862c, 'red', Facing.Right),
         # red brinstar
-        'RedTowerLeft': Door('RedTowerLeft', 0x0, 'yellow', Facing.Right),
-        'RedBrinstarFirefleaLeft': Door('RedBrinstarFirefleaLeft', 0x0, 'red', Facing.Right),
-        'RedTowerElevatorTopLeft': Door('RedTowerElevatorTopLeft', 0x0, 'green', Facing.Right),
-        'RedTowerElevatorLeft': Door('RedTowerElevatorLeft', 0x0, 'yellow', Facing.Right),
-        'RedTowerElevatorBottomLeft': Door('RedTowerElevatorBottomLeft', 0x0, 'green', Facing.Right),
-        'BelowSpazerTopRight': Door('BelowSpazerTopRight', 0x0, 'green', Facing.Left),
+        'RedTowerLeft': Door('RedTowerLeft', 0x78866, 'yellow', Facing.Right),
+        'RedBrinstarFirefleaLeft': Door('RedBrinstarFirefleaLeft', 0x7886e, 'red', Facing.Right),
+        'RedTowerElevatorTopLeft': Door('RedTowerElevatorTopLeft', 0x788aa, 'green', Facing.Right),
+        'RedTowerElevatorLeft': Door('RedTowerElevatorLeft', 0x788b0, 'yellow', Facing.Right),
+        'RedTowerElevatorBottomLeft': Door('RedTowerElevatorBottomLeft', 0x788b6, 'green', Facing.Right),
+        'BelowSpazerTopRight': Door('BelowSpazerTopRight', 0x78966, 'green', Facing.Left),
         # Wrecked ship
-        'WestOceanRight': Door('WestOceanRight', 0x0, 'green', Facing.Left),
-        'LeCoudeBottom': Door('LeCoudeBottom', 0x0, 'yellow', Facing.Top),
-        'WreckedShipMainShaftBottom': Door('WreckedShipMainShaftBottom', 0x0, 'green', Facing.Top),
-        'ElectricDeathRoomTopLeft': Door('ElectricDeathRoomTopLeft', 0x0, 'red', Facing.Right),
+        'WestOceanRight': Door('WestOceanRight', 0x781e2, 'green', Facing.Left),
+        'LeCoudeBottom': Door('LeCoudeBottom', 0x7823e, 'yellow', Facing.Top),
+        'WreckedShipMainShaftBottom': Door('WreckedShipMainShaftBottom', 0x7c277, 'green', Facing.Top),
+        'ElectricDeathRoomTopLeft': Door('ElectricDeathRoomTopLeft', 0x7c32f, 'red', Facing.Right),
         # Upper Norfair
-        'BusinessCenterTopLeft': Door('BusinessCenterTopLeft', 0x0, 'green', Facing.Right),
-        'BusinessCenterBottomLeft': Door('BusinessCenterBottomLeft', 0x0, 'red', Facing.Right),
-        'CathedralEntranceRight': Door('CathedralEntranceRight', 0x0, 'red', Facing.Left),
-        'CathedralRight': Door('CathedralRight', 0x0, 'green', Facing.Left),
-        'BubbleMountainTopRight': Door('BubbleMountainTopRight', 0x0, 'green', Facing.Left),
-        'BubbleMountainTopLeft': Door('BubbleMountainTopLeft', 0x0, 'green', Facing.Right),
-        'SpeedBoosterHallRight': Door('SpeedBoosterHallRight', 0x0, 'red', Facing.Left),
-        'SingleChamberRight': Door('SingleChamberRight', 0x0, 'red', Facing.Left),
-        'DoubleChamberRight': Door('DoubleChamberRight', 0x0, 'red', Facing.Left),
-        'KronicBoostBottomLeft': Door('KronicBoostBottomLeft', 0x0, 'yellow', Facing.Right),
-        'CrocomireSpeedwayBottom': Door('CrocomireSpeedwayBottom', 0x0, 'green', Facing.Top),
+        'BusinessCenterTopLeft': Door('BusinessCenterTopLeft', 0x78b00, 'green', Facing.Right),
+        'BusinessCenterBottomLeft': Door('BusinessCenterBottomLeft', 0x78b0c, 'red', Facing.Right),
+        'CathedralEntranceRight': Door('CathedralEntranceRight', 0x78af2, 'red', Facing.Left),
+        'CathedralRight': Door('CathedralRight', 0x78aea, 'green', Facing.Left),
+        'BubbleMountainTopRight': Door('BubbleMountainTopRight', 0x78c60, 'green', Facing.Left),
+        'BubbleMountainTopLeft': Door('BubbleMountainTopLeft', 0x78c5a, 'green', Facing.Right),
+        'SpeedBoosterHallRight': Door('SpeedBoosterHallRight', 0x78c7a, 'red', Facing.Left),
+        'SingleChamberRight': Door('SingleChamberRight', 0x78ca8, 'red', Facing.Left),
+        'DoubleChamberRight': Door('DoubleChamberRight', 0x78cc2, 'red', Facing.Left),
+        'KronicBoostBottomLeft': Door('KronicBoostBottomLeft', 0x78d4e, 'yellow', Facing.Right),
+        'CrocomireSpeedwayBottom': Door('CrocomireSpeedwayBottom', 0x78b96, 'green', Facing.Top),
         # Crocomire
-        'PostCrocomireUpperLeft': Door('PostCrocomireUpperLeft', 0x0, 'red', Facing.Right),
-        'PostCrocomireShaftRight': Door('PostCrocomireShaftRight', 0x0, 'red', Facing.Left),
+        'PostCrocomireUpperLeft': Door('PostCrocomireUpperLeft', 0x78bf4, 'red', Facing.Right),
+        'PostCrocomireShaftRight': Door('PostCrocomireShaftRight', 0x78c0c, 'red', Facing.Left),
         # Lower Norfair
-        'RedKihunterShaftBottom': Door('RedKihunterShaftBottom', 0x0, 'yellow', Facing.Top),
-        'WastelandLeft': Door('WastelandLeft', 0x0, 'green', Facing.Right),
+        'RedKihunterShaftBottom': Door('RedKihunterShaftBottom', 0x7902e, 'yellow', Facing.Top),
+        'WastelandLeft': Door('WastelandLeft', 0x790ba, 'green', Facing.Right),
         # Maridia
-        'MainStreetBottomRight': Door('MainStreetBottomRight', 0x0, 'red', Facing.Left),
-        'FishTankRight': Door('FishTankRight', 0x0, 'red', Facing.Left),
-        'CrabShaftRight': Door('CrabShaftRight', 0x0, 'green', Facing.Left),
-        'ColosseumBottomRight': Door('ColosseumBottomRight', 0x0, 'green', Facing.Left),
-        'PlasmaSparkBottom': Door('PlasmaSparkBottom', 0x0, 'green', Facing.Top),
-        'OasisTop': Door('OasisTop', 0x0, 'green', Facing.Bottom),
+        'MainStreetBottomRight': Door('MainStreetBottomRight', 0x7c431, 'red', Facing.Left),
+        'FishTankRight': Door('FishTankRight', 0x7c475, 'red', Facing.Left),
+        'CrabShaftRight': Door('CrabShaftRight', 0x7c4fb, 'green', Facing.Left),
+        'ColosseumBottomRight': Door('ColosseumBottomRight', 0x7c6fb, 'green', Facing.Left),
+        'PlasmaSparkBottom': Door('PlasmaSparkBottom', 0x7c577, 'green', Facing.Top),
+        'OasisTop': Door('OasisTop', 0x7c5d3, 'green', Facing.Bottom),
     }
 
     def setSMBM(self, smbm):
@@ -189,12 +190,14 @@ class DoorsManager():
             door.randomize()
 
     # call from rom loader
-    def loadDoorsColor(self, rom):
+    @staticmethod
+    def loadDoorsColor(rom):
         # for each door store it's color
         for door in DoorsManager.doors.values():
             door.readColor(rom)
 
     # call from rom patcher
-    def writeDoorsColor(self, rom):
+    @staticmethod
+    def writeDoorsColor(rom):
         for door in DoorsManager.doors.values():
             door.writeColor(rom)

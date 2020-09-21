@@ -9,6 +9,7 @@ from parameters import appDir
 from rom_patches import RomPatches
 from graph_access import accessPoints, GraphUtils, getAccessPoint
 from graph_locations import locations
+from doorsmanager import DoorsManager
 
 def getWord(w):
     return (w & 0x00FF, (w & 0xFF00) >> 8)
@@ -1621,6 +1622,9 @@ class RomPatcher:
         for (i, char) in enumerate(version):
             self.setOamTile(i, middle, char2tile[char])
 
+    def writeDoorsColor(self):
+        DoorsManager.writeDoorsColor(self.romFile)
+
 # tile number in tileset
 char2tile = {
     '-': 207,
@@ -1942,6 +1946,10 @@ class RomLoader(object):
 
     def getStartAP(self):
         return self.romReader.getStartAP()
+
+    def loadDoorsColor(self):
+        DoorsManager.loadDoorsColor(self.romReader.romFile)
+        DoorsManager.setDoorsColor()
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

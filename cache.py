@@ -3,14 +3,16 @@
 class NotFound: pass
 
 class Debug_MasterCache(dict):
-    def __contains__(self, newKey):
-        has_newKey = dict.__contains__(self, newKey)
-        if has_newKey:
+    def get(self, newKey, default):
+        ret = dict.get(self, newKey, NotFound)
+        if ret is not NotFound:
             print("usek: "+format(newKey, '#067b'))
             if Cache.masterCache[newKey]['key'] != newKey:
                 print("ERROR: key stored in cache is not the same as the new key !!!!")
                 print("      "+format(self[newKey]['key'], '#067b')+" key in cache")
-        return has_newKey
+            return ret
+        else:
+            return default
 
     def __setitem__(self, newKey, value):
         dict.__setitem__(self, newKey, value)
@@ -60,12 +62,14 @@ class Cache:
 
     @staticmethod
     def update(newKey):
-        if newKey in Cache.masterCache:
-            Cache.cache = Cache.masterCache[newKey]
+        cache = Cache.masterCache.get(newKey, None)
+        if cache is None:
+            cache = Debug_Cache() if Cache.debug else { }
+            cache['key'] = newKey
+            Cache.cache = cache
+            Cache.masterCache[newKey] = cache
         else:
-            Cache.cache = Debug_Cache() if Cache.debug else { }
-            Cache.cache['key'] = newKey
-            Cache.masterCache[newKey] = Cache.cache
+            Cache.cache = cache
 
     @staticmethod
     def decorator(func):

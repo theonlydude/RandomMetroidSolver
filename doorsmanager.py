@@ -4,7 +4,6 @@ from rom_patches import RomPatches
 
 colorsList = ['red', 'green', 'yellow']
 
-
 class Facing:
     Left = 0
     Right = 1

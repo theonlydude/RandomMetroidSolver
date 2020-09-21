@@ -1160,7 +1160,8 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
 def sessionWebService():
     # web service to update the session
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'escapeRando', 'removeEscapeEnemies',
+               'areaRandomization', 'areaLayout', 'lightAreaRandomization',
+               'doorsColorsRando', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization', 'minimizer', 'minimizerTourian',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1193,6 +1194,7 @@ def sessionWebService():
     session.randomizer['areaRandomization'] = request.vars.areaRandomization
     session.randomizer['areaLayout'] = request.vars.areaLayout
     session.randomizer['lightAreaRandomization'] = request.vars.lightAreaRandomization
+    session.randomizer['doorsColorsRando'] = request.vars.doorsColorsRando
     session.randomizer['escapeRando'] = request.vars.escapeRando
     session.randomizer['removeEscapeEnemies'] = request.vars.removeEscapeEnemies
     session.randomizer['bossRandomization'] = request.vars.bossRandomization
@@ -1248,7 +1250,8 @@ def randomizerWebService():
 
     # check validity of all parameters
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'escapeRando', 'removeEscapeEnemies',
+               'areaRandomization', 'areaLayout', 'lightAreaRandomization',
+               'doorsColorsRando', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization', 'minimizer', 'minimizerTourian',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1373,6 +1376,11 @@ def randomizerWebService():
             params.append('--lightArea')
     elif request.vars.areaRandomization == 'random':
         params += ['--area', 'random']
+
+    if request.vars.doorsColorsRando == 'on':
+        params.append('--doorsColorsRando')
+    elif request.vars.doorsColorsRando == 'random':
+        params += ['--doorsColorsRando', 'random']
 
     if request.vars.escapeRando == 'on':
         params.append('--escapeRando')

@@ -197,9 +197,14 @@ class Helpers(object):
     @Cache.decorator
     def canGreenGateGlitch(self):
         sm = self.smbm
-        return sm.wand(sm.haveMissileOrSuper(),
+        return sm.wand(sm.haveItem('Super'),
                        sm.knowsGreenGateGlitch())
 
+    @Cache.decorator
+    def canBlueGateGlitch(self):
+        sm = self.smbm
+        return sm.wand(sm.haveMissileOrSuper(),
+                       sm.knowsGreenGateGlitch())
     @Cache.decorator
     def canUsePowerBombs(self):
         sm = self.smbm

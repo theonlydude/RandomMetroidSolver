@@ -127,7 +127,7 @@ accessPoints = [
     AccessPoint('Noob Bridge Right', 'GreenPinkBrinstar', {
         'Green Hill Zone Top Right': Cache.ldeco('NBR_GHZTR',
                                                  lambda sm: sm.wor(sm.haveItem('Wave'),
-                                                                   sm.wor(sm.canGreenGateGlitch(),
+                                                                   sm.wor(sm.canBlueGateGlitch(),
                                                                           RomPatches.has(RomPatches.AreaRandoGatesOther))))
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.traverse('NoobBridgeRight')),
        roomInfo = {'RoomPtr':0x9fba, "area": 0x1 },
@@ -235,7 +235,7 @@ accessPoints = [
         'Screw Attack Bottom': Cache.ldeco('LNE_SAB',
                                            lambda sm: sm.wand(sm.canUsePowerBombs(),
                                                               sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
-                                                              sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch()),
+                                                              sm.canGreenGateGlitch(),
                                                               sm.canDestroyBombWalls())),
         'Firefleas': Cache.ldeco('LNE_F',
                                  lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
@@ -278,7 +278,7 @@ accessPoints = [
                                            lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                               sm.canPassAmphitheaterReverse(),
                                                               sm.canDestroyBombWalls(),
-                                                              sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch()))),
+                                                              sm.canGreenGateGlitch())),
         'Firefleas Top': Cache.ldeco('F_FT',
                                      lambda sm: sm.wand(sm.canPassBombPassages(),
                                                         sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])))
@@ -386,7 +386,7 @@ accessPoints = [
         'Crocomire Speedway Bottom': Cache.ldeco('BC_CSB',
                                                  lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
                                                                            sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Croc via Frog w/Wave' if sm.haveItem('Wave') else 'Norfair Entrance -> Croc via Frog']),
-                                                                           sm.wor(sm.canGreenGateGlitch(),
+                                                                           sm.wor(sm.canBlueGateGlitch(),
                                                                                   sm.haveItem('Wave'))),
                                                                    # below ice
                                                                    sm.wand(sm.traverse('BusinessCenterTopLeft'),
@@ -425,7 +425,7 @@ accessPoints = [
         'Crocomire Speedway Bottom': Cache.ldeco('KBRBL_CSB',
                                                  lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
                                                                     sm.wor(sm.haveItem('Wave'),
-                                                                           sm.canGreenGateGlitch()))),
+                                                                           sm.canBlueGateGlitch()))),
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.traverse('KronicBoostBottomLeft')),
        roomInfo = {'RoomPtr':0xae74, "area": 0x2, 'songs':[0xae85]},
        exitInfo = {'DoorPtr':0x967e, 'direction': 0x5, "cap": (0x3e, 0x6), "bitFlag": 0x0,
@@ -466,7 +466,7 @@ accessPoints = [
         'Crocomire Speedway Bottom': Cache.ldeco('BM_CSB',
                                                  lambda sm: sm.wand(sm.canPassBombPassages(),
                                                                     sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Croc']),
-                                                                    sm.wor(sm.canGreenGateGlitch(),
+                                                                    sm.wor(sm.canBlueGateGlitch(),
                                                                            sm.haveItem('Wave'))))
     }, internal=True,
        start={'spawn':0x0201, 'doors':[0x54,0x55], 'patches':[RomPatches.SpeedAreaBlueDoors], 'knows':['BubbleMountainWallJump'], 'solveArea': "Bubble Norfair Bottom"}),
@@ -533,8 +533,7 @@ accessPoints = [
     AccessPoint('Crab Hole Bottom Left', 'WestMaridia', {
         'Main Street Bottom': Cache.ldeco('CHBL_MSB',
                                           lambda sm: sm.wand(sm.canExitCrabHole(),
-                                                             sm.wor(sm.wand(sm.haveItem('Super'),
-                                                                            sm.knowsGreenGateGlitch()),
+                                                             sm.wor(sm.canGreenGateGlitch(),
                                                                     RomPatches.has(RomPatches.AreaRandoGatesOther)))),
         # this transition leads to EastMaridia directly
         'Oasis Bottom': Cache.ldeco('CHBL_OB',

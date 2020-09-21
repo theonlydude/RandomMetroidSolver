@@ -474,17 +474,16 @@ define_location(
         'Crocomire Room Top': lambda sm: SMBool(True)
     },
     Available=lambda loc, sm: sm.wand(sm.enoughStuffCroc(),
-                                    sm.wor(sm.wand(sm.haveItem('Morph'),
-                                                   sm.canFly()),
-                                           sm.wand(sm.haveItem('SpeedBooster'),
-                                                   sm.wor(sm.knowsShortCharge(),
-                                                          sm.canUsePowerBombs())),
-                                           sm.wand(sm.haveItem('Morph'),
-                                                   sm.wor(sm.haveItem('SpeedBooster'),
-                                                          sm.canSpringBallJump()),
-                                                   sm.haveItem('HiJump')), # jump from the yellow plateform ennemy
-                                           sm.wand(sm.haveItem('Super'),
-                                                   sm.knowsGreenGateGlitch())))
+                                      sm.wor(sm.wand(sm.haveItem('Morph'),
+                                                     sm.canFly()),
+                                             sm.wand(sm.haveItem('SpeedBooster'),
+                                                     sm.wor(sm.knowsShortCharge(),
+                                                            sm.canUsePowerBombs())),
+                                             sm.wand(sm.haveItem('Morph'),
+                                                     sm.wor(sm.haveItem('SpeedBooster'),
+                                                            sm.canSpringBallJump()),
+                                                     sm.haveItem('HiJump')), # jump from the yellow plateform ennemy
+                                             sm.canGreenGateGlitch()))
 ),
 define_location(
     Area="Norfair",
@@ -537,10 +536,10 @@ define_location(
     },
     Available=lambda loc, sm: sm.wand(sm.traverse('SingleChamberRight'), sm.traverse('DoubleChamberRight')),
     PostAvailable=lambda loc, sm: sm.wor(sm.haveItem('Morph'), # exit through lower passage under the spikes
-                                       sm.wand(sm.wor(sm.haveItem('SpaceJump'), # exit through blue gate
-                                                      sm.haveItem('Grapple')),
-                                               sm.wor(sm.wand(sm.knowsGreenGateGlitch(), sm.heatProof()), # hell run + green gate glitch is too much
-                                                      sm.haveItem('Wave'))))
+                                         sm.wand(sm.wor(sm.haveItem('SpaceJump'), # exit through blue gate
+                                                        sm.haveItem('Grapple')),
+                                                 sm.wor(sm.wand(sm.canBlueGateGlitch(), sm.heatProof()), # hell run + green gate glitch is too much
+                                                        sm.haveItem('Wave'))))
 ),
 define_location(
     Area="LowerNorfair",
@@ -1582,8 +1581,7 @@ define_location(
                                                     sm.wand(sm.haveItem('SpeedBooster'),
                                                             sm.wor(sm.knowsShortCharge(),
                                                                    sm.canUsePowerBombs()))),
-                                             sm.wand(sm.haveItem('Super'), # from grapple room
-                                                     sm.knowsGreenGateGlitch(),
+                                             sm.wand(sm.canGreenGateGlitch(), # from grapple room
                                                      sm.canFly()))), # TODO::test if accessible with a spark (short charge), and how many etanks required
     PostAvailable=lambda loc, sm: sm.wor(sm.haveItem('Morph'), # normal exit
                                          sm.wand(sm.haveItem('Super'), # go back to grapple room

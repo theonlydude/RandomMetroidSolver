@@ -48,17 +48,8 @@ class VersionedCache(object):
 
     def reset(self):
         # reinit the whole cache
-        key = 0
-
-        if self.debug:
-            self.masterCache = Debug_MasterCache()
-            self.cache = Debug_Cache()
-            self.cache['key'] = key
-        else:
-            self.masterCache = { }
-            self.cache = { }
-
-        self.masterCache[key] = self.cache
+        self.masterCache = Debug_MasterCache() if self.debug else { }
+        self.update(0)
 
     def update(self, newKey):
         cache = self.masterCache.get(newKey, None)

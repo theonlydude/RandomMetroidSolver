@@ -38,64 +38,62 @@ class Debug_Cache(dict):
         if ret != self[name]:
             print("ERROR: cache ({}) != current ({}) for {}".format(self[name], ret, name))
 
-class Cache:
-    cache = {}
-    masterCache = {}
-    funcs = set()
-    lambdas = set()
-    debug = False
+class VersionedCache(object):
+    def __init__(self):
+        self.cache = {}
+        self.masterCache = {}
+        self.funcs = set()
+        self.lambdas = set()
+        self.debug = False
 
-    @staticmethod
-    def reset():
+    def reset(self):
         # reinit the whole cache
         key = 0
 
-        if Cache.debug:
-            Cache.masterCache = Debug_MasterCache()
-            Cache.cache = Debug_Cache()
-            Cache.cache['key'] = key
+        if self.debug:
+            self.masterCache = Debug_MasterCache()
+            self.cache = Debug_Cache()
+            self.cache['key'] = key
         else:
-            Cache.masterCache = { }
-            Cache.cache = { }
+            self.masterCache = { }
+            self.cache = { }
 
-        Cache.masterCache[key] = Cache.cache
+        self.masterCache[key] = self.cache
 
-    @staticmethod
-    def update(newKey):
-        cache = Cache.masterCache.get(newKey, None)
+    def update(self, newKey):
+        cache = self.masterCache.get(newKey, None)
         if cache is None:
-            cache = Debug_Cache(key=newKey) if Cache.debug else { }
-            Cache.cache = cache
-            Cache.masterCache[newKey] = cache
+            cache = Debug_Cache(key=newKey) if self.debug else { }
+            self.cache = cache
+            self.masterCache[newKey] = cache
         else:
-            Cache.cache = cache
+            self.cache = cache
 
-    @staticmethod
-    def decorator(func):
+    def decorator(self, func):
         name = func.__name__
-        Cache.funcs.add(name)
-        return Cache._decorate(name, func)
+        self.funcs.add(name)
+        return self._decorate(name, func)
 
     # for lambdas
-    @staticmethod
-    def ldeco(name, func):
-        Cache.lambdas.add(name)
-        return Cache._decorate(name, func)
+    def ldeco(self, name, func):
+        self.lambdas.add(name)
+        return self._decorate(name, func)
 
-    @staticmethod
-    def _decorate(name, func):
-        def _decorator(self):
-            ret = Cache.cache.get(name, None)
+    def _decorate(self, name, func):
+        def _decorator(arg):
+            ret = self.cache.get(name, None)
             if ret is not None:
-                if Cache.debug and name in Cache.funcs:
-                    ret = func(self)
-                    Cache.cache.validate(name, ret)
+                if self.debug and name in self.funcs:
+                    ret = func(arg)
+                    self.cache.validate(name, ret)
                 return ret
             else:
-                ret = func(self)
-                Cache.cache[name] = ret
+                ret = func(arg)
+                self.cache[name] = ret
                 return ret
         return _decorator
+
+Cache = VersionedCache()
 
 class RequestCache(object):
     def __init__(self):

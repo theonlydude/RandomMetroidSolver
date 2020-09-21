@@ -24,6 +24,7 @@ from rom import RomReader
 from rom_patches import RomPatches
 from ips import IPS_Patch
 from randomizer import energyQties, progDiffs, morphPlacements, majorsSplits, speeds
+from doorsmanager import DoorsManager
 
 # put an expiration date to the default cookie to have it kept between browser restart
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
@@ -851,6 +852,8 @@ def getAddressesToRead(plando=False):
     # start ap
     addresses["misc"].append(0x10F200)
     addresses["misc"].append(0x10F201)
+    # random doors
+    addresses["misc"] += DoorsManager.getAddressesToRead()
 
     # ranges [low, high]
     ## doorasm

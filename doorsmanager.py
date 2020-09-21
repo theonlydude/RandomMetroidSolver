@@ -201,3 +201,12 @@ class DoorsManager():
     def writeDoorsColor(rom):
         for door in DoorsManager.doors.values():
             door.writeColor(rom)
+
+    # call from web
+    @staticmethod
+    def getAddressesToRead():
+        ret = []
+        for door in DoorsManager.doors.values():
+            ret.append(door.address)
+            ret.append(door.address+1)
+        return ret

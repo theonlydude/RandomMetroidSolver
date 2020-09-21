@@ -246,7 +246,7 @@ if __name__ == "__main__":
     parser.add_argument('--seedIps', help='ips generated from previous seed', dest='seedIps', default=None)
     parser.add_argument('--jm,', help="display data used by jm for its stats", dest='jm', action='store_true', default=False)
     parser.add_argument('--doorsColorsRando', help='randomize color of colored doors', dest='doorsColorsRando',
-                        action='store_true', default=False)
+                        nargs='?', const=True, default=False)
 
     # parse args
     args = parser.parse_args()
@@ -356,6 +356,10 @@ if __name__ == "__main__":
         areaRandom = True
         args.area = bool(random.getrandbits(1))
     logger.debug("area: {}".format(args.area))
+
+    if args.doorsColorsRando == 'random':
+        args.doorsColorsRando = bool(random.getrandbits(1))
+    logger.debug("doorsColorsRando: {}".format(args.doorsColorsRando))
 
     bossesRandom = False
     if args.bosses == 'random':

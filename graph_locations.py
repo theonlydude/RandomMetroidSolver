@@ -1101,7 +1101,7 @@ define_location(
         'Etecoons Bottom': lambda sm: SMBool(True)
     },
     Available=lambda loc, sm: sm.wand(sm.haveItem('Morph'),
-                                      sm.wor(sm.haveItem('Missile'), sm.canUsePowerBombs(), sm.haveItem('ScrewAttack'))) # beetoms
+                                      sm.wor(sm.haveMissileOrSuper(), sm.canUsePowerBombs(), sm.haveItem('ScrewAttack'))) # beetoms
 ),
 define_location(
     Area="Brinstar",

@@ -1,4 +1,3 @@
-from singleton import Singleton
 from smbool import SMBool
 from rom_patches import RomPatches
 
@@ -67,7 +66,7 @@ class Door(object):
     def readColor(self, rom):
         self.setColor(plm2colors[rom.readWord(self.address)])
 
-class DoorsManager(metaclass=Singleton):
+class DoorsManager():
     doors = {
         # crateria
         'LandingSiteRight': Door('LandingSiteRight', 0x0, 'green'),

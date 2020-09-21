@@ -53,19 +53,18 @@ class Cache:
         if Cache.debug:
             Cache.masterCache = Debug_MasterCache()
             Cache.cache = Debug_Cache()
+            Cache.cache['key'] = key
         else:
             Cache.masterCache = { }
             Cache.cache = { }
 
-        Cache.cache['key'] = key
         Cache.masterCache[key] = Cache.cache
 
     @staticmethod
     def update(newKey):
         cache = Cache.masterCache.get(newKey, None)
         if cache is None:
-            cache = Debug_Cache() if Cache.debug else { }
-            cache['key'] = newKey
+            cache = Debug_Cache(key=newKey) if Cache.debug else { }
             Cache.cache = cache
             Cache.masterCache[newKey] = cache
         else:

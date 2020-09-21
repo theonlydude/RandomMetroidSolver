@@ -4,6 +4,7 @@ import sys, argparse
 from solver.interactiveSolver import InteractiveSolver
 from solver.standardSolver import StandardSolver
 from solver.conf import Conf
+from cache import Cache
 import log
 
 def interactiveSolver(args):
@@ -120,6 +121,7 @@ if __name__ == "__main__":
     parser.add_argument('--checkDuplicateMajor', dest="checkDuplicateMajor", action='store_true',
                         help="print a warning if the same major is collected more than once")
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
+    parser.add_argument('--debug-cache', help="activate debug logging for the cache", dest='debug_cache', action='store_true')
     parser.add_argument('--firstItemsLog', '-1',
                         help="path to file where for each item type the first time it was found and where will be written (spoilers!)",
                         nargs='?', default=None, type=str, dest='firstItemsLog')
@@ -189,6 +191,7 @@ if __name__ == "__main__":
             sys.exit(-1)
 
     log.init(args.debug)
+    Cache.debug = args.debug_cache
 
     if args.interactive == True:
         interactiveSolver(args)

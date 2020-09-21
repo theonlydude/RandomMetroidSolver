@@ -9,6 +9,7 @@ from utils import PresetLoader
 from solver.conf import Conf
 from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils, getAccessPoint
 from parameters import easy, medium, hard, harder, hardcore, mania, infinity
+from doorsmanager import DoorsManager
 
 class CommonSolver(object):
     def loadRom(self, rom, interactive=False, magic=None, startAP=None):
@@ -63,6 +64,7 @@ class CommonSolver(object):
             else:
                 self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
 
+        DoorsManager.setDoorsColor()
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
         # store at each step how many locations are available

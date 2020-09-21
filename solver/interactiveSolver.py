@@ -15,6 +15,7 @@ from parameters import hard, infinity
 from solver.solverState import SolverState
 from solver.comeback import ComeBack
 from rando.ItemLocContainer import ItemLocation
+from doorsmanager import DoorsManager
 import log
 
 class InteractiveSolver(CommonSolver):
@@ -70,6 +71,7 @@ class InteractiveSolver(CommonSolver):
         self.loadPreset(self.presetFileName)
 
         self.loadRom(rom, interactive=True, magic=magic, startAP=startAP)
+        DoorsManager.setDoorsColor()
         # in plando/tracker always consider that we're doing full
         self.majorsSplit = 'Full'
 
@@ -106,6 +108,8 @@ class InteractiveSolver(CommonSolver):
         state = SolverState()
         state.fromJson(stateJson)
         state.toSolver(self)
+
+        DoorsManager.setDoorsColor()
 
         self.loadPreset(self.presetFileName)
 

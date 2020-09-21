@@ -136,7 +136,8 @@ class DoorsManager():
     def traverse(self, doorName):
         return DoorsManager.doors[doorName].traverse(self.smbm)
 
-    def setDoorsColor(self):
+    @staticmethod
+    def setDoorsColor():
         # depending on loaded patches, force some doors to blue, excluding them from randomization
         if RomPatches.has(RomPatches.BlueBrinstarBlueDoor):
             DoorsManager.doors['ConstructionZoneRight'].forceBlue()
@@ -171,7 +172,8 @@ class DoorsManager():
         if RomPatches.has(RomPatches.CrabShaftBlueDoor):
             DoorsManager.doors['CrabShaftRight'].forceBlue()
 
-    def randomize(self):
+    @staticmethod
+    def randomize():
         for door in DoorsManager.doors.values():
             door.randomize()
 

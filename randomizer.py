@@ -565,10 +565,9 @@ if __name__ == "__main__":
                                   args.escapeRando, minimizerN, dotFile,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
 
-    doorsManager = DoorsManager()
-    doorsManager.setDoorsColor()
+    DoorsManager.setDoorsColor()
     if args.doorsColorsRando == True:
-        doorsManager.randomize()
+        DoorsManager.randomize()
 
     if args.patchOnly == False:
         try:

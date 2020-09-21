@@ -39,6 +39,8 @@ class Debug_Cache(dict):
             print("ERROR: cache ({}) != current ({}) for {}".format(self[name], ret, name))
 
 class VersionedCache(object):
+    __slots__ = ( 'cache', 'masterCache', 'funcs', 'lambdas', 'debug' )
+
     def __init__(self):
         self.cache = {}
         self.masterCache = {}

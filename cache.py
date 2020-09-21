@@ -33,7 +33,7 @@ class Debug_Cache(dict):
             print("cache added for {}: {}".format(name, self[name]))
 
     def validate(self, name, ret):
-        if ret != self[name] and name in Cache.funcs:
+        if ret != self[name]:
             print("ERROR: cache ({}) != current ({}) for {}".format(self[name], ret, name))
 
 class Cache:
@@ -71,26 +71,22 @@ class Cache:
     def decorator(func):
         name = func.__name__
         Cache.funcs.add(name)
-        def _decorator(self):
-            ret = Cache.cache.get(name, None)
-            if ret is not None:
-                if Cache.debug:
-                    ret = func(self)
-                    Cache.cache.validate(name, ret)
-                return ret
-            else:
-                ret = func(self)
-                Cache.cache[name] = ret
-                return ret
-        return _decorator
+        return Cache._decorate(name, func)
 
     # for lambdas
     @staticmethod
     def ldeco(name, func):
         Cache.lambdas.add(name)
+        return Cache._decorate(name, func)
+
+    @staticmethod
+    def _decorate(name, func):
         def _decorator(self):
             ret = Cache.cache.get(name, None)
             if ret is not None:
+                if Cache.debug and name in Cache.funcs:
+                    ret = func(self)
+                    Cache.cache.validate(name, ret)
                 return ret
             else:
                 ret = func(self)

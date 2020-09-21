@@ -185,7 +185,7 @@ define_location(
     },
     Available=lambda loc, sm: sm.wand(sm.wor(sm.canMockball(),
                                              sm.haveItem('SpeedBooster')),
-                                      sm.traverse('EarlySupersRight'))
+                                      sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.traverse('EarlySupersRight')))
 ),
 define_location(
     Area="Brinstar",

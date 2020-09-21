@@ -226,11 +226,37 @@ class RandoServices(object):
         else:
             del itemLocDict[morphLocItem]
 
-    def processMorphPlacements(self, ap, container, comebackCheck, itemLocDict, curLocs):
+    def processLateAmmo(self, itemLocDict, ap, container):
+        # exclude ammo from itemLocDict, if just ammo in there,
+        # leave only one type
+        noAmmoLocDict = {item:locList for item,locList in itemLocDict.items() if item.Category != "Ammo" or not self.isProgression(item, ap, container)}
+        if len(noAmmoLocDict) > 0:
+            self.log.debug('processLateAmmo. no ammo')
+            itemLocDict.clear()
+            itemLocDict.update(noAmmoLocDict)
+            return
+        # itemLocDict is made up only of progression ammo
+        def updateLocDictWithSingleAmmoType(ammoType):
+            nonlocal itemLocDict
+            ammoLocDict = {item:locList for item,locList in itemLocDict.items() if item.Type == ammoType}
+            assert len(ammoLocDict) > 0
+            itemLocDict.clear()
+            itemLocDict.update(ammoLocDict)
+        ammoTypes = ['Missile', 'PowerBomb']
+        random.shuffle(ammoTypes)
+        for ammo in ammoTypes+['Super']:
+            if any(item.Type == ammo for item in itemLocDict):
+                self.log.debug('processLateAmmo. '+ammo+' prog')
+                updateLocDictWithSingleAmmoType(ammo)
+                return
+
+    def processPlacementRestrictions(self, ap, container, comebackCheck, itemLocDict, curLocs):
         if self.restrictions.isEarlyMorph():
             self.processEarlyMorph(ap, container, comebackCheck, itemLocDict, curLocs)
         elif self.restrictions.isLateMorph():
             self.processLateMorph(container, itemLocDict)
+        if self.restrictions.isLateAmmo():
+            self.processLateAmmo(itemLocDict, ap, container)
 
     # main logic function to be used by fillers. gives possible locations for each item.
     # ap: AP to check from
@@ -278,7 +304,7 @@ class RandoServices(object):
 #            self.log.debug('getPossiblePlacements. itemType=' + itemType + ', locs='+str([loc.Name for loc in locations]))
             for item in items:
                 itemLocDict[item] = locations
-        self.processMorphPlacements(ap, container, comebackCheck, itemLocDict, curLocs)
+        self.processPlacementRestrictions(ap, container, comebackCheck, itemLocDict, curLocs)
         self.printItemLocDict(itemLocDict)
         self.log.debug('possibleProg='+str(possibleProg))
         return (itemLocDict, possibleProg)

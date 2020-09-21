@@ -147,6 +147,9 @@ if __name__ == "__main__":
     parser.add_argument('--strictMinors',
                         help="minors quantities values will be strictly followed instead of being probabilities",
                         dest='strictMinors', nargs='?', const=True, default=False)
+    parser.add_argument('--lateAmmo',
+                        help="place progression ammo as late as possible",
+                        dest='lateAmmo', nargs='?', const=True, default=False)
     parser.add_argument('--majorsSplit',
                         help="how to split majors/minors: Full, Major, Chozo",
                         dest='majorsSplit', nargs='?', choices=majorsSplits + ['random'], default='Full')
@@ -431,11 +434,14 @@ if __name__ == "__main__":
         if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
             optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for Chozo")
 
+    if progSpeed in ['speedrun', 'basic']:
+        optErrMsg += forceArg('lateAmmo', False, "'Late ammo' forced to off because of progression speed")
+
     if args.patchOnly == False:
         print("SEED: " + str(seed))
 
     # fill restrictions dict
-    restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement }
+    restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "ammo": "normal" if not args.lateAmmo else "late" }
     restrictions['MajorMinor'] = args.majorsSplit
     seedCode = 'X'
     if majorsSplitRandom == False:

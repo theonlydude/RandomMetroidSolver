@@ -29,6 +29,9 @@ class Restrictions(object):
     def isLateMorph(self):
         return self.settings.restrictions['Morph'] == 'late'
 
+    def isLateAmmo(self):
+        return self.settings.restrictions['ammo'] == 'late'
+
     def isChozo(self):
         return self.split == 'Chozo'
 

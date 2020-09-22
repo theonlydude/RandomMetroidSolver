@@ -3,28 +3,14 @@
 create table if not exists extended_stats (
   -- uniq identifier for join with item_locs
   id int unsigned not null auto_increment,
-  -- randomizer parameters
-  preset varchar(32),
-  area boolean,
-  boss boolean,
-  majorsSplit varchar(8),
-  progSpeed varchar(8),
-  morphPlacement varchar(8),
-  suitsRestriction boolean,
-  progDiff varchar(8),
-  superFunMovement boolean,
-  superFunCombat boolean,
-  superFunSuit boolean,
-  gravityBehaviour varchar(16),
-  nerfedCharge boolean,
-  maxDifficulty varchar(32),
-  startAP varchar(32),
-  doorsColorsRando boolean,
-  lateAmmo boolean,
+  -- skill preset
+  randoPreset varchar(32),
+  -- randomizer preset
+  skillPreset varchar(32),
 
   -- how many seeds
   count int unsigned default 0,
-  primary key(preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, doorsColorsRando, lateAmmo),
+  primary key(randoPreset, skillPreset),
   index(id)
 );
 -- alter table extended_stats drop version;

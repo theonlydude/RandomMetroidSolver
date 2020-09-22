@@ -57,7 +57,7 @@ if __name__ == "__main__":
     parser.add_argument('--patchOnly',
                         help="only apply patches, do not perform any randomization", action='store_true',
                         dest='patchOnly', default=False)
-    parser.add_argument('--param', '-p', help="the input parameters", nargs='+',
+    parser.add_argument('--param', '-p', help="the input parameters",
                         default=None, dest='paramsFileName')
     parser.add_argument('--dir',
                         help="output directory for ROM and dot files",
@@ -240,6 +240,7 @@ if __name__ == "__main__":
     parser.add_argument('--invert', help="invert color range", dest='invert', action='store_true', default=False)
     parser.add_argument('--ext_stats', help="dump extended stats SQL", nargs='?', default=None, dest='extStatsFilename')
     parser.add_argument('--randoPreset', help="rando preset file", dest="randoPreset", nargs='?', default=None)
+    parser.add_argument('--fakeRandoPreset', help="for prog speed stats", dest="fakeRandoPreset", nargs='?', default=None)
     parser.add_argument('--plandoRando', help="json string with already placed items/locs", dest="plandoRando",
                         nargs='?', default=None)
     parser.add_argument('--sprite', help='use a custom sprite for Samus', dest='sprite', default=None)
@@ -284,8 +285,8 @@ if __name__ == "__main__":
 
     # if diff preset given, load it
     if args.paramsFileName is not None:
-        PresetLoader.factory(args.paramsFileName[0]).load()
-        preset = os.path.splitext(os.path.basename(args.paramsFileName[0]))[0]
+        PresetLoader.factory(args.paramsFileName).load()
+        preset = os.path.splitext(os.path.basename(args.paramsFileName))[0]
 
         if args.preset is not None:
             preset = args.preset
@@ -363,6 +364,7 @@ if __name__ == "__main__":
     if args.doorsColorsRando == 'random':
         args.doorsColorsRando = bool(random.getrandbits(1))
     logger.debug("doorsColorsRando: {}".format(args.doorsColorsRando))
+    logger.debug("lateAmmo: {}".format(args.lateAmmo))
 
     bossesRandom = False
     if args.bosses == 'random':
@@ -643,29 +645,13 @@ if __name__ == "__main__":
 
     # generate extended stats
     if args.extStatsFilename != None:
-        if args.noGravHeat == True:
-            gravityBehaviour = 'Vanilla'
-        elif args.progressiveSuits == True:
-            gravityBehaviour = 'Progressive'
-        else:
-            gravityBehaviour = 'Balanced'
-        if args.maxDifficulty == None:
-            args.maxDifficulty = 'no difficulty cap'
-        parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses,
-                      'majorsSplit': args.majorsSplit,
-                      'startAP': args.startAP,
-                      'gravityBehaviour': gravityBehaviour,
-                      'nerfedCharge': args.nerfedCharge,
-                      'maxDifficulty': args.maxDifficulty,
-                      'progSpeed': progSpeed, 'morphPlacement': args.morphPlacement,
-                      'suitsRestriction': args.suitsRestriction, 'progDiff': progDiff,
-                      'superFunMovement': 'Movement' in args.superFun,
-                      'superFunCombat': 'Combat' in args.superFun,
-                      'superFunSuit': 'Suits' in args.superFun,
-                      'doorsColorsRando': args.doorsColorsRando,
-                      'lateAmmo': args.lateAmmo}
         with open(args.extStatsFilename, 'a') as extStatsFile:
-            db.DB.dumpExtStatsItems(parameters, locsItems, extStatsFile)
+            skillPreset = os.path.splitext(os.path.basename(args.paramsFileName))[0]
+            if args.fakeRandoPreset is not None:
+                randoPreset = args.fakeRandoPreset
+            else:
+                randoPreset = os.path.splitext(os.path.basename(args.randoPreset))[0]
+            db.DB.dumpExtStatsItems(skillPreset, randoPreset, locsItems, extStatsFile)
 
     try:
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source

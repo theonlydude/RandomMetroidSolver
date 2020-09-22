@@ -2618,13 +2618,16 @@ def extStats():
         skillPreset = request.vars.preset
         randoPreset = request.vars.randoPreset
 
-        # load rando preset
+        # load rando preset to get majors split
         fullPath = 'rando_presets/{}.json'.format(randoPreset)
+        if not os.path.isfile(fullPath):
+            raise HTTP(400, "Unknown rando preset: {}".format(e))
         try:
             with open(fullPath) as jsonFile:
-                randoPreset = json.load(jsonFile)
+                randoPresetContent = json.load(jsonFile)
         except Exception as e:
             raise HTTP(400, "Can't load the rando preset: {}".format(e))
+        majorsSplit = randoPresetContent["majorsSplit"]
 
         # load skill preset
         fullPath = '{}/{}.json'.format(getPresetDir(skillPreset), skillPreset)
@@ -2632,40 +2635,10 @@ def extStats():
             skillPresetContent = PresetLoader.factory(fullPath).params
             completePreset(skillPresetContent)
         except Exception as e:
-            raise HTTP(400, "Error loading the preset: {}".format(e))
-
-        parameters = {
-            'preset': skillPreset,
-            'area': 'areaRandomization' in randoPreset and randoPreset['areaRandomization'] == 'on',
-            'boss': 'bossRandomization' in randoPreset and randoPreset['bossRandomization'] == 'on',
-            'gravityBehaviour': randoPreset['gravityBehaviour'],
-            'nerfedCharge': randoPreset['nerfedCharge'] == 'on',
-            'maxDifficulty': randoPreset['maxDifficulty'],
-            'doorsColorsRando': 'doorsColorsRando' in randoPreset and randoPreset['doorsColorsRando'] == 'on',
-            'lateAmmo': 'lateAmmo' in randoPreset and randoPreset['lateAmmo'] == 'on',
-            # parameters which can be random:
-            'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
-            'startAP': randoPreset['startLocation'] if 'startLocation' in randoPreset else 'Landing Site',
-            'progSpeed': randoPreset['progressionSpeed'] if 'progressionSpeed' in randoPreset else 'VARIAble',
-            'morphPlacement': randoPreset['morphPlacement'] if 'morphPlacement' in randoPreset else 'early',
-            'suitsRestriction': 'suitsRestriction' in randoPreset and randoPreset['suitsRestriction'] == 'on',
-            'progDiff': randoPreset['progressionDifficulty'] if 'progressionDifficulty' in randoPreset else 'normal',
-            'superFunMovement': 'funMovement' in randoPreset and randoPreset['funMovement'] == 'on',
-            'superFunCombat': 'funCombat' in randoPreset and randoPreset['funCombat'] == 'on',
-            'superFunSuit': 'funSuits' in randoPreset and randoPreset['funSuits'] == 'on'
-        }
-
-        if randoPreset['suitsRestriction'] == "random":
-            parameters["suitsRestriction"] = "random"
-        if randoPreset['funMovement'] == "random":
-            parameters["superFunMovement"] = "random"
-        if randoPreset['funCombat'] == "random":
-            parameters["superFunCombat"] = "random"
-        if randoPreset['funSuits'] == "random":
-            parameters["superFunSuit"] = "random"
+            raise HTTP(400, "Error loading the skill preset: {}".format(e))
 
         DB = db.DB()
-        (itemsStats, techniquesStats, difficulties, solverStatsRaw) = DB.getExtStat(parameters)
+        (itemsStats, techniquesStats, difficulties, solverStatsRaw) = DB.getExtStat(skillPreset, randoPreset)
         DB.close()
 
         solverStats = {}
@@ -2695,7 +2668,7 @@ def extStats():
         difficulties = None
         solverStats = None
         skillPresetContent = None
-        parameters = None
+        majorsSplit = None
 
     (randoPresets, tourRandoPresets) = loadRandoPresetsList()
     # remove random presets those statistics are useless
@@ -2707,7 +2680,7 @@ def extStats():
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
                 itemsStats=itemsStats, techniquesStats=techniquesStats,
                 categories=Knows.categories, knowsDesc=Knows.desc, skillPresetContent=skillPresetContent,
-                locations=locations, parameters=parameters, difficulties=difficulties, solverStats=solverStats)
+                locations=locations, majorsSplit=majorsSplit, difficulties=difficulties, solverStats=solverStats)
 
 def transformStats(stats, maxRange=106):
     # input a list [(x, value), (x, value), ..., (x, value)]
@@ -2740,34 +2713,16 @@ def zipStats(stats):
 def initProgSpeedStatsSession():
     if session.progSpeedStats == None:
         session.progSpeedStats = {}
-        session.progSpeedStats['randoPreset'] = 'Season_Races'
         session.progSpeedStats['majorsSplit'] = 'Major'
 
 def updateProgSpeedStatsSession():
     if session.progSpeedStats is None:
         session.progSpeedStats = {}
 
-    session.progSpeedStats['randoPreset'] = request.vars.randoPreset
     session.progSpeedStats['majorsSplit'] = request.vars.majorsSplit
 
 def validateProgSpeedStatsParams():
-    for (preset, directory) in [("randoPreset", "rando_presets")]:
-        if request.vars[preset] == None:
-            return (False, "Missing parameter preset")
-        preset = request.vars[preset]
-
-        if IS_ALPHANUMERIC()(preset)[1] is not None:
-            return (False, "Wrong value for preset, must be alphanumeric")
-
-        if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
-            return (False, "Wrong length for preset, name must be between 1 and 32 characters")
-
-        # check that preset exists
-        fullPath = '{}/{}.json'.format(directory, preset)
-        if not os.path.isfile(fullPath):
-            return (False, "Unknown preset: {}".format(preset))
-
-    if request.vars['majorsSplit'] not in ['Full', 'Major']:
+    if request.vars.majorsSplit not in ['Full', 'Major']:
             return (False, "Wrong value for majorsSplit, authorized values Full/Major")
 
     return (True, None)
@@ -2785,46 +2740,9 @@ def progSpeedStats():
 
         updateProgSpeedStatsSession()
 
-        randoPreset = request.vars.randoPreset
-
-        # load rando preset
-        fullPath = 'rando_presets/{}.json'.format(randoPreset)
-        try:
-            with open(fullPath) as jsonFile:
-                randoPreset = json.load(jsonFile)
-        except Exception as e:
-            raise HTTP(400, "Can't load the rando preset: {}".format(e))
-
-        parameters = {
-            'preset': randoPreset['preset'] if 'preset' in randoPreset else 'regular',
-            'area': 'areaRandomization' in randoPreset and randoPreset['areaRandomization'] == 'on',
-            'boss': 'bossRandomization' in randoPreset and randoPreset['bossRandomization'] == 'on',
-            'gravityBehaviour': randoPreset['gravityBehaviour'],
-            'nerfedCharge': randoPreset['nerfedCharge'] == 'on',
-            'maxDifficulty': randoPreset['maxDifficulty'],
-            'doorsColorsRando': 'doorsColorsRando' in randoPreset and randoPreset['doorsColorsRando'] == 'on',
-            'lateAmmo': 'lateAmmo' in randoPreset and randoPreset['lateAmmo'] == 'on',
-            # parameters which can be random:
-            'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
-            'startAP': randoPreset['startLocation'] if 'startLocation' in randoPreset else 'Landing Site',
-            'morphPlacement': randoPreset['morphPlacement'] if 'morphPlacement' in randoPreset else 'early',
-            'suitsRestriction': 'suitsRestriction' in randoPreset and randoPreset['suitsRestriction'] == 'on',
-            'progDiff': randoPreset['progressionDifficulty'] if 'progressionDifficulty' in randoPreset else 'normal',
-            'superFunMovement': 'funMovement' in randoPreset and randoPreset['funMovement'] == 'on',
-            'superFunCombat': 'funCombat' in randoPreset and randoPreset['funCombat'] == 'on',
-            'superFunSuit': 'funSuits' in randoPreset and randoPreset['funSuits'] == 'on'
-        }
-
-        if randoPreset['suitsRestriction'] == "random":
-            parameters["suitsRestriction"] = "random"
-        if randoPreset['funMovement'] == "random":
-            parameters["superFunMovement"] = "random"
-        if randoPreset['funCombat'] == "random":
-            parameters["superFunCombat"] = "random"
-        if randoPreset['funSuits'] == "random":
-            parameters["superFunSuit"] = "random"
-
-        parameters['majorsSplit'] = request.vars.majorsSplit
+        skillPreset = "Season_Races"
+        randoPreset = "Season_Races"
+        majorsSplit = request.vars.majorsSplit
 
         DB = db.DB()
         progSpeedStatsRaw = {}
@@ -2837,8 +2755,8 @@ def progSpeedStats():
         realProgSpeeds = []
         realProgSpeedsName = []
         for progSpeed in progSpeeds:
-            parameters['progSpeed'] = progSpeed
-            progSpeedStatsRaw[progSpeed] = DB.getProgSpeedStat(parameters)
+            curRandoPreset = "{}_{}_{}".format(randoPreset, majorsSplit, progSpeed)
+            progSpeedStatsRaw[progSpeed] = DB.getProgSpeedStat(skillPreset, curRandoPreset)
 
             if len(progSpeedStatsRaw[progSpeed]) != 0:
                 progSpeedStats[progSpeed] = {}
@@ -2880,10 +2798,9 @@ def progSpeedStats():
     else:
         progSpeedStats = None
 
-    randoPresets = ['Season_Races']
     majorsSplit = ['Major', 'Full']
 
-    return dict(randoPresets=randoPresets, majorsSplit=majorsSplit, progSpeedStats=progSpeedStats)
+    return dict(majorsSplit=majorsSplit, progSpeedStats=progSpeedStats)
 
 ipsBasePath = "plandository/"
 def plandorepo():

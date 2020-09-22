@@ -81,9 +81,12 @@ class VersionedCache(object):
         def _decorator(arg):
             ret = self.cache.get(name, None)
             if ret is not None:
-                if self.debug and name in self.funcs:
-                    ret = func(arg)
-                    self.cache.validate(name, ret)
+                # TODO: Commented-out, because this function can get
+                # called 500K times or more during a run, and so this
+                # conditional measurably affects performance.
+                # if self.debug and name in self.funcs:
+                #     ret = func(arg)
+                #     self.cache.validate(name, ret)
                 return ret
             else:
                 ret = func(arg)

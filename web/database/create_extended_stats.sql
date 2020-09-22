@@ -19,10 +19,12 @@ create table if not exists extended_stats (
   nerfedCharge boolean,
   maxDifficulty varchar(32),
   startAP varchar(32),
+  doorsColorsRando boolean,
+  lateAmmo boolean,
 
   -- how many seeds
   count int unsigned default 0,
-  primary key(preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP),
+  primary key(preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, doorsColorsRando, lateAmmo),
   index(id)
 );
 -- alter table extended_stats drop version;

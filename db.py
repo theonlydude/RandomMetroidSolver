@@ -340,7 +340,7 @@ order by r.id;"""
 
         # custom sort of the params
         paramsHead = []
-        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'doorsColorsRando', 'bossRandomization', 'minimizer', 'minimizerQty', 'minimizerTourian', 'majorsSplit', 'majorsSplitMultiSelect', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
+        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'doorsColorsRando', 'lateAmmo', 'bossRandomization', 'minimizer', 'minimizerQty', 'minimizerTourian', 'majorsSplit', 'majorsSplitMultiSelect', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
             if param in paramsSet:
                 paramsHead.append(param)
                 paramsSet.remove(param)
@@ -464,14 +464,14 @@ order by init_time;"""
 
     @staticmethod
     def dumpExtStatsItems(parameters, locsItems, sqlFile):
-        sql = """insert into extended_stats (preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, count)
+        sql = """insert into extended_stats (preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, doorsColorsRando, lateAmmo, count)
 values
-('%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, '%s', %s, '%s', '%s', 1)
+('%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, '%s', %s, '%s', '%s', %s, %s, 1)
 on duplicate key update id=LAST_INSERT_ID(id), count = count + 1;
 set @last_id = last_insert_id();
 """
 
-        sqlFile.write(sql % (parameters['preset'], parameters['area'], parameters['boss'], parameters['majorsSplit'], parameters['progSpeed'], parameters['morphPlacement'], parameters['suitsRestriction'], parameters['progDiff'], parameters['superFunMovement'], parameters['superFunCombat'], parameters['superFunSuit'], parameters['gravityBehaviour'], parameters['nerfedCharge'], parameters['maxDifficulty'], parameters['startAP']))
+        sqlFile.write(sql % (parameters['preset'], parameters['area'], parameters['boss'], parameters['majorsSplit'], parameters['progSpeed'], parameters['morphPlacement'], parameters['suitsRestriction'], parameters['progDiff'], parameters['superFunMovement'], parameters['superFunCombat'], parameters['superFunSuit'], parameters['gravityBehaviour'], parameters['nerfedCharge'], parameters['maxDifficulty'], parameters['startAP'], parameters['doorsColorsRando'], parameters['lateAmmo']))
 
         for (location, item) in locsItems.items():
             if item == 'Boss':
@@ -606,9 +606,9 @@ order by 1,2;"""
         return solverStatsOut
 
     def getWhereClause(self, parameters):
-        where = """and e.preset = '%s' and e.area = %s and e.boss = %s and e.gravityBehaviour = '%s' and e.nerfedCharge = %s """
+        where = """and e.preset = '%s' and e.area = %s and e.boss = %s and e.gravityBehaviour = '%s' and e.nerfedCharge = %s and e.doorsColorsRando = %s and e.lateAmmo = %s """
 
-        sqlParams = [parameters['preset'], parameters['area'], parameters['boss'], parameters['gravityBehaviour'], parameters['nerfedCharge']]
+        sqlParams = [parameters['preset'], parameters['area'], parameters['boss'], parameters['gravityBehaviour'], parameters['nerfedCharge'], parameters['doorsColorsRando'], parameters['lateAmmo']]
 
         if parameters["maxDifficulty"] != "random":
             where += """and e.maxDifficulty = '%s' """

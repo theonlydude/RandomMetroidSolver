@@ -661,7 +661,9 @@ if __name__ == "__main__":
                       'suitsRestriction': args.suitsRestriction, 'progDiff': progDiff,
                       'superFunMovement': 'Movement' in args.superFun,
                       'superFunCombat': 'Combat' in args.superFun,
-                      'superFunSuit': 'Suits' in args.superFun}
+                      'superFunSuit': 'Suits' in args.superFun,
+                      'doorsColorsRando': args.doorsColorsRando,
+                      'lateAmmo': args.lateAmmo}
         with open(args.extStatsFilename, 'a') as extStatsFile:
             db.DB.dumpExtStatsItems(parameters, locsItems, extStatsFile)
 

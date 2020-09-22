@@ -2641,6 +2641,8 @@ def extStats():
             'gravityBehaviour': randoPreset['gravityBehaviour'],
             'nerfedCharge': randoPreset['nerfedCharge'] == 'on',
             'maxDifficulty': randoPreset['maxDifficulty'],
+            'doorsColorsRando': 'doorsColorsRando' in randoPreset and randoPreset['doorsColorsRando'] == 'on',
+            'lateAmmo': 'lateAmmo' in randoPreset and randoPreset['lateAmmo'] == 'on',
             # parameters which can be random:
             'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
             'startAP': randoPreset['startLocation'] if 'startLocation' in randoPreset else 'Landing Site',
@@ -2800,6 +2802,8 @@ def progSpeedStats():
             'gravityBehaviour': randoPreset['gravityBehaviour'],
             'nerfedCharge': randoPreset['nerfedCharge'] == 'on',
             'maxDifficulty': randoPreset['maxDifficulty'],
+            'doorsColorsRando': 'doorsColorsRando' in randoPreset and randoPreset['doorsColorsRando'] == 'on',
+            'lateAmmo': 'lateAmmo' in randoPreset and randoPreset['lateAmmo'] == 'on',
             # parameters which can be random:
             'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
             'startAP': randoPreset['startLocation'] if 'startLocation' in randoPreset else 'Landing Site',

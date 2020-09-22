@@ -1950,6 +1950,7 @@ class RomLoader(object):
     def loadDoorsColor(self):
         DoorsManager.loadDoorsColor(self.romReader.romFile)
         DoorsManager.setDoorsColor()
+        DoorsManager.debugDoorsColor()
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

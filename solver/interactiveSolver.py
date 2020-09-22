@@ -71,7 +71,6 @@ class InteractiveSolver(CommonSolver):
         self.loadPreset(self.presetFileName)
 
         self.loadRom(rom, interactive=True, magic=magic, startAP=startAP)
-        DoorsManager.setDoorsColor()
         # in plando/tracker always consider that we're doing full
         self.majorsSplit = 'Full'
 
@@ -108,8 +107,6 @@ class InteractiveSolver(CommonSolver):
         state = SolverState()
         state.fromJson(stateJson)
         state.toSolver(self)
-
-        DoorsManager.setDoorsColor()
 
         self.loadPreset(self.presetFileName)
 

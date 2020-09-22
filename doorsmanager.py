@@ -195,9 +195,7 @@ class DoorsManager():
         toiletBottom = DoorsManager.doors['OasisTop']
         if toiletTop.color != toiletBottom.color:
             toiletBottom.setColor(toiletTop.color)
-        if LOG.getEffectiveLevel() == logging.DEBUG:
-            for door in DoorsManager.doors.values():
-                LOG.debug("{:>32}: {:>6}".format(door.name, door.color))
+        DoorsManager.debugDoorsColor()
 
     # call from rom loader
     @staticmethod
@@ -205,6 +203,9 @@ class DoorsManager():
         # for each door store it's color
         for door in DoorsManager.doors.values():
             door.readColor(rom)
+
+    @staticmethod
+    def debugDoorsColor():
         if LOG.getEffectiveLevel() == logging.DEBUG:
             for door in DoorsManager.doors.values():
                 LOG.debug("{:>32}: {:>6}".format(door.name, door.color))

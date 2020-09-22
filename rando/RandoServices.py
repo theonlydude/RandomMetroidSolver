@@ -229,7 +229,7 @@ class RandoServices(object):
     def processLateAmmo(self, itemLocDict, ap, container):
         # exclude ammo from itemLocDict, if just ammo in there,
         # leave only one type
-        noAmmoLocDict = {item:locList for item,locList in itemLocDict.items() if item.Category != "Ammo" or not self.isProgression(item, ap, container)}
+        noAmmoLocDict = {item:locList for item,locList in itemLocDict.items() if item.Category != "Ammo" or container.sm.haveItem(item.Type)}
         if len(noAmmoLocDict) > 0:
             self.log.debug('processLateAmmo. no ammo')
             itemLocDict.clear()

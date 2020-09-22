@@ -1,6 +1,9 @@
 import random
 from smbool import SMBool
 from rom_patches import RomPatches
+import log, logging
+
+LOG = log.get('DoorsManager')
 
 colorsList = ['red', 'green', 'yellow']
 
@@ -11,9 +14,9 @@ class Facing:
     Bottom = 3
 
 # door facing left - right - top   - bottom
-plmRed    = [0xc88a, 0xc890, 0xc896, 0xc89c]
-plmGreen  = [0xc872, 0xc878, 0xc87e, 0xc884]
-plmYellow = [0xc85a, 0xc860, 0xc866, 0xc86c]
+plmRed    = [0x8a,   0x90,   0x96,   0x9c]
+plmGreen  = [0x72,   0x78,   0x7e,   0x84]
+plmYellow = [0x5a,   0x60,   0x66,   0x6c]
 
 colors2plm = {
     'red': plmRed,
@@ -63,10 +66,10 @@ class Door(object):
         if not self.isRandom() or self.color == 'blue':
             return
 
-        rom.writeWord(colors2plm[self.color][self.facing], self.address)
+        rom.writeByte(colors2plm[self.color][self.facing], self.address)
 
     def readColor(self, rom):
-        plm = rom.readWord(self.address)
+        plm = rom.readByte(self.address)
         if plm in plmRed:
             self.setColor('red')
         elif plm in plmGreen:
@@ -192,6 +195,9 @@ class DoorsManager():
         toiletBottom = DoorsManager.doors['OasisTop']
         if toiletTop.color != toiletBottom.color:
             toiletBottom.setColor(toiletTop.color)
+        if LOG.getEffectiveLevel() == logging.DEBUG:
+            for door in DoorsManager.doors.values():
+                LOG.debug("{:>32}: {:>6}".format(door.name, door.color))
 
     # call from rom loader
     @staticmethod
@@ -199,6 +205,9 @@ class DoorsManager():
         # for each door store it's color
         for door in DoorsManager.doors.values():
             door.readColor(rom)
+        if LOG.getEffectiveLevel() == logging.DEBUG:
+            for door in DoorsManager.doors.values():
+                LOG.debug("{:>32}: {:>6}".format(door.name, door.color))
 
     # call from rom patcher
     @staticmethod
@@ -209,8 +218,4 @@ class DoorsManager():
     # call from web
     @staticmethod
     def getAddressesToRead():
-        ret = []
-        for door in DoorsManager.doors.values():
-            ret.append(door.address)
-            ret.append(door.address+1)
-        return ret
+        return [door.address for door in DoorsManager.doors.values()]

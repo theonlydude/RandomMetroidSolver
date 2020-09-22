@@ -187,6 +187,11 @@ class DoorsManager():
     def randomize():
         for door in DoorsManager.doors.values():
             door.randomize()
+        # set both ends of toilet to the same color to avoid soft locking in area rando
+        toiletTop = DoorsManager.doors['PlasmaSparkBottom']
+        toiletBottom = DoorsManager.doors['OasisTop']
+        if toiletTop.color != toiletBottom.color:
+            toiletBottom.setColor(toiletTop.color)
 
     # call from rom loader
     @staticmethod

@@ -4,6 +4,7 @@ from smbool import SMBool
 from rom_patches import RomPatches
 from utils import removeChars, fixEnergy
 from parameters import diff4solver, Knows
+from doorsmanager import DoorsManager
 
 class SolverState(object):
     def __init__(self, debug=False):
@@ -73,6 +74,8 @@ class SolverState(object):
             self.state["innerTransitions"] = self.getInnerTransitions(solver.areaGraph.availAccessPoints, solver.curGraphTransitions)
         else:
             self.state["innerTransitions"] = []
+        # doors colors: dict {name: color}
+        self.state["doors"] = DoorsManager.serialize()
 
     def toSolver(self, solver):
         solver.majorsSplit = self.state["majorsSplit"]
@@ -98,6 +101,7 @@ class SolverState(object):
         solver.lastAP = self.state["lastAP"]
         solver.mode = self.state["mode"]
         solver.seed = self.state["seed"]
+        DoorsManager.unserialize(self.state["doors"])
 
     def getInnerTransitions(self, availAccessPoints, curGraphTransitions):
         innerTransitions = []

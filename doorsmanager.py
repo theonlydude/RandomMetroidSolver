@@ -220,3 +220,13 @@ class DoorsManager():
     @staticmethod
     def getAddressesToRead():
         return [door.address for door in DoorsManager.doors.values()]
+
+    # for isolver state
+    @staticmethod
+    def serialize():
+        return {door.name: door.color for door in DoorsManager.doors.values()}
+
+    @staticmethod
+    def unserialize(state):
+        for name, color in state.items():
+            DoorsManager.doors[name].setColor(color)

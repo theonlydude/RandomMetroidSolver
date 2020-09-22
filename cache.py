@@ -39,7 +39,7 @@ class Debug_Cache(dict):
             print("ERROR: cache ({}) != current ({}) for {}".format(self[name], ret, name))
 
 class VersionedCache(object):
-    __slots__ = ( 'cache', 'masterCache', 'funcs', 'lambdas', 'debug' )
+    __slots__ = ( 'cache', 'masterCache', 'funcs', 'lambdas', 'debug', 'key' )
 
     def __init__(self):
         self.cache = {}
@@ -47,6 +47,7 @@ class VersionedCache(object):
         self.funcs = set()
         self.lambdas = set()
         self.debug = False
+        self.key = None
 
     def reset(self):
         # reinit the whole cache
@@ -54,13 +55,17 @@ class VersionedCache(object):
         self.update(0)
 
     def update(self, newKey):
+        if self.key == newKey and not self.debug:
+            return
         cache = self.masterCache.get(newKey, None)
         if cache is None:
             cache = Debug_Cache(key=newKey) if self.debug else { }
-            self.cache = cache
             self.masterCache[newKey] = cache
+            self.cache = cache
+            self.key = newKey
         else:
             self.cache = cache
+            self.key = newKey
 
     def decorator(self, func):
         name = func.__name__

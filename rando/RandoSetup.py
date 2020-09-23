@@ -1,7 +1,7 @@
 import copy, log, random
 
 from utils import randGaussBounds
-from smbool import SMBool
+from smbool import SMBool, smboolFalse
 from smboolmanager import SMBoolManager
 from helpers import Bosses
 from graph_access import getAccessPoint, GraphUtils
@@ -272,7 +272,7 @@ class RandoSetup(object):
             (possible, energyDiff) = self.sm.mbEtankCheck()
             if possible == True:
                 return self.okay()
-            return SMBool(False)
+            return smboolFalse
         self.sm.enoughStuffsMotherbrain = mbCheck
 
     def restoreBossChecks(self):

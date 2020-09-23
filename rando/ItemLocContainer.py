@@ -1,7 +1,7 @@
 
 import copy, log
 
-from smbool import SMBool
+from smbool import SMBool, smboolFalse
 from smboolmanager import SMBoolManager
 from collections import Counter
 
@@ -232,7 +232,7 @@ class ItemLocContainer(object):
         for il in self.itemLocations:
             loc = il.Location
             if loc.restricted and loc.difficulty == True:
-                loc.difficulty = SMBool(False)
+                loc.difficulty = smboolFalse
 
     def getDistinctItems(self):
         itemTypes = {item.Type for item in self.itemPool}

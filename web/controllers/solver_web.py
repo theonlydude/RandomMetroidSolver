@@ -1751,8 +1751,8 @@ class WS(object):
     @staticmethod
     def factory():
         scope = request.vars.scope
-        if scope not in ["area", "item", "common"]:
-            raiseHttp(400, "Unknown scope, must be area/item/common", True)
+        if scope not in ["area", "item", "common", "door"]:
+            raiseHttp(400, "Unknown scope, must be area/item/common/door", True)
 
         action = request.vars.action
         if action not in ['add', 'remove', 'toggle', 'clear', 'init', 'get', 'save', 'replace', 'randomize']:
@@ -1887,6 +1887,9 @@ class WS(object):
             elif scope == 'area':
                 params += ['--startPoint', parameters["startPoint"],
                            '--endPoint', parameters["endPoint"]]
+            elif scope == 'door':
+                params += ['--doorName', parameters["doorName"],
+                           '--newColor', parameters["newColor"]]
         elif action == 'remove' and scope == 'item':
             if 'loc' in parameters:
                 params += ['--loc', parameters["loc"]]
@@ -2270,6 +2273,20 @@ class WS_item_clear(WS):
 
     def action(self):
         return self.callSolverAction("item", "clear", {})
+
+class WS_door_replace(WS):
+    def validate(self):
+        super(WS_door_replace, self).validate()
+
+        self.doorName = request.vars.doorName
+        if self.doorName not in DoorsManager.doors.keys():
+            raiseHttp(400, "Wrong value for doorName", True)
+        self.newColor = request.vars.newColor
+        if self.newColor not in ["red", "green", "yellow"]:
+            raiseHttp(400, "Wrong value for newColor", True)
+
+    def action(self):
+        return self.callSolverAction("door", "replace", {"doorName": self.doorName, "newColor": self.newColor})
 
 def trackerWebService():
     # unified web service for item/area trackers

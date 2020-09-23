@@ -54,6 +54,7 @@ class InteractiveSolver(CommonSolver):
     def dumpState(self):
         state = SolverState(self.debug)
         state.fromSolver(self)
+
         state.toJson(self.outputFileName)
 
     def initialize(self, mode, rom, presetFileName, magic, debug, fill, startAP, trackerRace):
@@ -155,6 +156,11 @@ class InteractiveSolver(CommonSolver):
                     else:
                         # remove last transition
                         self.cancelLastTransition()
+        elif scope == 'door':
+            if action == 'replace':
+                doorName = params['doorName']
+                newColor = params['newColor']
+                DoorsManager.doors[doorName].setColor(newColor)
 
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
@@ -335,7 +341,7 @@ class InteractiveSolver(CommonSolver):
                 itemLocs.append(ItemLocation(ItemManager.getItem(loc.itemName), loc))
             else:
                 # put nothing items in unused locations
-                itemLocs.append(ItemManager.getItem("Nothing"), loc)
+                itemLocs.append(ItemLocation(ItemManager.getItem("Nothing"), loc))
 
         # patch the ROM
         if lock == True:
@@ -384,6 +390,7 @@ class InteractiveSolver(CommonSolver):
             romPatcher.writeMagic()
         else:
             romPatcher.writePlandoAddresses(self.visitedLocations)
+        romPatcher.writeDoorsColor()
 
         romPatcher.commitIPS()
         romPatcher.end()

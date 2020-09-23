@@ -373,7 +373,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         hideItemPopup();
     }
 
-    if(lastAction != null && lastAction["action"] != "init") {
+    if(lastAction != null && lastAction["action"] != "init" && lastAction["scope"] != "door") {
         updateLocations(jsonData);
 
         if(lastAction["scope"] == "area") {
@@ -475,7 +475,7 @@ function displayDoors(jsonData) {
         var tooltip = color+" door";
         $("#"+doorName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
 
-        // dragElement(document.getElementById(doorName), doorName);
+        dragElement(document.getElementById(doorName), doorName);
     }
 }
 
@@ -1211,6 +1211,70 @@ function clickLoc(elem) {
         ajaxCall({action: "remove", scope: "item", locName: locName}, "upload");
     }
   }
+}
+
+var selectedDoor = null;
+var currentDoorColor = null;
+function actionDoor(doorName) {
+    if(loaded == false || webServInProgress == true || init == false) {
+        return;
+    }
+
+    if(mode != "plando") {
+        return;
+    }
+
+    var currentColor = getColor(doorName);
+    // forced blue doors can't be updated
+    if(currentColor == "blue") {
+        return;
+    }
+
+    // hide color choice popup if already displayed
+    hideDoorPopup();
+
+    // display color choice popup near the clicked door
+    selectedDoor = doorName;
+    currentDoorColor = currentColor;
+    var doorDiv = $("#"+doorName);
+    var left = (doorDiv.offset().left + doorDiv.width()) + "px";
+    var top = doorDiv.offset().top + "px";
+    $("#doorPopup").css({"display": "block", "left": left, "top": top});
+
+    // highlight current color
+    $("#redDoorSelect").removeClass("highlightColor");
+    $("#greenDoorSelect").removeClass("highlightColor");
+    $("#yellowDoorSelect").removeClass("highlightColor");
+    $("#"+currentColor+"DoorSelect").addClass("highlightColor");
+}
+
+function getColor(doorName) {
+    if($("#"+doorName).hasClass("blueDoorV") || $("#"+doorName).hasClass("blueDoorH")) {
+        return "blue";
+    } else if($("#"+doorName).hasClass("redDoorV") || $("#"+doorName).hasClass("redDoorH")) {
+        return "red";
+    } else if($("#"+doorName).hasClass("greenDoorV") || $("#"+doorName).hasClass("greenDoorH")) {
+        return "green";
+    } else if($("#"+doorName).hasClass("yellowDoorV") || $("#"+doorName).hasClass("yellowDoorH")) {
+        return "yellow";
+    } else {
+        console.log("Can't find door "+doorName+" color");
+    }
+}
+
+function hideDoorPopup() {
+    document.getElementById("doorPopup").style.display = "none";
+}
+
+function updateDoorColor(newColor) {
+    console.log("update door "+selectedDoor+" to "+newColor);
+
+    if(newColor != currentDoorColor) {
+        ajaxCall({action: "replace", scope: "door", doorName: selectedDoor, newColor: newColor}, "upload");
+    }
+
+    selectedDoor = null;
+    hideDoorPopup();
 }
 
 function actionItem(itemName, action) {

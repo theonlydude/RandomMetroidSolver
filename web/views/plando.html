@@ -155,6 +155,18 @@
     top: 29.3%;
     left: 22%;
 }
+.doorPopup {
+    background-color: #ffffff;
+    position: absolute;
+    z-index: 7;
+    width: 10%;
+    height: auto;
+    top: 2em;
+    left: 45%;
+    display: none;
+    padding: 0.5%;
+    border: 2px solid gray;
+}
 </style>
 
 <script type="text/javascript">
@@ -446,6 +458,7 @@ function onloadHook() {
   dragElement(document.getElementById("debugPopup"), "VCRGrab");
   dragElement(document.getElementById("savePopup"), "SaveGrab");
   dragElement(document.getElementById("randomizerPopup"), "RandoGrab");
+  dragElement(document.getElementById("doorPopup"), "doorGrab");
 }
 
 function hidePlandoButtons() {
@@ -834,6 +847,20 @@ def displayNumber(id, min, max, default, step="1"):
     </table>
   </div>
 
+  <div id="doorPopup" class="doorPopup">
+    <table class="full">
+      <colgroup><col class="third" /><col class="third" /><col class="third" /></colgroup>
+      <tr><td colspan=3></td></tr>
+      <tr><td id="doorGrab" colspan=3 class="center greyRow">Choose door new color</td></tr>
+      <tr><td colspan=3 class="blankRow"></td></tr>
+      <tr>
+        <td><div id="redDoorSelect" onclick="updateDoorColor('red')"></div></td>
+        <td><div id="greenDoorSelect" onclick="updateDoorColor('green')"></div></td>
+        <td><div id="yellowDoorSelect" onclick="updateDoorColor('yellow')"></div></td>
+      </tr>
+    </table>
+  </div>
+
   <div id="debugPopup" class="debugPopup">
     <table class="full">
       <colgroup><col class="half" /><col class="half" /></colgroup>
@@ -891,6 +918,7 @@ def displayNumber(id, min, max, default, step="1"):
     </table>
     <input id="vcrJson" name="vcrJson" style="display:none" type="text"/>
   </div>
+
   <div id="hideRandoOverlay"></div>
 
 {{include 'solver_web/t_main.html'}}

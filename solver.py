@@ -67,6 +67,15 @@ def interactiveSolver(args):
                 params = {'startPoint': args.startPoint, 'endPoint': args.endPoint}
             if args.action == "remove" and args.startPoint != None:
                 params = {'startPoint': args.startPoint}
+        elif args.scope == 'door':
+            if args.state == None or args.action == None or args.output == None:
+                print("Missing state/action/output parameter")
+                sys.exit(1)
+            if args.action == "replace":
+                if args.doorName is None or args.newColor is None:
+                    print("Missing doorName or newColor parameter when using action replace for door")
+                    sys.exit(1)
+                params = {'doorName': args.doorName, 'newColor': args.newColor}
         params["debug"] = args.vcr
 
         solver = InteractiveSolver(args.output)
@@ -155,7 +164,7 @@ if __name__ == "__main__":
     parser.add_argument('--mode', help="Solver mode: standard/seedless/plando (used in interactive mode)",
                         dest="mode", nargs="?", default=None, choices=['standard', 'seedless', 'plando'])
     parser.add_argument('--scope', help="Scope for the action: common/area/item (used in interactive mode)",
-                        dest="scope", nargs="?", default=None, choices=['common', 'area', 'item'])
+                        dest="scope", nargs="?", default=None, choices=['common', 'area', 'item', 'door'])
     parser.add_argument('--count', help="Number of item rollback (used in interactive mode)",
                         dest="count", type=int)
     parser.add_argument('--lock', help="lock the plando seed (used in interactive mode)",
@@ -172,6 +181,10 @@ if __name__ == "__main__":
                         dest="energyQty", nargs="?", default=None, choices=["sparse", "medium", "vanilla"])
     parser.add_argument('--plot', help="dump plot data in file specified", dest="plot", nargs="?", default=None)
     parser.add_argument('--trackerRace', help="the seed is race protected, tell the solver to use seedless mode after reading the patchs from the seed", dest="trackerRace", action='store_true')
+    parser.add_argument('--doorName', help="door to replace (used in interactive mode)",
+                        dest="doorName", nargs="?", default=None)
+    parser.add_argument('--newColor', help="new color for door (used in interactive mode)",
+                        dest="newColor", nargs="?", default=None)
 
     args = parser.parse_args()
 

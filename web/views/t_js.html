@@ -554,6 +554,10 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       css = color+"Door"+"H";
     }
     $("#"+doorName).attr("class", doorName+" "+css);
+
+    var tooltip = color+" door";
+    $("#"+doorName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+
     // dragElement(document.getElementById(doorName), doorName);
   }
 

@@ -1853,7 +1853,8 @@ class WS(object):
                 "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0]),
                 "errorMsg": state["errorMsg"],
                 "last": state["last"],
-                "innerTransitions": state["innerTransitions"]
+                "innerTransitions": state["innerTransitions"],
+                "doors": state["doors"]
             })
         else:
             raiseHttp(200, "OK", True)

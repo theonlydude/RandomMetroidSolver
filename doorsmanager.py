@@ -224,9 +224,9 @@ class DoorsManager():
     # for isolver state
     @staticmethod
     def serialize():
-        return {door.name: door.color for door in DoorsManager.doors.values()}
+        return {door.name: (door.color, door.facing) for door in DoorsManager.doors.values()}
 
     @staticmethod
     def unserialize(state):
-        for name, color in state.items():
+        for name, (color, facing) in state.items():
             DoorsManager.doors[name].setColor(color)

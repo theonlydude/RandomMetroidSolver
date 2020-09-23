@@ -541,6 +541,22 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     document.getElementById("timer").style.display = "none";
   }
 
+  // display doors
+  for(doorName in jsonData["doors"]) {
+    // doorData is (color, facing), facing is 0: left, 1: right, 2: top, 3: bottom
+    var doorData = jsonData["doors"][doorName];
+    var color = doorData[0];
+    var facing = doorData[1];
+    var css = "";
+    if(facing == 0 || facing == 1) {
+      css = color+"Door"+"V";
+    } else {
+      css = color+"Door"+"H";
+    }
+    $("#"+doorName).attr("class", doorName+" "+css);
+    // dragElement(document.getElementById(doorName), doorName);
+  }
+
   // if no available locations, display a popup telling you're stuck
   if(Object.keys(jsonData["availableLocations"]).length == 0 && chained == false) {
     if(jsonData["allTransitions"] == true && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited")) {
@@ -630,7 +646,7 @@ var locsInfo = {
   ChargeBeam: {left: 13.3, top: 67.05},
   MorphingBall: {left: 34.3, top: 49.45},
   EnergyTankBrinstarCeiling: {left: 39.9, top: 49.45},
-  EnergyTankEtecoons: {left: 2.9, top: 65.6},
+  EnergyTankEtecoons: {left: 3.1, top: 65.6},
   EnergyTankWaterway: {left: 4.7, top: 70.09},
   EnergyTankBrinstarGate: {left: 17.2, top: 62.5},
   XRayScope: {left: 42.7, top: 55.27},
@@ -679,7 +695,7 @@ var locsInfo = {
   MissilegreenBrinstarpipe: {left: 18, top: 67.2},
   PowerBombblueBrinstar: {left: 32.25, top: 49.45},
   MissileblueBrinstarmiddle: {left: 40.8, top: 49.45},
-  SuperMissilegreenBrinstarbottom: {left: 1.9, top: 65.6},
+  SuperMissilegreenBrinstarbottom: {left: 1.7, top: 65.6},
   MissileblueBrinstarbottom: {left: 37, top: 50.99},
   MissileblueBrinstartop: {left: 38, top: 45.6},
   MissileblueBrinstarbehindmissile: {left: 38, top: 47},

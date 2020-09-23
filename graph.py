@@ -72,7 +72,7 @@ class AccessPoint(object):
     def connect(self, destName):
         self.disconnect()
         if self.Internal is False:
-            self.transitions[destName] = lambda sm: self.traverse(sm)
+            self.transitions[destName] = self.traverse
             self.ConnectedTo = destName
         else:
             raise RuntimeError("Cannot add an internal access point as inter-are transition")

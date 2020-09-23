@@ -17,6 +17,7 @@ class Facing:
 plmRed    = [0x8a,   0x90,   0x96,   0x9c]
 plmGreen  = [0x72,   0x78,   0x7e,   0x84]
 plmYellow = [0x5a,   0x60,   0x66,   0x6c]
+plmBlink  = [0x42,   0x48,   0x4e,   0x54]
 
 colors2plm = {
     'red': plmRed,
@@ -25,19 +26,19 @@ colors2plm = {
 }
 
 class Door(object):
-    __slots__ = ('name', 'address', 'vanillaColor', 'color', 'canRandom', 'facing')
+    __slots__ = ('name', 'address', 'vanillaColor', 'color', 'forced', 'facing')
     def __init__(self, name, address, vanillaColor, facing):
         self.name = name
         self.address = address
         self.vanillaColor = vanillaColor
         self.setColor(vanillaColor)
-        self.canRandom = True
+        self.forced = False
         self.facing = facing
 
     def forceBlue(self):
         # custom start location, area, patches can force doors to blue
         self.setColor('blue')
-        self.canRandom = False
+        self.forced = True
 
     def setColor(self, color):
         self.color = color
@@ -46,7 +47,7 @@ class Door(object):
         return self.color != self.vanillaColor
 
     def randomize(self):
-        if self.canRandom:
+        if not self.forced:
             self.setColor(random.choice(colorsList))
 
     def traverse(self, smbm):
@@ -69,6 +70,9 @@ class Door(object):
         rom.writeByte(colors2plm[self.color][self.facing], self.address)
 
     def readColor(self, rom):
+        if self.forced:
+            return
+
         plm = rom.readByte(self.address)
         if plm in plmRed:
             self.setColor('red')
@@ -76,6 +80,8 @@ class Door(object):
             self.setColor('green')
         elif plm in plmYellow:
             self.setColor('yellow')
+        elif plm in plmBlink:
+            self.setColor('blue')
         else:
             raise Exception("Unknown color {} for {}".format(hex(plm), self.name))
 
@@ -200,9 +206,12 @@ class DoorsManager():
     # call from rom loader
     @staticmethod
     def loadDoorsColor(rom):
+        # force to blue some doors depending on patches
+        DoorsManager.setDoorsColor()
         # for each door store it's color
         for door in DoorsManager.doors.values():
             door.readColor(rom)
+        DoorsManager.debugDoorsColor()
 
     @staticmethod
     def debugDoorsColor():

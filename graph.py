@@ -187,7 +187,7 @@ class AccessGraph(object):
                         diff = self.apCache[(src, dst, item)]
                     else:
                         tFunc = src.transitions[dstName]
-                        diff = smbm.eval(tFunc)
+                        diff = tFunc(smbm)
                         if self._useCache == True:
                             self.apCache[(src, dst, item)] = diff
                 else:
@@ -305,11 +305,11 @@ class AccessGraph(object):
 
                 tFunc = loc.AccessFrom[apName]
                 ap = self.accessPoints[apName]
-                tdiff = smbm.eval(tFunc)
+                tdiff = tFunc(smbm)
                 #if loc.Name == "Kraid":
                 #    print("{} root: {} ap: {}".format(loc.Name, rootNode, apName))
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
-                    diff = smbm.eval(loc.Available)
+                    diff = loc.Available(smbm)
                     if diff.bool == True:
                         path = availAPPaths[apName].path
                         #if loc.Name == "Kraid":

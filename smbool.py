@@ -71,20 +71,23 @@ class SMBool:
         return {key : getattr(self, key, None) for key in self.__slots__}
 
     def wand(*args):
-        if False in args:
-            return smboolFalse
-        else:
-            return SMBool(True,
-                          sum([smb.difficulty for smb in args]),
-                          [ smb._knows for smb in args ],
-                          [ smb._items for smb in args ])
+        # looping here is faster than using "if ... in" construct
+        for smb in args:
+            if not smb.bool:
+                return smboolFalse
+
+        return SMBool(True,
+                      sum([smb.difficulty for smb in args]),
+                      [ smb._knows for smb in args ],
+                      [ smb._items for smb in args ])
 
     def wor(*args):
-        if True in args:
-            # return the smbool with the smallest difficulty among True smbools.
-            return min(args)
-        else:
-            return smboolFalse
+        # looping here is faster than using "if ... in" construct
+        for smb in args:
+            if smb.bool:
+                return min(args)
+
+        return smboolFalse
 
     # negates boolean part of the SMBool
     def wnot(a):

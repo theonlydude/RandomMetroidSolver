@@ -76,8 +76,13 @@ class SMBool:
             if not smb.bool:
                 return smboolFalse
 
+        difficulty = 0
+
+        for smb in args:
+            difficulty += smb.difficulty
+
         return SMBool(True,
-                      sum([smb.difficulty for smb in args]),
+                      difficulty,
                       [ smb._knows for smb in args ],
                       [ smb._items for smb in args ])
 

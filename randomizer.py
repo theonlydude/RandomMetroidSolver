@@ -669,9 +669,8 @@ if __name__ == "__main__":
                                        args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
-                                       escapeAttr, args.noRemoveEscapeEnemies, minimizerN, args.minimizerTourian)
-            if args.doorsColorsRando == True:
-                romPatcher.writeDoorsColor()
+                                       escapeAttr, args.noRemoveEscapeEnemies, minimizerN, args.minimizerTourian,
+                                       args.doorsColorsRando)
         else:
             # from customizer permalink, apply previously generated seed ips first
             if args.seedIps != None:

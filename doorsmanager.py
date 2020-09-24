@@ -26,8 +26,8 @@ colors2plm = {
 }
 
 class Door(object):
-    __slots__ = ('name', 'address', 'vanillaColor', 'color', 'forced', 'facing', 'hidden')
-    def __init__(self, name, address, vanillaColor, facing):
+    __slots__ = ('name', 'address', 'vanillaColor', 'color', 'forced', 'facing', 'hidden', 'id')
+    def __init__(self, name, address, vanillaColor, facing, id=None):
         self.name = name
         self.address = address
         self.vanillaColor = vanillaColor
@@ -35,6 +35,7 @@ class Door(object):
         self.forced = False
         self.facing = facing
         self.hidden = False
+        self.id = id
 
     def forceBlue(self):
         # custom start location, area, patches can force doors to blue
@@ -56,8 +57,11 @@ class Door(object):
     def isRandom(self):
         return self.color != self.vanillaColor and self.color != 'blue'
 
+    def canRandomize(self):
+        return not self.forced and self.id is None
+
     def randomize(self):
-        if not self.forced:
+        if self.canRandomize():
             self.setColor(random.choice(colorsList))
 
     def traverse(self, smbm):
@@ -175,6 +179,15 @@ class DoorsManager():
         'ColosseumBottomRight': Door('ColosseumBottomRight', 0x7c6fb, 'green', Facing.Left),
         'PlasmaSparkBottom': Door('PlasmaSparkBottom', 0x7c577, 'green', Facing.Top),
         'OasisTop': Door('OasisTop', 0x7c5d3, 'green', Facing.Bottom),
+        # refill/save
+        'GreenBrinstarSaveStation': Door('GreenBrinstarSaveStation', 0x784b2, 'red', Facing.Right, 0x1f),
+        'MaridiaBottomSaveStation': Door('MaridiaBottomSaveStation', 0x7c431, 'red', Facing.Left, 0x8c),
+        'MaridiaAqueductSaveStation': Door('MaridiaAqueductSaveStation', 0x7c5fd, 'red', Facing.Right, 0x96),
+        'ForgottenHighwaySaveStation': Door('ForgottenHighwaySaveStation', 0x7c569, 'red', Facing.Left, 0x92),
+        'DraygonSaveRefillStation': Door('DraygonSaveRefillStation', 0x7c6ef, 'red', Facing.Left, 0x98),
+        'KraidRefillStation': Door('KraidRefillStation', 0x78a14, 'green', Facing.Left, 0x44),
+        'RedBrinstarEnergyRefill': Door('RedBrinstarEnergyRefill', 0x78860, 'green', Facing.Right, 0x38),
+        'GreenBrinstarMissileRefill': Door('GreenBrinstarMissileRefill', 0x784ca, 'red', Facing.Right, 0x23)
     }
 
     def setSMBM(self, smbm):
@@ -242,7 +255,16 @@ class DoorsManager():
         DoorsManager.debugDoorsColor()
 
         # tell that we have randomized doors
-        return any(door.isRandom() for door in DoorsManager.doors.values())
+        isRandom = any(door.isRandom() for door in DoorsManager.doors.values())
+        if isRandom:
+            DoorsManager.setRefillSaveToBlue()
+        return isRandom
+
+    @staticmethod
+    def setRefillSaveToBlue():
+        for door in DoorsManager.doors.values():
+            if door.id is not None:
+                door.forceBlue()
 
     @staticmethod
     def debugDoorsColor():
@@ -252,9 +274,12 @@ class DoorsManager():
 
     # call from rom patcher
     @staticmethod
-    def writeDoorsColor(rom):
+    def writeDoorsColor(rom, doors):
         for door in DoorsManager.doors.values():
             door.writeColor(rom)
+            # also set save/refill doors to blue
+            if door.id is not None:
+                doors.append(door.id)
 
     # call from web
     @staticmethod

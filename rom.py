@@ -843,6 +843,7 @@ class RomPatcher:
                 plms.append('WS_Save_Blinking_Door')
 
             doors = self.getStartDoors(plms, area, None)
+            self.writeDoorsColor(doors)
             self.applyStartAP(startAP, plms, doors)
 
             self.applyPLMs(plms)
@@ -854,7 +855,7 @@ class RomPatcher:
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
                         escapeAttr=None, noRemoveEscapeEnemies=False,
-                        minimizerN=None, minimizerTourian=True):
+                        minimizerN=None, minimizerTourian=True, doorsColorsRando=False):
         try:
             # apply standard patches
             stdPatches = []
@@ -924,6 +925,8 @@ class RomPatcher:
                     for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
                         self.applyIPSPatch(patchName)
             doors = self.getStartDoors(plms, area, minimizerN)
+            if doorsColorsRando:
+                self.writeDoorsColor(doors)
             self.applyStartAP(startAP, plms, doors)
             self.applyPLMs(plms)
         except Exception as e:
@@ -1622,8 +1625,8 @@ class RomPatcher:
         for (i, char) in enumerate(version):
             self.setOamTile(i, middle, char2tile[char])
 
-    def writeDoorsColor(self):
-        DoorsManager.writeDoorsColor(self.romFile)
+    def writeDoorsColor(self, doors):
+        DoorsManager.writeDoorsColor(self.romFile, doors)
 
 # tile number in tileset
 char2tile = {

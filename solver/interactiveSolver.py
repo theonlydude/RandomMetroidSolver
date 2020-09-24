@@ -376,7 +376,7 @@ class InteractiveSolver(CommonSolver):
                 escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
                 romPatcher.applyEscapeAttributes({'Timer': escapeTimer, 'Animals': None}, plms)
 
-        # write plm table
+        # write plm table & random doors
         romPatcher.writePlmTable(plms, self.areaRando, self.bossRando, self.startAP)
 
         romPatcher.setNothingId(self.startAP, itemLocs)
@@ -397,7 +397,6 @@ class InteractiveSolver(CommonSolver):
             romPatcher.writeMagic()
         else:
             romPatcher.writePlandoAddresses(self.visitedLocations)
-        romPatcher.writeDoorsColor()
 
         romPatcher.commitIPS()
         romPatcher.end()

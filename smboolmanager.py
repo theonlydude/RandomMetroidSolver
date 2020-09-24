@@ -77,9 +77,9 @@ class SMBoolManager(object):
             itemsDict[item] = self._counts[item]
         return itemsDict
 
-    def evalWithItem(self, func, item):
+    def withItem(self, item, func):
         self.addItem(item)
-        ret = func(self)
+        ret = func()
         self.removeItem(item)
         return ret
 

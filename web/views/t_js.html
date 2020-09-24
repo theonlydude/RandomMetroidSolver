@@ -475,7 +475,7 @@ function displayDoors(jsonData) {
         var tooltip = color+" door";
         $("#"+doorName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
 
-        dragElement(document.getElementById(doorName), doorName);
+        // dragElement(document.getElementById(doorName), doorName);
     }
 }
 
@@ -1237,7 +1237,24 @@ function actionDoor(doorName) {
     selectedDoor = doorName;
     currentDoorColor = currentColor;
     var doorDiv = $("#"+doorName);
-    var left = (doorDiv.offset().left + doorDiv.width()) + "px";
+    var doorPopup = $("#doorPopup");
+
+    var mapWidth = $(".map_container").width();
+    var popupWidth = doorPopup.width();
+    var doorLeft = doorDiv.offset().left;
+
+    // depending on the x position of the door, display the popup on the left center or right side of the door
+    if(mapWidth - doorLeft < popupWidth/2) {
+        // display on left of door
+        var left = (doorLeft - popupWidth) + "px";
+    } else if (doorLeft < popupWidth/2) {
+        // display on right of door
+        var left = (doorLeft + doorDiv.width()) + "px";
+    } else {
+        // display on center
+        var left = (doorLeft - popupWidth/2) + "px";
+    }
+
     var top = doorDiv.offset().top + "px";
     $("#doorPopup").css({"display": "block", "left": left, "top": top});
 

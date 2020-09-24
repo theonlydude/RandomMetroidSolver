@@ -685,6 +685,9 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/views/layout.html ] || ln -s ~/RandomMetroidSolver/web/web2py/views/layout.html ~/web2py/applications/solver/views/layout.html
 [ -L ~/web2py/applications/solver/views/web2py_ajax.html ] || ln -s ~/RandomMetroidSolver/web/web2py/views/web2py_ajax.html ~/web2py/applications/solver/views/web2py_ajax.html
 [ -L ~/web2py/applications/solver/static/css/bootstrap.min.css ] || ln -s ~/RandomMetroidSolver/web/web2py/static/css/bootstrap.min.css ~/web2py/applications/solver/static/css/bootstrap.min.css
+[ -L ~/web2py/applications/solver/static/css/calendar.css ] || ln -s ~/RandomMetroidSolver/web/web2py/static/css/calendar.css ~/web2py/applications/solver/static/css/calendar.css
+[ -L ~/web2py/applications/solver/static/css/web2py-bootstrap3.css ] || ln -s ~/RandomMetroidSolver/web/web2py/static/css/web2py-bootstrap3.css ~/web2py/applications/solver/static/css/web2py-bootstrap3.css
+[ -L ~/web2py/applications/solver/static/css/web2py.css ] || ln -s ~/RandomMetroidSolver/web/web2py/static/css/web2py.css ~/web2py/applications/solver/static/css/web2py.css
 [ -L ~/web2py/applications/solver/static/js/bootstrap.min.js ] || ln -s ~/RandomMetroidSolver/web/web2py/static/js/bootstrap.min.js ~/web2py/applications/solver/static/js/bootstrap.min.js
 [ -L ~/web2py/applications/solver/static/js/calendar.js ] || ln -s ~/RandomMetroidSolver/web/web2py/static/js/calendar.js ~/web2py/applications/solver/static/js/calendar.js
 [ -L ~/web2py/applications/solver/static/js/jquery.js ] || ln -s ~/RandomMetroidSolver/web/web2py/static/js/jquery.js ~/web2py/applications/solver/static/js/jquery.js

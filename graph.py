@@ -98,6 +98,10 @@ class AccessPoint(object):
         return self.ConnectedTo == self.Name
 
 class AccessGraph(object):
+    __slots__ = ( 'log', 'accessPoints', 'InterAreaTransitions',
+                  'EscapeAttributes', 'apCache', '_useCache',
+                  'availAccessPoints' )
+
     def __init__(self, accessPointList, transitions, dotFile=None):
         self.log = log.get('Graph')
         self.accessPoints = {}

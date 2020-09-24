@@ -378,9 +378,6 @@ def loadRandoPreset(randoPreset, args):
         if randoParams.get("minimizerTourian", "off") == "on":
             args.minimizerTourian = True
 
-    if randoParams.get("lateAmmo", "off") == "on":
-        args.lateAmmo = True
-
     defaultMultiValues = getDefaultMultiValues()
     multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"]
     for multiElem in multiElems:
@@ -421,7 +418,6 @@ def getRandomizerDefaultParameters():
     defaultParams['areaLayout'] = "off"
     defaultParams['lightAreaRandomization'] = "off"
     defaultParams['doorsColorsRando'] = "off"
-    defaultParams['lateAmmo'] = "off"
     defaultParams['escapeRando'] = "off"
     defaultParams['removeEscapeEnemies'] = "off"
     defaultParams['bossRandomization'] = "off"

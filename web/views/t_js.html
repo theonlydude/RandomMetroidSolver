@@ -380,6 +380,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
             updateLines(jsonData);
         }
         updateGps(jsonData);
+        displayDoors(jsonData);
     } else {
         // load everything
         updateGlobal(jsonData);
@@ -487,6 +488,7 @@ function updateGlobal(jsonData) {
     escapeRando = jsonData["escapeRando"];
     seed = jsonData["seed"];
     preset = jsonData["preset"];
+    doorsRando = jsonData["doorsRando"];
     init = true;
 
     document.getElementById("mode").value = mode;
@@ -674,6 +676,7 @@ var escapeRando = true;
 var init = false;
 var webServInProgress = false;
 var race = false;
+var doorsRando = false;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "break"]
@@ -1220,49 +1223,61 @@ function actionDoor(doorName) {
         return;
     }
 
-    if(mode != "plando") {
+    if(mode == "seedless") {
         return;
-    }
+    } else if(mode == "plando") {
+        var currentColor = getColor(doorName);
+        // forced blue doors can't be updated
+        if(currentColor == "blue") {
+            return;
+        }
 
-    var currentColor = getColor(doorName);
-    // forced blue doors can't be updated
-    if(currentColor == "blue") {
-        return;
-    }
+        // hide color choice popup if already displayed
+        hideDoorPopup();
 
-    // hide color choice popup if already displayed
-    hideDoorPopup();
+        // display color choice popup near the clicked door
+        selectedDoor = doorName;
+        currentDoorColor = currentColor;
+        var doorDiv = $("#"+doorName);
+        var doorPopup = $("#doorPopup");
 
-    // display color choice popup near the clicked door
-    selectedDoor = doorName;
-    currentDoorColor = currentColor;
-    var doorDiv = $("#"+doorName);
-    var doorPopup = $("#doorPopup");
+        var mapWidth = $(".map_container").width();
+        var popupWidth = doorPopup.width();
+        var doorLeft = doorDiv.offset().left;
 
-    var mapWidth = $(".map_container").width();
-    var popupWidth = doorPopup.width();
-    var doorLeft = doorDiv.offset().left;
+        // depending on the x position of the door, display the popup on the left center or right side of the door
+        if(mapWidth - doorLeft < popupWidth/2) {
+            // display on left of door
+            var left = (doorLeft - popupWidth) + "px";
+        } else if (doorLeft < popupWidth/2) {
+            // display on right of door
+            var left = (doorLeft + doorDiv.width()) + "px";
+        } else {
+            // display on center
+            var left = (doorLeft - popupWidth/2) + "px";
+        }
 
-    // depending on the x position of the door, display the popup on the left center or right side of the door
-    if(mapWidth - doorLeft < popupWidth/2) {
-        // display on left of door
-        var left = (doorLeft - popupWidth) + "px";
-    } else if (doorLeft < popupWidth/2) {
-        // display on right of door
-        var left = (doorLeft + doorDiv.width()) + "px";
+        var top = doorDiv.offset().top + "px";
+        $("#doorPopup").css({"display": "block", "left": left, "top": top});
+
+        // highlight current color
+        $("#redDoorSelect").removeClass("highlightColor");
+        $("#greenDoorSelect").removeClass("highlightColor");
+        $("#yellowDoorSelect").removeClass("highlightColor");
+        $("#"+currentColor+"DoorSelect").addClass("highlightColor");
     } else {
-        // display on center
-        var left = (doorLeft - popupWidth/2) + "px";
+        if(doorsRando == false) {
+            return;
+        }
+
+        var currentColor = getColor(doorName);
+        // forced blue doors can't be updated
+        if(currentColor == "blue") {
+            return;
+        }
+
+        ajaxCall({action: "toggle", scope: "door", doorName: doorName}, "upload");
     }
-
-    var top = doorDiv.offset().top + "px";
-    $("#doorPopup").css({"display": "block", "left": left, "top": top});
-
-    // highlight current color
-    $("#redDoorSelect").removeClass("highlightColor");
-    $("#greenDoorSelect").removeClass("highlightColor");
-    $("#yellowDoorSelect").removeClass("highlightColor");
-    $("#"+currentColor+"DoorSelect").addClass("highlightColor");
 }
 
 function getColor(doorName) {
@@ -1274,6 +1289,8 @@ function getColor(doorName) {
         return "green";
     } else if($("#"+doorName).hasClass("yellowDoorV") || $("#"+doorName).hasClass("yellowDoorH")) {
         return "yellow";
+    } else if($("#"+doorName).hasClass("greyDoorV") || $("#"+doorName).hasClass("greyDoorH")) {
+        return "grey";
     } else {
         console.log("Can't find door "+doorName+" color");
     }

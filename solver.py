@@ -76,6 +76,11 @@ def interactiveSolver(args):
                     print("Missing doorName or newColor parameter when using action replace for door")
                     sys.exit(1)
                 params = {'doorName': args.doorName, 'newColor': args.newColor}
+            elif args.action == "toggle":
+                if args.doorName is None:
+                    print("Missing doorName parameter when using action toggle for door")
+                    sys.exit(1)
+                params = {'doorName': args.doorName}
         params["debug"] = args.vcr
 
         solver = InteractiveSolver(args.output)

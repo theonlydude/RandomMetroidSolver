@@ -26,7 +26,7 @@ colors2plm = {
 }
 
 class Door(object):
-    __slots__ = ('name', 'address', 'vanillaColor', 'color', 'forced', 'facing')
+    __slots__ = ('name', 'address', 'vanillaColor', 'color', 'forced', 'facing', 'hidden')
     def __init__(self, name, address, vanillaColor, facing):
         self.name = name
         self.address = address
@@ -34,6 +34,7 @@ class Door(object):
         self.setColor(vanillaColor)
         self.forced = False
         self.facing = facing
+        self.hidden = False
 
     def forceBlue(self):
         # custom start location, area, patches can force doors to blue
@@ -41,17 +42,28 @@ class Door(object):
         self.forced = True
 
     def setColor(self, color):
-        self.color = color
+        if color == 'grey':
+            self.hidden = True
+        else:
+            self.color = color
+
+    def getColor(self):
+        if self.hidden:
+            return 'grey'
+        else:
+            return self.color
 
     def isRandom(self):
-        return self.color != self.vanillaColor
+        return self.color != self.vanillaColor and self.color != 'blue'
 
     def randomize(self):
         if not self.forced:
             self.setColor(random.choice(colorsList))
 
     def traverse(self, smbm):
-        if self.color == 'red':
+        if self.hidden:
+            return SMBool(False)
+        elif self.color == 'red':
             return smbm.canOpenRedDoors()
         elif self.color == 'green':
             return smbm.canOpenGreenDoors()
@@ -64,7 +76,7 @@ class Door(object):
         print("Door({}, {})".format(self.name, self.color))
 
     def writeColor(self, rom):
-        if not self.isRandom() or self.color == 'blue':
+        if not self.isRandom():
             return
 
         rom.writeByte(colors2plm[self.color][self.facing], self.address)
@@ -84,6 +96,22 @@ class Door(object):
             self.setColor('blue')
         else:
             raise Exception("Unknown color {} for {}".format(hex(plm), self.name))
+
+    def canHide(self):
+        return self.color != 'blue'
+
+    def hide(self):
+        if self.canHide():
+            self.hidden = True
+
+    def reveal(self):
+        self.hidden = False
+
+    def switch(self):
+        if self.hidden:
+            self.reveal()
+        else:
+            self.hide()
 
 class DoorsManager():
     doors = {
@@ -213,6 +241,9 @@ class DoorsManager():
             door.readColor(rom)
         DoorsManager.debugDoorsColor()
 
+        # tell that we have randomized doors
+        return any(door.isRandom() for door in DoorsManager.doors.values())
+
     @staticmethod
     def debugDoorsColor():
         if LOG.getEffectiveLevel() == logging.DEBUG:
@@ -233,9 +264,20 @@ class DoorsManager():
     # for isolver state
     @staticmethod
     def serialize():
-        return {door.name: (door.color, door.facing) for door in DoorsManager.doors.values()}
+        return {door.name: (door.getColor(), door.facing) for door in DoorsManager.doors.values()}
 
     @staticmethod
     def unserialize(state):
         for name, (color, facing) in state.items():
             DoorsManager.doors[name].setColor(color)
+
+    # when using the tracker, first set all colored doors to grey until the user clicks on it
+    @staticmethod
+    def initTracker():
+        for door in DoorsManager.doors.values():
+            door.hide()
+
+    # when the user clicks on a door in the tracker
+    @staticmethod
+    def switchVisibility(name):
+        DoorsManager.doors[name].switch()

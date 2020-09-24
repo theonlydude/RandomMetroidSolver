@@ -35,6 +35,7 @@ class CommonSolver(object):
                 loc.itemName = 'Nothing'
             # set doors related to default patches
             DoorsManager.setDoorsColor()
+            self.doorsRando = False
         else:
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
@@ -44,7 +45,7 @@ class CommonSolver(object):
             (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches()
             RomPatches.ActivePatches += startPatches
             self.escapeTimer = self.romLoader.getEscapeTimer()
-            self.romLoader.loadDoorsColor()
+            self.doorsRando = self.romLoader.loadDoorsColor()
 
             if interactive == False:
                 print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {} activePatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches()), sorted(RomPatches.ActivePatches)))

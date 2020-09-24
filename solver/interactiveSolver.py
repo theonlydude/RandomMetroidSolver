@@ -75,6 +75,10 @@ class InteractiveSolver(CommonSolver):
         # in plando/tracker always consider that we're doing full
         self.majorsSplit = 'Full'
 
+        # hide doors
+        if self.doorsRando and mode == 'standard':
+            DoorsManager.initTracker()
+
         self.clearItems()
 
         # in debug mode don't load plando locs/transitions
@@ -161,6 +165,9 @@ class InteractiveSolver(CommonSolver):
                 doorName = params['doorName']
                 newColor = params['newColor']
                 DoorsManager.doors[doorName].setColor(newColor)
+            elif action == 'toggle':
+                doorName = params['doorName']
+                DoorsManager.switchVisibility(doorName)
 
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 

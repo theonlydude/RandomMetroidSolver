@@ -1854,7 +1854,8 @@ class WS(object):
                 "errorMsg": state["errorMsg"],
                 "last": state["last"],
                 "innerTransitions": state["innerTransitions"],
-                "doors": state["doors"]
+                "doors": state["doors"],
+                "doorsRando": state["doorsRando"]
             })
         else:
             raiseHttp(200, "OK", True)
@@ -1897,8 +1898,11 @@ class WS(object):
                 params += ['--count', str(parameters["count"])]
             else:
                 params += ['--item', str(parameters["item"])]
-        elif action == 'toggle' and scope == 'item':
-            params += ['--item', parameters['item']]
+        elif action == 'toggle':
+            if scope == 'item':
+                params += ['--item', parameters['item']]
+            elif scope == 'door':
+                params += ['--doorName', parameters["doorName"]]
         elif action == 'remove' and scope == 'area' and "startPoint" in parameters:
             params += ['--startPoint', parameters["startPoint"]]
         elif action == 'save' and scope == 'common':
@@ -2287,6 +2291,17 @@ class WS_door_replace(WS):
 
     def action(self):
         return self.callSolverAction("door", "replace", {"doorName": self.doorName, "newColor": self.newColor})
+
+class WS_door_toggle(WS):
+    def validate(self):
+        super(WS_door_toggle, self).validate()
+
+        self.doorName = request.vars.doorName
+        if self.doorName not in DoorsManager.doors.keys():
+            raiseHttp(400, "Wrong value for doorName", True)
+
+    def action(self):
+        return self.callSolverAction("door", "toggle", {"doorName": self.doorName})
 
 def trackerWebService():
     # unified web service for item/area trackers

@@ -1948,7 +1948,7 @@ class RomLoader(object):
         return self.romReader.getStartAP()
 
     def loadDoorsColor(self):
-        DoorsManager.loadDoorsColor(self.romReader.romFile)
+        return DoorsManager.loadDoorsColor(self.romReader.romFile)
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

@@ -96,7 +96,8 @@ class SMBool:
 
     # negates boolean part of the SMBool
     def wnot(a):
-        return SMBool(not a.bool, a.difficulty)
+        b = a.bool
+        return smboolFalse if b else SMBool(not b, a.difficulty)
 
     __and__ = wand
     __or__ = wor

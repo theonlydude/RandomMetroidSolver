@@ -124,13 +124,13 @@ class ProgSpeedParameters(object):
         if progSpeed == 'slowest':
             return 1
         elif progSpeed == 'slow':
-            return 0.8
+            return 0.9
         elif progSpeed == 'medium':
-            return 0.6
+            return 0.8
         elif progSpeed == 'fast':
-            return 0.5
+            return 0.65
         elif progSpeed == 'fastest':
-            return 0.33
+            return 0.5
         return 0
 
     def getItemLimit(self, progSpeed):

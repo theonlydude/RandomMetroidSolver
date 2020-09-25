@@ -226,24 +226,12 @@ class AccessGraph(object):
 
         return path
 
-    def getPathDifficulty(self, path, availAps):
-        difficulty = 0
-        knows = [ ]
-        items = [ ]
-        for ap in path:
-            diff = availAps[ap]['difficulty']
-            difficulty = max(difficulty, diff.difficulty)
-            knows = [ knows, diff._knows ]
-            items = [ items, diff._items ]
-
-        return SMBool(True, difficulty, knows, items)
-
     def getAvailAPPaths(self, availAccessPoints, locsAPs):
         paths = {}
         for ap in availAccessPoints:
             if ap.Name in locsAPs:
                 path = self.getPath(ap, availAccessPoints)
-                pdiff = self.getPathDifficulty(path, availAccessPoints)
+                pdiff = SMBool.wandmax(*(availAccessPoints[ap]['difficulty'] for ap in path))
                 paths[ap.Name] = Path(path, pdiff, len(path))
         return paths
 
@@ -406,24 +394,12 @@ class AccessGraphSolver(AccessGraph):
         # pdiff: difficulty of the path from the current access point to the location's access point
         # in output we need the global difficulty but we also need to separate pdiff and (tdiff + diff)
 
-        # loc diff: tdiff + diff
-        locDiff = SMBool(diff.bool,
-                         difficulty=max(tdiff.difficulty, diff.difficulty),
-                         knows=[tdiff._knows, diff._knows],
-                         items=[tdiff._items, diff._items])
-
-        # total diff: loc diff + pdiff
-        allDiff = SMBool(diff.bool,
-                         difficulty=max(locDiff.difficulty, pdiff.difficulty),
-                         knows=[locDiff._knows, pdiff._knows],
-                         items=[locDiff._items, pdiff._items])
+        locDiff = SMBool.wandmax(tdiff, diff)
+        allDiff = SMBool.wandmax(locDiff, pdiff)
 
         return (allDiff, locDiff)
 
 class AccessGraphRando(AccessGraph):
     def computeLocDiff(self, tdiff, diff, pdiff):
-        allDiff = SMBool(diff.bool,
-                         difficulty=max(tdiff.difficulty, diff.difficulty, pdiff.difficulty),
-                         knows=[tdiff._knows, diff._knows, pdiff._knows],
-                         items=[tdiff._items, diff._items, pdiff._items])
+        allDiff = SMBool.wandmax(tdiff, diff, pdiff)
         return (allDiff, None)

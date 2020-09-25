@@ -79,6 +79,23 @@ class SMBool:
                           [ smb._knows for smb in args ],
                           [ smb._items for smb in args ])
 
+    def wandmax(*args):
+        # looping here is faster than using "if ... in" construct
+        for smb in args:
+            if not smb.bool:
+                return smboolFalse
+
+        difficulty = 0
+
+        for smb in args:
+            if smb.difficulty > difficulty:
+                difficulty = smb.difficulty
+
+        return SMBool(True,
+                      difficulty,
+                      [ smb._knows for smb in args ],
+                      [ smb._items for smb in args ])
+
     def wor(*args):
         if True in args:
             # return the smbool with the smallest difficulty among True smbools.

@@ -160,6 +160,7 @@ class SMBoolManager(object):
         return self._items[item]
 
     wand = staticmethod(SMBool.wand)
+    wandmax = staticmethod(SMBool.wandmax)
     wor = staticmethod(SMBool.wor)
     wnot = staticmethod(SMBool.wnot)
 

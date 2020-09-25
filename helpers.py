@@ -4,7 +4,7 @@ import math
 from cache import Cache
 from parameters import Settings, easy, medium, diff2text
 from rom_patches import RomPatches
-from smbool import SMBool
+from smbool import SMBool, smboolFalse
 from utils import normalizeRounding
 
 
@@ -475,39 +475,33 @@ class Helpers(object):
     @Cache.decorator
     def enoughStuffBotwoon(self):
         sm = self.smbm
-        knows = []
-        diff = easy
         (ammoMargin, secs, items) = self.canInflictEnoughDamages(6000, givesDrops=False)
+        diff = SMBool(True, easy, [], items)
         lowStuff = sm.knowsLowStuffBotwoon()
         if ammoMargin == 0 and lowStuff.bool:
-            knows = ['LowStuffBotwoon']
-            diff = lowStuff.difficulty
             (ammoMargin, secs, items) = self.canInflictEnoughDamages(3500, givesDrops=False)
+            diff = SMBool(lowStuff.bool, lowStuff.difficulty, lowStuff.knows, items)
         if ammoMargin == 0:
-            return SMBool(False)
-        else:
-            fight = sm.wor(sm.energyReserveCountOk(math.ceil(4/sm.getDmgReduction(envDmg=False)[0])),
-                           sm.knowsLowStuffBotwoon())
-            return SMBool(fight.bool, max(diff, fight.difficulty), items=items+fight._items, knows=knows+fight._knows)
+            return smboolFalse
+        fight = sm.wor(sm.energyReserveCountOk(math.ceil(4/sm.getDmgReduction(envDmg=False)[0])),
+                       lowStuff)
+        return sm.wandmax(fight, diff)
 
     @Cache.decorator
     def enoughStuffGT(self):
         sm = self.smbm
-        knows = []
-        diff = easy
         hasBeams = sm.wand(sm.haveItem('Charge'), sm.haveItem('Plasma')).bool
         (ammoMargin, secs, items) = self.canInflictEnoughDamages(9000, ignoreMissiles=True, givesDrops=hasBeams)
+        diff = SMBool(True, easy, [], items)
         lowStuff = sm.knowsLowStuffGT()
         if ammoMargin == 0 and lowStuff.bool:
-            knows = ['LowStuffGT']
-            diff = lowStuff.difficulty
             (ammoMargin, secs, items) = self.canInflictEnoughDamages(3000, ignoreMissiles=True)
+            diff = SMBool(lowStuff.bool, lowStuff.difficulty, lowStuff.knows, items)
         if ammoMargin == 0:
-            return SMBool(False)
-        else:
-            fight = sm.wor(sm.energyReserveCountOk(math.ceil(8/sm.getDmgReduction(envDmg=False)[0])),
-                           sm.knowsLowStuffGT())
-            return SMBool(fight.bool, max(diff, fight.difficulty), items=items+fight._items, knows=knows+fight._knows)
+            return smboolFalse
+        fight = sm.wor(sm.energyReserveCountOk(math.ceil(8/sm.getDmgReduction(envDmg=False)[0])),
+                       lowStuff)
+        return sm.wandmax(fight, diff)
 
     @Cache.decorator
     def enoughStuffsRidley(self):

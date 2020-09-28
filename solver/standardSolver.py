@@ -81,9 +81,16 @@ class StandardSolver(CommonSolver):
         self.computeExtStats()
 
         if self.extStatsFilename != None:
+            firstMinor = {'Missile': False, 'Super': False, 'PowerBomb': False}
+            locsItems = {}
+            for loc in self.visitedLocations:
+                if loc.itemName in firstMinor and firstMinor[loc.itemName] == False:
+                    locsItems[loc.Name] = loc.itemName
+                    firstMinor[loc.itemName] = True
+
             import db
             with open(self.extStatsFilename, 'a') as extStatsFile:
-                db.DB.dumpExtStatsSolver(self.difficulty, knowsUsedList, self.solverStats, self.extStatsStep, extStatsFile)
+                db.DB.dumpExtStatsSolver(self.difficulty, knowsUsedList, self.solverStats, locsItems, self.extStatsStep, extStatsFile)
 
         if self.plot != None:
             with open(self.plot, 'w') as outDataFile:

@@ -611,17 +611,14 @@ if __name__ == "__main__":
             args.patches.append(random.choice(animalsPatches))
         else:
             optErrMsg += "\nIgnored animals surprise because of escape randomization"
-    # transform itemLocs in our usual dict(location, item), for minors keep only the first
+    # transform itemLocs in our usual dict(location, item), exclude minors, we'll get them with the solver
     locsItems = {}
-    firstMinorsFound = {'Missile': False, 'Super': False, 'PowerBomb': False}
     for itemLoc in itemLocs:
         locName = itemLoc.Location.Name
         itemType = itemLoc.Item.Type
-        if itemType in firstMinorsFound and firstMinorsFound[itemType] == False:
-            locsItems[locName] = itemType
-            firstMinorsFound[itemType] = True
-        elif itemType not in firstMinorsFound:
-            locsItems[locName] = itemType
+        if itemType in ['Missile', 'Super', 'PowerBomb']:
+            continue
+        locsItems[locName] = itemType
     if args.debug == True:
         for loc in sorted(locsItems.keys()):
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))

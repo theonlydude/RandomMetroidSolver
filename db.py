@@ -463,16 +463,7 @@ order by init_time;"""
         return (header, self.execSelect(sql, (weeks,)))
 
     @staticmethod
-    def dumpExtStatsItems(skillPreset, randoPreset, locsItems, sqlFile):
-        sql = """insert into extended_stats (skillPreset, randoPreset, count)
-values
-('%s', '%s', 1)
-on duplicate key update id=LAST_INSERT_ID(id), count = count + 1;
-set @last_id = last_insert_id();
-"""
-
-        sqlFile.write(sql % (skillPreset, randoPreset))
-
+    def dumpItemLocs(locsItems, sqlFile):
         for (location, item) in locsItems.items():
             if item == 'Boss':
                 continue
@@ -483,10 +474,25 @@ set @last_id = last_insert_id();
             sqlFile.write(sql % (item,))
 
     @staticmethod
-    def dumpExtStatsSolver(difficulty, techniques, solverStats, step, sqlFile):
+    def dumpExtStatsItems(skillPreset, randoPreset, locsItems, sqlFile):
+        sql = """insert into extended_stats (skillPreset, randoPreset, count)
+values
+('%s', '%s', 1)
+on duplicate key update id=LAST_INSERT_ID(id), count = count + 1;
+set @last_id = last_insert_id();
+"""
+
+        sqlFile.write(sql % (skillPreset, randoPreset))
+
+        DB.dumpItemLocs(locsItems, sqlFile)
+
+    @staticmethod
+    def dumpExtStatsSolver(difficulty, techniques, solverStats, locsItems, step, sqlFile):
         # use @last_id defined by the randomizer
 
         if step == 1:
+            DB.dumpItemLocs(locsItems, sqlFile)
+
             # get difficulty column
             if difficulty < medium:
                 column = "easy"

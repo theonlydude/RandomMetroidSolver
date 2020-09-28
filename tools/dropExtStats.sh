@@ -6,9 +6,6 @@ CWD=$(pwd)
 
 [ -f "db_params.py" ] || exit 1
 
-SQL_DIR=${CWD}/sql
-LOG_DIR=${CWD}/logs
-mkdir -p ${LOG_DIR} ${SQL_DIR}
 
 function getDBParam {
     PARAM="$1"
@@ -29,12 +26,11 @@ database=$(getDBParam "database")
 password=$(getDBParam "password")
 port=$(getDBParam "port")
 
-info "Start loading extended stats"
+info "Dropping extended stats"
 
-for SQL in $(ls -1 ${SQL_DIR}/extStatsOut_*.sql); do
-    echo "source ${SQL};" | mysql -h ${host} -u ${user} -p${password} -P${port} ${database} > ${LOG_DIR}/$(basename ${SQL}).log 2>&1 &
-done
-
-wait
-
-info "Done"
+SQL="truncate table difficulties;
+truncate table extended_stats;
+truncate table item_locs;
+truncate table solver_stats;
+truncate table techniques;"
+echo "${SQL}" | mysql -h ${host} -u ${user} -p${password} -P${port} ${database}

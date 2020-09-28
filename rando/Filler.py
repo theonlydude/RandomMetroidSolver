@@ -14,14 +14,14 @@ from graph_access import GraphUtils
 # item pool is not empty).
 # entry point is generateItems
 class Filler(object):
-    def __init__(self, startAP, graph, restrictions, emptyContainer):
+    def __init__(self, startAP, graph, restrictions, emptyContainer, endDate=infinity):
         self.startAP = startAP
         self.cache = RequestCache()
         self.graph = graph
         self.services = RandoServices(graph, restrictions, self.cache)
         self.restrictions = restrictions
         self.settings = restrictions.settings
-        self.runtimeLimit_s = self.settings.runtimeLimit_s
+        self.endDate = endDate
         self.baseContainer = emptyContainer
         self.maxDiff = self.settings.maxDiff
         self.log = log.get('Filler')
@@ -33,7 +33,7 @@ class Filler(object):
         self.nSteps = 0
         self.errorMsg = ""
         self.settings.maxDiff = self.maxDiff
-        self.runtime_s = 0
+        self.startDate = time.process_time()
 
     # sets up container initial state
     def initContainer(self):
@@ -57,16 +57,16 @@ class Filler(object):
         if condition is None:
             condition = self.itemPoolCondition
         isStuck = False
-        startDate = time.process_time()
-        while condition() and not isStuck and self.runtime_s <= self.runtimeLimit_s:
+        date = self.startDate
+        while condition() and not isStuck and date <= self.endDate:
             isStuck = not self.step()
             if not isStuck:
                 self.nSteps += 1
-            self.runtime_s = time.process_time() - startDate
+            date = time.process_time()
         if condition():
             isStuck = True
-            if self.runtime_s > self.runtimeLimit_s:
-                self.errorMsg = "Exceeded time limit of "+str(self.runtimeLimit_s) +" seconds"
+            if date > self.endDate:
+                self.errorMsg = "Exceeded time limit of "+str(self.settings.runtimeLimit_s) +" seconds"
             else:
                 self.errorMsg = "STUCK !\n"+self.container.dump()
         else:
@@ -76,7 +76,7 @@ class Filler(object):
             if aboveMaxDiffStr != '[  ]':
                 self.errorMsg += "\nMaximum difficulty could not be applied everywhere. Affected locations: {}".format(aboveMaxDiffStr)
             isStuck = False
-        print('\n%d step(s) in %dms' % (self.nSteps, int(self.runtime_s*1000)))
+        print('\n%d step(s) in %dms' % (self.nSteps, int((date-self.startDate)*1000)))
         if self.vcr != None:
             self.vcr.dump()
         return (isStuck, self.container.itemLocations, self.getProgressionItemLocations())
@@ -107,8 +107,8 @@ class Filler(object):
 
 # very simple front fill algorithm with no rollback and no "softlock checks" (== dessy algorithm)
 class FrontFiller(Filler):
-    def __init__(self, startAP, graph, restrictions, emptyContainer):
-        super(FrontFiller, self).__init__(startAP, graph, restrictions, emptyContainer)
+    def __init__(self, startAP, graph, restrictions, emptyContainer, endDate=infinity):
+        super(FrontFiller, self).__init__(startAP, graph, restrictions, emptyContainer, endDate)
         self.choice = ItemThenLocChoice(restrictions)
         self.stdStart = GraphUtils.isStandardStart(self.startAP)
 

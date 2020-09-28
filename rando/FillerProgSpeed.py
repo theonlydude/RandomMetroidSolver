@@ -41,8 +41,8 @@ class FillerState(object):
 # rollback.  duration of each phases, item pool restrictions and
 # choices are based on progression speed (see ProgSpeedParameters)
 class FillerProgSpeed(Filler):
-    def __init__(self, graphSettings, areaGraph, restrictions, container):
-        super(FillerProgSpeed, self).__init__(graphSettings.startAP, areaGraph, restrictions, container)
+    def __init__(self, graphSettings, areaGraph, restrictions, container, endDate):
+        super(FillerProgSpeed, self).__init__(graphSettings.startAP, areaGraph, restrictions, container, endDate)
         distanceProp = 'GraphArea' if graphSettings.areaRando else 'Area'
         self.stdStart = GraphUtils.isStandardStart(self.startAP)
         self.progSpeedParams = ProgSpeedParameters(self.restrictions, len(container.unusedLocations))
@@ -425,8 +425,8 @@ class FillerRandomNoCopy(FillerRandom):
 # more and more chance to preserve "intended" Chozo progression as
 # speed slows.
 class FillerProgSpeedChozoSecondPhase(Filler):
-    def __init__(self, startAP, graph, restrictions, container):
-        super(FillerProgSpeedChozoSecondPhase, self).__init__(startAP, graph, restrictions, container)
+    def __init__(self, startAP, graph, restrictions, container, endDate):
+        super(FillerProgSpeedChozoSecondPhase, self).__init__(startAP, graph, restrictions, container, endDate)
         self.firstPhaseItemLocs = container.itemLocations
         self.progSpeedParams = ProgSpeedParameters(self.restrictions, len(container.unusedLocations))
 
@@ -495,7 +495,7 @@ class FillerProgSpeedChozoSecondPhase(Filler):
             self.log.debug('step. itemPool='+getItemListStr(itemPool))
             cont = ItemLocContainer(self.container.sm, itemPool, curLocs)
             self.container.transferCollected(cont)
-            filler = FillerRandomItems(self.ap, self.graph, self.restrictions, cont)
+            filler = FillerRandomItems(self.ap, self.graph, self.restrictions, cont, self.endDate)
             (stuck, itemLocs, prog) = filler.generateItems()
             if stuck:
                 if len(filler.errorMsg) > 0:

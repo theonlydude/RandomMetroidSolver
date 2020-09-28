@@ -1,5 +1,5 @@
 
-import random, sys, copy, logging
+import random, sys, copy, logging, time
 
 from rando.Filler import Filler, FrontFiller
 from rando.Choice import ItemThenLocChoice
@@ -12,8 +12,8 @@ from helpers import diffValue2txt
 
 # simple, uses mini solver only
 class FillerRandom(Filler):
-    def __init__(self, startAP, graph, restrictions, container, diffSteps=0):
-        super(FillerRandom, self).__init__(startAP, graph, restrictions, container)
+    def __init__(self, startAP, graph, restrictions, container, endDate, diffSteps=0):
+        super(FillerRandom, self).__init__(startAP, graph, restrictions, container, endDate)
         self.miniSolver = MiniSolver(startAP, graph, restrictions)
         self.diffSteps = diffSteps
         self.beatableBackup = None
@@ -50,7 +50,8 @@ class FillerRandom(Filler):
 
     def step(self):
         # here a step is not an item collection but a whole fill attempt
-        while not self.container.isPoolEmpty():
+        date = time.process_time()
+        while not self.container.isPoolEmpty() and date <= self.endDate:
             item = random.choice(self.container.itemPool)
             locs = self.getLocations(item)
             if not locs:
@@ -60,6 +61,9 @@ class FillerRandom(Filler):
             loc = random.choice(locs)
             itemLoc = ItemLocation(item, loc)
             self.container.collect(itemLoc, pickup=False)
+            date = time.process_time()
+        if date > self.endDate:
+            return False
         # pool is exhausted, use mini solver to see if it is beatable
         if self.isBeatable():
             sys.stdout.write('o')
@@ -95,8 +99,8 @@ class FillerRandom(Filler):
 # no logic random fill with one item placement per step. intended for incremental filling,
 # so does not copy initial container before filling.
 class FillerRandomItems(Filler):
-    def __init__(self, startAP, graph, restrictions, container, steps=0):
-        super(FillerRandomItems, self).__init__(startAP, graph, restrictions, container)
+    def __init__(self, startAP, graph, restrictions, container, endDate, steps=0):
+        super(FillerRandomItems, self).__init__(startAP, graph, restrictions, container, endDate)
         self.steps = steps
 
     def initContainer(self):
@@ -118,8 +122,8 @@ class FillerRandomItems(Filler):
         return True
 
 class FrontFillerNoCopy(FrontFiller):
-    def __init__(self, startAP, graph, restrictions, container):
-        super(FrontFillerNoCopy, self).__init__(startAP, graph, restrictions, container)
+    def __init__(self, startAP, graph, restrictions, container, endDate):
+        super(FrontFillerNoCopy, self).__init__(startAP, graph, restrictions, container, endDate)
 
     def initContainer(self):
         self.container = self.baseContainer
@@ -154,11 +158,12 @@ class FrontFillerKickstart(FrontFiller):
 
 # actual random filler will real solver on top of mini
 class FillerRandomSpeedrun(FillerRandom):
-    def __init__(self, graphSettings, graph, restrictions, container, diffSteps=0):
-        super(FillerRandomSpeedrun, self).__init__(graphSettings.startAP, graph, restrictions, container)
+    def __init__(self, graphSettings, graph, restrictions, container, endDate, diffSteps=0):
+        super(FillerRandomSpeedrun, self).__init__(graphSettings.startAP, graph, restrictions, container, endDate)
         self.nFrontFillSteps = graphSettings.getRandomFillHelp()
         # based on runtime limit, help the random fill with up to three front fill steps
-        self.runtimeSteps = [self.runtimeLimit_s/4, self.runtimeLimit_s/2, self.runtimeLimit_s*3/4, sys.maxsize]
+        limit_s = endDate - time.process_time()
+        self.runtimeSteps = [limit_s/4, limit_s/2, limit_s*3/4, sys.maxsize]
 
     def initFiller(self):
         super(FillerRandomSpeedrun, self).initFiller()
@@ -173,7 +178,6 @@ class FillerRandomSpeedrun(FillerRandom):
             filler = FrontFillerKickstart(self.startAP, self.graph, self.restrictions, self.container)
             condition = filler.createStepCountCondition(self.nFrontFillSteps)
             (isStuck, itemLocations, progItems) = filler.generateItems(condition)
-            self.settings.runtimeLimit_s -= filler.runtime_s
             self.log.debug(self.container.dump())
         if updateBase == True:
             # our container is updated, we can create base lists
@@ -202,12 +206,13 @@ class FillerRandomSpeedrun(FillerRandom):
             sys.stdout.write('X')
             sys.stdout.flush()
             return False
-        sys.stdout.write('S({}/{}ms)'.format(self.nSteps+1, int(self.runtime_s*1000)))
+        now = time.process_time()
+        sys.stdout.write('S({}/{}ms)'.format(self.nSteps+1, int((now-self.startDate)*1000)))
         sys.stdout.flush()
         return True
 
     def getHelp(self):
-        if self.runtime_s > self.runtimeSteps[self.nFrontFillSteps]:
+        if time.process_time() > self.runtimeSteps[self.nFrontFillSteps]:
             # store the step for debug purpose
             sys.stdout.write('n({})'.format(self.nSteps))
             sys.stdout.flush()

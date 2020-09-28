@@ -1,5 +1,5 @@
 
-import sys, random
+import sys, random, time
 
 from graph_locations import locations as graphLocations
 from rando.Restrictions import Restrictions
@@ -21,23 +21,23 @@ class RandoExec(object):
         self.seedName = seedName
         self.vcr = vcr
 
-    def getFillerFactory(self, progSpeed):
+    def getFillerFactory(self, progSpeed, endDate):
         if progSpeed == "basic":
-            return lambda graphSettings, graph, restr, cont: FrontFiller(graphSettings.startAP, graph, restr, cont)
+            return lambda graphSettings, graph, restr, cont: FrontFiller(graphSettings.startAP, graph, restr, cont, endDate)
         elif progSpeed == "speedrun":
-            return lambda graphSettings, graph, restr, cont: FillerRandomSpeedrun(graphSettings, graph, restr, cont)
+            return lambda graphSettings, graph, restr, cont: FillerRandomSpeedrun(graphSettings, graph, restr, cont, endDate)
         else:
-            return lambda graphSettings, graph, restr, cont: FillerProgSpeed(graphSettings, graph, restr, cont)
+            return lambda graphSettings, graph, restr, cont: FillerProgSpeed(graphSettings, graph, restr, cont, endDate)
 
-    def createFiller(self, randoSettings, graphSettings, container):
-        fact = self.getFillerFactory(randoSettings.progSpeed)
+    def createFiller(self, randoSettings, graphSettings, container, endDate):
+        fact = self.getFillerFactory(randoSettings.progSpeed, endDate)
         if self.restrictions.split != "Chozo":
             return fact(graphSettings, self.areaGraph, self.restrictions, container)
         else:
             if randoSettings.progSpeed in ['basic', 'speedrun']:
-                secondPhase = lambda graphSettings, graph, restr, cont, prog: FillerRandom(graphSettings.startAP, graph, restr, cont, diffSteps=100)
+                secondPhase = lambda graphSettings, graph, restr, cont, prog: FillerRandom(graphSettings.startAP, graph, restr, cont, endDate, diffSteps=100)
             else:
-                secondPhase = lambda graphSettings, graph, restr, cont, prog: FillerProgSpeedChozoSecondPhase(graphSettings.startAP, graph, restr, cont)
+                secondPhase = lambda graphSettings, graph, restr, cont, prog: FillerProgSpeedChozoSecondPhase(graphSettings.startAP, graph, restr, cont, endDate)
             chozoFact = ChozoFillerFactory(graphSettings, self.areaGraph, self.restrictions, fact, secondPhase)
             return ChozoWrapperFiller(randoSettings, container, chozoFact)
 
@@ -53,7 +53,11 @@ class RandoExec(object):
         container = None
         i = 0
         attempts = 500 if graphSettings.areaRando else 1
-        while container is None and i < attempts:
+        now = time.process_time()
+        endDate = sys.maxsize
+        if randoSettings.runtimeLimit_s < endDate:
+            endDate = now + randoSettings.runtimeLimit_s
+        while container is None and i < attempts and now <= endDate:
             self.areaGraph = graphBuilder.createGraph()
             services = RandoServices(self.areaGraph, self.restrictions)
             setup = RandoSetup(graphSettings, graphLocations, services)
@@ -64,6 +68,7 @@ class RandoExec(object):
                 i += 1
             else:
                 self.errorMsg += '\n'.join(setup.errorMsgs)
+            now = time.process_time()
         if container is None:
             if graphSettings.areaRando:
                 self.errorMsg += "Could not find an area layout with these settings"
@@ -72,7 +77,7 @@ class RandoExec(object):
             return (True, [], [])
         graphBuilder.escapeGraph(container, self.areaGraph, randoSettings.maxDiff)
         self.areaGraph.printGraph()
-        filler = self.createFiller(randoSettings, graphSettings, container)
+        filler = self.createFiller(randoSettings, graphSettings, container, endDate)
         vcr = VCR(self.seedName, 'rando') if self.vcr == True else None
         ret = filler.generateItems(vcr=vcr)
         self.errorMsg += filler.errorMsg

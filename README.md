@@ -199,3 +199,17 @@ Apply patch itemsounds.ips
 Apply patch megaman.ips
 Rom generated: VARIA
 ```
+
+# Web with Docker
+
+You can launch the web2py website locally using docker, it has been tested on Linux and WSL2:
+```
+root@computer:/home/dude/RandomMetroidSolver/web/docker# ./build_run.sh
+```
+
+Then you can connect to the local website on http://127.0.0.1:8000/ on Linux and http://<WSL2 local IP>:8000/ on WSL2.
+
+You can choose the branch to checkout with -b, and give a Github token with -t to be able to do git pull in the Docker image:
+```
+root@computer:/home/dude/RandomMetroidSolver/web/docker# ./build_run.sh -b minimizer -t ~dude/RandomMetroidSolver/github_token
+```

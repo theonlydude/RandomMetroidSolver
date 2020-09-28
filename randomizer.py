@@ -13,7 +13,6 @@ from rom import RomPatcher, FakeROM
 from utils import loadRandoPreset, getDefaultMultiValues
 from version import displayedVersion
 from smbool import SMBool
-from cache import Cache
 
 import log, db
 
@@ -95,8 +94,6 @@ if __name__ == "__main__":
     parser.add_argument('--startLocationList', help="list to choose from when random",
                         dest='startLocationList', nargs='?', default=None)
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
-                        action='store_true')
-    parser.add_argument('--debug-cache', help="activate debug logging for the cache", dest='debug_cache',
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',
                         help="the maximum difficulty generated seed will be for given parameters",
@@ -263,7 +260,6 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     log.init(args.debug)
-    Cache.debug = args.debug_cache
     logger = log.get('Rando')
     # service to force an argument value and notify it
     argDict = vars(args)

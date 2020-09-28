@@ -183,9 +183,10 @@ define_location(
     AccessFrom={
         'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.canOpenRedDoors())
     },
-    Available=lambda loc, sm: sm.wor(sm.wand(sm.knowsMockball(),
-                                           sm.haveItem('Morph')),
-                                   sm.haveItem('SpeedBooster'))
+    Available=lambda loc, sm: sm.wand(sm.wor(sm.wand(sm.knowsMockball(),
+                                                     sm.haveItem('Morph')),
+                                             sm.haveItem('SpeedBooster')),
+                                      sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.canOpenRedDoors()))
 ),
 define_location(
     Area="Brinstar",
@@ -513,7 +514,8 @@ define_location(
     Visibility="Chozo",
     Room='Speed Booster Room',
     AccessFrom={
-        'Bubble Mountain Top': lambda sm: sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoors), sm.canOpenGreenDoors())
+        'Bubble Mountain Top': lambda sm: sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoors),
+                                                 sm.wand(sm.canOpenGreenDoors(), sm.canOpenRedDoors()))
     },
     Available=lambda loc, sm: sm.canHellRunToSpeedBooster()
 ),
@@ -1151,7 +1153,7 @@ define_location(
         'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.canOpenRedDoors())
     },
     Available=lambda loc, sm: sm.wor(sm.wand(sm.haveItem('Morph'), sm.knowsMockball()),
-                                           sm.haveItem('SpeedBooster'))
+                                     sm.haveItem('SpeedBooster'))
 ),
 define_location(
     Area="Brinstar",
@@ -1165,15 +1167,15 @@ define_location(
     Visibility="Hidden",
     Room='Brinstar Reserve Tank Room',
     AccessFrom={
-        'Green Brinstar Elevator': lambda sm: SMBool(True)
+        'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.canOpenRedDoors())
     },
     Available=lambda loc, sm: sm.wand(sm.haveItem('Morph'),
-                                    sm.wor(sm.knowsMockball(),
-                                           sm.haveItem('SpeedBooster')),
-                                    sm.canOpenRedDoors(),
-                                    sm.wor(sm.canPassBombPassages(),
-                                           sm.wand(sm.knowsRonPopeilScrew(),
-                                                   sm.haveItem('ScrewAttack'))))
+                                      sm.wor(sm.knowsMockball(),
+                                             sm.haveItem('SpeedBooster')),
+                                      sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.canOpenRedDoors()),
+                                      sm.wor(sm.canPassBombPassages(),
+                                             sm.wand(sm.knowsRonPopeilScrew(),
+                                                     sm.haveItem('ScrewAttack'))))
 ),
 define_location(
     Area="Brinstar",
@@ -1187,12 +1189,12 @@ define_location(
     Visibility="Visible",
     Room='Brinstar Reserve Tank Room',
     AccessFrom={
-        'Green Brinstar Elevator': lambda sm: SMBool(True)
+        'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.canOpenRedDoors())
     },
-    Available=lambda loc, sm: sm.wand(sm.canOpenRedDoors(),
-                                    sm.haveItem('Morph'),
-                                    sm.wor(sm.knowsMockball(),
-                                           sm.haveItem('SpeedBooster')))
+    Available=lambda loc, sm: sm.wand(sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.canOpenRedDoors()),
+                                      sm.haveItem('Morph'),
+                                      sm.wor(sm.knowsMockball(),
+                                             sm.haveItem('SpeedBooster')))
 ),
 define_location(
     Area="Brinstar",
@@ -1862,10 +1864,11 @@ define_location(
         'Main Street Bottom': lambda sm: SMBool(True)
     },
     Available=lambda loc, sm: sm.wand(sm.haveItem('Gravity'),
-                                    sm.haveItem('SpeedBooster'),
-                                    sm.wor(sm.wand(sm.canOpenGreenDoors(), # run from room on the right
-                                                   sm.itemCountOk('ETank', 1)), # etank for the spark since sparking from low ground
-                                           sm.canSimpleShortCharge())), # run from above
+                                      sm.haveItem('SpeedBooster'),
+                                      sm.wor(sm.wand(sm.wor(sm.haveItem('Super'), # run from room on the right
+                                                            RomPatches.has(RomPatches.AreaRandoGatesOther)),
+                                                     sm.itemCountOk('ETank', 1)), # etank for the spark since sparking from low ground
+                                             sm.canSimpleShortCharge())), # run from above
 ),
 define_location(
     Area="Maridia",

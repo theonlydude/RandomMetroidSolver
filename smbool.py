@@ -33,7 +33,7 @@ class SMBool:
 
     def __repr__(self):
         # to display the smbool as a string
-        return 'SMBool({}, {}, {}, {})'.format(self.bool, self.difficulty, self.knows, self.items)
+        return 'SMBool({}, {}, {}, {})'.format(self.bool, self.difficulty, sorted(self.knows), sorted(self.items))
 
     def __getitem__(self, index):
         # to acces the smbool as [0] for the bool and [1] for the difficulty.

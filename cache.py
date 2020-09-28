@@ -1,60 +1,50 @@
 # the caching decorator for helpers functions
+class VersionedCache(object):
+    __slots__ = ( 'cache', 'masterCache', 'nextSlot', 'size')
 
-class Cache:
-    cache = {}
-    masterCache = {}
+    def __init__(self):
+        self.cache = []
+        self.masterCache = {}
+        self.nextSlot = 0
+        self.size = 0
 
-    @staticmethod
-    def reset():
+    def reset(self):
         # reinit the whole cache
-        key = 0
-        Cache.masterCache = {}
-        Cache.cache = {'key': key}
-        Cache.masterCache[key] = Cache.cache
+        self.masterCache = {}
+        self.update(0)
 
-    @staticmethod
-    def update(newKey):
-        if newKey in Cache.masterCache:
-#            print("usek: "+format(newKey, '#067b'))
-#            if Cache.masterCache[newKey]['key'] != newKey:
-#                print("ERROR: key stored in cache is not the same as the new key !!!!")
-#                print("      "+format(Cache.masterCache[newKey]['key'], '#067b')+" key in cache")
-            Cache.cache = Cache.masterCache[newKey]
-        else:
-#            print("newk: "+format(newKey, '#067b'))
-            Cache.cache = {'key': newKey}
-            Cache.masterCache[newKey] = Cache.cache
+    def update(self, newKey):
+        cache = self.masterCache.get(newKey, None)
+        if cache is None:
+            cache = [ None ] * self.size
+            self.masterCache[newKey] = cache
+        self.cache = cache
 
-    @staticmethod
-    def decorator(func):
-        name = func.__name__
-        def _decorator(self):
-            ret = Cache.cache.get(name, None)
-            if ret is not None:
-#                print("cache found for {}: {}".format(name, Cache.cache[func.__name__]))
-#                ret = func(self)
-#                if ret != Cache.cache[name]:
-#                    print("ERROR: cache ({}) != current ({}) for {}".format(Cache.cache[name], ret, name))
-                return ret
-            else:
-                ret = func(self)
-                Cache.cache[name] = ret
-#                print("cache added for {}: {}".format(name, Cache.cache[name]))
-                return ret
-        return _decorator
+    def decorator(self, func):
+        return self._decorate(func.__name__, self._new_slot(), func)
 
     # for lambdas
-    @staticmethod
-    def ldeco(name, func):
-        def _decorator(self):
-            ret = Cache.cache.get(name, None)
+    def ldeco(self, name, func):
+        return self._decorate(name, self._new_slot(), func)
+
+    def _new_slot(self):
+        slot = self.nextSlot
+        self.nextSlot += 1
+        self.size += 1
+        return slot
+
+    def _decorate(self, name, slot, func):
+        def _decorator(arg):
+            ret = self.cache[slot]
             if ret is not None:
                 return ret
             else:
-                ret = func(self)
-                Cache.cache[name] = ret
+                ret = func(arg)
+                self.cache[slot] = ret
                 return ret
         return _decorator
+
+Cache = VersionedCache()
 
 class RequestCache(object):
     def __init__(self):

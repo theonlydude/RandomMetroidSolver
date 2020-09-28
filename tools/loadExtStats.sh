@@ -13,7 +13,7 @@ mkdir -p ${LOG_DIR} ${SQL_DIR}
 function getDBParam {
     PARAM="$1"
 
-    sed -e "s+.*${PARAM}='\([^']*\)'.*+\1+" ${CWD}/db_params.py
+    sed -e "s+.*${PARAM}=\([^,)]*\).*+\1+" ${CWD}/db_params.py | sed -e "s+'++g"
 }
 
 function info {

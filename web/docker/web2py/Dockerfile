@@ -67,7 +67,7 @@ RUN mkdir -p js graph fonts images/sprite_sheets css
 RUN /root/RandomMetroidSolver/web/install.sh
 
 # add db conf
-RUN echo "dbParams = dict(host='127.0.0.1', user='varia', database='varia', password='varia', port=3366)" > /root/RandomMetroidSolver/db_params.py
+RUN echo "dbParams = dict(host='varia-mysql', user='varia', database='varia', password='varia', port=3306)" > /root/RandomMetroidSolver/db_params.py
 
 # create empty database
 

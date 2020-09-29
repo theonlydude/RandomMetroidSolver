@@ -8,6 +8,7 @@ from helpers import Bosses
 # used to specify whether we want to come back from locations
 @unique
 class ComebackCheckType(Enum):
+    Undefined = 0
     # do not check whether we should come back
     NoCheck = 1
     # come back with the placed item

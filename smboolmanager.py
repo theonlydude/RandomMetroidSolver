@@ -79,7 +79,7 @@ class SMBoolManager(object):
 
     def withItem(self, item, func):
         self.addItem(item)
-        ret = func()
+        ret = func(self)
         self.removeItem(item)
         return ret
 

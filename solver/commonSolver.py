@@ -1,6 +1,6 @@
 import logging
 
-from smbool import SMBool
+from smbool import SMBool, smboolFalse
 from helpers import Bosses
 from rom import RomLoader
 from rom_patches import RomPatches
@@ -174,7 +174,7 @@ class CommonSolver(object):
             self.collectedItems.append(item)
             # we still need the boss difficulty
             if not loc.isBoss():
-                loc.difficulty = SMBool(False)
+                loc.difficulty = smboolFalse
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             print("---------------------------------------------------------------")

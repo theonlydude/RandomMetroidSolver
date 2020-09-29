@@ -33,7 +33,7 @@ class SMBool:
 
     def __repr__(self):
         # to display the smbool as a string
-        return 'SMBool({}, {}, {}, {})'.format(self.bool, self.difficulty, self.knows, self.items)
+        return 'SMBool({}, {}, {}, {})'.format(self.bool, self.difficulty, sorted(self.knows), sorted(self.items))
 
     def __getitem__(self, index):
         # to acces the smbool as [0] for the bool and [1] for the difficulty.
@@ -71,24 +71,49 @@ class SMBool:
         return {key : getattr(self, key, None) for key in self.__slots__}
 
     def wand(*args):
-        if False in args:
-            return smboolFalse
-        else:
-            return SMBool(True,
-                          sum([smb.difficulty for smb in args]),
-                          [ smb._knows for smb in args ],
-                          [ smb._items for smb in args ])
+        # looping here is faster than using "if ... in" construct
+        for smb in args:
+            if not smb.bool:
+                return smboolFalse
+
+        difficulty = 0
+
+        for smb in args:
+            difficulty += smb.difficulty
+
+        return SMBool(True,
+                      difficulty,
+                      [ smb._knows for smb in args ],
+                      [ smb._items for smb in args ])
+
+    def wandmax(*args):
+        # looping here is faster than using "if ... in" construct
+        for smb in args:
+            if not smb.bool:
+                return smboolFalse
+
+        difficulty = 0
+
+        for smb in args:
+            if smb.difficulty > difficulty:
+                difficulty = smb.difficulty
+
+        return SMBool(True,
+                      difficulty,
+                      [ smb._knows for smb in args ],
+                      [ smb._items for smb in args ])
 
     def wor(*args):
-        if True in args:
-            # return the smbool with the smallest difficulty among True smbools.
-            return min(args)
-        else:
-            return smboolFalse
+        # looping here is faster than using "if ... in" construct
+        for smb in args:
+            if smb.bool:
+                return min(args)
+
+        return smboolFalse
 
     # negates boolean part of the SMBool
     def wnot(a):
-        return SMBool(not a.bool, a.difficulty)
+        return smboolFalse if a.bool else SMBool(True, a.difficulty)
 
     __and__ = wand
     __or__ = wor

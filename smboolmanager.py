@@ -77,15 +77,10 @@ class SMBoolManager(object):
             itemsDict[item] = self._counts[item]
         return itemsDict
 
-    def eval(self, func, item=None):
-        if item is not None:
-            self.addItem(item)
-
+    def withItem(self, item, func):
+        self.addItem(item)
         ret = func(self)
-
-        if item is not None:
-            self.removeItem(item)
-
+        self.removeItem(item)
         return ret
 
     def resetItems(self):

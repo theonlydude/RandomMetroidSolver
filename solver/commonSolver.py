@@ -1,6 +1,6 @@
 import logging
 
-from smbool import SMBool
+from smbool import SMBool, smboolFalse
 from helpers import Bosses
 from rom import RomLoader
 from rom_patches import RomPatches
@@ -174,7 +174,7 @@ class CommonSolver(object):
             self.collectedItems.append(item)
             # we still need the boss difficulty
             if not loc.isBoss():
-                loc.difficulty = SMBool(False)
+                loc.difficulty = smboolFalse
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             print("---------------------------------------------------------------")
@@ -209,13 +209,13 @@ class CommonSolver(object):
 
         # delete location params which are set when the location is available
         if loc.difficulty is not None:
-            del loc.difficulty
+            loc.difficulty = None
         if loc.distance is not None:
-            del loc.distance
+            loc.distance = None
         if loc.accessPoint is not None:
-            del loc.accessPoint
+            loc.accessPoint = None
         if loc.path is not None:
-            del loc.path
+            loc.path = None
 
         # item
         item = loc.itemName
@@ -263,13 +263,13 @@ class CommonSolver(object):
 
             # delete location params which are set when the location is available
             if loc.difficulty is not None:
-                del loc.difficulty
+                loc.difficulty = None
             if loc.distance is not None:
-                del loc.distance
+                loc.distance = None
             if loc.accessPoint is not None:
-                del loc.accessPoint
+                loc.accessPoint = None
             if loc.path is not None:
-                del loc.path
+                loc.path = None
 
             # item
             item = loc.itemName

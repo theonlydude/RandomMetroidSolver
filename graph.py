@@ -1,7 +1,7 @@
 import copy, logging
 from operator import attrgetter
 import log
-from smbool import SMBool
+from smbool import SMBool, smboolFalse
 from parameters import infinity
 from helpers import Bosses
 
@@ -72,7 +72,7 @@ class AccessPoint(object):
     def connect(self, destName):
         self.disconnect()
         if self.Internal is False:
-            self.transitions[destName] = lambda sm: self.traverse(sm)
+            self.transitions[destName] = self.traverse
             self.ConnectedTo = destName
         else:
             raise RuntimeError("Cannot add an internal access point as inter-are transition")
@@ -98,6 +98,10 @@ class AccessPoint(object):
         return self.ConnectedTo == self.Name
 
 class AccessGraph(object):
+    __slots__ = ( 'log', 'accessPoints', 'InterAreaTransitions',
+                  'EscapeAttributes', 'apCache', '_useCache',
+                  'availAccessPoints' )
+
     def __init__(self, accessPointList, transitions, dotFile=None):
         self.log = log.get('Graph')
         self.accessPoints = {}
@@ -282,7 +286,7 @@ class AccessGraph(object):
         for loc in locations:
             if loc.GraphArea not in availAreas:
                 loc.distance = 30000
-                loc.difficulty = SMBool(False)
+                loc.difficulty = smboolFalse
                 #if loc.Name == "Kraid":
                 #    print("loc: {} locDiff is area nok".format(loc.Name))
                 continue
@@ -290,7 +294,7 @@ class AccessGraph(object):
             locAPs = self.getSortedAPs(availAPPaths, loc.AccessFrom)
             if len(locAPs) == 0:
                 loc.distance = 40000
-                loc.difficulty = SMBool(False)
+                loc.difficulty = smboolFalse
                 #if loc.Name == "Kraid":
                 #    print("loc: {} no aps".format(loc.Name))
                 continue
@@ -298,7 +302,7 @@ class AccessGraph(object):
             for apName in locAPs:
                 if apName == None:
                     loc.distance = 20000
-                    loc.difficulty = SMBool(False)
+                    loc.difficulty = smboolFalse
                     #if loc.Name == "Kraid":
                     #    print("loc: {} ap is none".format(loc.Name))
                     break
@@ -330,17 +334,17 @@ class AccessGraph(object):
                             break
                         else:
                             loc.distance = 1000 + tdiff.difficulty
-                            loc.difficulty = SMBool(False)
+                            loc.difficulty = smboolFalse
                             #if loc.Name == "Kraid":
                             #    print("loc: {} allDiff is false".format(loc.Name))
                     else:
                         loc.distance = 1000 + tdiff.difficulty
-                        loc.difficulty = SMBool(False)
+                        loc.difficulty = smboolFalse
                         #if loc.Name == "Kraid":
                         #    print("loc: {} allDiff is false".format(loc.Name))
                 else:
                     loc.distance = 10000 + tdiff.difficulty
-                    loc.difficulty = SMBool(False)
+                    loc.difficulty = smboolFalse
                     #if loc.Name == "Kraid":
                     #    print("loc: {} tdiff is false".format(loc.Name))
 
@@ -348,7 +352,7 @@ class AccessGraph(object):
                 #if loc.Name == "Kraid":
                 #    print("loc: {} no difficulty in loc".format(loc.Name))
                 loc.distance = 100000
-                loc.difficulty = SMBool(False)
+                loc.difficulty = smboolFalse
 
             #if loc.Name == "Kraid":
             #    print("loc: {}: {}".format(loc.Name, loc))

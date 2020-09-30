@@ -12,6 +12,9 @@ class ItemLocation(object):
         self.Item = Item
         self.Location = Location
 
+    def json(self):
+        return {'Item': self.Item.json(), 'Location': self.Location.json()}
+
 def getItemListStr(items):
     return str(dict(Counter([item.Type for item in items])))
 

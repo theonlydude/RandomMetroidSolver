@@ -547,6 +547,7 @@ if __name__ == "__main__":
         progDiff = 'normal'
         args.plandoRando = json.loads(args.plandoRando)
         RomPatches.ActivePatches = args.plandoRando["patches"]
+        DoorsManager.unserialize(args.plandoRando["doors"])
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty,
                                   restrictions, args.superFun, args.runtimeLimit_s,
                                   args.plandoRando["locsItems"] if args.plandoRando != None else None,
@@ -570,9 +571,10 @@ if __name__ == "__main__":
                                   args.escapeRando, minimizerN, dotFile,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
 
-    DoorsManager.setDoorsColor()
-    if args.doorsColorsRando == True:
-        DoorsManager.randomize()
+    if args.plandoRando is None:
+        DoorsManager.setDoorsColor()
+        if args.doorsColorsRando == True:
+            DoorsManager.randomize()
 
     if args.patchOnly == False:
         try:
@@ -624,13 +626,8 @@ if __name__ == "__main__":
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
     if args.plandoRando != None:
-        # replace smbool with a dict
-        for itemLoc in itemLocs:
-            itemLoc.Location = itemLoc.Location.json()
-            itemLoc.Item = itemLoc.Item.json()
-
         with open(args.output, 'w') as jsonFile:
-            json.dump({"itemLocs": itemLocs, "errorMsg": randoExec.errorMsg}, jsonFile, default=lambda x: x.__dict__)
+            json.dump({"itemLocs": [il.json() for il in itemLocs], "errorMsg": randoExec.errorMsg}, jsonFile)
         sys.exit(0)
 
     # generate extended stats

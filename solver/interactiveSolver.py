@@ -286,7 +286,8 @@ class InteractiveSolver(CommonSolver):
         plandoCurrent = {
             "locsItems": plandoLocsItems,
             "transitions": self.curGraphTransitions,
-            "patches": RomPatches.ActivePatches
+            "patches": RomPatches.ActivePatches,
+            "doors": DoorsManager.serialize()
         }
 
         plandoCurrentJson = json.dumps(plandoCurrent)

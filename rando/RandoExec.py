@@ -95,4 +95,4 @@ class RandoExec(object):
         nothing = ItemManager.getItem('Nothing')
         for loc in unfilledLocs:
             loc.restricted = True
-            itemLocs.append(ItemLocation(nothing, loc))
+            itemLocs.append(ItemLocation(nothing, loc, False))

@@ -46,6 +46,9 @@ def dumpErrorMsg(outFileName, msg):
         with open(outFileName, 'w') as jsonFile:
             json.dump({"errorMsg": msg}, jsonFile)
 
+def dumpErrorMsgs(outFileName, msgs):
+    dumpErrorMsg(outFileName, '\n' + '\n'.join(msgs))
+
 def restricted_float(x):
     x = float(x)
     if x < 0.0 or x > 9.0:
@@ -268,14 +271,13 @@ if __name__ == "__main__":
     # service to force an argument value and notify it
     argDict = vars(args)
     forcedArgs = {}
+    optErrMsgs = [ ]
     def forceArg(arg, value, msg, webArg=None, webValue=None):
         if argDict[arg] != value:
             argDict[arg] = value
             forcedArgs[webArg if webArg != None else arg] = webValue if webValue != None else value
             print(msg)
-            return '\n'+msg
-        else:
-            return ''
+            optErrMsgs.append(msg)
     # if rando preset given, load it first
     if args.randoPreset != None:
         loadRandoPreset(args.randoPreset, args)
@@ -306,7 +308,6 @@ if __name__ == "__main__":
             sys.exit(-1)
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
-    optErrMsg = ""
     # if no max diff, set it very high
     if args.maxDifficulty:
         if args.maxDifficulty == 'random':
@@ -339,7 +340,7 @@ if __name__ == "__main__":
     if args.minDifficulty:
         minDifficulty = text2diff[args.minDifficulty]
         if progSpeed != "speedrun":
-            optErrMsg += "\nMinimum difficulty setting ignored, as prog speed is not speedrun"
+            optErrMsgs.append("Minimum difficulty setting ignored, as prog speed is not speedrun")
     else:
         minDifficulty = 0
 
@@ -349,7 +350,7 @@ if __name__ == "__main__":
             logger.debug("minimizerN: {}".format(minimizerN))
         else:
             minimizerN = int(args.minimizerN)
-        optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
+        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
     else:
         minimizerN = None
     areaRandom = False
@@ -373,11 +374,11 @@ if __name__ == "__main__":
     logger.debug("escapeRando: {}".format(args.escapeRando))
 
     if args.suitsRestriction != False and minimizerN is not None:
-        optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
+        forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
 
     if args.suitsRestriction == 'random':
         if args.morphPlacement == 'late' and args.area == True:
-            optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
+            forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
         else:
             args.suitsRestriction = bool(random.getrandbits(1))
     logger.debug("suitsRestriction: {}".format(args.suitsRestriction))
@@ -394,7 +395,7 @@ if __name__ == "__main__":
         args.morphPlacement = random.choice(morphPlacements)
     # random fill makes certain options unavailable
     if progSpeed == 'speedrun' or progSpeed == 'basic':
-        optErrMsg += forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
+        forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = args.progressionDifficulty
 
     if args.strictMinors == 'random':
@@ -402,11 +403,11 @@ if __name__ == "__main__":
 
     # in plando rando we know that the start ap is ok
     if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando == None:
-        optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
-        optErrMsg += forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", 'variaTweaks', 'on')
-        optErrMsg += forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
-        optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
-        optErrMsg += forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", 'areaLayout', 'on')
+        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
+        forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", 'variaTweaks', 'on')
+        forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
+        forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
+        forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", 'areaLayout', 'on')
         possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty, args.morphPlacement)
         if args.startAP == 'random':
             if args.startLocationList != None:
@@ -415,26 +416,26 @@ if __name__ == "__main__":
                 possibleStartAPs = sorted(list(set(possibleStartAPs).intersection(set(startLocationList))))
                 if len(possibleStartAPs) == 0:
                     reasonStr = '\n'.join(["%s : %s" % (apName, cause) for apName, cause in reasons.items() if apName in startLocationList])
-                    optErrMsg += '\nInvalid start locations list with your settings.\n'+reasonStr
-                    dumpErrorMsg(args.output, optErrMsg)
+                    '\nInvalid start locations list with your settings.\n'+reasonStr
+                    dumpErrorMsgs(args.output, optErrMsgs)
                     sys.exit(-1)
             args.startAP = random.choice(possibleStartAPs)
         elif args.startAP not in possibleStartAPs:
-            optErrMsg += '\nInvalid start location: {}. {}'.format(args.startAP, reasons[args.startAP])
-            optErrMsg += '\nPossible start locations with these settings: {}'.format(possibleStartAPs)
-            dumpErrorMsg(args.output, optErrMsg)
+            optErrMsgs.append('Invalid start location: {}.  {}'.format(args.startAP, reasons[args.startAP]))
+            optErrMsgs.append('Possible start locations with these settings: {}'.format(possibleStartAPs))
+            dumpErrorMsgs(args.output, optErrMsgs)
             sys.exit(-1)
     ap = getAccessPoint(args.startAP)
     if 'forcedEarlyMorph' in ap.Start and ap.Start['forcedEarlyMorph'] == True:
-        optErrMsg += forceArg('morphPlacement', 'early', "'Morph Placement' forced to early for custom start location")
+        forceArg('morphPlacement', 'early', "'Morph Placement' forced to early for custom start location")
     else:
         if progSpeed == 'speedrun':
             if args.morphPlacement == 'late':
-                optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
+                forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
             elif (not GraphUtils.isStandardStart(args.startAP)) and args.morphPlacement != 'normal':
-                optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for custom start location")
+                forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for custom start location")
         if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
-            optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for Chozo")
+            forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for Chozo")
 
     if args.patchOnly == False:
         print("SEED: " + str(seed))
@@ -539,11 +540,11 @@ if __name__ == "__main__":
                 raise ValueError("Invalid button name : " + str(b))
 
     if args.plandoRando != None:
-        optErrMsg += forceArg('progressionSpeed', 'speedrun', "'Progression Speed' forced to speedrun")
+        forceArg('progressionSpeed', 'speedrun', "'Progression Speed' forced to speedrun")
         progSpeed = 'speedrun'
-        optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
-        optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
-        optErrMsg += forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
+        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
+        forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
+        forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = 'normal'
         args.plandoRando = json.loads(args.plandoRando)
         RomPatches.ActivePatches = args.plandoRando["patches"]
@@ -610,7 +611,7 @@ if __name__ == "__main__":
         if args.escapeRando == False:
             args.patches.append(random.choice(animalsPatches))
         else:
-            optErrMsg += "\nIgnored animals surprise because of escape randomization"
+            optErrMsgs.append("Ignored animals surprise because of escape randomization")
     # transform itemLocs in our usual dict(location, item), exclude minors, we'll get them with the solver
     locsItems = {}
     for itemLoc in itemLocs:
@@ -728,8 +729,9 @@ if __name__ == "__main__":
             romPatcher.commitIPS()
         romPatcher.end()
         if args.patchOnly == False:
-            if optErrMsg != "":
-                msg = optErrMsg + '\n' + randoExec.errorMsg
+            if len(optErrMsgs) > 0:
+                optErrMsgs.append(randoExec.errorMsg)
+                msg = '\n' + '\n'.join(optErrMsgs)
             else:
                 msg = randoExec.errorMsg
         else:

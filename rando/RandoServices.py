@@ -1,7 +1,7 @@
 
-import log, copy, random, sys, logging
+import utils.log, copy, random, sys, logging
 from enum import Enum, unique
-from parameters import infinity
+from utils.parameters import infinity
 from rando.ItemLocContainer import getLocListStr, getItemListStr, ContainerSoftBackup, ItemLocation
 from logic.helpers import Bosses
 
@@ -23,7 +23,7 @@ class RandoServices(object):
         self.settings = restrictions.settings
         self.areaGraph = graph
         self.cache = cache
-        self.log = log.get('RandoServices')
+        self.log = utils.log.get('RandoServices')
 
     # collect an item/loc with logic in a container from a given AP
     # return new AP

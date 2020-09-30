@@ -3,7 +3,7 @@
 import random, sys, argparse
 from rando.PaletteRando import PaletteRando
 from rom.rompatcher import RomPatcher
-import log
+import utils.log
 
 # for local "palette rando" patching of a seed
 if __name__ == "__main__":
@@ -35,7 +35,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     log.init(args.debug)
-    logger = log.get('Palette')
+    logger = utils.log.get('Palette')
 
     if args.seed == 0:
         random.seed(random.randint(0, 9999999))

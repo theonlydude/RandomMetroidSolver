@@ -4,8 +4,8 @@ from logic.cache import Cache
 from logic.smbool import SMBool, smboolFalse
 from logic.helpers import Bosses
 from graph.graph_helpers import HelpersGraph
-from doorsmanager import DoorsManager
-from parameters import Knows, isKnows
+from utils.doorsmanager import DoorsManager
+from utils.parameters import Knows, isKnows
 
 class SMBoolManager(object):
     items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'MotherBrain', 'Hyper'] + Bosses.Golden4()

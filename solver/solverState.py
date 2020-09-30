@@ -2,9 +2,9 @@ import json
 
 from logic.smbool import SMBool
 from rom.rom_patches import RomPatches
-from utils import removeChars, fixEnergy
-from parameters import diff4solver, Knows
-from doorsmanager import DoorsManager
+from utils.utils import removeChars, fixEnergy
+from utils.parameters import diff4solver, Knows
+from utils.doorsmanager import DoorsManager
 
 class SolverState(object):
     def __init__(self, debug=False):

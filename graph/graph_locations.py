@@ -1,5 +1,5 @@
 from logic.helpers import Bosses
-from parameters import Settings, infinity
+from utils.parameters import Settings, infinity
 from rom.rom_patches import RomPatches
 from logic.smbool import SMBool
 import copy

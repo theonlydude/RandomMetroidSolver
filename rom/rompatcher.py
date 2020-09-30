@@ -4,8 +4,8 @@ from rando.Items import ItemManager
 from rom.compression import Compressor
 from rom.ips import IPS_Patch
 from rando.patches import patches, additional_PLMs
-from parameters import appDir
-from doorsmanager import DoorsManager
+from utils.parameters import appDir
+from utils.doorsmanager import DoorsManager
 from graph.graph_access import GraphUtils, getAccessPoint, accessPoints
 from rom.rom import RealROM, FakeROM
 

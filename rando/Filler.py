@@ -1,11 +1,11 @@
 
-import log, copy, time
+import utils.log, copy, time
 
 from logic.cache import RequestCache
 from rando.RandoServices import RandoServices
 from rando.Choice import ItemThenLocChoice
 from rando.RandoServices import ComebackCheckType
-from parameters import infinity
+from utils.parameters import infinity
 from logic.helpers import diffValue2txt
 from graph.graph_access import GraphUtils
 
@@ -24,7 +24,7 @@ class Filler(object):
         self.endDate = endDate
         self.baseContainer = emptyContainer
         self.maxDiff = self.settings.maxDiff
-        self.log = log.get('Filler')
+        self.log = utils.log.get('Filler')
 
     # reinit algo state
     def initFiller(self):

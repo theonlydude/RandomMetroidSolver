@@ -1,4 +1,4 @@
-import copy, random, log
+import copy, random, utils.log
 
 from graph.graph_access import getAccessPoint
 from rando.ItemLocContainer import getLocListStr
@@ -7,14 +7,13 @@ from rando.ItemLocContainer import getLocListStr
 # canPlaceAtLocation is the main entry point here
 class Restrictions(object):
     def __init__(self, settings):
-        self.log = log.get('Restrictions')
+        self.log = utils.log.get('Restrictions')
         self.settings = settings
         # Item split : Major, Chozo or Full
         self.split = settings.restrictions['MajorMinor']
         self.suitsRestrictions = settings.restrictions['Suits']
         # checker function chain used by canPlaceAtLocation
         self.checkers = self.getCheckers()
-        self.log = log.get("Restrictions")
         self.static = {}
         self.dynamic = {}
 

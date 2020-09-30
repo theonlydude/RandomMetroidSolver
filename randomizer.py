@@ -6,17 +6,16 @@ from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from rando.PaletteRando import PaletteRando
 from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
-from parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text
-from utils import PresetLoader
+from utils.parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text
 from rom.rom_patches import RomPatches
 from rom.rompatcher import RomPatcher
 from rom.rom import FakeROM
-from utils import loadRandoPreset, getDefaultMultiValues
-from version import displayedVersion
+from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues
+from utils.version import displayedVersion
 from logic.smbool import SMBool
-from doorsmanager import DoorsManager
+from utils.doorsmanager import DoorsManager
 
-import log, db
+import utils.log, utils.db
 
 defaultMultiValues = getDefaultMultiValues()
 speeds = defaultMultiValues['progressionSpeed']
@@ -264,8 +263,8 @@ if __name__ == "__main__":
         print("plandoRando param requires output param")
         sys.exit(-1)
 
-    log.init(args.debug)
-    logger = log.get('Rando')
+    utils.log.init(args.debug)
+    logger = utils.log.get('Rando')
     # service to force an argument value and notify it
     argDict = vars(args)
     forcedArgs = {}

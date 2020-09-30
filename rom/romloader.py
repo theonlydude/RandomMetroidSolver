@@ -3,7 +3,7 @@ import os, json
 from rom.rom_patches import RomPatches
 from rom.rom import RealROM, FakeROM
 from rom.romreader import RomReader
-from doorsmanager import DoorsManager
+from utils.doorsmanager import DoorsManager
 from graph.graph_access import getAccessPoint
 
 class RomLoader(object):

@@ -1,5 +1,5 @@
-from utils import randGaussBounds, getRangeDict, chooseFromRange
-import log, logging, copy, random
+from utils.utils import randGaussBounds, getRangeDict, chooseFromRange
+import utils.log, logging, copy, random
 
 class Item:
     __slots__ = ( 'Category', 'Class', 'Name', 'Code', 'Type' )
@@ -353,7 +353,7 @@ class ItemPoolGenerator(object):
         self.sm = sm
         self.maxItems = 105 # 100 item locs and 5 bosses
         self.maxEnergy = 18 # 14E, 4R
-        self.log = log.get('ItemPool')
+        self.log = utils.log.get('ItemPool')
 
     def calcMaxAmmo(self):
         self.nbMinorsAlready = 5

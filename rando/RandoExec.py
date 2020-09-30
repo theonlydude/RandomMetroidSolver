@@ -12,7 +12,7 @@ from rando.FillerRandom import FillerRandom, FillerRandomSpeedrun
 from rando.Chozo import ChozoFillerFactory, ChozoWrapperFiller
 from rando.Items import ItemManager
 from rando.ItemLocContainer import ItemLocation
-from vcr import VCR
+from utils.vcr import VCR
 
 # entry point for rando execution ("randomize" method)
 class RandoExec(object):

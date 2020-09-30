@@ -5,7 +5,7 @@ from logic.helpers import Helpers, Bosses
 from logic.cache import Cache
 from rom.rom_patches import RomPatches
 from graph.graph_access import getAccessPoint
-from parameters import Settings
+from utils.parameters import Settings
 
 class HelpersGraph(Helpers):
     def __init__(self, smbm):

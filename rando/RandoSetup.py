@@ -1,6 +1,6 @@
-import copy, log, random
+import copy, utils.log, random
 
-from utils import randGaussBounds
+from utils.utils import randGaussBounds
 from logic.smbool import SMBool, smboolFalse
 from logic.smboolmanager import SMBoolManager
 from logic.helpers import Bosses
@@ -8,7 +8,7 @@ from graph.graph_access import getAccessPoint, GraphUtils
 from rando.Filler import FrontFiller
 from rando.ItemLocContainer import ItemLocContainer, getLocListStr, ItemLocation
 from rando.Chozo import isChozoItem
-from parameters import infinity
+from utils.parameters import infinity
 
 # checks init conditions for the randomizer: processes super fun settings, graph, start location, special restrictions
 # the entry point is createItemLocContainer
@@ -49,7 +49,7 @@ class RandoSetup(object):
         # we have to use item manager only once, otherwise pool will change
         self.itemManager.createItemPool(exclude)
         self.basePool = self.itemManager.getItemPool()[:]
-        self.log = log.get('RandoSetup')
+        self.log = utils.log.get('RandoSetup')
         if len(locations) != len(self.locations):
             self.log.debug("inaccessible locations :"+getLocListStr([loc for loc in locations if loc not in self.locations]))
 

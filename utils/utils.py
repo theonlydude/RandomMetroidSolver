@@ -1,7 +1,7 @@
 import os, json, sys, re, random
 
-from parameters import Knows, Settings, Controller, isKnows, isSettings, isButton
-from parameters import easy, medium, hard, harder, hardcore, mania
+from utils.parameters import Knows, Settings, Controller, isKnows, isSettings, isButton
+from utils.parameters import easy, medium, hard, harder, hardcore, mania
 from logic.smbool import SMBool
 
 def isStdPreset(preset):

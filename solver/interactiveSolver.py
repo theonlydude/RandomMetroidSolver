@@ -9,14 +9,14 @@ from rom.rom_patches import RomPatches
 from graph.graph_locations import locations as graphLocations
 from graph.graph import AccessGraphSolver as AccessGraph
 from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
-from utils import removeChars
+from utils.utils import removeChars
 from solver.conf import Conf
-from parameters import hard, infinity
+from utils.parameters import hard, infinity
 from solver.solverState import SolverState
 from solver.comeback import ComeBack
 from rando.ItemLocContainer import ItemLocation
-from doorsmanager import DoorsManager
-import log
+from utils.doorsmanager import DoorsManager
+import utils.log
 
 class InteractiveSolver(CommonSolver):
     def __init__(self, output):
@@ -24,7 +24,7 @@ class InteractiveSolver(CommonSolver):
         self.errorMsg = ""
         self.checkDuplicateMajor = False
         self.vcr = None
-        self.log = log.get('Solver')
+        self.log = utils.log.get('Solver')
 
         self.outputFileName = output
         self.firstLogFile = None

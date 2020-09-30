@@ -2,12 +2,12 @@ import copy
 import random
 from graph.graph import AccessPoint, AccessGraph
 from graph.graph_locations import locations
-from parameters import Knows, Settings
+from utils.parameters import Knows, Settings
 from rom.rom_patches import RomPatches
 from logic.smbool import SMBool
 from logic.helpers import Bosses
 from logic.cache import Cache
-import log
+import utils.log
 
 # all access points and traverse functions
 accessPoints = [
@@ -845,7 +845,7 @@ def getAccessPoint(apName, apList=None):
     return next(ap for ap in apList if ap.Name == apName)
 
 class GraphUtils:
-    log = log.get('GraphUtils')
+    log = utils.log.get('GraphUtils')
 
     def getStartAccessPointNames():
         return [ap.Name for ap in accessPoints if ap.Start is not None]

@@ -10,21 +10,21 @@ import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math
 from datetime import datetime
 
 # to solve the rom
-from parameters import easy, medium, hard, harder, hardcore, mania, diff4solver
-from parameters import Knows, Settings, Controller, isKnows, isButton
+from utils.parameters import easy, medium, hard, harder, hardcore, mania, diff4solver
+from utils.parameters import Knows, Settings, Controller, isKnows, isButton
 from solver.conf import Conf
-from parameters import diff2text, text2diff
-from utils import PresetLoader, removeChars, getDefaultMultiValues
-import db
+from utils.parameters import diff2text, text2diff
+from utils.utils import PresetLoader, removeChars, getDefaultMultiValues
+from utils.db import DB
 from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
-from utils import isStdPreset, getRandomizerDefaultParameters
+from utils.utils import isStdPreset, getRandomizerDefaultParameters
 from graph.graph_locations import locations
 from logic.smboolmanager import SMBoolManager
 from rom.romreader import RomReader
 from rom.rom_patches import RomPatches
 from rom.ips import IPS_Patch
 from randomizer import energyQties, progDiffs, morphPlacements, majorsSplits, speeds
-from doorsmanager import DoorsManager
+from utils.doorsmanager import DoorsManager
 
 # put an expiration date to the default cookie to have it kept between browser restart
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
@@ -169,10 +169,10 @@ def getSkillLevelBarData(preset):
         score = PresetLoader.factory('{}/{}.json'.format(getPresetDir(preset), preset)).params['score']
         result['standards'][preset] = score
 
-    DB = db.DB()
-    result['generatedSeeds'] = DB.getGeneratedSeeds(result['custom'][0])
-    result['lastAction'] = DB.getPresetLastActionDate(result['custom'][0])
-    DB.close()
+    db = DB()
+    result['generatedSeeds'] = db.getGeneratedSeeds(result['custom'][0])
+    result['lastAction'] = db.getPresetLastActionDate(result['custom'][0])
+    db.close()
 
     # TODO: normalize result (or not ?)
     return result
@@ -429,9 +429,9 @@ def presets():
                 paramsDict['password'] = passwordSHA256
                 try:
                     PresetLoader.factory(paramsDict).dump(fullPath)
-                    DB = db.DB()
-                    DB.addPresetAction(preset, 'update')
-                    DB.close()
+                    db = DB()
+                    db.addPresetAction(preset, 'update')
+                    db.close()
                     updatePresetsSession()
                     session.flash = "Preset {} updated".format(preset)
                 except Exception as e:
@@ -449,9 +449,9 @@ def presets():
                 paramsDict['password'] = passwordSHA256
                 try:
                     PresetLoader.factory(paramsDict).dump(fullPath)
-                    DB = db.DB()
-                    DB.addPresetAction(preset, 'create')
-                    DB.close()
+                    db = DB()
+                    db.addPresetAction(preset, 'create')
+                    db.close()
                     updatePresetsSession()
                     session.flash = "Preset {} created".format(preset)
                 except Exception as e:
@@ -923,8 +923,8 @@ def computeDifficulty(jsonRomFileName, preset):
     presetFileName = "{}/{}.json".format(getPresetDir(preset), preset)
     (fd, jsonFileName) = tempfile.mkstemp()
 
-    DB = db.DB()
-    id = DB.initSolver()
+    db = DB()
+    id = db.initSolver()
 
     params = [
         pythonExec,  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
@@ -939,7 +939,7 @@ def computeDifficulty(jsonRomFileName, preset):
     for item in session.solver['itemsForbidden']:
         params += ['--itemsForbidden', item]
 
-    DB.addSolverParams(id, randomizedRom, preset, session.solver['difficultyTarget'],
+    db.addSolverParams(id, randomizedRom, preset, session.solver['difficultyTarget'],
                        session.solver['pickupStrategy'], session.solver['itemsForbidden'])
 
     print("before calling solver: {}".format(params))
@@ -955,8 +955,8 @@ def computeDifficulty(jsonRomFileName, preset):
     else:
         result = "Solver: something wrong happened while solving the ROM"
 
-    DB.addSolverResult(id, ret, duration, result)
-    DB.close()
+    db.addSolverResult(id, ret, duration, result)
+    db.close()
 
     os.close(fd)
     os.remove(jsonFileName)
@@ -1265,8 +1265,8 @@ def randomizerWebService():
     validateWebServiceParams(switchs, quantities, multis, others, isJson=True)
 
     # randomize
-    DB = db.DB()
-    id = DB.initRando()
+    db = DB()
+    id = db.initRando()
 
     # race mode
     useRace = False
@@ -1415,7 +1415,7 @@ def randomizerWebService():
         if "Moonwalk" in controlMapping and controlMapping["Moonwalk"] == True:
             params.append('--moonwalk')
 
-    DB.addRandoParams(id, request.vars)
+    db.addRandoParams(id, request.vars)
 
     print("before calling: {}".format(params))
     start = datetime.now()
@@ -1436,17 +1436,17 @@ def randomizerWebService():
                 msg = msg[1:]
             locsItems['errorMsg'] = msg.replace('\n', '<br/>')
 
-        DB.addRandoResult(id, ret, duration, msg)
+        db.addRandoResult(id, ret, duration, msg)
 
         if "forcedArgs" in locsItems:
-            DB.updateRandoParams(id, locsItems["forcedArgs"])
+            db.updateRandoParams(id, locsItems["forcedArgs"])
 
         # store ips in local directory
         guid = str(uuid.uuid4())
         if storeLocalIps(guid, locsItems["fileName"], locsItems["ips"]):
-            DB.addRandoUploadResult(id, guid, locsItems["fileName"])
+            db.addRandoUploadResult(id, guid, locsItems["fileName"])
             locsItems['seedKey'] = guid
-        DB.close()
+        db.close()
 
         os.close(fd1)
         os.remove(presetFileName)
@@ -1465,8 +1465,8 @@ def randomizerWebService():
         except:
             msg = "randomizerWebService: something wrong happened"
 
-        DB.addRandoResult(id, ret, duration, msg)
-        DB.close()
+        db.addRandoResult(id, ret, duration, msg)
+        db.close()
 
         os.close(fd1)
         os.remove(presetFileName)
@@ -1618,33 +1618,33 @@ def randoParamsWebService():
     if seed < 0 or seed > 9999999:
         raiseHttp(400, "Wrong value for seed, must be between 0 and 9999999", False)
 
-    DB = db.DB()
-    params = DB.getRandomizerSeedParams(seed)
-    DB.close()
+    db = DB()
+    params = db.getRandomizerSeedParams(seed)
+    db.close()
 
     return params
 
 def stats():
     response.title = 'Super Metroid VARIA Randomizer and Solver usage statistics'
 
-    DB = db.DB()
+    db = DB()
     weeks = 1
 
-    solverPresets = DB.getSolverPresets(weeks)
-    randomizerPresets = DB.getRandomizerPresets(weeks)
+    solverPresets = db.getSolverPresets(weeks)
+    randomizerPresets = db.getRandomizerPresets(weeks)
 
-    solverDurations = DB.getSolverDurations(weeks)
-    randomizerDurations = DB.getRandomizerDurations(weeks)
+    solverDurations = db.getSolverDurations(weeks)
+    randomizerDurations = db.getRandomizerDurations(weeks)
 
-    solverData = DB.getSolverData(weeks)
-    randomizerData = DB.getRandomizerData(weeks)
+    solverData = db.getSolverData(weeks)
+    randomizerData = db.getRandomizerData(weeks)
 
-    isolver = DB.getISolver(weeks)
-    isolverData = DB.getISolverData(weeks)
+    isolver = db.getISolver(weeks)
+    isolverData = db.getISolverData(weeks)
 
     errors = getErrors()
 
-    DB.close()
+    db.close()
 
     (fsStatus, fsPercent) = getFsUsage()
 
@@ -2073,9 +2073,9 @@ class WS_common_init(WS):
         print("ret: {}, duration: {}s".format(ret, duration))
 
         if ret == 0:
-            DB = db.DB()
-            DB.addISolver(preset, romFileName)
-            DB.close()
+            db = DB()
+            db.addISolver(preset, romFileName)
+            db.close()
 
             with open(jsonOutFileName) as jsonFile:
                 state = json.load(jsonFile)
@@ -2414,9 +2414,9 @@ def customizer():
         elif IS_LENGTH(maxsize=36, minsize=36)(key)[1] is not None:
             msg = "Seed key must be 36 chars long"
         else:
-            DB = db.DB()
-            seedInfo = DB.getSeedInfo(key)
-            DB.close()
+            db = DB()
+            seedInfo = db.getSeedInfo(key)
+            db.close()
             if seedInfo == None or len(seedInfo) == 0:
                 msg = "Seed {} not found".format(key)
                 seedInfo = None
@@ -2446,9 +2446,9 @@ def customizer():
                     seedParams = None
                 # accessing the url tell us to store the ips for more than 7 days
                 elif seedInfo["upload_status"] == 'local':
-                    DB = db.DB()
-                    DB.updateSeedUploadStatus(key, 'pending')
-                    DB.close()
+                    db = DB()
+                    db.updateSeedUploadStatus(key, 'pending')
+                    db.close()
 
     return dict(customSprites=customSprites, customShips=customShips,
                 seedInfo=seedInfo, seedParams=seedParams, msg=msg)
@@ -2563,10 +2563,10 @@ def customWebService():
     if request.vars.customShipEnable == 'on':
         params += ['--ship', "{}.ips".format(request.vars.customShip)]
     if request.vars.seedKey != None:
-        DB = db.DB()
-        seedIpsInfo = DB.getSeedIpsInfo(request.vars.seedKey)
+        db = DB()
+        seedIpsInfo = db.getSeedIpsInfo(request.vars.seedKey)
         print("seedIpsInfo: {}".format(seedIpsInfo))
-        DB.close()
+        db.close()
         if seedIpsInfo == None or len(seedIpsInfo) == 0:
             raise HTTP(400, json.dumps("Can't get seed info"))
         (uploadStatus, fileName) = seedIpsInfo[0]
@@ -2670,9 +2670,9 @@ def extStats():
         except Exception as e:
             raise HTTP(400, "Error loading the skill preset: {}".format(e))
 
-        DB = db.DB()
-        (itemsStats, techniquesStats, difficulties, solverStatsRaw) = DB.getExtStat(skillPreset, randoPreset)
-        DB.close()
+        db = DB()
+        (itemsStats, techniquesStats, difficulties, solverStatsRaw) = db.getExtStat(skillPreset, randoPreset)
+        db.close()
 
         solverStats = {}
         if "avgLocs" in solverStatsRaw:
@@ -2777,7 +2777,7 @@ def progSpeedStats():
         randoPreset = "Season_Races"
         majorsSplit = request.vars.majorsSplit
 
-        DB = db.DB()
+        db = DB()
         progSpeedStatsRaw = {}
         progSpeedStats = {}
         progSpeedStats["open14"] = {}
@@ -2789,7 +2789,7 @@ def progSpeedStats():
         realProgSpeedsName = []
         for progSpeed in progSpeeds:
             curRandoPreset = "{}_{}_{}".format(randoPreset, majorsSplit, progSpeed)
-            progSpeedStatsRaw[progSpeed] = DB.getProgSpeedStat(skillPreset, curRandoPreset)
+            progSpeedStatsRaw[progSpeed] = db.getProgSpeedStat(skillPreset, curRandoPreset)
 
             if len(progSpeedStatsRaw[progSpeed]) != 0:
                 progSpeedStats[progSpeed] = {}
@@ -2811,7 +2811,7 @@ def progSpeedStats():
                     realProgSpeedsName.append('total_rando')
                 else:
                     realProgSpeedsName.append(progSpeed)
-        DB.close()
+        db.close()
 
         # avg locs
         if len(realProgSpeeds) > 0:
@@ -2839,7 +2839,7 @@ ipsBasePath = "plandository/"
 def plandorepo():
     response.title = 'Super Metroid VARIA Plandository'
 
-    DB = db.DB()
+    db = DB()
     url = request.env.request_uri.split('/')
     msg = ""
     plandos = []
@@ -2855,15 +2855,15 @@ def plandorepo():
         if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
             msg = "Plando name can only contain [a-zA-Z0-9 -_]"
         else:
-            plandos = DB.getPlando(plandoName)
+            plandos = db.getPlando(plandoName)
             if plandos == None or len(plandos) == 0:
                 msg = "Plando not found"
     if len(plandos) == 0:
         # get plando list
-        plandos = DB.getPlandos()
+        plandos = db.getPlandos()
         expand = False
 
-    DB.close()
+    db.close()
 
     return dict(plandos=plandos, msg=msg, expand=expand, math=math, re=re)
 
@@ -2889,10 +2889,10 @@ def plandoRateWebService():
     rate = int(rate)
     ip = request.client
 
-    DB = db.DB()
-    DB.addRating(plando, rate, ip)
-    newRate = DB.getPlandoRate(plando)
-    DB.close()
+    db = DB()
+    db.addRating(plando, rate, ip)
+    newRate = db.getPlandoRate(plando)
+    db.close()
     if newRate == None:
         raiseHttp(400, "Can't get new rate")
     newCount = newRate[0][0]
@@ -2920,10 +2920,10 @@ def downloadPlandoWebService():
     with open(ipsFileName, 'rb') as ipsFile:
         ipsData = ipsFile.read()
 
-    DB = db.DB()
-    maxSize = DB.getPlandoIpsMaxSize(plandoName)
-    DB.increaseDownloadCount(plandoName)
-    DB.close()
+    db = DB()
+    maxSize = db.getPlandoIpsMaxSize(plandoName)
+    db.increaseDownloadCount(plandoName)
+    db.close()
 
     data = {
         "ips": base64.b64encode(ipsData).decode(),
@@ -2984,13 +2984,13 @@ def handleIps(plandoName, romDataJson):
 def uploadPlandoWebService():
     print("uploadPlandoWebService")
 
-    DB = db.DB()
-    count = DB.getPlandoCount()
+    db = DB()
+    count = db.getPlandoCount()
     plandoLimit = 2048
     if count == None or count[0][0] >= plandoLimit:
-        DB.close()
+        db.close()
         raise HTTP(400, "Maximum number of plandos reach: {}".format(plandoLimit))
-    DB.close()
+    db.close()
 
     for param in ["author", "plandoName", "longDesc", "preset", "romData"]:
         if request.vars[param] == None:
@@ -3016,9 +3016,9 @@ def uploadPlandoWebService():
 
     updateKey = generateUpdateKey()
 
-    DB = db.DB()
-    DB.insertPlando((plandoName, author, longDesc, preset, updateKey, maxSize))
-    DB.close()
+    db = DB()
+    db.insertPlando((plandoName, author, longDesc, preset, updateKey, maxSize))
+    db.close()
 
     return json.dumps(updateKey)
 
@@ -3040,14 +3040,14 @@ def deletePlandoWebService():
     if IS_MATCH('^[a-zA-Z0-9]*$')(plandoKey)[1] is not None:
         raise HTTP(400, "Plando key can only contain [a-zA-Z0-9]")
 
-    DB = db.DB()
-    valid = DB.isValidPlandoKey(plandoName, plandoKey)
+    db = DB()
+    valid = db.isValidPlandoKey(plandoName, plandoKey)
     if valid == None or len(valid) == 0:
-        DB.close()
+        db.close()
         raise HTTP(400, "Plando key mismatch")
-    DB.deletePlandoRating(plandoName)
-    DB.deletePlando(plandoName)
-    DB.close()
+    db.deletePlandoRating(plandoName)
+    db.deletePlando(plandoName)
+    db.close()
 
     return json.dumps("Plando {} deleted".format(plandoName))
 
@@ -3080,19 +3080,19 @@ def updatePlandoWebService():
     plandoKey = request.vars.plandoKey
 
     # check update key
-    DB = db.DB()
-    valid = DB.isValidPlandoKey(plandoName, plandoKey)
+    db = DB()
+    valid = db.isValidPlandoKey(plandoName, plandoKey)
     if valid == None or len(valid) == 0:
-        DB.close()
+        db.close()
         raise HTTP(400, "Plando key mismatch")
 
     if request.vars.romData != None:
         print("updatePlandoWebService: update ips")
         maxSize = handleIps(plandoName, request.vars.romData)
-        DB.updatePlandoAll((author, longDesc, preset, maxSize, plandoName))
+        db.updatePlandoAll((author, longDesc, preset, maxSize, plandoName))
     else:
-        DB.updatePlandoMeta((author, longDesc, preset, plandoName))
+        db.updatePlandoMeta((author, longDesc, preset, plandoName))
 
-    DB.close()
+    db.close()
 
     return json.dumps("Plando {} updated succesfully.".format(plandoName))

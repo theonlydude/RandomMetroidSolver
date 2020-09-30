@@ -1,5 +1,5 @@
 
-import copy, log
+import copy, utils.log
 
 from logic.smbool import SMBool, smboolFalse
 from logic.smboolmanager import SMBoolManager
@@ -57,7 +57,7 @@ class ItemLocContainer(object):
         self.itemPool = itemPool
         self.itemPoolBackup = None
         self.unrestrictedItems = set()
-        self.log = log.get('ItemLocContainer')
+        self.log = utils.log.get('ItemLocContainer')
         self.checkConsistency()
 
     def checkConsistency(self):

@@ -5,11 +5,11 @@ from logic.helpers import Bosses
 from rom.romloader import RomLoader
 from rom.rom_patches import RomPatches
 from graph.graph import AccessGraphSolver as AccessGraph
-from utils import PresetLoader
+from utils.utils import PresetLoader
 from solver.conf import Conf
 from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils, getAccessPoint
-from parameters import easy, medium, hard, harder, hardcore, mania, infinity
-from doorsmanager import DoorsManager
+from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
+from utils.doorsmanager import DoorsManager
 
 class CommonSolver(object):
     def loadRom(self, rom, interactive=False, magic=None, startAP=None):

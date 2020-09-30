@@ -1,9 +1,9 @@
 import random
 from logic.smbool import SMBool
 from rom.rom_patches import RomPatches
-import log, logging
+import utils.log, logging
 
-LOG = log.get('DoorsManager')
+LOG = utils.log.get('DoorsManager')
 
 colorsList = ['red', 'green', 'yellow']
 

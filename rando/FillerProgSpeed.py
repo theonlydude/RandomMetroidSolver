@@ -8,7 +8,7 @@ from rando.RandoServices import ComebackCheckType
 from rando.Items import ItemManager
 from rando.ItemLocContainer import ItemLocContainer, getLocListStr, getItemListStr, getItemLocationsStr, getItemLocStr
 from rando.RandoSettings import ProgSpeedParameters
-from parameters import infinity
+from utils.parameters import infinity
 from graph.graph_access import GraphUtils, getAccessPoint
 
 # algo state used for rollbacks

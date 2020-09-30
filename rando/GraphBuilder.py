@@ -1,5 +1,5 @@
 
-import log,random
+import utils.log, random
 
 from graph.graph_access import GraphUtils, vanillaTransitions, vanillaBossesTransitions, accessPoints, escapeSource, escapeTargets
 from graph.graph import AccessGraphRando as AccessGraph
@@ -12,7 +12,7 @@ class GraphBuilder(object):
         self.bossRando = graphSettings.bossRando
         self.escapeRando = graphSettings.escapeRando
         self.minimizerN = graphSettings.minimizerN
-        self.log = log.get('GraphBuilder')
+        self.log = utils.log.get('GraphBuilder')
 
     # builds everything but escape transitions
     def createGraph(self):

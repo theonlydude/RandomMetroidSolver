@@ -2,7 +2,7 @@ import colorsys, random
 from rom.romloader import RomLoader
 from rando.palettes import palettes
 from rando.sprite_palettes import sprite_palettes
-import log
+import utils.log
 
 #Palette Hue Shift
 
@@ -102,7 +102,7 @@ import log
 
 class PaletteRando(object):
     def __init__(self, romPatcher, settings, sprite):
-        self.logger = log.get('Palette')
+        self.logger = utils.log.get('Palette')
 
         self.romPatcher = romPatcher
         if sprite is not None:

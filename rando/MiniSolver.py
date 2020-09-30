@@ -1,8 +1,8 @@
 
-import log, random
+import utils.log, random
 
 from logic.smboolmanager import SMBoolManager
-from parameters import infinity
+from utils.parameters import infinity
 
 class MiniSolver(object):
     def __init__(self, startAP, areaGraph, restrictions):
@@ -11,7 +11,7 @@ class MiniSolver(object):
         self.restrictions = restrictions
         self.settings = restrictions.settings
         self.smbm = SMBoolManager()
-        self.log = log.get('MiniSolver')
+        self.log = utils.log.get('MiniSolver')
 
     # if True, does not mean it is actually beatable, unless you're sure of it from another source of information
     # if False, it is certain it is not beatable

@@ -1,9 +1,9 @@
 # from https://github.com/DJuttmann/SM3E/blob/master/SM3E/Tools/Compression.cs
-import log
+import utils.log
 
 class Compressor:
     def __init__(self):
-        self.log = log.get('Compressor')
+        self.log = utils.log.get('Compressor')
 
     def _concatBytes(self, b0, b1):
         return b0 + (b1 << 8)

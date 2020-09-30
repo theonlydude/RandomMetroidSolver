@@ -1,4 +1,4 @@
-import log
+import utils.log
 
 class ComeBack(object):
     # object to handle the decision to choose the next area when all locations have the "no comeback" flag.
@@ -8,7 +8,7 @@ class ComeBack(object):
         self.comeBackSteps = []
         # used to rewind
         self.solver = solver
-        self.log = log.get('Rewind')
+        self.log = utils.log.get('Rewind')
 
     def handleNoComeBack(self, locations, cur):
         # return True if a rewind is needed. choose the next area to use
@@ -125,7 +125,7 @@ class ComeBackStep(object):
         self.solveAreas = solveAreas
         self.cur = cur
         self.curSolveArea = None
-        self.log = log.get('RewindStep')
+        self.log = utils.log.get('RewindStep')
         self.log.debug("create rewind step: {} {}".format(cur, solveAreas))
 
     def moreAvailable(self):

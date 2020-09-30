@@ -1,6 +1,6 @@
 import itertools
 
-from utils import range_union
+from utils.utils import range_union
 
 # adapted from ips-util for python 3.2 (https://pypi.org/project/ips-util/)
 class IPS_Patch(object):

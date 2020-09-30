@@ -1,4 +1,4 @@
-from parameters import medium
+from utils.parameters import medium
 
 class Conf:
     # keep getting majors of at most this difficulty before going for minors or changing area

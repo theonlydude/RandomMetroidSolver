@@ -1,7 +1,7 @@
 
-import copy, log
+import copy, utils.log
 
-from parameters import Knows, isKnows, god
+from utils.parameters import Knows, isKnows, god
 from logic.smbool import SMBool
 from rando.Filler import Filler
 from rando.ItemLocContainer import ItemLocContainer, getItemListStr, getLocListStr
@@ -36,7 +36,7 @@ class ChozoWrapperFiller(Filler):
         self.maxDiff = self.settings.maxDiff
         self.baseContainer = container
         self.fillerFactory = fillerFactory
-        self.log = log.get('ChozoWrapperFiller')
+        self.log = utils.log.get('ChozoWrapperFiller')
 
     def prepareFirstPhase(self):
         self.changedKnows = {}

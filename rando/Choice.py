@@ -1,5 +1,5 @@
-import log, random
-from utils import getRangeDict, chooseFromRange
+import utils.log, random
+from utils.utils import getRangeDict, chooseFromRange
 from rando.ItemLocContainer import ItemLocation
 
 # helper object to choose item/loc
@@ -7,7 +7,7 @@ class Choice(object):
     def __init__(self, restrictions):
         self.restrictions = restrictions
         self.settings = restrictions.settings
-        self.log = log.get("Choice")
+        self.log = utils.log.get("Choice")
 
     # args are return from RandoServices.getPossiblePlacements
     # return itemLoc dict, or None if no possible choice

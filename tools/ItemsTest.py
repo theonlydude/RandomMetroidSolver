@@ -5,18 +5,18 @@ import sys, os
 # now that we're in directory 'tools/' we have to update sys.path
 sys.path.append(os.path.dirname(sys.path[0]))
 
-from utils import randGaussBounds
+from utils.utils import randGaussBounds
 from rando.Items import ItemManager
 from logic.smboolmanager import SMBoolManager
 import random
-import log
+import utils.log
 
 fun = ['HiJump', 'SpeedBooster', 'Plasma', 'ScrewAttack', 'Wave', 'Spazer', 'SpringBall']
 
 if __name__ == "__main__":
 #    log.init(True) # debug mode
-    log.init(False)
-    logger = log.get('ItemsTest')
+    utils.log.init(False)
+    logger = utils.log.get('ItemsTest')
     sm = SMBoolManager()
     with open("itemStats.csv", "w") as csvOut:
         csvOut.write("nLocs;energyQty;minorQty;nFun;strictMinors;MissProb;SuperProb;PowerProb;split;nItems;nTanks;nTanksTotal;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy;AmmoAccuracy\n")

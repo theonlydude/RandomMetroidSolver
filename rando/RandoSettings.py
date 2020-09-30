@@ -1,7 +1,7 @@
 
 import sys, random
 from rando.Items import ItemManager
-from utils import getRangeDict, chooseFromRange
+from utils.utils import getRangeDict, chooseFromRange
 from rando.ItemLocContainer import ItemLocation
 
 # Holder for settings and a few utility functions related to them

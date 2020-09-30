@@ -1,8 +1,8 @@
 import copy, logging
 from operator import attrgetter
-import log
+import utils.log
 from logic.smbool import SMBool, smboolFalse
-from parameters import infinity
+from utils.parameters import infinity
 from logic.helpers import Bosses
 
 class Path(object):
@@ -103,7 +103,7 @@ class AccessGraph(object):
                   'availAccessPoints' )
 
     def __init__(self, accessPointList, transitions, dotFile=None):
-        self.log = log.get('Graph')
+        self.log = utils.log.get('Graph')
         self.accessPoints = {}
         self.InterAreaTransitions = []
         self.EscapeAttributes = {

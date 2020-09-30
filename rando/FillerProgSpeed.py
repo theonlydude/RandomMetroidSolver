@@ -61,6 +61,7 @@ class FillerProgSpeed(Filler):
         speed = self.settings.progSpeed
         if speed == 'variable':
             speed = self.progSpeedParams.getVariableSpeed()
+        self.currentProgSpeed = speed
         self.choice.determineParameters(speed)
         self.minorHelpProb = self.progSpeedParams.getMinorHelpProb(speed)
         self.itemLimit = self.progSpeedParams.getItemLimit(speed)
@@ -98,8 +99,9 @@ class FillerProgSpeed(Filler):
 
     # from current accessible locations and an item pool, generate an item/loc dict.
     # return item/loc, or None if stuck
-    def generateItem(self):
-        itemLocDict, possibleProg = self.services.getPossiblePlacements(self.ap, self.container, self.getComebackCheck())
+    def generateItem(self, comeback=ComebackCheckType.Undefined):
+        comebackCheck = comeback if comeback != ComebackCheckType.Undefined else self.getComebackCheck()
+        itemLocDict, possibleProg = self.services.getPossiblePlacements(self.ap, self.container, comebackCheck)
         if self.isEarlyGame() and possibleProg == True:
             # cheat a little bit if non-standard start: place early
             # progression away from crateria/blue brin if possible
@@ -237,8 +239,19 @@ class FillerProgSpeed(Filler):
         self.container.unrestrictItemPool()
         return itemLocation is None
 
-    def getItemFromStandardPool(self):
+    def generateItemFromStandardPool(self):
         itemLoc = self.generateItem()
+        if itemLoc is not None and self.currentProgSpeed in ['medium', 'slow', 'slowest'] and\
+           not self.isEarlyGame() and not self.services.can100percent(self.ap, self.container):
+            itemLocWithout = self.generateItem(ComebackCheckType.ComebackWithoutItem)
+            if itemLocWithout is None:
+                # the *only* available locations are locs we couldn't come back from without the item,
+                # consider ourselves stuck (mitigates 'supers at spospo' syndrome)
+                return None
+        return itemLoc
+
+    def getItemFromStandardPool(self):
+        itemLoc = self.generateItemFromStandardPool()
         isStuck = itemLoc is None
         if not isStuck:
             sys.stdout.write('-')
@@ -254,11 +267,9 @@ class FillerProgSpeed(Filler):
         self.log.debug('initRollbackPoints: min=' + str(minRollbackPoint) + ", max=" + str(maxRollbackPoint))
         return minRollbackPoint, maxRollbackPoint
 
-    def initRollback(self, isFakeRollback):
+    def initRollback(self):
         self.log.debug('initRollback: progressionStatesIndices 1=' + str(self.progressionStatesIndices))
         if len(self.progressionStatesIndices) > 0 and self.progressionStatesIndices[-1] == len(self.states) - 1:
-            if isFakeRollback == True: # in fake rollback case we refuse to remove any progression
-                return
             # the state we are about to remove was a progression state
             self.progressionStatesIndices.pop()
         if len(self.states) > 0:
@@ -296,19 +307,8 @@ class FillerProgSpeed(Filler):
         nItemsAtStart = len(self.container.currentItems)
         nStatesAtStart = len(self.states)
         self.log.debug("rollback BEGIN: nItems={}, nStates={}".format(nItemsAtStart, nStatesAtStart))
-        currentState = self.getCurrentState()
         ret = None
-        # we can be in a 'fake rollback' situation where we rollback
-        # just after non prog phase without checking normal items first (we
-        # do this for more randomness, to avoid placing items in postavail locs
-        # like spospo etc. too often).
-        # in this case, we won't remove any prog items since we're not actually
-        # stuck
-        if not self.isEarlyGame():
-            ret = self.generateItem()
-        isFakeRollback = ret is not None
-        self.log.debug('isFakeRollback=' + str(isFakeRollback))
-        self.initRollback(isFakeRollback)
+        self.initRollback()
         if len(self.states) == 0:
             self.initState.apply(self)
             self.log.debug("rollback END initState apply, nCurLocs="+str(len(self.currentLocations())))
@@ -330,17 +330,17 @@ class FillerProgSpeed(Filler):
             states = self.states[:]
             minRollbackPoint, maxRollbackPoint = self.initRollbackPoints()
             i = maxRollbackPoint
-            while i >= minRollbackPoint and len(possibleStates) < 3:
+            while i >= minRollbackPoint:
                 state = states[i]
                 state.apply(self)
                 self.log.debug('rollback. state applied. Container=\n'+self.container.dump())
-                itemLoc = self.generateItem()
+                itemLoc = self.generateItemFromStandardPool()
                 if itemLoc is not None and not self.hasTried(itemLoc) and self.services.isProgression(itemLoc.Item, self.ap, self.container):
                     possibleStates.append((state, itemLoc))
                 i -= 1
             # nothing, let's rollback further a progression item
             if len(possibleStates) == 0 and i >= 0:
-                if len(self.progressionStatesIndices) > 0 and isFakeRollback == False:
+                if len(self.progressionStatesIndices) > 0:
                     sys.stdout.write('!')
                     sys.stdout.flush()
                     self.progressionStatesIndices.pop()
@@ -356,14 +356,10 @@ class FillerProgSpeed(Filler):
                 if nRoll > 0:
                     self.vcr.addRollback(nRoll)
         else:
-            if isFakeRollback == False:
-                self.log.debug('fallbackState apply')
-                fallbackState.apply(self)
-                if self.vcr != None:
-                    self.vcr.addRollback(1)
-            else:
-                self.log.debug('currentState restore')
-                currentState.apply(self)
+            self.log.debug('fallbackState apply')
+            fallbackState.apply(self)
+            if self.vcr != None:
+                self.vcr.addRollback(1)
         sys.stdout.write('<'*(nStatesAtStart - len(self.states)))
         sys.stdout.flush()
         self.log.debug("rollback END: {}".format(len(self.container.currentItems)))
@@ -387,8 +383,7 @@ class FillerProgSpeed(Filler):
         # fill up with non-progression stuff
         isStuck = self.fillNonProgressionItems()
         if not self.container.isPoolEmpty():
-            if not isStuck:
-                isStuck = self.getItemFromStandardPool()
+            isStuck = self.getItemFromStandardPool()
             if isStuck:
                 if onlyBossCheck == False and self.services.onlyBossesLeft(self.ap, self.container):
                     self.settings.maxDiff = infinity

@@ -306,6 +306,9 @@ def loadRandoPreset(randoPreset, args):
         if randoParams.get("removeEscapeEnemies", "on") == "off":
             args.noRemoveEscapeEnemies = True
 
+    if randoParams.get("doorsColorsRando", "off") == "on":
+        args.doorsColorsRando = True
+
     if randoParams.get("bossRandomization", "off") == "on":
         args.bosses = True
 
@@ -374,6 +377,7 @@ def loadRandoPreset(randoPreset, args):
         args.minimizerN = randoParams["minimizerQty"]
         if randoParams.get("minimizerTourian", "off") == "on":
             args.minimizerTourian = True
+
     defaultMultiValues = getDefaultMultiValues()
     multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"]
     for multiElem in multiElems:
@@ -413,6 +417,7 @@ def getRandomizerDefaultParameters():
     defaultParams['areaRandomization'] = "off"
     defaultParams['areaLayout'] = "off"
     defaultParams['lightAreaRandomization'] = "off"
+    defaultParams['doorsColorsRando'] = "off"
     defaultParams['escapeRando'] = "off"
     defaultParams['removeEscapeEnemies'] = "off"
     defaultParams['bossRandomization'] = "off"

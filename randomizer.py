@@ -13,6 +13,7 @@ from rom import RomPatcher, FakeROM
 from utils import loadRandoPreset, getDefaultMultiValues
 from version import displayedVersion
 from smbool import SMBool
+from doorsmanager import DoorsManager
 
 import log, db
 
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     parser.add_argument('--patchOnly',
                         help="only apply patches, do not perform any randomization", action='store_true',
                         dest='patchOnly', default=False)
-    parser.add_argument('--param', '-p', help="the input parameters", nargs='+',
+    parser.add_argument('--param', '-p', help="the input parameters",
                         default=None, dest='paramsFileName')
     parser.add_argument('--dir',
                         help="output directory for ROM and dot files",
@@ -236,6 +237,7 @@ if __name__ == "__main__":
     parser.add_argument('--invert', help="invert color range", dest='invert', action='store_true', default=False)
     parser.add_argument('--ext_stats', help="dump extended stats SQL", nargs='?', default=None, dest='extStatsFilename')
     parser.add_argument('--randoPreset', help="rando preset file", dest="randoPreset", nargs='?', default=None)
+    parser.add_argument('--fakeRandoPreset', help="for prog speed stats", dest="fakeRandoPreset", nargs='?', default=None)
     parser.add_argument('--plandoRando', help="json string with already placed items/locs", dest="plandoRando",
                         nargs='?', default=None)
     parser.add_argument('--sprite', help='use a custom sprite for Samus', dest='sprite', default=None)
@@ -244,6 +246,8 @@ if __name__ == "__main__":
     parser.add_argument('--ship', help='use a custom sprite for Samus ship', dest='ship', default=None)
     parser.add_argument('--seedIps', help='ips generated from previous seed', dest='seedIps', default=None)
     parser.add_argument('--jm,', help="display data used by jm for its stats", dest='jm', action='store_true', default=False)
+    parser.add_argument('--doorsColorsRando', help='randomize color of colored doors', dest='doorsColorsRando',
+                        nargs='?', const=True, default=False)
 
     # parse args
     args = parser.parse_args()
@@ -278,8 +282,8 @@ if __name__ == "__main__":
 
     # if diff preset given, load it
     if args.paramsFileName is not None:
-        PresetLoader.factory(args.paramsFileName[0]).load()
-        preset = os.path.splitext(os.path.basename(args.paramsFileName[0]))[0]
+        PresetLoader.factory(args.paramsFileName).load()
+        preset = os.path.splitext(os.path.basename(args.paramsFileName))[0]
 
         if args.preset is not None:
             preset = args.preset
@@ -353,6 +357,10 @@ if __name__ == "__main__":
         areaRandom = True
         args.area = bool(random.getrandbits(1))
     logger.debug("area: {}".format(args.area))
+
+    if args.doorsColorsRando == 'random':
+        args.doorsColorsRando = bool(random.getrandbits(1))
+    logger.debug("doorsColorsRando: {}".format(args.doorsColorsRando))
 
     bossesRandom = False
     if args.bosses == 'random':
@@ -432,7 +440,7 @@ if __name__ == "__main__":
         print("SEED: " + str(seed))
 
     # fill restrictions dict
-    restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement }
+    restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "ammo": "normal" if not args.doorsColorsRando else "late" }
     restrictions['MajorMinor'] = args.majorsSplit
     seedCode = 'X'
     if majorsSplitRandom == False:
@@ -561,6 +569,11 @@ if __name__ == "__main__":
     graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses,
                                   args.escapeRando, minimizerN, dotFile,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
+
+    DoorsManager.setDoorsColor()
+    if args.doorsColorsRando == True:
+        DoorsManager.randomize()
+
     if args.patchOnly == False:
         try:
             randoExec = RandoExec(seedName, args.vcr)
@@ -598,17 +611,14 @@ if __name__ == "__main__":
             args.patches.append(random.choice(animalsPatches))
         else:
             optErrMsg += "\nIgnored animals surprise because of escape randomization"
-    # transform itemLocs in our usual dict(location, item), for minors keep only the first
+    # transform itemLocs in our usual dict(location, item), exclude minors, we'll get them with the solver
     locsItems = {}
-    firstMinorsFound = {'Missile': False, 'Super': False, 'PowerBomb': False}
     for itemLoc in itemLocs:
         locName = itemLoc.Location.Name
         itemType = itemLoc.Item.Type
-        if itemType in firstMinorsFound and firstMinorsFound[itemType] == False:
-            locsItems[locName] = itemType
-            firstMinorsFound[itemType] = True
-        elif itemType not in firstMinorsFound:
-            locsItems[locName] = itemType
+        if itemType in ['Missile', 'Super', 'PowerBomb']:
+            continue
+        locsItems[locName] = itemType
     if args.debug == True:
         for loc in sorted(locsItems.keys()):
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
@@ -625,27 +635,13 @@ if __name__ == "__main__":
 
     # generate extended stats
     if args.extStatsFilename != None:
-        if args.noGravHeat == True:
-            gravityBehaviour = 'Vanilla'
-        elif args.progressiveSuits == True:
-            gravityBehaviour = 'Progressive'
-        else:
-            gravityBehaviour = 'Balanced'
-        if args.maxDifficulty == None:
-            args.maxDifficulty = 'no difficulty cap'
-        parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses,
-                      'majorsSplit': args.majorsSplit,
-                      'startAP': args.startAP,
-                      'gravityBehaviour': gravityBehaviour,
-                      'nerfedCharge': args.nerfedCharge,
-                      'maxDifficulty': args.maxDifficulty,
-                      'progSpeed': progSpeed, 'morphPlacement': args.morphPlacement,
-                      'suitsRestriction': args.suitsRestriction, 'progDiff': progDiff,
-                      'superFunMovement': 'Movement' in args.superFun,
-                      'superFunCombat': 'Combat' in args.superFun,
-                      'superFunSuit': 'Suits' in args.superFun}
         with open(args.extStatsFilename, 'a') as extStatsFile:
-            db.DB.dumpExtStatsItems(parameters, locsItems, extStatsFile)
+            skillPreset = os.path.splitext(os.path.basename(args.paramsFileName))[0]
+            if args.fakeRandoPreset is not None:
+                randoPreset = args.fakeRandoPreset
+            else:
+                randoPreset = os.path.splitext(os.path.basename(args.randoPreset))[0]
+            db.DB.dumpExtStatsItems(skillPreset, randoPreset, locsItems, extStatsFile)
 
     try:
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source
@@ -670,7 +666,8 @@ if __name__ == "__main__":
                                        args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
-                                       escapeAttr, args.noRemoveEscapeEnemies, minimizerN, args.minimizerTourian)
+                                       escapeAttr, args.noRemoveEscapeEnemies, minimizerN, args.minimizerTourian,
+                                       args.doorsColorsRando)
         else:
             # from customizer permalink, apply previously generated seed ips first
             if args.seedIps != None:

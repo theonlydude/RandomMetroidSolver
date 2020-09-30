@@ -8,6 +8,7 @@ from helpers import Bosses
 # used to specify whether we want to come back from locations
 @unique
 class ComebackCheckType(Enum):
+    Undefined = 0
     # do not check whether we should come back
     NoCheck = 1
     # come back with the placed item
@@ -226,7 +227,7 @@ class RandoServices(object):
         else:
             del itemLocDict[morphLocItem]
 
-    def processMorphPlacements(self, ap, container, comebackCheck, itemLocDict, curLocs):
+    def processPlacementRestrictions(self, ap, container, comebackCheck, itemLocDict, curLocs):
         if self.restrictions.isEarlyMorph():
             self.processEarlyMorph(ap, container, comebackCheck, itemLocDict, curLocs)
         elif self.restrictions.isLateMorph():
@@ -278,7 +279,7 @@ class RandoServices(object):
 #            self.log.debug('getPossiblePlacements. itemType=' + itemType + ', locs='+str([loc.Name for loc in locations]))
             for item in items:
                 itemLocDict[item] = locations
-        self.processMorphPlacements(ap, container, comebackCheck, itemLocDict, curLocs)
+        self.processPlacementRestrictions(ap, container, comebackCheck, itemLocDict, curLocs)
         self.printItemLocDict(itemLocDict)
         self.log.debug('possibleProg='+str(possibleProg))
         return (itemLocDict, possibleProg)

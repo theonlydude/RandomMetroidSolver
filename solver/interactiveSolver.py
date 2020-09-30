@@ -15,6 +15,7 @@ from parameters import hard, infinity
 from solver.solverState import SolverState
 from solver.comeback import ComeBack
 from rando.ItemLocContainer import ItemLocation
+from doorsmanager import DoorsManager
 import log
 
 class InteractiveSolver(CommonSolver):
@@ -53,6 +54,7 @@ class InteractiveSolver(CommonSolver):
     def dumpState(self):
         state = SolverState(self.debug)
         state.fromSolver(self)
+
         state.toJson(self.outputFileName)
 
     def initialize(self, mode, rom, presetFileName, magic, debug, fill, startAP, trackerRace):
@@ -72,6 +74,10 @@ class InteractiveSolver(CommonSolver):
         self.loadRom(rom, interactive=True, magic=magic, startAP=startAP)
         # in plando/tracker always consider that we're doing full
         self.majorsSplit = 'Full'
+
+        # hide doors
+        if self.doorsRando and mode == 'standard':
+            DoorsManager.initTracker()
 
         self.clearItems()
 
@@ -154,6 +160,14 @@ class InteractiveSolver(CommonSolver):
                     else:
                         # remove last transition
                         self.cancelLastTransition()
+        elif scope == 'door':
+            if action == 'replace':
+                doorName = params['doorName']
+                newColor = params['newColor']
+                DoorsManager.doors[doorName].setColor(newColor)
+            elif action == 'toggle':
+                doorName = params['doorName']
+                DoorsManager.switchVisibility(doorName)
 
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
@@ -334,7 +348,7 @@ class InteractiveSolver(CommonSolver):
                 itemLocs.append(ItemLocation(ItemManager.getItem(loc.itemName), loc))
             else:
                 # put nothing items in unused locations
-                itemLocs.append(ItemManager.getItem("Nothing"), loc)
+                itemLocs.append(ItemLocation(ItemManager.getItem("Nothing"), loc))
 
         # patch the ROM
         if lock == True:
@@ -362,7 +376,7 @@ class InteractiveSolver(CommonSolver):
                 escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
                 romPatcher.applyEscapeAttributes({'Timer': escapeTimer, 'Animals': None}, plms)
 
-        # write plm table
+        # write plm table & random doors
         romPatcher.writePlmTable(plms, self.areaRando, self.bossRando, self.startAP)
 
         romPatcher.setNothingId(self.startAP, itemLocs)

@@ -9,6 +9,7 @@ from parameters import appDir
 from rom_patches import RomPatches
 from graph_access import accessPoints, GraphUtils, getAccessPoint
 from graph_locations import locations
+from doorsmanager import DoorsManager
 
 def getWord(w):
     return (w & 0x00FF, (w & 0xFF00) >> 8)
@@ -842,6 +843,7 @@ class RomPatcher:
                 plms.append('WS_Save_Blinking_Door')
 
             doors = self.getStartDoors(plms, area, None)
+            self.writeDoorsColor(doors)
             self.applyStartAP(startAP, plms, doors)
 
             self.applyPLMs(plms)
@@ -853,7 +855,7 @@ class RomPatcher:
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
                         escapeAttr=None, noRemoveEscapeEnemies=False,
-                        minimizerN=None, minimizerTourian=True):
+                        minimizerN=None, minimizerTourian=True, doorsColorsRando=False):
         try:
             # apply standard patches
             stdPatches = []
@@ -923,6 +925,8 @@ class RomPatcher:
                     for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
                         self.applyIPSPatch(patchName)
             doors = self.getStartDoors(plms, area, minimizerN)
+            if doorsColorsRando:
+                self.writeDoorsColor(doors)
             self.applyStartAP(startAP, plms, doors)
             self.applyPLMs(plms)
         except Exception as e:
@@ -1621,6 +1625,9 @@ class RomPatcher:
         for (i, char) in enumerate(version):
             self.setOamTile(i, middle, char2tile[char])
 
+    def writeDoorsColor(self, doors):
+        DoorsManager.writeDoorsColor(self.romFile, doors)
+
 # tile number in tileset
 char2tile = {
     '-': 207,
@@ -1942,6 +1949,9 @@ class RomLoader(object):
 
     def getStartAP(self):
         return self.romReader.getStartAP()
+
+    def loadDoorsColor(self):
+        return DoorsManager.loadDoorsColor(self.romReader.romFile)
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

@@ -54,7 +54,7 @@ class HelpersGraph(Helpers):
     def canPassCrateriaGreenPirates(self):
         sm = self.smbm
         return sm.wor(sm.canPassBombPassages(),
-                      sm.canOpenRedDoors(),
+                      sm.haveMissileOrSuper(),
                       sm.energyReserveCountOk(1),
                       sm.wor(sm.haveItem('Charge'),
                              sm.haveItem('Ice'),
@@ -68,7 +68,7 @@ class HelpersGraph(Helpers):
     def canAccessBillyMays(self):
         sm = self.smbm
         return sm.wand(sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor),
-                              sm.canOpenRedDoors()),
+                              sm.traverse('ConstructionZoneRight')),
                        sm.canUsePowerBombs(),
                        sm.wor(sm.knowsBillyMays(),
                               sm.haveItem('Gravity'),
@@ -81,7 +81,7 @@ class HelpersGraph(Helpers):
         #             -hijump boots (easy regular way)
         #             -fly (space jump or infinite bomb jump)
         #             -know how to wall jump on the platform without the hijump boots
-        return sm.wand(sm.canOpenGreenDoors(),
+        return sm.wand(sm.haveItem('Super'),
                        sm.wor(sm.haveItem('HiJump'),
                               sm.canFly(),
                               sm.knowsEarlyKraid()))
@@ -143,7 +143,7 @@ class HelpersGraph(Helpers):
     def canAccessEtecoons(self):
         sm = self.smbm
         return sm.wor(sm.canUsePowerBombs(),
-                      sm.wand(sm.knowsMoondance(), sm.canUseBombs(), sm.canOpenRedDoors()))
+                      sm.wand(sm.knowsMoondance(), sm.canUseBombs(), sm.haveMissileOrSuper()))
 
     # the water zone east of WS
     def canPassForgottenHighway(self, fromWs):
@@ -188,7 +188,7 @@ class HelpersGraph(Helpers):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'),
                        sm.wor(RomPatches.has(RomPatches.AreaRandoGatesBase),
-                              sm.canOpenGreenDoors()))
+                              sm.haveItem('Super')))
 
     @Cache.decorator
     def canPassRedTowerToMaridiaNode(self):
@@ -198,7 +198,7 @@ class HelpersGraph(Helpers):
 
     def canEnterCathedral(self, mult=1.0):
         sm = self.smbm
-        return sm.wand(sm.canOpenRedDoors(),
+        return sm.wand(sm.traverse('CathedralEntranceRight'),
                        sm.wor(sm.wand(sm.canHellRun('MainUpperNorfair', mult),
                                       sm.wor(sm.wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),
                                                     sm.haveItem('HiJump'),
@@ -265,7 +265,7 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canEnterNorfairReserveAreaFromBubbleMoutain(self):
         sm = self.smbm
-        return sm.wand(sm.canOpenGreenDoors(),
+        return sm.wand(sm.traverse('BubbleMountainTopLeft'),
                        sm.wor(sm.canFly(),
                               sm.haveItem('Ice'),
                               sm.wand(sm.haveItem('HiJump'),
@@ -276,7 +276,7 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canEnterNorfairReserveAreaFromBubbleMoutainTop(self):
         sm = self.smbm
-        return sm.wand(sm.canOpenGreenDoors(),
+        return sm.wand(sm.traverse('BubbleMountainTopLeft'),
                        sm.wor(sm.haveItem('Grapple'),
                               sm.haveItem('SpaceJump'),
                               sm.knowsNorfairReserveDBoost()))

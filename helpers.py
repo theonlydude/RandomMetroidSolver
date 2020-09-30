@@ -150,6 +150,12 @@ class Helpers(object):
             return smboolFalse
 
     @Cache.decorator
+    def canMockball(self):
+        sm = self.smbm
+        return sm.wand(sm.haveItem('Morph'),
+                       sm.knowsMockball())
+
+    @Cache.decorator
     def canFly(self):
         sm = self.smbm
         return sm.wor(sm.haveItem('SpaceJump'),
@@ -178,22 +184,33 @@ class Helpers(object):
         return sm.wand(sm.haveItem('Morph'), sm.haveItem('Bomb'), sm.knowsInfiniteBombJump())
 
     @Cache.decorator
-    def canOpenRedDoors(self):
+    def haveMissileOrSuper(self):
         sm = self.smbm
         return sm.wor(sm.haveItem('Missile'), sm.haveItem('Super'))
+
+    canOpenRedDoors = haveMissileOrSuper
 
     @Cache.decorator
     def canOpenGreenDoors(self):
         return self.smbm.haveItem('Super')
 
     @Cache.decorator
-    def canOpenYellowDoors(self):
+    def canGreenGateGlitch(self):
+        sm = self.smbm
+        return sm.wand(sm.haveItem('Super'),
+                       sm.knowsGreenGateGlitch())
+
+    @Cache.decorator
+    def canBlueGateGlitch(self):
+        sm = self.smbm
+        return sm.wand(sm.haveMissileOrSuper(),
+                       sm.knowsGreenGateGlitch())
+    @Cache.decorator
+    def canUsePowerBombs(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'), sm.haveItem('PowerBomb'))
 
-    @Cache.decorator
-    def canUsePowerBombs(self):
-        return self.smbm.canOpenYellowDoors()
+    canOpenYellowDoors = canUsePowerBombs
 
     @Cache.decorator
     def canUseSpringBall(self):
@@ -458,6 +475,11 @@ class Helpers(object):
 #        print("final diff: "+str(round(difficulty, 2)))
 
         return (round(difficulty, 2), items)
+
+    @Cache.decorator
+    def enoughStuffSporeSpawn(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Missile'), sm.haveItem('Super'), sm.haveItem('Charge'))
 
     @Cache.decorator
     def enoughStuffCroc(self):

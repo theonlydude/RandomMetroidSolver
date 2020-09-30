@@ -7,6 +7,7 @@ ENV CERT_DOMAIN web2py.local
 #password web2py admin
 ENV PW admin
 ARG BRANCH=master
+ARG GITHUB_TOKEN
 
 EXPOSE 443 80 8000
 
@@ -16,7 +17,7 @@ RUN apt-get update && \
     apt-get -y install python3 python3-pip && \
     pip3 install gunicorn mysql-connector-python
 
-RUN apt-get install -y supervisor unzip
+RUN apt-get install -y supervisor unzip git
 
 WORKDIR /root
 
@@ -43,15 +44,11 @@ RUN openssl genrsa -passout pass:$CERT_PASS 2048 > web2py.key && \
 
 # add VARIA source, use /root as HOME
 WORKDIR /root
-
-RUN wget https://github.com/theonlydude/RandomMetroidSolver/archive/${BRANCH}.zip && unzip ${BRANCH}.zip && mv RandomMetroidSolver-${BRANCH} RandomMetroidSolver && rm -f ${BRANCH}.zip
-RUN mkdir -p /root/web2py/varia_repository
-
-# add local varia repository
-WORKDIR /root/web2py
+RUN if [ -n "${GITHUB_TOKEN}" ]; then git clone -b ${BRANCH} https://${GITHUB_TOKEN}:x-oauth-basic@github.com/theonlydude/RandomMetroidSolver.git; else wget https://github.com/theonlydude/RandomMetroidSolver/archive/${BRANCH}.zip && unzip ${BRANCH}.zip && mv RandomMetroidSolver-${BRANCH} RandomMetroidSolver && rm -f ${BRANCH}.zip; fi
 
 # add communitry presets
 WORKDIR /root/web2py
+RUN mkdir -p /root/web2py/varia_repository
 RUN wget https://github.com/theonlydude/community_presets/archive/master.zip && unzip master.zip && mv community_presets-master community_presets && rm -f master.zip
 
 # add symbolic links and other web2py customization
@@ -70,7 +67,7 @@ RUN mkdir -p js graph fonts images/sprite_sheets css
 RUN /root/RandomMetroidSolver/web/install.sh
 
 # add db conf
-RUN echo "dbParams = dict(host='127.0.0.1', user='varia', database='varia', password='varia', port=3366)" > /root/RandomMetroidSolver/db_params.py
+RUN echo "dbParams = dict(host='varia-mysql', user='varia', database='varia', password='varia', port=3306)" > /root/RandomMetroidSolver/db_params.py
 
 # create empty database
 

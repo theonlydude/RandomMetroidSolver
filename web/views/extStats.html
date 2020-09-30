@@ -417,11 +417,11 @@ elif itemsStats != None and len(itemsStats) > 0:
       <table class="right">
         <tr>
           <td class="border">0.0</td>
-          <td class="border red"><{{=getThreshold(0.33, numberSeeds, parameters["majorsSplit"])}}</td>
-          <td class="border yellow"><{{=getThreshold(0.5, numberSeeds, parameters["majorsSplit"])}}</td>
-          <td class="border green">>{{=getThreshold(0.5, numberSeeds, parameters["majorsSplit"])}} <{{=getThreshold(2.0, numberSeeds, parameters["majorsSplit"])}}</td>
-          <td class="border yellow">>{{=getThreshold(2.0, numberSeeds, parameters["majorsSplit"])}}</td>
-          <td class="border red">>{{=getThreshold(3.0, numberSeeds, parameters["majorsSplit"])}}</td>
+          <td class="border red"><{{=getThreshold(0.33, numberSeeds, majorsSplit)}}</td>
+          <td class="border yellow"><{{=getThreshold(0.5, numberSeeds, majorsSplit)}}</td>
+          <td class="border green">>{{=getThreshold(0.5, numberSeeds, majorsSplit)}} <{{=getThreshold(2.0, numberSeeds, majorsSplit)}}</td>
+          <td class="border yellow">>{{=getThreshold(2.0, numberSeeds, majorsSplit)}}</td>
+          <td class="border red">>{{=getThreshold(3.0, numberSeeds, majorsSplit)}}</td>
         </tr>
       </table>
     </div>
@@ -466,7 +466,7 @@ elif itemsStats != None and len(itemsStats) > 0:
               color = "none"
               pass
           else:
-            color = getColor(percent, numberSeeds, parameters["majorsSplit"])
+            color = getColor(percent, numberSeeds, majorsSplit)
             pass
 
           response.write("<td class=\"border {}\">{}</td>".format(color, percent), escape=False)

@@ -24,6 +24,7 @@ from rom import RomReader
 from rom_patches import RomPatches
 from ips import IPS_Patch
 from randomizer import energyQties, progDiffs, morphPlacements, majorsSplits, speeds
+from doorsmanager import DoorsManager
 
 # put an expiration date to the default cookie to have it kept between browser restart
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
@@ -851,6 +852,8 @@ def getAddressesToRead(plando=False):
     # start ap
     addresses["misc"].append(0x10F200)
     addresses["misc"].append(0x10F201)
+    # random doors
+    addresses["misc"] += DoorsManager.getAddressesToRead()
 
     # ranges [low, high]
     ## doorasm
@@ -1157,7 +1160,8 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
 def sessionWebService():
     # web service to update the session
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'escapeRando', 'removeEscapeEnemies',
+               'areaRandomization', 'areaLayout', 'lightAreaRandomization',
+               'doorsColorsRando', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization', 'minimizer', 'minimizerTourian',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1190,6 +1194,7 @@ def sessionWebService():
     session.randomizer['areaRandomization'] = request.vars.areaRandomization
     session.randomizer['areaLayout'] = request.vars.areaLayout
     session.randomizer['lightAreaRandomization'] = request.vars.lightAreaRandomization
+    session.randomizer['doorsColorsRando'] = request.vars.doorsColorsRando
     session.randomizer['escapeRando'] = request.vars.escapeRando
     session.randomizer['removeEscapeEnemies'] = request.vars.removeEscapeEnemies
     session.randomizer['bossRandomization'] = request.vars.bossRandomization
@@ -1245,7 +1250,8 @@ def randomizerWebService():
 
     # check validity of all parameters
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'escapeRando', 'removeEscapeEnemies',
+               'areaRandomization', 'areaLayout', 'lightAreaRandomization',
+               'doorsColorsRando', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization', 'minimizer', 'minimizerTourian',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1370,6 +1376,11 @@ def randomizerWebService():
             params.append('--lightArea')
     elif request.vars.areaRandomization == 'random':
         params += ['--area', 'random']
+
+    if request.vars.doorsColorsRando == 'on':
+        params.append('--doorsColorsRando')
+    elif request.vars.doorsColorsRando == 'random':
+        params += ['--doorsColorsRando', 'random']
 
     if request.vars.escapeRando == 'on':
         params.append('--escapeRando')
@@ -1740,8 +1751,8 @@ class WS(object):
     @staticmethod
     def factory():
         scope = request.vars.scope
-        if scope not in ["area", "item", "common"]:
-            raiseHttp(400, "Unknown scope, must be area/item/common", True)
+        if scope not in ["area", "item", "common", "door"]:
+            raiseHttp(400, "Unknown scope, must be area/item/common/door", True)
 
         action = request.vars.action
         if action not in ['add', 'remove', 'toggle', 'clear', 'init', 'get', 'save', 'replace', 'randomize']:
@@ -1842,7 +1853,9 @@ class WS(object):
                 "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0]),
                 "errorMsg": state["errorMsg"],
                 "last": state["last"],
-                "innerTransitions": state["innerTransitions"]
+                "innerTransitions": state["innerTransitions"],
+                "doors": state["doors"],
+                "doorsRando": state["doorsRando"]
             })
         else:
             raiseHttp(200, "OK", True)
@@ -1875,6 +1888,9 @@ class WS(object):
             elif scope == 'area':
                 params += ['--startPoint', parameters["startPoint"],
                            '--endPoint', parameters["endPoint"]]
+            elif scope == 'door':
+                params += ['--doorName', parameters["doorName"],
+                           '--newColor', parameters["newColor"]]
         elif action == 'remove' and scope == 'item':
             if 'loc' in parameters:
                 params += ['--loc', parameters["loc"]]
@@ -1882,8 +1898,11 @@ class WS(object):
                 params += ['--count', str(parameters["count"])]
             else:
                 params += ['--item', str(parameters["item"])]
-        elif action == 'toggle' and scope == 'item':
-            params += ['--item', parameters['item']]
+        elif action == 'toggle':
+            if scope == 'item':
+                params += ['--item', parameters['item']]
+            elif scope == 'door':
+                params += ['--doorName', parameters["doorName"]]
         elif action == 'remove' and scope == 'area' and "startPoint" in parameters:
             params += ['--startPoint', parameters["startPoint"]]
         elif action == 'save' and scope == 'common':
@@ -2259,6 +2278,31 @@ class WS_item_clear(WS):
     def action(self):
         return self.callSolverAction("item", "clear", {})
 
+class WS_door_replace(WS):
+    def validate(self):
+        super(WS_door_replace, self).validate()
+
+        self.doorName = request.vars.doorName
+        if self.doorName not in DoorsManager.doors.keys():
+            raiseHttp(400, "Wrong value for doorName", True)
+        self.newColor = request.vars.newColor
+        if self.newColor not in ["red", "green", "yellow"]:
+            raiseHttp(400, "Wrong value for newColor", True)
+
+    def action(self):
+        return self.callSolverAction("door", "replace", {"doorName": self.doorName, "newColor": self.newColor})
+
+class WS_door_toggle(WS):
+    def validate(self):
+        super(WS_door_toggle, self).validate()
+
+        self.doorName = request.vars.doorName
+        if self.doorName not in DoorsManager.doors.keys():
+            raiseHttp(400, "Wrong value for doorName", True)
+
+    def action(self):
+        return self.callSolverAction("door", "toggle", {"doorName": self.doorName})
+
 def trackerWebService():
     # unified web service for item/area trackers
     print("trackerWebService called")
@@ -2607,13 +2651,16 @@ def extStats():
         skillPreset = request.vars.preset
         randoPreset = request.vars.randoPreset
 
-        # load rando preset
+        # load rando preset to get majors split
         fullPath = 'rando_presets/{}.json'.format(randoPreset)
+        if not os.path.isfile(fullPath):
+            raise HTTP(400, "Unknown rando preset: {}".format(e))
         try:
             with open(fullPath) as jsonFile:
-                randoPreset = json.load(jsonFile)
+                randoPresetContent = json.load(jsonFile)
         except Exception as e:
             raise HTTP(400, "Can't load the rando preset: {}".format(e))
+        majorsSplit = randoPresetContent["majorsSplit"]
 
         # load skill preset
         fullPath = '{}/{}.json'.format(getPresetDir(skillPreset), skillPreset)
@@ -2621,38 +2668,10 @@ def extStats():
             skillPresetContent = PresetLoader.factory(fullPath).params
             completePreset(skillPresetContent)
         except Exception as e:
-            raise HTTP(400, "Error loading the preset: {}".format(e))
-
-        parameters = {
-            'preset': skillPreset,
-            'area': 'areaRandomization' in randoPreset and randoPreset['areaRandomization'] == 'on',
-            'boss': 'bossRandomization' in randoPreset and randoPreset['bossRandomization'] == 'on',
-            'gravityBehaviour': randoPreset['gravityBehaviour'],
-            'nerfedCharge': randoPreset['nerfedCharge'] == 'on',
-            'maxDifficulty': randoPreset['maxDifficulty'],
-            # parameters which can be random:
-            'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
-            'startAP': randoPreset['startLocation'] if 'startLocation' in randoPreset else 'Landing Site',
-            'progSpeed': randoPreset['progressionSpeed'] if 'progressionSpeed' in randoPreset else 'VARIAble',
-            'morphPlacement': randoPreset['morphPlacement'] if 'morphPlacement' in randoPreset else 'early',
-            'suitsRestriction': 'suitsRestriction' in randoPreset and randoPreset['suitsRestriction'] == 'on',
-            'progDiff': randoPreset['progressionDifficulty'] if 'progressionDifficulty' in randoPreset else 'normal',
-            'superFunMovement': 'funMovement' in randoPreset and randoPreset['funMovement'] == 'on',
-            'superFunCombat': 'funCombat' in randoPreset and randoPreset['funCombat'] == 'on',
-            'superFunSuit': 'funSuits' in randoPreset and randoPreset['funSuits'] == 'on'
-        }
-
-        if randoPreset['suitsRestriction'] == "random":
-            parameters["suitsRestriction"] = "random"
-        if randoPreset['funMovement'] == "random":
-            parameters["superFunMovement"] = "random"
-        if randoPreset['funCombat'] == "random":
-            parameters["superFunCombat"] = "random"
-        if randoPreset['funSuits'] == "random":
-            parameters["superFunSuit"] = "random"
+            raise HTTP(400, "Error loading the skill preset: {}".format(e))
 
         DB = db.DB()
-        (itemsStats, techniquesStats, difficulties, solverStatsRaw) = DB.getExtStat(parameters)
+        (itemsStats, techniquesStats, difficulties, solverStatsRaw) = DB.getExtStat(skillPreset, randoPreset)
         DB.close()
 
         solverStats = {}
@@ -2682,7 +2701,7 @@ def extStats():
         difficulties = None
         solverStats = None
         skillPresetContent = None
-        parameters = None
+        majorsSplit = None
 
     (randoPresets, tourRandoPresets) = loadRandoPresetsList()
     # remove random presets those statistics are useless
@@ -2694,7 +2713,7 @@ def extStats():
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
                 itemsStats=itemsStats, techniquesStats=techniquesStats,
                 categories=Knows.categories, knowsDesc=Knows.desc, skillPresetContent=skillPresetContent,
-                locations=locations, parameters=parameters, difficulties=difficulties, solverStats=solverStats)
+                locations=locations, majorsSplit=majorsSplit, difficulties=difficulties, solverStats=solverStats)
 
 def transformStats(stats, maxRange=106):
     # input a list [(x, value), (x, value), ..., (x, value)]
@@ -2727,34 +2746,16 @@ def zipStats(stats):
 def initProgSpeedStatsSession():
     if session.progSpeedStats == None:
         session.progSpeedStats = {}
-        session.progSpeedStats['randoPreset'] = 'Season_Races'
         session.progSpeedStats['majorsSplit'] = 'Major'
 
 def updateProgSpeedStatsSession():
     if session.progSpeedStats is None:
         session.progSpeedStats = {}
 
-    session.progSpeedStats['randoPreset'] = request.vars.randoPreset
     session.progSpeedStats['majorsSplit'] = request.vars.majorsSplit
 
 def validateProgSpeedStatsParams():
-    for (preset, directory) in [("randoPreset", "rando_presets")]:
-        if request.vars[preset] == None:
-            return (False, "Missing parameter preset")
-        preset = request.vars[preset]
-
-        if IS_ALPHANUMERIC()(preset)[1] is not None:
-            return (False, "Wrong value for preset, must be alphanumeric")
-
-        if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
-            return (False, "Wrong length for preset, name must be between 1 and 32 characters")
-
-        # check that preset exists
-        fullPath = '{}/{}.json'.format(directory, preset)
-        if not os.path.isfile(fullPath):
-            return (False, "Unknown preset: {}".format(preset))
-
-    if request.vars['majorsSplit'] not in ['Full', 'Major']:
+    if request.vars.majorsSplit not in ['Full', 'Major']:
             return (False, "Wrong value for majorsSplit, authorized values Full/Major")
 
     return (True, None)
@@ -2772,44 +2773,9 @@ def progSpeedStats():
 
         updateProgSpeedStatsSession()
 
-        randoPreset = request.vars.randoPreset
-
-        # load rando preset
-        fullPath = 'rando_presets/{}.json'.format(randoPreset)
-        try:
-            with open(fullPath) as jsonFile:
-                randoPreset = json.load(jsonFile)
-        except Exception as e:
-            raise HTTP(400, "Can't load the rando preset: {}".format(e))
-
-        parameters = {
-            'preset': randoPreset['preset'] if 'preset' in randoPreset else 'regular',
-            'area': 'areaRandomization' in randoPreset and randoPreset['areaRandomization'] == 'on',
-            'boss': 'bossRandomization' in randoPreset and randoPreset['bossRandomization'] == 'on',
-            'gravityBehaviour': randoPreset['gravityBehaviour'],
-            'nerfedCharge': randoPreset['nerfedCharge'] == 'on',
-            'maxDifficulty': randoPreset['maxDifficulty'],
-            # parameters which can be random:
-            'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
-            'startAP': randoPreset['startLocation'] if 'startLocation' in randoPreset else 'Landing Site',
-            'morphPlacement': randoPreset['morphPlacement'] if 'morphPlacement' in randoPreset else 'early',
-            'suitsRestriction': 'suitsRestriction' in randoPreset and randoPreset['suitsRestriction'] == 'on',
-            'progDiff': randoPreset['progressionDifficulty'] if 'progressionDifficulty' in randoPreset else 'normal',
-            'superFunMovement': 'funMovement' in randoPreset and randoPreset['funMovement'] == 'on',
-            'superFunCombat': 'funCombat' in randoPreset and randoPreset['funCombat'] == 'on',
-            'superFunSuit': 'funSuits' in randoPreset and randoPreset['funSuits'] == 'on'
-        }
-
-        if randoPreset['suitsRestriction'] == "random":
-            parameters["suitsRestriction"] = "random"
-        if randoPreset['funMovement'] == "random":
-            parameters["superFunMovement"] = "random"
-        if randoPreset['funCombat'] == "random":
-            parameters["superFunCombat"] = "random"
-        if randoPreset['funSuits'] == "random":
-            parameters["superFunSuit"] = "random"
-
-        parameters['majorsSplit'] = request.vars.majorsSplit
+        skillPreset = "Season_Races"
+        randoPreset = "Season_Races"
+        majorsSplit = request.vars.majorsSplit
 
         DB = db.DB()
         progSpeedStatsRaw = {}
@@ -2822,8 +2788,8 @@ def progSpeedStats():
         realProgSpeeds = []
         realProgSpeedsName = []
         for progSpeed in progSpeeds:
-            parameters['progSpeed'] = progSpeed
-            progSpeedStatsRaw[progSpeed] = DB.getProgSpeedStat(parameters)
+            curRandoPreset = "{}_{}_{}".format(randoPreset, majorsSplit, progSpeed)
+            progSpeedStatsRaw[progSpeed] = DB.getProgSpeedStat(skillPreset, curRandoPreset)
 
             if len(progSpeedStatsRaw[progSpeed]) != 0:
                 progSpeedStats[progSpeed] = {}
@@ -2865,10 +2831,9 @@ def progSpeedStats():
     else:
         progSpeedStats = None
 
-    randoPresets = ['Season_Races']
     majorsSplit = ['Major', 'Full']
 
-    return dict(randoPresets=randoPresets, majorsSplit=majorsSplit, progSpeedStats=progSpeedStats)
+    return dict(majorsSplit=majorsSplit, progSpeedStats=progSpeedStats)
 
 ipsBasePath = "plandository/"
 def plandorepo():

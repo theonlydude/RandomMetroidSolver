@@ -26,12 +26,13 @@ fi
 function getDBParam {
     PARAM="$1"
 
-    sed -e "s+.*${PARAM}='\([^']*\)'.*+\1+" ${CWD}/db_params.py
+    sed -e "s+.*${PARAM}=\([^,)]*\).*+\1+" ${CWD}/db_params.py | sed -e "s+'++g"
 }
 host=$(getDBParam "host")
 user=$(getDBParam "user")
 database=$(getDBParam "database")
 password=$(getDBParam "password")
+port=$(getDBParam "port")
 
 #################
 # truncate tables
@@ -42,7 +43,7 @@ truncate table extended_stats;
 truncate table item_locs;
 truncate table solver_stats;
 truncate table techniques;"
-echo "${SQL}" | mysql -h ${host} -u ${user} -p${password} ${database}
+echo "${SQL}" | mysql -h ${host} -u ${user} -p${password} -P${port} ${database}
 
 #################
 # compute stats
@@ -89,5 +90,5 @@ fi
 ${CWD}/tools/loadExtStats.sh
 
 # dump stats
-mysqldump -h ${host} -u ${user} -p${password} ${database} difficulties extended_stats item_locs techniques solver_stats > ${CWD}/new_stats.sql
+mysqldump -h ${host} -u ${user} -p${password} -P${port} ${database} difficulties extended_stats item_locs techniques solver_stats > ${CWD}/new_stats.sql
 gzip ${CWD}/new_stats.sql

@@ -340,7 +340,7 @@ order by r.id;"""
 
         # custom sort of the params
         paramsHead = []
-        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'bossRandomization', 'minimizer', 'minimizerQty', 'minimizerTourian', 'majorsSplit', 'majorsSplitMultiSelect', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
+        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'doorsColorsRando', 'bossRandomization', 'minimizer', 'minimizerQty', 'minimizerTourian', 'majorsSplit', 'majorsSplitMultiSelect', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
             if param in paramsSet:
                 paramsHead.append(param)
                 paramsSet.remove(param)
@@ -463,16 +463,7 @@ order by init_time;"""
         return (header, self.execSelect(sql, (weeks,)))
 
     @staticmethod
-    def dumpExtStatsItems(parameters, locsItems, sqlFile):
-        sql = """insert into extended_stats (preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, count)
-values
-('%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, '%s', %s, '%s', '%s', 1)
-on duplicate key update id=LAST_INSERT_ID(id), count = count + 1;
-set @last_id = last_insert_id();
-"""
-
-        sqlFile.write(sql % (parameters['preset'], parameters['area'], parameters['boss'], parameters['majorsSplit'], parameters['progSpeed'], parameters['morphPlacement'], parameters['suitsRestriction'], parameters['progDiff'], parameters['superFunMovement'], parameters['superFunCombat'], parameters['superFunSuit'], parameters['gravityBehaviour'], parameters['nerfedCharge'], parameters['maxDifficulty'], parameters['startAP']))
-
+    def dumpItemLocs(locsItems, sqlFile):
         for (location, item) in locsItems.items():
             if item == 'Boss':
                 continue
@@ -483,10 +474,25 @@ set @last_id = last_insert_id();
             sqlFile.write(sql % (item,))
 
     @staticmethod
-    def dumpExtStatsSolver(difficulty, techniques, solverStats, step, sqlFile):
+    def dumpExtStatsItems(skillPreset, randoPreset, locsItems, sqlFile):
+        sql = """insert into extended_stats (skillPreset, randoPreset, count)
+values
+('%s', '%s', 1)
+on duplicate key update id=LAST_INSERT_ID(id), count = count + 1;
+set @last_id = last_insert_id();
+"""
+
+        sqlFile.write(sql % (skillPreset, randoPreset))
+
+        DB.dumpItemLocs(locsItems, sqlFile)
+
+    @staticmethod
+    def dumpExtStatsSolver(difficulty, techniques, solverStats, locsItems, step, sqlFile):
         # use @last_id defined by the randomizer
 
         if step == 1:
+            DB.dumpItemLocs(locsItems, sqlFile)
+
             # get difficulty column
             if difficulty < medium:
                 column = "easy"
@@ -515,52 +521,47 @@ set @last_id = last_insert_id();
             # to avoid // issues
             sqlFile.write("commit;\n")
 
-    def getExtStat(self, parameters):
+    def getExtStat(self, skillPreset, randoPreset):
         if self.dbAvailable == False:
             return (None, None, None, None)
 
         sqlItems = """select sum(e.count), i.item, round(100*sum(i.EnergyTankGauntlet)/sum(e.count), 1), round(100*sum(i.Bomb)/sum(e.count), 1), round(100*sum(i.EnergyTankTerminator)/sum(e.count), 1), round(100*sum(i.ReserveTankBrinstar)/sum(e.count), 1), round(100*sum(i.ChargeBeam)/sum(e.count), 1), round(100*sum(i.MorphingBall)/sum(e.count), 1), round(100*sum(i.EnergyTankBrinstarCeiling)/sum(e.count), 1), round(100*sum(i.EnergyTankEtecoons)/sum(e.count), 1), round(100*sum(i.EnergyTankWaterway)/sum(e.count), 1), round(100*sum(i.EnergyTankBrinstarGate)/sum(e.count), 1), round(100*sum(i.XRayScope)/sum(e.count), 1), round(100*sum(i.Spazer)/sum(e.count), 1), round(100*sum(i.EnergyTankKraid)/sum(e.count), 1), round(100*sum(i.Kraid)/sum(e.count), 1), round(100*sum(i.VariaSuit)/sum(e.count), 1), round(100*sum(i.IceBeam)/sum(e.count), 1), round(100*sum(i.EnergyTankCrocomire)/sum(e.count), 1), round(100*sum(i.HiJumpBoots)/sum(e.count), 1), round(100*sum(i.GrappleBeam)/sum(e.count), 1), round(100*sum(i.ReserveTankNorfair)/sum(e.count), 1), round(100*sum(i.SpeedBooster)/sum(e.count), 1), round(100*sum(i.WaveBeam)/sum(e.count), 1), round(100*sum(i.Ridley)/sum(e.count), 1), round(100*sum(i.EnergyTankRidley)/sum(e.count), 1), round(100*sum(i.ScrewAttack)/sum(e.count), 1), round(100*sum(i.EnergyTankFirefleas)/sum(e.count), 1), round(100*sum(i.ReserveTankWreckedShip)/sum(e.count), 1), round(100*sum(i.EnergyTankWreckedShip)/sum(e.count), 1), round(100*sum(i.Phantoon)/sum(e.count), 1), round(100*sum(i.RightSuperWreckedShip)/sum(e.count), 1), round(100*sum(i.GravitySuit)/sum(e.count), 1), round(100*sum(i.EnergyTankMamaturtle)/sum(e.count), 1), round(100*sum(i.PlasmaBeam)/sum(e.count), 1), round(100*sum(i.ReserveTankMaridia)/sum(e.count), 1), round(100*sum(i.SpringBall)/sum(e.count), 1), round(100*sum(i.EnergyTankBotwoon)/sum(e.count), 1), round(100*sum(i.Draygon)/sum(e.count), 1), round(100*sum(i.SpaceJump)/sum(e.count), 1), round(100*sum(i.MotherBrain)/sum(e.count), 1), round(100*sum(i.PowerBombCrateriasurface)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShipbottom)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShiptop)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShipmiddle)/sum(e.count), 1), round(100*sum(i.MissileCrateriamoat)/sum(e.count), 1), round(100*sum(i.MissileCrateriabottom)/sum(e.count), 1), round(100*sum(i.MissileCrateriagauntletright)/sum(e.count), 1), round(100*sum(i.MissileCrateriagauntletleft)/sum(e.count), 1), round(100*sum(i.SuperMissileCrateria)/sum(e.count), 1), round(100*sum(i.MissileCrateriamiddle)/sum(e.count), 1), round(100*sum(i.PowerBombgreenBrinstarbottom)/sum(e.count), 1), round(100*sum(i.SuperMissilepinkBrinstar)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbelowsupermissile)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenBrinstartop)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbehindmissile)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbehindreservetank)/sum(e.count), 1), round(100*sum(i.MissilepinkBrinstartop)/sum(e.count), 1), round(100*sum(i.MissilepinkBrinstarbottom)/sum(e.count), 1), round(100*sum(i.PowerBombpinkBrinstar)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarpipe)/sum(e.count), 1), round(100*sum(i.PowerBombblueBrinstar)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarmiddle)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenBrinstarbottom)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarbottom)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstartop)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarbehindmissile)/sum(e.count), 1), round(100*sum(i.PowerBombredBrinstarsidehopperroom)/sum(e.count), 1), round(100*sum(i.PowerBombredBrinstarspikeroom)/sum(e.count), 1), round(100*sum(i.MissileredBrinstarspikeroom)/sum(e.count), 1), round(100*sum(i.MissileKraid)/sum(e.count), 1), round(100*sum(i.Missilelavaroom)/sum(e.count), 1), round(100*sum(i.MissilebelowIceBeam)/sum(e.count), 1), round(100*sum(i.MissileaboveCrocomire)/sum(e.count), 1), round(100*sum(i.MissileHiJumpBoots)/sum(e.count), 1), round(100*sum(i.EnergyTankHiJumpBoots)/sum(e.count), 1), round(100*sum(i.PowerBombCrocomire)/sum(e.count), 1), round(100*sum(i.MissilebelowCrocomire)/sum(e.count), 1), round(100*sum(i.MissileGrappleBeam)/sum(e.count), 1), round(100*sum(i.MissileNorfairReserveTank)/sum(e.count), 1), round(100*sum(i.MissilebubbleNorfairgreendoor)/sum(e.count), 1), round(100*sum(i.MissilebubbleNorfair)/sum(e.count), 1), round(100*sum(i.MissileSpeedBooster)/sum(e.count), 1), round(100*sum(i.MissileWaveBeam)/sum(e.count), 1), round(100*sum(i.MissileGoldTorizo)/sum(e.count), 1), round(100*sum(i.SuperMissileGoldTorizo)/sum(e.count), 1), round(100*sum(i.MissileMickeyMouseroom)/sum(e.count), 1), round(100*sum(i.MissilelowerNorfairabovefireflearoom)/sum(e.count), 1), round(100*sum(i.PowerBomblowerNorfairabovefireflearoom)/sum(e.count), 1), round(100*sum(i.PowerBombPowerBombsofshame)/sum(e.count), 1), round(100*sum(i.MissilelowerNorfairnearWaveBeam)/sum(e.count), 1), round(100*sum(i.MissileWreckedShipmiddle)/sum(e.count), 1), round(100*sum(i.MissileGravitySuit)/sum(e.count), 1), round(100*sum(i.MissileWreckedShiptop)/sum(e.count), 1), round(100*sum(i.SuperMissileWreckedShipleft)/sum(e.count), 1), round(100*sum(i.MissilegreenMaridiashinespark)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenMaridia)/sum(e.count), 1), round(100*sum(i.MissilegreenMaridiatatori)/sum(e.count), 1), round(100*sum(i.SuperMissileyellowMaridia)/sum(e.count), 1), round(100*sum(i.MissileyellowMaridiasupermissile)/sum(e.count), 1), round(100*sum(i.MissileyellowMaridiafalsewall)/sum(e.count), 1), round(100*sum(i.MissileleftMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.MissilerightMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.PowerBombrightMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.MissilepinkMaridia)/sum(e.count), 1), round(100*sum(i.SuperMissilepinkMaridia)/sum(e.count), 1), round(100*sum(i.MissileDraygon)/sum(e.count), 1)
 from extended_stats e join item_locs i on e.id = i.ext_id
 where item not in ('Nothing', 'NoEnergy', 'ETank', 'Reserve', 'Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain')
-{}
+  and e.skillPreset = '%s' and e.randoPreset = '%s'
 group by i.item
 order by i.item;"""
 
         sqlTechniques = """select t.technique, round(100*sum(t.count)/sum(e.count), 1)
 from extended_stats e
   join techniques t on e.id = t.ext_id
-where 1 = 1
-{}
+where e.skillPreset = '%s' and e.randoPreset = '%s'
 group by t.technique;"""
 
         sqlDifficulties = """
 select sum(d.easy), sum(d.medium), sum(d.hard), sum(d.harder), sum(d.hardcore), sum(d.mania)
 from extended_stats e
   join difficulties d on e.id = d.ext_id
-where 1 = 1
-{};"""
+where e.skillPreset = '%s' and e.randoPreset = '%s';"""
 
         sqlSolverStats = """
 select s.name, s.value, round(count(*) * 100 / e.count, 1)
 from extended_stats e
   join solver_stats s on e.id = s.ext_id
-where 1 = 1
-{}
+where e.skillPreset = '%s' and e.randoPreset = '%s'
 group by s.name, s.value
 order by 1,2;"""
 
-        (where, sqlParams) = self.getWhereClause(parameters)
+        items = self.execSelect(sqlItems, (skillPreset, randoPreset))
 
-        items = self.execSelect(sqlItems.format(where), tuple(sqlParams))
-
-        techniques = self.execSelect(sqlTechniques.format(where), tuple(sqlParams))
+        techniques = self.execSelect(sqlTechniques, (skillPreset, randoPreset))
         # transform techniques into a dict
         techOut = {}
         if techniques != None:
             for technique in techniques:
                 techOut[technique[0]] = technique[1]
 
-        difficulties = self.execSelect(sqlDifficulties.format(where), tuple(sqlParams))
+        difficulties = self.execSelect(sqlDifficulties, (skillPreset, randoPreset))
         if difficulties != None:
             difficulties = difficulties[0]
 
@@ -568,7 +569,7 @@ order by 1,2;"""
             if difficulties.count(None) == len(difficulties):
                 difficulties = []
 
-        solverStats = self.execSelect(sqlSolverStats.format(where), tuple(sqlParams))
+        solverStats = self.execSelect(sqlSolverStats, (skillPreset, randoPreset))
         solverStatsOut = {}
         if solverStats != None:
             for stat in solverStats:
@@ -579,7 +580,7 @@ order by 1,2;"""
 
         return (items, techOut, difficulties, solverStatsOut)
 
-    def getProgSpeedStat(self, parameters):
+    def getProgSpeedStat(self, skillPreset, randoPreset):
         if self.dbAvailable == False:
             return None
 
@@ -587,14 +588,11 @@ order by 1,2;"""
 select s.name, s.value, round(count(*) * 100 / e.count, 1)
 from extended_stats e
   join solver_stats s on e.id = s.ext_id
-where 1 = 1
-{}
+where e.skillPreset = '%s' and e.randoPreset = '%s'
 group by s.name, s.value
 order by 1,2;"""
 
-        (where, sqlParams) = self.getWhereClause(parameters)
-
-        solverStats = self.execSelect(sqlSolverStats.format(where), tuple(sqlParams))
+        solverStats = self.execSelect(sqlSolverStats, (skillPreset, randoPreset))
         solverStatsOut = {}
         if solverStats != None:
             for stat in solverStats:
@@ -604,57 +602,6 @@ order by 1,2;"""
                 solverStatsOut[name].append((value, count))
 
         return solverStatsOut
-
-    def getWhereClause(self, parameters):
-        where = """and e.preset = '%s' and e.area = %s and e.boss = %s and e.gravityBehaviour = '%s' and e.nerfedCharge = %s """
-
-        sqlParams = [parameters['preset'], parameters['area'], parameters['boss'], parameters['gravityBehaviour'], parameters['nerfedCharge']]
-
-        if parameters["maxDifficulty"] != "random":
-            where += """and e.maxDifficulty = '%s' """
-            sqlParams.append(parameters['maxDifficulty'])
-
-        if parameters["startAP"] != "random":
-            where += """and e.startAP = '%s' """
-            sqlParams.append(parameters['startAP'])
-
-        if parameters['majorsSplit'] != "random":
-            where += """and e.majorsSplit = '%s' """
-            sqlParams.append(parameters['majorsSplit'])
-
-        if parameters['progSpeed'] != "random":
-            if type(parameters['progSpeed']) != list:
-                where += """and e.progSpeed = '%s' """
-                sqlParams.append(parameters['progSpeed'])
-            else:
-                where += """and e.progSpeed in ('%s') """
-                sqlParams.append("','".join(parameters['progSpeed']))
-
-        if parameters['morphPlacement'] != "random":
-            where += """and e.morphPlacement = '%s' """
-            sqlParams.append(parameters['morphPlacement'])
-
-        if parameters['suitsRestriction'] != "random":
-            where += """and e.suitsRestriction = %s """
-            sqlParams.append(parameters['suitsRestriction'])
-
-        if parameters['progDiff'] != "random":
-            where += """and e.progDiff = '%s' """
-            sqlParams.append(parameters['progDiff'])
-
-        if parameters['superFunMovement'] != "random":
-            where += """and e.superFunMovement = %s """
-            sqlParams.append(parameters['superFunMovement'])
-
-        if parameters['superFunCombat'] != "random":
-            where += """and e.superFunCombat = %s """
-            sqlParams.append(parameters['superFunCombat'])
-
-        if parameters['superFunSuit'] != "random":
-            where += """and e.superFunSuit = %s """
-            sqlParams.append(parameters['superFunSuit'])
-
-        return (where, sqlParams)
 
     def getPlandos(self):
         if self.dbAvailable == False:

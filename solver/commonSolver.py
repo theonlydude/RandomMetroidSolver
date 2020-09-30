@@ -9,6 +9,7 @@ from utils import PresetLoader
 from solver.conf import Conf
 from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils, getAccessPoint
 from parameters import easy, medium, hard, harder, hardcore, mania, infinity
+from doorsmanager import DoorsManager
 
 class CommonSolver(object):
     def loadRom(self, rom, interactive=False, magic=None, startAP=None):
@@ -32,6 +33,9 @@ class CommonSolver(object):
             self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
             for loc in self.locations:
                 loc.itemName = 'Nothing'
+            # set doors related to default patches
+            DoorsManager.setDoorsColor()
+            self.doorsRando = False
         else:
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
@@ -41,6 +45,7 @@ class CommonSolver(object):
             (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches()
             RomPatches.ActivePatches += startPatches
             self.escapeTimer = self.romLoader.getEscapeTimer()
+            self.doorsRando = self.romLoader.loadDoorsColor()
 
             if interactive == False:
                 print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {} activePatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches()), sorted(RomPatches.ActivePatches)))

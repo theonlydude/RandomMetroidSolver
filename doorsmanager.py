@@ -43,10 +43,7 @@ class Door(object):
         self.forced = True
 
     def setColor(self, color):
-        if color == 'grey':
-            self.hidden = True
-        else:
-            self.color = color
+        self.color = color
 
     def getColor(self):
         if self.hidden:
@@ -289,12 +286,15 @@ class DoorsManager():
     # for isolver state
     @staticmethod
     def serialize():
-        return {door.name: (door.getColor(), door.facing) for door in DoorsManager.doors.values()}
+        return {door.name: (door.color, door.facing, door.hidden) for door in DoorsManager.doors.values()}
 
     @staticmethod
     def unserialize(state):
-        for name, (color, facing) in state.items():
-            DoorsManager.doors[name].setColor(color)
+        for name, (color, facing, hidden) in state.items():
+            door = DoorsManager.doors[name]
+            door.setColor(color)
+            door.facing = facing
+            door.hidden = hidden
 
     # when using the tracker, first set all colored doors to grey until the user clicks on it
     @staticmethod

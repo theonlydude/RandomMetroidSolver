@@ -74,7 +74,7 @@ class SolverState(object):
             self.state["innerTransitions"] = self.getInnerTransitions(solver.areaGraph.availAccessPoints, solver.curGraphTransitions)
         else:
             self.state["innerTransitions"] = []
-        # doors colors: dict {name: (color, facing)}
+        # doors colors: dict {name: (color, facing, hidden)}
         self.state["doors"] = DoorsManager.serialize()
         # doorsRando: bool
         self.state["doorsRando"] = solver.doorsRando

@@ -2,7 +2,7 @@ import os, json, sys, re, random
 
 from parameters import Knows, Settings, Controller, isKnows, isSettings, isButton
 from parameters import easy, medium, hard, harder, hardcore, mania
-from smbool import SMBool
+from logic.smbool import SMBool
 
 def isStdPreset(preset):
     return preset in ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master', 'samus', 'solution', 'Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']

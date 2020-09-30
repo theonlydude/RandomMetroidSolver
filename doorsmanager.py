@@ -1,5 +1,5 @@
 import random
-from smbool import SMBool
+from logic.smbool import SMBool
 from rom.rom_patches import RomPatches
 import log, logging
 

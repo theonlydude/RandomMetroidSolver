@@ -1,9 +1,9 @@
 import sys, json, os
 
 from solver.commonSolver import CommonSolver
-from smbool import SMBool
-from smboolmanager import SMBoolManagerPlando as SMBoolManager
-from helpers import Pickup
+from logic.smbool import SMBool
+from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
+from logic.helpers import Pickup
 from rom.rompatcher import RomPatcher
 from rom.rom_patches import RomPatches
 from graph.graph_locations import locations as graphLocations

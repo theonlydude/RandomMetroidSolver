@@ -1,8 +1,8 @@
 
 import copy, log
 
-from smbool import SMBool, smboolFalse
-from smboolmanager import SMBoolManager
+from logic.smbool import SMBool, smboolFalse
+from logic.smboolmanager import SMBoolManager
 from collections import Counter
 
 class ItemLocation(object):

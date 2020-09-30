@@ -1,7 +1,7 @@
-from helpers import Bosses
+from logic.helpers import Bosses
 from parameters import Settings, infinity
 from rom.rom_patches import RomPatches
-from smbool import SMBool
+from logic.smbool import SMBool
 import copy
 
 class Location:

@@ -4,9 +4,9 @@ from graph.graph import AccessPoint, AccessGraph
 from graph.graph_locations import locations
 from parameters import Knows, Settings
 from rom.rom_patches import RomPatches
-from smbool import SMBool
-from helpers import Bosses
-from cache import Cache
+from logic.smbool import SMBool
+from logic.helpers import Bosses
+from logic.cache import Cache
 import log
 
 # all access points and traverse functions

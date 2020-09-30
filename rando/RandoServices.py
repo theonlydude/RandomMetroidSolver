@@ -3,7 +3,7 @@ import log, copy, random, sys, logging
 from enum import Enum, unique
 from parameters import infinity
 from rando.ItemLocContainer import getLocListStr, getItemListStr, ContainerSoftBackup, ItemLocation
-from helpers import Bosses
+from logic.helpers import Bosses
 
 # used to specify whether we want to come back from locations
 @unique

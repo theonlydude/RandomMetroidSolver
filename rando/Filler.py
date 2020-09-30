@@ -1,12 +1,12 @@
 
 import log, copy, time
 
-from cache import RequestCache
+from logic.cache import RequestCache
 from rando.RandoServices import RandoServices
 from rando.Choice import ItemThenLocChoice
 from rando.RandoServices import ComebackCheckType
 from parameters import infinity
-from helpers import diffValue2txt
+from logic.helpers import diffValue2txt
 from graph.graph_access import GraphUtils
 
 # base class for fillers. a filler responsibility is to fill a given

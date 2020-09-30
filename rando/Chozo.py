@@ -2,7 +2,7 @@
 import copy, log
 
 from parameters import Knows, isKnows, god
-from smbool import SMBool
+from logic.smbool import SMBool
 from rando.Filler import Filler
 from rando.ItemLocContainer import ItemLocContainer, getItemListStr, getLocListStr
 

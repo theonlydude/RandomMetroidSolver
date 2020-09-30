@@ -19,7 +19,7 @@ import db
 from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
 from utils import isStdPreset, getRandomizerDefaultParameters
 from graph.graph_locations import locations
-from smboolmanager import SMBoolManager
+from logic.smboolmanager import SMBoolManager
 from rom.romreader import RomReader
 from rom.rom_patches import RomPatches
 from rom.ips import IPS_Patch

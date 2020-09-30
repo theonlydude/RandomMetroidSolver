@@ -1,10 +1,10 @@
 
 import math
 
-from cache import Cache
+from logic.cache import Cache
+from logic.smbool import SMBool, smboolFalse
 from parameters import Settings, easy, medium, diff2text
 from rom.rom_patches import RomPatches
-from smbool import SMBool, smboolFalse
 from utils import normalizeRounding
 
 

@@ -1,7 +1,7 @@
 
 import log, random
 
-from smboolmanager import SMBoolManager
+from logic.smboolmanager import SMBoolManager
 from parameters import infinity
 
 class MiniSolver(object):

@@ -13,7 +13,7 @@ from rom.rompatcher import RomPatcher
 from rom.rom import FakeROM
 from utils import loadRandoPreset, getDefaultMultiValues
 from version import displayedVersion
-from smbool import SMBool
+from logic.smbool import SMBool
 from doorsmanager import DoorsManager
 
 import log, db

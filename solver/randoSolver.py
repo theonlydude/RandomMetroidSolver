@@ -1,5 +1,5 @@
-from smboolmanager import SMBoolManagerPlando as SMBoolManager
-from helpers import Pickup
+from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
+from logic.helpers import Pickup
 from solver.conf import Conf
 from graph.graph_access import getAccessPoint
 from solver.comeback import ComeBack

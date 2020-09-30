@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(sys.path[0]))
 
 from utils import randGaussBounds
 from rando.Items import ItemManager
-from smboolmanager import SMBoolManager
+from logic.smboolmanager import SMBoolManager
 import random
 import log
 

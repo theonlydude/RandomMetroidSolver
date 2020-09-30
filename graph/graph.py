@@ -1,9 +1,9 @@
 import copy, logging
 from operator import attrgetter
 import log
-from smbool import SMBool, smboolFalse
+from logic.smbool import SMBool, smboolFalse
 from parameters import infinity
-from helpers import Bosses
+from logic.helpers import Bosses
 
 class Path(object):
     __slots__ = ( 'path', 'pdiff', 'distance' )

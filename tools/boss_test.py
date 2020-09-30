@@ -6,8 +6,8 @@ import sys, os
 sys.path.append(os.path.dirname(sys.path[0]))
 
 from parameters import *
-from helpers import *
-from smboolmanager import *
+from logic.helpers import *
+from logic.smboolmanager import *
 from utils import PresetLoader
 from rom.rom_patches import RomPatches
 

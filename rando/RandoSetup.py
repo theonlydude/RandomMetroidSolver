@@ -1,9 +1,9 @@
 import copy, log, random
 
 from utils import randGaussBounds
-from smbool import SMBool, smboolFalse
-from smboolmanager import SMBoolManager
-from helpers import Bosses
+from logic.smbool import SMBool, smboolFalse
+from logic.smboolmanager import SMBoolManager
+from logic.helpers import Bosses
 from graph.graph_access import getAccessPoint, GraphUtils
 from rando.Filler import FrontFiller
 from rando.ItemLocContainer import ItemLocContainer, getLocListStr, ItemLocation

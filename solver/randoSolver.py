@@ -1,7 +1,7 @@
 from smboolmanager import SMBoolManagerPlando as SMBoolManager
 from helpers import Pickup
 from solver.conf import Conf
-from graph_access import getAccessPoint
+from graph.graph_access import getAccessPoint
 from solver.comeback import ComeBack
 from solver.standardSolver import StandardSolver
 from parameters import easy

@@ -3,7 +3,7 @@ import json, os
 from solver.commonSolver import CommonSolver
 from smboolmanager import SMBoolManagerPlando as SMBoolManager
 from helpers import Pickup
-from graph_locations import locations as graphLocations
+from graph.graph_locations import locations as graphLocations
 from utils import PresetLoader
 from solver.conf import Conf
 from solver.out import Out

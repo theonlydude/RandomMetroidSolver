@@ -5,7 +5,7 @@ import argparse, os.path, json, sys, shutil, random
 from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from rando.PaletteRando import PaletteRando
-from graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
+from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text
 from utils import PresetLoader
 from rom_patches import RomPatches

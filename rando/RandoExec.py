@@ -1,7 +1,7 @@
 
 import sys, random, time
 
-from graph_locations import locations as graphLocations
+from graph.graph_locations import locations as graphLocations
 from rando.Restrictions import Restrictions
 from rando.RandoServices import RandoServices
 from rando.GraphBuilder import GraphBuilder

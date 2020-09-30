@@ -16,9 +16,9 @@ from solver.conf import Conf
 from parameters import diff2text, text2diff
 from utils import PresetLoader, removeChars, getDefaultMultiValues
 import db
-from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
+from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
 from utils import isStdPreset, getRandomizerDefaultParameters
-from graph_locations import locations
+from graph.graph_locations import locations
 from smboolmanager import SMBoolManager
 from rom import RomReader
 from rom_patches import RomPatches

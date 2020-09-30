@@ -1,7 +1,7 @@
 import copy
 import random
-from graph import AccessPoint, AccessGraph
-from graph_locations import locations
+from graph.graph import AccessPoint, AccessGraph
+from graph.graph_locations import locations
 from parameters import Knows, Settings
 from rom_patches import RomPatches
 from smbool import SMBool

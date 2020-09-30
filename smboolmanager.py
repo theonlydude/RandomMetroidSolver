@@ -1,7 +1,7 @@
 # object to handle the smbools and optimize them
 
 from cache import Cache
-from graph_helpers import HelpersGraph
+from graph.graph_helpers import HelpersGraph
 from doorsmanager import DoorsManager
 from parameters import Knows, isKnows
 from smbool import SMBool, smboolFalse

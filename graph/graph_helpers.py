@@ -1,7 +1,7 @@
 from smbool import SMBool
 from rom_patches import RomPatches
 from helpers import Helpers, Bosses
-from graph_access import getAccessPoint
+from graph.graph_access import getAccessPoint
 from cache import Cache
 from math import ceil
 from parameters import Settings

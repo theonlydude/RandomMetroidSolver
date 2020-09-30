@@ -7,8 +7,8 @@ from compression import Compressor
 from ips import IPS_Patch
 from parameters import appDir
 from rom_patches import RomPatches
-from graph_access import accessPoints, GraphUtils, getAccessPoint
-from graph_locations import locations
+from graph.graph_access import accessPoints, GraphUtils, getAccessPoint
+from graph.graph_locations import locations
 from doorsmanager import DoorsManager
 
 def getWord(w):

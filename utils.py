@@ -246,7 +246,7 @@ class PresetLoaderDict(PresetLoader):
         super(PresetLoaderDict, self).__init__()
 
 def getDefaultMultiValues():
-    from graph_access import GraphUtils
+    from graph.graph_access import GraphUtils
     defaultMultiValues = {
         'startLocation': GraphUtils.getStartAccessPointNames(),
         'majorsSplit': ['Full', 'Major', 'Chozo'],

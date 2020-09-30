@@ -4,10 +4,10 @@ from smbool import SMBool, smboolFalse
 from helpers import Bosses
 from rom import RomLoader
 from rom_patches import RomPatches
-from graph import AccessGraphSolver as AccessGraph
+from graph.graph import AccessGraphSolver as AccessGraph
 from utils import PresetLoader
 from solver.conf import Conf
-from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils, getAccessPoint
+from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils, getAccessPoint
 from parameters import easy, medium, hard, harder, hardcore, mania, infinity
 from doorsmanager import DoorsManager
 

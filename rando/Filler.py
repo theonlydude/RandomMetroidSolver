@@ -63,7 +63,7 @@ class Filler(object):
             if not isStuck:
                 self.nSteps += 1
             date = time.process_time()
-        if condition():
+        if condition() or date > self.endDate:
             isStuck = True
             if date > self.endDate:
                 self.errorMsg = "Exceeded time limit of "+str(self.settings.runtimeLimit_s) +" seconds"

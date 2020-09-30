@@ -9,7 +9,8 @@ from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, Gra
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text
 from utils import PresetLoader
 from rom.rom_patches import RomPatches
-from rom.rom import RomPatcher, FakeROM
+from rom.rompatcher import RomPatcher
+from rom.rom import FakeROM
 from utils import loadRandoPreset, getDefaultMultiValues
 from version import displayedVersion
 from smbool import SMBool

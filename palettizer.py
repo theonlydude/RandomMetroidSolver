@@ -2,7 +2,7 @@
 
 import random, sys, argparse
 from rando.PaletteRando import PaletteRando
-from rom.rom import RomPatcher
+from rom.rompatcher import RomPatcher
 import log
 
 # for local "palette rando" patching of a seed

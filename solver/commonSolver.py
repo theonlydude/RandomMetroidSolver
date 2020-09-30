@@ -2,7 +2,7 @@ import logging
 
 from smbool import SMBool, smboolFalse
 from helpers import Bosses
-from rom.rom import RomLoader
+from rom.romloader import RomLoader
 from rom.rom_patches import RomPatches
 from graph.graph import AccessGraphSolver as AccessGraph
 from utils import PresetLoader

@@ -20,7 +20,7 @@ from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, van
 from utils import isStdPreset, getRandomizerDefaultParameters
 from graph.graph_locations import locations
 from smboolmanager import SMBoolManager
-from rom.rom import RomReader
+from rom.romreader import RomReader
 from rom.rom_patches import RomPatches
 from rom.ips import IPS_Patch
 from randomizer import energyQties, progDiffs, morphPlacements, majorsSplits, speeds

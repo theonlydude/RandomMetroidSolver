@@ -1,5 +1,5 @@
 import colorsys, random
-from rom.rom import RomLoader
+from rom.romloader import RomLoader
 from rando.palettes import palettes
 from rando.sprite_palettes import sprite_palettes
 import log

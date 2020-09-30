@@ -57,11 +57,12 @@ class FillerRandom(Filler):
             if not locs:
                 self.log.debug("FillerRandom: constraint collision during step {} for item {}".format(self.nSteps, item.Type))
                 self.resetHelpingContainer()
+                date = time.process_time()
                 continue
             loc = random.choice(locs)
             itemLoc = ItemLocation(item, loc)
             self.container.collect(itemLoc, pickup=False)
-            date = time.process_time()
+        date = time.process_time()
         if date > self.endDate:
             return False
         # pool is exhausted, use mini solver to see if it is beatable

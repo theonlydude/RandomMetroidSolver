@@ -6,11 +6,12 @@ from logic.smboolmanager import SMBoolManager
 from collections import Counter
 
 class ItemLocation(object):
-    __slots__ = ( 'Item', 'Location' )
+    __slots__ = ( 'Item', 'Location', 'Accessible' )
 
-    def __init__(self, Item=None, Location=None):
+    def __init__(self, Item=None, Location=None, accessible=True):
         self.Item = Item
         self.Location = Location
+        self.Accessible = accessible
 
     def json(self):
         return {'Item': self.Item.json(), 'Location': self.Location.json()}

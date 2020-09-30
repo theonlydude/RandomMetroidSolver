@@ -172,7 +172,7 @@ class RomPatcher:
             isMorph = loc.Name == 'Morphing Ball'
             if item.Category == 'Nothing':
                 self.writeNothing(itemLoc)
-                if loc.Id == self.nothingId and not loc.restricted:
+                if loc.Id == self.nothingId and not loc.restricted and itemLoc.Accessible:
                     # nothing at morph gives a missile pack
                     self.nothingMissile = True
                     self.nItems += 1
@@ -624,7 +624,7 @@ class RomPatcher:
         self.romFile.writeByte(self.nothingId, address)
 
     def getItemQty(self, itemLocs, itemType):
-        q = len([il for il in itemLocs if il.Item.Type == itemType])
+        q = len([il for il in itemLocs if il.Accessible and il.Item.Type == itemType])
         if itemType == 'Missile' and self.nothingMissile == True:
             q += 1
         return q
@@ -652,49 +652,54 @@ class RomPatcher:
 
     def writeRandoSettings(self, settings, itemLocs):
         dist = self.getMinorsDistribution(itemLocs)
-        tanks = self.getItemQty(itemLocs, 'ETank') + self.getItemQty(itemLocs, 'Reserve')
-
+        totalAmmo = sum(d['Quantity'] for ammo,d in dist.items())
+        totalItemLocs = sum(1 for il in itemLocs if il.Accessible)
+        totalNothing = sum(1 for il in itemLocs if il.Accessible and il.Item.Category == 'Nothing')
+        if self.nothingMissile == True:
+            totalNothing -= 1
+        totalEnergy = self.getItemQty(itemLocs, 'ETank')+self.getItemQty(itemLocs, 'Reserve')
+        totalMajors = totalItemLocs - totalEnergy - totalAmmo - totalNothing
         address = 0x2736C0
-        value = "{:>2}".format(int(dist['Missile']['Quantity']))
-        line = " MISSILE PACKS               %s " % value
+        value = "{:>2}".format(totalItemLocs)
+        line = " ITEM LOCATIONS              %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
-        line = " missile packs ............. %s " % value
+        line = " item locations ............ %s " % value
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = "{:>2}".format(int(dist['Super']['Quantity']))
-        line = " SUPER PACKS                 %s " % value
+        maj = "{:>2}".format(int(totalMajors))
+        htanks = "{:>2}".format(int(totalEnergy))
+        ammo = "{:>2}".format(int(totalAmmo))
+        blank = "{:>2}".format(int(totalNothing))
+        line = "  MAJ %s EN %s AMMO %s BLANK %s " % (maj, htanks, ammo, blank)
+        self.writeCreditsStringBig(address, line, top=True)
+        address += 0x40
+        line = "  maj %s en %s ammo %s blank %s " % (maj, htanks, ammo, blank)
+        self.writeCreditsStringBig(address, line, top=False)
+        address += 0x40
+
+        pbs = "{:>2}".format(int(dist['PowerBomb']['Quantity']))
+        miss = "{:>2}".format(int(dist['Missile']['Quantity']))
+        supers = "{:>2}".format(int(dist['Super']['Quantity']))
+        line = " AMMO PACKS  MI %s SUP %s PB %s " % (miss, supers, pbs)
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
-        line = " super packs ............... %s " % value
+        line = " ammo packs  mi %s sup %s pb %s " % (miss, supers, pbs)
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = "{:>2}".format(int(dist['PowerBomb']['Quantity']))
-        line = " POWER BOMB PACKS            %s " % value
+        etanks = "{:>2}".format(int(self.getItemQty(itemLocs, 'ETank')))
+        reserves = "{:>2}".format(int(self.getItemQty(itemLocs, 'Reserve')))
+        line = " HEALTH TANKS         E %s R %s " % (etanks, reserves)
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
-        line = " power bomb packs .......... %s " % value
+        line = " health tanks ......  e %s r %s " % (etanks, reserves)
         self.writeCreditsStringBig(address, line, top=False)
-        address += 0x40
-
-        value = "{:>2}".format(int(tanks))
-        line = " HEALTH TANKS                %s " % value
-        self.writeCreditsStringBig(address, line, top=True)
-        address += 0x40
-
-        line = " health tanks .............. %s " % value
-        self.writeCreditsStringBig(address, line, top=False)
-        address += 0x40
-
-        # value = " "+settings.qty['energy'].upper()
-        # line = " ENERGY QUANTITY ......%s " % value.rjust(8, '.')
-        # self.writeCreditsString(address, 0x04, line)
-        address += 0x40
+        address += 0x80
 
         value = " "+settings.progSpeed.upper()
         line = " PROGRESSION SPEED ....%s " % value.rjust(8, '.')
@@ -733,7 +738,7 @@ class RomPatcher:
 
         # write ammo/energy pct
         address = 0x273C40
-        (ammoPct, energyPct) = (int(self.getAmmoPct(dist)), int(100*tanks/18))
+        (ammoPct, energyPct) = (int(self.getAmmoPct(dist)), int(100*totalEnergy/18))
         line = " AVAILABLE AMMO {:>3}% ENERGY {:>3}%".format(ammoPct, energyPct)
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40

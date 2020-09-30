@@ -3,7 +3,7 @@ import math
 
 from cache import Cache
 from parameters import Settings, easy, medium, diff2text
-from rom_patches import RomPatches
+from rom.rom_patches import RomPatches
 from smbool import SMBool, smboolFalse
 from utils import normalizeRounding
 

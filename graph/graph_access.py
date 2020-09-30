@@ -3,7 +3,7 @@ import random
 from graph.graph import AccessPoint, AccessGraph
 from graph.graph_locations import locations
 from parameters import Knows, Settings
-from rom_patches import RomPatches
+from rom.rom_patches import RomPatches
 from smbool import SMBool
 from helpers import Bosses
 from cache import Cache

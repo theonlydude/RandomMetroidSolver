@@ -4,8 +4,8 @@ from solver.commonSolver import CommonSolver
 from smbool import SMBool
 from smboolmanager import SMBoolManagerPlando as SMBoolManager
 from helpers import Pickup
-from rom import RomPatcher
-from rom_patches import RomPatches
+from rom.rom import RomPatcher
+from rom.rom_patches import RomPatches
 from graph.graph_locations import locations as graphLocations
 from graph.graph import AccessGraphSolver as AccessGraph
 from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils

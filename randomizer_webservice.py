@@ -8,8 +8,8 @@
 
 import json, argparse, sys, random, os, os.path, base64, shutil, tempfile
 from requests import Session
-from rom import RealROM
-from ips import IPS_Patch
+from rom.rom import RealROM
+from rom.ips import IPS_Patch
 from utils import getRandomizerDefaultParameters
 
 if __name__ == "__main__":

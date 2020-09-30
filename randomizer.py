@@ -8,8 +8,8 @@ from rando.PaletteRando import PaletteRando
 from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text
 from utils import PresetLoader
-from rom_patches import RomPatches
-from rom import RomPatcher, FakeROM
+from rom.rom_patches import RomPatches
+from rom.rom import RomPatcher, FakeROM
 from utils import loadRandoPreset, getDefaultMultiValues
 from version import displayedVersion
 from smbool import SMBool

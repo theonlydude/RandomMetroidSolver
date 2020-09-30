@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from rom import RomLoader
+from rom.rom import RomLoader
 from sys import argv
 
 if __name__ == "__main__":

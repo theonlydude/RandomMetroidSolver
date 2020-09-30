@@ -1,5 +1,5 @@
 from smbool import SMBool
-from rom_patches import RomPatches
+from rom.rom_patches import RomPatches
 from helpers import Helpers, Bosses
 from graph.graph_access import getAccessPoint
 from cache import Cache

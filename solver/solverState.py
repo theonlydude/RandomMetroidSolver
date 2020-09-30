@@ -1,7 +1,7 @@
 import json
 
 from smbool import SMBool
-from rom_patches import RomPatches
+from rom.rom_patches import RomPatches
 from utils import removeChars, fixEnergy
 from parameters import diff4solver, Knows
 from doorsmanager import DoorsManager

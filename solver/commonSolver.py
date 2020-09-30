@@ -2,8 +2,8 @@ import logging
 
 from smbool import SMBool, smboolFalse
 from helpers import Bosses
-from rom import RomLoader
-from rom_patches import RomPatches
+from rom.rom import RomLoader
+from rom.rom_patches import RomPatches
 from graph.graph import AccessGraphSolver as AccessGraph
 from utils import PresetLoader
 from solver.conf import Conf

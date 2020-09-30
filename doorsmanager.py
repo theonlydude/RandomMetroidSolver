@@ -1,6 +1,6 @@
 import random
 from smbool import SMBool
-from rom_patches import RomPatches
+from rom.rom_patches import RomPatches
 import log, logging
 
 LOG = log.get('DoorsManager')

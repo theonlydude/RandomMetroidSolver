@@ -9,7 +9,7 @@ from parameters import *
 from helpers import *
 from smboolmanager import *
 from utils import PresetLoader
-from rom_patches import RomPatches
+from rom.rom_patches import RomPatches
 
 def stuff(base, nEtanks, nMissiles, nSupers, nPowerBombs, patches=None):
     ret = base

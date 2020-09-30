@@ -3,10 +3,10 @@ import re, sys, os, json, copy, base64, random
 
 from rando.Items import ItemManager
 from rando.patches import patches, additional_PLMs
-from compression import Compressor
-from ips import IPS_Patch
+from rom.compression import Compressor
+from rom.ips import IPS_Patch
 from parameters import appDir
-from rom_patches import RomPatches
+from rom.rom_patches import RomPatches
 from graph.graph_access import accessPoints, GraphUtils, getAccessPoint
 from graph.graph_locations import locations
 from doorsmanager import DoorsManager

@@ -1,6 +1,6 @@
 from helpers import Bosses
 from parameters import Settings, infinity
-from rom_patches import RomPatches
+from rom.rom_patches import RomPatches
 from smbool import SMBool
 import copy
 

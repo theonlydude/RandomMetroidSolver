@@ -68,7 +68,7 @@ class SMBool:
 
     def json(self):
         # as we have slots instead of dict
-        return {key : getattr(self, key, None) for key in self.__slots__}
+        return {'bool': self.bool, 'difficulty': self.difficulty, 'knows': self.knows, 'items': self.items}
 
     def wand(*args):
         # looping here is faster than using "if ... in" construct

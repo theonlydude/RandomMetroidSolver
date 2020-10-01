@@ -1,8 +1,8 @@
 import os, json, sys, re, random
 
-from parameters import Knows, Settings, Controller, isKnows, isSettings, isButton
-from parameters import easy, medium, hard, harder, hardcore, mania
-from smbool import SMBool
+from utils.parameters import Knows, Settings, Controller, isKnows, isSettings, isButton
+from utils.parameters import easy, medium, hard, harder, hardcore, mania
+from logic.smbool import SMBool
 
 def isStdPreset(preset):
     return preset in ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master', 'samus', 'solution', 'Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
@@ -246,7 +246,7 @@ class PresetLoaderDict(PresetLoader):
         super(PresetLoaderDict, self).__init__()
 
 def getDefaultMultiValues():
-    from graph_access import GraphUtils
+    from graph.graph_access import GraphUtils
     defaultMultiValues = {
         'startLocation': GraphUtils.getStartAccessPointNames(),
         'majorsSplit': ['Full', 'Major', 'Chozo'],

@@ -5,17 +5,17 @@ import argparse, os.path, json, sys, shutil, random
 from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from rando.PaletteRando import PaletteRando
-from graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
-from parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text
-from utils import PresetLoader
-from rom_patches import RomPatches
-from rom import RomPatcher, FakeROM
-from utils import loadRandoPreset, getDefaultMultiValues
-from version import displayedVersion
-from smbool import SMBool
-from doorsmanager import DoorsManager
+from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
+from utils.parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text
+from rom.rom_patches import RomPatches
+from rom.rompatcher import RomPatcher
+from rom.rom import FakeROM
+from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues
+from utils.version import displayedVersion
+from logic.smbool import SMBool
+from utils.doorsmanager import DoorsManager
 
-import log, db
+import utils.log, utils.db
 
 defaultMultiValues = getDefaultMultiValues()
 speeds = defaultMultiValues['progressionSpeed']
@@ -266,8 +266,8 @@ if __name__ == "__main__":
         print("plandoRando param requires output param")
         sys.exit(-1)
 
-    log.init(args.debug)
-    logger = log.get('Rando')
+    utils.log.init(args.debug)
+    logger = utils.log.get('Rando')
     # service to force an argument value and notify it
     argDict = vars(args)
     forcedArgs = {}
@@ -548,6 +548,7 @@ if __name__ == "__main__":
         progDiff = 'normal'
         args.plandoRando = json.loads(args.plandoRando)
         RomPatches.ActivePatches = args.plandoRando["patches"]
+        DoorsManager.unserialize(args.plandoRando["doors"])
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty,
                                   restrictions, args.superFun, args.runtimeLimit_s,
                                   args.plandoRando["locsItems"] if args.plandoRando != None else None,
@@ -571,9 +572,10 @@ if __name__ == "__main__":
                                   args.escapeRando, minimizerN, dotFile,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
 
-    DoorsManager.setDoorsColor()
-    if args.doorsColorsRando == True:
-        DoorsManager.randomize()
+    if args.plandoRando is None:
+        DoorsManager.setDoorsColor()
+        if args.doorsColorsRando == True:
+            DoorsManager.randomize()
 
     if args.patchOnly == False:
         try:
@@ -625,13 +627,8 @@ if __name__ == "__main__":
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
     if args.plandoRando != None:
-        # replace smbool with a dict
-        for itemLoc in itemLocs:
-            itemLoc.Location = itemLoc.Location.json()
-            itemLoc.Item = itemLoc.Item.json()
-
         with open(args.output, 'w') as jsonFile:
-            json.dump({"itemLocs": itemLocs, "errorMsg": randoExec.errorMsg}, jsonFile, default=lambda x: x.__dict__)
+            json.dump({"itemLocs": [il.json() for il in itemLocs], "errorMsg": randoExec.errorMsg}, jsonFile)
         sys.exit(0)
 
     # generate extended stats

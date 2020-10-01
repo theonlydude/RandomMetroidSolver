@@ -4,7 +4,7 @@ import sys, argparse
 from solver.interactiveSolver import InteractiveSolver
 from solver.standardSolver import StandardSolver
 from solver.conf import Conf
-import log
+import utils.log
 
 def interactiveSolver(args):
     # to init, requires interactive/romFileName/presetFileName/output parameters in standard/plando mode
@@ -206,7 +206,7 @@ if __name__ == "__main__":
             print("Invalid count")
             sys.exit(-1)
 
-    log.init(args.debug)
+    utils.log.init(args.debug)
 
     if args.interactive == True:
         interactiveSolver(args)

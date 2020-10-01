@@ -1198,19 +1198,19 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*157 // ITEMS DISTRIBUTION
     dw {draw}, {blank}
+    dw {draw}, {row}*146 // LOCATIONS
+    dw {draw}, {row}*147
+    dw {draw}, {blank}
+    dw {draw}, {row}*148 // LOCS DETAIL
+    dw {draw}, {row}*149
+    dw {draw}, {blank}
     dw {draw}, {row}*168 // AVAILABLE
     dw {draw}, {row}*169
     dw {draw}, {blank}
-    dw {draw}, {row}*152 // ENERGY
+    dw {draw}, {row}*152 // ENERGY DETAIL
     dw {draw}, {row}*153
     dw {draw}, {blank}
-    dw {draw}, {row}*146 // MISSILES
-    dw {draw}, {row}*147
-    dw {draw}, {blank}
-    dw {draw}, {row}*148 // SUPERS
-    dw {draw}, {row}*149
-    dw {draw}, {blank}
-    dw {draw}, {row}*150 // PBs
+    dw {draw}, {row}*150 // AMMO DETAIL
     dw {draw}, {row}*151
     dw {draw}, {blank}
     dw {draw}, {row}*163 // AMMO DISTRIBUTION
@@ -1466,15 +1466,15 @@ credits:
     dw "     RANDOMIZER PARAMETERS      " // 145
     {big}
     // item distribution data start
-    dw " MISSILE PACKS               XX " // 146
-    dw " missile packs ............. xx " // 147
-    dw " SUPER PACKS                 XX " // 148
-    dw " super packs ............... xx " // 149
-    dw " POWER BOMB PACKS            XX " // 150
-    dw " power bomb packs .......... xx " // 151
-    dw " HEALTH TANKS                XX " // 152
-    dw " health tanks .............. xx " // 153
-    dw "                                " // 154  : reusable
+    dw " ITEM LOCATIONS              XX " // 146
+    dw " item locations............. xx " // 147
+    dw "  MAJ XX EN XX AMMO XX BLANK XX " // 148
+    dw "  maj xx en xx ammo XX blank XX " // 149
+    dw " AMMO PACKS  MI XX SUP XX PB XX " // 150
+    dw " ammo packs  mi XX sup XX pb XX " // 151
+    dw " HEALTH TANKS         E XX R XX " // 152
+    dw " health tanks ......  e.xx.r xx " // 153
+    dw "                                " // 154 : reusable
     // params data start
     {yellow}
     dw " PROGRESSION SPEED .... XXXXXXX " // 155

@@ -465,6 +465,10 @@ function displayDoors(jsonData) {
         var doorData = jsonData["doors"][doorName];
         var color = doorData[0];
         var facing = doorData[1];
+        var hidden = doorData[2];
+        if(hidden == true) {
+            color = 'white';
+        }
         var css = "";
         if(facing == 0 || facing == 1) {
             css = color+"Door"+"V";
@@ -1264,6 +1268,7 @@ function actionDoor(doorName) {
         $("#redDoorSelect").removeClass("highlightColor");
         $("#greenDoorSelect").removeClass("highlightColor");
         $("#yellowDoorSelect").removeClass("highlightColor");
+        $("#greyDoorSelect").removeClass("highlightColor");
         $("#"+currentColor+"DoorSelect").addClass("highlightColor");
     } else {
         if(doorsRando == false) {

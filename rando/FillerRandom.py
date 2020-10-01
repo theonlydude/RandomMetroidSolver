@@ -7,8 +7,8 @@ from rando.MiniSolver import MiniSolver
 from rando.ItemLocContainer import ContainerSoftBackup, ItemLocation
 from rando.RandoServices import ComebackCheckType
 from solver.randoSolver import RandoSolver
-from parameters import infinity
-from helpers import diffValue2txt
+from utils.parameters import infinity
+from logic.helpers import diffValue2txt
 
 # simple, uses mini solver only
 class FillerRandom(Filler):

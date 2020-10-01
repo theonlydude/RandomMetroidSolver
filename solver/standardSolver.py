@@ -1,16 +1,16 @@
 import json, os
 
 from solver.commonSolver import CommonSolver
-from smboolmanager import SMBoolManagerPlando as SMBoolManager
-from helpers import Pickup
-from graph_locations import locations as graphLocations
-from utils import PresetLoader
+from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
+from logic.helpers import Pickup
+from graph.graph_locations import locations as graphLocations
+from utils.utils import PresetLoader
 from solver.conf import Conf
 from solver.out import Out
 from solver.comeback import ComeBack
-from parameters import easy, medium, hard, harder, hardcore, mania, infinity
-from parameters import Knows, isKnows, Settings
-import log
+from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
+from utils.parameters import Knows, isKnows, Settings
+import utils.log
 
 class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty
@@ -21,14 +21,14 @@ class StandardSolver(CommonSolver):
         self.interactive = False
         self.checkDuplicateMajor = checkDuplicateMajor
         if vcr == True:
-            from vcr import VCR
+            from utils.vcr import VCR
             self.vcr = VCR(rom, 'solver')
         else:
             self.vcr = None
         # for compatibility with some common methods of the interactive solver
         self.mode = 'standard'
 
-        self.log = log.get('Solver')
+        self.log = utils.log.get('Solver')
 
         self.setConf(difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath)
 
@@ -88,7 +88,7 @@ class StandardSolver(CommonSolver):
                     locsItems[loc.Name] = loc.itemName
                     firstMinor[loc.itemName] = True
 
-            import db
+            import utils.db
             with open(self.extStatsFilename, 'a') as extStatsFile:
                 db.DB.dumpExtStatsSolver(self.difficulty, knowsUsedList, self.solverStats, locsItems, self.extStatsStep, extStatsFile)
 

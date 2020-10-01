@@ -1,10 +1,10 @@
 import json
 
-from smbool import SMBool
-from rom_patches import RomPatches
-from utils import removeChars, fixEnergy
-from parameters import diff4solver, Knows
-from doorsmanager import DoorsManager
+from logic.smbool import SMBool
+from rom.rom_patches import RomPatches
+from utils.utils import removeChars, fixEnergy
+from utils.parameters import diff4solver, Knows
+from utils.doorsmanager import DoorsManager
 
 class SolverState(object):
     def __init__(self, debug=False):
@@ -74,7 +74,7 @@ class SolverState(object):
             self.state["innerTransitions"] = self.getInnerTransitions(solver.areaGraph.availAccessPoints, solver.curGraphTransitions)
         else:
             self.state["innerTransitions"] = []
-        # doors colors: dict {name: (color, facing)}
+        # doors colors: dict {name: (color, facing, hidden)}
         self.state["doors"] = DoorsManager.serialize()
         # doorsRando: bool
         self.state["doorsRando"] = solver.doorsRando

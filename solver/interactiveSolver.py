@@ -1,22 +1,22 @@
 import sys, json, os
 
 from solver.commonSolver import CommonSolver
-from smbool import SMBool
-from smboolmanager import SMBoolManagerPlando as SMBoolManager
-from helpers import Pickup
-from rom import RomPatcher
-from rom_patches import RomPatches
-from graph_locations import locations as graphLocations
-from graph import AccessGraphSolver as AccessGraph
-from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
-from utils import removeChars
+from logic.smbool import SMBool
+from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
+from logic.helpers import Pickup
+from rom.rompatcher import RomPatcher
+from rom.rom_patches import RomPatches
+from graph.graph_locations import locations as graphLocations
+from graph.graph import AccessGraphSolver as AccessGraph
+from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
+from utils.utils import removeChars
 from solver.conf import Conf
-from parameters import hard, infinity
+from utils.parameters import hard, infinity
 from solver.solverState import SolverState
 from solver.comeback import ComeBack
 from rando.ItemLocContainer import ItemLocation
-from doorsmanager import DoorsManager
-import log
+from utils.doorsmanager import DoorsManager
+import utils.log
 
 class InteractiveSolver(CommonSolver):
     def __init__(self, output):
@@ -24,7 +24,7 @@ class InteractiveSolver(CommonSolver):
         self.errorMsg = ""
         self.checkDuplicateMajor = False
         self.vcr = None
-        self.log = log.get('Solver')
+        self.log = utils.log.get('Solver')
 
         self.outputFileName = output
         self.firstLogFile = None
@@ -286,7 +286,8 @@ class InteractiveSolver(CommonSolver):
         plandoCurrent = {
             "locsItems": plandoLocsItems,
             "transitions": self.curGraphTransitions,
-            "patches": RomPatches.ActivePatches
+            "patches": RomPatches.ActivePatches,
+            "doors": DoorsManager.serialize()
         }
 
         plandoCurrentJson = json.dumps(plandoCurrent)

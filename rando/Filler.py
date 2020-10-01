@@ -1,13 +1,13 @@
 
-import log, copy, time
+import utils.log, copy, time
 
-from cache import RequestCache
+from logic.cache import RequestCache
 from rando.RandoServices import RandoServices
 from rando.Choice import ItemThenLocChoice
 from rando.RandoServices import ComebackCheckType
-from parameters import infinity
-from helpers import diffValue2txt
-from graph_access import GraphUtils
+from utils.parameters import infinity
+from logic.helpers import diffValue2txt
+from graph.graph_access import GraphUtils
 
 # base class for fillers. a filler responsibility is to fill a given
 # ItemLocContainer while a certain condition is fulfilled (usually
@@ -24,7 +24,7 @@ class Filler(object):
         self.endDate = endDate
         self.baseContainer = emptyContainer
         self.maxDiff = self.settings.maxDiff
-        self.log = log.get('Filler')
+        self.log = utils.log.get('Filler')
 
     # reinit algo state
     def initFiller(self):
@@ -63,7 +63,7 @@ class Filler(object):
             if not isStuck:
                 self.nSteps += 1
             date = time.process_time()
-        if condition():
+        if condition() or date > self.endDate:
             isStuck = True
             if date > self.endDate:
                 self.errorMsg = "Exceeded time limit of "+str(self.settings.runtimeLimit_s) +" seconds"

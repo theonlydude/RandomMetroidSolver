@@ -8,8 +8,8 @@ try:
 except:
     dbAvailable = False
 
-from parameters import medium, hard, harder, hardcore, mania
-from utils import removeChars
+from utils.parameters import medium, hard, harder, hardcore, mania
+from utils.utils import removeChars
 
 class DB:
     def __init__(self):

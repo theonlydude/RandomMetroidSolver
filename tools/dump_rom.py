@@ -2,7 +2,7 @@
 
 # from a .sfc get a .json
 import sys
-from rom import RomLoader
+from rom.romloader import RomLoader
 
 if len(sys.argv) != 3:
     print("missing parameters: ROM JSON")

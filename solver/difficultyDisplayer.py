@@ -1,4 +1,4 @@
-from parameters import easy, medium, hard, harder, hardcore, mania, impossibru, diff2text
+from utils.parameters import easy, medium, hard, harder, hardcore, mania, impossibru, diff2text
 
 class DifficultyDisplayer:
     def __init__(self, difficulty):

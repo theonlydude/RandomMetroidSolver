@@ -1,7 +1,7 @@
 import sys, json, os
 from solver.conf import Conf
 from solver.difficultyDisplayer import DifficultyDisplayer
-from utils import fixEnergy
+from utils.utils import fixEnergy
 
 class Out(object):
     @staticmethod

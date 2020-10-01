@@ -1,11 +1,13 @@
 import random
-from smbool import SMBool
-from rom_patches import RomPatches
-import log, logging
+from logic.smbool import SMBool
+from rom.rom_patches import RomPatches
+import utils.log, logging
 
-LOG = log.get('DoorsManager')
+LOG = utils.log.get('DoorsManager')
 
 colorsList = ['red', 'green', 'yellow']
+# 1/7 chance to have the door set to grey
+colorsListGrey = colorsList * 2 + ['grey']
 
 class Facing:
     Left = 0
@@ -17,17 +19,18 @@ class Facing:
 plmRed    = [0x8a,   0x90,   0x96,   0x9c]
 plmGreen  = [0x72,   0x78,   0x7e,   0x84]
 plmYellow = [0x5a,   0x60,   0x66,   0x6c]
-plmBlink  = [0x42,   0x48,   0x4e,   0x54]
+plmGrey   = [0x42,   0x48,   0x4e,   0x54]
 
 colors2plm = {
     'red': plmRed,
     'green': plmGreen,
-    'yellow': plmYellow
+    'yellow': plmYellow,
+    'grey': plmGrey
 }
 
 class Door(object):
-    __slots__ = ('name', 'address', 'vanillaColor', 'color', 'forced', 'facing', 'hidden', 'id')
-    def __init__(self, name, address, vanillaColor, facing, id=None):
+    __slots__ = ('name', 'address', 'vanillaColor', 'color', 'forced', 'facing', 'hidden', 'id', 'canGrey')
+    def __init__(self, name, address, vanillaColor, facing, id=None, canGrey=False):
         self.name = name
         self.address = address
         self.vanillaColor = vanillaColor
@@ -35,6 +38,7 @@ class Door(object):
         self.forced = False
         self.facing = facing
         self.hidden = False
+        self.canGrey = canGrey
         self.id = id
 
     def forceBlue(self):
@@ -43,10 +47,7 @@ class Door(object):
         self.forced = True
 
     def setColor(self, color):
-        if color == 'grey':
-            self.hidden = True
-        else:
-            self.color = color
+        self.color = color
 
     def getColor(self):
         if self.hidden:
@@ -62,10 +63,13 @@ class Door(object):
 
     def randomize(self):
         if self.canRandomize():
-            self.setColor(random.choice(colorsList))
+            if self.canGrey:
+                self.setColor(random.choice(colorsListGrey))
+            else:
+                self.setColor(random.choice(colorsList))
 
     def traverse(self, smbm):
-        if self.hidden:
+        if self.hidden or self.color == 'grey':
             return SMBool(False)
         elif self.color == 'red':
             return smbm.canOpenRedDoors()
@@ -85,6 +89,10 @@ class Door(object):
 
         rom.writeByte(colors2plm[self.color][self.facing], self.address)
 
+        # also set plm args high byte to never opened, even during escape
+        if self.color == 'grey':
+            rom.writeByte(0x90, self.address+4)
+
     def readColor(self, rom):
         if self.forced:
             return
@@ -96,11 +104,12 @@ class Door(object):
             self.setColor('green')
         elif plm in plmYellow:
             self.setColor('yellow')
-        elif plm in plmBlink:
-            self.setColor('blue')
+        elif plm in plmGrey:
+            self.setColor('grey')
         else:
             raise Exception("Unknown color {} for {}".format(hex(plm), self.name))
 
+    # for tracker
     def canHide(self):
         return self.color != 'blue'
 
@@ -117,30 +126,39 @@ class Door(object):
         else:
             self.hide()
 
+    # to send/receive state to tracker/plando
+    def serialize(self):
+        return (self.color, self.facing, self.hidden)
+
+    def unserialize(self, data):
+        self.setColor(data[0])
+        self.facing = data[1]
+        self.hidden = data[2]
+
 class DoorsManager():
     doors = {
         # crateria
-        'LandingSiteRight': Door('LandingSiteRight', 0x78018, 'green', Facing.Left),
+        'LandingSiteRight': Door('LandingSiteRight', 0x78018, 'green', Facing.Left, canGrey=True),
         'LandingSiteTopRight': Door('LandingSiteTopRight', 0x07801e, 'yellow', Facing.Left),
-        'KihunterBottom': Door('KihunterBottom', 0x78228, 'yellow', Facing.Top),
-        'KihunterRight': Door('KihunterRight', 0x78222, 'yellow', Facing.Left),
+        'KihunterBottom': Door('KihunterBottom', 0x78228, 'yellow', Facing.Top, canGrey=True),
+        'KihunterRight': Door('KihunterRight', 0x78222, 'yellow', Facing.Left, canGrey=True),
         'FlywayRight': Door('FlywayRight', 0x78420, 'red', Facing.Left),
-        'GreenPiratesShaftBottomRight': Door('GreenPiratesShaftBottomRight', 0x78470, 'red', Facing.Left),
+        'GreenPiratesShaftBottomRight': Door('GreenPiratesShaftBottomRight', 0x78470, 'red', Facing.Left, canGrey=True),
         'RedBrinstarElevatorTop': Door('RedBrinstarElevatorTop', 0x78256, 'yellow', Facing.Bottom),
         'ClimbRight': Door('ClimbRight', 0x78304, 'yellow', Facing.Left),
         # blue brinstar
         'ConstructionZoneRight': Door('ConstructionZoneRight', 0x78784, 'red', Facing.Left),
         # green brinstar
-        'GreenHillZoneTopRight': Door('GreenHillZoneTopRight', 0x78670, 'yellow', Facing.Left),
-        'NoobBridgeRight': Door('NoobBridgeRight', 0x787a6, 'green', Facing.Left),
+        'GreenHillZoneTopRight': Door('GreenHillZoneTopRight', 0x78670, 'yellow', Facing.Left, canGrey=True),
+        'NoobBridgeRight': Door('NoobBridgeRight', 0x787a6, 'green', Facing.Left, canGrey=True),
         'MainShaftRight': Door('MainShaftRight', 0x784be, 'red', Facing.Left),
-        'MainShaftBottomRight': Door('MainShaftBottomRight', 0x784c4, 'red', Facing.Left),
+        'MainShaftBottomRight': Door('MainShaftBottomRight', 0x784c4, 'red', Facing.Left, canGrey=True),
         'EarlySupersRight': Door('EarlySupersRight', 0x78512, 'red', Facing.Left),
         'EtecoonEnergyTankLeft': Door('EtecoonEnergyTankLeft', 0x787c8, 'green', Facing.Right),
         # pink brinstar
         'BigPinkTopRight': Door('BigPinkTopRight', 0x78626, 'red', Facing.Left),
         'BigPinkRight': Door('BigPinkRight', 0x7861a, 'yellow', Facing.Left),
-        'BigPinkBottomRight': Door('BigPinkBottomRight', 0x78620, 'green', Facing.Left),
+        'BigPinkBottomRight': Door('BigPinkBottomRight', 0x78620, 'green', Facing.Left, canGrey=True),
         'BigPinkBottomLeft': Door('BigPinkBottomLeft', 0x7862c, 'red', Facing.Right),
         # red brinstar
         'RedTowerLeft': Door('RedTowerLeft', 0x78866, 'yellow', Facing.Right),
@@ -150,22 +168,22 @@ class DoorsManager():
         'RedTowerElevatorBottomLeft': Door('RedTowerElevatorBottomLeft', 0x788b6, 'green', Facing.Right),
         'BelowSpazerTopRight': Door('BelowSpazerTopRight', 0x78966, 'green', Facing.Left),
         # Wrecked ship
-        'WestOceanRight': Door('WestOceanRight', 0x781e2, 'green', Facing.Left),
-        'LeCoudeBottom': Door('LeCoudeBottom', 0x7823e, 'yellow', Facing.Top),
+        'WestOceanRight': Door('WestOceanRight', 0x781e2, 'green', Facing.Left, canGrey=True),
+        'LeCoudeBottom': Door('LeCoudeBottom', 0x7823e, 'yellow', Facing.Top, canGrey=True),
         'WreckedShipMainShaftBottom': Door('WreckedShipMainShaftBottom', 0x7c277, 'green', Facing.Top),
         'ElectricDeathRoomTopLeft': Door('ElectricDeathRoomTopLeft', 0x7c32f, 'red', Facing.Right),
         # Upper Norfair
         'BusinessCenterTopLeft': Door('BusinessCenterTopLeft', 0x78b00, 'green', Facing.Right),
         'BusinessCenterBottomLeft': Door('BusinessCenterBottomLeft', 0x78b0c, 'red', Facing.Right),
-        'CathedralEntranceRight': Door('CathedralEntranceRight', 0x78af2, 'red', Facing.Left),
+        'CathedralEntranceRight': Door('CathedralEntranceRight', 0x78af2, 'red', Facing.Left, canGrey=True),
         'CathedralRight': Door('CathedralRight', 0x78aea, 'green', Facing.Left),
         'BubbleMountainTopRight': Door('BubbleMountainTopRight', 0x78c60, 'green', Facing.Left),
         'BubbleMountainTopLeft': Door('BubbleMountainTopLeft', 0x78c5a, 'green', Facing.Right),
         'SpeedBoosterHallRight': Door('SpeedBoosterHallRight', 0x78c7a, 'red', Facing.Left),
         'SingleChamberRight': Door('SingleChamberRight', 0x78ca8, 'red', Facing.Left),
         'DoubleChamberRight': Door('DoubleChamberRight', 0x78cc2, 'red', Facing.Left),
-        'KronicBoostBottomLeft': Door('KronicBoostBottomLeft', 0x78d4e, 'yellow', Facing.Right),
-        'CrocomireSpeedwayBottom': Door('CrocomireSpeedwayBottom', 0x78b96, 'green', Facing.Top),
+        'KronicBoostBottomLeft': Door('KronicBoostBottomLeft', 0x78d4e, 'yellow', Facing.Right, canGrey=True),
+        'CrocomireSpeedwayBottom': Door('CrocomireSpeedwayBottom', 0x78b96, 'green', Facing.Top, canGrey=True),
         # Crocomire
         'PostCrocomireUpperLeft': Door('PostCrocomireUpperLeft', 0x78bf4, 'red', Facing.Right),
         'PostCrocomireShaftRight': Door('PostCrocomireShaftRight', 0x78c0c, 'red', Facing.Left),
@@ -180,14 +198,14 @@ class DoorsManager():
         'PlasmaSparkBottom': Door('PlasmaSparkBottom', 0x7c577, 'green', Facing.Top),
         'OasisTop': Door('OasisTop', 0x7c5d3, 'green', Facing.Bottom),
         # refill/save
-        'GreenBrinstarSaveStation': Door('GreenBrinstarSaveStation', 0x784b2, 'red', Facing.Right, 0x1f),
-        'MaridiaBottomSaveStation': Door('MaridiaBottomSaveStation', 0x7c431, 'red', Facing.Left, 0x8c),
-        'MaridiaAqueductSaveStation': Door('MaridiaAqueductSaveStation', 0x7c5fd, 'red', Facing.Right, 0x96),
-        'ForgottenHighwaySaveStation': Door('ForgottenHighwaySaveStation', 0x7c569, 'red', Facing.Left, 0x92),
-        'DraygonSaveRefillStation': Door('DraygonSaveRefillStation', 0x7c6ef, 'red', Facing.Left, 0x98),
-        'KraidRefillStation': Door('KraidRefillStation', 0x78a14, 'green', Facing.Left, 0x44),
-        'RedBrinstarEnergyRefill': Door('RedBrinstarEnergyRefill', 0x78860, 'green', Facing.Right, 0x38),
-        'GreenBrinstarMissileRefill': Door('GreenBrinstarMissileRefill', 0x784ca, 'red', Facing.Right, 0x23)
+        'GreenBrinstarSaveStation': Door('GreenBrinstarSaveStation', 0x784b2, 'red', Facing.Right, id=0x1f),
+        'MaridiaBottomSaveStation': Door('MaridiaBottomSaveStation', 0x7c431, 'red', Facing.Left, id=0x8c),
+        'MaridiaAqueductSaveStation': Door('MaridiaAqueductSaveStation', 0x7c5fd, 'red', Facing.Right, id=0x96),
+        'ForgottenHighwaySaveStation': Door('ForgottenHighwaySaveStation', 0x7c569, 'red', Facing.Left, id=0x92),
+        'DraygonSaveRefillStation': Door('DraygonSaveRefillStation', 0x7c6ef, 'red', Facing.Left, id=0x98),
+        'KraidRefillStation': Door('KraidRefillStation', 0x78a14, 'green', Facing.Left, id=0x44),
+        'RedBrinstarEnergyRefill': Door('RedBrinstarEnergyRefill', 0x78860, 'green', Facing.Right, id=0x38),
+        'GreenBrinstarMissileRefill': Door('GreenBrinstarMissileRefill', 0x784ca, 'red', Facing.Right, id=0x23)
     }
 
     def setSMBM(self, smbm):
@@ -225,6 +243,11 @@ class DoorsManager():
             DoorsManager.doors['NoobBridgeRight'].forceBlue()
             DoorsManager.doors['LeCoudeBottom'].forceBlue()
             DoorsManager.doors['KronicBoostBottomLeft'].forceBlue()
+        else:
+            # no area rando, prevent some doors to be in the grey doors pool
+            DoorsManager.doors['GreenPiratesShaftBottomRight'].canGrey = False
+            DoorsManager.doors['CrocomireSpeedwayBottom'].canGrey = False
+            DoorsManager.doors['KronicBoostBottomLeft'].canGrey = False
         if RomPatches.has(RomPatches.AreaRandoMoreBlueDoors):
             DoorsManager.doors['KihunterBottom'].forceBlue()
             DoorsManager.doors['GreenPiratesShaftBottomRight'].forceBlue()
@@ -289,12 +312,12 @@ class DoorsManager():
     # for isolver state
     @staticmethod
     def serialize():
-        return {door.name: (door.getColor(), door.facing) for door in DoorsManager.doors.values()}
+        return {door.name: door.serialize() for door in DoorsManager.doors.values()}
 
     @staticmethod
     def unserialize(state):
-        for name, (color, facing) in state.items():
-            DoorsManager.doors[name].setColor(color)
+        for name, data in state.items():
+            DoorsManager.doors[name].unserialize(data)
 
     # when using the tracker, first set all colored doors to grey until the user clicks on it
     @staticmethod

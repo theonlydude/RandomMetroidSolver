@@ -851,14 +851,15 @@ def displayNumber(id, min, max, default, step="1"):
 
   <div id="doorPopup" class="doorPopup">
     <table class="full">
-      <colgroup><col class="third" /><col class="third" /><col class="third" /></colgroup>
-      <tr><td colspan=3></td></tr>
-      <tr><td id="doorGrab" colspan=3 class="center greyRow">Choose door new color</td></tr>
-      <tr><td colspan=3 class="blankRow"></td></tr>
+      <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter" /></colgroup>
+      <tr><td colspan=4></td></tr>
+      <tr><td id="doorGrab" colspan=4 class="center greyRow">Choose door new color</td></tr>
+      <tr><td colspan=4 class="blankRow"></td></tr>
       <tr>
         <td><div id="redDoorSelect" onclick="updateDoorColor('red')"></div></td>
         <td><div id="greenDoorSelect" onclick="updateDoorColor('green')"></div></td>
         <td><div id="yellowDoorSelect" onclick="updateDoorColor('yellow')"></div></td>
+        <td><div id="greyDoorSelect" onclick="updateDoorColor('grey')"></div></td>
       </tr>
     </table>
   </div>

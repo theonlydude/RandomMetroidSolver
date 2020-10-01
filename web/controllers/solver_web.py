@@ -2286,7 +2286,7 @@ class WS_door_replace(WS):
         if self.doorName not in DoorsManager.doors.keys():
             raiseHttp(400, "Wrong value for doorName", True)
         self.newColor = request.vars.newColor
-        if self.newColor not in ["red", "green", "yellow"]:
+        if self.newColor not in ["red", "green", "yellow", "grey"]:
             raiseHttp(400, "Wrong value for newColor", True)
 
     def action(self):

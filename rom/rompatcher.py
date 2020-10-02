@@ -104,7 +104,7 @@ class RomPatcher:
         else:
             self.romFile = RealROM(romFileName)
         if magic is not None:
-            from race_mode import RaceModePatcher
+            from rom.race_mode import RaceModePatcher
             self.race = RaceModePatcher(self, magic, plando)
         # IPS_Patch objects list
         self.ipsPatches = []

@@ -196,7 +196,7 @@ class RomReader:
         self.nothingId = 0x1a
         self.nothingAddr = 0x786DE
         if magic is not None:
-            from race_mode import RaceModeReader
+            from rom.race_mode import RaceModeReader
             self.race = RaceModeReader(self, magic)
 
     def getItemBytes(self):

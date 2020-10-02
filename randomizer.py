@@ -572,13 +572,11 @@ if __name__ == "__main__":
         if args.areaLayoutBase == False:
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
     graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses,
-                                  args.escapeRando, minimizerN, dotFile,
+                                  args.escapeRando, minimizerN, dotFile, args.doorsColorsRando,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
 
     if args.plandoRando is None:
         DoorsManager.setDoorsColor()
-        if args.doorsColorsRando == True:
-            DoorsManager.randomize()
 
     if args.patchOnly == False:
         try:

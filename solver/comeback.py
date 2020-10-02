@@ -74,8 +74,8 @@ class ComeBack(object):
         return lastStep.next(locations)
 
     def reuseLastStep(self, lastStep, solveAreas):
-        # reuse the last step if they share the same solve areas to avoid creating too many
-        return sorted(lastStep.solveAreas.keys()) == sorted(solveAreas.keys())
+        # reuse the last step if all solve areas are included in last step to avoid creating too many.
+        return set(solveAreas).issubset(set(lastStep.solveAreas))
 
     def visitedAllLocsInArea(self, lastStep, locations):
         for loc in locations:

@@ -47,7 +47,10 @@ def dumpErrorMsg(outFileName, msg):
             json.dump({"errorMsg": msg}, jsonFile)
 
 def dumpErrorMsgs(outFileName, msgs):
-    dumpErrorMsg(outFileName, '\n' + '\n'.join(msgs))
+    dumpErrorMsg(outFileName, joinErrorMsgs(msgs))
+
+def joinErrorMsgs(msgs):
+    return '\n' + '\n'.join(msgs)
 
 def restricted_float(x):
     x = float(x)
@@ -728,7 +731,7 @@ if __name__ == "__main__":
         if args.patchOnly == False:
             if len(optErrMsgs) > 0:
                 optErrMsgs.append(randoExec.errorMsg)
-                msg = '\n' + '\n'.join(optErrMsgs)
+                msg = joinErrorMsgs(optErrMsgs)
             else:
                 msg = randoExec.errorMsg
         else:

@@ -45,6 +45,10 @@ class ComeBack(object):
         if locsCount < 2:
             return False
 
+        # only one solve area, no need for come back
+        if len(solveAreas) == 1:
+            return False
+
         self.log.debug("WARNING: use no come back heuristic for {} locs in {} solve areas ({})".format(locsCount, len(solveAreas), solveAreas))
 
         # check if we can use an existing step

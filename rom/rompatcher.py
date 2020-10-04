@@ -653,7 +653,7 @@ class RomPatcher:
     def writeRandoSettings(self, settings, itemLocs):
         dist = self.getMinorsDistribution(itemLocs)
         totalAmmo = sum(d['Quantity'] for ammo,d in dist.items())
-        totalItemLocs = sum(1 for il in itemLocs if il.Accessible)
+        totalItemLocs = sum(1 for il in itemLocs if il.Accessible and not il.Location.isBoss())
         totalNothing = sum(1 for il in itemLocs if il.Accessible and il.Item.Category == 'Nothing')
         if self.nothingMissile == True:
             totalNothing -= 1

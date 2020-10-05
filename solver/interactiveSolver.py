@@ -451,15 +451,20 @@ class InteractiveSolver(CommonSolver):
         # replace itemName at locName
         loc = self.getWebLoc(locName)
         oldItemName = loc["itemName"]
+
+        # replace item at the old item spot in collectedItems
+        try:
+            index = next(i for i, vloc in enumerate(self.visitedLocations) if vloc['Name'] == loc['Name'])
+        except Exception as e:
+            self.errorMsg = "Empty location {}".format(locName)
+            return
+        self.collectedItems[index] = itemName
+
         loc["itemName"] = itemName
 
         # major item can be set multiple times in plando mode
         count = self.collectedItems.count(oldItemName)
         isCount = self.smbm.isCountItem(oldItemName)
-
-        # replace item at the old item spot in collectedItems
-        index = next(i for i, vloc in enumerate(self.visitedLocations) if vloc['Name'] == loc['Name'])
-        self.collectedItems[index] = itemName
 
         # update smbm if count item or major was only there once
         if isCount == True or count == 1:

@@ -939,7 +939,7 @@ class RomPatcher:
         asmAddress = 0x7F800
         for conn in doorConnections:
             # write door ASM for transition doors (code and pointers)
-            #print('Writing door connection ' + conn['ID'])
+#            print('Writing door connection ' + conn['ID'])
             doorPtr = conn['DoorPtr']
             roomPtr = conn['RoomPtr']
             if doorPtr in self.doorConnectionSpecific:
@@ -1006,6 +1006,8 @@ class RomPatcher:
             self.romFile.seek(asmAddress)
             for byte in asmPatch:
                 self.romFile.writeByte(byte)
+            # print("asmAddress=%x" % asmAddress)
+            # print("asmPatch=" + str(["%02x" % b for b in asmPatch]))
 
             asmAddress += len(asmPatch)
             # update room state header with song changes

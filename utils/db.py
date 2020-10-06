@@ -352,12 +352,18 @@ order by r.id;"""
         if self.dbAvailable == False:
             return None
 
-        sql = "select group_concat(\"--\", name, \" \", case when value = 'None' then \"\" else value end order by name separator ' ') from randomizer_params where randomizer_id = %d;"
+        sql = "select name, value from randomizer_params where randomizer_id = %d order by name;"
         data = self.execSelect(sql, (randomizer_id,))
         if data == None:
             return ""
         else:
-            return data[0][0]
+            ret = "{\n"
+            tmp = []
+            for row in data:
+                tmp.append('"{}": "{}"'.format(row[0], row[1]))
+            ret += ',\n'.join(tmp)
+            ret += "\n}"
+            return ret
 
     def getGeneratedSeeds(self, preset):
         if self.dbAvailable == False:

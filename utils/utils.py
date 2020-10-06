@@ -262,6 +262,9 @@ def loadRandoPreset(randoPreset, args):
     with open(randoPreset) as randoPresetFile:
         randoParams = json.load(randoPresetFile)
 
+    if randoParams.get("seed") != None:
+        args.seed = randoParams["seed"]
+
     if randoParams.get("animals", "off") == "on":
         args.animals = True
     if randoParams.get("variaTweaks", "on") == "off":

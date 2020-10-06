@@ -1610,7 +1610,7 @@ def getFsUsage():
         return ('CRITICAL', percent)
 
 def randoParamsWebService():
-    # get a string of the randomizer parameters for a given seed
+    # get a json string of the randomizer parameters for a given seed
     if request.vars.seed == None:
         raiseHttp(400, "Missing parameter seed", False)
 

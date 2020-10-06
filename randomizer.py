@@ -6,11 +6,11 @@ from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from rando.PaletteRando import PaletteRando
 from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
-from utils.parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text
+from utils.parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text, appDir
 from rom.rom_patches import RomPatches
 from rom.rompatcher import RomPatcher
 from rom.rom import FakeROM
-from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues
+from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir
 from utils.version import displayedVersion
 from logic.smbool import SMBool
 from utils.doorsmanager import DoorsManager
@@ -283,7 +283,10 @@ if __name__ == "__main__":
             optErrMsgs.append(msg)
     # if rando preset given, load it first
     if args.randoPreset != None:
-        loadRandoPreset(args.randoPreset, args)
+        preset = loadRandoPreset(args.randoPreset, args)
+        # use the skill preset from the rando preset
+        if preset is not None and args.paramsFileName is None:
+            args.paramsFileName = '{}/{}/{}.json'.format(appDir, getPresetDir(preset), preset)
 
     # if diff preset given, load it
     if args.paramsFileName is not None:

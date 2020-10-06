@@ -7,6 +7,12 @@ from logic.smbool import SMBool
 def isStdPreset(preset):
     return preset in ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master', 'samus', 'solution', 'Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
 
+def getPresetDir(preset):
+    if isStdPreset(preset):
+        return 'standard_presets'
+    else:
+        return 'community_presets'
+
 def removeChars(string, toRemove):
     return re.sub('[{}]+'.format(toRemove), '', string)
 
@@ -388,6 +394,8 @@ def loadRandoPreset(randoPreset, args):
             setattr(args, multiElem+'List', ','.join(randoParams[multiElem+'MultiSelect']))
         else:
             setattr(args, multiElem+'List', ','.join(defaultMultiValues[multiElem]))
+
+    return randoParams.get("preset")
 
 def getRandomizerDefaultParameters():
     defaultParams = {}

@@ -442,7 +442,7 @@ class RomPatcher:
             if os.path.exists(patchName):
                 patch = IPS_Patch.load(patchName)
             else:
-                patch = IPS_Patch.load(appDir + '/' + ipsDir + '/' + patchName)
+                patch = IPS_Patch.load(os.path.join(appDir, ipsDir, patchName))
         self.ipsPatches.append(patch)
 
     def getStartDoors(self, plms, area, minimizerN):

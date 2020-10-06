@@ -360,7 +360,13 @@ order by r.id;"""
             ret = "{\n"
             tmp = []
             for row in data:
-                tmp.append('"{}": "{}"'.format(row[0], row[1]))
+                arg = row[0]
+                value = row[1]
+                if arg.find("MultiSelect") != -1:
+                    value = '["{}"]'.format('", "'.join(value.split(',')))
+                else:
+                    value = '"{}"'.format(value)
+                tmp.append('"{}": {}'.format(arg, value))
             ret += ',\n'.join(tmp)
             ret += "\n}"
             return ret

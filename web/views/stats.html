@@ -8,6 +8,7 @@ extend 'layout.html'
 <script type = "text/javascript" src = "https://www.gstatic.com/charts/loader.js"></script>
 <script type = "text/javascript">google.charts.load('current', {packages: ['corechart']});</script>
 <script type="text/javascript" src="{{=URL('static', '/js/excellentexport.js')}}"></script>
+<script src="{{=URL('static','js/FileSaver.js')}}"></script>
 
 <title>Super Metroid VARIA Randomizer and Solver statistics</title>
 
@@ -50,6 +51,7 @@ function getRandoParams(id) {
       method: "POST",
       data: {seed: id},
       dataType: "text",
+      dataType: "json",
       crossDomain: true
     });
 
@@ -63,9 +65,9 @@ function ajaxFail(jqXHR, textStatus) {
 }
 
 function ajaxRandoParamsCallCompleted(data) {
-  console.log("ajaxRandoParamsCallCompleted: [ "+data+" ]");
-
-  alert(data);
+    var outFileName = data['seed'] + '.json';
+    var blob = new Blob([data['params']], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, outFileName);
 }
 
 // https://www.w3schools.com/howto/howto_js_sort_table.asp

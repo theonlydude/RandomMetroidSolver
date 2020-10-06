@@ -1619,10 +1619,10 @@ def randoParamsWebService():
         raiseHttp(400, "Wrong value for seed, must be between 0 and 9999999", False)
 
     db = DB()
-    params = db.getRandomizerSeedParams(seed)
+    (seed, params) = db.getRandomizerSeedParams(seed)
     db.close()
 
-    return params
+    return json.dumps({"seed": seed, "params": params})
 
 def stats():
     response.title = 'Super Metroid VARIA Randomizer and Solver usage statistics'

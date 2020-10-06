@@ -352,6 +352,7 @@ order by r.id;"""
         if self.dbAvailable == False:
             return None
 
+        seed = 0
         sql = "select name, value from randomizer_params where randomizer_id = %d order by name;"
         data = self.execSelect(sql, (randomizer_id,))
         if data == None:
@@ -362,6 +363,8 @@ order by r.id;"""
             for row in data:
                 arg = row[0]
                 value = row[1]
+                if arg == 'seed':
+                    seed = value
                 if arg.find("MultiSelect") != -1:
                     value = '["{}"]'.format('", "'.join(value.split(',')))
                 else:
@@ -369,7 +372,7 @@ order by r.id;"""
                 tmp.append('"{}": {}'.format(arg, value))
             ret += ',\n'.join(tmp)
             ret += "\n}"
-            return ret
+            return (seed, ret)
 
     def getGeneratedSeeds(self, preset):
         if self.dbAvailable == False:

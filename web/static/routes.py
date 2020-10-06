@@ -22,6 +22,7 @@ routers = dict(
             'randoPresetWebService',
             'randoPresetWebService.json',
             'randoParamsWebService',
+            'randoParamsWebService.json',
             'customizer',
             'customWebService',
             'customWebService.json',

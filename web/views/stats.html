@@ -66,7 +66,7 @@ function ajaxFail(jqXHR, textStatus) {
 
 function ajaxRandoParamsCallCompleted(data) {
     var outFileName = data['seed'] + '.json';
-    var blob = new Blob([data['params']], {type: "text/plain;charset=utf-8"});
+    var blob = new Blob([data['params']], {type: "text/plain"});
     saveAs(blob, outFileName);
 }
 

@@ -263,7 +263,7 @@ def loadRandoPreset(randoPreset, args):
         randoParams = json.load(randoPresetFile)
 
     if randoParams.get("seed") != None:
-        args.seed = randoParams["seed"]
+        args.seed = int(randoParams["seed"])
 
     if randoParams.get("animals", "off") == "on":
         args.animals = True

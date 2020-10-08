@@ -8,6 +8,7 @@ if os.path.exists(path) and path not in sys.path:
 
 import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math, string, base64, urllib.parse, uuid
 from datetime import datetime
+import urllib.parse
 
 # to solve the rom
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, diff4solver
@@ -25,6 +26,14 @@ from rom.rom_patches import RomPatches
 from rom.ips import IPS_Patch
 from randomizer import energyQties, progDiffs, morphPlacements, majorsSplits, speeds
 from utils.doorsmanager import DoorsManager
+
+# discord webhook for plandorepo
+try:
+    from webhook import webhookUrl
+    from discord_webhook import DiscordWebhook, DiscordEmbed
+    webhookAvailable = True
+except:
+    webhookAvailable = False
 
 # put an expiration date to the default cookie to have it kept between browser restart
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
@@ -3014,7 +3023,33 @@ def uploadPlandoWebService():
     db.insertPlando((plandoName, author, longDesc, preset, updateKey, maxSize))
     db.close()
 
+    if webhookAvailable:
+        plandoWebhook(plandoName, author, preset, longDesc)
+
     return json.dumps(updateKey)
+
+def plandoWebhook(plandoName, author, preset, longDesc):
+    webhook = DiscordWebhook(url=webhookUrl, username="Plandository")
+
+    embed = DiscordEmbed(title=plandoName, description="New {} plando by {}".format(preset, author), color=242424)
+
+    # there's a limit for discord for the size of an embed field
+    embedLimit = 512
+    if len(longDesc) > embedLimit:
+        longDesc = longDesc[:embedLimit]+"..."
+    embed.add_embed_field(name="description", value=longDesc, inline=False)
+
+    permalink = getPermalink(plandoName)
+    embed.add_embed_field(name="permalink", value=permalink)
+    webhook.add_embed(embed)
+
+    try:
+        response = webhook.execute()
+    except:
+        pass
+
+def getPermalink(plandoName):
+    return "http://{}/plandorepo/{}".format(request.env.HTTP_HOST, urllib.parse.quote(plandoName))
 
 def deletePlandoWebService():
     for param in ["plandoName", "plandoKey"]:

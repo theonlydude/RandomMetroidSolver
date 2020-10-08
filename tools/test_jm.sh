@@ -297,14 +297,18 @@ for MORPH in "early" "normal" "late"; do
     printf "%-24s" "${MORPH}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
 done
 
-echo "total: $(wc -l ${CSV})"
+TOTAL_COUNT=$(wc -l ${CSV} | awk '{print $1}')
+echo "total: ${TOTAL_COUNT}"
+ERRORS_COUNT=$(grep -E "^error" ${CSV} | wc -l)
+echo "errors: ${ERRORS_COUNT}/${TOTAL_COUNT}"
+grep DIAG ${LOG} | sed -e 's+\*++g' -e 's+Super Fun : Could not remove any suit++' | sort | uniq -c
 
-echo "errors:"
+echo "errors detail:"
 if [ ${COMPARE} -eq 0 ]; then
     # speedrun seeds are non deterministic, so filter them out in compare mode.
     grep -E "NOK|mismatch|Can't solve" ${CSV} | grep -v ';speedrun;'
 else
-    grep -E "NOK|mismatch|Can't solve" ${CSV}
+    grep -E "NOK|Can't solve" ${CSV}
 fi
 grep Traceback ${LOG}
 

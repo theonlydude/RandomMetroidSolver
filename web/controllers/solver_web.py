@@ -3011,6 +3011,14 @@ def uploadPlandoWebService():
     if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
         raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
 
+    # check if plando doesn't already exist
+    db = DB()
+    check = db.checkPlando(plandoName)
+    db.close()
+
+    if check is not None and len(check) > 0 and check[0][0] == plandoName:
+        raise HTTP(400, "Can't create plando, a plando with the same name already exists")
+
     author = request.vars.author
     longDesc = removeHtmlTags(request.vars.longDesc)
     preset = request.vars.preset

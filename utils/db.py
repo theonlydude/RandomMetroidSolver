@@ -651,15 +651,15 @@ order by 1,2;"""
             print("DB.getPlandoCount::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
-    def getPlandoKey(self, plandoName):
+    def checkPlando(self, plandoName):
         if self.dbAvailable == False:
             return None
 
         try:
-            sql = "select update_key from plando_repo where plando_name = '%';"
+            sql = "select plando_name from plando_repo where plando_name = '%s';"
             return self.execSelect(sql, (plandoName,))
         except Exception as e:
-            print("DB.getPlandoKey::error execute: {} error: {}".format(sql, e))
+            print("DB.checkPlando::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
     def getPlandoIpsMaxSize(self, plandoName):

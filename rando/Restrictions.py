@@ -39,10 +39,15 @@ class Restrictions(object):
         morph = emptyContainer.getNextItemInPool('Morph')
         assert morph is not None
         locs = services.possibleLocations(morph, ap, emptyContainer)
-        self.log.debug('lateMorphInit. locs='+getLocListStr(locs))
         self.lateMorphLimit = len(locs)
-        if len(set([loc.GraphArea for loc in locs])) > 1:
+        self.log.debug('lateMorphInit. {} locs: {}'.format(self.lateMorphLimit, getLocListStr(locs)))
+        areas = {}
+        for loc in locs:
+            areas[loc.GraphArea] = areas.get(loc.GraphArea, 0) + 1
+        self.log.debug('lateMorphLimit. areas: {}'.format(areas))
+        if len(areas) > 1:
             self.lateMorphForbiddenArea = getAccessPoint(ap).GraphArea
+            self.log.debug('lateMorphLimit. forbid start area: {}'.format(self.lateMorphForbiddenArea))
         else:
             self.lateMorphForbiddenArea = None
 

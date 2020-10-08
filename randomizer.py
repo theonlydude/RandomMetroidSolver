@@ -403,6 +403,7 @@ if __name__ == "__main__":
     if progSpeed == 'speedrun' or progSpeed == 'basic':
         forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = args.progressionDifficulty
+    logger.debug("progressionDifficulty: {}".format(progDiff))
 
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.getrandbits(1))

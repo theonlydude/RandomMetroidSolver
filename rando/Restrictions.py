@@ -38,7 +38,7 @@ class Restrictions(object):
         assert self.isLateMorph()
         morph = emptyContainer.getNextItemInPool('Morph')
         assert morph is not None
-        locs = services.possibleLocations(morph, ap, emptyContainer)
+        locs = services.possibleLocations(morph, ap, emptyContainer, bossesKilled=False)
         self.lateMorphLimit = len(locs)
         self.log.debug('lateMorphInit. {} locs: {}'.format(self.lateMorphLimit, getLocListStr(locs)))
         areas = {}

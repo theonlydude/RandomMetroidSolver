@@ -40,11 +40,15 @@ class RandoServices(object):
         return itemLoc.Location.accessPoint if pickup == True else ap
 
     # gives all the possible theoretical locations for a given item
-    def possibleLocations(self, item, ap, emptyContainer):
+    def possibleLocations(self, item, ap, emptyContainer, bossesKilled=True):
         assert len(emptyContainer.currentItems) == 0, "Invalid call to possibleLocations. emptyContainer had collected items"
         emptyContainer.sm.resetItems()
         self.log.debug('possibleLocations. item='+item.Type)
-        allBut = emptyContainer.getItems(lambda it: it.Type != item.Type)
+        if bossesKilled:
+            itemLambda = lambda it: it.Type != item.Type
+        else:
+            itemLambda = lambda it: it.Type != item.Type and it.Category != 'Boss'
+        allBut = emptyContainer.getItems(itemLambda)
         self.log.debug('possibleLocations. allBut='+getItemListStr(allBut))
         emptyContainer.sm.addItems([it.Type for it in allBut])
         ret = [loc for loc in self.currentLocations(ap, emptyContainer, post=True) if self.restrictions.canPlaceAtLocation(item, loc, emptyContainer)]

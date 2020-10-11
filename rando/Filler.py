@@ -1,5 +1,5 @@
 
-import utils.log, copy, time
+import utils.log, copy, time, random
 
 from logic.cache import RequestCache
 from rando.RandoServices import RandoServices

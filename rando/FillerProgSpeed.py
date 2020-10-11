@@ -54,7 +54,7 @@ class FillerProgSpeed(Filler):
         self.progressionItemLocs = []
         self.progressionStatesIndices = []
         self.rollbackItemsTried = {}
-        self.lastFallbackState = None
+        self.lastFallbackStates = []
         self.initState = FillerState(self)
 
     def determineParameters(self):
@@ -64,7 +64,7 @@ class FillerProgSpeed(Filler):
         self.currentProgSpeed = speed
         self.choice.determineParameters(speed)
         self.minorHelpProb = self.progSpeedParams.getMinorHelpProb(speed)
-        self.itemLimit = self.progSpeedParams.getItemLimit(speed)
+        self.itemLimit = self.progSpeedParams.getItemLimit(speed) if not self.isEarlyGame() else 0
         self.locLimit = self.progSpeedParams.getLocLimit(speed)
         self.possibleSoftlockProb = self.progSpeedParams.getPossibleSoftlockProb(speed)
         self.progressionItemTypes = self.progSpeedParams.getProgressionItemTypes(speed)
@@ -240,6 +240,7 @@ class FillerProgSpeed(Filler):
         return itemLocation is None
 
     def generateItemFromStandardPool(self):
+        self.log.debug('generateItemFromStandardPool')
         itemLoc = self.generateItem()
         if itemLoc is not None and self.currentProgSpeed in ['medium', 'slow', 'slowest'] and\
            not self.isEarlyGame() and not self.services.can100percent(self.ap, self.container):
@@ -261,7 +262,7 @@ class FillerProgSpeed(Filler):
 
     def initRollbackPoints(self):
         minRollbackPoint = 0
-        maxRollbackPoint = len(self.states) - 1
+        maxRollbackPoint = len(self.states)
         if len(self.progressionStatesIndices) > 0:
             minRollbackPoint = self.progressionStatesIndices[-1]
         self.log.debug('initRollbackPoints: min=' + str(minRollbackPoint) + ", max=" + str(maxRollbackPoint))
@@ -301,6 +302,20 @@ class FillerProgSpeed(Filler):
         self.log.debug('adding ' + itemType + ' to situation ' + situation)
         self.rollbackItemsTried[situation].append(itemType)
 
+    def getFallbackState(self):
+        self.log.debug("getFallbackState")
+        curState = self.getCurrentState()
+        fallbackState = self.states[-2] if len(self.states) > 1 else self.initState
+        if (len(self.lastFallbackStates) > 0 and curState == self.lastFallbackStates[-1]):
+            self.log.debug("getFallbackState. rewind fallback")
+            return fallbackState
+        # n = sum(1 for state in self.lastFallbackStates if state == fallbackState)
+        # if n >= 3:
+        #     self.log.debug("getFallbackState. kickstart needed")
+        #     self.lastFallbackStates = None
+        #     return None
+        return curState
+
     # goes back in the previous states to find one where
     # we can put a progression item
     def rollback(self):
@@ -318,16 +333,15 @@ class FillerProgSpeed(Filler):
             sys.stdout.flush()
             return None
         # to stay consistent in case no solution is found as states list was popped in init
-        fallbackState = self.getCurrentState()
-        if fallbackState == self.lastFallbackState:
-            # we're stuck there, rewind more in fallback
-            fallbackState = self.states[-2] if len(self.states) > 1 else self.initState
-        self.lastFallbackState = fallbackState
+        fallbackState = self.getFallbackState()
+        # if fallbackState is None: # kickstart needed
+        #     return None
+        self.lastFallbackStates.append(fallbackState)
         i = 0
         possibleStates = []
         self.log.debug('rollback. nStates='+str(len(self.states)))
         while i >= 0 and len(possibleStates) == 0:
-            states = self.states[:]
+            states = self.states[:] + [fallbackState]
             minRollbackPoint, maxRollbackPoint = self.initRollbackPoints()
             i = maxRollbackPoint
             while i >= minRollbackPoint:
@@ -365,6 +379,18 @@ class FillerProgSpeed(Filler):
         self.log.debug("rollback END: {}".format(len(self.container.currentItems)))
         return ret
 
+    # def kickStart(self):
+    #     self.initState.apply(self)
+    #     self.lastFallbackStates = []
+    #     pairItemLocDict = self.services.getStartupProgItemsPairs(self.ap, self.container)
+    #     if pairItemLocDict == None:
+    #         # no pair found
+    #         self.log.debug("kickStart KO")
+    #         return False
+    #     self.collectPair(pairItemLocDict)
+    #     self.log.debug("kickStart OK")
+    #     return True
+
     def step(self, onlyBossCheck=False):
         self.cache.reset()
         if self.services.can100percent(self.ap, self.container) and self.settings.progSpeed not in ['slowest', 'slow']:
@@ -397,6 +423,9 @@ class FillerProgSpeed(Filler):
                 if not self.services.can100percent(self.ap, self.container):
                     # stuck, rollback to make progress if we can't access everything yet
                     itemLoc = self.rollback()
+                    # if itemLoc is None and self.lastFallbackStates is None:
+                    #     # kickstart needed
+                    #     return self.kickStart()
                 if itemLoc is not None:
                     self.collect(itemLoc)
                     isStuck = False

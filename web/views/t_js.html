@@ -374,7 +374,9 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     }
 
     if(lastAction != null && lastAction["action"] != "init" && lastAction["scope"] != "door") {
+        resetItems();
         updateLocations(jsonData);
+        updateInventory(jsonData);
 
         if(lastAction["scope"] == "area") {
             updateLines(jsonData);
@@ -384,8 +386,9 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     } else {
         // load everything
         updateGlobal(jsonData);
-        updateInventory(jsonData);
+        resetItems();
         updateLocations(jsonData);
+        updateInventory(jsonData);
         updateLines(jsonData);
         displayDoors(jsonData);
         updateGps(jsonData);
@@ -640,8 +643,6 @@ function updateLocations(jsonData) {
 }
 
 function updateInventory(jsonData) {
-    resetItems();
-
     setItemCount("Missile");
     setItemCount("Super");
     setItemCount("PowerBomb");

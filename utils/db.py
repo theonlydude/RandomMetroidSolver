@@ -352,12 +352,27 @@ order by r.id;"""
         if self.dbAvailable == False:
             return None
 
-        sql = "select group_concat(\"--\", name, \" \", case when value = 'None' then \"\" else value end order by name separator ' ') from randomizer_params where randomizer_id = %d;"
+        seed = 0
+        sql = "select name, value from randomizer_params where randomizer_id = %d order by name;"
         data = self.execSelect(sql, (randomizer_id,))
         if data == None:
             return ""
         else:
-            return data[0][0]
+            ret = "{\n"
+            tmp = []
+            for row in data:
+                arg = row[0]
+                value = row[1]
+                if arg == 'seed':
+                    seed = value
+                if arg.find("MultiSelect") != -1:
+                    value = '["{}"]'.format('", "'.join(value.split(',')))
+                else:
+                    value = '"{}"'.format(value)
+                tmp.append('"{}": {}'.format(arg, value))
+            ret += ',\n'.join(tmp)
+            ret += "\n}"
+            return (seed, ret)
 
     def getGeneratedSeeds(self, preset):
         if self.dbAvailable == False:
@@ -636,15 +651,15 @@ order by 1,2;"""
             print("DB.getPlandoCount::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
-    def getPlandoKey(self, plandoName):
+    def checkPlando(self, plandoName):
         if self.dbAvailable == False:
             return None
 
         try:
-            sql = "select update_key from plando_repo where plando_name = '%';"
+            sql = "select plando_name from plando_repo where plando_name = '%s';"
             return self.execSelect(sql, (plandoName,))
         except Exception as e:
-            print("DB.getPlandoKey::error execute: {} error: {}".format(sql, e))
+            print("DB.checkPlando::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
     def getPlandoIpsMaxSize(self, plandoName):

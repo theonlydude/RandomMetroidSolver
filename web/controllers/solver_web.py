@@ -8,6 +8,7 @@ if os.path.exists(path) and path not in sys.path:
 
 import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math, string, base64, urllib.parse, uuid
 from datetime import datetime
+import urllib.parse
 
 # to solve the rom
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, diff4solver
@@ -17,7 +18,7 @@ from utils.parameters import diff2text, text2diff
 from utils.utils import PresetLoader, removeChars, getDefaultMultiValues
 from utils.db import DB
 from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
-from utils.utils import isStdPreset, getRandomizerDefaultParameters
+from utils.utils import isStdPreset, getRandomizerDefaultParameters, getPresetDir
 from graph.graph_locations import locations
 from logic.smboolmanager import SMBoolManager
 from rom.romreader import RomReader
@@ -25,6 +26,14 @@ from rom.rom_patches import RomPatches
 from rom.ips import IPS_Patch
 from randomizer import energyQties, progDiffs, morphPlacements, majorsSplits, speeds
 from utils.doorsmanager import DoorsManager
+
+# discord webhook for plandorepo
+try:
+    from webhook import webhookUrl
+    from discord_webhook import DiscordWebhook, DiscordEmbed
+    webhookAvailable = True
+except:
+    webhookAvailable = False
 
 # put an expiration date to the default cookie to have it kept between browser restart
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
@@ -38,12 +47,6 @@ maxPresets = 4096
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
     return len(os.listdir('community_presets')) >= maxPresets
-
-def getPresetDir(preset):
-    if isStdPreset(preset):
-        return 'standard_presets'
-    else:
-        return 'community_presets'
 
 def loadPreset():
     # load conf from session if available
@@ -1610,7 +1613,7 @@ def getFsUsage():
         return ('CRITICAL', percent)
 
 def randoParamsWebService():
-    # get a string of the randomizer parameters for a given seed
+    # get a json string of the randomizer parameters for a given seed
     if request.vars.seed == None:
         raiseHttp(400, "Missing parameter seed", False)
 
@@ -1619,10 +1622,10 @@ def randoParamsWebService():
         raiseHttp(400, "Wrong value for seed, must be between 0 and 9999999", False)
 
     db = DB()
-    params = db.getRandomizerSeedParams(seed)
+    (seed, params) = db.getRandomizerSeedParams(seed)
     db.close()
 
-    return params
+    return json.dumps({"seed": seed, "params": params})
 
 def stats():
     response.title = 'Super Metroid VARIA Randomizer and Solver usage statistics'
@@ -3008,6 +3011,14 @@ def uploadPlandoWebService():
     if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
         raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
 
+    # check if plando doesn't already exist
+    db = DB()
+    check = db.checkPlando(plandoName)
+    db.close()
+
+    if check is not None and len(check) > 0 and check[0][0] == plandoName:
+        raise HTTP(400, "Can't create plando, a plando with the same name already exists")
+
     author = request.vars.author
     longDesc = removeHtmlTags(request.vars.longDesc)
     preset = request.vars.preset
@@ -3020,7 +3031,33 @@ def uploadPlandoWebService():
     db.insertPlando((plandoName, author, longDesc, preset, updateKey, maxSize))
     db.close()
 
+    if webhookAvailable:
+        plandoWebhook(plandoName, author, preset, longDesc)
+
     return json.dumps(updateKey)
+
+def plandoWebhook(plandoName, author, preset, longDesc):
+    webhook = DiscordWebhook(url=webhookUrl, username="Plandository")
+
+    embed = DiscordEmbed(title=plandoName, description="New {} plando by {}".format(preset, author), color=242424)
+
+    # there's a limit for discord for the size of an embed field
+    embedLimit = 512
+    if len(longDesc) > embedLimit:
+        longDesc = longDesc[:embedLimit]+"..."
+    embed.add_embed_field(name="description", value=longDesc, inline=False)
+
+    permalink = getPermalink(plandoName)
+    embed.add_embed_field(name="permalink", value=permalink)
+    webhook.add_embed(embed)
+
+    try:
+        response = webhook.execute()
+    except:
+        pass
+
+def getPermalink(plandoName):
+    return "http://{}/plandorepo/{}".format(request.env.HTTP_HOST, urllib.parse.quote(plandoName))
 
 def deletePlandoWebService():
     for param in ["plandoName", "plandoKey"]:

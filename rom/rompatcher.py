@@ -442,7 +442,7 @@ class RomPatcher:
             if os.path.exists(patchName):
                 patch = IPS_Patch.load(patchName)
             else:
-                patch = IPS_Patch.load(appDir + '/' + ipsDir + '/' + patchName)
+                patch = IPS_Patch.load(os.path.join(appDir, ipsDir, patchName))
         self.ipsPatches.append(patch)
 
     def getStartDoors(self, plms, area, minimizerN):
@@ -653,12 +653,12 @@ class RomPatcher:
     def writeRandoSettings(self, settings, itemLocs):
         dist = self.getMinorsDistribution(itemLocs)
         totalAmmo = sum(d['Quantity'] for ammo,d in dist.items())
-        totalItemLocs = sum(1 for il in itemLocs if il.Accessible)
+        totalItemLocs = sum(1 for il in itemLocs if il.Accessible and not il.Location.isBoss())
         totalNothing = sum(1 for il in itemLocs if il.Accessible and il.Item.Category == 'Nothing')
         if self.nothingMissile == True:
             totalNothing -= 1
         totalEnergy = self.getItemQty(itemLocs, 'ETank')+self.getItemQty(itemLocs, 'Reserve')
-        totalMajors = totalItemLocs - totalEnergy - totalAmmo - totalNothing
+        totalMajors = max(totalItemLocs - totalEnergy - totalAmmo - totalNothing, 0)
         address = 0x2736C0
         value = "{:>2}".format(totalItemLocs)
         line = " ITEM LOCATIONS              %s " % value
@@ -939,7 +939,7 @@ class RomPatcher:
         asmAddress = 0x7F800
         for conn in doorConnections:
             # write door ASM for transition doors (code and pointers)
-            #print('Writing door connection ' + conn['ID'])
+#            print('Writing door connection ' + conn['ID'])
             doorPtr = conn['DoorPtr']
             roomPtr = conn['RoomPtr']
             if doorPtr in self.doorConnectionSpecific:
@@ -1006,6 +1006,8 @@ class RomPatcher:
             self.romFile.seek(asmAddress)
             for byte in asmPatch:
                 self.romFile.writeByte(byte)
+            # print("asmAddress=%x" % asmAddress)
+            # print("asmPatch=" + str(["%02x" % b for b in asmPatch]))
 
             asmAddress += len(asmPatch)
             # update room state header with song changes

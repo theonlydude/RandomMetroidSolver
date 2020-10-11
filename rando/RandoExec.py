@@ -13,6 +13,7 @@ from rando.Chozo import ChozoFillerFactory, ChozoWrapperFiller
 from rando.Items import ItemManager
 from rando.ItemLocContainer import ItemLocation
 from utils.vcr import VCR
+from utils.doorsmanager import DoorsManager
 
 # entry point for rando execution ("randomize" method)
 class RandoExec(object):
@@ -58,6 +59,8 @@ class RandoExec(object):
         if randoSettings.runtimeLimit_s < endDate:
             endDate = now + randoSettings.runtimeLimit_s
         while container is None and i < attempts and now <= endDate:
+            if graphSettings.doorsColorsRando == True:
+                DoorsManager.randomize()
             self.areaGraph = graphBuilder.createGraph()
             services = RandoServices(self.areaGraph, self.restrictions)
             setup = RandoSetup(graphSettings, graphLocations, services)

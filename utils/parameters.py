@@ -59,7 +59,8 @@ def diff4solver(difficulty):
     else:
         return "mania"
 
-appDir = os.path.expanduser(os.path.join("~/RandomMetroidSolver"))
+# allow multiple local repo
+appDir = sys.path[0]
 
 def isKnows(knows):
     return knows[0:len('__')] != '__' and knows[0] == knows[0].upper()

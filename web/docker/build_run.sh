@@ -40,7 +40,10 @@ docker build --tag varia-mysql -f mysql/Dockerfile mysql/ &&
 docker run --network varia-network --link varia-mysql:varia-mysql --name varia-mysql --publish 3366:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=varia -e MYSQL_USER=varia -e MYSQL_PASSWORD=varia -d varia-mysql
 
 # web2py + varia image build & run
-docker build --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=$(cat ${GITHUB_TOKEN}) -f web2py/Dockerfile web2py/ &&
+if [ -n "${GITHUB_TOKEN}" ]; then
+    GITHUB_TOKEN=$(cat ${GITHUB_TOKEN})
+fi
+docker build --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -f web2py/Dockerfile web2py/ &&
 docker run --network varia-network --link varia-${BRANCH}:varia-${BRANCH} -d --publish 8000:8000 --name varia-${BRANCH} varia-${BRANCH}
 
 rm -f mysql/*.sql

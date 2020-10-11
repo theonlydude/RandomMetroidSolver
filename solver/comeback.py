@@ -45,6 +45,11 @@ class ComeBack(object):
         if locsCount < 2:
             return False
 
+        # only one solve area, no need for come back
+        if len(solveAreas) == 1:
+            self.log.debug("handleNoComeBack: only one solve area")
+            return False
+
         self.log.debug("WARNING: use no come back heuristic for {} locs in {} solve areas ({})".format(locsCount, len(solveAreas), solveAreas))
 
         # check if we can use an existing step
@@ -63,10 +68,6 @@ class ComeBack(object):
             else:
                 self.log.debug("cur: {}, lastStep.cur: {}, don't use lastStep.next()".format(cur, lastStep.cur))
 
-        if len(solveAreas) == 1:
-            self.log.debug("handleNoComeBack: only one solve area")
-            return False
-
         # create a step
         self.log.debug("Create new step at {}".format(cur))
         lastStep = ComeBackStep(solveAreas, cur)
@@ -75,7 +76,14 @@ class ComeBack(object):
 
     def reuseLastStep(self, lastStep, solveAreas):
         # reuse the last step if all solve areas are included in last step to avoid creating too many.
-        return set(solveAreas).issubset(set(lastStep.solveAreas))
+        for area in solveAreas:
+            # new solve area, don't reuse
+            if area not in lastStep.solveAreas:
+                return False
+            # more locations available in new step, don't reuse old one
+            if solveAreas[area] > lastStep.solveAreas[area]:
+                return False
+        return True
 
     def visitedAllLocsInArea(self, lastStep, locations):
         for loc in locations:

@@ -658,7 +658,7 @@ class RomPatcher:
         if self.nothingMissile == True:
             totalNothing -= 1
         totalEnergy = self.getItemQty(itemLocs, 'ETank')+self.getItemQty(itemLocs, 'Reserve')
-        totalMajors = totalItemLocs - totalEnergy - totalAmmo - totalNothing
+        totalMajors = max(totalItemLocs - totalEnergy - totalAmmo - totalNothing, 0)
         address = 0x2736C0
         value = "{:>2}".format(totalItemLocs)
         line = " ITEM LOCATIONS              %s " % value

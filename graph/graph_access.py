@@ -637,11 +637,30 @@ accessPoints = [
         'Toilet Top': lambda sm: sm.wand(sm.canReachCacatacAlleyFromBotowoon(),
                                          sm.canPassCacatacAlley())
     }, internal=True),
+    AccessPoint('West Sand Hall Left', 'EastMaridia', {
+        # XXX there might be some tech to do this suitless, but HJ+ice is not enough
+        'Oasis Bottom': lambda sm: sm.haveItem('Gravity'),
+        'Aqueduct Bottom': lambda sm: RomPatches.has(RomPatches.MaridiaSandWarp),
+        # this goes directly to WestMaridia
+        'Main Street Bottom': Cache.ldeco('WSHL_MSB',
+                                          lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
+                                                             sm.wor(sm.canGreenGateGlitch(),
+                                                                    RomPatches.has(RomPatches.AreaRandoGatesOther)))),
+        # this goes directly to WestMaridia
+        'Crab Hole Bottom Left': Cache.ldeco('WSHL_CHBL',
+                                             lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
+                                                                sm.haveItem('Morph')))
+    }, internal=True),
     AccessPoint('Left Sandpit', 'EastMaridia', {
-        'Oasis Bottom': lambda sm: sm.canTraverseSandPits()
+        'West Sand Hall Left': lambda sm: sm.canAccessSandPits(),
+        'Oasis Bottom': lambda sm: sm.canAccessSandPits()
+    }, internal=True),
+    AccessPoint('Oasis Bottom', 'EastMaridia', {
+        'Toilet Top': lambda sm: sm.wand(sm.traverse('OasisTop'), sm.canDestroyBombWallsUnderwater()),
+        'West Sand Hall Left': lambda sm: sm.canAccessSandPits()
     }, internal=True),
     AccessPoint('Right Sandpit', 'EastMaridia', {
-        'Oasis Bottom': lambda sm: sm.canTraverseSandPits()
+        'Oasis Bottom': lambda sm: sm.canAccessSandPits()
     }, internal=True),
     AccessPoint('Le Coude Right', 'EastMaridia', {
         'Toilet Top': lambda sm: SMBool(True)
@@ -659,22 +678,6 @@ accessPoints = [
                                                             # suitless could be possible with this but unreasonable: https://youtu.be/rtLwytH-u8o
                                                             sm.haveItem('Gravity'),
                                                             sm.traverse('ColosseumBottomRight')))
-    }, internal=True),
-    AccessPoint('Oasis Bottom', 'EastMaridia', {
-        'Toilet Top': lambda sm: sm.wand(sm.traverse('OasisTop'), sm.canDestroyBombWallsUnderwater()),
-        # this goes directly to WestMaridia
-        'Main Street Bottom': Cache.ldeco('OB_MSB',
-                                          lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
-                                                             sm.wor(sm.canGreenGateGlitch(),
-                                                                    RomPatches.has(RomPatches.AreaRandoGatesOther)),
-                                                             sm.canTraverseSandPits())),
-        # this goes directly to WestMaridia
-        'Crab Hole Bottom Left': Cache.ldeco('OB_CHBL',
-                                             lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
-                                                                sm.canTraverseSandPits(),
-                                                                sm.haveItem('Morph'))),
-        'Aqueduct Bottom': lambda sm: sm.wand(RomPatches.has(RomPatches.MaridiaSandWarp),
-                                              sm.canTraverseSandPits())
     }, internal=True),
     AccessPoint('Colosseum Top Right', 'EastMaridia', {
         'Post Botwoon': lambda sm: sm.canColosseumToBotwoonExit(),

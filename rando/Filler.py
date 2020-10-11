@@ -5,6 +5,7 @@ from logic.cache import RequestCache
 from rando.RandoServices import RandoServices
 from rando.Choice import ItemThenLocChoice
 from rando.RandoServices import ComebackCheckType
+from rando.ItemLocContainer import ItemLocation
 from utils.parameters import infinity
 from logic.helpers import diffValue2txt
 from graph.graph_access import GraphUtils

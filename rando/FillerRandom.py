@@ -138,20 +138,18 @@ class FrontFillerKickstart(FrontFiller):
 
     # if during a step no item is a progression item, check all two items pairs instead of just one item
     def step(self, onlyBossCheck=False):
+        self.cache.reset()
+        (itemLocDict, isProg) = self.services.getPossiblePlacements(self.ap, self.container, ComebackCheckType.NoCheck)
+        if isProg == True:
+            self.log.debug("FrontFillerKickstart: found prog item")
+            return super(FrontFillerKickstart, self).step(onlyBossCheck)
+
+        self.cache.reset()
         pairItemLocDict = self.services.getStartupProgItemsPairs(self.ap, self.container)
         if pairItemLocDict == None:
             # no pair found or prog item found
-            return super(FrontFillerKickstart, self).step(onlyBossCheck)
-
-        # choose a pair of items which create progression
-        keys = list(pairItemLocDict.keys())
-        key = random.choice(keys)
-
-        # collect them
-        availableLocs = pairItemLocDict[key]
-        self.collect(ItemLocation(key[0], availableLocs[0][0]))
-        self.collect(ItemLocation(key[1], availableLocs[1][0]))
-
+            return
+        self.collectPair(pairItemLocDict)
         # we've collected two items, increase the number of steps
         self.nSteps += 1
 

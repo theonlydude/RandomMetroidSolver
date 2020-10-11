@@ -227,11 +227,23 @@ class RandoServices(object):
         else:
             del itemLocDict[morphLocItem]
 
+    def processNoComeback(self, ap, container, itemLocDict):
+        comebackDict = {}
+        for item,locList in itemLocDict.items():
+            comebackLocs = [loc for loc in locList if self.fullComebackCheck(container, ap, item, loc, ComebackCheckType.JustComeback)]
+            if len(comebackLocs) > 0:
+                comebackDict[item] = comebackLocs
+        if len(comebackDict) > 0:
+            itemLocDict.clear()
+            itemLocDict.update(comebackDict)
+
     def processPlacementRestrictions(self, ap, container, comebackCheck, itemLocDict, curLocs):
         if self.restrictions.isEarlyMorph():
             self.processEarlyMorph(ap, container, comebackCheck, itemLocDict, curLocs)
         elif self.restrictions.isLateMorph():
             self.processLateMorph(container, itemLocDict)
+        if comebackCheck == ComebackCheckType.NoCheck:
+            self.processNoComeback(ap, container, itemLocDict)
 
     # main logic function to be used by fillers. gives possible locations for each item.
     # ap: AP to check from
@@ -353,13 +365,8 @@ class RandoServices(object):
         return len(curLocs) == len(container.unusedLocations)
 
     def getStartupProgItemsPairs(self, ap, container):
-        self.cache.reset()
+        self.log.debug("getStartupProgItemsPairs: kickstart")
         (itemLocDict, isProg) = self.getPossiblePlacements(ap, container, ComebackCheckType.NoCheck)
-        if isProg == True:
-            self.log.debug("getStartupProgItemsPairs: found prog item")
-            return None
-
-        self.log.debug("getStartupProgItemsPairs: no prog item found, kickstart")
 
         # save container
         saveEmptyContainer = ContainerSoftBackup(container)
@@ -377,7 +384,8 @@ class RandoServices(object):
         if not uniqItemLocDict:
             return None
 
-        self.cache.reset()
+        if self.cache:
+            self.cache.reset()
         curLocsBefore = self.currentLocations(ap, container)
         if not curLocsBefore:
             return None
@@ -385,10 +393,12 @@ class RandoServices(object):
         self.log.debug("search for progression with a second item")
         for item1, locs1 in uniqItemLocDict.items():
             # collect first item in first available location matching restrictions
-            self.cache.reset()
+            if self.cache:
+                self.cache.reset()
             firstItemPlaced = False
             for loc in curLocsBefore:
                 if self.restrictions.canPlaceAtLocation(item1, loc, container):
+                    self.log.debug("getStartupProgItemsPairs. firstItemPlaced")
                     container.collect(ItemLocation(item1, loc))
                     firstItemPlaced = True
                     break
@@ -411,7 +421,8 @@ class RandoServices(object):
                     continue
 
                 # collect second item in first available location
-                self.cache.reset()
+                if self.cache:
+                    self.cache.reset()
                 secondItemPlaced = False
                 for loc in curLocsAfterFirst:
                     if self.restrictions.canPlaceAtLocation(item2, loc, container):

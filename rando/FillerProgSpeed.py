@@ -415,8 +415,8 @@ class FillerProgSpeed(Filler):
 
 
 class FillerRandomNoCopy(FillerRandom):
-    def __init__(self, startAP, graph, restrictions, container, endDate, diffSteps=0):
-        super(FillerRandomNoCopy, self).__init__(startAP, graph, restrictions, container, endDate, diffSteps)
+    def __init__(self, startAP, graph, restrictions, container, diffSteps=0):
+        super(FillerRandomNoCopy, self).__init__(startAP, graph, restrictions, container, diffSteps)
 
     def initContainer(self):
         self.container = self.baseContainer
@@ -509,7 +509,7 @@ class FillerProgSpeedChozoSecondPhase(Filler):
             # merge collected of 1st phase and 2nd phase so far for seed to be solvable by random fill
             self.container.itemLocations += self.firstPhaseItemLocs
             self.log.debug("step. LAST FILL. cont: "+self.container.dump())
-            filler = FillerRandomNoCopy(self.startAP, self.graph, self.restrictions, self.container, self.endDate, diffSteps=100)
+            filler = FillerRandomNoCopy(self.startAP, self.graph, self.restrictions, self.container, diffSteps=100)
             (stuck, itemLocs, prog) = filler.generateItems()
             if len(filler.errorMsg) > 0:
                 self.errorMsg += '\n'+filler.errorMsg

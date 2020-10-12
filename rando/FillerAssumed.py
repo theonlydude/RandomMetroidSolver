@@ -1,5 +1,4 @@
 import random, logging
-from collections import defaultdict
 
 from rando.Filler import Filler
 from rando.FillerRandom import FillerRandomItems, FrontFillerKickstart
@@ -8,7 +7,6 @@ from rando.Choice import ItemThenLocChoice
 from graph.graph_access import GraphUtils
 from rando.RandoServices import ComebackCheckType
 from rando.ItemLocContainer import ItemLocation, getItemListStr
-from utils.parameters import infinity
 
 class ReverseFiller(Filler):
     def __init__(self, graphSettings, graph, restrictions, emptyContainer, endDate=infinity):

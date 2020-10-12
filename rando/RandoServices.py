@@ -39,6 +39,20 @@ class RandoServices(object):
         sys.stdout.flush()
         return itemLoc.Location.accessPoint if pickup == True else ap
 
+    def getPossiblePlacementsWithoutItem(self, ap, container, items, alreadyPlacedItems):
+        self.log.debug("getPossiblePlacementsWithoutItem, unusedLocations: {}".format(len(container.unusedLocations)))
+        return {item: self.allLocationsWithoutItem(item, ap, container, items, alreadyPlacedItems) for item in items}
+
+    def allLocationsWithoutItem(self, item, ap, container, items, alreadyPlacedItems):
+        container.sm.resetItems()
+        container.sm.addItems([it.Type for it in items if id(it) != id(item)] + [it.Type for it in alreadyPlacedItems])
+        if self.cache:
+            self.cache.reset()
+        curLocs = self.currentLocations(ap, container, post=True)
+        ret = [loc for loc in curLocs if self.restrictions.canPlaceAtLocation(item, loc, container) and self.fullComebackCheck(container, ap, item, loc, ComebackCheckType.ComebackWithoutItem, checkSoftlock=False)]
+        container.sm.resetItems()
+        return ret
+
     # gives all the possible theoretical locations for a given item
     def possibleLocations(self, item, ap, emptyContainer, bossesKilled=True):
         assert len(emptyContainer.currentItems) == 0, "Invalid call to possibleLocations. emptyContainer had collected items"
@@ -146,7 +160,7 @@ class RandoServices(object):
 
         return False
 
-    def fullComebackCheck(self, container, ap, item, loc, comebackCheck):
+    def fullComebackCheck(self, container, ap, item, loc, comebackCheck, checkSoftlock=True):
         sm = container.sm
         tmpItems = []
         # draygon special case: there are two locations, and we can
@@ -156,7 +170,9 @@ class RandoServices(object):
             # temporary kill draygon
             tmpItems.append('Draygon')
         sm.addItems(tmpItems)
-        ret = self.locPostAvailable(sm, loc, item.Type if item is not None else None) and not self.isSoftlockPossible(container, ap, item, loc, comebackCheck)
+        ret = self.locPostAvailable(sm, loc, item.Type if item is not None else None)
+        if checkSoftlock:
+            ret &= not self.isSoftlockPossible(container, ap, item, loc, comebackCheck)
         for tmp in tmpItems:
             sm.removeItem(tmp)
         return ret

@@ -9,6 +9,7 @@ from rando.RandoSetup import RandoSetup
 from rando.Filler import FrontFiller
 from rando.FillerProgSpeed import FillerProgSpeed, FillerProgSpeedChozoSecondPhase
 from rando.FillerRandom import FillerRandom, FillerRandomSpeedrun
+from rando.FillerAssumed import ReverseFiller
 from rando.Chozo import ChozoFillerFactory, ChozoWrapperFiller
 from rando.Items import ItemManager
 from rando.ItemLocContainer import ItemLocation
@@ -27,6 +28,8 @@ class RandoExec(object):
             return lambda graphSettings, graph, restr, cont: FrontFiller(graphSettings.startAP, graph, restr, cont, endDate)
         elif progSpeed == "speedrun":
             return lambda graphSettings, graph, restr, cont: FillerRandomSpeedrun(graphSettings, graph, restr, cont, endDate)
+        elif progSpeed == "reverse":
+            return lambda graphSettings, graph, restr, cont: ReverseFiller(graphSettings, graph, restr, cont, endDate)
         else:
             return lambda graphSettings, graph, restr, cont: FillerProgSpeed(graphSettings, graph, restr, cont, endDate)
 
@@ -83,7 +86,7 @@ class RandoExec(object):
         filler = self.createFiller(randoSettings, graphSettings, container, endDate)
         vcr = VCR(self.seedName, 'rando') if self.vcr == True else None
         ret = filler.generateItems(vcr=vcr)
-        self.errorMsg += filler.errorMsg
+        self.errorMsg = filler.errorMsg + '\n' + self.errorMsg
         return ret
 
     def postProcessItemLocs(self, itemLocs, hide):

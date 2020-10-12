@@ -41,7 +41,7 @@ def randomMulti(args, param, defaultMultiValues):
     return (isRandom, value)
 
 def dumpErrorMsg(outFileName, msg):
-    print("DIAG: " + msg)
+    print("\nDIAG: " + msg)
     if outFileName is not None:
         with open(outFileName, 'w') as jsonFile:
             json.dump({"errorMsg": msg}, jsonFile)

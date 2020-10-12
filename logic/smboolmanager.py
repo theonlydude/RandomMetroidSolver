@@ -62,15 +62,6 @@ class SMBoolManager(object):
                 msg += " {}: {}".format(item, value)
         print("items:{}".format(msg))
 
-    def isEmpty(self):
-        for item in self.items:
-            if self.haveItem(item):
-                return False
-        for item in self.countItems:
-            if self.itemCount(item) > 0:
-                return False
-        return True
-
     def getItems(self):
         # get a dict of collected items and how many (to be displayed on the solver spoiler)
         itemsDict = {}

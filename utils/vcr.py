@@ -12,6 +12,8 @@ class VCR(object):
     def addRollback(self, count):
         self.tape.append({'type': 'rollback', 'count': count})
 
-    def dump(self):
+    def dump(self, reverse=False):
+        if reverse:
+            self.tape.reverse()
         with open(self.outFileName, 'w') as jsonFile:
             json.dump(self.tape, jsonFile)

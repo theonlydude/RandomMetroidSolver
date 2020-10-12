@@ -99,7 +99,8 @@ class AssumedFiller(Filler):
                 assumedItems.remove(item)
                 self.randomFillWithLogic = True
                 self.log.debug("Move item {} to 2nd phase".format(item.Type))
-                asdf
+                self.errorMsg = "Moving item to random fill phase is not implemented yet"
+                return (True, self.container.itemLocations, self.getProgressionItemLocations())
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             for item in firstItemLocDict.keys():
@@ -107,9 +108,6 @@ class AssumedFiller(Filler):
 
         # set start ap to mother brain as we're going in reverse from the end
         self.ap = 'Golden Four'
-
-        alreadyTriedItems = defaultdict(list)
-        alreadyTriedLocations = defaultdict(lambda: defaultdict(list))
 
         while len(assumedItems) > 0:
             step = len(assumedItems)
@@ -119,7 +117,7 @@ class AssumedFiller(Filler):
             itemLocDict = self.services.getPossiblePlacementsWithoutItem(self.ap, self.container, assumedItems, alreadyPlacedItems)
             # check if all items have no locs
             if len([item for item, locs in itemLocDict.items() if len(locs) > 0]) == 0:
-                self.errorMsg = "Stucked after testing all items"
+                self.errorMsg = "Stuck, no item with possible loc"
                 if self.vcr != None:
                     self.vcr.dump(reverse=True)
                 return (True, self.container.itemLocations, self.getProgressionItemLocations())

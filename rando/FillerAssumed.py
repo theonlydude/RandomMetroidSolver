@@ -19,10 +19,9 @@ class ReverseFiller(Filler):
         self.vcr = vcr
         self.initFiller()
 
-        # first between 2 and 3 steps of frontfill
+        # front fill until 1/3 of locations are available (like total)
         self.log.debug("initial front fill start")
         frontFiller = FrontFillerKickstart(self.startAP, self.graph, self.restrictions, self.container)
-        # fill until 1/3 of locations are available (like total)
         condition = lambda: len(frontFiller.services.currentLocations(self.ap, self.container))+len(frontFiller.container.itemLocations) < len(frontFiller.container.unusedLocations)/3
         (stuck, itemLocations, progItems) = frontFiller.generateItems(condition)
         if stuck:
@@ -69,8 +68,8 @@ class AssumedFiller(Filler):
         self.log.debug("alreadyPlacedItems: {}".format(getItemListStr(alreadyPlacedItems)))
         allItems = self.container.itemPool
 
-        # first collect mother brain and G4
-        for (boss, bossLocName) in [('MotherBrain', 'Mother Brain'), ('Kraid', 'Kraid'), ('Phantoon', 'Phantoon'), ('Draygon', 'Draygon'), ('Ridley', 'Ridley')]:
+        # first collect mother brain #and G4
+        for (boss, bossLocName) in [('MotherBrain', 'Mother Brain')]:#, ('Kraid', 'Kraid'), ('Phantoon', 'Phantoon'), ('Draygon', 'Draygon'), ('Ridley', 'Ridley')]:
             bossItem = self.container.getItems(lambda it: it.Type == boss)
             bossLoc = self.container.getLocs(lambda loc: loc.Name == bossLocName)
             if len(bossItem) > 0 and len(bossLoc) > 0:
@@ -121,6 +120,8 @@ class AssumedFiller(Filler):
                 return (True, self.container.itemLocations, self.getProgressionItemLocations())
 
             self.log.debug("before: {}".format([(it.Type, len(locs)) for (it, locs) in itemLocDict.items()]))
+            for it, locs in itemLocDict.items():
+                self.log.debug("{}: {}".format(it.Type, [loc.Name for loc in locs] if len(locs) < 5 else len(locs)))
 
             item = random.choice(list(itemLocDict.keys()))
             locations = itemLocDict[item]
@@ -131,6 +132,24 @@ class AssumedFiller(Filler):
                 self.log.debug("No remaining location for item {}".format(item.Type))
                 continue
             self.log.debug("loc choosen: {}".format(itemLoc.Location.Name))
+
+
+            # check that no item has zero possible locs after placing this item
+            assumedItems.remove(item)
+            # use chosen loc ap to check if an item can't be placed afterward
+            itemLocDictAfter = self.services.getPossiblePlacementsWithoutItem(itemLoc.Location.accessPoint, self.container, assumedItems, alreadyPlacedItems)
+            assumedItems.append(item)
+
+            self.log.debug("after: {}".format([(it.Type, len(locs)) for (it, locs) in itemLocDictAfter.items()]))
+            zeroLocsItemFound = False
+            for it, locs in itemLocDictAfter.items():
+                if len(locs) == 0:
+                    self.log.debug("step: {} - zeroLocsItemFound for {} after placing {} !!".format(step, it.Type, item.Type))
+                    zeroLocsItemFound = True
+                    break
+
+            if zeroLocsItemFound:
+                continue
 
             self.collect(itemLoc)
             assumedItems.remove(item)

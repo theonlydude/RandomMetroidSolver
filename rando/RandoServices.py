@@ -48,6 +48,17 @@ class RandoServices(object):
         container.sm.addItems([it.Type for it in items if id(it) != id(item)] + [it.Type for it in alreadyPlacedItems])
         if self.cache:
             self.cache.reset()
+
+        # check if bosses can be killed, if so add them to alreadyPlacedItems:
+        if item.Type != 'Kraid' and container.sm.enoughStuffsKraid():
+            container.sm.addItem('Kraid')
+        if item.Type != 'Phantoon' and container.sm.enoughStuffsPhantoon():
+            container.sm.addItem('Phantoon')
+        if item.Type != 'Ridley' and container.sm.enoughStuffsRidley():
+            container.sm.addItem('Ridley')
+        if item.Type != 'Draygon' and container.sm.wand(container.sm.canFightDraygon(), container.sm.enoughStuffsDraygon()):
+            container.sm.addItem('Draygon')
+
         curLocs = self.currentLocations(ap, container, post=True)
         ret = [loc for loc in curLocs if self.restrictions.canPlaceAtLocation(item, loc, container) and self.fullComebackCheck(container, ap, item, loc, ComebackCheckType.ComebackWithoutItem, checkSoftlock=False)]
         container.sm.resetItems()

@@ -23,32 +23,32 @@ class ReverseFiller(Filler):
         self.log.debug("initial front fill start")
         frontFiller = FrontFillerKickstart(self.startAP, self.graph, self.restrictions, self.container)
         condition = lambda: len(frontFiller.services.currentLocations(self.ap, self.container))+len(frontFiller.container.itemLocations) < len(frontFiller.container.unusedLocations)/3
-        (stuck, itemLocations, progItems) = frontFiller.generateItems(condition)
+        (stuck, itemLocations, progItems) = frontFiller.generateItems(condition, vcr=self.vcr)
         self.container = frontFiller.container
         if stuck:
             self.errorMsg = "Stuck during initial front fill: {}".format(frontFiller.errorMsg)
-            if self.vcr != None:
-                self.vcr.dump(reverse=True)
             return (stuck, self.container.itemLocations, self.getProgressionItemLocations())
 
         self.log.debug("available locs after initial frontfill: {}".format(len(self.services.currentLocations(self.startAP, self.container))))
 
         # assumed fill for important items
+        if self.vcr is not None:
+            self.vcr.beginAssumed()
         self.log.debug("assumed fill start")
         assumedFiller = AssumedFiller(self.startAP, self.graph, self.restrictions, self.container, self.endDate)
         (stuck, itemLocs, prog) = assumedFiller.generateItems(vcr=self.vcr)
+        if self.vcr is not None:
+            self.vcr.endAssumed()
         self.container = assumedFiller.container
         if stuck:
             self.errorMsg = "Stuck during assumed fill: {}".format(assumedFiller.errorMsg)
-            if self.vcr != None:
-                self.vcr.dump(reverse=True)
             return (stuck, self.container.itemLocations, self.getProgressionItemLocations())
 
         if assumedFiller.randomFillWithLogic:
             # random fill logic for remaining minors & major items we couldn't place during previous filler
             self.log.debug("final random fill logic start")
             frontFiller = FrontFillerNoCopy(self.startAP, self.graph, self.restrictions, self.container, self.endDate)
-            (stuck, itemLocations, progItems) = frontFiller.generateItems()
+            (stuck, itemLocations, progItems) = frontFiller.generateItems(vcr=self.vcr)
             self.container = frontFiller.container
             if stuck:
                 self.errorMsg = "Stuck during final random fill logic: {}".format(frontFiller.errorMsg)
@@ -61,8 +61,6 @@ class ReverseFiller(Filler):
             if stuck:
                 self.errorMsg = "Stuck during final random fill nologic: {}".format(randomFiller.errorMsg)
 
-        if self.vcr != None:
-            self.vcr.dump(reverse=True)
         return (stuck, self.container.itemLocations, self.getProgressionItemLocations())
 
 class AssumedFiller(Filler):
@@ -76,7 +74,7 @@ class AssumedFiller(Filler):
         self.vcr = vcr
         self.initFiller()
 
-        alreadyPlacedItems = [il.Item for il in self.container.itemLocations]
+        alreadyPlacedItems = [il.Item for il in self.container.itemLocations if not il.Location.restricted]
         self.log.debug("alreadyPlacedItems: {}".format(getItemListStr(alreadyPlacedItems)))
         allItems = self.container.itemPool
 
@@ -126,8 +124,6 @@ class AssumedFiller(Filler):
             # check if all items have no locs
             if len([item for item, locs in itemLocDict.items() if len(locs) > 0]) == 0:
                 self.errorMsg = "Stuck, no item with possible loc"
-                if self.vcr != None:
-                    self.vcr.dump(reverse=True)
                 return (True, self.container.itemLocations, self.getProgressionItemLocations())
 
             self.log.debug("before: {}".format([(it.Type, len(locs)) for (it, locs) in itemLocDict.items()]))
@@ -170,6 +166,4 @@ class AssumedFiller(Filler):
 
         print('\n%d step(s) in %dms' % (self.nSteps, int((time.process_time()-self.startDate)*1000)))
 
-        if self.vcr != None:
-            self.vcr.dump(reverse=True)
         return (False, self.container.itemLocations, self.getProgressionItemLocations())

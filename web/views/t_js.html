@@ -381,6 +381,9 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         if(lastAction["scope"] == "area") {
             updateLines(jsonData);
         }
+        if(debug == true) {
+            updateDebugLines(jsonData);
+        }
         updateGps(jsonData);
         displayDoors(jsonData);
     } else {
@@ -390,6 +393,9 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         updateLocations(jsonData);
         updateInventory(jsonData);
         updateLines(jsonData);
+        if(debug == true) {
+            updateDebugLines(jsonData);
+        }
         displayDoors(jsonData);
         updateGps(jsonData);
         updateTimer(jsonData);
@@ -507,13 +513,16 @@ function updateGlobal(jsonData) {
 
 function updateLines(jsonData) {
     resetLines();
-    resetDebugLines();
 
     // add area transitions
     var arrayLength = jsonData["linesSeq"].length;
     for(var i=0; i<arrayLength; i++) {
         addLine(jsonData["linesSeq"][i][0], jsonData["linesSeq"][i][1]);
     }
+}
+
+function updateDebugLines(jsonData) {
+    resetDebugLines();
 
     if("innerTransitions" in jsonData) {
         var arrayLength = jsonData["innerTransitions"].length;

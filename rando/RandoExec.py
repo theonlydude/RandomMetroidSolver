@@ -56,7 +56,7 @@ class RandoExec(object):
         graphBuilder = GraphBuilder(graphSettings)
         container = None
         i = 0
-        attempts = 500 if graphSettings.areaRando else 1
+        attempts = 500 if graphSettings.areaRando or graphSettings.doorsColorsRando else 1
         now = time.process_time()
         endDate = sys.maxsize
         if randoSettings.runtimeLimit_s < endDate:

@@ -1,4 +1,5 @@
 import random, logging, time
+from collections import defaultdict
 
 from rando.Filler import Filler
 from rando.FillerRandom import FillerRandomItems, FrontFillerKickstart, FrontFillerNoCopy
@@ -124,7 +125,9 @@ class AssumedFiller(Filler):
         self.ap = 'Golden Four'
 
         self.nSteps = 1
+        alreadyTriedItems = defaultdict(set)
         while len(assumedItems) > 0:
+            step = len(assumedItems)
             self.nSteps += 1
             self.log.debug("remaining assumed items: {}: {}".format(self.nSteps, getItemListStr(assumedItems)))
 
@@ -139,7 +142,15 @@ class AssumedFiller(Filler):
             for it, locs in itemLocDict.items():
                 self.log.debug("{}: {}".format(it.Type, [loc.Name for loc in locs] if len(locs) < 5 else len(locs)))
 
-            item = random.choice(list(itemLocDict.keys()))
+            if len(alreadyTriedItems[step]) > 0:
+                self.log.debug("alreadyTriedItems: {} / {}".format(len(alreadyTriedItems[step]), step))
+                try:
+                    item = random.choice([it for it in itemLocDict.keys() if it not in alreadyTriedItems[step]])
+                except IndexError:
+                    self.errorMsg = "Stucked after testing all items"
+                    return (True, self.container.itemLocations, self.getProgressionItemLocations())
+            else:
+                item = random.choice(list(itemLocDict.keys()))
             locations = itemLocDict[item]
             self.log.debug("item choosen: {} - available locs: {}".format(item.Type, len(locations)))
 
@@ -154,6 +165,7 @@ class AssumedFiller(Filler):
             itemLoc = self.choice.chooseItemLoc({item: locations}, False)
             if itemLoc is None:
                 self.log.debug("No remaining location for item {}".format(item.Type))
+                alreadyTriedItems[step].add(item)
                 continue
             self.log.debug("loc choosen: {}".format(itemLoc.Location.Name))
 
@@ -168,6 +180,7 @@ class AssumedFiller(Filler):
             for it, locs in itemLocDictAfter.items():
                 if it.Category == 'Boss' and len(locs) == 0:
                     self.log.debug("step: {} - zeroLocsItemFound for {} after placing {} !!".format(self.nSteps, it.Type, item.Type))
+                    alreadyTriedItems[step].add(item)
                     zeroLocsItemFound = True
                     break
 

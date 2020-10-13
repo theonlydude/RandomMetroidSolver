@@ -50,13 +50,16 @@ class RandoServices(object):
             self.cache.reset()
 
         # check if bosses can be killed, if so add them to alreadyPlacedItems:
-        if item.Type != 'Kraid' and container.sm.enoughStuffsKraid():
+        sm = container.sm
+        if item.Type != 'Kraid' and sm.enoughStuffsKraid():
             container.sm.addItem('Kraid')
-        if item.Type != 'Phantoon' and container.sm.enoughStuffsPhantoon():
+        if item.Type != 'Phantoon' and sm.enoughStuffsPhantoon():
             container.sm.addItem('Phantoon')
-        if item.Type != 'Ridley' and container.sm.enoughStuffsRidley():
+        if item.Type != 'Ridley' and sm.enoughStuffsRidley():
             container.sm.addItem('Ridley')
-        if item.Type != 'Draygon' and container.sm.wand(container.sm.canFightDraygon(), container.sm.enoughStuffsDraygon()):
+        if item.Type != 'Draygon' and sm.wand(sm.canFightDraygon(),
+                                              sm.enoughStuffsDraygon(),
+                                              sm.canExitDraygon()):
             container.sm.addItem('Draygon')
 
         curLocs = self.currentLocations(ap, container, post=True)

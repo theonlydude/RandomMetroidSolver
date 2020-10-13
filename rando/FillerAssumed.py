@@ -1,7 +1,7 @@
-import random, logging
+import random, logging, time
 
 from rando.Filler import Filler
-from rando.FillerRandom import FillerRandomItems, FrontFillerKickstart
+from rando.FillerRandom import FillerRandomItems, FrontFillerKickstart, FrontFillerNoCopy
 from utils.parameters import infinity
 from rando.Choice import ItemThenLocChoice
 from graph.graph_access import GraphUtils
@@ -44,13 +44,22 @@ class ReverseFiller(Filler):
                 self.vcr.dump(reverse=True)
             return (stuck, self.container.itemLocations, self.getProgressionItemLocations())
 
-        # random fill no logic for remaining minors
-        self.log.debug("final random fill start")
-        randomFiller = FillerRandomItems(self.startAP, self.graph, self.restrictions, self.container, self.endDate)
-        (stuck, itemLocs, prog) = randomFiller.generateItems(vcr=self.vcr)
-        self.container = randomFiller.container
-        if stuck:
-            self.errorMsg = "Stuck during final random fill: {}".format(randomFiller.errorMsg)
+        if assumedFiller.randomFillWithLogic:
+            # random fill logic for remaining minors & major items we couldn't place during previous filler
+            self.log.debug("final random fill logic start")
+            frontFiller = FrontFillerNoCopy(self.startAP, self.graph, self.restrictions, self.container, self.endDate)
+            (stuck, itemLocations, progItems) = frontFiller.generateItems()
+            self.container = frontFiller.container
+            if stuck:
+                self.errorMsg = "Stuck during final random fill logic: {}".format(frontFiller.errorMsg)
+        else:
+            # random fill no logic for remaining minors
+            self.log.debug("final random fill nologic start")
+            randomFiller = FillerRandomItems(self.startAP, self.graph, self.restrictions, self.container, self.endDate)
+            (stuck, itemLocs, prog) = randomFiller.generateItems(vcr=self.vcr)
+            self.container = randomFiller.container
+            if stuck:
+                self.errorMsg = "Stuck during final random fill nologic: {}".format(randomFiller.errorMsg)
 
         if self.vcr != None:
             self.vcr.dump(reverse=True)
@@ -99,8 +108,6 @@ class AssumedFiller(Filler):
                 assumedItems.remove(item)
                 self.randomFillWithLogic = True
                 self.log.debug("Move item {} to 2nd phase".format(item.Type))
-                self.errorMsg = "Moving item to random fill phase is not implemented yet"
-                return (True, self.container.itemLocations, self.getProgressionItemLocations())
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             for item in firstItemLocDict.keys():
@@ -109,9 +116,10 @@ class AssumedFiller(Filler):
         # set start ap to mother brain as we're going in reverse from the end
         self.ap = 'Golden Four'
 
+        self.nSteps = 1
         while len(assumedItems) > 0:
-            step = len(assumedItems)
-            self.log.debug("remaining assumed items: {}: {}".format(step, getItemListStr(assumedItems)))
+            self.nSteps += 1
+            self.log.debug("remaining assumed items: {}: {}".format(self.nSteps, getItemListStr(assumedItems)))
 
             # compute available locs without each item type
             itemLocDict = self.services.getPossiblePlacementsWithoutItem(self.ap, self.container, assumedItems, alreadyPlacedItems)
@@ -147,7 +155,7 @@ class AssumedFiller(Filler):
             zeroLocsItemFound = False
             for it, locs in itemLocDictAfter.items():
                 if it.Category == 'Boss' and len(locs) == 0:
-                    self.log.debug("step: {} - zeroLocsItemFound for {} after placing {} !!".format(step, it.Type, item.Type))
+                    self.log.debug("step: {} - zeroLocsItemFound for {} after placing {} !!".format(self.nSteps, it.Type, item.Type))
                     zeroLocsItemFound = True
                     break
 
@@ -156,6 +164,11 @@ class AssumedFiller(Filler):
 
             self.collect(itemLoc)
             assumedItems.remove(item)
+
+        # add collected assumed items to container's smbm for next filler
+        self.container.sm.addItems([itemLoc.Item.Type for itemLoc in self.container.itemLocations])
+
+        print('\n%d step(s) in %dms' % (self.nSteps, int((time.process_time()-self.startDate)*1000)))
 
         if self.vcr != None:
             self.vcr.dump(reverse=True)

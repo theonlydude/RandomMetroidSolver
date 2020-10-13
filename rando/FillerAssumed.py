@@ -76,6 +76,15 @@ class AssumedFiller(Filler):
 
         alreadyPlacedItems = [il.Item for il in self.container.itemLocations if not il.Location.restricted]
         self.log.debug("alreadyPlacedItems: {}".format(getItemListStr(alreadyPlacedItems)))
+
+        # store available aps, use them at the end to be able to connect frontfill end to assumed begining
+        sm = self.container.sm
+        sm.addItems([it.Type for it in alreadyPlacedItems])
+        initialAPs = self.services.areaGraph.getAvailableAccessPoints(self.services.areaGraph.accessPoints[self.startAP], sm, self.services.settings.maxDiff)
+        initialAPs = set([ap.Name for ap in initialAPs.keys()])
+        sm.resetItems()
+        self.log.debug("initial APs: {}".format(initialAPs))
+
         allItems = self.container.itemPool
 
         # first collect mother brain
@@ -134,12 +143,19 @@ class AssumedFiller(Filler):
             locations = itemLocDict[item]
             self.log.debug("item choosen: {} - available locs: {}".format(item.Type, len(locations)))
 
+            # keep only locations available from initial APs
+            if len(assumedItems) == 1:
+                locations = [loc for loc in locations if loc.accessPoint in initialAPs]
+                self.log.debug("last item - filtered available locs: {}".format(len(locations)))
+                if not locations:
+                    self.errorMsg = "Stuck, can't join front filler end to assumed filler end"
+                    return (True, self.container.itemLocations, self.getProgressionItemLocations())
+
             itemLoc = self.choice.chooseItemLoc({item: locations}, False)
             if itemLoc is None:
                 self.log.debug("No remaining location for item {}".format(item.Type))
                 continue
             self.log.debug("loc choosen: {}".format(itemLoc.Location.Name))
-
 
             # check if a boss can't be placed after this items
             assumedItems.remove(item)

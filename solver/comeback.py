@@ -76,6 +76,10 @@ class ComeBack(object):
 
     def reuseLastStep(self, lastStep, solveAreas):
         # reuse the last step if all solve areas are included in last step to avoid creating too many.
+        # to avoid issues when a solve area from the previous step can't be reached from the current solve area,
+        # check that we have the same number of solve areas in both steps before reusing.
+        if len(solveAreas) != len(lastStep.solveAreas):
+            return False
         for area in solveAreas:
             # new solve area, don't reuse
             if area not in lastStep.solveAreas:

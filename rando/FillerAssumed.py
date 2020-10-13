@@ -24,6 +24,7 @@ class ReverseFiller(Filler):
         frontFiller = FrontFillerKickstart(self.startAP, self.graph, self.restrictions, self.container)
         condition = lambda: len(frontFiller.services.currentLocations(self.ap, self.container))+len(frontFiller.container.itemLocations) < len(frontFiller.container.unusedLocations)/3
         (stuck, itemLocations, progItems) = frontFiller.generateItems(condition)
+        self.container = frontFiller.container
         if stuck:
             self.errorMsg = "Stuck during initial front fill: {}".format(frontFiller.errorMsg)
             if self.vcr != None:
@@ -36,6 +37,7 @@ class ReverseFiller(Filler):
         self.log.debug("assumed fill start")
         assumedFiller = AssumedFiller(self.startAP, self.graph, self.restrictions, self.container, self.endDate)
         (stuck, itemLocs, prog) = assumedFiller.generateItems(vcr=self.vcr)
+        self.container = assumedFiller.container
         if stuck:
             self.errorMsg = "Stuck during assumed fill: {}".format(assumedFiller.errorMsg)
             if self.vcr != None:
@@ -46,6 +48,7 @@ class ReverseFiller(Filler):
         self.log.debug("final random fill start")
         randomFiller = FillerRandomItems(self.startAP, self.graph, self.restrictions, self.container, self.endDate)
         (stuck, itemLocs, prog) = randomFiller.generateItems(vcr=self.vcr)
+        self.container = randomFiller.container
         if stuck:
             self.errorMsg = "Stuck during final random fill: {}".format(randomFiller.errorMsg)
 
@@ -68,8 +71,8 @@ class AssumedFiller(Filler):
         self.log.debug("alreadyPlacedItems: {}".format(getItemListStr(alreadyPlacedItems)))
         allItems = self.container.itemPool
 
-        # first collect mother brain #and G4
-        for (boss, bossLocName) in [('MotherBrain', 'Mother Brain')]:#, ('Kraid', 'Kraid'), ('Phantoon', 'Phantoon'), ('Draygon', 'Draygon'), ('Ridley', 'Ridley')]:
+        # first collect mother brain
+        for (boss, bossLocName) in [('MotherBrain', 'Mother Brain')]:
             bossItem = self.container.getItems(lambda it: it.Type == boss)
             bossLoc = self.container.getLocs(lambda loc: loc.Name == bossLocName)
             if len(bossItem) > 0 and len(bossLoc) > 0:
@@ -134,7 +137,7 @@ class AssumedFiller(Filler):
             self.log.debug("loc choosen: {}".format(itemLoc.Location.Name))
 
 
-            # check that no item has zero possible locs after placing this item
+            # check if a boss can't be placed after this items
             assumedItems.remove(item)
             # use chosen loc ap to check if an item can't be placed afterward
             itemLocDictAfter = self.services.getPossiblePlacementsWithoutItem(itemLoc.Location.accessPoint, self.container, assumedItems, alreadyPlacedItems)
@@ -143,7 +146,7 @@ class AssumedFiller(Filler):
             self.log.debug("after: {}".format([(it.Type, len(locs)) for (it, locs) in itemLocDictAfter.items()]))
             zeroLocsItemFound = False
             for it, locs in itemLocDictAfter.items():
-                if len(locs) == 0:
+                if it.Category == 'Boss' and len(locs) == 0:
                     self.log.debug("step: {} - zeroLocsItemFound for {} after placing {} !!".format(step, it.Type, item.Type))
                     zeroLocsItemFound = True
                     break

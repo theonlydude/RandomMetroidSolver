@@ -39,13 +39,14 @@ class RandoServices(object):
         sys.stdout.flush()
         return itemLoc.Location.accessPoint if pickup == True else ap
 
-    def getPossiblePlacementsWithoutItem(self, ap, container, items, alreadyPlacedItems):
+    def getPossiblePlacementsWithoutItem(self, ap, container, items):
+        distinctItems = {item.Type: item for item in items}
         self.log.debug("getPossiblePlacementsWithoutItem, unusedLocations: {}".format(len(container.unusedLocations)))
-        return {item: self.allLocationsWithoutItem(item, ap, container, items, alreadyPlacedItems) for item in items}
+        return {item: self.allLocationsWithoutItem(item, ap, container, items) for itemType, item in distinctItems.items()}
 
-    def allLocationsWithoutItem(self, item, ap, container, items, alreadyPlacedItems):
+    def allLocationsWithoutItem(self, item, ap, container, items):
         container.sm.resetItems()
-        container.sm.addItems([it.Type for it in items if id(it) != id(item)] + [it.Type for it in alreadyPlacedItems])
+        container.sm.addItems([it.Type for it in items if id(it) != id(item)])
         if self.cache:
             self.cache.reset()
 
@@ -57,9 +58,12 @@ class RandoServices(object):
             container.sm.addItem('Phantoon')
         if item.Type != 'Ridley' and sm.enoughStuffsRidley() and self.areaGraph.canAccess(container.sm, ap, 'RidleyRoomIn', self.settings.maxDiff):
             container.sm.addItem('Ridley')
-        if item.Type != 'Draygon' and sm.wand(sm.canFightDraygon(),
-                                              sm.enoughStuffsDraygon(),
-                                              sm.canExitDraygon()) and self.areaGraph.canAccess(container.sm, ap, 'DraygonRoomIn', self.settings.maxDiff):
+        if (item.Type != 'Draygon'
+            and sm.wand(sm.canFightDraygon(),
+                        sm.enoughStuffsDraygon(),
+                        sm.canExitDraygon())
+            and (ap == 'Draygon Room Bottom' # need draygon dead to exit draygon room bottom
+                 or self.areaGraph.canAccess(container.sm, ap, 'DraygonRoomIn', self.settings.maxDiff))):
             container.sm.addItem('Draygon')
 
         curLocs = self.currentLocations(ap, container, post=True)

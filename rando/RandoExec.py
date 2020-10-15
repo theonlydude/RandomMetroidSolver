@@ -9,7 +9,7 @@ from rando.RandoSetup import RandoSetup
 from rando.Filler import FrontFiller
 from rando.FillerProgSpeed import FillerProgSpeed, FillerProgSpeedChozoSecondPhase
 from rando.FillerRandom import FillerRandom, FillerRandomSpeedrun
-from rando.FillerAssumed import ReverseFiller
+from rando.FillerAssumed import AssumedFiller
 from rando.Chozo import ChozoFillerFactory, ChozoWrapperFiller
 from rando.Items import ItemManager
 from rando.ItemLocContainer import ItemLocation
@@ -29,7 +29,7 @@ class RandoExec(object):
         elif progSpeed == "speedrun":
             return lambda graphSettings, graph, restr, cont: FillerRandomSpeedrun(graphSettings, graph, restr, cont, endDate)
         elif progSpeed == "reverse":
-            return lambda graphSettings, graph, restr, cont: ReverseFiller(graphSettings, graph, restr, cont, endDate)
+            return lambda graphSettings, graph, restr, cont: AssumedFiller(graphSettings, graph, restr, cont, endDate)
         else:
             return lambda graphSettings, graph, restr, cont: FillerProgSpeed(graphSettings, graph, restr, cont, endDate)
 

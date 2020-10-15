@@ -202,13 +202,13 @@ Rom generated: VARIA
 
 # Web with Docker
 
-You can launch the web2py website locally using docker, it has been tested on Linux and WSL2:
+You can launch the web2py website locally using docker, it has been tested on Linux, macOS and WSL2:
 ```
 root@computer:/home/dude/RandomMetroidSolver/web/docker# ./build.sh
 root@computer:/home/dude/RandomMetroidSolver/web/docker# ./run.sh
 ```
 
-Then you can connect to the local website on http://127.0.0.1:8000/ on Linux and http://WSL2 local IP:8000/ on WSL2.
+Then you can connect to the local website on http://127.0.0.1:8000/ on Linux/macOS and http://WSL2-local-IP:8000/ on WSL2.
 
 You can choose the branch to checkout with -b, and give a Github token with -t to be able to do git pull in the Docker image:
 ```

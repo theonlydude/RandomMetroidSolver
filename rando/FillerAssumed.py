@@ -30,6 +30,15 @@ class AssumedFiller(Filler):
         # TODO::choose morph loc first to forbid other items in it. TODO::handle early/late morph
         #firstItemLocDict = self.services.getPossiblePlacementsWithoutItem(self.startAP, self.container, assumedItems, alreadyPlacedItems)
 
+    def switchTwoItems(self, itemLocDict):
+        # we are stuck, all items have zero location available (zero_item).
+        # so compute the locations available for each item using the already filled locations,
+        # then in all the filled locations choose one with a dispensable item (disp_item)
+        # then put a zero_item in the disp_item location and put back disp_item in the pool.
+        # check that after that items have available locations.
+        # in the end launch a mini solver to check that all the filled locations are still available.
+        pass
+
     def step(self, onlyBossCheck=False):
         assumedItems = self.container.itemPool
 

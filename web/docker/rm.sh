@@ -1,5 +1,5 @@
 #!/bin/bash
-# stop varia cotainers and remove varia images
+# remove all varia containers/images/network
 
 docker container ls -a | grep 'varia' | awk '{print $1}' | while read CONTAINER_ID; do docker container rm -f ${CONTAINER_ID}; done
 docker image ls | grep varia | awk '{print $3}' | while read IMAGE_ID; do docker image rm ${IMAGE_ID}; done

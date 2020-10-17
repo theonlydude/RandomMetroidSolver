@@ -1112,7 +1112,7 @@ class RomPatcher:
         self.nothingId = 0x1a
         # if not default start, use first loc with a nothing
         if not GraphUtils.isStandardStart(startAP):
-            firstNothing = next((il['Location'] for il in itemLocs if il['Item'].Category == 'Nothing'), None)
+            firstNothing = next((il['Location'] for il in itemLocs if il['Item'].Category == 'Nothing' and 'Boss' not in il['Location']["Class"]), None)
             if firstNothing is not None:
                 self.nothingId = firstNothing['Id']
 

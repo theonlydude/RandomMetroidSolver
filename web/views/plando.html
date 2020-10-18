@@ -673,8 +673,7 @@ function nextAction() {
       vcrIndex += 1;
       loadNextAction();
     } else if(nextActionType == "init") {
-        console.log("init, items: "+nextAction["items"]);
-        ajaxCall({action: "add", scope: "item", initialItems: nextAction["items"].join()}, "upload");
+      ajaxCall({action: "add", scope: "item", initialItems: nextAction["items"].join()}, "upload");
 
       vcrIndex += 1;
       loadNextAction();
@@ -737,32 +736,36 @@ function gotoX() {
 }
 
 function pushActions(len, stopAtNextRollback=false) {
-  var endAction = vcrIndex + len;
-  var tmpIndex = vcrIndex;
+    var endAction = vcrIndex + len;
+    var tmpIndex = vcrIndex;
 
-  while(tmpIndex < endAction) {
-    var nextAction = vcrData[tmpIndex];
+    while(tmpIndex < endAction) {
+        var nextAction = vcrData[tmpIndex];
 
-    if(nextAction["type"] == "location") {
-      var locISolver = nextAction["loc"];
-      locISolver.replace(/[ ,()-]/g, '');
-      ajaxChainedActions.push({action: "add", scope: "item", locName: locISolver, itemName: nextAction["item"], idxFunc: "loadNextAction"})
-    } else {
-      if(stopAtNextRollback == true) {
-        break;
-      }
-      var count = nextAction["count"];
-      ajaxChainedActions.push({action: "remove", scope: "item", count: nextAction["count"], idxFunc: "loadNextAction"});
+        if(nextAction["type"] == "location") {
+            var locISolver = loc2ISolver(nextAction["loc"]);
+            ajaxChainedActions.push({action: "add", scope: "item", locName: locISolver, itemName: nextAction["item"], filler: nextAction["filler"], idxFunc: "loadNextAction"})
+        } else if(nextAction["type"] == "rollback") {
+            if(stopAtNextRollback == true) {
+                break;
+            }
+            var count = nextAction["count"];
+            ajaxChainedActions.push({action: "remove", scope: "item", count: nextAction["count"], idxFunc: "loadNextAction"});
+        } else if(nextAction["type"] == "init") {
+            ajaxChainedActions.push({action: "add", scope: "item", initialItems: nextAction["items"].join(), idxFunc: "loadNextAction"});
+        } else if(nextAction["type"] == "remove") {
+            var locISolver = loc2ISolver(nextAction["loc"]);
+            ajaxChainedActions.push({action: "remove", scope: "item", locName: locISolver, itemName: nextAction["item"], filler: "reverse", idxFunc: "loadNextAction"});
+        }
+
+        tmpIndex += 1;
     }
 
-    tmpIndex += 1;
-  }
+    // the chained actions are executed from the end of the array
+    ajaxChainedActions.reverse();
 
-  // the chained actions are executed from the end of the array
-  ajaxChainedActions.reverse();
-
-  loadNextAction();
-  ajaxCallChained();
+    loadNextAction();
+    ajaxCallChained();
 }
 
 function isDesactivated(elemId) {

@@ -29,6 +29,7 @@ class MiniSolver(object):
             locations.append(loc)
         self.smbm.resetItems()
         if startItems:
+            self.log.debug("add start items: {}".format(startItems))
             self.smbm.addItems(startItems)
         ap = self.startAP
         onlyBossesLeft = -1

@@ -124,11 +124,14 @@ class InteractiveSolver(CommonSolver):
             else:
                 if action == 'add':
                     if self.mode == 'plando' or self.mode == 'seedless':
-                        if params['loc'] != None:
+                        if params.get('loc') is not None:
                             if self.mode == 'plando':
-                                self.setItemAt(params['loc'], params['item'], params['hide'])
+                                self.setItemAt(params['loc'], params['item'], params['hide'], params['filler'])
                             else:
                                 self.setItemAt(params['loc'], params.get('item', 'Nothing'), False)
+                        elif params.get('items') is not None:
+                            self.collectedItems = params['items']
+                            self.smbm.addItems(params['items'])
                         else:
                             self.increaseItem(params['item'])
                     else:
@@ -136,7 +139,7 @@ class InteractiveSolver(CommonSolver):
                         self.pickItemAt(params['loc'])
                 elif action == 'remove':
                     if 'loc' in params:
-                        self.removeItemAt(params['loc'])
+                        self.removeItemAt(params['loc'], params['filler'])
                     elif 'count' in params:
                         # remove last collected item
                         self.cancelLastItems(params['count'])
@@ -444,7 +447,7 @@ class InteractiveSolver(CommonSolver):
             loc.accessPoint = list(loc.AccessFrom)[0]
         self.collectMajor(loc)
 
-    def setItemAt(self, locName, itemName, hide):
+    def setItemAt(self, locName, itemName, hide, filler='front'):
         # set itemName at locName
 
         loc = self.getWebLoc(locName)
@@ -461,7 +464,7 @@ class InteractiveSolver(CommonSolver):
         if hide == True:
             loc.Visibility = 'Hidden'
 
-        self.collectMajor(loc, itemName)
+        self.collectMajor(loc, itemName, filler)
 
     def replaceItemAt(self, locName, itemName, hide):
         # replace itemName at locName

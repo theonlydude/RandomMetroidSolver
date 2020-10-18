@@ -143,17 +143,17 @@ class CommonSolver(object):
                     print("                                          smbool: {}".format(loc.difficulty))
                     print("                                            path: {}".format([ap.Name for ap in loc.path]))
 
-    def collectMajor(self, loc, itemName=None):
+    def collectMajor(self, loc, itemName=None, filler='front'):
         self.majorLocations.remove(loc)
         self.visitedLocations.append(loc)
-        self.collectItem(loc, itemName)
+        self.collectItem(loc, itemName, filler)
 
     def collectMinor(self, loc):
         self.minorLocations.remove(loc)
         self.visitedLocations.append(loc)
         self.collectItem(loc)
 
-    def collectItem(self, loc, item=None):
+    def collectItem(self, loc, item=None, filler='front'):
         if item == None:
             item = loc.itemName
 
@@ -165,13 +165,18 @@ class CommonSolver(object):
                 self.firstLogFile.write("{};{};{};{}\n".format(item, loc.Name, loc.Area, loc.GraphArea))
 
         if item not in Conf.itemsForbidden:
-            self.collectedItems.append(item)
-            if self.checkDuplicateMajor == True:
-                if item not in ['Nothing', 'NoEnergy', 'Missile', 'Super', 'PowerBomb', 'ETank', 'Reserve']:
-                    if self.smbm.haveItem(item):
-                        print("WARNING: {} has already been picked up".format(item))
+            if filler == 'front':
+                self.collectedItems.append(item)
+                if self.checkDuplicateMajor == True:
+                    if item not in ['Nothing', 'NoEnergy', 'Missile', 'Super', 'PowerBomb', 'ETank', 'Reserve']:
+                        if self.smbm.haveItem(item):
+                            print("WARNING: {} has already been picked up".format(item))
 
-            self.smbm.addItem(item)
+                self.smbm.addItem(item)
+            else:
+                # assumed filler vcr
+                self.collectedItems.remove(item)
+                self.smbm.removeItem(item)
         else:
             # update the name of the item
             item = "-{}-".format(item)
@@ -197,7 +202,7 @@ class CommonSolver(object):
             if loc.Name == locName:
                 return i
 
-    def removeItemAt(self, locNameWeb):
+    def removeItemAt(self, locNameWeb, filler='front'):
         locName = self.locNameWeb2Internal(locNameWeb)
         locIndex = self.getLocIndex(locName)
         loc = self.visitedLocations.pop(locIndex)
@@ -225,18 +230,22 @@ class CommonSolver(object):
         # item
         item = loc.itemName
 
-        if self.mode == 'seedless':
-            # in seedless remove the first nothing found as collectedItems is not ordered
-            self.collectedItems.remove(item)
-        else:
-            self.collectedItems.pop(locIndex)
+        if filler == 'front':
+            if self.mode == 'seedless':
+                # in seedless remove the first nothing found as collectedItems is not ordered
+                self.collectedItems.remove(item)
+            else:
+                self.collectedItems.pop(locIndex)
 
-        # if multiple majors in plando mode, remove it from smbm only when it's the last occurence of it
-        if self.smbm.isCountItem(item):
-            self.smbm.removeItem(item)
-        else:
-            if item not in self.collectedItems:
+            # if multiple majors in plando mode, remove it from smbm only when it's the last occurence of it
+            if self.smbm.isCountItem(item):
                 self.smbm.removeItem(item)
+            else:
+                if item not in self.collectedItems:
+                    self.smbm.removeItem(item)
+        else:
+            self.collectedItems.append(item)
+            self.smbm.removeItem(item)
 
     def cancelLastItems(self, count):
         if self.vcr != None:

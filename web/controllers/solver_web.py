@@ -1885,9 +1885,14 @@ class WS(object):
                 if 'loc' in parameters:
                     params += ['--loc', parameters["loc"]]
                 if self.mode != 'standard':
-                    params += ['--item', parameters["item"]]
-                    if parameters['hide'] == True:
-                        params.append('--hide')
+                    if "item" in parameters:
+                        params += ['--item', parameters["item"]]
+                        if parameters['hide'] == True:
+                            params.append('--hide')
+                        if 'filler' in parameters:
+                            params += ['--filler', parameters['filler']]
+                    elif "items" in parameters:
+                        params += ['--items', parameters["items"]]
             elif scope == 'area':
                 params += ['--startPoint', parameters["startPoint"],
                            '--endPoint', parameters["endPoint"]]
@@ -1897,6 +1902,8 @@ class WS(object):
         elif action == 'remove' and scope == 'item':
             if 'loc' in parameters:
                 params += ['--loc', parameters["loc"]]
+                if 'filler' in parameters:
+                    params += ['--filler', parameters['filler']]
             elif 'count' in parameters:
                 params += ['--count', str(parameters["count"])]
             else:
@@ -2189,7 +2196,7 @@ class WS_item_add(WS):
         super(WS_item_add, self).validate()
 
         # new location
-        if request.vars.locName != None:
+        if request.vars.locName is not None:
             locName = name4isolver(request.vars.locName)
 
             if locName not in validLocsList:
@@ -2197,30 +2204,47 @@ class WS_item_add(WS):
 
             request.vars.locName = locName
 
-        itemName = request.vars.itemName
-        if itemName == "NoEnergy":
-            itemName = "Nothing"
+        if request.vars.itemName is not None:
+            itemName = request.vars.itemName
+            if itemName not in validItemsList:
+                raiseHttp(400, "Unknown item name", True)
 
-        if itemName not in validItemsList:
-            raiseHttp(400, "Unknown item name", True)
+        elif request.vars.initialItems is not None:
+            initialItems = request.vars.initialItems.split(',')
 
+            for itemName in initialItems:
+                if itemName not in validItemsList:
+                    raiseHttp(400, "Unknown item name", True)
+
+        if request.vars.filler is not None:
+            filler = request.vars.filler
+            if filler not in ['front', 'reverse']:
+                raiseHttp(400, "Unknown filler type", True)
 
     def action(self):
         item = request.vars.itemName
+        items = request.vars.initialItems
         locName = request.vars.locName
+        filler = request.vars.filler
 
-        # items used only in the randomizer that we get in vcr mode
-        if item in ["NoEnergy", None]:
-            item = 'Nothing'
+        if items is not None:
+            params = {"items": items}
+        else:
+            # items used only in the randomizer that we get in vcr mode
+            if item is None:
+                item = 'Nothing'
 
-        # in seedless mode we have to had boss items instead of nothing
-        if request.vars.mode == "seedless":
-            if locName in ['Kraid', 'Ridley', 'Phantoon', 'Draygon', 'MotherBrain']:
-                item = locName
+            # in seedless mode we have to had boss items instead of nothing
+            if request.vars.mode == "seedless":
+                if locName in ['Kraid', 'Ridley', 'Phantoon', 'Draygon', 'MotherBrain']:
+                    item = locName
 
-        params = {"item": item, "hide": request.vars.hide == "true"}
-        if locName != None:
-            params['loc'] = locName
+            params = {"item": item, "hide": request.vars.hide == "true"}
+            if locName is not None:
+                params['loc'] = locName
+            if filler is not None:
+                params['filler'] = filler
+
         return self.callSolverAction("item", "add", params)
 
 class WS_item_replace(WS_item_add):
@@ -2248,8 +2272,8 @@ class WS_item_remove(WS):
             raiseHttp(400, "Unknown item name", True)
 
         self.itemName = request.vars.itemName
-        if self.itemName == None:
-            if request.vars.count != None:
+        if self.itemName is None:
+            if request.vars.count is not None:
                 self.count = getInt("count", True)
                 if self.count > 105 or self.count < 1:
                     raiseHttp(400, "Wrong value for count, must be in [1-105] ", True)
@@ -2259,17 +2283,26 @@ class WS_item_remove(WS):
             self.count = -1
 
         self.locName = request.vars.locName
-        if self.locName != None:
+        if self.locName is not None:
             self.locName = name4isolver(self.locName)
 
             if self.locName not in validLocsList:
                 raiseHttp(400, "Unknown location name", True)
 
+        if request.vars.filler is not None:
+            filler = request.vars.filler
+            if filler not in ['front', 'reverse']:
+                raiseHttp(400, "Unknown filler type", True)
+
     def action(self):
-        if self.locName != None:
-            return self.callSolverAction("item", "remove", {"loc": self.locName})
+        filler = request.vars.filler
+        if self.locName is not None:
+            params = {"loc": self.locName}
+            if filler is not None:
+                params['filler'] = filler
+            return self.callSolverAction("item", "remove", params)
         else:
-            if self.itemName != None:
+            if self.itemName is not None:
                 return self.callSolverAction("item", "remove", {"item": self.itemName})
             else:
                 return self.callSolverAction("item", "remove", {"count": self.count})

@@ -36,6 +36,10 @@ class Filler(object):
         self.settings.maxDiff = self.maxDiff
         self.startDate = time.process_time()
 
+    # return false if generated fill can't be solved, used by assumed filler
+    def validateFill(self):
+        return True
+
     # sets up container initial state
     def initContainer(self):
         self.container = copy.copy(self.baseContainer)
@@ -69,7 +73,10 @@ class Filler(object):
             if date > self.endDate:
                 self.errorMsg = "Exceeded time limit of "+str(self.settings.runtimeLimit_s) +" seconds"
             else:
-                self.errorMsg = "STUCK !\n"+self.container.dump()
+                self.errorMsg += " STUCK !\n"+self.container.dump()
+        elif not self.validateFill():
+            isStuck = True
+            self.errorMsg += " Final validation failed. STUCK !\n"+self.container.dump()
         else:
             # check if some locations are above max diff and add relevant message
             locs = self.container.getUsedLocs(lambda loc: loc.difficulty.difficulty > self.maxDiff)

@@ -35,40 +35,43 @@ def interactiveSolver(args):
                 params["minorQty"] = args.minorQty
                 params["energyQty"] = args.energyQty
         elif args.scope == 'item':
-            if args.state == None or args.action == None or args.output == None:
+            if args.state == None or args.action == None or args.output is None:
                 print("Missing state/action/output parameter")
                 sys.exit(1)
             if args.action in ["add", "replace"]:
-                if args.mode != 'seedless' and args.loc == None:
-                    print("Missing loc parameter when using action add for item")
-                    sys.exit(1)
-                if args.mode == 'plando':
-                    if args.item == None:
-                        print("Missing item parameter when using action add in plando/suitless mode")
+                if args.items is not None:
+                    params = {'items': args.items.split(',')}
+                else:
+                    if args.mode != 'seedless' and args.loc is None:
+                        print("Missing loc parameter when using action add for item")
                         sys.exit(1)
-                params = {'loc': args.loc, 'item': args.item, 'hide': args.hide}
+                    if args.mode == 'plando':
+                        if args.item is None:
+                            print("Missing item parameter when using action add in plando/suitless mode")
+                            sys.exit(1)
+                    params = {'loc': args.loc, 'item': args.item, 'hide': args.hide, 'filler': args.filler}
             elif args.action == "remove":
-                if args.loc != None:
-                    params = {'loc': args.loc}
-                elif args.item != None:
+                if args.loc is not None:
+                    params = {'loc': args.loc, 'filler': args.filler}
+                elif args.item is not None:
                     params = {'item': args.item}
                 else:
                     params = {'count': args.count}
             elif args.action == "toggle":
                 params = {'item': args.item}
         elif args.scope == 'area':
-            if args.state == None or args.action == None or args.output == None:
+            if args.state is None or args.action is None or args.output is None:
                 print("Missing state/action/output parameter")
                 sys.exit(1)
             if args.action == "add":
-                if args.startPoint == None or args.endPoint == None:
+                if args.startPoint is None or args.endPoint is None:
                     print("Missing start or end point parameter when using action add for item")
                     sys.exit(1)
                 params = {'startPoint': args.startPoint, 'endPoint': args.endPoint}
-            if args.action == "remove" and args.startPoint != None:
+            if args.action == "remove" and args.startPoint is not None:
                 params = {'startPoint': args.startPoint}
         elif args.scope == 'door':
-            if args.state == None or args.action == None or args.output == None:
+            if args.state is None or args.action is None or args.output is None:
                 print("Missing state/action/output parameter")
                 sys.exit(1)
             if args.action == "replace":
@@ -159,8 +162,12 @@ if __name__ == "__main__":
                         dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize', 'toggle'])
     parser.add_argument('--item', help="Name of the item to place in plando mode (used in interactive mode)",
                         dest="item", nargs='?', default=None)
+    parser.add_argument('--items', help="Initial assumed filler items (used in interactive mode)",
+                        dest="items", nargs='?', default=None)
     parser.add_argument('--hide', help="Hide the item to place in plando mode (used in interactive mode)",
                         dest="hide", action='store_true')
+    parser.add_argument('--filler', help="Front/Reserve filler, used by vcr when adding an item",
+                        dest="filler", nargs="?", default=None, choices=['front', 'reverse'])
     parser.add_argument('--startPoint', help="The start AP to connect (used in interactive mode)",
                         dest="startPoint", nargs='?', default=None)
     parser.add_argument('--endPoint', help="The destination AP to connect (used in interactive mode)",
@@ -196,19 +203,19 @@ if __name__ == "__main__":
     if args.presetFileName is None:
         args.presetFileName = 'standard_presets/regular.json'
 
-    if args.raceMagic != None:
+    if args.raceMagic is not None:
         if args.raceMagic <= 0 or args.raceMagic >= 0x10000:
             print("Invalid magic")
             sys.exit(-1)
 
-    if args.count != None:
+    if args.count is not None:
         if args.count < 1 or args.count > 0x80:
             print("Invalid count")
             sys.exit(-1)
 
     utils.log.init(args.debug)
 
-    if args.interactive == True:
+    if args.interactive:
         interactiveSolver(args)
     else:
         standardSolver(args)

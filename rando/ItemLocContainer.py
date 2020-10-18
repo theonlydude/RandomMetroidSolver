@@ -16,6 +16,9 @@ class ItemLocation(object):
     def json(self):
         return {'Item': self.Item.json(), 'Location': self.Location.json()}
 
+    def __repr__(self):
+        return "{}@{}".format(self.Item.Type, self.Location.Name)
+
 def getItemListStr(items):
     return str(dict(Counter([item.Type for item in items])))
 
@@ -213,6 +216,10 @@ class ItemLocContainer(object):
     def getUsedLocs(self, predicate):
         return [il.Location for il in self.itemLocations if predicate(il.Location) == True]
 
+    # access already collected itemLocations
+    def getItemLocations(self, predicate):
+        return [il for il in self.itemLocations if predicate(il) == True]
+
     def getCollectedItems(self, predicate):
         return [item for item in self.currentItems if predicate(item) == True]
 
@@ -241,3 +248,31 @@ class ItemLocContainer(object):
     def getDistinctItems(self):
         itemTypes = {item.Type for item in self.itemPool}
         return [self.getNextItemInPool(itemType) for itemType in itemTypes]
+
+    def restoreLocations(self):
+        # used by assumed filler
+        locsItem = {}
+        for il in self.itemLocations:
+            self.unusedLocations.append(il.Location)
+            locsItem[il.Location] = il.Item
+
+        return locsItem
+
+    def uncollect(self, loc):
+        # used by assumed filler
+        for il in self.itemLocations:
+            if il.Location == loc:
+                oldItemLocation = il
+                break
+
+        item = oldItemLocation.Item
+
+        self.log.debug("uncollect {}@{}".format(item.Type, loc.Name))
+
+        self.currentItems.remove(item)
+        self.sm.removeItem(item.Type)
+        self.itemLocations.remove(oldItemLocation)
+        self.itemPool.append(item)
+        self.unusedLocations.append(loc)
+
+        return item.Type

@@ -29,7 +29,7 @@ class RandoExec(object):
         elif progSpeed == "speedrun":
             return lambda graphSettings, graph, restr, cont: FillerRandomSpeedrun(graphSettings, graph, restr, cont, endDate)
         elif progSpeed == "reverse":
-            return lambda graphSettings, graph, restr, cont: AssumedFiller(graphSettings, graph, restr, cont, endDate)
+            return lambda graphSettings, graph, restr, cont: AssumedFiller(graphSettings.startAP, graph, restr, cont, endDate)
         else:
             return lambda graphSettings, graph, restr, cont: FillerProgSpeed(graphSettings, graph, restr, cont, endDate)
 

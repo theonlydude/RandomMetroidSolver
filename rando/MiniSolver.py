@@ -15,7 +15,7 @@ class MiniSolver(object):
 
     # if True, does not mean it is actually beatable, unless you're sure of it from another source of information
     # if False, it is certain it is not beatable
-    def isBeatable(self, itemLocations, maxDiff=None):
+    def isBeatable(self, itemLocations, maxDiff=None, startItems=[]):
         if maxDiff is None:
             maxDiff = self.settings.maxDiff
         minDiff = self.settings.minDiff
@@ -28,16 +28,20 @@ class MiniSolver(object):
             loc.difficulty = None
             locations.append(loc)
         self.smbm.resetItems()
+        if startItems:
+            self.smbm.addItems(startItems)
         ap = self.startAP
         onlyBossesLeft = -1
         hasOneLocAboveMinDiff = False
         while True:
             if not locations:
+                self.log.debug("all locations visited")
                 return hasOneLocAboveMinDiff
             # only two loops to collect all remaining locations in only bosses left mode
             if onlyBossesLeft >= 0:
                 onlyBossesLeft += 1
                 if onlyBossesLeft > 2:
+                    self.log.debug("failed after two only bosses left loops")
                     return False
             self.areaGraph.getAvailableLocations(locations, self.smbm, maxDiff, ap)
             post = [loc for loc in locations if loc.PostAvailable and loc.difficulty.bool == True]
@@ -47,12 +51,14 @@ class MiniSolver(object):
                 self.smbm.removeItem(loc.itemName)
                 loc.difficulty = self.smbm.wand(loc.difficulty, postAvailable)
             toCollect = [loc for loc in locations if loc.difficulty.bool == True and loc.difficulty.difficulty <= maxDiff]
+            self.log.debug("locs to collect: {}".format([loc.Name for loc in toCollect]))
             if not toCollect:
                 # mini onlyBossesLeft
                 if maxDiff < infinity:
                     maxDiff = infinity
                     onlyBossesLeft = 0
                     continue
+                self.log.debug("failed. remaining locs: {}".format([loc.Name for loc in locations]))
                 return False
             if not hasOneLocAboveMinDiff:
                 hasOneLocAboveMinDiff = any(loc.difficulty.difficulty >= minDiff for loc in locations)

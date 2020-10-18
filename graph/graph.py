@@ -13,6 +13,9 @@ class Path(object):
         self.pdiff = pdiff
         self.distance = distance
 
+    def __len__(self):
+        return len(self.path)
+
 class AccessPoint(object):
     # name : AccessPoint name
     # graphArea : graph area the node is located in
@@ -275,7 +278,7 @@ class AccessGraph(object):
             if loc.GraphArea not in availAreas:
                 loc.distance = 30000
                 loc.difficulty = smboolFalse
-                #if loc.Name == "Kraid":
+                #if loc.Name == "Phantoon":
                 #    print("loc: {} locDiff is area nok".format(loc.Name))
                 continue
 
@@ -283,7 +286,7 @@ class AccessGraph(object):
             if len(locAPs) == 0:
                 loc.distance = 40000
                 loc.difficulty = smboolFalse
-                #if loc.Name == "Kraid":
+                #if loc.Name == "Phantoon":
                 #    print("loc: {} no aps".format(loc.Name))
                 continue
 
@@ -291,20 +294,20 @@ class AccessGraph(object):
                 if apName == None:
                     loc.distance = 20000
                     loc.difficulty = smboolFalse
-                    #if loc.Name == "Kraid":
+                    #if loc.Name == "Phantoon":
                     #    print("loc: {} ap is none".format(loc.Name))
                     break
 
                 tFunc = loc.AccessFrom[apName]
                 ap = self.accessPoints[apName]
                 tdiff = tFunc(smbm)
-                #if loc.Name == "Kraid":
+                #if loc.Name == "Phantoon":
                 #    print("{} root: {} ap: {}".format(loc.Name, rootNode, apName))
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = loc.Available(smbm)
                     if diff.bool == True:
                         path = availAPPaths[apName].path
-                        #if loc.Name == "Kraid":
+                        #if loc.Name == "Phantoon":
                         #    print("{} path: {}".format(loc.Name, [a.Name for a in path]))
                         pdiff = availAPPaths[apName].pdiff
                         (allDiff, locDiff) = self.computeLocDiff(tdiff, diff, pdiff)
@@ -317,32 +320,32 @@ class AccessGraph(object):
                             loc.pathDifficulty = pdiff
                             loc.locDifficulty = locDiff
                             availLocs.append(loc)
-                            #if loc.Name == "Kraid":
+                            #if loc.Name == "Phantoon":
                             #    print("{} diff: {} tdiff: {} pdiff: {}".format(loc.Name, diff, tdiff, pdiff))
                             break
                         else:
                             loc.distance = 1000 + tdiff.difficulty
                             loc.difficulty = smboolFalse
-                            #if loc.Name == "Kraid":
-                            #    print("loc: {} allDiff is false".format(loc.Name))
+                            #if loc.Name == "Phantoon":
+                            #    print("loc: {} allDiff is false of > maxdiff: {}".format(loc.Name, allDiff))
                     else:
                         loc.distance = 1000 + tdiff.difficulty
                         loc.difficulty = smboolFalse
-                        #if loc.Name == "Kraid":
-                        #    print("loc: {} allDiff is false".format(loc.Name))
+                        #if loc.Name == "Phantoon":
+                        #    print("loc: {} fiff is false".format(loc.Name))
                 else:
                     loc.distance = 10000 + tdiff.difficulty
                     loc.difficulty = smboolFalse
-                    #if loc.Name == "Kraid":
+                    #if loc.Name == "Phantoon":
                     #    print("loc: {} tdiff is false".format(loc.Name))
 
             if loc.difficulty is None:
-                #if loc.Name == "Kraid":
+                #if loc.Name == "Phantoon":
                 #    print("loc: {} no difficulty in loc".format(loc.Name))
                 loc.distance = 100000
                 loc.difficulty = smboolFalse
 
-            #if loc.Name == "Kraid":
+            #if loc.Name == "Phantoon":
             #    print("loc: {}: {}".format(loc.Name, loc))
 
         #print("availableLocs: {}".format([loc.Name for loc in availLocs]))

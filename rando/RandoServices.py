@@ -39,14 +39,17 @@ class RandoServices(object):
         sys.stdout.flush()
         return itemLoc.Location.accessPoint if pickup == True else ap
 
-    def getPossiblePlacementsWithoutItem(self, ap, container, items):
-        distinctItems = {item.Type: item for item in items}
+    def getPossiblePlacementsWithoutItem(self, startAP, ap, container, items, maxDiff):
+        distinctItems = {item.Type: item for item in items if item.Type not in ['Nothing', 'NoEnergy']}
         self.log.debug("getPossiblePlacementsWithoutItem, unusedLocations: {}".format(len(container.unusedLocations)))
-        return {item: self.allLocationsWithoutItem(item, ap, container, items) for itemType, item in distinctItems.items()}
+        return {item: self.allLocationsWithoutItem(item, startAP, ap, container, items, maxDiff) for itemType, item in distinctItems.items()}
 
-    def allLocationsWithoutItem(self, item, ap, container, items):
+    def allLocationsWithoutItem(self, item, startAP, ap, container, items, maxDiff):
         container.sm.resetItems()
-        container.sm.addItems([it.Type for it in items if id(it) != id(item)])
+        items.remove(item)
+        container.sm.addItems([it.Type for it in items])
+        items.append(item)
+
         if self.cache:
             self.cache.reset()
 
@@ -66,10 +69,31 @@ class RandoServices(object):
                  or self.areaGraph.canAccess(container.sm, ap, 'DraygonRoomIn', self.settings.maxDiff))):
             container.sm.addItem('Draygon')
 
-        curLocs = self.currentLocations(ap, container, post=True)
-        ret = [loc for loc in curLocs if self.restrictions.canPlaceAtLocation(item, loc, container) and self.fullComebackCheck(container, ap, item, loc, ComebackCheckType.ComebackWithoutItem, checkSoftlock=False)]
+        curLocs = self.currentLocations(startAP, container, post=True, diff=maxDiff)
+        ret = [loc for loc in curLocs if self.restrictions.canPlaceAtLocation(item, loc, container) and self.fullComebackCheck(container, ap, item, loc, ComebackCheckType.JustComeback, checkSoftlock=False)]
+
         container.sm.resetItems()
         return ret
+
+    # reverse only boss left locations for assumed fill
+    def getOnlyBossLeftLocationReverse(self, startAP, container):
+        if self.settings.maxDiff == infinity:
+            return []
+
+        container.sm.resetItems()
+        container.sm.addItems([it.Type for it in container.itemPool])
+        if self.cache:
+            self.cache.reset()
+
+        curLocsMaxDiff = self.currentLocations(startAP, container, post=True)
+        curLocsInfinity = self.currentLocations(startAP, container, post=True, diff=infinity)
+
+        self.log.debug("curLocsMaxDiff: {}".format(len(curLocsMaxDiff)))
+        self.log.debug("curLocsInfinity: {}".format(len(curLocsInfinity)))
+
+        container.sm.resetItems()
+
+        return list(set(curLocsInfinity) - set(curLocsMaxDiff))
 
     # gives all the possible theoretical locations for a given item
     def possibleLocations(self, item, ap, emptyContainer, bossesKilled=True):

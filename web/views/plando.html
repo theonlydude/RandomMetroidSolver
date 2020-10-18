@@ -482,6 +482,12 @@ function hideDebugPopup() {
   document.getElementById("debugPopup").style.display = "none";
 }
 
+function loc2ISolver(locName) {
+    var locISolver = locName;
+    locISolver.replace(/[ ,()-]/g, '');
+    return locISolver;
+}
+
 function loadNextAction(chained=false) {
   if(chained == true) {
     vcrIndex += 1;
@@ -499,6 +505,10 @@ function loadNextAction(chained=false) {
       msg = msg + "Rollback " + nextAction["count"] + " locations";
     } else if(nextActionType == "location") {
       msg = msg + "Pick " + nextAction["item"] + " at " + nextAction["loc"];
+    } else if(nextActionType == "init") {
+        msg = msg + "Add initial items";
+    } else if(nextActionType == "remove") {
+        msg = msg + "Remove " + nextAction["item"] + " from " + nextAction["loc"];
     }
   }
 
@@ -516,6 +526,10 @@ function loadNextAction(chained=false) {
       msg = msg + "Rollback " + prevAction["count"] + " locations";
     } else if(prevActionType == "location") {
       msg = msg + "Pick " + prevAction["item"] + " at " + prevAction["loc"];
+    } else if(prevActionType == "init") {
+        msg = msg + "Remove initial items";
+    } else if(prevActionType == "remove") {
+        msg = msg + "Restore " + prevAction["item"] + " to " + prevAction["loc"];
     }
   }
 
@@ -578,7 +592,7 @@ function previousAction() {
     return;
   }
 
-  if(isDesactivated("prevous")) {
+  if(isDesactivated("previous")) {
     return;
   }
 
@@ -608,9 +622,7 @@ function previousAction() {
            prevAction = vcrData[curActionIndex];
         }
 
-        var locISolver = prevAction["loc"];
-        locISolver.replace(/[ ,()-]/g, '');
-
+        var locISolver = loc2ISolver(prevAction["loc"]);
         ajaxChainedActions.push({action: "add", scope: "item", locName: locISolver, itemName: prevAction["item"]})
         console.log("pushed action: add/item/"+locISolver+"/"+prevAction["item"]);
 
@@ -619,7 +631,13 @@ function previousAction() {
 
       ajaxCallChained();
     } else if(nextActionType == "location") {
-      ajaxCall({action: "remove", scope: "item"}, "upload");
+      var locISolver = loc2ISolver(nextAction["loc"]);
+      ajaxCall({action: "remove", scope: "item", locName: locISolver, filler: nextAction["filler"]}, "upload");
+    } else if(nextActionType == "init") {
+      ajaxCall({action: "clear", scope: "item"}, "upload");
+    } else if(nextActionType == "remove") {
+      var locISolver = loc2ISolver(nextAction["loc"]);
+      ajaxCall({action: "add", scope: "item", locName: locISolver, itemName: nextAction["item"], filler: "reverse"}, "upload");
     }
     vcrIndex -= 1;
     loadNextAction();
@@ -646,17 +664,23 @@ function nextAction() {
     if(nextActionType == "rollback") {
       ajaxCall({action: "remove", scope: "item", count: nextAction["count"]}, "upload");
 
-      // console.log("rollback");
-
       vcrIndex += 1;
       loadNextAction();
     } else if(nextActionType == "location") {
-      var locISolver = nextAction["loc"];
-      locISolver.replace(/[ ,()-]/g, '');
+      var locISolver = loc2ISolver(nextAction["loc"]);
+      ajaxCall({action: "add", scope: "item", locName: locISolver, itemName: nextAction["item"], filler: nextAction["filler"]}, "upload");
 
-      // console.log("locname: " + locISolver);
+      vcrIndex += 1;
+      loadNextAction();
+    } else if(nextActionType == "init") {
+        console.log("init, items: "+nextAction["items"]);
+        ajaxCall({action: "add", scope: "item", initialItems: nextAction["items"].join()}, "upload");
 
-      ajaxCall({action: "add", scope: "item", locName: locISolver, itemName: nextAction["item"]}, "upload");
+      vcrIndex += 1;
+      loadNextAction();
+    } else if(nextActionType == "remove") {
+      var locISolver = loc2ISolver(nextAction["loc"]);
+      ajaxCall({action: "remove", scope: "item", locName: locISolver, itemName: nextAction["item"], filler: "reverse"}, "upload");
 
       vcrIndex += 1;
       loadNextAction();

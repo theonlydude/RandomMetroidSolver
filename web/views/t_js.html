@@ -374,7 +374,6 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     }
 
     if(lastAction != null && lastAction["action"] != "init" && lastAction["scope"] != "door") {
-        resetItems();
         updateLocations(jsonData);
         updateInventory(jsonData);
 
@@ -389,7 +388,6 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     } else {
         // load everything
         updateGlobal(jsonData);
-        resetItems();
         updateLocations(jsonData);
         updateInventory(jsonData);
         updateLines(jsonData);
@@ -591,9 +589,6 @@ function updateLocations(jsonData) {
                     document.getElementById(bossName+"G4").style.display = "block";
                 }
             }
-
-            // add item
-            addItem(locData["item"]);
         }
 
         if(mode == "plando") {
@@ -606,17 +601,6 @@ function updateLocations(jsonData) {
             var tooltip = tooltip + ": "+jsonData["last"]["item"]+" at "+jsonData["last"]["loc"];
         }
         $("#"+elem+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
-    }
-
-    if(mode == "seedless") {
-        // load items as all locs contain Nothing
-        var collectedItems = jsonData["collectedItems"];
-        for(var i=0; i<collectedItems.length; i++) {
-            var item = collectedItems[i];
-            if(item != "Nothing") {
-                addItem(item);
-            }
-        }
     }
 
     // set remaining locations as sequence breakable
@@ -652,6 +636,16 @@ function updateLocations(jsonData) {
 }
 
 function updateInventory(jsonData) {
+    resetItems();
+
+    var collectedItems = jsonData["collectedItems"];
+    for(var i=0; i<collectedItems.length; i++) {
+        var item = collectedItems[i];
+        if(item != "Nothing") {
+            addItem(item);
+        }
+    }
+
     setItemCount("Missile");
     setItemCount("Super");
     setItemCount("PowerBomb");

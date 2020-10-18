@@ -310,6 +310,10 @@ function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
 function ajaxCallChained() {
   // to call several ws, one after the other
 
+  if(ajaxChainedActions.length == 0) {
+    return;
+  }
+
   console.log("ajaxCallChained with " + ajaxChainedActions.length + " actions");
 
   var nextAction = ajaxChainedActions.pop();

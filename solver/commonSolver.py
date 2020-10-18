@@ -165,7 +165,7 @@ class CommonSolver(object):
                 self.firstLogFile.write("{};{};{};{}\n".format(item, loc.Name, loc.Area, loc.GraphArea))
 
         if item not in Conf.itemsForbidden:
-            if filler == 'front':
+            if filler in ['front', None]:
                 self.collectedItems.append(item)
                 if self.checkDuplicateMajor == True:
                     if item not in ['Nothing', 'NoEnergy', 'Missile', 'Super', 'PowerBomb', 'ETank', 'Reserve']:
@@ -230,7 +230,7 @@ class CommonSolver(object):
         # item
         item = loc.itemName
 
-        if filler == 'front':
+        if filler in ['front', None]:
             if self.mode == 'seedless':
                 # in seedless remove the first nothing found as collectedItems is not ordered
                 self.collectedItems.remove(item)

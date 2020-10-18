@@ -86,6 +86,10 @@ class AssumedFiller(Filler):
         # display new itemLoc dict
         self.displayItemLocDict("with all locs", newItemLocDict)
 
+        if len(newItemLocDict) == 0:
+            self.log.debug("No location available even after setting all locations as available")
+            return False
+
         # get item with the less possible locations, it's the harder to place
         minLocsLen = infinity
         minItem = None

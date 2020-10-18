@@ -11,6 +11,7 @@ from rando.ItemLocContainer import ItemLocation, getItemListStr, ContainerSoftBa
 from logic.smbool import SMBool
 from logic.helpers import diffValue2txt
 from rando.MiniSolver import MiniSolver
+from solver.randoSolver import RandoSolver
 
 class AssumedFiller(Filler):
     def __init__(self, startAP, graph, restrictions, container, endDate=infinity):
@@ -18,6 +19,7 @@ class AssumedFiller(Filler):
         self.choice = ItemThenLocChoice(restrictions)
         self.stdStart = GraphUtils.isStandardStart(self.startAP)
         self.miniSolver = MiniSolver(startAP, graph, restrictions)
+        self.can100percent = False
 
     def initFiller(self):
         super(AssumedFiller, self).initFiller()
@@ -45,7 +47,7 @@ class AssumedFiller(Filler):
         self.alreadyTriedItems = defaultdict(set)
 
         # get all aps accessible from start ap with no items
-        self.firstAPs = [ap.Name for ap in self.services.areaGraph.getAvailableAccessPoints(self.services.areaGraph.accessPoints[self.startAP], self.container.sm, self.maxDiff)]
+        self.firstAPs = [ap.Name for ap in self.graph.getAvailableAccessPoints(self.graph.accessPoints[self.startAP], self.container.sm, self.maxDiff)]
 
         self.log.debug("first APs: {}".format(self.firstAPs))
         # then all the locations linked to these first APs
@@ -161,13 +163,30 @@ class AssumedFiller(Filler):
             return item2
 
     def validateFill(self):
-        self.log.debug("Final mini solver to validate the fill")
+        self.log.debug("Final mini/real solver check to validate the fill")
         return self.can100percentReverse()
 
     def can100percentReverse(self):
+        if self.can100percent:
+            self.log.debug("can100percentReverse: already validated by real solver")
+            return True
         # check that mini solver can beat the seed starting from start ap
         self.miniSolver.startAP = self.startAP
-        return self.miniSolver.isBeatable(self.container.itemLocations, self.maxDiff)
+        if not self.miniSolver.isBeatable(self.container.itemLocations, self.maxDiff):
+            return False
+        self.log.debug("can100percentReverse: validated by mini solver")
+        # do a full solver check
+        graphLocations = self.container.getLocsForSolver()
+        solver = RandoSolver(self.restrictions.split, self.startAP, self.graph, graphLocations)
+        diff = solver.solveRom()
+        self.container.cleanLocsAfterSolver()
+        if diff == -1:
+            self.log.debug("can100percentReverse: real solver validation failed")
+            return False
+        self.log.debug("can100percentReverse: validated by real solver")
+        # don't do a real solver check each loop
+        self.can100percent = True
+        return True
 
     def displayItemLocDict(self, msg, itemLocDict):
         if self.log.getEffectiveLevel() == logging.DEBUG:

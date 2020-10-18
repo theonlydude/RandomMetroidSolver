@@ -52,7 +52,7 @@ class MiniSolver(object):
                 self.smbm.removeItem(loc.itemName)
                 loc.difficulty = self.smbm.wand(loc.difficulty, postAvailable)
             toCollect = [loc for loc in locations if loc.difficulty.bool == True and loc.difficulty.difficulty <= maxDiff]
-            self.log.debug("locs to collect: {}".format([loc.Name for loc in toCollect]))
+            self.log.debug("locs to collect: {}".format([(loc.itemName, loc.Name) for loc in toCollect]))
             if not toCollect:
                 # mini onlyBossesLeft
                 if maxDiff < infinity:

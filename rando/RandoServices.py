@@ -55,6 +55,7 @@ class RandoServices(object):
 
         # check if bosses can be accessed and killed, if so add them to alreadyPlacedItems:
         sm = container.sm
+
         if item.Type != 'Kraid' and sm.enoughStuffsKraid() and self.areaGraph.canAccess(container.sm, ap, 'KraidRoomIn', self.settings.maxDiff):
             container.sm.addItem('Kraid')
         if item.Type != 'Phantoon' and sm.enoughStuffsPhantoon() and self.areaGraph.canAccess(container.sm, ap, 'PhantoonRoomIn', self.settings.maxDiff):
@@ -66,7 +67,7 @@ class RandoServices(object):
                         sm.enoughStuffsDraygon(),
                         sm.canExitDraygon())
             and (ap == 'Draygon Room Bottom' # need draygon dead to exit draygon room bottom
-                 or self.areaGraph.canAccess(container.sm, ap, 'DraygonRoomIn', self.settings.maxDiff))):
+                 or self.areaGraph.canAccess(sm, ap, 'DraygonRoomIn', self.settings.maxDiff))):
             container.sm.addItem('Draygon')
 
         curLocs = self.currentLocations(startAP, container, post=True, diff=maxDiff)
@@ -81,7 +82,8 @@ class RandoServices(object):
             return []
 
         container.sm.resetItems()
-        container.sm.addItems([it.Type for it in container.itemPool])
+        # draygon diff is computed in its path, so don't give draygon item
+        container.sm.addItems([it.Type for it in container.itemPool if it.Type != "Draygon"])
         if self.cache:
             self.cache.reset()
 

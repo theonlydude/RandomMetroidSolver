@@ -45,6 +45,7 @@ class AssumedFiller(Filler):
             self.errorMsg = "Maximum difficulty could not be applied everywhere. Affected locations: [ {} ]".format(' ; '.join(["{}: {}".format(loc.Name, diffValue2txt(loc.difficulty.difficulty)) for loc in self.onlyBossLeftLocations]))
 
         self.alreadyTriedItems = defaultdict(set)
+        self.alreadySwitchedItems = defaultdict(set)
 
         # get all aps accessible from start ap with no items
         self.firstAPs = [ap.Name for ap in self.graph.getAvailableAccessPoints(self.graph.accessPoints[self.startAP], self.container.sm, self.maxDiff)]
@@ -74,6 +75,8 @@ class AssumedFiller(Filler):
         # remove it, then use minisolver to check that we can still reach all the other filled locations.
         # loop until mini solver is ok or we've tested all locations.
 
+        step = len(self.container.itemPool)
+
         # create a backup of the container
         containerBackup = ContainerSoftBackup(self.container)
 
@@ -94,9 +97,19 @@ class AssumedFiller(Filler):
         minLocsLen = infinity
         minItem = None
         for item, locs in newItemLocDict.items():
+            if item.Type in self.alreadySwitchedItems[step]:
+                continue
             if len(locs) < minLocsLen:
                 minLocsLen = len(locs)
                 minItem = item
+
+        if minItem is None:
+            self.errorMsg = "All item's types in pool have already been switched"
+            self.log.debug(self.errorMsg)
+            return False
+        else:
+            self.alreadySwitchedItems[step].add(minItem.Type)
+
         self.log.debug("switch: minItem: {}".format(minItem.Type))
 
         # get items in minItem locations
@@ -244,12 +257,24 @@ class AssumedFiller(Filler):
                         locs.remove(loc)
 
         # TODO::check if we can do without that, or do better
-        # keep only items with the max number of available locs and bosses
-        maxLocsLen = -1
-        for it, locs in itemLocDict.items():
-            if len(locs) > maxLocsLen:
-                maxLocsLen = len(locs)
-        itemLocDict = {it: locs for it, locs in itemLocDict.items() if it.Category == 'Boss' or len(locs) == maxLocsLen}
+        # keep only items with the max number of available locs for each item type: major/minor/boss
+        if self.settings.restrictions["MajorMinor"] in ["Full", "Chozo"]:
+            maxLocsLen = -1
+            for it, locs in itemLocDict.items():
+                if len(locs) > maxLocsLen:
+                    maxLocsLen = len(locs)
+            itemLocDict = {it: locs for it, locs in itemLocDict.items() if it.Category == 'Boss' or len(locs) == maxLocsLen}
+        elif self.settings.restrictions["MajorMinor"] == "Major":
+            maxLocsLenMajor = -1
+            maxLocsLenMinor = -1
+            for it, locs in itemLocDict.items():
+                if it.Class == "Major":
+                    if len(locs) > maxLocsLenMajor:
+                        maxLocsLenMajor = len(locs)
+                elif it.Class == "Minor":
+                    if len(locs) > maxLocsLenMinor:
+                        maxLocsLenMinor = len(locs)
+            itemLocDict = {it: locs for it, locs in itemLocDict.items() if it.Category == 'Boss' or (it.Class == "Major" and len(locs) == maxLocsLenMajor) or (it.Class == "Minor" and len(locs) == maxLocsLenMinor)}
 
         # debug display
         self.displayItemLocDict("after filter", itemLocDict)

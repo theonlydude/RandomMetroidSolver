@@ -56,16 +56,21 @@ class AssumedFiller(Filler):
         for loc in self.container.unusedLocations:
             for ap in loc.AccessFrom.keys():
                 if ap in self.firstAPs:
-                    self.firstLocations.append(loc)
+                    if self.isMajor(loc):
+                        self.firstLocations.append(loc)
                     continue
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("first locations:")
+            self.log.debug("first locations: {}".format(len(self.firstLocations)))
             for loc in self.firstLocations:
                 self.log.debug(loc.Name)
 
         # TODO::choose morph loc first to forbid other items in it. TODO::handle early/late morph
         #firstItemLocDict = self.services.getPossiblePlacementsWithoutItem(self.startAP, self.container, assumedItems, alreadyPlacedItems)
+
+    def isMajor(self, obj):
+        return (self.settings.restrictions['MajorMinor'] == 'Full'
+                or self.settings.restrictions['MajorMinor'] in obj.Class)
 
     def switchTwoItems(self, zeroItemLocDict, maxDiff):
         # we are stuck, all items have zero location available (zero_item).
@@ -209,7 +214,7 @@ class AssumedFiller(Filler):
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("{}: {}".format(msg, [(it.Type, len(locs)) for (it, locs) in itemLocDict.items()]))
             for it, locs in itemLocDict.items():
-                self.log.debug("{}: {}".format(it.Type, [loc.Name for loc in locs] if len(locs) < 5 else len(locs)))
+                self.log.debug("  {}: {}".format(it.Type, [loc.Name for loc in locs] if len(locs) < 5 else len(locs)))
 
     def step(self, onlyBossCheck=False):
         self.log.debug("------------------------------------------------")
@@ -250,11 +255,14 @@ class AssumedFiller(Filler):
 
         # TODO::check that it's correct
         # remove fist locations if too many remaining items
-        if len(set([it.Type for it in assumedItems])) > len(self.firstLocations):
-            for item, locs in itemLocDict.items():
-                for loc in self.firstLocations:
-                    if loc in locs:
-                        locs.remove(loc)
+        remainingMajorItems = set([it.Type for it in assumedItems if self.isMajor(it)])
+        if len(remainingMajorItems) > len(self.firstLocations):
+            self.log.debug("Too many major items remain: {}, remove first locs: {}".format(len(remainingMajorItems), len(self.firstLocations)))
+            for it, locs in itemLocDict.items():
+                if self.isMajor(it):
+                    for loc in self.firstLocations:
+                        if loc in locs:
+                            locs.remove(loc)
 
         # TODO::check if we can do without that, or do better
         # keep only items with the max number of available locs for each item type: major/minor/boss

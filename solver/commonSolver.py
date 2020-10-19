@@ -193,7 +193,8 @@ class CommonSolver(object):
 
         # last loc is used as root node for the graph.
         # when loading a plando we can load locations from non connected areas, so they don't have an access point.
-        if loc.accessPoint is not None:
+        # in assumed filler we always use startAP to compute locations.
+        if loc.accessPoint is not None and filler == 'front':
             self.lastAP = loc.accessPoint
             self.lastArea = loc.SolveArea
 
@@ -209,13 +210,15 @@ class CommonSolver(object):
         # removeItemAt is only used from the tracker, so all the locs are in majorLocations
         self.majorLocations.append(loc)
 
-        # access point
-        if len(self.visitedLocations) == 0:
-            self.lastAP = self.startAP
-            self.lastArea = self.startArea
-        else:
-            self.lastAP = self.visitedLocations[-1].accessPoint
-            self.lastArea = self.visitedLocations[-1].SolveArea
+        # access point.
+        # in assumed filler we always use startAP to compute locations.
+        if filler == 'front':
+            if len(self.visitedLocations) == 0:
+                self.lastAP = self.startAP
+                self.lastArea = self.startArea
+            else:
+                self.lastAP = self.visitedLocations[-1].accessPoint
+                self.lastArea = self.visitedLocations[-1].SolveArea
 
         # delete location params which are set when the location is available
         if loc.difficulty is not None:

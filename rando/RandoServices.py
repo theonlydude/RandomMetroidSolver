@@ -70,8 +70,10 @@ class RandoServices(object):
                  or self.areaGraph.canAccess(sm, ap, 'DraygonRoomIn', self.settings.maxDiff))):
             container.sm.addItem('Draygon')
 
-        curLocs = self.currentLocations(startAP, container, post=True, diff=maxDiff)
-        ret = [loc for loc in curLocs if self.restrictions.canPlaceAtLocation(item, loc, container) and self.fullComebackCheck(container, ap, item, loc, ComebackCheckType.JustComeback, checkSoftlock=False)]
+        # check that we can access the location without the item,
+        curLocs = self.currentLocations(startAP, container, post=False, diff=maxDiff)
+        # but use the item for postavailable
+        ret = [loc for loc in curLocs if self.restrictions.canPlaceAtLocation(item, loc, container) and self.fullComebackCheck(container, ap, item, loc, None, checkSoftlock=False)]
 
         container.sm.resetItems()
         return ret

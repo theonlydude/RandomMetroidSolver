@@ -199,6 +199,8 @@ class AssumedFiller(Filler):
                 self.log.debug("{}: {}".format(it.Type, [loc.Name for loc in locs] if len(locs) < 5 else len(locs)))
 
     def step(self, onlyBossCheck=False):
+        self.log.debug("------------------------------------------------")
+
         if self.can100percentReverse():
             (itemLocDict, isProg) = self.services.getPossiblePlacementsNoLogic(self.container)
             itemLoc = ItemThenLocChoice.chooseItemLoc(self.choice, itemLocDict, False)
@@ -211,9 +213,10 @@ class AssumedFiller(Filler):
 
         step = len(assumedItems)
 
-        self.log.debug("remaining assumed items: {}".format(getItemListStr(assumedItems)))
-        self.log.debug("remaining locations: {}".format(len(self.container.unusedLocations) if len(self.container.unusedLocations) > 5 else [loc.Name for loc in self.container.unusedLocations]))
-        self.log.debug("start ap: {}".format(self.ap))
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.log.debug("remaining assumed items: {}".format(getItemListStr(assumedItems)))
+            self.log.debug("remaining locations: {}".format(len(self.container.unusedLocations) if len(self.container.unusedLocations) > 5 else [loc.Name for loc in self.container.unusedLocations]))
+            self.log.debug("start ap: {}".format(self.ap))
 
         if len(self.onlyBossLeftLocations) > 0:
             self.log.debug("onlyBossLeftLocations not empty: {}, set maxDiff to infinity".format([loc.Name for loc in self.onlyBossLeftLocations]))
@@ -232,6 +235,7 @@ class AssumedFiller(Filler):
         # debug display
         self.displayItemLocDict("before", itemLocDict)
 
+        # TODO::check that it's correct
         # remove fist locations if too many remaining items
         if len(set([it.Type for it in assumedItems])) > len(self.firstLocations):
             for item, locs in itemLocDict.items():
@@ -239,6 +243,7 @@ class AssumedFiller(Filler):
                     if loc in locs:
                         locs.remove(loc)
 
+        # TODO::check if we can do without that, or do better
         # keep only items with the max number of available locs and bosses
         maxLocsLen = -1
         for it, locs in itemLocDict.items():
@@ -276,11 +281,19 @@ class AssumedFiller(Filler):
         itemLocDictAfter = self.services.getPossiblePlacementsWithoutItem(self.startAP, ap, self.container, assumedItems, maxDiff)
         assumedItems.append(item)
 
-        self.log.debug("after: {}".format([(it.Type, len(locs)) for (it, locs) in itemLocDictAfter.items()]))
+        # TODO::do we have to generalize that to every items and not only boss items ?
+        self.displayItemLocDict("compute remaining without {}".format(item.Type), itemLocDictAfter)
         zeroLocsItemFound = False
         for it, locs in itemLocDictAfter.items():
             if it.Category == 'Boss' and len(locs) == 0:
                 self.log.debug("step: {} - zeroLocsItemFound for {} after placing {} !!".format(self.nSteps, it.Type, item.Type))
+                # if it's because of max diff, put back boss location in only boss left locations
+                if maxDiff < infinity:
+                    bossLoc = self.container.getLocs(lambda loc: loc.Name == it.Type)[0]
+                    self.onlyBossLeftLocations.append(bossLoc)
+                    self.errorMsg += " and {}".format(bossLoc.Name)
+                    return True
+
                 self.alreadyTriedItems[step].add(item)
                 zeroLocsItemFound = True
                 break

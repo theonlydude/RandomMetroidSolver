@@ -15,7 +15,8 @@ from utils.version import displayedVersion
 from logic.smbool import SMBool
 from utils.doorsmanager import DoorsManager
 
-import utils.log, utils.db
+import utils.log
+import utils.db as db
 
 defaultMultiValues = getDefaultMultiValues()
 speeds = defaultMultiValues['progressionSpeed']

@@ -40,7 +40,7 @@ class RandoServices(object):
         return itemLoc.Location.accessPoint if pickup == True else ap
 
     def getPossiblePlacementsWithoutItem(self, startAP, ap, container, items, maxDiff):
-        distinctItems = {item.Type: item for item in items if item.Type not in ['Nothing', 'NoEnergy']}
+        distinctItems = {item.Type: item for item in items}
         self.log.debug("getPossiblePlacementsWithoutItem, unusedLocations: {}".format(len(container.unusedLocations)))
         return {item: self.allLocationsWithoutItem(item, startAP, ap, container, items, maxDiff) for itemType, item in distinctItems.items()}
 
@@ -70,34 +70,64 @@ class RandoServices(object):
                  or self.areaGraph.canAccess(sm, ap, 'DraygonRoomIn', self.settings.maxDiff))):
             container.sm.addItem('Draygon')
 
-        # check that we can access the location without the item,
-        curLocs = self.currentLocations(startAP, container, post=False, diff=maxDiff)
-        # but use the item for postavailable
-        ret = [loc for loc in curLocs if self.restrictions.canPlaceAtLocation(item, loc, container) and self.fullComebackCheck(container, ap, item, loc, None, checkSoftlock=False)]
+        # check that we can access the locations without the item,
+        curLocs = set(self.currentLocations(startAP, container, post=False, diff=maxDiff))
+
+        # check if item is need to postavail some locs
+        curLocsPostAvail = set([loc for loc in curLocs if self.fullComebackCheck(container, ap, item, loc, None, checkSoftlock=False)])
+
+        curLocsPostAvailWoItem = set([loc for loc in curLocs if self.fullComebackCheck(container, ap, None, loc, None, checkSoftlock=False)])
+
+        locsPostNokWoItem = list(curLocsPostAvail - curLocsPostAvailWoItem)
+
+        # filter locs where we can place the item
+        curLocsCanPlace = [loc for loc in curLocsPostAvail if self.restrictions.canPlaceAtLocation(item, loc, container)]
 
         container.sm.resetItems()
-        return ret
+        # return locations still available without the item, and the number of it
+        # return the locs where post avail fails without the item
+        # return the list of locations that we can still reach without the item and where we can place the item.
+        return {"availLocsWoItem": curLocs, "availLocsWoItemLen": len(curLocs),
+                "locsPostNokWoItem": locsPostNokWoItem, "possibleLocs": curLocsCanPlace}
 
     # reverse only boss left locations for assumed fill
     def getOnlyBossLeftLocationReverse(self, startAP, container):
         if self.settings.maxDiff == infinity:
             return []
 
-        container.sm.resetItems()
         # draygon diff is computed in its path, so don't give draygon item
-        container.sm.addItems([it.Type for it in container.itemPool if it.Type != "Draygon"])
-        if self.cache:
-            self.cache.reset()
+        if self.cache: self.cache.reset()
+        container.sm.resetItems()
+        container.sm.addItems([it.Type for it in container.itemPool if it.Type != "Draygon"]+["Phantoon", "Ridley", "Kraid"])
 
-        curLocsMaxDiff = self.currentLocations(startAP, container, post=True)
-        curLocsInfinity = self.currentLocations(startAP, container, post=True, diff=infinity)
+        curLocsMaxDiff1 = set(self.currentLocations(startAP, container, post=True))
+        curLocsInfinity1 = set(self.currentLocations(startAP, container, post=True, diff=infinity))
+        onlyBossLeft1 = curLocsInfinity1 - curLocsMaxDiff1
 
-        self.log.debug("curLocsMaxDiff: {}".format(len(curLocsMaxDiff)))
-        self.log.debug("curLocsInfinity: {}".format(len(curLocsInfinity)))
+        # give draygon for space jump location which requires it
+        if self.cache: self.cache.reset()
+        container.sm.resetItems()
+        container.sm.addItems([it.Type for it in container.itemPool]+["Draygon", "Phantoon", "Ridley", "Kraid"])
+
+        curLocsMaxDiff2 = set(self.currentLocations(startAP, container, post=True))
+        curLocsInfinity2 = set(self.currentLocations(startAP, container, post=True, diff=infinity))
+        onlyBossLeft2 = curLocsInfinity2 - curLocsMaxDiff2
+
+        onlyBossLeft = onlyBossLeft1.union(onlyBossLeft2)
+
+        allReachableLocs = curLocsInfinity1.union(curLocsInfinity2)
+        allLocs = set(container.unusedLocations)
+        self.log.debug("only boss left, reach all locs ?: {}/{}".format(len(allReachableLocs), len(allLocs)))
+        self.log.debug("only boss left locs: {}".format([loc.Name for loc in list(onlyBossLeft)]))
+        if len(allReachableLocs) != len(allLocs):
+            self.log.debug("one or more locations are now non reachable, should not happen !")
+            for loc in list(allLocs - allReachableLocs):
+                self.log.debug("unreachable loc: {}".format(loc))
+            raise MonCul
 
         container.sm.resetItems()
 
-        return list(set(curLocsInfinity) - set(curLocsMaxDiff))
+        return {loc: loc.difficulty.difficulty for loc in list(onlyBossLeft)}
 
     # gives all the possible theoretical locations for a given item
     def possibleLocations(self, item, ap, emptyContainer, bossesKilled=True):

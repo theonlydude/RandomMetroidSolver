@@ -5,13 +5,14 @@ from logic.smboolmanager import SMBoolManager
 from utils.parameters import infinity
 
 class MiniSolver(object):
-    def __init__(self, startAP, areaGraph, restrictions):
+    def __init__(self, startAP, areaGraph, restrictions, maxOnlyBossesLeftSteps=2):
         self.startAP = startAP
         self.areaGraph = areaGraph
         self.restrictions = restrictions
         self.settings = restrictions.settings
         self.smbm = SMBoolManager()
         self.log = utils.log.get('MiniSolver')
+        self.maxOnlyBossesLeftSteps = maxOnlyBossesLeftSteps
 
     # if True, does not mean it is actually beatable, unless you're sure of it from another source of information
     # if False, it is certain it is not beatable
@@ -41,7 +42,7 @@ class MiniSolver(object):
             # only two loops to collect all remaining locations in only bosses left mode
             if onlyBossesLeft >= 0:
                 onlyBossesLeft += 1
-                if onlyBossesLeft > 2:
+                if onlyBossesLeft > self.maxOnlyBossesLeftSteps:
                     self.log.debug("failed after two only bosses left loops")
                     return False
             self.areaGraph.getAvailableLocations(locations, self.smbm, maxDiff, ap)

@@ -18,8 +18,10 @@ class AssumedFiller(Filler):
         super(AssumedFiller, self).__init__(startAP, graph, restrictions, container, endDate)
         self.choice = ItemThenLocChoice(restrictions)
         self.stdStart = GraphUtils.isStandardStart(self.startAP)
-        self.miniSolver = MiniSolver(startAP, graph, restrictions)
+        # be more generous with only boss left steps in minisolver
+        self.miniSolver = MiniSolver(startAP, graph, restrictions, 10)
         self.can100percent = False
+        self.earlyGame = False
 
     def initFiller(self):
         super(AssumedFiller, self).initFiller()
@@ -37,12 +39,6 @@ class AssumedFiller(Filler):
             bossItem = self.container.getItems(lambda it: it.Type == boss)
             bossLoc = self.container.getLocs(lambda loc: loc.Name == bossLocName)
             self.collect(ItemLocation(bossItem[0], bossLoc[0]))
-
-        # check only boss left
-        self.onlyBossLeftLocations = self.services.getOnlyBossLeftLocationReverse(self.startAP, self.container)
-        if self.onlyBossLeftLocations:
-            self.log.debug("only boss left locations: {}".format([loc.Name for loc in self.onlyBossLeftLocations]))
-            self.errorMsg = "Maximum difficulty could not be applied everywhere. Affected locations: [ {} ]".format(' ; '.join(["{}: {}".format(loc.Name, diffValue2txt(loc.difficulty.difficulty)) for loc in self.onlyBossLeftLocations]))
 
         self.alreadyTriedItems = defaultdict(set)
         self.alreadySwitchedItems = defaultdict(set)
@@ -71,104 +67,6 @@ class AssumedFiller(Filler):
     def isMajor(self, obj):
         return (self.settings.restrictions['MajorMinor'] == 'Full'
                 or self.settings.restrictions['MajorMinor'] in obj.Class)
-
-    def switchTwoItems(self, zeroItemLocDict, maxDiff):
-        # we are stuck, all items have zero location available (zero_item).
-        # we need to remove an already placed item.
-        # so compute the locations available for each item using the already filled locations,
-        # then test the filled locations accessible to get the most useless item,
-        # remove it, then use minisolver to check that we can still reach all the other filled locations.
-        # loop until mini solver is ok or we've tested all locations.
-
-        step = len(self.container.itemPool)
-
-        # create a backup of the container
-        containerBackup = ContainerSoftBackup(self.container)
-
-        # set back all locations as unused, return a {loc: item}
-        locsItem = self.container.restoreLocations()
-
-        # compute available locations from start ap with all locations set as unused
-        newItemLocDict = self.services.getPossiblePlacementsWithoutItem(self.startAP, self.ap, self.container, self.container.itemPool, maxDiff)
-
-        # display new itemLoc dict
-        self.displayItemLocDict("with all locs", newItemLocDict)
-
-        if len(newItemLocDict) == 0:
-            self.log.debug("No location available even after setting all locations as available")
-            return False
-
-        # get item with the less possible locations, it's the harder to place
-        minLocsLen = infinity
-        minItem = None
-        for item, locs in newItemLocDict.items():
-            if item.Type in self.alreadySwitchedItems[step]:
-                continue
-            if len(locs) < minLocsLen:
-                minLocsLen = len(locs)
-                minItem = item
-
-        if minItem is None:
-            self.errorMsg = "All item's types in pool have already been switched"
-            self.log.debug(self.errorMsg)
-            return False
-        else:
-            self.alreadySwitchedItems[step].add(minItem.Type)
-
-        self.log.debug("switch: minItem: {}".format(minItem.Type))
-
-        # get items in minItem locations
-        oldItemsLocs = {locsItem[loc]: loc for loc in newItemLocDict[minItem] if loc in locsItem}
-        oldItems = [it for it in oldItemsLocs.keys()]
-        if self.log.getEffectiveLevel() == logging.DEBUG:
-            for it, loc in oldItemsLocs.items():
-                self.log.debug("minItem possible loc: {} with old item: {}".format(loc.Name, it.Type))
-
-        # restore container
-        containerBackup.restore(self.container)
-
-        self.miniSolver.startAP = self.ap
-        while True:
-            containerBackup = ContainerSoftBackup(self.container)
-
-            # get more disposable item
-            if len(oldItems) > 1:
-                uselessItem = oldItems[0]
-                for it in oldItems[1:]:
-                    uselessItem = self.getMoreUseless(uselessItem, it)
-            elif len(oldItems) == 1:
-                uselessItem = oldItems[0]
-            else:
-                self.log.debug("switch: no more available location that has already been used, really stucked")
-                return False
-            self.log.debug("switch: Useless item found: {}".format(uselessItem.Type))
-            oldItems.remove(uselessItem)
-
-            # get loc with the most useless item
-            uselessLoc = oldItemsLocs[uselessItem]
-            del oldItemsLocs[uselessItem]
-
-            self.log.debug("switch: Useless associated location: {}".format(uselessLoc.Name))
-
-            # uncollect uselessLoc: put back useless item in pool
-            self.uncollect(uselessLoc)
-
-            # collect minItem in uselessLoc
-            self.log.debug("switch: collect {}@{}".format(minItem.Type, uselessLoc.Name))
-            self.collect(ItemLocation(minItem, uselessLoc))
-
-            # launch mini solver to check that all previously visited locations are still available
-            startItems = [it.Type for it in self.container.itemPool]
-            if self.miniSolver.isBeatable(self.container.itemLocations, self.maxDiff, startItems):
-                self.log.debug("minisolver has validated the item switch")
-                return True
-
-            self.log.debug("minisolver nok, continue with next useless item")
-
-            # restore container
-            containerBackup.restore(self.container)
-
-        return True
 
     def uncollect(self, loc):
         itemType = self.container.uncollect(loc)
@@ -212,12 +110,58 @@ class AssumedFiller(Filler):
 
     def displayItemLocDict(self, msg, itemLocDict):
         if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("{}: {}".format(msg, [(it.Type, len(locs)) for (it, locs) in itemLocDict.items()]))
-            for it, locs in itemLocDict.items():
+            self.log.debug("{}: {}".format(msg, [(it.Type, data['availLocsWoItemLen'], len(data['possibleLocs'])) for (it, data) in itemLocDict.items()]))
+            for it, data in itemLocDict.items():
+                locs = data['possibleLocs']
                 self.log.debug("  {}: {}".format(it.Type, [loc.Name for loc in locs] if len(locs) < 5 else len(locs)))
+
+    def getPriorityLocations(self, itemLocDict):
+        # for each item get the locations which become unreachable after placing the item (ie. without the item)
+        # then priorize the locations depending on how many items required them, favor item with smallest list,
+        # also priorize locs where placing an item invalidate their postAvailable
+        # return the list of locations of higher priority
+        postNokPriority = 1024 # have to be big, it's top priority to fill it else it will never be filled
+        # higher priorities for useful items
+        itemsPriorities = {
+            'Boss': 10,
+            'Progression': 5,
+            'Beam': 5,
+            'Misc': 5,
+            'Ammo': 1,
+            'Energy': 1,
+            'Nothing': 0
+        }
+
+        priorityLocations = defaultdict(float)
+        allLocations = set(self.container.unusedLocations)
+        for it, data in itemLocDict.items():
+            unreachableLocations = allLocations - set(data["availLocsWoItem"])
+            self.log.debug("priority locs for {}: {} - {}".format(it.Type, len(unreachableLocations), [loc.Name for loc in unreachableLocations]))
+
+            priority = itemsPriorities[it.Category]
+            for loc in unreachableLocations:
+                # lower priority if more locs have to be filled
+                priorityLocations[loc] += priority / len(unreachableLocations)
+            for loc in data["locsPostNokWoItem"]:
+                self.log.debug("loc post nok wo {}: {}".format(it.Type, loc.Name))
+                priorityLocations[loc] += postNokPriority
+
+        # get list of locations for each priorities
+        priorities = defaultdict(list)
+        for loc, count in priorityLocations.items():
+            priorities[count].append(loc)
+
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            #for count, locs in priorities.items():
+                #self.log.debug("priority {}: {}".format(round(count, 2), [loc.Name for loc in locs]))
+
+            self.log.debug("max priority locations: {} - {}".format(round(max(priorities), 2), [loc.Name for loc in priorities[max(priorities) if priorities else 0]]))
+
+        return priorities[max(priorities) if priorities else 0]
 
     def step(self, onlyBossCheck=False):
         self.log.debug("------------------------------------------------")
+        self.log.debug("is earlyGame: {}".format(self.earlyGame))
 
         if self.can100percentReverse():
             (itemLocDict, isProg) = self.services.getPossiblePlacementsNoLogic(self.container)
@@ -227,13 +171,16 @@ class AssumedFiller(Filler):
             self.ap = self.services.collect(self.ap, self.container, itemLoc)
             return True
 
+        # check only boss left
+        self.onlyBossLeftLocations = self.services.getOnlyBossLeftLocationReverse(self.startAP, self.container)
+
         assumedItems = self.container.itemPool
 
         step = len(assumedItems)
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("remaining assumed items: {}".format(getItemListStr(assumedItems)))
-            self.log.debug("remaining locations: {}".format(len(self.container.unusedLocations) if len(self.container.unusedLocations) > 5 else [loc.Name for loc in self.container.unusedLocations]))
+            self.log.debug("remaining assumed items: {} - {}".format(step, getItemListStr(assumedItems)))
+            self.log.debug("remaining locations: {}".format(len(self.container.unusedLocations) if len(self.container.unusedLocations) > 13 else [loc.Name for loc in self.container.unusedLocations]))
             self.log.debug("start ap: {}".format(self.ap))
 
         if len(self.onlyBossLeftLocations) > 0:
@@ -243,46 +190,35 @@ class AssumedFiller(Filler):
             self.log.debug("onlyBossLeftLocations empty, set maxDiff to {}".format(self.services.settings.maxDiff))
             maxDiff = self.maxDiff
 
-        # compute available locs without each item type, check that we can come back to start ap
+        # compute available locs without each item type from start ap
         itemLocDict = self.services.getPossiblePlacementsWithoutItem(self.startAP, self.ap, self.container, assumedItems, maxDiff)
-        # check if all items have no locs
-        if len([item for item, locs in itemLocDict.items() if len(locs) > 0]) == 0:
-            self.log.debug("all items have no locs, switch item")
-            return self.switchTwoItems(itemLocDict, maxDiff)
 
         # debug display
         self.displayItemLocDict("before", itemLocDict)
 
-        # TODO::check that it's correct
-        # remove fist locations if too many remaining items
-        remainingMajorItems = set([it.Type for it in assumedItems if self.isMajor(it)])
-        if len(remainingMajorItems) > len(self.firstLocations):
-            self.log.debug("Too many major items remain: {}, remove first locs: {}".format(len(remainingMajorItems), len(self.firstLocations)))
-            for it, locs in itemLocDict.items():
-                if self.isMajor(it):
-                    for loc in self.firstLocations:
-                        if loc in locs:
-                            locs.remove(loc)
+        # keep only priority locations, locations that need to be filled to allow placement of an item
+        # which will make other locations unreachable
+        priorityLocations = set(self.getPriorityLocations(itemLocDict))
 
-        # TODO::check if we can do without that, or do better
-        # keep only items with the max number of available locs for each item type: major/minor/boss
-        if self.settings.restrictions["MajorMinor"] in ["Full", "Chozo"]:
-            maxLocsLen = -1
-            for it, locs in itemLocDict.items():
-                if len(locs) > maxLocsLen:
-                    maxLocsLen = len(locs)
-            itemLocDict = {it: locs for it, locs in itemLocDict.items() if it.Category == 'Boss' or len(locs) == maxLocsLen}
-        elif self.settings.restrictions["MajorMinor"] == "Major":
-            maxLocsLenMajor = -1
-            maxLocsLenMinor = -1
-            for it, locs in itemLocDict.items():
-                if it.Class == "Major":
-                    if len(locs) > maxLocsLenMajor:
-                        maxLocsLenMajor = len(locs)
-                elif it.Class == "Minor":
-                    if len(locs) > maxLocsLenMinor:
-                        maxLocsLenMinor = len(locs)
-            itemLocDict = {it: locs for it, locs in itemLocDict.items() if it.Category == 'Boss' or (it.Class == "Major" and len(locs) == maxLocsLenMajor) or (it.Class == "Minor" and len(locs) == maxLocsLenMinor)}
+        if priorityLocations:
+            # keep only priority locations
+            for it, data in itemLocDict.items():
+                data["possibleLocs"] = set(data["possibleLocs"]).intersection(priorityLocations)
+            itemLocDict = {it: data for it, data in itemLocDict.items() if len(data['possibleLocs']) > 0}
+
+        # keep only items where we still have step available locs after placing the item
+        if not self.earlyGame:
+            itemLocDict = {it: data for it, data in itemLocDict.items() if data['availLocsWoItemLen'] == step}
+
+        if not itemLocDict:
+            if not self.earlyGame:
+                self.log.debug("no longer enforce that enough locs are available")
+                self.earlyGame = True
+                return True
+            else:
+                self.errorMsg = "No item with {} available locs after".format(step)
+                self.log.debug(self.errorMsg)
+                return False
 
         # debug display
         self.displayItemLocDict("after filter", itemLocDict)
@@ -295,8 +231,29 @@ class AssumedFiller(Filler):
                 self.errorMsg = "Stucked after testing all items"
                 return False
         else:
-            item = random.choice(list(itemLocDict.keys()))
-        locations = itemLocDict[item]
+            if not self.earlyGame:
+                # TODO::check if this doesn't create the same seeds:
+                # choose first boss, then major, then ammo, then nothing
+                boss = [it for it in itemLocDict.keys() if it.Category == 'Boss']
+                remain = [it for it in itemLocDict.keys() if it.Category != 'Boss']
+                #major = [it for it in itemLocDict.keys() if it.Category in ['Progression', 'Beam', 'Misc']]
+                #ammo_energy = [it for it in itemLocDict.keys() if it.Category in ['Ammo', 'Energy']]
+                #nothing = [it for it in itemLocDict.keys() if it.Category == 'Nothing']
+                #self.log.debug("Available items: boss: {} major: {} ammo/energy: {} nothing: {}".format(len(boss), len(major), len(ammo_energy), len(nothing)))
+                self.log.debug("Available items: boss: {} remain: {}".format(len(boss), len(remain)))
+
+                items = boss if boss else remain
+                self.log.debug("items in choice: {}".format([it.Type for it in items]))
+            else:
+                # choose between items with the highest number of available locs after
+                maxAvailLocs = -1
+                for it, data in itemLocDict.items():
+                    if data["availLocsWoItemLen"] > maxAvailLocs:
+                        maxAvailLocs = data["availLocsWoItemLen"]
+                items = [it for it, data in itemLocDict.items() if data["availLocsWoItemLen"] == maxAvailLocs]
+
+            item = random.choice(items)
+        locations = list(itemLocDict[item]['possibleLocs'])
         self.log.debug("item chosen: {} - available locs: {}".format(item.Type, len(locations)))
 
         itemLoc = self.choice.chooseItemLoc({item: locations}, False)
@@ -306,39 +263,15 @@ class AssumedFiller(Filler):
             return True
         self.log.debug("loc chosen: {}, difficulty: {}".format(itemLoc.Location.Name, itemLoc.Location.difficulty))
 
-        # check if a boss can't be placed after this items
-        assumedItems.remove(item)
-        # use chosen loc ap to check if an item can't be placed afterward
-        ap = itemLoc.Location.accessPoint
-        self.log.debug("middle ap: {}".format(ap))
-        itemLocDictAfter = self.services.getPossiblePlacementsWithoutItem(self.startAP, ap, self.container, assumedItems, maxDiff)
-        assumedItems.append(item)
-
-        # TODO::do we have to generalize that to every items and not only boss items ?
-        self.displayItemLocDict("compute remaining without {}".format(item.Type), itemLocDictAfter)
-        zeroLocsItemFound = False
-        for it, locs in itemLocDictAfter.items():
-            if it.Category == 'Boss' and len(locs) == 0:
-                self.log.debug("step: {} - zeroLocsItemFound for {} after placing {} !!".format(self.nSteps, it.Type, item.Type))
-                # if it's because of max diff, put back boss location in only boss left locations
-                if maxDiff < infinity:
-                    bossLoc = self.container.getLocs(lambda loc: loc.Name == it.Type)[0]
-                    self.onlyBossLeftLocations.append(bossLoc)
-                    self.errorMsg += " and {}".format(bossLoc.Name)
-                    return True
-
-                self.alreadyTriedItems[step].add(item)
-                zeroLocsItemFound = True
-                break
-
-        if zeroLocsItemFound:
-            return True
-
         self.collect(itemLoc)
 
         if itemLoc.Location in self.onlyBossLeftLocations:
             self.log.debug("Remove loc from onlyBossLeft locations")
-            self.onlyBossLeftLocations.remove(itemLoc.Location)
+            loc = itemLoc.Location
+            if len(self.errorMsg) == 0:
+                self.errorMsg = "Maximum difficulty could not be applied everywhere. Affected locations: "
+            self.errorMsg += " {}: {}".format(loc.Name, diffValue2txt(self.onlyBossLeftLocations[loc]))
+            del self.onlyBossLeftLocations[loc]
 
         self.log.debug("end ap: {}".format(self.ap))
 

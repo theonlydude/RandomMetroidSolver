@@ -88,7 +88,7 @@ class StandardSolver(CommonSolver):
                     locsItems[loc.Name] = loc.itemName
                     firstMinor[loc.itemName] = True
 
-            import utils.db
+            import utils.db as db
             with open(self.extStatsFilename, 'a') as extStatsFile:
                 db.DB.dumpExtStatsSolver(self.difficulty, knowsUsedList, self.solverStats, locsItems, self.extStatsStep, extStatsFile)
 

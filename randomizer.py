@@ -255,6 +255,8 @@ if __name__ == "__main__":
     parser.add_argument('--jm,', help="display data used by jm for its stats", dest='jm', action='store_true', default=False)
     parser.add_argument('--doorsColorsRando', help='randomize color of colored doors', dest='doorsColorsRando',
                         nargs='?', const=True, default=False)
+    parser.add_argument('--allowGreyDoors', help='add grey color in doors colors pool', dest='allowGreyDoors',
+                        nargs='?', const=True, default=False)
 
     # parse args
     args = parser.parse_args()
@@ -577,7 +579,7 @@ if __name__ == "__main__":
         if args.areaLayoutBase == False:
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
     graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses,
-                                  args.escapeRando, minimizerN, dotFile, args.doorsColorsRando,
+                                  args.escapeRando, minimizerN, dotFile, args.doorsColorsRando, args.allowGreyDoors,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
 
     if args.plandoRando is None:
@@ -666,6 +668,8 @@ if __name__ == "__main__":
                 suitsMode = "Progressive"
             elif args.noGravHeat:
                 suitsMode = "Vanilla"
+            if args.doorsColorsRando is not None:
+                args.patches.append("beam_doors.ips")
             romPatcher.applyIPSPatches(args.startAP, args.patches,
                                        args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,

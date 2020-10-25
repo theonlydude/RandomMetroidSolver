@@ -1164,7 +1164,7 @@ def sessionWebService():
     # web service to update the session
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
                'areaRandomization', 'areaLayout', 'lightAreaRandomization',
-               'doorsColorsRando', 'escapeRando', 'removeEscapeEnemies',
+               'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization', 'minimizer', 'minimizerTourian',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1198,6 +1198,7 @@ def sessionWebService():
     session.randomizer['areaLayout'] = request.vars.areaLayout
     session.randomizer['lightAreaRandomization'] = request.vars.lightAreaRandomization
     session.randomizer['doorsColorsRando'] = request.vars.doorsColorsRando
+    session.randomizer['allowGreyDoors'] = request.vars.allowGreyDoors
     session.randomizer['escapeRando'] = request.vars.escapeRando
     session.randomizer['removeEscapeEnemies'] = request.vars.removeEscapeEnemies
     session.randomizer['bossRandomization'] = request.vars.bossRandomization
@@ -1254,7 +1255,7 @@ def randomizerWebService():
     # check validity of all parameters
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
                'areaRandomization', 'areaLayout', 'lightAreaRandomization',
-               'doorsColorsRando', 'escapeRando', 'removeEscapeEnemies',
+               'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization', 'minimizer', 'minimizerTourian',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1384,6 +1385,8 @@ def randomizerWebService():
         params.append('--doorsColorsRando')
     elif request.vars.doorsColorsRando == 'random':
         params += ['--doorsColorsRando', 'random']
+    if request.vars.allowGreyDoors == 'on':
+        params.append('--allowGreyDoors')
 
     if request.vars.escapeRando == 'on':
         params.append('--escapeRando')
@@ -2289,7 +2292,7 @@ class WS_door_replace(WS):
         if self.doorName not in DoorsManager.doors.keys():
             raiseHttp(400, "Wrong value for doorName", True)
         self.newColor = request.vars.newColor
-        if self.newColor not in ["red", "green", "yellow", "grey"]:
+        if self.newColor not in ["red", "green", "yellow", "grey", "wave", "spazer", "plasma", "ice"]:
             raiseHttp(400, "Wrong value for newColor", True)
 
     def action(self):

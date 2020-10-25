@@ -5,8 +5,8 @@ import utils.log, logging
 
 LOG = utils.log.get('DoorsManager')
 
-colorsList = ['red', 'green', 'yellow']
-# 1/7 chance to have the door set to grey
+colorsList = ['red', 'green', 'yellow', 'wave', 'spazer', 'plasma', 'ice']
+# 1/15 chance to have the door set to grey
 colorsListGrey = colorsList * 2 + ['grey']
 
 class Facing:
@@ -16,16 +16,24 @@ class Facing:
     Bottom = 3
 
 # door facing left - right - top   - bottom
-plmRed    = [0x8a,   0x90,   0x96,   0x9c]
-plmGreen  = [0x72,   0x78,   0x7e,   0x84]
-plmYellow = [0x5a,   0x60,   0x66,   0x6c]
-plmGrey   = [0x42,   0x48,   0x4e,   0x54]
+plmRed    = [0xc88a, 0xc890, 0xc896, 0xc89c]
+plmGreen  = [0xc872, 0xc878, 0xc87e, 0xc884]
+plmYellow = [0xc85a, 0xc860, 0xc866, 0xc86c]
+plmGrey   = [0xc842, 0xc848, 0xc84e, 0xc854]
+plmWave   = [0xf763, 0xf769, 0xf70f, 0xf715]
+plmSpazer = [0xf733, 0xf739, 0xf73f, 0xf745]
+plmPlasma = [0xf74b, 0xf751, 0xf757, 0xf75d]
+plmIce    = [0xf71b, 0xf721, 0xf727, 0xf72d]
 
 colors2plm = {
     'red': plmRed,
     'green': plmGreen,
     'yellow': plmYellow,
-    'grey': plmGrey
+    'grey': plmGrey,
+    'wave': plmWave,
+    'spazer': plmSpazer,
+    'plasma': plmPlasma,
+    'ice': plmIce
 }
 
 class Door(object):
@@ -61,9 +69,9 @@ class Door(object):
     def canRandomize(self):
         return not self.forced and self.id is None
 
-    def randomize(self):
+    def randomize(self, allowGreyDoors):
         if self.canRandomize():
-            if self.canGrey:
+            if self.canGrey and allowGreyDoors:
                 self.setColor(random.choice(colorsListGrey))
             else:
                 self.setColor(random.choice(colorsList))
@@ -77,6 +85,14 @@ class Door(object):
             return smbm.canOpenGreenDoors()
         elif self.color == 'yellow':
             return smbm.canOpenYellowDoors()
+        elif self.color == 'wave':
+            return smbm.haveItem('Wave')
+        elif self.color == 'spazer':
+            return smbm.haveItem('Spazer')
+        elif self.color == 'plasma':
+            return smbm.haveItem('Plasma')
+        elif self.color == 'ice':
+            return smbm.haveItem('Ice')
         else:
             return SMBool(True)
 
@@ -87,7 +103,7 @@ class Door(object):
         if not self.isRandom():
             return
 
-        rom.writeByte(colors2plm[self.color][self.facing], self.address)
+        rom.writeWord(colors2plm[self.color][self.facing], self.address)
 
         # also set plm args high byte to never opened, even during escape
         if self.color == 'grey':
@@ -97,7 +113,7 @@ class Door(object):
         if self.forced:
             return
 
-        plm = rom.readByte(self.address)
+        plm = rom.readWord(self.address)
         if plm in plmRed:
             self.setColor('red')
         elif plm in plmGreen:
@@ -106,6 +122,14 @@ class Door(object):
             self.setColor('yellow')
         elif plm in plmGrey:
             self.setColor('grey')
+        elif plm in plmWave:
+            self.setColor('wave')
+        elif plm in plmSpazer:
+            self.setColor('spazer')
+        elif plm in plmPlasma:
+            self.setColor('plasma')
+        elif plm in plmIce:
+            self.setColor('ice')
         else:
             raise Exception("Unknown color {} for {}".format(hex(plm), self.name))
 
@@ -257,9 +281,9 @@ class DoorsManager():
             DoorsManager.doors['CrabShaftRight'].forceBlue()
 
     @staticmethod
-    def randomize():
+    def randomize(allowGreyDoors):
         for door in DoorsManager.doors.values():
-            door.randomize()
+            door.randomize(allowGreyDoors)
         # set both ends of toilet to the same color to avoid soft locking in area rando
         toiletTop = DoorsManager.doors['PlasmaSparkBottom']
         toiletBottom = DoorsManager.doors['OasisTop']
@@ -307,7 +331,7 @@ class DoorsManager():
     # call from web
     @staticmethod
     def getAddressesToRead():
-        return [door.address for door in DoorsManager.doors.values()]
+        return [door.address for door in DoorsManager.doors.values()] + [door.address+1 for door in DoorsManager.doors.values()]
 
     # for isolver state
     @staticmethod

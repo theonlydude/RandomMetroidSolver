@@ -695,3 +695,27 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/js/share.js ] || ln -s ~/RandomMetroidSolver/web/web2py/static/js/share.js ~/web2py/applications/solver/static/js/share.js
 [ -L ~/web2py/applications/solver/static/js/web2py-bootstrap3.js ] || ln -s ~/RandomMetroidSolver/web/web2py/static/js/web2py-bootstrap3.js ~/web2py/applications/solver/static/js/web2py-bootstrap3.js
 [ -L ~/web2py/applications/solver/static/js/web2py.js ] || ln -s ~/RandomMetroidSolver/web/web2py/static/js/web2py.js ~/web2py/applications/solver/static/js/web2py.js
+
+[ -L ~/web2py/applications/solver/static/images/blue_door.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/blue_door.svg ~/web2py/applications/solver/static/images/blue_door.svg
+[ -L ~/web2py/applications/solver/static/images/red_door.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/red_door.svg ~/web2py/applications/solver/static/images/red_door.svg
+[ -L ~/web2py/applications/solver/static/images/yellow_door.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/yellow_door.svg ~/web2py/applications/solver/static/images/yellow_door.svg
+[ -L ~/web2py/applications/solver/static/images/green_door.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/green_door.svg ~/web2py/applications/solver/static/images/green_door.svg
+[ -L ~/web2py/applications/solver/static/images/white_door.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/white_door.svg ~/web2py/applications/solver/static/images/white_door.svg
+[ -L ~/web2py/applications/solver/static/images/grey_door.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/grey_door.svg ~/web2py/applications/solver/static/images/grey_door.svg
+[ -L ~/web2py/applications/solver/static/images/wave_door_left.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/wave_door_left.svg ~/web2py/applications/solver/static/images/wave_door_left.svg
+[ -L ~/web2py/applications/solver/static/images/wave_door_right.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/wave_door_right.svg ~/web2py/applications/solver/static/images/wave_door_right.svg
+[ -L ~/web2py/applications/solver/static/images/ice_door.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/ice_door.svg ~/web2py/applications/solver/static/images/ice_door.svg
+[ -L ~/web2py/applications/solver/static/images/spazer_door.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/spazer_door.svg ~/web2py/applications/solver/static/images/spazer_door.svg
+[ -L ~/web2py/applications/solver/static/images/plasma_door_left.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/plasma_door_left.svg ~/web2py/applications/solver/static/images/plasma_door_left.svg
+[ -L ~/web2py/applications/solver/static/images/plasma_door_right.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/plasma_door_right.svg ~/web2py/applications/solver/static/images/plasma_door_right.svg
+[ -L ~/web2py/applications/solver/static/images/plasma_door_right.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/plasma_door_right.svg ~/web2py/applications/solver/static/images/plasma_door_right.svg
+[ -L ~/web2py/applications/solver/static/images/plasma_door_bottom.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/plasma_door_bottom.svg ~/web2py/applications/solver/static/images/plasma_door_bottom.svg
+[ -L ~/web2py/applications/solver/static/images/wave_door_bottom.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/wave_door_bottom.svg ~/web2py/applications/solver/static/images/wave_door_bottom.svg
+[ -L ~/web2py/applications/solver/static/images/ice_door_bottom.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/ice_door_bottom.svg ~/web2py/applications/solver/static/images/ice_door_bottom.svg
+[ -L ~/web2py/applications/solver/static/images/spazer_door_bottom.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/spazer_door_bottom.svg ~/web2py/applications/solver/static/images/spazer_door_bottom.svg
+[ -L ~/web2py/applications/solver/static/images/green_door_bottom.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/green_door_bottom.svg ~/web2py/applications/solver/static/images/green_door_bottom.svg
+[ -L ~/web2py/applications/solver/static/images/red_door_bottom.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/red_door_bottom.svg ~/web2py/applications/solver/static/images/red_door_bottom.svg
+[ -L ~/web2py/applications/solver/static/images/yellow_door_bottom.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/yellow_door_bottom.svg ~/web2py/applications/solver/static/images/yellow_door_bottom.svg
+[ -L ~/web2py/applications/solver/static/images/white_door_bottom.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/white_door_bottom.svg ~/web2py/applications/solver/static/images/white_door_bottom.svg
+[ -L ~/web2py/applications/solver/static/images/grey_door_bottom.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/grey_door_bottom.svg ~/web2py/applications/solver/static/images/grey_door_bottom.svg
+[ -L ~/web2py/applications/solver/static/images/blue_door_bottom.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/blue_door_bottom.svg ~/web2py/applications/solver/static/images/blue_door_bottom.svg

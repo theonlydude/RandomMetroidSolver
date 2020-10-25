@@ -317,6 +317,8 @@ def loadRandoPreset(randoPreset, args):
 
     if randoParams.get("doorsColorsRando", "off") == "on":
         args.doorsColorsRando = True
+    if randoParams.get("allowGreyDoors", "off") == "on":
+        args.allowGreyDoors = True
 
     if randoParams.get("bossRandomization", "off") == "on":
         args.bosses = True
@@ -429,6 +431,7 @@ def getRandomizerDefaultParameters():
     defaultParams['areaLayout'] = "off"
     defaultParams['lightAreaRandomization'] = "off"
     defaultParams['doorsColorsRando'] = "off"
+    defaultParams['allowGreyDoors'] = "off"
     defaultParams['escapeRando'] = "off"
     defaultParams['removeEscapeEnemies'] = "off"
     defaultParams['bossRandomization'] = "off"

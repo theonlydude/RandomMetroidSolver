@@ -94,7 +94,8 @@ class RomReader:
         'nerfedRainbowBeam': {'address': 0x14BA2E, 'value': 0x13, 'desc': 'nerfed rainbow beam'},
         'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'desc': "Crocomire in its own area"},
         'minimizer_bosses': {'address': 0x10F500, 'value': 0xAD, 'desc': "Minimizer"},
-        'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'desc': "Fast Tourian"}
+        'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'desc': "Fast Tourian"},
+        'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'desc': "Beam doors"}
     }
 
     # FIXME shouldn't be here
@@ -167,7 +168,8 @@ class RomReader:
         'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'vanillaValue': 0x4},
         'area_rando_warp_door': {'address': 0x26425E, 'value': 0x80, 'vanillaValue': 0x70},
         'minimizer_bosses': {'address': 0x10F500, 'value': 0xAD, 'vanillaValue': 0xff},
-        'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'vanillaValue': 0xff}
+        'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'vanillaValue': 0xff},
+        'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'vanillaValue': 0xaf}
     }
 
     @staticmethod

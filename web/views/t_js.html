@@ -11,6 +11,7 @@ function resizeChosen() {
 }
 
 var loaded = false;
+var debug = false;
 
 //-----------------------------------------------------------
 // AREAS TRACKER
@@ -479,10 +480,14 @@ function displayDoors(jsonData) {
             color = 'white';
         }
         var css = "";
-        if(facing == 0 || facing == 1) {
-            css = color+"Door"+"V";
-        } else {
-            css = color+"Door"+"H";
+        if(facing == 0) {
+            css = color+"Door"+"VL";
+        } else if(facing == 1) {
+            css = color+"Door"+"VR";
+        } else if(facing == 2) {
+            css = color+"Door"+"HT";
+        } else if(facing == 3) {
+            css = color+"Door"+"HB";
         }
         $("#"+doorName).attr("class", doorName+" "+css);
 
@@ -1275,10 +1280,10 @@ function actionDoor(doorName) {
         $("#doorPopup").css({"display": "block", "left": left, "top": top});
 
         // highlight current color
-        $("#redDoorSelect").removeClass("highlightColor");
-        $("#greenDoorSelect").removeClass("highlightColor");
-        $("#yellowDoorSelect").removeClass("highlightColor");
-        $("#greyDoorSelect").removeClass("highlightColor");
+        var colors = ["red", "green", "yellow", "grey", "wave", "spazer", "plasma", "ice"];
+        for(var i=0; i<colors.length; i++) {
+            $("#"+colors[i]+"DoorSelect").removeClass("highlightColor");
+        }
         $("#"+currentColor+"DoorSelect").addClass("highlightColor");
     } else {
         if(doorsRando == false) {
@@ -1296,19 +1301,14 @@ function actionDoor(doorName) {
 }
 
 function getColor(doorName) {
-    if($("#"+doorName).hasClass("blueDoorV") || $("#"+doorName).hasClass("blueDoorH")) {
-        return "blue";
-    } else if($("#"+doorName).hasClass("redDoorV") || $("#"+doorName).hasClass("redDoorH")) {
-        return "red";
-    } else if($("#"+doorName).hasClass("greenDoorV") || $("#"+doorName).hasClass("greenDoorH")) {
-        return "green";
-    } else if($("#"+doorName).hasClass("yellowDoorV") || $("#"+doorName).hasClass("yellowDoorH")) {
-        return "yellow";
-    } else if($("#"+doorName).hasClass("greyDoorV") || $("#"+doorName).hasClass("greyDoorH")) {
-        return "grey";
-    } else {
-        console.log("Can't find door "+doorName+" color");
+    var colors = ["red", "green", "yellow", "grey", "wave", "spazer", "plasma", "white", "ice"];
+    for(var i=0; i<colors.length; i++) {
+        if($("#"+doorName).hasClass(colors[i]+"DoorVL") || $("#"+doorName).hasClass(colors[i]+"DoorHT")
+           || $("#"+doorName).hasClass(colors[i]+"DoorVR") || $("#"+doorName).hasClass(colors[i]+"DoorHB")) {
+            return colors[i];
+        }
     }
+    console.log("Can't find door "+doorName+" color");
 }
 
 function hideDoorPopup() {

@@ -81,13 +81,15 @@ class RandoServices(object):
         locsPostNokWoItem = list(curLocsPostAvail - curLocsPostAvailWoItem)
 
         # filter locs where we can place the item
-        curLocsCanPlace = [loc for loc in curLocsPostAvail if self.restrictions.canPlaceAtLocation(item, loc, container)]
+        curLocsCanPlace = set([loc for loc in curLocsPostAvail if self.restrictions.canPlaceAtLocation(item, loc, container)])
 
         container.sm.resetItems()
         # return locations still available without the item, and the number of it
+        # return the locations no longer available without the item
         # return the locs where post avail fails without the item
         # return the list of locations that we can still reach without the item and where we can place the item.
         return {"availLocsWoItem": curLocs, "availLocsWoItemLen": len(curLocs),
+                "noLongerAvailLocsWoItem": set(container.unusedLocations) - curLocs,
                 "locsPostNokWoItem": locsPostNokWoItem, "possibleLocs": curLocsCanPlace}
 
     # reverse only boss left locations for assumed fill
@@ -119,11 +121,11 @@ class RandoServices(object):
         allLocs = set(container.unusedLocations)
         self.log.debug("only boss left, reach all locs ?: {}/{}".format(len(allReachableLocs), len(allLocs)))
         self.log.debug("only boss left locs: {}".format([loc.Name for loc in list(onlyBossLeft)]))
-        if len(allReachableLocs) != len(allLocs):
-            self.log.debug("one or more locations are now non reachable, should not happen !")
-            for loc in list(allLocs - allReachableLocs):
-                self.log.debug("unreachable loc: {}".format(loc))
-            raise MonCul
+#        if len(allReachableLocs) != len(allLocs):
+#            self.log.debug("one or more locations are now non reachable, should not happen !")
+#            for loc in list(allLocs - allReachableLocs):
+#                self.log.debug("unreachable loc: {}".format(loc))
+#            raise MonCul
 
         container.sm.resetItems()
 

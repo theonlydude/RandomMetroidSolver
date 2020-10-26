@@ -1,3 +1,11 @@
+try:
+    import networkx as nx
+    from networkx.drawing.nx_agraph import write_dot
+except:
+    print("missing networkx package, install it: pip3.7 install networkx --user")
+    import sys
+    sys.exit(1)
+
 import random, logging, time
 from collections import defaultdict
 
@@ -40,47 +48,9 @@ class AssumedFiller(Filler):
             bossLoc = self.container.getLocs(lambda loc: loc.Name == bossLocName)
             self.collect(ItemLocation(bossItem[0], bossLoc[0]))
 
-        self.alreadyTriedItems = defaultdict(set)
-        self.alreadySwitchedItems = defaultdict(set)
-
-        # get all aps accessible from start ap with no items
-        self.firstAPs = [ap.Name for ap in self.graph.getAvailableAccessPoints(self.graph.accessPoints[self.startAP], self.container.sm, self.maxDiff)]
-
-        self.log.debug("first APs: {}".format(self.firstAPs))
-        # then all the locations linked to these first APs
-        self.firstLocations = []
-        for loc in self.container.unusedLocations:
-            for ap in loc.AccessFrom.keys():
-                if ap in self.firstAPs:
-                    if self.isMajor(loc):
-                        self.firstLocations.append(loc)
-                    continue
-
-        if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("first locations: {}".format(len(self.firstLocations)))
-            for loc in self.firstLocations:
-                self.log.debug(loc.Name)
-
-        # TODO::choose morph loc first to forbid other items in it. TODO::handle early/late morph
-        #firstItemLocDict = self.services.getPossiblePlacementsWithoutItem(self.startAP, self.container, assumedItems, alreadyPlacedItems)
-
     def isMajor(self, obj):
         return (self.settings.restrictions['MajorMinor'] == 'Full'
                 or self.settings.restrictions['MajorMinor'] in obj.Class)
-
-    def uncollect(self, loc):
-        itemType = self.container.uncollect(loc)
-        if self.vcr is not None:
-            self.vcr.removeLocation(loc.Name, itemType)
-
-    def getMoreUseless(self, item1, item2):
-        # nothing < noenergy < missile < super < powerbomb < reserve < etank
-        usefulness = {'Nothing': 0, 'NoEnergy': 1, 'Missile': 2, 'Super': 3, 'PowerBomb': 4, 'Reserve': 5, 'ETank': 6}
-
-        if usefulness.get(item1.Type, infinity) < usefulness.get(item2.Type, infinity):
-            return item1
-        else:
-            return item2
 
     def validateFill(self):
         self.log.debug("Final mini/real solver check to validate the fill")
@@ -115,49 +85,67 @@ class AssumedFiller(Filler):
                 locs = data['possibleLocs']
                 self.log.debug("  {}: {}".format(it.Type, [loc.Name for loc in locs] if len(locs) < 5 else len(locs)))
 
-    def getPriorityLocations(self, itemLocDict):
-        # for each item get the locations which become unreachable after placing the item (ie. without the item)
-        # then priorize the locations depending on how many items required them, favor item with smallest list,
-        # also priorize locs where placing an item invalidate their postAvailable
-        # return the list of locations of higher priority
-        postNokPriority = 1024 # have to be big, it's top priority to fill it else it will never be filled
-        # higher priorities for useful items
-        itemsPriorities = {
-            'Boss': 10,
-            'Progression': 5,
-            'Beam': 5,
-            'Misc': 5,
-            'Ammo': 1,
-            'Energy': 1,
-            'Nothing': 0
-        }
-
-        priorityLocations = defaultdict(float)
-        allLocations = set(self.container.unusedLocations)
+    def computePriority(self, itemLocDict, step):
+        # build a dependency graph of the items/locations to help priorize some locations and some items.
         for it, data in itemLocDict.items():
-            unreachableLocations = allLocations - set(data["availLocsWoItem"])
-            self.log.debug("priority locs for {}: {} - {}".format(it.Type, len(unreachableLocations), [loc.Name for loc in unreachableLocations]))
+            data["newPossibleLocs"] = set()
 
-            priority = itemsPriorities[it.Category]
-            for loc in unreachableLocations:
-                # lower priority if more locs have to be filled
-                priorityLocations[loc] += priority / len(unreachableLocations)
+        # keep only items where we still have step available locs after placing the item
+        if step > 0:
+            validItems = set([it for it, data in itemLocDict.items() if data['availLocsWoItemLen'] == step])
+            self.log.debug("validItems: {}".format([it.Type for it in validItems]))
+        else:
+            validItems = set([it for it in itemLocDict.keys()])
+
+        # for a node N and its parent P we add an edge to the graph if at least one possible location for item N
+        # is in the locations which won't be available after placing item P (ie. we have to place N before P
+        # to not have inaccessible locations)
+        self.log.debug("begin graph construction")
+        itemGraph = nx.DiGraph()
+        for P, dataP in itemLocDict.items():
+            for N, dataN in itemLocDict.items():
+                if dataN["possibleLocs"].intersection(dataP["noLongerAvailLocsWoItem"]):
+                    itemGraph.add_edge(P, N)
+                    self.log.debug("add edge {} -> {}".format(P.Type, N.Type))
+
+        write_dot(itemGraph, "grid{}.dot".format(step))
+
+        # keep only the leafs (ie. nodes without transitions starting from them)
+        leafs = [N for N in itemGraph.nodes() if itemGraph.out_degree(N) == 0]
+        self.log.debug("leafs: {}".format([it.Type for it in leafs]))
+
+        postNokPriority = 100 # have to be big, it's top priority to fill it else it will never be filled
+        defaultPriority = 1
+
+        # keep intersection of all possible locations which are in parent no longer avail locations
+        priorityLocations = defaultdict(int)
+        priorityLocationsItems = defaultdict(set)
+        for P, N in itemGraph.edges():
+            if N not in leafs or N not in validItems:
+                self.log.debug("N {} not in leafs or not in validItems".format(N.Type))
+                continue
+            self.log.debug("handle N {} priority".format(N.Type))
+            newPossibleLocs = itemLocDict[P]["noLongerAvailLocsWoItem"].intersection(itemLocDict[N]["possibleLocs"])
+            # increase priority each time a location has to be filled to unlock an item
+            for loc in newPossibleLocs:
+                self.log.debug("increase N {} Loc {} priority".format(N.Type, loc.Name))
+                priorityLocations[loc] += defaultPriority
+                priorityLocationsItems[loc].add(N)
+            itemLocDict[N]["newPossibleLocs"].update(newPossibleLocs)
+        for it, data in itemLocDict.items():
+            if it not in leafs or N not in validItems:
+                continue
+            data["possibleLocs"] = data["newPossibleLocs"]
+
+        for it, data in itemLocDict.items():
             for loc in data["locsPostNokWoItem"]:
                 self.log.debug("loc post nok wo {}: {}".format(it.Type, loc.Name))
                 priorityLocations[loc] += postNokPriority
+                for it2, data in itemLocDict.items():
+                    if loc in data["possibleLocs"]:
+                        priorityLocationsItems[loc].add(it2)
 
-        # get list of locations for each priorities
-        priorities = defaultdict(list)
-        for loc, count in priorityLocations.items():
-            priorities[count].append(loc)
-
-        if self.log.getEffectiveLevel() == logging.DEBUG:
-            #for count, locs in priorities.items():
-                #self.log.debug("priority {}: {}".format(round(count, 2), [loc.Name for loc in locs]))
-
-            self.log.debug("max priority locations: {} - {}".format(round(max(priorities), 2), [loc.Name for loc in priorities[max(priorities) if priorities else 0]]))
-
-        return priorities[max(priorities) if priorities else 0]
+        return priorityLocations, priorityLocationsItems
 
     def step(self, onlyBossCheck=False):
         self.log.debug("------------------------------------------------")
@@ -196,78 +184,65 @@ class AssumedFiller(Filler):
         # debug display
         self.displayItemLocDict("before", itemLocDict)
 
+        # don't filter items based on availLocsWoItemLen
+        if self.earlyGame:
+            step = -1
+
         # keep only priority locations, locations that need to be filled to allow placement of an item
         # which will make other locations unreachable
-        priorityLocations = set(self.getPriorityLocations(itemLocDict))
+        priorityLocations, priorityLocationsItems = self.computePriority(itemLocDict, step)
 
-        if priorityLocations:
-            # keep only priority locations
+        if not priorityLocations:
+            self.log.debug("no priority locations")
+            # no more constraints between items.
+            # choose between items with the highest number of available locs after.
+            maxAvailLocs = -1
             for it, data in itemLocDict.items():
-                data["possibleLocs"] = set(data["possibleLocs"]).intersection(priorityLocations)
-            itemLocDict = {it: data for it, data in itemLocDict.items() if len(data['possibleLocs']) > 0}
-
-        # keep only items where we still have step available locs after placing the item
-        if not self.earlyGame:
-            itemLocDict = {it: data for it, data in itemLocDict.items() if data['availLocsWoItemLen'] == step}
-
-        if not itemLocDict:
-            if not self.earlyGame:
-                self.log.debug("no longer enforce that enough locs are available")
-                self.earlyGame = True
-                return True
-            else:
-                self.errorMsg = "No item with {} available locs after".format(step)
-                self.log.debug(self.errorMsg)
-                return False
-
-        # debug display
-        self.displayItemLocDict("after filter", itemLocDict)
-
-        if len(self.alreadyTriedItems[step]) > 0:
-            self.log.debug("self.alreadyTriedItems: {} / {}".format(len(self.alreadyTriedItems[step]), step))
-            try:
-                item = random.choice([it for it in itemLocDict.keys() if it not in self.alreadyTriedItems[step]])
-            except IndexError:
-                self.errorMsg = "Stucked after testing all items"
-                return False
-        else:
-            if not self.earlyGame:
-                # TODO::check if this doesn't create the same seeds:
-                # choose first boss, then major, then ammo, then nothing
-                boss = [it for it in itemLocDict.keys() if it.Category == 'Boss']
-                remain = [it for it in itemLocDict.keys() if it.Category != 'Boss']
-                #major = [it for it in itemLocDict.keys() if it.Category in ['Progression', 'Beam', 'Misc']]
-                #ammo_energy = [it for it in itemLocDict.keys() if it.Category in ['Ammo', 'Energy']]
-                #nothing = [it for it in itemLocDict.keys() if it.Category == 'Nothing']
-                #self.log.debug("Available items: boss: {} major: {} ammo/energy: {} nothing: {}".format(len(boss), len(major), len(ammo_energy), len(nothing)))
-                self.log.debug("Available items: boss: {} remain: {}".format(len(boss), len(remain)))
-
-                items = boss if boss else remain
-                self.log.debug("items in choice: {}".format([it.Type for it in items]))
-            else:
-                # choose between items with the highest number of available locs after
-                maxAvailLocs = -1
-                for it, data in itemLocDict.items():
-                    if data["availLocsWoItemLen"] > maxAvailLocs:
-                        maxAvailLocs = data["availLocsWoItemLen"]
-                items = [it for it, data in itemLocDict.items() if data["availLocsWoItemLen"] == maxAvailLocs]
+                if data["availLocsWoItemLen"] > maxAvailLocs:
+                    maxAvailLocs = data["availLocsWoItemLen"]
+            items = [it for it, data in itemLocDict.items() if data["availLocsWoItemLen"] == maxAvailLocs]
 
             item = random.choice(items)
-        locations = list(itemLocDict[item]['possibleLocs'])
-        self.log.debug("item chosen: {} - available locs: {}".format(item.Type, len(locations)))
+            locations = list(itemLocDict[item]['possibleLocs'])
+            self.log.debug("item chosen: {} - available locs: {}".format(item.Type, len(locations)))
 
-        itemLoc = self.choice.chooseItemLoc({item: locations}, False)
-        if itemLoc is None:
-            self.log.debug("No remaining location for item {}".format(item.Type))
-            self.alreadyTriedItems[step].add(item)
-            return True
-        self.log.debug("loc chosen: {}, difficulty: {}".format(itemLoc.Location.Name, itemLoc.Location.difficulty))
+            itemLoc = self.choice.chooseItemLoc({item: locations}, False)
+            if itemLoc is None:
+                self.log.debug("No remaining location for item {}".format(item.Type))
+                self.alreadyTriedItems[step].add(item)
+                return True
+            self.log.debug("loc chosen: {}, difficulty: {}".format(itemLoc.Location.Name, itemLoc.Location.difficulty))
+        else:
+            self.log.debug("priority locations")
+#        if not itemLocDict:
+#            if not self.earlyGame:
+#                self.log.debug("no longer enforce that enough locs are available")
+#                self.earlyGame = True
+#                return True
+#            else:
+#                self.errorMsg = "No item with {} available locs after".format(step)
+#                self.log.debug(self.errorMsg)
+#                return False
+
+            # first choose the location, then the item, the more priority on a loc the higher chance to choose it
+            locsChoice = [loc for loc, count in priorityLocations.items() for i in range(count)]
+
+            loc = random.choice(locsChoice)
+
+            # choose item
+            itemsChoice = list(priorityLocationsItems[loc])
+
+            item = random.choice(itemsChoice)
+            self.log.debug("loc chosen: {}, difficulty: {} - available items: {}".format(loc.Name, loc.difficulty, len(itemsChoice)))
+            self.log.debug("item chosen: {}".format(item.Type))
+
+            itemLoc = ItemLocation(item, loc)
 
         self.collect(itemLoc)
 
-        if itemLoc.Location in self.onlyBossLeftLocations:
+        loc = itemLoc.Location
+        if loc in self.onlyBossLeftLocations:
             self.log.debug("Remove loc from onlyBossLeft locations")
-            loc = itemLoc.Location
             if len(self.errorMsg) == 0:
                 self.errorMsg = "Maximum difficulty could not be applied everywhere. Affected locations: "
             self.errorMsg += " {}: {}".format(loc.Name, diffValue2txt(self.onlyBossLeftLocations[loc]))

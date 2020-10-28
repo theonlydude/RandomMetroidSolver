@@ -451,7 +451,7 @@ if __name__ == "__main__":
         print("SEED: " + str(seed))
 
     # fill restrictions dict
-    restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "ammo": "normal" if not args.doorsColorsRando else "late" }
+    restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "doors": "normal" if not args.doorsColorsRando else "late" }
     restrictions['MajorMinor'] = args.majorsSplit
     seedCode = 'X'
     if majorsSplitRandom == False:

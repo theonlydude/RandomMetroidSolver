@@ -122,17 +122,17 @@ class ProgSpeedParameters(object):
             return 0.5
         return 1
 
-    def getLateAmmoProb(self, progSpeed):
+    def getLateDoorsProb(self, progSpeed):
         if progSpeed == 'slowest':
             return 1
         elif progSpeed == 'slow':
-            return 0.9
-        elif progSpeed == 'medium':
             return 0.8
+        elif progSpeed == 'medium':
+            return 0.66
         elif progSpeed == 'fast':
-            return 0.65
-        elif progSpeed == 'fastest':
             return 0.5
+        elif progSpeed == 'fastest':
+            return 0.33
         return 0
 
     def getItemLimit(self, progSpeed):

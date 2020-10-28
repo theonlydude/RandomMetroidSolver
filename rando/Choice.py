@@ -85,28 +85,32 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
     def currentLocations(self, item=None):
         return self.services.currentLocations(self.ap, self.container, item=item)
 
-    def processLateAmmo(self, itemLocDict, ap, container):
-        # exclude ammo from itemLocDict, if just ammo in there,
-        # leave only one type
-        noAmmoLocDict = {item:locList for item,locList in itemLocDict.items() if item.Category != "Ammo" or container.sm.haveItem(item.Type)}
-        if len(noAmmoLocDict) > 0:
-            self.log.debug('processLateAmmo. no ammo')
+    def processLateDoors(self, itemLocDict, ap, container):
+        doorBeams = ['Spazer', 'Plasma', 'Wave', 'Ice']
+        def canOpenExtendedDoors(item):
+            return item.Category == 'Ammo' or item.Type in doorBeams
+        # exclude door items from itemLocDict
+        noDoorsLocDict = {item:locList for item,locList in itemLocDict.items() if canOpenExtendedDoors(item) or container.sm.haveItem(item.Type)}
+        if len(noDoorsLocDict) > 0:
+            self.log.debug('processLateDoors. no doors')
             itemLocDict.clear()
-            itemLocDict.update(noAmmoLocDict)
+            itemLocDict.update(noDoorsLocDict)
             return
-        # itemLocDict is made up only of progression ammo
-        def updateLocDictWithSingleAmmoType(ammoType):
+        # itemLocDict is made up only of progression ammo/beams
+        def updateLocDictWithSingleItemType(itemType):
             nonlocal itemLocDict
-            ammoLocDict = {item:locList for item,locList in itemLocDict.items() if item.Type == ammoType}
-            assert len(ammoLocDict) > 0
+            locDict = {item:locList for item,locList in itemLocDict.items() if item.Type == itemType}
+            assert len(locDict) > 0
             itemLocDict.clear()
-            itemLocDict.update(ammoLocDict)
-        ammoTypes = ['Missile', 'PowerBomb']
-        random.shuffle(ammoTypes)
-        for ammo in ammoTypes+['Super']:
-            if any(item.Type == ammo for item in itemLocDict):
-                self.log.debug('processLateAmmo. '+ammo+' prog')
-                updateLocDictWithSingleAmmoType(ammo)
+            itemLocDict.update(locDict)
+        itemTypes = doorBeams+['Missile', 'PowerBomb']
+        if not any(item.Type == 'Missile' for item in itemLocDict):
+            itemTypes.append('Super')
+        random.shuffle(itemTypes)
+        for itemType in itemTypes:
+            if any(item.Type == itemType for item in itemLocDict):
+                self.log.debug('processLateDoors. '+itemType+' prog')
+                updateLocDictWithSingleItemType(itemType)
                 return
 
     def chooseItemLoc(self, itemLocDict, isProg, progressionItemLocs, ap, container):
@@ -126,9 +130,9 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
             if item.Category == 'Boss':
                 assert len(locs) == 1 and locs[0].Name == item.Name
                 return ItemLocation(item, locs[0])
-        # late ammo check for random door colors
-        if self.restrictions.isLateAmmo() and random.random() < self.lateAmmoProb:
-            self.processLateAmmo(itemLocDict, ap, container)
+        # late doors check for random door colors
+        if self.restrictions.isLateDoors() and random.random() < self.lateDoorsProb:
+            self.processLateDoors(itemLocDict, ap, container)
         self.progressionItemLocs = progressionItemLocs
         self.ap = ap
         self.container = container
@@ -138,7 +142,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         self.chooseLocRanges = getRangeDict(self.getChooseLocs(progDiff))
         self.chooseItemRanges = getRangeDict(self.getChooseItems(progSpeed))
         self.spreadProb = self.progSpeedParams.getSpreadFactor(progSpeed)
-        self.lateAmmoProb = self.progSpeedParams.getLateAmmoProb(progSpeed)
+        self.lateDoorsProb = self.progSpeedParams.getLateDoorsProb(progSpeed)
 
     def getChooseLocs(self, progDiff=None):
         if progDiff is None:

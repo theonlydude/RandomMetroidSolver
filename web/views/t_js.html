@@ -1301,7 +1301,7 @@ function actionDoor(doorName) {
 }
 
 function getColor(doorName) {
-    var colors = ["red", "green", "yellow", "grey", "wave", "spazer", "plasma", "white", "ice"];
+    var colors = ["red", "green", "yellow", "grey", "wave", "spazer", "plasma", "white", "ice", "blue"];
     for(var i=0; i<colors.length; i++) {
         if($("#"+doorName).hasClass(colors[i]+"DoorVL") || $("#"+doorName).hasClass(colors[i]+"DoorHT")
            || $("#"+doorName).hasClass(colors[i]+"DoorVR") || $("#"+doorName).hasClass(colors[i]+"DoorHB")) {

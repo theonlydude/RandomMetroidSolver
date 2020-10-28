@@ -368,7 +368,9 @@ if __name__ == "__main__":
         args.area = bool(random.getrandbits(1))
     logger.debug("area: {}".format(args.area))
 
+    doorsColorsRandom = False
     if args.doorsColorsRando == 'random':
+        doorsColorsRandom = True
         args.doorsColorsRando = bool(random.getrandbits(1))
     logger.debug("doorsColorsRando: {}".format(args.doorsColorsRando))
 
@@ -463,6 +465,8 @@ if __name__ == "__main__":
             seedCode = 'MX'
     if args.bosses == True and bossesRandom == False:
         seedCode = 'B'+seedCode
+    if args.doorsColorsRando == True and doorsColorsRandom == False:
+        seedCode = 'D'+seedCode
     if args.area == True and areaRandom == False:
         seedCode = 'A'+seedCode
 

@@ -42,6 +42,8 @@ class RomPatches:
     # maridia
     MaridiaTubeOpened         = 51
     MamaTurtleBlueDoor        = 52
+    # ws start
+    WsEtankBlueDoor           = 53
     ## Area rando patches
     # remove crumble block for reverse lower norfair door access
     SingleChamberNoCrumble    = 101

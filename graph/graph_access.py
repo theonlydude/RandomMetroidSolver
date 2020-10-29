@@ -177,7 +177,10 @@ accessPoints = [
                                                                    RomPatches.has(RomPatches.SpongeBathBlueDoor)))),
         'PhantoonRoomOut': lambda sm: sm.wand(sm.traverse('WreckedShipMainShaftBottom'), sm.canPassBombPassages())
     }, internal=True,
-       start={'spawn':0x0300, 'doors':[0x83], 'patches':[RomPatches.SpongeBathBlueDoor], 'solveArea': "WreckedShip Main", 'needsPreRando':True}),
+       start={'spawn':0x0300,
+              'doors':[0x83,0x8b], 'patches':[RomPatches.SpongeBathBlueDoor, RomPatches.WsEtankBlueDoor],
+              'solveArea': "WreckedShip Main",
+              'needsPreRando':True}),
     AccessPoint('Wrecked Ship Back', 'WreckedShip', {
         'Wrecked Ship Main': lambda sm: SMBool(True),
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(True)

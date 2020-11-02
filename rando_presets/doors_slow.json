@@ -10,7 +10,7 @@
   "layoutPatches": "on",
   "missileQty": "3",
   "morphPlacement": "early",
-  "progressionSpeed": "medium",
+  "progressionSpeed": "slow",
   "No_Music": "off",
   "areaRandomization": "off",
   "escapeRando": "off",
@@ -30,5 +30,5 @@
   "nerfedCharge": "off",
   "bossRandomization": "off",
   "rando_speed": "off",
-  "doorsColorsRando": "off"
+  "doorsColorsRando": "on"
 }

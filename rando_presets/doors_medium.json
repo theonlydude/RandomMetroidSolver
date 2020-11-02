@@ -30,5 +30,5 @@
   "nerfedCharge": "off",
   "bossRandomization": "off",
   "rando_speed": "off",
-  "doorsColorsRando": "off"
+  "doorsColorsRando": "on"
 }

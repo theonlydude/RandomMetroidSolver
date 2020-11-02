@@ -166,19 +166,19 @@ class AssumedFiller(Filler):
         self.log.debug("possible items: {}".format([it.Type for it in itemLocDict.keys() if it in leafs and it in validItems]))
 
         # check if a loc must be filled or else it'll be no longer available
-        priorityLocs = []
+        extraPriorityLocations = []
         for it, data in itemLocDict.items():
             if it not in validItems:
                 continue
             for loc in data["locsPostNokWoItem"]:
                 self.log.debug("loc post nok wo {}: {}".format(it.Type, loc.Name))
                 priorityLocations[loc] += postNokPriority
-                priorityLocs.append(loc)
+                extraPriorityLocations.append(loc)
                 for it2, data in itemLocDict.items():
                     if loc in data["possibleLocs"] and it2 in validItems:
                         priorityLocationsItems[loc].add(it2)
 
-        return {it: data for it, data in itemLocDict.items() if it in leafs and it in validItems}, priorityLocs, priorityLocationsItems
+        return {it: data for it, data in itemLocDict.items() if it in leafs and it in validItems}, extraPriorityLocations, priorityLocations, priorityLocationsItems
 
 #        return priorityLocations, priorityLocationsItems
 
@@ -252,10 +252,10 @@ class AssumedFiller(Filler):
         # keep only priority locations, locations that need to be filled to allow placement of an item
         # which will make other locations unreachable
         #priorityLocations, priorityLocationsItems = self.computePriority(itemLocDict, step)
-        newItemLocDict, priorityLocs, priorityLocationsItems = self.computePriority(itemLocDict, step)
+        newItemLocDict, extraPriorityLocations, priorityLocations, priorityLocationsItems = self.computePriority(itemLocDict, step)
 
-        if priorityLocs:
-            loc = random.choice(sorted(priorityLocs))
+        if extraPriorityLocations:
+            loc = random.choice(sorted(extraPriorityLocations))
             itemsChoice = sorted(list(priorityLocationsItems[loc]))
 
             item = random.choice(itemsChoice)
@@ -266,7 +266,12 @@ class AssumedFiller(Filler):
         else:
             item = random.choice([it for it in newItemLocDict.keys()])
             locations = list(newItemLocDict[item]['possibleLocs'])
-            self.log.debug("item chosen: {} - available locs: {}".format(item.Type, len(locations)))
+            maxPriority = -1
+            for loc in locations:
+                if priorityLocations[loc] > maxPriority:
+                    maxPriority = priorityLocations[loc]
+            locations = [loc for loc in locations if priorityLocations[loc] == maxPriority]
+            self.log.debug("item chosen: {} - available locs: {}".format(item.Type, [(loc.Name, priorityLocations[loc]) for loc in locations] if len(locations) < 5 else len(locations)))
 
             itemLoc = self.choice.chooseItemLoc({item: locations}, False)
             self.log.debug("loc chosen: {}".format(itemLoc.Location.Name))

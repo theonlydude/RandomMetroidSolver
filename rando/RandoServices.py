@@ -83,6 +83,9 @@ class RandoServices(object):
         # filter locs where we can place the item
         curLocsCanPlace = set([loc for loc in curLocsPostAvail if self.restrictions.canPlaceAtLocation(item, loc, container)])
 
+        assert len(curLocsCanPlace) > 0
+
+
         container.sm.resetItems()
         # return locations still available without the item, and the number of it
         # return the locations no longer available without the item
@@ -121,11 +124,11 @@ class RandoServices(object):
         allLocs = set(container.unusedLocations)
         self.log.debug("only boss left, reach all locs ?: {}/{}".format(len(allReachableLocs), len(allLocs)))
         self.log.debug("only boss left locs: {}".format([loc.Name for loc in list(onlyBossLeft)]))
-#        if len(allReachableLocs) != len(allLocs):
-#            self.log.debug("one or more locations are now non reachable, should not happen !")
-#            for loc in list(allLocs - allReachableLocs):
-#                self.log.debug("unreachable loc: {}".format(loc))
-#            raise MonCul
+        if len(allReachableLocs) != len(allLocs):
+            self.log.debug("one or more locations are now non reachable, should not happen !")
+            for loc in list(allLocs - allReachableLocs):
+                self.log.debug("unreachable loc: {}".format(loc))
+        assert len(allReachableLocs) == len(allLocs)
 
         container.sm.resetItems()
 

@@ -90,7 +90,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         def canOpenExtendedDoors(item):
             return item.Category == 'Ammo' or item.Type in doorBeams
         # exclude door items from itemLocDict
-        noDoorsLocDict = {item:locList for item,locList in itemLocDict.items() if canOpenExtendedDoors(item) or container.sm.haveItem(item.Type)}
+        noDoorsLocDict = {item:locList for item,locList in itemLocDict.items() if not canOpenExtendedDoors(item) or container.sm.haveItem(item.Type)}
         if len(noDoorsLocDict) > 0:
             self.log.debug('processLateDoors. no doors')
             itemLocDict.clear()

@@ -86,17 +86,39 @@ class RandoServices(object):
         assert len(curLocsCanPlace) > 0
 
 
+        # if count item it could happen that we're one item before some locs get unavailable,
+        # so test the possible locs again with two items removed.
+        locsNokWoDoubleItem = []
+        if container.sm.isCountItem(item.Type) and container.sm.haveItem(item.Type):
+            self.log.debug("test double remove for {}".format(item.Type))
+            container.sm.removeItem(item.Type)
+
+            if self.cache:
+                self.cache.reset()
+
+            curLocsDouble = set(self.currentLocations(startAP, container, post=False, diff=maxDiff))
+            locsNokWoDoubleItem = list(curLocs - curLocsDouble)
+
+            #self.log.debug("curLocs:       {}".format(sorted([loc.Name for loc in curLocs])))
+            #self.log.debug("curLocsDouble: {}".format(sorted([loc.Name for loc in curLocsDouble])))
+
+            if locsNokWoDoubleItem:
+                self.log.debug("detected nok locs without double {}: {}".format(item.Type, [loc.Name for loc in locsNokWoDoubleItem]))
+
         container.sm.resetItems()
+
         # return locations still available without the item, and the number of it
         # return the locations no longer available without the item
         # return the locs where post avail fails without the item
+        # return the locs no longer available without two items (for count items)
         # return the list of locations that we can still reach without the item and where we can place the item.
         return {"availLocsWoItem": curLocs, "availLocsWoItemLen": len(curLocs),
                 "noLongerAvailLocsWoItem": set(container.unusedLocations) - curLocs,
+                "locsNokWoDoubleItem": locsNokWoDoubleItem,
                 "locsPostNokWoItem": locsPostNokWoItem, "possibleLocs": curLocsCanPlace}
 
     # reverse only boss left locations for assumed fill
-    def getOnlyBossLeftLocationReverse(self, startAP, container):
+    def getOnlyBossLeftLocationReverse(self, startAP, container, earlyGame):
         if self.settings.maxDiff == infinity:
             return []
 
@@ -120,15 +142,16 @@ class RandoServices(object):
 
         onlyBossLeft = onlyBossLeft1.union(onlyBossLeft2)
 
-        allReachableLocs = curLocsInfinity1.union(curLocsInfinity2)
-        allLocs = set(container.unusedLocations)
-        self.log.debug("only boss left, reach all locs ?: {}/{}".format(len(allReachableLocs), len(allLocs)))
-        self.log.debug("only boss left locs: {}".format([loc.Name for loc in list(onlyBossLeft)]))
-        if len(allReachableLocs) != len(allLocs):
-            self.log.debug("one or more locations are now non reachable, should not happen !")
-            for loc in list(allLocs - allReachableLocs):
-                self.log.debug("unreachable loc: {}".format(loc))
-        assert len(allReachableLocs) == len(allLocs)
+        if not earlyGame:
+            allReachableLocs = curLocsInfinity1.union(curLocsInfinity2)
+            allLocs = set(container.unusedLocations)
+            self.log.debug("only boss left, reach all locs ?: {}/{}".format(len(allReachableLocs), len(allLocs)))
+            self.log.debug("only boss left locs: {}".format([loc.Name for loc in list(onlyBossLeft)]))
+            if len(allReachableLocs) != len(allLocs):
+                self.log.debug("one or more locations are now non reachable, should not happen !")
+                for loc in list(allLocs - allReachableLocs):
+                    self.log.debug("unreachable loc: {}".format(loc))
+            assert len(allReachableLocs) == len(allLocs)
 
         container.sm.resetItems()
 

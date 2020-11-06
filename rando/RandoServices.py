@@ -44,15 +44,7 @@ class RandoServices(object):
         self.log.debug("getPossiblePlacementsWithoutItem, unusedLocations: {}".format(len(container.unusedLocations)))
         return {item: self.allLocationsWithoutItem(item, startAP, ap, container, items, maxDiff) for itemType, item in distinctItems.items()}
 
-    def allLocationsWithoutItem(self, item, startAP, ap, container, items, maxDiff):
-        container.sm.resetItems()
-        items.remove(item)
-        container.sm.addItems([it.Type for it in items])
-        items.append(item)
-
-        if self.cache:
-            self.cache.reset()
-
+    def addRequiredBosses(self, item, ap, container, maxDiff):
         # check if bosses can be accessed and killed, if so add them to alreadyPlacedItems:
         sm = container.sm
 
@@ -67,8 +59,40 @@ class RandoServices(object):
                         sm.enoughStuffsDraygon(),
                         sm.canExitDraygon())
             and (ap == 'Draygon Room Bottom' # need draygon dead to exit draygon room bottom
-                 or self.areaGraph.canAccess(sm, ap, 'DraygonRoomIn', self.settings.maxDiff))):
+                 or self.areaGraph.canAccess(sm, ap, 'DraygonRoomIn', maxDiff))):
             container.sm.addItem('Draygon')
+
+    def locStillOkWoBothItems(self, leafItem, oneLocItem, startAP, ap, oneLoc, container, items, maxDiff):
+        #self.log.debug("locStillOkWoBothItems: leafItem: {} oneLocItem: {} oneLoc: {}".format(leafItem.Type, oneLocItem.Type, oneLoc.Name))
+        container.sm.resetItems()
+        items.remove(leafItem)
+        items.remove(oneLocItem)
+        container.sm.addItems([it.Type for it in items])
+        items.append(oneLocItem)
+        items.append(leafItem)
+
+        if self.cache:
+            self.cache.reset()
+
+        self.addRequiredBosses(oneLocItem, ap, container, maxDiff)
+
+        # check that we can access the locations without the item,
+        curLocs = self.areaGraph.getAvailableLocations([oneLoc], container.sm, maxDiff, startAP)
+        curLocsPostAvail = set([loc for loc in curLocs if self.fullComebackCheck(container, ap, oneLocItem, loc, None, checkSoftlock=False)])
+        curLocsCanPlace = set([loc for loc in curLocsPostAvail if self.restrictions.canPlaceAtLocation(oneLocItem, loc, container)])
+
+        return len(curLocsCanPlace) > 0
+
+    def allLocationsWithoutItem(self, item, startAP, ap, container, items, maxDiff):
+        container.sm.resetItems()
+        items.remove(item)
+        container.sm.addItems([it.Type for it in items])
+        items.append(item)
+
+        if self.cache:
+            self.cache.reset()
+
+        self.addRequiredBosses(item, ap, container, maxDiff)
 
         # check that we can access the locations without the item,
         curLocs = set(self.currentLocations(startAP, container, post=False, diff=maxDiff))
@@ -83,6 +107,8 @@ class RandoServices(object):
         # filter locs where we can place the item
         curLocsCanPlace = set([loc for loc in curLocsPostAvail if self.restrictions.canPlaceAtLocation(item, loc, container)])
 
+        if not curLocsCanPlace:
+            self.log.debug("allLocationsWithoutItem: {} no locs available to place it !".format(item.Type))
         assert len(curLocsCanPlace) > 0
 
 
@@ -109,8 +135,8 @@ class RandoServices(object):
 
         # return locations still available without the item, and the number of it
         # return the locations no longer available without the item
-        # return the locs where post avail fails without the item
         # return the locs no longer available without two items (for count items)
+        # return the locs where post avail fails without the item
         # return the list of locations that we can still reach without the item and where we can place the item.
         return {"availLocsWoItem": curLocs, "availLocsWoItemLen": len(curLocs),
                 "noLongerAvailLocsWoItem": set(container.unusedLocations) - curLocs,

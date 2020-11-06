@@ -803,7 +803,7 @@ class RomPatcher:
             # reorder it with progression indices
             prog = ord('A')
             idx = 0
-            progNames = [il.Item.Name for il in progItemLocs if il.Item.Category != 'Boss']
+            progNames = [il.Item.Name for il in progItemLocs]
             for i in range(len(progNames)):
                 item = progNames[i]
                 if item in items and item not in displayNames:

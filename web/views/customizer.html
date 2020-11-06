@@ -886,10 +886,10 @@ response.write('</table>', escape=False)
       element: "#customShipStep",
       title: "Custom Ships",
       content: "<table>\
-  <th>Ship</th><th>Author</th>\
+  <th>Ship</th><th>Author</th><th>Description</th>\
 {{
 for (key, value) in sorted(customShips.items(), key=lambda x: x[1]['index']):
-  response.write('  <tr><td>{}</td><td>{}</td>\\\n'.format(key, value['author']), escape=False)
+  response.write('  <tr><td>{}</td><td>{}</td><td>{}</td>\\\n'.format(value['name'], value['author'], value['desc']), escape=False)
   pass
 response.write('</table>', escape=False)
 }}\

@@ -2393,11 +2393,13 @@ customSprites = {
 }
 
 customShips = {
-    'Red-M0nk3ySMShip1': {"index":0, "name": "Red-M0nk3ySMShip1", "desc": "", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip2': {"index":1, "name": "Red-M0nk3ySMShip2", "desc": "", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip3': {"index":2, "name": "Red-M0nk3ySMShip3", "desc": "", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip4': {"index":3, "name": "Red-M0nk3ySMShip4", "desc": "", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip5': {"index":4, "name": "Red-M0nk3ySMShip5", "desc": "", "author": "Red-M0nk3y"}
+    'Red-M0nk3ySMShip1': {"index":0, "name": "Red-M0nk3ySMShip1", "desc": "From MetConst", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip2': {"index":1, "name": "Red-M0nk3ySMShip2", "desc": "From MetConst", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip3': {"index":2, "name": "Red-M0nk3ySMShip3", "desc": "From MetConst", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip4': {"index":3, "name": "Red-M0nk3ySMShip4", "desc": "From MetConst", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip5': {"index":4, "name": "Red-M0nk3ySMShip5", "desc": "From MetConst", "author": "Red-M0nk3y"},
+    'opposition_ship': {"index":5, "name": "Opposition Ship", "desc": "From Opposition Hack", "author": "mccad00"},
+    'mario_ship': {"index":6, "name": "Mario Ship", "desc": "For Mario and Luigi sprites", "author": "mccad00"}
 }
 
 def customizer():

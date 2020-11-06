@@ -723,3 +723,7 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/white_door_bottom.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/white_door_bottom.svg ~/web2py/applications/solver/static/images/white_door_bottom.svg
 [ -L ~/web2py/applications/solver/static/images/grey_door_bottom.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/grey_door_bottom.svg ~/web2py/applications/solver/static/images/grey_door_bottom.svg
 [ -L ~/web2py/applications/solver/static/images/blue_door_bottom.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/blue_door_bottom.svg ~/web2py/applications/solver/static/images/blue_door_bottom.svg
+
+
+[ -L ~/web2py/applications/solver/static/images/mario_ship.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/mario_ship.png ~/web2py/applications/solver/static/images/mario_ship.png
+[ -L ~/web2py/applications/solver/static/images/opposition_ship.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/opposition_ship.png ~/web2py/applications/solver/static/images/opposition_ship.png

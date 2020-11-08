@@ -729,3 +729,11 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 
 [ -L ~/web2py/applications/solver/static/images/mario_ship.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/mario_ship.png ~/web2py/applications/solver/static/images/mario_ship.png
 [ -L ~/web2py/applications/solver/static/images/opposition_ship.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/opposition_ship.png ~/web2py/applications/solver/static/images/opposition_ship.png
+
+[ -L ~/web2py/applications/solver/static/images/ice_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ice_door.png ~/web2py/applications/solver/static/images/ice_door.png
+[ -L ~/web2py/applications/solver/static/images/missile_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/missile_door.png ~/web2py/applications/solver/static/images/missile_door.png
+[ -L ~/web2py/applications/solver/static/images/plasma_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/plasma_door.png ~/web2py/applications/solver/static/images/plasma_door.png
+[ -L ~/web2py/applications/solver/static/images/powerbomb_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/powerbomb_door.png ~/web2py/applications/solver/static/images/powerbomb_door.png
+[ -L ~/web2py/applications/solver/static/images/spazer_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/spazer_door.png ~/web2py/applications/solver/static/images/spazer_door.png
+[ -L ~/web2py/applications/solver/static/images/super_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/super_door.png ~/web2py/applications/solver/static/images/super_door.png
+[ -L ~/web2py/applications/solver/static/images/wave_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/wave_door.png ~/web2py/applications/solver/static/images/wave_door.png

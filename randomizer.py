@@ -672,7 +672,7 @@ if __name__ == "__main__":
                 suitsMode = "Progressive"
             elif args.noGravHeat:
                 suitsMode = "Vanilla"
-            if args.doorsColorsRando is not None:
+            if args.doorsColorsRando == True:
                 args.patches.append("beam_doors.ips")
             romPatcher.applyIPSPatches(args.startAP, args.patches,
                                        args.noLayout, suitsMode,

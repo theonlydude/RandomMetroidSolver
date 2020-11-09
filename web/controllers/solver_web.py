@@ -998,6 +998,8 @@ def randomizer():
         "all_random": "all the parameters set to random",
         "Chozo_Speedrun": "speedrun progression speed with Chozo split",
         "default": "VARIA randomizer default settings",
+        "doors_long": "be prepared to hunt for beams and ammo to open doors",
+        "doors_short": "uses Chozo/speedrun settings for a quicker door color rando",
         "free": "easiest possible settings",
         "hardway2hell": "harder highway2hell",
         "haste": "inspired by DASH randomizer with Nerfed Charge / Progressive Suits",

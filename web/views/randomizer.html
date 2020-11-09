@@ -243,13 +243,16 @@ if (hs.registerOverlay) {
 .centerIcon {
     display: block;
     margin-left: auto;
-    margin-right: auto;
+    margin-right: 1em;
     width: 32px;
     image-rendering: -moz-crisp-edges; /* Firefox */
     image-rendering: -o-crisp-edges; /* Opera */
     image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
     image-rendering: crisp-edges;
     -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
+}
+.marginRight {
+    margin-right: 2em;
 }
 </style>
 
@@ -1460,15 +1463,15 @@ This mode can be use as an introduction before doing full Area Randomization or 
       content: "<p>Randomize the color of Red/Green/Yellow doors.<br/>\
 Add four new type of doors which require Ice/Wave/Spazer/Plasma beams to open them.<br/>\
 <table>\
-<tr><th>Opened with</th><th>Door type</th><th>Opened with</th><th>Door type</th><th>Opened with</th><th>Door type</th><th>Opened with</th><th>Door type</th></tr>\
-<tr><td><img src=\"/solver/static/images/Missile.png\" class=\"centerIcon\"><img src=\"/solver/static/images/Super.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/missile_door.png\" class=\"width: 32px\"></td>\
-<td><img src=\"/solver/static/images/Super.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/super_door.png\" class=\"width: 32px\"></td>\
-<td><img src=\"/solver/static/images/PowerBomb.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/powerbomb_door.png\" class=\"width: 32px\"></td><td></td></tr>\
-<tr><td><img src=\"/solver/static/images/Ice.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/ice_door.png\" class=\"width: 32px\"></td>\
-<td><img src=\"/solver/static/images/Wave.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/wave_door.png\" class=\"width: 32px\"></td>\
-<td><img src=\"/solver/static/images/Spazer.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/spazer_door.png\" class=\"width: 32px\"></td>\
-<td><img src=\"/solver/static/images/Plasma.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/plasma_door.png\" class=\"width: 32px\"></td></tr>\
+<tr><td><img src=\"/solver/static/images/Missile.png\" class=\"centerIcon\"><img src=\"/solver/static/images/Super.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/missile_door.png\" class=\"marginRight\"></td>\
+<td><img src=\"/solver/static/images/Super.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/super_door.png\" class=\"marginRight\"></td>\
+<td><img src=\"/solver/static/images/PowerBomb.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/powerbomb_door.png\" class=\"marginRight\"></td><td></td></tr>\
+<tr><td><img src=\"/solver/static/images/Wave.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/wave_door.png\" class=\"marginRight\"></td>\
+<td><img src=\"/solver/static/images/Plasma.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/plasma_door.png\" class=\"marginRight\"></td>\
+<td><img src=\"/solver/static/images/Spazer.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/spazer_door.png\" class=\"marginRight\"></td>\
+<td><img src=\"/solver/static/images/Ice.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/ice_door.png\" class=\"marginRight\"></td></tr>\
 </table>\
+<b>Note:</b> Due to palettes technical limitations the color of the cage in front of beam doors can vary. Only the door color is relevant to know which beam to use.<br/>\
 Colored doors to save stations / refills / map stations are excluded from randomization.<br/>\
 Colored doors to save / refill stations are forced to blue.<br/>\
 The fill algorithm will be more trolly about ammo/beam if you use slower progression speed.</p>\

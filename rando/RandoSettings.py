@@ -167,6 +167,8 @@ class ProgSpeedParameters(object):
 
     def getProgressionItemTypes(self, progSpeed):
         progTypes = ItemManager.getProgTypes()
+        if self.restrictions.isLateDoors():
+            progTypes += ['Wave','Spazer','Plasma']
         progTypes.append('Charge')
         if progSpeed == 'slowest':
             return progTypes
@@ -181,7 +183,8 @@ class ProgSpeedParameters(object):
         if progSpeed == 'medium':
             return progTypes
         else:
-            progTypes.remove('Ice')
+            if not self.restrictions.isLateDoors():
+                progTypes.remove('Ice')
             progTypes.remove('SpaceJump')
         if progSpeed == 'fast':
             return progTypes

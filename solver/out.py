@@ -1,7 +1,7 @@
 import sys, json, os
 from solver.conf import Conf
 from solver.difficultyDisplayer import DifficultyDisplayer
-from utils import fixEnergy
+from utils.utils import fixEnergy
 
 class Out(object):
     @staticmethod
@@ -67,34 +67,34 @@ class OutWeb(Out):
 
         out = []
         for loc in locations:
-            if 'locDifficulty' in loc:
+            if loc.locDifficulty is not None:
                 # draygon fight is in it's path
-                if loc['Name'] == 'Draygon':
-                    loc['locDifficulty'] = loc['pathDifficulty']
+                if loc.Name == 'Draygon':
+                    loc.locDifficulty = loc.pathDifficulty
 
-                fixEnergy(loc['locDifficulty'].items)
-                fixEnergy(loc['pathDifficulty'].items)
+                fixEnergy(loc.locDifficulty.items)
+                fixEnergy(loc.pathDifficulty.items)
 
-                out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
-                            '{0:.2f}'.format(loc['locDifficulty'].difficulty),
-                            sorted(loc['locDifficulty'].knows),
-                            sorted(list(set(loc['locDifficulty'].items))),
-                            '{0:.2f}'.format(loc['pathDifficulty'].difficulty),
-                            sorted(loc['pathDifficulty'].knows),
-                            sorted(list(set(loc['pathDifficulty'].items))),
-                            [ap.Name for ap in loc['path']] if 'path' in loc else None,
-                            loc['Class']])
+                out.append([(loc.Name, loc.Room), loc.Area, loc.SolveArea, loc.itemName,
+                            '{0:.2f}'.format(loc.locDifficulty.difficulty),
+                            sorted(loc.locDifficulty.knows),
+                            sorted(list(set(loc.locDifficulty.items))),
+                            '{0:.2f}'.format(loc.pathDifficulty.difficulty),
+                            sorted(loc.pathDifficulty.knows),
+                            sorted(list(set(loc.pathDifficulty.items))),
+                            [ap.Name for ap in loc.path] if loc.path is not None else None,
+                            loc.Class])
 
             else:
-                fixEnergy(loc['difficulty'].items)
+                fixEnergy(loc.difficulty.items)
 
-                out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
-                            '{0:.2f}'.format(loc['difficulty'].difficulty),
-                            sorted(loc['difficulty'].knows),
-                            sorted(list(set(loc['difficulty'].items))),
+                out.append([(loc.Name, loc.Room), loc.Area, loc.SolveArea, loc.itemName,
+                            '{0:.2f}'.format(loc.difficulty.difficulty),
+                            sorted(loc.difficulty.knows),
+                            sorted(list(set(loc.difficulty.items))),
                             '0.00', [], [],
-                            [ap.Name for ap in loc['path']] if 'path' in loc else None,
-                            loc['Class']])
+                            [ap.Name for ap in loc.path] if loc.path is not None else None,
+                            loc.Class])
 
         return out
 
@@ -149,46 +149,46 @@ class OutConsole(Out):
         print('-'*150)
         lastAP = None
         for loc in locations:
-            if displayAPs == True and 'path' in loc:
-                path = [ap.Name for ap in loc['path']]
+            if displayAPs == True and loc.path is not None:
+                path = [ap.Name for ap in loc.path]
                 lastAP = path[-1]
                 if not (len(path) == 1 and path[0] == lastAP):
                     path = " -> ".join(path)
-                    pathDiff = loc['pathDifficulty']
+                    pathDiff = loc.pathDifficulty
                     print('{}: {} {} {} {}'.format('Path', path, round(float(pathDiff.difficulty), 2), sorted(pathDiff.knows), sorted(list(set(pathDiff.items)))))
             line = '{} {:>48}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'
 
-            if 'locDifficulty' in loc:
-                fixEnergy(loc['locDifficulty'].items)
+            if loc.locDifficulty is not None:
+                fixEnergy(loc.locDifficulty.items)
 
-                print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
-                                  loc['Name'],
-                                  loc['Area'],
-                                  loc['SolveArea'],
-                                  loc['distance'] if 'distance' in loc else 'nc',
-                                  loc['itemName'],
-                                  round(float(loc['locDifficulty'].difficulty), 2) if 'locDifficulty' in loc else 'nc',
-                                  sorted(loc['locDifficulty'].knows) if 'locDifficulty' in loc else 'nc',
-                                  sorted(list(set(loc['locDifficulty'].items))) if 'locDifficulty' in loc else 'nc'))
-            elif 'difficulty' in loc:
-                fixEnergy(loc['difficulty'].items)
+                print(line.format('Z' if loc.isChozo() else ' ',
+                                  loc.Name,
+                                  loc.Area,
+                                  loc.SolveArea,
+                                  loc.distance if loc.distance is not None else 'nc',
+                                  loc.itemName,
+                                  round(float(loc.locDifficulty.difficulty), 2) if loc.locDifficulty is not None else 'nc',
+                                  sorted(loc.locDifficulty.knows) if loc.locDifficulty is not None else 'nc',
+                                  sorted(list(set(loc.locDifficulty.items))) if loc.locDifficulty is not None else 'nc'))
+            elif loc.difficulty is not None:
+                fixEnergy(loc.difficulty.items)
 
-                print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
-                                  loc['Name'],
-                                  loc['Area'],
-                                  loc['SolveArea'],
-                                  loc['distance'] if 'distance' in loc else 'nc',
-                                  loc['itemName'],
-                                  round(float(loc['difficulty'].difficulty), 2),
-                                  sorted(loc['difficulty'].knows),
-                                  sorted(list(set(loc['difficulty'].items)))))
+                print(line.format('Z' if loc.isChozo() else ' ',
+                                  loc.Name,
+                                  loc.Area,
+                                  loc.SolveArea,
+                                  loc.distance if loc.distance is not None else 'nc',
+                                  loc.itemName,
+                                  round(float(loc.difficulty.difficulty), 2),
+                                  sorted(loc.difficulty.knows),
+                                  sorted(list(set(loc.difficulty.items)))))
             else:
-                print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
-                                  loc['Name'],
-                                  loc['Area'],
-                                  loc['SolveArea'],
-                                  loc['distance'] if 'distance' in loc else 'nc',
-                                  loc['itemName'],
+                print(line.format('Z' if loc.isChozo() else ' ',
+                                  loc.Name,
+                                  loc.Area,
+                                  loc.SolveArea,
+                                  loc.distance if loc.distance is not None else 'nc',
+                                  loc.itemName,
                                   'nc',
                                   'nc',
                                   'nc'))

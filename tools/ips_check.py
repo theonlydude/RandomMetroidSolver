@@ -5,7 +5,7 @@ import sys, os
 # now that we're in directory 'tools/' we have to update sys.path
 sys.path.append(os.path.dirname(sys.path[0]))
 
-from ips import IPS_Patch
+from rom.ips import IPS_Patch
 
 vanilla=sys.argv[1]
 ips_ranges = []
@@ -28,7 +28,7 @@ for patch in sys.argv[2:]:
 
 overlaps = {}
 last, lstop = None, -1
-for rg in sorted(ips_ranges, key=lambda r:[r['range'].start, r['range'].stop]):
+for rg in sorted(ips_ranges, key=lambda r:r['range'].start):
     thisStart = rg['range'].start
     if last and lstop > thisStart and lstop != 0x7fe0: # overlap, skip checksum
         k = (last['name'], rg['name'])

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from utils import PresetLoader
+from utils.utils import PresetLoader
 import os, sys
 
 def loadPresetsList(directory):

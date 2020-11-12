@@ -13,7 +13,8 @@ arch snes.cpu
 ;;; hijack item collection routine (different hijack point than endingtotals.asm)
 org $8488a7
     jsr btflagset
-org $84f050
+
+org $84f840
 btflagset:
     pha			; save A to perform original ORA afterwards
     ;; check if we're in BT room
@@ -34,7 +35,7 @@ btcheck:
     cmp !PickedUp
     rts
 
-warnpc $84f06f
+warnpc $84f860
 
 ;;; overwrite BT grey door PLM instruction (bomb check)
 org $84ba6f

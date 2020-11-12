@@ -1,8 +1,8 @@
 
-import log, random
+import utils.log, random
 
-from smboolmanager import SMBoolManager
-from parameters import infinity
+from logic.smboolmanager import SMBoolManager
+from utils.parameters import infinity
 
 class MiniSolver(object):
     def __init__(self, startAP, areaGraph, restrictions):
@@ -11,7 +11,7 @@ class MiniSolver(object):
         self.restrictions = restrictions
         self.settings = restrictions.settings
         self.smbm = SMBoolManager()
-        self.log = log.get('MiniSolver')
+        self.log = utils.log.get('MiniSolver')
 
     # if True, does not mean it is actually beatable, unless you're sure of it from another source of information
     # if False, it is certain it is not beatable
@@ -21,11 +21,11 @@ class MiniSolver(object):
         minDiff = self.settings.minDiff
         locations = []
         for il in itemLocations:
-            loc = il['Location']
-            if loc.get('restricted') == True:
+            loc = il.Location
+            if loc.restricted:
                 continue
-            loc['itemType'] = il['Item'].Type
-            loc['difficulty'] = None
+            loc.itemName = il.Item.Type
+            loc.difficulty = None
             locations.append(loc)
         self.smbm.resetItems()
         ap = self.startAP
@@ -40,13 +40,13 @@ class MiniSolver(object):
                 if onlyBossesLeft > 2:
                     return False
             self.areaGraph.getAvailableLocations(locations, self.smbm, maxDiff, ap)
-            post = [loc for loc in locations if 'PostAvailable' in loc and loc['difficulty'].bool == True]
+            post = [loc for loc in locations if loc.PostAvailable and loc.difficulty.bool == True]
             for loc in post:
-                self.smbm.addItem(loc['itemType'])
-                postAvailable = loc['PostAvailable'](self.smbm)
-                self.smbm.removeItem(loc['itemType'])
-                loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
-            toCollect = [loc for loc in locations if loc['difficulty'].bool == True and loc['difficulty'].difficulty <= maxDiff]
+                self.smbm.addItem(loc.itemName)
+                postAvailable = loc.PostAvailable(self.smbm)
+                self.smbm.removeItem(loc.itemName)
+                loc.difficulty = self.smbm.wand(loc.difficulty, postAvailable)
+            toCollect = [loc for loc in locations if loc.difficulty.bool == True and loc.difficulty.difficulty <= maxDiff]
             if not toCollect:
                 # mini onlyBossesLeft
                 if maxDiff < infinity:
@@ -55,9 +55,9 @@ class MiniSolver(object):
                     continue
                 return False
             if not hasOneLocAboveMinDiff:
-                hasOneLocAboveMinDiff = any(loc['difficulty'].difficulty >= minDiff for loc in locations)
-            self.smbm.addItems([loc['itemType'] for loc in toCollect])
+                hasOneLocAboveMinDiff = any(loc.difficulty.difficulty >= minDiff for loc in locations)
+            self.smbm.addItems([loc.itemName for loc in toCollect])
             for loc in toCollect:
                 locations.remove(loc)
             # if len(locations) > 0:
-            #     ap = random.choice([loc['accessPoint'] for loc in locations])
+            #     ap = random.choice([loc.accessPoint for loc in locations])

@@ -1,16 +1,16 @@
 import json, os
 
 from solver.commonSolver import CommonSolver
-from smboolmanager import SMBoolManagerPlando as SMBoolManager
-from helpers import Pickup
-from graph_locations import locations as graphLocations
-from utils import PresetLoader
+from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
+from logic.helpers import Pickup
+from graph.graph_locations import locations as graphLocations
+from utils.utils import PresetLoader
 from solver.conf import Conf
 from solver.out import Out
 from solver.comeback import ComeBack
-from parameters import easy, medium, hard, harder, hardcore, mania, infinity
-from parameters import Knows, isKnows, Settings
-import log
+from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
+from utils.parameters import Knows, isKnows, Settings
+import utils.log
 
 class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty
@@ -21,14 +21,14 @@ class StandardSolver(CommonSolver):
         self.interactive = False
         self.checkDuplicateMajor = checkDuplicateMajor
         if vcr == True:
-            from vcr import VCR
+            from utils.vcr import VCR
             self.vcr = VCR(rom, 'solver')
         else:
             self.vcr = None
         # for compatibility with some common methods of the interactive solver
         self.mode = 'standard'
 
-        self.log = log.get('Solver')
+        self.log = utils.log.get('Solver')
 
         self.setConf(difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath)
 
@@ -81,9 +81,16 @@ class StandardSolver(CommonSolver):
         self.computeExtStats()
 
         if self.extStatsFilename != None:
-            import db
+            firstMinor = {'Missile': False, 'Super': False, 'PowerBomb': False}
+            locsItems = {}
+            for loc in self.visitedLocations:
+                if loc.itemName in firstMinor and firstMinor[loc.itemName] == False:
+                    locsItems[loc.Name] = loc.itemName
+                    firstMinor[loc.itemName] = True
+
+            import utils.db as db
             with open(self.extStatsFilename, 'a') as extStatsFile:
-                db.DB.dumpExtStatsSolver(self.difficulty, knowsUsedList, self.solverStats, self.extStatsStep, extStatsFile)
+                db.DB.dumpExtStatsSolver(self.difficulty, knowsUsedList, self.solverStats, locsItems, self.extStatsStep, extStatsFile)
 
         if self.plot != None:
             with open(self.plot, 'w') as outDataFile:
@@ -134,19 +141,19 @@ class StandardSolver(CommonSolver):
         self.solverStats['open44'] = open44 if open44 != -1 else 0
 
     def getRemainMajors(self):
-        return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+        return [loc for loc in self.majorLocations if loc.difficulty.bool == False and loc.itemName not in ['Nothing', 'NoEnergy']]
 
     def getRemainMinors(self):
         if self.majorsSplit == 'Full':
             return None
         else:
-            return [loc for loc in self.minorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+            return [loc for loc in self.minorLocations if loc.difficulty.bool == False and loc.itemName not in ['Nothing', 'NoEnergy']]
 
     def getSkippedMajors(self):
-        return [loc for loc in self.majorLocations if loc['difficulty'].bool == True and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+        return [loc for loc in self.majorLocations if loc.difficulty.bool == True and loc.itemName not in ['Nothing', 'NoEnergy']]
 
     def getUnavailMajors(self):
-        return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+        return [loc for loc in self.majorLocations if loc.difficulty.bool == False and loc.itemName not in ['Nothing', 'NoEnergy']]
 
 
     def getDiffThreshold(self):
@@ -169,7 +176,7 @@ class StandardSolver(CommonSolver):
     def getKnowsUsed(self):
         knowsUsed = []
         for loc in self.visitedLocations:
-            knowsUsed += loc['difficulty'].knows
+            knowsUsed += loc.difficulty.knows
 
         # get unique knows
         knowsUsed = list(set(knowsUsed))
@@ -195,4 +202,4 @@ class StandardSolver(CommonSolver):
 
         self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastAP)
 
-        return [loc for loc in locations if loc['difficulty'].bool == True]
+        return [loc for loc in locations if loc.difficulty.bool == True]

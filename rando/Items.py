@@ -1,5 +1,5 @@
-from utils import randGaussBounds, getRangeDict, chooseFromRange
-import log, logging, copy, random
+from utils.utils import randGaussBounds, getRangeDict, chooseFromRange
+import utils.log, logging, copy, random
 
 class Item:
     __slots__ = ( 'Category', 'Class', 'Name', 'Code', 'Type' )
@@ -276,11 +276,12 @@ class ItemManager:
         itemCode = item.Code + modifier
         return itemCode
 
-    def __init__(self, majorsSplit, qty, sm, nLocs):
+    def __init__(self, majorsSplit, qty, sm, nLocs, maxDiff):
         self.qty = qty
         self.sm = sm
         self.majorsSplit = majorsSplit
         self.nLocs = nLocs
+        self.maxDiff = maxDiff
         self.majorClass = 'Chozo' if majorsSplit == 'Chozo' else 'Major'
         self.itemPool = []
 
@@ -325,7 +326,7 @@ class ItemManager:
             return ItemManager.Items[itemType].withClass(itemClass)
 
     def createItemPool(self, exclude=None):
-        itemPoolGenerator = ItemPoolGenerator.factory(self.majorsSplit, self, self.qty, self.sm, exclude, self.nLocs)
+        itemPoolGenerator = ItemPoolGenerator.factory(self.majorsSplit, self, self.qty, self.sm, exclude, self.nLocs, self.maxDiff)
         self.itemPool = itemPoolGenerator.getItemPool()
 
     @staticmethod
@@ -337,29 +338,37 @@ class ItemManager:
 
 class ItemPoolGenerator(object):
     @staticmethod
-    def factory(majorsSplit, itemManager, qty, sm, exclude, nLocs):
+    def factory(majorsSplit, itemManager, qty, sm, exclude, nLocs, maxDiff):
         if majorsSplit == 'Chozo':
-            return ItemPoolGeneratorChozo(itemManager, qty, sm)
+            return ItemPoolGeneratorChozo(itemManager, qty, sm, maxDiff)
         elif majorsSplit == 'Plando':
-            return ItemPoolGeneratorPlando(itemManager, qty, sm, exclude, nLocs)
+            return ItemPoolGeneratorPlando(itemManager, qty, sm, exclude, nLocs, maxDiff)
         elif nLocs == 105:
-            return ItemPoolGeneratorMajors(itemManager, qty, sm)
+            return ItemPoolGeneratorMajors(itemManager, qty, sm, maxDiff)
         else:
-            return ItemPoolGeneratorMinimizer(itemManager, qty, sm, nLocs)
+            return ItemPoolGeneratorMinimizer(itemManager, qty, sm, nLocs, maxDiff)
 
-    def __init__(self, itemManager, qty, sm):
+    def __init__(self, itemManager, qty, sm, maxDiff):
         self.itemManager = itemManager
         self.qty = qty
         self.sm = sm
         self.maxItems = 105 # 100 item locs and 5 bosses
         self.maxEnergy = 18 # 14E, 4R
-        self.log = log.get('ItemPool')
+        self.maxDiff = maxDiff
+        self.log = utils.log.get('ItemPool')
+
+    def isUltraSparseNoTanks(self):
+        # if low stuff botwoon is not known there is a hard energy req of one tank, even
+        # with both suits
+        lowStuffBotwoon = self.sm.knowsLowStuffBotwoon()
+        return random.random() < 0.5 and (lowStuffBotwoon.bool == True and lowStuffBotwoon.difficulty <= self.maxDiff)
 
     def calcMaxAmmo(self):
         self.nbMinorsAlready = 5
         # always add enough minors to pass zebetites (1100 damages) and mother brain 1 (3000 damages)
         # accounting for missile refill. so 15-10, or 10-10 if ice zeb skip is known (Ice is always in item pool)
-        if not self.sm.knowsIceZebSkip():
+        zebSkip = self.sm.knowsIceZebSkip()
+        if zebSkip.bool == False or zebSkip.difficulty > self.maxDiff:
             self.log.debug("Add missile because ice zeb skip is not known")
             self.itemManager.addMinor('Missile')
             self.nbMinorsAlready += 1
@@ -435,7 +444,7 @@ class ItemPoolGeneratorChozo(ItemPoolGenerator):
             self.itemManager.addItem('NoEnergy', 'Chozo')
             self.itemManager.removeItem('ETank')
             self.itemManager.addItem('NoEnergy', 'Chozo')
-            if random.random() < 0.5:
+            if self.isUltraSparseNoTanks():
                 # no etank nor reserve
                 self.itemManager.removeItem('ETank')
                 self.itemManager.addItem('NoEnergy', 'Chozo')
@@ -498,11 +507,11 @@ class ItemPoolGeneratorChozo(ItemPoolGenerator):
         return self.itemManager.getItemPool()
 
 class ItemPoolGeneratorMajors(ItemPoolGenerator):
-    def __init__(self, itemManager, qty, sm):
-        super(ItemPoolGeneratorMajors, self).__init__(itemManager, qty, sm)
+    def __init__(self, itemManager, qty, sm, maxDiff):
+        super(ItemPoolGeneratorMajors, self).__init__(itemManager, qty, sm, maxDiff)
         self.sparseRest = 1 + randGaussBounds(2, 5)
         self.mediumRest = 3 + randGaussBounds(4, 3.7)
-        self.ultraSparseNoTanks = random.random() < 0.5
+        self.ultraSparseNoTanks = self.isUltraSparseNoTanks()
 
     def addEnergy(self):
         total = self.maxEnergy
@@ -590,8 +599,8 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
         return self.itemManager.getItemPool()
 
 class ItemPoolGeneratorMinimizer(ItemPoolGeneratorMajors):
-    def __init__(self, itemManager, qty, sm, nLocs):
-        super(ItemPoolGeneratorMinimizer, self).__init__(itemManager, qty, sm)
+    def __init__(self, itemManager, qty, sm, nLocs, maxDiff):
+        super(ItemPoolGeneratorMinimizer, self).__init__(itemManager, qty, sm, maxDiff)
         self.maxItems = nLocs
         self.calcMaxAmmo()
         nMajors = len([itemName for itemName,item in ItemManager.Items.items() if item.Class == 'Major' and item.Category != 'Energy'])
@@ -622,8 +631,8 @@ class ItemPoolGeneratorMinimizer(ItemPoolGeneratorMajors):
         self.log.debug("maxEnergy: "+str(self.maxEnergy))
 
 class ItemPoolGeneratorPlando(ItemPoolGenerator):
-    def __init__(self, itemManager, qty, sm, exclude, nLocs):
-        super(ItemPoolGeneratorPlando, self).__init__(itemManager, qty, sm)
+    def __init__(self, itemManager, qty, sm, exclude, nLocs, maxDiff):
+        super(ItemPoolGeneratorPlando, self).__init__(itemManager, qty, sm, maxDiff)
         # dict of 'itemType: count' of items already added in the plando.
         # also a 'total: count' with the total number of items already added in the plando.
         self.exclude = exclude

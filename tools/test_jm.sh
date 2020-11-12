@@ -23,10 +23,14 @@ if [ $# -ne 2 -a $# -ne 3 ]; then
 fi
 
 ROM=$1
-LOOPS=$2
 if [ -n "$3" ]; then
+    # add more loops as we filter them out afterward
+    FILTER_HEAD=32
+    FILTER_TAIL=16
+    let LOOPS=$2+${FILTER_HEAD}+${FILTER_TAIL}
     COMPARE=0
 else
+    LOOPS=$2
     COMPARE=1
 fi
 
@@ -46,6 +50,18 @@ else
     ORIG=.
 fi
 
+function get_time {
+    case $(uname -s) in
+        "Darwin")
+            echo "gtime"
+            ;;
+        *)
+            echo "/usr/bin/time"
+            ;;
+    esac
+}
+TIME=$(get_time)
+
 PRESETS=("regular" "newbie" "master")
 SUITS=("" "--nogravheatPatch" "--progressiveSuits")
 CHARGES=("" "--nerfedCharge")
@@ -54,6 +70,7 @@ LAYOUTS=("" "--nolayout")
 STARTAPS=("" "--startAP random")
 AREAS=("" "" "--area" "--area --areaLayoutBase")
 MINIMIZERS=("--bosses random" "--bosses random" "--bosses random" "--area --bosses --minimizer " "--area --bosses --minimizerTourian --minimizer ")
+DOORS=("" "" "" "--doorsColorsRando")
 
 function generate_params {
     SEED="$1"
@@ -77,8 +94,10 @@ function generate_params {
     if(echo "${MINIMIZER}" | grep -q minimizer); then
         MINIMIZER="${MINIMIZER} $(echo 35+$RANDOM%65 | bc)"
     fi
+    let S=$RANDOM%${#DOORS[@]}
+    DOOR=${DOORS[$S]}
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${AREA} ${MINIMIZER} --jm"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${AREA} ${MINIMIZER} ${DOOR} --jm"
 }
 
 function computeSeed {
@@ -91,7 +110,7 @@ function computeSeed {
 
     if [ ${COMPARE} -eq 0 ]; then
 	OLD_MD5="old n/a"
-	RANDO_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
+	RANDO_OUT=$(${TIME} -f "\t%E real" $PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 	if [ $? -ne 0 ]; then
 	    echo "${RANDO_OUT}" >> ${LOG}
 	else
@@ -104,7 +123,7 @@ function computeSeed {
     fi
 
     NEW_MD5="new n/a"
-    RANDO_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ./randomizer.py ${PARAMS} 2>&1)
+    RANDO_OUT=$(${TIME} -f "\t%E real" $PYTHON ./randomizer.py ${PARAMS} 2>&1)
     if [ $? -ne 0 ]; then
 	echo "${RANDO_OUT}" >> ${LOG}
     else
@@ -142,7 +161,7 @@ function computeSeed {
     fi
 
     if [ ${COMPARE} -eq 0 ]; then
-	SOLVER_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+	SOLVER_OUT=$(${TIME} -f "\t%E real" $PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
 	if [ $? -ne 0 ]; then
             echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
@@ -160,7 +179,7 @@ function computeSeed {
 	DUP_OLD=1
     fi
 
-    SOLVER_OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ~/RandomMetroidSolver/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+    SOLVER_OUT=$(${TIME} -f "\t%E real" $PYTHON ~/RandomMetroidSolver/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
     if [ $? -ne 0 ]; then
         echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
         echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
@@ -212,7 +231,18 @@ function wait_for_a_child {
     done
 }
 
-NB_CPU=$(cat /proc/cpuinfo  | grep 'processor' | wc -l)
+function get_cpu {
+    case $(uname -s) in
+        "Darwin")
+            sysctl -n hw.ncpu
+            ;;
+        *)
+            cat /proc/cpuinfo  | grep 'processor' | wc -l
+            ;;
+    esac
+}
+
+NB_CPU=$(get_cpu)
 CUR_JOBS=0
 CUR_LOOP=0
 PIDS=""
@@ -267,14 +297,25 @@ for MORPH in "early" "normal" "late"; do
     printf "%-24s" "${MORPH}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
 done
 
-echo "total: $(wc -l ${CSV})"
+TOTAL_COUNT=$(wc -l ${CSV} | awk '{print $1}')
+echo "total: ${TOTAL_COUNT}"
+ERRORS_COUNT=$(grep -E "^error" ${CSV} | wc -l)
+echo "errors: ${ERRORS_COUNT}/${TOTAL_COUNT}"
+grep DIAG ${LOG} | sed -e 's+\*++g' -e 's+Super Fun : Could not remove any suit++' | sort | uniq -c
 
-echo "errors:"
-grep -E "NOK|mismatch|Can't solve" ${CSV}
+echo "errors detail:"
+if [ ${COMPARE} -eq 0 ]; then
+    # speedrun seeds are non deterministic, so filter them out in compare mode.
+    grep -E "NOK|mismatch|Can't solve" ${CSV} | grep -v ';speedrun;'
+else
+    grep -E "NOK|Can't solve" ${CSV}
+fi
 grep Traceback ${LOG}
 
 function getTime {
-    grep -v SOLVER ${CSV} | grep -v -E '^error' | grep -v '^[0-9]*;;;' | cut -d ';' -f $1 | sed -e 's+0:++g' | awk -F';' '{sum+=$1;} END{print sum}'
+    # speedrun seeds are non deterministics, filter them out.
+    # ignore the first and last lines, as there's always a big time difference in them.
+    grep -v SOLVER ${CSV} | tail -n +${FILTER_HEAD} | head -n -${FILTER_TAIL} | grep -v -E '^error|;speedrun;' | grep -v '^[0-9]*;;;' | cut -d ';' -f $1 | sed -e 's+0:++g' | awk -F';' '{sum+=$1;} END{print sum}'
 }
 
 if [ ${COMPARE} -eq 0 ]; then

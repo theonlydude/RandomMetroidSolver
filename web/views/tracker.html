@@ -92,6 +92,8 @@ The locations availability are computed from the current access point which is d
 When overing the mouse cursor on an available location a tooltip is displayed with the location's name, the techniques and items used to access it from the current access point.<br/>\
 The second green GPS icon displayed when overing on a location is the location's nearest access point, after collecting the item at the location the current access point will be updated to it.<br/>\
 After the location has been visited only the collected item is displayed.</p>\
+<h4>Doors Tracker</h4>\
+<p>Colored doors are displayed on the map. If the seed is doors colors randomized then doors are initially white, you have to click on them to reveal their color to allow the tracker to traverse them. If the seed is not doors colors randomized then doors can't be clicked.</p>\
 <h4>Touch screen tablette mode</h4>\
 <p>You can use the tracker on your touch screen tablette without a ROM file, aka seed less mode, to start using it leave the \"Randomized Super Metroid ROM\" input empty after clicking on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button.<br/>\
 You can choose the start location to match the seed you're playing.<br/>\
@@ -116,6 +118,7 @@ You can load a race protected seed in the tracker, it'll use it to know if the s
   tour.start();
 }
 
+var debug = false;
 function onloadHook() {}
 </script>
 

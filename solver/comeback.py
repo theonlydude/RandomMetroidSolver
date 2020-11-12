@@ -1,4 +1,4 @@
-import log
+import utils.log
 
 class ComeBack(object):
     # object to handle the decision to choose the next area when all locations have the "no comeback" flag.
@@ -8,7 +8,7 @@ class ComeBack(object):
         self.comeBackSteps = []
         # used to rewind
         self.solver = solver
-        self.log = log.get('Rewind')
+        self.log = utils.log.get('Rewind')
 
     def handleNoComeBack(self, locations, cur):
         # return True if a rewind is needed. choose the next area to use
@@ -17,10 +17,10 @@ class ComeBack(object):
         majorNoComeBack = False
         for loc in locations:
             if self.solver.majorsSplit != 'Full':
-                if self.solver.majorsSplit in loc['Class'] or "Boss" in loc['Class']:
-                    if "comeBack" not in loc:
+                if loc.isClass(self.solver.majorsSplit) or loc.isBoss():
+                    if loc.comeBack is None:
                         return False
-                    elif loc["comeBack"] == True:
+                    elif loc.comeBack == True:
                         return False
                     else:
                         # when the solver decide to visit a major no come back locations
@@ -28,21 +28,26 @@ class ComeBack(object):
                         # create a rollback point just in case more minors where actually required to do a special tech.
                         majorNoComeBack = True
             else:
-                if "comeBack" not in loc:
+                if loc.comeBack is None:
                     return False
-                if loc["comeBack"] == True:
+                if loc.comeBack == True:
                     return False
             locsCount += 1
-            if loc["SolveArea"] in solveAreas:
-                solveAreas[loc["SolveArea"]] += 1
+            if loc.SolveArea in solveAreas:
+                solveAreas[loc.SolveArea] += 1
             else:
-                solveAreas[loc["SolveArea"]] = 1
+                solveAreas[loc.SolveArea] = 1
 
         if majorNoComeBack == False and self.solver.majorsSplit != 'Full':
             return False
 
         # only minors locations, or just one major, no need for a rewind step
         if locsCount < 2:
+            return False
+
+        # only one solve area, no need for come back
+        if len(solveAreas) == 1:
+            self.log.debug("handleNoComeBack: only one solve area")
             return False
 
         self.log.debug("WARNING: use no come back heuristic for {} locs in {} solve areas ({})".format(locsCount, len(solveAreas), solveAreas))
@@ -63,10 +68,6 @@ class ComeBack(object):
             else:
                 self.log.debug("cur: {}, lastStep.cur: {}, don't use lastStep.next()".format(cur, lastStep.cur))
 
-        if len(solveAreas) == 1:
-            self.log.debug("handleNoComeBack: only one solve area")
-            return False
-
         # create a step
         self.log.debug("Create new step at {}".format(cur))
         lastStep = ComeBackStep(solveAreas, cur)
@@ -74,19 +75,29 @@ class ComeBack(object):
         return lastStep.next(locations)
 
     def reuseLastStep(self, lastStep, solveAreas):
-        # reuse the last step if they share the same solve areas to avoid creating too many
-        return sorted(lastStep.solveAreas.keys()) == sorted(solveAreas.keys())
+        # reuse the last step if all solve areas are included in last step to avoid creating too many.
+        # to avoid issues when a solve area from the previous step can't be reached from the current solve area,
+        # check that we have the same number of solve areas in both steps before reusing.
+        if len(solveAreas) != len(lastStep.solveAreas):
+            return False
+        for area in solveAreas:
+            # new solve area, don't reuse
+            if area not in lastStep.solveAreas:
+                return False
+            # more locations available in new step, don't reuse old one
+            if solveAreas[area] > lastStep.solveAreas[area]:
+                return False
+        return True
 
     def visitedAllLocsInArea(self, lastStep, locations):
         for loc in locations:
-            if loc['difficulty'] == True and loc['SolveArea'] == lastStep.curSolveArea:
+            if loc.difficulty == True and loc.SolveArea == lastStep.curSolveArea:
                 return False
         return True
 
     def cleanNoComeBack(self, locations):
         for loc in locations:
-            if "areaWeight" in loc:
-                del loc["areaWeight"]
+            loc.areaWeight = None
 
     def rewind(self, cur):
         # come back to the previous step
@@ -126,7 +137,7 @@ class ComeBackStep(object):
         self.solveAreas = solveAreas
         self.cur = cur
         self.curSolveArea = None
-        self.log = log.get('RewindStep')
+        self.log = utils.log.get('RewindStep')
         self.log.debug("create rewind step: {} {}".format(cur, solveAreas))
 
     def moreAvailable(self):
@@ -165,14 +176,14 @@ class ComeBackStep(object):
 
         # update locs
         for loc in locations:
-            solveArea = loc["SolveArea"]
+            solveArea = loc.SolveArea
             if solveArea in retSolveAreas:
-                loc["areaWeight"] = retSolveAreas[loc["SolveArea"]]
-                self.log.debug("rewind loc {} new areaWeight: {}".format(loc["Name"], loc["areaWeight"]))
+                loc.areaWeight = retSolveAreas[loc.SolveArea]
+                self.log.debug("rewind loc {} new areaWeight: {}".format(loc.Name, loc.areaWeight))
             else:
                 # can happen if going to the first area unlocks new areas,
                 # or for minors locations when we no longer need minors.
-                loc["areaWeight"] = outWeight
-                self.log.debug("rewind loc {} from area {} not in original areas".format(loc["Name"], solveArea))
+                loc.areaWeight = outWeight
+                self.log.debug("rewind loc {} from area {} not in original areas".format(loc.Name, solveArea))
 
         return False

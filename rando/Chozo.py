@@ -1,8 +1,8 @@
 
-import copy, log
+import copy, utils.log
 
-from parameters import Knows, isKnows, god
-from smbool import SMBool
+from utils.parameters import Knows, isKnows, god
+from logic.smbool import SMBool
 from rando.Filler import Filler
 from rando.ItemLocContainer import ItemLocContainer, getItemListStr, getLocListStr
 
@@ -36,7 +36,7 @@ class ChozoWrapperFiller(Filler):
         self.maxDiff = self.settings.maxDiff
         self.baseContainer = container
         self.fillerFactory = fillerFactory
-        self.log = log.get('ChozoWrapperFiller')
+        self.log = utils.log.get('ChozoWrapperFiller')
 
     def prepareFirstPhase(self):
         self.changedKnows = {}
@@ -54,7 +54,7 @@ class ChozoWrapperFiller(Filler):
         self.settings.maxDiff = god
         # prepare 1st phase container
         itemCond = isChozoItem
-        locCond = lambda loc: 'Chozo' in loc['Class'] or 'Boss' in loc['Class']
+        locCond = lambda loc: loc.isChozo() or loc.isBoss()
         # this will create a new smbm with new knows functions
         cont = self.baseContainer.slice(itemCond, locCond)
         secondPhaseItems = [item for item in self.baseContainer.itemPool if item not in cont.itemPool]
@@ -82,7 +82,6 @@ class ChozoWrapperFiller(Filler):
         if isStuck:
             self.errorMsg = filler.errorMsg
             return (isStuck, itemLocations, progItemLocs)
-        self.settings.runtimeLimit_s -= filler.runtime_s
         filler = self.prepareSecondPhase(filler.container, progItemLocs)
         (isStuck, itemLocations, secondProg) = filler.generateItems(vcr=vcr)
         self.errorMsg = filler.errorMsg

@@ -848,8 +848,27 @@ function sortTable(id, n) {
     }
 }
 
+function filter_plandos() {
+    var PresetFilter = document.getElementById("PresetFilter").value;
+    var RatingFilter = document.getElementById("RatingFilter").value;
+    var rows = document.querySelector("#plandoList tbody").rows;
+
+    for (var i = 1; i < rows.length; i+=2) {
+        var PresetCol = rows[i].cells[4].childNodes[1].textContent;
+        var RatingCol = rows[i].cells[5].querySelector('*[name="rate"]').textContent;
+        if ((PresetFilter == "" || PresetCol.indexOf(PresetFilter) > -1) && (RatingFilter == "" || parseFloat(RatingCol) >= parseFloat(RatingFilter))) {
+            rows[i].style.display = "";
+            rows[i+1].style.display = "";
+        } else {
+            rows[i].style.display = "none";
+            rows[i+1].style.display = "none";
+        }
+    }
+}
+
+
 function guessVARIAPreset(filename) {
-  var re = /VARIA_Randomizer_[A]?[B]?[F]?[M]?[Z]?X\d+_(\w+)/;
+  var re = /VARIA_Randomizer_[A]?[D]?[B]?[F]?[M]?[Z]?X\d+_(\w+)/;
   var match = filename.match(re);
   if(match == null) {
     re = /VARIA_Plandomizer_[A]?[B]?FX\d+_(\w+)/;
@@ -915,7 +934,7 @@ function setGuessedPreset(romName){
     <table class="full">
       <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter"/><col class="quarter"/></colgroup>
       <tr><td colspan=4></td></tr>
-      <tr><td id="uploadGrab" colspan=4 class="center greyRow"><p>Upload you Plando seed</p></td></tr>
+      <tr><td id="uploadGrab" colspan=4 class="center greyRow"><p>Upload your Plando seed</p></td></tr>
       <tr><td colspan=4 class="blankRow"></td></tr>
       <tr><td>Plando seed:</td><td colspan=3><input id="plandoROM" type="file"/></td></tr>
       <tr>
@@ -993,9 +1012,9 @@ function setGuessedPreset(romName){
   </div>
 
     <table class="full">
-      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <colgroup><col class="quarter" /><col class="quarter" /><col class="half" /></colgroup>
       <tr>
-        <td><p>Welcome to the Plandomizer repository where you can upload your own Plando seed for everyone to enjoy.</p><p>Weekly races seeds are also stored here, check the <a href="https://discord.gg/VsaDPVG">Discord channel</a> to participate.<p></td>
+        <td colspan="2"><p>Welcome to the Plandomizer repository where you can upload your own Plando seed for everyone to enjoy.</p><p>Weekly races seeds are also stored here, check the <a href="https://discord.gg/VsaDPVG">Discord channel</a> to participate.<p></td>
         <td><button class="uploadButton" onclick="displayUploadPopup()">Upload my Plando</button></td>
       </tr>
       <tr>
@@ -1007,6 +1026,24 @@ function setGuessedPreset(romName){
           <div id="vanillaROMOKVisibility">
             Vanilla ROM already loaded
           </div>
+        </td>
+        <td>
+          <table class="full">
+            <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter" /></colgroup>
+            <tr>
+              <td>Filter Preset:</td><td> {{=SELECT(["", "newbie", "casual", "regular", "veteran", "expert", "master"], _id="PresetFilter", value="", _class="full", _onchange="filter_plandos()")}}</td>
+              <td>Filter Rating:</td>
+              <td>
+                <select class="full" id="RatingFilter" onchange="filter_plandos()">
+                  <option value=""></option>
+                  <option value="1">>=1</option>
+                  <option value="2">>=2</option>
+                  <option value="3">>=3</option>
+                  <option value="4">>=4</option>
+                </select>
+              </td>
+            </tr>
+          </table>
         </td>
       </tr>
     </table>
@@ -1050,7 +1087,7 @@ function setGuessedPreset(romName){
             response.write("        <td class=\"collapsibleTd centerCell\"><div style=\"display: none\">{}</div><div id=\"{}_preset\">{}</div></td>\n".format(getPresetSortId(preset), pureName, preset), escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">", escape=False)
 
-            response.write("        <div style=\"display: none\">{}</div><div id=\"divrate{}\">".format(round(rating, 2) if rating != None else '0.00', pureName), escape=False)
+            response.write("        <div name=\"rate\" style=\"display: none\">{}</div><div id=\"divrate{}\">".format(round(rating, 2) if rating != None else '0.00', pureName), escape=False)
             if rating == None:
                 response.write("No rating", escape=False);
             else:

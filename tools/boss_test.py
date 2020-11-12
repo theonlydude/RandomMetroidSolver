@@ -5,11 +5,11 @@ import sys, os
 # now that we're in directory 'tools/' we have to update sys.path
 sys.path.append(os.path.dirname(sys.path[0]))
 
-from parameters import *
-from helpers import *
-from smboolmanager import *
-from utils import PresetLoader
-from rom_patches import RomPatches
+from utils.parameters import *
+from logic.helpers import *
+from logic.smboolmanager import *
+from utils.utils import PresetLoader
+from rom.rom_patches import RomPatches
 
 def stuff(base, nEtanks, nMissiles, nSupers, nPowerBombs, patches=None):
     ret = base

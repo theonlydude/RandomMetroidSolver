@@ -1,30 +1,31 @@
 
-import log, copy, time
+import utils.log, copy, time, random
 
-from cache import RequestCache
+from logic.cache import RequestCache
 from rando.RandoServices import RandoServices
 from rando.Choice import ItemThenLocChoice
 from rando.RandoServices import ComebackCheckType
-from parameters import infinity
-from helpers import diffValue2txt
-from graph_access import GraphUtils
+from rando.ItemLocContainer import ItemLocation
+from utils.parameters import infinity
+from logic.helpers import diffValue2txt
+from graph.graph_access import GraphUtils
 
 # base class for fillers. a filler responsibility is to fill a given
 # ItemLocContainer while a certain condition is fulfilled (usually
 # item pool is not empty).
 # entry point is generateItems
 class Filler(object):
-    def __init__(self, startAP, graph, restrictions, emptyContainer):
+    def __init__(self, startAP, graph, restrictions, emptyContainer, endDate=infinity):
         self.startAP = startAP
         self.cache = RequestCache()
         self.graph = graph
         self.services = RandoServices(graph, restrictions, self.cache)
         self.restrictions = restrictions
         self.settings = restrictions.settings
-        self.runtimeLimit_s = self.settings.runtimeLimit_s
+        self.endDate = endDate
         self.baseContainer = emptyContainer
         self.maxDiff = self.settings.maxDiff
-        self.log = log.get('Filler')
+        self.log = utils.log.get('Filler')
 
     # reinit algo state
     def initFiller(self):
@@ -33,7 +34,7 @@ class Filler(object):
         self.nSteps = 0
         self.errorMsg = ""
         self.settings.maxDiff = self.maxDiff
-        self.runtime_s = 0
+        self.startDate = time.process_time()
 
     # sets up container initial state
     def initContainer(self):
@@ -57,26 +58,26 @@ class Filler(object):
         if condition is None:
             condition = self.itemPoolCondition
         isStuck = False
-        startDate = time.process_time()
-        while condition() and not isStuck and self.runtime_s <= self.runtimeLimit_s:
+        date = self.startDate
+        while condition() and not isStuck and date <= self.endDate:
             isStuck = not self.step()
             if not isStuck:
                 self.nSteps += 1
-            self.runtime_s = time.process_time() - startDate
-        if condition():
+            date = time.process_time()
+        if condition() or date > self.endDate:
             isStuck = True
-            if self.runtime_s > self.runtimeLimit_s:
-                self.errorMsg = "Exceeded time limit of "+str(self.runtimeLimit_s) +" seconds"
+            if date > self.endDate:
+                self.errorMsg = "Exceeded time limit of "+str(self.settings.runtimeLimit_s) +" seconds"
             else:
                 self.errorMsg = "STUCK !\n"+self.container.dump()
         else:
             # check if some locations are above max diff and add relevant message
-            locs = self.container.getUsedLocs(lambda loc: loc['difficulty'].difficulty > self.maxDiff)
-            aboveMaxDiffStr = '[ ' + ' ; '.join([loc['Name'] + ': ' + diffValue2txt(loc['difficulty'].difficulty) for loc in locs]) + ' ]'
+            locs = self.container.getUsedLocs(lambda loc: loc.difficulty.difficulty > self.maxDiff)
+            aboveMaxDiffStr = '[ ' + ' ; '.join([loc.Name + ': ' + diffValue2txt(loc.difficulty.difficulty) for loc in locs]) + ' ]'
             if aboveMaxDiffStr != '[  ]':
                 self.errorMsg += "\nMaximum difficulty could not be applied everywhere. Affected locations: {}".format(aboveMaxDiffStr)
             isStuck = False
-        print('\n%d step(s) in %dms' % (self.nSteps, int(self.runtime_s*1000)))
+        print('\n%d step(s) in %dms' % (self.nSteps, int((date-self.startDate)*1000)))
         if self.vcr != None:
             self.vcr.dump()
         return (isStuck, self.container.itemLocations, self.getProgressionItemLocations())
@@ -86,13 +87,24 @@ class Filler(object):
         containerArg = container
         if container is None:
             container = self.container
-        location = itemLoc['Location']
-        item = itemLoc['Item']
-        pickup &= 'restricted' not in location or location['restricted'] == False
+        location = itemLoc.Location
+        item = itemLoc.Item
+        pickup &= location.restricted is None or location.restricted == False
         self.ap = self.services.collect(self.ap, container, itemLoc, pickup=pickup)
         self.log.debug("AP="+self.ap)
         if self.vcr is not None and containerArg is None:
-            self.vcr.addLocation(location['Name'], item.Type)
+            self.vcr.addLocation(location.Name, item.Type)
+
+    # collect item pair as returned by RandoServices.getStartupProgItemsPairs
+    def collectPair(self, pairItemLocDict):
+        # choose a pair of items which create progression
+        keys = list(pairItemLocDict.keys())
+        key = random.choice(keys)
+
+        # collect them
+        availableLocs = pairItemLocDict[key]
+        self.collect(ItemLocation(key[0], availableLocs[0][0]))
+        self.collect(ItemLocation(key[1], availableLocs[1][0]))
 
     # called by generateItems at the end to knows which particulier
     # item/locations were progression, if the info is available
@@ -107,8 +119,8 @@ class Filler(object):
 
 # very simple front fill algorithm with no rollback and no "softlock checks" (== dessy algorithm)
 class FrontFiller(Filler):
-    def __init__(self, startAP, graph, restrictions, emptyContainer):
-        super(FrontFiller, self).__init__(startAP, graph, restrictions, emptyContainer)
+    def __init__(self, startAP, graph, restrictions, emptyContainer, endDate=infinity):
+        super(FrontFiller, self).__init__(startAP, graph, restrictions, emptyContainer, endDate)
         self.choice = ItemThenLocChoice(restrictions)
         self.stdStart = GraphUtils.isStandardStart(self.startAP)
 

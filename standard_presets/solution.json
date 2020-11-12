@@ -351,6 +351,10 @@
     "LowStuffGT": [
       true,
       100
+    ],
+    "MtEverestGravJump": [
+      true,
+      50
     ]
   },
   "Settings": {

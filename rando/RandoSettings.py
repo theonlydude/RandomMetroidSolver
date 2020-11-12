@@ -1,7 +1,8 @@
 
 import sys, random
 from rando.Items import ItemManager
-from utils import getRangeDict, chooseFromRange
+from utils.utils import getRangeDict, chooseFromRange
+from rando.ItemLocContainer import ItemLocation
 
 # Holder for settings and a few utility functions related to them
 # (especially for plando/rando).
@@ -32,9 +33,9 @@ class RandoSettings(object):
 
     def getItemManager(self, smbm, nLocs):
         if not self.isPlandoRando():
-            return ItemManager(self.restrictions['MajorMinor'], self.qty, smbm, nLocs)
+            return ItemManager(self.restrictions['MajorMinor'], self.qty, smbm, nLocs, self.maxDiff)
         else:
-            return ItemManager('Plando', self.qty, smbm, nLocs)
+            return ItemManager('Plando', self.qty, smbm, nLocs, self.maxDiff)
 
     def getExcludeItems(self, locations):
         if not self.isPlandoRando():
@@ -42,7 +43,7 @@ class RandoSettings(object):
         exclude = {'total':0}
         # plandoRando is a dict {'loc name': 'item type'}
         for locName,itemType in self.plandoRandoItemLocs.items():
-            if not any(loc['Name'] == locName for loc in locations):
+            if not any(loc.Name == locName for loc in locations):
                 continue
             if itemType not in exclude:
                 exclude[itemType] = 0
@@ -55,17 +56,17 @@ class RandoSettings(object):
         if not self.isPlandoRando():
             return
         for locName,itemType in self.plandoRandoItemLocs.items():
-            if not any(loc['Name'] == locName for loc in container.unusedLocations):
+            if not any(loc.Name == locName for loc in container.unusedLocations):
                 continue
             item = container.getNextItemInPool(itemType)
             assert item is not None, "Invalid plando item pool"
-            location = container.getLocs(lambda loc: loc['Name'] == locName)[0]
-            itemLoc = {'Item':item, 'Location':location}
+            location = container.getLocs(lambda loc: loc.Name == locName)[0]
+            itemLoc = ItemLocation(item, location)
             container.collect(itemLoc, pickup=False)
 
 # Holds settings and utiliy functions related to graph layout
 class GraphSettings(object):
-    def __init__(self, startAP, areaRando, lightAreaRando, bossRando, escapeRando, minimizerN, dotFile, plandoRandoTransitions):
+    def __init__(self, startAP, areaRando, lightAreaRando, bossRando, escapeRando, minimizerN, dotFile, doorsColorsRando, allowGreyDoors, plandoRandoTransitions):
         self.startAP = startAP
         self.areaRando = areaRando
         self.lightAreaRando = lightAreaRando
@@ -73,6 +74,8 @@ class GraphSettings(object):
         self.escapeRando = escapeRando
         self.minimizerN = minimizerN
         self.dotFile = dotFile
+        self.doorsColorsRando = doorsColorsRando
+        self.allowGreyDoors = allowGreyDoors
         self.plandoRandoTransitions = plandoRandoTransitions
 
     def isMinimizer(self):
@@ -119,6 +122,19 @@ class ProgSpeedParameters(object):
             return 0.5
         return 1
 
+    def getLateDoorsProb(self, progSpeed):
+        if progSpeed == 'slowest':
+            return 1
+        elif progSpeed == 'slow':
+            return 0.8
+        elif progSpeed == 'medium':
+            return 0.66
+        elif progSpeed == 'fast':
+            return 0.5
+        elif progSpeed == 'fastest':
+            return 0.33
+        return 0
+
     def getItemLimit(self, progSpeed):
         itemLimit = self.nLocs
         if progSpeed == 'slow':
@@ -151,6 +167,8 @@ class ProgSpeedParameters(object):
 
     def getProgressionItemTypes(self, progSpeed):
         progTypes = ItemManager.getProgTypes()
+        if self.restrictions.isLateDoors():
+            progTypes += ['Wave','Spazer','Plasma']
         progTypes.append('Charge')
         if progSpeed == 'slowest':
             return progTypes
@@ -165,7 +183,8 @@ class ProgSpeedParameters(object):
         if progSpeed == 'medium':
             return progTypes
         else:
-            progTypes.remove('Ice')
+            if not self.restrictions.isLateDoors():
+                progTypes.remove('Ice')
             progTypes.remove('SpaceJump')
         if progSpeed == 'fast':
             return progTypes

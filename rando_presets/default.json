@@ -29,5 +29,6 @@
   "variaTweaks": "on",
   "nerfedCharge": "off",
   "bossRandomization": "off",
-  "rando_speed": "off"
+  "rando_speed": "off",
+  "doorsColorsRando": "off"
 }

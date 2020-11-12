@@ -1,12 +1,13 @@
-import log, random
-from utils import getRangeDict, chooseFromRange
+import utils.log, random
+from utils.utils import getRangeDict, chooseFromRange
+from rando.ItemLocContainer import ItemLocation
 
 # helper object to choose item/loc
 class Choice(object):
     def __init__(self, restrictions):
         self.restrictions = restrictions
         self.settings = restrictions.settings
-        self.log = log.get("Choice")
+        self.log = utils.log.get("Choice")
 
     # args are return from RandoServices.getPossiblePlacements
     # return itemLoc dict, or None if no possible choice
@@ -17,7 +18,7 @@ class Choice(object):
         return sorted([item for item in itemLocDict.keys()], key=lambda item: item.Type)
 
     def getLocList(self, itemLocDict, item):
-        return sorted(itemLocDict[item], key=lambda loc: loc['Name'])
+        return sorted(itemLocDict[item], key=lambda loc: loc.Name)
 
 # simple random choice, that chooses an item first, then a locatio to put it in
 class ItemThenLocChoice(Choice):
@@ -33,10 +34,7 @@ class ItemThenLocChoice(Choice):
         loc = self.chooseLocation(locList, item, isProg)
         if loc is None:
             return None
-        return {
-            'Item': item,
-            'Location': loc
-        }
+        return ItemLocation(item, loc)
 
     def chooseItem(self, itemList, isProg):
         if len(itemList) == 0:
@@ -87,6 +85,34 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
     def currentLocations(self, item=None):
         return self.services.currentLocations(self.ap, self.container, item=item)
 
+    def processLateDoors(self, itemLocDict, ap, container):
+        doorBeams = ['Spazer', 'Plasma', 'Wave', 'Ice']
+        def canOpenExtendedDoors(item):
+            return item.Category == 'Ammo' or item.Type in doorBeams
+        # exclude door items from itemLocDict
+        noDoorsLocDict = {item:locList for item,locList in itemLocDict.items() if not canOpenExtendedDoors(item) or container.sm.haveItem(item.Type)}
+        if len(noDoorsLocDict) > 0:
+            self.log.debug('processLateDoors. no doors')
+            itemLocDict.clear()
+            itemLocDict.update(noDoorsLocDict)
+            return
+        # itemLocDict is made up only of progression ammo/beams
+        def updateLocDictWithSingleItemType(itemType):
+            nonlocal itemLocDict
+            locDict = {item:locList for item,locList in itemLocDict.items() if item.Type == itemType}
+            assert len(locDict) > 0
+            itemLocDict.clear()
+            itemLocDict.update(locDict)
+        itemTypes = doorBeams+['Missile', 'PowerBomb']
+        if not any(item.Type == 'Missile' for item in itemLocDict):
+            itemTypes.append('Super')
+        random.shuffle(itemTypes)
+        for itemType in itemTypes:
+            if any(item.Type == itemType for item in itemLocDict):
+                self.log.debug('processLateDoors. '+itemType+' prog')
+                updateLocDictWithSingleItemType(itemType)
+                return
+
     def chooseItemLoc(self, itemLocDict, isProg, progressionItemLocs, ap, container):
         # if late morph, redo the late morph check if morph is the
         # only possibility since we can rollback
@@ -102,8 +128,11 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         # if a boss is available, choose it right away
         for item,locs in itemLocDict.items():
             if item.Category == 'Boss':
-                assert len(locs) == 1 and locs[0]['Name'] == item.Name
-                return {'Item':item, 'Location':locs[0]}
+                assert len(locs) == 1 and locs[0].Name == item.Name
+                return ItemLocation(item, locs[0])
+        # late doors check for random door colors
+        if self.restrictions.isLateDoors() and random.random() < self.lateDoorsProb:
+            self.processLateDoors(itemLocDict, ap, container)
         self.progressionItemLocs = progressionItemLocs
         self.ap = ap
         self.container = container
@@ -113,6 +142,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         self.chooseLocRanges = getRangeDict(self.getChooseLocs(progDiff))
         self.chooseItemRanges = getRangeDict(self.getChooseItems(progSpeed))
         self.spreadProb = self.progSpeedParams.getSpreadFactor(progSpeed)
+        self.lateDoorsProb = self.progSpeedParams.getLateDoorsProb(progSpeed)
 
     def getChooseLocs(self, progDiff=None):
         if progDiff is None:
@@ -133,7 +163,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         locs = self.getLocsSpreadProgression(locs)
         random.shuffle(locs)
         ret = self.getChooseFunc(self.chooseLocRanges, self.chooseLocFuncs)(locs)
-        self.log.debug('chooseLocationProg. ret='+ret['Name'])
+        self.log.debug('chooseLocationProg. ret='+ret.Name)
         return ret
 
     # get choose function from a weighted dict
@@ -167,17 +197,17 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
 
     def chooseLocationMaxDiff(self, availableLocations):
         self.log.debug("MAX")
-        self.log.debug("chooseLocationMaxDiff: {}".format([(l['Name'], l['difficulty']) for l in availableLocations]))
-        return max(availableLocations, key=lambda loc:loc['difficulty'].difficulty)
+        self.log.debug("chooseLocationMaxDiff: {}".format([(l.Name, l.difficulty) for l in availableLocations]))
+        return max(availableLocations, key=lambda loc:loc.difficulty.difficulty)
 
     def chooseLocationMinDiff(self, availableLocations):
         self.log.debug("MIN")
-        self.log.debug("chooseLocationMinDiff: {}".format([(l['Name'], l['difficulty']) for l in availableLocations]))
-        return min(availableLocations, key=lambda loc:loc['difficulty'].difficulty)
+        self.log.debug("chooseLocationMinDiff: {}".format([(l.Name, l.difficulty) for l in availableLocations]))
+        return min(availableLocations, key=lambda loc:loc.difficulty.difficulty)
 
     def areaDistance(self, loc, otherLocs):
-        areas = [l[self.distanceProp] for l in otherLocs]
-        cnt = areas.count(loc[self.distanceProp])
+        areas = [getattr(l, self.distanceProp) for l in otherLocs]
+        cnt = areas.count(getattr(loc, self.distanceProp))
         d = None
         if cnt == 0:
             d = 2
@@ -188,7 +218,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
     def getLocsSpreadProgression(self, availableLocations):
         split = self.restrictions.split
         cond = lambda item: ((split == 'Full' and item.Class == 'Major') or split == item.Class) and item.Category != "Energy"
-        progLocs = [il['Location'] for il in self.progressionItemLocs if cond(il['Item'])]
+        progLocs = [il.Location for il in self.progressionItemLocs if cond(il.Item)]
         distances = [self.areaDistance(loc, progLocs) for loc in availableLocations]
         maxDist = max(distances)
         locs = []

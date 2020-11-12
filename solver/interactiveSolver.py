@@ -1,20 +1,22 @@
 import sys, json, os
 
 from solver.commonSolver import CommonSolver
-from smbool import SMBool
-from smboolmanager import SMBoolManagerPlando as SMBoolManager
-from helpers import Pickup
-from rom import RomPatcher
-from rom_patches import RomPatches
-from graph_locations import locations as graphLocations
-from graph import AccessGraphSolver as AccessGraph
-from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
-from utils import removeChars
+from logic.smbool import SMBool
+from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
+from logic.helpers import Pickup
+from rom.rompatcher import RomPatcher
+from rom.rom_patches import RomPatches
+from graph.graph_locations import locations as graphLocations
+from graph.graph import AccessGraphSolver as AccessGraph
+from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
+from utils.utils import removeChars
 from solver.conf import Conf
-from parameters import hard, infinity
+from utils.parameters import hard, infinity
 from solver.solverState import SolverState
 from solver.comeback import ComeBack
-import log
+from rando.ItemLocContainer import ItemLocation
+from utils.doorsmanager import DoorsManager
+import utils.log
 
 class InteractiveSolver(CommonSolver):
     def __init__(self, output):
@@ -22,7 +24,7 @@ class InteractiveSolver(CommonSolver):
         self.errorMsg = ""
         self.checkDuplicateMajor = False
         self.vcr = None
-        self.log = log.get('Solver')
+        self.log = utils.log.get('Solver')
 
         self.outputFileName = output
         self.firstLogFile = None
@@ -37,9 +39,9 @@ class InteractiveSolver(CommonSolver):
         addressName = {}
         web2Internal = {}
         for loc in graphLocations:
-            webName = self.locNameInternal2Web(loc["Name"])
-            addressName[loc["Address"] % 0x10000] = webName
-            web2Internal[webName] = loc["Name"]
+            webName = self.locNameInternal2Web(loc.Name)
+            addressName[loc.Address % 0x10000] = webName
+            web2Internal[webName] = loc.Name
         return (addressName, web2Internal)
 
     def initTransitionsName(self):
@@ -52,6 +54,7 @@ class InteractiveSolver(CommonSolver):
     def dumpState(self):
         state = SolverState(self.debug)
         state.fromSolver(self)
+
         state.toJson(self.outputFileName)
 
     def initialize(self, mode, rom, presetFileName, magic, debug, fill, startAP, trackerRace):
@@ -71,6 +74,10 @@ class InteractiveSolver(CommonSolver):
         self.loadRom(rom, interactive=True, magic=magic, startAP=startAP)
         # in plando/tracker always consider that we're doing full
         self.majorsSplit = 'Full'
+
+        # hide doors
+        if self.doorsRando and mode == 'standard':
+            DoorsManager.initTracker()
 
         self.clearItems()
 
@@ -153,6 +160,14 @@ class InteractiveSolver(CommonSolver):
                     else:
                         # remove last transition
                         self.cancelLastTransition()
+        elif scope == 'door':
+            if action == 'replace':
+                doorName = params['doorName']
+                newColor = params['newColor']
+                DoorsManager.doors[doorName].setColor(newColor)
+            elif action == 'toggle':
+                doorName = params['doorName']
+                DoorsManager.switchVisibility(doorName)
 
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
@@ -166,7 +181,7 @@ class InteractiveSolver(CommonSolver):
         # as it may be available with the newly placed item.
         if len(self.visitedLocations) > 0:
             lastVisited = self.visitedLocations[-1]
-            if lastVisited['difficulty'].difficulty == -1:
+            if lastVisited.difficulty.difficulty == -1:
                 self.visitedLocations.remove(lastVisited)
                 self.majorLocations.append(lastVisited)
             else:
@@ -182,9 +197,9 @@ class InteractiveSolver(CommonSolver):
         if lastVisited != None:
             self.majorLocations.remove(lastVisited)
             self.visitedLocations.append(lastVisited)
-            if lastVisited["difficulty"] == False:
+            if lastVisited.difficulty == False:
                 # if the loc is still sequence break, put it back as sequence break
-                lastVisited["difficulty"] = SMBool(True, -1)
+                lastVisited.difficulty = SMBool(True, -1)
 
         # return them
         self.dumpState()
@@ -230,10 +245,10 @@ class InteractiveSolver(CommonSolver):
         if self.itemsOk == False:
             # add remaining locs as sequence break
             for loc in self.majorLocations[:]:
-                loc["difficulty"] = SMBool(True, -1)
-                if "accessPoint" not in loc:
+                loc.difficulty = SMBool(True, -1)
+                if loc.accessPoint is not None:
                     # take first ap of the loc
-                    loc["accessPoint"] = list(loc["AccessFrom"])[0]
+                    loc.accessPoint = list(loc.AccessFrom)[0]
                 self.collectMajor(loc)
 
         self.locations = locationsBck
@@ -266,12 +281,13 @@ class InteractiveSolver(CommonSolver):
 
         plandoLocsItems = {}
         for loc in self.visitedLocations:
-            plandoLocsItems[loc["Name"]] = loc["itemName"]
+            plandoLocsItems[loc.Name] = loc.itemName
 
         plandoCurrent = {
             "locsItems": plandoLocsItems,
             "transitions": self.curGraphTransitions,
-            "patches": RomPatches.ActivePatches
+            "patches": RomPatches.ActivePatches,
+            "doors": DoorsManager.serialize()
         }
 
         plandoCurrentJson = json.dumps(plandoCurrent)
@@ -313,12 +329,12 @@ class InteractiveSolver(CommonSolver):
                 if "difficulty" in itemLoc["Location"]:
                     difficulty = itemLoc["Location"]["difficulty"]
                     smbool = SMBool(difficulty["bool"], difficulty["difficulty"], difficulty["knows"], difficulty["items"])
-                    loc["difficulty"] = smbool
+                    loc.difficulty = smbool
                     itemName = itemLoc["Item"]["Type"]
                     if itemName == "Boss":
                         itemName = "Nothing"
-                    loc["itemName"] = itemName
-                    loc["accessPoint"] = itemLoc["Location"]["accessPoint"]
+                    loc.itemName = itemName
+                    loc.accessPoint = itemLoc["Location"]["accessPoint"]
                     self.collectMajor(loc)
 
     def savePlando(self, lock, escapeTimer):
@@ -327,13 +343,13 @@ class InteractiveSolver(CommonSolver):
         locsItems = {}
         itemLocs = []
         for loc in self.visitedLocations:
-            locsItems[loc["Name"]] = loc["itemName"]
+            locsItems[loc.Name] = loc.itemName
         for loc in self.locations:
-            if loc["Name"] in locsItems:
-                itemLocs.append({'Location': loc, 'Item': ItemManager.getItem(locsItems[loc["Name"]])})
+            if loc.Name in locsItems:
+                itemLocs.append(ItemLocation(ItemManager.getItem(loc.itemName), loc))
             else:
                 # put nothing items in unused locations
-                itemLocs.append({'Location': loc, 'Item': ItemManager.getItem("Nothing")})
+                itemLocs.append(ItemLocation(ItemManager.getItem("Nothing"), loc))
 
         # patch the ROM
         if lock == True:
@@ -342,7 +358,7 @@ class InteractiveSolver(CommonSolver):
         else:
             magic = None
         romPatcher = RomPatcher(magic=magic, plando=True)
-        patches = ['credits_varia.ips', 'tracking.ips', "Escape_Animals_Disable"]
+        patches = ['credits_varia.ips', 'tracking.ips', "Escape_Animals_Disable", 'beam_doors.ips']
         if magic != None:
             patches.insert(0, 'race_mode.ips')
             patches.append('race_mode_credits.ips')
@@ -361,7 +377,7 @@ class InteractiveSolver(CommonSolver):
                 escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
                 romPatcher.applyEscapeAttributes({'Timer': escapeTimer, 'Animals': None}, plms)
 
-        # write plm table
+        # write plm table & random doors
         romPatcher.writePlmTable(plms, self.areaRando, self.bossRando, self.startAP)
 
         romPatcher.setNothingId(self.startAP, itemLocs)
@@ -413,19 +429,19 @@ class InteractiveSolver(CommonSolver):
     def getWebLoc(self, locNameWeb):
         locName = self.locNameWeb2Internal(locNameWeb)
         for loc in self.locations:
-            if loc["Name"] == locName:
+            if loc.Name == locName:
                 return loc
         raise Exception("Location '{}' not found".format(locName))
 
     def pickItemAt(self, locName):
         # collect new item at newLoc
         loc = self.getWebLoc(locName)
-        if "difficulty" not in loc or loc["difficulty"] == False:
+        if loc.difficulty is None or loc.difficulty == False:
             # sequence break
-            loc["difficulty"] = SMBool(True, -1)
-        if "accessPoint" not in loc:
+            loc.difficulty = SMBool(True, -1)
+        if loc.accessPoint is None:
             # take first ap of the loc
-            loc["accessPoint"] = list(loc["AccessFrom"])[0]
+            loc.accessPoint = list(loc.AccessFrom)[0]
         self.collectMajor(loc)
 
     def setItemAt(self, locName, itemName, hide):
@@ -433,34 +449,34 @@ class InteractiveSolver(CommonSolver):
 
         loc = self.getWebLoc(locName)
         # plando mode
-        loc["itemName"] = itemName
+        loc.itemName = itemName
 
-        if "difficulty" not in loc:
+        if loc.difficulty is None:
             # sequence break
-            loc["difficulty"] = SMBool(True, -1)
-        if "accessPoint" not in loc:
+            loc.difficulty = SMBool(True, -1)
+        if loc.accessPoint is None:
             # take first ap of the loc
-            loc["accessPoint"] = list(loc["AccessFrom"])[0]
+            loc.accessPoint = list(loc.AccessFrom)[0]
 
         if hide == True:
-            loc["Visibility"] = 'Hidden'
+            loc.Visibility = 'Hidden'
 
         self.collectMajor(loc, itemName)
 
     def replaceItemAt(self, locName, itemName, hide):
         # replace itemName at locName
         loc = self.getWebLoc(locName)
-        oldItemName = loc["itemName"]
+        oldItemName = loc.itemName
 
         # replace item at the old item spot in collectedItems
         try:
-            index = next(i for i, vloc in enumerate(self.visitedLocations) if vloc['Name'] == loc['Name'])
+            index = next(i for i, vloc in enumerate(self.visitedLocations) if vloc.Name == loc.Name)
         except Exception as e:
             self.errorMsg = "Empty location {}".format(locName)
             return
         self.collectedItems[index] = itemName
 
-        loc["itemName"] = itemName
+        loc.itemName = itemName
 
         # major item can be set multiple times in plando mode
         count = self.collectedItems.count(oldItemName)
@@ -471,10 +487,10 @@ class InteractiveSolver(CommonSolver):
             self.smbm.removeItem(oldItemName)
 
         if hide == True:
-            loc["Visibility"] = 'Hidden'
-        elif loc['CanHidden'] == True and loc['Visibility'] == 'Hidden':
+            loc.Visibility = 'Hidden'
+        elif loc.CanHidden == True and loc.Visibility == 'Hidden':
             # the loc was previously hidden, set it back to visible
-            loc["Visibility"] = 'Visible'
+            loc.Visibility = 'Visible'
 
         self.smbm.addItem(itemName)
 
@@ -505,8 +521,7 @@ class InteractiveSolver(CommonSolver):
         self.majorLocations = self.locations
         if reload == True:
             for loc in self.majorLocations:
-                if "difficulty" in loc:
-                    del loc["difficulty"]
+                loc.difficulty = None
         self.smbm.resetItems()
 
     def addTransition(self, startPoint, endPoint):
@@ -569,8 +584,7 @@ class InteractiveSolver(CommonSolver):
 
     def clearLocs(self, locs):
         for loc in locs:
-            if 'difficulty' in loc:
-                del loc['difficulty']
+            loc.difficulty = None
 
     def getDiffThreshold(self):
         # in interactive solver we don't have the max difficulty parameter

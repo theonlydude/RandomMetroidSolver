@@ -1,12 +1,12 @@
-from smboolmanager import SMBoolManagerPlando as SMBoolManager
-from helpers import Pickup
+from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
+from logic.helpers import Pickup
 from solver.conf import Conf
-from graph_access import getAccessPoint
+from graph.graph_access import getAccessPoint
 from solver.comeback import ComeBack
 from solver.standardSolver import StandardSolver
-from parameters import easy
+from utils.parameters import easy
 from solver.out import Out
-import log
+import utils.log
 
 class RandoSolver(StandardSolver):
     def __init__(self, majorsSplit, startAP, areaGraph, locations):
@@ -16,7 +16,7 @@ class RandoSolver(StandardSolver):
         # for compatibility with some common methods of the interactive solver
         self.mode = 'standard'
 
-        self.log = log.get('Solver')
+        self.log = utils.log.get('Solver')
 
         # default conf
         self.setConf(easy, 'all', [], False)

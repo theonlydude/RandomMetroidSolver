@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-from rom import RomLoader
-from graph_locations import locations
+from rom.romloader import RomLoader
+from graph.graph_locations import locations
 import os.path
 import sys
 

@@ -5,16 +5,18 @@ import argparse, os.path, json, sys, shutil, random
 from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from rando.PaletteRando import PaletteRando
-from graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
-from parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text
-from utils import PresetLoader
-from rom_patches import RomPatches
-from rom import RomPatcher, FakeROM
-from utils import loadRandoPreset, getDefaultMultiValues
-from version import displayedVersion
-from smbool import SMBool
+from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
+from utils.parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text, appDir
+from rom.rom_patches import RomPatches
+from rom.rompatcher import RomPatcher
+from rom.rom import FakeROM
+from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir
+from utils.version import displayedVersion
+from logic.smbool import SMBool
+from utils.doorsmanager import DoorsManager
 
-import log, db
+import utils.log
+import utils.db as db
 
 defaultMultiValues = getDefaultMultiValues()
 speeds = defaultMultiValues['progressionSpeed']
@@ -45,6 +47,12 @@ def dumpErrorMsg(outFileName, msg):
         with open(outFileName, 'w') as jsonFile:
             json.dump({"errorMsg": msg}, jsonFile)
 
+def dumpErrorMsgs(outFileName, msgs):
+    dumpErrorMsg(outFileName, joinErrorMsgs(msgs))
+
+def joinErrorMsgs(msgs):
+    return '\n' + '\n'.join(msgs)
+
 def restricted_float(x):
     x = float(x)
     if x < 0.0 or x > 9.0:
@@ -56,7 +64,7 @@ if __name__ == "__main__":
     parser.add_argument('--patchOnly',
                         help="only apply patches, do not perform any randomization", action='store_true',
                         dest='patchOnly', default=False)
-    parser.add_argument('--param', '-p', help="the input parameters", nargs='+',
+    parser.add_argument('--param', '-p', help="the input parameters",
                         default=None, dest='paramsFileName')
     parser.add_argument('--dir',
                         help="output directory for ROM and dot files",
@@ -236,6 +244,7 @@ if __name__ == "__main__":
     parser.add_argument('--invert', help="invert color range", dest='invert', action='store_true', default=False)
     parser.add_argument('--ext_stats', help="dump extended stats SQL", nargs='?', default=None, dest='extStatsFilename')
     parser.add_argument('--randoPreset', help="rando preset file", dest="randoPreset", nargs='?', default=None)
+    parser.add_argument('--fakeRandoPreset', help="for prog speed stats", dest="fakeRandoPreset", nargs='?', default=None)
     parser.add_argument('--plandoRando', help="json string with already placed items/locs", dest="plandoRando",
                         nargs='?', default=None)
     parser.add_argument('--sprite', help='use a custom sprite for Samus', dest='sprite', default=None)
@@ -244,6 +253,10 @@ if __name__ == "__main__":
     parser.add_argument('--ship', help='use a custom sprite for Samus ship', dest='ship', default=None)
     parser.add_argument('--seedIps', help='ips generated from previous seed', dest='seedIps', default=None)
     parser.add_argument('--jm,', help="display data used by jm for its stats", dest='jm', action='store_true', default=False)
+    parser.add_argument('--doorsColorsRando', help='randomize color of colored doors', dest='doorsColorsRando',
+                        nargs='?', const=True, default=False)
+    parser.add_argument('--allowGreyDoors', help='add grey color in doors colors pool', dest='allowGreyDoors',
+                        nargs='?', const=True, default=False)
 
     # parse args
     args = parser.parse_args()
@@ -259,27 +272,29 @@ if __name__ == "__main__":
         print("plandoRando param requires output param")
         sys.exit(-1)
 
-    log.init(args.debug)
-    logger = log.get('Rando')
+    utils.log.init(args.debug)
+    logger = utils.log.get('Rando')
     # service to force an argument value and notify it
     argDict = vars(args)
     forcedArgs = {}
+    optErrMsgs = [ ]
     def forceArg(arg, value, msg, webArg=None, webValue=None):
         if argDict[arg] != value:
             argDict[arg] = value
             forcedArgs[webArg if webArg != None else arg] = webValue if webValue != None else value
             print(msg)
-            return '\n'+msg
-        else:
-            return ''
+            optErrMsgs.append(msg)
     # if rando preset given, load it first
     if args.randoPreset != None:
-        loadRandoPreset(args.randoPreset, args)
+        preset = loadRandoPreset(args.randoPreset, args)
+        # use the skill preset from the rando preset
+        if preset is not None and args.paramsFileName is None:
+            args.paramsFileName = '{}/{}/{}.json'.format(appDir, getPresetDir(preset), preset)
 
     # if diff preset given, load it
     if args.paramsFileName is not None:
-        PresetLoader.factory(args.paramsFileName[0]).load()
-        preset = os.path.splitext(os.path.basename(args.paramsFileName[0]))[0]
+        PresetLoader.factory(args.paramsFileName).load()
+        preset = os.path.splitext(os.path.basename(args.paramsFileName))[0]
 
         if args.preset is not None:
             preset = args.preset
@@ -302,7 +317,6 @@ if __name__ == "__main__":
             sys.exit(-1)
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
-    optErrMsg = ""
     # if no max diff, set it very high
     if args.maxDifficulty:
         if args.maxDifficulty == 'random':
@@ -335,7 +349,7 @@ if __name__ == "__main__":
     if args.minDifficulty:
         minDifficulty = text2diff[args.minDifficulty]
         if progSpeed != "speedrun":
-            optErrMsg += "\nMinimum difficulty setting ignored, as prog speed is not speedrun"
+            optErrMsgs.append("Minimum difficulty setting ignored, as prog speed is not speedrun")
     else:
         minDifficulty = 0
 
@@ -345,7 +359,7 @@ if __name__ == "__main__":
             logger.debug("minimizerN: {}".format(minimizerN))
         else:
             minimizerN = int(args.minimizerN)
-        optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
+        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
     else:
         minimizerN = None
     areaRandom = False
@@ -353,6 +367,12 @@ if __name__ == "__main__":
         areaRandom = True
         args.area = bool(random.getrandbits(1))
     logger.debug("area: {}".format(args.area))
+
+    doorsColorsRandom = False
+    if args.doorsColorsRando == 'random':
+        doorsColorsRandom = True
+        args.doorsColorsRando = bool(random.getrandbits(1))
+    logger.debug("doorsColorsRando: {}".format(args.doorsColorsRando))
 
     bossesRandom = False
     if args.bosses == 'random':
@@ -365,11 +385,11 @@ if __name__ == "__main__":
     logger.debug("escapeRando: {}".format(args.escapeRando))
 
     if args.suitsRestriction != False and minimizerN is not None:
-        optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
+        forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
 
     if args.suitsRestriction == 'random':
         if args.morphPlacement == 'late' and args.area == True:
-            optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
+            forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
         else:
             args.suitsRestriction = bool(random.getrandbits(1))
     logger.debug("suitsRestriction: {}".format(args.suitsRestriction))
@@ -386,19 +406,20 @@ if __name__ == "__main__":
         args.morphPlacement = random.choice(morphPlacements)
     # random fill makes certain options unavailable
     if progSpeed == 'speedrun' or progSpeed == 'basic':
-        optErrMsg += forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
+        forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = args.progressionDifficulty
+    logger.debug("progressionDifficulty: {}".format(progDiff))
 
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.getrandbits(1))
 
     # in plando rando we know that the start ap is ok
     if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando == None:
-        optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
-        optErrMsg += forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", 'variaTweaks', 'on')
-        optErrMsg += forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
-        optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
-        optErrMsg += forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", 'areaLayout', 'on')
+        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
+        forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", 'variaTweaks', 'on')
+        forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
+        forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
+        forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", 'areaLayout', 'on')
         possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty, args.morphPlacement)
         if args.startAP == 'random':
             if args.startLocationList != None:
@@ -407,32 +428,32 @@ if __name__ == "__main__":
                 possibleStartAPs = sorted(list(set(possibleStartAPs).intersection(set(startLocationList))))
                 if len(possibleStartAPs) == 0:
                     reasonStr = '\n'.join(["%s : %s" % (apName, cause) for apName, cause in reasons.items() if apName in startLocationList])
-                    optErrMsg += '\nInvalid start locations list with your settings.\n'+reasonStr
-                    dumpErrorMsg(args.output, optErrMsg)
+                    '\nInvalid start locations list with your settings.\n'+reasonStr
+                    dumpErrorMsgs(args.output, optErrMsgs)
                     sys.exit(-1)
             args.startAP = random.choice(possibleStartAPs)
         elif args.startAP not in possibleStartAPs:
-            optErrMsg += '\nInvalid start location: {}. {}'.format(args.startAP, reasons[args.startAP])
-            optErrMsg += '\nPossible start locations with these settings: {}'.format(possibleStartAPs)
-            dumpErrorMsg(args.output, optErrMsg)
+            optErrMsgs.append('Invalid start location: {}.  {}'.format(args.startAP, reasons[args.startAP]))
+            optErrMsgs.append('Possible start locations with these settings: {}'.format(possibleStartAPs))
+            dumpErrorMsgs(args.output, optErrMsgs)
             sys.exit(-1)
     ap = getAccessPoint(args.startAP)
     if 'forcedEarlyMorph' in ap.Start and ap.Start['forcedEarlyMorph'] == True:
-        optErrMsg += forceArg('morphPlacement', 'early', "'Morph Placement' forced to early for custom start location")
+        forceArg('morphPlacement', 'early', "'Morph Placement' forced to early for custom start location")
     else:
         if progSpeed == 'speedrun':
             if args.morphPlacement == 'late':
-                optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
+                forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
             elif (not GraphUtils.isStandardStart(args.startAP)) and args.morphPlacement != 'normal':
-                optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for custom start location")
+                forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for custom start location")
         if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
-            optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for Chozo")
+            forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for Chozo")
 
     if args.patchOnly == False:
         print("SEED: " + str(seed))
 
     # fill restrictions dict
-    restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement }
+    restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "doors": "normal" if not args.doorsColorsRando else "late" }
     restrictions['MajorMinor'] = args.majorsSplit
     seedCode = 'X'
     if majorsSplitRandom == False:
@@ -444,6 +465,8 @@ if __name__ == "__main__":
             seedCode = 'MX'
     if args.bosses == True and bossesRandom == False:
         seedCode = 'B'+seedCode
+    if args.doorsColorsRando == True and doorsColorsRandom == False:
+        seedCode = 'D'+seedCode
     if args.area == True and areaRandom == False:
         seedCode = 'A'+seedCode
 
@@ -531,14 +554,15 @@ if __name__ == "__main__":
                 raise ValueError("Invalid button name : " + str(b))
 
     if args.plandoRando != None:
-        optErrMsg += forceArg('progressionSpeed', 'speedrun', "'Progression Speed' forced to speedrun")
+        forceArg('progressionSpeed', 'speedrun', "'Progression Speed' forced to speedrun")
         progSpeed = 'speedrun'
-        optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
-        optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
-        optErrMsg += forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
+        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
+        forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
+        forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = 'normal'
         args.plandoRando = json.loads(args.plandoRando)
         RomPatches.ActivePatches = args.plandoRando["patches"]
+        DoorsManager.unserialize(args.plandoRando["doors"])
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty,
                                   restrictions, args.superFun, args.runtimeLimit_s,
                                   args.plandoRando["locsItems"] if args.plandoRando != None else None,
@@ -559,8 +583,12 @@ if __name__ == "__main__":
         if args.areaLayoutBase == False:
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
     graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses,
-                                  args.escapeRando, minimizerN, dotFile,
+                                  args.escapeRando, minimizerN, dotFile, args.doorsColorsRando, args.allowGreyDoors,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
+
+    if args.plandoRando is None:
+        DoorsManager.setDoorsColor()
+
     if args.patchOnly == False:
         try:
             randoExec = RandoExec(seedName, args.vcr)
@@ -597,58 +625,33 @@ if __name__ == "__main__":
         if args.escapeRando == False:
             args.patches.append(random.choice(animalsPatches))
         else:
-            optErrMsg += "\nIgnored animals surprise because of escape randomization"
-    # transform itemLocs in our usual dict(location, item), for minors keep only the first
+            optErrMsgs.append("Ignored animals surprise because of escape randomization")
+    # transform itemLocs in our usual dict(location, item), exclude minors, we'll get them with the solver
     locsItems = {}
-    firstMinorsFound = {'Missile': False, 'Super': False, 'PowerBomb': False}
     for itemLoc in itemLocs:
-        locName = itemLoc["Location"]["Name"]
-        itemType = itemLoc["Item"].Type
-        if itemType in firstMinorsFound and firstMinorsFound[itemType] == False:
-            locsItems[locName] = itemType
-            firstMinorsFound[itemType] = True
-        elif itemType not in firstMinorsFound:
-            locsItems[locName] = itemType
+        locName = itemLoc.Location.Name
+        itemType = itemLoc.Item.Type
+        if itemType in ['Missile', 'Super', 'PowerBomb']:
+            continue
+        locsItems[locName] = itemType
     if args.debug == True:
         for loc in sorted(locsItems.keys()):
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
     if args.plandoRando != None:
-        # replace smbool with a dict
-        for itemLoc in itemLocs:
-            if "difficulty" in itemLoc["Location"]:
-                itemLoc["Location"]["difficulty"] = itemLoc["Location"]["difficulty"].json()
-            if "pathDifficulty" in itemLoc["Location"]:
-                del itemLoc["Location"]["pathDifficulty"]
-            itemLoc["Item"] = itemLoc["Item"].json()
-
         with open(args.output, 'w') as jsonFile:
-            json.dump({"itemLocs": itemLocs, "errorMsg": randoExec.errorMsg}, jsonFile, default=lambda x: x.__dict__)
+            json.dump({"itemLocs": [il.json() for il in itemLocs], "errorMsg": randoExec.errorMsg}, jsonFile)
         sys.exit(0)
 
     # generate extended stats
     if args.extStatsFilename != None:
-        if args.noGravHeat == True:
-            gravityBehaviour = 'Vanilla'
-        elif args.progressiveSuits == True:
-            gravityBehaviour = 'Progressive'
-        else:
-            gravityBehaviour = 'Balanced'
-        if args.maxDifficulty == None:
-            args.maxDifficulty = 'no difficulty cap'
-        parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses,
-                      'majorsSplit': args.majorsSplit,
-                      'startAP': args.startAP,
-                      'gravityBehaviour': gravityBehaviour,
-                      'nerfedCharge': args.nerfedCharge,
-                      'maxDifficulty': args.maxDifficulty,
-                      'progSpeed': progSpeed, 'morphPlacement': args.morphPlacement,
-                      'suitsRestriction': args.suitsRestriction, 'progDiff': progDiff,
-                      'superFunMovement': 'Movement' in args.superFun,
-                      'superFunCombat': 'Combat' in args.superFun,
-                      'superFunSuit': 'Suits' in args.superFun}
         with open(args.extStatsFilename, 'a') as extStatsFile:
-            db.DB.dumpExtStatsItems(parameters, locsItems, extStatsFile)
+            skillPreset = os.path.splitext(os.path.basename(args.paramsFileName))[0]
+            if args.fakeRandoPreset is not None:
+                randoPreset = args.fakeRandoPreset
+            else:
+                randoPreset = os.path.splitext(os.path.basename(args.randoPreset))[0]
+            db.DB.dumpExtStatsItems(skillPreset, randoPreset, locsItems, extStatsFile)
 
     try:
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source
@@ -669,11 +672,14 @@ if __name__ == "__main__":
                 suitsMode = "Progressive"
             elif args.noGravHeat:
                 suitsMode = "Vanilla"
+            if args.doorsColorsRando == True:
+                args.patches.append("beam_doors.ips")
             romPatcher.applyIPSPatches(args.startAP, args.patches,
                                        args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
-                                       escapeAttr, args.noRemoveEscapeEnemies, minimizerN, args.minimizerTourian)
+                                       escapeAttr, args.noRemoveEscapeEnemies, minimizerN, args.minimizerTourian,
+                                       args.doorsColorsRando)
         else:
             # from customizer permalink, apply previously generated seed ips first
             if args.seedIps != None:
@@ -734,8 +740,9 @@ if __name__ == "__main__":
             romPatcher.commitIPS()
         romPatcher.end()
         if args.patchOnly == False:
-            if optErrMsg != "":
-                msg = optErrMsg + '\n' + randoExec.errorMsg
+            if len(optErrMsgs) > 0:
+                optErrMsgs.append(randoExec.errorMsg)
+                msg = joinErrorMsgs(optErrMsgs)
             else:
                 msg = randoExec.errorMsg
         else:

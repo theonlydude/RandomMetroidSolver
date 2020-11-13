@@ -1,24 +1,16 @@
-try:
-    import networkx as nx
-    from networkx.drawing.nx_agraph import write_dot
-except:
-    print("missing networkx package, install it: pip3.7 install networkx --user")
-    import sys
-    sys.exit(1)
-
 import random, logging, time
-from collections import defaultdict
 
 from rando.Filler import Filler
 from rando.FillerRandom import FillerRandomItems, FrontFillerKickstart, FrontFillerNoCopy
-from utils.parameters import infinity
 from rando.Choice import ItemThenLocChoice
-from graph.graph_access import GraphUtils
 from rando.RandoServices import ComebackCheckType
 from rando.ItemLocContainer import ItemLocation, getItemListStr, ContainerSoftBackup
+from rando.MiniSolver import MiniSolver
+from rando.AssumedGraph import AssumedGraph
+from utils.parameters import infinity
+from graph.graph_access import GraphUtils
 from logic.smbool import SMBool
 from logic.helpers import diffValue2txt
-from rando.MiniSolver import MiniSolver
 from solver.randoSolver import RandoSolver
 
 class AssumedFiller(Filler):
@@ -85,16 +77,10 @@ class AssumedFiller(Filler):
             self.log.debug("{}: (it, stillAvail, possLocs) {}".format(msg, [(it.Type, data['availLocsWoItemLen'], len(data['possibleLocs'])) for (it, data) in itemLocDict.items()]))
             for it, data in itemLocDict.items():
                 locs = data['possibleLocs']
-                self.log.debug("  {}: {}".format(it.Type, [loc.Name for loc in locs] if len(locs) <= 5 else len(locs)))
+                self.log.debug("  {} ({}): {}".format(it.Type, data['availLocsWoItemLen'], [loc.Name for loc in locs] if len(locs) <= 5 else len(locs)))
 
-    def computePriority(self, itemLocDict, step, maxDiff):
+    def computePriority(self, itemLocDict):
         # build a dependency graph of the items/locations to help priorize some locations and some items.
-        for it, data in itemLocDict.items():
-            data["newPossibleLocs"] = {}
-
-        self.log.debug("begin graph construction")
-        itemGraph = nx.DiGraph()
-
         if self.earlyGame:
             validItems = set([it for it in itemLocDict.keys()])
         else:
@@ -102,135 +88,9 @@ class AssumedFiller(Filler):
             validItems = set([it for it, data in itemLocDict.items() if not data['noLongerAvailLocsWoItem']])
         self.log.debug("validItems: {}".format([it.Type for it in validItems]))
 
-        # add valid items to the graph
-        for it in validItems:
-            itemGraph.add_node(it)
-
-        # for a node N and its parent P we add an edge to the graph if at least one possible location for item N
-        # is in the locations which won't be available after placing item P (ie. we have to place N before P
-        # to not have inaccessible locations)
-        for P, dataP in itemLocDict.items():
-            for N, dataN in itemLocDict.items():
-                if dataN["possibleLocs"].intersection(dataP["noLongerAvailLocsWoItem"]):
-                    itemGraph.add_edge(P, N)
-                    #self.log.debug("add edge {} -> {}".format(P.Type, N.Type))
-
-        #write_dot(itemGraph, "grid{}.dot".format(step))
-
-        if self.earlyGame:
-            leafs = validItems
-        else:
-            # keep only the leafs (ie. nodes without transitions starting from them)
-            leafs = set([N for N in itemGraph.nodes() if itemGraph.out_degree(N) == 0 and N in validItems])
-        self.log.debug("leafs: {}".format([it.Type for it in leafs]))
-
-        extraPriority = 100 # have to be big, it's top priority to fill it else it will never be filled
-        defaultPriority = 1
-
-        # keep intersection of all possible locations which are in parent no longer avail locations
-        priorityLocations = defaultdict(int)
-        priorityLocationsItems = defaultdict(set)
-        for N in leafs:
-            for P in itemGraph.predecessors(N):
-                #self.log.debug("handle P {} -> N {} priority".format(P.Type, N.Type))
-                newPossibleLocs = itemLocDict[P]["noLongerAvailLocsWoItem"].intersection(itemLocDict[N]["possibleLocs"])
-                # increase priority each time a location has to be filled to unlock an item
-                for loc in newPossibleLocs:
-                    #self.log.debug("increase N {} Loc {} priority".format(N.Type, loc.Name))
-                    priorityLocations[loc] += defaultPriority
-                    priorityLocationsItems[loc].add(N)
-                itemLocDict[N]["newPossibleLocs"][P] = newPossibleLocs
-
-        # if locs max priority > 1 remove locs from the item with the biggest noLongerAvailLocsWoItem
-        # which are only no longer without this item (because of morph which has almost all locations no longer available)
-        removeLowestPriority = False
-        for priority in priorityLocations.values():
-            if priority > 1:
-                removeLowestPriority = True
-                break
-
-        if removeLowestPriority:
-            # get item with biggest noLongerAvailLocsWoItem
-            itemToRemove = None
-            noLongerAvailLocsWoItemCount = -1
-            for it, data in itemLocDict.items():
-                if noLongerAvailLocsWoItemCount < len(data['noLongerAvailLocsWoItem']):
-                    itemToRemove = it
-                    noLongerAvailLocsWoItemCount = len(data['noLongerAvailLocsWoItem'])
-            assert itemToRemove is not None
-            self.log.debug("ignore noLongerAvailLocsWoItem for item {}".format(itemToRemove.Type))
-            noLongerAvailLocsWoItem = itemLocDict[itemToRemove]['noLongerAvailLocsWoItem']
-            for it1, data in itemLocDict.items():
-                # don't update nodes with no parents (could be bosses)
-                if len(data['newPossibleLocs']) > 0:
-                    data['possibleLocs'] = set()
-                    for it2, locs in data['newPossibleLocs'].items():
-                        if it2 != itemToRemove:
-                            data['possibleLocs'].update(locs)
-                    # all the possible locs where from item to remove parent
-                    if len(data['possibleLocs']) == 0:
-                        data['possibleLocs'] = data['newPossibleLocs'][itemToRemove]
-
-        self.log.debug("possible items: {}".format([it.Type for it in itemLocDict.keys() if it in leafs and it in validItems]))
-
-        # check if a loc must be filled or else it'll be no longer available
-        extraPriorityLocations = []
-        for it, data in itemLocDict.items():
-            if it not in validItems:
-                continue
-            for loc in data["locsPostNokWoItem"]+data["locsNokWoDoubleItem"]:
-                self.log.debug("loc post nok wo OR double {}: {}".format(it.Type, loc.Name))
-                self.log.debug("possible items for loc: {}".format([i.Type for i in priorityLocationsItems[loc]]))
-                validItemsForLoc = leafs.intersection(priorityLocationsItems[loc])
-                self.log.debug("valid items for loc: {}".format([i.Type for i in validItemsForLoc]))
-                if validItemsForLoc:
-                    priorityLocations[loc] += extraPriority
-                    extraPriorityLocations.append(loc)
-                    for it2, data2 in itemLocDict.items():
-                        if loc in data2["possibleLocs"] and it2 in leafs:
-                            priorityLocationsItems[loc].add(it2)
-                    # if more than one loc has its postavailable nok without this item, remove item
-                    if len(data['locsPostNokWoItem']) > 1 and it in priorityLocationsItems[loc]:
-                        self.log.debug("more than one loc post nok wo {}, remove it for this loc items".format(it.Type))
-                        priorityLocationsItems[loc].remove(it)
-
-        # for each leaf item1, for each item2 with only one possible location,
-        # check that item2 location is still available without item1 and item2.
-        oneLocationItemsLocs = [(it, data['possibleLocs']) for it, data in itemLocDict.items() if len(data['possibleLocs']) == 1]
-        removeFromLeafs = set()
-        for leafItem in leafs:
-            for oneLocItem, oneLoc in oneLocationItemsLocs:
-                if leafItem == oneLocItem:
-                    continue
-                oneLoc = list(oneLoc)[0]
-                if not self.services.locStillOkWoBothItems(leafItem, oneLocItem, self.startAP, self.ap, oneLoc, self.container, self.container.itemPool, maxDiff):
-                    # if one loc item is in leaf, increase its location priority, else remove leaf item from leafs
-                    self.log.debug("found loc unavailable wo both items, leaf: {} one loc item: {}, loc: {}".format(leafItem.Type, oneLocItem.Type, oneLoc.Name))
-                    if oneLocItem in leafs:
-                        self.log.debug("priorize loc: {}".format(oneLoc.Name))
-                        priorityLocations[loc] += extraPriority
-                    else:
-                        self.log.debug("remove leaf item from leafs: {}".format(leafItem.Type))
-                        removeFromLeafs.add(leafItem)
-        if removeFromLeafs:
-            leafs -= removeFromLeafs
-
-        # for each leaf item1, for each item2 with only one possible location,
-        # check if item2 only loc is in item1 possible locs, if so remove it
-        for leafItem in leafs:
-            for oneLocItem, oneLoc in oneLocationItemsLocs:
-                if leafItem == oneLocItem:
-                    continue
-                self.log.debug("leaf: {} one: {} loc: {}".format(leafItem.Type, oneLocItem.Type, oneLoc))
-                oneLoc = list(oneLoc)[0]
-                if oneLoc in itemLocDict[leafItem]['possibleLocs']:
-                    self.log.debug("remove loc {} from {} as it only loc for {}".format(oneLoc.Name, leafItem.Type, oneLocItem.Type))
-                    priorityLocations[loc] += extraPriority
-                    itemLocDict[leafItem]['possibleLocs'].remove(oneLoc)
-                    if leafItem in priorityLocationsItems[loc]:
-                        priorityLocationsItems[loc].remove(leafItem)
-
-        return {it: data for it, data in itemLocDict.items() if it in leafs and it in validItems}, extraPriorityLocations, priorityLocations, priorityLocationsItems
+        graph = AssumedGraph(validItems)
+        graph.build(itemLocDict, self.container)
+        return graph.getLocationsItems()
 
     def displayNoLongerAvailLocsWoItem(self, itemLocDict):
         if self.log.getEffectiveLevel() == logging.DEBUG:
@@ -265,7 +125,6 @@ class AssumedFiller(Filler):
         self.onlyBossLeftLocations = self.services.getOnlyBossLeftLocationReverse(self.startAP, self.container, self.earlyGame)
 
         assumedItems = self.container.itemPool
-
         step = len(assumedItems)
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
@@ -281,7 +140,7 @@ class AssumedFiller(Filler):
             maxDiff = self.maxDiff
 
         # compute available locs without each item type from start ap
-        itemLocDict = self.services.getPossiblePlacementsWithoutItem(self.startAP, self.ap, self.container, assumedItems, maxDiff)
+        itemLocDict = self.services.getPossiblePlacementsWithoutItem(self.startAP, self.ap, self.container, assumedItems, maxDiff, self.earlyGame)
 
         # debug display
         self.displayItemLocDict("before", itemLocDict)
@@ -295,72 +154,52 @@ class AssumedFiller(Filler):
             if len(allPossibleLocs) != len(self.container.unusedLocations):
                 self.log.debug("lost locations: {}".format([loc.Name for loc in set(self.container.unusedLocations)-allPossibleLocs]))
                 return False
-            #assert len(allPossibleLocs) == len(self.container.unusedLocations)
 
         # keep only priority locations, locations that need to be filled to allow placement of an item
         # which will make other locations unreachable
-        newItemLocDict, extraPriorityLocations, priorityLocations, priorityLocationsItems = self.computePriority(itemLocDict, step, maxDiff)
-        possibleTypes = set([it.Type for it in newItemLocDict.keys()])
+        locItemDict = self.computePriority(itemLocDict)
 
-        if extraPriorityLocations:
-            loc = random.choice(sorted(extraPriorityLocations))
-            itemsChoice = sorted(list(priorityLocationsItems[loc]))
-
-            item = random.choice(itemsChoice)
-            self.log.debug("priority loc chosen: {}, difficulty: {} - available items: {}".format(loc.Name, loc.difficulty, len(itemsChoice)))
-            self.log.debug("item chosen: {}".format(item.Type))
-
-            itemLoc = ItemLocation(item, loc)
-        else:
-            possibleItems = sorted([it for it in assumedItems if it.Type in possibleTypes])
-            self.log.debug("all possible items: {} {}".format(len(possibleItems), getItemListStr(possibleItems)))
-            if not possibleItems:
-                if self.earlyGame:
-                    self.log.debug("even without constraints we're stucked")
-                    return False
-                else:
-                    self.earlyGame = True
-                    self.log.debug("no more possible items with all the constraints, remove them and retry")
-                    return True
-
-            # if an item is now available and wasn't before prioritize it (to avoid too many suits early)
-            if not self.previousAvailableItemsTypes:
-                self.previousAvailableItemsTypes = possibleTypes
-            self.log.debug("possibleTypes: {}".format(possibleTypes))
-            self.log.debug("previousAvailableItemsTypes: {}".format(self.previousAvailableItemsTypes))
-            self.log.debug("old newAvailableItems: {}".format(self.newAvailableItems))
-            self.newAvailableItems.update(possibleTypes - self.previousAvailableItemsTypes)
-            self.log.debug("new newAvailableItems: {}".format(self.newAvailableItems))
-            # some items in newAvailableItems could no longer be in possibleItems
-            # (if space jump was in it before speedbooster is placed, and once you place speedbooster
-            #  some locs which were available with speedbooster require space jump)
-            self.newAvailableItems = self.newAvailableItems.intersection(set(possibleItems))
-            if self.newAvailableItems and random.random() > 0.5:
-                self.log.debug("choose in newAvailableItems: {}".format(self.newAvailableItems))
-                itemType = random.choice(sorted(list(self.newAvailableItems)))
-                self.newAvailableItems.remove(itemType)
-                for it, data in newItemLocDict.items():
-                    if it.Type == itemType:
-                        item = it
-                        locations = data['possibleLocs']
-                        break
+        if not locItemDict:
+            if self.earlyGame:
+                self.log.debug("even without constraints we're stucked")
+                return False
             else:
-                item = random.choice(possibleItems)
-                # not very pythonic
-                for it, data in newItemLocDict.items():
-                    if it.Type == item.Type:
-                        locations = list(data['possibleLocs'])
-                        break
-            self.log.debug("item chosen: {} - available locs before prio: {}".format(item.Type, [(loc.Name, priorityLocations[loc]) for loc in locations] if len(locations) < 5 else len(locations)))
-            maxPriority = -1
-            for loc in locations:
-                if priorityLocations[loc] > maxPriority:
-                    maxPriority = priorityLocations[loc]
-            locations = [loc for loc in locations if priorityLocations[loc] == maxPriority]
-            self.log.debug("item chosen: {} - available locs after prio: {}".format(item.Type, [(loc.Name, priorityLocations[loc]) for loc in locations] if len(locations) < 5 else len(locations)))
+                self.earlyGame = True
+                self.log.debug("no more possible locs/items with all the constraints, remove them and retry")
+                return True
 
-            itemLoc = self.choice.chooseItemLoc({item: locations}, False)
-            self.log.debug("loc chosen: {}".format(itemLoc.Location.Name))
+        # choose loc
+        loc = random.choice(sorted(list(locItemDict.keys())))
+        self.log.debug("loc chosen: {}".format(loc.Name))
+
+        possibleTypes = set([item.Type for item in locItemDict[loc]])
+        possibleItems = sorted([it for it in assumedItems if it.Type in possibleTypes])
+
+        # if an item is now available and wasn't before prioritize it (to avoid too many suits early in game)
+        if not self.previousAvailableItemsTypes:
+            self.previousAvailableItemsTypes = possibleTypes
+        self.log.debug("possibleTypes: {}".format(possibleTypes))
+        self.log.debug("previousAvailableItemsTypes: {}".format(self.previousAvailableItemsTypes))
+        self.log.debug("old newAvailableItems: {}".format(self.newAvailableItems))
+        self.newAvailableItems.update(possibleTypes - self.previousAvailableItemsTypes)
+        self.log.debug("new newAvailableItems: {}".format(self.newAvailableItems))
+        # some items in newAvailableItems could no longer be in possibleItems
+        # (if space jump was in it before speedbooster is placed, and once you place speedbooster
+        #  some locs which were available with speedbooster require space jump)
+        self.newAvailableItems = self.newAvailableItems.intersection(set(possibleItems))
+        if self.newAvailableItems and random.random() > 0.5:
+            self.log.debug("choose in newAvailableItems: {}".format([it.Type for it in self.newAvailableItems]))
+            itemType = random.choice(sorted(list(self.newAvailableItems)))
+            for item in assumedItems:
+                if item.Type == itemType:
+                    break
+            self.newAvailableItems.remove(itemType)
+            self.log.debug("item type chosen: {}".format(item.Type))
+        else:
+            item = random.choice(possibleItems)
+            self.log.debug("item type chosen: {}".format(item.Type))
+
+        itemLoc = ItemLocation(item, loc)
 
         self.previousAvailableItemsTypes = possibleTypes
 

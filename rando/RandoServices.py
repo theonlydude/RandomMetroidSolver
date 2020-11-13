@@ -39,10 +39,32 @@ class RandoServices(object):
         sys.stdout.flush()
         return itemLoc.Location.accessPoint if pickup == True else ap
 
-    def getPossiblePlacementsWithoutItem(self, startAP, ap, container, items, maxDiff):
+    def getPossiblePlacementsWithoutItem(self, startAP, ap, container, items, maxDiff, earlyGame):
         distinctItems = {item.Type: item for item in items}
         self.log.debug("getPossiblePlacementsWithoutItem, unusedLocations: {}".format(len(container.unusedLocations)))
-        return {item: self.allLocationsWithoutItem(item, startAP, ap, container, items, maxDiff) for itemType, item in distinctItems.items()}
+        itemLocDict = {item: self.allLocationsWithoutItem(item, startAP, ap, container, items, maxDiff) for itemType, item in distinctItems.items()}
+
+        if earlyGame:
+            validItems = set([it for it in itemLocDict.keys()])
+        else:
+            # we only place items which won't make some locs unavailable
+            validItems = set([it for it, data in itemLocDict.items() if not data['noLongerAvailLocsWoItem']])
+
+        # for each item1 with only one possible location, for each leaf item2,
+        # check that item1 loc is still available without both items.
+        # TODO::detect if two items have the same only possible location
+        oneLocationItemsLocs = {it: data for it, data in itemLocDict.items() if len(data['possibleLocs']) == 1 and it in validItems}
+        for oneLocItem, data in oneLocationItemsLocs.items():
+            oneLoc = list(data['possibleLocs'])[0]
+            for item in itemLocDict.keys():
+                if item in oneLocationItemsLocs.keys():
+                    continue
+                if not self.locStillOkWoBothItems(item, oneLocItem, startAP, ap, oneLoc, container, container.itemPool, maxDiff):
+                    # if one loc item is in leaf, increase its location priority, else remove leaf item from leafs
+                    self.log.debug("found loc unavailable wo both items, item: {} one loc item: {}, loc: {}".format(item.Type, oneLocItem.Type, oneLoc.Name))
+                    data['locsNokWoBothItems'] = [oneLoc]
+
+        return itemLocDict
 
     def addRequiredBosses(self, item, ap, container, maxDiff):
         # check if bosses can be accessed and killed, if so add them to alreadyPlacedItems:

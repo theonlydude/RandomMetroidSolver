@@ -16,13 +16,20 @@ class AssumedGraph(object):
         self.locations = {}
         self.validItems = validItems
         # we have different kind of edges between items and locs:
-        # p: item can be place at loc
+        # pv: valid item can be place at loc
+        # pi: invalid item can be place at loc
         # u: loc unavailable without item
         # b: loc unavailable without both items
         # c: loc unavailable without two count items
         # n: loc post unavailable without item
-        self.priorities = {'u': 1, 'c': 100, 'n': 100, 'b': 100, 'p': 0}
+        self.priorities = {'u': 1, 'c': 100, 'n': 100, 'b': 100, 'pv': 0, 'pi': 0}
         self.log = utils.log.get('AssumedGraph')
+
+    def getLocNeighbours(self, loc, type):
+        return [itemNode.data for itemNode in self.locations[loc].neighbours[type]]
+
+    def getItemNeighbours(self, item, type):
+        return [locNode.data for locNode in self.items[item].neighbours[type]]
 
     def addItem(self, item, isValid):
         node = Node(item, {'isValid': isValid})
@@ -58,7 +65,10 @@ class AssumedGraph(object):
                 self.addEdge(it, loc, type='n')
             if it in self.validItems:
                 for loc in data['possibleLocs']:
-                    self.addEdge(it, loc, type='p')
+                    self.addEdge(it, loc, type='pv')
+            else:
+                for loc in data['possibleLocs']:
+                    self.addEdge(it, loc, type='pi')
             if 'locsNokWoBothItems' in data:
                 for loc in data['locsNokWoBothItems']:
                     self.addEdge(it, loc, type='b')
@@ -69,21 +79,68 @@ class AssumedGraph(object):
         locationsPriorities = defaultdict(list)
         for loc, locNode in self.locations.items():
             locationsPriorities[locNode.attributes['priority']].append(loc)
-        maxPriority = -1
-        for priority in locationsPriorities:
-            if priority > maxPriority:
-                maxPriority = priority
-        priorityLocations = locationsPriorities[maxPriority]
-        self.log.debug("max priority: {} locs: {}".format(maxPriority, [loc.Name for loc in priorityLocations]))
-        # keep only locs with at least one valid item
-        locItemDict = {loc: set([itemNode.data for itemNode in self.locations[loc].neighbours['p']]).intersection(self.validItems) for loc in priorityLocations}
-        return {loc: items for loc, items in locItemDict.items() if len(items) > 0}
+        priorities = set(list(locationsPriorities.keys()))
+
+        while priorities:
+            maxPriority = max(priorities)
+            priorityLocations = locationsPriorities[maxPriority]
+            self.log.debug("max priority: {} unfiltered locs: {}".format(maxPriority, [loc.Name for loc in priorityLocations]))
+            # keep only locs with at least one valid item
+            locItemDict = {loc: set(self.getLocNeighbours(loc, 'pv')) for loc in priorityLocations}
+            removedLocs = [loc for loc, items in locItemDict.items() if not items]
+            locItemDict = {loc: items for loc, items in locItemDict.items() if items}
+
+            # if some locs have been filtered replace with the noLongerAvailLocsWoItem of the items
+            # linked to these locs (it means that they are of higher priority).
+            if removedLocs:
+                newPrioLocs = self.getMorePriorityLocs(removedLocs)
+                if newPrioLocs:
+                    self.log.debug("new priority locs from filtered locs: {}".format([loc.Name for loc in newPrioLocs]))
+                    locItemDict = newPrioLocs
+
+            if not locItemDict:
+                priorities.remove(maxPriority)
+            else:
+                # check in the locs if some have only one possible item, if so keep only these locs
+                filteredLocItemDict = {loc: items for loc, items in locItemDict.items() if len(items) == 1}
+                if filteredLocItemDict:
+                    self.log.debug("filter to keep only locs with one possible item")
+                    return filteredLocItemDict
+                else:
+                    return locItemDict
+        return {}
+
+    def getMorePriorityLocs(self, removedLocs):
+        newPrioLocs = {}
+        self.log.debug("removed locs: {}".format([loc.Name for loc in removedLocs]))
+        for rloc in removedLocs:
+            # possible invalid items for the removed loc
+            ritems = self.getLocNeighbours(rloc, 'pi')
+            self.log.debug("invalid items of rloc {}: {}".format(rloc.Name, [it.Type for it in ritems]))
+            for ritem in ritems:
+                # no longer avail locs wo invalid item
+                noLongerAvailLocsWoItem = self.getItemNeighbours(ritem, 'u')
+                self.log.debug("item: {} nolongeravaillocswoitem: {}".format(ritem.Type, [loc.Name for loc in noLongerAvailLocsWoItem]))
+                for loc in noLongerAvailLocsWoItem:
+                    # valid items for the loc
+                    items = set(self.getLocNeighbours(loc, 'pv'))
+                    if items:
+                        newPrioLocs[loc] = items
+        return newPrioLocs
 
     def handleItemsWithOnePossibleLoc(self):
-        # if an item has only one possible loc, remove other 'p' edges to that loc to prevent
+        # if an item has only one possible loc, remove other 'pv' edges to that loc to prevent
         # having an item with no possible loc.
+        # also do that for pi edges to avoid filing a loc which will be the only possible one for
+        # an item when its dependent locs get filled.
         for item, itemNode in self.items.items():
-            if len(itemNode.neighbours['p']) == 1:
-                locNode = itemNode.neighbours['p'][0]
-                locNode.neighbours['p'] = [itemNode]
-                self.log.debug("one loc item {}, remove other possible items for loc {}".format(item.Type, locNode.data.Name))
+            pvLocsNodes = itemNode.neighbours['pv']
+            piLocsNodes = itemNode.neighbours['pi']
+            if len(pvLocsNodes) == 1:
+                locNode = pvLocsNodes[0]
+                locNode.neighbours['pv'] = [itemNode]
+                self.log.debug("one loc valid item {}, set it as only possible items for loc {}".format(item.Type, locNode.data.Name))
+            if len(piLocsNodes) == 1:
+                locNode = piLocsNodes[0]
+                locNode.neighbours['pv'] = []
+                self.log.debug("one loc invalid item {}, remove all possible items for loc {}".format(item.Type, locNode.data.Name))

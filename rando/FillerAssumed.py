@@ -74,10 +74,10 @@ class AssumedFiller(Filler):
 
     def displayItemLocDict(self, msg, itemLocDict):
         if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("{}: (it, stillAvail, possLocs) {}".format(msg, [(it.Type, data['availLocsWoItemLen'], len(data['possibleLocs'])) for (it, data) in itemLocDict.items()]))
+            self.log.debug("{}: (it, stillAvail, possLocs, notAvail) {}".format(msg, [(it.Type, data['availLocsWoItemLen'], len(data['possibleLocs']), len(data['noLongerAvailLocsWoItem'])) for (it, data) in itemLocDict.items()]))
             for it, data in itemLocDict.items():
                 locs = data['possibleLocs']
-                self.log.debug("  {} ({}): {}".format(it.Type, data['availLocsWoItemLen'], [loc.Name for loc in locs] if len(locs) <= 5 else len(locs)))
+                self.log.debug("  {} ({}): {} - {}".format(it.Type, data['availLocsWoItemLen'], [loc.Name for loc in locs] if len(locs) <= 5 else len(locs), [loc.Name for loc in data['noLongerAvailLocsWoItem']] if len(data['noLongerAvailLocsWoItem']) <= 5 else len(data['noLongerAvailLocsWoItem'])))
 
     def computePriority(self, itemLocDict):
         # build a dependency graph of the items/locations to help priorize some locations and some items.
@@ -87,6 +87,8 @@ class AssumedFiller(Filler):
             # we only place items which won't make some locs unavailable
             validItems = set([it for it, data in itemLocDict.items() if not data['noLongerAvailLocsWoItem']])
         self.log.debug("validItems: {}".format([it.Type for it in validItems]))
+        if not validItems:
+            return {}
 
         graph = AssumedGraph(validItems)
         graph.build(itemLocDict, self.container)

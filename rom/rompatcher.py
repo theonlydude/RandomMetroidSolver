@@ -88,12 +88,13 @@ class RomPatcher:
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips',
-                     'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips', 'beam_doors.ips'],
+                     'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips'],
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
                  'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street' ],
         'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips'],
-        'MinimizerTourian': ['minimizer_tourian.ips', 'nerfed_rainbow_beam.ips']
+        'MinimizerTourian': ['minimizer_tourian.ips', 'nerfed_rainbow_beam.ips'],
+        'DoorsColors': ['beam_doors.ips', 'red_doors.ips']
     }
 
     def __init__(self, romFileName=None, magic=None, plando=False):
@@ -425,6 +426,8 @@ class RomPatcher:
                         self.applyIPSPatch(patchName)
             doors = self.getStartDoors(plms, area, minimizerN)
             if doorsColorsRando:
+                for patchName in RomPatcher.IPSPatches['DoorsColors']:
+                    self.applyIPSPatch(patchName)
                 self.writeDoorsColor(doors)
             self.applyStartAP(startAP, plms, doors)
             self.applyPLMs(plms)

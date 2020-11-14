@@ -582,6 +582,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.AreaBaseSet
         if args.areaLayoutBase == False:
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
+    if args.doorsColorsRando == True:
+        RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
     graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses,
                                   args.escapeRando, minimizerN, dotFile, args.doorsColorsRando, args.allowGreyDoors,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
@@ -672,8 +674,6 @@ if __name__ == "__main__":
                 suitsMode = "Progressive"
             elif args.noGravHeat:
                 suitsMode = "Vanilla"
-            if args.doorsColorsRando == True:
-                args.patches.append("beam_doors.ips")
             romPatcher.applyIPSPatches(args.startAP, args.patches,
                                        args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,

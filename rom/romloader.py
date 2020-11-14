@@ -97,6 +97,10 @@ class RomLoader(object):
         if self.hasPatch("minimizer_tourian"):
             RomPatches.ActivePatches.append(RomPatches.TourianSpeedup)
 
+        # red doors
+        if self.hasPatch('red_doors'):
+            RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
+
         return (isArea, isBoss, isEscape)
 
     def getPatches(self):

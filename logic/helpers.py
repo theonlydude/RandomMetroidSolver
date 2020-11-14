@@ -188,7 +188,18 @@ class Helpers(object):
         sm = self.smbm
         return sm.wor(sm.haveItem('Missile'), sm.haveItem('Super'))
 
-    canOpenRedDoors = haveMissileOrSuper
+    @Cache.decorator
+    def canOpenRedDoors(self):
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.wnot(RomPatches.has(RomPatches.RedDoorsMissileOnly)),
+                              sm.haveMissileOrSuper()),
+                      sm.haveItem('Missile'))
+
+    @Cache.decorator
+    def canOpenEyeDoors(self):
+        sm = self.smbm
+        return sm.wor(RomPatches.has(RomPatches.NoGadoras),
+                      sm.haveMissileOrSuper())
 
     @Cache.decorator
     def canOpenGreenDoors(self):
@@ -679,7 +690,7 @@ class Helpers(object):
     @Cache.decorator
     def canPassMetroids(self):
         sm = self.smbm
-        return sm.wand(sm.canOpenRedDoors(),
+        return sm.wand(sm.haveMissileOrSuper(),
                        sm.wor(sm.haveItem('Ice'),
                               # to avoid leaving tourian to refill power bombs
                               sm.itemCountOk('PowerBomb', 3)))

@@ -690,10 +690,9 @@ class Helpers(object):
     @Cache.decorator
     def canPassMetroids(self):
         sm = self.smbm
-        return sm.wand(sm.haveMissileOrSuper(),
-                       sm.wor(sm.haveItem('Ice'),
-                              # to avoid leaving tourian to refill power bombs
-                              sm.itemCountOk('PowerBomb', 3)))
+        return sm.wor(sm.wand(sm.haveItem('Ice'), sm.haveMissileOrSuper()),
+                      # to avoid leaving tourian to refill power bombs
+                      sm.itemCountOk('PowerBomb', 3))
 
     @Cache.decorator
     def canPassZebetites(self):
@@ -709,6 +708,7 @@ class Helpers(object):
         ret = self.smbm.wand(sm.wor(RomPatches.has(RomPatches.TourianSpeedup),
                                     sm.wand(sm.canPassMetroids(),
                                             sm.canPassZebetites())),
+                             sm.canOpenRedDoors(),
                              sm.enoughStuffsMotherbrain())
         return ret
 

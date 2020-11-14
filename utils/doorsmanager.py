@@ -302,10 +302,14 @@ class DoorsManager():
         DoorsManager.debugDoorsColor()
 
         # tell that we have randomized doors
-        isRandom = any(door.isRandom() for door in DoorsManager.doors.values())
+        isRandom = DoorsManager.isRandom()
         if isRandom:
             DoorsManager.setRefillSaveToBlue()
         return isRandom
+
+    @staticmethod
+    def isRandom():
+        return any(door.isRandom() for door in DoorsManager.doors.values())
 
     @staticmethod
     def setRefillSaveToBlue():

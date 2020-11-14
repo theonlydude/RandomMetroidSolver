@@ -103,9 +103,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
             assert len(locDict) > 0
             itemLocDict.clear()
             itemLocDict.update(locDict)
-        itemTypes = doorBeams+['Missile', 'PowerBomb']
-        if not any(item.Type == 'Missile' for item in itemLocDict):
-            itemTypes.append('Super')
+        itemTypes = doorBeams+['Missile', 'Super', 'PowerBomb']
         random.shuffle(itemTypes)
         for itemType in itemTypes:
             if any(item.Type == itemType for item in itemLocDict):

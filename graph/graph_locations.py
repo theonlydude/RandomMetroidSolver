@@ -84,7 +84,7 @@ class Location:
         return ret
 
     def __eq__(self, other):
-        return self.Name == other.Name
+        return self.Name == other.Name if other is not None else False
 
     def __hash__(self):
         return id(self)

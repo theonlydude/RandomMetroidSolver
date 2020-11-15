@@ -242,6 +242,8 @@ if __name__ == "__main__":
     parser.add_argument('--max_degree', help="max hue shift", dest='max_degree', nargs='?', default=180, type=int)
     parser.add_argument('--no_global_shift', help="", action='store_false', dest='global_shift', default=True)
     parser.add_argument('--invert', help="invert color range", dest='invert', action='store_true', default=False)
+    parser.add_argument('--no_blue_door_palette', help="palette param", action='store_true',
+                        dest='no_blue_door_palette', default=False)
     parser.add_argument('--ext_stats', help="dump extended stats SQL", nargs='?', default=None, dest='extStatsFilename')
     parser.add_argument('--randoPreset', help="rando preset file", dest="randoPreset", nargs='?', default=None)
     parser.add_argument('--fakeRandoPreset', help="for prog speed stats", dest="fakeRandoPreset", nargs='?', default=None)
@@ -731,6 +733,7 @@ if __name__ == "__main__":
                 "min_degree": None,
                 "max_degree": None,
                 "invert": None,
+                "no_blue_door_palette": None
             }
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)

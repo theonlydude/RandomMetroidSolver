@@ -107,40 +107,9 @@ dude@computer:~/RandomMetroidSolver (master)$ python3.7 randomizer_webservice.py
                         remote url to connect to
 ```
 
-# CLI Palettizer
-
-To apply colors randomization to an existing seed you can use the palettizer.
-
-```
-dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./palettizer.py -r VARIA_Randomizer_FX1097821_Season_Races_medium.sfc
-```
-
-The parameters:
-```
-  --individual_suit_shift
-  --individual_tileset_shift
-  --no_match_ship_and_power
-  --seperate_enemy_palette_groups
-  --no_match_room_shift_with_boss
-  --no_shift_tileset_palette
-  --no_shift_boss_palettes
-  --no_shift_suit_palettes
-  --no_shift_enemy_palettes
-  --no_shift_beam_palettes
-  --no_shift_ship_palette
-  --seed [SEED], -s [SEED]
-                        randomization seed to use
-  --min_degree [MIN_DEGREE]
-                        min hue shift
-  --max_degree [MAX_DEGREE]
-                        max hue shift
-  --no_global_shift
-  --invert              invert color range
-```
-
 # CLI Customizer
 
-To change Samus sprite or apply patches on an existing seed you have to call the Randomizer with the --patchOnly parameter. It'll generate a new ROM: VARIA.sfc
+To change Samus sprite or apply patches or randomize palettes on an existing seed you have to call the Randomizer with the --patchOnly parameter. It'll generate a new ROM: VARIA.sfc
 
 To add a sprite use --sprite, the available sprites are in itemrandomizerweb/patches/sprites/:
 ```
@@ -169,7 +138,7 @@ Apply patch megaman.ips
 Rom generated: VARIA
 ```
 
-**Note**: if you want both colors randomization and custom sprite you can't use the palettizer, you have to add the colors randomization parameters to the randomizer on top of --patchOnly.
+**Note**: To apply colors randomization to an existing seed you have to add the colors randomization parameters to the randomizer on top of --patchOnly.
 
 The parameters:
 ```

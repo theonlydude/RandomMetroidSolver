@@ -2516,6 +2516,9 @@ def customWebService():
     session.customizer['remove_itemsounds'] = request.vars.remove_itemsounds
     session.customizer['remove_elevators_doors_speed'] = request.vars.remove_elevators_doors_speed
 
+    # when beam doors patch is detected, don't randomize blue door palette
+    no_blue_door_palette = request.vars.no_blue_door_palette
+
     # call the randomizer
     (fd, jsonFileName) = tempfile.mkstemp()
     params = [pythonExec,  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
@@ -2568,6 +2571,8 @@ def customWebService():
         params += ['--min_degree', request.vars.minDegree, '--max_degree', request.vars.maxDegree]
         if request.vars.invert == 'on':
             params.append('--invert')
+        if no_blue_door_palette == 'on':
+            params.append('--no_blue_door_palette')
 
     if request.vars.customSpriteEnable == 'on':
         params += ['--sprite', "{}.ips".format(request.vars.customSprite)]

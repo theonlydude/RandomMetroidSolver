@@ -94,6 +94,20 @@ class AssumedFiller(Filler):
         graph.build(itemLocDict, self.container)
         return graph.getLocationsItems()
 
+    def filterOnDistance(self, locItemDict):
+        # prevent locations too close to the start ap to be filled, because we need these spots
+        distances = sorted([(loc, loc.distance) for loc in locItemDict], key=lambda x: x[1])
+
+        # distances will be in [1, 4.x]
+        maxDistance = distances[-1][1]
+        self.log.debug("maxDistance: {}".format(maxDistance))
+        distanceThreshold = 2
+        if maxDistance >= distanceThreshold:
+            location, distance = (0, 1)
+            return {tuple[location]: locItemDict[tuple[location]] for tuple in distances if tuple[distance] >= distanceThreshold}
+        else:
+            return locItemDict
+
     def displayNoLongerAvailLocsWoItem(self, itemLocDict):
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("noLongerAvailLocsWoItem:")
@@ -169,6 +183,11 @@ class AssumedFiller(Filler):
                 self.earlyGame = True
                 self.log.debug("no more possible locs/items with all the constraints, remove them and retry")
                 return True
+
+        if not self.earlyGame:
+            # compute locs distance from start ap
+            self.services.getLocsDistance(list(locItemDict.keys()), self.startAP, self.ap, self.container, assumedItems, maxDiff)
+            locItemDict = self.filterOnDistance(locItemDict)
 
         # choose loc
         loc = random.choice(sorted(list(locItemDict.keys())))

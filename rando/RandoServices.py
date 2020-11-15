@@ -70,13 +70,13 @@ class RandoServices(object):
         # check if bosses can be accessed and killed, if so add them to alreadyPlacedItems:
         sm = container.sm
 
-        if item.Type != 'Kraid' and sm.enoughStuffsKraid() and self.areaGraph.canAccess(container.sm, ap, 'KraidRoomIn', self.settings.maxDiff):
+        if (item is None or item.Type != 'Kraid') and sm.enoughStuffsKraid() and self.areaGraph.canAccess(container.sm, ap, 'KraidRoomIn', self.settings.maxDiff):
             container.sm.addItem('Kraid')
-        if item.Type != 'Phantoon' and sm.enoughStuffsPhantoon() and self.areaGraph.canAccess(container.sm, ap, 'PhantoonRoomIn', self.settings.maxDiff):
+        if (item is None or item.Type != 'Phantoon') and sm.enoughStuffsPhantoon() and self.areaGraph.canAccess(container.sm, ap, 'PhantoonRoomIn', self.settings.maxDiff):
             container.sm.addItem('Phantoon')
-        if item.Type != 'Ridley' and sm.enoughStuffsRidley() and self.areaGraph.canAccess(container.sm, ap, 'RidleyRoomIn', self.settings.maxDiff):
+        if (item is None or item.Type != 'Ridley') and sm.enoughStuffsRidley() and self.areaGraph.canAccess(container.sm, ap, 'RidleyRoomIn', self.settings.maxDiff):
             container.sm.addItem('Ridley')
-        if (item.Type != 'Draygon'
+        if ((item is None or item.Type != 'Draygon')
             and sm.wand(sm.canFightDraygon(),
                         sm.enoughStuffsDraygon(),
                         sm.canExitDraygon())
@@ -105,6 +105,15 @@ class RandoServices(object):
 
         return len(curLocsCanPlace) > 0
 
+    def getLocsDistance(self, locs, startAP, ap, container, items, maxDiff):
+        container.sm.resetItems()
+        container.sm.addItems([it.Type for it in items])
+        if self.cache:
+            self.cache.reset()
+
+        self.addRequiredBosses(None, ap, container, maxDiff)
+        self.areaGraph.getAvailableLocations(locs, container.sm, maxDiff, startAP)
+
     def allLocationsWithoutItem(self, item, startAP, ap, container, items, maxDiff):
         container.sm.resetItems()
         items.remove(item)
@@ -131,8 +140,6 @@ class RandoServices(object):
 
         if not curLocsCanPlace:
             self.log.debug("allLocationsWithoutItem: {} no locs available to place it !".format(item.Type))
-        assert len(curLocsCanPlace) > 0
-
 
         # if count item it could happen that we're one item before some locs get unavailable,
         # so test the possible locs again with two items removed.

@@ -206,7 +206,6 @@ class RandoServices(object):
                 self.log.debug("one or more locations are now non reachable, should not happen !")
                 for loc in list(allLocs - allReachableLocs):
                     self.log.debug("unreachable loc: {}".format(loc))
-            assert len(allReachableLocs) == len(allLocs)
 
         container.sm.resetItems()
 

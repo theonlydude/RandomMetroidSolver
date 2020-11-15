@@ -75,9 +75,12 @@ class AssumedFiller(Filler):
     def displayItemLocDict(self, msg, itemLocDict):
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("{}: (it, stillAvail, possLocs, notAvail) {}".format(msg, [(it.Type, data['availLocsWoItemLen'], len(data['possibleLocs']), len(data['noLongerAvailLocsWoItem'])) for (it, data) in itemLocDict.items()]))
+            infos = []
             for it, data in itemLocDict.items():
                 locs = data['possibleLocs']
-                self.log.debug("  {} ({}): {} - {}".format(it.Type, data['availLocsWoItemLen'], [loc.Name for loc in locs] if len(locs) <= 5 else len(locs), [loc.Name for loc in data['noLongerAvailLocsWoItem']] if len(data['noLongerAvailLocsWoItem']) <= 5 else len(data['noLongerAvailLocsWoItem'])))
+                infos.append((it.Type, data['availLocsWoItemLen'], [loc.Name for loc in locs] if len(locs) <= 5 else len(locs), [loc.Name for loc in data['noLongerAvailLocsWoItem']] if len(data['noLongerAvailLocsWoItem']) <= 5 else len(data['noLongerAvailLocsWoItem'])))
+            for (it, stillAvail, possLocs, notAvail) in sorted(infos, key=lambda x: x[1], reverse=True):
+                self.log.debug("  {} ({}): {} - {}".format(it, stillAvail, possLocs, notAvail))
 
     def computePriority(self, itemLocDict):
         # build a dependency graph of the items/locations to help priorize some locations and some items.
@@ -148,7 +151,7 @@ class AssumedFiller(Filler):
             self.log.debug("remaining locations: {}".format(len(self.container.unusedLocations) if len(self.container.unusedLocations) > 13 else [loc.Name for loc in self.container.unusedLocations]))
             self.log.debug("start ap: {}".format(self.ap))
 
-        if len(self.onlyBossLeftLocations) > 0:
+        if self.onlyBossLeftLocations:
             self.log.debug("onlyBossLeftLocations not empty: {}, set maxDiff to infinity".format([loc.Name for loc in self.onlyBossLeftLocations]))
             maxDiff = infinity
         else:

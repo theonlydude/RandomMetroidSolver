@@ -358,7 +358,9 @@ class InteractiveSolver(CommonSolver):
         else:
             magic = None
         romPatcher = RomPatcher(magic=magic, plando=True)
-        patches = ['credits_varia.ips', 'tracking.ips', "Escape_Animals_Disable", 'beam_doors.ips']
+        patches = ['credits_varia.ips', 'tracking.ips', "Escape_Animals_Disable"]
+        if DoorsManager.isRandom():
+            patches += RomPatcher.IPSPatches['DoorsColors']
         if magic != None:
             patches.insert(0, 'race_mode.ips')
             patches.append('race_mode_credits.ips')

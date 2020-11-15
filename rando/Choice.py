@@ -86,7 +86,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         return self.services.currentLocations(self.ap, self.container, item=item)
 
     def processLateDoors(self, itemLocDict, ap, container):
-        doorBeams = ['Spazer', 'Plasma', 'Wave', 'Ice']
+        doorBeams = self.restrictions.mandatoryBeams
         def canOpenExtendedDoors(item):
             return item.Category == 'Ammo' or item.Type in doorBeams
         # exclude door items from itemLocDict
@@ -95,21 +95,6 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
             self.log.debug('processLateDoors. no doors')
             itemLocDict.clear()
             itemLocDict.update(noDoorsLocDict)
-            return
-        # itemLocDict is made up only of progression ammo/beams
-        def updateLocDictWithSingleItemType(itemType):
-            nonlocal itemLocDict
-            locDict = {item:locList for item,locList in itemLocDict.items() if item.Type == itemType}
-            assert len(locDict) > 0
-            itemLocDict.clear()
-            itemLocDict.update(locDict)
-        itemTypes = doorBeams+['Missile', 'Super', 'PowerBomb']
-        random.shuffle(itemTypes)
-        for itemType in itemTypes:
-            if any(item.Type == itemType for item in itemLocDict):
-                self.log.debug('processLateDoors. '+itemType+' prog')
-                updateLocDictWithSingleItemType(itemType)
-                return
 
     def chooseItemLoc(self, itemLocDict, isProg, progressionItemLocs, ap, container):
         # if late morph, redo the late morph check if morph is the

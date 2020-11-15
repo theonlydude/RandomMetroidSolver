@@ -16,6 +16,8 @@ class Restrictions(object):
         self.checkers = self.getCheckers()
         self.static = {}
         self.dynamic = {}
+        # only useful in door color rando
+        self.mandatoryBeams = []
 
     def disable(self):
         self.split = "Full"

@@ -95,6 +95,8 @@ class AssumedFiller(Filler):
 
         graph = AssumedGraph(validItems)
         graph.build(itemLocDict, self.container)
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            graph.toDot(len(self.container.itemPool))
         return graph.getLocationsItems()
 
     def filterOnDistance(self, locItemDict):

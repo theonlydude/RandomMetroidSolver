@@ -46,8 +46,16 @@ define stats_sram_slot0     $1400
 define stats_sram_slot1     $1700
 define stats_sram_slot2     $1a00
 
+define backup_save_data_off    #$02f9
+define backup_sram_slot0       $16f9
+define backup_sram_slot1       $19f9
+define backup_sram_slot2       $1cf9
 define last_stats_save_ok_off  #$02fc
 define last_stats_save_ok_flag #$caca
+
+// some scratch space in RAM for backup save system
+define backup_tmp	$7fff38
+define backup_tmp2	$7fff3a
 
 // Patch boot to init our stuff
 org $80844B
@@ -235,9 +243,267 @@ save_index:
 
 warnpc $80ffbf
 
+
+	// TODO rolling backup save mechanism:
+	// Additional data in saves :
+	//	- a player usage flag, set when a game is loaded by the user
+	//	- a save counter, incremented at each save in the file
+	// - when loading a game (i.e. the player actually uses a file),
+	//   mark the file as used with the player usage flag.
+	//	- if loading an existing file without the player flag (a backup),
+	//	  copy over stats from current player save (non-backup with the
+	//	  closest save counter? or highest?), or directly from RAM
+	//	  if possible
+	// - when saving a game, and it's not the first file creating save :
+	//	- increment the save counter
+	//	- check if there is an available backup save: a save file either 
+	//	  empty or used but without the 'player flag' and a save counter below
+	//	  the current one
+	//		- if there are already backup saves, find the most recent one,
+	//		  check the save station ID used and:
+	//			- if it's the same as the one we're using, return
+	//			- otherwise, determine a backup slot to use (see below)
+	//		- if there is an empty slot, use it
+	//		- if not, find the oldest backup save and use it
+
+	// notes: to id station used (see new_game) $079f (area), $078b (load station)
 // Patch load and save routines
 // a save will always be performed when starting a new game (see new_game.asm)
 org $81ef20
+// make optional to auto backup save, set this flag to non-zero in ROM to enable the feature
+opt_backup:
+	dw $0000
+// put that here to have it at a fixed location (will be called from new_game)
+new_save:
+	// call save routine
+	lda $0952
+	jsl $818000
+	// if backup saves are disables, return
+	lda opt_backup
+	beq .end
+	// init backup save data :
+
+	// first, get offset in SRAM, using save_index routine,
+	// which is based on last_saveslot value, which is correct,
+	// since we juste saved stats (through patch_save)
+	jsl save_index		// A is non-0, so get standard stats addr
+	// x += backup_save_data_off
+	txa
+	clc
+	adc {backup_save_data_off}
+	tax
+	// store current save slot in the save itself (useful if we reload
+	// a backup save, to copy over stats from original save)
+	lda $0952
+	sta $700000,x
+	// store 0 + high bit set (player flag) as save counter
+	inx
+	inx
+	lda #$8000
+	sta $700000,x
+.end:
+	rtl
+
+slot0_data:
+	dw $0001,{backup_sram_slot0},$0166
+
+slot1_data:
+	dw $0002,{backup_sram_slot1},$07c2
+
+slot2_data:
+	dw $0004,{backup_sram_slot2},$0e1e
+
+// args
+// sets carry if we need to check next slot
+// if carry clear, sets zero flag if backup is needed
+is_needed_slot0:
+	// if save empty, skip
+	lda $0954
+	ora #$0001
+	beq .slot1
+	// if not our save slot, skip
+	ldx #{backup_sram_slot0}
+	lda $700000,x
+	cmp $0952
+	bne .slot1
+	// if not a backup save, skip
+	inx
+	inx
+	lda $700000,x
+	bmi .slot1
+	// we have at least a backup
+	lda #$0001
+	sta {backup_tmp2}
+	// if save counter is different, skip (not the most recent backup)
+	cmp {backup_tmp}
+	bne .slot1
+	// now we're sure this slot is the last backup, if save stations are
+	// different, we must backup
+	lda $700166
+	cmp $078b
+	bne .needed
+	lda $700168
+	cmp $079f
+	bne .needed
+	bra .not_needed
+.slot1:
+	sec
+	bra .end
+.needed:
+	clc
+	lda #$0000
+	bra .end
+.not_needed:
+	clc
+	lda #$0001
+.end:
+	rts
+
+// sets carry if we need to check next slot
+// if carry clear, sets zero flag if backup is needed
+is_needed_slot1:
+	// if save empty, skip
+	lda $0954
+	ora #$0002
+	beq .slot2
+	// if not our save slot, skip
+	ldx #{backup_sram_slot1}
+	lda $700000,x
+	cmp $0952
+	bne .slot2
+	// if not a backup save, skip
+	inx
+	inx
+	lda $700000,x
+	bmi .slot2
+	// we have at least a backup
+	lda #$0001
+	sta {backup_tmp2}
+	// if save counter is different, skip (not the most recent backup)
+	cmp {backup_tmp}
+	bne .slot2
+	// now we're sure this slot is the last backup, if save stations are
+	// different, we must backup
+	lda $7007c2
+	cmp $078b
+	bne .needed
+	lda $7007c4
+	cmp $079f
+	bne .needed
+	bra .not_needed
+.slot2:
+	sec
+	bra .end
+.needed:
+	clc
+	lda #$0000
+	bra .end
+.not_needed:
+	clc
+	lda #$0001
+.end:
+	rts
+
+// sets carry if we need to check next slot
+// if carry clear, sets zero flag if backup is needed
+is_needed_slot2:
+	// if save empty, skip
+	lda $0954
+	ora #$0002
+	beq .slots_end
+	// if not our save slot, skip
+	ldx #{backup_sram_slot2}
+	lda $700000,x
+	cmp $0952
+	bne .slots_end
+	// if not a backup save, skip
+	inx
+	inx
+	lda $700000,x
+	bmi .slots_end
+	// we have at least a backup
+	lda #$0001
+	sta {backup_tmp2}
+	// if save counter is different, skip (not the most recent backup)
+	cmp {backup_tmp}
+	bne .slots_end
+	// now we're sure this slot is the last backup, if save stations are
+	// different, we must backup
+	lda $700e1e
+	cmp $078b
+	bne .needed
+	lda $700e20
+	cmp $079f
+	bne .needed
+	bra .not_needed
+.slots_end:
+	sec
+	bra .end
+.needed:
+	clc
+	lda #$0000
+	bra .end
+.not_needed:
+	clc
+	lda #$0001
+.end:
+	rts
+	
+// backup is needed if no existing backup of current save slot
+// or last backup is at a different save station than this one
+// return carry set if we need to backup the save
+is_backup_needed:
+	phx
+	// first, find out our save counter, and save it in backup_tmp
+	jsl save_index
+	// x += backup_save_data_off+2
+	txa
+	clc
+	adc {backup_save_data_off}
+	tax
+	inx
+	inx
+	lda $700000,x
+	and #$7fff
+	sta {backup_tmp}
+	// 2nd var will be used as a flag to determine if we already have at least a backup
+	lda #$0000
+	sta {backup_tmp2}
+	// now we'll check all slots, one by one...
+	// (this should be done via a macro, but it seems xkas-plus doesn't support it)
+.slot0:
+	jsr is_needed_slot0
+	bcs .slot1
+	beq .needed
+	bra .not_needed
+.slot1:
+	jsr is_needed_slot1
+	bcs .slot2
+	beq .needed
+	bra .not_needed
+.slot2:
+	jsr is_needed_slot2
+	bcs .slots_end
+	beq .needed
+	bra .not_needed
+.slots_end:
+	// need backup if no backup yet
+	lda {backup_tmp2}
+	beq .needed
+.not_needed:
+	clc
+	bra .end
+.needed:
+	sec
+.end:
+	plx
+	rts
+
+
+backup_save:
+	// TODO
+	rts
+
 patch_save:
     lda {timer1}
     sta {stats_timer}
@@ -245,6 +511,16 @@ patch_save:
     sta {stats_timer}+2
     lda #$0001
     jsl save_stats
+	lda opt_backup
+	beq .end	
+	jsl {check_new_game}
+	beq .end
+	// we have backup saves enabled, and it is not the 1st save:
+	// check if we shall backup the save
+	jsr is_backup_needed
+	bcc .end
+	jsr backup_save
+.end:
     ply
     plx
     clc
@@ -262,7 +538,58 @@ patch_load:
     plb
     // call load routine
     jsl $818085
-    bcs .end    // skip to end if new file or SRAM corrupt
+    bcc .backup_check    // skip to end if new file or SRAM corrupt
+    jmp .end
+.backup_check:
+	lda opt_backup
+	beq .check
+	// if backup saves are enabled:
+	// check if we load a backup save, and if so, get stats
+	// from original save slot, and mark this slot as non-backup
+	jsl save_index
+	txa
+	clc
+	adc {backup_save_data_off}
+	tax
+	inx
+	inx
+	lda $700000,x
+	bmi .check
+.load_backup:
+	dex
+	dex
+	phx
+	// n flag not set, we're loading a backup
+	// check if we're soft resetting: if so, will take stats from RAM
+	lda {softreset}
+	cmp #$babe
+	beq .load_backup_end
+	// load stats from original save SRAM
+	lda $700000,x	// save slot in SRAM
+	sta {last_saveslot}
+	lda #$0000
+	jsl save_index
+	jsl load_stats_at
+	// update live timer
+	lda {stats_timer}
+	sta {timer1}
+	lda {stats_timer}+2
+	sta {timer2}
+.load_backup_end:
+	// update current save slot in SRAM, and set player flag
+	plx
+	lda $0952
+	sta $700000,x
+	clc
+	adc #$0010
+	sta {last_saveslot}
+	inx
+	inx
+	lda $700000,x
+	ora #$8000
+	sta $700000,x
+	bra .end_ok
+.check:
     // check save slot
     lda $0952
     clc
@@ -282,10 +609,10 @@ patch_load:
     sta {timer1}
     lda {stats_timer}+2
     sta {timer2}
+.end_ok:
     // place marker for resets
     lda #$babe
     sta {softreset}
-.end_ok:
     // increment reset count
     lda #$0020
     jsl inc_stat
@@ -761,7 +1088,7 @@ load_stats:
     lda #$0000
     jsl save_index
 .notok:
-    jsr load_stats_at
+    jsl load_stats_at
     ply
     plx
     rtl
@@ -785,7 +1112,7 @@ load_stats_at:
     bcc .loop
     plb
     plx
-    rts
+    rtl
 
 // return carry flag set if flag ok
 is_last_save_flag_ok:

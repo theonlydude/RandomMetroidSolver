@@ -23,7 +23,7 @@ class AssumedGraph(object):
         # b: loc unavailable without both items
         # c: loc unavailable without two count items
         # n: loc post unavailable without item
-        self.priorities = {'u': 1, 'c': 50, 'n': 100, 'b': 100, 'pv': 0, 'pi': 0}
+        self.priorities = {'u': 1, 'c': 50, 'n': 100, 'b': 75, 'pv': 0, 'pi': 0}
         self.log = utils.log.get('AssumedGraph')
 
     def toDot(self, step):

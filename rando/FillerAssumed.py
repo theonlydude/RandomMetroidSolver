@@ -42,6 +42,9 @@ class AssumedFiller(Filler):
             bossLoc = self.container.getLocs(lambda loc: loc.Name == bossLocName)
             self.collect(ItemLocation(bossItem[0], bossLoc[0]))
 
+        # don't use rando cache as we manually handle sm items
+        self.services.cache = None
+
     def isMajor(self, obj):
         return (self.settings.restrictions['MajorMinor'] == 'Full'
                 or self.settings.restrictions['MajorMinor'] in obj.Class)
@@ -161,7 +164,7 @@ class AssumedFiller(Filler):
             maxDiff = self.maxDiff
 
         # compute available locs without each item type from start ap
-        itemLocDict = self.services.getPossiblePlacementsWithoutItem(self.startAP, self.ap, self.container, assumedItems, maxDiff, self.earlyGame)
+        itemLocDict = self.services.getPossiblePlacementsWithoutItem(self.startAP, self.container, assumedItems, maxDiff, self.earlyGame)
 
         # debug display
         self.displayItemLocDict("before", itemLocDict)
@@ -172,8 +175,9 @@ class AssumedFiller(Filler):
             for it, data in itemLocDict.items():
                 allPossibleLocs.update(data['possibleLocs'])
             self.log.debug("allPossibleLocs: {} unusedLocations: {}".format(len(allPossibleLocs), len(self.container.unusedLocations)))
-            if len(allPossibleLocs) != len(self.container.unusedLocations):
-                self.log.debug("lost locations: {}".format([loc.Name for loc in set(self.container.unusedLocations)-allPossibleLocs]))
+            lostLocations = set(self.container.unusedLocations)-allPossibleLocs
+            if lostLocations:
+                self.log.debug("lost locations: {}".format([loc.Name for loc in lostLocations]))
                 return False
 
         # keep only priority locations, locations that need to be filled to allow placement of an item
@@ -191,7 +195,7 @@ class AssumedFiller(Filler):
 
         if not self.earlyGame:
             # compute locs distance from start ap
-            self.services.getLocsDistance(list(locItemDict.keys()), self.startAP, self.ap, self.container, assumedItems, maxDiff)
+            self.services.getLocsDistance(list(locItemDict.keys()), self.startAP, self.container, assumedItems, maxDiff)
             locItemDict = self.filterOnDistance(locItemDict)
 
         # choose loc

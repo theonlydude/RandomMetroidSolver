@@ -258,16 +258,20 @@ class ItemLocContainer(object):
 
         return locsItem
 
-    def uncollect(self, loc):
+    def uncollect(self, loc=None):
         # used by assumed filler
-        for il in self.itemLocations:
-            if il.Location == loc:
-                oldItemLocation = il
-                break
+        if loc is not None:
+            for il in self.itemLocations:
+                if il.Location == loc:
+                    oldItemLocation = il
+                    break
+        else:
+            oldItemLocation = self.itemLocations[-1]
 
         item = oldItemLocation.Item
+        loc = oldItemLocation.Location
 
-        self.log.debug("uncollect {}@{}".format(item.Type, loc.Name))
+        self.log.debug("uncollect {}".format(oldItemLocation))
 
         self.currentItems.remove(item)
         self.sm.removeItem(item.Type)

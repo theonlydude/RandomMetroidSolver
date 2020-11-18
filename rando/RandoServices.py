@@ -39,10 +39,10 @@ class RandoServices(object):
         sys.stdout.flush()
         return itemLoc.Location.accessPoint if pickup == True else ap
 
-    def getPossiblePlacementsWithoutItem(self, startAP, ap, container, items, maxDiff, earlyGame):
+    def getPossiblePlacementsWithoutItem(self, startAP, container, items, maxDiff, earlyGame):
         distinctItems = {item.Type: item for item in items}
         self.log.debug("getPossiblePlacementsWithoutItem, unusedLocations: {}".format(len(container.unusedLocations)))
-        itemLocDict = {item: self.allLocationsWithoutItem(item, startAP, ap, container, items, maxDiff) for itemType, item in distinctItems.items()}
+        itemLocDict = {item: self.allLocationsWithoutItem(item, startAP, container, items, maxDiff) for itemType, item in distinctItems.items()}
 
         if earlyGame:
             validItems = set([it for it in itemLocDict.keys()])
@@ -59,32 +59,14 @@ class RandoServices(object):
             for item in itemLocDict.keys():
                 if item in oneLocationItemsLocs.keys():
                     continue
-                if not self.locStillOkWoBothItems(item, oneLocItem, startAP, ap, oneLoc, container, container.itemPool, maxDiff):
+                if not self.locStillOkWoBothItems(item, oneLocItem, startAP, oneLoc, container, container.itemPool, maxDiff):
                     # if one loc item is in leaf, increase its location priority, else remove leaf item from leafs
                     self.log.debug("found loc unavailable wo both items, item: {} one loc item: {}, loc: {}".format(item.Type, oneLocItem.Type, oneLoc.Name))
                     data['locsNokWoBothItems'] = [oneLoc]
 
         return itemLocDict
 
-    def addRequiredBosses(self, item, ap, container, maxDiff):
-        # check if bosses can be accessed and killed, if so add them to alreadyPlacedItems:
-        sm = container.sm
-
-        if (item is None or item.Type != 'Kraid') and sm.enoughStuffsKraid() and self.areaGraph.canAccess(container.sm, ap, 'KraidRoomIn', self.settings.maxDiff):
-            container.sm.addItem('Kraid')
-        if (item is None or item.Type != 'Phantoon') and sm.enoughStuffsPhantoon() and self.areaGraph.canAccess(container.sm, ap, 'PhantoonRoomIn', self.settings.maxDiff):
-            container.sm.addItem('Phantoon')
-        if (item is None or item.Type != 'Ridley') and sm.enoughStuffsRidley() and self.areaGraph.canAccess(container.sm, ap, 'RidleyRoomIn', self.settings.maxDiff):
-            container.sm.addItem('Ridley')
-        if ((item is None or item.Type != 'Draygon')
-            and sm.wand(sm.canFightDraygon(),
-                        sm.enoughStuffsDraygon(),
-                        sm.canExitDraygon())
-            and (ap == 'Draygon Room Bottom' # need draygon dead to exit draygon room bottom
-                 or self.areaGraph.canAccess(sm, ap, 'DraygonRoomIn', maxDiff))):
-            container.sm.addItem('Draygon')
-
-    def locStillOkWoBothItems(self, leafItem, oneLocItem, startAP, ap, oneLoc, container, items, maxDiff):
+    def locStillOkWoBothItems(self, leafItem, oneLocItem, startAP, oneLoc, container, items, maxDiff):
         #self.log.debug("locStillOkWoBothItems: leafItem: {} oneLocItem: {} oneLoc: {}".format(leafItem.Type, oneLocItem.Type, oneLoc.Name))
         container.sm.resetItems()
         items.remove(leafItem)
@@ -93,45 +75,32 @@ class RandoServices(object):
         items.append(oneLocItem)
         items.append(leafItem)
 
-        if self.cache:
-            self.cache.reset()
-
-        self.addRequiredBosses(oneLocItem, ap, container, maxDiff)
-
         # check that we can access the locations without the item,
         curLocs = self.areaGraph.getAvailableLocations([oneLoc], container.sm, maxDiff, startAP)
-        curLocsPostAvail = set([loc for loc in curLocs if self.fullComebackCheck(container, ap, oneLocItem, loc, None, checkSoftlock=False)])
+        curLocsPostAvail = set([loc for loc in curLocs if self.reverseComebackCheck(container, oneLocItem, loc)])
         curLocsCanPlace = set([loc for loc in curLocsPostAvail if self.restrictions.canPlaceAtLocation(oneLocItem, loc, container)])
 
         return len(curLocsCanPlace) > 0
 
-    def getLocsDistance(self, locs, startAP, ap, container, items, maxDiff):
+    def getLocsDistance(self, locs, startAP, container, items, maxDiff):
         container.sm.resetItems()
         container.sm.addItems([it.Type for it in items])
-        if self.cache:
-            self.cache.reset()
 
-        self.addRequiredBosses(None, ap, container, maxDiff)
         self.areaGraph.getAvailableLocations(locs, container.sm, maxDiff, startAP)
 
-    def allLocationsWithoutItem(self, item, startAP, ap, container, items, maxDiff):
+    def allLocationsWithoutItem(self, item, startAP, container, items, maxDiff):
         container.sm.resetItems()
         items.remove(item)
         container.sm.addItems([it.Type for it in items])
         items.append(item)
 
-        if self.cache:
-            self.cache.reset()
-
-        self.addRequiredBosses(item, ap, container, maxDiff)
-
         # check that we can access the locations without the item,
         curLocs = set(self.currentLocations(startAP, container, post=False, diff=maxDiff))
 
         # check if item is need to postavail some locs
-        curLocsPostAvail = set([loc for loc in curLocs if self.fullComebackCheck(container, ap, item, loc, None, checkSoftlock=False)])
+        curLocsPostAvail = set([loc for loc in curLocs if self.reverseComebackCheck(container, item, loc)])
 
-        curLocsPostAvailWoItem = set([loc for loc in curLocs if self.fullComebackCheck(container, ap, None, loc, None, checkSoftlock=False)])
+        curLocsPostAvailWoItem = set([loc for loc in curLocs if self.reverseComebackCheck(container, None, loc)])
 
         locsPostNokWoItem = list(curLocsPostAvail - curLocsPostAvailWoItem)
 
@@ -147,9 +116,6 @@ class RandoServices(object):
         if container.sm.isCountItem(item.Type) and container.sm.haveItem(item.Type):
             self.log.debug("test double remove for {}".format(item.Type))
             container.sm.removeItem(item.Type)
-
-            if self.cache:
-                self.cache.reset()
 
             curLocsDouble = set(self.currentLocations(startAP, container, post=False, diff=maxDiff))
             locsNokWoDoubleItem = list(curLocs - curLocsDouble)
@@ -178,7 +144,6 @@ class RandoServices(object):
             return []
 
         # draygon diff is computed in its path, so don't give draygon item
-        if self.cache: self.cache.reset()
         container.sm.resetItems()
         container.sm.addItems([it.Type for it in container.itemPool if it.Type != "Draygon"]+["Phantoon", "Ridley", "Kraid"])
 
@@ -187,7 +152,6 @@ class RandoServices(object):
         onlyBossLeft1 = curLocsInfinity1 - curLocsMaxDiff1
 
         # give draygon for space jump location which requires it
-        if self.cache: self.cache.reset()
         container.sm.resetItems()
         container.sm.addItems([it.Type for it in container.itemPool]+["Draygon", "Phantoon", "Ridley", "Kraid"])
 
@@ -210,6 +174,9 @@ class RandoServices(object):
         container.sm.resetItems()
 
         return {loc: loc.difficulty.difficulty for loc in list(onlyBossLeft)}
+
+    def reverseComebackCheck(self, container, item, loc):
+        return self.locPostAvailable(container.sm, loc, item.Type if item is not None else None)
 
     # gives all the possible theoretical locations for a given item
     def possibleLocations(self, item, ap, emptyContainer, bossesKilled=True):

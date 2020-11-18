@@ -54,8 +54,8 @@ define last_stats_save_ok_off  #$02fc
 define last_stats_save_ok_flag #$caca
 
 // some scratch space in RAM for backup save system
-define backup_tmp	$7fff38
-define backup_tmp2	$7fff3a
+define backup_counter	$7fff38
+define backup_candidate $7fff3a
 
 // Patch boot to init our stuff
 org $80844B
@@ -296,7 +296,7 @@ new_save:
 	// a backup save, to copy over stats from original save)
 	lda $0952
 	sta $700000,x
-	// store 0 + high bit set (player flag) as save counter
+	// store 0 + high bit set (player flag) as backup counter
 	inx
 	inx
 	lda #$8000
@@ -305,200 +305,149 @@ new_save:
 	rtl
 
 slot0_data:
-	dw $0001,{backup_sram_slot0},$0166
+	dw $0000,$0001,{backup_sram_slot0},$0166
 
 slot1_data:
-	dw $0002,{backup_sram_slot1},$07c2
+	dw $0001,$0002,{backup_sram_slot1},$07c2
 
 slot2_data:
-	dw $0004,{backup_sram_slot2},$0e1e
+	dw $0002,$0004,{backup_sram_slot2},$0e1e
 
-// args
-// sets carry if we need to check next slot
-// if carry clear, sets zero flag if backup is needed
-is_needed_slot0:
-	// if save empty, skip
-	lda $0954
-	ora #$0001
-	beq .slot1
-	// if not our save slot, skip
-	ldx #{backup_sram_slot0}
-	lda $700000,x
-	cmp $0952
-	bne .slot1
-	// if not a backup save, skip
-	inx
-	inx
-	lda $700000,x
-	bmi .slot1
-	// we have at least a backup
-	lda #$0001
-	sta {backup_tmp2}
-	// if save counter is different, skip (not the most recent backup)
-	cmp {backup_tmp}
-	bne .slot1
-	// now we're sure this slot is the last backup, if save stations are
-	// different, we must backup
-	lda $700166
-	cmp $078b
-	bne .needed
-	lda $700168
-	cmp $079f
-	bne .needed
-	bra .not_needed
-.slot1:
-	sec
-	bra .end
-.needed:
-	clc
-	lda #$0000
-	bra .end
-.not_needed:
-	clc
-	lda #$0001
-.end:
-	rts
-
-// sets carry if we need to check next slot
-// if carry clear, sets zero flag if backup is needed
-is_needed_slot1:
-	// if save empty, skip
-	lda $0954
-	ora #$0002
-	beq .slot2
-	// if not our save slot, skip
-	ldx #{backup_sram_slot1}
-	lda $700000,x
-	cmp $0952
-	bne .slot2
-	// if not a backup save, skip
-	inx
-	inx
-	lda $700000,x
-	bmi .slot2
-	// we have at least a backup
-	lda #$0001
-	sta {backup_tmp2}
-	// if save counter is different, skip (not the most recent backup)
-	cmp {backup_tmp}
-	bne .slot2
-	// now we're sure this slot is the last backup, if save stations are
-	// different, we must backup
-	lda $7007c2
-	cmp $078b
-	bne .needed
-	lda $7007c4
-	cmp $079f
-	bne .needed
-	bra .not_needed
-.slot2:
-	sec
-	bra .end
-.needed:
-	clc
-	lda #$0000
-	bra .end
-.not_needed:
-	clc
-	lda #$0001
-.end:
-	rts
-
-// sets carry if we need to check next slot
-// if carry clear, sets zero flag if backup is needed
-is_needed_slot2:
-	// if save empty, skip
-	lda $0954
-	ora #$0002
-	beq .slots_end
-	// if not our save slot, skip
-	ldx #{backup_sram_slot2}
-	lda $700000,x
-	cmp $0952
-	bne .slots_end
-	// if not a backup save, skip
-	inx
-	inx
-	lda $700000,x
-	bmi .slots_end
-	// we have at least a backup
-	lda #$0001
-	sta {backup_tmp2}
-	// if save counter is different, skip (not the most recent backup)
-	cmp {backup_tmp}
-	bne .slots_end
-	// now we're sure this slot is the last backup, if save stations are
-	// different, we must backup
-	lda $700e1e
-	cmp $078b
-	bne .needed
-	lda $700e20
-	cmp $079f
-	bne .needed
-	bra .not_needed
-.slots_end:
-	sec
-	bra .end
-.needed:
-	clc
-	lda #$0000
-	bra .end
-.not_needed:
-	clc
-	lda #$0001
-.end:
-	rts
-	
 // backup is needed if no existing backup of current save slot
 // or last backup is at a different save station than this one
-// return carry set if we need to backup the save
+//	
+// return carry set if we need to backup the save. if so, sets
+// the most suitable save slot in backup_candidate, or 3 if
+// no suitable slot found	
 is_backup_needed:
+	// save DB and set it to current bank in order to
+	// read slots data tables
+	phb
+	phk
+	plb
+	// save X and Y as they will be used
 	phx
-	// first, find out our save counter, and save it in backup_tmp
+	phy
+	// first, find out our save counter, and save it in backup_counter
 	jsl save_index
 	// x += backup_save_data_off+2
 	txa
 	clc
 	adc {backup_save_data_off}
 	tax
-	inx
-	inx
-	lda $700000,x
+	lda $700002,x
 	and #$7fff
-	sta {backup_tmp}
-	// 2nd var will be used as a flag to determine if we already have at least a backup
-	lda #$0000
-	sta {backup_tmp2}
-	// now we'll check all slots, one by one...
-	// (this should be done via a macro, but it seems xkas-plus doesn't support it)
-.slot0:
-	jsr is_needed_slot0
-	bcs .slot1
-	beq .needed
-	bra .not_needed
-.slot1:
-	jsr is_needed_slot1
-	bcs .slot2
-	beq .needed
-	bra .not_needed
-.slot2:
-	jsr is_needed_slot2
-	bcs .slots_end
-	beq .needed
-	bra .not_needed
-.slots_end:
-	// need backup if no backup yet
-	lda {backup_tmp2}
-	beq .needed
+	sta {backup_counter}
+	// backup_candidate will be used to store the backup slot candidate
+	// and various info as follows:
+	//
+	// eor-----fn----ss
+	//
+	// ss: save slot usable for backup
+	// e: ss is empty
+	// o: ss contains an old backup
+	// r: ss contains the most recent backup
+	// (e, o, and r are only use internally by check_slot to determine ss)
+	// f: flag that indicates if a backup save exists
+	// n: flag that indicates a backup is needed (most recent backup
+	//    has a different save station)
+	// (f and n will be read after all slots are checked)
+	lda #$0003	// 3 is used as invalid value marker, as slots are 0 to 2
+	sta {backup_candidate}
+	// check all slots
+	ldy #slot0_data
+	jsr check_slot
+	ldy #slot1_data
+	jsr check_slot
+	ldy #slot2_data
+	jsr check_slot
+	lda {backup_candidate}
+	bit #$0080	// check if f is clear
+	beq .needed	// backup needed if no backup yet
+	bit #$0040	// check if n is set
+	bne .needed	// most recent backup has different saves
 .not_needed:
 	clc
 	bra .end
 .needed:
+	// clear all our work flags from backup_candidate
+	lda {backup_candidate}
+	and #$0003
+	sta {backup_candidate}
 	sec
 .end:
+	ply
 	plx
+	plb
 	rts
 
+// arg. Y: offset to slot data in bank 81 (DB is assumed 81)
+// sets flags and candidate in backup_candidate
+check_slot:
+        // check empty save bitmask
+	lda $0002,y
+	and $0954
+	// if save empty, mark as backup candidate, with high bit (e)
+	// set to indicate it's an empty file
+	bne .not_empty
+	lda {backup_candidate}
+	and #$fffc
+	ora $0000,y
+	ora #$8000
+	sta {backup_candidate}
+	bra .end
+.not_empty:
+	// if not our save slot, skip
+	ldx $0004,y
+	lda $700000,x
+	cmp $0952
+	bne .end
+	// if not a backup save, skip
+	lda $700002,x
+	bmi .end
+	// we have at least one backup, set the f flag bit in backup_candidate
+	lda {backup_candidate}
+	ora #$0080
+	sta {backup_candidate}
+	// if save counter is different:
+	lda $700002,x
+	cmp {backup_counter}
+	beq .last_backup
+	// mark as backup candidate, with 'old backup' (o) bit marked
+	// only if no (e) flag bit marked yet
+	lda {backup_candidate}
+	bmi .end
+	and #$fffc
+	ora $0000,y
+	ora #$4000
+	sta {backup_candidate}
+	bra .end
+.last_backup:
+	// now we're sure this slot is the last backup, if save stations are
+	// different, we must backup
+	ldx $0006,y
+	lda $70000,x
+	cmp $078b
+	bne .needed
+	lda $70002,x
+	cmp $079f
+	beq .end
+.needed:
+	// we're here only if this save slot is the most recent backup
+	// mark the n flag bit in backup_candidate
+	lda {backup_candidate}
+	ora #$0040
+	sta {backup_candidate}
+	// mark it with the (r) flag bit and store slot if necessary
+	bit #$c000
+	bne .end
+	// no better candidate yet
+	and #$fffc
+	ora $0000,y
+	ora #$2000
+	sta {backup_candidate}
+.end:
+	rts
 
 backup_save:
 	// TODO

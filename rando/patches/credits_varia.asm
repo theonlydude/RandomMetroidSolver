@@ -53,6 +53,11 @@ define backup_sram_slot2       $1cf9
 define last_stats_save_ok_off  #$02fc
 define last_stats_save_ok_flag #$caca
 
+define current_save_slot	$0952
+define used_slots_mask		$0954
+define area_index		$079f
+define load_station_index	$078b
+
 // some scratch space in RAM for backup save system
 define backup_counter	$7fff38
 define backup_candidate $7fff3a
@@ -274,11 +279,12 @@ org $81ef20
 opt_backup:
 	dw $0000
 // put that here to have it at a fixed location (will be called from new_game)
+print "new_save: ", org
 new_save:
 	// call save routine
-	lda $0952
+	lda {current_save_slot}
 	jsl $818000
-	// if backup saves are disables, return
+	// if backup saves are disabled, return
 	lda opt_backup
 	beq .end
 	// init backup save data :
@@ -294,15 +300,17 @@ new_save:
 	tax
 	// store current save slot in the save itself (useful if we reload
 	// a backup save, to copy over stats from original save)
-	lda $0952
+	lda {current_save_slot}
 	sta $700000,x
 	// store 0 + high bit set (player flag) as backup counter
-	inx
-	inx
 	lda #$8000
-	sta $700000,x
+	sta $700002,x
 .end:
 	rtl
+
+// save slot data:
+// slot ID, slot bitmask, SRAM addr for backup data, SRAM addr for load station info
+// (SRAM addresses are offsets in bank $70)
 
 slot0_data:
 	dw $0000,$0001,{backup_sram_slot0},$0166
@@ -316,9 +324,10 @@ slot2_data:
 // backup is needed if no existing backup of current save slot
 // or last backup is at a different save station than this one
 //	
-// return carry set if we need to backup the save. if so, sets
-// the most suitable save slot in backup_candidate, or 3 if
-// no suitable slot found	
+// return carry set if we need to backup the save, and we can use a
+// slot to do so.
+// sets the most suitable save slot in backup_candidate,
+// or 3 if no suitable slot found (in that case, carry is clear anyway)
 is_backup_needed:
 	// save DB and set it to current bank in order to
 	// read slots data tables
@@ -330,7 +339,7 @@ is_backup_needed:
 	phy
 	// first, find out our save counter, and save it in backup_counter
 	jsl save_index
-	// x += backup_save_data_off+2
+	// x += backup_save_data_off
 	txa
 	clc
 	adc {backup_save_data_off}
@@ -374,6 +383,9 @@ is_backup_needed:
 	lda {backup_candidate}
 	and #$0003
 	sta {backup_candidate}
+	// check that we can actually backup somewhere
+	cmp #$0003
+	beq .not_needed
 	sec
 .end:
 	ply
@@ -386,7 +398,7 @@ is_backup_needed:
 check_slot:
         // check empty save bitmask
 	lda $0002,y
-	and $0954
+	and {used_slots_mask}
 	// if save empty, mark as backup candidate, with high bit (e)
 	// set to indicate it's an empty file
 	bne .not_empty
@@ -400,7 +412,7 @@ check_slot:
 	// if not our save slot, skip
 	ldx $0004,y
 	lda $700000,x
-	cmp $0952
+	cmp {current_save_slot}
 	bne .end
 	// if not a backup save, skip
 	lda $700002,x
@@ -427,13 +439,14 @@ check_slot:
 	// different, we must backup
 	ldx $0006,y
 	lda $70000,x
-	cmp $078b
+	cmp {load_station_index}
 	bne .needed
 	lda $70002,x
-	cmp $079f
+	cmp {area_index}
 	beq .end
 .needed:
 	// we're here only if this save slot is the most recent backup
+	// and load stations are different.
 	// mark the n flag bit in backup_candidate
 	lda {backup_candidate}
 	ora #$0040
@@ -450,7 +463,86 @@ check_slot:
 	rts
 
 backup_save:
-	// TODO
+	// reuse $47/$4A used in decompression routine according to RAM map
+	// we have to use direct page for copy, and I'm not sure we can use
+	// the start of direct page in game as it is done in original menu
+	// routine ($00/$03)
+
+	// set bank $70 as source and dest banks for copy
+	lda #$0070
+	sta $49
+	sta $4c	
+	// source slot is current one
+	lda {current_save_slot}
+	asl
+	tax
+	lda $81812b,x // get SRAM offset in bank 70 for slot
+	sta $47
+	// destination slot is in backup_candidate
+	lda {backup_candidate}
+	asl
+	tax
+	lda $81812b,x // get SRAM offset in bank 70 for slot
+	sta $4a
+	// copy save file
+	ldy #$0000
+-
+	lda [$47],y
+	sta [$4a],y
+	iny
+	iny
+	cpy #$065c
+	bmi -
+	// copy some other SRAM stuff (what??) like original routine
+	lda {current_save_slot}
+	asl
+	tax
+	lda $701ff0,x
+	pha
+	lda $701ff8,x
+	pha
+	lda $700000,x
+	pha
+	lda $700008,x
+	pha
+	lda {backup_candidate}
+	asl
+	tax
+	pla
+	sta $700008,x
+	pla
+	sta $700000,x
+	pla
+	sta $701ff8,x
+	pla
+	sta $701ff0,x
+	// copy stats (includes backup data)
+	lda {current_save_slot}
+	asl
+	tax
+	lda save_slots,x
+	sta $47
+	lda {backup_candidate}
+	asl
+	tax
+	lda save_slots,x
+	sta $4a
+	ldy #$0000
+-
+	lda [$47],y
+	sta [$4a],y
+	iny
+	iny
+	cpy {full_stats_area_sz_b}
+	bcc -
+	// clear player flag in backup data area
+	lda save_slots,x	// X still has destination slot SRAM offset
+	clc
+	adc {backup_save_data_off}
+	tax
+	lda $700002,x
+	and #$7fff
+	sta $700002,x
 	rts
 
 patch_save:
@@ -527,7 +619,7 @@ patch_load:
 .load_backup_end:
 	// update current save slot in SRAM, and set player flag
 	plx
-	lda $0952
+	lda {current_save_slot}
 	sta $700000,x
 	clc
 	adc #$0010
@@ -540,7 +632,7 @@ patch_load:
 	bra .end_ok
 .check:
     // check save slot
-    lda $0952
+    lda {current_save_slot}
     clc
     adc #$0010
     cmp {last_saveslot}
@@ -608,6 +700,7 @@ copy_stats:
     lda $19B7   // hijacked code
     rts
 
+//print "b81 end: ", org
 warnpc $81ffff
 ////////////////////////// CREDITS /////////////////////////////
 
@@ -1027,7 +1120,7 @@ print "load_stats: ", org
 load_stats:
     phx
     phy
-    lda $7e0952
+    lda {current_save_slot}
     clc
     adc #$0010
     sta {last_saveslot}
@@ -1130,7 +1223,7 @@ save_stats:
     phx
     phy
     pha
-    lda $7e0952
+    lda {current_save_slot}
     clc
     adc #$0010
     sta {last_saveslot}

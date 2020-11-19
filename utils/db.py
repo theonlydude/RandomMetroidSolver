@@ -339,8 +339,9 @@ order by r.id;"""
             paramsSet.update(dictParams.keys())
 
             # keep guid only for non race seeds
+            returnCodeColumn = 0
             guidColumn = 3
-            if outData[-1][-1]['raceMode'] == 'on':
+            if outData[-1][-1]['raceMode'] == 'on' or outData[-1][returnCodeColumn] != 0:
                 # remove guid
                 outData[-1][guidColumn] = ''
             else:

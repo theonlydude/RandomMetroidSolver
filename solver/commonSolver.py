@@ -234,7 +234,7 @@ class CommonSolver(object):
         item = loc.itemName
 
         if filler in ['front', None]:
-            if self.mode == 'seedless':
+            if self.mode in ['seedless', 'race', 'debug']:
                 # in seedless remove the first nothing found as collectedItems is not ordered
                 self.collectedItems.remove(item)
             else:
@@ -295,7 +295,7 @@ class CommonSolver(object):
 
             # in plando we have to remove the last added item,
             # else it could be used in computing the postAvailable of a location
-            if self.mode in ['plando', 'seedless']:
+            if self.mode in ['plando', 'seedless', 'race', 'debug']:
                 loc.itemName = 'Nothing'
 
             self.collectedItems.pop()

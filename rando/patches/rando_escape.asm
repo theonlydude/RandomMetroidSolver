@@ -85,7 +85,7 @@ bt_door_list:
 warnpc $83ae0f
 
 ;;; CODE in bank 84 (PLM)
-org $84f070
+org $84f860
 
 ;;; Disables "ammo locked" elements b/c of no ammo in escape :
 ;;; makes them react to hyper beam shots
@@ -143,7 +143,7 @@ save_station:
     jmp $8cf6
 
 print "B84 end: ", pc
-warnpc $84f0c2                  ; explicitly right there, to remember needed race mode update
+warnpc $84f8b2                  ; explicitly right there, to remember needed race mode update
 
 ;;; DATA, bank 8F. makes map stations doors in norfair/brin/maridia/ws
 ;;; permanently grey

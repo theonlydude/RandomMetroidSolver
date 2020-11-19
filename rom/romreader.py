@@ -76,7 +76,6 @@ class RomReader:
         '0x0': {'name': 'Nothing'}
     }
 
-    # FIXME not up to date
     patches = {
         'startCeres': {'address': 0x7F1F, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
         'startLS': {'address': 0x7F17, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
@@ -94,7 +93,9 @@ class RomReader:
         'nerfedRainbowBeam': {'address': 0x14BA2E, 'value': 0x13, 'desc': 'nerfed rainbow beam'},
         'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'desc': "Crocomire in its own area"},
         'minimizer_bosses': {'address': 0x10F500, 'value': 0xAD, 'desc': "Minimizer"},
-        'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'desc': "Fast Tourian"}
+        'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'desc': "Fast Tourian"},
+        'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'desc': "Beam doors"},
+        'red_doors': {'address':0x20560, 'value':0xbd, 'desc': "Red doors open with one Missile and do not react to Super"}
     }
 
     # FIXME shouldn't be here
@@ -105,17 +106,17 @@ class RomReader:
         #'animals': {'address': 0x7841D, 'value': 0x8C, 'vanillaValue': 0x18},
         'area_rando_blue_doors': {'address': 0x7823E, 'value': 0x3B, 'vanillaValue': 0x66},
         'area_rando_door_transition': {'address': 0x852BA, 'value': 0x20, 'vanillaValue': 0xad},
-        'rando_escape': {'address': 0x15f38, 'value': 0x5c, 'vanillaValue': 0xbd},
+        'rando_escape': {'address': 0x15F38, 'value': 0x5C, 'vanillaValue': 0xbd},
         'area_rando_layout_base': {'address': 0x788A0, 'value': 0x2B, 'vanillaValue': 0x26},
         'area_rando_layout': {'address': 0x78666, 'value': 0x62, 'vanillaValue': 0x64},
-        'bomb_torizo': {'address': 0x7FDC, 'value': 0xF2, 'vanillaValue': 0x20},
+        'bomb_torizo': {'address': 0x208A7, 'value': 0x20, 'vanillaValue': 0x0d},
         'brinstar_map_room': {'address': 0x784EC, 'value': 0x3B, 'vanillaValue': 0x42},
         'credits_varia': {'address': 0x44B, 'value': 0x5C, 'vanillaValue': 0xa2},
         'dachora': {'address': 0x22A173, 'value': 0xC9, 'vanillaValue': 0xc8},
         'draygonimals': {'address': 0x1ADAC, 'value': 0x60, 'vanillaValue': 0xff},
         'early_super_bridge': {'address': 0x22976B, 'value': 0xC7, 'vanillaValue': 0x43},
         'elevators_doors_speed': {'address': 0x2E9D, 'value': 0x08, 'vanillaValue': 0x04},
-        'endingtotals': {'address': 0x7FDC, 'value': 0x7B, 'vanillaValue': 0x20},
+        'endingtotals': {'address': 0x208A0, 'value': 0x30, 'vanillaValue': 0x8e},
         'escapimals': {'address': 0x1ADAC, 'value': 0x4D, 'vanillaValue': 0xff},
         'g4_skip': {'address': 0x18C5D, 'value': 0xFE, 'vanillaValue': 0x00},
         'gameend': {'address': 0x18BCC, 'value': 0x20, 'vanillaValue': 0x00},
@@ -167,7 +168,8 @@ class RomReader:
         'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'vanillaValue': 0x4},
         'area_rando_warp_door': {'address': 0x26425E, 'value': 0x80, 'vanillaValue': 0x70},
         'minimizer_bosses': {'address': 0x10F500, 'value': 0xAD, 'vanillaValue': 0xff},
-        'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'vanillaValue': 0xff}
+        'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'vanillaValue': 0xff},
+        'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'vanillaValue': 0xaf}
     }
 
     @staticmethod

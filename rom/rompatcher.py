@@ -93,7 +93,8 @@ class RomPatcher:
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
                  'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street' ],
         'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips'],
-        'MinimizerTourian': ['minimizer_tourian.ips', 'nerfed_rainbow_beam.ips']
+        'MinimizerTourian': ['minimizer_tourian.ips', 'nerfed_rainbow_beam.ips'],
+        'DoorsColors': ['beam_doors.ips', 'red_doors.ips']
     }
 
     def __init__(self, romFileName=None, magic=None, plando=False):
@@ -425,6 +426,8 @@ class RomPatcher:
                         self.applyIPSPatch(patchName)
             doors = self.getStartDoors(plms, area, minimizerN)
             if doorsColorsRando:
+                for patchName in RomPatcher.IPSPatches['DoorsColors']:
+                    self.applyIPSPatch(patchName)
                 self.writeDoorsColor(doors)
             self.applyStartAP(startAP, plms, doors)
             self.applyPLMs(plms)
@@ -615,7 +618,7 @@ class RomPatcher:
         self.nothingId = 0x1a
         # if not default start, use first loc with a nothing
         if not GraphUtils.isStandardStart(startAP):
-            firstNothing = next((il.Location for il in itemLocs if il.Item.Category == 'Nothing'), None)
+            firstNothing = next((il.Location for il in itemLocs if il.Item.Category == 'Nothing' and 'Boss' not in il.Location.Class), None)
             if firstNothing is not None:
                 self.nothingId = firstNothing.Id
 
@@ -803,7 +806,7 @@ class RomPatcher:
             # reorder it with progression indices
             prog = ord('A')
             idx = 0
-            progNames = [il.Item.Name for il in progItemLocs]
+            progNames = [il.Item.Name for il in progItemLocs if il.Item.Category != 'Boss']
             for i in range(len(progNames)):
                 item = progNames[i]
                 if item in items and item not in displayNames:

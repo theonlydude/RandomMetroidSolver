@@ -107,40 +107,9 @@ dude@computer:~/RandomMetroidSolver (master)$ python3.7 randomizer_webservice.py
                         remote url to connect to
 ```
 
-# CLI Palettizer
-
-To apply colors randomization to an existing seed you can use the palettizer.
-
-```
-dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./palettizer.py -r VARIA_Randomizer_FX1097821_Season_Races_medium.sfc
-```
-
-The parameters:
-```
-  --individual_suit_shift
-  --individual_tileset_shift
-  --no_match_ship_and_power
-  --seperate_enemy_palette_groups
-  --no_match_room_shift_with_boss
-  --no_shift_tileset_palette
-  --no_shift_boss_palettes
-  --no_shift_suit_palettes
-  --no_shift_enemy_palettes
-  --no_shift_beam_palettes
-  --no_shift_ship_palette
-  --seed [SEED], -s [SEED]
-                        randomization seed to use
-  --min_degree [MIN_DEGREE]
-                        min hue shift
-  --max_degree [MAX_DEGREE]
-                        max hue shift
-  --no_global_shift
-  --invert              invert color range
-```
-
 # CLI Customizer
 
-To change Samus sprite or apply patches on an existing seed you have to call the Randomizer with the --patchOnly parameter. It'll generate a new ROM: VARIA.sfc
+To change Samus sprite or apply patches or randomize palettes on an existing seed you have to call the Randomizer with the --patchOnly parameter. It'll generate a new ROM: VARIA.sfc
 
 To add a sprite use --sprite, the available sprites are in itemrandomizerweb/patches/sprites/:
 ```
@@ -169,7 +138,7 @@ Apply patch megaman.ips
 Rom generated: VARIA
 ```
 
-**Note**: if you want both colors randomization and custom sprite you can't use the palettizer, you have to add the colors randomization parameters to the randomizer on top of --patchOnly.
+**Note**: To apply colors randomization to an existing seed you have to add the colors randomization parameters to the randomizer on top of --patchOnly.
 
 The parameters:
 ```
@@ -202,14 +171,18 @@ Rom generated: VARIA
 
 # Web with Docker
 
-You can launch the web2py website locally using docker, it has been tested on Linux and WSL2:
+You can launch the web2py website locally using docker, it has been tested on Linux, macOS and WSL2:
 ```
-root@computer:/home/dude/RandomMetroidSolver/web/docker# ./build_run.sh
+root@computer:/home/dude/RandomMetroidSolver/web/docker# ./build.sh
+root@computer:/home/dude/RandomMetroidSolver/web/docker# ./run.sh
 ```
 
-Then you can connect to the local website on http://127.0.0.1:8000/ on Linux and http://WSL2 local IP:8000/ on WSL2.
+Then you can connect to the local website on http://127.0.0.1:8000/ on Linux/macOS and http://WSL2-local-IP:8000/ on WSL2.
 
 You can choose the branch to checkout with -b, and give a Github token with -t to be able to do git pull in the Docker image:
 ```
-root@computer:/home/dude/RandomMetroidSolver/web/docker# ./build_run.sh -b minimizer -t ~dude/RandomMetroidSolver/github_token
+root@computer:/home/dude/RandomMetroidSolver/web/docker# ./build.sh -b minimizer -t ~dude/RandomMetroidSolver/github_token
+root@computer:/home/dude/RandomMetroidSolver/web/docker# ./run.sh -b minimizer
 ```
+
+There's other scripts to start/stop the containers: start.sh / stop.sh, delete the containers/images: rm.sh and update the git repository in an image: update.sh -b branch .

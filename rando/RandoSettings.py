@@ -66,7 +66,7 @@ class RandoSettings(object):
 
 # Holds settings and utiliy functions related to graph layout
 class GraphSettings(object):
-    def __init__(self, startAP, areaRando, lightAreaRando, bossRando, escapeRando, minimizerN, dotFile, doorsColorsRando, plandoRandoTransitions):
+    def __init__(self, startAP, areaRando, lightAreaRando, bossRando, escapeRando, minimizerN, dotFile, doorsColorsRando, allowGreyDoors, plandoRandoTransitions):
         self.startAP = startAP
         self.areaRando = areaRando
         self.lightAreaRando = lightAreaRando
@@ -75,6 +75,7 @@ class GraphSettings(object):
         self.minimizerN = minimizerN
         self.dotFile = dotFile
         self.doorsColorsRando = doorsColorsRando
+        self.allowGreyDoors = allowGreyDoors
         self.plandoRandoTransitions = plandoRandoTransitions
 
     def isMinimizer(self):
@@ -121,17 +122,17 @@ class ProgSpeedParameters(object):
             return 0.5
         return 1
 
-    def getLateAmmoProb(self, progSpeed):
+    def getLateDoorsProb(self, progSpeed):
         if progSpeed == 'slowest':
             return 1
         elif progSpeed == 'slow':
-            return 0.9
-        elif progSpeed == 'medium':
             return 0.8
+        elif progSpeed == 'medium':
+            return 0.66
         elif progSpeed == 'fast':
-            return 0.65
-        elif progSpeed == 'fastest':
             return 0.5
+        elif progSpeed == 'fastest':
+            return 0.33
         return 0
 
     def getItemLimit(self, progSpeed):
@@ -166,6 +167,8 @@ class ProgSpeedParameters(object):
 
     def getProgressionItemTypes(self, progSpeed):
         progTypes = ItemManager.getProgTypes()
+        if self.restrictions.isLateDoors():
+            progTypes += ['Wave','Spazer','Plasma']
         progTypes.append('Charge')
         if progSpeed == 'slowest':
             return progTypes
@@ -180,7 +183,8 @@ class ProgSpeedParameters(object):
         if progSpeed == 'medium':
             return progTypes
         else:
-            progTypes.remove('Ice')
+            if not self.restrictions.isLateDoors():
+                progTypes.remove('Ice')
             progTypes.remove('SpaceJump')
         if progSpeed == 'fast':
             return progTypes

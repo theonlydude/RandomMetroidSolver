@@ -998,6 +998,8 @@ def randomizer():
         "all_random": "all the parameters set to random",
         "Chozo_Speedrun": "speedrun progression speed with Chozo split",
         "default": "VARIA randomizer default settings",
+        "doors_long": "be prepared to hunt for beams and ammo to open doors",
+        "doors_short": "uses Chozo/speedrun settings for a quicker door color rando",
         "free": "easiest possible settings",
         "hardway2hell": "harder highway2hell",
         "haste": "inspired by DASH randomizer with Nerfed Charge / Progressive Suits",
@@ -1164,7 +1166,7 @@ def sessionWebService():
     # web service to update the session
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
                'areaRandomization', 'areaLayout', 'lightAreaRandomization',
-               'doorsColorsRando', 'escapeRando', 'removeEscapeEnemies',
+               'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization', 'minimizer', 'minimizerTourian',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1198,6 +1200,7 @@ def sessionWebService():
     session.randomizer['areaLayout'] = request.vars.areaLayout
     session.randomizer['lightAreaRandomization'] = request.vars.lightAreaRandomization
     session.randomizer['doorsColorsRando'] = request.vars.doorsColorsRando
+    session.randomizer['allowGreyDoors'] = request.vars.allowGreyDoors
     session.randomizer['escapeRando'] = request.vars.escapeRando
     session.randomizer['removeEscapeEnemies'] = request.vars.removeEscapeEnemies
     session.randomizer['bossRandomization'] = request.vars.bossRandomization
@@ -1254,7 +1257,7 @@ def randomizerWebService():
     # check validity of all parameters
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
                'areaRandomization', 'areaLayout', 'lightAreaRandomization',
-               'doorsColorsRando', 'escapeRando', 'removeEscapeEnemies',
+               'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization', 'minimizer', 'minimizerTourian',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1384,6 +1387,8 @@ def randomizerWebService():
         params.append('--doorsColorsRando')
     elif request.vars.doorsColorsRando == 'random':
         params += ['--doorsColorsRando', 'random']
+    if request.vars.allowGreyDoors == 'on':
+        params.append('--allowGreyDoors')
 
     if request.vars.escapeRando == 'on':
         params.append('--escapeRando')
@@ -1762,8 +1767,8 @@ class WS(object):
             raiseHttp(400, "Unknown action, must be add/remove/toggle/clear/init/get/save/randomize", True)
 
         mode = request.vars.mode
-        if mode not in ["standard", "seedless", "plando"]:
-            raiseHttp(400, "Unknown mode, must be standard/seedless/plando", True)
+        if mode not in ["standard", "seedless", "plando", "race", "debug"]:
+            raiseHttp(400, "Unknown mode, must be standard/seedless/plando/race/debug", True)
 
         try:
             WSClass = globals()["WS_{}_{}".format(scope, action)]
@@ -1773,7 +1778,7 @@ class WS(object):
 
     def __init__(self, mode):
         self.mode = mode
-        if self.mode == "plando":
+        if self.mode in ["plando", "debug"]:
             if session.plando is None:
                 raiseHttp(400, "No session found for the Plandomizer Web service", True)
             self.session = session.plando
@@ -1925,10 +1930,6 @@ class WS(object):
                        '--energyQty', parameters["energyQty"]
             ]
 
-        if request.vars.debug != None:
-            params.append('--vcr')
-            params.append('--debug')
-
         # dump state as input
         with open(jsonInFileName, 'w') as jsonFile:
             json.dump(self.session["state"], jsonFile)
@@ -2042,13 +2043,11 @@ class WS_common_init(WS):
         self.session["mode"] = mode
         self.session["startLocation"] = startLocation if startLocation != None else "Landing Site"
 
-        vcr = request.vars.debug != None
         fill = request.vars.fill == "true"
-        race = request.vars.race == "true"
 
-        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr, fill, startLocation, race)
+        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, fill, startLocation)
 
-    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr, fill, startLocation, race):
+    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, fill, startLocation):
         (fd, jsonOutFileName) = tempfile.mkstemp()
         params = [
             pythonExec,  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
@@ -2062,12 +2061,6 @@ class WS_common_init(WS):
 
         if mode != "seedless":
             params += ['-r', str(jsonRomFileName)]
-
-        if race == True:
-            params.append('--trackerRace')
-
-        if vcr == True:
-            params.append('--vcr')
 
         if fill == True:
             params.append('--fill')
@@ -2235,7 +2228,7 @@ class WS_item_add(WS):
                 item = 'Nothing'
 
             # in seedless mode we have to had boss items instead of nothing
-            if request.vars.mode == "seedless":
+            if request.vars.mode in ["seedless", "race", "debug"]:
                 if locName in ['Kraid', 'Ridley', 'Phantoon', 'Draygon', 'MotherBrain']:
                     item = locName
 
@@ -2322,7 +2315,7 @@ class WS_door_replace(WS):
         if self.doorName not in DoorsManager.doors.keys():
             raiseHttp(400, "Wrong value for doorName", True)
         self.newColor = request.vars.newColor
-        if self.newColor not in ["red", "green", "yellow", "grey"]:
+        if self.newColor not in ["red", "green", "yellow", "grey", "wave", "spazer", "plasma", "ice"]:
             raiseHttp(400, "Wrong value for newColor", True)
 
     def action(self):
@@ -2395,37 +2388,42 @@ customSprites = {
     'samus_backwards': {"index":1, "name": "Samus (backwards)", "desc": "Samus, flipped horizontally", "author": "TarThoron", "group": "Samus"},
     'samus_upside_down': {"index":2, "name": "Samus (upside down)", "desc": "Samus, flipped vertically", "author": "TarThoron", "group": "Samus"},
     'samus_upside_down_and_backwards': {"index":3, "name": "Samus (180°)", "desc": "Samus, flpped both horizontally and vertically", "author": "TarThoron", "group": "Samus"},
-    'dark_samus': {"index":4, "name": "Dark Samus", "desc": "Samus recolor inspired by the Dark Samus character", "author": "TarThoron", "group": "Samus"},
-    'hack_ancient_chozo': {"index":5, "name": "Chozo", "desc": "Samus, from Ancient Chozo hack", "author": "Albert V and Physix", "group": "Samus"},
-    'hack_ascent': {"index":6, "name": "Ascent", "desc": "Samus, from Ascent hack", "author": "Benox50", "group": "Samus"},
-    'hack_decision': {"index":7, "name": "Decision", "desc": "Samus, from Decision hack", "author": "JoshShoeWah", "group": "Samus"},
-    'hack_escape2': {"index":8, "name": "Escape II", "desc": "Samus, from Escape II hack", "author": "Hiroishi", "group": "Samus"},
-    'hack_hyper': {"index":9, "name": "Hyper", "desc": "Samus, from Hyper Metroid hack", "author": "RealRed", "group": "Samus"},
-    'hack_nature': {"index":10, "name": "Nature", "desc": "Samus, from Nature hack", "author": "Jefe962", "group": "Samus"},
-    'hack_phazon': {"index":11, "name": "Phazon", "desc": "Samus, from Phazon hack", "author": "A_red_monk_called_Key", "group": "Samus"},
-    'hack_redesign': {"index":12, "name": "Redesign", "desc": "Samus, from Redesign hack", "author": "Drewseph", "group": "Samus"},
-    'hack_szm': {"index":13, "name": "SZM", "desc": "Samus, from Super Zero Mission hack", "author": "SBniconico", "group": "Samus"},
-    'hitbox_helper': {"index":14, "name": "Hitbox", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru", "group": "Samus"},
-    'bailey': {"index":15, "name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": "Auximines", "group": "Custom"},
-    'alucard': {"index":16, "name": "Alucard", "desc": "Alucard from Castlevania Symphony Of The Night", "author": "Nintoaster", "group": "Custom"},
-    'megaman': {"index":17, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau", "group": "Custom"},
-    'link': {"index":18, "name": "Link", "desc": "Sorry Link, your game is in another randomizer!", "author": "RonnSama", "group": "Custom"},
-    'fed_trooper': {"index":19, "name": "GF Trooper", "desc": "A Galactic Federation trooper", "author": "Physix", "group": "Custom"},
-    'super_controid': {"index":20, "name": "Contra", "desc": "Badass soldier from Contra III", "author": "Nintoaster", "group": "Custom"},
-    'mario_8bit': {"index":21, "name": "Mario (NES)", "desc": "One of the bros", "author": "TarThoron", "group": "Custom"},
-    'mario_8bit_modern': {"index":22, "name": "Mario (Alt)", "desc": "One of the bros, with a more modern palette", "author": "TarThoron", "group": "Custom"},
-    'luigi': {"index":23, "name": "Luigi", "desc": "The other bro", "author": "RonnSama", "group": "Custom"},
-    'marga': {"index":24, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
-    'sprite_can': {"index":25, "name": "Sprite", "desc": "A ... Sprite ... ", "author": "TarThoron", "group": "Custom"},
-    'win95_cursor': {"index":26, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
+    'fusion_green_varia': {"index":4, "name": "Fusion", "desc": "Samus resprite inspired by Metroid Fusion (green Varia Suit)", "author": "Gala", "group": "Samus"},
+    'fusion_orange_varia': {"index":5, "name": "Fusion", "desc": "Samus resprite inspired by Metroid Fusion (orange Varia Suit)", "author": "Gala", "group": "Samus"},
+    'dark_samus': {"index":6, "name": "Dark Samus", "desc": "Samus recolor inspired by the Dark Samus character", "author": "TarThoron", "group": "Samus"},
+    'hack_ancient_chozo': {"index":7, "name": "Chozo", "desc": "Samus, from Ancient Chozo hack", "author": "Albert V and Physix", "group": "Samus"},
+    'hack_ascent': {"index":8, "name": "Ascent", "desc": "Samus, from Ascent hack", "author": "Benox50", "group": "Samus"},
+    'hack_decision': {"index":9, "name": "Decision", "desc": "Samus, from Decision hack", "author": "JoshShoeWah", "group": "Samus"},
+    'hack_escape2': {"index":10, "name": "Escape II", "desc": "Samus, from Escape II hack", "author": "Hiroishi", "group": "Samus"},
+    'hack_hyper': {"index":11, "name": "Hyper", "desc": "Samus, from Hyper Metroid hack", "author": "RealRed", "group": "Samus"},
+    'hack_nature': {"index":12, "name": "Nature", "desc": "Samus, from Nature hack", "author": "Jefe962", "group": "Samus"},
+    'hack_opposition': {"index":13, "name": "Opposition", "desc": "Space Pirate themed suit for Samus, from Opposition hack", "author": "mccad00", "group": "Samus"},
+    'hack_phazon': {"index":14, "name": "Phazon", "desc": "Samus, from Phazon hack", "author": "A_red_monk_called_Key", "group": "Samus"},
+    'hack_redesign': {"index":15, "name": "Redesign", "desc": "Samus, from Redesign hack", "author": "Drewseph", "group": "Samus"},
+    'hack_szm': {"index":16, "name": "SZM", "desc": "Samus, from Super Zero Mission hack", "author": "SBniconico", "group": "Samus"},
+    'hitbox_helper': {"index":17, "name": "Hitbox", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru", "group": "Samus"},
+    'bailey': {"index":18, "name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": "Auximines", "group": "Custom"},
+    'alucard': {"index":19, "name": "Alucard", "desc": "Alucard from Castlevania Symphony Of The Night", "author": "Nintoaster", "group": "Custom"},
+    'megaman': {"index":20, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau", "group": "Custom"},
+    'link': {"index":21, "name": "Link", "desc": "Sorry Link, your game is in another randomizer!", "author": "RonnSama", "group": "Custom"},
+    'fed_trooper': {"index":22, "name": "GF Trooper", "desc": "A Galactic Federation trooper", "author": "Physix", "group": "Custom"},
+    'super_controid': {"index":23, "name": "Contra", "desc": "Badass soldier from Contra III", "author": "Nintoaster", "group": "Custom"},
+    'mario_8bit': {"index":24, "name": "Mario (NES)", "desc": "One of the bros", "author": "TarThoron", "group": "Custom"},
+    'mario_8bit_modern': {"index":25, "name": "Mario (Alt)", "desc": "One of the bros, with a more modern palette", "author": "TarThoron", "group": "Custom"},
+    'luigi': {"index":26, "name": "Luigi", "desc": "The other bro", "author": "RonnSama", "group": "Custom"},
+    'marga': {"index":27, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
+    'sprite_can': {"index":28, "name": "Sprite", "desc": "A ... Sprite ... ", "author": "TarThoron", "group": "Custom"},
+    'win95_cursor': {"index":29, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
 }
 
 customShips = {
-    'Red-M0nk3ySMShip1': {"index":0, "name": "Red-M0nk3ySMShip1", "desc": "", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip2': {"index":1, "name": "Red-M0nk3ySMShip2", "desc": "", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip3': {"index":2, "name": "Red-M0nk3ySMShip3", "desc": "", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip4': {"index":3, "name": "Red-M0nk3ySMShip4", "desc": "", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip5': {"index":4, "name": "Red-M0nk3ySMShip5", "desc": "", "author": "Red-M0nk3y"}
+    'Red-M0nk3ySMShip1': {"index":0, "name": "Red-M0nk3ySMShip1", "desc": "From MetConst", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip2': {"index":1, "name": "Red-M0nk3ySMShip2", "desc": "From MetConst", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip3': {"index":2, "name": "Red-M0nk3ySMShip3", "desc": "From MetConst", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip4': {"index":3, "name": "Red-M0nk3ySMShip4", "desc": "From MetConst", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip5': {"index":4, "name": "Red-M0nk3ySMShip5", "desc": "From MetConst", "author": "Red-M0nk3y"},
+    'opposition_ship': {"index":5, "name": "Opposition Ship", "desc": "From Opposition Hack", "author": "mccad00"},
+    'mario_ship': {"index":6, "name": "Mario Ship", "desc": "For Mario and Luigi sprites", "author": "mccad00"}
 }
 
 def customizer():
@@ -2539,6 +2537,9 @@ def customWebService():
     session.customizer['remove_itemsounds'] = request.vars.remove_itemsounds
     session.customizer['remove_elevators_doors_speed'] = request.vars.remove_elevators_doors_speed
 
+    # when beam doors patch is detected, don't randomize blue door palette
+    no_blue_door_palette = request.vars.no_blue_door_palette
+
     # call the randomizer
     (fd, jsonFileName) = tempfile.mkstemp()
     params = [pythonExec,  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
@@ -2591,6 +2592,8 @@ def customWebService():
         params += ['--min_degree', request.vars.minDegree, '--max_degree', request.vars.maxDegree]
         if request.vars.invert == 'on':
             params.append('--invert')
+        if no_blue_door_palette == 'on':
+            params.append('--no_blue_door_palette')
 
     if request.vars.customSpriteEnable == 'on':
         params += ['--sprite', "{}.ips".format(request.vars.customSprite)]

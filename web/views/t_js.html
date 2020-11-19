@@ -280,10 +280,6 @@ function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
       dataDict["mode"] = document.getElementById("mode").value;
     }
 
-    if(typeof debug !== 'undefined' && debug == true) {
-      dataDict["debug"] = true;
-    }
-
     // always store the timer
     if(escapeRando == true && mode == "plando") {
       var value = document.getElementById("timer").value;
@@ -384,7 +380,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         if(lastAction["scope"] == "area") {
             updateLines(jsonData);
         }
-        if(debug == true) {
+        if(mode == "debug") {
             updateDebugLines(jsonData);
         }
         updateGps(jsonData);
@@ -395,7 +391,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         updateLocations(jsonData);
         updateInventory(jsonData);
         updateLines(jsonData);
-        if(debug == true) {
+        if(mode == "debug") {
             updateDebugLines(jsonData);
         }
         displayDoors(jsonData);
@@ -411,6 +407,10 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
             alert("You're stuck, you can't finish this seed with the given preset.");
         }
     }
+}
+
+function isSeedless(mode) {
+    return mode == "seedless" || mode == "debug" || mode == "race"
 }
 
 function setActive(mode, area, boss) {
@@ -441,7 +441,7 @@ function setActive(mode, area, boss) {
             $("#"+areaElems[i]).addClass("greyed");
         }
     }
-    if(mode == "seedless") {
+    if(isSeedless(mode)) {
         document.getElementById("pause_background").style.display = "none";
         document.getElementById("pause_background_seedless").style.display = "block";
     } else {
@@ -481,16 +481,19 @@ function displayDoors(jsonData) {
             color = 'white';
         }
         var css = "";
-        if(facing == 0 || facing == 1) {
-            css = color+"Door"+"V";
-        } else {
-            css = color+"Door"+"H";
+        if(facing == 0) {
+            css = color+"Door"+"VL";
+        } else if(facing == 1) {
+            css = color+"Door"+"VR";
+        } else if(facing == 2) {
+            css = color+"Door"+"HT";
+        } else if(facing == 3) {
+            css = color+"Door"+"HB";
         }
         $("#"+doorName).attr("class", doorName+" "+css);
 
         var tooltip = color+" door";
         $("#"+doorName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
-
         // dragElement(document.getElementById(doorName), doorName);
     }
 }
@@ -538,7 +541,6 @@ function updateDebugLines(jsonData) {
 }
 
 function updateLocations(jsonData) {
-
     if("availableLocations" in jsonData) {
         for(var locName in jsonData["availableLocations"]) {
             // console.log(locName+" is available");
@@ -593,6 +595,10 @@ function updateLocations(jsonData) {
                     document.getElementById(bossName+"G4").style.display = "block";
                 }
             }
+            if(! isSeedless(mode)) {
+                // add item
+                addItem(locData["item"]);
+            }
         }
 
         if(mode == "plando") {
@@ -605,6 +611,17 @@ function updateLocations(jsonData) {
             var tooltip = tooltip + ": "+jsonData["last"]["item"]+" at "+jsonData["last"]["loc"];
         }
         $("#"+elem+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+    }
+
+    if(isSeedless(mode)) {
+        // load items as all locs contain Nothing
+        var collectedItems = jsonData["collectedItems"];
+        for(var i=0; i<collectedItems.length; i++) {
+            var item = collectedItems[i];
+            if(item != "Nothing") {
+                addItem(item);
+            }
+        }
     }
 
     // set remaining locations as sequence breakable
@@ -687,7 +704,6 @@ var hasMixedTransitions = false;
 var escapeRando = true;
 var init = false;
 var webServInProgress = false;
-var race = false;
 var doorsRando = false;
 
 // can add more variables:
@@ -801,6 +817,7 @@ var locsInfo = {
   MotherBrain: {left: 22, top: 33.2, boss: "MotherBrain"}
 };
 
+var romIsRaceProtected = false;
 window.onload = function(){
   initCurMode();
 
@@ -868,15 +885,15 @@ window.onload = function(){
         var bytes = new Uint8Array(e.target.result);
 
         // detect race mode patch
-        race = false;
+        romIsRaceProtected = false;
         for(var addr=0x1C0200; addr<0x1C0210; addr++) {
             if(bytes[addr] != 0xff) {
-                if(document.getElementById("mode").value == "plando") {
+                if(mode == "plando") {
                     clearInputSeed();
                     alert("race protected seed detected");
                     return false;
                 } else {
-                    race = true;
+                    romIsRaceProtected = true;
                     break;
                 }
             }
@@ -958,6 +975,7 @@ window.onload = function(){
   onloadHook();
 
   dragElement(document.getElementById("solverPopup"), "solverGrab");
+  dragElement(document.getElementById("doorPopup"), "doorGrab");
 
   $("#placeItemButton").keypress(onEnterKey);
 
@@ -1026,7 +1044,7 @@ function setGuessedPreset(romName){
 }
 
 function guessVARIAPreset(filename) {
-  var re = /VARIA_Randomizer_[A]?[B]?[F]?[M]?[Z]?X\d+_(\w+)/;
+  var re = /VARIA_Randomizer_[A]?[D]?[B]?[F]?[M]?[Z]?X\d+_(\w+)/;
   var match = filename.match(re);
   if(match == null) {
     re = /VARIA_Plandomizer_[A]?[B]?FX\d+_(\w+)/;
@@ -1129,16 +1147,24 @@ function initSolver() {
   var romJsonValue = romJson.value;
 
   if(globalPlando == true) {
-    mode = "plando";
-    if(romJsonValue.length == 0){
-      return;
-    }
+      if(debug == true) {
+          mode = "debug";
+      } else {
+          mode = "plando";
+      }
+      if(romJsonValue.length == 0){
+          return;
+      }
   } else {
-    if(romJsonValue.length == 0) {
-      mode = "seedless";
-    } else {
-      mode = "standard";
-    }
+      if(romJsonValue.length == 0) {
+          mode = "seedless";
+      } else {
+          if(romIsRaceProtected == true) {
+              mode = "race";
+          } else {
+              mode = "standard";
+          }
+      }
   }
 
   // reset everything
@@ -1152,7 +1178,7 @@ function initSolver() {
             fileName: document.getElementById("fileName").value,
             fill: document.getElementById("fillPlando").checked,
             startLocation: document.getElementById("startLocation").value,
-            mode: mode, race: race}, "download");
+            mode: mode}, "download");
 
   hidePopup();
   $('#hideRandoOverlay').hide();
@@ -1237,7 +1263,7 @@ function actionDoor(doorName) {
 
     if(mode == "seedless") {
         return;
-    } else if(mode == "plando") {
+    } else if(mode == "plando" || mode == "race") {
         var currentColor = getColor(doorName);
         // forced blue doors can't be updated
         if(currentColor == "blue") {
@@ -1273,10 +1299,10 @@ function actionDoor(doorName) {
         $("#doorPopup").css({"display": "block", "left": left, "top": top});
 
         // highlight current color
-        $("#redDoorSelect").removeClass("highlightColor");
-        $("#greenDoorSelect").removeClass("highlightColor");
-        $("#yellowDoorSelect").removeClass("highlightColor");
-        $("#greyDoorSelect").removeClass("highlightColor");
+        var colors = ["red", "green", "yellow", "grey", "wave", "spazer", "plasma", "ice"];
+        for(var i=0; i<colors.length; i++) {
+            $("#"+colors[i]+"DoorSelect").removeClass("highlightColor");
+        }
         $("#"+currentColor+"DoorSelect").addClass("highlightColor");
     } else {
         if(doorsRando == false) {
@@ -1294,19 +1320,14 @@ function actionDoor(doorName) {
 }
 
 function getColor(doorName) {
-    if($("#"+doorName).hasClass("blueDoorV") || $("#"+doorName).hasClass("blueDoorH")) {
-        return "blue";
-    } else if($("#"+doorName).hasClass("redDoorV") || $("#"+doorName).hasClass("redDoorH")) {
-        return "red";
-    } else if($("#"+doorName).hasClass("greenDoorV") || $("#"+doorName).hasClass("greenDoorH")) {
-        return "green";
-    } else if($("#"+doorName).hasClass("yellowDoorV") || $("#"+doorName).hasClass("yellowDoorH")) {
-        return "yellow";
-    } else if($("#"+doorName).hasClass("greyDoorV") || $("#"+doorName).hasClass("greyDoorH")) {
-        return "grey";
-    } else {
-        console.log("Can't find door "+doorName+" color");
+    var colors = ["red", "green", "yellow", "grey", "wave", "spazer", "plasma", "white", "ice", "blue"];
+    for(var i=0; i<colors.length; i++) {
+        if($("#"+doorName).hasClass(colors[i]+"DoorVL") || $("#"+doorName).hasClass(colors[i]+"DoorHT")
+           || $("#"+doorName).hasClass(colors[i]+"DoorVR") || $("#"+doorName).hasClass(colors[i]+"DoorHB")) {
+            return colors[i];
+        }
     }
+    console.log("Can't find door "+doorName+" color");
 }
 
 function hideDoorPopup() {
@@ -1329,7 +1350,7 @@ function actionItem(itemName, action) {
         return;
     }
 
-    if(mode == "seedless") {
+    if(isSeedless(mode)) {
         console.log("actionItem itemName: "+itemName+" action: "+action);
 
         // call webservice
@@ -1516,7 +1537,7 @@ function addItem(itemName) {
   if(itemName in itemCount) {
     itemCount[itemName] += 1
     if(itemName == "Missile" || itemName == "Super" || itemName == "PowerBomb") {
-      if(mode != "seedless") {
+      if(! isSeedless(mode)) {
         document.getElementById(itemName+"_pause").style.display = "block";
       }
     } else {

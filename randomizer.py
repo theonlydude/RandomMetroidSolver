@@ -242,6 +242,8 @@ if __name__ == "__main__":
     parser.add_argument('--max_degree', help="max hue shift", dest='max_degree', nargs='?', default=180, type=int)
     parser.add_argument('--no_global_shift', help="", action='store_false', dest='global_shift', default=True)
     parser.add_argument('--invert', help="invert color range", dest='invert', action='store_true', default=False)
+    parser.add_argument('--no_blue_door_palette', help="palette param", action='store_true',
+                        dest='no_blue_door_palette', default=False)
     parser.add_argument('--ext_stats', help="dump extended stats SQL", nargs='?', default=None, dest='extStatsFilename')
     parser.add_argument('--randoPreset', help="rando preset file", dest="randoPreset", nargs='?', default=None)
     parser.add_argument('--fakeRandoPreset', help="for prog speed stats", dest="fakeRandoPreset", nargs='?', default=None)
@@ -254,6 +256,8 @@ if __name__ == "__main__":
     parser.add_argument('--seedIps', help='ips generated from previous seed', dest='seedIps', default=None)
     parser.add_argument('--jm,', help="display data used by jm for its stats", dest='jm', action='store_true', default=False)
     parser.add_argument('--doorsColorsRando', help='randomize color of colored doors', dest='doorsColorsRando',
+                        nargs='?', const=True, default=False)
+    parser.add_argument('--allowGreyDoors', help='add grey color in doors colors pool', dest='allowGreyDoors',
                         nargs='?', const=True, default=False)
 
     # parse args
@@ -366,7 +370,9 @@ if __name__ == "__main__":
         args.area = bool(random.getrandbits(1))
     logger.debug("area: {}".format(args.area))
 
+    doorsColorsRandom = False
     if args.doorsColorsRando == 'random':
+        doorsColorsRandom = True
         args.doorsColorsRando = bool(random.getrandbits(1))
     logger.debug("doorsColorsRando: {}".format(args.doorsColorsRando))
 
@@ -449,7 +455,7 @@ if __name__ == "__main__":
         print("SEED: " + str(seed))
 
     # fill restrictions dict
-    restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "ammo": "normal" if not args.doorsColorsRando else "late" }
+    restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "doors": "normal" if not args.doorsColorsRando else "late" }
     restrictions['MajorMinor'] = args.majorsSplit
     seedCode = 'X'
     if majorsSplitRandom == False:
@@ -461,6 +467,8 @@ if __name__ == "__main__":
             seedCode = 'MX'
     if args.bosses == True and bossesRandom == False:
         seedCode = 'B'+seedCode
+    if args.doorsColorsRando == True and doorsColorsRandom == False:
+        seedCode = 'D'+seedCode
     if args.area == True and areaRandom == False:
         seedCode = 'A'+seedCode
 
@@ -576,8 +584,10 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.AreaBaseSet
         if args.areaLayoutBase == False:
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
+    if args.doorsColorsRando == True:
+        RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
     graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses,
-                                  args.escapeRando, minimizerN, dotFile, args.doorsColorsRando,
+                                  args.escapeRando, minimizerN, dotFile, args.doorsColorsRando, args.allowGreyDoors,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
 
     if args.plandoRando is None:
@@ -723,6 +733,7 @@ if __name__ == "__main__":
                 "min_degree": None,
                 "max_degree": None,
                 "invert": None,
+                "no_blue_door_palette": None
             }
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)

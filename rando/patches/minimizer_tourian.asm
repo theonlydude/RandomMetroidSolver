@@ -4,6 +4,8 @@
 ;;;   beat all Golden Four)
 ;;; - add door ASM for Gadora's door: refill+kill the zebs and MB
 ;;;   glass
+;;; - skips MB3 fight and baby cutscene: MB dies at the end of MB2,
+;;;   and you get hyper+refill for the escape
 ;;;
 ;;; Compiles with asar
 
@@ -23,9 +25,15 @@ lorom
 ;;; connect Statues Hallway to Tourian Eye Door Room...
 org $8fa616
 	dw $aa5c
+;;; update door bit flag
+org $83aa5e
+	db $40
 ;;; ...and back
 org $8fddeb
 	dw $9216
+;;; update door bit flag
+org $839218
+	db $40
 
 ;;; alternative door hit instruction that skips hit counter check
 org $848a6d ; end of some unused instruction

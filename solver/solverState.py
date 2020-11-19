@@ -55,7 +55,7 @@ class SolverState(object):
         self.state["visitedLocationsWeb"] = self.getAvailableLocationsWeb(solver.visitedLocations)
         # dict {locNameWeb: {infos}, ...}
         self.state["remainLocationsWeb"] = self.getRemainLocationsWeb(solver.majorLocations)
-        # string: standard/seedless/plando
+        # string: standard/seedless/plando/race/debug
         self.state["mode"] = solver.mode
         # string:
         self.state["seed"] = solver.seed

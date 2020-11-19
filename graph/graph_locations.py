@@ -655,12 +655,11 @@ define_location(
     Visibility="Visible",
     Room='Wrecked Ship Energy Tank Room',
     AccessFrom={
-        'Wrecked Ship Back': lambda sm: sm.wor(sm.wand(sm.wnot(Bosses.bossDead(sm, 'Phantoon')),
-                                                       RomPatches.has(RomPatches.WsEtankPhantoonAlive)),
+        'Wrecked Ship Back': lambda sm: sm.wor(RomPatches.has(RomPatches.WsEtankBlueDoor),
                                                sm.traverse('ElectricDeathRoomTopLeft'))
     },
     Available=lambda loc, sm: sm.wor(Bosses.bossDead(sm, 'Phantoon'),
-                                   RomPatches.has(RomPatches.WsEtankPhantoonAlive))
+                                     RomPatches.has(RomPatches.WsEtankPhantoonAlive))
 ),
 define_location(
     Area="WreckedShip",

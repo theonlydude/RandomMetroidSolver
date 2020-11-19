@@ -177,7 +177,10 @@ accessPoints = [
                                                                    RomPatches.has(RomPatches.SpongeBathBlueDoor)))),
         'PhantoonRoomOut': lambda sm: sm.wand(sm.traverse('WreckedShipMainShaftBottom'), sm.canPassBombPassages())
     }, internal=True,
-       start={'spawn':0x0300, 'doors':[0x83], 'patches':[RomPatches.SpongeBathBlueDoor], 'solveArea': "WreckedShip Main", 'needsPreRando':True}),
+       start={'spawn':0x0300,
+              'doors':[0x83,0x8b], 'patches':[RomPatches.SpongeBathBlueDoor, RomPatches.WsEtankBlueDoor],
+              'solveArea': "WreckedShip Main",
+              'needsPreRando':True}),
     AccessPoint('Wrecked Ship Back', 'WreckedShip', {
         'Wrecked Ship Main': lambda sm: SMBool(True),
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(True)
@@ -196,7 +199,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0xa2ac, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
        entryInfo = {'SamusX':0x49f, 'SamusY':0xb8},
-       traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.NoGadoras), sm.canOpenRedDoors()),
+       traverse=lambda sm: sm.canOpenEyeDoors(),
        dotOrientation = 's'),
     AccessPoint('PhantoonRoomIn', 'WreckedShip', {},
        boss = True,
@@ -323,7 +326,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x2e, 'SamusY':0x98},
        traverse=Cache.ldeco('RRO_T',
                             lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
-                                               sm.wor(RomPatches.has(RomPatches.NoGadoras), sm.canOpenRedDoors()))),
+                                               sm.canOpenEyeDoors())),
        dotOrientation = 'e'),
     AccessPoint('RidleyRoomIn', 'LowerNorfair', {},
        boss = True,
@@ -351,7 +354,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x91b6, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
        entryInfo = {'SamusX':0x1cd, 'SamusY':0x188, 'song':0x12},
-       traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.NoGadoras), sm.canOpenRedDoors()),
+       traverse=lambda sm: sm.canOpenEyeDoors(),
        dotOrientation = 'e'),
     AccessPoint('KraidRoomIn', 'Kraid', {},
        boss = True,
@@ -695,7 +698,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0xa840, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
        entryInfo = {'SamusX':0x34, 'SamusY':0x288, 'song':0x1b},
-       traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.NoGadoras), sm.canOpenRedDoors()),
+       traverse=lambda sm: sm.canOpenEyeDoors(),
        dotOrientation = 'e'),
     AccessPoint('DraygonRoomIn', 'EastMaridia', {
         'Draygon Room Bottom': Cache.ldeco('DRI_DRB',

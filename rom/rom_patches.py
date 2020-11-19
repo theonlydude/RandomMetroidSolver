@@ -42,6 +42,8 @@ class RomPatches:
     # maridia
     MaridiaTubeOpened         = 51
     MamaTurtleBlueDoor        = 52
+    # ws start
+    WsEtankBlueDoor           = 53
     ## Area rando patches
     # remove crumble block for reverse lower norfair door access
     SingleChamberNoCrumble    = 101
@@ -76,6 +78,8 @@ class RomPatches:
     NerfedCharge            = 1004
     # Nerfed rainbow beam for ultra sparse energy qty
     NerfedRainbowBeam       = 1005
+    # Red doors open with one missile, and don't react to supers: part of door color rando
+    RedDoorsMissileOnly     = 1006
 
     #### Patch sets
     # total randomizer

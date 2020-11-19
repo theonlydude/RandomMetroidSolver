@@ -28,7 +28,7 @@ for patch in sys.argv[2:]:
 
 overlaps = {}
 last, lstop = None, -1
-for rg in sorted(ips_ranges, key=lambda r:[r['range'].start, r['range'].stop]):
+for rg in sorted(ips_ranges, key=lambda r:r['range'].start):
     thisStart = rg['range'].start
     if last and lstop > thisStart and lstop != 0x7fe0: # overlap, skip checksum
         k = (last['name'], rg['name'])

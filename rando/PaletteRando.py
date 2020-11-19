@@ -426,11 +426,12 @@ class PaletteRando(object):
 
     def hue_shift_palette_single_offsets(self, data, offset_list, degree, address):
         #if green brinstar or crateria palette, shuffle blue door caps to also shuffle lower crateria color
-        if (address == 0x213264) or (address == 0x21335F): 
+        if not self.settings['no_blue_door_palette'] and ( (address == 0x213264) or (address == 0x21335F) ):
             copy_offset_list = (offset_list+self.bluedoor_bytes)
         else:
             copy_offset_list = offset_list
 
+        copy_offset_list = offset_list
         for offset in copy_offset_list:
             #Convert from LE to BE
             int_value_LE = self.get_word(data, offset)

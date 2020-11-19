@@ -1,3 +1,14 @@
+.doorPopup {
+    background-color: #ffffff;
+    position: absolute;
+    z-index: 7;
+    height: auto;
+    top: 2em;
+    left: 45%;
+    display: none;
+    padding: 0.5%;
+    border: 2px solid gray;
+}
 .imageItems {
     width: 16px;
     image-rendering: -moz-crisp-edges; /* Firefox */
@@ -3035,113 +3046,383 @@ img {
     width: 0.5875%;
     display: none;
 }
-.blueDoorV {
+.blueDoorVR {
     width: 0.4%;
     height: 1.2%;
-    border: 1px solid #000;
-    background-color: #3973e7;
     position: absolute;
     z-index: 1;
     cursor: pointer;
+    background-image: url("/solver/static/images/blue_door.svg");
+    background-size: contain;
 }
-.blueDoorH {
-    width: 0.8%;
-    height: 0.6%;
-    border: 1px solid #000;
-    background-color: #3973e7;
-    position: absolute;
-    z-index: 1;
-    cursor: pointer;
-}
-.redDoorV {
+.blueDoorVL {
     width: 0.4%;
     height: 1.2%;
-    border: 1px solid #000;
-    background-color: #de3994;
     position: absolute;
     z-index: 1;
     cursor: pointer;
+    background-image: url("/solver/static/images/blue_door.svg");
+    background-size: contain;
+    transform: rotate(180deg);
 }
-.redDoorH {
+.blueDoorHT {
     width: 0.8%;
     height: 0.6%;
-    border: 1px solid #000;
-    background-color: #de3994;
     position: absolute;
     z-index: 1;
     cursor: pointer;
+    background-image: url("/solver/static/images/blue_door_bottom.svg");
+    background-size: contain;
+    transform: rotate(180deg);
 }
-.greenDoorV {
+.blueDoorHB {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/blue_door_bottom.svg");
+    background-size: contain;
+}
+.redDoorVL {
     width: 0.4%;
     height: 1.2%;
-    border: 1px solid #000;
-    background-color: #8cef10;
     position: absolute;
     z-index: 1;
     cursor: pointer;
+    background-image: url("/solver/static/images/red_door.svg");
+    background-size: contain;
+    transform: rotate(180deg);
 }
-.greenDoorH {
-    width: 0.8%;
-    height: 0.6%;
-    border: 1px solid #000;
-    background-color: #8cef10;
-    position: absolute;
-    z-index: 1;
-    cursor: pointer;
-}
-.yellowDoorV {
+.redDoorVR {
     width: 0.4%;
     height: 1.2%;
-    border: 1px solid #000;
-    background-color: #ffb500;
     position: absolute;
     z-index: 1;
     cursor: pointer;
+    background-image: url("/solver/static/images/red_door.svg");
+    background-size: contain;
 }
-.yellowDoorH {
+.redDoorHT {
     width: 0.8%;
     height: 0.6%;
-    border: 1px solid #000;
-    background-color: #ffb500;
     position: absolute;
     z-index: 1;
     cursor: pointer;
+    background-image: url("/solver/static/images/red_door_bottom.svg");
+    background-size: contain;
+    transform: rotate(180deg);
 }
-.greyDoorV {
+.redDoorHB {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/red_door_bottom.svg");
+    background-size: contain;
+}
+.greenDoorVL {
     width: 0.4%;
     height: 1.2%;
-    border: 1px solid #000;
-    background-color: #734a52;
     position: absolute;
     z-index: 1;
     cursor: pointer;
+    background-image: url("/solver/static/images/green_door.svg");
+    background-size: contain;
+    transform: rotate(180deg);
 }
-.greyDoorH {
-    width: 0.8%;
-    height: 0.6%;
-    border: 1px solid #000;
-    background-color: #734a52;
-    position: absolute;
-    z-index: 1;
-    cursor: pointer;
-}
-.whiteDoorV {
+.greenDoorVR {
     width: 0.4%;
     height: 1.2%;
-    border: 1px solid #000;
-    background-color: #fff;
     position: absolute;
     z-index: 1;
     cursor: pointer;
+    background-image: url("/solver/static/images/green_door.svg");
+    background-size: contain;
 }
-.whiteDoorH {
+.greenDoorHT {
     width: 0.8%;
     height: 0.6%;
-    border: 1px solid #000;
-    background-color: #fff;
     position: absolute;
     z-index: 1;
     cursor: pointer;
+    background-image: url("/solver/static/images/green_door_bottom.svg");
+    background-size: contain;
+    transform: rotate(180deg);
+}
+.greenDoorHB {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/green_door_bottom.svg");
+    background-size: contain;
+}
+.yellowDoorVL {
+    width: 0.4%;
+    height: 1.2%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/yellow_door.svg");
+    background-size: contain;
+    transform: rotate(180deg);
+}
+.yellowDoorVR {
+    width: 0.4%;
+    height: 1.2%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/yellow_door.svg");
+    background-size: contain;
+}
+.yellowDoorHT {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/yellow_door_bottom.svg");
+    background-size: contain;
+    transform: rotate(180deg);
+}
+.yellowDoorHB {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/yellow_door_bottom.svg");
+    background-size: contain;
+}
+.greyDoorVL {
+    width: 0.4%;
+    height: 1.2%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/grey_door.svg");
+    background-size: contain;
+    transform: rotate(180deg);
+}
+.greyDoorVR {
+    width: 0.4%;
+    height: 1.2%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/grey_door.svg");
+    background-size: contain;
+}
+.greyDoorHT {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/grey_door_bottom.svg");
+    background-size: contain;
+    transform: rotate(180deg);
+}
+.greyDoorHB {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/grey_door_bottom.svg");
+    background-size: contain;
+}
+.whiteDoorVL {
+    width: 0.4%;
+    height: 1.2%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/white_door.svg");
+    background-size: contain;
+    transform: rotate(180deg);
+}
+.whiteDoorVR {
+    width: 0.4%;
+    height: 1.2%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/white_door.svg");
+    background-size: contain;
+}
+.whiteDoorHT {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/white_door_bottom.svg");
+    background-size: contain;
+    transform: rotate(180deg);
+}
+.whiteDoorHB {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/white_door_bottom.svg");
+    background-size: contain;
+}
+.waveDoorVL {
+    width: 0.4%;
+    height: 1.2%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/wave_door_left.svg");
+    background-size: contain;
+}
+.waveDoorVR {
+    width: 0.4%;
+    height: 1.2%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/wave_door_right.svg");
+    background-size: contain;
+}
+.waveDoorHT {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/wave_door_bottom.svg");
+    background-size: contain;
+    transform: rotate(180deg);
+}
+.waveDoorHB {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/wave_door_bottom.svg");
+    background-size: contain;
+}
+.spazerDoorVL {
+    width: 0.4%;
+    height: 1.2%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/spazer_door.svg");
+    background-size: contain;
+    transform: rotate(180deg);
+}
+.spazerDoorVR {
+    width: 0.4%;
+    height: 1.2%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/spazer_door.svg");
+    background-size: contain;
+}
+.spazerDoorHT {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/spazer_door_bottom.svg");
+    background-size: contain;
+    transform: rotate(180deg);
+}
+.spazerDoorHB {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/spazer_door_bottom.svg");
+    background-size: contain;
+}
+.plasmaDoorVL {
+    width: 0.4%;
+    height: 1.2%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/plasma_door_left.svg");
+    background-size: contain;
+}
+.plasmaDoorVR {
+    width: 0.4%;
+    height: 1.2%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/plasma_door_right.svg");
+    background-size: contain;
+}
+.plasmaDoorHT {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/plasma_door_bottom.svg");
+    background-size: contain;
+    transform: rotate(180deg);
+}
+.plasmaDoorHB {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/plasma_door_bottom.svg");
+    background-size: contain;
+}
+.iceDoorVR {
+    width: 0.4%;
+    height: 1.2%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/ice_door.svg");
+    background-size: contain;
+}
+.iceDoorVL {
+    width: 0.4%;
+    height: 1.2%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/ice_door.svg");
+    background-size: contain;
+    transform: rotate(180deg);
+}
+.iceDoorHT {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/ice_door_bottom.svg");
+    background-size: contain;
+    transform: rotate(180deg);
+}
+.iceDoorHB {
+    width: 0.8%;
+    height: 0.6%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    background-image: url("/solver/static/images/ice_door_bottom.svg");
+    background-size: contain;
 }
 
 /*
@@ -3383,29 +3664,74 @@ print("    top: {}%;    left: {}%;".format(round(a[0]*0.079166667, 2), round(a[1
 }
 
 .highlightColor {
-    border: 3px solid #3973e7;
+    border: 3px solid #000000;
 }
 #redDoorSelect {
-    width: 100%;
+    width: 2em;
     height: 2em;
     background-color: #de3994;
     cursor: pointer;
+    background-image: url("/solver/static/images/Missile.png");
+    background-repeat: no-repeat;
+    background-position: center;
 }
 #greenDoorSelect {
-    width: 100%;
+    width: 2em;
     height: 2em;
     background-color: #8cef10;
     cursor: pointer;
+    background-image: url("/solver/static/images/Super.png");
+    background-repeat: no-repeat;
+    background-position: center;
 }
 #yellowDoorSelect {
-    width: 100%;
+    width: 2em;
     height: 2em;
     background-color: #ffb500;
     cursor: pointer;
+    background-image: url("/solver/static/images/PowerBomb.png");
+    background-repeat: no-repeat;
+    background-position: center;
 }
 #greyDoorSelect {
-    width: 100%;
+    width: 2em;
     height: 2em;
     background-color: #734a52;
     cursor: pointer;
+}
+#waveDoorSelect {
+    width: 2em;
+    height: 2em;
+    background-color: #d83890;
+    cursor: pointer;
+    background-image: url("/solver/static/images/Wave.png");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+#spazerDoorSelect {
+    width: 2em;
+    height: 2em;
+    background-color: #f8b000;
+    cursor: pointer;
+    background-image: url("/solver/static/images/Spazer.png");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+#plasmaDoorSelect {
+    width: 2em;
+    height: 2em;
+    background-color: #5adb10;
+    cursor: pointer;
+    background-image: url("/solver/static/images/Plasma.png");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+#iceDoorSelect {
+    width: 2em;
+    height: 2em;
+    background-color: #3870e0;
+    cursor: pointer;
+    background-image: url("/solver/static/images/Ice.png");
+    background-repeat: no-repeat;
+    background-position: center;
 }

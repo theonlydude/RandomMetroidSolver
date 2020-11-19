@@ -22,7 +22,7 @@ def interactiveSolver(args):
             sys.exit(1)
 
         solver = InteractiveSolver(args.output)
-        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, debug=args.vcr, fill=args.fill, startAP=args.startAP, trackerRace=args.trackerRace)
+        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, fill=args.fill, startAP=args.startAP)
     else:
         # iterate
         params = {}
@@ -42,7 +42,7 @@ def interactiveSolver(args):
                 if args.items is not None:
                     params = {'items': args.items.split(',')}
                 else:
-                    if args.mode != 'seedless' and args.loc is None:
+                    if args.mode not in ['seedless', 'race', 'debug'] and args.loc is None:
                         print("Missing loc parameter when using action add for item")
                         sys.exit(1)
                     if args.mode == 'plando':
@@ -84,7 +84,7 @@ def interactiveSolver(args):
                     print("Missing doorName parameter when using action toggle for door")
                     sys.exit(1)
                 params = {'doorName': args.doorName}
-        params["debug"] = args.vcr
+        params["debug"] = args.mode == 'debug'
 
         solver = InteractiveSolver(args.output)
         solver.iterate(args.state, args.scope, args.action, params)
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     parser.add_argument('--displayGeneratedPath', '-g', help="display the generated path (spoilers!)",
                         dest='displayGeneratedPath', action='store_true')
     parser.add_argument('--race', help="Race mode magic number", dest='raceMagic', type=int)
-    parser.add_argument('--vcr', help="Generate VCR output file (in isolver it means debug mode: load all the transitions/add path info for locs)", dest='vcr', action='store_true')
+    parser.add_argument('--vcr', help="Generate VCR output file", dest='vcr', action='store_true')
     # standard/interactive, web site
     parser.add_argument('--output', '-o', help="When called from the website, contains the result of the solver",
                         dest='output', nargs='?', default=None)
@@ -174,7 +174,7 @@ if __name__ == "__main__":
                         dest="endPoint", nargs='?', default=None)
 
     parser.add_argument('--mode', help="Solver mode: standard/seedless/plando (used in interactive mode)",
-                        dest="mode", nargs="?", default=None, choices=['standard', 'seedless', 'plando'])
+                        dest="mode", nargs="?", default=None, choices=['standard', 'seedless', 'plando', 'race', 'debug'])
     parser.add_argument('--scope', help="Scope for the action: common/area/item (used in interactive mode)",
                         dest="scope", nargs="?", default=None, choices=['common', 'area', 'item', 'door'])
     parser.add_argument('--count', help="Number of item rollback (used in interactive mode)",
@@ -192,7 +192,6 @@ if __name__ == "__main__":
     parser.add_argument('--energyQty', help="rando plando  (used in interactive mode)",
                         dest="energyQty", nargs="?", default=None, choices=["sparse", "medium", "vanilla"])
     parser.add_argument('--plot', help="dump plot data in file specified", dest="plot", nargs="?", default=None)
-    parser.add_argument('--trackerRace', help="the seed is race protected, tell the solver to use seedless mode after reading the patchs from the seed", dest="trackerRace", action='store_true')
     parser.add_argument('--doorName', help="door to replace (used in interactive mode)",
                         dest="doorName", nargs="?", default=None)
     parser.add_argument('--newColor', help="new color for door (used in interactive mode)",

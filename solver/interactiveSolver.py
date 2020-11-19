@@ -121,11 +121,11 @@ class InteractiveSolver(CommonSolver):
             else:
                 if action == 'add':
                     if self.mode in ['plando', 'seedless', 'race', 'debug']:
-                        if params['loc'] is not None:
+                        if params.get('loc') is not None:
                             if self.mode == 'plando':
                                 self.setItemAt(params['loc'], params['item'], params['hide'], params['filler'])
                             else:
-                                self.setItemAt(params['loc'], params.get('item', 'Nothing'), False)
+                                self.setItemAt(params['loc'], params.get('item', 'Nothing'), False, params['filler'])
                         elif params.get('items') is not None:
                             self.collectedItems = params['items']
                             self.smbm.addItems(params['items'])

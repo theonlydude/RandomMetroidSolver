@@ -316,7 +316,7 @@ order by s.id;"""
             return None
 
         sql = """select rr.return_code,
-r.id, r.action_time, rr.return_code, lpad(round(rr.duration, 2), 5, '0'), rr.error_msg,
+r.id, r.action_time, r.guid, rr.return_code, lpad(round(rr.duration, 2), 5, '0'), rr.error_msg,
 group_concat("'", rp.name, "': '", rp.value, "'" order by rp.name)
 from randomizer r
   left join randomizer_params rp on r.id = rp.randomizer_id
@@ -335,8 +335,17 @@ order by r.id;"""
             # use a dict for the parameters which are in the last column
             params = row[-1]
             dictParams = eval('{' + params + '}')
-            outData.append(row[0:-1] + (dictParams,))
+            outData.append(list(row[0:-1]) + [dictParams,])
             paramsSet.update(dictParams.keys())
+
+            # keep guid only for non race seeds
+            guidColumn = 3
+            if outData[-1][-1]['raceMode'] == 'on':
+                # remove guid
+                outData[-1][guidColumn] = ''
+            else:
+                # add link
+                outData[-1][guidColumn] = '<a href="customizer/{}">permalink</a>'.format(outData[-1][guidColumn])
 
         # custom sort of the params
         paramsHead = []
@@ -345,7 +354,7 @@ order by r.id;"""
                 paramsHead.append(param)
                 paramsSet.remove(param)
 
-        header = ["id", "actionTime", "returnCode", "duration", "errorMsg"]
+        header = ["id", "actionTime", "guid", "returnCode", "duration", "errorMsg"]
         return (header, outData, paramsHead + sorted(list(paramsSet)))
 
     def getRandomizerSeedParams(self, randomizer_id):

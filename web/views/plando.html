@@ -155,17 +155,6 @@
     top: 29.3%;
     left: 22%;
 }
-.doorPopup {
-    background-color: #ffffff;
-    position: absolute;
-    z-index: 7;
-    height: auto;
-    top: 2em;
-    left: 45%;
-    display: none;
-    padding: 0.5%;
-    border: 2px solid gray;
-}
 .eighth {
     12.5%
 }
@@ -462,7 +451,6 @@ function onloadHook() {
   dragElement(document.getElementById("debugPopup"), "VCRGrab");
   dragElement(document.getElementById("savePopup"), "SaveGrab");
   dragElement(document.getElementById("randomizerPopup"), "RandoGrab");
-  dragElement(document.getElementById("doorPopup"), "doorGrab");
 }
 
 function hidePlandoButtons() {
@@ -847,25 +835,6 @@ def displayNumber(id, min, max, default, step="1"):
       <tr>
         <td class="half"><button type="button" onclick="save('popup')" class="full">Save</button></td>
         <td class="half"><button type="button" onclick="hideSavePopup()" class="full">Cancel</button></td>
-      </tr>
-    </table>
-  </div>
-
-  <div id="doorPopup" class="doorPopup">
-    <table class="full">
-      <colgroup><col class="eighth"/><col class="eighth"/><col class="eighth"/><col class="eighth"/><col class="eighth"/><col class="eighth"/><col class="eighth"/><col class="eighth"/></colgroup>
-      <tr><td colspan=8></td></tr>
-      <tr><td id="doorGrab" colspan=8 class="center greyRow">Choose door new color</td></tr>
-      <tr><td colspan=8 class="blankRow"></td></tr>
-      <tr>
-        <td><div id="redDoorSelect" onclick="updateDoorColor('red')"></div></td>
-        <td><div id="greenDoorSelect" onclick="updateDoorColor('green')"></div></td>
-        <td><div id="yellowDoorSelect" onclick="updateDoorColor('yellow')"></div></td>
-        <td><div id="greyDoorSelect" onclick="updateDoorColor('grey')"></div></td>
-        <td><div id="waveDoorSelect" onclick="updateDoorColor('wave')"></div></td>
-        <td><div id="spazerDoorSelect" onclick="updateDoorColor('spazer')"></div></td>
-        <td><div id="plasmaDoorSelect" onclick="updateDoorColor('plasma')"></div></td>
-        <td><div id="iceDoorSelect" onclick="updateDoorColor('ice')"></div></td>
       </tr>
     </table>
   </div>

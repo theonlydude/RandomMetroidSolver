@@ -357,3 +357,10 @@ class DoorsManager():
     @staticmethod
     def switchVisibility(name):
         DoorsManager.doors[name].switch()
+
+    # when the user clicks on a door in the race tracker or the plando
+    @staticmethod
+    def setColor(name, color):
+        # in race mode the doors are hidden
+        DoorsManager.doors[name].reveal()
+        DoorsManager.doors[name].setColor(color)

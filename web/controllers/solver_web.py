@@ -1767,8 +1767,8 @@ class WS(object):
             raiseHttp(400, "Unknown action, must be add/remove/toggle/clear/init/get/save/randomize", True)
 
         mode = request.vars.mode
-        if mode not in ["standard", "seedless", "plando"]:
-            raiseHttp(400, "Unknown mode, must be standard/seedless/plando", True)
+        if mode not in ["standard", "seedless", "plando", "race", "debug"]:
+            raiseHttp(400, "Unknown mode, must be standard/seedless/plando/race/debug", True)
 
         try:
             WSClass = globals()["WS_{}_{}".format(scope, action)]
@@ -1778,7 +1778,7 @@ class WS(object):
 
     def __init__(self, mode):
         self.mode = mode
-        if self.mode == "plando":
+        if self.mode in ["plando", "debug"]:
             if session.plando is None:
                 raiseHttp(400, "No session found for the Plandomizer Web service", True)
             self.session = session.plando
@@ -1923,10 +1923,6 @@ class WS(object):
                        '--energyQty', parameters["energyQty"]
             ]
 
-        if request.vars.debug != None:
-            params.append('--vcr')
-            params.append('--debug')
-
         # dump state as input
         with open(jsonInFileName, 'w') as jsonFile:
             json.dump(self.session["state"], jsonFile)
@@ -2040,13 +2036,11 @@ class WS_common_init(WS):
         self.session["mode"] = mode
         self.session["startLocation"] = startLocation if startLocation != None else "Landing Site"
 
-        vcr = request.vars.debug != None
         fill = request.vars.fill == "true"
-        race = request.vars.race == "true"
 
-        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr, fill, startLocation, race)
+        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, fill, startLocation)
 
-    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr, fill, startLocation, race):
+    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, fill, startLocation):
         (fd, jsonOutFileName) = tempfile.mkstemp()
         params = [
             pythonExec,  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
@@ -2060,12 +2054,6 @@ class WS_common_init(WS):
 
         if mode != "seedless":
             params += ['-r', str(jsonRomFileName)]
-
-        if race == True:
-            params.append('--trackerRace')
-
-        if vcr == True:
-            params.append('--vcr')
 
         if fill == True:
             params.append('--fill')
@@ -2219,7 +2207,7 @@ class WS_item_add(WS):
             item = 'Nothing'
 
         # in seedless mode we have to had boss items instead of nothing
-        if request.vars.mode == "seedless":
+        if request.vars.mode in ["seedless", "race", "debug"]:
             if locName in ['Kraid', 'Ridley', 'Phantoon', 'Draygon', 'MotherBrain']:
                 item = locName
 

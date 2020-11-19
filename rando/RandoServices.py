@@ -77,7 +77,7 @@ class RandoServices(object):
 
         # check that we can access the locations without the item,
         curLocs = self.areaGraph.getAvailableLocations([oneLoc], container.sm, maxDiff, startAP)
-        curLocsPostAvail = set([loc for loc in curLocs if self.reverseComebackCheck(container, oneLocItem, loc)])
+        curLocsPostAvail = set([loc for loc in curLocs if self.locPostAvailable(container.sm, loc, oneLocItem.Type)])
         curLocsCanPlace = set([loc for loc in curLocsPostAvail if self.restrictions.canPlaceAtLocation(oneLocItem, loc, container)])
 
         return len(curLocsCanPlace) > 0
@@ -98,9 +98,10 @@ class RandoServices(object):
         curLocs = set(self.currentLocations(startAP, container, post=False, diff=maxDiff))
 
         # check if item is need to postavail some locs
-        curLocsPostAvail = set([loc for loc in curLocs if self.reverseComebackCheck(container, item, loc)])
+        curLocsPostAvail = set([loc for loc in curLocs if self.locPostAvailable(container.sm, loc, item.Type)])
 
-        curLocsPostAvailWoItem = set([loc for loc in curLocs if self.reverseComebackCheck(container, None, loc)])
+        # check cur locs with can't post avail without the item
+        curLocsPostAvailWoItem = set([loc for loc in curLocs if self.locPostAvailable(container.sm, loc, None)])
 
         locsPostNokWoItem = list(curLocsPostAvail - curLocsPostAvailWoItem)
 
@@ -174,9 +175,6 @@ class RandoServices(object):
         container.sm.resetItems()
 
         return {loc: loc.difficulty.difficulty for loc in list(onlyBossLeft)}
-
-    def reverseComebackCheck(self, container, item, loc):
-        return self.locPostAvailable(container.sm, loc, item.Type if item is not None else None)
 
     # gives all the possible theoretical locations for a given item
     def possibleLocations(self, item, ap, emptyContainer, bossesKilled=True):

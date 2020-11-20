@@ -73,8 +73,10 @@ org $808268
     jmp $8294
 
 // Patch load/save/copy
+org $81800d
+	jsr patch_save_start
 org $81807f
-    jmp patch_save
+    jmp patch_save_end
 
 org $81A24A
     jsl patch_load // patch load from menu only
@@ -271,19 +273,31 @@ warnpc $80ffbf
 	//		- if there is an empty slot, use it
 	//		- if not, find the oldest backup save and use it
 
-	// notes: to id station used (see new_game) $079f (area), $078b (load station)
+
+	// FIXME backup counter has wrong value in SRAM
+	// FIXME SRAM offsets for save station and/or area are wrong
+	
 // Patch load and save routines
 // a save will always be performed when starting a new game (see new_game.asm)
 org $81ef20
 // make optional to auto backup save, set this flag to non-zero in ROM to enable the feature
 opt_backup:
-	dw $0000
+	dw $0001
 // put that here to have it at a fixed location (will be called from new_game)
 print "new_save: ", org
 new_save:
 	// call save routine
 	lda {current_save_slot}
 	jsl $818000
+	// set current save slot as used in bitmask
+	// (done only when loading the menu in vanilla code)
+	lda {current_save_slot}
+	asl
+	tax
+	lda {used_slots_mask}
+	ora $819af4,x	// bitmask index table in ROM
+	sta {used_slots_mask}
+
 	// if backup saves are disabled, return
 	lda opt_backup
 	beq .end
@@ -291,7 +305,7 @@ new_save:
 
 	// first, get offset in SRAM, using save_index routine,
 	// which is based on last_saveslot value, which is correct,
-	// since we juste saved stats (through patch_save)
+	// since we juste saved stats (through patch_save_end)
 	jsl save_index		// A is non-0, so get standard stats addr
 	// x += backup_save_data_off
 	txa
@@ -311,7 +325,7 @@ new_save:
 // save slot data:
 // slot ID, slot bitmask, SRAM addr for backup data, SRAM addr for load station info
 // (SRAM addresses are offsets in bank $70)
-
+slots_data:
 slot0_data:
 	dw $0000,$0001,{backup_sram_slot0},$0166
 
@@ -463,8 +477,21 @@ check_slot:
 	rts
 
 backup_save:
-	// reuse $47/$4A used in decompression routine according to RAM map
-	// we have to use direct page for copy, and I'm not sure we can use
+	// increment backup counter in our save file
+	lda {current_save_slot}
+	asl
+	asl
+	asl
+	tax
+	lda slots_data+2,x
+	tax
+	lda $700002,x
+	inc
+	sta $700002,x
+
+	// direct page indirect addressing copy :
+	// reuse $47/$4A used in decompression routine (according to RAM map)
+	// we have to use direct page for addresses, and I'm not sure we can use
 	// the start of direct page in game as it is done in original menu
 	// routine ($00/$03)
 
@@ -543,17 +570,19 @@ backup_save:
 	lda $700002,x
 	and #$7fff
 	sta $700002,x
+	// mark backup slot as used in bitmask
+	lda {backup_candidate}
+	asl
+	tax
+	lda {used_slots_mask}
+	ora $819af4,x	// bitmask index table in ROM
+	sta {used_slots_mask}
 	rts
 
-patch_save:
-    lda {timer1}
-    sta {stats_timer}
-    lda {timer2}
-    sta {stats_timer}+2
-    lda #$0001
-    jsl save_stats
+patch_save_start:
+	pha	// save A, it is used as arg in hijacked function
 	lda opt_backup
-	beq .end	
+	beq .end
 	jsl {check_new_game}
 	beq .end
 	// we have backup saves enabled, and it is not the 1st save:
@@ -561,6 +590,18 @@ patch_save:
 	jsr is_backup_needed
 	bcc .end
 	jsr backup_save
+.end:
+	pla
+	and #0003	// hijacked code
+	rts
+
+patch_save_end:
+    lda {timer1}
+    sta {stats_timer}
+    lda {timer2}
+    sta {stats_timer}+2
+    lda #$0001
+    jsl save_stats
 .end:
     ply
     plx
@@ -592,13 +633,9 @@ patch_load:
 	clc
 	adc {backup_save_data_off}
 	tax
-	inx
-	inx
-	lda $700000,x
+	lda $700002,x
 	bmi .check
 .load_backup:
-	dex
-	dex
 	phx
 	// n flag not set, we're loading a backup
 	// check if we're soft resetting: if so, will take stats from RAM
@@ -624,11 +661,9 @@ patch_load:
 	clc
 	adc #$0010
 	sta {last_saveslot}
-	inx
-	inx
-	lda $700000,x
+	lda $700002,x
 	ora #$8000
-	sta $700000,x
+	sta $700002,x
 	bra .end_ok
 .check:
     // check save slot

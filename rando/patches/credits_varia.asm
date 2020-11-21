@@ -273,10 +273,6 @@ warnpc $80ffbf
 	//		- if there is an empty slot, use it
 	//		- if not, find the oldest backup save and use it
 
-
-	// FIXME replace save station check with current save instead of most recent backup,
-	//	 and do it first thing in is_backup_needed
-
 // Patch load and save routines
 // a save will always be performed when starting a new game (see new_game.asm)
 org $81ef20
@@ -351,31 +347,34 @@ is_backup_needed:
 	// save X and Y as they will be used
 	phx
 	phy
-	// first, find out our backup counter, and save it in backup_counter
+	// first, check if current save station is different from last save
 	lda {current_save_slot}
 	asl
 	asl
 	asl
-	tax
-	lda slots_data+4,x
-	tax
+	tay
+	ldx slots_data+6,y
+	lda $700000,x
+	cmp {load_station_index}
+	bne .check_needed
+	lda $700002,x
+	cmp {area_index}
+	beq .end
+.check_needed:
+	// find out our backup counter, and save it in backup_counter
+	ldx slots_data+4,y
 	lda $700002,x
 	and #$7fff
 	sta {backup_counter}
 	// backup_candidate will be used to store the backup slot candidate
 	// and various info as follows:
 	//
-	// eor-----fn----ss
+	// eo------------ss
 	//
 	// ss: save slot usable for backup
 	// e: ss is empty
 	// o: ss contains an old backup
-	// r: ss contains the most recent backup
-	// (e, o, and r are only use internally by check_slot to determine ss)
-	// f: flag that indicates if a backup save exists
-	// n: flag that indicates a backup is needed (most recent backup
-	//    has a different save station)
-	// (f and n will be read after all slots are checked)
+	// (e and o are only use internally by check_slot to determine ss)
 	lda #$0003	// 3 is used as invalid value marker, as slots are 0 to 2
 	sta {backup_candidate}
 	// check all slots
@@ -432,10 +431,6 @@ check_slot:
 	// if not a backup save, skip
 	lda $700002,x
 	bmi .end
-	// we have at least one backup, set the f flag bit in backup_candidate
-	lda {backup_candidate}
-	ora #$0080
-	sta {backup_candidate}
 	// if backup counter is different:
 	lda $700002,x
 	cmp {backup_counter}
@@ -450,24 +445,8 @@ check_slot:
 	sta {backup_candidate}
 	bra .end
 .last_backup:
-	// now we're sure this slot is the last backup, if save stations are
-	// different, we must backup
-	ldx $0006,y
-	lda $700000,x
-	cmp {load_station_index}
-	bne .needed
-	lda $700002,x
-	cmp {area_index}
-	beq .end
-.needed:
 	// we're here only if this save slot is the most recent backup
-	// and load stations are different.
-	// mark the n flag bit in backup_candidate
-	lda {backup_candidate}
-	ora #$0040
-	sta {backup_candidate}
-	// mark it with the (r) flag bit and store slot if necessary
-	bit #$c000
+	bit #$c000 // checks both e and o flags
 	bne .end
 	// no better candidate yet
 	and #$fffc
@@ -521,7 +500,7 @@ backup_save:
 	iny
 	cpy #$065c
 	bmi -
-	// copy some other SRAM stuff (what??) like original routine
+	// copy checksum
 	lda {current_save_slot}
 	asl
 	tax
@@ -564,7 +543,7 @@ backup_save:
 	cpy {full_stats_area_sz_b}
 	bcc -
 	// clear player flag in backup data area
-	lda save_slots,x	// X still has destination slot SRAM offset
+	lda $4a		// still has destination slot SRAM offset
 	clc
 	adc {backup_save_data_off}
 	tax
@@ -629,10 +608,12 @@ patch_load:
 	// if backup saves are enabled:
 	// check if we load a backup save, and if so, get stats
 	// from original save slot, and mark this slot as non-backup
-	jsl save_index
-	txa
-	clc
-	adc {backup_save_data_off}
+	lda {current_save_slot}
+	asl
+	asl
+	asl
+	tax
+	lda.l slots_data+4,x
 	tax
 	lda $700002,x
 	bmi .check

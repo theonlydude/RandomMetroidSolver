@@ -359,7 +359,7 @@ is_backup_needed:
 	bne .check_needed
 	lda $700002,x
 	cmp {area_index}
-	beq .end
+	beq .no_backup
 .check_needed:
 	// find out our backup counter, and save it in backup_counter
 	ldx slots_data+4,y
@@ -384,23 +384,17 @@ is_backup_needed:
 	jsr check_slot
 	ldy #slot2_data
 	jsr check_slot
-	lda {backup_candidate}
-	bit #$0080	// check if f is clear
-	beq .needed	// backup needed if no backup yet
-	bit #$0040	// check if n is set
-	bne .needed	// most recent backup has different saves
-.not_needed:
-	clc
-	bra .end
-.needed:
 	// clear all our work flags from backup_candidate
 	lda {backup_candidate}
 	and #$0003
 	sta {backup_candidate}
 	// check that we can actually backup somewhere
 	cmp #$0003
-	beq .not_needed
+	beq .no_backup
 	sec
+	bra .end
+.no_backup:
+	clc
 .end:
 	ply
 	plx

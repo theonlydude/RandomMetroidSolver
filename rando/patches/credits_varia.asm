@@ -20,8 +20,9 @@ define green "table tables/green.tbl"
 define orange "table tables/orange.tbl"
 define purple "table tables/purple.tbl"
 define big "table tables/big.tbl"
-// store last save slot in unused SRAM
+// store last save slot and used saves in unused SRAM
 define last_saveslot $701dfe
+define used_slots_mask $701dfc
 // backup RAM for timer to avoid it to get cleared at boot
 define timer_backup1 $7fffe2
 define timer_backup2 {timer_backup1}+2
@@ -54,7 +55,6 @@ define last_stats_save_ok_off  #$02fc
 define last_stats_save_ok_flag #$caca
 
 define current_save_slot	$0952
-define used_slots_mask		$0954
 define area_index		$079f
 define load_station_index	$078b
 
@@ -83,6 +83,14 @@ org $81A24A
 
 org $819A66
     jsr copy_stats
+
+// hijack menu display for backup saves
+org $819f13
+	jsr load_menu_1st_file
+org $819f46
+	jsr load_menu_2nd_file
+org $819f7c
+	jsr load_menu_3rd_file
 
 // Hijack loading new game to reset stats
 org $828063
@@ -143,7 +151,10 @@ boot1:
     sta {timer_backup2}
     jsl is_save_slot
     beq .save
-    bra .cont   // don't restore anything if no game was ever saved
+    // no game was ever saved: init used save slots bitmask, and skip timer stuff
+    lda #$0000
+    sta {used_slots_mask}
+    bra .cont
 .save:
     // check if soft reset, if so, restore RAM timer
     lda {softreset}
@@ -285,8 +296,10 @@ new_save:
 	// call save routine
 	lda {current_save_slot}
 	jsl $818000
-	// set current save slot as used in bitmask
-	// (done only when loading the menu in vanilla code)
+	// if backup saves are disabled, return
+	lda.l opt_backup
+	beq .end
+	// set current save slot as used in SRAM bitmask
 	lda {current_save_slot}
 	asl
 	tax
@@ -294,9 +307,6 @@ new_save:
 	ora $819af4,x	// bitmask index table in ROM
 	sta {used_slots_mask}
 
-	// if backup saves are disabled, return
-	lda opt_backup
-	beq .end
 	// init backup save data :
 
 	// first, get offset in SRAM, using save_index routine,
@@ -387,10 +397,10 @@ is_backup_needed:
 	// clear all our work flags from backup_candidate
 	lda {backup_candidate}
 	and #$0003
-	sta {backup_candidate}
 	// check that we can actually backup somewhere
 	cmp #$0003
 	beq .no_backup
+	sta {backup_candidate}
 	sec
 	bra .end
 .no_backup:
@@ -555,7 +565,7 @@ backup_save:
 
 patch_save_start:
 	pha	// save A, it is used as arg in hijacked function
-	lda opt_backup
+	lda.l opt_backup
 	beq .end
 	jsl {check_new_game}
 	beq .end
@@ -597,7 +607,7 @@ patch_load:
     bcc .backup_check    // skip to end if new file or SRAM corrupt
     jmp .end
 .backup_check:
-	lda opt_backup
+	lda.l opt_backup
 	beq .check
 	// if backup saves are enabled:
 	// check if we load a backup save, and if so, get stats
@@ -678,6 +688,60 @@ patch_load:
     plx
     plb
     rtl
+
+files_tilemaps:
+	dw $b436,$b456,$b476
+
+// arg A=file
+load_menu_file:
+	phx
+	pha
+	lda.l opt_backup
+	beq .nochange
+.check_slot:
+	pla
+	pha
+	asl
+	tax
+	lda $819af4,x	// bitmask index table in ROM
+	and {used_slots_mask}
+	beq .nochange
+.load_slot:
+	// load save slot value in SRAM
+	pla
+	pha
+	asl
+	asl
+	asl
+	tax
+	lda.l slots_data+4,x
+	tax
+	lda $700000,x
+	bra .load_tilemap
+.nochange:
+	pla
+	pha
+.load_tilemap:
+	asl
+	tax
+	lda.l files_tilemaps,x
+	tay
+.end:
+	pla
+	plx
+	rts
+
+load_menu_1st_file:
+	lda #$0000
+	jmp load_menu_file
+
+load_menu_2nd_file:
+	lda #$0001
+	jmp load_menu_file
+
+load_menu_3rd_file:
+	lda #$0002
+	jmp load_menu_file
 
 save_slots:
     dw {stats_sram_slot0}

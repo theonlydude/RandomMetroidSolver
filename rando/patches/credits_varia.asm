@@ -46,10 +46,10 @@ define stats_sram_slot0     $1400
 define stats_sram_slot1     $1700
 define stats_sram_slot2     $1a00
 
-define backup_save_data_off    #$02f9
-define backup_sram_slot0       $16f9
-define backup_sram_slot1       $19f9
-define backup_sram_slot2       $1cf9
+define backup_save_data_off    #$02f8
+define backup_sram_slot0       $16f8
+define backup_sram_slot1       $19f8
+define backup_sram_slot2       $1cf8
 define last_stats_save_ok_off  #$02fc
 define last_stats_save_ok_flag #$caca
 
@@ -274,9 +274,9 @@ warnpc $80ffbf
 	//		- if not, find the oldest backup save and use it
 
 
-	// FIXME backup counter has wrong value in SRAM
-	// FIXME SRAM offsets for save station and/or area are wrong
-	
+	// FIXME replace save station check with current save instead of most recent backup,
+	//	 and do it first thing in is_backup_needed
+
 // Patch load and save routines
 // a save will always be performed when starting a new game (see new_game.asm)
 org $81ef20
@@ -351,12 +351,13 @@ is_backup_needed:
 	// save X and Y as they will be used
 	phx
 	phy
-	// first, find out our save counter, and save it in backup_counter
-	jsl save_index
-	// x += backup_save_data_off
-	txa
-	clc
-	adc {backup_save_data_off}
+	// first, find out our backup counter, and save it in backup_counter
+	lda {current_save_slot}
+	asl
+	asl
+	asl
+	tax
+	lda slots_data+4,x
 	tax
 	lda $700002,x
 	and #$7fff
@@ -435,7 +436,7 @@ check_slot:
 	lda {backup_candidate}
 	ora #$0080
 	sta {backup_candidate}
-	// if save counter is different:
+	// if backup counter is different:
 	lda $700002,x
 	cmp {backup_counter}
 	beq .last_backup
@@ -452,10 +453,10 @@ check_slot:
 	// now we're sure this slot is the last backup, if save stations are
 	// different, we must backup
 	ldx $0006,y
-	lda $70000,x
+	lda $700000,x
 	cmp {load_station_index}
 	bne .needed
-	lda $70002,x
+	lda $700002,x
 	cmp {area_index}
 	beq .end
 .needed:
@@ -483,7 +484,7 @@ backup_save:
 	asl
 	asl
 	tax
-	lda slots_data+2,x
+	lda.l slots_data+4,x
 	tax
 	lda $700002,x
 	inc
@@ -644,6 +645,8 @@ patch_load:
 	beq .load_backup_end
 	// load stats from original save SRAM
 	lda $700000,x	// save slot in SRAM
+	clc
+	adc #$0010
 	sta {last_saveslot}
 	lda #$0000
 	jsl save_index

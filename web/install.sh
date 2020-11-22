@@ -737,3 +737,6 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/spazer_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/spazer_door.png ~/web2py/applications/solver/static/images/spazer_door.png
 [ -L ~/web2py/applications/solver/static/images/super_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/super_door.png ~/web2py/applications/solver/static/images/super_door.png
 [ -L ~/web2py/applications/solver/static/images/wave_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/wave_door.png ~/web2py/applications/solver/static/images/wave_door.png
+
+[ -L ~/web2py/applications/solver/static/images/diddy_kong.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/diddy_kong.png ~/web2py/applications/solver/static/images/diddy_kong.png
+[ -L ~/web2py/applications/solver/static/images/sprite_sheets/diddy_kong.png ] || ln -s ~/RandomMetroidSolver/web/static/sprite_sheets/diddy_kong.png ~/web2py/applications/solver/static/images/sprite_sheets/diddy_kong.png

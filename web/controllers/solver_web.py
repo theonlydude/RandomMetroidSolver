@@ -2378,9 +2378,10 @@ customSprites = {
     'mario_8bit': {"index":24, "name": "Mario (NES)", "desc": "One of the bros", "author": "TarThoron", "group": "Custom"},
     'mario_8bit_modern': {"index":25, "name": "Mario (Alt)", "desc": "One of the bros, with a more modern palette", "author": "TarThoron", "group": "Custom"},
     'luigi': {"index":26, "name": "Luigi", "desc": "The other bro", "author": "RonnSama", "group": "Custom"},
-    'marga': {"index":27, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
-    'sprite_can': {"index":28, "name": "Sprite", "desc": "A ... Sprite ... ", "author": "TarThoron", "group": "Custom"},
-    'win95_cursor': {"index":29, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
+    'diddy_kong': {"index":27, "name": "Diddy Kong", "desc": "Diddy Kong from Donkey Kong Country", "author": "Di10", "group": "Custom"},
+    'marga': {"index":28, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
+    'sprite_can': {"index":29, "name": "Sprite", "desc": "A ... Sprite ... ", "author": "TarThoron", "group": "Custom"},
+    'win95_cursor': {"index":30, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
 }
 
 customShips = {

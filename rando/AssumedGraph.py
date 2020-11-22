@@ -20,14 +20,15 @@ class AssumedGraph(object):
         # pv: valid item can be place at loc
         # pi: invalid item can be place at loc
         # u: loc unavailable without item
-        # b: loc unavailable without both items
+        # b: nolongeravaillocswoitem locs of item where all its possible locations are unavailable without both items (bv the associated valid item)
+        # ov: one loc valid item unavailable without both items (o for the other item)
         # c: loc unavailable without two count items
         # n: loc post unavailable without item
-        self.priorities = {'u': 1, 'c': 50, 'n': 100, 'b': 75, 'pv': 0, 'pi': 0}
+        self.priorities = {'u': 1, 'c': 50, 'n': 100, 'ov': 25, 'o': 0, 'pv': 0, 'pi': 0, 'b': 25, 'bv': 0}
         self.log = utils.log.get('AssumedGraph')
 
     def toDot(self, step):
-        colors = {'u': "red", 'c': "yellow", 'n': "cyan", 'b': "green", 'pv': "pink", 'pi': "orange"}
+        colors = {'u': "red", 'c': "yellow", 'n': "cyan", 'b': "green", 'bv': "gold", 'pv': "pink", 'pi': "orange", 'o': "darkgreen", 'ov': "khaki"}
 
         with open("step{:02d}.dot".format(step), 'w') as f:
             f.write("digraph D {\n")
@@ -40,7 +41,10 @@ class AssumedGraph(object):
                 for type, neighbours in locNode.neighbours.items():
                     if type in ['pv', 'pi']:
                         continue
-                    f.write("{} -> {{{}}} [color=\"{}\"]\n".format(locNode.graphName, ', '.join([itemNode.data.Type for itemNode in neighbours]), colors[type]))
+                    if type == 'u':
+                        f.write("{} -> {{{}}} [color=\"{}\"]\n".format(locNode.graphName, ', '.join([itemNode.data.Type for itemNode in neighbours]), colors[type]))
+                    else:
+                        f.write("{} -> {{{}}} [color=\"{}\" label=\"{}\"]\n".format(locNode.graphName, ', '.join([itemNode.data.Type for itemNode in neighbours]), colors[type], type))
 
             # add items
             for item, itemNode in self.items.items():
@@ -48,7 +52,10 @@ class AssumedGraph(object):
                 for type, neighbours in itemNode.neighbours.items():
                     if type in ['pv', 'pi']:
                         continue
-                    f.write("{} -> {{{}}} [color=\"{}\"]\n".format(item.Type, ', '.join([locNode.graphName for locNode in neighbours]), colors[type]))
+                    if type == 'u':
+                        f.write("{} -> {{{}}} [color=\"{}\"]\n".format(item.Type, ', '.join([locNode.graphName for locNode in neighbours]), colors[type]))
+                    else:
+                        f.write("{} -> {{{}}} [color=\"{}\" label=\"{}\"]\n".format(item.Type, ', '.join([locNode.graphName for locNode in neighbours]), colors[type], type))
 
             # add ranks
             f.write("{{ rank=same {} }}\n".format(" ".join([locNode.graphName for locNode in self.locations.values()])))
@@ -100,9 +107,23 @@ class AssumedGraph(object):
             else:
                 for loc in data['possibleLocs']:
                     self.addEdge(it, loc, type='pi')
-            if 'locsNokWoBothItems' in data:
-                for loc in data['locsNokWoBothItems']:
-                    self.addEdge(it, loc, type='b')
+            oneLocItem = it
+            for item, locations in data['oneLocNokWoBothItems'].items():
+                for loc in locations:
+                    # one loc valid item
+                    self.addEdge(oneLocItem, loc, type='ov')
+                    # the associated item making the one loc non valid for oneLocItem
+                    self.addEdge(item, loc, type='o')
+#            for validItem, locations in data['locsNokWoBothItems'].items():
+#                # priorize it nolongeravaillocswoitem locs
+#                for loc in locations:
+#                    # 'it' those possible locs will become unavailable without 'it' and associated validItem.
+#                    # the locations are the nolongeravaillocswoitem of 'it'
+#                    self.addEdge(it, loc, type='b')
+#                    self.log.debug("b {} -> {}".format(it.Type, loc.Name))
+#                    # the associated valid item
+#                    self.addEdge(validItem, loc, type='bv')
+#                    self.log.debug("bv {} -> {}".format(validItem.Type, loc.Name))
 
         self.handleItemsWithOnePossibleLoc()
 

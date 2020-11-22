@@ -33,7 +33,7 @@ class AssumedFiller(Filler):
         if self.vcr is not None:
             # give all items to vcr, like we do in assumed fill
             self.vcr.setFiller('reverse')
-            self.vcr.addInitialItems([it.Type for it in self.container.itemPool])
+            self.vcr.addInitialItems([it.Type for it in self.container.itemPool], [loc.Name for loc in self.container.unusedLocations])
 
         # first collect mother brain
         self.ap = 'Golden Four'
@@ -133,6 +133,13 @@ class AssumedFiller(Filler):
             if not found:
                 self.log.debug("No item has noLongerAvailLocsWoItem reduced")
 
+    def lostItem(self, itemLocDict):
+        for item, data in itemLocDict.items():
+            if not data['possibleLocs']:
+                self.log.debug("lost item found: {}".format(item.Type))
+                return True
+        return False
+
     def step(self, onlyBossCheck=False):
         self.log.debug("------------------------------------------------")
         self.log.debug("is earlyGame: {}".format(self.earlyGame))
@@ -179,6 +186,11 @@ class AssumedFiller(Filler):
             if lostLocations:
                 self.log.debug("lost locations: {}".format([loc.Name for loc in lostLocations]))
                 return False
+
+        # check if an item has no possible locs
+        if self.lostItem(itemLocDict):
+            self.log.debug("found one item with no possible location")
+            return False
 
         # keep only priority locations, locations that need to be filled to allow placement of an item
         # which will make other locations unreachable

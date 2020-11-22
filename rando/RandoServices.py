@@ -1,5 +1,6 @@
 
 import utils.log, copy, random, sys, logging
+from collections import defaultdict
 from enum import Enum, unique
 from utils.parameters import infinity
 from rando.ItemLocContainer import getLocListStr, getItemListStr, ContainerSoftBackup, ItemLocation
@@ -50,7 +51,7 @@ class RandoServices(object):
             # we only place items which won't make some locs unavailable
             validItems = set([it for it, data in itemLocDict.items() if not data['noLongerAvailLocsWoItem']])
 
-        # for each item1 with only one possible location, for each leaf item2,
+        # for each valid item1 with only one possible location, for each leaf item2,
         # check that item1 loc is still available without both items.
         # TODO::detect if two items have the same only possible location
         oneLocationItemsLocs = {it: data for it, data in itemLocDict.items() if len(data['possibleLocs']) == 1 and it in validItems}
@@ -59,27 +60,47 @@ class RandoServices(object):
             for item in itemLocDict.keys():
                 if item in oneLocationItemsLocs.keys():
                     continue
-                if not self.locStillOkWoBothItems(item, oneLocItem, startAP, oneLoc, container, container.itemPool, maxDiff):
-                    # if one loc item is in leaf, increase its location priority, else remove leaf item from leafs
+                if not self.locsStillOkWoBothItems(oneLocItem, item, startAP, [oneLoc], container, container.itemPool, maxDiff):
                     self.log.debug("found loc unavailable wo both items, item: {} one loc item: {}, loc: {}".format(item.Type, oneLocItem.Type, oneLoc.Name))
-                    data['locsNokWoBothItems'] = [oneLoc]
+                    data['oneLocNokWoBothItems'][item].add(oneLoc)
+
+#        # for each valid item1 check for each other item2 if all possible locs for item2 get non available without both items
+#        for validItem, validItemData in itemLocDict.items():
+#            if validItemData["noLongerAvailLocsWoItem"]:
+#                # not a valid item, continue
+#                continue
+#            for testItem, testItemData in itemLocDict.items():
+#                if validItem == testItem:
+#                    continue
+#                if not self.locsStillOkWoBothItems(testItem, validItem, startAP, testItemData["possibleLocs"], container, container.itemPool, maxDiff):
+#                    self.log.debug("found test item with all its possible locs unavailable wo both items, test item: {} valid item: {}".format(testItem.Type, validItem.Type))
+#                    # priorize testItem locs non available without him (the graph will prevent validItem to be considered as valid)
+#                    testItemData['locsNokWoBothItems'][validItem].update(testItemData["noLongerAvailLocsWoItem"])
+#
+#        self.log.debug("####################################################")
+#        self.log.debug("locsNokWoBothItems:")
+#        for it1, data in itemLocDict.items():
+#            if data['locsNokWoBothItems']:
+#                for it2, locs in data['locsNokWoBothItems'].items():
+#                    self.log.debug("it1: {} it2: {} locs: {}".format(it1.Type, it2.Type, [loc.Name for loc in locs]))
+#        self.log.debug("####################################################")
 
         return itemLocDict
 
-    def locStillOkWoBothItems(self, leafItem, oneLocItem, startAP, oneLoc, container, items, maxDiff):
-        #self.log.debug("locStillOkWoBothItems: leafItem: {} oneLocItem: {} oneLoc: {}".format(leafItem.Type, oneLocItem.Type, oneLoc.Name))
+    def locsStillOkWoBothItems(self, validItem, testItem, startAP, locations, container, items, maxDiff):
         container.sm.resetItems()
-        items.remove(leafItem)
-        items.remove(oneLocItem)
+        items.remove(testItem)
+        items.remove(validItem)
         container.sm.addItems([it.Type for it in items])
-        items.append(oneLocItem)
-        items.append(leafItem)
+        items.append(validItem)
+        items.append(testItem)
 
-        # check that we can access the locations without the item,
-        curLocs = self.areaGraph.getAvailableLocations([oneLoc], container.sm, maxDiff, startAP)
-        curLocsPostAvail = set([loc for loc in curLocs if self.locPostAvailable(container.sm, loc, oneLocItem.Type)])
-        curLocsCanPlace = set([loc for loc in curLocsPostAvail if self.restrictions.canPlaceAtLocation(oneLocItem, loc, container)])
+        # check that we can access the locations without both items
+        curLocs = self.areaGraph.getAvailableLocations(locations, container.sm, maxDiff, startAP)
+        curLocsPostAvail = set([loc for loc in curLocs if self.locPostAvailable(container.sm, loc, validItem.Type)])
+        curLocsCanPlace = set([loc for loc in curLocsPostAvail if self.restrictions.canPlaceAtLocation(validItem, loc, container)])
 
+        #self.log.debug("locsStillOkWoBothItems: testItem: {} validItem: {} locations: {} curLocs: {} curLocsPostAvail: {} curLocsCanPlace: {}".format(testItem.Type, validItem.Type, len(locations), len(curLocs), len(curLocsPostAvail), len(curLocsCanPlace)))
         return len(curLocsCanPlace) > 0
 
     def getLocsDistance(self, locs, startAP, container, items, maxDiff):
@@ -134,10 +155,12 @@ class RandoServices(object):
         # return the locs no longer available without two items (for count items)
         # return the locs where post avail fails without the item
         # return the list of locations that we can still reach without the item and where we can place the item.
+        # add empty defaultdict for oneLocNokWoBothItems and locsNokWoBothItems
         return {"availLocsWoItem": curLocs, "availLocsWoItemLen": len(curLocs),
                 "noLongerAvailLocsWoItem": set(container.unusedLocations) - curLocs,
                 "locsNokWoDoubleItem": locsNokWoDoubleItem,
-                "locsPostNokWoItem": locsPostNokWoItem, "possibleLocs": curLocsCanPlace}
+                "locsPostNokWoItem": locsPostNokWoItem, "possibleLocs": curLocsCanPlace,
+                "oneLocNokWoBothItems": defaultdict(set), "locsNokWoBothItems": defaultdict(set)}
 
     # reverse only boss left locations for assumed fill
     def getOnlyBossLeftLocationReverse(self, startAP, container, earlyGame):

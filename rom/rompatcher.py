@@ -379,6 +379,8 @@ class RomPatcher:
                 plms.append('WS_Save_Blinking_Door')
             if bosses == True:
                 stdPatches.append("Phantoon_Eye_Door")
+            if area == True or doorsColorsRando == True:
+                stdPatches.append("Enable_Backup_Saves")
 
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)

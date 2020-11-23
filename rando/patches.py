@@ -61,6 +61,9 @@ patches = {
     "Escape_Animals_Open_Maridia": {
         0x7C54C: [0x10]
     },
+    "Enable_Backup_Saves": {
+        0xef20: [0x1]
+    },
     # vanilla data to restore setup asm for plandos
     "Escape_Animals_Disable": {
         0x79867: [0xb2, 0x91],

@@ -1922,6 +1922,8 @@ class WS(object):
             params += ['--minorQty', parameters["minorQty"],
                        '--energyQty', parameters["energyQty"]
             ]
+            if "forbiddenItems" in parameters:
+                params += ['--forbiddenItems', parameters["forbiddenItems"]]
 
         # dump state as input
         with open(jsonInFileName, 'w') as jsonFile:
@@ -2120,6 +2122,12 @@ class WS_common_randomize(WS):
             raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", True)
         if request.vars.energyQty not in ["sparse", "medium", "vanilla"]:
             raiseHttp(400, "Wrong value for energyQty", True)
+        if request.vars.forbiddenItems != '':
+            forbiddenItems = request.vars.forbiddenItems.split(',')
+            validItems = set(["Charge", "Ice", "Wave", "Spazer", "Plasma", "Varia", "Gravity", "Morph", "Bomb", "SpringBall", "ScrewAttack", "HiJump", "SpaceJump", "SpeedBooster", "Grapple", "XRayScope", "ETank", "Reserve", "Missile", "Super", "PowerBomb"])
+            for item in forbiddenItems:
+                if item not in validItems:
+                    raiseHttp(400, "Wrong value for forbidden items", True)
 
     def action(self):
         if self.session["mode"] != "plando":
@@ -2128,6 +2136,8 @@ class WS_common_randomize(WS):
         params = {}
         for elem in "minorQty", "energyQty":
             params[elem] = request.vars[elem]
+        if request.vars.forbiddenItems != '':
+            params["forbiddenItems"] = request.vars.forbiddenItems
 
         self.session["rando"] = params
 

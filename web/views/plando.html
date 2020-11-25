@@ -155,8 +155,8 @@
     top: 29.3%;
     left: 22%;
 }
-.eighth {
-    12.5%
+.rightMargin {
+    margin-right: 0.75em;
 }
 </style>
 
@@ -226,6 +226,15 @@ function randomize() {
   for(var i=0; i<elems.length; i++) {
     data[elems[i]] = document.getElementById(elems[i]).value;
   }
+
+  var forbiddenId = ["Charge", "Ice", "Wave", "Spazer", "Plasma", "Varia", "Gravity", "Morph", "Bomb", "SpringBall", "ScrewAttack", "HiJump", "SpaceJump", "SpeedBooster", "Grapple", "XRayScope", "ETank", "Reserve", "Missile", "Super", "PowerBomb"];
+  var forbiddenItems = [];
+  for(var i=0; i<forbiddenId.length; i++) {
+    if(document.getElementById(forbiddenId[i]+"_bool").checked) {
+      forbiddenItems.push(forbiddenId[i]);
+    }
+  }
+  data["forbiddenItems"] = forbiddenItems.join();
 
   // call WS
   ajaxCall(data, "download", ajaxOkRandomizer);
@@ -346,12 +355,11 @@ function startTheTour(step=-1) {
 <p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.</p>\
 <p>Please check the help on the <a href=\"{{=URL(f="tracker")}}\" target=\"_blank\">Tracker page</a> first, since the Plandomizer interface is based on the Tracker interface.</p>\
 <h4>Start</h4>\
-<p>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button, this popup will be displayed:\
-<img src=\"/solver/static/images/load_popup.png\" alt=\"Load popup\">\
+<p>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button, a popup will be displayed:\
 </p>\
 <p>As a base for your Plando ROM you should generate a seed on the <a href=\"/randomizer\" target=\"_blank\">Randomizer page</a> with all the optional patches that you need and the start location of your choice.</p>\
 <p><b>Hint:</b>You can load the base ROM locations and transitions by checking the \"Populate your plando with the items and transitions from the base ROM\" checkbox.</p>\
-<p><b>Warning:</b>Using a race protected seed as your base ROM is not supported and will likely result with in-game crash.</p>\
+<p><b>Warning:</b>Using a race protected seed as your base ROM is not supported and is forbidden.</p>\
 <p><b>Note:</b> Don't use a sprite customized seed as your base if you want to upload your plando to the <a href=\"{{=URL(f="plandorepo")}}\" target=\"_blank\">Plandository</a> later.</p>\
 <h4>Usage</h4>\
 <p>The available locations will be displayed on the map, click on a location and this popup will be displayed allowing you to choose which item to place:\
@@ -375,6 +383,7 @@ Using a base seed with Escape randomization allows you to edit the escape transi
 <h4>Randomization</h4>\
 <p>You can use the <img src=\"/solver/static/images/games.svg\" alt=\"Random\" style=\"width: 32px\"> button to let the VARIA Randomizer fill all the empty remaining locations of your plando.</p>\
 <p>It'll display a popup where you can choose the Randomizer parameters, the speedrun progression speed is used to randomize (random fill).</p>\
+<p>You can tell the randomizer to not add some items to the pool of items to randomize. Items already placed at locations in the plando are not concerned.</p>\
 <p><b>Hint:</b>In areas/bosses mode you don't have to add all the transitions, the VARIA randomizer will limit itself to the connected locations (like a Minimizer).</p>\
 <p><b>Hint:</b>You can add items in sequence break locations, the VARIA randomizer will fill in the gaps.</p>\
 <h4>Lock</h4>\
@@ -808,6 +817,32 @@ def displayNumber(id, min, max, default, step="1"):
       <tr>
         <td>Hide the result of the VARIA Randomizer (to save it without spoiling):</td>
         <td><input id="hideRando" name="hideRando" type="checkbox"></td>
+      </tr>
+      <tr>
+      <td>Items not to place</td>
+        <td>
+          <nobr><input id="Charge_bool" name="Charge_bool" type="checkbox" ><img src="/solver/static/images/Charge.png" alt="Charge.png" title="Charge.png" class="rightMargin"/></nobr>
+          <nobr><input id="Ice_bool" name="Ice_bool" type="checkbox" ><img src="/solver/static/images/Ice.png" alt="Ice.png" title="Ice.png" class="rightMargin"/></nobr>
+          <nobr><input id="Wave_bool" name="Wave_bool" type="checkbox" ><img src="/solver/static/images/Wave.png" alt="Wave.png" title="Wave.png" class="rightMargin"/></nobr>
+          <nobr><input id="Spazer_bool" name="Spazer_bool" type="checkbox" ><img src="/solver/static/images/Spazer.png" alt="Spazer.png" title="Spazer.png" class="rightMargin"/></nobr>
+          <nobr><input id="Plasma_bool" name="Plasma_bool" type="checkbox" ><img src="/solver/static/images/Plasma.png" alt="Plasma.png" title="Plasma.png" class="rightMargin"/></nobr>
+          <nobr><input id="Varia_bool" name="Varia_bool" type="checkbox" ><img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="rightMargin"/></nobr>
+          <nobr><input id="Gravity_bool" name="Gravity_bool" type="checkbox" ><img src="/solver/static/images/Gravity.png" alt="Gravity.png" title="Gravity.png" class="rightMargin"/></nobr>
+          <nobr><input id="Morph_bool" name="Morph_bool" type="checkbox" ><img src="/solver/static/images/Morph.png" alt="Morph.png" title="Morph.png" class="rightMargin"/></nobr>
+          <nobr><input id="Bomb_bool" name="Bomb_bool" type="checkbox" ><img src="/solver/static/images/Bomb.png" alt="Bomb.png" title="Bomb.png" class="rightMargin"/></nobr>
+          <nobr><input id="SpringBall_bool" name="SpringBall_bool" type="checkbox" ><img src="/solver/static/images/SpringBall.png" alt="SpringBall.png" title="SpringBall.png" class="rightMargin"/></nobr>
+          <nobr><input id="ScrewAttack_bool" name="ScrewAttack_bool" type="checkbox" ><img src="/solver/static/images/ScrewAttack.png" alt="ScrewAttack.png" title="ScrewAttack.png" class="rightMargin"/></nobr>
+          <nobr><input id="HiJump_bool" name="HiJump_bool" type="checkbox" ><img src="/solver/static/images/HiJump.png" alt="HiJump.png" title="HiJump.png" class="rightMargin"/></nobr>
+          <nobr><input id="SpaceJump_bool" name="SpaceJump_bool" type="checkbox" ><img src="/solver/static/images/SpaceJump.png" alt="SpaceJump.png" title="SpaceJump.png" class="rightMargin"/></nobr>
+          <nobr><input id="SpeedBooster_bool" name="SpeedBooster_bool" type="checkbox" ><img src="/solver/static/images/SpeedBooster.png" alt="SpeedBooster.png" title="SpeedBooster.png" class="rightMargin"/></nobr>
+          <nobr><input id="Grapple_bool" name="Grapple_bool" type="checkbox" ><img src="/solver/static/images/Grapple.png" alt="Grapple.png" title="Grapple.png" class="rightMargin"/></nobr>
+          <nobr><input id="XRayScope_bool" name="XRayScope_bool" type="checkbox" ><img src="/solver/static/images/XRayScope.png" alt="XRayScope.png" title="XRayScope.png" class="rightMargin"/></nobr>
+          <nobr><input id="ETank_bool" name="ETank_bool" type="checkbox" ><img src="/solver/static/images/ETank.png" alt="ETank.png" title="ETank.png" class="rightMargin"/></nobr>
+          <nobr><input id="Reserve_bool" name="Reserve_bool" type="checkbox" ><img src="/solver/static/images/Reserve.png" alt="Reserve.png" title="Reserve.png" class="rightMargin"/></nobr>
+          <nobr><input id="Missile_bool" name="Missile_bool" type="checkbox" ><img src="/solver/static/images/Missile.png" alt="Missile.png" title="Missile.png" class="rightMargin"/></nobr>
+          <nobr><input id="Super_bool" name="Super_bool" type="checkbox" ><img src="/solver/static/images/Super.png" alt="Super.png" title="Super.png" class="rightMargin"/></nobr>
+          <nobr><input id="PowerBomb_bool" name="PowerBomb_bool" type="checkbox" ><img src="/solver/static/images/PowerBomb.png" alt="PowerBomb.png" title="PowerBomb.png" class="rightMargin"/></nobr>
+        </td>
       </tr>
       <tr><td colspan=2 class="blankLastRow"></td></tr>
     </table>

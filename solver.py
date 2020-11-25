@@ -31,9 +31,9 @@ def interactiveSolver(args):
                 params["lock"] = args.lock
                 params["escapeTimer"] = args.escapeTimer
             elif args.action == "randomize":
-                params["progressionSpeed"] = args.progressionSpeed
                 params["minorQty"] = args.minorQty
                 params["energyQty"] = args.energyQty
+                params["forbiddenItems"] = args.forbiddenItems.split(',') if args.forbiddenItems is not None else []
         elif args.scope == 'item':
             if args.state == None or args.action == None or args.output == None:
                 print("Missing state/action/output parameter")
@@ -178,12 +178,12 @@ if __name__ == "__main__":
     parser.add_argument('--fill', help="in plando load all the source seed locations/transitions as a base (used in interactive mode)",
                         dest="fill", action='store_true')
     parser.add_argument('--startAP', help="in plando/seedless: the start location", dest="startAP", default="Landing Site")
-    parser.add_argument('--progressionSpeed', help="rando plando (used in interactive mode)",
-                        dest="progressionSpeed", nargs="?", default=None, choices=["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"])
     parser.add_argument('--minorQty', help="rando plando  (used in interactive mode)",
                         dest="minorQty", nargs="?", default=None, choices=[str(i) for i in range(0,101)])
     parser.add_argument('--energyQty', help="rando plando  (used in interactive mode)",
                         dest="energyQty", nargs="?", default=None, choices=["sparse", "medium", "vanilla"])
+    parser.add_argument('--forbiddenItems', help="rando plando  (used in interactive mode)",
+                        dest="forbiddenItems", nargs="?", default=None)
     parser.add_argument('--plot', help="dump plot data in file specified", dest="plot", nargs="?", default=None)
     parser.add_argument('--doorName', help="door to replace (used in interactive mode)",
                         dest="doorName", nargs="?", default=None)

@@ -633,35 +633,39 @@ class ItemPoolGeneratorMinimizer(ItemPoolGeneratorMajors):
 class ItemPoolGeneratorPlando(ItemPoolGenerator):
     def __init__(self, itemManager, qty, sm, exclude, nLocs, maxDiff):
         super(ItemPoolGeneratorPlando, self).__init__(itemManager, qty, sm, maxDiff)
-        # dict of 'itemType: count' of items already added in the plando.
-        # also a 'total: count' with the total number of items already added in the plando.
+        # in exclude dict:
+        #   in alreadyPlacedItems:
+        #     dict of 'itemType: count' of items already added in the plando.
+        #     also a 'total: count' with the total number of items already added in the plando.
+        #   in forbiddenItems: list of item forbidden in the pool
         self.exclude = exclude
         self.maxItems = nLocs
         self.log.debug("maxItems: {}".format(self.maxItems))
         self.log.debug("exclude: {}".format(self.exclude))
+        print("ItemPoolGeneratorPlando: exclude: {}".format(self.exclude))
 
     def getItemPool(self):
         exceptionMessage = "Too many items already placed by the plando or not enough available locations:"
         self.itemManager.newItemPool(addBosses=False)
 
         # add the already placed items by the plando
-        for item in self.exclude:
+        for item, count in self.exclude['alreadyPlacedItems'].items():
             if item == 'total':
                 continue
             itemClass = 'Major'
             if item in ['Missile', 'Super', 'PowerBomb', 'Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
                 itemClass = 'Minor'
-            for i in range(self.exclude[item]):
+            for i in range(count):
                 self.itemManager.addItem(item, itemClass)
 
-        remain = self.maxItems - self.exclude['total']
+        remain = self.maxItems - self.exclude['alreadyPlacedItems']['total']
         self.log.debug("Plando: remain start: {}".format(remain))
         if remain > 0:
             # add missing bosses
             for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
-                if boss not in self.exclude or self.exclude[boss] == 0:
+                if self.exclude['alreadyPlacedItems'][boss] == 0:
                     self.itemManager.addItem(boss, 'Minor')
-                    self.exclude[boss] = 1
+                    self.exclude['alreadyPlacedItems'][boss] = 1
                     remain -= 1
 
             self.log.debug("Plando: remain after bosses: {}".format(remain))
@@ -671,9 +675,9 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
             # add missing majors
             majors = []
             for itemType in ['Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:
-                if itemType not in self.exclude or self.exclude[itemType] == 0:
+                if self.exclude['alreadyPlacedItems'][itemType] == 0 and itemType not in self.exclude['forbiddenItems']:
                     self.itemManager.addItem(itemType, 'Major')
-                    self.exclude[itemType] = 1
+                    self.exclude['alreadyPlacedItems'][itemType] = 1
                     majors.append(itemType)
                     remain -= 1
 
@@ -683,11 +687,9 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
 
             # add minimum minors to finish the game
             for (itemType, minimum) in [('Missile', 3), ('Super', 2), ('PowerBomb', 1)]:
-                if itemType not in self.exclude:
-                    self.exclude[itemType] = 0
-                while self.exclude[itemType] < minimum:
+                while self.exclude['alreadyPlacedItems'][itemType] < minimum and itemType not in self.exclude['forbiddenItems']:
                     self.itemManager.addItem(itemType, 'Minor')
-                    self.exclude[itemType] += 1
+                    self.exclude['alreadyPlacedItems'][itemType] += 1
                     remain -= 1
 
             self.log.debug("Plando: remain after minimum minors: {}".format(remain))
@@ -702,11 +704,9 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
                 "vanilla": [('ETank', 14), ('Reserve', 4)]
             }
             for (itemType, minimum) in limits[energyQty]:
-                if itemType not in self.exclude:
-                    self.exclude[itemType] = 0
-                while self.exclude[itemType] < minimum:
+                while self.exclude['alreadyPlacedItems'][itemType] < minimum and itemType not in self.exclude['forbiddenItems']:
                     self.itemManager.addItem(itemType, 'Major')
-                    self.exclude[itemType] += 1
+                    self.exclude['alreadyPlacedItems'][itemType] += 1
                     remain -= 1
 
             self.log.debug("Plando: remain after energy: {}".format(remain))
@@ -714,14 +714,17 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
                 raise Exception("{} can't add energy".format(exceptionMessage))
 
             # add ammo
-            nbMinorsAlready = self.exclude['Missile'] + self.exclude['Super'] + self.exclude['PowerBomb']
+            nbMinorsAlready = self.exclude['alreadyPlacedItems']['Missile'] + self.exclude['alreadyPlacedItems']['Super'] + self.exclude['alreadyPlacedItems']['PowerBomb']
             minorLocations = max(0, 0.66*self.qty['minors'] - nbMinorsAlready)
             maxItems = len(self.itemManager.getItemPool()) + int(minorLocations)
-            rangeDict = getRangeDict(self.qty['ammo'])
-            while len(self.itemManager.getItemPool()) < maxItems and remain > 0:
-                item = chooseFromRange(rangeDict)
-                self.itemManager.addMinor(item)
-                remain -= 1
+            ammoQty = {itemType: qty for itemType, qty in self.qty['ammo'].items() if itemType not in self.exclude['forbiddenItems']}
+            print("ammoQty: {}".format(ammoQty))
+            if ammoQty:
+                rangeDict = getRangeDict(ammoQty)
+                while len(self.itemManager.getItemPool()) < maxItems and remain > 0:
+                    item = chooseFromRange(rangeDict)
+                    self.itemManager.addMinor(item)
+                    remain -= 1
 
             self.log.debug("Plando: remain after ammo: {}".format(remain))
 

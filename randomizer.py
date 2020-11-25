@@ -416,7 +416,7 @@ if __name__ == "__main__":
         args.strictMinors = bool(random.getrandbits(1))
 
     # in plando rando we know that the start ap is ok
-    if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando == None:
+    if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando is None:
         forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
         forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", 'variaTweaks', 'on')
         forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
@@ -555,7 +555,8 @@ if __name__ == "__main__":
             else:
                 raise ValueError("Invalid button name : " + str(b))
 
-    if args.plandoRando != None:
+    plandoSettings = None
+    if args.plandoRando is not None:
         forceArg('progressionSpeed', 'speedrun', "'Progression Speed' forced to speedrun")
         progSpeed = 'speedrun'
         forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
@@ -565,10 +566,10 @@ if __name__ == "__main__":
         args.plandoRando = json.loads(args.plandoRando)
         RomPatches.ActivePatches = args.plandoRando["patches"]
         DoorsManager.unserialize(args.plandoRando["doors"])
+        plandoSettings = {"locsItems": args.plandoRando['locsItems'], "forbiddenItems": args.plandoRando['forbiddenItems']}
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty,
                                   restrictions, args.superFun, args.runtimeLimit_s,
-                                  args.plandoRando["locsItems"] if args.plandoRando != None else None,
-                                  minDifficulty)
+                                  plandoSettings, minDifficulty)
 
     # print some parameters for jm's stats
     if args.jm == True:

@@ -1,5 +1,6 @@
 
 import sys, random
+from collections import defaultdict
 from rando.Items import ItemManager
 from utils.utils import getRangeDict, chooseFromRange
 from rando.ItemLocContainer import ItemLocation
@@ -9,7 +10,7 @@ from rando.ItemLocContainer import ItemLocation
 # Holds settings not related to graph layout.
 class RandoSettings(object):
     def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions,
-                 superFun, runtimeLimit_s, plandoRandoItemLocs, minDiff):
+                 superFun, runtimeLimit_s, plandoSettings, minDiff):
         self.progSpeed = progSpeed.lower()
         self.progDiff = progDiff.lower()
         self.maxDiff = maxDiff
@@ -19,7 +20,7 @@ class RandoSettings(object):
         self.runtimeLimit_s = runtimeLimit_s
         if self.runtimeLimit_s <= 0:
             self.runtimeLimit_s = sys.maxsize
-        self.plandoRandoItemLocs = plandoRandoItemLocs
+        self.plandoSettings = plandoSettings
         self.minDiff = minDiff
 
     def getSuperFun(self):
@@ -29,7 +30,7 @@ class RandoSettings(object):
         self.superFun = superFun[:]
 
     def isPlandoRando(self):
-        return self.plandoRandoItemLocs is not None
+        return self.plandoSettings is not None
 
     def getItemManager(self, smbm, nLocs):
         if not self.isPlandoRando():
@@ -40,22 +41,22 @@ class RandoSettings(object):
     def getExcludeItems(self, locations):
         if not self.isPlandoRando():
             return None
-        exclude = {'total':0}
-        # plandoRando is a dict {'loc name': 'item type'}
-        for locName,itemType in self.plandoRandoItemLocs.items():
+        exclude = {'alreadyPlacedItems': defaultdict(int), 'forbiddenItems': []}
+        # locsItems is a dict {'loc name': 'item type'}
+        for locName,itemType in self.plandoSettings["locsItems"].items():
             if not any(loc.Name == locName for loc in locations):
                 continue
-            if itemType not in exclude:
-                exclude[itemType] = 0
-            exclude[itemType] += 1
-            exclude['total'] += 1
+            exclude['alreadyPlacedItems'][itemType] += 1
+            exclude['alreadyPlacedItems']['total'] += 1
+
+        exclude['forbiddenItems'] = self.plandoSettings['forbiddenItems']
 
         return exclude
 
     def collectAlreadyPlacedItemLocations(self, container):
         if not self.isPlandoRando():
             return
-        for locName,itemType in self.plandoRandoItemLocs.items():
+        for locName,itemType in self.plandoSettings["locsItems"].items():
             if not any(loc.Name == locName for loc in container.unusedLocations):
                 continue
             item = container.getNextItemInPool(itemType)

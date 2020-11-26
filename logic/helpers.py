@@ -709,7 +709,8 @@ class Helpers(object):
                                     sm.wand(sm.canPassMetroids(),
                                             sm.canPassZebetites())),
                              sm.canOpenRedDoors(),
-                             sm.enoughStuffsMotherbrain())
+                             sm.enoughStuffsMotherbrain(),
+                             sm.haveItem('Morph'))
         return ret
 
 class Pickup:

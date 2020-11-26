@@ -1057,7 +1057,7 @@ define_location(
     AccessFrom={
         'Landing Site': lambda sm: SMBool(True)
     },
-    Available=lambda loc, sm: sm.wand(sm.haveItem('Morph'),
+    Available=lambda loc, sm: sm.wand(sm.canPassBombPassages(),
                                       sm.traverse("ClimbRight"),
                                       sm.haveItem('SpeedBooster'),
                                       # reserves are hard to trigger midspark when not having ETanks

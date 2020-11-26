@@ -269,7 +269,7 @@ class InteractiveSolver(CommonSolver):
         for apName in singleAPs:
             transitions.append((apName, apName))
 
-        return AccessGraph(accessPoints, transitions)
+        return transitions
 
     def randoPlando(self, parameters):
         # if all the locations are visited, do nothing
@@ -282,7 +282,7 @@ class InteractiveSolver(CommonSolver):
 
         plandoCurrent = {
             "locsItems": plandoLocsItems,
-            "transitions": self.curGraphTransitions,
+            "transitions": self.fillGraph(),
             "patches": RomPatches.ActivePatches,
             "doors": DoorsManager.serialize(),
             "forbiddenItems": parameters["forbiddenItems"]
@@ -366,7 +366,7 @@ class InteractiveSolver(CommonSolver):
 
         plms = []
         if self.areaRando == True or self.bossRando == True or self.escapeRando == True:
-            doors = GraphUtils.getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando, self.escapeRando, False)
+            doors = GraphUtils.getDoorConnections(AccessGraph(accessPoints, self.fillGraph()), self.areaRando, self.bossRando, self.escapeRando, False)
             romPatcher.writeDoorConnections(doors)
             if magic == None:
                 doorsPtrs = GraphUtils.getAps2DoorsPtrs()

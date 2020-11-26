@@ -225,6 +225,7 @@ class RandoSetup(object):
             availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.settings.maxDiff)
             for ap in interAPs:
                 if not ap in availAccessPoints:
+                    self.log.debug("checkPool: ap {} non accessible from {}".format(ap.Name, startAp.Name))
                     ret = False
         if not ret:
             self.log.debug("checkPool. inter-area APs check failed")

@@ -64,6 +64,7 @@ class RomPatches:
     ## Minimizer Patches
     NoGadoras                 = 200
     TourianSpeedup            = 201
+    OpenZebetites             = 202
 
     ### Other
     # Gravity no longer protects from environmental damage (heat, spikes...)
@@ -105,7 +106,7 @@ class RomPatches:
     VariaTweaks = [ WsEtankPhantoonAlive, LNChozoSJCheckDisabled ]
 
     # Tourian speedup in minimizer mode
-    MinimizerTourian = [ TourianSpeedup, NerfedRainbowBeam ]
+    MinimizerTourian = [ TourianSpeedup, NerfedRainbowBeam, OpenZebetites ]
 
     # dessyreqt randomizer
     Dessy = []

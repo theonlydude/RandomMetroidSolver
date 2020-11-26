@@ -710,7 +710,7 @@ class Helpers(object):
                                             sm.canPassZebetites())),
                              sm.canOpenRedDoors(),
                              sm.enoughStuffsMotherbrain(),
-                             sm.haveItem('Morph'))
+                             sm.wor(RomPatches.has(RomPatches.OpenZebetites), sm.haveItem('Morph')))
         return ret
 
 class Pickup:

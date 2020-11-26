@@ -93,7 +93,7 @@ class RomPatcher:
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
                  'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street' ],
         'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips'],
-        'MinimizerTourian': ['minimizer_tourian.ips', 'nerfed_rainbow_beam.ips'],
+        'MinimizerTourian': ['minimizer_tourian.ips', 'nerfed_rainbow_beam.ips', 'open_zebetites.ips'],
         'DoorsColors': ['beam_doors.ips', 'red_doors.ips']
     }
 

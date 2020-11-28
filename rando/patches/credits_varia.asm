@@ -55,7 +55,7 @@ define backup_sram_slot2       $1cf8
 define last_stats_save_ok_off  #$02fc
 define magic_flag 	       #$caca
 
-define current_save_slot	$0952
+define current_save_slot	$7e0952
 define area_index		$079f
 define load_station_index	$078b
 

@@ -517,9 +517,9 @@ accessPoints = [
         # this transition leads to EastMaridia directly
         'Oasis Bottom': Cache.ldeco('MSB_OB',
                                     lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
-                                                       sm.wor(sm.traverse('MainStreetBottomRight'),
-                                                              sm.wor(sm.haveItem('Super'),
-                                                                     RomPatches.has(RomPatches.AreaRandoGatesOther))),
+                                                       sm.traverse('MainStreetBottomRight'),
+                                                       sm.wor(sm.haveItem('Super'),
+                                                              RomPatches.has(RomPatches.AreaRandoGatesOther)),
                                                        sm.canTraverseWestSandHallLeftToRight())),
         'Crab Shaft Left': lambda sm: sm.canPassMtEverest()
     }, roomInfo = {'RoomPtr':0xcfc9, "area": 0x4},

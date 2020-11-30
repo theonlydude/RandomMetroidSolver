@@ -1,6 +1,7 @@
 ;;; Adds beam doors to the game. This file contains only the patch for the PLM bank,
 ;;; graphics have to be applied from a separate patch: beam_doors_gfx.ips
 ;;; Disassembled from the IPS patch by Mettyk25jigsaw using DiztinGUIsh
+;;; Factorized code and added extra check for spazer/plasma doors to avoid beam switching
 
 arch snes.cpu
 lorom
@@ -488,30 +489,36 @@ ORG $84F037
                                                             ;  
            check_wave: jsr check_beam : beq no_hit
                        LDA.W $1D77,X                        ;  
-                       AND.W #$0001                         ;  
-                       CMP.W #$0001                         ;  
-                       BEQ open_door
+                       bit #$0001                         ;  
+                       bne open_door
                        bra no_hit
                                                             ;  
             check_ice: jsr check_beam : beq no_hit
                        LDA.W $1D77,X                        ;  
-                       AND.W #$0002                         ;  
-                       CMP.W #$0002                         ;  
-                       BEQ open_door
+                       bit #$0002                         ;  
+                       bne open_door
                        bra no_hit
                                                             ;  
          check_spazer: jsr check_beam : beq no_hit
                        LDA.W $1D77,X                        ;
-                       AND.W #$0004                         ;
-                       CMP.W #$0004                         ;
-                       BEQ open_door
+                       bit #$0004                         ;
+                       bne open_door
+			;; if plasma and spazer are collected, check for plasma hit
+	               lda $09a8 : and #$000c : cmp #$000c : bne no_hit
+                       LDA.W $1D77,X                        ;  
+                       bit #$0008                         ;  
+                       bne open_door
                        bra no_hit
                                                             ;  
          check_plasma: jsr check_beam : beq no_hit
                        LDA.W $1D77,X                        ;  
-                       AND.W #$0008                         ;  
-                       CMP.W #$0008                         ;  
-                       BEQ open_door
+                       bit #$0008                         ;  
+                       bne open_door
+			;; if plasma and spazer are collected, check for spazer hit
+	               lda $09a8 : and #$000c : cmp #$000c : bne no_hit
+                       LDA.W $1D77,X                        ;  
+                       bit #$0004                         ;  
+                       bne open_door
 no_hit:
                        STZ.W $1D77,X                        ;  
                        RTS                                  ;  

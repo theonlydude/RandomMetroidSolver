@@ -94,7 +94,7 @@ class RomPatcher:
                  'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street' ],
         'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips'],
         'MinimizerTourian': ['minimizer_tourian.ips', 'nerfed_rainbow_beam.ips', 'open_zebetites.ips'],
-        'DoorsColors': ['beam_doors.ips', 'red_doors.ips']
+        'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips']
     }
 
     def __init__(self, romFileName=None, magic=None, plando=False):

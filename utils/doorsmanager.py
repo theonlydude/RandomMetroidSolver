@@ -232,12 +232,9 @@ class DoorsManager():
         'GreenBrinstarMissileRefill': Door('GreenBrinstarMissileRefill', 0x784ca, 'red', Facing.Right, id=0x23)
     }
 
-    def setSMBM(self, smbm):
-        self.smbm = smbm
-
     # call from logic
-    def traverse(self, doorName):
-        return DoorsManager.doors[doorName].traverse(self.smbm)
+    def traverse(self, smbm, doorName):
+        return DoorsManager.doors[doorName].traverse(smbm)
 
     @staticmethod
     def setDoorsColor():

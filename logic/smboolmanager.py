@@ -22,7 +22,6 @@ class SMBoolManager(object):
 
         self.helpers = HelpersGraph(self)
         self.doorsManager = DoorsManager()
-        self.doorsManager.setSMBM(self)
         self.createFacadeFunctions()
         self.createKnowsFunctions()
         self.resetItems()
@@ -137,7 +136,9 @@ class SMBoolManager(object):
         for fun in dir(self.helpers):
             if fun != 'smbm' and fun[0:2] != '__':
                 setattr(self, fun, getattr(self.helpers, fun))
-        self.traverse = self.doorsManager.traverse
+
+    def traverse(self, doorName):
+        return self.doorsManager.traverse(self, doorName)
 
     def createKnowsFunctions(self):
         # for each knows we have a function knowsKnows (ex: knowsAlcatrazEscape()) which

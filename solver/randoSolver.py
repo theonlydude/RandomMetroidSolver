@@ -1,3 +1,5 @@
+import time
+
 from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
 from logic.helpers import Pickup
 from solver.conf import Conf
@@ -50,3 +52,7 @@ class RandoSolver(StandardSolver):
 
         # store at each step how many locations are available
         self.nbAvailLocs = []
+
+        # limit to a few seconds to avoid cases with a lot of rewinds which could last for minutes
+        self.runtimeLimit_s = 5
+        self.startTime = time.process_time()

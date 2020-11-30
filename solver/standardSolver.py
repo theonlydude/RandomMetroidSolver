@@ -59,6 +59,9 @@ class StandardSolver(CommonSolver):
 
         self.comeBack = ComeBack(self)
 
+        # no time limitation
+        self.runtimeLimit_s = 0
+
     def setConf(self, difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath):
         Conf.difficultyTarget = difficultyTarget
         Conf.itemsPickup = pickupStrategy
@@ -78,9 +81,9 @@ class StandardSolver(CommonSolver):
         if self.vcr != None:
             self.vcr.dump()
 
-        self.computeExtStats()
-
         if self.extStatsFilename != None:
+            self.computeExtStats()
+
             firstMinor = {'Missile': False, 'Super': False, 'PowerBomb': False}
             locsItems = {}
             for loc in self.visitedLocations:

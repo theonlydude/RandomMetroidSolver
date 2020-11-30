@@ -486,86 +486,53 @@ ORG $84F037
                        dw $0001,$A983,$0001,$A98F,$0001,$A99B,$0001,$A69B;  
                        dw $86BC                             ;  
                                                             ;  
-           check_wave: LDA.W $1D77,X                        ;  
-                       BEQ CODE_84F66F                      ;  
-                       AND.W #$0F00                         ;  
-                       CMP.W #$0500                         ;  
-                       BEQ CODE_84F66F                      ;  
+           check_wave: jsr check_beam : beq no_hit
                        LDA.W $1D77,X                        ;  
                        AND.W #$0001                         ;  
                        CMP.W #$0001                         ;  
-                       BEQ CODE_84F673                      ;  
-          CODE_84F66F: STZ.W $1D77,X                        ;  
-                       RTS                                  ;  
+                       BEQ open_door
+                       bra no_hit
                                                             ;  
-          CODE_84F673: STZ.W $1D77,X                        ;  
-                       LDA.L $7EDEBC,X                      ;  
-                       STA.W $1D27,X                        ;  
-                       LDA.W #$0001                         ;  
-                       STA.L $7EDE1C,X                      ;  
-                       RTS                                  ;  
-                                                            ;  
-                                                            ;  
-            check_ice: LDA.W $1D77,X                        ;  
-                       BEQ CODE_84F69D                      ;  
-                       AND.W #$0F00                         ;  
-                       CMP.W #$0500                         ;  
-                       BEQ CODE_84F69D                      ;  
+            check_ice: jsr check_beam : beq no_hit
                        LDA.W $1D77,X                        ;  
                        AND.W #$0002                         ;  
                        CMP.W #$0002                         ;  
-                       BEQ CODE_84F6A1                      ;  
-          CODE_84F69D: STZ.W $1D77,X                        ;  
-                       RTS                                  ;  
+                       BEQ open_door
+                       bra no_hit
                                                             ;  
-          CODE_84F6A1: STZ.W $1D77,X                        ;  
-                       LDA.L $7EDEBC,X                      ;  
-                       STA.W $1D27,X                        ;  
-                       LDA.W #$0001                         ;  
-                       STA.L $7EDE1C,X                      ;  
-                       RTS                                  ;  
-                                                            ;  
-                                                            ;  
-         check_spazer: LDA.W $1D77,X                        ;  
-                       BEQ CODE_84F6CB                      ;  
-                       AND.W #$0F00                         ;  
-                       CMP.W #$0500                         ;  
-                       BEQ CODE_84F6CB                      ;  
+         check_spazer: jsr check_beam : beq no_hit
                        LDA.W $1D77,X                        ;  
                        AND.W #$0004                         ;  
                        CMP.W #$0004                         ;  
-                       BEQ CODE_84F6CF                      ;  
-          CODE_84F6CB: STZ.W $1D77,X                        ;  
-                       RTS                                  ;  
+                       BEQ open_door
+                       bra no_hit
                                                             ;  
-          CODE_84F6CF: STZ.W $1D77,X                        ;  
-                       LDA.L $7EDEBC,X                      ;  
-                       STA.W $1D27,X                        ;  
-                       LDA.W #$0001                         ;  
-                       STA.L $7EDE1C,X                      ;  
-                       RTS                                  ;  
-                                                            ;  
-                                                            ;  
-         check_plasma: LDA.W $1D77,X                        ;  
-                       BEQ CODE_84F6F9                      ;  
-                       AND.W #$0F00                         ;  
-                       CMP.W #$0500                         ;  
-                       BEQ CODE_84F6F9                      ;  
+         check_plasma: jsr check_beam : beq no_hit
                        LDA.W $1D77,X                        ;  
                        AND.W #$0008                         ;  
                        CMP.W #$0008                         ;  
-                       BEQ CODE_84F6FD                      ;  
-          CODE_84F6F9: STZ.W $1D77,X                        ;  
+                       BEQ open_door
+no_hit:
+                       STZ.W $1D77,X                        ;  
                        RTS                                  ;  
-                                                            ;  
-          CODE_84F6FD: STZ.W $1D77,X                        ;  
+open_door:
+	               STZ.W $1D77,X                        ;  
                        LDA.L $7EDEBC,X                      ;  
                        STA.W $1D27,X                        ;  
                        LDA.W #$0001                         ;  
                        STA.L $7EDE1C,X                      ;  
                        RTS                                  ;  
-                                                            ;  
-                                                            ;  
+
+check_beam:
+		       LDA.W $1D77,X                        ;  
+                       AND.W #$0F00                         ;  
+                       CMP.W #$0500                         ;  
+		       rts
+
+print pc
+warnpc $84f70e
+	
+org $84f70f                                ;  
         plm_wave_dir2: dw $C7B1                             ;  
                        dw main_list_wave_dir2               ;  
                        dw end_list_wave_dir2                ;  

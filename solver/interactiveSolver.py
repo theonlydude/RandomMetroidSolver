@@ -35,6 +35,9 @@ class InteractiveSolver(CommonSolver):
 
         Conf.difficultyTarget = infinity
 
+        # no time limitation
+        self.runtimeLimit_s = 0
+
     def initLocsAddressName(self):
         addressName = {}
         web2Internal = {}

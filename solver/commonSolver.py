@@ -1,4 +1,4 @@
-import logging
+import logging, time
 
 from logic.smbool import SMBool, smboolFalse
 from logic.helpers import Bosses
@@ -563,6 +563,12 @@ class CommonSolver(object):
                     break
                 else:
                     self.log.debug("canEnd but MB loc not accessible")
+
+            # check time limit
+            if self.runtimeLimit_s > 0:
+                if time.process_time() - self.startTime > self.runtimeLimit_s:
+                    self.log.debug("time limit exceeded ({})".format(self.runtimeLimit_s))
+                    return (-1, False)
 
             self.log.debug("Current AP/Area: {}/{}".format(self.lastAP, self.lastArea))
 

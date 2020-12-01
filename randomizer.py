@@ -288,7 +288,7 @@ class Options(object):
     def __str__(self):
         return str(self.__dict__)
 
-def finalizeArgs(args):
+def finalizeArgs(args, logger):
     # service to force an argument value and notify it
     forcedArgs = {}
     optErrMsgs = [ ]
@@ -641,7 +641,7 @@ if __name__ == "__main__":
     utils.log.init(args.debug)
     logger = utils.log.get('Rando')
 
-    opts, optErrMsgs = finalizeArgs(args)
+    opts, optErrMsgs = finalizeArgs(args, logger)
 
     randoSettings, graphSettings = settings(args, opts)
 

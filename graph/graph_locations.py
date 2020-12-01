@@ -1439,8 +1439,7 @@ define_location(
     Visibility="Hidden",
     Room='Cathedral',
     AccessFrom={
-        'Business Center': lambda sm: sm.canEnterCathedral(Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']['mult']),
-        'Bubble Mountain': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles'])
+        'Cathedral': lambda sm: SMBool(True)
     },
     Available=lambda loc, sm: sm.haveItem('Morph')
 ),

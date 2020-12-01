@@ -595,8 +595,6 @@ def finalizeArgs(args, logger):
             ctrlDict=ctrlDict,
             forcedArgs=forcedArgs)
 
-    print(opts)
-
     return opts, optErrMsgs
 
 def settings(args, opts):

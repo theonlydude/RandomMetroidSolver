@@ -278,15 +278,20 @@ def validateArgs(args):
 
     return None
 
-if __name__ == "__main__":
-    args = parseArgs(sys.argv)
-    err = validateArgs(args)
-    if err:
-        print(err)
-        sys.exit(-1)
+class Options(object):
+    def __init__(self, **d):
+        self.__dict__.update(d)
 
-    utils.log.init(args.debug)
-    logger = utils.log.get('Rando')
+    def __repr__(self):
+        return "Options(**%s)" % repr(self.__dict__)
+
+    def __str__(self):
+        return str(self.__dict__)
+
+def finalizeArgs(args):
+    global energyQties
+    global morphPlacements
+
     # service to force an argument value and notify it
     forcedArgs = {}
     optErrMsgs = [ ]
@@ -565,7 +570,6 @@ if __name__ == "__main__":
             else:
                 raise ValueError("Invalid button name : " + str(b))
 
-    plandoSettings = None
     if args.plandoRando is not None:
         forceArg('progressionSpeed', 'speedrun', "'Progression Speed' forced to speedrun")
         progSpeed = 'speedrun'
@@ -574,17 +578,51 @@ if __name__ == "__main__":
         forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = 'normal'
         args.plandoRando = json.loads(args.plandoRando)
+
+    opts = Options(
+            maxDifficulty=maxDifficulty,
+            minDifficulty=minDifficulty,
+            progSpeed=progSpeed,
+            progDiff=progDiff,
+            restrictions=restrictions,
+            qty=qty,
+            energyQty=energyQty,
+            minimizerN=minimizerN,
+            seedName=seedName,
+            fileName=fileName,
+            seed=seed,
+            ctrlDict=ctrlDict,
+            forcedArgs=forcedArgs)
+
+    print(opts)
+
+    return opts, optErrMsgs
+
+if __name__ == "__main__":
+    args = parseArgs(sys.argv)
+    err = validateArgs(args)
+    if err:
+        print(err)
+        sys.exit(-1)
+
+    utils.log.init(args.debug)
+    logger = utils.log.get('Rando')
+
+    opts, optErrMsgs = finalizeArgs(args)
+
+    plandoSettings = None
+    if args.plandoRando is not None:
         RomPatches.ActivePatches = args.plandoRando["patches"]
         DoorsManager.unserialize(args.plandoRando["doors"])
         plandoSettings = {"locsItems": args.plandoRando['locsItems'], "forbiddenItems": args.plandoRando['forbiddenItems']}
-    randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty,
-                                  restrictions, args.superFun, args.runtimeLimit_s,
-                                  plandoSettings, minDifficulty)
+    randoSettings = RandoSettings(opts.maxDifficulty, opts.progSpeed, opts.progDiff, opts.qty,
+                                  opts.restrictions, args.superFun, args.runtimeLimit_s,
+                                  plandoSettings, opts.minDifficulty)
 
     # print some parameters for jm's stats
     if args.jm == True:
         print("startAP:{}".format(args.startAP))
-        print("progressionSpeed:{}".format(progSpeed))
+        print("progressionSpeed:{}".format(opts.progSpeed))
         print("majorsSplit:{}".format(args.majorsSplit))
         print("morphPlacement:{}".format(args.morphPlacement))
 
@@ -598,7 +636,7 @@ if __name__ == "__main__":
     if args.doorsColorsRando == True:
         RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
     graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses,
-                                  args.escapeRando, minimizerN, dotFile, args.doorsColorsRando, args.allowGreyDoors,
+                                  args.escapeRando, opts.minimizerN, dotFile, args.doorsColorsRando, args.allowGreyDoors,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
 
     if args.plandoRando is None:
@@ -606,7 +644,7 @@ if __name__ == "__main__":
 
     if args.patchOnly == False:
         try:
-            randoExec = RandoExec(seedName, args.vcr)
+            randoExec = RandoExec(opts.seedName, args.vcr)
             (stuck, itemLocs, progItemLocs) = randoExec.randomize(randoSettings, graphSettings)
             # if we couldn't find an area layout then the escape graph is not created either
             # and getDoorConnections will crash if random escape is activated.
@@ -626,7 +664,7 @@ if __name__ == "__main__":
         progItemLocs = None
     if stuck == True:
         dumpErrorMsg(args.output, randoExec.errorMsg)
-        print("Can't generate " + fileName + " with the given parameters: {}".format(randoExec.errorMsg))
+        print("Can't generate " + opts.fileName + " with the given parameters: {}".format(randoExec.errorMsg))
         # in vcr mode we still want the seed to be generated to analyze it
         if args.vcr == False:
             sys.exit(-1)
@@ -674,7 +712,7 @@ if __name__ == "__main__":
         if args.rom is not None:
             # patch local rom
             romFileName = args.rom
-            outFileName = fileName + '.sfc'
+            outFileName = opts.fileName + '.sfc'
             shutil.copyfile(romFileName, outFileName)
             romPatcher = RomPatcher(outFileName, magic=args.raceMagic)
         else:
@@ -690,8 +728,8 @@ if __name__ == "__main__":
             romPatcher.applyIPSPatches(args.startAP, args.patches,
                                        args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,
-                                       args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
-                                       escapeAttr, args.noRemoveEscapeEnemies, minimizerN, args.minimizerTourian,
+                                       args.noVariaTweaks, args.nerfedCharge, opts.energyQty == 'ultra sparse',
+                                       escapeAttr, args.noRemoveEscapeEnemies, opts.minimizerN, args.minimizerTourian,
                                        args.doorsColorsRando)
         else:
             # from customizer permalink, apply previously generated seed ips first
@@ -714,12 +752,12 @@ if __name__ == "__main__":
             romPatcher.setNothingId(args.startAP, itemLocs)
             romPatcher.writeItemsLocs(itemLocs)
             romPatcher.writeItemsNumber()
-            romPatcher.writeSeed(seed) # lol if race mode
+            romPatcher.writeSeed(opts.seed) # lol if race mode
             romPatcher.writeSpoiler(itemLocs, progItemLocs)
             romPatcher.writeRandoSettings(randoSettings, itemLocs)
             romPatcher.writeDoorConnections(doors)
             romPatcher.writeVersion(displayedVersion)
-        if ctrlDict is not None:
+        if opts.ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
         if args.moonWalk == True:
             romPatcher.enableMoonWalk()
@@ -763,13 +801,13 @@ if __name__ == "__main__":
             msg = ''
         if args.rom is None: # web mode
             data = romPatcher.romFile.data
-            fileName = '{}.sfc'.format(fileName)
-            data["fileName"] = fileName
+            opts.fileName = '{}.sfc'.format(fileName)
+            data["fileName"] = opts.fileName
             # error msg in json to be displayed by the web site
             data["errorMsg"] = msg
             # replaced parameters to update stats in database
-            if len(forcedArgs) > 0:
-                data["forcedArgs"] = forcedArgs
+            if len(opts.forcedArgs) > 0:
+                data["forcedArgs"] = opts.forcedArgs
             with open(outFileName, 'w') as jsonFile:
                 json.dump(data, jsonFile)
         else: # CLI mode
@@ -783,6 +821,6 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     if stuck == True:
-        print("Rom generated for debug purpose: {}".format(fileName))
+        print("Rom generated for debug purpose: {}".format(opts.fileName))
     else:
-        print("Rom generated: {}".format(fileName))
+        print("Rom generated: {}".format(opts.fileName))

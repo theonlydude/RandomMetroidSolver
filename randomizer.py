@@ -59,8 +59,8 @@ def restricted_float(x):
         raise argparse.ArgumentTypeError("%r not in range [1.0, 9.0]"%(x,))
     return x
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
+def argumentParser(args):
+    parser = argparse.ArgumentParser(description="Random Metroid Randomizer", prog=args[0])
     parser.add_argument('--patchOnly',
                         help="only apply patches, do not perform any randomization", action='store_true',
                         dest='patchOnly', default=False)
@@ -260,7 +260,11 @@ if __name__ == "__main__":
     parser.add_argument('--allowGreyDoors', help='add grey color in doors colors pool', dest='allowGreyDoors',
                         nargs='?', const=True, default=False)
 
+    return parser
+
+if __name__ == "__main__":
     # parse args
+    parser = argumentParser(sys.argv)
     args = parser.parse_args()
 
     if args.output is None and args.rom is None:

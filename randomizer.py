@@ -262,10 +262,12 @@ def argumentParser(args):
 
     return parser
 
+def parseArgs(args):
+    parser = argumentParser(args)
+    return parser.parse_args(args[1:])
+
 if __name__ == "__main__":
-    # parse args
-    parser = argumentParser(sys.argv)
-    args = parser.parse_args()
+    args = parseArgs(sys.argv)
 
     if args.output is None and args.rom is None:
         print("Need --output or --rom parameter")

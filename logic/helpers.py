@@ -579,6 +579,9 @@ class Helpers(object):
         sm = self.smbm
         if not sm.haveItem('Morph') and not sm.haveItem('Gravity'):
             return smboolFalse
+        # some ammo to destroy the turrets during the fight
+        if not sm.haveMissileOrSuper():
+            return smboolFalse
         (ammoMargin, secs, ammoItems) = self.canInflictEnoughDamages(6000)
         # print('DRAY', ammoMargin, secs)
         if ammoMargin > 0:

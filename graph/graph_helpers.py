@@ -642,6 +642,12 @@ class HelpersGraph(Helpers):
                                       sm.haveItem('SpeedBooster'))))
 
     @Cache.decorator
+    def canGrappleExitDraygon(self):
+        sm = self.smbm
+        return sm.wand(sm.haveItem('Grapple'),
+                       sm.knowsDraygonRoomGrappleExit())
+
+    @Cache.decorator
     def canExitDraygonVanilla(self):
         sm = self.smbm
         # to get out of draygon room:
@@ -651,14 +657,12 @@ class HelpersGraph(Helpers):
         return sm.wor(sm.canExitDraygonRoomWithGravity(),
                       sm.wand(sm.canDraygonCrystalFlashSuit(),
                               # use the spark either to exit draygon room or precious room
-                              sm.wor(sm.wand(sm.haveItem('Grapple'),
-                                             sm.knowsDraygonRoomGrappleExit()),
+                              sm.wor(sm.canGrappleExitDraygon(),
                                      sm.wand(sm.haveItem('XRayScope'),
                                              sm.knowsPreciousRoomXRayExit()),
                                      sm.canSpringBallJump())),
                       # spark-less exit (no CF)
-                      sm.wand(sm.wand(sm.haveItem('Grapple'),
-                                      sm.knowsDraygonRoomGrappleExit()),
+                      sm.wand(sm.canGrappleExitDraygon(),
                               sm.wor(sm.wand(sm.haveItem('XRayScope'),
                                              sm.knowsPreciousRoomXRayExit()),
                                      sm.canSpringBallJump())),
@@ -670,8 +674,7 @@ class HelpersGraph(Helpers):
         # disregard precious room
         return sm.wor(sm.canExitDraygonRoomWithGravity(),
                       sm.canDraygonCrystalFlashSuit(),
-                      sm.wand(sm.haveItem('Grapple'),
-                              sm.knowsDraygonRoomGrappleExit()),
+                      sm.canGrappleExitDraygon(),
                       sm.canDoubleSpringBallJump())
 
     @Cache.decorator

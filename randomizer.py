@@ -288,12 +288,11 @@ if __name__ == "__main__":
     utils.log.init(args.debug)
     logger = utils.log.get('Rando')
     # service to force an argument value and notify it
-    argDict = vars(args)
     forcedArgs = {}
     optErrMsgs = [ ]
     def forceArg(arg, value, msg, webArg=None, webValue=None):
-        if argDict[arg] != value:
-            argDict[arg] = value
+        if getattr(args, arg) != value:
+            setattr(args, arg, value)
             forcedArgs[webArg if webArg != None else arg] = webValue if webValue != None else value
             print(msg)
             optErrMsgs.append(msg)

@@ -289,9 +289,6 @@ class Options(object):
         return str(self.__dict__)
 
 def finalizeArgs(args):
-    global energyQties
-    global morphPlacements
-
     # service to force an argument value and notify it
     forcedArgs = {}
     optErrMsgs = [ ]
@@ -416,11 +413,13 @@ def finalizeArgs(args):
 
     if args.morphPlacement == 'random':
         if args.morphPlacementList != None:
-            morphPlacements = args.morphPlacementList.split(',')
+            availableMorphPlacements = args.morphPlacementList.split(',')
+        else:
+            availableMorphPlacements = morphPlacements
         if (args.suitsRestriction == True and args.area == True) or args.majorsSplit == 'Chozo':
-            if 'late' in morphPlacements:
-                morphPlacements.remove('late')
-        args.morphPlacement = random.choice(morphPlacements)
+            if 'late' in availableMorphPlacements:
+                availableMorphPlacements.remove('late')
+        args.morphPlacement = random.choice(availableMorphPlacements)
     # random fill makes certain options unavailable
     if progSpeed == 'speedrun' or progSpeed == 'basic':
         forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
@@ -530,8 +529,10 @@ def finalizeArgs(args):
         minorQty = random.randint(25, 100)
     if energyQty == 'random':
         if args.energyQtyList != None:
-            energyQties = args.energyQtyList.split(',')
-        energyQty = random.choice(energyQties)
+            availableEnergyQties = args.energyQtyList.split(',')
+        else:
+            availableEnergyQties = energyQtyList
+        energyQty = random.choice(availableEnergyQties)
     if energyQty == 'ultra sparse':
         # add nerfed rainbow beam patch
         RomPatches.ActivePatches.append(RomPatches.NerfedRainbowBeam)

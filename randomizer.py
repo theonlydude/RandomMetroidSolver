@@ -59,8 +59,8 @@ def restricted_float(x):
         raise argparse.ArgumentTypeError("%r not in range [1.0, 9.0]"%(x,))
     return x
 
-def argumentParser(args):
-    parser = argparse.ArgumentParser(description="Random Metroid Randomizer", prog=args[0])
+def argumentParser(argv):
+    parser = argparse.ArgumentParser(description="Random Metroid Randomizer", prog=argv[0])
     parser.add_argument('--patchOnly',
                         help="only apply patches, do not perform any randomization", action='store_true',
                         dest='patchOnly', default=False)
@@ -262,22 +262,27 @@ def argumentParser(args):
 
     return parser
 
-def parseArgs(args):
-    parser = argumentParser(args)
-    return parser.parse_args(args[1:])
+def parseArgs(argv):
+    parser = argumentParser(argv)
+    return parser.parse_args(argv[1:])
+
+def validateArgs(args):
+    if args.output is None and args.rom is None:
+        return "Need --output or --rom parameter"
+
+    elif args.output is not None and args.rom is not None:
+        return "Can't have both --output and --rom parameters"
+
+    if args.plandoRando != None and args.output == None:
+        return "plandoRando param requires output param"
+
+    return None
 
 if __name__ == "__main__":
     args = parseArgs(sys.argv)
-
-    if args.output is None and args.rom is None:
-        print("Need --output or --rom parameter")
-        sys.exit(-1)
-    elif args.output is not None and args.rom is not None:
-        print("Can't have both --output and --rom parameters")
-        sys.exit(-1)
-
-    if args.plandoRando != None and args.output == None:
-        print("plandoRando param requires output param")
+    err = validateArgs(args)
+    if err:
+        print(err)
         sys.exit(-1)
 
     utils.log.init(args.debug)

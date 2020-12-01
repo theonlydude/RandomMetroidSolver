@@ -165,6 +165,7 @@ class RomPatcher:
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
         self.nothingMissile = False
+        hasAccessibleNothing = any(il for il in itemLocs if il.Item.Category == 'Nothing' and not il.Location.restricted and il.Accessible)
         for itemLoc in itemLocs:
             loc = itemLoc.Location
             item = itemLoc.Item
@@ -173,8 +174,8 @@ class RomPatcher:
             isMorph = loc.Name == 'Morphing Ball'
             if item.Category == 'Nothing':
                 self.writeNothing(itemLoc)
-                if loc.Id == self.nothingId and not loc.restricted and itemLoc.Accessible:
-                    # nothing at morph gives a missile pack
+                if loc.Id == self.nothingId and hasAccessibleNothing:
+                    # picking up the first nothing gives a missile pack
                     self.nothingMissile = True
                     self.nItems += 1
             else:

@@ -599,18 +599,7 @@ def finalizeArgs(args):
 
     return opts, optErrMsgs
 
-if __name__ == "__main__":
-    args = parseArgs(sys.argv)
-    err = validateArgs(args)
-    if err:
-        print(err)
-        sys.exit(-1)
-
-    utils.log.init(args.debug)
-    logger = utils.log.get('Rando')
-
-    opts, optErrMsgs = finalizeArgs(args)
-
+def settings(args, opts):
     plandoSettings = None
     if args.plandoRando is not None:
         RomPatches.ActivePatches = args.plandoRando["patches"]
@@ -639,6 +628,22 @@ if __name__ == "__main__":
     graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses,
                                   args.escapeRando, opts.minimizerN, dotFile, args.doorsColorsRando, args.allowGreyDoors,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
+
+    return randoSettings, graphSettings
+
+if __name__ == "__main__":
+    args = parseArgs(sys.argv)
+    err = validateArgs(args)
+    if err:
+        print(err)
+        sys.exit(-1)
+
+    utils.log.init(args.debug)
+    logger = utils.log.get('Rando')
+
+    opts, optErrMsgs = finalizeArgs(args)
+
+    randoSettings, graphSettings = settings(args, opts)
 
     if args.plandoRando is None:
         DoorsManager.setDoorsColor()

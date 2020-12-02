@@ -332,8 +332,6 @@ class InteractiveSolver(CommonSolver):
                     smbool = SMBool(difficulty["bool"], difficulty["difficulty"], difficulty["knows"], difficulty["items"])
                     loc.difficulty = smbool
                     itemName = itemLoc["Item"]["Type"]
-                    if itemName == "Boss":
-                        itemName = "Nothing"
                     loc.itemName = itemName
                     loc.accessPoint = itemLoc["Location"]["accessPoint"]
                     self.collectMajor(loc)

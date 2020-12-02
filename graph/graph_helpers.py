@@ -224,6 +224,18 @@ class HelpersGraph(Helpers):
         return sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Speed Booster w/Speed' if sm.haveItem('SpeedBooster') else 'Bubble -> Speed Booster'])
 
     @Cache.decorator
+    def canAccessDoubleChamberItems(self):
+        sm = self.smbm
+        hellRun = Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Wave']
+        return sm.wor(sm.wand(sm.traverse('SingleChamberRight'),
+                              sm.canHellRun(**hellRun)),
+                      sm.wand(sm.wor(sm.haveItem('HiJump'),
+                                     sm.canSimpleShortCharge(),
+                                     sm.canFly(),
+                                     sm.knowsDoubleChamberWallJump()),
+                              sm.canHellRun(hellRun['hellRun'], hellRun['mult']*0.75, hellRun['minE'])))
+
+    @Cache.decorator
     def canExitCathedral(self):
         # from top: can use bomb/powerbomb jumps
         # from bottom: can do a shinespark or use space jump

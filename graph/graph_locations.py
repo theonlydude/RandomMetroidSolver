@@ -532,9 +532,9 @@ define_location(
     Visibility="Chozo",
     Room='Wave Beam Room',
     AccessFrom={
-        'Bubble Mountain Top': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Wave'])
+        'Bubble Mountain Top': lambda sm: sm.canAccessDoubleChamberItems()
     },
-    Available=lambda loc, sm: sm.wand(sm.traverse('SingleChamberRight'), sm.traverse('DoubleChamberRight')),
+    Available=lambda loc, sm: sm.traverse('DoubleChamberRight'),
     PostAvailable=lambda loc, sm: sm.wor(sm.haveItem('Morph'), # exit through lower passage under the spikes
                                          sm.wand(sm.wor(sm.haveItem('SpaceJump'), # exit through blue gate
                                                         sm.haveItem('Grapple')),
@@ -1666,9 +1666,9 @@ define_location(
     Visibility="Visible",
     Room='Double Chamber',
     AccessFrom={
-        'Bubble Mountain Top': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Wave'])
+        'Bubble Mountain Top': lambda sm: sm.canAccessDoubleChamberItems()
     },
-    Available=lambda loc, sm: sm.traverse('SingleChamberRight')
+    Available=lambda loc, sm: SMBool(True)
 ),
 define_location(
     Area="LowerNorfair",

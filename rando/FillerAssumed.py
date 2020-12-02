@@ -1,4 +1,5 @@
 import random, logging, time
+from collections import defaultdict
 
 from rando.Filler import Filler
 from rando.FillerRandom import FillerRandomItems, FrontFillerKickstart, FrontFillerNoCopy
@@ -33,7 +34,7 @@ class AssumedFiller(Filler):
         if self.vcr is not None:
             # give all items to vcr, like we do in assumed fill
             self.vcr.setFiller('reverse')
-            self.vcr.addInitialItems([it.Type for it in self.container.itemPool], [loc.Name for loc in self.container.unusedLocations])
+            self.vcr.addInitialItems([it.Type for it in self.container.itemPool])
 
         # first collect mother brain
         self.ap = 'Golden Four'
@@ -115,6 +116,18 @@ class AssumedFiller(Filler):
             return {tuple[location]: locItemDict[tuple[location]] for tuple in distances if tuple[distance] >= distanceThreshold}
         else:
             return locItemDict
+
+    def priorizeItems(self, itemLocDict, items):
+        if self.earlyGame:
+            # choose items with the less no longer avail locs
+            priorities = defaultdict(list)
+            for item, data in itemLocDict.items():
+                if item not in items:
+                    continue
+                priorities[len(data["noLongerAvailLocsWoItem"])].append(item)
+            return priorities[min(priorities)]
+        else:
+            return items
 
     def displayNoLongerAvailLocsWoItem(self, itemLocDict):
         if self.log.getEffectiveLevel() == logging.DEBUG:
@@ -238,6 +251,7 @@ class AssumedFiller(Filler):
             self.newAvailableItems.remove(itemType)
             self.log.debug("item type chosen: {}".format(item.Type))
         else:
+            possibleItems = self.priorizeItems(itemLocDict, possibleItems)
             item = random.choice(possibleItems)
             self.log.debug("item type chosen: {}".format(item.Type))
 

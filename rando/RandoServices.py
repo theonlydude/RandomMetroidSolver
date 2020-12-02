@@ -51,10 +51,10 @@ class RandoServices(object):
             # we only place items which won't make some locs unavailable
             validItems = set([it for it, data in itemLocDict.items() if not data['noLongerAvailLocsWoItem']])
 
-        # for each valid item1 with only one possible location, for each leaf item2,
+        # for each item1 with only one possible location, for each item2,
         # check that item1 loc is still available without both items.
         # TODO::detect if two items have the same only possible location
-        oneLocationItemsLocs = {it: data for it, data in itemLocDict.items() if len(data['possibleLocs']) == 1 and it in validItems}
+        oneLocationItemsLocs = {it: data for it, data in itemLocDict.items() if len(data['possibleLocs']) == 1}
         for oneLocItem, data in oneLocationItemsLocs.items():
             oneLoc = list(data['possibleLocs'])[0]
             for item in itemLocDict.keys():
@@ -110,6 +110,7 @@ class RandoServices(object):
         self.areaGraph.getAvailableLocations(locs, container.sm, maxDiff, startAP)
 
     def allLocationsWithoutItem(self, item, startAP, container, items, maxDiff):
+        self.log.debug("allLocationsWithoutItem {}".format(item.Type))
         container.sm.resetItems()
         items.remove(item)
         container.sm.addItems([it.Type for it in items])

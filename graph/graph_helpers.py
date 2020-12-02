@@ -233,7 +233,7 @@ class HelpersGraph(Helpers):
                                      sm.canSimpleShortCharge(),
                                      sm.canFly(),
                                      sm.knowsDoubleChamberWallJump()),
-                              sm.canHellRun(hellRun['hellRun'], hellRun['mult']*0.75, hellRun['minE'])))
+                              sm.canHellRun(hellRun['hellRun'], hellRun['mult']*0.8, hellRun['minE'])))
 
     @Cache.decorator
     def canExitCathedral(self):

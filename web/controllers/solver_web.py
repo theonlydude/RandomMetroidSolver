@@ -101,12 +101,12 @@ def completePreset(params):
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master']
-    tourPresets = ['Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
+    tourPresets = ['Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2021']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList():
-    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020', 'VARIA_Weekly']
+    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2021', 'VARIA_Weekly']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
@@ -1018,7 +1018,7 @@ def randomizer():
         "Season_Races_Chozo": "rando league races (Chozo split)",
         "Playoff_Races": "rando league races during playoff (Majors/Minors split)",
         "Playoff_Races_Chozo": "rando league races during playoff (Chozo split)",
-        "SMRAT2020": "Super Metroid Randomizer Accessible Tournament 2020",
+        "SMRAT2021": "Super Metroid Randomizer Accessible Tournament 2021",
         "VARIA_Weekly": "Casual logic community races"
     }
 

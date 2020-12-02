@@ -27,7 +27,6 @@ class RandoSolver(StandardSolver):
 
         self.extStatsFilename = None
         self.extStatsStep = None
-        self.plot = None
 
         self.type = 'rando'
         self.output = Out.factory(self.type, self)

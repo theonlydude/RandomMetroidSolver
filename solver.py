@@ -110,7 +110,7 @@ def standardSolver(args):
                             extStatsStep=args.extStatsStep,
                             displayGeneratedPath=args.displayGeneratedPath,
                             outputFileName=args.output, magic=args.raceMagic,
-                            checkDuplicateMajor=args.checkDuplicateMajor, vcr=args.vcr, plot=args.plot)
+                            checkDuplicateMajor=args.checkDuplicateMajor, vcr=args.vcr)
 
     solver.solveRom()
 
@@ -184,7 +184,6 @@ if __name__ == "__main__":
                         dest="energyQty", nargs="?", default=None, choices=["sparse", "medium", "vanilla"])
     parser.add_argument('--forbiddenItems', help="rando plando  (used in interactive mode)",
                         dest="forbiddenItems", nargs="?", default=None)
-    parser.add_argument('--plot', help="dump plot data in file specified", dest="plot", nargs="?", default=None)
     parser.add_argument('--doorName', help="door to replace (used in interactive mode)",
                         dest="doorName", nargs="?", default=None)
     parser.add_argument('--newColor', help="new color for door (used in interactive mode)",

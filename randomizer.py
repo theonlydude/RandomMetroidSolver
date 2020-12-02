@@ -805,7 +805,7 @@ if __name__ == "__main__":
             msg = ''
         if args.rom is None: # web mode
             data = romPatcher.romFile.data
-            opts.fileName = '{}.sfc'.format(fileName)
+            opts.fileName = '{}.sfc'.format(opts.fileName)
             data["fileName"] = opts.fileName
             # error msg in json to be displayed by the web site
             data["errorMsg"] = msg

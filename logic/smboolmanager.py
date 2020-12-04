@@ -3,7 +3,7 @@
 from logic.cache import Cache
 from logic.smbool import SMBool, smboolFalse
 from logic.helpers import Bosses
-from graph.graph_helpers import HelpersGraph
+from logic.logic import Logic
 from utils.doorsmanager import DoorsManager
 from utils.parameters import Knows, isKnows
 
@@ -20,7 +20,7 @@ class SMBoolManager(object):
         self.computeItemsPositions()
         Cache.reset()
 
-        self.helpers = HelpersGraph(self)
+        self.helpers = Logic.HelpersGraph(self)
         self.doorsManager = DoorsManager()
         self.createFacadeFunctions()
         self.createKnowsFunctions()

@@ -8,7 +8,7 @@ from rando.RandoServices import ComebackCheckType
 from rando.ItemLocContainer import ItemLocation
 from utils.parameters import infinity
 from logic.helpers import diffValue2txt
-from graph.graph_access import GraphUtils
+from graph.graph_utils import GraphUtils
 
 # base class for fillers. a filler responsibility is to fill a given
 # ItemLocContainer while a certain condition is fulfilled (usually

@@ -17,9 +17,10 @@ from solver.conf import Conf
 from utils.parameters import diff2text, text2diff
 from utils.utils import PresetLoader, removeChars, getDefaultMultiValues
 from utils.db import DB
-from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
+from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
+from graph.varia.graph_access import accessPoints
 from utils.utils import isStdPreset, getRandomizerDefaultParameters, getPresetDir
-from graph.graph_locations import locations
+from graph.varia.graph_locations import locations
 from logic.smboolmanager import SMBoolManager
 from rom.romreader import RomReader
 from rom.rom_patches import RomPatches

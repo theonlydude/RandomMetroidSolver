@@ -5,7 +5,7 @@ import argparse, os.path, json, sys, shutil, random
 from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from rando.PaletteRando import PaletteRando
-from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
+from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
 from utils.parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text, appDir
 from rom.rom_patches import RomPatches
 from rom.rompatcher import RomPatcher
@@ -14,10 +14,20 @@ from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, ge
 from utils.version import displayedVersion
 from logic.smbool import SMBool
 from utils.doorsmanager import DoorsManager
+from logic.logic import Logic
 
 import utils.log
 import utils.db as db
 
+# we need to know the logic before doing anything else
+def getLogic():
+    # check if --logic is there
+    logic = 'varia'
+    for i, param in enumerate(sys.argv):
+        if param == '--logic' and i+1 < len(sys.argv):
+            logic = sys.argv[i+1]
+    return logic
+Logic.factory(getLogic())
 defaultMultiValues = getDefaultMultiValues()
 speeds = defaultMultiValues['progressionSpeed']
 energyQties = defaultMultiValues['energyQty']
@@ -259,6 +269,7 @@ if __name__ == "__main__":
                         nargs='?', const=True, default=False)
     parser.add_argument('--allowGreyDoors', help='add grey color in doors colors pool', dest='allowGreyDoors',
                         nargs='?', const=True, default=False)
+    parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="varia", choices=["varia", "rotation"])
 
     # parse args
     args = parser.parse_args()
@@ -276,6 +287,9 @@ if __name__ == "__main__":
 
     utils.log.init(args.debug)
     logger = utils.log.get('Rando')
+
+    Logic.factory(args.logic)
+
     # service to force an argument value and notify it
     argDict = vars(args)
     forcedArgs = {}

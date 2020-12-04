@@ -1,5 +1,6 @@
 import logging, time
 
+from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
 from logic.smbool import SMBool, smboolFalse
 from logic.helpers import Bosses
 from rom.romloader import RomLoader
@@ -7,14 +8,17 @@ from rom.rom_patches import RomPatches
 from graph.graph import AccessGraphSolver as AccessGraph
 from utils.utils import PresetLoader
 from solver.conf import Conf
-from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils, getAccessPoint
+from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils, getAccessPoint
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
 from utils.doorsmanager import DoorsManager
+from logic.logic import Logic
 
 class CommonSolver(object):
     def loadRom(self, rom, interactive=False, magic=None, startAP=None):
         # startAP param is only use for seedless
         if rom == None:
+            # TODO::add a --logic parameter for seedless
+            Logic.factory('varia')
             self.romFileName = 'seedless'
             self.majorsSplit = 'Full'
             self.areaRando = True
@@ -31,6 +35,7 @@ class CommonSolver(object):
             # in seedless we allow mixing of area and boss transitions
             self.hasMixedTransitions = True
             self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
+            self.locations = Logic.locations
             for loc in self.locations:
                 loc.itemName = 'Nothing'
             # set doors related to default patches
@@ -39,7 +44,9 @@ class CommonSolver(object):
         else:
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
+            Logic.factory(self.romLoader.readLogic())
             self.romLoader.readNothingId()
+            self.locations = Logic.locations
             self.majorsSplit = self.romLoader.assignItems(self.locations)
             (self.startAP, self.startArea, startPatches) = self.romLoader.getStartAP()
             (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches()
@@ -68,7 +75,8 @@ class CommonSolver(object):
             else:
                 self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
 
-        self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
+        self.smbm = SMBoolManager()
+        self.areaGraph = AccessGraph(Logic.accessPoints, self.curGraphTransitions)
 
         # store at each step how many locations are available
         self.nbAvailLocs = []

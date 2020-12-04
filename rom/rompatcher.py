@@ -3,11 +3,11 @@ import os, random, re
 from rando.Items import ItemManager
 from rom.compression import Compressor
 from rom.ips import IPS_Patch
-from rando.patches import patches, additional_PLMs
-from utils.parameters import appDir
 from utils.doorsmanager import DoorsManager
-from graph.graph_access import GraphUtils, getAccessPoint, accessPoints
+from graph.graph_utils import GraphUtils, getAccessPoint
+from logic.logic import Logic
 from rom.rom import RealROM, FakeROM
+from patches.patchaccess import PatchAccess
 
 def getWord(w):
     return (w & 0x00FF, (w & 0xFF00) >> 8)
@@ -123,6 +123,7 @@ class RomPatcher:
             # get out of croc room: reload CRE
             0x93ea: self.forceRoomCRE
         }
+        self.patchAccess = PatchAccess()
 
     def end(self):
         self.romFile.close()
@@ -250,10 +251,10 @@ class RomPatcher:
             self.applyIPSPatch(patchName)
 
     def customShip(self, ship):
-        self.applyIPSPatch(ship, ipsDir='rando/patches/ships')
+        self.applyIPSPatch(ship, ipsDir='patches/common/ips/ships')
 
     def customSprite(self, sprite, customNames):
-        self.applyIPSPatch(sprite, ipsDir='rando/patches/sprites')
+        self.applyIPSPatch(sprite, ipsDir='patches/common/ips/sprites')
 
         if not customNames:
             return
@@ -437,16 +438,16 @@ class RomPatcher:
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
-    def applyIPSPatch(self, patchName, patchDict=None, ipsDir="rando/patches"):
+    def applyIPSPatch(self, patchName, patchDict=None, ipsDir=None):
         if patchDict is None:
-            patchDict = patches
+            patchDict = self.patchAccess.getDictPatches()
         print("Apply patch {}".format(patchName))
         if patchName in patchDict:
             patch = IPS_Patch(patchDict[patchName])
         else:
             # look for ips file
-            if os.path.exists(patchName):
-                patch = IPS_Patch.load(patchName)
+            if ipsDir is None:
+                patch = IPS_Patch.load(self.patchAccess.getPatchPath(patchName))
             else:
                 patch = IPS_Patch.load(os.path.join(appDir, ipsDir, patchName))
         self.ipsPatches.append(patch)
@@ -455,13 +456,13 @@ class RomPatcher:
         doors = [0x10] # red brin elevator
         def addBlinking(name):
             key = 'Blinking[{}]'.format(name)
-            if key in patches:
+            if key in self.patchAccess.getDictPatches():
                 self.applyIPSPatch(key)
-            if key in additional_PLMs:
+            if key in self.patchAccess.getAdditionalPLMs():
                 plms.append(key)
         if area == True:
             plms += ['Maridia Sand Hall Seal', "Save_Main_Street", "Save_Crab_Shaft"]
-            for accessPoint in accessPoints:
+            for accessPoint in Logic.accessPoints:
                 if accessPoint.Internal == True or accessPoint.Boss == True:
                     continue
                 addBlinking(accessPoint.Name)
@@ -469,7 +470,7 @@ class RomPatcher:
             addBlinking("Below Botwoon Energy Tank Right")
         if minimizerN is not None:
             # add blinking doors inside and outside boss rooms
-            for accessPoint in accessPoints:
+            for accessPoint in Logic.accessPoints:
                 if accessPoint.Boss == True:
                     addBlinking(accessPoint.Name)
         return doors
@@ -533,8 +534,9 @@ class RomPatcher:
         plmDict = {}
         # we might need to update locations addresses on the fly
         plmLocs = {} # room key above => loc name
+        additionalPLMs = self.patchAccess.getAdditionalPLMs()
         for p in plms:
-            plm = additional_PLMs[p]
+            plm = additionalPLMs[p]
             room = plm['room']
             state = 0
             if 'state' in plm:

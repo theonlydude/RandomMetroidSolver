@@ -79,6 +79,9 @@ class Location:
             self.pathDifficulty, self.locDifficulty, self.restricted,
             self.itemName, self.itemType, self.comeBack,
             self.areaWeight)
+        ret.AccessFrom = self.AccessFrom
+        ret.Available = self.Available
+        ret.PostAvailable = self.PostAvailable
 
         return ret
 

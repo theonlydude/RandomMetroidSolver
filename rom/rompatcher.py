@@ -13,87 +13,65 @@ def getWord(w):
     return (w & 0x00FF, (w & 0xFF00) >> 8)
 
 class RomPatcher:
-    # standard:
-    # Instantly open G4 passage when all bosses are killed
-    #   g4_skip.ips
-    # Wake up zebes when going right from morph
-    #   wake_zebes.ips
-    # Seed display
-    #   seed_display.ips
-    # Custom credits with stats
-    #   credits.ips
-    # Custom credits with stats (tracking code)
-    #   tracking.ips
-    # Removes Gravity Suit heat protection
-    # Mother Brain Cutscene Edits
-    # Suit acquisition animation skip
-    # Fix Morph & Missiles Room State
-    # Fix heat damage speed echoes bug
-    # Disable GT Code
-    # Disable Space/Time select in menu
-    # Fix Morph Ball Hidden/Chozo PLM's
-    # Fix Screw Attack selection in menu
-    #
-    # optional (Kejardon):
-    # Allows the aim buttons to be assigned to any button
-    #   AimAnyButton.ips
-    #
-    # optional (Scyzer):
-    # Remove fanfare when picking up an item
-    #   itemsounds.ips
-    # Allows Samus to start spinning in mid air after jumping or falling
-    #   spinjumprestart.ips
-    #
-    # optional standard (imcompatible with MSU1 music):
-    # Max Ammo Display
-    #   max_ammo_display.ips
-    #
-    # optional (DarkShock):
-    # Play music with MSU1 chip on SD2SNES
-    #   supermetroid_msu1.ips
-    #
-    # layout:
-    # Disable respawning blocks at dachora pit
-    #   dachora.ips
-    # Make it possible to escape from below early super bridge without bombs
-    #   early_super_bridge.ips
-    # Replace bomb blocks with shot blocks before Hi-Jump
-    #   high_jump.ips
-    # Replace bomb blocks with shot blocks at Moat
-    #   moat.ips
-    # Raise platform in first heated norfair room to not require hi-jump
-    #   nova_boost_platform.ip
-    # Raise platforms in red tower bottom to always be able to get back up
-    #   red_tower.ips
-    # Replace bomb blocks with shot blocks before Spazer
-    #   spazer.ips
+    # possible patches. see patches asm source if applicable and available for more information
     IPSPatches = {
-        'Standard': ['new_game.ips', 'plm_spawn.ips', 'load_enemies_fix.ips',
-                     'credits_varia.ips', 'seed_display.ips', 'tracking.ips',
-                     'wake_zebes.ips', 'g4_skip.ips', # XXX those are door ASMs
-                     'Mother_Brain_Cutscene_Edits', "Allow_All_Saves",
-                     'Suit_acquisition_animation_skip',
-                     'Fix_heat_damage_speed_echoes_bug', 'Disable_GT_Code',
-                     'Disable_Space_Time_select_in_menu', 'Fix_Morph_Ball_Hidden_Chozo_PLMs',
-                     'Fix_Screw_Attack_selection_in_menu', 'fix_suits_selection_in_menu.ips',
-                     'Removes_Gravity_Suit_heat_protection',
-                     'AimAnyButton.ips', 'endingtotals.ips',
-                     'supermetroid_msu1.ips', 'max_ammo_display.ips', 'varia_logo.ips'],
+        # applied on all seeds
+        'Standard': [
+            # handles starting location and start blue doors
+            'new_game.ips',
+            # generic PLM spawner used for extra saves, blinking doors etc.
+            'plm_spawn.ips',
+            # needed fixes for VARIA
+            'vanilla_bugfixes.ips',
+            # custom credits, backup save system, base tracking code
+            'credits_varia.ips',
+            # actual game hijacks to update tracking stats
+            'tracking.ips',
+            # enemy names in menu for seed ID
+            'seed_display.ips',
+            # door ASM to wake zebes early in blue brinstar
+            'wake_zebes.ips',
+            # door ASM to skip G4 cutscene when all 4 bosses are dead
+            'g4_skip.ips',
+            # faster MB cutscene transitions
+            'Mother_Brain_Cutscene_Edits',
+            # "Balanced" suit mode
+            'Removes_Gravity_Suit_heat_protection',
+            # use any button for angle up/down
+            'AimAnyButton.ips',
+            # credits item% based on actual number of items in the game
+            'endingtotals.ips',
+            # MSU-1 patch
+            'supermetroid_msu1.ips',
+            # displays max ammo 
+            'max_ammo_display.ips',
+            # VARIA logo on startup screen
+            'varia_logo.ips'
+        ],
+        # VARIA tweaks
         'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
+        # anti-softlock/game opening layout patches
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips',
                    'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips'],
+        # comfort patches
         'Optional': ['itemsounds.ips', 'rando_speed.ips', 'Infinite_Space_Jump', 'refill_before_save.ips',
                      'spinjumprestart.ips', 'elevators_doors_speed.ips', 'No_Music', 'random_music.ips',
-                     'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
-                     'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
-                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips',
+                     # animals 
+                     'animal_enemies.ips', 'animals.ips', 'draygonimals.ips',
+                     'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
+                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips', # ...end animals
+                     # vanilla behaviour restore
                      'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips'],
+        # base patchset+optional layout for area rando
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
                  'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street' ],
+        # patches for escape rando
         'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips'],
-        'MinimizerTourian': ['minimizer_tourian.ips', 'nerfed_rainbow_beam.ips', 'open_zebetites.ips'],
+        # patches for  minimizer with fast Tourian
+        'MinimizerTourian': ['minimizer_tourian.ips', 'open_zebetites.ips'],
+        # patches for door color rando
         'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips']
     }
 

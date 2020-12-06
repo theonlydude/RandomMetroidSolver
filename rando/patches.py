@@ -33,19 +33,6 @@ patches = {
         0x14b19f: [0x20,0x00],
         0x14b1b2: [0x30,0x00],
         0x14b20c: [0x03,0x00]},
-    "Suit_acquisition_animation_skip":{
-        0x020717: [0xea,0xea,0xea,0xea]},
-    "Fix_heat_damage_speed_echoes_bug":{
-        0x08b629: [0x01]},
-    "Disable_GT_Code":{
-        0x15491c: [0x80]},
-    "Disable_Space_Time_select_in_menu":{
-        0x013175: [0x01]},
-    "Fix_Morph_Ball_Hidden_Chozo_PLMs":{
-        0x0268ce: [0x04],
-        0x026e02: [0x04]},
-    "Fix_Screw_Attack_selection_in_menu":{
-        0x0134c5: [0x0c]},
     "No_Music":{
         0x278413: [0x6f]},
     "Escape_Rando_Enable_Enemies":{

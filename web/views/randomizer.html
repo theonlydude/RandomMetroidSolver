@@ -254,6 +254,12 @@ if (hs.registerOverlay) {
 .marginRight {
     margin-right: 2em;
 }
+.center_img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 40%;
+}
 </style>
 
 <script type="text/javascript">
@@ -1480,9 +1486,7 @@ Colored doors to save stations / refills / map stations are excluded from random
 Colored doors to save / refill stations are forced to blue.<br/>\
 The fill algorithm will be more trolly about ammo/beam if you use slower progression speed.</p>\
 <p>Since in this mode there are seven distinct door keys, and some doors can close behind you if the door is blue on the other side, the probability of softlocking increases, especially with non standard starting locations. To avoid softlocking a save file, a rolling backup save system is enabled. When you save at a different save station than last time, a backup of your previous save is done, using an empty save, or an older backup of the same game. You can identify backups in the load menu, as they will have the same 'Samus Data' as the original save :</p>\
-<table class=\"quarter\">\
-<tr><td><img src=\"/solver/static/images/backup_saves.png\" alt=\"backup_saves.png\" title=\"Backup Saves menu example\" class=\"full\"/></td></tr>\
-</table>\
+<img src=\"/solver/static/images/backup_saves.png\" alt=\"backup_saves.png\" title=\"Backup Saves menu example\" class=\"third center_img\"/>\
 <p>As soon as you load a backup save from the menu, it becomes its own 'Samus Data'. In the example above, if you load your most recent backup (with 0:06 time), it will become 'Samus C'. When playing this new slot C game, when you save, it won't be able to backup, since other slots are taken by the original A slot and an older backup of the A slot. So if you softlock a save file, be sure to clear it for it to be reused as a backup afterwards.</p>\
 <p>Click on the dice button to randomly set this parameter.</p>\
 Beams doors patch by Mettyk25jigsaw.<br/>\

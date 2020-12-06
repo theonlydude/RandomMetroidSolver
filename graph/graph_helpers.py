@@ -152,8 +152,9 @@ class HelpersGraph(Helpers):
         suitless = sm.wand(sm.haveItem('HiJump'), sm.knowsGravLessLevel1())
         if fromWs is True and RomPatches.has(RomPatches.EastOceanPlatforms).bool is False:
             suitless = sm.wand(suitless,
-                               # to break water line and go through the door on the right
-                               sm.haveItem('SpaceJump'))
+                               sm.wor(sm.canSpringBallJump(), # two sbj on the far right
+                                      # to break water line and go through the door on the right
+                                      sm.haveItem('SpaceJump')))
         return sm.wand(sm.wor(sm.haveItem('Gravity'),
                               suitless),
                        sm.haveItem('Morph')) # for crab maze

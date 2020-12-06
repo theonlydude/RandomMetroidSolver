@@ -642,7 +642,6 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
         self.maxItems = nLocs
         self.log.debug("maxItems: {}".format(self.maxItems))
         self.log.debug("exclude: {}".format(self.exclude))
-        print("ItemPoolGeneratorPlando: exclude: {}".format(self.exclude))
 
     def getItemPool(self):
         exceptionMessage = "Too many items already placed by the plando or not enough available locations:"
@@ -718,7 +717,6 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
             minorLocations = max(0, 0.66*self.qty['minors'] - nbMinorsAlready)
             maxItems = len(self.itemManager.getItemPool()) + int(minorLocations)
             ammoQty = {itemType: qty for itemType, qty in self.qty['ammo'].items() if itemType not in self.exclude['forbiddenItems']}
-            print("ammoQty: {}".format(ammoQty))
             if ammoQty:
                 rangeDict = getRangeDict(ammoQty)
                 while len(self.itemManager.getItemPool()) < maxItems and remain > 0:

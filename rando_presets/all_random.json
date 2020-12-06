@@ -19,5 +19,6 @@
   "energyQty": "random",
   "energyQtyMultiSelect": ["sparse", "medium", "vanilla"],
   "funSuits": "random",
-  "escapeRando": "random"
+  "escapeRando": "random",
+  "doorsColorsRando": "random"
 }

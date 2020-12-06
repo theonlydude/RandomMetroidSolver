@@ -54,7 +54,7 @@ ${CWD}/tools/genExtStats.sh ${ROM} 100
 # 900 seeds pour les skill/settings presets de tournoi
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Season_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Playoff_Races
-${CWD}/tools/genExtStats.sh ${ROM} 900 SMRAT2020
+${CWD}/tools/genExtStats.sh ${ROM} 900 SMRAT2021
 
 # 900 seeds pour les skill preset inclus dans les rando presets
 ${CWD}/tools/genExtStats.sh ${ROM} 900 default regular

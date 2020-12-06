@@ -1009,7 +1009,7 @@ def randomizer():
         "minimizer_maximizer":"No longer a boss rush",
         "quite_random": "randomizes a few significant settings to have various seeds",
         "stupid_hard": "hardest possible settings",
-        "surprise": "quite_random with Area, Boss and Start Location randomized",
+        "surprise": "quite_random with Area/Boss/Doors/Start settings randomized",
         "vanilla": "closest possible to vanilla Super Metroid",
         "way_of_chozo": "chozo split with boss randomization",
         "where_am_i": "Area mode with random start location and early morph",

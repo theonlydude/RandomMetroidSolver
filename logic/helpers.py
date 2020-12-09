@@ -188,7 +188,18 @@ class Helpers(object):
         sm = self.smbm
         return sm.wor(sm.haveItem('Missile'), sm.haveItem('Super'))
 
-    canOpenRedDoors = haveMissileOrSuper
+    @Cache.decorator
+    def canOpenRedDoors(self):
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.wnot(RomPatches.has(RomPatches.RedDoorsMissileOnly)),
+                              sm.haveMissileOrSuper()),
+                      sm.haveItem('Missile'))
+
+    @Cache.decorator
+    def canOpenEyeDoors(self):
+        sm = self.smbm
+        return sm.wor(RomPatches.has(RomPatches.NoGadoras),
+                      sm.haveMissileOrSuper())
 
     @Cache.decorator
     def canOpenGreenDoors(self):
@@ -568,6 +579,9 @@ class Helpers(object):
         sm = self.smbm
         if not sm.haveItem('Morph') and not sm.haveItem('Gravity'):
             return smboolFalse
+        # some ammo to destroy the turrets during the fight
+        if not sm.haveMissileOrSuper():
+            return smboolFalse
         (ammoMargin, secs, ammoItems) = self.canInflictEnoughDamages(6000)
         # print('DRAY', ammoMargin, secs)
         if ammoMargin > 0:
@@ -636,7 +650,7 @@ class Helpers(object):
 
     def mbEtankCheck(self):
         sm = self.smbm
-        if RomPatches.has(RomPatches.NerfedRainbowBeam):
+        if sm.wor(RomPatches.has(RomPatches.NerfedRainbowBeam), RomPatches.has(RomPatches.TourianSpeedup)):
             # "add" energy for difficulty calculations
             energy = 2.8 if sm.haveItem('Varia') else 2.6
             return (True, energy)
@@ -679,10 +693,9 @@ class Helpers(object):
     @Cache.decorator
     def canPassMetroids(self):
         sm = self.smbm
-        return sm.wand(sm.canOpenRedDoors(),
-                       sm.wor(sm.haveItem('Ice'),
-                              # to avoid leaving tourian to refill power bombs
-                              sm.itemCountOk('PowerBomb', 3)))
+        return sm.wor(sm.wand(sm.haveItem('Ice'), sm.haveMissileOrSuper()),
+                      # to avoid leaving tourian to refill power bombs
+                      sm.itemCountOk('PowerBomb', 3))
 
     @Cache.decorator
     def canPassZebetites(self):
@@ -696,9 +709,10 @@ class Helpers(object):
     def enoughStuffTourian(self):
         sm = self.smbm
         ret = self.smbm.wand(sm.wor(RomPatches.has(RomPatches.TourianSpeedup),
-                                    sm.wand(sm.canPassMetroids(),
-                                            sm.canPassZebetites())),
-                             sm.enoughStuffsMotherbrain())
+                                    sm.wand(sm.canPassMetroids(), sm.canPassZebetites())),
+                             sm.canOpenRedDoors(),
+                             sm.enoughStuffsMotherbrain(),
+                             sm.wor(RomPatches.has(RomPatches.OpenZebetites), sm.haveItem('Morph')))
         return ret
 
 class Pickup:
@@ -735,7 +749,10 @@ class Pickup:
         elif self.itemsPickup == 'minimal':
             canResistRainbow = ((smbm.haveItemCount('ETank', 3) and smbm.haveItem('Varia'))
                                 or smbm.haveItemCount('ETank', 6)
-                                or RomPatches.has(RomPatches.NerfedRainbowBeam))
+                                # 20 dmg
+                                or RomPatches.has(RomPatches.NerfedRainbowBeam)
+                                # no rainbow
+                                or RomPatches.has(RomPatches.TourianSpeedup))
 
             return (smbm.haveItem('Morph')
                     # pass bomb block passages

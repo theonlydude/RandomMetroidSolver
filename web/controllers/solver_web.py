@@ -101,12 +101,12 @@ def completePreset(params):
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master']
-    tourPresets = ['Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
+    tourPresets = ['Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2021']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList():
-    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020', 'VARIA_Weekly']
+    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2021', 'VARIA_Weekly']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
@@ -1009,7 +1009,7 @@ def randomizer():
         "minimizer_maximizer":"No longer a boss rush",
         "quite_random": "randomizes a few significant settings to have various seeds",
         "stupid_hard": "hardest possible settings",
-        "surprise": "quite_random with Area, Boss and Start Location randomized",
+        "surprise": "quite_random with Area/Boss/Doors/Start settings randomized",
         "vanilla": "closest possible to vanilla Super Metroid",
         "way_of_chozo": "chozo split with boss randomization",
         "where_am_i": "Area mode with random start location and early morph",
@@ -1018,7 +1018,7 @@ def randomizer():
         "Season_Races_Chozo": "rando league races (Chozo split)",
         "Playoff_Races": "rando league races during playoff (Majors/Minors split)",
         "Playoff_Races_Chozo": "rando league races during playoff (Chozo split)",
-        "SMRAT2020": "Super Metroid Randomizer Accessible Tournament 2020",
+        "SMRAT2021": "Super Metroid Randomizer Accessible Tournament 2021",
         "VARIA_Weekly": "Casual logic community races"
     }
 
@@ -1767,8 +1767,8 @@ class WS(object):
             raiseHttp(400, "Unknown action, must be add/remove/toggle/clear/init/get/save/randomize", True)
 
         mode = request.vars.mode
-        if mode not in ["standard", "seedless", "plando"]:
-            raiseHttp(400, "Unknown mode, must be standard/seedless/plando", True)
+        if mode not in ["standard", "seedless", "plando", "race", "debug"]:
+            raiseHttp(400, "Unknown mode, must be standard/seedless/plando/race/debug", True)
 
         try:
             WSClass = globals()["WS_{}_{}".format(scope, action)]
@@ -1778,7 +1778,7 @@ class WS(object):
 
     def __init__(self, mode):
         self.mode = mode
-        if self.mode == "plando":
+        if self.mode in ["plando", "debug"]:
             if session.plando is None:
                 raiseHttp(400, "No session found for the Plandomizer Web service", True)
             self.session = session.plando
@@ -1922,10 +1922,8 @@ class WS(object):
             params += ['--minorQty', parameters["minorQty"],
                        '--energyQty', parameters["energyQty"]
             ]
-
-        if request.vars.debug != None:
-            params.append('--vcr')
-            params.append('--debug')
+            if "forbiddenItems" in parameters:
+                params += ['--forbiddenItems', parameters["forbiddenItems"]]
 
         # dump state as input
         with open(jsonInFileName, 'w') as jsonFile:
@@ -2040,13 +2038,11 @@ class WS_common_init(WS):
         self.session["mode"] = mode
         self.session["startLocation"] = startLocation if startLocation != None else "Landing Site"
 
-        vcr = request.vars.debug != None
         fill = request.vars.fill == "true"
-        race = request.vars.race == "true"
 
-        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr, fill, startLocation, race)
+        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, fill, startLocation)
 
-    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr, fill, startLocation, race):
+    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, fill, startLocation):
         (fd, jsonOutFileName) = tempfile.mkstemp()
         params = [
             pythonExec,  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
@@ -2060,12 +2056,6 @@ class WS_common_init(WS):
 
         if mode != "seedless":
             params += ['-r', str(jsonRomFileName)]
-
-        if race == True:
-            params.append('--trackerRace')
-
-        if vcr == True:
-            params.append('--vcr')
 
         if fill == True:
             params.append('--fill')
@@ -2132,6 +2122,12 @@ class WS_common_randomize(WS):
             raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", True)
         if request.vars.energyQty not in ["sparse", "medium", "vanilla"]:
             raiseHttp(400, "Wrong value for energyQty", True)
+        if request.vars.forbiddenItems != '':
+            forbiddenItems = request.vars.forbiddenItems.split(',')
+            validItems = set(["Charge", "Ice", "Wave", "Spazer", "Plasma", "Varia", "Gravity", "Morph", "Bomb", "SpringBall", "ScrewAttack", "HiJump", "SpaceJump", "SpeedBooster", "Grapple", "XRayScope", "ETank", "Reserve", "Missile", "Super", "PowerBomb"])
+            for item in forbiddenItems:
+                if item not in validItems:
+                    raiseHttp(400, "Wrong value for forbidden items", True)
 
     def action(self):
         if self.session["mode"] != "plando":
@@ -2140,6 +2136,8 @@ class WS_common_randomize(WS):
         params = {}
         for elem in "minorQty", "energyQty":
             params[elem] = request.vars[elem]
+        if request.vars.forbiddenItems != '':
+            params["forbiddenItems"] = request.vars.forbiddenItems
 
         self.session["rando"] = params
 
@@ -2219,7 +2217,7 @@ class WS_item_add(WS):
             item = 'Nothing'
 
         # in seedless mode we have to had boss items instead of nothing
-        if request.vars.mode == "seedless":
+        if request.vars.mode in ["seedless", "race", "debug"]:
             if locName in ['Kraid', 'Ridley', 'Phantoon', 'Draygon', 'MotherBrain']:
                 item = locName
 
@@ -2390,9 +2388,10 @@ customSprites = {
     'mario_8bit': {"index":24, "name": "Mario (NES)", "desc": "One of the bros", "author": "TarThoron", "group": "Custom"},
     'mario_8bit_modern': {"index":25, "name": "Mario (Alt)", "desc": "One of the bros, with a more modern palette", "author": "TarThoron", "group": "Custom"},
     'luigi': {"index":26, "name": "Luigi", "desc": "The other bro", "author": "RonnSama", "group": "Custom"},
-    'marga': {"index":27, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
-    'sprite_can': {"index":28, "name": "Sprite", "desc": "A ... Sprite ... ", "author": "TarThoron", "group": "Custom"},
-    'win95_cursor': {"index":29, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
+    'diddy_kong': {"index":27, "name": "Diddy Kong", "desc": "Diddy Kong from Donkey Kong Country", "author": "Di10", "group": "Custom"},
+    'marga': {"index":28, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
+    'sprite_can': {"index":29, "name": "Sprite", "desc": "A ... Sprite ... ", "author": "TarThoron", "group": "Custom"},
+    'win95_cursor': {"index":30, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
 }
 
 customShips = {
@@ -2516,6 +2515,9 @@ def customWebService():
     session.customizer['remove_itemsounds'] = request.vars.remove_itemsounds
     session.customizer['remove_elevators_doors_speed'] = request.vars.remove_elevators_doors_speed
 
+    # when beam doors patch is detected, don't randomize blue door palette
+    no_blue_door_palette = request.vars.no_blue_door_palette
+
     # call the randomizer
     (fd, jsonFileName) = tempfile.mkstemp()
     params = [pythonExec,  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
@@ -2568,6 +2570,8 @@ def customWebService():
         params += ['--min_degree', request.vars.minDegree, '--max_degree', request.vars.maxDegree]
         if request.vars.invert == 'on':
             params.append('--invert')
+        if no_blue_door_palette == 'on':
+            params.append('--no_blue_door_palette')
 
     if request.vars.customSpriteEnable == 'on':
         params += ['--sprite', "{}.ips".format(request.vars.customSprite)]

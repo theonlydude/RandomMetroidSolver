@@ -76,7 +76,6 @@ class RomReader:
         '0x0': {'name': 'Nothing'}
     }
 
-    # FIXME not up to date
     patches = {
         'startCeres': {'address': 0x7F1F, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
         'startLS': {'address': 0x7F17, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
@@ -95,7 +94,9 @@ class RomReader:
         'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'desc': "Crocomire in its own area"},
         'minimizer_bosses': {'address': 0x10F500, 'value': 0xAD, 'desc': "Minimizer"},
         'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'desc': "Fast Tourian"},
-        'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'desc': "Beam doors"}
+        'open_zebetites': {'address': 0x26DF22, 'value': 0xc3, 'desc': "Zebetites without morph"},
+        'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'desc': "Beam doors"},
+        'red_doors': {'address':0x20560, 'value':0xbd, 'desc': "Red doors open with one Missile and do not react to Super"}
     }
 
     # FIXME shouldn't be here
@@ -169,6 +170,7 @@ class RomReader:
         'area_rando_warp_door': {'address': 0x26425E, 'value': 0x80, 'vanillaValue': 0x70},
         'minimizer_bosses': {'address': 0x10F500, 'value': 0xAD, 'vanillaValue': 0xff},
         'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'vanillaValue': 0xff},
+        'open_zebetites': {'address': 0x26DF22, 'value': 0xc3, 'vanillaValue': 0x43},
         'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'vanillaValue': 0xaf}
     }
 

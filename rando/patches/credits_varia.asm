@@ -20,8 +20,10 @@ define green "table tables/green.tbl"
 define orange "table tables/orange.tbl"
 define purple "table tables/purple.tbl"
 define big "table tables/big.tbl"
-// store last save slot in unused SRAM
-define last_saveslot $701dfe
+// store last save slot and used saves in unused SRAM
+define last_saveslot       $701dfa
+define used_slots_mask     $701df8
+define was_started_flag32  $701dfc
 // backup RAM for timer to avoid it to get cleared at boot
 define timer_backup1 $7fffe2
 define timer_backup2 {timer_backup1}+2
@@ -46,8 +48,20 @@ define stats_sram_slot0     $1400
 define stats_sram_slot1     $1700
 define stats_sram_slot2     $1a00
 
+define backup_save_data_off    #$02f8
+define backup_sram_slot0       $16f8
+define backup_sram_slot1       $19f8
+define backup_sram_slot2       $1cf8
 define last_stats_save_ok_off  #$02fc
-define last_stats_save_ok_flag #$caca
+define magic_flag 	       #$caca
+
+define current_save_slot	$7e0952
+define area_index		$079f
+define load_station_index	$078b
+
+// some scratch space in RAM for backup save system
+define backup_counter	$7fff38
+define backup_candidate $7fff3a
 
 // Patch boot to init our stuff
 org $80844B
@@ -60,14 +74,29 @@ org $808268
     jmp $8294
 
 // Patch load/save/copy
+org $81800d
+	jsr patch_save_start
 org $81807f
-    jmp patch_save
+    jmp patch_save_end
 
 org $81A24A
     jsl patch_load // patch load from menu only
 
+// patch copy routine to copy SRAM stats
 org $819A66
     jsr copy_stats
+
+// patch clear routine to update used save slots bitmask in SRAM
+org $819cc3
+	jsr patch_clear
+
+// hijack menu display for backup saves
+org $819f13
+	jsr load_menu_1st_file
+org $819f46
+	jsr load_menu_2nd_file
+org $819f7c
+	jsr load_menu_3rd_file
 
 // Hijack loading new game to reset stats
 org $828063
@@ -126,10 +155,25 @@ boot1:
     lda #$0000
     sta {timer_backup1}
     sta {timer_backup2}
-    jsl is_save_slot
-    beq .save
-    bra .cont   // don't restore anything if no game was ever saved
-.save:
+    // check if first boot ever by checking magic 32-bit value in SRAM
+    lda {was_started_flag32}
+    cmp {magic_flag}
+    bne .first
+    lda {was_started_flag32}+2
+    cmp {magic_flag}
+    beq .check_reset
+.first:
+    // no game was ever saved:
+    // init used save slots bitmask
+    lda #$0000
+    sta {used_slots_mask}
+    // write magic number
+    lda {magic_flag}
+    sta {was_started_flag32}
+    sta {was_started_flag32}+2
+    // skip soft reset check, since it's the 1st boot
+    bra .cont
+.check_reset:
     // check if soft reset, if so, restore RAM timer
     lda {softreset}
     cmp #$babe
@@ -235,16 +279,329 @@ save_index:
 
 warnpc $80ffbf
 
+
+	// Rolling backup save mechanism:
+	//
+	// Additional data in saves :
+	//	- initial save slot ID
+	//	- a player usage flag, set when a game is loaded by the user
+	//	- a backup counter, incremented everytime a backup is made
+	// - when loading a game (i.e. the player actually uses a file),
+	//   mark the file as used with the player usage flag.
+	//	- if loading an existing file without the player flag (a backup),
+	//	  copy over stats from current player save (non-backup with the
+	//	  closest save counter? or highest?), or directly from RAM
+	//	  if possible
+	// - when saving a game, and it's not the first file creating save, and save
+	//   station used is different from the last one :
+	//	- scan through save files to determine the best candidate to use as
+	//	  backup
+	//	- priority: empty save, old backup, recent backup
+	//	- ignore save files with player flag set (was loaded once)
+	//	- ignore backup files from different slots
+
 // Patch load and save routines
 // a save will always be performed when starting a new game (see new_game.asm)
 org $81ef20
-patch_save:
+// make optional to auto backup save, set this flag to non-zero in ROM to enable the feature
+opt_backup:
+	dw $0000
+// put that here to have it at a fixed location (will be called from new_game)
+print "new_save: ", org
+new_save:
+	// call save routine
+	lda {current_save_slot}
+	jsl $818000
+	// if backup saves are disabled, return
+	lda.l opt_backup
+	beq .end
+	// set current save slot as used in SRAM bitmask
+	lda {current_save_slot}
+	asl
+	tax
+	lda {used_slots_mask}
+	ora $819af4,x	// bitmask index table in ROM
+	sta {used_slots_mask}
+
+	// init backup save data :
+
+	// first, get offset in SRAM, using save_index routine,
+	// which is based on last_saveslot value, which is correct,
+	// since we juste saved stats (through patch_save_end)
+	jsl save_index		// A is non-0, so get standard stats addr
+	// x += backup_save_data_off
+	txa
+	clc
+	adc {backup_save_data_off}
+	tax
+	// store current save slot in the save itself (useful if we reload
+	// a backup save, to copy over stats from original save)
+	lda {current_save_slot}
+	sta $700000,x
+	// store 0 + high bit set (player flag) as backup counter
+	lda #$8000
+	sta $700002,x
+.end:
+	rtl
+
+// save slot data:
+// slot ID, slot bitmask, SRAM addr for backup data, SRAM addr for load station info
+// (SRAM addresses are offsets in bank $70)
+slots_data:
+slot0_data:
+	dw $0000,$0001,{backup_sram_slot0},$0166
+
+slot1_data:
+	dw $0001,$0002,{backup_sram_slot1},$07c2
+
+slot2_data:
+	dw $0002,$0004,{backup_sram_slot2},$0e1e
+
+// backup is needed if no existing backup of current save slot
+// or last backup is at a different save station than this one
+//	
+// return carry set if we need to backup the save, and we can use a
+// slot to do so.
+// sets the most suitable save slot in backup_candidate,
+// or 3 if no suitable slot found (in that case, carry is clear anyway)
+is_backup_needed:
+	// save DB and set it to current bank in order to
+	// read slots data tables
+	phb
+	phk
+	plb
+	// save X and Y as they will be used
+	phx
+	phy
+	// first, check if current save station is different from last save
+	lda {current_save_slot}
+	asl
+	asl
+	asl
+	tay
+	ldx slots_data+6,y
+	lda $700000,x
+	cmp {load_station_index}
+	bne .check_needed
+	lda $700002,x
+	cmp {area_index}
+	beq .no_backup
+.check_needed:
+	// find out our backup counter, and save it in backup_counter
+	ldx slots_data+4,y
+	lda $700002,x
+	and #$7fff
+	sta {backup_counter}
+	// backup_candidate will be used to store the backup slot candidate
+	// and various info as follows:
+	//
+	// eo------------ss
+	//
+	// ss: save slot usable for backup
+	// e: ss is empty
+	// o: ss contains an old backup
+	// (e and o are only use internally by check_slot to determine ss)
+	lda #$0003	// 3 is used as invalid value marker, as slots are 0 to 2
+	sta {backup_candidate}
+	// check all slots
+	ldy #slot0_data
+	jsr check_slot
+	ldy #slot1_data
+	jsr check_slot
+	ldy #slot2_data
+	jsr check_slot
+	// clear all our work flags from backup_candidate
+	lda {backup_candidate}
+	and #$0003
+	// check that we can actually backup somewhere
+	cmp #$0003
+	beq .no_backup
+	sta {backup_candidate}
+	sec
+	bra .end
+.no_backup:
+	clc
+.end:
+	ply
+	plx
+	plb
+	rts
+
+// arg. Y: offset to slot data in bank 81 (DB is assumed 81)
+// sets flags and candidate in backup_candidate
+check_slot:
+        // check empty save bitmask
+	lda $0002,y
+	and {used_slots_mask}
+	// if save empty, mark as backup candidate, with high bit (e)
+	// set to indicate it's an empty file
+	bne .not_empty
+	lda {backup_candidate}
+	and #$fffc
+	ora $0000,y
+	ora #$8000
+	sta {backup_candidate}
+	bra .end
+.not_empty:
+	// if not our save slot, skip
+	ldx $0004,y
+	lda $700000,x
+	cmp {current_save_slot}
+	bne .end
+	// if not a backup save, skip
+	lda $700002,x
+	bmi .end
+	// if backup counter is different:
+	cmp {backup_counter}
+	beq .last_backup
+	// mark as backup candidate, with 'old backup' (o) bit marked
+	// only if no (e) flag bit marked yet
+	lda {backup_candidate}
+	bmi .end
+	and #$fffc
+	ora $0000,y
+	ora #$4000
+	sta {backup_candidate}
+	bra .end
+.last_backup:
+	// we're here only if this save slot is the most recent backup
+	lda {backup_candidate}
+	bit #$c000 // checks both e and o flags
+	bne .end
+	// no better candidate yet
+	and #$fffc
+	ora $0000,y
+	sta {backup_candidate}
+.end:
+	rts
+
+backup_save:
+	// increment backup counter in our save file
+	lda {current_save_slot}
+	asl
+	asl
+	asl
+	tax
+	lda.l slots_data+4,x
+	tax
+	lda $700002,x
+	inc
+	sta $700002,x
+
+	// direct page indirect addressing copy :
+	// reuse $47/$4A used in decompression routine (according to RAM map)
+	// we have to use direct page for addresses, and I'm not sure we can use
+	// the start of direct page in game as it is done in original menu
+	// routine ($00/$03)
+
+	// set bank $70 as source and dest banks for copy
+	lda #$0070
+	sta $49
+	sta $4c	
+	// source slot is current one
+	lda {current_save_slot}
+	asl
+	tax
+	lda $81812b,x // get SRAM offset in bank 70 for slot
+	sta $47
+	// destination slot is in backup_candidate
+	lda {backup_candidate}
+	asl
+	tax
+	lda $81812b,x // get SRAM offset in bank 70 for slot
+	sta $4a
+	// copy save file
+	ldy #$0000
+-
+	lda [$47],y
+	sta [$4a],y
+	iny
+	iny
+	cpy #$065c
+	bmi -
+	// copy checksum
+	lda {current_save_slot}
+	asl
+	tax
+	lda $701ff0,x
+	pha
+	lda $701ff8,x
+	pha
+	lda $700000,x
+	pha
+	lda $700008,x
+	pha
+	lda {backup_candidate}
+	asl
+	tax
+	pla
+	sta $700008,x
+	pla
+	sta $700000,x
+	pla
+	sta $701ff8,x
+	pla
+	sta $701ff0,x
+	// copy stats (includes backup data)
+	lda {current_save_slot}
+	asl
+	tax
+	lda save_slots,x
+	sta $47
+	lda {backup_candidate}
+	asl
+	tax
+	lda save_slots,x
+	sta $4a
+	ldy #$0000
+-
+	lda [$47],y
+	sta [$4a],y
+	iny
+	iny
+	cpy {full_stats_area_sz_b}
+	bcc -
+	// clear player flag in backup data area
+	lda $4a		// still has destination slot SRAM offset
+	clc
+	adc {backup_save_data_off}
+	tax
+	lda $700002,x
+	and #$7fff
+	sta $700002,x
+	// mark backup slot as used in bitmask
+	lda {backup_candidate}
+	asl
+	tax
+	lda {used_slots_mask}
+	ora $819af4,x	// bitmask index table in ROM
+	sta {used_slots_mask}
+	rts
+
+patch_save_start:
+	pha	// save A, it is used as arg in hijacked function
+	lda.l opt_backup
+	beq .end
+	jsl {check_new_game}
+	beq .end
+	// we have backup saves enabled, and it is not the 1st save:
+	// check if we shall backup the save
+	jsr is_backup_needed
+	bcc .end
+	jsr backup_save
+.end:
+	pla
+	and #0003	// hijacked code
+	rts
+
+patch_save_end:
     lda {timer1}
     sta {stats_timer}
     lda {timer2}
     sta {stats_timer}+2
     lda #$0001
     jsl save_stats
+.end:
     ply
     plx
     clc
@@ -262,9 +619,58 @@ patch_load:
     plb
     // call load routine
     jsl $818085
-    bcs .end    // skip to end if new file or SRAM corrupt
+    bcc .backup_check    // skip to end if new file or SRAM corrupt
+    jmp .end
+.backup_check:
+	lda.l opt_backup
+	beq .check
+	// if backup saves are enabled:
+	// check if we load a backup save, and if so, get stats
+	// from original save slot, and mark this slot as non-backup
+	lda {current_save_slot}
+	asl
+	asl
+	asl
+	tax
+	lda.l slots_data+4,x
+	tax
+	lda $700002,x
+	bmi .check
+.load_backup:
+	phx
+	// n flag not set, we're loading a backup
+	// check if we're soft resetting: if so, will take stats from RAM
+	lda {softreset}
+	cmp #$babe
+	beq .load_backup_end
+	// load stats from original save SRAM
+	lda $700000,x	// save slot in SRAM
+	clc
+	adc #$0010
+	sta {last_saveslot}
+	lda #$0000
+	jsl save_index
+	jsl load_stats_at
+	// update live timer
+	lda {stats_timer}
+	sta {timer1}
+	lda {stats_timer}+2
+	sta {timer2}
+.load_backup_end:
+	// update current save slot in SRAM, and set player flag
+	plx
+	lda {current_save_slot}
+	sta $700000,x
+	clc
+	adc #$0010
+	sta {last_saveslot}
+	lda $700002,x
+	ora #$8000
+	sta $700002,x
+	bra .end_ok
+.check:
     // check save slot
-    lda $0952
+    lda {current_save_slot}
     clc
     adc #$0010
     cmp {last_saveslot}
@@ -282,10 +688,10 @@ patch_load:
     sta {timer1}
     lda {stats_timer}+2
     sta {timer2}
+.end_ok:
     // place marker for resets
     lda #$babe
     sta {softreset}
-.end_ok:
     // increment reset count
     lda #$0020
     jsl inc_stat
@@ -297,6 +703,60 @@ patch_load:
     plx
     plb
     rtl
+
+files_tilemaps:
+	dw $b436,$b456,$b476
+
+// arg A=file
+load_menu_file:
+	phx
+	pha
+	lda.l opt_backup
+	beq .nochange
+.check_slot:
+	pla
+	pha
+	asl
+	tax
+	lda $819af4,x	// bitmask index table in ROM
+	and {used_slots_mask}
+	beq .nochange
+.load_slot:
+	// load save slot value in SRAM
+	pla
+	pha
+	asl
+	asl
+	asl
+	tax
+	lda.l slots_data+4,x
+	tax
+	lda $700000,x
+	bra .load_tilemap
+.nochange:
+	pla
+	pha
+.load_tilemap:
+	asl
+	tax
+	lda.l files_tilemaps,x
+	tay
+.end:
+	pla
+	plx
+	rts
+
+load_menu_1st_file:
+	lda #$0000
+	jmp load_menu_file
+
+load_menu_2nd_file:
+	lda #$0001
+	jmp load_menu_file
+
+load_menu_3rd_file:
+	lda #$0002
+	jmp load_menu_file
 
 save_slots:
     dw {stats_sram_slot0}
@@ -332,6 +792,21 @@ copy_stats:
     lda $19B7   // hijacked code
     rts
 
+// clear slot in used_slots_mask in SRAM
+patch_clear:
+	// $19b7 hold slot being cleared
+	lda $19b7
+	asl
+	tax
+	lda $819af4,x	// bitmask index table in ROM
+	eor #$ffff
+	and {used_slots_mask}
+	sta {used_slots_mask}
+.end:
+	lda $19b7	// hijacked code
+	rts
+
+//print "b81 end: ", org
 warnpc $81ffff
 ////////////////////////// CREDITS /////////////////////////////
 
@@ -751,7 +1226,7 @@ print "load_stats: ", org
 load_stats:
     phx
     phy
-    lda $7e0952
+    lda {current_save_slot}
     clc
     adc #$0010
     sta {last_saveslot}
@@ -761,7 +1236,7 @@ load_stats:
     lda #$0000
     jsl save_index
 .notok:
-    jsr load_stats_at
+    jsl load_stats_at
     ply
     plx
     rtl
@@ -785,7 +1260,7 @@ load_stats_at:
     bcc .loop
     plb
     plx
-    rts
+    rtl
 
 // return carry flag set if flag ok
 is_last_save_flag_ok:
@@ -797,7 +1272,7 @@ is_last_save_flag_ok:
     clc
     adc {last_stats_save_ok_off}
     tax
-    lda {last_stats_save_ok_flag}
+    lda {magic_flag}
     cmp $700000,x
     beq .flag_ok
     clc
@@ -854,7 +1329,7 @@ save_stats:
     phx
     phy
     pha
-    lda $7e0952
+    lda {current_save_slot}
     clc
     adc #$0010
     sta {last_saveslot}
@@ -868,7 +1343,7 @@ save_stats:
     lda #$0000
     jsr set_last_save_ok_flag
     jsr save_stats_at
-    lda {last_stats_save_ok_flag}
+    lda {magic_flag}
     jsr set_last_save_ok_flag
     ply
     plx

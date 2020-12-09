@@ -179,6 +179,8 @@ function resizeSlider() {
 }
 
 var globalSwitchs = {};
+// value from permalink seed
+var beamDoorsPatch = {{="true" if seedParams != None and seedParams["doorsColorsRando"] == "on" else "false"}};
 
 function ajaxFail(jqXHR, textStatus) {
   document.getElementById("flash").innerHTML = jqXHR.responseText;
@@ -371,6 +373,12 @@ function doSubmit() {
       dataDict["seedKey"] = seedKey;
     }
 
+    if(beamDoorsPatch == true) {
+      dataDict["no_blue_door_palette"] = "on";
+    } else {
+      dataDict["no_blue_door_palette"] = "off";
+    }
+
     console.log("before customizer web service call");
 
     // call customizer web service with parameters
@@ -503,6 +511,9 @@ window.onload = function(){
                     if(bytes[0x175ca] == 0x60 && bytes[0x19E1] == 0xEA && bytes[0xF27] == 0x20) {
                         isVARIA = true;
                     }
+
+                    // detect beam doors patch from seed to customize
+                    beamDoorsPatch = bytes[0x226e5] == 0x0D;
 
                     greyOutPatches(isRace, isVARIA);
                 }

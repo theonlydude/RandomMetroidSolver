@@ -17,7 +17,7 @@ class StandardSolver(CommonSolver):
 
     def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console',
                  firstItemsLog=None, extStatsFilename=None, extStatsStep=None, displayGeneratedPath=False,
-                 outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False, plot=None):
+                 outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False):
         self.interactive = False
         self.checkDuplicateMajor = checkDuplicateMajor
         if vcr == True:
@@ -39,7 +39,6 @@ class StandardSolver(CommonSolver):
 
         self.extStatsFilename = extStatsFilename
         self.extStatsStep = extStatsStep
-        self.plot = plot
 
         # can be called from command line (console) or from web site (web)
         self.type = type
@@ -58,6 +57,9 @@ class StandardSolver(CommonSolver):
         self.pickup = Pickup(Conf.itemsPickup)
 
         self.comeBack = ComeBack(self)
+
+        # no time limitation
+        self.runtimeLimit_s = 0
 
     def setConf(self, difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath):
         Conf.difficultyTarget = difficultyTarget
@@ -78,9 +80,9 @@ class StandardSolver(CommonSolver):
         if self.vcr != None:
             self.vcr.dump()
 
-        self.computeExtStats()
-
         if self.extStatsFilename != None:
+            self.computeExtStats()
+
             firstMinor = {'Missile': False, 'Super': False, 'PowerBomb': False}
             locsItems = {}
             for loc in self.visitedLocations:
@@ -91,11 +93,6 @@ class StandardSolver(CommonSolver):
             import utils.db as db
             with open(self.extStatsFilename, 'a') as extStatsFile:
                 db.DB.dumpExtStatsSolver(self.difficulty, knowsUsedList, self.solverStats, locsItems, self.extStatsStep, extStatsFile)
-
-        if self.plot != None:
-            with open(self.plot, 'w') as outDataFile:
-                for (i, number) in enumerate(self.nbAvailLocs):
-                    outDataFile.write("{} {}\n".format(i, number))
 
         self.output.out()
 

@@ -152,7 +152,7 @@ class Knows:
     desc['SpringBallJump'] = {'display': 'SpringBall-Jump',
                               'title': 'Do a SpringBall Jump from a jump to Access to Wrecked Ship Etank without anything else, Suitless Maridia navigation',
                               'href': 'https://www.youtube.com/watch?v=8ldQUIgBavw&t=49s',
-                              'rooms': ['Sponge Bath',
+                              'rooms': ['Sponge Bath', 'East Ocean',
                                         'Main Street', 'Crab Shaft', 'Pseudo Plasma Spark Room',
                                         'Mama Turtle Room', 'The Precious Room', 'Spring Ball Room', 'East Sand Hole',
                                         'Cathedral Entrance', 'Crocomire Escape', 'Post Crocomire Jump Room',
@@ -373,7 +373,7 @@ class Knows:
                          'href': 'https://www.youtube.com/watch?v=lFJPqu8qk54',
                          'rooms': ['Ice Beam Acid Room']}
 
-    WallJumpCathedralExit = SMBool(True, medium, ['WallJumpCathedralExit'])
+    WallJumpCathedralExit = SMBool(True, easy, ['WallJumpCathedralExit'])
     desc['WallJumpCathedralExit'] = {'display': 'Wall Jump to exit Cathedral',
                                      'title': 'Use a delayed wall jump to exit Cathedral',
                                      'href': 'https://www.youtube.com/watch?v=CqQik2z6IkE',
@@ -384,6 +384,12 @@ class Knows:
                                       'title': 'Run from the save room and get up Bubble Mountain without Hi-Jump',
                                       'href': 'https://youtu.be/2RmbFRCMlUg',
                                       'rooms': ['Bubble Mountain']}
+
+    DoubleChamberWallJump = SMBool(True, easy, ['DoubleChamberWallJump'])
+    desc['DoubleChamberWallJump'] =  {'display': 'Double Chamber wall jump',
+                                      'title': 'Climb up Double Chamber (pre-Wave Beam room) after entering through the bottom door',
+                                      'href': 'https://www.youtube.com/watch?v=MVaaoW8Y_VU',
+                                      'rooms': ['Double Chamber']}
 
     NovaBoost = SMBool(False, 0, ['NovaBoost'])
     desc['NovaBoost'] = {'display': 'Nova Boost',
@@ -519,7 +525,7 @@ class Knows:
     desc['DoubleSpringBallJump'] = {'display': 'Double SpringBall-Jump',
                                     'title': 'With Hi-Jump boots do two SpringBall-Jumps in a row',
                                     'href': 'https://youtu.be/KohE3e8sGLQ',
-                                    'rooms': ['Mt. Everest', "Draygon's Room"]}
+                                    'rooms': ['Mt. Everest', "Draygon's Room", 'Halfie Climb Room']}
 
     BotwoonToDraygonWithIce = SMBool(False, 0, ['BotwoonToDraygonWithIce'])
     desc['BotwoonToDraygonWithIce'] = {'display': 'Botwoon to Draygon with Ice',
@@ -707,7 +713,7 @@ class Knows:
         'Upper Norfair': [
             {'knows': ['WallJumpCathedralExit', 'IceEscape', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
               'title': 'Main Upper Norfair'},
-            {'knows': ['BubbleMountainWallJump', 'NorfairReserveDBoost'],
+            {'knows': ['BubbleMountainWallJump', 'NorfairReserveDBoost', 'DoubleChamberWallJump'],
              'title': 'Bubble Mountain'},
             {'knows': ['CrocPBsIce', 'CrocPBsDBoost', 'IceMissileFromCroc'],
              'title': 'Crocomire'}

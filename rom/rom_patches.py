@@ -64,6 +64,7 @@ class RomPatches:
     ## Minimizer Patches
     NoGadoras                 = 200
     TourianSpeedup            = 201
+    OpenZebetites             = 202
 
     ### Other
     # Gravity no longer protects from environmental damage (heat, spikes...)
@@ -78,6 +79,8 @@ class RomPatches:
     NerfedCharge            = 1004
     # Nerfed rainbow beam for ultra sparse energy qty
     NerfedRainbowBeam       = 1005
+    # Red doors open with one missile, and don't react to supers: part of door color rando
+    RedDoorsMissileOnly     = 1006
 
     #### Patch sets
     # total randomizer
@@ -103,7 +106,7 @@ class RomPatches:
     VariaTweaks = [ WsEtankPhantoonAlive, LNChozoSJCheckDisabled ]
 
     # Tourian speedup in minimizer mode
-    MinimizerTourian = [ TourianSpeedup, NerfedRainbowBeam ]
+    MinimizerTourian = [ TourianSpeedup, OpenZebetites ]
 
     # dessyreqt randomizer
     Dessy = []

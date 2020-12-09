@@ -254,6 +254,12 @@ if (hs.registerOverlay) {
 .marginRight {
     margin-right: 2em;
 }
+.center_img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 40%;
+}
 </style>
 
 <script type="text/javascript">
@@ -734,7 +740,9 @@ var tips = [
     "If you're new to area rando, or don't want to use the tracker, try out Light Area Randomization",
     "In Light Area rando, vanilla area transitions are preserved, only their place is changed",
     "In for a quick play? Try out Boss Rush/Minimizer mode. Load 'minimizer' settings preset to easily set it up",
-    "In Minimizer mode, areas and bosses transition are mixed together, and you can make the map as big as you want between 30 and 100 locations"
+    "In Minimizer mode, areas and bosses transition are mixed together, and you can make the map as big as you want between 30 and 100 locations",
+    "With Doors Colors randomization, all 3 ammo types and all 4 beams (not counting Charge) are distinct keys for locked colored doors",
+    "With Doors Colors and/or Areas Randomization, rolling backup saves are enabled. You can safely save in two different save stations even if unsure you can come back."
 ];
 
 var myTimer = null;
@@ -1163,7 +1171,7 @@ function startTheTour(step=-1) {
     {
       element: "#permalinkStep",
       title: "Permanent link",
-      content: "Use this permalink to share you seed to other players.<br/><b>Note:</b> You have to click at least once on the link to activate it, else it won't work after seven days."
+      content: "Use this permalink to share your seed with other players.<br/><b>Notes:</b> You have to click at least once on the link to activate it, else it won't work after seven days. If you want to retrieve a previous seed (from less than seven days ago) and lost the link, you can search for it at the bottom of <a href=\"/stats\" target=\"_blank\">VARIA usage statistics page</a> (search for your seed number in the page)."
     },
     {
       element: "#romStep",
@@ -1409,6 +1417,7 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
 </tr>\
 </table>\
 </p>\
+<p>Even with all layout modifications, it is still possible to softlock in some occurrences. To avoid softlocking your save file, an automatic rolling backup save system is enabled. See doors colors randomization option help for more details.</p>\
 Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
@@ -1463,7 +1472,7 @@ This mode can be use as an introduction before doing full Area Randomization or 
       content: "<p>Randomize the color of Red/Green/Yellow doors.<br/>\
 Add four new type of doors which require Ice/Wave/Spazer/Plasma beams to open them.<br/>\
 <table>\
-<tr><td><img src=\"/solver/static/images/Missile.png\" class=\"centerIcon\"><img src=\"/solver/static/images/Super.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/missile_door.png\" class=\"marginRight\"></td>\
+<tr><td><img src=\"/solver/static/images/Missile.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/missile_door.png\" class=\"marginRight\"></td>\
 <td><img src=\"/solver/static/images/Super.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/super_door.png\" class=\"marginRight\"></td>\
 <td><img src=\"/solver/static/images/PowerBomb.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/powerbomb_door.png\" class=\"marginRight\"></td><td></td></tr>\
 <tr><td><img src=\"/solver/static/images/Wave.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/wave_door.png\" class=\"marginRight\"></td>\
@@ -1471,22 +1480,26 @@ Add four new type of doors which require Ice/Wave/Spazer/Plasma beams to open th
 <td><img src=\"/solver/static/images/Spazer.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/spazer_door.png\" class=\"marginRight\"></td>\
 <td><img src=\"/solver/static/images/Ice.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/ice_door.png\" class=\"marginRight\"></td></tr>\
 </table>\
+Missile doors can no longer be opened with a Super Missile. Only one Missile is required to open a Missile door.<br/>\
+For Plasma/Spazer doors, when you have both beams collected and one equipped you can open both door types.<br/>\
 Colored doors to save stations / refills / map stations are excluded from randomization.<br/>\
 Colored doors to save / refill stations are forced to blue.<br/>\
 The fill algorithm will be more trolly about ammo/beam if you use slower progression speed.</p>\
+<p>In this mode there are seven distinct door keys, and sometimes (especially with non standard starting location or area rando), if you go through a blue door you can end up locked on the other side if you don't have or find the item required to come back. If you save in that situation, your save file will be hardlocked. To avoid this, a rolling backup save system is enabled. When you save at a different save station than the last time, a backup of your previous save is done, using an empty save, or an older backup of the same game. You can identify backups in the load menu, as they will have the same slot letter as the original save :</p>\
+<img src=\"/solver/static/images/backup_saves.png\" alt=\"backup_saves.png\" title=\"Backup Saves menu example\" class=\"third center_img\"/>\
+<p>As soon as you load a backup save from the menu, it becomes its own slot. In the example above, if you load your most recent backup (with 0:06 time), it will become 'Samus C'. When playing this new slot C game, when you save, it won't be able to backup, since other slots are taken by the original A slot and an older backup of the A slot. So if you hardlock a save file, be sure to clear it for it to be reused as a backup afterwards.</p>\
 <p>Click on the dice button to randomly set this parameter.</p>\
 Beams doors patch by Mettyk25jigsaw.<br/>\
 Beams doors gfx by prankard.<br/>\
-CRE gfx fix by Sirkura.",
+CRE gfx fix by Sirkura.<br/>\
+Rolling backup and Missile doors patches by Flo.",
       placement: "auto left"
     },
     {
       element: "#doorsColorsGreyStep",
       title: "Allow some doors to be grey",
-      content: "<p>Randomize the color of Red/Green/Yellow doors, beware that some doors can be randomized to Grey.<br/>\
-Colored doors to save stations / refills / map stations are excluded from randomization.<br/>\
-Colored doors to save / refill stations are forced to blue.</p>\
-Click on the dice button to randomly set this parameter.",
+      content: "<p>When randomizing the color of Red/Green/Yellow doors, some doors can be randomized to Grey.<br/>\
+Grey doors will never open, you will have to go around them.</p>",
       placement: "auto left"
     },
     {
@@ -1508,7 +1521,7 @@ Click on the dice button to randomly set this parameter.",
 You can generate anything from a densely packed game with just Crateria, Wrecked Ship, and bosses, to a full area+boss rando<br/>\
 <b>Boss and Area transitions are mixed together</b>, Gadoras are removed, and you can <b>exit boss fights</b> at any point (they are also considered dead as soon as they start exploding instead of when the drops appear).</p>\
 <p>\
-You can also <b>speed up Tourian</b> (on by default), to skip Metroids, Zebetites, and all cutscenes (including Mother Brain 3 fight). Golden Four statues are replaced by an invicible Gadora until all bosses are dead.\
+You can also <b>speed up Tourian</b> (on by default), to skip Metroids, Zebetites, and all cutscenes (including Mother Brain 3 fight). Golden Four statues are replaced by an invicible Gadora until all bosses are dead. It also adds a layout patch to open the Zebetites to pass them without Morph, allowing the creation of morphless plandos.\
 </p>\
 <p>Minimizer layout example:<a href=\"/solver/static/images/minimizer_example.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"minimizerThumb\" src=\"/solver/static/images/minimizer_example_thumbnail.png\" alt=\"Minimizer example\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p>\
 <b>Note:</b> will set Area and Boss randomization.<br/>\

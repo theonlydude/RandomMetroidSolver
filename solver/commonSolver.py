@@ -1,4 +1,4 @@
-import logging
+import logging, time
 
 from logic.smbool import SMBool, smboolFalse
 from logic.helpers import Bosses
@@ -225,7 +225,7 @@ class CommonSolver(object):
         # item
         item = loc.itemName
 
-        if self.mode == 'seedless':
+        if self.mode in ['seedless', 'race', 'debug']:
             # in seedless remove the first nothing found as collectedItems is not ordered
             self.collectedItems.remove(item)
         else:
@@ -283,7 +283,7 @@ class CommonSolver(object):
 
             # in plando we have to remove the last added item,
             # else it could be used in computing the postAvailable of a location
-            if self.mode in ['plando', 'seedless']:
+            if self.mode in ['plando', 'seedless', 'race', 'debug']:
                 loc.itemName = 'Nothing'
 
             self.collectedItems.pop()
@@ -563,6 +563,12 @@ class CommonSolver(object):
                     break
                 else:
                     self.log.debug("canEnd but MB loc not accessible")
+
+            # check time limit
+            if self.runtimeLimit_s > 0:
+                if time.process_time() - self.startTime > self.runtimeLimit_s:
+                    self.log.debug("time limit exceeded ({})".format(self.runtimeLimit_s))
+                    return (-1, False)
 
             self.log.debug("Current AP/Area: {}/{}".format(self.lastAP, self.lastArea))
 

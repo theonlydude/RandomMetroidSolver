@@ -199,7 +199,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0xa2ac, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
        entryInfo = {'SamusX':0x49f, 'SamusY':0xb8},
-       traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.NoGadoras), sm.canOpenRedDoors()),
+       traverse=lambda sm: sm.canOpenEyeDoors(),
        dotOrientation = 's'),
     AccessPoint('PhantoonRoomIn', 'WreckedShip', {},
        boss = True,
@@ -326,7 +326,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x2e, 'SamusY':0x98},
        traverse=Cache.ldeco('RRO_T',
                             lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
-                                               sm.wor(RomPatches.has(RomPatches.NoGadoras), sm.canOpenRedDoors()))),
+                                               sm.canOpenEyeDoors())),
        dotOrientation = 'e'),
     AccessPoint('RidleyRoomIn', 'LowerNorfair', {},
        boss = True,
@@ -354,7 +354,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x91b6, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
        entryInfo = {'SamusX':0x1cd, 'SamusY':0x188, 'song':0x12},
-       traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.NoGadoras), sm.canOpenRedDoors()),
+       traverse=lambda sm: sm.canOpenEyeDoors(),
        dotOrientation = 'e'),
     AccessPoint('KraidRoomIn', 'Kraid', {},
        boss = True,
@@ -380,6 +380,7 @@ accessPoints = [
        entryInfo = {'SamusX': 0x2c7, 'SamusY': 0x98},
        dotOrientation = 'nw'),
     AccessPoint('Business Center', 'Norfair', {
+        'Cathedral': lambda sm: sm.canEnterCathedral(Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']['mult']),
         'Bubble Mountain': Cache.ldeco('BC_BM',
                                        lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
                                                                  sm.canPassBombPassages()),
@@ -413,6 +414,11 @@ accessPoints = [
                     "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
         entryInfo = {'SamusX':0x5cf, 'SamusY':0x88},
         dotOrientation = 'ne'),
+    AccessPoint('Cathedral', 'Norfair', {
+        'Business Center': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles']),
+        'Bubble Mountain': lambda sm: sm.wand(sm.traverse('CathedralRight'),
+                                             sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']))
+    }, internal=True),
     AccessPoint('Kronic Boost Room Bottom Left', 'Norfair', {
         'Single Chamber Top Right': Cache.ldeco('KBRBL_SCTR',
                                                 lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Kronic Boost Room']),
@@ -470,7 +476,8 @@ accessPoints = [
                                                  lambda sm: sm.wand(sm.canPassBombPassages(),
                                                                     sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Croc']),
                                                                     sm.wor(sm.canBlueGateGlitch(),
-                                                                           sm.haveItem('Wave'))))
+                                                                           sm.haveItem('Wave')))),
+        'Cathedral': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles']),
     }, internal=True,
        start={'spawn':0x0201, 'doors':[0x54,0x55], 'patches':[RomPatches.SpeedAreaBlueDoors], 'knows':['BubbleMountainWallJump'], 'solveArea': "Bubble Norfair Bottom"}),
     AccessPoint('Bubble Mountain Top', 'Norfair', {
@@ -698,7 +705,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0xa840, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
        entryInfo = {'SamusX':0x34, 'SamusY':0x288, 'song':0x1b},
-       traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.NoGadoras), sm.canOpenRedDoors()),
+       traverse=lambda sm: sm.canOpenEyeDoors(),
        dotOrientation = 'e'),
     AccessPoint('DraygonRoomIn', 'EastMaridia', {
         'Draygon Room Bottom': Cache.ldeco('DRI_DRB',

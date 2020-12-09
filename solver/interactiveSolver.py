@@ -35,6 +35,9 @@ class InteractiveSolver(CommonSolver):
 
         Conf.difficultyTarget = infinity
 
+        # no time limitation
+        self.runtimeLimit_s = 0
+
     def initLocsAddressName(self):
         addressName = {}
         web2Internal = {}
@@ -57,9 +60,9 @@ class InteractiveSolver(CommonSolver):
 
         state.toJson(self.outputFileName)
 
-    def initialize(self, mode, rom, presetFileName, magic, debug, fill, startAP, trackerRace):
+    def initialize(self, mode, rom, presetFileName, magic, fill, startAP):
         # load rom and preset, return first state
-        self.debug = debug
+        self.debug = mode == "debug"
         self.mode = mode
         if self.mode != "seedless":
             self.seed = os.path.basename(os.path.splitext(rom)[0])+'.sfc'
@@ -76,7 +79,7 @@ class InteractiveSolver(CommonSolver):
         self.majorsSplit = 'Full'
 
         # hide doors
-        if self.doorsRando and mode == 'standard':
+        if self.doorsRando and mode in ['standard', 'race']:
             DoorsManager.initTracker()
 
         self.clearItems()
@@ -100,9 +103,6 @@ class InteractiveSolver(CommonSolver):
         # compute new available locations
         self.computeLocationsDifficulty(self.majorLocations)
 
-        if trackerRace == True:
-            self.mode = 'seedless'
-
         self.dumpState()
 
     def iterate(self, stateJson, scope, action, params):
@@ -123,7 +123,7 @@ class InteractiveSolver(CommonSolver):
                 self.clearItems(True)
             else:
                 if action == 'add':
-                    if self.mode == 'plando' or self.mode == 'seedless':
+                    if self.mode in ['plando', 'seedless', 'race', 'debug']:
                         if params['loc'] != None:
                             if self.mode == 'plando':
                                 self.setItemAt(params['loc'], params['item'], params['hide'])
@@ -164,7 +164,7 @@ class InteractiveSolver(CommonSolver):
             if action == 'replace':
                 doorName = params['doorName']
                 newColor = params['newColor']
-                DoorsManager.doors[doorName].setColor(newColor)
+                DoorsManager.setColor(doorName, newColor)
             elif action == 'toggle':
                 doorName = params['doorName']
                 DoorsManager.switchVisibility(doorName)
@@ -272,7 +272,7 @@ class InteractiveSolver(CommonSolver):
         for apName in singleAPs:
             transitions.append((apName, apName))
 
-        return AccessGraph(accessPoints, transitions)
+        return transitions
 
     def randoPlando(self, parameters):
         # if all the locations are visited, do nothing
@@ -285,9 +285,10 @@ class InteractiveSolver(CommonSolver):
 
         plandoCurrent = {
             "locsItems": plandoLocsItems,
-            "transitions": self.curGraphTransitions,
+            "transitions": self.fillGraph(),
             "patches": RomPatches.ActivePatches,
-            "doors": DoorsManager.serialize()
+            "doors": DoorsManager.serialize(),
+            "forbiddenItems": parameters["forbiddenItems"]
         }
 
         plandoCurrentJson = json.dumps(plandoCurrent)
@@ -331,8 +332,6 @@ class InteractiveSolver(CommonSolver):
                     smbool = SMBool(difficulty["bool"], difficulty["difficulty"], difficulty["knows"], difficulty["items"])
                     loc.difficulty = smbool
                     itemName = itemLoc["Item"]["Type"]
-                    if itemName == "Boss":
-                        itemName = "Nothing"
                     loc.itemName = itemName
                     loc.accessPoint = itemLoc["Location"]["accessPoint"]
                     self.collectMajor(loc)
@@ -358,7 +357,10 @@ class InteractiveSolver(CommonSolver):
         else:
             magic = None
         romPatcher = RomPatcher(magic=magic, plando=True)
-        patches = ['credits_varia.ips', 'tracking.ips', "Escape_Animals_Disable", 'beam_doors.ips']
+        patches = ['credits_varia.ips', 'tracking.ips', "Escape_Animals_Disable"]
+        if DoorsManager.isRandom():
+            patches += RomPatcher.IPSPatches['DoorsColors']
+            patches.append("Enable_Backup_Saves")
         if magic != None:
             patches.insert(0, 'race_mode.ips')
             patches.append('race_mode_credits.ips')
@@ -366,7 +368,7 @@ class InteractiveSolver(CommonSolver):
 
         plms = []
         if self.areaRando == True or self.bossRando == True or self.escapeRando == True:
-            doors = GraphUtils.getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando, self.escapeRando, False)
+            doors = GraphUtils.getDoorConnections(AccessGraph(accessPoints, self.fillGraph()), self.areaRando, self.bossRando, self.escapeRando, False)
             romPatcher.writeDoorConnections(doors)
             if magic == None:
                 doorsPtrs = GraphUtils.getAps2DoorsPtrs()

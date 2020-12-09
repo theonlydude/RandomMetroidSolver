@@ -152,8 +152,9 @@ class HelpersGraph(Helpers):
         suitless = sm.wand(sm.haveItem('HiJump'), sm.knowsGravLessLevel1())
         if fromWs is True and RomPatches.has(RomPatches.EastOceanPlatforms).bool is False:
             suitless = sm.wand(suitless,
-                               # to break water line and go through the door on the right
-                               sm.haveItem('SpaceJump'))
+                               sm.wor(sm.canSpringBallJump(), # two sbj on the far right
+                                      # to break water line and go through the door on the right
+                                      sm.haveItem('SpaceJump')))
         return sm.wand(sm.wor(sm.haveItem('Gravity'),
                               suitless),
                        sm.haveItem('Morph')) # for crab maze
@@ -222,6 +223,18 @@ class HelpersGraph(Helpers):
     def canHellRunToSpeedBooster(self):
         sm = self.smbm
         return sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Speed Booster w/Speed' if sm.haveItem('SpeedBooster') else 'Bubble -> Speed Booster'])
+
+    @Cache.decorator
+    def canAccessDoubleChamberItems(self):
+        sm = self.smbm
+        hellRun = Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Wave']
+        return sm.wor(sm.wand(sm.traverse('SingleChamberRight'),
+                              sm.canHellRun(**hellRun)),
+                      sm.wand(sm.wor(sm.haveItem('HiJump'),
+                                     sm.canSimpleShortCharge(),
+                                     sm.canFly(),
+                                     sm.knowsDoubleChamberWallJump()),
+                              sm.canHellRun(hellRun['hellRun'], hellRun['mult']*0.8, hellRun['minE'])))
 
     @Cache.decorator
     def canExitCathedral(self):
@@ -642,6 +655,12 @@ class HelpersGraph(Helpers):
                                       sm.haveItem('SpeedBooster'))))
 
     @Cache.decorator
+    def canGrappleExitDraygon(self):
+        sm = self.smbm
+        return sm.wand(sm.haveItem('Grapple'),
+                       sm.knowsDraygonRoomGrappleExit())
+
+    @Cache.decorator
     def canExitDraygonVanilla(self):
         sm = self.smbm
         # to get out of draygon room:
@@ -651,14 +670,12 @@ class HelpersGraph(Helpers):
         return sm.wor(sm.canExitDraygonRoomWithGravity(),
                       sm.wand(sm.canDraygonCrystalFlashSuit(),
                               # use the spark either to exit draygon room or precious room
-                              sm.wor(sm.wand(sm.haveItem('Grapple'),
-                                             sm.knowsDraygonRoomGrappleExit()),
+                              sm.wor(sm.canGrappleExitDraygon(),
                                      sm.wand(sm.haveItem('XRayScope'),
                                              sm.knowsPreciousRoomXRayExit()),
                                      sm.canSpringBallJump())),
                       # spark-less exit (no CF)
-                      sm.wand(sm.wand(sm.haveItem('Grapple'),
-                                      sm.knowsDraygonRoomGrappleExit()),
+                      sm.wand(sm.canGrappleExitDraygon(),
                               sm.wor(sm.wand(sm.haveItem('XRayScope'),
                                              sm.knowsPreciousRoomXRayExit()),
                                      sm.canSpringBallJump())),
@@ -670,8 +687,7 @@ class HelpersGraph(Helpers):
         # disregard precious room
         return sm.wor(sm.canExitDraygonRoomWithGravity(),
                       sm.canDraygonCrystalFlashSuit(),
-                      sm.wand(sm.haveItem('Grapple'),
-                              sm.knowsDraygonRoomGrappleExit()),
+                      sm.canGrappleExitDraygon(),
                       sm.canDoubleSpringBallJump())
 
     @Cache.decorator

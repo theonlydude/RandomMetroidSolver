@@ -60,6 +60,7 @@ class RandoSetup(object):
         if not self.checkPool():
             self.log.debug("createItemLocContainer: checkPool fail")
             return None
+        self.checkDoorBeams()
         self.container = ItemLocContainer(self.sm, self.getItemPool(), self.locations)
         if self.restrictions.isLateMorph():
             self.restrictions.lateMorphInit(self.startAP, self.container, self.services)
@@ -161,6 +162,13 @@ class RandoSetup(object):
         self.log.debug("********* PRE RANDO END")
         return not isStuck and len(self.services.currentLocations(filler.ap, filler.container)) > 0
 
+    # in door color rando, determine mandatory beams
+    def checkDoorBeams(self):
+        if self.restrictions.isLateDoors():
+            doorBeams = ['Wave','Ice','Spazer','Plasma']
+            self.restrictions.mandatoryBeams = [beam for beam in doorBeams if not self.checkPool(forbidden=[beam])]
+            self.log.debug("checkDoorBeams. mandatoryBeams="+str(self.restrictions.mandatoryBeams))
+
     def checkPool(self, forbidden=None):
         self.log.debug("checkPool. forbidden=" + str(forbidden) + ", self.forbiddenItems=" + str(self.forbiddenItems))
         if not self.graphSettings.isMinimizer() and not self.settings.isPlandoRando() and len(self.allLocations) > len(self.locations):
@@ -217,9 +225,10 @@ class RandoSetup(object):
             availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.settings.maxDiff)
             for ap in interAPs:
                 if not ap in availAccessPoints:
+                    self.log.debug("checkPool: ap {} non accessible from {}".format(ap.Name, startAp.Name))
                     ret = False
-                    self.log.debug("unavail AP: " + ap.Name + ", from " + startAp.Name)
-
+        if not ret:
+            self.log.debug("checkPool. inter-area APs check failed")
         # cleanup
         self.sm.resetItems()
         self.restoreBossChecks()

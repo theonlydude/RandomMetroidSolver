@@ -355,6 +355,10 @@
     "MtEverestGravJump": [
       true,
       50
+    ],
+    "DoubleChamberWallJump": [
+      true,
+      1
     ]
   },
   "Settings": {

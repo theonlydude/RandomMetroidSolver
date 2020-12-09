@@ -5,6 +5,7 @@
   "areaRandomization": "random",
   "escapeRando": "random",
   "bossRandomization": "random",
+  "doorsColorsRando": "random",
   "hideItems": "off",
   "funCombat": "off",
   "majorsSplit": "Full",

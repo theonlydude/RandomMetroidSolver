@@ -8,7 +8,7 @@ lorom
 
 ;;; CONSTANTS
 !GameStartState = $7ED914
-
+!new_save	= $81ef22
 
 ;;; HIJACKS (bank 82 init routines)
 
@@ -97,7 +97,7 @@ gameplay_start:
 .save:
     ;; Call the save code to create a new file
     plx
-    lda $7e0952 : jsl $818000
+    jsl !new_save		; see credits_varia
 .end:
     rtl
 

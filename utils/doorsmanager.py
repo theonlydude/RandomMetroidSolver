@@ -232,12 +232,9 @@ class DoorsManager():
         'GreenBrinstarMissileRefill': Door('GreenBrinstarMissileRefill', 0x784ca, 'red', Facing.Right, id=0x23)
     }
 
-    def setSMBM(self, smbm):
-        self.smbm = smbm
-
     # call from logic
-    def traverse(self, doorName):
-        return DoorsManager.doors[doorName].traverse(self.smbm)
+    def traverse(self, smbm, doorName):
+        return DoorsManager.doors[doorName].traverse(smbm)
 
     @staticmethod
     def setDoorsColor():
@@ -302,10 +299,14 @@ class DoorsManager():
         DoorsManager.debugDoorsColor()
 
         # tell that we have randomized doors
-        isRandom = any(door.isRandom() for door in DoorsManager.doors.values())
+        isRandom = DoorsManager.isRandom()
         if isRandom:
             DoorsManager.setRefillSaveToBlue()
         return isRandom
+
+    @staticmethod
+    def isRandom():
+        return any(door.isRandom() for door in DoorsManager.doors.values())
 
     @staticmethod
     def setRefillSaveToBlue():
@@ -353,3 +354,10 @@ class DoorsManager():
     @staticmethod
     def switchVisibility(name):
         DoorsManager.doors[name].switch()
+
+    # when the user clicks on a door in the race tracker or the plando
+    @staticmethod
+    def setColor(name, color):
+        # in race mode the doors are hidden
+        DoorsManager.doors[name].reveal()
+        DoorsManager.doors[name].setColor(color)

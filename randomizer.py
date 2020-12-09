@@ -242,6 +242,8 @@ if __name__ == "__main__":
     parser.add_argument('--max_degree', help="max hue shift", dest='max_degree', nargs='?', default=180, type=int)
     parser.add_argument('--no_global_shift', help="", action='store_false', dest='global_shift', default=True)
     parser.add_argument('--invert', help="invert color range", dest='invert', action='store_true', default=False)
+    parser.add_argument('--no_blue_door_palette', help="palette param", action='store_true',
+                        dest='no_blue_door_palette', default=False)
     parser.add_argument('--ext_stats', help="dump extended stats SQL", nargs='?', default=None, dest='extStatsFilename')
     parser.add_argument('--randoPreset', help="rando preset file", dest="randoPreset", nargs='?', default=None)
     parser.add_argument('--fakeRandoPreset', help="for prog speed stats", dest="fakeRandoPreset", nargs='?', default=None)
@@ -414,7 +416,7 @@ if __name__ == "__main__":
         args.strictMinors = bool(random.getrandbits(1))
 
     # in plando rando we know that the start ap is ok
-    if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando == None:
+    if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando is None:
         forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
         forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", 'variaTweaks', 'on')
         forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
@@ -553,7 +555,8 @@ if __name__ == "__main__":
             else:
                 raise ValueError("Invalid button name : " + str(b))
 
-    if args.plandoRando != None:
+    plandoSettings = None
+    if args.plandoRando is not None:
         forceArg('progressionSpeed', 'speedrun', "'Progression Speed' forced to speedrun")
         progSpeed = 'speedrun'
         forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
@@ -563,10 +566,10 @@ if __name__ == "__main__":
         args.plandoRando = json.loads(args.plandoRando)
         RomPatches.ActivePatches = args.plandoRando["patches"]
         DoorsManager.unserialize(args.plandoRando["doors"])
+        plandoSettings = {"locsItems": args.plandoRando['locsItems'], "forbiddenItems": args.plandoRando['forbiddenItems']}
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty,
                                   restrictions, args.superFun, args.runtimeLimit_s,
-                                  args.plandoRando["locsItems"] if args.plandoRando != None else None,
-                                  minDifficulty)
+                                  plandoSettings, minDifficulty)
 
     # print some parameters for jm's stats
     if args.jm == True:
@@ -582,6 +585,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.AreaBaseSet
         if args.areaLayoutBase == False:
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
+    if args.doorsColorsRando == True:
+        RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
     graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses,
                                   args.escapeRando, minimizerN, dotFile, args.doorsColorsRando, args.allowGreyDoors,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
@@ -672,8 +677,6 @@ if __name__ == "__main__":
                 suitsMode = "Progressive"
             elif args.noGravHeat:
                 suitsMode = "Vanilla"
-            if args.doorsColorsRando == True:
-                args.patches.append("beam_doors.ips")
             romPatcher.applyIPSPatches(args.startAP, args.patches,
                                        args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,
@@ -731,6 +734,7 @@ if __name__ == "__main__":
                 "min_degree": None,
                 "max_degree": None,
                 "invert": None,
+                "no_blue_door_palette": None
             }
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)

@@ -569,9 +569,9 @@ define_location(
     Visibility="Hidden",
     Room='Ridley Tank Room',
     AccessFrom={
-        'RidleyRoomIn': lambda sm: SMBool(True)
+        'RidleyRoomIn': lambda sm: sm.haveItem('Ridley')
     },
-    Available=lambda loc, sm: sm.haveItem('Ridley')
+    Available=lambda loc, sm: sm.haveItem('Morph')
 ),
 define_location(
     Area="LowerNorfair",

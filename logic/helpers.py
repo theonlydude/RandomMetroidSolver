@@ -538,6 +538,9 @@ class Helpers(object):
 
     @Cache.decorator
     def enoughStuffsRidley(self):
+        sm = self.smbm
+        if not sm.haveItem('Morph') and not sm.haveItem('ScrewAttack'):
+            return smboolFalse
         (ammoMargin, secs, ammoItems) = self.canInflictEnoughDamages(18000, doubleSuper=True, power=True, givesDrops=False)
         if ammoMargin == 0:
             return smboolFalse

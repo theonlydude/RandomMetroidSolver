@@ -409,6 +409,8 @@ class InteractiveSolver(CommonSolver):
         seedCode = 'FX'
         if self.bossRando == True:
             seedCode = 'B'+seedCode
+        if DoorsManager.isRandom():
+            seedCode = 'D'+seedCode
         if self.areaRando == True:
             seedCode = 'A'+seedCode
         from time import gmtime, strftime

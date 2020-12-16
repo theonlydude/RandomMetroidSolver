@@ -64,7 +64,10 @@ class Door(object):
             return self.color
 
     def isRandom(self):
-        return self.color != self.vanillaColor and self.color != 'blue'
+        return self.color != self.vanillaColor and not self.isBlue()
+
+    def isBlue(self):
+        return self.color == 'blue'
 
     def canRandomize(self):
         return not self.forced and self.id is None
@@ -100,7 +103,7 @@ class Door(object):
         print("Door({}, {})".format(self.name, self.color))
 
     def writeColor(self, rom):
-        if not self.isRandom():
+        if self.isBlue():
             return
 
         rom.writeWord(colors2plm[self.color][self.facing], self.address)

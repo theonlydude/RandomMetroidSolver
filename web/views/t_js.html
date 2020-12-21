@@ -153,10 +153,14 @@ function clickPortal(elemId) {
 }
 
 function addDebugLine(startPoint, endPoint, difficulty) {
-  // console.log("addDebugLine: "+startPoint+" -> "+endPoint+": "+difficulty);
+  //console.log("addDebugLine: "+startPoint+" -> "+endPoint+": "+difficulty);
 
   var startPointElem = document.getElementById(startPoint);
   var endPointElem = document.getElementById(endPoint);
+
+  if(startPointElem == null || endPointElem == null) {
+    console.log("addDebugLine startPointElem "+startPointElem+" or endPointElem "+endPointElem+" is null");
+  }
 
   var line = new LeaderLine(startPointElem, endPointElem,
                             {color: debugColors[difficulty],

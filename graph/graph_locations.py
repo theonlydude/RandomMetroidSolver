@@ -1276,9 +1276,12 @@ define_location(
     Visibility="Visible",
     Room='Morph Ball Room',
     AccessFrom={
-        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
+        'Blue Brinstar Elevator Bottom': lambda sm: sm.canUsePowerBombs(),
+        'Morph Ball Room Left': lambda sm: sm.wor(sm.canPassBombPassages(),
+                                                  sm.wand(sm.haveItem('Morph'),
+                                                          sm.canShortCharge())) # speedball
     },
-    Available=lambda loc, sm: sm.canUsePowerBombs()
+    Available=lambda loc, sm: SMBool(True)
 ),
 define_location(
     Area="Brinstar",

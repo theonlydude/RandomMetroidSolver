@@ -187,7 +187,10 @@ accessPoints = [
     }, internal=True),
     AccessPoint('Crab Maze Left', 'WreckedShip', {
         'Wrecked Ship Back': lambda sm: sm.canPassForgottenHighway(False)
-    }, roomInfo = {'RoomPtr':0x957d, "area": 0x0, 'songs':[0x958e]},
+    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors),
+                                  sm.traverse('LeCoudeBottom')), # it is not exactly coude's door
+                                                                 # but it is equivalent in vanilla anyway
+       roomInfo = {'RoomPtr':0x957d, "area": 0x0, 'songs':[0x958e]},
        exitInfo = {'DoorPtr':0x8aae, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x34, 'SamusY':0x188, 'song': 0xc},
@@ -674,8 +677,7 @@ accessPoints = [
     }, internal=True),
     AccessPoint('Le Coude Right', 'EastMaridia', {
         'Toilet Top': lambda sm: SMBool(True)
-    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.traverse('LeCoudeBottom')),
-       roomInfo = {'RoomPtr':0x95a8, "area": 0x0},
+    }, roomInfo = {'RoomPtr':0x95a8, "area": 0x0},
        exitInfo = {'DoorPtr':0x8aa2, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0xd1, 'SamusY':0x88},

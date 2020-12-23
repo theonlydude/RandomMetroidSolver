@@ -20,5 +20,6 @@
   "energyQtyMultiSelect": ["sparse", "medium", "vanilla"],
   "funSuits": "off",
   "nerfedCharge": "off",
-  "variaTweaks": "on"
+  "variaTweaks": "on",
+  "doorsColorsRando": "off"
 }

@@ -28,5 +28,6 @@
   "energyQty": "sparse",
   "funSuits": "on",
   "nerfedCharge": "off",
-  "variaTweaks": "on"
+  "variaTweaks": "on",
+  "doorsColorsRando": "off"
 }

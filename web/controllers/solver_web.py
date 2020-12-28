@@ -26,6 +26,7 @@ from rom.rom_patches import RomPatches
 from rom.ips import IPS_Patch
 from randomizer import energyQties, progDiffs, morphPlacements, majorsSplits, speeds
 from utils.doorsmanager import DoorsManager
+from utils.version import displayedVersion
 
 # discord webhook for plandorepo
 try:
@@ -1753,7 +1754,7 @@ def plando():
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
-                curSession=session.plando, addresses=addresses, startAPs=startAPs)
+                curSession=session.plando, addresses=addresses, startAPs=startAPs, version=displayedVersion)
 
 class WS(object):
     @staticmethod

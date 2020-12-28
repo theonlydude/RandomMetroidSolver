@@ -410,6 +410,8 @@ var vcrData = [];
 var vcrIndex = 0;
 
 function onloadHook() {
+  version = "{{=version}}";
+
   var url = window.location.pathname;
   if(url.includes("debug")) {
     debug = true;

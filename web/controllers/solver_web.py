@@ -1633,6 +1633,36 @@ def randoParamsWebService():
 
     return json.dumps({"seed": seed, "params": params})
 
+# from https://www.geeksforgeeks.org/how-to-validate-guid-globally-unique-identifier-using-regular-expres
+def isValidGUID(str):
+    regex = "^[{]?[0-9a-fA-F]{8}" + "-([0-9a-fA-F]{4}-)" + "{3}[0-9a-fA-F]{12}[}]?$"
+    p = re.compile(regex)
+
+    if (str == None):
+        return False
+
+    if(re.search(p, str)):
+        return True
+    else:
+        return False
+
+def randoParamsWebServiceAPI():
+    # get a json string of the randomizer parameters for a given seed
+    if request.vars.guid == None:
+        raiseHttp(400, "Missing parameter guid", False)
+
+    guid = request.vars.guid
+
+    # guid is: 8bc77c97-3e0f-4c19-817a-08f0668ade56
+    if not isValidGUID(guid):
+        raiseHttp(400, "Guid is not valid", False)
+
+    db = DB()
+    params = db.getRandomizerSeedParamsAPI(guid)
+    db.close()
+
+    return json.dumps(params)
+
 def stats():
     response.title = 'Super Metroid VARIA Randomizer and Solver usage statistics'
 

@@ -358,6 +358,29 @@ order by r.id;"""
         header = ["id", "actionTime", "guid", "returnCode", "duration", "errorMsg"]
         return (header, outData, paramsHead + sorted(list(paramsSet)))
 
+    def getRandomizerSeedParamsAPI(self, guid):
+        if self.dbAvailable == False:
+            return None
+
+        sql = "select rp.name, rp.value from randomizer_params rp join randomizer r on rp.randomizer_id = r.id where r.guid = '%s' order by rp.name;"
+        data = self.execSelect(sql, (guid,))
+        if data == None:
+            return ""
+        else:
+            ret = "{"
+            tmp = []
+            for row in data:
+                arg = row[0]
+                value = row[1]
+                if arg.find("MultiSelect") != -1:
+                    value = '["{}"]'.format('", "'.join(value.split(',')))
+                else:
+                    value = '"{}"'.format(value)
+                tmp.append('"{}": {}'.format(arg, value))
+            ret += ','.join(tmp)
+            ret += "}"
+            return ret
+
     def getRandomizerSeedParams(self, randomizer_id):
         if self.dbAvailable == False:
             return None

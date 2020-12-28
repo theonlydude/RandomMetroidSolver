@@ -1425,7 +1425,7 @@ def randomizerWebService():
 
     db.addRandoParams(id, request.vars)
 
-    print("before calling: {}".format(params))
+    print("before calling: {}".format(' '.join(params[2:])))
     start = datetime.now()
     ret = subprocess.call(params)
     end = datetime.now()

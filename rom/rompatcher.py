@@ -60,7 +60,8 @@ class RomPatcher:
                      # animals 
                      'animal_enemies.ips', 'animals.ips', 'draygonimals.ips',
                      'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
-                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips', # ...end animals
+                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips',
+                     'Escape_Animals_Change_Event', # ...end animals
                      # vanilla behaviour restore
                      'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips'],
         # base patchset+optional layout for area rando

@@ -208,7 +208,30 @@ class FillerRandomSpeedrun(FillerRandom):
         now = time.process_time()
         sys.stdout.write('S({}/{}ms)'.format(self.nSteps+1, int((now-self.startDate)*1000)))
         sys.stdout.flush()
+
+        # order item locations with the order used by the solver
+        self.orderItemLocations(solver)
+
         return True
+
+    def getProgressionItemLocations(self):
+        return self.progressionItemLocs
+
+    def orderItemLocations(self, solver):
+        orderedItemLocations = []
+        # keep only first minors
+        firstMinors = {"Missile": False, "Super": False, "PowerBomb": False}
+        for loc in solver.visitedLocations:
+            if loc.itemName in ["ETank", "Reserve"]:
+                continue
+            if loc.itemName in firstMinors:
+                if firstMinors[loc.itemName] == True:
+                    continue
+                else:
+                    firstMinors[loc.itemName] = True
+            itemLoc = self.container.getItemLoc(loc)
+            orderedItemLocations.append(itemLoc)
+        self.progressionItemLocs = orderedItemLocations
 
     def getHelp(self):
         if time.process_time() > self.runtimeSteps[self.nFrontFillSteps]:

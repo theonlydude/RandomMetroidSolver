@@ -884,7 +884,7 @@ window.onload = function(){
         romIsRaceProtected = false;
         for(var addr=0x1C0200; addr<0x1C0210; addr++) {
             if(bytes[addr] != 0xff) {
-                if(mode == "plando") {
+                if(mode == "plando" && debug == false) {
                     clearInputSeed();
                     alert("race protected seed detected");
                     return false;

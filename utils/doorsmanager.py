@@ -347,6 +347,13 @@ class DoorsManager():
         for name, data in state.items():
             DoorsManager.doors[name].unserialize(data)
 
+    @staticmethod
+    def allDoorsRevealed():
+        for door in DoorsManager.doors.values():
+            if door.hidden:
+                return False
+        return True
+
     # when using the tracker, first set all colored doors to grey until the user clicks on it
     @staticmethod
     def initTracker():

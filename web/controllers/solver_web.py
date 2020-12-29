@@ -1893,8 +1893,11 @@ class WS(object):
                 "errorMsg": state["errorMsg"],
                 "last": state["last"],
                 "innerTransitions": state["innerTransitions"],
+
+                # doors
                 "doors": state["doors"],
-                "doorsRando": state["doorsRando"]
+                "doorsRando": state["doorsRando"],
+                "allDoorsRevealed": state["allDoorsRevealed"]
             })
         else:
             raiseHttp(200, "OK", True)

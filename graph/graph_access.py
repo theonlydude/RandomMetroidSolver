@@ -275,11 +275,10 @@ accessPoints = [
                                    lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                       sm.traverse('WastelandLeft'),
                                                       sm.traverse('RedKihunterShaftBottom'),
-                                                      sm.canUsePowerBombs(),
-                                                      sm.wand(sm.canGetBackFromRidleyZone(),
-                                                              sm.canPassRedKiHunters(),
-                                                              sm.canPassWastelandDessgeegas(),
-                                                              sm.canPassNinjaPirates()))),
+                                                      sm.canGetBackFromRidleyZone(),
+                                                      sm.canPassRedKiHunters(),
+                                                      sm.canPassWastelandDessgeegas(),
+                                                      sm.canPassNinjaPirates())),
         'Screw Attack Bottom': Cache.ldeco('F_SAB',
                                            lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                               sm.canPassAmphitheaterReverse(),
@@ -304,10 +303,9 @@ accessPoints = [
     AccessPoint('Ridley Zone', 'LowerNorfair', {
         'Firefleas': Cache.ldeco('RZ_F',
                                  lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
-                                                    sm.canUsePowerBombs(),
-                                                    sm.wand(sm.canGetBackFromRidleyZone(),
-                                                            sm.canPassWastelandDessgeegas(),
-                                                            sm.canPassRedKiHunters()))),
+                                                    sm.canGetBackFromRidleyZone(),
+                                                    sm.canPassWastelandDessgeegas(),
+                                                    sm.canPassRedKiHunters())),
         'RidleyRoomOut': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
     }, internal=True),
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {
@@ -420,7 +418,7 @@ accessPoints = [
     AccessPoint('Cathedral', 'Norfair', {
         'Business Center': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles']),
         'Bubble Mountain': lambda sm: sm.wand(sm.traverse('CathedralRight'),
-                                             sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']))
+                                              sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']))
     }, internal=True),
     AccessPoint('Kronic Boost Room Bottom Left', 'Norfair', {
         'Single Chamber Top Right': Cache.ldeco('KBRBL_SCTR',

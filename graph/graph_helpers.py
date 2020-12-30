@@ -98,16 +98,16 @@ class HelpersGraph(Helpers):
         #             -do a gravity jump from below the right platform
         #             -do a mock ball and a bounce ball (https://www.youtube.com/watch?v=WYxtRF--834)
         #             -with gravity, either hijump or IBJ
-        return sm.wor(sm.wor(sm.haveItem('Grapple'),
-                             sm.haveItem('SpaceJump'),
-                             sm.knowsContinuousWallJump()),
-                             sm.wor(sm.wand(sm.knowsDiagonalBombJump(), sm.canUseBombs()),
-                                    sm.canSimpleShortCharge(),
-                                    sm.wand(sm.haveItem('Gravity'),
-                                            sm.wor(sm.knowsGravityJump(),
-                                                   sm.haveItem('HiJump'),
-                                                   sm.canInfiniteBombJump())),
-                                    sm.wand(sm.knowsMockballWs(), sm.canUseSpringBall())))
+        return sm.wor(sm.haveItem('Grapple'),
+                      sm.haveItem('SpaceJump'),
+                      sm.knowsContinuousWallJump(),
+                      sm.wand(sm.knowsDiagonalBombJump(), sm.canUseBombs()),
+                      sm.canSimpleShortCharge(),
+                      sm.wand(sm.haveItem('Gravity'),
+                              sm.wor(sm.knowsGravityJump(),
+                                     sm.haveItem('HiJump'),
+                                     sm.canInfiniteBombJump())),
+                      sm.wand(sm.knowsMockballWs(), sm.canUseSpringBall()))
 
     @Cache.decorator
     def canPassMoatReverse(self):
@@ -125,17 +125,17 @@ class HelpersGraph(Helpers):
                               sm.knowsSpongeBathBombJump()),
                       sm.wand(sm.haveItem('HiJump'),
                               sm.knowsSpongeBathHiJump()),
-                      sm.wor(sm.haveItem('Gravity'),
-                             sm.haveItem('SpaceJump'),
-                             sm.wand(sm.haveItem('SpeedBooster'),
-                                     sm.knowsSpongeBathSpeed()),
-                             sm.canSpringBallJump()))
+                      sm.haveItem('Gravity'),
+                      sm.haveItem('SpaceJump'),
+                      sm.wand(sm.haveItem('SpeedBooster'),
+                              sm.knowsSpongeBathSpeed()),
+                      sm.canSpringBallJump())
 
     @Cache.decorator
     def canPassBowling(self):
         sm = self.smbm
         return sm.wand(Bosses.bossDead(sm, 'Phantoon'),
-                       sm.wor(sm.heatProof(),
+                       sm.wor(SMBool(sm.getDmgReduction()[0] >= 2),
                               sm.energyReserveCountOk(1),
                               sm.haveItem("SpaceJump"),
                               sm.haveItem("Grapple")))
@@ -369,16 +369,14 @@ class HelpersGraph(Helpers):
 
     def canKillRedKiHunters(self, n):
         sm = self.smbm
-        destroy = sm.wor(sm.haveItem('Plasma'),
-                         sm.haveItem('ScrewAttack'),
-                         sm.wand(sm.heatProof(), # this takes a loooong time ...
-                                 sm.wor(sm.haveItem('Spazer'),
-                                        sm.haveItem('Ice'),
-                                        sm.wand(sm.haveItem('Charge'),
-                                                sm.haveItem('Wave')))))
-        if destroy.bool == True:
-            return destroy
-        return sm.canGoThroughLowerNorfairEnemy(1800.0, float(n), 200.0)
+        return sm.wor(sm.haveItem('Plasma'),
+                      sm.haveItem('ScrewAttack'),
+                      sm.wand(sm.heatProof(), # this takes a loooong time ...
+                              sm.wor(sm.haveItem('Spazer'),
+                                     sm.haveItem('Ice'),
+                                     sm.wand(sm.haveItem('Charge'),
+                                             sm.haveItem('Wave')))),
+                      sm.canGoThroughLowerNorfairEnemy(1800.0, float(n), 200.0))
 
     @Cache.decorator
     def canPassThreeMuskateers(self):
@@ -393,17 +391,14 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassWastelandDessgeegas(self):
         sm = self.smbm
-        destroy = sm.wor(sm.haveItem('Plasma'),
-                         sm.haveItem('ScrewAttack'),
-                         sm.wand(sm.heatProof(), # this takes a loooong time ...
-                                 sm.wor(sm.haveItem('Spazer'),
-                                        sm.wand(sm.haveItem('Charge'),
-                                                sm.haveItem('Wave')))),
-                                        sm.itemCountOk('PowerBomb', 4))
-        if destroy.bool == True:
-            return destroy
-
-        return sm.canGoThroughLowerNorfairEnemy(800.0, 3.0, 160.0)
+        return sm.wor(sm.haveItem('Plasma'),
+                      sm.haveItem('ScrewAttack'),
+                      sm.wand(sm.heatProof(), # this takes a loooong time ...
+                              sm.wor(sm.haveItem('Spazer'),
+                                     sm.wand(sm.haveItem('Charge'),
+                                             sm.haveItem('Wave')))),
+                      sm.itemCountOk('PowerBomb', 4),
+                      sm.canGoThroughLowerNorfairEnemy(800.0, 3.0, 160.0))
 
     @Cache.decorator
     def canPassNinjaPirates(self):
@@ -414,7 +409,8 @@ class HelpersGraph(Helpers):
                       sm.wor(sm.haveItem('Spazer'),
                              sm.wand(sm.haveItem('Charge'),
                                      sm.wor(sm.haveItem('Wave'),
-                                            sm.haveItem('Ice')))))
+                                            sm.haveItem('Ice')))),
+                      sm.canShortCharge()) # echoes kill
 
     @Cache.decorator
     def canPassWorstRoomPirates(self):
@@ -422,12 +418,12 @@ class HelpersGraph(Helpers):
         return sm.wor(sm.haveItem('ScrewAttack'),
                       sm.itemCountOk('Missile', 6),
                       sm.itemCountOk('Super', 3),
-                      sm.wor(sm.wand(sm.canFireChargedShots(), sm.haveItem('Plasma')),
-                             sm.wand(sm.haveItem('Charge'),
-                                     sm.wor(sm.haveItem('Spazer'),
-                                            sm.haveItem('Wave'),
-                                            sm.haveItem('Ice'))),
-                             sm.knowsDodgeLowerNorfairEnemies()))
+                      sm.wand(sm.canFireChargedShots(), sm.haveItem('Plasma')),
+                      sm.wand(sm.haveItem('Charge'),
+                              sm.wor(sm.haveItem('Spazer'),
+                                     sm.haveItem('Wave'),
+                                     sm.haveItem('Ice'))),
+                      sm.knowsDodgeLowerNorfairEnemies())
 
     # go though the pirates room filled with acid
     @Cache.decorator
@@ -444,11 +440,12 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canGetBackFromRidleyZone(self):
         sm = self.smbm
-        return sm.wand(sm.wor(sm.canUseSpringBall(),
+        return sm.wand(sm.canUsePowerBombs(),
+                       sm.wor(sm.canUseSpringBall(),
                               sm.canUseBombs(),
+                              sm.itemCountOk('PowerBomb', 2),
                               sm.haveItem('ScrewAttack'),
-                              sm.wand(sm.canUsePowerBombs(), sm.itemCountOk('PowerBomb', 2)),
-                              sm.wand(sm.haveItem('Morph'), sm.canShortCharge())), # speedball
+                              sm.canShortCharge()), # speedball
                        # in escape you don't have PBs and can't shoot bomb blocks in long tunnels
                        # in wasteland and ki hunter room
                        sm.wnot(sm.canUseHyperBeam()))
@@ -463,10 +460,10 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canClimbBottomRedTower(self):
         sm = self.smbm
-        return sm.wor(sm.wor(RomPatches.has(RomPatches.RedTowerLeftPassage),
-                             sm.haveItem('HiJump'),
-                             sm.haveItem('Ice'),
-                             sm.canFly()),
+        return sm.wor(RomPatches.has(RomPatches.RedTowerLeftPassage),
+                      sm.haveItem('HiJump'),
+                      sm.haveItem('Ice'),
+                      sm.canFly(),
                       sm.canShortCharge())
 
     @Cache.decorator

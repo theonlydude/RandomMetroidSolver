@@ -100,10 +100,13 @@ class Door(object):
             return SMBool(True)
 
     def __repr__(self):
-        print("Door({}, {})".format(self.name, self.color))
+        return "Door({}, {})".format(self.name, self.color)
+
+    def isRefillSave(self):
+        return self.address is None
 
     def writeColor(self, rom):
-        if self.isBlue():
+        if self.isBlue() or self.isRefillSave():
             return
 
         rom.writeWord(colors2plm[self.color][self.facing], self.address)
@@ -113,7 +116,7 @@ class Door(object):
             rom.writeByte(0x90, self.address+4)
 
     def readColor(self, rom):
-        if self.forced:
+        if self.forced or self.isRefillSave():
             return
 
         plm = rom.readWord(self.address)
@@ -225,14 +228,14 @@ class DoorsManager():
         'PlasmaSparkBottom': Door('PlasmaSparkBottom', 0x7c577, 'green', Facing.Top),
         'OasisTop': Door('OasisTop', 0x7c5d3, 'green', Facing.Bottom),
         # refill/save
-        'GreenBrinstarSaveStation': Door('GreenBrinstarSaveStation', 0x784b2, 'red', Facing.Right, id=0x1f),
-        'MaridiaBottomSaveStation': Door('MaridiaBottomSaveStation', 0x7c431, 'red', Facing.Left, id=0x8c),
-        'MaridiaAqueductSaveStation': Door('MaridiaAqueductSaveStation', 0x7c5fd, 'red', Facing.Right, id=0x96),
-        'ForgottenHighwaySaveStation': Door('ForgottenHighwaySaveStation', 0x7c569, 'red', Facing.Left, id=0x92),
-        'DraygonSaveRefillStation': Door('DraygonSaveRefillStation', 0x7c6ef, 'red', Facing.Left, id=0x98),
-        'KraidRefillStation': Door('KraidRefillStation', 0x78a14, 'green', Facing.Left, id=0x44),
-        'RedBrinstarEnergyRefill': Door('RedBrinstarEnergyRefill', 0x78860, 'green', Facing.Right, id=0x38),
-        'GreenBrinstarMissileRefill': Door('GreenBrinstarMissileRefill', 0x784ca, 'red', Facing.Right, id=0x23)
+        'GreenBrinstarSaveStation': Door('GreenBrinstarSaveStation', None, 'red', Facing.Right, id=0x1f),
+        'MaridiaBottomSaveStation': Door('MaridiaBottomSaveStation', None, 'red', Facing.Left, id=0x8c),
+        'MaridiaAqueductSaveStation': Door('MaridiaAqueductSaveStation', None, 'red', Facing.Right, id=0x96),
+        'ForgottenHighwaySaveStation': Door('ForgottenHighwaySaveStation', None, 'red', Facing.Left, id=0x92),
+        'DraygonSaveRefillStation': Door('DraygonSaveRefillStation', None, 'red', Facing.Left, id=0x98),
+        'KraidRefillStation': Door('KraidRefillStation', None, 'green', Facing.Left, id=0x44),
+        'RedBrinstarEnergyRefill': Door('RedBrinstarEnergyRefill', None, 'green', Facing.Right, id=0x38),
+        'GreenBrinstarMissileRefill': Door('GreenBrinstarMissileRefill', None, 'red', Facing.Right, id=0x23)
     }
 
     # call from logic

@@ -736,9 +736,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x2f, 'SamusY':0x488},
        dotOrientation = 'w'),
     AccessPoint('Caterpillar Room Top Right', 'RedBrinstar', {
-        'Red Brinstar Elevator': lambda sm: sm.canPassMaridiaToRedTowerNode(),
-        'Red Tower Top Left': lambda sm: sm.wand(sm.canPassMaridiaToRedTowerNode(),
-                                                 sm.traverse('RedTowerElevatorLeft'))
+        'Red Brinstar Elevator': lambda sm: sm.canPassMaridiaToRedTowerNode()
     }, roomInfo = {'RoomPtr':0xa322, "area": 0x1},
        exitInfo = {'DoorPtr':0x90c6, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x40,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbdaf},

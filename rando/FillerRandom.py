@@ -167,6 +167,7 @@ class FillerRandomSpeedrun(FillerRandom):
     def initFiller(self):
         super(FillerRandomSpeedrun, self).initFiller()
         self.restrictions.precomputeRestrictions(self.container)
+        self.progressionItemLocs = []
 
     # depending on the start location help the randomfill with a little bit of frontfill.
     # also if the randomfill can't find a solution, help him too with a little bit of frontfill.

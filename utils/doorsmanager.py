@@ -338,7 +338,7 @@ class DoorsManager():
     # call from web
     @staticmethod
     def getAddressesToRead():
-        return [door.address for door in DoorsManager.doors.values()] + [door.address+1 for door in DoorsManager.doors.values()]
+        return [door.address for door in DoorsManager.doors.values() if door.address is not None] + [door.address+1 for door in DoorsManager.doors.values() if door.address is not None]
 
     # for isolver state
     @staticmethod

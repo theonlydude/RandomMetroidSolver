@@ -2425,7 +2425,7 @@ customSprites = {
     'luigi': {"name": "Luigi", "desc": "The other bro", "author": "RonnSama", "group": "Custom"},
     'diddy_kong': {"name": "Diddy Kong", "desc": "Diddy Kong from Donkey Kong Country", "author": "Di10", "group": "Custom"},
     'marga': {"name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
-    'captain_novolin': {"name": "Captan Novolin", "desc": "Captain Novolin, from the eponymous educational SNES game on diabetes", "author": "PaddyCo", "group": "Custom"},
+    'captain_novolin': {"name": "Captain Novolin", "desc": "Captain Novolin, from the eponymous educational SNES game on diabetes", "author": "PaddyCo", "group": "Custom"},
     'metroid': {"name": "Metroid", "desc": "It can't crawl", "author": "Fingersmcgee", "group": "Custom"},
     'sprite_can': {"name": "Sprite", "desc": "A ... Sprite ... ", "author": "TarThoron", "group": "Custom"},
     'win95_cursor': {"name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}

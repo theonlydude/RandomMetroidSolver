@@ -56,6 +56,10 @@ patches = {
         0x79867: [0xb2, 0x91],
         0x798dc: [0xbb, 0x91]
     },
+    # with animals suprise make the bomb blocks at alcatraz disapear with event "Zebes timebomb set" instead of "critters escaped"
+    "Escape_Animals_Change_Event": {
+        0x023B0A: [0x0E]
+    },
     "LN_Chozo_SpaceJump_Check_Disable": {
         0x2518f: [0xea, 0xea, 0xea, 0xea, 0xea, 0xea, 0xea, 0xea]
     },

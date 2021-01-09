@@ -38,7 +38,9 @@ routers = dict(
             'deletePlandoWebService',
             'deletePlandoWebService.json',
             'updatePlandoWebService',
-            'updatePlandoWebService.json'
+            'updatePlandoWebService.json',
+            'randoParamsWebServiceAPI',
+            'randoParamsWebServiceAPI.json'
         ]
     )
 )

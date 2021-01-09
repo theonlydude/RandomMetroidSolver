@@ -629,6 +629,7 @@ if __name__ == "__main__":
                           'phantoonimals.ips', 'ridleyimals.ips']
         if args.escapeRando == False:
             args.patches.append(random.choice(animalsPatches))
+            args.patches.append("Escape_Animals_Change_Event")
         else:
             optErrMsgs.append("Ignored animals surprise because of escape randomization")
     # transform itemLocs in our usual dict(location, item), exclude minors, we'll get them with the solver

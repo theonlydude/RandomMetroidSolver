@@ -113,7 +113,7 @@ class Door(object):
 
         # also set plm args high byte to never opened, even during escape
         if self.color == 'grey':
-            rom.writeByte(0x90, self.address+4)
+            rom.writeByte(0x90, self.address+5)
 
     def readColor(self, rom):
         if self.forced or self.isRefillSave():

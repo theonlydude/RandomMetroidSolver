@@ -7,23 +7,11 @@ import sys, os
 sys.path.append(os.path.dirname(sys.path[0]))
 
 from rooms import rooms
-from rom.rom import RealROM
+from rom.rom import RealROM, snes_to_pc
 from utils.utils import removeChars
 
 def concatBytes(b0, b1, b2=0):
     return b0 + (b1 << 8) + (b2 << 16)
-
-def LRtoPC(B):
-    B_1 = B >> 16
-    B_2 = B & 0xFFFF
-    # return 0 if invalid LoROM address
-    if B_1 < 0x80 or B_1 > 0xFFFFFF or B_2 < 0x8000:
-        return 0
-    A_1 = (B_1 - 0x80) >> 1
-    # if B_1 is even, remove most significant bit
-    A_2 = B_2 & 0x7FFF if (B_1 & 1) == 0 else B_2
-
-    return (A_1 << 16) | A_2
 
 def readDoorsPtrs(romFile, roomInfo):
     size = roomInfo['DoorCount'] * 2
@@ -33,7 +21,7 @@ def readDoorsPtrs(romFile, roomInfo):
 
     doorPtrs = []
     for n in range(0, roomInfo['DoorCount']):
-        doorPtrs.append(LRtoPC(concatBytes(data[2*n], data[2*n + 1], 0x83)))
+        doorPtrs.append(snes_to_pc(concatBytes(data[2*n], data[2*n + 1], 0x83)))
 
     roomInfo['DoorPtrs'] = doorPtrs
 
@@ -139,7 +127,7 @@ def readRooms(romFileName):
         roomInfo['UpScroller'] = data[RoomHeader.UpScroller]
         roomInfo['DownScroller'] = data[RoomHeader.DownScroller]
         roomInfo['SpecialGfxBitflag'] = data[RoomHeader.SpecialGfxBitflag]
-        roomInfo['DoorsPtr'] = LRtoPC(concatBytes(data[RoomHeader.DoorsPtr1], data[RoomHeader.DoorsPtr2], 0x8F))
+        roomInfo['DoorsPtr'] = snes_to_pc(concatBytes(data[RoomHeader.DoorsPtr1], data[RoomHeader.DoorsPtr2], 0x8F))
         #print("")
         #print("{} ({}) ({} x {}) in area: {}".format(roomInfo['Name'], hex(roomInfo['Address']), hex(roomInfo['Width']), hex(roomInfo['Height']), Areas.id2name[roomInfo['Area']]))
 

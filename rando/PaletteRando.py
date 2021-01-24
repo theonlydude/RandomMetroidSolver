@@ -660,15 +660,15 @@ class PaletteRando(object):
             if address == 0x213BC1 and not self.settings["shift_tileset_palette"]:
                 insert_address= self.base_address + (0*0x100)
                 self.compress(insert_address, data)
-                self.write_pointer(self.pointer_addresses[14], self.pc_to_snes(insert_address))
+                self.write_pointer(self.pointer_addresses[14], pc_to_snes(insert_address))
             elif address == 0x213510 and not self.settings["shift_tileset_palette"]:
                 insert_address = self.base_address + (1*0x100)
                 self.compress(insert_address, data)
-                self.write_pointer(self.pointer_addresses[22], self.pc_to_snes(insert_address))
+                self.write_pointer(self.pointer_addresses[22], pc_to_snes(insert_address))
             elif address == 0x213A2C and not self.settings["shift_tileset_palette"]:
                 insert_address = self.base_address + (2*0x100)
                 self.compress(insert_address, data)
-                self.write_pointer(self.pointer_addresses[24], self.pc_to_snes(insert_address))
+                self.write_pointer(self.pointer_addresses[24], pc_to_snes(insert_address))
             else:        
                 #Recompress palette and re-insert at offset
                 self.compress(insert_address, data)
@@ -737,8 +737,8 @@ class PaletteRando(object):
             for p_update in self.pointers_to_insert:
                 i=i+1
                 self.logger.debug("New Pointer Address: {}".format(p_update))
-                self.logger.debug("Write this to file: {}".format(hex(self.pc_to_snes(p_update))))
-                self.write_pointer(self.pointer_addresses[i], self.pc_to_snes(p_update))
+                self.logger.debug("Write this to file: {}".format(hex(pc_to_snes(p_update))))
+                self.write_pointer(self.pointer_addresses[i], pc_to_snes(p_update))
 
         #this NEEDS to be called after the tileset palette shift function (if tileset shift actually gets called) because it references newly created pointers
         if self.settings["shift_boss_palettes"]:

@@ -61,8 +61,15 @@ if (hs.registerOverlay) {
     text-align: center;
 }
 .donate {
-    text-align: center;
-    margin-top: 1em;
+    text-align: right;
+}
+.nomargin {
+    margin: 0em;
+    border: 0em;
+    padding: 0em;
+}
+.inputImage {
+    margin-bottom: -1em;
 }
 .rightStep {
     float: right;
@@ -1862,10 +1869,18 @@ def displayNumber(id, min, max, default, step="1"):
         <button class="tablinks" id="simple" onclick="changeComplexity(event, 'simple');">Simple</button>
         <button class="tablinks" id="medium" onclick="changeComplexity(event, 'medium');">Medium</button>
         <button class="tablinks" id="advanced" onclick="changeComplexity(event, 'advanced');">Advanced</button>
+        <div class="donate">
+          <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank" class="nomargin">
+            <input type="hidden" name="cmd" value="_s-xclick" />
+            <input type="hidden" name="hosted_button_id" value="J6BEK8K8LVG7Y" />
+            <input type="image" src="/solver/static/images/donate_randomizer.png" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" class="inputImage"/>
+            <img alt="" border="0" src="https://www.paypal.com/en_FR/i/scr/pixel.gif" width="1" height="1" />
+          </form>
+        </div>
       </div>
     </div>
+    <div id="tabRando" class="tabcontent">
     <form id="mainform" name="mainform" onsubmit="doSubmit(); return false;">
-      <div id="tabRando" class="tabcontent">
         <div class="row">
           <div class="column">
             <p>The Very Adaptive Randomizer of Items and Area (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset.</p>
@@ -2227,13 +2242,5 @@ def displayNumber(id, min, max, default, step="1"):
         </p>
         {{=INPUT(_type="submit", _value="Randomize", _id="submitBtn", _class="btn btn-default buttonRandom")}}
     </form>
-    <div class="donate">
-      <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
-        <input type="hidden" name="cmd" value="_s-xclick" />
-        <input type="hidden" name="hosted_button_id" value="J6BEK8K8LVG7Y" />
-        <input class="leagueImg" type="image" src="/solver/static/images/donate_randomizer.png" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
-        <img alt="" border="0" src="https://www.paypal.com/en_FR/i/scr/pixel.gif" width="1" height="1" />
-      </form>
-    </div>
   </div>
 </body>

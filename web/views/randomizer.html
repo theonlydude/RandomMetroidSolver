@@ -2053,7 +2053,8 @@ def displayNumber(id, min, max, default, step="1"):
             <table id="areaLayoutVisibility" class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr>
-                <td colspan="2" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td>
+                <td id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td>
+                <td></td>
                 <td><button type="button" onclick="startTheTour(20)">?</button></td>
               </tr>
             </table>
@@ -2144,10 +2145,11 @@ def displayNumber(id, min, max, default, step="1"):
               <table class="full" id="nerfedChargeVisibility">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr id="nerfedChargeStep">
-                  <td colspan="2">
+                  <td>
                     {{displayCheckbox("nerfedCharge")}}
                     Nerfed Charge Beam available from the start
                   </td>
+                  <td></td>
                   <td><button type="button" onclick="startTheTour(33)">?</button></td>
                 </tr>
               </table>
@@ -2213,10 +2215,11 @@ def displayNumber(id, min, max, default, step="1"):
               <table class="full" id="miscVisibility">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr id="animalsStep">
-                  <td colspan="2">
+                  <td>
                     {{displayCheckbox("animals")}}
                     <span id="animalsText">Save the animals surprise</span>
                   </td>
+                  <td></td>
                   <td><button type="button" onclick="startTheTour(41)">?</button></td>
                 </tr>
               </table>

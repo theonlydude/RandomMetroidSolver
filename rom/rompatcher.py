@@ -1110,7 +1110,7 @@ class RomPatcher:
 
         return len(compressedData)
 
-    def setOamTile(self, nth, middle, newTile):
+    def setOamTile(self, nth, middle, newTile, y=0xFC):
         # an oam entry is made of five bytes: (s000000 xxxxxxxxx) (yyyyyyyy) (YXpp000t tttttttt)
 
         # after and before the middle of the screen is not handle the same
@@ -1120,10 +1120,10 @@ class RomPatcher:
             x = 0x200 - (0x08 * (middle - nth))
 
         self.romFile.writeWord(x)
-        self.romFile.writeByte(0xFC)
+        self.romFile.writeByte(y)
         self.romFile.writeWord(0x3100+newTile)
 
-    def writeVersion(self, version):
+    def writeVersion(self, version, addRotation=False):
         # max 32 chars
 
         # new oamlist address in free space at the end of bank 8C
@@ -1131,13 +1131,23 @@ class RomPatcher:
         self.romFile.writeWord(0xF3E9, 0x5a0e9)
 
         # string length
-        length = len(version)
+        versionLength = len(version)
+        if addRotation:
+            rotationLength = len('rotation')
+            length = versionLength + rotationLength
+        else:
+            length = versionLength
         self.romFile.writeWord(length, 0x0673e9)
-        middle = int(length / 2) + length % 2
+        versionMiddle = int(versionLength / 2) + versionLength % 2
 
         # oams
         for (i, char) in enumerate(version):
-            self.setOamTile(i, middle, char2tile[char])
+            self.setOamTile(i, versionMiddle, char2tile[char])
+
+        if addRotation:
+            rotationMiddle = int(rotationLength / 2) + rotationLength % 2
+            for (i, char) in enumerate('rotation'):
+                self.setOamTile(i, rotationMiddle, char2tile[char], y=0x8e)
 
     def writeDoorsColor(self, doors):
         DoorsManager.writeDoorsColor(self.romFile, doors)

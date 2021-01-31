@@ -41,8 +41,11 @@ response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
 
 localIpsDir = 'varia_repository'
 
-# use the correct one
-pythonExec = "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
+# use the correct one or the one provided in config file
+try:
+    from utils.python_exec import pythonExec
+except:
+    pythonExec = "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
 
 maxPresets = 4096
 def maxPresetsReach():
@@ -1426,7 +1429,7 @@ def randomizerWebService():
 
     db.addRandoParams(id, request.vars)
 
-    print("before calling: {}".format(' '.join(params[2:])))
+    print("before calling: {}".format(' '.join(params)))
     start = datetime.now()
     ret = subprocess.call(params)
     end = datetime.now()

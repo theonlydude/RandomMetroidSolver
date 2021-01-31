@@ -1188,16 +1188,6 @@ function startTheTour(step=-1) {
 The vanilla ROM is stored in the browser local storage and is never sent to our server, all the patching is done locally in the browser.</p>"
     },
     {
-      element: "#seedStep",
-      title: "Randomizer seed",
-      content: "Choose a seed number between 1 and {{=maxsize}}, choose 0 to generate a random one."
-    },
-    {
-      element: "#presetStep",
-      title: "Skills Preset",
-      content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\" target=\"_blank\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), tournament presets, or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p><p><b>Standard presets outlook:</b><br/><ul><li><b>newbie: </b>New to randomizers, but completed Super Metroid 100% and knows basic techniques (Wall Jump, Shinespark, Mid-air Morph)</li><li><b>casual:</b> occasional rando player. No hell runs or suitless Maridia, some easy to learn tricks in logic.</li><li><b>regular: </b>plays rando regularly. Knows tricks that are not too hard and open up the game: hell runs (generous energy requirements), suitless Maridia, lava dive, gate glitches, Alcatraz, Gauntlet...</li><li><b>veteran:</b> experienced rando player. Harder everything, some tougher tricks in logic.</li><li><b>expert: </b>knows almost all tricks: full suitless Maridia, Lower Norfair hell runs, hi-jumpless Lava Dive (mania difficulty only, so not by default in most rando settings)</li><li><b>master:</b> Everything on hardest, all tricks known.</li></ul></p>"
-    },
-    {
       element: "#randoPresetStep",
       title: "Settings Preset",
       content: "Choose from a list of typical Randomizer usages. They're independent from skills preset, and settings can still be changed after loading the preset:<ul>\
@@ -1215,10 +1205,20 @@ Tournament presets:\
 </ul>"
     },
     {
+      element: "#seedStep",
+      title: "Randomizer seed",
+      content: "Choose a seed number between 1 and {{=maxsize}}, choose 0 to generate a random one."
+    },
+    {
       element: "#raceStep",
       title: "Race",
       content: "<p>When enabled, makes it difficult to cheat by using a Super Metroid editor like SMILE.</p>\
 <p>You won't be able to solve/track a race protected seed on the VARIA website.</p>"
+    },
+    {
+      element: "#presetStep",
+      title: "Skills Preset",
+      content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\" target=\"_blank\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), tournament presets, or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p><p><b>Standard presets outlook:</b><br/><ul><li><b>newbie: </b>New to randomizers, but completed Super Metroid 100% and knows basic techniques (Wall Jump, Shinespark, Mid-air Morph)</li><li><b>casual:</b> occasional rando player. No hell runs or suitless Maridia, some easy to learn tricks in logic.</li><li><b>regular: </b>plays rando regularly. Knows tricks that are not too hard and open up the game: hell runs (generous energy requirements), suitless Maridia, lava dive, gate glitches, Alcatraz, Gauntlet...</li><li><b>veteran:</b> experienced rando player. Harder everything, some tougher tricks in logic.</li><li><b>expert: </b>knows almost all tricks: full suitless Maridia, Lower Norfair hell runs, hi-jumpless Lava Dive (mania difficulty only, so not by default in most rando settings)</li><li><b>master:</b> Everything on hardest, all tricks known.</li></ul></p>"
     },
     {
       element: "#StartLocationStep",
@@ -1901,16 +1901,6 @@ def displayNumber(id, min, max, default, step="1"):
                 </td>
                 <td id="romStep"><button type="button" onclick="startTheTour(1)">?</button></td>
               </tr>
-              <tr id="seedVisibility">
-                <td>Randomizer seed:</td>
-                <td>{{displayNumber("seed", "0", maxsize, "0")}}</td>
-                <td id="seedStep"><button type="button" onclick="startTheTour(2)">?</button></td>
-              </tr>
-              <tr>
-                <td>Skills Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a><span></td><!-- ' -->
-                <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
-                <td id="presetStep"><button type="button" onclick="startTheTour(3)">?</button></td>
-              </tr>
               <tr>
                 <td>Settings Preset:</td>
                 <td>
@@ -1935,17 +1925,28 @@ def displayNumber(id, min, max, default, step="1"):
                 </optgroup>
                 </select>
                 </td>
-                <td id="randoPresetStep"><button type="button" onclick="startTheTour(4)">?</button></td>
+                <td id="randoPresetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
+              </tr>
+              <tr id="seedVisibility">
+                <td>Randomizer seed:</td>
+                <td>{{displayNumber("seed", "0", maxsize, "0")}}</td>
+                <td id="seedStep"><button type="button" onclick="startTheTour(3)">?</button></td>
               </tr>
               <tr id="raceModeVisibility">
                 <td>{{displayCheckbox("raceMode")}}<span id="raceModeText">Race Mode</span></td>
                 <td></td>
-                <td id="raceStep"><button type="button" onclick="startTheTour(5)">?</button></td>
+                <td id="raceStep"><button type="button" onclick="startTheTour(4)">?</button></td>
               </tr>
             </table>
             <br/>
             <h4>Randomizer parameters</h4>
             <table class="full">
+              <tr>
+                <td class="small"></td>
+                <td>Skills Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a><span></td><!-- ' -->
+                <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
+                <td id="presetStep"><button type="button" onclick="startTheTour(5)">?</button></td>
+              </tr>
               <tr>
                 <td class="small"><div class="random"><button id="startLocationRandom" type="button" onclick="randomize(event, 'startLocation')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="startLocationText">Start location</span></td>

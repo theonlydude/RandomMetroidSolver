@@ -1205,15 +1205,15 @@ Tournament presets:\
 </ul>"
     },
     {
-      element: "#seedStep",
-      title: "Randomizer seed",
-      content: "Choose a seed number between 1 and {{=maxsize}}, choose 0 to generate a random one."
-    },
-    {
       element: "#raceStep",
       title: "Race",
       content: "<p>When enabled, makes it difficult to cheat by using a Super Metroid editor like SMILE.</p>\
 <p>You won't be able to solve/track a race protected seed on the VARIA website.</p>"
+    },
+    {
+      element: "#seedStep",
+      title: "Randomizer seed",
+      content: "Choose a seed number between 1 and {{=maxsize}}, choose 0 to generate a random one."
     },
     {
       element: "#presetStep",
@@ -1927,20 +1927,21 @@ def displayNumber(id, min, max, default, step="1"):
                 </td>
                 <td id="randoPresetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
               </tr>
-              <tr id="seedVisibility">
-                <td>Randomizer seed:</td>
-                <td>{{displayNumber("seed", "0", maxsize, "0")}}</td>
-                <td id="seedStep"><button type="button" onclick="startTheTour(3)">?</button></td>
-              </tr>
               <tr id="raceModeVisibility">
                 <td>{{displayCheckbox("raceMode")}}<span id="raceModeText">Race Mode</span></td>
                 <td></td>
-                <td id="raceStep"><button type="button" onclick="startTheTour(4)">?</button></td>
+                <td id="raceStep"><button type="button" onclick="startTheTour(3)">?</button></td>
               </tr>
             </table>
             <br/>
             <h4>Randomizer parameters</h4>
             <table class="full">
+              <tr id="seedVisibility">
+                <td class="small"></td>
+                <td>Randomizer seed:</td>
+                <td>{{displayNumber("seed", "0", maxsize, "0")}}</td>
+                <td id="seedStep"><button type="button" onclick="startTheTour(4)">?</button></td>
+              </tr>
               <tr>
                 <td class="small"></td>
                 <td>Skills Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a><span></td><!-- ' -->

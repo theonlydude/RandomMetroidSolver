@@ -416,7 +416,7 @@ function isSeedless(mode) {
     return mode == "seedless" || mode == "debug" || mode == "race"
 }
 
-function setActive(mode, area, boss) {
+function setActive(mode, area, boss, escape) {
     var itemElems = ["repeatItem", "binItem"];
     var plandoElems = ["repeatPlando", "binPlando", "savePlando"];
     var areaElems = ["repeatArea", "binArea"];
@@ -435,7 +435,7 @@ function setActive(mode, area, boss) {
             $("#"+plandoElems[i]).removeClass("greyed");
         }
     }
-    if(area == true || boss == true) {
+    if(area == true || boss == true || (escape == true && mode == "plando")) {
         for(var i=0; i<areaElems.length; i++) {
             $("#"+areaElems[i]).removeClass("greyed");
         }
@@ -516,7 +516,7 @@ function updateGlobal(jsonData) {
     document.getElementById("cur_seed").value = seed;
     document.getElementById("cur_preset").value = preset;
 
-    setActive(mode, area, boss);
+    setActive(mode, area, boss, escapeRando);
 }
 
 function updateLines(jsonData) {
@@ -689,7 +689,7 @@ function isActive(elemId) {
     }
   }
   if(elemId.includes("Area")) {
-    return area || boss;
+    return area || boss || (escapeRando && mode == "plando");
   }
 }
 

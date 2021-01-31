@@ -537,10 +537,14 @@ class InteractiveSolver(CommonSolver):
             if len(self.curGraphTransitions) > 0:
                 self.curGraphTransitions.pop()
         elif self.areaRando == True:
-            if len(self.curGraphTransitions) > len(self.bossTransitions):
+            if len(self.curGraphTransitions) > len(self.bossTransitions) + (1 if self.escapeRando == False else 0):
                 self.curGraphTransitions.pop()
         elif self.bossRando == True:
-            if len(self.curGraphTransitions) > len(self.areaTransitions):
+            print("len cur graph: {} len area: {} len escape: {} len sum: {}".format(len(self.curGraphTransitions), len(self.areaTransitions), 1 if self.escapeRando == False else 0, len(self.areaTransitions) + (1 if self.escapeRando == False else 0)))
+            if len(self.curGraphTransitions) > len(self.areaTransitions) + (1 if self.escapeRando == False else 0):
+                self.curGraphTransitions.pop()
+        elif self.escapeRando == True:
+            if len(self.curGraphTransitions) > len(self.areaTransitions) + len(self.bossTransitions):
                 self.curGraphTransitions.pop()
 
     def cancelTransition(self, startPoint):
@@ -559,18 +563,39 @@ class InteractiveSolver(CommonSolver):
             return
 
         # check that transition is cancelable
-        if self.areaRando == True and self.bossRando == True:
+        if self.areaRando == True and self.bossRando == True and self.escapeRando == True:
             if len(self.curGraphTransitions) == 0:
                 return
-        elif self.areaRando == True:
+        elif self.areaRando == True and self.escapeRando == False:
+            if len(self.curGraphTransitions) == len(self.bossTransitions) + len(self.escapeTransition):
+                return
+            elif [startPoint, endPoint] in self.bossTransitions or [endPoint, startPoint] in self.bossTransitions:
+                return
+            elif [startPoint, endPoint] in self.escapeTransition or [endPoint, startPoint] in self.escapeTransition:
+                return
+        elif self.bossRando == True and self.escapeRando == False:
+            if len(self.curGraphTransitions) == len(self.areaTransitions) + len(self.escapeTransition):
+                return
+            elif [startPoint, endPoint] in self.areaTransitions or [endPoint, startPoint] in self.areaTransitions:
+                return
+            elif [startPoint, endPoint] in self.escapeTransition or [endPoint, startPoint] in self.escapeTransition:
+                return
+        elif self.areaRando == True and self.escapeRando == True:
             if len(self.curGraphTransitions) == len(self.bossTransitions):
                 return
             elif [startPoint, endPoint] in self.bossTransitions or [endPoint, startPoint] in self.bossTransitions:
                 return
-        elif self.bossRando == True:
+        elif self.bossRando == True and self.escapeRando == True:
             if len(self.curGraphTransitions) == len(self.areaTransitions):
                 return
             elif [startPoint, endPoint] in self.areaTransitions or [endPoint, startPoint] in self.areaTransitions:
+                return
+        elif self.escapeRando == True and self.areaRando == False and self.bossRando == False:
+            if len(self.curGraphTransitions) == len(self.areaTransitions) + len(self.bossTransitions):
+                return
+            elif [startPoint, endPoint] in self.areaTransitions or [endPoint, startPoint] in self.areaTransitions:
+                return
+            elif [startPoint, endPoint] in self.bossTransitions or [endPoint, startPoint] in self.bossTransitions:
                 return
 
         # remove transition
@@ -585,6 +610,9 @@ class InteractiveSolver(CommonSolver):
             self.curGraphTransitions = self.areaTransitions[:]
         else:
             self.curGraphTransitions = self.bossTransitions + self.areaTransitions
+
+        if self.escapeRando == False:
+            self.curGraphTransitions += self.escapeTransition
 
     def clearLocs(self, locs):
         for loc in locs:

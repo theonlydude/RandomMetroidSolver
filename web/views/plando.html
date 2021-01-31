@@ -198,10 +198,19 @@ function save(lock) {
     var saveFile = document.getElementById("saveFile");
     if(saveFile.files.length == 0) {
       // display popup to choose the local ROM
+      document.getElementById("savePopupText").innerHTML = "The page has been reloaded, please select your ROM again: "+document.getElementById("cur_seed").value;
       document.getElementById("savePopup").style.display = "block";
     } else {
-      // call WS
-      ajaxCall(dataDict, "download", ajaxOkSave);
+      // check that chosen seed is the same that was used to init the plando
+        var saveFileName = saveFile.files[0].name;
+        var initFileName = document.getElementById("cur_seed").value;
+        if(saveFileName != initFileName) {
+            document.getElementById("saveFile").value = "";
+            alert("Not the seed used to init the plando, please choose: "+initFileName);
+        } else {
+            // call WS
+            ajaxCall(dataDict, "download", ajaxOkSave);
+        }
     }
   } else {
     // call WS
@@ -862,7 +871,7 @@ def displayNumber(id, min, max, default, step="1"):
     <table class="full">
       <colgroup><col class="half" /><col class="half" /></colgroup>
       <tr><td colspan=2></td></tr>
-      <tr><td id="SaveGrab" colspan=2 class="center greyRow">The page has been reloaded, please select your ROM again</td></tr>
+      <tr><td id="SaveGrab" colspan=2 class="center greyRow"><p id="savePopupText" class="center">The page has been reloaded, please select your ROM again</p></td></tr>
       <tr><td colspan=2 class="blankRow"></td></tr>
       <tr>
         <td>Randomized Super Metroid ROM: </td>

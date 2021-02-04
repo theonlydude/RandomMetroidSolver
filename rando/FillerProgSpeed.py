@@ -8,6 +8,7 @@ from rando.RandoServices import ComebackCheckType
 from rando.Items import ItemManager
 from rando.ItemLocContainer import ItemLocContainer, getLocListStr, getItemListStr, getItemLocationsStr, getItemLocStr
 from rando.RandoSettings import ProgSpeedParameters
+from rando.infiniteRollback import InfiniteRollback
 from utils.parameters import infinity
 from graph.graph_access import GraphUtils, getAccessPoint
 
@@ -47,6 +48,7 @@ class FillerProgSpeed(Filler):
         self.stdStart = GraphUtils.isStandardStart(self.startAP)
         self.progSpeedParams = ProgSpeedParameters(self.restrictions, len(container.unusedLocations))
         self.choice = ItemThenLocChoiceProgSpeed(restrictions, self.progSpeedParams, distanceProp, self.services)
+        self.infiniteRollback = InfiniteRollback(self.startAP, restrictions)
 
     def initFiller(self):
         super(FillerProgSpeed, self).initFiller()
@@ -173,6 +175,7 @@ class FillerProgSpeed(Filler):
         if len(accessibleLocations) <= self.locLimit:
             sys.stdout.write('|')
             sys.stdout.flush()
+            self.infiniteRollback.addStep('|')
             return False
         # check that there is room left in all main areas
         room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0 }
@@ -187,6 +190,7 @@ class FillerProgSpeed(Filler):
             if r > 0 and r <= self.locLimit:
                 sys.stdout.write('|')
                 sys.stdout.flush()
+                self.infiniteRollback.addStep('|')
                 return False
         return True
 
@@ -257,6 +261,7 @@ class FillerProgSpeed(Filler):
         if not isStuck:
             sys.stdout.write('-')
             sys.stdout.flush()
+            self.infiniteRollback.addStep('-')
             self.collect(itemLoc)
         return isStuck
 
@@ -331,7 +336,8 @@ class FillerProgSpeed(Filler):
                 self.vcr.addRollback(nStatesAtStart)
             sys.stdout.write('<'*nStatesAtStart)
             sys.stdout.flush()
-            return None
+            infiniteRollbackDetected = self.infiniteRollback.addRollback('<'*nStatesAtStart)
+            return (None, infiniteRollbackDetected)
         # to stay consistent in case no solution is found as states list was popped in init
         fallbackState = self.getFallbackState()
         # if fallbackState is None: # kickstart needed
@@ -357,6 +363,7 @@ class FillerProgSpeed(Filler):
                 if len(self.progressionStatesIndices) > 0:
                     sys.stdout.write('!')
                     sys.stdout.flush()
+                    self.infiniteRollback.addStep('!')
                     self.progressionStatesIndices.pop()
                 else:
                     break
@@ -376,8 +383,9 @@ class FillerProgSpeed(Filler):
                 self.vcr.addRollback(1)
         sys.stdout.write('<'*(nStatesAtStart - len(self.states)))
         sys.stdout.flush()
+        infiniteRollbackDetected = self.infiniteRollback.addRollback('<'*(nStatesAtStart - len(self.states)))
         self.log.debug("rollback END: {}".format(len(self.container.currentItems)))
-        return ret
+        return (ret, infiniteRollbackDetected)
 
     # def kickStart(self):
     #     self.initState.apply(self)
@@ -404,6 +412,7 @@ class FillerProgSpeed(Filler):
                 itemLoc = self.chooseItemLocNoLogic(itemLocDict)
             assert itemLoc is not None
             self.ap = self.services.collect(self.ap, self.container, itemLoc)
+            self.infiniteRollback.addStep('.')
             return True
         self.determineParameters()
         # fill up with non-progression stuff
@@ -422,10 +431,12 @@ class FillerProgSpeed(Filler):
                 itemLoc = None
                 if not self.services.can100percent(self.ap, self.container):
                     # stuck, rollback to make progress if we can't access everything yet
-                    itemLoc = self.rollback()
+                    (itemLoc, infiniteRollbackDetected) = self.rollback()
                     # if itemLoc is None and self.lastFallbackStates is None:
                     #     # kickstart needed
                     #     return self.kickStart()
+                    if infiniteRollbackDetected:
+                        return False
                 if itemLoc is not None:
                     self.collect(itemLoc)
                     isStuck = False

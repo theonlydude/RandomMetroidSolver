@@ -8,7 +8,7 @@
 CWD=$(dirname $0)/..
 cd ${CWD}
 CWD=$(pwd)
-[ -z "$PYTHON" ] && PYTHON=python3.7
+[ -z "$PYTHON" ] && PYTHON=pyston3.8
 
 LOG_DIR=${CWD}/logs
 mkdir -p ${LOG_DIR}
@@ -113,6 +113,7 @@ function computeSeed {
 	RANDO_OUT=$(${TIME} -f "\t%E real" $PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 	if [ $? -ne 0 ]; then
 	    echo "${RANDO_OUT}" >> ${LOG}
+	    RTIME_OLD=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
 	else
 	    RTIME_OLD=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
 	    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
@@ -126,6 +127,7 @@ function computeSeed {
     RANDO_OUT=$(${TIME} -f "\t%E real" $PYTHON ./randomizer.py ${PARAMS} 2>&1)
     if [ $? -ne 0 ]; then
 	echo "${RANDO_OUT}" >> ${LOG}
+	RTIME_NEW=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
     else
 	RTIME_NEW=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
 	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
@@ -318,6 +320,10 @@ function getTime {
     grep -v SOLVER ${CSV} | tail -n +${FILTER_HEAD} | head -n -${FILTER_TAIL} | grep -v -E '^error|;speedrun;' | grep -v '^[0-9]*;;;' | cut -d ';' -f $1 | sed -e 's+0:++g' | awk -F';' '{sum+=$1;} END{print sum}'
 }
 
+function getErrorTime {
+    grep -v SOLVER ${CSV} | tail -n +${FILTER_HEAD} | head -n -${FILTER_TAIL} | grep -E '^error' | grep -v -E ';speedrun;' | grep -v '^[0-9]*;;;' | cut -d ';' -f $1 | sed -e 's+0:++g' | awk -F';' '{sum+=$1;} END{print sum}'
+}
+
 if [ ${COMPARE} -eq 0 ]; then
     RANDOTIME_BEFORE=$(getTime 3)
     RANDOTIME_AFTER=$(getTime 4)
@@ -328,6 +334,11 @@ if [ ${COMPARE} -eq 0 ]; then
     echo "Speed increase/decrease:"
     echo "rando:  ${RANDO_PERCENT}%"
     echo "solver: ${SOLVER_PERCENT}%"
+
+    RANDOTIME_ERROR_BEFORE=$(getErrorTime 4)
+    RANDOTIME_ERROR_AFTER=$(getErrorTime 5)
+    RANDO_ERROR_PERCENT=$(echo "scale=4; (${RANDOTIME_ERROR_AFTER} - ${RANDOTIME_ERROR_BEFORE}) / ${RANDOTIME_ERROR_BEFORE} * 100" | bc -l)
+    echo "rando error:  ${RANDO_ERROR_PERCENT}%"
 fi
 
 rm -rf ${TEMP_DIR}

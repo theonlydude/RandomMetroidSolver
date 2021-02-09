@@ -8,7 +8,7 @@
 CWD=$(dirname $0)/..
 cd ${CWD}
 CWD=$(pwd)
-[ -z "$PYTHON" ] && PYTHON=python3.7
+[ -z "$PYTHON" ] && PYTHON=pyston3.8
 
 LOG_DIR=${CWD}/logs
 mkdir -p ${LOG_DIR}

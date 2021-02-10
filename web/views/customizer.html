@@ -439,7 +439,8 @@ function greyOutPatches(isRace, isVARIA) {
     }
 
     // set noSpinAttack to on when a race seed is detected
-    if(isRace) {
+    var noSpinAttack = document.getElementById("noSpinAttack");
+    if(isRace && noSpinAttack.disabled == false) {
         var noSpinAttack = document.getElementById("noSpinAttack");
         if(! noSpinAttack.checked) {
             noSpinAttack.click();
@@ -450,6 +451,7 @@ function greyOutPatches(isRace, isVARIA) {
 
 var vanillaROMBytes = null;
 var romSize = 0x300000;
+var isRace = false;
 window.onload = function(){
     //Check File API support
     if(window.File && window.FileList && window.FileReader) {
@@ -507,11 +509,12 @@ window.onload = function(){
 
                 } else {
                     // detect race mode patch
+                    isRace = false;
                     var bytes = new Uint8Array(e.target.result);
-                    var isRace = false;
                     for(var addr=0x1C0200; addr<0x1C0210; addr++) {
                         if(bytes[addr] != 0xff) {
                             isRace = true;
+                            console.log("race mode detected");
                             break;
                         }
                     }
@@ -644,32 +647,44 @@ function enableCustomSpriteDropdown() {
     var customItemsEnable = document.getElementById("customItemsEnable");
     var text = document.getElementById("customSpriteEnableText");
     var itemsText = document.getElementById("customItemsEnableText");
+    var noSpinAttack = document.getElementById("noSpinAttack");
+    var noSpinAttackText = document.getElementById("noSpinAttackText");
     if(customSpriteEnable.checked) {
       customSpriteEnable.value = "on";
       text.className = "";
       itemsText.className = "";
+      noSpinAttackText.className = "";
 
       customItemsEnable.disabled = false;
       if(customItemsEnable.checked == false) {
         customItemsEnable.click();
       }
+      noSpinAttack.disabled = false;
+      if(isRace && noSpinAttack.value == "off") {
+        noSpinAttack.click();
+      }
     } else {
       customSpriteEnable.value = "off";
       text.className = "disabledText";
       itemsText.className = "disabledText";
+      noSpinAttackText.className = "disabledText";
 
       if(customItemsEnable.checked == true) {
         customItemsEnable.click();
       }
       customItemsEnable.disabled = true;
+      noSpinAttack.disabled = true;
     }
 
     // tell switchery
-    var sw = globalSwitchs["customItemsEnable"];
+    var swCustomItems = globalSwitchs["customItemsEnable"];
+    var swSpinAttack = globalSwitchs["noSpinAttack"];
     if(customSpriteEnable.checked) {
-        sw.enable();
+        swCustomItems.enable();
+        swSpinAttack.enable();
     } else {
-        sw.disable();
+        swCustomItems.disable();
+        swSpinAttack.disable();
     }
 }
 

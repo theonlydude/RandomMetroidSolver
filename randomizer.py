@@ -51,7 +51,7 @@ def dumpErrorMsgs(outFileName, msgs):
     dumpErrorMsg(outFileName, joinErrorMsgs(msgs))
 
 def joinErrorMsgs(msgs):
-    return '\n' + '\n'.join(msgs)
+    return '\n'.join(msgs)
 
 def restricted_float(x):
     x = float(x)
@@ -430,8 +430,8 @@ if __name__ == "__main__":
                 startLocationList = args.startLocationList.split(',')
                 possibleStartAPs = sorted(list(set(possibleStartAPs).intersection(set(startLocationList))))
                 if len(possibleStartAPs) == 0:
-                    reasonStr = '\n'.join(["%s : %s" % (apName, cause) for apName, cause in reasons.items() if apName in startLocationList])
-                    '\nInvalid start locations list with your settings.\n'+reasonStr
+                    optErrMsgs += ["%s : %s" % (apName, cause) for apName, cause in reasons.items() if apName in startLocationList]
+                    optErrMsgs.append('Invalid start locations list with your settings.')
                     dumpErrorMsgs(args.output, optErrMsgs)
                     sys.exit(-1)
             args.startAP = random.choice(possibleStartAPs)

@@ -786,3 +786,6 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/marker_visited_medium_MotherBrain.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_medium_MotherBrain.png ~/web2py/applications/solver/static/images/marker_visited_medium_MotherBrain.png
 
 [ -L ~/web2py/applications/solver/static/images/gauntlet_position.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/gauntlet_position.png ~/web2py/applications/solver/static/images/gauntlet_position.png
+
+[ -L ~/web2py/applications/solver/static/images/shaktool.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/shaktool.png ~/web2py/applications/solver/static/images/shaktool.png
+[ -L ~/web2py/applications/solver/static/images/sprite_sheets/shaktool.png ] || ln -s ~/RandomMetroidSolver/web/static/sprite_sheets/shaktool.png ~/web2py/applications/solver/static/images/sprite_sheets/shaktool.png

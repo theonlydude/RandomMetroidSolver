@@ -231,9 +231,10 @@ class RomPatcher:
     def customShip(self, ship):
         self.applyIPSPatch(ship, ipsDir='rando/patches/ships')
 
-    def customSprite(self, sprite, customNames):
+    def customSprite(self, sprite, customNames, noSpinAttack):
         self.applyIPSPatch(sprite, ipsDir='rando/patches/sprites')
-
+        if noSpinAttack == True:
+            self.applyIPSPatch('SpriteSomething_Disable_Spin_Attack')
         if not customNames:
             return
 

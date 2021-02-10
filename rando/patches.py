@@ -90,10 +90,10 @@ patches = {
     "Infinite_Space_Jump": {
         0x82493: [0x80, 0x0D]
     },
-    # custom load points for non standard start APs
-    "Allow_All_Saves": { # allow usage of save indexes > 8
-        0x20d0d: [0x1f]
+    "SpriteSomething_Disable_Spin_Attack": {
+        0xD93FE: [0x0, 0x0]
     },
+    # custom load points for non standard start APs
     "Save_G4": {
         # load point entry
         0x4527: [0xED, 0xA5, 0x16, 0x92, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0xA8, 0x00, 0x60, 0x00],

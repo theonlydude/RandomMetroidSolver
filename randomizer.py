@@ -250,6 +250,7 @@ if __name__ == "__main__":
     parser.add_argument('--plandoRando', help="json string with already placed items/locs", dest="plandoRando",
                         nargs='?', default=None)
     parser.add_argument('--sprite', help='use a custom sprite for Samus', dest='sprite', default=None)
+    parser.add_argument('--no_spin_attack', help='when using a custom sprite, use the same animation for screw attack with or without Space Jump', dest='noSpinAttack', action='store_true', default=False)
     parser.add_argument('--customItemNames', help='add custom item names for some of them, related to the custom sprite',
                         dest='customItemNames', action='store_true', default=False)
     parser.add_argument('--ship', help='use a custom sprite for Samus ship', dest='ship', default=None)
@@ -691,7 +692,7 @@ if __name__ == "__main__":
 
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:
-            romPatcher.customSprite(args.sprite, args.customItemNames) # adds another IPS
+            romPatcher.customSprite(args.sprite, args.customItemNames, args.noSpinAttack) # adds another IPS
         if args.ship is not None:
             romPatcher.customShip(args.ship) # adds another IPS
             # don't color randomize custom ships

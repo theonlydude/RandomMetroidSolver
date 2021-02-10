@@ -2381,6 +2381,7 @@ def initCustomizerSession():
         session.customizer['customSpriteEnable'] = "off"
         session.customizer['customSprite'] = "samus"
         session.customizer['customItemsEnable'] = "off"
+        session.customizer['noSpinAttack'] = "off"
         session.customizer['customShipEnable'] = "off"
         session.customizer['customShip'] = "Red-M0nk3ySMShip1"
         session.customizer['itemsounds'] = "off"
@@ -2566,7 +2567,8 @@ def customWebService():
     # check validity of all parameters
     switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music',
                'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save',
-               'customSpriteEnable', 'customItemsEnable', 'customShipEnable', 'remove_itemsounds', 'remove_elevators_doors_speed']
+               'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
+               'remove_elevators_doors_speed']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(switchs, [], [], others, isJson=True)
@@ -2594,6 +2596,7 @@ def customWebService():
     session.customizer['customSpriteEnable'] = request.vars.customSpriteEnable
     session.customizer['customSprite'] = request.vars.customSprite
     session.customizer['customItemsEnable'] = request.vars.customItemsEnable
+    session.customizer['noSpinAttack'] = request.vars.noSpinAttack
     session.customizer['customShipEnable'] = request.vars.customShipEnable
     session.customizer['customShip'] = request.vars.customShip
     session.customizer['itemsounds'] = request.vars.itemsounds
@@ -2672,6 +2675,8 @@ def customWebService():
         params += ['--sprite', "{}.ips".format(request.vars.customSprite)]
         if request.vars.customItemsEnable == 'on':
             params.append('--customItemNames')
+        if request.vars.noSpinAttack == 'on':
+            params.append('--no_spin_attack')
     if request.vars.customShipEnable == 'on':
         params += ['--ship', "{}.ips".format(request.vars.customShip)]
     if request.vars.seedKey != None:

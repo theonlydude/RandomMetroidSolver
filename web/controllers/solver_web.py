@@ -109,11 +109,15 @@ def loadPresetsList():
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
     return (stdPresets, tourPresets, comPresets)
 
-def loadRandoPresetsList():
+def loadRandoPresetsList(filter=False):
     tourPresets = ['Season_Races', 'Season_Races_Chozo', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2021', 'VARIA_Weekly']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
+
+    if filter:
+        # remove rando presets with no stats
+        randoPresets = [preset for preset in randoPresets if preset not in ['all_random', 'minimizer_hardcore', 'minimizer', 'minimizer_maximizer', 'quite_random']]
 
     return (randoPresets, tourPresets)
 
@@ -2820,10 +2824,7 @@ def extStats():
         skillPresetContent = None
         majorsSplit = None
 
-    (randoPresets, tourRandoPresets) = loadRandoPresetsList()
-    # remove random presets those statistics are useless
-    randoPresets.remove("all_random")
-    randoPresets.remove("quite_random")
+    (randoPresets, tourRandoPresets) = loadRandoPresetsList(filter=True)
     (stdPresets, tourPresets, comPresets) = loadPresetsList()
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets,

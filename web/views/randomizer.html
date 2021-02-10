@@ -831,7 +831,7 @@ window.onload = function(){
                 // store file in localforage
                 localforage.setItem('vanillaROM', e.target.result, function(err, value) {
                     if(err != null) {
-                        console.log("error detected with local storage: "+err);
+                        alert("Error detected with local storage: "+err+" Please try again");
                         clearLocalStorage();
                     } else {
                         console.log("vanilla ROM stored in local storage");

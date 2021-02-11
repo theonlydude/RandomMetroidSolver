@@ -923,6 +923,15 @@ window.onload = function(){
                     return false;
                 }
             }
+
+            // put the plando seed in local storage
+            localforage.setItem('plandoROM', e.target.result, function(err, value) {
+                if(err != null) {
+                    console.log("Error detected with local storage: "+err);
+                } else {
+                    console.log("plando ROM stored in local storage");
+                }
+            });
         }
 
         var romData = {};

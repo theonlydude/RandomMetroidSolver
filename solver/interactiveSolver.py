@@ -478,13 +478,14 @@ class InteractiveSolver(CommonSolver):
         except Exception as e:
             self.errorMsg = "Empty location {}".format(locName)
             return
-        self.collectedItems[index] = itemName
-
-        loc.itemName = itemName
 
         # major item can be set multiple times in plando mode
         count = self.collectedItems.count(oldItemName)
         isCount = self.smbm.isCountItem(oldItemName)
+
+        # update item in collected items after we check the count
+        self.collectedItems[index] = itemName
+        loc.itemName = itemName
 
         # update smbm if count item or major was only there once
         if isCount == True or count == 1:

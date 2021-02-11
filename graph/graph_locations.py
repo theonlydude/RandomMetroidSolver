@@ -483,7 +483,15 @@ define_location(
                                                      sm.wor(sm.haveItem('SpeedBooster'),
                                                             sm.canSpringBallJump()),
                                                      sm.haveItem('HiJump')), # jump from the yellow plateform ennemy
-                                             sm.canGreenGateGlitch()))
+                                             sm.canGreenGateGlitch())),
+    PostAvailable=lambda loc, sm: sm.wor(sm.haveItem('Morph'), # regular exit
+                                         sm.wand(sm.haveItem('Super'), # grapple escape reverse
+                                                 sm.wor(sm.canFly(), # Grapple Tutorial Room 2
+                                                        sm.haveItem('HiJump'),
+                                                        sm.haveItem('Grapple')),
+                                                 sm.wor(sm.haveItem('Gravity'), # Grapple Tutorial Room 3
+                                                        sm.haveItem('SpaceJump'),
+                                                        sm.haveItem('Grapple'))))
 ),
 define_location(
     Area="Norfair",

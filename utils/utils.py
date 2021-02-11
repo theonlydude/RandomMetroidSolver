@@ -272,7 +272,7 @@ def convertParam(randoParams, param, inverse=False):
         return False if inverse == False else True
     elif value == "random":
         return "random"
-    raise moncul
+    raise Exception("invalid value for parameter {}".format(param))
 
 def loadRandoPreset(randoPreset, args):
     # load the rando preset json file and add the parameters inside it to the args parser

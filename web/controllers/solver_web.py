@@ -1026,7 +1026,7 @@ def randomizer():
         "Season_Races_Week3": "rando league season 3 week 3 (Chozo split)",
         "Season_Races_Week5": "rando league season 3 week 5 (Boss randomization)",
         "Season_Races_Week6": "rando league season 3 week 6 (Full split, random start location)",
-        "Season_Races_Week7": "rando league season 3 week 7 (Area and Boss randomization)",
+        "Season_Races_Week7": "rando league season 3 week 7 (Majors/Minors split, Area and Boss randomization)",
         "SMRAT2021": "Super Metroid Randomizer Accessible Tournament 2021",
         "VARIA_Weekly": "Casual logic community races"
     }

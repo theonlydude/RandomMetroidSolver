@@ -105,12 +105,12 @@ def completePreset(params):
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master']
-    tourPresets = ['Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2021']
+    tourPresets = ['Season_Races', 'SMRAT2021']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList(filter=False):
-    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2021', 'VARIA_Weekly']
+    tourPresets = ['Season_Races', 'Season_Races_Week3', 'Season_Races_Week5', 'Season_Races_Week6', 'Season_Races_Week7', 'SMRAT2021', 'VARIA_Weekly']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
@@ -1023,9 +1023,10 @@ def randomizer():
         "where_am_i": "Area mode with random start location and early morph",
         "where_is_morph": "Area mode with late Morph",
         "Season_Races": "rando league races (Majors/Minors split)",
-        "Season_Races_Chozo": "rando league races (Chozo split)",
-        "Playoff_Races": "rando league races during playoff (Majors/Minors split)",
-        "Playoff_Races_Chozo": "rando league races during playoff (Chozo split)",
+        "Season_Races_Week3": "rando league season 3 week 3 (Chozo split)",
+        "Season_Races_Week5": "rando league season 3 week 5 (Boss randomization)",
+        "Season_Races_Week6": "rando league season 3 week 6 (Full split, random start location)",
+        "Season_Races_Week7": "rando league season 3 week 7 (Area and Boss randomization)",
         "SMRAT2021": "Super Metroid Randomizer Accessible Tournament 2021",
         "VARIA_Weekly": "Casual logic community races"
     }

@@ -128,7 +128,10 @@ class InteractiveSolver(CommonSolver):
                             if self.mode == 'plando':
                                 self.setItemAt(params['loc'], params['item'], params['hide'])
                             else:
-                                self.setItemAt(params['loc'], params.get('item', 'Nothing'), False)
+                                itemName = params.get('item', 'Nothing')
+                                if itemName is None:
+                                    itemName = 'Nothing'
+                                self.setItemAt(params['loc'], itemName, False)
                         else:
                             self.increaseItem(params['item'])
                     else:

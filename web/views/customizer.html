@@ -1399,7 +1399,9 @@ if seedInfo != None:
               <tr class="advanced"><td>VARIA tweaks</td><td>{{=seedParams["variaTweaks"]}}</td></tr>
               <tr class="medium"><td>Nerfed Charge Beam available from the start</td><td>{{=seedParams["nerfedCharge"]}}</td></tr>
               <tr class="advanced"><td>Suits properties</td><td>{{=seedParams["gravityBehaviour"]}}</td></tr>
-
+{{    if seedParams["gravityBehaviour"] == "random":}}
+              <tr class="advanced"><td>Suits properties pool</td><td>{{=seedParams["gravityBehaviourMultiSelect"]}}</td></tr>
+{{        pass}}
               <tr class="medium"><td>Remove fanfare when picking up an item</td><td>{{=seedParams["itemsounds"]}}</td></tr>
               <tr class="medium"><td>Accelerate doors and elevators transitions</td><td>{{=seedParams["elevators_doors_speed"]}}</td></tr>
               <tr class="medium"><td>Spin jump restart (a.k.a. Respin)</td><td>{{=seedParams["spinjumprestart"]}}</td></tr>

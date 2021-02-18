@@ -445,6 +445,7 @@ def getRandomizerDefaultParameters():
     defaultParams['layoutPatches'] = "on"
     defaultParams['variaTweaks'] = "on"
     defaultParams['gravityBehaviour'] = "Balanced"
+    defaultParams['gravityBehaviourMultiSelect'] = defaultMultiValues['gravityBehaviour']
     defaultParams['nerfedCharge'] = "off"
     defaultParams['itemsounds'] = "on"
     defaultParams['elevators_doors_speed'] = "on"

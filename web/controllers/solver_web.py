@@ -2437,9 +2437,6 @@ customSprites = {
 
 customSpritesOrder = [
     'samus',
-    'samus_backwards',
-    'samus_upside_down',
-    'samus_upside_down_and_backwards',
     'fusion_green_varia',
     'fusion_orange_varia',
     'combat_armor_samus',
@@ -2455,6 +2452,9 @@ customSpritesOrder = [
     'hack_phazon',
     'hack_redesign',
     'hack_szm',
+    'samus_backwards',
+    'samus_upside_down',
+    'samus_upside_down_and_backwards',
     'hitbox_helper',
     'bailey',
     'alucard',

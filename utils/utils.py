@@ -259,7 +259,8 @@ def getDefaultMultiValues():
         'progressionSpeed': ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble', 'speedrun'],
         'progressionDifficulty': ['easier', 'normal', 'harder'],
         'morphPlacement': ['early', 'late', 'normal'],
-        'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla' ]
+        'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla' ],
+        'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive']
     }
     return defaultMultiValues
 
@@ -307,11 +308,7 @@ def loadRandoPreset(randoPreset, args):
     if randoParams.get("layoutPatches", "on") == "off":
         args.noLayout = True
     if "gravityBehaviour" in randoParams:
-        # Balanced is the default
-        if randoParams["gravityBehaviour"] == "Vanilla":
-            args.noGravHeat = True
-        elif randoParams["gravityBehaviour"] == "Progressive":
-            args.progressiveSuits = True
+        args.gravityBehaviour = randoParams["gravityBehaviour"]
     if randoParams.get("nerfedCharge", "off") == "on":
         args.nerfedCharge = True
 
@@ -394,7 +391,7 @@ def loadRandoPreset(randoPreset, args):
             args.minimizerTourian = True
 
     defaultMultiValues = getDefaultMultiValues()
-    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"]
+    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"]
     for multiElem in multiElems:
         if multiElem+'MultiSelect' in randoParams:
             setattr(args, multiElem+'List', ','.join(randoParams[multiElem+'MultiSelect']))

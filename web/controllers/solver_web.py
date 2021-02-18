@@ -1184,8 +1184,8 @@ def sessionWebService():
                'Infinite_Space_Jump', 'refill_before_save']
     quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty']
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
-              'morphPlacement', 'energyQty', 'startLocation']
-    others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'gravityBehaviour']
+              'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
+    others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty']
     validateWebServiceParams(switchs, quantities, multis, others)
 
     if session.randomizer is None:
@@ -1221,7 +1221,6 @@ def sessionWebService():
     session.randomizer['funSuits'] = request.vars.funSuits
     session.randomizer['layoutPatches'] = request.vars.layoutPatches
     session.randomizer['variaTweaks'] = request.vars.variaTweaks
-    session.randomizer['gravityBehaviour'] = request.vars.gravityBehaviour
     session.randomizer['nerfedCharge'] = request.vars.nerfedCharge
     session.randomizer['itemsounds'] = request.vars.itemsounds
     session.randomizer['elevators_doors_speed'] = request.vars.elevators_doors_speed
@@ -1234,7 +1233,7 @@ def sessionWebService():
     session.randomizer['refill_before_save'] = request.vars.refill_before_save
 
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
-              'morphPlacement', 'energyQty', 'startLocation']
+              'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
     for multi in multis:
         session.randomizer[multi] = request.vars[multi]
         if request.vars[multi] == 'random':
@@ -1275,8 +1274,8 @@ def randomizerWebService():
                'Infinite_Space_Jump', 'refill_before_save']
     quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty']
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
-              'morphPlacement', 'energyQty', 'startLocation']
-    others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'gravityBehaviour', 'maxDifficulty']
+              'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
+    others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty']
     validateWebServiceParams(switchs, quantities, multis, others, isJson=True)
 
     # randomize
@@ -1376,12 +1375,6 @@ def randomizerWebService():
 
     if request.vars.layoutPatches == 'off':
         params.append('--nolayout')
-
-
-    if request.vars.gravityBehaviour == 'Vanilla':
-        params.append('--nogravheat')
-    elif request.vars.gravityBehaviour == 'Progressive':
-        params.append('--progressiveSuits')
 
     if request.vars.areaRandomization == 'on':
         params.append('--area')

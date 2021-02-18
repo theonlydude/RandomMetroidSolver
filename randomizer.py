@@ -24,6 +24,7 @@ energyQties = defaultMultiValues['energyQty']
 progDiffs = defaultMultiValues['progressionDifficulty']
 morphPlacements = defaultMultiValues['morphPlacement']
 majorsSplits = defaultMultiValues['majorsSplit']
+gravityBehaviours = defaultMultiValues['gravityBehaviour']
 
 def randomMulti(args, param, defaultMultiValues):
     value = args[param]
@@ -191,12 +192,11 @@ if __name__ == "__main__":
     parser.add_argument('--nolayout',
                         help="do not include total randomizer layout patches",
                         dest='noLayout', action='store_true', default=False)
-    parser.add_argument('--nogravheatPatch',
-                        help="do not include total randomizer suits patches",
-                        dest='noGravHeat', action='store_true', default=False)
-    parser.add_argument('--progressiveSuits',
-                        help="apply progressive suits patch",
-                        dest='progressiveSuits', action='store_true', default=False)
+    parser.add_argument('--gravityBehaviour',
+                        help="varia/gravity suits behaviour",
+                        dest='gravityBehaviour', nargs='?', default='Balanced', choices=gravityBehaviours+['random'])
+    parser.add_argument('--gravityBehaviourList', help="list to choose from when random",
+                        dest='gravityBehaviourList', nargs='?', default=None)
     parser.add_argument('--nerfedCharge',
                         help="apply nerfed charge patch",
                         dest='nerfedCharge', action='store_true', default=False)
@@ -349,6 +349,7 @@ if __name__ == "__main__":
     (_, progSpeed) = randomMulti(args.__dict__, "progressionSpeed", speeds)
     (_, progDiff) = randomMulti(args.__dict__, "progressionDifficulty", progDiffs)
     (majorsSplitRandom, args.majorsSplit) = randomMulti(args.__dict__, "majorsSplit", majorsSplits)
+    (_, gravityBehaviour) = randomMulti(args.__dict__, "gravityBehaviour", gravityBehaviours)
     if args.minDifficulty:
         minDifficulty = text2diff[args.minDifficulty]
         if progSpeed != "speedrun":
@@ -493,9 +494,9 @@ if __name__ == "__main__":
         RomPatches.ActivePatches = RomPatches.Total
     RomPatches.ActivePatches.remove(RomPatches.BlueBrinstarBlueDoor)
     RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startAP)
-    if args.noGravHeat == True or args.progressiveSuits == True:
+    if gravityBehaviour != "Balanced":
         RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
-    if args.progressiveSuits == True:
+    if gravityBehaviour == "Progressive":
         RomPatches.ActivePatches.append(RomPatches.ProgressiveSuits)
     if args.nerfedCharge == True:
         RomPatches.ActivePatches.append(RomPatches.NerfedCharge)
@@ -678,13 +679,8 @@ if __name__ == "__main__":
             romPatcher = RomPatcher(magic=args.raceMagic)
 
         if args.patchOnly == False:
-            suitsMode = "Classic"
-            if args.progressiveSuits:
-                suitsMode = "Progressive"
-            elif args.noGravHeat:
-                suitsMode = "Vanilla"
             romPatcher.applyIPSPatches(args.startAP, args.patches,
-                                       args.noLayout, suitsMode,
+                                       args.noLayout, gravityBehaviour,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
                                        escapeAttr, args.noRemoveEscapeEnemies, minimizerN, args.minimizerTourian,

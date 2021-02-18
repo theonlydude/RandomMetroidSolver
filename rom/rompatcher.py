@@ -332,7 +332,7 @@ class RomPatcher:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
     def applyIPSPatches(self, startAP="Landing Site",
-                        optionalPatches=[], noLayout=False, suitsMode="Classic",
+                        optionalPatches=[], noLayout=False, suitsMode="Balanced",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
                         escapeAttr=None, noRemoveEscapeEnemies=False,
@@ -347,7 +347,7 @@ class RomPatcher:
             stdPatches += RomPatcher.IPSPatches['Standard'][:]
             if self.race is not None:
                 stdPatches.append('race_mode_credits.ips')
-            if suitsMode != "Classic":
+            if suitsMode != "Balanced":
                 stdPatches.remove('Removes_Gravity_Suit_heat_protection')
             if suitsMode == "Progressive":
                 stdPatches.append('progressive_suits.ips')

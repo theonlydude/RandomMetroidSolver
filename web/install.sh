@@ -789,3 +789,5 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 
 [ -L ~/web2py/applications/solver/static/images/shaktool.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/shaktool.png ~/web2py/applications/solver/static/images/shaktool.png
 [ -L ~/web2py/applications/solver/static/images/sprite_sheets/shaktool.png ] || ln -s ~/RandomMetroidSolver/web/static/sprite_sheets/shaktool.png ~/web2py/applications/solver/static/images/sprite_sheets/shaktool.png
+[ -L ~/web2py/applications/solver/static/images/combat_armor_samus.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/combat_armor_samus.png ~/web2py/applications/solver/static/images/combat_armor_samus.png
+[ -L ~/web2py/applications/solver/static/images/sprite_sheets/combat_armor_samus.png ] || ln -s ~/RandomMetroidSolver/web/static/sprite_sheets/combat_armor_samus.png ~/web2py/applications/solver/static/images/sprite_sheets/combat_armor_samus.png

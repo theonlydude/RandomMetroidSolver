@@ -341,7 +341,7 @@ order by r.id;"""
             # keep guid only for non race seeds
             returnCodeColumn = 0
             guidColumn = 3
-            if outData[-1][-1]['raceMode'] == 'on' or outData[-1][returnCodeColumn] != 0:
+            if outData[-1][-1].get('raceMode', 'off') == 'on' or outData[-1][returnCodeColumn] != 0:
                 # remove guid
                 outData[-1][guidColumn] = ''
             else:

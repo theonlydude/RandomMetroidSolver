@@ -1682,6 +1682,8 @@ def stats():
     isolver = db.getISolver(weeks)
     isolverData = db.getISolverData(weeks)
 
+    randomizerParamsStats = db.getRandomizerParamsStats(weeks)
+
     errors = getErrors()
 
     db.close()
@@ -1690,7 +1692,7 @@ def stats():
 
     return dict(solverPresets=solverPresets, randomizerPresets=randomizerPresets,
                 solverDurations=solverDurations, randomizerDurations=randomizerDurations,
-                solverData=solverData, randomizerData=randomizerData,
+                solverData=solverData, randomizerData=randomizerData, randomizerParamsStats=randomizerParamsStats,
                 isolver=isolver, isolverData=isolverData, errors=errors,
                 fsStatus=fsStatus, fsPercent=fsPercent)
 

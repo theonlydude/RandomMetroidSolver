@@ -12,8 +12,8 @@
     position: absolute;
     z-index: 2;
     width: 2.5%;
-    height: 3.75%;
-    top: 0.5%;
+    height: 5%;
+    top: 0%;
     left: 2.75%;
 }
 .titleItem {
@@ -21,7 +21,7 @@
     z-index: 2;
     width: 10%;
     height: 3.75%;
-    top: 5.25%;
+    top: 6%;
     left: 6%;
     color: #ffffff;
     font-size: 1.25vw;
@@ -32,8 +32,8 @@
     position: absolute;
     z-index: 2;
     width: 2.5%;
-    height: 3.75%;
-    top: 4.75%;
+    height: 5%;
+    top: 5.2%;
     left: 10.5%;
 }
 .repeatItem {
@@ -41,8 +41,8 @@
     position: absolute;
     z-index: 2;
     width: 2.5%;
-    height: 3.75%;
-    top: 4.75%;
+    height: 5%;
+    top: 5.2%;
     left: 13.25%;
 }
 .binItem {
@@ -50,8 +50,8 @@
     position: absolute;
     z-index: 2;
     width: 2.5%;
-    height: 3.75%;
-    top: 4.75%;
+    height: 5%;
+    top: 5.2%;
     left: 16%;
 }
 </style>
@@ -61,6 +61,7 @@ var globalPlando = false;
 
 function initCurMode() {
   document.getElementById("mode").value = "seedless";
+  mode = "seedless";
 }
 
 {{include 'solver_web/t_js.html'}}
@@ -76,7 +77,7 @@ function startTheTour(step=-1) {
       element: "#help",
       title: "VARIA Areas/Bosses & Items Tracker",
       content: "<h2 class=\"center\">Welcome to the VARIA Areas/Bosses & Items Tracker</h2><h4>Areas/Bosses Tracker</h4>\
-<p>The Areas and Bosses Tracker allows you to track the connections between the areas and bosses portals.<br/>To use it, click on a portal <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 20px\">, it'll highlight it, then click on a second portal, it'll draw a line between the two portals.<br/>\
+<p>The Areas and Bosses Tracker allows you to track the connections between the areas and bosses portals.<br/>To use it, click on a portal <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 20px\">, it'll highlight it, then click on a second portal, it'll draw a line between the two portals with a random color.<br/>\
 You can delete the latest added transition with the <img src=\"/solver/static/images/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button and all of them with the <img src=\"/solver/static/images/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.<br/>\
 You can also click on the portal <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 20px\"> of an existing transition and click on the <img src=\"/solver/static/images/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button to delete it.<br/>\
 Only the locations of connected areas/bosses are computed by the Items Tracker (as such if the ROM is not Areas/Bosses randomized the vanilla transitions will be automatically added).<br/>\

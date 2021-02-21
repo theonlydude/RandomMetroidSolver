@@ -131,6 +131,10 @@ function drawCharts() {
   drawRandomizerPresets();
   drawSolverDurations();
   drawRandomizerDurations();
+  drawRandomizerParamsStats1();
+  drawRandomizerParamsStats2();
+  drawRandomizerParamsStats3();
+  drawRandomizerParamsStats4();
   drawISolver();
 }
 
@@ -252,6 +256,114 @@ function drawRandomizerDurations() {
 }}
 }
 
+function drawRandomizerParamsStats1() {
+{{
+  if randomizerParamsStats == None:
+    response.write("  return;", escape=False)
+    pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable(
+{{
+    response.write(randomizerParamsStats['Randomizer parameters'], escape=False)
+}}
+    );
+
+    var options = {
+      title: 'Randomizer parameters',
+      isStacked: 'percent'
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.ColumnChart(document.getElementById("randomizerParamsStats1"));
+    chart.draw(data, options);
+{{
+    pass
+}}
+}
+
+function drawRandomizerParamsStats2() {
+{{
+  if randomizerParamsStats == None:
+    response.write("  return;", escape=False)
+    pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable(
+{{
+    response.write(randomizerParamsStats['Ammo and Energy'], escape=False)
+}}
+    );
+
+    var options = {
+      title: 'Ammo and Energy',
+      isStacked: 'percent'
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.ColumnChart(document.getElementById("randomizerParamsStats2"));
+    chart.draw(data, options);
+{{
+    pass
+}}
+}
+
+function drawRandomizerParamsStats3() {
+{{
+  if randomizerParamsStats == None:
+    response.write("  return;", escape=False)
+    pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable(
+{{
+    response.write(randomizerParamsStats['Areas and Fun'], escape=False)
+}}
+    );
+
+    var options = {
+      title: 'Areas and Fun',
+      isStacked: 'percent'
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.ColumnChart(document.getElementById("randomizerParamsStats3"));
+    chart.draw(data, options);
+{{
+    pass
+}}
+}
+
+function drawRandomizerParamsStats4() {
+{{
+  if randomizerParamsStats == None:
+    response.write("  return;", escape=False)
+    pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable(
+{{
+    response.write(randomizerParamsStats['Patches'], escape=False)
+}}
+    );
+
+    var options = {
+      title: 'Patches',
+      isStacked: 'percent'
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.ColumnChart(document.getElementById("randomizerParamsStats4"));
+    chart.draw(data, options);
+{{
+    pass
+}}
+}
+
 function drawISolver() {
 {{
   if isolver == None:
@@ -315,12 +427,19 @@ google.charts.setOnLoadCallback(drawCharts);
     <h4>Solver statistics</h4>
     <div id = "solverPresets" style = "height: 400px; margin: 0 auto"></div>
     <div id = "solverDurations" style = "height: 400px; margin: 0 auto"></div>
+    <h4>Interactive Solver statistics</h4>
+    <div id = "isolver" style = "height: 400px; margin: 0 auto"></div>
   </div>
 </div>
 <div class="row">
   <div class="column">
-    <h4>Interactive Solver statistics</h4>
-    <div id = "isolver" style = "height: 400px; margin: 0 auto"></div>
+    <h4>Randomizer parameters repartition</h4>
+    <div id = "randomizerParamsStats1" style = "height: 400px; margin: 0 auto"></div>
+    <div id = "randomizerParamsStats2" style = "height: 400px; margin: 0 auto"></div>
+  </div>
+  <div class="column">
+    <div id = "randomizerParamsStats3" style = "height: 400px; margin: 0 auto"></div>
+    <div id = "randomizerParamsStats4" style = "height: 400px; margin: 0 auto"></div>
   </div>
 </div>
 {{

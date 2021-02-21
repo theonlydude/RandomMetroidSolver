@@ -341,7 +341,7 @@ order by r.id;"""
             # keep guid only for non race seeds
             returnCodeColumn = 0
             guidColumn = 3
-            if outData[-1][-1]['raceMode'] == 'on' or outData[-1][returnCodeColumn] != 0:
+            if outData[-1][-1].get('raceMode', 'off') == 'on' or outData[-1][returnCodeColumn] != 0:
                 # remove guid
                 outData[-1][guidColumn] = ''
             else:
@@ -357,6 +357,84 @@ order by r.id;"""
 
         header = ["id", "actionTime", "guid", "returnCode", "duration", "errorMsg"]
         return (header, outData, paramsHead + sorted(list(paramsSet)))
+
+    def getRandomizerParamsStats(self, weeks):
+        if self.dbAvailable == False:
+            return None
+
+        sql = """select rp.name, rp.value, count(*) as total
+from randomizer_params rp
+where rp.name not like '%%MultiSelect'
+  and rp.name != 'seed'
+  and rp.randomizer_id >= (select min(id) from randomizer where action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK))
+group by rp.name, rp.value
+order by 1,2;"""
+
+        rows = self.execSelect(sql, (weeks,))
+
+        # transform it from [(param1, value1, count1), (param1, value2, count2), (param2, value3, count3)]
+        # to [('parameter', 'value1', 'value2', value3', ...),
+        #     (param1, count1, count2, 0, ...)
+        #     (param2, 0, 0, count3, ...)]
+        groups = {
+            'Randomizer parameters': ['preset', 'startLocation', 'majorsSplit', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'progressionDifficulty', 'suitsRestriction', 'hideItems'],
+            'Ammo and Energy': ['minorQty', 'energyQty', 'strictMinors', 'missileQty', 'superQty', 'powerBombQty'],
+            'Areas and Fun': ['areaRandomization', 'lightAreaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'minimizerTourian', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits'],
+            'Patches': ['layoutPatches', 'variaTweaks', 'nerfedCharge', 'gravityBehaviour', 'itemsounds', 'elevators_doors_speed', 'spinjumprestart', 'rando_speed', 'Infinite_Space_Jump', 'refill_before_save', 'animals', 'No_Music', 'random_music']
+        }
+
+        result = {}
+        valuesIndex = {'Randomizer parameters': {}, 'Ammo and Energy': {}, 'Areas and Fun': {}, 'Patches': {}}
+        paramsIndex = {'Randomizer parameters': {}, 'Ammo and Energy': {}, 'Areas and Fun': {}, 'Patches': {}}
+        maxValuesIndex = {'Randomizer parameters': 1, 'Ammo and Energy': 1, 'Areas and Fun': 1, 'Patches': 1}
+        firstRow = {'Randomizer parameters': ['parameter'], 'Ammo and Energy': ['parameter'], 'Areas and Fun': ['parameter'], 'Patches': ['parameter']}
+
+        for group in groups.keys():
+            for row in rows:
+                param, value, count = row
+                if param not in groups[group]:
+                    continue
+                if param not in paramsIndex[group]:
+                    paramsIndex[group][param] = groups[group].index(param)+1
+                if value not in valuesIndex[group]:
+                    valuesIndex[group][value] = maxValuesIndex[group]
+                    maxValuesIndex[group] += 1
+                    firstRow[group].append(value)
+
+            result[group] = [[0]*(maxValuesIndex[group]) for i in range(len(groups[group])+1)]
+            result[group][0] = firstRow[group]
+            for row in rows:
+                param, value, count = row
+                if param not in groups[group]:
+                    continue
+                paramIndex = paramsIndex[group][param]
+                result[group][paramIndex][valuesIndex[group][value]] = count
+                result[group][paramIndex][0] = param
+
+        return result
+
+    def getRandomizerSeedParamsAPI(self, guid):
+        if self.dbAvailable == False:
+            return None
+
+        sql = "select rp.name, rp.value from randomizer_params rp join randomizer r on rp.randomizer_id = r.id where r.guid = '%s' order by rp.name;"
+        data = self.execSelect(sql, (guid,))
+        if data == None:
+            return ""
+        else:
+            ret = "{"
+            tmp = []
+            for row in data:
+                arg = row[0]
+                value = row[1]
+                if arg.find("MultiSelect") != -1:
+                    value = '["{}"]'.format('", "'.join(value.split(',')))
+                else:
+                    value = '"{}"'.format(value)
+                tmp.append('"{}": {}'.format(arg, value))
+            ret += ','.join(tmp)
+            ret += "}"
+            return ret
 
     def getRandomizerSeedParams(self, randomizer_id):
         if self.dbAvailable == False:

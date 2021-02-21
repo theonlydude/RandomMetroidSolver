@@ -8,6 +8,7 @@ from graph.graph_access import getAccessPoint, GraphUtils
 from rando.Filler import FrontFiller
 from rando.ItemLocContainer import ItemLocContainer, getLocListStr, ItemLocation
 from rando.Chozo import isChozoItem
+from rando.Restrictions import Restrictions
 from utils.parameters import infinity
 
 # checks init conditions for the randomizer: processes super fun settings, graph, start location, special restrictions
@@ -78,35 +79,39 @@ class RandoSetup(object):
             return None
         # add placement restriction helpers for random fill
         if self.settings.progSpeed == 'speedrun':
-            itemTypes = {item.Type for item in self.container.itemPool if item.Category not in ['Energy', 'Nothing', 'Boss']}
-            itemTypes.remove('Missile')
-            items = [self.container.getNextItemInPool(itemType) for itemType in itemTypes]
-            restrictionDict = {}
-            for item in items:
-                itemType = item.Type
-                poss = self.services.possibleLocations(item, self.startAP, self.container)
-                for loc in poss:
-                    if loc.GraphArea not in restrictionDict:
-                        restrictionDict[loc.GraphArea] = {}
-                    if itemType not in restrictionDict[loc.GraphArea]:
-                        restrictionDict[loc.GraphArea][itemType] = set()
-                    restrictionDict[loc.GraphArea][itemType].add(loc.Name)
-            if self.restrictions.isEarlyMorph() and GraphUtils.isStandardStart(self.startAP):
-                morphLocs = ['Morphing Ball']
-                if self.restrictions.split in ['Full', 'Major']:
-                    dboost = self.sm.knowsCeilingDBoost()
-                    if dboost.bool == True and dboost.difficulty <= self.settings.maxDiff:
-                        morphLocs += ['Energy Tank, Brinstar Ceiling']
-                for area, locDict in restrictionDict.items():
-                    if area == 'Crateria':
-                        locDict['Morph'] = set(morphLocs)
-                    elif 'Morph' in locDict:
-                        del locDict['Morph']
+            restrictionDict = self.getSpeedrunRestrictionsDict()
             self.restrictions.addPlacementRestrictions(restrictionDict)
         self.fillRestrictedLocations()
         self.settings.collectAlreadyPlacedItemLocations(self.container)
         self.settings.updateSuperFun(self.superFun)
         return self.container
+
+    def getSpeedrunRestrictionsDict(self):
+        itemTypes = {item.Type for item in self.container.itemPool if item.Category not in Restrictions.NoCheckCat}
+        allAreas = {loc.GraphArea for loc in self.locations}
+        items = [self.container.getNextItemInPool(itemType) for itemType in itemTypes]
+        restrictionDict = {}
+        for area in allAreas:
+            restrictionDict[area] = {}
+            for itemType in itemTypes:
+                restrictionDict[area][itemType] = set()
+        for item in items:
+            itemType = item.Type
+            poss = self.services.possibleLocations(item, self.startAP, self.container)
+            for loc in poss:
+                restrictionDict[loc.GraphArea][itemType].add(loc.Name)
+        if self.restrictions.isEarlyMorph() and GraphUtils.isStandardStart(self.startAP):
+            morphLocs = ['Morphing Ball']
+            if self.restrictions.split in ['Full', 'Major']:
+                dboost = self.sm.knowsCeilingDBoost()
+                if dboost.bool == True and dboost.difficulty <= self.settings.maxDiff:
+                    morphLocs.append('Energy Tank, Brinstar Ceiling')
+            for area, locDict in restrictionDict.items():
+                if area == 'Crateria':
+                    locDict['Morph'] = set(morphLocs)
+                else:
+                    locDict['Morph'] = set()
+        return restrictionDict
 
     # fill up unreachable locations with "junk" to maximize the chance of the ROM
     # to be finishable

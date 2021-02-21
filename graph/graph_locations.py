@@ -483,7 +483,15 @@ define_location(
                                                      sm.wor(sm.haveItem('SpeedBooster'),
                                                             sm.canSpringBallJump()),
                                                      sm.haveItem('HiJump')), # jump from the yellow plateform ennemy
-                                             sm.canGreenGateGlitch()))
+                                             sm.canGreenGateGlitch())),
+    PostAvailable=lambda loc, sm: sm.wor(sm.haveItem('Morph'), # regular exit
+                                         sm.wand(sm.haveItem('Super'), # grapple escape reverse
+                                                 sm.wor(sm.canFly(), # Grapple Tutorial Room 2
+                                                        sm.haveItem('HiJump'),
+                                                        sm.haveItem('Grapple')),
+                                                 sm.wor(sm.haveItem('Gravity'), # Grapple Tutorial Room 3
+                                                        sm.haveItem('SpaceJump'),
+                                                        sm.haveItem('Grapple'))))
 ),
 define_location(
     Area="Norfair",
@@ -1870,8 +1878,9 @@ define_location(
     },
     Available=lambda loc, sm: sm.wand(sm.haveItem('Gravity'),
                                       sm.haveItem('SpeedBooster'),
-                                      sm.wor(sm.wand(sm.wor(sm.haveItem('Super'), # run from room on the right
-                                                            RomPatches.has(RomPatches.AreaRandoGatesOther)),
+                                      sm.wor(sm.wand(sm.traverse('MainStreetBottomRight'), # run from room on the right
+                                                     sm.wor(RomPatches.has(RomPatches.AreaRandoGatesOther),
+                                                            sm.haveItem('Super')),
                                                      sm.itemCountOk('ETank', 1)), # etank for the spark since sparking from low ground
                                              sm.canSimpleShortCharge())), # run from above
 ),

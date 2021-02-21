@@ -15,7 +15,7 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
-   sodipodi:docname="wave_door_right_bottom.svg">
+   sodipodi:docname="wave_door_bottom.svg">
   <defs
      id="defs2">
     <clipPath
@@ -38,7 +38,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="3.959798"
-     inkscape:cx="27.181483"
+     inkscape:cx="-15.497462"
      inkscape:cy="52.391652"
      inkscape:document-units="mm"
      inkscape:current-layer="layer2"
@@ -56,7 +56,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -67,7 +67,7 @@
      style="display:inline"
      transform="translate(-70.10667,-119.43738)">
     <path
-       style="fill:#d83890;fill-opacity:1;stroke:#000000;stroke-width:0.20163593;stroke-opacity:1"
+       style="fill:#d83890;fill-opacity:1;stroke:#fbfbfb;stroke-width:3;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        d="m 104.1341,127.66167 a 19.843753,6.0948672 0 0 0 -0.003,-0.002 V 119.5382 H 70.207488 v 7.41764 0.56017 6.4394 a 19.843753,6.0948672 0 0 0 16.820161,2.87528 19.843753,6.0948672 0 0 0 17.106451,-3.02152 z"
        id="rect10"
        inkscape:connector-curvature="0" />
@@ -75,13 +75,13 @@
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:24.80181313px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.62004536"
        x="199.54939"
-       y="-42.613449"
+       y="-43.248604"
        id="text4808"
        transform="matrix(0,0.60014452,-1.6662653,0,0,0)"><tspan
          sodipodi:role="line"
          id="tspan4806"
          x="199.54939"
-         y="-42.613449"
+         y="-43.248604"
          style="stroke-width:0.62004536">W</tspan></text>
   </g>
 </svg>

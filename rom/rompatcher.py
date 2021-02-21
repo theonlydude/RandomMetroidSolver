@@ -60,7 +60,8 @@ class RomPatcher:
                      # animals 
                      'animal_enemies.ips', 'animals.ips', 'draygonimals.ips',
                      'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
-                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips', # ...end animals
+                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips',
+                     'Escape_Animals_Change_Event', # ...end animals
                      # vanilla behaviour restore
                      'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips'],
         # base patchset+optional layout for area rando
@@ -230,9 +231,10 @@ class RomPatcher:
     def customShip(self, ship):
         self.applyIPSPatch(ship, ipsDir='rando/patches/ships')
 
-    def customSprite(self, sprite, customNames):
+    def customSprite(self, sprite, customNames, noSpinAttack):
         self.applyIPSPatch(sprite, ipsDir='rando/patches/sprites')
-
+        if noSpinAttack == True:
+            self.applyIPSPatch('SpriteSomething_Disable_Spin_Attack')
         if not customNames:
             return
 
@@ -330,7 +332,7 @@ class RomPatcher:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
     def applyIPSPatches(self, startAP="Landing Site",
-                        optionalPatches=[], noLayout=False, suitsMode="Classic",
+                        optionalPatches=[], noLayout=False, suitsMode="Balanced",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
                         escapeAttr=None, noRemoveEscapeEnemies=False,
@@ -345,7 +347,7 @@ class RomPatcher:
             stdPatches += RomPatcher.IPSPatches['Standard'][:]
             if self.race is not None:
                 stdPatches.append('race_mode_credits.ips')
-            if suitsMode != "Classic":
+            if suitsMode != "Balanced":
                 stdPatches.remove('Removes_Gravity_Suit_heat_protection')
             if suitsMode == "Progressive":
                 stdPatches.append('progressive_suits.ips')

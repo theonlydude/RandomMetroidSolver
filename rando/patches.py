@@ -56,6 +56,10 @@ patches = {
         0x79867: [0xb2, 0x91],
         0x798dc: [0xbb, 0x91]
     },
+    # with animals suprise make the bomb blocks at alcatraz disapear with event "Zebes timebomb set" instead of "critters escaped"
+    "Escape_Animals_Change_Event": {
+        0x023B0A: [0x0E]
+    },
     "LN_Chozo_SpaceJump_Check_Disable": {
         0x2518f: [0xea, 0xea, 0xea, 0xea, 0xea, 0xea, 0xea, 0xea]
     },
@@ -86,10 +90,10 @@ patches = {
     "Infinite_Space_Jump": {
         0x82493: [0x80, 0x0D]
     },
-    # custom load points for non standard start APs
-    "Allow_All_Saves": { # allow usage of save indexes > 8
-        0x20d0d: [0x1f]
+    "SpriteSomething_Disable_Spin_Attack": {
+        0xD93FE: [0x0, 0x0]
     },
+    # custom load points for non standard start APs
     "Save_G4": {
         # load point entry
         0x4527: [0xED, 0xA5, 0x16, 0x92, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0xA8, 0x00, 0x60, 0x00],

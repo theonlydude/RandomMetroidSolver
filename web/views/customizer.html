@@ -349,7 +349,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "No_Music", "random_music", "Infinite_Space_Jump", "refill_before_save", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_doors_speed"];
+      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "No_Music", "random_music", "Infinite_Space_Jump", "refill_before_save", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_doors_speed"];
 
     for(var i=0; i<elems.length; i++) {
         var elem = document.getElementById(elems[i]);
@@ -437,10 +437,21 @@ function greyOutPatches(isRace, isVARIA) {
     for(var i=0; i<buttons.length; i++) {
         disableElement(buttons[i], isVARIA);
     }
+
+    // set noSpinAttack to on when a race seed is detected
+    var noSpinAttack = document.getElementById("noSpinAttack");
+    if(isRace && noSpinAttack.disabled == false) {
+        var noSpinAttack = document.getElementById("noSpinAttack");
+        if(! noSpinAttack.checked) {
+            noSpinAttack.click();
+            noSpinAttack.value = "on";
+        }
+    }
 }
 
 var vanillaROMBytes = null;
 var romSize = 0x300000;
+var isRace = false;
 window.onload = function(){
     //Check File API support
     if(window.File && window.FileList && window.FileReader) {
@@ -498,11 +509,12 @@ window.onload = function(){
 
                 } else {
                     // detect race mode patch
+                    isRace = false;
                     var bytes = new Uint8Array(e.target.result);
-                    var isRace = false;
                     for(var addr=0x1C0200; addr<0x1C0210; addr++) {
                         if(bytes[addr] != 0xff) {
                             isRace = true;
+                            console.log("race mode detected");
                             break;
                         }
                     }
@@ -635,32 +647,44 @@ function enableCustomSpriteDropdown() {
     var customItemsEnable = document.getElementById("customItemsEnable");
     var text = document.getElementById("customSpriteEnableText");
     var itemsText = document.getElementById("customItemsEnableText");
+    var noSpinAttack = document.getElementById("noSpinAttack");
+    var noSpinAttackText = document.getElementById("noSpinAttackText");
     if(customSpriteEnable.checked) {
       customSpriteEnable.value = "on";
       text.className = "";
       itemsText.className = "";
+      noSpinAttackText.className = "";
 
       customItemsEnable.disabled = false;
       if(customItemsEnable.checked == false) {
         customItemsEnable.click();
       }
+      noSpinAttack.disabled = false;
+      if(isRace && noSpinAttack.value == "off") {
+        noSpinAttack.click();
+      }
     } else {
       customSpriteEnable.value = "off";
       text.className = "disabledText";
       itemsText.className = "disabledText";
+      noSpinAttackText.className = "disabledText";
 
       if(customItemsEnable.checked == true) {
         customItemsEnable.click();
       }
       customItemsEnable.disabled = true;
+      noSpinAttack.disabled = true;
     }
 
     // tell switchery
-    var sw = globalSwitchs["customItemsEnable"];
+    var swCustomItems = globalSwitchs["customItemsEnable"];
+    var swSpinAttack = globalSwitchs["noSpinAttack"];
     if(customSpriteEnable.checked) {
-        sw.enable();
+        swCustomItems.enable();
+        swSpinAttack.enable();
     } else {
-        sw.disable();
+        swCustomItems.disable();
+        swSpinAttack.disable();
     }
 }
 
@@ -897,6 +921,11 @@ response.write('</table>', escape=False)
       content: "<p>Replace the name of some items displayed in the message box when the item is picked up, for example 'Morphing Doll' for the Margatroid sprite instead of 'Morphing Ball'.</p>"
     },
     {
+      element: "#noSpinAttackStep",
+      title: "Vanilla Screw Attack animation",
+      content: "<p>Keep the vanilla behaviour for Screw Attack animation where it's the same with or without Space Jump<br/><b>Note:</b> In the rando league you have to use the vanilla behaviour.<br/><b>Note:</b> Activated when a race protected seed is detected.</p>"
+    },
+    {
       element: "#customShipStep",
       title: "Custom Ships",
       content: "<table>\
@@ -1103,6 +1132,11 @@ def displayCheckbox(id, defaultTrue=False):
                   <td><button type="button" onclick="startTheTour(4)" id="customItemsStep">?</button></td>
                 </tr>
                 <tr>
+                  <td>{{displayCheckbox("noSpinAttack")}}</td>
+                  <td><span id="noSpinAttackText">Use the same animation for Screw Attack with or without Space Jump.</span></td>
+                  <td><button type="button" onclick="startTheTour(5)" id="noSpinAttackStep">?</button></td>
+                </tr>
+                <tr>
                   <td></td>
                   <td>
                     <div class="border">
@@ -1127,7 +1161,7 @@ def displayCheckbox(id, defaultTrue=False):
                 <tr>
                   <td>{{displayCheckbox("customShipEnable")}}</td>
                   <td><span id="customShipEnableText">Replace Samus Ship sprite with a custom one.</span></td>
-                  <td><button type="button" onclick="startTheTour(5)" id="customShipStep">?</button></td>
+                  <td><button type="button" onclick="startTheTour(6)" id="customShipStep">?</button></td>
                 </tr>
                 <tr>
                   <td></td>
@@ -1146,7 +1180,7 @@ def displayCheckbox(id, defaultTrue=False):
                 </tr>
               </table>
             </p>
-            <h4>Patches<span class="right"><button type="button" onclick="startTheTour(6)" id="patchesStep">?</button></span></h4>
+            <h4>Patches<span class="right"><button type="button" onclick="startTheTour(7)" id="patchesStep">?</button></span></h4>
             <p>
               Patches to customize your ROM.
             </p>
@@ -1162,42 +1196,42 @@ def displayCheckbox(id, defaultTrue=False):
                     {{displayCheckbox("itemsounds")}}
                     <span id="itemsoundsText">Remove fanfare when picking up an item</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(7)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(8)">?</button></td>
                 </tr>
                 <tr id="ElevatorDoorsStep">
                   <td colspan="2">
                     {{displayCheckbox("elevators_doors_speed")}}
                     <span id="elevators_doors_speedText">Accelerate doors and elevators transitions</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(8)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(9)">?</button></td>
                 </tr>
                 <tr id="spinjumprestartStep">
                   <td colspan="2">
                     {{displayCheckbox("spinjumprestart")}}
                     <span id="spinjumprestartText">Spin jump restart (a.k.a. Respin)</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(9)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(10)">?</button></td>
                 </tr>
                 <tr id="rando_speedStep">
                   <td colspan="2">
                     {{displayCheckbox("rando_speed")}}
                      <span id="rando_speedText">Momentum conservation (a.k.a. Speedkeep)</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(10)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(11)">?</button></td>
                 </tr>
                 <tr id="Infinite_Space_JumpStep">
                   <td colspan="2">
                     {{displayCheckbox("Infinite_Space_Jump")}}
                      <span id="Infinite_Space_JumpText">Infinite Space Jump</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(11)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(12)">?</button></td>
                 </tr>
                 <tr id="refill_before_saveStep">
                   <td colspan="2">
                     {{displayCheckbox("refill_before_save")}}
                      <span id="refill_before_saveText">Refill energy and ammo when saving</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(12)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(13)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -1211,35 +1245,35 @@ def displayCheckbox(id, defaultTrue=False):
                     {{displayCheckbox("No_Music")}}
                     <span id="No_MusicText">Disable background music</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(13)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(14)">?</button></td>
                 </tr>
                 <tr id="random_musicStep">
                   <td colspan="2">
                     {{displayCheckbox("random_music")}}
                     <span id="random_musicText">Randomize background music</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(14)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(15)">?</button></td>
                 </tr>
                 <tr id="AimAnyButtonStep">
                   <td colspan="2">
                     {{displayCheckbox("AimAnyButton")}}
                     <span id="AimAnyButtonText">Allows the aim buttons to be assigned to any button</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(15)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(16)">?</button></td>
                 </tr>
                 <tr id="max_ammo_displayStep">
                   <td colspan="2">
                     {{displayCheckbox("max_ammo_display")}}
                     <span id="max_ammo_displayText">Max Ammo Display</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(16)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(17)">?</button></td>
                 </tr>
                 <tr id="supermetroid_msu1Step">
                   <td colspan="2">
                     {{displayCheckbox("supermetroid_msu1")}}
                     <span id="supermetroid_msu1Text">Play music with MSU1 chip on SD2SNES</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(17)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(18)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -1253,14 +1287,14 @@ def displayCheckbox(id, defaultTrue=False):
                     {{displayCheckbox("remove_itemsounds")}}
                     <span id="remove_itemsoundsText">Restore vanilla fanfare when picking up an item</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(18)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(19)">?</button></td>
                 </tr>
                 <tr id="remove_ElevatorDoorsStep">
                   <td colspan="2">
                     {{displayCheckbox("remove_elevators_doors_speed")}}
                     <span id="remove_elevators_doors_speedText">Restore vanilla doors and elevators transitions</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(19)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
               </table>
           </div>
@@ -1365,7 +1399,9 @@ if seedInfo != None:
               <tr class="advanced"><td>VARIA tweaks</td><td>{{=seedParams["variaTweaks"]}}</td></tr>
               <tr class="medium"><td>Nerfed Charge Beam available from the start</td><td>{{=seedParams["nerfedCharge"]}}</td></tr>
               <tr class="advanced"><td>Suits properties</td><td>{{=seedParams["gravityBehaviour"]}}</td></tr>
-
+{{    if seedParams["gravityBehaviour"] == "random":}}
+              <tr class="advanced"><td>Suits properties pool</td><td>{{=seedParams["gravityBehaviourMultiSelect"]}}</td></tr>
+{{        pass}}
               <tr class="medium"><td>Remove fanfare when picking up an item</td><td>{{=seedParams["itemsounds"]}}</td></tr>
               <tr class="medium"><td>Accelerate doors and elevators transitions</td><td>{{=seedParams["elevators_doors_speed"]}}</td></tr>
               <tr class="medium"><td>Spin jump restart (a.k.a. Respin)</td><td>{{=seedParams["spinjumprestart"]}}</td></tr>

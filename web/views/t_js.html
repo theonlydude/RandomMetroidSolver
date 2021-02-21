@@ -1298,7 +1298,7 @@ function actionDoor(doorName) {
 
     if(mode == "seedless") {
         return;
-    } else if(mode == "plando" || mode == "race") {
+    } else if(mode == "plando" || (mode == "race" && doorsRando)) {
         var currentColor = getColor(doorName);
         // forced blue doors can't be updated
         if(currentColor == "blue") {

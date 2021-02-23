@@ -186,6 +186,7 @@ class StandardSolver(CommonSolver):
         locations = self.majorLocations if self.majorsSplit == 'Full' else self.majorLocations + self.minorLocations
 
         # instanciate a new smbool manager to reset the cache
+        from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
         self.smbm = SMBoolManager()
         presetFileName = os.path.expanduser('~/RandomMetroidSolver/standard_presets/solution.json')
         presetLoader = PresetLoader.factory(presetFileName)

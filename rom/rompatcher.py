@@ -8,6 +8,7 @@ from graph.graph_utils import GraphUtils, getAccessPoint
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM
 from patches.patchaccess import PatchAccess
+from utils.parameters import appDir
 
 def getWord(w):
     return (w & 0x00FF, (w & 0xFF00) >> 8)

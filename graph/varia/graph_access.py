@@ -14,7 +14,7 @@ accessPoints = [
        start={'spawn': 0xfffe, 'doors':[0x32], 'patches':[RomPatches.BlueBrinstarBlueDoor], 'solveArea': "Crateria Landing Site"}),
     ### Crateria and Blue Brinstar
     AccessPoint('Landing Site', 'Crateria', {
-        'Lower Mushrooms Left': lambda sm: sm.canPassTerminatorBombWall(),
+        'Lower Mushrooms Left': lambda sm: sm.wand(sm.canPassTerminatorBombWall(), sm.canPassCrateriaGreenPirates()),
         'Keyhunter Room Bottom': lambda sm: sm.traverse('LandingSiteRight'),
         'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     }, internal=True,
@@ -24,7 +24,7 @@ accessPoints = [
         'Landing Site': lambda sm: SMBool(True)
     }, internal=True),
     AccessPoint('Gauntlet Top', 'Crateria', {
-        'Green Pirates Shaft Bottom Right': lambda sm: sm.haveItem('Morph')
+        'Green Pirates Shaft Bottom Right': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canPassCrateriaGreenPirates())
     }, internal=True,
        start={'spawn': 0x0006, 'solveArea': "Crateria Gauntlet", 'save':"Save_Gauntlet", 'forcedEarlyMorph':True}),
     AccessPoint('Lower Mushrooms Left', 'Crateria', {

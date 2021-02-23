@@ -20,14 +20,14 @@ locationsDict["Bomb"].Available = (
     lambda sm: sm.wand(sm.haveItem('Morph'),
                        sm.traverse('FlywayRight'))
 )
-#locationsDict["Energy Tank, Terminator"].AccessFrom = {
-#    'Landing Site': lambda sm: sm.canPassTerminatorBombWall(),
-#    'Lower Mushrooms Left': lambda sm: sm.canPassCrateriaGreenPirates(),
+locationsDict["Energy Tank, Terminator"].AccessFrom = {
+    'Landing Site': lambda sm: sm.canPassTerminatorBombWall(),
+    'Lower Mushrooms Left': lambda sm: sm.canPassCrateriaGreenPirates(),
 #    'Gauntlet Top': lambda sm: sm.haveItem('Morph')
-#}
-#locationsDict["Energy Tank, Terminator"].Available = (
-#    lambda sm: SMBool(True)
-#)
+}
+locationsDict["Energy Tank, Terminator"].Available = (
+    lambda sm: SMBool(True)
+)
 locationsDict["Reserve Tank, Brinstar"].AccessFrom = {
     'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.traverse('MainShaftRight'))
 }
@@ -413,24 +413,31 @@ locationsDict["Missile (Crateria moat)"].Available = (
 #                      sm.wand(sm.haveItem('SpeedBooster'),
 #                              sm.knowsOldMBWithSpeed()))
 #)
-#locationsDict["Missile (Crateria gauntlet right)"].AccessFrom = {
+locationsDict["Missile (Crateria gauntlet right)"].AccessFrom = {
+     # TODO::regular gauntlet, but it's filled with acid    
 #    'Landing Site': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
 #                                              sm.canPassBombPassages()),
 #                                      sm.canDoLowGauntlet()),
-#    'Gauntlet Top': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (Crateria gauntlet right)"].Available = (
-#    lambda sm: SMBool(True)
-#)
-#locationsDict["Missile (Crateria gauntlet left)"].AccessFrom = {
+    'Landing Site': lambda sm: sm.canUsePowerBombs(), # from gauntlet back
+    'Gauntlet Top': lambda sm: SMBool(True),
+    # we can shoot blocks from the back, we can kill green pirate with power bomb, so no need for more
+    'Lower Mushrooms Left': lambda sm: sm.canUsePowerBombs()
+}
+locationsDict["Missile (Crateria gauntlet right)"].Available = (
+    lambda sm: SMBool(True)
+)
+locationsDict["Missile (Crateria gauntlet left)"].AccessFrom = {
+     # TODO::regular gauntlet, but it's filled with acid
 #    'Landing Site': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
 #                                              sm.canPassBombPassages()),
 #                                      sm.canDoLowGauntlet()),
-#    'Gauntlet Top': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (Crateria gauntlet left)"].Available = (
-#    lambda sm: SMBool(True)
-#)
+    'Landing Site': lambda sm: sm.canUsePowerBombs(), # from gauntlet back
+    'Gauntlet Top': lambda sm: SMBool(True),
+    'Lower Mushrooms Left': lambda sm: sm.canUsePowerBombs()
+}
+locationsDict["Missile (Crateria gauntlet left)"].Available = (
+    lambda sm: SMBool(True)
+)
 #locationsDict["Super Missile (Crateria)"].AccessFrom = {
 #    'Landing Site': lambda sm: SMBool(True)
 #}

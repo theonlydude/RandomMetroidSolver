@@ -60,7 +60,7 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassCrateriaGreenPirates(self):
         sm = self.smbm
-        return sm.wor(sm.canPassBombPassages(),
+        return sm.wor(sm.canPassBombPassages(), # pirates can be killed with bombs or power bombs
                       sm.haveMissileOrSuper(),
                       sm.energyReserveCountOk(1),
                       sm.wor(sm.haveItem('Charge'),

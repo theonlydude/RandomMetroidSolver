@@ -272,6 +272,9 @@ class CommonSolver(object):
                 self.lastArea = self.startArea
             else:
                 self.lastAP = self.visitedLocations[-1].accessPoint
+                if self.lastAP is None:
+                    # default to location first access from access point
+                    self.lastAP = list(self.visitedLocations[-1].AccessFrom.keys())[0]
                 self.lastArea = self.visitedLocations[-1].SolveArea
 
             # delete location params which are set when the location is available

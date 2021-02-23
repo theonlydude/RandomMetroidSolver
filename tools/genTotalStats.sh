@@ -9,6 +9,7 @@ fi
 CWD=$(dirname $0)/..
 cd ${CWD}
 CWD=$(pwd)
+[ -z "$PYTHON" ] && PYTHON=pyston3.8
 
 # directory to store the logs and sqls
 LOG_DIR=${CWD}/logs
@@ -24,9 +25,9 @@ else
     SPLIT="Major"
 fi
 
-SQL_BASE="insert into extended_stats (preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, count)
+SQL_BASE="insert into extended_stats (randoPreset, skillPreset, count)
 values
-('Season_Races', False, False, '${SPLIT}', 'total', 'early', True, 'normal', False, False, False, 'Balanced', False, 'harder', 'Landing Site', 1)
+('Season_Races_${SPLIT}_total', 'Season_Races', 1)
 on duplicate key update id=LAST_INSERT_ID(id), count = count + 1;
 set @last_id = last_insert_id();"
 
@@ -38,7 +39,7 @@ function computeSeed {
     SQL=${SQL_DIR}/extStats_${JOB_ID}.sql
     echo "${SQL_BASE}" > ${SQL}
 
-    python3.7 ${CWD}/solver.py -r "${SEED}" --preset "${CWD}/standard_presets/Season_Races.json" --pickupStrategy all --difficultyTarget 10 --ext_stats "${SQL}" --ext_stats_step 2 >/dev/null
+    ${PYTHON} ${CWD}/solver.py -r "${SEED}" --preset "${CWD}/standard_presets/Season_Races.json" --pickupStrategy all --difficultyTarget 10 --ext_stats "${SQL}" --ext_stats_step 2 >/dev/null
 
     printf "."
 }

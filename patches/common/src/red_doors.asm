@@ -28,8 +28,8 @@ red_doors:
 .end:
 	RTS
 
-;;; end of unused space
-warnpc $8485b2
+;;; start of save station fix
+warnpc $84858c
 
 ;;; now overwrite all references to vanilla PLM instruction with our
 ;;; tweaked one in red door PLMs instruction lists, and update 

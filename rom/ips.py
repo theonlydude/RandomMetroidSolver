@@ -17,7 +17,7 @@ class IPS_Patch(object):
         ret = {}
         for record in self.records:
             if 'rle_count' in record:
-                ret[record['address']] = [record['data']]*record['rle_count']
+                ret[record['address']] = [int.from_bytes(record['data'],'little')]*record['rle_count']
             else:
                 ret[record['address']] = [int(b) for b in record['data']]
         return ret

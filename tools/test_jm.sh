@@ -8,14 +8,14 @@
 CWD=$(dirname $0)/..
 cd ${CWD}
 CWD=$(pwd)
-[ -z "$PYTHON" ] && PYTHON=python3.7
+[ -z "$PYTHON" ] && PYTHON=pyston3.8
 
 LOG_DIR=${CWD}/logs
 mkdir -p ${LOG_DIR}
 LOG=${LOG_DIR}/test_jm.log
 CSV=${LOG_DIR}/test_jm.csv
 > ${LOG}
-#> ${CSV}
+> ${CSV}
 
 if [ $# -ne 2 -a $# -ne 3 ]; then
     echo "params: ROM LOOPS [COMPARE]"
@@ -30,6 +30,8 @@ if [ -n "$3" ]; then
     let LOOPS=$2+${FILTER_HEAD}+${FILTER_TAIL}
     COMPARE=0
 else
+    FILTER_HEAD=0
+    FILTER_TAIL=0
     LOOPS=$2
     COMPARE=1
 fi
@@ -63,7 +65,6 @@ function get_time {
 TIME=$(get_time)
 
 PRESETS=("regular" "newbie" "master")
-SUITS=("" "--nogravheatPatch" "--progressiveSuits")
 CHARGES=("" "--nerfedCharge")
 TWEAKS=("" "--novariatweaks")
 LAYOUTS=("" "--nolayout")
@@ -77,8 +78,6 @@ function generate_params {
     PRESET="$2"
 
     # optional patches
-    let S=$RANDOM%${#SUITS[@]}
-    SUIT=${SUITS[$S]}
     let S=$RANDOM%${#CHARGES[@]}
     CHARGE=${CHARGES[$S]}
     let S=$RANDOM%${#TWEAKS[@]}
@@ -97,7 +96,7 @@ function generate_params {
     let S=$RANDOM%${#DOORS[@]}
     DOOR=${DOORS[$S]}
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${AREA} ${MINIMIZER} ${DOOR} --jm"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random --gravityBehaviour random ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${AREA} ${MINIMIZER} ${DOOR} --jm"
 }
 
 function computeSeed {
@@ -315,7 +314,17 @@ grep Traceback ${LOG}
 function getTime {
     # speedrun seeds are non deterministics, filter them out.
     # ignore the first and last lines, as there's always a big time difference in them.
-    grep -v SOLVER ${CSV} | tail -n +${FILTER_HEAD} | head -n -${FILTER_TAIL} | grep -v -E '^error|;speedrun;' | grep -v '^[0-9]*;;;' | cut -d ';' -f $1 | sed -e 's+0:++g' | awk -F';' '{sum+=$1;} END{print sum}'
+    COLUMN="${1}"
+    KEEP_SPEEDRUN="${2}"
+    if [ -n "${KEEP_SPEEDRUN}" ]; then
+        SPEEDRUN=""
+        GREP_V=""
+    else
+        SPEEDRUN="|;speedrun;"
+        GREP_V="-v"
+    fi
+
+    grep -v SOLVER ${CSV} | tail -n +${FILTER_HEAD} | head -n -${FILTER_TAIL} | grep -v -E "^error${SPEEDRUN}" | grep ${GREP_V} '^[0-9]*;;;' | cut -d ';' -f ${COLUMN} | sed -e 's+0:++g' | awk -F';' '{sum+=$1;} END{print sum}'
 }
 
 if [ ${COMPARE} -eq 0 ]; then
@@ -328,6 +337,17 @@ if [ ${COMPARE} -eq 0 ]; then
     echo "Speed increase/decrease:"
     echo "rando:  ${RANDO_PERCENT}%"
     echo "solver: ${SOLVER_PERCENT}%"
+else
+    # display average randomizer and solver time
+    RANDOTIME=$(getTime 4 "keep")
+    SOLVERTIME=$(getTime 6 "keep")
+    OK_SEEDS=$(grep -v SOLVER ${CSV} | grep -v -E "^error" | grep '^[0-9]*;;;' | wc -l)
+    AVG_RANDO=$(echo "scale=2; ${RANDOTIME}/${OK_SEEDS}" | bc -l)
+    AVG_SOLVER=$(echo "scale=2; ${SOLVERTIME}/${OK_SEEDS}" | bc -l)
+
+    echo "Avg times:"
+    echo "rando: ${AVG_RANDO}"
+    echo "solver: ${AVG_SOLVER}"
 fi
 
 rm -rf ${TEMP_DIR}

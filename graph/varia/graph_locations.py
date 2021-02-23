@@ -186,6 +186,16 @@ locationsDict["Grapple Beam"].Available = (
                                       sm.haveItem('HiJump')), # jump from the yellow plateform ennemy
                               sm.canGreenGateGlitch()))
 )
+locationsDict["Grapple Beam"].PostAvailable = (
+    lambda sm: sm.wor(sm.haveItem('Morph'), # regular exit
+                      sm.wand(sm.haveItem('Super'), # grapple escape reverse
+                              sm.wor(sm.canFly(), # Grapple Tutorial Room 2
+                                     sm.haveItem('HiJump'),
+                                     sm.haveItem('Grapple')),
+                              sm.wor(sm.haveItem('Gravity'), # Grapple Tutorial Room 3
+                                     sm.haveItem('SpaceJump'),
+                                     sm.haveItem('Grapple'))))
+)
 locationsDict["Reserve Tank, Norfair"].AccessFrom = {
     'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
     'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop(),
@@ -221,10 +231,10 @@ locationsDict["Ridley"].Available = (
     lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffsRidley())
 )
 locationsDict["Energy Tank, Ridley"].AccessFrom = {
-    'RidleyRoomIn': lambda sm: SMBool(True)
+    'RidleyRoomIn': lambda sm: sm.haveItem('Ridley')
 }
 locationsDict["Energy Tank, Ridley"].Available = (
-    lambda sm: sm.haveItem('Ridley')
+    lambda sm: sm.haveItem('Morph')
 )
 locationsDict["Screw Attack"].AccessFrom = {
     'Screw Attack Bottom': lambda sm: SMBool(True)
@@ -567,10 +577,13 @@ locationsDict["Missile (green Brinstar pipe)"].Available = (
     lambda sm: sm.haveItem('Morph')
 )
 locationsDict["Power Bomb (blue Brinstar)"].AccessFrom = {
-    'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
+    'Blue Brinstar Elevator Bottom': lambda sm: sm.canUsePowerBombs(),
+    'Morph Ball Room Left': lambda sm: sm.wor(sm.canPassBombPassages(),
+                                              sm.wand(sm.haveItem('Morph'),
+                                                      sm.canShortCharge())) # speedball
 }
 locationsDict["Power Bomb (blue Brinstar)"].Available = (
-    lambda sm: sm.canUsePowerBombs()
+    lambda sm: SMBool(True)
 )
 locationsDict["Missile (blue Brinstar middle)"].AccessFrom = {
     'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
@@ -827,8 +840,9 @@ locationsDict["Missile (green Maridia shinespark)"].AccessFrom = {
 locationsDict["Missile (green Maridia shinespark)"].Available = (
     lambda sm: sm.wand(sm.haveItem('Gravity'),
                        sm.haveItem('SpeedBooster'),
-                       sm.wor(sm.wand(sm.wor(sm.haveItem('Super'), # run from room on the right
-                                             RomPatches.has(RomPatches.AreaRandoGatesOther)),
+                       sm.wor(sm.wand(sm.traverse('MainStreetBottomRight'), # run from room on the right
+                                      sm.wor(RomPatches.has(RomPatches.AreaRandoGatesOther),
+                                             sm.haveItem('Super')),
                                       sm.itemCountOk('ETank', 1)), # etank for the spark since sparking from low ground
                               sm.canSimpleShortCharge())) # run from above
 )

@@ -57,13 +57,10 @@ class Restrictions(object):
 
     def addPlacementRestrictions(self, restrictionDict):
         self.log.debug("add speedrun placement restrictions")
-#        self.log.debug(restrictionDict)
+        self.log.debug(restrictionDict)
         self.checkers.append(lambda item, loc, cont:
                              item.Category in Restrictions.NoCheckCat
-                             or item.Type == 'Missile'
                              or (item.Category == 'Ammo' and cont.hasUnrestrictedLocWithItemType(item.Type))
-                             or loc.GraphArea not in restrictionDict
-                             or item.Type not in restrictionDict[loc.GraphArea]
                              or loc.Name in restrictionDict[loc.GraphArea][item.Type])
 
     def isLocMajor(self, loc):

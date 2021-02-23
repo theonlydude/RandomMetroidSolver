@@ -27,6 +27,7 @@ from rom.rom_patches import RomPatches
 from rom.ips import IPS_Patch
 from randomizer import energyQties, progDiffs, morphPlacements, majorsSplits, speeds
 from utils.doorsmanager import DoorsManager
+from utils.version import displayedVersion
 
 # discord webhook for plandorepo
 try:
@@ -41,8 +42,11 @@ response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
 
 localIpsDir = 'varia_repository'
 
-# use the correct one
-pythonExec = "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
+# use the correct one or the one provided in config file
+try:
+    from utils.python_exec import pythonExec
+except:
+    pythonExec = "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
 
 maxPresets = 4096
 def maxPresetsReach():
@@ -102,15 +106,19 @@ def completePreset(params):
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master']
-    tourPresets = ['Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2021']
+    tourPresets = ['Season_Races', 'SMRAT2021']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
     return (stdPresets, tourPresets, comPresets)
 
-def loadRandoPresetsList():
-    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2021', 'VARIA_Weekly']
+def loadRandoPresetsList(filter=False):
+    tourPresets = ['Season_Races', 'Season_Races_Week3', 'Season_Races_Week5', 'Season_Races_Week6', 'Season_Races_Week7', 'SMRAT2021', 'VARIA_Weekly']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
+
+    if filter:
+        # remove rando presets with no stats
+        randoPresets = [preset for preset in randoPresets if preset not in ['all_random', 'minimizer_hardcore', 'minimizer', 'minimizer_maximizer', 'quite_random']]
 
     return (randoPresets, tourPresets)
 
@@ -1010,15 +1018,16 @@ def randomizer():
         "minimizer_maximizer":"No longer a boss rush",
         "quite_random": "randomizes a few significant settings to have various seeds",
         "stupid_hard": "hardest possible settings",
-        "surprise": "quite_random with Area, Boss and Start Location randomized",
+        "surprise": "quite_random with Area/Boss/Doors/Start settings randomized",
         "vanilla": "closest possible to vanilla Super Metroid",
         "way_of_chozo": "chozo split with boss randomization",
         "where_am_i": "Area mode with random start location and early morph",
         "where_is_morph": "Area mode with late Morph",
         "Season_Races": "rando league races (Majors/Minors split)",
-        "Season_Races_Chozo": "rando league races (Chozo split)",
-        "Playoff_Races": "rando league races during playoff (Majors/Minors split)",
-        "Playoff_Races_Chozo": "rando league races during playoff (Chozo split)",
+        "Season_Races_Week3": "rando league season 3 week 3 (Chozo split)",
+        "Season_Races_Week5": "rando league season 3 week 5 (Boss randomization)",
+        "Season_Races_Week6": "rando league season 3 week 6 (Full split, random start location)",
+        "Season_Races_Week7": "rando league season 3 week 7 (Majors/Minors split, Area and Boss randomization)",
         "SMRAT2021": "Super Metroid Randomizer Accessible Tournament 2021",
         "VARIA_Weekly": "Casual logic community races"
     }
@@ -1176,8 +1185,8 @@ def sessionWebService():
                'Infinite_Space_Jump', 'refill_before_save']
     quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty']
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
-              'morphPlacement', 'energyQty', 'startLocation']
-    others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'gravityBehaviour']
+              'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
+    others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty']
     validateWebServiceParams(switchs, quantities, multis, others)
 
     if session.randomizer is None:
@@ -1213,7 +1222,6 @@ def sessionWebService():
     session.randomizer['funSuits'] = request.vars.funSuits
     session.randomizer['layoutPatches'] = request.vars.layoutPatches
     session.randomizer['variaTweaks'] = request.vars.variaTweaks
-    session.randomizer['gravityBehaviour'] = request.vars.gravityBehaviour
     session.randomizer['nerfedCharge'] = request.vars.nerfedCharge
     session.randomizer['itemsounds'] = request.vars.itemsounds
     session.randomizer['elevators_doors_speed'] = request.vars.elevators_doors_speed
@@ -1226,7 +1234,7 @@ def sessionWebService():
     session.randomizer['refill_before_save'] = request.vars.refill_before_save
 
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
-              'morphPlacement', 'energyQty', 'startLocation']
+              'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
     for multi in multis:
         session.randomizer[multi] = request.vars[multi]
         if request.vars[multi] == 'random':
@@ -1267,8 +1275,8 @@ def randomizerWebService():
                'Infinite_Space_Jump', 'refill_before_save']
     quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty']
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
-              'morphPlacement', 'energyQty', 'startLocation']
-    others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'gravityBehaviour', 'maxDifficulty']
+              'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
+    others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty']
     validateWebServiceParams(switchs, quantities, multis, others, isJson=True)
 
     # randomize
@@ -1369,12 +1377,6 @@ def randomizerWebService():
     if request.vars.layoutPatches == 'off':
         params.append('--nolayout')
 
-
-    if request.vars.gravityBehaviour == 'Vanilla':
-        params.append('--nogravheat')
-    elif request.vars.gravityBehaviour == 'Progressive':
-        params.append('--progressiveSuits')
-
     if request.vars.areaRandomization == 'on':
         params.append('--area')
         if request.vars.areaLayout == 'off':
@@ -1426,7 +1428,7 @@ def randomizerWebService():
 
     db.addRandoParams(id, request.vars)
 
-    print("before calling: {}".format(params))
+    print("before calling: {}".format(' '.join(params)))
     start = datetime.now()
     ret = subprocess.call(params)
     end = datetime.now()
@@ -1633,6 +1635,36 @@ def randoParamsWebService():
 
     return json.dumps({"seed": seed, "params": params})
 
+# from https://www.geeksforgeeks.org/how-to-validate-guid-globally-unique-identifier-using-regular-expres
+def isValidGUID(str):
+    regex = "^[{]?[0-9a-fA-F]{8}" + "-([0-9a-fA-F]{4}-)" + "{3}[0-9a-fA-F]{12}[}]?$"
+    p = re.compile(regex)
+
+    if (str == None):
+        return False
+
+    if(re.search(p, str)):
+        return True
+    else:
+        return False
+
+def randoParamsWebServiceAPI():
+    # get a json string of the randomizer parameters for a given seed
+    if request.vars.guid == None:
+        raiseHttp(400, "Missing parameter guid", False)
+
+    guid = request.vars.guid
+
+    # guid is: 8bc77c97-3e0f-4c19-817a-08f0668ade56
+    if not isValidGUID(guid):
+        raiseHttp(400, "Guid is not valid", False)
+
+    db = DB()
+    params = db.getRandomizerSeedParamsAPI(guid)
+    db.close()
+
+    return json.dumps(params)
+
 def stats():
     response.title = 'Super Metroid VARIA Randomizer and Solver usage statistics'
 
@@ -1651,6 +1683,8 @@ def stats():
     isolver = db.getISolver(weeks)
     isolverData = db.getISolverData(weeks)
 
+    randomizerParamsStats = db.getRandomizerParamsStats(weeks)
+
     errors = getErrors()
 
     db.close()
@@ -1659,7 +1693,7 @@ def stats():
 
     return dict(solverPresets=solverPresets, randomizerPresets=randomizerPresets,
                 solverDurations=solverDurations, randomizerDurations=randomizerDurations,
-                solverData=solverData, randomizerData=randomizerData,
+                solverData=solverData, randomizerData=randomizerData, randomizerParamsStats=randomizerParamsStats,
                 isolver=isolver, isolverData=isolverData, errors=errors,
                 fsStatus=fsStatus, fsPercent=fsPercent)
 
@@ -1754,7 +1788,7 @@ def plando():
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
-                curSession=session.plando, addresses=addresses, startAPs=startAPs)
+                curSession=session.plando, addresses=addresses, startAPs=startAPs, version=displayedVersion)
 
 class WS(object):
     @staticmethod
@@ -1863,8 +1897,11 @@ class WS(object):
                 "errorMsg": state["errorMsg"],
                 "last": state["last"],
                 "innerTransitions": state["innerTransitions"],
+
+                # doors
                 "doors": state["doors"],
-                "doorsRando": state["doorsRando"]
+                "doorsRando": state["doorsRando"],
+                "allDoorsRevealed": state["allDoorsRevealed"]
             })
         else:
             raiseHttp(200, "OK", True)
@@ -2345,6 +2382,7 @@ def initCustomizerSession():
         session.customizer['customSpriteEnable'] = "off"
         session.customizer['customSprite'] = "samus"
         session.customizer['customItemsEnable'] = "off"
+        session.customizer['noSpinAttack'] = "off"
         session.customizer['customShipEnable'] = "off"
         session.customizer['customShip'] = "Red-M0nk3ySMShip1"
         session.customizer['itemsounds'] = "off"
@@ -2362,53 +2400,115 @@ def initCustomizerSession():
         session.customizer['remove_spinjumprestart'] = "off"
 
 customSprites = {
-    'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh", "group": "Samus"},
-    'samus_backwards': {"index":1, "name": "Samus (backwards)", "desc": "Samus, flipped horizontally", "author": "TarThoron", "group": "Samus"},
-    'samus_upside_down': {"index":2, "name": "Samus (upside down)", "desc": "Samus, flipped vertically", "author": "TarThoron", "group": "Samus"},
-    'samus_upside_down_and_backwards': {"index":3, "name": "Samus (180°)", "desc": "Samus, flpped both horizontally and vertically", "author": "TarThoron", "group": "Samus"},
-    'fusion_green_varia': {"index":4, "name": "Fusion", "desc": "Samus resprite inspired by Metroid Fusion (green Varia Suit)", "author": "Gala", "group": "Samus"},
-    'fusion_orange_varia': {"index":5, "name": "Fusion", "desc": "Samus resprite inspired by Metroid Fusion (orange Varia Suit)", "author": "Gala", "group": "Samus"},
-    'dark_samus': {"index":6, "name": "Dark Samus", "desc": "Samus recolor inspired by the Dark Samus character", "author": "TarThoron", "group": "Samus"},
-    'hack_ancient_chozo': {"index":7, "name": "Chozo", "desc": "Samus, from Ancient Chozo hack", "author": "Albert V and Physix", "group": "Samus"},
-    'hack_ascent': {"index":8, "name": "Ascent", "desc": "Samus, from Ascent hack", "author": "Benox50", "group": "Samus"},
-    'hack_decision': {"index":9, "name": "Decision", "desc": "Samus, from Decision hack", "author": "JoshShoeWah", "group": "Samus"},
-    'hack_escape2': {"index":10, "name": "Escape II", "desc": "Samus, from Escape II hack", "author": "Hiroishi", "group": "Samus"},
-    'hack_hyper': {"index":11, "name": "Hyper", "desc": "Samus, from Hyper Metroid hack", "author": "RealRed", "group": "Samus"},
-    'hack_nature': {"index":12, "name": "Nature", "desc": "Samus, from Nature hack", "author": "Jefe962", "group": "Samus"},
-    'hack_opposition': {"index":13, "name": "Opposition", "desc": "Space Pirate themed suit for Samus, from Opposition hack", "author": "mccad00", "group": "Samus"},
-    'hack_phazon': {"index":14, "name": "Phazon", "desc": "Samus, from Phazon hack", "author": "A_red_monk_called_Key", "group": "Samus"},
-    'hack_redesign': {"index":15, "name": "Redesign", "desc": "Samus, from Redesign hack", "author": "Drewseph", "group": "Samus"},
-    'hack_szm': {"index":16, "name": "SZM", "desc": "Samus, from Super Zero Mission hack", "author": "SBniconico", "group": "Samus"},
-    'hitbox_helper': {"index":17, "name": "Hitbox", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru", "group": "Samus"},
-    'bailey': {"index":18, "name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": "Auximines", "group": "Custom"},
-    'alucard': {"index":19, "name": "Alucard", "desc": "Alucard from Castlevania Symphony Of The Night", "author": "Nintoaster", "group": "Custom"},
-    'megaman': {"index":20, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau", "group": "Custom"},
-    'link': {"index":21, "name": "Link", "desc": "Sorry Link, your game is in another randomizer!", "author": "RonnSama", "group": "Custom"},
-    'fed_trooper': {"index":22, "name": "GF Trooper", "desc": "A Galactic Federation trooper", "author": "Physix", "group": "Custom"},
-    'super_controid': {"index":23, "name": "Contra", "desc": "Badass soldier from Contra III", "author": "Nintoaster", "group": "Custom"},
-    'mario_8bit': {"index":24, "name": "Mario (NES)", "desc": "One of the bros", "author": "TarThoron", "group": "Custom"},
-    'mario_8bit_modern': {"index":25, "name": "Mario (Alt)", "desc": "One of the bros, with a more modern palette", "author": "TarThoron", "group": "Custom"},
-    'luigi': {"index":26, "name": "Luigi", "desc": "The other bro", "author": "RonnSama", "group": "Custom"},
-    'diddy_kong': {"index":27, "name": "Diddy Kong", "desc": "Diddy Kong from Donkey Kong Country", "author": "Di10", "group": "Custom"},
-    'marga': {"index":28, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
-    'sprite_can': {"index":29, "name": "Sprite", "desc": "A ... Sprite ... ", "author": "TarThoron", "group": "Custom"},
-    'win95_cursor': {"index":30, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
+    'samus': {"name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh", "group": "Samus"},
+    'samus_backwards': {"name": "Samus (backwards)", "desc": "Samus, flipped horizontally", "author": "TarThoron", "group": "Samus"},
+    'samus_upside_down': {"name": "Samus (upside down)", "desc": "Samus, flipped vertically", "author": "TarThoron", "group": "Samus"},
+    'samus_upside_down_and_backwards': {"name": "Samus (180°)", "desc": "Samus, flpped both horizontally and vertically", "author": "TarThoron", "group": "Samus"},
+    'fusion_green_varia': {"name": "Fusion", "desc": "Samus resprite inspired by Metroid Fusion (green Varia Suit)", "author": "Gala", "group": "Samus"},
+    'fusion_orange_varia': {"name": "Fusion", "desc": "Samus resprite inspired by Metroid Fusion (orange Varia Suit)", "author": "Gala", "group": "Samus"},
+    'combat_armor_samus': {"name": "Combat Armor", "desc": "Samus, from Samus Combat Armor hack", "author": "Munchy (ripped by TarThoron)", "group": "Samus"},
+    'dark_samus': {"name": "Dark Samus", "desc": "Samus recolor inspired by the Dark Samus character", "author": "TarThoron", "group": "Samus"},
+    'trans': {"name": "Trans Colors", "desc": "Samus in trans pride colors", "author": "TarThoron", "group": "Samus"},
+    'hack_ancient_chozo': {"name": "Chozo", "desc": "Samus, from Ancient Chozo hack", "author": "Albert V and Physix", "group": "Samus"},
+    'hack_ascent': {"name": "Ascent", "desc": "Samus, from Ascent hack", "author": "Benox50", "group": "Samus"},
+    'hack_decision': {"name": "Decision", "desc": "Samus, from Decision hack", "author": "JoshShoeWah", "group": "Samus"},
+    'hack_escape2': {"name": "Escape II", "desc": "Samus, from Escape II hack", "author": "Hiroishi", "group": "Samus"},
+    'hack_hyper': {"name": "Hyper", "desc": "Samus, from Hyper Metroid hack", "author": "RealRed", "group": "Samus"},
+    'hack_nature': {"name": "Nature", "desc": "Samus, from Nature hack", "author": "Jefe962", "group": "Samus"},
+    'hack_opposition': {"name": "Opposition", "desc": "Space Pirate themed suit for Samus, from Opposition hack", "author": "mccad00", "group": "Samus"},
+    'hack_phazon': {"name": "Phazon", "desc": "Samus, from Phazon hack", "author": "A_red_monk_called_Key", "group": "Samus"},
+    'hack_redesign': {"name": "Redesign", "desc": "Samus, from Redesign hack", "author": "Drewseph", "group": "Samus"},
+    'hack_szm': {"name": "SZM", "desc": "Samus, from Super Zero Mission hack", "author": "SBniconico", "group": "Samus"},
+    'hitbox_helper': {"name": "Hitbox", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru", "group": "Samus"},
+    'bailey': {"name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": "Auximines", "group": "Custom"},
+    'alucard': {"name": "Alucard", "desc": "Alucard from Castlevania Symphony Of The Night", "author": "Nintoaster", "group": "Custom"},
+    'megaman': {"name": "Megaman", "desc": "Megaman X!", "author": "Artheau", "group": "Custom"},
+    'link': {"name": "Link", "desc": "Sorry Link, your game is in another randomizer!", "author": "RonnSama", "group": "Custom"},
+    'fed_trooper': {"name": "GF Trooper", "desc": "A Galactic Federation trooper", "author": "Physix", "group": "Custom"},
+    'super_controid': {"name": "Contra", "desc": "Badass soldier from Contra III", "author": "Nintoaster", "group": "Custom"},
+    'mario_8bit': {"name": "Mario (NES)", "desc": "One of the bros", "author": "TarThoron", "group": "Custom"},
+    'mario_8bit_modern': {"name": "Mario (Alt)", "desc": "One of the bros, with a more modern palette", "author": "TarThoron", "group": "Custom"},
+    'luigi': {"name": "Luigi", "desc": "The other bro", "author": "RonnSama", "group": "Custom"},
+    'diddy_kong': {"name": "Diddy Kong", "desc": "Diddy Kong from Donkey Kong Country", "author": "Di10", "group": "Custom"},
+    'marga': {"name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
+    'captain_novolin': {"name": "Captain Novolin", "desc": "Captain Novolin, from the eponymous educational SNES game on diabetes", "author": "PaddyCo", "group": "Custom"},
+    'metroid': {"name": "Metroid", "desc": "It can't crawl", "author": "Fingersmcgee", "group": "Custom"},
+    'shaktool': {"name": "Shaktool", "desc": "Shaktool in all its glory", "author": "Pneumatic", "group": "Custom"},
+    'sprite_can': {"name": "Sprite", "desc": "A ... Sprite ... ", "author": "TarThoron", "group": "Custom"},
+    'win95_cursor': {"name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
 }
 
+customSpritesOrder = [
+    'samus',
+    'fusion_green_varia',
+    'fusion_orange_varia',
+    'combat_armor_samus',
+    'dark_samus',
+    'trans',
+    'hack_ancient_chozo',
+    'hack_ascent',
+    'hack_decision',
+    'hack_escape2',
+    'hack_hyper',
+    'hack_nature',
+    'hack_opposition',
+    'hack_phazon',
+    'hack_redesign',
+    'hack_szm',
+    'samus_backwards',
+    'samus_upside_down',
+    'samus_upside_down_and_backwards',
+    'hitbox_helper',
+    'bailey',
+    'alucard',
+    'megaman',
+    'link',
+    'fed_trooper',
+    'super_controid',
+    'mario_8bit',
+    'mario_8bit_modern',
+    'luigi',
+    'diddy_kong',
+    'marga',
+    'captain_novolin',
+    'metroid',
+    'shaktool',
+    'sprite_can',
+    'win95_cursor'
+]
+
 customShips = {
-    'Red-M0nk3ySMShip1': {"index":0, "name": "Red-M0nk3ySMShip1", "desc": "From MetConst", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip2': {"index":1, "name": "Red-M0nk3ySMShip2", "desc": "From MetConst", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip3': {"index":2, "name": "Red-M0nk3ySMShip3", "desc": "From MetConst", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip4': {"index":3, "name": "Red-M0nk3ySMShip4", "desc": "From MetConst", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip5': {"index":4, "name": "Red-M0nk3ySMShip5", "desc": "From MetConst", "author": "Red-M0nk3y"},
-    'opposition_ship': {"index":5, "name": "Opposition Ship", "desc": "From Opposition Hack", "author": "mccad00"},
-    'mario_ship': {"index":6, "name": "Mario Ship", "desc": "For Mario and Luigi sprites", "author": "mccad00"}
+    'Red-M0nk3ySMShip1': {"name": "Red-M0nk3ySMShip1", "desc": "From MetConst", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip2': {"name": "Red-M0nk3ySMShip2", "desc": "From MetConst", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip3': {"name": "Red-M0nk3ySMShip3", "desc": "From MetConst", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip4': {"name": "Red-M0nk3ySMShip4", "desc": "From MetConst", "author": "Red-M0nk3y"},
+    'Red-M0nk3ySMShip5': {"name": "Red-M0nk3ySMShip5", "desc": "From MetConst", "author": "Red-M0nk3y"},
+    'opposition_ship': {"name": "Opposition Ship", "desc": "From Opposition Hack", "author": "mccad00"},
+    'mario_ship': {"name": "Mario Ship", "desc": "For Mario and Luigi sprites", "author": "mccad00"}
 }
+
+customShipsOrder = [
+    'Red-M0nk3ySMShip1',
+    'Red-M0nk3ySMShip2',
+    'Red-M0nk3ySMShip3',
+    'Red-M0nk3ySMShip4',
+    'Red-M0nk3ySMShip5',
+    'opposition_ship',
+    'mario_ship'
+]
+
+def initCustomSprites():
+    def updateSpriteDict(spriteDict, order):
+        for i in range(len(order)):
+            spriteDict[order[i]]['index'] = i
+    updateSpriteDict(customSprites, customSpritesOrder)
+    updateSpriteDict(customShips, customShipsOrder)
 
 def customizer():
     response.title = 'Super Metroid VARIA Seeds Customizer'
 
     initCustomizerSession()
+    initCustomSprites()
 
     url = request.env.request_uri.split('/')
     msg = ""
@@ -2472,7 +2572,8 @@ def customWebService():
     # check validity of all parameters
     switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music',
                'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save',
-               'customSpriteEnable', 'customItemsEnable', 'customShipEnable', 'remove_itemsounds', 'remove_elevators_doors_speed']
+               'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
+               'remove_elevators_doors_speed']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(switchs, [], [], others, isJson=True)
@@ -2500,6 +2601,7 @@ def customWebService():
     session.customizer['customSpriteEnable'] = request.vars.customSpriteEnable
     session.customizer['customSprite'] = request.vars.customSprite
     session.customizer['customItemsEnable'] = request.vars.customItemsEnable
+    session.customizer['noSpinAttack'] = request.vars.noSpinAttack
     session.customizer['customShipEnable'] = request.vars.customShipEnable
     session.customizer['customShip'] = request.vars.customShip
     session.customizer['itemsounds'] = request.vars.itemsounds
@@ -2578,6 +2680,8 @@ def customWebService():
         params += ['--sprite', "{}.ips".format(request.vars.customSprite)]
         if request.vars.customItemsEnable == 'on':
             params.append('--customItemNames')
+        if request.vars.noSpinAttack == 'on':
+            params.append('--no_spin_attack')
     if request.vars.customShipEnable == 'on':
         params += ['--ship', "{}.ips".format(request.vars.customShip)]
     if request.vars.seedKey != None:
@@ -2721,10 +2825,7 @@ def extStats():
         skillPresetContent = None
         majorsSplit = None
 
-    (randoPresets, tourRandoPresets) = loadRandoPresetsList()
-    # remove random presets those statistics are useless
-    randoPresets.remove("all_random")
-    randoPresets.remove("quite_random")
+    (randoPresets, tourRandoPresets) = loadRandoPresetsList(filter=True)
     (stdPresets, tourPresets, comPresets) = loadPresetsList()
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets,

@@ -9,6 +9,7 @@ fi
 CWD=$(dirname $0)/..
 cd ${CWD}
 CWD=$(pwd)
+[ -z "$PYTHON" ] && PYTHON=pyston3.8
 
 # directory to store the logs and sqls
 LOG_DIR=${CWD}/logs
@@ -29,16 +30,16 @@ function computeSeed {
     LOG=${LOG_DIR}/log_$(basename ${RANDO_PRESET} | cut -d '.' -f 1)_$(basename ${SKILL_PRESET} | cut -d '.' -f 1)_${JOB_ID}.log
     SQL=${SQL_DIR}/extStats_${JOB_ID}.sql
 
-    python3.7 ${CWD}/randomizer.py -r "${ROM}" --randoPreset "${RANDO_PRESET}" --param "${SKILL_PRESET}" --ext_stats "${SQL}" --runtime ${RUNTIME_LIMIT} > ${LOG}
+    ${PYTHON} ${CWD}/randomizer.py -r "${ROM}" --randoPreset "${RANDO_PRESET}" --param "${SKILL_PRESET}" --ext_stats "${SQL}" --runtime ${RUNTIME_LIMIT} > ${LOG}
      if [ $? -eq 0 ]; then
 	 SEED=$(grep 'Rom generated:' ${LOG} | awk '{print $NF}')".sfc"
 	 if [ -f "${SEED}" ]; then
 	     printf "."
 	     rm -f ${LOG}
 
-	     python3.7 ${CWD}/solver.py -r "${SEED}" --preset "${SKILL_PRESET}" --pickupStrategy any --difficultyTarget 0 --ext_stats "${SQL}" --ext_stats_step 1 >/dev/null
+	     ${PYTHON} ${CWD}/solver.py -r "${SEED}" --preset "${SKILL_PRESET}" --pickupStrategy any --difficultyTarget 0 --ext_stats "${SQL}" --ext_stats_step 1 >/dev/null
 
-	     python3.7 ${CWD}/solver.py -r "${SEED}" --preset "${SKILL_PRESET}" --pickupStrategy all --difficultyTarget 10 --ext_stats "${SQL}" --ext_stats_step 2 >/dev/null
+	     ${PYTHON} ${CWD}/solver.py -r "${SEED}" --preset "${SKILL_PRESET}" --pickupStrategy all --difficultyTarget 10 --ext_stats "${SQL}" --ext_stats_step 2 >/dev/null
 
 	     # delete generated ROM
 	     rm -f "${SEED}"

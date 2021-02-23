@@ -83,6 +83,7 @@ function clickPortal(elemId) {
         return;
     }
 
+    // dragElement(document.getElementById(elemId), elemId);
     // console.log("clickPortal "+elemId+" is escape ? "+isEscapeAP(elemId)+" escape mode ? "+escapeRando);
 
     isEscape = isEscapeAP(elemId);
@@ -158,6 +159,10 @@ function addDebugLine(startPoint, endPoint, difficulty) {
   var startPointElem = document.getElementById(startPoint);
   var endPointElem = document.getElementById(endPoint);
 
+  if(startPointElem == null || endPointElem == null) {
+    console.log("addDebugLine startPointElem "+startPointElem+" or endPointElem "+endPointElem+" is null");
+  }
+
   var line = new LeaderLine(startPointElem, endPointElem,
                             {color: debugColors[difficulty],
                              size: 2,
@@ -183,7 +188,7 @@ function addLine(startPoint, endPoint) {
                              dropShadow: true,
                              startPlugColor: colors[nextColor],
                              endPlugColor: colors[nextColor],
-                             size: 4,
+                             size: 2,
                              color: colors[nextColor],
                              outlineColor: 'rgb(255, 255, 255)',
                              outline: true,
@@ -401,7 +406,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
 
     // if no available locations, display a popup telling you're stuck
     if(Object.keys(jsonData["availableLocations"]).length == 0 && chained == false) {
-        if(jsonData["allTransitions"] == true && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited")) {
+        if(jsonData["allTransitions"] == true && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited") && jsonData["allDoorsRevealed"] == true) {
             alert("You're stuck, you can't finish this seed with the given preset.");
         }
     }
@@ -411,7 +416,7 @@ function isSeedless(mode) {
     return mode == "seedless" || mode == "debug" || mode == "race"
 }
 
-function setActive(mode, area, boss) {
+function setActive(mode, area, boss, escape) {
     var itemElems = ["repeatItem", "binItem"];
     var plandoElems = ["repeatPlando", "binPlando", "savePlando"];
     var areaElems = ["repeatArea", "binArea"];
@@ -430,7 +435,7 @@ function setActive(mode, area, boss) {
             $("#"+plandoElems[i]).removeClass("greyed");
         }
     }
-    if(area == true || boss == true) {
+    if(area == true || boss == true || (escape == true && mode == "plando")) {
         for(var i=0; i<areaElems.length; i++) {
             $("#"+areaElems[i]).removeClass("greyed");
         }
@@ -511,7 +516,7 @@ function updateGlobal(jsonData) {
     document.getElementById("cur_seed").value = seed;
     document.getElementById("cur_preset").value = preset;
 
-    setActive(mode, area, boss);
+    setActive(mode, area, boss, escapeRando);
 }
 
 function updateLines(jsonData) {
@@ -554,6 +559,8 @@ function updateLocations(jsonData) {
             var tooltip = getTooltip(locName, locData, "?", false);
             $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
 
+            // dragElement(document.getElementById(locName), locName);
+
             // check if a boss was at that location
             if("boss" in locsInfo[locName]) {
                 var bossName = locsInfo[locName]["boss"];
@@ -585,6 +592,8 @@ function updateLocations(jsonData) {
             $("#"+locName).attr("class", base+" "+className);
             var tooltip = getTooltip(locName, locData, locData["item"], true);
             $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+
+            // dragElement(document.getElementById(locName), locName);
 
             // check if a boss was at that location
             if("boss" in locsInfo[locName]) {
@@ -644,6 +653,8 @@ function updateLocations(jsonData) {
             var tooltip = getTooltip(locName, locData, "?", false);
             $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
 
+            // dragElement(document.getElementById(locName), locName);
+
             // check if a boss was at that location
             if("boss" in locsInfo[locName]) {
                 var bossName = locsInfo[locName]["boss"];
@@ -678,7 +689,7 @@ function isActive(elemId) {
     }
   }
   if(elemId.includes("Area")) {
-    return area || boss;
+    return area || boss || (escapeRando && mode == "plando");
   }
 }
 
@@ -699,113 +710,116 @@ var doorsRando = false;
 //  -state: posible values: ["available", "visited", "break"]
 //  -difficulty: possible values: ["easy", "medium", "hard", "harder", "hardcore", "mania"]
 var locsInfo = {
-  EnergyTankGauntlet: {left: 29.4, top: 5.4},
-  Bomb: {left: 37, top: 11.35},
-  EnergyTankTerminator: {left: 24.8, top: 11.35},
-  ReserveTankBrinstar: {left: 9.4, top: 56.3},
-  ChargeBeam: {left: 13.3, top: 67.05},
-  MorphingBall: {left: 34.3, top: 49.45},
-  EnergyTankBrinstarCeiling: {left: 39.9, top: 49.45},
-  EnergyTankEtecoons: {left: 3.1, top: 65.6},
-  EnergyTankWaterway: {left: 4.7, top: 70.09},
-  EnergyTankBrinstarGate: {left: 17.2, top: 62.5},
-  XRayScope: {left: 42.7, top: 55.27},
-  Spazer: {left: 57, top: 58.3},
-  EnergyTankKraid: {left: 50.97, top: 66.8},
-  VariaSuit: {left: 67.6, top: 66.75},
-  IceBeam: {left: 38.6, top: 73.99},
-  EnergyTankCrocomire: {left: 25.8, top: 82.5},
-  HiJumpBoots: {left: 40.4, top: 80},
-  GrappleBeam: {left: 10.6, top: 91.65},
-  ReserveTankNorfair: {left: 51.02, top: 73.99},
-  SpeedBooster: {left: 69.05, top: 73.95},
-  WaveBeam: {left: 61.4, top: 76.9},
-  EnergyTankRidley: {left: 75.6, top: 94.6},
-  ScrewAttack: {left: 76.45, top: 90.4},
-  EnergyTankFirefleas: {left: 92.5, top: 82.8},
-  ReserveTankWreckedShip: {left: 71.71, top: 5.7},
-  EnergyTankWreckedShip: {left: 74.7, top: 7.3},
-  RightSuperWreckedShip: {left: 77.4, top: 13.3},
-  GravitySuit: {left: 66.97, top: 7.2},
-  EnergyTankMamaturtle: {left: 73.73, top: 52.3},
-  PlasmaBeam: {left: 85.4, top: 36.87},
-  ReserveTankMaridia: {left: 78.8, top: 56.85},
-  SpringBall: {left: 90.3, top: 58.4},
-  EnergyTankBotwoon: {left: 86.5, top: 46.2},
-  SpaceJump: {left: 92.4, top: 50.8},
-  PowerBombCrateriasurface: {left: 44.5, top: 3.9},
-  MissileoutsideWreckedShipbottom: {left: 61.35, top: 10.1},
-  MissileoutsideWreckedShiptop: {left: 62.1, top: 2.75},
-  MissileoutsideWreckedShipmiddle: {left: 61.35, top: 5.55},
-  MissileCrateriamoat: {left: 47.5, top: 8.4},
-  MissileCrateriabottom: {left: 32.25, top: 29.6},
-  MissileCrateriagauntletright: {left: 24.2, top: 6.9},
-  MissileCrateriagauntletleft: {left: 23.2, top: 6.9},
-  SuperMissileCrateria: {left: 36.1, top: 15.98},
-  MissileCrateriamiddle: {left: 28.4, top: 12.85},
-  PowerBombgreenBrinstarbottom: {left: 8.5, top: 61},
-  SuperMissilepinkBrinstar: {left: 19.94, top: 64},
-  MissilegreenBrinstarbelowsupermissile: {left: 7.5, top: 56.3},
-  SuperMissilegreenBrinstartop: {left: 6.6, top: 54.9},
-  MissilegreenBrinstarbehindmissile: {left: 10.55, top: 55.6},
-  MissilegreenBrinstarbehindreservetank: {left: 10.37, top: 57},
-  MissilepinkBrinstartop: {left: 13.3, top: 61},
-  MissilepinkBrinstarbottom: {left: 13.3, top: 65.5},
-  PowerBombpinkBrinstar: {left: 11.4, top: 62.5},
-  MissilegreenBrinstarpipe: {left: 18, top: 67.2},
-  PowerBombblueBrinstar: {left: 32.25, top: 49.45},
-  MissileblueBrinstarmiddle: {left: 40.8, top: 49.45},
-  SuperMissilegreenBrinstarbottom: {left: 1.7, top: 65.6},
-  MissileblueBrinstarbottom: {left: 37, top: 50.99},
-  MissileblueBrinstartop: {left: 38, top: 45.6},
-  MissileblueBrinstarbehindmissile: {left: 38, top: 47},
-  PowerBombredBrinstarsidehopperroom: {left: 54.15, top: 44.6},
-  PowerBombredBrinstarspikeroom: {left: 54.15, top: 49.2},
-  MissileredBrinstarspikeroom: {left: 53.2, top: 49.2},
-  MissileKraid: {left: 54.9, top: 65.2},
-  Missilelavaroom: {left: 48, top: 76.95},
-  MissilebelowIceBeam: {left: 35.7, top: 76.95},
-  MissileaboveCrocomire: {left: 45.2, top: 80.1},
-  MissileHiJumpBoots: {left: 41.4, top: 78.6},
-  EnergyTankHiJumpBoots: {left: 42.4, top: 78.5},
-  PowerBombCrocomire: {left: 16.3, top: 82.5},
-  MissilebelowCrocomire: {left: 21, top: 90.15},
-  MissileGrappleBeam: {left: 15.3, top: 90.25},
-  MissileNorfairReserveTank: {left: 51.9, top: 73.95},
-  MissilebubbleNorfairgreendoor: {left: 53.8, top: 73.95},
-  MissilebubbleNorfair: {left: 55.7, top: 78.45},
-  MissileSpeedBooster: {left: 67.6, top: 73.95},
-  MissileWaveBeam: {left: 58.55, top: 77.1},
-  MissileGoldTorizo: {left: 74.5, top: 88.9},
-  SuperMissileGoldTorizo: {left: 75.5, top: 88.9},
-  MissileMickeyMouseroom: {left: 84.1, top: 81.4},
-  MissilelowerNorfairabovefireflearoom: {left: 90.75, top: 73.7},
-  PowerBomblowerNorfairabovefireflearoom: {left: 92.6, top: 75.2},
-  PowerBombPowerBombsofshame: {left: 87.9, top: 87.35},
-  MissilelowerNorfairnearWaveBeam: {left: 85, top: 73.7},
-  MissileWreckedShipmiddle: {left: 68.9, top: 11.75},
-  MissileGravitySuit: {left: 69.8, top: 7.2},
-  MissileWreckedShiptop: {left: 77.4, top: 2.65},
-  SuperMissileWreckedShipleft: {left: 71.8, top: 13.3},
-  MissilegreenMaridiashinespark: {left: 66.1, top: 52.2},
-  SuperMissilegreenMaridia: {left: 66.9, top: 50.75},
-  MissilegreenMaridiatatori: {left: 74.5, top: 53.7},
-  SuperMissileyellowMaridia: {left: 68.4, top: 43.1},
-  MissileyellowMaridiasupermissile: {left: 67.4, top: 43.1},
-  MissileyellowMaridiafalsewall: {left: 75.5, top: 43},
+  EnergyTankGauntlet: {left: 29.35, top: 7.18},
+  Bomb: {left: 36.99, top: 15.1},
+  EnergyTankTerminator: {left: 24.87, top: 15.1},
+  ReserveTankBrinstar: {left: 8.08, top: 57.55},
+  ChargeBeam: {left: 11.96, top: 71.81},
+  MorphingBall: {left: 34.14, top: 66},
+  EnergyTankBrinstarCeiling: {left: 39.78, top: 66},
+  EnergyTankEtecoons: {left: 1.84, top: 69.9},
+  EnergyTankWaterway: {left: 3.37, top: 75.92},
+  EnergyTankBrinstarGate: {left: 15.7, top: 65.79},
+  XRayScope: {left: 42.68, top: 54.8},
+  Spazer: {left: 57.01, top: 58.82},
+  EnergyTankKraid: {left: 50.74, top: 68.64},
+  VariaSuit: {left: 67.51, top: 70.01},
+  IceBeam: {left: 38.52, top: 79.62},
+  EnergyTankCrocomire: {left: 25.8, top: 82.68},
+  HiJumpBoots: {left: 40.45, top: 87.75},
+  GrappleBeam: {left: 10.59, top: 94.93},
+  ReserveTankNorfair: {left: 50.83, top: 79.62},
+  SpeedBooster: {left: 69.1, top: 79.51},
+  WaveBeam: {left: 61.5, top: 83.53},
+  EnergyTankRidley: {left: 75.6, top: 96.52},
+  ScrewAttack: {left: 76.4, top: 90.71},
+  EnergyTankFirefleas: {left: 92.45, top: 80.46},
+  ReserveTankWreckedShip: {left: 71.75, top: 7.6},
+  EnergyTankWreckedShip: {left: 74.71, top: 9.71},
+  RightSuperWreckedShip: {left: 77.4, top: 17.74},
+  GravitySuit: {left: 66.95, top: 9.61},
+  EnergyTankMamaturtle: {left: 73.65, top: 51.11},
+  PlasmaBeam: {left: 85.43, top: 30.62},
+  ReserveTankMaridia: {left: 78.83, top: 57.34},
+  SpringBall: {left: 90.3, top: 59.24},
+  EnergyTankBotwoon: {left: 86.54, top: 43.08},
+  SpaceJump: {left: 92.4, top: 49.74},
+  PowerBombCrateriasurface: {left: 44.57, top: 5.17},
+  MissileoutsideWreckedShipbottom: {left: 61.35, top: 13.52},
+  MissileoutsideWreckedShiptop: {left: 62.1, top: 3.59},
+  MissileoutsideWreckedShipmiddle: {left: 61.35, top: 7.60},
+  MissileCrateriamoat: {left: 47.47, top: 11.19},
+  MissileCrateriabottom: {left: 32.19, top: 39.6},
+  MissileCrateriagauntletright: {left: 24.08, top: 9.19},
+  MissileCrateriagauntletleft: {left: 23.08, top: 9.19},
+  SuperMissileCrateria: {left: 35.99, top: 21.22},
+  MissileCrateriamiddle: {left: 28.35, top: 17.21},
+  PowerBombgreenBrinstarbottom: {left: 7.11, top: 63.78},
+  SuperMissilepinkBrinstar: {left: 18.6, top: 67.79},
+  MissilegreenBrinstarbelowsupermissile: {left: 6.16, top: 57.55},
+  SuperMissilegreenBrinstartop: {left: 5.22, top: 55.65},
+  MissilegreenBrinstarbehindmissile: {left: 9.29, top: 56.49},
+  MissilegreenBrinstarbehindreservetank: {left: 9.13, top: 58.50},
+  MissilepinkBrinstartop: {left: 11.91, top: 63.78},
+  MissilepinkBrinstarbottom: {left: 11.96, top: 69.69},
+  PowerBombpinkBrinstar: {left: 10.01, top: 65.68},
+  MissilegreenBrinstarpipe: {left: 16.6, top: 72.02},
+  PowerBombblueBrinstar: {left: 32.19, top: 66.0},
+  MissileblueBrinstarmiddle: {left: 40.83, top: 66},
+  SuperMissilegreenBrinstarbottom: {left: 0.32, top: 69.9},
+  MissileblueBrinstarbottom: {left: 36.93, top: 68},
+  MissileblueBrinstartop: {left: 37.93, top: 61.03},
+  MissileblueBrinstarbehindmissile: {left: 37.93, top: 63.04},
+  PowerBombredBrinstarsidehopperroom: {left: 54.22, top: 40.55},
+  PowerBombredBrinstarspikeroom: {left: 54.22, top: 46.67},
+  MissileredBrinstarspikeroom: {left: 53.17, top: 46.67},
+  MissileKraid: {left: 54.65, top: 66.63},
+  Missilelavaroom: {left: 48, top: 83.42},
+  MissilebelowIceBeam: {left: 35.7, top: 83.63},
+  MissileaboveCrocomire: {left: 45.2, top: 87.75},
+  MissileHiJumpBoots: {left: 41.4, top: 85.74},
+  EnergyTankHiJumpBoots: {left: 42.4, top: 85.74},
+  PowerBombCrocomire: {left: 16.3, top: 82.79},
+  MissilebelowCrocomire: {left: 21, top: 92.93},
+  MissileGrappleBeam: {left: 15.36, top: 93.14},
+  MissileNorfairReserveTank: {left: 51.9, top: 79.62},
+  MissilebubbleNorfairgreendoor: {left: 53.8, top: 79.62},
+  MissilebubbleNorfair: {left: 55.7, top: 85.53},
+  MissileSpeedBooster: {left: 67.6, top: 79.51},
+  MissileWaveBeam: {left: 58.55, top: 83.74},
+  MissileGoldTorizo: {left: 74.5, top: 88.7},
+  SuperMissileGoldTorizo: {left: 75.5, top: 88.7},
+  MissileMickeyMouseroom: {left: 84.1, top: 78.56},
+  MissilelowerNorfairabovefireflearoom: {left: 90.75, top: 68.53},
+  PowerBomblowerNorfairabovefireflearoom: {left: 92.6, top: 70.43},
+  PowerBombPowerBombsofshame: {left: 87.9, top: 86.69},
+  MissilelowerNorfairnearWaveBeam: {left: 85, top: 68.43},
+  MissileWreckedShipmiddle: {left: 68.9, top: 15.63},
+  MissileGravitySuit: {left: 69.9, top: 9.61},
+  MissileWreckedShiptop: {left: 77.4, top: 3.48},
+  SuperMissileWreckedShipleft: {left: 71.8, top: 17.74},
+  MissilegreenMaridiashinespark: {left: 66, top: 50.9},
+  SuperMissilegreenMaridia: {left: 66.9, top: 49},
+  MissilegreenMaridiatatori: {left: 74.5, top: 53.01},
+  SuperMissileyellowMaridia: {left: 68.37, top: 38.65},
+  MissileyellowMaridiasupermissile: {left: 67.37, top: 38.65},
+  MissileyellowMaridiafalsewall: {left: 75.4, top: 38.65},
   MissileleftMaridiasandpitroom: {left: 77.95, top: 55.4},
   MissilerightMaridiasandpitroom: {left: 80.8, top: 55.4},
-  PowerBombrightMaridiasandpitroom: {left: 81.7, top: 56.8},
-  MissilepinkMaridia: {left: 81.7, top: 47.85},
-  SuperMissilepinkMaridia: {left: 82.7, top: 47.85},
-  MissileDraygon: {left: 98.85, top: 44.7},
-  Kraid: {left: 66.16, top: 66, boss: "Kraid"},
-  Ridley: {left: 76.6, top: 93.8, boss: "Ridley"},
-  Phantoon: {left: 78.8, top: 16.3, boss: "Phantoon"},
-  Draygon: {left: 93.8, top: 50, boss: "Draygon"},
-  MotherBrain: {left: 22, top: 33.2, boss: "MotherBrain"}
+  PowerBombrightMaridiasandpitroom: {left: 81.7, top: 57.23},
+  MissilepinkMaridia: {left: 81.7, top: 45.2},
+  SuperMissilepinkMaridia: {left: 82.7, top: 45.2},
+  MissileDraygon: {left: 98.85, top: 41.08},
+  Kraid: {left: 66.16, top: 68.95, boss: "Kraid"},
+  Ridley: {left: 76.6, top: 95.25, boss: "Ridley"},
+  Phantoon: {left: 78.8, top: 21.65, boss: "Phantoon"},
+  Draygon: {left: 93.8, top: 48.68, boss: "Draygon"},
+  MotherBrain: {left: 21.92, top: 44.24, boss: "MotherBrain"}
 };
 
+var tile2char = {243: '.', 244: '0', 207: '-', 208: 'a', 209: 'b', 210: 'c', 211: 'd', 212: 'e', 213: 'f', 214: 'g', 215: 'h', 216: 'i', 217: 'j', 218: 'k', 219: 'l', 220: 'm', 221: 'n', 222: 'o', 223: 'p', 224: 'q', 225: 'r', 226: 's', 227: 't', 228: 'u', 229: 'v', 230: 'w', 231: 'x', 232: 'y', 233: 'z', 245: '1', 246: '2', 247: '3', 248: '4', 249: '5', 250: '6', 251: '7', 252: '8', 253: '9'};
+
+var version = "";
 var romIsRaceProtected = false;
 window.onload = function(){
   initCurMode();
@@ -877,7 +891,7 @@ window.onload = function(){
         romIsRaceProtected = false;
         for(var addr=0x1C0200; addr<0x1C0210; addr++) {
             if(bytes[addr] != 0xff) {
-                if(mode == "plando") {
+                if(mode == "plando" && debug == false) {
                     clearInputSeed();
                     alert("race protected seed detected");
                     return false;
@@ -886,6 +900,38 @@ window.onload = function(){
                     break;
                 }
             }
+        }
+
+        // in plando check that seed version if the same as the current one
+        if(mode == "plando") {
+            length = bytes[0x0673e9];
+            // beta or r.2020.12.09
+            if (length == 4) {
+                if (version != "beta") {
+                    clearInputSeed();
+                    alert("base seed is a beta seed, use a seed generated on production");
+                    return false;
+                }
+            } else if (length == 12) {
+                var seedVersion = "";
+                for (var i=0; i<length; i++) {
+                    seedVersion += tile2char[bytes[0x0673ee+i*5]];
+                }
+                if(seedVersion != version) {
+                    clearInputSeed();
+                    alert("base seed's version is "+seedVersion+" but current version is "+version+", use a base seed generated with the current version");
+                    return false;
+                }
+            }
+
+            // put the plando seed in local storage
+            localforage.setItem('plandoROM', e.target.result, function(err, value) {
+                if(err != null) {
+                    console.log("Error detected with local storage: "+err);
+                } else {
+                    console.log("plando ROM stored in local storage");
+                }
+            });
         }
 
         var romData = {};
@@ -1075,7 +1121,7 @@ function mouseOver(elem) {
       $(elem).addClass(classNameOver);
     }
 
-    var newTop = locsInfo[locName].top - 0.75;
+    var newTop = locsInfo[locName].top - 1;
     var newLeft = locsInfo[locName].left - 0.5;
     $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
   }
@@ -1252,7 +1298,7 @@ function actionDoor(doorName) {
 
     if(mode == "seedless") {
         return;
-    } else if(mode == "plando" || mode == "race") {
+    } else if(mode == "plando" || (mode == "race" && doorsRando)) {
         var currentColor = getColor(doorName);
         // forced blue doors can't be updated
         if(currentColor == "blue") {
@@ -1639,5 +1685,8 @@ function dragElement(elmnt, headerId) {
     // stop moving when mouse button is released:
     document.onmouseup = null;
     document.onmousemove = null;
+
+    // display new percentage, usefull when we have to move things around
+    // console.log("elmnt: "+headerId+" top: "+(elmnt.style.top.match(/(\d+)/)[0]*100/document.getElementById('map_container').clientHeight).toFixed(2)+"% left: "+(elmnt.style.left.match(/(\d+)/)[0]*100/document.getElementById('map_container').clientWidth).toFixed(2)+"%");
   }
 }

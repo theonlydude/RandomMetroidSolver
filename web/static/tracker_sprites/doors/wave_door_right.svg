@@ -15,7 +15,7 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
-   sodipodi:docname="wave_door.svg">
+   sodipodi:docname="wave_door_right.svg">
   <defs
      id="defs2">
     <clipPath
@@ -38,7 +38,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="3.959798"
-     inkscape:cx="-4.6341304"
+     inkscape:cx="-47.313075"
      inkscape:cy="83.446367"
      inkscape:document-units="mm"
      inkscape:current-layer="layer2"
@@ -56,7 +56,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -67,21 +67,21 @@
      style="display:inline"
      transform="translate(-78.524551,-111.22469)">
     <path
-       style="fill:#d83890;fill-opacity:1;stroke:#000000;stroke-width:0.76208854;stroke-opacity:1"
+       style="fill:#d83890;fill-opacity:1;stroke:#ffffff;stroke-width:11.33858282;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        d="M 30.701172 -0.01171875 A 23.035719 75.000012 0 0 0 30.695312 0 L 0 0 L 0 128.21484 L 28.035156 128.21484 L 30.152344 128.21484 L 54.490234 128.21484 A 23.035719 75.000012 0 0 0 65.357422 64.642578 A 23.035719 75.000012 0 0 0 53.9375 -0.01171875 L 30.701172 -0.01171875 z "
        transform="matrix(0.26458333,0,0,0.26458333,78.524551,111.22469)"
        id="rect10" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:24.80181313px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.62004536"
-       x="131.14587"
-       y="86.601501"
+       x="132.0276"
+       y="85.966354"
        id="text4808"
        transform="scale(0.60014452,1.6662653)"><tspan
          sodipodi:role="line"
          id="tspan4806"
-         x="131.14587"
-         y="86.601501"
+         x="132.0276"
+         y="85.966354"
          style="stroke-width:0.62004536">W</tspan></text>
   </g>
 </svg>

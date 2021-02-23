@@ -510,7 +510,4 @@ class RomReader:
                     startPatches = ap.Start['patches']
                 break
 
-        if startAP == 'Ceres':
-            startAP = 'Landing Site'
-
         return (startAP, startArea, startPatches)

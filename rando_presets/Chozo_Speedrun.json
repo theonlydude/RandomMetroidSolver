@@ -23,5 +23,6 @@
   "funSuits": "off",
   "variaTweaks": "on",
   "nerfedCharge": "off",
-  "bossRandomization": "off"
+  "bossRandomization": "off",
+  "doorsColorsRando": "off"
 }

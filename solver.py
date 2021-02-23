@@ -21,7 +21,7 @@ def interactiveSolver(args):
             print("Missing preset or output parameter")
             sys.exit(1)
 
-        solver = InteractiveSolver(args.output)
+        solver = InteractiveSolver(args.output, args.logic)
         solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, fill=args.fill, startAP=args.startAP)
     else:
         # iterate
@@ -83,7 +83,7 @@ def interactiveSolver(args):
                 params = {'doorName': args.doorName}
         params["debug"] = args.mode == 'debug'
 
-        solver = InteractiveSolver(args.output)
+        solver = InteractiveSolver(args.output, args.logic)
         solver.iterate(args.state, args.scope, args.action, params)
 
 def standardSolver(args):
@@ -188,6 +188,7 @@ if __name__ == "__main__":
                         dest="doorName", nargs="?", default=None)
     parser.add_argument('--newColor', help="new color for door (used in interactive mode)",
                         dest="newColor", nargs="?", default=None)
+    parser.add_argument('--logic', help='logic to use (used in interactive mode)', dest='logic', nargs='?', default="varia", choices=["varia", "rotation"])
 
     args = parser.parse_args()
 

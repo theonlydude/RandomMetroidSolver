@@ -19,7 +19,7 @@ from logic.logic import Logic
 import utils.log
 
 class InteractiveSolver(CommonSolver):
-    def __init__(self, output):
+    def __init__(self, output, logic):
         self.interactive = True
         self.errorMsg = ""
         self.checkDuplicateMajor = False
@@ -28,6 +28,8 @@ class InteractiveSolver(CommonSolver):
 
         self.outputFileName = output
         self.firstLogFile = None
+
+        Logic.factory(logic)
         self.locations = Logic.locations
 
         (self.locsAddressName, self.locsWeb2Internal) = self.initLocsAddressName()

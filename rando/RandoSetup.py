@@ -4,7 +4,7 @@ from utils.utils import randGaussBounds
 from logic.smbool import SMBool, smboolFalse
 from logic.smboolmanager import SMBoolManager
 from logic.helpers import Bosses
-from graph.graph_access import getAccessPoint, GraphUtils
+from graph.graph_utils import getAccessPoint, GraphUtils
 from rando.Filler import FrontFiller
 from rando.ItemLocContainer import ItemLocContainer, getLocListStr, ItemLocation
 from rando.Chozo import isChozoItem

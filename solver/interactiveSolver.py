@@ -6,9 +6,8 @@ from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
 from logic.helpers import Pickup
 from rom.rompatcher import RomPatcher
 from rom.rom_patches import RomPatches
-from graph.graph_locations import locations as graphLocations
 from graph.graph import AccessGraphSolver as AccessGraph
-from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
+from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
 from utils.utils import removeChars
 from solver.conf import Conf
 from utils.parameters import hard, infinity
@@ -16,10 +15,11 @@ from solver.solverState import SolverState
 from solver.comeback import ComeBack
 from rando.ItemLocContainer import ItemLocation
 from utils.doorsmanager import DoorsManager
+from logic.logic import Logic
 import utils.log
 
 class InteractiveSolver(CommonSolver):
-    def __init__(self, output):
+    def __init__(self, output, logic):
         self.interactive = True
         self.errorMsg = ""
         self.checkDuplicateMajor = False
@@ -28,7 +28,9 @@ class InteractiveSolver(CommonSolver):
 
         self.outputFileName = output
         self.firstLogFile = None
-        self.locations = graphLocations
+
+        Logic.factory(logic)
+        self.locations = Logic.locations
 
         (self.locsAddressName, self.locsWeb2Internal) = self.initLocsAddressName()
         self.transWeb2Internal = self.initTransitionsName()
@@ -41,7 +43,7 @@ class InteractiveSolver(CommonSolver):
     def initLocsAddressName(self):
         addressName = {}
         web2Internal = {}
-        for loc in graphLocations:
+        for loc in Logic.locations:
             webName = self.locNameInternal2Web(loc.Name)
             addressName[loc.Address % 0x10000] = webName
             web2Internal[webName] = loc.Name
@@ -89,14 +91,14 @@ class InteractiveSolver(CommonSolver):
             if fill == True:
                 # load the source seed transitions and items/locations
                 self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
-                self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
+                self.areaGraph = AccessGraph(Logic.accessPoints, self.curGraphTransitions)
                 self.fillPlandoLocs()
             else:
                 if self.areaRando == True or self.bossRando == True:
                     plandoTrans = self.loadPlandoTransitions()
                     if len(plandoTrans) > 0:
                         self.curGraphTransitions = plandoTrans
-                    self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
+                    self.areaGraph = AccessGraph(Logic.accessPoints, self.curGraphTransitions)
 
                 self.loadPlandoLocs()
 
@@ -172,7 +174,7 @@ class InteractiveSolver(CommonSolver):
                 doorName = params['doorName']
                 DoorsManager.switchVisibility(doorName)
 
-        self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
+        self.areaGraph = AccessGraph(Logic.accessPoints, self.curGraphTransitions)
 
         if scope == 'common':
             if action == 'save':
@@ -264,7 +266,7 @@ class InteractiveSolver(CommonSolver):
             usedAPs[dst] = True
 
         singleAPs = []
-        for ap in accessPoints:
+        for ap in Logic.accessPoints:
             if ap.isInternal() == True:
                 continue
 
@@ -371,7 +373,7 @@ class InteractiveSolver(CommonSolver):
 
         plms = []
         if self.areaRando == True or self.bossRando == True or self.escapeRando == True:
-            doors = GraphUtils.getDoorConnections(AccessGraph(accessPoints, self.fillGraph()), self.areaRando, self.bossRando, self.escapeRando, False)
+            doors = GraphUtils.getDoorConnections(AccessGraph(Logic.accessPoints, self.fillGraph()), self.areaRando, self.bossRando, self.escapeRando, False)
             romPatcher.writeDoorConnections(doors)
             if magic == None:
                 doorsPtrs = GraphUtils.getAps2DoorsPtrs()

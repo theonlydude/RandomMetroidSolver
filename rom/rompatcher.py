@@ -3,11 +3,12 @@ import os, random, re
 from rando.Items import ItemManager
 from rom.compression import Compressor
 from rom.ips import IPS_Patch
-from rando.patches import patches, additional_PLMs
-from utils.parameters import appDir
 from utils.doorsmanager import DoorsManager
-from graph.graph_access import GraphUtils, getAccessPoint, accessPoints
+from graph.graph_utils import GraphUtils, getAccessPoint
+from logic.logic import Logic
 from rom.rom import RealROM, FakeROM
+from patches.patchaccess import PatchAccess
+from utils.parameters import appDir
 
 def getWord(w):
     return (w & 0x00FF, (w & 0xFF00) >> 8)
@@ -102,6 +103,7 @@ class RomPatcher:
             # get out of croc room: reload CRE
             0x93ea: self.forceRoomCRE
         }
+        self.patchAccess = PatchAccess()
 
     def end(self):
         self.romFile.close()
@@ -229,12 +231,13 @@ class RomPatcher:
             self.applyIPSPatch(patchName)
 
     def customShip(self, ship):
-        self.applyIPSPatch(ship, ipsDir='rando/patches/ships')
+        self.applyIPSPatch(ship, ipsDir='patches/common/ips/ships')
 
     def customSprite(self, sprite, customNames, noSpinAttack):
-        self.applyIPSPatch(sprite, ipsDir='rando/patches/sprites')
+        self.applyIPSPatch(sprite, ipsDir='patches/common/ips/sprites')
         if noSpinAttack == True:
             self.applyIPSPatch('SpriteSomething_Disable_Spin_Attack')
+
         if not customNames:
             return
 
@@ -417,16 +420,16 @@ class RomPatcher:
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
-    def applyIPSPatch(self, patchName, patchDict=None, ipsDir="rando/patches"):
+    def applyIPSPatch(self, patchName, patchDict=None, ipsDir=None):
         if patchDict is None:
-            patchDict = patches
+            patchDict = self.patchAccess.getDictPatches()
         print("Apply patch {}".format(patchName))
         if patchName in patchDict:
             patch = IPS_Patch(patchDict[patchName])
         else:
             # look for ips file
-            if os.path.exists(patchName):
-                patch = IPS_Patch.load(patchName)
+            if ipsDir is None:
+                patch = IPS_Patch.load(self.patchAccess.getPatchPath(patchName))
             else:
                 patch = IPS_Patch.load(os.path.join(appDir, ipsDir, patchName))
         self.ipsPatches.append(patch)
@@ -435,13 +438,13 @@ class RomPatcher:
         doors = [0x10] # red brin elevator
         def addBlinking(name):
             key = 'Blinking[{}]'.format(name)
-            if key in patches:
+            if key in self.patchAccess.getDictPatches():
                 self.applyIPSPatch(key)
-            if key in additional_PLMs:
+            if key in self.patchAccess.getAdditionalPLMs():
                 plms.append(key)
         if area == True:
             plms += ['Maridia Sand Hall Seal', "Save_Main_Street", "Save_Crab_Shaft"]
-            for accessPoint in accessPoints:
+            for accessPoint in Logic.accessPoints:
                 if accessPoint.Internal == True or accessPoint.Boss == True:
                     continue
                 addBlinking(accessPoint.Name)
@@ -449,7 +452,7 @@ class RomPatcher:
             addBlinking("Below Botwoon Energy Tank Right")
         if minimizerN is not None:
             # add blinking doors inside and outside boss rooms
-            for accessPoint in accessPoints:
+            for accessPoint in Logic.accessPoints:
                 if accessPoint.Boss == True:
                     addBlinking(accessPoint.Name)
         return doors
@@ -513,8 +516,9 @@ class RomPatcher:
         plmDict = {}
         # we might need to update locations addresses on the fly
         plmLocs = {} # room key above => loc name
+        additionalPLMs = self.patchAccess.getAdditionalPLMs()
         for p in plms:
-            plm = additional_PLMs[p]
+            plm = additionalPLMs[p]
             room = plm['room']
             state = 0
             if 'state' in plm:
@@ -1088,7 +1092,7 @@ class RomPatcher:
 
         return len(compressedData)
 
-    def setOamTile(self, nth, middle, newTile):
+    def setOamTile(self, nth, middle, newTile, y=0xFC):
         # an oam entry is made of five bytes: (s000000 xxxxxxxxx) (yyyyyyyy) (YXpp000t tttttttt)
 
         # after and before the middle of the screen is not handle the same
@@ -1098,10 +1102,10 @@ class RomPatcher:
             x = 0x200 - (0x08 * (middle - nth))
 
         self.romFile.writeWord(x)
-        self.romFile.writeByte(0xFC)
+        self.romFile.writeByte(y)
         self.romFile.writeWord(0x3100+newTile)
 
-    def writeVersion(self, version):
+    def writeVersion(self, version, addRotation=False):
         # max 32 chars
 
         # new oamlist address in free space at the end of bank 8C
@@ -1109,13 +1113,23 @@ class RomPatcher:
         self.romFile.writeWord(0xF3E9, 0x5a0e9)
 
         # string length
-        length = len(version)
+        versionLength = len(version)
+        if addRotation:
+            rotationLength = len('rotation')
+            length = versionLength + rotationLength
+        else:
+            length = versionLength
         self.romFile.writeWord(length, 0x0673e9)
-        middle = int(length / 2) + length % 2
+        versionMiddle = int(versionLength / 2) + versionLength % 2
 
         # oams
         for (i, char) in enumerate(version):
-            self.setOamTile(i, middle, char2tile[char])
+            self.setOamTile(i, versionMiddle, char2tile[char])
+
+        if addRotation:
+            rotationMiddle = int(rotationLength / 2) + rotationLength % 2
+            for (i, char) in enumerate('rotation'):
+                self.setOamTile(i, rotationMiddle, char2tile[char], y=0x8e)
 
     def writeDoorsColor(self, doors):
         DoorsManager.writeDoorsColor(self.romFile, doors)

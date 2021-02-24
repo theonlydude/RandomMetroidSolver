@@ -1,7 +1,6 @@
-
 import sys, random, time
 
-from graph.graph_locations import locations as graphLocations
+from logic.logic import Logic
 from rando.Restrictions import Restrictions
 from rando.RandoServices import RandoServices
 from rando.GraphBuilder import GraphBuilder
@@ -63,7 +62,7 @@ class RandoExec(object):
                 DoorsManager.randomize(graphSettings.allowGreyDoors)
             self.areaGraph = graphBuilder.createGraph()
             services = RandoServices(self.areaGraph, self.restrictions)
-            setup = RandoSetup(graphSettings, graphLocations, services)
+            setup = RandoSetup(graphSettings, Logic.locations, services)
             container = setup.createItemLocContainer()
             if container is None:
                 sys.stdout.write('*')
@@ -99,7 +98,7 @@ class RandoExec(object):
                         loc.Visibility = 'Hidden'
         # put nothing in unfilled locations
         filledLocNames = [il.Location.Name for il in itemLocs]
-        unfilledLocs = [loc for loc in graphLocations if loc.Name not in filledLocNames]
+        unfilledLocs = [loc for loc in Logic.locations if loc.Name not in filledLocNames]
         nothing = ItemManager.getItem('Nothing')
         for loc in unfilledLocs:
             loc.restricted = True

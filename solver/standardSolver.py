@@ -1,15 +1,14 @@
 import json, os
 
 from solver.commonSolver import CommonSolver
-from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
 from logic.helpers import Pickup
-from graph.graph_locations import locations as graphLocations
 from utils.utils import PresetLoader
 from solver.conf import Conf
 from solver.out import Out
 from solver.comeback import ComeBack
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
 from utils.parameters import Knows, isKnows, Settings
+from logic.logic import Logic
 import utils.log
 
 class StandardSolver(CommonSolver):
@@ -45,14 +44,10 @@ class StandardSolver(CommonSolver):
         self.output = Out.factory(self.type, self)
         self.outputFileName = outputFileName
 
-        self.locations = graphLocations
-
-        self.smbm = SMBoolManager()
+        self.loadRom(rom, magic=magic)
 
         self.presetFileName = presetFileName
         self.loadPreset(self.presetFileName)
-
-        self.loadRom(rom, magic=magic)
 
         self.pickup = Pickup(Conf.itemsPickup)
 
@@ -191,6 +186,7 @@ class StandardSolver(CommonSolver):
         locations = self.majorLocations if self.majorsSplit == 'Full' else self.majorLocations + self.minorLocations
 
         # instanciate a new smbool manager to reset the cache
+        from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
         self.smbm = SMBoolManager()
         presetFileName = os.path.expanduser('~/RandomMetroidSolver/standard_presets/solution.json')
         presetLoader = PresetLoader.factory(presetFileName)

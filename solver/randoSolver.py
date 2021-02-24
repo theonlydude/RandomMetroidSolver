@@ -3,7 +3,7 @@ import time
 from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
 from logic.helpers import Pickup
 from solver.conf import Conf
-from graph.graph_access import getAccessPoint
+from graph.graph_utils import getAccessPoint
 from solver.comeback import ComeBack
 from solver.standardSolver import StandardSolver
 from utils.parameters import easy

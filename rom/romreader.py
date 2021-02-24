@@ -1,8 +1,8 @@
 import copy
 
 from rom.compression import Compressor
-from graph.graph_locations import locations
-from graph.graph_access import GraphUtils, getAccessPoint, accessPoints
+from graph.graph_utils import GraphUtils, getAccessPoint
+from logic.logic import Logic
 
 class RomReader:
     # read the items in the rom
@@ -96,7 +96,8 @@ class RomReader:
         'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'desc': "Fast Tourian"},
         'open_zebetites': {'address': 0x26DF22, 'value': 0xc3, 'desc': "Zebetites without morph"},
         'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'desc': "Beam doors"},
-        'red_doors': {'address':0x20560, 'value':0xbd, 'desc': "Red doors open with one Missile and do not react to Super"}
+        'red_doors': {'address':0x20560, 'value':0xbd, 'desc': "Red doors open with one Missile and do not react to Super"},
+        'rotation': {'address': 0x44DF, 'value': 0xD0, 'desc': "Rotation hack"}
     }
 
     # FIXME shouldn't be here
@@ -171,7 +172,8 @@ class RomReader:
         'minimizer_bosses': {'address': 0x10F500, 'value': 0xAD, 'vanillaValue': 0xff},
         'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'vanillaValue': 0xff},
         'open_zebetites': {'address': 0x26DF22, 'value': 0xc3, 'vanillaValue': 0x43},
-        'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'vanillaValue': 0xaf}
+        'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'vanillaValue': 0xaf},
+        'rotation': {'address': 0x44DF, 'value': 0xD0, 'vanillaValue': 0xe0}
     }
 
     @staticmethod
@@ -334,7 +336,7 @@ class RomReader:
         rooms = GraphUtils.getRooms()
         bossTransitions = {}
         areaTransitions = {}
-        for accessPoint in accessPoints:
+        for accessPoint in Logic.accessPoints:
             if accessPoint.isInternal() == True:
                 continue
             key = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
@@ -482,10 +484,16 @@ class RomReader:
             self.nothingId = value
 
         # find the associated location to get its address
-        for loc in locations:
+        for loc in Logic.locations:
             if loc.Id == self.nothingId:
                 self.nothingAddr = 0x70000 | loc.Address
                 break
+
+    def readLogic(self):
+        if self.patchPresent('rotation'):
+            return 'rotation'
+        else:
+            return 'varia'
 
     def getStartAP(self):
         address = 0x10F200
@@ -494,7 +502,7 @@ class RomReader:
         startAP = 'Landing Site'
         startArea = 'Crateria Landing Site'
         startPatches = []
-        for ap in accessPoints:
+        for ap in Logic.accessPoints:
             if ap.Start != None and 'spawn' in ap.Start and ap.Start['spawn'] == value:
                 startAP = ap.Name
                 startArea = ap.Start['solveArea']

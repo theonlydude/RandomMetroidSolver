@@ -1,6 +1,6 @@
 import copy, random, utils.log
 
-from graph.graph_access import getAccessPoint
+from graph.graph_utils import getAccessPoint
 from rando.ItemLocContainer import getLocListStr
 
 # Holds settings related to item placement restrictions.

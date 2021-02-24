@@ -1,7 +1,8 @@
 
 import utils.log, random
 
-from graph.graph_access import GraphUtils, vanillaTransitions, vanillaBossesTransitions, accessPoints, escapeSource, escapeTargets
+from graph.graph_utils import GraphUtils, vanillaTransitions, vanillaBossesTransitions, escapeSource, escapeTargets
+from logic.logic import Logic
 from graph.graph import AccessGraphRando as AccessGraph
 
 # creates graph and handles randomized escape
@@ -30,7 +31,7 @@ class GraphBuilder(object):
                     transitions += vanillaTransitions
                 else:
                     transitions += GraphUtils.createAreaTransitions(self.graphSettings.lightAreaRando)
-        return AccessGraph(accessPoints, transitions, self.graphSettings.dotFile)
+        return AccessGraph(Logic.accessPoints, transitions, self.graphSettings.dotFile)
 
     # fills in escape transitions if escape rando is enabled
     def escapeGraph(self, emptyContainer, graph, maxDiff):

@@ -184,6 +184,11 @@ class Helpers(object):
         return sm.wand(sm.haveItem('Morph'), sm.haveItem('Bomb'), sm.knowsInfiniteBombJump())
 
     @Cache.decorator
+    def canInfiniteBombJumpSuitless(self):
+        sm = self.smbm
+        return sm.wand(sm.haveItem('Morph'), sm.haveItem('Bomb'), sm.knowsInfiniteBombJumpSuitless())
+
+    @Cache.decorator
     def haveMissileOrSuper(self):
         sm = self.smbm
         return sm.wor(sm.haveItem('Missile'), sm.haveItem('Super'))
@@ -264,6 +269,12 @@ class Helpers(object):
         sm = self.smbm
         return sm.wor(sm.canUseBombs(),
                       sm.canUsePowerBombs())
+
+    @Cache.decorator
+    def canMorphJump(self):
+        # small hop in morph ball form
+        sm = self.smbm
+        return sm.wor(sm.canPassBombPassages(), sm.haveItem('SpringBall'))
 
     def canCrystalFlash(self, n=1):
         sm = self.smbm

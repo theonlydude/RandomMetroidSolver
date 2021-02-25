@@ -8,6 +8,16 @@ from graph.location import locationsDict
 #    'Landing Site': lambda sm: SMBool(True)
 #}
 #locationsDict["Energy Tank, Gauntlet"].Available = (
+# TODO::from gauntlet top to etank with vanilla suits behaviour:
+# V + G + bomb: 3 energy
+# 0 + 0 + bomb: dead with 13 energy
+# V + 0 + bomb: 6 energy
+# 0 + G + bomb: 3 energy
+# V + G + 3 PB: 2 energy
+#  from etank to landing site:
+# V + G + bomb: 4 energy
+# V + G + 5 PB: 3 energy
+# V + 0 + 5 PB: 7 energy
 #    lambda sm: sm.wor(sm.canEnterAndLeaveGauntlet(),
 #                      sm.wand(sm.canShortCharge(),
 #                              sm.canEnterAndLeaveGauntletQty(1, 0)), # thanks ponk! https://youtu.be/jil5zTBCF1s
@@ -405,14 +415,12 @@ locationsDict["Missile (Crateria moat)"].AccessFrom = {
 locationsDict["Missile (Crateria moat)"].Available = (
     lambda sm: SMBool(True)
 )
-#locationsDict["Missile (Crateria bottom)"].AccessFrom = {
-#    'Landing Site': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (Crateria bottom)"].Available = (
-#    lambda sm: sm.wor(sm.canDestroyBombWalls(),
-#                      sm.wand(sm.haveItem('SpeedBooster'),
-#                              sm.knowsOldMBWithSpeed()))
-#)
+locationsDict["Missile (Crateria bottom)"].AccessFrom = {
+    'Landing Site': lambda sm: SMBool(True)
+}
+locationsDict["Missile (Crateria bottom)"].Available = (
+    lambda sm: sm.canPassBombPassages()
+)
 locationsDict["Missile (Crateria gauntlet right)"].AccessFrom = {
      # TODO::regular gauntlet, but it's filled with acid    
 #    'Landing Site': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
@@ -438,50 +446,50 @@ locationsDict["Missile (Crateria gauntlet left)"].AccessFrom = {
 locationsDict["Missile (Crateria gauntlet left)"].Available = (
     lambda sm: SMBool(True)
 )
-#locationsDict["Super Missile (Crateria)"].AccessFrom = {
-#    'Landing Site': lambda sm: SMBool(True)
-#}
-#locationsDict["Super Missile (Crateria)"].Available = (
-#    lambda sm: sm.wand(sm.canPassBombPassages(),
-#                       sm.traverse("ClimbRight"),
-#                       sm.haveItem('SpeedBooster'),
-#                       # reserves are hard to trigger midspark when not having ETanks
-#                                      sm.wor(sm.wand(sm.energyReserveCountOk(2), sm.itemCountOk('ETank', 1)), # need energy to get out
-#                                             sm.wand(sm.itemCountOk('ETank', 1),
-#                                                     sm.wor(sm.haveItem('Grapple'), # use grapple/space or dmg protection to get out
-#                                                            sm.haveItem('SpaceJump'),
-#                                                            sm.heatProof()))),
-#                       sm.wor(sm.haveItem('Ice'),
-#                              sm.wand(sm.canSimpleShortCharge(), sm.canUsePowerBombs()))) # there's also a dboost involved in simple short charge or you have to kill the yellow enemies with some power bombs
-#)
-#locationsDict["Missile (Crateria middle)"].AccessFrom = {
-#    'Landing Site': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (Crateria middle)"].Available = (
-#    lambda sm: sm.canPassBombPassages()
-#)
+locationsDict["Super Missile (Crateria)"].AccessFrom = {
+    'Landing Site': lambda sm: SMBool(True)
+}
+locationsDict["Super Missile (Crateria)"].Available = (
+    lambda sm: sm.wand(sm.canPassBombPassages(),
+                       sm.traverse("ClimbRight"),
+                       sm.haveItem('SpeedBooster')) # use speedbooster to get out too
+)
+locationsDict["Missile (Crateria middle)"].AccessFrom = {
+    'Landing Site': lambda sm: SMBool(True)
+}
+locationsDict["Missile (Crateria middle)"].Available = (
+    # the hidden path used to comeback in vanilla requires nothing in rotation
+    lambda sm: SMBool(True)
+)
 locationsDict["Power Bomb (green Brinstar bottom)"].AccessFrom = {
     'Etecoons Bottom': lambda sm: SMBool(True)
 }
 locationsDict["Power Bomb (green Brinstar bottom)"].Available = (
     lambda sm: SMBool(True)
 )
-#locationsDict["Super Missile (pink Brinstar)"].AccessFrom = {
-#    'Big Pink': lambda sm: SMBool(True)
-#}
-#locationsDict["Super Missile (pink Brinstar)"].Available = (
-#    lambda sm: sm.wor(sm.wand(sm.traverse('BigPinkTopRight'),
-#                              sm.enoughStuffSporeSpawn()),
-#                      # back way into spore spawn
-#                                     sm.wand(sm.canOpenGreenDoors(),
-#                                             sm.canPassBombPassages()))
-#)
-#locationsDict["Super Missile (pink Brinstar)"].PostAvailable = (
-#    lambda sm: sm.wand(sm.canOpenGreenDoors(),
-#                       sm.canPassBombPassages())
-#)
-# TODO::add a knows for morph from walljump to exit after super missile (green brinstar top) ?
-# or not as you have to be able to 100% finish the hack before doing rando
+locationsDict["Super Missile (pink Brinstar)"].AccessFrom = {
+    'Big Pink': lambda sm: sm.haveItem('Morph'),
+    'Green Hill Zone Top Right': lambda sm: SMBool(True)
+}
+locationsDict["Super Missile (pink Brinstar)"].Available = (
+                      # spore spawn
+    lambda sm: sm.wor(sm.wand(sm.traverse('BigPinkTopRight'),
+                              sm.enoughStuffSporeSpawn(),
+                              sm.haveItem('Morph')),
+                      # back way into spore spawn
+                      sm.wand(sm.canOpenGreenDoors(),
+                              # TODO::try with screw attack to not require morph
+                              sm.canPassBombPassages()))
+)
+locationsDict["Super Missile (pink Brinstar)"].PostAvailable = (
+    # coming back to entrance after killing spore spawn requires super + morph
+    # coming back to back door requires super + canpassbombpassages
+    lambda sm: sm.wand(sm.canOpenGreenDoors(),
+                       # TODO::try with screw attack to not require morph
+                       sm.canPassBombPassages())
+)
+# no technique for morph from walljump to exit after super missile (green brinstar top)
+# as you have to be able to 99% finish the hack before doing rando
 locationsDict["Missile (green Brinstar below super missile)"].AccessFrom = {
     'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.traverse('MainShaftRight'))
 }

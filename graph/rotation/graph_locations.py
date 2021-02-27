@@ -298,31 +298,23 @@ locationsDict["Energy Tank, Mama turtle"].Available = (
 locationsDict["Energy Tank, Mama turtle"].PostAvailable = (
     lambda sm: sm.canExitMamaTurtle()
 )
-#locationsDict["Plasma Beam"].AccessFrom = {
-#    'Toilet Top': lambda sm: SMBool(True)
-#}
-#locationsDict["Plasma Beam"].Available = (
-#    lambda sm: Bosses.bossDead(sm, 'Draygon')
-#)
-#locationsDict["Plasma Beam"].PostAvailable = (
-#    lambda sm: sm.wand(sm.wor(sm.wand(sm.canShortCharge(),
-#                                      sm.knowsKillPlasmaPiratesWithSpark()),
-#                              sm.wand(sm.canFireChargedShots(),
-#                                      sm.knowsKillPlasmaPiratesWithCharge(),
-#                                      # 160/80/40 dmg * 4 ground plasma pirates
-#                                      # => 640/320/160 damage take required
-#                                      # check below is 1099/599/299 (give margin for taking dmg a bit)
-#                                      # (* 4 for nerfed charge, since you need to take hits 4 times instead of one)
-#                                                       sm.energyReserveCountOk(int(10.0 * sm.getPiratesPseudoScrewCoeff()/sm.getDmgReduction(False)[0]))),
-#                              sm.haveItem('ScrewAttack'),
-#                              sm.haveItem('Plasma')),
-#                       sm.wor(sm.canFly(),
-#                              sm.wand(sm.haveItem('HiJump'),
-#                                      sm.knowsGetAroundWallJump()),
-#                              sm.canShortCharge(),
-#                              sm.wand(sm.canSpringBallJump(),
-#                                      sm.knowsSpringBallJumpFromWall())))
-#)
+locationsDict["Plasma Beam"].AccessFrom = {
+    'Toilet Top': lambda sm: SMBool(True)
+}
+locationsDict["Plasma Beam"].Available = (
+    lambda sm: Bosses.bossDead(sm, 'Draygon')
+)
+locationsDict["Plasma Beam"].PostAvailable = (
+    lambda sm: sm.wor(sm.wand(sm.canFireChargedShots(),
+                              sm.knowsKillPlasmaPiratesWithCharge(),
+                              # 160/80/40 dmg * 4 ground plasma pirates
+                              # => 640/320/160 damage take required
+                              # check below is 1099/599/299 (give margin for taking dmg a bit)
+                              # (* 4 for nerfed charge, since you need to take hits 4 times instead of one)
+                              sm.energyReserveCountOk(int(10.0 * sm.getPiratesPseudoScrewCoeff()/sm.getDmgReduction(False)[0]))),
+                      sm.haveItem('ScrewAttack'),
+                      sm.haveItem('Plasma'))
+)
 locationsDict["Reserve Tank, Maridia"].AccessFrom = {
     'Left Sandpit': lambda sm: SMBool(True)
 }
@@ -348,21 +340,25 @@ locationsDict["Energy Tank, Botwoon"].AccessFrom = {
 locationsDict["Energy Tank, Botwoon"].Available = (
     lambda sm: SMBool(True)
 )
-#locationsDict["Draygon"].AccessFrom = {
-#    'Draygon Room Bottom': lambda sm: SMBool(True)
-#}
-#locationsDict["Draygon"].Available = (
-#    lambda sm: SMBool(True)
-#)
-#locationsDict["Space Jump"].AccessFrom = {
-#    'Draygon Room Bottom': lambda sm: SMBool(True)
-#}
-#locationsDict["Space Jump"].Available = (
-#    lambda sm: SMBool(True)
-#)
-#locationsDict["Space Jump"].PostAvailable = (
-#    lambda sm: Bosses.bossDead(sm, 'Draygon')
-#)
+locationsDict["Draygon"].AccessFrom = {
+    'Draygon Room Bottom': lambda sm: SMBool(True)
+}
+locationsDict["Draygon"].Available = (
+    lambda sm: SMBool(True)
+)
+locationsDict["Space Jump"].AccessFrom = {
+    'Draygon Room Bottom': lambda sm: SMBool(True)
+}
+locationsDict["Space Jump"].Available = (
+    # suitless is just too complicated...
+    lambda sm: sm.wand(sm.haveItem('Gravity'),
+                       sm.wor(sm.canFly(),
+                              sm.haveItem('HiJump'),
+                              sm.canSpringBallJumpFromWall()))
+)
+locationsDict["Space Jump"].PostAvailable = (
+    lambda sm: Bosses.bossDead(sm, 'Draygon')
+)
 #locationsDict["Mother Brain"].AccessFrom = {
 #    'Golden Four': lambda sm: Bosses.allBossesDead(sm)
 #}
@@ -577,18 +573,18 @@ locationsDict["Missile (blue Brinstar bottom)"].AccessFrom = {
 locationsDict["Missile (blue Brinstar bottom)"].Available = (
     lambda sm: sm.haveItem('Morph')
 )
-#locationsDict["Missile (blue Brinstar top)"].AccessFrom = {
-#    'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (blue Brinstar top)"].Available = (
-#    lambda sm: sm.canAccessBillyMays()
-#)
-#locationsDict["Missile (blue Brinstar behind missile)"].AccessFrom = {
-#    'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (blue Brinstar behind missile)"].Available = (
-#    lambda sm: sm.canAccessBillyMays()
-#)
+locationsDict["Missile (blue Brinstar top)"].AccessFrom = {
+    'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
+}
+locationsDict["Missile (blue Brinstar top)"].Available = (
+    lambda sm: sm.canAccessBillyMays()
+)
+locationsDict["Missile (blue Brinstar behind missile)"].AccessFrom = {
+    'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
+}
+locationsDict["Missile (blue Brinstar behind missile)"].Available = (
+    lambda sm: sm.canAccessBillyMays()
+)
 locationsDict["Power Bomb (red Brinstar sidehopper room)"].AccessFrom = {
     'Red Brinstar Elevator': lambda sm: SMBool(True)
 }
@@ -671,6 +667,7 @@ locationsDict["Missile (below Crocomire)"].Available = (
 )
 locationsDict["Missile (below Crocomire)"].PostAvailable = (
     # TODO::room is full of acid, ask for both suits and energy to climb
+    # TODO::create and use acid bath tables
     lambda sm: sm.wand(sm.haveItem('Gravity'), sm.haveItem('Varia'),
                        sm.energyReserveCountOk(4))
 )
@@ -801,24 +798,25 @@ locationsDict["Super Missile (Wrecked Ship left)"].AccessFrom = {
 locationsDict["Super Missile (Wrecked Ship left)"].Available = (
     lambda sm: Bosses.bossDead(sm, 'Phantoon')
 )
-#locationsDict["Missile (green Maridia shinespark)"].AccessFrom = {
-#    'Main Street Bottom': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (green Maridia shinespark)"].Available = (
-#    lambda sm: sm.wand(sm.haveItem('Gravity'),
-#                       sm.haveItem('SpeedBooster'),
-#                       sm.wor(sm.wand(sm.wor(sm.haveItem('Super'), # run from room on the right
-#                                             RomPatches.has(RomPatches.AreaRandoGatesOther)),
-#                                      sm.itemCountOk('ETank', 1)), # etank for the spark since sparking from low ground
-#                              sm.canSimpleShortCharge())) # run from above
-#)
-#locationsDict["Super Missile (green Maridia)"].AccessFrom = {
-#    'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'),
-#                                            sm.canDoSuitlessOuterMaridia())
-#}
-#locationsDict["Super Missile (green Maridia)"].Available = (
-#    lambda sm: sm.haveItem('Morph')
-#)
+locationsDict["Missile (green Maridia shinespark)"].AccessFrom = {
+    'Main Street Bottom': lambda sm: SMBool(True)
+}
+locationsDict["Missile (green Maridia shinespark)"].Available = (
+    lambda sm: sm.wand(sm.haveItem('Gravity'),
+                       sm.haveItem('SpeedBooster'),
+                       # speedball required
+                       sm.knowsShortCharge())
+)
+locationsDict["Super Missile (green Maridia)"].AccessFrom = {
+    'Main Street Bottom': lambda sm: sm.canGravLessLevel1()
+}
+locationsDict["Super Missile (green Maridia)"].Available = (
+    lambda sm: sm.wand(sm.haveItem('Morph'),
+                       sm.canGravLessLevel1(),
+                       # hijump required when suitless & hard to avoid the crab when suitless
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.wand(sm.haveItem('HiJump'), sm.itemCountOk('ETank', 1))))
+)
 locationsDict["Missile (green Maridia tatori)"].AccessFrom = {
     # it's possible to crounched jump over the pink pirate when suitless without taking damage
     'Main Street Bottom': lambda sm: sm.wand(sm.wor(sm.traverse('FishTankRight'),
@@ -891,12 +889,15 @@ locationsDict["Super Missile (pink Maridia)"].AccessFrom = {
 locationsDict["Super Missile (pink Maridia)"].Available = (
     lambda sm: SMBool(True)
 )
-#locationsDict["Missile (Draygon)"].AccessFrom = {
-#    'Precious Room Top': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (Draygon)"].Available = (
-#    lambda sm: SMBool(True)
-#)
+locationsDict["Missile (Draygon)"].AccessFrom = {
+    'Precious Room Top': lambda sm: SMBool(True)
+}
+locationsDict["Missile (Draygon)"].Available = (
+    lambda sm: SMBool(True)
+)
+locationsDict["Missile (Draygon)"].PostAvailable = (
+    lambda sm: sm.canGravLessLevel1()
+)
 
 # TODO::use the dict in solver/randomizer
 # create the list that the solver/randomizer use

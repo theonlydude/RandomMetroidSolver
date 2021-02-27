@@ -33,16 +33,16 @@ accessPoints = [
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x36, 'SamusY':0x88, 'song': 0x9},
        dotOrientation = 'nw'),
-#    AccessPoint('Green Pirates Shaft Bottom Right', 'Crateria', {
-#        'Lower Mushrooms Left': lambda sm: SMBool(True)
-#    }, traverse = lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoMoreBlueDoors),
-#                                    sm.traverse('GreenPiratesShaftBottomRight')),
-#       roomInfo = {'RoomPtr':0x99bd, "area": 0x0, 'songs':[0x99ce]},
-#       # the doorAsmPtr 7FE00 is set by the g4_skip.ips patch, we have to call it
-#       exitInfo = {'DoorPtr':0x8c52, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
-#                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xfe00},
-#       entryInfo = {'SamusX':0xcc, 'SamusY':0x688, 'song': 0x9},
-#       dotOrientation = 'e'),
+    AccessPoint('Green Pirates Shaft Bottom Right', 'Crateria', {
+        'Lower Mushrooms Left': lambda sm: SMBool(True)
+    }, traverse = lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoMoreBlueDoors),
+                                    sm.traverse('GreenPiratesShaftBottomRight')),
+       roomInfo = {'RoomPtr':0x99bd, "area": 0x0, 'songs':[0x99ce]},
+       # the doorAsmPtr 7FE00 is set by the g4_skip.ips patch, we have to call it
+       exitInfo = {'DoorPtr':0x8c52, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xfe00},
+       entryInfo = {'SamusX':0xcc, 'SamusY':0x688, 'song': 0x9},
+       dotOrientation = 'e'),
     AccessPoint('Moat Right', 'Crateria', {
         'Keyhunter Room Bottom': lambda sm: sm.wand(sm.canPassMoatReverse(), sm.haveItem('Morph'))
     }, roomInfo = {'RoomPtr':0x95ff, "area": 0x0, 'songs':[0x9610]},
@@ -140,6 +140,7 @@ accessPoints = [
 #       dotOrientation = 'ne'),
     AccessPoint('Etecoons Supers', 'GreenPinkBrinstar', {
         # TODO::need clarification to know exactly where is etecoons bottom, up or down from the etank ?
+        #       -> it's up
         'Etecoons Bottom': lambda sm: sm.haveItem('Morph')
     }, internal=True,
        start={'spawn': 0x0107, 'doors':[0x34], 'patches':[RomPatches.EtecoonSupersBlueDoor],
@@ -178,7 +179,8 @@ accessPoints = [
                                Bosses.bossDead(sm, 'Phantoon'),
                                # need hijump when suitless
                                # TODO::check with other items than hijump when suitless
-                               sm.wor(sm.haveItem('Hijump'), sm.haveItem('Gravity')))
+                               sm.wor(sm.haveItem('Gravity'),
+                                      sm.wand(sm.knowsGravLessLevel1(), sm.haveItem('Hijump'))))
         )
     }, internal=True,
        start={'spawn':0x0300,
@@ -189,16 +191,20 @@ accessPoints = [
         'Wrecked Ship Main': lambda sm: sm.haveItem('Morph')
     }, internal=True),
     AccessPoint('Wrecked Ship Back', 'WreckedShip', {
-        'Wrecked Ship Main': lambda sm: sm.wand(sm.haveItem('Morph'), sm.knowsSuitlessBreakFree()),
-#        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(True)
+        'Wrecked Ship Main': lambda sm: sm.wand(sm.haveItem('Morph'),
+                                                sm.knowsSuitlessBreakFree(),
+                                                sm.canGravLessLevel1()),
+        # all for crabe maze, just fall in east ocean
+        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway()
     }, internal=True),
-#    AccessPoint('Crab Maze Left', 'WreckedShip', {
-#        'Wrecked Ship Back': lambda sm: sm.canPassForgottenHighway(False)
-#    }, roomInfo = {'RoomPtr':0x957d, "area": 0x0, 'songs':[0x958e]},
-#       exitInfo = {'DoorPtr':0x8aae, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
-#                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
-#       entryInfo = {'SamusX':0x34, 'SamusY':0x188, 'song': 0xc},
-#       dotOrientation = 'e'),
+    AccessPoint('Crab Maze Left', 'WreckedShip', {
+        # exit crab maze & climb east ocean
+        'Wrecked Ship Back': lambda sm: sm.canPassForgottenHighway()
+    }, roomInfo = {'RoomPtr':0x957d, "area": 0x0, 'songs':[0x958e]},
+       exitInfo = {'DoorPtr':0x8aae, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0x34, 'SamusY':0x188, 'song': 0xc},
+       dotOrientation = 'e'),
     AccessPoint('PhantoonRoomOut', 'WreckedShip', {
         # TODO::test with screwattack
         'Wrecked Ship Main': lambda sm: sm.canPassBombPassages()
@@ -232,6 +238,9 @@ accessPoints = [
 #       entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}, # unused
 #       escape = True,
 #       dotOrientation = 'ne'),
+
+
+
 #    ### Lower Norfair
 #    AccessPoint('Lava Dive Right', 'LowerNorfair', {
 #        'LN Entrance': lambda sm: sm.canPassLavaPit()
@@ -680,9 +689,9 @@ accessPoints = [
                                              sm.canGravLessLevel1()),
         'Colosseum Top Right': lambda sm: sm.wand(sm.haveItem('Morph'),
                                                   sm.canGravLessLevel1())
-#        'Toilet Top': lambda sm: sm.wand(sm.canReachCacatacAlleyFromBotowoon(),
-#                                         sm.canPassCacatacAlley())
-#    }, internal=True),
+        'Toilet Top': lambda sm: sm.wand(sm.canReachCacatacAlleyFromBotowoon(),
+                                         sm.canPassCacatacAlley())
+    }, internal=True),
 #    AccessPoint('West Sand Hall Left', 'EastMaridia', {
 #        # XXX there might be some tech to do this suitless, but HJ+ice is not enough
 #        'Oasis Bottom': lambda sm: sm.haveItem('Gravity'),
@@ -712,23 +721,28 @@ accessPoints = [
         'Oasis Bottom': lambda sm: sm.canTraverseSandPitsBottom(),
         'Aqueduct Bottom': lambda sm: sm.wand(sm.canGravLessLevel1(), sm.haveItem('Morph'))
     }, internal=True),
-#    AccessPoint('Le Coude Right', 'EastMaridia', {
-#        'Toilet Top': lambda sm: SMBool(True)
-#    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.traverse('LeCoudeBottom')),
-#       roomInfo = {'RoomPtr':0x95a8, "area": 0x0},
-#       exitInfo = {'DoorPtr':0x8aa2, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
-#                   "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
-#       entryInfo = {'SamusX':0xd1, 'SamusY':0x88},
-#       dotOrientation = 'ne'),
-#    AccessPoint('Toilet Top', 'EastMaridia', {
-#        'Oasis Bottom': lambda sm: sm.wand(sm.traverse('PlasmaSparkBottom'), sm.canDestroyBombWallsUnderwater()),
-#        'Le Coude Right': lambda sm: SMBool(True),
-#        'Precious Room Top': Cache.ldeco('TT_PRT',
-#                                         lambda sm: sm.wand(Bosses.bossDead(sm, 'Draygon'),
-#                                                            # suitless could be possible with this but unreasonable: https://youtu.be/rtLwytH-u8o
-#                                                            sm.haveItem('Gravity'),
-#                                                            sm.traverse('ColosseumBottomRight')))
-#    }, internal=True),
+    AccessPoint('Le Coude Right', 'EastMaridia', {
+        'Toilet Top': lambda sm: sm.wor(sm.haveItem('Gravity'),
+                                        sm.wand(sm.knowsGravLessLevel1()
+                                                # the final jump to exit the needle room,
+                                                # not an easy one, even with hijump...
+                                                # way easier with space jump
+                                                sm.wor(sm.haveItem('HiJump'),
+                                                       sm.haveItem('SpaceJump'))))
+    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.traverse('LeCoudeBottom')),
+       roomInfo = {'RoomPtr':0x95a8, "area": 0x0},
+       exitInfo = {'DoorPtr':0x8aa2, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
+                   "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0xd1, 'SamusY':0x88},
+       dotOrientation = 'ne'),
+    AccessPoint('Toilet Top', 'EastMaridia', {
+        'Oasis Bottom': lambda sm: sm.wand(sm.traverse('PlasmaSparkBottom'), sm.canDestroyBombWallsUnderwater()),
+        'Le Coude Right': lambda sm: sm.canGravLessLevel1(),
+        'Precious Room Top': Cache.ldeco('TT_PRT', (
+            # just fall all the way
+            lambda sm: sm.canGravLessLevel1()
+        )
+    }, internal=True),
     AccessPoint('Colosseum Top Right', 'EastMaridia', {
         'Post Botwoon': lambda sm: sm.canEnterExitBotwoon(),
         'Precious Room Top': lambda sm: sm.traverse('ColosseumBottomRight'), # go left
@@ -738,35 +752,35 @@ accessPoints = [
         'DraygonRoomOut': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canGravLessLevel1())
     }, internal = True),
 #    # boss APs
-#    AccessPoint('DraygonRoomOut', 'EastMaridia', {
-#        'Precious Room Top': lambda sm: sm.canExitPreciousRoom()
-#    }, boss = True,
-#       roomInfo = {'RoomPtr':0xd78f, "area": 0x4, "songs":[0xd7a5]},
-#       exitInfo = {'DoorPtr':0xa840, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
-#                   "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
-#       entryInfo = {'SamusX':0x34, 'SamusY':0x288, 'song':0x1b},
-#       traverse=lambda sm: sm.canOpenEyeDoors(),
-#       dotOrientation = 'e'),
-#    AccessPoint('DraygonRoomIn', 'EastMaridia', {
-#        'Draygon Room Bottom': Cache.ldeco('DRI_DRB',
-#                                           lambda sm: sm.wor(Bosses.bossDead(sm, "Draygon"),
-#                                                             sm.wand(sm.canFightDraygon(),
-#                                                                     sm.enoughStuffsDraygon())))
-#    }, boss = True,
-#       roomInfo = {'RoomPtr':0xda60, "area": 0x4},
-#       exitInfo = {'DoorPtr':0xa96c, 'direction': 0x4, "cap": (0x1, 0x26), "bitFlag": 0x0,
-#                   "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe3d9,
-#                   "exitAsmPtr": 0xf7f0},
-#       entryInfo = {'SamusX':0x1c8, 'SamusY':0x88},
-#       dotOrientation = 'e'),
-#    AccessPoint('Draygon Room Bottom', 'EastMaridia', {
-#       'DraygonRoomIn': lambda sm: sm.wand(Bosses.bossDead(sm, 'Draygon'), sm.canExitDraygon())
-#    }, internal = True),
+    AccessPoint('DraygonRoomOut', 'EastMaridia', {
+        'Precious Room Top': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canGravLessLevel1())
+    }, boss = True,
+       roomInfo = {'RoomPtr':0xd78f, "area": 0x4, "songs":[0xd7a5]},
+       exitInfo = {'DoorPtr':0xa840, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
+                   "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
+       entryInfo = {'SamusX':0x34, 'SamusY':0x288, 'song':0x1b},
+       traverse=lambda sm: sm.canOpenEyeDoors(),
+       dotOrientation = 'e'),
+    AccessPoint('DraygonRoomIn', 'EastMaridia', {
+        'Draygon Room Bottom': Cache.ldeco('DRI_DRB',
+                                           lambda sm: sm.wor(Bosses.bossDead(sm, "Draygon"),
+                                                             sm.wand(sm.canFightDraygon(),
+                                                                     sm.enoughStuffsDraygon())))
+    }, boss = True,
+       roomInfo = {'RoomPtr':0xda60, "area": 0x4},
+       exitInfo = {'DoorPtr':0xa96c, 'direction': 0x4, "cap": (0x1, 0x26), "bitFlag": 0x0,
+                   "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe3d9,
+                   "exitAsmPtr": 0xf7f0},
+       entryInfo = {'SamusX':0x1c8, 'SamusY':0x88},
+       dotOrientation = 'e'),
+    AccessPoint('Draygon Room Bottom', 'EastMaridia', {
+       'DraygonRoomIn': lambda sm: sm.wand(Bosses.bossDead(sm, 'Draygon'), sm.canGravLessLevel1())
+    }, internal = True),
     ### Red Brinstar. Main nodes: Red Tower Top Left, East Tunnel Right
     AccessPoint('Red Tower Top Left', 'RedBrinstar', {
         # go right
-        'Red Brinstar Elevator': lambda sm: sm.canClimbRedTower(),
-        'Caterpillar Room Top Right': lambda sm: sm.canClimbRedTower()
+        'Red Brinstar Elevator': lambda sm: sm.haveItem('Morph'),
+        'Caterpillar Room Top Right': lambda sm: sm.haveItem('Morph')
         # go left
         'East Tunnel Right': lambda sm: SMBool(True)
     }, roomInfo = {'RoomPtr':0xa253, "area": 0x1},
@@ -776,8 +790,10 @@ accessPoints = [
        dotOrientation = 'w'),
     AccessPoint('Caterpillar Room Top Right', 'RedBrinstar', {
         'Red Brinstar Elevator': lambda sm: SMBool(True) # wall jump up
-#        'Red Tower Top Left': lambda sm: sm.wand(sm.canPassMaridiaToRedTowerNode(),
-#                                                 sm.traverse('RedTowerElevatorLeft'))
+        'Red Tower Top Left': lambda sm: sm.wand(sm.wor(RomPatches.has(RomPatches.HellwayBlueDoor),
+                                                        sm.traverse('RedTowerElevatorLeft')),
+                                                 # pass shot block right of tower climb
+                                                 sm.haveItem('Morph'))
     }, roomInfo = {'RoomPtr':0xa322, "area": 0x1},
        exitInfo = {'DoorPtr':0x90c6, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x40,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbdaf},

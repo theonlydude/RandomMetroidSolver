@@ -70,17 +70,15 @@ class HelpersGraph(Helpers):
                              sm.haveItem('Plasma'),
                              sm.haveItem('ScrewAttack')))
 
-#    # from blue brin elevator
-#    @Cache.decorator
-#    def canAccessBillyMays(self):
-#        sm = self.smbm
-#        return sm.wand(sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor),
-#                              sm.traverse('ConstructionZoneRight')),
-#                       sm.canUsePowerBombs(),
-#                       sm.wor(sm.knowsBillyMays(),
-#                              sm.haveItem('Gravity'),
-#                              sm.haveItem('SpaceJump')))
-#
+    # from blue brin elevator
+    @Cache.decorator
+    def canAccessBillyMays(self):
+        sm = self.smbm
+        return sm.wand(sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor),
+                              sm.traverse('ConstructionZoneRight')),
+                       sm.canUsePowerBombs(),
+                       sm.canGravLessLevel1())
+
 #    @Cache.decorator
 #    def canAccessKraidsLair(self):
 #        sm = self.smbm
@@ -155,19 +153,14 @@ class HelpersGraph(Helpers):
                               sm.canUsePowerBombs(),
                               sm.haveItem('ScrewAttack')))
 
-#    # the water zone east of WS
-#    def canPassForgottenHighway(self, fromWs):
-#        sm = self.smbm
-#        suitless = sm.wand(sm.haveItem('HiJump'), sm.knowsGravLessLevel1())
-#        if fromWs is True and RomPatches.has(RomPatches.EastOceanPlatforms).bool is False:
-#            suitless = sm.wand(suitless,
-#                               sm.wor(sm.canSpringBallJump(), # two sbj on the far right
-#                                      # to break water line and go through the door on the right
-#                                      sm.haveItem('SpaceJump')))
-#        return sm.wand(sm.wor(sm.haveItem('Gravity'),
-#                              suitless),
-#                       sm.haveItem('Morph')) # for crab maze
-#
+    # the water zone east of WS
+    @Cache.decorator
+    def canPassForgottenHighway(self):
+        sm = self.smbm
+        return wm.wand(sm.canMorphJump(),
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.wand(sm.knowsGravLessLevel1(),
+                                      sm.haveItem('HiJump'))))
 #    @Cache.decorator
 #    def canExitCrabHole(self):
 #        sm = self.smbm
@@ -476,20 +469,7 @@ class HelpersGraph(Helpers):
 #                       # in wasteland and ki hunter room
 #                       sm.wnot(sm.canUseHyperBeam()))
 #
-    @Cache.decorator
-    def canClimbRedTower(self):
-        sm = self.smbm
-        return sm.wor(sm.haveItem('Morph'),
-                      sm.haveItem('ScrewAttack'))
 #
-#    @Cache.decorator
-#    def canClimbBottomRedTower(self):
-#        sm = self.smbm
-#        return sm.wor(sm.wor(RomPatches.has(RomPatches.RedTowerLeftPassage),
-#                             sm.haveItem('HiJump'),
-#                             sm.haveItem('Ice'),
-#                             sm.canFly()),
-#                      sm.canShortCharge())
 
      @Cache.decorator
      def canExitMamaTurtle(self):
@@ -498,8 +478,7 @@ class HelpersGraph(Helpers):
          return sm.wand(sm.wor(sm.canFly(),
                                sm.haveItem('HiJump')),
                         # go back to main street (use crounched jump over the pirates)
-                        sm.wor(sm.haveItem('Gravity'),
-                               sm.knowsGravLessLevel1()))
+                        sm.canGravLessLevel1())
 
     @Cache.decorator
     def canGoUpMtEverest(self):
@@ -511,32 +490,11 @@ class HelpersGraph(Helpers):
                               sm.haveItem('Grapple')))
     
 #    @Cache.decorator
-#    def canPassMtEverest(self):
-#        sm = self.smbm
-#        return  sm.wor(sm.wand(sm.haveItem('Gravity'),
-#                               sm.wor(sm.haveItem('Grapple'),
-#                                      sm.haveItem('SpeedBooster'),
-#                                      sm.canFly(),
-#                                      sm.knowsGravityJump())),
-#                       sm.wand(sm.canDoSuitlessOuterMaridia(),
-#                               sm.wor(sm.haveItem('Grapple'),
-#                                      sm.wand(sm.haveItem('Ice'), sm.knowsTediousMountEverest(), sm.haveItem('Super')),
-#                                      sm.canDoubleSpringBallJump())))
-#
-#    @Cache.decorator
 #    def canJumpUnderwater(self):
 #        sm = self.smbm
 #        return sm.wor(sm.haveItem('Gravity'),
 #                      sm.wand(sm.knowsGravLessLevel1(),
 #                              sm.haveItem('HiJump')))
-#
-#    @Cache.decorator
-#    def canDoSuitlessOuterMaridia(self):
-#        sm = self.smbm
-#        return sm.wand(sm.knowsGravLessLevel1(),
-#                       sm.haveItem('HiJump'),
-#                       sm.wor(sm.haveItem('Ice'),
-#                              sm.canSpringBallJump()))
 #
 #    @Cache.decorator
 #    def canPassBotwoonHallway(self):
@@ -552,25 +510,29 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.enoughStuffBotwoon(),
                        sm.haveItem('Morph'))
 
-#    @Cache.decorator
-#    def canReachCacatacAlleyFromBotowoon(self):
-#        sm = self.smbm
-#        return sm.wor(sm.haveItem('Gravity'),
-#                      sm.wand(sm.knowsGravLessLevel2(),
-#                              sm.haveItem("HiJump"),
-#                              sm.wor(sm.haveItem('Grapple'),
-#                                     sm.haveItem('Ice'),
-#                                     sm.canDoubleSpringBallJump())))
-#
-#    @Cache.decorator
-#    def canPassCacatacAlley(self):
-#        sm = self.smbm
-#        return sm.wand(Bosses.bossDead(sm, 'Draygon'),
-#                       sm.wor(sm.haveItem('Gravity'),
-#                              sm.wand(sm.knowsGravLessLevel2(),
-#                                      sm.haveItem('HiJump'),
-#                                      sm.haveItem('SpaceJump'))))
-#
+    @Cache.decorator
+    def canReachCacatacAlleyFromBotowoon(self):
+        sm = self.smbm
+                       # fall through the morph maze
+        return sm.wand(sm.haveItem('Morph'),
+                       sm.canGravLessLevel1(),
+                       # enter cacatac alley from halfie climb room
+                       sm.wor(sm.haveItem('HiJump'),
+                              sm.haveItem('Ice'),
+                              sm.haveItem('SpeedBooster'),
+                              sm.canFly()))
+
+    @Cache.decorator
+    def canPassCacatacAlley(self):
+        sm = self.smbm
+        return sm.wand(Bosses.bossDead(sm, 'Draygon'),
+                       # cacatac alley suitless: hijump + gravless level 1
+                       # butterfly room suitless: hijump + ice + gravless level 2
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.wand(sm.haveItem('HiJump'),
+                                      sm.haveItem('Ice'),
+                                      sm.knowsGravLessLevel2())))
+
 #    @Cache.decorator
 #    def canGoThroughColosseumSuitless(self):
 #        sm = self.smbm
@@ -659,14 +621,13 @@ class HelpersGraph(Helpers):
 #        crocRoom = getAccessPoint('Crocomire Room Top')
 #        return SMBool(crocRoom.ConnectedTo == 'Crocomire Speedway Bottom')
 #
-#    @Cache.decorator
-#    def canFightDraygon(self):
-#        sm = self.smbm
-#        return sm.wor(sm.haveItem('Gravity'),
-#                      sm.wand(sm.haveItem('HiJump'),
-#                              sm.wor(sm.knowsGravLessLevel2(),
-#                                     sm.knowsGravLessLevel3())))
-#
+    @Cache.decorator
+    def canFightDraygon(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.wor(sm.knowsGravLessLevel2(),
+                                     sm.knowsGravLessLevel3())))
+
 #    @Cache.decorator
 #    def canDraygonCrystalFlashSuit(self):
 #        sm = self.smbm

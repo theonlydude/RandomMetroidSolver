@@ -439,8 +439,7 @@ locationsDict["Missile (outside Wrecked Ship middle)"].Available = (
     lambda sm: sm.wand(sm.haveItem('Super'), sm.haveItem('Morph'), Bosses.bossDead(sm, 'Phantoon'))
 )
 locationsDict["Missile (Crateria moat)"].AccessFrom = {
-    'Keyhunter Room Bottom': lambda sm: sm.traverse('KihunterRight'),
-    'Moat Right': lambda sm: sm.canPassMoatReverse()
+    'Moat Left': lambda sm: SMBool(True)
 }
 locationsDict["Missile (Crateria moat)"].Available = (
     lambda sm: SMBool(True)

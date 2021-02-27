@@ -46,15 +46,18 @@ accessPoints = [
        entryInfo = {'SamusX':0xcc, 'SamusY':0x688, 'song': 0x9},
        dotOrientation = 'e'),
     AccessPoint('Moat Right', 'Crateria', {
-        'Keyhunter Room Bottom': lambda sm: sm.canPassMoatReverse()
+        'Moat Left': lambda sm: sm.canPassMoatReverse()
     }, roomInfo = {'RoomPtr':0x95ff, "area": 0x0, 'songs':[0x9610]},
        exitInfo = {'DoorPtr':0x8aea, 'direction': 0x4, "cap": (0x1, 0x46), "bitFlag": 0x0,
                    "screen": (0x0, 0x4), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x1cf, 'SamusY':0x88, 'song': 0xc},
        dotOrientation = 'ne'),
+    AccessPoint('Moat Left', 'Crateria', {
+        'Keyhunter Room Bottom': lambda sm: SMBool(True),
+        'Moat Right': lambda sm: sm.canPassMoat()
+    }, internal=True),
     AccessPoint('Keyhunter Room Bottom', 'Crateria', {
-        'Moat Right': lambda sm: sm.wand(sm.traverse('KihunterRight'),
-                                         sm.canPassMoat()),
+        'Moat Left': lambda sm: sm.traverse('KihunterRight'),
         'Landing Site': lambda sm: SMBool(True)
     }, traverse = lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoMoreBlueDoors),
                                     sm.traverse('KihunterBottom')),

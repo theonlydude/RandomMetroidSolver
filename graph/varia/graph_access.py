@@ -54,10 +54,11 @@ accessPoints = [
        dotOrientation = 'ne'),
     AccessPoint('Moat Left', 'Crateria', {
         'Keyhunter Room Bottom': lambda sm: SMBool(True),
-        'Moat Right': lambda sm: sm.canPassMoat()
+        'Moat Right': lambda sm: sm.canPassMoatFromMoat()
     }, internal=True),
     AccessPoint('Keyhunter Room Bottom', 'Crateria', {
         'Moat Left': lambda sm: sm.traverse('KihunterRight'),
+        'Moat Right': lambda sm: sm.wand(sm.traverse('KihunterRight'), sm.canPassMoat()),
         'Landing Site': lambda sm: SMBool(True)
     }, traverse = lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoMoreBlueDoors),
                                     sm.traverse('KihunterBottom')),

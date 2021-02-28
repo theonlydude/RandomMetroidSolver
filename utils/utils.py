@@ -5,7 +5,7 @@ from utils.parameters import easy, medium, hard, harder, hardcore, mania
 from logic.smbool import SMBool
 
 def isStdPreset(preset):
-    return preset in ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master', 'samus', 'solution', 'Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2021']
+    return preset in ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master', 'samus', 'solution', 'Season_Races', 'SMRAT2021']
 
 def getPresetDir(preset):
     if isStdPreset(preset):
@@ -259,9 +259,21 @@ def getDefaultMultiValues():
         'progressionSpeed': ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble', 'speedrun'],
         'progressionDifficulty': ['easier', 'normal', 'harder'],
         'morphPlacement': ['early', 'late', 'normal'],
-        'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla' ]
+        'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla' ],
+        'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive']
     }
     return defaultMultiValues
+
+# from web to cli
+def convertParam(randoParams, param, inverse=False):
+    value = randoParams.get(param, "off" if inverse == False else "on")
+    if value == "on":
+        return True if inverse == False else False
+    elif value == "off":
+        return False if inverse == False else True
+    elif value == "random":
+        return "random"
+    raise Exception("invalid value for parameter {}".format(param))
 
 def loadRandoPreset(randoPreset, args):
     # load the rando preset json file and add the parameters inside it to the args parser
@@ -296,32 +308,21 @@ def loadRandoPreset(randoPreset, args):
     if randoParams.get("layoutPatches", "on") == "off":
         args.noLayout = True
     if "gravityBehaviour" in randoParams:
-        # Balanced is the default
-        if randoParams["gravityBehaviour"] == "Vanilla":
-            args.noGravHeat = True
-        elif randoParams["gravityBehaviour"] == "Progressive":
-            args.progressiveSuits = True
+        args.gravityBehaviour = randoParams["gravityBehaviour"]
     if randoParams.get("nerfedCharge", "off") == "on":
         args.nerfedCharge = True
 
-    if randoParams.get("areaRandomization", "off") == "on":
-        args.area = True
-        if randoParams.get("areaLayout", "on") == "off":
-            args.areaLayoutBase = True
-        if randoParams.get("lightAreaRandomization", "off") == "on":
-            args.lightArea = True
-        if randoParams.get("escapeRando", "on") == "off":
-            args.noEscapeRando = True
-        if randoParams.get("removeEscapeEnemies", "on") == "off":
-            args.noRemoveEscapeEnemies = True
+    args.area = convertParam(randoParams, "areaRandomization")
+    if args.area == True:
+        args.areaLayoutBase = convertParam(randoParams, "areaLayout", inverse=True)
+        args.lightArea = convertParam(randoParams, "lightAreaRandomization")
+    args.escapeRando = convertParam(randoParams, "escapeRando")
+    if args.escapeRando == True:
+        args.noRemoveEscapeEnemies = convertParam(randoParams, "removeEscapeEnemies", inverse=True)
 
-    if randoParams.get("doorsColorsRando", "off") == "on":
-        args.doorsColorsRando = True
-    if randoParams.get("allowGreyDoors", "off") == "on":
-        args.allowGreyDoors = True
-
-    if randoParams.get("bossRandomization", "off") == "on":
-        args.bosses = True
+    args.doorsColorsRando = convertParam(randoParams, "doorsColorsRando")
+    args.allowGreyDoors = convertParam(randoParams, "allowGreyDoors")
+    args.bosses = convertParam(randoParams, "bossRandomization")
 
     if randoParams.get("funCombat", "off") != "off":
         if randoParams["funCombat"] == "on":
@@ -390,7 +391,7 @@ def loadRandoPreset(randoPreset, args):
             args.minimizerTourian = True
 
     defaultMultiValues = getDefaultMultiValues()
-    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"]
+    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"]
     for multiElem in multiElems:
         if multiElem+'MultiSelect' in randoParams:
             setattr(args, multiElem+'List', ','.join(randoParams[multiElem+'MultiSelect']))
@@ -444,6 +445,7 @@ def getRandomizerDefaultParameters():
     defaultParams['layoutPatches'] = "on"
     defaultParams['variaTweaks'] = "on"
     defaultParams['gravityBehaviour'] = "Balanced"
+    defaultParams['gravityBehaviourMultiSelect'] = defaultMultiValues['gravityBehaviour']
     defaultParams['nerfedCharge'] = "off"
     defaultParams['itemsounds'] = "on"
     defaultParams['elevators_doors_speed'] = "on"

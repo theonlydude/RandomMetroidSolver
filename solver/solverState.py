@@ -34,6 +34,8 @@ class SolverState(object):
         self.state["areaTransitions"] = solver.areaTransitions
         # list [(ap1, ap2), (ap3, ap4), ...]
         self.state["bossTransitions"] = solver.bossTransitions
+        # list [(ap1, ap2)]
+        self.state["escapeTransition"] = solver.escapeTransition
         # list [(ap1, ap2), ...]
         self.state["curGraphTransitions"] = solver.curGraphTransitions
         # bool
@@ -62,7 +64,7 @@ class SolverState(object):
         # dict {point: point, ...} / array of startPoints
         (self.state["linesWeb"], self.state["linesSeqWeb"]) = self.getLinesWeb(solver.curGraphTransitions)
         # bool
-        self.state["allTransitions"] = len(solver.curGraphTransitions) == len(solver.areaTransitions) + len(solver.bossTransitions)
+        self.state["allTransitions"] = len(solver.curGraphTransitions) == len(solver.areaTransitions) + len(solver.bossTransitions) + len(solver.escapeTransition)
         self.state["errorMsg"] = solver.errorMsg
         if len(solver.visitedLocations) > 0:
             self.state["last"] = {"loc": solver.visitedLocations[-1].Name,
@@ -78,6 +80,8 @@ class SolverState(object):
         self.state["doors"] = DoorsManager.serialize()
         # doorsRando: bool
         self.state["doorsRando"] = solver.doorsRando
+        # allDoorsRevealed: bool
+        self.state["allDoorsRevealed"] = DoorsManager.allDoorsRevealed()
 
     def toSolver(self, solver):
         solver.majorsSplit = self.state["majorsSplit"]
@@ -91,6 +95,7 @@ class SolverState(object):
         self.setLocsData(solver.locations)
         solver.areaTransitions = self.state["areaTransitions"]
         solver.bossTransitions = self.state["bossTransitions"]
+        solver.escapeTransition = self.state["escapeTransition"]
         solver.curGraphTransitions = self.state["curGraphTransitions"]
         solver.hasMixedTransitions = self.state["hasMixedTransitions"]
         # preset

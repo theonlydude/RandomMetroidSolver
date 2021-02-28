@@ -1,6 +1,7 @@
 {{extend 'layout.html'}}
 
 {{include 'solver_web/t_includes.html'}}
+<script type="text/javascript" src="{{=URL('static', 'js/localforage.nopromises.min.js')}}"></script>
 
 <title>Super Metroid VARIA Plandomizer</title>
 
@@ -26,7 +27,7 @@
     z-index: 7;
     width: 2.5%;
     height: 3.75%;
-    top: 0.5%;
+    top: 0%;
     left: 11.875%;
 }
 .binArea {
@@ -35,7 +36,7 @@
     z-index: 7;
     width: 2.5%;
     height: 3.75%;
-    top: 0.5%;
+    top: 0%;
     left: 14.625%;
 }
 
@@ -44,7 +45,7 @@
     z-index: 7;
     width: 10%;
     height: 3.75%;
-    top: 5.25%;
+    top: 5.2%;
     left: 4.3%;
     color: #ffffff;
     font-size: 1.25vw;
@@ -92,7 +93,7 @@
     z-index: 7;
     width: 2.5%;
     height: 3.75%;
-    top: 0.50%;
+    top: 0%;
     left: 18.75%;
 }
 .lockPlando {
@@ -101,7 +102,7 @@
     z-index: 7;
     width: 2.5%;
     height: 3.75%;
-    top: 9%;
+    top: 10%;
     left: 18.75%;
 }
 .helpPlando {
@@ -110,7 +111,7 @@
     z-index: 7;
     width: 2.5%;
     height: 3.75%;
-    top: 0.5%;
+    top: 0%;
     left: 2.75%;
 }
 .startDebug {
@@ -165,47 +166,79 @@ var globalPlando = true;
 
 function initCurMode() {
   document.getElementById("mode").value = "plando";
+  mode = "plando";
 }
 
 {{include 'solver_web/t_js.html'}}
 
 var g_lock = "save";
-function save(lock) {
-  if(loaded == false || webServInProgress == true || init == false) {
-    return;
-  }
-  if(! isActive("savePlando")) {
-    return;
-  }
-
-  if(lock == "save") {
-    g_lock = "save";
-  } else if(lock == "lock") {
-    g_lock = "lock";
-  } else {
-    lock = g_lock;
-  }
-
-  // check if escape rando is on that tourian transition is set, display an alert otherwise
-  if(escapeRando == true && !("tourianEscapeRoom4TopRight" in lines)) {
-    alert("Tourian escape transition is not set, you have to set it before playing or the game will crash during the escape sequence");
-  }
-
-  var dataDict = {action: "save", scope: "common", lock: g_lock};
-  var uploadFile = document.getElementById("uploadFile");
-  if(uploadFile.files.length == 0) {
-    var saveFile = document.getElementById("saveFile");
-    if(saveFile.files.length == 0) {
-      // display popup to choose the local ROM
-      document.getElementById("savePopup").style.display = "block";
-    } else {
-      // call WS
-      ajaxCall(dataDict, "download", ajaxOkSave);
+var plandoROM = null;
+async function save(lock) {
+    if(loaded == false || webServInProgress == true || init == false) {
+        return;
     }
-  } else {
-    // call WS
-    ajaxCall(dataDict, "download", ajaxOkSave);
-  }
+    if(! isActive("savePlando")) {
+        return;
+    }
+
+    if(lock == "save") {
+        g_lock = "save";
+    } else if(lock == "lock") {
+        g_lock = "lock";
+    } else {
+        lock = g_lock;
+    }
+
+    // check if escape rando is on that tourian transition is set, display an alert otherwise
+    if(escapeRando == true && !("tourianEscapeRoom4TopRight" in lines)) {
+        alert("Tourian escape transition is not set, you have to set it before playing or the game will crash during the escape sequence");
+    }
+
+    var dataDict = {action: "save", scope: "common", lock: g_lock};
+    var uploadFile = document.getElementById("uploadFile");
+    if(uploadFile.files.length == 0) {
+        // check if we have the plando ROM in local storage
+        console.log("check if rom in local storage");
+        try {
+            plandoROM = await localforage.getItem('plandoROM');
+            console.log("plando ROM found in local storage");
+            if(plandoROM == null) {
+                console.log("plando ROM loaded from local storage is null");
+                localforage.clear();
+            }
+        } catch (err) {
+            // This code runs if there were any errors.
+            console.log("error detected when loading plando ROM from local storage: "+err);
+            localforage.clear();
+        }
+        // nothing in local storage
+        if(plandoROM == null) {
+            console.log("plando rom not found in local storage");
+            var saveFile = document.getElementById("saveFile");
+            if(saveFile.files.length == 0) {
+                // display popup to choose the local ROM
+                document.getElementById("savePopupText").innerHTML = "The page has been reloaded, please select your ROM again: "+document.getElementById("cur_seed").value;
+                document.getElementById("savePopup").style.display = "block";
+            } else {
+                // check that chosen seed is the same that was used to init the plando
+                var saveFileName = saveFile.files[0].name;
+                var initFileName = document.getElementById("cur_seed").value;
+                if(saveFileName != initFileName) {
+                    document.getElementById("saveFile").value = "";
+                    alert("Not the seed used to init the plando, please choose: "+initFileName);
+                } else {
+                    // call WS
+                    ajaxCall(dataDict, "download", ajaxOkSave);
+                }
+            }
+        } else {
+            // call WS
+            ajaxCall(dataDict, "download", ajaxOkSave);
+        }
+    } else {
+        // call WS
+        ajaxCall(dataDict, "download", ajaxOkSave);
+    }
 }
 
 function randomize() {
@@ -263,64 +296,77 @@ function unpack_2bytes(ips, i) {
   return (b1*256) + b2;
 }
 
+function applyToROM(bytes, data) {
+    var binary_string = atob(data["ips"]);
+    var len = binary_string.length;
+    var ips = new Uint8Array(len);
+    for(var i = 0; i < len; i++) {
+        ips[i] = binary_string.charCodeAt(i);
+    }
+
+    console.log("IPS size: "+ips.length);
+    var i = 5;
+    var offset = 0;
+    var size = 0;
+    var rle_size = 0;
+
+    while(i < ips.length - 3) {
+        offset = unpack_3bytes(ips, i);
+        i += 3;
+        size = unpack_2bytes(ips, i);
+        i += 2;
+
+        if(size == 0) {
+            // RLE
+            rle_size = unpack_2bytes(ips, i);
+            i += 2;
+            for(j=0; j<rle_size; j++) {
+                bytes[offset+j] = ips[i];
+            }
+            i += 1;
+        } else {
+            for(j=0; j<size; j++) {
+                bytes[offset+j] = ips[i+j];
+            }
+            i += j;
+        }
+    }
+
+    var blob = new Blob([bytes], {type: "octet/stream"})
+
+    var outFileName = data['fileName']
+    saveAs(blob, outFileName)
+}
+
 function ajaxOkSave(data) {
-  webServInProgress = false;
+    webServInProgress = false;
 
-  console.log("ajaxSaveOk");
+    console.log("ajaxSaveOk");
 
-  var uploadFile = document.getElementById("uploadFile");
-  if(uploadFile.files.length == 0) {
-    uploadFile = document.getElementById("saveFile");
-  }
+    var useLocalStorage = false;
+    var uploadFile = document.getElementById("uploadFile");
+    if(uploadFile.files.length == 0) {
+        if(plandoROM != null) {
+            useLocalStorage = true;
+        } else {
+            uploadFile = document.getElementById("saveFile");
+        }
+    }
 
-  var file = uploadFile.files[0];
+    if(useLocalStorage) {
+        var bytes = new Uint8Array(plandoROM);
+        applyToROM(bytes, data);
+    } else {
+        var file = uploadFile.files[0];
 
-  var reader = new FileReader();
-  reader.readAsArrayBuffer(file)
+        var reader = new FileReader();
+        reader.readAsArrayBuffer(file)
 
-  reader.onload = function(e) {
-      var bytes = new Uint8Array(e.target.result);
-
-      var binary_string = atob(data["ips"]);
-      var len = binary_string.length;
-      var ips = new Uint8Array(len);
-      for(var i = 0; i < len; i++) {
-         ips[i] = binary_string.charCodeAt(i);
-      }
-
-      console.log("IPS size: "+ips.length);
-      var i = 5;
-      var offset = 0;
-      var size = 0;
-      var rle_size = 0;
-
-      while(i < ips.length - 3) {
-         offset = unpack_3bytes(ips, i);
-         i += 3;
-         size = unpack_2bytes(ips, i);
-         i += 2;
-
-         if(size == 0) {
-           // RLE
-           rle_size = unpack_2bytes(ips, i);
-           i += 2;
-           for(j=0; j<rle_size; j++) {
-             bytes[offset+j] = ips[i];
-           }
-           i += 1;
-         } else {
-           for(j=0; j<size; j++) {
-             bytes[offset+j] = ips[i+j];
-           }
-           i += j;
-         }
-      }
-
-      var blob = new Blob([bytes], {type: "octet/stream"})
-
-      var outFileName = data['fileName']
-      saveAs(blob, outFileName)
-  }
+        reader.onload = function(e) {
+            var bytes = new Uint8Array(e.target.result);
+            applyToROM(bytes, data);
+        }
+    }
 
   // info message to display ?
   if("errorMsg" in data && data["errorMsg"].length > 0) {
@@ -357,9 +403,10 @@ function startTheTour(step=-1) {
 <h4>Start</h4>\
 <p>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button, a popup will be displayed:\
 </p>\
-<p>As a base for your Plando ROM you should generate a seed on the <a href=\"/randomizer\" target=\"_blank\">Randomizer page</a> with all the optional patches that you need and the start location of your choice.</p>\
+<p>As a base for your Plando ROM generate a seed on the <a href=\"/randomizer\" target=\"_blank\">Randomizer page</a> with all the optional patches that you need and the start location of your choice.</p>\
 <p><b>Hint:</b>You can load the base ROM locations and transitions by checking the \"Populate your plando with the items and transitions from the base ROM\" checkbox.</p>\
 <p><b>Warning:</b>Using a race protected seed as your base ROM is not supported and is forbidden.</p>\
+<p><b>Warning:</b>To avoid incompatibilities and crashes always use a base seed from the current VARIA release.</p>\
 <p><b>Note:</b> Don't use a sprite customized seed as your base if you want to upload your plando to the <a href=\"{{=URL(f="plandorepo")}}\" target=\"_blank\">Plandository</a> later.</p>\
 <h4>Usage</h4>\
 <p>The available locations will be displayed on the map, click on a location and this popup will be displayed allowing you to choose which item to place:\
@@ -409,6 +456,8 @@ var vcrData = [];
 var vcrIndex = 0;
 
 function onloadHook() {
+  version = "{{=version}}";
+
   var url = window.location.pathname;
   if(url.includes("debug")) {
     debug = true;
@@ -577,7 +626,7 @@ function previousAction() {
     return;
   }
 
-  if(isDesactivated("prevous")) {
+  if(isDesactivated("previous")) {
     return;
   }
 
@@ -858,7 +907,7 @@ def displayNumber(id, min, max, default, step="1"):
     <table class="full">
       <colgroup><col class="half" /><col class="half" /></colgroup>
       <tr><td colspan=2></td></tr>
-      <tr><td id="SaveGrab" colspan=2 class="center greyRow">The page has been reloaded, please select your ROM again</td></tr>
+      <tr><td id="SaveGrab" colspan=2 class="center greyRow"><p id="savePopupText" class="center">The page has been reloaded, please select your ROM again</p></td></tr>
       <tr><td colspan=2 class="blankRow"></td></tr>
       <tr>
         <td>Randomized Super Metroid ROM: </td>

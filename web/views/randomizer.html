@@ -61,8 +61,15 @@ if (hs.registerOverlay) {
     text-align: center;
 }
 .donate {
-    text-align: center;
-    margin-top: 1em;
+    text-align: right;
+}
+.nomargin {
+    margin: 0em;
+    border: 0em;
+    padding: 0em;
+}
+.inputImage {
+    margin-bottom: -1em;
 }
 .rightStep {
     float: right;
@@ -254,6 +261,12 @@ if (hs.registerOverlay) {
 .marginRight {
     margin-right: 2em;
 }
+.center_img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 40%;
+}
 </style>
 
 <script type="text/javascript">
@@ -263,7 +276,7 @@ $(document).ready(function(){
 });
 
 // chosen elements need a special method to update their value
-var chosenElements = ["preset", "startLocationMultiSelect", "majorsSplitMultiSelect", "progressionSpeedMultiSelect", "progressionDifficultyMultiSelect", "morphPlacementMultiSelect", "energyQtyMultiSelect"];
+var chosenElements = ["preset", "startLocationMultiSelect", "majorsSplitMultiSelect", "progressionSpeedMultiSelect", "progressionDifficultyMultiSelect", "morphPlacementMultiSelect", "energyQtyMultiSelect", "gravityBehaviourMultiSelect"];
 var currentMultiValues = {{response.write(currentMultiValues, escape=False)}};
 var defaultMultiValues = {{response.write(defaultMultiValues, escape=False)}};
 
@@ -379,7 +392,7 @@ function getComplexity() {
 
 function setRandom() {
 {{
-    for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "startLocation", "minimizerQty"]:
+    for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "startLocation", "minimizerQty", "gravityBehaviour"]:
       if id in session.randomizer and session.randomizer[id] == "random":
         response.write("  document.getElementById(\"{}Random\").click();\n".format(id), escape=False)
         if "{}MultiSelect".format(id) in session.randomizer:
@@ -447,9 +460,9 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "minimizerTourian", "allowGreyDoors"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "minimizerTourian", "allowGreyDoors"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty"];
-    var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"];
+    var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"];
 
     for(var i=0; i<elems.length; i++) {
         // if element is disabled set it to off
@@ -616,9 +629,9 @@ function AjaxRandomizerCallCompleted(data) {
     document.getElementById("submitBtn").data = "Randomize";
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "minimizerTourian", "allowGreyDoors"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "minimizerTourian", "allowGreyDoors"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty"];
-    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"];
+    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -734,7 +747,9 @@ var tips = [
     "If you're new to area rando, or don't want to use the tracker, try out Light Area Randomization",
     "In Light Area rando, vanilla area transitions are preserved, only their place is changed",
     "In for a quick play? Try out Boss Rush/Minimizer mode. Load 'minimizer' settings preset to easily set it up",
-    "In Minimizer mode, areas and bosses transition are mixed together, and you can make the map as big as you want between 30 and 100 locations"
+    "In Minimizer mode, areas and bosses transition are mixed together, and you can make the map as big as you want between 30 and 100 locations",
+    "With Doors Colors randomization, all 3 ammo types and all 4 beams (not counting Charge) are distinct keys for locked colored doors",
+    "With Doors Colors and/or Areas Randomization, rolling backup saves are enabled. You can safely save in two different save stations even if unsure you can come back."
 ];
 
 var myTimer = null;
@@ -816,6 +831,7 @@ window.onload = function(){
                 // store file in localforage
                 localforage.setItem('vanillaROM', e.target.result, function(err, value) {
                     if(err != null) {
+                        alert("Error detected with local storage: "+err+" Please try again");
                         clearLocalStorage();
                     } else {
                         console.log("vanilla ROM stored in local storage");
@@ -1163,23 +1179,13 @@ function startTheTour(step=-1) {
     {
       element: "#permalinkStep",
       title: "Permanent link",
-      content: "Use this permalink to share you seed to other players.<br/><b>Note:</b> You have to click at least once on the link to activate it, else it won't work after seven days."
+      content: "Use this permalink to share your seed with other players.<br/><b>Notes:</b> You have to click at least once on the link to activate it, else it won't work after seven days. If you want to retrieve a previous seed (from less than seven days ago) and lost the link, you can search for it at the bottom of <a href=\"/stats\" target=\"_blank\">VARIA usage statistics page</a> (search for your seed number in the page)."
     },
     {
       element: "#romStep",
       title: "Vanilla Super Metroid ROM",
       content: "<p>Use an American/Japan unheadered ROM of Super Metroid.<br/>\
 The vanilla ROM is stored in the browser local storage and is never sent to our server, all the patching is done locally in the browser.</p>"
-    },
-    {
-      element: "#seedStep",
-      title: "Randomizer seed",
-      content: "Choose a seed number between 1 and {{=maxsize}}, choose 0 to generate a random one."
-    },
-    {
-      element: "#presetStep",
-      title: "Skills Preset",
-      content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\" target=\"_blank\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), tournament presets, or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p><p><b>Standard presets outlook:</b><br/><ul><li><b>newbie: </b>New to randomizers, but completed Super Metroid 100% and knows basic techniques (Wall Jump, Shinespark, Mid-air Morph)</li><li><b>casual:</b> occasional rando player. No hell runs or suitless Maridia, some easy to learn tricks in logic.</li><li><b>regular: </b>plays rando regularly. Knows tricks that are not too hard and open up the game: hell runs (generous energy requirements), suitless Maridia, lava dive, gate glitches, Alcatraz, Gauntlet...</li><li><b>veteran:</b> experienced rando player. Harder everything, some tougher tricks in logic.</li><li><b>expert: </b>knows almost all tricks: full suitless Maridia, Lower Norfair hell runs, hi-jumpless Lava Dive (mania difficulty only, so not by default in most rando settings)</li><li><b>master:</b> Everything on hardest, all tricks known.</li></ul></p>"
     },
     {
       element: "#randoPresetStep",
@@ -1203,6 +1209,16 @@ Tournament presets:\
       title: "Race",
       content: "<p>When enabled, makes it difficult to cheat by using a Super Metroid editor like SMILE.</p>\
 <p>You won't be able to solve/track a race protected seed on the VARIA website.</p>"
+    },
+    {
+      element: "#seedStep",
+      title: "Randomizer seed",
+      content: "Choose a seed number between 1 and {{=maxsize}}, choose 0 to generate a random one."
+    },
+    {
+      element: "#presetStep",
+      title: "Skills Preset",
+      content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\" target=\"_blank\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), tournament presets, or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p><p><b>Standard presets outlook:</b><br/><ul><li><b>newbie: </b>New to randomizers, but completed Super Metroid 100% and knows basic techniques (Wall Jump, Shinespark, Mid-air Morph)</li><li><b>casual:</b> occasional rando player. No hell runs or suitless Maridia, some easy to learn tricks in logic.</li><li><b>regular: </b>plays rando regularly. Knows tricks that are not too hard and open up the game: hell runs (generous energy requirements), suitless Maridia, lava dive, gate glitches, Alcatraz, Gauntlet...</li><li><b>veteran:</b> experienced rando player. Harder everything, some tougher tricks in logic.</li><li><b>expert: </b>knows almost all tricks: full suitless Maridia, Lower Norfair hell runs, hi-jumpless Lava Dive (mania difficulty only, so not by default in most rando settings)</li><li><b>master:</b> Everything on hardest, all tricks known.</li></ul></p>"
     },
     {
       element: "#StartLocationStep",
@@ -1229,10 +1245,10 @@ Tournament presets:\
 <td><img src=\"/solver/static/images/landing_site_start.png\" alt=\"Landing Site\" title=\"Landing Site\" class=\"full\"/></td><td><img src=\"/solver/static/images/blue_bt_blue_door.png\" alt=\"Blue Brinstar blue door\" title=\"Blue Brinstar blue door\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
-<td>Gauntlet Top</td><td></td><td></td>\
+<td>Gauntlet Top</td><td>Position to access both items</td><td></td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/gauntlet_start.png\" alt=\"Gauntlet\" title=\"Gauntlet\" class=\"full\"/></td><td></td><td></td>\
+<td><img src=\"/solver/static/images/gauntlet_start.png\" alt=\"Gauntlet\" title=\"Gauntlet\" class=\"full\"/></td><td><img src=\"/solver/static/images/gauntlet_position.png\" alt=\"Gauntlet\" title=\"Gauntlet\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
 <td>Green Brinstar Elevator</td><td>Brinstar reserve blue door</td><td>Brinstar reserve blue door</td>\
@@ -1409,6 +1425,7 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
 </tr>\
 </table>\
 </p>\
+<p>Even with all layout modifications, it is still possible to softlock in some occurrences. To avoid softlocking your save file, an automatic rolling backup save system is enabled. See doors colors randomization option help for more details.</p>\
 Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
@@ -1472,24 +1489,25 @@ Add four new type of doors which require Ice/Wave/Spazer/Plasma beams to open th
 <td><img src=\"/solver/static/images/Ice.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/ice_door.png\" class=\"marginRight\"></td></tr>\
 </table>\
 Missile doors can no longer be opened with a Super Missile. Only one Missile is required to open a Missile door.<br/>\
+For Plasma/Spazer doors, when you have both beams collected and one equipped you can open both door types.<br/>\
 Colored doors to save stations / refills / map stations are excluded from randomization.<br/>\
 Colored doors to save / refill stations are forced to blue.<br/>\
-The fill algorithm will be more trolly about ammo/beam if you use slower progression speed.<br/>\
-For Plasma/Spazer doors, when you have both beams collected and one equipped you can open both doors type.</p>\
+The fill algorithm will be more trolly about ammo/beam if you use slower progression speed.</p>\
+<p>In this mode there are seven distinct door keys, and sometimes (especially with non standard starting location or area rando), if you go through a blue door you can end up locked on the other side if you don't have or find the item required to come back. If you save in that situation, your save file will be hardlocked. To avoid this, a rolling backup save system is enabled. When you save at a different save station than the last time, a backup of your previous save is done, using an empty save, or an older backup of the same game. You can identify backups in the load menu, as they will have the same slot letter as the original save :</p>\
+<img src=\"/solver/static/images/backup_saves.png\" alt=\"backup_saves.png\" title=\"Backup Saves menu example\" class=\"third center_img\"/>\
+<p>As soon as you load a backup save from the menu, it becomes its own slot. In the example above, if you load your most recent backup (with 0:06 time), it will become 'Samus C'. When playing this new slot C game, when you save, it won't be able to backup, since other slots are taken by the original A slot and an older backup of the A slot. So if you hardlock a save file, be sure to clear it for it to be reused as a backup afterwards.</p>\
 <p>Click on the dice button to randomly set this parameter.</p>\
 Beams doors patch by Mettyk25jigsaw.<br/>\
 Beams doors gfx by prankard.<br/>\
 CRE gfx fix by Sirkura.<br/>\
-Missile doors patch by Flo.",
+Rolling backup and Missile doors patches by Flo.",
       placement: "auto left"
     },
     {
       element: "#doorsColorsGreyStep",
       title: "Allow some doors to be grey",
-      content: "<p>Randomize the color of Red/Green/Yellow doors, beware that some doors can be randomized to Grey.<br/>\
-Colored doors to save stations / refills / map stations are excluded from randomization.<br/>\
-Colored doors to save / refill stations are forced to blue.</p>\
-Click on the dice button to randomly set this parameter.",
+      content: "<p>When randomizing the color of Red/Green/Yellow doors, some doors can be randomized to Grey.<br/>\
+Grey doors will never open, you will have to go around them.</p>",
       placement: "auto left"
     },
     {
@@ -1683,6 +1701,7 @@ Click on the dice button to randomly set this parameter.",
 </li>\
 <li>Vanilla:<p>No change to vanilla suits properties. Most notably, Gravity <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> provides full protection against environmental damages (heat, spikes, electricity...).</p></li>\
 </ul></p>\
+<p>Click on the dice button to randomly set this parameter.</p>\
 <p>Patches developed by Total and Smiley.</p>",
       placement: "auto left"
     },
@@ -1851,10 +1870,18 @@ def displayNumber(id, min, max, default, step="1"):
         <button class="tablinks" id="simple" onclick="changeComplexity(event, 'simple');">Simple</button>
         <button class="tablinks" id="medium" onclick="changeComplexity(event, 'medium');">Medium</button>
         <button class="tablinks" id="advanced" onclick="changeComplexity(event, 'advanced');">Advanced</button>
+        <div class="donate">
+          <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank" class="nomargin">
+            <input type="hidden" name="cmd" value="_s-xclick" />
+            <input type="hidden" name="hosted_button_id" value="J6BEK8K8LVG7Y" />
+            <input type="image" src="/solver/static/images/donate_randomizer.png" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" class="inputImage"/>
+            <img alt="" border="0" src="https://www.paypal.com/en_FR/i/scr/pixel.gif" width="1" height="1" />
+          </form>
+        </div>
       </div>
     </div>
+    <div id="tabRando" class="tabcontent">
     <form id="mainform" name="mainform" onsubmit="doSubmit(); return false;">
-      <div id="tabRando" class="tabcontent">
         <div class="row">
           <div class="column">
             <p>The Very Adaptive Randomizer of Items and Area (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset.</p>
@@ -1874,16 +1901,6 @@ def displayNumber(id, min, max, default, step="1"):
                    </div>
                 </td>
                 <td id="romStep"><button type="button" onclick="startTheTour(1)">?</button></td>
-              </tr>
-              <tr id="seedVisibility">
-                <td>Randomizer seed:</td>
-                <td>{{displayNumber("seed", "0", maxsize, "0")}}</td>
-                <td id="seedStep"><button type="button" onclick="startTheTour(2)">?</button></td>
-              </tr>
-              <tr>
-                <td>Skills Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a><span></td><!-- ' -->
-                <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
-                <td id="presetStep"><button type="button" onclick="startTheTour(3)">?</button></td>
               </tr>
               <tr>
                 <td>Settings Preset:</td>
@@ -1909,17 +1926,29 @@ def displayNumber(id, min, max, default, step="1"):
                 </optgroup>
                 </select>
                 </td>
-                <td id="randoPresetStep"><button type="button" onclick="startTheTour(4)">?</button></td>
+                <td id="randoPresetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
               </tr>
               <tr id="raceModeVisibility">
                 <td>{{displayCheckbox("raceMode")}}<span id="raceModeText">Race Mode</span></td>
                 <td></td>
-                <td id="raceStep"><button type="button" onclick="startTheTour(5)">?</button></td>
+                <td id="raceStep"><button type="button" onclick="startTheTour(3)">?</button></td>
               </tr>
             </table>
             <br/>
             <h4>Randomizer parameters</h4>
             <table class="full">
+              <tr id="seedVisibility">
+                <td class="small"></td>
+                <td>Randomizer seed:</td>
+                <td>{{displayNumber("seed", "0", maxsize, "0")}}</td>
+                <td id="seedStep"><button type="button" onclick="startTheTour(4)">?</button></td>
+              </tr>
+              <tr>
+                <td class="small"></td>
+                <td>Skills Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a><span></td><!-- ' -->
+                <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
+                <td id="presetStep"><button type="button" onclick="startTheTour(5)">?</button></td>
+              </tr>
               <tr>
                 <td class="small"><div class="random"><button id="startLocationRandom" type="button" onclick="randomize(event, 'startLocation')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="startLocationText">Start location</span></td>
@@ -2027,7 +2056,8 @@ def displayNumber(id, min, max, default, step="1"):
             <table id="areaLayoutVisibility" class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr>
-                <td colspan="2" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td>
+                <td id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td>
+                <td></td>
                 <td><button type="button" onclick="startTheTour(20)">?</button></td>
               </tr>
             </table>
@@ -2118,18 +2148,20 @@ def displayNumber(id, min, max, default, step="1"):
               <table class="full" id="nerfedChargeVisibility">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr id="nerfedChargeStep">
-                  <td colspan="2">
+                  <td>
                     {{displayCheckbox("nerfedCharge")}}
                     Nerfed Charge Beam available from the start
                   </td>
+                  <td></td>
                   <td><button type="button" onclick="startTheTour(33)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="gravityBehaviourVisibility">
                 <tr id="gravityBehaviourStep">
-                  <td class="half">Suits properties</td>
+                  <td class="small"><div class="random"><button id="gravityBehaviourRandom" type="button" onclick="randomize(event, 'gravityBehaviour')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td class="half"><span id="gravityBehaviourText">Suits properties</span></td>
                   <td class="half">
-                    {{displaySelect("gravityBehaviour", ["Balanced", "Progressive", "Vanilla"], "Balanced")}}
+                    {{displayMultiSelect("gravityBehaviour", currentMultiValues["gravityBehaviour"], "Balanced", defaultMultiValues["gravityBehaviour"])}}
                   </td>
                   <td><button type="button" onclick="startTheTour(34)">?</button></td>
                 </tr>
@@ -2187,10 +2219,11 @@ def displayNumber(id, min, max, default, step="1"):
               <table class="full" id="miscVisibility">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr id="animalsStep">
-                  <td colspan="2">
+                  <td>
                     {{displayCheckbox("animals")}}
                     <span id="animalsText">Save the animals surprise</span>
                   </td>
+                  <td></td>
                   <td><button type="button" onclick="startTheTour(41)">?</button></td>
                 </tr>
               </table>
@@ -2216,13 +2249,5 @@ def displayNumber(id, min, max, default, step="1"):
         </p>
         {{=INPUT(_type="submit", _value="Randomize", _id="submitBtn", _class="btn btn-default buttonRandom")}}
     </form>
-    <div class="donate">
-      <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
-        <input type="hidden" name="cmd" value="_s-xclick" />
-        <input type="hidden" name="hosted_button_id" value="J6BEK8K8LVG7Y" />
-        <input class="leagueImg" type="image" src="/solver/static/images/donate_randomizer.png" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
-        <img alt="" border="0" src="https://www.paypal.com/en_FR/i/scr/pixel.gif" width="1" height="1" />
-      </form>
-    </div>
   </div>
 </body>

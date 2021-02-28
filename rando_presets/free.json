@@ -28,5 +28,6 @@
   "funSuits": "off",
   "nerfedCharge": "on",
   "variaTweaks": "on",
-  "rando_speed": "on"
+  "rando_speed": "on",
+  "doorsColorsRando": "off"
 }

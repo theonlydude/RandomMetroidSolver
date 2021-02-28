@@ -126,29 +126,31 @@ window.onload = function(){
 }
 
 function startTheTour(step=-1) {
-  // the tour tutorial
-  var tour = new Tour({
-    storage: false,
-    steps: [
-    {
-      element: "#presetStep",
-      title: "Preset",
-      content: "Choose from the list of standard skill presets and tournament ones."
-    },
-    {
-      element: "#randoPresetStep",
-      title: "Settings Preset",
-      content: "Choose from the list of Randomizer presets and tournament ones."
-    } ]});
+    // the tour tutorial
+    var tour = new Tour({
+        storage: false,
+        steps: [
+            {
+                element: "#randoPresetStep",
+                title: "Settings Preset",
+                content: "Choose from the list of Randomizer presets and tournament ones."
+            },
+            {
+                element: "#presetStep",
+                title: "Preset",
+                content: "Choose from the list of standard skill presets and tournament ones."
+            }
+        ]
+    });
 
-  // Initialize the tour
-  tour.init();
+    // Initialize the tour
+    tour.init();
 
-  // Start the tour
-  if(step != -1) {
-    tour.goTo(step);
-  }
-  tour.start();
+    // Start the tour
+    if(step != -1) {
+        tour.goTo(step);
+    }
+    tour.start();
 }
 
 function drawDifficultiesHistogram() {
@@ -301,13 +303,12 @@ function ajaxFail(jqXHR, textStatus) {
     <form id="mainform" name="mainform">
       <table class="full">
         <tr>
-          <td>Skills Preset:</td>
-          <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), **dict(_name="preset", _id="preset", value=session.extStats["preset"], _class="filldropdown chzn-select"))}}</td>
-          <td><button id="presetStep" type="button" onclick="startTheTour(0)">?</button></td>
-
           <td>Settings Preset:</td>
           <td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.extStats["randoPreset"], _class="filldropdown chzn-select", _onchange="loadRandoPreset()"))}}</td>
-          <td><button id="randoPresetStep" type="button" onclick="startTheTour(1)">?</button></td>
+          <td><button id="randoPresetStep" type="button" onclick="startTheTour(0)">?</button></td>
+          <td>Skills Preset:</td>
+          <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), **dict(_name="preset", _id="preset", value=session.extStats["preset"], _class="filldropdown chzn-select"))}}</td>
+          <td><button id="presetStep" type="button" onclick="startTheTour(1)">?</button></td>
           <td>{{=INPUT(_type="submit", _value="Load", _name="action", _class="btn btn-default")}}</td>
         </tr>
       </table>

@@ -110,7 +110,7 @@ class RomPatches:
     VariaTweaks = [ WsEtankPhantoonAlive, LNChozoSJCheckDisabled ]
 
     # Tourian speedup in minimizer mode
-    MinimizerTourian = [ TourianSpeedup, NerfedRainbowBeam, OpenZebetites ]
+    MinimizerTourian = [ TourianSpeedup, OpenZebetites ]
 
     # dessyreqt randomizer
     Dessy = []

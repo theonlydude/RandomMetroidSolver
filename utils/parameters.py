@@ -152,7 +152,7 @@ class Knows:
     desc['SpringBallJump'] = {'display': 'SpringBall-Jump',
                               'title': 'Do a SpringBall Jump from a jump to Access to Wrecked Ship Etank without anything else, Suitless Maridia navigation',
                               'href': 'https://www.youtube.com/watch?v=8ldQUIgBavw&t=49s',
-                              'rooms': ['Sponge Bath',
+                              'rooms': ['Sponge Bath', 'East Ocean',
                                         'Main Street', 'Crab Shaft', 'Pseudo Plasma Spark Room',
                                         'Mama Turtle Room', 'The Precious Room', 'Spring Ball Room', 'East Sand Hole',
                                         'Cathedral Entrance', 'Crocomire Escape', 'Post Crocomire Jump Room',
@@ -472,7 +472,7 @@ class Knows:
     DodgeLowerNorfairEnemies = SMBool(False, 0, ['DodgeLowerNorfairEnemies'])
     desc['DodgeLowerNorfairEnemies'] = {'display': 'Dodge Lower Norfair Enemies',
                                         'title': 'Go through hard-hitting enemies in Lower Norfair without taking damage or killing them',
-                                        'href': None, # TODO
+                                        'href': 'https://www.youtube.com/watch?v=5yuBK0YFulA',
                                         'rooms': ["Three Musketeers' Room", "Wasteland", 'Red Kihunter Shaft', 'The Worst Room In The Game']}
 
     # wrecked ship
@@ -525,7 +525,7 @@ class Knows:
     desc['DoubleSpringBallJump'] = {'display': 'Double SpringBall-Jump',
                                     'title': 'With Hi-Jump boots do two SpringBall-Jumps in a row',
                                     'href': 'https://youtu.be/KohE3e8sGLQ',
-                                    'rooms': ['Mt. Everest', "Draygon's Room"]}
+                                    'rooms': ['Mt. Everest', "Draygon's Room", 'Halfie Climb Room']}
 
     BotwoonToDraygonWithIce = SMBool(False, 0, ['BotwoonToDraygonWithIce'])
     desc['BotwoonToDraygonWithIce'] = {'display': 'Botwoon to Draygon with Ice',
@@ -1060,6 +1060,7 @@ class Settings:
             'Bubble -> Kronic Boost Room': {'mult': 1.25, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Bubble -> Kronic Boost Room wo/Bomb': {'mult': 0.5, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Bubble -> Croc': {'mult': 2.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Bubble Top <-> Bubble Bottom': {'mult': 0.357, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Croc -> Grapple Escape Missiles': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Croc -> Ice Missiles': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Single Chamber <-> Bubble Mountain': {'mult': 1.25, 'minE': 2, 'hellRun': 'MainUpperNorfair'},

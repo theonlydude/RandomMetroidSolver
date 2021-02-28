@@ -40,5 +40,6 @@
   "refill_before_save": "off",
   "animals": "off",
   "No_Music": "off",
-  "random_music": "off"
+  "random_music": "off",
+  "doorsColorsRando": "off"
 }

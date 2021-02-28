@@ -11,15 +11,23 @@
   "gravityBehaviour": "Balanced",
   "missileQty": "3",
   "morphPlacement": "early",
-  "progressionSpeed": "VARIAble",
+  "progressionSpeed": "random",
+  "progressionSpeedMultiSelect": [
+    "slow",
+    "medium",
+    "fast",
+    "VARIAble",
+    "basic",
+    "speedrun"
+  ],
   "No_Music": "off",
   "areaRandomization": "off",
-  "escapeRando": "off",
-  "maxDifficulty": "mania",
+  "escapeRando": "off",    
+  "maxDifficulty": "harder",
   "powerBombQty": "1",
   "minorQty": "100",
   "suitsRestriction": "on",
-  "preset": "Playoff_Races_Chozo",
+  "preset": "Season_Races",
   "spinjumprestart": "off",
   "superQty": "2",
   "animals": "off",
@@ -29,5 +37,6 @@
   "variaTweaks": "off",
   "bossRandomization": "off",
   "nerfedCharge": "off",
-  "rando_speed": "off"
+  "rando_speed": "off",
+  "doorsColorsRando": "off"
 }

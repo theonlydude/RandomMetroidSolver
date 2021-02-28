@@ -33,5 +33,6 @@
   "energyQty": "vanilla",
   "funSuits": "off",
   "nerfedCharge": "on",
-  "variaTweaks": "on"
+  "variaTweaks": "on",
+  "doorsColorsRando": "off"
 }

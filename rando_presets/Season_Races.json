@@ -11,7 +11,15 @@
   "gravityBehaviour": "Balanced",
   "missileQty": "3",
   "morphPlacement": "early",
-  "progressionSpeed": "VARIAble",
+  "progressionSpeed": "random",
+  "progressionSpeedMultiSelect": [
+    "slow",
+    "medium",
+    "fast",
+    "VARIAble",
+    "basic",
+    "speedrun"
+  ],
   "No_Music": "off",
   "areaRandomization": "off",
   "escapeRando": "off",    
@@ -29,5 +37,6 @@
   "variaTweaks": "off",
   "bossRandomization": "off",
   "nerfedCharge": "off",
-  "rando_speed": "off"
+  "rando_speed": "off",
+  "doorsColorsRando": "off"
 }

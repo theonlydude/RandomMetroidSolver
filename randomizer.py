@@ -34,6 +34,7 @@ energyQties = defaultMultiValues['energyQty']
 progDiffs = defaultMultiValues['progressionDifficulty']
 morphPlacements = defaultMultiValues['morphPlacement']
 majorsSplits = defaultMultiValues['majorsSplit']
+gravityBehaviours = defaultMultiValues['gravityBehaviour']
 
 def randomMulti(args, param, defaultMultiValues):
     value = args[param]
@@ -61,7 +62,7 @@ def dumpErrorMsgs(outFileName, msgs):
     dumpErrorMsg(outFileName, joinErrorMsgs(msgs))
 
 def joinErrorMsgs(msgs):
-    return '\n' + '\n'.join(msgs)
+    return '\n'.join(msgs)
 
 def restricted_float(x):
     x = float(x)
@@ -201,12 +202,11 @@ if __name__ == "__main__":
     parser.add_argument('--nolayout',
                         help="do not include total randomizer layout patches",
                         dest='noLayout', action='store_true', default=False)
-    parser.add_argument('--nogravheatPatch',
-                        help="do not include total randomizer suits patches",
-                        dest='noGravHeat', action='store_true', default=False)
-    parser.add_argument('--progressiveSuits',
-                        help="apply progressive suits patch",
-                        dest='progressiveSuits', action='store_true', default=False)
+    parser.add_argument('--gravityBehaviour',
+                        help="varia/gravity suits behaviour",
+                        dest='gravityBehaviour', nargs='?', default='Balanced', choices=gravityBehaviours+['random'])
+    parser.add_argument('--gravityBehaviourList', help="list to choose from when random",
+                        dest='gravityBehaviourList', nargs='?', default=None)
     parser.add_argument('--nerfedCharge',
                         help="apply nerfed charge patch",
                         dest='nerfedCharge', action='store_true', default=False)
@@ -260,6 +260,7 @@ if __name__ == "__main__":
     parser.add_argument('--plandoRando', help="json string with already placed items/locs", dest="plandoRando",
                         nargs='?', default=None)
     parser.add_argument('--sprite', help='use a custom sprite for Samus', dest='sprite', default=None)
+    parser.add_argument('--no_spin_attack', help='when using a custom sprite, use the same animation for screw attack with or without Space Jump', dest='noSpinAttack', action='store_true', default=False)
     parser.add_argument('--customItemNames', help='add custom item names for some of them, related to the custom sprite',
                         dest='customItemNames', action='store_true', default=False)
     parser.add_argument('--ship', help='use a custom sprite for Samus ship', dest='ship', default=None)
@@ -362,6 +363,7 @@ if __name__ == "__main__":
     (_, progSpeed) = randomMulti(args.__dict__, "progressionSpeed", speeds)
     (_, progDiff) = randomMulti(args.__dict__, "progressionDifficulty", progDiffs)
     (majorsSplitRandom, args.majorsSplit) = randomMulti(args.__dict__, "majorsSplit", majorsSplits)
+    (_, gravityBehaviour) = randomMulti(args.__dict__, "gravityBehaviour", gravityBehaviours)
     if args.minDifficulty:
         minDifficulty = text2diff[args.minDifficulty]
         if progSpeed != "speedrun":
@@ -419,6 +421,10 @@ if __name__ == "__main__":
         if (args.suitsRestriction == True and args.area == True) or args.majorsSplit == 'Chozo':
             if 'late' in morphPlacements:
                 morphPlacements.remove('late')
+        if not morphPlacements:
+            optErrMsgs.append("Can't have late morph with Chozo split or suits restriction and area randomization")
+            dumpErrorMsgs(args.output, optErrMsgs)
+            sys.exit(-1)
         args.morphPlacement = random.choice(morphPlacements)
     # random fill makes certain options unavailable
     if progSpeed == 'speedrun' or progSpeed == 'basic':
@@ -443,8 +449,8 @@ if __name__ == "__main__":
                 startLocationList = args.startLocationList.split(',')
                 possibleStartAPs = sorted(list(set(possibleStartAPs).intersection(set(startLocationList))))
                 if len(possibleStartAPs) == 0:
-                    reasonStr = '\n'.join(["%s : %s" % (apName, cause) for apName, cause in reasons.items() if apName in startLocationList])
-                    '\nInvalid start locations list with your settings.\n'+reasonStr
+                    optErrMsgs += ["%s : %s" % (apName, cause) for apName, cause in reasons.items() if apName in startLocationList]
+                    optErrMsgs.append('Invalid start locations list with your settings.')
                     dumpErrorMsgs(args.output, optErrMsgs)
                     sys.exit(-1)
             args.startAP = random.choice(possibleStartAPs)
@@ -502,9 +508,9 @@ if __name__ == "__main__":
         RomPatches.ActivePatches = RomPatches.Total
     RomPatches.ActivePatches.remove(RomPatches.BlueBrinstarBlueDoor)
     RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startAP)
-    if args.noGravHeat == True or args.progressiveSuits == True:
+    if gravityBehaviour != "Balanced":
         RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
-    if args.progressiveSuits == True:
+    if gravityBehaviour == "Progressive":
         RomPatches.ActivePatches.append(RomPatches.ProgressiveSuits)
     if args.nerfedCharge == True:
         RomPatches.ActivePatches.append(RomPatches.NerfedCharge)
@@ -643,6 +649,7 @@ if __name__ == "__main__":
                           'phantoonimals.ips', 'ridleyimals.ips']
         if args.escapeRando == False:
             args.patches.append(random.choice(animalsPatches))
+            args.patches.append("Escape_Animals_Change_Event")
         else:
             optErrMsgs.append("Ignored animals surprise because of escape randomization")
     # transform itemLocs in our usual dict(location, item), exclude minors, we'll get them with the solver
@@ -686,13 +693,8 @@ if __name__ == "__main__":
             romPatcher = RomPatcher(magic=args.raceMagic)
 
         if args.patchOnly == False:
-            suitsMode = "Classic"
-            if args.progressiveSuits:
-                suitsMode = "Progressive"
-            elif args.noGravHeat:
-                suitsMode = "Vanilla"
             romPatcher.applyIPSPatches(args.startAP, args.patches,
-                                       args.noLayout, suitsMode,
+                                       args.noLayout, gravityBehaviour,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
                                        escapeAttr, args.noRemoveEscapeEnemies, minimizerN, args.minimizerTourian,
@@ -704,7 +706,7 @@ if __name__ == "__main__":
 
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:
-            romPatcher.customSprite(args.sprite, args.customItemNames) # adds another IPS
+            romPatcher.customSprite(args.sprite, args.customItemNames, args.noSpinAttack) # adds another IPS
         if args.ship is not None:
             romPatcher.customShip(args.ship) # adds another IPS
             # don't color randomize custom ships

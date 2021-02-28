@@ -44,18 +44,6 @@ class HelpersGraph(Helpers):
 #        return sm.wor(sm.wand(sm.canShortCharge(),
 #                              sm.canEnterAndLeaveGauntletQty(2, 2)),
 #                      sm.canEnterAndLeaveGauntletQty(2, 3))
-#
-    def canPassTerminatorBombWall(self, fromLandingSite=True):
-        sm = self.smbm
-        # from landing site
-        return sm.canDestroyBombWalls()
-        # from other side
-        # TODO::check with speedbooster
-        sm.wand(sm.haveItem('SpeedBooster'), SMBool(not fromLandingSite))
-
-        return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
-                              sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
-                      sm.canDestroyBombWalls())
 
     @Cache.decorator
     def canPassCrateriaGreenPirates(self):

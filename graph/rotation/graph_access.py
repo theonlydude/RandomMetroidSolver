@@ -9,24 +9,31 @@ from logic.cache import Cache
 accessPoints = [
     ### Crateria and Blue Brinstar
     AccessPoint('Landing Site', 'Crateria', {
-        'Lower Mushrooms Left': lambda sm: sm.wand(sm.canPassTerminatorBombWall(), sm.canPassCrateriaGreenPirates()),
+        'Lower Mushrooms Left': lambda sm: sm.wand(sm.canDestroyBombWalls(),
+                                                   sm.canPassCrateriaGreenPirates()),
+        'Gauntlet Top': lambda sm: sm.wand(sm.haveItem('Morph'),
+                                           sm.canDestroyBombWalls()),
         'Keyhunter Room Bottom': lambda sm: sm.traverse('LandingSiteRight'),
-        'Moat Right': lambda sm: sm.wand(sm.traverse('LandingSiteRight'), sm.traverse('KihunterRight'))
+        'Moat Right': lambda sm: sm.wand(sm.traverse('LandingSiteRight'),
+                                         sm.traverse('KihunterRight'))
         'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     }, internal=True,
        start={'spawn': 0x0000, 'doors':[0x32], 'patches':[RomPatches.BlueBrinstarBlueDoor], 'solveArea': "Crateria Landing Site"}),
     AccessPoint('Blue Brinstar Elevator Bottom', 'Crateria', {
-        # TODO::energy requirement to kill the sidehoppers as two are stacked at the bottom of the room ?
-        'Morph Ball Room Left': lambda sm: sm.canUsePowerBombs(),
+        # energy requirement is to kill the sidehoppers as two are stacked at the bottom of the room
+        'Morph Ball Room Left': lambda sm: sm.wand(sm.canUsePowerBombs(),
+                                                   sm.energyReserveCountOk(int(2.0/sm.getDmgReduction()[0]))),
         'Landing Site': lambda sm: SMBool(True)
     }, internal=True),
-#    AccessPoint('Gauntlet Top', 'Crateria', {
-#        'Green Pirates Shaft Bottom Right': lambda sm: sm.haveItem('Morph')
-#    }, internal=True,
-#       start={'spawn': 0x0006, 'solveArea': "Crateria Gauntlet", 'save':"Save_Gauntlet", 'forcedEarlyMorph':True}),
+    AccessPoint('Gauntlet Top', 'Crateria', {
+        'Green Pirates Shaft Bottom Right': lambda sm: sm.wand(sm.haveItem('Morph'),
+                                                               sm.canPassCrateriaGreenPirates()),
+        'Landing Site': sm.wand(sm.haveItem('Morph'),
+                                sm.canDestroyBombWalls())
+    }, internal=True,
+       start={'spawn': 0x0006, 'solveArea': "Crateria Gauntlet", 'save':"Save_Gauntlet", 'forcedEarlyMorph':True}),
     AccessPoint('Lower Mushrooms Left', 'Crateria', {
-        # TODO::check if we can avoid the green pirates
-        'Landing Site': Cache.ldeco('LML_LS', lambda sm: sm.wand(sm.canPassTerminatorBombWall(False), sm.canPassCrateriaGreenPirates())),
+        'Landing Site': Cache.ldeco('LML_LS', lambda sm: sm.wand(sm.canDestroyBombWalls(), sm.canPassCrateriaGreenPirates())),
         'Green Pirates Shaft Bottom Right': lambda sm: SMBool(True)
     }, roomInfo = {'RoomPtr':0x9969, "area": 0x0, 'songs':[0x997a]},
        exitInfo = {'DoorPtr':0x8c22, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
@@ -35,6 +42,8 @@ accessPoints = [
        dotOrientation = 'nw'),
     AccessPoint('Green Pirates Shaft Bottom Right', 'Crateria', {
         'Lower Mushrooms Left': lambda sm: SMBool(True)
+        'Gauntlet Top': lambda sm: sm.wand(sm.haveItem('Morph'),
+                                           sm.canPassCrateriaGreenPirates())
     }, traverse = lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoMoreBlueDoors),
                                     sm.traverse('GreenPiratesShaftBottomRight')),
        roomInfo = {'RoomPtr':0x99bd, "area": 0x0, 'songs':[0x99ce]},
@@ -61,7 +70,8 @@ accessPoints = [
        entryInfo = {'SamusX':0x14c, 'SamusY':0x2b8, 'song': 0xc},
        dotOrientation = 'se'),
     AccessPoint('Morph Ball Room Left', 'Crateria', {
-        'Blue Brinstar Elevator Bottom': lambda sm: sm.canUsePowerBombs()
+        'Blue Brinstar Elevator Bottom': lambda sm: sm.wand(sm.canUsePowerBombs(),
+                                                            sm.energyReserveCountOk(int(2.0/sm.getDmgReduction()[0])))
     }, roomInfo = { 'RoomPtr':0x9e9f, "area": 0x1},
        exitInfo = {'DoorPtr':0x8e9e, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},

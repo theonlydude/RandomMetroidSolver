@@ -68,16 +68,14 @@ locationsDict["Energy Tank, Etecoons"].AccessFrom = {
 locationsDict["Energy Tank, Etecoons"].Available = (
     lambda sm: SMBool(True)
 )
-#locationsDict["Energy Tank, Waterway"].AccessFrom = {
-#    'Big Pink': lambda sm: SMBool(True)
-#}
-#locationsDict["Energy Tank, Waterway"].Available = (
-#    lambda sm: sm.wand(sm.canUsePowerBombs(),
-#                       sm.traverse('BigPinkBottomLeft'),
-#                       sm.haveItem('SpeedBooster'),
-#                       sm.wor(sm.haveItem('Gravity'),
-#                              sm.canSimpleShortCharge())) # from the blocks above the water
-#)
+locationsDict["Energy Tank, Waterway"].AccessFrom = {
+    'Big Pink': lambda sm: SMBool(True)
+}
+locationsDict["Energy Tank, Waterway"].Available = (
+    lambda sm: sm.wand(sm.canUsePowerBombs(),
+                       sm.traverse('BigPinkBottomLeft'),
+                       sm.haveItem('SpeedBooster'))
+)
 locationsDict["Energy Tank, Brinstar Gate"].AccessFrom = {
     'Big Pink': lambda sm: SMBool(True)
 }

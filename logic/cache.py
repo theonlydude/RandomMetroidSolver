@@ -24,8 +24,8 @@ class VersionedCache(object):
         return self._decorate(func.__name__, self._new_slot(), func)
 
     # for lambdas
-    def ldeco(self, name, func):
-        return self._decorate(name, self._new_slot(), func)
+    def ldeco(self, func):
+        return self._decorate(func.__code__, self._new_slot(), func)
 
     def _new_slot(self):
         slot = self.nextSlot

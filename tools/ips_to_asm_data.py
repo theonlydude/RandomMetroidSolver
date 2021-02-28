@@ -30,12 +30,14 @@ def writeAsm(patch, outAsm):
     p=splitPatchByBank(IPS_Patch.load(patch).toDict())
     with open(outAsm, 'w') as f:
         f.write("lorom\narch snes.cpu\n\n")
+        idx=0
         for addr,bytez in p.items():
-            f.write("org $%06x\nprint pc\n" % pc_to_snes(addr))
+            idx+=1
+            f.write('org $%06x\nprint "Patch %d START: ", pc\n' % (pc_to_snes(addr), idx))
             for i in range(0, len(bytez), 8):
                 blist = ["$%02x" % b for b in bytez[i:min(len(bytez), i+8)]]
                 f.write("\tdb %s\n" % ','.join(blist))
-            f.write('print pc\n')
+            f.write('print "Patch %d END: ", pc\n' % idx)
 
 for patch in sys.argv[1:]:
     outAsm = os.path.splitext(patch)[0] + ".asm"

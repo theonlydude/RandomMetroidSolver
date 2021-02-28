@@ -14,7 +14,7 @@ LOG_DIR=${CWD}/logs
 mkdir -p ${LOG_DIR}
 LOG=${LOG_DIR}/test_jm.log
 CSV=${LOG_DIR}/test_jm.csv
-> ${LOG}
+date > ${LOG}
 > ${CSV}
 
 if [ $# -ne 2 -a $# -ne 3 ]; then
@@ -262,6 +262,7 @@ while true; do
 done
 
 echo "DONE"
+date >> ${LOG}
 
 echo ""
 echo "Start AP"

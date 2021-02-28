@@ -110,6 +110,17 @@ class HelpersGraph(Helpers):
                       sm.wand(sm.knowsMockballWs(), sm.canUseSpringBall()))
 
     @Cache.decorator
+    def canPassMoatFromMoat(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Grapple'),
+                      sm.haveItem('SpaceJump'),
+                      sm.wand(sm.knowsDiagonalBombJump(), sm.canUseBombs()),
+                      sm.wand(sm.haveItem('Gravity'),
+                              sm.wor(sm.knowsGravityJump(),
+                                     sm.haveItem('HiJump'),
+                                     sm.canInfiniteBombJump())))
+
+    @Cache.decorator
     def canPassMoatReverse(self):
         sm = self.smbm
         return sm.wor(RomPatches.has(RomPatches.MoatShotBlock),

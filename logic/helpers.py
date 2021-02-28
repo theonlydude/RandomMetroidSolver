@@ -248,6 +248,12 @@ class Helpers(object):
                        sm.knowsDoubleSpringBallJump())
 
     @Cache.decorator
+    def canSpringBallJumpFromWall(self):
+        sm = self.smbm
+        return sm.wand(sm.canUseSpringBall(),
+                       sm.knowsSpringBallJumpFromWall())
+
+    @Cache.decorator
     def canDestroyBombWalls(self):
         sm = self.smbm
         return sm.wor(sm.wand(sm.haveItem('Morph'),

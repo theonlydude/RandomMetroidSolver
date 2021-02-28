@@ -31,11 +31,11 @@ def writeAsm(patch, outAsm):
     with open(outAsm, 'w') as f:
         f.write("lorom\narch snes.cpu\n\n")
         for addr,bytez in p.items():
-            f.write("org $%06x\n" % pc_to_snes(addr))
+            f.write("org $%06x\nprint pc\n" % pc_to_snes(addr))
             for i in range(0, len(bytez), 8):
                 blist = ["$%02x" % b for b in bytez[i:min(len(bytez), i+8)]]
                 f.write("\tdb %s\n" % ','.join(blist))
-            f.write('\n')
+            f.write('print pc\n')
 
 for patch in sys.argv[1:]:
     outAsm = os.path.splitext(patch)[0] + ".asm"

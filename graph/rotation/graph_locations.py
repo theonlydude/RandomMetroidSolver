@@ -8,6 +8,16 @@ from graph.location import locationsDict
 #    'Landing Site': lambda sm: SMBool(True)
 #}
 #locationsDict["Energy Tank, Gauntlet"].Available = (
+# TODO::from gauntlet top to etank with vanilla suits behaviour:
+# V + G + bomb: 3 energy
+# 0 + 0 + bomb: dead with 13 energy
+# V + 0 + bomb: 6 energy
+# 0 + G + bomb: 3 energy
+# V + G + 3 PB: 2 energy
+#  from etank to landing site:
+# V + G + bomb: 4 energy
+# V + G + 5 PB: 3 energy
+# V + 0 + 5 PB: 7 energy
 #    lambda sm: sm.wor(sm.canEnterAndLeaveGauntlet(),
 #                      sm.wand(sm.canShortCharge(),
 #                              sm.canEnterAndLeaveGauntletQty(1, 0)), # thanks ponk! https://youtu.be/jil5zTBCF1s
@@ -20,14 +30,14 @@ locationsDict["Bomb"].Available = (
     lambda sm: sm.wand(sm.haveItem('Morph'),
                        sm.traverse('FlywayRight'))
 )
-#locationsDict["Energy Tank, Terminator"].AccessFrom = {
-#    'Landing Site': lambda sm: sm.canPassTerminatorBombWall(),
-#    'Lower Mushrooms Left': lambda sm: sm.canPassCrateriaGreenPirates(),
+locationsDict["Energy Tank, Terminator"].AccessFrom = {
+    'Landing Site': lambda sm: sm.canPassTerminatorBombWall(),
+    'Lower Mushrooms Left': lambda sm: sm.canPassCrateriaGreenPirates(),
 #    'Gauntlet Top': lambda sm: sm.haveItem('Morph')
-#}
-#locationsDict["Energy Tank, Terminator"].Available = (
-#    lambda sm: SMBool(True)
-#)
+}
+locationsDict["Energy Tank, Terminator"].Available = (
+    lambda sm: SMBool(True)
+)
 locationsDict["Reserve Tank, Brinstar"].AccessFrom = {
     'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.traverse('MainShaftRight'))
 }
@@ -58,16 +68,14 @@ locationsDict["Energy Tank, Etecoons"].AccessFrom = {
 locationsDict["Energy Tank, Etecoons"].Available = (
     lambda sm: SMBool(True)
 )
-#locationsDict["Energy Tank, Waterway"].AccessFrom = {
-#    'Big Pink': lambda sm: SMBool(True)
-#}
-#locationsDict["Energy Tank, Waterway"].Available = (
-#    lambda sm: sm.wand(sm.canUsePowerBombs(),
-#                       sm.traverse('BigPinkBottomLeft'),
-#                       sm.haveItem('SpeedBooster'),
-#                       sm.wor(sm.haveItem('Gravity'),
-#                              sm.canSimpleShortCharge())) # from the blocks above the water
-#)
+locationsDict["Energy Tank, Waterway"].AccessFrom = {
+    'Big Pink': lambda sm: SMBool(True)
+}
+locationsDict["Energy Tank, Waterway"].Available = (
+    lambda sm: sm.wand(sm.canUsePowerBombs(),
+                       sm.traverse('BigPinkBottomLeft'),
+                       sm.haveItem('SpeedBooster'))
+)
 locationsDict["Energy Tank, Brinstar Gate"].AccessFrom = {
     'Big Pink': lambda sm: SMBool(True)
 }
@@ -288,31 +296,23 @@ locationsDict["Energy Tank, Mama turtle"].Available = (
 locationsDict["Energy Tank, Mama turtle"].PostAvailable = (
     lambda sm: sm.canExitMamaTurtle()
 )
-#locationsDict["Plasma Beam"].AccessFrom = {
-#    'Toilet Top': lambda sm: SMBool(True)
-#}
-#locationsDict["Plasma Beam"].Available = (
-#    lambda sm: Bosses.bossDead(sm, 'Draygon')
-#)
-#locationsDict["Plasma Beam"].PostAvailable = (
-#    lambda sm: sm.wand(sm.wor(sm.wand(sm.canShortCharge(),
-#                                      sm.knowsKillPlasmaPiratesWithSpark()),
-#                              sm.wand(sm.canFireChargedShots(),
-#                                      sm.knowsKillPlasmaPiratesWithCharge(),
-#                                      # 160/80/40 dmg * 4 ground plasma pirates
-#                                      # => 640/320/160 damage take required
-#                                      # check below is 1099/599/299 (give margin for taking dmg a bit)
-#                                      # (* 4 for nerfed charge, since you need to take hits 4 times instead of one)
-#                                                       sm.energyReserveCountOk(int(10.0 * sm.getPiratesPseudoScrewCoeff()/sm.getDmgReduction(False)[0]))),
-#                              sm.haveItem('ScrewAttack'),
-#                              sm.haveItem('Plasma')),
-#                       sm.wor(sm.canFly(),
-#                              sm.wand(sm.haveItem('HiJump'),
-#                                      sm.knowsGetAroundWallJump()),
-#                              sm.canShortCharge(),
-#                              sm.wand(sm.canSpringBallJump(),
-#                                      sm.knowsSpringBallJumpFromWall())))
-#)
+locationsDict["Plasma Beam"].AccessFrom = {
+    'Toilet Top': lambda sm: SMBool(True)
+}
+locationsDict["Plasma Beam"].Available = (
+    lambda sm: Bosses.bossDead(sm, 'Draygon')
+)
+locationsDict["Plasma Beam"].PostAvailable = (
+    lambda sm: sm.wor(sm.wand(sm.canFireChargedShots(),
+                              sm.knowsKillPlasmaPiratesWithCharge(),
+                              # 160/80/40 dmg * 4 ground plasma pirates
+                              # => 640/320/160 damage take required
+                              # check below is 1099/599/299 (give margin for taking dmg a bit)
+                              # (* 4 for nerfed charge, since you need to take hits 4 times instead of one)
+                              sm.energyReserveCountOk(int(10.0 * sm.getPiratesPseudoScrewCoeff()/sm.getDmgReduction(False)[0]))),
+                      sm.haveItem('ScrewAttack'),
+                      sm.haveItem('Plasma'))
+)
 locationsDict["Reserve Tank, Maridia"].AccessFrom = {
     'Left Sandpit': lambda sm: SMBool(True)
 }
@@ -338,21 +338,25 @@ locationsDict["Energy Tank, Botwoon"].AccessFrom = {
 locationsDict["Energy Tank, Botwoon"].Available = (
     lambda sm: SMBool(True)
 )
-#locationsDict["Draygon"].AccessFrom = {
-#    'Draygon Room Bottom': lambda sm: SMBool(True)
-#}
-#locationsDict["Draygon"].Available = (
-#    lambda sm: SMBool(True)
-#)
-#locationsDict["Space Jump"].AccessFrom = {
-#    'Draygon Room Bottom': lambda sm: SMBool(True)
-#}
-#locationsDict["Space Jump"].Available = (
-#    lambda sm: SMBool(True)
-#)
-#locationsDict["Space Jump"].PostAvailable = (
-#    lambda sm: Bosses.bossDead(sm, 'Draygon')
-#)
+locationsDict["Draygon"].AccessFrom = {
+    'Draygon Room Bottom': lambda sm: SMBool(True)
+}
+locationsDict["Draygon"].Available = (
+    lambda sm: SMBool(True)
+)
+locationsDict["Space Jump"].AccessFrom = {
+    'Draygon Room Bottom': lambda sm: SMBool(True)
+}
+locationsDict["Space Jump"].Available = (
+    # suitless is just too complicated...
+    lambda sm: sm.wand(sm.haveItem('Gravity'),
+                       sm.wor(sm.canFly(),
+                              sm.haveItem('HiJump'),
+                              sm.canSpringBallJumpFromWall()))
+)
+locationsDict["Space Jump"].PostAvailable = (
+    lambda sm: Bosses.bossDead(sm, 'Draygon')
+)
 #locationsDict["Mother Brain"].AccessFrom = {
 #    'Golden Four': lambda sm: Bosses.allBossesDead(sm)
 #}
@@ -405,76 +409,81 @@ locationsDict["Missile (Crateria moat)"].AccessFrom = {
 locationsDict["Missile (Crateria moat)"].Available = (
     lambda sm: SMBool(True)
 )
-#locationsDict["Missile (Crateria bottom)"].AccessFrom = {
-#    'Landing Site': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (Crateria bottom)"].Available = (
-#    lambda sm: sm.wor(sm.canDestroyBombWalls(),
-#                      sm.wand(sm.haveItem('SpeedBooster'),
-#                              sm.knowsOldMBWithSpeed()))
-#)
-#locationsDict["Missile (Crateria gauntlet right)"].AccessFrom = {
+locationsDict["Missile (Crateria bottom)"].AccessFrom = {
+    'Landing Site': lambda sm: SMBool(True)
+}
+locationsDict["Missile (Crateria bottom)"].Available = (
+    lambda sm: sm.canPassBombPassages()
+)
+locationsDict["Missile (Crateria gauntlet right)"].AccessFrom = {
+     # TODO::regular gauntlet, but it's filled with acid    
 #    'Landing Site': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
 #                                              sm.canPassBombPassages()),
 #                                      sm.canDoLowGauntlet()),
-#    'Gauntlet Top': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (Crateria gauntlet right)"].Available = (
-#    lambda sm: SMBool(True)
-#)
-#locationsDict["Missile (Crateria gauntlet left)"].AccessFrom = {
+    'Landing Site': lambda sm: sm.canUsePowerBombs(), # from gauntlet back
+    'Gauntlet Top': lambda sm: SMBool(True),
+    # we can shoot blocks from the back, we can kill green pirate with power bomb, so no need for more
+    'Lower Mushrooms Left': lambda sm: sm.canUsePowerBombs()
+}
+locationsDict["Missile (Crateria gauntlet right)"].Available = (
+    lambda sm: SMBool(True)
+)
+locationsDict["Missile (Crateria gauntlet left)"].AccessFrom = {
+     # TODO::regular gauntlet, but it's filled with acid
 #    'Landing Site': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
 #                                              sm.canPassBombPassages()),
 #                                      sm.canDoLowGauntlet()),
-#    'Gauntlet Top': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (Crateria gauntlet left)"].Available = (
-#    lambda sm: SMBool(True)
-#)
-#locationsDict["Super Missile (Crateria)"].AccessFrom = {
-#    'Landing Site': lambda sm: SMBool(True)
-#}
-#locationsDict["Super Missile (Crateria)"].Available = (
-#    lambda sm: sm.wand(sm.canPassBombPassages(),
-#                       sm.traverse("ClimbRight"),
-#                       sm.haveItem('SpeedBooster'),
-#                       # reserves are hard to trigger midspark when not having ETanks
-#                                      sm.wor(sm.wand(sm.energyReserveCountOk(2), sm.itemCountOk('ETank', 1)), # need energy to get out
-#                                             sm.wand(sm.itemCountOk('ETank', 1),
-#                                                     sm.wor(sm.haveItem('Grapple'), # use grapple/space or dmg protection to get out
-#                                                            sm.haveItem('SpaceJump'),
-#                                                            sm.heatProof()))),
-#                       sm.wor(sm.haveItem('Ice'),
-#                              sm.wand(sm.canSimpleShortCharge(), sm.canUsePowerBombs()))) # there's also a dboost involved in simple short charge or you have to kill the yellow enemies with some power bombs
-#)
-#locationsDict["Missile (Crateria middle)"].AccessFrom = {
-#    'Landing Site': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (Crateria middle)"].Available = (
-#    lambda sm: sm.canPassBombPassages()
-#)
+    'Landing Site': lambda sm: sm.canUsePowerBombs(), # from gauntlet back
+    'Gauntlet Top': lambda sm: SMBool(True),
+    'Lower Mushrooms Left': lambda sm: sm.canUsePowerBombs()
+}
+locationsDict["Missile (Crateria gauntlet left)"].Available = (
+    lambda sm: SMBool(True)
+)
+locationsDict["Super Missile (Crateria)"].AccessFrom = {
+    'Landing Site': lambda sm: SMBool(True)
+}
+locationsDict["Super Missile (Crateria)"].Available = (
+    lambda sm: sm.wand(sm.canPassBombPassages(),
+                       sm.traverse("ClimbRight"),
+                       sm.haveItem('SpeedBooster')) # use speedbooster to get out too
+)
+locationsDict["Missile (Crateria middle)"].AccessFrom = {
+    'Landing Site': lambda sm: SMBool(True)
+}
+locationsDict["Missile (Crateria middle)"].Available = (
+    # the hidden path used to comeback in vanilla requires nothing in rotation
+    lambda sm: SMBool(True)
+)
 locationsDict["Power Bomb (green Brinstar bottom)"].AccessFrom = {
     'Etecoons Bottom': lambda sm: SMBool(True)
 }
 locationsDict["Power Bomb (green Brinstar bottom)"].Available = (
     lambda sm: SMBool(True)
 )
-#locationsDict["Super Missile (pink Brinstar)"].AccessFrom = {
-#    'Big Pink': lambda sm: SMBool(True)
-#}
-#locationsDict["Super Missile (pink Brinstar)"].Available = (
-#    lambda sm: sm.wor(sm.wand(sm.traverse('BigPinkTopRight'),
-#                              sm.enoughStuffSporeSpawn()),
-#                      # back way into spore spawn
-#                                     sm.wand(sm.canOpenGreenDoors(),
-#                                             sm.canPassBombPassages()))
-#)
-#locationsDict["Super Missile (pink Brinstar)"].PostAvailable = (
-#    lambda sm: sm.wand(sm.canOpenGreenDoors(),
-#                       sm.canPassBombPassages())
-#)
-# TODO::add a knows for morph from walljump to exit after super missile (green brinstar top) ?
-# or not as you have to be able to 100% finish the hack before doing rando
+locationsDict["Super Missile (pink Brinstar)"].AccessFrom = {
+    'Big Pink': lambda sm: sm.haveItem('Morph'),
+    'Green Hill Zone Top Right': lambda sm: SMBool(True)
+}
+locationsDict["Super Missile (pink Brinstar)"].Available = (
+                      # spore spawn
+    lambda sm: sm.wor(sm.wand(sm.traverse('BigPinkTopRight'),
+                              sm.enoughStuffSporeSpawn(),
+                              sm.haveItem('Morph')),
+                      # back way into spore spawn
+                      sm.wand(sm.canOpenGreenDoors(),
+                              # TODO::try with screw attack to not require morph
+                              sm.canPassBombPassages()))
+)
+locationsDict["Super Missile (pink Brinstar)"].PostAvailable = (
+    # coming back to entrance after killing spore spawn requires super + morph
+    # coming back to back door requires super + canpassbombpassages
+    lambda sm: sm.wand(sm.canOpenGreenDoors(),
+                       # TODO::try with screw attack to not require morph
+                       sm.canPassBombPassages())
+)
+# no technique for morph from walljump to exit after super missile (green brinstar top)
+# as you have to be able to 99% finish the hack before doing rando
 locationsDict["Missile (green Brinstar below super missile)"].AccessFrom = {
     'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.traverse('MainShaftRight'))
 }
@@ -562,18 +571,18 @@ locationsDict["Missile (blue Brinstar bottom)"].AccessFrom = {
 locationsDict["Missile (blue Brinstar bottom)"].Available = (
     lambda sm: sm.haveItem('Morph')
 )
-#locationsDict["Missile (blue Brinstar top)"].AccessFrom = {
-#    'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (blue Brinstar top)"].Available = (
-#    lambda sm: sm.canAccessBillyMays()
-#)
-#locationsDict["Missile (blue Brinstar behind missile)"].AccessFrom = {
-#    'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (blue Brinstar behind missile)"].Available = (
-#    lambda sm: sm.canAccessBillyMays()
-#)
+locationsDict["Missile (blue Brinstar top)"].AccessFrom = {
+    'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
+}
+locationsDict["Missile (blue Brinstar top)"].Available = (
+    lambda sm: sm.canAccessBillyMays()
+)
+locationsDict["Missile (blue Brinstar behind missile)"].AccessFrom = {
+    'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
+}
+locationsDict["Missile (blue Brinstar behind missile)"].Available = (
+    lambda sm: sm.canAccessBillyMays()
+)
 locationsDict["Power Bomb (red Brinstar sidehopper room)"].AccessFrom = {
     'Red Brinstar Elevator': lambda sm: SMBool(True)
 }
@@ -656,6 +665,7 @@ locationsDict["Missile (below Crocomire)"].Available = (
 )
 locationsDict["Missile (below Crocomire)"].PostAvailable = (
     # TODO::room is full of acid, ask for both suits and energy to climb
+    # TODO::create and use acid bath tables
     lambda sm: sm.wand(sm.haveItem('Gravity'), sm.haveItem('Varia'),
                        sm.energyReserveCountOk(4))
 )
@@ -786,24 +796,25 @@ locationsDict["Super Missile (Wrecked Ship left)"].AccessFrom = {
 locationsDict["Super Missile (Wrecked Ship left)"].Available = (
     lambda sm: Bosses.bossDead(sm, 'Phantoon')
 )
-#locationsDict["Missile (green Maridia shinespark)"].AccessFrom = {
-#    'Main Street Bottom': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (green Maridia shinespark)"].Available = (
-#    lambda sm: sm.wand(sm.haveItem('Gravity'),
-#                       sm.haveItem('SpeedBooster'),
-#                       sm.wor(sm.wand(sm.wor(sm.haveItem('Super'), # run from room on the right
-#                                             RomPatches.has(RomPatches.AreaRandoGatesOther)),
-#                                      sm.itemCountOk('ETank', 1)), # etank for the spark since sparking from low ground
-#                              sm.canSimpleShortCharge())) # run from above
-#)
-#locationsDict["Super Missile (green Maridia)"].AccessFrom = {
-#    'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'),
-#                                            sm.canDoSuitlessOuterMaridia())
-#}
-#locationsDict["Super Missile (green Maridia)"].Available = (
-#    lambda sm: sm.haveItem('Morph')
-#)
+locationsDict["Missile (green Maridia shinespark)"].AccessFrom = {
+    'Main Street Bottom': lambda sm: SMBool(True)
+}
+locationsDict["Missile (green Maridia shinespark)"].Available = (
+    lambda sm: sm.wand(sm.haveItem('Gravity'),
+                       sm.haveItem('SpeedBooster'),
+                       # speedball required
+                       sm.knowsShortCharge())
+)
+locationsDict["Super Missile (green Maridia)"].AccessFrom = {
+    'Main Street Bottom': lambda sm: sm.canGravLessLevel1()
+}
+locationsDict["Super Missile (green Maridia)"].Available = (
+    lambda sm: sm.wand(sm.haveItem('Morph'),
+                       sm.canGravLessLevel1(),
+                       # hijump required when suitless & hard to avoid the crab when suitless
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.wand(sm.haveItem('HiJump'), sm.itemCountOk('ETank', 1))))
+)
 locationsDict["Missile (green Maridia tatori)"].AccessFrom = {
     # it's possible to crounched jump over the pink pirate when suitless without taking damage
     'Main Street Bottom': lambda sm: sm.wand(sm.wor(sm.traverse('FishTankRight'),
@@ -876,12 +887,15 @@ locationsDict["Super Missile (pink Maridia)"].AccessFrom = {
 locationsDict["Super Missile (pink Maridia)"].Available = (
     lambda sm: SMBool(True)
 )
-#locationsDict["Missile (Draygon)"].AccessFrom = {
-#    'Precious Room Top': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (Draygon)"].Available = (
-#    lambda sm: SMBool(True)
-#)
+locationsDict["Missile (Draygon)"].AccessFrom = {
+    'Precious Room Top': lambda sm: SMBool(True)
+}
+locationsDict["Missile (Draygon)"].Available = (
+    lambda sm: SMBool(True)
+)
+locationsDict["Missile (Draygon)"].PostAvailable = (
+    lambda sm: sm.canGravLessLevel1()
+)
 
 # TODO::use the dict in solver/randomizer
 # create the list that the solver/randomizer use

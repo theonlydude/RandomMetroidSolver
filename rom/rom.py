@@ -18,6 +18,9 @@ def snes_to_pc(B):
 
     return (A_1 << 16) | A_2
 
+def getBank(loromAddr):
+    return ((loromAddr & 0xff0000) >> 16 ) | 0x80
+
 class ROM(object):
     def readWord(self, address=None):
         return self.readBytes(2, address)

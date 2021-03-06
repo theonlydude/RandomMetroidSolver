@@ -1328,24 +1328,24 @@ if seedInfo != None:
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr {{=setBold("startLocation")}}><td>Start location</td><td>{{=seedParams["startLocation"]}}</td></tr>
 {{    if seedParams["startLocation"] == "random":}}
-              <tr {{=setBold("startLocationMultiSelect")}}><td>Start location pool</td><td>{{=seedParams["startLocationMultiSelect"]}}</td></tr>
+              <tr><td>Start location pool</td><td>{{=seedParams["startLocationMultiSelect"]}}</td></tr>
 {{        pass}}
               <tr {{=setBold("majorsSplit")}}><td>Majors Split</td><td>{{=seedParams["majorsSplit"]}}</td></tr>
 {{    if seedParams["majorsSplit"] == "random":}}
-              <tr {{=setBold("majorsSplitMultiSelect")}}><td>Majors Split pool</td><td>{{=seedParams["majorsSplitMultiSelect"]}}</td></tr>
+              <tr><td>Majors Split pool</td><td>{{=seedParams["majorsSplitMultiSelect"]}}</td></tr>
 {{        pass}}
               <tr {{=setBold("maxDifficulty")}}><td>Maximum difficulty for picking an item </td><td>{{=seedParams["maxDifficulty"]}}</td></tr>
               <tr {{=setBold("progressionSpeed")}}><td>Progression speed</td><td>{{=seedParams["progressionSpeed"]}}</td></tr>
 {{    if seedParams["progressionSpeed"] == "random":}}
-              <tr {{=setBold("progressionSpeedMultiSelect")}}><td>Progression speed pool</td><td>{{=seedParams["progressionSpeedMultiSelect"]}}</td></tr>
+              <tr><td>Progression speed pool</td><td>{{=seedParams["progressionSpeedMultiSelect"]}}</td></tr>
 {{        pass}}
               <tr {{=setBold("progressionDifficulty")}}><td>Progression difficulty</td><td>{{=seedParams["progressionDifficulty"]}}</td></tr>
 {{    if seedParams["progressionDifficulty"] == "random":}}
-              <tr {{=setBold("progressionDifficultyMultiSelect")}}><td>Progression difficulty pool</td><td>{{=seedParams["progressionDifficultyMultiSelect"]}}</td></tr>
+              <tr><td>Progression difficulty pool</td><td>{{=seedParams["progressionDifficultyMultiSelect"]}}</td></tr>
 {{        pass}}
               <tr {{=setBold("morphPlacement")}}><td>Morph Placement</td><td>{{=seedParams["morphPlacement"]}}</td></tr>
 {{    if seedParams["morphPlacement"] == "random":}}
-              <tr {{=setBold("morphPlacementMultiSelect")}}><td>Morph Placement pool</td><td>{{=seedParams["morphPlacementMultiSelect"]}}</td></tr>
+              <tr><td>Morph Placement pool</td><td>{{=seedParams["morphPlacementMultiSelect"]}}</td></tr>
 {{        pass}}
               <tr {{=setBold("suitsRestriction")}}><td>Suits restriction</td><td>{{=seedParams["suitsRestriction"]}}</td></tr>
               <tr {{=setBold("hideItems")}}><td>Hide some items</td><td>{{=seedParams["hideItems"]}}</td></tr>
@@ -1361,7 +1361,7 @@ if seedInfo != None:
               <tr {{=setBold("minorQty")}}><td>Percentage of minors available</td><td>{{=seedParams["minorQty"]}}</td></tr>
               <tr {{=setBold("energyQty")}}><td>Quantity of Energy/Reserve Tanks available</td><td>{{=seedParams["energyQty"]}}</td></tr>
 {{    if seedParams["energyQty"] == "random":}}
-              <tr {{=setBold("energyQtyMultiSelect")}}><td>Quantity of Energy/Reserve pool</td><td>{{=seedParams["energyQtyMultiSelect"]}}</td></tr>
+              <tr><td>Quantity of Energy/Reserve pool</td><td>{{=seedParams["energyQtyMultiSelect"]}}</td></tr>
 {{        pass}}
             </table>
 
@@ -1397,7 +1397,7 @@ if seedInfo != None:
               <tr {{=setBold("nerfedCharge")}}><td>Nerfed Charge Beam available from the start</td><td>{{=seedParams["nerfedCharge"]}}</td></tr>
               <tr {{=setBold("gravityBehaviour")}}><td>Suits properties</td><td>{{=seedParams["gravityBehaviour"]}}</td></tr>
 {{    if seedParams["gravityBehaviour"] == "random":}}
-              <tr {{=setBold("gravityBehaviourMultiSelect")}}><td>Suits properties pool</td><td>{{=seedParams["gravityBehaviourMultiSelect"]}}</td></tr>
+              <tr><td>Suits properties pool</td><td>{{=seedParams["gravityBehaviourMultiSelect"]}}</td></tr>
 {{        pass}}
               <tr {{=setBold("itemsounds")}}><td>Remove fanfare when picking up an item</td><td>{{=seedParams["itemsounds"]}}</td></tr>
               <tr {{=setBold("elevators_doors_speed")}}><td>Accelerate doors and elevators transitions</td><td>{{=seedParams["elevators_doors_speed"]}}</td></tr>

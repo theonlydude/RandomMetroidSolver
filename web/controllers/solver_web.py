@@ -2514,6 +2514,7 @@ def customizer():
     msg = ""
     seedInfo = None
     seedParams = None
+    defaultParams = None
     if len(url) > 0 and url[-1] != 'customizer':
         # a seed unique key was passed as parameter
         key = url[-1]
@@ -2564,7 +2565,7 @@ def customizer():
                     db.close()
 
     return dict(customSprites=customSprites, customShips=customShips,
-                seedInfo=seedInfo, seedParams=seedParams, msg=msg)
+                seedInfo=seedInfo, seedParams=seedParams, msg=msg, defaultParams=defaultParams)
 
 def customWebService():
     print("customWebService")

@@ -5,6 +5,7 @@
 my_dir=$(dirname $(readlink -f $0))
 
 [ -z "$ASAR" ] && ASAR=asar.exe
+[ -z "$ASAR_OPTS" ] && ASAR_OPTS=--fix-checksum=off
 [ -z "$VANILLA" ] && VANILLA=${my_dir}/../vanilla.sfc
 
 [ $# -lt 1 ] && {
@@ -22,7 +23,7 @@ cp $VANILLA $tmprom
 
 echo "Assembling $patch ..."
 
-$ASAR $patch $tmprom 
+$ASAR $ASAR_OPTS $patch $tmprom
 
 echo
 echo "Generating $target ..."

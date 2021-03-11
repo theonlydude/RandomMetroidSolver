@@ -67,40 +67,6 @@ class HelpersGraph(Helpers):
                        sm.canUsePowerBombs(),
                        sm.canGravLessLevel1())
 
-#    @Cache.decorator
-#    def canAccessKraidsLair(self):
-#        sm = self.smbm
-#        # EXPLAINED: access the upper right platform with either:
-#        #             -hijump boots (easy regular way)
-#        #             -fly (space jump or infinite bomb jump)
-#        #             -know how to wall jump on the platform without the hijump boots
-#        return sm.wand(sm.haveItem('Super'),
-#                       sm.wor(sm.haveItem('HiJump'),
-#                              sm.canFly(),
-#                              sm.knowsEarlyKraid()))
-#
-#    @Cache.decorator
-#    def canPassMoat(self):
-#        sm = self.smbm
-#        # EXPLAINED: In the Moat we can either:
-#        #             -use grapple or space jump (easy way)
-#        #             -do a continuous wall jump (https://www.youtube.com/watch?v=4HVhTwwax6g)
-#        #             -do a diagonal bomb jump from the middle platform (https://www.youtube.com/watch?v=5NRqQ7RbK3A&t=10m58s)
-#        #             -do a short charge from the Keyhunter room (https://www.youtube.com/watch?v=kFAYji2gFok)
-#        #             -do a gravity jump from below the right platform
-#        #             -do a mock ball and a bounce ball (https://www.youtube.com/watch?v=WYxtRF--834)
-#        #             -with gravity, either hijump or IBJ
-#        return sm.wor(sm.wor(sm.haveItem('Grapple'),
-#                             sm.haveItem('SpaceJump'),
-#                             sm.knowsContinuousWallJump()),
-#                             sm.wor(sm.wand(sm.knowsDiagonalBombJump(), sm.canUseBombs()),
-#                                    sm.canSimpleShortCharge(),
-#                                    sm.wand(sm.haveItem('Gravity'),
-#                                            sm.wor(sm.knowsGravityJump(),
-#                                                   sm.haveItem('HiJump'),
-#                                                   sm.canInfiniteBombJump())),
-#                                    sm.wand(sm.knowsMockballWs(), sm.canUseSpringBall())))
-#
     @Cache.decorator
     def canPassMoatReverse(self):
         sm = self.smbm
@@ -110,28 +76,6 @@ class HelpersGraph(Helpers):
                               sm.haveItem('HiJump'),
                               sm.canShortCharge()))
 
-#    @Cache.decorator
-#    def canPassSpongeBath(self):
-#        sm = self.smbm
-#        return sm.wor(sm.wand(sm.canPassBombPassages(),
-#                              sm.knowsSpongeBathBombJump()),
-#                      sm.wand(sm.haveItem('HiJump'),
-#                              sm.knowsSpongeBathHiJump()),
-#                      sm.wor(sm.haveItem('Gravity'),
-#                             sm.haveItem('SpaceJump'),
-#                             sm.wand(sm.haveItem('SpeedBooster'),
-#                                     sm.knowsSpongeBathSpeed()),
-#                             sm.canSpringBallJump()))
-#
-#    @Cache.decorator
-#    def canPassBowling(self):
-#        sm = self.smbm
-#        return sm.wand(Bosses.bossDead(sm, 'Phantoon'),
-#                       sm.wor(sm.heatProof(),
-#                              sm.energyReserveCountOk(1),
-#                              sm.haveItem("SpaceJump"),
-#                              sm.haveItem("Grapple")))
-#
     @Cache.decorator
     def canAccessEtecoons(self):
         sm = self.smbm
@@ -149,23 +93,10 @@ class HelpersGraph(Helpers):
                        sm.wor(sm.haveItem('Gravity'),
                               sm.wand(sm.knowsGravLessLevel1(),
                                       sm.haveItem('HiJump'))))
-#    @Cache.decorator
-#    def canExitCrabHole(self):
-#        sm = self.smbm
-#        return sm.wand(sm.haveItem('Morph'), # morph to exit the hole
-#                       sm.wor(sm.wand(sm.haveItem('Gravity'), # even with gravity you need some way to climb...
-#                                      sm.wor(sm.haveItem('Ice'), # ...on crabs...
-#                                             sm.wand(sm.haveItem('HiJump'), sm.knowsMaridiaWallJumps()), # ...or by jumping
-#                                             sm.knowsGravityJump(),
-#                                             sm.canFly())),
-#                              sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia()), # climbing crabs
-#                              sm.canDoubleSpringBallJump()))
-#
-
     @Cache.decorator
     def canTraverseSandPitsBottom(self):
         sm = self.smbm
-        # quite horrible to do...
+        # quite horrible to do... even with gravity...
         return sm.wand(sm.haveItem('Gravity'),
                        # eigher freeze top evir to jump on it, or use speedbooster to jump higher
                        # or use spacejump
@@ -180,35 +111,17 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.haveItem('Gravity'),
                        sm.wor(sm.haveItem('HiJump'), sm.haveItem('SpaceJump')))
 
-#    @Cache.decorator
-#    def canPassMaridiaToRedTowerNode(self):
-#        sm = self.smbm
-#        return sm.wand(sm.haveItem('Morph'),
-#                       sm.wor(RomPatches.has(RomPatches.AreaRandoGatesBase),
-#                              sm.haveItem('Super')))
-#
     def canEnterCathedral(self, mult=1.0):
         sm = self.smbm
         return sm.wand(sm.traverse('CathedralEntranceRight'),
-                       sm.haveItem('Morph'))
-#                       sm.wor(sm.wand(sm.canHellRun('MainUpperNorfair', mult),
-#                                      sm.wor(sm.wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),
-#                                                    sm.haveItem('HiJump'),
-#                                                    sm.canFly()),
-#                                             sm.wor(sm.haveItem('SpeedBooster'), # spark
-#                                                    sm.canSpringBallJump()))),
-#                              sm.wand(sm.canHellRun('MainUpperNorfair', 0.5*mult),
-#                                      sm.haveItem('Morph'),
-#                                      sm.knowsNovaBoost())))
-#
-#    @Cache.decorator
-#    def canClimbBubbleMountain(self):
-#        sm = self.smbm
-#        return sm.wor(sm.haveItem('HiJump'),
-#                      sm.canFly(),
-#                      sm.haveItem('Ice'),
-#                      sm.knowsBubbleMountainWallJump())
-#
+                       sm.haveItem('Morph')
+                       # TODO::there's lava now...
+                       # 0 + 0: go and back to business center: dead with 8 etanks...
+                       # v + 0: go and back to business center: 5 etanks
+                       # 0 + g: go and back to business center: 0 etanks
+                       # v + g: go and back to business center: 0 etanks
+                       sm.wand(sm.canHellRun('MainUpperNorfair', mult)))
+
     @Cache.decorator
     def canFallToSpeedBooster(self):
         sm = self.smbm

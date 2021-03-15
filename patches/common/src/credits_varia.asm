@@ -807,7 +807,7 @@ patch_clear:
 	rts
 
 //print "b81 end: ", org
-warnpc $81ffff
+warnpc $81f29f
 ////////////////////////// CREDITS /////////////////////////////
 
 // Hijack after decompression of regular credits tilemaps

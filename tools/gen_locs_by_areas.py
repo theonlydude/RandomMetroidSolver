@@ -19,7 +19,8 @@ def getLocIdsByArea(area):
 with open(asm, "w") as src:
     src.write("locs_by_areas:\n\tdw "+','.join(["locs_"+area for area in areas]))
     for area in areas:
+        src.write('\nprint "locs_'+area+': ", pc')
         src.write("\nlocs_"+area+":\n")
         locIds = getLocIdsByArea(area)
         src.write("\tdw "+','.join(["$%02x" % locId for locId in locIds]))
-    src.write("\nprint pc\n")
+    src.write("\n")

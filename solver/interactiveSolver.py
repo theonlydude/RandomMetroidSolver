@@ -445,6 +445,12 @@ class InteractiveSolver(CommonSolver):
     def pickItemAt(self, locName):
         # collect new item at newLoc
         loc = self.getWebLoc(locName)
+
+        # check that location has not already been visited
+        if loc in self.visitedLocations:
+            self.errorMsg = "Location '{}' has already been visited".format(loc.Name)
+            return
+
         if loc.difficulty is None or loc.difficulty == False:
             # sequence break
             loc.difficulty = SMBool(True, -1)

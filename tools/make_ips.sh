@@ -16,7 +16,9 @@ my_dir=$(dirname $(readlink -f $0))
 set -e
 
 patch=$1
-target=$(dirname $patch)/$(basename $patch asm)ips
+tdir=$(dirname $patch)
+[ -d "${tdir}/../ips" ] && tdir=${tdir}/../ips
+target=${tdir}/$(basename $patch asm)ips
 tmprom=sm.sfc
 
 cp $VANILLA $tmprom

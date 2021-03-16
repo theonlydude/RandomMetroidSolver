@@ -22,5 +22,5 @@ with open(asm, "w") as src:
         src.write('\nprint "locs_'+area+': ", pc')
         src.write("\nlocs_"+area+":\n")
         locIds = getLocIdsByArea(area)
-        src.write("\tdw "+','.join(["$%02x" % locId for locId in locIds]))
+        src.write("\tdb "+','.join(["$%02x" % locId for locId in locIds]))
     src.write("\n")

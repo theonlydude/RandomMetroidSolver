@@ -12,7 +12,7 @@
 ;;; area/item counter
 !previous = $7fff3c		; hi: area, lo: remaining items
 ;;; RAM for remaining items in current area
-!rem_items = $7fff3e
+!n_items = $7fff3e
 ;;; item split written by randomizer
 !seed_type = $82fb68
 ;;; vanilla bit array to keep track of collected items
@@ -29,7 +29,7 @@ org $809B8B
 
 ;;; hijack load room state, to init remaining items counter
 org $82def7
-	jsl load_state
+	jml load_state
 
 ;;; yet another item pickup hijack, different from the ones in endingtotals and bomb_torizo
 ;;; this one is used to count remaining items in current area
@@ -39,7 +39,7 @@ org $8488aa
 ;;; the following code will overwrite the normal etank drawing code,
 ;;; no extra space required, just turn the 2 lines of 14 etank into
 ;;; 1 lines of combined 14 etanks
-org $809B96
+org $809B99
 	STA $4204
 	SEP #$20
 	LDA #$64
@@ -85,13 +85,13 @@ draw_info:
 
 	;; determine current graph area
 	ldx $07bb
-	sep #20
+	sep #$20
 	lda $8f0010,x
 	;; check if we must draw it
 	cmp !previous
 	beq .items
 	sta !previous
-	rep #20
+	rep #$20
 	;; get text address
 	asl : asl : asl : asl
 	tay
@@ -106,19 +106,19 @@ draw_info:
 	bra .draw_area_loop
 .items:
 	;; check if we must draw remaining items counter
-	sep #20
-	lda !previous+1 : cmp !rem_items
+	sep #$20
+	lda !n_items : cmp !previous+1
 	beq .end
 	sta !previous+1
 	lda !seed_type
-	rep #20
+	rep #$20
 	and #$00ff
 	cmp #$005a		; 'Z'
 	beq .draw_chozo
 	cmp #$004d		; 'M'
 	beq .draw_major
 	;; default to full split: draw remaining item count on 2 digits
-	lda !rem_items : jsr draw_two
+	lda !n_items : jsr draw_two
 	bra .end
 .draw_chozo:
 	lda chozo_split : sta $7ec60e
@@ -126,7 +126,7 @@ draw_info:
 .draw_major:
 	lda major_split : sta $7ec60e
 .draw_items:
-	lda !rem_items : jsr draw_one
+	lda !n_items : jsr draw_one
 .end:
 	plp
 	ply
@@ -143,21 +143,21 @@ draw_two:
 	pha : pla : pha : pla : rep #$20
 	lda $4214 : asl : tay
 	lda NumberGFXTable, y
-	sta $7ec60e
+	sta $7ec614
 	lda $4216
 draw_one:			; A=remaining items (1 digit)
 	asl : tay
 	lda NumberGFXTable, y
-	sta $7ec610
+	sta $7ec616
 	rts
 
 ;; Normal numbers (like energy/ammo)
-NumberGFXTable:
-	DW #$0C09,#$0C00,#$0C01,#$0C02,#$0C03,#$0C04,#$0C05,#$0C06,#$0C07,#$0C08
+;; NumberGFXTable:
+;; 	DW #$0C09,#$0C00,#$0C01,#$0C02,#$0C03,#$0C04,#$0C05,#$0C06,#$0C07,#$0C08
 
 ;; Inverse video numbers
-;; NumberGFXTable:
-;; 	DW #$0C45,#$0C3C,#$0C3D,#$0C3E,#$0C3F,#$0C40,#$0C41,#$0C42,#$0C43,#$0C44
+NumberGFXTable:
+	DW #$0C45,#$0C3C,#$0C3D,#$0C3E,#$0C3F,#$0C40,#$0C41,#$0C42,#$0C43,#$0C44
 
 table "tables/hud_chars.txt"
 
@@ -198,8 +198,11 @@ print "b80 end: ", pc
 warnpc $80d1af
 
 org $a1f550
+
+incsrc "locs_by_areas.asm"
+
 load_state:
-	jsl compute_rem_items
+	jsl compute_n_items
 	;; hijacked code
 	LDX $07BB
 	LDA $0003,x
@@ -207,10 +210,10 @@ load_state:
 
 item_pickup:
 	sta $7ED870,x		; hijacked code
-compute_rem_items:
+compute_n_items:
 	phx
 	phy
-	lda #$0000 : sta !rem_items ; temporarily used to count collected items in current area
+	lda #$0000 : sta !n_items ; temporarily used to count collected items in current area
 	ldy #$0000		; Y will be used to store number of items in current area
 	;; go through loc id list for current area, counting collected items
 	;; determine current graph area
@@ -223,22 +226,21 @@ compute_rem_items:
 	phx
 	jsl !bit_index
 	lda !item_bit_array,x : and $05e7
-	bne .next
-	lda !rem_items : inc : sta !rem_items
+	beq .next
+	lda !n_items : inc : sta !n_items
 .next:
 	plx
 	iny
 	inx
 	bra .count_loop
 .end:
-	;; here, rem_items contain collected items, and Y number of items
-	;; rem_items = Y - rem_items
-	tya : sec : sbc !rem_items : sta !rem_items
+	;; here, n_items contain collected items, and Y number of items
+	;; make it so, n_items contains remaining items:
+	;; n_items = Y - n_items
+	tya : sec : sbc !n_items : sta !n_items
 	ply
 	plx
 	rtl
-
-incsrc "locs_by_areas.asm"
 
 print "a1 end: ", pc
 warnpc $a1f6af

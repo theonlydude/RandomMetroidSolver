@@ -77,7 +77,7 @@ org $809B99
 	NOP 
 ;end of etank row combine
 
-org $80d030
+org $80d130
 draw_info:
 	phx
 	phy
@@ -195,7 +195,7 @@ chozo_split:
 cleartable
 
 print "b80 end: ", pc
-warnpc $80d1af
+warnpc $80d2af
 
 org $a1f550
 

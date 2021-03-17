@@ -6,7 +6,7 @@ from rom.ips import IPS_Patch
 from utils.doorsmanager import DoorsManager
 from graph.graph_utils import GraphUtils, getAccessPoint
 from logic.logic import Logic
-from rom.rom import RealROM, FakeROM
+from rom.rom import RealROM, FakeROM, snes_to_pc
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir
 
@@ -24,6 +24,8 @@ class RomPatcher:
             'plm_spawn.ips',
             # needed fixes for VARIA
             'vanilla_bugfixes.ips',
+            # use a byte in a unsued room state header field to store area ID in the VARIA sense
+            'area_ids.ips',
             # custom credits, backup save system, base tracking code
             'credits_varia.ips',
             # actual game hijacks to update tracking stats
@@ -64,7 +66,8 @@ class RomPatcher:
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips',
                      'Escape_Animals_Change_Event', # ...end animals
                      # vanilla behaviour restore
-                     'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips'],
+                     'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips',
+                     'varia_hud.ips'],
         # base patchset+optional layout for area rando
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
@@ -164,6 +167,31 @@ class RomPatcher:
                 self.writeItem(itemLoc)
             if isMorph:
                 self.patchMorphBallEye(itemLoc.Item)
+
+    def writeSplitLocs(self, itemLocs, split):
+        listAddresses = {
+            "Ceres": snes_to_pc(0xA1F568),
+            "Crateria": snes_to_pc(0xA1F569),
+            "GreenPinkBrinstar": snes_to_pc(0xA1F57B),
+            "RedBrinstar": snes_to_pc(0xA1F58C),
+            "WreckedShip": snes_to_pc(0xA1F592),
+            "Kraid": snes_to_pc(0xA1F59E),
+            "Norfair": snes_to_pc(0xA1F5A2),
+            "Crocomire": snes_to_pc(0xA1F5B2),
+            "LowerNorfair": snes_to_pc(0xA1F5B8),
+            "WestMaridia": snes_to_pc(0xA1F5C3),
+            "EastMaridia": snes_to_pc(0xA1F5CB),
+            "Tourian": snes_to_pc(0xA1F5D7)
+        }
+        isNothingMissile = lambda loc: loc.Id == self.nothingId and self.nothingMissile == True
+        splitCheck = lambda itemLoc: (split == "Full" and itemLoc.Location.Id is not None) or (itemLoc.Item.Class == split and split in itemLoc.Location.Class)
+        hasItem = lambda itemLoc: itemLoc.Item.Category != "Nothing" or isNothingMissile(itemLoc.Location)
+        for area,addr in listAddresses.items():
+            ids = [il.Location.Id for il in itemLocs if splitCheck(il) and il.Location.GraphArea == area and hasItem(il)]
+            self.romFile.seek(addr)
+            for idByte in ids:
+                self.romFile.writeByte(idByte)
+            self.romFile.writeByte(0xff)
 
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball

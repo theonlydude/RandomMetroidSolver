@@ -271,7 +271,8 @@ if __name__ == "__main__":
     parser.add_argument('--allowGreyDoors', help='add grey color in doors colors pool', dest='allowGreyDoors',
                         nargs='?', const=True, default=False)
     parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="varia", choices=["varia", "rotation"])
-
+    parser.add_argument('--hud', help='Enable VARIA hud', dest='hud',
+                        nargs='?', const=True, default=False)
     # parse args
     args = parser.parse_args()
 
@@ -692,6 +693,8 @@ if __name__ == "__main__":
             outFileName = args.output
             romPatcher = RomPatcher(magic=args.raceMagic)
 
+        if args.hud == True:
+            args.patches.append("varia_hud.ips")
         if args.patchOnly == False:
             romPatcher.applyIPSPatches(args.startAP, args.patches,
                                        args.noLayout, gravityBehaviour,
@@ -719,6 +722,8 @@ if __name__ == "__main__":
         if args.patchOnly == False:
             romPatcher.setNothingId(args.startAP, itemLocs)
             romPatcher.writeItemsLocs(itemLocs)
+            if args.hud == True:
+                romPatcher.writeSplitLocs(itemLocs, args.majorsSplit)
             romPatcher.writeItemsNumber()
             romPatcher.writeSeed(seed) # lol if race mode
             romPatcher.writeSpoiler(itemLocs, progItemLocs)

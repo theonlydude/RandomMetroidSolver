@@ -16,7 +16,7 @@ def addRanges(name, patch):
         ips_ranges.append({'name':name, 'range':r})
 
 def loadPatchPy():
-    from rando.patches import patches as patches_py
+    from patches.common.patches import patches as patches_py
     for name,patch in patches_py.items():
         addRanges(name, IPS_Patch(patch))
 

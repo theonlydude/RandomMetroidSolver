@@ -200,6 +200,10 @@ class CommonSolver(object):
     def removeItemAt(self, locNameWeb):
         locName = self.locNameWeb2Internal(locNameWeb)
         locIndex = self.getLocIndex(locName)
+        if locIndex is None:
+            self.errorMsg = "Location '{}' has not been visited".format(locName)
+            return
+
         loc = self.visitedLocations.pop(locIndex)
         # removeItemAt is only used from the tracker, so all the locs are in majorLocations
         self.majorLocations.append(loc)

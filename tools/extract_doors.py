@@ -177,12 +177,12 @@ node [shape="plaintext",fontsize=30];
 edge [color="#0025fa80"];
 """)
     for (address, roomInfo) in roomsGraph.items():
-        if roomInfo['Area'] == Areas.Tourian:
-            src = roomInfo['Name']
-            print("{} [label = {}];".format(roomInfo['Name'], genLabel(roomInfo['Name'], roomInfo["Width"], roomInfo["Height"])))
+        if True: #roomInfo['Area'] == Areas.Tourian:
+            src = roomInfo['Name'].replace('.', '')
+            print("{} [label = {}];".format(roomInfo['Name'].replace('.', ''), genLabel(roomInfo['Name'], roomInfo["Width"], roomInfo["Height"])))
             for doorData in roomInfo["Doors"].values():
                 dstInfo = roomsGraph[doorData['roomPtr']]
-                dst = dstInfo['Name']
+                dst = dstInfo['Name'].replace('.', '')
                 print("{}:x{}{}:{} -> {}:x{}{}:{};".format(src, doorData.get('entryScreenX'), doorData.get('entryScreenY'), getDir(doorData.get('entryDirection')), dst, doorData.get('exitScreenX'), doorData.get('exitScreenY'), getDir(doorData.get('exitDirection'))))
     print("}")
 

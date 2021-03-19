@@ -116,7 +116,7 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.traverse('CathedralEntranceRight'),
                        sm.haveItem('Morph')
                        # TODO::there's lava now...
-                       # 0 + 0: go and back to business center: dead with 8 etanks...
+                       # 0 + 0: go and back to business center: n/a
                        # v + 0: go and back to business center: 5 etanks
                        # 0 + g: go and back to business center: 0 etanks
                        # v + g: go and back to business center: 0 etanks

@@ -651,10 +651,10 @@ accessPoints = [
     AccessPoint('Toilet Top', 'EastMaridia', {
         'Oasis Bottom': Cache.ldeco(lambda sm: sm.wand(sm.traverse('PlasmaSparkBottom'), sm.canDestroyBombWallsUnderwater())),
         'Le Coude Right': lambda sm: SMBool(True),
-        'Precious Room Top': Cache.ldeco(lambda sm: sm.wand(Bosses.bossDead(sm, 'Draygon'),
-                                                            # suitless could be possible with this but unreasonable: https://youtu.be/rtLwytH-u8o
-                                                            sm.haveItem('Gravity'),
-                                                            sm.traverse('ColosseumBottomRight')))
+        'Colosseum Top Right': Cache.ldeco(lambda sm: sm.wand(Bosses.bossDead(sm, 'Draygon'),
+                                                              # suitless could be possible with this but unreasonable: https://youtu.be/rtLwytH-u8o
+                                                              sm.haveItem('Gravity'),
+                                                              sm.haveItem('Morph')))
     }, internal=True),
     AccessPoint('Colosseum Top Right', 'EastMaridia', {
         'Post Botwoon': lambda sm: sm.canColosseumToBotwoonExit(),

@@ -554,6 +554,7 @@ class HelpersGraph(Helpers):
     def canPassCacatacAlley(self):
         sm = self.smbm
         return sm.wand(Bosses.bossDead(sm, 'Draygon'),
+                       sm.haveItem('Morph'),
                        sm.wor(sm.haveItem('Gravity'),
                               sm.wand(sm.knowsGravLessLevel2(),
                                       sm.haveItem('HiJump'),

@@ -14,7 +14,7 @@
 ;;; RAM for remaining items in current area
 !n_items = $7fff3e
 ;;; item split written by randomizer
-!seed_type = $82fb68
+!seed_type = $82fb6c
 ;;; vanilla bit array to keep track of collected items
 !item_bit_array = $7ed870
 ;;; bit index to byte index/bitmask routine
@@ -99,7 +99,7 @@ draw_info:
 	ldx !hudposition
 .draw_area_loop:
 	lda area_names,y
-	beq .end
+	beq .items
 	sta $7ec602,x
 	iny : iny
 	inx : inx
@@ -121,10 +121,10 @@ draw_info:
 	lda !n_items : jsr draw_two
 	bra .end
 .draw_chozo:
-	lda chozo_split : sta $7ec60e
+	lda #$0CF9 : sta $7ec614 ; blue 'Z'
 	bra .draw_items
 .draw_major:
-	lda major_split : sta $7ec60e
+	lda #$0CEC : sta $7ec614 ; blue 'M'
 .draw_items:
 	lda !n_items : jsr draw_one
 .end:
@@ -152,12 +152,12 @@ draw_one:			; A=remaining items (1 digit)
 	rts
 
 ;; Normal numbers (like energy/ammo)
-;; NumberGFXTable:
-;; 	DW #$0C09,#$0C00,#$0C01,#$0C02,#$0C03,#$0C04,#$0C05,#$0C06,#$0C07,#$0C08
-
-;; Inverse video numbers
 NumberGFXTable:
-	DW #$0C45,#$0C3C,#$0C3D,#$0C3E,#$0C3F,#$0C40,#$0C41,#$0C42,#$0C43,#$0C44
+	DW #$0C09,#$0C00,#$0C01,#$0C02,#$0C03,#$0C04,#$0C05,#$0C06,#$0C07,#$0C08
+
+;; ;; Inverse video numbers
+;; NumberGFXTable:
+;; 	DW #$0C45,#$0C3C,#$0C3D,#$0C3E,#$0C3F,#$0C40,#$0C41,#$0C42,#$0C43,#$0C44
 
 table "tables/hud_chars.txt"
 
@@ -186,11 +186,6 @@ area_names:
 	dw $0000
 	dw " TOUR  "
 	dw $0000
-
-major_split:
-	dw "M"
-chozo_split:
-	dw "Z"
 
 cleartable
 

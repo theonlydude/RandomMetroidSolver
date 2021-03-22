@@ -71,7 +71,7 @@ class RomPatcher:
         # base patchset+optional layout for area rando
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
-                 'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street' ],
+                 'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street', 'no_demo.ips'],
         # patches for escape rando
         'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips'],
         # patches for  minimizer with fast Tourian

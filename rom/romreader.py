@@ -171,7 +171,8 @@ class RomReader:
         'minimizer_bosses': {'address': 0x10F500, 'value': 0xAD, 'vanillaValue': 0xff},
         'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'vanillaValue': 0xff},
         'open_zebetites': {'address': 0x26DF22, 'value': 0xc3, 'vanillaValue': 0x43},
-        'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'vanillaValue': 0xaf}
+        'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'vanillaValue': 0xaf},
+        'no_demo': {'address': 0x59F2C, 'value': 0x80, 'vanillaValue': 0xf0}
     }
 
     @staticmethod

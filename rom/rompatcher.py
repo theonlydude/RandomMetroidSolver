@@ -433,6 +433,7 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
             elif bosses == True:
                 self.applyIPSPatch('door_transition.ips')
+                self.applyIPSPatch('no_demo.ips')
             if minimizerN is not None:
                 self.applyIPSPatch('minimizer_bosses.ips')
                 if minimizerTourian == True:

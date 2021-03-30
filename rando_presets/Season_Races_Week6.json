@@ -3,7 +3,7 @@
   "progressionDifficulty": "normal",
   "funMovement": "off",
   "startLocation": "random",
-  "startLocationMultiSelect": ["Gauntlet Top","Green Brinstar Elevator","Big Pink","Etecoons Supers","Wrecked Ship Main","Firefleas Top","Business Center","Bubble Mountain","Mama Turtle","Watering Hole","Aqueduct"],
+  "startLocationMultiSelect": ["Gauntlet Top","Green Brinstar Elevator","Big Pink","Etecoons Supers","Wrecked Ship Main","Firefleas Top","Business Center","Bubble Mountain","Mama Turtle"],
   "hideItems": "off",
   "funCombat": "off",
   "majorsSplit": "Full",

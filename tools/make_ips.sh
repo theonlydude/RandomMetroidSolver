@@ -5,6 +5,7 @@
 my_dir=$(dirname $(readlink -f $0))
 
 [ -z "$ASAR" ] && ASAR=asar.exe
+[ -z "$XKAS_PLUS" ] && XKAS_PLUS=xkas.exe
 [ -z "$ASAR_OPTS" ] && ASAR_OPTS=--fix-checksum=off
 [ -z "$VANILLA" ] && VANILLA=${my_dir}/../vanilla.sfc
 
@@ -23,9 +24,34 @@ tmprom=sm.sfc
 
 cp $VANILLA $tmprom
 
-echo "Assembling $patch ..."
+assembler=asar
 
-$ASAR $ASAR_OPTS $patch $tmprom
+grep '//' $patch > /dev/null
+
+[ $? -eq 0 ] && {
+    assembler="xkas-plus"
+}
+
+echo "Assembling $patch with $assembler ..."
+
+case $assembler in
+    asar)
+	$ASAR $ASAR_OPTS $patch $tmprom	
+	;;
+
+    xkas-plus)
+	(
+	    cd $(dirname $patch)
+	    $XKAS_PLUS -o $(readlink -f $tmprom) $(basename $patch)
+	)
+	;;
+
+    *)
+	echo "Unknown assembler $assembler" >&2
+	exit 1
+	;;
+
+esac
 
 echo
 echo "Generating $target ..."

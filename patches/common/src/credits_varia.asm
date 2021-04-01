@@ -1657,6 +1657,11 @@ script:
     dw {draw}, {row}*166
     dw {draw}, {row}*167
     dw {draw}, {blank}
+    dw {draw}, {row}*184 // Sprite Something
+    dw {draw}, {blank}
+    dw {draw}, {row}*224
+    dw {draw}, {row}*225
+    dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {row}*145 // RANDOMIZER PARAMETERS
     dw {draw}, {blank}
@@ -1978,8 +1983,8 @@ credits:
     {yellow}
     dw "   SUPER METROID DISASSEMBLY    " // 165
     {big}
-    dw "     PJBOY        KEJARDON      " // 166
-    dw "     pjboy        kejardon      " // 167
+    dw "        PJBOY    KEJARDON       " // 166
+    dw "        pjboy    kejardon       " // 167
 // stats continued
     dw " AVAILABLE AMMO XXX% ENERGY XXX%" // 168
     dw " available ammo xxx> energy xxx>" // 169
@@ -1989,11 +1994,11 @@ credits:
     dw " deaths                       } " // 173
     dw " RESETS                       0 " // 174
     dw " resets                       } " // 175
-// credits
+// some more credits
     dw "   all super metroid hackers    " // 176
     dw "     OUR GENEROUS DONATORS      " // 177
     dw "     our generous donators      " // 178
-// credits end
+// varia URLs
     {big}
     dw "            VARIA RUN           " // 179
     dw "            varia.run           " // 180
@@ -2002,7 +2007,8 @@ credits:
     dw "        DISCORD.VARIA.RUN       " // 182
     {purple}
     dw "      GAMEPLAY STATISTICS       " // 183
-    dw "                                " // 184  : reusable
+    {yellow}
+    dw "        SPRITE SOMETHING        " // 184  : credits
     {big}
     dw " DOOR TRANSITIONS             0 " // 185
     dw " door transitions             } " // 186
@@ -2049,11 +2055,9 @@ credits:
     {cyan}
     dw "     PLAY THIS RANDOMIZER AT    " // 223
     {big}
-    dw "       THANKS FOR PLAYING       " // 224
-    dw "       thanks for playing       " // 225
-
-    //dw " ARM PUMPING GAIN      00'00^00 " // 224
-    //dw " arm pumping gain               " // 225
+    // how about some more credits
+    dw "    ARTHEAU   MIKE TRETHEWEY    " // 224
+    dw "    artheau   mike trethewey    " // 225
     dw $0000                              // End of credits tilemap
 
 warnpc $ceffff

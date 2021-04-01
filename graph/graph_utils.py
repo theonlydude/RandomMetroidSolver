@@ -4,6 +4,22 @@ from logic.logic import Logic
 from utils.parameters import Knows
 import utils.log
 
+# order expected by ROM patches
+graphAreas = [
+    "Ceres",
+    "Crateria",
+    "GreenPinkBrinstar",
+    "RedBrinstar",
+    "WreckedShip",
+    "Kraid",
+    "Norfair",
+    "Crocomire",
+    "LowerNorfair",
+    "WestMaridia",
+    "EastMaridia",
+    "Tourian"
+]
+
 vanillaTransitions = [
     ('Lower Mushrooms Left', 'Green Brinstar Elevator'),
     ('Morph Ball Room Left', 'Green Hill Zone Top Right'),

@@ -5,11 +5,10 @@ import sys, os
 # now that we're in directory 'tools/' we have to update sys.path
 sys.path.append(os.path.dirname(sys.path[0]))
 
+from graph.graph_utils import graphAreas as areas
+
 # generate asm file listing vanilla locs IDs by area ID
 asm=sys.argv[1]
-
-# area ID is index in this list
-areas = ["Ceres", "Crateria", "GreenPinkBrinstar", "RedBrinstar", "WreckedShip", "Kraid", "Norfair", "Crocomire", "LowerNorfair", "WestMaridia", "EastMaridia", "Tourian"]
 
 from graph.location import locationsDict
 

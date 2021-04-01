@@ -15,9 +15,7 @@ layout="area"
 if len(sys.argv) > 3:
     layout=sys.argv[3]
 
-# area ID is index in this list
-areas = ["Ceres", "Crateria", "GreenPinkBrinstar", "RedBrinstar", "WreckedShip", "Kraid", "Norfair", "Crocomire", "LowerNorfair", "WestMaridia", "EastMaridia", "Tourian"]
-
+from graph.graph_utils import graphAreas as areas
 from rooms import rooms as rooms_area
 from rooms import rooms_alt
 

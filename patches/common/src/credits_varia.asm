@@ -1659,7 +1659,7 @@ script:
     dw {draw}, {row}*166
     dw {draw}, {row}*167
     dw {draw}, {blank}
-    dw {draw}, {row}*184 // Sprite Something
+    dw {draw}, {row}*184 // SpriteSomething
     dw {draw}, {blank}
     dw {draw}, {row}*224
     dw {draw}, {row}*225
@@ -2033,7 +2033,7 @@ credits:
     {purple}
     dw "      GAMEPLAY STATISTICS       " // 183
     {yellow}
-    dw "        SPRITE SOMETHING        " // 184  : credits
+    dw "        SPRITESOMETHING         " // 184  : credits
     {big}
     dw " DOOR TRANSITIONS             0 " // 185
     dw " door transitions             } " // 186

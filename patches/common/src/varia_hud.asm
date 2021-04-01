@@ -93,6 +93,7 @@ draw_info:
 	sta !previous
 	rep #$20
 	;; get text address
+	and #$00ff
 	asl : asl : asl : asl
 	tay
 	;; draw text
@@ -197,6 +198,7 @@ org $a1f550
 incsrc "locs_by_areas.asm"
 
 load_state:
+	lda #$ffff : sta !previous
 	jsl compute_n_items
 	;; hijacked code
 	LDX $07BB

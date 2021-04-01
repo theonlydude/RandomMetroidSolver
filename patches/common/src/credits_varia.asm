@@ -816,6 +816,7 @@ org $8be0d1
 
 // Load credits script data from bank $df instead of $8c
 org $8bf770
+// set scroll speed routine ({speed} instruction in credits script)
 set_scroll:
     rep #$30
     phb; pea $df00; plb; plb
@@ -1420,11 +1421,15 @@ warnpc $dfd91a
 // New credits script in free space of bank $DF
 org $dfd91b
 script:
-    dw {set}, $0002; -
+    dw {set}, $0002
+-
     dw {draw}, {blank}
     dw {delay}, -
 
-    // Show a compact version of the original credits so we get time to add more
+    // Show a compact and sped up version of the original credits so we get time to add more
+    // change scroll speed to 1 pixel per frame
+    dw {speed}, $0001
+
     dw {draw}, {row}*0      // SUPER METROID STAFF
     dw {draw}, {blank}
     dw {draw}, {row}*4      // PRODUCER
@@ -1605,8 +1610,9 @@ script:
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
-
-    // Custom item randomizer credits text : max 248 dw {draw} statements
+    // change scroll speed to 2 pixels per frame
+    dw {speed}, $0002
+    // Custom item randomizer credits text
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {row}*128 // VARIA RANDOMIZER STAFF
@@ -1618,31 +1624,33 @@ script:
     dw {draw}, {row}*131 // ORIGINAL ITEM RANDOMIZERS
     dw {draw}, {blank}
     dw {draw}, {row}*132
+    dw {draw}, {row}*133
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {row}*133 // SNES CODE
-    dw {draw}, {blank}
-    dw {draw}, {row}*134
+    dw {draw}, {row}*134 // CONTRIBUTORS
     dw {draw}, {blank}
     dw {draw}, {row}*135
-    dw {draw}, {blank}
     dw {draw}, {row}*136
     dw {draw}, {blank}
     dw {draw}, {row}*137
+    dw {draw}, {row}*138
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {row}*142 // PALETTE RANDOMIZER
+    dw {draw}, {row}*139 // SPECIAL THANKS TO
+    dw {draw}, {blank}
+    dw {draw}, {row}*140 // SMILEY SUKU
+    dw {draw}, {row}*141
+    dw {draw}, {blank}
+    dw {draw}, {row}*154 // hackers
+    dw {draw}, {row}*176
+    dw {draw}, {blank}
+    dw {draw}, {row}*177 // donators
+    dw {draw}, {row}*178
+    dw {draw}, {blank}
+    dw {draw}, {row}*142 // METROID CONSTRUCTION
     dw {draw}, {blank}
     dw {draw}, {row}*143
     dw {draw}, {row}*144
-    dw {draw}, {blank}
-    dw {draw}, {blank}
-    dw {draw}, {row}*138 // SPECIAL THANKS TO
-    dw {draw}, {blank}
-    dw {draw}, {row}*139 // METROID CONSTRUCTION
-    dw {draw}, {blank}
-    dw {draw}, {row}*140
-    dw {draw}, {row}*141
     dw {draw}, {blank}
     dw {draw}, {row}*165 // SUPER METROID DISASSEMBLY
     dw {draw}, {blank}
@@ -1661,7 +1669,7 @@ script:
     dw {draw}, {row}*159 // MORPH PLACEMENT
     dw {draw}, {blank}
 
-    // change scroll speed
+    // change scroll speed to 3 px/frame
     dw {speed}, $0003
 
     dw {draw}, {row}*160 // SUPER FUN COMBAT
@@ -1710,9 +1718,6 @@ script:
 
     dw {draw}, {row}*183 // GAMEPLAY STATS
     dw {draw}, {blank}
-
-    // Set scroll speed to 3 frames per pixel
-//    dw {speed}, $0003
     dw {draw}, {row}*172 // DEATHS
     dw {draw}, {row}*173
     dw {draw}, {blank}
@@ -1851,6 +1856,7 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*219 // Thanks
     dw {draw}, {row}*220
+
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
@@ -1865,7 +1871,8 @@ script:
     dw {speed}, $0004
 
     // Scroll all text off and end credits
-    dw {set}, $0017; -
+    dw {set}, $0017
+-
     dw {draw}, {blank}
     dw {delay}, -
     dw {end}
@@ -1907,7 +1914,7 @@ credits:
     // 0123456789%& '´
     // }!@#$%&/()>~.
 
-    // This is not exactly in display order
+    // This is not in display order
     {pink}
     dw "     VARIA RANDOMIZER STAFF     " // 128
     {big}
@@ -1915,27 +1922,26 @@ credits:
     dw "          dude and flo          " // 130
     {purple}
     dw "    ORIGINAL ITEM RANDOMIZERS   " // 131
-    {yellow}
+    {big}
     dw "       TOTAL   DESSYREQT        " // 132
+    dw "       total   dessyreqt        " // 133
     {purple}
-    dw "            SNES CODE           " // 133
-    {yellow}
-    dw "      FLO     TOTAL    FOOSDA   " // 134
-    dw "   DARKSHOCK  RAKKI    SCYZER   " // 135
-    dw "   KEJARDON   SMILEY   LIORAN   " // 136
-    dw "      PERSONITIS    DUDE        " // 137
+    dw "          CONTRIBUTORS          " // 134
+    {big}
+    dw "         RAND 0   COUT          " // 135
+    dw "         rand }   cout          " // 136
+    dw "        DJLO   PRANKARD         " // 137
+    dw "        djlo   prankard         " // 138
     {cyan}
-    dw "       SPECIAL THANKS TO        " // 138
+    dw "       SPECIAL THANKS TO        " // 139
+    {big}
+    dw "         SMILEY   SUKU          " // 140
+    dw "         smiley   suku          " // 141
     {yellow}
-    dw "      METROID CONSTRUCTION      " // 139
+    dw "      METROID CONSTRUCTION      " // 142
     {big}
-    dw "     METROIDCONSTRUCTION COM    " // 140
-    dw "     metroidconstruction.com    " // 141
-    {purple}
-    dw "       PALETTE RANDOMIZER       " // 142
-    {big}
-    dw "             RAND 0             " // 143
-    dw "             rand }             " // 144
+    dw "     METROIDCONSTRUCTION COM    " // 143
+    dw "     metroidconstruction.com    " // 144
     {purple}
     // params title
     dw "     RANDOMIZER PARAMETERS      " // 145
@@ -1949,7 +1955,7 @@ credits:
     dw " ammo packs  mi XX sup XX pb XX " // 151
     dw " HEALTH TANKS         E XX R XX " // 152
     dw " health tanks ......  e.xx.r xx " // 153
-    dw "                                " // 154 : reusable
+    dw "   ALL SUPER METROID HACKERS    " // 154 : credits
     // params data start
     {yellow}
     dw " PROGRESSION SPEED .... XXXXXXX " // 155
@@ -1983,11 +1989,11 @@ credits:
     dw " deaths                       } " // 173
     dw " RESETS                       0 " // 174
     dw " resets                       } " // 175
-// --- this space is reusable
-    dw "                                " // 176
-    dw "                                " // 177
-    dw "                                " // 178
-// End of reusable space
+// credits
+    dw "   all super metroid hackers    " // 176
+    dw "     OUR GENEROUS DONATORS      " // 177
+    dw "     our generous donators      " // 178
+// credits end
     {big}
     dw "            VARIA RUN           " // 179
     dw "            varia.run           " // 180
@@ -2043,6 +2049,9 @@ credits:
     {cyan}
     dw "     PLAY THIS RANDOMIZER AT    " // 223
     {big}
+    dw "       THANKS FOR PLAYING       " // 224
+    dw "       thanks for playing       " // 225
+
     //dw " ARM PUMPING GAIN      00'00^00 " // 224
     //dw " arm pumping gain               " // 225
     dw $0000                              // End of credits tilemap

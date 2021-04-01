@@ -722,8 +722,7 @@ if __name__ == "__main__":
         if args.patchOnly == False:
             romPatcher.setNothingId(args.startAP, itemLocs)
             romPatcher.writeItemsLocs(itemLocs)
-            if args.hud == True:
-                romPatcher.writeSplitLocs(itemLocs, args.majorsSplit)
+            romPatcher.writeSplitLocs(itemLocs, args.majorsSplit)
             romPatcher.writeItemsNumber()
             romPatcher.writeSeed(seed) # lol if race mode
             romPatcher.writeSpoiler(itemLocs, progItemLocs)

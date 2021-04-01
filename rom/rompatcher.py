@@ -24,7 +24,7 @@ class RomPatcher:
             'plm_spawn.ips',
             # needed fixes for VARIA
             'vanilla_bugfixes.ips',
-            # use a byte in a unsued room state header field to store area ID in the VARIA sense
+            # use a byte in a unused room state header field to store area ID in the VARIA sense
             'area_ids.ips',
             # custom credits, backup save system, base tracking code
             'credits_varia.ips',
@@ -431,9 +431,11 @@ class RomPatcher:
                     RomPatcher.IPSPatches['Area'].append('area_rando_layout_base.ips')
                 for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
-            elif bosses == True:
-                self.applyIPSPatch('door_transition.ips')
-                self.applyIPSPatch('no_demo.ips')
+            else:
+                self.applyIPSPatch('area_ids_alt.ips')
+                if bosses == True:
+                    self.applyIPSPatch('door_transition.ips')
+                    self.applyIPSPatch('no_demo.ips')
             if minimizerN is not None:
                 self.applyIPSPatch('minimizer_bosses.ips')
                 if minimizerTourian == True:

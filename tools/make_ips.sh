@@ -24,6 +24,8 @@ tmprom=sm.sfc
 
 cp $VANILLA $tmprom
 
+tmprom=$(readlink -f $tmprom)
+
 assembler=asar
 
 grep '//' $patch > /dev/null
@@ -42,7 +44,7 @@ case $assembler in
     xkas-plus)
 	(
 	    cd $(dirname $patch)
-	    $XKAS_PLUS -o $(readlink -f $tmprom) $(basename $patch)
+	    $XKAS_PLUS -o $tmprom $(basename $patch)
 	)
 	;;
 

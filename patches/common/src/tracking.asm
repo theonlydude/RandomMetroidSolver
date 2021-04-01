@@ -34,6 +34,22 @@ define pause_timer_hi $7fff0c
 define add_time_32_tmp_lo $7fff0e
 define add_time_32_tmp_hi $7fff1a
 
+// tracked stats (see tracking.txt)
+define stat_nb_door_transitions		#$0002
+define stat_rta_door_transitions	#$0003
+define stat_rta_door_align		#$0005
+define stat_rta_regions			#$0007
+define stat_uncharged_shots		#$001f
+define stat_charged_shots		#$0020
+define stat_SBAs			#$0021
+define stat_missiles			#$0022
+define stat_supers			#$0023
+define stat_PBs				#$0024
+define stat_bombs			#$0025
+define stat_rta_menu			#$0026
+define stat_deaths			#$0028
+define stat_resets			#$0029
+
 // -------------------------------
 // HIJACKS
 // -------------------------------
@@ -93,7 +109,6 @@ org $90c107
 org $90f800
 fire_sba_local:
     jml fire_sba
-
 
 // screen finished fading out
 org $828cea
@@ -171,7 +186,7 @@ door_entered:
     // save last stats to resist power cycle
     jsl {save_last_stats}
     // Number of door transitions
-    lda #$0002
+    lda {stat_nb_door_transitions}
     jsl {inc_stat}
     // Save RTA time to temp variable
     lda {timer1}
@@ -200,16 +215,18 @@ store_region_time:
 door_exited:
     // Increment saved value with time spent in door transition
     lda {door_timer_tmp}
-    ldx #$0003
+    ldx {stat_rta_door_transitions}
     jsr add_time
     // update time spent in region since last store_region_time call,
     jsr update_region_time
     jsr store_region_time
-    // Store (region*2) + 7 to region_tmp (This uses stat id 7-18 for region timers)
-    lda $7e079f
+    // Store (region*2) + stats_regions to region_tmp.(region == graph area, found in state header)
+    lda $7e07bb
+    tax
+    lda $8f0010,x
     asl
     clc
-    adc #$0007
+    adc {stat_rta_regions}
     sta {region_tmp}
 
     // Run hijacked code and return
@@ -231,7 +248,7 @@ door_adjust_start:
 door_adjust_stop:
     lda {door_adjust_tmp}
     inc // Add extra frame to time delta so that perfect doors counts as 0
-    ldx #$0005
+    ldx {stat_rta_door_align}
     jsr add_time
 
     // Run hijacked code and return
@@ -241,7 +258,7 @@ door_adjust_stop:
 
 // samus is dead
 death:
-    lda #$001f
+    lda {stat_deaths}
     jsl {inc_stat}
     jsl {save_last_stats}
     // hijacked code
@@ -251,7 +268,7 @@ death:
 
 // timer is up (equivalent to death)
 time_up:
-    lda #$001f
+    lda {stat_deaths}
     jsl {inc_stat}
     jsl {save_last_stats}
     // hijacked code
@@ -263,7 +280,7 @@ time_up:
 uncharged_beam:
     sta $0ccc // execute first part of hijacked code, to freely use A
 
-    lda #$0013
+    lda {stat_uncharged_shots}
     jsl {inc_stat}
     // do the vanilla check, done in both auto and normal fire
     pla
@@ -277,7 +294,7 @@ uncharged_beam:
 hyper_shot:
     sta $0cd0 // execute first part of hijacked code, to freely use A
 
-    lda #$0013
+    lda {stat_uncharged_shots}
     jsl {inc_stat}
 
     plp // execute last instr of hijacked code
@@ -285,7 +302,7 @@ hyper_shot:
 
 // Charged Beam Fire
 charged_beam:
-    lda #$0014
+    lda {stat_charged_shots}
     jsl {inc_stat}
     // Run hijacked code and return
     LDX #$0000
@@ -298,7 +315,7 @@ fire_sba:
     cmp $09ce
     beq .end
     pha
-    lda #$0015
+    lda {stat_SBAs}
     jsl {inc_stat}
     pla
     // Run hijacked code and return
@@ -312,12 +329,12 @@ missiles_fired:
     cmp #$0002
     beq .super
     dec $09c6
-    lda #$0016
+    lda {stat_missiles}
     jsl {inc_stat}
     bra .end
 .super:
     dec $09ca
-    lda #$0017
+    lda {stat_supers}
     jsl {inc_stat}
 .end:
     jml $90bec7
@@ -327,10 +344,10 @@ bombs_laid:
     lda $09d2			// HUD sleection index
     cmp #$0003
     beq .power_bomb
-    lda #$001a
+    lda {stat_bombs}
     bra .end
 .power_bomb:
-    lda #$0018
+    lda {stat_PBs}
 .end:
     jsl {inc_stat}
     //run hijacked code and return
@@ -357,7 +374,7 @@ pausing:
 resuming:
     // add time spent in pause to stat at 27-28 spot
     phy // XXX don't know whether Y is actually used in vanilla code, save it for safety
-    ldy #$001b
+    ldy {stat_rta_menu}
     ldx {pause_timer_idx}
     jsr add_time_32
     ply

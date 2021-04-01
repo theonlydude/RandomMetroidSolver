@@ -63,6 +63,8 @@ define load_station_index	$078b
 define backup_counter	$7fff38
 define backup_candidate $7fff3a
 
+define stat_resets	#$0029
+
 // Patch boot to init our stuff
 org $80844B
     jml boot1
@@ -693,7 +695,7 @@ patch_load:
     lda #$babe
     sta {softreset}
     // increment reset count
-    lda #$0020
+    lda {stat_resets}
     jsl inc_stat
     jsl save_last_stats
     // return carry clear
@@ -1741,23 +1743,41 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*191 // TIME SPENT
     dw {draw}, {blank}
-    dw {draw}, {row}*192 // CRATERIA
+    dw {draw}, {row}*192 // CERES
     dw {draw}, {row}*193
     dw {draw}, {blank}
-    dw {draw}, {row}*194 // BRINSTAR
+    dw {draw}, {row}*194 // CRATERIA
     dw {draw}, {row}*195
     dw {draw}, {blank}
-    dw {draw}, {row}*196 // NORFAIR
+    dw {draw}, {row}*196 // GREEN BRINSTAR
     dw {draw}, {row}*197
     dw {draw}, {blank}
-    dw {draw}, {row}*198 // WS
+    dw {draw}, {row}*198 // RED BRINSTAR
     dw {draw}, {row}*199
     dw {draw}, {blank}
-    dw {draw}, {row}*200 // MARIDIA
+    dw {draw}, {row}*200 // WRECKED SHIP
     dw {draw}, {row}*201
     dw {draw}, {blank}
-    dw {draw}, {row}*202 // TOURIAN
+    dw {draw}, {row}*202 // KRAID
     dw {draw}, {row}*203
+    dw {draw}, {blank}
+    dw {draw}, {row}*226 // UPPER NORFAIR
+    dw {draw}, {row}*227
+    dw {draw}, {blank}
+    dw {draw}, {row}*228 // CROC
+    dw {draw}, {row}*229
+    dw {draw}, {blank}
+    dw {draw}, {row}*230 // LOWER NORFAIR
+    dw {draw}, {row}*231
+    dw {draw}, {blank}
+    dw {draw}, {row}*232 // WEST MARIDIA
+    dw {draw}, {row}*233
+    dw {draw}, {blank}
+    dw {draw}, {row}*234 // EAST MARIDIA
+    dw {draw}, {row}*235
+    dw {draw}, {blank}
+    dw {draw}, {row}*236 // TOURIAN
+    dw {draw}, {row}*237
     dw {draw}, {blank}
     dw {draw}, {row}*221 // PAUSE MENU
     dw {draw}, {row}*222
@@ -1888,23 +1908,28 @@ stats:
     dw 2,       {row}*185,  1, 0    // Door transitions
     dw 3,       {row}*187,  3, 0    // Time in doors
     dw 5,       {row}*189,  2, 0    // Time adjusting doors
-    dw 7,       {row}*192,  3, 0    // Crateria
-    dw 9,       {row}*194,  3, 0    // Brinstar
-    dw 11,      {row}*196,  3, 0    // Norfair
-    dw 13,      {row}*198,  3, 0    // Wrecked Ship
-    dw 15,      {row}*200,  3, 0    // Maridia
-    dw 17,      {row}*202,  3, 0    // Tourian
-    dw 19,      {row}*170,  1, 0    // Uncharged Shots
-    dw 20,      {row}*205,  1, 0    // Charged Shots
-    dw 21,      {row}*207,  1, 0    // Special Beam Attacks
-    dw 22,      {row}*209,  1, 0    // Missiles
-    dw 23,      {row}*211,  1, 0    // Super Missiles
-    dw 24,      {row}*213,  1, 0    // Power Bombs
-    dw 26,      {row}*215,  1, 0    // Bombs
-    dw 27,      {row}*221,  3, 0    // Time in pause
-//  dw 29,      {row}*224,  2, 0    // time saved arm pumping
-    dw 31,      {row}*172,  1, 0    // deaths
-    dw 32,      {row}*174,  1, 0    // resets
+    dw 7,       {row}*192,  3, 0    // Ceres
+    dw 9,       {row}*194,  3, 0    // Crateria/Blue brin
+    dw 11,      {row}*196,  3, 0    // Green/Pink brin
+    dw 13,      {row}*198,  3, 0    // Red Brin
+    dw 15,      {row}*200,  3, 0    // WS
+    dw 17,      {row}*202,  3, 0    // Kraid
+    dw 19,      {row}*226,  3, 0    // Upper Norfair
+    dw 21,      {row}*228,  3, 0    // Croc
+    dw 23,      {row}*230,  3, 0    // Lower Norfair
+    dw 25,      {row}*232,  3, 0    // West Maridia
+    dw 27,      {row}*234,  3, 0    // East Maridia
+    dw 29,      {row}*236,  3, 0    // Tourian
+    dw 31,      {row}*170,  1, 0    // Uncharged Shots
+    dw 32,      {row}*205,  1, 0    // Charged Shots
+    dw 33,      {row}*207,  1, 0    // Special Beam Attacks
+    dw 34,      {row}*209,  1, 0    // Missiles
+    dw 35,      {row}*211,  1, 0    // Super Missiles
+    dw 36,      {row}*213,  1, 0    // Power Bombs
+    dw 37,      {row}*215,  1, 0    // Bombs
+    dw 38,      {row}*221,  3, 0    // Time in pause
+    dw 40,      {row}*172,  1, 0    // deaths
+    dw 41,      {row}*174,  1, 0    // resets
     dw 0,               0,  0, 0    // end of table
 
 print "credits end : ", org
@@ -2019,18 +2044,18 @@ credits:
     {blue}
     dw "         TIME SPENT IN          " // 191
     {big}
-    dw " CRATERIA           00'00'00^00 " // 192
-    dw " crateria                       " // 193
-    dw " BRINSTAR           00'00'00^00 " // 194
-    dw " brinstar                       " // 195
-    dw " NORFAIR            00'00'00^00 " // 196
-    dw " norfair                        " // 197
-    dw " WRECKED SHIP       00'00'00^00 " // 198
-    dw " wrecked ship                   " // 199
-    dw " MARIDIA            00'00'00^00 " // 200
-    dw " maridia                        " // 201
-    dw " TOURIAN            00'00'00^00 " // 202
-    dw " tourian                        " // 203
+    dw " CERES              00'00'00^00 " // 192
+    dw " ceres                          " // 193
+    dw " CRATERIA           00'00'00^00 " // 194
+    dw " crateria                       " // 195
+    dw " GREEN BRINSTAR     00'00'00^00 " // 196
+    dw " green brinstar                 " // 197
+    dw " RED BRINSTAR       00'00'00^00 " // 198
+    dw " red brinstar                   " // 199
+    dw " WRECKED SHIP       00'00'00^00 " // 200
+    dw " wrecked ship                   " // 201
+    dw " KRAID'S LAIR       00'00'00^00 " // 202
+    dw " kraid s lair                   " // 203
     {green}
     dw "      SHOTS AND AMMO FIRED      " // 204
     {big}
@@ -2058,6 +2083,20 @@ credits:
     // how about some more credits
     dw "    ARTHEAU   MIKE TRETHEWEY    " // 224
     dw "    artheau   mike trethewey    " // 225
+    // now some more stats
+    dw " UPPER NORFAIR      00'00'00^00 " // 226
+    dw " upper norfair                  " // 227
+    dw " CROCOMIRE          00'00'00^00 " // 228
+    dw " crocomire                      " // 229
+    dw " LOWER NORFAIR      00'00'00^00 " // 230
+    dw " lower norfair                  " // 231
+    dw " WEST MARIDIA       00'00'00^00 " // 232
+    dw " west maridia                   " // 233
+    dw " EAST MARIDIA       00'00'00^00 " // 234
+    dw " east maridia                   " // 235
+    dw " TOURIAN            00'00'00^00 " // 236
+    dw " tourian                        " // 237
+
     dw $0000                              // End of credits tilemap
 
 warnpc $ceffff

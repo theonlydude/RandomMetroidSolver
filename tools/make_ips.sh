@@ -14,8 +14,6 @@ my_dir=$(dirname $(readlink -f $0))
     exit 1
 }
 
-set -e
-
 patch=$1
 tdir=$(dirname $patch)
 [ -d "${tdir}/../ips" ] && tdir=${tdir}/../ips
@@ -28,7 +26,7 @@ tmprom=$(readlink -f $tmprom)
 
 assembler=asar
 
-grep '//' $patch > /dev/null
+grep 'xkas-plus' $patch > /dev/null
 
 [ $? -eq 0 ] && {
     assembler="xkas-plus"
@@ -38,7 +36,7 @@ echo "Assembling $patch with $assembler ..."
 
 case $assembler in
     asar)
-	$ASAR $ASAR_OPTS $patch $tmprom	
+	$ASAR $ASAR_OPTS $patch $tmprom
 	;;
 
     xkas-plus)
@@ -55,10 +53,16 @@ case $assembler in
 
 esac
 
+[ $? -ne 0 ] && {
+    echo "$assembler failed" >&2
+    exit 1
+}
+
 echo
 echo "Generating $target ..."
 
 ${my_dir}/make_ips.py $VANILLA $tmprom $target
+
 rm -f $tmprom
 
 echo

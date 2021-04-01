@@ -214,7 +214,7 @@ org $8fa635
 org $8fa65e
 	db $05
 org $8fa6be
-	db $03
+	db $06
 org $8fa6ff
 	db $05
 org $8fa728

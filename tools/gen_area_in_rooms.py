@@ -11,10 +11,20 @@ sys.path.append(os.path.dirname(sys.path[0]))
 vanilla=sys.argv[1]
 asm=sys.argv[2]
 
+layout="area"
+if len(sys.argv) > 3:
+    layout=sys.argv[3]
+
 # area ID is index in this list
 areas = ["Ceres", "Crateria", "GreenPinkBrinstar", "RedBrinstar", "WreckedShip", "Kraid", "Norfair", "Crocomire", "LowerNorfair", "WestMaridia", "EastMaridia", "Tourian"]
 
-from rooms import rooms
+from rooms import rooms as rooms_area
+from rooms import rooms_alt
+
+rooms = rooms_area
+if layout == "alt":
+    rooms = rooms_alt
+
 from rom.rom import pc_to_snes,RealROM
 
 rom = RealROM(vanilla)

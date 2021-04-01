@@ -1,3 +1,4 @@
+# GraphArea given for area rando layout (tracker map)
 rooms = [
 {"Address": 0x0791F8, "DoorCount": 4, "Name": "Landing Site","GraphArea":"Crateria"},
 {"Address": 0x0792B3, "DoorCount": 2, "Name": "Gauntlet Entrance","GraphArea":"Crateria"},
@@ -83,7 +84,7 @@ rooms = [
 {"Address": 0x07A59F, "DoorCount": 2, "Name": "Kraid Room","GraphArea":"Kraid"},
 {"Address": 0x07A618, "DoorCount": 1, "Name": "[Red Tower Energy Charge Station]","GraphArea":"RedBrinstar"},
 {"Address": 0x07A641, "DoorCount": 1, "Name": "[Kraid Recharge Station]","GraphArea":"Kraid"},
-{"Address": 0x07A6A1, "DoorCount": 4, "Name": "Warehouse Entrance","GraphArea":"RedBrinstar"},
+{"Address": 0x07A6A1, "DoorCount": 4, "Name": "Warehouse Entrance","GraphArea":"Norfair"},
 {"Address": 0x07A6E2, "DoorCount": 1, "Name": "Varia Suit Room","GraphArea":"Kraid"},
 {"Address": 0x07A70B, "DoorCount": 1, "Name": "[Kraid Save Room]","GraphArea":"Kraid"},
 {"Address": 0x07A734, "DoorCount": 1, "Name": "[Caterpillar Save Room]","GraphArea":"RedBrinstar"},
@@ -262,4 +263,18 @@ rooms = [
 {"Address": 0x07E06B, "DoorCount": 2, "Name": "[Ceres Last Corridor]","GraphArea":"Ceres"},
 {"Address": 0x07E0B5, "DoorCount": 1, "Name": "[Ceres Ridley Room]","GraphArea":"Ceres"},
 #{"Address": 0x07E82C, "DoorCount": 4, "Name": "[Tile Debug Room]"}
+]
+
+# alternate area definitions for a few rooms in vanilla layout
+rooms_alt = [
+    {"Address": 0x0795A8, "DoorCount": 2, "Name": "[Crab Maze to Elevator]","GraphArea":"WreckedShip"},
+    {"Address": 0x0794CC, "DoorCount": 3, "Name": "[Elevator to Maridia]","GraphArea":"WreckedShip"},
+    {"Address": 0x07962A, "DoorCount": 3, "Name": "[Elevator to Red Brinstar]","GraphArea":"Crateria"},
+    {"Address": 0x079938, "DoorCount": 3, "Name": "[Elevator to Green Brinstar]","GraphArea":"Crateria"},
+    {"Address": 0x07A5ED, "DoorCount": 2, "Name": "Statues Hallway","GraphArea":"Crateria"},
+    {"Address": 0x07A66A, "DoorCount": 3, "Name": "Statues Room","GraphArea":"Crateria"},
+    {"Address": 0x07A6A1, "DoorCount": 4, "Name": "Warehouse Entrance","GraphArea":"RedBrinstar"},
+    {"Address": 0x07AF14, "DoorCount": 2, "Name": "Lava Dive Room","GraphArea":"Norfair"},
+    {"Address": 0x07AF3F, "DoorCount": 4, "Name": "[Elevator to Lower Norfair]","GraphArea":"Norfair"},
+    {"Address": 0x07B1BB, "DoorCount": 1, "Name": "[Elevator Save Room]","GraphArea":"Norfair"}
 ]

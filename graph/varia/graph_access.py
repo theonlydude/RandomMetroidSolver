@@ -1,9 +1,9 @@
 from graph.graph import AccessPoint
-from utils.parameters import Settings
 from rom.rom_patches import RomPatches
 from logic.smbool import SMBool
 from logic.helpers import Bosses
 from logic.cache import Cache
+from logic.logic import Logic
 
 # all access points and traverse functions
 accessPoints = [
@@ -238,45 +238,45 @@ accessPoints = [
         'Lava Dive Right': lambda sm: sm.canPassLavaPitReverse(),
         'LN Above GT': lambda sm: sm.canPassLowerNorfairChozo(),
         'Screw Attack Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canUsePowerBombs(),
-                                                              sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+                                                              sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']),
                                                               sm.canGreenGateGlitch(),
                                                               sm.canDestroyBombWalls())),
-        'Firefleas': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+        'Firefleas': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']),
                                                     sm.canPassWorstRoom(),
                                                     sm.canUsePowerBombs()))
     }, internal=True),
     AccessPoint('LN Above GT', 'LowerNorfair', {
-        'Screw Attack Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+        'Screw Attack Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']),
                                                               sm.enoughStuffGT()))
     }, internal=True),
     AccessPoint('Screw Attack Bottom', 'LowerNorfair', {
-        'LN Entrance': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+        'LN Entrance': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']),
                                                       sm.canExitScrewAttackArea(),
                                                       sm.haveItem('Super'),
                                                       sm.canUsePowerBombs()))
     }, internal=True),
     AccessPoint('Firefleas', 'LowerNorfair', {
-        'LN Entrance': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+        'LN Entrance': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']),
                                                       sm.canPassAmphitheaterReverse(),
                                                       sm.canPassWorstRoomPirates(),
                                                       sm.canUsePowerBombs())),
-        'Three Muskateers Room Left': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+        'Three Muskateers Room Left': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']),
                                                                      sm.haveItem('Morph'),
                                                                      # check for only 3 ki hunters this way
                                                                      sm.canPassRedKiHunters())),
-        'Ridley Zone': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+        'Ridley Zone': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']),
                                                       sm.traverse('WastelandLeft'),
                                                       sm.traverse('RedKihunterShaftBottom'),
                                                       sm.canGetBackFromRidleyZone(),
                                                       sm.canPassRedKiHunters(),
                                                       sm.canPassWastelandDessgeegas(),
                                                       sm.canPassNinjaPirates())),
-        'Screw Attack Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+        'Screw Attack Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']),
                                                               sm.canPassAmphitheaterReverse(),
                                                               sm.canDestroyBombWalls(),
                                                               sm.canGreenGateGlitch())),
         'Firefleas Top': Cache.ldeco(lambda sm: sm.wand(sm.canPassBombPassages(),
-                                                        sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])))
+                                                        sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main'])))
     }, internal=True),
     AccessPoint('Firefleas Top', 'LowerNorfair', {
         # this weird condition basically says: "if we start here, give heat protection"
@@ -291,14 +291,14 @@ accessPoints = [
               'solveArea': "Lower Norfair After Amphitheater",
               'forcedEarlyMorph':True}),
     AccessPoint('Ridley Zone', 'LowerNorfair', {
-        'Firefleas': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+        'Firefleas': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']),
                                                     sm.canGetBackFromRidleyZone(),
                                                     sm.canPassWastelandDessgeegas(),
                                                     sm.canPassRedKiHunters())),
-        'RidleyRoomOut': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']))
+        'RidleyRoomOut': Cache.ldeco(lambda sm: sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']))
     }, internal=True),
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {
-        'Firefleas': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+        'Firefleas': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']),
                                                     sm.haveItem('Morph'),
                                                     sm.canPassThreeMuskateers()))
     }, roomInfo = {'RoomPtr':0xb656, "area": 0x2},
@@ -307,13 +307,13 @@ accessPoints = [
        entryInfo = {'SamusX':0x134, 'SamusY':0x88},
        dotOrientation = 'n'),
     AccessPoint('RidleyRoomOut', 'LowerNorfair', {
-        'Ridley Zone': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']))
+        'Ridley Zone': Cache.ldeco(lambda sm: sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']))
     }, boss = True,
        roomInfo = {'RoomPtr':0xb37a, "area": 0x2},
        exitInfo = {'DoorPtr':0x98ca, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
        entryInfo = {'SamusX':0x2e, 'SamusY':0x98},
-       traverse=Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+       traverse=Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']),
                                                sm.canOpenEyeDoors())),
        dotOrientation = 'e'),
     AccessPoint('RidleyRoomIn', 'LowerNorfair', {},
@@ -368,49 +368,49 @@ accessPoints = [
        entryInfo = {'SamusX': 0x2c7, 'SamusY': 0x98},
        dotOrientation = 'nw'),
     AccessPoint('Business Center', 'Norfair', {
-        'Cathedral': Cache.ldeco(lambda sm: sm.canEnterCathedral(Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']['mult'])),
+        'Cathedral': Cache.ldeco(lambda sm: sm.canEnterCathedral(Logic.Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']['mult'])),
         'Bubble Mountain': Cache.ldeco(# go through cathedral
                                        lambda sm: sm.wand(sm.traverse('CathedralRight'),
-                                                          sm.canEnterCathedral(Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Bubble']['mult']))),
+                                                          sm.canEnterCathedral(Logic.Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Bubble']['mult']))),
         'Bubble Mountain Bottom': Cache.ldeco(lambda sm: sm.haveItem('SpeedBooster')), # frog speedway
         'Crocomire Speedway Bottom': Cache.ldeco(lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
-                                                                           sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Croc via Frog w/Wave' if sm.haveItem('Wave') else 'Norfair Entrance -> Croc via Frog']),
+                                                                           sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Croc via Frog w/Wave' if sm.haveItem('Wave') else 'Norfair Entrance -> Croc via Frog']),
                                                                            sm.wor(sm.canBlueGateGlitch(),
                                                                                   sm.haveItem('Wave'))),
                                                                    # below ice
                                                                    sm.wand(sm.traverse('BusinessCenterTopLeft'),
                                                                            sm.haveItem('SpeedBooster'),
                                                                            sm.canUsePowerBombs(),
-                                                                           sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Croc via Ice'])))),
+                                                                           sm.canHellRun(**Logic.Settings.hellRunsTable['Ice']['Norfair Entrance -> Croc via Ice'])))),
         'Warehouse Entrance Left': lambda sm: SMBool(True)
     }, internal=True,
        start={'spawn':0x0208, 'doors':[0x4d], 'patches':[RomPatches.HiJumpAreaBlueDoor], 'solveArea': "Norfair Entrance", 'needsPreRando':True}),
     AccessPoint('Single Chamber Top Right', 'Norfair', {
         'Bubble Mountain Top': Cache.ldeco(lambda sm: sm.wand(sm.canDestroyBombWalls(),
                                                               sm.haveItem('Morph'),
-                                                              sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain']))),
+                                                              sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain']))),
         'Kronic Boost Room Bottom Left': Cache.ldeco(lambda sm: sm.wand(sm.canDestroyBombWalls(),
                                                                         sm.haveItem('Morph'),
-                                                                        sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Kronic Boost Room'])))
+                                                                        sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Kronic Boost Room'])))
     },  roomInfo = {'RoomPtr':0xad5e, "area": 0x2},
         exitInfo = {'DoorPtr':0x95fa, 'direction': 0x4, "cap": (0x11, 0x6), "bitFlag": 0x0,
                     "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
         entryInfo = {'SamusX':0x5cf, 'SamusY':0x88},
         dotOrientation = 'ne'),
     AccessPoint('Cathedral', 'Norfair', {
-        'Business Center': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles'])),
+        'Business Center': Cache.ldeco(lambda sm: sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles'])),
         'Bubble Mountain': Cache.ldeco(lambda sm: sm.wand(sm.traverse('CathedralRight'),
-                                                          sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles'])))
+                                                          sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles'])))
     }, internal=True),
     AccessPoint('Kronic Boost Room Bottom Left', 'Norfair', {
-        'Single Chamber Top Right': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Kronic Boost Room']),
+        'Single Chamber Top Right': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Kronic Boost Room']),
                                                                    sm.canDestroyBombWalls(),
                                                                    sm.haveItem('Morph'),
                                                                    RomPatches.has(RomPatches.SingleChamberNoCrumble))),
-        'Bubble Mountain Bottom': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain'])),
+        'Bubble Mountain Bottom': Cache.ldeco(lambda sm: sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain'])),
         'Bubble Mountain Top': Cache.ldeco(lambda sm: sm.wand(sm.haveItem('Morph'),
-                                                              sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room -> Bubble Mountain Top']))), # go all the way around
-        'Crocomire Speedway Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
+                                                              sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room -> Bubble Mountain Top']))), # go all the way around
+        'Crocomire Speedway Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
                                                                     sm.wor(sm.haveItem('Wave'),
                                                                            sm.canBlueGateGlitch()))),
     }, traverse=Cache.ldeco(lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.traverse('KronicBoostBottomLeft'))),
@@ -421,12 +421,12 @@ accessPoints = [
        dotOrientation = 'se'),
     AccessPoint('Crocomire Speedway Bottom', 'Norfair', {
         'Business Center': Cache.ldeco(lambda sm: sm.wor(sm.wand(sm.canPassFrogSpeedwayRightToLeft(),
-                                                                 sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Norfair Entrance'])),
-                                                         sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Norfair Entrance']),
+                                                                 sm.canHellRun(**Logic.Settings.hellRunsTable['Ice']['Croc -> Norfair Entrance'])),
+                                                         sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Croc -> Norfair Entrance']),
                                                                  sm.canGrappleEscape(),
                                                                  sm.haveItem('Super')))),
-        'Bubble Mountain Bottom': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Bubble Mountain'])),
-        'Kronic Boost Room Bottom Left': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
+        'Bubble Mountain Bottom': Cache.ldeco(lambda sm: sm.canHellRun(**Logic.Settings.hellRunsTable['Ice']['Croc -> Bubble Mountain'])),
+        'Kronic Boost Room Bottom Left': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
                                                                         sm.haveItem('Morph')))
     }, traverse=Cache.ldeco(lambda sm: sm.wor(RomPatches.has(RomPatches.CrocBlueDoors), sm.traverse('CrocomireSpeedwayBottom'))),
        roomInfo = {'RoomPtr':0xa923, "area": 0x2},
@@ -437,33 +437,33 @@ accessPoints = [
     AccessPoint('Bubble Mountain', 'Norfair', {
         'Business Center': lambda sm: sm.canExitCathedral(),
         'Bubble Mountain Top': lambda sm: sm.canClimbBubbleMountain(),
-        'Cathedral': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles'])),
+        'Cathedral': Cache.ldeco(lambda sm: sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles'])),
         'Bubble Mountain Bottom': lambda sm: sm.canPassBombPassages()
     }, internal=True,
        start={'spawn':0x0201, 'doors':[0x54,0x55], 'patches':[RomPatches.SpeedAreaBlueDoors], 'knows':['BubbleMountainWallJump'], 'solveArea': "Bubble Norfair Bottom"}),
     AccessPoint('Bubble Mountain Top', 'Norfair', {
         'Kronic Boost Room Bottom Left': Cache.ldeco(# go all the way around
                                                      lambda sm: sm.wand(sm.haveItem('Morph'),
-                                                                        sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Kronic Boost Room wo/Bomb']))),
-        'Single Chamber Top Right': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain']),
+                                                                        sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Kronic Boost Room wo/Bomb']))),
+        'Single Chamber Top Right': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain']),
                                                                    sm.canDestroyBombWalls(),
                                                                    sm.haveItem('Morph'),
                                                                    RomPatches.has(RomPatches.SingleChamberNoCrumble))),
         'Bubble Mountain': lambda sm: SMBool(True),
         # all the way around
         'Bubble Mountain Bottom': Cache.ldeco(lambda sm: sm.wand(sm.haveItem('Morph'),
-                                                                 sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble Top <-> Bubble Bottom'])))
+                                                                 sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble Top <-> Bubble Bottom'])))
     }, internal=True),
     AccessPoint('Bubble Mountain Bottom', 'Norfair', {
         'Bubble Mountain': lambda sm: sm.canPassBombPassages(),
-        'Crocomire Speedway Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Croc']),
+        'Crocomire Speedway Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Croc']),
                                                                     sm.wor(sm.canBlueGateGlitch(),
                                                                            sm.haveItem('Wave')))),
-        'Kronic Boost Room Bottom Left': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Kronic Boost Room'])),
+        'Kronic Boost Room Bottom Left': Cache.ldeco(lambda sm: sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Kronic Boost Room'])),
         'Business Center': lambda sm: sm.canPassFrogSpeedwayRightToLeft(),
         # all the way around
         'Bubble Mountain Top': Cache.ldeco(lambda sm: sm.wand(sm.haveItem('Morph'),
-                                                              sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble Top <-> Bubble Bottom'])))
+                                                              sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble Top <-> Bubble Bottom'])))
     }, internal=True),
     AccessPoint('Business Center Mid Left', 'Norfair', {
         'Warehouse Entrance Left': lambda sm: SMBool(True)

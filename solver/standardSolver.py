@@ -7,7 +7,7 @@ from solver.conf import Conf
 from solver.out import Out
 from solver.comeback import ComeBack
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
-from utils.parameters import Knows, isKnows, Settings
+from utils.parameters import Knows, isKnows
 from logic.logic import Logic
 import utils.log
 
@@ -176,7 +176,7 @@ class StandardSolver(CommonSolver):
 
         # get total of known knows
         knowsKnownCount = len([knows for  knows in Knows.__dict__ if isKnows(knows) and getattr(Knows, knows).bool == True])
-        knowsKnownCount += len([hellRun for hellRun in Settings.hellRuns if Settings.hellRuns[hellRun] is not None])
+        knowsKnownCount += len([hellRun for hellRun in Logic.Settings.hellRuns if Logic.Settings.hellRuns[hellRun] is not None])
 
         return (knowsUsedCount, knowsKnownCount, knowsUsed)
 

@@ -12,6 +12,7 @@ import urllib.parse
 
 # to solve the rom
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, diff4solver
+# we import Settings directly as we don't support rotation in the web part for now
 from utils.parameters import Knows, Settings, Controller, isKnows, isButton
 from solver.conf import Conf
 from utils.parameters import diff2text, text2diff

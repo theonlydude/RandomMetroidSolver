@@ -1,8 +1,9 @@
 import os, json, sys, re, random
 
-from utils.parameters import Knows, Settings, Controller, isKnows, isSettings, isButton
+from utils.parameters import Knows, Controller, isKnows, isSettings, isButton
 from utils.parameters import easy, medium, hard, harder, hardcore, mania
 from logic.smbool import SMBool
+from logic.logic import Logic
 
 def isStdPreset(preset):
     return preset in ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master', 'samus', 'solution', 'Season_Races', 'SMRAT2021']
@@ -106,17 +107,17 @@ class PresetLoader(object):
         ## hard rooms
         for hardRoom in ['X-Ray', 'Gauntlet']:
             if hardRoom in self.params['Settings']:
-                Settings.hardRooms[hardRoom] = Settings.hardRoomsPresets[hardRoom][self.params['Settings'][hardRoom]]
+                Logic.Settings.hardRooms[hardRoom] = Logic.Settings.hardRoomsPresets[hardRoom][self.params['Settings'][hardRoom]]
 
         ## bosses
         for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
             if boss in self.params['Settings']:
-                Settings.bossesDifficulty[boss] = Settings.bossesDifficultyPresets[boss][self.params['Settings'][boss]]
+                Logic.Settings.bossesDifficulty[boss] = Logic.Settings.bossesDifficultyPresets[boss][self.params['Settings'][boss]]
 
         ## hellruns
         for hellRun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
             if hellRun in self.params['Settings']:
-                Settings.hellRuns[hellRun] = Settings.hellRunPresets[hellRun][self.params['Settings'][hellRun]]
+                Logic.Settings.hellRuns[hellRun] = Logic.Settings.hellRunPresets[hellRun][self.params['Settings'][hellRun]]
 
         # Controller
         for button in self.params['Controller']:
@@ -135,9 +136,9 @@ class PresetLoader(object):
             if isKnows(knows):
                 print("{}: {}".format(knows, Knows.__dict__[knows]))
         print("loaded settings:")
-        for setting in Settings.__dict__:
+        for setting in Logic.Settings.__dict__:
             if isSettings(setting):
-                print("{}: {}".format(setting, Settings.__dict__[setting]))
+                print("{}: {}".format(setting, Logic.Settings.__dict__[setting]))
         print("loaded controller:")
         for button in Controller.__dict__:
             if isButton(button):

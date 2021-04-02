@@ -3,9 +3,9 @@ from math import ceil
 from logic.smbool import SMBool
 from logic.helpers import Helpers, Bosses
 from logic.cache import Cache
+from logic.logic import Logic
 from rom.rom_patches import RomPatches
 from graph.graph_utils import getAccessPoint
-from utils.parameters import Settings
 
 class HelpersGraph(Helpers):
     def __init__(self, smbm):
@@ -233,12 +233,12 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canHellRunToSpeedBooster(self):
         sm = self.smbm
-        return sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Speed Booster w/Speed' if sm.haveItem('SpeedBooster') else 'Bubble -> Speed Booster'])
+        return sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Speed Booster w/Speed' if sm.haveItem('SpeedBooster') else 'Bubble -> Speed Booster'])
 
     @Cache.decorator
     def canAccessDoubleChamberItems(self):
         sm = self.smbm
-        hellRun = Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Wave']
+        hellRun = Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Wave']
         return sm.wor(sm.wand(sm.traverse('SingleChamberRight'),
                               sm.canHellRun(**hellRun)),
                       sm.wand(sm.wor(sm.haveItem('HiJump'),
@@ -255,7 +255,7 @@ class HelpersGraph(Helpers):
         #              can do it with only two wall jumps (the first one is delayed like on alcatraz)
         #              can do it with a spring ball jump from wall
         sm = self.smbm
-        return sm.wand(sm.wor(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Entrance']),
+        return sm.wand(sm.wor(sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Entrance']),
                               sm.heatProof()),
                        sm.wor(sm.wor(sm.canPassBombPassages(),
                                      sm.haveItem("SpeedBooster")),
@@ -331,7 +331,7 @@ class HelpersGraph(Helpers):
     def canPassLowerNorfairChozo(self):
         sm = self.smbm
         # to require one more CF if no heat protection because of distance to cover, wait times, acid...
-        return sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Entrance -> GT via Chozo']),
+        return sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Entrance -> GT via Chozo']),
                        sm.canUsePowerBombs(),
                        sm.wor(RomPatches.has(RomPatches.LNChozoSJCheckDisabled), sm.haveItem('SpaceJump')))
 

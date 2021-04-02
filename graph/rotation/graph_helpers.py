@@ -3,9 +3,9 @@ from math import ceil
 from logic.smbool import SMBool
 from logic.helpers import Helpers, Bosses
 from logic.cache import Cache
+from logic.logic import Logic
 from rom.rom_patches import RomPatches
 from graph.graph_utils import getAccessPoint
-from utils.parameters import Settings
 
 class HelpersGraph(Helpers):
     def __init__(self, smbm):
@@ -111,59 +111,58 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.haveItem('Gravity'),
                        sm.wor(sm.haveItem('HiJump'), sm.haveItem('SpaceJump')))
 
-    def canEnterCathedral(self, mult=1.0):
+    @Cache.decorator
+    def canBusinessToCathedral(self):
         sm = self.smbm
         return sm.wand(sm.traverse('CathedralEntranceRight'),
-                       sm.haveItem('Morph')
-                       # TODO::there's lava now...
-                       # 0 + 0: go and back to business center: n/a
-                       # v + 0: go and back to business center: 5 etanks
-                       # 0 + g: go and back to business center: 0 etanks
-                       # v + g: go and back to business center: 0 etanks
-                       sm.wand(sm.canHellRun('MainUpperNorfair', mult)))
+                       sm.haveItem('Morph'),
+                       sm.canLavaBath(**Logic.Settings.bathsTable['Lava']['Cathedral'],
+                                      **Logic.Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']))
+
+    @Cache.decorator
+    def canCathedralToBubble(self):
+        sm = self.smbm
+        return sm.wand(sm.traverse('CathedralRight'),
+                       sm.canLavaBath(**Logic.Settings.bathsTable['Lava']['Cathedral'],
+                                      **Logic.Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']))
+
+    @Cache.decorator
+    def canBubbleToCathedral(self):
+        sm = self.smbm
+        return sm.canLavaBath(**Logic.Settings.bathsTable['Lava']['Cathedral'],
+                              **Logic.Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']))
+
+    @Cache.decorator
+    def canCathedralToBusiness(self):
+        sm = self.smbm
+        return sm.wand(sm.haveItem('Morph'),
+                       sm.canLavaBath(**Logic.Settings.bathsTable['Lava']['Cathedral'],
+                                      **Logic.Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']))
+
+    @Cache.decorator
+    def canGoUpFrogSpeedway(self):
+        sm = self.smbm
+        # kill/freeze beetoms, or enough energy.
+        return sm.wor(sm.canPassBeetoms(),
+                      sm.energyReserveCountOk(2))
 
     @Cache.decorator
     def canFallToSpeedBooster(self):
         sm = self.smbm
         # TODO::new hellrun table
-        return sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Speed Booster'])
+        return sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Speed Booster'])
 
     @Cache.decorator
     def canGetBackFromSpeedBooster(self):
         sm = self.smbm
         # TODO::new hellrun table
-        return sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Speed Booster'])
+        return sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Speed Booster'])
 
     @Cache.decorator
     def canAccessDoubleChamberItems(self):
         sm = self.smbm
-        hellRun = Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Wave']
+        hellRun = Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Wave']
         return sm.wand(sm.haveItem('Morph'), sm.canHellRun(**hellRun))
-
-#    @Cache.decorator
-#    def canExitCathedral(self):
-#        # from top: can use bomb/powerbomb jumps
-#        # from bottom: can do a shinespark or use space jump
-#        #              can do it with highjump + wall jump
-#        #              can do it with only two wall jumps (the first one is delayed like on alcatraz)
-#        #              can do it with a spring ball jump from wall
-#        sm = self.smbm
-#        return sm.wand(sm.wor(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Entrance']),
-#                              sm.heatProof()),
-#                       sm.wor(sm.wor(sm.canPassBombPassages(),
-#                                     sm.haveItem("SpeedBooster")),
-#                              sm.wor(sm.haveItem("SpaceJump"),
-#                                     sm.haveItem("HiJump"),
-#                                     sm.knowsWallJumpCathedralExit(),
-#                                     sm.wand(sm.knowsSpringBallJumpFromWall(), sm.canUseSpringBall()))))
-
-    @Cache.decorator
-    def canWallJumpInLava(self):
-        # without gravity samus take damage in lava
-        sm = self.smbm
-        return sm.wor(sm.haveItem('Gravity'),
-                      # TODO::add lava in settings
-                      sm.energyReserveCountOk(Settings.lava))
 
     @Cache.decorator
     def canClimbAttic(self):
@@ -172,29 +171,29 @@ class HelpersGraph(Helpers):
         # TODO::check if it's possible with IBJ
         return sm.wor(sm.haveItem('Hijump'), sm.haveItem('SpaceJump'))
 
-#    @Cache.decorator
-#    def canGrappleEscape(self):
-#        sm = self.smbm
-#        return sm.wor(sm.wor(sm.haveItem('SpaceJump'),
-#                             sm.wand(sm.canInfiniteBombJump(), # IBJ from lava...either have grav or freeze the enemy there if hellrunning (otherwise single DBJ at the end)
-#                                     sm.wor(sm.heatProof(),
-#                                            sm.haveItem('Gravity'),
-#                                            sm.haveItem('Ice')))),
-#                      sm.haveItem('Grapple'),
-#                      sm.wand(sm.haveItem('SpeedBooster'),
-#                              sm.wor(sm.haveItem('HiJump'), # jump from the blocks below
-#                                     sm.knowsShortCharge())), # spark from across the grapple blocks
-#                      sm.wand(sm.haveItem('HiJump'), sm.canSpringBallJump())) # jump from the blocks below
-#
-#    @Cache.decorator
-#    def canPassFrogSpeedwayRightToLeft(self):
-#        sm = self.smbm
-#        return sm.wor(sm.haveItem('SpeedBooster'),
-#                      sm.wand(sm.knowsFrogSpeedwayWithoutSpeed(),
-#                              sm.haveItem('Wave'),
-#                              sm.wor(sm.haveItem('Spazer'),
-#                                     sm.haveItem('Plasma'))))
-#
+    @Cache.decorator
+    def canClimbCrocSpeedway(self):
+        sm = self.smbm
+        # croc speedway, only morph required.
+        # the hellrun is way to complicated to do it suitless,
+        # with speed it's a easier but still complicated...
+        # the speed start is only possible when vanilla croc though
+        return sm.wand(sm.haveItem('Morph'),
+                       sm.wor(sm.heatProof(),
+                              sm.wand(sm.haveItem('SpeedBooster'),
+                                      sm.canHellRun(**Logic.Settings.hellRunsTable['Ice']['Croc -> Norfair Entrance']),
+                                      sm.isVanillaCroc())))
+
+
+    @Cache.decorator
+    def canClimbGrappleEscape(self):
+        sm = self.smbm
+                        # something to kill the enemies
+        return  sm.wand(sm.wor(sm.haveItem('Missile'), sm.haveItem('Super'), sm.haveItem('PowerBomb'),
+                               sm.haveItem('Charge'), sm.haveItem('Ice'), sm.haveItem('Plasma')),
+                        sm.canLavaBath(**Logic.Settings.bathsTable['Lava']['Crocomire Escape'],
+                                       **Logic.Settings.hellRunsTable['MainUpperNorfair']['Croc -> Norfair Entrance']))
+
     @Cache.decorator
     def canEnterNorfairReserveAreaFromBubbleMoutain(self):
         sm = self.smbm
@@ -204,14 +203,6 @@ class HelpersGraph(Helpers):
                               sm.haveItem('Ice'),
                               sm.haveItem('HiJump'))),
 
-#    @Cache.decorator
-#    def canEnterNorfairReserveAreaFromBubbleMoutainTop(self):
-#        sm = self.smbm
-#        return sm.wand(sm.traverse('BubbleMountainTopLeft'),
-#                       sm.wor(sm.haveItem('Grapple'),
-#                              sm.haveItem('SpaceJump'),
-#                              sm.knowsNorfairReserveDBoost()))
-#
 #    @Cache.decorator
 #    def canPassLavaPit(self):
 #        sm = self.smbm
@@ -237,7 +228,7 @@ class HelpersGraph(Helpers):
 #    def canPassLowerNorfairChozo(self):
 #        sm = self.smbm
 #        # to require one more CF if no heat protection because of distance to cover, wait times, acid...
-#        return sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Entrance -> GT via Chozo']),
+#        return sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Entrance -> GT via Chozo']),
 #                       sm.canUsePowerBombs(),
 #                       sm.wor(RomPatches.has(RomPatches.LNChozoSJCheckDisabled), sm.haveItem('SpaceJump')))
 #
@@ -517,11 +508,11 @@ class HelpersGraph(Helpers):
 #    def isVanillaDraygon(self):
 #        return SMBool(self.getDraygonConnection() == 'DraygonRoomIn')
 #
-#    @Cache.decorator
-#    def isVanillaCroc(self):
-#        crocRoom = getAccessPoint('Crocomire Room Top')
-#        return SMBool(crocRoom.ConnectedTo == 'Crocomire Speedway Bottom')
-#
+    @Cache.decorator
+    def isVanillaCroc(self):
+        crocRoom = getAccessPoint('Crocomire Room Top')
+        return SMBool(crocRoom.ConnectedTo == 'Crocomire Speedway Bottom')
+
     @Cache.decorator
     def canFightDraygon(self):
         sm = self.smbm

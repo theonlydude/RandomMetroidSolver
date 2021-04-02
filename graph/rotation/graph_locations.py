@@ -1,7 +1,7 @@
 from logic.helpers import Bosses
-from utils.parameters import Settings
 from rom.rom_patches import RomPatches
 from logic.smbool import SMBool
+from logic.logic import Logic
 from graph.location import locationsDict
 
 #locationsDict["Energy Tank, Gauntlet"].AccessFrom = {
@@ -130,7 +130,7 @@ locationsDict["Ice Beam"].AccessFrom = {
     'Business Center': lambda sm: sm.traverse('BusinessCenterTopLeft')
 }
 locationsDict["Ice Beam"].Available = (
-    lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Ice Beam']),
+    lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['Ice']['Norfair Entrance -> Ice Beam']),
                        sm.haveItem('Morph'))
 )
 locationsDict["Energy Tank, Crocomire"].AccessFrom = {
@@ -170,7 +170,7 @@ locationsDict["Grapple Beam"].Available = (
 #    'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop(),
 #}
 #locationsDict["Reserve Tank, Norfair"].Available = (
-#    lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
+#    lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
 #)
 locationsDict["Speed Booster"].AccessFrom = {
     'Bubble Mountain Top': lambda sm: sm.wand(sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoors),
@@ -201,7 +201,7 @@ locationsDict["Wave Beam"].Available = (
 #    'RidleyRoomIn': lambda sm: SMBool(True)
 #}
 #locationsDict["Ridley"].Available = (
-#    lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffsRidley())
+#    lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffsRidley())
 #)
 #locationsDict["Energy Tank, Ridley"].AccessFrom = {
 #    'RidleyRoomIn': lambda sm: SMBool(True)
@@ -609,30 +609,28 @@ locationsDict["Missile (Kraid)"].AccessFrom = {
 locationsDict["Missile (Kraid)"].Available = (
     lambda sm: sm.canUsePowerBombs()
 )
-#locationsDict["Missile (lava room)"].AccessFrom = {
-#    'Cathedral': lambda sm: SMBool(True)
-#}
-#locationsDict["Missile (lava room)"].Available = (
-#    lambda sm: sm.haveItem('Morph')
-#)
+locationsDict["Missile (lava room)"].AccessFrom = {
+    'Cathedral': lambda sm: SMBool(True)
+}
+locationsDict["Missile (lava room)"].Available = (
+    lambda sm: SMBool(True)
+)
 locationsDict["Missile (below Ice Beam)"].AccessFrom = {
     'Business Center': lambda sm: sm.wand(sm.traverse('BusinessCenterTopLeft'),
                                           sm.canUsePowerBombs(),
-                                          sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Ice Beam'])),
-#    'Crocomire Speedway Bottom': lambda sm: sm.wand(sm.isVanillaCroc(),
-#                                                    sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Ice Missiles']),
-#                                                    sm.haveItem('SpeedBooster'),
-#                                                    sm.knowsIceMissileFromCroc())
+                                          sm.canHellRun(**Logic.Settings.hellRunsTable['Ice']['Norfair Entrance -> Ice Beam'])),
+    'Crocomire Speedway Bottom': lambda sm: sm.canClimbCrocSpeedway()
 }
 locationsDict["Missile (below Ice Beam)"].Available = (
     lambda sm: SMBool(True)
 )
-#locationsDict["Missile (above Crocomire)"].AccessFrom = {
-#    'Crocomire Speedway Bottom': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Grapple Escape Missiles'])
-#}
-#locationsDict["Missile (above Crocomire)"].Available = (
-#    lambda sm: sm.canGrappleEscape()
-#)
+locationsDict["Missile (above Crocomire)"].AccessFrom = {
+    'Crocomire Speedway Bottom': lambda sm: sm.wand(sm.canClimbGrappleEscape(),
+                                                    sm.haveItem('Morph'))
+}
+locationsDict["Missile (above Crocomire)"].Available = (
+    lambda sm: SMBool(True)
+)
 locationsDict["Missile (Hi-Jump Boots)"].AccessFrom = {
     'Business Center': lambda sm: sm.wor(RomPatches.has(RomPatches.HiJumpAreaBlueDoor), sm.traverse('BusinessCenterBottomLeft'))
 }
@@ -683,13 +681,13 @@ locationsDict["Missile (Grapple Beam)"].Available = (
 #    'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop()
 #}
 #locationsDict["Missile (Norfair Reserve Tank)"].Available = (
-#    lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
+#    lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
 #)
 locationsDict["Missile (bubble Norfair green door)"].AccessFrom = {
     'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain()
 }
 locationsDict["Missile (bubble Norfair green door)"].Available = (
-    lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve Missiles'])
+    lambda sm: sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve Missiles'])
 )
 locationsDict["Missile (bubble Norfair)"].AccessFrom = {
     'Bubble Mountain': lambda sm: SMBool(True)
@@ -722,7 +720,7 @@ locationsDict["Missile (Wave Beam)"].Available = (
 #    'LN Above GT': lambda sm: SMBool(True)
 #}
 #locationsDict["Missile (Gold Torizo)"].Available = (
-#    lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
+#    lambda sm: sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main'])
 #)
 #locationsDict["Missile (Gold Torizo)"].PostAvailable = (
 #    lambda sm: sm.enoughStuffGT()
@@ -740,10 +738,10 @@ locationsDict["Missile (Wave Beam)"].Available = (
 #    'LN Entrance': lambda sm: sm.wand(sm.canUsePowerBombs(), sm.canPassWorstRoom()),
 #}
 #locationsDict["Missile (Mickey Mouse room)"].Available = (
-#    lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
+#    lambda sm: sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main'])
 #)
 #locationsDict["Missile (lower Norfair above fire flea room)"].AccessFrom = {
-#    'Firefleas': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
+#    'Firefleas': lambda sm: sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main'])
 #}
 #locationsDict["Missile (lower Norfair above fire flea room)"].Available = (
 #    lambda sm: SMBool(True)
@@ -758,13 +756,13 @@ locationsDict["Missile (Wave Beam)"].Available = (
 #    'Ridley Zone': lambda sm: sm.canUsePowerBombs()
 #}
 #locationsDict["Power Bomb (Power Bombs of shame)"].Available = (
-#    lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
+#    lambda sm: sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main'])
 #)
 #locationsDict["Missile (lower Norfair near Wave Beam)"].AccessFrom = {
 #    'Firefleas': lambda sm: SMBool(True)
 #}
 #locationsDict["Missile (lower Norfair near Wave Beam)"].Available = (
-#    lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+#    lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']),
 #                       sm.canDestroyBombWalls(),
 #                       sm.haveItem('Morph'))
 #)

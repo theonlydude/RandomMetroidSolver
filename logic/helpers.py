@@ -3,10 +3,10 @@ import math
 
 from logic.cache import Cache
 from logic.smbool import SMBool, smboolFalse
-from utils.parameters import Settings, easy, medium, diff2text
+from utils.parameters import easy, medium, diff2text
 from rom.rom_patches import RomPatches
 from utils.utils import normalizeRounding
-
+from logic.logic import Logic
 
 class Helpers(object):
     def __init__(self, smbm):
@@ -34,11 +34,20 @@ class Helpers(object):
         return result
 
     def energyReserveCountOkHellRun(self, hellRunName, mult=1.0):
-        difficulties = Settings.hellRuns[hellRunName]
+        difficulties = Logic.Settings.hellRuns[hellRunName]
         result = self.energyReserveCountOkDiff(difficulties, mult)
 
         if result == True:
             result.knows = [hellRunName+'HellRun']
+
+        return result
+
+    def energyReserveCountOkLavaBath(self, bathName, mult=1.0):
+        difficulties = Logic.Settings.baths[bathName]
+        result = self.energyReserveCountOkDiff(difficulties, mult)
+
+        if result == True:
+            result.knows = [bathName+'LavaBath']
 
         return result
 
@@ -78,7 +87,7 @@ class Helpers(object):
 
     # higher values for mult means room is that much "easier" (HP mult)
     def energyReserveCountOkHardRoom(self, roomName, mult=1.0):
-        difficulties = Settings.hardRooms[roomName]
+        difficulties = Logic.Settings.hardRooms[roomName]
         (dmgRed, items) = self.getDmgReduction()
         mult *= dmgRed
         result = self.energyReserveCountOkDiff(difficulties, mult)
@@ -108,6 +117,29 @@ class Helpers(object):
     def canFireChargedShots(self):
         sm = self.smbm
         return sm.wor(sm.haveItem('Charge'), RomPatches.has(RomPatches.NerfedCharge))
+
+    def canLavaBath(self, bath, bathMult, hellrun, mult=1.0, minE=2):
+        # hellrun in lava in rotation:
+        #  gravity protect against lava.
+        #  varia protect against heat.
+        #  vanilla gravity protect against heat.
+        #  progressive gravity half protect against heat.
+        #  balanced gravity doesn't protect against heat.
+        isHeatProof = sm.heatProof()
+        hasGravity = sm.haveItem('Gravity')
+        if isHeatProof and hasGravity:
+            # easy way, no energy required
+            return sm.wand(isHeatProof, hasGravity)
+        elif isHeatProof:
+            # no need to hellrun, but energy required for lava bath
+            return sm.wand(isHeatProof, sm.energyReserveCountOkLavaBath(bath, bathMult))
+        elif hasGravity:
+            # hellrun required, protected against lava bath
+            return sm.wand(hasGravity, sm.canHellRun(hellrun, mult, minE))
+        else:
+            # naked, no lava bath naked for now
+            # TODO::see if there're naked lava baths that we allow
+            return smboolFalse
 
     # higher values for mult means hell run is that much "easier" (HP mult)
     def canHellRun(self, hellRun, mult=1.0, minE=2):
@@ -313,6 +345,14 @@ class Helpers(object):
         return sm.haveItem('Hyper')
 
     @Cache.decorator
+    def canPassBeetoms(self):
+        sm = self.sm
+        return sm.wor(sm.haveMissileOrSuper(),
+                      sm.canUsePowerBombs(),
+                      sm.haveItem('ScrewAttack'),
+                      sm.haveItem('Ice'))
+
+    @Cache.decorator
     def getBeamDamage(self):
         sm = self.smbm
         standardDamage = 20
@@ -410,15 +450,15 @@ class Helpers(object):
         if chargeDamage > 0:
             ammoMargin += 2
 
-        missilesDPS = Settings.algoSettings['missilesPerSecond'] * 100.0
-        supersDPS = Settings.algoSettings['supersPerSecond'] * 300.0
+        missilesDPS = Logic.Settings.algoSettings['missilesPerSecond'] * 100.0
+        supersDPS = Logic.Settings.algoSettings['supersPerSecond'] * 300.0
         if doubleSuper == True:
             supersDPS *= 2
         if powerDamage > 0:
-            powerDPS = Settings.algoSettings['powerBombsPerSecond'] * 200.0
+            powerDPS = Logic.Settings.algoSettings['powerBombsPerSecond'] * 200.0
         else:
             powerDPS = 0.0
-        chargeDPS = chargeDamage * Settings.algoSettings['chargedShotsPerSecond']
+        chargeDPS = chargeDamage * Logic.Settings.algoSettings['chargedShotsPerSecond']
         # print("chargeDPS=" + str(chargeDPS))
         dpsDict = {
             missilesDPS: (missilesAmount, 100.0),
@@ -440,7 +480,7 @@ class Helpers(object):
                 break
         if bossEnergy > 0:
             # print ('!! drops !! ')
-            secs += bossEnergy * Settings.algoSettings['missileDropsPerMinute'] * 100 / 60
+            secs += bossEnergy * Logic.Settings.algoSettings['missileDropsPerMinute'] * 100 / 60
             # print('ammoMargin = ' + str(ammoMargin) + ', secs = ' + str(secs))
 
         return (ammoMargin, secs, items)
@@ -497,7 +537,7 @@ class Helpers(object):
         # only augment difficulty in case of no charge, don't lower it.
         # if we have charge, ammoMargin will have a huge value (see canInflictEnoughDamages),
         # so this does not apply
-        diffAdjust = (1 - (ammoMargin - Settings.algoSettings['ammoMarginIfNoCharge']))
+        diffAdjust = (1 - (ammoMargin - Logic.Settings.algoSettings['ammoMarginIfNoCharge']))
         if diffAdjust > 1:
             difficulty *= diffAdjust
 #        print("final diff: "+str(round(difficulty, 2)))
@@ -564,7 +604,7 @@ class Helpers(object):
 
         # print('RIDLEY', ammoMargin, secs)
         (diff, defenseItems) = self.computeBossDifficulty(ammoMargin, secs,
-                                                          Settings.bossesDifficulty['Ridley'])
+                                                          Logic.Settings.bossesDifficulty['Ridley'])
         if diff < 0:
             return smboolFalse
         else:
@@ -578,7 +618,7 @@ class Helpers(object):
             return smboolFalse
         #print('KRAID True ', ammoMargin, secs)
         (diff, defenseItems) = self.computeBossDifficulty(ammoMargin, secs,
-                                                          Settings.bossesDifficulty['Kraid'])
+                                                          Logic.Settings.bossesDifficulty['Kraid'])
         if diff < 0:
             return smboolFalse
 
@@ -589,9 +629,9 @@ class Helpers(object):
         # 2 is Varia suit, considered standard eqt for boss fights
         # there's certainly a smarter way to do this but...
         if dmgRed < 2:
-            difficulty *= Settings.algoSettings['dmgReductionDifficultyFactor']
+            difficulty *= Logic.Settings.algoSettings['dmgReductionDifficultyFactor']
         elif dmgRed > 2:
-            difficulty /= Settings.algoSettings['dmgReductionDifficultyFactor']
+            difficulty /= Logic.Settings.algoSettings['dmgReductionDifficultyFactor']
         return difficulty
 
     @Cache.decorator
@@ -606,19 +646,19 @@ class Helpers(object):
         # print('DRAY', ammoMargin, secs)
         if ammoMargin > 0:
             (diff, defenseItems) = self.computeBossDifficulty(ammoMargin, secs,
-                                                              Settings.bossesDifficulty['Draygon'])
+                                                              Logic.Settings.bossesDifficulty['Draygon'])
             if diff < 0:
                 fight = smboolFalse
             else:
                 fight = SMBool(True, diff, items=ammoItems+defenseItems)
             if sm.haveItem('Gravity') == False:
-                fight.difficulty *= Settings.algoSettings['draygonNoGravityMalus']
+                fight.difficulty *= Logic.Settings.algoSettings['draygonNoGravityMalus']
             else:
                 fight._items.append('Gravity')
             if not sm.haveItem('Morph'):
-                fight.difficulty *= Settings.algoSettings['draygonNoMorphMalus']
+                fight.difficulty *= Logic.Settings.algoSettings['draygonNoMorphMalus']
             if sm.haveItem('Gravity') and sm.haveItem('ScrewAttack'):
-                fight.difficulty /= Settings.algoSettings['draygonScrewBonus']
+                fight.difficulty /= Logic.Settings.algoSettings['draygonScrewBonus']
             fight.difficulty = self.adjustHealthDropDiff(fight.difficulty)
         else:
             fight = smboolFalse
@@ -646,19 +686,19 @@ class Helpers(object):
             return smboolFalse
         # print('PHANTOON', ammoMargin, secs)
         (difficulty, defenseItems) = self.computeBossDifficulty(ammoMargin, secs,
-                                                                Settings.bossesDifficulty['Phantoon'])
+                                                                Logic.Settings.bossesDifficulty['Phantoon'])
         if difficulty < 0:
             return smboolFalse
         hasCharge = sm.canFireChargedShots()
         hasScrew = sm.haveItem('ScrewAttack')
         if hasScrew:
-            difficulty /= Settings.algoSettings['phantoonFlamesAvoidBonusScrew']
+            difficulty /= Logic.Settings.algoSettings['phantoonFlamesAvoidBonusScrew']
             defenseItems += hasScrew.items
         elif hasCharge:
-            difficulty /= Settings.algoSettings['phantoonFlamesAvoidBonusCharge']
+            difficulty /= Logic.Settings.algoSettings['phantoonFlamesAvoidBonusCharge']
             defenseItems += hasCharge.items
         elif not hasCharge and sm.itemCount('Missile') <= 2: # few missiles is harder
-            difficulty *= Settings.algoSettings['phantoonLowMissileMalus']
+            difficulty *= Logic.Settings.algoSettings['phantoonLowMissileMalus']
         difficulty = self.adjustHealthDropDiff(difficulty)
         fight = SMBool(True, difficulty, items=ammoItems+defenseItems)
 
@@ -704,8 +744,8 @@ class Helpers(object):
         if possible == False:
             return smboolFalse
         # print('MB2', ammoMargin, secs)
-        #print("ammoMargin: {}, secs: {}, settings: {}, energyDiff: {}".format(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'], energyDiff))
-        (diff, defenseItems) = self.computeBossDifficulty(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'], energyDiff)
+        #print("ammoMargin: {}, secs: {}, settings: {}, energyDiff: {}".format(ammoMargin, secs, Logic.Settings.bossesDifficulty['MotherBrain'], energyDiff))
+        (diff, defenseItems) = self.computeBossDifficulty(ammoMargin, secs, Logic.Settings.bossesDifficulty['MotherBrain'], energyDiff)
         if diff < 0:
             return smboolFalse
         return SMBool(True, diff, items=ammoItems+defenseItems)

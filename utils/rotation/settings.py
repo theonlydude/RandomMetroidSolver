@@ -14,14 +14,27 @@ class SettingsRotation(Settings):
             'Croc -> Norfair Entrance': {'mult': 0.33, 'minE': 6, 'hellRun': 'Ice'},
             # to access "Missile (below Ice Beam)" from 'Crocomire Speedway Bottom'
             'Croc -> Ice Missiles': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
-            # from 'Crocomire Speedway Bottom' to 'Bubble Mountain Bottom' through Acid Snakes Tunnel
             # from 'Crocomire Speedway Bottom' to 'Business Center' through frog speedway and acid snakes tunnel
-            'Croc -> Bubble Mountain': {'mult': 2.0, 'minE': 1, 'hellRun': 'Ice'}
+            'Croc -> Bubble Mountain': {'mult': 2.0, 'minE': 1, 'hellRun': 'Ice'},
+            # fall through croc speedway, there's many enemies...
+            'Norfair Entrance -> Croc via Ice': {'mult': 0.5, 'minE': 5, 'hellRun': 'Ice'},
         },
         'MainUpperNorfair': {
             # from 'Crocomire Speedway Bottom' to 'Business Center' through grapple escape
             # also used to grapple escape missiles
-            'Croc -> Norfair Entrance': {'mult': 0.75, 'minE': 2, 'hellRun': 'MainUpperNorfair'}
+            'Croc -> Norfair Entrance': {'mult': 0.75, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            # from 'Crocomire Speedway Bottom' to 'Bubble Mountain Bottom' through Acid Snakes Tunnel
+            # 3 etanks is easy, 2 min etanks
+            'Croc -> Bubble Mountain': {'mult': 3.0, 'minE': 2, 'hellRun': 'Ice'},
+            # TODO::use this one, with climb and lava bath
+            'Kronic Boost Room -> Croc': {'mult': X, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            # just fall, 2 etanks is enough suitless
+            'Croc -> Kronic Boost Room': {'mult': 4.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            # two refill points during the path
+            'Norfair Entrance -> Croc via Frog': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            # access speed & speed missile and come back
+            'Bubble -> Speed Booster': {'mult': 2.0, 'minE': 3, 'hellRun': 'MainUpperNorfair'},
+            'Speed Booster -> Bubble': {'mult': 1.0, 'minE': 6, 'hellRun': 'MainUpperNorfair'},
         }
     }
 
@@ -53,11 +66,14 @@ class SettingsRotation(Settings):
         'Lava': {
             'Cathedral': {'bathMult': 1.0, 'bath': 'Lava'},
             'Magdollite Tunnel': {'bathMult': 2.0, 'bath': 'Lava'},
-            'Acid Snakes Tunnel': {'bathMult': 0.75, 'bath': 'Lava'},
+            'Acid Snakes Tunnel': {'bathMult': 2.0, 'bath': 'Lava'},
             'Spiky Platforms Tunnel': {'bathMult': 1.0, 'bath': 'Lava'},
             # when coming from bubble lava is up
             'Volcano Room': {'bathMult': 2.0, 'bath': 'Lava'},
             'Crocomire Escape': {'bathMult': 1.0, 'bath': 'Lava'},
+            # before norfair reserve
+            'Green Bubbles Missile Room': {'bathMult': 3.0, 'bath': 'Lava'},
+            'Norfair Reserve Tank Room': {'bathMult': 1.0, 'bath': 'Lava'},
             '': {'bathMult': 1.0, 'bath': 'Lava'},
         },
         'Acid': {

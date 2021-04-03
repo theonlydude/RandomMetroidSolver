@@ -165,13 +165,14 @@ locationsDict["Grapple Beam"].Available = (
                               # TODO::test with space jump, get etank requirement (there's annoying enemies)
                               sm.wand(sm.haveItem('SpaceJump'), sm.energyReserveCountOk(10))))
 )
-#locationsDict["Reserve Tank, Norfair"].AccessFrom = {
-#    'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
-#    'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop(),
-#}
-#locationsDict["Reserve Tank, Norfair"].Available = (
-#    lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
-#)
+locationsDict["Reserve Tank, Norfair"].AccessFrom = {
+    'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
+}
+locationsDict["Reserve Tank, Norfair"].Available = (
+    lambda sm: sm.wand(sm.haveItem('Morph'),
+                       sm.canLavaBath(**Logic.Settings.bathsTable['Lava']['Norfair Reserve Tank Room'],
+                                      **Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
+)
 locationsDict["Speed Booster"].AccessFrom = {
     'Bubble Mountain Top': lambda sm: sm.wand(sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoors),
                                                      sm.wand(sm.traverse('BubbleMountainTopRight'),
@@ -676,18 +677,20 @@ locationsDict["Missile (Grapple Beam)"].Available = (
                        # TODO::change energy requirement depending on the suits and beams (for annoying enemies)
                        sm.energyReserveCountOk(10))
 )
-#locationsDict["Missile (Norfair Reserve Tank)"].AccessFrom = {
-#    'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
-#    'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop()
-#}
-#locationsDict["Missile (Norfair Reserve Tank)"].Available = (
-#    lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
-#)
+locationsDict["Missile (Norfair Reserve Tank)"].AccessFrom = {
+    'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
+}
+locationsDict["Missile (Norfair Reserve Tank)"].Available = (
+    lambda sm: sm.wand(sm.haveItem('Morph'),
+                       sm.canLavaBath(**Logic.Settings.bathsTable['Lava']['Norfair Reserve Tank Room'],
+                                      **Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
+)
 locationsDict["Missile (bubble Norfair green door)"].AccessFrom = {
     'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain()
 }
 locationsDict["Missile (bubble Norfair green door)"].Available = (
-    lambda sm: sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve Missiles'])
+    lambda sm: sm.canLavaBath(**Logic.Settings.bathsTable['Lava']['Green Bubbles Missile Room'],
+                              **Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve Missiles'])
 )
 locationsDict["Missile (bubble Norfair)"].AccessFrom = {
     'Bubble Mountain': lambda sm: SMBool(True)
@@ -706,9 +709,7 @@ locationsDict["Missile (Speed Booster)"].Available = (
 )
 locationsDict["Missile (Speed Booster)"].PostAvailable = (
     # get back all the way up
-    lambda sm: sm.wand(sm.canGetBackFromSpeedBooster(),
-                       # can't just roll out of the hole
-                       sm.canMorphJump())
+    lambda sm: sm.canGetBackFromSpeedBooster()
 )
 locationsDict["Missile (Wave Beam)"].AccessFrom = {
     'Bubble Mountain Top': lambda sm: sm.canAccessDoubleChamberItems()

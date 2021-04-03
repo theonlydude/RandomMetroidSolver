@@ -140,7 +140,7 @@ class HelpersGraph(Helpers):
                                       **Logic.Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']))
 
     @Cache.decorator
-    def canGoUpFrogSpeedway(self):
+    def canTraverseFrogSpeedway(self):
         sm = self.smbm
         # kill/freeze beetoms, or enough energy.
         return sm.wor(sm.canPassBeetoms(),
@@ -149,14 +149,16 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canFallToSpeedBooster(self):
         sm = self.smbm
-        # TODO::new hellrun table
+        # 3 etanks
         return sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Speed Booster'])
 
     @Cache.decorator
     def canGetBackFromSpeedBooster(self):
         sm = self.smbm
-        # TODO::new hellrun table
-        return sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Speed Booster'])
+        # 8 etanks
+        return sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Speed Booster -> Bubble']),
+                       # in bat cave (and also to exit the small tunnel for speed missile)
+                       sm.canMorphJump())
 
     @Cache.decorator
     def canAccessDoubleChamberItems(self):
@@ -198,10 +200,13 @@ class HelpersGraph(Helpers):
     def canEnterNorfairReserveAreaFromBubbleMoutain(self):
         sm = self.smbm
         return sm.wand(sm.traverse('BubbleMountainTopLeft'),
+                       # it's possible with a delayed wall jump off the grapple blocks but it's hard
+                       # TODO::add it as a wall jump technique ?
                        sm.wor(sm.canFly(),
-                              # TODO::check with ice and hijump
                               sm.haveItem('Ice'),
-                              sm.haveItem('HiJump'))),
+                              sm.haveItem('HiJump'),
+                              # spring ball jump from the right (at the grapple blocks)
+                              sm.canSpringBallJump()))
 
 #    @Cache.decorator
 #    def canPassLavaPit(self):

@@ -399,10 +399,13 @@ accessPoints = [
     AccessPoint('Business Center', 'Norfair', {
         'Cathedral': lambda sm: sm.canEnterCathedral(),
         # frog speedway is opened
-        'Bubble Mountain Bottom': lambda sm: SMBool(True),
-        'Crocomire Speedway Bottom':Cache.ldeco((
-            lambda sm: sm.wor(sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Croc via Frog']),
-                              # below ice
+        'Bubble Mountain Bottom': lambda sm: sm.canTraverseFrogSpeedway()
+        'Crocomire Speedway Bottom': Cache.ldeco((
+                              # frog speedway and 'acid snakes tunnel' lava bath
+            lambda sm: sm.wor(sm.wand(sm.canLavaBath(**Logic.Settings.bathsTable['Lava']['Acid Snakes Tunnel'],
+                                                     **Logic.Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Croc via Frog']),
+                                      sm.canTraverseFrogSpeedway()),
+                              # below ice through croc speedway
                               sm.wand(sm.traverse('BusinessCenterTopLeft'),
                                       sm.canUsePowerBombs(),
                                       sm.canHellRun(**Logic.Settings.hellRunsTable['Ice']['Norfair Entrance -> Croc via Ice']))))),
@@ -461,12 +464,11 @@ accessPoints = [
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x134, 'SamusY':0x288, 'song': 0x15},
        dotOrientation = 'se'),
-    # TODO::finish that
     AccessPoint('Crocomire Speedway Bottom', 'Norfair', {
         'Business Center': Cache.ldeco((
                               # frog speedway, use bubble mountain hellrun as they share their path
             lambda sm: sm.wor(sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['Ice']['Croc -> Bubble Mountain']),
-                                      sm.canGoUpFrogSpeedway()),
+                                      sm.canTraverseFrogSpeedway()),
                               # croc speedway
                               sm.wand(sm.canUsePowerBombs(),
                                       sm.canClimbCrocSpeedway())
@@ -474,11 +476,11 @@ accessPoints = [
                               sm.wand(sm.haveItem('Morph'),
                                       sm.canClimbGrappleEscape())))),
         'Bubble Mountain': Cache.ldeco((
-            # just falling TODO::adjust hellrun
-            lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['Ice']['Croc -> Bubble Mountain'])))),
+            # just falling and avoiding the red space pirates
+            lambda sm: sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Croc -> Bubble Mountain']))),
         'Kronic Boost Room Bottom Left': Cache.ldeco((
-            # just falling TODO::adjust hellrun
-            lambda sm: sm.wand(sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']))))
+            # just falling
+            lambda sm: sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Croc -> Kronic Boost Room'])))
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.CrocBlueDoors), sm.traverse('CrocomireSpeedwayBottom')),
        roomInfo = {'RoomPtr':0xa923, "area": 0x2},
        exitInfo = {'DoorPtr':0x93d2, 'direction': 0x6, "cap": (0x36, 0x2), "bitFlag": 0x0,
@@ -510,7 +512,7 @@ accessPoints = [
         'Business Center': Cache.ldeco((
             lambda sm: sm.wand(sm.wor(sm.heatProof(),
                                       sm.energyReserveCountOk(1)),
-                               sm.canGoUpFrogSpeedway())),
+                               sm.canTraverseFrogSpeedway())),
         'Crocomire Speedway Bottom': Cache.ldeco((
             lambda sm: sm.canLavaBath(**Logic.Settings.bathsTable['Lava']['Acid Snakes Tunnel'],
                                       **Logic.Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Croc']))),

@@ -120,6 +120,7 @@ class Helpers(object):
 
     def canLavaBath(self, bath, bathMult, hellrun, mult=1.0, minE=2):
         # hellrun in lava in rotation:
+        #  TODO::check gravity lava protection for progressive and balanced
         #  gravity protect against lava.
         #  varia protect against heat.
         #  vanilla gravity protect against heat.

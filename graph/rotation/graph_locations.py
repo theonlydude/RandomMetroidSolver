@@ -191,13 +191,11 @@ locationsDict["Wave Beam"].AccessFrom = {
 locationsDict["Wave Beam"].Available = (
     lambda sm: sm.traverse('DoubleChamberRight')
 )
-#locationsDict["Wave Beam"].PostAvailable = (
-#    lambda sm: sm.wor(sm.haveItem('Morph'), # exit through lower passage under the spikes
-#                      sm.wand(sm.wor(sm.haveItem('SpaceJump'), # exit through blue gate
-#                                     sm.haveItem('Grapple')),
-#                              sm.wor(sm.wand(sm.canBlueGateGlitch(), sm.heatProof()), # hell run + green gate glitch is too much
-#                                     sm.haveItem('Wave'))))
-#)
+locationsDict["Wave Beam"].PostAvailable = (
+    # with a precise wall jump you can go up double chamber with no mouvement item
+    lambda sm: sm.wand(sm.haveItem('Morph'),
+                       sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Wave -> Bubble']))
+)
 #locationsDict["Ridley"].AccessFrom = {
 #    'RidleyRoomIn': lambda sm: SMBool(True)
 #}

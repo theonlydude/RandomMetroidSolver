@@ -35,6 +35,10 @@ class SettingsRotation(Settings):
             # access speed & speed missile and come back
             'Bubble -> Speed Booster': {'mult': 2.0, 'minE': 3, 'hellRun': 'MainUpperNorfair'},
             'Speed Booster -> Bubble': {'mult': 1.0, 'minE': 6, 'hellRun': 'MainUpperNorfair'},
+            # this hellrun is quite long...
+            'Single Chamber -> Kronic Boost Room': {'mult': 0.25, 'minE': 12, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Wave': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Wave -> Bubble': {'mult': 1.0, 'minE': 3, 'hellRun': 'MainUpperNorfair'},
         }
     }
 
@@ -74,6 +78,7 @@ class SettingsRotation(Settings):
             # before norfair reserve
             'Green Bubbles Missile Room': {'bathMult': 3.0, 'bath': 'Lava'},
             'Norfair Reserve Tank Room': {'bathMult': 1.0, 'bath': 'Lava'},
+            'Lava Dive Room': {'bathMult': 1.0, 'bath': 'Lava'},
             '': {'bathMult': 1.0, 'bath': 'Lava'},
         },
         'Acid': {

@@ -249,18 +249,16 @@ accessPoints = [
        escape = True,
        dotOrientation = 'ne'),
 
-
-
-#    ### Lower Norfair
-#    AccessPoint('Lava Dive Right', 'LowerNorfair', {
-#        'LN Entrance': lambda sm: sm.canPassLavaPit()
-#    }, roomInfo = {'RoomPtr':0xaf14, "area": 0x2, 'songs':[0xaf25]},
-#       exitInfo = {'DoorPtr':0x96d2, 'direction': 0x4, "cap": (0x11, 0x26), "bitFlag": 0x0,
-#                   "screen": (0x1, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
-#       entryInfo = {'SamusX':0x3d0, 'SamusY':0x88, 'song': 0x15},
-#       dotOrientation = 'w'),
-#    AccessPoint('LN Entrance', 'LowerNorfair', {
-#        'Lava Dive Right': lambda sm: sm.canPassLavaPitReverse(),
+    ### Lower Norfair
+    AccessPoint('Lava Dive Right', 'LowerNorfair', {
+        'LN Entrance': lambda sm: sm.canPassLavaPit()
+    }, roomInfo = {'RoomPtr':0xaf14, "area": 0x2, 'songs':[0xaf25]},
+       exitInfo = {'DoorPtr':0x96d2, 'direction': 0x4, "cap": (0x11, 0x26), "bitFlag": 0x0,
+                   "screen": (0x1, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0x3d0, 'SamusY':0x88, 'song': 0x15},
+       dotOrientation = 'w'),
+    AccessPoint('LN Entrance', 'LowerNorfair', {
+        'Lava Dive Right': lambda sm: sm.canPassLavaPitReverse(),
 #        'LN Above GT': lambda sm: sm.canPassLowerNorfairChozo(),
 #        'Screw Attack Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canUsePowerBombs(),
 #                                                              sm.canHellRun(**Logic.Settings.hellRunsTable['LowerNorfair']['Main']),
@@ -422,8 +420,8 @@ accessPoints = [
                                sm.haveItem('Morph'),
                                sm.haveItem('Super'),
                                # there's a lot of lava in there...
-                               # TODO::add lava bath
-                               sm.canHellRun(**Logic.Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Kronic Boost Room']))))
+                               sm.canLavaBath(**Logic.Settings.bathsTable['Lava']['Volcano Room'],
+                                              **Logic.Settings.hellRunsTable['MainUpperNorfair']['Single Chamber -> Kronic Boost Room']))))
     },  roomInfo = {'RoomPtr':0xad5e, "area": 0x2},
         exitInfo = {'DoorPtr':0x95fa, 'direction': 0x4, "cap": (0x11, 0x6), "bitFlag": 0x0,
                     "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},

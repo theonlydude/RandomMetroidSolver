@@ -208,27 +208,28 @@ class HelpersGraph(Helpers):
                               # spring ball jump from the right (at the grapple blocks)
                               sm.canSpringBallJump()))
 
-#    @Cache.decorator
-#    def canPassLavaPit(self):
-#        sm = self.smbm
-#        nTanks4Dive = 8 / sm.getDmgReduction()[0]
-#        if sm.haveItem('HiJump').bool == False:
-#            nTanks4Dive = ceil(nTanks4Dive * 1.25)
-#        return sm.wand(sm.wor(sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpaceJump')),
-#                              sm.wand(sm.knowsGravityJump(), sm.haveItem('Gravity'), sm.wor(sm.haveItem('HiJump'), sm.knowsLavaDive())),
-#                              sm.wand(sm.wor(sm.wand(sm.knowsLavaDive(), sm.haveItem('HiJump')),
-#                                             sm.knowsLavaDiveNoHiJump()),
-#                                      sm.energyReserveCountOk(nTanks4Dive))),
-#                       sm.canUsePowerBombs()) # power bomb blocks left and right of LN entrance without any items before
-#
-#    @Cache.decorator
-#    def canPassLavaPitReverse(self):
-#        sm = self.smbm
-#        nTanks = 2
-#        if sm.heatProof().bool == False:
-#            nTanks = 6
-#        return sm.energyReserveCountOk(nTanks)
-#
+    @Cache.decorator
+    def canPassLavaPit(self):
+        sm = self.smbm
+        # in rotation it's possible to pass it with no items if you're fast enough and you can wall jump
+        # on the right fune before it spits a flame, starting your jump from the left fune,
+        # we use the knowsLavaDive for it
+        return sm.wand(sm.canUsePowerBombs(), # power bomb blocks left and right of LN entrance without any items before
+                       sm.wor(sm.knowsLavaDive(),
+                              sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpaceJump')),
+                              sm.wand(sm.haveItem('Gravity'), sm.knowsGravityJump()),
+                              sm.haveItem('HiJump')),
+                       sm.canLavaBath(**Logic.Settings.bathsTable['Lava']['Lava Dive Room'],
+                                      **Logic.Settings.hellRunsTable['LowerNorfair']['Main']))
+
+    @Cache.decorator
+    def canPassLavaPitReverse(self):
+        sm = self.smbm
+        nTanks = 2
+        if sm.heatProof().bool == False:
+            nTanks = 6
+        return sm.energyReserveCountOk(nTanks)
+
 #    @Cache.decorator
 #    def canPassLowerNorfairChozo(self):
 #        sm = self.smbm

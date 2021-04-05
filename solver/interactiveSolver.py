@@ -463,6 +463,12 @@ class InteractiveSolver(CommonSolver):
         # set itemName at locName
 
         loc = self.getWebLoc(locName)
+
+        # check if location has not already been visited
+        if loc in self.visitedLocations:
+            self.errorMsg = "Location {} has already been visited".format(loc.Name)
+            return
+
         # plando mode
         loc.itemName = itemName
 

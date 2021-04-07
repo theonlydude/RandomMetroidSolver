@@ -1441,6 +1441,10 @@ script:
 
     // Show a compact and sped up version of the original credits so we get time to add more
     // change scroll speed to 1 pixel per frame
+
+    // NOTE: when adding new stuff to the credits, remove blanks from
+    //	     "Last info" section, as this credits script is in sync with credits music
+
     dw {speed}, $0001
 
     dw {draw}, {row}*0      // SUPER METROID STAFF
@@ -1883,16 +1887,31 @@ script:
     dw {draw}, {row}*678
     dw {draw}, {blank}
 
-    // Last info
+    // Last info.
     dw {draw}, {blank}
     dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+
     dw {draw}, {row}*217 // Final Time
     dw {draw}, {row}*218
+
     dw {draw}, {blank}
     dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+
     dw {draw}, {row}*219 // Thanks
     dw {draw}, {row}*220
 
+    // don't touch those blanks
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}

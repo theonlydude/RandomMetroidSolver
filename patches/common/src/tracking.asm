@@ -82,6 +82,10 @@ org $828423
     nop
     nop
 
+// update current region stat
+org $82DEFD
+	jml load_state
+
 // Firing uncharged beam
 org $90b911
     jml uncharged_beam
@@ -128,6 +132,12 @@ resuming_local:
 // CODE (using bank A1 free space)
 // -------------------------------
 org $a1ec00
+// fixed loc for outside access
+update_and_store_region_time:
+	jsr update_region_time
+	jsr store_region_time
+	rtl
+
 // Helper function to add a time delta, X = stat to add to, A = value to check against
 // This uses 4-bytes for each time delta
 add_time:
@@ -181,6 +191,30 @@ add_time_32:
     sta {stats},x
     rts
 
+// ran when loading state header, to have up to date region stat
+load_state:
+    pha
+    phx
+    // init region timer tmp if needed
+    lda {region_tmp}
+    bne +
+    jsr store_region_time
++
+    // Store (region*2) + stats_regions to region_tmp.(region == graph area, found in state header)
+    lda $7e07bb
+    tax
+    lda $8f0010,x
+    asl
+    clc
+    adc {stat_rta_regions}
+    sta {region_tmp}
+    plx
+    pla
+    // run hijacked code and return
+    and #$00ff
+    asl
+    jml $82DF01
+
 // Samus hit a door block (Gamestate change to $09 just before hitting $0a)
 door_entered:
     // save last stats to resist power cycle
@@ -220,14 +254,6 @@ door_exited:
     // update time spent in region since last store_region_time call,
     jsr update_region_time
     jsr store_region_time
-    // Store (region*2) + stats_regions to region_tmp.(region == graph area, found in state header)
-    lda $7e07bb
-    tax
-    lda $8f0010,x
-    asl
-    clc
-    adc {stat_rta_regions}
-    sta {region_tmp}
 
     // Run hijacked code and return
     lda #$0008

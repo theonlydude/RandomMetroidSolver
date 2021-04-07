@@ -32,8 +32,6 @@ define scroll_speed $7fffe8
 // RTA timer RAM updated during NMI
 define timer1 $05b8
 define timer2 $05ba
-// routine in new_game.asm
-define check_new_game   $A1F210
 
 define stats_sram_sz_b  #$0080
 define full_stats_area_sz_b  #$0300
@@ -64,6 +62,12 @@ define backup_counter	$7fff38
 define backup_candidate $7fff3a
 
 define stat_resets	#$0029
+
+// External Routines
+// routine in new_game.asm
+define check_new_game   $A1F210
+// routine in tracking.asm
+define update_and_store_region_time $A1EC00
 
 // Patch boot to init our stuff
 org $80844B
@@ -936,21 +940,28 @@ clear_values:
 
 // Game has ended, save RTA timer to RAM and copy all stats to SRAM a final time
 game_end:
+    // Subtract frames from pressing down at ship to this code running
+    lda {timer1}
+    sec
+    sbc #$013d
+    sta {timer1}
+    lda #$0000  // if carry clear this will subtract one from the high byte of timer
+    sbc {timer2}
+
+    // save timer in stats
     lda {timer1}
     sta {stats_timer}
     lda {timer2}
     sta {stats_timer}+2
 
-    // Subtract frames from pressing down at ship to this code running
-    lda {stats_timer}
-    sec
-    sbc #$013d
-    sta {stats_timer}
-    lda #$0000  // if carry clear this will subtract one from the high byte of timer
-    sbc {stats_timer}+2
+    // also update region time
+    jsl {update_and_store_region_time}
 
+    // save stats to SRAM
     lda #$0001
     jsl save_stats
+
+    // hijacked code
     lda #$000a
     jsl $90f084
     rtl

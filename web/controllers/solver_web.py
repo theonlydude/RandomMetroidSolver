@@ -945,7 +945,8 @@ def computeDifficulty(jsonRomFileName, preset):
         '--difficultyTarget', str(session.solver['difficultyTarget']),
         '--pickupStrategy', session.solver['pickupStrategy'],
         '--type', 'web',
-        '--output', jsonFileName
+        '--output', jsonFileName,
+        '--runtime', '10'
     ]
 
     for item in session.solver['itemsForbidden']:

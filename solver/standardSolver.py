@@ -1,4 +1,4 @@
-import json, os
+import json, os, time
 
 from solver.commonSolver import CommonSolver
 from logic.helpers import Pickup
@@ -16,7 +16,7 @@ class StandardSolver(CommonSolver):
 
     def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console',
                  firstItemsLog=None, extStatsFilename=None, extStatsStep=None, displayGeneratedPath=False,
-                 outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False):
+                 outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False, runtimeLimit_s=0):
         self.interactive = False
         self.checkDuplicateMajor = checkDuplicateMajor
         if vcr == True:
@@ -53,8 +53,8 @@ class StandardSolver(CommonSolver):
 
         self.comeBack = ComeBack(self)
 
-        # no time limitation
-        self.runtimeLimit_s = 0
+        self.runtimeLimit_s = runtimeLimit_s
+        self.startTime = time.process_time()
 
     def setConf(self, difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath):
         Conf.difficultyTarget = difficultyTarget

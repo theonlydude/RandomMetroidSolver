@@ -311,6 +311,29 @@ class RomPatcher:
                 'Reserve': 'evreser knat',
                 'Gravity': 'ytivarg tius'
             },
+            'sprite_can.ips': {
+                'ScrewAttack': 'sprite attack',
+                'SpaceJump': 'sprite jump',
+                'Spazer': 'sprizer',
+                'SpeedBooster': 'sprite booster',
+                'SpringBall': 'sprite bubble',
+                'Super': 'carbonated blast',
+                'PowerBomb': 'lymon bomb',
+                'Morph': 'can crusher',
+                'Bomb': 'carbonation bomb',
+                'Plasma': 'lemon lime beam',
+                'Charge': 'quench beam',
+                'Ice': 'ice cube',
+                'Wave': 'cherry beam',
+                'XRayScope': 'citrus beam',
+                'ETank': 'sugar tank',
+                'Reserve': 'sweet tank',
+                'Varia': 'sprite cranberry',
+                'Gravity': 'sprite remix',
+                'Missile': 'sprite blast',
+                'Grapple': 'thirst grabber',
+                'HiJump': 'diet sprite'
+            },
             'vanilla':
             {
                 'ETank': 'energy tank',
@@ -1215,6 +1238,7 @@ class MessageBox(object):
     def updateMessage(self, box, message, vFlip=False, hFlip=False):
         (address, oldLength) = self.offsets[box]
         newLength = len(message)
+        assert newLength <= oldLength, "string '{}' is too long, max {}".format(message, oldLength)
         padding = oldLength - newLength
         paddingLeft = int(padding / 2)
         paddingRight = int(padding / 2)

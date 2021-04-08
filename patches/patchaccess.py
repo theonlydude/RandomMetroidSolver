@@ -25,7 +25,15 @@ class PatchAccess(object):
         self.additionalPLMs.update(logicPLMs)
 
     def getPatchPath(self, patch):
-        return os.path.join(self.patchesPath[patch], patch)
+        # is patch preloaded
+        if patch in self.patchesPath:
+            return os.path.join(self.patchesPath[patch], patch)
+        else:
+            # patchs from varia_repository used by the customizer for permalinks
+            if os.path.exists(patch):
+                return patch
+            else:
+                raise Exception("unknown patch: {}".format(patch))
 
     def getDictPatches(self):
         return self.dictPatches

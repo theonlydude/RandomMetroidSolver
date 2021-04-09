@@ -136,6 +136,7 @@ function drawCharts() {
   drawRandomizerParamsStats3();
   drawRandomizerParamsStats4();
   drawISolver();
+  drawSprites();
 }
 
 function drawSolverPresets() {
@@ -394,6 +395,37 @@ function drawISolver() {
 }}
 }
 
+function drawSprites() {
+{{
+  if spritesData == None:
+    response.write("  return;", escape=False)
+    pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable([
+      [{type: 'date', label: 'Date'}, {{response.write(", ".join(["'{}'".format(p) for p in spritesData[0]]), escape=False)}}]
+{{
+    for row in spritesData[1]:
+      response.write(", [\"Date({}, {}, {})\", {}]".format(row[0].year, row[0].month-1, row[0].day, ", ".join([str(x) for x in row[1:]])), escape=False)
+      pass
+}}
+    ]);
+
+    var options = {
+      title: "Custom Sprites usage",
+      isStacked: true
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.ColumnChart(document.getElementById("sprites"));
+    chart.draw(data, options);
+{{
+    pass
+}}
+}
+
+
 google.charts.setOnLoadCallback(drawCharts);
 </script>
 
@@ -422,6 +454,8 @@ google.charts.setOnLoadCallback(drawCharts);
     <h4>Randomizer statistics</h4>
     <div id = "randomizerPresets" style = "height: 400px; margin: 0 auto"></div>
     <div id = "randomizerDurations" style = "height: 400px; margin: 0 auto"></div>
+    <h4>Sprites statistics</h4>
+    <div id = "sprites" style = "height: 400px; margin: 0 auto"></div>
   </div>
   <div class="column">
     <h4>Solver statistics</h4>

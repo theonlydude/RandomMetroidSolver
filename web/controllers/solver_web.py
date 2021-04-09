@@ -1684,6 +1684,8 @@ def stats():
     isolver = db.getISolver(weeks)
     isolverData = db.getISolverData(weeks)
 
+    spritesData = db.getSpritesData(weeks)
+
     randomizerParamsStats = db.getRandomizerParamsStats(weeks)
 
     errors = getErrors()
@@ -1695,7 +1697,7 @@ def stats():
     return dict(solverPresets=solverPresets, randomizerPresets=randomizerPresets,
                 solverDurations=solverDurations, randomizerDurations=randomizerDurations,
                 solverData=solverData, randomizerData=randomizerData, randomizerParamsStats=randomizerParamsStats,
-                isolver=isolver, isolverData=isolverData, errors=errors,
+                isolver=isolver, isolverData=isolverData, spritesData=spritesData, errors=errors,
                 fsStatus=fsStatus, fsPercent=fsPercent)
 
 def transition2isolver(transition):
@@ -2682,6 +2684,9 @@ def customWebService():
 
     if request.vars.customSpriteEnable == 'on':
         params += ['--sprite', "{}.ips".format(request.vars.customSprite)]
+        db = DB()
+        db.addSprite(request.vars.customSprite)
+        db.close()
         if request.vars.customItemsEnable == 'on':
             params.append('--customItemNames')
         if request.vars.noSpinAttack == 'on':

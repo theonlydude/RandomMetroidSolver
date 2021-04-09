@@ -106,6 +106,7 @@ create table if not exists isolver (
   primary key (init_time, preset)
 );
 
+-- plandository
 create table if not exists plando_repo (
   plando_name varchar(32) not null,
   init_time datetime not null,
@@ -126,3 +127,10 @@ create table if not exists plando_rating (
 );
 -- drop index plando_rating_idx01 on plando_rating;
 -- alter table plando_rating add primary key (plando_name, ipv4);
+
+-- custom sprites
+create table if not exists sprites (
+  init_time datetime not null,
+  sprite varchar(32) not null,
+  primary key (init_time, sprite)
+);

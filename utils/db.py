@@ -188,6 +188,17 @@ where id = %s;"""
             print("DB.addISolver::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
+    def addSprite(self, sprite):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "insert into sprites (init_time, sprite) values (now(), '%s');"
+            self.cursor.execute(sql % (sprite, ))
+        except Exception as e:
+            print("DB.addSprite::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
     # read data
     def execSelect(self, sql, params=None):
         if self.dbAvailable == False:
@@ -564,6 +575,26 @@ order by init_time;"""
 
         header = ["initTime", "preset", "romFileName"]
         return (header, self.execSelect(sql, (weeks,)))
+
+    def getSpritesData(self, weeks):
+        if self.dbAvailable == False:
+            return None
+
+        sql = "select distinct(sprite) from sprites where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK);"
+        sprites = self.execSelect(sql, (weeks,))
+        if sprites == None:
+            return None
+
+        # db returns tuples
+        sprites = [sprite[0] for sprite in sprites]
+
+        # pivot
+        sql = "SELECT date(init_time)"
+        for sprite in sprites:
+            sql += ", SUM(CASE WHEN sprite = '{}' THEN 1 ELSE 0 END) AS count_{}".format(sprite, sprite)
+        sql += " FROM sprites where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) GROUP BY date(init_time);".format(weeks)
+
+        return (sprites, self.execSelect(sql))
 
     @staticmethod
     def dumpItemLocs(locsItems, sqlFile):

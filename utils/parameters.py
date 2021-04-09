@@ -108,6 +108,13 @@ class Knows:
                           'rooms': [],
                           'readonly' : True}
 
+    UnequipGravity = SMBool(True, easy, ['UnequipGravity'])
+    desc['UnequipGravity'] = {'display': 'Unequip Gravity',
+                          'title': 'Unequip Gravity suit to have more time to morph after jumping',
+                          'href': None,
+                          'rooms': ['Main Street', 'Spring Ball Room'],
+                          'readonly' : True}
+
     Mockball = SMBool(True, easy, ['Mockball'])
     desc['Mockball'] = {'display': 'Mockball',
                         'title': 'Morph from runing without loosing momentum to get Early Super and Ice Beam',
@@ -665,7 +672,7 @@ class Knows:
 
     categories = {
         'Common': [
-            {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 'CrouchJump'],
+            {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 'CrouchJump', 'UnequipGravity'],
              'title': 'Basics'},
             {'knows': ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
                        'GravityJump', 'GetAroundWallJump',

@@ -128,12 +128,10 @@ class RomPatcher:
         loc = itemLoc.Location
         if loc.isBoss():
             return
-
         for addr in self.getLocAddresses(loc):
-            self.writeItemCode(ItemManager.Items['Missile'], loc.Visibility, addr)
-            # all Nothing not at this loc Id will disappear when loc
-            # item is collected
-            self.romFile.writeByte(self.nothingId, addr + 4)
+            self.romFile.writeWord(ItemManager.Items['Nothing'].Code, addr)
+            self.romFile.writeWord(0xffff) # x=ff, Y=ff
+            self.romFile.writeWord(0x0000) # PLM variable=0000
 
     def writeItem(self, itemLoc):
         loc = itemLoc.Location
@@ -142,14 +140,9 @@ class RomPatcher:
         #print('write ' + itemLoc.Item.Type + ' at ' + loc.Name)
         for addr in self.getLocAddresses(loc):
             self.writeItemCode(itemLoc.Item, loc.Visibility, addr)
-            # if nothing was written at this loc before (in plando),
-            # then restore the vanilla value
-            self.romFile.writeByte(loc.Id, addr + 4)
 
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
-        self.nothingMissile = False
-        hasAccessibleNothing = any(il for il in itemLocs if il.Item.Category == 'Nothing' and not il.Location.restricted and il.Accessible)
         for itemLoc in itemLocs:
             loc = itemLoc.Location
             item = itemLoc.Item
@@ -158,10 +151,6 @@ class RomPatcher:
             isMorph = loc.Name == 'Morphing Ball'
             if item.Category == 'Nothing':
                 self.writeNothing(itemLoc)
-                if loc.Id == self.nothingId and hasAccessibleNothing:
-                    # picking up the first nothing gives a missile pack
-                    self.nothingMissile = True
-                    self.nItems += 1
             else:
                 self.nItems += 1
                 self.writeItem(itemLoc)
@@ -183,11 +172,9 @@ class RomPatcher:
             "EastMaridia": snes_to_pc(0xA1F5CB),
             "Tourian": snes_to_pc(0xA1F5D7)
         }
-        isNothingMissile = lambda loc: loc.Id == self.nothingId and self.nothingMissile == True
         splitCheck = lambda itemLoc: (split == "Full" and itemLoc.Location.Id is not None) or (itemLoc.Item.Class == split and split in itemLoc.Location.Class)
-        hasItem = lambda itemLoc: itemLoc.Item.Category != "Nothing" or isNothingMissile(itemLoc.Location)
         for area,addr in listAddresses.items():
-            ids = [il.Location.Id for il in itemLocs if splitCheck(il) and il.Location.GraphArea == area and hasItem(il)]
+            ids = [il.Location.Id for il in itemLocs if splitCheck(il) and il.Location.GraphArea == area and il.Item.Category != "Nothing"]
             self.romFile.seek(addr)
             for idByte in ids:
                 self.romFile.writeByte(idByte)
@@ -197,16 +184,7 @@ class RomPatcher:
     # not just morph ball
     def patchMorphBallEye(self, item):
 #        print('Eye item = ' + item.Type)
-        # consider Nothing as missile, because if it is at morph ball it will actually be a missile
-        if item.Category == 'Nothing':
-            if self.nothingId == 0x1a:
-                isNothingMissile = True
-            else:
-                return
-        else:
-            isNothingMissile = False
-        isAmmo = item.Category == 'Ammo' or isNothingMissile
-        isMissile = item.Type == 'Missile' or isNothingMissile
+        isAmmo = item.Category == 'Ammo'
         # category to check
         if ItemManager.isBeam(item):
             cat = 0xA8 # collected beams
@@ -214,7 +192,7 @@ class RomPatcher:
             cat = 0xC4 # max health
         elif item.Type == 'Reserve':
             cat = 0xD4 # max reserves
-        elif isMissile:
+        elif item.Type == 'Missile':
             cat = 0xC8 # max missiles
         elif item.Type == 'Super':
             cat = 0xCC # max supers
@@ -654,24 +632,8 @@ class RomPatcher:
             char = 'M'
         self.romFile.writeByte(ord(char), address)
 
-    def setNothingId(self, startAP, itemLocs):
-        # morph ball loc by default
-        self.nothingId = 0x1a
-        # if not default start, use first loc with a nothing
-        if not GraphUtils.isStandardStart(startAP):
-            firstNothing = next((il.Location for il in itemLocs if il.Item.Category == 'Nothing' and 'Boss' not in il.Location.Class), None)
-            if firstNothing is not None:
-                self.nothingId = firstNothing.Id
-
-    def writeNothingId(self):
-        address = 0x17B6D
-        self.romFile.writeByte(self.nothingId, address)
-
     def getItemQty(self, itemLocs, itemType):
-        q = len([il for il in itemLocs if il.Accessible and il.Item.Type == itemType])
-        if itemType == 'Missile' and self.nothingMissile == True:
-            q += 1
-        return q
+        return len([il for il in itemLocs if il.Accessible and il.Item.Type == itemType])
 
     def getMinorsDistribution(self, itemLocs):
         dist = {}
@@ -699,8 +661,6 @@ class RomPatcher:
         totalAmmo = sum(d['Quantity'] for ammo,d in dist.items())
         totalItemLocs = sum(1 for il in itemLocs if il.Accessible and not il.Location.isBoss())
         totalNothing = sum(1 for il in itemLocs if il.Accessible and il.Item.Category == 'Nothing')
-        if self.nothingMissile == True:
-            totalNothing -= 1
         totalEnergy = self.getItemQty(itemLocs, 'ETank')+self.getItemQty(itemLocs, 'Reserve')
         totalMajors = max(totalItemLocs - totalEnergy - totalAmmo - totalNothing, 0)
         address = 0x2736C0
@@ -790,7 +750,7 @@ class RomPatcher:
         self.writeCreditsStringBig(address, line, top=False)
 
     def writeSpoiler(self, itemLocs, progItemLocs=None):
-        # keep only majors, filter out Etanks and Reserve
+        # keep only majors
         fItemLocs = [il for il in itemLocs if il.Item.Category not in ['Ammo', 'Nothing', 'Energy', 'Boss']]
         # add location of the first instance of each minor
         for t in ['Missile', 'Super', 'PowerBomb']:

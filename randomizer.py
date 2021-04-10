@@ -720,7 +720,6 @@ if __name__ == "__main__":
         if args.rom != None:
             romPatcher.commitIPS()
         if args.patchOnly == False:
-            romPatcher.setNothingId(args.startAP, itemLocs)
             romPatcher.writeItemsLocs(itemLocs)
             romPatcher.writeSplitLocs(itemLocs, args.majorsSplit)
             romPatcher.writeItemsNumber()
@@ -736,7 +735,6 @@ if __name__ == "__main__":
         if args.patchOnly == False:
             romPatcher.writeMagic()
             romPatcher.writeMajorsSplit(args.majorsSplit)
-            romPatcher.writeNothingId()
         if args.palette == True:
             paletteSettings = {
                 "global_shift": None,

@@ -183,14 +183,14 @@ class ItemManager:
         'Nothing': Item(
             Category='Nothing',
             Class='Minor',
-            Code=0xeedb,
+            Code=0xb63b, # arrow PLM. coords have to be set to FF/FF as well for proper detection
             Name="Nothing",
             Type='Nothing',
         ),
         'NoEnergy': Item(
             Category='Nothing',
             Class='Major',
-            Code=0xeedb,
+            Code=0xb63b, # see above
             Name="No Energy",
             Type='NoEnergy',
         ),

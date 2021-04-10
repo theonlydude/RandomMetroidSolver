@@ -2116,7 +2116,7 @@ class WS_common_init(WS):
 
         if ret == 0:
             with DB() as db:
-                db.addISolver(preset, romFileName)
+                db.addISolver(preset, 'plando' if mode == 'plando' else 'tracker', romFileName)
 
             with open(jsonOutFileName) as jsonFile:
                 state = json.load(jsonFile)

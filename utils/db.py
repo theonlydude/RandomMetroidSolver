@@ -184,13 +184,13 @@ where id = %s;"""
             print("DB.initPresets::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
-    def addISolver(self, preset, romFileName):
+    def addISolver(self, preset, type, romFileName):
         if self.dbAvailable == False:
             return None
 
         try:
-            sql = "insert into isolver (init_time, preset, romFileName) values (now(), '%s', '%s');"
-            self.cursor.execute(sql % (preset, romFileName))
+            sql = "insert into isolver (init_time, preset, type, romFileName) values (now(), '%s', '%s', '%s');"
+            self.cursor.execute(sql % (preset, type, romFileName))
         except Exception as e:
             print("DB.addISolver::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
@@ -586,12 +586,12 @@ order by 1;"""
             return None
 
         # return all data csv style
-        sql = """select 0, init_time, preset, romFileName
+        sql = """select 0, init_time, type, preset, romFileName
 from isolver
 where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK)
 order by init_time;"""
 
-        header = ["initTime", "preset", "romFileName"]
+        header = ["initTime", "type", "preset", "romFileName"]
         return (header, self.execSelect(sql, (weeks,)))
 
     def getSpritesData(self, weeks):

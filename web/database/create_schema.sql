@@ -103,8 +103,10 @@ create table if not exists isolver (
   init_time datetime not null,
   preset varchar(32) not null,
   romFileName tinytext,
+  type varchar(8),
   primary key (init_time, preset)
 );
+-- alter table isolver add type varchar(8);
 
 -- plandository
 create table if not exists plando_repo (

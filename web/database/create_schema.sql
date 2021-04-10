@@ -134,3 +134,13 @@ create table if not exists sprites (
   sprite varchar(32) not null,
   primary key (init_time, sprite)
 );
+
+-- plando rando
+-- we just store usage to know if someone use it
+create table if not exists plando_rando (
+  init_time datetime not null,
+  return_code tinyint unsigned,
+  duration float,
+  error_msg text,
+  primary key (init_time)
+);

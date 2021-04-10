@@ -35,6 +35,13 @@ class DB:
         except Exception as e:
             print("DB.close::error: {}".format(e))
 
+    # to be used with 'with'
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self.close()
+
     def commit(self):
         if self.dbAvailable == False:
             return
@@ -197,6 +204,17 @@ where id = %s;"""
             self.cursor.execute(sql % (sprite, ))
         except Exception as e:
             print("DB.addSprite::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def addPlandoRando(self, return_code, duration, msg):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "insert into plando_rando (init_time, return_code, duration, error_msg) values (now(), %d, %f, '%s');"
+            self.cursor.execute(sql % (return_code, duration, msg))
+        except Exception as e:
+            print("DB.addPlandoRando::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
     # read data
@@ -595,6 +613,19 @@ order by init_time;"""
         sql += " FROM sprites where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) GROUP BY date(init_time);".format(weeks)
 
         return (sprites, self.execSelect(sql))
+
+    def getPlandoRandoData(self, weeks):
+        if self.dbAvailable == False:
+            return None
+
+        # return all data csv style
+        sql = """select 0, init_time, return_code, duration, error_msg
+from plando_rando
+where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK)
+order by init_time;"""
+
+        header = ["initTime", "returnCode", "duration", "errorMsg"]
+        return (header, self.execSelect(sql, (weeks,)))
 
     @staticmethod
     def dumpItemLocs(locsItems, sqlFile):

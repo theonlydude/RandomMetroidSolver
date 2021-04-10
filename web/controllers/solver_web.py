@@ -181,10 +181,9 @@ def getSkillLevelBarData(preset):
         score = PresetLoader.factory('{}/{}.json'.format(getPresetDir(preset), preset)).params['score']
         result['standards'][preset] = score
 
-    db = DB()
-    result['generatedSeeds'] = db.getGeneratedSeeds(result['custom'][0])
-    result['lastAction'] = db.getPresetLastActionDate(result['custom'][0])
-    db.close()
+    with DB() as db:
+        result['generatedSeeds'] = db.getGeneratedSeeds(result['custom'][0])
+        result['lastAction'] = db.getPresetLastActionDate(result['custom'][0])
 
     # TODO: normalize result (or not ?)
     return result
@@ -441,9 +440,8 @@ def presets():
                 paramsDict['password'] = passwordSHA256
                 try:
                     PresetLoader.factory(paramsDict).dump(fullPath)
-                    db = DB()
-                    db.addPresetAction(preset, 'update')
-                    db.close()
+                    with DB() as db:
+                        db.addPresetAction(preset, 'update')
                     updatePresetsSession()
                     session.flash = "Preset {} updated".format(preset)
                 except Exception as e:
@@ -461,9 +459,8 @@ def presets():
                 paramsDict['password'] = passwordSHA256
                 try:
                     PresetLoader.factory(paramsDict).dump(fullPath)
-                    db = DB()
-                    db.addPresetAction(preset, 'create')
-                    db.close()
+                    with DB() as db:
+                        db.addPresetAction(preset, 'create')
                     updatePresetsSession()
                     session.flash = "Preset {} created".format(preset)
                 except Exception as e:
@@ -1630,9 +1627,8 @@ def randoParamsWebService():
     if seed < 0 or seed > 9999999:
         raiseHttp(400, "Wrong value for seed, must be between 0 and 9999999", False)
 
-    db = DB()
-    (seed, params) = db.getRandomizerSeedParams(seed)
-    db.close()
+    with DB() as db:
+        (seed, params) = db.getRandomizerSeedParams(seed)
 
     return json.dumps({"seed": seed, "params": params})
 
@@ -1660,37 +1656,35 @@ def randoParamsWebServiceAPI():
     if not isValidGUID(guid):
         raiseHttp(400, "Guid is not valid", False)
 
-    db = DB()
-    params = db.getRandomizerSeedParamsAPI(guid)
-    db.close()
+    with DB() as db:
+        params = db.getRandomizerSeedParamsAPI(guid)
 
     return json.dumps(params)
 
 def stats():
     response.title = 'Super Metroid VARIA Randomizer and Solver usage statistics'
 
-    db = DB()
     weeks = 1
 
-    solverPresets = db.getSolverPresets(weeks)
-    randomizerPresets = db.getRandomizerPresets(weeks)
+    with DB() as db:
+        solverPresets = db.getSolverPresets(weeks)
+        randomizerPresets = db.getRandomizerPresets(weeks)
 
-    solverDurations = db.getSolverDurations(weeks)
-    randomizerDurations = db.getRandomizerDurations(weeks)
+        solverDurations = db.getSolverDurations(weeks)
+        randomizerDurations = db.getRandomizerDurations(weeks)
 
-    solverData = db.getSolverData(weeks)
-    randomizerData = db.getRandomizerData(weeks)
+        solverData = db.getSolverData(weeks)
+        randomizerData = db.getRandomizerData(weeks)
 
-    isolver = db.getISolver(weeks)
-    isolverData = db.getISolverData(weeks)
+        isolver = db.getISolver(weeks)
+        isolverData = db.getISolverData(weeks)
 
-    spritesData = db.getSpritesData(weeks)
+        spritesData = db.getSpritesData(weeks)
+        plandoRandoData = db.getPlandoRandoData(weeks)
 
-    randomizerParamsStats = db.getRandomizerParamsStats(weeks)
+        randomizerParamsStats = db.getRandomizerParamsStats(weeks)
 
     errors = getErrors()
-
-    db.close()
 
     (fsStatus, fsPercent) = getFsUsage()
 
@@ -1698,7 +1692,7 @@ def stats():
                 solverDurations=solverDurations, randomizerDurations=randomizerDurations,
                 solverData=solverData, randomizerData=randomizerData, randomizerParamsStats=randomizerParamsStats,
                 isolver=isolver, isolverData=isolverData, spritesData=spritesData, errors=errors,
-                fsStatus=fsStatus, fsPercent=fsPercent)
+                fsStatus=fsStatus, fsPercent=fsPercent, plandoRandoData=plandoRandoData)
 
 def transition2isolver(transition):
     transition = str(transition)
@@ -1989,6 +1983,10 @@ class WS(object):
             if action == 'save':
                 return json.dumps(state)
             else:
+                if action == 'randomize':
+                    with DB() as db:
+                        db.addPlandoRando(ret, duration, state.get("errorMsg", ""))
+
                 # save the escape timer at every step to avoid loosing its value
                 if request.vars.escapeTimer != None:
                     state["escapeTimer"] = request.vars.escapeTimer
@@ -2006,6 +2004,11 @@ class WS(object):
             except Exception as e:
                 # happen when jsonOutFileName is empty
                 pass
+
+            if action == 'randomize':
+                with DB() as db:
+                    db.addPlandoRando(ret, duration, msg)
+
             os.close(fd1)
             os.remove(jsonInFileName)
             os.close(fd2)
@@ -2112,9 +2115,8 @@ class WS_common_init(WS):
         print("ret: {}, duration: {}s".format(ret, duration))
 
         if ret == 0:
-            db = DB()
-            db.addISolver(preset, romFileName)
-            db.close()
+            with DB() as db:
+                db.addISolver(preset, romFileName)
 
             with open(jsonOutFileName) as jsonFile:
                 state = json.load(jsonFile)
@@ -2533,9 +2535,8 @@ def customizer():
         elif IS_LENGTH(maxsize=36, minsize=36)(key)[1] is not None:
             msg = "Seed key must be 36 chars long"
         else:
-            db = DB()
-            seedInfo = db.getSeedInfo(key)
-            db.close()
+            with DB() as db:
+                seedInfo = db.getSeedInfo(key)
             if seedInfo == None or len(seedInfo) == 0:
                 msg = "Seed {} not found".format(key)
                 seedInfo = None
@@ -2565,9 +2566,8 @@ def customizer():
                     seedParams = None
                 # accessing the url tell us to store the ips for more than 7 days
                 elif seedInfo["upload_status"] == 'local':
-                    db = DB()
-                    db.updateSeedUploadStatus(key, 'pending')
-                    db.close()
+                    with DB() as db:
+                        db.updateSeedUploadStatus(key, 'pending')
 
     return dict(customSprites=customSprites, customShips=customShips,
                 seedInfo=seedInfo, seedParams=seedParams, msg=msg, defaultParams=defaultParams)
@@ -2684,9 +2684,8 @@ def customWebService():
 
     if request.vars.customSpriteEnable == 'on':
         params += ['--sprite', "{}.ips".format(request.vars.customSprite)]
-        db = DB()
-        db.addSprite(request.vars.customSprite)
-        db.close()
+        with DB() as db:
+            db.addSprite(request.vars.customSprite)
         if request.vars.customItemsEnable == 'on':
             params.append('--customItemNames')
         if request.vars.noSpinAttack == 'on':
@@ -2694,10 +2693,9 @@ def customWebService():
     if request.vars.customShipEnable == 'on':
         params += ['--ship', "{}.ips".format(request.vars.customShip)]
     if request.vars.seedKey != None:
-        db = DB()
-        seedIpsInfo = db.getSeedIpsInfo(request.vars.seedKey)
+        with DB() as db:
+            seedIpsInfo = db.getSeedIpsInfo(request.vars.seedKey)
         print("seedIpsInfo: {}".format(seedIpsInfo))
-        db.close()
         if seedIpsInfo == None or len(seedIpsInfo) == 0:
             raise HTTP(400, json.dumps("Can't get seed info"))
         (uploadStatus, fileName) = seedIpsInfo[0]
@@ -2801,9 +2799,8 @@ def extStats():
         except Exception as e:
             raise HTTP(400, "Error loading the skill preset: {}".format(e))
 
-        db = DB()
-        (itemsStats, techniquesStats, difficulties, solverStatsRaw) = db.getExtStat(skillPreset, randoPreset)
-        db.close()
+        with DB() as db:
+            (itemsStats, techniquesStats, difficulties, solverStatsRaw) = db.getExtStat(skillPreset, randoPreset)
 
         solverStats = {}
         if "avgLocs" in solverStatsRaw:
@@ -2905,41 +2902,40 @@ def progSpeedStats():
         randoPreset = "Season_Races"
         majorsSplit = request.vars.majorsSplit
 
-        db = DB()
-        progSpeedStatsRaw = {}
-        progSpeedStats = {}
-        progSpeedStats["open14"] = {}
-        progSpeedStats["open24"] = {}
-        progSpeedStats["open34"] = {}
-        progSpeedStats["open44"] = {}
-        progSpeeds = ['speedrun', 'slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'variable', 'total']
-        realProgSpeeds = []
-        realProgSpeedsName = []
-        for progSpeed in progSpeeds:
-            curRandoPreset = "{}_{}_{}".format(randoPreset, majorsSplit, progSpeed)
-            progSpeedStatsRaw[progSpeed] = db.getProgSpeedStat(skillPreset, curRandoPreset)
+        with DB() as db:
+            progSpeedStatsRaw = {}
+            progSpeedStats = {}
+            progSpeedStats["open14"] = {}
+            progSpeedStats["open24"] = {}
+            progSpeedStats["open34"] = {}
+            progSpeedStats["open44"] = {}
+            progSpeeds = ['speedrun', 'slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'variable', 'total']
+            realProgSpeeds = []
+            realProgSpeedsName = []
+            for progSpeed in progSpeeds:
+                curRandoPreset = "{}_{}_{}".format(randoPreset, majorsSplit, progSpeed)
+                progSpeedStatsRaw[progSpeed] = db.getProgSpeedStat(skillPreset, curRandoPreset)
 
-            if len(progSpeedStatsRaw[progSpeed]) != 0:
-                progSpeedStats[progSpeed] = {}
-                progSpeedStats[progSpeed]["avgLocs"] = transformStats(progSpeedStatsRaw[progSpeed]["avgLocs"], 50)
-                open14 = transformStats(progSpeedStatsRaw[progSpeed]["open14"])
-                open24 = transformStats(progSpeedStatsRaw[progSpeed]["open24"])
-                open34 = transformStats(progSpeedStatsRaw[progSpeed]["open34"])
-                open44 = transformStats(progSpeedStatsRaw[progSpeed]["open44"])
-                progSpeedStats[progSpeed]["open"] = zipStats([open14, open24, open34, open44])
-                progSpeedStats[progSpeed]["open"].insert(0, ['Collected items', '1/4 locations available', '2/4 locations available', '3/4 locations available', '4/4 locations available'])
+                if len(progSpeedStatsRaw[progSpeed]) != 0:
+                    progSpeedStats[progSpeed] = {}
+                    progSpeedStats[progSpeed]["avgLocs"] = transformStats(progSpeedStatsRaw[progSpeed]["avgLocs"], 50)
+                    open14 = transformStats(progSpeedStatsRaw[progSpeed]["open14"])
+                    open24 = transformStats(progSpeedStatsRaw[progSpeed]["open24"])
+                    open34 = transformStats(progSpeedStatsRaw[progSpeed]["open34"])
+                    open44 = transformStats(progSpeedStatsRaw[progSpeed]["open44"])
+                    progSpeedStats[progSpeed]["open"] = zipStats([open14, open24, open34, open44])
+                    progSpeedStats[progSpeed]["open"].insert(0, ['Collected items', '1/4 locations available', '2/4 locations available', '3/4 locations available', '4/4 locations available'])
 
-                progSpeedStats["open14"][progSpeed] = open14
-                progSpeedStats["open24"][progSpeed] = open24
-                progSpeedStats["open34"][progSpeed] = open34
-                progSpeedStats["open44"][progSpeed] = open44
+                    progSpeedStats["open14"][progSpeed] = open14
+                    progSpeedStats["open24"][progSpeed] = open24
+                    progSpeedStats["open34"][progSpeed] = open34
+                    progSpeedStats["open44"][progSpeed] = open44
 
-                realProgSpeeds.append(progSpeed)
-                if progSpeed == 'total':
-                    realProgSpeedsName.append('total_rando')
-                else:
-                    realProgSpeedsName.append(progSpeed)
-        db.close()
+                    realProgSpeeds.append(progSpeed)
+                    if progSpeed == 'total':
+                        realProgSpeedsName.append('total_rando')
+                    else:
+                        realProgSpeedsName.append(progSpeed)
 
         # avg locs
         if len(realProgSpeeds) > 0:
@@ -2967,31 +2963,29 @@ ipsBasePath = "plandository/"
 def plandorepo():
     response.title = 'Super Metroid VARIA Plandository'
 
-    db = DB()
-    url = request.env.request_uri.split('/')
-    msg = ""
-    plandos = []
-    expand = True
-    if len(url) > 0 and url[-1] != 'plandorepo':
-        # a plando name was passed as parameter
-        plandoName = url[-1]
+    with DB() as db:
+        url = request.env.request_uri.split('/')
+        msg = ""
+        plandos = []
+        expand = True
+        if len(url) > 0 and url[-1] != 'plandorepo':
+            # a plando name was passed as parameter
+            plandoName = url[-1]
 
-        # decode url
-        plandoName = urllib.parse.unquote(plandoName)
+            # decode url
+            plandoName = urllib.parse.unquote(plandoName)
 
-        # sanity check
-        if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
-            msg = "Plando name can only contain [a-zA-Z0-9 -_]"
-        else:
-            plandos = db.getPlando(plandoName)
-            if plandos == None or len(plandos) == 0:
-                msg = "Plando not found"
-    if len(plandos) == 0:
-        # get plando list
-        plandos = db.getPlandos()
-        expand = False
-
-    db.close()
+            # sanity check
+            if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
+                msg = "Plando name can only contain [a-zA-Z0-9 -_]"
+            else:
+                plandos = db.getPlando(plandoName)
+                if plandos == None or len(plandos) == 0:
+                    msg = "Plando not found"
+        if len(plandos) == 0:
+            # get plando list
+            plandos = db.getPlandos()
+            expand = False
 
     return dict(plandos=plandos, msg=msg, expand=expand, math=math, re=re)
 
@@ -3017,10 +3011,9 @@ def plandoRateWebService():
     rate = int(rate)
     ip = request.client
 
-    db = DB()
-    db.addRating(plando, rate, ip)
-    newRate = db.getPlandoRate(plando)
-    db.close()
+    with DB() as db:
+        db.addRating(plando, rate, ip)
+        newRate = db.getPlandoRate(plando)
     if newRate == None:
         raiseHttp(400, "Can't get new rate")
     newCount = newRate[0][0]
@@ -3048,10 +3041,9 @@ def downloadPlandoWebService():
     with open(ipsFileName, 'rb') as ipsFile:
         ipsData = ipsFile.read()
 
-    db = DB()
-    maxSize = db.getPlandoIpsMaxSize(plandoName)
-    db.increaseDownloadCount(plandoName)
-    db.close()
+    with DB() as db:
+        maxSize = db.getPlandoIpsMaxSize(plandoName)
+        db.increaseDownloadCount(plandoName)
 
     data = {
         "ips": base64.b64encode(ipsData).decode(),
@@ -3112,13 +3104,11 @@ def handleIps(plandoName, romDataJson):
 def uploadPlandoWebService():
     print("uploadPlandoWebService")
 
-    db = DB()
-    count = db.getPlandoCount()
-    plandoLimit = 2048
-    if count == None or count[0][0] >= plandoLimit:
-        db.close()
-        raise HTTP(400, "Maximum number of plandos reach: {}".format(plandoLimit))
-    db.close()
+    with DB() as db:
+        count = db.getPlandoCount()
+        plandoLimit = 2048
+        if count == None or count[0][0] >= plandoLimit:
+            raise HTTP(400, "Maximum number of plandos reach: {}".format(plandoLimit))
 
     for param in ["author", "plandoName", "longDesc", "preset", "romData"]:
         if request.vars[param] == None:
@@ -3137,9 +3127,8 @@ def uploadPlandoWebService():
         raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
 
     # check if plando doesn't already exist
-    db = DB()
-    check = db.checkPlando(plandoName)
-    db.close()
+    with DB() as db:
+        check = db.checkPlando(plandoName)
 
     if check is not None and len(check) > 0 and check[0][0] == plandoName:
         raise HTTP(400, "Can't create plando, a plando with the same name already exists")
@@ -3152,9 +3141,8 @@ def uploadPlandoWebService():
 
     updateKey = generateUpdateKey()
 
-    db = DB()
-    db.insertPlando((plandoName, author, longDesc, preset, updateKey, maxSize))
-    db.close()
+    with DB() as db:
+        db.insertPlando((plandoName, author, longDesc, preset, updateKey, maxSize))
 
     if webhookAvailable:
         plandoWebhook(plandoName, author, preset, longDesc)
@@ -3202,14 +3190,12 @@ def deletePlandoWebService():
     if IS_MATCH('^[a-zA-Z0-9]*$')(plandoKey)[1] is not None:
         raise HTTP(400, "Plando key can only contain [a-zA-Z0-9]")
 
-    db = DB()
-    valid = db.isValidPlandoKey(plandoName, plandoKey)
-    if valid == None or len(valid) == 0:
-        db.close()
-        raise HTTP(400, "Plando key mismatch")
-    db.deletePlandoRating(plandoName)
-    db.deletePlando(plandoName)
-    db.close()
+    with DB() as db:
+        valid = db.isValidPlandoKey(plandoName, plandoKey)
+        if valid == None or len(valid) == 0:
+            raise HTTP(400, "Plando key mismatch")
+        db.deletePlandoRating(plandoName)
+        db.deletePlando(plandoName)
 
     return json.dumps("Plando {} deleted".format(plandoName))
 
@@ -3242,19 +3228,16 @@ def updatePlandoWebService():
     plandoKey = request.vars.plandoKey
 
     # check update key
-    db = DB()
-    valid = db.isValidPlandoKey(plandoName, plandoKey)
-    if valid == None or len(valid) == 0:
-        db.close()
-        raise HTTP(400, "Plando key mismatch")
+    with DB() as db:
+        valid = db.isValidPlandoKey(plandoName, plandoKey)
+        if valid == None or len(valid) == 0:
+            raise HTTP(400, "Plando key mismatch")
 
-    if request.vars.romData != None:
-        print("updatePlandoWebService: update ips")
-        maxSize = handleIps(plandoName, request.vars.romData)
-        db.updatePlandoAll((author, longDesc, preset, maxSize, plandoName))
-    else:
-        db.updatePlandoMeta((author, longDesc, preset, plandoName))
-
-    db.close()
+        if request.vars.romData != None:
+            print("updatePlandoWebService: update ips")
+            maxSize = handleIps(plandoName, request.vars.romData)
+            db.updatePlandoAll((author, longDesc, preset, maxSize, plandoName))
+        else:
+            db.updatePlandoMeta((author, longDesc, preset, plandoName))
 
     return json.dumps("Plando {} updated succesfully.".format(plandoName))

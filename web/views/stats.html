@@ -528,6 +528,11 @@ google.charts.setOnLoadCallback(drawCharts);
 
 <a download="isolver.csv" href="#" onclick="return ExcellentExport.csv(this, 'isolverData');">Export to CSV</a>
 
+<h4>Plando Rando data</h4>
+{{displayData("plandoRandoData", plandoRandoData)}}
+
+<a download="plandoRando.csv" href="#" onclick="return ExcellentExport.csv(this, 'plandoRandoData');">Export to CSV</a>
+
 <h4>Randomizer data</h4>
 {{
     # data[0]: list of column headers, data[1]: rows (last column is a dict of the params), data[2]: list of params

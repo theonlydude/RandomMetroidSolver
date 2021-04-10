@@ -174,7 +174,8 @@ class RomReader:
         'open_zebetites': {'address': 0x26DF22, 'value': 0xc3, 'vanillaValue': 0x43},
         'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'vanillaValue': 0xaf},
         'rotation': {'address': 0x44DF, 'value': 0xD0, 'vanillaValue': 0xe0},
-        'no_demo': {'address': 0x59F2C, 'value': 0x80, 'vanillaValue': 0xf0}
+        'no_demo': {'address': 0x59F2C, 'value': 0x80, 'vanillaValue': 0xf0},
+        'varia_hud': {'address': 0x15EF7, 'value': 0x5C, 'vanillaValue': 0xAE}
     }
 
     @staticmethod

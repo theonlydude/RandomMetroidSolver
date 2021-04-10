@@ -73,7 +73,8 @@ class RomReader:
         '0xefc7': {'name': 'ScrewAttack'},
         '0xefcb': {'name': 'Morph'},
         '0xefcf': {'name': 'Reserve'},
-        '0x0': {'name': 'Nothing'}
+        '0x0': {'name': 'Nothing'},
+        '0xb63b': {'name': 'Nothing'} # "modern" Nothing items are arrow PLMs
     }
 
     patches = {

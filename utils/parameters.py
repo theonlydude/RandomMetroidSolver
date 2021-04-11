@@ -108,11 +108,12 @@ class Knows:
                           'rooms': [],
                           'readonly' : True}
 
-    UnequipGravity = SMBool(True, easy, ['UnequipGravity'])
-    desc['UnequipGravity'] = {'display': 'Unequip Gravity',
-                          'title': 'Unequip Gravity suit to have more time to morph after jumping',
+    UnequipItem = SMBool(True, easy, ['UnequipItem'])
+    desc['UnequipItem'] = {'display': 'Unequip an item',
+                          'title': 'Unequip Gravity suit to have more time to morph after jumping or unequip Hi-Jump Boots to jump to limit jump height',
+                           # TODO::add a video with all the occurences
                           'href': None,
-                          'rooms': ['Main Street', 'Spring Ball Room'],
+                          'rooms': ['Main Street', 'Spring Ball Room', 'West Ocean'],
                           'readonly' : True}
 
     Mockball = SMBool(True, easy, ['Mockball'])
@@ -672,7 +673,7 @@ class Knows:
 
     categories = {
         'Common': [
-            {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 'CrouchJump', 'UnequipGravity'],
+            {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 'CrouchJump', 'UnequipItem'],
              'title': 'Basics'},
             {'knows': ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
                        'GravityJump', 'GetAroundWallJump',

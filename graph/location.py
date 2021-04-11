@@ -46,6 +46,9 @@ class Location:
     def isClass(self, _class):
         return _class in self.Class
 
+    def setClass(self, _class):
+        self.Class = _class
+
     def evalPostAvailable(self, smbm):
         if self.difficulty.bool == True and self.PostAvailable is not None:
             smbm.addItem(self.itemName)

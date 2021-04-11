@@ -16,53 +16,56 @@ from utils.doorsmanager import DoorsManager
 
 # entry point for rando execution ("randomize" method)
 class RandoExec(object):
-    def __init__(self, seedName, vcr):
+    def __init__(self, seedName, vcr, randoSettings, graphSettings):
         self.errorMsg = ""
         self.seedName = seedName
         self.vcr = vcr
+        self.randoSettings = randoSettings
+        self.graphSettings = graphSettings
 
     def getFillerFactory(self, progSpeed, endDate):
         if progSpeed == "basic":
-            return lambda graphSettings, graph, restr, cont: FrontFiller(graphSettings.startAP, graph, restr, cont, endDate)
+            return lambda cont: FrontFiller(self.graphSettings.startAP, self.areaGraph, self.restrictions, cont, endDate)
         elif progSpeed == "speedrun":
-            return lambda graphSettings, graph, restr, cont: FillerRandomSpeedrun(graphSettings, graph, restr, cont, endDate)
+            return lambda cont: FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, cont, endDate)
         else:
-            return lambda graphSettings, graph, restr, cont: FillerProgSpeed(graphSettings, graph, restr, cont, endDate)
+            return lambda cont: FillerProgSpeed(self.graphSettings, self.areaGraph, self.restrictions, cont, endDate)
 
-    def createFiller(self, randoSettings, graphSettings, container, endDate):
-        fact = self.getFillerFactory(randoSettings.progSpeed, endDate)
-        if self.restrictions.split != "Chozo":
-            return fact(graphSettings, self.areaGraph, self.restrictions, container)
+    def createFiller(self, container, endDate):
+        progSpeed = self.randoSettings.progSpeed
+        fact = self.getFillerFactory(progSpeed, endDate)
+        if self.randoSettings.restrictions['MajorMinor'] != "Chozo":
+            return fact(container)
         else:
-            if randoSettings.progSpeed in ['basic', 'speedrun']:
-                secondPhase = lambda graphSettings, graph, restr, cont, prog: FillerRandom(graphSettings.startAP, graph, restr, cont, endDate, diffSteps=100)
+            if progSpeed in ['basic', 'speedrun']:
+                secondPhase = lambda cont, prog: FillerRandom(self.graphSettings.startAP, self.areaGraph, self.restrictions, cont, endDate, diffSteps=100)
             else:
-                secondPhase = lambda graphSettings, graph, restr, cont, prog: FillerProgSpeedChozoSecondPhase(graphSettings.startAP, graph, restr, cont, endDate)
-            chozoFact = ChozoFillerFactory(graphSettings, self.areaGraph, self.restrictions, fact, secondPhase)
-            return ChozoWrapperFiller(randoSettings, container, chozoFact)
+                secondPhase = lambda cont, prog: FillerProgSpeedChozoSecondPhase(self.graphSettings.startAP, self.areaGraph, self.restrictions, cont, endDate)
+            chozoFact = ChozoFillerFactory(fact, secondPhase)
+            return ChozoWrapperFiller(self.randoSettings, container, chozoFact)
 
     # processes settings to :
     # - create Restrictions and GraphBuilder objects
     # - create graph and item loc container using a RandoSetup instance: in area rando, if it fails, iterate on possible graph layouts
     # - create filler based on progression speed and run it
     # return (isStuck, itemLocs, progItemLocs)
-    def randomize(self, randoSettings, graphSettings):
-        self.restrictions = Restrictions(randoSettings)
+    def randomize(self):
+        self.restrictions = Restrictions(self.randoSettings)
         self.errorMsg = ""
-        graphBuilder = GraphBuilder(graphSettings)
+        graphBuilder = GraphBuilder(self.graphSettings)
         container = None
         i = 0
-        attempts = 500 if graphSettings.areaRando or graphSettings.doorsColorsRando else 1
+        attempts = 500 if self.graphSettings.areaRando or self.graphSettings.doorsColorsRando else 1
         now = time.process_time()
         endDate = sys.maxsize
-        if randoSettings.runtimeLimit_s < endDate:
-            endDate = now + randoSettings.runtimeLimit_s
+        if self.randoSettings.runtimeLimit_s < endDate:
+            endDate = now + self.randoSettings.runtimeLimit_s
         while container is None and i < attempts and now <= endDate:
-            if graphSettings.doorsColorsRando == True:
-                DoorsManager.randomize(graphSettings.allowGreyDoors)
+            if self.graphSettings.doorsColorsRando == True:
+                DoorsManager.randomize(self.graphSettings.allowGreyDoors)
             self.areaGraph = graphBuilder.createGraph()
             services = RandoServices(self.areaGraph, self.restrictions)
-            setup = RandoSetup(graphSettings, Logic.locations, services)
+            setup = RandoSetup(self.graphSettings, Logic.locations, services)
             container = setup.createItemLocContainer()
             if container is None:
                 sys.stdout.write('*')
@@ -72,14 +75,14 @@ class RandoExec(object):
                 self.errorMsg += '\n'.join(setup.errorMsgs)
             now = time.process_time()
         if container is None:
-            if graphSettings.areaRando:
+            if self.graphSettings.areaRando:
                 self.errorMsg += "Could not find an area layout with these settings"
             else:
                 self.errorMsg += "Unable to process settings"
             return (True, [], [])
-        graphBuilder.escapeGraph(container, self.areaGraph, randoSettings.maxDiff)
+        graphBuilder.escapeGraph(container, self.areaGraph, self.randoSettings.maxDiff)
         self.areaGraph.printGraph()
-        filler = self.createFiller(randoSettings, graphSettings, container, endDate)
+        filler = self.createFiller(container, endDate)
         vcr = VCR(self.seedName, 'rando') if self.vcr == True else None
         ret = filler.generateItems(vcr=vcr)
         self.errorMsg += filler.errorMsg
@@ -103,3 +106,12 @@ class RandoExec(object):
         for loc in unfilledLocs:
             loc.restricted = True
             itemLocs.append(ItemLocation(nothing, loc, False))
+        # if random major locations, set locations class according to item class
+        if self.randoSettings.restrictions['MajorLocs'] == 'random':
+            split = self.randoSettings.restrictions['MajorMinor']
+            assert split != 'Full', "Major split settings inconsistency"
+            for il in itemLocs:
+                if il.Item.Class == split:
+                    il.Location.setClass([split])
+                else:
+                    il.Location.setClass(['Minor'])

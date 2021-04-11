@@ -65,7 +65,7 @@ create table if not exists randomizer (
   guid char(36),
   primary key (id)
 );
-create unique index randomizer_idx01 on randomizer(action_time);
+create index randomizer_idx01 on randomizer(action_time);
 create index randomizer_idx02 on randomizer(upload_status);
 create index randomizer_idx03 on randomizer(guid);
 -- alter table randomizer add upload_status varchar(8) after action_time;

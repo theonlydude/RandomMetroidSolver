@@ -81,8 +81,8 @@ class RandoSetup(object):
         if self.settings.progSpeed == 'speedrun':
             restrictionDict = self.getSpeedrunRestrictionsDict()
             self.restrictions.addPlacementRestrictions(restrictionDict)
-        self.fillRestrictedLocations()
         self.settings.collectAlreadyPlacedItemLocations(self.container)
+        self.fillRestrictedLocations()
         self.settings.updateSuperFun(self.superFun)
         return self.container
 

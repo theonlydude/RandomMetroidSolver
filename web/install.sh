@@ -316,11 +316,6 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/greenhill_platform.png ] || ln -s ~/RandomMetroidSolver/web/static/help/greenhill_platform.png ~/web2py/applications/solver/static/images/greenhill_platform.png
 [ -L ~/web2py/applications/solver/static/images/greenhill_gate.png ] || ln -s ~/RandomMetroidSolver/web/static/help/greenhill_gate.png ~/web2py/applications/solver/static/images/greenhill_gate.png
 
-[ -L ~/web2py/applications/solver/static/images/blue_door_noob.png ] || ln -s ~/RandomMetroidSolver/web/static/help/blue_door_noob.png ~/web2py/applications/solver/static/images/blue_door_noob.png
-[ -L ~/web2py/applications/solver/static/images/blue_door_lecoude.png ] || ln -s ~/RandomMetroidSolver/web/static/help/blue_door_lecoude.png ~/web2py/applications/solver/static/images/blue_door_lecoude.png
-[ -L ~/web2py/applications/solver/static/images/blue_door_kronic.png ] || ln -s ~/RandomMetroidSolver/web/static/help/blue_door_kronic.png ~/web2py/applications/solver/static/images/blue_door_kronic.png
-[ -L ~/web2py/applications/solver/static/images/blue_door_greenhill.png ] || ln -s ~/RandomMetroidSolver/web/static/help/blue_door_greenhill.png ~/web2py/applications/solver/static/images/blue_door_greenhill.png
-
 [ -L ~/web2py/applications/solver/static/images/ws_etank.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ws_etank.png ~/web2py/applications/solver/static/images/ws_etank.png
 [ -L ~/web2py/applications/solver/static/images/ln_chozo.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ln_chozo.png ~/web2py/applications/solver/static/images/ln_chozo.png
 [ -L ~/web2py/applications/solver/static/images/bomb_torizo.png ] || ln -s ~/RandomMetroidSolver/web/static/help/bomb_torizo.png ~/web2py/applications/solver/static/images/bomb_torizo.png
@@ -603,9 +598,6 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/maridia_tube_opened.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/maridia_tube_opened.png ~/web2py/applications/solver/static/images/maridia_tube_opened.png
 [ -L ~/web2py/applications/solver/static/images/red_bt_blue_door.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/red_bt_blue_door.png ~/web2py/applications/solver/static/images/red_bt_blue_door.png
 
-[ -L ~/web2py/applications/solver/static/images/pirates_shaft_blue_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/pirates_shaft_blue_door.png ~/web2py/applications/solver/static/images/pirates_shaft_blue_door.png
-[ -L ~/web2py/applications/solver/static/images/kihunter_blue_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/kihunter_blue_door.png ~/web2py/applications/solver/static/images/kihunter_blue_door.png
-
 [ -L ~/web2py/applications/solver/views/solver_web/progSpeedStats.html ] || ln -s ~/RandomMetroidSolver/web/views/progSpeedStats.html ~/web2py/applications/solver/views/solver_web/progSpeedStats.html
 
 [ -L ~/web2py/applications/solver/static/images/skip_forward.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/skip_forward.svg ~/web2py/applications/solver/static/images/skip_forward.svg
@@ -794,3 +786,9 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 
 [ -L ~/web2py/applications/solver/static/images/enby.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/enby.png ~/web2py/applications/solver/static/images/enby.png
 [ -L ~/web2py/applications/solver/static/images/sprite_sheets/enby.png ] || ln -s ~/RandomMetroidSolver/web/static/sprite_sheets/enby.png ~/web2py/applications/solver/static/images/sprite_sheets/enby.png
+
+[ -L ~/web2py/applications/solver/static/images/below_botwoon_etank.png ] || ln -s ~/RandomMetroidSolver/web/static/help/below_botwoon_etank.png ~/web2py/applications/solver/static/images/below_botwoon_etank.png
+[ -L ~/web2py/applications/solver/static/images/west_sand_hall_tunnel.png ] || ln -s ~/RandomMetroidSolver/web/static/help/west_sand_hall_tunnel.png ~/web2py/applications/solver/static/images/west_sand_hall_tunnel.png
+[ -L ~/web2py/applications/solver/static/images/west_sand_hall.png ] || ln -s ~/RandomMetroidSolver/web/static/help/west_sand_hall.png ~/web2py/applications/solver/static/images/west_sand_hall.png
+[ -L ~/web2py/applications/solver/static/images/main_street_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/main_street_save.png ~/web2py/applications/solver/static/images/main_street_save.png
+[ -L ~/web2py/applications/solver/static/images/crab_shaft_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/crab_shaft_save.png ~/web2py/applications/solver/static/images/crab_shaft_save.png

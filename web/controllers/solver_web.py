@@ -1180,7 +1180,7 @@ def sessionWebService():
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
                'rando_speed', 'animals', 'No_Music', 'random_music',
-               'Infinite_Space_Jump', 'refill_before_save']
+               'Infinite_Space_Jump', 'refill_before_save', 'hud']
     quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty']
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
@@ -1231,6 +1231,7 @@ def sessionWebService():
     session.randomizer['random_music'] = request.vars.random_music
     session.randomizer['Infinite_Space_Jump'] = request.vars.Infinite_Space_Jump
     session.randomizer['refill_before_save'] = request.vars.refill_before_save
+    session.randomizer['hud'] = request.vars.hud
 
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
@@ -1271,7 +1272,7 @@ def randomizerWebService():
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
                'rando_speed', 'animals', 'No_Music', 'random_music',
-               'Infinite_Space_Jump', 'refill_before_save']
+               'Infinite_Space_Jump', 'refill_before_save', 'hud']
     quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty']
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
@@ -1411,6 +1412,9 @@ def randomizerWebService():
 
     if request.vars.randomMajorLocs == 'on':
         params += ['--randomMajorLocs', '--hud']
+
+    if request.vars.hud == 'on':
+        params.append('--hud')
 
     # load content of preset to get controller mapping
     try:

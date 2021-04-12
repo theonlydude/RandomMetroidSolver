@@ -350,6 +350,9 @@ def loadRandoPreset(randoPreset, args):
         if randoParams.get(patch, "off") == "on":
             args.patches.append(patch)
 
+    if randoParams.get("hud", "off") == "on":
+        args.hud = True
+
     if "morphPlacement" in randoParams:
         args.morphPlacement = randoParams["morphPlacement"]
     if "majorsSplit" in randoParams:
@@ -456,6 +459,7 @@ def getRandomizerDefaultParameters():
     defaultParams['rando_speed'] = "off"
     defaultParams['Infinite_Space_Jump'] = "off"
     defaultParams['refill_before_save'] = "off"
+    defaultParams['hud'] = "off"
     defaultParams['animals'] = "off"
     defaultParams['No_Music'] = "off"
     defaultParams['random_music'] = "off"

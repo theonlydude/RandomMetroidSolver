@@ -387,11 +387,12 @@ class InteractiveSolver(CommonSolver):
         # write plm table & random doors
         romPatcher.writePlmTable(plms, self.areaRando, self.bossRando, self.startAP)
 
-        romPatcher.setNothingId(self.startAP, itemLocs)
         romPatcher.writeItemsLocs(itemLocs)
         romPatcher.writeItemsNumber()
         romPatcher.writeSpoiler(itemLocs)
-        romPatcher.writeNothingId()
+        # plando is considered Full
+        romPatcher.writeSplitLocs(itemLocs, "Full")
+        romPatcher.writeMajorsSplit("Full")
         class FakeRandoSettings:
             def __init__(self):
                 self.qty = {'energy': 'plando'}

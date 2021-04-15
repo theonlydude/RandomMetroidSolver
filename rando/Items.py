@@ -183,14 +183,14 @@ class ItemManager:
         'Nothing': Item(
             Category='Nothing',
             Class='Minor',
-            Code=0xb63b, # arrow PLM. coords have to be set to FF/FF as well for proper detection
+            Code=0xbae9, # new nothing plm
             Name="Nothing",
             Type='Nothing',
         ),
         'NoEnergy': Item(
             Category='Nothing',
             Class='Major',
-            Code=0xb63b, # see above
+            Code=0xbae9, # see above
             Name="No Energy",
             Type='NoEnergy',
         ),
@@ -266,12 +266,18 @@ class ItemManager:
 
     @staticmethod
     def getItemTypeCode(item, itemVisibility):
-        if itemVisibility == 'Visible':
-            modifier = 0
-        elif itemVisibility == 'Chozo':
-            modifier = 84
-        elif itemVisibility == 'Hidden':
-            modifier = 168
+        if item.Category == 'Nothing':
+            if itemVisibility in ['Visible', 'Chozo']:
+                modifier = 0
+            elif itemVisibility == 'Hidden':
+                modifier = 4
+        else:
+            if itemVisibility == 'Visible':
+                modifier = 0
+            elif itemVisibility == 'Chozo':
+                modifier = 84
+            elif itemVisibility == 'Hidden':
+                modifier = 168
 
         itemCode = item.Code + modifier
         return itemCode

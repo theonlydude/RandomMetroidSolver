@@ -5,6 +5,7 @@ from graph.graph_utils import GraphUtils, getAccessPoint
 from logic.logic import Logic
 
 class RomReader:
+    nothings = ['0xbae9', '0xbaed']
     # read the items in the rom
     items = {
         # vanilla
@@ -74,7 +75,8 @@ class RomReader:
         '0xefcb': {'name': 'Morph'},
         '0xefcf': {'name': 'Reserve'},
         '0x0': {'name': 'Nothing'},
-        '0xb63b': {'name': 'Nothing'} # "modern" Nothing items are arrow PLMs
+        '0xbae9': {'name': 'Nothing'}, # new visible/chozo Nothing
+        '0xbaed': {'name': 'Nothing'}  # new hidden Nothing
     }
 
     patches = {
@@ -176,7 +178,8 @@ class RomReader:
         'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'vanillaValue': 0xaf},
         'rotation': {'address': 0x44DF, 'value': 0xD0, 'vanillaValue': 0xe0},
         'no_demo': {'address': 0x59F2C, 'value': 0x80, 'vanillaValue': 0xf0},
-        'varia_hud': {'address': 0x15EF7, 'value': 0x5C, 'vanillaValue': 0xAE}
+        'varia_hud': {'address': 0x15EF7, 'value': 0x5C, 'vanillaValue': 0xAE},
+        'nothing_item_plm': {'address': 0x23AD1, 'value': 0x24, 'vanillaValue': 0xb9}
     }
 
     @staticmethod
@@ -235,9 +238,18 @@ class RomReader:
         else:
             raise Exception("RomReader: unknown visibility: {}".format(visibility))
 
+        # for the new nothing item plm the visibility is:
+        # Visible/Chozo -> 0
+        # Hidden -> 4
+        if itemCode not in self.items:
+            if visibility in ['Visible', 'Chozo']:
+                nothingCode = hex(value2*256+(value1-0))
+            elif visibility == 'Hidden':
+                nothingCode = hex(value2*256+(value1-4))
+            if nothingCode in self.nothings:
+                itemCode = nothingCode
+
         # dessyreqt randomizer make some missiles non existant, detect it
-        # 0xeedb is missile item
-        # 0x786de is Morphing Ball location
         self.romFile.seek(address+4)
         value3 = int.from_bytes(self.romFile.read(1), byteorder='little')
         if (value3 == self.nothingId

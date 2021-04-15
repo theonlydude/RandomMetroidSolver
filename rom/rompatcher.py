@@ -49,7 +49,9 @@ class RomPatcher:
             # displays max ammo 
             'max_ammo_display.ips',
             # VARIA logo on startup screen
-            'varia_logo.ips'
+            'varia_logo.ips',
+            # new nothing plm
+            'nothing_item_plm.ips'
         ],
         # VARIA tweaks
         'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
@@ -124,15 +126,6 @@ class RomPatcher:
             ret.append(self.altLocsAddresses[loc.Name])
         return ret
 
-    def writeNothing(self, itemLoc):
-        loc = itemLoc.Location
-        if loc.isBoss():
-            return
-        for addr in self.getLocAddresses(loc):
-            self.romFile.writeWord(ItemManager.Items['Nothing'].Code, addr)
-            self.romFile.writeWord(0xffff) # x=ff, Y=ff
-            self.romFile.writeWord(0x0000) # PLM variable=0000
-
     def writeItem(self, itemLoc):
         loc = itemLoc.Location
         if loc.isBoss():
@@ -148,14 +141,11 @@ class RomPatcher:
             item = itemLoc.Item
             if loc.isBoss():
                 continue
-            isMorph = loc.Name == 'Morphing Ball'
-            if item.Category == 'Nothing':
-                self.writeNothing(itemLoc)
-            else:
+            self.writeItem(itemLoc)
+            if item.Category != 'Nothing':
                 self.nItems += 1
-                self.writeItem(itemLoc)
-            if isMorph:
-                self.patchMorphBallEye(itemLoc.Item)
+                if loc.Name == 'Morphing Ball':
+                    self.patchMorphBallEye(item)
 
     def writeSplitLocs(self, itemLocs, split):
         listAddresses = {

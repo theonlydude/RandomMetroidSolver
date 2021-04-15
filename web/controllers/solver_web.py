@@ -375,6 +375,76 @@ def computeLNHellRun(sm, addScrew):
                     sm.addItem('ETank')
     return result
 
+def skillPresetActionWebService():
+    print("skillPresetActionWebService call")
+
+    # for create/update, not load
+    (ok, msg) = validatePresetsParams(request.vars.action)
+    if not ok:
+        raise HTTP(400, json.dumps(msg))
+    else:
+        session.presets['currentTab'] = request.vars.currenttab
+
+    if request.vars.action == 'Create':
+        preset = request.vars.presetCreate
+    else:
+        preset = request.vars.preset
+
+    # check if the presets file already exists
+    password = request.vars['password']
+    password = password.encode('utf-8')
+    passwordSHA256 = hashlib.sha256(password).hexdigest()
+    fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
+    if os.path.isfile(fullPath):
+        # load it
+        end = False
+        try:
+            oldParams = PresetLoader.factory(fullPath).params
+        except Exception as e:
+            msg = "UC:Error loading the preset {}: {}".format(preset, e)
+            end = True
+        if end == True:
+            raise HTTP(400, json.dumps(msg))
+
+        # check if password match
+        if 'password' in oldParams and passwordSHA256 == oldParams['password']:
+            # update the presets file
+            paramsDict = genJsonFromParams(request.vars)
+            paramsDict['password'] = passwordSHA256
+            try:
+                PresetLoader.factory(paramsDict).dump(fullPath)
+                with DB() as db:
+                    db.addPresetAction(preset, 'update')
+                updatePresetsSession()
+                msg = "Preset {} updated".format(preset)
+                return json.dumps(msg)
+            except Exception as e:
+                msg = "Error writing the preset {}: {}".format(preset, e)
+                raise HTTP(400, json.dumps(msg))
+        else:
+            msg = "Password mismatch with existing presets file {}".format(preset)
+            raise HTTP(400, json.dumps(msg))
+    else:
+        # prevent a malicious user from creating presets in a loop
+        if not maxPresetsReach():
+            # write the presets file
+            paramsDict = genJsonFromParams(request.vars)
+            paramsDict['password'] = passwordSHA256
+            try:
+                PresetLoader.factory(paramsDict).dump(fullPath)
+                with DB() as db:
+                    db.addPresetAction(preset, 'create')
+                updatePresetsSession()
+                msg = "Preset {} created".format(preset)
+                return json.dumps(msg)
+            except Exception as e:
+                msg = "Error writing the preset {}: {}".format(preset, e)
+                raise HTTP(400, json.dumps(msg))
+            redirect(URL(r=request, f='presets'))
+        else:
+            msg = "Sorry, maximum number of presets reached, can't add more"
+            raise HTTP(400, json.dumps(msg))
+
 def presets():
     initPresetsSession()
 
@@ -395,10 +465,7 @@ def presets():
         else:
             session.presets['currentTab'] = request.vars.currenttab
 
-        if request.vars.action == 'Create':
-            preset = request.vars.presetCreate
-        else:
-            preset = request.vars.preset
+        preset = request.vars.preset
 
     # in web2py.js, in disableElement, remove 'working...' to have action with correct value
     if request.vars.action == 'Load':
@@ -415,60 +482,6 @@ def presets():
         else:
             session.flash = "Presets file not found: {}".format(fullPath)
         redirect(URL(r=request, f='presets'))
-
-    elif request.vars.action in ['Update', 'Create']:
-        # check if the presets file already exists
-        password = request.vars['password']
-        password = password.encode('utf-8')
-        passwordSHA256 = hashlib.sha256(password).hexdigest()
-        fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
-        if os.path.isfile(fullPath):
-            # load it
-            end = False
-            try:
-                oldParams = PresetLoader.factory(fullPath).params
-            except Exception as e:
-                session.flash = "UC:Error loading the preset {}: {}".format(preset, e)
-                end = True
-            if end == True:
-                redirect(URL(r=request, f='presets'))
-
-            # check if password match
-            if 'password' in oldParams and passwordSHA256 == oldParams['password']:
-                # update the presets file
-                paramsDict = genJsonFromParams(request.vars)
-                paramsDict['password'] = passwordSHA256
-                try:
-                    PresetLoader.factory(paramsDict).dump(fullPath)
-                    with DB() as db:
-                        db.addPresetAction(preset, 'update')
-                    updatePresetsSession()
-                    session.flash = "Preset {} updated".format(preset)
-                except Exception as e:
-                    session.flash = "Error writing the preset {}: {}".format(preset, e)
-                redirect(URL(r=request, f='presets'))
-            else:
-                session.flash = "Password mismatch with existing presets file {}".format(preset)
-                redirect(URL(r=request, f='presets'))
-
-        else:
-            # check that there's no more than 2K presets (there's less than 2K sm rando players in the world)
-            if not maxPresetsReach():
-                # write the presets file
-                paramsDict = genJsonFromParams(request.vars)
-                paramsDict['password'] = passwordSHA256
-                try:
-                    PresetLoader.factory(paramsDict).dump(fullPath)
-                    with DB() as db:
-                        db.addPresetAction(preset, 'create')
-                    updatePresetsSession()
-                    session.flash = "Preset {} created".format(preset)
-                except Exception as e:
-                    session.flash = "Error writing the preset {}: {}".format(preset, e)
-                redirect(URL(r=request, f='presets'))
-            else:
-                session.flash = "Sorry, maximum number of presets reached, can't add more"
-                redirect(URL(r=request, f='presets'))
 
     # set title
     response.title = 'Super Metroid VARIA Presets'

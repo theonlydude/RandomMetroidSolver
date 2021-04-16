@@ -29,6 +29,9 @@ from randomizer import energyQties, progDiffs, morphPlacements, majorsSplits, sp
 from utils.doorsmanager import DoorsManager
 from utils.version import displayedVersion
 
+# custom sprites data
+from varia_custom_sprites.custom_sprites import customSprites, customSpritesOrder
+
 # discord webhook for plandorepo
 try:
     from webhook import webhookUrl
@@ -2424,86 +2427,6 @@ def initCustomizerSession():
         session.customizer['supermetroid_msu1'] = "off"
         session.customizer['remove_itemsounds'] = "off"
         session.customizer['remove_spinjumprestart'] = "off"
-
-customSprites = {
-    'samus': {"name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh", "group": "Samus"},
-    'samus_backwards': {"name": "Samus (backwards)", "desc": "Samus, flipped horizontally", "author": "TarThoron", "group": "Samus"},
-    'samus_upside_down': {"name": "Samus (upside down)", "desc": "Samus, flipped vertically", "author": "TarThoron", "group": "Samus"},
-    'samus_upside_down_and_backwards': {"name": "Samus (180°)", "desc": "Samus, flpped both horizontally and vertically", "author": "TarThoron", "group": "Samus"},
-    'fusion_green_varia': {"name": "Fusion", "desc": "Samus resprite inspired by Metroid Fusion (green Varia Suit)", "author": "Gala", "group": "Samus"},
-    'fusion_orange_varia': {"name": "Fusion", "desc": "Samus resprite inspired by Metroid Fusion (orange Varia Suit)", "author": "Gala", "group": "Samus"},
-    'combat_armor_samus': {"name": "Combat Armor", "desc": "Samus, from Samus Combat Armor hack", "author": "Munchy (ripped by TarThoron)", "group": "Samus"},
-    'dark_samus': {"name": "Dark Samus", "desc": "Samus recolor inspired by the Dark Samus character", "author": "TarThoron", "group": "Samus"},
-    'trans': {"name": "Trans Colors", "desc": "Samus in trans pride colors", "author": "TarThoron", "group": "Samus"},
-    'enby': {"name": "Enby Colors", "desc": "Samus in non binary colors", "author": "Glove", "group": "Samus"},
-    'hack_ancient_chozo': {"name": "Chozo", "desc": "Samus, from Ancient Chozo hack", "author": "Albert V and Physix", "group": "Samus"},
-    'hack_ascent': {"name": "Ascent", "desc": "Samus, from Ascent hack", "author": "Benox50", "group": "Samus"},
-    'hack_decision': {"name": "Decision", "desc": "Samus, from Decision hack", "author": "JoshShoeWah", "group": "Samus"},
-    'hack_escape2': {"name": "Escape II", "desc": "Samus, from Escape II hack", "author": "Hiroishi", "group": "Samus"},
-    'hack_hyper': {"name": "Hyper", "desc": "Samus, from Hyper Metroid hack", "author": "RealRed", "group": "Samus"},
-    'hack_nature': {"name": "Nature", "desc": "Samus, from Nature hack", "author": "Jefe962", "group": "Samus"},
-    'hack_opposition': {"name": "Opposition", "desc": "Space Pirate themed suit for Samus, from Opposition hack", "author": "mccad00", "group": "Samus"},
-    'hack_phazon': {"name": "Phazon", "desc": "Samus, from Phazon hack", "author": "A_red_monk_called_Key", "group": "Samus"},
-    'hack_redesign': {"name": "Redesign", "desc": "Samus, from Redesign hack", "author": "Drewseph", "group": "Samus"},
-    'hack_szm': {"name": "SZM", "desc": "Samus, from Super Zero Mission hack", "author": "SBniconico", "group": "Samus"},
-    'hitbox_helper': {"name": "Hitbox", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru", "group": "Samus"},
-    'bailey': {"name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": "Auximines", "group": "Custom"},
-    'alucard': {"name": "Alucard", "desc": "Alucard from Castlevania Symphony Of The Night", "author": "Nintoaster", "group": "Custom"},
-    'megaman': {"name": "Megaman", "desc": "Megaman X!", "author": "Artheau", "group": "Custom"},
-    'link': {"name": "Link", "desc": "Sorry Link, your game is in another randomizer!", "author": "RonnSama", "group": "Custom"},
-    'fed_trooper': {"name": "GF Trooper", "desc": "A Galactic Federation trooper", "author": "Physix", "group": "Custom"},
-    'super_controid': {"name": "Contra", "desc": "Badass soldier from Contra III", "author": "Nintoaster", "group": "Custom"},
-    'mario_8bit': {"name": "Mario (NES)", "desc": "One of the bros", "author": "TarThoron", "group": "Custom"},
-    'mario_8bit_modern': {"name": "Mario (Alt)", "desc": "One of the bros, with a more modern palette", "author": "TarThoron", "group": "Custom"},
-    'luigi': {"name": "Luigi", "desc": "The other bro", "author": "RonnSama", "group": "Custom"},
-    'diddy_kong': {"name": "Diddy Kong", "desc": "Diddy Kong from Donkey Kong Country", "author": "Di10", "group": "Custom"},
-    'marga': {"name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
-    'captain_novolin': {"name": "Captain Novolin", "desc": "Captain Novolin, from the eponymous educational SNES game on diabetes", "author": "PaddyCo", "group": "Custom"},
-    'metroid': {"name": "Metroid", "desc": "It can't crawl", "author": "Fingersmcgee", "group": "Custom"},
-    'shaktool': {"name": "Shaktool", "desc": "Shaktool in all its glory", "author": "Pneumatic", "group": "Custom"},
-    'sprite_can': {"name": "Sprite", "desc": "A ... Sprite ... ", "author": "TarThoron", "group": "Custom"},
-    'win95_cursor': {"name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
-}
-
-customSpritesOrder = [
-    'samus',
-    'fusion_green_varia',
-    'fusion_orange_varia',
-    'combat_armor_samus',
-    'dark_samus',
-    'trans',
-    'enby',
-    'hack_ancient_chozo',
-    'hack_ascent',
-    'hack_decision',
-    'hack_escape2',
-    'hack_hyper',
-    'hack_nature',
-    'hack_opposition',
-    'hack_phazon',
-    'hack_redesign',
-    'hack_szm',
-    'samus_backwards',
-    'samus_upside_down',
-    'samus_upside_down_and_backwards',
-    'hitbox_helper',
-    'bailey',
-    'alucard',
-    'megaman',
-    'link',
-    'fed_trooper',
-    'super_controid',
-    'mario_8bit',
-    'mario_8bit_modern',
-    'luigi',
-    'diddy_kong',
-    'marga',
-    'captain_novolin',
-    'metroid',
-    'shaktool',
-    'sprite_can',
-    'win95_cursor'
-]
 
 customShips = {
     'Red-M0nk3ySMShip1': {"name": "Red-M0nk3ySMShip1", "desc": "From MetConst", "author": "Red-M0nk3y"},

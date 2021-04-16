@@ -2,7 +2,7 @@ import colorsys, random
 from rom.rom import pc_to_snes
 from rom.romloader import RomLoader
 from rando.palettes import palettes
-from rando.sprite_palettes import sprite_palettes
+from varia_custom_sprites.sprite_palettes import sprite_palettes
 import utils.log
 
 #Palette Hue Shift

@@ -230,7 +230,7 @@ class RomPatcher:
         self.applyIPSPatch(ship, ipsDir='patches/common/ips/ships')
 
     def customSprite(self, sprite, customNames, noSpinAttack):
-        self.applyIPSPatch(sprite, ipsDir='patches/common/ips/sprites')
+        self.applyIPSPatch(sprite, ipsDir='varia_custom_sprites/patches')
         if noSpinAttack == True:
             self.applyIPSPatch('SpriteSomething_Disable_Spin_Attack')
 

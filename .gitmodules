@@ -1,3 +1,4 @@
 [submodule "varia_custom_sprites"]
 	path = varia_custom_sprites
 	url = https://github.com/theonlydude/varia_custom_sprites
+	branch = main

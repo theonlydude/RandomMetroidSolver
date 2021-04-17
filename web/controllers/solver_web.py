@@ -1309,6 +1309,7 @@ def randomizerWebService():
     (fd1, presetFileName) = tempfile.mkstemp()
     presetFileName += '.json'
     (fd2, jsonFileName) = tempfile.mkstemp()
+    (fd3, jsonRandoPreset) = tempfile.mkstemp()
 
     print("randomizerWebService, params validated")
     for var in request.vars:
@@ -1324,114 +1325,12 @@ def randomizerWebService():
 
     params = [pythonExec,  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
               '--runtime', '20',
-              '--seed', request.vars.seed,
               '--output', jsonFileName,
               '--param', presetFileName,
               '--preset', preset]
-    params += ['--missileQty', request.vars.missileQty if request.vars.missileQty != 'random' else '0',
-               '--superQty', request.vars.superQty if request.vars.superQty != 'random' else '0',
-               '--powerBombQty', request.vars.powerBombQty if request.vars.powerBombQty != 'random' else '0',
-               '--minorQty', request.vars.minorQty if request.vars.minorQty != 'random' else '0']
-
-    for multi in multis:
-        params += ["--{}".format(multi), request.vars[multi]]
-        if request.vars[multi] == 'random':
-            params += ["--{}List".format(multi), request.vars[multi+"MultiSelect"]]
-
-    if request.vars.maxDifficulty != 'no difficulty cap':
-        params.append('--maxDifficulty')
-        params.append(request.vars.maxDifficulty)
 
     if useRace == True:
         params += ['--race', str(magic)]
-
-    if request.vars.nerfedCharge == 'on':
-        params.append('--nerfedCharge')
-
-    if request.vars.itemsounds == 'on':
-        params += ['-c', 'itemsounds.ips']
-    if request.vars.elevators_doors_speed == 'on':
-        params += ['-c', 'elevators_doors_speed.ips']
-    if request.vars.spinjumprestart == 'on':
-        params += ['-c', 'spinjumprestart.ips']
-    if request.vars.rando_speed == 'on':
-        params += ['-c', 'rando_speed.ips']
-    if request.vars.No_Music == 'on':
-        params += ['-c', 'No_Music']
-    if request.vars.random_music == 'on':
-        params += ['-c', 'random_music.ips']
-    if request.vars.Infinite_Space_Jump == 'on':
-        params += ['-c', 'Infinite_Space_Jump']
-    if request.vars.refill_before_save == 'on':
-        params += ['-c', 'refill_before_save.ips']
-
-    if request.vars.animals == 'on':
-        params.append('--animals')
-    if request.vars.variaTweaks == 'off':
-        params.append('--novariatweaks')
-
-    def addParamRandom(id, params):
-        if request.vars[id] in ['on', 'random']:
-            params.append('--{}'.format(id))
-        if request.vars[id] == 'random':
-            params.append('random')
-
-    addParamRandom('suitsRestriction', params)
-    addParamRandom('hideItems', params)
-    addParamRandom('strictMinors', params)
-
-    def addSuperFun(id, params):
-        fun = id[len('fun'):]
-        if request.vars[id] == 'on':
-            params += ['--superFun', fun]
-        elif request.vars[id] == 'random':
-            params += ['--superFun', "{}Random".format(fun)]
-
-    addSuperFun('funCombat', params)
-    addSuperFun('funMovement', params)
-    addSuperFun('funSuits', params)
-
-    if request.vars.layoutPatches == 'off':
-        params.append('--nolayout')
-
-    if request.vars.areaRandomization == 'on':
-        params.append('--area')
-        if request.vars.areaLayout == 'off':
-            params.append('--areaLayoutBase')
-        if request.vars.lightAreaRandomization == 'on':
-            params.append('--lightArea')
-    elif request.vars.areaRandomization == 'random':
-        params += ['--area', 'random']
-
-    if request.vars.doorsColorsRando == 'on':
-        params.append('--doorsColorsRando')
-    elif request.vars.doorsColorsRando == 'random':
-        params += ['--doorsColorsRando', 'random']
-    if request.vars.allowGreyDoors == 'on':
-        params.append('--allowGreyDoors')
-
-    if request.vars.escapeRando == 'on':
-        params.append('--escapeRando')
-        if request.vars.removeEscapeEnemies == 'off':
-            params.append('--noRemoveEscapeEnemies')
-    elif request.vars.escapeRando == 'random':
-        params += ['--escapeRando', 'random']
-
-    if request.vars.bossRandomization == 'on':
-        params.append('--bosses')
-    elif request.vars.bossRandomization == 'random':
-        params += ['--bosses', 'random']
-
-    if request.vars.minimizer == 'on':
-        params += ['--minimizer', request.vars.minimizerQty]
-    if request.vars.minimizerTourian == 'on':
-        params.append('--minimizerTourian')
-
-    if request.vars.randomMajorLocs == 'on':
-        params += ['--randomMajorLocs', '--hud']
-
-    if request.vars.hud == 'on':
-        params.append('--hud')
 
     # load content of preset to get controller mapping
     try:
@@ -1441,6 +1340,8 @@ def randomizerWebService():
         os.remove(presetFileName)
         os.close(fd2)
         os.remove(jsonFileName)
+        os.close(fd3)
+        os.remove(jsonRandoPreset)
         raise HTTP(400, json.dumps("randomizerWebService: can't load the preset"))
 
     (custom, controlParam) = getCustomMapping(controlMapping)
@@ -1448,6 +1349,15 @@ def randomizerWebService():
         params += ['--controls', controlParam]
         if "Moonwalk" in controlMapping and controlMapping["Moonwalk"] == True:
             params.append('--moonwalk')
+
+    randoPresetDict = {var: request.vars[var] for var in request.vars if var != 'paramsFileTarget'}
+    # set multi select as list as expected in a rando preset
+    for var, value in randoPresetDict.items():
+        if 'MultiSelect' in var:
+            randoPresetDict[var] = value.split(',')
+    with open(jsonRandoPreset, 'w') as randoPresetFile:
+        json.dump(randoPresetDict, randoPresetFile)
+    params += ['--randoPreset', jsonRandoPreset]
 
     db.addRandoParams(id, request.vars)
 
@@ -1486,6 +1396,8 @@ def randomizerWebService():
         os.remove(presetFileName)
         os.close(fd2)
         os.remove(jsonFileName)
+        os.close(fd3)
+        os.remove(jsonRandoPreset)
 
         return json.dumps(locsItems)
     else:
@@ -1506,6 +1418,8 @@ def randomizerWebService():
         os.remove(presetFileName)
         os.close(fd2)
         os.remove(jsonFileName)
+        os.close(fd3)
+        os.remove(jsonRandoPreset)
         raise HTTP(400, json.dumps(msg))
 
 def storeLocalIps(key, fileName, ipsData):

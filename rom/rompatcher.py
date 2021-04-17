@@ -227,7 +227,7 @@ class RomPatcher:
             self.applyIPSPatch(patchName)
 
     def customShip(self, ship):
-        self.applyIPSPatch(ship, ipsDir='patches/common/ips/ships')
+        self.applyIPSPatch(ship, ipsDir='varia_custom_sprites/patches')
 
     def customSprite(self, sprite, customNames, noSpinAttack):
         self.applyIPSPatch(sprite, ipsDir='varia_custom_sprites/patches')

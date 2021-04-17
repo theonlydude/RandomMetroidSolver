@@ -605,12 +605,6 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/donate.png ] || ln -s ~/RandomMetroidSolver/web/static/donate.png ~/web2py/applications/solver/static/images/donate.png
 [ -L ~/web2py/applications/solver/static/images/donate_randomizer.png ] || ln -s ~/RandomMetroidSolver/web/static/donate_randomizer.png ~/web2py/applications/solver/static/images/donate_randomizer.png
 
-[ -L ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip1.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/Red-M0nk3ySMShip1.png ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip1.png
-[ -L ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip2.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/Red-M0nk3ySMShip2.png ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip2.png
-[ -L ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip3.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/Red-M0nk3ySMShip3.png ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip3.png
-[ -L ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip4.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/Red-M0nk3ySMShip4.png ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip4.png
-[ -L ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip5.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/Red-M0nk3ySMShip5.png ~/web2py/applications/solver/static/images/Red-M0nk3ySMShip5.png
-
 [ -L ~/web2py/applications/solver/static/images/minimizer_example.png ] || ln -s ~/RandomMetroidSolver/web/static/minimizer_example.png ~/web2py/applications/solver/static/images/minimizer_example.png
 [ -L ~/web2py/applications/solver/static/images/minimizer_example_thumbnail.png ] || ln -s ~/RandomMetroidSolver/web/static/minimizer_example_thumbnail.png ~/web2py/applications/solver/static/images/minimizer_example_thumbnail.png
 
@@ -656,9 +650,6 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/grey_door_bottom.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/grey_door_bottom.svg ~/web2py/applications/solver/static/images/grey_door_bottom.svg
 [ -L ~/web2py/applications/solver/static/images/blue_door_bottom.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/blue_door_bottom.svg ~/web2py/applications/solver/static/images/blue_door_bottom.svg
 
-
-[ -L ~/web2py/applications/solver/static/images/mario_ship.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/mario_ship.png ~/web2py/applications/solver/static/images/mario_ship.png
-[ -L ~/web2py/applications/solver/static/images/opposition_ship.png ] || ln -s ~/RandomMetroidSolver/web/static/ship_sprites/opposition_ship.png ~/web2py/applications/solver/static/images/opposition_ship.png
 
 [ -L ~/web2py/applications/solver/static/images/ice_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ice_door.png ~/web2py/applications/solver/static/images/ice_door.png
 [ -L ~/web2py/applications/solver/static/images/missile_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/missile_door.png ~/web2py/applications/solver/static/images/missile_door.png

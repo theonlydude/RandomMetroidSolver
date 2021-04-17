@@ -31,6 +31,7 @@ from utils.version import displayedVersion
 
 # custom sprites data
 from varia_custom_sprites.custom_sprites import customSprites, customSpritesOrder
+from varia_custom_sprites.custom_ships import customShips, customShipsOrder
 
 # discord webhook for plandorepo
 try:
@@ -2427,26 +2428,6 @@ def initCustomizerSession():
         session.customizer['supermetroid_msu1'] = "off"
         session.customizer['remove_itemsounds'] = "off"
         session.customizer['remove_spinjumprestart'] = "off"
-
-customShips = {
-    'Red-M0nk3ySMShip1': {"name": "Red-M0nk3ySMShip1", "desc": "From MetConst", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip2': {"name": "Red-M0nk3ySMShip2", "desc": "From MetConst", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip3': {"name": "Red-M0nk3ySMShip3", "desc": "From MetConst", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip4': {"name": "Red-M0nk3ySMShip4", "desc": "From MetConst", "author": "Red-M0nk3y"},
-    'Red-M0nk3ySMShip5': {"name": "Red-M0nk3ySMShip5", "desc": "From MetConst", "author": "Red-M0nk3y"},
-    'opposition_ship': {"name": "Opposition Ship", "desc": "From Opposition Hack", "author": "mccad00"},
-    'mario_ship': {"name": "Mario Ship", "desc": "For Mario and Luigi sprites", "author": "mccad00"}
-}
-
-customShipsOrder = [
-    'Red-M0nk3ySMShip1',
-    'Red-M0nk3ySMShip2',
-    'Red-M0nk3ySMShip3',
-    'Red-M0nk3ySMShip4',
-    'Red-M0nk3ySMShip5',
-    'opposition_ship',
-    'mario_ship'
-]
 
 def initCustomSprites():
     def updateSpriteDict(spriteDict, order):

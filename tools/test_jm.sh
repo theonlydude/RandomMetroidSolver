@@ -9,6 +9,7 @@ CWD=$(dirname $0)/..
 cd ${CWD}
 CWD=$(pwd)
 [ -z "$PYTHON" ] && PYTHON=pyston3.8
+[ -z "$OLD_PYTHON" ] && OLD_PYTHON=pyston3.8
 
 LOG_DIR=${CWD}/logs
 mkdir -p ${LOG_DIR}
@@ -43,7 +44,7 @@ if [ ${COMPARE} -eq 0 ]; then
     mkdir -p ${TEMP_DIR}
     (
 	cd ${TEMP_DIR}
-	git clone git@github.com:theonlydude/RandomMetroidSolver.git
+	git clone --recurse-submodules git@github.com:theonlydude/RandomMetroidSolver.git
 	cd RandomMetroidSolver
 	#git reset --hard 14e9088f07f64e093c53b773b016f5042765044b
     )
@@ -109,7 +110,7 @@ function computeSeed {
 
     if [ ${COMPARE} -eq 0 ]; then
 	OLD_MD5="old n/a"
-	RANDO_OUT=$(${TIME} -f "\t%E real" $PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
+	RANDO_OUT=$(${TIME} -f "\t%E real" $OLD_PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 	if [ $? -ne 0 ]; then
 	    echo "${RANDO_OUT}" >> ${LOG}
 	else
@@ -160,7 +161,7 @@ function computeSeed {
     fi
 
     if [ ${COMPARE} -eq 0 ]; then
-	SOLVER_OUT=$(${TIME} -f "\t%E real" $PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+	SOLVER_OUT=$(${TIME} -f "\t%E real" $OLD_PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
 	if [ $? -ne 0 ]; then
             echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}

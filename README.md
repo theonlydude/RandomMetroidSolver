@@ -10,8 +10,9 @@ You can join the VARIA discord too: [http://discord.varia.run/](http://discord.v
 
 You need a git client:
 ```
-dude@computer:~$ git clone git@github.com:theonlydude/RandomMetroidSolver.git
+dude@computer:~$ git clone --recurse-submodules git@github.com:theonlydude/RandomMetroidSolver.git
 dude@computer:~$ cd RandomMetroidSolver
+dude@computer:~/RandomMetroidSolver (master)$ git submodule foreach git checkout main
 ```
 
 The current work in progress version is in the master branch (the default one, accessible on beta website (http://beta.varia.run/), if you want the version running on the production website (http://varia.run/) you have to checkout the production branch:

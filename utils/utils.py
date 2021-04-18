@@ -255,7 +255,7 @@ def getDefaultMultiValues():
     from graph.graph_utils import GraphUtils
     defaultMultiValues = {
         'startLocation': GraphUtils.getStartAccessPointNames(),
-        'majorsSplit': ['Full', 'Major', 'Chozo'],
+        'majorsSplit': ['Full', 'FullWithHUD', 'Major', 'Chozo'],
         'progressionSpeed': ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble', 'speedrun'],
         'progressionDifficulty': ['easier', 'normal', 'harder'],
         'morphPlacement': ['early', 'late', 'normal'],

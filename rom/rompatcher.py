@@ -162,9 +162,16 @@ class RomPatcher:
             "EastMaridia": snes_to_pc(0xA1F5CB),
             "Tourian": snes_to_pc(0xA1F5D7)
         }
-        splitCheck = lambda itemLoc: (split == "Full" and itemLoc.Location.Id is not None) or (itemLoc.Item.Class == split and split in itemLoc.Location.Class)
+        majChozoCheck = lambda itemLoc: (itemLoc.Item.Class == split and split in itemLoc.Location.Class)
+        splitChecks = {
+            'Full': lambda itemLoc: itemLoc.Location.Id is not None,
+            'Major': majChozoCheck,
+            'Chozo': majChozoCheck,
+            'FullWithHUD': lambda itemLoc: itemLoc.Item.Category not in ['Energy', 'Ammo', 'Boss']
+        }
+        itemLocCheck = lambda itemLoc: itemLoc.Item.Category != "Nothing" and splitChecks[split](itemLoc)
         for area,addr in listAddresses.items():
-            ids = [il.Location.Id for il in itemLocs if splitCheck(il) and il.Location.GraphArea == area and il.Item.Category != "Nothing"]
+            ids = [il.Location.Id for il in itemLocs if itemLocCheck(il) and il.Location.GraphArea == area]
             self.romFile.seek(addr)
             for idByte in ids:
                 self.romFile.writeByte(idByte)
@@ -528,10 +535,10 @@ class RomPatcher:
         address = 0x17B6C
         if majorsSplit == 'Chozo':
             char = 'Z'
-        elif majorsSplit == 'Full':
-            char = 'F'
-        else:
+        elif majorsSplit == 'Major':
             char = 'M'
+        else:
+            char = 'F'
         self.romFile.writeByte(ord(char), address)
 
     def getItemQty(self, itemLocs, itemType):

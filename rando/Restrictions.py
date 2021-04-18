@@ -10,8 +10,7 @@ class Restrictions(object):
         self.log = utils.log.get('Restrictions')
         self.settings = settings
         # Item split : Major, Chozo or Full
-        self.majorLocs = settings.restrictions['MajorLocs']
-        self.split = settings.restrictions['MajorMinor'] if self.majorLocs != "random" else 'Full'
+        self.split = settings.restrictions['MajorMinor']
         self.suitsRestrictions = settings.restrictions['Suits']
         # checker function chain used by canPlaceAtLocation
         self.checkers = self.getCheckers()

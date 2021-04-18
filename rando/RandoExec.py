@@ -106,12 +106,3 @@ class RandoExec(object):
         for loc in unfilledLocs:
             loc.restricted = True
             itemLocs.append(ItemLocation(nothing, loc, False))
-        # if random major locations, set locations class according to item class
-        if self.randoSettings.restrictions['MajorLocs'] == 'random':
-            split = self.randoSettings.restrictions['MajorMinor']
-            assert split != 'Full', "Major split settings inconsistency"
-            for il in itemLocs:
-                if il.Item.Class == split:
-                    il.Location.setClass([split])
-                else:
-                    il.Location.setClass(['Minor'])

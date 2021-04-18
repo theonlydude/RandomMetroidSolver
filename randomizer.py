@@ -166,13 +166,10 @@ if __name__ == "__main__":
                         help="minors quantities values will be strictly followed instead of being probabilities",
                         dest='strictMinors', nargs='?', const=True, default=False)
     parser.add_argument('--majorsSplit',
-                        help="how to split majors/minors: Full, Major, Chozo",
+                        help="how to split majors/minors: Full, FullWithHUD, Major, Chozo",
                         dest='majorsSplit', nargs='?', choices=majorsSplits + ['random'], default='Full')
     parser.add_argument('--majorsSplitList', help="list to choose from when random",
                         dest='majorsSplitList', nargs='?', default=None)
-    parser.add_argument('--randomMajorLocs',
-                        help="Use major splits for items, but locations will be full rando",
-                        dest='randomMajorLocs', nargs='?', const=True, default=False)
     parser.add_argument('--suitsRestriction',
                         help="no suits in early game",
                         dest='suitsRestriction', nargs='?', const=True, default=False)
@@ -422,7 +419,7 @@ if __name__ == "__main__":
     if args.morphPlacement == 'random':
         if args.morphPlacementList != None:
             morphPlacements = args.morphPlacementList.split(',')
-        if (args.suitsRestriction == True and args.area == True) or (args.majorsSplit == 'Chozo' and args.randomMajorLocs == False):
+        if (args.suitsRestriction == True and args.area == True) or args.majorsSplit == 'Chozo':
             if 'late' in morphPlacements:
                 morphPlacements.remove('late')
         if not morphPlacements:
@@ -441,8 +438,8 @@ if __name__ == "__main__":
 
     # in plando rando we know that the start ap is ok
     if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando is None:
-        if args.randomMajorLocs == False:
-            forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
+        # TODO add major/chozo support in random start
+        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
         forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", 'variaTweaks', 'on')
         forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
@@ -475,18 +472,14 @@ if __name__ == "__main__":
                 forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
             elif (not GraphUtils.isStandardStart(args.startAP)) and args.morphPlacement != 'normal':
                 forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for custom start location")
-        if args.majorsSplit == 'Chozo' and args.randomMajorLocs == False and args.morphPlacement == "late":
+        if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
             forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for Chozo")
     if args.patchOnly == False:
         print("SEED: " + str(seed))
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "doors": "normal" if not args.doorsColorsRando else "late" }
-    restrictions['MajorMinor'] = args.majorsSplit
-    restrictions['MajorLocs'] = args.majorsSplit != 'Full'
-    if restrictions['MajorLocs'] == True and args.randomMajorLocs == True:
-        restrictions['MajorLocs'] = "random"
-        forceArg('hud', True, "VARIA HUD forced on for random major locations")
+    restrictions['MajorMinor'] = 'Full' if args.majorsSplit == 'FullWithHUD' else args.majorsSplit
     seedCode = 'X'
     if majorsSplitRandom == False:
         if restrictions['MajorMinor'] == 'Full':
@@ -704,7 +697,7 @@ if __name__ == "__main__":
             outFileName = args.output
             romPatcher = RomPatcher(magic=args.raceMagic)
 
-        if args.hud == True:
+        if args.hud == True or args.majorsSplit == "FullWithHUD":
             args.patches.append("varia_hud.ips")
         if args.patchOnly == False:
             romPatcher.applyIPSPatches(args.startAP, args.patches,

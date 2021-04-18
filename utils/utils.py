@@ -259,7 +259,7 @@ def getDefaultMultiValues():
         'progressionSpeed': ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble', 'speedrun'],
         'progressionDifficulty': ['easier', 'normal', 'harder'],
         'morphPlacement': ['early', 'late', 'normal'],
-        'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla' ],
+        'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla'],
         'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive']
     }
     return defaultMultiValues

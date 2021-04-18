@@ -73,6 +73,7 @@ STARTAPS=("" "--startAP random")
 AREAS=("" "" "--area" "--area --areaLayoutBase")
 MINIMIZERS=("--bosses random" "--bosses random" "--bosses random" "--area --bosses --minimizer " "--area --bosses --minimizerTourian --minimizer ")
 DOORS=("" "" "" "--doorsColorsRando")
+RANDOMMAJORLOCSS=("" "" "" "--randomMajorLocs")
 
 function generate_params {
     SEED="$1"
@@ -96,8 +97,10 @@ function generate_params {
     fi
     let S=$RANDOM%${#DOORS[@]}
     DOOR=${DOORS[$S]}
+    let S=$RANDOM%${#RANDOMMAJORLOCSS[@]}
+    RANDOMMAJORLOCS=${RANDOMMAJORLOCSS[$S]}
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random --gravityBehaviour random ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${AREA} ${MINIMIZER} ${DOOR} --jm"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random --gravityBehaviour random --randomMajorLocs ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${AREA} ${MINIMIZER} ${DOOR} --jm"
 }
 
 function computeSeed {

@@ -1494,23 +1494,34 @@ def randoPresetWebService():
             # can be called from randomizer and extended stats pages
             updateSession = request.vars.origin == "randomizer"
 
-            params = loadRandoPreset(fullPath, updateSession)
-            params = json.dumps(params)
-            return params
+            params = loadRandoPreset(fullPath)
+
+            # first load default preset to set all parameters to default values,
+            # thus preventing parameters from previous loaded preset to stay when loading a new one,
+            # (like comfort patches from the free preset).
+            if updateSession and preset != 'default':
+                defaultParams = loadRandoPreset('rando_presets/default.json')
+                # don't reset skill preset
+                defaultParams.pop('preset', None)
+                defaultParams.update(params)
+                params = defaultParams
+
+            if updateSession:
+                updateRandoSession(params)
+
+            return json.dumps(params)
         except Exception as e:
             raise HTTP(400, "Can't load the rando preset")
     else:
         raise HTTP(400, "Rando preset not found")
 
-def loadRandoPreset(presetFullPath, updateSession):
+def updateRandoSession(randoPreset):
+    for key, value in randoPreset.items():
+        session.randomizer[key] = value
+
+def loadRandoPreset(presetFullPath):
     with open(presetFullPath) as jsonFile:
         randoPreset = json.load(jsonFile)
-
-    # update session
-    if updateSession == True:
-        for key in randoPreset:
-            session.randomizer[key] = randoPreset[key]
-
     return randoPreset
 
 def home():

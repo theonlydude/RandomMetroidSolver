@@ -1157,6 +1157,7 @@ function loadRandoPresetOK(data) {
   // instead of reloading the page which remove the sm ROM, update all fields manually
   for(var key in data) {
     value = data[key];
+    // console.log("loadRandoPresetOK "+key+": "+value);
     var elem = document.getElementById(key);
 
     var elemRandom = document.getElementById(key+"Random");

@@ -450,8 +450,10 @@ if __name__ == "__main__":
         possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty, args.morphPlacement)
         if args.startAP == 'random':
             if args.startLocationList != None:
+                # to be able to give the list in jm we had to replace ' ' with '_', do the opposite operation
+                startLocationList = args.startLocationList.replace('_', ' ')
+                startLocationList = startLocationList.split(',')
                 # intersection between user whishes and reality
-                startLocationList = args.startLocationList.split(',')
                 possibleStartAPs = sorted(list(set(possibleStartAPs).intersection(set(startLocationList))))
                 if len(possibleStartAPs) == 0:
                     optErrMsgs += ["%s : %s" % (apName, cause) for apName, cause in reasons.items() if apName in startLocationList]
@@ -543,7 +545,9 @@ if __name__ == "__main__":
         minorQty = random.randint(25, 100)
     if energyQty == 'random':
         if args.energyQtyList != None:
-            energyQties = args.energyQtyList.split(',')
+            # with jm can't have a list with space in it
+            energyQtyList = args.energyQtyList.replace('_', ' ')
+            energyQties = energyQtyList.split(',')
         energyQty = random.choice(energyQties)
     if energyQty == 'ultra sparse':
         # add nerfed rainbow beam patch

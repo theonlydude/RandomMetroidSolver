@@ -75,6 +75,32 @@ MINIMIZERS=("--bosses random" "--bosses random" "--bosses random" "--area --boss
 DOORS=("" "" "" "--doorsColorsRando")
 RANDOMMAJORLOCSS=("" "" "" "--randomMajorLocs")
 
+function generate_random_list {
+    FIRST=0
+    while [ $# -ne 0 ]; do
+        if [ ${RANDOM} -gt 10000 ]; then
+            if [ ${FIRST} -eq 0 ]; then
+                FIRST=1
+                echo -en "${1}"
+            else
+                echo -en ",${1}"
+            fi
+        fi
+        shift
+    done
+}
+
+function generate_multi_select {
+    NAME="${1}"
+    shift
+
+    MULTISELECTLIST=$(generate_random_list $*)
+
+    if [ -n "${MULTISELECTLIST}" ]; then
+        echo "--${NAME}List ${MULTISELECTLIST}"
+    fi
+}
+
 function generate_params {
     SEED="$1"
     PRESET="$2"
@@ -100,7 +126,17 @@ function generate_params {
     let S=$RANDOM%${#RANDOMMAJORLOCSS[@]}
     RANDOMMAJORLOCS=${RANDOMMAJORLOCSS[$S]}
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random --gravityBehaviour random --randomMajorLocs ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${AREA} ${MINIMIZER} ${DOOR} --jm"
+    MAJORS_SPLIT_LIST=$(generate_multi_select "majorsSplit" 'Full' 'Major' 'Chozo')
+    PROGRESSION_DIFFICULTY_LIST=$(generate_multi_select "progressionDifficulty" 'easier' 'normal' 'harder')
+    MORPH_PLACEMENT_LIST=$(generate_multi_select "morphPlacement" 'early' 'late' 'normal')
+    ENERGY_QTY_LIST=$(generate_multi_select "energyQty" 'ultra_sparse' 'sparse' 'medium' 'vanilla')
+    GRAVITY_BEHAVIOUR_LIST=$(generate_multi_select "gravityBehaviour" 'Vanilla' 'Balanced' 'Progressive')
+
+    if [ -n "${STARTAP}" ]; then
+        START_LOCATION_LIST=$(generate_multi_select "startLocation" "Ceres" "Landing_Site" "Gauntlet_Top" "Green_Brinstar_Elevator" "Big_Pink" "Etecoons_Supers" "Wrecked_Ship_Main" "Firefleas_Top" "Business_Center" "Bubble_Mountain" "Mama_Turtle" "Watering_Hole" "Aqueduct" "Red_Brinstar_Elevator" "Golden_Four")
+    fi
+
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random ${MORPH_PLACEMENT_LIST} --progressionDifficulty random ${PROGRESSION_DIFFICULTY_LIST} --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random ${ENERGY_QTY_LIST} --majorsSplit random ${MAJORS_SPLIT_LIST} --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random --gravityBehaviour random ${GRAVITY_BEHAVIOUR_LIST} ${RANDOMMAJORLOCSS} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${START_LOCATION_LIST} ${AREA} ${MINIMIZER} ${DOOR} --jm"
 }
 
 function computeSeed {
@@ -126,6 +162,7 @@ function computeSeed {
     fi
 
     NEW_MD5="new n/a"
+    echo $PYTHON ./randomizer.py ${PARAMS}
     RANDO_OUT=$(${TIME} -f "\t%E real" $PYTHON ./randomizer.py ${PARAMS} 2>&1)
     if [ $? -ne 0 ]; then
 	echo "${RANDO_OUT}" >> ${LOG}
@@ -271,9 +308,9 @@ date >> ${LOG}
 echo ""
 echo "Start AP"
 for AP in "Ceres" "Landing Site" "Gauntlet Top" "Green Brinstar Elevator" "Big Pink" "Etecoons Supers" "Wrecked Ship Main" "Business Center" "Bubble Mountain" "Watering Hole" "Red Brinstar Elevator" "Golden Four" "Aqueduct" "Mama Turtle" "Firefleas Top"; do
-    TOTAL=$(grep "${AP}" ${CSV}  | wc -l)
-    ERROR=$(grep "${AP}" ${CSV} | grep -E '^error' | wc -l)
-    PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+    TOTAL=$(grep ";${AP};" ${CSV}  | wc -l)
+    ERROR=$(grep ";${AP};" ${CSV} | grep -E '^error' | wc -l)
+    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
     printf "%-24s" "${AP}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
 done
 echo ""
@@ -281,23 +318,23 @@ echo "Prog speed"
 for PROGSPEED in "speedrun" "slowest" "slow" "medium" "fast" "fastest" "VARIAble"; do
     TOTAL=$(grep ";${PROGSPEED};" ${CSV}  | wc -l)
     ERROR=$(grep ";${PROGSPEED};" ${CSV} | grep -E '^error' | wc -l)
-    PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
     printf "%-24s" "${PROGSPEED}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
 done
 echo ""
 echo "Majors split"
 for MAJORSPLIT in "Major" "Full" "Chozo"; do
-    TOTAL=$(grep "${MAJORSPLIT}" ${CSV}  | wc -l)
-    ERROR=$(grep "${MAJORSPLIT}" ${CSV} | grep -E '^error' | wc -l)
-    PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+    TOTAL=$(grep ";${MAJORSPLIT};" ${CSV}  | wc -l)
+    ERROR=$(grep ";${MAJORSPLIT};" ${CSV} | grep -E '^error' | wc -l)
+    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
     printf "%-24s" "${MAJORSPLIT}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
 done
 echo ""
 echo "Morph placement"
 for MORPH in "early" "normal" "late"; do
-    TOTAL=$(grep "${MORPH}" ${CSV}  | wc -l)
-    ERROR=$(grep "${MORPH}" ${CSV} | grep -E '^error' | wc -l)
-    PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+    TOTAL=$(grep ";${MORPH};" ${CSV}  | wc -l)
+    ERROR=$(grep ";${MORPH};" ${CSV} | grep -E '^error' | wc -l)
+    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
     printf "%-24s" "${MORPH}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
 done
 

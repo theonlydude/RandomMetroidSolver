@@ -328,8 +328,14 @@ function randomize(evt, elemId) {
                      "majorsSplit": ["randomMajorLocs"]};
   if(elemId in additionnal) {
       for(var i=0; i<additionnal[elemId].length; i++) {
+          // disable it if isActive is false
           disableElement(additionnal[elemId][i], isActive);
       }
+  }
+
+  // when random is removed call the onchange function to enable/disable dependent elements based on elemId value
+  if (!isActive && typeof e.onchange === "function") {
+      e.onchange();
   }
 
   // special case for multi select
@@ -1182,6 +1188,11 @@ function loadRandoPresetOK(data) {
       elem.value = value;
       if(chosenElements.includes(key)) {
         $("#"+key).val(value).trigger("chosen:updated");
+      }
+
+      if(typeof elem.onchange === "function") {
+        console.log("loadRandoPresetOK: calling onchange() on: "+key);
+        elem.onchange();
       }
     }
   }

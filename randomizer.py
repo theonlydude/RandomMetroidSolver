@@ -296,12 +296,17 @@ if __name__ == "__main__":
     argDict = vars(args)
     forcedArgs = {}
     optErrMsgs = [ ]
-    def forceArg(arg, value, msg, webArg=None, webValue=None):
-        if argDict[arg] != value:
+    def forceArg(arg, value, msg, altValue=None, webArg=None, webValue=None):
+        okValues = [value]
+        if altValue is not None:
+            okValues.append(altValue)
+
+        if argDict[arg] not in okValues:
             argDict[arg] = value
             forcedArgs[webArg if webArg != None else arg] = webValue if webValue != None else value
             print(msg)
             optErrMsgs.append(msg)
+
     # if rando preset given, load it first
     if args.randoPreset != None:
         preset = loadRandoPreset(args.randoPreset, args)
@@ -373,7 +378,7 @@ if __name__ == "__main__":
         minDifficulty = 0
 
     if args.area == True and args.bosses == True and args.minimizerN is not None:
-        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
+        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full", altValue='FullWithHUD')
         if args.minimizerN == "random":
             minimizerN = random.randint(30, 60)
             logger.debug("minimizerN: {}".format(minimizerN))
@@ -439,7 +444,7 @@ if __name__ == "__main__":
     # in plando rando we know that the start ap is ok
     if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando is None:
         # TODO add major/chozo support in random start
-        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
+        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full", altValue='FullWithHUD')
         forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", 'variaTweaks', 'on')
         forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')

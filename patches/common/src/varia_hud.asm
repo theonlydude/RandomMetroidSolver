@@ -36,6 +36,28 @@ org $82def7
 org $8488aa
 	jsl item_pickup
 
+
+;;; skip top row of auto reserve to have more room (HUD draw main routine)
+org $809B61
+write_reserve_main:
+	bra .write_mid_reserve_row
+org $809B6F
+.write_mid_reserve_row:
+
+;;; skip top row of auto reserve to have more room (pause screen manual/auto switch)
+org $82AF08
+write_reserve_pause_enable:
+	bra .write_mid_reserve_row
+org $82AF16
+.write_mid_reserve_row:
+
+org $82AF36
+write_reserve_pause_disable:
+	bra .write_mid_reserve_row
+org $82AF3E
+.write_mid_reserve_row:
+
+
 ;;; the following code will overwrite the normal etank drawing code,
 ;;; no extra space required, just turn the 2 lines of 14 etank into
 ;;; 1 lines of combined 14 etanks
@@ -144,12 +166,12 @@ draw_two:
 	pha : pla : pha : pla : rep #$20
 	lda $4214 : asl : tay
 	lda NumberGFXTable, y
-	sta $7ec614
+	sta $7ec618
 	lda $4216
 draw_one:			; A=remaining items (1 digit)
 	asl : tay
 	lda NumberGFXTable, y
-	sta $7ec616
+	sta $7ec61a
 	rts
 
 ;; Normal numbers (like energy/ammo)
@@ -163,29 +185,29 @@ NumberGFXTable:
 table "tables/hud_chars.txt"
 
 area_names:
-	dw "CERES  "
+	dw " CERES "
 	dw $0000
-	dw " CRAT  "
+	dw " CRATER"
 	dw $0000
-	dw "GBRIN  "
+	dw "GP BRIN"
 	dw $0000
-	dw "RBRIN  "
+	dw "RED BRI"
 	dw $0000
-	dw " SHIP  "
+	dw " W SHIP"
 	dw $0000
-	dw "KRAID  "
+	dw " KRAID "
 	dw $0000
-	dw "UNORF  "
+	dw "UP NORF"
 	dw $0000
 	dw " CROC  "
 	dw $0000
-	dw "LNORF  "
+	dw "LO NORF"
 	dw $0000
-	dw "WMARI  "
+	dw "W MARID"
 	dw $0000
-	dw "EMARI  "
+	dw "E MARID"
 	dw $0000
-	dw " TOUR  "
+	dw "TOURIAN"
 	dw $0000
 
 cleartable

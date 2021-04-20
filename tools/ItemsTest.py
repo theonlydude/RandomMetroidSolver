@@ -8,6 +8,8 @@ sys.path.append(os.path.dirname(sys.path[0]))
 from utils.utils import randGaussBounds
 from rando.Items import ItemManager
 from logic.smboolmanager import SMBoolManager
+from logic.logic import Logic
+
 import random
 import utils.log
 
@@ -17,6 +19,7 @@ if __name__ == "__main__":
 #    log.init(True) # debug mode
     utils.log.init(False)
     logger = utils.log.get('ItemsTest')
+    Logic.factory('varia')
     sm = SMBoolManager()
     with open("itemStats.csv", "w") as csvOut:
         csvOut.write("nLocs;energyQty;minorQty;nFun;strictMinors;MissProb;SuperProb;PowerProb;split;nItems;nTanks;nTanksTotal;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy;AmmoAccuracy\n")
@@ -64,17 +67,17 @@ if __name__ == "__main__":
             split = random.choice(splits) if nLocs == 105 else 'Full'
             # write params
             csvOut.write("%d;%s;%d;%d;%s;%d;%d;%d;%s;" % (nLocs, energyQty, minQty, len(forbidden), str(strictMinors), missProb, superProb, pbProb, split))
-            itemManager = ItemManager(split, qty, sm, nLocs)
+            itemManager = ItemManager(split, qty, sm, nLocs, 100)
             itemPool = itemManager.createItemPool()
             itemPool = itemManager.removeForbiddenItems(forbidden)
             # compute stats
-            nItems = len([item for item in itemPool if item['Category'] != 'Nothing'])
-            nTanks = len([item for item in itemPool if item['Category'] == 'Energy'])
-            nEnergyTotal = len([item for item in itemPool if item['Category'] == 'Energy' or item['Type'] == 'NoEnergy']) - len(forbidden)
-            nMinors = len([item for item in itemPool if item['Category'] == 'Ammo'])
-            nMissiles = len([item for item in itemPool if item['Type'] == 'Missile'])
-            nSupers = len([item for item in itemPool if item['Type'] == 'Super'])
-            nPowers = len([item for item in itemPool if item['Type'] == 'PowerBomb'])
+            nItems = len([item for item in itemPool if item.Category != 'Nothing'])
+            nTanks = len([item for item in itemPool if item.Category == 'Energy'])
+            nEnergyTotal = len([item for item in itemPool if item.Category == 'Energy' or item.Type == 'NoEnergy']) - len(forbidden)
+            nMinors = len([item for item in itemPool if item.Category == 'Ammo'])
+            nMissiles = len([item for item in itemPool if item.Type == 'Missile'])
+            nSupers = len([item for item in itemPool if item.Type == 'Super'])
+            nPowers = len([item for item in itemPool if item.Type == 'PowerBomb'])
             csvOut.write("%d;%d;%d;%d;%d;%d;%d;" % (nItems, nTanks, nEnergyTotal, nMinors, nMissiles, nSupers, nPowers))
             totalProbs = missProb + superProb + pbProb
             def getAccuracy(prob, res):

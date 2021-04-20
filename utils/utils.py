@@ -357,8 +357,6 @@ def loadRandoPreset(randoPreset, args):
         args.morphPlacement = randoParams["morphPlacement"]
     if "majorsSplit" in randoParams:
         args.majorsSplit = randoParams["majorsSplit"]
-    if randoParams.get("randomMajorLocs", "off") == "on":
-        args.randomMajorLocs = True
     if "startLocation" in randoParams:
         args.startAP = randoParams["startLocation"]
     if "progressionDifficulty" in randoParams:
@@ -415,7 +413,6 @@ def getRandomizerDefaultParameters():
     defaultParams['raceMode'] = "off"
     defaultParams['majorsSplit'] = "Full"
     defaultParams['majorsSplitMultiSelect'] = defaultMultiValues['majorsSplit']
-    defaultParams['randomMajorLocs'] = "off"
     defaultParams['startLocation'] = "Landing Site"
     defaultParams['startLocationMultiSelect'] = defaultMultiValues['startLocation']
     defaultParams['maxDifficulty'] = 'hardcore'

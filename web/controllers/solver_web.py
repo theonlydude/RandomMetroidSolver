@@ -1193,7 +1193,7 @@ def sessionWebService():
                'areaRandomization', 'areaLayout', 'lightAreaRandomization',
                'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization', 'minimizer', 'minimizerTourian',
-               'funCombat', 'funMovement', 'funSuits', 'randomMajorLocs',
+               'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
                'rando_speed', 'animals', 'No_Music', 'random_music',
@@ -1213,7 +1213,6 @@ def sessionWebService():
     # generating a seed with the rando preset selected but not with all
     # the options set with the rando preset, so always empty the rando preset
     session.randomizer['randoPreset'] = ""
-    session.randomizer['randomMajorLocs'] = request.vars.randomMajorLocs
     session.randomizer['maxDifficulty'] = request.vars.maxDifficulty
     session.randomizer['suitsRestriction'] = request.vars.suitsRestriction
     session.randomizer['hideItems'] = request.vars.hideItems
@@ -1285,7 +1284,7 @@ def randomizerWebService():
                'areaRandomization', 'areaLayout', 'lightAreaRandomization',
                'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization', 'minimizer', 'minimizerTourian',
-               'funCombat', 'funMovement', 'funSuits', 'randomMajorLocs',
+               'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
                'rando_speed', 'animals', 'No_Music', 'random_music',

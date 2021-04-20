@@ -2,7 +2,6 @@
     "preset": "regular",
     "startLocation": "Landing Site",
     "majorsSplit": "Full",
-    "randomMajorLocs": "off",
     "maxDifficulty": "hardcore",
     "progressionSpeed": "medium",
     "progressionDifficulty": "normal",

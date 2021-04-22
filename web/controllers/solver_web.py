@@ -1822,14 +1822,14 @@ class WS(object):
                 "availableLocations": state["availableLocationsWeb"],
                 "visitedLocations": state["visitedLocationsWeb"],
                 "collectedItems": state["collectedItems"],
-                # compatibility with existing sessions
-                "remainLocations": state["remainLocationsWeb"] if "remainLocationsWeb" in state else [],
+                "remainLocations": state["remainLocationsWeb"],
                 "lastAP": self.locName4isolver(state["lastAP"]),
 
                 # area tracker
                 "lines": state["linesWeb"],
                 "linesSeq": state["linesSeqWeb"],
                 "allTransitions": state["allTransitions"],
+                "roomsVisibility": state["roomsVisibility"],
 
                 # infos on seed
                 "mode": state["mode"],

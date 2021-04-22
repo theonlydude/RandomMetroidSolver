@@ -355,6 +355,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         webServInProgress = false;
     }
 
+    // for plando rando
     $('#overlay').hide();
     $('#loadingGIF').hide();
 
@@ -376,6 +377,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
 
     if(lastAction != null && lastAction["action"] != "init" && lastAction["scope"] != "door") {
         resetItems();
+        updateRoomsVisibility(jsonData);
         updateLocations(jsonData);
         updateInventory(jsonData);
 
@@ -391,6 +393,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         // load everything
         updateGlobal(jsonData);
         resetItems();
+        updateRoomsVisibility(jsonData);
         updateLocations(jsonData);
         updateInventory(jsonData);
         updateLines(jsonData);
@@ -450,6 +453,34 @@ function setActive(mode, area, boss, escape) {
     } else {
         document.getElementById("pause_background").style.display = "block";
         document.getElementById("pause_background_seedless").style.display = "none";
+    }
+}
+
+function updateRoomsVisibility(jsonData) {
+    // console.log("roomsVisibility: "+jsonData["roomsVisibility"])
+
+    // use a set for faster lookup
+    const roomsVisibility = new Set(jsonData["roomsVisibility"]);
+
+    // there's also svg for the lines, so search only in the rooms visibility svg
+    var svgObject = document.getElementById('roomsVisibilitySvg');
+
+    // in our svg there's paths and rectangles only
+    var paths = svgObject.getElementsByTagName('path');
+    for(var i=0; i<paths.length; i++) {
+        if(roomsVisibility.has(paths[i].id)) {
+            paths[i].style.display = "block";
+        } else {
+            paths[i].style.display = "none";
+        }
+    }
+    var rects = svgObject.getElementsByTagName('rect');
+    for(var i=0; i<rects.length; i++) {
+        if(roomsVisibility.has(rects[i].id)) {
+            rects[i].style.display = "block";
+        } else {
+            rects[i].style.display = "none";
+        }
     }
 }
 

@@ -709,3 +709,5 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/samus_run_Power.gif ] || ln -s ~/RandomMetroidSolver/web/static/solver/samus_run_Power.gif ~/web2py/applications/solver/static/images/samus_run_Power.gif
 [ -L ~/web2py/applications/solver/static/images/samus_run_Varia.gif ] || ln -s ~/RandomMetroidSolver/web/static/solver/samus_run_Varia.gif ~/web2py/applications/solver/static/images/samus_run_Varia.gif
 [ -L ~/web2py/applications/solver/static/images/samus_run_Gravity.gif ] || ln -s ~/RandomMetroidSolver/web/static/solver/samus_run_Gravity.gif ~/web2py/applications/solver/static/images/samus_run_Gravity.gif
+
+[ -L ~/web2py/applications/solver/views/solver_web/inc_area_map.svg ] || ln -s ~/RandomMetroidSolver/web/views/inc_area_map.svg ~/web2py/applications/solver/views/solver_web/inc_area_map.svg

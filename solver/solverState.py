@@ -129,7 +129,7 @@ class SolverState(object):
             roomsVisibility.add('DachoraRoomLeftSvg')
         if 'bigPinkSvg' in roomsVisibility and sm.wor(sm.haveItem('SpeedBooster'), sm.canDestroyBombWalls()):
             roomsVisibility.add('DachoraRoomCenterSvg')
-        if 'redBrinstarElevatorSvg' in roomsVisibility and sm.wor(RomPatches.has(RomPatches.HellwayBlueDoor), sm.traverse('RedTowerElevatorLeft')):
+        if ('redBrinstarElevatorSvg' in roomsVisibility and sm.wor(RomPatches.has(RomPatches.HellwayBlueDoor), sm.traverse('RedTowerElevatorLeft'))) or ('redTowerTopLeftSvg' in roomsVisibility and sm.canClimbRedTower()):
             roomsVisibility.add('HellwaySvg')
         if 'businessCenterSvg' in roomsVisibility and sm.haveItem('SpeedBooster'):
             roomsVisibility.add('FrogSpeedwayCenterSvg')

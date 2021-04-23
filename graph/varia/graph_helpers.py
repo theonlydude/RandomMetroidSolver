@@ -519,6 +519,12 @@ class HelpersGraph(Helpers):
                               sm.canSpringBallJump()))
 
     @Cache.decorator
+    def canDoOuterMaridia(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.canDoSuitlessOuterMaridia())
+
+    @Cache.decorator
     def canPassBotwoonHallway(self):
         sm = self.smbm
         return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
@@ -727,8 +733,21 @@ class HelpersGraph(Helpers):
                                      sm.haveItem('HiJump'))),
                       suitlessRoomExit)
 
+    @Cache.decorator
     def canExitPreciousRoom(self):
         if self.isVanillaDraygon():
             return self.canExitPreciousRoomVanilla()
         else:
             return self.canExitPreciousRoomRandomized()
+
+    @Cache.decorator
+    def canPassDachoraRoom(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('SpeedBooster'), sm.canDestroyBombWalls())
+
+    @Cache.decorator
+    def canTraverseCrabTunnelLeftToRight(self):
+        sm = self.smbm
+        return sm.wand(sm.traverse('MainStreetBottomRight'),
+                       sm.wor(sm.haveItem('Super'),
+                              RomPatches.has(RomPatches.AreaRandoGatesOther)))

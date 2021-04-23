@@ -127,17 +127,15 @@ class SolverState(object):
             roomsVisibility.add('CrocomireSvg')
         if 'greenBrinstarElevatorSvg' in roomsVisibility and sm.traverse('MainShaftBottomRight'):
             roomsVisibility.add('DachoraRoomLeftSvg')
-        if 'bigPinkSvg' in roomsVisibility and sm.wor(sm.haveItem('SpeedBooster'), sm.canDestroyBombWalls()):
+        if 'bigPinkSvg' in roomsVisibility and sm.canPassDachoraRoom():
             roomsVisibility.add('DachoraRoomCenterSvg')
         if ('redBrinstarElevatorSvg' in roomsVisibility and sm.wor(RomPatches.has(RomPatches.HellwayBlueDoor), sm.traverse('RedTowerElevatorLeft'))) or ('redTowerTopLeftSvg' in roomsVisibility and sm.canClimbRedTower()):
             roomsVisibility.add('HellwaySvg')
         if 'businessCenterSvg' in roomsVisibility and sm.haveItem('SpeedBooster'):
             roomsVisibility.add('FrogSpeedwayCenterSvg')
-        if 'crabShaftLeftSvg' in roomsVisibility or 'redFishRoomLeftSvg' in roomsVisibility or ('mainStreetBottomSvg' in roomsVisibility and sm.canGoUpMtEverest()):
+        if 'crabShaftLeftSvg' in roomsVisibility or 'redFishRoomLeftSvg' in roomsVisibility or ('mainStreetBottomSvg' in roomsVisibility and sm.canDoOuterMaridia()):
             roomsVisibility.add('westMaridiaSvg')
-        if 'mainStreetBottomSvg' in roomsVisibility and sm.wand(sm.traverse('MainStreetBottomRight'),
-                                                                sm.wor(sm.haveItem('Super'),
-                                                                       RomPatches.has(RomPatches.AreaRandoGatesOther))):
+        if 'mainStreetBottomSvg' in roomsVisibility and sm.canTraverseCrabTunnelLeftToRight():
             roomsVisibility.add('CrabTunnelSvg')
         if 'SpaceJumpSvg' in roomsVisibility and ('colosseumTopRightSvg' in roomsVisibility or 'leCoudeRightSvg' in roomsVisibility):
             roomsVisibility.add('CacatacAlleySvg')

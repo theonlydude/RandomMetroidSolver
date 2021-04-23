@@ -120,7 +120,7 @@ class SolverState(object):
         # add available locations
         roomsVisibility.update([loc+'Svg' for loc, data in self.state["availableLocationsWeb"].items() if data["difficulty"] != "break"])
         # add visited locations
-        roomsVisibility.update([loc+'Svg' for loc in self.state["visitedLocationsWeb"].keys()])
+        roomsVisibility.update([loc+'Svg' for loc, data in self.state["visitedLocationsWeb"].items() if data['accessPoint']+'Svg' in roomsVisibility])
         # add special rooms that have conditions to traverse them but no item in them,
         # so we need to know if they are visible or not
         if 'crocomireRoomTopSvg' in roomsVisibility and sm.enoughStuffCroc():

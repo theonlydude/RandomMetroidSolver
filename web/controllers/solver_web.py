@@ -2974,9 +2974,9 @@ def plandorepo():
             msg = "Plando name can only contain [a-zA-Z0-9 -_]"
         else:
             plandos = db.getPlando(plandoName)
-            if plandos == None or len(plandos) == 0:
+            if plandos is None or len(plandos) == 0:
                 msg = "Plando not found"
-    if len(plandos) == 0:
+    if plandos is None or len(plandos) == 0:
         # get plando list
         plandos = db.getPlandos()
         expand = False

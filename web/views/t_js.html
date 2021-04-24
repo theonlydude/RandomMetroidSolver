@@ -375,35 +375,29 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         hideItemPopup();
     }
 
-    if(lastAction != null && lastAction["action"] != "init" && lastAction["scope"] != "door") {
-        resetItems();
-        updateRoomsVisibility(jsonData);
-        updateLocations(jsonData);
-        updateInventory(jsonData);
-
+    if(lastAction != null && lastAction["action"] != "init") {
         if(lastAction["scope"] == "area") {
             updateLines(jsonData);
         }
         if(mode == "debug") {
             updateDebugLines(jsonData);
         }
-        updateGps(jsonData);
-        displayDoors(jsonData);
     } else {
         // load everything
         updateGlobal(jsonData);
-        resetItems();
-        updateRoomsVisibility(jsonData);
-        updateLocations(jsonData);
-        updateInventory(jsonData);
         updateLines(jsonData);
         if(mode == "debug") {
             updateDebugLines(jsonData);
         }
-        displayDoors(jsonData);
-        updateGps(jsonData);
         updateTimer(jsonData);
     }
+
+    resetItems();
+    updateRoomsVisibility(jsonData);
+    updateLocations(jsonData);
+    updateInventory(jsonData);
+    updateGps(jsonData);
+    displayDoors(jsonData);
 
     setWSIcon("checkmark");
 
@@ -579,6 +573,7 @@ function updateLocations(jsonData) {
         for(var locName in jsonData["availableLocations"]) {
             // console.log(locName+" is available");
             var locData = jsonData["availableLocations"][locName];
+            var update = (locsInfo[locName]["difficulty"] != locData["difficulty"] || locsInfo[locName]["state"] != "available");
             locsInfo[locName]["state"] = "available";
             locsInfo[locName]["difficulty"] = locData["difficulty"];
             locsInfo[locName]["canHidden"] = locData["canHidden"];
@@ -586,9 +581,11 @@ function updateLocations(jsonData) {
             locsInfo[locName]["accessPoint"] = locData["accessPoint"];
             locsInfo[locName]["path"] = locData["path"];
 
-            $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
-            var tooltip = getTooltip(locName, locData, "?", false);
-            $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+            if(update) {
+                $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
+                var tooltip = getTooltip(locName, locData, "?", false);
+                $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+            }
 
             // dragElement(document.getElementById(locName), locName);
 
@@ -606,6 +603,7 @@ function updateLocations(jsonData) {
         for(var locName in jsonData["visitedLocations"]) {
             // console.log(locName+" is visited");
             var locData = jsonData["visitedLocations"][locName];
+            var update = (locsInfo[locName]["state"] != "visited" || locsInfo[locName]["item"] != locData["item"]);
             locsInfo[locName]["state"] = "visited";
             locsInfo[locName]["difficulty"] = locData["difficulty"];
             locsInfo[locName]["canHidden"] = locData["canHidden"];
@@ -613,26 +611,28 @@ function updateLocations(jsonData) {
             locsInfo[locName]["item"] = locData["item"];
             locsInfo[locName]["accessPoint"] = locData["accessPoint"];
 
-            // keep current loc zoomed
-            var base = "baseLoc";
-            if($("#"+locName).hasClass("baseLocOver")) {
-                base = "baseLocOver";
-            }
+            if(update) {
+                // keep current loc zoomed
+                var base = "baseLoc";
+                if($("#"+locName).hasClass("baseLocOver")) {
+                    base = "baseLocOver";
+                }
 
-            var className = "marker_visited_"+locData["difficulty"]+"_"+locData["item"];
-            $("#"+locName).attr("class", base+" "+className);
-            var tooltip = getTooltip(locName, locData, locData["item"], true);
-            $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+                var className = "marker_visited_"+locData["difficulty"]+"_"+locData["item"];
+                $("#"+locName).attr("class", base+" "+className);
+                var tooltip = getTooltip(locName, locData, locData["item"], true);
+                $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
 
-            // dragElement(document.getElementById(locName), locName);
-
-            // check if a boss was at that location
-            if("boss" in locsInfo[locName]) {
-                var bossName = locsInfo[locName]["boss"];
-                if(bossName != "MotherBrain") {
-                    document.getElementById(bossName+"G4").style.display = "block";
+                // check if a boss was at that location
+                if("boss" in locsInfo[locName]) {
+                    var bossName = locsInfo[locName]["boss"];
+                    if(bossName != "MotherBrain") {
+                        document.getElementById(bossName+"G4").style.display = "block";
+                    }
                 }
             }
+
+            // dragElement(document.getElementById(locName), locName);
 
             if(! isSeedless(mode)) {
                 // add item
@@ -668,31 +668,35 @@ function updateLocations(jsonData) {
         for(var locName in jsonData["remainLocations"]) {
             // console.log(locName+": sequence breakable");
             var locData = jsonData["remainLocations"][locName];
+            var update = locsInfo[locName]["state"] != "break";
+
             locsInfo[locName]["state"] = "break";
             locsInfo[locName]["difficulty"] = locData["difficulty"];
             locsInfo[locName]["canHidden"] = locData["canHidden"];
             locsInfo[locName]["visibility"] = locData["visibility"];
 
-            // keep current loc zoomed
-            var base = "baseLoc";
-            if($("#"+locName).hasClass("baseLocOver")) {
-                base = "baseLocOver";
-            }
+            if(update) {
+                // keep current loc zoomed
+                var base = "baseLoc";
+                if($("#"+locName).hasClass("baseLocOver")) {
+                    base = "baseLocOver";
+                }
 
-            var className = "marker_available_break";
-            $("#"+locName).attr("class", base+" "+className);
-            var tooltip = getTooltip(locName, locData, "?", false);
-            $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+                var className = "marker_available_break";
+                $("#"+locName).attr("class", base+" "+className);
+                var tooltip = getTooltip(locName, locData, "?", false);
+                $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
 
-            // dragElement(document.getElementById(locName), locName);
-
-            // check if a boss was at that location
-            if("boss" in locsInfo[locName]) {
-                var bossName = locsInfo[locName]["boss"];
-                if(bossName != "MotherBrain") {
-                    document.getElementById(bossName+"G4").style.display = "none";
+                // check if a boss was at that location
+                if("boss" in locsInfo[locName]) {
+                    var bossName = locsInfo[locName]["boss"];
+                    if(bossName != "MotherBrain") {
+                        document.getElementById(bossName+"G4").style.display = "none";
+                    }
                 }
             }
+
+            // dragElement(document.getElementById(locName), locName);
         }
     }
 }
@@ -1463,7 +1467,7 @@ function deleteLoc(isPlando) {
 }
 
 function resetLocsInfo() {
-  // remove info and reset css
+  // remove some info to update all locs
   var keys = ["state", "difficulty"];
   for(var locName in locsInfo) {
     for(var i in keys) {
@@ -1474,12 +1478,7 @@ function resetLocsInfo() {
         delete locsInfo[locName][key];
       }
     }
-    $("#"+locName).attr("class", "baseLoc");
-    $("#"+locName+'[data-toggle="tooltip"]').attr("title", "").tooltip('fixTitle');
-    $("#"+locName+'[data-toggle="tooltip"]').attr("data-original-title", "").tooltip('fixTitle');
   }
-  lastAP = "landingSite";
-  $("#lastAP").attr("class", "lastAP "+lastAP+"Gps");
 }
 
 function clearLocs(isPlando) {

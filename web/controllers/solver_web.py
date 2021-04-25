@@ -1843,6 +1843,7 @@ class WS(object):
                 "errorMsg": state["errorMsg"],
                 "last": state["last"],
                 "innerTransitions": state["innerTransitions"],
+                "innerTransitionsSeq": state["innerTransitionsSeq"],
 
                 # doors
                 "doors": state["doors"],

@@ -74,9 +74,10 @@ class SolverState(object):
             self.state["last"] = ""
         # store the inner graph transitions to display in vcr
         if self.debug == True:
-            self.state["innerTransitions"] = self.getInnerTransitions(solver.areaGraph.availAccessPoints, solver.curGraphTransitions)
+            (self.state["innerTransitions"], self.state["innerTransitionsSeq"]) = self.getInnerTransitions(solver.areaGraph.availAccessPoints, solver.curGraphTransitions)
         else:
-            self.state["innerTransitions"] = []
+            self.state["innerTransitions"] = {}
+            self.state["innerTransitionsSeq"] = []
         # doors colors: dict {name: (color, facing, hidden)}
         self.state["doors"] = DoorsManager.serialize()
         # doorsRando: bool
@@ -143,7 +144,8 @@ class SolverState(object):
         return list(roomsVisibility)
 
     def getInnerTransitions(self, availAccessPoints, curGraphTransitions):
-        innerTransitions = []
+        innerTransitions = {}
+        innerTransitionsSeq = []
         for (apDst, dataSrc) in availAccessPoints.items():
             if dataSrc['from'] is None:
                 continue
@@ -153,8 +155,10 @@ class SolverState(object):
                 continue
             src = self.transition2isolver(src)
             dst = self.transition2isolver(dst)
-            innerTransitions.append([src, dst, diff4solver(dataSrc['difficulty'].difficulty)])
-        return innerTransitions
+            innerTransitionsSeq.append([src, dst, diff4solver(dataSrc['difficulty'].difficulty)])
+            innerTransitions[src] = dst
+            innerTransitions[dst] = src
+        return innerTransitions, innerTransitionsSeq
 
     def getLocsData(self, locations):
         ret = {}

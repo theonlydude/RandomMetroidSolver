@@ -21,37 +21,13 @@ var secondClick = "";
 var lines = {};
 var leaderLines = {};
 var nextColor = 0;
-var linesSeq = new Array();
 
 // to display inter area lines in debug mode
-var debugLines = new Array();
+var debugLines = {};
+var debugLeaderLines = {};
 
 var colors = ['grey', 'lime', 'pink',  'fuchsia', 'orange', 'yellow', 'purple', 'aqua', 'red', '#bfef45', 'white', 'cyan', 'magenta', 'olive', 'green', 'blue', 'maroon', 'teal'];
 var debugColors = {easy: '#6daa53', medium: '#C1B725', hard: '#e69235', harder: '#d13434', hardcore: '#123456', mania: '#ffffff'};
-
-function resetLines() {
-  for (var startPoint in lines) {
-    if(lines[startPoint] != "") {
-      var endPoint = lines[startPoint];
-      lines[startPoint] = "";
-      lines[endPoint] = "";
-      leaderLines[startPoint].remove();
-      leaderLines[startPoint] = "";
-      leaderLines[endPoint] = "";
-    }
-  }
-  lines = {};
-  leaderLines = {};
-  linesSeq = [];
-  nextColor = 0;
-}
-
-function resetDebugLines() {
-  for(var i=0; i<debugLines.length; i++) {
-    debugLines[i].remove()
-  }
-  debugLines = new Array();
-}
 
 function checkCompatibleAPs(startAP, endAP) {
 {{
@@ -154,31 +130,37 @@ function clickPortal(elemId) {
 }
 
 function addDebugLine(startPoint, endPoint, difficulty) {
-  // console.log("addDebugLine: "+startPoint+" -> "+endPoint+": "+difficulty);
+    // console.log("addDebugLine: "+startPoint+" -> "+endPoint+": "+difficulty);
 
-  var startPointElem = document.getElementById(startPoint);
-  var endPointElem = document.getElementById(endPoint);
+    var startPointElem = document.getElementById(startPoint);
+    var endPointElem = document.getElementById(endPoint);
 
-  if(startPointElem == null || endPointElem == null) {
-    console.log("addDebugLine startPointElem "+startPointElem+" or endPointElem "+endPointElem+" is null");
-  }
+    if(startPointElem == null || endPointElem == null) {
+        console.log("addDebugLine startPointElem "+startPointElem+" or endPointElem "+endPointElem+" is null");
+    }
 
-  var line = new LeaderLine(startPointElem, endPointElem,
-                            {color: debugColors[difficulty],
-                             size: 2,
-                             startPlug: 'disc',
-                             endPlug: 'disc',
-                             path: 'straight'});
-  if(! (startPoint in lines)) {
-    line.setOptions({startSocket: 'bottom'});
-  }
-  if(! (endPoint in lines)) {
-    line.setOptions({endSocket: 'bottom'});
-  }
-  debugLines.push(line);
+    var line = new LeaderLine(startPointElem, endPointElem,
+                              {color: debugColors[difficulty],
+                               size: 2,
+                               startPlug: 'disc',
+                               endPlug: 'disc',
+                               path: 'straight'});
+    if(! (startPoint in lines)) {
+        line.setOptions({startSocket: 'bottom'});
+    }
+    if(! (endPoint in lines)) {
+        line.setOptions({endSocket: 'bottom'});
+    }
+
+    debugLines[startPoint] = endPoint;
+    debugLines[endPoint] = startPoint;
+
+    debugLeaderLines[startPoint] = line;
+    debugLeaderLines[endPoint] = line;
 }
 
 function addLine(startPoint, endPoint) {
+  // console.log("addLine: "+startPoint+" "+endPoint);
   var startPointElem = document.getElementById(startPoint);
   var endPointElem = document.getElementById(endPoint);
 
@@ -203,8 +185,28 @@ function addLine(startPoint, endPoint) {
 
   leaderLines[startPoint] = line;
   leaderLines[endPoint] = line;
+}
 
-  linesSeq.push(startPoint);
+function removeLine(startPoint, endPoint) {
+    // console.log("removeLine: "+startPoint+" "+endPoint);
+    nextColor -= 1;
+
+    delete lines[startPoint];
+    delete lines[endPoint];
+
+    leaderLines[startPoint].remove();
+    delete leaderLines[startPoint];
+    delete leaderLines[endPoint];
+}
+
+function removeDebugLine(startPoint, endPoint) {
+    // console.log("removeDebugLine: "+startPoint+" "+endPoint);
+    delete debugLines[startPoint];
+    delete debugLines[endPoint];
+
+    debugLeaderLines[startPoint].remove();
+    delete debugLeaderLines[startPoint];
+    delete debugLeaderLines[endPoint];
 }
 
 function clearLines() {
@@ -545,25 +547,42 @@ function updateGlobal(jsonData) {
 }
 
 function updateLines(jsonData) {
-    resetLines();
-
-    // add area transitions
+    // add missing area transitions
     var arrayLength = jsonData["linesSeq"].length;
     for(var i=0; i<arrayLength; i++) {
-        addLine(jsonData["linesSeq"][i][0], jsonData["linesSeq"][i][1]);
+        var startPoint = jsonData["linesSeq"][i][0];
+        var endPoint = jsonData["linesSeq"][i][1];
+        if(! (startPoint in lines)) {
+            addLine(startPoint, endPoint);
+        }
+    }
+
+    // delete removed transitions
+    for(var startPoint in lines) {
+        if(! (startPoint in jsonData["lines"])) {
+            var endPoint = lines[startPoint]
+            removeLine(startPoint, endPoint);
+        }
     }
 }
 
 function updateDebugLines(jsonData) {
-    resetDebugLines();
+    // resetDebugLines();
 
-    if("innerTransitions" in jsonData) {
-        var arrayLength = jsonData["innerTransitions"].length;
-        for(var i=0; i<arrayLength; i++) {
-            var start = jsonData["innerTransitions"][i][0];
-            var end = jsonData["innerTransitions"][i][1]
-            var difficulty = jsonData['innerTransitions'][i][2]
+    var arrayLength = jsonData["innerTransitionsSeq"].length;
+    for(var i=0; i<arrayLength; i++) {
+        var start = jsonData["innerTransitionsSeq"][i][0];
+        var end = jsonData["innerTransitionsSeq"][i][1]
+        var difficulty = jsonData['innerTransitionsSeq'][i][2]
+        if(! (start in debugLines)) {
             addDebugLine(start, end, difficulty);
+        }
+    }
+
+    for(var startPoint in debugLines) {
+        if(! (startPoint in jsonData["innerTransitions"])) {
+            var endPoint = debugLines[startPoint]
+            removeDebugLine(startPoint, endPoint);
         }
     }
 }

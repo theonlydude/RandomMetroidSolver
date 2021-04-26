@@ -654,7 +654,7 @@ locationsDict["Missile (below Ice Beam)"].AccessFrom = {
                                           sm.wor(sm.wand(sm.haveItem('Morph'),
                                                          sm.knowsMockball()),
                                                  sm.haveItem('SpeedBooster'))),
-    'Crocomire Speedway Bottom': lambda sm: sm.wand(sm.isVanillaCroc(),
+    'Crocomire Speedway Bottom': lambda sm: sm.wand(sm.canUseCrocRoomToChargeSpeed(),
                                                     sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Ice Missiles']),
                                                     sm.haveItem('SpeedBooster'),
                                                     sm.knowsIceMissileFromCroc())

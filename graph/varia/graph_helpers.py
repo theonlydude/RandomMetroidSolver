@@ -636,9 +636,13 @@ class HelpersGraph(Helpers):
         return SMBool(self.getDraygonConnection() == 'DraygonRoomIn')
 
     @Cache.decorator
-    def isVanillaCroc(self):
+    def canUseCrocRoomToChargeSpeed(self):
+        sm = self.smbm
         crocRoom = getAccessPoint('Crocomire Room Top')
-        return SMBool(crocRoom.ConnectedTo == 'Crocomire Speedway Bottom')
+        speedway = getAccessPoint('Crocomire Speedway Bottom')
+        return sm.wand(SMBool(crocRoom.ConnectedTo == 'Crocomire Speedway Bottom'),
+                       crocRoom.traverse(sm),
+                       speedway.traverse(sm))
 
     @Cache.decorator
     def canFightDraygon(self):

@@ -396,7 +396,7 @@ accessPoints = [
         entryInfo = {'SamusX':0x5cf, 'SamusY':0x88},
         dotOrientation = 'ne'),
     AccessPoint('Cathedral', 'Norfair', {
-        'Business Center': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles'])),
+        'Business Center': Cache.ldeco(lambda sm: sm.canExitCathedral(Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles'])),
         'Bubble Mountain': Cache.ldeco(lambda sm: sm.wand(sm.traverse('CathedralRight'),
                                                           sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles'])))
     }, internal=True),
@@ -433,7 +433,7 @@ accessPoints = [
        entryInfo = {'SamusX':0xc57, 'SamusY':0x2b8},
        dotOrientation = 'se'),
     AccessPoint('Bubble Mountain', 'Norfair', {
-        'Business Center': lambda sm: sm.canExitCathedral(),
+        'Business Center': lambda sm: sm.canExitCathedral(Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Entrance']),
         'Bubble Mountain Top': lambda sm: sm.canClimbBubbleMountain(),
         'Cathedral': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles'])),
         'Bubble Mountain Bottom': lambda sm: sm.canPassBombPassages()

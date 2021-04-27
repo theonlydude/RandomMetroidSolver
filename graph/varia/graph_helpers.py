@@ -247,15 +247,14 @@ class HelpersGraph(Helpers):
                                      sm.knowsDoubleChamberWallJump()),
                               sm.canHellRun(hellRun['hellRun'], hellRun['mult']*0.8, hellRun['minE'])))
 
-    @Cache.decorator
-    def canExitCathedral(self):
+    def canExitCathedral(self, hellRun):
         # from top: can use bomb/powerbomb jumps
         # from bottom: can do a shinespark or use space jump
         #              can do it with highjump + wall jump
         #              can do it with only two wall jumps (the first one is delayed like on alcatraz)
         #              can do it with a spring ball jump from wall
         sm = self.smbm
-        return sm.wand(sm.wor(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Entrance']),
+        return sm.wand(sm.wor(sm.canHellRun(**hellRun),
                               sm.heatProof()),
                        sm.wor(sm.wor(sm.canPassBombPassages(),
                                      sm.haveItem("SpeedBooster")),

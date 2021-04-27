@@ -298,7 +298,7 @@ locationsDict["Gravity Suit"].Available = (
                        sm.canPassBowling())
 )
 locationsDict["Energy Tank, Mama turtle"].AccessFrom = {
-    'Main Street Bottom': lambda sm: sm.wand(sm.wor(sm.haveItem('Gravity'), sm.canDoSuitlessOuterMaridia()),
+    'Main Street Bottom': lambda sm: sm.wand(sm.canDoOuterMaridia(),
                                              sm.wor(sm.traverse('FishTankRight'),
                                                     RomPatches.has(RomPatches.MamaTurtleBlueDoor)),
                                              sm.wor(sm.wor(sm.canFly(),
@@ -654,7 +654,7 @@ locationsDict["Missile (below Ice Beam)"].AccessFrom = {
                                           sm.wor(sm.wand(sm.haveItem('Morph'),
                                                          sm.knowsMockball()),
                                                  sm.haveItem('SpeedBooster'))),
-    'Crocomire Speedway Bottom': lambda sm: sm.wand(sm.isVanillaCroc(),
+    'Crocomire Speedway Bottom': lambda sm: sm.wand(sm.canUseCrocRoomToChargeSpeed(),
                                                     sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Ice Missiles']),
                                                     sm.haveItem('SpeedBooster'),
                                                     sm.knowsIceMissileFromCroc())
@@ -846,8 +846,7 @@ locationsDict["Missile (green Maridia shinespark)"].Available = (
                               sm.canSimpleShortCharge())) # run from above
 )
 locationsDict["Super Missile (green Maridia)"].AccessFrom = {
-    'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                            sm.canDoSuitlessOuterMaridia())
+    'Main Street Bottom': lambda sm: sm.canDoOuterMaridia()
 }
 locationsDict["Super Missile (green Maridia)"].Available = (
     lambda sm: sm.haveItem('Morph')
@@ -855,8 +854,7 @@ locationsDict["Super Missile (green Maridia)"].Available = (
 locationsDict["Missile (green Maridia tatori)"].AccessFrom = {
     'Main Street Bottom': lambda sm: sm.wand(sm.wor(sm.traverse('FishTankRight'),
                                                     RomPatches.has(RomPatches.MamaTurtleBlueDoor)),
-                                             sm.wor(sm.haveItem('Gravity'),
-                                                    sm.canDoSuitlessOuterMaridia())),
+                                             sm.canDoOuterMaridia()),
     'Mama Turtle': lambda sm: SMBool(True)
 }
 locationsDict["Missile (green Maridia tatori)"].Available = (

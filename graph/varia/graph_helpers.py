@@ -519,6 +519,12 @@ class HelpersGraph(Helpers):
                               sm.canSpringBallJump()))
 
     @Cache.decorator
+    def canDoOuterMaridia(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.canDoSuitlessOuterMaridia())
+
+    @Cache.decorator
     def canPassBotwoonHallway(self):
         sm = self.smbm
         return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
@@ -630,9 +636,13 @@ class HelpersGraph(Helpers):
         return SMBool(self.getDraygonConnection() == 'DraygonRoomIn')
 
     @Cache.decorator
-    def isVanillaCroc(self):
+    def canUseCrocRoomToChargeSpeed(self):
+        sm = self.smbm
         crocRoom = getAccessPoint('Crocomire Room Top')
-        return SMBool(crocRoom.ConnectedTo == 'Crocomire Speedway Bottom')
+        speedway = getAccessPoint('Crocomire Speedway Bottom')
+        return sm.wand(SMBool(crocRoom.ConnectedTo == 'Crocomire Speedway Bottom'),
+                       crocRoom.traverse(sm),
+                       speedway.traverse(sm))
 
     @Cache.decorator
     def canFightDraygon(self):
@@ -727,8 +737,21 @@ class HelpersGraph(Helpers):
                                      sm.haveItem('HiJump'))),
                       suitlessRoomExit)
 
+    @Cache.decorator
     def canExitPreciousRoom(self):
         if self.isVanillaDraygon():
             return self.canExitPreciousRoomVanilla()
         else:
             return self.canExitPreciousRoomRandomized()
+
+    @Cache.decorator
+    def canPassDachoraRoom(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('SpeedBooster'), sm.canDestroyBombWalls())
+
+    @Cache.decorator
+    def canTraverseCrabTunnelLeftToRight(self):
+        sm = self.smbm
+        return sm.wand(sm.traverse('MainStreetBottomRight'),
+                       sm.wor(sm.haveItem('Super'),
+                              RomPatches.has(RomPatches.AreaRandoGatesOther)))

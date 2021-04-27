@@ -5,6 +5,7 @@ from rom.rom_patches import RomPatches
 from utils.utils import removeChars, fixEnergy
 from utils.parameters import diff4solver, Knows
 from utils.doorsmanager import DoorsManager
+from rom.rom_patches import RomPatches
 
 class SolverState(object):
     def __init__(self, debug=False):
@@ -73,15 +74,18 @@ class SolverState(object):
             self.state["last"] = ""
         # store the inner graph transitions to display in vcr
         if self.debug == True:
-            self.state["innerTransitions"] = self.getInnerTransitions(solver.areaGraph.availAccessPoints, solver.curGraphTransitions)
+            (self.state["innerTransitions"], self.state["innerTransitionsSeq"]) = self.getInnerTransitions(solver.areaGraph.availAccessPoints, solver.curGraphTransitions)
         else:
-            self.state["innerTransitions"] = []
+            self.state["innerTransitions"] = {}
+            self.state["innerTransitionsSeq"] = []
         # doors colors: dict {name: (color, facing, hidden)}
         self.state["doors"] = DoorsManager.serialize()
         # doorsRando: bool
         self.state["doorsRando"] = solver.doorsRando
         # allDoorsRevealed: bool
         self.state["allDoorsRevealed"] = DoorsManager.allDoorsRevealed()
+        # roomsVisibility: array of string ['landingSiteSvg', 'MissileCrateriamoatSvg']
+        self.state["roomsVisibility"] = self.getRoomsVisibility(solver, solver.areaGraph, solver.smbm)
 
     def toSolver(self, solver):
         solver.majorsSplit = self.state["majorsSplit"]
@@ -111,8 +115,37 @@ class SolverState(object):
         DoorsManager.unserialize(self.state["doors"])
         solver.doorsRando = self.state["doorsRando"]
 
+    def getRoomsVisibility(self, solver, areaGraph, sm):
+        # add graph access points
+        roomsVisibility = set([self.transition2isolver(ap.Name)+'Svg' for ap in solver.areaGraph.availAccessPoints])
+        # add available locations
+        roomsVisibility.update([loc+'Svg' for loc, data in self.state["availableLocationsWeb"].items() if data["difficulty"] != "break"])
+        # add visited locations
+        roomsVisibility.update([loc+'Svg' for loc, data in self.state["visitedLocationsWeb"].items() if data['accessPoint']+'Svg' in roomsVisibility])
+        # add special rooms that have conditions to traverse them but no item in them,
+        # so we need to know if they are visible or not
+        if 'crocomireRoomTopSvg' in roomsVisibility and sm.enoughStuffCroc():
+            roomsVisibility.add('CrocomireSvg')
+        if 'greenBrinstarElevatorSvg' in roomsVisibility and sm.traverse('MainShaftBottomRight'):
+            roomsVisibility.add('DachoraRoomLeftSvg')
+        if 'bigPinkSvg' in roomsVisibility and sm.canPassDachoraRoom():
+            roomsVisibility.add('DachoraRoomCenterSvg')
+        if ('redBrinstarElevatorSvg' in roomsVisibility and sm.wor(RomPatches.has(RomPatches.HellwayBlueDoor), sm.traverse('RedTowerElevatorLeft'))) or ('redTowerTopLeftSvg' in roomsVisibility and sm.canClimbRedTower()):
+            roomsVisibility.add('HellwaySvg')
+        if 'businessCenterSvg' in roomsVisibility and sm.haveItem('SpeedBooster'):
+            roomsVisibility.add('FrogSpeedwayCenterSvg')
+        if 'crabShaftLeftSvg' in roomsVisibility or 'redFishRoomLeftSvg' in roomsVisibility or ('mainStreetBottomSvg' in roomsVisibility and sm.canDoOuterMaridia()):
+            roomsVisibility.add('westMaridiaSvg')
+        if 'mainStreetBottomSvg' in roomsVisibility and sm.canTraverseCrabTunnelLeftToRight():
+            roomsVisibility.add('CrabTunnelSvg')
+        if 'SpaceJumpSvg' in roomsVisibility and ('colosseumTopRightSvg' in roomsVisibility or 'leCoudeRightSvg' in roomsVisibility):
+            roomsVisibility.add('CacatacAlleySvg')
+
+        return list(roomsVisibility)
+
     def getInnerTransitions(self, availAccessPoints, curGraphTransitions):
-        innerTransitions = []
+        innerTransitions = {}
+        innerTransitionsSeq = []
         for (apDst, dataSrc) in availAccessPoints.items():
             if dataSrc['from'] is None:
                 continue
@@ -122,8 +155,10 @@ class SolverState(object):
                 continue
             src = self.transition2isolver(src)
             dst = self.transition2isolver(dst)
-            innerTransitions.append([src, dst, diff4solver(dataSrc['difficulty'].difficulty)])
-        return innerTransitions
+            innerTransitionsSeq.append([src, dst, diff4solver(dataSrc['difficulty'].difficulty)])
+            innerTransitions[src] = dst
+            innerTransitions[dst] = src
+        return innerTransitions, innerTransitionsSeq
 
     def getLocsData(self, locations):
         ret = {}

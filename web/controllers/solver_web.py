@@ -1822,14 +1822,14 @@ class WS(object):
                 "availableLocations": state["availableLocationsWeb"],
                 "visitedLocations": state["visitedLocationsWeb"],
                 "collectedItems": state["collectedItems"],
-                # compatibility with existing sessions
-                "remainLocations": state["remainLocationsWeb"] if "remainLocationsWeb" in state else [],
+                "remainLocations": state["remainLocationsWeb"],
                 "lastAP": self.locName4isolver(state["lastAP"]),
 
                 # area tracker
                 "lines": state["linesWeb"],
                 "linesSeq": state["linesSeqWeb"],
                 "allTransitions": state["allTransitions"],
+                "roomsVisibility": state["roomsVisibility"],
 
                 # infos on seed
                 "mode": state["mode"],
@@ -1843,6 +1843,7 @@ class WS(object):
                 "errorMsg": state["errorMsg"],
                 "last": state["last"],
                 "innerTransitions": state["innerTransitions"],
+                "innerTransitionsSeq": state["innerTransitionsSeq"],
 
                 # doors
                 "doors": state["doors"],
@@ -2829,9 +2830,9 @@ def plandorepo():
                 msg = "Plando name can only contain [a-zA-Z0-9 -_]"
             else:
                 plandos = db.getPlando(plandoName)
-                if plandos == None or len(plandos) == 0:
+                if plandos is None or len(plandos) == 0:
                     msg = "Plando not found"
-        if len(plandos) == 0:
+        if plandos is None or len(plandos) == 0:
             # get plando list
             plandos = db.getPlandos()
             expand = False

@@ -100,8 +100,7 @@ accessPoints = [
        escape = True),
     ### Green and Pink Brinstar
     AccessPoint('Green Brinstar Elevator', 'GreenPinkBrinstar', {
-        'Big Pink': Cache.ldeco(lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
-                                                          sm.canDestroyBombWalls()),
+        'Big Pink': Cache.ldeco(lambda sm: sm.wand(sm.canPassDachoraRoom(),
                                                    sm.traverse('MainShaftBottomRight'))),
         'Etecoons Bottom': lambda sm: sm.canAccessEtecoons()
     }, roomInfo = {'RoomPtr':0x9938, "area": 0x0},
@@ -113,8 +112,7 @@ accessPoints = [
     AccessPoint('Big Pink', 'GreenPinkBrinstar', {
         'Green Hill Zone Top Right': Cache.ldeco(lambda sm: sm.wand(sm.haveItem('Morph'),
                                                                     sm.traverse('BigPinkBottomRight'))),
-        'Green Brinstar Elevator': Cache.ldeco(lambda sm: sm.wor(sm.haveItem('SpeedBooster'),
-                                                                 sm.canDestroyBombWalls()))
+        'Green Brinstar Elevator': lambda sm: sm.canPassDachoraRoom()
     }, internal=True, start={'spawn': 0x0100, 'solveArea': "Pink Brinstar"}),
     AccessPoint('Green Hill Zone Top Right', 'GreenPinkBrinstar', {
         'Noob Bridge Right': lambda sm: SMBool(True),
@@ -494,9 +492,7 @@ accessPoints = [
         'Red Fish Room Left': Cache.ldeco(lambda sm: sm.wand(sm.canGoUpMtEverest(),
                                                              sm.haveItem('Morph'))),
         'Crab Hole Bottom Left': Cache.ldeco(lambda sm: sm.wand(sm.haveItem('Morph'),
-                                                                sm.traverse('MainStreetBottomRight'),
-                                                                sm.wor(sm.haveItem('Super'),
-                                                                       RomPatches.has(RomPatches.AreaRandoGatesOther)))),
+                                                                sm.canTraverseCrabTunnelLeftToRight())),
         # this transition leads to EastMaridia directly
         'Oasis Bottom': Cache.ldeco(lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
                                                        sm.traverse('MainStreetBottomRight'),
@@ -538,8 +534,7 @@ accessPoints = [
        dotOrientation = 'w'),
     AccessPoint('Crab Shaft Left', 'WestMaridia', {
         'Main Street Bottom': lambda sm: SMBool(True), # fall down
-        'Beach': Cache.ldeco(lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                               sm.canDoSuitlessOuterMaridia())),
+        'Beach': lambda sm: sm.canDoOuterMaridia(),
         'Crab Shaft Right': lambda sm: SMBool(True)
     }, internal=True),
     AccessPoint('Watering Hole', 'WestMaridia', {
@@ -556,8 +551,7 @@ accessPoints = [
         'Crab Shaft Left': lambda sm: SMBool(True), # fall down
         'Watering Hole': Cache.ldeco(lambda sm: sm.wand(sm.wor(sm.canPassBombPassages(),
                                                                sm.canUseSpringBall()),
-                                                        sm.wor(sm.haveItem('Gravity'),
-                                                               sm.canDoSuitlessOuterMaridia())))
+                                                        sm.canDoOuterMaridia()))
     }, internal=True),
     AccessPoint('Crab Shaft Right', 'WestMaridia', {
         'Crab Shaft Left': lambda sm: sm.canJumpUnderwater()

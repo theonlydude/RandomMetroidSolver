@@ -1,6 +1,7 @@
 import sys, random, time, utils.log
 
 from logic.logic import Logic
+from graph.graph_utils import GraphUtils, getAccessPoint
 from rando.Restrictions import Restrictions
 from rando.RandoServices import RandoServices
 from rando.GraphBuilder import GraphBuilder
@@ -61,6 +62,7 @@ class RandoExec(object):
         endDate = sys.maxsize
         if self.randoSettings.runtimeLimit_s < endDate:
             endDate = now + self.randoSettings.runtimeLimit_s
+        self.updateLocationsClass()
         while container is None and i < attempts and now <= endDate:
             if self.graphSettings.doorsColorsRando == True:
                 DoorsManager.randomize(self.graphSettings.allowGreyDoors)
@@ -89,6 +91,17 @@ class RandoExec(object):
         ret = filler.generateItems(vcr=vcr)
         self.errorMsg += filler.errorMsg
         return ret
+
+    def updateLocationsClass(self):
+        split = self.restrictions.split
+        if split != 'Full':
+            startAP = getAccessPoint(self.graphSettings.startAP)
+            possibleMajLocs, preserveMajLocs, nMaj, nChozo = Logic.LocationsHelper.getStartMajors(startAP.Name)
+            if split == 'Major':
+                n = nMaj
+            elif split == 'Chozo':
+                n = nChozo
+            GraphUtils.updateLocClassesStart(startAP.GraphArea, self.restrictions.split, possibleMajLocs, preserveMajLocs, n)
 
     def postProcessItemLocs(self, itemLocs, hide):
         # hide some items like in dessy's

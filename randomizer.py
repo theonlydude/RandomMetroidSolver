@@ -443,8 +443,8 @@ if __name__ == "__main__":
 
     # in plando rando we know that the start ap is ok
     if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando is None:
-        # TODO add major/chozo support in random start
-        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full", altValue='FullWithHUD')
+        if args.majorsSplit in ['Major', "Chozo"]:
+            forceArg('hud', True, "'VARIA HUD' forced to on", 'hud', 'on')
         forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", 'variaTweaks', 'on')
         forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')

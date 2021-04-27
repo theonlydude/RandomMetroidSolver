@@ -82,19 +82,6 @@ class GraphSettings(object):
     def isMinimizer(self):
         return self.minimizerN is not None
 
-    # used by FillerRandom to know how many front fill steps it must perform
-    def getRandomFillHelp(self):
-        helpByAp = {
-            "Firefleas Top": 3,
-            "Aqueduct": 1,
-            "Mama Turtle": 1,
-            "Watering Hole": 2,
-            "Etecoons Supers": 2,
-            "Gauntlet Top":1,
-            "Bubble Mountain":1
-        }
-        return helpByAp[self.startAP] if self.startAP in helpByAp else 0
-
 # algo settings depending on prog speed (slowest to fastest+variable,
 # other "speeds" are actually different algorithms)
 class ProgSpeedParameters(object):

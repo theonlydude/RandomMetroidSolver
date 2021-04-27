@@ -900,3 +900,11 @@ locationsDict["Missile (Draygon)"].PostAvailable = (
 # TODO::use the dict in solver/randomizer
 # create the list that the solver/randomizer use
 locations = [loc for loc in locationsDict.values()]
+
+class LocationsHelper:
+    # used by FillerRandom to know how many front fill steps it must perform
+    def getRandomFillHelp(startAP):
+        return 0
+
+    def getStartMajors(startAP):
+        return ([],[],0,0)

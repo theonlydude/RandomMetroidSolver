@@ -923,3 +923,68 @@ locationsDict["Missile (Draygon)"].Available = (
 # TODO::use the dict in solver/randomizer
 # create the list that the solver/randomizer use
 locations = [loc for loc in locationsDict.values()]
+
+class LocationsHelper:
+    # used by FillerRandom to know how many front fill steps it must perform
+    def getRandomFillHelp(startAP):
+        helpByAp = {
+            "Firefleas Top": 3,
+            "Aqueduct": 1,
+            "Mama Turtle": 1,
+            "Watering Hole": 2,
+            "Etecoons Supers": 2,
+            "Gauntlet Top":1,
+            "Bubble Mountain":1
+        }
+        return helpByAp[startAP] if startAP in helpByAp else 0
+
+    # for a given start AP, gives:
+    # - locations that can be used as majors/chozo in the start area
+    # - locations to preserve in the split
+    # - the minimum number of necessary majors locations to add in the start area,
+    # - the minimum number of necessary chozo locations to add in the start area
+    def getStartMajors(startAP):
+        majLocsByAp = {
+            'Gauntlet Top': ([
+                "Missile (Crateria gauntlet right)",
+                "Missile (Crateria gauntlet left)"
+            ], ["Energy Tank, Terminator"], 1, 2),
+            'Green Brinstar Elevator': ([
+                "Missile (green Brinstar below super missile)"
+            ], ["Reserve Tank, Brinstar"], 1, 1),
+            'Big Pink': ([
+                "Missile (pink Brinstar top)",
+                "Missile (pink Brinstar bottom)"
+            ], ["Charge Beam"], 1, 2),
+            'Etecoons Supers': ([
+                "Energy Tank, Etecoons",
+                "Super Missile (green Brinstar bottom)"
+            ], [], 1, 2),
+            'Firefleas': ([
+                "Power Bomb (lower Norfair above fire flea room)",
+                "Energy Tank, Firefleas",
+                "Missile (lower Norfair above fire flea room)",
+                "Missile (lower Norfair near Wave Beam)"
+            ], ["Energy Tank, Firefleas"], 3, 3),
+            'Business Center': ([
+                "Energy Tank (Hi-Jump Boots)",
+            ], ["Hi-Jump Boots"], 1, 1),
+            'Bubble Mountain': ([
+                "Missile (bubble Norfair)"
+            ], ["Speed Booster", "Wave Beam"], 1, 1),
+            'Mama Turtle': ([
+                "Energy Tank, Mama turtle",
+                "Missile (green Maridia tatori)"
+            ], ["Energy Tank, Mama turtle"], 1, 2),
+            'Watering Hole': ([
+                "Missile (yellow Maridia super missile)",
+                "Super Missile (yellow Maridia)",
+                "Missile (yellow Maridia false wall)"
+            ], [], 2, 3),
+            'Aqueduct': ([
+                "Missile (pink Maridia)",
+                "Super Missile (pink Maridia)",
+                "Missile (right Maridia sand pit room)"
+            ], ["Reserve Tank, Maridia"], 2, 3)
+        }
+        return majLocsByAp[startAP] if startAP in majLocsByAp else ([],[],0,0)

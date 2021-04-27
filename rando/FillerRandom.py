@@ -9,6 +9,7 @@ from rando.RandoServices import ComebackCheckType
 from solver.randoSolver import RandoSolver
 from utils.parameters import infinity
 from logic.helpers import diffValue2txt
+from logic.logic import Logic
 
 # simple, uses mini solver only
 class FillerRandom(Filler):
@@ -159,7 +160,7 @@ class FrontFillerKickstart(FrontFiller):
 class FillerRandomSpeedrun(FillerRandom):
     def __init__(self, graphSettings, graph, restrictions, container, endDate, diffSteps=0):
         super(FillerRandomSpeedrun, self).__init__(graphSettings.startAP, graph, restrictions, container, endDate)
-        self.nFrontFillSteps = graphSettings.getRandomFillHelp()
+        self.nFrontFillSteps = Logic.LocationsHelper.getRandomFillHelp(graphSettings.startAP)
         # based on runtime limit, help the random fill with up to three front fill steps
         limit_s = endDate - time.process_time()
         self.runtimeSteps = [limit_s/4, limit_s/2, limit_s*3/4, sys.maxsize]

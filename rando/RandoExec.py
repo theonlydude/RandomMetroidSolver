@@ -1,4 +1,4 @@
-import sys, random, time
+import sys, random, time, utils.log
 
 from logic.logic import Logic
 from rando.Restrictions import Restrictions
@@ -22,6 +22,7 @@ class RandoExec(object):
         self.vcr = vcr
         self.randoSettings = randoSettings
         self.graphSettings = graphSettings
+        self.log = utils.log.get('RandoExec')
 
     def getFillerFactory(self, progSpeed, endDate):
         if progSpeed == "basic":
@@ -84,6 +85,7 @@ class RandoExec(object):
         self.areaGraph.printGraph()
         filler = self.createFiller(container, endDate)
         vcr = VCR(self.seedName, 'rando') if self.vcr == True else None
+        self.log.debug("ItemLocContainer dump before filling:\n"+container.dump())
         ret = filler.generateItems(vcr=vcr)
         self.errorMsg += filler.errorMsg
         return ret

@@ -16,7 +16,7 @@ import utils.log
 fun = ['HiJump', 'SpeedBooster', 'Plasma', 'ScrewAttack', 'Wave', 'Spazer', 'SpringBall']
 
 if __name__ == "__main__":
-#    log.init(True) # debug mode
+#    utils.log.init(True) # debug mode
     utils.log.init(False)
     logger = utils.log.get('ItemsTest')
     Logic.factory('varia')

@@ -369,6 +369,15 @@ class ItemPoolGenerator(object):
         lowStuffBotwoon = self.sm.knowsLowStuffBotwoon()
         return random.random() < 0.5 and (lowStuffBotwoon.bool == True and lowStuffBotwoon.difficulty <= self.maxDiff)
 
+    def calcMaxMinors(self):
+        pool = self.itemManager.getItemPool()
+        energy = [item for item in pool if item.Category == 'Energy']
+        if len(energy) == 0:
+            self.maxMinors = 0.66*(self.maxItems - 5) # 5 for bosses
+        else:
+            # if energy has been placed, we can be as accurate as possible
+            self.maxMinors = self.maxItems - len(pool) + self.nbMinorsAlready
+
     def calcMaxAmmo(self):
         self.nbMinorsAlready = 5
         # always add enough minors to pass zebetites (1100 damages) and mother brain 1 (3000 damages)
@@ -378,7 +387,7 @@ class ItemPoolGenerator(object):
             self.log.debug("Add missile because ice zeb skip is not known")
             self.itemManager.addMinor('Missile')
             self.nbMinorsAlready += 1
-        self.maxMinors = 0.66*(self.maxItems - 5)
+        self.calcMaxMinors()
         self.log.debug("maxMinors: "+str(self.maxMinors))
         self.minorLocations = max(0, self.maxMinors*self.qty['minors']/100.0 - self.nbMinorsAlready)
         self.log.debug("minorLocations: {}".format(self.minorLocations))
@@ -388,7 +397,7 @@ class ItemPoolGenerator(object):
         self.calcMaxAmmo()
         # we have to remove the minors already added
         maxItems = min(len(self.itemManager.getItemPool()) + int(self.minorLocations), self.maxItems)
-        self.log.debug("maxItems: {}".format(maxItems))
+        self.log.debug("maxItems: {}, (self.maxItems={})".format(maxItems, self.maxItems))
         ammoQty = self.qty['ammo']
         if not self.qty['strictMinors']:
             rangeDict = getRangeDict(ammoQty)
@@ -400,9 +409,7 @@ class ItemPoolGenerator(object):
             minorsTypes = ['Missile', 'Super', 'PowerBomb']
             totalProps = sum(ammoQty[m] for m in minorsTypes)
             minorsByProp = sorted(minorsTypes, key=lambda m: ammoQty[m])
-            maxMinors = 0.66*(maxItems - 5)
-            totalMinorLocations = int(maxMinors * self.qty['minors'] / 100)
-            self.log.debug("totalProps: {}".format(totalProps))
+            totalMinorLocations = self.minorLocations + self.nbMinorsAlready
             self.log.debug("totalMinorLocations: {}".format(totalMinorLocations))
             def ammoCount(ammo):
                 return float(len([item for item in self.itemManager.getItemPool() if item.Type == ammo]))

@@ -941,8 +941,9 @@ class LocationsHelper:
     # for a given start AP, gives:
     # - locations that can be used as majors/chozo in the start area
     # - locations to preserve in the split
-    # - the minimum number of necessary majors locations to add in the start area,
-    # - the minimum number of necessary chozo locations to add in the start area
+    # - number of necessary majors locations to add in the start area,
+    # - number of necessary chozo locations to add in the start area
+    # locs are taken in the first n in the list
     def getStartMajors(startAP):
         majLocsByAp = {
             'Gauntlet Top': ([
@@ -960,12 +961,12 @@ class LocationsHelper:
                 "Energy Tank, Etecoons",
                 "Super Missile (green Brinstar bottom)"
             ], ["Energy Tank, Etecoons"], 1, 2),
-            'Firefleas': ([
+            'Firefleas Top': ([
                 "Power Bomb (lower Norfair above fire flea room)",
                 "Energy Tank, Firefleas",
-                "Missile (lower Norfair above fire flea room)",
-                "Missile (lower Norfair near Wave Beam)"
-            ], ["Energy Tank, Firefleas"], 3, 3),
+                "Missile (lower Norfair near Wave Beam)",
+                "Missile (lower Norfair above fire flea room)"
+            ], ["Energy Tank, Firefleas"], 3, 4),
             'Business Center': ([
                 "Energy Tank (Hi-Jump Boots)",
             ], ["Hi-Jump Boots"], 1, 1),
@@ -978,8 +979,9 @@ class LocationsHelper:
             ], ["Energy Tank, Mama turtle"], 1, 2),
             'Watering Hole': ([
                 "Missile (yellow Maridia super missile)",
-                "Super Missile (yellow Maridia)"
-            ], [], 2, 2),
+                "Super Missile (yellow Maridia)",
+                "Missile (yellow Maridia false wall)"
+            ], [], 2, 3),
             'Aqueduct': ([
                 "Missile (pink Maridia)",
                 "Super Missile (pink Maridia)",

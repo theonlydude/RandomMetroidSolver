@@ -57,6 +57,7 @@ class ChozoWrapperFiller(Filler):
         secondPhaseItems = [item for item in self.baseContainer.itemPool if item not in cont.itemPool]
         contLocs = self.baseContainer.extractLocs(cont.unusedLocations)
         secondPhaseLocs = [loc for loc in self.baseContainer.unusedLocations if loc not in contLocs]
+        self.log.debug("prepareFirstPhase. 1st phase container="+cont.dump())
         self.log.debug("prepareFirstPhase. secondPhaseItems="+getItemListStr(secondPhaseItems))
         self.log.debug("prepareFirstPhase. secondPhaseLocs="+getLocListStr(secondPhaseLocs))
         self.secondPhaseContainer = ItemLocContainer(cont.sm, secondPhaseItems, secondPhaseLocs)

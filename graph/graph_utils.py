@@ -120,23 +120,22 @@ class GraphUtils:
                 refused[apName] = cause
         return ret, refused
 
-    def updateLocClassesStart(startGraphArea, split, possibleMajLocs, preserveMajLocs, minLocs):
+    def updateLocClassesStart(startGraphArea, split, possibleMajLocs, preserveMajLocs, nLocs):
         locs = Logic.locations
-        possLocs = [loc for loc in locs if loc.Name in possibleMajLocs]
-        candidates = [loc for loc in locs if loc.GraphArea == startGraphArea and split in loc.Class and loc.Name not in preserveMajLocs]
-        remLocs = [loc for loc in locs if loc not in possLocs and loc not in candidates and split in loc.Class]
-        nLocs = random.randint(minLocs, len(possibleMajLocs))
+        possLocs = [loc for loc in locs if loc.Name in possibleMajLocs][:nLocs]
+        candidates = [loc for loc in locs if loc.GraphArea == startGraphArea and loc.isClass(split) and loc.Name not in preserveMajLocs]
+        remLocs = [loc for loc in locs if loc not in possLocs and loc not in candidates and loc.isClass(split)]
         newLocs = []
         while len(newLocs) < nLocs:
-            loc = possLocs.pop(random.randint(0,len(possLocs)-1))
-            newLocs.append(loc)
-            loc.Class = [split]
-            GraphUtils.log.debug("newMajor="+loc.Name)
-            loc = candidates.pop(random.randint(0,len(candidates)-1))
-            loc.Class = ["Minor"]
-            GraphUtils.log.debug("replaced="+loc.Name)
             if len(candidates) == 0:
                 candidates = remLocs
+            loc = possLocs.pop(random.randint(0,len(possLocs)-1))
+            newLocs.append(loc)
+            loc.setClass([split])
+            GraphUtils.log.debug("newMajor="+loc.Name)
+            loc = candidates.pop(random.randint(0,len(candidates)-1))
+            loc.setClass(["Minor"])
+            GraphUtils.log.debug("replaced="+loc.Name)
 
     def getGraphPatches(startApName):
         ap = getAccessPoint(startApName)

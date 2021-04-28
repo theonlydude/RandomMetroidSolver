@@ -48,6 +48,10 @@ class Location:
 
     def setClass(self, _class):
         self.Class = _class
+        self._isChozo = 'Chozo' in _class
+        self._isMajor = 'Major' in _class
+        self._isMinor = 'Minor' in _class
+        self._isBoss = 'Boss' in _class
 
     def evalPostAvailable(self, smbm):
         if self.difficulty.bool == True and self.PostAvailable is not None:

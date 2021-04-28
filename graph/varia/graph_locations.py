@@ -975,8 +975,9 @@ class LocationsHelper:
             ], ["Speed Booster", "Wave Beam"], 1, 1),
             'Mama Turtle': ([
                 "Energy Tank, Mama turtle",
-                "Missile (green Maridia tatori)"
-            ], ["Energy Tank, Mama turtle"], 1, 2),
+                "Missile (green Maridia tatori)",
+                "Super Missile (green Maridia)"
+            ], ["Energy Tank, Mama turtle"], 2, 3),
             'Watering Hole': ([
                 "Missile (yellow Maridia super missile)",
                 "Super Missile (yellow Maridia)",

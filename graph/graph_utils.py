@@ -2,6 +2,7 @@ import copy
 import random
 from logic.logic import Logic
 from utils.parameters import Knows
+from graph.location import locationsDict
 import utils.log
 
 # order expected by ROM patches
@@ -121,10 +122,12 @@ class GraphUtils:
         return ret, refused
 
     def updateLocClassesStart(startGraphArea, split, possibleMajLocs, preserveMajLocs, nLocs):
-        locs = Logic.locations
-        possLocs = [loc for loc in locs if loc.Name in possibleMajLocs][:nLocs]
-        candidates = [loc for loc in locs if loc.GraphArea == startGraphArea and loc.isClass(split) and loc.Name not in preserveMajLocs]
-        remLocs = [loc for loc in locs if loc not in possLocs and loc not in candidates and loc.isClass(split)]
+        locs = locationsDict
+        preserveMajLocs = [locs[locName] for locName in preserveMajLocs if locs[locName].isClass(split)]
+        possLocs = [locs[locName] for locName in possibleMajLocs][:nLocs]
+        GraphUtils.log.debug("possLocs="+str([loc.Name for loc in possLocs]))
+        candidates = [loc for loc in locs.values() if loc.GraphArea == startGraphArea and loc.isClass(split) and loc not in preserveMajLocs]
+        remLocs = [loc for loc in locs.values() if loc not in possLocs and loc not in candidates and loc.isClass(split)]
         newLocs = []
         while len(newLocs) < nLocs:
             if len(candidates) == 0:
@@ -132,10 +135,11 @@ class GraphUtils:
             loc = possLocs.pop(random.randint(0,len(possLocs)-1))
             newLocs.append(loc)
             loc.setClass([split])
-            GraphUtils.log.debug("newMajor="+loc.Name)
-            loc = candidates.pop(random.randint(0,len(candidates)-1))
-            loc.setClass(["Minor"])
-            GraphUtils.log.debug("replaced="+loc.Name)
+            if not loc in preserveMajLocs:
+                GraphUtils.log.debug("newMajor="+loc.Name)
+                loc = candidates.pop(random.randint(0,len(candidates)-1))
+                loc.setClass(["Minor"])
+                GraphUtils.log.debug("replaced="+loc.Name)
 
     def getGraphPatches(startApName):
         ap = getAccessPoint(startApName)

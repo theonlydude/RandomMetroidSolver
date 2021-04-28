@@ -959,7 +959,7 @@ class LocationsHelper:
             'Etecoons Supers': ([
                 "Energy Tank, Etecoons",
                 "Super Missile (green Brinstar bottom)"
-            ], [], 1, 2),
+            ], ["Energy Tank, Etecoons"], 1, 2),
             'Firefleas': ([
                 "Power Bomb (lower Norfair above fire flea room)",
                 "Energy Tank, Firefleas",
@@ -978,9 +978,8 @@ class LocationsHelper:
             ], ["Energy Tank, Mama turtle"], 1, 2),
             'Watering Hole': ([
                 "Missile (yellow Maridia super missile)",
-                "Super Missile (yellow Maridia)",
-                "Missile (yellow Maridia false wall)"
-            ], [], 2, 3),
+                "Super Missile (yellow Maridia)"
+            ], [], 2, 2),
             'Aqueduct': ([
                 "Missile (pink Maridia)",
                 "Super Missile (pink Maridia)",

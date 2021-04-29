@@ -54,6 +54,54 @@
     top: 5.2%;
     left: 16%;
 }
+
+#titleAutoTracker {
+    position: absolute;
+    z-index: 2;
+    width: 20%;
+    height: 3.75%;
+    top: 0%;
+    left: 84.5%;
+    color: #ffffff;
+    font-size: 1.25vw;
+    font-weight: bold;
+}
+#startStopAutoTracker {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 5%;
+    top: 4%;
+    left: 79%;
+}
+#statusAutoTracker {
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 5%;
+    top: 4%;
+    left: 81.75%;
+}
+#helpAutoTracker {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 5%;
+    top: 4%;
+    left: 84.50%;
+}
+#logAutoTracker {
+    position: absolute;
+    z-index: 2;
+    width: 12%;
+    height: 16%;
+    top: 4%;
+    left: 88%;
+    resize: none;
+    font-size: 0.5vw;
+}
 </style>
 
 <script type="text/javascript">
@@ -120,7 +168,446 @@ You can load a race protected seed in the tracker, it'll use it to know if the s
 }
 
 var debug = false;
-function onloadHook() {}
+function onloadHook() {
+}
+
+
+// auto tracker
+var socket;
+// timeout to peek data
+var timeout;
+// timeout duration in ms
+var waitingTime = 1000;
+
+// first you open the socket,
+// then you list the available devices,
+// then you attach to the device and ask info to confirm attachment,
+// then you can ask for data (main loop)
+var stateEnum = {
+    "opening": 1,
+    "listing": 2,
+    "infoing": 3,
+    "looping": 4
+}
+var curState = 0;
+
+// handle fragmented data reception
+var askedDataSize = 0;
+var receivedDataSize = 0;
+var receivedData = [];
+var transfertStart = 0;
+
+// different data that we ask
+var dataEnum = {
+    "state": 1,
+    "map": 2
+}
+// W $0998: Game state
+// W $05D1: Debug. Debug mode. Set to [$80:8004] during boot / soft reset
+// CD52 -> D251: map tiles for: Crateria + Brinstar + Norfair + Wrecked Ship + Maridia
+var dataToAsk = {
+    1: [{"address": "F50998", "size": 0x2},
+        {"address": "F505D1", "size": 0x2}],
+    2: [{"address": "F5CD52", "size": 0x500}]
+}
+var curDataState = 0;
+function resetLog() {
+    document.getElementById("logAutoTracker").value = "";
+}
+
+function appendLog(msg) {
+    console.log(Date.now()+" "+msg);
+    var txtArea = document.getElementById("logAutoTracker");
+    txtArea.value +=  msg + '\r\n';
+
+    // auto scroll to bottom
+    txtArea.scrollTop = txtArea.scrollHeight;
+}
+
+function setAutoTrackerIcon(icon) {
+  var names = ["statusOK", "statusKO", "statusLoad", "statusNA"];
+  for(var i=0; i<names.length; i++) {
+    if(names[i] == icon){
+      document.getElementById(names[i]).style.display = "block";
+    } else {
+      document.getElementById(names[i]).style.display = "none";
+    }
+  }
+}
+
+function displayStopButton() {
+    document.getElementById("stopAutoTracker").style.display = "block";
+    document.getElementById("startAutoTracker").style.display = "none";
+}
+
+function displayStartButton() {
+    document.getElementById("startAutoTracker").style.display = "block";
+    document.getElementById("stopAutoTracker").style.display = "none";
+}
+
+function startAutoTracker() {
+    if(loaded == false || webServInProgress == true || init == false) {
+        return;
+    }
+
+    appendLog("\r\n\u2026 Starting Auto Tracker");
+    // open websocket
+    var url = 'ws://localhost:8080';
+    socket = new WebSocket(url);
+    socket.onopen = socketOnOpen;
+    socket.onmessage = socketOnMessage;
+    socket.onclose = socketOnClose;
+    socket.onerror = socketOnError;
+
+    // update state
+    curState = stateEnum.opening;
+
+    // update interface
+    displayStopButton();
+    setAutoTrackerIcon("statusLoad");
+}
+
+function closeSocket() {
+    socket.close(1000);
+
+    // update state
+    curState = stateEnum.closing;
+
+    // update interface
+    setAutoTrackerIcon("statusLoad");
+}
+
+function stopAutoTracker() {
+    if(loaded == false || webServInProgress == true || init == false) {
+        return;
+    }
+
+    appendLog("\u2026 Stopping Auto Tracker");
+    closeSocket();
+
+    // update interface
+    displayStartButton();
+}
+
+function socketOnOpen(e) {
+    appendLog("\u2705 Connection established");
+    // appendLog(" bufferedAmount: "+socket.bufferedAmount);
+// Constant 	Value
+// WebSocket.CONNECTING 	0
+// WebSocket.OPEN 	1
+// WebSocket.CLOSING 	2
+// WebSocket.CLOSED 	3
+    // appendLog(" readyState: "+socket.readyState);
+
+    appendLog("\u2026 Asking Device List");
+    sendAutoTrackerMessage({
+        "Opcode" : "DeviceList",
+        "Space" : "SNES"
+    }, stateEnum.listing);
+}
+
+function socketOnMessage(event) {
+    if(curState == stateEnum.looping) {
+        socketOnLoopMessage(event);
+    } else {
+        socketOnInitMessage(event);
+    }
+}
+
+function socketOnInitMessage(event) {
+    var data = JSON.parse(event.data);
+    var results = data["Results"];
+    // appendLog(`Data received: ${results}`);
+    setAutoTrackerIcon("statusOK");
+
+    if(curState == stateEnum.listing) {
+        if(results.length == 0) {
+            appendLog("\u274C no device found");
+            closeSocket();
+        } else if(results.length > 1) {
+            appendLog("\u274C too many devices found, please connect only one");
+            closeSocket();
+        } else {
+            var device = results;
+            appendLog(`\u2705 device found: ${device}`);
+
+            appendLog("\u2026 Attaching to Device");
+            sendAutoTrackerMessage({
+                "Opcode" : "Attach",
+                "Space" : "SNES",
+                "Operands" : device
+            }, stateEnum.infoing);
+
+            // tell qusb our app name
+            appendLog("\u2026 Send VARIA app name");
+            sendAutoTrackerMessage({
+                "Opcode" : "Name",
+                "Space" : "SNES",
+                "Operands": ["VARIA Tracker"]
+            }, stateEnum.infoing);
+
+            // send info command to validate attaching, we can send it right away as there's a queue in qusb
+            appendLog("\u2026 Getting Device Info");
+            sendAutoTrackerMessage({
+                "Opcode" : "Info",
+                "Space" : "SNES"
+            }, stateEnum.infoing);
+
+        }
+    } else if(curState == stateEnum.infoing) {
+        appendLog(`\u2705 info received: ${results}`);
+        appendLog(`\u2705 device attached`);
+
+        // start loop, update state
+        curState = stateEnum.looping;
+
+        // ask socket to return an arraybuffer instead of a blob
+        socket.binaryType = "arraybuffer";
+
+        // first data retrieval
+        curDataState = dataEnum.state;
+        askForData();
+    } else {
+        appendLog(`\u274C unknown receiving state ${curState}`);
+        closeSocket();
+    }
+}
+
+function socketOnLoopMessage(event) {
+    setAutoTrackerIcon("statusOK");
+    handleData(event.data);
+}
+
+function socketOnClose(event) {
+    if (event.wasClean) {
+        appendLog(`\u2705 Connection closed cleanly`);
+        console.log(`socketOnClose clean: code=${event.code} reason=${event.reason}`);
+    } else {
+        // e.g. server process killed or network down
+        // event.code is usually 1006 in this case
+        appendLog('\u274C Connection died');
+        console.log(`socketOnClose not clean: code=${event.code} reason=${event.reason}`);
+    }
+    // stop running timeout
+    clearTimeout(timeout);
+
+    // update state & interface
+    curState = stateEnum.closed;
+    setAutoTrackerIcon("statusNA");
+    displayStartButton();
+}
+
+function socketOnError(error) {
+    appendLog("\u274C Connection error");
+
+    // stop running timeout
+    clearTimeout(timeout);
+
+    // update state & interface
+    curState = stateEnum.closed;
+    setAutoTrackerIcon("statusKO");
+    displayStartButton();
+}
+
+// called to request datas from qusb
+function askForData() {
+    // check current state
+    if(curState != stateEnum.looping) {
+        appendLog(`\u274C Wrong state: ${curState}`);
+        closeSocket();
+    } else {
+        var metadata = dataToAsk[curDataState];
+        askedDataSize = 0;
+        var ranges = [];
+
+        for(var i=0; i<metadata.length; i++) {
+            askedDataSize += metadata[i].size;
+            ranges.push(metadata[i].address);
+            ranges.push(metadata[i].size.toString(16));
+        }
+
+        appendLog(`\u2026 Asking ${askedDataSize} bytes of Data`);
+
+        transfertStart = Date.now();
+        sendAutoTrackerMessage({
+            "Opcode" : "GetAddress",
+            "Space" : "SNES",
+            "Operands": ranges
+        }, stateEnum.looping);
+        setAutoTrackerIcon("statusLoad");
+    }
+}
+
+function readWord(array, addr) {
+    return (array[addr+1]<<8) + array[addr];
+}
+
+function getGameStateName(gameStateCode) {
+    switch(gameStateCode) {
+        case '0': return "Reset/start";
+        case '1': return "Opening. Cinematic";
+        case '2': return "Game options menu";
+        case '3': return "Nothing (RTS)";
+        case '4': return "Save game menus";
+        case '5': return "Loading game map view";
+        case '6': return "Loading game data";
+        case '7': return "Setting game up after loading the game";
+        case '8': return "Main gameplay";
+        case '9': return "Hit a door block";
+        case 'a': return "Loading next room";
+        case 'b': return "Loading next room";
+        case 'c': return "Pausing, normal gameplay but darkening";
+        case 'd': return "Pausing, loading pause screen";
+        case 'e': return "Paused, loading pause screen";
+        case 'f': return "Paused, map and item screens";
+        case '10': return "Unpausing, loading normal gameplay";
+        case '11': return "Unpausing, loading normal gameplay";
+        case '12': return "Unpausing, normal gameplay but brightening";
+        case '13': return "Samus ran out of health";
+        case '14': return "Samus ran out of health, black out surroundings";
+        case '15': return "Samus ran out of health, black out surroundings";
+        case '16': return "Samus ran out of health, starting death animation";
+        case '17': return "Samus ran out of health, flashing";
+        case '18': return "Samus ran out of health, explosion";
+        case '19': return "Samus ran out of health, black out (also cut to by time up death)";
+        case '1a': return "Game over screen";
+        case '1b': return "Reserve tanks auto";
+        case '1c': return "Unused. Does JMP ($0DEA) ($0DEA is never set to a pointer)";
+        case '1d': return "Debug game over menu (end/continue)";
+        case '1e': return "Intro. Cinematic. Set up entirely new game with cutscenes";
+        case '1f': return "Set up new game. Post-intro";
+        case '20': return "Made it to Ceres elevator";
+        case '21': return "Blackout from Ceres";
+        case '22': return "Ceres goes boom, Samus goes to Zebes. Cinematic";
+        case '23': return "Time up";
+        case '24': return "Whiting out from time up";
+        case '25': return "Ceres goes boom with Samus. Cinematic";
+        case '26': return "Samus escapes from Zebes. Transition from main gameplay to ending and credits";
+        case '27': return "Ending and credits. Cinematic";
+        case '28': return "Transition to demo";
+        case '29': return "Transition to demo";
+        case '2a': return "Playing demo";
+        case '2b': return "Transition from demo";
+        case '2c': return "Transition from demo";
+        default: return `Unkown game state (${gameStateCode})`;
+    }
+}
+
+// $079B: Room pointer
+// $079D: Room index
+// $079F: Area index
+// {
+//     0: Crateria
+//     1: Brinstar
+//     2: Norfair
+//     3: Wrecked Ship
+//     4: Maridia
+//     5: Tourian
+//     6: Ceres
+//     7: Debug
+// }
+// $07A1: Room X co-ordinate (on map)
+// $07A3: Room Y co-ordinate (on map)
+// $07A5: Room width in blocks
+// $07A7: Room height in blocks
+// 
+// $07F7..08F6: Map tiles explored (for current area). One bit per room. Laid out like a 64x32 1bpp VRAM tilemap: 2x1 pages of 32x32 map tiles (80h bytes per page, 4 bytes per row, 1 bit per tile), each byte is 8 map tiles where the most significant bit is the leftmost tile. The first row is padding and skipped during index calculation ($90:A8A6), that is, room (0, 0) maps to $07FB rather than $07F7
+// 
+// $7E:CD52..CE51: Crateria map tiles explored.     See current area map tiles explored at $07F7
+// $7E:CE52..CF51: Brinstar map tiles explored.     See current area map tiles explored at $07F7
+// $7E:CF52..D051: Norfair map tiles explored.      See current area map tiles explored at $07F7
+// $7E:D052..D151: Wrecked Ship map tiles explored. See current area map tiles explored at $07F7
+// $7E:D152..D251: Maridia map tiles explored.      See current area map tiles explored at $07F7
+// $7E:D252..D351: Tourian map tiles explored.      See current area map tiles explored at $07F7
+// $7E:D352..D451: Ceres map tiles explored.        See current area map tiles explored at $07F7
+// $7E:D452..D551: Debug map tiles explored.        See current area map tiles explored at $07F7
+
+// managed data returned by qusb
+function handleData(data) {
+    var chunk = new Uint8Array(data);
+    var chunkSize = chunk.length
+    receivedDataSize += chunkSize;
+    receivedData.push(chunk);
+    console.log(`\u2026 get: ${chunkSize} (${receivedDataSize}/${askedDataSize})`);
+
+    if(receivedDataSize >= askedDataSize) {
+        appendLog(`\u2705 All data received`);
+
+        if(curDataState == dataEnum.state) {
+            var duration = Date.now() - transfertStart;
+            appendLog(`\u2705 State data received in ${duration}ms`);
+
+            // we have only one chunk
+            if(receivedData.length != 1) {
+                // something is wrong
+                appendLog("\u274C State data was received in more than one chunk");
+                closeSocket();
+            } else {
+                var data = receivedData[0];
+
+                // biggest valid game state
+                var maxGameState = 0x2c;
+                var mainGameplayState = 8;
+
+                var gameState = readWord(data, 0x00);
+                var gameStateName = getGameStateName(gameState.toString(16));
+                // appendLog(`\u2026 Game state: ${gameStateName}`);
+
+                var debugMode = readWord(data, 0x2);
+                // appendLog(`\u2026 Debug Mode: ${debugMode}`);
+
+                // check if game is running and is metroid
+                if(debugMode == 0 && gameState < maxGameState) {
+                    if(gameState == mainGameplayState) {
+                        appendLog(`\u2705 Super Metroid gameplay state: ${gameStateName}`);
+                        // ask map data
+                        askNextData(dataEnum.map, true);
+                    } else {
+                        appendLog(`\u231B Super Metroid other state: ${gameStateName}`);
+                        askNextData(dataEnum.state, false);
+                    }
+                } else {
+                    appendLog("\u231B Super Metroid is not running");
+                    askNextData(dataEnum.state, false);
+                }
+            }
+        } else if(curDataState == dataEnum.map) {
+            var duration = Date.now() - transfertStart;
+            appendLog(`\u2705 Map data received in ${duration}ms`);
+
+            // TODO::extract the data we want from map data
+
+            // rearm timer for next data retrieval
+            askNextData(dataEnum.state, false);
+        }
+    }
+}
+
+function askNextData(newDataState, now) {
+    // reset data vars
+    askedDataSize = 0;
+    receivedDataSize = 0;
+    receivedData = [];
+    curDataState = newDataState;
+
+    if(now) {
+        askForData();
+    } else {
+        timeout = setTimeout(askForData, waitingTime);
+    }
+}
+
+function sendAutoTrackerMessage(data, newState) {
+    // console.log("sendAutoTrackerMessage debug: "+JSON.stringify(data));
+
+    socket.send(JSON.stringify(data));
+
+    // update state
+    curState = newState;
+
+    // update interface
+    setAutoTrackerIcon("statusLoad");
+}
 </script>
 
 <div class="fixed">
@@ -151,8 +638,23 @@ function onloadHook() {}
     <div id="repeatItem" class="repeatItem"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc(false)" data-toggle="tooltip" title="Remove last visited location" data-placement="bottom" data-container="body" data-html="true" id="repeatItemImg"></div>
     <div id="binItem" class="binItem"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs(false)" data-toggle="tooltip" title="Remove all visited locations" data-placement="bottom" data-container="body" data-html="true"></div>
 
+    <!-- tracker help -->
     <div id="help" class="help"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the help" data-placement="bottom" data-container="body" data-html="true"></div>
 
+    <!-- auto tracker -->
+    <div id="titleAutoTracker">AUTO TRACKER</div>
+    <div id="startStopAutoTracker">
+      <img id="startAutoTracker" src="/solver/static/images/play.svg" alt="Start AutoTracker" onclick="startAutoTracker()" data-toggle="tooltip" title="Start the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
+      <img id="stopAutoTracker" src="/solver/static/images/shut_down.svg" alt="Stop AutoTracker" style="display: none" onclick="stopAutoTracker()" data-toggle="tooltip" title="Stop the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
+    </div>
+    <div id="helpAutoTracker"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(1)" data-toggle="tooltip" title="Display the AutoTracker help" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="statusAutoTracker">
+      <img id="statusKO" src="/solver/static/images/record_ko.svg" alt="statusKO" style="display: none" data-toggle="tooltip" title="AutoTracker status OK" data-placement="bottom" data-container="body" data-html="true">
+      <img id="statusOK" src="/solver/static/images/record_ok.svg" alt="statusOK" style="display: none" data-toggle="tooltip" title="AutoTracker status KO" data-placement="bottom" data-container="body" data-html="true">
+      <img id="statusLoad" src="/solver/static/images/record_load.svg" alt="statusLoad" style="display: none" data-toggle="tooltip" title="AutoTracker status Load" data-placement="bottom" data-container="body" data-html="true">
+      <img id="statusNA" src="/solver/static/images/record.svg" alt="statusNA" data-toggle="tooltip" title="AutoTracker status NA" data-placement="bottom" data-container="body" data-html="true">
+    </div>
+    <textarea id="logAutoTracker" disabled></textarea>
   </div>
 
   <!-- info on current loaded seed -->

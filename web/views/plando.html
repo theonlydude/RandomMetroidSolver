@@ -174,7 +174,7 @@ function initCurMode() {
 var g_lock = "save";
 var plandoROM = null;
 async function save(lock) {
-    if(loaded == false || webServInProgress == true || init == false) {
+    if(interfaceIsFrozen()) {
         return;
     }
     if(! isActive("savePlando")) {
@@ -242,7 +242,7 @@ async function save(lock) {
 }
 
 function randomize() {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
   if(! isActive("randoPlando")) {
@@ -520,7 +520,7 @@ function hidePlandoButtons() {
 }
 
 function displayDebugPopup() {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
   document.getElementById("debugPopup").style.display = "block";
@@ -794,7 +794,7 @@ function isDesactivated(elemId) {
 }
 
 function displayRandoPopup() {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
 

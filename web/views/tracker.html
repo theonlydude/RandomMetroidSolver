@@ -356,7 +356,16 @@ function displayStartButton() {
 }
 
 function startAutoTracker() {
-    if(loaded == false || webServInProgress == true || init == false) {
+    if(interfaceIsFrozen()) {
+        return;
+    }
+
+    if(mode == 'seedless') {
+        alert("Auto Tracker is incompatible with seedless mode, please load the seed to track first");
+        return;
+    }
+    if(mode == 'race') {
+        alert("Auto Tracker is disabled with race protected seeds");
         return;
     }
 
@@ -371,6 +380,7 @@ function startAutoTracker() {
 
     // update state
     curState = stateEnum.opening;
+    autoTrackInProgress = true;
 
     // update interface
     displayStopButton();
@@ -393,7 +403,7 @@ function closeSocket() {
 }
 
 function stopAutoTracker() {
-    if(loaded == false || webServInProgress == true || init == false) {
+    if(loaded == false || webServInProgress == true || init == false || autoTrackInProgress == false) {
         return;
     }
 
@@ -509,6 +519,7 @@ function socketOnClose(event) {
     // update state & interface
     cleanupBuffer();
     curState = stateEnum.closed;
+    autoTrackInProgress = false;
     setAutoTrackerIcon("statusNA");
     displayStartButton();
 }
@@ -522,6 +533,7 @@ function socketOnError(error) {
     // update state & interface
     cleanupBuffer();
     curState = stateEnum.closed;
+    autoTrackInProgress = false;
     setAutoTrackerIcon("statusKO");
     displayStartButton();
 }

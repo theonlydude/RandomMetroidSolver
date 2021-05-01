@@ -379,7 +379,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
 
     if(lastAction != null && lastAction["action"] != "init") {
         if(lastAction["scope"] == "area") {
-            updateLines(jsonData);
+            updateLines(jsonData, false);
         }
         if(mode == "debug") {
             updateDebugLines(jsonData);
@@ -387,7 +387,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     } else {
         // load everything
         updateGlobal(jsonData);
-        updateLines(jsonData);
+        updateLines(jsonData, true);
         if(mode == "debug") {
             updateDebugLines(jsonData);
         }
@@ -546,7 +546,14 @@ function updateGlobal(jsonData) {
     setActive(mode, area, boss, escapeRando);
 }
 
-function updateLines(jsonData) {
+function updateLines(jsonData, reset) {
+    if(reset) {
+        for(var startPoint in lines) {
+            // updating a dict while looping on it ?? let's try
+            removeLine(startPoint, lines[startPoint]);
+        }
+    }
+
     // add missing area transitions
     var arrayLength = jsonData["linesSeq"].length;
     for(var i=0; i<arrayLength; i++) {

@@ -240,7 +240,10 @@ var dataToAsk = {
         {"address": "F50AFA", "size": 0x2},
         {"address": "F5079B", "size": 0x0a}]
 }
-var curDataState = 0;
+// use an array listing the data to retrieve, the chain is init at auto tracker start
+var dataToAskChain = [];
+// the current position in the chain
+var dataToAskStep = 0;
 
 // maps
 var mapOffsetEnum = {
@@ -490,7 +493,7 @@ function socketOnInitMessage(event) {
         socket.binaryType = "arraybuffer";
 
         // first data retrieval
-        curDataState = dataEnum.state;
+        initDataChain();
         askForData();
     } else {
         appendLog(`\u274C unknown receiving state ${curState}`);
@@ -545,7 +548,7 @@ function askForData() {
         appendLog(`\u274C Wrong state: ${curState}`);
         closeSocket();
     } else {
-        var metadata = dataToAsk[curDataState];
+        var metadata = dataToAsk[dataToAskChain[dataToAskStep]];
         askedDataSize = 0;
         var ranges = [];
 
@@ -631,9 +634,7 @@ function handleData(data) {
     console.log(`\u2026 get: ${chunkSize} (${receivedDataSize}/${askedDataSize})`);
 
     if(receivedDataSize >= askedDataSize) {
-        // appendLog(`\u2705 All data received curDataState: ${curDataState}`);
-
-        if(curDataState == dataEnum.state) {
+        if(dataToAskChain[dataToAskStep] == dataEnum.state) {
             var duration = Date.now() - transfertStart;
             appendLog(`\u2705 State data received in ${duration}ms`);
 
@@ -660,19 +661,17 @@ function handleData(data) {
                 if(debugMode == 0 && gameState < maxGameState) {
                     if(gameState == mainGameplayState) {
                         appendLog(`\u2705 Super Metroid gameplay state: ${gameStateName}`);
-                        // ask map data
-                        //askNextData(dataEnum.map, true);
-                        askNextData(dataEnum.curMap, true);
+                        askNextData();
                     } else {
                         appendLog(`\u231B Super Metroid other state: ${gameStateName}`);
-                        askNextData(dataEnum.state, false);
+                        resetNextDataChain();
                     }
                 } else {
                     appendLog("\u231B Super Metroid is not running");
-                    askNextData(dataEnum.state, false);
+                    resetNextDataChain();
                 }
             }
-        } else if(curDataState == dataEnum.map) {
+        } else if(dataToAskChain[dataToAskStep] == dataEnum.map) {
             var duration = Date.now() - transfertStart;
             appendLog(`\u2705 Map data received in ${duration}ms`);
 
@@ -684,9 +683,8 @@ function handleData(data) {
             // display debug map for now
             displayDebugMap(mapData, mapOffsetEnum.crateria);
 
-            // rearm timer for next data retrieval
-            askNextData(dataEnum.state, false);
-        } else if(curDataState == dataEnum.curMap) {
+            askNextData();
+        } else if(dataToAskChain[dataToAskStep] == dataEnum.curMap) {
             var duration = Date.now() - transfertStart;
             appendLog(`\u2705 Current Map data received in ${duration}ms`);
 
@@ -697,8 +695,8 @@ function handleData(data) {
 
             displayDebugMap(mapData, mapOffsetEnum.curMap);
 
-            askNextData(dataEnum.samus, true);
-        } else if(curDataState = dataEnum.samus) {
+            askNextData();
+        } else if(dataToAskChain[dataToAskStep] = dataEnum.samus) {
             var duration = Date.now() - transfertStart;
             appendLog(`\u2705 Samus data received in ${duration}ms`);
 
@@ -729,7 +727,7 @@ function handleData(data) {
             displaySamus(byteIndex, bitMask);
 
             // rearm timer for next data retrieval
-            askNextData(dataEnum.state, false);
+            askNextData();
         }
     }
 }
@@ -850,16 +848,63 @@ function cleanupBuffer() {
     receivedData = [];
 }
 
-function askNextData(newDataState, now) {
+function initDataChain() {
+    // always ask for game state first
+    dataToAskChain = [dataEnum.state];
+
+    // ask item locs
+    // dataToAskChain.push(dataEnum.items);
+
+    // ask area data
+    if(area || boss) {
+        dataToAskChain.push(dataEnum.map);
+        dataToAskChain.push(dataEnum.curMap);
+    }
+
+    // ask samus position to display it on the map
+    dataToAskChain.push(dataEnum.samus);
+
+    // start at the beginning of the chain
+    dataToAskStep = 0;
+}
+
+// called after a state upload to rearm the timer
+function postAjaxHook() {
+    resetNextDataChain();
+}
+
+function resetNextDataChain() {
+    cleanupBuffer();
+    // start at the beginning of the chain
+    dataToAskStep = 0;
+    // rearm timer
+    timeout = setTimeout(askForData, waitingTime);
+}
+
+function askNextData() {
     // reset data vars
     cleanupBuffer();
-    curDataState = newDataState;
 
-    if(now) {
+    dataToAskStep++;
+
+    if(dataToAskStep < dataToAskChain.length) {
+        // next step
         askForData();
     } else {
-        timeout = setTimeout(askForData, waitingTime);
+        // we've collected all the required data, check if there's a state change,
+        // return true if no state change, so we can rearm the timer
+        if(checkCollectedData()) {
+            // restart chain
+            resetNextDataChain();
+        }
     }
+}
+
+function checkCollectedData() {
+    // TODO::implement
+
+    // rearm the timer for next data retrieval
+    return true;
 }
 
 function sendAutoTrackerMessage(data, newState) {

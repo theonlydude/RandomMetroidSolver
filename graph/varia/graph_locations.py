@@ -958,9 +958,9 @@ class LocationsHelper:
                 "Missile (pink Brinstar bottom)"
             ], ["Charge Beam"], 1, 2),
             'Etecoons Supers': ([
-                "Energy Tank, Etecoons",
-                "Super Missile (green Brinstar bottom)"
-            ], ["Energy Tank, Etecoons"], 1, 2),
+                "Super Missile (green Brinstar bottom)",
+                "Energy Tank, Etecoons"
+            ], [], 1, 2),
             'Firefleas Top': ([
                 "Power Bomb (lower Norfair above fire flea room)",
                 "Energy Tank, Firefleas",

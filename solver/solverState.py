@@ -78,6 +78,8 @@ class SolverState(object):
         else:
             self.state["innerTransitions"] = {}
             self.state["innerTransitionsSeq"] = []
+        # has nothing: bool
+        self.state["hasNothing"] = solver.hasNothing
         # doors colors: dict {name: (color, facing, hidden)}
         self.state["doors"] = DoorsManager.serialize()
         # doorsRando: bool
@@ -112,6 +114,7 @@ class SolverState(object):
         solver.lastAP = self.state["lastAP"]
         solver.mode = self.state["mode"]
         solver.seed = self.state["seed"]
+        solver.hasNothing = self.state["hasNothing"]
         DoorsManager.unserialize(self.state["doors"])
         solver.doorsRando = self.state["doorsRando"]
 

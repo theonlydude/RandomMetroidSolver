@@ -546,6 +546,7 @@ function updateGlobal(jsonData) {
     seed = jsonData["seed"];
     preset = jsonData["preset"];
     doorsRando = jsonData["doorsRando"];
+    hasNothing = jsonData["hasNothing"];
     init = true;
 
     document.getElementById("mode").value = mode;
@@ -776,6 +777,7 @@ var init = false;
 var webServInProgress = false;
 var doorsRando = false;
 var autoTrackInProgress = false;
+var hasNothing = false;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "break"]

@@ -211,13 +211,16 @@ var dataEnum = {
     "state": 1,
     "map": 2,
     "curMap": 3,
-    "samus": 4
+    "samus": 4,
+    "items": 5,
+    "boss": 6
 }
 // 1. state:
 // $0998: Game state
 // $05D1: Debug. Debug mode. Set to [$80:8004] during boot / soft reset
 
 // 2. map:
+// used for area/boss transitions - doors - nothing
 // CD52 -> D251: map tiles for: Crateria + Brinstar + Norfair + Wrecked Ship + Maridia
 
 // 3. curmap:
@@ -231,6 +234,21 @@ var dataEnum = {
 // $079F: Area index
 // $07A1: Room X co-ordinate (on map)
 // $07A3: Room Y co-ordinate (on map)
+
+// 5. items
+// $7E:D870..AF: Item bit array. $90h..AF are unused. See "Item PLMs.asm"
+// loc id is used to index in it
+
+// 6. boss
+// $7E:D828..2F: Boss bits. Indexed by area
+//     1: Area boss (Kraid, Phantoon, Draygon, both Ridleys)
+//     2: Area mini-boss (Spore Spawn, Botwoon, Crocomire, Mother Brain)
+//     4: Area torizo (Bomb Torizo, Golden Torizo)
+//
+// Kraid: 0x48     byte index: 0x09 - bit mask: 0x01
+// Ridley: 0x50    byte index: 0x0a - bit mask: 0x01
+// Phantoon: 0x58  byte index: 0x0b - bit mask: 0x01
+// Draygon: 0x60   byte index: 0x0c - bit mask: 0x01
 var dataToAsk = {
     1: [{"address": "F50998", "size": 0x2},
         {"address": "F505D1", "size": 0x2}],
@@ -238,7 +256,9 @@ var dataToAsk = {
     3: [{"address": "F507F7", "size": 0x100}],
     4: [{"address": "F50AF6", "size": 0x2},
         {"address": "F50AFA", "size": 0x2},
-        {"address": "F5079B", "size": 0x0a}]
+        {"address": "F5079B", "size": 0x0a}],
+    5: [{"address": "F5D870", "size": 0x20}],
+    6: [{"address": "F5D828", "size": 0x8}]
 }
 // use an array listing the data to retrieve, the chain is init at auto tracker start
 var dataToAskChain = [];
@@ -638,38 +658,31 @@ function handleData(data) {
             var duration = Date.now() - transfertStart;
             appendLog(`\u2705 State data received in ${duration}ms`);
 
-            // we have only one chunk
-            if(receivedData.length != 1) {
-                // something is wrong
-                appendLog("\u274C State data was received in more than one chunk");
-                closeSocket();
-            } else {
-                var data = receivedData[0];
+            var stateData = concatArrays(dataEnum.state);
 
-                // biggest valid game state
-                var maxGameState = 0x2c;
-                var mainGameplayState = 8;
+            // biggest valid game state
+            var maxGameState = 0x2c;
+            var mainGameplayState = 0x08;
 
-                var gameState = readWord(data, 0x00);
-                var gameStateName = getGameStateName(gameState.toString(16));
-                // appendLog(`\u2026 Game state: ${gameStateName}`);
+            var gameState = readWord(stateData, 0x00);
+            var gameStateName = getGameStateName(gameState.toString(16));
+            // appendLog(`\u2026 Game state: ${gameStateName}`);
 
-                var debugMode = readWord(data, 0x2);
-                // appendLog(`\u2026 Debug Mode: ${debugMode}`);
+            var debugMode = readWord(stateData, 0x02);
+            // appendLog(`\u2026 Debug Mode: ${debugMode}`);
 
-                // check if game is running and is metroid
-                if(debugMode == 0 && gameState < maxGameState) {
-                    if(gameState == mainGameplayState) {
-                        appendLog(`\u2705 Super Metroid gameplay state: ${gameStateName}`);
-                        askNextData();
-                    } else {
-                        appendLog(`\u231B Super Metroid other state: ${gameStateName}`);
-                        resetNextDataChain();
-                    }
+            // check if game is running and is metroid
+            if(debugMode == 0 && gameState < maxGameState) {
+                if(gameState == mainGameplayState) {
+                    appendLog(`\u2705 Super Metroid gameplay state: ${gameStateName}`);
+                    askNextData();
                 } else {
-                    appendLog("\u231B Super Metroid is not running");
+                    appendLog(`\u231B Super Metroid other state: ${gameStateName}`);
                     resetNextDataChain();
                 }
+            } else {
+                appendLog("\u231B Super Metroid is not running");
+                resetNextDataChain();
             }
         } else if(dataToAskChain[dataToAskStep] == dataEnum.map) {
             var duration = Date.now() - transfertStart;
@@ -696,7 +709,7 @@ function handleData(data) {
             displayDebugMap(mapData, mapOffsetEnum.curMap);
 
             askNextData();
-        } else if(dataToAskChain[dataToAskStep] = dataEnum.samus) {
+        } else if(dataToAskChain[dataToAskStep] == dataEnum.samus) {
             var duration = Date.now() - transfertStart;
             appendLog(`\u2705 Samus data received in ${duration}ms`);
 
@@ -726,7 +739,26 @@ function handleData(data) {
             // console.log(`cur byteIndex: ${byteIndex} bitMask: ${bitMask} room: ${roomPointer.toString(16)} area: ${areaEnum[areaIndex]}`);
             displaySamus(byteIndex, bitMask);
 
-            // rearm timer for next data retrieval
+            askNextData();
+        } else if(dataToAskChain[dataToAskStep] == dataEnum.items) {
+            var duration = Date.now() - transfertStart;
+            appendLog(`\u2705 Items data received in ${duration}ms`);
+
+            // concatenate all arrays
+            var ItemsData = concatArrays(dataEnum.items);
+
+            // TODO::use it
+
+            askNextData();
+        } else if(dataToAskChain[dataToAskStep] == dataEnum.boss) {
+            var duration = Date.now() - transfertStart;
+            appendLog(`\u2705 Boss data received in ${duration}ms`);
+
+            // concatenate all arrays
+            var bossData = concatArrays(dataEnum.boss);
+
+            // TODO::use it
+
             askNextData();
         }
     }
@@ -852,11 +884,12 @@ function initDataChain() {
     // always ask for game state first
     dataToAskChain = [dataEnum.state];
 
-    // ask item locs
-    // dataToAskChain.push(dataEnum.items);
+    // ask item locs & boss
+    dataToAskChain.push(dataEnum.items);
+    dataToAskChain.push(dataEnum.boss);
 
-    // ask area data
-    if(area || boss) {
+    // ask map data
+    if(area || boss || doorsRando || hasNothing) {
         dataToAskChain.push(dataEnum.map);
         dataToAskChain.push(dataEnum.curMap);
     }

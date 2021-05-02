@@ -41,6 +41,7 @@ class CommonSolver(object):
             # set doors related to default patches
             DoorsManager.setDoorsColor()
             self.doorsRando = False
+            self.hasNothing = False
         else:
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
@@ -53,6 +54,7 @@ class CommonSolver(object):
             RomPatches.ActivePatches += startPatches
             self.escapeTimer = self.romLoader.getEscapeTimer()
             self.doorsRando = self.romLoader.loadDoorsColor()
+            self.hasNothing = self.checkLocsForNothing()
 
             if interactive == False:
                 print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {} activePatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches()), sorted(RomPatches.ActivePatches)))
@@ -110,6 +112,10 @@ class CommonSolver(object):
             mania: infinity
         }
         return nextDiffs[difficulty]
+
+    def checkLocsForNothing(self):
+        # for the auto tracker, need to know if we have to track nothing items
+        return any(loc.itemName == "Nothing" for loc in self.locations)
 
     def computeLocationsDifficulty(self, locations, phase="major"):
         difficultyTarget = Conf.difficultyTarget

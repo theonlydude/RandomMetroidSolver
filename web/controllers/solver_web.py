@@ -1844,6 +1844,7 @@ class WS(object):
                 "last": state["last"],
                 "innerTransitions": state["innerTransitions"],
                 "innerTransitionsSeq": state["innerTransitionsSeq"],
+                "hasNothing": state["hasNothing"],
 
                 # doors
                 "doors": state["doors"],

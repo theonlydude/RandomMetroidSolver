@@ -141,6 +141,8 @@ class ItemLocContainer(object):
         return ret
 
     def removeLocation(self, location):
+        # self.log.debug("removeLocation: "+location.Name)
+        # self.log.debug("unusedLocations: "+getLocListStr(self.unusedLocations))
         if location in self.unusedLocations:
             self.unusedLocations.remove(location)
         else:

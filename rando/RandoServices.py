@@ -2,7 +2,7 @@
 import utils.log, copy, random, sys, logging
 from enum import Enum, unique
 from utils.parameters import infinity
-from rando.ItemLocContainer import getLocListStr, getItemListStr, ContainerSoftBackup, ItemLocation
+from rando.ItemLocContainer import getLocListStr, getItemListStr, getItemLocStr, ItemLocation
 from logic.helpers import Bosses
 
 # used to specify whether we want to come back from locations
@@ -368,93 +368,22 @@ class RandoServices(object):
         curLocs = self.currentLocations(ap, container, post=True)
         return len(curLocs) == len(container.unusedLocations)
 
-    def getStartupProgItemsPairs(self, ap, container):
-        self.log.debug("getStartupProgItemsPairs: kickstart")
+    def findStartupProgItemPair(self, ap, container):
+        self.log.debug("findStartupProgItemPair")
         (itemLocDict, isProg) = self.getPossiblePlacements(ap, container, ComebackCheckType.NoCheck)
-
-        # save container
-        saveEmptyContainer = ContainerSoftBackup(container)
-
-        # key is (item1, item2)
-        pairItemLocDict = {}
-
-        # keep only unique items in itemLocDict
-        uniqItemLocDict = {}
-        for item, locs in itemLocDict.items():
-            if item.Type in ['NoEnergy', 'Nothing']:
-                continue
-            if item.Type not in [it.Type for it in uniqItemLocDict.keys()]:
-                uniqItemLocDict[item] = locs
-        if not uniqItemLocDict:
-            return None
-
-        if self.cache:
-            self.cache.reset()
-        curLocsBefore = self.currentLocations(ap, container)
-        if not curLocsBefore:
-            return None
-
-        self.log.debug("search for progression with a second item")
-        for item1, locs1 in uniqItemLocDict.items():
-            # collect first item in first available location matching restrictions
-            if self.cache:
-                self.cache.reset()
-            firstItemPlaced = False
-            for loc in curLocsBefore:
-                if self.restrictions.canPlaceAtLocation(item1, loc, container):
-                    self.log.debug("getStartupProgItemsPairs. firstItemPlaced")
-                    container.collect(ItemLocation(item1, loc))
-                    firstItemPlaced = True
-                    break
-            if not firstItemPlaced:
-                saveEmptyContainer.restore(container)
-                continue
-
-            saveAfterFirst = ContainerSoftBackup(container)
-
-            curLocsAfterFirst = self.currentLocations(ap, container)
-            if not curLocsAfterFirst:
-                saveEmptyContainer.restore(container)
-                continue
-
-            for item2, locs2 in uniqItemLocDict.items():
-                if item1.Type == item2.Type:
-                    continue
-
-                if (item1, item2) in pairItemLocDict.keys() or (item2, item1) in pairItemLocDict.keys():
-                    continue
-
-                # collect second item in first available location
-                if self.cache:
-                    self.cache.reset()
-                secondItemPlaced = False
-                for loc in curLocsAfterFirst:
-                    if self.restrictions.canPlaceAtLocation(item2, loc, container):
-                        container.collect(ItemLocation(item2, loc))
-                        secondItemPlaced = True
-                        break
-                if not secondItemPlaced:
-                    saveAfterFirst.restore(container)
-                    continue
-
-                curLocsAfterSecond = self.currentLocations(ap, container)
-                if not curLocsAfterSecond:
-                    saveAfterFirst.restore(container)
-                    continue
-
-                pairItemLocDict[(item1, item2)] = [curLocsBefore, curLocsAfterFirst, curLocsAfterSecond]
-                saveAfterFirst.restore(container)
-
-            saveEmptyContainer.restore(container)
-
-        # check if a pair was found
-        if len(pairItemLocDict) == 0:
-            self.log.debug("no pair was found")
-            return None
-        else:
-            if self.log.getEffectiveLevel() == logging.DEBUG:
-                self.log.debug("pairItemLocDict:")
-                for key, locs in pairItemLocDict.items():
-                    self.log.debug("{}->{}: {}".format(key[0].Type, key[1].Type, [l['Name'] for l in locs[2]]))
-
-            return pairItemLocDict
+        assert not isProg
+        items = list(itemLocDict.keys())
+        random.shuffle(items)
+        for item in items:
+            cont = copy.copy(container)
+            loc = random.choice(itemLocDict[item])
+            itemLoc1 = ItemLocation(item, loc)
+            self.log.debug("itemLoc1 attempt: "+getItemLocStr(itemLoc1))
+            newAP = self.collect(ap, cont, itemLoc1)
+            (ild, isProg) = self.getPossiblePlacements(newAP, cont, ComebackCheckType.NoCheck)
+            if isProg:
+                item2 = random.choice(list(ild.keys()))
+                itemLoc2 = ItemLocation(item2, random.choice(ild[item2]))
+                self.log.debug("itemLoc2: "+getItemLocStr(itemLoc2))
+                return (itemLoc1, itemLoc2)
+        return None

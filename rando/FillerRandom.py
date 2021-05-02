@@ -146,11 +146,13 @@ class FrontFillerKickstart(FrontFiller):
             return super(FrontFillerKickstart, self).step(onlyBossCheck)
 
         self.cache.reset()
-        pairItemLocDict = self.services.getStartupProgItemsPairs(self.ap, self.container)
-        if pairItemLocDict == None:
+        pair = self.services.findStartupProgItemPair(self.ap, self.container)
+        if pair == None:
             # no pair found or prog item found
-            return
-        self.collectPair(pairItemLocDict)
+            return False
+        itemLoc1, itemLoc2 = pair
+        self.collect(itemLoc1)
+        self.collect(itemLoc2)
         # we've collected two items, increase the number of steps
         self.nSteps += 1
 

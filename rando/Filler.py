@@ -95,17 +95,6 @@ class Filler(object):
         if self.vcr is not None and containerArg is None:
             self.vcr.addLocation(location.Name, item.Type)
 
-    # collect item pair as returned by RandoServices.getStartupProgItemsPairs
-    def collectPair(self, pairItemLocDict):
-        # choose a pair of items which create progression
-        keys = list(pairItemLocDict.keys())
-        key = random.choice(keys)
-
-        # collect them
-        availableLocs = pairItemLocDict[key]
-        self.collect(ItemLocation(key[0], availableLocs[0][0]))
-        self.collect(ItemLocation(key[1], availableLocs[1][0]))
-
     # called by generateItems at the end to knows which particulier
     # item/locations were progression, if the info is available
     def getProgressionItemLocations(self):

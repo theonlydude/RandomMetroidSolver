@@ -1,7 +1,7 @@
 import copy
 
 from rom.compression import Compressor
-from graph.graph_utils import GraphUtils, getAccessPoint
+from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
 from logic.logic import Logic
 
 class RomReader:
@@ -526,3 +526,15 @@ class RomReader:
                 break
 
         return (startAP, startArea, startPatches)
+
+    # go read all location IDs for item split. used to get major/chozo locs in non standard start
+    def getLocationsIds(self):
+        ret = []
+        for area,addr in locIdsByAreaAddresses.items():
+            self.romFile.seek(addr)
+            while True:
+               idByte = self.romFile.readByte()
+               if idByte == 0xff:
+                   break
+               ret.append(idByte)
+        return ret

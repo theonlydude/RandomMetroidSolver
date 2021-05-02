@@ -4,9 +4,9 @@ from rando.Items import ItemManager
 from rom.compression import Compressor
 from rom.ips import IPS_Patch
 from utils.doorsmanager import DoorsManager
-from graph.graph_utils import GraphUtils, getAccessPoint
+from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
 from logic.logic import Logic
-from rom.rom import RealROM, FakeROM, snes_to_pc
+from rom.rom import RealROM, FakeROM
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir
 
@@ -148,20 +148,6 @@ class RomPatcher:
                     self.patchMorphBallEye(item)
 
     def writeSplitLocs(self, itemLocs, split):
-        listAddresses = {
-            "Ceres": snes_to_pc(0xA1F568),
-            "Crateria": snes_to_pc(0xA1F569),
-            "GreenPinkBrinstar": snes_to_pc(0xA1F57B),
-            "RedBrinstar": snes_to_pc(0xA1F58C),
-            "WreckedShip": snes_to_pc(0xA1F592),
-            "Kraid": snes_to_pc(0xA1F59E),
-            "Norfair": snes_to_pc(0xA1F5A2),
-            "Crocomire": snes_to_pc(0xA1F5B2),
-            "LowerNorfair": snes_to_pc(0xA1F5B8),
-            "WestMaridia": snes_to_pc(0xA1F5C3),
-            "EastMaridia": snes_to_pc(0xA1F5CB),
-            "Tourian": snes_to_pc(0xA1F5D7)
-        }
         majChozoCheck = lambda itemLoc: (itemLoc.Item.Class == split and split in itemLoc.Location.Class)
         splitChecks = {
             'Full': lambda itemLoc: itemLoc.Location.Id is not None,
@@ -170,7 +156,7 @@ class RomPatcher:
             'FullWithHUD': lambda itemLoc: itemLoc.Item.Category not in ['Energy', 'Ammo', 'Boss']
         }
         itemLocCheck = lambda itemLoc: itemLoc.Item.Category != "Nothing" and splitChecks[split](itemLoc)
-        for area,addr in listAddresses.items():
+        for area,addr in locIdsByAreaAddresses.items():
             ids = [il.Location.Id for il in itemLocs if itemLocCheck(il) and il.Location.GraphArea == area]
             self.romFile.seek(addr)
             for idByte in ids:

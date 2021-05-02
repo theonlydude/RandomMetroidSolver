@@ -3,6 +3,7 @@ import random
 from logic.logic import Logic
 from utils.parameters import Knows
 from graph.location import locationsDict
+from rom.rom import snes_to_pc
 import utils.log
 
 # order expected by ROM patches
@@ -67,6 +68,20 @@ vanillaEscapeAnimalsTransitions = [
 escapeSource = 'Tourian Escape Room 4 Top Right'
 escapeTargets = ['Green Brinstar Main Shaft Top Left', 'Basement Left', 'Business Center Mid Left', 'Crab Hole Bottom Right']
 
+locIdsByAreaAddresses = {
+    "Ceres": snes_to_pc(0xA1F568),
+    "Crateria": snes_to_pc(0xA1F569),
+    "GreenPinkBrinstar": snes_to_pc(0xA1F57B),
+    "RedBrinstar": snes_to_pc(0xA1F58C),
+    "WreckedShip": snes_to_pc(0xA1F592),
+    "Kraid": snes_to_pc(0xA1F59E),
+    "Norfair": snes_to_pc(0xA1F5A2),
+    "Crocomire": snes_to_pc(0xA1F5B2),
+    "LowerNorfair": snes_to_pc(0xA1F5B8),
+    "WestMaridia": snes_to_pc(0xA1F5C3),
+    "EastMaridia": snes_to_pc(0xA1F5CB),
+    "Tourian": snes_to_pc(0xA1F5D7)
+}
 
 def getAccessPoint(apName, apList=None):
     if apList is None:

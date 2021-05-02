@@ -151,6 +151,14 @@ class RomLoader(object):
     def readLogic(self):
         return self.romReader.readLogic()
 
+    def updateSplitLocs(self, split, locations):
+        locIds = self.romReader.getLocationsIds()
+        for loc in locations:
+            if loc.Id in locIds:
+                loc.setClass([split])
+            else:
+                loc.setClass(["Minor"])
+
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)
     def __init__(self, romFileName, magic=None):

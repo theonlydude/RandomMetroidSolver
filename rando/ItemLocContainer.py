@@ -135,8 +135,6 @@ class ItemLocContainer(object):
     def removeLocation(self, location):
         if location in self.unusedLocations:
             self.unusedLocations.remove(location)
-        else:
-            self.unusedLocations.remove(next(loc for loc in self.unusedLocations if loc.Name == location.Name))
 
     def removeItem(self, item):
         self.itemPool.remove(item)

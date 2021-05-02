@@ -92,6 +92,9 @@ class Location:
 
         return ret
 
+    def __eq__(self, other):
+        return self.Name == other.Name
+
 def define_location(
         Area, GraphArea, SolveArea, Name, Class, CanHidden, Address, Id,
         Visibility, Room, AccessFrom=None, Available=None, PostAvailable=None):

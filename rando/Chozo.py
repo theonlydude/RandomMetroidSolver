@@ -55,8 +55,7 @@ class ChozoWrapperFiller(Filler):
         # this will create a new smbm with new knows functions
         cont = self.baseContainer.slice(itemCond, locCond)
         secondPhaseItems = [item for item in self.baseContainer.itemPool if item not in cont.itemPool]
-        contLocs = self.baseContainer.extractLocs(cont.unusedLocations)
-        secondPhaseLocs = [loc for loc in self.baseContainer.unusedLocations if loc not in contLocs]
+        secondPhaseLocs = [loc for loc in self.baseContainer.unusedLocations if loc not in cont.unusedLocations]
         self.log.debug("prepareFirstPhase. 1st phase container="+cont.dump())
         self.log.debug("prepareFirstPhase. secondPhaseItems="+getItemListStr(secondPhaseItems))
         self.log.debug("prepareFirstPhase. secondPhaseLocs="+getLocListStr(secondPhaseLocs))

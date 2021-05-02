@@ -132,17 +132,7 @@ class ItemLocContainer(object):
         self.itemPoolBackup = None
         self.log.debug("unrestrictItemPool: "+getItemListStr(self.itemPool))
 
-    # utility function that exists only because locations are lame dictionaries.
-    # extract from this container locations matching the ones given
-    def extractLocs(self, locs):
-        ret = []
-        for loc in locs:
-            ret.append(next(l for l in self.unusedLocations if l.Name == loc.Name))
-        return ret
-
     def removeLocation(self, location):
-        # self.log.debug("removeLocation: "+location.Name)
-        # self.log.debug("unusedLocations: "+getLocListStr(self.unusedLocations))
         if location in self.unusedLocations:
             self.unusedLocations.remove(location)
         else:

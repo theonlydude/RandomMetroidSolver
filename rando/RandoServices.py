@@ -210,7 +210,7 @@ class RandoServices(object):
                     # choose a morph item location in that context
                     morphItemLoc = ItemLocation(
                         morph,
-                        random.choice(containerCpy.extractLocs(morphLocs))
+                        random.choice(morphLocs)
                     )
                     # acquire morph in new context and see if we can still open new locs
                     newAP = self.collect(ap, containerCpy, morphItemLoc)
@@ -380,6 +380,8 @@ class RandoServices(object):
             itemLoc1 = ItemLocation(item, loc)
             self.log.debug("itemLoc1 attempt: "+getItemLocStr(itemLoc1))
             newAP = self.collect(ap, cont, itemLoc1)
+            if self.cache is not None:
+                self.cache.reset()
             (ild, isProg) = self.getPossiblePlacements(newAP, cont, ComebackCheckType.NoCheck)
             if isProg:
                 item2 = random.choice(list(ild.keys()))

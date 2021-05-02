@@ -9,6 +9,7 @@ from logic.logic import Logic
 from rom.rom import RealROM, FakeROM
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir
+import utils.log
 
 def getWord(w):
     return (w & 0x00FF, (w & 0xFF00) >> 8)
@@ -83,6 +84,7 @@ class RomPatcher:
     }
 
     def __init__(self, romFileName=None, magic=None, plando=False):
+        self.log = utils.log.get('RomPatcher')
         self.romFileName = romFileName
         self.race = None
         if romFileName == None:
@@ -148,7 +150,7 @@ class RomPatcher:
                     self.patchMorphBallEye(item)
 
     def writeSplitLocs(self, itemLocs, split):
-        majChozoCheck = lambda itemLoc: (itemLoc.Item.Class == split and split in itemLoc.Location.Class)
+        majChozoCheck = lambda itemLoc: itemLoc.Item.Class == split and itemLoc.Location.isClass(split)
         splitChecks = {
             'Full': lambda itemLoc: itemLoc.Location.Id is not None,
             'Major': majChozoCheck,
@@ -157,10 +159,12 @@ class RomPatcher:
         }
         itemLocCheck = lambda itemLoc: itemLoc.Item.Category != "Nothing" and splitChecks[split](itemLoc)
         for area,addr in locIdsByAreaAddresses.items():
-            ids = [il.Location.Id for il in itemLocs if itemLocCheck(il) and il.Location.GraphArea == area]
+            locs = [il.Location for il in itemLocs if itemLocCheck(il) and il.Location.GraphArea == area]
+            self.log.debug("writeSplitLocs. area="+area)
+            self.log.debug(str([loc.Name for loc in locs]))
             self.romFile.seek(addr)
-            for idByte in ids:
-                self.romFile.writeByte(idByte)
+            for loc in locs:
+                self.romFile.writeByte(loc.Id)
             self.romFile.writeByte(0xff)
 
     # trigger morph eye enemy on whatever item we put there,

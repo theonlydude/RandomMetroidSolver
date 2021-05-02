@@ -89,6 +89,7 @@ class Location:
         ret.AccessFrom = self.AccessFrom
         ret.Available = self.Available
         ret.PostAvailable = self.PostAvailable
+        ret.setClass(self.Class)
 
         return ret
 

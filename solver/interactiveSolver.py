@@ -173,6 +173,9 @@ class InteractiveSolver(CommonSolver):
             elif action == 'toggle':
                 doorName = params['doorName']
                 DoorsManager.switchVisibility(doorName)
+        elif scope == 'dump':
+            if action == 'import':
+                self.importDump(params["dump"])
 
         self.areaGraph = AccessGraph(Logic.accessPoints, self.curGraphTransitions)
 
@@ -641,3 +644,155 @@ class InteractiveSolver(CommonSolver):
         # in interactive solver we don't have the max difficulty parameter
         epsilon = 0.001
         return hard - epsilon
+
+    bossBitMasks = {
+        "Kraid": {"byteIndex": 0x09, "bitMask": 0x01},
+        "Ridley": {"byteIndex": 0x0a, "bitMask": 0x01},
+        "Phantoon": {"byteIndex": 0x0b, "bitMask": 0x01},
+        "Draygon": {"byteIndex": 0x0c, "bitMask": 0x01}
+    }
+
+    areaAccessPoints = {
+        "Lower Mushrooms Left": {"byteIndex": 36, "bitMask": 1, "room": 0x9969, "area": "Crateria"},
+        "Green Pirates Shaft Bottom Right": {"byteIndex": 37, "bitMask": 16, "room": 0x99bd, "area": "Crateria"},
+        "Moat Right": {"byteIndex": 148, "bitMask": 4, "room": 0x95ff, "area": "Crateria"},
+        "Keyhunter Room Bottom": {"byteIndex": 156, "bitMask": 32, "room": 0x948c, "area": "Crateria"},
+        "Morph Ball Room Left": {"byteIndex": 46, "bitMask": 4, "room": 0x9e9f, "area": "Brinstar"},
+        "Green Brinstar Elevator": {"byteIndex": 36, "bitMask": 2, "room": 0x9938, "area": "Crateria"},
+        "Green Hill Zone Top Right": {"byteIndex": 46, "bitMask": 8, "room": 0x9e52, "area": "Brinstar"},
+        "Noob Bridge Right": {"byteIndex": 184, "bitMask": 128, "room": 0x9fba, "area": "Brinstar"},
+        "West Ocean Left": {"byteIndex": 148, "bitMask": 2, "room": 0x93fe, "area": "Crateria"},
+        "Crab Maze Left": {"byteIndex": 170, "bitMask": 4, "room": 0x957d, "area": "Crateria"},
+        "Lava Dive Right": {"byteIndex": 47, "bitMask": 64, "room": 0xaf14, "area": "Norfair"},
+        "Three Muskateers Room Left": {"byteIndex": 19, "bitMask": 2, "room": 0xb656, "area": "Norfair"},
+        "Warehouse Zeela Room Left": {"byteIndex": 205, "bitMask": 8, "room": 0xa471, "area": "Brinstar"},
+        "Warehouse Entrance Left": {"byteIndex": 205, "bitMask": 64, "room": 0xa6a1, "area": "Brinstar"},
+        "Warehouse Entrance Right": {"byteIndex": 205, "bitMask": 16, "room": 0xa6a1, "area": "Brinstar"},
+        "Single Chamber Top Right": {"byteIndex": 19, "bitMask": 4, "room": 0xad5e, "area": "Norfair"},
+        "Kronic Boost Room Bottom Left": {"byteIndex": 47, "bitMask": 32, "room": 0xae74, "area": "Norfair"},
+        "Crocomire Speedway Bottom": {"byteIndex": 41, "bitMask": 1, "room": 0xa923, "area": "Norfair"},
+        "Crocomire Room Top": {"byteIndex": 45, "bitMask": 1, "room": 0xa98d, "area": "Norfair"},
+        "Main Street Bottom": {"byteIndex": 69, "bitMask": 16, "room": 0xcfc9, "area": "Maridia"},
+        "Crab Hole Bottom Left": {"byteIndex": 74, "bitMask": 128, "room": 0xd21c, "area": "Maridia"},
+        "Red Fish Room Left": {"byteIndex": 33, "bitMask": 8, "room": 0xd104, "area": "Maridia"},
+        "Crab Shaft Right": {"byteIndex": 46, "bitMask": 16, "room": 0xd1a3, "area": "Maridia"},
+        "Aqueduct Top Left": {"byteIndex": 46, "bitMask": 8, "room": 0xd5a7, "area": "Maridia"},
+        "Le Coude Right": {"byteIndex": 170, "bitMask": 8, "room": 0x95a8, "area": "Crateria"},
+        "Red Tower Top Left": {"byteIndex": 184, "bitMask": 64, "room": 0xa253, "area": "Brinstar"},
+        "Caterpillar Room Top Right": {"byteIndex": 160, "bitMask": 1, "room": 0xa322, "area": "Brinstar"},
+        "Red Brinstar Elevator": {"byteIndex": 160, "bitMask": 32, "room": 0x962a, "area": "Crateria"},
+        "East Tunnel Right": {"byteIndex": 77, "bitMask": 8, "room": 0xcf80, "area": "Maridia"},
+        "East Tunnel Top Right": {"byteIndex": 73, "bitMask": 1, "room": 0xcf80, "area": "Maridia"},
+        "Glass Tunnel Top": {"byteIndex": 73, "bitMask": 16, "room": 0xcefb, "area": "Maridia"},
+        "Golden Four": {"byteIndex": 37, "bitMask": 8, "room": 0xa5ed, "area": "Crateria"}
+    }
+
+    bossAccessPoints = {
+        "PhantoonRoomOut": {"byteIndex": 82, "bitMask": 32, "room": 0xcc6f, "area": "WreckedShip"},
+        "PhantoonRoomIn": {"byteIndex": 82, "bitMask": 16, "room": 0xcd13, "area": "WreckedShip"},
+        "RidleyRoomOut": {"byteIndex": 71, "bitMask": 128, "room": 0xb37a, "area": "Norfair"},
+        "RidleyRoomIn": {"byteIndex": 70, "bitMask": 1, "room": 0xb32e, "area": "Norfair"},
+        "KraidRoomOut": {"byteIndex": 210, "bitMask": 2, "room": 0xa56b, "area": "Brinstar"},
+        "KraidRoomIn": {"byteIndex": 210, "bitMask": 1, "room": 0xa59f, "area": "Brinstar"},
+        "DraygonRoomOut": {"byteIndex": 169, "bitMask": 64, "room": 0xd78f, "area": "Maridia"},
+        "DraygonRoomIn": {"byteIndex": 169, "bitMask": 128, "room": 0xda60, "area": "Maridia"}
+    }
+
+    mapOffsetEnum = {
+        "Crateria": 0,
+        "Brinstar": 0x100,
+        "Norfair": 0x200,
+        "WreckedShip": 0x300,
+        "Maridia": 0x400
+    }
+
+    def importDump(self, dumpFileName):
+        with open(dumpFileName, 'r') as jsonFile:
+            dumpData = json.load(jsonFile)
+
+        dataEnum = {
+            "state": '1',
+            "map": '2',
+            "curMap": '3',
+            "samus": '4',
+            "items": '5',
+            "boss": '6'
+        }
+
+        currentState = dumpData["currentState"]
+
+        for dataType, offset in dumpData["stateDataOffsets"].items():
+            if dataType == dataEnum["items"]:
+                # get item data, loop on all locations to check if they have been visited
+                for loc in self.locations:
+                    # loc id is used to index in the items data, boss locations don't have an Id
+                    if loc.Id is None:
+                        continue
+                    byteIndex = loc.Id >> 3
+                    bitMask = 0x01 << (loc.Id & 7)
+                    if currentState[offset + byteIndex] & bitMask != 0:
+                        if loc not in self.visitedLocations:
+                            print("add visited loc: {}".format(loc.Name))
+                            self.pickItemAt(self.locNameInternal2Web(loc.Name))
+                    else:
+                        if loc in self.visitedLocations:
+                            print("remove visited loc: {}".format(loc.Name))
+                            self.removeItemAt(self.locNameInternal2Web(loc.Name))
+            elif dataType == dataEnum["boss"]:
+                for boss, bossData in self.bossBitMasks.items():
+                    byteIndex = bossData["byteIndex"]
+                    bitMask = bossData["bitMask"]
+                    loc = self.getLoc(boss)
+                    if currentState[offset + byteIndex] & bitMask != 0:
+                        if loc not in self.visitedLocations:
+                            print("add boss loc: {}".format(loc.Name))
+                            self.pickItemAt(self.locNameInternal2Web(loc.Name))
+                    else:
+                        if loc in self.visitedLocations:
+                            print("remove visited boss loc: {}".format(loc.Name))
+                            self.removeItemAt(self.locNameInternal2Web(loc.Name))
+            elif dataType == dataEnum["map"]:
+                if self.areaRando or self.bossRando:
+                    availAPs = set()
+                    for apName, apData in self.areaAccessPoints.items():
+                        if self.isAPAvailable(currentState, offset, apData):
+                            availAPs.add(apName)
+                    for apName, apData in self.bossAccessPoints.items():
+                        if self.isAPAvailable(currentState, offset, apData):
+                            availAPs.add(apName)
+
+                    # static transitions
+                    if self.areaRando == True and self.bossRando == True:
+                        staticTransitions = []
+                        possibleTransitions = self.bossTransitions + self.areaTransitions
+                    elif self.areaRando == True:
+                        staticTransitions = self.bossTransitions[:]
+                        possibleTransitions = self.areaTransitions[:]
+                    elif self.bossRando == True:
+                        staticTransitions = self.areaTransitions[:]
+                        possibleTransitions = self.bossTransitions[:]
+                    if self.escapeRando == False:
+                        staticTransitions += self.escapeTransition
+
+                    # remove static transitions from current transitions
+                    dynamicTransitions = self.curGraphTransitions[:]
+                    for transition in self.curGraphTransitions:
+                        if transition in staticTransitions:
+                            dynamicTransitions.remove(transition)
+
+                    # remove dynamic transitions not visited
+                    for transition in dynamicTransitions:
+                        if transition[0] not in availAPs and transition[1] not in availAPs:
+                            print("remove transition: {}".format(transition))
+                            self.curGraphTransitions.remove(transition)
+
+                    # add new transitions
+                    for transition in possibleTransitions:
+                        if transition[0] in availAPs and transition[1] in availAPs:
+                            print("add transition: {}".format(transition))
+                            self.curGraphTransitions.append(transition)
+
+    def isAPAvailable(self, currentState, offset, apData):
+        byteIndex = apData["byteIndex"]
+        bitMask = apData["bitMask"]
+        return currentState[offset + byteIndex + self.mapOffsetEnum[apData["area"]]] & bitMask != 0

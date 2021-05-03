@@ -1051,7 +1051,7 @@ function checkCollectedData() {
     var crc32 = new Crc32();
     crc32.update(currentState);
     var newStateChksum = crc32.digest();
-    console.log(`newStateChksum: ${newStateChksum}`);
+    console.log(`State Checksum: ${newStateChksum}`);
 
     if(newStateChksum == previousStateChksum) {
         appendLog("\u2705 State is the same");
@@ -1064,11 +1064,23 @@ function checkCollectedData() {
         previousStateChksum = newStateChksum;
 
         // send state to backend
-        // TODO
+        ajaxCall({action: "import",
+                  scope: "dump",
+                  stateDataOffsets: JSON.stringify(stateDataOffsets),
+                  currentState: jsonArray(currentState)}, "upload");
 
-        //return false;
-        return true;
+        return false;
     }
+}
+
+function jsonArray(array) {
+    // json.stringify on a uint8array changes it to a dict...
+    var ret = '['+array[0];
+    for(var i=1; i<array.length; i++) {
+        ret += ', '+array[i];
+    }
+    ret += ']';
+    return ret;
 }
 
 function populateCurrentState() {
@@ -1078,9 +1090,8 @@ function populateCurrentState() {
     // add data to state
     for(var j=0; j<dataToAskChain.length; j++) {
         if(dataToAskChain[j] == dataEnum.items) {
-            var curOffset = stateDataOffsets[dataToAskChain[i]];
+            var curOffset = stateDataOffsets[dataToAskChain[j]];
             for(var i=0; i<itemsData.length; i++) {
-                var value = itemsData[i] & stateBitMasks[curOffset + i];
                 currentState[curOffset + i] = itemsData[i] & stateBitMasks[curOffset + i];
             }
         } else if(dataToAskChain[j] == dataEnum.boss) {

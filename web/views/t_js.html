@@ -382,7 +382,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     }
 
     if(lastAction != null && lastAction["action"] != "init") {
-        if(lastAction["scope"] == "area") {
+        if(lastAction["scope"] == "area" || lastAction["scope"] == "dump") {
             updateLines(jsonData, false);
         }
         if(mode == "debug") {

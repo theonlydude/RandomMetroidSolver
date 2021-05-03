@@ -4,6 +4,8 @@
 
 <title>Super Metroid VARIA Randomizer Tracker</title>
 
+<script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
+
 <style>
 {{include 'solver_web/t_style.html'}}
 
@@ -206,6 +208,22 @@ var receivedDataSize = 0;
 var receivedData = [];
 var transfertStart = 0;
 
+// current and previous step data, uint8array
+var stateArraySize = 0;
+var currentState = undefined;
+// data offsets in the state
+var stateDataOffsets = {};
+// to know if something changed
+var previousStateChksum = 0;
+// bit masks to apply on state to extract data we use
+var stateBitMasks = undefined;
+
+// array for each data we get
+var itemsData = undefined;
+var bossData = undefined;
+var mapData = undefined;
+var samusData = undefined;
+
 // different data that we ask
 var dataEnum = {
     "state": 1,
@@ -244,11 +262,6 @@ var dataEnum = {
 //     1: Area boss (Kraid, Phantoon, Draygon, both Ridleys)
 //     2: Area mini-boss (Spore Spawn, Botwoon, Crocomire, Mother Brain)
 //     4: Area torizo (Bomb Torizo, Golden Torizo)
-//
-// Kraid: 0x48     byte index: 0x09 - bit mask: 0x01
-// Ridley: 0x50    byte index: 0x0a - bit mask: 0x01
-// Phantoon: 0x58  byte index: 0x0b - bit mask: 0x01
-// Draygon: 0x60   byte index: 0x0c - bit mask: 0x01
 var dataToAsk = {
     1: [{"address": "F50998", "size": 0x2},
         {"address": "F505D1", "size": 0x2}],
@@ -268,11 +281,11 @@ var dataToAskStep = 0;
 // maps
 var mapOffsetEnum = {
     "curMap": 0,
-    "crateria": 0,
-    "brinstar": 0x100,
-    "norfair": 0x200,
-    "wreckedShip": 0x300,
-    "maridia": 0x400
+    "Crateria": 0,
+    "Brinstar": 0x100,
+    "Norfair": 0x200,
+    "WreckedShip": 0x300,
+    "Maridia": 0x400
 }
 
 // samus
@@ -291,13 +304,14 @@ var areaEnum = {
     0: "Crateria",
     1: "Brinstar",
     2: "Norfair",
-    3: "Wrecked Ship",
+    3: "WreckedShip",
     4: "Maridia",
     5: "Tourian",
     6: "Ceres",
     7: "Debug"
 }
 
+// bit masks for all datas
 var areaAccessPoints = {
     "Lower Mushrooms Left": {"byteIndex": 36, "bitMask": 1, "room": 0x9969, "area": "Crateria"},
     "Green Pirates Shaft Bottom Right": {"byteIndex": 37, "bitMask": 16, "room": 0x99bd, "area": "Crateria"},
@@ -334,8 +348,8 @@ var areaAccessPoints = {
 }
 
 var bossAccessPoints = {
-    "PhantoonRoomOut": {"byteIndex": 82, "bitMask": 32, "room": 0xcc6f, "area": "Wrecked Ship"},
-    "PhantoonRoomIn": {"byteIndex": 82, "bitMask": 16, "room": 0xcd13, "area": "Wrecked Ship"},
+    "PhantoonRoomOut": {"byteIndex": 82, "bitMask": 32, "room": 0xcc6f, "area": "WreckedShip"},
+    "PhantoonRoomIn": {"byteIndex": 82, "bitMask": 16, "room": 0xcd13, "area": "WreckedShip"},
     "RidleyRoomOut": {"byteIndex": 71, "bitMask": 128, "room": 0xb37a, "area": "Norfair"},
     "RidleyRoomIn": {"byteIndex": 70, "bitMask": 1, "room": 0xb32e, "area": "Norfair"},
     "KraidRoomOut": {"byteIndex": 210, "bitMask": 2, "room": 0xa56b, "area": "Brinstar"},
@@ -344,6 +358,35 @@ var bossAccessPoints = {
     "DraygonRoomIn": {"byteIndex": 169, "bitMask": 128, "room": 0xda60, "area": "Maridia"}
 }
 
+// Kraid: 0x48     byte index: 0x09 - bit mask: 0x01
+// Ridley: 0x50    byte index: 0x0a - bit mask: 0x01
+// Phantoon: 0x58  byte index: 0x0b - bit mask: 0x01
+// Draygon: 0x60   byte index: 0x0c - bit mask: 0x01
+var bossBitMasks = {
+    "Kraid": {"byteIndex": 0x09, "bitMask": 0x01},
+    "Ridley": {"byteIndex": 0x0a, "bitMask": 0x01},
+    "Phantoon": {"byteIndex": 0x0b, "bitMask": 0x01},
+    "Draygon": {"byteIndex": 0x0c, "bitMask": 0x01}
+}
+
+// in js dict keys are strings
+var itemsBitMasks = {
+    0x00: 0xFF,
+    0x01: 0xFF,
+    0x02: 0xFF,
+    0x03: 0xFF,
+    0x04: 0xFF,
+    0x05: 0xFF,
+    0x06: 0xFF,
+    0x07: 0xFF,
+    0x08: 0xFF,
+    0x09: 0xFF,
+    0x0A: 0xFF,
+    0x10: 0xFF,
+    0x11: 0xFF,
+    0x12: 0xFF,
+    0x13: 0xFF
+}
 function resetLog() {
     document.getElementById("logAutoTracker").value = "";
 }
@@ -688,25 +731,30 @@ function handleData(data) {
             var duration = Date.now() - transfertStart;
             appendLog(`\u2705 Map data received in ${duration}ms`);
 
-            // TODO::extract the data we want from map data
-
             // concatenate all arrays
-            var mapData = concatArrays(dataEnum.map);
-
-            // display debug map for now
-            displayDebugMap(mapData, mapOffsetEnum.crateria);
+            mapData = concatArrays(dataEnum.map);
 
             askNextData();
         } else if(dataToAskChain[dataToAskStep] == dataEnum.curMap) {
             var duration = Date.now() - transfertStart;
             appendLog(`\u2705 Current Map data received in ${duration}ms`);
 
-            // TODO::extract the data we want from map data
-
             // concatenate all arrays
-            var mapData = concatArrays(dataEnum.curMap);
+            var curMapData = concatArrays(dataEnum.curMap);
 
-            displayDebugMap(mapData, mapOffsetEnum.curMap);
+            // replace current map data in map data
+            var areaIndex = readWord(samusData, samusEnum.areaIndex);
+            var tourianAreaIndex = 5;
+            if(areaIndex < tourianAreaIndex) {
+                var mapOffset = mapOffsetEnum[areaEnum[areaIndex]];
+                var mapSize = 0x100;
+
+                for(var i=0; i<mapSize; i++) {
+                    mapData[mapOffset+i] = curMapData[i];
+                }
+
+                displayDebugMap(mapData, mapOffsetEnum.curMap);
+            }
 
             askNextData();
         } else if(dataToAskChain[dataToAskStep] == dataEnum.samus) {
@@ -714,7 +762,7 @@ function handleData(data) {
             appendLog(`\u2705 Samus data received in ${duration}ms`);
 
             // concatenate all arrays
-            var samusData = concatArrays(dataEnum.samus);
+            samusData = concatArrays(dataEnum.samus);
 
             // extract data we need
             var samusX = readWord(samusData, samusEnum.x);
@@ -745,9 +793,7 @@ function handleData(data) {
             appendLog(`\u2705 Items data received in ${duration}ms`);
 
             // concatenate all arrays
-            var ItemsData = concatArrays(dataEnum.items);
-
-            // TODO::use it
+            itemsData = concatArrays(dataEnum.items);
 
             askNextData();
         } else if(dataToAskChain[dataToAskStep] == dataEnum.boss) {
@@ -755,24 +801,27 @@ function handleData(data) {
             appendLog(`\u2705 Boss data received in ${duration}ms`);
 
             // concatenate all arrays
-            var bossData = concatArrays(dataEnum.boss);
-
-            // TODO::use it
+            bossData = concatArrays(dataEnum.boss);
 
             askNextData();
         }
     }
 }
 
+function getDataSize(dataType) {
+    var metadata = dataToAsk[dataType];
+    var dataSize = 0;
+    for(var i=0; i<metadata.length; i++) {
+        dataSize += metadata[i].size;
+    }
+    return dataSize;
+}
+
 function concatArrays(dataType) {
     if(receivedData.length == 1) {
         return receivedData[0];
     } else {
-        var metadata = dataToAsk[dataType];
-        var dataSize = 0;
-        for(var i=0; i<metadata.length; i++) {
-            dataSize += metadata[i].size;
-        }
+        dataSize = getDataSize(dataType);
 
         var data = new Uint8Array(dataSize);
         var curPos = 0;
@@ -884,21 +933,81 @@ function initDataChain() {
     // always ask for game state first
     dataToAskChain = [dataEnum.state];
 
+    stateDataOffsets = {};
+    var curOffset = 0;
+
     // ask item locs & boss
     dataToAskChain.push(dataEnum.items);
-    dataToAskChain.push(dataEnum.boss);
+    stateDataOffsets[dataEnum.items] = curOffset;
+    curOffset += getDataSize(dataEnum.items);
 
-    // ask map data
+    dataToAskChain.push(dataEnum.boss);
+    stateDataOffsets[dataEnum.boss] = curOffset;
+    curOffset += getDataSize(dataEnum.boss);
+
+    // ask samus position to know the current map area
+    dataToAskChain.push(dataEnum.samus);
+
+    // ask optional map data
     if(area || boss || doorsRando || hasNothing) {
         dataToAskChain.push(dataEnum.map);
+        stateDataOffsets[dataEnum.map] = curOffset;
+        curOffset += getDataSize(dataEnum.map);
+
         dataToAskChain.push(dataEnum.curMap);
     }
 
-    // ask samus position to display it on the map
-    dataToAskChain.push(dataEnum.samus);
-
     // start at the beginning of the chain
     dataToAskStep = 0;
+
+    // instantiate state/mask arrays (arrays are initialized with zeros)
+    stateArraySize = curOffset;
+    currentState = new Uint8Array(stateArraySize);
+    stateBitMasks = new Uint8Array(stateArraySize);
+    previousStateChksum = 0;
+    computeStateBitMasks();
+}
+
+function computeStateBitMasks() {
+    var curOffset = 0;
+
+    for(var i=0; i<dataToAskChain.length; i++) {
+        if(dataToAskChain[i] == dataEnum.items) {
+            var curOffset = stateDataOffsets[dataEnum.items];
+            for(var byteIndex in itemsBitMasks) {
+                // in js dict keys are strings
+                byteIndexInt = parseInt(byteIndex);
+                stateBitMasks[curOffset + byteIndexInt] |= itemsBitMasks[byteIndex];
+            }
+        } else if(dataToAskChain[i] == dataEnum.boss) {
+            var curOffset = stateDataOffsets[dataEnum.boss];
+            for(var bossName in bossBitMasks) {
+                stateBitMasks[curOffset + bossBitMasks[bossName]["byteIndex"]] |= bossBitMasks[bossName]["bitMask"];
+            }
+        } else if(dataToAskChain[i] == dataEnum.map) {
+            var curOffset = stateDataOffsets[dataEnum.map];
+            if(area) {
+                // loop on areaAccessPoints
+                for(var apName in areaAccessPoints) {
+                    var apData = areaAccessPoints[apName];
+                    stateBitMasks[curOffset + apData["byteIndex"] + mapOffsetEnum[apData["area"]]] |= apData["bitMask"];
+                }
+            }
+            if(boss) {
+                // loop on bossAccessPoints
+                for(var apName in bossAccessPoints) {
+                    var apData = bossAccessPoints[apName];
+                    stateBitMasks[curOffset + apData["byteIndex"] + mapOffsetEnum[apData["area"]]] |= apData["bitMask"];
+                }
+            }
+            if(doorsRando) {
+                // TODO
+            }
+            if(hasNothing) {
+                // TODO
+            }
+        }
+    }
 }
 
 // called after a state upload to rearm the timer
@@ -934,10 +1043,58 @@ function askNextData() {
 }
 
 function checkCollectedData() {
-    // TODO::implement
+    // populate state
+    populateCurrentState();
 
-    // rearm the timer for next data retrieval
-    return true;
+    // compute crc32
+    // TODO::check if we can reuse the same crc32 instance
+    var crc32 = new Crc32();
+    crc32.update(currentState);
+    var newStateChksum = crc32.digest();
+    console.log(`newStateChksum: ${newStateChksum}`);
+
+    if(newStateChksum == previousStateChksum) {
+        appendLog("\u2705 State is the same");
+
+        // rearm the timer for next data retrieval
+        return true;
+    } else {
+        appendLog("\u2705 New state detected");
+
+        previousStateChksum = newStateChksum;
+
+        // send state to backend
+        // TODO
+
+        //return false;
+        return true;
+    }
+}
+
+function populateCurrentState() {
+    // reset current state
+    currentState.fill(0);
+
+    // add data to state
+    for(var j=0; j<dataToAskChain.length; j++) {
+        if(dataToAskChain[j] == dataEnum.items) {
+            var curOffset = stateDataOffsets[dataToAskChain[i]];
+            for(var i=0; i<itemsData.length; i++) {
+                var value = itemsData[i] & stateBitMasks[curOffset + i];
+                currentState[curOffset + i] = itemsData[i] & stateBitMasks[curOffset + i];
+            }
+        } else if(dataToAskChain[j] == dataEnum.boss) {
+            var curOffset = stateDataOffsets[dataEnum.boss];
+            for(var i=0; i<bossData.length; i++) {
+                currentState[curOffset + i] = bossData[i] & stateBitMasks[curOffset + i];
+            }
+        } else if(dataToAskChain[j] == dataEnum.map) {
+            var curOffset = stateDataOffsets[dataEnum.map];
+            for(var i=0; i<mapData.length; i++) {
+                currentState[curOffset + i] = mapData[i] & stateBitMasks[curOffset + i];
+            }
+        }
+    }
 }
 
 function sendAutoTrackerMessage(data, newState) {

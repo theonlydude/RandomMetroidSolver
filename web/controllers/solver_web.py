@@ -14,6 +14,7 @@ import urllib.parse
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, diff4solver
 from utils.parameters import Knows, Settings, Controller, isKnows, isButton
 from solver.conf import Conf
+from solver.interactiveSolver import InteractiveSolver
 from utils.parameters import diff2text, text2diff
 from utils.utils import PresetLoader, removeChars, getDefaultMultiValues
 from utils.db import DB
@@ -1688,7 +1689,12 @@ def tracker():
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
-                curSession=session.tracker, addresses=addresses, startAPs=startAPs)
+                curSession=session.tracker, addresses=addresses, startAPs=startAPs,
+                areaAccessPoints=InteractiveSolver.areaAccessPoints,
+                bossAccessPoints=InteractiveSolver.bossAccessPoints,
+                nothingScreens=InteractiveSolver.nothingScreens,
+                doorsScreen=InteractiveSolver.doorsScreen,
+                bossBitMasks=InteractiveSolver.bossBitMasks)
 
 def plando():
     response.title = 'Super Metroid VARIA Areas and Items Plandomizer'

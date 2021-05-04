@@ -312,62 +312,11 @@ var areaEnum = {
 }
 
 // bit masks for all datas
-var areaAccessPoints = {
-    "Lower Mushrooms Left": {"byteIndex": 36, "bitMask": 1, "room": 0x9969, "area": "Crateria"},
-    "Green Pirates Shaft Bottom Right": {"byteIndex": 37, "bitMask": 16, "room": 0x99bd, "area": "Crateria"},
-    "Moat Right": {"byteIndex": 148, "bitMask": 4, "room": 0x95ff, "area": "Crateria"},
-    "Keyhunter Room Bottom": {"byteIndex": 156, "bitMask": 32, "room": 0x948c, "area": "Crateria"},
-    "Morph Ball Room Left": {"byteIndex": 46, "bitMask": 4, "room": 0x9e9f, "area": "Brinstar"},
-    "Green Brinstar Elevator": {"byteIndex": 36, "bitMask": 2, "room": 0x9938, "area": "Crateria"},
-    "Green Hill Zone Top Right": {"byteIndex": 46, "bitMask": 8, "room": 0x9e52, "area": "Brinstar"},
-    "Noob Bridge Right": {"byteIndex": 184, "bitMask": 128, "room": 0x9fba, "area": "Brinstar"},
-    "West Ocean Left": {"byteIndex": 148, "bitMask": 2, "room": 0x93fe, "area": "Crateria"},
-    "Crab Maze Left": {"byteIndex": 170, "bitMask": 4, "room": 0x957d, "area": "Crateria"},
-    "Lava Dive Right": {"byteIndex": 47, "bitMask": 64, "room": 0xaf14, "area": "Norfair"},
-    "Three Muskateers Room Left": {"byteIndex": 19, "bitMask": 2, "room": 0xb656, "area": "Norfair"},
-    "Warehouse Zeela Room Left": {"byteIndex": 205, "bitMask": 8, "room": 0xa471, "area": "Brinstar"},
-    "Warehouse Entrance Left": {"byteIndex": 205, "bitMask": 64, "room": 0xa6a1, "area": "Brinstar"},
-    "Warehouse Entrance Right": {"byteIndex": 205, "bitMask": 16, "room": 0xa6a1, "area": "Brinstar"},
-    "Single Chamber Top Right": {"byteIndex": 19, "bitMask": 4, "room": 0xad5e, "area": "Norfair"},
-    "Kronic Boost Room Bottom Left": {"byteIndex": 47, "bitMask": 32, "room": 0xae74, "area": "Norfair"},
-    "Crocomire Speedway Bottom": {"byteIndex": 41, "bitMask": 1, "room": 0xa923, "area": "Norfair"},
-    "Crocomire Room Top": {"byteIndex": 45, "bitMask": 1, "room": 0xa98d, "area": "Norfair"},
-    "Main Street Bottom": {"byteIndex": 69, "bitMask": 16, "room": 0xcfc9, "area": "Maridia"},
-    "Crab Hole Bottom Left": {"byteIndex": 74, "bitMask": 128, "room": 0xd21c, "area": "Maridia"},
-    "Red Fish Room Left": {"byteIndex": 33, "bitMask": 8, "room": 0xd104, "area": "Maridia"},
-    "Crab Shaft Right": {"byteIndex": 46, "bitMask": 16, "room": 0xd1a3, "area": "Maridia"},
-    "Aqueduct Top Left": {"byteIndex": 46, "bitMask": 8, "room": 0xd5a7, "area": "Maridia"},
-    "Le Coude Right": {"byteIndex": 170, "bitMask": 8, "room": 0x95a8, "area": "Crateria"},
-    "Red Tower Top Left": {"byteIndex": 184, "bitMask": 64, "room": 0xa253, "area": "Brinstar"},
-    "Caterpillar Room Top Right": {"byteIndex": 160, "bitMask": 1, "room": 0xa322, "area": "Brinstar"},
-    "Red Brinstar Elevator": {"byteIndex": 160, "bitMask": 32, "room": 0x962a, "area": "Crateria"},
-    "East Tunnel Right": {"byteIndex": 77, "bitMask": 8, "room": 0xcf80, "area": "Maridia"},
-    "East Tunnel Top Right": {"byteIndex": 73, "bitMask": 1, "room": 0xcf80, "area": "Maridia"},
-    "Glass Tunnel Top": {"byteIndex": 73, "bitMask": 16, "room": 0xcefb, "area": "Maridia"},
-    "Golden Four": {"byteIndex": 37, "bitMask": 8, "room": 0xa5ed, "area": "Crateria"}
-}
-
-var bossAccessPoints = {
-    "PhantoonRoomOut": {"byteIndex": 82, "bitMask": 32, "room": 0xcc6f, "area": "WreckedShip"},
-    "PhantoonRoomIn": {"byteIndex": 82, "bitMask": 16, "room": 0xcd13, "area": "WreckedShip"},
-    "RidleyRoomOut": {"byteIndex": 71, "bitMask": 128, "room": 0xb37a, "area": "Norfair"},
-    "RidleyRoomIn": {"byteIndex": 70, "bitMask": 1, "room": 0xb32e, "area": "Norfair"},
-    "KraidRoomOut": {"byteIndex": 210, "bitMask": 2, "room": 0xa56b, "area": "Brinstar"},
-    "KraidRoomIn": {"byteIndex": 210, "bitMask": 1, "room": 0xa59f, "area": "Brinstar"},
-    "DraygonRoomOut": {"byteIndex": 169, "bitMask": 64, "room": 0xd78f, "area": "Maridia"},
-    "DraygonRoomIn": {"byteIndex": 169, "bitMask": 128, "room": 0xda60, "area": "Maridia"}
-}
-
-// Kraid: 0x48     byte index: 0x09 - bit mask: 0x01
-// Ridley: 0x50    byte index: 0x0a - bit mask: 0x01
-// Phantoon: 0x58  byte index: 0x0b - bit mask: 0x01
-// Draygon: 0x60   byte index: 0x0c - bit mask: 0x01
-var bossBitMasks = {
-    "Kraid": {"byteIndex": 0x09, "bitMask": 0x01},
-    "Ridley": {"byteIndex": 0x0a, "bitMask": 0x01},
-    "Phantoon": {"byteIndex": 0x0b, "bitMask": 0x01},
-    "Draygon": {"byteIndex": 0x0c, "bitMask": 0x01}
-}
+var areaAccessPoints = {{response.write(areaAccessPoints, escape=False)}};
+var bossAccessPoints = {{response.write(bossAccessPoints, escape=False)}};
+var bossBitMasks = {{response.write(bossBitMasks, escape=False)}};
+var nothingScreens = {{response.write(nothingScreens, escape=False)}};
+var doorsScreen = {{response.write(doorsScreen, escape=False)}};
 
 // in js dict keys are strings
 var itemsBitMasks = {
@@ -453,9 +402,9 @@ function startAutoTracker() {
     setAutoTrackerIcon("statusLoad");
 
     // debug map
-    var debugMap = document.getElementById("debugMap")
-    debugMap.style.display = "block";
-    dragElement(debugMap, "debugMap");
+    // var debugMap = document.getElementById("debugMap")
+    // debugMap.style.display = "block";
+    // dragElement(debugMap, "debugMap");
 }
 
 function closeSocket() {
@@ -753,7 +702,7 @@ function handleData(data) {
                     mapData[mapOffset+i] = curMapData[i];
                 }
 
-                displayDebugMap(mapData, mapOffsetEnum.curMap);
+                //displayDebugMap(mapData, mapOffsetEnum.curMap);
             }
 
             askNextData();
@@ -784,8 +733,8 @@ function handleData(data) {
             // first line of map is unused, so add 4 to ignore it (8 bytes per lines, but 4 in each page)
             byteIndex += 4;
             var bitMask = 0x80 >> (x & 7);
-            // console.log(`cur byteIndex: ${byteIndex} bitMask: ${bitMask} room: ${roomPointer.toString(16)} area: ${areaEnum[areaIndex]}`);
-            displaySamus(byteIndex, bitMask);
+            //console.log(`cur byteIndex: ${byteIndex} bitMask: ${bitMask} room: ${roomPointer.toString(16)} area: ${areaEnum[areaIndex]}`);
+            // displaySamus(byteIndex, bitMask);
 
             askNextData();
         } else if(dataToAskChain[dataToAskStep] == dataEnum.items) {
@@ -1012,6 +961,9 @@ function computeStateBitMasks() {
 
 // called after a state upload to rearm the timer
 function postAjaxHook() {
+    var duration = Date.now() - transfertStart;
+    appendLog(`\u2705 Backend updated in ${duration}ms`);
+
     resetNextDataChain();
 }
 
@@ -1062,6 +1014,8 @@ function checkCollectedData() {
         appendLog("\u2705 New state detected");
 
         previousStateChksum = newStateChksum;
+
+        transfertStart = Date.now();
 
         // send state to backend
         ajaxCall({action: "import",

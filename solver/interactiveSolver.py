@@ -40,6 +40,9 @@ class InteractiveSolver(CommonSolver):
         # no time limitation
         self.runtimeLimit_s = 0
 
+        # used by auto tracker to know how many locs have changed
+        self.locDelta = 0
+
     def initLocsAddressName(self):
         addressName = {}
         web2Internal = {}
@@ -185,29 +188,57 @@ class InteractiveSolver(CommonSolver):
             elif action == 'randomize':
                 self.randoPlando(params)
 
+        rewindLimit = self.locDelta if scope == 'dump' and self.locDelta > 0 else 1
+        lastVisitedLocs = []
         # if last loc added was a sequence break, recompute its difficulty,
         # as it may be available with the newly placed item.
+        # generalize it for auto-tracker where we can add more than one loc at once.
         if len(self.visitedLocations) > 0:
-            lastVisited = self.visitedLocations[-1]
-            if lastVisited.difficulty.difficulty == -1:
-                self.visitedLocations.remove(lastVisited)
-                self.majorLocations.append(lastVisited)
-            else:
-                lastVisited = None
-        else:
-            lastVisited = None
+            for i in range(1, rewindLimit+1):
+                if i > len(self.visitedLocations):
+                    break
+                else:
+                    loc = self.visitedLocations[-i]
+                    if loc.difficulty.difficulty == -1:
+                        lastVisitedLocs.append(loc)
+
+            for loc in lastVisitedLocs:
+                self.visitedLocations.remove(loc)
+                self.majorLocations.append(loc)
 
         # compute new available locations
         self.clearLocs(self.majorLocations)
         self.computeLocationsDifficulty(self.majorLocations)
 
-        # put back last visited location
-        if lastVisited != None:
-            self.majorLocations.remove(lastVisited)
-            self.visitedLocations.append(lastVisited)
-            if lastVisited.difficulty == False:
-                # if the loc is still sequence break, put it back as sequence break
-                lastVisited.difficulty = SMBool(True, -1)
+        while True:
+            remainLocs = []
+            okLocs = []
+
+            for loc in lastVisitedLocs:
+                if loc.difficulty == False:
+                    remainLocs.append(loc)
+                else:
+                    okLocs.append(loc)
+
+            if len(remainLocs) == len(lastVisitedLocs):
+                # all remaining locs are seq break
+                for loc in lastVisitedLocs:
+                    self.majorLocations.remove(loc)
+                    self.visitedLocations.append(loc)
+                    if loc.difficulty == False:
+                        # if the loc is still sequence break, put it back as sequence break
+                        loc.difficulty = SMBool(True, -1)
+                break
+            else:
+                # add available locs
+                for loc in okLocs:
+                    lastVisitedLocs.remove(loc)
+                    self.majorLocations.remove(loc)
+                    self.visitedLocations.append(loc)
+
+            # compute again
+            self.clearLocs(self.majorLocations)
+            self.computeLocationsDifficulty(self.majorLocations)
 
         # return them
         self.dumpState()
@@ -888,6 +919,7 @@ class InteractiveSolver(CommonSolver):
         }
 
         currentState = dumpData["currentState"]
+        self.locDelta = 0
 
         for dataType, offset in dumpData["stateDataOffsets"].items():
             if dataType == dataEnum["items"]:
@@ -905,6 +937,7 @@ class InteractiveSolver(CommonSolver):
                         if loc not in self.visitedLocations:
                             print("add visited loc: {}".format(loc.Name))
                             self.pickItemAt(self.locNameInternal2Web(loc.Name))
+                            self.locDelta += 1
                     else:
                         if loc in self.visitedLocations:
                             print("remove visited loc: {}".format(loc.Name))
@@ -918,6 +951,7 @@ class InteractiveSolver(CommonSolver):
                         if loc not in self.visitedLocations:
                             print("add boss loc: {}".format(loc.Name))
                             self.pickItemAt(self.locNameInternal2Web(loc.Name))
+                            self.locDelta += 1
                     else:
                         if loc in self.visitedLocations:
                             print("remove visited boss loc: {}".format(loc.Name))
@@ -974,6 +1008,7 @@ class InteractiveSolver(CommonSolver):
                                 # visit it
                                 print("add visited nothing loc: {}".format(loc.Name))
                                 self.pickItemAt(self.locNameInternal2Web(loc.Name))
+                                self.locDelta += 1
                         else:
                             # nothing not yet seed, check if loc is already visited
                             if loc in self.visitedLocations:

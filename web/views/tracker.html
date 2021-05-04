@@ -134,8 +134,8 @@ function startTheTour(step=-1) {
     storage: false,
     steps: [{
       element: "#help",
-      title: "VARIA Areas/Bosses & Items Tracker",
-      content: "<h2 class=\"center\">Welcome to the VARIA Areas/Bosses & Items Tracker</h2><h4>Areas/Bosses Tracker</h4>\
+      title: "VARIA Areas/Bosses/Items/Doors Tracker",
+      content: "<h2 class=\"center\">Welcome to the VARIA Areas/Bosses/Items/Doors Tracker</h2><h4>Areas/Bosses Tracker</h4>\
 <p>The Areas and Bosses Tracker allows you to track the connections between the areas and bosses portals.<br/>To use it, click on a portal <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 20px\">, it'll highlight it, then click on a second portal, it'll draw a line between the two portals with a random color.<br/>\
 You can delete the latest added transition with the <img src=\"/solver/static/images/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button and all of them with the <img src=\"/solver/static/images/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.<br/>\
 You can also click on the portal <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 20px\"> of an existing transition and click on the <img src=\"/solver/static/images/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button to delete it.<br/>\
@@ -165,6 +165,20 @@ You can load a race protected seed in the tracker, it'll use it to know if the s
 <p>The tracker feature an auto save functionnality, so you can do your seed in multiple seatings.<br/>The different status icons of the auto save:<table><tr><td><img src=\"/solver/static/images/refresh.svg\" style=\"width: 32px\"> Loading in progress</td><td><img src=\"/solver/static/images/checkmark.svg\" style=\"width: 32px\"> Save ok</td></tr><tr><td><img src=\"/solver/static/images/cloud_upload.png\" style=\"width: 32px\"> Upload in progress</td><td><img src=\"/solver/static/images/cloud_download.svg\" style=\"width: 32px\"> Download in progress</td></tr><tr><td colspan=\"2\"><img src=\"/solver/static/images/warning.svg\" style=\"width: 32px\"> Something wrong happened (try reloading the page)</td></tr></table></p><p>You can display this help again by clicking on the <img src=\"/solver/static/images/help.svg\" alt=\"help\" style=\"width: 32px\"> button.</p>\
 <h4>Thanks to</h4>\
 <p><ul><li>Animated location icons by Djlo</li><li>Location icons from Alli_Cat's <a href='https://github.com/allibear17/Super-Metroid-Location-Tracker' target=\"_blank\">Location Tracker</a></li><li>G4 sprite from Crossproduct's <a href=\"https://www.twitch.tv/crossproduct\" target=\"_blank\">smrandohelper</a></li><li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set' target=\"_blank\">Dryicons</a></li></ul></p>"
+    }, {
+      element: "#helpAutoTracker",
+      title: "VARIA Areas/Bosses/Items/Doors Auto-Tracker",
+      placement: "auto left",
+      content: "VARIA Tracker can now be used with auto tracking.\
+<h4>Overview</h4>\
+Use the VARIA Auto-Tracker to automatically track Areas/Boss transitions, Items collected and Doors colors as you play the seed.\
+<h4>Installation</h4>\
+Install QUsb2snes on your computer by following its documentation: <a href=\"https://skarsnik.github.io/QUsb2snes/\" target=\"_blank\">QUsb2snes installation</a>\
+<h4>Usage</h4>\
+<p>Load your VARIA seed in your sd2snes/snes mini/emulator, start QUsb2snes, load the seed into the Tracker like usual then click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button in the upper right Auto-Tracker part.</p>\
+<p><b>Warning:</b> You have to use the same seed in the Tracker and in your sd2snes/snes mini/emulator.</p>\
+<p><b>Note:</b> When the Auto Tracker is active the usual Tracker elements are deactivated (locations, portals, doors, UI button), the Auto Tracker manages everything.</p>\
+<p>When you're done click on the shutdown button <img src=\"/solver/static/images/shut_down.svg\" alt=\"Shutdown\" style=\"width: 32px\"> to stop the Auto-Tracker.</p>"
     }]
   });
 

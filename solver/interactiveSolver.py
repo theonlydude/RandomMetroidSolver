@@ -725,7 +725,7 @@ class InteractiveSolver(CommonSolver):
         "Screw Attack": {"byteIndex": 70, "bitMask": 8, "room": 0xb6c1, "area": "Norfair"},
         "Energy Tank, Firefleas": {"byteIndex": 176, "bitMask": 4, "room": 0xb6ee, "area": "Norfair"},
         "Reserve Tank, Wrecked Ship": {"byteIndex": 49, "bitMask": 1, "room": 0xc98e, "area": "WreckedShip"},
-        "Energy Tank, Wrecked Ship": {"byteIndex": 58, "bitMask": 32, "room": 0xcc27, "area": "Wrecked"},
+        "Energy Tank, Wrecked Ship": {"byteIndex": 58, "bitMask": 32, "room": 0xcc27, "area": "WreckedShip"},
         "Right Super, Wrecked Ship": {"byteIndex": 74, "bitMask": 4, "room": 0xcdf1, "area": "WreckedShip"},
         "Gravity Suit": {"byteIndex": 57, "bitMask": 32, "room": 0xce40, "area": "WreckedShip"},
         "Energy Tank, Mama turtle": {"byteIndex": 54, "bitMask": 16, "room": 0xd055, "area": "Maridia"},
@@ -896,6 +896,9 @@ class InteractiveSolver(CommonSolver):
                     # loc id is used to index in the items data, boss locations don't have an Id
                     if loc.Id is None:
                         continue
+                    # nothing locs are handled later
+                    if loc.itemName == 'Nothing':
+                        continue
                     byteIndex = loc.Id >> 3
                     bitMask = 0x01 << (loc.Id & 7)
                     if currentState[offset + byteIndex] & bitMask != 0:
@@ -923,10 +926,10 @@ class InteractiveSolver(CommonSolver):
                 if self.areaRando or self.bossRando:
                     availAPs = set()
                     for apName, apData in self.areaAccessPoints.items():
-                        if self.isAPAvailable(currentState, offset, apData):
+                        if self.isElemAvailable(currentState, offset, apData):
                             availAPs.add(apName)
                     for apName, apData in self.bossAccessPoints.items():
-                        if self.isAPAvailable(currentState, offset, apData):
+                        if self.isElemAvailable(currentState, offset, apData):
                             availAPs.add(apName)
 
                     # static transitions
@@ -960,7 +963,38 @@ class InteractiveSolver(CommonSolver):
                             print("add transition: {}".format(transition))
                             self.curGraphTransitions.append(transition)
 
-    def isAPAvailable(self, currentState, offset, apData):
+                if self.hasNothing:
+                    # get locs with nothing
+                    locsNothing = [loc for loc in self.locations if loc.itemName == 'Nothing']
+                    for loc in locsNothing:
+                        locData = self.nothingScreens[loc.Name]
+                        if self.isElemAvailable(currentState, offset, locData):
+                            # nothing has been seen, check if loc is already visited
+                            if not loc in self.visitedLocations:
+                                # visit it
+                                print("add visited nothing loc: {}".format(loc.Name))
+                                self.pickItemAt(self.locNameInternal2Web(loc.Name))
+                        else:
+                            # nothing not yet seed, check if loc is already visited
+                            if loc in self.visitedLocations:
+                                # unvisit it
+                                print("remove visited nothing loc: {}".format(loc.Name))
+                                self.removeItemAt(self.locNameInternal2Web(loc.Name))
+                if self.doorsRando:
+                    # get currently hidden / revealed doors names in sets
+                    (hiddenDoors, revealedDoor) = DoorsManager.getDoorsState()
+                    for doorName in hiddenDoors:
+                        # check if door is still hidden
+                        doorData = self.doorsScreen[doorName]
+                        if self.isElemAvailable(currentState, offset, doorData):
+                            DoorsManager.switchVisibility(doorName)
+                    for doorName in revealedDoor:
+                        # check if door is still visible
+                        doorData = self.doorsScreen[doorName]
+                        if not self.isElemAvailable(currentState, offset, doorData):
+                            DoorsManager.switchVisibility(doorName)
+
+    def isElemAvailable(self, currentState, offset, apData):
         byteIndex = apData["byteIndex"]
         bitMask = apData["bitMask"]
         return currentState[offset + byteIndex + self.mapOffsetEnum[apData["area"]]] & bitMask != 0

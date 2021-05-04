@@ -374,3 +374,10 @@ class DoorsManager():
         # in race mode the doors are hidden
         DoorsManager.doors[name].reveal()
         DoorsManager.doors[name].setColor(color)
+
+    # in autotracker we need the current doors state
+    @staticmethod
+    def getDoorsState():
+        hiddenDoors = set([door.name for door in DoorsManager.doors.values() if door.hidden])
+        revealedDoor = set([door.name for door in DoorsManager.doors.values() if (not door.hidden) and door.canHide()])
+        return (hiddenDoors, revealedDoor)

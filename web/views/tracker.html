@@ -950,10 +950,16 @@ function computeStateBitMasks() {
                 }
             }
             if(doorsRando) {
-                // TODO
+                for(var doorName in doorsScreen) {
+                    var doorData = doorsScreen[doorName];
+                    stateBitMasks[curOffset + doorData["byteIndex"] + mapOffsetEnum[doorData["area"]]] |= doorData["bitMask"];
+                }
             }
             if(hasNothing) {
-                // TODO
+                for(var locName in nothingScreens) {
+                    var locData = nothingScreens[locName];
+                    stateBitMasks[curOffset + locData["byteIndex"] + mapOffsetEnum[locData["area"]]] |= locData["bitMask"];
+                }
             }
         }
     }

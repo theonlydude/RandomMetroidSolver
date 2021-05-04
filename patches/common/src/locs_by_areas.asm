@@ -1,3 +1,4 @@
+print "locs_by_areas: ", pc
 locs_by_areas:
 	dw locs_Ceres,locs_Crateria,locs_GreenPinkBrinstar,locs_RedBrinstar,locs_WreckedShip,locs_Kraid,locs_Norfair,locs_Crocomire,locs_LowerNorfair,locs_WestMaridia,locs_EastMaridia,locs_Tourian
 print "locs_Ceres: ", pc
@@ -36,3 +37,4 @@ locs_EastMaridia:
 print "locs_Tourian: ", pc
 locs_Tourian:
 	db $ff
+print "locs_by_areas END ", pc

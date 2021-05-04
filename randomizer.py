@@ -424,13 +424,6 @@ if __name__ == "__main__":
     if args.morphPlacement == 'random':
         if args.morphPlacementList != None:
             morphPlacements = args.morphPlacementList.split(',')
-        if (args.suitsRestriction == True and args.area == True) or args.majorsSplit == 'Chozo':
-            if 'late' in morphPlacements:
-                morphPlacements.remove('late')
-        if not morphPlacements:
-            optErrMsgs.append("Can't have late morph with Chozo split or suits restriction and area randomization")
-            dumpErrorMsgs(args.output, optErrMsgs)
-            sys.exit(-1)
         args.morphPlacement = random.choice(morphPlacements)
     # random fill makes certain options unavailable
     if progSpeed == 'speedrun' or progSpeed == 'basic':

@@ -508,7 +508,8 @@ accessPoints = [
     AccessPoint('Mama Turtle', 'WestMaridia', {
         'Main Street Bottom': lambda sm: sm.canJumpUnderwater()
     }, internal=True,
-       start = {'spawn': 0x0406, 'solveArea': "Maridia Green", 'save':"Save_Mama",
+       start = {'spawn': 0x0406, 'solveArea': "Maridia Green",
+                'save':"Save_Mama", 'needsPreRando':True,
                 'patches':[RomPatches.MamaTurtleBlueDoor],
                 'rom_patches':['mama_save.ips'], 'doors': [0x8e]}),
     AccessPoint('Crab Hole Bottom Left', 'WestMaridia', {
@@ -601,7 +602,8 @@ accessPoints = [
     AccessPoint('Aqueduct', 'EastMaridia', {
         'Aqueduct Bottom': lambda sm: SMBool(True) # go down
     }, internal=True,
-       start = {'spawn': 0x0405, 'solveArea': "Maridia Pink Bottom", 'save':"Save_Aqueduct",
+       start = {'spawn': 0x0405, 'solveArea': "Maridia Pink Bottom",
+                'save':"Save_Aqueduct", 'needsPreRando':True,
                 'doors': [0x96]}),
     AccessPoint('Post Botwoon', 'EastMaridia', {
         'Aqueduct Bottom': Cache.ldeco(lambda sm: sm.wor(sm.wand(sm.canJumpUnderwater(), # can't access the sand pits from the right side of the room

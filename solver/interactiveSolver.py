@@ -681,7 +681,8 @@ class InteractiveSolver(CommonSolver):
         "Kraid": {"byteIndex": 0x01, "bitMask": 0x01},
         "Ridley": {"byteIndex": 0x02, "bitMask": 0x01},
         "Phantoon": {"byteIndex": 0x03, "bitMask": 0x01},
-        "Draygon": {"byteIndex": 0x04, "bitMask": 0x01}
+        "Draygon": {"byteIndex": 0x04, "bitMask": 0x01},
+        "Mother Brain": {"byteIndex": 0x05, "bitMask": 0x02}
     }
 
     areaAccessPoints = {

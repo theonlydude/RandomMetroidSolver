@@ -14,6 +14,7 @@ import urllib.parse
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, diff4solver
 from utils.parameters import Knows, Settings, Controller, isKnows, isButton
 from solver.conf import Conf
+from solver.interactiveSolver import InteractiveSolver
 from utils.parameters import diff2text, text2diff
 from utils.utils import PresetLoader, removeChars, getDefaultMultiValues
 from utils.db import DB
@@ -1689,7 +1690,12 @@ def tracker():
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
-                curSession=session.tracker, addresses=addresses, startAPs=startAPs)
+                curSession=session.tracker, addresses=addresses, startAPs=startAPs,
+                areaAccessPoints=InteractiveSolver.areaAccessPoints,
+                bossAccessPoints=InteractiveSolver.bossAccessPoints,
+                nothingScreens=InteractiveSolver.nothingScreens,
+                doorsScreen=InteractiveSolver.doorsScreen,
+                bossBitMasks=InteractiveSolver.bossBitMasks)
 
 def plando():
     response.title = 'Super Metroid VARIA Areas and Items Plandomizer'
@@ -1741,12 +1747,12 @@ class WS(object):
     @staticmethod
     def factory():
         scope = request.vars.scope
-        if scope not in ["area", "item", "common", "door"]:
-            raiseHttp(400, "Unknown scope, must be area/item/common/door", True)
+        if scope not in ["area", "item", "common", "door", "dump"]:
+            raiseHttp(400, "Unknown scope, must be area/item/common/door/dump", True)
 
         action = request.vars.action
-        if action not in ['add', 'remove', 'toggle', 'clear', 'init', 'get', 'save', 'replace', 'randomize']:
-            raiseHttp(400, "Unknown action, must be add/remove/toggle/clear/init/get/save/randomize", True)
+        if action not in ['add', 'remove', 'toggle', 'clear', 'init', 'get', 'save', 'replace', 'randomize', 'import']:
+            raiseHttp(400, "Unknown action, must be add/remove/toggle/clear/init/get/save/randomize/import", True)
 
         mode = request.vars.mode
         if mode not in ["standard", "seedless", "plando", "race", "debug"]:
@@ -1777,8 +1783,8 @@ class WS(object):
             raiseHttp(400, "Missing parameter action", True)
         action = request.vars.action
 
-        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize', 'toggle']:
-            raiseHttp(400, "Unknown action, must be init/add/remove/toggle/clear/get/save/randomize", True)
+        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize', 'toggle', 'import']:
+            raiseHttp(400, "Unknown action, must be init/add/remove/toggle/clear/get/save/randomize/import", True)
 
         if request.vars.escapeTimer != None:
             if re.match("[0-9][0-9]:[0-9][0-9]", request.vars.escapeTimer) == None:
@@ -1845,6 +1851,7 @@ class WS(object):
                 "last": state["last"],
                 "innerTransitions": state["innerTransitions"],
                 "innerTransitionsSeq": state["innerTransitionsSeq"],
+                "hasNothing": state["hasNothing"],
 
                 # doors
                 "doors": state["doors"],
@@ -1910,6 +1917,8 @@ class WS(object):
             ]
             if "forbiddenItems" in parameters:
                 params += ['--forbiddenItems', parameters["forbiddenItems"]]
+        elif action == 'import':
+            params += ['--dump', parameters["dump"]]
 
         # dump state as input
         with open(jsonInFileName, 'w') as jsonFile:
@@ -2302,6 +2311,32 @@ class WS_door_toggle(WS):
 
     def action(self):
         return self.callSolverAction("door", "toggle", {"doorName": self.doorName})
+
+class WS_dump_import(WS):
+    def validate(self):
+        super(WS_dump_import, self).validate()
+
+        # create json file
+        (self.fd, self.jsonDumpName) = tempfile.mkstemp()
+
+        jsonData = {"stateDataOffsets": json.loads(request.vars.stateDataOffsets),
+                    "currentState": json.loads(request.vars.currentState)}
+        if len(jsonData["currentState"]) > 1320 or len(jsonData["stateDataOffsets"]) > 3:
+            raiseHttp(400, "Wrong state", True)
+        for key, value in jsonData["stateDataOffsets"].items():
+            if len(key) > 1 or type(value) != int:
+                raiseHttp(400, "Wrong state", True)
+        if any([d for d in jsonData["currentState"] if type(d) != int]):
+            raiseHttp(400, "Wrong state", True)
+        #print(jsonData)
+
+        with os.fdopen(self.fd, "w") as jsonFile:
+            json.dump(jsonData, jsonFile)
+
+    def action(self):
+        ret = self.callSolverAction("dump", "import", {"dump": self.jsonDumpName})
+        os.remove(self.jsonDumpName)
+        return ret
 
 def trackerWebService():
     # unified web service for item/area trackers

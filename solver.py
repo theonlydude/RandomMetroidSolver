@@ -81,6 +81,11 @@ def interactiveSolver(args):
                     print("Missing doorName parameter when using action toggle for door")
                     sys.exit(1)
                 params = {'doorName': args.doorName}
+        elif args.scope == 'dump':
+            if args.action == "import":
+                if args.dump is None:
+                    print("Missing dump parameter when import a dump")
+                params = {'dump': args.dump}
         params["debug"] = args.mode == 'debug'
 
         solver = InteractiveSolver(args.output, args.logic)
@@ -157,7 +162,7 @@ if __name__ == "__main__":
     parser.add_argument('--loc', help="Name of the location to action on (used in interactive mode)",
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
-                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize', 'toggle'])
+                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize', 'toggle', 'import'])
     parser.add_argument('--item', help="Name of the item to place in plando mode (used in interactive mode)",
                         dest="item", nargs='?', default=None)
     parser.add_argument('--hide', help="Hide the item to place in plando mode (used in interactive mode)",
@@ -170,7 +175,7 @@ if __name__ == "__main__":
     parser.add_argument('--mode', help="Solver mode: standard/seedless/plando (used in interactive mode)",
                         dest="mode", nargs="?", default=None, choices=['standard', 'seedless', 'plando', 'race', 'debug'])
     parser.add_argument('--scope', help="Scope for the action: common/area/item (used in interactive mode)",
-                        dest="scope", nargs="?", default=None, choices=['common', 'area', 'item', 'door'])
+                        dest="scope", nargs="?", default=None, choices=['common', 'area', 'item', 'door', 'dump'])
     parser.add_argument('--count', help="Number of item rollback (used in interactive mode)",
                         dest="count", type=int)
     parser.add_argument('--lock', help="lock the plando seed (used in interactive mode)",
@@ -193,6 +198,8 @@ if __name__ == "__main__":
     parser.add_argument('--runtime',
                         help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit.",
                         dest='runtimeLimit_s', nargs='?', default=0, type=int)
+    parser.add_argument('--dump', help="dump file with autotracker state (used in interactive mode)",
+                        dest="dump", nargs="?", default=None)
 
     args = parser.parse_args()
 

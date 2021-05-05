@@ -711,3 +711,9 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/samus_run_Gravity.gif ] || ln -s ~/RandomMetroidSolver/web/static/solver/samus_run_Gravity.gif ~/web2py/applications/solver/static/images/samus_run_Gravity.gif
 
 [ -L ~/web2py/applications/solver/views/solver_web/inc_area_map.svg ] || ln -s ~/RandomMetroidSolver/web/views/inc_area_map.svg ~/web2py/applications/solver/views/solver_web/inc_area_map.svg
+
+[ -L ~/web2py/applications/solver/static/images/record.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/record.svg ~/web2py/applications/solver/static/images/record.svg
+[ -L ~/web2py/applications/solver/static/images/record_ko.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/record_ko.svg ~/web2py/applications/solver/static/images/record_ko.svg
+[ -L ~/web2py/applications/solver/static/images/record_load.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/record_load.svg ~/web2py/applications/solver/static/images/record_load.svg
+[ -L ~/web2py/applications/solver/static/images/record_ok.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/record_ok.svg ~/web2py/applications/solver/static/images/record_ok.svg
+[ -L ~/web2py/applications/solver/static/images/shut_down.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/shut_down.svg ~/web2py/applications/solver/static/images/shut_down.svg

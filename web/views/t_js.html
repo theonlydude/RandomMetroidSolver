@@ -12,6 +12,10 @@ function resizeChosen() {
 
 var loaded = false;
 
+function interfaceIsFrozen() {
+    return loaded == false || webServInProgress == true || init == false || autoTrackInProgress == true;
+}
+
 //-----------------------------------------------------------
 // AREAS TRACKER
 
@@ -55,7 +59,7 @@ function isEscapeAP(ap) {
 }
 
 function clickPortal(elemId) {
-    if(loaded == false || webServInProgress == true) {
+    if(interfaceIsFrozen()) {
         return;
     }
 
@@ -210,7 +214,7 @@ function removeDebugLine(startPoint, endPoint) {
 }
 
 function clearLines() {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
 
@@ -227,7 +231,7 @@ function clearLines() {
 }
 
 function deleteLine() {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
 
@@ -378,7 +382,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     }
 
     if(lastAction != null && lastAction["action"] != "init") {
-        if(lastAction["scope"] == "area") {
+        if(lastAction["scope"] == "area" || lastAction["scope"] == "dump") {
             updateLines(jsonData, false);
         }
         if(mode == "debug") {
@@ -403,10 +407,15 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
 
     setWSIcon("checkmark");
 
-    // if no available locations, display a popup telling you're stuck
-    if(Object.keys(jsonData["availableLocations"]).length == 0 && chained == false) {
-        if(jsonData["allTransitions"] == true && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited") && jsonData["allDoorsRevealed"] == true) {
-            alert("You're stuck, you can't finish this seed with the given preset.");
+    if(autoTrackInProgress) {
+        // rearm timer for next data retrieval, never display the stuck alert
+        postAjaxHook();
+    } else {
+        // if no available locations, display a popup telling you're stuck
+        if(Object.keys(jsonData["availableLocations"]).length == 0 && chained == false) {
+            if(jsonData["allTransitions"] == true && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited") && jsonData["allDoorsRevealed"] == true) {
+                alert("You're stuck, you can't finish this seed with the given preset.");
+            }
         }
     }
 }
@@ -537,6 +546,7 @@ function updateGlobal(jsonData) {
     seed = jsonData["seed"];
     preset = jsonData["preset"];
     doorsRando = jsonData["doorsRando"];
+    hasNothing = jsonData["hasNothing"];
     init = true;
 
     document.getElementById("mode").value = mode;
@@ -766,6 +776,8 @@ var escapeRando = true;
 var init = false;
 var webServInProgress = false;
 var doorsRando = false;
+var autoTrackInProgress = false;
+var hasNothing = false;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "break"]
@@ -1209,7 +1221,7 @@ function mouseOut(elem) {
 }
 
 function displayPopup(isPlando) {
-  if(loaded == false || webServInProgress == true) {
+  if(loaded == false || webServInProgress == true || autoTrackInProgress == true) {
     return;
   }
 
@@ -1232,7 +1244,7 @@ function hidePopup() {
 }
 
 function initSolver() {
-  if(loaded == false || webServInProgress == true) {
+  if(loaded == false || webServInProgress == true || autoTrackInProgress == true) {
     return;
   }
 
@@ -1293,7 +1305,7 @@ function handleHide(locName) {
 }
 
 function clickLoc(elem) {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
 
@@ -1353,7 +1365,7 @@ function clickLoc(elem) {
 var selectedDoor = null;
 var currentDoorColor = null;
 function actionDoor(doorName) {
-    if(loaded == false || webServInProgress == true || init == false) {
+    if(interfaceIsFrozen()) {
         return;
     }
 
@@ -1442,7 +1454,7 @@ function updateDoorColor(newColor) {
 }
 
 function actionItem(itemName, action) {
-    if(loaded == false || webServInProgress == true || init == false) {
+    if(interfaceIsFrozen()) {
         return;
     }
 
@@ -1455,7 +1467,7 @@ function actionItem(itemName, action) {
 }
 
 function placeItem() {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
 
@@ -1476,7 +1488,7 @@ function hideItemPopup() {
 }
 
 function deleteLoc(isPlando) {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
   if(isPlando == true && ! isActive("repeatPlando")) {
@@ -1508,7 +1520,7 @@ function resetLocsInfo() {
 }
 
 function clearLocs(isPlando) {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
   if(isPlando == true && ! isActive("binPlando")) {

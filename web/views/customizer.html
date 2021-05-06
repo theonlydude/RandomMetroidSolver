@@ -389,24 +389,36 @@ function doSubmit() {
 }
 
 function disableElement(id, disable) {
-  var elem = document.getElementById(id);
-  elem.disabled = disable;
-  // grey out the disabled text
-  var text = document.getElementById(id+"Text");
-  if(elem.disabled) {
-      text.className = "disabledText";
-  } else {
-      text.className = "";
-  }
-  // tell switchery
-  if(id in globalSwitchs) {
-    var sw = globalSwitchs[id];
-    if(disable) {
-      sw.disable();
-    } else {
-      sw.enable();
+    var elem = document.getElementById(id);
+    // we have to enable it before updating it as we can't update a disabled element
+    if(! disable) {
+        elem.disabled = false;
     }
-  }
+    // grey out the disabled text
+    var text = document.getElementById(id+"Text");
+    if(disable) {
+        text.className = "disabledText";
+    } else {
+        text.className = "";
+    }
+    // set switch to off, else users could think that the switch is forced to on
+    if(disable && elem.checked) {
+        elem.click();
+        elem.value = "off";
+    }
+    // tell switchery
+    if(id in globalSwitchs) {
+        var sw = globalSwitchs[id];
+        if(disable) {
+            sw.disable();
+        } else {
+            sw.enable();
+        }
+    }
+    // we have to disable it after updating it as we can't update a disabled element
+    if(disable) {
+        elem.disabled = true;
+    }
 }
 
 var buttonText = "Customize";

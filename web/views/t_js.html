@@ -27,7 +27,7 @@ var leaderLines = {};
 var nextColor = 0;
 
 // to display inter area lines in debug mode
-var debugLines = {};
+var debugLines = [];
 var debugLeaderLines = {};
 
 var colors = ['grey', 'lime', 'pink',  'fuchsia', 'orange', 'yellow', 'purple', 'aqua', 'red', '#bfef45', 'white', 'cyan', 'magenta', 'olive', 'green', 'blue', 'maroon', 'teal'];
@@ -156,11 +156,9 @@ function addDebugLine(startPoint, endPoint, difficulty) {
         line.setOptions({endSocket: 'bottom'});
     }
 
-    debugLines[startPoint] = endPoint;
-    debugLines[endPoint] = startPoint;
-
-    debugLeaderLines[startPoint] = line;
-    debugLeaderLines[endPoint] = line;
+    var lineName = `${startPoint}-${endPoint}`;
+    debugLines.push(lineName);
+    debugLeaderLines[lineName] = line;
 }
 
 function addLine(startPoint, endPoint) {
@@ -205,12 +203,10 @@ function removeLine(startPoint, endPoint) {
 
 function removeDebugLine(startPoint, endPoint) {
     // console.log("removeDebugLine: "+startPoint+" "+endPoint);
-    delete debugLines[startPoint];
-    delete debugLines[endPoint];
-
-    debugLeaderLines[startPoint].remove();
-    delete debugLeaderLines[startPoint];
-    delete debugLeaderLines[endPoint];
+    var lineName = `${startPoint}-${endPoint}`;
+    debugLines.splice(debugLines.indexOf(lineName), 1);
+    debugLeaderLines[lineName].remove();
+    delete debugLeaderLines[`${startPoint} ${endPoint}`];
 }
 
 function clearLines() {
@@ -381,23 +377,18 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         hideItemPopup();
     }
 
-    if(lastAction != null && lastAction["action"] != "init") {
-        if(lastAction["scope"] == "area" || lastAction["scope"] == "dump") {
-            updateLines(jsonData, false);
-        }
-        if(mode == "debug") {
-            updateDebugLines(jsonData);
-        }
+    if(lastAction != null && lastAction["action"] != "init" && (lastAction["scope"] == "area" || lastAction["scope"] == "dump")) {
+        updateLines(jsonData, false);
     } else {
         // load everything
         updateGlobal(jsonData);
         updateLines(jsonData, true);
-        if(mode == "debug") {
-            updateDebugLines(jsonData);
-        }
         updateTimer(jsonData);
     }
 
+    if(mode == "debug") {
+        updateDebugLines(jsonData);
+    }
     resetItems();
     updateRoomsVisibility(jsonData);
     updateLocations(jsonData);
@@ -585,23 +576,34 @@ function updateLines(jsonData, reset) {
 }
 
 function updateDebugLines(jsonData) {
-    // resetDebugLines();
-
-    var arrayLength = jsonData["innerTransitionsSeq"].length;
+    var lines = new Set();
+    var arrayLength = jsonData["innerTransitions"].length;
     for(var i=0; i<arrayLength; i++) {
-        var start = jsonData["innerTransitionsSeq"][i][0];
-        var end = jsonData["innerTransitionsSeq"][i][1]
-        var difficulty = jsonData['innerTransitionsSeq'][i][2]
-        if(! (start in debugLines)) {
+        var start = jsonData["innerTransitions"][i][0];
+        var end = jsonData["innerTransitions"][i][1]
+        var difficulty = jsonData['innerTransitions'][i][2]
+
+        var lineName = `${start}-${end}`;
+        if(debugLines.indexOf(lineName) == -1) {
             addDebugLine(start, end, difficulty);
+        }
+        lines.add(lineName);
+    }
+
+    var toRemove = [];
+    for(var i=0; i<debugLines.length; i++) {
+        var lineName = debugLines[i];
+        if(! lines.has(lineName)) {
+            toRemove.push(lineName);
         }
     }
 
-    for(var startPoint in debugLines) {
-        if(! (startPoint in jsonData["innerTransitions"])) {
-            var endPoint = debugLines[startPoint]
-            removeDebugLine(startPoint, endPoint);
-        }
+    for(var i=0; i<toRemove.length; i++) {
+        var lineName = toRemove[i];
+        var middle = lineName.indexOf('-');
+        var start = lineName.substring(0, middle);
+        var end = lineName.substring(middle+1);
+        removeDebugLine(start, end);
     }
 }
 
@@ -1188,7 +1190,7 @@ function mouseOver(elem) {
     $(elem).removeClass("baseLoc");
     $(elem).addClass("baseLocOver");
 
-    if(locsInfo[locName]["state"] == "available"){
+    if(locsInfo[locName]["state"] == "available") {
       var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
       var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
       $(elem).removeClass(className);

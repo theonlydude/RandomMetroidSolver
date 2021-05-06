@@ -1824,6 +1824,7 @@ class WS(object):
         if len(self.session["state"]) > 0:
             state = self.session["state"]
             #print("state returned to frontend: availWeb {}, visWeb {}".format(state["availableLocationsWeb"], state["visitedLocationsWeb"]))
+
             return json.dumps({
                 # item tracker
                 "availableLocations": state["availableLocationsWeb"],
@@ -1850,7 +1851,6 @@ class WS(object):
                 "errorMsg": state["errorMsg"],
                 "last": state["last"],
                 "innerTransitions": state["innerTransitions"],
-                "innerTransitionsSeq": state["innerTransitionsSeq"],
                 "hasNothing": state["hasNothing"],
 
                 # doors

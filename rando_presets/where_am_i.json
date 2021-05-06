@@ -12,6 +12,8 @@
   "morphPlacement": "early",
   "progressionSpeed": "VARIAble",
   "areaRandomization": "on",
+  "escapeRando": "on",
+  "removeEscapeEnemies": "on",
   "maxDifficulty": "hardcore",
   "powerBombQty": "1",
   "minorQty": "100",

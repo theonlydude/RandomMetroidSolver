@@ -407,8 +407,9 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
 
     setWSIcon("checkmark");
 
-    if(autoTrackInProgress) {
-        // rearm timer for next data retrieval, never display the stuck alert
+    if(autoTrackInProgress || mode == "debug") {
+        // auto tracker: rearm timer for next data retrieval, never display the stuck alert
+        // debug: highlight next VCR loc
         postAjaxHook();
     } else {
         // if no available locations, display a popup telling you're stuck

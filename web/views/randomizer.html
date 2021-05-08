@@ -1351,9 +1351,8 @@ Tournament presets:\
 <ul><li>Full: All items are shuffled in all locations</li>\
 <li>Majors/Minors: Use major (upgrades and energy) and minor (ammo) item pools.</p><p><b>Note:</b> High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.</li>\
 <li>Chozo: Put all the upgrades as well as minimal ammo/energy to finish the seed in the Chozo locations. Theses are the Chozo statues, Morph Ball and boss item locations (Right Super in Wrecked Ship, Varia Suit, Ridley ETank). Depending on progresson speed and item distribution settings, you will be able to 'sequence break' by going to other locations as well.</li>\
-<li>FullWithHUD: Randomize like Full and display the number of remaining majors item (excluding energy and minors) in the VARIA hud.</li></ul></p>\
+<li>FullWithHUD: Randomize like Full and display the number of remaining majors items (everything but energy and ammo) in the current area in the HUD. See \"VARIA HUD\" comfort patch help for more information about it.</li></ul></p>\
 <p>Check the map for the list of Majors and Chozo locations and items:<br/><a href=\"/solver/static/images/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"chozoThumb\" src=\"/solver/static/images/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p>\
-<p>Using a non-standard or randomized start location will force this setting to 'Full'.</p>\
 <p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
@@ -1785,10 +1784,18 @@ Click on the dice button to randomly set this parameter.",
     },
     {
       element: "#hudStep",
-      title: "Custom HUD",
-      // TODO::write help
-      content: "<p>Display major items count in the HUD for the current area, decrease it when an item is collected.</p>\
-<p>This patch was developed by Flo.</p>",
+      title: "VARIA HUD",
+      content: "<p>Displays the current area name and the number of remaining items of selected item split in the HUD for the current area.\
+As it takes the place of the top energy tank rows, all energy is displayed on a single row (like the Arcade hack).\
+This patch is automatically enabled when using FullWithHUD item split, or Majors/Chozo split and non-standard start location.</p>\
+<p><b>Examples :</b>\
+<tr>\
+<td>Crateria start with Chozo split</td><td>In Full or FullWithHUD split</td><td>Major items split</td>\
+</tr>\
+<tr>\
+<td><img src=\"/solver/static/images/hud_chozo_start.png\" class=\"full\"/></td><td><img src=\"/solver/static/images/hud_full.png\" class=\"full\"/></td><td><img src=\"/solver/static/images/hud_major_energy.png\" class=\"full\"/></td>\
+</tr></p>\
+<p>This patch was developed by Flo (Area/Item track) and Lioran (Etank bar combine).</p>",
       placement: "auto left"
     },
     {

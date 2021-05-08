@@ -27,6 +27,9 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/standard_presets ] || ln -s ~/RandomMetroidSolver/standard_presets ~/web2py/standard_presets
 [ -L ~/web2py/community_presets -o -d ~/web2py/community_presets ] || ln -s ~/RandomMetroidSolver/community_presets ~/web2py/community_presets
 [ -L ~/web2py/applications/solver/static/images/super_metroid_logo.png ] || ln -s ~/RandomMetroidSolver/web/static/super_metroid_logo.png ~/web2py/applications/solver/static/images/super_metroid_logo.png
+[ -L ~/web2py/applications/solver/static/images/hud_full.png ] || ln -s ~/RandomMetroidSolver/web/static/hud_full.png ~/web2py/applications/solver/static/images/hud_full.png
+[ -L ~/web2py/applications/solver/static/images/hud_chozo_start.png ] || ln -s ~/RandomMetroidSolver/web/static/hud_chozo_start.png ~/web2py/applications/solver/static/images/hud_chozo_start.png
+[ -L ~/web2py/applications/solver/static/images/hud_major_energy.png ] || ln -s ~/RandomMetroidSolver/web/static/hud_major_energy.png ~/web2py/applications/solver/static/images/hud_major_energy.png
 [ -L ~/web2py/applications/solver/static/css/chosen.css ] || ln -s ~/RandomMetroidSolver/web/static/chosen.css ~/web2py/applications/solver/static/css/chosen.css
 [ -L ~/web2py/applications/solver/static/js/chosen.jquery.min.js ] || ln -s ~/RandomMetroidSolver/web/static/chosen.jquery.min.js ~/web2py/applications/solver/static/js/chosen.jquery.min.js
 [ -L ~/web2py/applications/solver/static/images/chosen-sprite.png ] || ln -s ~/RandomMetroidSolver/web/static/chosen-sprite.png ~/web2py/applications/solver/static/images/chosen-sprite.png

@@ -19,6 +19,8 @@
 !item_bit_array = $7ed870
 ;;; bit index to byte index/bitmask routine
 !bit_index = $80818e
+;;; RAM area to write to for split/locs in HUD
+!split_locs_hud = $7ec618
 
 lorom
 
@@ -144,10 +146,10 @@ draw_info:
 	lda !n_items : jsr draw_two
 	bra .end
 .draw_chozo:
-	lda #$0CF9 : sta $7ec614 ; blue 'Z'
+	lda #$0CF9 : sta !split_locs_hud ; blue 'Z'
 	bra .draw_items
 .draw_major:
-	lda #$0CEC : sta $7ec614 ; blue 'M'
+	lda #$0CEC : sta !split_locs_hud ; blue 'M'
 .draw_items:
 	lda !n_items : jsr draw_one
 .end:
@@ -166,12 +168,12 @@ draw_two:
 	pha : pla : pha : pla : rep #$20
 	lda $4214 : asl : tay
 	lda NumberGFXTable, y
-	sta $7ec618
+	sta !split_locs_hud
 	lda $4216
 draw_one:			; A=remaining items (1 digit)
 	asl : tay
 	lda NumberGFXTable, y
-	sta $7ec61a
+	sta !split_locs_hud+2
 	rts
 
 ;; Normal numbers (like energy/ammo)

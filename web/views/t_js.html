@@ -12,6 +12,10 @@ function resizeChosen() {
 
 var loaded = false;
 
+function interfaceIsFrozen() {
+    return loaded == false || webServInProgress == true || init == false || autoTrackInProgress == true;
+}
+
 //-----------------------------------------------------------
 // AREAS TRACKER
 
@@ -23,7 +27,7 @@ var leaderLines = {};
 var nextColor = 0;
 
 // to display inter area lines in debug mode
-var debugLines = {};
+var debugLines = [];
 var debugLeaderLines = {};
 
 var colors = ['grey', 'lime', 'pink',  'fuchsia', 'orange', 'yellow', 'purple', 'aqua', 'red', '#bfef45', 'white', 'cyan', 'magenta', 'olive', 'green', 'blue', 'maroon', 'teal'];
@@ -55,7 +59,7 @@ function isEscapeAP(ap) {
 }
 
 function clickPortal(elemId) {
-    if(loaded == false || webServInProgress == true) {
+    if(interfaceIsFrozen()) {
         return;
     }
 
@@ -152,11 +156,9 @@ function addDebugLine(startPoint, endPoint, difficulty) {
         line.setOptions({endSocket: 'bottom'});
     }
 
-    debugLines[startPoint] = endPoint;
-    debugLines[endPoint] = startPoint;
-
-    debugLeaderLines[startPoint] = line;
-    debugLeaderLines[endPoint] = line;
+    var lineName = `${startPoint}-${endPoint}`;
+    debugLines.push(lineName);
+    debugLeaderLines[lineName] = line;
 }
 
 function addLine(startPoint, endPoint) {
@@ -201,16 +203,14 @@ function removeLine(startPoint, endPoint) {
 
 function removeDebugLine(startPoint, endPoint) {
     // console.log("removeDebugLine: "+startPoint+" "+endPoint);
-    delete debugLines[startPoint];
-    delete debugLines[endPoint];
-
-    debugLeaderLines[startPoint].remove();
-    delete debugLeaderLines[startPoint];
-    delete debugLeaderLines[endPoint];
+    var lineName = `${startPoint}-${endPoint}`;
+    debugLines.splice(debugLines.indexOf(lineName), 1);
+    debugLeaderLines[lineName].remove();
+    delete debugLeaderLines[`${startPoint} ${endPoint}`];
 }
 
 function clearLines() {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
 
@@ -227,7 +227,7 @@ function clearLines() {
 }
 
 function deleteLine() {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
 
@@ -377,23 +377,18 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         hideItemPopup();
     }
 
-    if(lastAction != null && lastAction["action"] != "init") {
-        if(lastAction["scope"] == "area") {
-            updateLines(jsonData, false);
-        }
-        if(mode == "debug") {
-            updateDebugLines(jsonData);
-        }
+    if(lastAction != null && lastAction["action"] != "init" && (lastAction["scope"] == "area" || lastAction["scope"] == "dump")) {
+        updateLines(jsonData, false);
     } else {
         // load everything
         updateGlobal(jsonData);
         updateLines(jsonData, true);
-        if(mode == "debug") {
-            updateDebugLines(jsonData);
-        }
         updateTimer(jsonData);
     }
 
+    if(mode == "debug") {
+        updateDebugLines(jsonData);
+    }
     resetItems();
     updateRoomsVisibility(jsonData);
     updateLocations(jsonData);
@@ -403,10 +398,16 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
 
     setWSIcon("checkmark");
 
-    // if no available locations, display a popup telling you're stuck
-    if(Object.keys(jsonData["availableLocations"]).length == 0 && chained == false) {
-        if(jsonData["allTransitions"] == true && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited") && jsonData["allDoorsRevealed"] == true) {
-            alert("You're stuck, you can't finish this seed with the given preset.");
+    if(autoTrackInProgress || mode == "debug") {
+        // auto tracker: rearm timer for next data retrieval, never display the stuck alert
+        // debug: highlight next VCR loc
+        postAjaxHook();
+    } else {
+        // if no available locations, display a popup telling you're stuck
+        if(Object.keys(jsonData["availableLocations"]).length == 0 && chained == false) {
+            if(jsonData["allTransitions"] == true && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited") && jsonData["allDoorsRevealed"] == true) {
+                alert("You're stuck, you can't finish this seed with the given preset.");
+            }
         }
     }
 }
@@ -537,6 +538,7 @@ function updateGlobal(jsonData) {
     seed = jsonData["seed"];
     preset = jsonData["preset"];
     doorsRando = jsonData["doorsRando"];
+    hasNothing = jsonData["hasNothing"];
     init = true;
 
     document.getElementById("mode").value = mode;
@@ -574,23 +576,34 @@ function updateLines(jsonData, reset) {
 }
 
 function updateDebugLines(jsonData) {
-    // resetDebugLines();
-
-    var arrayLength = jsonData["innerTransitionsSeq"].length;
+    var lines = new Set();
+    var arrayLength = jsonData["innerTransitions"].length;
     for(var i=0; i<arrayLength; i++) {
-        var start = jsonData["innerTransitionsSeq"][i][0];
-        var end = jsonData["innerTransitionsSeq"][i][1]
-        var difficulty = jsonData['innerTransitionsSeq'][i][2]
-        if(! (start in debugLines)) {
+        var start = jsonData["innerTransitions"][i][0];
+        var end = jsonData["innerTransitions"][i][1]
+        var difficulty = jsonData['innerTransitions'][i][2]
+
+        var lineName = `${start}-${end}`;
+        if(debugLines.indexOf(lineName) == -1) {
             addDebugLine(start, end, difficulty);
+        }
+        lines.add(lineName);
+    }
+
+    var toRemove = [];
+    for(var i=0; i<debugLines.length; i++) {
+        var lineName = debugLines[i];
+        if(! lines.has(lineName)) {
+            toRemove.push(lineName);
         }
     }
 
-    for(var startPoint in debugLines) {
-        if(! (startPoint in jsonData["innerTransitions"])) {
-            var endPoint = debugLines[startPoint]
-            removeDebugLine(startPoint, endPoint);
-        }
+    for(var i=0; i<toRemove.length; i++) {
+        var lineName = toRemove[i];
+        var middle = lineName.indexOf('-');
+        var start = lineName.substring(0, middle);
+        var end = lineName.substring(middle+1);
+        removeDebugLine(start, end);
     }
 }
 
@@ -766,6 +779,8 @@ var escapeRando = true;
 var init = false;
 var webServInProgress = false;
 var doorsRando = false;
+var autoTrackInProgress = false;
+var hasNothing = false;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "break"]
@@ -862,8 +877,8 @@ var locsInfo = {
   MissilegreenMaridiashinespark: {left: 66, top: 50.9},
   SuperMissilegreenMaridia: {left: 66.9, top: 49},
   MissilegreenMaridiatatori: {left: 74.5, top: 53.01},
-  SuperMissileyellowMaridia: {left: 68.37, top: 38.65},
-  MissileyellowMaridiasupermissile: {left: 67.37, top: 38.65},
+  SuperMissileyellowMaridia: {left: 67.37, top: 38.65},
+  MissileyellowMaridiasupermissile: {left: 68.37, top: 38.65},
   MissileyellowMaridiafalsewall: {left: 75.4, top: 38.65},
   MissileleftMaridiasandpitroom: {left: 77.95, top: 55.4},
   MissilerightMaridiasandpitroom: {left: 80.8, top: 55.4},
@@ -1175,7 +1190,7 @@ function mouseOver(elem) {
     $(elem).removeClass("baseLoc");
     $(elem).addClass("baseLocOver");
 
-    if(locsInfo[locName]["state"] == "available"){
+    if(locsInfo[locName]["state"] == "available") {
       var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
       var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
       $(elem).removeClass(className);
@@ -1209,7 +1224,7 @@ function mouseOut(elem) {
 }
 
 function displayPopup(isPlando) {
-  if(loaded == false || webServInProgress == true) {
+  if(loaded == false || webServInProgress == true || autoTrackInProgress == true) {
     return;
   }
 
@@ -1232,7 +1247,7 @@ function hidePopup() {
 }
 
 function initSolver() {
-  if(loaded == false || webServInProgress == true) {
+  if(loaded == false || webServInProgress == true || autoTrackInProgress == true) {
     return;
   }
 
@@ -1293,7 +1308,7 @@ function handleHide(locName) {
 }
 
 function clickLoc(elem) {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
 
@@ -1353,7 +1368,7 @@ function clickLoc(elem) {
 var selectedDoor = null;
 var currentDoorColor = null;
 function actionDoor(doorName) {
-    if(loaded == false || webServInProgress == true || init == false) {
+    if(interfaceIsFrozen()) {
         return;
     }
 
@@ -1442,7 +1457,7 @@ function updateDoorColor(newColor) {
 }
 
 function actionItem(itemName, action) {
-    if(loaded == false || webServInProgress == true || init == false) {
+    if(interfaceIsFrozen()) {
         return;
     }
 
@@ -1455,7 +1470,7 @@ function actionItem(itemName, action) {
 }
 
 function placeItem() {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
 
@@ -1476,7 +1491,7 @@ function hideItemPopup() {
 }
 
 function deleteLoc(isPlando) {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
   if(isPlando == true && ! isActive("repeatPlando")) {
@@ -1508,7 +1523,7 @@ function resetLocsInfo() {
 }
 
 function clearLocs(isPlando) {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
   if(isPlando == true && ! isActive("binPlando")) {

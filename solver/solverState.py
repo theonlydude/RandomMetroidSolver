@@ -74,10 +74,11 @@ class SolverState(object):
             self.state["last"] = ""
         # store the inner graph transitions to display in vcr
         if self.debug == True:
-            (self.state["innerTransitions"], self.state["innerTransitionsSeq"]) = self.getInnerTransitions(solver.areaGraph.availAccessPoints, solver.curGraphTransitions)
+            self.state["innerTransitions"] = self.getInnerTransitions(solver.areaGraph.availAccessPoints, solver.curGraphTransitions)
         else:
-            self.state["innerTransitions"] = {}
-            self.state["innerTransitionsSeq"] = []
+            self.state["innerTransitions"] = []
+        # has nothing: bool
+        self.state["hasNothing"] = solver.hasNothing
         # doors colors: dict {name: (color, facing, hidden)}
         self.state["doors"] = DoorsManager.serialize()
         # doorsRando: bool
@@ -112,6 +113,7 @@ class SolverState(object):
         solver.lastAP = self.state["lastAP"]
         solver.mode = self.state["mode"]
         solver.seed = self.state["seed"]
+        solver.hasNothing = self.state["hasNothing"]
         DoorsManager.unserialize(self.state["doors"])
         solver.doorsRando = self.state["doorsRando"]
 
@@ -144,8 +146,7 @@ class SolverState(object):
         return list(roomsVisibility)
 
     def getInnerTransitions(self, availAccessPoints, curGraphTransitions):
-        innerTransitions = {}
-        innerTransitionsSeq = []
+        innerTransitions = []
         for (apDst, dataSrc) in availAccessPoints.items():
             if dataSrc['from'] is None:
                 continue
@@ -155,10 +156,8 @@ class SolverState(object):
                 continue
             src = self.transition2isolver(src)
             dst = self.transition2isolver(dst)
-            innerTransitionsSeq.append([src, dst, diff4solver(dataSrc['difficulty'].difficulty)])
-            innerTransitions[src] = dst
-            innerTransitions[dst] = src
-        return innerTransitions, innerTransitionsSeq
+            innerTransitions.append([src, dst, diff4solver(dataSrc['difficulty'].difficulty)])
+        return innerTransitions
 
     def getLocsData(self, locations):
         ret = {}

@@ -4,6 +4,8 @@
 
 <title>Super Metroid VARIA Randomizer Tracker</title>
 
+<script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
+
 <style>
 {{include 'solver_web/t_style.html'}}
 
@@ -54,6 +56,63 @@
     top: 5.2%;
     left: 16%;
 }
+
+#titleAutoTracker {
+    position: absolute;
+    z-index: 2;
+    width: 15.5%;
+    height: 3.75%;
+    top: 0%;
+    left: 84.5%;
+    color: #ffffff;
+    font-size: 1.25vw;
+    font-weight: bold;
+}
+#startStopAutoTracker {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 5%;
+    top: 4%;
+    left: 79%;
+}
+#statusAutoTracker {
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 5%;
+    top: 4%;
+    left: 81.75%;
+}
+#helpAutoTracker {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 5%;
+    top: 4%;
+    left: 84.50%;
+}
+#logAutoTracker {
+    position: absolute;
+    z-index: 2;
+    width: 12%;
+    height: 16%;
+    top: 4%;
+    left: 88%;
+    resize: none;
+    font-size: 0.5vw;
+}
+#debugMap {
+    position: absolute;
+    top: 20%;
+    left: 20%;
+    border: 2px solid #666666;
+    background-color: #000;
+    z-index: 5;
+    display: none;
+}
 </style>
 
 <script type="text/javascript">
@@ -75,8 +134,8 @@ function startTheTour(step=-1) {
     storage: false,
     steps: [{
       element: "#help",
-      title: "VARIA Areas/Bosses & Items Tracker",
-      content: "<h2 class=\"center\">Welcome to the VARIA Areas/Bosses & Items Tracker</h2><h4>Areas/Bosses Tracker</h4>\
+      title: "VARIA Areas/Bosses/Items/Doors Tracker",
+      content: "<h2 class=\"center\">Welcome to the VARIA Areas/Bosses/Items/Doors Tracker</h2><h4>Areas/Bosses Tracker</h4>\
 <p>The Areas and Bosses Tracker allows you to track the connections between the areas and bosses portals.<br/>To use it, click on a portal <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 20px\">, it'll highlight it, then click on a second portal, it'll draw a line between the two portals with a random color.<br/>\
 You can delete the latest added transition with the <img src=\"/solver/static/images/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button and all of them with the <img src=\"/solver/static/images/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.<br/>\
 You can also click on the portal <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 20px\"> of an existing transition and click on the <img src=\"/solver/static/images/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button to delete it.<br/>\
@@ -106,6 +165,20 @@ You can load a race protected seed in the tracker, it'll use it to know if the s
 <p>The tracker feature an auto save functionnality, so you can do your seed in multiple seatings.<br/>The different status icons of the auto save:<table><tr><td><img src=\"/solver/static/images/refresh.svg\" style=\"width: 32px\"> Loading in progress</td><td><img src=\"/solver/static/images/checkmark.svg\" style=\"width: 32px\"> Save ok</td></tr><tr><td><img src=\"/solver/static/images/cloud_upload.png\" style=\"width: 32px\"> Upload in progress</td><td><img src=\"/solver/static/images/cloud_download.svg\" style=\"width: 32px\"> Download in progress</td></tr><tr><td colspan=\"2\"><img src=\"/solver/static/images/warning.svg\" style=\"width: 32px\"> Something wrong happened (try reloading the page)</td></tr></table></p><p>You can display this help again by clicking on the <img src=\"/solver/static/images/help.svg\" alt=\"help\" style=\"width: 32px\"> button.</p>\
 <h4>Thanks to</h4>\
 <p><ul><li>Animated location icons by Djlo</li><li>Location icons from Alli_Cat's <a href='https://github.com/allibear17/Super-Metroid-Location-Tracker' target=\"_blank\">Location Tracker</a></li><li>G4 sprite from Crossproduct's <a href=\"https://www.twitch.tv/crossproduct\" target=\"_blank\">smrandohelper</a></li><li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set' target=\"_blank\">Dryicons</a></li></ul></p>"
+    }, {
+      element: "#helpAutoTracker",
+      title: "VARIA Areas/Bosses/Items/Doors Auto-Tracker",
+      placement: "auto left",
+      content: "VARIA Tracker can now be used with auto tracking.\
+<h4>Overview</h4>\
+Use the VARIA Auto-Tracker to automatically track Areas/Boss transitions, Items collected and Doors colors as you play the seed.\
+<h4>Installation</h4>\
+Install QUsb2snes on your computer by following its documentation: <a href=\"https://skarsnik.github.io/QUsb2snes/\" target=\"_blank\">QUsb2snes installation</a>\
+<h4>Usage</h4>\
+<p>Load your VARIA seed in your sd2snes/snes mini/emulator, start QUsb2snes, load the seed into the Tracker like usual then click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button in the upper right Auto-Tracker part.</p>\
+<p><b>Warning:</b> You have to use the same seed in the Tracker and in your sd2snes/snes mini/emulator.</p>\
+<p><b>Note:</b> When the Auto Tracker is active the usual Tracker elements are deactivated (locations, portals, doors, UI button), the Auto Tracker manages everything.</p>\
+<p>When you're done click on the shutdown button <img src=\"/solver/static/images/shut_down.svg\" alt=\"Shutdown\" style=\"width: 32px\"> to stop the Auto-Tracker.</p>"
     }]
   });
 
@@ -120,7 +193,905 @@ You can load a race protected seed in the tracker, it'll use it to know if the s
 }
 
 var debug = false;
-function onloadHook() {}
+function onloadHook() {
+}
+
+
+// auto tracker
+var socket;
+// timeout to peek data
+var timeout;
+// timeout duration in ms
+var waitingTime = 1000;
+
+// first you open the socket,
+// then you list the available devices,
+// then you attach to the device and ask info to confirm attachment,
+// then you can ask for data (main loop)
+var stateEnum = {
+    "opening": 1,
+    "listing": 2,
+    "infoing": 3,
+    "looping": 4
+}
+var curState = 0;
+
+// handle fragmented data reception
+var askedDataSize = 0;
+var receivedDataSize = 0;
+var receivedData = [];
+var transfertStart = 0;
+
+// current and previous step data, uint8array
+var stateArraySize = 0;
+var currentState = undefined;
+// data offsets in the state
+var stateDataOffsets = {};
+// to know if something changed
+var previousStateChksum = 0;
+// bit masks to apply on state to extract data we use
+var stateBitMasks = undefined;
+
+// array for each data we get
+var itemsData = undefined;
+var bossData = undefined;
+var mapData = undefined;
+var samusData = undefined;
+
+// different data that we ask
+var dataEnum = {
+    "state": 1,
+    "map": 2,
+    "curMap": 3,
+    "samus": 4,
+    "items": 5,
+    "boss": 6
+}
+// 1. state:
+// $0998: Game state
+// $05D1: Debug. Debug mode. Set to [$80:8004] during boot / soft reset
+
+// 2. map:
+// used for area/boss transitions - doors - nothing
+// CD52 -> D251: map tiles for: Crateria + Brinstar + Norfair + Wrecked Ship + Maridia
+
+// 3. curmap:
+// 07F7..08F6: map tiles for current area
+
+// 4. samus:
+// $0AF6: Samus X position (inside current screen)
+// $0AFA: Samus Y position (inside current screen)
+// 
+// $079B: Room pointer
+// $079F: Area index
+// $07A1: Room X co-ordinate (on map)
+// $07A3: Room Y co-ordinate (on map)
+
+// 5. items
+// $7E:D870..AF: Item bit array. $90h..AF are unused. See "Item PLMs.asm"
+// loc id is used to index in it
+
+// 6. boss
+// $7E:D828..2F: Boss bits. Indexed by area
+//     1: Area boss (Kraid, Phantoon, Draygon, both Ridleys)
+//     2: Area mini-boss (Spore Spawn, Botwoon, Crocomire, Mother Brain)
+//     4: Area torizo (Bomb Torizo, Golden Torizo)
+var dataToAsk = {
+    1: [{"address": "F50998", "size": 0x2},
+        {"address": "F505D1", "size": 0x2}],
+    2: [{"address": "F5CD52", "size": 0x500}],
+    3: [{"address": "F507F7", "size": 0x100}],
+    4: [{"address": "F50AF6", "size": 0x2},
+        {"address": "F50AFA", "size": 0x2},
+        {"address": "F5079B", "size": 0x0a}],
+    5: [{"address": "F5D870", "size": 0x20}],
+    6: [{"address": "F5D828", "size": 0x8}]
+}
+// use an array listing the data to retrieve, the chain is init at auto tracker start
+var dataToAskChain = [];
+// the current position in the chain
+var dataToAskStep = 0;
+
+// maps
+var mapOffsetEnum = {
+    "curMap": 0,
+    "Crateria": 0,
+    "Brinstar": 0x100,
+    "Norfair": 0x200,
+    "WreckedShip": 0x300,
+    "Maridia": 0x400
+}
+
+// samus
+var samusEnum = {
+    "x": 0,
+    "y": 2,
+    "roomPointer": 4,
+    "roomIndex": 6,
+    "areaIndex": 8,
+    "roomX": 10,
+    "roomY": 12
+}
+
+// areas
+var areaEnum = {
+    0: "Crateria",
+    1: "Brinstar",
+    2: "Norfair",
+    3: "WreckedShip",
+    4: "Maridia",
+    5: "Tourian",
+    6: "Ceres",
+    7: "Debug"
+}
+
+// bit masks for all datas
+var areaAccessPoints = {{response.write(areaAccessPoints, escape=False)}};
+var bossAccessPoints = {{response.write(bossAccessPoints, escape=False)}};
+var bossBitMasks = {{response.write(bossBitMasks, escape=False)}};
+var nothingScreens = {{response.write(nothingScreens, escape=False)}};
+var doorsScreen = {{response.write(doorsScreen, escape=False)}};
+
+// in js dict keys are strings
+var itemsBitMasks = {
+    0x00: 0xFF,
+    0x01: 0xFF,
+    0x02: 0xFF,
+    0x03: 0xFF,
+    0x04: 0xFF,
+    0x05: 0xFF,
+    0x06: 0xFF,
+    0x07: 0xFF,
+    0x08: 0xFF,
+    0x09: 0xFF,
+    0x0A: 0xFF,
+    0x10: 0xFF,
+    0x11: 0xFF,
+    0x12: 0xFF,
+    0x13: 0xFF
+}
+function resetLog() {
+    document.getElementById("logAutoTracker").value = "";
+}
+
+function appendLog(msg) {
+    console.log(msg);
+    var txtArea = document.getElementById("logAutoTracker");
+    txtArea.value +=  msg + '\r\n';
+
+    // auto scroll to bottom
+    txtArea.scrollTop = txtArea.scrollHeight;
+}
+
+function setAutoTrackerIcon(icon) {
+  var names = ["statusOK", "statusKO", "statusLoad", "statusNA"];
+  for(var i=0; i<names.length; i++) {
+    if(names[i] == icon){
+      document.getElementById(names[i]).style.display = "block";
+    } else {
+      document.getElementById(names[i]).style.display = "none";
+    }
+  }
+}
+
+function displayStopButton() {
+    document.getElementById("stopAutoTracker").style.display = "block";
+    document.getElementById("startAutoTracker").style.display = "none";
+}
+
+function displayStartButton() {
+    document.getElementById("startAutoTracker").style.display = "block";
+    document.getElementById("stopAutoTracker").style.display = "none";
+}
+
+function startAutoTracker() {
+    if(interfaceIsFrozen()) {
+        return;
+    }
+
+    if(mode == 'seedless') {
+        alert("Auto Tracker is incompatible with seedless mode, please load the seed to track first");
+        return;
+    }
+    if(mode == 'race') {
+        alert("Auto Tracker is disabled with race protected seeds");
+        return;
+    }
+
+    resetLog();
+    appendLog("\r\n\u2026 Starting Auto Tracker");
+    // open websocket
+    var url = 'ws://localhost:8080';
+    socket = new WebSocket(url);
+    socket.onopen = socketOnOpen;
+    socket.onmessage = socketOnMessage;
+    socket.onclose = socketOnClose;
+    socket.onerror = socketOnError;
+
+    // update state
+    curState = stateEnum.opening;
+    autoTrackInProgress = true;
+
+    // update interface
+    displayStopButton();
+    setAutoTrackerIcon("statusLoad");
+
+    // debug map
+    // var debugMap = document.getElementById("debugMap")
+    // debugMap.style.display = "block";
+    // dragElement(debugMap, "debugMap");
+}
+
+function closeSocket() {
+    socket.close(1000);
+
+    // update state
+    curState = stateEnum.closing;
+
+    // update interface
+    setAutoTrackerIcon("statusLoad");
+}
+
+function stopAutoTracker() {
+    if(loaded == false || webServInProgress == true || init == false || autoTrackInProgress == false) {
+        return;
+    }
+
+    appendLog("\u2026 Stopping Auto Tracker");
+    closeSocket();
+
+    // update interface
+    displayStartButton();
+}
+
+function socketOnOpen(e) {
+    appendLog("\u2705 Connection established");
+    // appendLog(" bufferedAmount: "+socket.bufferedAmount);
+// Constant 	Value
+// WebSocket.CONNECTING 	0
+// WebSocket.OPEN 	1
+// WebSocket.CLOSING 	2
+// WebSocket.CLOSED 	3
+    // appendLog(" readyState: "+socket.readyState);
+
+    appendLog("\u2026 Asking Device List");
+    sendAutoTrackerMessage({
+        "Opcode" : "DeviceList",
+        "Space" : "SNES"
+    }, stateEnum.listing);
+}
+
+function socketOnMessage(event) {
+    if(curState == stateEnum.looping) {
+        socketOnLoopMessage(event);
+    } else {
+        socketOnInitMessage(event);
+    }
+}
+
+function socketOnInitMessage(event) {
+    var data = JSON.parse(event.data);
+    var results = data["Results"];
+    // appendLog(`Data received: ${results}`);
+    setAutoTrackerIcon("statusOK");
+
+    if(curState == stateEnum.listing) {
+        if(results.length == 0) {
+            appendLog("\u274C no device found");
+            closeSocket();
+        } else if(results.length > 1) {
+            appendLog("\u274C too many devices found, please connect only one");
+            closeSocket();
+        } else {
+            var device = results;
+            appendLog(`\u2705 device found: ${device}`);
+
+            appendLog("\u2026 Attaching to Device");
+            sendAutoTrackerMessage({
+                "Opcode" : "Attach",
+                "Space" : "SNES",
+                "Operands" : device
+            }, stateEnum.infoing);
+
+            // tell qusb our app name
+            appendLog("\u2026 Send VARIA app name");
+            sendAutoTrackerMessage({
+                "Opcode" : "Name",
+                "Space" : "SNES",
+                "Operands": ["VARIA Tracker"]
+            }, stateEnum.infoing);
+
+            // send info command to validate attaching, we can send it right away as there's a queue in qusb
+            appendLog("\u2026 Getting Device Info");
+            sendAutoTrackerMessage({
+                "Opcode" : "Info",
+                "Space" : "SNES"
+            }, stateEnum.infoing);
+
+        }
+    } else if(curState == stateEnum.infoing) {
+        appendLog(`\u2705 info received: ${results}`);
+        appendLog(`\u2705 device attached`);
+
+        // start loop, update state
+        curState = stateEnum.looping;
+
+        // ask socket to return an arraybuffer instead of a blob
+        socket.binaryType = "arraybuffer";
+
+        // first data retrieval
+        initDataChain();
+        askForData();
+    } else {
+        appendLog(`\u274C unknown receiving state ${curState}`);
+        closeSocket();
+    }
+}
+
+function socketOnLoopMessage(event) {
+    setAutoTrackerIcon("statusOK");
+    handleData(event.data);
+}
+
+function socketOnClose(event) {
+    if (event.wasClean) {
+        appendLog(`\u2705 Connection closed cleanly`);
+        console.log(`socketOnClose clean: code=${event.code} reason=${event.reason}`);
+    } else {
+        // e.g. server process killed or network down
+        // event.code is usually 1006 in this case
+        appendLog('\u274C Connection died');
+        console.log(`socketOnClose not clean: code=${event.code} reason=${event.reason}`);
+    }
+    // stop running timeout
+    clearTimeout(timeout);
+
+    // update state & interface
+    cleanupBuffer();
+    curState = stateEnum.closed;
+    autoTrackInProgress = false;
+    setAutoTrackerIcon("statusNA");
+    displayStartButton();
+}
+
+function socketOnError(error) {
+    appendLog("\u274C Connection error");
+
+    // stop running timeout
+    clearTimeout(timeout);
+
+    // update state & interface
+    cleanupBuffer();
+    curState = stateEnum.closed;
+    autoTrackInProgress = false;
+    setAutoTrackerIcon("statusKO");
+    displayStartButton();
+}
+
+// called to request datas from qusb
+function askForData() {
+    // check current state
+    if(curState != stateEnum.looping) {
+        appendLog(`\u274C Wrong state: ${curState}`);
+        closeSocket();
+    } else {
+        var metadata = dataToAsk[dataToAskChain[dataToAskStep]];
+        askedDataSize = 0;
+        var ranges = [];
+
+        for(var i=0; i<metadata.length; i++) {
+            askedDataSize += metadata[i].size;
+            ranges.push(metadata[i].address);
+            ranges.push(metadata[i].size.toString(16));
+        }
+
+        console.log(`\u2026 Asking ${askedDataSize} bytes of Data`);
+
+        transfertStart = Date.now();
+        sendAutoTrackerMessage({
+            "Opcode" : "GetAddress",
+            "Space" : "SNES",
+            "Operands": ranges
+        }, stateEnum.looping);
+        setAutoTrackerIcon("statusLoad");
+    }
+}
+
+function readWord(array, addr) {
+    return (array[addr+1]<<8) + array[addr];
+}
+
+function getGameStateName(gameStateCode) {
+    switch(gameStateCode) {
+        case '0': return "Reset/start";
+        case '1': return "Opening. Cinematic";
+        case '2': return "Game options menu";
+        case '3': return "Nothing (RTS)";
+        case '4': return "Save game menus";
+        case '5': return "Loading game map view";
+        case '6': return "Loading game data";
+        case '7': return "Setting game up after loading the game";
+        case '8': return "Main gameplay";
+        case '9': return "Hit a door block";
+        case 'a': return "Loading next room";
+        case 'b': return "Loading next room";
+        case 'c': return "Pausing, normal gameplay but darkening";
+        case 'd': return "Pausing, loading pause screen";
+        case 'e': return "Paused, loading pause screen";
+        case 'f': return "Paused, map and item screens";
+        case '10': return "Unpausing, loading normal gameplay";
+        case '11': return "Unpausing, loading normal gameplay";
+        case '12': return "Unpausing, normal gameplay but brightening";
+        case '13': return "Samus ran out of health";
+        case '14': return "Samus ran out of health, black out surroundings";
+        case '15': return "Samus ran out of health, black out surroundings";
+        case '16': return "Samus ran out of health, starting death animation";
+        case '17': return "Samus ran out of health, flashing";
+        case '18': return "Samus ran out of health, explosion";
+        case '19': return "Samus ran out of health, black out (also cut to by time up death)";
+        case '1a': return "Game over screen";
+        case '1b': return "Reserve tanks auto";
+        case '1c': return "Unused. Does JMP ($0DEA) ($0DEA is never set to a pointer)";
+        case '1d': return "Debug game over menu (end/continue)";
+        case '1e': return "Intro. Cinematic. Set up entirely new game with cutscenes";
+        case '1f': return "Set up new game. Post-intro";
+        case '20': return "Made it to Ceres elevator";
+        case '21': return "Blackout from Ceres";
+        case '22': return "Ceres goes boom, Samus goes to Zebes. Cinematic";
+        case '23': return "Time up";
+        case '24': return "Whiting out from time up";
+        case '25': return "Ceres goes boom with Samus. Cinematic";
+        case '26': return "Samus escapes from Zebes. Transition from main gameplay to ending and credits";
+        case '27': return "Ending and credits. Cinematic";
+        case '28': return "Transition to demo";
+        case '29': return "Transition to demo";
+        case '2a': return "Playing demo";
+        case '2b': return "Transition from demo";
+        case '2c': return "Transition from demo";
+        default: return `Unkown game state (${gameStateCode})`;
+    }
+}
+
+// managed data returned by qusb
+function handleData(data) {
+    var chunk = new Uint8Array(data);
+    var chunkSize = chunk.length
+    receivedDataSize += chunkSize;
+    receivedData.push(chunk);
+    console.log(`\u2026 get: ${chunkSize} (${receivedDataSize}/${askedDataSize})`);
+
+    if(receivedDataSize >= askedDataSize) {
+        if(dataToAskChain[dataToAskStep] == dataEnum.state) {
+            var duration = Date.now() - transfertStart;
+            appendLog(`\u2705 State data received in ${duration}ms`);
+
+            var stateData = concatArrays(dataEnum.state);
+
+            // biggest valid game state
+            var maxGameState = 0x2c;
+            var mainGameplayState = 0x08;
+
+            var gameState = readWord(stateData, 0x00);
+            var gameStateName = getGameStateName(gameState.toString(16));
+            // appendLog(`\u2026 Game state: ${gameStateName}`);
+
+            var debugMode = readWord(stateData, 0x02);
+            // appendLog(`\u2026 Debug Mode: ${debugMode}`);
+
+            // check if game is running and is metroid
+            if(debugMode == 0 && gameState < maxGameState) {
+                if(gameState == mainGameplayState) {
+                    appendLog(`\u2705 Super Metroid gameplay state: ${gameStateName}`);
+                    askNextData();
+                } else {
+                    appendLog(`\u231B Super Metroid other state: ${gameStateName}`);
+                    resetNextDataChain();
+                }
+            } else {
+                appendLog("\u231B Super Metroid is not running");
+                resetNextDataChain();
+            }
+        } else if(dataToAskChain[dataToAskStep] == dataEnum.map) {
+            var duration = Date.now() - transfertStart;
+            appendLog(`\u2705 Map data received in ${duration}ms`);
+
+            // concatenate all arrays
+            mapData = concatArrays(dataEnum.map);
+
+            askNextData();
+        } else if(dataToAskChain[dataToAskStep] == dataEnum.curMap) {
+            var duration = Date.now() - transfertStart;
+            appendLog(`\u2705 Current Map data received in ${duration}ms`);
+
+            // concatenate all arrays
+            var curMapData = concatArrays(dataEnum.curMap);
+
+            // replace current map data in map data
+            var areaIndex = readWord(samusData, samusEnum.areaIndex);
+            var tourianAreaIndex = 5;
+            if(areaIndex < tourianAreaIndex) {
+                var mapOffset = mapOffsetEnum[areaEnum[areaIndex]];
+                var mapSize = 0x100;
+
+                for(var i=0; i<mapSize; i++) {
+                    mapData[mapOffset+i] = curMapData[i];
+                }
+
+                //displayDebugMap(mapData, mapOffsetEnum.curMap);
+            }
+
+            askNextData();
+        } else if(dataToAskChain[dataToAskStep] == dataEnum.samus) {
+            var duration = Date.now() - transfertStart;
+            appendLog(`\u2705 Samus data received in ${duration}ms`);
+
+            // concatenate all arrays
+            samusData = concatArrays(dataEnum.samus);
+
+            // extract data we need
+            var samusX = readWord(samusData, samusEnum.x);
+            var samusY = readWord(samusData, samusEnum.y);
+            var roomPointer = readWord(samusData, samusEnum.roomPointer);
+            var areaIndex = readWord(samusData, samusEnum.areaIndex);
+            var roomX = readWord(samusData, samusEnum.roomX);
+            var roomY = readWord(samusData, samusEnum.roomY);
+
+            // compute (byte, bit) index in map data for current samus screen
+            // Let
+            //     x = [room X co-ordinate] + [$12] / 100h
+            //     y = [room Y co-ordinate] + [$18] / 100h
+            // Then
+            //     $07FB + (y + (x & 20h)) * 4 + (x & 1Fh) / 8 |= 80h >> (x & 7)
+            var x = roomX + Math.floor(samusX / 0x100);
+            var y = roomY + Math.floor(samusY / 0x100);
+            var byteIndex = (y + (x & 0x20)) * 4 + Math.floor((x & 0x1F) / 8);
+            // first line of map is unused, so add 4 to ignore it (8 bytes per lines, but 4 in each page)
+            byteIndex += 4;
+            var bitMask = 0x80 >> (x & 7);
+            //console.log(`cur byteIndex: ${byteIndex} bitMask: ${bitMask} room: ${roomPointer.toString(16)} area: ${areaEnum[areaIndex]}`);
+            // displaySamus(byteIndex, bitMask);
+
+            askNextData();
+        } else if(dataToAskChain[dataToAskStep] == dataEnum.items) {
+            var duration = Date.now() - transfertStart;
+            appendLog(`\u2705 Items data received in ${duration}ms`);
+
+            // concatenate all arrays
+            itemsData = concatArrays(dataEnum.items);
+
+            askNextData();
+        } else if(dataToAskChain[dataToAskStep] == dataEnum.boss) {
+            var duration = Date.now() - transfertStart;
+            appendLog(`\u2705 Boss data received in ${duration}ms`);
+
+            // concatenate all arrays
+            bossData = concatArrays(dataEnum.boss);
+
+            askNextData();
+        }
+    }
+}
+
+function getDataSize(dataType) {
+    var metadata = dataToAsk[dataType];
+    var dataSize = 0;
+    for(var i=0; i<metadata.length; i++) {
+        dataSize += metadata[i].size;
+    }
+    return dataSize;
+}
+
+function concatArrays(dataType) {
+    if(receivedData.length == 1) {
+        return receivedData[0];
+    } else {
+        dataSize = getDataSize(dataType);
+
+        var data = new Uint8Array(dataSize);
+        var curPos = 0;
+
+        for(var i=0; i<receivedData.length; i++) {
+            data.set(receivedData[i], curPos);
+            curPos += receivedData[i].length;
+        }
+
+        return data;
+    }
+}
+
+function displayDebugMap(mapData, areaStart) {
+    // display the map on canvas
+    var canvas = document.getElementById('debugMap');
+    var ctx = canvas.getContext('2d');
+
+    // metroid map pink
+    ctx.fillStyle = 'rgb(222, 57, 148)';
+
+    // for each bit set in the map data display a 8x8 square on the map canvas
+    var areaSize = 0x100;
+    // 0x0: crateria ou current map
+    // 0x100: brinstar
+    // 0x200: norfair
+    // 0x300: WS
+    // 0x400: maridia
+    var areaEnd = areaStart + areaSize;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // squares we are drawing
+    var width = 8;
+    var height = 8;
+
+    for(var i=areaStart; i<areaEnd; i++) {
+        var b = mapData[i];
+        if(b == 0) {
+            continue;
+        } else {
+            var byteIndex = i - areaStart;
+            for(var j=7; j>=0; j--) {
+                if((b & 0x80) == 0x80) {
+                    var bitMask = Math.pow(2, j);
+                    var coords = getMapDisplayCoord(byteIndex, bitMask);
+                    ctx.fillRect(coords[0], coords[1], width, height);
+                }
+                b = b << 1;
+            }
+        }
+    }
+}
+
+function displaySamus(byteIndex, bitMask) {
+    var canvas = document.getElementById('debugMap');
+    var ctx = canvas.getContext('2d');
+
+    // samus yellow
+    ctx.fillStyle = 'rgb(255, 189, 3)';
+
+    var width = 4;
+    var height = 4;
+    var coords = getMapDisplayCoord(byteIndex, bitMask);
+
+    // add 2 to draw in the center of the map square
+    ctx.fillRect(coords[0]+2, coords[1]+2, width, height);
+}
+
+function getMapDisplayCoord(byteIndex, bitMask) {
+    // http://patrickjohnston.org/bank/90#fA8A6
+    //
+    // Map tiles explored (for current area). One bit per room.
+    // Laid out like a 64x32 1bpp VRAM tilemap:
+    //   2x1 pages of 32x32 map tiles (80h bytes per page, 4 bytes per row, 1 bit per tile),
+    //   each byte is 8 map tiles where the most significant bit is the leftmost tile.
+    //
+    // Let
+    //     x = [room X co-ordinate] + [$12] / 100h
+    //     y = [room Y co-ordinate] + [$18] / 100h
+    // Then
+    //     $07FB + (y + (x & 20h)) * 4 + (x & 1Fh) / 8 |= 80h >> (x & 7)
+    // are we in the first or second page
+
+    // squares we are drawing
+    var width = 8;
+    var height = 8;
+
+    var y = (byteIndex < 128) ? byteIndex : byteIndex - 128;
+    // each line in a page is 4 bytes.
+    // our squares are 8 pixels high.
+    y = (y >> 2) * height;
+    // are we in the first or second page
+    var baseX = (byteIndex < 128) ? 0 : 4;
+    // each bit is a square on the map, so 8 squares per byte
+    baseX = (baseX + (byteIndex % 4)) * 8 * width;
+    var j = Math.log2(bitMask);
+    var x = baseX + (7 - j) * width;
+
+    return [x, y];
+}
+
+function cleanupBuffer() {
+    askedDataSize = 0;
+    receivedDataSize = 0;
+    receivedData = [];
+}
+
+function initDataChain() {
+    // always ask for game state first
+    dataToAskChain = [dataEnum.state];
+
+    stateDataOffsets = {};
+    var curOffset = 0;
+
+    // ask item locs & boss
+    dataToAskChain.push(dataEnum.items);
+    stateDataOffsets[dataEnum.items] = curOffset;
+    curOffset += getDataSize(dataEnum.items);
+
+    dataToAskChain.push(dataEnum.boss);
+    stateDataOffsets[dataEnum.boss] = curOffset;
+    curOffset += getDataSize(dataEnum.boss);
+
+    // ask samus position to know the current map area
+    dataToAskChain.push(dataEnum.samus);
+
+    // ask optional map data
+    if(area || boss || doorsRando || hasNothing) {
+        dataToAskChain.push(dataEnum.map);
+        stateDataOffsets[dataEnum.map] = curOffset;
+        curOffset += getDataSize(dataEnum.map);
+
+        dataToAskChain.push(dataEnum.curMap);
+    }
+
+    // start at the beginning of the chain
+    dataToAskStep = 0;
+
+    // instantiate state/mask arrays (arrays are initialized with zeros)
+    stateArraySize = curOffset;
+    currentState = new Uint8Array(stateArraySize);
+    stateBitMasks = new Uint8Array(stateArraySize);
+    previousStateChksum = 0;
+    computeStateBitMasks();
+}
+
+function computeStateBitMasks() {
+    var curOffset = 0;
+
+    for(var i=0; i<dataToAskChain.length; i++) {
+        if(dataToAskChain[i] == dataEnum.items) {
+            var curOffset = stateDataOffsets[dataEnum.items];
+            for(var byteIndex in itemsBitMasks) {
+                // in js dict keys are strings
+                byteIndexInt = parseInt(byteIndex);
+                stateBitMasks[curOffset + byteIndexInt] |= itemsBitMasks[byteIndex];
+            }
+        } else if(dataToAskChain[i] == dataEnum.boss) {
+            var curOffset = stateDataOffsets[dataEnum.boss];
+            for(var bossName in bossBitMasks) {
+                stateBitMasks[curOffset + bossBitMasks[bossName]["byteIndex"]] |= bossBitMasks[bossName]["bitMask"];
+            }
+        } else if(dataToAskChain[i] == dataEnum.map) {
+            var curOffset = stateDataOffsets[dataEnum.map];
+            if(area) {
+                // loop on areaAccessPoints
+                for(var apName in areaAccessPoints) {
+                    var apData = areaAccessPoints[apName];
+                    stateBitMasks[curOffset + apData["byteIndex"] + mapOffsetEnum[apData["area"]]] |= apData["bitMask"];
+                }
+            }
+            if(boss) {
+                // loop on bossAccessPoints
+                for(var apName in bossAccessPoints) {
+                    var apData = bossAccessPoints[apName];
+                    stateBitMasks[curOffset + apData["byteIndex"] + mapOffsetEnum[apData["area"]]] |= apData["bitMask"];
+                }
+            }
+            if(doorsRando) {
+                for(var doorName in doorsScreen) {
+                    var doorData = doorsScreen[doorName];
+                    stateBitMasks[curOffset + doorData["byteIndex"] + mapOffsetEnum[doorData["area"]]] |= doorData["bitMask"];
+                }
+            }
+            if(hasNothing) {
+                for(var locName in nothingScreens) {
+                    var locData = nothingScreens[locName];
+                    stateBitMasks[curOffset + locData["byteIndex"] + mapOffsetEnum[locData["area"]]] |= locData["bitMask"];
+                }
+            }
+        }
+    }
+}
+
+// called after a state upload to rearm the timer
+function postAjaxHook() {
+    var duration = Date.now() - transfertStart;
+    appendLog(`\u2705 Backend updated in ${duration}ms`);
+
+    resetNextDataChain();
+}
+
+function resetNextDataChain() {
+    cleanupBuffer();
+    // start at the beginning of the chain
+    dataToAskStep = 0;
+    // rearm timer
+    timeout = setTimeout(askForData, waitingTime);
+}
+
+function askNextData() {
+    // reset data vars
+    cleanupBuffer();
+
+    dataToAskStep++;
+
+    if(dataToAskStep < dataToAskChain.length) {
+        // next step
+        askForData();
+    } else {
+        // we've collected all the required data, check if there's a state change,
+        // return true if no state change, so we can rearm the timer
+        if(checkCollectedData()) {
+            // restart chain
+            resetNextDataChain();
+        }
+    }
+}
+
+function checkCollectedData() {
+    // populate state
+    populateCurrentState();
+
+    // compute crc32
+    // TODO::check if we can reuse the same crc32 instance
+    var crc32 = new Crc32();
+    crc32.update(currentState);
+    var newStateChksum = crc32.digest();
+    console.log(`State Checksum: ${newStateChksum}`);
+
+    if(newStateChksum == previousStateChksum) {
+        appendLog("\u2705 State is the same");
+
+        // rearm the timer for next data retrieval
+        return true;
+    } else {
+        appendLog("\u2705 New state detected");
+
+        previousStateChksum = newStateChksum;
+
+        transfertStart = Date.now();
+
+        // send state to backend
+        ajaxCall({action: "import",
+                  scope: "dump",
+                  stateDataOffsets: JSON.stringify(stateDataOffsets),
+                  currentState: jsonArray(currentState)}, "upload");
+
+        return false;
+    }
+}
+
+function jsonArray(array) {
+    // json.stringify on a uint8array changes it to a dict...
+    var ret = '['+array[0];
+    for(var i=1; i<array.length; i++) {
+        ret += ', '+array[i];
+    }
+    ret += ']';
+    return ret;
+}
+
+function populateCurrentState() {
+    // reset current state
+    currentState.fill(0);
+
+    // add data to state
+    for(var j=0; j<dataToAskChain.length; j++) {
+        if(dataToAskChain[j] == dataEnum.items) {
+            var curOffset = stateDataOffsets[dataToAskChain[j]];
+            for(var i=0; i<itemsData.length; i++) {
+                currentState[curOffset + i] = itemsData[i] & stateBitMasks[curOffset + i];
+            }
+        } else if(dataToAskChain[j] == dataEnum.boss) {
+            var curOffset = stateDataOffsets[dataEnum.boss];
+            for(var i=0; i<bossData.length; i++) {
+                currentState[curOffset + i] = bossData[i] & stateBitMasks[curOffset + i];
+            }
+        } else if(dataToAskChain[j] == dataEnum.map) {
+            var curOffset = stateDataOffsets[dataEnum.map];
+            for(var i=0; i<mapData.length; i++) {
+                currentState[curOffset + i] = mapData[i] & stateBitMasks[curOffset + i];
+            }
+        }
+    }
+}
+
+function sendAutoTrackerMessage(data, newState) {
+    socket.send(JSON.stringify(data));
+
+    // update state
+    curState = newState;
+
+    // update interface
+    setAutoTrackerIcon("statusLoad");
+}
 </script>
 
 <div class="fixed">
@@ -151,8 +1122,29 @@ function onloadHook() {}
     <div id="repeatItem" class="repeatItem"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc(false)" data-toggle="tooltip" title="Remove last visited location" data-placement="bottom" data-container="body" data-html="true" id="repeatItemImg"></div>
     <div id="binItem" class="binItem"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs(false)" data-toggle="tooltip" title="Remove all visited locations" data-placement="bottom" data-container="body" data-html="true"></div>
 
+    <!-- tracker help -->
     <div id="help" class="help"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the help" data-placement="bottom" data-container="body" data-html="true"></div>
 
+    <!-- auto tracker -->
+    <div id="titleAutoTracker">AUTO TRACKER</div>
+
+    <div id="startStopAutoTracker">
+      <img id="startAutoTracker" src="/solver/static/images/play.svg" alt="Start AutoTracker" onclick="startAutoTracker()" data-toggle="tooltip" title="Start the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
+      <img id="stopAutoTracker" src="/solver/static/images/shut_down.svg" alt="Stop AutoTracker" style="display: none" onclick="stopAutoTracker()" data-toggle="tooltip" title="Stop the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
+    </div>
+
+    <div id="helpAutoTracker"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(1)" data-toggle="tooltip" title="Display the AutoTracker help" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="statusAutoTracker">
+      <img id="statusKO" src="/solver/static/images/record_ko.svg" alt="statusKO" style="display: none" data-toggle="tooltip" title="AutoTracker status OK" data-placement="bottom" data-container="body" data-html="true">
+      <img id="statusOK" src="/solver/static/images/record_ok.svg" alt="statusOK" style="display: none" data-toggle="tooltip" title="AutoTracker status KO" data-placement="bottom" data-container="body" data-html="true">
+      <img id="statusLoad" src="/solver/static/images/record_load.svg" alt="statusLoad" style="display: none" data-toggle="tooltip" title="AutoTracker status Load" data-placement="bottom" data-container="body" data-html="true">
+      <img id="statusNA" src="/solver/static/images/record.svg" alt="statusNA" data-toggle="tooltip" title="AutoTracker status NA" data-placement="bottom" data-container="body" data-html="true">
+    </div>
+
+    <textarea id="logAutoTracker" disabled></textarea>
+
+    <!-- debug canvas pink color: de3994 -->
+    <canvas id="debugMap" width="512" height="256"></canvas>
   </div>
 
   <!-- info on current loaded seed -->

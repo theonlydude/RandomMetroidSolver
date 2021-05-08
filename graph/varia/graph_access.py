@@ -149,10 +149,11 @@ accessPoints = [
        escape = True,
        dotOrientation = 'ne'),
     AccessPoint('Etecoons Supers', 'GreenPinkBrinstar', {
-        'Etecoons Bottom': Cache.ldeco(lambda sm: sm.haveItem('Morph'))
+        'Etecoons Bottom': lambda sm: SMBool(True)
     }, internal=True,
        start={'spawn': 0x0107, 'doors':[0x34], 'patches':[RomPatches.EtecoonSupersBlueDoor],
-              'save':"Save_Etecoons" ,'solveArea': "Green Brinstar", 'forcedEarlyMorph':True}),
+              'save':"Save_Etecoons" ,'solveArea': "Green Brinstar",
+              'forcedEarlyMorph':True, 'needsPreRando': True}),
     AccessPoint('Etecoons Bottom', 'GreenPinkBrinstar', {
         'Etecoons Supers': Cache.ldeco(lambda sm: sm.wor(RomPatches.has(RomPatches.EtecoonSupersBlueDoor),
                                                          sm.traverse('EtecoonEnergyTankLeft'))),

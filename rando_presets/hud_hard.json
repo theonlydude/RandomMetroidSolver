@@ -1,0 +1,11 @@
+{
+  "majorsSplit": "random",
+  "majorsSplitMultiSelect": "Full",
+  "progressionSpeed": "variable",
+  "minorQty": "40",
+  "energyQty": "sparse",
+  "hud": "on",
+  "funMovement": "random",
+  "funCombat": "random",
+  "funSuits": "random"
+}

@@ -1,0 +1,5 @@
+{
+  "majorsSplit": "FullWithHUD",
+  "progressionSpeed": "random",
+  "progressionSpeedMultiSelect": ["speedrun", "medium", "variable"]
+}

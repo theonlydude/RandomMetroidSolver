@@ -1,7 +1,7 @@
 {
-  "majorsSplit": "random",
-  "majorsSplitMultiSelect": "Full",
-  "progressionSpeed": "variable",
+  "majorsSplit": "Full",
+  "progressionSpeed": "random",
+  "progressionSpeedMultiSelect": ["slow", "medium", "VARIAble", "slowest"],
   "minorQty": "40",
   "energyQty": "sparse",
   "hud": "on",

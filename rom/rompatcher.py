@@ -390,9 +390,10 @@ class RomPatcher:
 
     def applyStartAP(self, apName, plms, doors):
         ap = getAccessPoint(apName)
-        if not GraphUtils.isStandardStart(apName):
-            # not Ceres or Landing Site, so Zebes will be awake
-            plms.append('Morph_Zebes_Awake')
+        # if start loc is not Ceres or Landing Site, or the ceiling loc picked up before morph loc,
+        # Zebes will be awake and morph loc item will disappear.
+        # this PLM ensures the item will be here whenever zebes awakes
+        plms.append('Morph_Zebes_Awake')
         (w0, w1) = getWord(ap.Start['spawn'])
         if 'doors' in ap.Start:
             doors += ap.Start['doors']

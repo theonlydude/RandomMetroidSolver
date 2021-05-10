@@ -154,7 +154,9 @@ class RomLoader(object):
     def updateSplitLocs(self, split, locations):
         locIds = self.romReader.getLocationsIds()
         for loc in locations:
-            if loc.Id in locIds:
+            if loc.isBoss():
+                continue
+            elif loc.Id in locIds:
                 loc.setClass([split])
             else:
                 loc.setClass(["Minor"])

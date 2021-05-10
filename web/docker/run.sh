@@ -4,7 +4,7 @@
 # -b branch: optional branch checkouted during build (default to master)
 
 BRANCH="master"
-while getopts "b:d:t:" ARG; do
+while getopts "b:" ARG; do
     case ${ARG} in
         b) export BRANCH="${OPTARG}";;
 	*) echo "Unknown option ${ARG}"; exit 0;;

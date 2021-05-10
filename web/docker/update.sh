@@ -13,4 +13,5 @@ while getopts "b:d:t:" ARG; do
 done
 
 docker exec -w /root/RandomMetroidSolver varia-${BRANCH} git pull
+docker exec -w /root/web2py varia-${BRANCH} rm -rf applications/solver/sessions/*
 docker exec -w /root/RandomMetroidSolver varia-${BRANCH} web/install.sh

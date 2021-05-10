@@ -262,15 +262,13 @@ class RomReader:
     def getMajorsSplit(self):
         address = 0x17B6C
         split = chr(self.romFile.readByte(address))
-        if split in ['F', 'M', 'Z']:
-            splits = {
-                'F': 'Full',
-                'Z': 'Chozo',
-                'M': 'Major'
-            }
-            return splits[split]
-        else:
-            return None
+        splits = {
+            'F': 'Full',
+            'Z': 'Chozo',
+            'M': 'Major',
+            'H': 'FullWithHUD'
+        }
+        return splits.get(split, None)
 
     def loadItems(self, locations):
         majorsSplit = self.getMajorsSplit()

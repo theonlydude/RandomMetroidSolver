@@ -528,6 +528,8 @@ class RomPatcher:
             char = 'Z'
         elif majorsSplit == 'Major':
             char = 'M'
+        elif majorsSplit == 'FullWithHUD':
+            char = 'H'
         else:
             char = 'F'
         self.romFile.writeByte(ord(char), address)

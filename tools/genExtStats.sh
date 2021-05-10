@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -ne 2 -a $# -ne 3 -a $# -ne 4 ]; then
-    echo "params: ROM LOOPS [tourney]"
+    echo "params: ROM LOOPS [tourney] [skills]"
     exit -1
 fi
 

@@ -191,7 +191,8 @@ class FillerProgSpeed(Filler):
         return True
 
     def addEnergyAsNonProg(self):
-        return self.restrictions.split == 'Chozo'
+        collectedEnergy = self.container.getCollectedItems(lambda item: item.Category == 'Energy')
+        return self.restrictions.split == 'Chozo' or (len(collectedEnergy) <= 2 and self.settings.progSpeed != 'slowest')
 
     def nonProgItemCheck(self, item):
         return (item.Category == 'Energy' and self.addEnergyAsNonProg()) or (not self.stdStart and item.Category == 'Ammo') or (self.restrictions.isEarlyMorph() and item.Type == 'Morph') or not self.isProgItem(item)

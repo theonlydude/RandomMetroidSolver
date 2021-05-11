@@ -307,7 +307,8 @@ bt_escape_setup:
     ;; run vanilla setup ASM
     jmp $91B2
 
-warnpc $8ff0ff
+print "8F lists end: ",pc
+warnpc $8ff05f
 
 ;;; DATA (bank A1 free space)
 org $a1f000

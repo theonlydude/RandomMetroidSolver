@@ -720,3 +720,5 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/record_load.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/record_load.svg ~/web2py/applications/solver/static/images/record_load.svg
 [ -L ~/web2py/applications/solver/static/images/record_ok.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/record_ok.svg ~/web2py/applications/solver/static/images/record_ok.svg
 [ -L ~/web2py/applications/solver/static/images/shut_down.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/shut_down.svg ~/web2py/applications/solver/static/images/shut_down.svg
+
+[ -L ~/web2py/applications/solver/static/images/samusIcon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/samusIcon.png ~/web2py/applications/solver/static/images/samusIcon.png

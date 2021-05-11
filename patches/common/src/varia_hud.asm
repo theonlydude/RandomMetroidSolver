@@ -191,7 +191,7 @@ area_names:
 	dw $0000
 	dw " CRATER"
 	dw $0000
-	dw "GP BRIN"
+	dw "GR BRIN"
 	dw $0000
 	dw "RED BRI"
 	dw $0000

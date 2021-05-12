@@ -387,10 +387,7 @@ accessPoints = [
     AccessPoint('Single Chamber Top Right', 'Norfair', {
         'Bubble Mountain Top': Cache.ldeco(lambda sm: sm.wand(sm.canDestroyBombWalls(),
                                                               sm.haveItem('Morph'),
-                                                              sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain']))),
-        'Kronic Boost Room Bottom Left': Cache.ldeco(lambda sm: sm.wand(sm.canDestroyBombWalls(),
-                                                                        sm.haveItem('Morph'),
-                                                                        sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Kronic Boost Room'])))
+                                                              sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain'])))
     },  roomInfo = {'RoomPtr':0xad5e, "area": 0x2},
         exitInfo = {'DoorPtr':0x95fa, 'direction': 0x4, "cap": (0x11, 0x6), "bitFlag": 0x0,
                     "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -402,10 +399,6 @@ accessPoints = [
                                                           sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles'])))
     }, internal=True),
     AccessPoint('Kronic Boost Room Bottom Left', 'Norfair', {
-        'Single Chamber Top Right': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Kronic Boost Room']),
-                                                                   sm.canDestroyBombWalls(),
-                                                                   sm.haveItem('Morph'),
-                                                                   RomPatches.has(RomPatches.SingleChamberNoCrumble))),
         'Bubble Mountain Bottom': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain'])),
         'Bubble Mountain Top': Cache.ldeco(lambda sm: sm.wand(sm.haveItem('Morph'),
                                                               sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room -> Bubble Mountain Top']))), # go all the way around

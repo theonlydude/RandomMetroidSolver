@@ -157,6 +157,12 @@ class HelpersGraph(Helpers):
         return sm.wor(sm.canUsePowerBombs(),
                       sm.wand(sm.knowsMoondance(), sm.canUseBombs(), sm.traverse('MainShaftBottomRight')))
 
+    @Cache.decorator
+    def canKillBeetoms(self):
+        sm = self.smbm
+        # can technically be killed with bomb, but it's harder
+        return sm.wor(sm.haveMissileOrSuper(), sm.canUsePowerBombs(), sm.haveItem('ScrewAttack'))
+
     # the water zone east of WS
     def canPassForgottenHighway(self, fromWs):
         sm = self.smbm

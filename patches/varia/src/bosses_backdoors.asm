@@ -10,18 +10,9 @@
 
 ;;; CONSTANTS
 !incompatible_doors  = $F600
-!door_list_ptr       = $07b5
+!door_list_ptr       = $07B5
 !SamusX		     = $0AF6
 !SamusY		     = $0AFA
-
-;;; macros
-
-;;; z set if boss alive
-macro isMiniBossDead()
-	LDX $079F
-	LDA $7ED828,x
-	AND #$0002
-endmacro
 
 ;;; DATA
 
@@ -44,6 +35,17 @@ org $8f9b80
 org $8ff060
 spospo_alt_doorlist:
 	dw $8D1E,spospo_backdoor
+
+;;; CODE
+
+;;; macros
+
+;;; z set if boss alive
+macro isMiniBossDead()
+	LDX $079F
+	LDA $7ED828,x
+	AND #$0002
+endmacro
 
 ;;; setup/door ASMs
 spospo_back_setup:

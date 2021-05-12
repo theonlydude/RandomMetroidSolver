@@ -4,10 +4,10 @@ class Logic(object):
     @staticmethod
     def factory(implementation):
         if implementation == 'varia':
-            from graph.varia.graph_helpers import HelpersGraph
-            from graph.varia.graph_access import accessPoints
-            from graph.varia.graph_locations import locations
-            from graph.varia.graph_locations import LocationsHelper
+            from graph.vanilla.graph_helpers import HelpersGraph
+            from graph.vanilla.graph_access import accessPoints
+            from graph.vanilla.graph_locations import locations
+            from graph.vanilla.graph_locations import LocationsHelper
             Logic.locations = locations
             Logic.accessPoints = accessPoints
             Logic.HelpersGraph = HelpersGraph

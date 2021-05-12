@@ -91,7 +91,7 @@ class FillerProgSpeed(Filler):
         return self.services.currentLocations(self.ap, self.container, item=item)
 
     def getComebackCheck(self):
-        if self.isEarlyGame():
+        if self.isEarlyGame() or self.services.can100percent(self.ap, self.container):
             return ComebackCheckType.NoCheck
         if random.random() >= self.possibleSoftlockProb:
             return ComebackCheckType.ComebackWithoutItem

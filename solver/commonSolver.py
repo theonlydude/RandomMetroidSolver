@@ -21,6 +21,7 @@ class CommonSolver(object):
             Logic.factory('varia')
             self.romFileName = 'seedless'
             self.majorsSplit = 'Full'
+            self.masterMajorsSplit = 'Full'
             self.areaRando = True
             self.bossRando = True
             self.escapeRando = False
@@ -48,7 +49,7 @@ class CommonSolver(object):
             Logic.factory(self.romLoader.readLogic())
             self.romLoader.readNothingId()
             self.locations = Logic.locations
-            self.majorsSplit = self.romLoader.assignItems(self.locations)
+            (self.majorsSplit, self.masterMajorsSplit) = self.romLoader.assignItems(self.locations)
             (self.startAP, self.startArea, startPatches) = self.romLoader.getStartAP()
             if not GraphUtils.isStandardStart(self.startAP) and self.majorsSplit != 'Full':
                 # update major/chozo locs in non standard start

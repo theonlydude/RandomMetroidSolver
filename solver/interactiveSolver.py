@@ -425,8 +425,9 @@ class InteractiveSolver(CommonSolver):
         romPatcher.writeItemsNumber()
         romPatcher.writeSpoiler(itemLocs)
         # plando is considered Full
-        romPatcher.writeSplitLocs(itemLocs, "Full")
-        romPatcher.writeMajorsSplit("Full")
+        majorsSplit = "Full" if self.masterMajorsSplit != "FullWithHUD" else self.masterMajorsSplit
+        romPatcher.writeSplitLocs(itemLocs, majorsSplit)
+        romPatcher.writeMajorsSplit(majorsSplit)
         class FakeRandoSettings:
             def __init__(self):
                 self.qty = {'energy': 'plando'}

@@ -22,11 +22,11 @@ class ComeBack(object):
                         return False
                     elif loc.comeBack == True:
                         return False
-                    else:
-                        # when the solver decide to visit a major no come back locations
-                        # when there's minors comeback locations available.
-                        # create a rollback point just in case more minors where actually required to do a special tech.
-                        majorNoComeBack = True
+                else:
+                    # when the solver decide to visit a major no come back locations
+                    # when there's minors comeback locations available.
+                    # create a rollback point just in case more minors where actually required to do a special tech.
+                    majorNoComeBack = True
             else:
                 if loc.comeBack is None:
                     return False

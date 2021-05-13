@@ -506,7 +506,7 @@ class RomReader:
         if self.patchPresent('rotation'):
             return 'rotation'
         else:
-            return 'varia'
+            return 'vanilla'
 
     def getStartAP(self):
         address = 0x10F200

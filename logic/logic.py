@@ -3,7 +3,7 @@
 class Logic(object):
     @staticmethod
     def factory(implementation):
-        if implementation == 'varia':
+        if implementation == 'vanilla':
             from graph.vanilla.graph_helpers import HelpersGraph
             from graph.vanilla.graph_access import accessPoints
             from graph.vanilla.graph_locations import locations

@@ -18,7 +18,7 @@ class CommonSolver(object):
         # startAP param is only use for seedless
         if rom == None:
             # TODO::add a --logic parameter for seedless
-            Logic.factory('varia')
+            Logic.factory('vanilla')
             self.romFileName = 'seedless'
             self.majorsSplit = 'Full'
             self.masterMajorsSplit = 'Full'

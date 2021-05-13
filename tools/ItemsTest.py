@@ -19,7 +19,7 @@ if __name__ == "__main__":
 #    utils.log.init(True) # debug mode
     utils.log.init(False)
     logger = utils.log.get('ItemsTest')
-    Logic.factory('varia')
+    Logic.factory('vanilla')
     sm = SMBoolManager()
     with open("itemStats.csv", "w") as csvOut:
         csvOut.write("nLocs;energyQty;minorQty;nFun;strictMinors;MissProb;SuperProb;PowerProb;split;nItems;nTanks;nTanksTotal;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy;AmmoAccuracy\n")

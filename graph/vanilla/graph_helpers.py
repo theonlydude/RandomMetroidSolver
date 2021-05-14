@@ -583,15 +583,19 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canBotwoonExitToColosseum(self):
         sm = self.smbm
-        return sm.wor(sm.haveItem('Gravity'),
-                      sm.wand(sm.knowsGravLessLevel2(),
-                              sm.haveItem("HiJump"),
-                              # get to top right door
-                              sm.wor(sm.haveItem('Grapple'),
-                                     sm.haveItem('Ice'), # climb mochtroids
-                                     sm.wand(sm.canDoubleSpringBallJump(),
-                                             sm.haveItem('SpaceJump'))),
-                              sm.canGoThroughColosseumSuitless()))
+                       # traverse Botwoon Energy Tank Room
+        return sm.wand(sm.wor(sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpeedBooster')),
+                              sm.wand(sm.haveItem('Morph'), sm.canJumpUnderwater())),
+                       # after Botwoon Energy Tank Room
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.wand(sm.knowsGravLessLevel2(),
+                                      sm.haveItem("HiJump"),
+                                      # get to top right door
+                                      sm.wor(sm.haveItem('Grapple'),
+                                             sm.haveItem('Ice'), # climb mochtroids
+                                             sm.wand(sm.canDoubleSpringBallJump(),
+                                                     sm.haveItem('SpaceJump'))),
+                                      sm.canGoThroughColosseumSuitless())))
 
     @Cache.decorator
     def canColosseumToBotwoonExit(self):

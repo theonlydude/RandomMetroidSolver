@@ -267,7 +267,7 @@ if __name__ == "__main__":
     parser.add_argument('--seedIps', help='ips generated from previous seed', dest='seedIps', default=None)
     parser.add_argument('--jm,', help="display data used by jm for its stats", dest='jm', action='store_true', default=False)
     parser.add_argument('--doorsColorsRando', help='randomize color of colored doors', dest='doorsColorsRando',
-                        nargs='?', const=True, default=False)
+                        nargs='?', const=True, default=False, choices=['on', 'off', 'random'])
     parser.add_argument('--allowGreyDoors', help='add grey color in doors colors pool', dest='allowGreyDoors',
                         nargs='?', const=True, default=False)
     parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="varia", choices=["varia", "rotation"])
@@ -396,6 +396,10 @@ if __name__ == "__main__":
     if args.doorsColorsRando == 'random':
         doorsColorsRandom = True
         args.doorsColorsRando = bool(random.getrandbits(1))
+    elif args.doorsColorsRando == 'on':
+        args.doorsColorsRando = True
+    else:
+        args.doorsColorsRando = False
     logger.debug("doorsColorsRando: {}".format(args.doorsColorsRando))
 
     bossesRandom = False

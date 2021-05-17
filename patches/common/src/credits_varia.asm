@@ -2068,24 +2068,24 @@ credits:
     dw " DOOR TRANSITIONS             0 " // 185
     dw " door transitions             } " // 186
     dw " TIME IN DOORS      00'00'00^00 " // 187
-    dw " time in doors                  " // 188
+    dw " time in doors      }} }} }} }} " // 188
     dw " TIME ALIGNING DOORS   00'00^00 " // 189
-    dw " time aligning doors            " // 190
+    dw " time aligning doors   }} }} }} " // 190
     {blue}
     dw "         TIME SPENT IN          " // 191
     {big}
     dw " CERES              00'00'00^00 " // 192
-    dw " ceres                          " // 193
+    dw " ceres              }} }} }} }} " // 193
     dw " CRATERIA           00'00'00^00 " // 194
-    dw " crateria                       " // 195
+    dw " crateria           }} }} }} }} " // 195
     dw " GREEN BRINSTAR     00'00'00^00 " // 196
-    dw " green brinstar                 " // 197
+    dw " green brinstar     }} }} }} }} " // 197
     dw " RED BRINSTAR       00'00'00^00 " // 198
-    dw " red brinstar                   " // 199
+    dw " red brinstar       }} }} }} }} " // 199
     dw " WRECKED SHIP       00'00'00^00 " // 200
-    dw " wrecked ship                   " // 201
+    dw " wrecked ship       }} }} }} }} " // 201
     dw " KRAID'S LAIR       00'00'00^00 " // 202
-    dw " kraid s lair                   " // 203
+    dw " kraid s lair       }} }} }} }} " // 203
     {green}
     dw "      SHOTS AND AMMO FIRED      " // 204
     {big}
@@ -2102,11 +2102,11 @@ credits:
     dw " BOMBS                        0 " // 215
     dw " bombs                        } " // 216
     dw " FINAL TIME         00'00'00^00 " // 217
-    dw " final time                     " // 218
+    dw " final time         }} }} }} }} " // 218
     dw "       THANKS FOR PLAYING       " // 219
     dw "       thanks for playing       " // 220
     dw " PAUSE MENU         00'00'00^00 " // 221
-    dw " pause menu                     " // 222
+    dw " pause menu         }} }} }} }} " // 222
     {cyan}
     dw "     PLAY THIS RANDOMIZER AT    " // 223
     {big}
@@ -2115,17 +2115,17 @@ credits:
     dw "    artheau   mike trethewey    " // 225
     // now some more stats
     dw " UPPER NORFAIR      00'00'00^00 " // 226
-    dw " upper norfair                  " // 227
+    dw " upper norfair      }} }} }} }} " // 227
     dw " CROCOMIRE          00'00'00^00 " // 228
-    dw " crocomire                      " // 229
+    dw " crocomire          }} }} }} }} " // 229
     dw " LOWER NORFAIR      00'00'00^00 " // 230
-    dw " lower norfair                  " // 231
+    dw " lower norfair      }} }} }} }} " // 231
     dw " WEST MARIDIA       00'00'00^00 " // 232
-    dw " west maridia                   " // 233
+    dw " west maridia       }} }} }} }} " // 233
     dw " EAST MARIDIA       00'00'00^00 " // 234
-    dw " east maridia                   " // 235
+    dw " east maridia       }} }} }} }} " // 235
     dw " TOURIAN            00'00'00^00 " // 236
-    dw " tourian                        " // 237
+    dw " tourian            }} }} }} }} " // 237
 
     dw $0000                              // End of credits tilemap
 

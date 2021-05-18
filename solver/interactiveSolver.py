@@ -176,6 +176,8 @@ class InteractiveSolver(CommonSolver):
             elif action == 'toggle':
                 doorName = params['doorName']
                 DoorsManager.switchVisibility(doorName)
+            elif action == 'clear':
+                DoorsManager.initTracker()
         elif scope == 'dump':
             if action == 'import':
                 self.importDump(params["dump"])

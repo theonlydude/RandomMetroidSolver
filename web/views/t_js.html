@@ -1527,32 +1527,41 @@ function resetLocsInfo() {
 }
 
 function clearLocs(isPlando) {
-  if(interfaceIsFrozen()) {
-    return;
-  }
-  if(isPlando == true && ! isActive("binPlando")) {
-    return;
-  }
-  if(isPlando == false && ! isActive("binItem")) {
-    return;
-  }
+    if(interfaceIsFrozen()) {
+        return;
+    }
+    if(isPlando == true && ! isActive("binPlando")) {
+        return;
+    }
+    if(isPlando == false && ! isActive("binItem")) {
+        return;
+    }
 
-  var msg = "Reset the locations of the Interactive VARIA ";
-  if(isPlando == true) {
-    msg = msg + "Plandomizer ?";
-  } else {
-    msg = msg + "Solver ?"
-  }
+    if(isPlando == true) {
+        var msg = "Reset the locations of the Plandomizer ?";
+    } else {
+        if(doorsRando == true) {
+            var msg = "Reset the locations and doors of the Tracker ?"
+        } else {
+            var msg = "Reset the locations of the Tracker ?"
+        }
+    }
 
-  var result = confirm(msg);
-  if(result == false){
-    return;
-  }
+    var result = confirm(msg);
+    if(result == false){
+        return;
+    }
 
-  resetLocsInfo();
+    resetLocsInfo();
 
-  // reset the state server side
-  ajaxCall({action: "clear", scope: "item"}, "upload");
+    if(isPlando == false && doorsRando == true) {
+        ajaxChainedActions.push({action: "clear", scope: "item"});
+        ajaxChainedActions.push({action: "clear", scope: "door"});
+        ajaxCallChained();
+    } else {
+        // reset the state server side
+        ajaxCall({action: "clear", scope: "item"}, "upload");
+    }
 }
 
 function getTooltip(locName, locData, item, visited) {

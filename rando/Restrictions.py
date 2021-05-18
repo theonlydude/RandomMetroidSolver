@@ -72,12 +72,16 @@ class Restrictions(object):
     def isItemMajor(self, item):
         if self.split == "Full":
             return True
+        elif self.split == 'Scavenger':
+            return not self.isItemMinor(item)
         else:
             return item.Class == self.split
 
     def isItemMinor(self, item):
         if self.split == "Full":
             return True
+        elif self.split == 'Scavenger':
+            return item.Class != "Major" or item.Category == "Energy" or item.Category == "Nothing"
         else:
             return item.Class == "Minor"
 
@@ -113,8 +117,12 @@ class Restrictions(object):
         self.log.debug("add bosses restriction")
         checkers.append(lambda item, loc, cont: (item.Category != 'Boss' and not loc.isBoss()) or (item.Category == 'Boss' and item.Name == loc.Name))
         if self.split != 'Full':
-            self.log.debug("add majorsSplit restriction")
-            checkers.append(lambda item, loc, cont: self.isItemLocMatching(item, loc))
+            if self.split != 'Scavenger':
+                self.log.debug("add majorsSplit restriction")
+                checkers.append(lambda item, loc, cont: self.isItemLocMatching(item, loc))
+            else:
+                self.log.debug("add scavenger restriction")
+                checkers.append(lambda item, loc, cont: (loc.VanillaItemType is None and self.isItemMinor(item)) or item.Type == loc.VanillaItemType)
         if self.suitsRestrictions:
             self.log.debug("add suits restriction")
             checkers.append(lambda item, loc, cont: not self.isSuit(item) or loc.GraphArea != 'Crateria')

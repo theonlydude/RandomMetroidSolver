@@ -212,10 +212,45 @@ area_names:
 	dw "TOURIAN"
 	dw $0000
 
+majors_names:
+	dw " MORPH "
+	dw $0000
+	dw " BOMB  "
+	dw $0000
+	dw " CHARGE"
+	dw $0000
+	dw " SPAZER"
+	dw $0000
+	dw " VARIA "
+	dw $0000
+	dw "HI JUMP"
+	dw $0000
+	dw "  ICE  "
+	dw $0000
+	dw " SPEED "
+	dw $0000
+	dw "  WAVE "
+	dw $0000
+	dw "GRAPPLE"
+	dw $0000
+	dw " X RAY "
+	dw $0000
+	dw "GRAVITY"
+	dw $0000
+	dw " SPACE "
+	dw $0000
+	dw " SPRING"
+	dw $0000
+	dw " PLASMA"
+	dw $0000
+	dw " SCREW "
+	dw $0000
+
 cleartable
 
 print "b80 end: ", pc
-warnpc $80d2af
+
+warnpc $80d3af
 
 org $a1f550
 

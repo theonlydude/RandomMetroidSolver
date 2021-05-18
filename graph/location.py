@@ -98,7 +98,7 @@ class Location:
 
 def define_location(
         Area, GraphArea, SolveArea, Name, Class, CanHidden, Address, Id,
-        Visibility, Room, AccessFrom=None, Available=None, PostAvailable=None):
+        Visibility, Room, VanillaItemType=None, AccessFrom=None, Available=None, PostAvailable=None):
     name = Name.replace(' ', '').replace(',', '') + 'Location'
     subclass = type(name, (Location,), {
         'Area': Area,
@@ -111,6 +111,7 @@ def define_location(
         'Id': Id,
         'Visibility': Visibility,
         'Room': Room,
+        'VanillaItemType': VanillaItemType,
         'AccessFrom': AccessFrom,
         'Available': Available,
         'PostAvailable': PostAvailable,
@@ -149,6 +150,7 @@ define_location(
     CanHidden=False,
     Visibility="Chozo",
     Room='Bomb Torizo Room',
+    VanillaItemType='Bomb',
 ),
     "Energy Tank, Terminator":
 define_location(
@@ -188,6 +190,7 @@ define_location(
     Id=0x17,
     Visibility="Chozo",
     Room='Big Pink',
+    VanillaItemType='Charge',
 ),
     "Morphing Ball":
 define_location(
@@ -201,6 +204,7 @@ define_location(
     Id=0x1a,
     Visibility="Visible",
     Room='Morph Ball Room',
+    VanillaItemType='Morph',
 ),
     "Energy Tank, Brinstar Ceiling":
 define_location(
@@ -266,6 +270,7 @@ define_location(
     Id=0x26,
     Visibility="Chozo",
     Room='X-Ray Scope Room',
+    VanillaItemType='XRayScope',
 ),
     "Spazer":
 define_location(
@@ -279,6 +284,7 @@ define_location(
     Id=0x2a,
     Visibility="Chozo",
     Room='Spazer Room',
+    VanillaItemType='Spazer',
 ),
     "Energy Tank, Kraid":
 define_location(
@@ -318,6 +324,7 @@ define_location(
     Id=0x30,
     Visibility="Chozo",
     Room='Varia Suit Room',
+    VanillaItemType='Varia',
 ),
     "Ice Beam":
 define_location(
@@ -331,6 +338,7 @@ define_location(
     Id=0x32,
     Visibility="Chozo",
     Room='Ice Beam Room',
+    VanillaItemType='Ice',
 ),
     "Energy Tank, Crocomire":
 define_location(
@@ -357,6 +365,7 @@ define_location(
     Id=0x35,
     Visibility="Chozo",
     Room='Hi Jump Boots Room',
+    VanillaItemType='HiJump',
 ),
     "Grapple Beam":
 define_location(
@@ -370,6 +379,7 @@ define_location(
     Id=0x3c,
     Visibility="Chozo",
     Room='Grapple Beam Room',
+    VanillaItemType='Grapple',
 ),
     "Reserve Tank, Norfair":
 define_location(
@@ -396,6 +406,7 @@ define_location(
     Id=0x42,
     Visibility="Chozo",
     Room='Speed Booster Room',
+    VanillaItemType='SpeedBooster',
 ),
     "Wave Beam":
 define_location(
@@ -409,6 +420,7 @@ define_location(
     Id=0x44,
     Visibility="Chozo",
     Room='Wave Beam Room',
+    VanillaItemType='Wave',
 ),
     "Ridley":
 define_location(
@@ -448,6 +460,7 @@ define_location(
     Id=0x4f,
     Visibility="Chozo",
     Room='Screw Attack Room',
+    VanillaItemType='ScrewAttack',
 ),
     "Energy Tank, Firefleas":
 define_location(
@@ -526,6 +539,7 @@ define_location(
     Id=0x87,
     Visibility="Chozo",
     Room='Gravity Suit Room',
+    VanillaItemType='Gravity',
 ),
     "Energy Tank, Mama turtle":
 define_location(
@@ -552,6 +566,7 @@ define_location(
     Id=0x8f,
     Visibility="Chozo",
     Room='Plasma Room',
+    VanillaItemType='Plasma',
 ),
     "Reserve Tank, Maridia":
 define_location(
@@ -578,6 +593,7 @@ define_location(
     Id=0x96,
     Visibility="Chozo",
     Room='Spring Ball Room',
+    VanillaItemType='SpringBall',
 ),
     "Energy Tank, Botwoon":
 define_location(
@@ -617,6 +633,7 @@ define_location(
     Id=0x9a,
     Visibility="Chozo",
     Room='Space Jump Room',
+    VanillaItemType='SpaceJump',
 ),
     "Mother Brain":
 define_location(

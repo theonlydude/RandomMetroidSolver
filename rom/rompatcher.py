@@ -151,8 +151,10 @@ class RomPatcher:
 
     def writeSplitLocs(self, itemLocs, split):
         majChozoCheck = lambda itemLoc: itemLoc.Item.Class == split and itemLoc.Location.isClass(split)
+        fullCheck = lambda itemLoc: itemLoc.Location.Id is not None
         splitChecks = {
-            'Full': lambda itemLoc: itemLoc.Location.Id is not None,
+            'Full': fullCheck,
+            'Scavenger': fullCheck,
             'Major': majChozoCheck,
             'Chozo': majChozoCheck,
             'FullWithHUD': lambda itemLoc: itemLoc.Item.Category not in ['Energy', 'Ammo', 'Boss']
@@ -201,9 +203,9 @@ class RomPatcher:
         elif item.Type == 'Reserve' or isAmmo:
             operand = 0x1 # < 1
         elif ItemManager.isBeam(item):
-            operand = ItemManager.BeamBits[item.Type]
+            operand = item.BeamBits
         else:
-            operand = ItemManager.ItemBits[item.Type]
+            operand = item.ItemBits
         self.patchMorphBallCheck(0x1410E6, cat, comp, operand, branch) # eye main AI
         self.patchMorphBallCheck(0x1468B2, cat, comp, operand, branch) # head main AI
 

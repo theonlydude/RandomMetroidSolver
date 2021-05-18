@@ -434,6 +434,8 @@ if __name__ == "__main__":
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.getrandbits(1))
 
+    if not GraphUtils.isStandardStart(args.startAP) and args.majorsSplit == "Scavenger":
+        forceArg('startAP', "Landing Site", "Start Location forced to Landing Site because of Scavenger mode", 'startAP', 'Landing Site')
     # in plando rando we know that the start ap is ok
     if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando is None:
         if args.majorsSplit in ['Major', "Chozo"]:
@@ -486,6 +488,8 @@ if __name__ == "__main__":
             seedCode = 'ZX'
         elif restrictions['MajorMinor'] == 'Major':
             seedCode = 'MX'
+        elif restrictions['MajorMinor'] == 'Scavenger':
+            seedCode = 'SX'
     if args.bosses == True and bossesRandom == False:
         seedCode = 'B'+seedCode
     if args.doorsColorsRando == True and doorsColorsRandom == False:

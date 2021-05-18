@@ -94,7 +94,7 @@ class RandoExec(object):
 
     def updateLocationsClass(self):
         split = self.restrictions.split
-        if split != 'Full':
+        if split != 'Full' and split != 'Scavenger':
             startAP = getAccessPoint(self.graphSettings.startAP)
             possibleMajLocs, preserveMajLocs, nMaj, nChozo = Logic.LocationsHelper.getStartMajors(startAP.Name)
             if split == 'Major':

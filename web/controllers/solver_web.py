@@ -2311,6 +2311,13 @@ class WS_door_toggle(WS):
     def action(self):
         return self.callSolverAction("door", "toggle", {"doorName": self.doorName})
 
+class WS_door_clear(WS):
+    def validate(self):
+        super(WS_door_clear, self).validate()
+
+    def action(self):
+        return self.callSolverAction("door", "clear", {})
+
 class WS_dump_import(WS):
     def validate(self):
         super(WS_dump_import, self).validate()

@@ -72,7 +72,7 @@ LAYOUTS=("" "--nolayout")
 STARTAPS=("" "--startAP random")
 AREAS=("" "" "--area" "--area --areaLayoutBase")
 MINIMIZERS=("--bosses random" "--bosses random" "--bosses random" "--area --bosses --minimizer " "--area --bosses --minimizerTourian --minimizer ")
-DOORS=("" "" "" "--doorsColorsRando")
+DOORS=("" "--doorsColorsRando random")
 
 function generate_random_list {
     FIRST=0

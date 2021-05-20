@@ -6,7 +6,7 @@ from rom.ips import IPS_Patch
 from utils.doorsmanager import DoorsManager
 from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
 from logic.logic import Logic
-from rom.rom import RealROM, FakeROM
+from rom.rom import RealROM, FakeROM, snes_to_pc
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir
 import utils.log
@@ -149,7 +149,7 @@ class RomPatcher:
                 if loc.Name == 'Morphing Ball':
                     self.patchMorphBallEye(item)
 
-    def writeSplitLocs(self, itemLocs, split):
+    def writeSplitLocs(self, split, itemLocs, progItemLocs):
         majChozoCheck = lambda itemLoc: itemLoc.Item.Class == split and itemLoc.Location.isClass(split)
         fullCheck = lambda itemLoc: itemLoc.Location.Id is not None
         splitChecks = {
@@ -168,6 +168,11 @@ class RomPatcher:
             for loc in locs:
                 self.romFile.writeByte(loc.Id)
             self.romFile.writeByte(0xff)
+        if split == "Scavenger":
+            # write required major item order
+            self.romFile.seek(snes_to_pc(0xA1F5D8))
+            for itemLoc in progItemLocs:
+                self.romFile.writeWord((itemLoc.Location.Id << 8) | itemLoc.Item.HUD)
 
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball

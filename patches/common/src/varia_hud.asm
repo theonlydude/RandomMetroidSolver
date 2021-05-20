@@ -9,10 +9,13 @@
 
 !hudposition = #$0006
 ;;; RAM used to store previous values to see whether we must draw
-;;; area/item counter
-!previous = $7fff3c		; hi: area, lo: remaining items
+;;; area/item counter or next major display
+!previous = $7fff3c		; hi: area/00, lo: remaining items/next major
 ;;; RAM for remaining items in current area
 !n_items = $7fff3e
+;;; RAM for current index in major list order
+!major_idx = $7fff40
+!major_tmp  = $7fff42
 ;;; item split written by randomizer
 !seed_type = $82fb6c
 ;;; vanilla bit array to keep track of collected items
@@ -21,6 +24,9 @@
 !bit_index = $80818e
 ;;; RAM area to write to for split/locs in HUD
 !split_locs_hud = $7ec618
+
+!game_state = $0998
+!major_timer = #$80
 
 lorom
 
@@ -107,6 +113,82 @@ draw_info:
 	phy
 	php
 
+	;; first, determine if we should show next major item or area/items
+	lda !major_idx : asl : tax
+	lda.l majors_order,x
+	cmp #$ffff : bne .draw_next_major
+	jmp .draw_area
+.draw_next_major:
+	and #$00ff
+	cmp !previous : beq .major_setup_next
+	sta !previous
+	asl : asl : asl : asl
+	tay
+	;; draw text
+	ldx !hudposition
+.draw_major_loop:
+	lda majors_names,y
+	beq .maj_index
+	sta $7ec602,x
+	iny : iny
+	inx : inx
+	bra .draw_major_loop
+.maj_index:
+	;; show current index in required major list
+	lda !major_idx : inc : jsr draw_two
+.major_setup_next:
+	;; when pausing, we cycle through the remaining items.
+	;; during this phase, major_tmp is used to store
+	;; maj_index backup in its low byte, and frames
+	;; remaining until next item in its high byte
+	;; major_tmp is set to ffff when not in pause
+	lda !game_state
+	cmp #$000c : beq .pause_start
+	cmp #$0010 : beq .pause_end
+	bra .pause_check
+.pause_start:
+	lda !major_tmp
+	cmp #$ffff : beq .pause_init
+	jmp .end
+.pause_init:
+	sep #$20
+	lda !major_idx : sta !major_tmp
+	lda !major_timer : sta !major_tmp+1
+	rep #$20
+	jmp .end
+.pause_end:
+	lda !major_tmp
+	cmp #$ffff : bne .pause_deinit
+	jmp .end
+.pause_deinit:
+	lda !major_tmp : and #$00ff : sta !major_idx
+	lda #$ffff : sta !major_tmp
+	jmp .end
+.pause_check:
+	lda !major_tmp
+	cmp #$ffff : bne .pause
+	jmp .end
+.pause:
+	sep #$20
+	xba
+	dec
+	beq .pause_next_major
+	sta !major_tmp+1
+	rep #$20
+	jmp .end
+.pause_next_major:
+	lda !major_timer : sta !major_tmp+1
+	lda !major_idx : inc : sta !major_idx
+	rep #$20
+	;; cycle through if we reach the end of the route
+	and #$00ff : asl : tax
+	lda.l majors_order,x
+	cmp #$ffff : beq .cycle_major
+	jmp .end
+.cycle_major:
+	lda !major_tmp : and #$00ff : sta !major_idx
+	jmp .end
+.draw_area:
 	;; determine current graph area
 	ldx $07bb
 	sep #$20
@@ -250,22 +332,69 @@ cleartable
 
 print "b80 end: ", pc
 
-warnpc $80d3af
+warnpc $80d4ff
 
 org $a1f550
 
 incsrc "locs_by_areas.asm"
 
+;;; used only in scavenger hunt mode, written to by rando
+;;; have a word for each major of required order in scavenger mode:
+;;; hi byte: location ID as in item bit array (same IDs used in locs_by_areas)
+;;; lo byte: item/location index in majors_names list for HUD display
+;;; #$ffff=major list terminator
+majors_order:
+	fillbyte $ff : fill 34	; 16 max majors * 2 + ffff terminator
+
 load_state:
-	lda #$ffff : sta !previous
-	jsl compute_n_items
+	lda #$ffff
+	sta !previous
+	sta !major_tmp
+	jsr compute_n_items
 	;; hijacked code
 	LDX $07BB
 	LDA $0003,x
 	jml $82DEFD		; resume routine
 
 item_pickup:
+	phy
 	sta $7ED870,x		; hijacked code
+	jsr compute_n_items
+	;; check if loc ID is the next required major
+	lda !major_idx : asl : tax
+	lda.l majors_order,x
+	cmp #$ffff : beq .end ; not in scavenger mode, or all required majors collected
+	;; major_tmp = loc ID to check against
+	and #$ff00 : xba : sta !major_tmp
+	;; checks if picked up loc is the next major.
+	;; Room PLM arg, which gives us our loc ID, has been pushed at the start
+	;; of the hijacked routine. Get it back in Y
+	lda 6,s : tay		; stack indexing starts at 1+2 bytes of 'phy' above+3 bytes return addr = 6
+	lda $1dc7,y : cmp !major_tmp : beq .found_next_major
+	;; now checks if the item we found is in the remaining list
+.major_check_loop:
+	inx : inx
+	lda.l majors_order,x
+	cmp #$ffff : beq .end
+	and #$ff00 : xba : sta !major_tmp
+	lda $1dc7,y : cmp !major_tmp : beq .found_forbidden_major
+	bra .major_check_loop
+.found_forbidden_major:
+	lda #$0013 : sta !game_state	; set game state to 13h (samus dies) to trigger game over
+	bra .end
+.found_next_major:
+	lda !major_idx : inc : sta !major_idx
+	asl : tax
+	lda.l majors_order,x
+	cmp #$ffff : bne .end
+	;; we picked up last major, reset previous for HUD drawing to switch back to area
+	sta !previous
+	bra .end
+.end:
+	lda #$ffff : sta !major_tmp
+	ply
+	rtl
+
 compute_n_items:
 	phx
 	phy
@@ -296,7 +425,7 @@ compute_n_items:
 	tya : sec : sbc !n_items : sta !n_items
 	ply
 	plx
-	rtl
+	rts
 
 print "a1 end: ", pc
-warnpc $a1f6af
+warnpc $a1f6ff

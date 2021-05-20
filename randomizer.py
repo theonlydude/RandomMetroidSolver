@@ -434,8 +434,10 @@ if __name__ == "__main__":
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.getrandbits(1))
 
-    if not GraphUtils.isStandardStart(args.startAP) and args.majorsSplit == "Scavenger":
-        forceArg('startAP', "Landing Site", "Start Location forced to Landing Site because of Scavenger mode", 'startAP', 'Landing Site')
+    if args.majorsSplit == "Scavenger":
+        forceArg('hud', True, "'VARIA HUD' forced to on", 'hud', 'on')
+        if not GraphUtils.isStandardStart(args.startAP):
+            forceArg('startAP', "Landing Site", "Start Location forced to Landing Site because of Scavenger mode", 'startAP', 'Landing Site')
     # in plando rando we know that the start ap is ok
     if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando is None:
         if args.majorsSplit in ['Major', "Chozo"]:
@@ -727,7 +729,7 @@ if __name__ == "__main__":
             romPatcher.commitIPS()
         if args.patchOnly == False:
             romPatcher.writeItemsLocs(itemLocs)
-            romPatcher.writeSplitLocs(itemLocs, args.majorsSplit)
+            romPatcher.writeSplitLocs(args.majorsSplit, itemLocs, progItemLocs)
             romPatcher.writeItemsNumber()
             romPatcher.writeSeed(seed) # lol if race mode
             romPatcher.writeSpoiler(itemLocs, progItemLocs)

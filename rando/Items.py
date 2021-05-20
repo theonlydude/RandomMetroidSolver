@@ -15,7 +15,7 @@ class Item:
         self.ItemBits = ItemBits
 
     def withClass(self, Class):
-        return Item(self.Category, Class, self.Name, self.Type, self.Code)
+        return Item(self.Category, Class, self.Name, self.Type, self.Code, self.HUD, self.BeamBits, self.ItemBits)
 
     def __eq__(self, other):
         # used to remove an item from a list
@@ -275,7 +275,7 @@ class ItemManager:
 
     @staticmethod
     def isBeam(item):
-        return item.BeamBits is not None
+        return item.BeamBits != 0
 
     @staticmethod
     def getItemTypeCode(item, itemVisibility):

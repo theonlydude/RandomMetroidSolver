@@ -157,6 +157,12 @@ class HelpersGraph(Helpers):
         return sm.wor(sm.canUsePowerBombs(),
                       sm.wand(sm.knowsMoondance(), sm.canUseBombs(), sm.traverse('MainShaftBottomRight')))
 
+    @Cache.decorator
+    def canKillBeetoms(self):
+        sm = self.smbm
+        # can technically be killed with bomb, but it's harder
+        return sm.wor(sm.haveMissileOrSuper(), sm.canUsePowerBombs(), sm.haveItem('ScrewAttack'))
+
     # the water zone east of WS
     def canPassForgottenHighway(self, fromWs):
         sm = self.smbm
@@ -577,15 +583,19 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canBotwoonExitToColosseum(self):
         sm = self.smbm
-        return sm.wor(sm.haveItem('Gravity'),
-                      sm.wand(sm.knowsGravLessLevel2(),
-                              sm.haveItem("HiJump"),
-                              # get to top right door
-                              sm.wor(sm.haveItem('Grapple'),
-                                     sm.haveItem('Ice'), # climb mochtroids
-                                     sm.wand(sm.canDoubleSpringBallJump(),
-                                             sm.haveItem('SpaceJump'))),
-                              sm.canGoThroughColosseumSuitless()))
+                       # traverse Botwoon Energy Tank Room
+        return sm.wand(sm.wor(sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpeedBooster')),
+                              sm.wand(sm.haveItem('Morph'), sm.canJumpUnderwater())),
+                       # after Botwoon Energy Tank Room
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.wand(sm.knowsGravLessLevel2(),
+                                      sm.haveItem("HiJump"),
+                                      # get to top right door
+                                      sm.wor(sm.haveItem('Grapple'),
+                                             sm.haveItem('Ice'), # climb mochtroids
+                                             sm.wand(sm.canDoubleSpringBallJump(),
+                                                     sm.haveItem('SpaceJump'))),
+                                      sm.canGoThroughColosseumSuitless())))
 
     @Cache.decorator
     def canColosseumToBotwoonExit(self):

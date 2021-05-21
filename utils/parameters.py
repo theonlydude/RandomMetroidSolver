@@ -1072,7 +1072,6 @@ class Settings:
             'Croc -> Grapple Escape Missiles': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Croc -> Ice Missiles': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Single Chamber <-> Bubble Mountain': {'mult': 1.25, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
-            'Single Chamber <-> Kronic Boost Room': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Kronic Boost Room -> Bubble Mountain Top': {'mult': 0.5, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Kronic Boost Room <-> Croc': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Croc -> Norfair Entrance': {'mult': 1.25, 'minE': 2, 'hellRun': 'MainUpperNorfair'}

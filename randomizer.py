@@ -22,7 +22,7 @@ import utils.db as db
 # we need to know the logic before doing anything else
 def getLogic():
     # check if --logic is there
-    logic = 'varia'
+    logic = 'vanilla'
     for i, param in enumerate(sys.argv):
         if param == '--logic' and i+1 < len(sys.argv):
             logic = sys.argv[i+1]

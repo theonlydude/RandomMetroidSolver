@@ -342,7 +342,7 @@ class RomPatcher:
                     for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
                         self.applyIPSPatch(patchName)
             doors = self.getStartDoors(plms, area, minimizerN)
-            if doorsColorsRando:
+            if doorsColorsRando == True:
                 for patchName in RomPatcher.IPSPatches['DoorsColors']:
                     self.applyIPSPatch(patchName)
                 self.writeDoorsColor(doors)

@@ -124,7 +124,9 @@ locationsDict["Energy Tank, Kraid"].AccessFrom = {
     'Warehouse Zeela Room Left': lambda sm: SMBool(True)
 }
 locationsDict["Energy Tank, Kraid"].Available = (
-    lambda sm: Bosses.bossDead(sm, 'Kraid')
+    lambda sm: sm.wand(Bosses.bossDead(sm, 'Kraid'),
+                       # kill the beetoms to unlock the door to get out
+                       sm.canKillBeetoms())
 )
 locationsDict["Kraid"].AccessFrom = {
     'KraidRoomIn': lambda sm: SMBool(True)
@@ -497,7 +499,7 @@ locationsDict["Power Bomb (green Brinstar bottom)"].AccessFrom = {
 }
 locationsDict["Power Bomb (green Brinstar bottom)"].Available = (
     lambda sm: sm.wand(sm.haveItem('Morph'),
-                       sm.wor(sm.haveMissileOrSuper(), sm.canUsePowerBombs(), sm.haveItem('ScrewAttack'))) # beetoms
+                       sm.canKillBeetoms())
 )
 locationsDict["Super Missile (pink Brinstar)"].AccessFrom = {
     'Big Pink': lambda sm: SMBool(True)

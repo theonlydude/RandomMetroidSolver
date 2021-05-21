@@ -15,6 +15,8 @@ class SolverState(object):
         self.state = {}
         # string
         self.state["majorsSplit"] = solver.majorsSplit
+        # string
+        self.state["masterMajorsSplit"] = solver.masterMajorsSplit
         # bool
         self.state["areaRando"] = solver.areaRando
         # bool
@@ -90,6 +92,7 @@ class SolverState(object):
 
     def toSolver(self, solver):
         solver.majorsSplit = self.state["majorsSplit"]
+        solver.masterMajorsSplit = self.state["masterMajorsSplit"]
         solver.areaRando = self.state["areaRando"]
         solver.bossRando = self.state["bossRando"]
         solver.escapeRando = self.state["escapeRando"]

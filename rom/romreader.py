@@ -273,7 +273,7 @@ class RomReader:
     def loadItems(self, locations):
         majorsSplit = self.getMajorsSplit()
 
-        if majorsSplit == None:
+        if majorsSplit is None:
             isFull = False
             chozoItems = {}
         for loc in locations:
@@ -288,7 +288,7 @@ class RomReader:
                 # race seeds
                 loc.itemName = "Nothing"
                 item = '0x0'
-            if majorsSplit == None:
+            if majorsSplit is None:
                 if loc.isMajor() and self.items[item]['name'] in ['Missile', 'Super', 'PowerBomb']:
                     isFull = True
                 if loc.isMinor() and self.items[item]['name'] not in ['Missile', 'Super', 'PowerBomb']:
@@ -300,16 +300,16 @@ class RomReader:
                         chozoItems[loc.itemName] = 1
 
         # if majors split is not written in the seed, use an heuristic
-        if majorsSplit == None:
+        if majorsSplit is None:
             isChozo = self.isChozoSeed(chozoItems)
             if isChozo == True:
-                return 'Chozo'
+                return ('Chozo', 'Chozo')
             elif isFull == True:
-                return 'Full'
+                return ('Full', 'Full')
             else:
-                return 'Major'
+                return ('Major', 'Major')
         else:
-            return majorsSplit
+            return (majorsSplit if majorsSplit != 'FullWithHUD' else 'Full', majorsSplit)
 
     def isChozoSeed(self, chozoItems):
         # we have 2 Missiles, 2 Supers and 1 PB in the chozo locations
@@ -506,7 +506,7 @@ class RomReader:
         if self.patchPresent('rotation'):
             return 'rotation'
         else:
-            return 'varia'
+            return 'vanilla'
 
     def getStartAP(self):
         address = 0x10F200

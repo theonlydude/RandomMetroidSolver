@@ -981,7 +981,7 @@ window.onload = function(){
         // in plando check that seed version if the same as the current one
         if(mode == "plando") {
             length = bytes[0x0673e9];
-            // beta or r.2020.12.09
+            // beta or r.2020.12.09 or non VARIA
             if (length == 4) {
                 if (version != "beta") {
                     clearInputSeed();
@@ -998,6 +998,10 @@ window.onload = function(){
                     alert("base seed's version is "+seedVersion+" but current version is "+version+", use a base seed generated with the current version");
                     return false;
                 }
+            } else {
+                clearInputSeed();
+                alert("base seed's is not a VARIA one, use a base seed generated on the randomizer page");
+                return false;
             }
 
             // put the plando seed in local storage
@@ -1523,32 +1527,41 @@ function resetLocsInfo() {
 }
 
 function clearLocs(isPlando) {
-  if(interfaceIsFrozen()) {
-    return;
-  }
-  if(isPlando == true && ! isActive("binPlando")) {
-    return;
-  }
-  if(isPlando == false && ! isActive("binItem")) {
-    return;
-  }
+    if(interfaceIsFrozen()) {
+        return;
+    }
+    if(isPlando == true && ! isActive("binPlando")) {
+        return;
+    }
+    if(isPlando == false && ! isActive("binItem")) {
+        return;
+    }
 
-  var msg = "Reset the locations of the Interactive VARIA ";
-  if(isPlando == true) {
-    msg = msg + "Plandomizer ?";
-  } else {
-    msg = msg + "Solver ?"
-  }
+    if(isPlando == true) {
+        var msg = "Reset the locations of the Plandomizer ?";
+    } else {
+        if(doorsRando == true) {
+            var msg = "Reset the locations and doors of the Tracker ?"
+        } else {
+            var msg = "Reset the locations of the Tracker ?"
+        }
+    }
 
-  var result = confirm(msg);
-  if(result == false){
-    return;
-  }
+    var result = confirm(msg);
+    if(result == false){
+        return;
+    }
 
-  resetLocsInfo();
+    resetLocsInfo();
 
-  // reset the state server side
-  ajaxCall({action: "clear", scope: "item"}, "upload");
+    if(isPlando == false && doorsRando == true) {
+        ajaxChainedActions.push({action: "clear", scope: "item"});
+        ajaxChainedActions.push({action: "clear", scope: "door"});
+        ajaxCallChained();
+    } else {
+        // reset the state server side
+        ajaxCall({action: "clear", scope: "item"}, "upload");
+    }
 }
 
 function getTooltip(locName, locData, item, visited) {

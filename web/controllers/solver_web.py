@@ -19,9 +19,9 @@ from utils.parameters import diff2text, text2diff
 from utils.utils import PresetLoader, removeChars, getDefaultMultiValues
 from utils.db import DB
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
-from graph.varia.graph_access import accessPoints
+from graph.vanilla.graph_access import accessPoints
 from utils.utils import isStdPreset, getRandomizerDefaultParameters, getPresetDir
-from graph.varia.graph_locations import locations
+from graph.vanilla.graph_locations import locations
 from logic.smboolmanager import SMBoolManager
 from rom.romreader import RomReader
 from rom.rom_patches import RomPatches
@@ -2310,6 +2310,13 @@ class WS_door_toggle(WS):
 
     def action(self):
         return self.callSolverAction("door", "toggle", {"doorName": self.doorName})
+
+class WS_door_clear(WS):
+    def validate(self):
+        super(WS_door_clear, self).validate()
+
+    def action(self):
+        return self.callSolverAction("door", "clear", {})
 
 class WS_dump_import(WS):
     def validate(self):

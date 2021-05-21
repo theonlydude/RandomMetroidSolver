@@ -360,7 +360,8 @@ class AccessGraph(object):
         srcAccessPoint = self.accessPoints[srcAccessPointName]
         availAccessPoints = self.getAvailableAccessPoints(srcAccessPoint, smbm, maxDiff, item)
         can = destAccessPoint in availAccessPoints
-        #self.log.debug("canAccess: avail = {}".format([ap.Name for ap in availAccessPoints.keys()]))
+        # if not can:
+        #     self.log.debug("canAccess KO: avail = {}".format([ap.Name for ap in availAccessPoints.keys()]))
         if item is not None:
             smbm.removeItem(item)
         #print("canAccess: {}".format(can))

@@ -2,6 +2,20 @@
 ;;; the split type (M for major, or Z for chozo), and the remaining
 ;;; number of items of the chozen split in the current area (1 digit
 ;;; for M/Z, 2 digits in full - no split indicator, and more items)
+;;;
+;;; It also handles Scavenger mode HUD. If the rando writes a list
+;;; of required majors (see address format specified at majors_order),
+;;; it will :
+;;; - display the next major to collect in the HUD, and its index in the
+;;;   majors list
+;;; - cycle through remaining required majors (the route) during pause
+;;; - prevent the player to pick up out of order majors by triggering
+;;;   a game over if they do
+;;; - prevent the player to go through G4 if all required majors have
+;;;   not been collected. For this, it overwrites g4_skip asm, so this
+;;;   patch *has to be applied after*
+;;; When all required majors have been collected, Tourian access is
+;;; unlocked, and the HUD falls back to remaining items mode.
 
 ;;; Includes etank bar combine by lioran
 
@@ -14,8 +28,8 @@
 ;;; RAM for remaining items in current area
 !n_items = $7fff3e
 ;;; RAM for current index in major list order
-!major_idx = $7fff40
-!major_tmp  = $7fff42
+!major_idx = $7ed86a		; saved to SRAM automatically
+!major_tmp  = $7fff40
 ;;; item split written by randomizer
 !seed_type = $82fb6c
 ;;; vanilla bit array to keep track of collected items
@@ -27,6 +41,7 @@
 
 !game_state = $0998
 !major_timer = #$80
+!mark_event = $8081FA
 
 lorom
 
@@ -153,7 +168,7 @@ draw_info:
 .pause_init:
 	sep #$20
 	lda !major_idx : sta !major_tmp
-	lda !major_timer : sta !major_tmp+1
+	lda !major_timer : lsr : sta !major_tmp+1 ; half timer for the first we already know
 	rep #$20
 	jmp .end
 .pause_end:
@@ -305,7 +320,7 @@ majors_names:
 	dw $0000
 	dw " VARIA "
 	dw $0000
-	dw "HI JUMP"
+	dw "HI-JUMP"
 	dw $0000
 	dw "  ICE  "
 	dw $0000
@@ -315,7 +330,7 @@ majors_names:
 	dw $0000
 	dw "GRAPPLE"
 	dw $0000
-	dw " X RAY "
+	dw " X-RAY "
 	dw $0000
 	dw "GRAVITY"
 	dw $0000
@@ -380,7 +395,8 @@ item_pickup:
 	lda $1dc7,y : cmp !major_tmp : beq .found_forbidden_major
 	bra .major_check_loop
 .found_forbidden_major:
-	lda #$0013 : sta !game_state	; set game state to 13h (samus dies) to trigger game over
+	lda #$000e : jsl !mark_event	; fakes zebes exploding to avoid ceres exploding cutscene before game over screen
+	lda #$0023 : sta !game_state	; set game state to 23h (time up) to trigger game over
 	bra .end
 .found_next_major:
 	lda !major_idx : inc : sta !major_idx
@@ -429,3 +445,55 @@ compute_n_items:
 
 print "a1 end: ", pc
 warnpc $a1f6ff
+
+;;; make golden statues instructions check for majors collection
+;;; in scavenger mode :
+org $878400			; Phantoon
+	dw alt_set_event
+
+org $878468			; Ridley
+	dw alt_set_event
+
+org $8784d0			; Kraid
+	dw alt_set_event
+
+org $878538			; Draygon
+	dw alt_set_event
+
+org $87d000
+;;; alternate instruction for statues objects:
+;;; set event in argument only if not in scavenger mode, or all majors collected
+alt_set_event:
+	phx
+	lda !major_idx : asl : tax
+	lda.l majors_order,x
+	cmp #$ffff : bne .end
+	lda $0000,y : jsl !mark_event
+.end:
+	iny : iny
+	plx
+	rts
+
+;;; overwrite g4_skip patch door asm
+org $8ffe00
+alt_g4_skip:
+    ;; skip check if not all majors collected in scavenger mode:
+    lda !major_idx : asl : tax
+    lda.l majors_order,x
+    cmp #$fefe : bmi +		; don't write ff because of ips patcher...
+    ;; original g4_skip code:
+    lda $7ed828
+    bit.w #$0100
+    beq +
+    lda $7ed82c
+    bit.w #$0001
+    beq +
+    lda $7ed82a
+    and.w #$0101
+    cmp.w #$0101
+    bne +
+    lda $7ed820
+    ora.w #$0400
+    sta $7ed820
++
+    rts

@@ -813,38 +813,45 @@ window.onload = function(){
             var reader = new FileReader();
             reader.readAsArrayBuffer(file)
             reader.onload = function(e) {
+                var arrayBuffer = e.target.result;
+                var bytes = new Uint8Array(arrayBuffer);
+
                 // check sfc or smc extention
                 var re = /(?:\.([^.]+))?$/;
                 var ext = re.exec(file.name)[1];
                 console.log("ext: "+ext)
-                if( ! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC") ) {
+                if(! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC")) {
                     document.getElementById("uploadFile").value = "";
                     alert("wrong extension: "+ext);
                     return false;
                 }
 
                 var fileSize = file.size;
-                if( fileSize > 4*1024*1024 ) {
+                if(fileSize > 4*1024*1024) {
                     document.getElementById("uploadFile").value = "";
                     alert("wrong ROM file size: "+fileSize.toString());
                     return false;
-                } else if( fileSize == 3146240) {
-                    document.getElementById("uploadFile").value = "";
-                    alert("headered ROM detected, please use an unheadered ROM");
-                    return false;
+                } else if(fileSize == 3146240) {
+                    console.log("headered ROM detected, removing first 512 bytes of the header");
+                    var headerSize = 512;
+                    bytes = bytes.slice(headerSize);
                 }
 
-                crc32.update(e.target.result);
+                crc32.update(bytes);
                 var digest = crc32.digest();
                 console.log("crc32: "+digest);
-                if(digest != "d63ed5f8") {
+                if(digest == "ad2cbf9c") {
+                    document.getElementById("uploadFile").value = "";
+                    alert("Europe vanilla ROM detected, you need the USA,JP ROM");
+                    return false;
+                } else if(digest != "d63ed5f8") {
                     document.getElementById("uploadFile").value = "";
                     alert("Non vanilla ROM detected");
                     return false;
                 }
 
                 // store file in localforage
-                localforage.setItem('vanillaROM', e.target.result, function(err, value) {
+                localforage.setItem('vanillaROM', bytes, function(err, value) {
                     if(err != null) {
                         alert("Error detected with local storage: "+err+" Please try again");
                         clearLocalStorage();
@@ -1204,7 +1211,7 @@ function startTheTour(step=-1) {
     {
       element: "#romStep",
       title: "Vanilla Super Metroid ROM",
-      content: "<p>Use an American/Japan unheadered ROM of Super Metroid.<br/>\
+      content: "<p>Use an American/Japan ROM of Super Metroid.<br/>\
 The vanilla ROM is stored in the browser local storage and is never sent to our server, all the patching is done locally in the browser.</p>"
     },
     {

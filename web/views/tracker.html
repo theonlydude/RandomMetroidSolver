@@ -199,6 +199,8 @@ function onloadHook() {
 
 // auto tracker
 var socket;
+// device type
+var device;
 // timeout to peek data
 var timeout;
 // timeout duration in ms
@@ -739,6 +741,7 @@ function socketOnMessage(event) {
 }
 
 function socketOnInitMessage(event) {
+    console.log(`event.data: ${event.data}`);
     var data = JSON.parse(event.data);
     var results = data["Results"];
     // appendLog(`Data received: ${results}`);
@@ -782,6 +785,10 @@ function socketOnInitMessage(event) {
         appendLog(`\u2705 info received: ${results}`);
         appendLog(`\u2705 device attached`);
 
+        // keep device type, results is an array, device type is in 2nd position
+        device = results[1];
+        console.log(`device: [${device}]`);
+
         // start loop, update state
         curState = stateEnum.looping;
 
@@ -803,7 +810,7 @@ function socketOnLoopMessage(event) {
 }
 
 function socketOnClose(event) {
-    if (event.wasClean) {
+    if(event.wasClean) {
         appendLog(`\u2705 Connection closed cleanly`);
         console.log(`socketOnClose clean: code=${event.code} reason=${event.reason}`);
     } else {
@@ -813,7 +820,7 @@ function socketOnClose(event) {
         console.log(`socketOnClose not clean: code=${event.code} reason=${event.reason}`);
     }
     setAutoTrackerIcon("statusNA");
-    cleanup();
+    cleanup(event.wasClean);
 }
 
 function socketOnError(error) {
@@ -821,10 +828,10 @@ function socketOnError(error) {
 
     // update state & interface
     setAutoTrackerIcon("statusKO");
-    cleanup();
+    cleanup(false);
 }
 
-function cleanup() {
+function cleanup(cleanExit) {
     // stop running timeout
     clearTimeout(timeout);
 
@@ -835,6 +842,12 @@ function cleanup() {
     displayStartButton();
     var samusIcon = document.getElementById("samusIcon");
     samusIcon.style.display = "none";
+
+    // if the device is an SNES Classic try to reconnect in 1s,
+    // as reseting the game on it will close the connection to the auto tracker
+    if(cleanExit == false && device == "SNES Classic") {
+        timeout = setTimeout(startAutoTracker, waitingTime);
+    }
 }
 
 // called to request datas from qusb

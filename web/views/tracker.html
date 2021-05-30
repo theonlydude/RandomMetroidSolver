@@ -204,6 +204,7 @@ var socket;
 // device type
 var device;
 // try to reconnect for snes classic
+var reconnectInProgress = false;
 var retryCount = 0;
 var retryMax = 30;
 // timeout to restart the auto tracker
@@ -804,6 +805,7 @@ function socketOnInitMessage(event) {
 
         // reset snes classic retries
         retryCount = 0;
+        reconnectInProgress = false;
 
         // start loop, update state
         curState = stateEnum.looping;
@@ -861,7 +863,8 @@ function cleanup(cleanExit) {
 
     // if the device is an SNES Classic try to reconnect in 1s,
     // as reseting the game on it will close the connection to the auto tracker
-    if(cleanExit == false && retryCount < retryMax && device == "SNES Classic") {
+    if(reconnectInProgress == true || (cleanExit == false && retryCount < retryMax && device == "SNES Classic")) {
+        reconnectInProgress = true;
         // sometimes socketOnClose and socketOnError are called, just arm the retry timer once
         if(retryTimeout == undefined) {
             appendLog(`will try to reconnect to SNES Classic in 1s ${retryCount}/${retryMax}`);

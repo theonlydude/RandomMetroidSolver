@@ -2,10 +2,8 @@
 extend 'layout.html'
 }}
 
-
 <meta name="description" content="Solver for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
-<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20191017.css')}} media="screen"/>
 
 <link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
 <script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
@@ -21,6 +19,7 @@ extend 'layout.html'
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 <style>
+{{include 'solver_web/varia.css'}}
 .column {
     padding-right: 10px;
 }

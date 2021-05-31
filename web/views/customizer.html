@@ -5,7 +5,6 @@ extend 'layout.html'
 <meta name="description" content="Palettizer for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
 <script src="{{=URL('static','js/FileSaver.js')}}"></script>
-<link rel="stylesheet" type="text/css" href={{=URL('static','css/mystyle_20191017.css')}} media="screen"/>
 
 <link rel="stylesheet" type="text/css" href={{=URL('static','dist/switchery.css')}} media="screen"/>
 <script src="{{=URL('static','dist/switchery.js')}}"></script>
@@ -26,6 +25,7 @@ extend 'layout.html'
 <title>Super Metroid VARIA Customizer</title>
 
 <style>
+{{include 'solver_web/varia.css'}}
 .bold {
     font-weight: bold;
 }

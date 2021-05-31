@@ -88,6 +88,7 @@ input, .none {
 
 .menuTable {
     background-color: #333;
+    white-space: nowrap;
 }
 
 .menu {

@@ -2,10 +2,8 @@
 extend 'layout.html'
 }}
 
-
 <meta name="description" content="Solver for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
-<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20191017.css')}} media="screen"/>
 <script type="text/javascript" src="{{=URL('static', '/highslide/highslide.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "/highslide/highslide.css")}} />
 <script type="text/javascript">
@@ -39,6 +37,7 @@ if (hs.registerOverlay) {
 <title>Super Metroid VARIA Solver</title>
 
 <style>
+{{include 'solver_web/varia.css'}}
 .rightStep {
     float: right;
     margin-right: 0.3em;

@@ -2395,6 +2395,7 @@ def initCustomizerSession():
         session.customizer['supermetroid_msu1'] = "off"
         session.customizer['remove_itemsounds'] = "off"
         session.customizer['remove_spinjumprestart'] = "off"
+        session.customizer['vanilla_music'] = "off"
 
 def initCustomSprites():
     def updateSpriteDict(spriteDict, order):
@@ -2471,7 +2472,7 @@ def customWebService():
     switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music',
                'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save',
                'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
-               'remove_elevators_doors_speed']
+               'remove_elevators_doors_speed', 'vanilla_music']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(switchs, [], [], others, isJson=True)
@@ -2515,6 +2516,7 @@ def customWebService():
     session.customizer['supermetroid_msu1'] = request.vars.supermetroid_msu1
     session.customizer['remove_itemsounds'] = request.vars.remove_itemsounds
     session.customizer['remove_elevators_doors_speed'] = request.vars.remove_elevators_doors_speed
+    session.customizer['vanilla_music'] = request.vars.vanilla_music
 
     # when beam doors patch is detected, don't randomize blue door palette
     no_blue_door_palette = request.vars.no_blue_door_palette
@@ -2550,6 +2552,8 @@ def customWebService():
         params += ['-c', 'remove_itemsounds.ips']
     if request.vars.remove_elevators_doors_speed == 'on':
         params += ['-c', 'remove_elevators_doors_speed.ips']
+    if request.vars.vanilla_music == 'on':
+        params += ['-c', 'vanilla_music.ips']
 
     if request.vars.colorsRandomization == 'on':
         params.append('--palette')

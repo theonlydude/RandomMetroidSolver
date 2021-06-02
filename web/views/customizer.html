@@ -5,7 +5,6 @@ extend 'layout.html'
 <meta name="description" content="Palettizer for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
 <script src="{{=URL('static','js/FileSaver.js')}}"></script>
-<link rel="stylesheet" type="text/css" href={{=URL('static','css/mystyle_20191017.css')}} media="screen"/>
 
 <link rel="stylesheet" type="text/css" href={{=URL('static','dist/switchery.css')}} media="screen"/>
 <script src="{{=URL('static','dist/switchery.js')}}"></script>
@@ -26,6 +25,7 @@ extend 'layout.html'
 <title>Super Metroid VARIA Customizer</title>
 
 <style>
+{{include 'solver_web/varia.css'}}
 .bold {
     font-weight: bold;
 }
@@ -341,7 +341,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "No_Music", "random_music", "Infinite_Space_Jump", "refill_before_save", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_doors_speed"];
+      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "No_Music", "random_music", "Infinite_Space_Jump", "refill_before_save", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_doors_speed", "vanilla_music"];
 
     for(var i=0; i<elems.length; i++) {
         var elem = document.getElementById(elems[i]);
@@ -573,6 +573,13 @@ window.onload = function(){
     elevators_doors_speed.onchange = switchOpposite;
     var itemsounds = document.getElementById("itemsounds");
     itemsounds.onchange = switchOpposite;
+
+    var vanilla_music = document.getElementById("vanilla_music");
+    vanilla_music.onchange = switchOpposite;
+    var No_Music = document.getElementById("No_Music");
+    No_Music.onchange = switchOpposite;
+    var random_music = document.getElementById("random_music");
+    random_music.onchange = switchOpposite;
 
     initSlider();
 
@@ -856,22 +863,28 @@ function switchCheckbox(id, elems=[]) {
 
 function switchOpposite() {
     var opposites = {
-        "itemsounds": "remove_itemsounds",
-        "remove_itemsounds": "itemsounds",
-        "elevators_doors_speed": "remove_elevators_doors_speed",
-        "remove_elevators_doors_speed": "elevators_doors_speed"
+        "itemsounds": ["remove_itemsounds"],
+        "remove_itemsounds": ["itemsounds"],
+        "elevators_doors_speed": ["remove_elevators_doors_speed"],
+        "remove_elevators_doors_speed": ["elevators_doors_speed"],
+        "No_Music": ["vanilla_music"],
+        "random_music": ["vanilla_music"],
+        "vanilla_music": ["random_music", "No_Music"]
     };
-    var oppositeId = opposites[this.id];
-    var opposite = document.getElementById(oppositeId);
+    var oppositeIds = opposites[this.id];
+    for(var i=0; i<oppositeIds.length; i++) {
+        var oppositeId = oppositeIds[i];
+        var opposite = document.getElementById(oppositeId);
 
-    if(this.checked && opposite.checked) {
-        opposite.click();
-    }
+        if(this.checked && opposite.checked) {
+            opposite.click();
+        }
 
-    if(this.checked){
-        this.value = "on";
-    } else {
-        this.value = "off";
+        if(this.checked){
+            this.value = "on";
+        } else {
+            this.value = "off";
+        }
     }
 }
 
@@ -1022,6 +1035,11 @@ response.write('</table>', escape=False)
       element: "#remove_ElevatorDoorsStep",
       title: "Restore Transitions",
       content: "<p>Restore vanilla doors and elevators transitions</p>"
+    },
+    {
+      element: "#vanilla_musicStep",
+      title: "Restore Vanilla Music",
+      content: "<p>Restore vanilla music if music was random, enable music if it was disabled</p>"
     }
   ]});
 
@@ -1299,6 +1317,13 @@ def displayCheckbox(id, defaultTrue=False):
                     <span id="remove_elevators_doors_speedText">Restore vanilla doors and elevators transitions</span>
                   </td>
                   <td><button type="button" onclick="startTheTour(20)">?</button></td>
+                </tr>
+                <tr id="vanilla_musicStep">
+                  <td colspan="2">
+                    {{displayCheckbox("vanilla_music")}}
+                    <span id="vanilla_musicText">Restore vanilla background music</span>
+                  </td>
+                  <td><button type="button" onclick="startTheTour(21)">?</button></td>
                 </tr>
               </table>
           </div>

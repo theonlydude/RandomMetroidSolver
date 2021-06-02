@@ -609,7 +609,7 @@ order by init_time;"""
         # pivot
         sql = "SELECT date(init_time)"
         for sprite in sprites:
-            sql += ", SUM(CASE WHEN sprite = '{}' THEN 1 ELSE 0 END) AS count_{}".format(sprite, sprite)
+            sql += ", SUM(CASE WHEN sprite = '{}' THEN 1 ELSE 0 END) AS count_{}".format(sprite, sprite.replace('-', '_'))
         sql += " FROM sprites where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) GROUP BY date(init_time);".format(weeks)
 
         return (sprites, self.execSelect(sql))

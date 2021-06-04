@@ -12,8 +12,8 @@
 ;;; - prevent the player to pick up out of order majors by triggering
 ;;;   a game over if they do
 ;;; - prevent the player to go through G4 if all required majors have
-;;;   not been collected. For this, it overwrites g4_skip asm, so this
-;;;   patch *has to be applied after*
+;;;   not been collected. For this, it replaces g4_skip asm, so don't
+;;;   apply g4_skip when this patch is applied.
 ;;; When all required majors have been collected, Tourian access is
 ;;; unlocked, and the HUD falls back to remaining items mode.
 
@@ -42,6 +42,7 @@
 !game_state = $0998
 !major_timer = #$80
 !mark_event = $8081FA
+!hunt_over_hud = #$0010
 
 lorom
 
@@ -56,8 +57,8 @@ org $82def7
 
 ;;; yet another item pickup hijack, different from the ones in endingtotals and bomb_torizo
 ;;; this one is used to count remaining items in current area
-org $8488aa
-	jsl item_pickup
+org $848899
+	jml item_pickup
 
 
 ;;; skip top row of auto reserve to have more room (HUD draw main routine)
@@ -149,6 +150,8 @@ draw_info:
 	inx : inx
 	bra .draw_major_loop
 .maj_index:
+	;; don't show index if hunt is over
+	lda !previous : cmp !hunt_over_hud : beq .major_setup_next
 	;; show current index in required major list
 	lda !major_idx : inc : jsr draw_two
 .major_setup_next:
@@ -197,8 +200,8 @@ draw_info:
 	rep #$20
 	;; cycle through if we reach the end of the route
 	and #$00ff : asl : tax
-	lda.l majors_order,x
-	cmp #$ffff : beq .cycle_major
+	lda.l majors_order,x : and #$00ff
+	cmp !hunt_over_hud : beq .cycle_major
 	jmp .end
 .cycle_major:
 	lda !major_tmp : and #$00ff : sta !major_idx
@@ -342,6 +345,8 @@ majors_names:
 	dw $0000
 	dw " SCREW "
 	dw $0000
+	dw "HUNT OVER "
+	dw $0000
 
 cleartable
 
@@ -359,7 +364,7 @@ incsrc "locs_by_areas.asm"
 ;;; lo byte: item/location index in majors_names list for HUD display
 ;;; #$ffff=major list terminator
 majors_order:
-	fillbyte $ff : fill 34	; 16 max majors * 2 + ffff terminator
+	fillbyte $ff : fill 36	; (16 max majors+"HUNT OVER"+terminator)*2
 
 load_state:
 	lda #$ffff
@@ -373,43 +378,47 @@ load_state:
 
 item_pickup:
 	phy
-	sta $7ED870,x		; hijacked code
+	phx
 	jsr compute_n_items
 	;; check if loc ID is the next required major
 	lda !major_idx : asl : tax
 	lda.l majors_order,x
-	cmp #$ffff : beq .end ; not in scavenger mode, or all required majors collected
+	cmp #$ffff : beq .pickup_end ; not in scavenger mode, or all required majors collected
 	;; major_tmp = loc ID to check against
 	and #$ff00 : xba : sta !major_tmp
 	;; checks if picked up loc is the next major.
 	;; Room PLM arg, which gives us our loc ID, has been pushed at the start
-	;; of the hijacked routine. Get it back in Y
-	lda 6,s : tay		; stack indexing starts at 1+2 bytes of 'phy' above+3 bytes return addr = 6
+	;; of the hijacked routine. Get it back in Y, and save it back to the stack
+	ply : phy
 	lda $1dc7,y : cmp !major_tmp : beq .found_next_major
 	;; now checks if the item we found is in the remaining list
 .major_check_loop:
 	inx : inx
 	lda.l majors_order,x
-	cmp #$ffff : beq .end
+	cmp #$ffff : beq .pickup_end
 	and #$ff00 : xba : sta !major_tmp
-	lda $1dc7,y : cmp !major_tmp : beq .found_forbidden_major
+	lda $1dc7,y : cmp !major_tmp : beq .nopickup_end
 	bra .major_check_loop
-.found_forbidden_major:
-	lda #$000e : jsl !mark_event	; fakes zebes exploding to avoid ceres exploding cutscene before game over screen
-	lda #$0023 : sta !game_state	; set game state to 23h (time up) to trigger game over
-	bra .end
 .found_next_major:
 	lda !major_idx : inc : sta !major_idx
 	asl : tax
 	lda.l majors_order,x
-	cmp #$ffff : bne .end
+	cmp #$ffff : bne .pickup_end
 	;; we picked up last major, reset previous for HUD drawing to switch back to area
 	sta !previous
-	bra .end
-.end:
+.pickup_end:			; routine end when we pick up the item
 	lda #$ffff : sta !major_tmp
+	plx
 	ply
-	rtl
+	LDA $1DC7,x		; remaining part hijacked code
+	phx			; stack balance, X will be pulled at the end of hijacked routine
+	jml $84889D		; resume pickup
+.nopickup_end:			; routine end when we prevent item pick up (forbidden item)
+	lda #$ffff : sta !major_tmp
+	plx
+	ply
+	rep 6 : dey		; move back PLM instruction pointer to "goto draw"
+	jml $8488AF		; jump to hijacked routine exit
 
 compute_n_items:
 	phx
@@ -465,22 +474,30 @@ org $87d000
 ;;; set event in argument only if not in scavenger mode, or all majors collected
 alt_set_event:
 	phx
+	;; skip check if not in scavenger mode:
 	lda !major_idx : asl : tax
-	lda.l majors_order,x
-	cmp #$ffff : bne .end
+	lda.l majors_order,x : cmp #$ffff : beq .set_event
+	;; in scavenger mode, check if the hunt is over
+	and #$00ff : cmp !hunt_over_hud : bne .end
+.set_event:
 	lda $0000,y : jsl !mark_event
 .end:
 	iny : iny
 	plx
 	rts
 
-;;; overwrite g4_skip patch door asm
+org $838c5c
+	dw alt_g4_skip
+
+;;; same place as g4_skip patch door asm
 org $8ffe00
 alt_g4_skip:
-    ;; skip check if not all majors collected in scavenger mode:
+    ;; skip check if not in scavenger mode:
     lda !major_idx : asl : tax
-    lda.l majors_order,x
-    cmp #$fefe : bmi +		; don't write ff because of ips patcher...
+    lda.l majors_order,x : cmp #$ffff : beq .g4_skip
+    ;; in scavenger mode, check if the hunt is over
+    and #$00ff : cmp !hunt_over_hud : bne +
+.g4_skip:
     ;; original g4_skip code:
     lda $7ed828
     bit.w #$0100

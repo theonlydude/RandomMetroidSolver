@@ -173,6 +173,8 @@ class RomPatcher:
             self.romFile.seek(snes_to_pc(0xA1F5D8))
             for itemLoc in progItemLocs:
                 self.romFile.writeWord((itemLoc.Location.Id << 8) | itemLoc.Item.HUD)
+            # bogus loc ID | "HUNT OVER" index
+            self.romFile.writeWord(0xff10)
 
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball
@@ -300,7 +302,9 @@ class RomPatcher:
                 stdPatches.append("Phantoon_Eye_Door")
             if area == True or doorsColorsRando == True:
                 stdPatches.append("Enable_Backup_Saves")
-
+            if 'varia_hud.ips' in optionalPatches:
+                # varia hud has its own variant of g4_skip for scavenger mode
+                stdPatches.remove("g4_skip.ips")
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
 

@@ -890,6 +890,9 @@ def getAddressesToRead(plando=False):
     addresses["ranges"] += [0x7F800, 0x7F800+(maxDoorAsmPatchLen * len([ap for ap in accessPoints if ap.Internal == False]))]
     # split locs
     addresses["ranges"] += [0x10F550, 0x10F5D8]
+    # scavenger hunt items list (16 prog items + hunt over + terminator, each is a word)
+    scavengerListSize = 36
+    addresses["ranges"] += [0x10F5D8, 0x10F5D8+scavengerListSize]
     if plando == True:
         # plando addresses
         addresses["ranges"] += [0x2F6000, 0x2F6100]

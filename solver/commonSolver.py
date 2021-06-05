@@ -15,6 +15,7 @@ from logic.logic import Logic
 
 class CommonSolver(object):
     def loadRom(self, rom, interactive=False, magic=None, startAP=None):
+        self.scavengerOrder = []
         # startAP param is only use for seedless
         if rom == None:
             # TODO::add a --logic parameter for seedless
@@ -59,6 +60,8 @@ class CommonSolver(object):
             self.escapeTimer = self.romLoader.getEscapeTimer()
             self.doorsRando = self.romLoader.loadDoorsColor()
             self.hasNothing = self.checkLocsForNothing()
+            if self.majorsSplit == 'Scavenger':
+                self.scavengerOrder = self.romLoader.loadScavengerOrder(self.locations)
 
             if interactive == False:
                 print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {} activePatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches()), sorted(RomPatches.ActivePatches)))
@@ -562,6 +565,9 @@ class CommonSolver(object):
         elif self.majorsSplit == 'Chozo':
             self.majorLocations = [loc for loc in self.locations if loc.isChozo() or loc.isBoss()]
             self.minorLocations = [loc for loc in self.locations if not loc.isChozo() and not loc.isBoss()]
+        elif self.majorsSplit == 'Scavenger':
+            self.majorLocations = [loc for loc in self.locations if loc.isScavenger() or loc.isBoss()]
+            self.minorLocations = [loc for loc in self.locations if not loc.isScavenger() and not loc.isBoss()]
         else:
             # Full
             self.majorLocations = self.locations[:] # copy
@@ -582,7 +588,7 @@ class CommonSolver(object):
             hasEnoughItems = hasEnoughMajors and hasEnoughMinors
             canEndGame = self.canEndGame()
             (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
-            if isEndPossible and hasEnoughItems and endDifficulty <= diffThreshold:
+            if isEndPossible and hasEnoughItems and endDifficulty <= diffThreshold and self.scavengerHuntComplete():
                 if self.checkMB(mbLoc):
                     self.log.debug("END")
                     break
@@ -647,6 +653,9 @@ class CommonSolver(object):
                 self.log.debug("getAvailableItemsList minors")
                 minorsAvailable = self.getAvailableItemsList(minorsAvailable, diffThreshold)
 
+            if self.majorsSplit == 'Scavenger':
+                majorsAvailable = self.filterScavengerLocs(majorsAvailable)
+
             # choose one to pick up
             self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold)
 
@@ -702,3 +711,32 @@ class CommonSolver(object):
             else:
                 # can finish but can't take all the requested items
                 return (difficulty, False)
+
+    def filterScavengerLocs(self, majorsAvailable):
+        # check where we are in the scavenger hunt
+        huntInProgress = False
+        for index, loc in enumerate(self.scavengerOrder):
+            if loc not in self.visitedLocations:
+                huntInProgress = True
+                break
+
+        if huntInProgress and index < len(self.scavengerOrder)-1:
+            self.log.debug("Scavenger hunt in progress, {}/{}".format(index, len(self.scavengerOrder)-1))
+            # remove all next locs in the hunt
+            nextHuntLocs = self.scavengerOrder[index+1:]
+            for loc in nextHuntLocs:
+                self.log.debug("Scavenger hunt, try to remove loc {}".format(loc.Name))
+                try:
+                    majorsAvailable.remove(loc)
+                except:
+                    pass
+
+        return majorsAvailable
+
+    def scavengerHuntComplete(self):
+        if self.majorsSplit != 'Scavenger':
+            return True
+        else:
+            # check that last loc from the scavenger hunt list has been visited
+            lastLoc = self.scavengerOrder[-1]
+            return lastLoc in self.visitedLocations

@@ -1,6 +1,7 @@
 import copy
 
 from rom.compression import Compressor
+from rom.rom import snes_to_pc
 from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
 from logic.logic import Logic
 
@@ -266,16 +267,15 @@ class RomReader:
             'F': 'Full',
             'Z': 'Chozo',
             'M': 'Major',
-            'H': 'FullWithHUD'
+            'H': 'FullWithHUD',
+            'S': 'Scavenger'
         }
-        return splits.get(split, None)
+        # default to Full
+        return splits.get(split, 'Full')
 
     def loadItems(self, locations):
         majorsSplit = self.getMajorsSplit()
 
-        if majorsSplit is None:
-            isFull = False
-            chozoItems = {}
         for loc in locations:
             if loc.isBoss():
                 # the boss item has the same name as its location, except for mother brain which has a space
@@ -288,61 +288,30 @@ class RomReader:
                 # race seeds
                 loc.itemName = "Nothing"
                 item = '0x0'
-            if majorsSplit is None:
-                if loc.isMajor() and self.items[item]['name'] in ['Missile', 'Super', 'PowerBomb']:
-                    isFull = True
-                if loc.isMinor() and self.items[item]['name'] not in ['Missile', 'Super', 'PowerBomb']:
-                    isFull = True
-                if loc.isChozo():
-                    if loc.itemName in chozoItems:
-                        chozoItems[loc.itemName] = chozoItems[loc.itemName] + 1
-                    else:
-                        chozoItems[loc.itemName] = 1
 
-        # if majors split is not written in the seed, use an heuristic
-        if majorsSplit is None:
-            isChozo = self.isChozoSeed(chozoItems)
-            if isChozo == True:
-                return ('Chozo', 'Chozo')
-            elif isFull == True:
-                return ('Full', 'Full')
-            else:
-                return ('Major', 'Major')
-        else:
-            return (majorsSplit if majorsSplit != 'FullWithHUD' else 'Full', majorsSplit)
+        return (majorsSplit if majorsSplit != 'FullWithHUD' else 'Full', majorsSplit)
 
-    def isChozoSeed(self, chozoItems):
-        # we have 2 Missiles, 2 Supers and 1 PB in the chozo locations
-        if 'Missile' not in chozoItems:
-            return False
-        if chozoItems['Missile'] != 2:
-            return False
-        if 'Super' not in chozoItems:
-            return False
-        if chozoItems['Super'] != 2:
-            return False
-        if 'PowerBomb' not in chozoItems:
-            return False
-        if chozoItems['PowerBomb'] != 1:
-            return False
+    # used to read scavenger locs
+    def genLocIdsDict(self, locations):
+        locIdsDict = {}
+        for loc in locations:
+            if loc.Id is None:
+                continue
+            locIdsDict[loc.Id] = loc
+        return locIdsDict
 
-        # we have at least 3 E and 1 R
-        if 'ETank' not in chozoItems:
-            return False
-        if chozoItems['ETank'] < 3:
-            return False
-        if 'Reserve' not in chozoItems:
-            return False
-
-        # all the majors items which can't be superfuned
-        if 'Charge' not in chozoItems:
-            return False
-        if 'Morph' not in chozoItems:
-            return False
-        if 'Ice' not in chozoItems:
-            return False
-
-        return True
+    def loadScavengerOrder(self, locations):
+        order = []
+        locIdsDict = self.genLocIdsDict(locations)
+        self.romFile.seek(snes_to_pc(0xA1F5D8))
+        while True:
+            data = self.romFile.readWord()
+            locId = (data & 0xFF00) >> 8
+            if locId == 0xFF:
+                break
+            loc = locIdsDict[locId]
+            order.append(loc)
+        return order
 
     def loadTransitions(self):
         # return the transitions

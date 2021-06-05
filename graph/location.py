@@ -43,6 +43,9 @@ class Location:
     def isBoss(self):
         return self._isBoss
 
+    def isScavenger(self):
+        return self._isScavenger
+
     def isClass(self, _class):
         return _class in self.Class
 
@@ -52,6 +55,7 @@ class Location:
         self._isMajor = 'Major' in _class
         self._isMinor = 'Minor' in _class
         self._isBoss = 'Boss' in _class
+        self._isScavenger = 'Scavenger' in _class
 
     def evalPostAvailable(self, smbm):
         if self.difficulty.bool == True and self.PostAvailable is not None:
@@ -118,7 +122,8 @@ def define_location(
         '_isMajor': 'Major' in Class,
         '_isChozo': 'Chozo' in Class,
         '_isMinor': 'Minor' in Class,
-        '_isBoss': 'Boss' in Class
+        '_isBoss': 'Boss' in Class,
+        '_isScavenger': 'Scavenger' in Class
     })
     return subclass()
 
@@ -146,7 +151,7 @@ define_location(
     Name="Bomb",
     Address=0x78404,
     Id=0x7,
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Visibility="Chozo",
     Room='Bomb Torizo Room',
@@ -184,7 +189,7 @@ define_location(
     GraphArea="GreenPinkBrinstar",
     SolveArea="Pink Brinstar",
     Name="Charge Beam",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78614,
     Id=0x17,
@@ -198,7 +203,7 @@ define_location(
     GraphArea="Crateria",
     SolveArea="Blue Brinstar",
     Name="Morphing Ball",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x786DE,
     Id=0x1a,
@@ -264,7 +269,7 @@ define_location(
     GraphArea="RedBrinstar",
     SolveArea="Red Brinstar",
     Name="X-Ray Scope",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78876,
     Id=0x26,
@@ -278,7 +283,7 @@ define_location(
     GraphArea="RedBrinstar",
     SolveArea="Red Brinstar",
     Name="Spazer",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x7896E,
     Id=0x2a,
@@ -318,7 +323,7 @@ define_location(
     GraphArea="Kraid",
     SolveArea="Kraid Boss",
     Name="Varia Suit",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78ACA,
     Id=0x30,
@@ -332,7 +337,7 @@ define_location(
     GraphArea="Norfair",
     SolveArea="Norfair Ice",
     Name="Ice Beam",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78B24,
     Id=0x32,
@@ -359,7 +364,7 @@ define_location(
     GraphArea="Norfair",
     SolveArea="Norfair Entrance",
     Name="Hi-Jump Boots",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78BAC,
     Id=0x35,
@@ -373,7 +378,7 @@ define_location(
     GraphArea="Crocomire",
     SolveArea="Crocomire",
     Name="Grapple Beam",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78C36,
     Id=0x3c,
@@ -400,7 +405,7 @@ define_location(
     GraphArea="Norfair",
     SolveArea="Bubble Norfair Speed",
     Name="Speed Booster",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78C82,
     Id=0x42,
@@ -414,7 +419,7 @@ define_location(
     GraphArea="Norfair",
     SolveArea="Bubble Norfair Wave",
     Name="Wave Beam",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78CCA,
     Id=0x44,
@@ -454,7 +459,7 @@ define_location(
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Screw Attack",
     Name="Screw Attack",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x79110,
     Id=0x4f,
@@ -533,7 +538,7 @@ define_location(
     GraphArea="WreckedShip",
     SolveArea="WreckedShip Gravity",
     Name="Gravity Suit",
-    Class=["Major"],
+    Class=["Major", "Scavenger"],
     CanHidden=False,
     Address=0x7C36D,
     Id=0x87,
@@ -560,7 +565,7 @@ define_location(
     GraphArea="EastMaridia",
     SolveArea="Maridia Forgotten Highway",
     Name="Plasma Beam",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x7C559,
     Id=0x8f,
@@ -587,7 +592,7 @@ define_location(
     GraphArea="EastMaridia",
     SolveArea="Maridia Sandpits",
     Name="Spring Ball",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x7C6E5,
     Id=0x96,
@@ -627,7 +632,7 @@ define_location(
     GraphArea="EastMaridia",
     SolveArea="Draygon Boss",
     Name="Space Jump",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x7C7A7,
     Id=0x9a,

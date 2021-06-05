@@ -535,14 +535,13 @@ class RomPatcher:
 
     def writeMajorsSplit(self, majorsSplit):
         address = 0x17B6C
-        if majorsSplit == 'Chozo':
-            char = 'Z'
-        elif majorsSplit == 'Major':
-            char = 'M'
-        elif majorsSplit == 'FullWithHUD':
-            char = 'H'
-        else:
-            char = 'F'
+        splits = {
+            'Chozo': 'Z',
+            'Major': 'M',
+            'FullWithHUD': 'H',
+            'Scavenger': 'S'
+        }
+        char = splits.get(majorsSplit, 'F')
         self.romFile.writeByte(ord(char), address)
 
     def getItemQty(self, itemLocs, itemType):

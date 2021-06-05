@@ -383,6 +383,9 @@ def computeLNHellRun(sm, addScrew):
 def skillPresetActionWebService():
     print("skillPresetActionWebService call")
 
+    if session.presets is None:
+        session.presets = {}
+
     # for create/update, not load
     (ok, msg) = validatePresetsParams(request.vars.action)
     if not ok:

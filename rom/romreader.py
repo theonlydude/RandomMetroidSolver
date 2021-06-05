@@ -295,9 +295,8 @@ class RomReader:
     def genLocIdsDict(self, locations):
         locIdsDict = {}
         for loc in locations:
-            if loc.Id is None:
-                continue
-            locIdsDict[loc.Id] = loc
+            if loc.isScavenger():
+                locIdsDict[loc.Id] = loc
         return locIdsDict
 
     def loadScavengerOrder(self, locations):

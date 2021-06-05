@@ -9,6 +9,7 @@ from rando.RandoSetup import RandoSetup
 from rando.Filler import FrontFiller
 from rando.FillerProgSpeed import FillerProgSpeed, FillerProgSpeedChozoSecondPhase
 from rando.FillerRandom import FillerRandom, FillerRandomSpeedrun
+from rando.FillerScavenger import FillerScavenger
 from rando.Chozo import ChozoFillerFactory, ChozoWrapperFiller
 from rando.Items import ItemManager
 from rando.ItemLocContainer import ItemLocation
@@ -26,12 +27,15 @@ class RandoExec(object):
         self.log = utils.log.get('RandoExec')
 
     def getFillerFactory(self, progSpeed, endDate):
-        if progSpeed == "basic":
-            return lambda cont: FrontFiller(self.graphSettings.startAP, self.areaGraph, self.restrictions, cont, endDate)
-        elif progSpeed == "speedrun":
-            return lambda cont: FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, cont, endDate)
+        if self.restrictions.split != "Scavenger":
+            if progSpeed == "basic":
+                return lambda cont: FrontFiller(self.graphSettings.startAP, self.areaGraph, self.restrictions, cont, endDate)
+            elif progSpeed == "speedrun":
+                return lambda cont: FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, cont, endDate)
+            else:
+                return lambda cont: FillerProgSpeed(self.graphSettings, self.areaGraph, self.restrictions, cont, endDate)
         else:
-            return lambda cont: FillerProgSpeed(self.graphSettings, self.areaGraph, self.restrictions, cont, endDate)
+            return lambda cont: FillerScavenger(self.graphSettings.startAP, self.areaGraph, self.restrictions, cont, endDate)
 
     def createFiller(self, container, endDate):
         progSpeed = self.randoSettings.progSpeed
@@ -57,7 +61,7 @@ class RandoExec(object):
         graphBuilder = GraphBuilder(self.graphSettings)
         container = None
         i = 0
-        attempts = 500 if self.graphSettings.areaRando or self.graphSettings.doorsColorsRando else 1
+        attempts = 500 if self.graphSettings.areaRando or self.graphSettings.doorsColorsRando or self.restrictions.split == 'Scavenger' else 1
         now = time.process_time()
         endDate = sys.maxsize
         if self.randoSettings.runtimeLimit_s < endDate:
@@ -69,7 +73,7 @@ class RandoExec(object):
             self.areaGraph = graphBuilder.createGraph()
             services = RandoServices(self.areaGraph, self.restrictions)
             setup = RandoSetup(self.graphSettings, Logic.locations, services)
-            container = setup.createItemLocContainer()
+            container = setup.createItemLocContainer(endDate)
             if container is None:
                 sys.stdout.write('*')
                 sys.stdout.flush()

@@ -80,7 +80,7 @@ class Filler(object):
         print('\n%d step(s) in %dms' % (self.nSteps, int((date-self.startDate)*1000)))
         if self.vcr != None:
             self.vcr.dump()
-        return (isStuck, self.container.itemLocations, self._getProgressionItemLocations())
+        return (isStuck, self.container.itemLocations, self.getProgressionItemLocations())
 
     # helper method to collect in item/location with logic. updates self.ap and VCR
     def collect(self, itemLoc, container=None, pickup=True):
@@ -94,15 +94,6 @@ class Filler(object):
         self.log.debug("AP="+self.ap)
         if self.vcr is not None and containerArg is None:
             self.vcr.addLocation(location.Name, item.Type)
-
-    def _getProgressionItemLocations(self):
-        itemLocs = self.getProgressionItemLocations()
-        if self.restrictions.split == 'Scavenger':
-            allItemLocs = self.container.itemLocations
-            # TODO use itemLocs (progression) to constrain item order (speedrun speed)
-            itemLocs = [il for il in allItemLocs if self.restrictions.isItemMajor(il.Item)]
-            print(getItemLocationsStr(itemLocs))
-        return itemLocs
 
     # called by generateItems at the end to knows which particulier
     # item/locations were progression, if the info is available

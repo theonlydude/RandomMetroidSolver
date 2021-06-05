@@ -2,20 +2,19 @@ from utils.utils import randGaussBounds, getRangeDict, chooseFromRange
 import utils.log, logging, copy, random
 
 class Item:
-    __slots__ = ( 'Category', 'Class', 'Name', 'Code', 'Type', 'HUD', 'BeamBits', 'ItemBits' )
+    __slots__ = ( 'Category', 'Class', 'Name', 'Code', 'Type', 'BeamBits', 'ItemBits' )
 
-    def __init__(self, Category, Class, Name, Type, Code=None, HUD=-1, BeamBits=0, ItemBits=0):
+    def __init__(self, Category, Class, Name, Type, Code=None, BeamBits=0, ItemBits=0):
         self.Category = Category
         self.Class = Class
         self.Code = Code
         self.Name = Name
         self.Type = Type
-        self.HUD = HUD
         self.BeamBits = BeamBits
         self.ItemBits = ItemBits
 
     def withClass(self, Class):
-        return Item(self.Category, Class, self.Name, self.Type, self.Code, self.HUD, self.BeamBits, self.ItemBits)
+        return Item(self.Category, Class, self.Name, self.Type, self.Code, self.BeamBits, self.ItemBits)
 
     def __eq__(self, other):
         # used to remove an item from a list
@@ -70,7 +69,6 @@ class ItemManager:
             Code=0xeee7,
             Name="Bomb",
             Type='Bomb',
-            HUD=1,
             ItemBits=0x1000,
         ),
         'Charge': Item(
@@ -79,7 +77,6 @@ class ItemManager:
             Code=0xeeeb,
             Name="Charge Beam",
             Type='Charge',
-            HUD=2,
             BeamBits=0x1000
         ),
         'Ice': Item(
@@ -88,7 +85,6 @@ class ItemManager:
             Code=0xeeef,
             Name="Ice Beam",
             Type='Ice',
-            HUD=6,
             BeamBits=0x2,
         ),
         'HiJump': Item(
@@ -97,7 +93,6 @@ class ItemManager:
             Code=0xeef3,
             Name="Hi-Jump Boots",
             Type='HiJump',
-            HUD=5,
             ItemBits=0x100,
         ),
         'SpeedBooster': Item(
@@ -106,7 +101,6 @@ class ItemManager:
             Code=0xeef7,
             Name="Speed Booster",
             Type='SpeedBooster',
-            HUD=7,
             ItemBits=0x2000,
         ),
         'Wave': Item(
@@ -115,7 +109,6 @@ class ItemManager:
             Code=0xeefb,
             Name="Wave Beam",
             Type='Wave',
-            HUD=8,
             BeamBits=0x1,
         ),
         'Spazer': Item(
@@ -124,7 +117,6 @@ class ItemManager:
             Code=0xeeff,
             Name="Spazer",
             Type='Spazer',
-            HUD=3,
             BeamBits=0x4,
         ),
         'SpringBall': Item(
@@ -133,7 +125,6 @@ class ItemManager:
             Code=0xef03,
             Name="Spring Ball",
             Type='SpringBall',
-            HUD=13,
             ItemBits=0x2,
         ),
         'Varia': Item(
@@ -142,7 +133,6 @@ class ItemManager:
             Code=0xef07,
             Name="Varia Suit",
             Type='Varia',
-            HUD=4,
             ItemBits=0x1,
         ),
         'Plasma': Item(
@@ -151,7 +141,6 @@ class ItemManager:
             Code=0xef13,
             Name="Plasma Beam",
             Type='Plasma',
-            HUD=14,
             BeamBits=0x8,
         ),
         'Grapple': Item(
@@ -160,7 +149,6 @@ class ItemManager:
             Code=0xef17,
             Name="Grappling Beam",
             Type='Grapple',
-            HUD=9,
             ItemBits=0x4000,
         ),
         'Morph': Item(
@@ -169,7 +157,6 @@ class ItemManager:
             Code=0xef23,
             Name="Morph Ball",
             Type='Morph',
-            HUD=0,
             ItemBits=0x4,
         ),
         'Reserve': Item(
@@ -185,7 +172,6 @@ class ItemManager:
             Code=0xef0b,
             Name="Gravity Suit",
             Type='Gravity',
-            HUD=11,
             ItemBits=0x20,
         ),
         'XRayScope': Item(
@@ -194,7 +180,6 @@ class ItemManager:
             Code=0xef0f,
             Name="X-Ray Scope",
             Type='XRayScope',
-            HUD=10,
             ItemBits=0x8000,
         ),
         'SpaceJump': Item(
@@ -203,7 +188,6 @@ class ItemManager:
             Code=0xef1b,
             Name="Space Jump",
             Type='SpaceJump',
-            HUD=12,
             ItemBits=0x200,
         ),
         'ScrewAttack': Item(
@@ -212,7 +196,6 @@ class ItemManager:
             Code=0xef1f,
             Name="Screw Attack",
             Type='ScrewAttack',
-            HUD=15,
             ItemBits= 0x8,
         ),
         'Nothing': Item(

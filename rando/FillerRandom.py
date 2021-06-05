@@ -13,7 +13,7 @@ from logic.logic import Logic
 
 # simple, uses mini solver only
 class FillerRandom(Filler):
-    def __init__(self, startAP, graph, restrictions, container, endDate, diffSteps=0):
+    def __init__(self, startAP, graph, restrictions, container, endDate=infinity, diffSteps=0):
         super(FillerRandom, self).__init__(startAP, graph, restrictions, container, endDate)
         self.miniSolver = MiniSolver(startAP, graph, restrictions)
         self.diffSteps = diffSteps
@@ -160,7 +160,7 @@ class FrontFillerKickstart(FrontFiller):
 
 # actual random filler will real solver on top of mini
 class FillerRandomSpeedrun(FillerRandom):
-    def __init__(self, graphSettings, graph, restrictions, container, endDate, diffSteps=0):
+    def __init__(self, graphSettings, graph, restrictions, container, endDate=infinity, diffSteps=0):
         super(FillerRandomSpeedrun, self).__init__(graphSettings.startAP, graph, restrictions, container, endDate)
         self.nFrontFillSteps = Logic.LocationsHelper.getRandomFillHelp(graphSettings.startAP)
         # based on runtime limit, help the random fill with up to three front fill steps
@@ -202,7 +202,8 @@ class FillerRandomSpeedrun(FillerRandom):
             maxDiff = self.settings.maxDiff
         minDiff = self.settings.minDiff
         graphLocations = self.container.getLocsForSolver()
-        solver = RandoSolver(self.restrictions.split, self.startAP, self.graph, graphLocations)
+        split = self.restrictions.split if self.restrictions.split != 'Scavenger' else 'Full'
+        solver = RandoSolver(split, self.startAP, self.graph, graphLocations)
         diff = solver.solveRom()
         self.container.cleanLocsAfterSolver()
         if diff < minDiff: # minDiff is 0 if unspecified: that covers "unsolvable" (-1)

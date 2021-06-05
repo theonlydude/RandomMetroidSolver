@@ -172,7 +172,7 @@ class RomPatcher:
             # write required major item order
             self.romFile.seek(snes_to_pc(0xA1F5D8))
             for itemLoc in progItemLocs:
-                self.romFile.writeWord((itemLoc.Location.Id << 8) | itemLoc.Item.HUD)
+                self.romFile.writeWord((itemLoc.Location.Id << 8) | itemLoc.Location.HUD)
             # bogus loc ID | "HUNT OVER" index
             self.romFile.writeWord(0xff10)
 

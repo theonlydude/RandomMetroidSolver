@@ -171,6 +171,13 @@ if __name__ == "__main__":
                         dest='majorsSplit', nargs='?', choices=majorsSplits + ['random'], default='Full')
     parser.add_argument('--majorsSplitList', help="list to choose from when random",
                         dest='majorsSplitList', nargs='?', default=None)
+    parser.add_argument('--scavNumLocs',
+                        help="For Scavenger split, number of major locations in the mandatory route",
+                        dest='scavNumLocs', nargs='?', default=10,
+                        choices=[str(i) for i in range(4,17)])
+    parser.add_argument('--scavRandomized',
+                        help="For Scavenger split, decide whether mandatory major locs will have non-vanilla items",
+                        dest='scavRandomized', nargs='?', const=True, default=False)
     parser.add_argument('--suitsRestriction',
                         help="no suits in early game",
                         dest='suitsRestriction', nargs='?', const=True, default=False)
@@ -430,6 +437,9 @@ if __name__ == "__main__":
     if progSpeed == 'speedrun' or progSpeed == 'basic':
         forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = args.progressionDifficulty
+        if args.majorsSplit == 'Scavenger':
+            forceArg('progressionSpeed', 'medium', "'Progression speed' forced to medium")
+            progSpeed = "medium"
     logger.debug("progressionDifficulty: {}".format(progDiff))
 
     if args.strictMinors == 'random':
@@ -483,6 +493,9 @@ if __name__ == "__main__":
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "doors": "normal" if not args.doorsColorsRando else "late" }
     restrictions['MajorMinor'] = 'Full' if args.majorsSplit == 'FullWithHUD' else args.majorsSplit
+    if restrictions["MajorMinor"] == "Scavenger":
+        scavNumLocs = int(args.scavNumLocs)
+        restrictions["ScavengerParams"] = {'numLocs':scavNumLocs, 'vanillaItems':not args.scavRandomized}
     seedCode = 'X'
     if majorsSplitRandom == False:
         if restrictions['MajorMinor'] == 'Full':

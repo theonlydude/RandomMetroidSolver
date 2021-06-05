@@ -12,6 +12,11 @@ class Restrictions(object):
         # Item split : Major, Chozo or Full
         self.split = settings.restrictions['MajorMinor']
         self.suitsRestrictions = settings.restrictions['Suits']
+        self.scavLocs = None
+        self.scavIsVanilla = False
+        self.restrictionDict = None
+        if self.split == 'Scavenger':
+            self.scavIsVanilla = settings.restrictions['ScavengerParams']['vanillaItems']
         # checker function chain used by canPlaceAtLocation
         self.checkers = self.getCheckers()
         self.static = {}
@@ -23,6 +28,10 @@ class Restrictions(object):
         self.split = "Full"
         self.suitsRestrictions = False
         self.checkers = []
+
+    def setScavengerLocs(self, scavLocs):
+        self.scavLocs = scavLocs
+        self.scavItemTypes = [loc.VanillaItemType for loc in scavLocs]
 
     def isEarlyMorph(self):
         return self.settings.restrictions['Morph'] == 'early'
@@ -55,13 +64,15 @@ class Restrictions(object):
 
     NoCheckCat = set(['Energy', 'Nothing', 'Boss'])
 
-    def addPlacementRestrictions(self, restrictionDict):
-        self.log.debug("add speedrun placement restrictions")
-        self.log.debug(restrictionDict)
-        self.checkers.append(lambda item, loc, cont:
-                             item.Category in Restrictions.NoCheckCat
-                             or (item.Category == 'Ammo' and cont.hasUnrestrictedLocWithItemType(item.Type))
-                             or loc.Name in restrictionDict[loc.GraphArea][item.Type])
+    def setPlacementRestrictions(self, restrictionDict):
+        self.log.debug("set placement restrictions")
+#        self.log.debug(restrictionDict)
+        if self.restrictionDict is None:
+            self.checkers.append(lambda item, loc, cont:
+                                 item.Category in Restrictions.NoCheckCat
+                                 or (item.Category == 'Ammo' and cont.hasUnrestrictedLocWithItemType(item.Type))
+                                 or loc.Name in self.restrictionDict[loc.GraphArea][item.Type])
+        self.restrictionDict = restrictionDict
 
     def isLocMajor(self, loc):
         return not loc.isBoss() and (self.split == "Full" or loc.isClass(self.split))
@@ -122,7 +133,12 @@ class Restrictions(object):
                 checkers.append(lambda item, loc, cont: self.isItemLocMatching(item, loc))
             else:
                 self.log.debug("add scavenger restriction")
-                checkers.append(lambda item, loc, cont: (loc.VanillaItemType is None and self.isItemMinor(item)) or item.Type == loc.VanillaItemType)
+                checkers.append(
+                    lambda item, loc, cont: (loc.VanillaItemType is None and self.isItemMinor(item))
+                                         or (loc.VanillaItemType is not None and self.isItemMajor(item)
+                                             and (not self.scavIsVanilla or self.scavLocs is None or
+                                                  (loc not in self.scavLocs and item.Type not in self.scavItemTypes)
+                                                  or (item.Type == loc.VanillaItemType and loc in self.scavLocs))))
         if self.suitsRestrictions:
             self.log.debug("add suits restriction")
             checkers.append(lambda item, loc, cont: not self.isSuit(item) or loc.GraphArea != 'Crateria')

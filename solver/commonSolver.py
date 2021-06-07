@@ -168,11 +168,13 @@ class CommonSolver(object):
         self.majorLocations.remove(loc)
         self.visitedLocations.append(loc)
         self.collectItem(loc, itemName)
+        return loc
 
     def collectMinor(self, loc):
         self.minorLocations.remove(loc)
         self.visitedLocations.append(loc)
         self.collectItem(loc)
+        return loc
 
     def collectItem(self, loc, item=None):
         if item == None:

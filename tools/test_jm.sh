@@ -73,6 +73,7 @@ STARTAPS=("" "--startAP random")
 AREAS=("" "" "--area" "--area --areaLayoutBase")
 MINIMIZERS=("--bosses random" "--bosses random" "--bosses random" "--area --bosses --minimizer " "--area --bosses --minimizerTourian --minimizer ")
 DOORS=("" "--doorsColorsRando random")
+MAJORSSPLITS=("random" "random" "random" "Scavenger")
 
 function generate_random_list {
     FIRST=0
@@ -122,8 +123,20 @@ function generate_params {
     fi
     let S=$RANDOM%${#DOORS[@]}
     DOOR=${DOORS[$S]}
+    let S=$RANDOM%${#MAJORSSPLITS[@]}
+    MAJORSSPLIT=${MAJORSSPLITS[$S]}
 
-    MAJORS_SPLIT_LIST=$(generate_multi_select "majorsSplit" 'Full' 'Major' 'Chozo')
+    if(echo "${MAJORSSPLIT}" | grep -q "Scavenger"); then
+        MAJORS_SPLIT_LIST=""
+        let NUM_LOCS=4+$RANDOM%12
+        SCAV_RANDOMS=("" "--scavRandomized")
+        let S=$RANDOM%${#SCAV_RANDOMS[@]}
+        SCAV_RANDOM=${SCAV_RANDOMS[$S]}
+        SCAVENGER="--scavNumLocs ${NUM_LOCS} ${SCAV_RANDOM}"
+    else
+        MAJORS_SPLIT_LIST=$(generate_multi_select "majorsSplit" 'Full' 'Major' 'Chozo' 'FullWithHUD')
+        SCAVENGER=""
+    fi
     PROGRESSION_DIFFICULTY_LIST=$(generate_multi_select "progressionDifficulty" 'easier' 'normal' 'harder')
     MORPH_PLACEMENT_LIST=$(generate_multi_select "morphPlacement" 'early' 'late' 'normal')
     ENERGY_QTY_LIST=$(generate_multi_select "energyQty" 'ultra_sparse' 'sparse' 'medium' 'vanilla')
@@ -133,7 +146,7 @@ function generate_params {
         START_LOCATION_LIST=$(generate_multi_select "startLocation" "Ceres" "Landing_Site" "Gauntlet_Top" "Green_Brinstar_Elevator" "Big_Pink" "Etecoons_Supers" "Wrecked_Ship_Main" "Firefleas_Top" "Business_Center" "Bubble_Mountain" "Mama_Turtle" "Watering_Hole" "Aqueduct" "Red_Brinstar_Elevator" "Golden_Four")
     fi
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random ${MORPH_PLACEMENT_LIST} --progressionDifficulty random ${PROGRESSION_DIFFICULTY_LIST} --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random ${ENERGY_QTY_LIST} --majorsSplit random ${MAJORS_SPLIT_LIST} --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random --gravityBehaviour random ${GRAVITY_BEHAVIOUR_LIST} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${START_LOCATION_LIST} ${AREA} ${MINIMIZER} ${DOOR} --jm"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random ${MORPH_PLACEMENT_LIST} --progressionDifficulty random ${PROGRESSION_DIFFICULTY_LIST} --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random ${ENERGY_QTY_LIST} --majorsSplit ${MAJORSSPLIT} ${MAJORS_SPLIT_LIST} ${SCAVENGER} --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random --gravityBehaviour random ${GRAVITY_BEHAVIOUR_LIST} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${START_LOCATION_LIST} ${AREA} ${MINIMIZER} ${DOOR} --jm"
 }
 
 function computeSeed {
@@ -320,7 +333,7 @@ for PROGSPEED in "speedrun" "slowest" "slow" "medium" "fast" "fastest" "VARIAble
 done
 echo ""
 echo "Majors split"
-for MAJORSPLIT in "Major" "Full" "Chozo"; do
+for MAJORSPLIT in "Major" "Full" "Chozo" "FullWithHUD" "Scavenger"; do
     TOTAL=$(grep ";${MAJORSPLIT};" ${CSV}  | wc -l)
     ERROR=$(grep ";${MAJORSPLIT};" ${CSV} | grep -E '^error' | wc -l)
     [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'

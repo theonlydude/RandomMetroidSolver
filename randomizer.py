@@ -167,7 +167,7 @@ if __name__ == "__main__":
                         help="minors quantities values will be strictly followed instead of being probabilities",
                         dest='strictMinors', nargs='?', const=True, default=False)
     parser.add_argument('--majorsSplit',
-                        help="how to split majors/minors: Full, FullWithHUD, Major, Chozo",
+                        help="how to split majors/minors: Full, FullWithHUD, Major, Chozo, Scavenger",
                         dest='majorsSplit', nargs='?', choices=majorsSplits + ['random'], default='Full')
     parser.add_argument('--majorsSplitList', help="list to choose from when random",
                         dest='majorsSplitList', nargs='?', default=None)

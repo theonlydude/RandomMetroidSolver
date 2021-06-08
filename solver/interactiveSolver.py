@@ -8,6 +8,7 @@ from rom.rompatcher import RomPatcher
 from rom.rom_patches import RomPatches
 from graph.graph import AccessGraphSolver as AccessGraph
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
+from graph.location import define_location
 from utils.utils import removeChars
 from solver.conf import Conf
 from utils.parameters import hard, infinity
@@ -427,8 +428,10 @@ class InteractiveSolver(CommonSolver):
         romPatcher.writeItemsNumber()
         romPatcher.writeSpoiler(itemLocs)
         # plando is considered Full
-        majorsSplit = "Full" if self.masterMajorsSplit != "FullWithHUD" else self.masterMajorsSplit
-        romPatcher.writeSplitLocs(itemLocs, majorsSplit)
+        majorsSplit = self.masterMajorsSplit if self.masterMajorsSplit in ["FullWithHUD", "Scavenger"] else "Full"
+        # for scavenger hunt, use a location with id and hud at 0xff, ie. scavenger locs list terminator
+        dummyLocation = define_location(Area="", GraphArea="", SolveArea="", Name="", Address=0, Id=0xff, Class=[], CanHidden=False, Visibility="", Room='', HUD=0xff)
+        romPatcher.writeSplitLocs(majorsSplit, itemLocs, [ItemLocation(Location=dummyLocation)])
         romPatcher.writeMajorsSplit(majorsSplit)
         class FakeRandoSettings:
             def __init__(self):

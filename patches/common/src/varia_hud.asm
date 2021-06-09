@@ -163,6 +163,7 @@ draw_info:
 	lda !game_state
 	cmp #$000c : beq .pause_start
 	cmp #$0010 : beq .pause_end
+	cmp #$001b : beq .pause_end ; interpret reserve auto as pause end
 	bra .pause_check
 .pause_start:
 	lda !major_tmp

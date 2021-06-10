@@ -15,7 +15,7 @@
 ;;;   not been collected. For this, it replaces g4_skip asm, so don't
 ;;;   apply g4_skip when this patch is applied.
 ;;; When all required majors have been collected, Tourian access is
-;;; unlocked, and the HUD falls back to remaining items mode.
+;;; unlocked, and the HUD displays 'HUNT OVER'
 
 ;;; Includes etank bar combine by lioran
 

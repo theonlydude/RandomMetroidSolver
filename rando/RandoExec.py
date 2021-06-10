@@ -56,18 +56,19 @@ class RandoExec(object):
     # - create filler based on progression speed and run it
     # return (isStuck, itemLocs, progItemLocs)
     def randomize(self):
-        self.restrictions = Restrictions(self.randoSettings)
         self.errorMsg = ""
+        split = self.randoSettings.restrictions['MajorMinor']
         graphBuilder = GraphBuilder(self.graphSettings)
         container = None
         i = 0
-        attempts = 500 if self.graphSettings.areaRando or self.graphSettings.doorsColorsRando or self.restrictions.split == 'Scavenger' else 1
+        attempts = 500 if self.graphSettings.areaRando or self.graphSettings.doorsColorsRando or split == 'Scavenger' else 1
         now = time.process_time()
         endDate = sys.maxsize
         if self.randoSettings.runtimeLimit_s < endDate:
             endDate = now + self.randoSettings.runtimeLimit_s
-        self.updateLocationsClass()
+        self.updateLocationsClass(split)
         while container is None and i < attempts and now <= endDate:
+            self.restrictions = Restrictions(self.randoSettings)
             if self.graphSettings.doorsColorsRando == True:
                 DoorsManager.randomize(self.graphSettings.allowGreyDoors)
             self.areaGraph = graphBuilder.createGraph()
@@ -96,8 +97,7 @@ class RandoExec(object):
         self.errorMsg += filler.errorMsg
         return ret
 
-    def updateLocationsClass(self):
-        split = self.restrictions.split
+    def updateLocationsClass(self, split):
         if split != 'Full' and split != 'Scavenger':
             startAP = getAccessPoint(self.graphSettings.startAP)
             possibleMajLocs, preserveMajLocs, nMaj, nChozo = Logic.LocationsHelper.getStartMajors(startAP.Name)
@@ -105,7 +105,7 @@ class RandoExec(object):
                 n = nMaj
             elif split == 'Chozo':
                 n = nChozo
-            GraphUtils.updateLocClassesStart(startAP.GraphArea, self.restrictions.split, possibleMajLocs, preserveMajLocs, n)
+            GraphUtils.updateLocClassesStart(startAP.GraphArea, split, possibleMajLocs, preserveMajLocs, n)
 
     def postProcessItemLocs(self, itemLocs, hide):
         # hide some items like in dessy's
@@ -113,7 +113,7 @@ class RandoExec(object):
             for itemLoc in itemLocs:
                 item = itemLoc.Item
                 loc = itemLoc.Location
-                if (item.Type not in ['Nothing', 'NoEnergy']
+                if (item.Category != "Nothing"
                     and loc.CanHidden == True
                     and loc.Visibility == 'Visible'):
                     if bool(random.getrandbits(1)) == True:

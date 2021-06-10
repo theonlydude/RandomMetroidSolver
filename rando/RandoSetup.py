@@ -7,7 +7,7 @@ from logic.helpers import Bosses
 from graph.graph_utils import getAccessPoint, GraphUtils
 from rando.Filler import FrontFiller
 from rando.FillerRandom import FillerRandomSpeedrun
-from rando.ItemLocContainer import ItemLocContainer, getLocListStr, ItemLocation
+from rando.ItemLocContainer import ItemLocContainer, getLocListStr, ItemLocation, getItemListStr
 from rando.Chozo import isChozoItem
 from rando.Restrictions import Restrictions
 from utils.parameters import infinity
@@ -121,9 +121,10 @@ class RandoSetup(object):
         return restrictionDict
 
     def initScavenger(self, endDate):
-        attempts = 100 if self.restrictions.scavIsVanilla else 1
-        majorLocs = [loc for loc in self.container.unusedLocations if self.restrictions.isLocMajor(loc)]
+        attempts = 30 if self.restrictions.scavIsVanilla else 1
+        majorLocs = [loc for loc in self.container.unusedLocations if self.restrictions.isLocMajor(loc) and (not self.restrictions.scavIsVanilla or loc.VanillaItemType not in self.forbiddenItems)]
         nLocs = min(self.settings.restrictions['ScavengerParams']['numLocs'], len(majorLocs))
+        self.log.debug("initScavenger. nLocs="+str(nLocs))
         cont = None
         restr = None
         i = 0
@@ -136,7 +137,7 @@ class RandoSetup(object):
                     if itemType not in allTypes:
                         allTypes.append(itemType)
                     if itemType not in okTypes and len(locs) > 0:
-                         okTypes.append(itemType)
+                        okTypes.append(itemType)
             self.log.debug("checkRestrictionsDict. allTypes="+str(allTypes))
             self.log.debug("checkRestrictionsDict. okTypes="+str(okTypes))
             return len(okTypes) == len(allTypes)
@@ -155,11 +156,11 @@ class RandoSetup(object):
             if checkRestrictionsDict(r):
                 restr = r
         if restr is not None:
-            self.log.debug("initScavenger. got list after "+str(i)+" attempts")
-            # finally, actually do the randomization using a speedrun filler (25 attempts heuristic)
+            self.log.debug("initScavenger. got list after "+str(i+1)+" attempts")
+            # finally, actually do the randomization using a speedrun filler (50 attempts heuristic)
             self.restrictions.setPlacementRestrictions(restr)
-            filler = FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, self.container, endDate=endDate, diffSteps=25)
-            stepCond = filler.createStepCountCondition(25)
+            filler = FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, self.container, endDate=endDate, diffSteps=50)
+            stepCond = filler.createStepCountCondition(50)
             filler.generateItems(condition=lambda: filler.itemPoolCondition() and stepCond())
             if not filler.itemPoolCondition():
                 cont = filler.container
@@ -195,7 +196,7 @@ class RandoSetup(object):
                     itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('ETank'))
                 else:
                     raise RuntimeError("Cannot fill restricted locations")
-                self.log.debug("Fill: {} at {}".format(itemLocation.Item.Type, itemLocation.Location.Name))
+                self.log.debug("Fill: {}/{} at {}".format(itemLocation.Item.Type, itemLocation.Item.Class, itemLocation.Location.Name))
                 self.container.collect(itemLocation, False)
         fill(majorRestrictedLocs, getItemPredicateMajor)
         fill(otherRestrictedLocs, getItemPredicateMinor)
@@ -259,8 +260,7 @@ class RandoSetup(object):
         self.disableBossChecks()
         self.sm.resetItems()
         self.sm.addItems([item.Type for item in contPool]) # will add bosses as well
-        poolDict = container.getPoolDict()
-        self.log.debug('pool={}'.format(sorted([(t, len(poolDict[t])) for t in poolDict])))
+        self.log.debug('pool={}'.format(getItemListStr(container.itemPool)))
         locs = self.services.currentLocations(self.startAP, container, post=True)
         self.areaGraph.useCache(True)
         for loc in locs:

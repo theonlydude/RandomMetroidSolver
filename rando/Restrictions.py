@@ -14,7 +14,7 @@ class Restrictions(object):
         self.suitsRestrictions = settings.restrictions['Suits']
         self.scavLocs = None
         self.scavIsVanilla = False
-        self.restrictionDict = None
+        self.restrictionDictChecker = None
         if self.split == 'Scavenger':
             self.scavIsVanilla = settings.restrictions['ScavengerParams']['vanillaItems']
         # checker function chain used by canPlaceAtLocation
@@ -31,6 +31,7 @@ class Restrictions(object):
 
     def setScavengerLocs(self, scavLocs):
         self.scavLocs = scavLocs
+        self.log.debug("scavLocs="+getLocListStr(scavLocs))
         self.scavItemTypes = [loc.VanillaItemType for loc in scavLocs]
 
     def isEarlyMorph(self):
@@ -66,13 +67,16 @@ class Restrictions(object):
 
     def setPlacementRestrictions(self, restrictionDict):
         self.log.debug("set placement restrictions")
-#        self.log.debug(restrictionDict)
-        if self.restrictionDict is None:
-            self.checkers.append(lambda item, loc, cont:
-                                 item.Category in Restrictions.NoCheckCat
-                                 or (item.Category == 'Ammo' and cont.hasUnrestrictedLocWithItemType(item.Type))
-                                 or loc.Name in self.restrictionDict[loc.GraphArea][item.Type])
-        self.restrictionDict = restrictionDict
+        self.log.debug(restrictionDict)
+        if self.restrictionDictChecker is not None:
+            self.checkers.remove(self.restrictionDictChecker)
+            self.restrictionDictChecker = None
+        if restrictionDict is None:
+            return
+        self.restrictionDictChecker = lambda item, loc, cont: item.Category in Restrictions.NoCheckCat\
+                                   or (item.Category == 'Ammo' and cont.hasUnrestrictedLocWithItemType(item.Type))\
+                                   or loc.Name in restrictionDict[loc.GraphArea][item.Type]
+        self.checkers.append(self.restrictionDictChecker)
 
     def isLocMajor(self, loc):
         return not loc.isBoss() and (self.split == "Full" or loc.isClass(self.split))
@@ -92,7 +96,7 @@ class Restrictions(object):
         if self.split == "Full":
             return True
         elif self.split == 'Scavenger':
-            return item.Class != "Major" or item.Category == "Energy" or item.Category == "Nothing"
+            return item.Class != "Major" or item.Category == "Energy"
         else:
             return item.Class == "Minor"
 

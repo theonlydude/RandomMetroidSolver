@@ -17,7 +17,7 @@ class ItemLocation(object):
         return {'Item': self.Item.json(), 'Location': self.Location.json()}
 
 def getItemListStr(items):
-    return str(dict(Counter([item.Type for item in items])))
+    return str(dict(Counter(["%s/%s" % (item.Type,item.Class) for item in items])))
 
 def getLocListStr(locs):
     return str([loc.Name for loc in locs])

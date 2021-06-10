@@ -346,7 +346,10 @@ class ItemPoolGenerator(object):
         elif majorsSplit == 'Plando':
             return ItemPoolGeneratorPlando(itemManager, qty, sm, exclude, nLocs, maxDiff)
         elif nLocs == 105:
-            return ItemPoolGeneratorMajors(itemManager, qty, sm, maxDiff)
+            if majorsSplit == "Scavenger":
+                return ItemPoolGeneratorScavenger(itemManager, qty, sm, maxDiff)
+            else:
+                return ItemPoolGeneratorMajors(itemManager, qty, sm, maxDiff)
         else:
             return ItemPoolGeneratorMinimizer(itemManager, qty, sm, nLocs, maxDiff)
 
@@ -522,6 +525,9 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
         self.mediumRest = 3 + randGaussBounds(4, 3.7)
         self.ultraSparseNoTanks = self.isUltraSparseNoTanks()
 
+    def addNoEnergy(self):
+        self.itemManager.addItem('NoEnergy')
+
     def addEnergy(self):
         total = self.maxEnergy
         alreadyInPool = 2
@@ -536,10 +542,10 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
             # 0-1, add up to one energy (etank or reserve)
             self.itemManager.removeItem('Reserve')
             self.itemManager.removeItem('ETank')
-            self.itemManager.addItem('NoEnergy')
+            self.addNoEnergy()
             if self.ultraSparseNoTanks:
                 # no energy at all
-                self.itemManager.addItem('NoEnergy')
+                self.addNoEnergy()
             else:
                 if random.random() < 0.5:
                     self.itemManager.addItem('ETank')
@@ -548,7 +554,7 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
 
             # complete with nothing item
             for i in range(total - alreadyInPool):
-                self.itemManager.addItem('NoEnergy')
+                self.addNoEnergy()
 
         elif energyQty == 'sparse':
             # 4-6
@@ -563,7 +569,7 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
                 self.itemManager.addItem('ETank')
             # complete with nothing item
             for i in range(total - alreadyInPool - rest):
-                self.itemManager.addItem('NoEnergy')
+                self.addNoEnergy()
 
         elif energyQty == 'medium':
             # 8-12
@@ -581,7 +587,7 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
                 self.itemManager.addItem('ETank')
             # fill the rest with NoEnergy
             for i in range(total - alreadyInPool - rest):
-                self.itemManager.addItem('NoEnergy')
+                self.addNoEnergy()
         else:
             nE = getE(13)
             alreadyInPool += nE
@@ -592,7 +598,7 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
             for i in range(nE):
                 self.itemManager.addItem('ETank')
             for i in range(total - alreadyInPool):
-                self.itemManager.addItem('NoEnergy')
+                self.addNoEnergy()
 
     def getItemPool(self):
         self.itemManager.newItemPool()
@@ -606,6 +612,13 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
         self.addAmmo()
 
         return self.itemManager.getItemPool()
+
+class ItemPoolGeneratorScavenger(ItemPoolGeneratorMajors):
+    def __init__(self, itemManager, qty, sm, maxDiff):
+        super(ItemPoolGeneratorScavenger, self).__init__(itemManager, qty, sm, maxDiff)
+
+    def addNoEnergy(self):
+        self.itemManager.addItem('NoEnergy', 'Minor')
 
 class ItemPoolGeneratorMinimizer(ItemPoolGeneratorMajors):
     def __init__(self, itemManager, qty, sm, nLocs, maxDiff):

@@ -56,7 +56,7 @@ class FillerRandom(Filler):
             item = random.choice(self.container.itemPool)
             locs = self.getLocations(item)
             if not locs:
-                self.log.debug("FillerRandom: constraint collision during step {} for item {}".format(self.nSteps, item.Type))
+                self.log.debug("FillerRandom: constraint collision during step {} for item {}/{}".format(self.nSteps, item.Type, item.Class))
                 self.resetHelpingContainer()
                 date = time.process_time()
                 continue
@@ -190,8 +190,9 @@ class FillerRandomSpeedrun(FillerRandom):
         else:
             super(FillerRandomSpeedrun, self).createHelpingBaseLists()
 
-    def getLocations(self, item):
-        return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocationFast(item.Type, loc.Name, self.container)]
+    # FIXME disabled for now because items are indexed by type only, and item class matters
+    # def getLocations(self, item):
+    #     return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocationFast(item.Type, loc.Name, self.container)]
 
     def isBeatable(self, maxDiff=None):
         miniOk = self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)

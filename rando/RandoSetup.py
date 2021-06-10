@@ -62,6 +62,8 @@ class RandoSetup(object):
         if not self.checkPool():
             self.log.debug("createItemLocContainer: last checkPool fail")
             return None
+        for loc in self.restrictedLocs:
+            loc.restricted = True
         self.checkDoorBeams()
         self.container = ItemLocContainer(self.sm, self.getItemPool(), self.locations)
         if self.restrictions.isLateMorph():
@@ -122,7 +124,7 @@ class RandoSetup(object):
 
     def initScavenger(self, endDate):
         attempts = 30 if self.restrictions.scavIsVanilla else 1
-        majorLocs = [loc for loc in self.container.unusedLocations if self.restrictions.isLocMajor(loc) and (not self.restrictions.scavIsVanilla or loc.VanillaItemType not in self.forbiddenItems)]
+        majorLocs = [loc for loc in self.container.unusedLocations if self.restrictions.isLocMajor(loc) and (not self.restrictions.scavIsVanilla or (loc.VanillaItemType not in self.forbiddenItems and self.container.getNextItemInPool(loc.VanillaItemType) is not None))]
         nLocs = min(self.settings.restrictions['ScavengerParams']['numLocs'], len(majorLocs))
         self.log.debug("initScavenger. nLocs="+str(nLocs))
         cont = None
@@ -169,37 +171,36 @@ class RandoSetup(object):
     # fill up unreachable locations with "junk" to maximize the chance of the ROM
     # to be finishable
     def fillRestrictedLocations(self):
-        majorRestrictedLocs = [loc for loc in self.restrictedLocs if self.restrictions.isLocMajor(loc)]
-        otherRestrictedLocs = [loc for loc in self.restrictedLocs if loc not in majorRestrictedLocs]
-        def getItemPredicateMajor(itemType):
-            return lambda item: item.Type == itemType and self.restrictions.isItemMajor(item)
-        def getItemPredicateMinor(itemType):
-            return lambda item: item.Type == itemType and self.restrictions.isItemMinor(item)
-        def fill(locs, getPred):
-            self.log.debug("fillRestrictedLocations. locs="+getLocListStr(locs))
-            for loc in locs:
-                loc.restricted = True
-                itemLocation = ItemLocation(None, loc)
-                if self.container.hasItemInPool(getPred('Nothing')):
-                    itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('Nothing'))
-                elif self.container.hasItemInPool(getPred('NoEnergy')):
-                    itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('NoEnergy'))
-                elif self.container.countItems(getPred('Missile')) > 3:
-                    itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('Missile'))
-                elif self.container.countItems(getPred('Super')) > 2:
-                    itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('Super'))
-                elif self.container.countItems(getPred('PowerBomb')) > 1:
-                    itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('PowerBomb'))
-                elif self.container.countItems(getPred('Reserve')) > 1:
-                    itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('Reserve'))
-                elif self.container.countItems(getPred('ETank')) > 3:
-                    itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('ETank'))
-                else:
-                    raise RuntimeError("Cannot fill restricted locations")
-                self.log.debug("Fill: {}/{} at {}".format(itemLocation.Item.Type, itemLocation.Item.Class, itemLocation.Location.Name))
-                self.container.collect(itemLocation, False)
-        fill(majorRestrictedLocs, getItemPredicateMajor)
-        fill(otherRestrictedLocs, getItemPredicateMinor)
+        def getPred(itemType, loc):
+            return lambda item: (itemType is None or item.Type == itemType) and self.restrictions.canPlaceAtLocation(item, loc, self.container)
+        locs = self.restrictedLocs
+        self.log.debug("fillRestrictedLocations. locs="+getLocListStr(locs))
+        for loc in locs:
+            itemLocation = ItemLocation(None, loc)
+            if self.container.hasItemInPool(getPred('Nothing', loc)):
+                itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('Nothing', loc))
+            elif self.container.hasItemInPool(getPred('NoEnergy', loc)):
+                itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('NoEnergy', loc))
+            elif self.container.countItems(getPred('Missile', loc)) > 3:
+                itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('Missile', loc))
+            elif self.container.countItems(getPred('Super', loc)) > 2:
+                itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('Super', loc))
+            elif self.container.countItems(getPred('PowerBomb', loc)) > 1:
+                itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('PowerBomb', loc))
+            elif self.container.countItems(getPred('Reserve', loc)) > 1:
+                itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('Reserve', loc))
+            elif self.container.countItems(getPred('ETank', loc)) > 3:
+                itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('ETank', loc))
+            # getting desperate here...
+            elif self.container.hasItemInPool(getPred('XRayScope', loc)):
+                itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('XRayScope', loc))
+            # yolo
+            elif self.container.hasItemInPool(getPred(None, loc)):
+                itemLocation.Item = self.container.getNextItemInPoolMatching(getPred(None, loc))
+            else:
+                raise RuntimeError("Cannot fill restricted locations")
+            self.log.debug("Fill: {}/{} at {}".format(itemLocation.Item.Type, itemLocation.Item.Class, itemLocation.Location.Name))
+            self.container.collect(itemLocation, False)
 
     def getItemPool(self, forbidden=[]):
         self.itemManager.setItemPool(self.basePool[:]) # reuse base pool to have constant base item set

@@ -190,9 +190,8 @@ class FillerRandomSpeedrun(FillerRandom):
         else:
             super(FillerRandomSpeedrun, self).createHelpingBaseLists()
 
-    # FIXME disabled for now because items are indexed by type only, and item class matters
-    # def getLocations(self, item):
-    #     return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocationFast(item.Type, loc.Name, self.container)]
+    def getLocations(self, item):
+        return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocationFast(item.Type, loc.Name, self.container)]
 
     def isBeatable(self, maxDiff=None):
         miniOk = self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)

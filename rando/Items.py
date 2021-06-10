@@ -618,7 +618,7 @@ class ItemPoolGeneratorScavenger(ItemPoolGeneratorMajors):
         super(ItemPoolGeneratorScavenger, self).__init__(itemManager, qty, sm, maxDiff)
 
     def addNoEnergy(self):
-        self.itemManager.addItem('NoEnergy', 'Minor')
+        self.itemManager.addItem('Nothing')
 
 class ItemPoolGeneratorMinimizer(ItemPoolGeneratorMajors):
     def __init__(self, itemManager, qty, sm, nLocs, maxDiff):

@@ -347,6 +347,15 @@ for MORPH in "early" "normal" "late"; do
     [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
     printf "%-24s" "${MORPH}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
 done
+echo ""
+echo "Skill preset"
+for PRESET in "regular" "newbie" "master"; do
+    TOTAL=$(grep "${PRESET}.json" ${CSV}  | wc -l)
+    ERROR=$(grep "${PRESET}.json" ${CSV} | grep -E '^error' | wc -l)
+    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
+    printf "%-24s" "${PRESET}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+
+done
 
 TOTAL_COUNT=$(wc -l ${CSV} | awk '{print $1}')
 echo "total: ${TOTAL_COUNT}"

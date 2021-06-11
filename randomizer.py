@@ -450,6 +450,9 @@ if __name__ == "__main__":
         forceArg('hud', True, "'VARIA HUD' forced to on", 'hud', 'on')
         if not GraphUtils.isStandardStart(args.startAP):
             forceArg('startAP', "Landing Site", "Start Location forced to Landing Site because of Scavenger mode", 'startAP', 'Landing Site')
+        if args.morphPlacement == 'late':
+            forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
+
     # in plando rando we know that the start ap is ok
     if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando is None:
         if args.majorsSplit in ['Major', "Chozo"]:

@@ -16,6 +16,7 @@ class ScavengerSolver(RandoSolver):
     def pickupScav(self, nextScav):
         self.scavOrder.append(nextScav)
         self.remainingScavLocs.remove(nextScav)
+        self.log.debug("pickupScav: {}".format(nextScav.Name))
 
     def chooseNextScavLoc(self, scavAvailable):
         return random.choice(scavAvailable)
@@ -39,6 +40,18 @@ class ScavengerSolver(RandoSolver):
             if loc is not None and loc in self.remainingScavLocs:
                 self.pickupScav(loc)
             return loc
+
+    def cancelLastItems(self, count):
+        # remove locs from scavOrder
+        for i in range(1, count+1):
+            loc = self.visitedLocations[-i]
+            if loc in self.scavOrder:
+                self.scavOrder.remove(loc)
+                self.remainingScavLocs.append(loc)
+                self.log.debug("cancel scav loc: {}".format(loc.Name))
+
+        # call base func
+        super(ScavengerSolver, self).cancelLastItems(count)
 
 class FillerScavenger(Filler):
     def __init__(self, startAP, graph, restrictions, fullContainer, endDate=infinity):
@@ -66,5 +79,5 @@ class FillerScavenger(Filler):
         return True
 
     def getProgressionItemLocations(self):
-        print(getLocListStr(self.solver.scavOrder))
+        self.log.debug("Scavenger list: {}".format(getLocListStr(self.solver.scavOrder)))
         return [self.container.getItemLoc(loc) for loc in self.solver.scavOrder]

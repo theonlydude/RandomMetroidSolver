@@ -621,6 +621,10 @@ class CommonSolver(object):
 
             self.nbAvailLocs.append(len(locs))
 
+            # remove next scavenger locs before checking if we're stuck
+            if self.majorsSplit == 'Scavenger':
+                majorsAvailable = self.filterScavengerLocs(majorsAvailable)
+
             # check if we're stuck
             if len(majorsAvailable) == 0 and len(minorsAvailable) == 0:
                 if not isEndPossible:
@@ -654,9 +658,6 @@ class CommonSolver(object):
             else:
                 self.log.debug("getAvailableItemsList minors")
                 minorsAvailable = self.getAvailableItemsList(minorsAvailable, diffThreshold)
-
-            if self.majorsSplit == 'Scavenger':
-                majorsAvailable = self.filterScavengerLocs(majorsAvailable)
 
             # choose one to pick up
             self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold)

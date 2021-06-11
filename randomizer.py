@@ -435,11 +435,12 @@ if __name__ == "__main__":
         args.morphPlacement = random.choice(morphPlacements)
     # random fill makes certain options unavailable
     if progSpeed == 'speedrun' or progSpeed == 'basic':
-        forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
-        progDiff = args.progressionDifficulty
         if args.majorsSplit == 'Scavenger':
             forceArg('progressionSpeed', 'medium', "'Progression speed' forced to medium")
             progSpeed = "medium"
+        else:
+            forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
+            progDiff = args.progressionDifficulty
     logger.debug("progressionDifficulty: {}".format(progDiff))
 
     if args.strictMinors == 'random':

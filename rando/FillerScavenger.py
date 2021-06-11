@@ -7,13 +7,14 @@ from utils.parameters import easy, medium, hard, harder, hardcore, mania, infini
 
 
 class ScavengerSolver(RandoSolver):
-    def __init__(self, startAP, areaGraph, locations, scavLocs, maxDiff, progDiff):
+    def __init__(self, startAP, areaGraph, locations, scavLocs, maxDiff, progDiff, vcr):
         super(ScavengerSolver, self).__init__("Full", startAP, areaGraph, locations)
         self.remainingScavLocs = scavLocs
         self.maxDiff = maxDiff
         self.progDiff = progDiff
         self.threshold = self.getThreshold()
         self.scavOrder = []
+        self.vcr = vcr
 
     def getThreshold(self):
         if self.maxDiff >= mania:
@@ -82,7 +83,7 @@ class FillerScavenger(Filler):
     def initFiller(self):
         super(FillerScavenger, self).initFiller()
         locs = self.container.getLocsForSolver()
-        self.solver = ScavengerSolver(self.startAP, self.graph, locs, self.remainingScavLocs, self.maxDiff, self.settings.progDiff)
+        self.solver = ScavengerSolver(self.startAP, self.graph, locs, self.remainingScavLocs, self.maxDiff, self.settings.progDiff, self.vcr)
 
     def itemPoolCondition(self):
         return len(self.remainingScavLocs) > 0

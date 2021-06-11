@@ -46,6 +46,9 @@ class Restrictions(object):
     def isChozo(self):
         return self.split == 'Chozo'
 
+    def isScavenger(self):
+        return self.split == "Scavenger"
+
     def lateMorphInit(self, ap, emptyContainer, services):
         assert self.isLateMorph()
         morph = emptyContainer.getNextItemInPool('Morph')

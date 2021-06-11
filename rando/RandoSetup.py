@@ -191,12 +191,6 @@ class RandoSetup(object):
                 itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('Reserve', loc))
             elif self.container.countItems(getPred('ETank', loc)) > 3:
                 itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('ETank', loc))
-            # getting desperate here...
-            elif self.container.hasItemInPool(getPred('XRayScope', loc)):
-                itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('XRayScope', loc))
-            # yolo
-            elif self.container.hasItemInPool(getPred(None, loc)):
-                itemLocation.Item = self.container.getNextItemInPoolMatching(getPred(None, loc))
             else:
                 raise RuntimeError("Cannot fill restricted locations")
             self.log.debug("Fill: {}/{} at {}".format(itemLocation.Item.Type, itemLocation.Item.Class, itemLocation.Location.Name))
@@ -318,15 +312,16 @@ class RandoSetup(object):
                     self.log.debug('checkPool. locked by Phantoon or Draygon')
                 self.log.debug('checkPool. boss access sanity check: '+str(ret))
 
-        if self.restrictions.isChozo():
-            # last check for chozo locations: don't put more restricted chozo locations than removed chozo items
-            # (we cannot rely on removing ammo/energy in fillRestrictedLocations since it is already the bare minimum in chozo pool)
-            # FIXME something to do there for ultra sparse, it gives us up to 3 more spots for nothing items
+        if self.restrictions.isChozo() or self.restrictions.isScavenger():
+            # in chozo or scavenger, we cannot put other items than NoEnergy in the restricted locations,
+            # we would be forced to put majors in there, which can make seed generation fail:
+            # don't put more restricted major locations than removed major items
+            # FIXME something to do there for chozo/ultra sparse, it gives us up to 3 more spots for nothing items
             restrictedLocs = self.restrictedLocs + [loc for loc in self.lastRestricted if loc not in self.restrictedLocs]
-            nRestrictedChozo = sum(1 for loc in restrictedLocs if loc.isChozo())
-            nNothingChozo = sum(1 for item in pool if 'Chozo' in item.Class and item.Category == 'Nothing')
-            ret &= nRestrictedChozo <= nNothingChozo
-            self.log.debug('checkPool. nRestrictedChozo='+str(nRestrictedChozo)+', nNothingChozo='+str(nNothingChozo))
+            nRestrictedMajor = sum(1 for loc in restrictedLocs if self.restrictions.isLocMajor(loc))
+            nNothingMajor = sum(1 for item in pool if self.restrictions.isItemMajor(item) and item.Category == 'Nothing')
+            ret &= nRestrictedMajor <= nNothingMajor
+            self.log.debug('checkPool. nRestrictedMajor='+str(nRestrictedMajor)+', nNothingMajor='+str(nNothingMajor))
         self.log.debug('checkPool. result: '+str(ret))
         return ret
 

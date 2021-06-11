@@ -3,15 +3,23 @@ import random, sys, copy, logging, time
 from rando.Filler import Filler
 from rando.ItemLocContainer import getLocListStr
 from solver.randoSolver import RandoSolver
-from utils.parameters import infinity
+from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
 
 
 class ScavengerSolver(RandoSolver):
-    def __init__(self, startAP, areaGraph, locations, scavLocs, maxDiff):
+    def __init__(self, startAP, areaGraph, locations, scavLocs, maxDiff, progDiff):
         super(ScavengerSolver, self).__init__("Full", startAP, areaGraph, locations)
         self.remainingScavLocs = scavLocs
         self.maxDiff = maxDiff
+        self.progDiff = progDiff
+        self.threshold = self.getThreshold()
         self.scavOrder = []
+
+    def getThreshold(self):
+        if self.maxDiff >= mania:
+            return harder
+        else:
+            return hard
 
     def pickupScav(self, nextScav):
         self.scavOrder.append(nextScav)
@@ -19,7 +27,14 @@ class ScavengerSolver(RandoSolver):
         self.log.debug("pickupScav: {}".format(nextScav.Name))
 
     def chooseNextScavLoc(self, scavAvailable):
-        return random.choice(scavAvailable)
+        harder = [loc for loc in scavAvailable if loc.difficulty.difficulty >= self.threshold]
+        easier = [loc for loc in scavAvailable if loc.difficulty.difficulty < self.threshold]
+        if harder and self.progDiff == "harder":
+            return random.choice(harder)
+        elif easier and self.progDiff == "easier":
+            return random.choice(easier)
+        else:
+            return random.choice(scavAvailable)
 
     def nextDecision(self, majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold):
         # since solver split is forced to Full, majorsAvailable=minorsAvailable
@@ -31,6 +46,7 @@ class ScavengerSolver(RandoSolver):
             nextMinor = random.choice(minorsAvailable)
             return self.collectMajor(nextMinor)
         elif len(scavAvailable) > 0:
+            self.log.debug("scavAvailable: "+getLocListStr(scavAvailable))
             nextScav = self.chooseNextScavLoc(scavAvailable)
             self.pickupScav(nextScav)
             return self.collectMajor(nextScav)
@@ -57,7 +73,7 @@ class FillerScavenger(Filler):
     def __init__(self, startAP, graph, restrictions, fullContainer, endDate=infinity):
         super(FillerScavenger, self).__init__(startAP, graph, restrictions, fullContainer, endDate)
         self.remainingScavLocs = restrictions.scavLocs[:]
-        print("scavLocs="+getLocListStr(self.remainingScavLocs))
+        self.log.debug("FillerScavenger ctor. scavLocs="+getLocListStr(self.remainingScavLocs))
 
     def initContainer(self):
         self.container = self.baseContainer
@@ -66,7 +82,7 @@ class FillerScavenger(Filler):
     def initFiller(self):
         super(FillerScavenger, self).initFiller()
         locs = self.container.getLocsForSolver()
-        self.solver = ScavengerSolver(self.startAP, self.graph, locs, self.remainingScavLocs, self.maxDiff)
+        self.solver = ScavengerSolver(self.startAP, self.graph, locs, self.remainingScavLocs, self.maxDiff, self.settings.progDiff)
 
     def itemPoolCondition(self):
         return len(self.remainingScavLocs) > 0
@@ -79,5 +95,5 @@ class FillerScavenger(Filler):
         return True
 
     def getProgressionItemLocations(self):
-        self.log.debug("Scavenger list: {}".format(getLocListStr(self.solver.scavOrder)))
+        self.log.debug("Final Scavenger list: {}".format(getLocListStr(self.solver.scavOrder)))
         return [self.container.getItemLoc(loc) for loc in self.solver.scavOrder]

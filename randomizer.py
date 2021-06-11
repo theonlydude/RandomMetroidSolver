@@ -4,7 +4,7 @@ import argparse, os.path, json, sys, shutil, random
 
 from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
-from rando.PaletteRando import PaletteRando
+#from rando.PaletteRando import PaletteRando
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
 from utils.parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text, appDir
 from rom.rom_patches import RomPatches
@@ -433,14 +433,13 @@ if __name__ == "__main__":
         if args.morphPlacementList != None:
             morphPlacements = args.morphPlacementList.split(',')
         args.morphPlacement = random.choice(morphPlacements)
+    if args.majorsSplit == 'Scavenger':
+        forceArg('progressionSpeed', 'speedrun', "'Progression speed' forced to speedrun")
+        progSpeed = "speedrun"
     # random fill makes certain options unavailable
-    if progSpeed == 'speedrun' or progSpeed == 'basic':
-        if args.majorsSplit == 'Scavenger':
-            forceArg('progressionSpeed', 'medium', "'Progression speed' forced to medium")
-            progSpeed = "medium"
-        else:
-            forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
-            progDiff = args.progressionDifficulty
+    if (progSpeed == 'speedrun' or progSpeed == 'basic') and args.majorsSplit != 'Scavenger':
+        forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
+        progDiff = args.progressionDifficulty
     logger.debug("progressionDifficulty: {}".format(progDiff))
 
     if args.strictMinors == 'random':

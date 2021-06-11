@@ -36,15 +36,15 @@ class ScavengerSolver(RandoSolver):
             return self.collectMajor(nextScav)
         else:
             # fallback to base solver behaviour to handle comeback etc
-            loc = super(ScavengerSolver, self).nextDecision(majorsAvailable, majorsAvailable, hasEnoughMinors, diffThreshold) # not a typo, the args are the same, and we overwrote minorsAvailable            
+            loc = super(ScavengerSolver, self).nextDecision(majorsAvailable, majorsAvailable, hasEnoughMinors, diffThreshold) # not a typo, the args are the same, and we overwrote minorsAvailable
             if loc is not None and loc in self.remainingScavLocs:
                 self.pickupScav(loc)
             return loc
 
     def cancelLastItems(self, count):
         # remove locs from scavOrder
-        for i in range(1, count+1):
-            loc = self.visitedLocations[-i]
+        a=len(self.visitedLocations)-count
+        for loc in self.visitedLocations[a:]:
             if loc in self.scavOrder:
                 self.scavOrder.remove(loc)
                 self.remainingScavLocs.append(loc)

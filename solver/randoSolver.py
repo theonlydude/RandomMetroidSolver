@@ -11,10 +11,10 @@ from solver.out import Out
 import utils.log
 
 class RandoSolver(StandardSolver):
-    def __init__(self, majorsSplit, startAP, areaGraph, locations):
+    def __init__(self, majorsSplit, startAP, areaGraph, locations, vcr=None):
         self.interactive = False
         self.checkDuplicateMajor = False
-        self.vcr = None
+        self.vcr = vcr
         # for compatibility with some common methods of the interactive solver
         self.mode = 'standard'
 

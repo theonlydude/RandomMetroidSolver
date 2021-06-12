@@ -56,6 +56,7 @@ class RandoExec(object):
     # - create filler based on progression speed and run it
     # return (isStuck, itemLocs, progItemLocs)
     def randomize(self):
+        vcr = VCR(self.seedName, 'rando') if self.vcr == True else None
         self.errorMsg = ""
         split = self.randoSettings.restrictions['MajorMinor']
         graphBuilder = GraphBuilder(self.graphSettings)
@@ -74,7 +75,7 @@ class RandoExec(object):
             self.areaGraph = graphBuilder.createGraph()
             services = RandoServices(self.areaGraph, self.restrictions)
             setup = RandoSetup(self.graphSettings, Logic.locations, services)
-            container = setup.createItemLocContainer(endDate)
+            container = setup.createItemLocContainer(endDate, vcr)
             if container is None:
                 sys.stdout.write('*')
                 sys.stdout.flush()
@@ -91,7 +92,6 @@ class RandoExec(object):
         graphBuilder.escapeGraph(container, self.areaGraph, self.randoSettings.maxDiff)
         self.areaGraph.printGraph()
         filler = self.createFiller(container, endDate)
-        vcr = VCR(self.seedName, 'rando') if self.vcr == True else None
         self.log.debug("ItemLocContainer dump before filling:\n"+container.dump())
         ret = filler.generateItems(vcr=vcr)
         self.errorMsg += filler.errorMsg

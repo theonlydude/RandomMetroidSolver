@@ -56,7 +56,7 @@ class RandoSetup(object):
             self.log.debug("inaccessible locations :"+getLocListStr([loc for loc in locations if loc not in self.locations]))
 
     # processes everything and returns an ItemLocContainer, or None if failed (invalid init conditions/settings)
-    def createItemLocContainer(self, endDate):
+    def createItemLocContainer(self, endDate, vcr=None):
         self.getForbidden()
         self.log.debug("LAST CHECKPOOL")
         if not self.checkPool():
@@ -89,7 +89,7 @@ class RandoSetup(object):
         if self.restrictions.split == 'Scavenger':
             # initScavenger will actually fill up the container using random fill,
             # the scavenger "filler" will focus on determining mandatory route
-            self.container = self.initScavenger(endDate)
+            self.container = self.initScavenger(endDate, vcr)
             if self.container is None:
                 self.log.debug("createItemLocContainer: initScavenger fail")
                 return None
@@ -126,7 +126,7 @@ class RandoSetup(object):
                     locDict['Morph'] = set()
         return restrictionDict
 
-    def initScavenger(self, endDate):
+    def initScavenger(self, endDate, vcr=None):
         attempts = 30 if self.restrictions.scavIsVanilla else 1
         majorLocs = [loc for loc in self.container.unusedLocations if self.restrictions.isLocMajor(loc) and (not self.restrictions.scavIsVanilla or (loc.VanillaItemType not in self.forbiddenItems and self.container.getNextItemInPool(loc.VanillaItemType) is not None))]
         nLocs = min(self.settings.restrictions['ScavengerParams']['numLocs'], len(majorLocs))
@@ -167,7 +167,7 @@ class RandoSetup(object):
             self.restrictions.setPlacementRestrictions(restr)
             filler = FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, self.container, endDate=endDate, diffSteps=50)
             stepCond = filler.createStepCountCondition(50)
-            filler.generateItems(condition=lambda: filler.itemPoolCondition() and stepCond())
+            filler.generateItems(condition=lambda: filler.itemPoolCondition() and stepCond(), vcr=vcr)
             if not filler.itemPoolCondition():
                 cont = filler.container
         return cont

@@ -203,12 +203,17 @@ class FillerRandomSpeedrun(FillerRandom):
         minDiff = self.settings.minDiff
         graphLocations = self.container.getLocsForSolver()
         split = self.restrictions.split if self.restrictions.split != 'Scavenger' else 'Full'
-        solver = RandoSolver(split, self.startAP, self.graph, graphLocations)
+        solver = RandoSolver(split, self.startAP, self.graph, graphLocations, self.vcr)
         diff = solver.solveRom()
         self.container.cleanLocsAfterSolver()
         if diff < minDiff: # minDiff is 0 if unspecified: that covers "unsolvable" (-1)
             sys.stdout.write('X')
             sys.stdout.flush()
+
+            # remove vcr data
+            if self.vcr is not None:
+                self.vcr.empty()
+
             return False
         now = time.process_time()
         sys.stdout.write('S({}/{}ms)'.format(self.nSteps+1, int((now-self.startDate)*1000)))

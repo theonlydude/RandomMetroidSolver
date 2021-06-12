@@ -62,7 +62,11 @@ class RandoSetup(object):
         if not self.checkPool():
             self.log.debug("createItemLocContainer: last checkPool fail")
             return None
+        # reset restricted in locs from previous attempt
+        for loc in self.locations:
+            loc.restricted = False
         for loc in self.restrictedLocs:
+            self.log.debug("createItemLocContainer: loc is restricted: {}".format(loc.Name))
             loc.restricted = True
         self.checkDoorBeams()
         self.container = ItemLocContainer(self.sm, self.getItemPool(), self.locations)

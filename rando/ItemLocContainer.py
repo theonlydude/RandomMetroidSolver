@@ -218,8 +218,10 @@ class ItemLocContainer(object):
         locs = []
         for il in self.itemLocations:
             loc = il.Location
+            self.log.debug("getLocsForSolver: {}".format(loc.Name))
             # filter out restricted locations
             if loc.restricted:
+                self.log.debug("getLocsForSolver: restricted, remove {}".format(loc.Name))
                 continue
             loc.itemName = il.Item.Type
             locs.append(loc)

@@ -538,10 +538,13 @@ class CommonSolver(object):
 
         raise Exception("Can't take a decision")
 
-    def checkMB(self, mbLoc):
+    def checkMB(self, mbLoc, justCheck=False):
         # add mother brain loc and check if it's accessible
         self.majorLocations.append(mbLoc)
         self.computeLocationsDifficulty(self.majorLocations)
+        if justCheck:
+            self.majorLocations.remove(mbLoc)
+            return mbLoc.difficulty == True
         if mbLoc.difficulty == True:
             self.log.debug("MB loc accessible")
             self.collectMajor(mbLoc)
@@ -585,6 +588,7 @@ class CommonSolver(object):
         endDifficulty = mania
         diffThreshold = self.getDiffThreshold()
         self.motherBrainKilled = False
+        self.motherBrainCouldBeKilled = False
         while True:
             # actual while condition
             hasEnoughMinors = self.pickup.enoughMinors(self.smbm, self.minorLocations)
@@ -592,12 +596,17 @@ class CommonSolver(object):
             hasEnoughItems = hasEnoughMajors and hasEnoughMinors
             canEndGame = self.canEndGame()
             (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
-            if isEndPossible and hasEnoughItems and endDifficulty <= diffThreshold and self.scavengerHuntComplete():
-                if self.checkMB(mbLoc):
-                    self.log.debug("all end game checks are ok, END")
-                    break
+            if isEndPossible and hasEnoughItems and self.scavengerHuntComplete():
+                if endDifficulty <= diffThreshold:
+                    if self.checkMB(mbLoc):
+                        self.log.debug("checkMB: all end game checks are ok, END")
+                        break
+                    else:
+                        self.log.debug("checkMB: canEnd but MB loc not accessible")
                 else:
-                    self.log.debug("canEnd but MB loc not accessible")
+                    if not self.motherBrainCouldBeKilled:
+                        self.motherBrainCouldBeKilled = self.checkMB(mbLoc, justCheck=True)
+                    self.log.debug("checkMB: end checks ok except MB difficulty, MB could be killed: {}".format(self.motherBrainCouldBeKilled))
 
             # check time limit
             if self.runtimeLimit_s > 0:
@@ -642,9 +651,14 @@ class CommonSolver(object):
                         if self.comeBack.rewind(len(self.collectedItems)) == True:
                             continue
                         else:
-                            # we're really stucked
-                            self.log.debug("We could end but we're STUCK CAN'T REWIND")
-                            return (-1, False)
+                            # we're really stucked, check if we were able to access MB and kill it
+                            if self.motherBrainCouldBeKilled:
+                                self.log.debug("we're stucked but we could have killed MB before")
+                                self.motherBrainKilled = True
+                                break
+                            else:
+                                self.log.debug("We could end but we're STUCK CAN'T REWIND")
+                                return (-1, False)
 
             # handle no comeback locations
             rewindRequired = self.comeBack.handleNoComeBack(self.getAllLocs(majorsAvailable, minorsAvailable),
@@ -695,9 +709,8 @@ class CommonSolver(object):
         return (hasPB and hasSuper and hasMissile)
 
     def canEndGame(self):
-        # to finish the game you must :
-        # - beat golden 4 : we force pickup of the 4 items
-        #   behind the bosses to ensure that
+        # to finish the game you must:
+        # - beat golden 4
         # - defeat metroids
         # - destroy/skip the zebetites
         # - beat Mother Brain

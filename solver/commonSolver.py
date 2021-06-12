@@ -545,11 +545,12 @@ class CommonSolver(object):
         if mbLoc.difficulty == True:
             self.log.debug("MB loc accessible")
             self.collectMajor(mbLoc)
-            return True
+            self.motherBrainKilled = True
         else:
             self.log.debug("MB loc not accessible")
             self.majorLocations.remove(mbLoc)
-            return False
+            self.motherBrainKilled = False
+        return self.motherBrainKilled
 
     def computeDifficulty(self):
         # loop on the available locations depending on the collected items.
@@ -583,6 +584,7 @@ class CommonSolver(object):
         isEndPossible = False
         endDifficulty = mania
         diffThreshold = self.getDiffThreshold()
+        self.motherBrainKilled = False
         while True:
             # actual while condition
             hasEnoughMinors = self.pickup.enoughMinors(self.smbm, self.minorLocations)
@@ -592,7 +594,7 @@ class CommonSolver(object):
             (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
             if isEndPossible and hasEnoughItems and endDifficulty <= diffThreshold and self.scavengerHuntComplete():
                 if self.checkMB(mbLoc):
-                    self.log.debug("END")
+                    self.log.debug("all end game checks are ok, END")
                     break
                 else:
                     self.log.debug("canEnd but MB loc not accessible")
@@ -632,8 +634,17 @@ class CommonSolver(object):
                         break
                 else:
                     self.log.debug("HARD END 2")
-                    self.checkMB(mbLoc)
-                    break
+                    if self.checkMB(mbLoc):
+                        self.log.debug("all end game checks are ok, END")
+                        break
+                    else:
+                        self.log.debug("We're stucked somewhere and can't reach mother brain")
+                        if self.comeBack.rewind(len(self.collectedItems)) == True:
+                            continue
+                        else:
+                            # we're really stucked
+                            self.log.debug("We could end but we're STUCK CAN'T REWIND")
+                            return (-1, False)
 
             # handle no comeback locations
             rewindRequired = self.comeBack.handleNoComeBack(self.getAllLocs(majorsAvailable, minorsAvailable),
@@ -658,7 +669,7 @@ class CommonSolver(object):
             # choose one to pick up
             self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold)
 
-            self.comeBack.cleanNoComeBack(self.getAllLocs(majorsAvailable, minorsAvailable))
+            self.comeBack.cleanNoComeBack(self.getAllLocs(self.majorLocations, self.minorLocations))
 
         # compute difficulty value
         (difficulty, itemsOk) = self.computeDifficultyValue()
@@ -699,7 +710,7 @@ class CommonSolver(object):
             return majorsAvailable+minorsAvailable
 
     def computeDifficultyValue(self):
-        if not self.canEndGame().bool:
+        if not self.canEndGame() or not self.motherBrainKilled:
             # we have aborted
             return (-1, False)
         else:

@@ -738,59 +738,23 @@ class Helpers(object):
 class Pickup:
     def __init__(self, itemsPickup):
         self.itemsPickup = itemsPickup
-        self.minorsPickupMinimal = {
-            'Missile' : 10,
-            'Super' : 5,
-            # to allow suitless crystal flash
-            'PowerBomb' : 4
-        }
-    def _enoughMinorTable(self, smbm, minorType):
-        return smbm.haveItemCount(minorType, int(self.minorsPickupMinimal[minorType]))
 
     def enoughMinors(self, smbm, minorLocations):
         if self.itemsPickup == 'all':
             # need them all
             return len(minorLocations) == 0
-        elif self.itemsPickup == 'any':
-            return True
+        elif self.itemsPickup == 'minimal':
+            # simulate go mode
+            return smbm.enoughStuffTourian()
         else:
-            canEnd = smbm.enoughStuffTourian()
-            return (canEnd
-                    and self._enoughMinorTable(smbm, 'Missile')
-                    and self._enoughMinorTable(smbm, 'Super')
-                    and self._enoughMinorTable(smbm, 'PowerBomb'))
+            return True
 
     def enoughMajors(self, smbm, majorLocations):
         # the end condition
         if self.itemsPickup == 'all':
             return len(majorLocations) == 0
-        elif self.itemsPickup == 'any':
-            return True
-        elif self.itemsPickup == 'minimal':
-            canResistRainbow = ((smbm.haveItemCount('ETank', 3) and smbm.haveItem('Varia'))
-                                or smbm.haveItemCount('ETank', 6)
-                                # 20 dmg
-                                or RomPatches.has(RomPatches.NerfedRainbowBeam)
-                                # no rainbow
-                                or RomPatches.has(RomPatches.TourianSpeedup))
-
-            return (smbm.haveItem('Morph')
-                    # pass bomb block passages
-                    and (smbm.haveItem('Bomb')
-                         or smbm.haveItem('PowerBomb'))
-                    # mother brain rainbow attack
-                    and canResistRainbow
-                    # lower norfair access
-                    and (smbm.haveItem('Varia') or smbm.wand(smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)), smbm.wnot(RomPatches.has(RomPatches.ProgressiveSuits)))) # gravity is checked below
-                    # speed or ice to access botwoon
-                    and (smbm.haveItem('SpeedBooster')
-                         or smbm.haveItem('Ice'))
-                    # draygon access
-                    and smbm.haveItem('Gravity')
-                    # all boss locs collected (draygon pickup is not on draygon location)
-                    and not any(loc.isBoss() for loc in majorLocations))
         else:
-            return False
+            return True
 
 class Bosses:
     # bosses helpers to know if they are dead

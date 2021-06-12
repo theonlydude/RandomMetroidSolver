@@ -614,12 +614,7 @@ class CommonSolver(object):
             majorsAvailable = [loc for loc in self.majorLocations if loc.difficulty is not None and loc.difficulty.bool == True]
             minorsAvailable = [loc for loc in self.minorLocations if loc.difficulty is not None and loc.difficulty.bool == True]
 
-            if self.majorsSplit == 'Full':
-                locs = majorsAvailable
-            else:
-                locs = majorsAvailable+minorsAvailable
-
-            self.nbAvailLocs.append(len(locs))
+            self.nbAvailLocs.append(len(self.getAllLocs(majorsAvailable, minorsAvailable)))
 
             # remove next scavenger locs before checking if we're stuck
             if self.majorsSplit == 'Scavenger':
@@ -641,7 +636,8 @@ class CommonSolver(object):
                     break
 
             # handle no comeback locations
-            rewindRequired = self.comeBack.handleNoComeBack(locs, len(self.collectedItems))
+            rewindRequired = self.comeBack.handleNoComeBack(self.getAllLocs(majorsAvailable, minorsAvailable),
+                                                            len(self.collectedItems))
             if rewindRequired == True:
                 if self.comeBack.rewind(len(self.collectedItems)) == True:
                     continue
@@ -662,7 +658,7 @@ class CommonSolver(object):
             # choose one to pick up
             self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold)
 
-            self.comeBack.cleanNoComeBack(locs)
+            self.comeBack.cleanNoComeBack(self.getAllLocs(majorsAvailable, minorsAvailable))
 
         # compute difficulty value
         (difficulty, itemsOk) = self.computeDifficultyValue()
@@ -695,6 +691,12 @@ class CommonSolver(object):
         # - destroy/skip the zebetites
         # - beat Mother Brain
         return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
+
+    def getAllLocs(self, majorsAvailable, minorsAvailable):
+        if self.majorsSplit == 'Full':
+            return majorsAvailable
+        else:
+            return majorsAvailable+minorsAvailable
 
     def computeDifficultyValue(self):
         if not self.canEndGame().bool:

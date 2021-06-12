@@ -648,14 +648,16 @@ class CommonSolver(object):
                         break
                     else:
                         self.log.debug("We're stucked somewhere and can't reach mother brain")
-                        if self.comeBack.rewind(len(self.collectedItems)) == True:
-                            continue
+                        # check if we were able to access MB and kill it.
+                        # we do it before rollbacks to avoid endless rollbacks.
+                        if self.motherBrainCouldBeKilled:
+                            self.log.debug("we're stucked but we could have killed MB before")
+                            self.motherBrainKilled = True
+                            break
                         else:
-                            # we're really stucked, check if we were able to access MB and kill it
-                            if self.motherBrainCouldBeKilled:
-                                self.log.debug("we're stucked but we could have killed MB before")
-                                self.motherBrainKilled = True
-                                break
+                            # we're really stucked, try to rollback
+                            if self.comeBack.rewind(len(self.collectedItems)) == True:
+                                continue
                             else:
                                 self.log.debug("We could end but we're STUCK CAN'T REWIND")
                                 return (-1, False)

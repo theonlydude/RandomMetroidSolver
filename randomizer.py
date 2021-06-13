@@ -171,7 +171,7 @@ if __name__ == "__main__":
     parser.add_argument('--scavNumLocs',
                         help="For Scavenger split, number of major locations in the mandatory route",
                         dest='scavNumLocs', nargs='?', default=10,
-                        choices=[str(i) for i in range(4,17)])
+                        choices=["0"]+[str(i) for i in range(4,17)])
     parser.add_argument('--scavRandomized',
                         help="For Scavenger split, decide whether mandatory major locs will have non-vanilla items",
                         dest='scavRandomized', nargs='?', const=True, default=False)
@@ -495,6 +495,8 @@ if __name__ == "__main__":
     restrictions['MajorMinor'] = 'Full' if args.majorsSplit == 'FullWithHUD' else args.majorsSplit
     if restrictions["MajorMinor"] == "Scavenger":
         scavNumLocs = int(args.scavNumLocs)
+        if scavNumLocs == 0:
+            scavNumLocs = random.randint(4,16)
         restrictions["ScavengerParams"] = {'numLocs':scavNumLocs, 'vanillaItems':not args.scavRandomized}
     seedCode = 'X'
     if majorsSplitRandom == False:

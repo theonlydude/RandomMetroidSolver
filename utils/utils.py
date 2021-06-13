@@ -359,7 +359,10 @@ def loadRandoPreset(randoPreset, args):
         args.majorsSplit = randoParams["majorsSplit"]
         if randoParams["majorsSplit"] == "Scavenger":
             if "scavNumLocs" in randoParams:
-                args.scavNumLocs = randoParams["scavNumLocs"]
+                if randoParams["scavNumLocs"] == "random":
+                    args.scavNumLocs = 0
+                else:
+                    args.scavNumLocs = randoParams["scavNumLocs"]
             if "scavRandomized" in randoParams:
                 args.scavRandomized = randoParams["scavRandomized"] == "on"
     if "startLocation" in randoParams:

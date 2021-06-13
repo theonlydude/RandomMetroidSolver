@@ -47,9 +47,6 @@ if (hs.registerOverlay) {
 
 <style>
 {{include 'solver_web/varia.css'}}
-.randomDice {
-    width: 2.5%;
-}
 .innertd {
     padding-left: 5px;
     padding-right: 5px;
@@ -312,7 +309,7 @@ function randomize(evt, elemId) {
     evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
     isActive = false;
 
-    defaultValues = {"missileQty": 3, "superQty": 2, "powerBombQty": 1, "minorQty": 100};
+    defaultValues = {"missileQty": 3, "superQty": 2, "powerBombQty": 1, "minorQty": 100, "scavNumLocs": 10};
 
     if(e.value.length == 0 && elemId in defaultValues) {
       e.value = defaultValues[elemId];
@@ -421,7 +418,7 @@ function getComplexity() {
 
 function setRandom() {
 {{
-    for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "startLocation", "minimizerQty", "gravityBehaviour"]:
+    for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "startLocation", "minimizerQty", "gravityBehaviour", "scavNumLocs"]:
       if id in session.randomizer and session.randomizer[id] == "random":
         response.write("  document.getElementById(\"{}Random\").click();\n".format(id), escape=False)
         if "{}MultiSelect".format(id) in session.randomizer:
@@ -489,8 +486,8 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "minimizerTourian", "allowGreyDoors", "hud", "scavNumLocs", "scavRandomized"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "minimizerTourian", "allowGreyDoors", "hud", "scavRandomized"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"];
 
     for(var i=0; i<elems.length; i++) {
@@ -658,8 +655,8 @@ function AjaxRandomizerCallCompleted(data) {
     document.getElementById("submitBtn").data = "Randomize";
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "minimizerTourian", "allowGreyDoors", "hud", "scavNumLocs", "scavRandomized"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "minimizerTourian", "allowGreyDoors", "hud", "scavRandomized"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"];
 
     for(var i=0; i<elems.length; i++) {
@@ -2061,10 +2058,10 @@ def displayNumber(id, min, max, default, step="1"):
               </tr>
             </table>
             <table class="full" id="scavengerParams">
-              <colgroup><col class="small randomDice"/><col class="quarter" /><col class="quarter" /><col class="small"/><col class="half"/><col class="small"/></colgroup>
+              <colgroup><col class="small"/><col class="quarter" /><col class="quarter" /><col class="small"/><col class="half"/><col class="small"/></colgroup>
               <tr>
-                <td class="small randomDice"></td>
-                <td id="scavNumLocsStep">Mandatory locations to visit:</td>
+                <td class="small"><div class="random"><button id="scavNumLocsRandom" type="button" onclick="randomize(event, 'scavNumLocs')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td id="scavNumLocsStep"><span id="scavNumLocsText">Mandatory locations to visit:</span></td>
                 <td>{{displayNumber("scavNumLocs", "4", "16", "10", "1")}}</td>
                 <td><button type="button" onclick="startTheTour(8)">?</button></td>
                 <td id="scavRandomizedStep">{{displayCheckbox("scavRandomized")}}Randomize items in mandatory locations</td>

@@ -480,18 +480,18 @@ class RomReader:
         address = 0x10F200
         value = self.romFile.readWord(address)
 
-        startAP = 'Landing Site'
+        startLocation = 'Landing Site'
         startArea = 'Crateria Landing Site'
         startPatches = []
         for ap in Logic.accessPoints:
-            if ap.Start != None and 'spawn' in ap.Start and ap.Start['spawn'] == value:
-                startAP = ap.Name
+            if ap.Start is not None and 'spawn' in ap.Start and ap.Start['spawn'] == value:
+                startLocation = ap.Name
                 startArea = ap.Start['solveArea']
                 if 'patches' in ap.Start:
                     startPatches = ap.Start['patches']
                 break
 
-        return (startAP, startArea, startPatches)
+        return (startLocation, startArea, startPatches)
 
     # go read all location IDs for item split. used to get major/chozo locs in non standard start
     def getLocationsIds(self):

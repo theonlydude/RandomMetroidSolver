@@ -928,7 +928,7 @@ locations = [loc for loc in locationsDict.values()]
 
 class LocationsHelper:
     # used by FillerRandom to know how many front fill steps it must perform
-    def getRandomFillHelp(startAP):
+    def getRandomFillHelp(startLocation):
         helpByAp = {
             "Firefleas Top": 3,
             "Aqueduct": 1,
@@ -938,7 +938,7 @@ class LocationsHelper:
             "Gauntlet Top":1,
             "Bubble Mountain":1
         }
-        return helpByAp[startAP] if startAP in helpByAp else 0
+        return helpByAp[startLocation] if startLocation in helpByAp else 0
 
     # for a given start AP, gives:
     # - locations that can be used as majors/chozo in the start area
@@ -946,7 +946,7 @@ class LocationsHelper:
     # - number of necessary majors locations to add in the start area,
     # - number of necessary chozo locations to add in the start area
     # locs are taken in the first n in the list
-    def getStartMajors(startAP):
+    def getStartMajors(startLocation):
         majLocsByAp = {
             'Gauntlet Top': ([
                 "Missile (Crateria gauntlet right)",
@@ -991,4 +991,4 @@ class LocationsHelper:
                 "Missile (right Maridia sand pit room)"
             ], ["Reserve Tank, Maridia"], 2, 3)
         }
-        return majLocsByAp[startAP] if startAP in majLocsByAp else ([],[],0,0)
+        return majLocsByAp[startLocation] if startLocation in majLocsByAp else ([],[],0,0)

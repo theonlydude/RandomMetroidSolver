@@ -484,7 +484,7 @@ function onloadHook() {
           }
 
           var fileSize = file.size;
-          if( fileSize > 1024*1024 ) {
+          if( fileSize > 4*1024*1024 ) {
             document.getElementById("vcrFile").value = "";
             alert("Wrong VCR file size: "+fileSize.toString());
             return false;

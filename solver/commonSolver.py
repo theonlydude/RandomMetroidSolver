@@ -14,9 +14,9 @@ from utils.doorsmanager import DoorsManager
 from logic.logic import Logic
 
 class CommonSolver(object):
-    def loadRom(self, rom, interactive=False, magic=None, startAP=None):
+    def loadRom(self, rom, interactive=False, magic=None, startLocation=None):
         self.scavengerOrder = []
-        # startAP param is only use for seedless
+        # startLocation param is only use for seedless
         if rom == None:
             # TODO::add a --logic parameter for seedless
             Logic.factory('vanilla')
@@ -27,9 +27,9 @@ class CommonSolver(object):
             self.bossRando = True
             self.escapeRando = False
             self.escapeTimer = "03:00"
-            self.startAP = startAP
-            RomPatches.setDefaultPatches(startAP)
-            self.startArea = getAccessPoint(startAP).Start['solveArea']
+            self.startLocation = startLocation
+            RomPatches.setDefaultPatches(startLocation)
+            self.startArea = getAccessPoint(startLocation).Start['solveArea']
             # in seedless load all the vanilla transitions
             self.areaTransitions = vanillaTransitions[:]
             self.bossTransitions = vanillaBossesTransitions[:]
@@ -51,8 +51,8 @@ class CommonSolver(object):
             self.romLoader.readNothingId()
             self.locations = Logic.locations
             (self.majorsSplit, self.masterMajorsSplit) = self.romLoader.assignItems(self.locations)
-            (self.startAP, self.startArea, startPatches) = self.romLoader.getStartAP()
-            if not GraphUtils.isStandardStart(self.startAP) and self.majorsSplit != 'Full':
+            (self.startLocation, self.startArea, startPatches) = self.romLoader.getStartAP()
+            if not GraphUtils.isStandardStart(self.startLocation) and self.majorsSplit != 'Full':
                 # update major/chozo locs in non standard start
                 self.romLoader.updateSplitLocs(self.majorsSplit, self.locations)
             (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches()
@@ -233,7 +233,7 @@ class CommonSolver(object):
 
         # access point
         if len(self.visitedLocations) == 0:
-            self.lastAP = self.startAP
+            self.lastAP = self.startLocation
             self.lastArea = self.startArea
         else:
             self.lastAP = self.visitedLocations[-1].accessPoint
@@ -287,7 +287,7 @@ class CommonSolver(object):
 
             # access point
             if len(self.visitedLocations) == 0:
-                self.lastAP = self.startAP
+                self.lastAP = self.startLocation
                 self.lastArea = self.startArea
             else:
                 self.lastAP = self.visitedLocations[-1].accessPoint

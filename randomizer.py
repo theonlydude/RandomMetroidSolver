@@ -104,11 +104,8 @@ if __name__ == "__main__":
     parser.add_argument('--minimizerTourian',
                         help="Tourian speedup in minimizer mode",
                         dest='minimizerTourian', nargs='?', const=True, default=False)
-    parser.add_argument('--startAP', help="Name of the Access Point to start from",
-                        dest='startAP', nargs='?', default="Landing Site",
-                        choices=['random'] + GraphUtils.getStartAccessPointNames())
     parser.add_argument('--startLocation', help="Name of the Access Point to start from",
-                        dest='startAP', nargs='?', default="Landing Site",
+                        dest='startLocation', nargs='?', default="Landing Site",
                         choices=['random'] + GraphUtils.getStartAccessPointNames())
     parser.add_argument('--startLocationList', help="list to choose from when random",
                         dest='startLocationList', nargs='?', default=None)
@@ -446,22 +443,22 @@ if __name__ == "__main__":
         args.strictMinors = bool(random.getrandbits(1))
 
     if args.majorsSplit == "Scavenger":
-        forceArg('hud', True, "'VARIA HUD' forced to on", 'hud', 'on')
-        if not GraphUtils.isStandardStart(args.startAP):
-            forceArg('startAP', "Landing Site", "Start Location forced to Landing Site because of Scavenger mode", 'startAP', 'Landing Site')
+        forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
+        if not GraphUtils.isStandardStart(args.startLocation):
+            forceArg('startLocation', "Landing Site", "Start Location forced to Landing Site because of Scavenger mode")
         if args.morphPlacement == 'late':
             forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
 
     # in plando rando we know that the start ap is ok
-    if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando is None:
+    if not GraphUtils.isStandardStart(args.startLocation) and args.plandoRando is None:
         if args.majorsSplit in ['Major', "Chozo"]:
-            forceArg('hud', True, "'VARIA HUD' forced to on", 'hud', 'on')
-        forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", 'variaTweaks', 'on')
-        forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
+            forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
+        forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", webValue='on')
+        forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", webValue='on')
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
-        forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", 'areaLayout', 'on')
+        forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", webValue='on')
         possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty, args.morphPlacement)
-        if args.startAP == 'random':
+        if args.startLocation == 'random':
             if args.startLocationList != None:
                 # to be able to give the list in jm we had to replace ' ' with '_', do the opposite operation
                 startLocationList = args.startLocationList.replace('_', ' ')
@@ -473,20 +470,20 @@ if __name__ == "__main__":
                     optErrMsgs.append('Invalid start locations list with your settings.')
                     dumpErrorMsgs(args.output, optErrMsgs)
                     sys.exit(-1)
-            args.startAP = random.choice(possibleStartAPs)
-        elif args.startAP not in possibleStartAPs:
-            optErrMsgs.append('Invalid start location: {}.  {}'.format(args.startAP, reasons[args.startAP]))
+            args.startLocation = random.choice(possibleStartAPs)
+        elif args.startLocation not in possibleStartAPs:
+            optErrMsgs.append('Invalid start location: {}.  {}'.format(args.startLocation, reasons[args.startLocation]))
             optErrMsgs.append('Possible start locations with these settings: {}'.format(possibleStartAPs))
             dumpErrorMsgs(args.output, optErrMsgs)
             sys.exit(-1)
-    ap = getAccessPoint(args.startAP)
+    ap = getAccessPoint(args.startLocation)
     if 'forcedEarlyMorph' in ap.Start and ap.Start['forcedEarlyMorph'] == True:
         forceArg('morphPlacement', 'early', "'Morph Placement' forced to early for custom start location")
     else:
         if progSpeed == 'speedrun':
             if args.morphPlacement == 'late':
                 forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
-            elif (not GraphUtils.isStandardStart(args.startAP)) and args.morphPlacement != 'normal':
+            elif (not GraphUtils.isStandardStart(args.startLocation)) and args.morphPlacement != 'normal':
                 forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for custom start location")
         if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
             forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for Chozo")
@@ -531,7 +528,7 @@ if __name__ == "__main__":
     else:
         RomPatches.ActivePatches = RomPatches.Total
     RomPatches.ActivePatches.remove(RomPatches.BlueBrinstarBlueDoor)
-    RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startAP)
+    RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startLocation)
     if gravityBehaviour != "Balanced":
         RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
     if gravityBehaviour == "Progressive":
@@ -619,7 +616,7 @@ if __name__ == "__main__":
 
     # print some parameters for jm's stats
     if args.jm == True:
-        print("startAP:{}".format(args.startAP))
+        print("startLocation:{}".format(args.startLocation))
         print("progressionSpeed:{}".format(progSpeed))
         print("majorsSplit:{}".format(args.majorsSplit))
         print("morphPlacement:{}".format(args.morphPlacement))
@@ -633,7 +630,7 @@ if __name__ == "__main__":
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
     if args.doorsColorsRando == True:
         RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
-    graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses,
+    graphSettings = GraphSettings(args.startLocation, args.area, args.lightArea, args.bosses,
                                   args.escapeRando, minimizerN, dotFile, args.doorsColorsRando, args.allowGreyDoors,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
 
@@ -721,7 +718,7 @@ if __name__ == "__main__":
         if args.hud == True or args.majorsSplit == "FullWithHUD":
             args.patches.append("varia_hud.ips")
         if args.patchOnly == False:
-            romPatcher.applyIPSPatches(args.startAP, args.patches,
+            romPatcher.applyIPSPatches(args.startLocation, args.patches,
                                        args.noLayout, gravityBehaviour,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',

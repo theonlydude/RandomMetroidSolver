@@ -1105,6 +1105,11 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
                 qtyInt = getInt(qty, isJson)
                 if qtyInt < 30 or qtyInt > 100:
                     raiseHttp(400, "Wrong value for {}, must be between 30 and 100".format(qty), isJson)
+        elif qty == 'scavNumLocs':
+            if request.vars.majorsSplit == 'Scavenger':
+                qtyInt = getInt(qty, isJson)
+                if qtyInt < 4 or qtyInt > 16:
+                    raiseHttp(400, "Wrong value for {}, must be between 4 and 16".format(qty), isJson)
         else:
             qtyFloat = getFloat(qty, isJson)
             if qtyFloat < 1.0 or qtyFloat > 9.0:
@@ -1201,8 +1206,8 @@ def sessionWebService():
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
                'rando_speed', 'animals', 'No_Music', 'random_music',
-               'Infinite_Space_Jump', 'refill_before_save', 'hud']
-    quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty']
+               'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized"]
+    quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
     others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty']
@@ -1252,6 +1257,8 @@ def sessionWebService():
     session.randomizer['Infinite_Space_Jump'] = request.vars.Infinite_Space_Jump
     session.randomizer['refill_before_save'] = request.vars.refill_before_save
     session.randomizer['hud'] = request.vars.hud
+    session.randomizer['scavNumLocs'] = request.vars.scavNumLocs
+    session.randomizer['scavRandomized'] = request.vars.scavRandomized
 
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
@@ -1292,8 +1299,8 @@ def randomizerWebService():
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
                'rando_speed', 'animals', 'No_Music', 'random_music',
-               'Infinite_Space_Jump', 'refill_before_save', 'hud']
-    quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty']
+               'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized"]
+    quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
     others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty']
@@ -2067,7 +2074,7 @@ class WS_common_init(WS):
             params.append('--fill')
 
         if startLocation != None:
-            params += ['--startAP', startLocation]
+            params += ['--startLocation', startLocation]
 
         print("before calling isolver: {}".format(params))
         start = datetime.now()

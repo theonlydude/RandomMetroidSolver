@@ -63,7 +63,7 @@ class StandardSolver(CommonSolver):
         Conf.itemsForbidden = itemsForbidden
 
     def solveRom(self):
-        self.lastAP = self.startAP
+        self.lastAP = self.startLocation
         self.lastArea = self.startArea
 
         (self.difficulty, self.itemsOk) = self.computeDifficulty()

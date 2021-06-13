@@ -28,7 +28,7 @@ class SolverState(object):
         # list of active patches
         self.state["patches"] = RomPatches.ActivePatches
         # start ap
-        self.state["startAP"] = solver.startAP
+        self.state["startLocation"] = solver.startLocation
         # start area
         self.state["startArea"] = solver.startArea
         # dict {locName: {itemName: "xxx", "accessPoint": "xxx"}, ...}
@@ -98,7 +98,7 @@ class SolverState(object):
         solver.escapeRando = self.state["escapeRando"]
         solver.escapeTimer = self.state["escapeTimer"]
         RomPatches.ActivePatches = self.state["patches"]
-        solver.startAP = self.state["startAP"]
+        solver.startLocation = self.state["startLocation"]
         solver.startArea = self.state["startArea"]
         self.setLocsData(solver.locations)
         solver.areaTransitions = self.state["areaTransitions"]

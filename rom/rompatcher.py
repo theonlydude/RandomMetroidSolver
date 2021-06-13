@@ -257,7 +257,7 @@ class RomPatcher:
             for (messageKey, newMessage) in messageBoxes[sprite].items():
                 messageBox.updateMessage(messageKey, newMessage, doVFlip, doHFlip)
 
-    def writePlmTable(self, plms, area, bosses, startAP):
+    def writePlmTable(self, plms, area, bosses, startLocation):
         # called when saving a plando
         try:
             if bosses == True or area == True:
@@ -265,13 +265,13 @@ class RomPatcher:
 
             doors = self.getStartDoors(plms, area, None)
             self.writeDoorsColor(doors)
-            self.applyStartAP(startAP, plms, doors)
+            self.applyStartAP(startLocation, plms, doors)
 
             self.applyPLMs(plms)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
-    def applyIPSPatches(self, startAP="Landing Site",
+    def applyIPSPatches(self, startLocation="Landing Site",
                         optionalPatches=[], noLayout=False, suitsMode="Balanced",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
@@ -357,7 +357,7 @@ class RomPatcher:
                 for patchName in RomPatcher.IPSPatches['DoorsColors']:
                     self.applyIPSPatch(patchName)
                 self.writeDoorsColor(doors)
-            self.applyStartAP(startAP, plms, doors)
+            self.applyStartAP(startLocation, plms, doors)
             self.applyPLMs(plms)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))

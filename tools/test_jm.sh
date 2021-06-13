@@ -69,7 +69,7 @@ PRESETS=("regular" "newbie" "master")
 CHARGES=("" "--nerfedCharge")
 TWEAKS=("" "--novariatweaks")
 LAYOUTS=("" "--nolayout")
-STARTAPS=("" "--startAP random")
+STARTAPS=("" "--startLocation random")
 AREAS=("" "" "--area" "--area --areaLayoutBase")
 MINIMIZERS=("--bosses random" "--bosses random" "--bosses random" "--area --bosses --minimizer " "--area --bosses --minimizerTourian --minimizer ")
 DOORS=("" "--doorsColorsRando random")
@@ -164,7 +164,7 @@ function computeSeed {
 	    echo "${RANDO_OUT}" >> ${LOG}
 	else
 	    RTIME_OLD=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
-	    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
+	    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}*.sfc 2>/dev/null)
 	    if [ $? -eq 0 ]; then
 		OLD_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
 	    fi
@@ -178,12 +178,12 @@ function computeSeed {
 	echo "${RANDO_OUT}" >> ${LOG}
     else
 	RTIME_NEW=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
-	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
+	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}*.sfc 2>/dev/null)
 	if [ $? -eq 0 ]; then
 	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
 	fi
     fi
-    STARTAP_NEW=$(echo "${RANDO_OUT}" | grep startAP | cut -d ':' -f 2)
+    STARTAP_NEW=$(echo "${RANDO_OUT}" | grep startLocation | cut -d ':' -f 2)
     PROGSPEED_NEW=$(echo "${RANDO_OUT}" | grep progressionSpeed | cut -d ':' -f 2)
     MAJORSSPLIT_NEW=$(echo "${RANDO_OUT}" | grep majorsSplit | cut -d ':' -f 2)
     MORPH_NEW=$(echo "${RANDO_OUT}" | grep morphPlacement | cut -d ':' -f 2)
@@ -204,14 +204,14 @@ function computeSeed {
     fi
 
     # solve seed
-    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc)
+    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}*.sfc)
     if [ $? -ne 0 ]; then
 	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
 	exit 0
     fi
 
     if [ ${COMPARE} -eq 0 ]; then
-	SOLVER_OUT=$(${TIME} -f "\t%E real" $OLD_PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor --runtime 10 2>&1)
+	SOLVER_OUT=$(${TIME} -f "\t%E real" $OLD_PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor --runtime 10 --pickupStrategy any 2>&1)
 	if [ $? -ne 0 ]; then
             echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
@@ -229,7 +229,7 @@ function computeSeed {
 	DUP_OLD=1
     fi
 
-    SOLVER_OUT=$(${TIME} -f "\t%E real" $PYTHON ~/RandomMetroidSolver/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor --runtime 10 2>&1)
+    SOLVER_OUT=$(${TIME} -f "\t%E real" $PYTHON ~/RandomMetroidSolver/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor --runtime 10 --pickupStrategy any 2>&1)
     if [ $? -ne 0 ]; then
         echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
         echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}

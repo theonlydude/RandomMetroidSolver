@@ -132,7 +132,7 @@ random_music.ips
 Example:
 ```
 dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./randomizer.py -r VARIA_Randomizer_FX1097821_Season_Races_medium.sfc --patchOnly --sprite megaman.ips --patch itemsounds.ips --patch No_Music
-startAP:Landing Site
+startLocation:Landing Site
 Apply patch itemsounds.ips
 Apply patch No_Music
 Apply patch megaman.ips
@@ -164,7 +164,7 @@ The parameters:
 Example:
 ```
 dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./randomizer.py -r VARIA_Randomizer_AFX8258621_Season_Races_VARIAble.sfc  --patchOnly --sprite megaman.ips --patch itemsounds.ips --palette --min_degree -75 --max_degree 25 --invert
-startAP:Landing Site
+startLocation:Landing Site
 Apply patch itemsounds.ips
 Apply patch megaman.ips
 Rom generated: VARIA

@@ -8,6 +8,7 @@ from rom.rompatcher import RomPatcher
 from rom.rom_patches import RomPatches
 from graph.graph import AccessGraphSolver as AccessGraph
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
+from graph.location import define_location
 from utils.utils import removeChars
 from solver.conf import Conf
 from utils.parameters import hard, infinity
@@ -65,7 +66,7 @@ class InteractiveSolver(CommonSolver):
 
         state.toJson(self.outputFileName)
 
-    def initialize(self, mode, rom, presetFileName, magic, fill, startAP):
+    def initialize(self, mode, rom, presetFileName, magic, fill, startLocation):
         # load rom and preset, return first state
         self.debug = mode == "debug"
         self.mode = mode
@@ -79,7 +80,7 @@ class InteractiveSolver(CommonSolver):
         self.presetFileName = presetFileName
         self.loadPreset(self.presetFileName)
 
-        self.loadRom(rom, interactive=True, magic=magic, startAP=startAP)
+        self.loadRom(rom, interactive=True, magic=magic, startLocation=startLocation)
         # in plando/tracker always consider that we're doing full
         self.majorsSplit = 'Full'
 
@@ -275,7 +276,7 @@ class InteractiveSolver(CommonSolver):
         mbLoc = self.getLoc("Mother Brain")
         locationsBck = self.locations[:]
 
-        self.lastAP = self.startAP
+        self.lastAP = self.startLocation
         self.lastArea = self.startArea
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
 
@@ -345,7 +346,7 @@ class InteractiveSolver(CommonSolver):
             '--minorQty', parameters["minorQty"],
             '--maxDifficulty', 'hardcore',
             '--energyQty', parameters["energyQty"],
-            '--startAP', self.startAP
+            '--startLocation', self.startLocation
         ]
 
         import subprocess
@@ -421,14 +422,16 @@ class InteractiveSolver(CommonSolver):
                 romPatcher.applyEscapeAttributes({'Timer': escapeTimer, 'Animals': None}, plms)
 
         # write plm table & random doors
-        romPatcher.writePlmTable(plms, self.areaRando, self.bossRando, self.startAP)
+        romPatcher.writePlmTable(plms, self.areaRando, self.bossRando, self.startLocation)
 
         romPatcher.writeItemsLocs(itemLocs)
         romPatcher.writeItemsNumber()
         romPatcher.writeSpoiler(itemLocs)
         # plando is considered Full
-        majorsSplit = "Full" if self.masterMajorsSplit != "FullWithHUD" else self.masterMajorsSplit
-        romPatcher.writeSplitLocs(itemLocs, majorsSplit)
+        majorsSplit = self.masterMajorsSplit if self.masterMajorsSplit in ["FullWithHUD", "Scavenger"] else "Full"
+        # for scavenger hunt, use a location with id and hud at 0xff, ie. scavenger locs list terminator
+        dummyLocation = define_location(Area="", GraphArea="", SolveArea="", Name="", Address=0, Id=0xff, Class=[], CanHidden=False, Visibility="", Room='', HUD=0xff)
+        romPatcher.writeSplitLocs(majorsSplit, itemLocs, [ItemLocation(Location=dummyLocation)])
         romPatcher.writeMajorsSplit(majorsSplit)
         class FakeRandoSettings:
             def __init__(self):
@@ -576,7 +579,7 @@ class InteractiveSolver(CommonSolver):
     def clearItems(self, reload=False):
         self.collectedItems = []
         self.visitedLocations = []
-        self.lastAP = self.startAP
+        self.lastAP = self.startLocation
         self.lastArea = self.startArea
         self.majorLocations = self.locations
         if reload == True:

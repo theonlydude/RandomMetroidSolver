@@ -161,6 +161,9 @@ class RomLoader(object):
             else:
                 loc.setClass(["Minor"])
 
+    def loadScavengerOrder(self, locations):
+        return self.romReader.loadScavengerOrder(locations)
+
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)
     def __init__(self, romFileName, magic=None):

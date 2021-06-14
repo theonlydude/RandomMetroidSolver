@@ -903,8 +903,8 @@ locations = [loc for loc in locationsDict.values()]
 
 class LocationsHelper:
     # used by FillerRandom to know how many front fill steps it must perform
-    def getRandomFillHelp(startAP):
+    def getRandomFillHelp(startLocation):
         return 0
 
-    def getStartMajors(startAP):
+    def getStartMajors(startLocation):
         return ([],[],0,0)

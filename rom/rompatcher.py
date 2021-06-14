@@ -6,7 +6,7 @@ from rom.ips import IPS_Patch
 from utils.doorsmanager import DoorsManager
 from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
 from logic.logic import Logic
-from rom.rom import RealROM, FakeROM
+from rom.rom import RealROM, FakeROM, snes_to_pc
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir
 import utils.log
@@ -149,10 +149,12 @@ class RomPatcher:
                 if loc.Name == 'Morphing Ball':
                     self.patchMorphBallEye(item)
 
-    def writeSplitLocs(self, itemLocs, split):
+    def writeSplitLocs(self, split, itemLocs, progItemLocs):
         majChozoCheck = lambda itemLoc: itemLoc.Item.Class == split and itemLoc.Location.isClass(split)
+        fullCheck = lambda itemLoc: itemLoc.Location.Id is not None
         splitChecks = {
-            'Full': lambda itemLoc: itemLoc.Location.Id is not None,
+            'Full': fullCheck,
+            'Scavenger': fullCheck,
             'Major': majChozoCheck,
             'Chozo': majChozoCheck,
             'FullWithHUD': lambda itemLoc: itemLoc.Item.Category not in ['Energy', 'Ammo', 'Boss']
@@ -166,6 +168,13 @@ class RomPatcher:
             for loc in locs:
                 self.romFile.writeByte(loc.Id)
             self.romFile.writeByte(0xff)
+        if split == "Scavenger":
+            # write required major item order
+            self.romFile.seek(snes_to_pc(0xA1F5D8))
+            for itemLoc in progItemLocs:
+                self.romFile.writeWord((itemLoc.Location.Id << 8) | itemLoc.Location.HUD)
+            # bogus loc ID | "HUNT OVER" index
+            self.romFile.writeWord(0xff10)
 
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball
@@ -201,9 +210,9 @@ class RomPatcher:
         elif item.Type == 'Reserve' or isAmmo:
             operand = 0x1 # < 1
         elif ItemManager.isBeam(item):
-            operand = ItemManager.BeamBits[item.Type]
+            operand = item.BeamBits
         else:
-            operand = ItemManager.ItemBits[item.Type]
+            operand = item.ItemBits
         self.patchMorphBallCheck(0x1410E6, cat, comp, operand, branch) # eye main AI
         self.patchMorphBallCheck(0x1468B2, cat, comp, operand, branch) # head main AI
 
@@ -248,7 +257,7 @@ class RomPatcher:
             for (messageKey, newMessage) in messageBoxes[sprite].items():
                 messageBox.updateMessage(messageKey, newMessage, doVFlip, doHFlip)
 
-    def writePlmTable(self, plms, area, bosses, startAP):
+    def writePlmTable(self, plms, area, bosses, startLocation):
         # called when saving a plando
         try:
             if bosses == True or area == True:
@@ -256,13 +265,13 @@ class RomPatcher:
 
             doors = self.getStartDoors(plms, area, None)
             self.writeDoorsColor(doors)
-            self.applyStartAP(startAP, plms, doors)
+            self.applyStartAP(startLocation, plms, doors)
 
             self.applyPLMs(plms)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
-    def applyIPSPatches(self, startAP="Landing Site",
+    def applyIPSPatches(self, startLocation="Landing Site",
                         optionalPatches=[], noLayout=False, suitsMode="Balanced",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
@@ -293,7 +302,9 @@ class RomPatcher:
                 stdPatches.append("Phantoon_Eye_Door")
             if area == True or doorsColorsRando == True:
                 stdPatches.append("Enable_Backup_Saves")
-
+            if 'varia_hud.ips' in optionalPatches:
+                # varia hud has its own variant of g4_skip for scavenger mode
+                stdPatches.remove("g4_skip.ips")
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
 
@@ -346,7 +357,7 @@ class RomPatcher:
                 for patchName in RomPatcher.IPSPatches['DoorsColors']:
                     self.applyIPSPatch(patchName)
                 self.writeDoorsColor(doors)
-            self.applyStartAP(startAP, plms, doors)
+            self.applyStartAP(startLocation, plms, doors)
             self.applyPLMs(plms)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
@@ -524,14 +535,13 @@ class RomPatcher:
 
     def writeMajorsSplit(self, majorsSplit):
         address = 0x17B6C
-        if majorsSplit == 'Chozo':
-            char = 'Z'
-        elif majorsSplit == 'Major':
-            char = 'M'
-        elif majorsSplit == 'FullWithHUD':
-            char = 'H'
-        else:
-            char = 'F'
+        splits = {
+            'Chozo': 'Z',
+            'Major': 'M',
+            'FullWithHUD': 'H',
+            'Scavenger': 'S'
+        }
+        char = splits.get(majorsSplit, 'F')
         self.romFile.writeByte(ord(char), address)
 
     def getItemQty(self, itemLocs, itemType):

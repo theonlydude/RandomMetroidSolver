@@ -2,6 +2,8 @@
     "preset": "regular",
     "startLocation": "Landing Site",
     "majorsSplit": "Full",
+    "scavNumLocs": "10",
+    "scavRandomized": "off",
     "maxDifficulty": "hardcore",
     "progressionSpeed": "medium",
     "progressionDifficulty": "normal",

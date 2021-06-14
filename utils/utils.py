@@ -255,7 +255,7 @@ def getDefaultMultiValues():
     from graph.graph_utils import GraphUtils
     defaultMultiValues = {
         'startLocation': GraphUtils.getStartAccessPointNames(),
-        'majorsSplit': ['Full', 'FullWithHUD', 'Major', 'Chozo'],
+        'majorsSplit': ['Full', 'FullWithHUD', 'Major', 'Chozo', 'Scavenger'],
         'progressionSpeed': ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble', 'speedrun'],
         'progressionDifficulty': ['easier', 'normal', 'harder'],
         'morphPlacement': ['early', 'late', 'normal'],
@@ -357,8 +357,16 @@ def loadRandoPreset(randoPreset, args):
         args.morphPlacement = randoParams["morphPlacement"]
     if "majorsSplit" in randoParams:
         args.majorsSplit = randoParams["majorsSplit"]
+        if randoParams["majorsSplit"] == "Scavenger":
+            if "scavNumLocs" in randoParams:
+                if randoParams["scavNumLocs"] == "random":
+                    args.scavNumLocs = 0
+                else:
+                    args.scavNumLocs = randoParams["scavNumLocs"]
+            if "scavRandomized" in randoParams:
+                args.scavRandomized = randoParams["scavRandomized"] == "on"
     if "startLocation" in randoParams:
-        args.startAP = randoParams["startLocation"]
+        args.startLocation = randoParams["startLocation"]
     if "progressionDifficulty" in randoParams:
         args.progressionDifficulty = randoParams["progressionDifficulty"]
 
@@ -413,6 +421,8 @@ def getRandomizerDefaultParameters():
     defaultParams['raceMode'] = "off"
     defaultParams['majorsSplit'] = "Full"
     defaultParams['majorsSplitMultiSelect'] = defaultMultiValues['majorsSplit']
+    defaultParams['scavNumLocs'] = "10"
+    defaultParams['scavRandomized'] = "off"
     defaultParams['startLocation'] = "Landing Site"
     defaultParams['startLocationMultiSelect'] = defaultMultiValues['startLocation']
     defaultParams['maxDifficulty'] = 'hardcore'

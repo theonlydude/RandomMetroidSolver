@@ -127,6 +127,8 @@ class ComeBack(object):
             self.log.debug("Can't rewind, it's buggy here !")
             return False
         self.solver.cancelLastItems(count)
+        # we've rewind, we may no longer be able to kill mother brain
+        self.motherBrainCouldBeKilled = False
         self.log.debug("Rewind {} items to {}".format(count, lastStep.cur))
         return True
 

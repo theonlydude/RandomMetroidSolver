@@ -27,11 +27,25 @@ class ScavengerSolver(RandoSolver):
         self.log.debug("pickupScav: {}".format(nextScav.Name))
 
     def chooseNextScavLoc(self, scavAvailable):
-        harder = [loc for loc in scavAvailable if loc.difficulty.difficulty >= self.threshold]
-        easier = [loc for loc in scavAvailable if loc.difficulty.difficulty < self.threshold]
-        if harder and self.progDiff == "harder":
+        def getHarder(th):
+            if th <= easy:
+                th = 0
+            harder = [loc for loc in scavAvailable if loc.difficulty.difficulty >= th]
+            if len(harder) > 1:
+                return harder
+            else:
+                return getHarder(th/1.5)
+        def getEasier(th):
+            easier = [loc for loc in scavAvailable if loc.difficulty.difficulty < th]
+            if len(easier) > 1:
+                return easier
+            else:
+                return getEasier(th*1.5)
+        if self.progDiff == "harder" and len(scavAvailable) > 1:
+            harder = getHarder(self.threshold)
             return random.choice(harder)
-        elif easier and self.progDiff == "easier":
+        elif self.progDiff == "easier" and len(scavAvailable) > 1:
+            easier = getEasier(self.threshold)
             return random.choice(easier)
         else:
             return random.choice(scavAvailable)

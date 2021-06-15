@@ -1,0 +1,9 @@
+{
+    "majorsSplit": "Scavenger",
+    "areaRandomization": "on",
+    "escapeRando": "on",
+    "bossRandomization": "on",
+    "hud": "on",
+    "scavNumLocs": "16",
+    "scavRandomized": "off"
+}

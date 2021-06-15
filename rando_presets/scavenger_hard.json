@@ -3,6 +3,7 @@
     "scavNumLocs": "10",
     "scavRandomized": "off",
     "progressionDifficulty": "harder",
+    "progressionSpeed":"speedrun",
     "minorQty": "40",
     "energyQty": "sparse",
     "funMovement": "random",

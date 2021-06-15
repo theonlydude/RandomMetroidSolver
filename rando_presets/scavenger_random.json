@@ -2,5 +2,6 @@
     "majorsSplit": "Scavenger",
     "scavNumLocs": "random",
     "hud": "on",
-    "scavRandomized": "on"
+    "scavRandomized": "on",
+    "progressionSpeed":"speedrun"
 }

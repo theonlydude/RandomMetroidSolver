@@ -4,6 +4,7 @@
     "escapeRando": "on",
     "bossRandomization": "on",
     "hud": "on",
+    "progressionSpeed":"speedrun",
     "scavNumLocs": "16",
     "scavRandomized": "off"
 }

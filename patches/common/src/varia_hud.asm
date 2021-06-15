@@ -155,6 +155,9 @@ draw_info:
 	;; show current index in required major list
 	lda !major_idx : inc : jsr draw_two
 .major_setup_next:
+	lda !previous : cmp !hunt_over_hud : bne .game_state_check
+	jmp .end
+.game_state_check:
 	;; when pausing, we cycle through the remaining items.
 	;; during this phase, major_tmp is used to store
 	;; maj_index backup in its low byte, and frames

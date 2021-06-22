@@ -54,8 +54,8 @@ class ScavengerSolver(RandoSolver):
         # since solver split is forced to Full, majorsAvailable=minorsAvailable
         # we don't care about hasEnoughMinors, we're gonna pick enough anyway
         # we can ignore diffThreshold as well, we have self.maxDiff
-        scavAvailable = [loc for loc in majorsAvailable if loc in self.remainingScavLocs and loc.difficulty.difficulty < self.maxDiff and loc.comeBack == True]
-        minorsAvailable = [loc for loc in majorsAvailable if loc not in self.remainingScavLocs and loc.difficulty.difficulty < self.maxDiff and loc.comeBack == True]
+        scavAvailable = [loc for loc in majorsAvailable if loc in self.remainingScavLocs and loc.difficulty.difficulty <= self.maxDiff and loc.comeBack == True]
+        minorsAvailable = [loc for loc in majorsAvailable if loc not in self.remainingScavLocs and loc.difficulty.difficulty <= self.maxDiff and loc.comeBack == True]
         if len(minorsAvailable) > 0:
             nextMinor = random.choice(minorsAvailable)
             return self.collectMajor(nextMinor)

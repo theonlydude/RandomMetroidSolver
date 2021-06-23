@@ -224,7 +224,7 @@ class Knows:
 
     LowStuffGT = SMBool(False, 0, ['LowStuffGT'])
     desc['LowStuffGT'] = {'display': 'Low Ammo/Health Golden Torizo',
-                          'title': "Fight GT with either charge beam or 10 supers and nothing else. Otherwise require either 30 supers or Charge+Plasma and 4 tanks of energy (with Varia).",
+                          'title': "Fight GT with either charge beam or 5 supers and nothing else. Otherwise require either 30 supers or Charge+Plasma and 4 tanks of energy (with Varia).",
                           'href': None,
                           'rooms': ["Golden Torizo's Room"]}
 

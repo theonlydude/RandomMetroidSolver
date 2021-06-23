@@ -37,8 +37,8 @@ colors2plm = {
 }
 
 class Door(object):
-    __slots__ = ('name', 'address', 'vanillaColor', 'color', 'forced', 'facing', 'hidden', 'id', 'canGrey')
-    def __init__(self, name, address, vanillaColor, facing, id=None, canGrey=False):
+    __slots__ = ('name', 'address', 'vanillaColor', 'color', 'forced', 'facing', 'hidden', 'id', 'canGrey', 'forbiddenColors')
+    def __init__(self, name, address, vanillaColor, facing, id=None, canGrey=False, forbiddenColors=None):
         self.name = name
         self.address = address
         self.vanillaColor = vanillaColor
@@ -48,6 +48,8 @@ class Door(object):
         self.hidden = False
         self.canGrey = canGrey
         self.id = id
+        # list of forbidden colors
+        self.forbiddenColors = forbiddenColors
 
     def forceBlue(self):
         # custom start location, area, patches can force doors to blue
@@ -72,12 +74,18 @@ class Door(object):
     def canRandomize(self):
         return not self.forced and self.id is None
 
+    def filterColorList(self, colorsList):
+        if self.forbiddenColors is None:
+            return colorsList
+        else:
+            return [color for color in colorsList if color not in self.forbiddenColors]
+
     def randomize(self, allowGreyDoors):
         if self.canRandomize():
             if self.canGrey and allowGreyDoors:
-                self.setColor(random.choice(colorsListGrey))
+                self.setColor(random.choice(self.filterColorList(colorsListGrey)))
             else:
-                self.setColor(random.choice(colorsList))
+                self.setColor(random.choice(self.filterColorList(colorsList)))
 
     def traverse(self, smbm):
         if self.hidden or self.color == 'grey':
@@ -219,7 +227,7 @@ class DoorsManager():
         'PostCrocomireShaftRight': Door('PostCrocomireShaftRight', 0x78c0c, 'red', Facing.Left),
         # Lower Norfair
         'RedKihunterShaftBottom': Door('RedKihunterShaftBottom', 0x7902e, 'yellow', Facing.Top),
-        'WastelandLeft': Door('WastelandLeft', 0x790ba, 'green', Facing.Right),
+        'WastelandLeft': Door('WastelandLeft', 0x790ba, 'green', Facing.Right, forbiddenColors=['yellow']),
         # Maridia
         'MainStreetBottomRight': Door('MainStreetBottomRight', 0x7c431, 'red', Facing.Left),
         'FishTankRight': Door('FishTankRight', 0x7c475, 'red', Facing.Left),

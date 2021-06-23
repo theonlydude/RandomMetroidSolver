@@ -730,7 +730,7 @@ def validateSolverParams():
     if request.vars.difficultyTarget not in difficultyTargetChoices:
         return (False, "Wrong value for difficultyTarget: {}, authorized values: {}".format(request.vars.difficultyTarget, difficultyTargetChoices))
 
-    pickupStrategyChoices = ["all", "minimal", "any"]
+    pickupStrategyChoices = ["all", "any"]
     if request.vars.pickupStrategy not in pickupStrategyChoices:
         return (False, "Wrong value for pickupStrategy: {}, authorized values: {}".format(request.vars.pickupStrategy, pickupStrategyChoice))
 

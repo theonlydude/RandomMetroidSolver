@@ -131,7 +131,7 @@ if __name__ == "__main__":
                         dest='difficultyTarget', nargs='?', default=None, type=int)
     parser.add_argument('--pickupStrategy', '-s', help="Pickup strategy for the Solver",
                         dest='pickupStrategy', nargs='?', default=None,
-                        choices=['minimal', 'all', 'any'])
+                        choices=['all', 'any'])
     parser.add_argument('--itemsForbidden', '-f', help="Item not picked up during solving",
                         dest='itemsForbidden', nargs='+', default=[], action='append')
 

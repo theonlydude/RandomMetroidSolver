@@ -741,16 +741,11 @@ class Pickup:
 
     def enoughMinors(self, smbm, minorLocations):
         if self.itemsPickup == 'all':
-            # need them all
             return len(minorLocations) == 0
-        elif self.itemsPickup == 'minimal':
-            # simulate go mode
-            return smbm.enoughStuffTourian()
         else:
             return True
 
     def enoughMajors(self, smbm, majorLocations):
-        # the end condition
         if self.itemsPickup == 'all':
             return len(majorLocations) == 0
         else:

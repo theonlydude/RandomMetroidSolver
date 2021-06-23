@@ -1,7 +1,9 @@
 {
     "majorsSplit": "Scavenger",
     "areaRandomization": "on",
+    "areaLayout": "on",
     "escapeRando": "on",
+    "removeEscapeEnemies": "on",
     "bossRandomization": "on",
     "hud": "on",
     "progressionSpeed":"speedrun",

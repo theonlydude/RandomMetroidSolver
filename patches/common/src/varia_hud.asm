@@ -43,6 +43,8 @@
 !major_timer = #$80
 !mark_event = $8081FA
 !hunt_over_hud = #$0010
+!hunt_over_hud8 = #$10
+!press_xy_hud = #$8000
 
 lorom
 
@@ -130,17 +132,28 @@ draw_info:
 	php
 
 	;; first, determine if we should show next major item or area/items
-	lda !major_idx : asl : tax
+	lda !major_idx
+	bmi .special
+	asl : tax
 	lda.l majors_order,x
 	cmp #$ffff : bne .draw_next_major
 	jmp .draw_area
+.special:
+	;; special values
+	cmp !press_xy_hud : beq .draw_press_xy
+	bra .draw_next_major
+.draw_press_xy:
+	cmp !previous : beq .major_setup_next
+	sta !previous
+	ldy #press_xy-majors_names
+	bra .draw_major_text
 .draw_next_major:
 	and #$00ff
 	cmp !previous : beq .major_setup_next
 	sta !previous
 	asl : asl : asl : asl
 	tay
-	;; draw text
+.draw_major_text:
 	ldx !hudposition
 .draw_major_loop:
 	lda majors_names,y
@@ -150,18 +163,22 @@ draw_info:
 	inx : inx
 	bra .draw_major_loop
 .maj_index:
-	;; don't show index if hunt is over
-	lda !previous : cmp !hunt_over_hud : beq .major_setup_next
+	;; don't show index if showing special stuff
+	lda !previous
+	cmp !hunt_over_hud : beq .major_setup_next
+	cmp !press_xy_hud : beq .major_setup_next
 	;; show current index in required major list
+	lda #$2C0F : sta !split_locs_hud-2 ; blank before numbers for cleanup
 	lda !major_idx : inc : jsr draw_two
 .major_setup_next:
 	lda !previous : cmp !hunt_over_hud : bne .game_state_check
 	jmp .end
 .game_state_check:
-	;; when pausing, we cycle through the remaining items.
+	;; when pausing, we allow the user to press X/Y to
+	;; cycle through the remaining items.
 	;; during this phase, major_tmp is used to store
-	;; maj_index backup in its low byte, and frames
-	;; remaining until next item in its high byte
+	;; maj_index backup in its low byte, and current
+	;; increment due to button pressed its high byte
 	;; major_tmp is set to ffff when not in pause
 	lda !game_state
 	cmp #$000c : beq .pause_start
@@ -175,8 +192,10 @@ draw_info:
 .pause_init:
 	sep #$20
 	lda !major_idx : sta !major_tmp
-	lda !major_timer : lsr : sta !major_tmp+1 ; half timer for the first we already know
+	lda #$00 : sta !major_tmp+1	; current increment=0
 	rep #$20
+	;; show "PRESS X-Y" next frame
+	lda !press_xy_hud : sta !major_idx
 	jmp .end
 .pause_end:
 	lda !major_tmp
@@ -193,22 +212,50 @@ draw_info:
 .pause:
 	sep #$20
 	xba
-	dec
-	beq .pause_next_major
-	sta !major_tmp+1
+	bne .pause_next_major
+	;; no action registered, check if we must register one
 	rep #$20
+	lda $8f			; newly pressed input
+	bit #$0040 : bne .pause_x_was_pressed
+	bit #$4000 : bne .pause_y_was_pressed
+	jmp .end
+.pause_x_was_pressed:
+	lda #$0001
+	bra .pause_store_action
+.pause_y_was_pressed:
+	lda #$ffff
+.pause_store_action:
+	sep #$20 : sta !major_tmp+1 : rep #$20
 	jmp .end
 .pause_next_major:
-	lda !major_timer : sta !major_tmp+1
-	lda !major_idx : inc : sta !major_idx
+	;; action required: user pressed X or Y last frame
+	;; first, save our action increment and check if we're
+	;; just displaying the first item (works with either button)
+	pha
 	rep #$20
-	;; cycle through if we reach the end of the route
-	and #$00ff : asl : tax
-	lda.l majors_order,x : and #$00ff
-	cmp !hunt_over_hud : beq .cycle_major
-	jmp .end
-.cycle_major:
-	lda !major_tmp : and #$00ff : sta !major_idx
+	lda !major_idx : cmp !press_xy_hud : beq .pause_first_major
+	sep #$20
+	pla
+	;; add action increment (1 or -1) to major_idx
+	clc : adc !major_idx : sta !major_idx
+	cmp !major_tmp : bmi .pause_first_major_store
+	asl : tax
+	lda.l majors_order,x
+	cmp !hunt_over_hud8 : beq .pause_end_list
+	bra .pause_next_major_end
+.pause_end_list:
+	lda !major_idx : dec : sta !major_idx
+	bra .pause_next_major_end
+.pause_first_major:
+	sep #$20
+	pla
+.pause_first_major_store:
+	lda !major_tmp : sta !major_idx
+	lda #$00 : sta !major_idx+1
+.pause_next_major_end:
+	;; reset action
+	lda #$00 : sta !major_tmp+1
+	rep #$20
 	jmp .end
 .draw_area:
 	;; determine current graph area
@@ -352,11 +399,15 @@ majors_names:
 	dw "HUNT OVER "
 	dw $0000
 
+press_xy:
+	dw "PRESS X-Y "
+	dw $0000
+
 cleartable
 
 print "b80 end: ", pc
 
-warnpc $80d4ff
+warnpc $80d5ff
 
 org $a1f550
 

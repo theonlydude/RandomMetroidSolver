@@ -58,6 +58,7 @@ class GraphBuilder(object):
         possibleTargets = [target for target in escapeTargets if graph.accessPath(sm, target, 'Landing Site', maxDiff) is not None]
         # failsafe
         if len(possibleTargets) == 0:
+            self.log.debug("Can't randomize escape, fallback to vanilla")
             possibleTargets.append('Climb Bottom Left')
         random.shuffle(possibleTargets)
         # pick one

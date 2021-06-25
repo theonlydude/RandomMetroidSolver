@@ -140,12 +140,18 @@ class Restrictions(object):
                 checkers.append(lambda item, loc, cont: self.isItemLocMatching(item, loc))
             else:
                 self.log.debug("add scavenger restriction")
-                checkers.append(
-                    lambda item, loc, cont: (loc.VanillaItemType is None and self.isItemMinor(item))
-                                         or (loc.VanillaItemType is not None and self.isItemMajor(item)
-                                             and (not self.scavIsVanilla or self.scavLocs is None or
-                                                  (loc not in self.scavLocs and item.Type not in self.scavItemTypes)
-                                                  or (item.Type == loc.VanillaItemType and loc in self.scavLocs))))
+                baseScavCheck = lambda item, loc: ((loc.VanillaItemType is None and self.isItemMinor(item))
+                                                or (loc.VanillaItemType is not None and self.isItemMajor(item)))
+                vanillaScavCheck = lambda item, loc: (self.scavLocs is None
+                                                  or (loc not in self.scavLocs and item.Type not in self.scavItemTypes)
+                                                  or (item.Type == loc.VanillaItemType and loc in self.scavLocs))
+                nonVanillaScavCheck = lambda item, loc: (self.scavLocs is None
+                                                      or loc not in self.scavLocs
+                                                      or (loc in self.scavLocs and item.Category != 'Nothing'))
+                if self.scavIsVanilla:
+                    checkers.append(lambda item, loc, cont: baseScavCheck(item, loc) and vanillaScavCheck(item, loc))
+                else:
+                    checkers.append(lambda item, loc, cont: baseScavCheck(item, loc) and nonVanillaScavCheck(item, loc))
         if self.suitsRestrictions:
             self.log.debug("add suits restriction")
             checkers.append(lambda item, loc, cont: not self.isSuit(item) or loc.GraphArea != 'Crateria')

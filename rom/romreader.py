@@ -362,8 +362,12 @@ class RomReader:
         # get escape transition
         escapeSrcAP = getAccessPoint('Tourian Escape Room 4 Top Right')
         key = self.getTransition(escapeSrcAP.ExitInfo['DoorPtr'])
-        escapeDstAP = rooms[key]
-        escapeTransition = [(escapeSrcAP.Name, escapeDstAP.Name)]
+        # may not be set in plandomizer
+        if key in rooms:
+            escapeDstAP = rooms[key]
+            escapeTransition = [(escapeSrcAP.Name, escapeDstAP.Name)]
+        else:
+            escapeTransition = []
 
         areaTransitions = removeBiTrans(areaTransitions)
         bossTransitions = removeBiTrans(bossTransitions)

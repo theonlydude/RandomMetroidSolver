@@ -310,6 +310,9 @@ class RomReader:
                 break
             loc = locIdsDict[locId]
             order.append(loc)
+
+            # check that there's no nothing in the loc
+            assert loc.itemName != "Nothing", "Nothing detected in scav loc {}".format(loc.Name)
         return order
 
     def loadTransitions(self):

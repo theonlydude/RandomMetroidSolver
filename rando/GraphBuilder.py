@@ -1,5 +1,5 @@
 
-import utils.log, random
+import utils.log, random, copy
 
 from graph.graph_utils import GraphUtils, vanillaTransitions, vanillaBossesTransitions, escapeSource, escapeTargets
 from logic.logic import Logic
@@ -46,16 +46,18 @@ class GraphBuilder(object):
         # animals
         GraphUtils.escapeAnimalsTransitions(graph, possibleTargets, dst)
 
-    def getPossibleEscapeTargets(self, emptyContainer, graph, maxDiff):
+    def getPossibleEscapeTargets(self, container, graph, maxDiff):
+        emptyContainer = copy.copy(container)
+        emptyContainer.resetCollected()
         sm = emptyContainer.sm
         # setup smbm with item pool
-        sm.resetItems()
         # Ice not usable because of hyper beam
         # remove energy to avoid hell runs
         # (will add bosses as well)
         sm.addItems([item.Type for item in emptyContainer.itemPool if item.Type != 'Ice' and item.Category != 'Energy'])
         sm.addItem('Hyper')
         possibleTargets = [target for target in escapeTargets if graph.accessPath(sm, target, 'Landing Site', maxDiff) is not None]
+        self.log.debug('getPossibleEscapeTargets. targets='+str(possibleTargets))
         # failsafe
         if len(possibleTargets) == 0:
             self.log.debug("Can't randomize escape, fallback to vanilla")

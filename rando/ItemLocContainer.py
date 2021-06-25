@@ -111,7 +111,10 @@ class ItemLocContainer(object):
     # reset collected items/locations
     def resetCollected(self):
         self.currentItems = []
-        self.itemLocations = []
+        while len(self.itemLocations) > 0:
+            il = self.itemLocations.pop()
+            self.itemPool.append(il.Item)
+            self.unusedLocations.append(il.Location)
         self.unrestrictedItems = set()
         self.sm.resetItems()
 

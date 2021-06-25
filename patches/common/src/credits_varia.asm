@@ -940,6 +940,8 @@ clear_values:
 
 // Game has ended, save RTA timer to RAM and copy all stats to SRAM a final time
 game_end:
+    // update region time (will be slightly off, but avoids dealing with negative substraction result, see below)
+    jsl {update_and_store_region_time}
     // Subtract frames from pressing down at ship to this code running
     lda {timer1}
     sec
@@ -953,9 +955,6 @@ game_end:
     sta {stats_timer}
     lda {timer2}
     sta {stats_timer}+2
-
-    // also update region time
-    jsl {update_and_store_region_time}
 
     // save stats to SRAM
     lda #$0001

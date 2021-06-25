@@ -34,10 +34,10 @@ class GraphBuilder(object):
         return AccessGraph(Logic.accessPoints, transitions, self.graphSettings.dotFile)
 
     # fills in escape transitions if escape rando is enabled
-    def escapeGraph(self, emptyContainer, graph, maxDiff):
+    def escapeGraph(self, container, graph, maxDiff):
         if not self.escapeRando:
             return
-        possibleTargets, dst, path = self.getPossibleEscapeTargets(emptyContainer, graph, maxDiff)
+        possibleTargets, dst, path = self.getPossibleEscapeTargets(container, graph, maxDiff)
         # update graph with escape transition
         graph.addTransition(escapeSource, dst)
         # get timer value

@@ -75,8 +75,10 @@ class RomPatcher:
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
                  'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street', 'no_demo.ips'],
+        # patches for boss rando
+        'Bosses': ['door_transition.ips', 'no_demo.ips'],
         # patches for escape rando
-        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips'],
+        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips', 'door_transition.ips'],
         # patches for  minimizer with fast Tourian
         'MinimizerTourian': ['minimizer_tourian.ips', 'open_zebetites.ips'],
         # patches for door color rando
@@ -303,8 +305,10 @@ class RomPatcher:
             if area == True or doorsColorsRando == True:
                 stdPatches.append("Enable_Backup_Saves")
             if 'varia_hud.ips' in optionalPatches:
-                # varia hud has its own variant of g4_skip for scavenger mode
+                # varia hud has its own variant of g4_skip for scavenger mode,
+                # it can also make demos glitch out
                 stdPatches.remove("g4_skip.ips")
+                self.applyIPSPatch("no_demo.ips")
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
 
@@ -328,9 +332,6 @@ class RomPatcher:
                     RomPatcher.IPSPatches['Escape'].append('Escape_Rando_Enable_Enemies')
                 for patchName in RomPatcher.IPSPatches['Escape']:
                     self.applyIPSPatch(patchName)
-                # handle incompatible doors transitions
-                if area == False and bosses == False:
-                    self.applyIPSPatch('door_transition.ips')
                 # animals and timer
                 self.applyEscapeAttributes(escapeAttr, plms)
 
@@ -344,9 +345,9 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
             else:
                 self.applyIPSPatch('area_ids_alt.ips')
-                if bosses == True:
-                    self.applyIPSPatch('door_transition.ips')
-                    self.applyIPSPatch('no_demo.ips')
+            if bosses == True:
+                for patchName in RomPatcher.IPSPatches['Bosses']:
+                    self.applyIPSPatch(patchName)
             if minimizerN is not None:
                 self.applyIPSPatch('minimizer_bosses.ips')
                 if minimizerTourian == True:

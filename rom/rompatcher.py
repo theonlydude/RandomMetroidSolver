@@ -277,8 +277,8 @@ class RomPatcher:
                         optionalPatches=[], noLayout=False, suitsMode="Balanced",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
-                        escapeAttr=None, noRemoveEscapeEnemies=False,
-                        minimizerN=None, minimizerTourian=True, doorsColorsRando=False):
+                        escapeAttr=None, minimizerN=None, minimizerTourian=True,
+                        doorsColorsRando=False):
         try:
             # apply standard patches
             stdPatches = []
@@ -328,8 +328,6 @@ class RomPatcher:
 
             # random escape
             if escapeAttr is not None:
-                if noRemoveEscapeEnemies == True:
-                    RomPatcher.IPSPatches['Escape'].append('Escape_Rando_Enable_Enemies')
                 for patchName in RomPatcher.IPSPatches['Escape']:
                     self.applyIPSPatch(patchName)
                 # animals and timer
@@ -452,6 +450,9 @@ class RomPatcher:
                 plms.append("WS_Map_Grey_Door_Openable")
         else:
             plms.append("WS_Map_Grey_Door")
+        # optional patches (enemies, scavenger)
+        for patch in escapeAttr['patches']:
+            self.applyIPSPatch(patch)
 
     # adds ad-hoc "IPS patches" for additional PLM tables
     def applyPLMs(self, plms):

@@ -200,11 +200,7 @@ org $8fcb3a
 org $8ff500
 
 ;;; CODE (in a tiny bit of bank 8F free space)
-test_door_asm:
-    lda #$0000 : jsl $8081fa    ; wake zebes
-    lda #$000e : jsl $8081fa    ; set escape flag
-;;; door ASM for MB escape door
-escape_setup:
+escape_setup_l:
     ;; init possible escapes cycle (for animals)
     lda #$0000 : sta !current_escape
     ;; open all doors
@@ -225,6 +221,14 @@ escape_setup:
     ;; open Maridia Tube
     lda #$000b : jsl $8081fa
 .end:
+    rtl
+
+test_door_asm:
+    lda #$0000 : jsl $8081fa    ; wake zebes
+    lda #$000e : jsl $8081fa    ; set escape flag
+;;; door ASM for MB escape door
+escape_setup:
+    jsl escape_setup_l
     rts
 
 room_setup:

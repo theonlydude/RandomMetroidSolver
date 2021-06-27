@@ -24,12 +24,12 @@
 !hudposition = #$0006
 ;;; RAM used to store previous values to see whether we must draw
 ;;; area/item counter or next major display
-!previous = $7fff3c		; hi: area/00, lo: remaining items/next major
+!previous = $7fff3c		; hi: area/00, lo: remaining items/next major (scav)
 ;;; RAM for remaining items in current area
 !n_items = $7fff3e
-;;; RAM for current index in major list order
+;;; RAM for current index in major list order in scavenger
 !major_idx = $7ed86a		; saved to SRAM automatically
-!major_tmp  = $7fff40
+!major_tmp  = $7fff40		; temp RAM used for a lot of stuff in scavenger
 ;;; item split written by randomizer
 !seed_type = $82fb6c
 ;;; vanilla bit array to keep track of collected items
@@ -38,15 +38,18 @@
 !bit_index = $80818e
 ;;; RAM area to write to for split/locs in HUD
 !split_locs_hud = $7ec618
-!fix_timer_gfx	     = $a1f2c0	; in new_game.asm (common routines section)
 
-!game_state = $0998
-!major_timer = #$80
+;;; external routines
 !mark_event = $8081FA
 !song_routine = $808fc1
-!hunt_over_hud = #$0010
-!hunt_over_hud8 = #$10
-!press_xy_hud = #$8000
+!fix_timer_gfx = $a1f2c0	; in new_game.asm (common routines section)
+!escape_setup = $8ff500		; in rando_escape.asm
+
+;;; scavenger stuff
+!game_state = $0998		; used to check pause/unpause
+!hunt_over_hud = #$0010		; HUD ID of the fake loc 'HUNT OVER'
+!hunt_over_hud8 = #$10		; same as above, for 8-bits mode
+!press_xy_hud = #$8000		; fake major_idx value telling we shall write 'PRESS X-Y' in scavenger hunt pause
 
 lorom
 
@@ -551,6 +554,7 @@ clear_music_queue:
 	rts
 
 trigger_escape:
+	jsl !escape_setup
 	; load timer graphics
 	lda #$000f : jsl $90f084
 	jsl !fix_timer_gfx

@@ -18,7 +18,10 @@ endmacro
 !current_escape      = $7fff34
 !door_sz             = 12
 !door_list_ptr       = $07b5
+
+;;; external definitions
 !fix_timer_gfx	     = $a1f2c0	; in new_game.asm (common routines section)
+!scavenger_escape_flag = $a1f5fc ; in varia_hud.asm (option flag)
 
 org $809E21
 print "timer_value: ", pc
@@ -97,6 +100,7 @@ escape_hyper_check:
     lda $0c18,x
     bit #$0008                  ; check for plasma (hyper = wave+plasma)
     beq .nohit
+    lda !scavenger_escape_flag : bne .nohit ; avoid having actual plasma beam destroy blocks in scavenger mode escape
     lda #$0000                  ; set zero flag
     bra .end
 .nohit:
@@ -144,7 +148,7 @@ save_station:
     jmp $8cf6
 
 print "B84 end: ", pc
-warnpc $84f8b2                  ; explicitly right there, to remember needed race mode update
+warnpc $84f8b9                  ; explicitly right there, to remember needed race mode update
 
 ;;; DATA, bank 8F. makes map stations doors in norfair/brin/maridia/ws
 ;;; permanently grey

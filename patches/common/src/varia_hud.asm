@@ -299,6 +299,7 @@ draw_info:
 	lda #$00 : sta !major_tmp+1
 	rep #$20
 	jmp .end
+
 .draw_area:
 	;; determine current graph area
 	ldx $07bb
@@ -345,6 +346,7 @@ draw_info:
 	lda #$0CEC : sta !split_locs_hud ; blue 'M'
 .draw_items:
 	lda !n_items : jsr draw_one
+
 .end:
 	plp
 	ply
@@ -525,6 +527,7 @@ item_pickup:
 	rep 6 : dey		; move back PLM instruction pointer to "goto draw"
 	jml $8488AF		; jump to hijacked routine exit
 
+
 item_post_collect:
 	lda !major_tmp
 	cmp #$eeee : bne .normal_pickup
@@ -553,8 +556,17 @@ clear_music_queue:
 	STA $063D
 	rts
 
+;;; copied from escape rooms setup asm
+room_earthquake:
+	LDA #$0018             ;\
+	STA $183E              ;} Earthquake type = BG1, BG2 and enemies; 3 pixel displacement, horizontal
+	LDA #$FFFF
+	STA $1840
+	rts
+
 trigger_escape:
 	jsl !escape_setup
+	jsr room_earthquake	; could not be called by setup asm since not in escape yet
 	; load timer graphics
 	lda #$000f : jsl $90f084
 	jsl !fix_timer_gfx

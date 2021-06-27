@@ -39,7 +39,7 @@ class GraphBuilder(object):
         if not self.escapeRando:
             return True
         emptyContainer = copy.copy(container)
-        emptyContainer.resetCollected()
+        emptyContainer.resetCollected(reassignItemLocs=True)
         dst = None
         if scavEscape is None:
             possibleTargets, dst, path = self.getPossibleEscapeTargets(emptyContainer, graph, maxDiff)
@@ -47,6 +47,8 @@ class GraphBuilder(object):
             graph.addTransition(escapeSource, dst)
         else:
             possibleTargets, path = self.getScavengerEscape(emptyContainer, graph, maxDiff, scavEscape)
+            if path is None:
+                return False
         # get timer value
         self.escapeTimer(graph, path, self.areaRando or scavEscape is not None)
         self.log.debug("escapeGraph: ({}, {}) timer: {}".format(escapeSource, dst, graph.EscapeAttributes['Timer']))

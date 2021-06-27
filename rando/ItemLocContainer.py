@@ -108,13 +108,18 @@ class ItemLocContainer(object):
         dest.itemLocations = copy.copy(self.itemLocations)
         dest.unrestrictedItems = copy.copy(self.unrestrictedItems)
 
-    # reset collected items/locations
-    def resetCollected(self):
+    # reset collected items/locations. if reassignItemLocs is True,
+    # will re-fill itemPool and unusedLocations as they were before
+    # collection
+    def resetCollected(self, reassignItemLocs=False):
         self.currentItems = []
-        while len(self.itemLocations) > 0:
-            il = self.itemLocations.pop()
-            self.itemPool.append(il.Item)
-            self.unusedLocations.append(il.Location)
+        if reassignItemLocs == False:
+            self.itemLocations = []
+        else:
+            while len(self.itemLocations) > 0:
+                il = self.itemLocations.pop()
+                self.itemPool.append(il.Item)
+                self.unusedLocations.append(il.Location)
         self.unrestrictedItems = set()
         self.sm.resetItems()
 

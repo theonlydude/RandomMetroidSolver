@@ -18,6 +18,7 @@ endmacro
 !current_escape      = $7fff34
 !door_sz             = 12
 !door_list_ptr       = $07b5
+!fix_timer_gfx	     = $a1f2c0	; in new_game.asm (common routines section)
 
 org $809E21
 print "timer_value: ", pc
@@ -233,7 +234,7 @@ room_setup:
     plb
     jsr $919c                   ; sets up room shaking
     plb
-    jsl fix_timer_gfx
+    jsl !fix_timer_gfx
 .end:
     ;; goes back to vanilla setup asm call
     lda $0018,x
@@ -444,24 +445,6 @@ music_and_enemies:
     sta $07D1   ;} Enemy set pointer = empty list
 .end:
     jml $82df5c
-
-
-;;; courtesy of Smiley
-fix_timer_gfx:
-    PHX
-    LDX $0330						;get index for the table
-    LDA #$0400 : STA $D0,x  				;Size
-    INX : INX						;inc X for next entry (twice because 2 bytes)
-    LDA #$C000 : STA $D0,x					;source address
-    INX : INX						;inc again
-    SEP #$20 : LDA #$B0 : STA $D0,x : REP #$20  		;Source bank $B0
-    INX							;inc once, because the bank is stored in one byte only
-    ;; VRAM destination (in word addresses, basically take the byte
-    ;; address from the RAM map and and devide them by 2)
-    LDA #$7E00	: STA $D0,x
-    INX : INX : STX $0330 					;storing index
-    PLX
-    RTL							;done. return
 
 warnpc $a1f1ff
 

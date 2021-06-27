@@ -38,10 +38,12 @@
 !bit_index = $80818e
 ;;; RAM area to write to for split/locs in HUD
 !split_locs_hud = $7ec618
+!fix_timer_gfx	     = $a1f2c0	; in new_game.asm (common routines section)
 
 !game_state = $0998
 !major_timer = #$80
 !mark_event = $8081FA
+!song_routine = $808fc1
 !hunt_over_hud = #$0010
 !hunt_over_hud8 = #$10
 !press_xy_hud = #$8000
@@ -58,10 +60,47 @@ org $82def7
 	jml load_state
 
 ;;; yet another item pickup hijack, different from the ones in endingtotals and bomb_torizo
-;;; this one is used to count remaining items in current area
+;;; this one is used to count remaining items in current area, and handle scavenger hunt
 org $848899
 	jml item_pickup
 
+;;; a bunch of hijacks post item collection to trigger the escape after last item in scavenger hunt if option is set
+;;; has to be done after item_pickup because of music management
+org $8488de			; Beams
+	nop : nop : nop
+	jsl item_post_collect
+
+org $848905			; Equipment
+	nop : nop : nop
+	jsl item_post_collect
+
+org $848930			; Grapple
+	nop : nop : nop
+	jsl item_post_collect
+
+org $848957			; X-Ray
+	nop : nop : nop
+	jsl item_post_collect
+
+org $848975			; ETank
+	nop : nop : nop
+	jsl item_post_collect
+
+org $848998			; RTank
+	nop : nop : nop
+	jsl item_post_collect
+
+org $8489c1			; Missile
+	nop : nop : nop
+	jsl item_post_collect
+
+org $8489ea			; Super
+	nop : nop : nop
+	jsl item_post_collect
+
+org $848a13			; Power Bomb
+	nop : nop : nop
+	jsl item_post_collect
 
 ;;; skip top row of auto reserve to have more room (HUD draw main routine)
 org $809B61
@@ -421,6 +460,11 @@ incsrc "locs_by_areas.asm"
 majors_order:
 	fillbyte $ff : fill 36	; (16 max majors+"HUNT OVER"+terminator)*2
 
+print "option_end: ", pc
+;;; set to non-zero to trigger escape on last item pickup
+option_end:
+	dw $0000
+
 load_state:
 	lda #$ffff
 	sta !previous
@@ -438,7 +482,7 @@ item_pickup:
 	;; check if loc ID is the next required major
 	lda !major_idx : asl : tax
 	lda.l majors_order,x
-	cmp #$ffff : beq .pickup_end ; not in scavenger mode, or all required majors collected
+	cmp #$ffff : beq .pickup_end_noescape ; not in scavenger mode
 	;; major_tmp = loc ID to check against
 	and #$ff00 : xba : sta !major_tmp
 	;; checks if picked up loc is the next major.
@@ -450,19 +494,22 @@ item_pickup:
 .major_check_loop:
 	inx : inx
 	lda.l majors_order,x
-	cmp #$ffff : beq .pickup_end
+	cmp #$ffff : beq .pickup_end_noescape
 	and #$ff00 : xba : sta !major_tmp
 	lda $1dc7,y : cmp !major_tmp : beq .nopickup_end
 	bra .major_check_loop
 .found_next_major:
 	lda !major_idx : inc : sta !major_idx
 	asl : tax
-	lda.l majors_order,x
-	cmp #$ffff : bne .pickup_end
-	;; we picked up last major, reset previous for HUD drawing to switch back to area
-	sta !previous
-.pickup_end:			; routine end when we pick up the item
+	lda.l majors_order,x : and #$00ff
+	cmp !hunt_over_hud : bne .pickup_end_noescape
+	;; last item pickup : check if we shall trigger the escape
+	lda option_end : beq .pickup_end_noescape
+	lda #$eeee : sta !major_tmp ; place marker to trigger escape a bit later (needed because of music change)
+	bra .pickup_end
+.pickup_end_noescape:			; routine end when we pick up the item
 	lda #$ffff : sta !major_tmp
+.pickup_end:
 	plx
 	ply
 	LDA $1DC7,x		; remaining part hijacked code
@@ -474,6 +521,45 @@ item_pickup:
 	ply
 	rep 6 : dey		; move back PLM instruction pointer to "goto draw"
 	jml $8488AF		; jump to hijacked routine exit
+
+item_post_collect:
+	lda !major_tmp
+	cmp #$eeee : bne .normal_pickup
+	lda #$ffff : sta !major_tmp
+	jsr trigger_escape
+	bra .end
+.normal_pickup:
+	LDA #$0168 : JSL $82E118 ;} Play room music track after 6 seconds
+.end:
+	rtl
+
+;;; copy-pasted from a PLM instruction
+clear_music_queue:
+	PHX
+	LDX #$000E
+	STZ $0619,x
+	STZ $0629,x
+	DEX
+	DEX
+	BPL $F6
+	PLX
+	LDA $0639
+	STA $063B
+	LDA #$0000
+	STA $063F
+	STA $063D
+	rts
+
+trigger_escape:
+	; load timer graphics
+	lda #$000f : jsl $90f084
+	jsl !fix_timer_gfx
+	lda #$0002 : sta $0943	 ; set timer state to 2 (MB timer start)
+	jsr clear_music_queue
+	lda #$ff24 : jsl !song_routine ; load boss 1 music data
+	lda #$0007 : jsl !song_routine ; load music track 2
+	lda #$000e : jsl !mark_event ; timebomb set event
+	rts
 
 compute_n_items:
 	phx
@@ -508,7 +594,7 @@ compute_n_items:
 	rts
 
 print "a1 end: ", pc
-warnpc $a1f6ff
+warnpc $a1f7ff
 
 ;;; make golden statues instructions check for majors collection
 ;;; in scavenger mode :

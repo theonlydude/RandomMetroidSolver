@@ -175,6 +175,9 @@ if __name__ == "__main__":
     parser.add_argument('--scavRandomized',
                         help="For Scavenger split, decide whether mandatory major locs will have non-vanilla items",
                         dest='scavRandomized', nargs='?', const=True, default=False)
+    parser.add_argument('--scavEscape',
+                        help="For Scavenger split, decide whether escape sequence shall be triggered as soon as the hunt is over",
+                        dest='scavEscape', nargs='?', const=True, default=False)
     parser.add_argument('--suitsRestriction',
                         help="no suits in early game",
                         dest='suitsRestriction', nargs='?', const=True, default=False)
@@ -430,9 +433,18 @@ if __name__ == "__main__":
         if args.morphPlacementList != None:
             morphPlacements = args.morphPlacementList.split(',')
         args.morphPlacement = random.choice(morphPlacements)
+    # Scavenger Hunt constraints
     if args.majorsSplit == 'Scavenger':
         forceArg('progressionSpeed', 'speedrun', "'Progression speed' forced to speedrun")
         progSpeed = "speedrun"
+        forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
+        if not GraphUtils.isStandardStart(args.startLocation):
+            forceArg('startLocation', "Landing Site", "Start Location forced to Landing Site because of Scavenger mode")
+        if args.morphPlacement == 'late':
+            forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
+        if args.scavEscape == True:
+            forceArg('escapeRando', True, "'Escape randomization' forced to on", webValue='on')
+            forceArg('noRemoveEscapeEnemies', True, "Enemies enabled during escape sequence", webArg='removeEscapeEnemies', webValue='off')
     # random fill makes certain options unavailable
     if (progSpeed == 'speedrun' or progSpeed == 'basic') and args.majorsSplit != 'Scavenger':
         forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
@@ -441,13 +453,6 @@ if __name__ == "__main__":
 
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.getrandbits(1))
-
-    if args.majorsSplit == "Scavenger":
-        forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
-        if not GraphUtils.isStandardStart(args.startLocation):
-            forceArg('startLocation', "Landing Site", "Start Location forced to Landing Site because of Scavenger mode")
-        if args.morphPlacement == 'late':
-            forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
 
     # in plando rando we know that the start ap is ok
     if not GraphUtils.isStandardStart(args.startLocation) and args.plandoRando is None:
@@ -497,7 +502,7 @@ if __name__ == "__main__":
         scavNumLocs = int(args.scavNumLocs)
         if scavNumLocs == 0:
             scavNumLocs = random.randint(4,16)
-        restrictions["ScavengerParams"] = {'numLocs':scavNumLocs, 'vanillaItems':not args.scavRandomized}
+        restrictions["ScavengerParams"] = {'numLocs':scavNumLocs, 'vanillaItems':not args.scavRandomized, 'escape': args.scavEscape}
     seedCode = 'X'
     if majorsSplitRandom == False:
         if restrictions['MajorMinor'] == 'Full':
@@ -650,6 +655,12 @@ if __name__ == "__main__":
                                                       args.area, args.bosses,
                                                       args.escapeRando)
                 escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
+                if escapeAttr is not None:
+                    escapeAttr['patches'] = []
+                    if args.noRemoveEscapeEnemies == True:
+                        escapeAttr['patches'].append("Escape_Rando_Enable_Enemies")
+                    if args.scavEscape == True:
+                        escapeAttr['patches'].append('Escape_Scavenger')
         except Exception as e:
             import traceback
             traceback.print_exc(file=sys.stdout)
@@ -724,7 +735,7 @@ if __name__ == "__main__":
                                        args.noLayout, gravityBehaviour,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
-                                       escapeAttr, args.noRemoveEscapeEnemies, minimizerN, args.minimizerTourian,
+                                       escapeAttr, minimizerN, args.minimizerTourian,
                                        args.doorsColorsRando)
         else:
             # from customizer permalink, apply previously generated seed ips first

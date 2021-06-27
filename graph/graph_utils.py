@@ -398,15 +398,16 @@ class GraphUtils:
 
     def escapeAnimalsTransitions(graph, possibleTargets, firstEscape):
         n = len(possibleTargets)
-        assert n < 4, "Invalid possibleTargets list: " + str(possibleTargets)
+        assert (n < 4 and firstEscape is not None) or (n <= 4 and firstEscape is None), "Invalid possibleTargets list: " + str(possibleTargets)
         # first get our list of 4 entries for escape patch
         if n >= 1:
             # get actual animals: pick one of the remaining targets
             animalsAccess = possibleTargets.pop()
             graph.EscapeAttributes['Animals'] = animalsAccess
-            # we now have at most 2 targets left, fill up to fill cycling 4 targets for animals suprise
+            # we now have at most 3 targets left, fill up to fill cycling 4 targets for animals suprise
             possibleTargets.append('Climb Bottom Left')
-            possibleTargets.append(firstEscape)
+            if firstEscape is not None:
+                possibleTargets.append(firstEscape)
             poss = possibleTargets[:]
             while len(possibleTargets) < 4:
                 possibleTargets.append(poss.pop(random.randint(0, len(poss)-1)))
@@ -414,6 +415,7 @@ class GraphUtils:
             # failsafe: if not enough targets left, abort and do vanilla animals
             animalsAccess = 'Flyway Right'
             possibleTargets = ['Bomb Torizo Room Left'] * 4
+        GraphUtils.log.debug("escapeAnimalsTransitions. animalsAccess="+animalsAccess)
         assert len(possibleTargets) == 4, "Invalid possibleTargets list: " + str(possibleTargets)
         # actually add the 4 connections for successive escapes challenge
         basePtr = 0xADAC

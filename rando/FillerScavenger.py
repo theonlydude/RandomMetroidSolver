@@ -13,6 +13,7 @@ class ScavengerSolver(RandoSolver):
         self.maxDiff = maxDiff
         self.progDiff = progDiff
         self.threshold = self.getThreshold()
+        self.visited = []
         self.scavOrder = []
 
     def getThreshold(self):
@@ -56,20 +57,23 @@ class ScavengerSolver(RandoSolver):
         # we can ignore diffThreshold as well, we have self.maxDiff
         scavAvailable = [loc for loc in majorsAvailable if loc in self.remainingScavLocs and loc.difficulty.difficulty <= self.maxDiff and loc.comeBack == True]
         minorsAvailable = [loc for loc in majorsAvailable if loc not in self.remainingScavLocs and loc.difficulty.difficulty <= self.maxDiff and loc.comeBack == True]
+        ret = None
         if len(minorsAvailable) > 0:
             nextMinor = random.choice(minorsAvailable)
-            return self.collectMajor(nextMinor)
+            ret = self.collectMajor(nextMinor)
         elif len(scavAvailable) > 0:
             self.log.debug("scavAvailable: "+getLocListStr(scavAvailable))
             nextScav = self.chooseNextScavLoc(scavAvailable)
             self.pickupScav(nextScav)
-            return self.collectMajor(nextScav)
+            ret = self.collectMajor(nextScav)
         else:
             # fallback to base solver behaviour to handle comeback etc
-            loc = super(ScavengerSolver, self).nextDecision(majorsAvailable, majorsAvailable, hasEnoughMinors, diffThreshold) # not a typo, the args are the same, and we overwrote minorsAvailable
-            if loc is not None and loc in self.remainingScavLocs:
-                self.pickupScav(loc)
-            return loc
+            ret = super(ScavengerSolver, self).nextDecision(majorsAvailable, majorsAvailable, hasEnoughMinors, diffThreshold) # not a typo, the args are the same, and we overwrote minorsAvailable
+            if ret is not None and ret in self.remainingScavLocs:
+                self.pickupScav(ret)
+        if ret is not None:
+            self.visited.append(ret)
+        return ret
 
     def cancelLastItems(self, count):
         # remove locs from scavOrder
@@ -79,6 +83,8 @@ class ScavengerSolver(RandoSolver):
                 self.scavOrder.remove(loc)
                 self.remainingScavLocs.append(loc)
                 self.log.debug("cancel scav loc: {}".format(loc.Name))
+            if loc in self.visited:
+                self.visited.remove(loc)
 
         # call base func
         super(ScavengerSolver, self).cancelLastItems(count)
@@ -108,6 +114,15 @@ class FillerScavenger(Filler):
         self.container.cleanLocsAfterSolver()
         if self.itemPoolCondition():
             return False
+        # reorder item/locs in container to follow pickup order
+        def indexInVisited(itemLoc):
+            ret = len(self.solver.visited)
+            try:
+                ret = self.solver.visited.index(itemLoc.Location)
+            except ValueError:
+                pass
+            return ret
+        self.container.itemLocations.sort(key=indexInVisited)
         return True
 
     def getProgressionItemLocations(self):

@@ -95,7 +95,7 @@ class RandoExec(object):
         ret = filler.generateItems(vcr=vcr)
         if not ret[0]:
             scavEscape = (ret[1], ret[2]) if self.restrictions.scavEscape else None
-            escapeOk = graphBuilder.escapeGraph(filler.container, self.areaGraph, self.randoSettings.maxDiff, scavEscape)
+            escapeOk = graphBuilder.escapeGraph(container, self.areaGraph, self.randoSettings.maxDiff, scavEscape)
             if not escapeOk:
                 self.errorMsg += "Could not find a solution for escape"
                 ret = (True, ret[1], ret[2])

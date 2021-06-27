@@ -128,11 +128,13 @@ function generate_params {
 
     if(echo "${MAJORSSPLIT}" | grep -q "Scavenger"); then
         MAJORS_SPLIT_LIST=""
-        let NUM_LOCS=4+$RANDOM%12
         SCAV_RANDOMS=("" "--scavRandomized")
         let S=$RANDOM%${#SCAV_RANDOMS[@]}
         SCAV_RANDOM=${SCAV_RANDOMS[$S]}
-        SCAVENGER="--scavNumLocs ${NUM_LOCS} ${SCAV_RANDOM}"
+	SCAV_ESCAPES=("" "--scavEscape")
+        let S=$RANDOM%${#SCAV_ESCAPES[@]}
+        SCAV_ESCAPE=${SCAV_ESCAPES[$S]}
+        SCAVENGER="--scavNumLocs 0 ${SCAV_RANDOM} ${SCAV_ESCAPE}"
     else
         MAJORS_SPLIT_LIST=$(generate_multi_select "majorsSplit" 'Full' 'Major' 'Chozo' 'FullWithHUD')
         SCAVENGER=""

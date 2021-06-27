@@ -100,7 +100,9 @@ escape_hyper_check:
     lda $0c18,x
     bit #$0008                  ; check for plasma (hyper = wave+plasma)
     beq .nohit
-    lda !scavenger_escape_flag : bne .nohit ; avoid having actual plasma beam destroy blocks in scavenger mode escape
+    ;; avoid having actual plasma beam destroy blocks in scavenger mode escape
+    lda !scavenger_escape_flag
+    cmp #$0001 : bne .nohit
     lda #$0000                  ; set zero flag
     bra .end
 .nohit:
@@ -148,7 +150,7 @@ save_station:
     jmp $8cf6
 
 print "B84 end: ", pc
-warnpc $84f8b9                  ; explicitly right there, to remember needed race mode update
+warnpc $84f8bb                  ; explicitly right there, to remember needed race mode update
 
 ;;; DATA, bank 8F. makes map stations doors in norfair/brin/maridia/ws
 ;;; permanently grey

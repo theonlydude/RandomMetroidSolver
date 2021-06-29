@@ -509,7 +509,7 @@ item_pickup:
 	lda.l majors_order,x : and #$00ff
 	cmp !hunt_over_hud : bne .pickup_end_noescape
 	;; last item pickup : check if we shall trigger the escape
-	lda option_end : beq .pickup_end_noescape
+	lda.l option_end : beq .pickup_end_noescape
 	lda #$eeee : sta !major_tmp ; place marker to trigger escape a bit later (needed because of music change)
 	bra .pickup_end
 .pickup_end_noescape:			; routine end when we pick up the item

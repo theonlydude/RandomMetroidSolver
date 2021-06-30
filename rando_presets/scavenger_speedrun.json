@@ -3,5 +3,6 @@
     "scavNumLocs": "4",
     "hud": "on",
     "progressionSpeed":"speedrun",
-    "scavRandomized": "on"
+    "scavRandomized": "on",
+    "scavEscape": "on"
 }

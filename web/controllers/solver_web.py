@@ -1213,7 +1213,7 @@ def sessionWebService():
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
                'rando_speed', 'animals', 'No_Music', 'random_music',
-               'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized"]
+               'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized", "scavEscape"]
     quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
@@ -1266,6 +1266,7 @@ def sessionWebService():
     session.randomizer['hud'] = request.vars.hud
     session.randomizer['scavNumLocs'] = request.vars.scavNumLocs
     session.randomizer['scavRandomized'] = request.vars.scavRandomized
+    session.randomizer['scavEscape'] = request.vars.scavEscape
 
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']

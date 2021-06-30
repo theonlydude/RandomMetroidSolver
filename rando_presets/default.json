@@ -4,6 +4,7 @@
     "majorsSplit": "Full",
     "scavNumLocs": "10",
     "scavRandomized": "off",
+    "scavEscape": "off",
     "maxDifficulty": "hardcore",
     "progressionSpeed": "medium",
     "progressionDifficulty": "normal",

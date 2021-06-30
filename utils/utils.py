@@ -365,6 +365,8 @@ def loadRandoPreset(randoPreset, args):
                     args.scavNumLocs = randoParams["scavNumLocs"]
             if "scavRandomized" in randoParams:
                 args.scavRandomized = randoParams["scavRandomized"] == "on"
+            if "scavEscape" in randoParams:
+                args.scavRandomized = randoParams["scavEscape"] == "on"
     if "startLocation" in randoParams:
         args.startLocation = randoParams["startLocation"]
     if "progressionDifficulty" in randoParams:
@@ -423,6 +425,7 @@ def getRandomizerDefaultParameters():
     defaultParams['majorsSplitMultiSelect'] = defaultMultiValues['majorsSplit']
     defaultParams['scavNumLocs'] = "10"
     defaultParams['scavRandomized'] = "off"
+    defaultParams['scavEscape'] = "off"
     defaultParams['startLocation'] = "Landing Site"
     defaultParams['startLocationMultiSelect'] = defaultMultiValues['startLocation']
     defaultParams['maxDifficulty'] = 'hardcore'

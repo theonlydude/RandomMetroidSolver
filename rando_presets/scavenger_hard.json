@@ -1,4 +1,5 @@
 {
+    "preset": "expert",
     "startLocation": "Landing Site",
     "majorsSplit": "Scavenger",
     "scavNumLocs": "10",

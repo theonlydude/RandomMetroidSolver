@@ -105,7 +105,7 @@ org $819f7c
 	jsr load_menu_3rd_file
 
 // Hijack loading new game to reset stats
-org $828063
+org $82805f
     jsl clear_values
 
 // Hijack the original credits code to read the script from bank $DF
@@ -625,7 +625,8 @@ patch_load:
     plb
     // call load routine
     jsl $818085
-    bcc .backup_check    // skip to end if new file or SRAM corrupt
+    bcc .backup_check
+    // skip to end if new file or SRAM corrupt
     jmp .end
 .backup_check:
 	lda.l opt_backup
@@ -935,7 +936,7 @@ clear_values:
     sta {softreset}
 .ret:
     plp
-    jsl $809a79
+    jsl $80a07b	// hijacked code
     rtl
 
 // Game has ended, save RTA timer to RAM and copy all stats to SRAM a final time

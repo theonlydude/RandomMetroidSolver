@@ -134,8 +134,10 @@ resuming_local:
 org $a1ec00
 // fixed loc for outside access
 update_and_store_region_time:
+	phx
 	jsr update_region_time
 	jsr store_region_time
+	plx
 	rtl
 
 // Helper function to add a time delta, X = stat to add to, A = value to check against

@@ -223,14 +223,13 @@ draw_info:
 	;; increment due to button pressed its high byte
 	;; major_tmp is set to ffff when not in pause
 	lda !game_state
-	cmp #$000c : beq .pause_start
+	cmp #$000f : beq .pause_start_check
 	cmp #$0010 : beq .pause_end
-	cmp #$001b : beq .pause_end ; interpret reserve auto as pause end
-	bra .pause_check
-.pause_start:
+	jmp .end
+.pause_start_check:
 	lda !major_tmp
 	cmp #$ffff : beq .pause_init
-	jmp .end
+	bra .pause
 .pause_init:
 	sep #$20
 	lda !major_idx : sta !major_tmp
@@ -246,10 +245,6 @@ draw_info:
 .pause_deinit:
 	lda !major_tmp : and #$00ff : sta !major_idx
 	lda #$ffff : sta !major_tmp
-	jmp .end
-.pause_check:
-	lda !major_tmp
-	cmp #$ffff : bne .pause
 	jmp .end
 .pause:
 	sep #$20

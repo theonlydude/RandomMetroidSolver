@@ -102,7 +102,7 @@ escape_hyper_check:
     beq .nohit
     ;; avoid having actual plasma beam destroy blocks in scavenger mode escape
     lda !scavenger_escape_flag
-    cmp #$0001 : bne .nohit
+    cmp #$0001 : beq .nohit
     lda #$0000                  ; set zero flag
     bra .end
 .nohit:

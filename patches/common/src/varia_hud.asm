@@ -1,6 +1,6 @@
 ;;; VARIA HUD to display current area (in the area randomizer sense),
 ;;; the split type (M for major, or Z for chozo), and the remaining
-;;; number of items of the chozen split in the current area (1 digit
+;;; number of items of the chosen split in the current area (1 digit
 ;;; for M/Z, 2 digits in full - no split indicator, and more items)
 ;;;
 ;;; It also handles Scavenger mode HUD. If the rando writes a list
@@ -9,13 +9,14 @@
 ;;; - display the next major to collect in the HUD, and its index in the
 ;;;   majors list
 ;;; - cycle through remaining required majors (the route) during pause
-;;; - prevent the player to pick up out of order majors by triggering
-;;;   a game over if they do
+;;; - prevent the player to pick up out of order majors
 ;;; - prevent the player to go through G4 if all required majors have
 ;;;   not been collected. For this, it replaces g4_skip asm, so don't
 ;;;   apply g4_skip when this patch is applied.
-;;; When all required majors have been collected, Tourian access is
-;;; unlocked, and the HUD displays 'HUNT OVER'
+;;; - alternatively, it can trigger the escape immediately after the last
+;;;   item has been collected. If the option is enabled, rando_escape also
+;;;   has to be applied
+;;; When all required majors have been collected, the HUD displays 'HUNT OVER'
 
 ;;; Includes etank bar combine by lioran
 

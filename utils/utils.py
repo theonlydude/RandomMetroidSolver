@@ -366,7 +366,7 @@ def loadRandoPreset(randoPreset, args):
             if "scavRandomized" in randoParams:
                 args.scavRandomized = randoParams["scavRandomized"] == "on"
             if "scavEscape" in randoParams:
-                args.scavRandomized = randoParams["scavEscape"] == "on"
+                args.scavEscape = randoParams["scavEscape"] == "on"
     if "startLocation" in randoParams:
         args.startLocation = randoParams["startLocation"]
     if "progressionDifficulty" in randoParams:

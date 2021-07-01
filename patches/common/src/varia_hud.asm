@@ -513,8 +513,8 @@ item_pickup:
 .pickup_end:
 	plx
 	ply
-	LDA $1DC7,x		; remaining part hijacked code
 	phx			; stack balance, X will be pulled at the end of hijacked routine
+	LDA $1DC7,x		; remaining part hijacked code
 	jml $84889D		; resume pickup
 .nopickup_end:			; routine end when we prevent item pick up (forbidden item)
 	lda #$ffff : sta !major_tmp
@@ -561,6 +561,7 @@ room_earthquake:
 	rts
 
 trigger_escape:
+	phx : phy
 	jsl !escape_setup
 	jsr room_earthquake	; could not be called by setup asm since not in escape yet
 	; load timer graphics
@@ -571,6 +572,7 @@ trigger_escape:
 	lda #$ff24 : jsl !song_routine ; load boss 1 music data
 	lda #$0007 : jsl !song_routine ; load music track 2
 	lda #$000e : jsl !mark_event ; timebomb set event
+	ply : plx
 	rts
 
 compute_n_items:

@@ -466,10 +466,6 @@ option_end:
 	dw $0000
 
 load_state:
-	lda !major_idx : bpl .state_init
-	;; major_idx < 0 : special value, which shouldn't happen, restore it from major_tmp
-	lda !major_tmp : and #$00ff : sta !major_idx
-.state_init:
 	lda #$ffff
 	sta !previous
 	sta !major_tmp

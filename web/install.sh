@@ -29,6 +29,9 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/hud_full.png ] || ln -s ~/RandomMetroidSolver/web/static/hud_full.png ~/web2py/applications/solver/static/images/hud_full.png
 [ -L ~/web2py/applications/solver/static/images/hud_chozo_start.png ] || ln -s ~/RandomMetroidSolver/web/static/hud_chozo_start.png ~/web2py/applications/solver/static/images/hud_chozo_start.png
 [ -L ~/web2py/applications/solver/static/images/hud_major_energy.png ] || ln -s ~/RandomMetroidSolver/web/static/hud_major_energy.png ~/web2py/applications/solver/static/images/hud_major_energy.png
+[ -L ~/web2py/applications/solver/static/images/hud_scav.png ] || ln -s ~/RandomMetroidSolver/web/static/hud_scav.png ~/web2py/applications/solver/static/images/hud_scav.png
+[ -L ~/web2py/applications/solver/static/images/hud_scav_over.png ] || ln -s ~/RandomMetroidSolver/web/static/hud_scav_over.png ~/web2py/applications/solver/static/images/hud_scav_over.png
+[ -L ~/web2py/applications/solver/static/images/hud_scav_pause.png ] || ln -s ~/RandomMetroidSolver/web/static/hud_scav_pause.png ~/web2py/applications/solver/static/images/hud_scav_pause.png
 [ -L ~/web2py/applications/solver/static/css/chosen.css ] || ln -s ~/RandomMetroidSolver/web/static/chosen.css ~/web2py/applications/solver/static/css/chosen.css
 [ -L ~/web2py/applications/solver/static/js/chosen.jquery.min.js ] || ln -s ~/RandomMetroidSolver/web/static/chosen.jquery.min.js ~/web2py/applications/solver/static/js/chosen.jquery.min.js
 [ -L ~/web2py/applications/solver/static/images/chosen-sprite.png ] || ln -s ~/RandomMetroidSolver/web/static/chosen-sprite.png ~/web2py/applications/solver/static/images/chosen-sprite.png

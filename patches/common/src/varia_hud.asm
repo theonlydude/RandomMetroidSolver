@@ -68,8 +68,8 @@ org $82def7
 org $848899
 	jml item_pickup
 
-;;; a bunch of hijacks post item collection to trigger the escape after last item in scavenger hunt if option is set
-;;; has to be done after item_pickup because of music management
+;;; a bunch of hijacks post item collection to count items or trigger the escape after last item
+;;; in scavenger hunt if option is set (has to be done after item_pickup because of music management)
 org $8488de			; Beams
 	nop : nop : nop
 	jsl item_post_collect
@@ -479,7 +479,6 @@ load_state:
 item_pickup:
 	phy
 	phx
-	jsr compute_n_items
 	;; check if loc ID is the next required major
 	lda !major_idx : asl : tax
 	lda.l majors_order,x
@@ -525,6 +524,7 @@ item_pickup:
 
 
 item_post_collect:
+	jsr compute_n_items
 	lda !major_tmp
 	cmp #$eeee : bne .normal_pickup
 	lda #$ffff : sta !major_tmp

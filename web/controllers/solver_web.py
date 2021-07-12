@@ -572,7 +572,7 @@ def getLastSolvedROM():
     else:
         return None
 
-def genPathTable(locations, displayAPs=True):
+def genPathTable(locations, scavengerOrder, displayAPs=True):
     if locations is None or len(locations) == 0:
         return None
 
@@ -609,8 +609,10 @@ def genPathTable(locations, displayAPs=True):
   <td>{}</td>
 </tr>
 """.format(item, getRoomLink(name, room), getAreaLink(area), getSubArea(subarea),
-           getBossImg(name) if "Boss" in _class else getItemImg(item), getDiffImg(locDiff),
-           getTechniques(locTechniques), getItems(locItems))
+           getBossImg(name) if "Boss" in _class else getItemImg(item, location=name, scavengerOrder=scavengerOrder),
+           getDiffImg(locDiff),
+           getTechniques(locTechniques),
+           getItems(locItems))
 
             if item == 'Varia' and currentSuit == 'Power':
                 currentSuit = 'Varia'
@@ -628,9 +630,9 @@ def getItems(items):
             # for etanks and reserves
             count = item[:item.find('-')]
             item = item[item.find('-')+1:]
-            ret += "<span>{}-{}</span>".format(count, getItemImg(item, True))
+            ret += "<span>{}-{}</span>".format(count, getItemImg(item, small=True))
         else:
-            ret += getItemImg(item, True)
+            ret += getItemImg(item, small=True)
     return ret
 
 def getTechniques(techniques):
@@ -667,12 +669,20 @@ def getSubArea(subarea):
 def getBossImg(boss):
     return """<img alt="{}" class="imageBoss" src="/solver/static/images/{}.png" title="{}" />""".format(boss, boss.replace(' ', ''), boss)
 
-def getItemImg(item, small=False):
+def getItemImg(item, location=None, scavengerOrder=[], small=False):
     if small == True:
         _class = "imageItems"
     else:
         _class = "imageItem"
-    return """<img alt="{}" class="{}" src="/solver/static/images/{}.png" title="{}" />""".format(item, _class, item, item)
+    itemImg = """<img alt="{}" class="{}" src="/solver/static/images/{}.png" title="{}" />""".format(item, _class, item, item)
+
+    if location is not None and len(scavengerOrder) > 0 and location in scavengerOrder:
+        index = scavengerOrder.index(location) + 1
+        if index >= 10:
+            itemImg += """<img class="imageItems" src="/solver/static/images/1.png"/>"""
+        index %= 10
+        itemImg += """<img class="imageItems" src="/solver/static/images/{}.png"/>""".format(index)
+    return itemImg
 
 def getDiffImg(diff):
     diffName = diff4solver(float(diff))
@@ -692,12 +702,12 @@ def prepareResult():
                 result['resultText'] = "The ROM \"{}\" estimated difficulty is: ".format(result['randomizedRom'])
 
         # add generated path (spoiler !)
-        result['pathTable'] = genPathTable(result['generatedPath'])
-        result['pathremainTry'] = genPathTable(result['remainTry'])
-        result['pathremainMajors'] = genPathTable(result['remainMajors'], False)
-        result['pathremainMinors'] = genPathTable(result['remainMinors'], False)
-        result['pathskippedMajors'] = genPathTable(result['skippedMajors'], False)
-        result['pathunavailMajors'] = genPathTable(result['unavailMajors'], False)
+        result['pathTable'] = genPathTable(result['generatedPath'], result['scavengerOrder'])
+        result['pathremainTry'] = genPathTable(result['remainTry'], result['scavengerOrder'])
+        result['pathremainMajors'] = genPathTable(result['remainMajors'], result['scavengerOrder'], False)
+        result['pathremainMinors'] = genPathTable(result['remainMinors'], result['scavengerOrder'], False)
+        result['pathskippedMajors'] = genPathTable(result['skippedMajors'], result['scavengerOrder'], False)
+        result['pathunavailMajors'] = genPathTable(result['unavailMajors'], result['scavengerOrder'], False)
 
         # display the result only once
         session.solver['result'] = None

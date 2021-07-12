@@ -403,7 +403,7 @@ class RandoSetup(object):
                 self.addRestricted()
         else:
             self.superFun.remove('Suits')
-            self.errorMsgs.append("Super Fun : Could not remove any suit")
+            self.log.debug("Super Fun : Could not remove any suit")
         self.log.debug("getForbiddenSuits END. forbidden="+str(self.forbiddenItems))
 
     def getForbiddenMovement(self):
@@ -416,7 +416,7 @@ class RandoSetup(object):
             self.addForbidden(removableMovement + [None])
         else:
             self.superFun.remove('Movement')
-            self.errorMsgs.append('Super Fun : Could not remove any movement item')
+            self.log.debug('Super Fun : Could not remove any movement item')
         self.log.debug("getForbiddenMovement END. forbidden="+str(self.forbiddenItems))
 
     def getForbiddenCombat(self):
@@ -436,7 +436,7 @@ class RandoSetup(object):
             self.addForbidden(removableCombat + fake)
         else:
             self.superFun.remove('Combat')
-            self.errorMsgs.append('Super Fun : Could not remove any combat item')
+            self.log.debug('Super Fun : Could not remove any combat item')
         self.log.debug("getForbiddenCombat END. forbidden="+str(self.forbiddenItems))
 
     def getForbidden(self):

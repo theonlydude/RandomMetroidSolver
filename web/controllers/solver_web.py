@@ -1070,7 +1070,7 @@ def randomizer():
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets, randoPresetsDesc=randoPresetsDesc,
                 startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues,
-                maxsize=sys.maxsize)
+                maxsize=sys.maxsize, displayNames=displayNames)
 
 def raiseHttp(code, msg, isJson=False):
     #print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
@@ -2460,7 +2460,7 @@ def customizer():
                     if k in infoKeys:
                         info[k] = value
                     else:
-                        seedParams[k] = value
+                        seedParams[k] = updateParameterDisplay(value)
                 seedInfo = info
                 seedInfo['key'] = key
 
@@ -2482,6 +2482,15 @@ def customizer():
 
     return dict(customSprites=customSprites, customShips=customShips,
                 seedInfo=seedInfo, seedParams=seedParams, msg=msg, defaultParams=defaultParams)
+
+# if we have an internal parameter value different from its display value
+displayNames = {"FullWithHUD": "Full Countdown"}
+
+def updateParameterDisplay(value):
+    for internal, display in displayNames.items():
+        if internal in value:
+            value = value.replace(internal, display)
+    return value
 
 def customWebService():
     print("customWebService")

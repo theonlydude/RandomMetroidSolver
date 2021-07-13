@@ -431,7 +431,7 @@ if seedInfo != None:
     pass
 }}
 
-function greyOutPatches(isRace, isVARIA) {
+function greyOutPatches(isRace, isVARIA, isVanilla) {
     var buttons = ["itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save", "No_Music", "random_music"];
     for(var i=0; i<buttons.length; i++) {
         disableElement(buttons[i], isRace);
@@ -440,6 +440,11 @@ function greyOutPatches(isRace, isVARIA) {
     var buttons = ["AimAnyButton", "max_ammo_display", "supermetroid_msu1"];
     for(var i=0; i<buttons.length; i++) {
         disableElement(buttons[i], isVARIA);
+    }
+
+    // grey out random music when vanilla rom is detected as it'll crash
+    if(isVanilla == true) {
+        disableElement("random_music", true);
     }
 
     // set noSpinAttack to on when a race seed is detected
@@ -488,12 +493,14 @@ window.onload = function(){
                     return false;
                 }
 
+                var crc32 = new Crc32();
+                crc32.update(e.target.result);
+                var digest = crc32.digest();
+                console.log("crc32: "+digest);
+                var isVanilla = digest == "d63ed5f8";
+
                 if(permalink == true) {
-                    var crc32 = new Crc32();
-                    crc32.update(e.target.result);
-                    var digest = crc32.digest();
-                    console.log("crc32: "+digest);
-                    if(digest != "d63ed5f8") {
+                    if(! isVanilla) {
                         alert("Non vanilla ROM detected");
                         document.getElementById(inputName).value = "";
                         return false;
@@ -532,7 +539,7 @@ window.onload = function(){
                     // detect beam doors patch from seed to customize
                     beamDoorsPatch = bytes[0x226e5] == 0x0D;
 
-                    greyOutPatches(isRace, isVARIA);
+                    greyOutPatches(isRace, isVARIA, isVanilla);
                 }
             }
 
@@ -603,7 +610,7 @@ if session.customizer["invert"] == "on":
 
 {{
 if seedInfo != None:
-    response.write("    greyOutPatches({}, true);".format("true" if seedInfo["raceMode"] == "on" else "false"), escape=False)
+    response.write("    greyOutPatches({}, true, false);".format("true" if seedInfo["raceMode"] == "on" else "false"), escape=False)
     pass
 }}
 

@@ -263,7 +263,7 @@ class Knows:
     GravLessLevel1 = SMBool(True, hardcore, ['GravLessLevel1'])
     desc['GravLessLevel1'] = {'display': 'Level 1',
                               'title': 'Make your way underwater with Hi-Jump and Ice, freezing crabs and fishes. Access Botwoon with grapple.',
-                              'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
+                              'href': 'https://www.youtube.com/watch?v=G5bB03j5GZc',
                               'rooms': ['Main Street', 'Mt. Everest', 'Crab Shaft', 'Pseudo Plasma Spark Room',
                                         'Aqueduct', 'Botwoon Hallway', "Botwoon's Room", 'Botwoon Energy Tank Room',
                                         'Crab Hole', 'Crab Tunnel', 'East Ocean']}

@@ -129,7 +129,9 @@ class RandoSetup(object):
     def initScavenger(self, endDate, vcr=None):
         attempts = 30 if self.restrictions.scavIsVanilla else 1
         majorLocs = [loc for loc in self.container.unusedLocations if self.restrictions.isLocMajor(loc) and (not self.restrictions.scavIsVanilla or (loc.VanillaItemType not in self.forbiddenItems and self.container.getNextItemInPool(loc.VanillaItemType) is not None))]
-        nLocs = min(self.settings.restrictions['ScavengerParams']['numLocs'], len(majorLocs))
+        # if scav randomized and super funs we have to remove super fun items
+        superFunCount = len(self.forbiddenItems) if not self.restrictions.scavIsVanilla and len(self.forbiddenItems) > 0 else 0
+        nLocs = min(self.settings.restrictions['ScavengerParams']['numLocs'], len(majorLocs) - superFunCount)
         self.log.debug("initScavenger. nLocs="+str(nLocs))
         cont = None
         restr = None

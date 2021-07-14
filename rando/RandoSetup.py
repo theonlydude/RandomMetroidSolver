@@ -128,7 +128,7 @@ class RandoSetup(object):
 
     def initScavenger(self, endDate, vcr=None):
         attempts = 30 if self.restrictions.scavIsVanilla else 1
-        majorLocs = [loc for loc in self.container.unusedLocations if self.restrictions.isLocMajor(loc) and (not self.restrictions.scavIsVanilla or (loc.VanillaItemType not in self.forbiddenItems and self.container.getNextItemInPool(loc.VanillaItemType) is not None))]
+        majorLocs = [loc for loc in self.container.unusedLocations if self.restrictions.isLocMajor(loc) and (not self.restrictions.scavIsVanilla or (loc.VanillaItemType not in self.forbiddenItems and loc not in self.restrictedLocs and self.container.getNextItemInPool(loc.VanillaItemType) is not None))]
         # if scav randomized and super funs we have to remove super fun items
         superFunCount = len(self.forbiddenItems) if not self.restrictions.scavIsVanilla and len(self.forbiddenItems) > 0 else 0
         nLocs = min(self.settings.restrictions['ScavengerParams']['numLocs'], len(majorLocs) - superFunCount)
@@ -165,10 +165,11 @@ class RandoSetup(object):
                 restr = r
         if restr is not None:
             self.log.debug("initScavenger. got list after "+str(i+1)+" attempts")
-            # finally, actually do the randomization using a speedrun filler (50 attempts heuristic)
+            # finally, actually do the randomization using a speedrun filler (stepLimit attempts heuristic)
+            stepLimit = 50
             self.restrictions.setPlacementRestrictions(restr)
-            filler = FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, self.container, endDate=endDate, diffSteps=50)
-            stepCond = filler.createStepCountCondition(50)
+            filler = FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, self.container, endDate=endDate, diffSteps=stepLimit)
+            stepCond = filler.createStepCountCondition(stepLimit)
             filler.generateItems(condition=lambda: filler.itemPoolCondition() and stepCond(), vcr=vcr)
             if not filler.itemPoolCondition():
                 cont = filler.container

@@ -173,7 +173,9 @@ accessPoints = [
                                                                    sm.canPassSpongeBath()),
                                                            sm.wand(sm.wnot(Bosses.bossDead(sm, 'Phantoon')),
                                                                    RomPatches.has(RomPatches.SpongeBathBlueDoor)))),
-        'PhantoonRoomOut': Cache.ldeco(lambda sm: sm.wand(sm.traverse('WreckedShipMainShaftBottom'), sm.canPassBombPassages()))
+        'PhantoonRoomOut': Cache.ldeco(lambda sm: sm.wand(sm.traverse('WreckedShipMainShaftBottom'), sm.canPassBombPassages())),
+        'Bowling': Cache.ldeco(lambda sm: sm.wand(sm.canPassBombPassages(),
+                                                  sm.canPassBowling()))
     }, internal=True,
        start={'spawn':0x0300,
               'doors':[0x83,0x8b], 'patches':[RomPatches.SpongeBathBlueDoor, RomPatches.WsEtankBlueDoor],
@@ -182,6 +184,9 @@ accessPoints = [
     AccessPoint('Wrecked Ship Back', 'WreckedShip', {
         'Wrecked Ship Main': lambda sm: SMBool(True),
         'Crab Maze Left': Cache.ldeco(lambda sm: sm.canPassForgottenHighway(True))
+    }, internal=True),
+    AccessPoint('Bowling', 'WreckedShip', {
+        'West Ocean Left': lambda sm: SMBool(True)
     }, internal=True),
     AccessPoint('Crab Maze Left', 'WreckedShip', {
         'Wrecked Ship Back': Cache.ldeco(lambda sm: sm.canPassForgottenHighway(False))

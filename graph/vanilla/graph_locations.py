@@ -265,12 +265,11 @@ locationsDict["Energy Tank, Firefleas"].PostAvailable = (
                              sm.canSpringBallJump()))
 )
 locationsDict["Reserve Tank, Wrecked Ship"].AccessFrom = {
-    'Wrecked Ship Main': lambda sm: SMBool(True)
+    'Bowling': lambda sm: SMBool(True)
 }
 locationsDict["Reserve Tank, Wrecked Ship"].Available = (
     lambda sm: sm.wand(sm.canUsePowerBombs(),
-                       sm.haveItem('SpeedBooster'),
-                       sm.canPassBowling())
+                       sm.haveItem('SpeedBooster'))
 )
 locationsDict["Energy Tank, Wrecked Ship"].AccessFrom = {
     'Wrecked Ship Back': lambda sm: sm.wor(RomPatches.has(RomPatches.WsEtankBlueDoor),
@@ -293,11 +292,10 @@ locationsDict["Right Super, Wrecked Ship"].Available = (
     lambda sm: sm.canPassBombPassages()
 )
 locationsDict["Gravity Suit"].AccessFrom = {
-    'Wrecked Ship Main': lambda sm: SMBool(True)
+    'Bowling': lambda sm: SMBool(True)
 }
 locationsDict["Gravity Suit"].Available = (
-    lambda sm: sm.wand(sm.canPassBombPassages(),
-                       sm.canPassBowling())
+    lambda sm: SMBool(True)
 )
 locationsDict["Energy Tank, Mama turtle"].AccessFrom = {
     'Main Street Bottom': lambda sm: sm.wand(sm.canDoOuterMaridia(),
@@ -817,11 +815,10 @@ locationsDict["Missile (Wrecked Ship middle)"].Available = (
     lambda sm: sm.canPassBombPassages()
 )
 locationsDict["Missile (Gravity Suit)"].AccessFrom = {
-    'Wrecked Ship Main': lambda sm: SMBool(True)
+    'Bowling': lambda sm: SMBool(True)
 }
 locationsDict["Missile (Gravity Suit)"].Available = (
-    lambda sm: sm.wand(sm.canPassBowling(),
-                       sm.canPassBombPassages())
+    lambda sm: SMBool(True)
 )
 locationsDict["Missile (Wrecked Ship top)"].AccessFrom = {
     'Wrecked Ship Main': lambda sm: SMBool(True)

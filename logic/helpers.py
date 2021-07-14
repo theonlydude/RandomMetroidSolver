@@ -522,14 +522,14 @@ class Helpers(object):
         else:
             return SMBool(True, easy, items=items)
 
-    @Cache.decorator
-    def enoughStuffBotwoon(self):
+    def enoughStuffBotwoon(self, cfClip=False):
         sm = self.smbm
-        (ammoMargin, secs, items) = self.canInflictEnoughDamages(6000, givesDrops=False)
+        cfClipOffset = 0 if (not cfClip or sm.canFireChargedShots()) else 4000
+        (ammoMargin, secs, items) = self.canInflictEnoughDamages(6000+cfClipOffset, givesDrops=False)
         diff = SMBool(True, easy, [], items)
         lowStuff = sm.knowsLowStuffBotwoon()
         if ammoMargin == 0 and lowStuff.bool:
-            (ammoMargin, secs, items) = self.canInflictEnoughDamages(3500, givesDrops=False)
+            (ammoMargin, secs, items) = self.canInflictEnoughDamages(3500+cfClipOffset, givesDrops=False)
             diff = SMBool(lowStuff.bool, lowStuff.difficulty, lowStuff.knows, items)
         if ammoMargin == 0:
             return smboolFalse

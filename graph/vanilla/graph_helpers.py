@@ -540,8 +540,10 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canDefeatBotwoon(self):
         sm = self.smbm
-        return sm.wand(sm.enoughStuffBotwoon(),
-                       sm.canPassBotwoonHallway())
+        hallway = sm.canPassBotwoonHallway()
+        cfClip = 'CrystalFlashClip' in hallway.knows or 'SuitlessCrystalFlashClip' in hallway.knows
+        return sm.wand(hallway,
+                       sm.enoughStuffBotwoon(cfClip))
 
     # the sandpits from aqueduct
     @Cache.decorator

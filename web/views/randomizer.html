@@ -1084,11 +1084,38 @@ window.onload = function(){
         var scavengerParams = document.getElementById("scavengerParams");
         if(majorsSplit.value == "Scavenger") {
             scavengerParams.style.display = "block";
+            var startLocation = document.getElementById("startLocation");
+            if(startLocation.value != "Landing Site") {
+                startLocation.value = "Landing Site";
+            }
+            var progressionSpeed = document.getElementById("progressionSpeed");
+            if(progressionSpeed.value != "speedrun") {
+                progressionSpeed.value = "speedrun";
+            }
+            var morphPlacement = document.getElementById("morphPlacement");
+            if(morphPlacement.value == "late") {
+                morphPlacement.value = "normal";
+            }
+            var hud = document.getElementById("hud");
+            if(! hud.checked) {
+                hud.click();
+            }
         } else {
             scavengerParams.style.display = "none";
         }
     }
     majorsSplit.onchange();
+
+    var scavEscape = document.getElementById("scavEscape");
+    scavEscape.onchange = function() {
+        var escapeRando = document.getElementById("escapeRando");
+        var removeEscapeEnemies = document.getElementById("removeEscapeEnemies");
+        if(scavEscape.checked) {
+            if(! escapeRando.checked){ escapeRando.click(); }
+            if(removeEscapeEnemies.checked){ removeEscapeEnemies.click(); }
+        }
+    }
+    scavEscape.onchange();
 
     var inputs = document.getElementsByTagName("input");
     for(var i = 0; i < inputs.length; i++) {

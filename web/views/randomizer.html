@@ -1004,6 +1004,8 @@ window.onload = function(){
 
             if(majorsSplit.value == "Scavenger") {
                 majorsSplit.value = "Full";
+                // changing a value in js doesn't call onchange, so explicitly call it
+                majorsSplit.onchange();
             }
             if(variaTweaks.checked == false) {
                 variaTweaks.click();

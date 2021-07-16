@@ -109,6 +109,16 @@ class Helpers(object):
         sm = self.smbm
         return sm.wor(sm.haveItem('Charge'), RomPatches.has(RomPatches.NerfedCharge))
 
+    # gives number of required Crystal Flashes when hellrunning LN
+    # see canHellRun for description of mult
+    def getLNRequiredCFs(self, mult):
+        tanks = self.energyReserveCount()
+        multCF = mult
+        if tanks >= 14:
+            multCF *= 2.0
+        nCF = int(math.ceil(2/multCF))
+        return nCF
+
     # higher values for mult means hell run is that much "easier" (HP mult)
     def canHellRun(self, hellRun, mult=1.0, minE=2):
         sm = self.smbm
@@ -129,11 +139,7 @@ class Helpers(object):
                     ret._items.append(items)
                 return ret
             else:
-                tanks = self.energyReserveCount()
-                multCF = mult
-                if tanks >= 14:
-                    multCF *= 2.0
-                nCF = int(math.ceil(2/multCF))
+                nCF = self.getLNRequiredCFs(mult)
                 ret = sm.wand(self.energyReserveCountOkHellRun(hellRun, mult),
                               self.canCrystalFlash(nCF))
                 if ret.bool == True:

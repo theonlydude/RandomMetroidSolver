@@ -318,44 +318,55 @@ class Helpers(object):
         sm = self.smbm
         return sm.haveItem('Hyper')
 
+    # return beam damage and used beams
     @Cache.decorator
     def getBeamDamage(self):
         sm = self.smbm
         standardDamage = 20
-
+        beams = []
         if sm.wand(sm.haveItem('Ice'),
                    sm.haveItem('Wave'),
                    sm.haveItem('Plasma')) == True:
+            beams = ['Ice', 'Wave', 'Plasma']
             standardDamage = 300
         elif sm.wand(sm.haveItem('Wave'),
                      sm.haveItem('Plasma')) == True:
+            beams = ['Wave', 'Plasma']
             standardDamage = 250
         elif sm.wand(sm.haveItem('Ice'),
                      sm.haveItem('Plasma')) == True:
+            beams = ['Ice', 'Plasma']
             standardDamage = 200
         elif sm.haveItem('Plasma') == True:
             standardDamage = 150
         elif sm.wand(sm.haveItem('Ice'),
                      sm.haveItem('Wave'),
                      sm.haveItem('Spazer')) == True:
+            beams = ['Ice', 'Wave', 'Spazer']
             standardDamage = 100
         elif sm.wand(sm.haveItem('Wave'),
                      sm.haveItem('Spazer')) == True:
+            beams = ['Wave', 'Spazer']
             standardDamage = 70
         elif sm.wand(sm.haveItem('Ice'),
                      sm.haveItem('Spazer')) == True:
+            beams = ['Ice', 'Spazer']
             standardDamage = 60
         elif sm.wand(sm.haveItem('Ice'),
                      sm.haveItem('Wave')) == True:
+            beams = ['Ice', 'Wave']
             standardDamage = 60
         elif sm.haveItem('Wave') == True:
+            beams = ['Wave']
             standardDamage = 50
         elif sm.haveItem('Spazer') == True:
+            beams = ['Spazer']
             standardDamage = 40
         elif sm.haveItem('Ice') == True:
+            beams = ['Ice']
             standardDamage = 30
 
-        return standardDamage
+        return standardDamage, beams
 
     # returns a tuple with :
     #
@@ -368,36 +379,34 @@ class Helpers(object):
     # - estimation of the fight duration in seconds (well not really, it
     # is if you fire and land shots perfectly and constantly), giving info
     # to compute boss fight difficulty
+    #
+    # - list of used items in the simulated fight. includes beams, and ammo packs
+    #   (for instance ["Charge", "Plasma", "Super", "Super", "Super"])
     def canInflictEnoughDamages(self, bossEnergy, doubleSuper=False, charge=True, power=False, givesDrops=True, ignoreMissiles=False, ignoreSupers=False):
         # TODO: handle special beam attacks ? (http://deanyd.net/sm/index.php?title=Charge_Beam_Combos)
         sm = self.smbm
         items = []
-
+        beams = []
         # http://deanyd.net/sm/index.php?title=Damage
         standardDamage = 0
         if sm.canFireChargedShots().bool == True and charge == True:
-            standardDamage = self.getBeamDamage()
-            items.append('Charge')
+            standardDamage, beams = self.getBeamDamage()
         # charge triples the damage
         chargeDamage = standardDamage
         if sm.haveItem('Charge').bool == True:
             chargeDamage *= 3.0
-
+            beams.append('Charge')
         # missile 100 damages, super missile 300 damages, PBs 200 dmg, 5 in each extension
         missilesAmount = sm.itemCount('Missile') * 5
         if ignoreMissiles == True:
             missilesDamage = 0
         else:
             missilesDamage = missilesAmount * 100
-            if missilesAmount > 0:
-                items.append('Missile')
         supersAmount = sm.itemCount('Super') * 5
         if ignoreSupers == True:
             oneSuper = 0
         else:
             oneSuper = 300.0
-            if supersAmount > 0:
-                items.append('Super')
         if doubleSuper == True:
             oneSuper *= 2
         supersDamage = supersAmount * oneSuper
@@ -406,8 +415,6 @@ class Helpers(object):
         if power == True and sm.haveItem('PowerBomb') == True:
             powerAmount = sm.itemCount('PowerBomb') * 5
             powerDamage = powerAmount * 200
-            items.append('PowerBomb')
-
         canBeatBoss = chargeDamage > 0 or givesDrops or (missilesDamage + supersDamage + powerDamage) >= bossEnergy
         if not canBeatBoss:
             return (0, 0, [])
@@ -427,13 +434,14 @@ class Helpers(object):
         chargeDPS = chargeDamage * Settings.algoSettings['chargedShotsPerSecond']
         # print("chargeDPS=" + str(chargeDPS))
         dpsDict = {
-            missilesDPS: (missilesAmount, 100.0),
-            supersDPS: (supersAmount, oneSuper),
-            powerDPS: (powerAmount, 200.0),
+            missilesDPS: (missilesAmount, 100.0, ['Missile']),
+            supersDPS: (supersAmount, oneSuper, ['Super']),
+            powerDPS: (powerAmount, 200.0, ['PowerBomb']),
             # no boss will take more 10000 charged shots
-            chargeDPS: (10000, chargeDamage)
+            chargeDPS: (10000, chargeDamage, beams)
         }
         secs = 0
+        tmpItems = []
         for dps in sorted(dpsDict, reverse=True):
             amount = dpsDict[dps][0]
             one = dpsDict[dps][1]
@@ -442,13 +450,20 @@ class Helpers(object):
             fire = min(bossEnergy / one, amount)
             secs += fire * (one / dps)
             bossEnergy -= fire * one
+            tmpItems.append(dpsDict[dps][2]*int(fire))
             if bossEnergy <= 0:
                 break
         if bossEnergy > 0:
             # print ('!! drops !! ')
             secs += bossEnergy * Settings.algoSettings['missileDropsPerMinute'] * 100 / 60
             # print('ammoMargin = ' + str(ammoMargin) + ', secs = ' + str(secs))
-
+        # post process used items to get ammo packs and only one occurrence of beam items
+        for ammo in ['Missile', 'Super', 'PowerBomb']:
+            count = int(math.ceil(tmpItems.count(ammo)/5.0))
+            items += [ammo]*count
+        for beam in beams:
+            if beam in tmpItems:
+                items.append(beam)
         return (ammoMargin, secs, items)
 
     # return diff score, or -1 if below minimum energy in diffTbl
@@ -567,7 +582,13 @@ class Helpers(object):
         (ammoMargin, secs, ammoItems) = self.canInflictEnoughDamages(19000, doubleSuper=True, power=True, givesDrops=False)
         if ammoMargin == 0:
             return smboolFalse
-
+        # if suitless, check for enogh ammo left for a CF
+        if sm.heatProof().bool == False:
+            nMiss = sm.itemCount('Missile') - ammoItems.count('Missile')
+            nSupers = sm.itemCount('Super') - ammoItems.count('Super')
+            nPB = sm.itemCount('PowerBomb') - ammoItems.count('PowerBomb')
+            if nMiss < 2 or nSupers < 2 or nPB < 3:
+                return smboolFalse
         # print('RIDLEY', ammoMargin, secs)
         (diff, defenseItems) = self.computeBossDifficulty(ammoMargin, secs,
                                                           Settings.bossesDifficulty['Ridley'])

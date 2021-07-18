@@ -450,7 +450,7 @@ class Helpers(object):
             fire = min(bossEnergy / one, amount)
             secs += fire * (one / dps)
             bossEnergy -= fire * one
-            tmpItems.append(dpsDict[dps][2]*int(fire))
+            tmpItems += dpsDict[dps][2]*int(fire)
             if bossEnergy <= 0:
                 break
         if bossEnergy > 0:

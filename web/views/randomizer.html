@@ -537,7 +537,6 @@ function ajaxFail(jqXHR, textStatus) {
   $('#flash').show();
   $('#overlay').hide();
   $('#loadingGIF').hide();
-  cancelTip();
 }
 
 function ajaxFailJSON(jqXHR, textStatus) {
@@ -550,7 +549,6 @@ function ajaxFailJSON(jqXHR, textStatus) {
   $('#flash').show();
   $('#overlay').hide();
   $('#loadingGIF').hide();
-  cancelTip();
 }
 
 function unpack_3bytes(ips, i) {
@@ -698,7 +696,6 @@ function AjaxRandomizerCallCompleted(data) {
     }
     $('#overlay').hide();
     $('#loadingGIF').hide();
-    cancelTip();
 }
 
 function doSubmit() {
@@ -798,16 +795,6 @@ function loadTip(first = true) {
     document.getElementById(elem).style.marginLeft = "-" + tip.length/4 + "em";
     $("#"+elem).fadeIn(1000);
     myTimer = setTimeout(loadTip, 5000, false);
-}
-
-function cancelTip() {
-  if(myTimer != null) {
-    clearTimeout(myTimer);
-    myTimer = null;
-  }
-  $("#loadingTips"+curLoadingTips).fadeOut(3000);
-  curLoadingTips = 1 - curLoadingTips;
-  $("#loadingTips"+curLoadingTips).hide();
 }
 
 var vanillaROMStored = false;

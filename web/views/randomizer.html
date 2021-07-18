@@ -129,7 +129,7 @@ if (hs.registerOverlay) {
 .loadingTips {
     position: fixed;
     left: 50%;
-    bottom: 10%;
+    top: 3.25%;
     z-index: 99;
     display:none;
     border-radius: 2em;
@@ -725,7 +725,6 @@ function doSubmit() {
     // while WS is working, display "working" message
     $('#overlay').show();
     $('#loadingGIF').show();
-    loadTip();
   }
 
   return false;
@@ -1137,6 +1136,7 @@ window.onload = function(){
     $("#preset").chosen();
     $("#randoPreset").chosen();
     resizeChosen();
+    loadTip();
 
     // check if a vanilla ROM is already in local storage
     localforage.getItem('vanillaROM', function(err, value) {

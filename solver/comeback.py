@@ -14,7 +14,6 @@ class ComeBack(object):
         # return True if a rewind is needed. choose the next area to use
         solveAreas = {}
         locsCount = 0
-        majorNoComeBack = False
         for loc in locations:
             if self.solver.majorsSplit != 'Full':
                 if loc.isClass(self.solver.majorsSplit) or loc.isBoss():
@@ -22,11 +21,6 @@ class ComeBack(object):
                         return False
                     elif loc.comeBack == True:
                         return False
-                else:
-                    # when the solver decide to visit a major no come back locations
-                    # when there's minors comeback locations available.
-                    # create a rollback point just in case more minors where actually required to do a special tech.
-                    majorNoComeBack = True
             else:
                 if loc.comeBack is None:
                     return False
@@ -37,9 +31,6 @@ class ComeBack(object):
                 solveAreas[loc.SolveArea] += 1
             else:
                 solveAreas[loc.SolveArea] = 1
-
-        if majorNoComeBack == False and self.solver.majorsSplit != 'Full':
-            return False
 
         # only minors locations, or just one major, no need for a rewind step
         if locsCount < 2:

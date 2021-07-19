@@ -85,9 +85,13 @@ class RandoExec(object):
             now = time.process_time()
         if container is None:
             if self.graphSettings.areaRando:
-                self.errorMsg += "Could not find an area layout with these settings"
-            else:
-                self.errorMsg += "Unable to process settings"
+                self.errorMsg += "Could not find an area layout with these settings\n"
+            if self.graphSettings.doorsColorsRando:
+                self.errorMsg += "Could not find a door color combination with these settings\n"
+            if split == "Scavenger":
+                self.errorMsg += "Scavenger seed generation timed out\n"
+            if self.errorMsg == "":
+                self.errorMsg += "Unable to process settings\n"
             return (True, [], [])
         self.areaGraph.printGraph()
         filler = self.createFiller(container, endDate)

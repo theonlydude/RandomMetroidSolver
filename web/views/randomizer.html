@@ -798,7 +798,7 @@ function loadTip(first = true) {
     document.getElementById(elem).innerHTML = tip;
     document.getElementById(elem).style.marginLeft = "-" + tip.length/4 + "em";
     $("#"+elem).fadeIn(1000);
-    myTimer = setTimeout(loadTip, 5000, false);
+    myTimer = setTimeout(loadTip, 10000, false);
 }
 
 var vanillaROMStored = false;

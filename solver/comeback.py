@@ -6,6 +6,9 @@ class ComeBack(object):
     # one ComebackStep object is created each time we have to use the no comeback heuristic, used for rewinding.
     def __init__(self, solver):
         self.comeBackSteps = []
+        # heuristic to prevent infinite rollbacks
+        self.areaCount = 0
+        self.maxAreaCount = 16
         # used to rewind
         self.solver = solver
         self.log = utils.log.get('Rewind')
@@ -59,8 +62,15 @@ class ComeBack(object):
             else:
                 self.log.debug("cur: {}, lastStep.cur: {}, don't use lastStep.next()".format(cur, lastStep.cur))
 
+        # prevent creating to many steps to avoid infinite rollbacks
+        if self.areaCount + len(solveAreas) > self.maxAreaCount:
+            self.log.debug("Max area count reached, don't create new step")
+            return False
+
         # create a step
         self.log.debug("Create new step at {}".format(cur))
+        self.areaCount += len(solveAreas)
+        self.log.debug("areaCount: {}".format(self.areaCount))
         lastStep = ComeBackStep(solveAreas, cur)
         self.comeBackSteps.append(lastStep)
         return lastStep.next(locations)
@@ -104,6 +114,8 @@ class ComeBack(object):
             if not lastStep.moreAvailable():
                 self.log.debug("last step has been fully visited, go up one more time")
                 self.comeBackSteps.pop()
+
+                self.areaCount -= len(lastStep.solveAreas)
 
                 if len(self.comeBackSteps) == 0:
                     self.log.debug("No more steps to rewind")

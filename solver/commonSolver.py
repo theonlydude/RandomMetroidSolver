@@ -743,14 +743,17 @@ class CommonSolver(object):
                 # can finish but can't take all the requested items
                 return (difficulty, False)
 
-    def filterScavengerLocs(self, majorsAvailable):
+    def getScavengerHuntState(self):
         # check where we are in the scavenger hunt
         huntInProgress = False
         for index, loc in enumerate(self.scavengerOrder):
             if loc not in self.visitedLocations:
                 huntInProgress = True
                 break
+        return (huntInProgress, index)
 
+    def filterScavengerLocs(self, majorsAvailable):
+        huntInProgress, index = self.getScavengerHuntState()
         if huntInProgress and index < len(self.scavengerOrder)-1:
             self.log.debug("Scavenger hunt in progress, {}/{}".format(index, len(self.scavengerOrder)-1))
             # remove all next locs in the hunt
@@ -771,3 +774,14 @@ class CommonSolver(object):
             # check that last loc from the scavenger hunt list has been visited
             lastLoc = self.scavengerOrder[-1]
             return lastLoc in self.visitedLocations
+
+    def getPriorityArea(self):
+        # if scav returns solve area of next loc in the hunt
+        if self.majorsSplit != 'Scavenger':
+            return None
+        else:
+            huntInProgress, index = self.getScavengerHuntState()
+            if huntInProgress and index < len(self.scavengerOrder)-1:
+                return self.scavengerOrder[index].SolveArea
+            else:
+                return None

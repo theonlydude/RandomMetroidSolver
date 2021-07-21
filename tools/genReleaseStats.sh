@@ -61,6 +61,8 @@ ${CWD}/tools/genExtStats.sh ${ROM} 900 free newbie
 ${CWD}/tools/genExtStats.sh ${ROM} 900 hardway2hell master
 ${CWD}/tools/genExtStats.sh ${ROM} 900 haste Season_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 highway2hell expert
+${CWD}/tools/genExtStats.sh ${ROM} 900 minimizer_hardcore expert
+${CWD}/tools/genExtStats.sh ${ROM} 900 scavenger_hard expert
 ${CWD}/tools/genExtStats.sh ${ROM} 900 stupid_hard master
 ${CWD}/tools/genExtStats.sh ${ROM} 900 way_of_chozo regular
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Chozo_Speedrun regular

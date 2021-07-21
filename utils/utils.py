@@ -280,6 +280,11 @@ def loadRandoPreset(randoPreset, args):
     with open(randoPreset) as randoPresetFile:
         randoParams = json.load(randoPresetFile)
 
+    # use default params as base
+    defaultParams = getRandomizerDefaultParameters()
+    defaultParams.update(randoParams)
+    randoParams = defaultParams
+
     if randoParams.get("seed") != None:
         args.seed = int(randoParams["seed"])
 

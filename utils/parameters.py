@@ -109,11 +109,10 @@ class Knows:
                           'readonly' : True}
 
     UnequipItem = SMBool(True, easy, ['UnequipItem'])
-    desc['UnequipItem'] = {'display': 'Unequip an item',
-                          'title': 'Unequip Gravity suit to have more time to morph after jumping or unequip Hi-Jump Boots to jump to limit jump height',
-                           # TODO::add a video with all the occurences
-                          'href': None,
-                          'rooms': ['Main Street', 'Spring Ball Room', 'West Ocean'],
+    desc['UnequipItem'] = {'display': 'Unequip items',
+                          'title': 'Unequip Gravity suit to have more time to morph after jumping or unequip Hi-Jump Boots to limit jump height',
+                          'href': 'https://youtu.be/qiFiIKYU14k',
+                          'rooms': ['Main Street', 'Spring Ball Room', 'West Ocean', 'Botwoon Energy Tank Room', 'Wrecked Ship Energy Tank Room'],
                           'readonly' : True}
 
     Mockball = SMBool(True, easy, ['Mockball'])

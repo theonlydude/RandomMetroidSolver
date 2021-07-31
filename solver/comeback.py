@@ -145,13 +145,13 @@ class ComeBackStep(object):
 
         self.log.debug("rewind next, solveAreas: {} visitedSolveAreas: {}".format(self.solveAreas, self.visitedSolveAreas))
 
+        maxAreaName = ""
         if priorityArea is not None and priorityArea in self.solveAreas:
             self.visitedSolveAreas.append(priorityArea)
             self.curSolveArea = priorityArea
         else:
             # get area with max available locs
             maxAreaWeigth = 0
-            maxAreaName = ""
             for solveArea in sorted(self.solveAreas):
                 if solveArea in self.visitedSolveAreas:
                     continue

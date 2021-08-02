@@ -69,6 +69,41 @@
   <h2>Change Log</h2>
   <ul>
     <li>
+      <h4>2021/08/02</h4>
+      <p>Hello @randomizer,</p>
+      <p>We've released a new version of the VARIA Randomizer, Solver, Tracker, Plandomizer and Customizer (http://varia.run/) featuring a new HUD and an auto tracker!</p>
+      <p>The HUD is used in two brand new majors split :
+        <ul>
+          <li>Full Countdown: Randomize like Full and display in the HUD the number of remaining unique upgrades (everything but energy and ammo) in the current area.</li>
+          <li>Scavenger (thanks to @Slappy for the idea!): you must visit a given number of locations in a mandatory order in a scavenger hunt, and collect items there. The scavenger locations are the 16 locations where a unique upgrade is in the vanilla game. The HUD shows the next location in the hunt (whole route available in the pause menu). You can choose how many locations will be in the hunt (between 4-16, defaut is 10), whether the items in the hunt locations will be vanilla (default), or whether the escape is immediately triggered when the hunt is over (by default, you still have to beat G4 and go through Tourian after the hunt is over). The remaining unique upgrades will be randomized between the remaining scavenger locations.</li>
+        </ul>
+      </p>
+      <p>
+        The HUD also enables the usage of Major/Chozo split with random start location (some locations are changed, so the HUD is used to know how many Major/Chozo items are left in the current area). It can also be used as a standalone comfort patch. The area names in the HUD are the ones used by the area randomizer, so mind that Crocomire and Kraid’s Lair are their own areas for example.
+        You can play around with the options and/or try out the new settings presets starting with ‘hud_’ or ‘scavenger_’ to enjoy the new modes!</p>
+      <p>Also featuring the VARIA Auto-Tracker to automatically track Area/Boss transitions, collected Items and Door colors as you play the seed, as long as you play on a platform compatible with <a href="https://github.com/Skarsnik/QUsb2snes/releases" target="_blank">QUsb2Snes</a>.</p>
+      <p>Other new stuff:
+        <ul>
+          <li>tracker: highlight accessible rooms on the map</li>
+          <li>tracker: reset door colors when clicking on items bin</li>
+          <li>solver: removed minimal pickup strategy, only any% and 100% now</li>
+          <li>rando: slight credits rework</li>
+          <li>rando: new ‘nothing’ item PLM to avoid having an extra missile pack in some cases</li>
+          <li>rando: detect headered ROM and automatically remove the header</li>
+          <li>rando: always load ‘default’ setting preset before loading a settings preset</li>
+          <li>rando: tips are now always displayed on top of the page</li>
+          <li>customizer: new sprites: Enby Samus by @Glove, Shaktool Jr by @Pneumatic</li>
+          <li>customizer: more custom items names for sprites by @Avatar: Sprite Can, Link, Megaman, Win95, Mario/Luigi</li>
+          <li>customizer: new custom sprites/ships will now be added independently from main releases</li>
+          <li>customizer: option to restore vanilla music</li>
+          <li>customizer: display non default parameters in bold for permalinks</li>
+          <li>logic: some adjustments/fixes</li>
+          <li>preset: preset modification are no longer lost when you enter a wrong password</li>
+          <li>preset: new basic technique enabled in all presets: Unequip items with explaining video</li>
+        </ul>
+      </p>
+    </li>
+    <li>
       <h4>2021/02/21</h4>
       <p>Hello @randomizer,</p>
       <p>We've released a new version of the VARIA Randomizer, Solver, Tracker, Plandomizer and Customizer (http://varia.run/), a small release before randomizer league Season 3 starts.</p>
@@ -77,7 +112,7 @@
         <li>tracker: the whole map now fits the screen, no more scrolling required</li>
         <li>presets: added presets for rando league season 3</li>
         <li>customizer: option to have vanilla Screw Attack graphics on sprites (disabled by default, enabled on race seeds to enforce a rando league rule)</li>
-        <li>-customizer: new custom sprites: Trans Colors (by TarThoron), Metroid (by Fingersmcgee), Captain Novolin (by PaddyCo), Shaktool (by Pneumatic), Combat Armor (by Munchy, ripped by TarThoron)</li>
+        <li>customizer: new custom sprites: Trans Colors (by TarThoron), Metroid (by Fingersmcgee), Captain Novolin (by PaddyCo), Shaktool (by Pneumatic), Combat Armor (by Munchy, ripped by TarThoron)</li>
         <li>rando: Suits properties can now be randomized</li>
       </ul>
       New small stuff:

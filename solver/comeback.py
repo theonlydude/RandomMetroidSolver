@@ -166,7 +166,7 @@ class ComeBackStep(object):
         outWeight = 10000
         retSolveAreas = {}
         for solveArea in self.solveAreas:
-            if solveArea == maxAreaName:
+            if solveArea == self.curSolveArea:
                 retSolveAreas[solveArea] = 1
             else:
                 retSolveAreas[solveArea] = outWeight

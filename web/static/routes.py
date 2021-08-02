@@ -14,6 +14,8 @@ routers = dict(
             'sessionWebService',
             'randomizerWebService.json',
             'presets',
+            'skillPresetActionWebService',
+            'skillPresetActionWebService.json',
             'stats',
             'tracker',
             'plando',

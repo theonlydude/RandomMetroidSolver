@@ -82,6 +82,10 @@ class RomPatches:
     # Red doors open with one missile, and don't react to supers: part of door color rando
     RedDoorsMissileOnly     = 1006
 
+    ### Hacks
+    # rotation hack
+    RotationHack            = 10000
+
     #### Patch sets
     # total randomizer
     TotalBase = [ BlueBrinstarBlueDoor, RedTowerBlueDoors, NoGravityEnvProtection ]
@@ -119,8 +123,8 @@ class RomPatches:
         return SMBool(patch in RomPatches.ActivePatches)
 
     @staticmethod
-    def setDefaultPatches(startAP):
+    def setDefaultPatches(startLocation):
         # called by the isolver in seedless mode.
-        # activate only layout patch (the most common one), red tower blue doors and the startAP's patches.
-        from graph.graph_access import GraphUtils
-        RomPatches.ActivePatches = [RomPatches.RedTowerBlueDoors] + RomPatches.TotalLayout + GraphUtils.getGraphPatches(startAP)
+        # activate only layout patch (the most common one), red tower blue doors and the startLocation's patches.
+        from graph.graph_utils import GraphUtils
+        RomPatches.ActivePatches = [RomPatches.RedTowerBlueDoors] + RomPatches.TotalLayout + GraphUtils.getGraphPatches(startLocation)

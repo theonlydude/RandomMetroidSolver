@@ -68,7 +68,7 @@ function worker {
     solver_log=${dest}/${rom/sfc/log}
     romjson=${dest}/${rom/sfc/json}
     [ -f $rom ] && {
-	$SOLVER -r $rom --preset standard_presets/$p.json  --difficultyTarget 5 --displayGeneratedPath -1 $rom1st > $solver_log
+	$SOLVER -r $rom --preset standard_presets/$p.json  --difficultyTarget 5 --displayGeneratedPath -1 $rom1st --runtime 10 > $solver_log
 	[ $? -ne 0 ] && {
 	    echo "SOLVER failed"  > $errfile
 	    echo "rom : $rom" >> $errfile

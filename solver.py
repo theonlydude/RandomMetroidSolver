@@ -21,8 +21,8 @@ def interactiveSolver(args):
             print("Missing preset or output parameter")
             sys.exit(1)
 
-        solver = InteractiveSolver(args.output)
-        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, fill=args.fill, startAP=args.startAP)
+        solver = InteractiveSolver(args.output, args.logic)
+        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, fill=args.fill, startLocation=args.startLocation)
     else:
         # iterate
         params = {}
@@ -81,9 +81,14 @@ def interactiveSolver(args):
                     print("Missing doorName parameter when using action toggle for door")
                     sys.exit(1)
                 params = {'doorName': args.doorName}
+        elif args.scope == 'dump':
+            if args.action == "import":
+                if args.dump is None:
+                    print("Missing dump parameter when import a dump")
+                params = {'dump': args.dump}
         params["debug"] = args.mode == 'debug'
 
-        solver = InteractiveSolver(args.output)
+        solver = InteractiveSolver(args.output, args.logic)
         solver.iterate(args.state, args.scope, args.action, params)
 
 def standardSolver(args):
@@ -110,7 +115,8 @@ def standardSolver(args):
                             extStatsStep=args.extStatsStep,
                             displayGeneratedPath=args.displayGeneratedPath,
                             outputFileName=args.output, magic=args.raceMagic,
-                            checkDuplicateMajor=args.checkDuplicateMajor, vcr=args.vcr)
+                            checkDuplicateMajor=args.checkDuplicateMajor, vcr=args.vcr,
+                            runtimeLimit_s=args.runtimeLimit_s)
 
     solver.solveRom()
 
@@ -125,7 +131,7 @@ if __name__ == "__main__":
                         dest='difficultyTarget', nargs='?', default=None, type=int)
     parser.add_argument('--pickupStrategy', '-s', help="Pickup strategy for the Solver",
                         dest='pickupStrategy', nargs='?', default=None,
-                        choices=['minimal', 'all', 'any'])
+                        choices=['all', 'any'])
     parser.add_argument('--itemsForbidden', '-f', help="Item not picked up during solving",
                         dest='itemsForbidden', nargs='+', default=[], action='append')
 
@@ -156,7 +162,7 @@ if __name__ == "__main__":
     parser.add_argument('--loc', help="Name of the location to action on (used in interactive mode)",
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
-                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize', 'toggle'])
+                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize', 'toggle', 'import'])
     parser.add_argument('--item', help="Name of the item to place in plando mode (used in interactive mode)",
                         dest="item", nargs='?', default=None)
     parser.add_argument('--hide', help="Hide the item to place in plando mode (used in interactive mode)",
@@ -169,7 +175,7 @@ if __name__ == "__main__":
     parser.add_argument('--mode', help="Solver mode: standard/seedless/plando (used in interactive mode)",
                         dest="mode", nargs="?", default=None, choices=['standard', 'seedless', 'plando', 'race', 'debug'])
     parser.add_argument('--scope', help="Scope for the action: common/area/item (used in interactive mode)",
-                        dest="scope", nargs="?", default=None, choices=['common', 'area', 'item', 'door'])
+                        dest="scope", nargs="?", default=None, choices=['common', 'area', 'item', 'door', 'dump'])
     parser.add_argument('--count', help="Number of item rollback (used in interactive mode)",
                         dest="count", type=int)
     parser.add_argument('--lock', help="lock the plando seed (used in interactive mode)",
@@ -177,7 +183,7 @@ if __name__ == "__main__":
     parser.add_argument('--escapeTimer', help="escape timer like 03:00", dest="escapeTimer", default=None)
     parser.add_argument('--fill', help="in plando load all the source seed locations/transitions as a base (used in interactive mode)",
                         dest="fill", action='store_true')
-    parser.add_argument('--startAP', help="in plando/seedless: the start location", dest="startAP", default="Landing Site")
+    parser.add_argument('--startLocation', help="in plando/seedless: the start location", dest="startLocation", default="Landing Site")
     parser.add_argument('--minorQty', help="rando plando  (used in interactive mode)",
                         dest="minorQty", nargs="?", default=None, choices=[str(i) for i in range(0,101)])
     parser.add_argument('--energyQty', help="rando plando  (used in interactive mode)",
@@ -188,6 +194,12 @@ if __name__ == "__main__":
                         dest="doorName", nargs="?", default=None)
     parser.add_argument('--newColor', help="new color for door (used in interactive mode)",
                         dest="newColor", nargs="?", default=None)
+    parser.add_argument('--logic', help='logic to use (used in interactive mode)', dest='logic', nargs='?', default="vanilla", choices=["vanilla", "rotation"])
+    parser.add_argument('--runtime',
+                        help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit.",
+                        dest='runtimeLimit_s', nargs='?', default=0, type=int)
+    parser.add_argument('--dump', help="dump file with autotracker state (used in interactive mode)",
+                        dest="dump", nargs="?", default=None)
 
     args = parser.parse_args()
 

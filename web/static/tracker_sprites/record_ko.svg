@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="Layer_1"
+   data-name="Layer 1"
+   viewBox="0 0 512 512"
+   version="1.1"
+   sodipodi:docname="record_ko.svg"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)">
+  <metadata
+     id="metadata49">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>record</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs47" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1270"
+     inkscape:window-height="837"
+     id="namedview45"
+     showgrid="false"
+     inkscape:zoom="0.4609375"
+     inkscape:cx="256"
+     inkscape:cy="256"
+     inkscape:window-x="666"
+     inkscape:window-y="167"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="Layer_1" />
+  <title
+     id="title2">record</title>
+  <circle
+     cx="256"
+     cy="256"
+     r="256"
+     fill="#404041"
+     id="circle4" />
+  <path
+     d="M28,139.52,139.52,28A257.1,257.1,0,0,0,28,139.52Z"
+     fill="#4d4d4f"
+     id="path6" />
+  <path
+     d="M179.06,11.77,11.77,179.06a254.14,254.14,0,0,0-6.43,24.69L203.75,5.34A253.94,253.94,0,0,0,179.06,11.77Z"
+     fill="#4d4d4f"
+     id="path8" />
+  <path
+     d="M231.24,1.2l-230,230Q.27,240.84.07,250.64L250.63.07Q240.84.27,231.24,1.2Z"
+     fill="#4d4d4f"
+     id="path10" />
+  <path
+     d="M273.44.6.6,273.43q.56,8.39,1.66,16.63L290.05,2.26Q281.83,1.17,273.44.6Z"
+     fill="#4d4d4f"
+     id="path12" />
+  <path
+     d="M309.94,5.71,5.71,309.95q1.59,7.41,3.6,14.66L324.6,9.31Q317.35,7.3,309.94,5.71Z"
+     fill="#4d4d4f"
+     id="path14" />
+  <path
+     d="M342.32,14.93,14.94,342.33Q17.32,349,20,355.47L355.46,20Q349,17.31,342.32,14.93Z"
+     fill="#4d4d4f"
+     id="path16" />
+  <path
+     d="M371.41,27.44l-344,344q3,6,6.39,11.86L383.28,33.83Q377.44,30.48,371.41,27.44Z"
+     fill="#4d4d4f"
+     id="path18" />
+  <path
+     d="M397.69,42.77,42.77,397.69q3.63,5.46,7.53,10.72L408.42,50.31Q403.16,46.4,397.69,42.77Z"
+     fill="#4d4d4f"
+     id="path20" />
+  <path
+     d="M421.43,60.64,60.65,421.43q4.18,4.93,8.6,9.65L431.08,69.25Q426.36,64.82,421.43,60.64Z"
+     fill="#4d4d4f"
+     id="path22" />
+  <path
+     d="M442.75,80.91,80.92,442.75q4.72,4.42,9.65,8.6L451.37,90.58Q447.18,85.64,442.75,80.91Z"
+     fill="#4d4d4f"
+     id="path24" />
+  <path
+     d="M461.69,103.58,103.58,461.69q5.26,3.91,10.73,7.54L469.23,114.31Q465.59,108.85,461.69,103.58Z"
+     fill="#4d4d4f"
+     id="path26" />
+  <path
+     d="M478.17,128.72,128.71,478.16q5.84,3.35,11.88,6.4l344-344Q481.51,134.56,478.17,128.72Z"
+     fill="#4d4d4f"
+     id="path28" />
+  <path
+     d="M492,156.53,156.53,492q6.48,2.73,13.14,5.11L497.06,169.67Q494.68,163,492,156.53Z"
+     fill="#4d4d4f"
+     id="path30" />
+  <path
+     d="M502.69,187.41,187.4,502.69q7.24,2,14.66,3.6L506.29,202.06Q504.7,194.65,502.69,187.41Z"
+     fill="#4d4d4f"
+     id="path32" />
+  <path
+     d="M509.74,222,221.94,509.74q8.23,1.09,16.62,1.66L511.4,238.56Q510.83,230.18,509.74,222Z"
+     fill="#4d4d4f"
+     id="path34" />
+  <path
+     d="M510.81,280.75q.92-9.59,1.13-19.38L261.37,511.93q9.79-.2,19.39-1.13Z"
+     fill="#4d4d4f"
+     id="path36" />
+  <path
+     d="M332.92,500.23,500.23,332.92a254,254,0,0,0,6.42-24.68L308.23,506.66A254.22,254.22,0,0,0,332.92,500.23Z"
+     fill="#4d4d4f"
+     id="path38" />
+  <path
+     d="M484,372.49,372.48,484A257.12,257.12,0,0,0,484,372.49Z"
+     fill="#4d4d4f"
+     id="path40" />
+  <path
+     d="M355.84,256A99.84,99.84,0,1,1,256,156.15,99.83,99.83,0,0,1,355.84,256Z"
+     fill="#fff"
+     fill-rule="evenodd"
+     id="path42"
+     style="fill:#ff1000;fill-opacity:1" />
+</svg>

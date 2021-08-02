@@ -12,18 +12,15 @@ def isChozoItem(item):
 
 # provides factory methods to instantate fillers for chozo first and second phase
 class ChozoFillerFactory(object):
-    def __init__(self, graphSettings, areaGraph, restrictions, firstPhaseFact, secondPhaseFact):
-        self.graphSettings = graphSettings
-        self.areaGraph = areaGraph
-        self.restrictions = restrictions
+    def __init__(self, firstPhaseFact, secondPhaseFact):
         self.firstPhaseFact = firstPhaseFact
         self.secondPhaseFact = secondPhaseFact
 
     def createFirstPhaseFiller(self, container):
-        return self.firstPhaseFact(self.graphSettings, self.areaGraph, self.restrictions, container)
+        return self.firstPhaseFact(container)
 
     def createSecondPhaseFiller(self, container, firstPhaseProg):
-        return self.secondPhaseFact(self.graphSettings, self.areaGraph, self.restrictions, container, firstPhaseProg)
+        return self.secondPhaseFact(container, firstPhaseProg)
 
 # settings-agnostic fille for chozo randos. handles all the specifics related to Chozo:
 # - ensures that seed is finishable by going only to chozo locations (first phase)
@@ -58,8 +55,8 @@ class ChozoWrapperFiller(Filler):
         # this will create a new smbm with new knows functions
         cont = self.baseContainer.slice(itemCond, locCond)
         secondPhaseItems = [item for item in self.baseContainer.itemPool if item not in cont.itemPool]
-        contLocs = self.baseContainer.extractLocs(cont.unusedLocations)
-        secondPhaseLocs = [loc for loc in self.baseContainer.unusedLocations if loc not in contLocs]
+        secondPhaseLocs = [loc for loc in self.baseContainer.unusedLocations if loc not in cont.unusedLocations]
+        self.log.debug("prepareFirstPhase. 1st phase container="+cont.dump())
         self.log.debug("prepareFirstPhase. secondPhaseItems="+getItemListStr(secondPhaseItems))
         self.log.debug("prepareFirstPhase. secondPhaseLocs="+getLocListStr(secondPhaseLocs))
         self.secondPhaseContainer = ItemLocContainer(cont.sm, secondPhaseItems, secondPhaseLocs)

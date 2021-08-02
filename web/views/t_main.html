@@ -120,6 +120,8 @@
     <!-- the map -->
     <img id="map" src="/solver/static/images/area_map_20200112.png" class="center">
 
+{{include 'solver_web/inc_area_map.svg'}}
+
     <!-- area access points -->
     <div id="lowerMushroomsLeft" class="baseButton" onclick="clickPortal('lowerMushroomsLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Lower Mushrooms Left"></div>
     <div id="moatRight" class="baseButton" onclick="clickPortal('moatRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Moat Right"></div>
@@ -194,6 +196,9 @@
     <div id="businessCenter" class="lastAP businessCenterGps"></div>
     <div id="mamaTurtle" class="lastAP mamaTurtleGps"></div>
     <div id="cathedral" class="lastAP cathedralGps"></div>
+    <div id="moatLeft" class="lastAP moatLeftGps"></div>
+    <div id="bowling" class="lastAP bowlingGps"></div>
+    <div id="wasteland" class="lastAP wastelandGps"></div>
 
     <!-- bosses -->
     <div id="phantoonRoomOut" class="baseButton" onclick="clickPortal('phantoonRoomOut')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Phantoon Room Out"></div>
@@ -767,3 +772,6 @@
     <div id="KraidRefillStation" data-toggle="tooltip" title="" data-html="true" data-placement="bottom"></div>
     <div id="RedBrinstarEnergyRefill" data-toggle="tooltip" title="" data-html="true" data-placement="bottom"></div>
     <div id="GreenBrinstarMissileRefill" data-toggle="tooltip" title="" data-html="true" data-placement="bottom"></div>
+
+    <!-- samus current position on the map -->
+    <div id="samusIcon"></div>

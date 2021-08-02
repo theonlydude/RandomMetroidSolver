@@ -5,7 +5,6 @@ extend 'layout.html'
 <meta name="description" content="Palettizer for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
 <script src="{{=URL('static','js/FileSaver.js')}}"></script>
-<link rel="stylesheet" type="text/css" href={{=URL('static','css/mystyle_20191017.css')}} media="screen"/>
 
 <link rel="stylesheet" type="text/css" href={{=URL('static','dist/switchery.css')}} media="screen"/>
 <script src="{{=URL('static','dist/switchery.js')}}"></script>
@@ -26,16 +25,9 @@ extend 'layout.html'
 <title>Super Metroid VARIA Customizer</title>
 
 <style>
-.simple {
-    //background-color: #ddffe1;
-}
-.medium {
-    //background-color: #fff995;
-    //font-size: small;
-}
-.advanced {
-    //background-color: #f9cfcf;
-    //font-size: x-small;
+{{include 'solver_web/varia.css'}}
+.bold {
+    font-weight: bold;
 }
 .center_image {
     display: block;
@@ -349,7 +341,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "No_Music", "random_music", "Infinite_Space_Jump", "refill_before_save", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_doors_speed"];
+      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "No_Music", "random_music", "Infinite_Space_Jump", "refill_before_save", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_doors_speed", "vanilla_music"];
 
     for(var i=0; i<elems.length; i++) {
         var elem = document.getElementById(elems[i]);
@@ -397,24 +389,36 @@ function doSubmit() {
 }
 
 function disableElement(id, disable) {
-  var elem = document.getElementById(id);
-  elem.disabled = disable;
-  // grey out the disabled text
-  var text = document.getElementById(id+"Text");
-  if(elem.disabled) {
-      text.className = "disabledText";
-  } else {
-      text.className = "";
-  }
-  // tell switchery
-  if(id in globalSwitchs) {
-    var sw = globalSwitchs[id];
-    if(disable) {
-      sw.disable();
-    } else {
-      sw.enable();
+    var elem = document.getElementById(id);
+    // we have to enable it before updating it as we can't update a disabled element
+    if(! disable) {
+        elem.disabled = false;
     }
-  }
+    // grey out the disabled text
+    var text = document.getElementById(id+"Text");
+    if(disable) {
+        text.className = "disabledText";
+    } else {
+        text.className = "";
+    }
+    // set switch to off, else users could think that the switch is forced to on
+    if(disable && elem.checked) {
+        elem.click();
+        elem.value = "off";
+    }
+    // tell switchery
+    if(id in globalSwitchs) {
+        var sw = globalSwitchs[id];
+        if(disable) {
+            sw.disable();
+        } else {
+            sw.enable();
+        }
+    }
+    // we have to disable it after updating it as we can't update a disabled element
+    if(disable) {
+        elem.disabled = true;
+    }
 }
 
 var buttonText = "Customize";
@@ -427,7 +431,7 @@ if seedInfo != None:
     pass
 }}
 
-function greyOutPatches(isRace, isVARIA) {
+function greyOutPatches(isRace, isVARIA, isVanilla) {
     var buttons = ["itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save", "No_Music", "random_music"];
     for(var i=0; i<buttons.length; i++) {
         disableElement(buttons[i], isRace);
@@ -436,6 +440,11 @@ function greyOutPatches(isRace, isVARIA) {
     var buttons = ["AimAnyButton", "max_ammo_display", "supermetroid_msu1"];
     for(var i=0; i<buttons.length; i++) {
         disableElement(buttons[i], isVARIA);
+    }
+
+    // grey out random music when vanilla rom is detected as it'll crash
+    if(isVanilla == true) {
+        disableElement("random_music", true);
     }
 
     // set noSpinAttack to on when a race seed is detected
@@ -484,12 +493,14 @@ window.onload = function(){
                     return false;
                 }
 
+                var crc32 = new Crc32();
+                crc32.update(e.target.result);
+                var digest = crc32.digest();
+                console.log("crc32: "+digest);
+                var isVanilla = digest == "d63ed5f8";
+
                 if(permalink == true) {
-                    var crc32 = new Crc32();
-                    crc32.update(e.target.result);
-                    var digest = crc32.digest();
-                    console.log("crc32: "+digest);
-                    if(digest != "d63ed5f8") {
+                    if(! isVanilla) {
                         alert("Non vanilla ROM detected");
                         document.getElementById(inputName).value = "";
                         return false;
@@ -528,7 +539,7 @@ window.onload = function(){
                     // detect beam doors patch from seed to customize
                     beamDoorsPatch = bytes[0x226e5] == 0x0D;
 
-                    greyOutPatches(isRace, isVARIA);
+                    greyOutPatches(isRace, isVARIA, isVanilla);
                 }
             }
 
@@ -570,6 +581,13 @@ window.onload = function(){
     var itemsounds = document.getElementById("itemsounds");
     itemsounds.onchange = switchOpposite;
 
+    var vanilla_music = document.getElementById("vanilla_music");
+    vanilla_music.onchange = switchOpposite;
+    var No_Music = document.getElementById("No_Music");
+    No_Music.onchange = switchOpposite;
+    var random_music = document.getElementById("random_music");
+    random_music.onchange = switchOpposite;
+
     initSlider();
 
 {{
@@ -592,7 +610,7 @@ if session.customizer["invert"] == "on":
 
 {{
 if seedInfo != None:
-    response.write("    greyOutPatches({}, true);".format("true" if seedInfo["raceMode"] == "on" else "false"), escape=False)
+    response.write("    greyOutPatches({}, true, false);".format("true" if seedInfo["raceMode"] == "on" else "false"), escape=False)
     pass
 }}
 
@@ -852,22 +870,28 @@ function switchCheckbox(id, elems=[]) {
 
 function switchOpposite() {
     var opposites = {
-        "itemsounds": "remove_itemsounds",
-        "remove_itemsounds": "itemsounds",
-        "elevators_doors_speed": "remove_elevators_doors_speed",
-        "remove_elevators_doors_speed": "elevators_doors_speed"
+        "itemsounds": ["remove_itemsounds"],
+        "remove_itemsounds": ["itemsounds"],
+        "elevators_doors_speed": ["remove_elevators_doors_speed"],
+        "remove_elevators_doors_speed": ["elevators_doors_speed"],
+        "No_Music": ["vanilla_music"],
+        "random_music": ["vanilla_music"],
+        "vanilla_music": ["random_music", "No_Music"]
     };
-    var oppositeId = opposites[this.id];
-    var opposite = document.getElementById(oppositeId);
+    var oppositeIds = opposites[this.id];
+    for(var i=0; i<oppositeIds.length; i++) {
+        var oppositeId = oppositeIds[i];
+        var opposite = document.getElementById(oppositeId);
 
-    if(this.checked && opposite.checked) {
-        opposite.click();
-    }
+        if(this.checked && opposite.checked) {
+            opposite.click();
+        }
 
-    if(this.checked){
-        this.value = "on";
-    } else {
-        this.value = "off";
+        if(this.checked){
+            this.value = "on";
+        } else {
+            this.value = "off";
+        }
     }
 }
 
@@ -1018,6 +1042,11 @@ response.write('</table>', escape=False)
       element: "#remove_ElevatorDoorsStep",
       title: "Restore Transitions",
       content: "<p>Restore vanilla doors and elevators transitions</p>"
+    },
+    {
+      element: "#vanilla_musicStep",
+      title: "Restore Vanilla Music",
+      content: "<p>Restore vanilla music if music was random, enable music if it was disabled</p>"
     }
   ]});
 
@@ -1296,11 +1325,23 @@ def displayCheckbox(id, defaultTrue=False):
                   </td>
                   <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
+                <tr id="vanilla_musicStep">
+                  <td colspan="2">
+                    {{displayCheckbox("vanilla_music")}}
+                    <span id="vanilla_musicText">Restore vanilla background music</span>
+                  </td>
+                  <td><button type="button" onclick="startTheTour(21)">?</button></td>
+                </tr>
               </table>
           </div>
           <div class="column" id="seedInfoVisibility">
 {{
 if seedInfo != None:
+  def setBold(param):
+    if seedParams[param] != defaultParams[param]:
+      response.write("class='bold'", escape=False)
+      pass
+    pass
 }}
             <h4>Download seed {{=seedInfo["filename"]}}</h4>
             <table class="full">
@@ -1321,96 +1362,102 @@ if seedInfo != None:
             <h4>Game Details</h4>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
-              <tr class="simple"><td>Skills preset</td><td>{{=seedInfo["preset"]}}</td></tr>
-              <tr class="simple"><td>Seed</td><td>{{=seedInfo["seed"]}}</td></tr>
-              <tr class="simple"><td>Created</td><td>{{=seedInfo["time"]}}</td></tr>
-              <tr class="advanced"><td>Race mode</td><td>{{=seedInfo["raceMode"]}}</td></tr>
+              <tr><td>Skills preset</td><td>{{=seedInfo["preset"]}}</td></tr>
+              <tr><td>Seed</td><td>{{=seedInfo["seed"]}}</td></tr>
+              <tr><td>Created</td><td>{{=seedInfo["time"]}}</td></tr>
+              <tr><td>Race mode</td><td>{{=seedInfo["raceMode"]}}</td></tr>
             </table>
             <h4>Randomizer Parameters</h4>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
-              <tr class="simple"><td>Start location</td><td>{{=seedParams["startLocation"]}}</td></tr>
+              <tr {{=setBold("startLocation")}}><td>Start location</td><td>{{=seedParams["startLocation"]}}</td></tr>
 {{    if seedParams["startLocation"] == "random":}}
-              <tr class="simple"><td>Start location pool</td><td>{{=seedParams["startLocationMultiSelect"]}}</td></tr>
+              <tr><td>Start location pool</td><td>{{=seedParams["startLocationMultiSelect"]}}</td></tr>
 {{        pass}}
-              <tr class="simple"><td>Majors Split</td><td>{{=seedParams["majorsSplit"]}}</td></tr>
+              <tr {{=setBold("majorsSplit")}}><td>Majors Split</td><td>{{=seedParams["majorsSplit"]}}</td></tr>
 {{    if seedParams["majorsSplit"] == "random":}}
-              <tr class="simple"><td>Majors Split pool</td><td>{{=seedParams["majorsSplitMultiSelect"]}}</td></tr>
+              <tr><td>Majors Split pool</td><td>{{=seedParams["majorsSplitMultiSelect"]}}</td></tr>
 {{        pass}}
-              <tr class="medium"><td>Maximum difficulty for picking an item </td><td>{{=seedParams["maxDifficulty"]}}</td></tr>
-              <tr class="simple"><td>Progression speed</td><td>{{=seedParams["progressionSpeed"]}}</td></tr>
+{{    if seedParams["majorsSplit"] == "Scavenger":}}
+              <tr {{=setBold("scavNumLocs")}}><td>Major locations in the mandatory route</td><td>{{=seedParams["scavNumLocs"]}}</td></tr>
+              <tr {{=setBold("scavRandomized")}}><td>Non-vanilla items in mandatory major locs</td><td>{{=seedParams["scavRandomized"]}}</td></tr>
+              <tr {{=setBold("scavEscape")}}><td>Trigger escape at hunt's end</td><td>{{=seedParams["scavEscape"]}}</td></tr>
+{{        pass}}
+              <tr {{=setBold("maxDifficulty")}}><td>Maximum difficulty for picking an item </td><td>{{=seedParams["maxDifficulty"]}}</td></tr>
+              <tr {{=setBold("progressionSpeed")}}><td>Progression speed</td><td>{{=seedParams["progressionSpeed"]}}</td></tr>
 {{    if seedParams["progressionSpeed"] == "random":}}
-              <tr class="simple"><td>Progression speed pool</td><td>{{=seedParams["progressionSpeedMultiSelect"]}}</td></tr>
+              <tr><td>Progression speed pool</td><td>{{=seedParams["progressionSpeedMultiSelect"]}}</td></tr>
 {{        pass}}
-              <tr class="advanced"><td>Progression difficulty</td><td>{{=seedParams["progressionDifficulty"]}}</td></tr>
+              <tr {{=setBold("progressionDifficulty")}}><td>Progression difficulty</td><td>{{=seedParams["progressionDifficulty"]}}</td></tr>
 {{    if seedParams["progressionDifficulty"] == "random":}}
-              <tr class="advanced"><td>Progression difficulty pool</td><td>{{=seedParams["progressionDifficultyMultiSelect"]}}</td></tr>
+              <tr><td>Progression difficulty pool</td><td>{{=seedParams["progressionDifficultyMultiSelect"]}}</td></tr>
 {{        pass}}
-              <tr class="medium"><td>Morph Placement</td><td>{{=seedParams["morphPlacement"]}}</td></tr>
+              <tr {{=setBold("morphPlacement")}}><td>Morph Placement</td><td>{{=seedParams["morphPlacement"]}}</td></tr>
 {{    if seedParams["morphPlacement"] == "random":}}
-              <tr class="medium"><td>Morph Placement pool</td><td>{{=seedParams["morphPlacementMultiSelect"]}}</td></tr>
+              <tr><td>Morph Placement pool</td><td>{{=seedParams["morphPlacementMultiSelect"]}}</td></tr>
 {{        pass}}
-              <tr class="advanced"><td>Suits restriction</td><td>{{=seedParams["suitsRestriction"]}}</td></tr>
-              <tr class="advanced"><td>Hide some items</td><td>{{=seedParams["hideItems"]}}</td></tr>
+              <tr {{=setBold("suitsRestriction")}}><td>Suits restriction</td><td>{{=seedParams["suitsRestriction"]}}</td></tr>
+              <tr {{=setBold("hideItems")}}><td>Hide some items</td><td>{{=seedParams["hideItems"]}}</td></tr>
             </table>
 
             <h4>Ammo and Energy</h4>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
-              <tr class="advanced"><td>Strict Minors distribution</td><td>{{=seedParams["strictMinors"]}}</td></tr>
-              <tr class="advanced"><td>Proportion of Missiles</td><td>{{=seedParams["missileQty"]}}</td></tr>
-              <tr class="advanced"><td>Proportion of Super Missiles</td><td>{{=seedParams["superQty"]}}</td></tr>
-              <tr class="advanced"><td>Proportion of Power Bombs</td><td>{{=seedParams["powerBombQty"]}}</td></tr>
-              <tr class="medium"><td>Percentage of minors available</td><td>{{=seedParams["minorQty"]}}</td></tr>
-              <tr class="medium"><td>Quantity of Energy/Reserve Tanks available</td><td>{{=seedParams["energyQty"]}}</td></tr>
+              <tr {{=setBold("strictMinors")}}><td>Strict Minors distribution</td><td>{{=seedParams["strictMinors"]}}</td></tr>
+              <tr {{=setBold("missileQty")}}><td>Proportion of Missiles</td><td>{{=seedParams["missileQty"]}}</td></tr>
+              <tr {{=setBold("superQty")}}><td>Proportion of Super Missiles</td><td>{{=seedParams["superQty"]}}</td></tr>
+              <tr {{=setBold("powerBombQty")}}><td>Proportion of Power Bombs</td><td>{{=seedParams["powerBombQty"]}}</td></tr>
+              <tr {{=setBold("minorQty")}}><td>Percentage of minors available</td><td>{{=seedParams["minorQty"]}}</td></tr>
+              <tr {{=setBold("energyQty")}}><td>Quantity of Energy/Reserve Tanks available</td><td>{{=seedParams["energyQty"]}}</td></tr>
 {{    if seedParams["energyQty"] == "random":}}
-              <tr class="medium"><td>Quantity of Energy/Reserve pool</td><td>{{=seedParams["energyQtyMultiSelect"]}}</td></tr>
+              <tr><td>Quantity of Energy/Reserve pool</td><td>{{=seedParams["energyQtyMultiSelect"]}}</td></tr>
 {{        pass}}
             </table>
 
             <h4>Areas/Doors/Bosses/Escape Randomization</h4>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
-              <tr class="simple"><td>Areas randomization</td><td>{{=seedParams["areaRandomization"]}}</td></tr>
-              <tr class="simple"><td>Additional layout patches for easier navigation</td><td>{{=seedParams["areaLayout"]}}</td></tr>
-              <tr class="simple"><td>Light Areas randomization</td><td>{{=seedParams["lightAreaRandomization"]}}</td></tr>
-              <tr class="simple"><td>Doors Colors randomization</td><td>{{=seedParams["doorsColorsRando"]}}</td></tr>
-              <tr class="simple"><td>Allow some doors to be grey</td><td>{{=seedParams["allowGreyDoors"]}}</td></tr>
-              <tr class="simple"><td>Bosses randomization</td><td>{{=seedParams["bossRandomization"]}}</td></tr>
-              <tr class="simple"><td>Bosses rush, aka Minimizer</td><td>{{=seedParams["minimizer"]}}</td></tr>
-              <tr class="simple"><td>Number of locations</td><td>{{=seedParams["minimizerQty"]}}</td></tr>
-              <tr class="simple"><td>Speed up Tourian</td><td>{{=seedParams["minimizerTourian"]}}</td></tr>
-              <tr class="medium"><td>Randomize the escape sequence</td><td>{{=seedParams["escapeRando"]}}</td></tr>
-              <tr class="medium"><td>Remove enemies during randomized escape sequence</td><td>{{=seedParams["removeEscapeEnemies"]}}</td></tr>
+              <tr {{=setBold("areaRandomization")}}><td>Areas randomization</td><td>{{=seedParams["areaRandomization"]}}</td></tr>
+              <tr {{=setBold("areaLayout")}}><td>Additional layout patches for easier navigation</td><td>{{=seedParams["areaLayout"]}}</td></tr>
+              <tr {{=setBold("lightAreaRandomization")}}><td>Light Areas randomization</td><td>{{=seedParams["lightAreaRandomization"]}}</td></tr>
+              <tr {{=setBold("doorsColorsRando")}}><td>Doors Colors randomization</td><td>{{=seedParams["doorsColorsRando"]}}</td></tr>
+              <tr {{=setBold("allowGreyDoors")}}><td>Allow some doors to be grey</td><td>{{=seedParams["allowGreyDoors"]}}</td></tr>
+              <tr {{=setBold("bossRandomization")}}><td>Bosses randomization</td><td>{{=seedParams["bossRandomization"]}}</td></tr>
+              <tr {{=setBold("minimizer")}}><td>Bosses rush, aka Minimizer</td><td>{{=seedParams["minimizer"]}}</td></tr>
+              <tr {{=setBold("minimizerQty")}}><td>Number of locations</td><td>{{=seedParams["minimizerQty"]}}</td></tr>
+              <tr {{=setBold("minimizerTourian")}}><td>Speed up Tourian</td><td>{{=seedParams["minimizerTourian"]}}</td></tr>
+              <tr {{=setBold("escapeRando")}}><td>Randomize the escape sequence</td><td>{{=seedParams["escapeRando"]}}</td></tr>
+              <tr {{=setBold("removeEscapeEnemies")}}><td>Remove enemies during randomized escape sequence</td><td>{{=seedParams["removeEscapeEnemies"]}}</td></tr>
             </table>
 
             <h4>Super Fun Times™</h4>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
-              <tr class="advanced"><td>Super Fun Combat</td><td>{{=seedParams["funCombat"]}}</td></tr>
-              <tr class="advanced"><td>Super Fun Movement</td><td>{{=seedParams["funMovement"]}}</td></tr>
-              <tr class="advanced"><td>Suitless</td><td>{{=seedParams["funSuits"]}}</td></tr>
+              <tr {{=setBold("funCombat")}}><td>Super Fun Combat</td><td>{{=seedParams["funCombat"]}}</td></tr>
+              <tr {{=setBold("funMovement")}}><td>Super Fun Movement</td><td>{{=seedParams["funMovement"]}}</td></tr>
+              <tr {{=setBold("funSuits")}}><td>Suitless</td><td>{{=seedParams["funSuits"]}}</td></tr>
             </table>
 
             <h4>Patches</h4>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
-              <tr class="advanced"><td>Anti-softlock layout patches</td><td>{{=seedParams["layoutPatches"]}}</td></tr>
-              <tr class="advanced"><td>VARIA tweaks</td><td>{{=seedParams["variaTweaks"]}}</td></tr>
-              <tr class="medium"><td>Nerfed Charge Beam available from the start</td><td>{{=seedParams["nerfedCharge"]}}</td></tr>
-              <tr class="advanced"><td>Suits properties</td><td>{{=seedParams["gravityBehaviour"]}}</td></tr>
+              <tr {{=setBold("layoutPatches")}}><td>Anti-softlock layout patches</td><td>{{=seedParams["layoutPatches"]}}</td></tr>
+              <tr {{=setBold("variaTweaks")}}><td>VARIA tweaks</td><td>{{=seedParams["variaTweaks"]}}</td></tr>
+              <tr {{=setBold("nerfedCharge")}}><td>Nerfed Charge Beam available from the start</td><td>{{=seedParams["nerfedCharge"]}}</td></tr>
+              <tr {{=setBold("gravityBehaviour")}}><td>Suits properties</td><td>{{=seedParams["gravityBehaviour"]}}</td></tr>
 {{    if seedParams["gravityBehaviour"] == "random":}}
-              <tr class="advanced"><td>Suits properties pool</td><td>{{=seedParams["gravityBehaviourMultiSelect"]}}</td></tr>
+              <tr><td>Suits properties pool</td><td>{{=seedParams["gravityBehaviourMultiSelect"]}}</td></tr>
 {{        pass}}
-              <tr class="medium"><td>Remove fanfare when picking up an item</td><td>{{=seedParams["itemsounds"]}}</td></tr>
-              <tr class="medium"><td>Accelerate doors and elevators transitions</td><td>{{=seedParams["elevators_doors_speed"]}}</td></tr>
-              <tr class="medium"><td>Spin jump restart (a.k.a. Respin)</td><td>{{=seedParams["spinjumprestart"]}}</td></tr>
-              <tr class="medium"><td>Momentum conservation (a.k.a. Speedkeep)</td><td>{{=seedParams["rando_speed"]}}</td></tr>
-              <tr class="advanced"><td>Infinite Space Jump</td><td>{{=seedParams["Infinite_Space_Jump"]}}</td></tr>
-              <tr class="advanced"><td>Refill before save</td><td>{{=seedParams["refill_before_save"]}}</td></tr>
-              <tr class="advanced"><td>Save the animals surprise</td><td>{{=seedParams["animals"]}}</td></tr>
-              <tr class="medium"><td>Disable background music</td><td>{{=seedParams["No_Music"]}}</td></tr>
-              <tr class="medium"><td>Randomize background music</td><td>{{=seedParams["random_music"]}}</td></tr>
+              <tr {{=setBold("itemsounds")}}><td>Remove fanfare when picking up an item</td><td>{{=seedParams["itemsounds"]}}</td></tr>
+              <tr {{=setBold("elevators_doors_speed")}}><td>Accelerate doors and elevators transitions</td><td>{{=seedParams["elevators_doors_speed"]}}</td></tr>
+              <tr {{=setBold("spinjumprestart")}}><td>Spin jump restart (a.k.a. Respin)</td><td>{{=seedParams["spinjumprestart"]}}</td></tr>
+              <tr {{=setBold("rando_speed")}}><td>Momentum conservation (a.k.a. Speedkeep)</td><td>{{=seedParams["rando_speed"]}}</td></tr>
+              <tr {{=setBold("Infinite_Space_Jump")}}><td>Infinite Space Jump</td><td>{{=seedParams["Infinite_Space_Jump"]}}</td></tr>
+              <tr {{=setBold("refill_before_save")}}><td>Refill before save</td><td>{{=seedParams["refill_before_save"]}}</td></tr>
+              <tr {{=setBold("hud")}}><td>Display items count in the HUD</td><td>{{=seedParams["hud"]}}</td></tr>
+              <tr {{=setBold("animals")}}><td>Save the animals surprise</td><td>{{=seedParams["animals"]}}</td></tr>
+              <tr {{=setBold("No_Music")}}><td>Disable background music</td><td>{{=seedParams["No_Music"]}}</td></tr>
+              <tr {{=setBold("random_music")}}><td>Randomize background music</td><td>{{=seedParams["random_music"]}}</td></tr>
             </table>
 {{
     pass

@@ -65,7 +65,7 @@ create table if not exists randomizer (
   guid char(36),
   primary key (id)
 );
-create unique index randomizer_idx01 on randomizer(action_time);
+create index randomizer_idx01 on randomizer(action_time);
 create index randomizer_idx02 on randomizer(upload_status);
 create index randomizer_idx03 on randomizer(guid);
 -- alter table randomizer add upload_status varchar(8) after action_time;
@@ -103,9 +103,12 @@ create table if not exists isolver (
   init_time datetime not null,
   preset varchar(32) not null,
   romFileName tinytext,
+  type varchar(8),
   primary key (init_time, preset)
 );
+-- alter table isolver add type varchar(8);
 
+-- plandository
 create table if not exists plando_repo (
   plando_name varchar(32) not null,
   init_time datetime not null,
@@ -126,3 +129,20 @@ create table if not exists plando_rating (
 );
 -- drop index plando_rating_idx01 on plando_rating;
 -- alter table plando_rating add primary key (plando_name, ipv4);
+
+-- custom sprites
+create table if not exists sprites (
+  init_time datetime not null,
+  sprite varchar(32) not null,
+  primary key (init_time, sprite)
+);
+
+-- plando rando
+-- we just store usage to know if someone use it
+create table if not exists plando_rando (
+  init_time datetime not null,
+  return_code tinyint unsigned,
+  duration float,
+  error_msg text,
+  primary key (init_time)
+);

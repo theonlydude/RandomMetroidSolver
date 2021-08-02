@@ -2,17 +2,19 @@ from utils.utils import randGaussBounds, getRangeDict, chooseFromRange
 import utils.log, logging, copy, random
 
 class Item:
-    __slots__ = ( 'Category', 'Class', 'Name', 'Code', 'Type' )
+    __slots__ = ( 'Category', 'Class', 'Name', 'Code', 'Type', 'BeamBits', 'ItemBits' )
 
-    def __init__(self, Category, Class, Name, Type, Code=None):
+    def __init__(self, Category, Class, Name, Type, Code=None, BeamBits=0, ItemBits=0):
         self.Category = Category
         self.Class = Class
         self.Code = Code
         self.Name = Name
         self.Type = Type
+        self.BeamBits = BeamBits
+        self.ItemBits = ItemBits
 
     def withClass(self, Class):
-        return Item(self.Category, Class, self.Name, self.Type, self.Code)
+        return Item(self.Category, Class, self.Name, self.Type, self.Code, self.BeamBits, self.ItemBits)
 
     def __eq__(self, other):
         # used to remove an item from a list
@@ -67,6 +69,7 @@ class ItemManager:
             Code=0xeee7,
             Name="Bomb",
             Type='Bomb',
+            ItemBits=0x1000,
         ),
         'Charge': Item(
             Category='Beam',
@@ -74,6 +77,7 @@ class ItemManager:
             Code=0xeeeb,
             Name="Charge Beam",
             Type='Charge',
+            BeamBits=0x1000
         ),
         'Ice': Item(
             Category='Progression',
@@ -81,6 +85,7 @@ class ItemManager:
             Code=0xeeef,
             Name="Ice Beam",
             Type='Ice',
+            BeamBits=0x2,
         ),
         'HiJump': Item(
             Category='Progression',
@@ -88,6 +93,7 @@ class ItemManager:
             Code=0xeef3,
             Name="Hi-Jump Boots",
             Type='HiJump',
+            ItemBits=0x100,
         ),
         'SpeedBooster': Item(
             Category='Progression',
@@ -95,6 +101,7 @@ class ItemManager:
             Code=0xeef7,
             Name="Speed Booster",
             Type='SpeedBooster',
+            ItemBits=0x2000,
         ),
         'Wave': Item(
             Category='Beam',
@@ -102,6 +109,7 @@ class ItemManager:
             Code=0xeefb,
             Name="Wave Beam",
             Type='Wave',
+            BeamBits=0x1,
         ),
         'Spazer': Item(
             Category='Beam',
@@ -109,6 +117,7 @@ class ItemManager:
             Code=0xeeff,
             Name="Spazer",
             Type='Spazer',
+            BeamBits=0x4,
         ),
         'SpringBall': Item(
             Category='Misc',
@@ -116,6 +125,7 @@ class ItemManager:
             Code=0xef03,
             Name="Spring Ball",
             Type='SpringBall',
+            ItemBits=0x2,
         ),
         'Varia': Item(
             Category='Progression',
@@ -123,6 +133,7 @@ class ItemManager:
             Code=0xef07,
             Name="Varia Suit",
             Type='Varia',
+            ItemBits=0x1,
         ),
         'Plasma': Item(
             Category='Beam',
@@ -130,6 +141,7 @@ class ItemManager:
             Code=0xef13,
             Name="Plasma Beam",
             Type='Plasma',
+            BeamBits=0x8,
         ),
         'Grapple': Item(
             Category='Progression',
@@ -137,6 +149,7 @@ class ItemManager:
             Code=0xef17,
             Name="Grappling Beam",
             Type='Grapple',
+            ItemBits=0x4000,
         ),
         'Morph': Item(
             Category='Progression',
@@ -144,6 +157,7 @@ class ItemManager:
             Code=0xef23,
             Name="Morph Ball",
             Type='Morph',
+            ItemBits=0x4,
         ),
         'Reserve': Item(
             Category='Energy',
@@ -158,6 +172,7 @@ class ItemManager:
             Code=0xef0b,
             Name="Gravity Suit",
             Type='Gravity',
+            ItemBits=0x20,
         ),
         'XRayScope': Item(
             Category='Misc',
@@ -165,6 +180,7 @@ class ItemManager:
             Code=0xef0f,
             Name="X-Ray Scope",
             Type='XRayScope',
+            ItemBits=0x8000,
         ),
         'SpaceJump': Item(
             Category='Progression',
@@ -172,6 +188,7 @@ class ItemManager:
             Code=0xef1b,
             Name="Space Jump",
             Type='SpaceJump',
+            ItemBits=0x200,
         ),
         'ScrewAttack': Item(
             Category='Misc',
@@ -179,18 +196,19 @@ class ItemManager:
             Code=0xef1f,
             Name="Screw Attack",
             Type='ScrewAttack',
+            ItemBits= 0x8,
         ),
         'Nothing': Item(
             Category='Nothing',
             Class='Minor',
-            Code=0xeedb,
+            Code=0xbae9, # new nothing plm
             Name="Nothing",
             Type='Nothing',
         ),
         'NoEnergy': Item(
             Category='Nothing',
             Class='Major',
-            Code=0xeedb,
+            Code=0xbae9, # see above
             Name="No Energy",
             Type='NoEnergy',
         ),
@@ -240,38 +258,22 @@ class ItemManager:
 
     @staticmethod
     def isBeam(item):
-        return item.Category == 'Beam' or item.Type == 'Ice'
-
-    BeamBits = {
-        'Wave'   : 0x1,
-        'Ice'    : 0x2,
-        'Spazer' : 0x4,
-        'Plasma' : 0x8,
-        'Charge' : 0x1000
-    }
-
-    ItemBits = {
-        'Varia'        : 0x1,
-        'SpringBall'   : 0x2,
-        'Morph'        : 0x4,
-        'ScrewAttack'  : 0x8,
-        'Gravity'      : 0x20,
-        'HiJump'       : 0x100,
-        'SpaceJump'    : 0x200,
-        'Bomb'         : 0x1000,
-        'SpeedBooster' : 0x2000,
-        'Grapple'      : 0x4000,
-        'XRayScope'    : 0x8000
-    }
+        return item.BeamBits != 0
 
     @staticmethod
     def getItemTypeCode(item, itemVisibility):
-        if itemVisibility == 'Visible':
-            modifier = 0
-        elif itemVisibility == 'Chozo':
-            modifier = 84
-        elif itemVisibility == 'Hidden':
-            modifier = 168
+        if item.Category == 'Nothing':
+            if itemVisibility in ['Visible', 'Chozo']:
+                modifier = 0
+            elif itemVisibility == 'Hidden':
+                modifier = 4
+        else:
+            if itemVisibility == 'Visible':
+                modifier = 0
+            elif itemVisibility == 'Chozo':
+                modifier = 84
+            elif itemVisibility == 'Hidden':
+                modifier = 168
 
         itemCode = item.Code + modifier
         return itemCode
@@ -344,7 +346,10 @@ class ItemPoolGenerator(object):
         elif majorsSplit == 'Plando':
             return ItemPoolGeneratorPlando(itemManager, qty, sm, exclude, nLocs, maxDiff)
         elif nLocs == 105:
-            return ItemPoolGeneratorMajors(itemManager, qty, sm, maxDiff)
+            if majorsSplit == "Scavenger":
+                return ItemPoolGeneratorScavenger(itemManager, qty, sm, maxDiff)
+            else:
+                return ItemPoolGeneratorMajors(itemManager, qty, sm, maxDiff)
         else:
             return ItemPoolGeneratorMinimizer(itemManager, qty, sm, nLocs, maxDiff)
 
@@ -363,6 +368,15 @@ class ItemPoolGenerator(object):
         lowStuffBotwoon = self.sm.knowsLowStuffBotwoon()
         return random.random() < 0.5 and (lowStuffBotwoon.bool == True and lowStuffBotwoon.difficulty <= self.maxDiff)
 
+    def calcMaxMinors(self):
+        pool = self.itemManager.getItemPool()
+        energy = [item for item in pool if item.Category == 'Energy']
+        if len(energy) == 0:
+            self.maxMinors = 0.66*(self.maxItems - 5) # 5 for bosses
+        else:
+            # if energy has been placed, we can be as accurate as possible
+            self.maxMinors = self.maxItems - len(pool) + self.nbMinorsAlready
+
     def calcMaxAmmo(self):
         self.nbMinorsAlready = 5
         # always add enough minors to pass zebetites (1100 damages) and mother brain 1 (3000 damages)
@@ -372,7 +386,7 @@ class ItemPoolGenerator(object):
             self.log.debug("Add missile because ice zeb skip is not known")
             self.itemManager.addMinor('Missile')
             self.nbMinorsAlready += 1
-        self.maxMinors = 0.66*(self.maxItems - 5)
+        self.calcMaxMinors()
         self.log.debug("maxMinors: "+str(self.maxMinors))
         self.minorLocations = max(0, self.maxMinors*self.qty['minors']/100.0 - self.nbMinorsAlready)
         self.log.debug("minorLocations: {}".format(self.minorLocations))
@@ -382,7 +396,7 @@ class ItemPoolGenerator(object):
         self.calcMaxAmmo()
         # we have to remove the minors already added
         maxItems = min(len(self.itemManager.getItemPool()) + int(self.minorLocations), self.maxItems)
-        self.log.debug("maxItems: {}".format(maxItems))
+        self.log.debug("maxItems: {}, (self.maxItems={})".format(maxItems, self.maxItems))
         ammoQty = self.qty['ammo']
         if not self.qty['strictMinors']:
             rangeDict = getRangeDict(ammoQty)
@@ -394,9 +408,7 @@ class ItemPoolGenerator(object):
             minorsTypes = ['Missile', 'Super', 'PowerBomb']
             totalProps = sum(ammoQty[m] for m in minorsTypes)
             minorsByProp = sorted(minorsTypes, key=lambda m: ammoQty[m])
-            maxMinors = 0.66*(maxItems - 5)
-            totalMinorLocations = int(maxMinors * self.qty['minors'] / 100)
-            self.log.debug("totalProps: {}".format(totalProps))
+            totalMinorLocations = self.minorLocations + self.nbMinorsAlready
             self.log.debug("totalMinorLocations: {}".format(totalMinorLocations))
             def ammoCount(ammo):
                 return float(len([item for item in self.itemManager.getItemPool() if item.Type == ammo]))
@@ -513,6 +525,9 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
         self.mediumRest = 3 + randGaussBounds(4, 3.7)
         self.ultraSparseNoTanks = self.isUltraSparseNoTanks()
 
+    def addNoEnergy(self):
+        self.itemManager.addItem('NoEnergy')
+
     def addEnergy(self):
         total = self.maxEnergy
         alreadyInPool = 2
@@ -527,10 +542,10 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
             # 0-1, add up to one energy (etank or reserve)
             self.itemManager.removeItem('Reserve')
             self.itemManager.removeItem('ETank')
-            self.itemManager.addItem('NoEnergy')
+            self.addNoEnergy()
             if self.ultraSparseNoTanks:
                 # no energy at all
-                self.itemManager.addItem('NoEnergy')
+                self.addNoEnergy()
             else:
                 if random.random() < 0.5:
                     self.itemManager.addItem('ETank')
@@ -539,7 +554,7 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
 
             # complete with nothing item
             for i in range(total - alreadyInPool):
-                self.itemManager.addItem('NoEnergy')
+                self.addNoEnergy()
 
         elif energyQty == 'sparse':
             # 4-6
@@ -554,7 +569,7 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
                 self.itemManager.addItem('ETank')
             # complete with nothing item
             for i in range(total - alreadyInPool - rest):
-                self.itemManager.addItem('NoEnergy')
+                self.addNoEnergy()
 
         elif energyQty == 'medium':
             # 8-12
@@ -572,7 +587,7 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
                 self.itemManager.addItem('ETank')
             # fill the rest with NoEnergy
             for i in range(total - alreadyInPool - rest):
-                self.itemManager.addItem('NoEnergy')
+                self.addNoEnergy()
         else:
             nE = getE(13)
             alreadyInPool += nE
@@ -583,7 +598,7 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
             for i in range(nE):
                 self.itemManager.addItem('ETank')
             for i in range(total - alreadyInPool):
-                self.itemManager.addItem('NoEnergy')
+                self.addNoEnergy()
 
     def getItemPool(self):
         self.itemManager.newItemPool()
@@ -597,6 +612,13 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
         self.addAmmo()
 
         return self.itemManager.getItemPool()
+
+class ItemPoolGeneratorScavenger(ItemPoolGeneratorMajors):
+    def __init__(self, itemManager, qty, sm, maxDiff):
+        super(ItemPoolGeneratorScavenger, self).__init__(itemManager, qty, sm, maxDiff)
+
+    def addNoEnergy(self):
+        self.itemManager.addItem('Nothing')
 
 class ItemPoolGeneratorMinimizer(ItemPoolGeneratorMajors):
     def __init__(self, itemManager, qty, sm, nLocs, maxDiff):

@@ -2,10 +2,8 @@
 extend 'layout.html'
 }}
 
-
 <meta name="description" content="Solver for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
-<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20191017.css')}} media="screen"/>
 
 <link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
 <script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
@@ -21,6 +19,7 @@ extend 'layout.html'
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 <style>
+{{include 'solver_web/varia.css'}}
 .column {
     padding-right: 10px;
 }
@@ -108,13 +107,15 @@ function changeTab(evt, tabName) {
     curTab.value = tabName;
 }
 
-function askPassword() {
-  var password = prompt("Please enter your password, it'll be used to later modify your preset, maximum 32 characters", "password");
+function askPassword(action) {
+    $('#flash').hide();
 
-  if (password != null) {
-    document.getElementById("password").value = password;
-    document.getElementById("presetForm").submit();
-  }
+    var password = prompt("Please enter your password, it'll be used to later modify your preset, maximum 32 characters", "password");
+
+    if (password != null) {
+        document.getElementById("password").value = password;
+        ajaxPresetActionCall(action);
+    }
 }
 function toggleSelect(elem)
 {
@@ -286,6 +287,82 @@ function setGauntletEnergy(gauntletSetting, bombItem) {
     }
     item.innerHTML = valueS+" | "+valueV;
   }
+}
+
+function ajaxPresetActionCall(action) {
+    // store the action to retreive it after the ajax call is completed
+    document.getElementById("stored_action").value = action;
+
+    var dataDict = {
+        action: action,
+        currenttab: document.getElementById("currenttab").value,
+        presetCreate: document.getElementById("presetCreate").value,
+        preset: document.getElementById("preset").value,
+        password: document.getElementById("password").value
+    };
+
+    // add knows
+    var knows = {{response.write([technique for category in categories.values() for section in category for technique in section['knows']], escape=False)}};
+    for(var i=0; i < knows.length; i++) {
+        var know = knows[i];
+
+        // to set a knows to false don't send it
+        if(document.getElementById(know+"_bool").checked) {
+            dataDict[know+"_bool"] = document.getElementById(know+"_bool").value;
+            dataDict[know+"_diff"] = document.getElementById(know+"_diff").value;
+        }
+    }
+
+    // add settings: bosses, hellruns, hard rooms
+    var settings = ["Kraid", "Draygon", "Ridley", "Phantoon", "MotherBrain",
+                    "Ice", "MainUpperNorfair", "LowerNorfair",
+                    "X-Ray", "Gauntlet"];
+    for(var i=0; i < settings.length; i++) {
+        var setting = settings[i];
+        dataDict[setting] = document.getElementById(setting).value;
+    }
+
+    // add controller
+    var controllers = ["A", "B", "X", "Y", "L", "R", "Select", "Moonwalk"];
+    for(var i=0; i < controllers.length; i++) {
+        var controller = controllers[i];
+        dataDict[controller] = document.getElementById(controller).value;
+    }
+
+    // call web service with parameters
+    var request = $.ajax({
+        url: "{{=URL(f='skillPresetActionWebService')}}",
+        method: "POST",
+        data: dataDict,
+        dataType: "json"
+    });
+
+    request.done(ajaxPresetActionCallCompleted);
+    request.fail(ajaxFailJSON);
+}
+
+function ajaxPresetActionCallCompleted() {
+    console.log("ajaxPresetActionCallCompleted OK");
+    var action = document.getElementById("stored_action").value;
+    document.getElementById("flash").innerHTML = "Preset "+action+" ok";
+
+    $('#flash').show();
+
+    if(action == "Create") {
+        // reload page to load newly created  preset
+        location.reload();
+    }
+
+}
+
+function ajaxFailJSON(jqXHR, textStatus) {
+    if(jqXHR.responseJSON == null) {
+        document.getElementById("flash").innerHTML = "Something wrong happened";
+    } else {
+        document.getElementById("flash").innerHTML = jqXHR.responseJSON;
+    }
+
+    $('#flash').show();
 }
 
 {{
@@ -567,7 +644,7 @@ pass
         </tr>
         <tr>
           <td>New preset:</td>
-          <td colspan="3"><input class="full" name="presetCreate" type="text"/></td>
+          <td colspan="3"><input class="full" id="presetCreate", name="presetCreate" type="text"/></td>
           <td id="presetCreateStep"><button type="button" onclick="startTheTour(1)">?</button></td>
         </tr>
         <tr>
@@ -576,16 +653,17 @@ pass
             <input class="full" name="action" type="submit" value="Load"/>
           </td>
           <td>
-            <input class="full" name="action" onclick="askPassword();" type="submit" value="Update"/>
+            <input class="full btn btn-default" onclick="askPassword('Update');" value="Update"/>
           </td>
           <td>
-            <input class="full" name="action" onclick="askPassword()" type="submit" value="Create"/>
+            <input class="full btn btn-default" onclick="askPassword('Create')" value="Create"/>
           </td>
           <td id="buttonsStep"><button type="button" onclick="startTheTour(2)">?</button></td>
         </tr>
       </table>
       <input id="password" name="password" style="display:none" type="text"/>
       <input id="currenttab" name="currenttab" style="display:none" type="text"/>
+      <input id="stored_action" name="stored_action" style="display:none" type="text"/>
     </div>
     <div class="columnThird">
       <table class="full">

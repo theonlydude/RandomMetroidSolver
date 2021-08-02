@@ -4,8 +4,8 @@ import argparse, os.path, json, sys, shutil, random
 
 from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
-from rando.PaletteRando import PaletteRando
-from graph.graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
+from rom.PaletteRando import PaletteRando
+from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
 from utils.parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text, appDir
 from rom.rom_patches import RomPatches
 from rom.rompatcher import RomPatcher
@@ -14,10 +14,20 @@ from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, ge
 from utils.version import displayedVersion
 from logic.smbool import SMBool
 from utils.doorsmanager import DoorsManager
+from logic.logic import Logic
 
 import utils.log
 import utils.db as db
 
+# we need to know the logic before doing anything else
+def getLogic():
+    # check if --logic is there
+    logic = 'vanilla'
+    for i, param in enumerate(sys.argv):
+        if param == '--logic' and i+1 < len(sys.argv):
+            logic = sys.argv[i+1]
+    return logic
+Logic.factory(getLogic())
 defaultMultiValues = getDefaultMultiValues()
 speeds = defaultMultiValues['progressionSpeed']
 energyQties = defaultMultiValues['energyQty']
@@ -94,11 +104,8 @@ if __name__ == "__main__":
     parser.add_argument('--minimizerTourian',
                         help="Tourian speedup in minimizer mode",
                         dest='minimizerTourian', nargs='?', const=True, default=False)
-    parser.add_argument('--startAP', help="Name of the Access Point to start from",
-                        dest='startAP', nargs='?', default="Landing Site",
-                        choices=['random'] + GraphUtils.getStartAccessPointNames())
     parser.add_argument('--startLocation', help="Name of the Access Point to start from",
-                        dest='startAP', nargs='?', default="Landing Site",
+                        dest='startLocation', nargs='?', default="Landing Site",
                         choices=['random'] + GraphUtils.getStartAccessPointNames())
     parser.add_argument('--startLocationList', help="list to choose from when random",
                         dest='startLocationList', nargs='?', default=None)
@@ -129,7 +136,8 @@ if __name__ == "__main__":
                         choices=['itemsounds.ips', 'elevators_doors_speed.ips', 'random_music.ips',
                                  'spinjumprestart.ips', 'rando_speed.ips', 'No_Music', 'AimAnyButton.ips',
                                  'max_ammo_display.ips', 'supermetroid_msu1.ips', 'Infinite_Space_Jump',
-                                 'refill_before_save.ips', 'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips'])
+                                 'refill_before_save.ips', 'remove_elevators_doors_speed.ips',
+                                 'remove_itemsounds.ips', 'vanilla_music.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -156,10 +164,20 @@ if __name__ == "__main__":
                         help="minors quantities values will be strictly followed instead of being probabilities",
                         dest='strictMinors', nargs='?', const=True, default=False)
     parser.add_argument('--majorsSplit',
-                        help="how to split majors/minors: Full, Major, Chozo",
+                        help="how to split majors/minors: Full, FullWithHUD, Major, Chozo, Scavenger",
                         dest='majorsSplit', nargs='?', choices=majorsSplits + ['random'], default='Full')
     parser.add_argument('--majorsSplitList', help="list to choose from when random",
                         dest='majorsSplitList', nargs='?', default=None)
+    parser.add_argument('--scavNumLocs',
+                        help="For Scavenger split, number of major locations in the mandatory route",
+                        dest='scavNumLocs', nargs='?', default=10,
+                        choices=["0"]+[str(i) for i in range(4,17)])
+    parser.add_argument('--scavRandomized',
+                        help="For Scavenger split, decide whether mandatory major locs will have non-vanilla items",
+                        dest='scavRandomized', nargs='?', const=True, default=False)
+    parser.add_argument('--scavEscape',
+                        help="For Scavenger split, decide whether escape sequence shall be triggered as soon as the hunt is over",
+                        dest='scavEscape', nargs='?', const=True, default=False)
     parser.add_argument('--suitsRestriction',
                         help="no suits in early game",
                         dest='suitsRestriction', nargs='?', const=True, default=False)
@@ -260,7 +278,9 @@ if __name__ == "__main__":
                         nargs='?', const=True, default=False)
     parser.add_argument('--allowGreyDoors', help='add grey color in doors colors pool', dest='allowGreyDoors',
                         nargs='?', const=True, default=False)
-
+    parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="varia", choices=["varia", "rotation"])
+    parser.add_argument('--hud', help='Enable VARIA hud', dest='hud',
+                        nargs='?', const=True, default=False)
     # parse args
     args = parser.parse_args()
 
@@ -277,16 +297,24 @@ if __name__ == "__main__":
 
     utils.log.init(args.debug)
     logger = utils.log.get('Rando')
+
+    Logic.factory(args.logic)
+
     # service to force an argument value and notify it
     argDict = vars(args)
     forcedArgs = {}
     optErrMsgs = [ ]
-    def forceArg(arg, value, msg, webArg=None, webValue=None):
-        if argDict[arg] != value:
+    def forceArg(arg, value, msg, altValue=None, webArg=None, webValue=None):
+        okValues = [value]
+        if altValue is not None:
+            okValues.append(altValue)
+
+        if argDict[arg] not in okValues:
             argDict[arg] = value
             forcedArgs[webArg if webArg != None else arg] = webValue if webValue != None else value
             print(msg)
             optErrMsgs.append(msg)
+
     # if rando preset given, load it first
     if args.randoPreset != None:
         preset = loadRandoPreset(args.randoPreset, args)
@@ -358,12 +386,12 @@ if __name__ == "__main__":
         minDifficulty = 0
 
     if args.area == True and args.bosses == True and args.minimizerN is not None:
+        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full", altValue='FullWithHUD')
         if args.minimizerN == "random":
             minimizerN = random.randint(30, 60)
             logger.debug("minimizerN: {}".format(minimizerN))
         else:
             minimizerN = int(args.minimizerN)
-        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
     else:
         minimizerN = None
     areaRandom = False
@@ -404,16 +432,21 @@ if __name__ == "__main__":
     if args.morphPlacement == 'random':
         if args.morphPlacementList != None:
             morphPlacements = args.morphPlacementList.split(',')
-        if (args.suitsRestriction == True and args.area == True) or args.majorsSplit == 'Chozo':
-            if 'late' in morphPlacements:
-                morphPlacements.remove('late')
-        if not morphPlacements:
-            optErrMsgs.append("Can't have late morph with Chozo split or suits restriction and area randomization")
-            dumpErrorMsgs(args.output, optErrMsgs)
-            sys.exit(-1)
         args.morphPlacement = random.choice(morphPlacements)
+    # Scavenger Hunt constraints
+    if args.majorsSplit == 'Scavenger':
+        forceArg('progressionSpeed', 'speedrun', "'Progression speed' forced to speedrun")
+        progSpeed = "speedrun"
+        forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
+        if not GraphUtils.isStandardStart(args.startLocation):
+            forceArg('startLocation', "Landing Site", "Start Location forced to Landing Site because of Scavenger mode")
+        if args.morphPlacement == 'late':
+            forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
+        if args.scavEscape == True:
+            forceArg('escapeRando', True, "'Escape randomization' forced to on", webValue='on')
+            forceArg('noRemoveEscapeEnemies', True, "Enemies enabled during escape sequence", webArg='removeEscapeEnemies', webValue='off')
     # random fill makes certain options unavailable
-    if progSpeed == 'speedrun' or progSpeed == 'basic':
+    if (progSpeed == 'speedrun' or progSpeed == 'basic') and args.majorsSplit != 'Scavenger':
         forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = args.progressionDifficulty
     logger.debug("progressionDifficulty: {}".format(progDiff))
@@ -422,47 +455,54 @@ if __name__ == "__main__":
         args.strictMinors = bool(random.getrandbits(1))
 
     # in plando rando we know that the start ap is ok
-    if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando is None:
-        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
-        forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", 'variaTweaks', 'on')
-        forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
+    if not GraphUtils.isStandardStart(args.startLocation) and args.plandoRando is None:
+        if args.majorsSplit in ['Major', "Chozo"]:
+            forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
+        forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", webValue='on')
+        forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", webValue='on')
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
-        forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", 'areaLayout', 'on')
+        forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", webValue='on')
         possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty, args.morphPlacement)
-        if args.startAP == 'random':
+        if args.startLocation == 'random':
             if args.startLocationList != None:
+                # to be able to give the list in jm we had to replace ' ' with '_', do the opposite operation
+                startLocationList = args.startLocationList.replace('_', ' ')
+                startLocationList = startLocationList.split(',')
                 # intersection between user whishes and reality
-                startLocationList = args.startLocationList.split(',')
                 possibleStartAPs = sorted(list(set(possibleStartAPs).intersection(set(startLocationList))))
                 if len(possibleStartAPs) == 0:
                     optErrMsgs += ["%s : %s" % (apName, cause) for apName, cause in reasons.items() if apName in startLocationList]
                     optErrMsgs.append('Invalid start locations list with your settings.')
                     dumpErrorMsgs(args.output, optErrMsgs)
                     sys.exit(-1)
-            args.startAP = random.choice(possibleStartAPs)
-        elif args.startAP not in possibleStartAPs:
-            optErrMsgs.append('Invalid start location: {}.  {}'.format(args.startAP, reasons[args.startAP]))
+            args.startLocation = random.choice(possibleStartAPs)
+        elif args.startLocation not in possibleStartAPs:
+            optErrMsgs.append('Invalid start location: {}.  {}'.format(args.startLocation, reasons[args.startLocation]))
             optErrMsgs.append('Possible start locations with these settings: {}'.format(possibleStartAPs))
             dumpErrorMsgs(args.output, optErrMsgs)
             sys.exit(-1)
-    ap = getAccessPoint(args.startAP)
+    ap = getAccessPoint(args.startLocation)
     if 'forcedEarlyMorph' in ap.Start and ap.Start['forcedEarlyMorph'] == True:
         forceArg('morphPlacement', 'early', "'Morph Placement' forced to early for custom start location")
     else:
         if progSpeed == 'speedrun':
             if args.morphPlacement == 'late':
                 forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
-            elif (not GraphUtils.isStandardStart(args.startAP)) and args.morphPlacement != 'normal':
+            elif (not GraphUtils.isStandardStart(args.startLocation)) and args.morphPlacement != 'normal':
                 forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for custom start location")
         if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
             forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for Chozo")
-
     if args.patchOnly == False:
         print("SEED: " + str(seed))
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "doors": "normal" if not args.doorsColorsRando else "late" }
-    restrictions['MajorMinor'] = args.majorsSplit
+    restrictions['MajorMinor'] = 'Full' if args.majorsSplit == 'FullWithHUD' else args.majorsSplit
+    if restrictions["MajorMinor"] == "Scavenger":
+        scavNumLocs = int(args.scavNumLocs)
+        if scavNumLocs == 0:
+            scavNumLocs = random.randint(4,16)
+        restrictions["ScavengerParams"] = {'numLocs':scavNumLocs, 'vanillaItems':not args.scavRandomized, 'escape': args.scavEscape}
     seedCode = 'X'
     if majorsSplitRandom == False:
         if restrictions['MajorMinor'] == 'Full':
@@ -471,6 +511,8 @@ if __name__ == "__main__":
             seedCode = 'ZX'
         elif restrictions['MajorMinor'] == 'Major':
             seedCode = 'MX'
+        elif restrictions['MajorMinor'] == 'Scavenger':
+            seedCode = 'SX'
     if args.bosses == True and bossesRandom == False:
         seedCode = 'B'+seedCode
     if args.doorsColorsRando == True and doorsColorsRandom == False:
@@ -493,7 +535,7 @@ if __name__ == "__main__":
     else:
         RomPatches.ActivePatches = RomPatches.Total
     RomPatches.ActivePatches.remove(RomPatches.BlueBrinstarBlueDoor)
-    RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startAP)
+    RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startLocation)
     if gravityBehaviour != "Balanced":
         RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
     if gravityBehaviour == "Progressive":
@@ -521,7 +563,9 @@ if __name__ == "__main__":
         minorQty = random.randint(25, 100)
     if energyQty == 'random':
         if args.energyQtyList != None:
-            energyQties = args.energyQtyList.split(',')
+            # with jm can't have a list with space in it
+            energyQtyList = args.energyQtyList.replace('_', ' ')
+            energyQties = energyQtyList.split(',')
         energyQty = random.choice(energyQties)
     if energyQty == 'ultra sparse':
         # add nerfed rainbow beam patch
@@ -579,7 +623,7 @@ if __name__ == "__main__":
 
     # print some parameters for jm's stats
     if args.jm == True:
-        print("startAP:{}".format(args.startAP))
+        print("startLocation:{}".format(args.startLocation))
         print("progressionSpeed:{}".format(progSpeed))
         print("majorsSplit:{}".format(args.majorsSplit))
         print("morphPlacement:{}".format(args.morphPlacement))
@@ -593,7 +637,7 @@ if __name__ == "__main__":
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
     if args.doorsColorsRando == True:
         RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
-    graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses,
+    graphSettings = GraphSettings(args.startLocation, args.area, args.lightArea, args.bosses,
                                   args.escapeRando, minimizerN, dotFile, args.doorsColorsRando, args.allowGreyDoors,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
 
@@ -602,8 +646,8 @@ if __name__ == "__main__":
 
     if args.patchOnly == False:
         try:
-            randoExec = RandoExec(seedName, args.vcr)
-            (stuck, itemLocs, progItemLocs) = randoExec.randomize(randoSettings, graphSettings)
+            randoExec = RandoExec(seedName, args.vcr, randoSettings, graphSettings)
+            (stuck, itemLocs, progItemLocs) = randoExec.randomize()
             # if we couldn't find an area layout then the escape graph is not created either
             # and getDoorConnections will crash if random escape is activated.
             if not stuck or args.vcr == True:
@@ -611,6 +655,12 @@ if __name__ == "__main__":
                                                       args.area, args.bosses,
                                                       args.escapeRando)
                 escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
+                if escapeAttr is not None:
+                    escapeAttr['patches'] = []
+                    if args.noRemoveEscapeEnemies == True:
+                        escapeAttr['patches'].append("Escape_Rando_Enable_Enemies")
+                    if args.scavEscape == True:
+                        escapeAttr['patches'].append('Escape_Scavenger')
         except Exception as e:
             import traceback
             traceback.print_exc(file=sys.stdout)
@@ -678,12 +728,14 @@ if __name__ == "__main__":
             outFileName = args.output
             romPatcher = RomPatcher(magic=args.raceMagic)
 
+        if args.hud == True or args.majorsSplit == "FullWithHUD":
+            args.patches.append("varia_hud.ips")
         if args.patchOnly == False:
-            romPatcher.applyIPSPatches(args.startAP, args.patches,
+            romPatcher.applyIPSPatches(args.startLocation, args.patches,
                                        args.noLayout, gravityBehaviour,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
-                                       escapeAttr, args.noRemoveEscapeEnemies, minimizerN, args.minimizerTourian,
+                                       escapeAttr, minimizerN, args.minimizerTourian,
                                        args.doorsColorsRando)
         else:
             # from customizer permalink, apply previously generated seed ips first
@@ -703,8 +755,8 @@ if __name__ == "__main__":
         if args.rom != None:
             romPatcher.commitIPS()
         if args.patchOnly == False:
-            romPatcher.setNothingId(args.startAP, itemLocs)
             romPatcher.writeItemsLocs(itemLocs)
+            romPatcher.writeSplitLocs(args.majorsSplit, itemLocs, progItemLocs)
             romPatcher.writeItemsNumber()
             romPatcher.writeSeed(seed) # lol if race mode
             romPatcher.writeSpoiler(itemLocs, progItemLocs)
@@ -718,7 +770,6 @@ if __name__ == "__main__":
         if args.patchOnly == False:
             romPatcher.writeMagic()
             romPatcher.writeMajorsSplit(args.majorsSplit)
-            romPatcher.writeNothingId()
         if args.palette == True:
             paletteSettings = {
                 "global_shift": None,

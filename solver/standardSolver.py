@@ -1,15 +1,14 @@
-import json, os
+import json, os, time
 
 from solver.commonSolver import CommonSolver
-from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
 from logic.helpers import Pickup
-from graph.graph_locations import locations as graphLocations
 from utils.utils import PresetLoader
 from solver.conf import Conf
 from solver.out import Out
 from solver.comeback import ComeBack
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
 from utils.parameters import Knows, isKnows, Settings
+from logic.logic import Logic
 import utils.log
 
 class StandardSolver(CommonSolver):
@@ -17,7 +16,7 @@ class StandardSolver(CommonSolver):
 
     def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console',
                  firstItemsLog=None, extStatsFilename=None, extStatsStep=None, displayGeneratedPath=False,
-                 outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False):
+                 outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False, runtimeLimit_s=0):
         self.interactive = False
         self.checkDuplicateMajor = checkDuplicateMajor
         if vcr == True:
@@ -45,21 +44,17 @@ class StandardSolver(CommonSolver):
         self.output = Out.factory(self.type, self)
         self.outputFileName = outputFileName
 
-        self.locations = graphLocations
-
-        self.smbm = SMBoolManager()
+        self.loadRom(rom, magic=magic)
 
         self.presetFileName = presetFileName
         self.loadPreset(self.presetFileName)
-
-        self.loadRom(rom, magic=magic)
 
         self.pickup = Pickup(Conf.itemsPickup)
 
         self.comeBack = ComeBack(self)
 
-        # no time limitation
-        self.runtimeLimit_s = 0
+        self.runtimeLimit_s = runtimeLimit_s
+        self.startTime = time.process_time()
 
     def setConf(self, difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath):
         Conf.difficultyTarget = difficultyTarget
@@ -68,7 +63,7 @@ class StandardSolver(CommonSolver):
         Conf.itemsForbidden = itemsForbidden
 
     def solveRom(self):
-        self.lastAP = self.startAP
+        self.lastAP = self.startLocation
         self.lastArea = self.startArea
 
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
@@ -191,6 +186,7 @@ class StandardSolver(CommonSolver):
         locations = self.majorLocations if self.majorsSplit == 'Full' else self.majorLocations + self.minorLocations
 
         # instanciate a new smbool manager to reset the cache
+        from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
         self.smbm = SMBoolManager()
         presetFileName = os.path.expanduser('~/RandomMetroidSolver/standard_presets/solution.json')
         presetLoader = PresetLoader.factory(presetFileName)

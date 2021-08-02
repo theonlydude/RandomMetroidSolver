@@ -2,10 +2,8 @@
 extend 'layout.html'
 }}
 
-
 <meta name="description" content="Solver for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
-<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20191017.css')}} media="screen"/>
 <script type="text/javascript" src="{{=URL('static', '/highslide/highslide.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "/highslide/highslide.css")}} />
 <script type="text/javascript">
@@ -39,6 +37,7 @@ if (hs.registerOverlay) {
 <title>Super Metroid VARIA Solver</title>
 
 <style>
+{{include 'solver_web/varia.css'}}
 .rightStep {
     float: right;
     margin-right: 0.3em;
@@ -142,7 +141,7 @@ function resizeChosen() {
 }
 
 function guessVARIAPreset(filename) {
-  var re = /VARIA_Randomizer_[A]?[D]?[B]?[F]?[M]?[Z]?X\d+_(\w+)/;
+  var re = /VARIA_Randomizer_[A]?[D]?[B]?[F]?[M]?[Z]?[S]?X\d+_(\w+)/;
   var match = filename.match(re);
   if(match == null) {
     re = /VARIA_Plandomizer_[A]?[B]?FX\d+_(\w+)/;
@@ -594,15 +593,11 @@ function startTheTour(step=-1) {
     {
       element: "#pickupStrategy",
       title: "Pickup Strategy",
-      content: "The strategy for picking up major and minor items.<br/>\
-<ul><li>All:</li><ul><li>Will grab all the major and minor items.</li></ul>\
-<li>Any:</li><ul><li>No requirements on the items as long as the ROM is finishable.<br/>\
-<b>Warning</b>: The generated path may not be realistic.<br/>\
-Use this setting on seeds that are unfinishable at first, such as masochist seeds in Dessyreqt randomizer, or super fun VARIA seeds.</li></ul>\
-<li>Minimal:</li><ul><li>Majors: Will get Morph, Bomb and/or Power bombs, 3 ETanks, Varia,<br/>\
-Gravity, Speed Booster or Ice Beam, and anything else along the way.</li>\
-<li>Minors:Will pick up 10 Missiles packs, 5 Super packs and 2 Power Bomb packs.<br/>\
-If Charge Beam is not picked up along the way or not accessible, enough minors to beat Mother Brain will be picked up.</li></ul></ul>",
+      content: "Strategy for picking up major and minor items.<br/>\
+<ul>\
+<li>100%: Will grab all major and minor items.</li>\
+<li>Any%: No requirements on the items as long as the seed is finishable.</li>\
+</ul>",
       placement: "auto left"
     },
     {
@@ -702,7 +697,20 @@ function DoPost(){
           </tr>
             <tr>
               <td>Pickup strategy:</td>
-              <td>{{=SELECT("all", "minimal", "any", _id="pickupStrategy", _name="pickupStrategy", _form="solverForm", _class="full", value=session.solver["pickupStrategy"])}}</td>
+              <td>
+                  <select form="solverForm" class="full" id="pickupStrategy" name="pickupStrategy">
+                    <option {{
+if session.solver["pickupStrategy"] == "any":
+  response.write('selected="selected"', escape=False)
+  pass
+}} value="any">any%</option>
+                    <option {{
+if session.solver["pickupStrategy"] == "all":
+  response.write('selected="selected"', escape=False)
+  pass
+}} value="all">100%</option>
+                  </select>
+              </td>
               <td><button type="button" onclick="startTheTour(4)">?</button></td>
             </tr>
           </table>

@@ -12,6 +12,10 @@ function resizeChosen() {
 
 var loaded = false;
 
+function interfaceIsFrozen() {
+    return loaded == false || webServInProgress == true || init == false || autoTrackInProgress == true;
+}
+
 //-----------------------------------------------------------
 // AREAS TRACKER
 
@@ -21,37 +25,13 @@ var secondClick = "";
 var lines = {};
 var leaderLines = {};
 var nextColor = 0;
-var linesSeq = new Array();
 
 // to display inter area lines in debug mode
-var debugLines = new Array();
+var debugLines = [];
+var debugLeaderLines = {};
 
 var colors = ['grey', 'lime', 'pink',  'fuchsia', 'orange', 'yellow', 'purple', 'aqua', 'red', '#bfef45', 'white', 'cyan', 'magenta', 'olive', 'green', 'blue', 'maroon', 'teal'];
 var debugColors = {easy: '#6daa53', medium: '#C1B725', hard: '#e69235', harder: '#d13434', hardcore: '#123456', mania: '#ffffff'};
-
-function resetLines() {
-  for (var startPoint in lines) {
-    if(lines[startPoint] != "") {
-      var endPoint = lines[startPoint];
-      lines[startPoint] = "";
-      lines[endPoint] = "";
-      leaderLines[startPoint].remove();
-      leaderLines[startPoint] = "";
-      leaderLines[endPoint] = "";
-    }
-  }
-  lines = {};
-  leaderLines = {};
-  linesSeq = [];
-  nextColor = 0;
-}
-
-function resetDebugLines() {
-  for(var i=0; i<debugLines.length; i++) {
-    debugLines[i].remove()
-  }
-  debugLines = new Array();
-}
 
 function checkCompatibleAPs(startAP, endAP) {
 {{
@@ -79,7 +59,7 @@ function isEscapeAP(ap) {
 }
 
 function clickPortal(elemId) {
-    if(loaded == false || webServInProgress == true) {
+    if(interfaceIsFrozen()) {
         return;
     }
 
@@ -154,31 +134,35 @@ function clickPortal(elemId) {
 }
 
 function addDebugLine(startPoint, endPoint, difficulty) {
-  // console.log("addDebugLine: "+startPoint+" -> "+endPoint+": "+difficulty);
+    // console.log("addDebugLine: "+startPoint+" -> "+endPoint+": "+difficulty);
 
-  var startPointElem = document.getElementById(startPoint);
-  var endPointElem = document.getElementById(endPoint);
+    var startPointElem = document.getElementById(startPoint);
+    var endPointElem = document.getElementById(endPoint);
 
-  if(startPointElem == null || endPointElem == null) {
-    console.log("addDebugLine startPointElem "+startPointElem+" or endPointElem "+endPointElem+" is null");
-  }
+    if(startPointElem == null || endPointElem == null) {
+        console.log("addDebugLine startPointElem "+startPointElem+" or endPointElem "+endPointElem+" is null");
+    }
 
-  var line = new LeaderLine(startPointElem, endPointElem,
-                            {color: debugColors[difficulty],
-                             size: 2,
-                             startPlug: 'disc',
-                             endPlug: 'disc',
-                             path: 'straight'});
-  if(! (startPoint in lines)) {
-    line.setOptions({startSocket: 'bottom'});
-  }
-  if(! (endPoint in lines)) {
-    line.setOptions({endSocket: 'bottom'});
-  }
-  debugLines.push(line);
+    var line = new LeaderLine(startPointElem, endPointElem,
+                              {color: debugColors[difficulty],
+                               size: 2,
+                               startPlug: 'disc',
+                               endPlug: 'disc',
+                               path: 'straight'});
+    if(! (startPoint in lines)) {
+        line.setOptions({startSocket: 'bottom'});
+    }
+    if(! (endPoint in lines)) {
+        line.setOptions({endSocket: 'bottom'});
+    }
+
+    var lineName = `${startPoint}-${endPoint}`;
+    debugLines.push(lineName);
+    debugLeaderLines[lineName] = line;
 }
 
 function addLine(startPoint, endPoint) {
+  // console.log("addLine: "+startPoint+" "+endPoint);
   var startPointElem = document.getElementById(startPoint);
   var endPointElem = document.getElementById(endPoint);
 
@@ -203,12 +187,30 @@ function addLine(startPoint, endPoint) {
 
   leaderLines[startPoint] = line;
   leaderLines[endPoint] = line;
+}
 
-  linesSeq.push(startPoint);
+function removeLine(startPoint, endPoint) {
+    // console.log("removeLine: "+startPoint+" "+endPoint);
+    nextColor -= 1;
+
+    delete lines[startPoint];
+    delete lines[endPoint];
+
+    leaderLines[startPoint].remove();
+    delete leaderLines[startPoint];
+    delete leaderLines[endPoint];
+}
+
+function removeDebugLine(startPoint, endPoint) {
+    // console.log("removeDebugLine: "+startPoint+" "+endPoint);
+    var lineName = `${startPoint}-${endPoint}`;
+    debugLines.splice(debugLines.indexOf(lineName), 1);
+    debugLeaderLines[lineName].remove();
+    delete debugLeaderLines[`${startPoint} ${endPoint}`];
 }
 
 function clearLines() {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
 
@@ -225,7 +227,7 @@ function clearLines() {
 }
 
 function deleteLine() {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
 
@@ -355,6 +357,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         webServInProgress = false;
     }
 
+    // for plando rando
     $('#overlay').hide();
     $('#loadingGIF').hide();
 
@@ -374,40 +377,37 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         hideItemPopup();
     }
 
-    if(lastAction != null && lastAction["action"] != "init" && lastAction["scope"] != "door") {
-        resetItems();
-        updateLocations(jsonData);
-        updateInventory(jsonData);
-
-        if(lastAction["scope"] == "area") {
-            updateLines(jsonData);
-        }
-        if(mode == "debug") {
-            updateDebugLines(jsonData);
-        }
-        updateGps(jsonData);
-        displayDoors(jsonData);
+    if(lastAction != null && lastAction["action"] != "init" && (lastAction["scope"] == "area" || lastAction["scope"] == "dump")) {
+        updateLines(jsonData, false);
     } else {
         // load everything
         updateGlobal(jsonData);
-        resetItems();
-        updateLocations(jsonData);
-        updateInventory(jsonData);
-        updateLines(jsonData);
-        if(mode == "debug") {
-            updateDebugLines(jsonData);
-        }
-        displayDoors(jsonData);
-        updateGps(jsonData);
+        updateLines(jsonData, true);
         updateTimer(jsonData);
     }
 
+    if(mode == "debug") {
+        updateDebugLines(jsonData);
+    }
+    resetItems();
+    updateRoomsVisibility(jsonData);
+    updateLocations(jsonData);
+    updateInventory(jsonData);
+    updateGps(jsonData);
+    displayDoors(jsonData);
+
     setWSIcon("checkmark");
 
-    // if no available locations, display a popup telling you're stuck
-    if(Object.keys(jsonData["availableLocations"]).length == 0 && chained == false) {
-        if(jsonData["allTransitions"] == true && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited") && jsonData["allDoorsRevealed"] == true) {
-            alert("You're stuck, you can't finish this seed with the given preset.");
+    if(autoTrackInProgress || mode == "debug") {
+        // auto tracker: rearm timer for next data retrieval, never display the stuck alert
+        // debug: highlight next VCR loc
+        postAjaxHook();
+    } else {
+        // if no available locations, display a popup telling you're stuck
+        if(Object.keys(jsonData["availableLocations"]).length == 0 && chained == false) {
+            if(jsonData["allTransitions"] == true && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited") && jsonData["allDoorsRevealed"] == true) {
+                alert("You're stuck, you can't finish this seed with the given preset.");
+            }
         }
     }
 }
@@ -450,6 +450,34 @@ function setActive(mode, area, boss, escape) {
     } else {
         document.getElementById("pause_background").style.display = "block";
         document.getElementById("pause_background_seedless").style.display = "none";
+    }
+}
+
+function updateRoomsVisibility(jsonData) {
+    // console.log("roomsVisibility: "+jsonData["roomsVisibility"])
+
+    // use a set for faster lookup
+    const roomsVisibility = new Set(jsonData["roomsVisibility"]);
+
+    // there's also svg for the lines, so search only in the rooms visibility svg
+    var svgObject = document.getElementById('roomsVisibilitySvg');
+
+    // in our svg there's paths and rectangles only
+    var paths = svgObject.getElementsByTagName('path');
+    for(var i=0; i<paths.length; i++) {
+        if(roomsVisibility.has(paths[i].id)) {
+            paths[i].style.display = "block";
+        } else {
+            paths[i].style.display = "none";
+        }
+    }
+    var rects = svgObject.getElementsByTagName('rect');
+    for(var i=0; i<rects.length; i++) {
+        if(roomsVisibility.has(rects[i].id)) {
+            rects[i].style.display = "block";
+        } else {
+            rects[i].style.display = "none";
+        }
     }
 }
 
@@ -510,6 +538,7 @@ function updateGlobal(jsonData) {
     seed = jsonData["seed"];
     preset = jsonData["preset"];
     doorsRando = jsonData["doorsRando"];
+    hasNothing = jsonData["hasNothing"];
     init = true;
 
     document.getElementById("mode").value = mode;
@@ -519,27 +548,62 @@ function updateGlobal(jsonData) {
     setActive(mode, area, boss, escapeRando);
 }
 
-function updateLines(jsonData) {
-    resetLines();
+function updateLines(jsonData, reset) {
+    if(reset) {
+        for(var startPoint in lines) {
+            // updating a dict while looping on it ?? let's try
+            removeLine(startPoint, lines[startPoint]);
+        }
+    }
 
-    // add area transitions
+    // add missing area transitions
     var arrayLength = jsonData["linesSeq"].length;
     for(var i=0; i<arrayLength; i++) {
-        addLine(jsonData["linesSeq"][i][0], jsonData["linesSeq"][i][1]);
+        var startPoint = jsonData["linesSeq"][i][0];
+        var endPoint = jsonData["linesSeq"][i][1];
+        if(! (startPoint in lines)) {
+            addLine(startPoint, endPoint);
+        }
+    }
+
+    // delete removed transitions
+    for(var startPoint in lines) {
+        if(! (startPoint in jsonData["lines"])) {
+            var endPoint = lines[startPoint]
+            removeLine(startPoint, endPoint);
+        }
     }
 }
 
 function updateDebugLines(jsonData) {
-    resetDebugLines();
+    var lines = new Set();
+    var arrayLength = jsonData["innerTransitions"].length;
+    for(var i=0; i<arrayLength; i++) {
+        var start = jsonData["innerTransitions"][i][0];
+        var end = jsonData["innerTransitions"][i][1]
+        var difficulty = jsonData['innerTransitions'][i][2]
 
-    if("innerTransitions" in jsonData) {
-        var arrayLength = jsonData["innerTransitions"].length;
-        for(var i=0; i<arrayLength; i++) {
-            var start = jsonData["innerTransitions"][i][0];
-            var end = jsonData["innerTransitions"][i][1]
-            var difficulty = jsonData['innerTransitions'][i][2]
+        var lineName = `${start}-${end}`;
+        if(debugLines.indexOf(lineName) == -1) {
             addDebugLine(start, end, difficulty);
         }
+        lines.add(lineName);
+    }
+
+    var toRemove = [];
+    for(var i=0; i<debugLines.length; i++) {
+        var lineName = debugLines[i];
+        if(! lines.has(lineName)) {
+            toRemove.push(lineName);
+        }
+    }
+
+    for(var i=0; i<toRemove.length; i++) {
+        var lineName = toRemove[i];
+        var middle = lineName.indexOf('-');
+        var start = lineName.substring(0, middle);
+        var end = lineName.substring(middle+1);
+        removeDebugLine(start, end);
     }
 }
 
@@ -548,6 +612,7 @@ function updateLocations(jsonData) {
         for(var locName in jsonData["availableLocations"]) {
             // console.log(locName+" is available");
             var locData = jsonData["availableLocations"][locName];
+            var update = (locsInfo[locName]["difficulty"] != locData["difficulty"] || locsInfo[locName]["state"] != "available");
             locsInfo[locName]["state"] = "available";
             locsInfo[locName]["difficulty"] = locData["difficulty"];
             locsInfo[locName]["canHidden"] = locData["canHidden"];
@@ -555,9 +620,11 @@ function updateLocations(jsonData) {
             locsInfo[locName]["accessPoint"] = locData["accessPoint"];
             locsInfo[locName]["path"] = locData["path"];
 
-            $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
-            var tooltip = getTooltip(locName, locData, "?", false);
-            $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+            if(update) {
+                $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
+                var tooltip = getTooltip(locName, locData, "?", false);
+                $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+            }
 
             // dragElement(document.getElementById(locName), locName);
 
@@ -575,6 +642,7 @@ function updateLocations(jsonData) {
         for(var locName in jsonData["visitedLocations"]) {
             // console.log(locName+" is visited");
             var locData = jsonData["visitedLocations"][locName];
+            var update = (locsInfo[locName]["state"] != "visited" || locsInfo[locName]["item"] != locData["item"]);
             locsInfo[locName]["state"] = "visited";
             locsInfo[locName]["difficulty"] = locData["difficulty"];
             locsInfo[locName]["canHidden"] = locData["canHidden"];
@@ -582,26 +650,28 @@ function updateLocations(jsonData) {
             locsInfo[locName]["item"] = locData["item"];
             locsInfo[locName]["accessPoint"] = locData["accessPoint"];
 
-            // keep current loc zoomed
-            var base = "baseLoc";
-            if($("#"+locName).hasClass("baseLocOver")) {
-                base = "baseLocOver";
-            }
+            if(update) {
+                // keep current loc zoomed
+                var base = "baseLoc";
+                if($("#"+locName).hasClass("baseLocOver")) {
+                    base = "baseLocOver";
+                }
 
-            var className = "marker_visited_"+locData["difficulty"]+"_"+locData["item"];
-            $("#"+locName).attr("class", base+" "+className);
-            var tooltip = getTooltip(locName, locData, locData["item"], true);
-            $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+                var className = "marker_visited_"+locData["difficulty"]+"_"+locData["item"];
+                $("#"+locName).attr("class", base+" "+className);
+                var tooltip = getTooltip(locName, locData, locData["item"], true);
+                $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
 
-            // dragElement(document.getElementById(locName), locName);
-
-            // check if a boss was at that location
-            if("boss" in locsInfo[locName]) {
-                var bossName = locsInfo[locName]["boss"];
-                if(bossName != "MotherBrain") {
-                    document.getElementById(bossName+"G4").style.display = "block";
+                // check if a boss was at that location
+                if("boss" in locsInfo[locName]) {
+                    var bossName = locsInfo[locName]["boss"];
+                    if(bossName != "MotherBrain") {
+                        document.getElementById(bossName+"G4").style.display = "block";
+                    }
                 }
             }
+
+            // dragElement(document.getElementById(locName), locName);
 
             if(! isSeedless(mode)) {
                 // add item
@@ -637,31 +707,35 @@ function updateLocations(jsonData) {
         for(var locName in jsonData["remainLocations"]) {
             // console.log(locName+": sequence breakable");
             var locData = jsonData["remainLocations"][locName];
+            var update = locsInfo[locName]["state"] != "break";
+
             locsInfo[locName]["state"] = "break";
             locsInfo[locName]["difficulty"] = locData["difficulty"];
             locsInfo[locName]["canHidden"] = locData["canHidden"];
             locsInfo[locName]["visibility"] = locData["visibility"];
 
-            // keep current loc zoomed
-            var base = "baseLoc";
-            if($("#"+locName).hasClass("baseLocOver")) {
-                base = "baseLocOver";
-            }
+            if(update) {
+                // keep current loc zoomed
+                var base = "baseLoc";
+                if($("#"+locName).hasClass("baseLocOver")) {
+                    base = "baseLocOver";
+                }
 
-            var className = "marker_available_break";
-            $("#"+locName).attr("class", base+" "+className);
-            var tooltip = getTooltip(locName, locData, "?", false);
-            $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+                var className = "marker_available_break";
+                $("#"+locName).attr("class", base+" "+className);
+                var tooltip = getTooltip(locName, locData, "?", false);
+                $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
 
-            // dragElement(document.getElementById(locName), locName);
-
-            // check if a boss was at that location
-            if("boss" in locsInfo[locName]) {
-                var bossName = locsInfo[locName]["boss"];
-                if(bossName != "MotherBrain") {
-                    document.getElementById(bossName+"G4").style.display = "none";
+                // check if a boss was at that location
+                if("boss" in locsInfo[locName]) {
+                    var bossName = locsInfo[locName]["boss"];
+                    if(bossName != "MotherBrain") {
+                        document.getElementById(bossName+"G4").style.display = "none";
+                    }
                 }
             }
+
+            // dragElement(document.getElementById(locName), locName);
         }
     }
 }
@@ -705,6 +779,8 @@ var escapeRando = true;
 var init = false;
 var webServInProgress = false;
 var doorsRando = false;
+var autoTrackInProgress = false;
+var hasNothing = false;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "break"]
@@ -748,7 +824,7 @@ var locsInfo = {
   MissileoutsideWreckedShipbottom: {left: 61.35, top: 13.52},
   MissileoutsideWreckedShiptop: {left: 62.1, top: 3.59},
   MissileoutsideWreckedShipmiddle: {left: 61.35, top: 7.60},
-  MissileCrateriamoat: {left: 47.47, top: 11.19},
+  MissileCrateriamoat: {left: 47.9, top: 11.19},
   MissileCrateriabottom: {left: 32.19, top: 39.6},
   MissileCrateriagauntletright: {left: 24.08, top: 9.19},
   MissileCrateriagauntletleft: {left: 23.08, top: 9.19},
@@ -801,8 +877,8 @@ var locsInfo = {
   MissilegreenMaridiashinespark: {left: 66, top: 50.9},
   SuperMissilegreenMaridia: {left: 66.9, top: 49},
   MissilegreenMaridiatatori: {left: 74.5, top: 53.01},
-  SuperMissileyellowMaridia: {left: 68.37, top: 38.65},
-  MissileyellowMaridiasupermissile: {left: 67.37, top: 38.65},
+  SuperMissileyellowMaridia: {left: 67.37, top: 38.65},
+  MissileyellowMaridiasupermissile: {left: 68.37, top: 38.65},
   MissileyellowMaridiafalsewall: {left: 75.4, top: 38.65},
   MissileleftMaridiasandpitroom: {left: 77.95, top: 55.4},
   MissilerightMaridiasandpitroom: {left: 80.8, top: 55.4},
@@ -1083,7 +1159,7 @@ function setGuessedPreset(romName){
 }
 
 function guessVARIAPreset(filename) {
-  var re = /VARIA_Randomizer_[A]?[D]?[B]?[F]?[M]?[Z]?X\d+_(\w+)/;
+  var re = /VARIA_Randomizer_[A]?[D]?[B]?[F]?[M]?[Z]?[S]?X\d+_(\w+)/;
   var match = filename.match(re);
   if(match == null) {
     re = /VARIA_Plandomizer_[A]?[B]?FX\d+_(\w+)/;
@@ -1118,7 +1194,7 @@ function mouseOver(elem) {
     $(elem).removeClass("baseLoc");
     $(elem).addClass("baseLocOver");
 
-    if(locsInfo[locName]["state"] == "available"){
+    if(locsInfo[locName]["state"] == "available") {
       var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
       var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
       $(elem).removeClass(className);
@@ -1152,7 +1228,7 @@ function mouseOut(elem) {
 }
 
 function displayPopup(isPlando) {
-  if(loaded == false || webServInProgress == true) {
+  if(loaded == false || webServInProgress == true || autoTrackInProgress == true) {
     return;
   }
 
@@ -1175,7 +1251,7 @@ function hidePopup() {
 }
 
 function initSolver() {
-  if(loaded == false || webServInProgress == true) {
+  if(loaded == false || webServInProgress == true || autoTrackInProgress == true) {
     return;
   }
 
@@ -1236,7 +1312,7 @@ function handleHide(locName) {
 }
 
 function clickLoc(elem) {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
 
@@ -1296,7 +1372,7 @@ function clickLoc(elem) {
 var selectedDoor = null;
 var currentDoorColor = null;
 function actionDoor(doorName) {
-    if(loaded == false || webServInProgress == true || init == false) {
+    if(interfaceIsFrozen()) {
         return;
     }
 
@@ -1385,7 +1461,7 @@ function updateDoorColor(newColor) {
 }
 
 function actionItem(itemName, action) {
-    if(loaded == false || webServInProgress == true || init == false) {
+    if(interfaceIsFrozen()) {
         return;
     }
 
@@ -1398,7 +1474,7 @@ function actionItem(itemName, action) {
 }
 
 function placeItem() {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
 
@@ -1419,7 +1495,7 @@ function hideItemPopup() {
 }
 
 function deleteLoc(isPlando) {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
   if(isPlando == true && ! isActive("repeatPlando")) {
@@ -1436,7 +1512,7 @@ function deleteLoc(isPlando) {
 }
 
 function resetLocsInfo() {
-  // remove info and reset css
+  // remove some info to update all locs
   var keys = ["state", "difficulty"];
   for(var locName in locsInfo) {
     for(var i in keys) {
@@ -1447,41 +1523,45 @@ function resetLocsInfo() {
         delete locsInfo[locName][key];
       }
     }
-    $("#"+locName).attr("class", "baseLoc");
-    $("#"+locName+'[data-toggle="tooltip"]').attr("title", "").tooltip('fixTitle');
-    $("#"+locName+'[data-toggle="tooltip"]').attr("data-original-title", "").tooltip('fixTitle');
   }
-  lastAP = "landingSite";
-  $("#lastAP").attr("class", "lastAP "+lastAP+"Gps");
 }
 
 function clearLocs(isPlando) {
-  if(loaded == false || webServInProgress == true || init == false) {
-    return;
-  }
-  if(isPlando == true && ! isActive("binPlando")) {
-    return;
-  }
-  if(isPlando == false && ! isActive("binItem")) {
-    return;
-  }
+    if(interfaceIsFrozen()) {
+        return;
+    }
+    if(isPlando == true && ! isActive("binPlando")) {
+        return;
+    }
+    if(isPlando == false && ! isActive("binItem")) {
+        return;
+    }
 
-  var msg = "Reset the locations of the Interactive VARIA ";
-  if(isPlando == true) {
-    msg = msg + "Plandomizer ?";
-  } else {
-    msg = msg + "Solver ?"
-  }
+    if(isPlando == true) {
+        var msg = "Reset the locations of the Plandomizer ?";
+    } else {
+        if(doorsRando == true) {
+            var msg = "Reset the locations and doors of the Tracker ?"
+        } else {
+            var msg = "Reset the locations of the Tracker ?"
+        }
+    }
 
-  var result = confirm(msg);
-  if(result == false){
-    return;
-  }
+    var result = confirm(msg);
+    if(result == false){
+        return;
+    }
 
-  resetLocsInfo();
+    resetLocsInfo();
 
-  // reset the state server side
-  ajaxCall({action: "clear", scope: "item"}, "upload");
+    if(isPlando == false && doorsRando == true) {
+        ajaxChainedActions.push({action: "clear", scope: "item"});
+        ajaxChainedActions.push({action: "clear", scope: "door"});
+        ajaxCallChained();
+    } else {
+        // reset the state server side
+        ajaxCall({action: "clear", scope: "item"}, "upload");
+    }
 }
 
 function getTooltip(locName, locData, item, visited) {

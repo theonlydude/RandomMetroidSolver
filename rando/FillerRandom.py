@@ -9,10 +9,11 @@ from rando.RandoServices import ComebackCheckType
 from solver.randoSolver import RandoSolver
 from utils.parameters import infinity
 from logic.helpers import diffValue2txt
+from logic.logic import Logic
 
 # simple, uses mini solver only
 class FillerRandom(Filler):
-    def __init__(self, startAP, graph, restrictions, container, endDate, diffSteps=0):
+    def __init__(self, startAP, graph, restrictions, container, endDate=infinity, diffSteps=0):
         super(FillerRandom, self).__init__(startAP, graph, restrictions, container, endDate)
         self.miniSolver = MiniSolver(startAP, graph, restrictions)
         self.diffSteps = diffSteps
@@ -55,7 +56,7 @@ class FillerRandom(Filler):
             item = random.choice(self.container.itemPool)
             locs = self.getLocations(item)
             if not locs:
-                self.log.debug("FillerRandom: constraint collision during step {} for item {}".format(self.nSteps, item.Type))
+                self.log.debug("FillerRandom: constraint collision during step {} for item {}/{}".format(self.nSteps, item.Type, item.Class))
                 self.resetHelpingContainer()
                 date = time.process_time()
                 continue
@@ -145,11 +146,13 @@ class FrontFillerKickstart(FrontFiller):
             return super(FrontFillerKickstart, self).step(onlyBossCheck)
 
         self.cache.reset()
-        pairItemLocDict = self.services.getStartupProgItemsPairs(self.ap, self.container)
-        if pairItemLocDict == None:
+        pair = self.services.findStartupProgItemPair(self.ap, self.container)
+        if pair == None:
             # no pair found or prog item found
-            return
-        self.collectPair(pairItemLocDict)
+            return False
+        itemLoc1, itemLoc2 = pair
+        self.collect(itemLoc1)
+        self.collect(itemLoc2)
         # we've collected two items, increase the number of steps
         self.nSteps += 1
 
@@ -157,9 +160,9 @@ class FrontFillerKickstart(FrontFiller):
 
 # actual random filler will real solver on top of mini
 class FillerRandomSpeedrun(FillerRandom):
-    def __init__(self, graphSettings, graph, restrictions, container, endDate, diffSteps=0):
+    def __init__(self, graphSettings, graph, restrictions, container, endDate=infinity, diffSteps=0):
         super(FillerRandomSpeedrun, self).__init__(graphSettings.startAP, graph, restrictions, container, endDate)
-        self.nFrontFillSteps = graphSettings.getRandomFillHelp()
+        self.nFrontFillSteps = Logic.LocationsHelper.getRandomFillHelp(graphSettings.startAP)
         # based on runtime limit, help the random fill with up to three front fill steps
         limit_s = endDate - time.process_time()
         self.runtimeSteps = [limit_s/4, limit_s/2, limit_s*3/4, sys.maxsize]
@@ -199,12 +202,18 @@ class FillerRandomSpeedrun(FillerRandom):
             maxDiff = self.settings.maxDiff
         minDiff = self.settings.minDiff
         graphLocations = self.container.getLocsForSolver()
-        solver = RandoSolver(self.restrictions.split, self.startAP, self.graph, graphLocations)
+        split = self.restrictions.split if self.restrictions.split != 'Scavenger' else 'Full'
+        solver = RandoSolver(split, self.startAP, self.graph, graphLocations, self.vcr)
         diff = solver.solveRom()
         self.container.cleanLocsAfterSolver()
         if diff < minDiff: # minDiff is 0 if unspecified: that covers "unsolvable" (-1)
             sys.stdout.write('X')
             sys.stdout.flush()
+
+            # remove vcr data
+            if self.vcr is not None:
+                self.vcr.empty()
+
             return False
         now = time.process_time()
         sys.stdout.write('S({}/{}ms)'.format(self.nSteps+1, int((now-self.startDate)*1000)))

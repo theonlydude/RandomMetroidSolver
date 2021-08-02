@@ -9,12 +9,13 @@ CWD=$(dirname $0)/..
 cd ${CWD}
 CWD=$(pwd)
 [ -z "$PYTHON" ] && PYTHON=pyston3.8
+[ -z "$OLD_PYTHON" ] && OLD_PYTHON=pyston3.8
 
 LOG_DIR=${CWD}/logs
 mkdir -p ${LOG_DIR}
 LOG=${LOG_DIR}/test_jm.log
 CSV=${LOG_DIR}/test_jm.csv
-> ${LOG}
+date > ${LOG}
 > ${CSV}
 
 if [ $# -ne 2 -a $# -ne 3 ]; then
@@ -43,7 +44,7 @@ if [ ${COMPARE} -eq 0 ]; then
     mkdir -p ${TEMP_DIR}
     (
 	cd ${TEMP_DIR}
-	git clone git@github.com:theonlydude/RandomMetroidSolver.git
+	git clone --recurse-submodules git@github.com:theonlydude/RandomMetroidSolver.git
 	cd RandomMetroidSolver
 	#git reset --hard 14e9088f07f64e093c53b773b016f5042765044b
     )
@@ -68,10 +69,37 @@ PRESETS=("regular" "newbie" "master")
 CHARGES=("" "--nerfedCharge")
 TWEAKS=("" "--novariatweaks")
 LAYOUTS=("" "--nolayout")
-STARTAPS=("" "--startAP random")
+STARTAPS=("" "--startLocation random")
 AREAS=("" "" "--area" "--area --areaLayoutBase")
 MINIMIZERS=("--bosses random" "--bosses random" "--bosses random" "--area --bosses --minimizer " "--area --bosses --minimizerTourian --minimizer ")
-DOORS=("" "" "" "--doorsColorsRando")
+DOORS=("" "--doorsColorsRando random")
+MAJORSSPLITS=("random" "random" "random" "Scavenger")
+
+function generate_random_list {
+    FIRST=0
+    while [ $# -ne 0 ]; do
+        if [ ${RANDOM} -gt 10000 ]; then
+            if [ ${FIRST} -eq 0 ]; then
+                FIRST=1
+                echo -en "${1}"
+            else
+                echo -en ",${1}"
+            fi
+        fi
+        shift
+    done
+}
+
+function generate_multi_select {
+    NAME="${1}"
+    shift
+
+    MULTISELECTLIST=$(generate_random_list $*)
+
+    if [ -n "${MULTISELECTLIST}" ]; then
+        echo "--${NAME}List ${MULTISELECTLIST}"
+    fi
+}
 
 function generate_params {
     SEED="$1"
@@ -95,8 +123,32 @@ function generate_params {
     fi
     let S=$RANDOM%${#DOORS[@]}
     DOOR=${DOORS[$S]}
+    let S=$RANDOM%${#MAJORSSPLITS[@]}
+    MAJORSSPLIT=${MAJORSSPLITS[$S]}
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random --gravityBehaviour random ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${AREA} ${MINIMIZER} ${DOOR} --jm"
+    if(echo "${MAJORSSPLIT}" | grep -q "Scavenger"); then
+        MAJORS_SPLIT_LIST=""
+        SCAV_RANDOMS=("" "--scavRandomized")
+        let S=$RANDOM%${#SCAV_RANDOMS[@]}
+        SCAV_RANDOM=${SCAV_RANDOMS[$S]}
+	SCAV_ESCAPES=("" "--scavEscape")
+        let S=$RANDOM%${#SCAV_ESCAPES[@]}
+        SCAV_ESCAPE=${SCAV_ESCAPES[$S]}
+        SCAVENGER="--scavNumLocs 0 ${SCAV_RANDOM} ${SCAV_ESCAPE}"
+    else
+        MAJORS_SPLIT_LIST=$(generate_multi_select "majorsSplit" 'Full' 'Major' 'Chozo' 'FullWithHUD')
+        SCAVENGER=""
+    fi
+    PROGRESSION_DIFFICULTY_LIST=$(generate_multi_select "progressionDifficulty" 'easier' 'normal' 'harder')
+    MORPH_PLACEMENT_LIST=$(generate_multi_select "morphPlacement" 'early' 'late' 'normal')
+    ENERGY_QTY_LIST=$(generate_multi_select "energyQty" 'ultra_sparse' 'sparse' 'medium' 'vanilla')
+    GRAVITY_BEHAVIOUR_LIST=$(generate_multi_select "gravityBehaviour" 'Vanilla' 'Balanced' 'Progressive')
+
+    if [ -n "${STARTAP}" ]; then
+        START_LOCATION_LIST=$(generate_multi_select "startLocation" "Ceres" "Landing_Site" "Gauntlet_Top" "Green_Brinstar_Elevator" "Big_Pink" "Etecoons_Supers" "Wrecked_Ship_Main" "Firefleas_Top" "Business_Center" "Bubble_Mountain" "Mama_Turtle" "Watering_Hole" "Aqueduct" "Red_Brinstar_Elevator" "Golden_Four")
+    fi
+
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random ${MORPH_PLACEMENT_LIST} --progressionDifficulty random ${PROGRESSION_DIFFICULTY_LIST} --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random ${ENERGY_QTY_LIST} --majorsSplit ${MAJORSSPLIT} ${MAJORS_SPLIT_LIST} ${SCAVENGER} --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random --gravityBehaviour random ${GRAVITY_BEHAVIOUR_LIST} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${START_LOCATION_LIST} ${AREA} ${MINIMIZER} ${DOOR} --jm"
 }
 
 function computeSeed {
@@ -109,12 +161,12 @@ function computeSeed {
 
     if [ ${COMPARE} -eq 0 ]; then
 	OLD_MD5="old n/a"
-	RANDO_OUT=$(${TIME} -f "\t%E real" $PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
+	RANDO_OUT=$(${TIME} -f "\t%E real" $OLD_PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 	if [ $? -ne 0 ]; then
 	    echo "${RANDO_OUT}" >> ${LOG}
 	else
 	    RTIME_OLD=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
-	    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
+	    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}*.sfc 2>/dev/null)
 	    if [ $? -eq 0 ]; then
 		OLD_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
 	    fi
@@ -122,17 +174,18 @@ function computeSeed {
     fi
 
     NEW_MD5="new n/a"
+    echo $PYTHON ./randomizer.py ${PARAMS}
     RANDO_OUT=$(${TIME} -f "\t%E real" $PYTHON ./randomizer.py ${PARAMS} 2>&1)
     if [ $? -ne 0 ]; then
 	echo "${RANDO_OUT}" >> ${LOG}
     else
 	RTIME_NEW=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
-	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
+	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}*.sfc 2>/dev/null)
 	if [ $? -eq 0 ]; then
 	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
 	fi
     fi
-    STARTAP_NEW=$(echo "${RANDO_OUT}" | grep startAP | cut -d ':' -f 2)
+    STARTAP_NEW=$(echo "${RANDO_OUT}" | grep startLocation | cut -d ':' -f 2)
     PROGSPEED_NEW=$(echo "${RANDO_OUT}" | grep progressionSpeed | cut -d ':' -f 2)
     MAJORSSPLIT_NEW=$(echo "${RANDO_OUT}" | grep majorsSplit | cut -d ':' -f 2)
     MORPH_NEW=$(echo "${RANDO_OUT}" | grep morphPlacement | cut -d ':' -f 2)
@@ -153,14 +206,14 @@ function computeSeed {
     fi
 
     # solve seed
-    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc)
+    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}*.sfc)
     if [ $? -ne 0 ]; then
 	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
 	exit 0
     fi
 
     if [ ${COMPARE} -eq 0 ]; then
-	SOLVER_OUT=$(${TIME} -f "\t%E real" $PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+	SOLVER_OUT=$(${TIME} -f "\t%E real" $OLD_PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor --runtime 10 --pickupStrategy any 2>&1)
 	if [ $? -ne 0 ]; then
             echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
@@ -178,7 +231,7 @@ function computeSeed {
 	DUP_OLD=1
     fi
 
-    SOLVER_OUT=$(${TIME} -f "\t%E real" $PYTHON ~/RandomMetroidSolver/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+    SOLVER_OUT=$(${TIME} -f "\t%E real" $PYTHON ~/RandomMetroidSolver/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor --runtime 10 --pickupStrategy any 2>&1)
     if [ $? -ne 0 ]; then
         echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
         echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
@@ -262,13 +315,14 @@ while true; do
 done
 
 echo "DONE"
+date >> ${LOG}
 
 echo ""
 echo "Start AP"
 for AP in "Ceres" "Landing Site" "Gauntlet Top" "Green Brinstar Elevator" "Big Pink" "Etecoons Supers" "Wrecked Ship Main" "Business Center" "Bubble Mountain" "Watering Hole" "Red Brinstar Elevator" "Golden Four" "Aqueduct" "Mama Turtle" "Firefleas Top"; do
-    TOTAL=$(grep "${AP}" ${CSV}  | wc -l)
-    ERROR=$(grep "${AP}" ${CSV} | grep -E '^error' | wc -l)
-    PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+    TOTAL=$(grep ";${AP};" ${CSV}  | wc -l)
+    ERROR=$(grep ";${AP};" ${CSV} | grep -E '^error' | wc -l)
+    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
     printf "%-24s" "${AP}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
 done
 echo ""
@@ -276,24 +330,33 @@ echo "Prog speed"
 for PROGSPEED in "speedrun" "slowest" "slow" "medium" "fast" "fastest" "VARIAble"; do
     TOTAL=$(grep ";${PROGSPEED};" ${CSV}  | wc -l)
     ERROR=$(grep ";${PROGSPEED};" ${CSV} | grep -E '^error' | wc -l)
-    PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
     printf "%-24s" "${PROGSPEED}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
 done
 echo ""
 echo "Majors split"
-for MAJORSPLIT in "Major" "Full" "Chozo"; do
-    TOTAL=$(grep "${MAJORSPLIT}" ${CSV}  | wc -l)
-    ERROR=$(grep "${MAJORSPLIT}" ${CSV} | grep -E '^error' | wc -l)
-    PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+for MAJORSPLIT in "Major" "Full" "Chozo" "FullWithHUD" "Scavenger"; do
+    TOTAL=$(grep ";${MAJORSPLIT};" ${CSV}  | wc -l)
+    ERROR=$(grep ";${MAJORSPLIT};" ${CSV} | grep -E '^error' | wc -l)
+    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
     printf "%-24s" "${MAJORSPLIT}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
 done
 echo ""
 echo "Morph placement"
 for MORPH in "early" "normal" "late"; do
-    TOTAL=$(grep "${MORPH}" ${CSV}  | wc -l)
-    ERROR=$(grep "${MORPH}" ${CSV} | grep -E '^error' | wc -l)
-    PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+    TOTAL=$(grep ";${MORPH};" ${CSV}  | wc -l)
+    ERROR=$(grep ";${MORPH};" ${CSV} | grep -E '^error' | wc -l)
+    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
     printf "%-24s" "${MORPH}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+done
+echo ""
+echo "Skill preset"
+for PRESET in "regular" "newbie" "master"; do
+    TOTAL=$(grep "${PRESET}.json" ${CSV}  | wc -l)
+    ERROR=$(grep "${PRESET}.json" ${CSV} | grep -E '^error' | wc -l)
+    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
+    printf "%-24s" "${PRESET}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+
 done
 
 TOTAL_COUNT=$(wc -l ${CSV} | awk '{print $1}')

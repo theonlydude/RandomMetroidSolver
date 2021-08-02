@@ -4,7 +4,7 @@ from rom.rom_patches import RomPatches
 from rom.rom import RealROM, FakeROM
 from rom.romreader import RomReader
 from utils.doorsmanager import DoorsManager
-from graph.graph_access import getAccessPoint
+from graph.graph_utils import getAccessPoint
 
 class RomLoader(object):
     @staticmethod
@@ -147,6 +147,22 @@ class RomLoader(object):
 
     def loadDoorsColor(self):
         return DoorsManager.loadDoorsColor(self.romReader.romFile)
+
+    def readLogic(self):
+        return self.romReader.readLogic()
+
+    def updateSplitLocs(self, split, locations):
+        locIds = self.romReader.getLocationsIds()
+        for loc in locations:
+            if loc.isBoss():
+                continue
+            elif loc.Id in locIds:
+                loc.setClass([split])
+            else:
+                loc.setClass(["Minor"])
+
+    def loadScavengerOrder(self, locations):
+        return self.romReader.loadScavengerOrder(locations)
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

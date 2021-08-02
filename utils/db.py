@@ -35,6 +35,13 @@ class DB:
         except Exception as e:
             print("DB.close::error: {}".format(e))
 
+    # to be used with 'with'
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self.close()
+
     def commit(self):
         if self.dbAvailable == False:
             return
@@ -177,15 +184,37 @@ where id = %s;"""
             print("DB.initPresets::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
-    def addISolver(self, preset, romFileName):
+    def addISolver(self, preset, type, romFileName):
         if self.dbAvailable == False:
             return None
 
         try:
-            sql = "insert into isolver (init_time, preset, romFileName) values (now(), '%s', '%s');"
-            self.cursor.execute(sql % (preset, romFileName))
+            sql = "insert into isolver (init_time, preset, type, romFileName) values (now(), '%s', '%s', '%s');"
+            self.cursor.execute(sql % (preset, type, romFileName))
         except Exception as e:
             print("DB.addISolver::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def addSprite(self, sprite):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "insert into sprites (init_time, sprite) values (now(), '%s');"
+            self.cursor.execute(sql % (sprite, ))
+        except Exception as e:
+            print("DB.addSprite::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def addPlandoRando(self, return_code, duration, msg):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "insert into plando_rando (init_time, return_code, duration, error_msg) values (now(), %d, %f, '%s');"
+            self.cursor.execute(sql % (return_code, duration, msg))
+        except Exception as e:
+            print("DB.addPlandoRando::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
     # read data
@@ -350,7 +379,7 @@ order by r.id;"""
 
         # custom sort of the params
         paramsHead = []
-        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'minimizerTourian', 'majorsSplit', 'majorsSplitMultiSelect', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
+        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'minimizerTourian', 'majorsSplit', 'majorsSplitMultiSelect', 'scavNumLocs', 'scavRandomized', 'scavEscape', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
             if param in paramsSet:
                 paramsHead.append(param)
                 paramsSet.remove(param)
@@ -377,10 +406,10 @@ order by 1,2;"""
         #     (param1, count1, count2, 0, ...)
         #     (param2, 0, 0, count3, ...)]
         groups = {
-            'Randomizer parameters': ['preset', 'startLocation', 'majorsSplit', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'progressionDifficulty', 'suitsRestriction', 'hideItems'],
+            'Randomizer parameters': ['preset', 'startLocation', 'majorsSplit', 'scavNumLocs', 'scavRandomized', 'scavEscape', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'progressionDifficulty', 'suitsRestriction', 'hideItems'],
             'Ammo and Energy': ['minorQty', 'energyQty', 'strictMinors', 'missileQty', 'superQty', 'powerBombQty'],
             'Areas and Fun': ['areaRandomization', 'lightAreaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'minimizerTourian', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits'],
-            'Patches': ['layoutPatches', 'variaTweaks', 'nerfedCharge', 'gravityBehaviour', 'itemsounds', 'elevators_doors_speed', 'spinjumprestart', 'rando_speed', 'Infinite_Space_Jump', 'refill_before_save', 'animals', 'No_Music', 'random_music']
+            'Patches': ['layoutPatches', 'variaTweaks', 'nerfedCharge', 'gravityBehaviour', 'itemsounds', 'elevators_doors_speed', 'spinjumprestart', 'rando_speed', 'Infinite_Space_Jump', 'refill_before_save', 'hud', 'animals', 'No_Music', 'random_music']
         }
 
         result = {}
@@ -557,12 +586,45 @@ order by 1;"""
             return None
 
         # return all data csv style
-        sql = """select 0, init_time, preset, romFileName
+        sql = """select 0, init_time, type, preset, romFileName
 from isolver
 where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK)
 order by init_time;"""
 
-        header = ["initTime", "preset", "romFileName"]
+        header = ["initTime", "type", "preset", "romFileName"]
+        return (header, self.execSelect(sql, (weeks,)))
+
+    def getSpritesData(self, weeks):
+        if self.dbAvailable == False:
+            return None
+
+        sql = "select distinct(sprite) from sprites where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK);"
+        sprites = self.execSelect(sql, (weeks,))
+        if sprites == None:
+            return None
+
+        # db returns tuples
+        sprites = [sprite[0] for sprite in sprites]
+
+        # pivot
+        sql = "SELECT date(init_time)"
+        for sprite in sprites:
+            sql += ", SUM(CASE WHEN sprite = '{}' THEN 1 ELSE 0 END) AS count_{}".format(sprite, sprite.replace('-', '_'))
+        sql += " FROM sprites where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) GROUP BY date(init_time);".format(weeks)
+
+        return (sprites, self.execSelect(sql))
+
+    def getPlandoRandoData(self, weeks):
+        if self.dbAvailable == False:
+            return None
+
+        # return all data csv style
+        sql = """select 0, init_time, return_code, duration, error_msg
+from plando_rando
+where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK)
+order by init_time;"""
+
+        header = ["initTime", "returnCode", "duration", "errorMsg"]
         return (header, self.execSelect(sql, (weeks,)))
 
     @staticmethod

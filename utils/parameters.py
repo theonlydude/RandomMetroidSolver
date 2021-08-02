@@ -108,6 +108,13 @@ class Knows:
                           'rooms': [],
                           'readonly' : True}
 
+    UnequipItem = SMBool(True, easy, ['UnequipItem'])
+    desc['UnequipItem'] = {'display': 'Unequip items',
+                          'title': 'Unequip Gravity suit to have more time to morph after jumping or unequip Hi-Jump Boots to limit jump height',
+                          'href': 'https://youtu.be/qiFiIKYU14k',
+                          'rooms': ['Main Street', 'Spring Ball Room', 'West Ocean', 'Botwoon Energy Tank Room', 'Wrecked Ship Energy Tank Room'],
+                          'readonly' : True}
+
     Mockball = SMBool(True, easy, ['Mockball'])
     desc['Mockball'] = {'display': 'Mockball',
                         'title': 'Morph from runing without loosing momentum to get Early Super and Ice Beam',
@@ -216,7 +223,7 @@ class Knows:
 
     LowStuffGT = SMBool(False, 0, ['LowStuffGT'])
     desc['LowStuffGT'] = {'display': 'Low Ammo/Health Golden Torizo',
-                          'title': "Fight GT with either charge beam or 10 supers and nothing else. Otherwise require either 30 supers or Charge+Plasma and 4 tanks of energy (with Varia).",
+                          'title': "Fight GT with either charge beam or 5 supers and nothing else. Otherwise require either 30 supers or Charge+Plasma and 4 tanks of energy (with Varia).",
                           'href': None,
                           'rooms': ["Golden Torizo's Room"]}
 
@@ -255,7 +262,7 @@ class Knows:
     GravLessLevel1 = SMBool(True, hardcore, ['GravLessLevel1'])
     desc['GravLessLevel1'] = {'display': 'Level 1',
                               'title': 'Make your way underwater with Hi-Jump and Ice, freezing crabs and fishes. Access Botwoon with grapple.',
-                              'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
+                              'href': 'https://www.youtube.com/watch?v=G5bB03j5GZc',
                               'rooms': ['Main Street', 'Mt. Everest', 'Crab Shaft', 'Pseudo Plasma Spark Room',
                                         'Aqueduct', 'Botwoon Hallway', "Botwoon's Room", 'Botwoon Energy Tank Room',
                                         'Crab Hole', 'Crab Tunnel', 'East Ocean']}
@@ -665,7 +672,7 @@ class Knows:
 
     categories = {
         'Common': [
-            {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 'CrouchJump'],
+            {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 'CrouchJump', 'UnequipItem'],
              'title': 'Basics'},
             {'knows': ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
                        'GravityJump', 'GetAroundWallJump',
@@ -1064,7 +1071,6 @@ class Settings:
             'Croc -> Grapple Escape Missiles': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Croc -> Ice Missiles': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Single Chamber <-> Bubble Mountain': {'mult': 1.25, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
-            'Single Chamber <-> Kronic Boost Room': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Kronic Boost Room -> Bubble Mountain Top': {'mult': 0.5, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Kronic Boost Room <-> Croc': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Croc -> Norfair Entrance': {'mult': 1.25, 'minE': 2, 'hellRun': 'MainUpperNorfair'}

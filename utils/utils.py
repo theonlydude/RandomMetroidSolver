@@ -252,14 +252,14 @@ class PresetLoaderDict(PresetLoader):
         super(PresetLoaderDict, self).__init__()
 
 def getDefaultMultiValues():
-    from graph.graph_access import GraphUtils
+    from graph.graph_utils import GraphUtils
     defaultMultiValues = {
         'startLocation': GraphUtils.getStartAccessPointNames(),
-        'majorsSplit': ['Full', 'Major', 'Chozo'],
+        'majorsSplit': ['Full', 'FullWithHUD', 'Major', 'Chozo', 'Scavenger'],
         'progressionSpeed': ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble', 'speedrun'],
         'progressionDifficulty': ['easier', 'normal', 'harder'],
         'morphPlacement': ['early', 'late', 'normal'],
-        'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla' ],
+        'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla'],
         'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive']
     }
     return defaultMultiValues
@@ -279,6 +279,11 @@ def loadRandoPreset(randoPreset, args):
     # load the rando preset json file and add the parameters inside it to the args parser
     with open(randoPreset) as randoPresetFile:
         randoParams = json.load(randoPresetFile)
+
+    # use default params as base
+    defaultParams = getRandomizerDefaultParameters()
+    defaultParams.update(randoParams)
+    randoParams = defaultParams
 
     if randoParams.get("seed") != None:
         args.seed = int(randoParams["seed"])
@@ -350,12 +355,25 @@ def loadRandoPreset(randoPreset, args):
         if randoParams.get(patch, "off") == "on":
             args.patches.append(patch)
 
+    if randoParams.get("hud", "off") == "on":
+        args.hud = True
+
     if "morphPlacement" in randoParams:
         args.morphPlacement = randoParams["morphPlacement"]
     if "majorsSplit" in randoParams:
         args.majorsSplit = randoParams["majorsSplit"]
+        if randoParams["majorsSplit"] == "Scavenger":
+            if "scavNumLocs" in randoParams:
+                if randoParams["scavNumLocs"] == "random":
+                    args.scavNumLocs = 0
+                else:
+                    args.scavNumLocs = randoParams["scavNumLocs"]
+            if "scavRandomized" in randoParams:
+                args.scavRandomized = randoParams["scavRandomized"] == "on"
+            if "scavEscape" in randoParams:
+                args.scavEscape = randoParams["scavEscape"] == "on"
     if "startLocation" in randoParams:
-        args.startAP = randoParams["startLocation"]
+        args.startLocation = randoParams["startLocation"]
     if "progressionDifficulty" in randoParams:
         args.progressionDifficulty = randoParams["progressionDifficulty"]
 
@@ -410,6 +428,9 @@ def getRandomizerDefaultParameters():
     defaultParams['raceMode'] = "off"
     defaultParams['majorsSplit'] = "Full"
     defaultParams['majorsSplitMultiSelect'] = defaultMultiValues['majorsSplit']
+    defaultParams['scavNumLocs'] = "10"
+    defaultParams['scavRandomized'] = "off"
+    defaultParams['scavEscape'] = "off"
     defaultParams['startLocation'] = "Landing Site"
     defaultParams['startLocationMultiSelect'] = defaultMultiValues['startLocation']
     defaultParams['maxDifficulty'] = 'hardcore'
@@ -453,6 +474,7 @@ def getRandomizerDefaultParameters():
     defaultParams['rando_speed'] = "off"
     defaultParams['Infinite_Space_Jump'] = "off"
     defaultParams['refill_before_save'] = "off"
+    defaultParams['hud'] = "off"
     defaultParams['animals'] = "off"
     defaultParams['No_Music'] = "off"
     defaultParams['random_music'] = "off"

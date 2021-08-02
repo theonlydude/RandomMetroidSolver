@@ -1,10 +1,12 @@
 import copy
 
 from rom.compression import Compressor
-from graph.graph_locations import locations
-from graph.graph_access import GraphUtils, getAccessPoint, accessPoints
+from rom.rom import snes_to_pc
+from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
+from logic.logic import Logic
 
 class RomReader:
+    nothings = ['0xbae9', '0xbaed']
     # read the items in the rom
     items = {
         # vanilla
@@ -73,7 +75,9 @@ class RomReader:
         '0xefc7': {'name': 'ScrewAttack'},
         '0xefcb': {'name': 'Morph'},
         '0xefcf': {'name': 'Reserve'},
-        '0x0': {'name': 'Nothing'}
+        '0x0': {'name': 'Nothing'},
+        '0xbae9': {'name': 'Nothing'}, # new visible/chozo Nothing
+        '0xbaed': {'name': 'Nothing'}  # new hidden Nothing
     }
 
     patches = {
@@ -96,7 +100,8 @@ class RomReader:
         'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'desc': "Fast Tourian"},
         'open_zebetites': {'address': 0x26DF22, 'value': 0xc3, 'desc': "Zebetites without morph"},
         'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'desc': "Beam doors"},
-        'red_doors': {'address':0x20560, 'value':0xbd, 'desc': "Red doors open with one Missile and do not react to Super"}
+        'red_doors': {'address':0x20560, 'value':0xbd, 'desc': "Red doors open with one Missile and do not react to Super"},
+        'rotation': {'address': 0x44DF, 'value': 0xD0, 'desc': "Rotation hack"}
     }
 
     # FIXME shouldn't be here
@@ -172,7 +177,10 @@ class RomReader:
         'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'vanillaValue': 0xff},
         'open_zebetites': {'address': 0x26DF22, 'value': 0xc3, 'vanillaValue': 0x43},
         'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'vanillaValue': 0xaf},
-        'no_demo': {'address': 0x59F2C, 'value': 0x80, 'vanillaValue': 0xf0}
+        'rotation': {'address': 0x44DF, 'value': 0xD0, 'vanillaValue': 0xe0},
+        'no_demo': {'address': 0x59F2C, 'value': 0x80, 'vanillaValue': 0xf0},
+        'varia_hud': {'address': 0x15EF7, 'value': 0x5C, 'vanillaValue': 0xAE},
+        'nothing_item_plm': {'address': 0x23AD1, 'value': 0x24, 'vanillaValue': 0xb9}
     }
 
     @staticmethod
@@ -231,9 +239,18 @@ class RomReader:
         else:
             raise Exception("RomReader: unknown visibility: {}".format(visibility))
 
+        # for the new nothing item plm the visibility is:
+        # Visible/Chozo -> 0
+        # Hidden -> 4
+        if itemCode not in self.items:
+            if visibility in ['Visible', 'Chozo']:
+                nothingCode = hex(value2*256+(value1-0))
+            elif visibility == 'Hidden':
+                nothingCode = hex(value2*256+(value1-4))
+            if nothingCode in self.nothings:
+                itemCode = nothingCode
+
         # dessyreqt randomizer make some missiles non existant, detect it
-        # 0xeedb is missile item
-        # 0x786de is Morphing Ball location
         self.romFile.seek(address+4)
         value3 = int.from_bytes(self.romFile.read(1), byteorder='little')
         if (value3 == self.nothingId
@@ -246,22 +263,19 @@ class RomReader:
     def getMajorsSplit(self):
         address = 0x17B6C
         split = chr(self.romFile.readByte(address))
-        if split in ['F', 'M', 'Z']:
-            splits = {
-                'F': 'Full',
-                'Z': 'Chozo',
-                'M': 'Major'
-            }
-            return splits[split]
-        else:
-            return None
+        splits = {
+            'F': 'Full',
+            'Z': 'Chozo',
+            'M': 'Major',
+            'H': 'FullWithHUD',
+            'S': 'Scavenger'
+        }
+        # default to Full
+        return splits.get(split, 'Full')
 
     def loadItems(self, locations):
         majorsSplit = self.getMajorsSplit()
 
-        if majorsSplit == None:
-            isFull = False
-            chozoItems = {}
         for loc in locations:
             if loc.isBoss():
                 # the boss item has the same name as its location, except for mother brain which has a space
@@ -274,68 +288,39 @@ class RomReader:
                 # race seeds
                 loc.itemName = "Nothing"
                 item = '0x0'
-            if majorsSplit == None:
-                if loc.isMajor() and self.items[item]['name'] in ['Missile', 'Super', 'PowerBomb']:
-                    isFull = True
-                if loc.isMinor() and self.items[item]['name'] not in ['Missile', 'Super', 'PowerBomb']:
-                    isFull = True
-                if loc.isChozo():
-                    if loc.itemName in chozoItems:
-                        chozoItems[loc.itemName] = chozoItems[loc.itemName] + 1
-                    else:
-                        chozoItems[loc.itemName] = 1
 
-        # if majors split is not written in the seed, use an heuristic
-        if majorsSplit == None:
-            isChozo = self.isChozoSeed(chozoItems)
-            if isChozo == True:
-                return 'Chozo'
-            elif isFull == True:
-                return 'Full'
-            else:
-                return 'Major'
-        else:
-            return majorsSplit
+        return (majorsSplit if majorsSplit != 'FullWithHUD' else 'Full', majorsSplit)
 
-    def isChozoSeed(self, chozoItems):
-        # we have 2 Missiles, 2 Supers and 1 PB in the chozo locations
-        if 'Missile' not in chozoItems:
-            return False
-        if chozoItems['Missile'] != 2:
-            return False
-        if 'Super' not in chozoItems:
-            return False
-        if chozoItems['Super'] != 2:
-            return False
-        if 'PowerBomb' not in chozoItems:
-            return False
-        if chozoItems['PowerBomb'] != 1:
-            return False
+    # used to read scavenger locs
+    def genLocIdsDict(self, locations):
+        locIdsDict = {}
+        for loc in locations:
+            if loc.isScavenger():
+                locIdsDict[loc.Id] = loc
+        return locIdsDict
 
-        # we have at least 3 E and 1 R
-        if 'ETank' not in chozoItems:
-            return False
-        if chozoItems['ETank'] < 3:
-            return False
-        if 'Reserve' not in chozoItems:
-            return False
+    def loadScavengerOrder(self, locations):
+        order = []
+        locIdsDict = self.genLocIdsDict(locations)
+        self.romFile.seek(snes_to_pc(0xA1F5D8))
+        while True:
+            data = self.romFile.readWord()
+            locId = (data & 0xFF00) >> 8
+            if locId == 0xFF:
+                break
+            loc = locIdsDict[locId]
+            order.append(loc)
 
-        # all the majors items which can't be superfuned
-        if 'Charge' not in chozoItems:
-            return False
-        if 'Morph' not in chozoItems:
-            return False
-        if 'Ice' not in chozoItems:
-            return False
-
-        return True
+            # check that there's no nothing in the loc
+            assert loc.itemName != "Nothing", "Nothing detected in scav loc {}".format(loc.Name)
+        return order
 
     def loadTransitions(self):
         # return the transitions
         rooms = GraphUtils.getRooms()
         bossTransitions = {}
         areaTransitions = {}
-        for accessPoint in accessPoints:
+        for accessPoint in Logic.accessPoints:
             if accessPoint.isInternal() == True:
                 continue
             key = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
@@ -487,24 +472,42 @@ class RomReader:
             self.nothingId = value
 
         # find the associated location to get its address
-        for loc in locations:
+        for loc in Logic.locations:
             if loc.Id == self.nothingId:
                 self.nothingAddr = 0x70000 | loc.Address
                 break
+
+    def readLogic(self):
+        if self.patchPresent('rotation'):
+            return 'rotation'
+        else:
+            return 'vanilla'
 
     def getStartAP(self):
         address = 0x10F200
         value = self.romFile.readWord(address)
 
-        startAP = 'Landing Site'
+        startLocation = 'Landing Site'
         startArea = 'Crateria Landing Site'
         startPatches = []
-        for ap in accessPoints:
-            if ap.Start != None and 'spawn' in ap.Start and ap.Start['spawn'] == value:
-                startAP = ap.Name
+        for ap in Logic.accessPoints:
+            if ap.Start is not None and 'spawn' in ap.Start and ap.Start['spawn'] == value:
+                startLocation = ap.Name
                 startArea = ap.Start['solveArea']
                 if 'patches' in ap.Start:
                     startPatches = ap.Start['patches']
                 break
 
-        return (startAP, startArea, startPatches)
+        return (startLocation, startArea, startPatches)
+
+    # go read all location IDs for item split. used to get major/chozo locs in non standard start
+    def getLocationsIds(self):
+        ret = []
+        for area,addr in locIdsByAreaAddresses.items():
+            self.romFile.seek(addr)
+            while True:
+               idByte = self.romFile.readByte()
+               if idByte == 0xff:
+                   break
+               ret.append(idByte)
+        return ret

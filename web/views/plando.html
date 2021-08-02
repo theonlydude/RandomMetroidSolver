@@ -174,7 +174,7 @@ function initCurMode() {
 var g_lock = "save";
 var plandoROM = null;
 async function save(lock) {
-    if(loaded == false || webServInProgress == true || init == false) {
+    if(interfaceIsFrozen()) {
         return;
     }
     if(! isActive("savePlando")) {
@@ -242,7 +242,7 @@ async function save(lock) {
 }
 
 function randomize() {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
   if(! isActive("randoPlando")) {
@@ -484,7 +484,7 @@ function onloadHook() {
           }
 
           var fileSize = file.size;
-          if( fileSize > 1024*1024 ) {
+          if( fileSize > 4*1024*1024 ) {
             document.getElementById("vcrFile").value = "";
             alert("Wrong VCR file size: "+fileSize.toString());
             return false;
@@ -520,7 +520,7 @@ function hidePlandoButtons() {
 }
 
 function displayDebugPopup() {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
   document.getElementById("debugPopup").style.display = "block";
@@ -530,46 +530,82 @@ function hideDebugPopup() {
   document.getElementById("debugPopup").style.display = "none";
 }
 
+var gchained = false;
 function loadNextAction(chained=false) {
-  if(chained == true) {
-    vcrIndex += 1;
-  }
-
-  // next action
-  if(vcrIndex >= vcrData.length) {
-    var msg = "the end";
-  } else {
-    var nextAction = vcrData[vcrIndex];
-    var nextActionType = nextAction["type"];
-
-    var msg = (vcrIndex+1) + "/" + vcrData.length + ": ";
-    if(nextActionType == "rollback") {
-      msg = msg + "Rollback " + nextAction["count"] + " locations";
-    } else if(nextActionType == "location") {
-      msg = msg + "Pick " + nextAction["item"] + " at " + nextAction["loc"];
+    gchained = chained;
+    if(chained == true) {
+        vcrIndex += 1;
     }
-  }
 
-  document.getElementById("nextAction").value = msg;
+    // next action
+    if(vcrIndex >= vcrData.length) {
+        var msg = "the end";
+    } else {
+        var nextAction = vcrData[vcrIndex];
+        var nextActionType = nextAction["type"];
 
-  // previous action
-  if(vcrIndex == 0) {
-    var msg = "start";
-  } else {
-    var prevAction = vcrData[vcrIndex-1];
-    var prevActionType = prevAction["type"];
-
-    var msg = (vcrIndex) + "/" + vcrData.length + ": ";
-    if(prevActionType == "rollback") {
-      msg = msg + "Rollback " + prevAction["count"] + " locations";
-    } else if(prevActionType == "location") {
-      msg = msg + "Pick " + prevAction["item"] + " at " + prevAction["loc"];
+        var msg = (vcrIndex+1) + "/" + vcrData.length + ": ";
+        if(nextActionType == "rollback") {
+            msg = msg + "Rollback " + nextAction["count"] + " locations";
+        } else if(nextActionType == "location") {
+            msg = msg + "Pick " + nextAction["item"] + " at " + nextAction["loc"];
+        }
     }
-  }
 
-  document.getElementById("prevAction").value = msg;
+    document.getElementById("nextAction").value = msg;
 
-  activateVCRButtons(vcrIndex, vcrData.length);
+    // previous action
+    if(vcrIndex == 0) {
+        var msg = "start";
+    } else {
+        var prevAction = vcrData[vcrIndex-1];
+        var prevActionType = prevAction["type"];
+
+        var msg = (vcrIndex) + "/" + vcrData.length + ": ";
+        if(prevActionType == "rollback") {
+            msg = msg + "Rollback " + prevAction["count"] + " locations";
+        } else if(prevActionType == "location") {
+            msg = msg + "Pick " + prevAction["item"] + " at " + prevAction["loc"];
+        }
+    }
+
+    document.getElementById("prevAction").value = msg;
+
+    activateVCRButtons(vcrIndex, vcrData.length);
+}
+
+function postAjaxHook() {
+    if(gchained == false && vcrIndex < vcrData.length) {
+        // highlight next action location
+        highlightAction(vcrIndex, true);
+    }
+    if(vcrIndex > 0) {
+        // un-highlight forward prev action location
+        highlightAction(vcrIndex-1, false);
+    }
+    if(vcrIndex < vcrData.length-1) {
+        // un-highlight backward prev action location
+        highlightAction(vcrIndex+1, false);
+    }
+}
+
+function highlightAction(index, show) {
+    var action = vcrData[index];
+    if(action["type"] == "location") {
+        highlightLoc(action["loc"], show);
+    }
+}
+
+function highlightLoc(locName, show) {
+    var locName = locName.replace(/[ ,()-]/g, '');
+    var loc = document.getElementById(locName);
+    if(show) {
+        mouseOver(loc);
+        $('#'+locName).tooltip('show');
+    } else {
+        mouseOut(loc);
+        $('#'+locName).tooltip('hide');
+    }
 }
 
 function activateVCRButtons(index, len) {
@@ -700,10 +736,6 @@ function nextAction() {
       loadNextAction();
     } else if(nextActionType == "location") {
       var locISolver = nextAction["loc"];
-      locISolver.replace(/[ ,()-]/g, '');
-
-      // console.log("locname: " + locISolver);
-
       ajaxCall({action: "add", scope: "item", locName: locISolver, itemName: nextAction["item"]}, "upload");
 
       vcrIndex += 1;
@@ -794,7 +826,7 @@ function isDesactivated(elemId) {
 }
 
 function displayRandoPopup() {
-  if(loaded == false || webServInProgress == true || init == false) {
+  if(interfaceIsFrozen()) {
     return;
   }
 

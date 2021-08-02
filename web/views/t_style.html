@@ -1,3 +1,4 @@
+{{include 'solver_web/varia.css'}}
 .doorPopup {
     background-color: #ffffff;
     position: absolute;
@@ -95,9 +96,21 @@ body {
 .map_container {
     position: relative;
 }
+.map_container img {
+   max-width: 100%;
+   height: auto;
+}
+.map_container svg {
+   position: absolute;
+   top: 0;
+   left: 0;
+}
 img {
     max-width: 100%;
     height: auto;
+}
+.svginvisible {
+    display: none;
 }
 .greyed {
     opacity: 0.5;
@@ -423,6 +436,10 @@ img {
     left: 76.8%;
     top: 9.3%;
 }
+.bowlingGps {
+    left: 67.35%;
+    top: 7.5%;
+}
 .crabMazeLeftGps {
     left: 80.79%;
     top: 18.57%;
@@ -454,6 +471,10 @@ img {
 .ridleyZoneGps {
     left: 80.6%;
     top: 88.4%;
+}
+.wastelandGps {
+    left: 88.15%;
+    top: 84.4%;
 }
 .threeMuskateersRoomLeftGps {
     left: 84.54%;
@@ -522,6 +543,10 @@ img {
 .oasisBottomGps {
     top: 56.9%;
     left: 79.2%;
+}
+.westSandHallLeftGps {
+    top: 56.9%;
+    left: 75.2%;
 }
 .postBotwoonGps {
     top: 40.6%;
@@ -678,6 +703,10 @@ img {
 .cathedralGps {
     left: 47.4%;
     top: 79%;
+}
+.moatLeftGps {
+    left: 46.6%;
+    top: 8.6%;
 }
 .lastAP {
     position: absolute;
@@ -1496,7 +1525,7 @@ img {
     top: 7.60%;
 }
 #MissileCrateriamoat {
-    left: 47.47%;
+    left: 47.9%;
     top: 11.19%;
 }
 #MissileCrateriabottom {
@@ -1708,11 +1737,11 @@ img {
     top: 53.01%;
 }
 #SuperMissileyellowMaridia {
-    left: 68.37%;
+    left: 67.37%;
     top: 38.65%;
 }
 #MissileyellowMaridiasupermissile {
-    left: 67.37%;
+    left: 68.37%;
     top: 38.65%;
 }
 #MissileyellowMaridiafalsewall {
@@ -3710,4 +3739,17 @@ img {
     background-image: url("/solver/static/images/Ice.png");
     background-repeat: no-repeat;
     background-position: center;
+}
+
+#samusIcon {
+    position: absolute;
+    z-index: 2;
+    left: 0%;
+    top: 0%;
+    background-image: url("/solver/static/images/samusIcon.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 1.5em;
+    height: 1.5em;
+    display: none;
 }

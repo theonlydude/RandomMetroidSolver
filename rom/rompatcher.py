@@ -3,11 +3,13 @@ import os, random, re
 from rando.Items import ItemManager
 from rom.compression import Compressor
 from rom.ips import IPS_Patch
-from rando.patches import patches, additional_PLMs
-from utils.parameters import appDir
 from utils.doorsmanager import DoorsManager
-from graph.graph_access import GraphUtils, getAccessPoint, accessPoints
-from rom.rom import RealROM, FakeROM
+from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
+from logic.logic import Logic
+from rom.rom import RealROM, FakeROM, snes_to_pc
+from patches.patchaccess import PatchAccess
+from utils.parameters import appDir
+import utils.log
 
 def getWord(w):
     return (w & 0x00FF, (w & 0xFF00) >> 8)
@@ -23,6 +25,8 @@ class RomPatcher:
             'plm_spawn.ips',
             # needed fixes for VARIA
             'vanilla_bugfixes.ips',
+            # use a byte in a unused room state header field to store area ID in the VARIA sense
+            'area_ids.ips',
             # custom credits, backup save system, base tracking code
             'credits_varia.ips',
             # actual game hijacks to update tracking stats
@@ -46,7 +50,9 @@ class RomPatcher:
             # displays max ammo 
             'max_ammo_display.ips',
             # VARIA logo on startup screen
-            'varia_logo.ips'
+            'varia_logo.ips',
+            # new nothing plm
+            'nothing_item_plm.ips'
         ],
         # VARIA tweaks
         'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
@@ -63,13 +69,16 @@ class RomPatcher:
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips',
                      'Escape_Animals_Change_Event', # ...end animals
                      # vanilla behaviour restore
-                     'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips'],
+                     'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips',
+                     'varia_hud.ips'],
         # base patchset+optional layout for area rando
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
                  'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street', 'no_demo.ips'],
+        # patches for boss rando
+        'Bosses': ['door_transition.ips', 'no_demo.ips'],
         # patches for escape rando
-        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips'],
+        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips', 'door_transition.ips'],
         # patches for  minimizer with fast Tourian
         'MinimizerTourian': ['minimizer_tourian.ips', 'open_zebetites.ips'],
         # patches for door color rando
@@ -77,6 +86,7 @@ class RomPatcher:
     }
 
     def __init__(self, romFileName=None, magic=None, plando=False):
+        self.log = utils.log.get('RomPatcher')
         self.romFileName = romFileName
         self.race = None
         if romFileName == None:
@@ -102,6 +112,7 @@ class RomPatcher:
             # get out of croc room: reload CRE
             0x93ea: self.forceRoomCRE
         }
+        self.patchAccess = PatchAccess()
 
     def end(self):
         self.romFile.close()
@@ -119,17 +130,6 @@ class RomPatcher:
             ret.append(self.altLocsAddresses[loc.Name])
         return ret
 
-    def writeNothing(self, itemLoc):
-        loc = itemLoc.Location
-        if loc.isBoss():
-            return
-
-        for addr in self.getLocAddresses(loc):
-            self.writeItemCode(ItemManager.Items['Missile'], loc.Visibility, addr)
-            # all Nothing not at this loc Id will disappear when loc
-            # item is collected
-            self.romFile.writeByte(self.nothingId, addr + 4)
-
     def writeItem(self, itemLoc):
         loc = itemLoc.Location
         if loc.isBoss():
@@ -137,46 +137,52 @@ class RomPatcher:
         #print('write ' + itemLoc.Item.Type + ' at ' + loc.Name)
         for addr in self.getLocAddresses(loc):
             self.writeItemCode(itemLoc.Item, loc.Visibility, addr)
-            # if nothing was written at this loc before (in plando),
-            # then restore the vanilla value
-            self.romFile.writeByte(loc.Id, addr + 4)
 
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
-        self.nothingMissile = False
-        hasAccessibleNothing = any(il for il in itemLocs if il.Item.Category == 'Nothing' and not il.Location.restricted and il.Accessible)
         for itemLoc in itemLocs:
             loc = itemLoc.Location
             item = itemLoc.Item
             if loc.isBoss():
                 continue
-            isMorph = loc.Name == 'Morphing Ball'
-            if item.Category == 'Nothing':
-                self.writeNothing(itemLoc)
-                if loc.Id == self.nothingId and hasAccessibleNothing:
-                    # picking up the first nothing gives a missile pack
-                    self.nothingMissile = True
-                    self.nItems += 1
-            else:
+            self.writeItem(itemLoc)
+            if item.Category != 'Nothing':
                 self.nItems += 1
-                self.writeItem(itemLoc)
-            if isMorph:
-                self.patchMorphBallEye(itemLoc.Item)
+                if loc.Name == 'Morphing Ball':
+                    self.patchMorphBallEye(item)
+
+    def writeSplitLocs(self, split, itemLocs, progItemLocs):
+        majChozoCheck = lambda itemLoc: itemLoc.Item.Class == split and itemLoc.Location.isClass(split)
+        fullCheck = lambda itemLoc: itemLoc.Location.Id is not None
+        splitChecks = {
+            'Full': fullCheck,
+            'Scavenger': fullCheck,
+            'Major': majChozoCheck,
+            'Chozo': majChozoCheck,
+            'FullWithHUD': lambda itemLoc: itemLoc.Item.Category not in ['Energy', 'Ammo', 'Boss']
+        }
+        itemLocCheck = lambda itemLoc: itemLoc.Item.Category != "Nothing" and splitChecks[split](itemLoc)
+        for area,addr in locIdsByAreaAddresses.items():
+            locs = [il.Location for il in itemLocs if itemLocCheck(il) and il.Location.GraphArea == area]
+            self.log.debug("writeSplitLocs. area="+area)
+            self.log.debug(str([loc.Name for loc in locs]))
+            self.romFile.seek(addr)
+            for loc in locs:
+                self.romFile.writeByte(loc.Id)
+            self.romFile.writeByte(0xff)
+        if split == "Scavenger":
+            # write required major item order
+            self.romFile.seek(snes_to_pc(0xA1F5D8))
+            for itemLoc in progItemLocs:
+                self.romFile.writeWord((itemLoc.Location.Id << 8) | itemLoc.Location.HUD)
+            # bogus loc ID | "HUNT OVER" index
+            self.romFile.writeWord(0xff10)
 
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball
     def patchMorphBallEye(self, item):
 #        print('Eye item = ' + item.Type)
-        # consider Nothing as missile, because if it is at morph ball it will actually be a missile
-        if item.Category == 'Nothing':
-            if self.nothingId == 0x1a:
-                isNothingMissile = True
-            else:
-                return
-        else:
-            isNothingMissile = False
-        isAmmo = item.Category == 'Ammo' or isNothingMissile
-        isMissile = item.Type == 'Missile' or isNothingMissile
+        isAmmo = item.Category == 'Ammo'
         # category to check
         if ItemManager.isBeam(item):
             cat = 0xA8 # collected beams
@@ -184,7 +190,7 @@ class RomPatcher:
             cat = 0xC4 # max health
         elif item.Type == 'Reserve':
             cat = 0xD4 # max reserves
-        elif isMissile:
+        elif item.Type == 'Missile':
             cat = 0xC8 # max missiles
         elif item.Type == 'Super':
             cat = 0xCC # max supers
@@ -206,9 +212,9 @@ class RomPatcher:
         elif item.Type == 'Reserve' or isAmmo:
             operand = 0x1 # < 1
         elif ItemManager.isBeam(item):
-            operand = ItemManager.BeamBits[item.Type]
+            operand = item.BeamBits
         else:
-            operand = ItemManager.ItemBits[item.Type]
+            operand = item.ItemBits
         self.patchMorphBallCheck(0x1410E6, cat, comp, operand, branch) # eye main AI
         self.patchMorphBallCheck(0x1468B2, cat, comp, operand, branch) # head main AI
 
@@ -229,82 +235,18 @@ class RomPatcher:
             self.applyIPSPatch(patchName)
 
     def customShip(self, ship):
-        self.applyIPSPatch(ship, ipsDir='rando/patches/ships')
+        self.applyIPSPatch(ship, ipsDir='varia_custom_sprites/patches')
 
     def customSprite(self, sprite, customNames, noSpinAttack):
-        self.applyIPSPatch(sprite, ipsDir='rando/patches/sprites')
+        self.applyIPSPatch(sprite, ipsDir='varia_custom_sprites/patches')
         if noSpinAttack == True:
             self.applyIPSPatch('SpriteSomething_Disable_Spin_Attack')
+
         if not customNames:
             return
 
-        # custom sprite message boxes update
-        messageBoxes = {
-            'marga.ips': {
-                'Morph': 'morphing doll',
-                'SpringBall': 'spring doll',
-            },
-            'super_controid.ips': {
-                'PowerBomb': 'm-80,000 helio bomb'
-            },
-            'alucard.ips': {
-                'HiJump': 'gravity boots',
-                'SpeedBooster': 'god speed shoes',
-                'Morph': 'soul of bat',
-                'XRayScope': 'holy glasses',
-                'Varia': 'fire mail',
-                'Gravity': 'holy symbol',
-                'ETank': 'life vessel',
-                'Reserve': 'heart vessel'
-            },
-            'samus_backwards.ips': {
-                'ETank': 'ygrene knat',
-                'Missile': 'elissim',
-                'Super': 'repus elissim',
-                'PowerBomb': 'rewop bmob',
-                'Grapple': 'gnilpparg maeb',
-                'XRayScope': 'yar-x epocs',
-                'Varia': 'airav uius',
-                'SpringBall': 'gnirps llab',
-                'Morph': 'gnihprom llab',
-                'ScrewAttack': 'wercs kcatta',
-                'HiJump': 'pmuj-ih stoob',
-                'SpaceJump': 'ecaps pmuj',
-                'SpeedBooster': 'deeps retsoob',
-                'Charge': 'egrahc maeb',
-                'Ice': 'eci maeb',
-                'Wave': 'evaw maeb',
-                'Spazer': 'rezaps',
-                'Plasma': 'amsalp maeb',
-                'Bomb': 'bmob',
-                'Reserve': 'evreser knat',
-                'Gravity': 'ytivarg tius'
-            },
-            'vanilla':
-            {
-                'ETank': 'energy tank',
-                'Missile': 'misille',
-                'Super': 'super missile',
-                'PowerBomb': 'power bomb',
-                'Grapple': 'grappling beam',
-                'XRayScope': 'x-ray scope',
-                'Varia': 'varia suit',
-                'SpringBall': 'spring ball',
-                'Morph': 'morphing ball',
-                'ScrewAttack': 'screw attack',
-                'HiJump': 'hi-jump boots',
-                'SpaceJump': 'space jump',
-                'SpeedBooster': 'speed booster',
-                'Charge': 'charge beam',
-                'Ice': 'ice beam',
-                'Wave': 'wave beam',
-                'Spazer': 'spazer',
-                'Plasma': 'plasma beam',
-                'Bomb': 'bomb',
-                'Reserve': 'server tank',
-                'Gravity': 'gravity suit'
-            }
-        }
+        from varia_custom_sprites.custom_sprites import messageBoxes
+
         messageBoxes['samus_upside_down_and_backwards.ips'] = messageBoxes['samus_backwards.ips']
         vFlip = ['samus_upside_down.ips', 'samus_upside_down_and_backwards.ips']
         hFlip = ['samus_backwards.ips']
@@ -317,7 +259,7 @@ class RomPatcher:
             for (messageKey, newMessage) in messageBoxes[sprite].items():
                 messageBox.updateMessage(messageKey, newMessage, doVFlip, doHFlip)
 
-    def writePlmTable(self, plms, area, bosses, startAP):
+    def writePlmTable(self, plms, area, bosses, startLocation):
         # called when saving a plando
         try:
             if bosses == True or area == True:
@@ -325,18 +267,18 @@ class RomPatcher:
 
             doors = self.getStartDoors(plms, area, None)
             self.writeDoorsColor(doors)
-            self.applyStartAP(startAP, plms, doors)
+            self.applyStartAP(startLocation, plms, doors)
 
             self.applyPLMs(plms)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
-    def applyIPSPatches(self, startAP="Landing Site",
+    def applyIPSPatches(self, startLocation="Landing Site",
                         optionalPatches=[], noLayout=False, suitsMode="Balanced",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
-                        escapeAttr=None, noRemoveEscapeEnemies=False,
-                        minimizerN=None, minimizerTourian=True, doorsColorsRando=False):
+                        escapeAttr=None, minimizerN=None, minimizerTourian=True,
+                        doorsColorsRando=False):
         try:
             # apply standard patches
             stdPatches = []
@@ -362,7 +304,11 @@ class RomPatcher:
                 stdPatches.append("Phantoon_Eye_Door")
             if area == True or doorsColorsRando == True:
                 stdPatches.append("Enable_Backup_Saves")
-
+            if 'varia_hud.ips' in optionalPatches:
+                # varia hud has its own variant of g4_skip for scavenger mode,
+                # it can also make demos glitch out
+                stdPatches.remove("g4_skip.ips")
+                self.applyIPSPatch("no_demo.ips")
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
 
@@ -382,13 +328,8 @@ class RomPatcher:
 
             # random escape
             if escapeAttr is not None:
-                if noRemoveEscapeEnemies == True:
-                    RomPatcher.IPSPatches['Escape'].append('Escape_Rando_Enable_Enemies')
                 for patchName in RomPatcher.IPSPatches['Escape']:
                     self.applyIPSPatch(patchName)
-                # handle incompatible doors transitions
-                if area == False and bosses == False:
-                    self.applyIPSPatch('door_transition.ips')
                 # animals and timer
                 self.applyEscapeAttributes(escapeAttr, plms)
 
@@ -400,34 +341,36 @@ class RomPatcher:
                     RomPatcher.IPSPatches['Area'].append('area_rando_layout_base.ips')
                 for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
-            elif bosses == True:
-                self.applyIPSPatch('door_transition.ips')
-                self.applyIPSPatch('no_demo.ips')
+            else:
+                self.applyIPSPatch('area_ids_alt.ips')
+            if bosses == True:
+                for patchName in RomPatcher.IPSPatches['Bosses']:
+                    self.applyIPSPatch(patchName)
             if minimizerN is not None:
                 self.applyIPSPatch('minimizer_bosses.ips')
                 if minimizerTourian == True:
                     for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
                         self.applyIPSPatch(patchName)
             doors = self.getStartDoors(plms, area, minimizerN)
-            if doorsColorsRando:
+            if doorsColorsRando == True:
                 for patchName in RomPatcher.IPSPatches['DoorsColors']:
                     self.applyIPSPatch(patchName)
                 self.writeDoorsColor(doors)
-            self.applyStartAP(startAP, plms, doors)
+            self.applyStartAP(startLocation, plms, doors)
             self.applyPLMs(plms)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
-    def applyIPSPatch(self, patchName, patchDict=None, ipsDir="rando/patches"):
+    def applyIPSPatch(self, patchName, patchDict=None, ipsDir=None):
         if patchDict is None:
-            patchDict = patches
+            patchDict = self.patchAccess.getDictPatches()
         print("Apply patch {}".format(patchName))
         if patchName in patchDict:
             patch = IPS_Patch(patchDict[patchName])
         else:
             # look for ips file
-            if os.path.exists(patchName):
-                patch = IPS_Patch.load(patchName)
+            if ipsDir is None:
+                patch = IPS_Patch.load(self.patchAccess.getPatchPath(patchName))
             else:
                 patch = IPS_Patch.load(os.path.join(appDir, ipsDir, patchName))
         self.ipsPatches.append(patch)
@@ -436,13 +379,13 @@ class RomPatcher:
         doors = [0x10] # red brin elevator
         def addBlinking(name):
             key = 'Blinking[{}]'.format(name)
-            if key in patches:
+            if key in self.patchAccess.getDictPatches():
                 self.applyIPSPatch(key)
-            if key in additional_PLMs:
+            if key in self.patchAccess.getAdditionalPLMs():
                 plms.append(key)
         if area == True:
             plms += ['Maridia Sand Hall Seal', "Save_Main_Street", "Save_Crab_Shaft"]
-            for accessPoint in accessPoints:
+            for accessPoint in Logic.accessPoints:
                 if accessPoint.Internal == True or accessPoint.Boss == True:
                     continue
                 addBlinking(accessPoint.Name)
@@ -450,16 +393,17 @@ class RomPatcher:
             addBlinking("Below Botwoon Energy Tank Right")
         if minimizerN is not None:
             # add blinking doors inside and outside boss rooms
-            for accessPoint in accessPoints:
+            for accessPoint in Logic.accessPoints:
                 if accessPoint.Boss == True:
                     addBlinking(accessPoint.Name)
         return doors
 
     def applyStartAP(self, apName, plms, doors):
         ap = getAccessPoint(apName)
-        if not GraphUtils.isStandardStart(apName):
-            # not Ceres or Landing Site, so Zebes will be awake
-            plms.append('Morph_Zebes_Awake')
+        # if start loc is not Ceres or Landing Site, or the ceiling loc picked up before morph loc,
+        # Zebes will be awake and morph loc item will disappear.
+        # this PLM ensures the item will be here whenever zebes awakes
+        plms.append('Morph_Zebes_Awake')
         (w0, w1) = getWord(ap.Start['spawn'])
         if 'doors' in ap.Start:
             doors += ap.Start['doors']
@@ -506,6 +450,9 @@ class RomPatcher:
                 plms.append("WS_Map_Grey_Door_Openable")
         else:
             plms.append("WS_Map_Grey_Door")
+        # optional patches (enemies, scavenger)
+        for patch in escapeAttr['patches']:
+            self.applyIPSPatch(patch)
 
     # adds ad-hoc "IPS patches" for additional PLM tables
     def applyPLMs(self, plms):
@@ -514,8 +461,9 @@ class RomPatcher:
         plmDict = {}
         # we might need to update locations addresses on the fly
         plmLocs = {} # room key above => loc name
+        additionalPLMs = self.patchAccess.getAdditionalPLMs()
         for p in plms:
-            plm = additional_PLMs[p]
+            plm = additionalPLMs[p]
             room = plm['room']
             state = 0
             if 'state' in plm:
@@ -589,32 +537,17 @@ class RomPatcher:
 
     def writeMajorsSplit(self, majorsSplit):
         address = 0x17B6C
-        if majorsSplit == 'Chozo':
-            char = 'Z'
-        elif majorsSplit == 'Full':
-            char = 'F'
-        else:
-            char = 'M'
+        splits = {
+            'Chozo': 'Z',
+            'Major': 'M',
+            'FullWithHUD': 'H',
+            'Scavenger': 'S'
+        }
+        char = splits.get(majorsSplit, 'F')
         self.romFile.writeByte(ord(char), address)
 
-    def setNothingId(self, startAP, itemLocs):
-        # morph ball loc by default
-        self.nothingId = 0x1a
-        # if not default start, use first loc with a nothing
-        if not GraphUtils.isStandardStart(startAP):
-            firstNothing = next((il.Location for il in itemLocs if il.Item.Category == 'Nothing' and 'Boss' not in il.Location.Class), None)
-            if firstNothing is not None:
-                self.nothingId = firstNothing.Id
-
-    def writeNothingId(self):
-        address = 0x17B6D
-        self.romFile.writeByte(self.nothingId, address)
-
     def getItemQty(self, itemLocs, itemType):
-        q = len([il for il in itemLocs if il.Accessible and il.Item.Type == itemType])
-        if itemType == 'Missile' and self.nothingMissile == True:
-            q += 1
-        return q
+        return len([il for il in itemLocs if il.Accessible and il.Item.Type == itemType])
 
     def getMinorsDistribution(self, itemLocs):
         dist = {}
@@ -642,8 +575,6 @@ class RomPatcher:
         totalAmmo = sum(d['Quantity'] for ammo,d in dist.items())
         totalItemLocs = sum(1 for il in itemLocs if il.Accessible and not il.Location.isBoss())
         totalNothing = sum(1 for il in itemLocs if il.Accessible and il.Item.Category == 'Nothing')
-        if self.nothingMissile == True:
-            totalNothing -= 1
         totalEnergy = self.getItemQty(itemLocs, 'ETank')+self.getItemQty(itemLocs, 'Reserve')
         totalMajors = max(totalItemLocs - totalEnergy - totalAmmo - totalNothing, 0)
         address = 0x2736C0
@@ -733,7 +664,7 @@ class RomPatcher:
         self.writeCreditsStringBig(address, line, top=False)
 
     def writeSpoiler(self, itemLocs, progItemLocs=None):
-        # keep only majors, filter out Etanks and Reserve
+        # keep only majors
         fItemLocs = [il for il in itemLocs if il.Item.Category not in ['Ammo', 'Nothing', 'Energy', 'Boss']]
         # add location of the first instance of each minor
         for t in ['Missile', 'Super', 'PowerBomb']:
@@ -1089,7 +1020,7 @@ class RomPatcher:
 
         return len(compressedData)
 
-    def setOamTile(self, nth, middle, newTile):
+    def setOamTile(self, nth, middle, newTile, y=0xFC):
         # an oam entry is made of five bytes: (s000000 xxxxxxxxx) (yyyyyyyy) (YXpp000t tttttttt)
 
         # after and before the middle of the screen is not handle the same
@@ -1099,10 +1030,10 @@ class RomPatcher:
             x = 0x200 - (0x08 * (middle - nth))
 
         self.romFile.writeWord(x)
-        self.romFile.writeByte(0xFC)
+        self.romFile.writeByte(y)
         self.romFile.writeWord(0x3100+newTile)
 
-    def writeVersion(self, version):
+    def writeVersion(self, version, addRotation=False):
         # max 32 chars
 
         # new oamlist address in free space at the end of bank 8C
@@ -1110,13 +1041,23 @@ class RomPatcher:
         self.romFile.writeWord(0xF3E9, 0x5a0e9)
 
         # string length
-        length = len(version)
+        versionLength = len(version)
+        if addRotation:
+            rotationLength = len('rotation')
+            length = versionLength + rotationLength
+        else:
+            length = versionLength
         self.romFile.writeWord(length, 0x0673e9)
-        middle = int(length / 2) + length % 2
+        versionMiddle = int(versionLength / 2) + versionLength % 2
 
         # oams
         for (i, char) in enumerate(version):
-            self.setOamTile(i, middle, char2tile[char])
+            self.setOamTile(i, versionMiddle, char2tile[char])
+
+        if addRotation:
+            rotationMiddle = int(rotationLength / 2) + rotationLength % 2
+            for (i, char) in enumerate('rotation'):
+                self.setOamTile(i, rotationMiddle, char2tile[char], y=0x8e)
 
     def writeDoorsColor(self, doors):
         DoorsManager.writeDoorsColor(self.romFile, doors)
@@ -1171,6 +1112,7 @@ class MessageBox(object):
     def updateMessage(self, box, message, vFlip=False, hFlip=False):
         (address, oldLength) = self.offsets[box]
         newLength = len(message)
+        assert newLength <= oldLength, "string '{}' is too long, max {}".format(message, oldLength)
         padding = oldLength - newLength
         paddingLeft = int(padding / 2)
         paddingRight = int(padding / 2)

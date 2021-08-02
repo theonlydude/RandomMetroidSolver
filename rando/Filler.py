@@ -5,10 +5,10 @@ from logic.cache import RequestCache
 from rando.RandoServices import RandoServices
 from rando.Choice import ItemThenLocChoice
 from rando.RandoServices import ComebackCheckType
-from rando.ItemLocContainer import ItemLocation
+from rando.ItemLocContainer import ItemLocation, getItemLocationsStr
 from utils.parameters import infinity
 from logic.helpers import diffValue2txt
-from graph.graph_access import GraphUtils
+from graph.graph_utils import GraphUtils
 
 # base class for fillers. a filler responsibility is to fill a given
 # ItemLocContainer while a certain condition is fulfilled (usually
@@ -94,17 +94,6 @@ class Filler(object):
         self.log.debug("AP="+self.ap)
         if self.vcr is not None and containerArg is None:
             self.vcr.addLocation(location.Name, item.Type)
-
-    # collect item pair as returned by RandoServices.getStartupProgItemsPairs
-    def collectPair(self, pairItemLocDict):
-        # choose a pair of items which create progression
-        keys = list(pairItemLocDict.keys())
-        key = random.choice(keys)
-
-        # collect them
-        availableLocs = pairItemLocDict[key]
-        self.collect(ItemLocation(key[0], availableLocs[0][0]))
-        self.collect(ItemLocation(key[1], availableLocs[1][0]))
 
     # called by generateItems at the end to knows which particulier
     # item/locations were progression, if the info is available

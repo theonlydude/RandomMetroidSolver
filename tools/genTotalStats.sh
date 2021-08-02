@@ -39,7 +39,7 @@ function computeSeed {
     SQL=${SQL_DIR}/extStats_${JOB_ID}.sql
     echo "${SQL_BASE}" > ${SQL}
 
-    ${PYTHON} ${CWD}/solver.py -r "${SEED}" --preset "${CWD}/standard_presets/Season_Races.json" --pickupStrategy all --difficultyTarget 10 --ext_stats "${SQL}" --ext_stats_step 2 >/dev/null
+    ${PYTHON} ${CWD}/solver.py -r "${SEED}" --preset "${CWD}/standard_presets/Season_Races.json" --pickupStrategy all --difficultyTarget 10 --ext_stats "${SQL}" --ext_stats_step 2 --runtime 10 >/dev/null
 
     printf "."
 }

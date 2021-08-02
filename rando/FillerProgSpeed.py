@@ -9,7 +9,7 @@ from rando.Items import ItemManager
 from rando.ItemLocContainer import ItemLocContainer, getLocListStr, getItemListStr, getItemLocationsStr, getItemLocStr
 from rando.RandoSettings import ProgSpeedParameters
 from utils.parameters import infinity
-from graph.graph_access import GraphUtils, getAccessPoint
+from graph.graph_utils import GraphUtils, getAccessPoint
 
 # algo state used for rollbacks
 class FillerState(object):
@@ -91,7 +91,7 @@ class FillerProgSpeed(Filler):
         return self.services.currentLocations(self.ap, self.container, item=item)
 
     def getComebackCheck(self):
-        if self.isEarlyGame():
+        if self.isEarlyGame() or self.services.can100percent(self.ap, self.container):
             return ComebackCheckType.NoCheck
         if random.random() >= self.possibleSoftlockProb:
             return ComebackCheckType.ComebackWithoutItem
@@ -191,7 +191,8 @@ class FillerProgSpeed(Filler):
         return True
 
     def addEnergyAsNonProg(self):
-        return self.restrictions.split == 'Chozo'
+        collectedEnergy = self.container.getCollectedItems(lambda item: item.Category == 'Energy')
+        return self.restrictions.split == 'Chozo' or (len(collectedEnergy) <= 2 and self.settings.progSpeed != 'slowest')
 
     def nonProgItemCheck(self, item):
         return (item.Category == 'Energy' and self.addEnergyAsNonProg()) or (not self.stdStart and item.Category == 'Ammo') or (self.restrictions.isEarlyMorph() and item.Type == 'Morph') or not self.isProgItem(item)

@@ -5,6 +5,8 @@
 my_dir=$(dirname $(readlink -f $0))
 
 [ -z "$ASAR" ] && ASAR=asar.exe
+[ -z "$XKAS_PLUS" ] && XKAS_PLUS=xkas.exe
+[ -z "$ASAR_OPTS" ] && ASAR_OPTS=--fix-checksum=off
 [ -z "$VANILLA" ] && VANILLA=${my_dir}/../vanilla.sfc
 
 [ $# -lt 1 ] && {
@@ -12,22 +14,55 @@ my_dir=$(dirname $(readlink -f $0))
     exit 1
 }
 
-set -e
-
 patch=$1
-target=$(dirname $patch)/$(basename $patch asm)ips
+tdir=$(dirname $patch)
+[ -d "${tdir}/../ips" ] && tdir=${tdir}/../ips
+target=${tdir}/$(basename $patch asm)ips
 tmprom=sm.sfc
 
 cp $VANILLA $tmprom
 
-echo "Assembling $patch ..."
+tmprom=$(readlink -f $tmprom)
 
-$ASAR $patch $tmprom 
+assembler=asar
+
+grep 'xkas-plus' $patch > /dev/null
+
+[ $? -eq 0 ] && {
+    assembler="xkas-plus"
+}
+
+echo "Assembling $patch with $assembler ..."
+
+case $assembler in
+    asar)
+	$ASAR $ASAR_OPTS $patch $tmprom
+	;;
+
+    xkas-plus)
+	(
+	    cd $(dirname $patch)
+	    $XKAS_PLUS -o $tmprom $(basename $patch)
+	)
+	;;
+
+    *)
+	echo "Unknown assembler $assembler" >&2
+	exit 1
+	;;
+
+esac
+
+[ $? -ne 0 ] && {
+    echo "$assembler failed" >&2
+    exit 1
+}
 
 echo
 echo "Generating $target ..."
 
 ${my_dir}/make_ips.py $VANILLA $tmprom $target
+
 rm -f $tmprom
 
 echo

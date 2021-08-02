@@ -6,6 +6,7 @@ import sys, os
 sys.path.append(os.path.dirname(sys.path[0]))
 
 from rom.ips import IPS_Patch
+from rom.rom import pc_to_snes
 
 vanilla=sys.argv[1]
 ips_ranges = []
@@ -15,7 +16,7 @@ def addRanges(name, patch):
         ips_ranges.append({'name':name, 'range':r})
 
 def loadPatchPy():
-    from rando.patches import patches as patches_py
+    from patches.common.patches import patches as patches_py
     for name,patch in patches_py.items():
         addRanges(name, IPS_Patch(patch))
 
@@ -39,5 +40,6 @@ for rg in sorted(ips_ranges, key=lambda r:r['range'].start):
     lstop = last['range'].stop
 
 for k,v in overlaps.items():
-    addresses = ["(0x%x, 0x%x)" % a for a in v]
-    print("%s and %s overlap! %s" % (k[0], k[1], addresses))
+    pc_addresses = ["(0x%x, 0x%x)" % a for a in v]
+    snes_addresses = ["($%06x, $%06x)" % (pc_to_snes(a[0]), pc_to_snes(a[1])) for a in v]
+    print("%s and %s overlap!\n\tPC:\t%s\n\tSNES:\t%s" % (k[0], k[1], pc_addresses, snes_addresses))

@@ -17,7 +17,7 @@ class ItemLocation(object):
         return {'Item': self.Item.json(), 'Location': self.Location.json()}
 
 def getItemListStr(items):
-    return str(dict(Counter([item.Type for item in items])))
+    return str(dict(Counter(["%s/%s" % (item.Type,item.Class) for item in items])))
 
 def getLocListStr(locs):
     return str([loc.Name for loc in locs])
@@ -108,10 +108,18 @@ class ItemLocContainer(object):
         dest.itemLocations = copy.copy(self.itemLocations)
         dest.unrestrictedItems = copy.copy(self.unrestrictedItems)
 
-    # reset collected items/locations
-    def resetCollected(self):
+    # reset collected items/locations. if reassignItemLocs is True,
+    # will re-fill itemPool and unusedLocations as they were before
+    # collection
+    def resetCollected(self, reassignItemLocs=False):
         self.currentItems = []
-        self.itemLocations = []
+        if reassignItemLocs == False:
+            self.itemLocations = []
+        else:
+            while len(self.itemLocations) > 0:
+                il = self.itemLocations.pop()
+                self.itemPool.append(il.Item)
+                self.unusedLocations.append(il.Location)
         self.unrestrictedItems = set()
         self.sm.resetItems()
 
@@ -132,19 +140,9 @@ class ItemLocContainer(object):
         self.itemPoolBackup = None
         self.log.debug("unrestrictItemPool: "+getItemListStr(self.itemPool))
 
-    # utility function that exists only because locations are lame dictionaries.
-    # extract from this container locations matching the ones given
-    def extractLocs(self, locs):
-        ret = []
-        for loc in locs:
-            ret.append(next(l for l in self.unusedLocations if l.Name == loc.Name))
-        return ret
-
     def removeLocation(self, location):
         if location in self.unusedLocations:
             self.unusedLocations.remove(location)
-        else:
-            self.unusedLocations.remove(next(loc for loc in self.unusedLocations if loc.Name == location.Name))
 
     def removeItem(self, item):
         self.itemPool.remove(item)
@@ -228,8 +226,10 @@ class ItemLocContainer(object):
         locs = []
         for il in self.itemLocations:
             loc = il.Location
+            self.log.debug("getLocsForSolver: {}".format(loc.Name))
             # filter out restricted locations
             if loc.restricted:
+                self.log.debug("getLocsForSolver: restricted, remove {}".format(loc.Name))
                 continue
             loc.itemName = il.Item.Type
             locs.append(loc)

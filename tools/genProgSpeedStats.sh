@@ -37,7 +37,7 @@ function computeSeed {
 	     printf "."
 	     rm -f ${LOG}
 
-	     ${PYTHON} ${CWD}/solver.py -r "${SEED}" --preset "${SKILL_PRESET}" --pickupStrategy all --difficultyTarget 10 --ext_stats "${SQL}" --ext_stats_step 2 >/dev/null
+	     ${PYTHON} ${CWD}/solver.py -r "${SEED}" --preset "${SKILL_PRESET}" --pickupStrategy all --difficultyTarget 10 --ext_stats "${SQL}" --ext_stats_step 2 --runtime 10 >/dev/null
 
 	     # delete generated ROM
 	     rm -f "${SEED}"

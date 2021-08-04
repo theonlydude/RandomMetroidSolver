@@ -1149,3 +1149,9 @@ class MessageBox(object):
 
     def updateAttr(self, byte, address):
         self.rom.writeByte(byte, address)
+
+
+class MusicPatcher(object):
+    def __init__(self, rom):
+        self.rom = rom
+

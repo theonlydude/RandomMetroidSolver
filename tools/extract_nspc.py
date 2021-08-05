@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(sys.path[0]))
 
 # extract vanilla soundtrack as nspc files. args:
 # - vanilla ROM
-# - path to nspc directory 
+# - path to nspc directory. *has* to be one level deeper than music base dir
 # - path to JSON metadata file to write.
 # will also parse room state headers, and list pointers where
 # music data/track has to be written, ie track number >= 5
@@ -95,8 +95,10 @@ for i in range(len(vanillaMusicData)):
     musicdata = vanillaMusicData[i]
     for j in range(len(musicdata)):
         track = musicdata[j]
+        h,t=os.path.split(nspc_path)
         metadata[track] = {
-            'nspc_path':nspc_path,
+            'nspc_path':os.path.join(os.path.split(h)[1], t),
+            'data_index':i,
             'track_index':j,
             'original_author':'Kenji Yamamoto',
             'port_author': '',
@@ -159,9 +161,10 @@ for ap in accessPoints:
         trackId = 0x5
         track = tracksByMusicId[(dataId, trackId)]
         trackMeta = metadata[track]
-        if 'pc_addresses_extra' not in trackMeta:
-            trackMeta['pc_addresses_extra'] = []
-        trackMeta['pc_addresses_extra'] += [0x70000 | a for a in ap.RoomInfo['songs']]
+        key = 'pc_addresses_area' if not ap.Boss else 'pc_addresses_boss'
+        if key not in trackMeta:
+            trackMeta[key] = []
+        trackMeta[key] += [0x70000 | a for a in ap.RoomInfo['songs']]
 
 print("Writing %s ..." % json_path)
 with open(json_path, 'w') as fp:

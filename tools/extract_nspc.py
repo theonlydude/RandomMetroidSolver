@@ -8,7 +8,11 @@ sys.path.append(os.path.dirname(sys.path[0]))
 # extract vanilla soundtrack as nspc files. args:
 # - vanilla ROM
 # - path to nspc directory 
-# - path to JSON metadata file to write
+# - path to JSON metadata file to write.
+# will also parse room state headers, and list pointers where
+# music data/track has to be written, ie track number >= 5
+# also lists the extra pointers for area rando, all of this
+# stored in the JSON metadata
 
 from rom.rom import RealROM, snes_to_pc
 
@@ -46,7 +50,7 @@ vanillaMusicData = [
     # Song 0: BT/Ridley/Draygon,
     # Song 1: BT tension,
     # Song 2: Escape
-    ["Boss fight - BT/Ridley/Draygon", "Boss fight - BT tension"],
+    ["Boss fight - BT/Ridley/Draygon", "Boss fight - BT tension", "Escape"],
     # Song 0: Kraid/Phantoon/Croc,
     # Song 1: Tension
     ["Boss fight - Kraid/Phantoon/Croc", "Boss fight - Kraid/Phantoon/Croc tension"],
@@ -98,6 +102,66 @@ for i in range(len(vanillaMusicData)):
             'port_author': '',
             'description': "Original track from vanilla Super Metroid"
         }
+
+# key: music ID (music data, music track)
+# value: track name
+tracksByMusicId = {}
+
+for i in range(len(vanillaMusicData)):
+    dataId = (i+1)*3
+    tracks = vanillaMusicData[i]
+    for j in range(len(tracks)):
+        trackId = j+5
+        track = tracks[j]
+        tracksByMusicId[(dataId, trackId)] = track
+
+# now parse room headers, and get song data addresses in metadata
+# (a lot of it is copy-pasted from gen_area_in_rooms, well that's
+#  how it goes for one-time use tools I guess)
+statesChecksArgSize = {
+    0xe5eb: 2,
+    0xe612: 1,
+    0xe629: 1
+}
+
+from rooms import rooms
+
+for room in rooms:
+#    print(room['Name'])
+    def processState(stateWordAddr):
+        pc_addr = (0x70000 | stateWordAddr) + 4
+        rom.seek(pc_addr)
+        dataId = int(rom.readByte())
+        trackId = int(rom.readByte())
+        if dataId > 0 and trackId >= 0x5 and trackId != 0x80:
+            track = tracksByMusicId[(dataId, trackId)]
+            trackMeta = metadata[track]
+            if 'pc_addresses' not in trackMeta:
+                trackMeta['pc_addresses'] = []
+            trackMeta['pc_addresses'].append(pc_addr)
+    address = room['Address']+11
+    while True:
+        w=rom.readWord(address)
+        if w == 0xe5e6:
+            break
+        address += 2 + statesChecksArgSize.get(w, 0)
+        processState(rom.readWord(address))
+        address += 2
+    # default state
+    processState((address+2)-0x70000)
+
+# finally, add extra addresses for area rando
+from graph.vanilla.graph_access import accessPoints
+
+for ap in accessPoints:
+    if ap.EntryInfo is not None and 'song' in ap.EntryInfo:
+        dataId = ap.EntryInfo['song']
+        trackId = 0x5
+        track = tracksByMusicId[(dataId, trackId)]
+        trackMeta = metadata[track]
+        if 'pc_addresses_extra' not in trackMeta:
+            trackMeta['pc_addresses_extra'] = []
+        trackMeta['pc_addresses_extra'] += [0x70000 | a for a in ap.RoomInfo['songs']]
 
 print("Writing %s ..." % json_path)
 with open(json_path, 'w') as fp:

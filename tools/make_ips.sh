@@ -24,6 +24,10 @@ cp $VANILLA $tmprom
 
 tmprom=$(readlink -f $tmprom)
 
+[ "$OSTYPE" == "cygwin" ] && {
+    tmprom=$(cygpath -w $tmprom)
+}
+
 assembler=asar
 
 grep 'xkas-plus' $patch > /dev/null

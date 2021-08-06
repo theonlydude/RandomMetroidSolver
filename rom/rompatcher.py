@@ -71,7 +71,7 @@ class RomPatcher:
                      'Escape_Animals_Change_Event', # ...end animals
                      # vanilla behaviour restore
                      'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips',
-                     'varia_hud.ips'],
+                     'varia_hud.ips', 'custom_music.ips'],
         # base patchset+optional layout for area rando
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
@@ -1192,7 +1192,7 @@ class MusicPatcher(object):
         assert self.vanillaTracks is not None, "MusicPatcher: missing vanilla JSON descriptor"
         self.replaceableTracks = [track for track in self.vanillaTracks if track not in self.constraints['preserve']]
         self.musicDataTableAddress = snes_to_pc(0x8FE7E4)
-        self.musicDataTableMaxSize = 50 # to avoid overwriting useful data in bank 8F
+        self.musicDataTableMaxSize = 45 # to avoid overwriting useful data in bank 8F
 
     # tracks: dict with track name to replace as key, and track name
     # updateRoomStates: change room state headers. may be False if you're patching a rom hack or something

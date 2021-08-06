@@ -153,6 +153,18 @@ for room in rooms:
     # default state
     processState((address+2)-0x70000)
 
+# extra addresses for special music (see custom_music.asm patch)
+def addExtraAddress(track, snesAddress):
+    if "pc_addresses" not in metadata[track]:
+        metadata[track]["pc_addresses"] = []
+    metadata[track]["pc_addresses"].append(snes_to_pc(snesAddress))
+
+addExtraAddress("Title sequence intro", 0x8FE86D)
+addExtraAddress("Menu theme", 0x8FE86F)
+addExtraAddress("Escape", 0x8FE871)
+addExtraAddress("Credits", 0x8FE873)
+addExtraAddress("Mother Brain 3 (Samus Theme 2)", 0x8FE875)
+
 # finally, add extra addresses for area rando
 from graph.vanilla.graph_access import accessPoints
 

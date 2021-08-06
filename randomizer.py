@@ -732,6 +732,7 @@ if __name__ == "__main__":
             romPatcher = RomPatcher(magic=args.raceMagic)
         musicPatcher = None
         if args.music is not None:
+            args.patches.append('custom_music.ips')
             romType = 0
             with open(args.music, "r") as f:
                 music = json.load(f)

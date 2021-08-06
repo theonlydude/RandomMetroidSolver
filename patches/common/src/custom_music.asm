@@ -82,6 +82,7 @@ load_title_screen_music_track:
 	%loadMusicTrack(title_screen_intro)
 
 load_menu_music:
+	lda #$0000 : jsl !song_routine
 	lda.l menu
 	ora #$ff00
 	jsl !song_routine

@@ -52,6 +52,11 @@
 !hunt_over_hud8 = #$10		; same as above, for 8-bits mode
 !press_xy_hud = #$8000		; fake major_idx value telling we shall write 'PRESS X-Y' in scavenger hunt pause
 
+;;; custom music patch detection for escape music trigger
+!custom_music_marker = $8fe86b
+!custom_music_id = #$caca
+!custom_music_escape = $8fe871
+
 lorom
 
 ;;; hijack the start of health handling in the HUD to draw area or
@@ -569,11 +574,21 @@ trigger_escape:
 	jsl !fix_timer_gfx
 	lda #$0002 : sta $0943	 ; set timer state to 2 (MB timer start)
 	jsr clear_music_queue
-	;; TODO be aware of music customization to change music ID
-	lda #$ff24 : jsl !song_routine ; load boss 1 music data
-	lda #$0007 : jsl !song_routine ; load music track 2
+	jsr trigger_escape_music
 	lda #$000e : jsl !mark_event ; timebomb set event
 	ply : plx
+	rts
+
+trigger_escape_music:
+	lda !custom_music_marker
+	cmp !custom_music_id : beq .custom_music
+	lda #$ff24 : jsl !song_routine ; load boss 1 music data
+	lda #$0007 : jsl !song_routine ; load music track 2
+	bra .end
+.custom_music:
+	lda !custom_music_escape : ora #$ff00 : jsl !song_routine
+	lda !custom_music_escape+1 : and #$00ff : jsl !song_routine
+.end:
 	rts
 
 compute_n_items:

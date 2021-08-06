@@ -8,7 +8,7 @@ from rom.PaletteRando import PaletteRando
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
 from utils.parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text, appDir
 from rom.rom_patches import RomPatches
-from rom.rompatcher import RomPatcher
+from rom.rompatcher import RomPatcher, MusicPatcher, RomTypeForMusic
 from rom.rom import FakeROM
 from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir
 from utils.version import displayedVersion
@@ -281,6 +281,9 @@ if __name__ == "__main__":
     parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="varia", choices=["varia", "rotation"])
     parser.add_argument('--hud', help='Enable VARIA hud', dest='hud',
                         nargs='?', const=True, default=False)
+    parser.add_argument('--music',
+                        help="JSON file for music replacement mapping",
+                        dest='music', nargs='?', default=None)
     # parse args
     args = parser.parse_args()
 
@@ -727,7 +730,30 @@ if __name__ == "__main__":
         else:
             outFileName = args.output
             romPatcher = RomPatcher(magic=args.raceMagic)
-
+        musicPatcher = None
+        if args.music is not None:
+            romType = 0
+            with open(args.music, "r") as f:
+                music = json.load(f)
+            musicParams = music.get('params', {})
+            musicMapping = music.get('mapping', {})
+            if args.patchOnly == False:
+                romType |= RomTypeForMusic.VariaSeed
+                if args.area == True:
+                    romType |= RomTypeForMusic.AreaSeed
+                if args.bosses == True:
+                    romType |= RomTypeForMusic.BossSeed
+            else:
+                variaSeed = musicParams.get('varia', False)
+                areaSeed = musicParams.get('area', False)
+                bossSeed = musicParams.get('boss', False)
+                if variaSeed == True:
+                    romType |= RomTypeForMusic.VariaSeed
+                if areaSeed == True:
+                    romType |= RomTypeForMusic.AreaSeed
+                if bossSeed == True:
+                    romType |= RomTypeForMusic.BossSeed
+            musicPatcher = MusicPatcher(romPatcher.romFile, romType)
         if args.hud == True or args.majorsSplit == "FullWithHUD":
             args.patches.append("varia_hud.ips")
         if args.patchOnly == False:
@@ -792,6 +818,10 @@ if __name__ == "__main__":
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)
             PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
+        if musicPatcher is not None:
+            musicPatcher.replace(musicMapping,
+                                 updateRoomStates=musicParams.get('room_states', True),
+                                 output=musicParams.get("output", None))
         # web mode, generate only one ips at the end
         if args.rom == None:
             romPatcher.commitIPS()

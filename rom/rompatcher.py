@@ -1190,7 +1190,7 @@ class MusicPatcher(object):
             if metaFile == "vanilla.json":
                 self.vanillaTracks = meta
         assert self.vanillaTracks is not None, "MusicPatcher: missing vanilla JSON descriptor"
-        self.replaceableTracks = [track for track in self.vanillaTracks if track not in self.constraints['preserve'] and track not in self.constraints['discard']]
+        self.replaceableTracks = [track for track in self.vanillaTracks if track not in self.constraints['preserve']]
         self.musicDataTableAddress = snes_to_pc(0x8FE7E4)
         self.musicDataTableMaxSize = 50 # to avoid overwriting useful data in bank 8F
 
@@ -1202,6 +1202,9 @@ class MusicPatcher(object):
     # tracks not in the dict will be kept vanilla
     # raise RuntimeError if not possible
     def replace(self, tracks, updateRoomStates=True, output=None):
+        for track in tracks:
+            if track not in self.replaceableTracks:
+                raise RuntimeError("Cannot replace track %s" % track)
         trackList = self._getTrackList(tracks)
         musicData = self._getMusicData(trackList)
         if len(musicData) > self.musicDataTableMaxSize:

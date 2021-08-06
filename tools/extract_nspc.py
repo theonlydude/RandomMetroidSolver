@@ -90,6 +90,7 @@ for i in range(len(vanillaMusicData)):
     rom.seek(addr)
     nspc_path = "%s/vanilla_%06x_%06x.nspc" % (nspc_dir, ptr, endptr-1)
     print("Writing %s ..." % nspc_path)
+    rom.seek(ptr)
     with open(nspc_path, "wb") as nspc:
         nspc.write(rom.read(endptr-ptr))
     musicdata = vanillaMusicData[i]

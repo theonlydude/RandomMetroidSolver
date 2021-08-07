@@ -726,3 +726,6 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/samusIcon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/samusIcon.png ~/web2py/applications/solver/static/images/samusIcon.png
 
 [ -L ~/web2py/applications/solver/views/solver_web/varia.css ] || ln -s ~/RandomMetroidSolver/web/views/varia.css ~/web2py/applications/solver/views/solver_web/varia.css
+
+[ -L ~/web2py/applications/solver/static/js/spc_snes.js ] || ln -s ~/RandomMetroidSolver/web/static/spc_js/spc_snes.js ~/web2py/applications/solver/static/js/spc_snes.js
+[ -L ~/web2py/applications/solver/static/js/spc_snes.js.mem ] || ln -s ~/RandomMetroidSolver/web/static/spc_js/spc_snes.js.mem ~/web2py/applications/solver/static/js/spc_snes.js.mem

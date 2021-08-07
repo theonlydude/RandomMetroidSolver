@@ -1190,14 +1190,14 @@ class MusicPatcher(object):
             if metaFile == "vanilla.json":
                 self.vanillaTracks = meta
         assert self.vanillaTracks is not None, "MusicPatcher: missing vanilla JSON descriptor"
-        self.replaceableTracks = [track for track in self.vanillaTracks if track not in self.constraints['preserve']]
+        self.replaceableTracks = [track for track in self.vanillaTracks if track not in self.constraints['preserve'] and track not in self.constraints['discard']]
         self.musicDataTableAddress = snes_to_pc(0x8FE7E4)
         self.musicDataTableMaxSize = 45 # to avoid overwriting useful data in bank 8F
 
-    # tracks: dict with track name to replace as key, and track name
-    # updateRoomStates: change room state headers. may be False if you're patching a rom hack or something
+    # tracks: dict with track name to replace as key, and replacing track name as value
+    # updateRoomStates: change room state headers and special tracks. may be False if you're patching a rom hack or something
     # output: if not None, dump a JSON file with what was done 
-    # replacing it as value replaced tracks must be in
+    # replaced tracks must be in
     # replaceableTracks, and new tracks must be in allTracks
     # tracks not in the dict will be kept vanilla
     # raise RuntimeError if not possible

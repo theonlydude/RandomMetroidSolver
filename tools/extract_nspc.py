@@ -164,6 +164,7 @@ addExtraAddress("Menu theme", 0x8FE86F)
 addExtraAddress("Escape", 0x8FE871)
 addExtraAddress("Credits", 0x8FE873)
 addExtraAddress("Mother Brain 3 (Samus Theme 2)", 0x8FE875)
+addExtraAddress("Mother Brain", 0x8FE877)
 
 # finally, add extra addresses for area rando
 from graph.vanilla.graph_access import accessPoints

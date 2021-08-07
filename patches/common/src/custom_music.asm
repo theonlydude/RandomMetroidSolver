@@ -28,6 +28,9 @@ credits:
 print "mb3: ", pc
 mb3:
 	db $48, $05
+print "mb2: ", pc
+mb2:
+	db $21, $05
 
 org $A98810
     rep 4 : nop	    ; disables MB2 "no music" before fight, as cutscene is sped up
@@ -61,6 +64,12 @@ org $a9cc65
 
 org $a9cc6c
 	jsr load_mb3_music_track
+
+org $a98859
+	jsr load_mb2_music_data
+
+org $a98e17
+	jsr load_mb2_music_track
 
 macro loadMusicData(data)
 	lda.l <data>
@@ -106,3 +115,9 @@ load_mb3_music_data:
 
 load_mb3_music_track:
 	%loadMusicTrack(mb3)
+
+load_mb2_music_data:
+	%loadMusicData(mb2)
+
+load_mb2_music_track:
+	%loadMusicTrack(mb2)

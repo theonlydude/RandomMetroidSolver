@@ -1170,8 +1170,8 @@ class MusicPatcher(object):
         variaSeed = bool(romType & RomTypeForMusic.VariaSeed)
         self.area = variaSeed and bool(romType & RomTypeForMusic.AreaSeed)
         self.boss = variaSeed and bool(romType & RomTypeForMusic.BossSeed)
-        metaDir = os.path.join(baseDir, "metadata")
-        constraintsDir = os.path.join(baseDir, "constraints")
+        metaDir = os.path.join(baseDir, "_metadata")
+        constraintsDir = os.path.join(baseDir, "_constraints")
         if constraintsFile is None:
             constraintsFile = 'varia.json' if variaSeed else 'vanilla.json'
         with open(os.path.join(constraintsDir, constraintsFile), 'r') as f:

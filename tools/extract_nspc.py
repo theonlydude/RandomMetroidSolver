@@ -166,6 +166,13 @@ addExtraAddress("Credits", 0x8FE873)
 addExtraAddress("Mother Brain 3 (Samus Theme 2)", 0x8FE875)
 addExtraAddress("Mother Brain", 0x8FE877)
 
+# add random start music (no impact if not random start as it is current area music anyway)
+addExtraAddress("Crateria Pirates", 0x8F99CE) # gauntlet
+addExtraAddress("West Maridia", 0x8FD14C) # watering hole
+addExtraAddress("West Maridia", 0x8FD066) # mama turtle
+addExtraAddress("Green Brinstar", 0x8FA062) # etecoon supers
+addExtraAddress("Lower Norfair", 0x8FB56B) # firefleas
+
 # finally, add extra addresses for area rando
 from graph.vanilla.graph_access import accessPoints
 

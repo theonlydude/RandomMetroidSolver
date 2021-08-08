@@ -1206,7 +1206,9 @@ class MusicPatcher(object):
             if track not in self.replaceableTracks:
                 raise RuntimeError("Cannot replace track %s" % track)
         trackList = self._getTrackList(tracks)
+#        print("trackList="+str(trackList))
         musicData = self._getMusicData(trackList)
+#        print("musicData="+str(musicData))
         if len(musicData) > self.musicDataTableMaxSize:
             raise RuntimeError("Music data table too long. %d entries, max is %d" % (len(musicData, self.musicDataTableMaxSize)))
         musicDataAddresses = self._getMusicDataAddresses(musicData)
@@ -1244,17 +1246,24 @@ class MusicPatcher(object):
             nspc = self._nspc_path(self.vanillaTracks[track]['nspc_path'])
             if nspc not in musicData:
                 musicData[idx] = nspc
+#                print("stored " + nspc + " at "+ str(idx))
         # then fill data in remaining spots
+        idx = 0
         for track in trackList:
+            previdx = idx
             if track not in self.constraints['preserve']:
                 nspc = self._nspc_path(self.allTracks[track]['nspc_path'])
                 if nspc not in musicData:
-                    for i in range(len(musicData)):
+                    for i in range(idx, len(musicData)):
+#                        print("at " + str(i) + ": "+str(musicData[i]))
                         if musicData[i] is None:
                             musicData[i] = nspc
+                            idx = i+1
                             break
-                    if i == len(musicData):
+                    if idx == previdx:
+                        idx += 1
                         musicData.append(nspc)
+#                    print("stored " + nspc + " at "+ str(idx))
         return musicData
 
     # get addresses to store each data file to. raise RuntimeError if not possible

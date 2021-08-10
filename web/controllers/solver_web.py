@@ -8,7 +8,6 @@ if os.path.exists(path) and path not in sys.path:
 
 import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math, string, base64, urllib.parse, uuid
 from datetime import datetime
-import urllib.parse
 
 # to solve the rom
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, diff4solver
@@ -3174,3 +3173,6 @@ def updatePlandoWebService():
             db.updatePlandoMeta((author, longDesc, preset, plandoName))
 
     return json.dumps("Plando {} updated succesfully.".format(plandoName))
+
+def _redirect():
+    redirect(URL(r=request, scheme=True, host="randommetroidsolver.pythonanywhere.com"))

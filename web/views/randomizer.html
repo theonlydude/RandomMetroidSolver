@@ -481,8 +481,6 @@ function showHide(show, hide) {
 }
 
 var globalSwitchs = {};
-var defaultUrl = "{{=URL(f='randomizerWebService')}}";
-var defaultProdUrl = "randommetroidsolver.pythonanywhere.com";
 
 function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
@@ -521,9 +519,9 @@ function AjaxPresetCallCompleted(data) {
        }
     }
 
-    // if production server randomly use one of the two webapps
-    var prodUrls = [defaultProdUrl, "www.varia.run"];
-    var url = defaultUrl;
+    // if production server randomly use one of the two redirect webapps
+    var prodUrls = ["varia.run", "www.varia.run"];
+    var url = "{{=URL(f='randomizerWebService')}}";
     if(isProduction()) {
         url = window.location.protocol+"//"+prodUrls[Math.floor(Math.random() * 2)]+"/randomizerWebService";
     }
@@ -542,7 +540,7 @@ function AjaxPresetCallCompleted(data) {
 }
 
 function isProduction() {
-    return window.location.hostname == defaultProdUrl;
+    return window.location.hostname == "randommetroidsolver.pythonanywhere.com";
 }
 
 function ajaxFail(jqXHR, textStatus) {

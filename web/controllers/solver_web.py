@@ -3175,4 +3175,4 @@ def updatePlandoWebService():
     return json.dumps("Plando {} updated succesfully.".format(plandoName))
 
 def _redirect():
-    redirect(URL(r=request, scheme=True, host="randommetroidsolver.pythonanywhere.com"))
+    redirect(URL(request.env.path_info, r=request, scheme=True, host="randommetroidsolver.pythonanywhere.com"))

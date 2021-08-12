@@ -403,18 +403,15 @@ function drawSprites() {
   else:
 }}
     // Define the chart to be drawn.
-    var data = google.visualization.arrayToDataTable([
-      [{type: 'date', label: 'Date'}, {{response.write(", ".join(["'{}'".format(p) for p in spritesData[0]]), escape=False)}}]
+    var data = google.visualization.arrayToDataTable(
 {{
-    for row in spritesData[1]:
-      response.write(", [\"Date({}, {}, {})\", {}]".format(row[0].year, row[0].month-1, row[0].day, ", ".join([str(x) for x in row[1:]])), escape=False)
-      pass
+    response.write(spritesData, escape=False)
 }}
-    ]);
+    );
 
     var options = {
       title: "Custom Sprites usage",
-      isStacked: true
+      isStacked: "percent"
     };
 
     // Instantiate and draw the chart.

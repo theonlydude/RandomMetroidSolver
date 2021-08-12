@@ -607,12 +607,15 @@ order by init_time;"""
         sprites = [sprite[0] for sprite in sprites]
 
         # pivot
-        sql = "SELECT date(init_time)"
-        for sprite in sprites:
-            sql += ", SUM(CASE WHEN sprite = '{}' THEN 1 ELSE 0 END) AS count_{}".format(sprite, sprite.replace('-', '_'))
-        sql += " FROM sprites where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) GROUP BY date(init_time);".format(weeks)
+        sql = "SELECT "
+        sql += ", ".join(["SUM(CASE WHEN sprite = '{}' THEN 1 ELSE 0 END) AS count_{}".format(sprite, sprite.replace('-', '_')) for sprite in sprites])
+        sql += " FROM sprites where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK);".format(weeks)
 
-        return (sprites, self.execSelect(sql))
+        rows = self.execSelect(sql)
+        # convert from Decimal to int
+        row = [int(count) for count in rows[0]]
+
+        return [['sprite']+sprites, ['sprite']+list(row)]
 
     def getPlandoRandoData(self, weeks):
         if self.dbAvailable == False:

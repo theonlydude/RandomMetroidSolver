@@ -752,7 +752,8 @@ class HelpersGraph(Helpers):
     def canExitPreciousRoomRandomized(self):
         sm = self.smbm
         suitlessRoomExit = sm.wand(sm.wnot(sm.haveItem('Gravity')),
-                                   sm.canJumpUnderwater())
+                                   sm.canJumpUnderwater(),
+                                   sm.canSpringBallJump())
         if suitlessRoomExit.bool == False:
             if self.getDraygonConnection() == 'KraidRoomIn':
                 suitlessRoomExit = sm.canShortCharge() # charge spark in kraid's room

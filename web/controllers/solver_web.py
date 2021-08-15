@@ -2414,8 +2414,6 @@ def initCustomizerSession():
         session.customizer['spinjumprestart'] = "off"
         session.customizer['rando_speed'] = "off"
         session.customizer['elevators_doors_speed'] = "off"
-        session.customizer['No_Music'] = "off"
-        session.customizer['random_music'] = "off"
         session.customizer['Infinite_Space_Jump'] = "off"
         session.customizer['refill_before_save'] = "off"
         session.customizer['AimAnyButton'] = "off"
@@ -2423,7 +2421,7 @@ def initCustomizerSession():
         session.customizer['supermetroid_msu1'] = "off"
         session.customizer['remove_itemsounds'] = "off"
         session.customizer['remove_spinjumprestart'] = "off"
-        session.customizer['vanilla_music'] = "off"
+        session.customizer['music'] = "Don't touch"
 
 def initCustomSprites():
     def updateSpriteDict(spriteDict, order):
@@ -2507,10 +2505,10 @@ def customWebService():
     print("customWebService")
 
     # check validity of all parameters
-    switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music',
+    switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed',
                'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save',
                'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
-               'remove_elevators_doors_speed', 'vanilla_music']
+               'remove_elevators_doors_speed']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(switchs, [], [], others, isJson=True)
@@ -2520,6 +2518,8 @@ def customWebService():
     if request.vars.customShipEnable == 'on':
         if request.vars.customShip not in customShips:
             raiseHttp(400, "Wrong value for customShip", True)
+    if request.vars.music not in ["Don't touch", "Disable", "Randomize", "Customize", "Restore"]:
+        raiseHttp(400, "Wrong value for music", True)
 
     if session.customizer == None:
         session.customizer = {}
@@ -2545,8 +2545,6 @@ def customWebService():
     session.customizer['spinjumprestart'] = request.vars.spinjumprestart
     session.customizer['rando_speed'] = request.vars.rando_speed
     session.customizer['elevators_doors_speed'] = request.vars.elevators_doors_speed
-    session.customizer['No_Music'] = request.vars.No_Music
-    session.customizer['random_music'] = request.vars.random_music
     session.customizer['Infinite_Space_Jump'] = request.vars.Infinite_Space_Jump
     session.customizer['refill_before_save'] = request.vars.refill_before_save
     session.customizer['AimAnyButton'] = request.vars.AimAnyButton
@@ -2554,7 +2552,7 @@ def customWebService():
     session.customizer['supermetroid_msu1'] = request.vars.supermetroid_msu1
     session.customizer['remove_itemsounds'] = request.vars.remove_itemsounds
     session.customizer['remove_elevators_doors_speed'] = request.vars.remove_elevators_doors_speed
-    session.customizer['vanilla_music'] = request.vars.vanilla_music
+    session.customizer['music'] = request.vars.music
 
     # when beam doors patch is detected, don't randomize blue door palette
     no_blue_door_palette = request.vars.no_blue_door_palette
@@ -2572,10 +2570,6 @@ def customWebService():
         params += ['-c', 'spinjumprestart.ips']
     if request.vars.rando_speed == 'on':
         params += ['-c', 'rando_speed.ips']
-    if request.vars.No_Music == 'on':
-        params += ['-c', 'No_Music']
-    if request.vars.random_music == 'on':
-        params += ['-c', 'random_music.ips']
     if request.vars.AimAnyButton == 'on':
         params += ['-c', 'AimAnyButton.ips']
     if request.vars.max_ammo_display == 'on':
@@ -2590,7 +2584,11 @@ def customWebService():
         params += ['-c', 'remove_itemsounds.ips']
     if request.vars.remove_elevators_doors_speed == 'on':
         params += ['-c', 'remove_elevators_doors_speed.ips']
-    if request.vars.vanilla_music == 'on':
+    if request.vars.music == 'Disable':
+        params += ['-c', 'No_Music']
+    if request.vars.music == 'Randomize':
+        params += ['-c', 'random_music.ips']
+    if request.vars.music == 'Restore':
         params += ['-c', 'vanilla_music.ips']
 
     if request.vars.colorsRandomization == 'on':

@@ -42,7 +42,9 @@ routers = dict(
             'updatePlandoWebService',
             'updatePlandoWebService.json',
             'randoParamsWebServiceAPI',
-            'randoParamsWebServiceAPI.json'
+            'randoParamsWebServiceAPI.json',
+            'getSpcFile',
+            'getSpcFile.json'
         ]
     )
 )

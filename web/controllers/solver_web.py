@@ -2437,6 +2437,7 @@ def customizer():
 
     initCustomizerSession()
     initCustomSprites()
+    musics = loadMusics()
 
     url = request.env.request_uri.split('/')
     msg = ""
@@ -2490,7 +2491,7 @@ def customizer():
                     with DB() as db:
                         db.updateSeedUploadStatus(key, 'pending')
 
-    return dict(customSprites=customSprites, customShips=customShips,
+    return dict(customSprites=customSprites, customShips=customShips, musics=musics,
                 seedInfo=seedInfo, seedParams=seedParams, msg=msg, defaultParams=defaultParams)
 
 # if we have an internal parameter value different from its display value
@@ -2664,6 +2665,51 @@ def customWebService():
         os.close(fd)
         os.remove(jsonFileName)
         raise HTTP(400, json.dumps(msg))
+
+def loadMusics():
+    musics = cache.ram('musics', lambda:dict(), time_expire=None)
+    if musics:
+        return musics
+
+    musicDir = 'music/_metadata'
+    dropdown = {}
+    metadatas = sorted(os.listdir(musicDir), key=lambda v: v.upper())
+    for metadata in metadatas:
+        with open(os.path.join(musicDir, metadata)) as jsonFile:
+            data = json.load(jsonFile)
+            musics.update(data)
+            group = os.path.splitext(metadata)[0]
+            dropdown[group] = list(data.keys())
+    musics["_dropdown"] = dropdown
+
+    with open('music/_metadata/vanilla.json', 'r') as jsonFile:
+        vanilla = json.load(jsonFile)
+    with open('music/_constraints/vanilla.json', 'r') as jsonFile:
+        constraints = json.load(jsonFile)
+    musics["_list"] = [(song, removeChars(song, " ,()-/")) for song in vanilla.keys() if song not in constraints["preserve"]]
+    return musics
+
+def getSpcFile():
+    songName = request.vars.songName
+    if IS_NOT_EMPTY()(songName)[1] is not None:
+        raise HTTP(400, "Song is empty")
+    if IS_MATCH('[a-zA-Z0-9_\.() ,\-]*', strict=True)(songName)[1] is not None:
+        raise HTTP(400, "Invalid char in song name")
+    if IS_LENGTH(64)(songName)[1] is not None:
+        raise HTTP(400, "Song must be max 64 chars")
+    print("getSpcFile songName: {}".format(songName))
+
+    musics = loadMusics()
+    if songName not in musics:
+        raise HTTP(400, "song not found")
+
+    if 'spc_path' not in musics[songName] or musics[songName]['spc_path'] == "":
+        raise HTTP(400, "song has no spc")
+
+    songFile = musics[songName]['spc_path']
+    with open(os.path.join('music', songFile), 'rb') as spcFile:
+        spcFileData = spcFile.read()
+        return json.dumps({'spc': base64.b64encode(spcFileData).decode()})
 
 def initExtStatsSession():
     if session.extStats == None:

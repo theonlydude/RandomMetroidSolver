@@ -21,11 +21,25 @@ extend 'layout.html'
 <script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
 
 <script type="text/javascript" src="{{=URL('static', 'js/localforage.nopromises.min.js')}}"></script>
+<script type="text/javascript" src="static/js/spc_snes.js"></script>
+
+<script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
 
 <title>Super Metroid VARIA Customizer</title>
 
 <style>
 {{include 'solver_web/varia.css'}}
+.spc_player {
+    border: 1px solid #ddd;
+    width: 97%;
+    margin: 1em;
+}
+#controlPlayer {
+    cursor: pointer;
+    width: 2em;
+}
+
 .bold {
     font-weight: bold;
 }
@@ -155,10 +169,10 @@ h1 {
 
 <script type="text/javascript">
 $(document).ready(function(){
-   jQuery(window).on('resize', resizeSlider);
+   jQuery(window).on('resize', resizeSliderAndChosen);
 });
 
-function resizeSlider() {
+function resizeSliderAndChosen() {
    var slider = $("#degree_slider_range");
    var width = slider.width();
 
@@ -168,6 +182,10 @@ function resizeSlider() {
 
    update_handle_track_pos(slider, slider.slider("values", 0), 0);
    update_handle_track_pos(slider, slider.slider("values", 1), 1);
+
+   $(".chosen-container").each(function() {
+       $(this).attr('style', 'width: 100%');
+   });
 }
 
 var globalSwitchs = {};
@@ -386,6 +404,136 @@ function doSubmit() {
   }
 
   return false;
+}
+
+var musics = {
+{{
+    for song, data in musics.items():
+      if song in ["_dropdown", "_list"]:
+        continue
+      response.write('  "{}": {{\n'.format(song), escape=False)
+      for key, value in data.items():
+        if key in ["original_author", "port_author", "description"]:
+          response.write('    "{}": "{}",\n'.format(key, value), escape=False)
+          pass
+        pass
+      response.write("  },\n", escape=False)
+      pass
+}}
+};
+
+var playerState = "stopped";
+var currentSong = "";
+var audioContext = null;
+
+function setPlayerButton(button) {
+    var names = ["play", "download", "stop"];
+    for(var i=0; i<names.length; i++) {
+        if(names[i] == button){
+            document.getElementById(names[i]).style.display = "block";
+        } else {
+            document.getElementById(names[i]).style.display = "none";
+        }
+    }
+}
+
+function loadNewSong(elemId) {
+    stopSong();
+
+    var elem = document.getElementById(elemId);
+    currentSong = elem.value;
+
+    // display song metadatas
+    document.getElementById("player_port_author").innerHTML = musics[currentSong]["port_author"];
+    document.getElementById("player_original_author").innerHTML = musics[currentSong]["original_author"];
+    document.getElementById("player_desc").innerHTML = musics[currentSong]["description"];
+    document.getElementById("player_song").innerHTML = currentSong;
+}
+
+function play() {
+    if(currentSong == "" || playerState != "stopped") {
+        return;
+    }
+    setPlayerButton("download");
+    var request = $.ajax({
+      url: "{{=URL(f='getSpcFile')}}",
+      method: "POST",
+      data: {"songName": currentSong},
+      dataType: "json"
+    });
+
+    request.done(spcFileDownloaded);
+    request.fail(ajaxPlayerFail);
+}
+
+function spcFileDownloaded(data) {
+    console.log("spcFileDownloaded");
+
+    var binary_string = atob(data["spc"]);
+    var len = binary_string.length;
+    var spc = new Uint8Array(len);
+    for(var i = 0; i < len; i++) {
+        spc[i] = binary_string.charCodeAt(i);
+    }
+
+    playSong(spc);
+}
+
+function ajaxPlayerFail(jqXHR, textStatus) {
+    ajaxFail(jqXHR, textStatus);
+    setPlayerButton("play");
+}
+
+function stopSong() {
+    if(audioContext == null) {
+        return;
+    }
+    audioContext.close();
+    audioContext = null;
+    playerState = "stopped";
+    setPlayerButton("play");
+}
+
+function playSong(spcData) {
+    audioContext = new AudioContext();
+    spc = allocate(spcData, 'i8', ALLOC_STACK);
+    _my_init(spc, spcData.length);
+    frame_size=16384;
+    in_rate=32000;
+    out_rate=audioContext.sampleRate;
+    initial_offset=0;
+    ratio=in_rate/out_rate;
+    final_offset=frame_size*ratio;
+    last_sample=1+Math.floor(final_offset);
+    chan=0;
+    sample=function(x){
+        offset=initial_offset+ratio*x;
+        buffer_offset=Math.floor(offset);
+        if(buffer_offset+1>last_sample){throw "error";};
+        high=offset-buffer_offset;
+        low=1-high;
+        low_val=HEAP16[chan+buf/2+(buffer_offset)*2]*low;
+        high_val=HEAP16[chan+buf/2+(buffer_offset+1)*2]*high;
+        return(low_val+high_val);
+    }
+
+    buf_size=4*(last_sample-1);
+    buf=allocate(new Uint8Array(buf_size+4), 'i8', ALLOC_STACK);
+
+    audioNode = audioContext.createScriptProcessor(frame_size, 0, 2);
+    audioNode.onaudioprocess = function(audioProcessingEvent) {
+        _my_decode(buf,last_sample*2);
+        outputBuffer = audioProcessingEvent.outputBuffer;
+        for (chan = 0; chan < outputBuffer.numberOfChannels; chan++) {
+            out_data=outputBuffer.getChannelData(chan);
+            for(var k=0;k<out_data.length;k++){
+                out_data[k]=sample(k)/32000;
+            }
+        }
+    }
+    audioNode.connect(audioContext.destination);
+    playerState = "playing";
+    setPlayerButton("stop");
 }
 
 function disableElement(id, disable) {
@@ -1208,6 +1356,41 @@ def displayCheckbox(id, defaultTrue=False):
                   <td>
                 </tr>
               </table>
+            </p>
+            <h4>Custom Music</h4>
+            <p>
+              <table class="full">
+{{
+  for (song, songId) in musics["_list"]:
+    response.write("<tr><td>{}</td><td>".format(song), escape=False)
+}}
+    {{=SELECT(*[OPTGROUP(*values, **dict(_label=name)) for name, values in musics["_dropdown"].items()], **dict(_id=songId, value=song, _class="filldropdown chzn-select", _onchange="loadNewSong('{}')".format(songId)))}}
+{{
+    response.write("</td></tr>", escape=False)
+    pass
+}}
+              </table>
+              <div id="spc_player" class="spc_player">
+                <table>
+                  <tr>
+                    <td>
+                      <div id="controlPlayer">
+                        <img id="play" src="/solver/static/images/play.svg" alt="Play Song" onclick="play()">
+                        <img id="download" src="/solver/static/images/cloud_download.svg" alt="Downloading Song" style="display: none">
+                        <img id="stop" src="/solver/static/images/shut_down.svg" alt="Stop Song" style="display: none" onclick="stopSong()">
+                      </div>
+                    </td>
+                    <td>
+                      <table>
+                        <tr><td>Song: </td><td><span id="player_song"></span></td></tr>
+                        <tr><td>Description: </td><td><span id="player_desc"></span></td></tr>
+                        <tr><td>Port author: </td><td><span id="player_port_author"></span></td></tr>
+                        <tr><td>Original author: </td><td><span id="player_original_author"></span></td></tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </div>
             </p>
             <h4>Patches<span class="right"><button type="button" onclick="startTheTour(7)" id="patchesStep">?</button></span></h4>
             <p>

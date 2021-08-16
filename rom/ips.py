@@ -16,7 +16,7 @@ class IPS_Patch(object):
                     start = i*recMaxSize
                     end = min((i+1)*recMaxSize, len(data))
                     byteData = bytearray(data[start:end])
-                    self.add_record(addr, byteData)
+                    self.add_record(addr+start, byteData)
 
     def toDict(self):
         ret = {}

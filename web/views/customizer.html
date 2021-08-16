@@ -428,7 +428,7 @@ function musicSelectChange() {
         // activate chosen dropdown lists
         for(var i=0; i<musicIds.length; i++) {
             var songId = musicIds[i];
-            $("#"+songId).chosen();
+            $("#"+songId).chosen({ width: '100%' });
         }
     } else {
         musicCustom.style.display = "none";
@@ -1386,7 +1386,7 @@ def displayCheckbox(id, defaultTrue=False):
                 <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr>
                   <td><span id="customMusicEnableText">Music</span></td>
-                  <td>{{=SELECT(*["Don't touch", "Disable", "Randomize", "Customize", "Restore"], **dict(_id="music", _class="filldropdown chzn-select", _onchange="musicSelectChange()", value=session.customizer["music"]))}}</td>
+                  <td>{{=SELECT(*["Don't touch", "Disable", "Randomize", "Customize", "Restore"], **dict(_id="music", _class="chzn-select", _onchange="musicSelectChange()", value=session.customizer["music"]))}}</td>
                   <td><button type="button" onclick="startTheTour(7)" id="customMusicStep">?</button></td>
                 </tr>
               </table>
@@ -1397,7 +1397,7 @@ def displayCheckbox(id, defaultTrue=False):
   for (song, songId) in musics["_list"]:
     response.write("<tr><td>{}</td><td>".format(song), escape=False)
 }}
-    {{=SELECT(*[OPTGROUP(*values, **dict(_label=name)) for name, values in musics["_dropdown"].items()], **dict(_id=songId, value=session.customizer.get(songId, song), _class="filldropdown chzn-select", _onchange="loadNewSong('{}')".format(songId)))}}
+    {{=SELECT(*[OPTGROUP(*values, **dict(_label=name)) for name, values in musics["_dropdown"].items()], **dict(_id=songId, value=session.customizer.get(songId, song), _class="chzn-select", _onchange="loadNewSong('{}')".format(songId)))}}
 {{
     response.write("</td></tr>", escape=False)
     pass

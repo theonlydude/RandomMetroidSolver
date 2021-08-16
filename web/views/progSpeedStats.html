@@ -121,7 +121,7 @@ function resizeChosen() {
 }
 
 window.onload = function(){
-    $(".chzn-select").chosen();
+    $(".chzn-select").chosen({ width: '100%' });
     resizeChosen();
 }
 
@@ -445,7 +445,7 @@ google.charts.setOnLoadCallback(drawOpennessHistogram_44);
           <td><button id="randoPresetStep" type="button" onclick="startTheTour(0)">?</button></td>
 
           <td>Majors Split:</td>
-          <td>{{=SELECT(*majorsSplit, **dict(_name="majorsSplit", _id="majorsSplit", value=session.progSpeedStats["majorsSplit"], _class="filldropdown chzn-select"))}}</td>
+          <td>{{=SELECT(*majorsSplit, **dict(_name="majorsSplit", _id="majorsSplit", value=session.progSpeedStats["majorsSplit"], _class="chzn-select"))}}</td>
           <td><button id="majorsSplitStep" type="button" onclick="startTheTour(1)">?</button></td>
 
           <td>{{=INPUT(_type="submit", _value="Load", _name="action", _class="btn btn-default")}}</td>

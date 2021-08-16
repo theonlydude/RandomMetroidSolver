@@ -1242,7 +1242,7 @@ function displayPopup(isPlando) {
   // display popup
   document.getElementById("solverPopup").style.display = "block";
   // chosen must be activated when it's visible, else it doesn't work...
-  $(".chzn-select").chosen();
+  $(".chzn-select").chosen({ width: '100%' });
   resizeChosen();
 }
 

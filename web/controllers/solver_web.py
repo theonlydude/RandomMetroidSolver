@@ -2423,6 +2423,10 @@ def initCustomizerSession():
         session.customizer['remove_spinjumprestart'] = "off"
         session.customizer['music'] = "Don't touch"
 
+        musics = loadMusics()
+        for song, songId in musics["_list"]:
+            session.customizer[songId] = song
+
 def initCustomSprites():
     def updateSpriteDict(spriteDict, order):
         for i in range(len(order)):
@@ -2554,6 +2558,11 @@ def customWebService():
     session.customizer['remove_elevators_doors_speed'] = request.vars.remove_elevators_doors_speed
     session.customizer['music'] = request.vars.music
 
+    if request.vars.music == 'Customize':
+        musics = loadMusics()
+        for song, songId in musics["_list"]:
+            session.customizer[songId] = request.vars[songId]
+
     # when beam doors patch is detected, don't randomize blue door palette
     no_blue_door_palette = request.vars.no_blue_door_palette
 
@@ -2637,12 +2646,35 @@ def customWebService():
         ipsFileName = os.path.join(localIpsDir, request.vars.seedKey, fileName.replace('sfc', 'ips'))
         params += ['--seedIps', ipsFileName]
 
+    if request.vars.music == "Customize":
+        musics = loadMusics()
+        customMusic = {
+            'params': {
+                "varia": request.vars.varia == "true",
+                "area": request.vars.area == "true",
+                "boss": request.vars.boss == "true"
+            }, 'mapping': {}}
+        for song, songId in musics["_list"]:
+            newSong = request.vars[songId]
+            if newSong not in musics:
+                raise HTTP(400, "unknown song for {}".format(song))
+            if newSong != song:
+                customMusic['mapping'][song] = newSong
+        (fd2, jsonMusicFileName) = tempfile.mkstemp()
+        with open(jsonMusicFileName, 'w') as musicFile:
+            json.dump(customMusic, musicFile)
+        params += ['--music', jsonMusicFileName]
+
     print("before calling: {}".format(params))
     start = datetime.now()
     ret = subprocess.call(params)
     end = datetime.now()
     duration = (end - start).total_seconds()
     print("ret: {}, duration: {}s".format(ret, duration))
+
+    if request.vars.music == "Customize":
+        os.close(fd2)
+        os.remove(jsonMusicFileName)
 
     if ret == 0:
         with open(jsonFileName) as jsonFile:

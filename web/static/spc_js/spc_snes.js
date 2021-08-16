@@ -1285,7 +1285,7 @@ var memoryInitializer = null;
 STATIC_BASE = 8;
 STATICTOP = STATIC_BASE + Runtime.alignMemory(3107);
 __ATINIT__.push();
-var memoryInitializer = "static/js/spc_snes.js.mem";
+var memoryInitializer = "/solver/static/js/spc_snes.js.mem";
 var tempDoublePtr = Runtime.alignMemory(allocate(12, "i8", ALLOC_STATIC), 8);
 assert(tempDoublePtr % 8 == 0);
 function copyTempFloat(ptr) {

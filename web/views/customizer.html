@@ -21,7 +21,7 @@ extend 'layout.html'
 <script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
 
 <script type="text/javascript" src="{{=URL('static', 'js/localforage.nopromises.min.js')}}"></script>
-<script type="text/javascript" src="static/js/spc_snes.js"></script>
+<script type="text/javascript" src="{{=URL('static', 'js/spc_snes.js')}}"></script>
 
 <script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
@@ -393,7 +393,6 @@ function doSubmit() {
 
     dataDict["music"] = document.getElementById("music").value;
     if(dataDict["music"] == "Customize") {
-        var musicIds = {{response.write([songId for song, songId in musics["_list"]], escape=False)}};
         for(var i=0; i<musicIds.length; i++) {
             var id = musicIds[i];
             dataDict[id] = document.getElementById(id).value;
@@ -425,12 +424,19 @@ function musicSelectChange() {
     var musicCustom = document.getElementById("musicCustomizer");
     if(elem.value == "Customize") {
         musicCustom.style.display = "block";
+
+        // activate chosen dropdown lists
+        for(var i=0; i<musicIds.length; i++) {
+            var songId = musicIds[i];
+            $("#"+songId).chosen();
+        }
     } else {
         musicCustom.style.display = "none";
         stopSong();
     }
 }
 
+var musicIds = {{response.write([songId for song, songId in musics["_list"]], escape=False)}};
 var musics = {
 {{
     for song, data in musics.items():
@@ -475,7 +481,7 @@ function loadNewSong(elemId) {
     document.getElementById("player_song").innerHTML = currentSong;
 }
 
-function play() {
+function action_play() {
     if(currentSong == "" || playerState != "stopped") {
         return;
     }
@@ -1380,7 +1386,7 @@ def displayCheckbox(id, defaultTrue=False):
                 <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr>
                   <td><span id="customMusicEnableText">Music</span></td>
-                  <td>{{=SELECT(*["Don't touch", "Disable", "Randomize", "Customize", "Restore"], **dict(_id="music", _class="filldropdown", _onchange="musicSelectChange()", value=session.customizer["music"]))}}</td>
+                  <td>{{=SELECT(*["Don't touch", "Disable", "Randomize", "Customize", "Restore"], **dict(_id="music", _class="filldropdown chzn-select", _onchange="musicSelectChange()", value=session.customizer["music"]))}}</td>
                   <td><button type="button" onclick="startTheTour(7)" id="customMusicStep">?</button></td>
                 </tr>
               </table>
@@ -1402,7 +1408,7 @@ def displayCheckbox(id, defaultTrue=False):
                   <tr>
                     <td>
                       <div id="controlPlayer">
-                        <img id="play" src="/solver/static/images/play.svg" alt="Play Song" onclick="play()">
+                        <img id="play" src="/solver/static/images/play.svg" alt="Play Song" onclick="action_play()">
                         <img id="download" src="/solver/static/images/cloud_download.svg" alt="Downloading Song" style="display: none">
                         <img id="stop" src="/solver/static/images/shut_down.svg" alt="Stop Song" style="display: none" onclick="stopSong()">
                       </div>

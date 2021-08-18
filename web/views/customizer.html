@@ -54,11 +54,15 @@ extend 'layout.html'
 .spc_player {
     border: 2px solid #aaa;
 }
+.music_button {
+    cursor: pointer;
+    width: 4em;
+}
 #controlPlayer {
     cursor: pointer;
     width: 2em;
 }
-#musicCustomizer {
+.margin_top {
     margin-top: 1em;
 }
 .bold {
@@ -446,6 +450,7 @@ function musicSelectChange() {
 }
 
 var musicIds = {{response.write([songId for song, songId in musics["_list"]], escape=False)}};
+var musicList = {{response.write([[songId, song] for song, songId in musics["_list"]], escape=False)}};
 var musics = {
 {{
     for song, data in musics.items():
@@ -596,6 +601,64 @@ function drop(ev) {
     ev.preventDefault();
     var data = ev.dataTransfer.getData("text");
     ev.target.innerHTML = data;
+}
+
+function resetPlaylist() {
+    for(var i=0; i<musicList.length; i++) {
+        var id = musicList[i][0];
+        var song = musicList[i][1];
+        document.getElementById(id).innerHTML = song;
+    }
+}
+
+function randomizePlaylist() {
+    var keys = Object.keys(musics);
+    for(var i=0; i<musicIds.length; i++) {
+        randomSong = keys[Math.floor(keys.length * Math.random())];
+        var id = musicIds[i];
+        document.getElementById(id).innerHTML = randomSong;
+    }
+}
+
+function savePlaylist() {
+    // ask user for playlist name
+    var filename = prompt("What is your playlist name?");
+
+    var playlist = {};
+    for(var i=0; i<musicIds.length; i++) {
+        var id = musicIds[i];
+        var song = document.getElementById(id).innerHTML;
+        playlist[id] = song;
+    }
+
+    var blob = new Blob([JSON.stringify(playlist, null, 2)], {type: "text/plain"});
+    saveAs(blob, filename+'.json');
+}
+
+function loadPlaylist() {
+    var fileSelector = $('<input type="file" onchange="loadPlaylistCallbak(event)">');
+    fileSelector.click();
+}
+
+function loadPlaylistCallbak(e) {
+    var file = e.target.files[0];
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = function(readerEvent) {
+        var content = readerEvent.target.result;
+        (async function () {
+            const response = await fetch(content);
+            const data = await response.json();
+            var keys = Object.keys(data);
+
+            for(var i=0; i<keys.length; i++) {
+                var id = keys[i];
+                var song = data[id];
+                document.getElementById(id).innerHTML = song;
+            }
+        })();
+    }
 }
 
 function disableElement(id, disable) {
@@ -1421,8 +1484,20 @@ def displayCheckbox(id, defaultTrue=False):
                   <td><button type="button" onclick="startTheTour(7)" id="customMusicStep">?</button></td>
                 </tr>
               </table>
-            <div id="musicCustomizer">
-              <table class="full">
+            <div id="musicCustomizer" class="margin_top">
+              <p>
+                Use the Music Player to listen to custom songs then drag & drop songs to replace the vanilla ones.
+              </p>
+              <table class="full margin_top">
+                <colgroup><col class="quater"/><col class="quater"/><col class="quater"/><col class="quater"/></colgroup>
+                <tr>
+                  <td><img class="music_button" id="reset" src="/solver/static/images/refresh.svg" title="Reset" alt="Reset" onclick="resetPlaylist()"> Reset playlist</td>
+                  <td><img class="music_button" id="randomize" src="/solver/static/images/games.svg" title="Randomize" alt="Randomize" onclick="randomizePlaylist()"> Randomize playlist</td>
+                  <td><img class="music_button" id="reset" src="/solver/static/images/save.svg" title="Save" alt="Save" onclick="savePlaylist()"> Save playlist</td>
+                  <td><img class="music_button" id="reset" src="/solver/static/images/cloud_upload.png" title="Load" alt="Load" onclick="loadPlaylist()"> Load playlist</td>
+                </tr>
+              </table>
+              <table class="full margin_top">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr><th>Track to replace</th><th class="align_center">Music Player</th></tr>
                 <tr><th class="align_right">Replace with</th><th></th></tr>

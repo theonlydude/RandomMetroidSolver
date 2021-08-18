@@ -23,17 +23,36 @@ extend 'layout.html'
 <script type="text/javascript" src="{{=URL('static', 'js/localforage.nopromises.min.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static', 'js/spc_snes.js')}}"></script>
 
-<script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
-<link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
-
 <title>Super Metroid VARIA Customizer</title>
 
 <style>
 {{include 'solver_web/varia.css'}}
-.spc_player {
+.lighter {
+    background-color: #eee
+}
+.darker {
+    background-color: #ddd
+}
+.song_in_list {
+    cursor: pointer;
+}
+.drop_target {
     border: 1px solid #ddd;
-    width: 97%;
-    margin: 1em;
+}
+.player_table {
+    height: 60em;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-top: 2px solid #aaa;
+}
+.align_right {
+    text-align: right;
+}
+.align_center {
+    text-align: center;
+}
+.spc_player {
+    border: 2px solid #aaa;
 }
 #controlPlayer {
     cursor: pointer;
@@ -171,10 +190,10 @@ h1 {
 
 <script type="text/javascript">
 $(document).ready(function(){
-   jQuery(window).on('resize', resizeSliderAndChosen);
+   jQuery(window).on('resize', resizeSlider);
 });
 
-function resizeSliderAndChosen() {
+function resizeSlider() {
    var slider = $("#degree_slider_range");
    var width = slider.width();
 
@@ -184,10 +203,6 @@ function resizeSliderAndChosen() {
 
    update_handle_track_pos(slider, slider.slider("values", 0), 0);
    update_handle_track_pos(slider, slider.slider("values", 1), 1);
-
-   $(".chosen-container").each(function() {
-       $(this).attr('style', 'width: 100%');
-   });
 }
 
 var globalSwitchs = {};
@@ -395,7 +410,7 @@ function doSubmit() {
     if(dataDict["music"] == "Customize") {
         for(var i=0; i<musicIds.length; i++) {
             var id = musicIds[i];
-            dataDict[id] = document.getElementById(id).value;
+            dataDict[id] = document.getElementById(id).innerHTML;
         }
         dataDict["varia"] = isVARIA;
         dataDict["area"] = isArea;
@@ -424,12 +439,6 @@ function musicSelectChange() {
     var musicCustom = document.getElementById("musicCustomizer");
     if(elem.value == "Customize") {
         musicCustom.style.display = "block";
-
-        // activate chosen dropdown lists
-        for(var i=0; i<musicIds.length; i++) {
-            var songId = musicIds[i];
-            $("#"+songId).chosen({ width: '100%' });
-        }
     } else {
         musicCustom.style.display = "none";
         stopSong();
@@ -468,17 +477,24 @@ function setPlayerButton(button) {
     }
 }
 
-function loadNewSong(elemId) {
+function loadNewSongFromId(elemId) {
+    var song = document.getElementById(elemId).innerHTML;
+    loadNewSong(song);
+}
+
+function loadNewSong(song) {
     stopSong();
 
-    var elem = document.getElementById(elemId);
-    currentSong = elem.value;
+    currentSong = song;
 
     // display song metadatas
     document.getElementById("player_port_author").innerHTML = musics[currentSong]["port_author"];
     document.getElementById("player_original_author").innerHTML = musics[currentSong]["original_author"];
     document.getElementById("player_desc").innerHTML = musics[currentSong]["description"];
     document.getElementById("player_song").innerHTML = currentSong;
+
+    // autoplay
+    action_play();
 }
 
 function action_play() {
@@ -565,6 +581,21 @@ function playSong(spcData) {
     audioNode.connect(audioContext.destination);
     playerState = "playing";
     setPlayerButton("stop");
+}
+
+// songs drag & drop
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.innerHTML);
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData("text");
+    ev.target.innerHTML = data;
 }
 
 function disableElement(id, disable) {
@@ -1386,44 +1417,57 @@ def displayCheckbox(id, defaultTrue=False):
                 <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr>
                   <td><span id="customMusicEnableText">Music</span></td>
-                  <td>{{=SELECT(*["Don't touch", "Disable", "Randomize", "Customize", "Restore"], **dict(_id="music", _class="chzn-select", _onchange="musicSelectChange()", value=session.customizer["music"]))}}</td>
+                  <td>{{=SELECT(*["Don't touch", "Disable", "Randomize", "Customize", "Restore"], **dict(_id="music", _class="full", _onchange="musicSelectChange()", value=session.customizer["music"]))}}</td>
                   <td><button type="button" onclick="startTheTour(7)" id="customMusicStep">?</button></td>
                 </tr>
               </table>
             <div id="musicCustomizer">
               <table class="full">
-                <tr><th>Track to replace</th><th>Replace with</th></tr>
+                <colgroup><col class="half" /><col class="half" /></colgroup>
+                <tr><th>Track to replace</th><th class="align_center">Music Player</th></tr>
+                <tr><th class="align_right">Replace with</th><th></th></tr>
+                <tr><td></td><td rowspan="46">
+                    <div id="spc_player" class="spc_player lighter">
+                      <table>
+                        <tr>
+                          <td>
+                            <div id="controlPlayer">
+                              <img id="play" src="/solver/static/images/play.svg" title="Play Song" alt="Play Song" onclick="action_play()">
+                              <img id="download" src="/solver/static/images/cloud_download.svg" alt="Downloading Song" style="display: none">
+                              <img id="stop" src="/solver/static/images/shut_down.svg" title="Stop Song" alt="Stop Song" style="display: none" onclick="stopSong()">
+                            </div>
+                          </td>
+                          <td>
+                            <table class="full">
+                              <tr><td>Song: </td><td><span id="player_song"></span></td></tr>
+                              <tr><td>Description: </td><td><span id="player_desc"></span></td></tr>
+                              <tr><td>Port author: </td><td><span id="player_port_author"></span></td></tr>
+                              <tr><td>Original author: </td><td><span id="player_original_author"></span></td></tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                      <div class="player_table">
+                        <table class="full">
+{{
+for name, values in musics["_dropdown"].items():
+  response.write('<tr><td class="align_center darker">{}</td></tr>\n'.format(name), escape=False)
+  for value in values:
+    response.write('<tr><td class="song_in_list" onclick="loadNewSong(\'{}\')" draggable="true" ondragstart="drag(event)">{}</td></tr>\n'.format(value, value), escape=False)
+    pass
+  pass
+}}
+                        </table>
+                      </div>
+                    </div>
+                </td></tr>
 {{
   for (song, songId) in musics["_list"]:
-    response.write("<tr><td>{}</td><td>".format(song), escape=False)
-}}
-    {{=SELECT(*[OPTGROUP(*values, **dict(_label=name)) for name, values in musics["_dropdown"].items()], **dict(_id=songId, value=session.customizer.get(songId, song), _class="chzn-select", _onchange="loadNewSong('{}')".format(songId)))}}
-{{
-    response.write("</td></tr>", escape=False)
+    response.write('<tr><td title="Click to listen" onclick="loadNewSong(\'{}\')">{}</td></tr>\n'.format(song, song), escape=False)
+    response.write('<tr><td id="{}" ondrop="drop(event)" ondragover="allowDrop(event)" onclick="loadNewSongFromId(\'{}\')" class="align_right drop_target lighter" title="Drag & drop songs from player to customize">{}</td></tr>\n'.format(songId, songId, session.customizer.get(songId, song)), escape=False)
     pass
 }}
               </table>
-              <div id="spc_player" class="spc_player">
-                <table>
-                  <tr>
-                    <td>
-                      <div id="controlPlayer">
-                        <img id="play" src="/solver/static/images/play.svg" alt="Play Song" onclick="action_play()">
-                        <img id="download" src="/solver/static/images/cloud_download.svg" alt="Downloading Song" style="display: none">
-                        <img id="stop" src="/solver/static/images/shut_down.svg" alt="Stop Song" style="display: none" onclick="stopSong()">
-                      </div>
-                    </td>
-                    <td>
-                      <table>
-                        <tr><td>Song: </td><td><span id="player_song"></span></td></tr>
-                        <tr><td>Description: </td><td><span id="player_desc"></span></td></tr>
-                        <tr><td>Port author: </td><td><span id="player_port_author"></span></td></tr>
-                        <tr><td>Original author: </td><td><span id="player_original_author"></span></td></tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-              </div>
             </div>
             <h4>Patches<span class="right"><button type="button" onclick="startTheTour(8)" id="patchesStep">?</button></span></h4>
             <p>

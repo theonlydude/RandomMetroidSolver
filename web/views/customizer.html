@@ -490,6 +490,7 @@ function loadNewSongFromId(elemId) {
 function loadNewSong(song) {
     stopSong();
 
+    var previousSong = currentSong;
     currentSong = song;
 
     // display song metadatas
@@ -498,8 +499,23 @@ function loadNewSong(song) {
     document.getElementById("player_desc").innerHTML = musics[currentSong]["description"];
     document.getElementById("player_song").innerHTML = currentSong;
 
+    // highligth song in list
+    highligthSong(previousSong, currentSong);
+
     // autoplay
     action_play();
+}
+
+function highligthSong(previousSong, currentSong) {
+    if(previousSong != "") {
+        $( '.song_in_list:contains("'+previousSong+'")').css( "background-color", "#eee" );
+    }
+    var curElem = $( '.song_in_list:contains("'+currentSong+'")');
+    curElem.css( "background-color", "#f0f57f" );
+
+    // change table scroll to have song visible
+    var player_table = $('.player_table');
+    player_table.scrollTop(player_table.scrollTop() + (curElem.position().top - player_table.position().top) - (player_table.height()/2) + (curElem.height()/2)  );
 }
 
 function action_play() {

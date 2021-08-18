@@ -184,7 +184,7 @@ pass
   onChangeLowerNorfairHellRun();
 
 
-  $(".chzn-select").chosen();
+  $(".chzn-select").chosen({ width: '100%' });
   resizeChosen();
 }
 
@@ -639,7 +639,7 @@ pass
         <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter"></colgroup>
         <tr>
           <td>Preset:</td>
-          <td colspan="3">{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.presets["preset"], _class="filldropdown chzn-select"))}}</td>
+          <td colspan="3">{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.presets["preset"], _class="chzn-select"))}}</td>
           <td id="presetStep"><button type="button" onclick="startTheTour(0)">?</button></td>
         </tr>
         <tr>

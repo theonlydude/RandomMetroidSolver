@@ -32,7 +32,7 @@
       </tr>
       <tr>
         <td>Preset:</td>
-        <td colspan=2>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=curSession["preset"], _class="filldropdown chzn-select"))}}</td>
+        <td colspan=2>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=curSession["preset"], _class="chzn-select"))}}</td>
       </tr>
       <tr id="fillPlandoVisibility">
         <td colspan=2>Populate your plando with the items and transitions from the base ROM:</td>

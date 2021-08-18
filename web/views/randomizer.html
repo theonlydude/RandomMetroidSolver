@@ -357,7 +357,7 @@ function randomize(evt, elemId) {
       e.style.display = "none";
       multi.style.display = "block";
       // chosen must be activated when it's visible, else it doesn't work...
-      $("#"+elemId+"MultiSelect").chosen();
+      $("#"+elemId+"MultiSelect").chosen({ width: '100%' });
     } else {
       e.style.display = "block";
       multi.style.display = "none";
@@ -1136,8 +1136,8 @@ window.onload = function(){
 
     setRandom();
 
-    $("#preset").chosen();
-    $("#randoPreset").chosen();
+    $("#preset").chosen({ width: '100%' });
+    $("#randoPreset").chosen({ width: '100%' });
     resizeChosen();
     loadTip();
 
@@ -1954,7 +1954,7 @@ def displayMultiSelect(id, selectedValues, default, multipleValues):
   displaySelect(id, multipleValues, default)
 
   response.write("<div id=\"{}MultiSelectDiv\" style=\"display:none\">".format(id), escape=False)
-  response.write("<select id=\"{}MultiSelect\" class=\"filldropdown chzn-select\" multiple>".format(id), escape=False)
+  response.write("<select id=\"{}MultiSelect\" class=\"chzn-select\" multiple>".format(id), escape=False)
   for value in multipleValues:
     displayValue = displayNames.get(value, value)
     if value in selectedValues:
@@ -2045,7 +2045,7 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td>Settings Preset:</td>
                 <td>
-                  <select class="filldropdown chzn-select" id="randoPreset" name="randoPreset" onchange="loadRandoPreset()">
+                  <select class="chzn-select" id="randoPreset" name="randoPreset" onchange="loadRandoPreset()">
                     <optgroup label="Standard presets">
 {{
   for preset in randoPresets:
@@ -2087,7 +2087,7 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td class="small"></td>
                 <td>Skills Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a><span></td><!-- ' -->
-                <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
+                <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="chzn-select"))}}</td>
                 <td id="presetStep"><button type="button" onclick="startTheTour(5)">?</button></td>
               </tr>
               <tr>

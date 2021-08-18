@@ -966,6 +966,8 @@ game_end:
     jsl $90f084
     rtl
 
+warnpc $8bf88f
+
 org $dfd4f0
 // Draw full time as hh:mm:ss:ff
 // Pointer to first byte of RAM in A

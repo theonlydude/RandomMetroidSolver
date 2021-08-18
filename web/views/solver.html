@@ -363,7 +363,7 @@ pass
 var timeoutIdRoom;
 var timeoutIdSubArea;
 window.onload = function(){
-    $(".chzn-select").chosen();
+    $(".chzn-select").chosen({ width: '100%' });
     resizeChosen();
 
     setComplexity();
@@ -682,7 +682,7 @@ function DoPost(){
             </tr>
             <tr>
               <td>Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a></td>
-              <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.solver["preset"], _class="filldropdown chzn-select"))}}</td>
+              <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.solver["preset"], _class="chzn-select"))}}</td>
               <td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
             </tr>
           </table>

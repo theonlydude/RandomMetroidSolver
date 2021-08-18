@@ -25,6 +25,9 @@ class ROM(object):
     def readByte(self, address=None):
         return self.readBytes(1, address)
 
+    def readLong(self, address=None):
+        return self.readBytes(3, address)
+
     def readBytes(self, size, address=None):
         if address != None:
             self.seek(address)
@@ -35,6 +38,9 @@ class ROM(object):
 
     def writeByte(self, byte, address=None):
         self.writeBytes(byte, 1, address)
+
+    def writeLong(self, lng, address=None):
+        self.writeBytes(lng, 3, address)
 
     def writeBytes(self, value, size, address=None):
         if address != None:

@@ -488,6 +488,8 @@ function loadNewSongFromId(elemId) {
 }
 
 function loadNewSong(song) {
+    // first innerHTML modifilcation will change scroll, so store it to restore at the end
+    var scroll = $(window).scrollTop();
     stopSong();
 
     var previousSong = currentSong;
@@ -504,6 +506,7 @@ function loadNewSong(song) {
 
     // autoplay
     action_play();
+    $("html").scrollTop(scroll);
 }
 
 function highligthSong(previousSong, currentSong) {
@@ -620,25 +623,32 @@ function drop(ev) {
 }
 
 function resetPlaylist() {
+    var scroll = $(window).scrollTop();
     for(var i=0; i<musicList.length; i++) {
         var id = musicList[i][0];
         var song = musicList[i][1];
         document.getElementById(id).innerHTML = song;
     }
+    $("html").scrollTop(scroll);
 }
 
 function randomizePlaylist() {
+    var scroll = $(window).scrollTop();
     var keys = Object.keys(musics);
     for(var i=0; i<musicIds.length; i++) {
         randomSong = keys[Math.floor(keys.length * Math.random())];
         var id = musicIds[i];
         document.getElementById(id).innerHTML = randomSong;
     }
+    $("html").scrollTop(scroll);
 }
 
 function savePlaylist() {
     // ask user for playlist name
     var filename = prompt("What is your playlist name?");
+    if(filename == null) {
+        return false;
+    }
 
     var playlist = {};
     for(var i=0; i<musicIds.length; i++) {

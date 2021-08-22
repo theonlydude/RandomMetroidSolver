@@ -362,6 +362,15 @@ function drawOpennessHistogram_variable() {
 google.charts.setOnLoadCallback(drawOpennessHistogram_variable);
 {{
       pass
+    if "reverse" in progSpeedStats:
+}}
+
+function drawOpennessHistogram_reverse() {
+    drawOpennessHistogram("reverse", {{response.write(progSpeedStats["reverse"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_reverse);
+{{
+      pass
     if "total" in progSpeedStats:
 }}
 
@@ -500,6 +509,11 @@ if progSpeedStats != None:
   if "variable" in progSpeedStats:
 }}
     <div id="opennessHistogram_variable" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "reverse" in progSpeedStats:
+}}
+    <div id="opennessHistogram_reverse" style="height: 400px; margin: 0 auto"></div>
 {{
     pass
   if "total" in progSpeedStats:

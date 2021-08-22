@@ -14,7 +14,6 @@ class ComeBack(object):
         # return True if a rewind is needed. choose the next area to use
         solveAreas = {}
         locsCount = 0
-        majorNoComeBack = False
         for loc in locations:
             if self.solver.majorsSplit != 'Full':
                 if loc.isClass(self.solver.majorsSplit) or loc.isBoss():
@@ -22,11 +21,6 @@ class ComeBack(object):
                         return False
                     elif loc.comeBack == True:
                         return False
-                else:
-                    # when the solver decide to visit a major no come back locations
-                    # when there's minors comeback locations available.
-                    # create a rollback point just in case more minors where actually required to do a special tech.
-                    majorNoComeBack = True
             else:
                 if loc.comeBack is None:
                     return False
@@ -37,9 +31,6 @@ class ComeBack(object):
                 solveAreas[loc.SolveArea] += 1
             else:
                 solveAreas[loc.SolveArea] = 1
-
-        if majorNoComeBack == False and self.solver.majorsSplit != 'Full':
-            return False
 
         # only minors locations, or just one major, no need for a rewind step
         if locsCount < 2:
@@ -72,7 +63,7 @@ class ComeBack(object):
         self.log.debug("Create new step at {}".format(cur))
         lastStep = ComeBackStep(solveAreas, cur)
         self.comeBackSteps.append(lastStep)
-        return lastStep.next(locations)
+        return lastStep.next(locations, self.solver.getPriorityArea())
 
     def reuseLastStep(self, lastStep, solveAreas):
         # reuse the last step if all solve areas are included in last step to avoid creating too many.
@@ -127,6 +118,8 @@ class ComeBack(object):
             self.log.debug("Can't rewind, it's buggy here !")
             return False
         self.solver.cancelLastItems(count)
+        # we've rewind, we may no longer be able to kill mother brain
+        self.solver.motherBrainCouldBeKilled = False
         self.log.debug("Rewind {} items to {}".format(count, lastStep.cur))
         return True
 
@@ -144,7 +137,7 @@ class ComeBackStep(object):
         self.log.debug("moreAvailable: cur: {} len(visited): {} len(areas): {}".format(self.cur, len(self.visitedSolveAreas), len(self.solveAreas)))
         return len(self.visitedSolveAreas) < len(self.solveAreas)
 
-    def next(self, locations):
+    def next(self, locations, priorityArea=None):
         # use next available area, if all areas have been visited return True (stuck), else False
         if not self.moreAvailable():
             self.log.debug("rewind: all areas have been visited, stuck")
@@ -152,24 +145,28 @@ class ComeBackStep(object):
 
         self.log.debug("rewind next, solveAreas: {} visitedSolveAreas: {}".format(self.solveAreas, self.visitedSolveAreas))
 
-        # get area with max available locs
-        maxAreaWeigth = 0
         maxAreaName = ""
-        for solveArea in sorted(self.solveAreas):
-            if solveArea in self.visitedSolveAreas:
-                continue
-            else:
-                if self.solveAreas[solveArea] > maxAreaWeigth:
-                    maxAreaWeigth = self.solveAreas[solveArea]
-                    maxAreaName = solveArea
-        self.visitedSolveAreas.append(maxAreaName)
-        self.curSolveArea = maxAreaName
-        self.log.debug("rewind next area: {}".format(maxAreaName))
+        if priorityArea is not None and priorityArea in self.solveAreas:
+            self.visitedSolveAreas.append(priorityArea)
+            self.curSolveArea = priorityArea
+        else:
+            # get area with max available locs
+            maxAreaWeigth = 0
+            for solveArea in sorted(self.solveAreas):
+                if solveArea in self.visitedSolveAreas:
+                    continue
+                else:
+                    if self.solveAreas[solveArea] > maxAreaWeigth:
+                        maxAreaWeigth = self.solveAreas[solveArea]
+                        maxAreaName = solveArea
+            self.visitedSolveAreas.append(maxAreaName)
+            self.curSolveArea = maxAreaName
+        self.log.debug("rewind next area: {}".format(self.curSolveArea))
 
         outWeight = 10000
         retSolveAreas = {}
         for solveArea in self.solveAreas:
-            if solveArea == maxAreaName:
+            if solveArea == self.curSolveArea:
                 retSolveAreas[solveArea] = 1
             else:
                 retSolveAreas[solveArea] = outWeight

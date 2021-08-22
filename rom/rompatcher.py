@@ -1,12 +1,13 @@
-import os, random, re
+import os, random, re, json
 
+from enum import IntFlag
 from rando.Items import ItemManager
 from rom.compression import Compressor
 from rom.ips import IPS_Patch
 from utils.doorsmanager import DoorsManager
 from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
 from logic.logic import Logic
-from rom.rom import RealROM, FakeROM
+from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir
 import utils.log
@@ -70,13 +71,15 @@ class RomPatcher:
                      'Escape_Animals_Change_Event', # ...end animals
                      # vanilla behaviour restore
                      'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips',
-                     'varia_hud.ips'],
+                     'varia_hud.ips', 'custom_music.ips'],
         # base patchset+optional layout for area rando
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
                  'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street', 'no_demo.ips'],
+        # patches for boss rando
+        'Bosses': ['door_transition.ips', 'no_demo.ips'],
         # patches for escape rando
-        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips'],
+        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips', 'door_transition.ips'],
         # patches for  minimizer with fast Tourian
         'MinimizerTourian': ['minimizer_tourian.ips', 'open_zebetites.ips'],
         # patches for door color rando
@@ -149,10 +152,12 @@ class RomPatcher:
                 if loc.Name == 'Morphing Ball':
                     self.patchMorphBallEye(item)
 
-    def writeSplitLocs(self, itemLocs, split):
+    def writeSplitLocs(self, split, itemLocs, progItemLocs):
         majChozoCheck = lambda itemLoc: itemLoc.Item.Class == split and itemLoc.Location.isClass(split)
+        fullCheck = lambda itemLoc: itemLoc.Location.Id is not None
         splitChecks = {
-            'Full': lambda itemLoc: itemLoc.Location.Id is not None,
+            'Full': fullCheck,
+            'Scavenger': fullCheck,
             'Major': majChozoCheck,
             'Chozo': majChozoCheck,
             'FullWithHUD': lambda itemLoc: itemLoc.Item.Category not in ['Energy', 'Ammo', 'Boss']
@@ -166,6 +171,13 @@ class RomPatcher:
             for loc in locs:
                 self.romFile.writeByte(loc.Id)
             self.romFile.writeByte(0xff)
+        if split == "Scavenger":
+            # write required major item order
+            self.romFile.seek(snes_to_pc(0xA1F5D8))
+            for itemLoc in progItemLocs:
+                self.romFile.writeWord((itemLoc.Location.Id << 8) | itemLoc.Location.HUD)
+            # bogus loc ID | "HUNT OVER" index
+            self.romFile.writeWord(0xff10)
 
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball
@@ -201,9 +213,9 @@ class RomPatcher:
         elif item.Type == 'Reserve' or isAmmo:
             operand = 0x1 # < 1
         elif ItemManager.isBeam(item):
-            operand = ItemManager.BeamBits[item.Type]
+            operand = item.BeamBits
         else:
-            operand = ItemManager.ItemBits[item.Type]
+            operand = item.ItemBits
         self.patchMorphBallCheck(0x1410E6, cat, comp, operand, branch) # eye main AI
         self.patchMorphBallCheck(0x1468B2, cat, comp, operand, branch) # head main AI
 
@@ -248,7 +260,7 @@ class RomPatcher:
             for (messageKey, newMessage) in messageBoxes[sprite].items():
                 messageBox.updateMessage(messageKey, newMessage, doVFlip, doHFlip)
 
-    def writePlmTable(self, plms, area, bosses, startAP):
+    def writePlmTable(self, plms, area, bosses, startLocation):
         # called when saving a plando
         try:
             if bosses == True or area == True:
@@ -256,18 +268,18 @@ class RomPatcher:
 
             doors = self.getStartDoors(plms, area, None)
             self.writeDoorsColor(doors)
-            self.applyStartAP(startAP, plms, doors)
+            self.applyStartAP(startLocation, plms, doors)
 
             self.applyPLMs(plms)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
-    def applyIPSPatches(self, startAP="Landing Site",
+    def applyIPSPatches(self, startLocation="Landing Site",
                         optionalPatches=[], noLayout=False, suitsMode="Balanced",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
-                        escapeAttr=None, noRemoveEscapeEnemies=False,
-                        minimizerN=None, minimizerTourian=True, doorsColorsRando=False):
+                        escapeAttr=None, minimizerN=None, minimizerTourian=True,
+                        doorsColorsRando=False):
         try:
             # apply standard patches
             stdPatches = []
@@ -293,7 +305,11 @@ class RomPatcher:
                 stdPatches.append("Phantoon_Eye_Door")
             if area == True or doorsColorsRando == True:
                 stdPatches.append("Enable_Backup_Saves")
-
+            if 'varia_hud.ips' in optionalPatches:
+                # varia hud has its own variant of g4_skip for scavenger mode,
+                # it can also make demos glitch out
+                stdPatches.remove("g4_skip.ips")
+                self.applyIPSPatch("no_demo.ips")
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
 
@@ -313,13 +329,8 @@ class RomPatcher:
 
             # random escape
             if escapeAttr is not None:
-                if noRemoveEscapeEnemies == True:
-                    RomPatcher.IPSPatches['Escape'].append('Escape_Rando_Enable_Enemies')
                 for patchName in RomPatcher.IPSPatches['Escape']:
                     self.applyIPSPatch(patchName)
-                # handle incompatible doors transitions
-                if area == False and bosses == False:
-                    self.applyIPSPatch('door_transition.ips')
                 # animals and timer
                 self.applyEscapeAttributes(escapeAttr, plms)
 
@@ -333,9 +344,9 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
             else:
                 self.applyIPSPatch('area_ids_alt.ips')
-                if bosses == True:
-                    self.applyIPSPatch('door_transition.ips')
-                    self.applyIPSPatch('no_demo.ips')
+            if bosses == True:
+                for patchName in RomPatcher.IPSPatches['Bosses']:
+                    self.applyIPSPatch(patchName)
             if minimizerN is not None:
                 self.applyIPSPatch('minimizer_bosses.ips')
                 if minimizerTourian == True:
@@ -346,7 +357,7 @@ class RomPatcher:
                 for patchName in RomPatcher.IPSPatches['DoorsColors']:
                     self.applyIPSPatch(patchName)
                 self.writeDoorsColor(doors)
-            self.applyStartAP(startAP, plms, doors)
+            self.applyStartAP(startLocation, plms, doors)
             self.applyPLMs(plms)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
@@ -440,6 +451,9 @@ class RomPatcher:
                 plms.append("WS_Map_Grey_Door_Openable")
         else:
             plms.append("WS_Map_Grey_Door")
+        # optional patches (enemies, scavenger)
+        for patch in escapeAttr['patches']:
+            self.applyIPSPatch(patch)
 
     # adds ad-hoc "IPS patches" for additional PLM tables
     def applyPLMs(self, plms):
@@ -524,14 +538,13 @@ class RomPatcher:
 
     def writeMajorsSplit(self, majorsSplit):
         address = 0x17B6C
-        if majorsSplit == 'Chozo':
-            char = 'Z'
-        elif majorsSplit == 'Major':
-            char = 'M'
-        elif majorsSplit == 'FullWithHUD':
-            char = 'H'
-        else:
-            char = 'F'
+        splits = {
+            'Chozo': 'Z',
+            'Major': 'M',
+            'FullWithHUD': 'H',
+            'Scavenger': 'S'
+        }
+        char = splits.get(majorsSplit, 'F')
         self.romFile.writeByte(ord(char), address)
 
     def getItemQty(self, itemLocs, itemType):
@@ -1137,3 +1150,205 @@ class MessageBox(object):
 
     def updateAttr(self, byte, address):
         self.rom.writeByte(byte, address)
+
+class RomTypeForMusic(IntFlag):
+    VariaSeed = 1
+    AreaSeed = 2
+    BossSeed = 4
+
+class MusicPatcher(object):
+    # rom: ROM object to patch
+    # romType: 0 if not varia seed, or bitwise or of RomTypeForMusic enum
+    # baseDir: directory containing all music data/descriptors/constraints
+    # constraintsFile: file to constraints JSON descriptor, relative to baseDir/constraints.
+    #                  if None, will be determined automatically from romType
+    def __init__(self, rom, romType,
+                 baseDir=os.path.join(appDir, 'varia_custom_sprites', 'music'),
+                 constraintsFile=None):
+        self.rom = rom
+        self.baseDir = baseDir
+        variaSeed = bool(romType & RomTypeForMusic.VariaSeed)
+        self.area = variaSeed and bool(romType & RomTypeForMusic.AreaSeed)
+        self.boss = variaSeed and bool(romType & RomTypeForMusic.BossSeed)
+        metaDir = os.path.join(baseDir, "_metadata")
+        constraintsDir = os.path.join(baseDir, "_constraints")
+        if constraintsFile is None:
+            constraintsFile = 'varia.json' if variaSeed else 'vanilla.json'
+        with open(os.path.join(constraintsDir, constraintsFile), 'r') as f:
+            self.constraints = json.load(f)
+        self.allTracks = {}
+        self.vanillaTracks = None
+        for metaFile in os.listdir(metaDir):
+            metaPath = os.path.join(metaDir, metaFile)
+            if not metaPath.endswith(".json"):
+                continue
+            with open(metaPath, 'r') as f:
+                meta = json.load(f)
+            # will silently overwrite entries with same name, so avoid
+            # conflicting descriptor files ...
+            self.allTracks.update(meta)
+            if metaFile == "vanilla.json":
+                self.vanillaTracks = meta
+        assert self.vanillaTracks is not None, "MusicPatcher: missing vanilla JSON descriptor"
+        self.replaceableTracks = [track for track in self.vanillaTracks if track not in self.constraints['preserve'] and track not in self.constraints['discard']]
+        self.musicDataTableAddress = snes_to_pc(0x8FE7E4)
+        self.musicDataTableMaxSize = 45 # to avoid overwriting useful data in bank 8F
+
+    # tracks: dict with track name to replace as key, and replacing track name as value
+    # updateRoomStates: change room state headers and special tracks. may be False if you're patching a rom hack or something
+    # output: if not None, dump a JSON file with what was done 
+    # replaced tracks must be in
+    # replaceableTracks, and new tracks must be in allTracks
+    # tracks not in the dict will be kept vanilla
+    # raise RuntimeError if not possible
+    def replace(self, tracks, updateRoomStates=True, output=None):
+        for track in tracks:
+            if track not in self.replaceableTracks:
+                raise RuntimeError("Cannot replace track %s" % track)
+        trackList = self._getTrackList(tracks)
+#        print("trackList="+str(trackList))
+        musicData = self._getMusicData(trackList)
+#        print("musicData="+str(musicData))
+        if len(musicData) > self.musicDataTableMaxSize:
+            raise RuntimeError("Music data table too long. %d entries, max is %d" % (len(musicData, self.musicDataTableMaxSize)))
+        musicDataAddresses = self._getMusicDataAddresses(musicData)
+        self._writeMusicData(musicDataAddresses)
+        self._writeMusicDataTable(musicData, musicDataAddresses)
+        if updateRoomStates == True:
+            self._updateRoomStateHeaders(trackList, musicData, tracks)
+        if output is not None:
+            self._dump(output, trackList, musicData, musicDataAddresses)
+
+    # compose a track list from vanilla tracks, replaced tracks, and constraints
+    def _getTrackList(self, replacedTracks):
+        trackList = set()
+        for track in self.vanillaTracks:
+            if track in replacedTracks:
+                trackList.add(replacedTracks[track])
+            elif track not in self.constraints['discard']:
+                trackList.add(track)
+        return list(trackList)
+
+    def _nspc_path(self, nspc_path):
+        return os.path.join(self.baseDir, nspc_path)
+
+    # get list of music data files to include in the ROM
+    # can contain empty entries, marked with a None, to account
+    # for fixed place data ('preserve' constraint)
+    def _getMusicData(self, trackList):
+        # first, make musicData the minimum size wrt preserved tracks
+        preservedTracks = {trackName:self.vanillaTracks[trackName] for trackName in self.constraints['preserve']}
+        preservedDataIndexes = [track['data_index'] for trackName,track in preservedTracks.items()]
+        musicData = [None]*(max(preservedDataIndexes)+1)
+        # fill preserved spots
+        for track in self.constraints['preserve']:
+            idx = self.vanillaTracks[track]['data_index']
+            nspc = self._nspc_path(self.vanillaTracks[track]['nspc_path'])
+            if nspc not in musicData:
+                musicData[idx] = nspc
+#                print("stored " + nspc + " at "+ str(idx))
+        # then fill data in remaining spots
+        idx = 0
+        for track in trackList:
+            previdx = idx
+            if track not in self.constraints['preserve']:
+                nspc = self._nspc_path(self.allTracks[track]['nspc_path'])
+                if nspc not in musicData:
+                    for i in range(idx, len(musicData)):
+#                        print("at " + str(i) + ": "+str(musicData[i]))
+                        if musicData[i] is None:
+                            musicData[i] = nspc
+                            idx = i+1
+                            break
+                    if idx == previdx:
+                        idx += 1
+                        musicData.append(nspc)
+#                    print("stored " + nspc + " at "+ str(idx))
+        return musicData
+
+    # get addresses to store each data file to. raise RuntimeError if not possible
+    # pretty dumb algorithm for now, just store data wherever possible,
+    # prioritizing first areas in usableSpace
+    # store data from end of usable space to make room for other data (for hacks for instance)
+    def _getMusicDataAddresses(self, musicData):
+        usableSpace = self.constraints['usable_space_ranges_pc']
+        musicDataAddresses = {}
+        for dataFile in musicData:
+            if dataFile is None:
+                continue
+            sz = os.path.getsize(dataFile)
+            for r in usableSpace:
+                if (r['end'] - sz) >= r['start']:
+                    r['end'] -= sz
+                    musicDataAddresses[dataFile] = r['end']
+                    break
+            if dataFile not in musicDataAddresses:
+                raise RuntimeError("Cannot find enough space to store music data file "+dataFile)
+        return musicDataAddresses
+
+    def _writeMusicData(self, musicDataAddresses):
+        for dataFile, addr in musicDataAddresses.items():
+            self.rom.seek(addr)
+            with open(dataFile, 'rb') as f:
+                self.rom.write(f.read())
+
+    def _writeMusicDataTable(self, musicData, musicDataAddresses):
+        self.rom.seek(self.musicDataTableAddress)
+        for dataFile in musicData:
+            addr = pc_to_snes(musicDataAddresses[dataFile]) if dataFile in musicDataAddresses else 0
+            self.rom.writeLong(addr)
+
+    def _updateRoomStateHeaders(self, trackList, musicData, replacedTracks):
+        trackAddresses = {}
+        def addAddresses(track, vanillaTrackData):
+            nonlocal trackAddresses
+            if track not in trackAddresses:
+                trackAddresses[track] = []
+            if 'pc_addresses' in vanillaTrackData:
+                trackAddresses[track] += vanillaTrackData['pc_addresses']
+            if self.area and 'pc_addresses_area' in vanillaTrackData:
+                trackAddresses[track] += vanillaTrackData['pc_addresses_area']
+            if self.boss and 'pc_addresses_boss' in vanillaTrackData:
+                trackAddresses[track] += vanillaTrackData['pc_addresses_boss']
+        for track in trackList:
+            if track in replacedTracks.values():
+                for van,rep in replacedTracks.items():
+                    if rep == track:
+                        addAddresses(track, self.vanillaTracks[van])
+            else:
+                addAddresses(track, self.vanillaTracks[track])
+        for track in trackList:
+            dataId = (musicData.index(self._nspc_path(self.allTracks[track]['nspc_path']))+1)*3
+            trackId = self.allTracks[track]['track_index'] + 5
+            for addr in trackAddresses[track]:
+                self.rom.seek(addr)
+                self.rom.writeByte(dataId)
+                self.rom.writeByte(trackId)
+
+    def _dump(self, output, trackList, musicData, musicDataAddresses):
+        music={}
+        no=0
+        for md in musicData:
+            if md is None:
+                music["NoData_%d" % no] = None
+                no += 1
+            else:
+                tracks = []
+                h,t=os.path.split(md)
+                md=os.path.join(os.path.split(h)[1], t)
+                for track,trackData in self.allTracks.items():
+                    if trackData['nspc_path'] == md:
+                        tracks.append(track)
+                music[md] = tracks
+        musicSnesAddresses = {}
+        for nspc, addr in musicDataAddresses.items():
+            h,t=os.path.split(nspc)
+            nspc=os.path.join(os.path.split(h)[1], t)
+            musicSnesAddresses[nspc] = "$%06x" % pc_to_snes(addr)
+        dump = {
+            "track_list": sorted(trackList),
+            "music_data": music,
+            "music_data_addresses": musicSnesAddresses
+        }
+        with open(output, 'w') as f:
+            json.dump(dump, f, indent=4)

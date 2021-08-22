@@ -28,7 +28,7 @@ class SolverState(object):
         # list of active patches
         self.state["patches"] = RomPatches.ActivePatches
         # start ap
-        self.state["startAP"] = solver.startAP
+        self.state["startLocation"] = solver.startLocation
         # start area
         self.state["startArea"] = solver.startArea
         # dict {locName: {itemName: "xxx", "accessPoint": "xxx"}, ...}
@@ -98,7 +98,7 @@ class SolverState(object):
         solver.escapeRando = self.state["escapeRando"]
         solver.escapeTimer = self.state["escapeTimer"]
         RomPatches.ActivePatches = self.state["patches"]
-        solver.startAP = self.state["startAP"]
+        solver.startLocation = self.state["startLocation"]
         solver.startArea = self.state["startArea"]
         self.setLocsData(solver.locations)
         solver.areaTransitions = self.state["areaTransitions"]
@@ -126,7 +126,7 @@ class SolverState(object):
         # add available locations
         roomsVisibility.update([loc+'Svg' for loc, data in self.state["availableLocationsWeb"].items() if data["difficulty"] != "break"])
         # add visited locations
-        roomsVisibility.update([loc+'Svg' for loc, data in self.state["visitedLocationsWeb"].items() if data['accessPoint']+'Svg' in roomsVisibility])
+        roomsVisibility.update([loc+'Svg' for loc, data in self.state["visitedLocationsWeb"].items() if 'accessPoint' in data and data['accessPoint']+'Svg' in roomsVisibility])
         # add special rooms that have conditions to traverse them but no item in them,
         # so we need to know if they are visible or not
         if 'crocomireRoomTopSvg' in roomsVisibility and sm.enoughStuffCroc():

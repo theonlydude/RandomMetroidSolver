@@ -43,6 +43,9 @@ class Location:
     def isBoss(self):
         return self._isBoss
 
+    def isScavenger(self):
+        return self._isScavenger
+
     def isClass(self, _class):
         return _class in self.Class
 
@@ -52,6 +55,7 @@ class Location:
         self._isMajor = 'Major' in _class
         self._isMinor = 'Minor' in _class
         self._isBoss = 'Boss' in _class
+        self._isScavenger = 'Scavenger' in _class
 
     def evalPostAvailable(self, smbm):
         if self.difficulty.bool == True and self.PostAvailable is not None:
@@ -98,7 +102,7 @@ class Location:
 
 def define_location(
         Area, GraphArea, SolveArea, Name, Class, CanHidden, Address, Id,
-        Visibility, Room, AccessFrom=None, Available=None, PostAvailable=None):
+        Visibility, Room, VanillaItemType=None, AccessFrom=None, Available=None, PostAvailable=None, HUD=None):
     name = Name.replace(' ', '').replace(',', '') + 'Location'
     subclass = type(name, (Location,), {
         'Area': Area,
@@ -111,13 +115,16 @@ def define_location(
         'Id': Id,
         'Visibility': Visibility,
         'Room': Room,
+        'VanillaItemType': VanillaItemType,
+        'HUD': HUD,
         'AccessFrom': AccessFrom,
         'Available': Available,
         'PostAvailable': PostAvailable,
         '_isMajor': 'Major' in Class,
         '_isChozo': 'Chozo' in Class,
         '_isMinor': 'Minor' in Class,
-        '_isBoss': 'Boss' in Class
+        '_isBoss': 'Boss' in Class,
+        '_isScavenger': 'Scavenger' in Class
     })
     return subclass()
 
@@ -145,10 +152,12 @@ define_location(
     Name="Bomb",
     Address=0x78404,
     Id=0x7,
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Visibility="Chozo",
     Room='Bomb Torizo Room',
+    VanillaItemType='Bomb',
+    HUD=1,
 ),
     "Energy Tank, Terminator":
 define_location(
@@ -182,12 +191,14 @@ define_location(
     GraphArea="GreenPinkBrinstar",
     SolveArea="Pink Brinstar",
     Name="Charge Beam",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78614,
     Id=0x17,
     Visibility="Chozo",
     Room='Big Pink',
+    VanillaItemType='Charge',
+    HUD=2,
 ),
     "Morphing Ball":
 define_location(
@@ -195,12 +206,14 @@ define_location(
     GraphArea="Crateria",
     SolveArea="Blue Brinstar",
     Name="Morphing Ball",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x786DE,
     Id=0x1a,
     Visibility="Visible",
     Room='Morph Ball Room',
+    VanillaItemType='Morph',
+    HUD=0,
 ),
     "Energy Tank, Brinstar Ceiling":
 define_location(
@@ -260,12 +273,14 @@ define_location(
     GraphArea="RedBrinstar",
     SolveArea="Red Brinstar",
     Name="X-Ray Scope",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78876,
     Id=0x26,
     Visibility="Chozo",
     Room='X-Ray Scope Room',
+    VanillaItemType='XRayScope',
+    HUD=10,
 ),
     "Spazer":
 define_location(
@@ -273,12 +288,14 @@ define_location(
     GraphArea="RedBrinstar",
     SolveArea="Red Brinstar",
     Name="Spazer",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x7896E,
     Id=0x2a,
     Visibility="Chozo",
     Room='Spazer Room',
+    VanillaItemType='Spazer',
+    HUD=3,
 ),
     "Energy Tank, Kraid":
 define_location(
@@ -312,12 +329,14 @@ define_location(
     GraphArea="Kraid",
     SolveArea="Kraid Boss",
     Name="Varia Suit",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78ACA,
     Id=0x30,
     Visibility="Chozo",
     Room='Varia Suit Room',
+    VanillaItemType='Varia',
+    HUD=4,
 ),
     "Ice Beam":
 define_location(
@@ -325,12 +344,14 @@ define_location(
     GraphArea="Norfair",
     SolveArea="Norfair Ice",
     Name="Ice Beam",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78B24,
     Id=0x32,
     Visibility="Chozo",
     Room='Ice Beam Room',
+    VanillaItemType='Ice',
+    HUD=6,
 ),
     "Energy Tank, Crocomire":
 define_location(
@@ -351,12 +372,14 @@ define_location(
     GraphArea="Norfair",
     SolveArea="Norfair Entrance",
     Name="Hi-Jump Boots",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78BAC,
     Id=0x35,
     Visibility="Chozo",
     Room='Hi Jump Boots Room',
+    VanillaItemType='HiJump',
+    HUD=5,
 ),
     "Grapple Beam":
 define_location(
@@ -364,12 +387,14 @@ define_location(
     GraphArea="Crocomire",
     SolveArea="Crocomire",
     Name="Grapple Beam",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78C36,
     Id=0x3c,
     Visibility="Chozo",
     Room='Grapple Beam Room',
+    VanillaItemType='Grapple',
+    HUD=9,
 ),
     "Reserve Tank, Norfair":
 define_location(
@@ -390,12 +415,14 @@ define_location(
     GraphArea="Norfair",
     SolveArea="Bubble Norfair Speed",
     Name="Speed Booster",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78C82,
     Id=0x42,
     Visibility="Chozo",
     Room='Speed Booster Room',
+    VanillaItemType='SpeedBooster',
+    HUD=7,
 ),
     "Wave Beam":
 define_location(
@@ -403,12 +430,14 @@ define_location(
     GraphArea="Norfair",
     SolveArea="Bubble Norfair Wave",
     Name="Wave Beam",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x78CCA,
     Id=0x44,
     Visibility="Chozo",
     Room='Wave Beam Room',
+    VanillaItemType='Wave',
+    HUD=8,
 ),
     "Ridley":
 define_location(
@@ -442,12 +471,14 @@ define_location(
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Screw Attack",
     Name="Screw Attack",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x79110,
     Id=0x4f,
     Visibility="Chozo",
     Room='Screw Attack Room',
+    VanillaItemType='ScrewAttack',
+    HUD=15,
 ),
     "Energy Tank, Firefleas":
 define_location(
@@ -520,12 +551,14 @@ define_location(
     GraphArea="WreckedShip",
     SolveArea="WreckedShip Gravity",
     Name="Gravity Suit",
-    Class=["Major"],
+    Class=["Major", "Scavenger"],
     CanHidden=False,
     Address=0x7C36D,
     Id=0x87,
     Visibility="Chozo",
     Room='Gravity Suit Room',
+    VanillaItemType='Gravity',
+    HUD=11,
 ),
     "Energy Tank, Mama turtle":
 define_location(
@@ -546,12 +579,14 @@ define_location(
     GraphArea="EastMaridia",
     SolveArea="Maridia Forgotten Highway",
     Name="Plasma Beam",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x7C559,
     Id=0x8f,
     Visibility="Chozo",
     Room='Plasma Room',
+    VanillaItemType='Plasma',
+    HUD=14,
 ),
     "Reserve Tank, Maridia":
 define_location(
@@ -572,12 +607,14 @@ define_location(
     GraphArea="EastMaridia",
     SolveArea="Maridia Sandpits",
     Name="Spring Ball",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x7C6E5,
     Id=0x96,
     Visibility="Chozo",
     Room='Spring Ball Room',
+    VanillaItemType='SpringBall',
+    HUD=13,
 ),
     "Energy Tank, Botwoon":
 define_location(
@@ -611,12 +648,14 @@ define_location(
     GraphArea="EastMaridia",
     SolveArea="Draygon Boss",
     Name="Space Jump",
-    Class=["Major", "Chozo"],
+    Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
     Address=0x7C7A7,
     Id=0x9a,
     Visibility="Chozo",
     Room='Space Jump Room',
+    VanillaItemType='SpaceJump',
+    HUD=12,
 ),
     "Mother Brain":
 define_location(

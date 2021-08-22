@@ -7,8 +7,8 @@ class Conf:
     # display the generated path (spoilers!)
     displayGeneratedPath = False
 
-    # choose how many items are required (possible value: minimal/all/any)
-    itemsPickup = 'minimal'
+    # choose how many items are required (possible value: all (100%)/any (any%))
+    itemsPickup = 'any'
 
     # the list of items to not pick up
     itemsForbidden = []

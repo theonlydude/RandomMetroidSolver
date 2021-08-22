@@ -1,0 +1,179 @@
+A quick listing of some x-ray climbs you could add to VARIA logic. All climbs require x-ray. You also should be able to open the door in both ways (although one direction isn't needed, it allows reseting if you screw up).
+
+Some terminology:
+ - Left door:  Doors on the left side of the screen, easy to get stuck in. Nothing required.
+ - Right door:  Doors on the right side of the screen, hard to get stuck in. Nothing required.
+ - Suitless:  Being suitless underwater affects getting stuck in right doors. Nothing required.
+ - Area Door:  Area doors behave a little funky. It is possible to get door stuck in them, doing nothing fancy, but it is different (except Precious in my tests). So these are flagged below. It also requires that the transitions be matched.
+  -- If don't want to add a check for matched transition, could at least add to non-area rando. But they are also less interesting in non-area rando.
+ - Deep stuck:  If there is a slope tile adjacent to the door you are trying to x-ray climb from, then you have to be stuck deeper in the door to get past it. The only method I would recommend adding to logic is a shinespark deep stuck, so these would require Speed Booster.
+ - Inaccessible tiles:  Some map tiles cannot be accessed via normal means in the game. These are not technically OoB, but some people may disagree.
+
+Note this ignores climbs that COULD be helpful in a door randomizer, e.g., escaping the Parlor save door without morph or escaping Dachora pit.
+
+Short list of climbs, with some comments:
+
+CRATERIA (ignoring West Ocean)
+
+1. Landing Site:  From bottom right door to top right door. Right door, 3 screens, but ***special***.
+ - Skips the check for jumping up there.
+ - Should require opening the door, so can try again if fail the door stuck.
+ - There is a slope tile, which seemingly makes this pointless (since a shinespark gets you up there). However, you can bypass the slope with a Crystal Flash. Note this can be done in other locations, but this is the only non-OoB application I am aware of.
+
+2. Climb Room:  Break the bomb blocks with Screw Attack. Right door, 1 screen.
+ - In door rando, allows first bombs / power bombs to be at Crateria Supers. Otherwise pointless.
+ - You can also break the bomb block with Screw Attack using a moonfall.
+
+3. Crateria Supers:  Access item without speed. Left door, 7 screens, moves through inaccessible tiles.
+ - You need to cross the spike pit twice. Since you aren't shinesparking, this isn't really a difference in energy requirements.
+ - Although with space jump, you could get to the item with no energy.
+
+BRINSTAR
+
+4. Green Brinstar Main Shaft:  Get up from Etecoons without power bombs. Left door, 2 screens.
+ - Neat interaction with moon dance, since can get up without power bombs as well.
+ - Potentially bad interaction with Etecoons start, where this may be required a lot.
+ - May want to require missiles OR supers OR screw attack OR bombs, to kill Beetoms in the set-up room. Note I think bombs is a reasonable requirement, since this is an advanced strat.
+
+5. Big Pink, right:  Get past the morph requirement, to access Big Pink proper. Right door, 1 screen.
+ - Should require opening the door, so can reset if failed the door stuck.
+
+6. Spore Spawn Supers:  Get past the morph / bomb requirement when leaving the location. Left door, 8 screens, moves through inaccessible tiles.
+ - Very long, but completely standard.
+
+7. Red Tower, top:  Climb Red Tower with an x-ray climb. Left door, 4 screens, Area Door.
+ - This just avoids the Red Tower climb. Anyone who can x-ray climb can wall jump up there, probably, so kind of silly.
+ - Note this is labeled "top" since you can x-ray climb from the x-ray hallway door to get past power bomb obstruction. However, all methods to bypass the power bomb obstruction on the wall in are very difficult.
+
+8. Below Spazer:  Bypasses morph/bomb requirement to get TO the item...still need it to get out. Right door, 1 screen.
+ - I think this is neat, since it is another possibility for Morph. But it does softlock you if nothing.
+
+WRECKED SHIP + WEST OCEAN
+
+9. West Ocean:  Get up to West Ocean items without killing Phantoon. Deep stuck, 3 screens, moves through inaccessible tiles.
+ - Should require opening door, so can reset if you mess up.
+ - I think this is neat, because getting these items without killing Phantoon is just cool.
+ - Note the door to the top right and back down to Wrecked Ship Main are blue with power off, so nothing is needed to get back.
+
+10. Failed Bowling Skip:  Same as (10), but different requirements. Special, 2 screens.
+ - This requires grapple, morph, crystal flash ammo, and x-ray.
+ - You have to not get deep enough in the door to trigger the transition, but be deep enough to get past the slope tile farther up.
+ - This gives access to the top items WITHOUT traversing the door to the right of West Ocean.
+ - Also, this gives a method of getting INTO the ship WITHOUT traversing that door. Which is kind of neat.
+ - Note actual Bowling Skip adds nothing to logic, since for gravity item to spawn requires Phantoon dead and then you need morph + grapple + power bombs to Bowling Skip, so you could get there normally.
+
+
+MARIDIA
+
+11. Oasis:  Skip bomb requirement. Left door, less than 1 screen.
+ - I think this, in conjunction with Aqueduct one, adds some more spice to Aqueduct start.
+
+12. Crab Hole:  Skip jumping up requirement...and morph requirement. Left door, Area Door, 1 screen.
+ - This is only really relevant in Area randomizer, where it is an Area Door, which is kind of unfortunate. But I do this a lot. (Although is it relevant in non-Area with randomized escape? Can you do that?)
+ - For example, in randomized escapes, I have definitely done this.
+ - Note if the map room can be accessed, you can do this from the right:  Is it accessible if escape isn't randomized?
+
+13. Aqueduct, left, bottom:  Skips the bomb requirement. Left door, 1 screen.
+ - From the save room, to the transition.
+ - Requires opening the save room door (so with Aqueduct start, requires only x-ray, allowing for weirder openings).
+
+14. Aqueduct, left, top:  Skips the power bomb requirement. Left door, Area Door, a little more than 1 screen.
+ - It is this stupid door that made me realize Area Doors are different.
+ - But I do think this is neat, and short.
+
+15. Aqueduct, right:  Gets straight to the items. Right door, Suitless, a little more than 1 screen.
+ - This is really only helpful when suitless, since otherwise could snail clip.
+ - Note a suitless right door stuck is the "same" as CWJ:  A 2 frame window, followed by a 1 frame window.
+
+16. Halfie Climb Room:  Allows climbing Halfie Climb with less stuff. Left door, 1 screen.
+ - For example, can climb with x-ray + hi-jump + space jump.
+ - Also gives access through Cac Alley with x-ray + hi-jump + space jump.
+
+17. Halfie Climb Room, grey door clip:  Using grapple, can clip through the door. Left door, a little more than 1 screen.
+ - You can do this to clip into Cac Alley. Pretty advanced to add?
+ - Requires grapple, as stated.
+
+18. Colosseum, right:  Climb up Colosseum. Right door, 1 screen.
+ - Since suitless always requires hi-jump, you could always door gravity jump instead. But this method is an alternative.
+ - Note in conjunction with (17), this allows going to and from Draygon without grapple or ice, which is neat.
+
+19. Precious:  Already in logic.
+ - Note current logic only allows x-ray climbing from Ridley or Draygon. If other Area Doors are added, could also check if this is matched.
+ - This Area Door, in my brief tests, behaved more "normally" than the other Area Doors.
+
+20. Pants Room:  Already in logic.
+
+NORFAIR
+
+21. Bubble Mountain, bottom:  Skip bomb requirement. Left door, 1 screen.
+ - May want to require a little bit of health, since the set-up is in a heated room. But it is easily doable without.
+ - Nice, short, and kind of neat in area rando.
+
+22. Bubble Mountain, top:  Skip climb requirement. Left door, 1 screen.
+ - From the save room, to reserve area.
+ - Kind of pointless, for similar reasons to Red Tower one. But not too bad to add either.
+ - Note to get to Bubble Mountain Top requires Grapple or a Waver damage boost...this only leads directly to the Reserve area.
+
+LOWER NORFAIR
+
+23. Screw Attack Room, bottom:  Skip climb requirement. Left door, 2 screens.
+ - Neat:  Hi-jump lava dive in, go down here, and now can get out (without the stupid near impossible jump).
+ - Requires killing GT, since set-up is from GT's room.
+ - Should require heat proof, so can x-ray climb at leisure.
+
+24. Screw Attack Room, top:  Skip climb requirement. Right door, 1 screen.
+ - This is an alternative to (24), which doesn't have to kill GT.
+ - Thus, you could come down with Screw Attack, check the Screw Attack item, and then x-ray climb back out, for example.
+
+25. Fast Pillars Setup Room:  Skip power bomb requirement. Deep stuck, 1 screen.
+ - Getting a charge for the deep stuck may require short charge or GGG.
+
+26. WRITG:  Skip climb requirement. Left door, 2 screens.
+ - There is a Namihe flame. You can x-ray climb fast enough to dodge it, but eh.
+  -- Namihe shoots flame before you can freeze it, so that isn't an option.
+ - There is a gold pirate. With appropriate set-up (have it jump into you while crouched), it will hit you and then climb away forever never to return.
+  -- You can kill the pirate before it hits you with Supers, or Charge+Plasma. Unsure on nerfed charge.
+ - Thus, I recommend requiring 4 (damage reduced) tanks:  Get hit by Namihe flame once and Gold Pirate once for 400 damage.
+ - Also, heat proof so can x-ray climb at leisure.
+
+(Small related note:  I would add a graph_access for 'Screw Attack Bottom' straight to 'Firefleas' that doesn't need power bombs at all. This allows the terrible thing that is coming from Three Musketeers, going down to Screw Attack, and then going all the way back to Three Musketeers without power bombs. Which I think is funny.)
+
+27. Wasteland:  Bypasses power bomb requirement. Left door, 2 screens.
+ - Should require opening door, so can reset if messed up
+ - Only notable in minimizer.
+
+USELESS IN CURRENT LOGIC
+
+Things that I think don't add anything in current logic.
+
+28. Plasma Spark Room:  Deep stuck, 2 screens.
+ - Allows suitless climbing the room. But requires deep stuck, so need to spark while suitless underwater. So...
+ - I don't remember if a crystal flash works, but I kind of doubt it.
+
+29. East Cactus Alley:  Right door, Suitless, 1 screen.
+ - X-ray climb up to break surface of water, then cross Cac Alley.
+ - In current logic, hi-jump is needed for this level of suitless.
+ - Crossing the first pit is non-trivial without, say, space jump.
+ - Hi-jump + space jump is sufficient without the x-ray climb.
+
+30. West Cactus Alley:  Left door, 1 screen.
+ - X-ray climb up this room, so don't need to jump up it.
+ - Currently, no suitless method for crossing Cac Alleys from left to right are in logic, so pointless.
+
+ADVANCED
+
+Some things that you could add, but are kind of advanced. Feel free to ask for more details, if you want to add them.
+
+31. Big Pink, left:  Get past power bomb requirement to get to Mission Impossible. Two methods:
+ - 31.1:  Vertical ice clip past the crumble blocks, and then do a left door stuck into a 1 screen x-ray climb.
+  -- To be at all reasonable, this requires Spazer or Wave to freeze a Zeb in the correct position. It can be done with a Reo without either of these.
+ - 31.2:  Horizontal ice clip using a Zeb directly below the power bomb obstruction. Then x-ray climb up less than one screen.
+  -- This is far easier than the vertical method, in my opinion, and doesn't require spazer/wave.
+ - I think (31.2) is perfectly reasonable to add, but it is a little strange to be the only example of horizontal ice clipping. Other vertical ice clips are in logic (mochtroid, puyo), so maybe (31.1) makes more sense to add?
+
+32. Billy Mays:  X-ray climb up to Billy Mays, to avoid power bomb requirement.
+ - This is not a door x-ray climb, but uses frozen enemy (like 31.2 above).
+ - This requires Ice, Supers, Morph, Grapple, and X-Ray...so is kind of strange.
+
+
+I think the other x-ray climbs are completely useless in current logic, or require r-mode or g-mode stuff.

@@ -173,7 +173,9 @@ accessPoints = [
                                                                    sm.canPassSpongeBath()),
                                                            sm.wand(sm.wnot(Bosses.bossDead(sm, 'Phantoon')),
                                                                    RomPatches.has(RomPatches.SpongeBathBlueDoor)))),
-        'PhantoonRoomOut': Cache.ldeco(lambda sm: sm.wand(sm.traverse('WreckedShipMainShaftBottom'), sm.canPassBombPassages()))
+        'PhantoonRoomOut': Cache.ldeco(lambda sm: sm.wand(sm.traverse('WreckedShipMainShaftBottom'), sm.canPassBombPassages())),
+        'Bowling': Cache.ldeco(lambda sm: sm.wand(sm.canPassBombPassages(),
+                                                  sm.canPassBowling()))
     }, internal=True,
        start={'spawn':0x0300,
               'doors':[0x83,0x8b], 'patches':[RomPatches.SpongeBathBlueDoor, RomPatches.WsEtankBlueDoor],
@@ -182,6 +184,9 @@ accessPoints = [
     AccessPoint('Wrecked Ship Back', 'WreckedShip', {
         'Wrecked Ship Main': lambda sm: SMBool(True),
         'Crab Maze Left': Cache.ldeco(lambda sm: sm.canPassForgottenHighway(True))
+    }, internal=True),
+    AccessPoint('Bowling', 'WreckedShip', {
+        'West Ocean Left': lambda sm: SMBool(True)
     }, internal=True),
     AccessPoint('Crab Maze Left', 'WreckedShip', {
         'Wrecked Ship Back': Cache.ldeco(lambda sm: sm.canPassForgottenHighway(False))
@@ -262,12 +267,12 @@ accessPoints = [
         'Three Muskateers Room Left': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                                      sm.haveItem('Morph'),
                                                                      # check for only 3 ki hunters this way
-                                                                     sm.canPassRedKiHunters())),
+                                                                     sm.canPassRedKiHunterStairs())),
         'Ridley Zone': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                       sm.traverse('WastelandLeft'),
                                                       sm.traverse('RedKihunterShaftBottom'),
                                                       sm.canGetBackFromRidleyZone(),
-                                                      sm.canPassRedKiHunters(),
+                                                      sm.canPassRedKiHunterStairs(),
                                                       sm.canPassWastelandDessgeegas(),
                                                       sm.canPassNinjaPirates())),
         'Screw Attack Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
@@ -293,8 +298,19 @@ accessPoints = [
         'Firefleas': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                     sm.canGetBackFromRidleyZone(),
                                                     sm.canPassWastelandDessgeegas(),
-                                                    sm.canPassRedKiHunters())),
-        'RidleyRoomOut': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']))
+                                                    sm.canPassRedKiHunterStairs())),
+        'RidleyRoomOut': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])),
+        'Wasteland': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+                                                    sm.canGetBackFromRidleyZone(),
+                                                    sm.canPassWastelandDessgeegas()))
+    }, internal=True),
+    AccessPoint('Wasteland', 'LowerNorfair', {
+        # no transition to firefleas to exlude pb of shame location when starting at firefleas top
+        'Ridley Zone': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+                                                      sm.traverse('WastelandLeft'),
+                                                      sm.canGetBackFromRidleyZone(),
+                                                      sm.canPassWastelandDessgeegas(),
+                                                      sm.canPassNinjaPirates()))
     }, internal=True),
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {
         'Firefleas': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),

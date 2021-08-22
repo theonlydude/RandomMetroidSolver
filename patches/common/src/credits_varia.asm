@@ -105,7 +105,7 @@ org $819f7c
 	jsr load_menu_3rd_file
 
 // Hijack loading new game to reset stats
-org $828063
+org $82805f
     jsl clear_values
 
 // Hijack the original credits code to read the script from bank $DF
@@ -625,7 +625,8 @@ patch_load:
     plb
     // call load routine
     jsl $818085
-    bcc .backup_check    // skip to end if new file or SRAM corrupt
+    bcc .backup_check
+    // skip to end if new file or SRAM corrupt
     jmp .end
 .backup_check:
 	lda.l opt_backup
@@ -935,11 +936,13 @@ clear_values:
     sta {softreset}
 .ret:
     plp
-    jsl $809a79
+    jsl $80a07b	// hijacked code
     rtl
 
 // Game has ended, save RTA timer to RAM and copy all stats to SRAM a final time
 game_end:
+    // update region time (will be slightly off, but avoids dealing with negative substraction result, see below)
+    jsl {update_and_store_region_time}
     // Subtract frames from pressing down at ship to this code running
     lda {timer1}
     sec
@@ -954,9 +957,6 @@ game_end:
     lda {timer2}
     sta {stats_timer}+2
 
-    // also update region time
-    jsl {update_and_store_region_time}
-
     // save stats to SRAM
     lda #$0001
     jsl save_stats
@@ -965,6 +965,8 @@ game_end:
     lda #$000a
     jsl $90f084
     rtl
+
+warnpc $8bf88f
 
 org $dfd4f0
 // Draw full time as hh:mm:ss:ff

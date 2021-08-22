@@ -1,5 +1,5 @@
 
-import utils.log, random
+import utils.log, random, copy
 
 from graph.graph_utils import GraphUtils, vanillaTransitions, vanillaBossesTransitions, escapeSource, escapeTargets
 from logic.logic import Logic
@@ -34,42 +34,67 @@ class GraphBuilder(object):
         return AccessGraph(Logic.accessPoints, transitions, self.graphSettings.dotFile)
 
     # fills in escape transitions if escape rando is enabled
-    def escapeGraph(self, emptyContainer, graph, maxDiff):
+    # scavEscape = None or (itemLocs, scavItemLocs) couple from filler
+    def escapeGraph(self, container, graph, maxDiff, scavEscape):
         if not self.escapeRando:
-            return
-        possibleTargets, dst, path = self.getPossibleEscapeTargets(emptyContainer, graph, maxDiff)
-        # update graph with escape transition
-        graph.addTransition(escapeSource, dst)
+            return True
+        emptyContainer = copy.copy(container)
+        emptyContainer.resetCollected(reassignItemLocs=True)
+        dst = None
+        if scavEscape is None:
+            possibleTargets, dst, path = self.getPossibleEscapeTargets(emptyContainer, graph, maxDiff)
+            # update graph with escape transition
+            graph.addTransition(escapeSource, dst)
+        else:
+            possibleTargets, path = self.getScavengerEscape(emptyContainer, graph, maxDiff, scavEscape)
+            if path is None:
+                return False
         # get timer value
-        self.escapeTimer(graph, path)
+        self.escapeTimer(graph, path, self.areaRando or scavEscape is not None)
         self.log.debug("escapeGraph: ({}, {}) timer: {}".format(escapeSource, dst, graph.EscapeAttributes['Timer']))
         # animals
         GraphUtils.escapeAnimalsTransitions(graph, possibleTargets, dst)
+        return True
+
+    def _getTargets(self, sm, graph, maxDiff):
+        possibleTargets = [target for target in escapeTargets if graph.accessPath(sm, target, 'Landing Site', maxDiff) is not None]
+        self.log.debug('_getTargets. targets='+str(possibleTargets))
+        # failsafe
+        if len(possibleTargets) == 0:
+            self.log.debug("Can't randomize escape, fallback to vanilla")
+            possibleTargets.append('Climb Bottom Left')
+        random.shuffle(possibleTargets)
+        return possibleTargets
 
     def getPossibleEscapeTargets(self, emptyContainer, graph, maxDiff):
         sm = emptyContainer.sm
         # setup smbm with item pool
-        sm.resetItems()
         # Ice not usable because of hyper beam
         # remove energy to avoid hell runs
         # (will add bosses as well)
         sm.addItems([item.Type for item in emptyContainer.itemPool if item.Type != 'Ice' and item.Category != 'Energy'])
         sm.addItem('Hyper')
-        possibleTargets = [target for target in escapeTargets if graph.accessPath(sm, target, 'Landing Site', maxDiff) is not None]
-        # failsafe
-        if len(possibleTargets) == 0:
-            possibleTargets.append('Climb Bottom Left')
-        random.shuffle(possibleTargets)
+        possibleTargets = self._getTargets(sm, graph, maxDiff)
         # pick one
         dst = possibleTargets.pop()
         path = graph.accessPath(sm, dst, 'Landing Site', maxDiff)
-        # cleanup smbm
-        sm.resetItems()
         return (possibleTargets, dst, path)
 
+    def getScavengerEscape(self, emptyContainer, graph, maxDiff, scavEscape):
+        sm = emptyContainer.sm
+        itemLocs, lastScavItemLoc = scavEscape[0], scavEscape[1][-1]
+        # collect all item/locations up until last scav
+        for il in itemLocs:
+            emptyContainer.collect(il)
+            if il == lastScavItemLoc:
+                break
+        possibleTargets = self._getTargets(sm, graph, maxDiff)
+        path = graph.accessPath(sm, lastScavItemLoc.Location.accessPoint, 'Landing Site', maxDiff)
+        return (possibleTargets, path)
+
     # path: as returned by AccessGraph.accessPath
-    def escapeTimer(self, graph, path):
-        if self.areaRando == True:
+    def escapeTimer(self, graph, path, compute):
+        if compute == True:
             if path[0].Name == 'Climb Bottom Left':
                 graph.EscapeAttributes['Timer'] = None
                 return
@@ -87,12 +112,12 @@ class GraphBuilder(object):
                 'EastMaridia':100,
                 'RedBrinstar':75,
                 'Norfair': 120,
+                'Kraid': 40,
+                'Crocomire': 40,
                 # can't be on the path
-                'Kraid': 0,
                 'Tourian': 0,
-                'Crocomire': 0
             }
-            t = 90
+            t = 90 if self.areaRando else 0
             for area in traversedAreas:
                 t += traversals[area]
             t = max(t, 180)

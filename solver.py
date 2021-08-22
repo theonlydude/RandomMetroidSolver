@@ -22,7 +22,7 @@ def interactiveSolver(args):
             sys.exit(1)
 
         solver = InteractiveSolver(args.output, args.logic)
-        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, fill=args.fill, startAP=args.startAP)
+        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, fill=args.fill, startLocation=args.startLocation)
     else:
         # iterate
         params = {}
@@ -131,7 +131,7 @@ if __name__ == "__main__":
                         dest='difficultyTarget', nargs='?', default=None, type=int)
     parser.add_argument('--pickupStrategy', '-s', help="Pickup strategy for the Solver",
                         dest='pickupStrategy', nargs='?', default=None,
-                        choices=['minimal', 'all', 'any'])
+                        choices=['all', 'any'])
     parser.add_argument('--itemsForbidden', '-f', help="Item not picked up during solving",
                         dest='itemsForbidden', nargs='+', default=[], action='append')
 
@@ -183,7 +183,7 @@ if __name__ == "__main__":
     parser.add_argument('--escapeTimer', help="escape timer like 03:00", dest="escapeTimer", default=None)
     parser.add_argument('--fill', help="in plando load all the source seed locations/transitions as a base (used in interactive mode)",
                         dest="fill", action='store_true')
-    parser.add_argument('--startAP', help="in plando/seedless: the start location", dest="startAP", default="Landing Site")
+    parser.add_argument('--startLocation', help="in plando/seedless: the start location", dest="startLocation", default="Landing Site")
     parser.add_argument('--minorQty', help="rando plando  (used in interactive mode)",
                         dest="minorQty", nargs="?", default=None, choices=[str(i) for i in range(0,101)])
     parser.add_argument('--energyQty', help="rando plando  (used in interactive mode)",

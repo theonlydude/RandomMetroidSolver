@@ -175,10 +175,12 @@ Use the VARIA Auto-Tracker to automatically track Areas/Boss transitions, Items 
 <h4>Installation</h4>\
 Install QUsb2snes on your computer and configure your sd2snes/snes mini/emulator by following its documentation: <a href=\"https://skarsnik.github.io/QUsb2snes/\" target=\"_blank\">QUsb2snes installation</a>\
 <h4>Usage</h4>\
-<p>Load your VARIA seed in your sd2snes/snes mini/emulator, start QUsb2snes, load the seed into the Tracker like usual then click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button in the upper right Auto-Tracker part.</p>\
-<p><b>Warning:</b> You have to use the same seed in the Tracker and in your sd2snes/snes mini/emulator.</p>\
+<p>Load your VARIA seed in your sd2snes/SNES Classic/emulator, start QUsb2snes, load the seed into the Tracker like usual then click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button in the upper right Auto-Tracker part.</p>\
+<p><b>Warning:</b> You have to use the same seed in the Tracker and in your sd2snes/SNES Classic/emulator.</p>\
 <p><b>Note:</b> When the Auto Tracker is active the usual Tracker elements are deactivated (locations, portals, doors, UI button), the Auto Tracker manages everything.</p>\
-<p>When you're done click on the shutdown button <img src=\"/solver/static/images/shut_down.svg\" alt=\"Shutdown\" style=\"width: 32px\"> to stop the Auto-Tracker.</p>"
+<p>When you're done click on the shutdown button <img src=\"/solver/static/images/shut_down.svg\" alt=\"Shutdown\" style=\"width: 32px\"> to stop the Auto-Tracker.</p>\
+<h4>SNES Classic</h4>\
+<p>You can press start+select+L+R for a few seconds to reset the game, it won't stop the Auto-Tracker.<br/>When accessing the SNES Classic menu the Auto-Tracker will stop, it'll try to reconnect automatically for 30 seconds.</p>"
     }]
   });
 
@@ -199,6 +201,14 @@ function onloadHook() {
 
 // auto tracker
 var socket;
+// device type
+var device;
+// try to reconnect for snes classic
+var reconnectInProgress = false;
+var retryCount = 0;
+var retryMax = 30;
+// timeout to restart the auto tracker
+var retryTimeout;
 // timeout to peek data
 var timeout;
 // timeout duration in ms
@@ -665,6 +675,12 @@ function startAutoTracker() {
         return;
     }
 
+    // in case a snes classic retry was in progress
+    if(retryTimeout != undefined) {
+        clearTimeout(retryTimeout);
+        retryTimeout = undefined;
+    }
+
     resetLog();
     appendLog("\r\n\u2026 Starting Auto Tracker");
     // open websocket
@@ -739,6 +755,7 @@ function socketOnMessage(event) {
 }
 
 function socketOnInitMessage(event) {
+    console.log(`event.data: ${event.data}`);
     var data = JSON.parse(event.data);
     var results = data["Results"];
     // appendLog(`Data received: ${results}`);
@@ -752,14 +769,14 @@ function socketOnInitMessage(event) {
             appendLog("\u274C too many devices found, please connect only one");
             closeSocket();
         } else {
-            var device = results;
-            appendLog(`\u2705 device found: ${device}`);
+            var deviceToAttach = results;
+            appendLog(`\u2705 device found: ${deviceToAttach}`);
 
             appendLog("\u2026 Attaching to Device");
             sendAutoTrackerMessage({
                 "Opcode" : "Attach",
                 "Space" : "SNES",
-                "Operands" : device
+                "Operands" : deviceToAttach
             }, stateEnum.infoing);
 
             // tell qusb our app name
@@ -782,6 +799,14 @@ function socketOnInitMessage(event) {
         appendLog(`\u2705 info received: ${results}`);
         appendLog(`\u2705 device attached`);
 
+        // keep device type, results is an array, device type is in 2nd position
+        device = results[1];
+        console.log(`device: [${device}]`);
+
+        // reset snes classic retries
+        retryCount = 0;
+        reconnectInProgress = false;
+
         // start loop, update state
         curState = stateEnum.looping;
 
@@ -803,7 +828,7 @@ function socketOnLoopMessage(event) {
 }
 
 function socketOnClose(event) {
-    if (event.wasClean) {
+    if(event.wasClean) {
         appendLog(`\u2705 Connection closed cleanly`);
         console.log(`socketOnClose clean: code=${event.code} reason=${event.reason}`);
     } else {
@@ -813,7 +838,7 @@ function socketOnClose(event) {
         console.log(`socketOnClose not clean: code=${event.code} reason=${event.reason}`);
     }
     setAutoTrackerIcon("statusNA");
-    cleanup();
+    cleanup(event.wasClean);
 }
 
 function socketOnError(error) {
@@ -821,10 +846,10 @@ function socketOnError(error) {
 
     // update state & interface
     setAutoTrackerIcon("statusKO");
-    cleanup();
+    cleanup(false);
 }
 
-function cleanup() {
+function cleanup(cleanExit) {
     // stop running timeout
     clearTimeout(timeout);
 
@@ -835,6 +860,21 @@ function cleanup() {
     displayStartButton();
     var samusIcon = document.getElementById("samusIcon");
     samusIcon.style.display = "none";
+
+    // if the device is an SNES Classic try to reconnect in 1s,
+    // as reseting the game on it will close the connection to the auto tracker
+    if(reconnectInProgress == true || (cleanExit == false && retryCount < retryMax && device == "SNES Classic")) {
+        reconnectInProgress = true;
+        // sometimes socketOnClose and socketOnError are called, just arm the retry timer once
+        if(retryTimeout == undefined) {
+            appendLog(`will try to reconnect to SNES Classic in 1s ${retryCount}/${retryMax}`);
+            retryTimeout = setTimeout(startAutoTracker, waitingTime);
+            retryCount += 1;
+        }
+    } else {
+        // use the device variable to know if we were connected to a device before
+        device = undefined;
+    }
 }
 
 // called to request datas from qusb

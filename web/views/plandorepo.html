@@ -5,7 +5,6 @@ extend 'layout.html'
 <meta name="description" content="VARIA Randomizer Plandomizer Repository"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
 <script src="{{=URL('static','js/FileSaver.js')}}"></script>
-<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20191017.css')}} media="screen"/>
 
 <script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
 
@@ -14,6 +13,7 @@ extend 'layout.html'
 <title>Super Metroid VARIA Randomizer Plandomizer Repository</title>
 
 <style>
+{{include 'solver_web/varia.css'}}
 .hidden {
     display: none;
 }
@@ -868,7 +868,7 @@ function filter_plandos() {
 
 
 function guessVARIAPreset(filename) {
-  var re = /VARIA_Randomizer_[A]?[D]?[B]?[F]?[M]?[Z]?X\d+_(\w+)/;
+  var re = /VARIA_Randomizer_[A]?[D]?[B]?[F]?[M]?[Z]?[S]?X\d+_(\w+)/;
   var match = filename.match(re);
   if(match == null) {
     re = /VARIA_Plandomizer_[A]?[B]?FX\d+_(\w+)/;

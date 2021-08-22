@@ -265,12 +265,11 @@ locationsDict["Energy Tank, Firefleas"].PostAvailable = (
                              sm.canSpringBallJump()))
 )
 locationsDict["Reserve Tank, Wrecked Ship"].AccessFrom = {
-    'Wrecked Ship Main': lambda sm: SMBool(True)
+    'Bowling': lambda sm: SMBool(True)
 }
 locationsDict["Reserve Tank, Wrecked Ship"].Available = (
     lambda sm: sm.wand(sm.canUsePowerBombs(),
-                       sm.haveItem('SpeedBooster'),
-                       sm.canPassBowling())
+                       sm.haveItem('SpeedBooster'))
 )
 locationsDict["Energy Tank, Wrecked Ship"].AccessFrom = {
     'Wrecked Ship Back': lambda sm: sm.wor(RomPatches.has(RomPatches.WsEtankBlueDoor),
@@ -293,11 +292,10 @@ locationsDict["Right Super, Wrecked Ship"].Available = (
     lambda sm: sm.canPassBombPassages()
 )
 locationsDict["Gravity Suit"].AccessFrom = {
-    'Wrecked Ship Main': lambda sm: SMBool(True)
+    'Bowling': lambda sm: SMBool(True)
 }
 locationsDict["Gravity Suit"].Available = (
-    lambda sm: sm.wand(sm.canPassBombPassages(),
-                       sm.canPassBowling())
+    lambda sm: SMBool(True)
 )
 locationsDict["Energy Tank, Mama turtle"].AccessFrom = {
     'Main Street Bottom': lambda sm: sm.wand(sm.canDoOuterMaridia(),
@@ -797,10 +795,10 @@ locationsDict["Power Bomb (lower Norfair above fire flea room)"].Available = (
     lambda sm: SMBool(True)
 )
 locationsDict["Power Bomb (Power Bombs of shame)"].AccessFrom = {
-    'Ridley Zone': lambda sm: sm.canUsePowerBombs()
+    'Wasteland': lambda sm: sm.canUsePowerBombs()
 }
 locationsDict["Power Bomb (Power Bombs of shame)"].Available = (
-    lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
+    lambda sm: SMBool(True)
 )
 locationsDict["Missile (lower Norfair near Wave Beam)"].AccessFrom = {
     'Firefleas': lambda sm: SMBool(True)
@@ -817,11 +815,10 @@ locationsDict["Missile (Wrecked Ship middle)"].Available = (
     lambda sm: sm.canPassBombPassages()
 )
 locationsDict["Missile (Gravity Suit)"].AccessFrom = {
-    'Wrecked Ship Main': lambda sm: SMBool(True)
+    'Bowling': lambda sm: SMBool(True)
 }
 locationsDict["Missile (Gravity Suit)"].Available = (
-    lambda sm: sm.wand(sm.canPassBowling(),
-                       sm.canPassBombPassages())
+    lambda sm: SMBool(True)
 )
 locationsDict["Missile (Wrecked Ship top)"].AccessFrom = {
     'Wrecked Ship Main': lambda sm: SMBool(True)
@@ -928,7 +925,7 @@ locations = [loc for loc in locationsDict.values()]
 
 class LocationsHelper:
     # used by FillerRandom to know how many front fill steps it must perform
-    def getRandomFillHelp(startAP):
+    def getRandomFillHelp(startLocation):
         helpByAp = {
             "Firefleas Top": 3,
             "Aqueduct": 1,
@@ -938,7 +935,7 @@ class LocationsHelper:
             "Gauntlet Top":1,
             "Bubble Mountain":1
         }
-        return helpByAp[startAP] if startAP in helpByAp else 0
+        return helpByAp[startLocation] if startLocation in helpByAp else 0
 
     # for a given start AP, gives:
     # - locations that can be used as majors/chozo in the start area
@@ -946,7 +943,7 @@ class LocationsHelper:
     # - number of necessary majors locations to add in the start area,
     # - number of necessary chozo locations to add in the start area
     # locs are taken in the first n in the list
-    def getStartMajors(startAP):
+    def getStartMajors(startLocation):
         majLocsByAp = {
             'Gauntlet Top': ([
                 "Missile (Crateria gauntlet right)",
@@ -991,4 +988,4 @@ class LocationsHelper:
                 "Missile (right Maridia sand pit room)"
             ], ["Reserve Tank, Maridia"], 2, 3)
         }
-        return majLocsByAp[startAP] if startAP in majLocsByAp else ([],[],0,0)
+        return majLocsByAp[startLocation] if startLocation in majLocsByAp else ([],[],0,0)

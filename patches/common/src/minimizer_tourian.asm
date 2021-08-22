@@ -200,3 +200,5 @@ hyper_end:
 	lda !samus_max_reserve : sta !samus_reserve
 	lda #$b1d5	  ; hijacked code
 	rts
+
+warnpc $a9fc5f

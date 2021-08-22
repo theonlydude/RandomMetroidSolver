@@ -9,6 +9,7 @@ from rando.RandoSetup import RandoSetup
 from rando.Filler import FrontFiller
 from rando.FillerProgSpeed import FillerProgSpeed, FillerProgSpeedChozoSecondPhase
 from rando.FillerRandom import FillerRandom, FillerRandomSpeedrun
+from rando.FillerScavenger import FillerScavenger
 from rando.Chozo import ChozoFillerFactory, ChozoWrapperFiller
 from rando.Items import ItemManager
 from rando.ItemLocContainer import ItemLocation
@@ -26,12 +27,15 @@ class RandoExec(object):
         self.log = utils.log.get('RandoExec')
 
     def getFillerFactory(self, progSpeed, endDate):
-        if progSpeed == "basic":
-            return lambda cont: FrontFiller(self.graphSettings.startAP, self.areaGraph, self.restrictions, cont, endDate)
-        elif progSpeed == "speedrun":
-            return lambda cont: FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, cont, endDate)
+        if self.restrictions.split != "Scavenger":
+            if progSpeed == "basic":
+                return lambda cont: FrontFiller(self.graphSettings.startAP, self.areaGraph, self.restrictions, cont, endDate)
+            elif progSpeed == "speedrun":
+                return lambda cont: FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, cont, endDate)
+            else:
+                return lambda cont: FillerProgSpeed(self.graphSettings, self.areaGraph, self.restrictions, cont, endDate)
         else:
-            return lambda cont: FillerProgSpeed(self.graphSettings, self.areaGraph, self.restrictions, cont, endDate)
+            return lambda cont: FillerScavenger(self.graphSettings.startAP, self.areaGraph, self.restrictions, cont, endDate)
 
     def createFiller(self, container, endDate):
         progSpeed = self.randoSettings.progSpeed
@@ -52,24 +56,26 @@ class RandoExec(object):
     # - create filler based on progression speed and run it
     # return (isStuck, itemLocs, progItemLocs)
     def randomize(self):
-        self.restrictions = Restrictions(self.randoSettings)
+        vcr = VCR(self.seedName, 'rando') if self.vcr == True else None
         self.errorMsg = ""
+        split = self.randoSettings.restrictions['MajorMinor']
         graphBuilder = GraphBuilder(self.graphSettings)
         container = None
         i = 0
-        attempts = 500 if self.graphSettings.areaRando or self.graphSettings.doorsColorsRando else 1
+        attempts = 500 if self.graphSettings.areaRando or self.graphSettings.doorsColorsRando or split == 'Scavenger' else 1
         now = time.process_time()
         endDate = sys.maxsize
         if self.randoSettings.runtimeLimit_s < endDate:
             endDate = now + self.randoSettings.runtimeLimit_s
-        self.updateLocationsClass()
+        self.updateLocationsClass(split)
         while container is None and i < attempts and now <= endDate:
+            self.restrictions = Restrictions(self.randoSettings)
             if self.graphSettings.doorsColorsRando == True:
                 DoorsManager.randomize(self.graphSettings.allowGreyDoors)
             self.areaGraph = graphBuilder.createGraph()
             services = RandoServices(self.areaGraph, self.restrictions)
             setup = RandoSetup(self.graphSettings, Logic.locations, services)
-            container = setup.createItemLocContainer()
+            container = setup.createItemLocContainer(endDate, vcr)
             if container is None:
                 sys.stdout.write('*')
                 sys.stdout.flush()
@@ -79,29 +85,36 @@ class RandoExec(object):
             now = time.process_time()
         if container is None:
             if self.graphSettings.areaRando:
-                self.errorMsg += "Could not find an area layout with these settings"
-            else:
-                self.errorMsg += "Unable to process settings"
+                self.errorMsg += "Could not find an area layout with these settings\n"
+            if self.graphSettings.doorsColorsRando:
+                self.errorMsg += "Could not find a door color combination with these settings\n"
+            if split == "Scavenger":
+                self.errorMsg += "Scavenger seed generation timed out\n"
+            if self.errorMsg == "":
+                self.errorMsg += "Unable to process settings\n"
             return (True, [], [])
-        graphBuilder.escapeGraph(container, self.areaGraph, self.randoSettings.maxDiff)
         self.areaGraph.printGraph()
         filler = self.createFiller(container, endDate)
-        vcr = VCR(self.seedName, 'rando') if self.vcr == True else None
         self.log.debug("ItemLocContainer dump before filling:\n"+container.dump())
         ret = filler.generateItems(vcr=vcr)
+        if not ret[0]:
+            scavEscape = (ret[1], ret[2]) if self.restrictions.scavEscape else None
+            escapeOk = graphBuilder.escapeGraph(container, self.areaGraph, self.randoSettings.maxDiff, scavEscape)
+            if not escapeOk:
+                self.errorMsg += "Could not find a solution for escape"
+                ret = (True, ret[1], ret[2])
         self.errorMsg += filler.errorMsg
         return ret
 
-    def updateLocationsClass(self):
-        split = self.restrictions.split
-        if split != 'Full':
+    def updateLocationsClass(self, split):
+        if split != 'Full' and split != 'Scavenger':
             startAP = getAccessPoint(self.graphSettings.startAP)
             possibleMajLocs, preserveMajLocs, nMaj, nChozo = Logic.LocationsHelper.getStartMajors(startAP.Name)
             if split == 'Major':
                 n = nMaj
             elif split == 'Chozo':
                 n = nChozo
-            GraphUtils.updateLocClassesStart(startAP.GraphArea, self.restrictions.split, possibleMajLocs, preserveMajLocs, n)
+            GraphUtils.updateLocClassesStart(startAP.GraphArea, split, possibleMajLocs, preserveMajLocs, n)
 
     def postProcessItemLocs(self, itemLocs, hide):
         # hide some items like in dessy's
@@ -109,7 +122,7 @@ class RandoExec(object):
             for itemLoc in itemLocs:
                 item = itemLoc.Item
                 loc = itemLoc.Location
-                if (item.Type not in ['Nothing', 'NoEnergy']
+                if (item.Category != "Nothing"
                     and loc.CanHidden == True
                     and loc.Visibility == 'Visible'):
                     if bool(random.getrandbits(1)) == True:

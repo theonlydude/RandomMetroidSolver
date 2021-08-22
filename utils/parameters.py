@@ -109,11 +109,10 @@ class Knows:
                           'readonly' : True}
 
     UnequipItem = SMBool(True, easy, ['UnequipItem'])
-    desc['UnequipItem'] = {'display': 'Unequip an item',
-                          'title': 'Unequip Gravity suit to have more time to morph after jumping or unequip Hi-Jump Boots to jump to limit jump height',
-                           # TODO::add a video with all the occurences
-                          'href': None,
-                          'rooms': ['Main Street', 'Spring Ball Room', 'West Ocean'],
+    desc['UnequipItem'] = {'display': 'Unequip items',
+                          'title': 'Unequip Gravity suit to have more time to morph after jumping or unequip Hi-Jump Boots to limit jump height',
+                          'href': 'https://youtu.be/qiFiIKYU14k',
+                          'rooms': ['Main Street', 'Spring Ball Room', 'West Ocean', 'Botwoon Energy Tank Room', 'Wrecked Ship Energy Tank Room'],
                           'readonly' : True}
 
     Mockball = SMBool(True, easy, ['Mockball'])
@@ -224,7 +223,7 @@ class Knows:
 
     LowStuffGT = SMBool(False, 0, ['LowStuffGT'])
     desc['LowStuffGT'] = {'display': 'Low Ammo/Health Golden Torizo',
-                          'title': "Fight GT with either charge beam or 10 supers and nothing else. Otherwise require either 30 supers or Charge+Plasma and 4 tanks of energy (with Varia).",
+                          'title': "Fight GT with either charge beam or 5 supers and nothing else. Otherwise require either 30 supers or Charge+Plasma and 4 tanks of energy (with Varia).",
                           'href': None,
                           'rooms': ["Golden Torizo's Room"]}
 
@@ -263,7 +262,7 @@ class Knows:
     GravLessLevel1 = SMBool(True, hardcore, ['GravLessLevel1'])
     desc['GravLessLevel1'] = {'display': 'Level 1',
                               'title': 'Make your way underwater with Hi-Jump and Ice, freezing crabs and fishes. Access Botwoon with grapple.',
-                              'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
+                              'href': 'https://www.youtube.com/watch?v=G5bB03j5GZc',
                               'rooms': ['Main Street', 'Mt. Everest', 'Crab Shaft', 'Pseudo Plasma Spark Room',
                                         'Aqueduct', 'Botwoon Hallway', "Botwoon's Room", 'Botwoon Energy Tank Room',
                                         'Crab Hole', 'Crab Tunnel', 'East Ocean']}

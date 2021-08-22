@@ -1159,7 +1159,7 @@ function setGuessedPreset(romName){
 }
 
 function guessVARIAPreset(filename) {
-  var re = /VARIA_Randomizer_[A]?[D]?[B]?[F]?[M]?[Z]?X\d+_(\w+)/;
+  var re = /VARIA_Randomizer_[A]?[D]?[B]?[F]?[M]?[Z]?[S]?X\d+_(\w+)/;
   var match = filename.match(re);
   if(match == null) {
     re = /VARIA_Plandomizer_[A]?[B]?FX\d+_(\w+)/;
@@ -1242,7 +1242,7 @@ function displayPopup(isPlando) {
   // display popup
   document.getElementById("solverPopup").style.display = "block";
   // chosen must be activated when it's visible, else it doesn't work...
-  $(".chzn-select").chosen();
+  $(".chzn-select").chosen({ width: '100%' });
   resizeChosen();
 }
 

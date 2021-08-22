@@ -9,7 +9,6 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/area_map.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map.png ~/web2py/applications/solver/static/images/area_map.png
 [ -L ~/web2py/applications/solver/static/images/snes-controller.png ] || ln -s ~/RandomMetroidSolver/web/static/snes-controller.png ~/web2py/applications/solver/static/images/snes-controller.png
 [ -L ~/web2py/applications/solver/static/images/ajax-loader.gif ] || ln -s ~/RandomMetroidSolver/web/static/ajax-loader.gif ~/web2py/applications/solver/static/images/ajax-loader.gif
-[ -L ~/web2py/applications/solver/static/css/mystyle_20191017.css ] || ln -s ~/RandomMetroidSolver/web/static/mystyle_20191017.css ~/web2py/applications/solver/static/css/mystyle_20191017.css
 [ -L ~/web2py/applications/solver/static/css/bootstrap-tour.min.css ] || ln -s ~/RandomMetroidSolver/web/static/bootstrap-tour.min.css ~/web2py/applications/solver/static/css/bootstrap-tour.min.css
 [ -L ~/web2py/applications/solver/static/barrating ] || ln -s ~/RandomMetroidSolver/web/static/barrating ~/web2py/applications/solver/static/barrating
 [ -L ~/web2py/applications/solver/static/js/bootstrap-tour.min.js ] || ln -s ~/RandomMetroidSolver/web/static/bootstrap-tour.min.js ~/web2py/applications/solver/static/js/bootstrap-tour.min.js
@@ -30,6 +29,9 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/hud_full.png ] || ln -s ~/RandomMetroidSolver/web/static/hud_full.png ~/web2py/applications/solver/static/images/hud_full.png
 [ -L ~/web2py/applications/solver/static/images/hud_chozo_start.png ] || ln -s ~/RandomMetroidSolver/web/static/hud_chozo_start.png ~/web2py/applications/solver/static/images/hud_chozo_start.png
 [ -L ~/web2py/applications/solver/static/images/hud_major_energy.png ] || ln -s ~/RandomMetroidSolver/web/static/hud_major_energy.png ~/web2py/applications/solver/static/images/hud_major_energy.png
+[ -L ~/web2py/applications/solver/static/images/hud_scav.png ] || ln -s ~/RandomMetroidSolver/web/static/hud_scav.png ~/web2py/applications/solver/static/images/hud_scav.png
+[ -L ~/web2py/applications/solver/static/images/hud_scav_over.png ] || ln -s ~/RandomMetroidSolver/web/static/hud_scav_over.png ~/web2py/applications/solver/static/images/hud_scav_over.png
+[ -L ~/web2py/applications/solver/static/images/hud_scav_pause.png ] || ln -s ~/RandomMetroidSolver/web/static/hud_scav_pause.png ~/web2py/applications/solver/static/images/hud_scav_pause.png
 [ -L ~/web2py/applications/solver/static/css/chosen.css ] || ln -s ~/RandomMetroidSolver/web/static/chosen.css ~/web2py/applications/solver/static/css/chosen.css
 [ -L ~/web2py/applications/solver/static/js/chosen.jquery.min.js ] || ln -s ~/RandomMetroidSolver/web/static/chosen.jquery.min.js ~/web2py/applications/solver/static/js/chosen.jquery.min.js
 [ -L ~/web2py/applications/solver/static/images/chosen-sprite.png ] || ln -s ~/RandomMetroidSolver/web/static/chosen-sprite.png ~/web2py/applications/solver/static/images/chosen-sprite.png
@@ -722,3 +724,10 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/shut_down.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/shut_down.svg ~/web2py/applications/solver/static/images/shut_down.svg
 
 [ -L ~/web2py/applications/solver/static/images/samusIcon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/samusIcon.png ~/web2py/applications/solver/static/images/samusIcon.png
+
+[ -L ~/web2py/applications/solver/views/solver_web/varia.css ] || ln -s ~/RandomMetroidSolver/web/views/varia.css ~/web2py/applications/solver/views/solver_web/varia.css
+
+[ -L ~/web2py/applications/solver/static/js/spc_snes.js ] || ln -s ~/RandomMetroidSolver/web/static/spc_js/spc_snes.js ~/web2py/applications/solver/static/js/spc_snes.js
+[ -L ~/web2py/applications/solver/static/js/spc_snes.js.mem ] || ln -s ~/RandomMetroidSolver/web/static/spc_js/spc_snes.js.mem ~/web2py/applications/solver/static/js/spc_snes.js.mem
+
+[ -L ~/web2py/music ] || ln -s ~/RandomMetroidSolver/varia_custom_sprites/music ~/web2py/music

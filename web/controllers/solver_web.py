@@ -8,7 +8,6 @@ if os.path.exists(path) and path not in sys.path:
 
 import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math, string, base64, urllib.parse, uuid
 from datetime import datetime
-import urllib.parse
 
 # to solve the rom
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, diff4solver
@@ -383,6 +382,9 @@ def computeLNHellRun(sm, addScrew):
 def skillPresetActionWebService():
     print("skillPresetActionWebService call")
 
+    if session.presets is None:
+        session.presets = {}
+
     # for create/update, not load
     (ok, msg) = validatePresetsParams(request.vars.action)
     if not ok:
@@ -569,7 +571,7 @@ def getLastSolvedROM():
     else:
         return None
 
-def genPathTable(locations, displayAPs=True):
+def genPathTable(locations, scavengerOrder, displayAPs=True):
     if locations is None or len(locations) == 0:
         return None
 
@@ -606,8 +608,10 @@ def genPathTable(locations, displayAPs=True):
   <td>{}</td>
 </tr>
 """.format(item, getRoomLink(name, room), getAreaLink(area), getSubArea(subarea),
-           getBossImg(name) if "Boss" in _class else getItemImg(item), getDiffImg(locDiff),
-           getTechniques(locTechniques), getItems(locItems))
+           getBossImg(name) if "Boss" in _class else getItemImg(item, location=name, scavengerOrder=scavengerOrder),
+           getDiffImg(locDiff),
+           getTechniques(locTechniques),
+           getItems(locItems))
 
             if item == 'Varia' and currentSuit == 'Power':
                 currentSuit = 'Varia'
@@ -625,9 +629,9 @@ def getItems(items):
             # for etanks and reserves
             count = item[:item.find('-')]
             item = item[item.find('-')+1:]
-            ret += "<span>{}-{}</span>".format(count, getItemImg(item, True))
+            ret += "<span>{}-{}</span>".format(count, getItemImg(item, small=True))
         else:
-            ret += getItemImg(item, True)
+            ret += getItemImg(item, small=True)
     return ret
 
 def getTechniques(techniques):
@@ -664,12 +668,20 @@ def getSubArea(subarea):
 def getBossImg(boss):
     return """<img alt="{}" class="imageBoss" src="/solver/static/images/{}.png" title="{}" />""".format(boss, boss.replace(' ', ''), boss)
 
-def getItemImg(item, small=False):
+def getItemImg(item, location=None, scavengerOrder=[], small=False):
     if small == True:
         _class = "imageItems"
     else:
         _class = "imageItem"
-    return """<img alt="{}" class="{}" src="/solver/static/images/{}.png" title="{}" />""".format(item, _class, item, item)
+    itemImg = """<img alt="{}" class="{}" src="/solver/static/images/{}.png" title="{}" />""".format(item, _class, item, item)
+
+    if location is not None and len(scavengerOrder) > 0 and location in scavengerOrder:
+        index = scavengerOrder.index(location) + 1
+        if index >= 10:
+            itemImg += """<img class="imageItems" src="/solver/static/images/1.png"/>"""
+        index %= 10
+        itemImg += """<img class="imageItems" src="/solver/static/images/{}.png"/>""".format(index)
+    return itemImg
 
 def getDiffImg(diff):
     diffName = diff4solver(float(diff))
@@ -689,12 +701,12 @@ def prepareResult():
                 result['resultText'] = "The ROM \"{}\" estimated difficulty is: ".format(result['randomizedRom'])
 
         # add generated path (spoiler !)
-        result['pathTable'] = genPathTable(result['generatedPath'])
-        result['pathremainTry'] = genPathTable(result['remainTry'])
-        result['pathremainMajors'] = genPathTable(result['remainMajors'], False)
-        result['pathremainMinors'] = genPathTable(result['remainMinors'], False)
-        result['pathskippedMajors'] = genPathTable(result['skippedMajors'], False)
-        result['pathunavailMajors'] = genPathTable(result['unavailMajors'], False)
+        result['pathTable'] = genPathTable(result['generatedPath'], result['scavengerOrder'])
+        result['pathremainTry'] = genPathTable(result['remainTry'], result['scavengerOrder'])
+        result['pathremainMajors'] = genPathTable(result['remainMajors'], result['scavengerOrder'], False)
+        result['pathremainMinors'] = genPathTable(result['remainMinors'], result['scavengerOrder'], False)
+        result['pathskippedMajors'] = genPathTable(result['skippedMajors'], result['scavengerOrder'], False)
+        result['pathunavailMajors'] = genPathTable(result['unavailMajors'], result['scavengerOrder'], False)
 
         # display the result only once
         session.solver['result'] = None
@@ -727,7 +739,7 @@ def validateSolverParams():
     if request.vars.difficultyTarget not in difficultyTargetChoices:
         return (False, "Wrong value for difficultyTarget: {}, authorized values: {}".format(request.vars.difficultyTarget, difficultyTargetChoices))
 
-    pickupStrategyChoices = ["all", "minimal", "any"]
+    pickupStrategyChoices = ["all", "any"]
     if request.vars.pickupStrategy not in pickupStrategyChoices:
         return (False, "Wrong value for pickupStrategy: {}, authorized values: {}".format(request.vars.pickupStrategy, pickupStrategyChoice))
 
@@ -890,6 +902,9 @@ def getAddressesToRead(plando=False):
     addresses["ranges"] += [0x7F800, 0x7F800+(maxDoorAsmPatchLen * len([ap for ap in accessPoints if ap.Internal == False]))]
     # split locs
     addresses["ranges"] += [0x10F550, 0x10F5D8]
+    # scavenger hunt items list (16 prog items + hunt over + terminator, each is a word)
+    scavengerListSize = 36
+    addresses["ranges"] += [0x10F5D8, 0x10F5D8+scavengerListSize]
     if plando == True:
         # plando addresses
         addresses["ranges"] += [0x2F6000, 0x2F6100]
@@ -1037,6 +1052,10 @@ def randomizer():
         "minimizer_hardcore":"Have fun 'rushing' bosses with no equipment on a tiny map",
         "minimizer_maximizer":"No longer a boss rush",
         "quite_random": "randomizes a few significant settings to have various seeds",
+        "scavenger_hard":"Pretty hostile Scavenger mode",
+        "scavenger_random":"Randomize everything within Scavenger mode",
+        "scavenger_speedrun":"Quickest Scavenger settings",
+        "scavenger_vanilla_but_not":"Items are vanilla, but area and bosses are not",
         "stupid_hard": "hardest possible settings",
         "surprise": "quite_random with Area/Boss/Doors/Start settings randomized",
         "vanilla": "closest possible to vanilla Super Metroid",
@@ -1060,7 +1079,7 @@ def randomizer():
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets, randoPresetsDesc=randoPresetsDesc,
                 startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues,
-                maxsize=sys.maxsize)
+                maxsize=sys.maxsize, displayNames=displayNames)
 
 def raiseHttp(code, msg, isJson=False):
     #print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
@@ -1102,6 +1121,11 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
                 qtyInt = getInt(qty, isJson)
                 if qtyInt < 30 or qtyInt > 100:
                     raiseHttp(400, "Wrong value for {}, must be between 30 and 100".format(qty), isJson)
+        elif qty == 'scavNumLocs':
+            if request.vars.majorsSplit == 'Scavenger':
+                qtyInt = getInt(qty, isJson)
+                if qtyInt < 4 or qtyInt > 16:
+                    raiseHttp(400, "Wrong value for {}, must be between 4 and 16".format(qty), isJson)
         else:
             qtyFloat = getFloat(qty, isJson)
             if qtyFloat < 1.0 or qtyFloat > 9.0:
@@ -1198,8 +1222,8 @@ def sessionWebService():
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
                'rando_speed', 'animals', 'No_Music', 'random_music',
-               'Infinite_Space_Jump', 'refill_before_save', 'hud']
-    quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty']
+               'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized", "scavEscape"]
+    quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
     others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty']
@@ -1249,6 +1273,9 @@ def sessionWebService():
     session.randomizer['Infinite_Space_Jump'] = request.vars.Infinite_Space_Jump
     session.randomizer['refill_before_save'] = request.vars.refill_before_save
     session.randomizer['hud'] = request.vars.hud
+    session.randomizer['scavNumLocs'] = request.vars.scavNumLocs
+    session.randomizer['scavRandomized'] = request.vars.scavRandomized
+    session.randomizer['scavEscape'] = request.vars.scavEscape
 
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
@@ -1289,8 +1316,8 @@ def randomizerWebService():
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
                'rando_speed', 'animals', 'No_Music', 'random_music',
-               'Infinite_Space_Jump', 'refill_before_save', 'hud']
-    quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty']
+               'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized"]
+    quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
     others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty']
@@ -2064,7 +2091,7 @@ class WS_common_init(WS):
             params.append('--fill')
 
         if startLocation != None:
-            params += ['--startAP', startLocation]
+            params += ['--startLocation', startLocation]
 
         print("before calling isolver: {}".format(params))
         start = datetime.now()
@@ -2386,8 +2413,6 @@ def initCustomizerSession():
         session.customizer['spinjumprestart'] = "off"
         session.customizer['rando_speed'] = "off"
         session.customizer['elevators_doors_speed'] = "off"
-        session.customizer['No_Music'] = "off"
-        session.customizer['random_music'] = "off"
         session.customizer['Infinite_Space_Jump'] = "off"
         session.customizer['refill_before_save'] = "off"
         session.customizer['AimAnyButton'] = "off"
@@ -2395,6 +2420,11 @@ def initCustomizerSession():
         session.customizer['supermetroid_msu1'] = "off"
         session.customizer['remove_itemsounds'] = "off"
         session.customizer['remove_spinjumprestart'] = "off"
+        session.customizer['music'] = "Don't touch"
+
+        musics = loadMusics()
+        for song, songId in musics["_list"]:
+            session.customizer[songId] = song
 
 def initCustomSprites():
     def updateSpriteDict(spriteDict, order):
@@ -2408,6 +2438,7 @@ def customizer():
 
     initCustomizerSession()
     initCustomSprites()
+    musics = loadMusics()
 
     url = request.env.request_uri.split('/')
     msg = ""
@@ -2441,7 +2472,7 @@ def customizer():
                     if k in infoKeys:
                         info[k] = value
                     else:
-                        seedParams[k] = value
+                        seedParams[k] = updateParameterDisplay(value)
                 seedInfo = info
                 seedInfo['key'] = key
 
@@ -2461,14 +2492,23 @@ def customizer():
                     with DB() as db:
                         db.updateSeedUploadStatus(key, 'pending')
 
-    return dict(customSprites=customSprites, customShips=customShips,
+    return dict(customSprites=customSprites, customShips=customShips, musics=musics,
                 seedInfo=seedInfo, seedParams=seedParams, msg=msg, defaultParams=defaultParams)
+
+# if we have an internal parameter value different from its display value
+displayNames = {"FullWithHUD": "Full Countdown"}
+
+def updateParameterDisplay(value):
+    for internal, display in displayNames.items():
+        if internal in value:
+            value = value.replace(internal, display)
+    return value
 
 def customWebService():
     print("customWebService")
 
     # check validity of all parameters
-    switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music',
+    switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed',
                'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save',
                'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
                'remove_elevators_doors_speed']
@@ -2481,6 +2521,8 @@ def customWebService():
     if request.vars.customShipEnable == 'on':
         if request.vars.customShip not in customShips:
             raiseHttp(400, "Wrong value for customShip", True)
+    if request.vars.music not in ["Don't touch", "Disable", "Randomize", "Customize", "Restore"]:
+        raiseHttp(400, "Wrong value for music", True)
 
     if session.customizer == None:
         session.customizer = {}
@@ -2506,8 +2548,6 @@ def customWebService():
     session.customizer['spinjumprestart'] = request.vars.spinjumprestart
     session.customizer['rando_speed'] = request.vars.rando_speed
     session.customizer['elevators_doors_speed'] = request.vars.elevators_doors_speed
-    session.customizer['No_Music'] = request.vars.No_Music
-    session.customizer['random_music'] = request.vars.random_music
     session.customizer['Infinite_Space_Jump'] = request.vars.Infinite_Space_Jump
     session.customizer['refill_before_save'] = request.vars.refill_before_save
     session.customizer['AimAnyButton'] = request.vars.AimAnyButton
@@ -2515,6 +2555,12 @@ def customWebService():
     session.customizer['supermetroid_msu1'] = request.vars.supermetroid_msu1
     session.customizer['remove_itemsounds'] = request.vars.remove_itemsounds
     session.customizer['remove_elevators_doors_speed'] = request.vars.remove_elevators_doors_speed
+    session.customizer['music'] = request.vars.music
+
+    if request.vars.music == 'Customize':
+        musics = loadMusics()
+        for song, songId in musics["_list"]:
+            session.customizer[songId] = request.vars[songId]
 
     # when beam doors patch is detected, don't randomize blue door palette
     no_blue_door_palette = request.vars.no_blue_door_palette
@@ -2532,10 +2578,6 @@ def customWebService():
         params += ['-c', 'spinjumprestart.ips']
     if request.vars.rando_speed == 'on':
         params += ['-c', 'rando_speed.ips']
-    if request.vars.No_Music == 'on':
-        params += ['-c', 'No_Music']
-    if request.vars.random_music == 'on':
-        params += ['-c', 'random_music.ips']
     if request.vars.AimAnyButton == 'on':
         params += ['-c', 'AimAnyButton.ips']
     if request.vars.max_ammo_display == 'on':
@@ -2550,6 +2592,12 @@ def customWebService():
         params += ['-c', 'remove_itemsounds.ips']
     if request.vars.remove_elevators_doors_speed == 'on':
         params += ['-c', 'remove_elevators_doors_speed.ips']
+    if request.vars.music == 'Disable':
+        params += ['-c', 'No_Music']
+    if request.vars.music == 'Randomize':
+        params += ['-c', 'random_music.ips']
+    if request.vars.music == 'Restore':
+        params += ['-c', 'vanilla_music.ips']
 
     if request.vars.colorsRandomization == 'on':
         params.append('--palette')
@@ -2597,12 +2645,35 @@ def customWebService():
         ipsFileName = os.path.join(localIpsDir, request.vars.seedKey, fileName.replace('sfc', 'ips'))
         params += ['--seedIps', ipsFileName]
 
+    if request.vars.music == "Customize":
+        musics = loadMusics()
+        customMusic = {
+            'params': {
+                "varia": request.vars.varia == "true",
+                "area": request.vars.area == "true",
+                "boss": request.vars.boss == "true"
+            }, 'mapping': {}}
+        for song, songId in musics["_list"]:
+            newSong = request.vars[songId]
+            if newSong not in musics:
+                raise HTTP(400, "unknown song for {}".format(song))
+            if newSong != song:
+                customMusic['mapping'][song] = newSong
+        (fd2, jsonMusicFileName) = tempfile.mkstemp()
+        with open(jsonMusicFileName, 'w') as musicFile:
+            json.dump(customMusic, musicFile)
+        params += ['--music', jsonMusicFileName]
+
     print("before calling: {}".format(params))
     start = datetime.now()
     ret = subprocess.call(params)
     end = datetime.now()
     duration = (end - start).total_seconds()
     print("ret: {}, duration: {}s".format(ret, duration))
+
+    if request.vars.music == "Customize":
+        os.close(fd2)
+        os.remove(jsonMusicFileName)
 
     if ret == 0:
         with open(jsonFileName) as jsonFile:
@@ -2623,6 +2694,51 @@ def customWebService():
         os.close(fd)
         os.remove(jsonFileName)
         raise HTTP(400, json.dumps(msg))
+
+def loadMusics():
+    musics = cache.ram('musics', lambda:dict(), time_expire=None)
+    if musics:
+        return musics
+
+    musicDir = 'music/_metadata'
+    dropdown = {}
+    metadatas = sorted(os.listdir(musicDir), key=lambda v: v.upper())
+    for metadata in metadatas:
+        with open(os.path.join(musicDir, metadata)) as jsonFile:
+            data = json.load(jsonFile)
+            musics.update(data)
+            group = os.path.splitext(metadata)[0]
+            dropdown[group] = list(data.keys())
+    musics["_dropdown"] = dropdown
+
+    with open('music/_metadata/vanilla.json', 'r') as jsonFile:
+        vanilla = json.load(jsonFile)
+    with open('music/_constraints/vanilla.json', 'r') as jsonFile:
+        constraints = json.load(jsonFile)
+    musics["_list"] = [(song, removeChars(song, " ,()-/")) for song in vanilla.keys() if song not in constraints["preserve"]]
+    return musics
+
+def getSpcFile():
+    songName = request.vars.songName
+    if IS_NOT_EMPTY()(songName)[1] is not None:
+        raise HTTP(400, "Song is empty")
+    if IS_MATCH('[a-zA-Z0-9_\.() ,\-/]*', strict=True)(songName)[1] is not None:
+        raise HTTP(400, "Invalid char in song name")
+    if IS_LENGTH(64)(songName)[1] is not None:
+        raise HTTP(400, "Song must be max 64 chars")
+    print("getSpcFile songName: {}".format(songName))
+
+    musics = loadMusics()
+    if songName not in musics:
+        raise HTTP(400, "song not found")
+
+    if 'spc_path' not in musics[songName] or musics[songName]['spc_path'] == "":
+        raise HTTP(400, "song has no spc")
+
+    songFile = musics[songName]['spc_path']
+    with open(os.path.join('music', songFile), 'rb') as spcFile:
+        spcFileData = spcFile.read()
+        return json.dumps({'spc': base64.b64encode(spcFileData).decode()})
 
 def initExtStatsSession():
     if session.extStats == None:
@@ -3133,3 +3249,6 @@ def updatePlandoWebService():
             db.updatePlandoMeta((author, longDesc, preset, plandoName))
 
     return json.dumps("Plando {} updated succesfully.".format(plandoName))
+
+def _redirect():
+    redirect(URL(request.env.path_info, r=request, scheme=True, host="randommetroidsolver.pythonanywhere.com"))

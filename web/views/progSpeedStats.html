@@ -4,7 +4,6 @@ extend 'layout.html'
 
 <meta name="description" content="VARIA Randomizer progression speed statistics"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
-<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20191017.css')}} media="screen"/>
 <script type="text/javascript" src="{{=URL('static', '/highslide/highslide.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "/highslide/highslide.css")}} />
 <script type="text/javascript">
@@ -36,6 +35,7 @@ if (hs.registerOverlay) {
 <title>Super Metroid VARIA Randomizer progresssion speed statistics</title>
 
 <style>
+{{include 'solver_web/varia.css'}}
 .clickable {
     cursor: pointer;
 }
@@ -121,7 +121,7 @@ function resizeChosen() {
 }
 
 window.onload = function(){
-    $(".chzn-select").chosen();
+    $(".chzn-select").chosen({ width: '100%' });
     resizeChosen();
 }
 
@@ -445,7 +445,7 @@ google.charts.setOnLoadCallback(drawOpennessHistogram_44);
           <td><button id="randoPresetStep" type="button" onclick="startTheTour(0)">?</button></td>
 
           <td>Majors Split:</td>
-          <td>{{=SELECT(*majorsSplit, **dict(_name="majorsSplit", _id="majorsSplit", value=session.progSpeedStats["majorsSplit"], _class="filldropdown chzn-select"))}}</td>
+          <td>{{=SELECT(*majorsSplit, **dict(_name="majorsSplit", _id="majorsSplit", value=session.progSpeedStats["majorsSplit"], _class="chzn-select"))}}</td>
           <td><button id="majorsSplitStep" type="button" onclick="startTheTour(1)">?</button></td>
 
           <td>{{=INPUT(_type="submit", _value="Load", _name="action", _class="btn btn-default")}}</td>

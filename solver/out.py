@@ -37,6 +37,7 @@ class OutWeb(Out):
         diffPercent = DifficultyDisplayer(s.difficulty).percent()
         generatedPath = self.getPath(s.visitedLocations)
         collectedItems = s.smbm.getItems()
+        scavengerOrder = [loc.Name for loc in s.scavengerOrder]
 
         if s.difficulty == -1:
             remainTry = self.getPath(s.tryRemainingLocs())
@@ -56,7 +57,8 @@ class OutWeb(Out):
                       knowsUsed=(s.knowsUsed, s.knowsKnown), itemsOk=s.itemsOk, patches=s.romLoader.getPatches(),
                       pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
                       remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
-                      skippedMajors=skippedMajors, unavailMajors=unavailMajors, collectedItems=collectedItems)
+                      skippedMajors=skippedMajors, unavailMajors=unavailMajors, collectedItems=collectedItems,
+                      scavengerOrder=scavengerOrder)
 
         with open(s.outputFileName, 'w') as jsonFile:
             json.dump(result, jsonFile)

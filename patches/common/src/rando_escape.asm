@@ -19,6 +19,10 @@ endmacro
 !door_sz             = 12
 !door_list_ptr       = $07b5
 
+;;; external definitions
+!fix_timer_gfx	     = $a1f2c0	; in new_game.asm (common routines section)
+!scavenger_escape_flag = $a1f5fc ; in varia_hud.asm (option flag)
+
 org $809E21
 print "timer_value: ", pc
 timer_value:
@@ -96,6 +100,9 @@ escape_hyper_check:
     lda $0c18,x
     bit #$0008                  ; check for plasma (hyper = wave+plasma)
     beq .nohit
+    ;; avoid having actual plasma beam destroy blocks in scavenger mode escape
+    lda !scavenger_escape_flag
+    cmp #$0001 : beq .nohit
     lda #$0000                  ; set zero flag
     bra .end
 .nohit:
@@ -143,7 +150,7 @@ save_station:
     jmp $8cf6
 
 print "B84 end: ", pc
-warnpc $84f8b2                  ; explicitly right there, to remember needed race mode update
+warnpc $84f8bb                  ; explicitly right there, to remember needed race mode update
 
 ;;; DATA, bank 8F. makes map stations doors in norfair/brin/maridia/ws
 ;;; permanently grey
@@ -199,11 +206,7 @@ org $8fcb3a
 org $8ff500
 
 ;;; CODE (in a tiny bit of bank 8F free space)
-test_door_asm:
-    lda #$0000 : jsl $8081fa    ; wake zebes
-    lda #$000e : jsl $8081fa    ; set escape flag
-;;; door ASM for MB escape door
-escape_setup:
+escape_setup_l:
     ;; init possible escapes cycle (for animals)
     lda #$0000 : sta !current_escape
     ;; open all doors
@@ -224,6 +227,14 @@ escape_setup:
     ;; open Maridia Tube
     lda #$000b : jsl $8081fa
 .end:
+    rtl
+
+test_door_asm:
+    lda #$0000 : jsl $8081fa    ; wake zebes
+    lda #$000e : jsl $8081fa    ; set escape flag
+;;; door ASM for MB escape door
+escape_setup:
+    jsl escape_setup_l
     rts
 
 room_setup:
@@ -233,7 +244,7 @@ room_setup:
     plb
     jsr $919c                   ; sets up room shaking
     plb
-    jsl fix_timer_gfx
+    jsl !fix_timer_gfx
 .end:
     ;; goes back to vanilla setup asm call
     lda $0018,x
@@ -445,24 +456,6 @@ music_and_enemies:
     sta $07D1   ;} Enemy set pointer = empty list
 .end:
     jml $82df5c
-
-
-;;; courtesy of Smiley
-fix_timer_gfx:
-    PHX
-    LDX $0330						;get index for the table
-    LDA #$0400 : STA $D0,x  				;Size
-    INX : INX						;inc X for next entry (twice because 2 bytes)
-    LDA #$C000 : STA $D0,x					;source address
-    INX : INX						;inc again
-    SEP #$20 : LDA #$B0 : STA $D0,x : REP #$20  		;Source bank $B0
-    INX							;inc once, because the bank is stored in one byte only
-    ;; VRAM destination (in word addresses, basically take the byte
-    ;; address from the RAM map and and devide them by 2)
-    LDA #$7E00	: STA $D0,x
-    INX : INX : STX $0330 					;storing index
-    PLX
-    RTL							;done. return
 
 warnpc $a1f1ff
 

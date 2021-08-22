@@ -4,11 +4,11 @@ import argparse, os.path, json, sys, shutil, random
 
 from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
-from rando.PaletteRando import PaletteRando
+from rom.PaletteRando import PaletteRando
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
 from utils.parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text, appDir
 from rom.rom_patches import RomPatches
-from rom.rompatcher import RomPatcher
+from rom.rompatcher import RomPatcher, MusicPatcher, RomTypeForMusic
 from rom.rom import FakeROM
 from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir
 from utils.version import displayedVersion
@@ -104,11 +104,8 @@ if __name__ == "__main__":
     parser.add_argument('--minimizerTourian',
                         help="Tourian speedup in minimizer mode",
                         dest='minimizerTourian', nargs='?', const=True, default=False)
-    parser.add_argument('--startAP', help="Name of the Access Point to start from",
-                        dest='startAP', nargs='?', default="Landing Site",
-                        choices=['random'] + GraphUtils.getStartAccessPointNames())
     parser.add_argument('--startLocation', help="Name of the Access Point to start from",
-                        dest='startAP', nargs='?', default="Landing Site",
+                        dest='startLocation', nargs='?', default="Landing Site",
                         choices=['random'] + GraphUtils.getStartAccessPointNames())
     parser.add_argument('--startLocationList', help="list to choose from when random",
                         dest='startLocationList', nargs='?', default=None)
@@ -139,7 +136,8 @@ if __name__ == "__main__":
                         choices=['itemsounds.ips', 'elevators_doors_speed.ips', 'random_music.ips',
                                  'spinjumprestart.ips', 'rando_speed.ips', 'No_Music', 'AimAnyButton.ips',
                                  'max_ammo_display.ips', 'supermetroid_msu1.ips', 'Infinite_Space_Jump',
-                                 'refill_before_save.ips', 'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips'])
+                                 'refill_before_save.ips', 'remove_elevators_doors_speed.ips',
+                                 'remove_itemsounds.ips', 'vanilla_music.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -166,10 +164,20 @@ if __name__ == "__main__":
                         help="minors quantities values will be strictly followed instead of being probabilities",
                         dest='strictMinors', nargs='?', const=True, default=False)
     parser.add_argument('--majorsSplit',
-                        help="how to split majors/minors: Full, FullWithHUD, Major, Chozo",
+                        help="how to split majors/minors: Full, FullWithHUD, Major, Chozo, Scavenger",
                         dest='majorsSplit', nargs='?', choices=majorsSplits + ['random'], default='Full')
     parser.add_argument('--majorsSplitList', help="list to choose from when random",
                         dest='majorsSplitList', nargs='?', default=None)
+    parser.add_argument('--scavNumLocs',
+                        help="For Scavenger split, number of major locations in the mandatory route",
+                        dest='scavNumLocs', nargs='?', default=10,
+                        choices=["0"]+[str(i) for i in range(4,17)])
+    parser.add_argument('--scavRandomized',
+                        help="For Scavenger split, decide whether mandatory major locs will have non-vanilla items",
+                        dest='scavRandomized', nargs='?', const=True, default=False)
+    parser.add_argument('--scavEscape',
+                        help="For Scavenger split, decide whether escape sequence shall be triggered as soon as the hunt is over",
+                        dest='scavEscape', nargs='?', const=True, default=False)
     parser.add_argument('--suitsRestriction',
                         help="no suits in early game",
                         dest='suitsRestriction', nargs='?', const=True, default=False)
@@ -273,6 +281,9 @@ if __name__ == "__main__":
     parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="varia", choices=["varia", "rotation"])
     parser.add_argument('--hud', help='Enable VARIA hud', dest='hud',
                         nargs='?', const=True, default=False)
+    parser.add_argument('--music',
+                        help="JSON file for music replacement mapping",
+                        dest='music', nargs='?', default=None)
     # parse args
     args = parser.parse_args()
 
@@ -425,8 +436,20 @@ if __name__ == "__main__":
         if args.morphPlacementList != None:
             morphPlacements = args.morphPlacementList.split(',')
         args.morphPlacement = random.choice(morphPlacements)
+    # Scavenger Hunt constraints
+    if args.majorsSplit == 'Scavenger':
+        forceArg('progressionSpeed', 'speedrun', "'Progression speed' forced to speedrun")
+        progSpeed = "speedrun"
+        forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
+        if not GraphUtils.isStandardStart(args.startLocation):
+            forceArg('startLocation', "Landing Site", "Start Location forced to Landing Site because of Scavenger mode")
+        if args.morphPlacement == 'late':
+            forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
+        if args.scavEscape == True:
+            forceArg('escapeRando', True, "'Escape randomization' forced to on", webValue='on')
+            forceArg('noRemoveEscapeEnemies', True, "Enemies enabled during escape sequence", webArg='removeEscapeEnemies', webValue='off')
     # random fill makes certain options unavailable
-    if progSpeed == 'speedrun' or progSpeed == 'basic':
+    if (progSpeed == 'speedrun' or progSpeed == 'basic') and args.majorsSplit != 'Scavenger':
         forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = args.progressionDifficulty
     logger.debug("progressionDifficulty: {}".format(progDiff))
@@ -435,15 +458,15 @@ if __name__ == "__main__":
         args.strictMinors = bool(random.getrandbits(1))
 
     # in plando rando we know that the start ap is ok
-    if not GraphUtils.isStandardStart(args.startAP) and args.plandoRando is None:
+    if not GraphUtils.isStandardStart(args.startLocation) and args.plandoRando is None:
         if args.majorsSplit in ['Major', "Chozo"]:
-            forceArg('hud', True, "'VARIA HUD' forced to on", 'hud', 'on')
-        forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", 'variaTweaks', 'on')
-        forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", 'layoutPatches', 'on')
+            forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
+        forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", webValue='on')
+        forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", webValue='on')
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
-        forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", 'areaLayout', 'on')
+        forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", webValue='on')
         possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty, args.morphPlacement)
-        if args.startAP == 'random':
+        if args.startLocation == 'random':
             if args.startLocationList != None:
                 # to be able to give the list in jm we had to replace ' ' with '_', do the opposite operation
                 startLocationList = args.startLocationList.replace('_', ' ')
@@ -455,20 +478,20 @@ if __name__ == "__main__":
                     optErrMsgs.append('Invalid start locations list with your settings.')
                     dumpErrorMsgs(args.output, optErrMsgs)
                     sys.exit(-1)
-            args.startAP = random.choice(possibleStartAPs)
-        elif args.startAP not in possibleStartAPs:
-            optErrMsgs.append('Invalid start location: {}.  {}'.format(args.startAP, reasons[args.startAP]))
+            args.startLocation = random.choice(possibleStartAPs)
+        elif args.startLocation not in possibleStartAPs:
+            optErrMsgs.append('Invalid start location: {}.  {}'.format(args.startLocation, reasons[args.startLocation]))
             optErrMsgs.append('Possible start locations with these settings: {}'.format(possibleStartAPs))
             dumpErrorMsgs(args.output, optErrMsgs)
             sys.exit(-1)
-    ap = getAccessPoint(args.startAP)
+    ap = getAccessPoint(args.startLocation)
     if 'forcedEarlyMorph' in ap.Start and ap.Start['forcedEarlyMorph'] == True:
         forceArg('morphPlacement', 'early', "'Morph Placement' forced to early for custom start location")
     else:
         if progSpeed == 'speedrun':
             if args.morphPlacement == 'late':
                 forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
-            elif (not GraphUtils.isStandardStart(args.startAP)) and args.morphPlacement != 'normal':
+            elif (not GraphUtils.isStandardStart(args.startLocation)) and args.morphPlacement != 'normal':
                 forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for custom start location")
         if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
             forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for Chozo")
@@ -478,6 +501,11 @@ if __name__ == "__main__":
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "doors": "normal" if not args.doorsColorsRando else "late" }
     restrictions['MajorMinor'] = 'Full' if args.majorsSplit == 'FullWithHUD' else args.majorsSplit
+    if restrictions["MajorMinor"] == "Scavenger":
+        scavNumLocs = int(args.scavNumLocs)
+        if scavNumLocs == 0:
+            scavNumLocs = random.randint(4,16)
+        restrictions["ScavengerParams"] = {'numLocs':scavNumLocs, 'vanillaItems':not args.scavRandomized, 'escape': args.scavEscape}
     seedCode = 'X'
     if majorsSplitRandom == False:
         if restrictions['MajorMinor'] == 'Full':
@@ -486,6 +514,8 @@ if __name__ == "__main__":
             seedCode = 'ZX'
         elif restrictions['MajorMinor'] == 'Major':
             seedCode = 'MX'
+        elif restrictions['MajorMinor'] == 'Scavenger':
+            seedCode = 'SX'
     if args.bosses == True and bossesRandom == False:
         seedCode = 'B'+seedCode
     if args.doorsColorsRando == True and doorsColorsRandom == False:
@@ -508,7 +538,7 @@ if __name__ == "__main__":
     else:
         RomPatches.ActivePatches = RomPatches.Total
     RomPatches.ActivePatches.remove(RomPatches.BlueBrinstarBlueDoor)
-    RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startAP)
+    RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startLocation)
     if gravityBehaviour != "Balanced":
         RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
     if gravityBehaviour == "Progressive":
@@ -596,7 +626,7 @@ if __name__ == "__main__":
 
     # print some parameters for jm's stats
     if args.jm == True:
-        print("startAP:{}".format(args.startAP))
+        print("startLocation:{}".format(args.startLocation))
         print("progressionSpeed:{}".format(progSpeed))
         print("majorsSplit:{}".format(args.majorsSplit))
         print("morphPlacement:{}".format(args.morphPlacement))
@@ -610,7 +640,7 @@ if __name__ == "__main__":
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
     if args.doorsColorsRando == True:
         RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
-    graphSettings = GraphSettings(args.startAP, args.area, args.lightArea, args.bosses,
+    graphSettings = GraphSettings(args.startLocation, args.area, args.lightArea, args.bosses,
                                   args.escapeRando, minimizerN, dotFile, args.doorsColorsRando, args.allowGreyDoors,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
 
@@ -628,6 +658,12 @@ if __name__ == "__main__":
                                                       args.area, args.bosses,
                                                       args.escapeRando)
                 escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
+                if escapeAttr is not None:
+                    escapeAttr['patches'] = []
+                    if args.noRemoveEscapeEnemies == True:
+                        escapeAttr['patches'].append("Escape_Rando_Enable_Enemies")
+                    if args.scavEscape == True:
+                        escapeAttr['patches'].append('Escape_Scavenger')
         except Exception as e:
             import traceback
             traceback.print_exc(file=sys.stdout)
@@ -694,15 +730,39 @@ if __name__ == "__main__":
         else:
             outFileName = args.output
             romPatcher = RomPatcher(magic=args.raceMagic)
-
+        musicPatcher = None
+        if args.music is not None:
+            args.patches.append('custom_music.ips')
+            romType = 0
+            with open(args.music, "r") as f:
+                music = json.load(f)
+            musicParams = music.get('params', {})
+            musicMapping = music.get('mapping', {})
+            if args.patchOnly == False:
+                romType |= RomTypeForMusic.VariaSeed
+                if args.area == True:
+                    romType |= RomTypeForMusic.AreaSeed
+                if args.bosses == True:
+                    romType |= RomTypeForMusic.BossSeed
+            else:
+                variaSeed = musicParams.get('varia', False)
+                areaSeed = musicParams.get('area', False)
+                bossSeed = musicParams.get('boss', False)
+                if variaSeed == True:
+                    romType |= RomTypeForMusic.VariaSeed
+                if areaSeed == True:
+                    romType |= RomTypeForMusic.AreaSeed
+                if bossSeed == True:
+                    romType |= RomTypeForMusic.BossSeed
+            musicPatcher = MusicPatcher(romPatcher.romFile, romType)
         if args.hud == True or args.majorsSplit == "FullWithHUD":
             args.patches.append("varia_hud.ips")
         if args.patchOnly == False:
-            romPatcher.applyIPSPatches(args.startAP, args.patches,
+            romPatcher.applyIPSPatches(args.startLocation, args.patches,
                                        args.noLayout, gravityBehaviour,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
-                                       escapeAttr, args.noRemoveEscapeEnemies, minimizerN, args.minimizerTourian,
+                                       escapeAttr, minimizerN, args.minimizerTourian,
                                        args.doorsColorsRando)
         else:
             # from customizer permalink, apply previously generated seed ips first
@@ -723,7 +783,7 @@ if __name__ == "__main__":
             romPatcher.commitIPS()
         if args.patchOnly == False:
             romPatcher.writeItemsLocs(itemLocs)
-            romPatcher.writeSplitLocs(itemLocs, args.majorsSplit)
+            romPatcher.writeSplitLocs(args.majorsSplit, itemLocs, progItemLocs)
             romPatcher.writeItemsNumber()
             romPatcher.writeSeed(seed) # lol if race mode
             romPatcher.writeSpoiler(itemLocs, progItemLocs)
@@ -759,6 +819,10 @@ if __name__ == "__main__":
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)
             PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
+        if musicPatcher is not None:
+            musicPatcher.replace(musicMapping,
+                                 updateRoomStates=musicParams.get('room_states', True),
+                                 output=musicParams.get("output", None))
         # web mode, generate only one ips at the end
         if args.rom == None:
             romPatcher.commitIPS()

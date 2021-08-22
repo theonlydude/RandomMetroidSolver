@@ -379,7 +379,7 @@ order by r.id;"""
 
         # custom sort of the params
         paramsHead = []
-        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'minimizerTourian', 'majorsSplit', 'majorsSplitMultiSelect', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
+        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'minimizerTourian', 'majorsSplit', 'majorsSplitMultiSelect', 'scavNumLocs', 'scavRandomized', 'scavEscape', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
             if param in paramsSet:
                 paramsHead.append(param)
                 paramsSet.remove(param)
@@ -406,7 +406,7 @@ order by 1,2;"""
         #     (param1, count1, count2, 0, ...)
         #     (param2, 0, 0, count3, ...)]
         groups = {
-            'Randomizer parameters': ['preset', 'startLocation', 'majorsSplit', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'progressionDifficulty', 'suitsRestriction', 'hideItems'],
+            'Randomizer parameters': ['preset', 'startLocation', 'majorsSplit', 'scavNumLocs', 'scavRandomized', 'scavEscape', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'progressionDifficulty', 'suitsRestriction', 'hideItems'],
             'Ammo and Energy': ['minorQty', 'energyQty', 'strictMinors', 'missileQty', 'superQty', 'powerBombQty'],
             'Areas and Fun': ['areaRandomization', 'lightAreaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'minimizerTourian', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits'],
             'Patches': ['layoutPatches', 'variaTweaks', 'nerfedCharge', 'gravityBehaviour', 'itemsounds', 'elevators_doors_speed', 'spinjumprestart', 'rando_speed', 'Infinite_Space_Jump', 'refill_before_save', 'hud', 'animals', 'No_Music', 'random_music']
@@ -607,12 +607,15 @@ order by init_time;"""
         sprites = [sprite[0] for sprite in sprites]
 
         # pivot
-        sql = "SELECT date(init_time)"
-        for sprite in sprites:
-            sql += ", SUM(CASE WHEN sprite = '{}' THEN 1 ELSE 0 END) AS count_{}".format(sprite, sprite)
-        sql += " FROM sprites where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) GROUP BY date(init_time);".format(weeks)
+        sql = "SELECT "
+        sql += ", ".join(["SUM(CASE WHEN sprite = '{}' THEN 1 ELSE 0 END) AS count_{}".format(sprite, sprite.replace('-', '_')) for sprite in sprites])
+        sql += " FROM sprites where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK);".format(weeks)
 
-        return (sprites, self.execSelect(sql))
+        rows = self.execSelect(sql)
+        # convert from Decimal to int
+        row = [int(count) for count in rows[0]]
+
+        return [['sprite']+sprites, ['sprite']+list(row)]
 
     def getPlandoRandoData(self, weeks):
         if self.dbAvailable == False:

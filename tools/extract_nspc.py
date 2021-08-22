@@ -28,68 +28,68 @@ musicDataEnd = snes_to_pc(0xDED1C0)
 vanillaMusicData = [
     # Song 0: intro,
     # Song 1: menu theme
-    [("Title sequence intro", "vanilla/title_menu.spc"),
-     ("Menu theme", None)],
+    [("Title sequence intro", "vanilla/title_menu.spc", "Vanilla Soundtrack"),
+     ("Menu theme", None, "Vanilla Soundtrack")],
     # Song 0: thunder - zebes asleep,
     # Song 1: thunder - zebes awake,
     # Song 2: no thunder (morph room...)
-    [("Crateria Landing - Thunder, Zebes asleep", "vanilla/crateria_arrival.spc"),
-     ("Crateria Landing - Thunder, Zebes awake", "vanilla/crateria_rainstorm.spc"),
-     ("Crateria Landing - No Thunder", "vanilla/crateria_underground.spc")],
+    [("Crateria Landing - Thunder, Zebes asleep", "vanilla/crateria_arrival.spc", "Vanilla Soundtrack"),
+     ("Crateria Landing - Thunder, Zebes awake", "vanilla/crateria_rainstorm.spc", "Vanilla Soundtrack"),
+     ("Crateria Landing - No Thunder", "vanilla/crateria_underground.spc", "Vanilla Soundtrack")],
     # Song 0: Main theme,
     # Song 1: Tourian Entrance
-    [("Crateria Pirates", "vanilla/crateria_pirates.spc"),
-     ("Tourian Entrance", "vanilla/tourian_entrance.spc")],
+    [("Crateria Pirates", "vanilla/crateria_pirates.spc", "Vanilla Soundtrack"),
+     ("Tourian Entrance", "vanilla/tourian_entrance.spc", "Vanilla Soundtrack")],
     # Song 0: Upper Crateria with PBs/outside Wrecked Ship
-    [("Samus Theme", "vanilla/samus_theme.spc")],
-    [("Green Brinstar", "vanilla/green_brinstar.spc")],
-    [("Red Brinstar", "vanilla/red_brinstar.spc")],
-    [("Upper Norfair", "vanilla/upper_norfair.spc")],
-    [("Lower Norfair", "vanilla/lower_norfair.spc")],
+    [("Samus Theme", "vanilla/samus_theme.spc", "Vanilla Soundtrack")],
+    [("Green Brinstar", "vanilla/green_brinstar.spc", "Vanilla Soundtrack")],
+    [("Red Brinstar", "vanilla/red_brinstar.spc", "Vanilla Soundtrack")],
+    [("Upper Norfair", "vanilla/upper_norfair.spc", "Vanilla Soundtrack")],
+    [("Lower Norfair", "vanilla/lower_norfair.spc", "Vanilla Soundtrack")],
     # Song 0: East Maridia,
     # Song 1: West Maridia
-    [("East Maridia", "vanilla/east_maridia.spc"),
-     ("West Maridia", "vanilla/west_maridia.spc")],
+    [("East Maridia", "vanilla/east_maridia.spc", "Vanilla Soundtrack"),
+     ("West Maridia", "vanilla/west_maridia.spc", "Vanilla Soundtrack")],
     # Song 0: Tourian, Song 1: no music
-    [("Tourian", "vanilla/tourian.spc")],
-    [("Mother Brain", "vanilla/mother_brain.spc")],
+    [("Tourian", "vanilla/tourian.spc", "Vanilla Soundtrack")],
+    [("Mother Brain", "vanilla/mother_brain.spc", "Vanilla Soundtrack")],
     # Song 0: BT/Ridley/Draygon,
     # Song 1: BT tension,
     # Song 2: Escape
-    [("Boss fight - BT/Ridley/Draygon", "vanilla/boss1.spc"),
-     ("Boss fight - BT tension", "vanilla/bt_tension.spc"),
-     ("Escape", "vanilla/escape.spc")],
+    [("Boss fight - BT/Ridley/Draygon", "vanilla/boss1.spc", "Vanilla Soundtrack"),
+     ("Boss fight - BT tension", "vanilla/bt_tension.spc", "Vanilla Soundtrack"),
+     ("Escape", "vanilla/escape.spc", "Vanilla Soundtrack")],
     # Song 0: Kraid/Phantoon/Croc,
     # Song 1: Tension
-    [("Boss fight - Kraid/Phantoon/Croc", "vanilla/boss2.spc"),
-     ("Boss fight - Kraid/Phantoon/Croc tension", "vanilla/tension.spc")],
+    [("Boss fight - Kraid/Phantoon/Croc", "vanilla/boss2.spc", "Vanilla Soundtrack"),
+     ("Boss fight - Kraid/Phantoon/Croc tension", "vanilla/tension.spc", "Vanilla Soundtrack")],
     # Song 0: Spore Spawn/Botwoon
-    [("Boss fight - Spore Spawn/Botwoon", "vanilla/mini_boss.spc")],
+    [("Boss fight - Spore Spawn/Botwoon", "vanilla/mini_boss.spc", "Vanilla Soundtrack")],
     # Song 0: Flying to Ceres,
     # Song 1: Ceres,
     # Song 2: Flying to Zebes,
     # Song 3: Ceres time up
-    [("Flying to Ceres", "vanilla/space_ship.spc"),
-     ("Ceres", "vanilla/ceres.spc"),
-     ("Flying to Zebes", "vanilla/to_zebes.spc"),
-     ("Ceres time up", "vanilla/ceres_explodes.spc")],
+    [("Flying to Ceres", "vanilla/space_ship.spc", "Vanilla Soundtrack - Sound Effects"),
+     ("Ceres", "vanilla/ceres.spc", "Vanilla Soundtrack"),
+     ("Flying to Zebes", "vanilla/to_zebes.spc", "Vanilla Soundtrack - Sound Effects"),
+     ("Ceres time up", "vanilla/ceres_explodes.spc", "Vanilla Soundtrack - Sound Effects")],
     # Song 0: Power off,
     # Song 1: Power on
-    [("Wrecked Ship - Power off", "vanilla/wrecked_ship_off.spc"),
-     ("Wrecked Ship - Power on", "vanilla/wrecked_ship_on.spc")],
-    [("Zebes boom", "vanilla/zebes_explodes.spc")],
-    [("Intro", "vanilla/intro.spc")],
-    [("Death", "vanilla/samus_cry.spc")],
-    [("Ending/Credits", "vanilla/ending.spc")],
-    [("The last Metroid is in captivity", None)],
-    [("The galaxy is at peace", None)],
+    [("Wrecked Ship - Power off", "vanilla/wrecked_ship_off.spc", "Vanilla Soundtrack"),
+     ("Wrecked Ship - Power on", "vanilla/wrecked_ship_on.spc", "Vanilla Soundtrack")],
+    [("Zebes boom", "vanilla/zebes_explodes.spc", "Vanilla Soundtrack - Sound Effects")],
+    [("Intro", "vanilla/intro.spc", "Vanilla Soundtrack")],
+    [("Death", "vanilla/samus_cry.spc", "Vanilla Soundtrack - Sound Effects")],
+    [("Ending/Credits", "vanilla/ending.spc", "Vanilla Soundtrack")],
+    [("The last Metroid is in captivity", None, "Vanilla Soundtrack - Sound Effects")],
+    [("The galaxy is at peace", None, "Vanilla Soundtrack - Sound Effects")],
     # Song 0: Boss music,
     # Song 1: Pre-boss music,
     # Song 2: No music
-    [("Baby Metroid", "vanilla/boss2.spc"),
-     ("Baby Metroid - Tension", "vanilla/tension.spc"),
-     ("Baby Metroid - No music", None)],
-    [("Mother Brain 3 (Samus Theme 2)", "vanilla/samus_theme.spc")]
+    [("Baby Metroid", "vanilla/boss2.spc", "Vanilla Soundtrack"),
+     ("Baby Metroid - Tension", "vanilla/tension.spc", "Vanilla Soundtrack"),
+     ("Baby Metroid - No music", None, "Vanilla Soundtrack - Sound Effects")],
+    [("Mother Brain 3 (Samus Theme 2)", "vanilla/samus_theme.spc", "Vanilla Soundtrack")]
 ]
 
 metadata = {}
@@ -110,8 +110,7 @@ for i in range(len(vanillaMusicData)):
         nspc.write(rom.read(endptr-ptr))
     musicdata = vanillaMusicData[i]
     for j in range(len(musicdata)):
-        track = musicdata[j][0]
-        spc_path = musicdata[j][1]
+        track, spc_path, group = musicdata[j]
         h,t=os.path.split(nspc_path)
         metadata[track] = {
             'nspc_path':os.path.join(os.path.split(h)[1], t),
@@ -119,7 +118,8 @@ for i in range(len(vanillaMusicData)):
             'track_index':j,
             'original_author':'Kenji Yamamoto',
             'port_author': '',
-            'description': "Original track from vanilla Super Metroid"
+            'description': "Original track from vanilla Super Metroid",
+            "group": group
         }
         if spc_path is not None:
             metadata[track]['spc_path'] = spc_path

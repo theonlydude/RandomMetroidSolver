@@ -3,6 +3,7 @@ import random, logging, time
 from rando.Filler import Filler
 from rando.Choice import ItemThenLocChoice
 from rando.ItemLocContainer import ItemLocation
+from solver.randoSolver import RandoSolver
 from graph.graph_utils import getAccessPoint
 from utils.parameters import infinity
 
@@ -29,6 +30,18 @@ class AssumedFiller(Filler):
 
         # don't use rando cache as we manually handle sm items
         self.services.cache = None
+
+    def validateSeed(self):
+        # do a full solver check
+        graphLocations = self.container.getLocsForSolver()
+        solver = RandoSolver(self.restrictions.split, self.startAP, self.graph, graphLocations)
+        diff = solver.solveRom()
+        self.container.cleanLocsAfterSolver()
+        if diff == -1:
+            self.log.debug("can100percentReverse: real solver validation failed")
+            return False
+        else:
+            return True
 
     def GetReachableLocationsAssumed(self, locations, owneditems):
         # Find items within R
@@ -106,6 +119,5 @@ class AssumedFiller(Filler):
         if len(reachablelocations) > 0 or len(owneditems) > 0:
             print("STUCK: reachablelocations: {} owneditems: {}".format(len(reachablelocations), len(owneditems)))
             return False
-        return True
-
+        return self.validateSeed()
 

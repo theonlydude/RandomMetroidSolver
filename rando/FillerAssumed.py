@@ -88,7 +88,9 @@ class AssumedFiller(Filler):
                 # If this happens, means there are no reachable locations left and must return,
                 # usually indicates uncompletable permutation
                 self.log.debug("reachablelocations is empty")
-                return False
+                # return true to try again
+                self.container.resetCollected(reassignItemLocs=True)
+                return True
             # Place random item in random location
             itemLoc = ItemLocation(item, location)
             self.log.debug("try to collect {} at {}".format(item.Type, location.Name))

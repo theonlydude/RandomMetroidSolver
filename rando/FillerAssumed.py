@@ -3,12 +3,14 @@ import random, logging, time
 from rando.Filler import Filler
 from rando.Choice import ItemThenLocChoice
 from rando.ItemLocContainer import ItemLocation
+from graph.graph_utils import getAccessPoint
 from utils.parameters import infinity
 
 class AssumedFiller(Filler):
     def __init__(self, startAP, graph, restrictions, container, endDate=infinity):
         super(AssumedFiller, self).__init__(startAP, graph, restrictions, container, endDate)
         self.choice = ItemThenLocChoice(restrictions)
+        self.startGraphArea = getAccessPoint(self.startAP).GraphArea
 
     def initFiller(self):
         super(AssumedFiller, self).initFiller()
@@ -58,7 +60,10 @@ class AssumedFiller(Filler):
             return locs
         else:
             # keep only locations where the selected item can be placed
-            return [loc for loc in locs if self.restrictions.canPlaceAtLocation(item, loc, self.container)]
+            locs = [loc for loc in locs if self.restrictions.canPlaceAtLocation(item, loc, self.container)]
+            if item.Type == 'Morph' and self.restrictions.isEarlyMorph():
+                locs = [loc for loc in locs if loc.GraphArea == self.startGraphArea]
+            return locs
 
     def step(self, onlyBossCheck=False):
         # In contrast to other two algos, I is initialized to all items and itempool is empty

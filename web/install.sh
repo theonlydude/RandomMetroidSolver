@@ -5,6 +5,7 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 
 # create all the required symlinks if they don't already exist
 [ -L ~/web2py/applications/solver/static/favicon.ico ] || ln -s ~/RandomMetroidSolver/web/static/favicon.ico ~/web2py/applications/solver/static/favicon.ico
+[ -L ~/web2py/applications/solver/static/favicon.png ] || ln -s ~/RandomMetroidSolver/web/static/favicon.png ~/web2py/applications/solver/static/favicon.png
 [ -L ~/web2py/applications/solver/static/images/area_map_thumbnail.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map_thumbnail.png ~/web2py/applications/solver/static/images/area_map_thumbnail.png
 [ -L ~/web2py/applications/solver/static/images/area_map.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map.png ~/web2py/applications/solver/static/images/area_map.png
 [ -L ~/web2py/applications/solver/static/images/snes-controller.png ] || ln -s ~/RandomMetroidSolver/web/static/snes-controller.png ~/web2py/applications/solver/static/images/snes-controller.png

@@ -186,7 +186,11 @@ def getSkillLevelBarData(preset):
         result['standards'][preset] = score
 
     with DB() as db:
-        result['generatedSeeds'] = db.getGeneratedSeeds(result['custom'][0])
+        # can't get it to work without a dict, so use a dict
+        generatedSeeds = cache.ram(preset, lambda:dict(), time_expire=24*60*60)
+        if not generatedSeeds:
+            generatedSeeds['dummy'] = db.getGeneratedSeeds(result['custom'][0])
+        result['generatedSeeds'] = generatedSeeds['dummy']
         result['lastAction'] = db.getPresetLastActionDate(result['custom'][0])
 
     # TODO: normalize result (or not ?)

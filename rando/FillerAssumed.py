@@ -73,10 +73,7 @@ class AssumedFiller(Filler):
             return locs
         else:
             # keep only locations where the selected item can be placed
-            locs = [loc for loc in locs if self.restrictions.canPlaceAtLocation(item, loc, self.container)]
-            if item.Type == 'Morph' and self.restrictions.isEarlyMorph():
-                locs = [loc for loc in locs if loc.GraphArea == self.startGraphArea]
-            return locs
+            return [loc for loc in locs if self.restrictions.canPlaceAtLocation(item, loc, self.container)]
 
     def step(self, onlyBossCheck=False):
         # In contrast to other two algos, I is initialized to all items and itempool is empty

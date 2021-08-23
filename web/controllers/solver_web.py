@@ -8,6 +8,7 @@ if os.path.exists(path) and path not in sys.path:
 
 import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math, string, base64, urllib.parse, uuid
 from datetime import datetime
+from collections import defaultdict
 
 # to solve the rom
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, diff4solver
@@ -2700,14 +2701,16 @@ def loadMusics():
         return musics
 
     musicDir = 'music/_metadata'
-    dropdown = {}
+    dropdown = defaultdict(list)
     metadatas = sorted(os.listdir(musicDir), key=lambda v: v.upper())
     for metadata in metadatas:
         with open(os.path.join(musicDir, metadata)) as jsonFile:
             data = json.load(jsonFile)
+            defaultGroup = os.path.splitext(metadata)[0]
             musics.update(data)
-            group = os.path.splitext(metadata)[0]
-            dropdown[group] = list(data.keys())
+            # check if there's group for musics
+            for song, songData in data.items():
+                dropdown[songData.get("group", defaultGroup)].append(song)
     musics["_dropdown"] = dropdown
 
     with open('music/_metadata/vanilla.json', 'r') as jsonFile:

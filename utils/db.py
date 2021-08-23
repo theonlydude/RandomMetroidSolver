@@ -491,17 +491,6 @@ order by 1,2;"""
             ret += "\n}"
             return (seed, ret)
 
-    def getGeneratedSeeds(self, preset):
-        if self.dbAvailable == False:
-            return None
-
-        sql = "select count(*) from randomizer_params where name = 'preset' and value = '%s';"
-        data = self.execSelect(sql, (preset,))
-        if data == None:
-            return 0
-        else:
-            return data[0][0]
-
     def getPresetLastActionDate(self, preset):
         if self.dbAvailable == False:
             return None

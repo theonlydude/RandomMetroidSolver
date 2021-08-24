@@ -2732,10 +2732,10 @@ def getSpcFile():
 
     musics = loadMusics()
     if songName not in musics:
-        raise HTTP(400, "song not found")
+        raise HTTP(400, "No preview for this song")
 
     if 'spc_path' not in musics[songName] or musics[songName]['spc_path'] == "":
-        raise HTTP(400, "song has no spc")
+        raise HTTP(400, "No preview for this song")
 
     songFile = musics[songName]['spc_path']
     with open(os.path.join('music', songFile), 'rb') as spcFile:

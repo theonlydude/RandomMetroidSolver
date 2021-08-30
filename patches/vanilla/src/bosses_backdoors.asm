@@ -5,6 +5,7 @@
 ;;; Spore Spawn: if alive, spawn in its screen when backdooring, otherwise act normal
 ;;; Crocomire: if alive, spawn before spikes when backdooring, otherwise act normal
 ;;; Kraid: ???
+;;; Botwoon: if alive, spawn in its screen when backdooring, otherwise act normal
 ;;;
 ;;; compile with asar
 

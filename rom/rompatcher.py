@@ -1300,16 +1300,26 @@ class MusicPatcher(object):
 
     def _updateRoomStateHeaders(self, trackList, musicData, replacedTracks):
         trackAddresses = {}
-        def addAddresses(track, vanillaTrackData):
+        def addAddresses(track, vanillaTrackData, prio=False):
             nonlocal trackAddresses
+            addrs = []
+            prioAddrs = []
+            if 'pc_addresses' in vanillaTrackData:
+                addrs += vanillaTrackData['pc_addresses']
+            if self.area and 'pc_addresses_area' in vanillaTrackData:
+                prioAddrs += vanillaTrackData['pc_addresses_area']
+            if self.boss and 'pc_addresses_boss' in vanillaTrackData:
+                prioAddrs += vanillaTrackData['pc_addresses_boss']
             if track not in trackAddresses:
                 trackAddresses[track] = []
-            if 'pc_addresses' in vanillaTrackData:
-                trackAddresses[track] += vanillaTrackData['pc_addresses']
-            if self.area and 'pc_addresses_area' in vanillaTrackData:
-                trackAddresses[track] += vanillaTrackData['pc_addresses_area']
-            if self.boss and 'pc_addresses_boss' in vanillaTrackData:
-                trackAddresses[track] += vanillaTrackData['pc_addresses_boss']
+            # if prioAddrs are somewhere else, remove if necessary
+            prioSet = set(prioAddrs)
+            for t,tAddrs in trackAddresses.items():
+                trackAddresses[t] = list(set(tAddrs) - prioSet)
+            # if some of addrs are somewhere else, remove them from here
+            for t,tAddrs in trackAddresses.items():
+                addrs = list(set(addrs) - set(tAddrs))
+            trackAddresses[track] = prioAddrs + addrs
         for track in trackList:
             if track in replacedTracks.values():
                 for van,rep in replacedTracks.items():

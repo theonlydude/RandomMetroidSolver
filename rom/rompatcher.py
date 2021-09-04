@@ -1319,7 +1319,7 @@ class MusicPatcher(object):
             # if some of addrs are somewhere else, remove them from here
             for t,tAddrs in trackAddresses.items():
                 addrs = list(set(addrs) - set(tAddrs))
-            trackAddresses[track] = prioAddrs + addrs
+            trackAddresses[track] += prioAddrs + addrs
         for track in trackList:
             if track in replacedTracks.values():
                 for van,rep in replacedTracks.items():

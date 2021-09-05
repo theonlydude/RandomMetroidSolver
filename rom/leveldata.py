@@ -563,9 +563,10 @@ class LevelData(object):
 
         # recompress data
         compressedData = Compressor(computeLimit=128).compress(rawData)
-        print("compressedData len: {}".format(len(compressedData)))
         recompressedDataSize = len(compressedData)
-        assert recompressedDataSize <= self.compressedSize
+        vanillaSize = 5165
+        print("compressedData len: {} (old: {}, vanilla: {})".format(recompressedDataSize, self.compressedSize, vanillaSize))
+        assert recompressedDataSize <= vanillaSize
         # write compress data
         self.rom.seek(self.dataAddr)
         for byte in compressedData:

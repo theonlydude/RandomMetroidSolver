@@ -2,8 +2,9 @@
 import utils.log
 
 class Compressor:
-    def __init__(self):
+    def __init__(self, computeLimit=5):
         self.log = utils.log.get('Compressor')
+        self.computeLimit = computeLimit
 
     def _concatBytes(self, b0, b1):
         return b0 + (b1 << 8)
@@ -273,7 +274,6 @@ class Compressor:
 
     def _computeCopy(self, inputData):
         self.copyLengths = []
-        limit = 5
 
         # for each possible value store the positions of the value in the input data
         start = [[] for i in range(len(inputData))]
@@ -285,7 +285,7 @@ class Compressor:
             maxAddress = -1
             for j, address in enumerate(start[inputData[i]], start=0):
                 # for performance reasons limit the number of addresses
-                if j >= limit:
+                if j >= self.computeLimit:
                     break
                 # only in previous addresses
                 if address >= i:

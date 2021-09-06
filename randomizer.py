@@ -795,7 +795,6 @@ if __name__ == "__main__":
         if args.moonWalk == True:
             romPatcher.enableMoonWalk()
         if args.patchOnly == False:
-            romPatcher.writeMagic()
             romPatcher.writeMajorsSplit(args.majorsSplit)
         if args.palette == True:
             paletteSettings = {

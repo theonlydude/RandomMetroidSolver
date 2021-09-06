@@ -56,6 +56,9 @@ class FakeROM(ROM):
     def seek(self, address):
         self.curAddress = address
 
+    def tell(self):
+        return self.curAddress
+
     def write(self, bytes):
         for byte in bytes:
             self.data[self.curAddress] = byte
@@ -112,6 +115,9 @@ class RealROM(ROM):
     def seek(self, address):
         self.address = address
         self.romFile.seek(address)
+
+    def tell(self):
+        return self.address
 
     def write(self, bytes):
         self.romFile.write(bytes)

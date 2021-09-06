@@ -284,12 +284,7 @@ class RomPatcher:
             # apply standard patches
             stdPatches = []
             plms = []
-            # apply race mode first because it fills the rom with a bunch of crap
-            if self.race is not None:
-                stdPatches.append('race_mode.ips')
             stdPatches += RomPatcher.IPSPatches['Standard'][:]
-            if self.race is not None:
-                stdPatches.append('race_mode_credits.ips')
             if suitsMode != "Balanced":
                 stdPatches.remove('Removes_Gravity_Suit_heat_protection')
             if suitsMode == "Progressive":
@@ -531,10 +526,6 @@ class RomPatcher:
         seedInfo2 = random.randint(0, 0xFFFF)
         self.romFile.writeWord(seedInfo, 0x2FFF00)
         self.romFile.writeWord(seedInfo2)
-
-    def writeMagic(self):
-        if self.race is not None:
-            self.race.writeMagic()
 
     def writeMajorsSplit(self, majorsSplit):
         address = 0x17B6C
@@ -844,6 +835,12 @@ class RomPatcher:
             else:
                 self.race.writeWordMagic(w)
 
+    def writeDoorTransition(self, roomPtr):
+        if self.race is None:
+            self.writeWord(roomPtr)
+        else:
+            self.race.writeDoorTransition(roomPtr)
+
     # write area randomizer transitions to ROM
     # doorConnections : a list of connections. each connection is a dictionary describing
     # - where to write in the ROM :
@@ -868,7 +865,7 @@ class RomPatcher:
             self.romFile.seek(0x10000 + doorPtr)
 
             # write room ptr
-            self.romFile.writeWord(roomPtr & 0xFFFF)
+            self.writeDoorTransition(roomPtr & 0xFFFF)
 
             # write bitflag (if area switch we have to set bit 0x40, and remove it if same area)
             self.romFile.writeByte(conn['bitFlag'])

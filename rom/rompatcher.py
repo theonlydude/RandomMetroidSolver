@@ -86,9 +86,10 @@ class RomPatcher:
         'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips']
     }
 
-    def __init__(self, romFileName=None, magic=None, plando=False):
+    def __init__(self, romFileName=None, magic=None):
         self.log = utils.log.get('RomPatcher')
         self.romFileName = romFileName
+        self.patchAccess = PatchAccess()
         self.race = None
         if romFileName == None:
             self.romFile = FakeROM()
@@ -96,7 +97,7 @@ class RomPatcher:
             self.romFile = RealROM(romFileName)
         if magic is not None:
             from rom.race_mode import RaceModePatcher
-            self.race = RaceModePatcher(self, magic, plando)
+            self.race = RaceModePatcher(self, magic)
         # IPS_Patch objects list
         self.ipsPatches = []
         # loc name to alternate address. we still write to original
@@ -113,7 +114,6 @@ class RomPatcher:
             # get out of croc room: reload CRE
             0x93ea: self.forceRoomCRE
         }
-        self.patchAccess = PatchAccess()
 
     def end(self):
         self.romFile.close()

@@ -285,6 +285,8 @@ class RomPatcher:
             stdPatches = []
             plms = []
             stdPatches += RomPatcher.IPSPatches['Standard'][:]
+            if self.race is not None:
+                stdPatches.append('race_mode_credits.ips')
             if suitsMode != "Balanced":
                 stdPatches.remove('Removes_Gravity_Suit_heat_protection')
             if suitsMode == "Progressive":
@@ -526,6 +528,10 @@ class RomPatcher:
         seedInfo2 = random.randint(0, 0xFFFF)
         self.romFile.writeWord(seedInfo, 0x2FFF00)
         self.romFile.writeWord(seedInfo2)
+
+    def writeMagic(self):
+        if self.race is not None:
+            self.race.writeMagic()
 
     def writeMajorsSplit(self, majorsSplit):
         address = 0x17B6C

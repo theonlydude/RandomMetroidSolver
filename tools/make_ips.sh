@@ -43,7 +43,7 @@ function call_assembler() {
     if [ -z "$assembler_stdout" ]; then
 	eval $cmd
     else
-	eval $cmd > $assembler_stdout
+	eval $cmd >> $assembler_stdout
     fi
 }
 

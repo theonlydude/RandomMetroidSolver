@@ -19,6 +19,15 @@ def snes_to_pc(B):
     return (A_1 << 16) | A_2
 
 class ROM(object):
+    def __init__(self, data={}):
+        self.address = 0
+
+    def seek(self, address):
+        self.address = address
+
+    def tell(self):
+        return self.address
+
     def readWord(self, address=None):
         return self.readBytes(2, address)
 
@@ -50,25 +59,19 @@ class ROM(object):
 class FakeROM(ROM):
     # to have the same code for real ROM and the webservice
     def __init__(self, data={}):
-        self.curAddress = 0
+        super(FakeROM, self).__init__()
         self.data = data
-
-    def seek(self, address):
-        self.curAddress = address
-
-    def tell(self):
-        return self.curAddress
 
     def write(self, bytes):
         for byte in bytes:
-            self.data[self.curAddress] = byte
-            self.curAddress += 1
+            self.data[self.address] = byte
+            self.address += 1
 
     def read(self, byteCount):
         bytes = []
         for i in range(byteCount):
-            bytes.append(self.data[self.curAddress])
-            self.curAddress += 1
+            bytes.append(self.data[self.address])
+            self.address += 1
 
         return bytes
 
@@ -109,14 +112,15 @@ class FakeROM(ROM):
 
 class RealROM(ROM):
     def __init__(self, name):
+        super(RealROM, self).__init__()
         self.romFile = open(name, "rb+")
-        self.address = 0
 
     def seek(self, address):
-        self.address = address
+        super(RealROM, self).seek(address)
         self.romFile.seek(address)
 
     def tell(self):
+        self.address = self.romFile.tell()
         return self.address
 
     def write(self, bytes):

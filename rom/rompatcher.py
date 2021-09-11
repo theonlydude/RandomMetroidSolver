@@ -843,7 +843,7 @@ class RomPatcher:
 
     def writeDoorTransition(self, roomPtr):
         if self.race is None:
-            self.writeWord(roomPtr)
+            self.romFile.writeWord(roomPtr)
         else:
             self.race.writeDoorTransition(roomPtr)
 
@@ -861,15 +861,14 @@ class RomPatcher:
         asmAddress = 0x7F800
         for conn in doorConnections:
             # write door ASM for transition doors (code and pointers)
-#            print('Writing door connection ' + conn['ID'])
             doorPtr = conn['DoorPtr']
             roomPtr = conn['RoomPtr']
+#            print('Writing door connection ' + conn['ID'] + ". doorPtr="+hex(doorPtr))
             if doorPtr in self.doorConnectionSpecific:
                 self.doorConnectionSpecific[doorPtr](roomPtr)
             if roomPtr in self.roomConnectionSpecific:
                 self.roomConnectionSpecific[roomPtr](doorPtr)
             self.romFile.seek(0x10000 + doorPtr)
-
             # write room ptr
             self.writeDoorTransition(roomPtr & 0xFFFF)
 

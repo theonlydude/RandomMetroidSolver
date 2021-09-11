@@ -286,7 +286,7 @@ class RomPatcher:
             plms = []
             stdPatches += RomPatcher.IPSPatches['Standard'][:]
             if self.race is not None:
-                stdPatches.append('race_mode_credits.ips')
+                stdPatches.append('race_mode_post.ips')
             if suitsMode != "Balanced":
                 stdPatches.remove('Removes_Gravity_Suit_heat_protection')
             if suitsMode == "Progressive":

@@ -324,7 +324,9 @@ class RomReader:
             if accessPoint.isInternal() == True:
                 continue
             key = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
-
+            if key not in rooms:
+                # can happen with race mode seeds
+                continue
             destAP = rooms[key]
             if accessPoint.Boss == True or destAP.Boss == True:
                 bossTransitions[accessPoint.Name] = destAP.Name

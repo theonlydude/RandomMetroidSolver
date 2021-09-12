@@ -59,6 +59,7 @@ check_new_game:
 .end:
     rtl
 
+print "startup: ", pc
 startup:
     jsl check_new_game      : bne .end
     lda.l start_location    : beq .zebes
@@ -101,7 +102,7 @@ gameplay_start:
 .end:
     rtl
 
-warnpc $a1f29f
+warnpc $a1f28f
 
 ;;; since this patch is always included, we can put utility
 ;;; routines for other patches here (in fixed locations)

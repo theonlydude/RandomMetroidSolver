@@ -111,12 +111,12 @@ def completePreset(params):
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master']
-    tourPresets = ['Season_Races', 'SMRAT2021']
+    tourPresets = ['Season_Races', 'SMRAT2021', 'Torneio_SGPT2']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList(filter=False):
-    tourPresets = ['Season_Races', 'SGLive2021', 'SMRAT2021', 'VARIA_Weekly']
+    tourPresets = ['Season_Races', 'SGLive2021', 'SMRAT2021', 'VARIA_Weekly', 'Torneio_SGPT2']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
@@ -1065,7 +1065,8 @@ def randomizer():
         "Season_Races": "rando league races (Majors/Minors split)",
         "SGLive2021": "SGLive 2021 Super Metroid randomizer tournament",
         "SMRAT2021": "Super Metroid Randomizer Accessible Tournament 2021",
-        "VARIA_Weekly": "Casual logic community races"
+        "VARIA_Weekly": "Casual logic community races",
+        "Torneio_SGPT2": "Super Metroid Randomizer da Speedgaming Português Tournament 2021"
     }
 
     startAPs = GraphUtils.getStartAccessPointNamesCategory()

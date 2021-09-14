@@ -154,7 +154,7 @@ def validatePresetsParams(action):
             if isButton(button):
                 value = request.vars[button]
                 if button == "Moonwalk":
-                    if value not in [None, 'on']:
+                    if value not in [None, 'on', 'off']:
                         return (False, "Invalid value for Moonwalk: {}".format(value))
                 else:
                     if value is None:

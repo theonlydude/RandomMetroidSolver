@@ -5,7 +5,7 @@ from utils.parameters import easy, medium, hard, harder, hardcore, mania
 from logic.smbool import SMBool
 
 def isStdPreset(preset):
-    return preset in ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master', 'samus', 'solution', 'Season_Races', 'SMRAT2021''Torneio_SGPT2']
+    return preset in ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master', 'samus', 'solution', 'Season_Races', 'SMRAT2021', 'Torneio_SGPT2']
 
 def getPresetDir(preset):
     if isStdPreset(preset):

@@ -461,255 +461,285 @@
         <img src="/solver/static/images/ridley.png" title="Ridley" class="full">
     </div>
 
+    <!-- inventory streaming -->
+    <div id="inventory_streaming">
+      <div id="pause_background_streaming" class="stream">
+        <img src="/solver/static/images/background_streaming.png" class="full">
+      </div>
+      <div id="Charge_stream" class="Charge_stream">
+        <img id="Charge_stream_img" src="/solver/static/images/Charge.png" class="imageItem">
+      </div>
+      <div id="Ice_stream" class="Ice_stream">
+        <img id="Ice_stream_img" src="/solver/static/images/Ice.png" class="imageItem">
+      </div>
+      <div id="Wave_stream" class="Wave_stream">
+        <img id="Wave_stream_img" src="/solver/static/images/Wave.png" class="imageItem">
+      </div>
+      <div id="Spazer_stream" class="Spazer_stream">
+        <img id="Spazer_stream_img" src="/solver/static/images/Spazer.png" class="imageItem">
+      </div>
+      <div id="Plasma_stream" class="Plasma_stream">
+        <img id="Plasma_stream_img" src="/solver/static/images/Plasma.png" class="imageItem">
+      </div>
+      <div id="Varia_stream" class="Varia_stream">
+        <img id="Varia_stream_img" src="/solver/static/images/Varia.png" class="imageItem">
+      </div>
+      <div id="Gravity_stream" class="Gravity_stream">
+        <img id="Gravity_stream_img" src="/solver/static/images/Gravity.png" class="imageItem">
+      </div>
+    </div>
+
     <!-- inventory menu -->
-    <div id="pause_background_seedless" class="pause">
+    <div id="inventory_screen">
+      <div id="pause_background_seedless" class="pause">
         <img src="/solver/static/images/background_seedless.png" class="full">
-    </div>
-    <div id="pause_background" class="pause">
+      </div>
+      <div id="pause_background" class="pause">
         <img src="/solver/static/images/background.png" class="full">
-    </div>
-    <div id="Charge_pause" class="Charge_pause" onclick="actionItem('Charge', 'toggle')" title="Toggle Charge Beam">
-        <img id="Charge_pause_img" src="/solver/static/images/charge.png" class="full hidden_img">
-    </div>
-    <div id="Ice_pause" class="Ice_pause" onclick="actionItem('Ice', 'toggle')" title="Toggle Ice Beam">
-        <img id="Ice_pause_img" src="/solver/static/images/ice.png" class="full hidden_img">
-    </div>
-    <div id="Wave_pause" class="Wave_pause" onclick="actionItem('Wave', 'toggle')" title="Toggle Wave Beam">
-        <img id="Wave_pause_img" src="/solver/static/images/wave.png" class="full hidden_img">
-    </div>
-    <div id="Spazer_pause" class="Spazer_pause" onclick="actionItem('Spazer', 'toggle')" title="Toggle Spazer Beam">
-        <img id="Spazer_pause_img" src="/solver/static/images/spazer.png" class="full hidden_img">
-    </div>
-    <div id="Plasma_pause" class="Plasma_pause" onclick="actionItem('Plasma', 'toggle')" title="Toggle Plasma Beam">
-        <img id="Plasma_pause_img" src="/solver/static/images/plasma.png" class="full hidden_img">
-    </div>
+      </div>
+      <div id="Charge_pause" class="Charge_pause" onclick="actionItem('Charge', 'toggle')" title="Toggle Charge Beam">
+        <img id="Charge_pause_img" src="/solver/static/images/icharge.png" class="full hidden_img">
+      </div>
+      <div id="Ice_pause" class="Ice_pause" onclick="actionItem('Ice', 'toggle')" title="Toggle Ice Beam">
+        <img id="Ice_pause_img" src="/solver/static/images/iice.png" class="full hidden_img">
+      </div>
+      <div id="Wave_pause" class="Wave_pause" onclick="actionItem('Wave', 'toggle')" title="Toggle Wave Beam">
+        <img id="Wave_pause_img" src="/solver/static/images/iwave.png" class="full hidden_img">
+      </div>
+      <div id="Spazer_pause" class="Spazer_pause" onclick="actionItem('Spazer', 'toggle')" title="Toggle Spazer Beam">
+        <img id="Spazer_pause_img" src="/solver/static/images/ispazer.png" class="full hidden_img">
+      </div>
+      <div id="Plasma_pause" class="Plasma_pause" onclick="actionItem('Plasma', 'toggle')" title="Toggle Plasma Beam">
+        <img id="Plasma_pause_img" src="/solver/static/images/iplasma.png" class="full hidden_img">
+      </div>
 
-    <div id="Varia_pause" class="Varia_pause" onclick="actionItem('Varia', 'toggle')" title="Toggle Varia Suit">
-        <img id="Varia_pause_img" src="/solver/static/images/varia.png" class="full hidden_img">
-    </div>
-    <div id="Gravity_pause" class="Gravity_pause" onclick="actionItem('Gravity', 'toggle')" title="Toggle Gravity Suit">
-        <img id="Gravity_pause_img" src="/solver/static/images/gravity.png" class="full hidden_img">
-    </div>
-    <div id="Morph_pause" class="Morph_pause" onclick="actionItem('Morph', 'toggle')" title="Toggle Morph Ball">
-        <img id="Morph_pause_img" src="/solver/static/images/morph.png" class="full hidden_img">
-    </div>
-    <div id="Bomb_pause" class="Bomb_pause" onclick="actionItem('Bomb', 'toggle')" title="Toggle Bomb">
-        <img id="Bomb_pause_img" src="/solver/static/images/bomb.png" class="full hidden_img">
-    </div>
-    <div id="SpringBall_pause" class="SpringBall_pause" onclick="actionItem('SpringBall', 'toggle')" title="Toggle Spring Ball">
-        <img id="SpringBall_pause_img" src="/solver/static/images/springball.png" class="full hidden_img">
-    </div>
-    <div id="ScrewAttack_pause" class="ScrewAttack_pause" onclick="actionItem('ScrewAttack', 'toggle')" title="Toggle Screw Attack">
-        <img id="ScrewAttack_pause_img" src="/solver/static/images/screwattack.png" class="full hidden_img">
-    </div>
-    <div id="HiJump_pause" class="HiJump_pause" onclick="actionItem('HiJump', 'toggle')" title="Toggle High Jump Boots">
-        <img id="HiJump_pause_img" src="/solver/static/images/hijump.png" class="full hidden_img">
-    </div>
-    <div id="SpaceJump_pause" class="SpaceJump_pause" onclick="actionItem('SpaceJump', 'toggle')" title="Toggle Space Jump">
-        <img id="SpaceJump_pause_img" src="/solver/static/images/spacejump.png" class="full hidden_img">
-    </div>
-    <div id="SpeedBooster_pause" class="SpeedBooster_pause" onclick="actionItem('SpeedBooster', 'toggle')" title="Toggle Speed Booster">
-        <img id="SpeedBooster_pause_img" src="/solver/static/images/speedbooster.png" class="full hidden_img">
-    </div>
+      <div id="Varia_pause" class="Varia_pause" onclick="actionItem('Varia', 'toggle')" title="Toggle Varia Suit">
+        <img id="Varia_pause_img" src="/solver/static/images/ivaria.png" class="full hidden_img">
+      </div>
+      <div id="Gravity_pause" class="Gravity_pause" onclick="actionItem('Gravity', 'toggle')" title="Toggle Gravity Suit">
+        <img id="Gravity_pause_img" src="/solver/static/images/igravity.png" class="full hidden_img">
+      </div>
+      <div id="Morph_pause" class="Morph_pause" onclick="actionItem('Morph', 'toggle')" title="Toggle Morph Ball">
+        <img id="Morph_pause_img" src="/solver/static/images/imorph.png" class="full hidden_img">
+      </div>
+      <div id="Bomb_pause" class="Bomb_pause" onclick="actionItem('Bomb', 'toggle')" title="Toggle Bomb">
+        <img id="Bomb_pause_img" src="/solver/static/images/ibomb.png" class="full hidden_img">
+      </div>
+      <div id="SpringBall_pause" class="SpringBall_pause" onclick="actionItem('SpringBall', 'toggle')" title="Toggle Spring Ball">
+        <img id="SpringBall_pause_img" src="/solver/static/images/ispringball.png" class="full hidden_img">
+      </div>
+      <div id="ScrewAttack_pause" class="ScrewAttack_pause" onclick="actionItem('ScrewAttack', 'toggle')" title="Toggle Screw Attack">
+        <img id="ScrewAttack_pause_img" src="/solver/static/images/iscrewattack.png" class="full hidden_img">
+      </div>
+      <div id="HiJump_pause" class="HiJump_pause" onclick="actionItem('HiJump', 'toggle')" title="Toggle High Jump Boots">
+        <img id="HiJump_pause_img" src="/solver/static/images/ihijump.png" class="full hidden_img">
+      </div>
+      <div id="SpaceJump_pause" class="SpaceJump_pause" onclick="actionItem('SpaceJump', 'toggle')" title="Toggle Space Jump">
+        <img id="SpaceJump_pause_img" src="/solver/static/images/ispacejump.png" class="full hidden_img">
+      </div>
+      <div id="SpeedBooster_pause" class="SpeedBooster_pause" onclick="actionItem('SpeedBooster', 'toggle')" title="Toggle Speed Booster">
+        <img id="SpeedBooster_pause_img" src="/solver/static/images/ispeedbooster.png" class="full hidden_img">
+      </div>
 
-    <div id="Missile_pause_increase" class="Missile_pause_increase" onclick="actionItem('Missile', 'add')" title="Add one Missile"></div>
-    <div id="Missile_pause_decrease" class="Missile_pause_decrease" onclick="actionItem('Missile', 'remove')" title="Remove one Missile"></div>
-    <div id="Missile_pause" class="Missile_pause">
-        <img src="/solver/static/images/missile.png" class="full">
-    </div>
-    <div id="Super_pause_increase" class="Super_pause_increase" onclick="actionItem('Super', 'add')" title="Add one Super"></div>
-    <div id="Super_pause_decrease" class="Super_pause_decrease" onclick="actionItem('Super', 'remove')" title="Remove one Super"></div>
-    <div id="Super_pause" class="Super_pause">
-        <img src="/solver/static/images/super.png" class="full">
-    </div>
-    <div id="PowerBomb_pause_increase" class="PowerBomb_pause_increase" onclick="actionItem('PowerBomb', 'add')" title="Add one Power Bomb"></div>
-    <div id="PowerBomb_pause_decrease" class="PowerBomb_pause_decrease" onclick="actionItem('PowerBomb', 'remove')" title="Remove one Power Bomb"></div>
-    <div id="PowerBomb_pause" class="PowerBomb_pause">
-        <img src="/solver/static/images/powerbomb.png" class="full">
-    </div>
-    <div id="Grapple_pause" class="Grapple_pause" onclick="actionItem('Grapple', 'toggle')">
-        <img id="Grapple_pause_img" src="/solver/static/images/grapple.png" class="full hidden_img">
-    </div>
-    <div id="XRayScope_pause" class="XRayScope_pause" onclick="actionItem('XRayScope', 'toggle')">
-        <img id="XRayScope_pause_img" src="/solver/static/images/xray.png" class="full hidden_img">
-    </div>
+      <div id="Missile_pause_increase" class="Missile_pause_increase" onclick="actionItem('Missile', 'add')" title="Add one Missile"></div>
+      <div id="Missile_pause_decrease" class="Missile_pause_decrease" onclick="actionItem('Missile', 'remove')" title="Remove one Missile"></div>
+      <div id="Missile_pause" class="Missile_pause">
+        <img src="/solver/static/images/imissile.png" class="full">
+      </div>
+      <div id="Super_pause_increase" class="Super_pause_increase" onclick="actionItem('Super', 'add')" title="Add one Super"></div>
+      <div id="Super_pause_decrease" class="Super_pause_decrease" onclick="actionItem('Super', 'remove')" title="Remove one Super"></div>
+      <div id="Super_pause" class="Super_pause">
+        <img src="/solver/static/images/isuper.png" class="full">
+      </div>
+      <div id="PowerBomb_pause_increase" class="PowerBomb_pause_increase" onclick="actionItem('PowerBomb', 'add')" title="Add one Power Bomb"></div>
+      <div id="PowerBomb_pause_decrease" class="PowerBomb_pause_decrease" onclick="actionItem('PowerBomb', 'remove')" title="Remove one Power Bomb"></div>
+      <div id="PowerBomb_pause" class="PowerBomb_pause">
+        <img src="/solver/static/images/ipowerbomb.png" class="full">
+      </div>
+      <div id="Grapple_pause" class="Grapple_pause" onclick="actionItem('Grapple', 'toggle')">
+        <img id="Grapple_pause_img" src="/solver/static/images/igrapple.png" class="full hidden_img">
+      </div>
+      <div id="XRayScope_pause" class="XRayScope_pause" onclick="actionItem('XRayScope', 'toggle')">
+        <img id="XRayScope_pause_img" src="/solver/static/images/ixray.png" class="full hidden_img">
+      </div>
 
-    <div id="Energy_pause_increase" class="Energy_pause_increase" onclick="actionItem('ETank', 'add')" title="Add one ETank"></div>
-    <div id="Energy_pause_decrease" class="Energy_pause_decrease" onclick="actionItem('ETank', 'remove')" title="Remove one ETank"></div>
-    <div id="Energy_pause" class="Energy_pause">
+      <div id="Energy_pause_increase" class="Energy_pause_increase" onclick="actionItem('ETank', 'add')" title="Add one ETank"></div>
+      <div id="Energy_pause_decrease" class="Energy_pause_decrease" onclick="actionItem('ETank', 'remove')" title="Remove one ETank"></div>
+      <div id="Energy_pause" class="Energy_pause">
         <img src="/solver/static/images/energy.png" class="full">
-    </div>
-    <div id="Energy_90_pause" class="Energy_90_pause">
+      </div>
+      <div id="Energy_90_pause" class="Energy_90_pause">
         <img src="/solver/static/images/9.png" class="full">
-    </div>
-    <div id="Energy_9_pause" class="Energy_9_pause">
+      </div>
+      <div id="Energy_9_pause" class="Energy_9_pause">
         <img src="/solver/static/images/9.png" class="full">
-    </div>
+      </div>
 
-    <div id="ETank_1_pause" class="ETank_1_pause">
-        <img src="/solver/static/images/etank.png" class="full">
-    </div>
-    <div id="ETank_2_pause" class="ETank_2_pause">
-        <img src="/solver/static/images/etank.png" class="full">
-    </div>
-    <div id="ETank_3_pause" class="ETank_3_pause">
-        <img src="/solver/static/images/etank.png" class="full">
-    </div>
-    <div id="ETank_4_pause" class="ETank_4_pause">
-        <img src="/solver/static/images/etank.png" class="full">
-    </div>
-    <div id="ETank_5_pause" class="ETank_5_pause">
-        <img src="/solver/static/images/etank.png" class="full">
-    </div>
-    <div id="ETank_6_pause" class="ETank_6_pause">
-        <img src="/solver/static/images/etank.png" class="full">
-    </div>
-    <div id="ETank_7_pause" class="ETank_7_pause">
-        <img src="/solver/static/images/etank.png" class="full">
-    </div>
-    <div id="ETank_8_pause" class="ETank_8_pause">
-        <img src="/solver/static/images/etank.png" class="full">
-    </div>
-    <div id="ETank_9_pause" class="ETank_9_pause">
-        <img src="/solver/static/images/etank.png" class="full">
-    </div>
-    <div id="ETank_10_pause" class="ETank_10_pause">
-        <img src="/solver/static/images/etank.png" class="full">
-    </div>
-    <div id="ETank_11_pause" class="ETank_11_pause">
-        <img src="/solver/static/images/etank.png" class="full">
-    </div>
-    <div id="ETank_12_pause" class="ETank_12_pause">
-        <img src="/solver/static/images/etank.png" class="full">
-    </div>
-    <div id="ETank_13_pause" class="ETank_13_pause">
-        <img src="/solver/static/images/etank.png" class="full">
-    </div>
-    <div id="ETank_14_pause" class="ETank_14_pause">
-        <img src="/solver/static/images/etank.png" class="full">
-    </div>
+      <div id="ETank_1_pause" class="ETank_1_pause">
+        <img src="/solver/static/images/ietank.png" class="full">
+      </div>
+      <div id="ETank_2_pause" class="ETank_2_pause">
+        <img src="/solver/static/images/ietank.png" class="full">
+      </div>
+      <div id="ETank_3_pause" class="ETank_3_pause">
+        <img src="/solver/static/images/ietank.png" class="full">
+      </div>
+      <div id="ETank_4_pause" class="ETank_4_pause">
+        <img src="/solver/static/images/ietank.png" class="full">
+      </div>
+      <div id="ETank_5_pause" class="ETank_5_pause">
+        <img src="/solver/static/images/ietank.png" class="full">
+      </div>
+      <div id="ETank_6_pause" class="ETank_6_pause">
+        <img src="/solver/static/images/ietank.png" class="full">
+      </div>
+      <div id="ETank_7_pause" class="ETank_7_pause">
+        <img src="/solver/static/images/ietank.png" class="full">
+      </div>
+      <div id="ETank_8_pause" class="ETank_8_pause">
+        <img src="/solver/static/images/ietank.png" class="full">
+      </div>
+      <div id="ETank_9_pause" class="ETank_9_pause">
+        <img src="/solver/static/images/ietank.png" class="full">
+      </div>
+      <div id="ETank_10_pause" class="ETank_10_pause">
+        <img src="/solver/static/images/ietank.png" class="full">
+      </div>
+      <div id="ETank_11_pause" class="ETank_11_pause">
+        <img src="/solver/static/images/ietank.png" class="full">
+      </div>
+      <div id="ETank_12_pause" class="ETank_12_pause">
+        <img src="/solver/static/images/ietank.png" class="full">
+      </div>
+      <div id="ETank_13_pause" class="ETank_13_pause">
+        <img src="/solver/static/images/ietank.png" class="full">
+      </div>
+      <div id="ETank_14_pause" class="ETank_14_pause">
+        <img src="/solver/static/images/ietank.png" class="full">
+      </div>
 
-    <div id="Reserve_pause_increase" class="Reserve_pause_increase" onclick="actionItem('Reserve', 'add')" title="Add one Reserve Tank"></div>
-    <div id="Reserve_pause_decrease" class="Reserve_pause_decrease" onclick="actionItem('Reserve', 'remove')" title="Remove one Reserve Tank"></div>
-    <div id="Reserve_1_pause" class="Reserve_1_pause">
-        <img src="/solver/static/images/reserve.png" class="full">
-    </div>
-    <div id="Reserve_2_pause" class="Reserve_2_pause">
-        <img src="/solver/static/images/reserve.png" class="full">
-    </div>
-    <div id="Reserve_3_pause" class="Reserve_3_pause">
-        <img src="/solver/static/images/reserve.png" class="full">
-    </div>
-    <div id="Reserve_4_pause" class="Reserve_4_pause">
-        <img src="/solver/static/images/reserve.png" class="full">
-    </div>
+      <div id="Reserve_pause_increase" class="Reserve_pause_increase" onclick="actionItem('Reserve', 'add')" title="Add one Reserve Tank"></div>
+      <div id="Reserve_pause_decrease" class="Reserve_pause_decrease" onclick="actionItem('Reserve', 'remove')" title="Remove one Reserve Tank"></div>
+      <div id="Reserve_1_pause" class="Reserve_1_pause">
+        <img src="/solver/static/images/ireserve.png" class="full">
+      </div>
+      <div id="Reserve_2_pause" class="Reserve_2_pause">
+        <img src="/solver/static/images/ireserve.png" class="full">
+      </div>
+      <div id="Reserve_3_pause" class="Reserve_3_pause">
+        <img src="/solver/static/images/ireserve.png" class="full">
+      </div>
+      <div id="Reserve_4_pause" class="Reserve_4_pause">
+        <img src="/solver/static/images/ireserve.png" class="full">
+      </div>
 
-    <div id="Missile_900_0_pause" class="Missile_900_0_pause">
+      <div id="Missile_900_0_pause" class="Missile_900_0_pause">
         <img src="/solver/static/images/0.png" class="full">
+      </div>
+
+      <div id="Missile_900_0_pause" class="Missile_900_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+      <div id="Missile_900_1_pause" class="Missile_900_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+      <div id="Missile_900_2_pause" class="Missile_900_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+      <div id="Missile_900_3_pause" class="Missile_900_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+      <div id="Missile_900_4_pause" class="Missile_900_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+      <div id="Missile_900_5_pause" class="Missile_900_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+      <div id="Missile_900_6_pause" class="Missile_900_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+      <div id="Missile_900_7_pause" class="Missile_900_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+      <div id="Missile_900_8_pause" class="Missile_900_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+      <div id="Missile_900_9_pause" class="Missile_900_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+      <div id="Missile_90_0_pause" class="Missile_90_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+      <div id="Missile_90_1_pause" class="Missile_90_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+      <div id="Missile_90_2_pause" class="Missile_90_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+      <div id="Missile_90_3_pause" class="Missile_90_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+      <div id="Missile_90_4_pause" class="Missile_90_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+      <div id="Missile_90_5_pause" class="Missile_90_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+      <div id="Missile_90_6_pause" class="Missile_90_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+      <div id="Missile_90_7_pause" class="Missile_90_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+      <div id="Missile_90_8_pause" class="Missile_90_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+      <div id="Missile_90_9_pause" class="Missile_90_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+      <div id="Missile_9_0_pause" class="Missile_9_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+      <div id="Missile_9_1_pause" class="Missile_9_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+      <div id="Missile_9_2_pause" class="Missile_9_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+      <div id="Missile_9_3_pause" class="Missile_9_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+      <div id="Missile_9_4_pause" class="Missile_9_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+      <div id="Missile_9_5_pause" class="Missile_9_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+      <div id="Missile_9_6_pause" class="Missile_9_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+      <div id="Missile_9_7_pause" class="Missile_9_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+      <div id="Missile_9_8_pause" class="Missile_9_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+      <div id="Missile_9_9_pause" class="Missile_9_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+
+      <div id="Super_900_0_pause" class="Super_900_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+      <div id="Super_900_1_pause" class="Super_900_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+      <div id="Super_900_2_pause" class="Super_900_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+      <div id="Super_900_3_pause" class="Super_900_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+      <div id="Super_900_4_pause" class="Super_900_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+      <div id="Super_900_5_pause" class="Super_900_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+      <div id="Super_900_6_pause" class="Super_900_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+      <div id="Super_900_7_pause" class="Super_900_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+      <div id="Super_900_8_pause" class="Super_900_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+      <div id="Super_900_9_pause" class="Super_900_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+      <div id="Super_90_0_pause" class="Super_90_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+      <div id="Super_90_1_pause" class="Super_90_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+      <div id="Super_90_2_pause" class="Super_90_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+      <div id="Super_90_3_pause" class="Super_90_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+      <div id="Super_90_4_pause" class="Super_90_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+      <div id="Super_90_5_pause" class="Super_90_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+      <div id="Super_90_6_pause" class="Super_90_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+      <div id="Super_90_7_pause" class="Super_90_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+      <div id="Super_90_8_pause" class="Super_90_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+      <div id="Super_90_9_pause" class="Super_90_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+      <div id="Super_9_0_pause" class="Super_9_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+      <div id="Super_9_1_pause" class="Super_9_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+      <div id="Super_9_2_pause" class="Super_9_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+      <div id="Super_9_3_pause" class="Super_9_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+      <div id="Super_9_4_pause" class="Super_9_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+      <div id="Super_9_5_pause" class="Super_9_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+      <div id="Super_9_6_pause" class="Super_9_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+      <div id="Super_9_7_pause" class="Super_9_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+      <div id="Super_9_8_pause" class="Super_9_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+      <div id="Super_9_9_pause" class="Super_9_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+
+      <div id="PowerBomb_900_0_pause" class="PowerBomb_900_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+      <div id="PowerBomb_900_1_pause" class="PowerBomb_900_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+      <div id="PowerBomb_900_2_pause" class="PowerBomb_900_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+      <div id="PowerBomb_900_3_pause" class="PowerBomb_900_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+      <div id="PowerBomb_900_4_pause" class="PowerBomb_900_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+      <div id="PowerBomb_900_5_pause" class="PowerBomb_900_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+      <div id="PowerBomb_900_6_pause" class="PowerBomb_900_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+      <div id="PowerBomb_900_7_pause" class="PowerBomb_900_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+      <div id="PowerBomb_900_8_pause" class="PowerBomb_900_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+      <div id="PowerBomb_900_9_pause" class="PowerBomb_900_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+      <div id="PowerBomb_90_0_pause" class="PowerBomb_90_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+      <div id="PowerBomb_90_1_pause" class="PowerBomb_90_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+      <div id="PowerBomb_90_2_pause" class="PowerBomb_90_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+      <div id="PowerBomb_90_3_pause" class="PowerBomb_90_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+      <div id="PowerBomb_90_4_pause" class="PowerBomb_90_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+      <div id="PowerBomb_90_5_pause" class="PowerBomb_90_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+      <div id="PowerBomb_90_6_pause" class="PowerBomb_90_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+      <div id="PowerBomb_90_7_pause" class="PowerBomb_90_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+      <div id="PowerBomb_90_8_pause" class="PowerBomb_90_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+      <div id="PowerBomb_90_9_pause" class="PowerBomb_90_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+      <div id="PowerBomb_9_0_pause" class="PowerBomb_9_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+      <div id="PowerBomb_9_1_pause" class="PowerBomb_9_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+      <div id="PowerBomb_9_2_pause" class="PowerBomb_9_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+      <div id="PowerBomb_9_3_pause" class="PowerBomb_9_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+      <div id="PowerBomb_9_4_pause" class="PowerBomb_9_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+      <div id="PowerBomb_9_5_pause" class="PowerBomb_9_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+      <div id="PowerBomb_9_6_pause" class="PowerBomb_9_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+      <div id="PowerBomb_9_7_pause" class="PowerBomb_9_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+      <div id="PowerBomb_9_8_pause" class="PowerBomb_9_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+      <div id="PowerBomb_9_9_pause" class="PowerBomb_9_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+
+      <div id="auto" class="auto"><img src="/solver/static/images/auto.png" class="full"></div>
+      <div id="reserve_text" class="reserve_text"><img src="/solver/static/images/reserve_text.png" class="full"></div>
+
+      <div id="reserve_0" class="reserve_0"><img src="/solver/static/images/0_reserve.png" class="full"></div>
+      <div id="reserve_00" class="reserve_00"><img src="/solver/static/images/0_reserve.png" class="full"></div>
+      <div id="reserve_1" class="reserve_1"><img src="/solver/static/images/1_reserve.png" class="full"></div>
+      <div id="reserve_2" class="reserve_1"><img src="/solver/static/images/2_reserve.png" class="full"></div>
+      <div id="reserve_3" class="reserve_1"><img src="/solver/static/images/3_reserve.png" class="full"></div>
+      <div id="reserve_4" class="reserve_1"><img src="/solver/static/images/4_reserve.png" class="full"></div>
     </div>
-
-    <div id="Missile_900_0_pause" class="Missile_900_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
-    <div id="Missile_900_1_pause" class="Missile_900_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
-    <div id="Missile_900_2_pause" class="Missile_900_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
-    <div id="Missile_900_3_pause" class="Missile_900_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
-    <div id="Missile_900_4_pause" class="Missile_900_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
-    <div id="Missile_900_5_pause" class="Missile_900_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
-    <div id="Missile_900_6_pause" class="Missile_900_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
-    <div id="Missile_900_7_pause" class="Missile_900_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
-    <div id="Missile_900_8_pause" class="Missile_900_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
-    <div id="Missile_900_9_pause" class="Missile_900_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
-    <div id="Missile_90_0_pause" class="Missile_90_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
-    <div id="Missile_90_1_pause" class="Missile_90_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
-    <div id="Missile_90_2_pause" class="Missile_90_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
-    <div id="Missile_90_3_pause" class="Missile_90_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
-    <div id="Missile_90_4_pause" class="Missile_90_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
-    <div id="Missile_90_5_pause" class="Missile_90_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
-    <div id="Missile_90_6_pause" class="Missile_90_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
-    <div id="Missile_90_7_pause" class="Missile_90_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
-    <div id="Missile_90_8_pause" class="Missile_90_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
-    <div id="Missile_90_9_pause" class="Missile_90_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
-    <div id="Missile_9_0_pause" class="Missile_9_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
-    <div id="Missile_9_1_pause" class="Missile_9_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
-    <div id="Missile_9_2_pause" class="Missile_9_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
-    <div id="Missile_9_3_pause" class="Missile_9_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
-    <div id="Missile_9_4_pause" class="Missile_9_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
-    <div id="Missile_9_5_pause" class="Missile_9_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
-    <div id="Missile_9_6_pause" class="Missile_9_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
-    <div id="Missile_9_7_pause" class="Missile_9_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
-    <div id="Missile_9_8_pause" class="Missile_9_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
-    <div id="Missile_9_9_pause" class="Missile_9_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
-
-    <div id="Super_900_0_pause" class="Super_900_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
-    <div id="Super_900_1_pause" class="Super_900_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
-    <div id="Super_900_2_pause" class="Super_900_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
-    <div id="Super_900_3_pause" class="Super_900_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
-    <div id="Super_900_4_pause" class="Super_900_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
-    <div id="Super_900_5_pause" class="Super_900_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
-    <div id="Super_900_6_pause" class="Super_900_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
-    <div id="Super_900_7_pause" class="Super_900_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
-    <div id="Super_900_8_pause" class="Super_900_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
-    <div id="Super_900_9_pause" class="Super_900_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
-    <div id="Super_90_0_pause" class="Super_90_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
-    <div id="Super_90_1_pause" class="Super_90_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
-    <div id="Super_90_2_pause" class="Super_90_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
-    <div id="Super_90_3_pause" class="Super_90_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
-    <div id="Super_90_4_pause" class="Super_90_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
-    <div id="Super_90_5_pause" class="Super_90_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
-    <div id="Super_90_6_pause" class="Super_90_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
-    <div id="Super_90_7_pause" class="Super_90_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
-    <div id="Super_90_8_pause" class="Super_90_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
-    <div id="Super_90_9_pause" class="Super_90_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
-    <div id="Super_9_0_pause" class="Super_9_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
-    <div id="Super_9_1_pause" class="Super_9_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
-    <div id="Super_9_2_pause" class="Super_9_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
-    <div id="Super_9_3_pause" class="Super_9_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
-    <div id="Super_9_4_pause" class="Super_9_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
-    <div id="Super_9_5_pause" class="Super_9_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
-    <div id="Super_9_6_pause" class="Super_9_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
-    <div id="Super_9_7_pause" class="Super_9_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
-    <div id="Super_9_8_pause" class="Super_9_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
-    <div id="Super_9_9_pause" class="Super_9_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
-
-    <div id="PowerBomb_900_0_pause" class="PowerBomb_900_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
-    <div id="PowerBomb_900_1_pause" class="PowerBomb_900_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
-    <div id="PowerBomb_900_2_pause" class="PowerBomb_900_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
-    <div id="PowerBomb_900_3_pause" class="PowerBomb_900_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
-    <div id="PowerBomb_900_4_pause" class="PowerBomb_900_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
-    <div id="PowerBomb_900_5_pause" class="PowerBomb_900_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
-    <div id="PowerBomb_900_6_pause" class="PowerBomb_900_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
-    <div id="PowerBomb_900_7_pause" class="PowerBomb_900_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
-    <div id="PowerBomb_900_8_pause" class="PowerBomb_900_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
-    <div id="PowerBomb_900_9_pause" class="PowerBomb_900_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
-    <div id="PowerBomb_90_0_pause" class="PowerBomb_90_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
-    <div id="PowerBomb_90_1_pause" class="PowerBomb_90_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
-    <div id="PowerBomb_90_2_pause" class="PowerBomb_90_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
-    <div id="PowerBomb_90_3_pause" class="PowerBomb_90_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
-    <div id="PowerBomb_90_4_pause" class="PowerBomb_90_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
-    <div id="PowerBomb_90_5_pause" class="PowerBomb_90_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
-    <div id="PowerBomb_90_6_pause" class="PowerBomb_90_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
-    <div id="PowerBomb_90_7_pause" class="PowerBomb_90_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
-    <div id="PowerBomb_90_8_pause" class="PowerBomb_90_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
-    <div id="PowerBomb_90_9_pause" class="PowerBomb_90_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
-    <div id="PowerBomb_9_0_pause" class="PowerBomb_9_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
-    <div id="PowerBomb_9_1_pause" class="PowerBomb_9_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
-    <div id="PowerBomb_9_2_pause" class="PowerBomb_9_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
-    <div id="PowerBomb_9_3_pause" class="PowerBomb_9_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
-    <div id="PowerBomb_9_4_pause" class="PowerBomb_9_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
-    <div id="PowerBomb_9_5_pause" class="PowerBomb_9_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
-    <div id="PowerBomb_9_6_pause" class="PowerBomb_9_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
-    <div id="PowerBomb_9_7_pause" class="PowerBomb_9_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
-    <div id="PowerBomb_9_8_pause" class="PowerBomb_9_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
-    <div id="PowerBomb_9_9_pause" class="PowerBomb_9_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
-
-    <div id="auto" class="auto"><img src="/solver/static/images/auto.png" class="full"></div>
-    <div id="reserve_text" class="reserve_text"><img src="/solver/static/images/reserve_text.png" class="full"></div>
-
-    <div id="reserve_0" class="reserve_0"><img src="/solver/static/images/0_reserve.png" class="full"></div>
-    <div id="reserve_00" class="reserve_00"><img src="/solver/static/images/0_reserve.png" class="full"></div>
-    <div id="reserve_1" class="reserve_1"><img src="/solver/static/images/1_reserve.png" class="full"></div>
-    <div id="reserve_2" class="reserve_1"><img src="/solver/static/images/2_reserve.png" class="full"></div>
-    <div id="reserve_3" class="reserve_1"><img src="/solver/static/images/3_reserve.png" class="full"></div>
-    <div id="reserve_4" class="reserve_1"><img src="/solver/static/images/4_reserve.png" class="full"></div>
 
     <input id="timer" type="time" value="03:00" class="timer" style="display:none">
 

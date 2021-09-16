@@ -21,7 +21,6 @@ import itertools
 from collections import defaultdict
 
 from rom.rom import RealROM, snes_to_pc, pc_to_snes
-from rom.ips import IPS_Patch
 from rom.compression import Compressor
 from rom.leveldata import LevelData, Room, BoundingRect
 
@@ -670,7 +669,8 @@ if enableMode7 and not args.no_mode7:
     print("compressing tilemap")
     compressedData = Compressor(computeLimit=128).compress(tilemapData)
     recompressedDataSize = len(compressedData)
-    if recompressedDataSize > compressedTilemapSize:
+    vanillaSize = 171
+    if recompressedDataSize > vanillaSize:
         freespaceSize = 4574
         assert recompressedDataSize < freespaceSize
         # relocate in freespace
@@ -692,9 +692,10 @@ if enableMode7 and not args.no_mode7:
 
     print("compressing tiles, {}".format(len(tileData)))
     compressedData = Compressor(computeLimit=4096).compress(tileData)
+    vanillaSize = 10330
     recompressedDataSize = len(compressedData)
-    print("recompressedDataSize: {} compressedTileSize: {}".format(recompressedDataSize, compressedTileSize))
-    assert recompressedDataSize <= compressedTileSize
+    print("recompressedDataSize: {} vanillaSize: {}".format(recompressedDataSize, vanillaSize))
+    assert recompressedDataSize <= vanillaSize
     # write compress data
     vanillaRom.seek(tileAddr)
     for byte in compressedData:

@@ -86,63 +86,64 @@ def isEmpty(img, box):
                 return False
     return True
 
-# check how many tiles in the ship image are not empty.
-# ship image in the template is 7 x 5 tiles.
-width = 7
-height = 5
-emptyMatrix = [ [ True for x in range(width) ] for y in range(height) ]
+if not args.no_ship:
+    # check how many tiles in the ship image are not empty.
+    # ship image in the template is 7 x 5 tiles.
+    width = 7
+    height = 5
+    emptyMatrix = [ [ True for x in range(width) ] for y in range(height) ]
 
-for tileX in range(width):
-    for tileY in range(height):
-        emptyMatrix[tileY][tileX] = isEmpty(shipImg, (tileX*16, tileY*16, (tileX+1)*16, (tileY+1)*16))
+    for tileX in range(width):
+        for tileY in range(height):
+            emptyMatrix[tileY][tileX] = isEmpty(shipImg, (tileX*16, tileY*16, (tileX+1)*16, (tileY+1)*16))
 
-#print("matrix:")
-#for row in emptyMatrix:
-#    print(row)
+    #print("matrix:")
+    #for row in emptyMatrix:
+    #    print(row)
 
-# max 26 tiles can be non empty, as vanilla has 52 oam for the ship
-maxTiles = 26
-nonEmptyCount = sum([row.count(False) for row in emptyMatrix])
-assert nonEmptyCount <= maxTiles, "Too many tiles in the ship: {}, max authorized is {}".format(nonEmptyCount, maxTiles)
+    # max 26 tiles can be non empty, as vanilla has 52 oam for the ship
+    maxTiles = 26
+    nonEmptyCount = sum([row.count(False) for row in emptyMatrix])
+    assert nonEmptyCount <= maxTiles, "Too many tiles in the ship: {}, max authorized is {}".format(nonEmptyCount, maxTiles)
 
-# convert hatch tiles with new colors
-if enableHatch:
-    for origColor, newColor in zip(hatchOrigPalette, hatchNewPalette):
-        data = np.array(hatchCloseImg)
-        data[(data == origColor).all(axis = -1)] = newColor
-        hatchCloseImg = Image.fromarray(data, mode='RGBA')
+    # convert hatch tiles with new colors
+    if enableHatch:
+        for origColor, newColor in zip(hatchOrigPalette, hatchNewPalette):
+            data = np.array(hatchCloseImg)
+            data[(data == origColor).all(axis = -1)] = newColor
+            hatchCloseImg = Image.fromarray(data, mode='RGBA')
 
-        data = np.array(hatchOpenImg)
-        data[(data == origColor).all(axis = -1)] = newColor
-        hatchOpenImg = Image.fromarray(data, mode='RGBA')
+            data = np.array(hatchOpenImg)
+            data[(data == origColor).all(axis = -1)] = newColor
+            hatchOpenImg = Image.fromarray(data, mode='RGBA')
 
-# check how many different colors are in the ship, max 16 (including the glowing and transparent one)
-# TODO::use provided function
-shipColors = set()
-for r, g, b, a in shipImg.getdata():
-    shipColors.add((r, g, b))
-
-if enableHatch:
-    for r, g, b, a in hatchCloseImg.getdata():
-        shipColors.add((r, g, b))
-    for r, g, b, a in hatchOpenImg.getdata():
+    # check how many different colors are in the ship, max 16 (including the glowing and transparent one)
+    # TODO::use provided function
+    shipColors = set()
+    for r, g, b, a in shipImg.getdata():
         shipColors.add((r, g, b))
 
-# remove transparent color
-try:
-    shipColors.remove((0, 0, 0))
-except:
-    pass
+    if enableHatch:
+        for r, g, b, a in hatchCloseImg.getdata():
+            shipColors.add((r, g, b))
+        for r, g, b, a in hatchOpenImg.getdata():
+            shipColors.add((r, g, b))
 
-print("ship colors: {}".format(shipColors))
-maxColors = 16
-if len(shipColors) >= maxColors:
-    print("Too many colors in the image, convert it to 16 colors using ImageMagick for example:")
-    print("convert {} +dither -colors 16 - | convert - PNG32:{}".format(ship_template, ship_template))
-    sys.exit(1)
+    # remove transparent color
+    try:
+        shipColors.remove((0, 0, 0))
+    except:
+        pass
 
-# put back transparency as first element
-shipColors = [(0, 0, 0)] + list(shipColors)
+    print("ship colors: {}".format(shipColors))
+    maxColors = 16
+    if len(shipColors) >= maxColors:
+        print("Too many colors in the image, convert it to 16 colors using ImageMagick for example:")
+        print("convert {} +dither -colors 16 - | convert - PNG32:{}".format(ship_template, ship_template))
+        sys.exit(1)
+
+    # put back transparency as first element
+    shipColors = [(0, 0, 0)] + list(shipColors)
 
 def RGB_15_to_24(SNESColor):
     R = ((SNESColor      ) % 32) * 8
@@ -158,24 +159,25 @@ def RGB_24_to_15(color_tuple):
 
     return B_adj * 1024 + G_adj * 32 + R_adj
 
-paletteFinal = []
-paletteFinalRGB = []
-for color in shipColors:
-    paletteFinalRGB += color
-    paletteFinal.append(RGB_24_to_15(color))
+if not args.no_ship:
+    paletteFinal = []
+    paletteFinalRGB = []
+    for color in shipColors:
+        paletteFinalRGB += color
+        paletteFinal.append(RGB_24_to_15(color))
 
-print("final palette, {} colors: {}".format(len(paletteFinal), [hex(c) for c in paletteFinal]))
-print("final palette RGB: {}".format(paletteFinalRGB))
+    print("final palette, {} colors: {}".format(len(paletteFinal), [hex(c) for c in paletteFinal]))
+    print("final palette RGB: {}".format(paletteFinalRGB))
 
-# if all 16 colors are used disable the glowing color
-if len(shipColors) == maxColors and not args.no_ship:
-    glowListAddr = snes_to_pc(0x8DCA52)
-    vanillaRom.seek(glowListAddr)
-    vanillaRom.writeWord(0x0005) # set color
-    vanillaRom.writeWord(paletteFinal[-1]) # glow color
-    vanillaRom.writeWord(0xC595) # done
-    vanillaRom.writeWord(0xC61E) # goto CA52
-    vanillaRom.writeWord(0xCA52)
+    # if all 16 colors are used disable the glowing color
+    if len(shipColors) == maxColors and not args.no_ship:
+        glowListAddr = snes_to_pc(0x8DCA52)
+        vanillaRom.seek(glowListAddr)
+        vanillaRom.writeWord(0x0005) # set color
+        vanillaRom.writeWord(paletteFinal[-1]) # glow color
+        vanillaRom.writeWord(0xC595) # done
+        vanillaRom.writeWord(0xC61E) # goto CA52
+        vanillaRom.writeWord(0xCA52)
 
 # from sprite something
 def get_single_raw_tile(image):
@@ -313,43 +315,43 @@ def palettize(this_image, palette):
 
     return paletted_image
 
-if enableHatch:
-    # add hatch tiles to ship tiles to palettize all images with the same palette
-    tmpImg = Image.new("RGBA", (112, 96))
-    tmpImg.paste(shipImg, (0, 0))
-    tmpImg.paste(hatchCloseImg, (0, 80, 16, 88))
-    tmpImg.paste(hatchOpenImg, (0, 88, 16, 96))
-    # tmpImg.show()
-
-    tmpImg = palettize(tmpImg, paletteFinalRGB[3:])
-    shipImg = tmpImg.crop((0, 0, 112, 80))
-    hatchCloseImg = tmpImg.crop((0, 80, 16, 88))
-    hatchOpenImg = tmpImg.crop((0, 88, 16, 96))
-else:
-    # convert image to 4bpp, indexed in final palette.
-    # treat each 16x16 tile separately.
-    shipImg = palettize(shipImg, paletteFinalRGB[3:])
-
-#print("ship palette: {}".format(shipImg.getpalette()))
-#shipImg.show()
-
-# convert to 4bpp
-tiles = {}
-for y in range(height):
-    for x in range(width):
-        if not emptyMatrix[y][x]:
-            # extract 16x16 tile
-            tile = shipImg.crop((x*16, y*16, (x+1)*16, (y+1)*16))
-            tiles[(y, x)] = convert_to_4bpp(tile, (0,0), (0,0,16,16), None)
-
-if enableHatch: 
-    hatchCloseTile = convert_to_4bpp(hatchCloseImg, (0,0), (0,0,16,8), None)
-    hatchOpenTile = convert_to_4bpp(hatchOpenImg, (0,0), (0,0,16,8), None)
-
-#for pos, data in tiles.items():
-#    print("{} {}".format(pos, len(data)))
-
 if not args.no_ship:
+    if enableHatch:
+        # add hatch tiles to ship tiles to palettize all images with the same palette
+        tmpImg = Image.new("RGBA", (112, 96))
+        tmpImg.paste(shipImg, (0, 0))
+        tmpImg.paste(hatchCloseImg, (0, 80, 16, 88))
+        tmpImg.paste(hatchOpenImg, (0, 88, 16, 96))
+        # tmpImg.show()
+
+        tmpImg = palettize(tmpImg, paletteFinalRGB[3:])
+        shipImg = tmpImg.crop((0, 0, 112, 80))
+        hatchCloseImg = tmpImg.crop((0, 80, 16, 88))
+        hatchOpenImg = tmpImg.crop((0, 88, 16, 96))
+    else:
+        # convert image to 4bpp, indexed in final palette.
+        # treat each 16x16 tile separately.
+        shipImg = palettize(shipImg, paletteFinalRGB[3:])
+
+    #print("ship palette: {}".format(shipImg.getpalette()))
+    #shipImg.show()
+
+    # convert to 4bpp
+    tiles = {}
+    for y in range(height):
+        for x in range(width):
+            if not emptyMatrix[y][x]:
+                # extract 16x16 tile
+                tile = shipImg.crop((x*16, y*16, (x+1)*16, (y+1)*16))
+                tiles[(y, x)] = convert_to_4bpp(tile, (0,0), (0,0,16,16), None)
+
+    if enableHatch: 
+        hatchCloseTile = convert_to_4bpp(hatchCloseImg, (0,0), (0,0,16,8), None)
+        hatchOpenTile = convert_to_4bpp(hatchOpenImg, (0,0), (0,0,16,8), None)
+
+    #for pos, data in tiles.items():
+    #    print("{} {}".format(pos, len(data)))
+
     # write palette data
     paletteAddr = snes_to_pc(0xA2A59E)
     vanillaRom.seek(paletteAddr)
@@ -360,15 +362,14 @@ if not args.no_ship:
     tileAddr = snes_to_pc(0xADB600)
     vanillaRom.seek(tileAddr)
 
-# there's 16 8x8 tiles per row, a 16x16 tile is on two rows.
-# cut tiles in batchs of 8
-tilesKeys = list(tiles.keys())
-tilesBatchs = defaultdict(list)
-for i, k in enumerate(tilesKeys):
-    tilesBatchs[i//8].append(k)
-#print("tilesBatchs: {}".format(tilesBatchs))
+    # there's 16 8x8 tiles per row, a 16x16 tile is on two rows.
+    # cut tiles in batchs of 8
+    tilesKeys = list(tiles.keys())
+    tilesBatchs = defaultdict(list)
+    for i, k in enumerate(tilesKeys):
+        tilesBatchs[i//8].append(k)
+    #print("tilesBatchs: {}".format(tilesBatchs))
 
-if not args.no_ship:
     # a 16 8x8 4bpp tiles row size
     rowSize = 32 * 16
 
@@ -423,79 +424,78 @@ if not args.no_ship:
             for i in range(128):
                 vanillaRom.writeByte(0)
 
-# compute tile index
-tilesIndexes = {}
-for index, pos in enumerate(tilesKeys):
-    # each tile is 16x16, so twice as large as a 8x8 for x, same for y.
-    # 8 16x16 tiles on each row
-    tilesIndexes[pos] = index * 2 + (index//8) * 16
+    # compute tile index
+    tilesIndexes = {}
+    for index, pos in enumerate(tilesKeys):
+        # each tile is 16x16, so twice as large as a 8x8 for x, same for y.
+        # 8 16x16 tiles on each row
+        tilesIndexes[pos] = index * 2 + (index//8) * 16
 
-print("tilesIndexes: {}".format(tilesIndexes))
+    print("tilesIndexes: {}".format(tilesIndexes))
 
-defaultOAM = {
-    (0, 0): [0xC391,0xEE,0x3F00], (0, 1): [0xC3A1,0xEE,0x3F00], (0, 2): [0xC3B1,0xEE,0x3F00], (0, 3): [0xC3C1,0xEE,0x3F00], (0, 4): [0xC3D1,0xEE,0x3F00], (0, 5): [0xC3E1,0xEE,0x3F00], (0, 6): [0xC3F1,0xEE,0x3F00],
-    (1, 0): [0xC391,0xFE,0x3F00], (1, 1): [0xC3A1,0xFE,0x3F00], (1, 2): [0xC3B1,0xFE,0x3F00], (1, 3): [0xC3C1,0xFE,0x3F00], (1, 4): [0xC3D1,0xFE,0x3F00], (1, 5): [0xC3E1,0xFE,0x3F00], (1, 6): [0xC3F1,0xFE,0x3F00],
-    (2, 0): [0xC391,0xE6,0x3F00], (2, 1): [0xC3A1,0xE6,0x3F00], (2, 2): [0xC3B1,0xE6,0x3F00], (2, 3): [0xC3C1,0xE6,0x3F00], (2, 4): [0xC3D1,0xE6,0x3F00], (2, 5): [0xC3E1,0xE6,0x3F00], (2, 6): [0xC3F1,0xE6,0x3F00],
-    (3, 0): [0xC391,0xF6,0x3F00], (3, 1): [0xC3A1,0xF6,0x3F00], (3, 2): [0xC3B1,0xF6,0x3F00], (3, 3): [0xC3C1,0xF6,0x3F00], (3, 4): [0xC3D1,0xF6,0x3F00], (3, 5): [0xC3E1,0xF6,0x3F00], (3, 6): [0xC3F1,0xF6,0x3F00],
-    (4, 0): [0xC391,0x06,0x3F00], (4, 1): [0xC3A1,0x06,0x3F00], (4, 2): [0xC3B1,0x06,0x3F00], (4, 3): [0xC3C1,0x06,0x3F00], (4, 4): [0xC3D1,0x06,0x3F00], (4, 5): [0xC3E1,0x06,0x3F00], (4, 6): [0xC3F1,0x06,0x3F00],
-}
+    defaultOAM = {
+        (0, 0): [0xC391,0xEE,0x3F00], (0, 1): [0xC3A1,0xEE,0x3F00], (0, 2): [0xC3B1,0xEE,0x3F00], (0, 3): [0xC3C1,0xEE,0x3F00], (0, 4): [0xC3D1,0xEE,0x3F00], (0, 5): [0xC3E1,0xEE,0x3F00], (0, 6): [0xC3F1,0xEE,0x3F00],
+        (1, 0): [0xC391,0xFE,0x3F00], (1, 1): [0xC3A1,0xFE,0x3F00], (1, 2): [0xC3B1,0xFE,0x3F00], (1, 3): [0xC3C1,0xFE,0x3F00], (1, 4): [0xC3D1,0xFE,0x3F00], (1, 5): [0xC3E1,0xFE,0x3F00], (1, 6): [0xC3F1,0xFE,0x3F00],
+        (2, 0): [0xC391,0xE6,0x3F00], (2, 1): [0xC3A1,0xE6,0x3F00], (2, 2): [0xC3B1,0xE6,0x3F00], (2, 3): [0xC3C1,0xE6,0x3F00], (2, 4): [0xC3D1,0xE6,0x3F00], (2, 5): [0xC3E1,0xE6,0x3F00], (2, 6): [0xC3F1,0xE6,0x3F00],
+        (3, 0): [0xC391,0xF6,0x3F00], (3, 1): [0xC3A1,0xF6,0x3F00], (3, 2): [0xC3B1,0xF6,0x3F00], (3, 3): [0xC3C1,0xF6,0x3F00], (3, 4): [0xC3D1,0xF6,0x3F00], (3, 5): [0xC3E1,0xF6,0x3F00], (3, 6): [0xC3F1,0xF6,0x3F00],
+        (4, 0): [0xC391,0x06,0x3F00], (4, 1): [0xC3A1,0x06,0x3F00], (4, 2): [0xC3B1,0x06,0x3F00], (4, 3): [0xC3C1,0x06,0x3F00], (4, 4): [0xC3D1,0x06,0x3F00], (4, 5): [0xC3E1,0x06,0x3F00], (4, 6): [0xC3F1,0x06,0x3F00],
+    }
 
-defaultOAMMirror = {
-    (0, 6): [0xC201,0xEE,0x7F00], (0, 5): [0xC211,0xEE,0x7F00], (0, 4): [0xC221,0xEE,0x7F00], (0, 3): [0xC231,0xEE,0x7F00], (0, 2): [0xC241,0xEE,0x7F00], (0, 1): [0xC251,0xEE,0x7F00], (0, 0): [0xC261,0xEE,0x7F00],
-    (1, 6): [0xC201,0xFE,0x7F00], (1, 5): [0xC211,0xFE,0x7F00], (1, 4): [0xC221,0xFE,0x7F00], (1, 3): [0xC231,0xFE,0x7F00], (1, 2): [0xC241,0xFE,0x7F00], (1, 1): [0xC251,0xFE,0x7F00], (1, 0): [0xC261,0xFE,0x7F00],
-    (2, 6): [0xC201,0xE6,0x7F00], (2, 5): [0xC211,0xE6,0x7F00], (2, 4): [0xC221,0xE6,0x7F00], (2, 3): [0xC231,0xE6,0x7F00], (2, 2): [0xC241,0xE6,0x7F00], (2, 1): [0xC251,0xE6,0x7F00], (2, 0): [0xC261,0xE6,0x7F00],
-    (3, 6): [0xC201,0xF6,0x7F00], (3, 5): [0xC211,0xF6,0x7F00], (3, 4): [0xC221,0xF6,0x7F00], (3, 3): [0xC231,0xF6,0x7F00], (3, 2): [0xC241,0xF6,0x7F00], (3, 1): [0xC251,0xF6,0x7F00], (3, 0): [0xC261,0xF6,0x7F00],
-    (4, 6): [0xC201,0x06,0x7F00], (4, 5): [0xC211,0x06,0x7F00], (4, 4): [0xC221,0x06,0x7F00], (4, 3): [0xC231,0x06,0x7F00], (4, 2): [0xC241,0x06,0x7F00], (4, 1): [0xC251,0x06,0x7F00], (4, 0): [0xC261,0x06,0x7F00],
-}
+    defaultOAMMirror = {
+        (0, 6): [0xC201,0xEE,0x7F00], (0, 5): [0xC211,0xEE,0x7F00], (0, 4): [0xC221,0xEE,0x7F00], (0, 3): [0xC231,0xEE,0x7F00], (0, 2): [0xC241,0xEE,0x7F00], (0, 1): [0xC251,0xEE,0x7F00], (0, 0): [0xC261,0xEE,0x7F00],
+        (1, 6): [0xC201,0xFE,0x7F00], (1, 5): [0xC211,0xFE,0x7F00], (1, 4): [0xC221,0xFE,0x7F00], (1, 3): [0xC231,0xFE,0x7F00], (1, 2): [0xC241,0xFE,0x7F00], (1, 1): [0xC251,0xFE,0x7F00], (1, 0): [0xC261,0xFE,0x7F00],
+        (2, 6): [0xC201,0xE6,0x7F00], (2, 5): [0xC211,0xE6,0x7F00], (2, 4): [0xC221,0xE6,0x7F00], (2, 3): [0xC231,0xE6,0x7F00], (2, 2): [0xC241,0xE6,0x7F00], (2, 1): [0xC251,0xE6,0x7F00], (2, 0): [0xC261,0xE6,0x7F00],
+        (3, 6): [0xC201,0xF6,0x7F00], (3, 5): [0xC211,0xF6,0x7F00], (3, 4): [0xC221,0xF6,0x7F00], (3, 3): [0xC231,0xF6,0x7F00], (3, 2): [0xC241,0xF6,0x7F00], (3, 1): [0xC251,0xF6,0x7F00], (3, 0): [0xC261,0xF6,0x7F00],
+        (4, 6): [0xC201,0x06,0x7F00], (4, 5): [0xC211,0x06,0x7F00], (4, 4): [0xC221,0x06,0x7F00], (4, 3): [0xC231,0x06,0x7F00], (4, 2): [0xC241,0x06,0x7F00], (4, 1): [0xC251,0x06,0x7F00], (4, 0): [0xC261,0x06,0x7F00],
+    }
 
 
-# write OAM
-# top is first two rows
-oamAddrTop = snes_to_pc(0xA2AD81)
-# we compute left part of the image, mult by 2 to add mirrored tiles
-topSpriteHeight = 2
-bottomSpriteHeight = 3
-tilesInTopCount = sum([row.count(False) for row in emptyMatrix[0:topSpriteHeight]]) * 2
-tilesInTop = []
-for y in range(topSpriteHeight):
-    for x in range(width):
-        if not emptyMatrix[y][x]:
-            tilesInTop.append((y, x))
-tilesInBottom = []
-for y in range(topSpriteHeight, topSpriteHeight + bottomSpriteHeight):
-    for x in range(width):
-        if not emptyMatrix[y][x]:
-            tilesInBottom.append((y, x))
+    # write OAM
+    # top is first two rows
+    oamAddrTop = snes_to_pc(0xA2AD81)
+    # we compute left part of the image, mult by 2 to add mirrored tiles
+    topSpriteHeight = 2
+    bottomSpriteHeight = 3
+    tilesInTopCount = sum([row.count(False) for row in emptyMatrix[0:topSpriteHeight]]) * 2
+    tilesInTop = []
+    for y in range(topSpriteHeight):
+        for x in range(width):
+            if not emptyMatrix[y][x]:
+                tilesInTop.append((y, x))
+    tilesInBottom = []
+    for y in range(topSpriteHeight, topSpriteHeight + bottomSpriteHeight):
+        for x in range(width):
+            if not emptyMatrix[y][x]:
+                tilesInBottom.append((y, x))
 
-# bottom is last three rows
-tilesInBottomCount = sum([row.count(False) for row in emptyMatrix[topSpriteHeight:]]) * 2
-# 5 bytes per oam, sprite map size is 2
-oamSize = 5
-spritemapSize = 2
-oamAddrBottom = oamAddrTop + tilesInTopCount * oamSize + spritemapSize
+    # bottom is last three rows
+    tilesInBottomCount = sum([row.count(False) for row in emptyMatrix[topSpriteHeight:]]) * 2
+    # 5 bytes per oam, sprite map size is 2
+    oamSize = 5
+    spritemapSize = 2
+    oamAddrBottom = oamAddrTop + tilesInTopCount * oamSize + spritemapSize
 
-# convert from (y, x) in the image to OAM (x, y) and tile index
-oamTop = []
-for pos in tilesInTop:
-    baseOam = defaultOAM[pos]
-    baseOam[2] = (baseOam[2] & 0xFF00) + (tilesIndexes[pos] & 0xFF)
-    oamTop.append(baseOam)
-for pos in tilesInTop:
-    baseOam = defaultOAMMirror[pos]
-    baseOam[2] = (baseOam[2] & 0xFF00) + (tilesIndexes[pos] & 0xFF)
-    oamTop.append(baseOam)
+    # convert from (y, x) in the image to OAM (x, y) and tile index
+    oamTop = []
+    for pos in tilesInTop:
+        baseOam = defaultOAM[pos]
+        baseOam[2] = (baseOam[2] & 0xFF00) + (tilesIndexes[pos] & 0xFF)
+        oamTop.append(baseOam)
+    for pos in tilesInTop:
+        baseOam = defaultOAMMirror[pos]
+        baseOam[2] = (baseOam[2] & 0xFF00) + (tilesIndexes[pos] & 0xFF)
+        oamTop.append(baseOam)
 
-oamBottom = []
-for pos in tilesInBottom:
-    baseOam = defaultOAM[pos]
-    baseOam[2] = (baseOam[2] & 0xFF00) + (tilesIndexes[pos] & 0xFF)
-    oamBottom.append(baseOam)
-for pos in tilesInBottom:
-    baseOam = defaultOAMMirror[pos]
-    baseOam[2] = (baseOam[2] & 0xFF00) + (tilesIndexes[pos] & 0xFF)
-    oamBottom.append(baseOam)
+    oamBottom = []
+    for pos in tilesInBottom:
+        baseOam = defaultOAM[pos]
+        baseOam[2] = (baseOam[2] & 0xFF00) + (tilesIndexes[pos] & 0xFF)
+        oamBottom.append(baseOam)
+    for pos in tilesInBottom:
+        baseOam = defaultOAMMirror[pos]
+        baseOam[2] = (baseOam[2] & 0xFF00) + (tilesIndexes[pos] & 0xFF)
+        oamBottom.append(baseOam)
 
-if not args.no_ship:
     # write oam data
     vanillaRom.seek(oamAddrTop)
     vanillaRom.writeWord(tilesInTopCount)
@@ -544,7 +544,8 @@ if enableMode7 and not args.no_mode7:
     except:
         pass
 
-    print("mode7 ship colors: {}".format(shipColors))
+    print("mode7 ship colors: {}".format(mode7shipColors))
+    maxColors = 16
     if len(mode7shipColors) >= maxColors:
         print("Too many colors in the mode7 image, convert it to 16 colors using ImageMagick for example:")
         print("convert {} +dither -colors 16 - | convert - PNG32:{}".format(ship_template, ship_template))

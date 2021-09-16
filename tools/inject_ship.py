@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sys, os
+import sys, os, argparse
 from shutil import copyfile
 
 # we're in directory 'tools/' we have to update sys.path
@@ -25,11 +25,19 @@ from rom.ips import IPS_Patch
 from rom.compression import Compressor
 from rom.leveldata import LevelData, Room, BoundingRect
 
-vanilla = sys.argv[1]
-ship_template = sys.argv[2]
+parser = argparse.ArgumentParser(description="ship injector")
+parser.add_argument('--rom', '-r', help="the input rom", dest="vanilla")
+parser.add_argument('--png', '-p', help="ship png template", dest="ship_template")
+parser.add_argument('--no-layout', '-l', help="no layout update", dest="no_layout",
+                    action='store_true', default=False)
+parser.add_argument('--no-mode7', '-m', help="no mode7 update", dest="no_mode7",
+                    action='store_true', default=False)
+parser.add_argument('--no-ship', '-s', help="no ship update", dest="no_ship",
+                    action='store_true', default=False)
+args = parser.parse_args()
 
-vanillaRom = RealROM(vanilla)
-baseImg = Image.open(ship_template)
+vanillaRom = RealROM(args.vanilla)
+baseImg = Image.open(args.ship_template)
 
 # extract ship
 shipBox = (128, 144, 240, 224)
@@ -161,7 +169,7 @@ print("final palette, {} colors: {}".format(len(paletteFinal), [hex(c) for c in 
 print("final palette RGB: {}".format(paletteFinalRGB))
 
 # if all 16 colors are used disable the glowing color
-if len(shipColors) == maxColors:
+if len(shipColors) == maxColors and not args.no_ship:
     glowListAddr = snes_to_pc(0x8DCA52)
     vanillaRom.seek(glowListAddr)
     vanillaRom.writeWord(0x0005) # set color
@@ -342,15 +350,16 @@ if enableHatch:
 #for pos, data in tiles.items():
 #    print("{} {}".format(pos, len(data)))
 
-# write palette data
-paletteAddr = snes_to_pc(0xA2A59E)
-vanillaRom.seek(paletteAddr)
-for word in paletteFinal:
-    vanillaRom.writeWord(word)
+if not args.no_ship:
+    # write palette data
+    paletteAddr = snes_to_pc(0xA2A59E)
+    vanillaRom.seek(paletteAddr)
+    for word in paletteFinal:
+        vanillaRom.writeWord(word)
 
-# write tile data
-tileAddr = snes_to_pc(0xADB600)
-vanillaRom.seek(tileAddr)
+    # write tile data
+    tileAddr = snes_to_pc(0xADB600)
+    vanillaRom.seek(tileAddr)
 
 # there's 16 8x8 tiles per row, a 16x16 tile is on two rows.
 # cut tiles in batchs of 8
@@ -360,59 +369,60 @@ for i, k in enumerate(tilesKeys):
     tilesBatchs[i//8].append(k)
 #print("tilesBatchs: {}".format(tilesBatchs))
 
-# a 16 8x8 4bpp tiles row size
-rowSize = 32 * 16
+if not args.no_ship:
+    # a 16 8x8 4bpp tiles row size
+    rowSize = 32 * 16
 
-length = len(tiles[tilesKeys[0]])
-for i, poses in tilesBatchs.items():
-    for pos in poses:
-        # first row
-        for byte in tiles[pos][:length//2]:
-            vanillaRom.writeByte(int(byte))
-    if len(poses) < 8:
+    length = len(tiles[tilesKeys[0]])
+    for i, poses in tilesBatchs.items():
+        for pos in poses:
+            # first row
+            for byte in tiles[pos][:length//2]:
+                vanillaRom.writeByte(int(byte))
+        if len(poses) < 8:
+            # last row is incomplete
+            lastRow8Addr = tileAddr + i * 2 * rowSize + rowSize
+            vanillaRom.seek(lastRow8Addr)
+        for pos in poses:
+            # second row
+            for byte in tiles[pos][length//2:]:
+                vanillaRom.writeByte(int(byte))
+
+    # if last two tiles are used we also have to copy them to escape tiles
+    escapeTilesAddr = snes_to_pc(0x94C800)
+    if len(tilesKeys) > 24:
+        vanillaRom.seek(escapeTilesAddr)
+        poses = tilesBatchs[3]
+        for pos in poses:
+            # top row
+            for byte in tiles[pos][:length//2]:
+                vanillaRom.writeByte(int(byte))
         # last row is incomplete
-        lastRow8Addr = tileAddr + i * 2 * rowSize + rowSize
+        lastRow8Addr = escapeTilesAddr + rowSize
         vanillaRom.seek(lastRow8Addr)
-    for pos in poses:
-        # second row
-        for byte in tiles[pos][length//2:]:
-            vanillaRom.writeByte(int(byte))
+        for pos in poses:
+            # second row
+            for byte in tiles[pos][length//2:]:
+                vanillaRom.writeByte(int(byte))
 
-# if last two tiles are used we also have to copy them to escape tiles
-escapeTilesAddr = snes_to_pc(0x94C800)
-if len(tilesKeys) > 24:
-    vanillaRom.seek(escapeTilesAddr)
-    poses = tilesBatchs[3]
-    for pos in poses:
-        # top row
-        for byte in tiles[pos][:length//2]:
-            vanillaRom.writeByte(int(byte))
-    # last row is incomplete
-    lastRow8Addr = escapeTilesAddr + rowSize
-    vanillaRom.seek(lastRow8Addr)
-    for pos in poses:
-        # second row
-        for byte in tiles[pos][length//2:]:
-            vanillaRom.writeByte(int(byte))
-
-# if hatch colors have changed, also copy its tiles to escape tiles
-tile8size = 32
-row8size = tile8size * 16
-hatchAddr = tileAddr + row8size * 6 + tile8size * 4
-hatchEscapeAddr = escapeTilesAddr + tile8size * 4
-if enableHatch:
-    for addr in [hatchAddr, hatchEscapeAddr]:
-        vanillaRom.seek(addr)
-        for byte in hatchCloseTile:
-            vanillaRom.writeByte(int(byte))
-        for byte in hatchOpenTile:
-            vanillaRom.writeByte(int(byte))
-else:
-    # put transparent tiles
-    for addr in [hatchAddr, hatchEscapeAddr]:
-        vanillaRom.seek(addr)
-        for i in range(128):
-            vanillaRom.writeByte(0)
+    # if hatch colors have changed, also copy its tiles to escape tiles
+    tile8size = 32
+    row8size = tile8size * 16
+    hatchAddr = tileAddr + row8size * 6 + tile8size * 4
+    hatchEscapeAddr = escapeTilesAddr + tile8size * 4
+    if enableHatch:
+        for addr in [hatchAddr, hatchEscapeAddr]:
+            vanillaRom.seek(addr)
+            for byte in hatchCloseTile:
+                vanillaRom.writeByte(int(byte))
+            for byte in hatchOpenTile:
+                vanillaRom.writeByte(int(byte))
+    else:
+        # put transparent tiles
+        for addr in [hatchAddr, hatchEscapeAddr]:
+            vanillaRom.seek(addr)
+            for i in range(128):
+                vanillaRom.writeByte(0)
 
 # compute tile index
 tilesIndexes = {}
@@ -486,28 +496,29 @@ for pos in tilesInBottom:
     baseOam[2] = (baseOam[2] & 0xFF00) + (tilesIndexes[pos] & 0xFF)
     oamBottom.append(baseOam)
 
-# write oam data
-vanillaRom.seek(oamAddrTop)
-vanillaRom.writeWord(tilesInTopCount)
-for oam in oamTop:
-    vanillaRom.writeWord(oam[0])
-    vanillaRom.writeByte(oam[1])
-    vanillaRom.writeWord(oam[2])
-vanillaRom.writeWord(tilesInBottomCount)
-for oam in oamBottom:
-    vanillaRom.writeWord(oam[0])
-    vanillaRom.writeByte(oam[1])
-    vanillaRom.writeWord(oam[2])
+if not args.no_ship:
+    # write oam data
+    vanillaRom.seek(oamAddrTop)
+    vanillaRom.writeWord(tilesInTopCount)
+    for oam in oamTop:
+        vanillaRom.writeWord(oam[0])
+        vanillaRom.writeByte(oam[1])
+        vanillaRom.writeWord(oam[2])
+    vanillaRom.writeWord(tilesInBottomCount)
+    for oam in oamBottom:
+        vanillaRom.writeWord(oam[0])
+        vanillaRom.writeByte(oam[1])
+        vanillaRom.writeWord(oam[2])
 
-# write ship bottom start oam list in ship bottom instruction list
-vanillaRom.seek(snes_to_pc(0xA2A61E))
-vanillaRom.writeWord(pc_to_snes(oamAddrBottom) & 0xFFFF)
+    # write ship bottom start oam list in ship bottom instruction list
+    vanillaRom.seek(snes_to_pc(0xA2A61E))
+    vanillaRom.writeWord(pc_to_snes(oamAddrBottom) & 0xFFFF)
 
 # mode 7, convert whole ship sprite (with left & right part) to 112x48 pixels
 # first check is image is not empty
 width, height = mode7shipImg.size
 enableMode7 = not isEmpty(mode7shipImg, (0, 0, width, height))
-if enableMode7:
+if enableMode7 and not args.no_mode7:
     wholeMode7ShipImg = Image.new("RGBA", (width*2, height))
     wholeMode7ShipImg.paste(mode7shipImg, (0, 0))
     wholeMode7ShipImg.paste(mode7shipImg.transpose(Image.FLIP_LEFT_RIGHT), (width, 0))
@@ -527,6 +538,7 @@ if enableMode7:
     for r, g, b, a in wholeMode7ShipImg.getdata():
         mode7shipColors.add((r, g, b))
 
+    print("mode7 ship has {} different colors".format(len(mode7shipColors)))
     # remove transparent color
     try:
         mode7shipColors.remove((0, 0, 0))
@@ -545,11 +557,11 @@ if enableMode7:
     mode7paletteFinal = []
     mode7paletteFinalRGB = []
     for color in mode7shipColors:
-        mode7paletteFinalRGB += color
+        mode7paletteFinalRGB.append(color)
         mode7paletteFinal.append(RGB_24_to_15(color))
 
-    print("final mode 7 palette, {} colors: {}".format(len(paletteFinal), [hex(c) for c in paletteFinal]))
-    print("final mode 7 palette RGB: {}".format(paletteFinalRGB))
+    print("final mode 7 palette, {} colors: {}".format(len(mode7paletteFinal), [hex(c) for c in mode7paletteFinal]))
+    print("final mode 7 palette RGB, {} colors: {}".format(len(mode7paletteFinalRGB), mode7paletteFinalRGB))
 
     # convert image to 4bpp, indexed in final palette.
     # ship palette is in the 6th row, we'll have to add 0x50 to each pixel as mode 7 is not interleaved
@@ -599,12 +611,19 @@ if enableMode7:
     tileSize = 8 * 8
     # palette has 256 colors, our is on the 6th line
     paletteOffset = 0x50
+    writtenColors = set()
     for pos, index in tilesMode7Indexes.items():
         posInData = index * tileSize
         for i, byte in enumerate(tilesMode7[pos].getdata()):
+            writtenColors.add(int(byte))
             tileData[posInData + i] = int(byte) + (paletteOffset if int(byte) > 0 else 0)
         posInTilemap = pos[0]*tilemapRowLength+pos[1]
         tilemapData[posInTilemap] = index
+
+    # fix palette gap as we use direct indexed color
+    for i in range(16):
+        if i not in writtenColors:
+            mode7paletteFinal = mode7paletteFinal[:i] + [0] + mode7paletteFinal[i:]
 
     def applyPercent(i, basePalette):
         percents = [90, 70, 50, 30, 10, -10, -30, -30, -25, -20, -15, -10, -5, -1]
@@ -644,24 +663,48 @@ if enableMode7:
         palette = applyPercent(j, mode7paletteFinal)
         for i, word in enumerate(palette):
             vanillaRom.writeWord(word, paletteAddr+paletteGap*(j+1)+i*2)
+        for i in range(16-len(palette)):
+            vanillaRom.writeWord(0x7fff)
 
     # last is regular palette
     j += 1
     for i, word in enumerate(mode7paletteFinal):
         vanillaRom.writeWord(word, paletteAddr+paletteGap*(j+1)+i*2)
+    for i in range(16-len(mode7paletteFinal)):
+        vanillaRom.writeWord(0x7fff)
 
     # compress
     print("compressing tilemap")
     compressedData = Compressor(computeLimit=128).compress(tilemapData)
     recompressedDataSize = len(compressedData)
-    assert recompressedDataSize <= compressedTilemapSize
+    freespaceAddr = snes_to_pc(0x99EE21)
+    freespaceSize = 4574
+    if recompressedDataSize > compressedTilemapSize:
+        assert recompressedDataSize < freespaceSize
+        # relocate in freespace
+        tilemapAddr = freespaceAddr
+        freespaceAddr += recompressedDataSize
+        freespaceSize -= recompressedDataSize
+        print("rellocating tilemap data in freespace")
+        # change pointers
+        vanillaRom.writeWord(0x9900, snes_to_pc(0x8BBCCE))
+        vanillaRom.writeWord(0xEE21, snes_to_pc(0x8BBCD3))
+        vanillaRom.writeWord(0x9900, snes_to_pc(0x8BC166))
+        vanillaRom.writeWord(0xEE21, snes_to_pc(0x8BC16B))
+        vanillaRom.writeWord(0x9900, snes_to_pc(0x8BD58E))
+        vanillaRom.writeWord(0xEE21, snes_to_pc(0x8BD593))
+
     # write compress data
     vanillaRom.seek(tilemapAddr)
     for byte in compressedData:
         vanillaRom.writeByte(byte)
 
+    # reread compressed data to validate them
+    newcompressedTileSize, newtilemapData = Compressor().decompress(vanillaRom, tilemapAddr)
+    assert newtilemapData == tilemapData
+
     print("compressing tiles")
-    compressedData = Compressor(computeLimit=256).compress(tileData)
+    compressedData = Compressor(computeLimit=512).compress(tileData)
     recompressedDataSize = len(compressedData)
     assert recompressedDataSize <= compressedTileSize
     # write compress data
@@ -669,293 +712,294 @@ if enableMode7:
     for byte in compressedData:
         vanillaRom.writeByte(byte)
 
-# generate layout behind the ship
-slopesImg = Image.open('tools/ship/slopes.png')
-# keep only alpha channel
-slopesImg = slopesImg.getchannel('A')
-#slopesImg.show()
+if not args.no_layout:
+    # generate layout behind the ship
+    slopesImg = Image.open('tools/ship/slopes.png')
+    # keep only alpha channel
+    slopesImg = slopesImg.getchannel('A')
+    #slopesImg.show()
 
-tmpslopes = {
-    # fully filled blocks on the outside of the ship
-    19: {"flipX": False, "flipY": True},
-    # regular slopes
-    0: {"flipX": False, "flipY": True},
-    1: {"flipX": True,  "flipY": False},
-    2: {"flipX": True,  "flipY": True},
-    3: {"flipX": True,  "flipY": True},
-    5: {"flipX": True,  "flipY": True},
-    6: {"flipX": True,  "flipY": True},
-    18: {"flipX": True,  "flipY": True},
-    20: {"flipX": True,  "flipY": True},
-    21: {"flipX": True,  "flipY": True},
-    22: {"flipX": True,  "flipY": True},
-    23: {"flipX": True,  "flipY": True},
-    24: {"flipX": True,  "flipY": True},
-    25: {"flipX": True,  "flipY": True},
-    26: {"flipX": True,  "flipY": True},
-    27: {"flipX": True,  "flipY": True},
-    28: {"flipX": True,  "flipY": True},
-    29: {"flipX": True,  "flipY": True},
-    30: {"flipX": True,  "flipY": True},
-    31: {"flipX": True,  "flipY": True}
-}
+    tmpslopes = {
+        # fully filled blocks on the outside of the ship
+        19: {"flipX": False, "flipY": True},
+        # regular slopes
+        0: {"flipX": False, "flipY": True},
+        1: {"flipX": True,  "flipY": False},
+        2: {"flipX": True,  "flipY": True},
+        3: {"flipX": True,  "flipY": True},
+        5: {"flipX": True,  "flipY": True},
+        6: {"flipX": True,  "flipY": True},
+        18: {"flipX": True,  "flipY": True},
+        20: {"flipX": True,  "flipY": True},
+        21: {"flipX": True,  "flipY": True},
+        22: {"flipX": True,  "flipY": True},
+        23: {"flipX": True,  "flipY": True},
+        24: {"flipX": True,  "flipY": True},
+        25: {"flipX": True,  "flipY": True},
+        26: {"flipX": True,  "flipY": True},
+        27: {"flipX": True,  "flipY": True},
+        28: {"flipX": True,  "flipY": True},
+        29: {"flipX": True,  "flipY": True},
+        30: {"flipX": True,  "flipY": True},
+        31: {"flipX": True,  "flipY": True}
+    }
 
-slopes = defaultdict(dict)
-for slope, data in tmpslopes.items():
-    # extract slope image
-    x = (slope % 8) * 16
-    y = (slope//8) * 16
-    slopeImg = slopesImg.crop((x, y, x+16, y+16))
-    slopeImgi = ImageOps.invert(slopeImg)
+    slopes = defaultdict(dict)
+    for slope, data in tmpslopes.items():
+        # extract slope image
+        x = (slope % 8) * 16
+        y = (slope//8) * 16
+        slopeImg = slopesImg.crop((x, y, x+16, y+16))
+        slopeImgi = ImageOps.invert(slopeImg)
 
-    slopes[slope]["reg"] = slopeImg.convert('1')
-    slopes[slope]["inv"] = slopeImgi.convert('1')
+        slopes[slope]["reg"] = slopeImg.convert('1')
+        slopes[slope]["inv"] = slopeImgi.convert('1')
 
-    # generated flipped images
-    if data["flipX"]:
-        slopes[0x100+slope]["reg"] = slopeImg.transpose(Image.FLIP_LEFT_RIGHT).convert('1')
-        slopes[0x100+slope]["inv"] = slopeImgi.transpose(Image.FLIP_LEFT_RIGHT).convert('1')
-    if data["flipY"]:
-        slopes[0x200+slope]["reg"] = slopeImg.transpose(Image.FLIP_TOP_BOTTOM).convert('1')
-        slopes[0x200+slope]["inv"] = slopeImgi.transpose(Image.FLIP_TOP_BOTTOM).convert('1')
-    if data["flipX"] and data["flipY"]:
-        slopes[0x300+slope]["reg"] = slopeImg.transpose(Image.ROTATE_180).convert('1')
-        slopes[0x300+slope]["inv"] = slopeImgi.transpose(Image.ROTATE_180).convert('1')
+        # generated flipped images
+        if data["flipX"]:
+            slopes[0x100+slope]["reg"] = slopeImg.transpose(Image.FLIP_LEFT_RIGHT).convert('1')
+            slopes[0x100+slope]["inv"] = slopeImgi.transpose(Image.FLIP_LEFT_RIGHT).convert('1')
+        if data["flipY"]:
+            slopes[0x200+slope]["reg"] = slopeImg.transpose(Image.FLIP_TOP_BOTTOM).convert('1')
+            slopes[0x200+slope]["inv"] = slopeImgi.transpose(Image.FLIP_TOP_BOTTOM).convert('1')
+        if data["flipX"] and data["flipY"]:
+            slopes[0x300+slope]["reg"] = slopeImg.transpose(Image.ROTATE_180).convert('1')
+            slopes[0x300+slope]["inv"] = slopeImgi.transpose(Image.ROTATE_180).convert('1')
 
-# extract slopes overide
-width = 7
-height = 5
-forceEmpty = -1
-slopesOverideMatrix = [ [ None for x in range(width) ] for y in range(height) ]
-for tileY in range(height):
-    for tileX in range(width):
-        if not emptyMatrix[tileY][tileX]:
-            # first check for empty slope force (color 0xcc3535)
-            r, g, b, a = slopesOverideImg.getpixel((tileX*16, tileY*16))
-            if r == 0xcc and g == 0x35 and b == 0x35:
-                slopesOverideMatrix[tileY][tileX] = forceEmpty
+    # extract slopes overide
+    width = 7
+    height = 5
+    forceEmpty = -1
+    slopesOverideMatrix = [ [ None for x in range(width) ] for y in range(height) ]
+    for tileY in range(height):
+        for tileX in range(width):
+            if not emptyMatrix[tileY][tileX]:
+                # first check for empty slope force (color 0xcc3535)
+                r, g, b, a = slopesOverideImg.getpixel((tileX*16, tileY*16))
+                if r == 0xcc and g == 0x35 and b == 0x35:
+                    slopesOverideMatrix[tileY][tileX] = forceEmpty
 
-def findMatchingSlope(overide, slopes):
-    overideData = overide.getdata()
-    for slope, data in slopes.items():
-        slopeData = data["reg"].getdata()
-        if list(overideData) == list(slopeData):
-            return slope
-    raise Exception("Can't find a matching slope")
+    def findMatchingSlope(overide, slopes):
+        overideData = overide.getdata()
+        for slope, data in slopes.items():
+            slopeData = data["reg"].getdata()
+            if list(overideData) == list(slopeData):
+                return slope
+        raise Exception("Can't find a matching slope")
 
-# convert slopes overide to 1bit per pixel image
-for tileY in range(height):
-    for tileX in range(width):
-        if not emptyMatrix[tileY][tileX] and slopesOverideMatrix[tileY][tileX] is None:
-            slope = slopesOverideImg.crop((tileX*16, tileY*16, (tileX+1)*16, (tileY+1)*16))
-            if not isEmpty(slope, (0, 0, 16, 16)):
-                slope = slope.getchannel('A').convert('1')
-                slopesOverideMatrix[tileY][tileX] = findMatchingSlope(slope, slopes)
+    # convert slopes overide to 1bit per pixel image
+    for tileY in range(height):
+        for tileX in range(width):
+            if not emptyMatrix[tileY][tileX] and slopesOverideMatrix[tileY][tileX] is None:
+                slope = slopesOverideImg.crop((tileX*16, tileY*16, (tileX+1)*16, (tileY+1)*16))
+                if not isEmpty(slope, (0, 0, 16, 16)):
+                    slope = slope.getchannel('A').convert('1')
+                    slopesOverideMatrix[tileY][tileX] = findMatchingSlope(slope, slopes)
 
-#print("slopes overide matrix:")
-#for row in slopesOverideMatrix:
-#    print(row)
+    #print("slopes overide matrix:")
+    #for row in slopesOverideMatrix:
+    #    print(row)
 
-def isOutline(x, y, height):
-    if emptyMatrix[y][x]:
+    def isOutline(x, y, height):
+        if emptyMatrix[y][x]:
+            return False
+        # tiles on the Y borders are outlines
+        if y == 0 or y == height-1:
+            return True
+
+        # a tile is an outline if it has one empty tile around it
+        for subX in [x-1, x, x+1]:
+            for subY in [y-1, y, y+1]:
+                try:
+                    empty = emptyMatrix[subY][subX] or slopesOverideMatrix[subY][subX] == forceEmpty
+                except:
+                    continue
+                if empty:
+                    return True
         return False
-    # tiles on the Y borders are outlines
-    if y == 0 or y == height-1:
-        return True
 
-    # a tile is an outline if it has one empty tile around it
-    for subX in [x-1, x, x+1]:
-        for subY in [y-1, y, y+1]:
-            try:
-                empty = emptyMatrix[subY][subX] or slopesOverideMatrix[subY][subX] == forceEmpty
-            except:
-                continue
-            if empty:
-                return True
-    return False
+    # generate ship outline from empty matrix
+    width = 7
+    height = 5
+    outlineMatrix = [ [ False for x in range(width) ] for y in range(height) ]
 
-# generate ship outline from empty matrix
-width = 7
-height = 5
-outlineMatrix = [ [ False for x in range(width) ] for y in range(height) ]
+    for tileX in range(width):
+        for tileY in range(height):
+            outlineMatrix[tileY][tileX] = isOutline(tileX, tileY, height)
 
-for tileX in range(width):
-    for tileY in range(height):
-        outlineMatrix[tileY][tileX] = isOutline(tileX, tileY, height)
+    #print("empty matrix")
+    #for row in emptyMatrix:
+    #    print(row)
+    #print("")
+    #
+    #print("outline matrix")
+    #for row in outlineMatrix:
+    #    print(row)
+    #print("")
 
-#print("empty matrix")
-#for row in emptyMatrix:
-#    print(row)
-#print("")
-#
-#print("outline matrix")
-#for row in outlineMatrix:
-#    print(row)
-#print("")
+    # generate inside matrix from empty & outline matrixes
+    insideMatrix = [ [ False for x in range(width) ] for y in range(height) ]
+    for tileX in range(width):
+        for tileY in range(height):
+            insideMatrix[tileY][tileX] = (not emptyMatrix[tileY][tileX]) and (not outlineMatrix[tileY][tileX])
 
-# generate inside matrix from empty & outline matrixes
-insideMatrix = [ [ False for x in range(width) ] for y in range(height) ]
-for tileX in range(width):
-    for tileY in range(height):
-        insideMatrix[tileY][tileX] = (not emptyMatrix[tileY][tileX]) and (not outlineMatrix[tileY][tileX])
+    #print("inside matrix")
+    #for row in insideMatrix:
+    #    print(row)
 
-#print("inside matrix")
-#for row in insideMatrix:
-#    print(row)
+    def getBestSlope(x, y, slopes, shipAlphaImg):
+        # first check for overide
+        overide = slopesOverideMatrix[y][x]
+        if overide is not None:
+            if overide == forceEmpty:
+                return None
+            else:
+                return overide
 
-def getBestSlope(x, y, slopes, shipAlphaImg):
-    # first check for overide
-    overide = slopesOverideMatrix[y][x]
-    if overide is not None:
-        if overide == forceEmpty:
-            return None
-        else:
-            return overide
+        # extract ship tile
+        shipTile = shipAlphaImg.crop((x*16, y*16, (x+1)*16, (y+1)*16))
+        shipTilei = ImageOps.invert(shipTile).convert('1')
+        shipTile = shipTile.convert('1')
 
-    # extract ship tile
-    shipTile = shipAlphaImg.crop((x*16, y*16, (x+1)*16, (y+1)*16))
-    shipTilei = ImageOps.invert(shipTile).convert('1')
-    shipTile = shipTile.convert('1')
+        bestScore = -1
+        bestSlope = -1
+        for slope, imgs in slopes.items():
+            # match both empty to maximize empty ship pixels outside of the slop
+            empty = ImageChops.logical_and(shipTilei, imgs["inv"])
+            colors = empty.getcolors()
+            # get the 255 color
+            emptyScore = 0
+            for color in colors:
+                if color[1] == 255:
+                    emptyScore = color[0]
+                    break
 
-    bestScore = -1
-    bestSlope = -1
-    for slope, imgs in slopes.items():
-        # match both empty to maximize empty ship pixels outside of the slop
-        empty = ImageChops.logical_and(shipTilei, imgs["inv"])
-        colors = empty.getcolors()
-        # get the 255 color
-        emptyScore = 0
-        for color in colors:
-            if color[1] == 255:
-                emptyScore = color[0]
-                break
+            # match both filled to maximize ship pixels under the slop
+            filled = ImageChops.logical_and(shipTile, imgs["reg"])
+            colors = filled.getcolors()
+            # get the 255 color
+            filledScore = 0
+            for color in colors:
+                if color[1] == 255:
+                    filledScore = color[0]
+                    break
 
-        # match both filled to maximize ship pixels under the slop
-        filled = ImageChops.logical_and(shipTile, imgs["reg"])
-        colors = filled.getcolors()
-        # get the 255 color
-        filledScore = 0
-        for color in colors:
-            if color[1] == 255:
-                filledScore = color[0]
-                break
+            finalScore = emptyScore + filledScore
+            if finalScore > bestScore:
+                bestScore = finalScore
+                bestSlope = slope
 
-        finalScore = emptyScore + filledScore
-        if finalScore > bestScore:
-            bestScore = finalScore
-            bestSlope = slope
+        return bestSlope
 
-    return bestSlope
+    print("compute slopes")
+    slopesMatrix = [ [ {} for x in range(width) ] for y in range(height) ]
+    for tileX in range(width):
+        for tileY in range(height):
+            if emptyMatrix[tileY][tileX]:
+                slopesMatrix[tileY][tileX] = {"isSolid": False, "bts": None}
+            elif insideMatrix[tileY][tileX]:
+                slopesMatrix[tileY][tileX] = {"isSolid": True, "bts": None}
+            else:
+                slopesMatrix[tileY][tileX] = {"isSolid": False, "bts": getBestSlope(tileX, tileY, slopes, shipAlphaImg)}
 
-print("compute slopes")
-slopesMatrix = [ [ {} for x in range(width) ] for y in range(height) ]
-for tileX in range(width):
-    for tileY in range(height):
-        if emptyMatrix[tileY][tileX]:
-            slopesMatrix[tileY][tileX] = {"isSolid": False, "bts": None}
-        elif insideMatrix[tileY][tileX]:
-            slopesMatrix[tileY][tileX] = {"isSolid": True, "bts": None}
-        else:
-            slopesMatrix[tileY][tileX] = {"isSolid": False, "bts": getBestSlope(tileX, tileY, slopes, shipAlphaImg)}
+    # mirror slopes matrix
+    fullSlopesMatrix = [ [ {} for x in range(width*2) ] for y in range(height) ]
+    for tileX in range(width):
+        for tileY in range(height):
+            fullSlopesMatrix[tileY][tileX] = slopesMatrix[tileY][tileX]
+    for tileX in range(width, 2*width):
+        for tileY in range(height):
+            fullSlopesMatrix[tileY][tileX] = slopesMatrix[tileY][2*width - tileX -1]
+            bts = fullSlopesMatrix[tileY][tileX]["bts"]
+            if bts is not None:
+                # inverse X flip
+                bts ^= 0x100
+                fullSlopesMatrix[tileY][tileX] = {"isSolid": False, "bts": bts}
 
-# mirror slopes matrix
-fullSlopesMatrix = [ [ {} for x in range(width*2) ] for y in range(height) ]
-for tileX in range(width):
-    for tileY in range(height):
-        fullSlopesMatrix[tileY][tileX] = slopesMatrix[tileY][tileX]
-for tileX in range(width, 2*width):
-    for tileY in range(height):
-        fullSlopesMatrix[tileY][tileX] = slopesMatrix[tileY][2*width - tileX -1]
-        bts = fullSlopesMatrix[tileY][tileX]["bts"]
-        if bts is not None:
-            # inverse X flip
-            bts ^= 0x100
-            fullSlopesMatrix[tileY][tileX] = {"isSolid": False, "bts": bts}
+    #print("full slopes matrix")
+    #for row in fullSlopesMatrix:
+    #    print(row)
 
-#print("full slopes matrix")
-#for row in fullSlopesMatrix:
-#    print(row)
+    ## generate img with slopes
+    #result = Image.new('1', (7*16, 5*16))
+    #for tileX in range(width):
+    #    for tileY in range(height):
+    #        slope = slopesMatrix[tileY][tileX]
+    #        if not slope["isSolid"] and slope["bts"] is None:
+    #            continue
+    #        elif slope["isSolid"]:
+    #            # copy filled slope
+    #            result.paste(ImageOps.invert(slopes[19]["inv"].convert("L")), (tileX*16, tileY*16))
+    #        else:
+    #            result.paste(ImageOps.invert(slopes[slope["bts"]]["inv"].convert("L")), (tileX*16, tileY*16))
+    #result.save('slopes.png')
 
-## generate img with slopes
-#result = Image.new('1', (7*16, 5*16))
-#for tileX in range(width):
-#    for tileY in range(height):
-#        slope = slopesMatrix[tileY][tileX]
-#        if not slope["isSolid"] and slope["bts"] is None:
-#            continue
-#        elif slope["isSolid"]:
-#            # copy filled slope
-#            result.paste(ImageOps.invert(slopes[19]["inv"].convert("L")), (tileX*16, tileY*16))
-#        else:
-#            result.paste(ImageOps.invert(slopes[slope["bts"]]["inv"].convert("L")), (tileX*16, tileY*16))
-#result.save('slopes.png')
-
-# now insert the slopes/tiles into landing site layout
-print("insert ship slopes into landing site layout")
+    # now insert the slopes/tiles into landing site layout
+    print("insert ship slopes into landing site layout")
 
 
-landingSiteAddr = snes_to_pc(0x8F91F8)
-vLandingSite = Room(vanillaRom, landingSiteAddr)
-vLevelDataAddr = vLandingSite.defaultRoomState.levelDataPtr
-vRoomScreenSize = (vLandingSite.width, vLandingSite.height)
-vlevelData = LevelData(vanillaRom, snes_to_pc(vLevelDataAddr), vRoomScreenSize)
+    landingSiteAddr = snes_to_pc(0x8F91F8)
+    vLandingSite = Room(vanillaRom, landingSiteAddr)
+    vLevelDataAddr = vLandingSite.defaultRoomState.levelDataPtr
+    vRoomScreenSize = (vLandingSite.width, vLandingSite.height)
+    vlevelData = LevelData(vanillaRom, snes_to_pc(vLevelDataAddr), vRoomScreenSize)
 
-boundingRect = BoundingRect()
-boundingRect.x1 = 17
-boundingRect.y1 = 78
-boundingRect.x2 = 241
-boundingRect.y2 = 158
-vShipScreen = (4,4)
+    boundingRect = BoundingRect()
+    boundingRect.x1 = 17
+    boundingRect.y1 = 78
+    boundingRect.x2 = 241
+    boundingRect.y2 = 158
+    vShipScreen = (4,4)
 
-#vlevelData.displaySubScreen(vShipScreen, boundingRect)
+    #vlevelData.displaySubScreen(vShipScreen, boundingRect)
 
-# empty layout data
-vlevelData.emptyLayout(vShipScreen, boundingRect)
+    # empty layout data
+    vlevelData.emptyLayout(vShipScreen, boundingRect)
 
-# generate layout data
-layer1 = []
-bts = []
-width = boundingRect.width()
-height = boundingRect.height()
-for y in range(height):
-    for x in range(width):
-        slopeData = fullSlopesMatrix[y][x]
-        if slopeData["isSolid"]:
-            btsType = 8
-            layoutWord = (btsType << 12) + 0xFF
-            layer1.append(layoutWord)
-            bts.append(0)
-        elif slopeData["bts"] is None:
-            layer1.append(0xFF)
-            bts.append(0)
-        else:
-            # layout: bbbbhvtttttttttt b: bts type h: hflip, v: vflip t: tile
-            # bts:    vhbbbbbb v: vflip h: hflip b: value
-            rawBts = slopeData["bts"]
-            if rawBts & 0xFF == 19 and not (y == 0 or emptyMatrix[y-1][x if x < width//2 else width//2-((x-width//2)+1)]):
-                # put a solid block instead, but not if the block is a top one
+    # generate layout data
+    layer1 = []
+    bts = []
+    width = boundingRect.width()
+    height = boundingRect.height()
+    for y in range(height):
+        for x in range(width):
+            slopeData = fullSlopesMatrix[y][x]
+            if slopeData["isSolid"]:
                 btsType = 8
                 layoutWord = (btsType << 12) + 0xFF
                 layer1.append(layoutWord)
                 bts.append(0)
+            elif slopeData["bts"] is None:
+                layer1.append(0xFF)
+                bts.append(0)
             else:
-                flip = (rawBts & 0xFF00) >> 8
-                btsHFlip = flip & 0x1
-                btsVFlip = (flip & 0x2) >> 1
-                btsType = 1
-                btsValue = rawBts & 0xFF
-                layoutWord = (btsType << 12) + 0xFF
-                btsByte = (btsVFlip << 7) + (btsHFlip << 6) + (btsValue & 0x3F)
-                layer1.append(layoutWord)
-                bts.append(btsByte)
+                # layout: bbbbhvtttttttttt b: bts type h: hflip, v: vflip t: tile
+                # bts:    vhbbbbbb v: vflip h: hflip b: value
+                rawBts = slopeData["bts"]
+                if rawBts & 0xFF == 19 and not (y == 0 or emptyMatrix[y-1][x if x < width//2 else width//2-((x-width//2)+1)]):
+                    # put a solid block instead, but not if the block is a top one
+                    btsType = 8
+                    layoutWord = (btsType << 12) + 0xFF
+                    layer1.append(layoutWord)
+                    bts.append(0)
+                else:
+                    flip = (rawBts & 0xFF00) >> 8
+                    btsHFlip = flip & 0x1
+                    btsVFlip = (flip & 0x2) >> 1
+                    btsType = 1
+                    btsValue = rawBts & 0xFF
+                    layoutWord = (btsType << 12) + 0xFF
+                    btsByte = (btsVFlip << 7) + (btsHFlip << 6) + (btsValue & 0x3F)
+                    layer1.append(layoutWord)
+                    bts.append(btsByte)
 
-layoutData = [layer1, bts]
+    layoutData = [layer1, bts]
 
-# paste layout data in landing site
-vlevelData.pasteLayout(layoutData, vShipScreen, boundingRect)
-#vlevelData.displaySubScreen(vShipScreen, boundingRect)
+    # paste layout data in landing site
+    vlevelData.pasteLayout(layoutData, vShipScreen, boundingRect)
+    #vlevelData.displaySubScreen(vShipScreen, boundingRect)
 
-print("compress landing site layout")
-vlevelData.write()
+    print("compress landing site layout")
+    vlevelData.write()
 
 vanillaRom.close()

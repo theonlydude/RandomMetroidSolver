@@ -557,7 +557,7 @@ if enableMode7 and not args.no_mode7:
     mode7paletteFinal = []
     mode7paletteFinalRGB = []
     for color in mode7shipColors:
-        mode7paletteFinalRGB.append(color)
+        mode7paletteFinalRGB += color
         mode7paletteFinal.append(RGB_24_to_15(color))
 
     print("final mode 7 palette, {} colors: {}".format(len(mode7paletteFinal), [hex(c) for c in mode7paletteFinal]))
@@ -565,7 +565,7 @@ if enableMode7 and not args.no_mode7:
 
     # convert image to 4bpp, indexed in final palette.
     # ship palette is in the 6th row, we'll have to add 0x50 to each pixel as mode 7 is not interleaved
-    wholeMode7ShipImg = palettize(wholeMode7ShipImg, paletteFinalRGB[3:])
+    wholeMode7ShipImg = palettize(wholeMode7ShipImg, mode7paletteFinalRGB[3:])
 
     # extract 8x8 tiles
     width, height = (16, 6)
@@ -611,19 +611,12 @@ if enableMode7 and not args.no_mode7:
     tileSize = 8 * 8
     # palette has 256 colors, our is on the 6th line
     paletteOffset = 0x50
-    writtenColors = set()
     for pos, index in tilesMode7Indexes.items():
         posInData = index * tileSize
         for i, byte in enumerate(tilesMode7[pos].getdata()):
-            writtenColors.add(int(byte))
             tileData[posInData + i] = int(byte) + (paletteOffset if int(byte) > 0 else 0)
         posInTilemap = pos[0]*tilemapRowLength+pos[1]
         tilemapData[posInTilemap] = index
-
-    # fix palette gap as we use direct indexed color
-    for i in range(16):
-        if i not in writtenColors:
-            mode7paletteFinal = mode7paletteFinal[:i] + [0] + mode7paletteFinal[i:]
 
     def applyPercent(i, basePalette):
         percents = [90, 70, 50, 30, 10, -10, -30, -30, -25, -20, -15, -10, -5, -1]
@@ -677,14 +670,12 @@ if enableMode7 and not args.no_mode7:
     print("compressing tilemap")
     compressedData = Compressor(computeLimit=128).compress(tilemapData)
     recompressedDataSize = len(compressedData)
-    freespaceAddr = snes_to_pc(0x99EE21)
-    freespaceSize = 4574
     if recompressedDataSize > compressedTilemapSize:
+        freespaceSize = 4574
         assert recompressedDataSize < freespaceSize
         # relocate in freespace
+        freespaceAddr = snes_to_pc(0x99EE21)
         tilemapAddr = freespaceAddr
-        freespaceAddr += recompressedDataSize
-        freespaceSize -= recompressedDataSize
         print("rellocating tilemap data in freespace")
         # change pointers
         vanillaRom.writeWord(0x9900, snes_to_pc(0x8BBCCE))
@@ -699,13 +690,10 @@ if enableMode7 and not args.no_mode7:
     for byte in compressedData:
         vanillaRom.writeByte(byte)
 
-    # reread compressed data to validate them
-    newcompressedTileSize, newtilemapData = Compressor().decompress(vanillaRom, tilemapAddr)
-    assert newtilemapData == tilemapData
-
-    print("compressing tiles")
-    compressedData = Compressor(computeLimit=512).compress(tileData)
+    print("compressing tiles, {}".format(len(tileData)))
+    compressedData = Compressor(computeLimit=4096).compress(tileData)
     recompressedDataSize = len(compressedData)
+    print("recompressedDataSize: {} compressedTileSize: {}".format(recompressedDataSize, compressedTileSize))
     assert recompressedDataSize <= compressedTileSize
     # write compress data
     vanillaRom.seek(tileAddr)

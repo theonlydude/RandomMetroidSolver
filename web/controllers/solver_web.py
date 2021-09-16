@@ -2706,7 +2706,7 @@ def loadMusics():
     dropdown = defaultdict(list)
     metadatas = sorted(os.listdir(musicDir), key=lambda v: v.upper())
     for metadata in metadatas:
-        with open(os.path.join(musicDir, metadata)) as jsonFile:
+        with open(os.path.join(musicDir, metadata), 'r', encoding='utf-8') as jsonFile:
             data = json.load(jsonFile)
             defaultGroup = os.path.splitext(metadata)[0]
             musics.update(data)
@@ -2715,9 +2715,9 @@ def loadMusics():
                 dropdown[songData.get("group", defaultGroup)].append(song)
     musics["_dropdown"] = dropdown
 
-    with open('music/_metadata/vanilla.json', 'r') as jsonFile:
+    with open('music/_metadata/vanilla.json', 'r', encoding='utf-8') as jsonFile:
         vanilla = json.load(jsonFile)
-    with open('music/_constraints/vanilla.json', 'r') as jsonFile:
+    with open('music/_constraints/vanilla.json', 'r', encoding='utf-8') as jsonFile:
         constraints = json.load(jsonFile)
     musics["_list"] = [(song, removeChars(song, " ,()-/")) for song in vanilla.keys() if song not in constraints["preserve"]]
     return musics

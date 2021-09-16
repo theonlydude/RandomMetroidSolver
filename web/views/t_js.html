@@ -1641,17 +1641,27 @@ function resetItems() {
   var items = ["Charge", "Ice", "Wave", "Spazer", "Plasma", "Varia", "Gravity", "Morph", "Bomb", "SpringBall", "ScrewAttack", "HiJump", "SpaceJump", "SpeedBooster", "Grapple", "XRayScope"];
   for(var item in items) {
     document.getElementById(items[item]+"_pause_img").style.display = "none";
+    if(items[item] != "Grapple" && items[item] != "XRayScope") {
+      document.getElementById(items[item]+"_stream_img").style.display = "none";
+      document.getElementById("No"+items[item]+"_stream_img").style.display = "block";
+    }
   }
 
   var items = ["Missile", "Super", "PowerBomb"];
   for(var item in items) {
       document.getElementById(items[item]+"_pause").style.display = "none";
   }
+
+  var bosses = ["Kraid", "Phantoon", "Draygon", "Ridley"];
+  for(var boss in bosses) {
+    document.getElementById(bosses[boss]+"_stream_img").style.display = "none";
+    document.getElementById("No"+bosses[boss]+"_stream_img").style.display = "block";
+  }
 }
 
 var bosses = ["Kraid", "Phantoon", "Draygon", "Ridley", "MotherBrain"];
 function addItem(itemName) {
-  if(itemName == "Nothing" || itemName == "NoEnergy" || bosses.includes(itemName)) {
+  if(itemName == "Nothing" || itemName == "NoEnergy") {
     return;
   }
   if(itemName in itemCount) {
@@ -1670,7 +1680,13 @@ function addItem(itemName) {
       }
     }
   } else {
-    document.getElementById(itemName+"_pause_img").style.display = "block";
+    if(! bosses.includes(itemName)) {
+      document.getElementById(itemName+"_pause_img").style.display = "block";
+    }
+    if(itemName != "Grapple" && itemName != "XRayScope") {
+      document.getElementById(itemName+"_stream_img").style.display = "block";
+      document.getElementById("No"+itemName+"_stream_img").style.display = "none";
+    }
   }
 }
 

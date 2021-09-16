@@ -462,30 +462,81 @@
     </div>
 
     <!-- inventory streaming -->
-    <div id="inventory_streaming">
+    <div id="inventory_streaming" style="display:none">
       <div id="pause_background_streaming" class="stream">
         <img src="/solver/static/images/background_streaming.png" class="full">
       </div>
       <div id="Charge_stream" class="Charge_stream">
-        <img id="Charge_stream_img" src="/solver/static/images/Charge.png" class="imageItem">
+        <img id="Charge_stream_img" src="/solver/static/images/Charge.png" class="imageItem" style="display:none">
+        <img id="NoCharge_stream_img" src="/solver/static/images/No_Charge.png" class="imageItem">
       </div>
       <div id="Ice_stream" class="Ice_stream">
-        <img id="Ice_stream_img" src="/solver/static/images/Ice.png" class="imageItem">
+        <img id="Ice_stream_img" src="/solver/static/images/Ice.png" class="imageItem" style="display:none">
+        <img id="NoIce_stream_img" src="/solver/static/images/No_Ice.png" class="imageItem">
       </div>
       <div id="Wave_stream" class="Wave_stream">
-        <img id="Wave_stream_img" src="/solver/static/images/Wave.png" class="imageItem">
+        <img id="Wave_stream_img" src="/solver/static/images/Wave.png" class="imageItem" style="display:none">
+        <img id="NoWave_stream_img" src="/solver/static/images/No_Wave.png" class="imageItem">
       </div>
       <div id="Spazer_stream" class="Spazer_stream">
-        <img id="Spazer_stream_img" src="/solver/static/images/Spazer.png" class="imageItem">
+        <img id="Spazer_stream_img" src="/solver/static/images/Spazer.png" class="imageItem" style="display:none">
+        <img id="NoSpazer_stream_img" src="/solver/static/images/No_Spazer.png" class="imageItem">
       </div>
       <div id="Plasma_stream" class="Plasma_stream">
-        <img id="Plasma_stream_img" src="/solver/static/images/Plasma.png" class="imageItem">
+        <img id="Plasma_stream_img" src="/solver/static/images/Plasma.png" class="imageItem" style="display:none">
+        <img id="NoPlasma_stream_img" src="/solver/static/images/No_Plasma.png" class="imageItem">
       </div>
       <div id="Varia_stream" class="Varia_stream">
-        <img id="Varia_stream_img" src="/solver/static/images/Varia.png" class="imageItem">
+        <img id="Varia_stream_img" src="/solver/static/images/Varia.png" class="imageItem" style="display:none">
+        <img id="NoVaria_stream_img" src="/solver/static/images/No_Varia.png" class="imageItem">
       </div>
       <div id="Gravity_stream" class="Gravity_stream">
-        <img id="Gravity_stream_img" src="/solver/static/images/Gravity.png" class="imageItem">
+        <img id="Gravity_stream_img" src="/solver/static/images/Gravity.png" class="imageItem" style="display:none">
+        <img id="NoGravity_stream_img" src="/solver/static/images/No_Gravity.png" class="imageItem">
+      </div>
+      <div id="Morph_stream" class="Morph_stream">
+        <img id="Morph_stream_img" src="/solver/static/images/Morph.png" class="imageItem" style="display:none">
+        <img id="NoMorph_stream_img" src="/solver/static/images/No_Morph.png" class="imageItem">
+      </div>
+      <div id="Bomb_stream" class="Bomb_stream">
+        <img id="Bomb_stream_img" src="/solver/static/images/Bomb.png" class="imageItem" style="display:none">
+        <img id="NoBomb_stream_img" src="/solver/static/images/No_Bomb.png" class="imageItem">
+      </div>
+      <div id="SpringBall_stream" class="SpringBall_stream">
+        <img id="SpringBall_stream_img" src="/solver/static/images/SpringBall.png" class="imageItem" style="display:none">
+        <img id="NoSpringBall_stream_img" src="/solver/static/images/No_SpringBall.png" class="imageItem">
+      </div>
+      <div id="ScrewAttack_stream" class="ScrewAttack_stream">
+        <img id="ScrewAttack_stream_img" src="/solver/static/images/ScrewAttack.png" class="imageItem" style="display:none">
+        <img id="NoScrewAttack_stream_img" src="/solver/static/images/No_ScrewAttack.png" class="imageItem">
+      </div>
+      <div id="HiJump_stream" class="HiJump_stream">
+        <img id="HiJump_stream_img" src="/solver/static/images/HiJump.png" class="imageItem" style="display:none">
+        <img id="NoHiJump_stream_img" src="/solver/static/images/No_HiJump.png" class="imageItem">
+      </div>
+      <div id="SpaceJump_stream" class="SpaceJump_stream">
+        <img id="SpaceJump_stream_img" src="/solver/static/images/SpaceJump.png" class="imageItem" style="display:none">
+        <img id="NoSpaceJump_stream_img" src="/solver/static/images/No_SpaceJump.png" class="imageItem">
+      </div>
+      <div id="SpeedBooster_stream" class="SpeedBooster_stream">
+        <img id="SpeedBooster_stream_img" src="/solver/static/images/SpeedBooster.png" class="imageItem" style="display:none">
+        <img id="NoSpeedBooster_stream_img" src="/solver/static/images/No_SpeedBooster.png" class="imageItem">
+      </div>
+      <div id="Kraid_stream" class="Kraid_stream">
+        <img id="Kraid_stream_img" src="/solver/static/images/kraid_head.png" class="imageItem" style="display:none">
+        <img id="NoKraid_stream_img" src="/solver/static/images/No_kraid_head.png" class="imageItem">
+      </div>
+      <div id="Phantoon_stream" class="Phantoon_stream">
+        <img id="Phantoon_stream_img" src="/solver/static/images/phantoon_head.png" class="imageItem" style="display:none">
+        <img id="NoPhantoon_stream_img" src="/solver/static/images/No_phantoon_head.png" class="imageItem">
+      </div>
+      <div id="Draygon_stream" class="Draygon_stream">
+        <img id="Draygon_stream_img" src="/solver/static/images/draygon_head.png" class="imageItem" style="display:none">
+        <img id="NoDraygon_stream_img" src="/solver/static/images/No_draygon_head.png" class="imageItem">
+      </div>
+      <div id="Ridley_stream" class="Ridley_stream">
+        <img id="Ridley_stream_img" src="/solver/static/images/ridley_head.png" class="imageItem" style="display:none">
+        <img id="NoRidley_stream_img" src="/solver/static/images/No_ridley_head.png" class="imageItem">
       </div>
     </div>
 

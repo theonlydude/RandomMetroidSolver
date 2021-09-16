@@ -213,8 +213,8 @@ function switchStreaming() {
     if(loaded == false || init == false || mode == "seedless" || mode == "race") {
         return;
     }
-    menu = document.getElementById("inventory_screen")
-    streaming = document.getElementById("inventory_streaming")
+    var menu = document.getElementById("inventory_screen")
+    var streaming = document.getElementById("inventory_streaming")
     if(inventory == "menu") {
         inventory = "streaming";
         menu.style.display = "none";

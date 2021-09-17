@@ -12,6 +12,14 @@
 #  -ship glow color: to use a custom glow color (must be present in the ship colors). leave empty to disable glow color, allow the use of 16 colors.
 #  -mode7 ship: 16 colors (including the empty one), on the 8x6=48 8x8 tiles only 34 can be used.
 #  -in game ship: 16 colors (including the empty one), on the 7x5=35 16x16 tiles only 24 can be used.
+#
+# hints:
+#  -you should set the GIMP grid to 16x16 when you're working on the in-game ship and to 8x8 when you're working on the mode-7 ship.
+#  -a slopes.png file is generated, you can import it in the GIMP in the upper right box as a base if you need to override some slopes.
+#   in the example_ship.xcf it's imported in the 'am2r gen slopes' layer.
+#   don't forget to hide this layer before exporting the GIMP file to png.
+#   you can load the updated ROM in SMILE to see if there're errors in the generated slopes (displayed in red in SMILE).
+#   look for the Super Metroid Mode Manual for more infos on slopes.
 
 import sys, os, argparse, random, itertools
 from shutil import copyfile
@@ -955,19 +963,19 @@ if not args.no_layout:
 #    for row in fullSlopesMatrix:
 #        print(row)
 #
-#    # generate img with slopes
-#    result = Image.new('1', (7*16, 5*16))
-#    for tileX in range(width):
-#        for tileY in range(height):
-#            slope = slopesMatrix[tileY][tileX]
-#            if not slope["isSolid"] and slope["bts"] is None:
-#                continue
-#            elif slope["isSolid"]:
-#                # copy filled slope
-#                result.paste(ImageOps.invert(slopes[19]["inv"].convert("L")), (tileX*16, tileY*16))
-#            else:
-#                result.paste(ImageOps.invert(slopes[slope["bts"]]["inv"].convert("L")), (tileX*16, tileY*16))
-#    result.save('slopes.png')
+    # generate img with slopes
+    result = Image.new('1', (7*16, 5*16))
+    for tileX in range(width):
+        for tileY in range(height):
+            slope = slopesMatrix[tileY][tileX]
+            if not slope["isSolid"] and slope["bts"] is None:
+                continue
+            elif slope["isSolid"]:
+                # copy filled slope
+                result.paste(ImageOps.invert(slopes[19]["inv"].convert("L")), (tileX*16, tileY*16))
+            else:
+                result.paste(ImageOps.invert(slopes[slope["bts"]]["inv"].convert("L")), (tileX*16, tileY*16))
+    result.save('slopes.png')
 
     # now insert the slopes/tiles into landing site layout
     print("insert ship slopes into landing site layout")

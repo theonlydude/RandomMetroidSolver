@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
-import sys, os, argparse
+import sys, os, argparse, random, itertools
 from shutil import copyfile
+from collections import defaultdict
 
 # we're in directory 'tools/' we have to update sys.path
 sys.path.append(os.path.dirname(sys.path[0]))
@@ -17,66 +18,9 @@ except:
     print("Missing prerequisite numpy")
     sys.exit(1)
 
-import itertools
-from collections import defaultdict
-
 from rom.rom import RealROM, snes_to_pc, pc_to_snes
 from rom.compression import Compressor
 from rom.leveldata import LevelData, Room, BoundingRect
-
-parser = argparse.ArgumentParser(description="ship injector")
-parser.add_argument('--rom', '-r', help="the input rom", dest="vanilla")
-parser.add_argument('--png', '-p', help="ship png template", dest="ship_template")
-parser.add_argument('--no-layout', '-l', help="no layout update", dest="no_layout",
-                    action='store_true', default=False)
-parser.add_argument('--no-mode7', '-m', help="no mode7 update", dest="no_mode7",
-                    action='store_true', default=False)
-parser.add_argument('--no-ship', '-s', help="no ship update", dest="no_ship",
-                    action='store_true', default=False)
-args = parser.parse_args()
-
-vanillaRom = RealROM(args.vanilla)
-baseImg = Image.open(args.ship_template)
-
-# extract ship
-shipBox = (128, 144, 240, 224)
-shipImg = baseImg.crop(shipBox)
-shipAlphaImg = shipImg.getchannel('A')
-#shipImg.show()
-
-# extract hatch tiles, original palette, new palette
-hatchOrigPaletteBox = (56, 96, 96, 104)
-hatchOrigPaletteImg = baseImg.crop(hatchOrigPaletteBox)
-hatchNewPaletteBox = (56, 104, 96, 112)
-hatchNewPaletteImg = baseImg.crop(hatchNewPaletteBox)
-hatchCloseBox = (64, 120, 80, 128)
-hatchCloseImg = baseImg.crop(hatchCloseBox)
-hatchOpenBox = (64, 128, 80, 136)
-hatchOpenImg = baseImg.crop(hatchOpenBox)
-
-# get hatch old & new colors
-hatchColors = (hatchOrigPaletteBox[2] - hatchOrigPaletteBox[0]) // 8 # 8x8 square for each color
-hatchOrigPalette = []
-for x in range(hatchColors):
-    hatchOrigPalette.append(hatchOrigPaletteImg.getpixel((x*8, 0)))
-hatchNewPalette = []
-for x in range(hatchColors):
-    hatchNewPalette.append(hatchNewPaletteImg.getpixel((x*8, 0)))
-
-#print("hatch colors:")
-#print(hatchOrigPalette)
-#print(hatchNewPalette)
-
-# check if new hatch palette has no colors, which means that we disable the hatch sprite. (0,0,0,0) is empty color.
-enableHatch = sum([r+g+b+a for r,g,b,a in hatchNewPalette]) > 0
-
-# mode 7
-mode7shipBox = (40, 160, 104, 208)
-mode7shipImg = baseImg.crop(mode7shipBox)
-
-# slopes
-slopesOverideBox = (240, 16, 352, 96)
-slopesOverideImg = baseImg.crop(slopesOverideBox)
 
 def isEmpty(img, box):
     for x in range(box[0], box[2]):
@@ -85,65 +29,6 @@ def isEmpty(img, box):
             if r != 0 or g != 0 or b != 0:
                 return False
     return True
-
-if not args.no_ship:
-    # check how many tiles in the ship image are not empty.
-    # ship image in the template is 7 x 5 tiles.
-    width = 7
-    height = 5
-    emptyMatrix = [ [ True for x in range(width) ] for y in range(height) ]
-
-    for tileX in range(width):
-        for tileY in range(height):
-            emptyMatrix[tileY][tileX] = isEmpty(shipImg, (tileX*16, tileY*16, (tileX+1)*16, (tileY+1)*16))
-
-    #print("matrix:")
-    #for row in emptyMatrix:
-    #    print(row)
-
-    # max 26 tiles can be non empty, as vanilla has 52 oam for the ship
-    maxTiles = 26
-    nonEmptyCount = sum([row.count(False) for row in emptyMatrix])
-    assert nonEmptyCount <= maxTiles, "Too many tiles in the ship: {}, max authorized is {}".format(nonEmptyCount, maxTiles)
-
-    # convert hatch tiles with new colors
-    if enableHatch:
-        for origColor, newColor in zip(hatchOrigPalette, hatchNewPalette):
-            data = np.array(hatchCloseImg)
-            data[(data == origColor).all(axis = -1)] = newColor
-            hatchCloseImg = Image.fromarray(data, mode='RGBA')
-
-            data = np.array(hatchOpenImg)
-            data[(data == origColor).all(axis = -1)] = newColor
-            hatchOpenImg = Image.fromarray(data, mode='RGBA')
-
-    # check how many different colors are in the ship, max 16 (including the glowing and transparent one)
-    # TODO::use provided function
-    shipColors = set()
-    for r, g, b, a in shipImg.getdata():
-        shipColors.add((r, g, b))
-
-    if enableHatch:
-        for r, g, b, a in hatchCloseImg.getdata():
-            shipColors.add((r, g, b))
-        for r, g, b, a in hatchOpenImg.getdata():
-            shipColors.add((r, g, b))
-
-    # remove transparent color
-    try:
-        shipColors.remove((0, 0, 0))
-    except:
-        pass
-
-    print("ship colors: {}".format(shipColors))
-    maxColors = 16
-    if len(shipColors) >= maxColors:
-        print("Too many colors in the image, convert it to 16 colors using ImageMagick for example:")
-        print("convert {} +dither -colors 16 - | convert - PNG32:{}".format(ship_template, ship_template))
-        sys.exit(1)
-
-    # put back transparency as first element
-    shipColors = [(0, 0, 0)] + list(shipColors)
 
 def RGB_15_to_24(SNESColor):
     R = ((SNESColor      ) % 32) * 8
@@ -159,25 +44,13 @@ def RGB_24_to_15(color_tuple):
 
     return B_adj * 1024 + G_adj * 32 + R_adj
 
-if not args.no_ship:
-    paletteFinal = []
-    paletteFinalRGB = []
-    for color in shipColors:
-        paletteFinalRGB += color
-        paletteFinal.append(RGB_24_to_15(color))
-
-    print("final palette, {} colors: {}".format(len(paletteFinal), [hex(c) for c in paletteFinal]))
-    print("final palette RGB: {}".format(paletteFinalRGB))
-
-    # if all 16 colors are used disable the glowing color
-    if len(shipColors) == maxColors and not args.no_ship:
-        glowListAddr = snes_to_pc(0x8DCA52)
-        vanillaRom.seek(glowListAddr)
-        vanillaRom.writeWord(0x0005) # set color
-        vanillaRom.writeWord(paletteFinal[-1]) # glow color
-        vanillaRom.writeWord(0xC595) # done
-        vanillaRom.writeWord(0xC61E) # goto CA52
-        vanillaRom.writeWord(0xCA52)
+def genDummyColor(usedColors):
+    while True:
+        color = [random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)]
+        if color in usedColors:
+            continue
+        else:
+            return color
 
 # from sprite something
 def get_single_raw_tile(image):
@@ -315,7 +188,248 @@ def palettize(this_image, palette):
 
     return paletted_image
 
+def applyPercent(percent, basePalette):
+    computedPalette = []
+    def extractColors(color):
+        R = ((color      ) % 32)
+        G = ((color//32  ) % 32)
+        B = ((color//1024) % 32)
+        return (R,G,B)
+    def createColor(r, g, b):
+        return b * 1024 + g * 32 + r
+    for color in basePalette:
+        color = extractColors(color)
+        r, g, b = color
+        r = min((r * (100 + percent)) // 100, 31)
+        g = min((g * (100 + percent)) // 100, 31)
+        b = min((b * (100 + percent)) // 100, 31)
+        computedPalette.append(createColor(r, g, b))
+    return computedPalette
+
+def findMatchingSlope(overide, slopes):
+    overideData = overide.getdata()
+    for slope, data in slopes.items():
+        slopeData = data["reg"].getdata()
+        if list(overideData) == list(slopeData):
+            return slope
+    raise Exception("Can't find a matching slope")
+
+def isOutline(x, y, height):
+    if emptyMatrix[y][x]:
+        return False
+    # tiles on the Y borders are outlines
+    if y == 0 or y == height-1:
+        return True
+
+    # a tile is an outline if it has one empty tile around it
+    for subX in [x-1, x, x+1]:
+        for subY in [y-1, y, y+1]:
+            try:
+                empty = emptyMatrix[subY][subX] or slopesOverideMatrix[subY][subX] == forceEmpty
+            except:
+                continue
+            if empty:
+                return True
+    return False
+
+def getBestSlope(x, y, slopes, shipAlphaImg):
+    # extract ship tile
+    shipTile = shipAlphaImg.crop((x*16, y*16, (x+1)*16, (y+1)*16))
+    shipTilei = ImageOps.invert(shipTile).convert('1')
+    shipTile = shipTile.convert('1')
+
+    bestScore = -1
+    bestSlope = -1
+    for slope, imgs in slopes.items():
+        # match both empty to maximize empty ship pixels outside of the slop
+        empty = ImageChops.logical_and(shipTilei, imgs["inv"])
+        colors = empty.getcolors()
+        # get the 255 color
+        emptyScore = 0
+        for color in colors:
+            if color[1] == 255:
+                emptyScore = color[0]
+                break
+
+        # match both filled to maximize ship pixels under the slop
+        filled = ImageChops.logical_and(shipTile, imgs["reg"])
+        colors = filled.getcolors()
+        # get the 255 color
+        filledScore = 0
+        for color in colors:
+            if color[1] == 255:
+                filledScore = color[0]
+                break
+
+        finalScore = emptyScore + filledScore
+        if finalScore > bestScore:
+            bestScore = finalScore
+            bestSlope = slope
+
+    return bestSlope
+
+parser = argparse.ArgumentParser(description="ship injector")
+parser.add_argument('--rom', '-r', help="the input rom", dest="vanilla")
+parser.add_argument('--png', '-p', help="ship png template", dest="ship_template")
+parser.add_argument('--no-layout', '-l', help="no layout update", dest="no_layout",
+                    action='store_true', default=False)
+parser.add_argument('--no-mode7', '-m', help="no mode7 update", dest="no_mode7",
+                    action='store_true', default=False)
+parser.add_argument('--no-ship', '-s', help="no ship update", dest="no_ship",
+                    action='store_true', default=False)
+args = parser.parse_args()
+
+vanillaRom = RealROM(args.vanilla)
+baseImg = Image.open(args.ship_template)
+
+# extract ship
+shipBox = (128, 144, 240, 224)
+shipImg = baseImg.crop(shipBox)
+shipAlphaImg = shipImg.getchannel('A')
+shipGlowCustomImg = baseImg.crop((176, 120, 184, 128))
+(r, g, b, a) = shipGlowCustomImg.getpixel((0, 0))
+shipGlowCustomColor = [r, g, b]
+enableShipGlowCustom = sum(shipGlowCustomColor) > 0
+#shipImg.show()
+
+# extract hatch tiles, original palette, new palette
+hatchOrigPaletteBox = (56, 96, 96, 104)
+hatchOrigPaletteImg = baseImg.crop(hatchOrigPaletteBox)
+hatchNewPaletteBox = (56, 104, 96, 112)
+hatchNewPaletteImg = baseImg.crop(hatchNewPaletteBox)
+hatchCloseBox = (64, 120, 80, 128)
+hatchCloseImg = baseImg.crop(hatchCloseBox)
+hatchOpenBox = (64, 128, 80, 136)
+hatchOpenImg = baseImg.crop(hatchOpenBox)
+
+# get hatch old & new colors
+hatchColors = (hatchOrigPaletteBox[2] - hatchOrigPaletteBox[0]) // 8 # 8x8 square for each color
+hatchOrigPalette = []
+for x in range(hatchColors):
+    hatchOrigPalette.append(hatchOrigPaletteImg.getpixel((x*8, 0)))
+hatchNewPalette = []
+for x in range(hatchColors):
+    hatchNewPalette.append(hatchNewPaletteImg.getpixel((x*8, 0)))
+
+#print("hatch colors:")
+#print(hatchOrigPalette)
+#print(hatchNewPalette)
+
+# check if new hatch palette has no colors, which means that we disable the hatch sprite. (0,0,0,0) is empty color.
+enableHatch = sum([r+g+b+a for r,g,b,a in hatchNewPalette]) > 0
+
+# mode 7
+mode7shipBox = (40, 160, 104, 208)
+mode7shipImg = baseImg.crop(mode7shipBox)
+
+# slopes
+slopesOverideBox = (240, 16, 352, 96)
+slopesOverideImg = baseImg.crop(slopesOverideBox)
+
 if not args.no_ship:
+    # check how many tiles in the ship image are not empty.
+    # ship image in the template is 7 x 5 tiles.
+    width = 7
+    height = 5
+    emptyMatrix = [ [ True for x in range(width) ] for y in range(height) ]
+
+    for tileX in range(width):
+        for tileY in range(height):
+            emptyMatrix[tileY][tileX] = isEmpty(shipImg, (tileX*16, tileY*16, (tileX+1)*16, (tileY+1)*16))
+
+    #print("matrix:")
+    #for row in emptyMatrix:
+    #    print(row)
+
+    # max 26 tiles can be non empty, as vanilla has 52 oam for the ship
+    maxTiles = 26
+    nonEmptyCount = sum([row.count(False) for row in emptyMatrix])
+    assert nonEmptyCount <= maxTiles, "Too many tiles in the ship: {}, max authorized is {}".format(nonEmptyCount, maxTiles)
+
+    # convert hatch tiles with new colors
+    if enableHatch:
+        for origColor, newColor in zip(hatchOrigPalette, hatchNewPalette):
+            data = np.array(hatchCloseImg)
+            data[(data == origColor).all(axis = -1)] = newColor
+            hatchCloseImg = Image.fromarray(data, mode='RGBA')
+
+            data = np.array(hatchOpenImg)
+            data[(data == origColor).all(axis = -1)] = newColor
+            hatchOpenImg = Image.fromarray(data, mode='RGBA')
+
+    # check how many different colors are in the ship, max 16 (including the glowing and transparent one)
+    # TODO::use provided function
+    shipColors = set()
+    for r, g, b, a in shipImg.getdata():
+        shipColors.add((r, g, b))
+
+    if enableHatch:
+        for r, g, b, a in hatchCloseImg.getdata():
+            shipColors.add((r, g, b))
+        for r, g, b, a in hatchOpenImg.getdata():
+            shipColors.add((r, g, b))
+
+    # remove transparent color
+    try:
+        shipColors.remove((0, 0, 0))
+    except:
+        pass
+
+    print("ship colors: {}".format(shipColors))
+    maxColors = 16
+    if len(shipColors) >= maxColors:
+        print("Too many colors in the image, convert it to 16 colors using ImageMagick for example:")
+        print("convert {} +dither -colors 16 - | convert - PNG32:{}".format(args.ship_template, args.ship_template))
+        sys.exit(1)
+
+    # put back transparency as first element
+    shipColors = [(0, 0, 0)] + list(shipColors)
+
+    paletteFinal = []
+    paletteFinalRGB = []
+    for color in shipColors:
+        paletteFinalRGB += color
+        paletteFinal.append(RGB_24_to_15(color))
+
+    print("final palette, {} colors: {}".format(len(paletteFinal), [hex(c) for c in paletteFinal]))
+    print("final palette RGB: {}".format(paletteFinalRGB))
+
+    # if all 16 colors are used disable the glowing color
+    if len(shipColors) == maxColors and not enableShipGlowCustom:
+        glowListAddr = snes_to_pc(0x8DCA52)
+        vanillaRom.seek(glowListAddr)
+        vanillaRom.writeWord(0x0005) # set color
+        vanillaRom.writeWord(paletteFinal[-1]) # glow color
+        vanillaRom.writeWord(0xC595) # done
+        vanillaRom.writeWord(0xC61E) # goto CA52
+        vanillaRom.writeWord(0xCA52)
+
+    if enableShipGlowCustom:
+        # we need to have the glowing color as last color in the palette
+        finalGlowColor = RGB_24_to_15(shipGlowCustomColor)
+        # if not all 16 colors are filled, add dummy colors
+        if len(shipColors) < 16:
+            colorsToAdd = 16 - len(shipColors)
+            #dummyColorRGB = genDummyColor(shipColors)
+            dummyColorRGB = [paletteFinalRGB[3], paletteFinalRGB[4], paletteFinalRGB[5]]
+            dummyColorFinal = RGB_24_to_15(dummyColorRGB)
+            paletteFinalRGB += dummyColorRGB * colorsToAdd
+            paletteFinal += [dummyColorFinal] * colorsToAdd
+        index = paletteFinal.index(finalGlowColor)
+        paletteFinal.remove(finalGlowColor)
+        paletteFinal.append(finalGlowColor)
+        paletteFinalRGB = paletteFinalRGB[:index*3] + paletteFinalRGB[index*3+3:] + shipGlowCustomColor
+
+        print("final palette, {} colors: {}".format(len(paletteFinal), [hex(c) for c in paletteFinal]))
+        print("final palette RGB: {}".format(paletteFinalRGB))
+
+        glowListAddr = snes_to_pc(0x8DCA52) + 8
+        paletteGap = 6
+        percents = [-85, -70, -55, -40, -25, -10, 0, -10, -25, -40, -55, -70, -85]
+        for j in range(12):
+            percentGlowColor = applyPercent(percents[j], [finalGlowColor])[0]
+            vanillaRom.writeWord(percentGlowColor, glowListAddr+paletteGap*j)
+
     if enableHatch:
         # add hatch tiles to ship tiles to palettize all images with the same palette
         tmpImg = Image.new("RGBA", (112, 96))
@@ -548,7 +662,7 @@ if enableMode7 and not args.no_mode7:
     maxColors = 16
     if len(mode7shipColors) >= maxColors:
         print("Too many colors in the mode7 image, convert it to 16 colors using ImageMagick for example:")
-        print("convert {} +dither -colors 16 - | convert - PNG32:{}".format(ship_template, ship_template))
+        print("convert {} +dither -colors 16 - | convert - PNG32:{}".format(args.ship_template, args.ship_template))
         sys.exit(1)
 
     # put back transparency as first element
@@ -618,26 +732,6 @@ if enableMode7 and not args.no_mode7:
         posInTilemap = pos[0]*tilemapRowLength+pos[1]
         tilemapData[posInTilemap] = index
 
-    def applyPercent(i, basePalette):
-        percents = [90, 70, 50, 30, 10, -10, -30, -30, -25, -20, -15, -10, -5, -1]
-        percent = percents[i]
-        computedPalette = []
-        def extractColors(color):
-            R = ((color      ) % 32)
-            G = ((color//32  ) % 32)
-            B = ((color//1024) % 32)
-            return (R,G,B)
-        def createColor(r, g, b):
-            return b * 1024 + g * 32 + r
-        for color in basePalette:
-            color = extractColors(color)
-            r, g, b = color
-            r = min((r * (100 + percent)) // 100, 31)
-            g = min((g * (100 + percent)) // 100, 31)
-            b = min((b * (100 + percent)) // 100, 31)
-            computedPalette.append(createColor(r, g, b))
-        return computedPalette
-
     # write palette
     # skip three first word instructions
     paletteAddr = snes_to_pc(0x8DD6BA) + 6
@@ -652,8 +746,9 @@ if enableMode7 and not args.no_mode7:
         vanillaRom.writeWord(word, paletteAddr+i*2)
 
     # 14 transitions
+    percents = [90, 70, 50, 30, 10, -10, -30, -30, -25, -20, -15, -10, -5, -1]
     for j in range(14):
-        palette = applyPercent(j, mode7paletteFinal)
+        palette = applyPercent(percents[j], mode7paletteFinal)
         for i, word in enumerate(palette):
             vanillaRom.writeWord(word, paletteAddr+paletteGap*(j+1)+i*2)
         for i in range(16-len(palette)):
@@ -769,14 +864,6 @@ if not args.no_layout:
                 if r == 0xcc and g == 0x35 and b == 0x35:
                     slopesOverideMatrix[tileY][tileX] = forceEmpty
 
-    def findMatchingSlope(overide, slopes):
-        overideData = overide.getdata()
-        for slope, data in slopes.items():
-            slopeData = data["reg"].getdata()
-            if list(overideData) == list(slopeData):
-                return slope
-        raise Exception("Can't find a matching slope")
-
     # convert slopes overide to 1bit per pixel image
     for tileY in range(height):
         for tileX in range(width):
@@ -789,24 +876,6 @@ if not args.no_layout:
     #print("slopes overide matrix:")
     #for row in slopesOverideMatrix:
     #    print(row)
-
-    def isOutline(x, y, height):
-        if emptyMatrix[y][x]:
-            return False
-        # tiles on the Y borders are outlines
-        if y == 0 or y == height-1:
-            return True
-
-        # a tile is an outline if it has one empty tile around it
-        for subX in [x-1, x, x+1]:
-            for subY in [y-1, y, y+1]:
-                try:
-                    empty = emptyMatrix[subY][subX] or slopesOverideMatrix[subY][subX] == forceEmpty
-                except:
-                    continue
-                if empty:
-                    return True
-        return False
 
     # generate ship outline from empty matrix
     width = 7
@@ -837,55 +906,18 @@ if not args.no_layout:
     #for row in insideMatrix:
     #    print(row)
 
-    def getBestSlope(x, y, slopes, shipAlphaImg):
-        # first check for overide
-        overide = slopesOverideMatrix[y][x]
-        if overide is not None:
-            if overide == forceEmpty:
-                return None
-            else:
-                return overide
-
-        # extract ship tile
-        shipTile = shipAlphaImg.crop((x*16, y*16, (x+1)*16, (y+1)*16))
-        shipTilei = ImageOps.invert(shipTile).convert('1')
-        shipTile = shipTile.convert('1')
-
-        bestScore = -1
-        bestSlope = -1
-        for slope, imgs in slopes.items():
-            # match both empty to maximize empty ship pixels outside of the slop
-            empty = ImageChops.logical_and(shipTilei, imgs["inv"])
-            colors = empty.getcolors()
-            # get the 255 color
-            emptyScore = 0
-            for color in colors:
-                if color[1] == 255:
-                    emptyScore = color[0]
-                    break
-
-            # match both filled to maximize ship pixels under the slop
-            filled = ImageChops.logical_and(shipTile, imgs["reg"])
-            colors = filled.getcolors()
-            # get the 255 color
-            filledScore = 0
-            for color in colors:
-                if color[1] == 255:
-                    filledScore = color[0]
-                    break
-
-            finalScore = emptyScore + filledScore
-            if finalScore > bestScore:
-                bestScore = finalScore
-                bestSlope = slope
-
-        return bestSlope
 
     print("compute slopes")
     slopesMatrix = [ [ {} for x in range(width) ] for y in range(height) ]
     for tileX in range(width):
         for tileY in range(height):
-            if emptyMatrix[tileY][tileX]:
+            if slopesOverideMatrix[tileY][tileX] is not None:
+                overide = slopesOverideMatrix[tileY][tileX]
+                if overide == forceEmpty:
+                    slopesMatrix[tileY][tileX] = {"isSolid": False, "bts": None}
+                else:
+                    slopesMatrix[tileY][tileX] = {"isSolid": False, "bts": overide}
+            elif emptyMatrix[tileY][tileX]:
                 slopesMatrix[tileY][tileX] = {"isSolid": False, "bts": None}
             elif insideMatrix[tileY][tileX]:
                 slopesMatrix[tileY][tileX] = {"isSolid": True, "bts": None}
@@ -906,23 +938,23 @@ if not args.no_layout:
                 bts ^= 0x100
                 fullSlopesMatrix[tileY][tileX] = {"isSolid": False, "bts": bts}
 
-    #print("full slopes matrix")
-    #for row in fullSlopesMatrix:
-    #    print(row)
-
-    ## generate img with slopes
-    #result = Image.new('1', (7*16, 5*16))
-    #for tileX in range(width):
-    #    for tileY in range(height):
-    #        slope = slopesMatrix[tileY][tileX]
-    #        if not slope["isSolid"] and slope["bts"] is None:
-    #            continue
-    #        elif slope["isSolid"]:
-    #            # copy filled slope
-    #            result.paste(ImageOps.invert(slopes[19]["inv"].convert("L")), (tileX*16, tileY*16))
-    #        else:
-    #            result.paste(ImageOps.invert(slopes[slope["bts"]]["inv"].convert("L")), (tileX*16, tileY*16))
-    #result.save('slopes.png')
+#    print("full slopes matrix")
+#    for row in fullSlopesMatrix:
+#        print(row)
+#
+#    # generate img with slopes
+#    result = Image.new('1', (7*16, 5*16))
+#    for tileX in range(width):
+#        for tileY in range(height):
+#            slope = slopesMatrix[tileY][tileX]
+#            if not slope["isSolid"] and slope["bts"] is None:
+#                continue
+#            elif slope["isSolid"]:
+#                # copy filled slope
+#                result.paste(ImageOps.invert(slopes[19]["inv"].convert("L")), (tileX*16, tileY*16))
+#            else:
+#                result.paste(ImageOps.invert(slopes[slope["bts"]]["inv"].convert("L")), (tileX*16, tileY*16))
+#    result.save('slopes.png')
 
     # now insert the slopes/tiles into landing site layout
     print("insert ship slopes into landing site layout")
@@ -966,7 +998,7 @@ if not args.no_layout:
                 # layout: bbbbhvtttttttttt b: bts type h: hflip, v: vflip t: tile
                 # bts:    vhbbbbbb v: vflip h: hflip b: value
                 rawBts = slopeData["bts"]
-                if rawBts & 0xFF == 19 and not (y == 0 or emptyMatrix[y-1][x if x < width//2 else width//2-((x-width//2)+1)]):
+                if rawBts & 0xFF == 19 and not (y == 0 or emptyMatrix[y-1][x if x < width//2 else width//2-((x-width//2)+1)]) and slopesOverideMatrix[y][x if x < width//2 else width//2-((x-width//2)+1)] is None:
                     # put a solid block instead, but not if the block is a top one
                     btsType = 8
                     layoutWord = (btsType << 12) + 0xFF

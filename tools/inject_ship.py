@@ -1,4 +1,17 @@
 #!/usr/bin/python3
+# inject a custom ship in a Super Metroid ROM from a png file.
+# an example custom file GIMP is available in tools/ship/example_ship.xcf
+# inject the ship in game and in the mode 7 outro.
+# generate a layout matching the ship's shape and inject it in Landing Site layout data.
+# you can force some slopes if the generated ones are not perfect.
+#
+# there's six boxes in the file, from left to right and top to bottom:
+#  -available slopes to create the ship layout (don't modify them).
+#  -force some slopes for the ship, slopes can be mirrored horizontaly of verticaly, putting the tile to red means no slopes.
+#  -hatch: vanilla colors, you can set custom colors under them, if no custom colors the hatch is removed.
+#  -ship glow color: to use a custom glow color (must be present in the ship colors). leave empty to disable glow color, allow the use of 16 colors.
+#  -mode7 ship: 16 colors (including the empty one), on the 8x6=48 8x8 tiles only 34 can be used.
+#  -in game ship: 16 colors (including the empty one), on the 7x5=35 16x16 tiles only 24 can be used.
 
 import sys, os, argparse, random, itertools
 from shutil import copyfile

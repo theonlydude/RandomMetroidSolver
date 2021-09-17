@@ -398,7 +398,7 @@ class InteractiveSolver(CommonSolver):
             magic = random.randint(1, 0xffff)
         else:
             magic = None
-        romPatcher = RomPatcher(magic=magic, plando=True)
+        romPatcher = RomPatcher(magic=magic)
         patches = ['credits_varia.ips', 'tracking.ips', "Escape_Animals_Disable"]
         if DoorsManager.isRandom():
             patches += RomPatcher.IPSPatches['DoorsColors']

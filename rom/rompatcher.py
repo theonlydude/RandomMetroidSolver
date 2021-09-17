@@ -86,9 +86,10 @@ class RomPatcher:
         'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips']
     }
 
-    def __init__(self, romFileName=None, magic=None, plando=False):
+    def __init__(self, romFileName=None, magic=None):
         self.log = utils.log.get('RomPatcher')
         self.romFileName = romFileName
+        self.patchAccess = PatchAccess()
         self.race = None
         if romFileName == None:
             self.romFile = FakeROM()
@@ -96,7 +97,7 @@ class RomPatcher:
             self.romFile = RealROM(romFileName)
         if magic is not None:
             from rom.race_mode import RaceModePatcher
-            self.race = RaceModePatcher(self, magic, plando)
+            self.race = RaceModePatcher(self, magic)
         # IPS_Patch objects list
         self.ipsPatches = []
         # loc name to alternate address. we still write to original
@@ -113,7 +114,6 @@ class RomPatcher:
             # get out of croc room: reload CRE
             0x93ea: self.forceRoomCRE
         }
-        self.patchAccess = PatchAccess()
 
     def end(self):
         self.romFile.close()
@@ -284,12 +284,9 @@ class RomPatcher:
             # apply standard patches
             stdPatches = []
             plms = []
-            # apply race mode first because it fills the rom with a bunch of crap
-            if self.race is not None:
-                stdPatches.append('race_mode.ips')
             stdPatches += RomPatcher.IPSPatches['Standard'][:]
             if self.race is not None:
-                stdPatches.append('race_mode_credits.ips')
+                stdPatches.append('race_mode_post.ips')
             if suitsMode != "Balanced":
                 stdPatches.remove('Removes_Gravity_Suit_heat_protection')
             if suitsMode == "Progressive":
@@ -844,6 +841,12 @@ class RomPatcher:
             else:
                 self.race.writeWordMagic(w)
 
+    def writeDoorTransition(self, roomPtr):
+        if self.race is None:
+            self.romFile.writeWord(roomPtr)
+        else:
+            self.race.writeDoorTransition(roomPtr)
+
     # write area randomizer transitions to ROM
     # doorConnections : a list of connections. each connection is a dictionary describing
     # - where to write in the ROM :
@@ -858,17 +861,16 @@ class RomPatcher:
         asmAddress = 0x7F800
         for conn in doorConnections:
             # write door ASM for transition doors (code and pointers)
-#            print('Writing door connection ' + conn['ID'])
             doorPtr = conn['DoorPtr']
             roomPtr = conn['RoomPtr']
+#            print('Writing door connection ' + conn['ID'] + ". doorPtr="+hex(doorPtr))
             if doorPtr in self.doorConnectionSpecific:
                 self.doorConnectionSpecific[doorPtr](roomPtr)
             if roomPtr in self.roomConnectionSpecific:
                 self.roomConnectionSpecific[roomPtr](doorPtr)
             self.romFile.seek(0x10000 + doorPtr)
-
             # write room ptr
-            self.romFile.writeWord(roomPtr & 0xFFFF)
+            self.writeDoorTransition(roomPtr & 0xFFFF)
 
             # write bitflag (if area switch we have to set bit 0x40, and remove it if same area)
             self.romFile.writeByte(conn['bitFlag'])
@@ -1300,16 +1302,26 @@ class MusicPatcher(object):
 
     def _updateRoomStateHeaders(self, trackList, musicData, replacedTracks):
         trackAddresses = {}
-        def addAddresses(track, vanillaTrackData):
+        def addAddresses(track, vanillaTrackData, prio=False):
             nonlocal trackAddresses
+            addrs = []
+            prioAddrs = []
+            if 'pc_addresses' in vanillaTrackData:
+                addrs += vanillaTrackData['pc_addresses']
+            if self.area and 'pc_addresses_area' in vanillaTrackData:
+                prioAddrs += vanillaTrackData['pc_addresses_area']
+            if self.boss and 'pc_addresses_boss' in vanillaTrackData:
+                prioAddrs += vanillaTrackData['pc_addresses_boss']
             if track not in trackAddresses:
                 trackAddresses[track] = []
-            if 'pc_addresses' in vanillaTrackData:
-                trackAddresses[track] += vanillaTrackData['pc_addresses']
-            if self.area and 'pc_addresses_area' in vanillaTrackData:
-                trackAddresses[track] += vanillaTrackData['pc_addresses_area']
-            if self.boss and 'pc_addresses_boss' in vanillaTrackData:
-                trackAddresses[track] += vanillaTrackData['pc_addresses_boss']
+            # if prioAddrs are somewhere else, remove if necessary
+            prioSet = set(prioAddrs)
+            for t,tAddrs in trackAddresses.items():
+                trackAddresses[t] = list(set(tAddrs) - prioSet)
+            # if some of addrs are somewhere else, remove them from here
+            for t,tAddrs in trackAddresses.items():
+                addrs = list(set(addrs) - set(tAddrs))
+            trackAddresses[track] += prioAddrs + addrs
         for track in trackList:
             if track in replacedTracks.values():
                 for van,rep in replacedTracks.items():

@@ -656,7 +656,7 @@ if __name__ == "__main__":
             if not stuck or args.vcr == True:
                 doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
                                                       args.area, args.bosses,
-                                                      args.escapeRando)
+                                                      args.escapeRando if not stuck else False)
                 escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
                 if escapeAttr is not None:
                     escapeAttr['patches'] = []

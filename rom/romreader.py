@@ -324,7 +324,9 @@ class RomReader:
             if accessPoint.isInternal() == True:
                 continue
             key = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
-
+            if key not in rooms:
+                # can happen with race mode seeds
+                continue
             destAP = rooms[key]
             if accessPoint.Boss == True or destAP.Boss == True:
                 bossTransitions[accessPoint.Name] = destAP.Name
@@ -359,9 +361,15 @@ class RomReader:
 
         return (areaTransitions, bossTransitions, escapeTransition, GraphUtils.hasMixedTransitions(areaTransitions, bossTransitions))
 
+    def readRoomPtr(self, address=None):
+        if self.race is None:
+            return self.romFile.readWord(address)
+        else:
+            return self.race.readDoorTransition(address)
+
     def getTransition(self, doorPtr):
         # room ptr is in two bytes
-        roomPtr = self.romFile.readWord(0x10000 | doorPtr)
+        roomPtr = self.readRoomPtr(0x10000 | doorPtr)
 
         direction = self.romFile.readByte((0x10000 | doorPtr) + 3)
 

@@ -8,6 +8,7 @@ if os.path.exists(path) and path not in sys.path:
 
 import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math, string, base64, urllib.parse, uuid
 from datetime import datetime
+from collections import defaultdict
 
 # to solve the rom
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, diff4solver
@@ -115,7 +116,7 @@ def loadPresetsList():
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList(filter=False):
-    tourPresets = ['Season_Races', 'SMRAT2021', 'VARIA_Weekly']
+    tourPresets = ['Season_Races', 'SGLive2021', 'SMRAT2021', 'VARIA_Weekly']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
@@ -186,7 +187,6 @@ def getSkillLevelBarData(preset):
         result['standards'][preset] = score
 
     with DB() as db:
-        result['generatedSeeds'] = db.getGeneratedSeeds(result['custom'][0])
         result['lastAction'] = db.getPresetLastActionDate(result['custom'][0])
 
     # TODO: normalize result (or not ?)
@@ -1063,6 +1063,7 @@ def randomizer():
         "where_am_i": "Area mode with random start location and early morph",
         "where_is_morph": "Area mode with late Morph",
         "Season_Races": "rando league races (Majors/Minors split)",
+        "SGLive2021": "SGLive 2021 Super Metroid randomizer tournament",
         "SMRAT2021": "Super Metroid Randomizer Accessible Tournament 2021",
         "VARIA_Weekly": "Casual logic community races"
     }
@@ -2701,14 +2702,16 @@ def loadMusics():
         return musics
 
     musicDir = 'music/_metadata'
-    dropdown = {}
+    dropdown = defaultdict(list)
     metadatas = sorted(os.listdir(musicDir), key=lambda v: v.upper())
     for metadata in metadatas:
         with open(os.path.join(musicDir, metadata)) as jsonFile:
             data = json.load(jsonFile)
+            defaultGroup = os.path.splitext(metadata)[0]
             musics.update(data)
-            group = os.path.splitext(metadata)[0]
-            dropdown[group] = list(data.keys())
+            # check if there's group for musics
+            for song, songData in data.items():
+                dropdown[songData.get("group", defaultGroup)].append(song)
     musics["_dropdown"] = dropdown
 
     with open('music/_metadata/vanilla.json', 'r') as jsonFile:
@@ -2730,10 +2733,10 @@ def getSpcFile():
 
     musics = loadMusics()
     if songName not in musics:
-        raise HTTP(400, "song not found")
+        raise HTTP(400, "No preview for this song")
 
     if 'spc_path' not in musics[songName] or musics[songName]['spc_path'] == "":
-        raise HTTP(400, "song has no spc")
+        raise HTTP(400, "No preview for this song")
 
     songFile = musics[songName]['spc_path']
     with open(os.path.join('music', songFile), 'rb') as spcFile:

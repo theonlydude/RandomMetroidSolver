@@ -488,9 +488,12 @@ function loadNewSongFromId(elemId) {
 }
 
 function loadNewSong(song) {
-    // first innerHTML modifilcation will change scroll, so store it to restore at the end
+    // first innerHTML modification will change scroll, so store it to restore at the end
     var scroll = $(window).scrollTop();
     stopSong();
+
+    // if error with previous song, remote the popup
+    $('#flash').hide();
 
     var previousSong = currentSong;
     currentSong = song;

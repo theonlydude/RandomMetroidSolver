@@ -1654,8 +1654,8 @@ function resetItems() {
 
   var bosses = ["Kraid", "Phantoon", "Draygon", "Ridley"];
   for(var boss in bosses) {
-    document.getElementById(bosses[boss]+"_stream_img").style.display = "none";
-    document.getElementById("No"+bosses[boss]+"_stream_img").style.display = "block";
+    document.getElementById(bosses[boss]+"_stream_img").style.display = "block";
+    document.getElementById("No"+bosses[boss]+"_stream_img").style.display = "none";
   }
 }
 
@@ -1684,8 +1684,15 @@ function addItem(itemName) {
       document.getElementById(itemName+"_pause_img").style.display = "block";
     }
     if(itemName != "Grapple" && itemName != "XRayScope") {
-      document.getElementById(itemName+"_stream_img").style.display = "block";
-      document.getElementById("No"+itemName+"_stream_img").style.display = "none";
+        if(itemName != "MotherBrain") {
+            if(bosses.includes(itemName)) {
+                document.getElementById(itemName+"_stream_img").style.display = "none";
+                document.getElementById("No"+itemName+"_stream_img").style.display = "block";
+            } else {
+                document.getElementById(itemName+"_stream_img").style.display = "block";
+                document.getElementById("No"+itemName+"_stream_img").style.display = "none";
+            }
+        }
     }
   }
 }

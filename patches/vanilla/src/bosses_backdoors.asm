@@ -27,12 +27,10 @@ spospo_backdoor:
 	dw $0000,spospo_back_enter  ; distance to spawn=0, set door ASM
 
 ;;; setup ASM ptrs overwrites in bank 8F
-
 org $8f9b80
 	dw spospo_back_setup
 
 ;;; alternate door lists in bank 8F
-
 org $8ff060
 spospo_alt_doorlist:
 	dw $8D1E,spospo_backdoor
@@ -42,22 +40,35 @@ spospo_alt_doorlist:
 ;;; macros
 
 ;;; z set if boss alive
-macro isMiniBossDead()
+macro isBossDead(flag)
 	LDX $079F
 	LDA $7ED828,x
-	AND #$0002
+	bit #$000<flag>
+endmacro
+
+macro isMiniBossAlive()
+%isBossAlive(2)
+endmacro
+
+macro isTorizoAlive()
+%isBossAlive(4)
+endmacro
+
+macro placeSamus(x, y)
+	lda #<x> : sta !SamusX
+	lda #<y> : sta !SamusY
+	jsr !incompatible_doors
+.end:
+	rts
 endmacro
 
 ;;; setup/door ASMs
 spospo_back_setup:
-	%isMiniBossDead() : bne .end
+	%isMiniBossAlive() : bne .end
 	lda #spospo_alt_doorlist : sta !door_list_ptr
 .end:
 	rts
 
 spospo_back_enter:
-	lda #$0049 : sta !SamusX
-	lda #$02c8 : sta !SamusY
-	jsr !incompatible_doors
-.end:
-	rts
+	%placeSamus($0049, $02c8)
+

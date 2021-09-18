@@ -1,0 +1,100 @@
+
+* Objectifs
+***********
+
+V1
+
+Laisser l'objectif de base G4, on doit juste checker aussi les
+minibosses pour les trouver. Le pb de cette approche c'est que les
+mini-bosses sont accessibles très tôt (BT, spospo, Croc), et que les
+seeds seront potentiellement finies très vite si les progs items sont
+assez accessibles (cela dit, on peut compter sur l'algo prog speed
+pour éviter ça...)
+
+V2
+
+Changer l'objectif en "tuer tous les bosses du jeu".
+
+Rajouter MB dans le mix? à voir si c'est possible en ASM, mais après
+tout Arcade le fait, donc s'inspirer de ça. Si on ajoute MB,
+déclencher l'escape auto (a la scavenger) quand tous les bosses sont
+morts (ainsi on se fait pas chier avec Tourian).
+
+Cela impliquerait de généraliser certains trucs du patch scav (mélangé au
+HUD...) et peut être l'occasion d'initier le système d'objectifs en
+ASM. Objectifs à vérifier (G4, all bosses, Scav Hunt over etc.) + type
+de déclenchement de fin (débloquer l'accès à Tourian, ou déclencher
+l'escape)
+
+* Couloirs/Impasses
+*******************
+
+Faire en sorte que chaque boss/miniboss puisse être une impasse (porte
+à griser le cas échéant, à la fois coté boss room, et de l’autre coté)
+ou un couloir (porte à rajouter coté boss room le cas échéant). Ainsi,
+peu importe où on place chaque boss/miniboss, c’est compatible avec
+les rooms autour.
+
+Virer les crumble pour GT et spospo pour en faire des vrais couloirs.
+
+Si on ajoute MB, prévoir son "mode couloir". Là encore, s'inspirer
+d'Arcade. Il parait difficile de backdoor MB quand-même... La forcer
+en "impasse only" semblerait plus raisonnable.
+
+* Front/Back
+************
+
+Maintenant que tout peut être un couloir où une impasse, on peut
+mettre n'importe quel boss où on veut. Il faut introduire une notion
+de front door/back door, à randomizer entre elles.
+
+Parfois ça semblera peu naturel, mais au moins ce sera cohérent
+partout : "je m'apprete à backdoor spospo, donc je vais backdoor un
+boss quel qu'il soit"
+
+Aussi, quand on backdoor certains bosses, ça bugge, il faut donc spawn
+à des endroits qui font pas planter. Jouer avec les screens et le X/Y
+a la area rando des door transitions. Faire ça uniquement quand le
+boss est vivant. Dans certains cas précis (Spospo, Kraid, MB?), ça
+peut se gérer statiquement car la pièce d'où on arrive ne sera pas
+randomizée. Pour les autres (Croc, Botwoon) il faudra générer les
+portes et ASM à/p de certaines infos (réserver l'espace dans le patch
+ASM?) 
+
+* Se barrer des boss rooms comme en minimizer?
+**********************************************
+
+Problème, on ne veut pas que toutes les portes soient open bar, donc
+il faut que seule la porte par laquelle on est entré soit ouverte. Pas
+facile, et pour certains bosses, d'autres problèmes :
+- backdoor Croc, à cause des pics
+- backdoor Botwoon, on ne peut pas le fight de ce coté, donc il
+faudrait spawn dans son écran, ou modifier suffisamment le truc pour
+virer le mur, mais ça semble galère
+
+Donc 2 options :
+
+- faire comme en boss rando normal, et de s'appuyer sur le fait qu'il
+y a toujours une save à côté. Ainsi on peut spawn où il faut pour Croc
+et Botwoon
+- pouvoir se barrer, mais certains bosses ne pourront pas etre
+backdoor et devront être placés en dead end only. Croc serait
+particulièrement affecté puisqu'on devrait balader son area entière
+avec lui (il est un couloir en vanilla, et le seul chemin d'accès vers
+son area)
+
+
+* Logique/graphe:
+*****************
+
+Créer des nouveaux AP pour pouvoir gérer ça proprement (comme on a du
+faire à la création du boss rando). Ca devra être la fin du système
+dégueulasse basé sur le nommage "RoomIn/RoomOut", car ce sera plus
+complexe: APs front out, front in, back out, back in, boss/miniboss.
+
+A la construction du graphe, en fonction des impasses ou couloir
+certains APs seront présents ou non. Leur attacher les data sur les
+patches à appliquer etc. Ainsi à l'écriture de la ROM, on check le
+graph pour savoir quels patches mettre, et quel ASM générer.
+
+Point ouvert sur le minimizer, 

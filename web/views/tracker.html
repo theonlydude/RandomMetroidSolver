@@ -122,6 +122,23 @@
     z-index: 5;
     display: none;
 }
+#rtaTimerDiv {
+    position: absolute;
+    top: 2.5%;
+    left: 48.5%;
+    border: 2px solid white;
+    background-color: #000;
+    z-index: 2;
+    display: none;
+}
+#rtaTimer {
+    text-align: center;
+    font-family: 'Courier New (monospace)';
+    font-size: 1.5vw;
+    background-color: black;
+    color: white;
+    margin: 0em;
+}
 </style>
 
 <script type="text/javascript">
@@ -240,6 +257,12 @@ var retryTimeout;
 var timeout;
 // timeout duration in ms
 var waitingTime = 1000;
+// timeout to increment RTA
+var incrRTA;
+// time when the timeout has been set
+var incrRTAstart = 0;
+var rawTimeFrames = 0;
+var RTAwaitingTime = 50;
 
 // first you open the socket,
 // then you list the available devices,
@@ -287,6 +310,14 @@ var dataEnum = {
 // 1. state:
 // $0998: Game state
 // $05D1: Debug. Debug mode. Set to [$80:8004] during boot / soft reset
+// in-game timer:
+// $05B8: NMI counter (RTA timer)
+// $05BA: Lag counter (RTA timer)
+// SRAM timer after game's end:
+// define current_save_slot    $7e0952
+// define stats_sram_slot0     $701400
+// define stats_sram_slot1     $701700
+// define stats_sram_slot2     $701a00
 
 // 2. map:
 // used for area/boss transitions - doors - nothing
@@ -315,7 +346,12 @@ var dataEnum = {
 //     4: Area torizo (Bomb Torizo, Golden Torizo)
 var dataToAsk = {
     1: [{"address": "F50998", "size": 0x2},
-        {"address": "F505D1", "size": 0x2}],
+        {"address": "F505D1", "size": 0x2},
+        {"address": "F505B8", "size": 0x4},
+        {"address": "F50952", "size": 0x2},
+        {"address": "E01400", "size": 0x4},
+        {"address": "E01700", "size": 0x4},
+        {"address": "E01A00", "size": 0x4}],
     2: [{"address": "F5CD52", "size": 0x500}],
     3: [{"address": "F507F7", "size": 0x100}],
     4: [{"address": "F50AF6", "size": 0x2},
@@ -840,6 +876,10 @@ function socketOnInitMessage(event) {
         // ask socket to return an arraybuffer instead of a blob
         socket.binaryType = "arraybuffer";
 
+        // display initial time
+        document.getElementById("rtaTimer").innerHTML = "00'00'00''00";
+        document.getElementById("rtaTimerDiv").style.display = "block";
+
         // first data retrieval
         initDataChain();
         askForData();
@@ -887,6 +927,7 @@ function cleanup(cleanExit) {
     displayStartButton();
     var samusIcon = document.getElementById("samusIcon");
     samusIcon.style.display = "none";
+    document.getElementById("rtaTimerDiv").style.display = "none";
 
     // if the device is an SNES Classic try to reconnect in 1s,
     // as reseting the game on it will close the connection to the auto tracker
@@ -988,6 +1029,49 @@ function getGameStateName(gameStateCode) {
     }
 }
 
+function displayRTA(frames) {
+    // 60 frame per second
+    var timeSeconds = Math.floor(frames / 60);
+    var remainFrames = frames % 60;
+    var hours   = Math.floor(timeSeconds / 3600);
+    var minutes = Math.floor((timeSeconds - (hours * 3600)) / 60);
+    var seconds = timeSeconds - (hours * 3600) - (minutes * 60);
+
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    if (remainFrames < 10) {remainFrames = "0"+remainFrames;}
+
+    document.getElementById("rtaTimer").innerHTML = `${hours}'${minutes}'${seconds}''${remainFrames}`;
+}
+
+function updateRTAFake() {
+    var diffms = new Date() - incrRTAstart;
+    // 60 frames per seconds
+    rawTimeFrames += Math.floor(diffms / (1000/60));
+    displayRTA(rawTimeFrames);
+    incrRTAstart = new Date();
+    incrRTA = setTimeout(updateRTAFake, RTAwaitingTime);
+}
+
+function updateRTA(frames, armFakeTimer) {
+    displayRTA(frames);
+
+    if(incrRTA != undefined) {
+        clearTimeout(incrRTA);
+    }
+
+    if(armFakeTimer) {
+        // arm a timer to increase displayed RTA between two data retrieval
+        if(incrRTA != undefined) {
+            clearTimeout(incrRTA);
+        }
+        rawTimeFrames = frames;
+        incrRTAstart = new Date();
+        incrRTA = setTimeout(updateRTAFake, RTAwaitingTime);
+    }
+}
+
 // managed data returned by qusb
 function handleData(data) {
     var chunk = new Uint8Array(data);
@@ -1006,6 +1090,8 @@ function handleData(data) {
             // biggest valid game state
             var maxGameState = 0x2c;
             var mainGameplayState = 0x08;
+            var gameOverState = 0x1a;
+            var creditState = 0x27;
 
             var gameState = readWord(stateData, 0x00);
             var gameStateName = getGameStateName(gameState.toString(16));
@@ -1015,7 +1101,21 @@ function handleData(data) {
             // appendLog(`\u2026 Debug Mode: ${debugMode}`);
 
             // check if game is running and is metroid
-            if(debugMode == 0 && gameState < maxGameState) {
+            if(debugMode == 0 && gameState <= maxGameState) {
+                if(gameState >= mainGameplayState && gameState < gameOverState) {
+                    var w0 = readWord(stateData, 0x04);
+                    var w1 = readWord(stateData, 0x06);
+                    var rawTimeFrames = w1 << 16 | w0;
+                    updateRTA(rawTimeFrames, true);
+                } else if(gameState == creditState) {
+                    var save = readWord(stateData, 0x08);
+                    var offset = 0xa + save * 0x4;
+                    var w0 = readWord(stateData, offset);
+                    var w1 = readWord(stateData, offset+2);
+                    var rawTimeFrames = w1 << 16 | w0;
+                    updateRTA(rawTimeFrames, false);
+                }
+
                 if(gameState == mainGameplayState) {
                     appendLog(`\u2705 Gameplay state: ${gameStateName}`);
                     askNextData();
@@ -1501,6 +1601,11 @@ function sendAutoTrackerMessage(data, newState) {
 
     <!-- debug canvas pink color: de3994 -->
     <canvas id="debugMap" width="512" height="256"></canvas>
+
+    <!-- RTA timer -->
+    <div id="rtaTimerDiv">
+      <p id="rtaTimer"></p>
+    </div>
   </div>
 
   <!-- info on current loaded seed -->

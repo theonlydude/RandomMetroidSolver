@@ -174,7 +174,7 @@ accessPoints = [
                                                            sm.wand(sm.wnot(Bosses.bossDead(sm, 'Phantoon')),
                                                                    RomPatches.has(RomPatches.SpongeBathBlueDoor)))),
         'PhantoonRoomOut': Cache.ldeco(lambda sm: sm.wand(sm.traverse('WreckedShipMainShaftBottom'), sm.canPassBombPassages())),
-        'Bowling': Cache.ldeco(lambda sm: sm.wand(sm.canPassBombPassages(),
+        'Bowling': Cache.ldeco(lambda sm: sm.wand(sm.canMorphJump(),
                                                   sm.canPassBowling()))
     }, internal=True,
        start={'spawn':0x0300,

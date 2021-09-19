@@ -812,6 +812,10 @@ function loadTip(first = true) {
     myTimer = setTimeout(loadTip, 10000, false);
 }
 
+function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
 var vanillaROMStored = false;
 var vanillaROM = null;
 window.onload = function(){
@@ -1139,7 +1143,10 @@ window.onload = function(){
     $("#preset").chosen({ width: '100%' });
     $("#randoPreset").chosen({ width: '100%' });
     resizeChosen();
-    loadTip();
+    if(! isMobileDevice()) {
+        // on a mobile device tips take all the screen width, so remove them
+        loadTip();
+    }
 
     // check if a vanilla ROM is already in local storage
     localforage.getItem('vanillaROM', function(err, value) {

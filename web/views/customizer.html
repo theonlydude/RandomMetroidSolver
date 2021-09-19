@@ -734,8 +734,8 @@ if seedInfo != None:
     response.write("permalink = true;", escape=False)
     response.write("seedKey = '{}';".format(seedInfo["key"]), escape=False)
     response.write("isVARIA = true;", escape=False)
-    response.write("isArea = '{}';".format(seedParams["areaRandomization"]), escape=False)
-    response.write("isBoss = '{}';".format(seedParams["bossRandomization"]), escape=False)
+    response.write("isArea = {};".format("true" if seedParams["areaRandomization"] in ["on", "random"] else "false"), escape=False)
+    response.write("isBoss = {};".format("true" if seedParams["bossRandomization"] in ["on", "random"] else "false"), escape=False)
     pass
 }}
 

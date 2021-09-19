@@ -916,6 +916,9 @@ class InteractiveSolver(CommonSolver):
         with open(dumpFileName, 'r') as jsonFile:
             dumpData = json.load(jsonFile)
 
+        # first update current access point
+        self.lastAP = dumpData["newAP"]
+
         dataEnum = {
             "state": '1',
             "map": '2',

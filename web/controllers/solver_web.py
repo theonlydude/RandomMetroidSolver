@@ -1716,6 +1716,9 @@ def tracker():
                 OPTGROUP(_label="Custom", *startAPs["custom"]),
                 OPTGROUP(_label="Custom (Area rando only)", *startAPs["area"])]
 
+    # get ap -> grapharea for auto tracker
+    apsGraphArea = {locName4isolver(ap.Name): ap.GraphArea for ap in accessPoints}
+
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
                 curSession=session.tracker, addresses=addresses, startAPs=startAPs,
@@ -1723,7 +1726,8 @@ def tracker():
                 bossAccessPoints=InteractiveSolver.bossAccessPoints,
                 nothingScreens=InteractiveSolver.nothingScreens,
                 doorsScreen=InteractiveSolver.doorsScreen,
-                bossBitMasks=InteractiveSolver.bossBitMasks)
+                bossBitMasks=InteractiveSolver.bossBitMasks,
+                apsGraphArea=apsGraphArea)
 
 def plando():
     response.title = 'Super Metroid VARIA Areas and Items Plandomizer'
@@ -1770,6 +1774,12 @@ def plando():
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
                 curSession=session.plando, addresses=addresses, startAPs=startAPs, version=displayedVersion)
+
+def locName4isolver(locName):
+    # remove space and special characters
+    # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
+    locName = str(locName)
+    return locName[0].lower() + removeChars(locName[1:], " ,()-")
 
 class WS(object):
     @staticmethod
@@ -1842,12 +1852,6 @@ class WS(object):
     def action(self):
         pass
 
-    def locName4isolver(self, locName):
-        # remove space and special characters
-        # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
-        locName = str(locName)
-        return locName[0].lower() + removeChars(locName[1:], " ,()-")
-
     def returnState(self):
         if len(self.session["state"]) > 0:
             state = self.session["state"]
@@ -1859,7 +1863,7 @@ class WS(object):
                 "visitedLocations": state["visitedLocationsWeb"],
                 "collectedItems": state["collectedItems"],
                 "remainLocations": state["remainLocationsWeb"],
-                "lastAP": self.locName4isolver(state["lastAP"]),
+                "lastAP": locName4isolver(state["lastAP"]),
 
                 # area tracker
                 "lines": state["linesWeb"],
@@ -2347,15 +2351,21 @@ class WS_door_clear(WS):
     def action(self):
         return self.callSolverAction("door", "clear", {})
 
+webAPs = {locName4isolver(ap.Name): ap.Name for ap in accessPoints}
 class WS_dump_import(WS):
     def validate(self):
         super(WS_dump_import, self).validate()
+
+        newAP = request.vars.newAP
+        if newAP not in webAPs:
+            raiseHttp(400, "Wrong AP", True)
 
         # create json file
         (self.fd, self.jsonDumpName) = tempfile.mkstemp()
 
         jsonData = {"stateDataOffsets": json.loads(request.vars.stateDataOffsets),
-                    "currentState": json.loads(request.vars.currentState)}
+                    "currentState": json.loads(request.vars.currentState),
+                    "newAP": webAPs[newAP]}
         if len(jsonData["currentState"]) > 1320 or len(jsonData["stateDataOffsets"]) > 3:
             raiseHttp(400, "Wrong state", True)
         for key, value in jsonData["stateDataOffsets"].items():

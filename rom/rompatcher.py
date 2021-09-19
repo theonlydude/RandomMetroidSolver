@@ -53,9 +53,7 @@ class RomPatcher:
             # VARIA logo on startup screen
             'varia_logo.ips',
             # new nothing plm
-            'nothing_item_plm.ips',
-            # fix gadora crash vanilla bug
-            'eye_door_fix.ips'
+            'nothing_item_plm.ips'
         ],
         # VARIA tweaks
         'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],

@@ -181,7 +181,7 @@ class RomReader:
         'no_demo': {'address': 0x59F2C, 'value': 0x80, 'vanillaValue': 0xf0},
         'varia_hud': {'address': 0x15EF7, 'value': 0x5C, 'vanillaValue': 0xAE},
         'nothing_item_plm': {'address': 0x23AD1, 'value': 0x24, 'vanillaValue': 0xb9},
-        'eye_door_fix': {'address': 0x33704, 'value': 0xF0, 'vanillaValue': 0xD0}
+        'vanilla_bugfixes': {'address': 0x33704, 'value': 0xF0, 'vanillaValue': 0xD0}
     }
 
     @staticmethod

@@ -1078,6 +1078,42 @@ def randomizer():
     currentMultiValues = getCurrentMultiValues()
     defaultMultiValues = getDefaultMultiValues()
 
+    # check if we have a guid in the url
+    url = request.env.request_uri.split('/')
+    if len(url) > 0 and url[-1] != 'randomizer':
+        # a seed unique key was passed as parameter
+        key = url[-1]
+
+        # decode url
+        key = urllib.parse.unquote(key)
+
+        # sanity check
+        if IS_MATCH('^[0-9a-z-]*$')(key)[1] is None and IS_LENGTH(maxsize=36, minsize=36)(key)[1] is None:
+            with DB() as db:
+                seedInfo = db.getSeedInfo(key)
+            if seedInfo is not None and len(seedInfo) > 0:
+                defaultParams = getRandomizerDefaultParameters()
+                defaultParams.update(seedInfo)
+                seedInfo = defaultParams
+
+                # check that the seed ips is available
+                if seedInfo["upload_status"] in ['pending', 'uploaded', 'local']:
+                    # load parameters in session
+                    for key, value in seedInfo.items():
+                        if key in ["complexity", "randoPreset", "raceMode"]:
+                            continue
+                        elif key in defaultMultiValues:
+                            keyMulti = key + 'MultiSelect'
+                            if keyMulti in seedInfo:
+                                session.randomizer[key] = seedInfo[key]
+                                valueMulti = seedInfo[keyMulti]
+                                if type(valueMulti) == str:
+                                    valueMulti = valueMulti.split(',')
+                                session.randomizer[keyMulti] = valueMulti
+                                currentMultiValues[key] = valueMulti
+                        elif key in session.randomizer and 'MultiSelect' not in key:
+                            session.randomizer[key] = value
+
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets, randoPresetsDesc=randoPresetsDesc,
                 startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues,

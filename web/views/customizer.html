@@ -22,6 +22,7 @@ extend 'layout.html'
 
 <script type="text/javascript" src="{{=URL('static', 'js/localforage.nopromises.min.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static', 'js/spc_snes.js')}}"></script>
+<script type="text/javascript" src="{{=URL('static', 'js/jquery.redirect.js')}}"></script>
 
 <title>Super Metroid VARIA Customizer</title>
 
@@ -196,6 +197,18 @@ h1 {
 $(document).ready(function(){
    jQuery(window).on('resize', resizeSlider);
 });
+
+var guid = undefined;
+{{
+if seedInfo is not None:
+    response.write("guid = '{}';".format(seedInfo["key"]), escape=False)
+    pass
+}}
+function DoPost(){
+    if(guid != undefined) {
+        $.redirect("/randomizer/"+guid, {}, "POST", "_blank");
+    }
+}
 
 function resizeSlider() {
    var slider = $("#degree_slider_range");
@@ -1688,6 +1701,9 @@ if seedInfo != None:
     pass
 }}
             <h4>Download seed {{=seedInfo["filename"]}}</h4>
+            <table class="full">
+              <tr><td><a href="javascript:DoPost()">Generate another seed with the same parameters</a></td></tr>
+            </table>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr id="vanillaUploadFileStep">

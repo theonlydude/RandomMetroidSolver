@@ -2194,3 +2194,108 @@ itemlocations:
     dw "         ITEM LOCATIONS         " // 640
     padbyte $ca
     pad $dedbcf
+
+// update 'clear time' to display 'rta   time'
+org $8cb49b
+// 'R'
+        dw $0002
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB4A7
+// 'RT'
+        dw $0004
+        dw $01C8; db $00; dw $3153
+        dw $01C8; db $F8; dw $3143
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB4BD
+// 'RTA'
+        dw $0006
+        dw $01D0; db $00; dw $3130
+        dw $01D0; db $F8; dw $3120
+        dw $01C8; db $00; dw $3153
+        dw $01C8; db $F8; dw $3143
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB4DD
+// 'RTA'
+        dw $0006
+        dw $01D0; db $00; dw $3130
+        dw $01D0; db $F8; dw $3120
+        dw $01C8; db $00; dw $3153
+        dw $01C8; db $F8; dw $3143
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB507
+// 'RTA'
+        dw $0006
+        dw $01D0; db $00; dw $3130
+        dw $01D0; db $F8; dw $3120
+        dw $01C8; db $00; dw $3153
+        dw $01C8; db $F8; dw $3143
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB53B
+// 'RTA   T'
+        dw $0008
+        dw $01F0; db $00; dw $3153
+        dw $01F0; db $F8; dw $3143
+        dw $01D0; db $00; dw $3130
+        dw $01D0; db $F8; dw $3120
+        dw $01C8; db $00; dw $3153
+        dw $01C8; db $F8; dw $3143
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB579
+// 'RTA   TI'
+        dw $000A
+        dw $01F8; db $00; dw $3138
+        dw $01F8; db $F8; dw $3128
+        dw $01F0; db $00; dw $3153
+        dw $01F0; db $F8; dw $3143
+        dw $01D0; db $00; dw $3130
+        dw $01D0; db $F8; dw $3120
+        dw $01C8; db $00; dw $3153
+        dw $01C8; db $F8; dw $3143
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB5C1
+// 'RTA   TIM'
+        dw $000C
+        dw $0000; db $00; dw $313C
+        dw $0000; db $F8; dw $312C
+        dw $01F8; db $00; dw $3138
+        dw $01F8; db $F8; dw $3128
+        dw $01F0; db $00; dw $3153
+        dw $01F0; db $F8; dw $3143
+        dw $01D0; db $00; dw $3130
+        dw $01D0; db $F8; dw $3120
+        dw $01C8; db $00; dw $3153
+        dw $01C8; db $F8; dw $3143
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB613
+// 'RTA   TIME'
+        dw $000E
+        dw $0008; db $00; dw $3134
+        dw $0008; db $F8; dw $3124
+        dw $0000; db $00; dw $313C
+        dw $0000; db $F8; dw $312C
+        dw $01F8; db $00; dw $3138
+        dw $01F8; db $F8; dw $3128
+        dw $01F0; db $00; dw $3153
+        dw $01F0; db $F8; dw $3143
+        dw $01D0; db $00; dw $3130
+        dw $01D0; db $F8; dw $3120
+        dw $01C8; db $00; dw $3153
+        dw $01C8; db $F8; dw $3143
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141

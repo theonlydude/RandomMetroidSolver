@@ -1966,7 +1966,61 @@ stats:
 
 print "credits end : ", org
 
-warnpc $dfffff
+// load RTA in IGT
+// update values in:
+//    $09DE: Game time, minutes
+//    $09E0: Game time, hours (capped at 99:59:59.59)
+update_igt:
+    phx
+    lda {current_save_slot}
+    asl
+    tax
+    lda save_slots,x
+    tax
+    lda $700000, x // rta timer in sram is the first value in stats
+    sta $16
+    lda $700002, x
+    sta $14
+    lda #$003c
+    sta $12
+    lda #$ffff
+    sta $1a
+    jsr div32 // frames in $14, rest in $16
+    lda $16  // RTA in seconds
+    sta $004204 // divide by 60 to get minutes
+    sep #$20
+    lda #$ff
+    sta $1a
+    lda #$3c
+    sta $004206
+    pha; pla; pha; pla; rep #$20
+    lda $004214 // hours/minutes
+    sta $004204 // divide by 60 to get hours and minutes
+    sep #$20
+    lda #$3c
+    sta $004206
+    pha; pla; pha; pla; rep #$20
+    lda $004216 // rta minutes
+    sta $0009DE // replace igt minutes
+    lda $004214 // rta hours
+    sta $0009E0 // replace igt hours
+    plx
+    // vanilla code
+    sta $004204
+    rtl
+
+print "after IGT hijack : ", org
+
+// palette rando stores its relocated palette there
+warnpc $dfe1ff
+
+// hijack to load RTA in IGT RAM
+// vanilla code:
+//  $8B:F3D5 AD E0 09    LDA $09E0  [$7E:09E0]
+//  $8B:F3D8 8D 04 42    STA $4204  [$7E:4204]
+org $8bF3D5
+jsl update_igt
+nop; nop
 
 // Relocated credits tilemap to free space in bank CE
 org $ceb240

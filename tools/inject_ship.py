@@ -10,6 +10,7 @@
 #  -force some slopes for the ship, slopes can be mirrored horizontaly of verticaly, putting the tile to red means no slopes.
 #  -hatch: vanilla colors, you can set custom colors under them, if no custom colors the hatch is removed.
 #  -ship glow color: to use a custom glow color (must be present in the ship colors). leave empty to disable glow color, allow the use of 16 colors.
+#   you can add a second glow color under the first to glow between the two colors instead of from black to first color.
 #  -mode7 ship: 16 colors (including the empty one), on the 8x6=48 8x8 tiles only 34 can be used.
 #  -in game ship: 16 colors (including the empty one), on the 7x5=35 16x16 tiles only 24 can be used.
 #
@@ -209,15 +210,24 @@ def palettize(this_image, palette):
 
     return paletted_image
 
+def extractColors(color):
+    R = ((color      ) % 32)
+    G = ((color//32  ) % 32)
+    B = ((color//1024) % 32)
+    return (R,G,B)
+def createColor(r, g, b):
+    return b * 1024 + g * 32 + r
+
+def applyMergePercent(percent, startColor, endColor):
+    startColor = extractColors(startColor)
+    endColor = extractColors(endColor)
+    r = min(startColor[0] + (endColor[0] * percent)//100, 31)
+    g = min(startColor[1] + (endColor[1] * percent)//100, 31)
+    b = min(startColor[2] + (endColor[2] * percent)//100, 31)
+    return createColor(r, g, b)
+
 def applyPercent(percent, basePalette):
     computedPalette = []
-    def extractColors(color):
-        R = ((color      ) % 32)
-        G = ((color//32  ) % 32)
-        B = ((color//1024) % 32)
-        return (R,G,B)
-    def createColor(r, g, b):
-        return b * 1024 + g * 32 + r
     for color in basePalette:
         color = extractColors(color)
         r, g, b = color
@@ -311,6 +321,10 @@ shipGlowCustomImg = baseImg.crop((176, 120, 184, 128))
 (r, g, b, a) = shipGlowCustomImg.getpixel((0, 0))
 shipGlowCustomColor = [r, g, b]
 enableShipGlowCustom = sum(shipGlowCustomColor) > 0
+shipGlowCustomMinImg = baseImg.crop((176, 128, 184, 136))
+(r, g, b, a) = shipGlowCustomImg.getpixel((0, 0))
+shipGlowCustomMinColor = [r, g, b]
+enableShipGlowMinCustom = sum(shipGlowCustomMinColor) > 0
 #shipImg.show()
 
 # extract hatch tiles, original palette, new palette
@@ -444,12 +458,21 @@ if not args.no_ship:
         print("final palette, {} colors: {}".format(len(paletteFinal), [hex(c) for c in paletteFinal]))
         print("final palette RGB: {}".format(paletteFinalRGB))
 
-        glowListAddr = snes_to_pc(0x8DCA52) + 8
-        paletteGap = 6
-        percents = [-85, -70, -55, -40, -25, -10, 0, -10, -25, -40, -55, -70, -85]
-        for j in range(12):
-            percentGlowColor = applyPercent(percents[j], [finalGlowColor])[0]
-            vanillaRom.writeWord(percentGlowColor, glowListAddr+paletteGap*j)
+        if enableShipGlowMinCustom:
+            glowListAddr = snes_to_pc(0x8DCA52) + 2
+            paletteGap = 6
+            finalGlowMinColor = RGB_24_to_15(shipGlowCustomMinColor)
+            percents = [0,   15,  30,  45,  60,  75, 100, 100, 75, 60,  45,  30,  15,  0]
+            for j in range(14):
+                percentGlowColor = applyMergePercent(percents[j], finalGlowMinColor, finalGlowColor)
+                vanillaRom.writeWord(percentGlowColor, glowListAddr+paletteGap*j)
+        else:
+            glowListAddr = snes_to_pc(0x8DCA52) + 8
+            paletteGap = 6
+            percents = [-85, -70, -55, -40, -25, -10, 0, -10, -25, -40, -55, -70, -85]
+            for j in range(12):
+                percentGlowColor = applyPercent(percents[j], [finalGlowColor])[0]
+                vanillaRom.writeWord(percentGlowColor, glowListAddr+paletteGap*j)
 
     if enableHatch:
         # add hatch tiles to ship tiles to palettize all images with the same palette

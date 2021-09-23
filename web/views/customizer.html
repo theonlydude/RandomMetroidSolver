@@ -28,6 +28,9 @@ extend 'layout.html'
 
 <style>
 {{include 'solver_web/varia.css'}}
+.toDisable{
+    pointer-events: none;
+}
 .lighter {
     background-color: #eee
 }
@@ -920,6 +923,9 @@ if session.customizer["invert"] == "on":
     $("#customSprite").imagepicker({show_label: true});
     $("#customShip").imagepicker();
 
+    enableCustomSpriteDropdown();
+    enableCustomShipDropdown();
+
     permalinkCustomization(permalink);
 
     displayMessage();
@@ -998,6 +1004,7 @@ function enableCustomSpriteDropdown() {
       if(isRace && noSpinAttack.value == "off") {
         noSpinAttack.click();
       }
+      $("#customSprite").siblings(".image_picker_selector").removeClass("toDisable");
     } else {
       customSpriteEnable.value = "off";
       text.className = "disabledText";
@@ -1009,6 +1016,7 @@ function enableCustomSpriteDropdown() {
       }
       customItemsEnable.disabled = true;
       noSpinAttack.disabled = true;
+      $("#customSprite").siblings(".image_picker_selector").addClass("toDisable");
     }
 
     // tell switchery
@@ -1029,9 +1037,11 @@ function enableCustomShipDropdown() {
     if(customShipEnable.checked) {
       customShipEnable.value = "on";
       text.className = "";
+      $("#customShip").siblings(".image_picker_selector").removeClass("toDisable");
     } else {
       customShipEnable.value = "off";
       text.className = "disabledText";
+      $("#customShip").siblings(".image_picker_selector").addClass("toDisable");
     }
 }
 

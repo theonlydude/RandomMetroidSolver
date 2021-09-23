@@ -2680,6 +2680,8 @@ def customWebService():
             params.append('--no_spin_attack')
     if request.vars.customShipEnable == 'on':
         params += ['--ship', "{}.ips".format(request.vars.customShip)]
+        if customShips[request.vars.customShip].get("hideSamus", False):
+            params += ['-c', 'custom_ship.ips']
     if request.vars.seedKey != None:
         with DB() as db:
             seedIpsInfo = db.getSeedIpsInfo(request.vars.seedKey)

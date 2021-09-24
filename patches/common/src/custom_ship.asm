@@ -2,21 +2,13 @@
 
 lorom
 
-!invisible_flag = $7fff42
+!temp = $0743		; from pause screen RAM
+
 ;;; relative to the ship. midway between top and bottom samus position
 !invisible_offset = #$0018
 
-org $9085ec
-	jml handle_invisible_flag
-
-org $9085f1
-visibility_checks:
-
-org $908606
-visible:
-
-org $908647
-invisible:
+org $A2A814
+	jsl landing_descent
 
 org $A2AA69
 	jsl lower_samus
@@ -28,14 +20,12 @@ org $A2A95C
 	jsl raise_samus_land
 
 org $a1f800
-handle_invisible_flag:
-	lda !invisible_flag : bne .invisible
-	lda $18aa : beq .checks	; hijacked vanilla check
-	jml visible
-.invisible:
-	jml invisible
-.checks:
-	jml visibility_checks
+landing_descent:
+	jsr hide_samus
+	;; hijacked code
+	lda $0AFC
+	clc
+	rtl
 
 lower_samus:
 	clc : adc #$0002	; hijacked code
@@ -54,10 +44,23 @@ raise_samus:
 	lda $12
 	clc : adc.l !invisible_offset
 check_invisible_offset:
-	sta !invisible_flag	; use flag RAM as tmp value
+	sta !temp
 	pla : pha
-	cmp !invisible_flag : bpl .end
-	lda #$0000 : sta !invisible_flag
+	cmp !temp : bmi .visible
+	jsr hide_samus
+	bra .end
+.visible:
+	jsr show_samus
 .end:
 	pla
 	rtl
+
+hide_samus:
+	;; set en empty samus draw handler
+	LDA #$E90E : STA $0A5C
+	rts
+
+show_samus:
+	;; restore default samus draw handler
+	LDA #$EB52 : STA $0A5C
+	rts

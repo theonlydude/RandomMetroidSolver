@@ -63,11 +63,13 @@ define backup_candidate $7fff3a
 
 define stat_resets	#$0029
 
-// External Routines
+// External
 // routine in new_game.asm
 define check_new_game   $A1F210
 // routine in tracking.asm
 define update_and_store_region_time $A1EC00
+// seed 32bits ID (see seed_display.asm)
+define seed_id 	       $dfff00
 
 // Patch boot to init our stuff
 org $80844B
@@ -163,19 +165,31 @@ boot1:
     sta {timer_backup2}
     // check if first boot ever by checking magic 32-bit value in SRAM
     lda {was_started_flag32}
-    cmp {magic_flag}
+    cmp {seed_id}
     bne .first
     lda {was_started_flag32}+2
-    cmp {magic_flag}
+    cmp {seed_id}+2
     beq .check_reset
 .first:
     // no game was ever saved:
     // init used save slots bitmask
     lda #$0000
     sta {used_slots_mask}
-    // write magic number
+    // clear all save files by corrupting checksums
+    ldx	#0005
     lda {magic_flag}
+.clear_loop:
+    sta $701ff0,x
+    sta $701ff8,x
+    sta $700000,x
+    sta $700008,x
+    dex
+    dex
+    bpl .clear_loop
+    // write magic number
+    lda {seed_id}
     sta {was_started_flag32}
+    lda {seed_id}+2
     sta {was_started_flag32}+2
     // skip soft reset check, since it's the 1st boot
     bra .cont

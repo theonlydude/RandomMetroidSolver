@@ -103,7 +103,7 @@ load_credits_music_data:
 load_credits_music_track:
 	%loadMusicTrack(credits)
 
-org $a9fc60
+org $a9fc70
 load_escape_music_data:
 	%loadMusicData(escape)
 

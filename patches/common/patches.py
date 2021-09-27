@@ -96,6 +96,9 @@ patches = {
     "SpriteSomething_Disable_Spin_Attack": {
         0xD93FE: [0x0, 0x0]
     },
+    "Ship_Takeoff_Disable_Hide_Samus": {
+        0x112B13: [0x6B]
+    },
     # custom load points for non standard start APs
     "Save_G4": {
         # load point entry

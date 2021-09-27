@@ -137,7 +137,8 @@ if __name__ == "__main__":
                                  'spinjumprestart.ips', 'rando_speed.ips', 'No_Music', 'AimAnyButton.ips',
                                  'max_ammo_display.ips', 'supermetroid_msu1.ips', 'Infinite_Space_Jump',
                                  'refill_before_save.ips', 'remove_elevators_doors_speed.ips',
-                                 'remove_itemsounds.ips', 'vanilla_music.ips', 'custom_ship.ips'])
+                                 'remove_itemsounds.ips', 'vanilla_music.ips', 'custom_ship.ips',
+                                 'Ship_Takeoff_Disable_Hide_Samus'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -771,7 +772,8 @@ if __name__ == "__main__":
 
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:
-            romPatcher.customSprite(args.sprite, args.customItemNames, args.noSpinAttack) # adds another IPS
+            purge = args.ship is not None
+            romPatcher.customSprite(args.sprite, args.customItemNames, args.noSpinAttack, purge) # adds another IPS
         if args.ship is not None:
             romPatcher.customShip(args.ship) # adds another IPS
             # don't color randomize custom ships

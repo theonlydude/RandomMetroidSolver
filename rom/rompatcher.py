@@ -238,8 +238,29 @@ class RomPatcher:
     def customShip(self, ship):
         self.applyIPSPatch(ship, ipsDir='varia_custom_sprites/patches')
 
-    def customSprite(self, sprite, customNames, noSpinAttack):
+    def purgeSprite(self):
+        # custom sprites are also modifying ship palettes, so remove these records from the custom sprite
+        paletteShip = [snes_to_pc(0xA2A59E), snes_to_pc(0xA2A5BE)]
+        paletteShip7 = [snes_to_pc(0x8DD6BA), snes_to_pc(0x8DD900)]
+        paletteShipGlow = [snes_to_pc(0x8DCA4E), snes_to_pc(0x8DCAAA)]
+        spriteIps = self.ipsPatches[-1]
+        spriteIps = spriteIps.toDict()
+        filteredDict ={}
+        for keyLow, data in spriteIps.items():
+            dataLength = len(data)
+            keyHigh = keyLow + dataLength
+            if ((keyHigh < paletteShip[0] or keyLow >= paletteShip[1]) and
+                (keyHigh < paletteShip7[0] or keyLow >= paletteShip7[1]) and
+                (keyHigh < paletteShipGlow[0] or keyLow >= paletteShipGlow[1])):
+                filteredDict[keyLow] = data
+        self.ipsPatches[-1] = IPS_Patch(filteredDict)
+
+    def customSprite(self, sprite, customNames, noSpinAttack, purge):
         self.applyIPSPatch(sprite, ipsDir='varia_custom_sprites/patches')
+
+        if purge:
+            self.purgeSprite()
+
         if noSpinAttack == True:
             self.applyIPSPatch('SpriteSomething_Disable_Spin_Attack')
 

@@ -2682,6 +2682,8 @@ def customWebService():
         params += ['--ship', "{}.ips".format(request.vars.customShip)]
         if customShips[request.vars.customShip].get("hideSamus", False):
             params += ['-c', 'custom_ship.ips']
+        if customShips[request.vars.customShip].get("showSamusAtTakeoff", False):
+            params += ['-c', 'Ship_Takeoff_Disable_Hide_Samus']
     if request.vars.seedKey != None:
         with DB() as db:
             seedIpsInfo = db.getSeedIpsInfo(request.vars.seedKey)

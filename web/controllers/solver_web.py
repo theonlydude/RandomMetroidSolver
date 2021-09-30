@@ -2752,6 +2752,8 @@ def loadMusics():
     if musics:
         return musics
 
+    hiddenGroups = ["Vanilla Soundtrack - Sound Effects"]
+
     musicDir = 'music/_metadata'
     dropdown = defaultdict(list)
     metadatas = sorted(os.listdir(musicDir), key=lambda v: v.upper())
@@ -2762,7 +2764,10 @@ def loadMusics():
             musics.update(data)
             # check if there's group for musics
             for song, songData in data.items():
-                dropdown[songData.get("group", defaultGroup)].append(song)
+                group = songData.get("group", defaultGroup)
+                if group in hiddenGroups:
+                    continue
+                dropdown[group].append(song)
     musics["_dropdown"] = dropdown
 
     with open('music/_metadata/vanilla.json', 'r', encoding='utf-8') as jsonFile:

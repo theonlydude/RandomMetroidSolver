@@ -82,32 +82,32 @@ for addr in sorted(tracksTable.keys()):
     if nspcData[0] is None and nspcData[1] is None:
         print("  Warning: no nspc end found for {}".format(trackData["trackName"]))
         tracksTable[addr]["nspcData"] = [None]
-        tracksTable[addr]["md5sum"] = [None]
+        tracksTable[addr]["nspc_md5sum"] = [None]
         continue
 
     md5sum = getMd5Sum(nspcData[0])
     tracksTable[addr]["nspcData"] = [nspcData[0]]
-    tracksTable[addr]["md5sum"] = [md5sum]
+    tracksTable[addr]["nspc_md5sum"] = [md5sum]
 
     if nspcData[1] is not None:
         md5sum = getMd5Sum(nspcData[1])
         tracksTable[addr]["nspcData"].append(nspcData[1])
-        tracksTable[addr]["md5sum"].append(md5sum)
+        tracksTable[addr]["nspc_md5sum"].append(md5sum)
 
 # index by md5sum
 allTracksMd5 = {}
 for songName, data in allTracks.items():
-    allTracksMd5[data["md5sum"]] = songName
+    allTracksMd5[data["nspc_md5sum"]] = songName
 
 playlist = {}
 for data in tracksTable.values():
-    md5sums = data["md5sum"]
+    md5sums = data["nspc_md5sum"]
     if md5sums[0] in allTracksMd5 or (len(md5sums) > 1 and md5sums[1] in allTracksMd5):
         md5sum = md5sums[0] if md5sums[0] in allTracksMd5 else md5sums[1]
         #print("$%02x %s replaced with: %s" % (data["dataId"], data["trackName"], allTracksMd5[md5sum]))
         playlist[removeChars(data["trackName"], ' ,()-/')] = allTracksMd5[md5sum]
     else:
-        print("  Warning: replacement not found for {} - {} - {}".format(hex(data["dataId"]), data["trackName"], data["md5sum"]))
+        print("  Warning: replacement not found for {} - {} - {}".format(hex(data["dataId"]), data["trackName"], data["nspc_md5sum"]))
 
 playlistName = sys.argv[1][:-4]+'.json'
 with open(playlistName, 'w') as f:

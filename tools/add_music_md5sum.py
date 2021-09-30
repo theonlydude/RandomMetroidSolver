@@ -24,7 +24,7 @@ for metaFile in os.listdir(metaDir):
 
 for metaFile, meta in allMetas.items():
     for song, data in meta.items():
-        data['md5sum'] = getMd5Sum(data['nspc_path'])
+        data['nspc_md5sum'] = getMd5Sum(data['nspc_path'])
 
     metaPath = os.path.join(metaDir, metaFile)
     with open(metaPath, 'w') as f:

@@ -2752,7 +2752,7 @@ def loadMusics():
     if musics:
         return musics
 
-    hiddenGroups = ["Vanilla Soundtrack - Sound Effects"]
+    hiddenGroups = ["Vanilla Soundtrack - Sound Effects", "Memory Violation"]
 
     musicDir = 'music/_metadata'
     dropdown = defaultdict(list)

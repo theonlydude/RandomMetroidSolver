@@ -64,12 +64,20 @@ for vTrack in preserved:
     dataId = (vTrackData['data_index']+1)*3
     updateTable(dataId, vTrack, vTrack)
 
+minAddr,maxAddr = (0xffffffff, 0x0)
+
 # compare nspc data and dump if different than expected
 for dataId, expected_nspc in expected_table.items():
     with open(expected_nspc, 'rb') as f:
         expected_music_data = f.read()
     sz = len(expected_music_data)
-    addr = snes_to_pc(rom.readLong(tableAddr+dataId))
+    snesAddr = rom.readLong(tableAddr+dataId)
+    if snesAddr+sz > maxAddr:
+        maxAddr = snesAddr+sz
+    if snesAddr < minAddr:
+        minAddr = snesAddr
+    print("Data $%02x, $%06x - $%06x" % (dataId, snesAddr, snesAddr+sz-1))
+    addr = snes_to_pc(snesAddr)
     rom.seek(addr)
     music_data = rom.read(sz)
     if music_data != expected_music_data:
@@ -78,3 +86,5 @@ for dataId, expected_nspc in expected_table.items():
         print("Dumping it in %s ..." % out_nspc)
         with open(out_nspc, 'wb') as f:
             f.write(music_data)
+
+print("Music range: $%06x - $%06x" % (minAddr, maxAddr))

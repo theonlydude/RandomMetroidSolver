@@ -1301,6 +1301,12 @@ class MusicPatcher(object):
                 continue
             sz = os.path.getsize(dataFile)
             for r in usableSpace:
+                # on SNES Classic (at least), if EOF indicator is written cross bank
+                # music data upload fails and it crashes SPC by overwriting engine code
+                # EOF is 4 bytes, we check for 5 just to be safe
+                endAddrShort = pc_to_snes(r['end']) & 0xffff
+                if endAddrShort <= 5:
+                    r['end'] -= 5
                 if (r['end'] - sz) >= r['start']:
                     r['end'] -= sz
                     musicDataAddresses[dataFile] = r['end']

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sys, os, json, hashlib
+import sys, os, json
 
 # we're in directory 'tools/' we have to update sys.path
 sys.path.append(os.path.dirname(sys.path[0]))
@@ -23,9 +23,6 @@ metadata={}
 
 dbase=os.path.split(directory)[1]
 
-def getMd5Sum(nspcFileName):
-    return hashlib.md5(open(nspcFileName,'rb').read()).hexdigest()
-
 for f in files:
     dname,e=os.path.splitext(f)
     if e == ".bin" or e == ".nspc":
@@ -42,8 +39,7 @@ for f in files:
                 "track_index":i,
                 "original_author":orig_auth,
                 "port_author":port_auth,
-                "description":desc,
-                "nspc_md5sum": getMd5Sum(os.path.join(directory,f))
+                "description":desc
             }
             metadata[tname]['spc_path'] = os.path.join(dbase, spc_files[i]) if len(spc_files) > 0 else ''
 

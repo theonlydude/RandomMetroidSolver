@@ -17,6 +17,9 @@ p=MusicPatcher(rom, RomTypeForMusic.VariaSeed, baseDir=baseDir)
 vanillaTracks=p.vanillaTracks
 allTracks=p.allTracks
 tableAddr=p.musicDataTableAddress-3
+nspcMetaPath = os.path.join(baseDir, "nspc_metadata.json")
+with open(nspcMetaPath, "r") as f:
+    nspcMeta = json.load(f)
 
 def readNspcData(rom, addr):
     # songs can have two tracks
@@ -97,7 +100,7 @@ for addr in sorted(tracksTable.keys()):
 # index by md5sum
 allTracksMd5 = {}
 for songName, data in allTracks.items():
-    allTracksMd5[data["nspc_md5sum"]] = songName
+    allTracksMd5[nspcMeta[data["nspc_path"]]["md5sum"]] = songName
 
 playlist = {}
 for data in tracksTable.values():

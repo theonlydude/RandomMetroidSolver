@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sys, os, json, hashlib
+import sys, os, json
 
 # we're in directory 'tools/' we have to update sys.path
 sys.path.append(os.path.dirname(sys.path[0]))
@@ -19,9 +19,6 @@ from rom.rom import RealROM, snes_to_pc
 vanilla=sys.argv[1]
 nspc_dir=sys.argv[2]
 json_path=sys.argv[3]
-
-def getMd5Sum(nspcFileName):
-    return hashlib.md5(open(nspcFileName,'rb').read()).hexdigest()
 
 rom=RealROM(vanilla)
 musicDataTable = snes_to_pc(0x8FE7E4)
@@ -122,8 +119,7 @@ for i in range(len(vanillaMusicData)):
             'original_author':'Kenji Yamamoto',
             'port_author': '',
             'description': "Original track from vanilla Super Metroid",
-            "group": group,
-            "nspc_md5sum": getMd5Sum(nspc_path)
+            "group": group
         }
         if spc_path is not None:
             metadata[track]['spc_path'] = spc_path

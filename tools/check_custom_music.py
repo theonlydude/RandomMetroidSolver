@@ -27,6 +27,7 @@ allTracks=p.allTracks
 tableAddr=p.musicDataTableAddress-3
 baseDir=p.baseDir
 preserved=p.constraints['preserve']
+nspcInfo=p.nspcInfo
 
 # build the music data table to expect:
 # dataId => expected nspc file path
@@ -86,5 +87,13 @@ for dataId, expected_nspc in expected_table.items():
         print("Dumping it in %s ..." % out_nspc)
         with open(out_nspc, 'wb') as f:
             f.write(music_data)
+    else:
+        # check if some block headers are cross-bank
+        def isCrossBank(off):
+            endBankOffset = (snesAddr+off+4) & 0x7fff
+            return endBankOffset == 1 or endBankOffset == 3
+        offending = [off for off in nspcInfo[expected_nspc]['block_headers_offsets'] if isCrossBank(off)]
+        if len(offending) > 0:
+            print("Cross bank header offsets for data $%02x : %s" % (dataId, str(offending)))
 
 print("Music range: $%06x - $%06x" % (minAddr, maxAddr))

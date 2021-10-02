@@ -40,6 +40,7 @@ def getBlockHeaderOffsets(nspcFileName):
         if blkSize == 0:
             break
         addr += 4 + blkSize # 4 is the size of the header itself
+    f.close()
     return offsets
 
 for trackName, trackData in allTracks.items():

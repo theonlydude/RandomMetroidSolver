@@ -1199,6 +1199,12 @@ class MusicPatcher(object):
             constraintsFile = 'varia.json' if variaSeed else 'vanilla.json'
         with open(os.path.join(constraintsDir, constraintsFile), 'r') as f:
             self.constraints = json.load(f)
+        nspcInfoPath = os.path.join(baseDir, "nspc_metadata.json")
+        with open(nspcInfoPath, "r") as f:
+            nspcInfo = json.load(f)
+        self.nspcInfo = {}
+        for nspc,info in nspcInfo.items():
+            self.nspcInfo[self._nspc_path(nspc)] = info
         self.allTracks = {}
         self.vanillaTracks = None
         for metaFile in os.listdir(metaDir):
@@ -1300,16 +1306,19 @@ class MusicPatcher(object):
             if dataFile is None:
                 continue
             sz = os.path.getsize(dataFile)
+            blocks = self.nspcInfo[dataFile]['block_headers_offsets']
             for r in usableSpace:
-                # on SNES Classic (at least), if EOF indicator is written cross bank
-                # music data upload fails and it crashes SPC by overwriting engine code
-                # EOF is 4 bytes, we check for 5 just to be safe
-                endAddrShort = pc_to_snes(r['end']) & 0xffff
-                if endAddrShort <= 5:
-                    r['end'] -= 5
-                if (r['end'] - sz) >= r['start']:
-                    r['end'] -= sz
-                    musicDataAddresses[dataFile] = r['end']
+                # find a suitable address so header words are not split across banks (header is 2 words)
+                addr = r['end'] - sz
+                def isCrossBank(off):
+                    nonlocal addr
+                    endBankOffset = pc_to_snes(addr+off+4) & 0x7fff
+                    return endBankOffset == 1 or endBankOffset == 3
+                while addr >= r['start'] and any(isCrossBank(off) for off in blocks):
+                    addr -= 1
+                if addr >= r['start']:
+                    musicDataAddresses[dataFile] = addr
+                    r['end'] = addr
                     break
             if dataFile not in musicDataAddresses:
                 raise RuntimeError("Cannot find enough space to store music data file "+dataFile)

@@ -127,8 +127,10 @@ org $8b9a19
     jml patch4
 
 // Hijack when samus is in the ship and ready to leave the planet
-org $a2ab13
-    jsl game_end
+org $a2ab0d
+	jsl game_end
+	nop
+	nop
 
 // Patch NMI to skip resetting 05ba and instead use that as an extra time counter
 org $8095e5
@@ -976,8 +978,8 @@ game_end:
     jsl save_stats
 
     // hijacked code
+    stz $0df2	
     lda #$000a
-    jsl $90f084
     rtl
 
 warnpc $8bf88f

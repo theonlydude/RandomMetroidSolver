@@ -512,6 +512,7 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 
 
 [ -L ~/web2py/applications/solver/static/images/area_map_20200112.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map.png ~/web2py/applications/solver/static/images/area_map_20200112.png
+[ -L ~/web2py/applications/solver/static/images/area_map_stream.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map_stream.png ~/web2py/applications/solver/static/images/area_map_stream.png
 
 [ -L ~/web2py/applications/solver/static/images/gauntlet_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/gauntlet_start.png ~/web2py/applications/solver/static/images/gauntlet_start.png
 [ -L ~/web2py/applications/solver/static/images/green_bt_elevator_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/green_bt_elevator_start.png ~/web2py/applications/solver/static/images/green_bt_elevator_start.png

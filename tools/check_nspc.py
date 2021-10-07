@@ -53,7 +53,7 @@ class DataBlock:
 allowUnused = True
 ranges = [
     Range(0x0000, 0x14ff, "RAM before SPC Engine", False),
-    Range(0x1500, 0x530D, "SPC Engine Code", True),
+    Range(0x1500, 0x530D, "SPC Engine Code", False),
     Range(0x530E, 0x56E1, "Shared trackers", False),
       Range(0x530E, 0x546D, "  Music track 1 - Samus fanfare", False),
       Range(0x546E, 0x5568, "  Music track 2 - item fanfare", False),

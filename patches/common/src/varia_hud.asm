@@ -54,6 +54,9 @@
 !ridley_id = #$00aa
 !area_index = $079f
 !norfair = #$0002
+!ridley_timer = $0FB2
+!scav_escape = #$eeee
+!scav_next_found = #$aaaa
 
 ;;; custom music patch detection for escape music trigger
 !custom_music_marker = $8fe86b
@@ -75,6 +78,10 @@ org $82def7
 ;;; this one is used to count remaining items in current area, and handle scavenger hunt
 org $848899
 	jml item_pickup
+org $84889D
+item_resume_pickup:
+org $8488AF
+item_abort_pickup:
 
 ;;; a bunch of hijacks post item collection to count items or trigger the escape after last item
 ;;; in scavenger hunt if option is set (has to be done after item_pickup because of music management)
@@ -121,7 +128,12 @@ ridley_initial_wait_show:
 org $A6A388
 ridley_initial_wait_continue:
 
-;;; TODO add Ridley death hijack (different from minimizer one)
+org $A6C58B
+	jml scav_ridley_dead
+org $A6C550
+ridley_still_dying:
+org $A6C590			; would have been simpler to just hijack here, but already done by minimizer bosses patch
+ridley_dead:
 
 ;;; skip top row of auto reserve to have more room (HUD draw main routine)
 org $809B61
@@ -495,8 +507,10 @@ load_state:
 	LDA $0003,x
 	jml $82DEFD		; resume routine
 
-
-;;; return carry set if in scav mode, X set to index in scav_order
+;;; return
+;;; - carry set if in scav mode, clear if not
+;;; - X set to index in scav_order
+;;; - A scav_order entry
 scav_mode_check:
 	lda !scav_idx : asl : tax
 	lda.l scav_order,x
@@ -513,61 +527,92 @@ scav_mode_check:
 ;;; !scav_tmp: next scav loc ID
 ;;; Y : loc ID of current pickup
 ;;;
-;;; returns carry set if pickup allowed, clear if not
+;;; returns carry set if pickup allowed, clear if not.
+;;; !scav_tmp contains !scav_next_found if the location
+;;; found is the next scav loc, otherwise garbage
 scav_list_check:
-	cmp !scav_tmp : beq .found_next_scav
+	tya : cmp !scav_tmp : beq .found_next_scav
 	;; now checks if the item we found is in the remaining list
 .scav_list_check_loop:
 	inx : inx
 	lda.l scav_order,x
-	cmp #$ffff : beq .pickup_end_noescape
+	cmp #$ffff : beq .allow
 	and #$ff00 : xba : sta !scav_tmp
-	lda $1dc7,y : cmp !scav_tmp : beq .nopickup_end
+	tya : cmp !scav_tmp : beq .deny
 	bra .scav_list_check_loop
 .found_next_scav:
-	;; FIXME don't do that here (otherwise Ridley fight will be optional...)
+	lda !scav_next_found : sta !scav_tmp
+.allow:
+	sec
+	bra .end
+.deny:
+	clc
+.end:
+	rts
+
+found_next_scav:
 	lda !scav_idx : inc : sta !scav_idx
 	asl : tax
 	lda.l scav_order,x : and #$00ff
 	cmp !hunt_over_hud : bne .pickup_end_noescape
 	;; last item pickup : check if we shall trigger the escape
 	lda.l option_end : beq .pickup_end_noescape
-	lda #$eeee : sta !scav_tmp ; place marker to trigger escape a bit later (needed because of music change)
-	bra .pickup_end
-.pickup_end_noescape:			; routine end when we pick up the item
-	lda #$ffff : sta !scav_tmp
-.pickup_end:
-	sec
+	lda !scav_escape : sta !scav_tmp ; place marker to trigger escape a bit later (needed because of music change)
 	bra .end
-.nopickup_end:
+.pickup_end_noescape:
 	lda #$ffff : sta !scav_tmp
-	clc
 .end:
 	rts
 
 scav_ridley_check:
-	dec $0FB2
+	phx : phy
+	dec !ridley_timer
 	bne .continue
 	;; here, Ridley is supposed to show up
+	lda !area_index : cmp !norfair : bne .show ; don't check Ceres Ridley
 	jsl scav_mode_check
 	bcc .show				   ; not in scav mode
-	lda !area_index : cmp !norfair : bne .show ; don't check Ceres Ridley
 	;; scav_tmp = loc ID to check against
 	and #$ff00 : xba : sta !scav_tmp
 	ldy !ridley_id
 	jsr scav_list_check
+	lda #$ffff : sta !scav_tmp
 	bcs .show
+	inc !ridley_timer
 .continue:
+	ply : plx
 	jml ridley_initial_wait_continue
 .show:
+	ply : plx
 	jml ridley_initial_wait_show
+
+scav_ridley_dead:
+	dec !ridley_timer
+	bpl .not_dead
+	;; dead: see if it was the scav location, and advance
+	phx
+	jsl scav_mode_check
+	bcc .dead
+	and #$ff00 : xba
+	cmp !ridley_id : bne .dead
+	;; Ridley was indeed the next scav location
+	jsr found_next_scav
+	lda !scav_tmp
+	cmp !scav_escape : bne .dead
+	jsr trigger_escape
+	bra .dead
+.not_dead:
+	jml ridley_still_dying
+.dead:
+	plx
+	jml ridley_dead
 
 item_pickup:
 	phy
 	phx
 	;; check if loc ID is the next required scav
 	jsl scav_mode_check
-	bcc .pickup_end_noescape ; not in scavenger mode
+	bcc .pickup_end_return ; not in scavenger mode
 	;; scav_tmp = loc ID to check against
 	and #$ff00 : xba : sta !scav_tmp
 	;; checks if picked up loc is the next scav loc
@@ -578,23 +623,28 @@ item_pickup:
 	jsr scav_list_check
 	bcc .nopickup_end
 .pickup_end:
+	lda !scav_tmp : cmp !scav_next_found : beq .found_next_scav
+	lda #$ffff : sta !scav_tmp
+	bra .pickup_end_return
+.found_next_scav:
+	jsr found_next_scav
+.pickup_end_return:
 	plx
 	ply
 	phx			; stack balance, X will be pulled at the end of hijacked routine
 	LDA $1DC7,x		; remaining part hijacked code
-	jml $84889D		; resume pickup
+	jml item_resume_pickup
 .nopickup_end:			; routine end when we prevent item pick up (forbidden item)
+	lda #$ffff : sta !scav_tmp
 	plx
 	ply
 	rep 6 : dey		; move back PLM instruction pointer to "goto draw"
-	jml $8488AF		; jump to hijacked routine exit
-
+	jml item_abort_pickup	; jump to hijacked routine exit
 
 item_post_collect:
 	jsr compute_n_items
 	lda !scav_tmp
-	cmp #$eeee : bne .normal_pickup
-	lda #$ffff : sta !scav_tmp
+	cmp !scav_escape : bne .normal_pickup
 	jsr trigger_escape
 	bra .end
 .normal_pickup:
@@ -628,6 +678,7 @@ room_earthquake:
 	rts
 
 trigger_escape:
+	lda #$ffff : sta !scav_tmp
 	phx : phy
 	jsl !escape_setup
 	jsr room_earthquake	; could not be called by setup asm since not in escape yet
@@ -686,7 +737,7 @@ compute_n_items:
 	rts
 
 print "a1 end: ", pc
-warnpc $a1f7ff
+warnpc $a1f8ff
 
 ;;; make golden statues instructions check for scavenger collection
 ;;; in scavenger mode :
@@ -726,7 +777,7 @@ org $838c5c
 org $8ffe00
 alt_g4_skip:
     ;; skip check if not in scavenger mode:
-    jsr scav_mode_check
+    jsl scav_mode_check
     bcc .g4_skip
     ;; in scavenger mode, check if the hunt is over
     and #$00ff : cmp !hunt_over_hud : bne +

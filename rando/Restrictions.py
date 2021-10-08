@@ -84,7 +84,7 @@ class Restrictions(object):
         self.checkers.append(self.restrictionDictChecker)
 
     def isLocMajor(self, loc):
-        return not loc.isBoss() and (self.split == "Full" or loc.isClass(self.split))
+        return (not loc.isBoss() and self.split == "Full") or loc.isClass(self.split)
 
     def isLocMinor(self, loc):
         return not loc.isBoss() and (self.split == "Full" or not loc.isClass(self.split))
@@ -93,7 +93,7 @@ class Restrictions(object):
         if self.split == "Full":
             return True
         elif self.split == 'Scavenger':
-            return not self.isItemMinor(item)
+            return not self.isItemMinor(item) or item.Type == "Ridley"
         else:
             return item.Class == self.split
 

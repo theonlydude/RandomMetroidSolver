@@ -172,7 +172,7 @@ if __name__ == "__main__":
     parser.add_argument('--scavNumLocs',
                         help="For Scavenger split, number of major locations in the mandatory route",
                         dest='scavNumLocs', nargs='?', default=10,
-                        choices=["0"]+[str(i) for i in range(4,17)])
+                        choices=["0"]+[str(i) for i in range(4,18)])
     parser.add_argument('--scavRandomized',
                         help="For Scavenger split, decide whether mandatory major locs will have non-vanilla items",
                         dest='scavRandomized', nargs='?', const=True, default=False)

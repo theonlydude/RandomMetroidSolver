@@ -52,7 +52,7 @@ patches = {
         0xef20: [0x1]
     },
     'Escape_Scavenger' : {
-        0x10F5FC: [0x1]
+        0x10F5FE: [0x1]
     },
     # vanilla data to restore setup asm for plandos
     "Escape_Animals_Disable": {

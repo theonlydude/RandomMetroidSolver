@@ -177,7 +177,7 @@ class RomPatcher:
             for itemLoc in progItemLocs:
                 self.romFile.writeWord((itemLoc.Location.Id << 8) | itemLoc.Location.HUD)
             # bogus loc ID | "HUNT OVER" index
-            self.romFile.writeWord(0xff10)
+            self.romFile.writeWord(0xff11)
 
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball

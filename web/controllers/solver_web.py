@@ -1162,7 +1162,7 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
         elif qty == 'scavNumLocs':
             if request.vars.majorsSplit == 'Scavenger':
                 qtyInt = getInt(qty, isJson)
-                if qtyInt < 4 or qtyInt > 16:
+                if qtyInt < 4 or qtyInt > 17:
                     raiseHttp(400, "Wrong value for {}, must be between 4 and 16".format(qty), isJson)
         else:
             qtyFloat = getFloat(qty, isJson)

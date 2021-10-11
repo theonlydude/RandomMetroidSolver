@@ -665,6 +665,8 @@ if __name__ == "__main__":
                         escapeAttr['patches'].append("Escape_Rando_Enable_Enemies")
                     if args.scavEscape == True:
                         escapeAttr['patches'].append('Escape_Scavenger')
+                if args.majorsSplit == 'Scavenger' and any(il for il in progItemLocs if il.Location.Name == "Ridley"):
+                    args.patches.append("Blinking[RidleyRoomIn]")
         except Exception as e:
             import traceback
             traceback.print_exc(file=sys.stdout)
@@ -758,6 +760,8 @@ if __name__ == "__main__":
             musicPatcher = MusicPatcher(romPatcher.romFile, romType)
         if args.hud == True or args.majorsSplit == "FullWithHUD":
             args.patches.append("varia_hud.ips")
+        if args.debug == True:
+            args.patches.append("Disable_Clear_Save_Boot")
         if args.patchOnly == False:
             romPatcher.applyIPSPatches(args.startLocation, args.patches,
                                        args.noLayout, gravityBehaviour,

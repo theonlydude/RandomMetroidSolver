@@ -61,17 +61,6 @@ class RomPatcher:
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips',
                    'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips'],
-        # comfort patches
-        'Optional': ['itemsounds.ips', 'rando_speed.ips', 'Infinite_Space_Jump', 'refill_before_save.ips',
-                     'spinjumprestart.ips', 'elevators_doors_speed.ips', 'No_Music', 'random_music.ips',
-                     # animals 
-                     'animal_enemies.ips', 'animals.ips', 'draygonimals.ips',
-                     'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
-                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips',
-                     'Escape_Animals_Change_Event', # ...end animals
-                     # vanilla behaviour restore
-                     'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips',
-                     'varia_hud.ips', 'custom_music.ips'],
         # base patchset+optional layout for area rando
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
@@ -342,8 +331,7 @@ class RomPatcher:
 
             # apply optional patches
             for patchName in optionalPatches:
-                if patchName in RomPatcher.IPSPatches['Optional']:
-                    self.applyIPSPatch(patchName)
+                self.applyIPSPatch(patchName)
 
             # random escape
             if escapeAttr is not None:

@@ -206,6 +206,17 @@ where id = %s;"""
             print("DB.addSprite::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
+    def addShip(self, ship):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "insert into ships (init_time, ship) values (now(), '%s');"
+            self.cursor.execute(sql % (ship, ))
+        except Exception as e:
+            print("DB.addShip::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
     def addPlandoRando(self, return_code, duration, msg):
         if self.dbAvailable == False:
             return None
@@ -604,7 +615,40 @@ order by init_time;"""
         # convert from Decimal to int
         row = [int(count) for count in rows[0]]
 
+        # sort output
+        output = sorted([(sprite, count) for sprite, count in zip(sprites, row)], key=lambda x: x[1], reverse=True)
+        sprites = [sprite for sprite, count in output]
+        row = [count for sprite, count in output]
+
         return [['sprite']+sprites, ['sprite']+list(row)]
+
+    def getShipsData(self, weeks):
+        if self.dbAvailable == False:
+            return None
+
+        sql = "select distinct(ship) from ships where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK);"
+        ships = self.execSelect(sql, (weeks,))
+        if ships == None:
+            return None
+
+        # db returns tuples
+        ships = [ship[0] for ship in ships]
+
+        # pivot
+        sql = "SELECT "
+        sql += ", ".join(["SUM(CASE WHEN ship = '{}' THEN 1 ELSE 0 END) AS count_{}".format(ship, ship.replace('-', '_')) for ship in ships])
+        sql += " FROM ships where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK);".format(weeks)
+
+        rows = self.execSelect(sql)
+        # convert from Decimal to int
+        row = [int(count) for count in rows[0]]
+
+        # sort output
+        output = sorted([(ship, count) for ship, count in zip(ships, row)], key=lambda x: x[1], reverse=True)
+        ships = [ship for ship, count in output]
+        row = [count for ship, count in output]
+
+        return [['ship']+ships, ['ship']+list(row)]
 
     def getPlandoRandoData(self, weeks):
         if self.dbAvailable == False:

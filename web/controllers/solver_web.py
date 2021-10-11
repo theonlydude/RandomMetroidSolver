@@ -1695,6 +1695,7 @@ def stats():
         isolverData = db.getISolverData(weeks)
 
         spritesData = db.getSpritesData(weeks)
+        shipsData = db.getShipsData(weeks)
         plandoRandoData = db.getPlandoRandoData(weeks)
 
         randomizerParamsStats = db.getRandomizerParamsStats(weeks)
@@ -1706,7 +1707,7 @@ def stats():
     return dict(solverPresets=solverPresets, randomizerPresets=randomizerPresets,
                 solverDurations=solverDurations, randomizerDurations=randomizerDurations,
                 solverData=solverData, randomizerData=randomizerData, randomizerParamsStats=randomizerParamsStats,
-                isolver=isolver, isolverData=isolverData, spritesData=spritesData, errors=errors,
+                isolver=isolver, isolverData=isolverData, spritesData=spritesData, shipsData=shipsData, errors=errors,
                 fsStatus=fsStatus, fsPercent=fsPercent, plandoRandoData=plandoRandoData)
 
 def transition2isolver(transition):
@@ -2680,6 +2681,8 @@ def customWebService():
             params.append('--no_spin_attack')
     if request.vars.customShipEnable == 'on':
         params += ['--ship', "{}.ips".format(request.vars.customShip)]
+        with DB() as db:
+            db.addShip(request.vars.customShip)
         if customShips[request.vars.customShip].get("hideSamus", False):
             params += ['-c', 'custom_ship.ips']
         if customShips[request.vars.customShip].get("showSamusAtTakeoff", False):

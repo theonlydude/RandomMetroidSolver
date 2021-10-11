@@ -606,6 +606,9 @@ order by init_time;"""
         # db returns tuples
         sprites = [sprite[0] for sprite in sprites]
 
+        if not sprites:
+            return [['sprite'], ['sprite']]
+
         # pivot
         sql = "SELECT "
         sql += ", ".join(["SUM(CASE WHEN sprite = '{}' THEN 1 ELSE 0 END) AS count_{}".format(sprite, sprite.replace('-', '_')) for sprite in sprites])
@@ -633,6 +636,9 @@ order by init_time;"""
 
         # db returns tuples
         ships = [ship[0] for ship in ships]
+
+        if not ships:
+            return [['ship'], ['ship']]
 
         # pivot
         sql = "SELECT "

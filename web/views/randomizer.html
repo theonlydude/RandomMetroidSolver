@@ -1429,7 +1429,7 @@ Tournament presets:\
     {
       element: "#scavNumLocsStep",
         title: "Mandatory locations to visit",
-      content: "You can choose between 4 and 16 major locations to be included in the scavenger hunt, 10 being the default.<br/>Click on the dice button to randomize the quantity of major locations."
+      content: "You can choose between 4 and 17 major locations to be included in the scavenger hunt, 10 being the default.<br/>Ridley is a scavenger hunt location.<br/>Click on the dice button to randomize the quantity of major locations."
     },
     {
       element: "#scavRandomizedStep",
@@ -2115,7 +2115,7 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td class="small"><div class="random"><button id="scavNumLocsRandom" type="button" onclick="randomize(event, 'scavNumLocs')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td id="scavNumLocsStep"><span id="scavNumLocsText">Mandatory locations to visit:</span></td>
-                <td>{{displayNumber("scavNumLocs", "4", "16", "10", "1")}}</td>
+                <td>{{displayNumber("scavNumLocs", "4", "17", "10", "1")}}</td>
                 <td><button type="button" onclick="startTheTour(8)">?</button></td>
                 <td id="scavRandomizedStep">{{displayCheckbox("scavRandomized")}}Randomize items in mandatory locations</td>
                 <td><button type="button" onclick="startTheTour(9)">?</button></td>

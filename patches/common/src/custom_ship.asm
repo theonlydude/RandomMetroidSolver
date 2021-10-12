@@ -3,6 +3,7 @@
 ;;; Compile with "asar" (https://github.com/RPGHacker/asar/releases)
 
 lorom
+arch snes.cpu
 
 !temp = $0743		; from pause screen RAM
 
@@ -21,7 +22,7 @@ org $A2AB7A
 org $A2A95C
 	jsl raise_samus_land
 
-org $a1f800
+org $a1f900
 landing_descent:
 	jsr hide_samus
 	;; hijacked code
@@ -66,3 +67,5 @@ show_samus:
 	;; restore default samus draw handler
 	LDA #$EB52 : STA $0A5C
 	rts
+
+warnpc $a1f97f

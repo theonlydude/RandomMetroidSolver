@@ -49,14 +49,14 @@ function call_assembler() {
 
 case $assembler in
     asar)
-	cmd="$ASAR $ASAR_OPTS $patch $tmprom"
+	cmd="$ASAR $ASAR_OPTS $patch '$tmprom'"
 	call_assembler
 	;;
 
     xkas-plus)
 	(
 	    cd $(dirname $patch)
-	    cmd="$XKAS_PLUS -o $tmprom $(basename $patch)"
+	    cmd="$XKAS_PLUS -o '$tmprom' $(basename $patch)"
 	    call_assembler
 	)
 	;;

@@ -172,7 +172,7 @@ if __name__ == "__main__":
     parser.add_argument('--scavNumLocs',
                         help="For Scavenger split, number of major locations in the mandatory route",
                         dest='scavNumLocs', nargs='?', default=10,
-                        choices=["0"]+[str(i) for i in range(4,17)])
+                        choices=["0"]+[str(i) for i in range(4,18)])
     parser.add_argument('--scavRandomized',
                         help="For Scavenger split, decide whether mandatory major locs will have non-vanilla items",
                         dest='scavRandomized', nargs='?', const=True, default=False)
@@ -665,6 +665,8 @@ if __name__ == "__main__":
                         escapeAttr['patches'].append("Escape_Rando_Enable_Enemies")
                     if args.scavEscape == True:
                         escapeAttr['patches'].append('Escape_Scavenger')
+                if args.majorsSplit == 'Scavenger' and any(il for il in progItemLocs if il.Location.Name == "Ridley"):
+                    args.patches.append("Blinking[RidleyRoomIn]")
         except Exception as e:
             import traceback
             traceback.print_exc(file=sys.stdout)
@@ -758,6 +760,8 @@ if __name__ == "__main__":
             musicPatcher = MusicPatcher(romPatcher.romFile, romType)
         if args.hud == True or args.majorsSplit == "FullWithHUD":
             args.patches.append("varia_hud.ips")
+        if args.debug == True:
+            args.patches.append("Disable_Clear_Save_Boot")
         if args.patchOnly == False:
             romPatcher.applyIPSPatches(args.startLocation, args.patches,
                                        args.noLayout, gravityBehaviour,

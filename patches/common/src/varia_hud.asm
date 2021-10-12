@@ -135,6 +135,9 @@ ridley_still_dying:
 org $A6C590			; would have been simpler to just hijack here, but already done by minimizer bosses patch
 ridley_dead:
 
+org $A6C5ED
+	jsl scav_ridley_drops
+
 ;;; skip top row of auto reserve to have more room (HUD draw main routine)
 org $809B61
 write_reserve_main:
@@ -210,6 +213,7 @@ draw_info:
 	lda.l scav_order,x
 	cmp #$ffff : bne .draw_next_scav
 	jmp .draw_area
+
 .special:
 	;; special values
 	cmp !press_xy_hud : beq .draw_press_xy
@@ -219,6 +223,7 @@ draw_info:
 	sta !previous
 	ldy #press_xy-scav_names
 	bra .draw_scav_text
+
 .draw_next_scav:
 	and #$00ff
 	cmp !previous : beq .scav_setup_next
@@ -606,6 +611,14 @@ scav_ridley_dead:
 .dead:
 	plx
 	jml ridley_dead
+
+;;; checks whether Ridley was last on scav list with escape option enabled
+scav_ridley_drops:
+	lda #$000e : jsl $808233 ;if escape flag is off:
+	bcs .end
+	lda #$0003 : jsl $808FC1 ;  Queue elevator music track
+.end:				 ;else do nothing
+	rtl
 
 item_pickup:
 	phy

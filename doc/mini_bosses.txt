@@ -59,7 +59,8 @@ boss est vivant. Dans certains cas précis (Spospo, Kraid, MB?), ça
 peut se gérer statiquement car la pièce d'où on arrive ne sera pas
 randomizée. Pour les autres (Croc, Botwoon) il faudra générer les
 portes et ASM à/p de certaines infos (réserver l'espace dans le patch
-ASM?) 
+ASM?). Grosso modo c'est identique à area rando, il y a l'information
+du screen en plus à gérer.
 
 * Se barrer des boss rooms comme en minimizer?
 **********************************************
@@ -67,10 +68,12 @@ ASM?)
 Problème, on ne veut pas que toutes les portes soient open bar, donc
 il faut que seule la porte par laquelle on est entré soit ouverte. Pas
 facile, et pour certains bosses, d'autres problèmes :
-- backdoor Croc, à cause des pics
+- backdoor Croc, à cause des pics. à voir si on peut bidouiller qq
+chose, mais pas évident
 - backdoor Botwoon, on ne peut pas le fight de ce coté, donc il
 faudrait spawn dans son écran, ou modifier suffisamment le truc pour
-virer le mur, mais ça semble galère
+virer le mur, mais ça semble galère. Sinon => on met le backdoor
+botwoon fight en logique (wave required)
 
 Donc 2 options :
 

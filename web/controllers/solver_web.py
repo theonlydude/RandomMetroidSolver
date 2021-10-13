@@ -608,7 +608,7 @@ def genPathTable(locations, scavengerOrder, displayAPs=True):
   <td>{}</td>
 </tr>
 """.format(item, getRoomLink(name, room), getAreaLink(area), getSubArea(subarea),
-           getBossImg(name) if "Boss" in _class else getItemImg(item, location=name, scavengerOrder=scavengerOrder),
+           getItemImg(item, location=name, scavengerOrder=scavengerOrder, boss="Boss" in _class),
            getDiffImg(locDiff),
            getTechniques(locTechniques),
            getItems(locItems))
@@ -665,15 +665,14 @@ def getSubArea(subarea):
         img += "SubArea"
     return """<span data-thumbnail-src="/solver/static/images/{}.png" class="subarea">{}</span>""".format(img, subarea)
 
-def getBossImg(boss):
-    return """<img alt="{}" class="imageBoss" src="/solver/static/images/{}.png" title="{}" />""".format(boss, boss.replace(' ', ''), boss)
-
-def getItemImg(item, location=None, scavengerOrder=[], small=False):
-    if small == True:
+def getItemImg(item, location=None, scavengerOrder=[], small=False, boss=False):
+    if boss:
+        _class = "imageBoss"
+    elif small == True:
         _class = "imageItems"
     else:
         _class = "imageItem"
-    itemImg = """<img alt="{}" class="{}" src="/solver/static/images/{}.png" title="{}" />""".format(item, _class, item, item)
+    itemImg = """<img alt="{}" class="{}" src="/solver/static/images/{}.png" title="{}" />""".format(item, _class, item.replace(' ', ''), item)
 
     if location is not None and len(scavengerOrder) > 0 and location in scavengerOrder:
         index = scavengerOrder.index(location) + 1

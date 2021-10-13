@@ -390,12 +390,13 @@ if __name__ == "__main__":
         minDifficulty = 0
 
     if args.area == True and args.bosses == True and args.minimizerN is not None:
-        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full", altValue='FullWithHUD')
         if args.minimizerN == "random":
             minimizerN = random.randint(30, 60)
             logger.debug("minimizerN: {}".format(minimizerN))
         else:
             minimizerN = int(args.minimizerN)
+        if minimizerN < 100:
+            forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full. Use 100 locations on your minimizer to use a non-Full split.", altValue='FullWithHUD')
     else:
         minimizerN = None
     areaRandom = False

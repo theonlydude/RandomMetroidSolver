@@ -56,6 +56,8 @@ def interactiveSolver(args):
                     params = {'count': args.count}
             elif args.action == "toggle":
                 params = {'item': args.item}
+            elif args.action == "upload_scav":
+                params = {'plandoScavengerOrder': args.plandoScavengerOrder.split(',') if args.plandoScavengerOrder is not None else []}
         elif args.scope == 'area':
             if args.state == None or args.action == None or args.output == None:
                 print("Missing state/action/output parameter")
@@ -162,7 +164,7 @@ if __name__ == "__main__":
     parser.add_argument('--loc', help="Name of the location to action on (used in interactive mode)",
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
-                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize', 'toggle', 'import'])
+                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize', 'toggle', 'import', 'upload_scav'])
     parser.add_argument('--item', help="Name of the item to place in plando mode (used in interactive mode)",
                         dest="item", nargs='?', default=None)
     parser.add_argument('--hide', help="Hide the item to place in plando mode (used in interactive mode)",
@@ -200,6 +202,8 @@ if __name__ == "__main__":
                         dest='runtimeLimit_s', nargs='?', default=0, type=int)
     parser.add_argument('--dump', help="dump file with autotracker state (used in interactive mode)",
                         dest="dump", nargs="?", default=None)
+    parser.add_argument('--plandoScavengerOrder', help="list of plando scavenger hunt locations (used in interactive mode)",
+                        dest="plandoScavengerOrder", nargs="?", default=None)
 
     args = parser.parse_args()
 

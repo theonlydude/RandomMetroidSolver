@@ -63,11 +63,13 @@ define backup_candidate $7fff3a
 
 define stat_resets	#$0029
 
-// External Routines
+// External
 // routine in new_game.asm
 define check_new_game   $A1F210
 // routine in tracking.asm
 define update_and_store_region_time $A1EC00
+// seed 32bits ID (see seed_display.asm)
+define seed_id 	       $dfff00
 
 // Patch boot to init our stuff
 org $80844B
@@ -125,8 +127,10 @@ org $8b9a19
     jml patch4
 
 // Hijack when samus is in the ship and ready to leave the planet
-org $a2ab13
-    jsl game_end
+org $a2ab0d
+	jsl game_end
+	nop
+	nop
 
 // Patch NMI to skip resetting 05ba and instead use that as an extra time counter
 org $8095e5
@@ -163,19 +167,31 @@ boot1:
     sta {timer_backup2}
     // check if first boot ever by checking magic 32-bit value in SRAM
     lda {was_started_flag32}
-    cmp {magic_flag}
+    cmp {seed_id}
     bne .first
     lda {was_started_flag32}+2
-    cmp {magic_flag}
+    cmp {seed_id}+2
     beq .check_reset
 .first:
     // no game was ever saved:
     // init used save slots bitmask
     lda #$0000
     sta {used_slots_mask}
-    // write magic number
+    // clear all save files by corrupting checksums
+    ldx	#0005
     lda {magic_flag}
+.clear_loop:
+    sta $701ff0,x
+    sta $701ff8,x
+    sta $700000,x
+    sta $700008,x
+    dex
+    dex
+    bpl .clear_loop
+    // write magic number
+    lda {seed_id}
     sta {was_started_flag32}
+    lda {seed_id}+2
     sta {was_started_flag32}+2
     // skip soft reset check, since it's the 1st boot
     bra .cont
@@ -962,8 +978,8 @@ game_end:
     jsl save_stats
 
     // hijacked code
+    stz $0df2	
     lda #$000a
-    jsl $90f084
     rtl
 
 warnpc $8bf88f
@@ -1966,7 +1982,61 @@ stats:
 
 print "credits end : ", org
 
-warnpc $dfffff
+// load RTA in IGT
+// update values in:
+//    $09DE: Game time, minutes
+//    $09E0: Game time, hours (capped at 99:59:59.59)
+update_igt:
+    phx
+    lda {current_save_slot}
+    asl
+    tax
+    lda save_slots,x
+    tax
+    lda $700000, x // rta timer in sram is the first value in stats
+    sta $16
+    lda $700002, x
+    sta $14
+    lda #$003c
+    sta $12
+    lda #$ffff
+    sta $1a
+    jsr div32 // frames in $14, rest in $16
+    lda $16  // RTA in seconds
+    sta $004204 // divide by 60 to get minutes
+    sep #$20
+    lda #$ff
+    sta $1a
+    lda #$3c
+    sta $004206
+    pha; pla; pha; pla; rep #$20
+    lda $004214 // hours/minutes
+    sta $004204 // divide by 60 to get hours and minutes
+    sep #$20
+    lda #$3c
+    sta $004206
+    pha; pla; pha; pla; rep #$20
+    lda $004216 // rta minutes
+    sta $0009DE // replace igt minutes
+    lda $004214 // rta hours
+    sta $0009E0 // replace igt hours
+    plx
+    // vanilla code
+    sta $004204
+    rtl
+
+print "after IGT hijack : ", org
+
+// palette rando stores its relocated palette there
+warnpc $dfe1ff
+
+// hijack to load RTA in IGT RAM
+// vanilla code:
+//  $8B:F3D5 AD E0 09    LDA $09E0  [$7E:09E0]
+//  $8B:F3D8 8D 04 42    STA $4204  [$7E:4204]
+org $8bF3D5
+jsl update_igt
+nop; nop
 
 // Relocated credits tilemap to free space in bank CE
 org $ceb240
@@ -2140,3 +2210,120 @@ itemlocations:
     dw "         ITEM LOCATIONS         " // 640
     padbyte $ca
     pad $dedbcf
+
+// update 'clear time' to display 'real  time'
+org $8cb49b
+// 'R'
+        dw $0002
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB4A7
+// 'RE'
+        dw $0004
+        dw $01C8; db $00; dw $3134
+        dw $01C8; db $F8; dw $3124
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB4BD
+// 'REA'
+        dw $0006
+        dw $01D0; db $00; dw $3130
+        dw $01D0; db $F8; dw $3120
+        dw $01C8; db $00; dw $3134
+        dw $01C8; db $F8; dw $3124
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB4DD
+// 'REAL'
+        dw $0008
+        dw $01D8; db $00; dw $313B
+        dw $01D8; db $F8; dw $312B
+        dw $01D0; db $00; dw $3130
+        dw $01D0; db $F8; dw $3120
+        dw $01C8; db $00; dw $3134
+        dw $01C8; db $F8; dw $3124
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB507
+// 'REAL'
+        dw $0008
+        dw $01D8; db $00; dw $313B
+        dw $01D8; db $F8; dw $312B
+        dw $01D0; db $00; dw $3130
+        dw $01D0; db $F8; dw $3120
+        dw $01C8; db $00; dw $3134
+        dw $01C8; db $F8; dw $3124
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB53B
+// 'REAL  T'
+        dw $000A
+        dw $01F0; db $00; dw $3153
+        dw $01F0; db $F8; dw $3143
+        dw $01D8; db $00; dw $313B
+        dw $01D8; db $F8; dw $312B
+        dw $01D0; db $00; dw $3130
+        dw $01D0; db $F8; dw $3120
+        dw $01C8; db $00; dw $3134
+        dw $01C8; db $F8; dw $3124
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB579
+// 'REAL  TI'
+        dw $000C
+        dw $01F8; db $00; dw $3138
+        dw $01F8; db $F8; dw $3128
+        dw $01F0; db $00; dw $3153
+        dw $01F0; db $F8; dw $3143
+        dw $01D8; db $00; dw $313B
+        dw $01D8; db $F8; dw $312B
+        dw $01D0; db $00; dw $3130
+        dw $01D0; db $F8; dw $3120
+        dw $01C8; db $00; dw $3134
+        dw $01C8; db $F8; dw $3124
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB5C1
+// 'REAL  TIM'
+        dw $000E
+        dw $0000; db $00; dw $313C
+        dw $0000; db $F8; dw $312C
+        dw $01F8; db $00; dw $3138
+        dw $01F8; db $F8; dw $3128
+        dw $01F0; db $00; dw $3153
+        dw $01F0; db $F8; dw $3143
+        dw $01D8; db $00; dw $313B
+        dw $01D8; db $F8; dw $312B
+        dw $01D0; db $00; dw $3130
+        dw $01D0; db $F8; dw $3120
+        dw $01C8; db $00; dw $3134
+        dw $01C8; db $F8; dw $3124
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141
+
+org $8CB613
+// 'REAL  TIME'
+        dw $0010
+        dw $0008; db $00; dw $3134
+        dw $0008; db $F8; dw $3124
+        dw $0000; db $00; dw $313C
+        dw $0000; db $F8; dw $312C
+        dw $01F8; db $00; dw $3138
+        dw $01F8; db $F8; dw $3128
+        dw $01F0; db $00; dw $3153
+        dw $01F0; db $F8; dw $3143
+        dw $01D8; db $00; dw $313B
+        dw $01D8; db $F8; dw $312B
+        dw $01D0; db $00; dw $3130
+        dw $01D0; db $F8; dw $3120
+        dw $01C8; db $00; dw $3134
+        dw $01C8; db $F8; dw $3124
+        dw $01C0; db $00; dw $3151
+        dw $01C0; db $F8; dw $3141

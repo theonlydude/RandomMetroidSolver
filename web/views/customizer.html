@@ -22,11 +22,15 @@ extend 'layout.html'
 
 <script type="text/javascript" src="{{=URL('static', 'js/localforage.nopromises.min.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static', 'js/spc_snes.js')}}"></script>
+<script type="text/javascript" src="{{=URL('static', 'js/jquery.redirect.js')}}"></script>
 
 <title>Super Metroid VARIA Customizer</title>
 
 <style>
 {{include 'solver_web/varia.css'}}
+.toDisable{
+    pointer-events: none;
+}
 .lighter {
     background-color: #eee
 }
@@ -196,6 +200,18 @@ h1 {
 $(document).ready(function(){
    jQuery(window).on('resize', resizeSlider);
 });
+
+var guid = undefined;
+{{
+if seedInfo is not None:
+    response.write("guid = '{}';".format(seedInfo["key"]), escape=False)
+    pass
+}}
+function DoPost(){
+    if(guid != undefined) {
+        $.redirect("/randomizer/"+guid, {}, "POST", "_blank");
+    }
+}
 
 function resizeSlider() {
    var slider = $("#degree_slider_range");
@@ -734,8 +750,8 @@ if seedInfo != None:
     response.write("permalink = true;", escape=False)
     response.write("seedKey = '{}';".format(seedInfo["key"]), escape=False)
     response.write("isVARIA = true;", escape=False)
-    response.write("isArea = '{}';".format(seedParams["areaRandomization"]), escape=False)
-    response.write("isBoss = '{}';".format(seedParams["bossRandomization"]), escape=False)
+    response.write("isArea = {};".format("true" if seedParams["areaRandomization"] in ["on", "random"] else "false"), escape=False)
+    response.write("isBoss = {};".format("true" if seedParams["bossRandomization"] in ["on", "random"] else "false"), escape=False)
     pass
 }}
 
@@ -907,6 +923,9 @@ if session.customizer["invert"] == "on":
     $("#customSprite").imagepicker({show_label: true});
     $("#customShip").imagepicker();
 
+    enableCustomSpriteDropdown();
+    enableCustomShipDropdown();
+
     permalinkCustomization(permalink);
 
     displayMessage();
@@ -985,6 +1004,7 @@ function enableCustomSpriteDropdown() {
       if(isRace && noSpinAttack.value == "off") {
         noSpinAttack.click();
       }
+      $("#customSprite").siblings(".image_picker_selector").removeClass("toDisable");
     } else {
       customSpriteEnable.value = "off";
       text.className = "disabledText";
@@ -996,6 +1016,7 @@ function enableCustomSpriteDropdown() {
       }
       customItemsEnable.disabled = true;
       noSpinAttack.disabled = true;
+      $("#customSprite").siblings(".image_picker_selector").addClass("toDisable");
     }
 
     // tell switchery
@@ -1016,9 +1037,11 @@ function enableCustomShipDropdown() {
     if(customShipEnable.checked) {
       customShipEnable.value = "on";
       text.className = "";
+      $("#customShip").siblings(".image_picker_selector").removeClass("toDisable");
     } else {
       customShipEnable.value = "off";
       text.className = "disabledText";
+      $("#customShip").siblings(".image_picker_selector").addClass("toDisable");
     }
 }
 
@@ -1688,6 +1711,9 @@ if seedInfo != None:
     pass
 }}
             <h4>Download seed {{=seedInfo["filename"]}}</h4>
+            <table class="full">
+              <tr><td><a href="javascript:DoPost()">Generate another seed with the same parameters</a></td></tr>
+            </table>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr id="vanillaUploadFileStep">

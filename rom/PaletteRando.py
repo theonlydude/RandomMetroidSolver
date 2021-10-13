@@ -544,7 +544,7 @@ class PaletteRando(object):
                     self.logger.debug("write decomp palette index: {} value: {}".format(hex(subset+(j*2)), BE_hex_color))
 
             insert_address = self.base_address + (count*0x100)
-            assert insert_address <= 0x2FFF00, "Possible ROM corruption by palette rando"
+            assert insert_address <= 0x2FFE00, "Possible ROM corruption by palette rando"
             self.pointers_to_insert.append(insert_address)
             self.logger.debug("pointers_to_insert: {}".format(self.pointers_to_insert))
 

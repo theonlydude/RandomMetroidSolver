@@ -165,6 +165,7 @@ org $a9cfdb
 
 org $a9fc00
 hyper_start:
+	jsr reset_samus_palette
 	lda #$8000 : sta $0a4a	; set rainbow samus
 	jsl enable_hyper
 	;; compute health increase per frame: health to refill/nb frames
@@ -188,10 +189,7 @@ hyper_start:
 hyper_end:
 	;; unrainbow samus
 	stz $0a4a
-	;; reset various samus palette stuff
-	stz $0ace
-	stz $0ad0
-	stz $0b62
+	jsr reset_samus_palette
 	;; load samus suit palette
 	jsl $91deba
 	;; stop health refill and cap health to max
@@ -201,4 +199,11 @@ hyper_end:
 	lda #$b1d5	  ; hijacked code
 	rts
 
-warnpc $a9fc5f
+reset_samus_palette:
+	;; reset various samus palette stuff
+	stz $0ace
+	stz $0ad0
+	stz $0b62
+	rts
+
+warnpc $a9fc6f

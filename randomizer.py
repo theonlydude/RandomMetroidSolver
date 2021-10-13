@@ -137,7 +137,8 @@ if __name__ == "__main__":
                                  'spinjumprestart.ips', 'rando_speed.ips', 'No_Music', 'AimAnyButton.ips',
                                  'max_ammo_display.ips', 'supermetroid_msu1.ips', 'Infinite_Space_Jump',
                                  'refill_before_save.ips', 'remove_elevators_doors_speed.ips',
-                                 'remove_itemsounds.ips', 'vanilla_music.ips'])
+                                 'remove_itemsounds.ips', 'vanilla_music.ips', 'custom_ship.ips',
+                                 'Ship_Takeoff_Disable_Hide_Samus'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -171,7 +172,7 @@ if __name__ == "__main__":
     parser.add_argument('--scavNumLocs',
                         help="For Scavenger split, number of major locations in the mandatory route",
                         dest='scavNumLocs', nargs='?', default=10,
-                        choices=["0"]+[str(i) for i in range(4,17)])
+                        choices=["0"]+[str(i) for i in range(4,18)])
     parser.add_argument('--scavRandomized',
                         help="For Scavenger split, decide whether mandatory major locs will have non-vanilla items",
                         dest='scavRandomized', nargs='?', const=True, default=False)
@@ -662,8 +663,10 @@ if __name__ == "__main__":
                     escapeAttr['patches'] = []
                     if args.noRemoveEscapeEnemies == True:
                         escapeAttr['patches'].append("Escape_Rando_Enable_Enemies")
-                    if args.scavEscape == True:
+                    if args.majorsSplit == "Scavenger" and args.scavEscape == True:
                         escapeAttr['patches'].append('Escape_Scavenger')
+                if args.majorsSplit == 'Scavenger' and any(il for il in progItemLocs if il.Location.Name == "Ridley"):
+                    args.patches.append("Blinking[RidleyRoomIn]")
         except Exception as e:
             import traceback
             traceback.print_exc(file=sys.stdout)
@@ -757,6 +760,8 @@ if __name__ == "__main__":
             musicPatcher = MusicPatcher(romPatcher.romFile, romType)
         if args.hud == True or args.majorsSplit == "FullWithHUD":
             args.patches.append("varia_hud.ips")
+        if args.debug == True:
+            args.patches.append("Disable_Clear_Save_Boot")
         if args.patchOnly == False:
             romPatcher.applyIPSPatches(args.startLocation, args.patches,
                                        args.noLayout, gravityBehaviour,
@@ -771,7 +776,8 @@ if __name__ == "__main__":
 
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:
-            romPatcher.customSprite(args.sprite, args.customItemNames, args.noSpinAttack) # adds another IPS
+            purge = args.ship is not None
+            romPatcher.customSprite(args.sprite, args.customItemNames, args.noSpinAttack, purge) # adds another IPS
         if args.ship is not None:
             romPatcher.customShip(args.ship) # adds another IPS
             # don't color randomize custom ships

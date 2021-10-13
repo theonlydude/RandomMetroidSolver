@@ -16,6 +16,7 @@ from logic.logic import Logic
 class CommonSolver(object):
     def loadRom(self, rom, interactive=False, magic=None, startLocation=None):
         self.scavengerOrder = []
+        self.plandoScavengerOrder = []
         # startLocation param is only use for seedless
         if rom == None:
             # TODO::add a --logic parameter for seedless

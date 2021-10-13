@@ -14,6 +14,9 @@ from rom.leveldata import LevelData, Ship, Room
 
 vanilla = sys.argv[1]
 hack = sys.argv[2]
+fixEscape = len(sys.argv) > 2
+
+print("fix escape: {}".format(fixEscape))
 
 # copy vanilla in tmpfile
 tmpfile = '/tmp/vanilla.sfc'
@@ -172,7 +175,8 @@ print("updated bts behind vanilla ship bottom")
 vlevelData.displaySubScreen(vShipScreen, hShipBottom.spritemap.boundingRect)
 print("")
 
-vlevelData.write()
+if not fixEscape:
+    vlevelData.write()
 
 for name, addrRange in addresses.items():
     print("check {} at {}".format(name, hex(addrRange["vanilla"][0])))
@@ -198,18 +202,28 @@ for name, addrRange in addresses.items():
     print("end check {}".format(name))
     print("")
 
-# copy data
-for name, diff in needCopy.items():
-    if not diff:
-        continue
-    print("copy {} from hack".format(name))
-    tmpBytes = []
-    addrs = addresses[name]
-    for addr in range(addrs["hack"][0], addrs["hack"][1]):
-        tmpBytes.append(hackRom.readByte(addr))
-    vanillaRom.seek(addrs["vanilla"][0])
-    for byte in tmpBytes:
-        vanillaRom.writeByte(byte)
+if not fixEscape:
+    # copy data
+    for name, diff in needCopy.items():
+        if not diff:
+            continue
+        print("copy {} from hack".format(name))
+        tmpBytes = []
+        addrs = addresses[name]
+        for addr in range(addrs["hack"][0], addrs["hack"][1]):
+            tmpBytes.append(hackRom.readByte(addr))
+        vanillaRom.seek(addrs["vanilla"][0])
+        for byte in tmpBytes:
+            vanillaRom.writeByte(byte)
+
+# also copy last line of ship tiles in escape sequence
+rowSize = 1024
+hAddr = addresses["tilesAddr"]["hack"][0] + rowSize * 3
+vAddr = snes_to_pc(0x94C800)
+hackRom.seek(hAddr)
+vanillaRom.seek(vAddr)
+for i in range(rowSize):
+    vanillaRom.writeByte(hackRom.readByte())
 
 vanillaRom.close()
 

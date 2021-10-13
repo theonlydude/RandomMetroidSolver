@@ -7,7 +7,24 @@
 
 <style>
 {{include 'solver_web/t_style.html'}}
-
+.scavBin {
+    width: 100%;
+    margin-right: 1.5em;
+    cursor: pointer;
+}
+.emptyScav {
+    margin-right: 1.5em;
+}
+.placedLoc {
+    background-color: #ddd;
+}
+.drop_src {
+    cursor: pointer;
+}
+.drop_target {
+    cursor: pointer;
+    border: 1px solid #ddd;
+}
 #hideRandoOverlay {
     position: fixed;
     display: none;
@@ -50,6 +67,16 @@
     color: #ffffff;
     font-size: 1.25vw;
     font-weight: bold;
+}
+.scavPlando {
+    display: none;
+    cursor: pointer;
+    position: absolute;
+    z-index: 7;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0%;
+    left: 18.75%;
 }
 .startPlando {
     cursor: pointer;
@@ -144,6 +171,18 @@
     padding: 0.5%;
     border: 2px solid gray;
     opacity: 0.8;
+}
+.scavPopup {
+    background-color: #ffffff;
+    position: absolute;
+    z-index: 4;
+    height: auto;
+    top: 17%;
+    left: 51%;
+    width: 20%;
+    display: none;
+    padding: 0.5%;
+    border: 2px solid gray;
 }
 .gotoAction {
     width: 4em;
@@ -386,6 +425,56 @@ function hideRandoPopup() {
   document.getElementById("randomizerPopup").style.display = "none";
 }
 
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+var dragId = "";
+var scavLocs = [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined];
+function drag(ev) {
+    if($("#"+ev.target.id).hasClass("placedLoc")) {
+        ev.preventDefault();
+        return;
+    }
+    ev.dataTransfer.setData("text", ev.target.innerHTML);
+    dragId = ev.target.id;
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData("text");
+
+    // check if there's already a loc in that step
+    var step = parseInt(ev.target.id.substring(4));
+    if(scavLocs[step] != undefined) {
+        var prevLoc = scavLocs[step];
+        scavLocs[step] = undefined;
+        $("#"+prevLoc).removeClass("placedLoc");
+    }
+    ev.target.innerHTML = data;
+
+    if(dragId != "") {
+        if(dragId.indexOf('hunt') != -1) {
+            var prevStep = parseInt(dragId.substring(4));
+            scavLocs[step] = scavLocs[prevStep];
+            scavLocs[prevStep] = undefined;
+            document.getElementById("hunt"+prevStep).innerHTML = "";
+        } else {
+            $("#"+dragId).addClass("placedLoc");
+            scavLocs[step] = dragId;
+        }
+    }
+    dragId = "";
+}
+
+function clearScavLoc(step) {
+    if(scavLocs[step] != undefined) {
+        var prevLoc = scavLocs[step];
+        scavLocs[step] = undefined;
+        $("#"+prevLoc).removeClass("placedLoc");
+        document.getElementById("hunt"+step).innerHTML = "";
+    }
+}
 
 //-----------------------------------------------------------
 // TUTORIAL
@@ -425,6 +514,10 @@ function startTheTour(step=-1) {
 Using a base seed with Escape randomization allows you to edit the escape transition (<img src=\"/solver/static/images/portal_escape.png\" alt=\"Escape Portal\" style=\"width: 20px\">), it must start from Tourian escape portal. You can also set the escape timer by entering the time in the input just under Tourian escape portal (displayed only when the base seed is an escape randomization one) (the am/pm is ignored).</p>\
 <h4>Doors</h4>\
 <p>Even if the base seed is not doors colors randomized the doors are displayed and you can click on them to display a popup to change their colors. Changing a door's color on a non doors colors randomized seed will set save / refill stations' doors to blue. For technical reasons you can't set a colored door to blue.</p>\
+<h4>Scavenger Hunt</h4>\
+<p>When the base seed is a Scavenger Hunt you can edit which items is in the Scavenger Hunt by clicking on the puzzle button <img src=\"/solver/static/images/puzzle.svg\" alt=\"Scav\" style=\"width: 32px\"></p>\
+<p><b>WARNING:</b> Puting a Nothing item at a Scavenger Hunt location will result in an unfinishable seed.</p>\
+<p><b>Note:</b> You can't use the Plandomizer Randomizer when the base seed is a Scavenger Hunt seed.</p>\
 <h4>Unused locations/transitions</h4>\
 <p>If you don't set an item to a location it'll be empty. Portals with no transitions will be looping on themselves.</p>\
 <h4>Randomization</h4>\
@@ -509,6 +602,7 @@ function onloadHook() {
   dragElement(document.getElementById("debugPopup"), "VCRGrab");
   dragElement(document.getElementById("savePopup"), "SaveGrab");
   dragElement(document.getElementById("randomizerPopup"), "RandoGrab");
+  dragElement(document.getElementById("scavPopup"), "ScavGrab");
 }
 
 function hidePlandoButtons() {
@@ -528,6 +622,93 @@ function displayDebugPopup() {
 
 function hideDebugPopup() {
   document.getElementById("debugPopup").style.display = "none";
+}
+
+function displayScavPopup() {
+    if(interfaceIsFrozen()) {
+        return;
+    }
+    document.getElementById("scavPopup").style.display = "block";
+}
+
+function uploadScavList() {
+    var plandoScavengerOrder = [];
+    var maxScavLocs = 17;
+    for(var i=0; i<maxScavLocs; i++) {
+        var loci = document.getElementById("hunt"+i);
+        if(loci.innerHTML != "") {
+            plandoScavengerOrder.push(loci.innerHTML.substring(loci.innerHTML.indexOf('>')+2));
+        } else {
+            break;
+        }
+    }
+
+    var data = {action: "upload_scav", scope: "item"};
+    if(plandoScavengerOrder.length > 0) {
+        data["plandoScavengerOrder"] = plandoScavengerOrder.join();
+    }
+    ajaxCall(data, "upload");
+
+    document.getElementById("scavPopup").style.display = "none";
+}
+
+function setActiveHook(mode, majorsSplit, area, boss, escape) {
+    // for scavenger hunt plandos, to display the puzzle button
+    if(mode == "plando") {
+        var scavPlando = document.getElementById("scavPlando");
+        var randoPlando  = document.getElementById("randoPlando");
+        if(majorsSplit == "Scavenger") {
+            scavPlando.style.display = "block";
+            randoPlando.style.display = "none";
+        } else {
+            scavPlando.style.display = "none";
+            randoPlando.style.display = "block";
+        }
+    }
+}
+
+var loc2item = {
+    "Charge Beam": "Charge",
+    "Ice Beam": "Ice",
+    "Wave Beam": "Wave",
+    "Spazer": "Spazer",
+    "Plasma Beam": "Plasma",
+    "Varia Suit": "Varia",
+    "Gravity Suit": "Gravity",
+    "Morphing Ball": "Morph",
+    "Bomb": "Bomb",
+    "Spring Ball": "SpringBall",
+    "Screw Attack": "ScrewAttack",
+    "Hi-Jump Boots": "HiJump",
+    "Space Jump": "SpaceJump",
+    "Speed Booster": "SpeedBooster",
+    "Grapple Beam": "Grapple",
+    "X-Ray Scope": "XRayScope",
+    "Ridley": "Ridley"
+}
+
+function getLocItem(locName) {
+    return loc2item[locName];
+}
+
+function updateGlobalHook(jsonData) {
+    var maxPlandoLocs = 17;
+    for(var i=0; i<maxPlandoLocs; i++) {
+        document.getElementById("hunt"+i).innerHTML = "";
+        scavLocs[i] = undefined;
+    }
+    for (const [key, value] of Object.entries(loc2item)) {
+        $("#d"+value).removeClass("placedLoc");
+    }
+    var plandoScavengerOrder = jsonData["plandoScavengerOrder"];
+    for(var i=0; i<plandoScavengerOrder.length; i++) {
+        var locName = plandoScavengerOrder[i];
+        var item = getLocItem(locName);
+        scavLocs[i] = "d"+item;
+
+        document.getElementById("hunt"+i).innerHTML = "<img src=\"/solver/static/images/"+item+".png\" class=\"imageItems\"> "+locName;
+        $("#d"+item).addClass("placedLoc");
+    }
 }
 
 var gchained = false;
@@ -1013,12 +1194,51 @@ def displayNumber(id, min, max, default, step="1"):
     <input id="vcrJson" name="vcrJson" style="display:none" type="text"/>
   </div>
 
+  <div id="scavPopup" class="scavPopup">
+    <table class="full">
+      <colgroup><col class="small"><col class="half"><col class="small"><col class="small"><col class="half"></colgroup>
+      <tr><td colspan=5></td></tr>
+      <tr>
+        <td id="ScavGrab" colspan=5 class="center greyRow drop_src">
+          <p>Drag and drop item locations for the Scavenger Hunt</p>
+        </td>
+      </tr>
+      <tr><td colspan=5 class="blankRow"></td></tr>
+
+      <tr><th colspan=4>Locations in the Hunt</th><th colspan=1>Available item locations</th></tr>
+      <tr><td>1: </td><td id="hunt0" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(0)" class="scavBin"></td><td class="emptyScav"></td><td id="dCharge" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Charge.png" class="imageItems"> Charge Beam</td></tr>
+      <tr><td>2: </td><td id="hunt1" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(1)" class="scavBin"></td><td class="emptyScav"></td><td id="dIce" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Ice.png" class="imageItems"> Ice Beam</td></tr>
+      <tr><td>3: </td><td id="hunt2" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(2)" class="scavBin"></td><td class="emptyScav"></td><td id="dWave" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Wave.png" class="imageItems"> Wave Beam</td></tr>
+      <tr><td>4: </td><td id="hunt3" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(3)" class="scavBin"></td><td class="emptyScav"></td><td id="dSpazer" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Spazer.png" class="imageItems"> Spazer</td></tr>
+      <tr><td>5: </td><td id="hunt4" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(4)" class="scavBin"></td><td class="emptyScav"></td><td id="dPlasma" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Plasma.png" class="imageItems"> Plasma Beam</td></tr>
+      <tr><td>6: </td><td id="hunt5" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(5)" class="scavBin"></td><td class="emptyScav"></td><td id="dVaria" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Varia.png" class="imageItems"> Varia Suit</td></tr>
+      <tr><td>7: </td><td id="hunt6" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(6)" class="scavBin"></td><td class="emptyScav"></td><td id="dGravity" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Gravity.png" class="imageItems"> Gravity Suit</td></tr>
+      <tr><td>8: </td><td id="hunt7" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(7)" class="scavBin"></td><td class="emptyScav"></td><td id="dMorph" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Morph.png" class="imageItems"> Morphing Ball</td></tr>
+      <tr><td>9: </td><td id="hunt8" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(8)" class="scavBin"></td><td class="emptyScav"></td><td id="dBomb" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Bomb.png" class="imageItems"> Bomb</td></tr>
+      <tr><td>10: </td><td id="hunt9" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(9)" class="scavBin"></td><td class="emptyScav"></td><td id="dSpringBall" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/SpringBall.png" class="imageItems"> Spring Ball</td></tr>
+      <tr><td>11: </td><td id="hunt10" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(10)" class="scavBin"></td><td class="emptyScav"></td><td id="dScrewAttack" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/ScrewAttack.png" class="imageItems"> Screw Attack</td></tr>
+      <tr><td>12: </td><td id="hunt11" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(11)" class="scavBin"></td><td class="emptyScav"></td><td id="dHiJump" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/HiJump.png" class="imageItems"> Hi-Jump Boots</td></tr>
+      <tr><td>13: </td><td id="hunt12" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(12)" class="scavBin"></td><td class="emptyScav"></td><td id="dSpaceJump" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/SpaceJump.png" class="imageItems"> Space Jump</td></tr>
+      <tr><td>14: </td><td id="hunt13" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(13)" class="scavBin"></td><td class="emptyScav"></td><td id="dSpeedBooster" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/SpeedBooster.png" class="imageItems"> Speed Booster</td></tr>
+      <tr><td>15: </td><td id="hunt14" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(14)" class="scavBin"></td><td class="emptyScav"></td><td id="dGrapple" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Grapple.png" class="imageItems"> Grapple Beam</td></tr>
+      <tr><td>16: </td><td id="hunt15" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(15)" class="scavBin"></td><td class="emptyScav"></td><td id="dXRayScope" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/XRayScope.png" class="imageItems"> X-Ray Scope</td></tr>
+      <tr><td>17: </td><td id="hunt16" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(16)" class="scavBin"></td><td class="emptyScav"></td><td id="dRidley" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Ridley.png" class="imageItems"> Ridley</td></tr>
+      <tr><td colspan=5 class="blankLastRow"></td></tr>
+    </table>
+    <table>
+      <tr>
+        <td class="half"><button type="button" onclick="uploadScavList()" class="full">Close</button></td>
+      </tr>
+    </table>
+  </div>
+
   <div id="hideRandoOverlay"></div>
 
 {{include 'solver_web/t_main.html'}}
 
     <!-- plando buttons -->
     <div id="titlePlando" class="titlePlando">PLANDO</div>
+    <div id="scavPlando" class="scavPlando"><img src="/solver/static/images/puzzle.svg" alt="Scavenger" onclick="displayScavPopup()" data-toggle="tooltip" title="Scavenger Hunt locations" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="startPlando" class="startPlando"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup(true)" data-toggle="tooltip" title="Start the Plando creator" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="repeatPlando" class="repeatPlando"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc(true)" data-toggle="tooltip" title="Remove last placed item" data-placement="bottom" data-container="body" data-html="true" id="repeatPlandoImg"></div>
     <div id="binPlando" class="binPlando"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs(true)" data-toggle="tooltip" title="Remove all placed items" data-placement="bottom" data-container="body" data-html="true"></div>

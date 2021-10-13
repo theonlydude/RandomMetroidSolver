@@ -137,6 +137,13 @@ create table if not exists sprites (
   primary key (init_time, sprite)
 );
 
+-- custom ships
+create table if not exists ships (
+  init_time datetime not null,
+  ship varchar(32) not null,
+  primary key (init_time, ship)
+);
+
 -- plando rando
 -- we just store usage to know if someone use it
 create table if not exists plando_rando (

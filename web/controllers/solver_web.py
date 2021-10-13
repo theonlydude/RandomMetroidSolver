@@ -111,12 +111,12 @@ def completePreset(params):
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master']
-    tourPresets = ['Season_Races', 'SMRAT2021']
+    tourPresets = ['Season_Races', 'SMRAT2021', 'Torneio_SGPT2']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList(filter=False):
-    tourPresets = ['Season_Races', 'SGLive2021', 'SMRAT2021', 'VARIA_Weekly']
+    tourPresets = ['Season_Races', 'SGLive2021', 'SMRAT2021', 'VARIA_Weekly', 'Torneio_SGPT2']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
@@ -154,7 +154,7 @@ def validatePresetsParams(action):
             if isButton(button):
                 value = request.vars[button]
                 if button == "Moonwalk":
-                    if value not in [None, 'on']:
+                    if value not in [None, 'on', 'off']:
                         return (False, "Invalid value for Moonwalk: {}".format(value))
                 else:
                     if value is None:
@@ -608,7 +608,7 @@ def genPathTable(locations, scavengerOrder, displayAPs=True):
   <td>{}</td>
 </tr>
 """.format(item, getRoomLink(name, room), getAreaLink(area), getSubArea(subarea),
-           getBossImg(name) if "Boss" in _class else getItemImg(item, location=name, scavengerOrder=scavengerOrder),
+           getItemImg(item, location=name, scavengerOrder=scavengerOrder, boss="Boss" in _class),
            getDiffImg(locDiff),
            getTechniques(locTechniques),
            getItems(locItems))
@@ -665,15 +665,14 @@ def getSubArea(subarea):
         img += "SubArea"
     return """<span data-thumbnail-src="/solver/static/images/{}.png" class="subarea">{}</span>""".format(img, subarea)
 
-def getBossImg(boss):
-    return """<img alt="{}" class="imageBoss" src="/solver/static/images/{}.png" title="{}" />""".format(boss, boss.replace(' ', ''), boss)
-
-def getItemImg(item, location=None, scavengerOrder=[], small=False):
-    if small == True:
+def getItemImg(item, location=None, scavengerOrder=[], small=False, boss=False):
+    if boss:
+        _class = "imageBoss"
+    elif small == True:
         _class = "imageItems"
     else:
         _class = "imageItem"
-    itemImg = """<img alt="{}" class="{}" src="/solver/static/images/{}.png" title="{}" />""".format(item, _class, item, item)
+    itemImg = """<img alt="{}" class="{}" src="/solver/static/images/{}.png" title="{}" />""".format(item, _class, item.replace(' ', ''), item)
 
     if location is not None and len(scavengerOrder) > 0 and location in scavengerOrder:
         index = scavengerOrder.index(location) + 1
@@ -1065,7 +1064,8 @@ def randomizer():
         "Season_Races": "rando league races (Majors/Minors split)",
         "SGLive2021": "SGLive 2021 Super Metroid randomizer tournament",
         "SMRAT2021": "Super Metroid Randomizer Accessible Tournament 2021",
-        "VARIA_Weekly": "Casual logic community races"
+        "VARIA_Weekly": "Casual logic community races",
+        "Torneio_SGPT2": "Super Metroid Randomizer da Speedgaming Português Tournament 2021"
     }
 
     startAPs = GraphUtils.getStartAccessPointNamesCategory()
@@ -1076,6 +1076,42 @@ def randomizer():
     # get multi
     currentMultiValues = getCurrentMultiValues()
     defaultMultiValues = getDefaultMultiValues()
+
+    # check if we have a guid in the url
+    url = request.env.request_uri.split('/')
+    if len(url) > 0 and url[-1] != 'randomizer':
+        # a seed unique key was passed as parameter
+        key = url[-1]
+
+        # decode url
+        key = urllib.parse.unquote(key)
+
+        # sanity check
+        if IS_MATCH('^[0-9a-z-]*$')(key)[1] is None and IS_LENGTH(maxsize=36, minsize=36)(key)[1] is None:
+            with DB() as db:
+                seedInfo = db.getSeedInfo(key)
+            if seedInfo is not None and len(seedInfo) > 0:
+                defaultParams = getRandomizerDefaultParameters()
+                defaultParams.update(seedInfo)
+                seedInfo = defaultParams
+
+                # check that the seed ips is available
+                if seedInfo["upload_status"] in ['pending', 'uploaded', 'local']:
+                    # load parameters in session
+                    for key, value in seedInfo.items():
+                        if key in ["complexity", "randoPreset", "raceMode"]:
+                            continue
+                        elif key in defaultMultiValues:
+                            keyMulti = key + 'MultiSelect'
+                            if keyMulti in seedInfo:
+                                session.randomizer[key] = seedInfo[key]
+                                valueMulti = seedInfo[keyMulti]
+                                if type(valueMulti) == str:
+                                    valueMulti = valueMulti.split(',')
+                                session.randomizer[keyMulti] = valueMulti
+                                currentMultiValues[key] = valueMulti
+                        elif key in session.randomizer and 'MultiSelect' not in key:
+                            session.randomizer[key] = value
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets, randoPresetsDesc=randoPresetsDesc,
@@ -1125,7 +1161,7 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
         elif qty == 'scavNumLocs':
             if request.vars.majorsSplit == 'Scavenger':
                 qtyInt = getInt(qty, isJson)
-                if qtyInt < 4 or qtyInt > 16:
+                if qtyInt < 4 or qtyInt > 17:
                     raiseHttp(400, "Wrong value for {}, must be between 4 and 16".format(qty), isJson)
         else:
             qtyFloat = getFloat(qty, isJson)
@@ -1658,6 +1694,7 @@ def stats():
         isolverData = db.getISolverData(weeks)
 
         spritesData = db.getSpritesData(weeks)
+        shipsData = db.getShipsData(weeks)
         plandoRandoData = db.getPlandoRandoData(weeks)
 
         randomizerParamsStats = db.getRandomizerParamsStats(weeks)
@@ -1669,7 +1706,7 @@ def stats():
     return dict(solverPresets=solverPresets, randomizerPresets=randomizerPresets,
                 solverDurations=solverDurations, randomizerDurations=randomizerDurations,
                 solverData=solverData, randomizerData=randomizerData, randomizerParamsStats=randomizerParamsStats,
-                isolver=isolver, isolverData=isolverData, spritesData=spritesData, errors=errors,
+                isolver=isolver, isolverData=isolverData, spritesData=spritesData, shipsData=shipsData, errors=errors,
                 fsStatus=fsStatus, fsPercent=fsPercent, plandoRandoData=plandoRandoData)
 
 def transition2isolver(transition):
@@ -1715,6 +1752,9 @@ def tracker():
                 OPTGROUP(_label="Custom", *startAPs["custom"]),
                 OPTGROUP(_label="Custom (Area rando only)", *startAPs["area"])]
 
+    # get ap -> grapharea for auto tracker
+    apsGraphArea = {locName4isolver(ap.Name): ap.GraphArea for ap in accessPoints}
+
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
                 curSession=session.tracker, addresses=addresses, startAPs=startAPs,
@@ -1722,7 +1762,8 @@ def tracker():
                 bossAccessPoints=InteractiveSolver.bossAccessPoints,
                 nothingScreens=InteractiveSolver.nothingScreens,
                 doorsScreen=InteractiveSolver.doorsScreen,
-                bossBitMasks=InteractiveSolver.bossBitMasks)
+                bossBitMasks=InteractiveSolver.bossBitMasks,
+                apsGraphArea=apsGraphArea)
 
 def plando():
     response.title = 'Super Metroid VARIA Areas and Items Plandomizer'
@@ -1770,6 +1811,12 @@ def plando():
                 vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
                 curSession=session.plando, addresses=addresses, startAPs=startAPs, version=displayedVersion)
 
+def locName4isolver(locName):
+    # remove space and special characters
+    # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
+    locName = str(locName)
+    return locName[0].lower() + removeChars(locName[1:], " ,()-")
+
 class WS(object):
     @staticmethod
     def factory():
@@ -1778,8 +1825,8 @@ class WS(object):
             raiseHttp(400, "Unknown scope, must be area/item/common/door/dump", True)
 
         action = request.vars.action
-        if action not in ['add', 'remove', 'toggle', 'clear', 'init', 'get', 'save', 'replace', 'randomize', 'import']:
-            raiseHttp(400, "Unknown action, must be add/remove/toggle/clear/init/get/save/randomize/import", True)
+        if action not in ['add', 'remove', 'toggle', 'clear', 'init', 'get', 'save', 'replace', 'randomize', 'import', 'upload_scav']:
+            raiseHttp(400, "Unknown action", True)
 
         mode = request.vars.mode
         if mode not in ["standard", "seedless", "plando", "race", "debug"]:
@@ -1810,9 +1857,6 @@ class WS(object):
             raiseHttp(400, "Missing parameter action", True)
         action = request.vars.action
 
-        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize', 'toggle', 'import']:
-            raiseHttp(400, "Unknown action, must be init/add/remove/toggle/clear/get/save/randomize/import", True)
-
         if request.vars.escapeTimer != None:
             if re.match("[0-9][0-9]:[0-9][0-9]", request.vars.escapeTimer) == None:
                 raiseHttp(400, "Wrong escape timer value")
@@ -1841,12 +1885,6 @@ class WS(object):
     def action(self):
         pass
 
-    def locName4isolver(self, locName):
-        # remove space and special characters
-        # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
-        locName = str(locName)
-        return locName[0].lower() + removeChars(locName[1:], " ,()-")
-
     def returnState(self):
         if len(self.session["state"]) > 0:
             state = self.session["state"]
@@ -1858,7 +1896,7 @@ class WS(object):
                 "visitedLocations": state["visitedLocationsWeb"],
                 "collectedItems": state["collectedItems"],
                 "remainLocations": state["remainLocationsWeb"],
-                "lastAP": self.locName4isolver(state["lastAP"]),
+                "lastAP": locName4isolver(state["lastAP"]),
 
                 # area tracker
                 "lines": state["linesWeb"],
@@ -1868,6 +1906,7 @@ class WS(object):
 
                 # infos on seed
                 "mode": state["mode"],
+                "majorsSplit": state["masterMajorsSplit"],
                 "areaRando": state["areaRando"],
                 "bossRando": state["bossRando"],
                 "hasMixedTransitions": state["hasMixedTransitions"],
@@ -1883,7 +1922,10 @@ class WS(object):
                 # doors
                 "doors": state["doors"],
                 "doorsRando": state["doorsRando"],
-                "allDoorsRevealed": state["allDoorsRevealed"]
+                "allDoorsRevealed": state["allDoorsRevealed"],
+
+                # plando scav hunt
+                "plandoScavengerOrder": state["plandoScavengerOrder"]
             })
         else:
             raiseHttp(200, "OK", True)
@@ -1946,6 +1988,8 @@ class WS(object):
                 params += ['--forbiddenItems', parameters["forbiddenItems"]]
         elif action == 'import':
             params += ['--dump', parameters["dump"]]
+        elif action == 'upload_scav' and 'plandoScavengerOrder' in parameters:
+            params += ['--plandoScavengerOrder', ','.join(parameters['plandoScavengerOrder'])]
 
         # dump state as input
         with open(jsonInFileName, 'w') as jsonFile:
@@ -2314,6 +2358,29 @@ class WS_item_clear(WS):
     def action(self):
         return self.callSolverAction("item", "clear", {})
 
+def getScavLocs():
+    scavLocs = cache.ram('scavLocs', lambda:list(), time_expire=None)
+    if len(scavLocs):
+        return scavLocs
+    else:
+        scavLocs = [loc.Name for loc in locations if loc.isScavenger()]
+        return scavLocs
+
+class WS_item_upload_scav(WS):
+    def validate(self):
+        super(WS_item_upload_scav, self).validate()
+
+        self.params = {}
+        if request.vars.plandoScavengerOrder is not None:
+            scavLocs = getScavLocs()
+            self.params["plandoScavengerOrder"] = request.vars.plandoScavengerOrder.split(',')
+            for loc in self.params["plandoScavengerOrder"]:
+                if loc not in scavLocs:
+                    raiseHttp(400, "Unknown scavenger location: [{}]".format(loc), True)
+
+    def action(self):
+        return self.callSolverAction("item", "upload_scav", self.params)
+
 class WS_door_replace(WS):
     def validate(self):
         super(WS_door_replace, self).validate()
@@ -2346,15 +2413,21 @@ class WS_door_clear(WS):
     def action(self):
         return self.callSolverAction("door", "clear", {})
 
+webAPs = {locName4isolver(ap.Name): ap.Name for ap in accessPoints}
 class WS_dump_import(WS):
     def validate(self):
         super(WS_dump_import, self).validate()
+
+        newAP = request.vars.newAP
+        if newAP not in webAPs:
+            raiseHttp(400, "Wrong AP", True)
 
         # create json file
         (self.fd, self.jsonDumpName) = tempfile.mkstemp()
 
         jsonData = {"stateDataOffsets": json.loads(request.vars.stateDataOffsets),
-                    "currentState": json.loads(request.vars.currentState)}
+                    "currentState": json.loads(request.vars.currentState),
+                    "newAP": webAPs[newAP]}
         if len(jsonData["currentState"]) > 1320 or len(jsonData["stateDataOffsets"]) > 3:
             raiseHttp(400, "Wrong state", True)
         for key, value in jsonData["stateDataOffsets"].items():
@@ -2633,6 +2706,12 @@ def customWebService():
             params.append('--no_spin_attack')
     if request.vars.customShipEnable == 'on':
         params += ['--ship', "{}.ips".format(request.vars.customShip)]
+        with DB() as db:
+            db.addShip(request.vars.customShip)
+        if customShips[request.vars.customShip].get("hideSamus", False):
+            params += ['-c', 'custom_ship.ips']
+        if customShips[request.vars.customShip].get("showSamusAtTakeoff", False):
+            params += ['-c', 'Ship_Takeoff_Disable_Hide_Samus']
     if request.vars.seedKey != None:
         with DB() as db:
             seedIpsInfo = db.getSeedIpsInfo(request.vars.seedKey)
@@ -2701,22 +2780,27 @@ def loadMusics():
     if musics:
         return musics
 
+    hiddenGroups = ["Vanilla Soundtrack - Sound Effects", "Memory Violation"]
+
     musicDir = 'music/_metadata'
     dropdown = defaultdict(list)
     metadatas = sorted(os.listdir(musicDir), key=lambda v: v.upper())
     for metadata in metadatas:
-        with open(os.path.join(musicDir, metadata)) as jsonFile:
+        with open(os.path.join(musicDir, metadata), 'r', encoding='utf-8') as jsonFile:
             data = json.load(jsonFile)
             defaultGroup = os.path.splitext(metadata)[0]
             musics.update(data)
             # check if there's group for musics
             for song, songData in data.items():
-                dropdown[songData.get("group", defaultGroup)].append(song)
+                group = songData.get("group", defaultGroup)
+                if group in hiddenGroups:
+                    continue
+                dropdown[group].append(song)
     musics["_dropdown"] = dropdown
 
-    with open('music/_metadata/vanilla.json', 'r') as jsonFile:
+    with open('music/_metadata/vanilla.json', 'r', encoding='utf-8') as jsonFile:
         vanilla = json.load(jsonFile)
-    with open('music/_constraints/vanilla.json', 'r') as jsonFile:
+    with open('music/_constraints/vanilla.json', 'r', encoding='utf-8') as jsonFile:
         constraints = json.load(jsonFile)
     musics["_list"] = [(song, removeChars(song, " ,()-/")) for song in vanilla.keys() if song not in constraints["preserve"]]
     return musics

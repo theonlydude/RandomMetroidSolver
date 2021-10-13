@@ -8,7 +8,7 @@
     "bossRandomization": "on",
     "hud": "on",
     "progressionSpeed":"speedrun",
-    "scavNumLocs": "16",
+    "scavNumLocs": "17",
     "scavRandomized": "off",
     "scavEscape": "on"
 }

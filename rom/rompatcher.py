@@ -61,17 +61,6 @@ class RomPatcher:
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips',
                    'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips'],
-        # comfort patches
-        'Optional': ['itemsounds.ips', 'rando_speed.ips', 'Infinite_Space_Jump', 'refill_before_save.ips',
-                     'spinjumprestart.ips', 'elevators_doors_speed.ips', 'No_Music', 'random_music.ips',
-                     # animals 
-                     'animal_enemies.ips', 'animals.ips', 'draygonimals.ips',
-                     'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
-                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips',
-                     'Escape_Animals_Change_Event', # ...end animals
-                     # vanilla behaviour restore
-                     'remove_elevators_doors_speed.ips', 'remove_itemsounds.ips',
-                     'varia_hud.ips', 'custom_music.ips'],
         # base patchset+optional layout for area rando
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
@@ -177,7 +166,7 @@ class RomPatcher:
             for itemLoc in progItemLocs:
                 self.romFile.writeWord((itemLoc.Location.Id << 8) | itemLoc.Location.HUD)
             # bogus loc ID | "HUNT OVER" index
-            self.romFile.writeWord(0xff10)
+            self.romFile.writeWord(0xff11)
 
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball
@@ -238,8 +227,29 @@ class RomPatcher:
     def customShip(self, ship):
         self.applyIPSPatch(ship, ipsDir='varia_custom_sprites/patches')
 
-    def customSprite(self, sprite, customNames, noSpinAttack):
+    def purgeSprite(self):
+        # custom sprites are also modifying ship palettes, so remove these records from the custom sprite
+        paletteShip = [snes_to_pc(0xA2A59E), snes_to_pc(0xA2A5BE)]
+        paletteShip7 = [snes_to_pc(0x8DD6BA), snes_to_pc(0x8DD900)]
+        paletteShipGlow = [snes_to_pc(0x8DCA4E), snes_to_pc(0x8DCAAA)]
+        spriteIps = self.ipsPatches[-1]
+        spriteIps = spriteIps.toDict()
+        filteredDict ={}
+        for keyLow, data in spriteIps.items():
+            dataLength = len(data)
+            keyHigh = keyLow + dataLength
+            if ((keyHigh < paletteShip[0] or keyLow >= paletteShip[1]) and
+                (keyHigh < paletteShip7[0] or keyLow >= paletteShip7[1]) and
+                (keyHigh < paletteShipGlow[0] or keyLow >= paletteShipGlow[1])):
+                filteredDict[keyLow] = data
+        self.ipsPatches[-1] = IPS_Patch(filteredDict)
+
+    def customSprite(self, sprite, customNames, noSpinAttack, purge):
         self.applyIPSPatch(sprite, ipsDir='varia_custom_sprites/patches')
+
+        if purge:
+            self.purgeSprite()
+
         if noSpinAttack == True:
             self.applyIPSPatch('SpriteSomething_Disable_Spin_Attack')
 
@@ -321,8 +331,7 @@ class RomPatcher:
 
             # apply optional patches
             for patchName in optionalPatches:
-                if patchName in RomPatcher.IPSPatches['Optional']:
-                    self.applyIPSPatch(patchName)
+                self.applyIPSPatch(patchName)
 
             # random escape
             if escapeAttr is not None:
@@ -1178,6 +1187,12 @@ class MusicPatcher(object):
             constraintsFile = 'varia.json' if variaSeed else 'vanilla.json'
         with open(os.path.join(constraintsDir, constraintsFile), 'r') as f:
             self.constraints = json.load(f)
+        nspcInfoPath = os.path.join(baseDir, "nspc_metadata.json")
+        with open(nspcInfoPath, "r") as f:
+            nspcInfo = json.load(f)
+        self.nspcInfo = {}
+        for nspc,info in nspcInfo.items():
+            self.nspcInfo[self._nspc_path(nspc)] = info
         self.allTracks = {}
         self.vanillaTracks = None
         for metaFile in os.listdir(metaDir):
@@ -1279,10 +1294,19 @@ class MusicPatcher(object):
             if dataFile is None:
                 continue
             sz = os.path.getsize(dataFile)
+            blocks = self.nspcInfo[dataFile]['block_headers_offsets']
             for r in usableSpace:
-                if (r['end'] - sz) >= r['start']:
-                    r['end'] -= sz
-                    musicDataAddresses[dataFile] = r['end']
+                # find a suitable address so header words are not split across banks (header is 2 words)
+                addr = r['end'] - sz
+                def isCrossBank(off):
+                    nonlocal addr
+                    endBankOffset = pc_to_snes(addr+off+4) & 0x7fff
+                    return endBankOffset == 1 or endBankOffset == 3
+                while addr >= r['start'] and any(isCrossBank(off) for off in blocks):
+                    addr -= 1
+                if addr >= r['start']:
+                    musicDataAddresses[dataFile] = addr
+                    r['end'] = addr
                     break
             if dataFile not in musicDataAddresses:
                 raise RuntimeError("Cannot find enough space to store music data file "+dataFile)

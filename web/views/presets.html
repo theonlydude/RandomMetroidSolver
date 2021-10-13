@@ -323,10 +323,16 @@ function ajaxPresetActionCall(action) {
     }
 
     // add controller
-    var controllers = ["A", "B", "X", "Y", "L", "R", "Select", "Moonwalk"];
+    var controllers = ["A", "B", "X", "Y", "L", "R", "Select"];
     for(var i=0; i < controllers.length; i++) {
         var controller = controllers[i];
         dataDict[controller] = document.getElementById(controller).value;
+    }
+    var moonwalkElem = document.getElementById("Moonwalk");
+    if(moonwalkElem.checked == true) {
+        dataDict["Moonwalk"] = "on";
+    } else {
+        dataDict["Moonwalk"] = "off";
     }
 
     // call web service with parameters

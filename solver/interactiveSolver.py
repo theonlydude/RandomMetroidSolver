@@ -155,6 +155,8 @@ class InteractiveSolver(CommonSolver):
                     self.replaceItemAt(params['loc'], params['item'], params['hide'])
                 elif action == 'toggle':
                     self.toggleItem(params['item'])
+                elif action == 'upload_scav':
+                    self.updatePlandoScavengerOrder(params['plandoScavengerOrder'])
         elif scope == 'area':
             if action == 'clear':
                 self.clearTransitions()
@@ -429,9 +431,16 @@ class InteractiveSolver(CommonSolver):
         romPatcher.writeSpoiler(itemLocs)
         # plando is considered Full
         majorsSplit = self.masterMajorsSplit if self.masterMajorsSplit in ["FullWithHUD", "Scavenger"] else "Full"
-        # for scavenger hunt, use a location with id and hud at 0xff, ie. scavenger locs list terminator
-        dummyLocation = define_location(Area="", GraphArea="", SolveArea="", Name="", Address=0, Id=0xff, Class=[], CanHidden=False, Visibility="", Room='', HUD=0xff)
-        romPatcher.writeSplitLocs(majorsSplit, itemLocs, [ItemLocation(Location=dummyLocation)])
+
+        progItemLocs = []
+        if majorsSplit == "Scavenger":
+            def getLoc(locName):
+                for loc in self.locations:
+                    if loc.Name == locName:
+                        return loc
+            for locName in self.plandoScavengerOrder:
+                progItemLocs.append(ItemLocation(Location=getLoc(locName)))
+        romPatcher.writeSplitLocs(majorsSplit, itemLocs, progItemLocs)
         romPatcher.writeMajorsSplit(majorsSplit)
         class FakeRandoSettings:
             def __init__(self):
@@ -586,6 +595,9 @@ class InteractiveSolver(CommonSolver):
             for loc in self.majorLocations:
                 loc.difficulty = None
         self.smbm.resetItems()
+
+    def updatePlandoScavengerOrder(self, plandoScavengerOrder):
+        self.plandoScavengerOrder = plandoScavengerOrder
 
     def addTransition(self, startPoint, endPoint):
         # already check in controller if transition is valid for seed

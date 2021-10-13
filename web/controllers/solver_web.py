@@ -1826,8 +1826,8 @@ class WS(object):
             raiseHttp(400, "Unknown scope, must be area/item/common/door/dump", True)
 
         action = request.vars.action
-        if action not in ['add', 'remove', 'toggle', 'clear', 'init', 'get', 'save', 'replace', 'randomize', 'import']:
-            raiseHttp(400, "Unknown action, must be add/remove/toggle/clear/init/get/save/randomize/import", True)
+        if action not in ['add', 'remove', 'toggle', 'clear', 'init', 'get', 'save', 'replace', 'randomize', 'import', 'upload_scav']:
+            raiseHttp(400, "Unknown action", True)
 
         mode = request.vars.mode
         if mode not in ["standard", "seedless", "plando", "race", "debug"]:
@@ -1857,9 +1857,6 @@ class WS(object):
         if request.vars.action == None:
             raiseHttp(400, "Missing parameter action", True)
         action = request.vars.action
-
-        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize', 'toggle', 'import']:
-            raiseHttp(400, "Unknown action, must be init/add/remove/toggle/clear/get/save/randomize/import", True)
 
         if request.vars.escapeTimer != None:
             if re.match("[0-9][0-9]:[0-9][0-9]", request.vars.escapeTimer) == None:
@@ -1910,6 +1907,7 @@ class WS(object):
 
                 # infos on seed
                 "mode": state["mode"],
+                "majorsSplit": state["masterMajorsSplit"],
                 "areaRando": state["areaRando"],
                 "bossRando": state["bossRando"],
                 "hasMixedTransitions": state["hasMixedTransitions"],
@@ -1925,7 +1923,10 @@ class WS(object):
                 # doors
                 "doors": state["doors"],
                 "doorsRando": state["doorsRando"],
-                "allDoorsRevealed": state["allDoorsRevealed"]
+                "allDoorsRevealed": state["allDoorsRevealed"],
+
+                # plando scav hunt
+                "plandoScavengerOrder": state["plandoScavengerOrder"]
             })
         else:
             raiseHttp(200, "OK", True)
@@ -1988,6 +1989,8 @@ class WS(object):
                 params += ['--forbiddenItems', parameters["forbiddenItems"]]
         elif action == 'import':
             params += ['--dump', parameters["dump"]]
+        elif action == 'upload_scav' and 'plandoScavengerOrder' in parameters:
+            params += ['--plandoScavengerOrder', ','.join(parameters['plandoScavengerOrder'])]
 
         # dump state as input
         with open(jsonInFileName, 'w') as jsonFile:
@@ -2355,6 +2358,29 @@ class WS_item_clear(WS):
 
     def action(self):
         return self.callSolverAction("item", "clear", {})
+
+def getScavLocs():
+    scavLocs = cache.ram('scavLocs', lambda:list(), time_expire=None)
+    if len(scavLocs):
+        return scavLocs
+    else:
+        scavLocs = [loc.Name for loc in locations if loc.isScavenger()]
+        return scavLocs
+
+class WS_item_upload_scav(WS):
+    def validate(self):
+        super(WS_item_upload_scav, self).validate()
+
+        self.params = {}
+        if request.vars.plandoScavengerOrder is not None:
+            scavLocs = getScavLocs()
+            self.params["plandoScavengerOrder"] = request.vars.plandoScavengerOrder.split(',')
+            for loc in self.params["plandoScavengerOrder"]:
+                if loc not in scavLocs:
+                    raiseHttp(400, "Unknown scavenger location: [{}]".format(loc), True)
+
+    def action(self):
+        return self.callSolverAction("item", "upload_scav", self.params)
 
 class WS_door_replace(WS):
     def validate(self):

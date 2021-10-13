@@ -422,7 +422,7 @@ function isSeedless(mode) {
     return mode == "seedless" || mode == "debug" || mode == "race"
 }
 
-function setActive(mode, area, boss, escape) {
+function setActive(mode, majorsSplit, area, boss, escape) {
     var itemElems = ["repeatItem", "binItem"];
     var plandoElems = ["repeatPlando", "binPlando", "savePlando"];
     var areaElems = ["repeatArea", "binArea"];
@@ -457,6 +457,7 @@ function setActive(mode, area, boss, escape) {
         document.getElementById("pause_background").style.display = "block";
         document.getElementById("pause_background_seedless").style.display = "none";
     }
+    setActiveHook(mode, majorsSplit, area, boss, escape);
 }
 
 function updateRoomsVisibility(jsonData) {
@@ -537,6 +538,7 @@ function displayDoors(jsonData) {
 
 function updateGlobal(jsonData) {
     mode = jsonData["mode"];
+    majorsSplit = jsonData["majorsSplit"];
     area = jsonData["areaRando"];
     boss = jsonData["bossRando"];
     hasMixedTransitions = jsonData["hasMixedTransitions"];
@@ -551,7 +553,9 @@ function updateGlobal(jsonData) {
     document.getElementById("cur_seed").value = seed;
     document.getElementById("cur_preset").value = preset;
 
-    setActive(mode, area, boss, escapeRando);
+    setActive(mode, majorsSplit, area, boss, escapeRando);
+
+    updateGlobalHook(jsonData);
 }
 
 function updateLines(jsonData, reset) {
@@ -784,6 +788,7 @@ function isActive(elemId) {
 
 var lastAP = "landingSite";
 var mode = "standard";
+var majorsSplit = "Full";
 var area = true;
 var boss = true;
 var hasMixedTransitions = false;

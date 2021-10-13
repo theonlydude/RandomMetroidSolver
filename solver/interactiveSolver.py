@@ -382,6 +382,7 @@ class InteractiveSolver(CommonSolver):
 
     def savePlando(self, lock, escapeTimer):
         # store filled locations addresses in the ROM for next creating session
+        errorMsg = ""
         from rando.Items import ItemManager
         locsItems = {}
         itemLocs = []
@@ -440,6 +441,8 @@ class InteractiveSolver(CommonSolver):
                         return loc
             for locName in self.plandoScavengerOrder:
                 progItemLocs.append(ItemLocation(Location=getLoc(locName)))
+                if locName not in locsItems:
+                    errorMsg = "Nothing at a Scavenger location, seed is unfinishable"
         romPatcher.writeSplitLocs(majorsSplit, itemLocs, progItemLocs)
         romPatcher.writeMajorsSplit(majorsSplit)
         class FakeRandoSettings:
@@ -472,7 +475,7 @@ class InteractiveSolver(CommonSolver):
         fileName = 'VARIA_Plandomizer_{}{}_{}.sfc'.format(seedCode, strftime("%Y%m%d%H%M%S", gmtime()), preset)
         data["fileName"] = fileName
         # error msg in json to be displayed by the web site
-        data["errorMsg"] = ""
+        data["errorMsg"] = errorMsg
         with open(self.outputFileName, 'w') as jsonFile:
             json.dump(data, jsonFile)
 

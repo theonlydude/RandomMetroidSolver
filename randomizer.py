@@ -659,7 +659,7 @@ if __name__ == "__main__":
                     escapeAttr['patches'] = []
                     if args.noRemoveEscapeEnemies == True:
                         escapeAttr['patches'].append("Escape_Rando_Enable_Enemies")
-                    if args.scavEscape == True:
+                    if args.majorsSplit == "Scavenger" and args.scavEscape == True:
                         escapeAttr['patches'].append('Escape_Scavenger')
         except Exception as e:
             import traceback

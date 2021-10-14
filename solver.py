@@ -210,11 +210,6 @@ if __name__ == "__main__":
     if args.presetFileName is None:
         args.presetFileName = 'standard_presets/regular.json'
 
-    if args.raceMagic != None:
-        if args.raceMagic <= 0 or args.raceMagic >= 0x10000:
-            print("Invalid magic")
-            sys.exit(-1)
-
     if args.count != None:
         if args.count < 1 or args.count > 0x80:
             print("Invalid count")

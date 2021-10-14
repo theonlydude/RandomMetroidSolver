@@ -231,7 +231,7 @@ if __name__ == "__main__":
     parser.add_argument('--runtime',
                         help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit. Default is 30.",
                         dest='runtimeLimit_s', nargs='?', default=30, type=int)
-    parser.add_argument('--race', help="Race mode magic number, between 1 and 65535", dest='raceMagic',
+    parser.add_argument('--race', help="Race mode magic number", dest='raceMagic',
                         type=int)
     parser.add_argument('--vcr', help="Generate VCR output file", dest='vcr', action='store_true')
     parser.add_argument('--palette', help="Randomize the palettes", dest='palette', action='store_true')
@@ -347,9 +347,6 @@ if __name__ == "__main__":
 
     seed4rand = seed
     if args.raceMagic is not None:
-        if args.raceMagic <= 0 or args.raceMagic >= 0x10000:
-            print("Invalid magic")
-            sys.exit(-1)
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
     # if no max diff, set it very high

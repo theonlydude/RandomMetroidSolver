@@ -2461,7 +2461,7 @@ def trackerWebService():
 
 # race mode
 def getMagic():
-    return random.randint(1, 0xffff)
+    return random.randint(1, sys.maxsize)
 
 def initCustomizerSession():
     if session.customizer == None:

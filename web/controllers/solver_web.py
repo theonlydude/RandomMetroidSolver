@@ -2483,6 +2483,8 @@ def initCustomizerSession():
         session.customizer['noSpinAttack'] = "off"
         session.customizer['customShipEnable'] = "off"
         session.customizer['customShip'] = "Red-M0nk3ySMShip1"
+        session.customizer['gamepadMapping'] = "off"
+        session.customizer['preset'] = ""
         session.customizer['itemsounds'] = "off"
         session.customizer['spinjumprestart'] = "off"
         session.customizer['rando_speed'] = "off"
@@ -2513,6 +2515,7 @@ def customizer():
     initCustomizerSession()
     initCustomSprites()
     musics = loadMusics()
+    (stdPresets, tourPresets, comPresets) = loadPresetsList()
 
     url = request.env.request_uri.split('/')
     msg = ""
@@ -2566,7 +2569,7 @@ def customizer():
                     with DB() as db:
                         db.updateSeedUploadStatus(key, 'pending')
 
-    return dict(customSprites=customSprites, customShips=customShips, musics=musics,
+    return dict(customSprites=customSprites, customShips=customShips, musics=musics, comPresets=comPresets,
                 seedInfo=seedInfo, seedParams=seedParams, msg=msg, defaultParams=defaultParams)
 
 # if we have an internal parameter value different from its display value
@@ -2585,7 +2588,7 @@ def customWebService():
     switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed',
                'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save',
                'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
-               'remove_elevators_doors_speed']
+               'remove_elevators_doors_speed', 'gamepadMapping']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(switchs, [], [], others, isJson=True)
@@ -2618,6 +2621,9 @@ def customWebService():
     session.customizer['noSpinAttack'] = request.vars.noSpinAttack
     session.customizer['customShipEnable'] = request.vars.customShipEnable
     session.customizer['customShip'] = request.vars.customShip
+    session.customizer['gamepadMapping'] = request.vars.gamepadMapping
+    if session.customizer['gamepadMapping'] == "on":
+        session.customizer['preset'] = request.vars.preset
     session.customizer['itemsounds'] = request.vars.itemsounds
     session.customizer['spinjumprestart'] = request.vars.spinjumprestart
     session.customizer['rando_speed'] = request.vars.rando_speed
@@ -2743,6 +2749,17 @@ def customWebService():
         with open(jsonMusicFileName, 'w') as musicFile:
             json.dump(customMusic, musicFile)
         params += ['--music', jsonMusicFileName]
+
+    if request.vars.gamepadMapping == "on":
+        preset = request.vars.preset
+        fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
+        controlMapping = PresetLoader.factory(fullPath).params['Controller']
+        (custom, controlParam) = getCustomMapping(controlMapping)
+        if custom == True:
+            print("apply custom gamepad mapping from preset: {}".format(request.vars.preset))
+            params += ['--controls', controlParam]
+            if "Moonwalk" in controlMapping and controlMapping["Moonwalk"] == True:
+                params.append('--moonwalk')
 
     print("before calling: {}".format(params))
     start = datetime.now()

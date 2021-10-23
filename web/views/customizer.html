@@ -24,6 +24,9 @@ extend 'layout.html'
 <script type="text/javascript" src="{{=URL('static', 'js/spc_snes.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static', 'js/jquery.redirect.js')}}"></script>
 
+<script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
+
 <title>Super Metroid VARIA Customizer</title>
 
 <style>
@@ -198,7 +201,7 @@ h1 {
 
 <script type="text/javascript">
 $(document).ready(function(){
-   jQuery(window).on('resize', resizeSlider);
+   jQuery(window).on('resize', resizeElements);
 });
 
 var guid = undefined;
@@ -211,6 +214,17 @@ function DoPost(){
     if(guid != undefined) {
         $.redirect("/randomizer/"+guid, {}, "POST", "_blank");
     }
+}
+
+function resizeElements() {
+    resizeSlider();
+    resizeChosen();
+}
+
+function resizeChosen() {
+   $(".chosen-container").each(function() {
+       $(this).attr('style', 'width: 100%');
+   });
 }
 
 function resizeSlider() {
@@ -396,7 +410,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "Infinite_Space_Jump", "refill_before_save", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_doors_speed"];
+      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "Infinite_Space_Jump", "refill_before_save", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_doors_speed", "gamepadMapping"];
 
     for(var i=0; i<elems.length; i++) {
         var elem = document.getElementById(elems[i]);
@@ -435,6 +449,10 @@ function doSubmit() {
         dataDict["varia"] = isVARIA;
         dataDict["area"] = isArea;
         dataDict["boss"] = isBoss;
+    }
+
+    if(dataDict["gamepadMapping"] == "on") {
+      dataDict["preset"] = document.getElementById("preset").value;
     }
 
     console.log("before customizer web service call");
@@ -908,6 +926,11 @@ window.onload = function(){
     itemsounds.onchange = switchOpposite;
 
     initSlider();
+    $("#preset").chosen({ width: '100%' });
+
+    var gamepadMapping = document.getElementById("gamepadMapping");
+    gamepadMapping.onchange = switchGamepadMapping;
+    switchGamepadMapping();
 
 {{
 if session.customizer["invert"] == "on":
@@ -951,6 +974,19 @@ if seedInfo != None:
                 }
             }
         });
+    }
+}
+
+function switchGamepadMapping() {
+    switchCheckbox("gamepadMapping");
+    var gamepadMapping = document.getElementById("gamepadMapping");
+    var text = document.getElementById("gamepadMappingText");
+    if(gamepadMapping.checked) {
+        $('#preset').prop('disabled', false).trigger("chosen:updated");
+        text.className = "";
+    } else {
+        $('#preset').prop('disabled', true).trigger("chosen:updated");
+        text.className = "disabledText";
     }
 }
 
@@ -1304,6 +1340,11 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
       content: "Choose the patches that you want to include in your customized seed."
     },
     {
+      element: "#gamepadMappingStep",
+      title: "Gamepad Mapping",
+      content: "Use the custom gamepad mapping defined in a community preset."
+    },
+    {
       element: "#itemsoundsStep",
       title: "Fanfare",
       content: "<p>Replaces the quite long fanfare played when picking up an item by a short sound effect related with the item picked, and does not restart game music on item pickup.</p>\
@@ -1604,6 +1645,23 @@ for name, values in musics["_dropdown"].items():
 
               <table class="full">
                 <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+                <tr><td colspan="2"><h5 class="center"><b>Gamepad Mapping</b></h5></td><td></td></tr>
+              </table>
+              <table class="full">
+                <colgroup><col class="half" /><col class="half" /></colgroup>
+                <tr id="gamepadMappingStep">
+                  <td>
+                    {{displayCheckbox("gamepadMapping")}}
+                    <span id="gamepadMappingText">Use gamepad mapping from preset: </span>
+                  </td>
+                  <td>
+                    {{=SELECT(OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.customizer["preset"], _class="chzn-select"))}}
+                  </td>
+                  <td><button type="button" onclick="startTheTour(9)">?</button></td>
+                </tr>
+              </table>
+              <table class="full">
+                <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
                 <tr><td colspan="2"><h5 class="center"><b>Game comfort</b></h5></td><td></td></tr>
               </table>
               <table class="full">
@@ -1613,42 +1671,42 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("itemsounds")}}
                     <span id="itemsoundsText">Remove fanfare when picking up an item</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(9)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(10)">?</button></td>
                 </tr>
                 <tr id="ElevatorDoorsStep">
                   <td colspan="2">
                     {{displayCheckbox("elevators_doors_speed")}}
                     <span id="elevators_doors_speedText">Accelerate doors and elevators transitions</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(10)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(11)">?</button></td>
                 </tr>
                 <tr id="spinjumprestartStep">
                   <td colspan="2">
                     {{displayCheckbox("spinjumprestart")}}
                     <span id="spinjumprestartText">Spin jump restart (a.k.a. Respin)</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(11)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(12)">?</button></td>
                 </tr>
                 <tr id="rando_speedStep">
                   <td colspan="2">
                     {{displayCheckbox("rando_speed")}}
                      <span id="rando_speedText">Momentum conservation (a.k.a. Speedkeep)</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(12)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(13)">?</button></td>
                 </tr>
                 <tr id="Infinite_Space_JumpStep">
                   <td colspan="2">
                     {{displayCheckbox("Infinite_Space_Jump")}}
                      <span id="Infinite_Space_JumpText">Infinite Space Jump</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(13)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(14)">?</button></td>
                 </tr>
                 <tr id="refill_before_saveStep">
                   <td colspan="2">
                     {{displayCheckbox("refill_before_save")}}
                      <span id="refill_before_saveText">Refill energy and ammo when saving</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(14)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(15)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -1662,21 +1720,21 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("AimAnyButton")}}
                     <span id="AimAnyButtonText">Allows the aim buttons to be assigned to any button</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(15)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(16)">?</button></td>
                 </tr>
                 <tr id="max_ammo_displayStep">
                   <td colspan="2">
                     {{displayCheckbox("max_ammo_display")}}
                     <span id="max_ammo_displayText">Max Ammo Display</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(16)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(17)">?</button></td>
                 </tr>
                 <tr id="supermetroid_msu1Step">
                   <td colspan="2">
                     {{displayCheckbox("supermetroid_msu1")}}
                     <span id="supermetroid_msu1Text">Play music with MSU1 chip on SD2SNES</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(17)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(18)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -1690,14 +1748,14 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_itemsounds")}}
                     <span id="remove_itemsoundsText">Restore vanilla fanfare when picking up an item</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(18)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(19)">?</button></td>
                 </tr>
                 <tr id="remove_ElevatorDoorsStep">
                   <td colspan="2">
                     {{displayCheckbox("remove_elevators_doors_speed")}}
                     <span id="remove_elevators_doors_speedText">Restore vanilla doors and elevators transitions</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(19)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
               </table>
           </div>

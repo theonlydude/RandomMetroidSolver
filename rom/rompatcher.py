@@ -109,10 +109,13 @@ class RomPatcher:
 
     def writeItemCode(self, item, visibility, address):
         itemCode = ItemManager.getItemTypeCode(item, visibility)
+        self.writePlmWord(itemCode, address)
+
+    def writePlmWord(self, word, address):
         if self.race is None:
-            self.romFile.writeWord(itemCode, address)
+            self.romFile.writeWord(word, address)
         else:
-            self.race.writeItemCode(itemCode, address)
+            self.race.writePlmWord(word, address)
 
     def getLocAddresses(self, loc):
         ret = [loc.Address]
@@ -1071,8 +1074,11 @@ class RomPatcher:
             for (i, char) in enumerate('rotation'):
                 self.setOamTile(i, rotationMiddle, char2tile[char], y=0x8e)
 
-    def writeDoorsColor(self, doors):
-        DoorsManager.writeDoorsColor(self.romFile, doors)
+    def writeDoorsColor(self, doorsStart):
+        if self.race is None:
+            DoorsManager.writeDoorsColor(self.romFile, doorsStart, self.romFile.writeWord)
+        else:
+            DoorsManager.writeDoorsColor(self.romFile, doorsStart, self.writePlmWord)
 
 # tile number in tileset
 char2tile = {

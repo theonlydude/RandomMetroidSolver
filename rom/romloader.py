@@ -146,7 +146,11 @@ class RomLoader(object):
         return self.romReader.getStartAP()
 
     def loadDoorsColor(self):
-        return DoorsManager.loadDoorsColor(self.romReader.romFile)
+        rom = self.getROM()
+        if self.romReader.race is None:
+            return DoorsManager.loadDoorsColor(rom, rom.readWord)
+        else:
+            return DoorsManager.loadDoorsColor(rom, self.romReader.readPlmWord)
 
     def readLogic(self):
         return self.romReader.readLogic()

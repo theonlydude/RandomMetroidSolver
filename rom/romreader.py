@@ -213,6 +213,12 @@ class RomReader:
             from rom.race_mode import RaceModeReader
             self.race = RaceModeReader(self, magic)
 
+    def readPlmWord(self, address):
+        if self.race is None:
+            return self.romFile.readWord(address)
+        else:
+            return self.race.readPlmWord(address)
+
     def getItemBytes(self):
         value1 = int.from_bytes(self.romFile.read(1), byteorder='little')
         value2 = int.from_bytes(self.romFile.read(1), byteorder='little')
@@ -287,7 +293,7 @@ class RomReader:
                 loc.itemName = self.items[item]["name"]
             except:
                 # race seeds
-                loc.itemName = "Nothing"
+                loc.itemName = "SpringBall"
                 item = '0x0'
 
         return (majorsSplit if majorsSplit != 'FullWithHUD' else 'Full', majorsSplit)

@@ -21,7 +21,7 @@ endmacro
 
 ;;; external definitions
 !fix_timer_gfx	     = $a1f2c0	; in new_game.asm (common routines section)
-!scavenger_escape_flag = $a1f5fc ; in varia_hud.asm (option flag)
+!scavenger_escape_flag = $a1f5fe ; in varia_hud.asm (option flag)
 
 org $809E21
 print "timer_value: ", pc

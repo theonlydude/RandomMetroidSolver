@@ -59,8 +59,134 @@ org $82A505
 org $82A61D
         jsr (new_pause_palettes_func_list,x)
 
-;;; new pointers list in free space after tracking.ips
-org $82F717
+org $808233
+check_event:
+
+;;; free space after tracking.ips and seed_display.ips
+org $82f983
+	
+;;; seed objectives checker functions pointers, max 5, list ends with $0000
+dw kraid_is_dead, phantoon_is_dead, draygon_is_dead, ridley_is_dead, $0000, $0000
+;;; completed objectives icons position (x, y)
+db $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+
+;;; objectives checker functions, set carry if objective is completed
+print ""
+
+;;; load boss dead event to check in A
+print "Kraid is dead: ", pc
+kraid_is_dead:
+        lda #$0048
+        jsl check_event
+        rts
+
+print "Phantoon is dead: ", pc
+phantoon_is_dead:
+        lda #$0058
+        jsl check_event
+        rts
+
+print "Draygon is dead: ", pc
+draygon_is_dead:
+        lda #$0060
+        jsl check_event
+        rts
+
+print "Ridley is dead: ", pc
+ridley_is_dead:
+        lda #$0050
+        jsl check_event
+        rts
+
+print "All bosses dead: ", pc
+all_g4_dead:
+        jsr kraid_is_dead
+        bcc .no
+        jsr phantoon_is_dead
+        bcc .no
+        jsr draygon_is_dead
+        bcc .no
+        jsr ridley_is_dead
+        bcc .no
+        sec
+.no
+        rts
+	
+; $7E:D828..2F: Boss bits. Indexed by area
+;     1: Area boss (Kraid, Phantoon, Draygon, both Ridleys)
+;     2: Area mini-boss (Spore Spawn, Botwoon, Crocomire, Mother Brain)
+;     4: Area torizo (Bomb Torizo, Golden Torizo)
+; 
+; $079F: Area index
+;     0: Crateria
+;     1: Brinstar
+;     2: Norfair
+;     3: Wrecked Ship
+;     4: Maridia
+;     5: Tourian
+;     6: Ceres
+;     7: Debug
+
+; event bytes start at $7ED820
+; event code is: (byte index << 3) + ln(boss bit), with byte index == area index + 8
+
+print "Spore Spawn is dead: ", pc
+spore_spawn_dead:
+        lda #$0049
+        jsl check_event
+        rts
+
+print "Botwoon is dead: ", pc
+botwoon_dead:
+        lda #$0061
+        jsl check_event
+        rts
+
+print "Crocomire is dead: ", pc
+crocomire_dead:
+        lda #$0051
+        jsl check_event
+        rts
+
+print "Bomb Torizo is dead: ", pc
+bomb_torizo_dead:
+        lda #$0042
+        jsl check_event
+        rts
+
+print "Golden Torizo is dead: ", pc
+golden_torizo_dead:
+        lda #$0052
+        jsl check_event
+        rts
+
+print "All mini bosses dead: ", pc
+all_mini_bosses_dead:
+        jsr spore_spawn_dead
+        bcc .no
+        jsr botwoon_dead
+        bcc .no
+        jsr crocomire_dead
+        bcc .no
+        jsr bomb_torizo_dead
+        bcc .no
+        jsr golden_torizo_dead
+        bcc .no
+        sec
+.no
+        rts
+
+print "Shaktool cleared the path: ", pc
+shaktool_cleared_path:
+        lda #$000D
+        jsl check_event
+        rts
+
+print "Scavenger hunt completed: (TODO) ", pc
+scavenger_hunt_completed:
+        ;; TODO
+
+;;; new pointers list
 new_pause_actions_func_list:
         dw $9120                ; map
         dw $9142                ; equipment
@@ -68,7 +194,7 @@ new_pause_actions_func_list:
         dw $9186, $91D7, $9200  ; equip2map
         dw func_objective_screen
         dw func_map2obj_fading_out, func_map2obj_load_obj, func_map2obj_fading_in
-        dw func_obj2map_fading_out, func_obj2map_load_map, func_obj2map_fading_in
+        dw func_obj2map_fading_out, $91D7, $9200
 
 new_pause_palettes_func_list:
 	dw $A796, $A6DF, $A628, update_palette_objective_screen
@@ -189,46 +315,11 @@ func_obj2map_fading_out:
 .end
         RTS
 
-func_obj2map_load_map:
-	;; load map
-        REP #$30
-        JSL $82BB30  ; Display map elevator destinations
-        JSL $8293C3  ; Updates the area and map in the map screen
-        JSR $A615    ; Set pause screen button label palettes
-        STZ $073F    ; $073F = 0
-        LDA $C10C    ;\
-        STA $072B    ;} $072B = Fh
-        LDA #$0001   ;\
-        STA $0723    ;} Screen fade delay = 1
-        STA $0725    ; Screen fade counter = 1
-        STZ !pause_screen_mode    ;} Pause screen mode = map screen
-        INC !pause_index    ; Pause index = obj screen to map screen - fading in
-        RTS
-
-func_obj2map_fading_in:
-	;; fade in map
-        JSR $B9C8    ; Map screen - draw Samus position indicator
-        JSL $82B672  ; Draw map icons
-        JSL $82BB30  ; Display map elevator destinations
-        STZ !pause_screen_mode  ;} Pause screen mode = map screen
-        JSL $80894D  ; Handle fading in
-        SEP #$20
-        LDA $51      ;\
-        CMP #$0F     ;} If not finished fading in: return
-        BNE .end     ;/
-        REP #$20
-        STZ $0723    ; Screen fade delay = 0
-        STZ $0725    ; Screen fade counter = 0
-        STZ !pause_screen_button_mode     ; button = map
-        STZ !pause_index    ; index = map
-.end
-        RTS
-
 ;;; seed display patch start
-print "Before seed display ($82f900): ", pc
-warnpc $82f900
+print "Before seed display ($82fb6c): ", pc
+warnpc $82fb6c
 
-;;; continue after seed_display.asm
+;;; continue after InfoStr & Nothing loc id in seed_display.asm
 org $82FB6E
 
 !held_buttons = $05E1
@@ -498,135 +589,11 @@ samus_bottom:
 glowing_LR_animation:
         dw $002A, $002A, $002A, $002A
 
-;;; seed objectives checker functions pointers, max 5, list ends with $0000
-dw kraid_is_dead, phantoon_is_dead, draygon_is_dead, ridley_is_dead, $0000, $0000
-;;; completed objectives icons position (x, y)
-db $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-
-;;; objectives checker functions, set carry if objective is completed
-print ""
-
-;;; load boss dead event to check in A
-print "Kraid is dead: ", pc
-kraid_is_dead:
-        lda #$0048
-        jsl check_event
-        rts
-
-print "Phantoon is dead: ", pc
-phantoon_is_dead:
-        lda #$0058
-        jsl check_event
-        rts
-
-print "Draygon is dead: ", pc
-draygon_is_dead:
-        lda #$0060
-        jsl check_event
-        rts
-
-print "Ridley is dead: ", pc
-ridley_is_dead:
-        lda #$0050
-        jsl check_event
-        rts
-
-print "All bosses dead: ", pc
-all_g4_dead:
-        jsr kraid_is_dead
-        bcc .no
-        jsr phantoon_is_dead
-        bcc .no
-        jsr draygon_is_dead
-        bcc .no
-        jsr ridley_is_dead
-        bcc .no
-        sec
-.no
-        rts
-	
-; $7E:D828..2F: Boss bits. Indexed by area
-;     1: Area boss (Kraid, Phantoon, Draygon, both Ridleys)
-;     2: Area mini-boss (Spore Spawn, Botwoon, Crocomire, Mother Brain)
-;     4: Area torizo (Bomb Torizo, Golden Torizo)
-; 
-; $079F: Area index
-;     0: Crateria
-;     1: Brinstar
-;     2: Norfair
-;     3: Wrecked Ship
-;     4: Maridia
-;     5: Tourian
-;     6: Ceres
-;     7: Debug
-
-; event bytes start at $7ED820
-; event code is: (byte index << 3) + ln(boss bit), with byte index == area index + 8
-
-print "Spore Spawn is dead: ", pc
-spore_spawn_dead:
-        lda #$0049
-        jsl check_event
-        rts
-
-print "Botwoon is dead: ", pc
-botwoon_dead:
-        lda #$0061
-        jsl check_event
-        rts
-
-print "Crocomire is dead: ", pc
-crocomire_dead:
-        lda #$0051
-        jsl check_event
-        rts
-
-print "Bomb Torizo is dead: ", pc
-bomb_torizo_dead:
-        lda #$0042
-        jsl check_event
-        rts
-
-print "Golden Torizo is dead: ", pc
-golden_torizo_dead:
-        lda #$0052
-        jsl check_event
-        rts
-
-print "All mini bosses dead: ", pc
-all_mini_bosses_dead:
-        jsr spore_spawn_dead
-        bcc .no
-        jsr botwoon_dead
-        bcc .no
-        jsr crocomire_dead
-        bcc .no
-        jsr bomb_torizo_dead
-        bcc .no
-        jsr golden_torizo_dead
-        bcc .no
-        sec
-.no
-        rts
-
-print "Shaktool cleared the path: ", pc
-shaktool_cleared_path:
-        lda #$000D
-        jsl check_event
-        rts
-
-print "Scavenger hunt completed: (TODO) ", pc
-scavenger_hunt_completed:
-        ;; TODO
-
 print ""
 print "The end: ", pc
 
 ;;; end of bank
 warnpc $82ffff
-
-org $808233
-check_event:
 
 ;;; keep 'MAP' left button visible on map screen by keeping palette 2 instead of palette 5 (grey one)
 org $82A820

@@ -5,9 +5,11 @@ lorom
 
 // Inject new menu graphic data after decompression
 org $82ecbb
-	jsr $f900
+	jsr seed_display
 
-org $82f900
+// in $82 free space after tracking.ips
+org $82F717
+seed_display:
 	pha
 	phx
         php
@@ -158,7 +160,9 @@ WordTable:
     db "GERUTA  "
     db "SOVA    "
     db "BULL    "
+print "After seed display : ", org
 
+org $82fb6c
 // place holder for VARIA seed type
 print "InfoStr : ", org
 InfoStr:

@@ -481,18 +481,6 @@ class RomReader:
 
         return "{:02d}:{:02d}".format(minute, second)
 
-    def readNothingId(self):
-        address = 0x17B6D
-        value = self.romFile.readByte(address)
-        if value != 0xff:
-            self.nothingId = value
-
-        # find the associated location to get its address
-        for loc in Logic.locations:
-            if loc.Id == self.nothingId:
-                self.nothingAddr = 0x70000 | loc.Address
-                break
-
     def readLogic(self):
         if self.patchPresent('rotation'):
             return 'rotation'

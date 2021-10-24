@@ -68,33 +68,33 @@ class Objectives(object):
 
     def __init__(self):
         self.goals = {
-            "kill kraid": Goal("kill kraid", lambda sm: Bosses.bossDead(sm, 'Kraid'), 0xF999,
+            "kill kraid": Goal("kill kraid", lambda sm: Bosses.bossDead(sm, 'Kraid'), 0xF98F,
                                ["kill G4"], "{} kraid", True),
-            "kill phantoon": Goal("kill phantoon", lambda sm: Bosses.bossDead(sm, 'Phantoon'), 0xF9A1,
+            "kill phantoon": Goal("kill phantoon", lambda sm: Bosses.bossDead(sm, 'Phantoon'), 0xF997,
                                   ["kill G4"], "{} phantoon", True),
-            "kill draygon": Goal("kill draygon", lambda sm: Bosses.bossDead(sm, 'Draygon'), 0xF9A9,
+            "kill draygon": Goal("kill draygon", lambda sm: Bosses.bossDead(sm, 'Draygon'), 0xF99F,
                                  ["kill G4"], "{} draygon", True),
-            "kill ridley": Goal("kill ridley", lambda sm: Bosses.bossDead(sm, 'Ridley'), 0xF9B1,
+            "kill ridley": Goal("kill ridley", lambda sm: Bosses.bossDead(sm, 'Ridley'), 0xF9A7,
                                 ["kill G4"], "{} ridley", True),
-            "kill G4": Goal("kill G4", lambda sm: Bosses.allBossesDead(sm), 0xF9B9,
+            "kill G4": Goal("kill G4", lambda sm: Bosses.allBossesDead(sm), 0xF9AF,
                             ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"],
                             "{} golden four", True),
-            "kill spore spawn": Goal("kill spore spawn", None, 0xF9CF,
+            "kill spore spawn": Goal("kill spore spawn", None, 0xF9C5,
                                      ["kill mini bosses"], "{} spore spawn", True),
-            "kill botwoon": Goal("kill botwoon", None, 0xF9D7,
+            "kill botwoon": Goal("kill botwoon", None, 0xF9CD,
                                  ["kill mini bosses"], "{} botwoon", True),
-            "kill crocomire": Goal("kill crocomire", None, 0xF9DF,
+            "kill crocomire": Goal("kill crocomire", None, 0xF9D5,
                                    ["kill mini bosses"], "{} crocomire", True),
-            "kill bomb torizo": Goal("kill bomb torizo", None, 0xF9E7,
+            "kill bomb torizo": Goal("kill bomb torizo", None, 0xF9DD,
                                      ["kill mini bosses"], "{} bomb torizo", True),
-            "kill golden torizo": Goal("kill golden torizo", None, 0xF9EF,
+            "kill golden torizo": Goal("kill golden torizo", None, 0xF9E5,
                                        ["kill mini bosses"], "{} golden torizo", True),
-            "kill mini bosses": Goal("kill mini bosses", None, 0xF9F7,
+            "kill mini bosses": Goal("kill mini bosses", None, 0xF9ED,
                                      ["kill spore spawn", "kill botwoon", "kill crocomire", "kill bomb torizo", "kill golden torizo"],
                                      "{} mini bosses", True),
-            "shaktool cleared path": Goal("shaktool cleared path", None, 0xFA12,
+            "shaktool cleared path": Goal("shaktool cleared path", None, 0xFA08,
                                           [], "shaktool cleared its path", False),
-            "finish scavenger hunt": Goal("finish scavenger hunt", None, 0xFA1A,
+            "finish scavenger hunt": Goal("finish scavenger hunt", None, 0xFA10,
                                           [], "finish scavenger hunt", False)
         }
         self.activeGoals = []
@@ -179,11 +179,12 @@ class Objectives(object):
             for c in text:
                 romFile.writeWord(0x3800 + char2tile[c])
 
-        # write goal completed positions x,y (0->31)
-        x = 2
-        baseY = 8
-        addr = snes_to_pc(0x82F98F)
-        romFile.seek(addr)
+        # write goal completed positions y in sprites OAM
+        baseY = 0x40
+        addr = snes_to_pc(0x82FD4D)
+        spritemapSize = 5 + 2
         for i, goal in enumerate(self.activeGoals):
-            romFile.writeByte(x)
-            romFile.writeByte(baseY + i * space)
+            y = baseY + i * space * 8
+            # sprite center is at 128
+            y = (y - 128) & 0xFF
+            romFile.writeByte(y, addr+4 + i*spritemapSize)

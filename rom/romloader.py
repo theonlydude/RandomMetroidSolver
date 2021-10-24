@@ -139,9 +139,6 @@ class RomLoader(object):
     def getEscapeTimer(self):
         return self.romReader.getEscapeTimer()
 
-    def readNothingId(self):
-        self.romReader.readNothingId()
-
     def getStartAP(self):
         return self.romReader.getStartAP()
 

@@ -167,9 +167,5 @@ org $82fb6c
 print "InfoStr : ", org
 InfoStr:
     db 0
-// VARIA: placeholder for 'nothing' loc identifier (defaults to morph ball loc)
-print "Nothing : ", org
-NothingId:
-   db $1a
 
 print "The end : ", org

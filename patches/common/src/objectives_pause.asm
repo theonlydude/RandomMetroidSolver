@@ -53,7 +53,7 @@ org $82910A
 
 ;;; new function to check for L/R button pressed
 org $82A505
-	jsr check_l_r_pressed
+        jsr check_l_r_pressed
 
 ;;; replace pause screen button label palettes functions
 org $82A61D
@@ -64,13 +64,20 @@ check_event:
 
 ;;; free space after tracking.ips and seed_display.ips
 org $82f983
-	
+
 ;;; seed objectives checker functions pointers, max 5, list ends with $0000
 print "objectives checker functions: ", pc
-dw kraid_is_dead, phantoon_is_dead, draygon_is_dead, ridley_is_dead, $0000, $0000
-;;; completed objectives icons position (x, y)
-print "objectives icon positions: ", pc
-db $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+first_objective_func:
+        dw kraid_is_dead
+second_objective_func:
+        dw phantoon_is_dead
+third_objective_func:
+        dw draygon_is_dead
+fourth_objective_func:
+        dw ridley_is_dead
+fith_objective_func:
+        dw $0000
+        dw $0000
 
 ;;; objectives checker functions, set carry if objective is completed
 print ""
@@ -113,7 +120,7 @@ all_g4_dead:
         sec
 .no
         rts
-	
+
 ; $7E:D828..2F: Boss bits. Indexed by area
 ;     1: Area boss (Kraid, Phantoon, Draygon, both Ridleys)
 ;     2: Area mini-boss (Spore Spawn, Botwoon, Crocomire, Mother Brain)
@@ -187,6 +194,9 @@ shaktool_cleared_path:
 print "Scavenger hunt completed: (TODO) ", pc
 scavenger_hunt_completed:
         ;; TODO
+	rts
+
+print ""
 
 ;;; new pointers list
 new_pause_actions_func_list:
@@ -199,15 +209,15 @@ new_pause_actions_func_list:
         dw func_obj2map_fading_out, $91D7, $9200
 
 new_pause_palettes_func_list:
-	dw $A796, $A6DF, $A628, update_palette_objective_screen
+        dw $A796, $A6DF, $A628, update_palette_objective_screen
 
 update_palette_objective_screen:
         PHP
         REP #$30
-	jsr set_bg2_objective_screen
+        jsr set_bg2_objective_screen
         LDY #$000A
         LDX #$0000
-.loop_top	
+.loop_top
         LDA $7E364A,x
         AND #$E3FF
         ORA #$1400
@@ -229,13 +239,10 @@ update_palette_objective_screen:
         PLP
         RTS
 
-objective_screen_main:
-        RTS
-
 func_objective_screen:
         STZ $B1      ; BG1 X scroll = 0
         STZ $B3      ; BG1 Y scroll = 0
-        JSR objective_screen_main
+        JSR draw_completed_objectives_sprites
         JSR $A505    ; Checks for L or R input during pause screens
         JSR $A5B7    ; Checks for start input during pause screen
         LDA !pause_screen_mode_obj ;\
@@ -267,10 +274,11 @@ func_map2obj_load_obj:
         STA $BD  ;} BG4 X scroll = [BG1 X scroll]
         LDA $B3
         STA $BF  ;} BG4 Y scroll = [BG1 Y scroll]
-	;; no scroll
+        ;; no scroll
         STZ $B1      ; BG1 X scroll = 0
         STZ $B3      ; BG1 Y scroll = 0
         JSR transfert_objective_bg1  ; objective screen - transfer BG1 tilemap
+        JSR draw_completed_objectives_sprites
         LDA !pause_screen_mode_obj   ;\
         STA !pause_screen_mode       ;} Pause screen mode = objective screen
         JSR $A615    ; Set pause screen button label palettes
@@ -284,6 +292,7 @@ func_map2obj_load_obj:
         RTS
 
 func_map2obj_fading_in:
+        JSR draw_completed_objectives_sprites
         LDA !pause_screen_mode_obj   ;\
         STA !pause_screen_mode       ;} Pause screen mode = objective screen
         JSL $80894D  ; Handle fading in
@@ -294,15 +303,16 @@ func_map2obj_fading_in:
         REP #$20
         STZ $0723    ; Screen fade delay = 0
         STZ $0725    ; Screen fade counter = 0
-	LDA !pause_screen_button_obj
+        LDA !pause_screen_button_obj
         STA !pause_screen_button_mode
-	LDA !pause_index_objective_screen ; index = objective
+        LDA !pause_index_objective_screen ; index = objective
         STA !pause_index    ;/
 .end
         RTS
 
 func_obj2map_fading_out:
         ;; fade out to map
+        JSR draw_completed_objectives_sprites
         JSR $A56D    ; Updates the flashing buttons when you change pause screens
         JSL $808924  ; Handle fading out
         SEP #$20
@@ -321,8 +331,8 @@ func_obj2map_fading_out:
 print "Before seed display ($82fb6c): ", pc
 warnpc $82fb6c
 
-;;; continue after InfoStr & Nothing loc id in seed_display.asm
-org $82FB6E
+;;; continue after InfoStr in seed_display.asm
+org $82FB6D
 
 !held_buttons = $05E1
 !l_button = #$0020
@@ -341,7 +351,7 @@ check_l_r_pressed:
         BIT !r_button
         BNE .press_R
         BRA .end
-	
+
 .press_R
         LDA !pause_screen_button_mode
         CMP !pause_screen_button_equip  ; if already equipment screen => end
@@ -356,23 +366,23 @@ check_l_r_pressed:
         CMP !pause_screen_button_obj
         BEQ .move_to_map_from_obj
 
-.move_to_equip_from_map	
+.move_to_equip_from_map
         LDA !pause_index_map2equip_fading_out
         STA !pause_index
-	LDA !pause_screen_button_equip
+        LDA !pause_screen_button_equip
         STA !pause_screen_button_mode
-	BRA .play_sound
+        BRA .play_sound
 
 .move_to_map_from_obj
         LDA !pause_index_obj2map_fading_out
         STA !pause_index
-	LDA !pause_screen_button_map
+        LDA !pause_screen_button_map
         STA !pause_screen_button_mode   ; pause_screen_button_mode set to pause_screen_button_equip
-	BRA .play_sound
+        BRA .play_sound
 
-.press_L	
+.press_L
         LDA !pause_screen_button_mode  ; pause_screen_button_mode, 00 == map screen
-	CMP !pause_screen_button_obj
+        CMP !pause_screen_button_obj
         BEQ .end                ; if already on objective screen => end
         ;; common actions
         LDA $C10A  ; $82:C10A             db 05,00
@@ -381,22 +391,22 @@ check_l_r_pressed:
         STA $0751
 
         LDA !pause_screen_button_mode
-	CMP !pause_screen_button_map
+        CMP !pause_screen_button_map
         BEQ .move_to_obj_from_map   ; if on map screen and L pressed => objective screen
 
 .move_to_map_from_equip
         LDA !pause_index_equip2map_fading_out
         STA !pause_index
         STZ !pause_screen_button_mode  ; pause_screen_button_mode set to pause_screen_button_map
-	BRA .play_sound
-	
+        BRA .play_sound
+
 .move_to_obj_from_map
         LDA !pause_index_map2obj_fading_out
         STA !pause_index
         LDA !pause_screen_button_obj
         STA !pause_screen_button_mode
         
-.play_sound	
+.play_sound
         JSR $A615   ; $A615: Set pause screen buttons label palettes to show/hide them
         LDA #$0038  ;\
         JSL $809049 ;} Queue sound 38h, sound library 1, max queued sounds allowed = 6 (menu option selected)
@@ -407,7 +417,7 @@ check_l_r_pressed:
 
 ;;; load from ROM $B6F200 to VRAM $F200
 load_objective_bg1:
-        STA $420B	        ; vanilla code
+        STA $420B                ; vanilla code
 
         LDA #$00
         STA $2181   ; WRAM Address Registers, low
@@ -416,8 +426,8 @@ load_objective_bg1:
         LDA #$7E
         STA $2183   ; high => 7EF200
         JSL $8091A9 ; Set up a DMA transfer
- 	;; DMA option 00: Write 1 byte, B0->$21xx
- 	;; DMA target 80: write to $2180: WRAM Data Register
+         ;; DMA option 00: Write 1 byte, B0->$21xx
+         ;; DMA target 80: write to $2180: WRAM Data Register
         db $01,$00,$80
         dl $B6F200
         dw $0800
@@ -442,11 +452,11 @@ transfert_objective_bg1:
                      ;    0x80 == 0b10000000 => i---ffrr => i=1 (increment when $2119 is accessed),
                      ;    ff=0 (full graphic ??), rr=0 (increment by 2 bytes)
         JSL $8091A9  ;| Set up a DMA transfer
- 	;; DMA options: AB0CDEEE A: transfert direction 0 == CPU -> PPU, B HDMA addressing mode 0 == absolute, C CPU addr Auto inc/dec selection 0 == Increment, D CPU addr Auto inc/dec enable 0 == Enable, EEE DMA Transfer Word Select 1 == Write 2 bytes, B0->$21xx B1->$21XX+1
+         ;; DMA options: AB0CDEEE A: transfert direction 0 == CPU -> PPU, B HDMA addressing mode 0 == absolute, C CPU addr Auto inc/dec selection 0 == Increment, D CPU addr Auto inc/dec enable 0 == Enable, EEE DMA Transfer Word Select 1 == Write 2 bytes, B0->$21xx B1->$21XX+1
         ;; DMA target: PPU register selection
         ;;  The byte written here is ORed with $2100 to form the destination address for the DMA transfer. This is the "$21XX" in the description of the DMA Transfer Word Select for $43x0.
         ;;  here write to $2118: VRAM Data Write Registers (Low) (and $2119 as we write words)
- 	;; DMA channel, DMA options, DMA target, Source address, Size (in bytes)
+         ;; DMA channel, DMA options, DMA target, Source address, Size (in bytes)
         db         $01,         $01,        $18,  $00, $F2, $7E,        $00, $08
         LDA #$02     ;\
         STA $420B    ;/ DMA Enable Register, start transfert on channel 1: 76543210 => 7/6/5/4/3/2/1/0
@@ -591,6 +601,84 @@ samus_bottom:
 glowing_LR_animation:
         dw $002A, $002A, $002A, $002A
 
+;;; sprites for completed objectives.
+;;; an oam entry is made of five bytes: (s000000 xxxxxxxxx) (yyyyyyyy) (YXppPPPt tttttttt)
+print "completed spritemaps: ", pc
+first_spritemap:
+        dw $0001, $0000 : db $00 : dw $3E8C
+second_spritemap:
+        dw $0001, $0000 : db $00 : dw $3E8C
+third_spritemap:
+        dw $0001, $0000 : db $00 : dw $3E8C
+fourth_spritemap:
+        dw $0001, $0000 : db $00 : dw $3E8C
+fith_spritemap:
+        dw $0001, $0000 : db $00 : dw $3E8C
+
+draw_completed_objectives_sprites:
+        lda first_objective_func
+        beq .end
+        ldx #$0000 : jsr (first_objective_func, x)
+        bcc .second_objective
+        ldy #first_spritemap
+        jsr draw_spritemap
+
+.second_objective
+        lda second_objective_func
+        beq .end
+        ldx #$0000 : jsr (second_objective_func, x)
+        bcc .third_objective
+        ldy #second_spritemap
+        jsr draw_spritemap
+
+.third_objective
+        lda third_objective_func
+        beq .end
+        ldx #$0000 : jsr (third_objective_func, x)
+        bcc .fourth_objective
+        ldy #third_spritemap
+        jsr draw_spritemap
+
+.fourth_objective
+        lda fourth_objective_func
+        beq .end
+        ldx #$0000 : jsr (fourth_objective_func, x)
+        bcc .fith_objective
+        ldy #fourth_spritemap
+        jsr draw_spritemap
+
+.fith_objective
+        lda fith_objective_func
+        beq .end
+        ldx #$0000 : jsr (fith_objective_func, x)
+        bcc .end
+        ldy #fith_spritemap
+        jsr draw_spritemap
+
+.end
+        rts
+
+draw_spritemap:
+        ;; Y: spritemap addr
+        PHP
+        REP #$30
+        PHB
+
+        PEA $8200
+        PLB
+        PLB
+        LDA #$1E00
+        STA $16                 ; palette * 200h
+        lda #$0008
+        STA $14                 ; X
+	lda #$0080
+        STA $12                 ; Y at screen center
+        JSL $81879F ; Add spritemap to OAM
+
+        PLB
+        PLP
+        RTS
+
 print ""
 print "The end: ", pc
 
@@ -615,7 +703,7 @@ org $828F3A
 
 ;;; display correct sprites when unpausing
 org $82932B
-	JSR display_unpause
+        JSR display_unpause
 
 ;;; update glowing sprite around L/R pointer
 org $82C1E6
@@ -623,17 +711,17 @@ org $82C1E6
 
 ;;; new tiles for 'OBJ' button in unused tiles
 org $B69100
-	db $00,$ff,$00,$00,$ff,$ff,$ff,$ff,$f8,$f8,$f0,$f0,$f2,$f2,$f2,$f2,$ff,$ff,$ff,$ff,$00,$ff,$00,$ff,$07,$f8,$0f,$f0,$0d,$f2,$0d,$f2
+        db $00,$ff,$00,$00,$ff,$ff,$ff,$ff,$f8,$f8,$f0,$f0,$f2,$f2,$f2,$f2,$ff,$ff,$ff,$ff,$00,$ff,$00,$ff,$07,$f8,$0f,$f0,$0d,$f2,$0d,$f2
 org $B69300
-	db $f2,$f2,$f2,$f2,$f0,$f0,$f8,$f8,$ff,$ff,$00,$ff,$00,$00,$00,$ff,$0d,$f2,$0d,$f2,$0f,$f0,$07,$f8,$00,$ff,$ff,$00,$ff,$ff,$ff,$ff
+        db $f2,$f2,$f2,$f2,$f0,$f0,$f8,$f8,$ff,$ff,$00,$ff,$00,$00,$00,$ff,$0d,$f2,$0d,$f2,$0f,$f0,$07,$f8,$00,$ff,$ff,$00,$ff,$ff,$ff,$ff
 org $B693C0
-	db $00,$ff,$00,$00,$ff,$ff,$ff,$ff,$c1,$c1,$4c,$4c,$4c,$4c,$41,$41,$ff,$ff,$ff,$ff,$00,$ff,$00,$ff,$3e,$c1,$b3,$4c,$b3,$4c,$be,$41
+        db $00,$ff,$00,$00,$ff,$ff,$ff,$ff,$c1,$c1,$4c,$4c,$4c,$4c,$41,$41,$ff,$ff,$ff,$ff,$00,$ff,$00,$ff,$3e,$c1,$b3,$4c,$b3,$4c,$be,$41
 org $B693E0
-	db $00,$ff,$00,$00,$ff,$ff,$ff,$ff,$f3,$f3,$f3,$f3,$f3,$f3,$f3,$f3,$ff,$ff,$ff,$ff,$00,$ff,$00,$ff,$0c,$f3,$0c,$f3,$0c,$f3,$0c,$f3
+        db $00,$ff,$00,$00,$ff,$ff,$ff,$ff,$f3,$f3,$f3,$f3,$f3,$f3,$f3,$f3,$ff,$ff,$ff,$ff,$00,$ff,$00,$ff,$0c,$f3,$0c,$f3,$0c,$f3,$0c,$f3
 org $B695C0
-	db $41,$41,$4c,$4c,$4c,$4c,$c1,$c1,$ff,$ff,$00,$ff,$00,$00,$00,$ff,$be,$41,$b3,$4c,$b3,$4c,$3e,$c1,$00,$ff,$ff,$00,$ff,$ff,$ff,$ff
+        db $41,$41,$4c,$4c,$4c,$4c,$c1,$c1,$ff,$ff,$00,$ff,$00,$00,$00,$ff,$be,$41,$b3,$4c,$b3,$4c,$3e,$c1,$00,$ff,$ff,$00,$ff,$ff,$ff,$ff
 org $B695E0
-	db $93,$93,$93,$93,$83,$83,$c7,$c7,$ff,$ff,$00,$ff,$00,$00,$00,$ff,$6c,$93,$6c,$93,$7c,$83,$38,$c7,$00,$ff,$ff,$00,$ff,$ff,$ff,$ff
+        db $93,$93,$93,$93,$83,$83,$c7,$c7,$ff,$ff,$00,$ff,$00,$00,$00,$ff,$6c,$93,$6c,$93,$7c,$83,$38,$c7,$00,$ff,$ff,$00,$ff,$ff,$ff,$ff
 
 ;;; blank objective screen from B6F200 to B6FA00
 org $B6F200
@@ -642,7 +730,7 @@ org $B6F200
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
-	;;                                                 ===== ::          O     B     J     E     C     T     I     V     E     S           ::    =====
+        ;;                                                 ===== ::          O     B     J     E     C     T     I     V     E     S           ::    =====
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$68BD,$2801,$383E,$3831,$3839,$3834,$3832,$3843,$3838,$3845,$3834,$3842,$2801,$68BD,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000

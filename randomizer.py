@@ -15,6 +15,7 @@ from utils.version import displayedVersion
 from logic.smbool import SMBool
 from utils.doorsmanager import DoorsManager
 from logic.logic import Logic
+from utils.objectives import Objectives
 
 import utils.log
 import utils.db as db
@@ -647,6 +648,13 @@ if __name__ == "__main__":
         DoorsManager.setDoorsColor()
 
     if args.patchOnly == False:
+        # TODO::use objectives in logic
+        objectives = Objectives()
+        if args.majorsSplit == "Scavenger":
+            objectives.setScavengerHunt(args.scavEscape)
+        else:
+            objectives.setVanilla()
+
         try:
             randoExec = RandoExec(seedName, args.vcr, randoSettings, graphSettings)
             (stuck, itemLocs, progItemLocs) = randoExec.randomize()
@@ -786,6 +794,7 @@ if __name__ == "__main__":
         if args.rom != None:
             romPatcher.commitIPS()
         if args.patchOnly == False:
+            romPatcher.writeObjectives(objectives)
             romPatcher.writeItemsLocs(itemLocs)
             romPatcher.writeSplitLocs(args.majorsSplit, itemLocs, progItemLocs)
             romPatcher.writeItemsNumber()

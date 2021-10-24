@@ -66,8 +66,10 @@ check_event:
 org $82f983
 	
 ;;; seed objectives checker functions pointers, max 5, list ends with $0000
+print "objectives checker functions: ", pc
 dw kraid_is_dead, phantoon_is_dead, draygon_is_dead, ridley_is_dead, $0000, $0000
 ;;; completed objectives icons position (x, y)
+print "objectives icon positions: ", pc
 db $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
 ;;; objectives checker functions, set carry if objective is completed

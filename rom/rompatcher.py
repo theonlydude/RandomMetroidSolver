@@ -53,7 +53,9 @@ class RomPatcher:
             # VARIA logo on startup screen
             'varia_logo.ips',
             # new nothing plm
-            'nothing_item_plm.ips'
+            'nothing_item_plm.ips',
+            # display objectives in pause manu
+            'objectives_pause.ips'
         ],
         # VARIA tweaks
         'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
@@ -1079,6 +1081,9 @@ class RomPatcher:
             DoorsManager.writeDoorsColor(self.romFile, doorsStart, self.romFile.writeWord)
         else:
             DoorsManager.writeDoorsColor(self.romFile, doorsStart, self.writePlmWord)
+
+    def writeObjectives(self, objectives):
+        objectives.writeGoals(self.romFile)
 
 # tile number in tileset
 char2tile = {

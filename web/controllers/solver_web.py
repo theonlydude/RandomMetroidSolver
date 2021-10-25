@@ -910,6 +910,9 @@ def getAddressesToRead(plando=False):
         # plando transitions (4 bytes per transitions, ap#/2 transitions)
         addresses["ranges"] += [0x2F6100, 0x2F6100+((len(addresses["transitions"])/2) * 4)]
 
+    # objectives
+    addresses["ranges"] += [0x17983, 0x1798F]
+
     return addresses
 
 def genJsonFromParams(vars):

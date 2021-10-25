@@ -103,7 +103,10 @@ class RomLoader(object):
         if self.hasPatch('red_doors'):
             RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
 
-        return (isArea, isBoss, isEscape)
+        # objectives
+        hasObjectives = self.hasPatch('objectives_pause')
+
+        return (isArea, isBoss, isEscape, hasObjectives)
 
     def getPatches(self):
         return self.romReader.getPatches()
@@ -151,6 +154,9 @@ class RomLoader(object):
 
     def readLogic(self):
         return self.romReader.readLogic()
+
+    def loadObjectives(self, objectives):
+        self.romReader.readObjectives(objectives)
 
     def updateSplitLocs(self, split, locations):
         locIds = self.romReader.getLocationsIds()

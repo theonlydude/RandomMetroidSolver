@@ -2,6 +2,9 @@ import random
 from rom.rom import snes_to_pc
 from logic.helpers import Bosses
 from logic.smbool import SMBool
+import utils.log, logging
+
+LOG = utils.log.get('Objectives')
 
 class Synonyms(object):
     killSynonyms = [
@@ -100,6 +103,10 @@ class Objectives(object):
         self.activeGoals = []
         self.nbActiveGoals = 0
 
+    def resetGoals(self):
+        self.activeGoals = []
+        self.nbActiveGoals = 0
+
     def addGoal(self, goalName):
         goal = self.goals[goalName]
         self.nbActiveGoals += 1
@@ -117,6 +124,9 @@ class Objectives(object):
             self.setVanilla()
         self.addGoal("finish scavenger hunt")
 
+    def setScavengerHuntFunc(self, scavClearFunc):
+        self.goals["finish scavenger hunt"].clearFunc = scavClearFunc
+
     def setRandom(self, nbGoals):
         pass
 
@@ -133,11 +143,13 @@ class Objectives(object):
         assert True, "Goal with check function {} not found".format(hex(checkFunction))
 
     def readGoals(self, romFile):
+        self.resetGoals()
         romFile.seek(Objectives.objectivesList)
         checkFunction = romFile.readWord()
         while checkFunction != 0x0000:
             goal = self.getGoalFromCheckFunction(checkFunction)
             self.activeGoals.append(goal)
+            LOG.debug("add goal: {}".format(goal.name))
             checkFunction = romFile.readWord()
 
     def writeGoals(self, romFile):

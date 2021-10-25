@@ -101,7 +101,8 @@ class RomReader:
         'open_zebetites': {'address': 0x26DF22, 'value': 0xc3, 'desc': "Zebetites without morph"},
         'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'desc': "Beam doors"},
         'red_doors': {'address':0x20560, 'value':0xbd, 'desc': "Red doors open with one Missile and do not react to Super"},
-        'rotation': {'address': 0x44DF, 'value': 0xD0, 'desc': "Rotation hack"}
+        'rotation': {'address': 0x44DF, 'value': 0xD0, 'desc': "Rotation hack"},
+        'objectives_pause': {'address': 0x12822, 'value': 0x08, 'desc': "Objectives displayed in pause"}
     }
 
     # FIXME shouldn't be here
@@ -182,7 +183,7 @@ class RomReader:
         'varia_hud': {'address': 0x15EF7, 'value': 0x5C, 'vanillaValue': 0xAE},
         'nothing_item_plm': {'address': 0x23AD1, 'value': 0x24, 'vanillaValue': 0xb9},
         'vanilla_bugfixes': {'address': 0x33704, 'value': 0xF0, 'vanillaValue': 0xD0},
-        'objectives_pause': {'address': 0x10F3B, 'value': 0xF7, 'vanillaValue': 0x0B}
+        'objectives_pause': {'address': 0x12822, 'value': 0x08, 'vanillaValue': 0x14}
     }
 
     @staticmethod
@@ -486,6 +487,9 @@ class RomReader:
             return 'rotation'
         else:
             return 'vanilla'
+
+    def readObjectives(self, objectives):
+        objectives.readGoals(self.romFile)
 
     def getStartAP(self):
         address = 0x10F200

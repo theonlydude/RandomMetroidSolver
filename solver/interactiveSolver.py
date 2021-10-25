@@ -17,6 +17,7 @@ from solver.comeback import ComeBack
 from rando.ItemLocContainer import ItemLocation
 from utils.doorsmanager import DoorsManager
 from logic.logic import Logic
+from utils.objectives import Objectives
 import utils.log
 
 class InteractiveSolver(CommonSolver):
@@ -37,6 +38,9 @@ class InteractiveSolver(CommonSolver):
         self.transWeb2Internal = self.initTransitionsName()
 
         Conf.difficultyTarget = infinity
+
+        self.objectives = Objectives()
+        self.objectives.setVanilla()
 
         # no time limitation
         self.runtimeLimit_s = 0

@@ -55,13 +55,19 @@ class CommonSolver(object):
             if not GraphUtils.isStandardStart(self.startLocation) and self.majorsSplit != 'Full':
                 # update major/chozo locs in non standard start
                 self.romLoader.updateSplitLocs(self.majorsSplit, self.locations)
-            (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches()
+            (self.areaRando, self.bossRando, self.escapeRando, hasObjectives) = self.romLoader.loadPatches()
             RomPatches.ActivePatches += startPatches
             self.escapeTimer = self.romLoader.getEscapeTimer()
             self.doorsRando = self.romLoader.loadDoorsColor()
             self.hasNothing = self.checkLocsForNothing()
             if self.majorsSplit == 'Scavenger':
                 self.scavengerOrder = self.romLoader.loadScavengerOrder(self.locations)
+            if hasObjectives:
+                self.romLoader.loadObjectives(self.objectives)
+            else:
+                if self.majorsSplit == "Scavenger":
+                    self.objectives.setScavengerHunt(True)
+            self.objectives.setScavengerHuntFunc(self.scavengerHuntComplete)
 
             if interactive == False:
                 print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {} activePatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches()), sorted(RomPatches.ActivePatches)))
@@ -596,7 +602,7 @@ class CommonSolver(object):
             hasEnoughItems = hasEnoughMajors and hasEnoughMinors
             canEndGame = self.canEndGame()
             (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
-            if isEndPossible and hasEnoughItems and self.scavengerHuntComplete():
+            if isEndPossible and hasEnoughItems:
                 if endDifficulty <= diffThreshold:
                     if self.checkMB(mbLoc):
                         self.log.debug("checkMB: all end game checks are ok, END")
@@ -716,7 +722,7 @@ class CommonSolver(object):
         # - defeat metroids
         # - destroy/skip the zebetites
         # - beat Mother Brain
-        return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
+        return self.smbm.wand(self.objectives.canClearGoals(self.smbm), self.smbm.enoughStuffTourian())
 
     def getAllLocs(self, majorsAvailable, minorsAvailable):
         if self.majorsSplit == 'Full':
@@ -767,13 +773,13 @@ class CommonSolver(object):
 
         return majorsAvailable
 
-    def scavengerHuntComplete(self):
+    def scavengerHuntComplete(self, smbm=None):
         if self.majorsSplit != 'Scavenger':
-            return True
+            return SMBool(True)
         else:
             # check that last loc from the scavenger hunt list has been visited
             lastLoc = self.scavengerOrder[-1]
-            return lastLoc in self.visitedLocations
+            return SMBool(lastLoc in self.visitedLocations)
 
     def getPriorityArea(self):
         # if scav returns solve area of next loc in the hunt

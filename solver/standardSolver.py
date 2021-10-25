@@ -9,6 +9,7 @@ from solver.comeback import ComeBack
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
 from utils.parameters import Knows, isKnows, Settings
 from logic.logic import Logic
+from utils.objectives import Objectives
 import utils.log
 
 class StandardSolver(CommonSolver):
@@ -43,6 +44,9 @@ class StandardSolver(CommonSolver):
         self.type = type
         self.output = Out.factory(self.type, self)
         self.outputFileName = outputFileName
+
+        self.objectives = Objectives()
+        self.objectives.setVanilla()
 
         self.loadRom(rom, magic=magic)
 

@@ -357,14 +357,14 @@ org $82FB6D
 objectives_completed:
         phx
         sec                     ; in case no objective function has been set
-        ldx $#0000
+        ldx #$0000
 .loop
         lda first_objective_func, x
         beq .end                ; function not set
         jsr (first_objective_func, x)
         bcc .end                ; objective not completed
         inx : inx
-        cpx $#000a              ; max five objective functions to check
+        cpx #$000a              ; max five objective functions to check
         bne .loop
 .end
         plx

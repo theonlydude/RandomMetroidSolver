@@ -318,9 +318,7 @@ class RomPatcher:
             if area == True or doorsColorsRando == True:
                 stdPatches.append("Enable_Backup_Saves")
             if 'varia_hud.ips' in optionalPatches:
-                # varia hud has its own variant of g4_skip for scavenger mode,
-                # it can also make demos glitch out
-                stdPatches.remove("g4_skip.ips")
+                # varia hud can make demos glitch out
                 self.applyIPSPatch("no_demo.ips")
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)

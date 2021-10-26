@@ -59,8 +59,14 @@ org $82A505
 org $82A61D
         jsr (new_pause_palettes_func_list,x)
 
+;;; vanilla function to check an event
 org $808233
 check_event:
+
+;;; scavenger hunt order in ROM
+org $A1F5D8
+scav_order:
+
 
 ;;; free space after tracking.ips and seed_display.ips
 org $82f983
@@ -191,9 +197,21 @@ shaktool_cleared_path:
         jsl check_event
         rts
 
-print "Scavenger hunt completed: (TODO) ", pc
+!scav_idx = $7ed86a
+!hunt_over_hud = #$0011
+print "Scavenger hunt completed: ", pc
 scavenger_hunt_completed:
-        ;; TODO
+        ;; TODO::to be replaced with an event
+        lda !scav_idx : asl : tax
+        lda.l scav_order,x
+        and #$00ff
+        cmp !hunt_over_hud
+        bne .scav_not_completed
+        sec
+        bra .end
+.scav_not_completed
+        clc
+.end
 	rts
 
 print ""
@@ -333,6 +351,24 @@ warnpc $82fb6c
 
 ;;; continue after InfoStr in seed_display.asm
 org $82FB6D
+
+;;; don't move, used by other patches: g4_skip, minimizer_tourian.
+;;; returns carry set if all objectives are completed, carry clear if not
+objectives_completed:
+        phx
+        sec                     ; in case no objective function has been set
+        ldx $#0000
+.loop
+        lda first_objective_func, x
+        beq .end                ; function not set
+        jsr (first_objective_func, x)
+        bcc .end                ; objective not completed
+        inx : inx
+        cpx $#000a              ; max five objective functions to check
+        bne .loop
+.end
+        plx
+        rtl
 
 !held_buttons = $05E1
 !l_button = #$0020

@@ -87,6 +87,10 @@ enable_hyper:
 
 warnpc $91ffff
 
+;;; objectives_completed function from objectives_pause patch which is applied by default
+org $82fb6d
+objectives_completed:
+
 org $8ff730
 ;;; gadora door asm
 tourian_door:
@@ -101,18 +105,11 @@ tourian_door:
 
 ;;; statues door asm leading to gadora room
 pre_tourian_door:
-	;; check if all G4 are dead (g4 check borrowed from g4_skip patch)
-	lda $7ed828
-	bit.w #$0100
-	beq .end
-	lda $7ed82c
-	bit.w #$0001
-	beq .end
-	lda $7ed82a
-	and.w #$0101
-	cmp.w #$0101
-	bne .end
-	;; if they are dead, set door open for gadora
+	;; check if objectives are completed
+        jsl objectives_completed
+        bcc .end
+
+	;; if they are completed, set door open for gadora
 print "test pre_tourian_door: ", pc
 	phx
 	lda #$00a8 : jsl !bit_index

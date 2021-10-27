@@ -356,16 +356,17 @@ org $82FB6D
 ;;; returns carry set if all objectives are completed, carry clear if not
 objectives_completed:
         phx
-        sec                     ; in case no objective function has been set
         ldx #$0000
 .loop
-        lda first_objective_func, x
-        beq .end                ; function not set
+        lda.l first_objective_func, x
+        beq .objectives_ok      ; function not set
         jsr (first_objective_func, x)
         bcc .end                ; objective not completed
         inx : inx
         cpx #$000a              ; max five objective functions to check
         bne .loop
+.objectives_ok
+        sec
 .end
         plx
         rtl

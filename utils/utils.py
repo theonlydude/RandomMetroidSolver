@@ -501,4 +501,15 @@ def fixEnergy(items):
         items.append('{}-ETank'.format(maxETank))
         if maxReserve > 0:
             items.append('{}-Reserve'.format(maxReserve))
+
+    # keep biggest crystal flash
+    cfs = [i for i in items if i.find('CrystalFlash') != -1]
+    if len(cfs) > 1:
+        maxCf = 0
+        for cf in cfs:
+            nCf = int(cf[0:cf.find('-CrystalFlash')])
+            if nCf > maxCf:
+                maxCf = nCf
+            items.remove(cf)
+        items.append('{}-CrystalFlash'.format(maxCf))
     return items

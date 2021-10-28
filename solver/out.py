@@ -68,6 +68,35 @@ class OutWeb(Out):
             return None
 
         out = []
+        order = {
+            'Kraid': 0,
+            'Phantoon': 1,
+            'Draygon': 2,
+            'Ridley': 3,
+            'Varia': 4,
+            'Gravity': 5,
+            'Morph': 6,
+            'Bomb': 7,
+            'SpringBall': 8,
+            'ScrewAttack': 9,
+            'HiJump': 10,
+            'SpaceJump': 11,
+            'SpeedBooster': 12,
+            'Charge': 13,
+            'Ice': 14,
+            'Wave': 15,
+            'Spazer': 16,
+            'Plasma': 17,
+            'Grapple': 18,
+            'XRayScope': 19,
+            'CrystalFlash': 20,
+            'ETank': 21,
+            'Reserve': 22,
+            'Missile': 23,
+            'Super': 24,
+            'PowerBomb': 25
+        }
+        key = lambda item: order[item[item.find('-')+1:]] if '-' in item else order[item]
         for loc in locations:
             if loc.locDifficulty is not None:
                 # draygon fight is in it's path
@@ -80,10 +109,10 @@ class OutWeb(Out):
                 out.append([(loc.Name, loc.Room), loc.Area, loc.SolveArea, loc.itemName,
                             '{0:.2f}'.format(loc.locDifficulty.difficulty),
                             sorted(loc.locDifficulty.knows),
-                            sorted(list(set(loc.locDifficulty.items))),
+                            sorted(list(set(loc.locDifficulty.items)), key=key),
                             '{0:.2f}'.format(loc.pathDifficulty.difficulty),
                             sorted(loc.pathDifficulty.knows),
-                            sorted(list(set(loc.pathDifficulty.items))),
+                            sorted(list(set(loc.pathDifficulty.items)), key=key),
                             [ap.Name for ap in loc.path] if loc.path is not None else None,
                             loc.Class])
 
@@ -93,7 +122,7 @@ class OutWeb(Out):
                 out.append([(loc.Name, loc.Room), loc.Area, loc.SolveArea, loc.itemName,
                             '{0:.2f}'.format(loc.difficulty.difficulty),
                             sorted(loc.difficulty.knows),
-                            sorted(list(set(loc.difficulty.items))),
+                            sorted(list(set(loc.difficulty.items)), key=key),
                             '0.00', [], [],
                             [ap.Name for ap in loc.path] if loc.path is not None else None,
                             loc.Class])

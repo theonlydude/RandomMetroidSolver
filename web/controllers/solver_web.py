@@ -56,7 +56,8 @@ except:
 maxPresets = 4096
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
-    return len(os.listdir('community_presets')) >= maxPresets
+    (stdPresets, tourPresets, comPresets) = loadPresetsList()
+    return len(comPresets) >= maxPresets
 
 def loadPreset():
     # load conf from session if available
@@ -109,21 +110,42 @@ def completePreset(params):
                 params['Controller'][button] = Controller.__dict__[button]
 
 def loadPresetsList():
+    # use a cache to avoid reading the files everytime
+    presets = cache.ram('skillPresets', lambda:dict(), time_expire=None)
+    if presets:
+        return presets.values()
+
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master']
     tourPresets = ['Season_Races', 'SMRAT2021', 'Torneio_SGPT2']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
-    return (stdPresets, tourPresets, comPresets)
+
+    presets['stdPresets'] = stdPresets
+    presets['tourPresets'] = tourPresets
+    presets['comPresets'] = comPresets
+
+    return presets.values()
 
 def loadRandoPresetsList(filter=False):
-    tourPresets = ['Season_Races', 'SGLive2021', 'SMRAT2021', 'VARIA_Weekly', 'Torneio_SGPT2']
-    files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
-    randoPresets = [os.path.splitext(file)[0] for file in files]
-    randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
+    presets = cache.ram('randoPresets', lambda:dict(), time_expire=None)
+    if not presets:
+        tourPresets = ['Season_Races', 'SGLive2021', 'SMRAT2021', 'VARIA_Weekly', 'Torneio_SGPT2']
+        files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
+        randoPresets = [os.path.splitext(file)[0] for file in files]
+        randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
+
+        presets['randoPresets'] = randoPresets
+        presets['tourPresets'] = tourPresets
+
+    randoPresets = presets['randoPresets']
+    tourPresets = presets['tourPresets']
 
     if filter:
         # remove rando presets with no stats
         randoPresets = [preset for preset in randoPresets if preset not in ['all_random', 'minimizer_hardcore', 'minimizer', 'minimizer_maximizer', 'quite_random']]
+    else:
+        # create a copy to not modify cached one later
+        randoPresets = randoPresets[:]
 
     return (randoPresets, tourPresets)
 
@@ -442,6 +464,12 @@ def skillPresetActionWebService():
                 with DB() as db:
                     db.addPresetAction(preset, 'create')
                 updatePresetsSession()
+
+                # add new preset in cache
+                (stdPresets, tourPresets, comPresets) = loadPresetsList()
+                comPresets.append(preset)
+                comPresets.sort(key=lambda v: v.upper())
+
                 msg = "Preset {} created".format(preset)
                 return json.dumps(msg)
             except Exception as e:
@@ -551,25 +579,10 @@ def updateSolverSession():
     session.solver['itemsForbidden'] = itemsForbidden
 
 def getROMsList():
-    # filter the displayed roms to display only the ones uploaded in this session
-    if session.solver['romFiles'] is None:
-        session.solver['romFiles'] = []
-        roms = []
-    elif len(session.solver['romFiles']) == 0:
-        roms = []
-    else:
-        files = sorted(os.listdir('roms'))
-        bases = [os.path.splitext(file)[0] for file in files]
-        filtered = [base for base in bases if base in session.solver['romFiles']]
-        roms = ['{}.sfc'.format(file) for file in filtered]
-
-    return roms
+    return ['{}.sfc'.format(base) for base in session.solver['romFiles']]
 
 def getLastSolvedROM():
-    if session.solver['romFile'] is not None:
-        return '{}.sfc'.format(session.solver['romFile'])
-    else:
-        return None
+    return '{}.sfc'.format(session.solver['romFile']) if session.solver['romFile'] is not None else None
 
 def genPathTable(locations, scavengerOrder, displayAPs=True):
     if locations is None or len(locations) == 0:

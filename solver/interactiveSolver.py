@@ -408,7 +408,7 @@ class InteractiveSolver(CommonSolver):
             patches.append("Enable_Backup_Saves")
         if magic != None:
             patches.insert(0, 'race_mode.ips')
-            patches.append('race_mode_credits.ips')
+            patches.append('race_mode_post.ips')
         romPatcher.addIPSPatches(patches)
 
         plms = []

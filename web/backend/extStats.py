@@ -7,7 +7,7 @@ from utils.parameters import Knows
 from graph.vanilla.graph_locations import locations
 from utils.db import DB
 
-from gluon.packages.dal.pydal.validators import IS_LENGTH, IS_ALPHANUMERIC
+from gluon.validators import IS_LENGTH, IS_ALPHANUMERIC
 from gluon.http import redirect
 from gluon.html import URL
 

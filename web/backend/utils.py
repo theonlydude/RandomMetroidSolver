@@ -7,7 +7,7 @@ from utils.doorsmanager import DoorsManager
 from utils.utils import getDefaultMultiValues, getPresetDir, removeChars
 from utils.parameters import Knows, isKnows, Controller, isButton
 
-from gluon.packages.dal.pydal.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
+from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import HTTP
 
 localIpsDir = 'varia_repository'

@@ -8,7 +8,7 @@ from graph.graph_utils import GraphUtils
 from utils.db import DB
 from logic.logic import Logic
 
-from gluon.packages.dal.pydal.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
+from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.html import OPTGROUP
 
 class Randomizer(object):

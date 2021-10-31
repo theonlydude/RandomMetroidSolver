@@ -4,7 +4,7 @@ from web.backend.utils import raiseHttp
 from rom.ips import IPS_Patch
 from utils.db import DB
 
-from gluon.packages.dal.pydal.validators import IS_LENGTH, IS_MATCH, IS_INT_IN_RANGE
+from gluon.validators import IS_LENGTH, IS_MATCH, IS_INT_IN_RANGE
 
 # discord webhook for plandorepo
 try:

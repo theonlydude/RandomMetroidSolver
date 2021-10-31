@@ -11,7 +11,7 @@ from logic.logic import Logic
 
 from gluon.http import redirect
 from gluon.html import URL
-from gluon.packages.dal.pydal.validators import IS_NOT_EMPTY, IS_ALPHANUMERIC, IS_LENGTH
+from gluon.validators import IS_NOT_EMPTY, IS_ALPHANUMERIC, IS_LENGTH
 
 class Presets(object):
     def __init__(self, session, request, cache):

@@ -11,7 +11,7 @@ from logic.logic import Logic
 from varia_custom_sprites.custom_sprites import customSprites, customSpritesOrder
 from varia_custom_sprites.custom_ships import customShips, customShipsOrder
 
-from gluon.packages.dal.pydal.validators import IS_LENGTH, IS_MATCH, IS_NOT_EMPTY
+from gluon.validators import IS_LENGTH, IS_MATCH, IS_NOT_EMPTY
 
 class Customizer(object):
     def __init__(self, session, request, cache):

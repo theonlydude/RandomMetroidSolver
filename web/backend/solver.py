@@ -8,7 +8,7 @@ from utils.utils import getPresetDir
 from utils.db import DB
 from solver.conf import Conf
 
-from gluon.packages.dal.pydal.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
+from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import redirect
 from gluon.html import URL
 

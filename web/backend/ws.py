@@ -8,7 +8,7 @@ from utils.utils import removeChars, getPresetDir
 from utils.doorsmanager import DoorsManager
 from utils.db import DB
 
-from gluon.packages.dal.pydal.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_NOT_EMPTY
+from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_NOT_EMPTY
 
 class WS(object):
     @staticmethod

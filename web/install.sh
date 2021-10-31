@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir -p ~/web2py/roms/
+
 # first remove brocken symlinks
 find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 

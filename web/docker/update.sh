@@ -16,6 +16,7 @@ docker exec -w /root/RandomMetroidSolver varia-${BRANCH} git pull
 docker exec -w /root/web2py varia-${BRANCH} rm -rf applications/solver/sessions/*
 docker exec -w /root/RandomMetroidSolver varia-${BRANCH} web/install.sh
 docker exec -w /root/RandomMetroidSolver/varia_custom_sprites varia-${BRANCH} git pull origin main
+docker exec -w /root/RandomMetroidSolver/varia_custom_sprites varia-${BRANCH} ./install.sh --clean
 docker exec -w /root/varia-race-mode varia-${BRANCH} git pull
 
 if [ $? -eq 0 ]; then 

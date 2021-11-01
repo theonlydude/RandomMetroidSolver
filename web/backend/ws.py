@@ -1,10 +1,10 @@
 import os, uuid, json, subprocess, tempfile, re
 from datetime import datetime
 
-from web.backend.utils import raiseHttp, locName4isolver, getPythonExec, generateJsonROM, getInt
+from web.backend.utils import raiseHttp, locName4isolver, generateJsonROM, getInt
 from graph.vanilla.graph_access import accessPoints
 from graph.graph_utils import GraphUtils
-from utils.utils import removeChars, getPresetDir
+from utils.utils import removeChars, getPresetDir, getPythonExec
 from utils.doorsmanager import DoorsManager
 from utils.db import DB
 

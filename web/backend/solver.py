@@ -1,10 +1,10 @@
 import os, json, tempfile, subprocess
 from datetime import datetime
 
-from web.backend.utils import getAddressesToRead, loadPresetsList, getPythonExec, generateJsonROM
+from web.backend.utils import getAddressesToRead, loadPresetsList, generateJsonROM
 from utils.parameters import Knows, diff2text, text2diff, diff4solver
 from utils.parameters import easy, medium, hard, harder, hardcore, mania
-from utils.utils import getPresetDir
+from utils.utils import getPresetDir, getPythonExec
 from utils.db import DB
 from solver.conf import Conf
 

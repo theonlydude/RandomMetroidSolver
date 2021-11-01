@@ -91,6 +91,7 @@ def getSpcFile():
     from web.backend.customizer import Customizer
     return Customizer(session, request, cache).getSpcFile()
 
+
 def stats():
     session.forget(response)
     from web.backend.stats import Stats
@@ -137,5 +138,4 @@ def updatePlandoWebService():
 
 
 def _redirect():
-    from gluon.http import redirect
     redirect(URL(request.env.path_info, r=request, scheme=True, host="randommetroidsolver.pythonanywhere.com"))

@@ -4,6 +4,13 @@ from utils.parameters import Knows, Settings, Controller, isKnows, isSettings, i
 from utils.parameters import easy, medium, hard, harder, hardcore, mania
 from logic.smbool import SMBool
 
+def getPythonExec():
+    try:
+        from utils.python_exec import pythonExec
+    except:
+        pythonExec = "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
+    return pythonExec
+
 def isStdPreset(preset):
     return preset in ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master', 'samus', 'solution', 'Season_Races', 'SMRAT2021', 'Torneio_SGPT2']
 

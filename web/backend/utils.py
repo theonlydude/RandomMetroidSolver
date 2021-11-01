@@ -12,13 +12,6 @@ from gluon.http import HTTP
 
 localIpsDir = 'varia_repository'
 
-def getPythonExec():
-    try:
-        from utils.python_exec import pythonExec
-    except:
-        pythonExec = "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
-    return pythonExec
-
 def loadPresetsList(cache):
     # use a cache to avoid reading the files everytime
     presets = cache.ram('skillPresets', lambda:dict(), time_expire=None)

@@ -70,7 +70,7 @@ vanillaMusicData = [
     # Song 2: Flying to Zebes,
     # Song 3: Ceres time up
     [("Flying to Ceres", "vanilla/space_ship.spc", "Vanilla Soundtrack - Sound Effects"),
-     ("Ceres", "vanilla/ceres.spc", "Vanilla Soundtrack"),
+     ("Ceres Station", "vanilla/ceres.spc", "Vanilla Soundtrack"),
      ("Flying to Zebes", "vanilla/to_zebes.spc", "Vanilla Soundtrack - Sound Effects"),
      ("Ceres time up", "vanilla/ceres_explodes.spc", "Vanilla Soundtrack - Sound Effects")],
     # Song 0: Power off,

@@ -33,6 +33,9 @@ var debugLeaderLines = {};
 var colors = ['grey', 'lime', 'pink',  'fuchsia', 'orange', 'yellow', 'purple', 'aqua', 'red', '#bfef45', 'white', 'cyan', 'magenta', 'olive', 'green', 'blue', 'maroon', 'teal'];
 var debugColors = {easy: '#6daa53', medium: '#C1B725', hard: '#e69235', harder: '#d13434', hardcore: '#123456', mania: '#ffffff'};
 
+// for streaming area view
+var linePrefix = "";
+
 function checkCompatibleAPs(startAP, endAP) {
 {{
   response.write("  var vanillaAPs = {};\n".format(vanillaAPs), escape=False)
@@ -87,10 +90,10 @@ function clickPortal(elemId) {
 
         // highlight first element, allow highlight of already linked portals for link removal
         firstClick = elemId;
-        $("#"+firstClick).addClass("addBorder");
+        $("#"+linePrefix+firstClick).addClass("addBorder");
     } else if(firstClick == elemId){
         // click back on same portal
-        $("#"+firstClick).removeClass("addBorder");
+        $("#"+linePrefix+firstClick).removeClass("addBorder");
         firstClick = "";
     } else if(secondClick == "" && elemId != firstClick) {
         isFirstEscape = isEscapeAP(firstClick);
@@ -102,9 +105,9 @@ function clickPortal(elemId) {
 
         if(firstClick in lines) {
             // first portal was an already connected one, replace the selection
-            $("#"+firstClick).removeClass("addBorder");
+            $("#"+linePrefix+firstClick).removeClass("addBorder");
             firstClick = elemId;
-            $("#"+firstClick).addClass("addBorder");
+            $("#"+linePrefix+firstClick).addClass("addBorder");
         } else {
             if(! ((firstClick in lines) || (elemId in lines))) {
                 // add new line
@@ -162,31 +165,34 @@ function addDebugLine(startPoint, endPoint, difficulty) {
 }
 
 function addLine(startPoint, endPoint) {
-  // console.log("addLine: "+startPoint+" "+endPoint);
-  var startPointElem = document.getElementById(startPoint);
-  var endPointElem = document.getElementById(endPoint);
+    // console.log("addLine: "+startPoint+" "+endPoint);
+    var startPointElem = document.getElementById(linePrefix+startPoint);
+    var endPointElem = document.getElementById(linePrefix+endPoint);
+    if(startPointElem == null || endPointElem == null) {
+        return;
+    }
 
-  var line = new LeaderLine(startPointElem, endPointElem,
-                            {startPlug: 'disc',
-                             endPlug: 'disc',
-                             dropShadow: true,
-                             startPlugColor: colors[nextColor],
-                             endPlugColor: colors[nextColor],
-                             size: 2,
-                             color: colors[nextColor],
-                             outlineColor: 'rgb(255, 255, 255)',
-                             outline: true,
-                             outlineSize: 0.10,
-                             path: 'straight'});
+    var line = new LeaderLine(startPointElem, endPointElem,
+                              {startPlug: 'disc',
+                               endPlug: 'disc',
+                               dropShadow: true,
+                               startPlugColor: colors[nextColor],
+                               endPlugColor: colors[nextColor],
+                               size: 2,
+                               color: colors[nextColor],
+                               outlineColor: 'rgb(255, 255, 255)',
+                               outline: true,
+                               outlineSize: 0.10,
+                               path: 'straight'});
 
-  nextColor += 1;
-  $("#"+startPoint).removeClass("addBorder");
+    nextColor += 1;
+    $("#"+linePrefix+startPoint).removeClass("addBorder");
 
-  lines[startPoint] = endPoint;
-  lines[endPoint] = startPoint;
+    lines[startPoint] = endPoint;
+    lines[endPoint] = startPoint;
 
-  leaderLines[startPoint] = line;
-  leaderLines[endPoint] = line;
+    leaderLines[startPoint] = line;
+    leaderLines[endPoint] = line;
 }
 
 function removeLine(startPoint, endPoint) {
@@ -237,7 +243,7 @@ function deleteLine() {
 
   // check if a portal linked to an existing line is selected
   if(firstClick != "" && firstClick in lines) {
-    $("#"+firstClick).removeClass("addBorder");
+    $("#"+linePrefix+firstClick).removeClass("addBorder");
     ajaxCall({action: "remove", scope: "area", startPoint: firstClick}, "upload");
     firstClick = "";
   } else {
@@ -416,7 +422,7 @@ function isSeedless(mode) {
     return mode == "seedless" || mode == "debug" || mode == "race"
 }
 
-function setActive(mode, area, boss, escape) {
+function setActive(mode, majorsSplit, area, boss, escape) {
     var itemElems = ["repeatItem", "binItem"];
     var plandoElems = ["repeatPlando", "binPlando", "savePlando"];
     var areaElems = ["repeatArea", "binArea"];
@@ -451,6 +457,7 @@ function setActive(mode, area, boss, escape) {
         document.getElementById("pause_background").style.display = "block";
         document.getElementById("pause_background_seedless").style.display = "none";
     }
+    setActiveHook(mode, majorsSplit, area, boss, escape);
 }
 
 function updateRoomsVisibility(jsonData) {
@@ -531,6 +538,7 @@ function displayDoors(jsonData) {
 
 function updateGlobal(jsonData) {
     mode = jsonData["mode"];
+    majorsSplit = jsonData["majorsSplit"];
     area = jsonData["areaRando"];
     boss = jsonData["bossRando"];
     hasMixedTransitions = jsonData["hasMixedTransitions"];
@@ -545,7 +553,9 @@ function updateGlobal(jsonData) {
     document.getElementById("cur_seed").value = seed;
     document.getElementById("cur_preset").value = preset;
 
-    setActive(mode, area, boss, escapeRando);
+    setActive(mode, majorsSplit, area, boss, escapeRando);
+
+    updateGlobalHook(jsonData);
 }
 
 function updateLines(jsonData, reset) {
@@ -573,6 +583,12 @@ function updateLines(jsonData, reset) {
             removeLine(startPoint, endPoint);
         }
     }
+
+//    for(var startPoint in lines) {
+//        var endPoint = lines[startPoint]
+//        dragElement(document.getElementById(linePrefix+startPoint), linePrefix+startPoint);
+//        dragElement(document.getElementById(linePrefix+endPoint), linePrefix+endPoint);
+//    }
 }
 
 function updateDebugLines(jsonData) {
@@ -772,6 +788,7 @@ function isActive(elemId) {
 
 var lastAP = "landingSite";
 var mode = "standard";
+var majorsSplit = "Full";
 var area = true;
 var boss = true;
 var hasMixedTransitions = false;
@@ -1242,7 +1259,7 @@ function displayPopup(isPlando) {
   // display popup
   document.getElementById("solverPopup").style.display = "block";
   // chosen must be activated when it's visible, else it doesn't work...
-  $(".chzn-select").chosen();
+  $(".chzn-select").chosen({ width: '100%' });
   resizeChosen();
 }
 
@@ -1257,6 +1274,7 @@ function initSolver() {
 
   console.log("initSolver");
 
+  // seedless debug plando race standard
   var mode = "seedless";
   var romJson = document.getElementById("romJson");
   var romJsonValue = romJson.value;
@@ -1640,17 +1658,27 @@ function resetItems() {
   var items = ["Charge", "Ice", "Wave", "Spazer", "Plasma", "Varia", "Gravity", "Morph", "Bomb", "SpringBall", "ScrewAttack", "HiJump", "SpaceJump", "SpeedBooster", "Grapple", "XRayScope"];
   for(var item in items) {
     document.getElementById(items[item]+"_pause_img").style.display = "none";
+    if(items[item] != "Grapple" && items[item] != "XRayScope") {
+      document.getElementById(items[item]+"_stream_img").style.display = "none";
+      document.getElementById("No"+items[item]+"_stream_img").style.display = "block";
+    }
   }
 
   var items = ["Missile", "Super", "PowerBomb"];
   for(var item in items) {
       document.getElementById(items[item]+"_pause").style.display = "none";
   }
+
+  var bosses = ["Kraid", "Phantoon", "Draygon", "Ridley"];
+  for(var boss in bosses) {
+    document.getElementById(bosses[boss]+"_stream_img").style.display = "block";
+    document.getElementById("No"+bosses[boss]+"_stream_img").style.display = "none";
+  }
 }
 
 var bosses = ["Kraid", "Phantoon", "Draygon", "Ridley", "MotherBrain"];
 function addItem(itemName) {
-  if(itemName == "Nothing" || itemName == "NoEnergy" || bosses.includes(itemName)) {
+  if(itemName == "Nothing" || itemName == "NoEnergy") {
     return;
   }
   if(itemName in itemCount) {
@@ -1669,7 +1697,20 @@ function addItem(itemName) {
       }
     }
   } else {
-    document.getElementById(itemName+"_pause_img").style.display = "block";
+    if(! bosses.includes(itemName)) {
+      document.getElementById(itemName+"_pause_img").style.display = "block";
+    }
+    if(itemName != "Grapple" && itemName != "XRayScope") {
+        if(itemName != "MotherBrain") {
+            if(bosses.includes(itemName)) {
+                document.getElementById(itemName+"_stream_img").style.display = "none";
+                document.getElementById("No"+itemName+"_stream_img").style.display = "block";
+            } else {
+                document.getElementById(itemName+"_stream_img").style.display = "block";
+                document.getElementById("No"+itemName+"_stream_img").style.display = "none";
+            }
+        }
+    }
   }
 }
 

@@ -286,14 +286,17 @@ class Helpers(object):
     def canMorphJump(self):
         # small hop in morph ball form
         sm = self.smbm
-        return sm.wor(sm.canPassBombPassages(), sm.haveItem('SpringBall'))
+        return sm.wor(sm.canPassBombPassages(), sm.canUseSpringBall())
 
     def canCrystalFlash(self, n=1):
         sm = self.smbm
-        return sm.wand(sm.canUsePowerBombs(),
-                       sm.itemCountOk('Missile', 2*n),
-                       sm.itemCountOk('Super', 2*n),
-                       sm.itemCountOk('PowerBomb', 2*n+1))
+        ret = sm.wand(sm.canUsePowerBombs(),
+                      sm.itemCountOk('Missile', 2*n),
+                      sm.itemCountOk('Super', 2*n),
+                      sm.itemCountOk('PowerBomb', 2*n+1))
+        if ret:
+            ret._items.append("{}-CrystalFlash".format(n))
+        return ret
 
     @Cache.decorator
     def canCrystalFlashClip(self):

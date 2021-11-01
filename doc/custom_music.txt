@@ -1,0 +1,137 @@
+
+Remplacement de music par des musiques custom dans le customizer
+****************************************************************
+
+Généralités/Faisabilité :
+-------------------------
+
+Remplacer de la music data par une autre est très simple :
+- écraser la music data existante si la taille est compatible ou
+écrire dans du free space
+- changer le ptr dans la table en bank 8F si nécessaire
+
+C'est tout.
+
+MAIS, les musiques data contiennent plusieurs tracks.
+
+- Areas : Crateria, Maridia et Wrecked Ship
+- Musiques de boss
+- Musiques de "cinématiques": Title Screen/Ceres/Tourian/baby/escape
+
+Si on veut changer les tracks individuellement ça pose donc
+pb.
+
+1) Areas
+
+Exemple : on veut changer la musique de west maridia et garder
+celle de east maridia, ou tout simplement changer les deux musiques de
+maridia par des data différentes.
+
+=> il faut donc réorganiser la music data, changer la table de
+pointeurs, puis les room state headers pour pointer vers les bonnes
+data/track. Cela nécessite de connaître les rooms organisées "par
+musique". En passant, cela permettrait aussi potentiellement de virer
+la partie "songs" de area rando en utilisant ces infos à la place
+(disons donner la liste des ptrs room state a changer plutot que
+directement les ptr vers la musique à changer?)
+
+2) Cinematiques/Bosses
+
+Souvent ces musiques sont changées dynamiquement via du code. C'est
+plus ou moins simple à modifier, mais surtout, charger de la music
+data crée du lag.
+
+On peut identifier dans un premier temps des cas où changer de music
+data est pas ou peu problématique, et faire un patch qui s'occupe de
+changer cela :
+
+- Title screen: on doit pouvoir faire un patch qui permet d'utiliser
+  une music data différente au moment de la transition
+- Ceres: à laisser vanilla, on s'en fout pas mal de Ceres et ya moult
+  tracks pour les cinématiques
+- Transition boss tension=>boss(Kraid/Phantoon/Croc): à laisser
+  vanilla a priori, pas ouf d'ajouter du lag dans une boss room
+- Transition BT tension=>BT: idem
+- Baby: idem, c'est le bordel et ça dure pas longtemps, osef
+- Transition Tourian=>Mother Brain (via Tourian track 1 'no
+  music'). Déjà géré dans le patch random music, suffit de ne pas
+  faire ce changement, vu que dans les seeds on raccourcit le temps de
+  transition.
+- Escape: le jeu charge déjà une music data différente, donc le lag
+  est déjà présent. C'est donc OK pour le changer. ATTENTION au
+  déclenchement d'escape scavenger qu'il faudra patcher aussi.
+
+Musiques à ne jamais changer :
+------------------------------
+
+- Ceres/Bosses (sauf MB): cf ci-dessus
+- Zebes boom
+- Death
+- Baby
+
+Il faut non seulement préserver la music data, mais aussi que les
+identifiants (indices dans la table de ptrs) de ces musiques ne
+changent pas, afin de ne pas avoir à modifier le code qui fait les
+transitions dynamiquement.
+
+Free Space :
+------------
+
+Identifier la taille limite pour la list de pointeurs (on peut
+dépasser un peu, mais faut voir de combien). 
+
+On peut utiliser E0-F4, mais c'est pas forcément une raison pour
+s'étaler. Il faudra essayer d'optimiser la place prise en réorganisant
+les music data et en changeant les pointeurs.
+
+On peut écraser la musique d'intro et 'The last metroid...' vu qu'on
+zap l'intro. ATTENTION, ne faire cela que si on détecte que la ROM que
+l'on patche est une VARIA seed, sinon ces musiques sont considérées à
+préserver, comme celles ci-cessus.
+
+Cette config de free space serait idéalement faite de façon
+extérieure, afin que des développeurs de hack puissent éventuellement
+se servir de l'outil en utilisant un layout de freespace différent (à
+définir en json?).
+
+Plutôt que du Free Space, on peut d'ailleurs appeler ça "usable
+space", car c'est plutôt de cela dont il s'agit. L'outil va donc
+prendre en entrée les plages de usable space, et les tracks à inclure
+dans la ROM. Ces tracks, en fonction du type de ROM comporteront
+certains tracks "inbougeables"  
+
+Compatibilité patch random music :
+----------------------------------
+
+Vu qu'on prévoit de réécrire globalement la music data, il faut aussi
+réécrire la table de music data du patch random_music. On peut dans un
+premier temps laisser le biais qui permet de rendre Tourian/WS moins
+probable.
+
+Stockage des musiques :
+-----------------------
+
+La donnée de référence manipulable par l'utilisateur est le *track* et
+non pas la music data. Ainsi il faut indexer toute la musique data
+qu'on a (custom et vanilla) selon le track.
+
+Avoir un dict json avec pour clé le track name et pour valeur un autre
+dict de métadonnées avec:
+
+- path vers fichier nspc
+- numéro de track dans le fichier nspc
+- path vers preview ogg?
+- auteur original
+- auteur du port
+- description (jeu d'origine etc...)
+
+On pourrait avoir plusieurs json de ce type chargé par le customizer,
+plus simple pour extraire la musique de hacks si nécessaire.
+
+Evolutions :
+------------
+
+Dans une V2, il serait pas mal de stocker plus de musique que
+nécessaire (genre un gros tas de zik dans tout le free space
+possible), et avoir une version du patch random_music qui va piocher
+dedans au pif lieu d'avoir un mapping strict.

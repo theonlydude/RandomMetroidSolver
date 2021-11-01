@@ -184,7 +184,7 @@ pass
   onChangeLowerNorfairHellRun();
 
 
-  $(".chzn-select").chosen();
+  $(".chzn-select").chosen({ width: '100%' });
   resizeChosen();
 }
 
@@ -323,10 +323,16 @@ function ajaxPresetActionCall(action) {
     }
 
     // add controller
-    var controllers = ["A", "B", "X", "Y", "L", "R", "Select", "Moonwalk"];
+    var controllers = ["A", "B", "X", "Y", "L", "R", "Select"];
     for(var i=0; i < controllers.length; i++) {
         var controller = controllers[i];
         dataDict[controller] = document.getElementById(controller).value;
+    }
+    var moonwalkElem = document.getElementById("Moonwalk");
+    if(moonwalkElem.checked == true) {
+        dataDict["Moonwalk"] = "on";
+    } else {
+        dataDict["Moonwalk"] = "off";
     }
 
     // call web service with parameters
@@ -639,7 +645,7 @@ pass
         <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter"></colgroup>
         <tr>
           <td>Preset:</td>
-          <td colspan="3">{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.presets["preset"], _class="filldropdown chzn-select"))}}</td>
+          <td colspan="3">{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.presets["preset"], _class="chzn-select"))}}</td>
           <td id="presetStep"><button type="button" onclick="startTheTour(0)">?</button></td>
         </tr>
         <tr>

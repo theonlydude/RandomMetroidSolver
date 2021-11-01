@@ -113,21 +113,21 @@ class Door(object):
     def isRefillSave(self):
         return self.address is None
 
-    def writeColor(self, rom):
+    def writeColor(self, rom, writeWordFunc):
         if self.isBlue() or self.isRefillSave():
             return
 
-        rom.writeWord(colors2plm[self.color][self.facing], self.address)
+        writeWordFunc(colors2plm[self.color][self.facing], self.address)
 
         # also set plm args high byte to never opened, even during escape
         if self.color == 'grey':
             rom.writeByte(0x90, self.address+5)
 
-    def readColor(self, rom):
+    def readColor(self, rom, readWordFunc):
         if self.forced or self.isRefillSave():
             return
 
-        plm = rom.readWord(self.address)
+        plm = readWordFunc(self.address)
         if plm in plmRed:
             self.setColor('red')
         elif plm in plmGreen:
@@ -145,7 +145,8 @@ class Door(object):
         elif plm in plmIce:
             self.setColor('ice')
         else:
-            raise Exception("Unknown color {} for {}".format(hex(plm), self.name))
+            # we can't read the color, handle as grey door (can happen in race protected seeds)
+            self.setColor('grey')
 
     # for tracker
     def canHide(self):
@@ -304,12 +305,12 @@ class DoorsManager():
 
     # call from rom loader
     @staticmethod
-    def loadDoorsColor(rom):
+    def loadDoorsColor(rom, readWordFunc):
         # force to blue some doors depending on patches
         DoorsManager.setDoorsColor()
         # for each door store it's color
         for door in DoorsManager.doors.values():
-            door.readColor(rom)
+            door.readColor(rom, readWordFunc)
         DoorsManager.debugDoorsColor()
 
         # tell that we have randomized doors
@@ -336,9 +337,9 @@ class DoorsManager():
 
     # call from rom patcher
     @staticmethod
-    def writeDoorsColor(rom, doors):
+    def writeDoorsColor(rom, doors, writeWordFunc):
         for door in DoorsManager.doors.values():
-            door.writeColor(rom)
+            door.writeColor(rom, writeWordFunc)
             # also set save/refill doors to blue
             if door.id is not None:
                 doors.append(door.id)

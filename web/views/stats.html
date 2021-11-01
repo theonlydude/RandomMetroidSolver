@@ -137,6 +137,7 @@ function drawCharts() {
   drawRandomizerParamsStats4();
   drawISolver();
   drawSprites();
+  drawShips();
 }
 
 function drawSolverPresets() {
@@ -422,6 +423,32 @@ function drawSprites() {
 }}
 }
 
+function drawShips() {
+{{
+  if shipsData == None:
+    response.write("  return;", escape=False)
+    pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable(
+{{
+    response.write(shipsData, escape=False)
+}}
+    );
+
+    var options = {
+      title: "Custom Ships usage",
+      isStacked: "percent"
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.ColumnChart(document.getElementById("ships"));
+    chart.draw(data, options);
+{{
+    pass
+}}
+}
 
 google.charts.setOnLoadCallback(drawCharts);
 </script>
@@ -451,8 +478,9 @@ google.charts.setOnLoadCallback(drawCharts);
     <h4>Randomizer statistics</h4>
     <div id = "randomizerPresets" style = "height: 400px; margin: 0 auto"></div>
     <div id = "randomizerDurations" style = "height: 400px; margin: 0 auto"></div>
-    <h4>Sprites statistics</h4>
+    <h4>Customizer statistics</h4>
     <div id = "sprites" style = "height: 400px; margin: 0 auto"></div>
+    <div id = "ships" style = "height: 400px; margin: 0 auto"></div>
   </div>
   <div class="column">
     <h4>Solver statistics</h4>

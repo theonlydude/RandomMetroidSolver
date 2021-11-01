@@ -1,0 +1,528 @@
+from rom.rom import pc_to_snes
+
+# zero mission ship:
+addrs = [0x6CA54, 0x11259E, 0x112810, 0x112DE4, 0x112E39, 0x16B62E, 0x2142D3]
+
+for addr in addrs:
+    print("{} -> {}".format(hex(addr), hex(pc_to_snes(addr))))
+
+# 0x6ca54  -> 0x8dca54: spritemaps
+#;;; $CA4E: Instruction list - palette FX object $E1C0 (gunship glow) ;;;
+# $8D:CA4E             dx C655,01FE,  ; Palette FX object colour index = 01FEh
+# $8D:CA52             dx 0005,
+#                             0000,
+#                             C595,       ; Done
+#                         0005,
+#                             0402,
+#                             C595,       ; Done
+#                         0005,
+#                             0404,
+#                             C595,       ; Done
+#                         0005,
+#                             0806,
+#                             C595,       ; Done
+#                         0005,
+#                             0C08,
+#                             C595,       ; Done
+#                         0005,
+#                             0C0A,
+#                             C595,       ; Done
+#                         0005,
+#                             100C,
+#                             C595,       ; Done
+#                         0005,
+#                             180E,
+#                             C595,       ; Done
+#                         0005,
+#                             100C,
+#                             C595,       ; Done
+#                         0005,
+#                             0C0A,
+#                             C595,       ; Done
+#                         0005,
+#                             0C08,
+#                             C595,       ; Done
+#                         0005,
+#                             0806,
+#                             C595,       ; Done
+#                         0005,
+#                             0404,
+#                             C595,       ; Done
+#                         0005,
+#                             0402,
+#                             C595,       ; Done
+#                         C61E,CA52   ; Go to $CA52
+
+
+# 0x11259e -> 0xa2a59e: enemy ai
+#;;; $A59E: Palette - enemy $D07F/$D0BF (gunship) ;;;
+# $A2:A59E             dw 3800, 0295, 0190, 0403, 0001, 0211, 014D, 00C9, 0024, 3BE0, 2680, 1580, 24C6, 1442, 0000, 0000
+
+
+#                         frame delay (nb frame ou on affiche la apritemap)
+#                              spritemap
+# ;;; $A5BE: Instruction list - gunship entrance pad - opening ;;;
+# $A2:A5BE             dx 0028,AFDD,
+#                         0008,AFC7,
+#                         0008,AE89,
+#                         0008,AE9F,
+#                         0018,AEB5,
+#                         0008,AECB,
+#                         0007,AEF5,
+#                         0006,AF1F,
+#                         0005,AF49,
+#                         0004,AF73
+# $A2:A5E6             dx 0004,AF9D,
+#                         80ED,A5E6   ; Go to $A5E6
+# 
+# ;;; $A5EE: Instruction list - gunship entrance pad - closing ;;;
+# $A2:A5EE             dx 0004,AF73,
+#                         0005,AF49,
+#                         0006,AF1F,
+#                         0007,AEF5,
+#                         0008,AECB,
+#                         0018,AEB5,
+#                         0008,AE9F,
+#                         0008,AFC7
+# 
+# ;;; $A60E: Instruction list - gunship entrance pad - closed ;;;
+# $A2:A60E             dx 0008,AFDD,
+#                         80ED,A60E   ; Go to $A60E
+# 
+# ;;; $A616: Instruction list - gunship top ;;;
+# $A2:A616             dx 0001,AD81,
+#                         812F        ; Sleep
+# 
+# ;;; $A61C: Instruction list - gunship bottom ;;;
+# $A2:A61C             dx 0001,ADDD,
+#                         812F        ; Sleep
+
+
+# chargement des instruction list du gunship
+#
+# ;;; $A644: Initialisation AI - enemy $D07F (gunship top) ;;;
+# {
+# $A2:A644 AE 54 0E    LDX $0E54  [$7E:0E54]
+# $A2:A647 BD 86 0F    LDA $0F86,x[$7E:0F86]  ;\
+# $A2:A64A 09 00 24    ORA #$2400             ;} Set enemy as intangible and to process instructions
+# $A2:A64D 9D 86 0F    STA $0F86,x[$7E:0F86]  ;/
+# $A2:A650 A9 01 00    LDA #$0001             ;\
+# $A2:A653 9D 94 0F    STA $0F94,x[$7E:0F94]  ;} Enemy instruction timer = 1
+# $A2:A656 9E 90 0F    STZ $0F90,x[$7E:0F90]  ; Enemy timer = 0
+# $A2:A659 A9 16 A6    LDA #$A616             ;\
+# $A2:A65C 9D 92 0F    STA $0F92,x[$7E:0F92]  ;} Enemy instruction list pointer = $A616
+# $A2:A65F A9 00 0E    LDA #$0E00             ;\
+# $A2:A662 9D 96 0F    STA $0F96,x[$7E:0F96]  ;} Enemy palette index = E00h (palette 7)
+# $A2:A665 AD 98 09    LDA $0998  [$7E:0998]  ;\
+# $A2:A668 C9 28 00    CMP #$0028             ;} If [game state] = 28h (transition to demo): go to BRANCH_DEMO_TRANSITION
+# $A2:A66B F0 30       BEQ $30    [$A69D]     ;/
+# 
+# 
+# ;;; $A6D2: Initialisation AI - enemy $D0BF (gunship bottom / entrance pad) ;;;
+# {
+# ; Enemy parameter 2 = 0: gunship bottom
+# ; Enemy parameter 2 != 0: gunship entrance pad
+# $A2:A6D2 AE 54 0E    LDX $0E54  [$7E:0E54]
+# $A2:A6D5 BD 86 0F    LDA $0F86,x[$7E:0FC6]  ;\
+# $A2:A6D8 09 00 24    ORA #$2400             ;} Set enemy as intangible and to process instructions
+# $A2:A6DB 9D 86 0F    STA $0F86,x[$7E:0FC6]  ;/
+# $A2:A6DE A9 01 00    LDA #$0001             ;\
+# $A2:A6E1 9D 94 0F    STA $0F94,x[$7E:0FD4]  ;} Enemy instruction timer = 1
+# $A2:A6E4 9E 90 0F    STZ $0F90,x[$7E:0FD0]  ; Enemy timer = 0
+# $A2:A6E7 BD B6 0F    LDA $0FB6,x[$7E:0FF6]  ;\
+# $A2:A6EA F0 08       BEQ $08    [$A6F4]     ;} If [enemy parameter 2] != 0:
+# $A2:A6EC A9 0E A6    LDA #$A60E             ;\
+# $A2:A6EF 9D 92 0F    STA $0F92,x[$7E:1012]  ;} Enemy instruction list pointer = $A60E
+# $A2:A6F2 80 06       BRA $06    [$A6FA]
+# 
+# $A2:A6F4 A9 1C A6    LDA #$A61C             ;\ Else ([enemy parameter 2] = 0):
+# $A2:A6F7 9D 92 0F    STA $0F92,x[$7E:0FD2]  ;} Enemy instruction list pointer = $A61C
+
+
+
+# 0x112810 -> 0xa2a810
+# ;;; $A80C: Gunship function - landing on Zebes - descending ;;;
+
+# 0x112DE4 -> 0xa2ade4
+# 0x112e39 -> 0xa2ae39: enemy ai
+#;;; $AD81: Spritemaps - gunship ;;;
+# $A2:AD81             dx 0012, C201,FE,7F20, C211,FE,7F0E, C221,FE,7F0C, C231,FE,7F0A, C241,FE,7F08, C201,EE,7F06, C211,EE,7F04, C221,EE,7F02,
+#                               C231,EE,7F00, C3F1,FE,3F20, C3E1,FE,3F0E, C3D1,FE,3F0C, C3C1,FE,3F0A, C3B1,FE,3F08, C3F1,EE,3F06, C3E1,EE,3F04,
+#                               C3D1,EE,3F02, C3C1,EE,3F00
+# $A2:ADDD             dx 0022, C201,06,7F62, C211,06,7F60, C221,06,7F4E, C231,06,7F4C, C241,06,7F4A, C201,F6,7F48, C211,F6,7F46, C221,F6,7F44,
+#                               C231,F6,7F42, C241,F6,7F40, C251,F6,7F2E, C201,E6,7F2C, C211,E6,7F2A, C221,E6,7F28, C231,E6,7F26, C241,E6,7F24,
+#                               C251,E6,7F22, C3F1,06,3F62, C3E1,06,3F60, C3D1,06,3F4E, C3C1,06,3F4C, C3B1,06,3F4A, C3F1,F6,3F48, C3E1,F6,3F46,
+#                               C3D1,F6,3F44, C3C1,F6,3F42, C3B1,F6,3F40, C3A1,F6,3F2E, C3F1,E6,3F2C, C3E1,E6,3F2A, C3D1,E6,3F28, C3C1,E6,3F26,
+#                               C3B1,E6,3F24, C3A1,E6,3F22
+# $A2:AE89             dx 0004, 0000,F6,7F65, 0008,F6,7F64, 01F8,F6,3F65, 01F0,F6,3F64
+# $A2:AE9F             dx 0004, 0000,F4,7F65, 0008,F4,7F64, 01F8,F4,3F65, 01F0,F4,3F64
+# $A2:AEB5             dx 0004, 0000,F2,7F65, 0008,F3,7F64, 01F8,F2,3F65, 01F0,F3,3F64
+# $A2:AECB             dx 0008, 01F6,F2,3F65, 01EE,F3,3F64, 0002,F2,7F65, 000A,F3,7F64, 0000,F5,7F67, 0008,F5,7F66, 01F8,F5,3F67, 01F0,F5,3F66
+# $A2:AEF5             dx 0008, 0004,F2,7F65, 000C,F4,7F64, 01F4,F2,3F65, 01EC,F4,3F64, 0000,F4,7F67, 0008,F4,7F66, 01F8,F4,3F67, 01F0,F4,3F66
+# $A2:AF1F             dx 0008, 0006,F2,7F65, 000E,F4,7F64, 01F2,F2,3F65, 01EA,F4,3F64, 0000,F3,7F67, 0008,F3,7F66, 01F8,F3,3F67, 01F0,F3,3F66
+# $A2:AF49             dx 0008, 0008,F2,7F65, 0010,F4,7F64, 01F0,F2,3F65, 01E8,F4,3F64, 0000,F3,7F67, 0008,F3,7F66, 01F8,F3,3F67, 01F0,F3,3F66
+# $A2:AF73             dx 0008, 000A,F3,7F65, 0012,F6,7F64, 01EE,F3,3F65, 01E6,F6,3F64, 0000,F3,7F67, 0008,F3,7F66, 01F8,F3,3F67, 01F0,F3,3F66
+# $A2:AF9D             dx 0008, 000C,F3,7F65, 0014,F6,7F64, 01EC,F3,3F65, 01E4,F6,3F64, 0000,F3,7F67, 0008,F3,7F66, 01F8,F3,3F67, 01F0,F3,3F66
+# $A2:AFC7             dx 0004, 0000,F7,7F65, 0008,F7,7F64, 01F8,F7,3F65, 01F0,F7,3F64
+# $A2:AFDD             dx 0004, 0000,F8,7F65, 0008,F8,7F64, 01F8,F8,3F65, 01F0,F8,3F64
+
+# 52 ship: AD81 + ADDD
+# hatch animation: [AE89 -> AFDD]
+
+#0x11259E: [0xE0,0x3,0x5F,0x4A,0x5F,0x29,0xFB,0x1C,0xD7,0x18,0x92,0x10,0x6D,0xC,0x27,0x4,0x1D,0x27,0x7B,0x16,0xF6,0x9,0x70,0x1,0x9,0x9,0xD2,0x6B,0xC8,0x3F,0xC3,0xD],
+#0x112810: [0xEA,0x2],
+#0x112DE4: [0x61,0xC2,0xEE,0x60,0x7F,0x61,0xC2,0xFE,0x4E,0x7F,0x71,0xC2,0xFE,0x4C,0x7F,0x59],
+#0x112E39: [0x91,0xC3,0xEE,0x60,0x3F,0x91,0xC3,0xFE,0x4E,0x3F,0x81,0xC3,0xFE,0x4C,0x3F,0x99],
+
+# ship ennemy:
+#;                        _________________________________________________________________________________________________________________________________________________________________________________________ 0: Tile data size
+#;                       |      ___________________________________________________________________________________________________________________________________________________________________________________ 2: Palette
+#;                       |     |      _____________________________________________________________________________________________________________________________________________________________________________ 4: Health
+#;                       |     |     |      _______________________________________________________________________________________________________________________________________________________________________ 6: Damage
+#;                       |     |     |     |      _________________________________________________________________________________________________________________________________________________________________ 8: X radius
+#;                       |     |     |     |     |      ___________________________________________________________________________________________________________________________________________________________ Ah: Y radius
+#;                       |     |     |     |     |     |      _____________________________________________________________________________________________________________________________________________________ Ch: Bank
+#;                       |     |     |     |     |     |     |    _________________________________________________________________________________________________________________________________________________ Dh: Hurt AI time
+#;                       |     |     |     |     |     |     |   |    _____________________________________________________________________________________________________________________________________________ Eh: Cry
+#;                       |     |     |     |     |     |     |   |   |      _______________________________________________________________________________________________________________________________________ 10h: Boss value
+#;                       |     |     |     |     |     |     |   |   |     |      _________________________________________________________________________________________________________________________________ 12h: Initialisation AI
+#;                       |     |     |     |     |     |     |   |   |     |     |      ___________________________________________________________________________________________________________________________ 14h: Number of parts
+#;                       |     |     |     |     |     |     |   |   |     |     |     |      _____________________________________________________________________________________________________________________ 16h: Unused (Set to 0001 by DCFF, DD3F, F553)
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |      _______________________________________________________________________________________________________________ 18h: Main AI
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |      _________________________________________________________________________________________________________ 1Ah: Grapple AI
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |      ___________________________________________________________________________________________________ 1Ch: Hurt AI
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |      _____________________________________________________________________________________________ 1Eh: Frozen AI
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |     |      _______________________________________________________________________________________ 20h: X-ray AI
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |     |     |      _________________________________________________________________________________ 22h: Death animation
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |     |     |     |      ___________________________________________________________________________ 24h: Unused
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |     |     |     |     |          _________________________________________________________________ 28h: Power bomb reaction
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |     |     |     |     |         |      ___________________________________________________________ 2Ah: Unknown (PLM-esque instruction list)
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |     |     |     |     |         |     |      _____________________________________________________ 2Ch: Unused
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |     |     |     |     |         |     |     |          ___________________________________________ 30h: Enemy touch
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |     |     |     |     |         |     |     |         |      _____________________________________ 32h: Enemy shot
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |     |     |     |     |         |     |     |         |     |      _______________________________ 34h: Unknown (sprite maps) (Ceres door points to Zebetites initialisation, so I'm thinking this is definitely never used)
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |     |     |     |     |         |     |     |         |     |     |      _________________________ 36h: Tile data
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |     |     |     |     |         |     |     |         |     |     |     |        _________________ 39h: Layer
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |     |     |     |     |         |     |     |         |     |     |     |       |    _____________ 3Ah: Drop chances ($B4)
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |     |     |     |     |         |     |     |         |     |     |     |       |   |      _______ 3Ch: Vulnerabilities ($B4)
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |     |     |     |     |         |     |     |         |     |     |     |       |   |     |      _ 3Eh: Enemy name ($B4)
+#;                       |     |     |     |     |     |     |   |   |     |     |     |     |     |     |     |     |     |     |     |         |     |     |         |     |     |     |       |   |     |     |
+#;                       00    02    04    06    08    0A    0C  0D  0E    10    12    14    16    18    1A    1C    1E    20    22    24        28    2A    2C        30    32    34    36      39  3A    3C    3E
+# $A0:D07F            dx 1000, A59E, 0014, 0028, 005C, 0028, A2, 00, 0000, 0000, A644, 0001, 0000, A759, 800F, 804C, 8041, 0000, 0000, 00000000, 804C, 0000, 00000000, 804C, 804C, 0000, ADB600, 02, F3C2, EC1C, 0000
+# $A0:D0BF            dx 0200, A59E, 0014, 0028, 0060, 0028, A2, 00, 0000, 0000, A6D2, 0001, 0000, 804C, 800F, 804C, 804C, 0000, 0000, 00000000, 804C, 0000, 00000000, 804C, 804C, 0000, ADB600, 02, F3C2, EC1C, 0000
+
+
+# landing site enemy set: A1883D
+## enemy set
+# ; Enemy population format is:
+# ;  ____________________________________ Enemy ID
+# ; |     _______________________________ X position
+# ; |    |     __________________________ Y position
+# ; |    |    |     _____________________ Initialisation parameter (orientation in SMILE)
+# ; |    |    |    |     ________________ Properties (special in SMILE)
+# ; |    |    |    |    |     ___________ Extra properties (special graphics bitset in SMILE)
+# ; |    |    |    |    |    |     ______ Parameter 1 (speed in SMILE)
+# ; |    |    |    |    |    |    |     _ Parameter 2 (speed2 in SMILE)
+# ; |    |    |    |    |    |    |    |
+# ; iiii xxxx yyyy oooo pppp gggg aaaa bbbb
+# 
+# ;  ______ Terminator
+# ; |     _ Number of enemy deaths needed to clear current room
+# ; |    |
+# ; FFFF nn
+# 
+# ; Room $91F8, state $9213: Enemy population
+# ; Room $91F8, state $922D: Enemy population
+# ; Room $91F8, state $9247: Enemy population
+# $A1:883D             dx D07F,0480,0478,0000,2400,0000,0000,0000,
+#                         D0BF,0480,0478,0000,2400,0000,0000,0000,
+#                         D0BF,0480,0478,0000,2400,0000,0000,0001,
+#                         FFFF, 00
+
+# ; Room $91F8, state $9261: Enemy population
+# $A1:8C0D             dx
+# D07F,0480,0478,0000,2400,0000,0000,0000, 
+# D0BF,0480,0478,0000,2400,0000,0000,0000, 
+# D0BF,0480,0478,0000,2400,0000,0000,0001, 
+# steam enemies during escape:
+# E1FF,0051,04AA,0000,2000,0000,0000,0000, 
+# E1FF,0080,04BC,0000,2000,0000,0000,0000, 
+# E1FF,00A1,04D0,0000,2000,0000,0000,0000, 
+# E1FF,00E5,04D7,0000,2000,0000,0000,0000, 
+# E1FF,015B,04D7,0000,2000,0000,0000,0000, 
+# E1FF,019D,04D5,0000,2000,0000,0000,0000, 
+# E1FF,01C0,04C9,0000,2000,0000,0000,0000, 
+# E1FF,0222,04C8,0000,2000,0000,0000,0000, 
+# E1FF,0243,04C4,0000,2000,0000,0000,0000, 
+# E1FF,027C,04CE,0000,2000,0000,0000,0000, 
+# E1FF,0317,04D7,0000,2000,0000,0000,0000, 
+# E1FF,033F,04C9,0000,2000,0000,0000,0000, 
+# E1FF,036C,04B6,0000,2000,0000,0000,0000, 
+# E1FF,0390,04A9,0000,2000,0000,0000,0000, 
+# E1FF,03D9,04B7,0000,2000,0000,0000,0000, 
+# E1FF,041A,04D9,0000,2000,0000,0000,0000, 
+# E1FF,049C,04D8,0000,2000,0000,0000,0000, 
+# E1FF,04F9,04CA,0000,2000,0000,0000,0000, 
+# E1FF,0525,04BB,0000,2000,0000,0000,0000, 
+# E1FF,0557,04C9,0000,2000,0000,0000,0000, 
+# E1FF,05C6,04D4,0000,2000,0000,0000,0000, 
+# E1FF,0624,04D4,0000,2000,0000,0000,0000, 
+# FFFF, 00
+
+
+
+## enemy GFX
+# ; Room $91F8, state $9213: Enemy set name
+# ; Room $91F8, state $922D: Enemy set name
+# ; Room $91F8, state $9247: Enemy set name
+# $B4:818C             db 73,66,31,5F,30,30,20 ; "sf1_00 "
+# 
+#
+# landing site Enemy Gfx: B48193
+# ; Room $91F8, state $9213: Enemy set
+# ; Room $91F8, state $922D: Enemy set
+# ; Room $91F8, state $9247: Enemy set
+#                         enemy id
+#                              palette
+# $B4:8193             dw D07F,0002,
+#                         D0BF,0007,
+#                         FFFF
+# $B4:819D             db 00
+
+# relié au champ palette de l'enemy gfx
+#  public enum EnemyGfxPalette
+#    None = 0x0000,
+#    P1 = 0x0001,
+#    P2 = 0x0002,
+#    P3 = 0x0003,
+#    P4 = 0x0007
+
+
+# 0x16b62e -> 0xadb62e: graphic
+#;;; $B600: Tiles - enemy $D0BF/$D07F (gunship) ;;;
+
+# 0x2142d3 -> 0xc2c2d3: level data
+#;;; $C2BB: Level data (compressed) ;;;
+#; Room $91F8: Landing site
+# $C2:C2BB -> $C2:D6E8 - 1
+
+# timed palette for glow:
+#    _,intro_ship_palette = samus.get_timed_palette("ship","intro")[0]
+#    intro_ship_555 = common.convert_to_555(intro_ship_palette)
+#    rom.write_to_snes_address(0x8CE689+2, intro_ship_555, "2"*0x0F)
+
+
+$81:8AC2 AE 90 05    LDX $0590  [$7E:0590]  ; X = [OAM stack pointer]
+$81:8AC5 18          CLC
+
+Y=AD83
+$81:8AC6 B9 00 00    LDA $0000,y[$A6:F923]  ;\
+A=C201
+$14 = 0080h (128)
+$81:8AC9 65 14       ADC $14    [$7E:0014]  ;} OAM entry X position = [[Y]] + [$14] (X position)
+A=C281
+$81:8ACB 9D 70 03    STA $0370,x[$7E:0370]  ;/
+
+$81:8ACE 29 00 01    AND #$0100             ;\
+
+$81:8AD1 F0 0E       BEQ $0E    [$8AE1]     ;} If [OAM entry X position] & 100h:
+# pas executé du coup quand a droite du milieu
+$81:8AD3 BF 9F 85 81 LDA $81859F,x[$81:85A7];\
+
+$81:8AD7 85 16       STA $16    [$7E:0016]  ;|
+
+$81:8AD9 B2 16       LDA ($16)  [$7E:0570]  ;} Set OAM entry high X position bit
+
+$81:8ADB 1F 9F 83 81 ORA $81839F,x[$81:83A7];|
+
+$81:8ADF 92 16       STA ($16)  [$7E:0570]  ;/
+
+A=0
+$81:8AE1 B9 00 00    LDA $0000,y[$A6:F923]  ;\
+A=C201
+$81:8AE4 10 0E       BPL $0E    [$8AF4]     ;} If [[Y]] & 8000h (size bit) != 0: (le bit le plus a gauche)
+c est le cas car sprite 16x16
+charge depuis ;;; $859F: Map of OAM index to high OAM address and corresponding bitmask ;;;
+X=0 # TODO::voir l'evolution de X depuis le debut de la boucle
+$81:8AE6 BF 9F 85 81 LDA $81859F,x[$81:859F];\
+A=0570 un adresse en rapport avec le hardware pour les OAM
+$81:8AEA 85 16       STA $16    [$7E:0016]  ;|
+$16=0570 memoire de travail
+$81:8AEC B2 16       LDA ($16)  [$7E:0570]  ;} Set OAM entry size bit
+A= la valeur en memoire a l adresse pointee par $16, donc la valeur en memoire a 0570, ici 0
+
+charge le size bit depuis ;;; $839F: Map of OAM index to high X position bit and size bit ;;;
+le size bit, ici X=0, du coup le bit vaut 2: dw 0001,0002
+$81:8AEE 1F A1 83 81 ORA $8183A1,x[$81:83A1];|
+A=2, 2 doit vouloir dire 16x16
+$81:8AF2 92 16       STA ($16)  [$7E:0570]  ;/
+dans l adresse OAM stocké dans $16 on stocke la taille du sprite
+
+Sets A to 8-bit mode
+$81:8AF4 E2 20       SEP #$20
+charge dans A le byte suivant de la sprite map
+$81:8AF6 B9 02 00    LDA $0002,y[$A6:F925]  ;\
+A=FE
+$81:8AF9 18          CLC                    ;|
+$12=60
+$81:8AFA 65 12       ADC $12    [$7E:0012]  ;} OAM entry Y position = [[Y] + 2] + [$12] (Y position)
+(0x60 + 0xFE) & 0xFF => 5E (94)
+X=0 stocke la position Y dans le byte pour la position Y du x-eme oam
+$81:8AFC 9D 71 03    STA $0371,x[$7E:0371]  ;/
+
+Sets A to 16-bit mode
+$81:8AFF C2 21       REP #$21
+
+tile number & attributes
+$81:8B01 B9 03 00    LDA $0003,y[$A6:F926]  ;\
+A=7F20
+$00=0000
+$81:8B04 65 00       ADC $00    [$7E:0000]  ;|
+A=7F20                          0b01111111 00100000
+$03=0E00 ($03     = palette bits of sprite (palette * 200h))
+mask pour les bits de la palette
+$03=0b00001110 00000000
+$81:8B06 05 03       ORA $03    [$7E:0003]  ;} OAM entry tile number and attributes = [[Y] + 3] + [$00] | [$03]
+0b01111111 00100000 (Y not flip, X flip, priority 3, palette 7), tile 20
+X=0 stocke le tile & attributes dans les deux bytes suivant pour le x-eme oam
+$81:8B08 9D 72 03    STA $0372,x[$7E:0372]  ;/
+
+next spritemap, 5 bytes per entries
+$81:8B0B 98          TYA                    ;\
+$81:8B0C 69 05 00    ADC #$0005             ;} Y += 5 (next sprite map entry)
+$81:8B0F A8          TAY                    ;/
+next low OAM, 4 bytes per entries
+$81:8B10 8A          TXA                    ;\
+$81:8B11 69 04 00    ADC #$0004             ;|
+$81:8B14 29 FF 01    AND #$01FF             ;} X = ([X] + 4) % 200h (next OAM index)
+$81:8B17 AA          TAX                    ;/
+
+$81:8B18 C6 18       DEC $18    [$7E:0018]  ; Decrement $18 (number of entries)
+$81:8B1A D0 AA       BNE $AA    [$8AC6]     ; If [$18] != 0: go to LOOP
+$81:8B1C 8E 90 05    STX $0590  [$7E:0590]  ; OAM stack pointer = [X]
+
+$81:8B1F 7A          PLY
+$81:8B20 6B          RTL
+
+
+
+
+
+
+$0370..058F: OAM (updated during NMI by $80:933A). 80h entries
+{
+    $0370..056F: Low OAM. 4 byte entries
+    {
+        v = xxxxxxxx yyyyyyyy YXPPpppttttttttt
+        x: X position (lower 8 bits)
+        y: Y position
+        t: Tile number
+        p: Palette
+        P: Priority
+        X: X flip
+        Y: Y flip
+    }
+    $0570..8F: High OAM. 2 bit entries
+    {
+        ddccbbsx
+        x: X position (upper 1 bit)
+        s: Size
+        b: sx for sprite 4n+1
+        c: sx for sprite 4n+2
+        d: sx for sprite 4n+3
+    }
+}
+
+
+# la palette dynamique pour ship outro (from sprite something):
+;;; $D6BA: Instruction list - palette FX object $E1E4 ;;;
+{
+$8D:D6BA             dx C655,00A0,  ; Palette FX object colour index = 00A0h
+                        0018,
+                            0000,7FFF,7FFF,7FFF,7FFF,7FFF,7FFF,7FFF,7FFF,7FFF,7FFF,7FFF,7FFF,7FFF,7FFF,7FFF,
+                            C595,       ; Done
+                        0018,
+                            0000,6F7B,6B7B,6B5A,6B5A,6B7B,6B7B,6B7B,6B5B,6F7A,6B7A,6B7A,6F7B,6F5A,6B5A,6B5B,
+                            C595,       ; Done
+                        0018,
+                            0000,5F18,5AF8,5AD6,5AD6,5B18,5AF7,5AF7,5AD7,5F16,5AF6,5AF6,5EF7,5ED6,5AD6,5AD7,
+                            C595,       ; Done
+                        0018,
+                            0000,4EB5,4694,4652,4631,4A94,4674,4673,4653,4EB1,4A71,4A71,4E73,4E52,4A52,4A33,
+                            C595,       ; Done
+                        0018,
+                            0000,4231,3611,35CE,35AD,3631,3610,35F0,35CF,3E2D,3A0D,35ED,41EF,3DCE,39AD,35AF,
+                            C595,       ; Done
+                        0018,
+                            0000,31CE,21AD,214A,2108,25AD,218D,216C,214B,2DC8,2988,2568,316B,2D4A,2929,250B,
+                            C595,       ; Done
+                        0018,
+                            0000,216B,112A,10C6,1084,154A,1109,10E8,10C7,1D64,1904,14E4,20E7,1CC6,18A5,1487,
+                            C595,       ; Done
+                        0018,
+                            0000,1508,00C7,0042,0000,04E7,00A6,0085,0043,1100,08A0,0460,1484,0C42,0821,0404,
+                            C595,       ; Done
+                        0018,
+                            0000,1508,00C7,0042,0000,04E7,00A6,0085,0043,1100,08A0,0460,1484,0C42,0821,0000,
+                            C595,       ; Done
+                        0018,
+                            0000,1D6B,010A,0063,0000,094A,00E8,00C7,0064,1560,0CE0,0880,1CC6,1063,0C42,0000,
+                            C595,       ; Done
+                        0018,
+                            0000,25CE,014C,0064,0000,098C,012B,00E9,0086,1DE0,1120,08C0,24E7,1884,1042,0000,
+                            C595,       ; Done
+                        0018,
+                            0000,2E31,018F,0085,0000,0DEF,016D,012B,00A7,2240,1560,0CE0,2D29,1CA5,1463,0000,
+                            C595,       ; Done
+                        0018,
+                            0000,3295,05F1,00A7,0000,0E32,01AF,014C,00E9,2AA0,19C0,0D00,314A,20C6,1463,0000,
+                            C595,       ; Done
+                        0018,
+                            0000,3AF8,0634,00C8,0000,1295,01F1,018E,010A,2F00,1E00,1120,398C,24E7,1884,0000,
+                            C595,       ; Done
+                        0018,
+                            0000,435B,0676,00C9,0000,12D7,0234,01B0,012C,3780,2240,1160,41AD,2D08,1C84,0000,
+                            C595,       ; Done
+                        0018,
+                            0000,4BBE,06B9,00EA,0000,173A,0276,01F2,014D,3BE0,2680,1580,49EF,3129,20A5,0000,
+                            C595,       ; Done
+                        C5CF        ; Delete
+}
+
+
+
+# decompression des tiles & tilemaps pour le ship mode7
+$8B:D57C A9 00 95    LDA #$9500             ;\
+$8B:D57F 85 48       STA $48    [$7E:0048]  ;|
+$8B:D581 A9 2F A8    LDA #$A82F             ;|
+$8B:D584 85 47       STA $47    [$7E:0047]  ;} Decompress gunship/Ceres tiles to $7F:0000 from 95A82F
+$8B:D586 22 FF B0 80 JSL $80B0FF[$80:B0FF]  ;|
+$8B:D58A             db 7F0000              ;/
+$8B:D58D A9 00 96    LDA #$9600             ;\
+$8B:D590 85 48       STA $48    [$7E:0048]  ;|
+$8B:D592 A9 69 FE    LDA #$FE69             ;|
+$8B:D595 85 47       STA $47    [$7E:0047]  ;} Decompress gunship/Ceres tilemap to $7F:4000 from 96FE69
+$8B:D597 22 FF B0 80 JSL $80B0FF[$80:B0FF]  ;|
+$8B:D59B             db 7F4000              ;/
+
+
+# dans les tiles du ship mode 7, la face avant est sur ces cases, soit 68 8x8 tiles disponibles:
+.XXXXXXXX.XXXXXX
+XXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXX
+XXXXXXXX.XXXXXXX
+XXXX............
+XXX.............
+
+# les tiles du vaisseau ont leur palette sur la 6eme ligne des palettes mode7, du coup faut ajouter 0x50 aux pixels
+
+
+# tilemap vanilla (chaque ligne fait 128 bytes, les 14 premiers de chaque ligne sont pour le face avant du ship)
+# 8c est la tile vide
+# on a 14x6 = 84 tiles de 8x8 pixels
+8c 8c 8c 01 02 03 04 05  06 07 08 8c 8c 8c
+8c 8c 10 11 12 13 14 15  16 17 18 19 8c 8c
+0a 0b 0c 0d 0e 0f 20 21  22 23 24 25 26 27
+1a 1b 1c 1d 1e 1f 30 31  32 33 34 35 36 37
+8c 28 29 2a 2b 2c 2d 2e  2f 40 41 42 43 8c
+8c 8c 39 3a 3b 3c 3d 3e  3f 50 51 52 8c 8c

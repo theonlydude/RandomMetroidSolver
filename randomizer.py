@@ -8,7 +8,7 @@ from rom.PaletteRando import PaletteRando
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
 from utils.parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text, appDir
 from rom.rom_patches import RomPatches
-from rom.rompatcher import RomPatcher
+from rom.rompatcher import RomPatcher, MusicPatcher, RomTypeForMusic
 from rom.rom import FakeROM
 from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir
 from utils.version import displayedVersion
@@ -137,7 +137,8 @@ if __name__ == "__main__":
                                  'spinjumprestart.ips', 'rando_speed.ips', 'No_Music', 'AimAnyButton.ips',
                                  'max_ammo_display.ips', 'supermetroid_msu1.ips', 'Infinite_Space_Jump',
                                  'refill_before_save.ips', 'remove_elevators_doors_speed.ips',
-                                 'remove_itemsounds.ips', 'vanilla_music.ips'])
+                                 'remove_itemsounds.ips', 'vanilla_music.ips', 'custom_ship.ips',
+                                 'Ship_Takeoff_Disable_Hide_Samus'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -171,7 +172,7 @@ if __name__ == "__main__":
     parser.add_argument('--scavNumLocs',
                         help="For Scavenger split, number of major locations in the mandatory route",
                         dest='scavNumLocs', nargs='?', default=10,
-                        choices=["0"]+[str(i) for i in range(4,17)])
+                        choices=["0"]+[str(i) for i in range(4,18)])
     parser.add_argument('--scavRandomized',
                         help="For Scavenger split, decide whether mandatory major locs will have non-vanilla items",
                         dest='scavRandomized', nargs='?', const=True, default=False)
@@ -230,7 +231,7 @@ if __name__ == "__main__":
     parser.add_argument('--runtime',
                         help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit. Default is 30.",
                         dest='runtimeLimit_s', nargs='?', default=30, type=int)
-    parser.add_argument('--race', help="Race mode magic number, between 1 and 65535", dest='raceMagic',
+    parser.add_argument('--race', help="Race mode magic number", dest='raceMagic',
                         type=int)
     parser.add_argument('--vcr', help="Generate VCR output file", dest='vcr', action='store_true')
     parser.add_argument('--palette', help="Randomize the palettes", dest='palette', action='store_true')
@@ -281,6 +282,9 @@ if __name__ == "__main__":
     parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="varia", choices=["varia", "rotation"])
     parser.add_argument('--hud', help='Enable VARIA hud', dest='hud',
                         nargs='?', const=True, default=False)
+    parser.add_argument('--music',
+                        help="JSON file for music replacement mapping",
+                        dest='music', nargs='?', default=None)
     # parse args
     args = parser.parse_args()
 
@@ -343,9 +347,6 @@ if __name__ == "__main__":
 
     seed4rand = seed
     if args.raceMagic is not None:
-        if args.raceMagic <= 0 or args.raceMagic >= 0x10000:
-            print("Invalid magic")
-            sys.exit(-1)
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
     # if no max diff, set it very high
@@ -386,12 +387,13 @@ if __name__ == "__main__":
         minDifficulty = 0
 
     if args.area == True and args.bosses == True and args.minimizerN is not None:
-        forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full", altValue='FullWithHUD')
         if args.minimizerN == "random":
             minimizerN = random.randint(30, 60)
             logger.debug("minimizerN: {}".format(minimizerN))
         else:
             minimizerN = int(args.minimizerN)
+        if minimizerN < 100:
+            forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full. Use 100 locations on your minimizer to use a non-Full split.", altValue='FullWithHUD')
     else:
         minimizerN = None
     areaRandom = False
@@ -653,7 +655,7 @@ if __name__ == "__main__":
             if not stuck or args.vcr == True:
                 doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
                                                       args.area, args.bosses,
-                                                      args.escapeRando)
+                                                      args.escapeRando if not stuck else False)
                 escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
                 if escapeAttr is not None:
                     escapeAttr['patches'] = []
@@ -661,6 +663,8 @@ if __name__ == "__main__":
                         escapeAttr['patches'].append("Escape_Rando_Enable_Enemies")
                     if args.majorsSplit == "Scavenger" and args.scavEscape == True:
                         escapeAttr['patches'].append('Escape_Scavenger')
+                if args.majorsSplit == 'Scavenger' and any(il for il in progItemLocs if il.Location.Name == "Ridley"):
+                    args.patches.append("Blinking[RidleyRoomIn]")
         except Exception as e:
             import traceback
             traceback.print_exc(file=sys.stdout)
@@ -727,9 +731,35 @@ if __name__ == "__main__":
         else:
             outFileName = args.output
             romPatcher = RomPatcher(magic=args.raceMagic)
-
+        musicPatcher = None
+        if args.music is not None:
+            args.patches.append('custom_music.ips')
+            romType = 0
+            with open(args.music, "r") as f:
+                music = json.load(f)
+            musicParams = music.get('params', {})
+            musicMapping = music.get('mapping', {})
+            if args.patchOnly == False:
+                romType |= RomTypeForMusic.VariaSeed
+                if args.area == True:
+                    romType |= RomTypeForMusic.AreaSeed
+                if args.bosses == True:
+                    romType |= RomTypeForMusic.BossSeed
+            else:
+                variaSeed = musicParams.get('varia', False)
+                areaSeed = musicParams.get('area', False)
+                bossSeed = musicParams.get('boss', False)
+                if variaSeed == True:
+                    romType |= RomTypeForMusic.VariaSeed
+                if areaSeed == True:
+                    romType |= RomTypeForMusic.AreaSeed
+                if bossSeed == True:
+                    romType |= RomTypeForMusic.BossSeed
+            musicPatcher = MusicPatcher(romPatcher.romFile, romType)
         if args.hud == True or args.majorsSplit == "FullWithHUD":
             args.patches.append("varia_hud.ips")
+        if args.debug == True:
+            args.patches.append("Disable_Clear_Save_Boot")
         if args.patchOnly == False:
             romPatcher.applyIPSPatches(args.startLocation, args.patches,
                                        args.noLayout, gravityBehaviour,
@@ -744,7 +774,8 @@ if __name__ == "__main__":
 
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:
-            romPatcher.customSprite(args.sprite, args.customItemNames, args.noSpinAttack) # adds another IPS
+            purge = args.ship is not None
+            romPatcher.customSprite(args.sprite, args.customItemNames, args.noSpinAttack, purge) # adds another IPS
         if args.ship is not None:
             romPatcher.customShip(args.ship) # adds another IPS
             # don't color randomize custom ships
@@ -792,6 +823,10 @@ if __name__ == "__main__":
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)
             PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
+        if musicPatcher is not None:
+            musicPatcher.replace(musicMapping,
+                                 updateRoomStates=musicParams.get('room_states', True),
+                                 output=musicParams.get("output", None))
         # web mode, generate only one ips at the end
         if args.rom == None:
             romPatcher.commitIPS()

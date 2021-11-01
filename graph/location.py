@@ -445,12 +445,14 @@ define_location(
     GraphArea="LowerNorfair",
     SolveArea="Ridley Boss",
     Name="Ridley",
-    Class=["Boss"],
+    Class=["Boss", "Scavenger"],
     CanHidden=False,
     Address=0xB055B056,
-    Id=None,
+    Id=0xaa,
     Visibility="Hidden",
     Room="Ridley's Room",
+    VanillaItemType="Ridley",
+    HUD=16
 ),
     "Energy Tank, Ridley":
 define_location(

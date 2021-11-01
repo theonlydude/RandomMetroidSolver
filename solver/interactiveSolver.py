@@ -155,6 +155,8 @@ class InteractiveSolver(CommonSolver):
                     self.replaceItemAt(params['loc'], params['item'], params['hide'])
                 elif action == 'toggle':
                     self.toggleItem(params['item'])
+                elif action == 'upload_scav':
+                    self.updatePlandoScavengerOrder(params['plandoScavengerOrder'])
         elif scope == 'area':
             if action == 'clear':
                 self.clearTransitions()
@@ -335,9 +337,9 @@ class InteractiveSolver(CommonSolver):
 
         plandoCurrentJson = json.dumps(plandoCurrent)
 
-        pythonExec = "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
+        from utils.utils import getPythonExec
         params = [
-            pythonExec,  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
+            getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
             '--runtime', '10',
             '--param', self.presetFileName,
             '--output', self.outputFileName,
@@ -380,6 +382,7 @@ class InteractiveSolver(CommonSolver):
 
     def savePlando(self, lock, escapeTimer):
         # store filled locations addresses in the ROM for next creating session
+        errorMsg = ""
         from rando.Items import ItemManager
         locsItems = {}
         itemLocs = []
@@ -398,14 +401,14 @@ class InteractiveSolver(CommonSolver):
             magic = random.randint(1, 0xffff)
         else:
             magic = None
-        romPatcher = RomPatcher(magic=magic, plando=True)
+        romPatcher = RomPatcher(magic=magic)
         patches = ['credits_varia.ips', 'tracking.ips', "Escape_Animals_Disable"]
         if DoorsManager.isRandom():
             patches += RomPatcher.IPSPatches['DoorsColors']
             patches.append("Enable_Backup_Saves")
         if magic != None:
             patches.insert(0, 'race_mode.ips')
-            patches.append('race_mode_credits.ips')
+            patches.append('race_mode_post.ips')
         romPatcher.addIPSPatches(patches)
 
         plms = []
@@ -429,9 +432,18 @@ class InteractiveSolver(CommonSolver):
         romPatcher.writeSpoiler(itemLocs)
         # plando is considered Full
         majorsSplit = self.masterMajorsSplit if self.masterMajorsSplit in ["FullWithHUD", "Scavenger"] else "Full"
-        # for scavenger hunt, use a location with id and hud at 0xff, ie. scavenger locs list terminator
-        dummyLocation = define_location(Area="", GraphArea="", SolveArea="", Name="", Address=0, Id=0xff, Class=[], CanHidden=False, Visibility="", Room='', HUD=0xff)
-        romPatcher.writeSplitLocs(majorsSplit, itemLocs, [ItemLocation(Location=dummyLocation)])
+
+        progItemLocs = []
+        if majorsSplit == "Scavenger":
+            def getLoc(locName):
+                for loc in self.locations:
+                    if loc.Name == locName:
+                        return loc
+            for locName in self.plandoScavengerOrder:
+                progItemLocs.append(ItemLocation(Location=getLoc(locName)))
+                if locName not in locsItems:
+                    errorMsg = "Nothing at a Scavenger location, seed is unfinishable"
+        romPatcher.writeSplitLocs(majorsSplit, itemLocs, progItemLocs)
         romPatcher.writeMajorsSplit(majorsSplit)
         class FakeRandoSettings:
             def __init__(self):
@@ -463,7 +475,7 @@ class InteractiveSolver(CommonSolver):
         fileName = 'VARIA_Plandomizer_{}{}_{}.sfc'.format(seedCode, strftime("%Y%m%d%H%M%S", gmtime()), preset)
         data["fileName"] = fileName
         # error msg in json to be displayed by the web site
-        data["errorMsg"] = ""
+        data["errorMsg"] = errorMsg
         with open(self.outputFileName, 'w') as jsonFile:
             json.dump(data, jsonFile)
 
@@ -586,6 +598,9 @@ class InteractiveSolver(CommonSolver):
             for loc in self.majorLocations:
                 loc.difficulty = None
         self.smbm.resetItems()
+
+    def updatePlandoScavengerOrder(self, plandoScavengerOrder):
+        self.plandoScavengerOrder = plandoScavengerOrder
 
     def addTransition(self, startPoint, endPoint):
         # already check in controller if transition is valid for seed
@@ -915,6 +930,9 @@ class InteractiveSolver(CommonSolver):
     def importDump(self, dumpFileName):
         with open(dumpFileName, 'r') as jsonFile:
             dumpData = json.load(jsonFile)
+
+        # first update current access point
+        self.lastAP = dumpData["newAP"]
 
         dataEnum = {
             "state": '1',

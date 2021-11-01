@@ -357,7 +357,7 @@ function randomize(evt, elemId) {
       e.style.display = "none";
       multi.style.display = "block";
       // chosen must be activated when it's visible, else it doesn't work...
-      $("#"+elemId+"MultiSelect").chosen();
+      $("#"+elemId+"MultiSelect").chosen({ width: '100%' });
     } else {
       e.style.display = "block";
       multi.style.display = "none";
@@ -812,6 +812,10 @@ function loadTip(first = true) {
     myTimer = setTimeout(loadTip, 10000, false);
 }
 
+function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
 var vanillaROMStored = false;
 var vanillaROM = null;
 window.onload = function(){
@@ -1136,10 +1140,13 @@ window.onload = function(){
 
     setRandom();
 
-    $("#preset").chosen();
-    $("#randoPreset").chosen();
+    $("#preset").chosen({ width: '100%' });
+    $("#randoPreset").chosen({ width: '100%' });
     resizeChosen();
-    loadTip();
+    if(! isMobileDevice()) {
+        // on a mobile device tips take all the screen width, so remove them
+        loadTip();
+    }
 
     // check if a vanilla ROM is already in local storage
     localforage.getItem('vanillaROM', function(err, value) {
@@ -1414,7 +1421,7 @@ Tournament presets:\
 <li>Full Countdown: Randomize like Full and display in the HUD the number of remaining unique upgrades (everything but energy and ammo) in the current area. See \"VARIA HUD\" comfort patch help in the advanced tab for more information about it.</li>\
 <li>Majors/Minors: Use major (unique upgrades and energy) and minor (ammo) item pools.</p><p><b>Note:</b> High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.</li>\
 <li>Chozo: Put all unique upgrades as well as minimal ammo/energy to finish the seed in the Chozo locations. These are Chozo statues, Morph Ball and boss item locations (Right Super in Wrecked Ship, Varia Suit, Ridley ETank). Depending on progression speed and item distribution settings, you will be able to 'sequence break' by going to other locations as well.</li>\
-<li>Scavenger: You must visit a given number of locations in a mandatory order in a scavenger hunt, and collect items there. The scavenger locations are the 16 locations where a unique upgrade is in the vanilla game. By default items in the mandatory locations will be vanilla. Other unique upgrades will be randomized between the remaining scavenger locations. By default, you will have to collect all items in the mandatory locations to access Tourian (on top of killing the Golden 4 bosses). You can also choose to trigger the escape immediately after the hunt is over.<br/>The next mandatory location will be displayed in the HUD, and the whole route will be displayed in the HUD during pause (see \"VARIA HUD\" comfort patch help in the advanced tab for more information).</li></ul></p>\
+<li>Scavenger: You must visit a given number of locations in a mandatory order in a scavenger hunt, and collect items there. The scavenger locations are the 16 locations where a unique upgrade is in the vanilla game, plus Ridley. By default items in the mandatory locations will be vanilla. Other unique upgrades will be randomized between the remaining scavenger locations. By default, you will have to collect all items in the mandatory locations to access Tourian (on top of killing the Golden 4 bosses). You can also choose to trigger the escape immediately after the hunt is over.<br/>The next mandatory location will be displayed in the HUD, and the whole route will be displayed in the HUD during pause (see \"VARIA HUD\" comfort patch help in the advanced tab for more information).</li></ul></p>\
 <p>Check the map for the list of Majors and Chozo locations and items:<br/><a href=\"/solver/static/images/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"chozoThumb\" src=\"/solver/static/images/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p>\
 <p>Using a non-standard or randomized start location and any other split than 'Full' will enable the VARIA HUD, as Major/Chozo locations are slightly modified depending on the start location.</p>\
 <p>Click on the dice button to randomly set this parameter.</p>"
@@ -1422,7 +1429,7 @@ Tournament presets:\
     {
       element: "#scavNumLocsStep",
         title: "Mandatory locations to visit",
-      content: "You can choose between 4 and 16 major locations to be included in the scavenger hunt, 10 being the default.<br/>Click on the dice button to randomize the quantity of major locations."
+      content: "You can choose between 4 and 17 major locations to be included in the scavenger hunt, 10 being the default.<br/>Ridley is a scavenger hunt location.<br/>Click on the dice button to randomize the quantity of major locations."
     },
     {
       element: "#scavRandomizedStep",
@@ -1954,7 +1961,7 @@ def displayMultiSelect(id, selectedValues, default, multipleValues):
   displaySelect(id, multipleValues, default)
 
   response.write("<div id=\"{}MultiSelectDiv\" style=\"display:none\">".format(id), escape=False)
-  response.write("<select id=\"{}MultiSelect\" class=\"filldropdown chzn-select\" multiple>".format(id), escape=False)
+  response.write("<select id=\"{}MultiSelect\" class=\"chzn-select\" multiple>".format(id), escape=False)
   for value in multipleValues:
     displayValue = displayNames.get(value, value)
     if value in selectedValues:
@@ -2045,7 +2052,7 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td>Settings Preset:</td>
                 <td>
-                  <select class="filldropdown chzn-select" id="randoPreset" name="randoPreset" onchange="loadRandoPreset()">
+                  <select class="chzn-select" id="randoPreset" name="randoPreset" onchange="loadRandoPreset()">
                     <optgroup label="Standard presets">
 {{
   for preset in randoPresets:
@@ -2087,7 +2094,7 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td class="small"></td>
                 <td>Skills Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a><span></td><!-- ' -->
-                <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
+                <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="chzn-select"))}}</td>
                 <td id="presetStep"><button type="button" onclick="startTheTour(5)">?</button></td>
               </tr>
               <tr>
@@ -2108,7 +2115,7 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td class="small"><div class="random"><button id="scavNumLocsRandom" type="button" onclick="randomize(event, 'scavNumLocs')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td id="scavNumLocsStep"><span id="scavNumLocsText">Mandatory locations to visit:</span></td>
-                <td>{{displayNumber("scavNumLocs", "4", "16", "10", "1")}}</td>
+                <td>{{displayNumber("scavNumLocs", "4", "17", "10", "1")}}</td>
                 <td><button type="button" onclick="startTheTour(8)">?</button></td>
                 <td id="scavRandomizedStep">{{displayCheckbox("scavRandomized")}}Randomize items in mandatory locations</td>
                 <td><button type="button" onclick="startTheTour(9)">?</button></td>

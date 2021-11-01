@@ -9,6 +9,24 @@
 <style>
 {{include 'solver_web/t_style.html'}}
 
+.switchInventory {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 5%;
+    top: 5.2%;
+    left: 1.5%;
+}
+.switchMap {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 5%;
+    top: 0%;
+    left: 18.75%;
+}
 .help {
     cursor: pointer;
     position: absolute;
@@ -113,6 +131,28 @@
     z-index: 5;
     display: none;
 }
+#rtaTimerDiv {
+    position: absolute;
+    top: 2.5%;
+    border: 2px solid white;
+    background-color: #000;
+    z-index: 2;
+    display: none;
+}
+.rtaTimerClassic {
+    left: 48.5%;
+}
+.rtaTimerStream {
+    left: 22.5%;
+}
+#rtaTimer {
+    text-align: center;
+    font-family: 'Courier New (monospace)';
+    font-size: 1.5vw;
+    background-color: black;
+    color: white;
+    margin: 0em;
+}
 </style>
 
 <script type="text/javascript">
@@ -198,6 +238,69 @@ var debug = false;
 function onloadHook() {
 }
 
+var inventory = "menu";
+function switchStreamingInventory() {
+    // prevent when seedless mode
+    if(loaded == false || init == false || mode == "seedless" || mode == "race") {
+        return;
+    }
+    var menu = document.getElementById("inventory_screen")
+    var streaming = document.getElementById("inventory_streaming")
+    if(inventory == "menu") {
+        inventory = "streaming";
+        menu.style.display = "none";
+        streaming.style.display = "block";
+    } else {
+        inventory = "menu";
+        menu.style.display = "block";
+        streaming.style.display = "none";
+    }
+}
+
+function switchStreamingMap() {
+    if(loaded == false || init == false) {
+        return;
+    }
+
+    // remove border of already selected AP
+    $(".addBorder").removeClass("addBorder");
+
+    var classicMap = document.getElementById("classic_map");
+    var streamMap = document.getElementById("stream_map");
+    var RTA = document.getElementById("rtaTimerDiv");
+    if(linePrefix == "s") {
+        linePrefix = "";
+        classicMap.style.display = "block";
+        streamMap.style.display = "none";
+        $("#rtaTimerDiv").removeClass("rtaTimerStream");
+        $("#rtaTimerDiv").addClass("rtaTimerClassic");
+    } else {
+        linePrefix = "s";
+        classicMap.style.display = "none";
+        streamMap.style.display = "block";
+        $("#rtaTimerDiv").removeClass("rtaTimerClassic");
+        $("#rtaTimerDiv").addClass("rtaTimerStream");
+    }
+    // reset lines
+    switchLines();
+    firstClick = "";
+}
+
+function switchLines() {
+    // loop on leader lines and remove/create them
+    currentLines = [];
+    for(var startPoint in lines) {
+        var endPoint = lines[startPoint];
+        removeLine(startPoint, endPoint);
+        currentLines.push([startPoint, endPoint]);
+    }
+
+    for(var i=0; i < currentLines.length; i++) {
+        var startPoint = currentLines[i][0];
+        var endPoint = currentLines[i][1];
+        addLine(startPoint, endPoint);
+    }
+}
 
 // auto tracker
 var socket;
@@ -213,6 +316,12 @@ var retryTimeout;
 var timeout;
 // timeout duration in ms
 var waitingTime = 1000;
+// timeout to increment RTA
+var incrRTA;
+// time when the timeout has been set
+var incrRTAstart = 0;
+var rawTimeFrames = 0;
+var RTAwaitingTime = 50;
 
 // first you open the socket,
 // then you list the available devices,
@@ -260,6 +369,14 @@ var dataEnum = {
 // 1. state:
 // $0998: Game state
 // $05D1: Debug. Debug mode. Set to [$80:8004] during boot / soft reset
+// in-game timer:
+// $05B8: NMI counter (RTA timer)
+// $05BA: Lag counter (RTA timer)
+// SRAM timer after game's end:
+// define current_save_slot    $7e0952
+// define stats_sram_slot0     $701400
+// define stats_sram_slot1     $701700
+// define stats_sram_slot2     $701a00
 
 // 2. map:
 // used for area/boss transitions - doors - nothing
@@ -288,7 +405,12 @@ var dataEnum = {
 //     4: Area torizo (Bomb Torizo, Golden Torizo)
 var dataToAsk = {
     1: [{"address": "F50998", "size": 0x2},
-        {"address": "F505D1", "size": 0x2}],
+        {"address": "F505D1", "size": 0x2},
+        {"address": "F505B8", "size": 0x4},
+        {"address": "F50952", "size": 0x2},
+        {"address": "E01400", "size": 0x4},
+        {"address": "E01700", "size": 0x4},
+        {"address": "E01A00", "size": 0x4}],
     2: [{"address": "F5CD52", "size": 0x500}],
     3: [{"address": "F507F7", "size": 0x100}],
     4: [{"address": "F50AF6", "size": 0x2},
@@ -301,6 +423,16 @@ var dataToAsk = {
 var dataToAskChain = [];
 // the current position in the chain
 var dataToAskStep = 0;
+
+// state
+var stateDataEnum = {
+    "state": 0,
+    "debug": 2,
+    "rta1": 4,
+    "rta2": 6,
+    "saveSlot": 8,
+    "sramStats": 0xa
+}
 
 // maps
 var mapOffsetEnum = {
@@ -361,6 +493,14 @@ var itemsBitMasks = {
     0x13: 0xFF
 }
 
+// aps grapharea
+var apsGraphArea = { {{
+    response.write(", ".join(["'{}': '{}'".format(str(ap), str(grapharea)) for ap, grapharea in apsGraphArea.items()]), escape=False)
+}} };
+
+// for rooms with multiple APs
+var multipleAPs = 'MULTI';
+
 // rooms positions on the map
 var rooms = {
     '91f8': {'name': 'Landing Site', 'top': 3.06, 'left': 35.16},
@@ -368,18 +508,18 @@ var rooms = {
     '92fd': {'name': 'Parlor and Alcatraz', 'top': 11.09, 'left': 30.31},
     '93aa': {'name': 'Crateria Power Bomb Room', 'top': 4.96, 'left': 43.66},
     '93d5': {'name': '[Parlor Save Room]', 'top': 14.99, 'left': 30.31},
-    '93fe': {'name': 'West Ocean', 'top': 3.48, 'left': 61.30},
+    '93fe': {'name': 'West Ocean', 'top': 3.48, 'left': 61.30, 'graphArea': 'WreckedShip', 'nearestAP': 'westOceanLeft'},
     '9461': {'name': 'Bowling Alley Path', 'top': 7.39, 'left': 64.10},
-    '948c': {'name': 'Crateria Keyhunter Room', 'top': 11.09, 'left': 44.67},
+    '948c': {'name': 'Crateria Keyhunter Room', 'top': 11.09, 'left': 44.67, 'graphArea': 'Crateria', 'nearestAP': 'keyhunterRoomBottom'},
     '94cc': {'name': '[Elevator to Maridia]', 'top': 25.66, 'left': 91.24},
     // top: 11.51%, but room starts 4 screens before on Y: -> 3.35
     '94fd': {'name': 'East Ocean', 'top': 3.35, 'left': 78.41},
     '9552': {'name': 'Forgotten Highway Kago Room', 'top': 11.51, 'left': 85.01},
-    '957d': {'name': 'Crab Maze', 'top': 19.64, 'left': 82.26},
-    '95a8': {'name': '[Crab Maze to Elevator]', 'top': 23.65, 'left': 91.18},
+    '957d': {'name': 'Crab Maze', 'top': 19.64, 'left': 82.26, 'graphArea': 'WreckedShip', 'nearestAP': 'crabMazeLeft'},
+    '95a8': {'name': '[Crab Maze to Elevator]', 'top': 23.65, 'left': 91.18, 'graphArea': 'EastMaridia', 'nearestAP': 'leCoudeRight'},
     '95d4': {'name': 'Crateria Tube', 'top': 11.09, 'left': 43.61},
-    '95ff': {'name': 'The Moat', 'top': 11.09, 'left': 47.52},
-    '962a': {'name': '[Elevator to Red Brinstar]', 'top': 29.67, 'left': 56.07},
+    '95ff': {'name': 'The Moat', 'top': 11.09, 'left': 47.52, 'graphArea': 'Crateria', 'nearestAP': 'moatRight'},
+    '962a': {'name': '[Elevator to Red Brinstar]', 'top': 29.67, 'left': 56.07, 'graphArea': 'RedBrinstar', 'nearestAP': 'redBrinstarElevator'},
     '965b': {'name': 'Gauntlet Energy Tank Room', 'top': 7.07, 'left': 24.66},
     '968f': {'name': '[West Ocean Geemer Corridor]', 'top': 7.39, 'left': 66},
     '96ba': {'name': 'Climb', 'top': 21.12, 'left': 30.31},
@@ -389,10 +529,10 @@ var rooms = {
     '9879': {'name': 'Flyway', 'top': 14.99, 'left': 34.11},
     '98e2': {'name': 'Pre-Map Flyway', 'top': 17, 'left': 32.26},
     '990d': {'name': 'Terminator Room', 'top': 11.09, 'left': 24.71},
-    '9938': {'name': '[Elevator to Green Brinstar]', 'top': 39.92, 'left': 4.22},
-    '9969': {'name': 'Lower Mushrooms', 'top': 19.11, 'left': 20.01},
+    '9938': {'name': '[Elevator to Green Brinstar]', 'top': 39.92, 'left': 4.22, 'graphArea': 'GreenPinkBrinstar', 'nearestAP': 'greenBrinstarElevator'},
+    '9969': {'name': 'Lower Mushrooms', 'top': 19.11, 'left': 20.01, 'graphArea': 'Crateria', 'nearestAP': 'lowerMushroomsLeft'},
     '9994': {'name': 'Crateria Map Room', 'top': 17, 'left': 35.06},
-    '99bd': {'name': 'Green Pirates Shaft', 'top': 7.07, 'left': 23.65},
+    '99bd': {'name': 'Green Pirates Shaft', 'top': 7.07, 'left': 23.65, 'graphArea': 'Crateria', 'nearestAP': 'greenPiratesShaftBottomRight'},
     '99f9': {'name': 'Crateria Super Room', 'top': 21.12, 'left': 33.21},
     '9a44': {'name': 'Final Missile Bombway', 'top': 17, 'left': 29.41},
     '9a90': {'name': 'The Final Missile', 'top': 17, 'left': 28.41},
@@ -409,11 +549,11 @@ var rooms = {
     '9d9c': {'name': 'Spore Spawn Keyhunter Room', 'top': 57.44, 'left': 13.83},
     '9dc7': {'name': 'Spore Spawn Room', 'top': 51.32, 'left': 16.63},
     '9e11': {'name': 'Pink Brinstar Power Bomb Room', 'top': 63.57, 'left': 10.03},
-    '9e52': {'name': 'Green Hill Zone', 'top': 69.69, 'left': 13.89},
-    '9e9f': {'name': 'Morph Ball Room', 'top': 61.79, 'left': 30.33},
+    '9e52': {'name': 'Green Hill Zone', 'top': 69.69, 'left': 13.89, 'graphArea': 'GreenPinkBrinstar', 'nearestAP': 'greenHillZoneTopRight'},
+    '9e9f': {'name': 'Morph Ball Room', 'top': 61.79, 'left': 30.33, 'graphArea': 'Crateria', 'nearestAP': 'morphBallRoomLeft'},
     '9f11': {'name': 'Construction Zone', 'top': 65.89, 'left': 37.91},
     '9f64': {'name': 'Blue Brinstar Energy Tank Room', 'top': 61.79, 'left': 38.91},
-    '9fba': {'name': 'Noob Bridge', 'top': 75.71, 'left': 21.49},
+    '9fba': {'name': 'Noob Bridge', 'top': 75.71, 'left': 21.49, 'graphArea': 'GreenPinkBrinstar', 'nearestAP': 'noobBridgeRight'},
     '9fe5': {'name': 'Green Brinstar Beetom Room', 'top': 69.8, 'left': 3.33},
     'a011': {'name': 'Etecoon Energy Tank Room', 'top': 69.8, 'left': 1.53},
     'a051': {'name': 'Etecoon Super Room', 'top': 69.66, 'left': 0.26},
@@ -428,27 +568,29 @@ var rooms = {
     'a1d8': {'name': 'Blue Brinstar Double Missile Room', 'top': 61.77, 'left': 37.91},
     'a201': {'name': '[Green Brinstar Main Shaft Save Room]', 'top': 59.56, 'left': 3.33},
     'a22a': {'name': '[Etecoon Save Room]', 'top': 71.7, 'left': 0.48},
-    'a253': {'name': 'Red Tower', 'top': 42.45, 'left': 52.27},
+    'a253': {'name': 'Red Tower', 'top': 42.45, 'left': 52.27, 'graphArea': 'RedBrinstar', 'nearestAP': 'redTowerTopLeft'},
     'a293': {'name': 'Red Brinstar Fireflea Room', 'top': 54.59, 'left': 44.72},
     'a2ce': {'name': 'X-Ray Scope Room', 'top': 54.59, 'left': 42.71},
     'a2f7': {'name': 'Hellway', 'top': 42.45, 'left': 53.22},
-    'a322': {'name': 'Caterpillar Room', 'top': 32.43, 'left': 56.07},
+    'a322': {'name': 'Caterpillar Room', 'top': 32.43, 'left': 56.07, 'graphArea': 'RedBrinstar', 'nearestAP': 'caterpillarRoomTopRight'},
     'a37c': {'name': 'Beta Power Bomb Room', 'top': 38.44, 'left': 54.17},
     'a3ae': {'name': 'Alpha Power Bomb Room', 'top': 46.57, 'left': 53.22},
     'a3dd': {'name': 'Bat Room', 'top': 60.72, 'left': 53.27},
     'a408': {'name': 'Below Spazer', 'top': 58.71, 'left': 55.12},
     'a447': {'name': 'Spazer Room', 'top': 58.71, 'left': 57.02},
-    'a471': {'name': 'Warehouse Zeela Room', 'top': 66.43, 'left': 51.74},
+    'a471': {'name': 'Warehouse Zeela Room', 'top': 66.43, 'left': 51.74, 'graphArea': 'Kraid', 'nearestAP': 'warehouseZeelaRoomLeft'},
     'a4b1': {'name': 'Warehouse Energy Tank Room', 'top': 68.39, 'left': 50.61},
     'a4da': {'name': 'Warehouse Keyhunter Room', 'top': 66.42, 'left': 52.69},
     'a521': {'name': 'Baby Kraid Room', 'top': 68.43, 'left': 54.65},
-    'a56b': {'name': 'Kraid Eye Door Room', 'top': 66.42, 'left': 60.35},
+    'a56b': {'name': 'Kraid Eye Door Room', 'top': 66.42, 'left': 60.35, 'graphArea': 'Kraid', 'nearestAP': 'kraidRoomOut'},
     'a59f': {'name': 'Kraid Room', 'top': 67.9, 'left': 65.63},
-    'a5ed': {'name': 'Statues Hallway', 'top': 23.76, 'left': 23.86},
+    'a5ed': {'name': 'Statues Hallway', 'top': 23.76, 'left': 23.86, 'graphArea': 'Tourian', 'nearestAP': 'goldenFour'},
     'a618': {'name': '[Red Tower Energy Charge Station]', 'top': 60.72, 'left': 51.32},
     'a641': {'name': '[Kraid Recharge Station]', 'top': 66.42, 'left': 61.19},
     'a66a': {'name': 'Statues Room', 'top': 23.76, 'left': 28.51},
-    'a6a1': {'name': 'Warehouse Entrance', 'top': 71.28, 'left': 43.24},
+    'a6a1': {'name': 'Warehouse Entrance', 'top': 71.28, 'left': 43.24, 'graphArea': 'Norfair', 'nearestAP': multipleAPs,
+             'screens': [['warehouseEntranceLeft', 'warehouseEntranceRight', 'warehouseEntranceRight'],
+                         ['warehouseEntranceLeft', 'warehouseEntranceRight', 'warehouseEntranceRight']]},
     'a6e2': {'name': 'Varia Suit Room', 'top': 69.8, 'left': 67.48},
     'a70b': {'name': '[Kraid Save Room]', 'top': 66.42, 'left': 56.49},
     'a734': {'name': '[Caterpillar Save Room]', 'top': 40.44, 'left': 57.07},
@@ -461,8 +603,8 @@ var rooms = {
     'a890': {'name': 'Ice Beam Room', 'top': 79.41, 'left': 38.44},
     'a8b9': {'name': 'Ice Beam Snake Room', 'top': 77.4, 'left': 36.59},
     'a8f8': {'name': 'Crumble Shaft', 'top': 83.42, 'left': 35.64},
-    'a923': {'name': 'Crocomire Speedway', 'top': 89.55, 'left': 36.69},
-    'a98d': {'name': 'Crocomire Room', 'top': 82.68, 'left': 19.22},
+    'a923': {'name': 'Crocomire Speedway', 'top': 89.55, 'left': 36.69, 'graphArea': 'Norfair', 'nearestAP': 'crocomireSpeedwayBottom'},
+    'a98d': {'name': 'Crocomire Room', 'top': 82.68, 'left': 19.22, 'graphArea': 'Crocomire', 'nearestAP': 'crocomireRoomTop'},
     'a9e5': {'name': 'Hi Jump Boots Room', 'top': 87.54, 'left': 40.39},
     'aa0e': {'name': 'Crocomire Escape', 'top': 87.65, 'left': 44.3},
     'aa41': {'name': 'Hi Jump Energy Tank Room', 'top': 85.53, 'left': 41.34},
@@ -481,15 +623,15 @@ var rooms = {
     'acb3': {'name': 'Bubble Mountain', 'top': 79.51, 'left': 54.75},
     'acf0': {'name': 'Speed Booster Hall', 'top': 77.3, 'left': 57.6},
     'ad1b': {'name': 'Speed Booster Room', 'top': 79.3, 'left': 69.01},
-    'ad5e': {'name': 'Single Chamber', 'top': 81.52, 'left': 56.55},
+    'ad5e': {'name': 'Single Chamber', 'top': 81.52, 'left': 56.55, 'graphArea': 'Norfair', 'nearestAP': 'singleChamberTopRight'},
     'adad': {'name': 'Double Chamber', 'top': 83.63, 'left': 57.6},
     'adde': {'name': 'Wave Beam Room', 'top': 83.53, 'left': 61.4},
     'ae07': {'name': 'Spiky Platforms Tunnel', 'top': 87.54, 'left': 57.66},
     'ae32': {'name': 'Volcano Room', 'top': 87.54, 'left': 59.54},
-    'ae74': {'name': 'Kronic Boost Room', 'top': 91.66, 'left': 57.5},
+    'ae74': {'name': 'Kronic Boost Room', 'top': 91.66, 'left': 57.5, 'graphArea': 'Norfair', 'nearestAP': 'kronicBoostRoomBottomLeft'},
     'aeb4': {'name': 'Magdollite Tunnel', 'top': 91.66, 'left': 55.62},
     'aedf': {'name': 'Purple Shaft', 'top': 87.54, 'left': 54.7},
-    'af14': {'name': 'Lava Dive Room', 'top': 78.46, 'left': 78.3},
+    'af14': {'name': 'Lava Dive Room', 'top': 78.46, 'left': 78.3, 'graphArea': 'LowerNorfair', 'nearestAP': 'lavaDiveRight'},
     'af3f': {'name': '[Elevator to Lower Norfair]', 'top': 78.46, 'left': 77.35},
     'af72': {'name': 'Upper Norfair Farming Room', 'top': 85.43, 'left': 52.85},
     'afa3': {'name': 'Rising Tide', 'top': 83.42, 'left': 49.95},
@@ -511,7 +653,7 @@ var rooms = {
     'b2da': {'name': 'Fast Ripper Room', 'top': 86.48, 'left': 77.3},
     'b305': {'name': '[Screw Attack Energy Charge Room]', 'top': 88.49, 'left': 77.3},
     'b32e': {'name': 'Ridley Room', 'top': 94.19, 'left': 76.5},
-    'b37a': {'name': 'Lower Norfair Farming Room', 'top': 90.6, 'left': 80.23},
+    'b37a': {'name': 'Lower Norfair Farming Room', 'top': 90.6, 'left': 80.23, 'graphArea': 'LowerNorfair', 'nearestAP': 'ridleyRoomOut'},
     'b3a5': {'name': 'Fast Pillars Setup Room', 'top': 82.47, 'left': 81.05},
     'b40a': {'name': 'Mickey Mouse Room', 'top': 76.45, 'left': 82.07},
     'b457': {'name': 'Pillar Room', 'top': 86.59, 'left': 82.1},
@@ -523,7 +665,7 @@ var rooms = {
     'b585': {'name': 'Red Keyhunter Shaft', 'top': 76.45, 'left': 90.6},
     'b5d5': {'name': 'Wasteland', 'top': 86.48, 'left': 87.75},
     'b62b': {'name': 'Metal Pirates Room', 'top': 90.6, 'left': 85.9},
-    'b656': {'name': 'Three Muskateers Room', 'top': 64.31, 'left': 84.95},
+    'b656': {'name': 'Three Muskateers Room', 'top': 64.31, 'left': 84.95, 'graphArea': 'LowerNorfair', 'nearestAP': 'threeMuskateersRoomLeft'},
     'b698': {'name': 'Ridley Tank Room', 'top': 96.3, 'left': 75.57},
     'b6c1': {'name': 'Screw Attack Room', 'top': 86.59, 'left': 76.35},
     'b6ee': {'name': 'Lower Norfair Fireflea Room', 'top': 70.33, 'left': 90.6},
@@ -536,7 +678,7 @@ var rooms = {
     'cb8b': {'name': 'Spiky Death Room', 'top': 13.52, 'left': 75.61},
     'cbd5': {'name': 'Electric Death Room', 'top': 9.5, 'left': 77.4},
     'cc27': {'name': 'Wrecked Ship Energy Tank Room', 'top': 9.5, 'left': 74.66},
-    'cc6f': {'name': 'Basement', 'top': 21.54, 'left': 70.75},
+    'cc6f': {'name': 'Basement', 'top': 21.54, 'left': 70.75, 'graphArea': 'WreckedShip', 'nearestAP': 'phantoonRoomOut'},
     'cccb': {'name': 'Wrecked Ship Map Room', 'top': 21.54, 'left': 69.8},
     'cd13': {'name': 'Phantoon Room', 'top': 21.65, 'left': 78.62},
     'cd5c': {'name': 'Sponge Bath', 'top': 13.52, 'left': 73.65},
@@ -545,20 +687,22 @@ var rooms = {
     'ce40': {'name': 'Gravity Suit Room', 'top': 9.4, 'left': 66.95},
     'ce8a': {'name': '[Wrecked Ship Save Room]', 'top': 11.4, 'left': 73.6},
     'ced2': {'name': '[Glass Tunnel Save Room]', 'top': 62.72, 'left': 58.98},
-    'cefb': {'name': 'Glass Tunnel', 'top': 58.61, 'left': 57.97},
+    'cefb': {'name': 'Glass Tunnel', 'top': 58.61, 'left': 57.97, 'graphArea': 'RedBrinstar', 'nearestAP': 'glassTunnelTop'},
     'cf54': {'name': 'West Tunnel', 'top': 60.61, 'left': 57.07},
-    'cf80': {'name': 'East Tunnel', 'top': 58.61, 'left': 58.98},
-    'cfc9': {'name': 'Main Street', 'top': 44.98, 'left': 65.95},
+    'cf80': {'name': 'East Tunnel', 'top': 58.61, 'left': 58.98, 'graphArea': 'RedBrinstar', 'nearestAP': multipleAPs,
+             'screens': [['eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight'],
+                         ['eastTunnelRight']]},
+    'cfc9': {'name': 'Main Street', 'top': 44.98, 'left': 65.95, 'graphArea': 'WestMaridia', 'nearestAP': 'mainStreetBottom'},
     'd017': {'name': 'Fish Tank', 'top': 53.01, 'left': 68.8},
     'd055': {'name': 'Mama Turtle Room', 'top': 50.74, 'left': 72.66},
     'd08a': {'name': 'Crab Tunnel', 'top': 59.13, 'left': 67.85},
     'd0b9': {'name': 'Mt. Everest', 'top': 44.98, 'left': 67.85},
-    'd104': {'name': 'Red Fish Room', 'top': 40.87, 'left': 67.69},
+    'd104': {'name': 'Red Fish Room', 'top': 40.87, 'left': 67.69, 'graphArea': 'WestMaridia', 'nearestAP': 'redFishRoomLeft'},
     'd13b': {'name': 'Watering Hole', 'top': 34.74, 'left': 67.79},
     'd16d': {'name': 'Northwest Maridia Bug Room', 'top': 34.74, 'left': 69.69},
-    'd1a3': {'name': 'Crab Shaft', 'top': 40.87, 'left': 73.5},
+    'd1a3': {'name': 'Crab Shaft', 'top': 40.87, 'left': 73.5, 'graphArea': 'WestMaridia', 'nearestAP': 'crabShaftRight'},
     'd1dd': {'name': 'Pseudo Plasma Spark Room', 'top': 34.85, 'left': 73.55},
-    'd21c': {'name': 'Crab Hole', 'top': 59.13, 'left': 71.65},
+    'd21c': {'name': 'Crab Hole', 'top': 59.13, 'left': 71.65, 'graphArea': 'WestMaridia', 'nearestAP': 'crabHoleBottomLeft'},
     'd252': {'name': '[Tunnel to West Sand Hall]', 'top': 59.24, 'left': 72.65},
     'd27e': {'name': 'Plasma Tutorial Room', 'top': 26.72, 'left': 83.63},
     'd2aa': {'name': 'Plasma Room', 'top': 26.72, 'left': 84.58},
@@ -577,7 +721,7 @@ var rooms = {
     'd51e': {'name': 'East Sand Hole', 'top': 55.23, 'left': 80.78},
     'd54d': {'name': '[West Sand Fall]', 'top': 51, 'left': 78.78},
     'd57a': {'name': '[East Sand Fall]', 'top': 51, 'left': 80.73},
-    'd5a7': {'name': 'Aqueduct', 'top': 45.09, 'left': 77.93},
+    'd5a7': {'name': 'Aqueduct', 'top': 45.09, 'left': 77.93, 'graphArea': 'EastMaridia', 'nearestAP': 'aqueductTopLeft'},
     'd5ec': {'name': 'Butterfly Room', 'top': 40.87, 'left': 83.63},
     'd617': {'name': 'Botwoon Hallway', 'top': 42.98, 'left': 77.93},
     'd646': {'name': 'Pants Room', 'top': 53.22, 'left': 83.58},
@@ -586,7 +730,7 @@ var rooms = {
     'd6fd': {'name': 'Below Botwoon Energy Tank', 'top': 46.99, 'left': 83.63},
     'd72a': {'name': 'Colosseum', 'top': 38.97, 'left': 91.18},
     'd765': {'name': '[Aqueduct Save Room]', 'top': 49, 'left': 76.89},
-    'd78f': {'name': 'The Precious Room', 'top': 40.97, 'left': 97.89},
+    'd78f': {'name': 'The Precious Room', 'top': 40.97, 'left': 97.89, 'graphArea': 'EastMaridia', 'nearestAP': 'draygonRoomOut'},
     'd7e4': {'name': 'Botwoon Energy Tank Room', 'top': 42.98, 'left': 83.63},
     'd81a': {'name': '[Colosseum Save Room]', 'top': 38.86, 'left': 97.89},
     'd845': {'name': '[Halfie Climb Missile Station]', 'top': 42.92, 'left': 94.98},
@@ -813,6 +957,10 @@ function socketOnInitMessage(event) {
         // ask socket to return an arraybuffer instead of a blob
         socket.binaryType = "arraybuffer";
 
+        // display initial time
+        document.getElementById("rtaTimer").innerHTML = "00'00'00''00";
+        document.getElementById("rtaTimerDiv").style.display = "block";
+
         // first data retrieval
         initDataChain();
         askForData();
@@ -860,6 +1008,9 @@ function cleanup(cleanExit) {
     displayStartButton();
     var samusIcon = document.getElementById("samusIcon");
     samusIcon.style.display = "none";
+    // RTA
+    document.getElementById("rtaTimerDiv").style.display = "none";
+    disableRTAFake();
 
     // if the device is an SNES Classic try to reconnect in 1s,
     // as reseting the game on it will close the connection to the auto tracker
@@ -961,6 +1112,50 @@ function getGameStateName(gameStateCode) {
     }
 }
 
+function displayRTA(frames) {
+    // 60 frame per second
+    var timeSeconds = Math.floor(frames / 60);
+    var remainFrames = frames % 60;
+    var hours   = Math.floor(timeSeconds / 3600);
+    var minutes = Math.floor((timeSeconds - (hours * 3600)) / 60);
+    var seconds = timeSeconds - (hours * 3600) - (minutes * 60);
+
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    if (remainFrames < 10) {remainFrames = "0"+remainFrames;}
+
+    document.getElementById("rtaTimer").innerHTML = `${hours}'${minutes}'${seconds}''${remainFrames}`;
+}
+
+function disableRTAFake() {
+    if(incrRTA != undefined) {
+        clearTimeout(incrRTA);
+        incrRTA = undefined;
+    }
+}
+
+function updateRTAFake() {
+    var diffms = new Date() - incrRTAstart;
+    // 60 frames per seconds
+    rawTimeFrames += Math.floor(diffms / (1000/60));
+    displayRTA(rawTimeFrames);
+    incrRTAstart = new Date();
+    incrRTA = setTimeout(updateRTAFake, RTAwaitingTime);
+}
+
+function updateRTA(frames, armFakeTimer) {
+    displayRTA(frames);
+    disableRTAFake();
+
+    if(armFakeTimer) {
+        // arm a timer to increase displayed RTA between two data retrieval
+        rawTimeFrames = frames;
+        incrRTAstart = new Date();
+        incrRTA = setTimeout(updateRTAFake, RTAwaitingTime);
+    }
+}
+
 // managed data returned by qusb
 function handleData(data) {
     var chunk = new Uint8Array(data);
@@ -979,16 +1174,37 @@ function handleData(data) {
             // biggest valid game state
             var maxGameState = 0x2c;
             var mainGameplayState = 0x08;
+            var gameOverState = 0x1a;
+            var creditState = 0x27;
 
-            var gameState = readWord(stateData, 0x00);
+            var gameState = readWord(stateData, stateDataEnum.state);
             var gameStateName = getGameStateName(gameState.toString(16));
             // appendLog(`\u2026 Game state: ${gameStateName}`);
 
-            var debugMode = readWord(stateData, 0x02);
+            var debugMode = readWord(stateData, stateDataEnum.debug);
             // appendLog(`\u2026 Debug Mode: ${debugMode}`);
 
             // check if game is running and is metroid
-            if(debugMode == 0 && gameState < maxGameState) {
+            if(debugMode == 0 && gameState <= maxGameState) {
+                // handle RTA
+                if(gameState >= mainGameplayState && gameState <= gameOverState) {
+                    var w0 = readWord(stateData, stateDataEnum.rta1);
+                    var w1 = readWord(stateData, stateDataEnum.rta2);
+                    var rawTimeFrames = w1 << 16 | w0;
+                    updateRTA(rawTimeFrames, true);
+                } else if(gameState == creditState) {
+                    // during the credits the last RTA has been copied to SRAM
+                    var save = readWord(stateData, stateDataEnum.saveSlot);
+                    var offset = stateDataEnum.sramStats + save * 0x4;
+                    var w0 = readWord(stateData, offset);
+                    var w1 = readWord(stateData, offset+2);
+                    var rawTimeFrames = w1 << 16 | w0;
+                    updateRTA(rawTimeFrames, false);
+                } else {
+                    // if the user reset, stop incrementing the RTA
+                    disableRTAFake();
+                }
+
                 if(gameState == mainGameplayState) {
                     appendLog(`\u2705 Gameplay state: ${gameStateName}`);
                     askNextData();
@@ -1040,10 +1256,12 @@ function handleData(data) {
             // extract data we need
             var samusX = readWord(samusData, samusEnum.x);
             var samusY = readWord(samusData, samusEnum.y);
-            var roomPointer = readWord(samusData, samusEnum.roomPointer);
+            var roomPointer = readWord(samusData, samusEnum.roomPointer).toString(16);
             var x = Math.floor(samusX / 0x100);
             var y = Math.floor(samusY / 0x100);
-            displaySamusOnMap(roomPointer.toString(16), x, y);
+            displaySamusOnMap(roomPointer, x, y);
+
+            newAP = getNewAP(roomPointer, x, y);
 
             // uncomment to display current samus position in map in console
             // // compute (byte, bit) index in map data for current samus screen
@@ -1061,7 +1279,7 @@ function handleData(data) {
             // // first line of map is unused, so add 4 to ignore it (8 bytes per lines, but 4 in each page)
             // byteIndex += 4;
             // var bitMask = 0x80 >> (x & 7);
-            // console.log(`cur byteIndex: ${byteIndex} bitMask: ${bitMask} room: ${roomPointer.toString(16)} area: ${areaEnum[areaIndex]}`);
+            // console.log(`cur byteIndex: ${byteIndex} bitMask: ${bitMask} room: ${roomPointer} area: ${areaEnum[areaIndex]}`);
             // displaySamusOnDebugMap(byteIndex, bitMask);
 
             askNextData();
@@ -1150,6 +1368,23 @@ function displayDebugMap(mapData, areaStart) {
             }
         }
     }
+}
+
+var newAP = "";
+function getNewAP(roomPointer, x, y) {
+    // when samus enters a new graph area update the current access point
+    newAP = lastAP;
+    if(roomPointer in rooms && 'graphArea' in rooms[roomPointer]) {
+        var curGraphArea = apsGraphArea[lastAP];
+        if(curGraphArea != rooms[roomPointer]['graphArea']) {
+            newAP = rooms[roomPointer]['nearestAP'];
+            if(newAP == multipleAPs) {
+                // there's multiple APs in the room, choose the nearest one from samus position
+                newAP = rooms[roomPointer]['screens'][y][x];
+            }
+        }
+    }
+    return newAP;
 }
 
 function displaySamusOnMap(roomPointer, x, y) {
@@ -1314,6 +1549,12 @@ function postAjaxHook() {
     resetNextDataChain();
 }
 
+function setActiveHook(mode, majorsSplit, area, boss, escape) {
+}
+
+function updateGlobalHook(jsonData) {
+}
+
 function resetNextDataChain() {
     cleanupBuffer();
     // start at the beginning of the chain
@@ -1352,7 +1593,7 @@ function checkCollectedData() {
     var newStateChksum = crc32.digest();
     console.log(`State Checksum: ${newStateChksum}`);
 
-    if(newStateChksum == previousStateChksum) {
+    if(newStateChksum == previousStateChksum && newAP == lastAP) {
         appendLog("\u2705 State is the same");
 
         // rearm the timer for next data retrieval
@@ -1368,7 +1609,8 @@ function checkCollectedData() {
         ajaxCall({action: "import",
                   scope: "dump",
                   stateDataOffsets: JSON.stringify(stateDataOffsets),
-                  currentState: jsonArray(currentState)}, "upload");
+                  currentState: jsonArray(currentState),
+                  newAP: newAP}, "upload");
 
         return false;
     }
@@ -1442,6 +1684,12 @@ function sendAutoTrackerMessage(data, newState) {
 <div class="main">
 {{include 'solver_web/t_main.html'}}
 
+    <!-- map display switch -->
+    <div id="switchMap" class="switchMap"><img src="/solver/static/images/television.svg" alt="Switch" onclick="switchStreamingMap()" data-toggle="tooltip" title="Switch to streaming map" data-placement="bottom" data-container="body" data-html="true"></div>
+
+    <!-- inventory display switch -->
+    <div id="switchInventory" class="switchInventory"><img src="/solver/static/images/television.svg" alt="Switch" onclick="switchStreamingInventory()" data-toggle="tooltip" title="Switch to streaming inventory" data-placement="bottom" data-container="body" data-html="true"></div>
+
     <!-- item tracker buttons -->
     <div id="titleItem" class="titleItem">ITEM</div>
     <div id="startItem" class="startItem"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup(false)" data-toggle="tooltip" title="Start the Interactive Solver" data-placement="bottom" data-container="body" data-html="true"></div>
@@ -1471,6 +1719,11 @@ function sendAutoTrackerMessage(data, newState) {
 
     <!-- debug canvas pink color: de3994 -->
     <canvas id="debugMap" width="512" height="256"></canvas>
+
+    <!-- RTA timer -->
+    <div id="rtaTimerDiv" class="rtaTimerClassic">
+      <p id="rtaTimer"></p>
+    </div>
   </div>
 
   <!-- info on current loaded seed -->

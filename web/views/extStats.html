@@ -121,7 +121,7 @@ function resizeChosen() {
 }
 
 window.onload = function(){
-    $(".chzn-select").chosen();
+    $(".chzn-select").chosen({ width: '100%' });
     resizeChosen();
 }
 
@@ -304,10 +304,10 @@ function ajaxFail(jqXHR, textStatus) {
       <table class="full">
         <tr>
           <td>Settings Preset:</td>
-          <td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.extStats["randoPreset"], _class="filldropdown chzn-select", _onchange="loadRandoPreset()"))}}</td>
+          <td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.extStats["randoPreset"], _class="chzn-select", _onchange="loadRandoPreset()"))}}</td>
           <td><button id="randoPresetStep" type="button" onclick="startTheTour(0)">?</button></td>
           <td>Skills Preset:</td>
-          <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), **dict(_name="preset", _id="preset", value=session.extStats["preset"], _class="filldropdown chzn-select"))}}</td>
+          <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), **dict(_name="preset", _id="preset", value=session.extStats["preset"], _class="chzn-select"))}}</td>
           <td><button id="presetStep" type="button" onclick="startTheTour(1)">?</button></td>
           <td>{{=INPUT(_type="submit", _value="Load", _name="action", _class="btn btn-default")}}</td>
         </tr>

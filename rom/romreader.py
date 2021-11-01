@@ -180,7 +180,8 @@ class RomReader:
         'rotation': {'address': 0x44DF, 'value': 0xD0, 'vanillaValue': 0xe0},
         'no_demo': {'address': 0x59F2C, 'value': 0x80, 'vanillaValue': 0xf0},
         'varia_hud': {'address': 0x15EF7, 'value': 0x5C, 'vanillaValue': 0xAE},
-        'nothing_item_plm': {'address': 0x23AD1, 'value': 0x24, 'vanillaValue': 0xb9}
+        'nothing_item_plm': {'address': 0x23AD1, 'value': 0x24, 'vanillaValue': 0xb9},
+        'vanilla_bugfixes': {'address': 0x33704, 'value': 0xF0, 'vanillaValue': 0xD0}
     }
 
     @staticmethod
@@ -211,6 +212,12 @@ class RomReader:
         if magic is not None:
             from rom.race_mode import RaceModeReader
             self.race = RaceModeReader(self, magic)
+
+    def readPlmWord(self, address):
+        if self.race is None:
+            return self.romFile.readWord(address)
+        else:
+            return self.race.readPlmWord(address)
 
     def getItemBytes(self):
         value1 = int.from_bytes(self.romFile.read(1), byteorder='little')
@@ -286,7 +293,7 @@ class RomReader:
                 loc.itemName = self.items[item]["name"]
             except:
                 # race seeds
-                loc.itemName = "Nothing"
+                loc.itemName = "SpringBall"
                 item = '0x0'
 
         return (majorsSplit if majorsSplit != 'FullWithHUD' else 'Full', majorsSplit)
@@ -324,7 +331,9 @@ class RomReader:
             if accessPoint.isInternal() == True:
                 continue
             key = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
-
+            if key not in rooms:
+                # can happen with race mode seeds
+                continue
             destAP = rooms[key]
             if accessPoint.Boss == True or destAP.Boss == True:
                 bossTransitions[accessPoint.Name] = destAP.Name
@@ -359,9 +368,15 @@ class RomReader:
 
         return (areaTransitions, bossTransitions, escapeTransition, GraphUtils.hasMixedTransitions(areaTransitions, bossTransitions))
 
+    def readRoomPtr(self, address=None):
+        if self.race is None:
+            return self.romFile.readWord(address)
+        else:
+            return self.race.readDoorTransition(address)
+
     def getTransition(self, doorPtr):
         # room ptr is in two bytes
-        roomPtr = self.romFile.readWord(0x10000 | doorPtr)
+        roomPtr = self.readRoomPtr(0x10000 | doorPtr)
 
         direction = self.romFile.readByte((0x10000 | doorPtr) + 3)
 

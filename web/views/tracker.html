@@ -261,6 +261,10 @@ function switchStreamingMap() {
     if(loaded == false || init == false) {
         return;
     }
+
+    // remove border of already selected AP
+    $(".addBorder").removeClass("addBorder");
+
     var classicMap = document.getElementById("classic_map");
     var streamMap = document.getElementById("stream_map");
     var RTA = document.getElementById("rtaTimerDiv");

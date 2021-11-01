@@ -5,7 +5,7 @@
 
 
 BRANCH="master"
-while getopts "b:d:t:" ARG; do
+while getopts "b:" ARG; do
     case ${ARG} in
         b) export BRANCH="${OPTARG}";;
 	*) echo "Unknown option ${ARG}"; exit 0;;
@@ -15,3 +15,11 @@ done
 docker exec -w /root/RandomMetroidSolver varia-${BRANCH} git pull
 docker exec -w /root/web2py varia-${BRANCH} rm -rf applications/solver/sessions/*
 docker exec -w /root/RandomMetroidSolver varia-${BRANCH} web/install.sh
+docker exec -w /root/RandomMetroidSolver/varia_custom_sprites varia-${BRANCH} git pull origin main
+docker exec -w /root/varia-race-mode varia-${BRANCH} git pull
+
+if [ $? -eq 0 ]; then 
+    docker exec -w /root/varia-race-mode varia-${BRANCH} ./install.sh
+else
+    echo "Race Mode update failed. It's normal if you don't have access to race mode repository"
+fi

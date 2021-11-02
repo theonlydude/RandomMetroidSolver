@@ -388,7 +388,7 @@ class Presets(object):
         # for create/update, not load
         (ok, msg) = self.validatePresetsParams(self.vars.action)
         if not ok:
-            raise HTTP(400, json.dumps(msg))
+            raiseHttp(400, json.dumps(msg))
         else:
             self.session.presets['currentTab'] = self.vars.currenttab
 
@@ -411,7 +411,7 @@ class Presets(object):
                 msg = "UC:Error loading the preset {}: {}".format(preset, e)
                 end = True
             if end == True:
-                raise HTTP(400, json.dumps(msg))
+                raiseHttp(400, json.dumps(msg))
 
             # check if password match
             if 'password' in oldParams and passwordSHA256 == oldParams['password']:

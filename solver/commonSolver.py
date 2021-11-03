@@ -66,7 +66,7 @@ class CommonSolver(object):
                 self.romLoader.loadObjectives(self.objectives)
             else:
                 if self.majorsSplit == "Scavenger":
-                    self.objectives.setScavengerHunt(True)
+                    self.objectives.setScavengerHunt(self.romLoader.hasPatch('Escape_Scavenger'))
             self.objectives.setScavengerHuntFunc(self.scavengerHuntComplete)
 
             if interactive == False:
@@ -544,10 +544,12 @@ class CommonSolver(object):
 
         raise Exception("Can't take a decision")
 
-    def checkMB(self, mbLoc, justCheck=False):
+    def checkMB(self, mbLoc, justCheck=False, justAdd=False):
         # add mother brain loc and check if it's accessible
         self.majorLocations.append(mbLoc)
         self.computeLocationsDifficulty(self.majorLocations)
+        if justAdd:
+            return
         if justCheck:
             self.majorLocations.remove(mbLoc)
             return mbLoc.difficulty == True
@@ -603,16 +605,22 @@ class CommonSolver(object):
             canEndGame = self.canEndGame()
             (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
             if isEndPossible and hasEnoughItems:
-                if endDifficulty <= diffThreshold:
-                    if self.checkMB(mbLoc):
-                        self.log.debug("checkMB: all end game checks are ok, END")
-                        break
-                    else:
-                        self.log.debug("checkMB: canEnd but MB loc not accessible")
+                if not self.objectives.tourianRequired:
+                    # add MB loc for non visited locs
+                    self.checkMB(mbLoc, justAdd=True)
+                    self.log.debug("no need to checkMB, END")
+                    break
                 else:
-                    if not self.motherBrainCouldBeKilled:
-                        self.motherBrainCouldBeKilled = self.checkMB(mbLoc, justCheck=True)
-                    self.log.debug("checkMB: end checks ok except MB difficulty, MB could be killed: {}".format(self.motherBrainCouldBeKilled))
+                    if endDifficulty <= diffThreshold:
+                        if self.checkMB(mbLoc):
+                            self.log.debug("checkMB: all end game checks are ok, END")
+                            break
+                        else:
+                            self.log.debug("checkMB: canEnd but MB loc not accessible")
+                    else:
+                        if not self.motherBrainCouldBeKilled:
+                            self.motherBrainCouldBeKilled = self.checkMB(mbLoc, justCheck=True)
+                        self.log.debug("checkMB: end checks ok except MB difficulty, MB could be killed: {}".format(self.motherBrainCouldBeKilled))
 
             # check time limit
             if self.runtimeLimit_s > 0:
@@ -722,7 +730,12 @@ class CommonSolver(object):
         # - defeat metroids
         # - destroy/skip the zebetites
         # - beat Mother Brain
-        return self.smbm.wand(self.objectives.canClearGoals(self.smbm), self.smbm.enoughStuffTourian())
+        # if escape is triggered at the end of scav hunt you don't have to go to Tourian
+        canClearGoals = self.objectives.canClearGoals(self.smbm)
+        if self.objectives.tourianRequired:
+            return self.smbm.wand(canClearGoals, self.smbm.enoughStuffTourian())
+        else:
+            return canClearGoals
 
     def getAllLocs(self, majorsAvailable, minorsAvailable):
         if self.majorsSplit == 'Full':
@@ -731,7 +744,7 @@ class CommonSolver(object):
             return majorsAvailable+minorsAvailable
 
     def computeDifficultyValue(self):
-        if not self.canEndGame() or not self.motherBrainKilled:
+        if not self.canEndGame() or (not self.motherBrainKilled and self.objectives.tourianRequired):
             # we have aborted
             return (-1, False)
         else:

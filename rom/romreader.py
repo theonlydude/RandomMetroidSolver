@@ -102,7 +102,8 @@ class RomReader:
         'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'desc': "Beam doors"},
         'red_doors': {'address':0x20560, 'value':0xbd, 'desc': "Red doors open with one Missile and do not react to Super"},
         'rotation': {'address': 0x44DF, 'value': 0xD0, 'desc': "Rotation hack"},
-        'objectives_pause': {'address': 0x12822, 'value': 0x08, 'desc': "Objectives displayed in pause"}
+        'objectives_pause': {'address': 0x12822, 'value': 0x08, 'desc': "Objectives displayed in pause"},
+        'Escape_Scavenger': {'address': 0x10F5FE, 'value': 0x1, 'desc': "Trigger escape at end of Scavenger Hunt"}
     }
 
     # FIXME shouldn't be here
@@ -489,7 +490,7 @@ class RomReader:
             return 'vanilla'
 
     def readObjectives(self, objectives):
-        objectives.readGoals(self.romFile)
+        objectives.readGoals(self)
 
     def getStartAP(self):
         address = 0x10F200

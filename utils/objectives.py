@@ -102,6 +102,7 @@ class Objectives(object):
         }
         self.activeGoals = []
         self.nbActiveGoals = 0
+        self.tourianRequired = True
 
     def resetGoals(self):
         self.activeGoals = []
@@ -122,6 +123,10 @@ class Objectives(object):
     def setScavengerHunt(self, triggerEscape):
         if not triggerEscape:
             self.setVanilla()
+        else:
+            LOG.debug("triggerEscape: {}, tourian not required")
+            self.tourianRequired = False
+
         self.addGoal("finish scavenger hunt")
 
     def setScavengerHuntFunc(self, scavClearFunc):
@@ -142,15 +147,24 @@ class Objectives(object):
                 return goal
         assert True, "Goal with check function {} not found".format(hex(checkFunction))
 
-    def readGoals(self, romFile):
+    def readGoals(self, romReader):
         self.resetGoals()
-        romFile.seek(Objectives.objectivesList)
-        checkFunction = romFile.readWord()
+        romReader.romFile.seek(Objectives.objectivesList)
+        checkFunction = romReader.romFile.readWord()
+        checkScavEscape = False
         while checkFunction != 0x0000:
             goal = self.getGoalFromCheckFunction(checkFunction)
+            if goal.name == 'finish scavenger hunt':
+                checkScavEscape = True
             self.activeGoals.append(goal)
-            LOG.debug("add goal: {}".format(goal.name))
-            checkFunction = romFile.readWord()
+            checkFunction = romReader.romFile.readWord()
+
+        for goal in self.activeGoals:
+            LOG.debug("active goal: {}".format(goal.name))
+
+        if checkScavEscape:
+            self.tourianRequired = not romReader.patchPresent('Escape_Scavenger')
+            LOG.debug("tourianRequired: {}".format(self.tourianRequired))
 
     def writeGoals(self, romFile):
         # write check functions

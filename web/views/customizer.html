@@ -490,6 +490,8 @@ var musics = {
     for song, data in musics.items():
       if song in ["_dropdown", "_list"]:
         continue
+      if data.get("group") in ["Vanilla Soundtrack - Sound Effects", "Memory Violation"]:
+        continue
       response.write('  "{}": {{\n'.format(song), escape=False)
       for key, value in data.items():
         if key in ["original_author", "port_author", "description"]:

@@ -524,6 +524,9 @@ function loadNewSongFromId(elemId) {
 }
 
 function loadNewSong(song) {
+    if(playerState == "downloading") {
+        return;
+    }
     // first innerHTML modification will change scroll, so store it to restore at the end
     var scroll = $(window).scrollTop();
     stopSong();
@@ -565,6 +568,7 @@ function action_play() {
         return;
     }
     setPlayerButton("download");
+    playerState = "downloading";
     var request = $.ajax({
       url: "{{=URL(f='getSpcFile')}}",
       method: "POST",
@@ -578,6 +582,7 @@ function action_play() {
 
 function spcFileDownloaded(data) {
     console.log("spcFileDownloaded");
+    playerState = "stopped";
 
     var binary_string = atob(data["spc"]);
     var len = binary_string.length;
@@ -592,6 +597,7 @@ function spcFileDownloaded(data) {
 function ajaxPlayerFail(jqXHR, textStatus) {
     ajaxFail(jqXHR, textStatus);
     setPlayerButton("play");
+    playerState = "stopped";
 }
 
 function stopSong() {

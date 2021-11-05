@@ -29,6 +29,8 @@ def randomizer():
 
 def randomizerWebService():
     session.forget(response)
+    # set header to authorize cross domain AJAX
+    response.headers['Access-Control-Allow-Origin'] = '*'
     from web.backend.randomizer import Randomizer
     return Randomizer(session, request, response, cache).webService()
 

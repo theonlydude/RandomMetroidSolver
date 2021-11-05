@@ -152,10 +152,6 @@ class Randomizer(object):
         # web service to compute a new random (returns json string)
         print("randomizerWebService")
 
-
-        # set header to authorize cross domain AJAX
-        self.response.headers['Access-Control-Allow-Origin'] = '*'
-
         # check validity of all parameters
         switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
                    'areaRandomization', 'areaLayout', 'lightAreaRandomization',

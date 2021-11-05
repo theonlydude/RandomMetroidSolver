@@ -674,11 +674,21 @@ function resetPlaylist() {
 function randomizePlaylist() {
     var scroll = $(window).scrollTop();
     var keys = Object.keys(musics);
+    var alreadyUsed = [];
     for(var i=0; i<musicIds.length; i++) {
-        randomSong = keys[Math.floor(keys.length * Math.random())];
+        var r = Math.floor(keys.length * Math.random());
+        var randomSong = keys[r];
+        while(alreadyUsed.includes(randomSong)) {
+            // reroll
+            r = Math.floor(keys.length * Math.random());
+            randomSong = keys[r];
+        }
+        alreadyUsed.push(randomSong);
         var id = musicIds[i];
         document.getElementById(id).innerHTML = randomSong;
     }
+    // set same song for intro and menu
+    document.getElementById("Menutheme").innerHTML = document.getElementById("Titlesequenceintro").innerHTML
     $("html").scrollTop(scroll);
 }
 

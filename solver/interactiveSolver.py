@@ -960,12 +960,10 @@ class InteractiveSolver(CommonSolver):
                     bitMask = 0x01 << (loc.Id & 7)
                     if currentState[offset + byteIndex] & bitMask != 0:
                         if loc not in self.visitedLocations:
-                            print("add visited loc: {}".format(loc.Name))
                             self.pickItemAt(self.locNameInternal2Web(loc.Name))
                             self.locDelta += 1
                     else:
                         if loc in self.visitedLocations:
-                            print("remove visited loc: {}".format(loc.Name))
                             self.removeItemAt(self.locNameInternal2Web(loc.Name))
             elif dataType == dataEnum["boss"]:
                 for boss, bossData in self.bossBitMasks.items():
@@ -974,12 +972,10 @@ class InteractiveSolver(CommonSolver):
                     loc = self.getLoc(boss)
                     if currentState[offset + byteIndex] & bitMask != 0:
                         if loc not in self.visitedLocations:
-                            print("add boss loc: {}".format(loc.Name))
                             self.pickItemAt(self.locNameInternal2Web(loc.Name))
                             self.locDelta += 1
                     else:
                         if loc in self.visitedLocations:
-                            print("remove visited boss loc: {}".format(loc.Name))
                             self.removeItemAt(self.locNameInternal2Web(loc.Name))
             elif dataType == dataEnum["map"]:
                 if self.areaRando or self.bossRando:
@@ -1013,13 +1009,11 @@ class InteractiveSolver(CommonSolver):
                     # remove dynamic transitions not visited
                     for transition in dynamicTransitions:
                         if transition[0] not in availAPs and transition[1] not in availAPs:
-                            print("remove transition: {}".format(transition))
                             self.curGraphTransitions.remove(transition)
 
                     # add new transitions
                     for transition in possibleTransitions:
                         if transition[0] in availAPs and transition[1] in availAPs:
-                            print("add transition: {}".format(transition))
                             self.curGraphTransitions.append(transition)
 
                 if self.hasNothing:
@@ -1031,14 +1025,12 @@ class InteractiveSolver(CommonSolver):
                             # nothing has been seen, check if loc is already visited
                             if not loc in self.visitedLocations:
                                 # visit it
-                                print("add visited nothing loc: {}".format(loc.Name))
                                 self.pickItemAt(self.locNameInternal2Web(loc.Name))
                                 self.locDelta += 1
                         else:
                             # nothing not yet seed, check if loc is already visited
                             if loc in self.visitedLocations:
                                 # unvisit it
-                                print("remove visited nothing loc: {}".format(loc.Name))
                                 self.removeItemAt(self.locNameInternal2Web(loc.Name))
                 if self.doorsRando:
                     # get currently hidden / revealed doors names in sets

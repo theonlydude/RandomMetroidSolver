@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $# -eq 1 -a $1 == "--clean" ]; then
+if [ $# -eq 1 -a "$1" == "--clean" ]; then
     find ~/web2py/applications/solver/static/images -type l -exec rm -f {} \;
 fi
 

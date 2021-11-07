@@ -2,7 +2,7 @@ import sys, os, urllib, tempfile, random, subprocess, base64, json, uuid
 from datetime import datetime
 
 from web.backend.utils import loadPresetsList, loadRandoPresetsList, displayNames
-from web.backend.utils import validateWebServiceParams, getCustomMapping, localIpsDir, raiseHttp
+from web.backend.utils import validateWebServiceParams, getCustomMapping, localIpsDir, raiseHttp, getInt
 from utils.utils import getRandomizerDefaultParameters, getDefaultMultiValues, PresetLoader, getPresetDir, getPythonExec
 from graph.graph_utils import GraphUtils
 from utils.db import DB
@@ -400,13 +400,14 @@ class Randomizer(object):
         #    json.dump(self.session.randomizer, jsonFile)
 
     def randoParamsWebService(self):
-        # get a json string of the randomizer parameters for a given seed
+        # get a json string of the randomizer parameters for a given seed.
+        # seed is the id in randomizer table, not actual seed number.
         if self.vars.seed == None:
-            raiseHttp(400, "Missing parameter seed", False)
+            raiseHttp(400, "Missing parameter seed", True)
 
         seed = getInt(self.request, 'seed', False)
-        if seed < 0 or seed > 9999999:
-            raiseHttp(400, "Wrong value for seed, must be between 0 and 9999999", False)
+        if seed < 0 or seed > sys.maxsize:
+            raiseHttp(400, "Wrong value for seed", True)
 
         with DB() as db:
             (seed, params) = db.getRandomizerSeedParams(seed)
@@ -418,24 +419,21 @@ class Randomizer(object):
         regex = "^[{]?[0-9a-fA-F]{8}" + "-([0-9a-fA-F]{4}-)" + "{3}[0-9a-fA-F]{12}[}]?$"
         p = re.compile(regex)
 
-        if (str == None):
+        if str is None:
             return False
 
-        if(re.search(p, str)):
-            return True
-        else:
-            return False
+        return re.search(p, str)
 
     def randoParamsWebServiceAPI(self):
         # get a json string of the randomizer parameters for a given guid
-        if self.vars.guid == None:
-            raiseHttp(400, "Missing parameter guid", False)
+        if self.vars.guid is None:
+            raiseHttp(400, "Missing parameter guid", True)
 
         guid = self.vars.guid
 
         # guid is: 8bc77c97-3e0f-4c19-817a-08f0668ade56
         if not self.isValidGUID(guid):
-            raiseHttp(400, "Guid is not valid", False)
+            raiseHttp(400, "Guid is not valid", True)
 
         with DB() as db:
             params = db.getRandomizerSeedParamsAPI(guid)

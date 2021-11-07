@@ -214,7 +214,7 @@ class Randomizer(object):
             os.remove(jsonFileName)
             os.close(fd3)
             os.remove(jsonRandoPreset)
-            raiseHttp(400, json.dumps("randomizerWebService: can't load the preset"))
+            return json.dumps({"status": "NOK", "errorMsg": "randomizerWebService: can't load the preset"})
 
         (custom, controlParam) = getCustomMapping(controlMapping)
         if custom == True:
@@ -271,6 +271,7 @@ class Randomizer(object):
             os.close(fd3)
             os.remove(jsonRandoPreset)
 
+            locsItems["status"] = "OK"
             return json.dumps(locsItems)
         else:
             # extract error from json
@@ -292,7 +293,7 @@ class Randomizer(object):
             os.remove(jsonFileName)
             os.close(fd3)
             os.remove(jsonRandoPreset)
-            raiseHttp(400, json.dumps(msg))
+            return json.dumps({"status": "NOK", "errorMsg": msg})
 
     def presetWebService(self):
         # web service to get the content of the preset file

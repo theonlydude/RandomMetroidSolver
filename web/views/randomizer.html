@@ -553,7 +553,7 @@ function ajaxFail(jqXHR, textStatus) {
 function ajaxFailJSON(jqXHR, textStatus) {
   // cross domain calls currently return 'undefined' information... (cf. https://www.html5rocks.com/en/tutorials/cors/)
   if(jqXHR.responseJSON == null) {
-    document.getElementById("flash").innerHTML = "Something wrong happened or the VARIA randomizer aborted: please try again. If this happens again after retrying, raise or disable max difficulty setting, and/or disable Super Fun Times (TM) setting. If Area Randomization was selected, try to enable Full Randomization as well.";
+    document.getElementById("flash").innerHTML = "Something wrong happened or the VARIA randomizer aborted: please try again.";
   } else {
     document.getElementById("flash").innerHTML = jqXHR.responseJSON;
   }
@@ -577,6 +577,25 @@ function unpack_2bytes(ips, i) {
 
 function AjaxRandomizerCallCompleted(data) {
     console.log("AjaxRandomizerCallCompleted");
+
+    $('#overlay').hide();
+    $('#loadingGIF').hide();
+
+    // info message to display ?
+    if("errorMsg" in data && data["errorMsg"].length > 0) {
+        document.getElementById("flash").innerHTML = data["errorMsg"];
+        $('#flash').show();
+    }
+
+    if("status" in data) {
+        var status = data["status"];
+        if(status != "OK") {
+            return;
+        }
+    } else {
+        document.getElementById("flash").innerHTML = "Something wrong happened or the VARIA randomizer aborted: please try again.";
+        return;
+    }
 
     // with items/Locations patch the local rom in memory
     // always make a copy to avoid modifying vanilla rom buffer from local storage
@@ -651,15 +670,6 @@ function AjaxRandomizerCallCompleted(data) {
         document.getElementById("permalink").innerHTML = "<a href=\""+link+"\" target=\"_blank\">"+link+"</a>";
     }
 
-    // info message to display ?
-    if("errorMsg" in data && data["errorMsg"].length > 0) {
-        document.getElementById("flash").innerHTML = data["errorMsg"];
-        $('#flash').show();
-        displayFlash = true;
-    } else {
-        displayFlash = false;
-    }
-
     // set backup button text to Randomize
     document.getElementById("submitBtn").data = "Randomize";
 
@@ -700,13 +710,6 @@ function AjaxRandomizerCallCompleted(data) {
     });
 
     request.fail(ajaxFail);
-
-    // remove "working" message
-    if(displayFlash == false){
-        $('#flash').hide();
-    }
-    $('#overlay').hide();
-    $('#loadingGIF').hide();
 }
 
 function doSubmit() {

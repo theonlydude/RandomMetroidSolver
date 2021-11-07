@@ -1301,7 +1301,7 @@ function startTheTour(step=-1) {
     {
       element: "#colorsRandomizationStep",
       title: "Color randomization",
-      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"center_image half\"/></p><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:</p><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"center_image threequarter\"/><p>You can invert the range by clicking on the invert button.</p><p>By default, the same shift is applied to all elements for color consistency. If you disable the setting, a different shift will be used for each category.</p>"
+      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/customizer/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"center_image half\"/></p><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:</p><img src=\"/solver/static/images/customizer/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"center_image threequarter\"/><p>You can invert the range by clicking on the invert button.</p><p>By default, the same shift is applied to all elements for color consistency. If you disable the setting, a different shift will be used for each category.</p>"
     },
     {
       element: "#customSpriteStep",
@@ -1603,10 +1603,10 @@ def displayCheckbox(id, defaultTrue=False):
               <table class="full margin_top">
                 <colgroup><col class="quater"/><col class="quater"/><col class="quater"/><col class="quater"/></colgroup>
                 <tr>
-                  <td><img class="music_button" id="reset" src="/solver/static/images/refresh.svg" title="Reset" alt="Reset" onclick="resetPlaylist()"> Reset playlist</td>
-                  <td><img class="music_button" id="randomize" src="/solver/static/images/games.svg" title="Randomize" alt="Randomize" onclick="randomizePlaylist()"> Randomize playlist</td>
-                  <td><img class="music_button" id="reset" src="/solver/static/images/save.svg" title="Save" alt="Save" onclick="savePlaylist()"> Save playlist</td>
-                  <td><img class="music_button" id="reset" src="/solver/static/images/cloud_upload.png" title="Load" alt="Load" onclick="loadPlaylist()"> Load playlist</td>
+                  <td><img class="music_button" id="reset" src="/solver/static/images/ui/refresh.svg" title="Reset" alt="Reset" onclick="resetPlaylist()"> Reset playlist</td>
+                  <td><img class="music_button" id="randomize" src="/solver/static/images/ui/games.svg" title="Randomize" alt="Randomize" onclick="randomizePlaylist()"> Randomize playlist</td>
+                  <td><img class="music_button" id="reset" src="/solver/static/images/ui/save.svg" title="Save" alt="Save" onclick="savePlaylist()"> Save playlist</td>
+                  <td><img class="music_button" id="reset" src="/solver/static/images/ui/cloud_upload.png" title="Load" alt="Load" onclick="loadPlaylist()"> Load playlist</td>
                 </tr>
               </table>
               <table class="full margin_top">
@@ -1619,9 +1619,9 @@ def displayCheckbox(id, defaultTrue=False):
                         <tr>
                           <td>
                             <div id="controlPlayer">
-                              <img id="play" src="/solver/static/images/play.svg" title="Play Song" alt="Play Song" onclick="action_play()">
-                              <img id="download" src="/solver/static/images/cloud_download.svg" alt="Downloading Song" style="display: none">
-                              <img id="stop" src="/solver/static/images/shut_down.svg" title="Stop Song" alt="Stop Song" style="display: none" onclick="stopSong()">
+                              <img id="play" src="/solver/static/images/ui/play.svg" title="Play Song" alt="Play Song" onclick="action_play()">
+                              <img id="download" src="/solver/static/images/ui/cloud_download.svg" alt="Downloading Song" style="display: none">
+                              <img id="stop" src="/solver/static/images/ui/shut_down.svg" title="Stop Song" alt="Stop Song" style="display: none" onclick="stopSong()">
                             </div>
                           </td>
                           <td>

@@ -52,11 +52,6 @@ def randoParamsWebService():
     from web.backend.randomizer import Randomizer
     return Randomizer(session, request, response, cache).randoParamsWebService()
 
-def randoParamsWebServiceAPI():
-    session.forget(response)
-    from web.backend.randomizer import Randomizer
-    return Randomizer(session, request, response, cache).randoParamsWebServiceAPI()
-
 
 def presets():
     from web.backend.presets import Presets

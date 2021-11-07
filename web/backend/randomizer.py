@@ -414,32 +414,6 @@ class Randomizer(object):
 
         return json.dumps({"seed": seed, "params": params})
 
-    # from https://www.geeksforgeeks.org/how-to-validate-guid-globally-unique-identifier-using-regular-expres
-    def isValidGUID(self, str):
-        regex = "^[{]?[0-9a-fA-F]{8}" + "-([0-9a-fA-F]{4}-)" + "{3}[0-9a-fA-F]{12}[}]?$"
-        p = re.compile(regex)
-
-        if str is None:
-            return False
-
-        return re.search(p, str)
-
-    def randoParamsWebServiceAPI(self):
-        # get a json string of the randomizer parameters for a given guid
-        if self.vars.guid is None:
-            raiseHttp(400, "Missing parameter guid", True)
-
-        guid = self.vars.guid
-
-        # guid is: 8bc77c97-3e0f-4c19-817a-08f0668ade56
-        if not self.isValidGUID(guid):
-            raiseHttp(400, "Guid is not valid", True)
-
-        with DB() as db:
-            params = db.getRandomizerSeedParamsAPI(guid)
-
-        return json.dumps(params)
-
     def updateRandoSession(self, randoPreset):
         for key, value in randoPreset.items():
             self.session.randomizer[key] = value

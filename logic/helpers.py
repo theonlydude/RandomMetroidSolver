@@ -832,6 +832,10 @@ class Bosses:
         return ['Draygon', 'Kraid', 'Phantoon', 'Ridley']
 
     @staticmethod
+    def miniBosses():
+        return ['SporeSpawn', 'Crocomire', 'Botwoon', 'GoldenTorizo']
+
+    @staticmethod
     def bossDead(sm, boss):
         return sm.haveItem(boss)
 
@@ -847,6 +851,13 @@ class Bosses:
                          Bosses.bossDead(smbm, 'Phantoon'),
                          Bosses.bossDead(smbm, 'Draygon'),
                          Bosses.bossDead(smbm, 'Ridley'))
+
+    @staticmethod
+    def allMiniBossesDead(smbm):
+        return smbm.wand(Bosses.bossDead(smbm, 'SporeSpawn'),
+                         Bosses.bossDead(smbm, 'Botwoon'),
+                         Bosses.bossDead(smbm, 'Crocomire'),
+                         Bosses.bossDead(smbm, 'GoldenTorizo'))
 
 def diffValue2txt(diff):
     last = 0

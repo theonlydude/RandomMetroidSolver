@@ -672,6 +672,58 @@ define_location(
     CanHidden=False,
     Room='Mother Brain Room',
 ),
+    "Spore Spawn":
+define_location(
+    Area="Brinstar",
+    GraphArea="GreenPinkBrinstar",
+    SolveArea="Pink Brinstar",
+    Name="Spore Spawn",
+    Class=["Boss"],
+    CanHidden=False,
+    Address=0xB055B055,
+    Id=None,
+    Visibility="Hidden",
+    Room='Spore Spawn Room',
+),
+    "Botwoon":
+define_location(
+    Area="Maridia",
+    GraphArea="EastMaridia",
+    SolveArea="Maridia Pink Top",
+    Name="Botwoon",
+    Class=["Boss"],
+    CanHidden=False,
+    Address=0xB055B055,
+    Id=None,
+    Visibility="Hidden",
+    Room="Botwoon's Room",
+),
+    "Crocomire":
+define_location(
+    Area="Norfair",
+    GraphArea="Crocomire",
+    SolveArea="Crocomire",
+    Name="Crocomire",
+    Class=["Boss"],
+    CanHidden=False,
+    Address=0xB055B055,
+    Id=None,
+    Visibility="Hidden",
+    Room="Crocomire's Room",
+),
+    "Golden Torizo":
+define_location(
+    Area="LowerNorfair",
+    GraphArea="LowerNorfair",
+    SolveArea="Lower Norfair Screw Attack",
+    Name="Golden Torizo",
+    Class=["Boss"],
+    CanHidden=False,
+    Address=0xB055B055,
+    Id=None,
+    Visibility="Hidden",
+    Room="Golden Torizo's Room",
+),
 ###### MINORS
     "Power Bomb (Crateria surface)":
 define_location(

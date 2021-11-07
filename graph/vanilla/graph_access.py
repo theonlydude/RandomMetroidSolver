@@ -251,7 +251,7 @@ accessPoints = [
     }, internal=True),
     AccessPoint('LN Above GT', 'LowerNorfair', {
         'Screw Attack Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
-                                                              sm.enoughStuffGT()))
+                                                              sm.haveItem('GoldenTorizo')))
     }, internal=True),
     AccessPoint('Screw Attack Bottom', 'LowerNorfair', {
         'LN Entrance': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
@@ -601,7 +601,7 @@ accessPoints = [
         'Aqueduct Top Left': Cache.ldeco(lambda sm: sm.wand(sm.canDestroyBombWallsUnderwater(), # top left bomb blocks
                                                             sm.canJumpUnderwater())),
         'Post Botwoon': Cache.ldeco(lambda sm: sm.wand(sm.canJumpUnderwater(),
-                                                       sm.canDefeatBotwoon())), # includes botwoon hallway conditions
+                                                       sm.haveItem('Botwoon'))),
         'Left Sandpit': lambda sm: sm.canAccessSandPits(),
         'Right Sandpit': lambda sm: sm.canAccessSandPits(),
         'Aqueduct': Cache.ldeco(lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),

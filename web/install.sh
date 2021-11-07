@@ -704,6 +704,11 @@ mkdir -p ~/web2py/applications/solver/static/images/tracker/inventory/
 [ -L ~/web2py/applications/solver/static/images/tracker/inventory/Nothing.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Nothing.png ~/web2py/applications/solver/static/images/tracker/inventory/Nothing.png
 [ -L ~/web2py/applications/solver/static/images/tracker/inventory/CrystalFlash.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/CrystalFlash.png ~/web2py/applications/solver/static/images/tracker/inventory/CrystalFlash.png
 
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/SporeSpawn.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/SporeSpawn.png ~/web2py/applications/solver/static/images/tracker/inventory/SporeSpawn.png
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/Crocomire.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Crocomire.png ~/web2py/applications/solver/static/images/tracker/inventory/Crocomire.png
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/Botwoon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Botwoon.png ~/web2py/applications/solver/static/images/tracker/inventory/Botwoon.png
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/GoldenTorizo.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/GoldenTorizo.png ~/web2py/applications/solver/static/images/tracker/inventory/GoldenTorizo.png
+
 [ -L ~/web2py/applications/solver/static/images/tracker/inventory/Draygon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bosses/Draygon.png ~/web2py/applications/solver/static/images/tracker/inventory/Draygon.png
 [ -L ~/web2py/applications/solver/static/images/tracker/inventory/Kraid.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bosses/Kraid.png ~/web2py/applications/solver/static/images/tracker/inventory/Kraid.png
 [ -L ~/web2py/applications/solver/static/images/tracker/inventory/Phantoon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bosses/Phantoon.png ~/web2py/applications/solver/static/images/tracker/inventory/Phantoon.png

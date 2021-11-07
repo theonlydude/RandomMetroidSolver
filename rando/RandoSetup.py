@@ -93,7 +93,7 @@ class RandoSetup(object):
             if self.container is None:
                 self.log.debug("createItemLocContainer: initScavenger fail")
                 return None
-        elif self.settings.progSpeed == 'speedrun':
+        elif self.settings.progSpeed == 'speedrun' and not self.settings.isPlandoRando():
             # add placement restriction helpers for random fill
             self.restrictions.setPlacementRestrictions(self.getRestrictionsDict())
         self.settings.updateSuperFun(self.superFun)

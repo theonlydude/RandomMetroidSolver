@@ -1625,9 +1625,9 @@ function getItemsImages(items) {
             var hyphen = item.indexOf('-');
             var count = item.substring(0, hyphen);
             var item = item.substring(hyphen+1, item.length);
-            out += "<span>"+count+"-"+'<img class="imageItems" src="/solver/static/images/'+item+'.png" />'+"</span>";
+            out += "<span>"+count+"-"+'<img class="imageItems" src="/solver/static/images/tracker/inventory/'+item+'.png" />'+"</span>";
         } else {
-            out += '<img class="imageItems" src="/solver/static/images/'+items[i]+'.png" />';
+            out += '<img class="imageItems" src="/solver/static/images/tracker/inventory/'+items[i]+'.png" />';
         }
     }
     return out;

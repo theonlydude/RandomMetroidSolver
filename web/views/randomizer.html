@@ -553,7 +553,7 @@ function ajaxFail(jqXHR, textStatus) {
 function ajaxFailJSON(jqXHR, textStatus) {
   // cross domain calls currently return 'undefined' information... (cf. https://www.html5rocks.com/en/tutorials/cors/)
   if(jqXHR.responseJSON == null) {
-    document.getElementById("flash").innerHTML = "Something wrong happened or the VARIA randomizer aborted: please try again. If this happens again after retrying, raise or disable max difficulty setting, and/or disable Super Fun Times (TM) setting. If Area Randomization was selected, try to enable Full Randomization as well.";
+    document.getElementById("flash").innerHTML = "Something wrong happened or the VARIA randomizer aborted: please try again.";
   } else {
     document.getElementById("flash").innerHTML = jqXHR.responseJSON;
   }
@@ -577,6 +577,25 @@ function unpack_2bytes(ips, i) {
 
 function AjaxRandomizerCallCompleted(data) {
     console.log("AjaxRandomizerCallCompleted");
+
+    $('#overlay').hide();
+    $('#loadingGIF').hide();
+
+    // info message to display ?
+    if("errorMsg" in data && data["errorMsg"].length > 0) {
+        document.getElementById("flash").innerHTML = data["errorMsg"];
+        $('#flash').show();
+    }
+
+    if("status" in data) {
+        var status = data["status"];
+        if(status != "OK") {
+            return;
+        }
+    } else {
+        document.getElementById("flash").innerHTML = "Something wrong happened or the VARIA randomizer aborted: please try again.";
+        return;
+    }
 
     // with items/Locations patch the local rom in memory
     // always make a copy to avoid modifying vanilla rom buffer from local storage
@@ -651,15 +670,6 @@ function AjaxRandomizerCallCompleted(data) {
         document.getElementById("permalink").innerHTML = "<a href=\""+link+"\" target=\"_blank\">"+link+"</a>";
     }
 
-    // info message to display ?
-    if("errorMsg" in data && data["errorMsg"].length > 0) {
-        document.getElementById("flash").innerHTML = data["errorMsg"];
-        $('#flash').show();
-        displayFlash = true;
-    } else {
-        displayFlash = false;
-    }
-
     // set backup button text to Randomize
     document.getElementById("submitBtn").data = "Randomize";
 
@@ -700,13 +710,6 @@ function AjaxRandomizerCallCompleted(data) {
     });
 
     request.fail(ajaxFail);
-
-    // remove "working" message
-    if(displayFlash == false){
-        $('#flash').hide();
-    }
-    $('#overlay').hide();
-    $('#loadingGIF').hide();
 }
 
 function doSubmit() {
@@ -1313,7 +1316,7 @@ Tournament presets:\
       content: "<p>Choose where you want to start the game:\
 <table class=\"full\">\
 <tr>\
-<td>Red Brinstar elevator top door is always blue:</td><td><img src=\"/solver/static/images/red_bt_blue_door.png\" alt=\"Red Brinstar blue door\" title=\"Red Brinstar blue door\" class=\"full\"/></td><td></td>\
+<td>Red Brinstar elevator top door is always blue:</td><td><img src=\"/solver/static/images/help/red_bt_blue_door.png\" alt=\"Red Brinstar blue door\" title=\"Red Brinstar blue door\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
 <tr><td colspan=3 class=\"blankLastRow\"></td></tr>\
@@ -1323,91 +1326,91 @@ Tournament presets:\
 <td>Ceres Station</td><td>Blue Brinstar blue door</td><td></td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/ceres_start.png\" alt=\"Ceres\" title=\"Ceres\" class=\"full\"/></td><td><img src=\"/solver/static/images/blue_bt_blue_door.png\" alt=\"Blue Brinstar blue door\" title=\"Blue Brinstar blue door\" class=\"full\"/></td><td></td>\
+<td><img src=\"/solver/static/images/help/ceres_start.png\" alt=\"Ceres\" title=\"Ceres\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/blue_bt_blue_door.png\" alt=\"Blue Brinstar blue door\" title=\"Blue Brinstar blue door\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
 <td>Landing Site</td><td>Blue Brinstar blue door</td><td></td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/landing_site_start.png\" alt=\"Landing Site\" title=\"Landing Site\" class=\"full\"/></td><td><img src=\"/solver/static/images/blue_bt_blue_door.png\" alt=\"Blue Brinstar blue door\" title=\"Blue Brinstar blue door\" class=\"full\"/></td><td></td>\
+<td><img src=\"/solver/static/images/help/landing_site_start.png\" alt=\"Landing Site\" title=\"Landing Site\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/blue_bt_blue_door.png\" alt=\"Blue Brinstar blue door\" title=\"Blue Brinstar blue door\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
 <td>Gauntlet Top</td><td>Position to access both items</td><td></td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/gauntlet_start.png\" alt=\"Gauntlet\" title=\"Gauntlet\" class=\"full\"/></td><td><img src=\"/solver/static/images/gauntlet_position.png\" alt=\"Gauntlet\" title=\"Gauntlet\" class=\"full\"/></td><td></td>\
+<td><img src=\"/solver/static/images/help/gauntlet_start.png\" alt=\"Gauntlet\" title=\"Gauntlet\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/gauntlet_position.png\" alt=\"Gauntlet\" title=\"Gauntlet\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
 <td>Green Brinstar Elevator</td><td>Brinstar reserve blue door</td><td>Brinstar reserve blue door</td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/green_bt_elevator_start.png\" alt=\"Green Brinstar Elevator\" title=\"Green Brinstar Elevator\" class=\"full\"/></td><td><img src=\"/solver/static/images/bt_reserve_blue_door1.png\" alt=\"Brinstar reserve blue door\" title=\"Brinstar reserve blue door\" class=\"full\"/></td><td><img src=\"/solver/static/images/bt_reserve_blue_door2.png\" alt=\"Brinstar reserve blue door\" title=\"Brinstar reserve blue door\" class=\"full\"/></td>\
+<td><img src=\"/solver/static/images/help/green_bt_elevator_start.png\" alt=\"Green Brinstar Elevator\" title=\"Green Brinstar Elevator\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/bt_reserve_blue_door1.png\" alt=\"Brinstar reserve blue door\" title=\"Brinstar reserve blue door\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/bt_reserve_blue_door2.png\" alt=\"Brinstar reserve blue door\" title=\"Brinstar reserve blue door\" class=\"full\"/></td>\
 </tr>\
 <tr>\
 <td>Big Pink</td><td></td><td></td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/big_pink_start.png\" alt=\"Big Pink\" title=\"Big Pink\" class=\"full\"/></td><td></td><td></td>\
+<td><img src=\"/solver/static/images/help/big_pink_start.png\" alt=\"Big Pink\" title=\"Big Pink\" class=\"full\"/></td><td></td><td></td>\
 </tr>\
 <tr>\
 <td>Etecoons Supers</td><td>Etecoons Super blue door</td><td></td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/etecoons_supers_start.png\" alt=\"Etecoons Supers\" title=\"Etecoons Supers\" class=\"full\"/></td><td><img src=\"/solver/static/images/etecoons_blue_door.png\" alt=\"Etecoons Super blue door\" title=\"Etecoons Super blue door\" class=\"full\"/></td><td></td>\
+<td><img src=\"/solver/static/images/help/etecoons_supers_start.png\" alt=\"Etecoons Supers\" title=\"Etecoons Supers\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/etecoons_blue_door.png\" alt=\"Etecoons Super blue door\" title=\"Etecoons Super blue door\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
 <td>Wrecked Ship Main</td><td>Sponge Bath blue door</td><td></td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/wrecked_ship_start.png\" alt=\"Wrecked Ship Main\" title=\"Wrecked Ship Main\" class=\"full\"/></td><td><img src=\"/solver/static/images/sponge_bath_blue_door.png\" alt=\"Sponge Bath blue door\" title=\"Sponge Bath blue door\" class=\"full\"/></td><td></td>\
+<td><img src=\"/solver/static/images/help/wrecked_ship_start.png\" alt=\"Wrecked Ship Main\" title=\"Wrecked Ship Main\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/sponge_bath_blue_door.png\" alt=\"Sponge Bath blue door\" title=\"Sponge Bath blue door\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
 <td>Firefleas Top (heat removed)</td><td>Fune removed</td><td>Shot blocks at save station</td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/firefleas_top_start.png\" alt=\"Firefleas Top\" title=\"Firefleas Top\" class=\"full\"/></td><td><img src=\"/solver/static/images/fune_removed.png\" alt=\"Fune removed\" title=\"Fune removed\" class=\"full\"/></td><td><img src=\"/solver/static/images/firefleas_shot_blocks.png\" alt=\"Firefleas shot blocks\" title=\"Firefleas shot blocks\" class=\"full\"/></td>\
+<td><img src=\"/solver/static/images/help/firefleas_top_start.png\" alt=\"Firefleas Top\" title=\"Firefleas Top\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/fune_removed.png\" alt=\"Fune removed\" title=\"Fune removed\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/firefleas_shot_blocks.png\" alt=\"Firefleas shot blocks\" title=\"Firefleas shot blocks\" class=\"full\"/></td>\
 </tr>\
 <tr>\
 <td>Business Center</td><td>Hi-Jump area blue door</td><td></td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/business_center_start.png\" alt=\"Business Center\" title=\"Business Center\" class=\"full\"/></td><td><img src=\"/solver/static/images/hijump_blue_door.png\" alt=\"Hi-Jump area blue door\" title=\"Hi-Jump area blue door\" class=\"full\"/></td><td></td>\
+<td><img src=\"/solver/static/images/help/business_center_start.png\" alt=\"Business Center\" title=\"Business Center\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/hijump_blue_door.png\" alt=\"Hi-Jump area blue door\" title=\"Hi-Jump area blue door\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
 <td>Bubble Mountain</td><td>Speed area blue door</td><td>Speed area blue door</td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/bubble_mountain_start.png\" alt=\"Bubble Mountain\" title=\"Bubble Mountain\" class=\"full\"/></td><td><img src=\"/solver/static/images/speed_blue_door1.png\" alt=\"Speed area blue door\" title=\"Speed area blue door\" class=\"full\"/></td><td><img src=\"/solver/static/images/speed_blue_door2.png\" alt=\"Speed area blue door\" title=\"Speed area blue door\" class=\"full\"/></td>\
+<td><img src=\"/solver/static/images/help/bubble_mountain_start.png\" alt=\"Bubble Mountain\" title=\"Bubble Mountain\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/speed_blue_door1.png\" alt=\"Speed area blue door\" title=\"Speed area blue door\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/speed_blue_door2.png\" alt=\"Speed area blue door\" title=\"Speed area blue door\" class=\"full\"/></td>\
 </tr>\
 <tr>\
 <td>Mama Turtle</td><td>Mama Turtle blue door</td><td></td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/mama_turtle_start.png\" alt=\"Mama Turtle\" title=\"Mama Turtle\" class=\"full\"/></td><td><img src=\"/solver/static/images/mama_turtle_blue_door.png\" alt=\"Mama Turtle blue door\" title=\"Mama Turtle blue door\" class=\"full\"/></td><td></td>\
+<td><img src=\"/solver/static/images/help/mama_turtle_start.png\" alt=\"Mama Turtle\" title=\"Mama Turtle\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/mama_turtle_blue_door.png\" alt=\"Mama Turtle blue door\" title=\"Mama Turtle blue door\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
 <td>Watering Hole</td><td>Maridia tube opened</td><td></td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/watering_hole_start.png\" alt=\"Watering Hole\" title=\"Watering Hole\" class=\"full\"/></td><td><img src=\"/solver/static/images/maridia_tube_opened.png\" alt=\"Maridia tube opened\" title=\"Maridia tube opened\" class=\"full\"/></td><td></td>\
+<td><img src=\"/solver/static/images/help/watering_hole_start.png\" alt=\"Watering Hole\" title=\"Watering Hole\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/maridia_tube_opened.png\" alt=\"Maridia tube opened\" title=\"Maridia tube opened\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
 <td>Aqueduct</td><td>Aqueduct Save blue door</td><td></td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/aqueduct_start.png\" alt=\"Aqueduct\" title=\"Aqueduct\" class=\"full\"/></td><td><img src=\"/solver/static/images/aqueduct_save_blue.png\" alt=\"Aqueduct Save door\" title=\"Aqueduct Save door\" class=\"full\"/></td><td></td>\
+<td><img src=\"/solver/static/images/help/aqueduct_start.png\" alt=\"Aqueduct\" title=\"Aqueduct\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/aqueduct_save_blue.png\" alt=\"Aqueduct Save door\" title=\"Aqueduct Save door\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
 <td>Red Brinstar Elevator</td><td>Hellway blue door</td><td></td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/red_bt_elevator_start.png\" alt=\"Red Brinstar Elevator\" title=\"Red Brinstar Elevator\" class=\"full\"/></td><td><img src=\"/solver/static/images/hellway_blue_door.png\" alt=\"Hellway blue door\" title=\"Hellway blue door\" class=\"full\"/></td><td></td>\
+<td><img src=\"/solver/static/images/help/red_bt_elevator_start.png\" alt=\"Red Brinstar Elevator\" title=\"Red Brinstar Elevator\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/hellway_blue_door.png\" alt=\"Hellway blue door\" title=\"Hellway blue door\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
 <td>Golden Four</td><td></td><td></td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/golden_four_start.png\" alt=\"Golden Four\" title=\"Golden Four\" class=\"full\"/></td><td></td><td></td>\
+<td><img src=\"/solver/static/images/help/golden_four_start.png\" alt=\"Golden Four\" title=\"Golden Four\" class=\"full\"/></td><td></td><td></td>\
 </tr>\
 </table>\
 </p>\
@@ -1422,7 +1425,7 @@ Tournament presets:\
 <li>Majors/Minors: Use major (unique upgrades and energy) and minor (ammo) item pools.</p><p><b>Note:</b> High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.</li>\
 <li>Chozo: Put all unique upgrades as well as minimal ammo/energy to finish the seed in the Chozo locations. These are Chozo statues, Morph Ball and boss item locations (Right Super in Wrecked Ship, Varia Suit, Ridley ETank). Depending on progression speed and item distribution settings, you will be able to 'sequence break' by going to other locations as well.</li>\
 <li>Scavenger: You must visit a given number of locations in a mandatory order in a scavenger hunt, and collect items there. The scavenger locations are the 16 locations where a unique upgrade is in the vanilla game, plus Ridley. By default items in the mandatory locations will be vanilla. Other unique upgrades will be randomized between the remaining scavenger locations. By default, you will have to collect all items in the mandatory locations to access Tourian (on top of killing the Golden 4 bosses). You can also choose to trigger the escape immediately after the hunt is over.<br/>The next mandatory location will be displayed in the HUD, and the whole route will be displayed in the HUD during pause (see \"VARIA HUD\" comfort patch help in the advanced tab for more information).</li></ul></p>\
-<p>Check the map for the list of Majors and Chozo locations and items:<br/><a href=\"/solver/static/images/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"chozoThumb\" src=\"/solver/static/images/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p>\
+<p>Check the map for the list of Majors and Chozo locations and items:<br/><a href=\"/solver/static/images/help/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"chozoThumb\" src=\"/solver/static/images/help/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p>\
 <p>Using a non-standard or randomized start location and any other split than 'Full' will enable the VARIA HUD, as Major/Chozo locations are slightly modified depending on the start location.</p>\
 <p>Click on the dice button to randomly set this parameter.</p>"
     },
@@ -1499,7 +1502,7 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
       element: "#areaRandomizationStep",
       title: "Areas randomization",
       content: "<p>Randomize areas together using bidirectional access portals:</p>\
-<a href=\"/solver/static/images/area_map_20200112.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a>\
+<a href=\"/solver/static/images/common/area_map_20200112.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/help/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a>\
 <p>It is recommended to use the <a href=\"/solver/solver_web/tracker\" target=\"_blank\">Area Tracker</a> to find your way more easily.</p>\
 <p>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).</p>\
 <p>By default, the escape sequence will spawn you outside a random map station, and you have to find your way to the ship. See Escape Randomization section (in medium/advanced tab) for more information.</p>\
@@ -1511,9 +1514,9 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
 <td class=\"knowsUsed\"><p class=\"top\">Remove Lower Norfair exit crumble blocks:</td>\
 </tr>\
 <tr>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/fish_gate.png\" alt=\"fish_gate.png\" title=\"fish_gate.png\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/tube_gate.png\" alt=\"tube_gate.png\" title=\"tube_gate.png\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/ln_gate.png\" alt=\"ln_gate.png\" title=\"ln_gate.png\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/fish_gate.png\" alt=\"fish_gate.png\" title=\"fish_gate.png\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/tube_gate.png\" alt=\"tube_gate.png\" title=\"tube_gate.png\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/ln_gate.png\" alt=\"ln_gate.png\" title=\"ln_gate.png\" class=\"full\"/></td>\
 </tr>\
 </table>\
 </p>\
@@ -1525,9 +1528,9 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
 <td class=\"knowsUsed\"><p class=\"top\">Wrecked Ship save station is always active:</td>\
 </tr>\
 <tr>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/main_street_save.png\" alt=\"main_street_save.png\" title=\"main_street_save.png\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/crab_shaft_save.png\" alt=\"crab_shaft_save.png\" title=\"crab_shaft_save.png\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/ws_save.png\" alt=\"ws_save.png\" title=\"ws_save.png\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/main_street_save.png\" alt=\"main_street_save.png\" title=\"main_street_save.png\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/crab_shaft_save.png\" alt=\"crab_shaft_save.png\" title=\"crab_shaft_save.png\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/ws_save.png\" alt=\"ws_save.png\" title=\"ws_save.png\" class=\"full\"/></td>\
 </tr>\
 </table>\
 </p>\
@@ -1540,9 +1543,9 @@ To have a self contained East Maridia area West Sand Hall and the room below Bot
 <td class=\"knowsUsed\"><p class=\"top\">Grey door at West Sand Hall Tunnel right:</td>\
 </tr>\
 <tr>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/west_sand_hall.png\" alt=\"west_sand_hall.png\" title=\"west_sand_hall.png\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/below_botwoon_etank.png\" alt=\"below_botwoon_etank.png\" title=\"below_botwoon_etank.png\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/west_sand_hall_tunnel.png\" alt=\"west_sand_hall_tunnel.png\" title=\"west_sand_hall_tunnel.png\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/west_sand_hall.png\" alt=\"west_sand_hall.png\" title=\"west_sand_hall.png\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/below_botwoon_etank.png\" alt=\"below_botwoon_etank.png\" title=\"below_botwoon_etank.png\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/west_sand_hall_tunnel.png\" alt=\"west_sand_hall_tunnel.png\" title=\"west_sand_hall_tunnel.png\" class=\"full\"/></td>\
 </tr>\
 </table>\
 </p>\
@@ -1570,9 +1573,9 @@ This mode can be use as an introduction before doing full Area Randomization or 
 <td class=\"quarter\"><p class=\"top\">New platform in Green Hill Zone to access transition door:</p></td>\
 </tr>\
 <tr>\
-<td class=\"quarter\"><img src=\"/solver/static/images/crab_gate.png\" alt=\"crab_gate\" title=\"crab_gate\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/greenhill_gate.png\" alt=\"greenhill_gate\" title=\"greenhill_gate\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/greenhill_platform.png\" alt=\"greenhill_platform\" title=\"greenhill_platform\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/help/crab_gate.png\" alt=\"crab_gate\" title=\"crab_gate\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/help/greenhill_gate.png\" alt=\"greenhill_gate\" title=\"greenhill_gate\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/help/greenhill_platform.png\" alt=\"greenhill_platform\" title=\"greenhill_platform\" class=\"full\"/></td>\
 </tr>\
 <tr>\
 <td class=\"quarter\"><p class=\"top\">Access Maridia red fish exit:</p></td>\
@@ -1580,16 +1583,16 @@ This mode can be use as an introduction before doing full Area Randomization or 
 <td class=\"quarter\"><p class=\"top\">Access Lower Norfair exit:</p></td>\
 </tr>\
 <tr>\
-<td class=\"quarter\"><img src=\"/solver/static/images/fish_access.png\" alt=\"fish_access\" title=\"fish_access\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/tube_access.png\" alt=\"tube_access\" title=\"tube_access\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/ln_access.png\" alt=\"ln_access\" title=\"ln_access\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/help/fish_access.png\" alt=\"fish_access\" title=\"fish_access\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/help/tube_access.png\" alt=\"tube_access\" title=\"tube_access\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/help/ln_access.png\" alt=\"ln_access\" title=\"ln_access\" class=\"full\"/></td>\
 </tr>\
 <td class=\"quarter\" colspan=\"3\"><p class=\"top\">Sponge Bath door is set to blue to avoid softlocking and two new platforms are added to traverse Forgotten Highway both ways with only High-Jump boots and Level 1 underwater movement in preset:</p></td>\
 <tr>\
 </tr>\
 <tr>\
-<td class=\"quarter\"><img src=\"/solver/static/images/sponge_bath_blue_door.png\" alt=\"sponge_bath_blue_door\" title=\"sponge_bath_blue_door\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/forgotten_all_the_way.png\" alt=\"forgotten_all_the_way\" title=\"forgotten_all_the_way\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/help/sponge_bath_blue_door.png\" alt=\"sponge_bath_blue_door\" title=\"sponge_bath_blue_door\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/help/forgotten_all_the_way.png\" alt=\"forgotten_all_the_way\" title=\"forgotten_all_the_way\" class=\"full\"/></td>\
 </tr>\
 </table>\
 <p>Using Area randomization and a non-standard or randomized start location will force this setting on.</p>",
@@ -1601,13 +1604,13 @@ This mode can be use as an introduction before doing full Area Randomization or 
       content: "<p>Randomize the color of Red/Green/Yellow doors.<br/>\
 Add four new type of doors which require Ice/Wave/Spazer/Plasma beams to open them.<br/>\
 <table>\
-<tr><td><img src=\"/solver/static/images/Missile.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/missile_door.png\" class=\"marginRight\"></td>\
-<td><img src=\"/solver/static/images/Super.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/super_door.png\" class=\"marginRight\"></td>\
-<td><img src=\"/solver/static/images/PowerBomb.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/powerbomb_door.png\" class=\"marginRight\"></td><td></td></tr>\
-<tr><td><img src=\"/solver/static/images/Wave.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/wave_door.png\" class=\"marginRight\"></td>\
-<td><img src=\"/solver/static/images/Plasma.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/plasma_door.png\" class=\"marginRight\"></td>\
-<td><img src=\"/solver/static/images/Spazer.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/spazer_door.png\" class=\"marginRight\"></td>\
-<td><img src=\"/solver/static/images/Ice.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/ice_door.png\" class=\"marginRight\"></td></tr>\
+<tr><td><img src=\"/solver/static/images/tracker/inventory/Missile.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/help/missile_door.png\" class=\"marginRight\"></td>\
+<td><img src=\"/solver/static/images/tracker/inventory/Super.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/help/super_door.png\" class=\"marginRight\"></td>\
+<td><img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/help/powerbomb_door.png\" class=\"marginRight\"></td><td></td></tr>\
+<tr><td><img src=\"/solver/static/images/tracker/inventory/Wave.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/help/wave_door.png\" class=\"marginRight\"></td>\
+<td><img src=\"/solver/static/images/tracker/inventory/Plasma.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/help/plasma_door.png\" class=\"marginRight\"></td>\
+<td><img src=\"/solver/static/images/tracker/inventory/Spazer.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/help/spazer_door.png\" class=\"marginRight\"></td>\
+<td><img src=\"/solver/static/images/tracker/inventory/Ice.png\" class=\"centerIcon\"></td><td><img src=\"/solver/static/images/help/ice_door.png\" class=\"marginRight\"></td></tr>\
 </table>\
 Missile doors can no longer be opened with a Super Missile. Only one Missile is required to open a Missile door.<br/>\
 For Plasma/Spazer doors, when you have both beams collected and one equipped you can open both door types.<br/>\
@@ -1615,7 +1618,7 @@ Colored doors to save stations / refills / map stations are excluded from random
 Colored doors to save / refill stations are forced to blue.<br/>\
 The fill algorithm will be more trolly about ammo/beam if you use slower progression speed.</p>\
 <p>In this mode there are seven distinct door keys, and sometimes (especially with non standard starting location or area rando), if you go through a blue door you can end up locked on the other side if you don't have or find the item required to come back. If you save in that situation, your save file will be hardlocked. To avoid this, a rolling backup save system is enabled. When you save at a different save station than the last time, a backup of your previous save is done, using an empty save, or an older backup of the same game. You can identify backups in the load menu, as they will have the same slot letter as the original save :</p>\
-<img src=\"/solver/static/images/backup_saves.png\" alt=\"backup_saves.png\" title=\"Backup Saves menu example\" class=\"third center_img\"/>\
+<img src=\"/solver/static/images/help/backup_saves.png\" alt=\"backup_saves.png\" title=\"Backup Saves menu example\" class=\"third center_img\"/>\
 <p>As soon as you load a backup save from the menu, it becomes its own slot. In the example above, if you load your most recent backup (with 0:06 time), it will become 'Samus C'. When playing this new slot C game, when you save, it won't be able to backup, since other slots are taken by the original A slot and an older backup of the A slot. So if you hardlock a save file, be sure to clear it for it to be reused as a backup afterwards.</p>\
 <p>Click on the dice button to randomly set this parameter.</p>\
 Beams doors patch by Mettyk25jigsaw.<br/>\
@@ -1638,7 +1641,7 @@ Grey doors will never open, you will have to go around them.</p>",
 <p>The areas or rooms unlocked by the bosses stay unchanged. For example, you still have to kill Phantoon to activate Wrecked Ship.</p>\
 <p>Wrecked Ship save station is always active:</p>\
 <table class=\"quarter\">\
-<tr><td><img src=\"/solver/static/images/ws_save.png\" alt=\"ws_save.png\" title=\"ws_save.png\" class=\"full\"/></td></tr>\
+<tr><td><img src=\"/solver/static/images/help/ws_save.png\" alt=\"ws_save.png\" title=\"ws_save.png\" class=\"full\"/></td></tr>\
 </table>\
 Click on the dice button to randomly set this parameter.",
       placement: "auto left"
@@ -1652,7 +1655,7 @@ You can generate anything from a densely packed game with just Crateria, Wrecked
 <p>\
 You can also <b>speed up Tourian</b> (on by default), to skip Metroids, Zebetites, and all cutscenes (including Mother Brain 3 fight). Golden Four statues are replaced by an invicible Gadora until all bosses are dead. It also adds a layout patch to open the Zebetites to pass them without Morph, allowing the creation of morphless plandos.\
 </p>\
-<p>Minimizer layout example:<a href=\"/solver/static/images/minimizer_example.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"minimizerThumb\" src=\"/solver/static/images/minimizer_example_thumbnail.png\" alt=\"Minimizer example\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p>\
+<p>Minimizer layout example:<a href=\"/solver/static/images/help/minimizer_example.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"minimizerThumb\" src=\"/solver/static/images/help/minimizer_example_thumbnail.png\" alt=\"Minimizer example\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p>\
 <b>Note:</b> will set Area and Boss randomization.<br/>\
 Click on the dice button to randomly set the number of locations (between 30 and 60).",
       placement: "auto left"
@@ -1688,10 +1691,10 @@ Pick your challenge, or try to do both, but watch your timer!</p>",
     {
       element: "#funCombatStep",
       title: "Super Fun Combat",
-      content: "<p>Forces removal of Plasma Beam <img src=\"/solver/static/images/Plasma.png\" alt=\"Plasma.png\" title=\"Plasma.png\" class=\"width: 32px\"/>, and Screw Attack <img src=\"/solver/static/images/ScrewAttack.png\" alt=\"ScrewAttack.png\" title=\"ScrewAttack.png\" class=\"width: 32px\"/> if the preset and settings allow it.<br/>In addition, can randomly remove some items from the Combat set:</p>\
+      content: "<p>Forces removal of Plasma Beam <img src=\"/solver/static/images/tracker/inventory/Plasma.png\" alt=\"Plasma.png\" title=\"Plasma.png\" class=\"width: 32px\"/>, and Screw Attack <img src=\"/solver/static/images/tracker/inventory/ScrewAttack.png\" alt=\"ScrewAttack.png\" title=\"ScrewAttack.png\" class=\"width: 32px\"/> if the preset and settings allow it.<br/>In addition, can randomly remove some items from the Combat set:</p>\
 <ul>\
-<li><img src=\"/solver/static/images/Spazer.png\" alt=\"Spazer.png\" title=\"Spazer.png\" class=\"width: 32px\"/> Spazer</li>\
-<li><img src=\"/solver/static/images/Wave.png\" alt=\"Wave.png\" title=\"Wave.png\" class=\"width: 32px\"/> Wave Beam</li>\
+<li><img src=\"/solver/static/images/tracker/inventory/Spazer.png\" alt=\"Spazer.png\" title=\"Spazer.png\" class=\"width: 32px\"/> Spazer</li>\
+<li><img src=\"/solver/static/images/tracker/inventory/Wave.png\" alt=\"Wave.png\" title=\"Wave.png\" class=\"width: 32px\"/> Wave Beam</li>\
 </ul>\
 Click on the dice button to randomly set this parameter.",
       placement: "auto left"
@@ -1699,14 +1702,14 @@ Click on the dice button to randomly set this parameter.",
     {
       element: "#funMovementStep",
       title: "Super Fun Movement",
-      content: "<p>Forces removal of Space Jump <img src=\"/solver/static/images/SpaceJump.png\" alt=\"SpaceJump.png\" title=\"SpaceJump.png\" class=\"width: 32px\"/> if the preset allows it.<br/>\
+      content: "<p>Forces removal of Space Jump <img src=\"/solver/static/images/tracker/inventory/SpaceJump.png\" alt=\"SpaceJump.png\" title=\"SpaceJump.png\" class=\"width: 32px\"/> if the preset allows it.<br/>\
 In addition, can randomly remove some items from the Movement set:</p>\
 <ul>\
-<li><img src=\"/solver/static/images/HiJump.png\" alt=\"HiJump.png\" title=\"HiJump.png\" class=\"width: 32px\"/> Hi Jump</li>\
-<li><img src=\"/solver/static/images/Grapple.png\" alt=\"Grapple.png\" title=\"Grapple.png\" class=\"width: 32px\"/> Grappling Beam</li>\
-<li><img src=\"/solver/static/images/SpringBall.png\" alt=\"SpringBall.png\" title=\"SpringBall.png\" class=\"width: 32px\"/> Spring Ball</li>\
-<li><img src=\"/solver/static/images/SpeedBooster.png\" alt=\"SpeedBooster.png\" title=\"SpeedBooster.png\" class=\"width: 32px\"/> Speed Booster</li>\
-<li><img src=\"/solver/static/images/Bomb.png\" alt=\"Bomb.png\" title=\"Bomb.png\" class=\"width: 32px\"/> Bombs</li>\
+<li><img src=\"/solver/static/images/tracker/inventory/HiJump.png\" alt=\"HiJump.png\" title=\"HiJump.png\" class=\"width: 32px\"/> Hi Jump</li>\
+<li><img src=\"/solver/static/images/tracker/inventory/Grapple.png\" alt=\"Grapple.png\" title=\"Grapple.png\" class=\"width: 32px\"/> Grappling Beam</li>\
+<li><img src=\"/solver/static/images/tracker/inventory/SpringBall.png\" alt=\"SpringBall.png\" title=\"SpringBall.png\" class=\"width: 32px\"/> Spring Ball</li>\
+<li><img src=\"/solver/static/images/tracker/inventory/SpeedBooster.png\" alt=\"SpeedBooster.png\" title=\"SpeedBooster.png\" class=\"width: 32px\"/> Speed Booster</li>\
+<li><img src=\"/solver/static/images/tracker/inventory/Bomb.png\" alt=\"Bomb.png\" title=\"Bomb.png\" class=\"width: 32px\"/> Bombs</li>\
 </ul>\
 Click on the dice button to randomly set this parameter.",
       placement: "auto left"
@@ -1714,7 +1717,7 @@ Click on the dice button to randomly set this parameter.",
     {
       element: "#funSuitsStep",
       title: "Suitless",
-      content: "<p>If the preset and seed layout allow it, will force removal of at least one suit (Varia Suit <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> and/or Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/>).</p>\
+      content: "<p>If the preset and seed layout allow it, will force removal of at least one suit (Varia Suit <img src=\"/solver/static/images/tracker/inventory/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> and/or Gravity Suit <img src=\"/solver/static/images/tracker/inventory/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/>).</p>\
 <p>Click on the dice button to randomly set this parameter.</p>",
       placement: "auto left"
     },
@@ -1742,10 +1745,10 @@ Click on the dice button to randomly set this parameter.",
 <td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before Hi-Jump:</p></td>\
 </tr>\
 <tr>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/dachora.png\" alt=\"dachora\" title=\"dachora\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/early_super.png\" alt=\"early_super\" title=\"early_super\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/early_super_bis.png\" alt=\"early_super_bis\" title=\"early_super_bis\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/high_jump.png\" alt=\"high_jump\" title=\"high_jump\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/dachora.png\" alt=\"dachora\" title=\"dachora\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/early_super.png\" alt=\"early_super\" title=\"early_super\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/early_super_bis.png\" alt=\"early_super_bis\" title=\"early_super_bis\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/high_jump.png\" alt=\"high_jump\" title=\"high_jump\" class=\"full\"/></td>\
 </tr>\
 <tr>\
 <td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks at Moat:</p></td>\
@@ -1754,10 +1757,10 @@ Click on the dice button to randomly set this parameter.",
 <td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before Spazer:</p></td>\
 </tr>\
 <tr>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/moat.png\" alt=\"moat\" title=\"moat\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/cathedral.png\" alt=\"cathedral\" title=\"cathedral\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/red_tower.png\" alt=\"red_tower\" title=\"red_tower\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/spazer_block.png\" alt=\"spazer_block\" title=\"spazer_block\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/moat.png\" alt=\"moat\" title=\"moat\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/cathedral.png\" alt=\"cathedral\" title=\"cathedral\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/red_tower.png\" alt=\"red_tower\" title=\"red_tower\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/spazer_block.png\" alt=\"spazer_block\" title=\"spazer_block\" class=\"full\"/></td>\
 </tr>\
 <tr>\
 <td class=\"knowsUsed\"><p class=\"top\">Remove grey door at Brinstar map stations:</p></td>\
@@ -1766,10 +1769,10 @@ Click on the dice button to randomly set this parameter.",
 <td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks at Pink Brinstar Power Bomb Room:</p></td>\
 </tr>\
 <tr>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/bt_map.png\" alt=\"bt_map\" title=\"bt_map\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/spore_save.png\" alt=\"spore_save\" title=\"spore_save\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/kraid_save.png\" alt=\"kraid_save\" title=\"kraid_save\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/mission_impossible.png\" alt=\"mission_impossible\" title=\"mission_impossible\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/bt_map.png\" alt=\"bt_map\" title=\"bt_map\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/spore_save.png\" alt=\"spore_save\" title=\"spore_save\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/kraid_save.png\" alt=\"kraid_save\" title=\"kraid_save\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/mission_impossible.png\" alt=\"mission_impossible\" title=\"mission_impossible\" class=\"full\"/></td>\
 </tr>\
 </table>\
 <p>Using a non-standard or randomized start location will force this setting on.</p>\
@@ -1787,9 +1790,9 @@ Click on the dice button to randomly set this parameter.",
 <td class=\"quarter\"><p class=\"top\">Activate Lower Norfair Chozo (left of entrance) without Space Jump:</p></td>\
 </tr>\
 <tr>\
-<td class=\"quarter\"><img src=\"/solver/static/images/bomb_torizo.png\" alt=\"bomb_torizo\" title=\"bomb_torizo\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/ws_etank.png\" alt=\"ws_etank\" title=\"ws_etank\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/ln_chozo.png\" alt=\"ln_chozo\" title=\"ln_chozo\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/help/bomb_torizo.png\" alt=\"bomb_torizo\" title=\"bomb_torizo\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/help/ws_etank.png\" alt=\"ws_etank\" title=\"ws_etank\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/help/ln_chozo.png\" alt=\"ln_chozo\" title=\"ln_chozo\" class=\"full\"/></td>\
 </tr>\
 </table>\
 <p>Using a non-standard or randomized start location will force this setting on.</p>\
@@ -1800,10 +1803,10 @@ Click on the dice button to randomly set this parameter.",
       element: "#nerfedChargeStep",
       title: "Nerfed Charge Beam",
       content: "<ul>\
-<li>Samus begins with a starter Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> that does one third of charged shot damage, effectively bringing a nerfed charge shot damage to a standard shot damage, but that can damage bosses.</li>\
+<li>Samus begins with a starter Charge Beam <img src=\"/solver/static/images/tracker/inventory/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> that does one third of charged shot damage, effectively bringing a nerfed charge shot damage to a standard shot damage, but that can damage bosses.</li>\
 <li><a href=\"https://wiki.supermetroid.run/Pseudo_Screw_Attack\" target=\"_blank\">Pseudo Screws</a> also do one third damage.</li>\
 <li><a href=\"https://wiki.supermetroid.run/Charge_Beam_Combos\" target=\"_blank\">Special Beam Attacks</a> do normal damage but cost 3 Power Bombs instead of 1.</li>\
-<li>Once the Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> item has been collected, it does full damage and special attacks are back to normal.</li>\
+<li>Once the Charge Beam <img src=\"/solver/static/images/tracker/inventory/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> item has been collected, it does full damage and special attacks are back to normal.</li>\
 </ul>\
 <p>Patch developed by Smiley and Flo.</p>",
       placement: "auto left"
@@ -1812,15 +1815,15 @@ Click on the dice button to randomly set this parameter.",
       element: "#gravityBehaviourStep",
       title: "Suits Properties",
       content: "<p><ul>\
-<li>Balanced:<p>Removes Gravity <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> environmental protection (heat, spikes, electricity...). It also doubles the Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> environmental protection, to balance the two suits abilities. Enemy damage protection is still vanilla (50% for Varia, 75% for Gravity).</p></li>\
+<li>Balanced:<p>Removes Gravity <img src=\"/solver/static/images/tracker/inventory/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> environmental protection (heat, spikes, electricity...). It also doubles the Varia <img src=\"/solver/static/images/tracker/inventory/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> environmental protection, to balance the two suits abilities. Enemy damage protection is still vanilla (50% for Varia, 75% for Gravity).</p></li>\
 <li>Progressive:\
 <p><ul>\
-<li>Gravity <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> provides 50% heat damage reduction. Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> still provides full heat protection.</li>\
-<li>Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> and Gravity  <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> each add 50% damage reduction to enemy attacks and environmental damage.</li>\
-<li>Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> and Gravity  <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> stack to reach 75% reduction to enemy attacks and environmental damage.</li>\
+<li>Gravity <img src=\"/solver/static/images/tracker/inventory/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> provides 50% heat damage reduction. Varia <img src=\"/solver/static/images/tracker/inventory/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> still provides full heat protection.</li>\
+<li>Varia <img src=\"/solver/static/images/tracker/inventory/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> and Gravity  <img src=\"/solver/static/images/tracker/inventory/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> each add 50% damage reduction to enemy attacks and environmental damage.</li>\
+<li>Varia <img src=\"/solver/static/images/tracker/inventory/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> and Gravity  <img src=\"/solver/static/images/tracker/inventory/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> stack to reach 75% reduction to enemy attacks and environmental damage.</li>\
 </ul></p>\
 </li>\
-<li>Vanilla:<p>No change to vanilla suits properties. Most notably, Gravity <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> provides full protection against environmental damages (heat, spikes, electricity...).</p></li>\
+<li>Vanilla:<p>No change to vanilla suits properties. Most notably, Gravity <img src=\"/solver/static/images/tracker/inventory/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> provides full protection against environmental damages (heat, spikes, electricity...).</p></li>\
 </ul></p>\
 <p>Click on the dice button to randomly set this parameter.</p>\
 <p>Patches developed by Total and Smiley.</p>",
@@ -1881,13 +1884,13 @@ This patch is automatically enabled when using Full Countdown item split, or Maj
 <td>Crateria start with Chozo split</td><td>In Full or Full Countdown split</td><td>Major items split</td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/hud_chozo_start.png\" class=\"full\"/></td><td><img src=\"/solver/static/images/hud_full.png\" class=\"full\"/></td><td><img src=\"/solver/static/images/hud_major_energy.png\" class=\"full\"/></td>\
+<td><img src=\"/solver/static/images/help/hud_chozo_start.png\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/hud_full.png\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/hud_major_energy.png\" class=\"full\"/></td>\
 </tr>\
 <tr>\
 <td>Scavenger gameplay</td><td>Scavenger Hunt over</td><td>Prompt during pause to show Scavenger locations</td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/hud_scav.png\" class=\"full\"/></td><td><img src=\"/solver/static/images/hud_scav_over.png\" class=\"full\"/></td><td><img src=\"/solver/static/images/hud_scav_pause.png\" class=\"full\"/></td>\
+<td><img src=\"/solver/static/images/help/hud_scav.png\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/hud_scav_over.png\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/hud_scav_pause.png\" class=\"full\"/></td>\
 </tr>\
 </table></p>\
 <p>This patch was developed by Flo (Area/Item track) and Lioran (Etank bar combine).</p>",
@@ -1988,7 +1991,7 @@ def displayNumber(id, min, max, default, step="1"):
 }}
 <body>
   <div id="overlay"></div>
-  <div id="loadingGIF"><img src={{=URL('static/images','ajax-loader.gif')}}/></div>
+  <div id="loadingGIF"><img src={{=URL('static/images/rando','ajax-loader.gif')}}/></div>
   <div id="loadingTips0" class="loadingTips"></div>
   <div id="loadingTips1" class="loadingTips"></div>
 
@@ -2021,7 +2024,7 @@ def displayNumber(id, min, max, default, step="1"):
           <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank" class="nomargin">
             <input type="hidden" name="cmd" value="_s-xclick" />
             <input type="hidden" name="hosted_button_id" value="J6BEK8K8LVG7Y" />
-            <input type="image" src="/solver/static/images/donate_randomizer.png" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" class="inputImage"/>
+            <input type="image" src="/solver/static/images/rando/donate_randomizer.png" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" class="inputImage"/>
             <img alt="" border="0" src="https://www.paypal.com/en_FR/i/scr/pixel.gif" width="1" height="1" />
           </form>
         </div>

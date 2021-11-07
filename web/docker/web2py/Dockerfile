@@ -46,6 +46,9 @@ RUN openssl genrsa -passout pass:$CERT_PASS 2048 > web2py.key && \
 WORKDIR /root
 RUN if [ -n "${GITHUB_TOKEN}" ]; then git clone --recurse-submodules -b ${BRANCH} https://${GITHUB_TOKEN}:x-oauth-basic@github.com/theonlydude/RandomMetroidSolver.git; else wget https://github.com/theonlydude/RandomMetroidSolver/archive/${BRANCH}.zip && unzip ${BRANCH}.zip && mv RandomMetroidSolver-${BRANCH} RandomMetroidSolver && rm -f ${BRANCH}.zip; cd RandomMetroidSolver; rm -rf varia_custom_sprites && wget https://github.com/theonlydude/varia_custom_sprites/archive/main.zip && unzip main.zip && mv varia_custom_sprites-main varia_custom_sprites && rm -f main.zip; fi
 
+# fetch race mode, only through github because private repo
+RUN if [ -n "${GITHUB_TOKEN}" ]; then git clone https://${GITHUB_TOKEN}:x-oauth-basic@github.com/theonlydude/varia-race-mode; fi
+
 # add communitry presets
 WORKDIR /root/web2py
 RUN mkdir -p /root/web2py/varia_repository
@@ -63,9 +66,10 @@ RUN mkdir -p views/solver_web && touch views/solver_web/__init__.py
 WORKDIR /root/web2py/applications/solver/static
 RUN mkdir -p js graph fonts images/sprite_sheets css
 
-# varia web install
+# varia install
 RUN /root/RandomMetroidSolver/web/install.sh
 RUN /root/RandomMetroidSolver/varia_custom_sprites/install.sh
+RUN if [ -n "${GITHUB_TOKEN}" ]; then VARIA_DIR=/root/RandomMetroidSolver /root/varia-race-mode/install.sh; fi
 
 # add db conf
 RUN echo "dbParams = dict(host='varia-mysql', user='varia', database='varia', password='varia', port=3306)" > /root/RandomMetroidSolver/db_params.py

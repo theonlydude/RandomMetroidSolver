@@ -490,6 +490,8 @@ var musics = {
     for song, data in musics.items():
       if song in ["_dropdown", "_list"]:
         continue
+      if data.get("group") in ["Vanilla Soundtrack - Sound Effects", "Memory Violation"]:
+        continue
       response.write('  "{}": {{\n'.format(song), escape=False)
       for key, value in data.items():
         if key in ["original_author", "port_author", "description"]:
@@ -522,6 +524,9 @@ function loadNewSongFromId(elemId) {
 }
 
 function loadNewSong(song) {
+    if(playerState == "downloading") {
+        return;
+    }
     // first innerHTML modification will change scroll, so store it to restore at the end
     var scroll = $(window).scrollTop();
     stopSong();
@@ -563,6 +568,7 @@ function action_play() {
         return;
     }
     setPlayerButton("download");
+    playerState = "downloading";
     var request = $.ajax({
       url: "{{=URL(f='getSpcFile')}}",
       method: "POST",
@@ -576,6 +582,7 @@ function action_play() {
 
 function spcFileDownloaded(data) {
     console.log("spcFileDownloaded");
+    playerState = "stopped";
 
     var binary_string = atob(data["spc"]);
     var len = binary_string.length;
@@ -590,6 +597,7 @@ function spcFileDownloaded(data) {
 function ajaxPlayerFail(jqXHR, textStatus) {
     ajaxFail(jqXHR, textStatus);
     setPlayerButton("play");
+    playerState = "stopped";
 }
 
 function stopSong() {
@@ -672,11 +680,21 @@ function resetPlaylist() {
 function randomizePlaylist() {
     var scroll = $(window).scrollTop();
     var keys = Object.keys(musics);
+    var alreadyUsed = [];
     for(var i=0; i<musicIds.length; i++) {
-        randomSong = keys[Math.floor(keys.length * Math.random())];
+        var r = Math.floor(keys.length * Math.random());
+        var randomSong = keys[r];
+        while(alreadyUsed.includes(randomSong)) {
+            // reroll
+            r = Math.floor(keys.length * Math.random());
+            randomSong = keys[r];
+        }
+        alreadyUsed.push(randomSong);
         var id = musicIds[i];
         document.getElementById(id).innerHTML = randomSong;
     }
+    // set same song for intro and menu
+    document.getElementById("Menutheme").innerHTML = document.getElementById("Titlesequenceintro").innerHTML
     $("html").scrollTop(scroll);
 }
 
@@ -1283,7 +1301,7 @@ function startTheTour(step=-1) {
     {
       element: "#colorsRandomizationStep",
       title: "Color randomization",
-      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"center_image half\"/></p><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:</p><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"center_image threequarter\"/><p>You can invert the range by clicking on the invert button.</p><p>By default, the same shift is applied to all elements for color consistency. If you disable the setting, a different shift will be used for each category.</p>"
+      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/customizer/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"center_image half\"/></p><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:</p><img src=\"/solver/static/images/customizer/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"center_image threequarter\"/><p>You can invert the range by clicking on the invert button.</p><p>By default, the same shift is applied to all elements for color consistency. If you disable the setting, a different shift will be used for each category.</p>"
     },
     {
       element: "#customSpriteStep",
@@ -1585,10 +1603,10 @@ def displayCheckbox(id, defaultTrue=False):
               <table class="full margin_top">
                 <colgroup><col class="quater"/><col class="quater"/><col class="quater"/><col class="quater"/></colgroup>
                 <tr>
-                  <td><img class="music_button" id="reset" src="/solver/static/images/refresh.svg" title="Reset" alt="Reset" onclick="resetPlaylist()"> Reset playlist</td>
-                  <td><img class="music_button" id="randomize" src="/solver/static/images/games.svg" title="Randomize" alt="Randomize" onclick="randomizePlaylist()"> Randomize playlist</td>
-                  <td><img class="music_button" id="reset" src="/solver/static/images/save.svg" title="Save" alt="Save" onclick="savePlaylist()"> Save playlist</td>
-                  <td><img class="music_button" id="reset" src="/solver/static/images/cloud_upload.png" title="Load" alt="Load" onclick="loadPlaylist()"> Load playlist</td>
+                  <td><img class="music_button" id="reset" src="/solver/static/images/ui/refresh.svg" title="Reset" alt="Reset" onclick="resetPlaylist()"> Reset playlist</td>
+                  <td><img class="music_button" id="randomize" src="/solver/static/images/ui/games.svg" title="Randomize" alt="Randomize" onclick="randomizePlaylist()"> Randomize playlist</td>
+                  <td><img class="music_button" id="reset" src="/solver/static/images/ui/save.svg" title="Save" alt="Save" onclick="savePlaylist()"> Save playlist</td>
+                  <td><img class="music_button" id="reset" src="/solver/static/images/ui/cloud_upload.png" title="Load" alt="Load" onclick="loadPlaylist()"> Load playlist</td>
                 </tr>
               </table>
               <table class="full margin_top">
@@ -1601,9 +1619,9 @@ def displayCheckbox(id, defaultTrue=False):
                         <tr>
                           <td>
                             <div id="controlPlayer">
-                              <img id="play" src="/solver/static/images/play.svg" title="Play Song" alt="Play Song" onclick="action_play()">
-                              <img id="download" src="/solver/static/images/cloud_download.svg" alt="Downloading Song" style="display: none">
-                              <img id="stop" src="/solver/static/images/shut_down.svg" title="Stop Song" alt="Stop Song" style="display: none" onclick="stopSong()">
+                              <img id="play" src="/solver/static/images/ui/play.svg" title="Play Song" alt="Play Song" onclick="action_play()">
+                              <img id="download" src="/solver/static/images/ui/cloud_download.svg" alt="Downloading Song" style="display: none">
+                              <img id="stop" src="/solver/static/images/ui/shut_down.svg" title="Stop Song" alt="Stop Song" style="display: none" onclick="stopSong()">
                             </div>
                           </td>
                           <td>

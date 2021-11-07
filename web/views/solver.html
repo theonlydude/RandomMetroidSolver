@@ -732,7 +732,7 @@ if session.solver["pickupStrategy"] == "all":
       pass
     response.write("      <td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {}>".format(item, item, checked), escape=False)
 
-    response.write("<img src=\"/solver/static/images/{}.png\" alt=\"{}.png\" title=\"{}.png\" class=\"width: 32px\"/>".format(item, item, item), escape=False)
+    response.write("<img src=\"/solver/static/images/tracker/inventory/{}.png\" alt=\"{}.png\" title=\"{}.png\" class=\"width: 32px\"/>".format(item, item, item), escape=False)
     response.write("</td>\n", escape=False)
 
     pass
@@ -807,38 +807,38 @@ if result is not None:
       <div class="centerTable">
       <select multiple="multiple" id="item" name="item">
         <optgroup label="Nothing">
-          <option data-img-src="/solver/static/images/Nothing.png" value="Nothing">Nothing</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Nothing.png" value="Nothing">Nothing</option>
         </optgroup>
         <optgroup label="Ammo">
-          <option data-img-src="/solver/static/images/Missile.png" value="Missile">Missile</option>
-          <option data-img-src="/solver/static/images/Super.png" value="Super">Super Missile</option>
-          <option data-img-src="/solver/static/images/PowerBomb.png" value="PowerBomb">Power Bomb</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Missile.png" value="Missile">Missile</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Super.png" value="Super">Super Missile</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/PowerBomb.png" value="PowerBomb">Power Bomb</option>
         </optgroup>
         <optgroup label="Energy">
-          <option data-img-src="/solver/static/images/ETank.png" value="ETank">Energy Tank</option>
-            <option data-img-src="/solver/static/images/Reserve.png" value="Reserve">Reserve Tank</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/ETank.png" value="ETank">Energy Tank</option>
+            <option data-img-src="/solver/static/images/tracker/inventory/Reserve.png" value="Reserve">Reserve Tank</option>
         </optgroup>
         <optgroup label="Beams">
-          <option data-img-src="/solver/static/images/Charge.png" value="Charge">Charge Beam</option>
-          <option data-img-src="/solver/static/images/Ice.png" value="Ice">Ice Beam</option>
-          <option data-img-src="/solver/static/images/Wave.png" value="Wave">Wave Beam</option>
-          <option data-img-src="/solver/static/images/Spazer.png" value="Spazer">Spazer</option>
-          <option data-img-src="/solver/static/images/Plasma.png" value="Plasma">Plasma Beam</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Charge.png" value="Charge">Charge Beam</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Ice.png" value="Ice">Ice Beam</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Wave.png" value="Wave">Wave Beam</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Spazer.png" value="Spazer">Spazer</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Plasma.png" value="Plasma">Plasma Beam</option>
         </optgroup>
         <optgroup label="Suits">
-          <option data-img-src="/solver/static/images/Varia.png" value="Varia">Varia Suit</option>
-          <option data-img-src="/solver/static/images/Gravity.png" value="Gravity">Gravity Suit</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Varia.png" value="Varia">Varia Suit</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Gravity.png" value="Gravity">Gravity Suit</option>
         </optgroup>
         <optgroup label="Items">
-          <option data-img-src="/solver/static/images/Morph.png" value="Morph">Morph Ball</option>
-          <option data-img-src="/solver/static/images/Bomb.png" value="Bomb">Bomb</option>
-          <option data-img-src="/solver/static/images/SpringBall.png" value="SpringBall">Spring Ball</option>
-          <option data-img-src="/solver/static/images/ScrewAttack.png" value="ScrewAttack">Screw Attack</option>
-          <option data-img-src="/solver/static/images/HiJump.png" value="HiJump">Hi-Jump Boots</option>
-          <option data-img-src="/solver/static/images/SpaceJump.png" value="SpaceJump">Space Jump</option>
-          <option data-img-src="/solver/static/images/SpeedBooster.png" value="SpeedBooster">Speed Booster</option>
-          <option data-img-src="/solver/static/images/Grapple.png" value="Grapple">Grapple Beam</option>
-          <option data-img-src="/solver/static/images/XRayScope.png" value="XRayScope">X-Ray Scope</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Morph.png" value="Morph">Morph Ball</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Bomb.png" value="Bomb">Bomb</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/SpringBall.png" value="SpringBall">Spring Ball</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/ScrewAttack.png" value="ScrewAttack">Screw Attack</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/HiJump.png" value="HiJump">Hi-Jump Boots</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/SpaceJump.png" value="SpaceJump">Space Jump</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/SpeedBooster.png" value="SpeedBooster">Speed Booster</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Grapple.png" value="Grapple">Grapple Beam</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/XRayScope.png" value="XRayScope">X-Ray Scope</option>
         </optgroup>
       </select>
       </div>

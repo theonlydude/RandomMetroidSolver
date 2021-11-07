@@ -69,12 +69,12 @@ class DB:
             return
 
         try:
-            sql = "insert into solver_params values (%d, '%s', '%s', %d, '%s');" % (id, romFileName, preset, difficultyTarget, pickupStrategy)
-            self.cursor.execute(sql)
+            sql = "insert into solver_params values (%s, %s, %s, %s, %s);"
+            self.cursor.execute(sql, (id, romFileName, preset, difficultyTarget, pickupStrategy))
 
-            sql = "insert into solver_items_forbidden values (%d, '%s');"
+            sql = "insert into solver_items_forbidden values (%s, %s);"
             for item in itemsForbidden:
-                self.cursor.execute(sql % (id, item))
+                self.cursor.execute(sql, (id, item))
         except Exception as e:
             print("DB.addSolverParams::error execute: {}".format(e))
             self.dbAvailable = False
@@ -91,16 +91,17 @@ class DB:
 
         try:
             if returnCode == 0:
-                sql = "insert into solver_collected_items values (%d, '%s', %d);"
+                sql = "insert into solver_collected_items values (%s, %s, %s);"
                 for item, count in result['collectedItems'].items():
                     if count > 0:
-                        self.cursor.execute(sql % (id, item, count))
+                        self.cursor.execute(sql, (id, item, count))
 
-                sql = "insert into solver_result values (%d, %d, %f, %d, %d, %d, %s, %d, %d, %d, %d, %d);" % (id, returnCode, duration, result['difficulty'], result['knowsUsed'][0], result['knowsUsed'][1], result['itemsOk'], lenNone(result['remainTry']), lenNone(result['remainMajors']), lenNone(result['remainMinors']), lenNone(result['skippedMajors']), lenNone(result['unavailMajors']))
+                sql = "insert into solver_result values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+                self.cursor.execute(sql, (id, returnCode, duration, result['difficulty'], result['knowsUsed'][0], result['knowsUsed'][1], result['itemsOk'], lenNone(result['remainTry']), lenNone(result['remainMajors']), lenNone(result['remainMinors']), lenNone(result['skippedMajors']), lenNone(result['unavailMajors'])))
             else:
-                sql = "insert into solver_result (solver_id, return_code, duration) values (%d, %d, %f);" % (id, returnCode, duration)
+                sql = "insert into solver_result (solver_id, return_code, duration) values (%s, %s, %s);"
+                self.cursor.execute(sql, (id, returnCode, duration))
 
-            self.cursor.execute(sql)
         except Exception as e:
             print("DB.addSolverResult::error execute \"{}\" error: {}".format(sql, e))
             self.dbAvailable = False
@@ -124,11 +125,11 @@ class DB:
         ignoreParams = ['paramsFileTarget', 'complexity']
 
         try:
-            sql = "insert into randomizer_params values (%d, '%s', '%s');"
+            sql = "insert into randomizer_params values (%s, %s, %s);"
             for (name, value) in params.items():
                 if name in ignoreParams:
                     continue
-                self.cursor.execute(sql % (id, name, value))
+                self.cursor.execute(sql, (id, name, value))
         except Exception as e:
             print("DB.addRandoParams::error execute: {}".format(e))
             self.dbAvailable = False
@@ -138,9 +139,9 @@ class DB:
             return None
 
         try:
-            sql = "update randomizer_params set value = '%s' where randomizer_id = %d and name = '%s';"
+            sql = "update randomizer_params set value = %s where randomizer_id = %s and name = %s;"
             for (name, value) in params.items():
-                self.cursor.execute(sql % (value, id, name))
+                self.cursor.execute(sql, (value, id, name))
         except Exception as e:
             print("DB.updateRandoParams::error execute: {}".format(e))
             self.dbAvailable = False
@@ -154,8 +155,8 @@ class DB:
 
         try:
             msg = escapeMsg(msg)
-            sql = "insert into randomizer_result (randomizer_id, return_code, duration, error_msg) values (%d, %d, %f, '%s');"
-            self.cursor.execute(sql % (id, returnCode, duration, msg))
+            sql = "insert into randomizer_result (randomizer_id, return_code, duration, error_msg) values (%s, %s, %s, %s);"
+            self.cursor.execute(sql, (id, returnCode, duration, msg))
         except Exception as e:
             print("DB.addRandoResult::error execute \"{}\" error: {}".format(sql, e))
             self.dbAvailable = False
@@ -166,9 +167,9 @@ class DB:
 
         try:
             sql = """
-update randomizer set upload_status = 'local', filename = '%s', guid = '%s'
+update randomizer set upload_status = 'local', filename = %s, guid = %s
 where id = %s;"""
-            self.cursor.execute(sql % (fileName, guid, id))
+            self.cursor.execute(sql, (fileName, guid, id))
         except Exception as e:
             print("DB.addRandoUploadResult::error execute \"{}\" error: {}".format(sql, e))
             self.dbAvailable = False
@@ -178,8 +179,8 @@ where id = %s;"""
             return None
 
         try:
-            sql = "insert into preset_action (preset, action_time, action) values ('%s', now(), '%s');"
-            self.cursor.execute(sql % (preset, action))
+            sql = "insert into preset_action (preset, action_time, action) values (%s, now(), %s);"
+            self.cursor.execute(sql, (preset, action))
         except Exception as e:
             print("DB.initPresets::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
@@ -189,8 +190,8 @@ where id = %s;"""
             return None
 
         try:
-            sql = "insert into isolver (init_time, preset, type, romFileName) values (now(), '%s', '%s', '%s');"
-            self.cursor.execute(sql % (preset, type, romFileName))
+            sql = "insert into isolver (init_time, preset, type, romFileName) values (now(), %s, %s, %s);"
+            self.cursor.execute(sql, (preset, type, romFileName))
         except Exception as e:
             print("DB.addISolver::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
@@ -200,8 +201,8 @@ where id = %s;"""
             return None
 
         try:
-            sql = "insert into sprites (init_time, sprite) values (now(), '%s');"
-            self.cursor.execute(sql % (sprite, ))
+            sql = "insert into sprites (init_time, sprite) values (now(), %s);"
+            self.cursor.execute(sql, (sprite, ))
         except Exception as e:
             print("DB.addSprite::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
@@ -211,8 +212,8 @@ where id = %s;"""
             return None
 
         try:
-            sql = "insert into ships (init_time, ship) values (now(), '%s');"
-            self.cursor.execute(sql % (ship, ))
+            sql = "insert into ships (init_time, ship) values (now(), %s);"
+            self.cursor.execute(sql, (ship, ))
         except Exception as e:
             print("DB.addShip::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
@@ -222,8 +223,8 @@ where id = %s;"""
             return None
 
         try:
-            sql = "insert into plando_rando (init_time, return_code, duration, error_msg) values (now(), %d, %f, '%s');"
-            self.cursor.execute(sql % (return_code, duration, msg))
+            sql = "insert into plando_rando (init_time, return_code, duration, error_msg) values (now(), %s, %s, %s);"
+            self.cursor.execute(sql, (return_code, duration, msg))
         except Exception as e:
             print("DB.addPlandoRando::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
@@ -234,10 +235,10 @@ where id = %s;"""
             return None
 
         try:
-            if params == None:
+            if params is None:
                 self.cursor.execute(sql)
             else:
-                self.cursor.execute(sql % params)
+                self.cursor.execute(sql, params)
             return self.cursor.fetchall()
         except Exception as e:
             print("DB.execSelect::error execute \"{}\" error: {}".format(sql, e))
@@ -247,7 +248,7 @@ where id = %s;"""
         if self.dbAvailable == False:
             return None
 
-        sql = "select date(action_time), count(*) from {} where action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK) group by date(action_time) order by 1;".format(table)
+        sql = "select date(action_time), count(*) from {} where action_time > DATE_SUB(CURDATE(), INTERVAL %s WEEK) group by date(action_time) order by 1;".format(table)
         return self.execSelect(sql, (weeks,))
 
     def getSolverUsage(self, weeks):
@@ -260,7 +261,7 @@ where id = %s;"""
         if self.dbAvailable == False:
             return None
 
-        sql = "select distinct(sp.preset) from solver s join solver_params sp on s.id = sp.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK);"
+        sql = "select distinct(sp.preset) from solver s join solver_params sp on s.id = sp.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL %s WEEK);"
         presets = self.execSelect(sql, (weeks,))
         if presets == None:
             return None
@@ -280,21 +281,21 @@ where id = %s;"""
         if self.dbAvailable == False:
             return None
 
-        sql = "select date(s.action_time), sr.return_code, count(*) from solver s join solver_result sr on s.id = sr.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK) group by date(s.action_time), sr.return_code order by 1;"
+        sql = "select date(s.action_time), sr.return_code, count(*) from solver s join solver_result sr on s.id = sr.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL %s WEEK) group by date(s.action_time), sr.return_code order by 1;"
         return self.execSelect(sql, (weeks,))
 
     def getSolverDurations(self, weeks):
         if self.dbAvailable == False:
             return None
 
-        sql = "select s.action_time, sr.duration from solver s join solver_result sr on s.id = sr.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK) order by 1;"
+        sql = "select s.action_time, sr.duration from solver s join solver_result sr on s.id = sr.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL %s WEEK) order by 1;"
         return self.execSelect(sql, (weeks,))
 
     def getRandomizerPresets(self, weeks):
         if self.dbAvailable == False:
             return None
 
-        sql = "select distinct(value) from randomizer r join randomizer_params rp on r.id = rp.randomizer_id where rp.name = 'preset' and r.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK);"
+        sql = "select distinct(value) from randomizer r join randomizer_params rp on r.id = rp.randomizer_id where rp.name = 'preset' and r.action_time > DATE_SUB(CURDATE(), INTERVAL %s WEEK);"
         presets = self.execSelect(sql, (weeks,))
         if presets == None:
             return None
@@ -314,7 +315,7 @@ where id = %s;"""
         if self.dbAvailable == False:
             return None
 
-        sql = "select r.action_time, rr.duration from randomizer r join randomizer_result rr on r.id = rr.randomizer_id where r.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK) order by 1;"
+        sql = "select r.action_time, rr.duration from randomizer r join randomizer_result rr on r.id = rr.randomizer_id where r.action_time > DATE_SUB(CURDATE(), INTERVAL %s WEEK) order by 1;"
         return self.execSelect(sql, (weeks,))
 
     def getSolverData(self, weeks):
@@ -332,7 +333,7 @@ from solver s
   left join solver_result sr on s.id = sr.solver_id
   left join solver_collected_items sci on s.id = sci.solver_id
   left join (select solver_id, group_concat(item order by item) as forbidden_items from solver_items_forbidden group by solver_id) sif on s.id = sif.solver_id
-where s.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK)
+where s.action_time > DATE_SUB(CURDATE(), INTERVAL %s WEEK)
 group by s.id
 order by s.id;"""
 
@@ -361,7 +362,7 @@ group_concat("'", rp.name, "': '", rp.value, "'" order by rp.name)
 from randomizer r
   left join randomizer_params rp on r.id = rp.randomizer_id
   left join randomizer_result rr on r.id = rr.randomizer_id
-where r.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK)
+where r.action_time > DATE_SUB(CURDATE(), INTERVAL %s WEEK)
 group by r.id
 order by r.id;"""
 
@@ -406,7 +407,7 @@ order by r.id;"""
 from randomizer_params rp
 where rp.name not like '%%MultiSelect'
   and rp.name != 'seed'
-  and rp.randomizer_id >= (select min(id) from randomizer where action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK))
+  and rp.randomizer_id >= (select min(id) from randomizer where action_time > DATE_SUB(CURDATE(), INTERVAL %s WEEK))
 group by rp.name, rp.value
 order by 1,2;"""
 
@@ -453,35 +454,12 @@ order by 1,2;"""
 
         return result
 
-    def getRandomizerSeedParamsAPI(self, guid):
-        if self.dbAvailable == False:
-            return None
-
-        sql = "select rp.name, rp.value from randomizer_params rp join randomizer r on rp.randomizer_id = r.id where r.guid = '%s' order by rp.name;"
-        data = self.execSelect(sql, (guid,))
-        if data == None:
-            return ""
-        else:
-            ret = "{"
-            tmp = []
-            for row in data:
-                arg = row[0]
-                value = row[1]
-                if arg.find("MultiSelect") != -1:
-                    value = '["{}"]'.format('", "'.join(value.split(',')))
-                else:
-                    value = '"{}"'.format(value)
-                tmp.append('"{}": {}'.format(arg, value))
-            ret += ','.join(tmp)
-            ret += "}"
-            return ret
-
     def getRandomizerSeedParams(self, randomizer_id):
         if self.dbAvailable == False:
             return None
 
         seed = 0
-        sql = "select name, value from randomizer_params where randomizer_id = %d order by name;"
+        sql = "select name, value from randomizer_params where randomizer_id = %s order by name;"
         data = self.execSelect(sql, (randomizer_id,))
         if data == None:
             return ""
@@ -506,7 +484,7 @@ order by 1,2;"""
         if self.dbAvailable == False:
             return None
 
-        sql = "select max(action_time) from preset_action where preset = '%s';"
+        sql = "select max(action_time) from preset_action where preset = %s;"
         data = self.execSelect(sql, (preset,))
         if data == None:
             return 'N/A'
@@ -523,31 +501,31 @@ order by 1,2;"""
         sql = """
 select 'upload_status', upload_status
 from randomizer
-where guid = '%s'
+where guid = %s
 union all
 select 'filename', filename
 from randomizer
-where guid = '%s'
+where guid = %s
 union all
 select 'time', action_time
 from randomizer
-where guid = '%s'
+where guid = %s
 union all
 select name, value
 from randomizer_params
-where randomizer_id = (select id from randomizer where guid = '%s')
+where randomizer_id = (select id from randomizer where guid = %s)
 order by 1;"""
 
-        return self.execSelect(sql % (key, key, key, key))
+        return self.execSelect(sql, (key, key, key, key))
 
     def getSeedIpsInfo(self, key):
         # key is id from randomizer table
         if self.dbAvailable == False:
             return None
 
-        sql = """select upload_status, filename from randomizer where guid = '%s';"""
+        sql = """select upload_status, filename from randomizer where guid = %s;"""
 
-        return self.execSelect(sql % (key,))
+        return self.execSelect(sql, (key,))
 
     def updateSeedUploadStatus(self, key, newStatus):
         # key is id from randomizer table
@@ -555,8 +533,8 @@ order by 1;"""
             return None
 
         try:
-            sql = """update randomizer set upload_status = '%s' where guid = '%s';"""
-            self.cursor.execute(sql % (newStatus, key))
+            sql = """update randomizer set upload_status = %s where guid = %s;"""
+            self.cursor.execute(sql, (newStatus, key))
         except Exception as e:
             print("DB.updateSeedUploadStatus::error execute: {}".format(e))
             self.dbAvailable = False
@@ -565,7 +543,7 @@ order by 1;"""
         if self.dbAvailable == False:
             return None
 
-        sql = "select distinct(preset) from isolver where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK);"
+        sql = "select distinct(preset) from isolver where init_time > DATE_SUB(CURDATE(), INTERVAL %s WEEK);"
         presets = self.execSelect(sql, (weeks,))
         if presets == None:
             return None
@@ -588,7 +566,7 @@ order by 1;"""
         # return all data csv style
         sql = """select 0, init_time, type, preset, romFileName
 from isolver
-where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK)
+where init_time > DATE_SUB(CURDATE(), INTERVAL %s WEEK)
 order by init_time;"""
 
         header = ["initTime", "type", "preset", "romFileName"]
@@ -598,7 +576,7 @@ order by init_time;"""
         if self.dbAvailable == False:
             return None
 
-        sql = "select distinct(sprite) from sprites where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK);"
+        sql = "select distinct(sprite) from sprites where init_time > DATE_SUB(CURDATE(), INTERVAL %s WEEK);"
         sprites = self.execSelect(sql, (weeks,))
         if sprites == None:
             return None
@@ -629,7 +607,7 @@ order by init_time;"""
         if self.dbAvailable == False:
             return None
 
-        sql = "select distinct(ship) from ships where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK);"
+        sql = "select distinct(ship) from ships where init_time > DATE_SUB(CURDATE(), INTERVAL %s WEEK);"
         ships = self.execSelect(sql, (weeks,))
         if ships == None:
             return None
@@ -663,7 +641,7 @@ order by init_time;"""
         # return all data csv style
         sql = """select 0, init_time, return_code, duration, error_msg
 from plando_rando
-where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK)
+where init_time > DATE_SUB(CURDATE(), INTERVAL %s WEEK)
 order by init_time;"""
 
         header = ["initTime", "returnCode", "duration", "errorMsg"]
@@ -735,27 +713,27 @@ set @last_id = last_insert_id();
         sqlItems = """select sum(e.count), i.item, round(100*sum(i.EnergyTankGauntlet)/sum(e.count), 1), round(100*sum(i.Bomb)/sum(e.count), 1), round(100*sum(i.EnergyTankTerminator)/sum(e.count), 1), round(100*sum(i.ReserveTankBrinstar)/sum(e.count), 1), round(100*sum(i.ChargeBeam)/sum(e.count), 1), round(100*sum(i.MorphingBall)/sum(e.count), 1), round(100*sum(i.EnergyTankBrinstarCeiling)/sum(e.count), 1), round(100*sum(i.EnergyTankEtecoons)/sum(e.count), 1), round(100*sum(i.EnergyTankWaterway)/sum(e.count), 1), round(100*sum(i.EnergyTankBrinstarGate)/sum(e.count), 1), round(100*sum(i.XRayScope)/sum(e.count), 1), round(100*sum(i.Spazer)/sum(e.count), 1), round(100*sum(i.EnergyTankKraid)/sum(e.count), 1), round(100*sum(i.Kraid)/sum(e.count), 1), round(100*sum(i.VariaSuit)/sum(e.count), 1), round(100*sum(i.IceBeam)/sum(e.count), 1), round(100*sum(i.EnergyTankCrocomire)/sum(e.count), 1), round(100*sum(i.HiJumpBoots)/sum(e.count), 1), round(100*sum(i.GrappleBeam)/sum(e.count), 1), round(100*sum(i.ReserveTankNorfair)/sum(e.count), 1), round(100*sum(i.SpeedBooster)/sum(e.count), 1), round(100*sum(i.WaveBeam)/sum(e.count), 1), round(100*sum(i.Ridley)/sum(e.count), 1), round(100*sum(i.EnergyTankRidley)/sum(e.count), 1), round(100*sum(i.ScrewAttack)/sum(e.count), 1), round(100*sum(i.EnergyTankFirefleas)/sum(e.count), 1), round(100*sum(i.ReserveTankWreckedShip)/sum(e.count), 1), round(100*sum(i.EnergyTankWreckedShip)/sum(e.count), 1), round(100*sum(i.Phantoon)/sum(e.count), 1), round(100*sum(i.RightSuperWreckedShip)/sum(e.count), 1), round(100*sum(i.GravitySuit)/sum(e.count), 1), round(100*sum(i.EnergyTankMamaturtle)/sum(e.count), 1), round(100*sum(i.PlasmaBeam)/sum(e.count), 1), round(100*sum(i.ReserveTankMaridia)/sum(e.count), 1), round(100*sum(i.SpringBall)/sum(e.count), 1), round(100*sum(i.EnergyTankBotwoon)/sum(e.count), 1), round(100*sum(i.Draygon)/sum(e.count), 1), round(100*sum(i.SpaceJump)/sum(e.count), 1), round(100*sum(i.MotherBrain)/sum(e.count), 1), round(100*sum(i.PowerBombCrateriasurface)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShipbottom)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShiptop)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShipmiddle)/sum(e.count), 1), round(100*sum(i.MissileCrateriamoat)/sum(e.count), 1), round(100*sum(i.MissileCrateriabottom)/sum(e.count), 1), round(100*sum(i.MissileCrateriagauntletright)/sum(e.count), 1), round(100*sum(i.MissileCrateriagauntletleft)/sum(e.count), 1), round(100*sum(i.SuperMissileCrateria)/sum(e.count), 1), round(100*sum(i.MissileCrateriamiddle)/sum(e.count), 1), round(100*sum(i.PowerBombgreenBrinstarbottom)/sum(e.count), 1), round(100*sum(i.SuperMissilepinkBrinstar)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbelowsupermissile)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenBrinstartop)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbehindmissile)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbehindreservetank)/sum(e.count), 1), round(100*sum(i.MissilepinkBrinstartop)/sum(e.count), 1), round(100*sum(i.MissilepinkBrinstarbottom)/sum(e.count), 1), round(100*sum(i.PowerBombpinkBrinstar)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarpipe)/sum(e.count), 1), round(100*sum(i.PowerBombblueBrinstar)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarmiddle)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenBrinstarbottom)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarbottom)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstartop)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarbehindmissile)/sum(e.count), 1), round(100*sum(i.PowerBombredBrinstarsidehopperroom)/sum(e.count), 1), round(100*sum(i.PowerBombredBrinstarspikeroom)/sum(e.count), 1), round(100*sum(i.MissileredBrinstarspikeroom)/sum(e.count), 1), round(100*sum(i.MissileKraid)/sum(e.count), 1), round(100*sum(i.Missilelavaroom)/sum(e.count), 1), round(100*sum(i.MissilebelowIceBeam)/sum(e.count), 1), round(100*sum(i.MissileaboveCrocomire)/sum(e.count), 1), round(100*sum(i.MissileHiJumpBoots)/sum(e.count), 1), round(100*sum(i.EnergyTankHiJumpBoots)/sum(e.count), 1), round(100*sum(i.PowerBombCrocomire)/sum(e.count), 1), round(100*sum(i.MissilebelowCrocomire)/sum(e.count), 1), round(100*sum(i.MissileGrappleBeam)/sum(e.count), 1), round(100*sum(i.MissileNorfairReserveTank)/sum(e.count), 1), round(100*sum(i.MissilebubbleNorfairgreendoor)/sum(e.count), 1), round(100*sum(i.MissilebubbleNorfair)/sum(e.count), 1), round(100*sum(i.MissileSpeedBooster)/sum(e.count), 1), round(100*sum(i.MissileWaveBeam)/sum(e.count), 1), round(100*sum(i.MissileGoldTorizo)/sum(e.count), 1), round(100*sum(i.SuperMissileGoldTorizo)/sum(e.count), 1), round(100*sum(i.MissileMickeyMouseroom)/sum(e.count), 1), round(100*sum(i.MissilelowerNorfairabovefireflearoom)/sum(e.count), 1), round(100*sum(i.PowerBomblowerNorfairabovefireflearoom)/sum(e.count), 1), round(100*sum(i.PowerBombPowerBombsofshame)/sum(e.count), 1), round(100*sum(i.MissilelowerNorfairnearWaveBeam)/sum(e.count), 1), round(100*sum(i.MissileWreckedShipmiddle)/sum(e.count), 1), round(100*sum(i.MissileGravitySuit)/sum(e.count), 1), round(100*sum(i.MissileWreckedShiptop)/sum(e.count), 1), round(100*sum(i.SuperMissileWreckedShipleft)/sum(e.count), 1), round(100*sum(i.MissilegreenMaridiashinespark)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenMaridia)/sum(e.count), 1), round(100*sum(i.MissilegreenMaridiatatori)/sum(e.count), 1), round(100*sum(i.SuperMissileyellowMaridia)/sum(e.count), 1), round(100*sum(i.MissileyellowMaridiasupermissile)/sum(e.count), 1), round(100*sum(i.MissileyellowMaridiafalsewall)/sum(e.count), 1), round(100*sum(i.MissileleftMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.MissilerightMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.PowerBombrightMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.MissilepinkMaridia)/sum(e.count), 1), round(100*sum(i.SuperMissilepinkMaridia)/sum(e.count), 1), round(100*sum(i.MissileDraygon)/sum(e.count), 1)
 from extended_stats e join item_locs i on e.id = i.ext_id
 where item not in ('Nothing', 'NoEnergy', 'ETank', 'Reserve', 'Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain')
-  and e.skillPreset = '%s' and e.randoPreset = '%s'
+  and e.skillPreset = %s and e.randoPreset = %s
 group by i.item
 order by i.item;"""
 
         sqlTechniques = """select t.technique, round(100*sum(t.count)/sum(e.count), 1)
 from extended_stats e
   join techniques t on e.id = t.ext_id
-where e.skillPreset = '%s' and e.randoPreset = '%s'
+where e.skillPreset = %s and e.randoPreset = %s
 group by t.technique;"""
 
         sqlDifficulties = """
 select sum(d.easy), sum(d.medium), sum(d.hard), sum(d.harder), sum(d.hardcore), sum(d.mania)
 from extended_stats e
   join difficulties d on e.id = d.ext_id
-where e.skillPreset = '%s' and e.randoPreset = '%s';"""
+where e.skillPreset = %s and e.randoPreset = %s;"""
 
         sqlSolverStats = """
 select s.name, s.value, round(count(*) * 100 / e.count, 1)
 from extended_stats e
   join solver_stats s on e.id = s.ext_id
-where e.skillPreset = '%s' and e.randoPreset = '%s'
+where e.skillPreset = %s and e.randoPreset = %s
 group by s.name, s.value
 order by 1,2;"""
 
@@ -795,7 +773,7 @@ order by 1,2;"""
 select s.name, s.value, round(count(*) * 100 / e.count, 1)
 from extended_stats e
   join solver_stats s on e.id = s.ext_id
-where e.skillPreset = '%s' and e.randoPreset = '%s'
+where e.skillPreset = %s and e.randoPreset = %s
 group by s.name, s.value
 order by 1,2;"""
 
@@ -826,7 +804,7 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "select re.plando_name, re.init_time, re.author, re.long_desc, re.suggested_preset, re.download_count, (select sum(ra.rating)/count(1) from plando_rating ra where ra.plando_name = re.plando_name), (select count(1) from plando_rating ra where ra.plando_name = re.plando_name) from plando_repo re where re.plando_name = '%s';"
+            sql = "select re.plando_name, re.init_time, re.author, re.long_desc, re.suggested_preset, re.download_count, (select sum(ra.rating)/count(1) from plando_rating ra where ra.plando_name = re.plando_name), (select count(1) from plando_rating ra where ra.plando_name = re.plando_name) from plando_repo re where re.plando_name = %s;"
             return self.execSelect(sql, (plandoName,))
         except Exception as e:
             print("DB.getPlando::error execute: {} error: {}".format(sql, e))
@@ -848,7 +826,7 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "select plando_name from plando_repo where plando_name = '%s';"
+            sql = "select plando_name from plando_repo where plando_name = %s;"
             return self.execSelect(sql, (plandoName,))
         except Exception as e:
             print("DB.checkPlando::error execute: {} error: {}".format(sql, e))
@@ -859,7 +837,7 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "select ips_max_size from plando_repo where plando_name = '%s';"
+            sql = "select ips_max_size from plando_repo where plando_name = %s;"
             return self.execSelect(sql, (plandoName,))
         except Exception as e:
             print("DB.getPlandoIpsMaxSize::error execute: {} error: {}".format(sql, e))
@@ -870,7 +848,7 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "select count(1), sum(rating)/count(1) from plando_rating where plando_name = '%s';"
+            sql = "select count(1), sum(rating)/count(1) from plando_rating where plando_name = %s;"
             return self.execSelect(sql, (plandoName,))
         except Exception as e:
             print("DB.getPlandoRate::error execute: {} error: {}".format(sql, e))
@@ -881,8 +859,8 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "insert into plando_repo (plando_name, init_time, author, long_desc, suggested_preset, update_key, ips_max_size) values ('%s', now(), '%s', '%s', '%s', '%s', %d);"
-            self.cursor.execute(sql % params)
+            sql = "insert into plando_repo (plando_name, init_time, author, long_desc, suggested_preset, update_key, ips_max_size) values (%s, now(), %s, %s, %s, %s, %s);"
+            self.cursor.execute(sql, params)
             self.commit()
         except Exception as e:
             print("DB.insertPlando::error execute: {} error: {}".format(sql, e))
@@ -893,8 +871,8 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "update plando_repo set init_time = now(), author = '%s', long_desc = '%s', suggested_preset = '%s', ips_max_size = %d where plando_name = '%s'"
-            self.cursor.execute(sql % params)
+            sql = "update plando_repo set init_time = now(), author = %s, long_desc = %s, suggested_preset = %s, ips_max_size = %s where plando_name = %s"
+            self.cursor.execute(sql, params)
             self.commit()
         except Exception as e:
             print("DB.updatePlandoAll::error execute: {} error: {}".format(sql, e))
@@ -905,8 +883,8 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "update plando_repo set author = '%s', long_desc = '%s', suggested_preset = '%s' where plando_name = '%s'"
-            self.cursor.execute(sql % params)
+            sql = "update plando_repo set author = %s, long_desc = %s, suggested_preset = %s where plando_name = %s"
+            self.cursor.execute(sql, params)
             self.commit()
         except Exception as e:
             print("DB.updatePlandoMeta::error execute: {} error: {}".format(sql, e))
@@ -917,8 +895,8 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "select 1 from plando_rating where plando_name = '%s' and ipv4 = inet_aton('%s');"
-            return self.execSelect(sql % (plandoName, ip))
+            sql = "select 1 from plando_rating where plando_name = %s and ipv4 = inet_aton(%s);"
+            return self.execSelect(sql, (plandoName, ip))
         except Exception as e:
             print("DB.alreadyRated::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
@@ -931,8 +909,8 @@ order by 1,2;"""
             sql = """
 REPLACE INTO plando_rating
     (plando_name, rating, ipv4)
-VALUES ('%s', %d, inet_aton('%s'));"""
-            self.cursor.execute(sql % (plandoName, rating, ip))
+VALUES (%s, %s, inet_aton(%s));"""
+            self.cursor.execute(sql, (plandoName, rating, ip))
             self.commit()
         except Exception as e:
             print("DB.addRating::error execute: {} error: {}".format(sql, e))
@@ -943,8 +921,8 @@ VALUES ('%s', %d, inet_aton('%s'));"""
             return None
 
         try:
-            sql = "update plando_repo set download_count = download_count+1 where plando_name = '%s';"
-            self.cursor.execute(sql % (plandoName,))
+            sql = "update plando_repo set download_count = download_count+1 where plando_name = %s;"
+            self.cursor.execute(sql, (plandoName,))
             self.commit()
         except Exception as e:
             print("DB.increaseDownloadCount::error execute: {} error: {}".format(sql, e))
@@ -955,8 +933,8 @@ VALUES ('%s', %d, inet_aton('%s'));"""
             return None
 
         try:
-            sql = "select 1 from plando_repo where plando_name = '%s' and update_key = '%s';"
-            return self.execSelect(sql % (plandoName, key))
+            sql = "select 1 from plando_repo where plando_name = %s and update_key = %s;"
+            return self.execSelect(sql, (plandoName, key))
         except Exception as e:
             print("DB.isValidPlandoKey::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
@@ -966,8 +944,8 @@ VALUES ('%s', %d, inet_aton('%s'));"""
             return None
 
         try:
-            sql = "delete from plando_repo where plando_name = '%s';"
-            self.cursor.execute(sql % (plandoName,))
+            sql = "delete from plando_repo where plando_name = %s;"
+            self.cursor.execute(sql, (plandoName,))
             self.commit()
         except Exception as e:
             print("DB.deletePlando::error execute: {} error: {}".format(sql, e))
@@ -978,8 +956,8 @@ VALUES ('%s', %d, inet_aton('%s'));"""
             return None
 
         try:
-            sql = "delete from plando_rating where plando_name = '%s';"
-            self.cursor.execute(sql % (plandoName,))
+            sql = "delete from plando_rating where plando_name = %s;"
+            self.cursor.execute(sql, (plandoName,))
             self.commit()
         except Exception as e:
             print("DB.deletePlandoRating::error execute: {} error: {}".format(sql, e))

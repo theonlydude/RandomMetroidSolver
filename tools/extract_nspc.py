@@ -51,18 +51,18 @@ vanillaMusicData = [
     [("East Maridia", "vanilla/east_maridia.spc", "Vanilla Soundtrack"),
      ("West Maridia", "vanilla/west_maridia.spc", "Vanilla Soundtrack")],
     # Song 0: Tourian, Song 1: no music
-    [("Tourian", "vanilla/tourian.spc", "Vanilla Soundtrack")],
-    [("Mother Brain", "vanilla/mother_brain.spc", "Vanilla Soundtrack")],
+    [("Tourian Bubbles", "vanilla/tourian.spc", "Vanilla Soundtrack")],
+    [("Mother Brain 2", "vanilla/mother_brain.spc", "Vanilla Soundtrack")],
     # Song 0: BT/Ridley/Draygon,
     # Song 1: BT tension,
     # Song 2: Escape
     [("Boss fight - BT/Ridley/Draygon", "vanilla/boss1.spc", "Vanilla Soundtrack"),
      ("Boss fight - BT tension", "vanilla/bt_tension.spc", "Vanilla Soundtrack"),
-     ("Escape", "vanilla/escape.spc", "Vanilla Soundtrack")],
+     ("Escape Sequence", "vanilla/escape.spc", "Vanilla Soundtrack")],
     # Song 0: Kraid/Phantoon/Croc,
     # Song 1: Tension
     [("Boss fight - Kraid/Phantoon/Croc", "vanilla/boss2.spc", "Vanilla Soundtrack"),
-     ("Boss fight - Kraid/Phantoon/Croc tension", "vanilla/tension.spc", "Vanilla Soundtrack")],
+     ("Boss fight - Kraid / Phantoon / Croc tension", "vanilla/tension.spc", "Vanilla Soundtrack")],
     # Song 0: Spore Spawn/Botwoon
     [("Boss fight - Spore Spawn/Botwoon", "vanilla/mini_boss.spc", "Vanilla Soundtrack")],
     # Song 0: Flying to Ceres,
@@ -70,7 +70,7 @@ vanillaMusicData = [
     # Song 2: Flying to Zebes,
     # Song 3: Ceres time up
     [("Flying to Ceres", "vanilla/space_ship.spc", "Vanilla Soundtrack - Sound Effects"),
-     ("Ceres", "vanilla/ceres.spc", "Vanilla Soundtrack"),
+     ("Ceres Station", "vanilla/ceres.spc", "Vanilla Soundtrack"),
      ("Flying to Zebes", "vanilla/to_zebes.spc", "Vanilla Soundtrack - Sound Effects"),
      ("Ceres time up", "vanilla/ceres_explodes.spc", "Vanilla Soundtrack - Sound Effects")],
     # Song 0: Power off,
@@ -78,7 +78,7 @@ vanillaMusicData = [
     [("Wrecked Ship - Power off", "vanilla/wrecked_ship_off.spc", "Vanilla Soundtrack"),
      ("Wrecked Ship - Power on", "vanilla/wrecked_ship_on.spc", "Vanilla Soundtrack")],
     [("Zebes boom", "vanilla/zebes_explodes.spc", "Vanilla Soundtrack - Sound Effects")],
-    [("Intro", "vanilla/intro.spc", "Vanilla Soundtrack")],
+    [("Intro Cutscene", "vanilla/intro.spc", "Vanilla Soundtrack")],
     [("Death", "vanilla/samus_cry.spc", "Vanilla Soundtrack - Sound Effects")],
     [("Ending/Credits", "vanilla/ending.spc", "Vanilla Soundtrack")],
     [("The last Metroid is in captivity", None, "Vanilla Soundtrack - Sound Effects")],
@@ -86,10 +86,10 @@ vanillaMusicData = [
     # Song 0: Boss music,
     # Song 1: Pre-boss music,
     # Song 2: No music
-    [("Baby Metroid", "vanilla/boss2.spc", "Vanilla Soundtrack"),
+    [("Baby Metroid - Apparition", "vanilla/boss2.spc", "Vanilla Soundtrack"),
      ("Baby Metroid - Tension", "vanilla/tension.spc", "Vanilla Soundtrack"),
      ("Baby Metroid - No music", None, "Vanilla Soundtrack - Sound Effects")],
-    [("Mother Brain 3 (Samus Theme 2)", "vanilla/samus_theme.spc", "Vanilla Soundtrack")]
+    [("Mother Brain 3", "vanilla/samus_theme.spc", "Vanilla Soundtrack")]
 ]
 
 metadata = {}
@@ -188,10 +188,10 @@ def addExtraAddress(track, snesAddress=None, pcAddress=None):
 
 addExtraAddress("Title sequence intro", 0x8FE86D)
 addExtraAddress("Menu theme", 0x8FE86F)
-addExtraAddress("Escape", 0x8FE871)
+addExtraAddress("Escape Sequence", 0x8FE871)
 addExtraAddress("Ending/Credits", 0x8FE873)
-addExtraAddress("Mother Brain 3 (Samus Theme 2)", 0x8FE875)
-addExtraAddress("Mother Brain", 0x8FE877)
+addExtraAddress("Mother Brain 3", 0x8FE875)
+addExtraAddress("Mother Brain 2", 0x8FE877)
 
 # add random start music (no impact if not random start as it is current area music anyway)
 addExtraAddress("Crateria Pirates", 0x8F99CE) # gauntlet

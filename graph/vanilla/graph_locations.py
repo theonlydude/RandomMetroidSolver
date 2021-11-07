@@ -798,7 +798,7 @@ locationsDict["Super Missile (Gold Torizo)"].AccessFrom = {
     'Screw Attack Bottom': lambda sm: SMBool(True)
 }
 locationsDict["Super Missile (Gold Torizo)"].Available = (
-    lambda sm: SMBool(True)
+    lambda sm: sm.canDestroyBombWalls()
 )
 locationsDict["Super Missile (Gold Torizo)"].PostAvailable = (
     lambda sm: sm.enoughStuffGT()

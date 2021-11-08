@@ -2,8 +2,6 @@
 ;;; Fast doors patch diasm/tweak
 ;;; Original patch by Rakki
 
-;; ['$82de55 - 26']
-
 arch snes.cpu
 lorom
 
@@ -78,7 +76,7 @@ doors_rw_mult:
 	ASL A			;Door transition speed *= 2
 	STA.B $13		;\
 	LDA.B $12		;|
-	STA.W $092B		;} Door transition speed = [[X] + 8] / 100h
+	STA.W $092B		;} Door transition speed = [[X] + 8] / 80h
 	LDA.B $14		;|
 	STA.W $092D		;/
 	RTS

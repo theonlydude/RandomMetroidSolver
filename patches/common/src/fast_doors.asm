@@ -55,29 +55,32 @@ org $80aff5
 org $80b029
 	CPX #$001D	; If number of times screen has scrolled == 1Dh: (original is 39h)
 
-;;; General change
+;;; General changes
+
 org $82d961
 	LDA #$0006	; Set Palette change denominator to 6h (original is Ch)
 
 org $82de50
-	BPL door_rw_mult
+	BPL doors_rw_mult
 
 org $82de55
+;;; this slightly rewrites the vanilla routine to save one byte and be able to add an ASL
 door_rewrite:
-	ROR A
+	ROR A			; two ROR replace the BIT to save a byte
         ROR A
-        BCS doors_rw_2
-        LDA.W #$00C8
-        BRA door_rw_mult
-doors_rw_2:
-	LDA.W #$0180
-door_rw_mult:
-	ASL A
-	STA.B $13
-	LDA.B $12
-	STA.W $092B
-	LDA.B $14
-	STA.W $092D
+        BCS doors_rw_vertical	;If door orientation is horizontal:
+        LDA.W #$00C8		;  Door transition speed = 0.C800h
+        BRA doors_rw_mult
+doors_rw_vertical:		;Else:
+	LDA.W #$0180		;  Door transition speed = 1.8000h
+doors_rw_mult:
+	;; ASL added right here
+	ASL A			;Door transition speed *= 2
+	STA.B $13		;\
+	LDA.B $12		;|
+	STA.W $092B		;} Door transition speed = [[X] + 8] / 100h
+	LDA.B $14		;|
+	STA.W $092D		;/
 	RTS
 
 org $82e3f1

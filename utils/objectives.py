@@ -145,6 +145,11 @@ class Objectives(object):
                 return goal
         assert True, "Goal with check function {} not found".format(hex(checkFunction))
 
+    # call from web
+    @staticmethod
+    def getAddressesToRead():
+        return [Objectives.objectivesList+i for i in range(0, 10)]
+
     def readGoals(self, romReader):
         self.resetGoals()
         romReader.romFile.seek(Objectives.objectivesList)

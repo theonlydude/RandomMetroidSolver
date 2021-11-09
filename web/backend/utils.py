@@ -6,6 +6,7 @@ from rom.romreader import RomReader
 from utils.doorsmanager import DoorsManager
 from utils.utils import getDefaultMultiValues, getPresetDir, removeChars
 from utils.parameters import Knows, isKnows, Controller, isButton
+from utils.objectives import Objectives
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import HTTP
@@ -82,6 +83,8 @@ def getAddressesToRead(plando=False):
     addresses["misc"].append(0x10F201)
     # random doors
     addresses["misc"] += DoorsManager.getAddressesToRead()
+    # objectives
+    addresses["misc"] += Objectives.getAddressesToRead()
 
     # ranges [low, high]
     ## doorasm

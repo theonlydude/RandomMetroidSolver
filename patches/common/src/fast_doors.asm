@@ -116,9 +116,8 @@ SlideCode:
 	STA !layer1_x,X
 	RTL
 
-;;; for double door speed:
-;;; act as if layer moved only 4px
-;;; also halve samus movement this frame
+;;; for double door speed, adjust samus position depending on transition:
+;;; negate half of samus speed ($0.$C800 horizontal, $1.$8000 vertical) + half of camera move (4 px)
 fix_samus_pos:
 	lda !direction
 	bit #$0002
@@ -127,39 +126,27 @@ fix_samus_pos:
 	bit #$0001
 	beq .down
 .up:
-	;; samus_y += $1.$8000
+	;; samus_y += $5.$8000
 	lda !samus_sy : clc : adc #$8000 : sta !samus_sy
-	lda #$0001 : adc !samus_y : sta !samus_y
-	;; layer1_y += 4
-	lda !layer1_y : clc : adc #!S/2
-	bra .vertical_end
+	lda #$0005 : adc !samus_y : sta !samus_y
+	bra .end
 .down:
-	;; samus_y -= $1.$8000
+	;; samus_y -= $5.$8000
 	lda !samus_sy : sec : sbc #$8000 : sta !samus_sy
-	lda !samus_y : sbc #$0001 : sta !samus_y
-	;; layer1_y -= 4
-	lda !layer1_y : sec : sbc #!S/2
-.vertical_end:
-	sta !layer1_y
+	lda !samus_y : sbc #$0005 : sta !samus_y
 	bra .end
 .horizontal:
 	bit #$0001
 	beq .right
 .left:
-	;; samus_x += $0.$C800
+	;; samus_x += $4.$C800
 	lda !samus_sx : clc : adc #$C800 : sta !samus_sx
-	lda #$0000 : adc !samus_x : sta !samus_x
-	;; layer1_x += 4
-	lda !layer1_x : clc : adc #!S/2
-	bra .horizontal_end
+	lda #$0004 : adc !samus_x : sta !samus_x
+	bra .end
 .right:
-	;; samus_x -= $0.$C800
+	;; samus_x -= $4.$C800
 	lda !samus_sx : sec : sbc #$C800 : sta !samus_sx
-	lda !samus_x : sbc #$0000 : sta !samus_x
-	;; layer1_x -= 4
-	lda !layer1_x : sec : sbc #!S/2
-.horizontal_end:
-	sta !layer1_x
+	lda !samus_x : sbc #$0004 : sta !samus_x
 .end:
 	lda !samus_x		; hijacked code
 	rts

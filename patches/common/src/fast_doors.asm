@@ -150,3 +150,5 @@ fix_samus_pos:
 .end:
 	lda !samus_x		; hijacked code
 	rts
+
+warnpc $82f7ff

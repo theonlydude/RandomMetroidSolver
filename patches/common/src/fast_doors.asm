@@ -16,6 +16,14 @@ incsrc "decompression.asm"
 !Y = $00E0/!S+1	;Vertical loop counter, Y times S should equal $E0 ($100-$20 due to the HUD)
 !C = $0010/!S+1	;Vertical counter for drawing tile rows "behind" HUD (prior to scrolling)
 
+!direction = $0791
+!layer1_x = $0911
+!layer1_y = $0915
+!samus_x = $0af6
+!samus_sx = $0af8
+!samus_y = $0afa
+!samus_sy = $0afc
+
 org $80AE9D
 	dw !S
 org $80AEA7
@@ -49,7 +57,7 @@ org $82D962
 
 org $82DE50
 	BPL $0F
-	LDA $0791
+	LDA !direction
 	ROR A
 	ROR A
 	BCS $05
@@ -86,15 +94,15 @@ org !FreeSpace
 SlideCode:
 	SEP #$20
 	BMI $09
-	LDA $0911,X
+	LDA !layer1_x,X
 	CMP.b #$00+!Speed
 	BPL $12
 	BRA $0A
-	LDA $0911,X
+	LDA !layer1_x,X
 	CMP.b #$00-!Speed
 	BMI $10
-	INC $0912,X	;These two lines handle odd
-	STZ $0911,X	;screen scrolling distances
+	INC !layer1_x+1,X	;These two lines handle odd
+	STZ !layer1_x,X	;screen scrolling distances
 	REP #$20
 	RTL
 
@@ -104,44 +112,54 @@ SlideCode:
 	REP #$20
 	LDA.w #$0000+!Speed	;Screen is scrolling down or right
 	CLC
-	ADC $0911,X
-	STA $0911,X
+	ADC !layer1_x,X
+	STA !layer1_x,X
 	RTL
 
-;;; for double door speed: act as if we moved only 4px
+;;; for double door speed:
+;;; act as if layer moved only 4px
+;;; also halve samus movement this frame
 fix_samus_pos:
-	lda $0791
+	lda !direction
 	bit #$0002
 	beq .horizontal
 .vertical:
 	bit #$0001
 	beq .down
 .up:
-	lda $0915
-	clc
-	adc #!S/2
+	;; samus_y += $1.$8000
+	lda !samus_sy : clc : adc #$8000 : sta !samus_sy
+	lda #$0001 : adc !samus_y : sta !samus_y
+	;; layer1_y += 4
+	lda !layer1_y : clc : adc #!S/2
 	bra .vertical_end
 .down:
-	lda $0915
-	sec
-	sbc #!S/2
+	;; samus_y -= $1.$8000
+	lda !samus_sy : sec : sbc #$8000 : sta !samus_sy
+	lda !samus_y : sbc #$0001 : sta !samus_y
+	;; layer1_y -= 4
+	lda !layer1_y : sec : sbc #!S/2
 .vertical_end:
-	sta $0915
+	sta !layer1_y
 	bra .end
 .horizontal:
 	bit #$0001
 	beq .right
 .left:
-	lda $0911
-	clc
-	adc #!S/2
+	;; samus_x += $0.$C800
+	lda !samus_sx : clc : adc #$C800 : sta !samus_sx
+	lda #$0000 : adc !samus_x : sta !samus_x
+	;; layer1_x += 4
+	lda !layer1_x : clc : adc #!S/2
 	bra .horizontal_end
 .right:
-	lda $0911
-	sec
-	sbc #!S/2
+	;; samus_x -= $0.$C800
+	lda !samus_sx : sec : sbc #$C800 : sta !samus_sx
+	lda !samus_x : sbc #$0000 : sta !samus_x
+	;; layer1_x -= 4
+	lda !layer1_x : sec : sbc #!S/2
 .horizontal_end:
-	sta $0911
+	sta !layer1_x
 .end:
-	lda $0af6		; hijacked code
+	lda !samus_x		; hijacked code
 	rts

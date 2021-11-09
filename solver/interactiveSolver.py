@@ -707,7 +707,11 @@ class InteractiveSolver(CommonSolver):
         "Ridley": {"byteIndex": 0x02, "bitMask": 0x01},
         "Phantoon": {"byteIndex": 0x03, "bitMask": 0x01},
         "Draygon": {"byteIndex": 0x04, "bitMask": 0x01},
-        "Mother Brain": {"byteIndex": 0x05, "bitMask": 0x02}
+        "Mother Brain": {"byteIndex": 0x05, "bitMask": 0x02},
+        "Spore Spawn": {"byteIndex": 0x01, "bitMask": 0x02},
+        "Crocomire": {"byteIndex": 0x02, "bitMask": 0x02},
+        "Botwoon": {"byteIndex": 0x04, "bitMask": 0x02},
+        "Golden Torizo": {"byteIndex": 0x02, "bitMask": 0x04}
     }
 
     areaAccessPoints = {

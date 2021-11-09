@@ -8,7 +8,7 @@ from rando.ItemLocContainer import ItemLocContainer, getItemListStr, getLocListS
 
 # to filter item pools
 def isChozoItem(item):
-    return item.Class == 'Chozo' or item.Category == 'Boss'
+    return item.Class == 'Chozo' or item.Category in ['Boss', 'MiniBoss']
 
 # provides factory methods to instantate fillers for chozo first and second phase
 class ChozoFillerFactory(object):

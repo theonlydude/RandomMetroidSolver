@@ -154,7 +154,7 @@ class RomPatcher:
             'Scavenger': fullCheck,
             'Major': majChozoCheck,
             'Chozo': majChozoCheck,
-            'FullWithHUD': lambda itemLoc: itemLoc.Item.Category not in ['Energy', 'Ammo', 'Boss']
+            'FullWithHUD': lambda itemLoc: itemLoc.Item.Category not in ['Energy', 'Ammo', 'Boss', 'MiniBoss']
         }
         itemLocCheck = lambda itemLoc: itemLoc.Item.Category != "Nothing" and splitChecks[split](itemLoc)
         for area,addr in locIdsByAreaAddresses.items():

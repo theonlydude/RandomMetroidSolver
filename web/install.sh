@@ -98,7 +98,7 @@ mkdir -p ~/web2py/applications/solver/static/images/rando/
 [ -L ~/web2py/applications/solver/static/images/rando/donate_randomizer.png ] || ln -s ~/RandomMetroidSolver/web/static/donate_randomizer.png ~/web2py/applications/solver/static/images/rando/donate_randomizer.png
 [ -L ~/web2py/applications/solver/static/images/rando/ajax-loader.gif ] || ln -s ~/RandomMetroidSolver/web/static/ajax-loader.gif ~/web2py/applications/solver/static/images/rando/ajax-loader.gif
 
-# rando help
+# rando - help
 mkdir -p ~/web2py/applications/solver/static/images/help/
 [ -L ~/web2py/applications/solver/static/images/help/area_map_thumbnail.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map_thumbnail.png ~/web2py/applications/solver/static/images/help/area_map_thumbnail.png
 [ -L ~/web2py/applications/solver/static/images/help/hud_full.png ] || ln -s ~/RandomMetroidSolver/web/static/help/hud_full.png ~/web2py/applications/solver/static/images/help/hud_full.png
@@ -150,13 +150,13 @@ mkdir -p ~/web2py/applications/solver/static/images/help/
 [ -L ~/web2py/applications/solver/static/images/help/main_street_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/main_street_save.png ~/web2py/applications/solver/static/images/help/main_street_save.png
 [ -L ~/web2py/applications/solver/static/images/help/crab_shaft_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/crab_shaft_save.png ~/web2py/applications/solver/static/images/help/crab_shaft_save.png
 
-# rando maps
+# rando - maps
 [ -L ~/web2py/applications/solver/static/images/help/minimizer_example.png ] || ln -s ~/RandomMetroidSolver/web/static/help/minimizer_example.png ~/web2py/applications/solver/static/images/help/minimizer_example.png
 [ -L ~/web2py/applications/solver/static/images/help/minimizer_example_thumbnail.png ] || ln -s ~/RandomMetroidSolver/web/static/help/minimizer_example_thumbnail.png ~/web2py/applications/solver/static/images/help/minimizer_example_thumbnail.png
 [ -L ~/web2py/applications/solver/static/images/help/chozo_map_thumbnail.png ] || ln -s ~/RandomMetroidSolver/web/static/help/chozo_map_thumbnail.png ~/web2py/applications/solver/static/images/help/chozo_map_thumbnail.png
 [ -L ~/web2py/applications/solver/static/images/help/chozo_map.png ] || ln -s ~/RandomMetroidSolver/web/static/help/chozo_map.png ~/web2py/applications/solver/static/images/help/chozo_map.png
 
-# rando start locations
+# rando - start locations
 [ -L ~/web2py/applications/solver/static/images/help/gauntlet_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/gauntlet_start.png ~/web2py/applications/solver/static/images/help/gauntlet_start.png
 [ -L ~/web2py/applications/solver/static/images/help/green_bt_elevator_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/green_bt_elevator_start.png ~/web2py/applications/solver/static/images/help/green_bt_elevator_start.png
 [ -L ~/web2py/applications/solver/static/images/help/bt_reserve_blue_door1.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/bt_reserve_blue_door1.png ~/web2py/applications/solver/static/images/help/bt_reserve_blue_door1.png
@@ -189,7 +189,7 @@ mkdir -p ~/web2py/applications/solver/static/images/help/
 [ -L ~/web2py/applications/solver/static/images/help/firefleas_shot_blocks.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/firefleas_shot_blocks.png ~/web2py/applications/solver/static/images/help/firefleas_shot_blocks.png
 [ -L ~/web2py/applications/solver/static/images/help/gauntlet_position.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/gauntlet_position.png ~/web2py/applications/solver/static/images/help/gauntlet_position.png
 
-# customizer
+# customizer - help
 mkdir -p ~/web2py/applications/solver/static/images/customizer/
 [ -L ~/web2py/applications/solver/static/images/customizer/palettesRando.png ] || ln -s ~/RandomMetroidSolver/web/static/palettesRando.png ~/web2py/applications/solver/static/images/customizer/palettesRando.png
 [ -L ~/web2py/applications/solver/static/images/customizer/samus_degrees.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_degrees.png ~/web2py/applications/solver/static/images/customizer/samus_degrees.png
@@ -371,7 +371,7 @@ mkdir -p ~/web2py/applications/solver/static/images/ui/
 [ -L ~/web2py/applications/solver/static/images/ui/television.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/television.svg ~/web2py/applications/solver/static/images/ui/television.svg
 [ -L ~/web2py/applications/solver/static/images/ui/puzzle.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/puzzle.svg ~/web2py/applications/solver/static/images/ui/puzzle.svg
 
-# tracker
+# tracker - help
 mkdir -p ~/web2py/applications/solver/static/images/tracker/help/
 [ -L ~/web2py/applications/solver/static/images/tracker/help/portal.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/portal.png ~/web2py/applications/solver/static/images/tracker/help/portal.png
 [ -L ~/web2py/applications/solver/static/images/tracker/help/portal_boss.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/portal_boss.png ~/web2py/applications/solver/static/images/tracker/help/portal_boss.png
@@ -588,6 +588,34 @@ mkdir -p ~/web2py/applications/solver/static/images/tracker/markers/
 [ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_medium_Phantoon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_medium_Phantoon.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_medium_Phantoon.png
 [ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_medium_Kraid.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_medium_Kraid.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_medium_Kraid.png
 [ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_medium_MotherBrain.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_medium_MotherBrain.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_medium_MotherBrain.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_easy_SporeSpawn.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_easy_SporeSpawn.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_easy_SporeSpawn.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_medium_SporeSpawn.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_medium_SporeSpawn.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_medium_SporeSpawn.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hard_SporeSpawn.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_hard_SporeSpawn.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hard_SporeSpawn.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_harder_SporeSpawn.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_harder_SporeSpawn.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_harder_SporeSpawn.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hardcore_SporeSpawn.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_hardcore_SporeSpawn.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hardcore_SporeSpawn.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_mania_SporeSpawn.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_mania_SporeSpawn.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_mania_SporeSpawn.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_break_SporeSpawn.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_break_SporeSpawn.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_break_SporeSpawn.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_easy_Crocomire.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_easy_Crocomire.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_easy_Crocomire.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_medium_Crocomire.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_medium_Crocomire.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_medium_Crocomire.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hard_Crocomire.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_hard_Crocomire.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hard_Crocomire.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_harder_Crocomire.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_harder_Crocomire.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_harder_Crocomire.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hardcore_Crocomire.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_hardcore_Crocomire.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hardcore_Crocomire.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_mania_Crocomire.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_mania_Crocomire.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_mania_Crocomire.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_break_Crocomire.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_break_Crocomire.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_break_Crocomire.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_easy_Botwoon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_easy_Botwoon.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_easy_Botwoon.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_medium_Botwoon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_medium_Botwoon.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_medium_Botwoon.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hard_Botwoon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_hard_Botwoon.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hard_Botwoon.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_harder_Botwoon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_harder_Botwoon.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_harder_Botwoon.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hardcore_Botwoon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_hardcore_Botwoon.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hardcore_Botwoon.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_mania_Botwoon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_mania_Botwoon.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_mania_Botwoon.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_break_Botwoon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_break_Botwoon.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_break_Botwoon.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_easy_GoldenTorizo.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_easy_GoldenTorizo.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_easy_GoldenTorizo.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_medium_GoldenTorizo.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_medium_GoldenTorizo.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_medium_GoldenTorizo.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hard_GoldenTorizo.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_hard_GoldenTorizo.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hard_GoldenTorizo.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_harder_GoldenTorizo.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_harder_GoldenTorizo.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_harder_GoldenTorizo.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hardcore_GoldenTorizo.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_hardcore_GoldenTorizo.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_hardcore_GoldenTorizo.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_mania_GoldenTorizo.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_mania_GoldenTorizo.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_mania_GoldenTorizo.png
+[ -L ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_break_GoldenTorizo.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/visited/marker_visited_break_GoldenTorizo.png ~/web2py/applications/solver/static/images/tracker/markers/marker_visited_break_GoldenTorizo.png
 
 # tracker - G4 in the middle
 mkdir -p ~/web2py/applications/solver/static/images/tracker/G4/

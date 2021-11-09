@@ -1,5 +1,7 @@
 ;$30FF-$3265
 
+;;; Decompression optimization by Kejardon
+
 ;Compression format: One byte(XXX YYYYY) or two byte (111 XXX YY-YYYYYYYY) headers
 ;XXX = instruction, YYYYYYYYYY = counter
 lorom

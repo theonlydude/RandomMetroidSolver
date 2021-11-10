@@ -404,7 +404,7 @@ locationsDict["Space Jump"].PostAvailable = (
     lambda sm: Bosses.bossDead(sm, 'Draygon')
 )
 locationsDict["Mother Brain"].AccessFrom = {
-    'Golden Four': lambda sm: Bosses.allBossesDead(sm)
+    'Golden Four': lambda sm: sm.canPassG4()
 }
 locationsDict["Mother Brain"].Available = (
     lambda sm: sm.enoughStuffTourian()

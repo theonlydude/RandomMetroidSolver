@@ -68,49 +68,47 @@ class Goal(object):
 
 class Objectives(object):
     objectivesList = snes_to_pc(0x82f983)
-
-    def __init__(self):
-        self.goals = {
-            "kill kraid": Goal("kill kraid", lambda sm: Bosses.bossDead(sm, 'Kraid'), 0xF98F,
-                               ["kill G4"], "{} kraid", True),
-            "kill phantoon": Goal("kill phantoon", lambda sm: Bosses.bossDead(sm, 'Phantoon'), 0xF997,
-                                  ["kill G4"], "{} phantoon", True),
-            "kill draygon": Goal("kill draygon", lambda sm: Bosses.bossDead(sm, 'Draygon'), 0xF99F,
-                                 ["kill G4"], "{} draygon", True),
-            "kill ridley": Goal("kill ridley", lambda sm: Bosses.bossDead(sm, 'Ridley'), 0xF9A7,
-                                ["kill G4"], "{} ridley", True),
-            "kill G4": Goal("kill G4", lambda sm: Bosses.allBossesDead(sm), 0xF9AF,
-                            ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"],
-                            "{} golden four", True),
-            "kill spore spawn": Goal("kill spore spawn", lambda sm: Bosses.bossDead(sm, 'SporeSpawn'), 0xF9C5,
-                                     ["kill mini bosses"], "{} spore spawn", True),
-            "kill botwoon": Goal("kill botwoon", lambda sm: Bosses.bossDead(sm, 'Botwoon'), 0xF9CD,
-                                 ["kill mini bosses"], "{} botwoon", True),
-            "kill crocomire": Goal("kill crocomire", lambda sm: Bosses.bossDead(sm, 'Crocomire'), 0xF9D5,
-                                   ["kill mini bosses"], "{} crocomire", True),
-            "kill golden torizo": Goal("kill golden torizo", lambda sm: Bosses.bossDead(sm, 'GoldenTorizo'), 0xF9E5,
-                                       ["kill mini bosses"], "{} golden torizo", True),
-            "kill mini bosses": Goal("kill mini bosses", lambda sm: Bosses.allMiniBossesDead(sm), 0xF9ED,
-                                     ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo"],
-                                     "{} mini bosses", True),
-            "shaktool cleared path": Goal("shaktool cleared path", None, 0xFA08,
-                                          [], "shaktool cleared its path", False),
-            "finish scavenger hunt": Goal("finish scavenger hunt", None, 0xFA10,
-                                          [], "finish scavenger hunt", False)
-        }
-        self.activeGoals = []
-        self.nbActiveGoals = 0
-        self.tourianRequired = True
+    activeGoals = []
+    nbActiveGoals = 0
+    tourianRequired = True
+    goals = {
+        "kill kraid": Goal("kill kraid", lambda sm: Bosses.bossDead(sm, 'Kraid'), 0xF98F,
+                           ["kill G4"], "{} kraid", True),
+        "kill phantoon": Goal("kill phantoon", lambda sm: Bosses.bossDead(sm, 'Phantoon'), 0xF997,
+                              ["kill G4"], "{} phantoon", True),
+        "kill draygon": Goal("kill draygon", lambda sm: Bosses.bossDead(sm, 'Draygon'), 0xF99F,
+                             ["kill G4"], "{} draygon", True),
+        "kill ridley": Goal("kill ridley", lambda sm: Bosses.bossDead(sm, 'Ridley'), 0xF9A7,
+                            ["kill G4"], "{} ridley", True),
+        "kill G4": Goal("kill G4", lambda sm: Bosses.allBossesDead(sm), 0xF9AF,
+                        ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"],
+                        "{} golden four", True),
+        "kill spore spawn": Goal("kill spore spawn", lambda sm: Bosses.bossDead(sm, 'SporeSpawn'), 0xF9C5,
+                                 ["kill mini bosses"], "{} spore spawn", True),
+        "kill botwoon": Goal("kill botwoon", lambda sm: Bosses.bossDead(sm, 'Botwoon'), 0xF9CD,
+                             ["kill mini bosses"], "{} botwoon", True),
+        "kill crocomire": Goal("kill crocomire", lambda sm: Bosses.bossDead(sm, 'Crocomire'), 0xF9D5,
+                               ["kill mini bosses"], "{} crocomire", True),
+        "kill golden torizo": Goal("kill golden torizo", lambda sm: Bosses.bossDead(sm, 'GoldenTorizo'), 0xF9E5,
+                                   ["kill mini bosses"], "{} golden torizo", True),
+        "kill mini bosses": Goal("kill mini bosses", lambda sm: Bosses.allMiniBossesDead(sm), 0xF9ED,
+                                 ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo"],
+                                 "{} mini bosses", True),
+        "shaktool cleared path": Goal("shaktool cleared path", None, 0xFA08,
+                                      [], "shaktool cleared its path", False),
+        "finish scavenger hunt": Goal("finish scavenger hunt", None, 0xFA10,
+                                      [], "finish scavenger hunt", False)
+    }
 
     def resetGoals(self):
-        self.activeGoals = []
-        self.nbActiveGoals = 0
+        Objectives.activeGoals = []
+        Objectives.nbActiveGoals = 0
 
     def addGoal(self, goalName):
-        goal = self.goals[goalName]
-        self.nbActiveGoals += 1
-        goal.setRank(self.nbActiveGoals)
-        self.activeGoals.append(goal)
+        goal = Objectives.goals[goalName]
+        Objectives.nbActiveGoals += 1
+        goal.setRank(Objectives.nbActiveGoals)
+        Objectives.activeGoals.append(goal)
 
     def setVanilla(self):
         self.addGoal("kill kraid")
@@ -123,24 +121,26 @@ class Objectives(object):
             self.setVanilla()
         else:
             LOG.debug("triggerEscape: {}, tourian not required")
-            self.tourianRequired = False
+            Objectives.tourianRequired = False
 
         self.addGoal("finish scavenger hunt")
 
     def setScavengerHuntFunc(self, scavClearFunc):
-        self.goals["finish scavenger hunt"].clearFunc = scavClearFunc
+        Objectives.goals["finish scavenger hunt"].clearFunc = scavClearFunc
 
     def setRandom(self, nbGoals):
         pass
 
-    def canClearGoals(self, smbm):
+    # call from logic
+    @staticmethod
+    def canClearGoals(smbm):
         result = SMBool(True)
-        for goal in self.activeGoals:
+        for goal in Objectives.activeGoals:
             result = smbm.wand(result, goal.canClearGoal(smbm))
         return result
 
     def getGoalFromCheckFunction(self, checkFunction):
-        for name, goal in self.goals.items():
+        for name, goal in Objectives.goals.items():
             if goal.checkAddr == checkFunction:
                 return goal
         assert True, "Goal with check function {} not found".format(hex(checkFunction))
@@ -159,20 +159,20 @@ class Objectives(object):
             goal = self.getGoalFromCheckFunction(checkFunction)
             if goal.name == 'finish scavenger hunt':
                 checkScavEscape = True
-            self.activeGoals.append(goal)
+            Objectives.activeGoals.append(goal)
             checkFunction = romReader.romFile.readWord()
 
-        for goal in self.activeGoals:
+        for goal in Objectives.activeGoals:
             LOG.debug("active goal: {}".format(goal.name))
 
         if checkScavEscape:
-            self.tourianRequired = not romReader.patchPresent('Escape_Scavenger')
-            LOG.debug("tourianRequired: {}".format(self.tourianRequired))
+            Objectives.tourianRequired = not romReader.patchPresent('Escape_Scavenger')
+            LOG.debug("tourianRequired: {}".format(Objectives.tourianRequired))
 
     def writeGoals(self, romFile):
         # write check functions
         romFile.seek(Objectives.objectivesList)
-        for goal in self.activeGoals:
+        for goal in Objectives.activeGoals:
             romFile.writeWord(goal.checkAddr)
         # list terminator
         romFile.writeWord(0x0000)
@@ -200,8 +200,8 @@ class Objectives(object):
         # start at 8th line
         baseAddr = 0xB6F200 + lineLength * 8 + firstChar
         # space between two lines of text
-        space = 3 if self.nbActiveGoals == 5 else 4
-        for i, goal in enumerate(self.activeGoals):
+        space = 3 if Objectives.nbActiveGoals == 5 else 4
+        for i, goal in enumerate(Objectives.activeGoals):
             addr = baseAddr + i * lineLength * space
             text = goal.getText()
             romFile.seek(snes_to_pc(addr))
@@ -212,7 +212,7 @@ class Objectives(object):
         baseY = 0x40
         addr = snes_to_pc(0x82FD66)
         spritemapSize = 5 + 2
-        for i, goal in enumerate(self.activeGoals):
+        for i, goal in enumerate(Objectives.activeGoals):
             y = baseY + i * space * 8
             # sprite center is at 128
             y = (y - 128) & 0xFF

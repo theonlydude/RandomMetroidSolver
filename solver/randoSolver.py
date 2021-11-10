@@ -51,7 +51,6 @@ class RandoSolver(StandardSolver):
         self.areaGraph = areaGraph
 
         self.objectives = Objectives()
-        self.objectives.setVanilla()
 
         # store at each step how many locations are available
         self.nbAvailLocs = []

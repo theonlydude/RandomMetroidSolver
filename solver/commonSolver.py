@@ -11,6 +11,7 @@ from solver.conf import Conf
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils, getAccessPoint
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
 from utils.doorsmanager import DoorsManager
+from utils.objectives import Objectives
 from logic.logic import Logic
 
 class CommonSolver(object):
@@ -347,11 +348,15 @@ class CommonSolver(object):
         if len(locations) == 0:
             return []
 
+        mandatoryBosses = Objectives.getMandatoryBosses()
+
         # add nocomeback locations which has been selected by the comeback step (areaWeight == 1)
         around = [loc for loc in locations if( (loc.areaWeight is not None and loc.areaWeight == 1)
                                                or ((loc.SolveArea == self.lastArea or loc.distance < 3)
                                                    and loc.difficulty.difficulty <= threshold
-                                                   and not Bosses.areaBossDead(self.smbm, self.lastArea)
+                                                   and (not Bosses.areaBossDead(self.smbm, self.lastArea)
+                                                        and (self.lastArea not in Bosses.areaBosses
+                                                             or Bosses.areaBosses[self.lastArea] in mandatoryBosses))
                                                    and loc.comeBack is not None and loc.comeBack == True) )]
         outside = [loc for loc in locations if not loc in around]
 
@@ -726,7 +731,7 @@ class CommonSolver(object):
 
     def canEndGame(self):
         # to finish the game you must:
-        # - beat golden 4
+        # - finish objectives to open G4 (like beat golden 4 or mini bosses)
         # - defeat metroids
         # - destroy/skip the zebetites
         # - beat Mother Brain

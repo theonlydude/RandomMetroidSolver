@@ -647,8 +647,7 @@ if __name__ == "__main__":
     if args.plandoRando is None:
         DoorsManager.setDoorsColor()
 
-    if args.patchOnly == False:
-        # TODO::use objectives in logic
+    if not args.patchOnly:
         objectives = Objectives()
         if args.majorsSplit == "Scavenger":
             objectives.setScavengerHunt(args.scavEscape)

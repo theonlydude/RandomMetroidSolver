@@ -29,7 +29,9 @@ class RandoSetup(object):
         self.allLocations = locations
         self.locations = self.areaGraph.getAccessibleLocations(locations, self.startAP)
 #        print("nLocs Setup: "+str(len(self.locations)))
-        self.itemManager = self.settings.getItemManager(self.sm, len(self.locations))
+        # in minimizer we can have some missing boss locs
+        bossesItems = [loc.BossItemType for loc in self.locations if loc.isBoss()]
+        self.itemManager = self.settings.getItemManager(self.sm, len(self.locations), bossesItems)
         self.forbiddenItems = []
         self.restrictedLocs = []
         self.lastRestricted = []
@@ -185,7 +187,9 @@ class RandoSetup(object):
         self.log.debug("fillRestrictedLocations. locs="+getLocListStr(locs))
         for loc in locs:
             itemLocation = ItemLocation(None, loc)
-            if self.container.hasItemInPool(getPred('Nothing', loc)):
+            if loc.BossItemType is not None:
+                itemLocation.Item = self.container.getNextItemInPoolMatching(getPred(loc.BossItemType, loc))
+            elif self.container.hasItemInPool(getPred('Nothing', loc)):
                 itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('Nothing', loc))
             elif self.container.hasItemInPool(getPred('NoEnergy', loc)):
                 itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('NoEnergy', loc))

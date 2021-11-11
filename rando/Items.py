@@ -302,11 +302,12 @@ class ItemManager:
         itemCode = item.Code + modifier
         return itemCode
 
-    def __init__(self, majorsSplit, qty, sm, nLocs, maxDiff):
+    def __init__(self, majorsSplit, qty, sm, nLocs, bossesItems, maxDiff):
         self.qty = qty
         self.sm = sm
         self.majorsSplit = majorsSplit
         self.nLocs = nLocs
+        self.bossesItems = bossesItems
         self.maxDiff = maxDiff
         self.majorClass = 'Chozo' if majorsSplit == 'Chozo' else 'Major'
         self.itemPool = []
@@ -315,7 +316,7 @@ class ItemManager:
         self.itemPool = []
         if addBosses == True:
             # for the bosses
-            for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain', 'SporeSpawn', 'Crocomire', 'Botwoon', 'GoldenTorizo']:
+            for boss in self.bossesItems:
                 self.addMinor(boss)
 
     def getItemPool(self):
@@ -363,6 +364,7 @@ class ItemManager:
         return len([item for item in self.itemPool if item.Type == itemName]) >= count
 
 class ItemPoolGenerator(object):
+    # 100 item locs, 5 bosses, 4 mini bosses
     maxLocs = 109
     nbBosses = 9
 
@@ -384,7 +386,7 @@ class ItemPoolGenerator(object):
         self.itemManager = itemManager
         self.qty = qty
         self.sm = sm
-        self.maxItems = ItemPoolGenerator.maxLocs # 100 item locs, 5 bosses, 4 mini bosses
+        self.maxItems = ItemPoolGenerator.maxLocs
         self.maxEnergy = 18 # 14E, 4R
         self.maxDiff = maxDiff
         self.log = utils.log.get('ItemPool')
@@ -669,7 +671,8 @@ class ItemPoolGeneratorMinimizer(ItemPoolGeneratorMajors):
             else:
                 self.maxEnergy = 8 + int(float(nLocs - 55)/50.0 * 8)
             self.log.debug("maxEnergy: "+str(self.maxEnergy))
-            maxItems = self.maxItems - 10 # remove bosses and minimal minore
+            # remove bosses and minimal minors
+            maxItems = self.maxItems - (self.nbMinorsAlready + len(self.itemManager.bossesItems))
             self.maxEnergy = int(max(self.maxEnergy, maxItems - nMajors - self.minorLocations))
             if self.maxEnergy > 18:
                 self.maxEnergy = 18
@@ -710,7 +713,7 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
         self.log.debug("Plando: remain start: {}".format(remain))
         if remain > 0:
             # add missing bosses
-            for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain', 'SporeSpawn', 'Crocomire', 'Botwoon', 'GoldenTorizo']:
+            for boss in self.itemManager.bossesItems:
                 if self.exclude['alreadyPlacedItems'][boss] == 0:
                     self.itemManager.addItem(boss, 'Minor')
                     self.exclude['alreadyPlacedItems'][boss] = 1

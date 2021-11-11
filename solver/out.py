@@ -1,6 +1,7 @@
 import sys, json, os
 from solver.conf import Conf
 from solver.difficultyDisplayer import DifficultyDisplayer
+from utils.objectives import Objectives
 from utils.utils import fixEnergy
 
 class Out(object):
@@ -58,7 +59,7 @@ class OutWeb(Out):
                       pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
                       remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
                       skippedMajors=skippedMajors, unavailMajors=unavailMajors, collectedItems=collectedItems,
-                      scavengerOrder=scavengerOrder)
+                      scavengerOrder=scavengerOrder, objectives=Objectives.getGoalsList())
 
         with open(s.outputFileName, 'w') as jsonFile:
             json.dump(result, jsonFile)
@@ -232,6 +233,7 @@ class OutConsole(Out):
         s = self.solver
 
         print("all patches: {}".format(s.romLoader.getAllPatches()))
+        print("objectives: {}".format(Objectives.getGoalsList()))
 
         # print generated path
         if Conf.displayGeneratedPath == True:

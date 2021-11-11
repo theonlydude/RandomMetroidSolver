@@ -160,6 +160,11 @@ class Objectives(object):
         r = [goal.items for goal in Objectives.activeGoals]
         return [item for items in r for item in items]
 
+    # call from solver
+    @staticmethod
+    def getGoalsList():
+        return [goal.name for goal in Objectives.activeGoals]
+
     def readGoals(self, romReader):
         self.resetGoals()
         romReader.romFile.seek(Objectives.objectivesList)

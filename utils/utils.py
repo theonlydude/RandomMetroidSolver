@@ -260,6 +260,7 @@ class PresetLoaderDict(PresetLoader):
 
 def getDefaultMultiValues():
     from graph.graph_utils import GraphUtils
+    from utils.objectives import Objectives
     defaultMultiValues = {
         'startLocation': GraphUtils.getStartAccessPointNames(),
         'majorsSplit': ['Full', 'FullWithHUD', 'Major', 'Chozo', 'Scavenger'],
@@ -267,7 +268,8 @@ def getDefaultMultiValues():
         'progressionDifficulty': ['easier', 'normal', 'harder'],
         'morphPlacement': ['early', 'late', 'normal'],
         'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla'],
-        'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive']
+        'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive'],
+        'objective': Objectives.getAllGoals()
     }
     return defaultMultiValues
 

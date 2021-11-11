@@ -36,6 +36,7 @@ progDiffs = defaultMultiValues['progressionDifficulty']
 morphPlacements = defaultMultiValues['morphPlacement']
 majorsSplits = defaultMultiValues['majorsSplit']
 gravityBehaviours = defaultMultiValues['gravityBehaviour']
+objectives = defaultMultiValues['objective']
 
 def randomMulti(args, param, defaultMultiValues):
     value = args[param]
@@ -286,6 +287,14 @@ if __name__ == "__main__":
     parser.add_argument('--music',
                         help="JSON file for music replacement mapping",
                         dest='music', nargs='?', default=None)
+    parser.add_argument('--objective',
+                        help="objectives to open G4",
+                        dest='objective', nargs='?', default=[], action='append',
+                        choices=Objectives.getAllGoals()+["random"])
+    parser.add_argument('--objectiveList', help="list to choose from when random",
+                        dest='objectiveList', nargs='?', default=None)
+
+
     # parse args
     args = parser.parse_args()
 
@@ -498,6 +507,27 @@ if __name__ == "__main__":
     if args.patchOnly == False:
         print("SEED: " + str(seed))
 
+        objectivesManager = Objectives()
+        addedObjectives = 0
+        if args.majorsSplit == "Scavenger":
+            objectivesManager.setScavengerHunt(args.scavEscape)
+            addedObjectives = 1
+
+        if not args.scavEscape:
+            if args.objective:
+                maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
+                if "random" in args.objective:
+                    availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
+                    nbObjectives = random.randint(1, min(maxActiveGoals, len(availableObjectives)))
+                    objectivesManager.setRandom(nbObjectives, availableObjectives)
+                else:
+                    if len(args.objective) > maxActiveGoals:
+                        args.objective = args.objective[0:maxActiveGoals]
+                    for goal in args.objective:
+                        objectivesManager.addGoal(goal)
+            else:
+                objectivesManager.setVanilla()
+
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "doors": "normal" if not args.doorsColorsRando else "late" }
     restrictions['MajorMinor'] = 'Full' if args.majorsSplit == 'FullWithHUD' else args.majorsSplit
@@ -648,12 +678,6 @@ if __name__ == "__main__":
         DoorsManager.setDoorsColor()
 
     if not args.patchOnly:
-        objectives = Objectives()
-        if args.majorsSplit == "Scavenger":
-            objectives.setScavengerHunt(args.scavEscape)
-        else:
-            objectives.setVanilla()
-
         try:
             randoExec = RandoExec(seedName, args.vcr, randoSettings, graphSettings)
             (stuck, itemLocs, progItemLocs) = randoExec.randomize()
@@ -793,7 +817,7 @@ if __name__ == "__main__":
         if args.rom != None:
             romPatcher.commitIPS()
         if args.patchOnly == False:
-            romPatcher.writeObjectives(objectives)
+            romPatcher.writeObjectives(objectivesManager)
             romPatcher.writeItemsLocs(itemLocs)
             romPatcher.writeSplitLocs(args.majorsSplit, itemLocs, progItemLocs)
             romPatcher.writeItemsNumber()

@@ -37,8 +37,9 @@ class Synonyms(object):
         return verb
 
 class Goal(object):
-    def __init__(self, name, clearFunc, checkAddr, exclusionList, items, text, useSynonym):
+    def __init__(self, name, available, clearFunc, checkAddr, exclusionList, items, text, useSynonym):
         self.name = name
+        self.available = available
         self.clearFunc = clearFunc
         # in bank $82, see objectives_pause.asm
         self.checkAddr = checkAddr
@@ -70,33 +71,33 @@ class Objectives(object):
     maxActiveGoals = 5
     tourianRequired = True
     goals = {
-        "kill kraid": Goal("kill kraid", lambda sm: Bosses.bossDead(sm, 'Kraid'), 0xF98F,
+        "kill kraid": Goal("kill kraid", True, lambda sm: Bosses.bossDead(sm, 'Kraid'), 0xF98F,
                            ["kill G4"], ["Kraid"], "{} kraid", True),
-        "kill phantoon": Goal("kill phantoon", lambda sm: Bosses.bossDead(sm, 'Phantoon'), 0xF997,
+        "kill phantoon": Goal("kill phantoon", True, lambda sm: Bosses.bossDead(sm, 'Phantoon'), 0xF997,
                               ["kill G4"], ["Phantoon"], "{} phantoon", True),
-        "kill draygon": Goal("kill draygon", lambda sm: Bosses.bossDead(sm, 'Draygon'), 0xF99F,
+        "kill draygon": Goal("kill draygon", True, lambda sm: Bosses.bossDead(sm, 'Draygon'), 0xF99F,
                              ["kill G4"], ["Draygon"], "{} draygon", True),
-        "kill ridley": Goal("kill ridley", lambda sm: Bosses.bossDead(sm, 'Ridley'), 0xF9A7,
+        "kill ridley": Goal("kill ridley", True, lambda sm: Bosses.bossDead(sm, 'Ridley'), 0xF9A7,
                             ["kill G4"], ["Ridley"], "{} ridley", True),
-        "kill G4": Goal("kill G4", lambda sm: Bosses.allBossesDead(sm), 0xF9AF,
+        "kill G4": Goal("kill G4", True, lambda sm: Bosses.allBossesDead(sm), 0xF9AF,
                         ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"],
                         ["Kraid", "Phantoon", "Draygon", "Ridley"],
                         "{} golden four", True),
-        "kill spore spawn": Goal("kill spore spawn", lambda sm: Bosses.bossDead(sm, 'SporeSpawn'), 0xF9C5,
+        "kill spore spawn": Goal("kill spore spawn", True, lambda sm: Bosses.bossDead(sm, 'SporeSpawn'), 0xF9C5,
                                  ["kill mini bosses"], ["SporeSpawn"], "{} spore spawn", True),
-        "kill botwoon": Goal("kill botwoon", lambda sm: Bosses.bossDead(sm, 'Botwoon'), 0xF9CD,
+        "kill botwoon": Goal("kill botwoon", True, lambda sm: Bosses.bossDead(sm, 'Botwoon'), 0xF9CD,
                              ["kill mini bosses"], ["Botwoon"], "{} botwoon", True),
-        "kill crocomire": Goal("kill crocomire", lambda sm: Bosses.bossDead(sm, 'Crocomire'), 0xF9D5,
+        "kill crocomire": Goal("kill crocomire", True, lambda sm: Bosses.bossDead(sm, 'Crocomire'), 0xF9D5,
                                ["kill mini bosses"], ["Crocomire"], "{} crocomire", True),
-        "kill golden torizo": Goal("kill golden torizo", lambda sm: Bosses.bossDead(sm, 'GoldenTorizo'), 0xF9E5,
+        "kill golden torizo": Goal("kill golden torizo", True, lambda sm: Bosses.bossDead(sm, 'GoldenTorizo'), 0xF9E5,
                                    ["kill mini bosses"], ["GoldenTorizo"], "{} golden torizo", True),
-        "kill mini bosses": Goal("kill mini bosses", lambda sm: Bosses.allMiniBossesDead(sm), 0xF9ED,
+        "kill mini bosses": Goal("kill mini bosses", True, lambda sm: Bosses.allMiniBossesDead(sm), 0xF9ED,
                                  ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo"],
                                  ["SporeSpawn", "Botwoon", "Crocomire", "GoldenTorizo"],
                                  "{} mini bosses", True),
-        "shaktool cleared path": Goal("shaktool cleared path", None, 0xFA08,
+        "shaktool cleared path": Goal("shaktool cleared path", False, None, 0xFA08,
                                       [], [], "shaktool cleared its path", False),
-        "finish scavenger hunt": Goal("finish scavenger hunt", lambda sm: SMBool(True), 0xFA10,
+        "finish scavenger hunt": Goal("finish scavenger hunt", False, lambda sm: SMBool(True), 0xFA10,
                                       [], [], "finish scavenger hunt", False)
     }
 
@@ -104,7 +105,15 @@ class Objectives(object):
         Objectives.activeGoals = []
         Objectives.nbActiveGoals = 0
 
+    def conflict(self, newGoalName):
+        for goal in Objectives.activeGoals:
+            if newGoalName in goal.exclusionList:
+                return True
+        return False
+
     def addGoal(self, goalName):
+        if self.conflict(goalName):
+            return
         goal = Objectives.goals[goalName]
         Objectives.nbActiveGoals += 1
         assert Objectives.nbActiveGoals <= Objectives.maxActiveGoals, "Too many active goals"
@@ -118,9 +127,7 @@ class Objectives(object):
         self.addGoal("kill ridley")
 
     def setScavengerHunt(self, triggerEscape):
-        if not triggerEscape:
-            self.setVanilla()
-        else:
+        if triggerEscape:
             LOG.debug("triggerEscape: {}, tourian not required")
             Objectives.tourianRequired = False
 
@@ -128,9 +135,6 @@ class Objectives(object):
 
     def setScavengerHuntFunc(self, scavClearFunc):
         Objectives.goals["finish scavenger hunt"].clearFunc = scavClearFunc
-
-    def setRandom(self, nbGoals):
-        pass
 
     # call from logic
     @staticmethod
@@ -164,6 +168,18 @@ class Objectives(object):
     @staticmethod
     def getGoalsList():
         return [goal.name for goal in Objectives.activeGoals]
+
+    # call from rando
+    @staticmethod
+    def getAllGoals():
+        return [goal.name for goal in Objectives.goals.values() if goal.available]
+
+    # call from rando
+    def setRandom(self, nbGoals, availableGoals):
+        while Objectives.nbActiveGoals < nbGoals and availableGoals:
+            goalName = random.choice(availableGoals)
+            self.addGoal(goalName)
+            availableGoals.remove(goalName)
 
     def readGoals(self, romReader):
         self.resetGoals()

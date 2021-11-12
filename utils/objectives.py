@@ -99,7 +99,7 @@ class Objectives(object):
                                       [], [], "shaktool cleared its path", False),
         "finish scavenger hunt": Goal("finish scavenger hunt", False, lambda sm: SMBool(True), 0xFA10,
                                       [], [], "finish scavenger hunt", False),
-        "nothing": Goal("nothing", True, lambda sm: SMBool(True), 0xFA27, [], [], "nothing", False)
+        "nothing": Goal("nothing", True, lambda sm: SMBool(True), 0xFA27, ["kill kraid", "kill phantoon", "kill draygon", "kill ridley", "kill G4", "kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo", "kill mini bosses", "shaktool cleared path", "finish scavenger hunt"], [], "nothing", False)
     }
 
     def resetGoals(self):

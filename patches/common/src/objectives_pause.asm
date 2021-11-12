@@ -489,7 +489,9 @@ display_unpause:
 .equip
         JSR $B267    ; Draw item selector
         JSR $B2A2    ; Display reserve tank amount
+        JMP $A56D    ; Updates the flashing buttons when you change pause screens
 .objective
+        jsr draw_completed_objectives_sprites
         JMP $A56D    ; Updates the flashing buttons when you change pause screens
 
 ;;; buttons addresses in BG2

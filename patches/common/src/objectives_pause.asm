@@ -214,6 +214,11 @@ scavenger_hunt_completed:
 .end
 	rts
 
+print "Nothing objective: ", pc
+nothing_objective:
+        sec
+        rts
+
 print ""
 
 ;;; new pointers list

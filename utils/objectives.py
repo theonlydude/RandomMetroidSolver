@@ -98,7 +98,8 @@ class Objectives(object):
         "shaktool cleared path": Goal("shaktool cleared path", False, None, 0xFA08,
                                       [], [], "shaktool cleared its path", False),
         "finish scavenger hunt": Goal("finish scavenger hunt", False, lambda sm: SMBool(True), 0xFA10,
-                                      [], [], "finish scavenger hunt", False)
+                                      [], [], "finish scavenger hunt", False),
+        "nothing": Goal("nothing", True, lambda sm: SMBool(True), 0xFA27, [], [], "nothing", False)
     }
 
     def resetGoals(self):

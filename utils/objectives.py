@@ -241,7 +241,7 @@ class Objectives(object):
 
         # write goal completed positions y in sprites OAM
         baseY = 0x40
-        addr = snes_to_pc(0x82FD66)
+        addr = snes_to_pc(0x82FD3A)
         spritemapSize = 5 + 2
         for i, goal in enumerate(Objectives.activeGoals):
             y = baseY + i * space * 8

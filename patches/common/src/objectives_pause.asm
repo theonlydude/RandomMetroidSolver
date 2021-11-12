@@ -452,34 +452,11 @@ check_l_r_pressed:
         PLP
         RTS
 
-;;; load from ROM $B6F200 to VRAM $F200
-load_objective_bg1:
-        STA $420B                ; vanilla code
-
-        LDA #$00
-        STA $2181   ; WRAM Address Registers, low
-        LDA #$F2
-        STA $2182   ; middle
-        LDA #$7E
-        STA $2183   ; high => 7EF200
-        JSL $8091A9 ; Set up a DMA transfer
-         ;; DMA option 00: Write 1 byte, B0->$21xx
-         ;; DMA target 80: write to $2180: WRAM Data Register
-        db $01,$00,$80
-        dl $B6F200
-        dw $0800
-        LDA #$02
-        STA $420B   ; start transfert
-
-        RTS
-
-;;; transfert from VRAM $F200 to BG1 in VRAM $3000
+;;; load from ROM $B6F200 to VRAM $3000 (bg1)
 transfert_objective_bg1:
-        PHP
-        PHB
-        PHK
-        PLB
-        SEP #$30
+        php
+        sep #$30
+
         LDA #$00     ;\
         STA $2116    ;| VRAM Address Registers (Low) - This sets the address for $2118/9
         LDA #$30     ;|
@@ -488,20 +465,14 @@ transfert_objective_bg1:
         STA $2115    ;} Video Port Control Register - Set VRAM transfer mode to word-access, increment by 1.
                      ;    0x80 == 0b10000000 => i---ffrr => i=1 (increment when $2119 is accessed),
                      ;    ff=0 (full graphic ??), rr=0 (increment by 2 bytes)
-        JSL $8091A9  ;| Set up a DMA transfer
-         ;; DMA options: AB0CDEEE A: transfert direction 0 == CPU -> PPU, B HDMA addressing mode 0 == absolute, C CPU addr Auto inc/dec selection 0 == Increment, D CPU addr Auto inc/dec enable 0 == Enable, EEE DMA Transfer Word Select 1 == Write 2 bytes, B0->$21xx B1->$21XX+1
-        ;; DMA target: PPU register selection
-        ;;  The byte written here is ORed with $2100 to form the destination address for the DMA transfer. This is the "$21XX" in the description of the DMA Transfer Word Select for $43x0.
-        ;;  here write to $2118: VRAM Data Write Registers (Low) (and $2119 as we write words)
-         ;; DMA channel, DMA options, DMA target, Source address, Size (in bytes)
-        db         $01,         $01,        $18,  $00, $F2, $7E,        $00, $08
-        LDA #$02     ;\
-        STA $420B    ;/ DMA Enable Register, start transfert on channel 1: 76543210 => 7/6/5/4/3/2/1/0
+        JSL $8091A9 ; Set up a DMA transfer
+        db $01,$01,$18
+        dl $B6F200
+        dw $0800
+        LDA #$02
+        STA $420B   ; start transfert
 
-        STZ $B3      ;\
-        STZ $B4      ;} BG1 Y scroll = 0
-        PLB
-        PLP
+        plp
         RTS
 
 ;;; unpause
@@ -733,10 +704,6 @@ org $82A79B
         JSR set_bg2_map_screen
 org $82A62D
         JSR set_bg2_equipment_screen
-
-;;; load objective screen BG1 from ROM
-org $828F3A
-        JSR load_objective_bg1
 
 ;;; display correct sprites when unpausing
 org $82932B

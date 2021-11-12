@@ -46,7 +46,6 @@ class StandardSolver(CommonSolver):
         self.outputFileName = outputFileName
 
         self.objectives = Objectives()
-        self.objectives.setVanilla()
 
         self.loadRom(rom, magic=magic)
 

@@ -40,7 +40,6 @@ class InteractiveSolver(CommonSolver):
         Conf.difficultyTarget = infinity
 
         self.objectives = Objectives()
-        self.objectives.setVanilla()
 
         # no time limitation
         self.runtimeLimit_s = 0

@@ -61,7 +61,7 @@ class Goal(object):
             out += self.text.format(Synonyms.getVerb())
         else:
             out += self.text
-        assert len(out) < 28, "Goal text is too long: {}, max 28".format(len(out))
+        assert len(out) <= 28, "Goal text is too long: {}, max 28".format(len(out))
         return out
 
 class Objectives(object):

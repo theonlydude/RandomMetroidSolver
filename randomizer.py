@@ -517,7 +517,7 @@ if __name__ == "__main__":
             if args.objective:
                 maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
                 if "random" in args.objective:
-                    availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
+                    availableObjectives = args.objectiveList.replace('_', ' ').split(',') if args.objectiveList is not None else objectives
                     nbObjectives = random.randint(1, min(maxActiveGoals, len(availableObjectives)))
                     objectivesManager.setRandom(nbObjectives, availableObjectives)
                 else:

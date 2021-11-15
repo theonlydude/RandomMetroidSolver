@@ -660,6 +660,8 @@ if __name__ == "__main__":
         print("progressionSpeed:{}".format(progSpeed))
         print("majorsSplit:{}".format(args.majorsSplit))
         print("morphPlacement:{}".format(args.morphPlacement))
+        print("gravity:{}".format(gravityBehaviour))
+        print("maxDifficulty:{}".format(maxDifficulty))
 
     dotFile = None
     if args.area == True:

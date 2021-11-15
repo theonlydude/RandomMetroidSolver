@@ -233,7 +233,7 @@ locationsDict["Ridley"].Available = (
     lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffsRidley())
 )
 locationsDict["Energy Tank, Ridley"].AccessFrom = {
-    'RidleyRoomIn': lambda sm: sm.haveItem('Ridley')
+    'RidleyRoomIn': lambda sm: sm.wand(sm.haveItem('Ridley'), sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']))
 }
 locationsDict["Energy Tank, Ridley"].Available = (
     lambda sm: sm.haveItem('Morph')

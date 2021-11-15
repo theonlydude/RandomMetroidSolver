@@ -628,7 +628,7 @@ function updateLocations(jsonData) {
         for(var locName in jsonData["availableLocations"]) {
             // console.log(locName+" is available");
             var locData = jsonData["availableLocations"][locName];
-            var update = (locsInfo[locName]["difficulty"] != locData["difficulty"] || locsInfo[locName]["state"] != "available");
+            var update = (locsInfo[locName]["difficulty"] != locData["difficulty"] || locsInfo[locName]["state"] != "available" || "comeBack" in locData);
             locsInfo[locName]["state"] = "available";
             locsInfo[locName]["difficulty"] = locData["difficulty"];
             locsInfo[locName]["canHidden"] = locData["canHidden"];

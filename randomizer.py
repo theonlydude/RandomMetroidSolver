@@ -513,7 +513,7 @@ if __name__ == "__main__":
             objectivesManager.setScavengerHunt(args.scavEscape)
             addedObjectives = 1
 
-        if not args.scavEscape:
+        if not (args.scavEscape and args.majorsSplit == "Scavenger"):
             if args.objective:
                 maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
                 if "random" in args.objective:

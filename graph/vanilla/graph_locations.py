@@ -430,7 +430,6 @@ locationsDict["Crocomire"].Available = (
     lambda sm: sm.enoughStuffCroc()
 )
 locationsDict["Golden Torizo"].AccessFrom = {
-    'LN Above GT': lambda sm: SMBool(True),
     'Screw Attack Bottom': lambda sm: SMBool(True)
 }
 locationsDict["Golden Torizo"].Available = (

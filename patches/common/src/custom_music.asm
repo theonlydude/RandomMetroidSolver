@@ -10,6 +10,10 @@ arch snes.cpu
 
 !song_routine = $808fc1
 
+;;; max out the SPC communication timeout 
+org $80805d
+	dw #$ffff
+
 ;;; end of custom music data table. accounted for by MusicPatcher
 org $8fe86b
 	dw $caca		; identifier that we have custom music

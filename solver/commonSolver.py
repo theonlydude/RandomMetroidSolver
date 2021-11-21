@@ -46,6 +46,7 @@ class CommonSolver(object):
             DoorsManager.setDoorsColor()
             self.doorsRando = False
             self.hasNothing = False
+            self.objectives.setVanilla()
         else:
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
@@ -68,6 +69,8 @@ class CommonSolver(object):
             else:
                 if self.majorsSplit == "Scavenger":
                     self.objectives.setScavengerHunt(self.romLoader.hasPatch('Escape_Scavenger'))
+                else:
+                    self.objectives.setVanilla()
             self.objectives.setScavengerHuntFunc(self.scavengerHuntComplete)
 
             if interactive == False:

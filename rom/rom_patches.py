@@ -125,6 +125,6 @@ class RomPatches:
     @staticmethod
     def setDefaultPatches(startLocation):
         # called by the isolver in seedless mode.
-        # activate only layout patch (the most common one), red tower blue doors and the startLocation's patches.
+        # activate only layout patch (the most common one), red tower blue doors, startLocation's patches and balanced suits.
         from graph.graph_utils import GraphUtils
-        RomPatches.ActivePatches = [RomPatches.RedTowerBlueDoors] + RomPatches.TotalLayout + GraphUtils.getGraphPatches(startLocation)
+        RomPatches.ActivePatches = [RomPatches.RedTowerBlueDoors] + RomPatches.TotalLayout + GraphUtils.getGraphPatches(startLocation) + [RomPatches.NoGravityEnvProtection]

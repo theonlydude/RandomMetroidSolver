@@ -170,6 +170,9 @@ class RomPatcher:
                 self.romFile.writeWord((itemLoc.Location.Id << 8) | itemLoc.Location.HUD)
             # bogus loc ID | "HUNT OVER" index
             self.romFile.writeWord(0xff11)
+            # fill remaining list with 0xFFFF to avoid issue with plandomizer having less items than in the base seed
+            for i in range(18-len(progItemLocs)):
+                self.romFile.writeWord(0xffff)
 
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball

@@ -98,7 +98,7 @@ gameplay_start:
 .save:
     ;; Call the save code to create a new file
     plx
-    jsl !new_save		; see credits_varia
+    jsr add_etanks_and_save
 .end:
     rtl
 
@@ -125,6 +125,8 @@ rand:
     ply
     rtl
 
+warnpc $a1f2bf
+
 org $a1f2c0
 ;;; courtesy of Smiley
 fix_timer_gfx:
@@ -144,6 +146,25 @@ fix_timer_gfx:
     RTL							;done. return
 
 warnpc $a1f2ff
+
+org $a1f470
+print "additional_etanks: ", pc
+additional_etanks:
+	db $00
+
+add_etanks_and_save:
+	sep #$20
+	lda.l additional_etanks : sta $4202
+	lda #$64 : sta $4203
+	pha : pla : xba : xba
+	rep #$20
+	lda $4216 : clc : adc #$0063
+	sta $09c4
+	sta $09c2
+	jsl !new_save		; see credits_varia
+	rts
+
+warnpc $a1f4ff
 
 ;;; patch morph+missile room state check
 org $8fe652

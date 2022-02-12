@@ -112,6 +112,7 @@ class Customizer(object):
             self.session.customizer['elevators_doors_speed'] = "off"
             self.session.customizer['Infinite_Space_Jump'] = "off"
             self.session.customizer['refill_before_save'] = "off"
+            self.session.customizer['widescreen'] = "off"
             self.session.customizer['AimAnyButton'] = "off"
             self.session.customizer['max_ammo_display'] = "off"
             self.session.customizer['supermetroid_msu1'] = "off"
@@ -137,7 +138,7 @@ class Customizer(object):
         switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed',
                    'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save',
                    'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
-                   'remove_elevators_doors_speed', 'gamepadMapping']
+                   'remove_elevators_doors_speed', 'gamepadMapping', 'widescreen']
         others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
                   'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
         validateWebServiceParams(self.request, switchs, [], [], others, isJson=True)
@@ -179,6 +180,7 @@ class Customizer(object):
         self.session.customizer['elevators_doors_speed'] = self.vars.elevators_doors_speed
         self.session.customizer['Infinite_Space_Jump'] = self.vars.Infinite_Space_Jump
         self.session.customizer['refill_before_save'] = self.vars.refill_before_save
+        self.session.customizer['widescreen'] = self.vars.widescreen
         self.session.customizer['AimAnyButton'] = self.vars.AimAnyButton
         self.session.customizer['max_ammo_display'] = self.vars.max_ammo_display
         self.session.customizer['supermetroid_msu1'] = self.vars.supermetroid_msu1
@@ -217,6 +219,8 @@ class Customizer(object):
             params += ['-c', 'Infinite_Space_Jump']
         if self.vars.refill_before_save == 'on':
             params += ['-c', 'refill_before_save.ips']
+        if self.vars.widescreen == 'on':
+            params += ['-c', 'widescreen.ips']
         if self.vars.remove_itemsounds == 'on':
             params += ['-c', 'remove_itemsounds.ips']
         if self.vars.remove_elevators_doors_speed == 'on':

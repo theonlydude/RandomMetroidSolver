@@ -1013,6 +1013,11 @@ if seedInfo != None:
             }
         });
     }
+
+    // disable widescreen if custom music
+    if(document.getElementById("music").value == "Customize") {
+        disableElement("widescreen", true);
+    }
 }
 
 function switchGamepadMapping() {

@@ -579,8 +579,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.VariaTweaks
     if minimizerN is not None:
         RomPatches.ActivePatches.append(RomPatches.NoGadoras)
-        if args.minimizerTourian == True:
-            RomPatches.ActivePatches += RomPatches.MinimizerTourian
+    if args.minimizerTourian == True:
+        RomPatches.ActivePatches += RomPatches.MinimizerTourian
     missileQty = float(args.missileQty)
     superQty = float(args.superQty)
     powerBombQty = float(args.powerBombQty)

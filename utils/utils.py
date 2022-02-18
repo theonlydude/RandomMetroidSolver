@@ -412,13 +412,16 @@ def loadRandoPreset(randoPreset, args):
     if "energyQty" in randoParams:
         args.energyQty = randoParams["energyQty"]
 
+    if "objective" in randoParams:
+        args.objective = randoParams["objective"]
+
     if randoParams.get("minimizer", "off") == "on" and "minimizerQty" in randoParams:
         args.minimizerN = randoParams["minimizerQty"]
-        if randoParams.get("minimizerTourian", "off") == "on":
-            args.minimizerTourian = True
+    if randoParams.get("minimizerTourian", "off") == "on":
+        args.minimizerTourian = True
 
     defaultMultiValues = getDefaultMultiValues()
-    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"]
+    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective"]
     for multiElem in multiElems:
         if multiElem+'MultiSelect' in randoParams:
             setattr(args, multiElem+'List', ','.join(randoParams[multiElem+'MultiSelect']))
@@ -458,6 +461,8 @@ def getRandomizerDefaultParameters():
     defaultParams['minorQty'] = "100"
     defaultParams['energyQty'] = "vanilla"
     defaultParams['energyQtyMultiSelect'] = defaultMultiValues['energyQty']
+    defaultParams['objective'] = ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"]
+    defaultParams['objectiveMultiSelect'] = defaultMultiValues['objective']
     defaultParams['areaRandomization'] = "off"
     defaultParams['areaLayout'] = "off"
     defaultParams['lightAreaRandomization'] = "off"

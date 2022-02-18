@@ -358,9 +358,9 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
             if minimizerN is not None:
                 self.applyIPSPatch('minimizer_bosses.ips')
-                if minimizerTourian == True:
-                    for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
-                        self.applyIPSPatch(patchName)
+            if minimizerTourian == True:
+                for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
+                    self.applyIPSPatch(patchName)
             doors = self.getStartDoors(plms, area, minimizerN)
             if doorsColorsRando == True:
                 for patchName in RomPatcher.IPSPatches['DoorsColors']:

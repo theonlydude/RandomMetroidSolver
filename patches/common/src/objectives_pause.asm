@@ -67,6 +67,9 @@ check_event:
 org $A1F5D8
 scav_order:
 
+;;; default "ship refill" if we have fast tourian but not area rando
+org $8ff700
+	rts
 
 ;;; free space after tracking.ips and seed_display.ips
 org $82f983

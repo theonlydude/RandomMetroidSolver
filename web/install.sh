@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $# -eq 1 -a $1 == "--clean" ]; then
+if [ $# -eq 1 -a "$1" == "--clean" ]; then
     find ~/web2py/applications/solver/static/images -type l -exec rm -f {} \;
 fi
 
@@ -149,6 +149,7 @@ mkdir -p ~/web2py/applications/solver/static/images/help/
 [ -L ~/web2py/applications/solver/static/images/help/west_sand_hall.png ] || ln -s ~/RandomMetroidSolver/web/static/help/west_sand_hall.png ~/web2py/applications/solver/static/images/help/west_sand_hall.png
 [ -L ~/web2py/applications/solver/static/images/help/main_street_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/main_street_save.png ~/web2py/applications/solver/static/images/help/main_street_save.png
 [ -L ~/web2py/applications/solver/static/images/help/crab_shaft_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/crab_shaft_save.png ~/web2py/applications/solver/static/images/help/crab_shaft_save.png
+[ -L ~/web2py/applications/solver/static/images/help/objectives.png ] || ln -s ~/RandomMetroidSolver/web/static/help/objectives.png ~/web2py/applications/solver/static/images/help/objectives.png
 
 # rando - maps
 [ -L ~/web2py/applications/solver/static/images/help/minimizer_example.png ] || ln -s ~/RandomMetroidSolver/web/static/help/minimizer_example.png ~/web2py/applications/solver/static/images/help/minimizer_example.png

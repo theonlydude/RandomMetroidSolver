@@ -413,7 +413,10 @@ def loadRandoPreset(randoPreset, args):
         args.energyQty = randoParams["energyQty"]
 
     if "objective" in randoParams:
-        args.objective = randoParams["objective"]
+        if randoParams["objective"] == "random":
+            args.objective = ["random"]
+        else:
+            args.objective = randoParams["objective"]
 
     if randoParams.get("minimizer", "off") == "on" and "minimizerQty" in randoParams:
         args.minimizerN = randoParams["minimizerQty"]

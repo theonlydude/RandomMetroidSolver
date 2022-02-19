@@ -17,6 +17,7 @@
     "powerBombQty": "1",
     "minorQty": "100",
     "energyQty": "vanilla",
+    "objective": ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"],
     "areaRandomization": "off",
     "lightAreaRandomization": "off",
     "areaLayout": "off",

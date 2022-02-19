@@ -207,6 +207,17 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         if seedInt < 0 or seedInt > sys.maxsize:
             raiseHttp(400, "Wrong value for seed", isJson)
 
+    if 'objective' in others:
+        objective = request.vars.objective.split(',')
+        authorizedObjectives = defaultMultiValues['objective'] + ['random']
+        for value in objective:
+            if value not in authorizedObjectives:
+                raiseHttp(400, "Wrong value for objective", isJson)
+        if objective == ['random']:
+            for value in request.vars.objectiveMultiSelect.split(','):
+                if value not in authorizedObjectives:
+                    raiseHttp(400, "Wrong value for objectiveMultiSelect", isJson)
+
     preset = request.vars.preset
     if preset != None:
         if IS_ALPHANUMERIC()(preset)[1] is not None:

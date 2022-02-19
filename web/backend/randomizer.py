@@ -165,7 +165,7 @@ class Randomizer(object):
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty']
+        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize
@@ -227,6 +227,8 @@ class Randomizer(object):
         for var, value in randoPresetDict.items():
             if 'MultiSelect' in var:
                 randoPresetDict[var] = value.split(',')
+        randoPresetDict['objective'] = self.vars.objective.split(',')
+
         with open(jsonRandoPreset, 'w') as randoPresetFile:
             json.dump(randoPresetDict, randoPresetFile)
         params += ['--randoPreset', jsonRandoPreset]
@@ -337,7 +339,7 @@ class Randomizer(object):
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
-        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty']
+        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others)
 
         if self.session.randomizer is None:
@@ -387,6 +389,10 @@ class Randomizer(object):
         self.session.randomizer['scavNumLocs'] = self.vars.scavNumLocs
         self.session.randomizer['scavRandomized'] = self.vars.scavRandomized
         self.session.randomizer['scavEscape'] = self.vars.scavEscape
+        # objective is a special multi select
+        self.session.randomizer['objective'] = self.vars.objective.split(',')
+        if self.vars.objectiveMultiSelect is not None:
+            self.session.randomizer['objectiveMultiSelect'] = self.vars.objectiveMultiSelect.split(',')
 
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']

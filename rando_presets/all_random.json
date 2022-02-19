@@ -9,6 +9,7 @@
   "missileQty": "random",
   "morphPlacement": "random",
   "progressionSpeed": "random",
+  "objective": "random",
   "areaRandomization": "random",
   "bossRandomization": "random",
   "maxDifficulty": "hardcore",

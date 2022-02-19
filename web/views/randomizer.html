@@ -386,14 +386,24 @@ function randomizeMinimizer(evt) {
   }
 }
 
+var objectiveBackup = ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"];
 function randomizeObjective(evt) {
     var isActive;
     if(isElemRandom(evt.currentTarget)) {
         evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
         isActive = false;
+
+        // restore previous value
+        $("#objectiveMultiSelect").val(objectiveBackup).trigger("chosen:updated");
     } else {
         evt.currentTarget.className += " active";
         isActive = true;
+
+        // backup current value
+        objectiveBackup = $("#objectiveMultiSelect").val();
+
+        // add all objectives for randomization
+        $("#objectiveMultiSelect").val(defaultMultiValues["objective"]).trigger("chosen:updated");
     }
 
     disableElement("objective", isActive);
@@ -541,9 +551,7 @@ function AjaxPresetCallCompleted(data) {
        }
     }
 
-    // special case for the 2nd minimizer tourian checkbox
-    var minimizerTourianObj = document.getElementById("minimizerTourianObj");
-    dataDict["minimizerTourian"] = minimizerTourianObj.value;
+    getSpecialValues(dataDict);
 
     // if production server randomly use one of the two redirect webapps
     var prodUrls = ["varia.run", "www.varia.run"];
@@ -727,9 +735,7 @@ function AjaxRandomizerCallCompleted(data) {
        }
     }
 
-    // special case for the 2nd minimizer tourian checkbox
-    var minimizerTourianObj = document.getElementById("minimizerTourianObj");
-    dataDict["minimizerTourian"] = minimizerTourianObj.value;
+    getSpecialValues(dataDict);
 
     // call webservice to update the session
     var request = $.ajax({
@@ -742,33 +748,78 @@ function AjaxRandomizerCallCompleted(data) {
     request.fail(ajaxFail);
 }
 
-function doSubmit() {
-  if(window.File && window.FileList && window.FileReader) {
+function getSpecialValues(dataDict) {
+    // special case for the 2nd minimizer tourian checkbox
+    var minimizerTourianObj = document.getElementById("minimizerTourianObj");
+    dataDict["minimizerTourian"] = minimizerTourianObj.value;
 
-    if(vanillaROMStored == false) {
-        alert("Please select a Super Metroid Vanilla ROM first");
-        return false;
+    // special case for objectives multiselect
+    if(isElemIdRandom("objective")) {
+        dataDict["objective"] = "random";
+        dataDict["objectiveMultiSelect"] = $("#objectiveMultiSelect").val().join();
+    } else {
+        dataDict["objective"] = $("#objectiveMultiSelect").val().join();
+    }
+}
+
+function validateObjectives() {
+    //var objectives = document.getElementById("objectiveMultiSelect");
+    //console.log("objectiveMultiSelect: "+objectives.value);
+    var objectives = $("#objectiveMultiSelect");
+    var nbObjectives = objectives.val().length;
+    console.log("objectiveMultiSelect: "+objectives.val().join());
+
+    if(isElemIdRandom("objective")) {
+        // if objectives are randomized, check that there's at least one in the list
+        if(nbObjectives == 0) {
+            alert("Objectives are randomized but objectives list is empty");
+            return false;
+        }
+    } else {
+        // if not randomized, check that there's max 5 objectives in the list
+        if(nbObjectives > 5) {
+            alert("You can have maximum five objectives");
+            return false
+        }
+        if(nbObjectives == 0) {
+            alert("Objectives list is empty");
+            return false
+        }
+    }
+    return true;
+}
+
+function doSubmit() {
+    if(window.File && window.FileList && window.FileReader) {
+
+        if(vanillaROMStored == false) {
+            alert("Please select a Super Metroid Vanilla ROM first");
+            return false;
+        }
+
+        if(! validateObjectives()) {
+            return false;
+        }
+
+        var dataDict = {"preset": document.getElementById("preset").value};
+
+        // call preset web service with parameters
+        var request = $.ajax({
+            url: "{{=URL(f='presetWebService')}}",
+            method: "POST",
+            data: dataDict,
+            dataType: "html"
+        });
+
+        request.done(AjaxPresetCallCompleted);
+        request.fail(ajaxFail);
+
+        // while WS is working, display "working" message
+        $('#overlay').show();
+        $('#loadingGIF').show();
     }
 
-    var dataDict = {"preset": document.getElementById("preset").value};
-
-    // call preset web service with parameters
-    var request = $.ajax({
-      url: "{{=URL(f='presetWebService')}}",
-      method: "POST",
-      data: dataDict,
-      dataType: "html"
-    });
-
-    request.done(AjaxPresetCallCompleted);
-    request.fail(ajaxFail);
-
-    // while WS is working, display "working" message
-    $('#overlay').show();
-    $('#loadingGIF').show();
-  }
-
-  return false;
+    return false;
 }
 
 function getRndInteger(max) {
@@ -1270,48 +1321,70 @@ function loadRandoPreset() {
 }
 
 function loadRandoPresetOK(data) {
-  // instead of reloading the page which remove the sm ROM, update all fields manually
-  for(var key in data) {
-    value = data[key];
-    // console.log("loadRandoPresetOK "+key+": "+value);
-    var elem = document.getElementById(key);
-
-    var elemRandom = document.getElementById(key+"Random");
-    if(value == "random") {
-      // if not already set as random, set it
-      if(! isElemRandom(elemRandom)) {
-        randomize({currentTarget: elemRandom}, key);
-      }
-    } else {
-      // check if it was random before
-      if(elemRandom != null && isElemRandom(elemRandom)) {
-        randomize({currentTarget: elemRandom}, key);
-      }
-
-      // tell switchery for checkboxes
-      if(key in globalSwitchs) {
-        if(value != elem.value){
-          elem.click();
+    // instead of reloading the page which remove the sm ROM, update all fields manually
+    for(var key in data) {
+        if(key == "objective" || key == "objectiveMultiSelect") {
+            continue;
         }
-      }
+        value = data[key];
+        // console.log("loadRandoPresetOK "+key+": "+value);
+        var elem = document.getElementById(key);
 
-      elem.value = value;
-      if(chosenElements.includes(key)) {
-        $("#"+key).val(value).trigger("chosen:updated");
-      }
+        var elemRandom = document.getElementById(key+"Random");
+        if(value == "random") {
+            // if not already set as random, set it
+            if(! isElemRandom(elemRandom)) {
+                randomize({currentTarget: elemRandom}, key);
+            }
+        } else {
+            // check if it was random before
+            if(elemRandom != null && isElemRandom(elemRandom)) {
+                randomize({currentTarget: elemRandom}, key);
+            }
 
-      if(typeof elem.onchange === "function") {
-        elem.onchange();
-      }
+            // tell switchery for checkboxes
+            if(key in globalSwitchs) {
+                if(value != elem.value){
+                    elem.click();
+                }
+            }
+
+            elem.value = value;
+            if(chosenElements.includes(key)) {
+                $("#"+key).val(value).trigger("chosen:updated");
+            }
+
+            if(typeof elem.onchange === "function") {
+                elem.onchange();
+            }
+        }
     }
-  }
 
-  // check if multi select has been set by the rando preset, otherwise load default values
-  for(var key in defaultMultiValues) {
-      if(! (key+"MultiSelect" in data) ) {
-          $("#"+key+"MultiSelect").val(defaultMultiValues[key]).trigger("chosen:updated");
-      }
-  }
+    // check if multi select has been set by the rando preset, otherwise load default values
+    for(var key in defaultMultiValues) {
+        if(key == "objective") {
+            continue;
+        }
+        if(! (key+"MultiSelect" in data) ) {
+            $("#"+key+"MultiSelect").val(defaultMultiValues[key]).trigger("chosen:updated");
+        }
+    }
+
+    // objectives is special
+    var objectiveRandom = document.getElementById("objectiveRandom");
+    if(data["objective"] == "random") {
+        if(! isElemRandom(objectiveRandom)) {
+            randomizeObjective({currentTarget: objectiveRandom});
+        }
+        if("objectiveMultiSelect" in data) {
+            $("#objectiveMultiSelect").val(data["objectiveMultiSelect"]).trigger("chosen:updated");
+        }
+    } else {
+        if(isElemRandom(objectiveRandom)) {
+            randomizeObjective({currentTarget: objectiveRandom});
+        }
+        $("#objectiveMultiSelect").val(data["objective"]).trigger("chosen:updated");
+    }
 }
 
 function startTheTour(step=-1) {
@@ -1571,10 +1644,10 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
 <li>Nothing: unrestricted access to Tourian</li>\
 </ul>\
 </p><p>\
-<b>Note: With Scavenger Hunt majors split with escape sequence triggered at hunt's end you cannot use custom objectives (as you never go to Tourian).</b>\
+<b>Note: With Scavenger Hunt majors split with escape sequence triggered at hunt's end you cannot use custom objectives (as you never go to Tourian). If custom objectives are set they are ignored.</b>\
 </p>\
 <p>You can also <b>speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a></b> to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including Mother Brain 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">invicible Gadora</a> until all objectives are completed.</p>\
-<p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from.</p>"
+<p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 5 objectives from the list. To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
     },
     {
       element: "#areaRandomizationStep",

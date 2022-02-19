@@ -1781,8 +1781,14 @@ for name, values in musics["_dropdown"].items():
 {{
 if seedInfo != None:
   def setBold(param):
-    if seedParams[param] != defaultParams[param]:
-      response.write("class='bold'", escape=False)
+    if param == "objective":
+      if seedParams[param] != ','.join(defaultParams[param]):
+        response.write("class='bold'", escape=False)
+        pass
+    else:
+      if seedParams[param] != defaultParams[param]:
+        response.write("class='bold'", escape=False)
+        pass
       pass
     pass
 }}
@@ -1858,6 +1864,16 @@ if seedInfo != None:
 {{    if seedParams["energyQty"] == "random":}}
               <tr><td>Quantity of Energy/Reserve pool</td><td>{{=seedParams["energyQtyMultiSelect"]}}</td></tr>
 {{        pass}}
+            </table>
+
+            <h4>Objectives</h4>
+            <table class="full">
+              <colgroup><col class="half" /><col class="half" /></colgroup>
+              <tr {{=setBold("objective")}}><td>Objectives to access Tourian</td><td>{{=seedParams["objective"]}}</td></tr>
+{{    if seedParams["objective"] == "random":}}
+              <tr><td>Objectives pool</td><td>{{=seedParams["objectiveMultiSelect"]}}</td></tr>
+{{        pass}}
+              <tr {{=setBold("minimizerTourian")}}><td>Speed up Tourian</td><td>{{=seedParams["minimizerTourian"]}}</td></tr>
             </table>
 
             <h4>Areas/Doors/Bosses/Escape Randomization</h4>

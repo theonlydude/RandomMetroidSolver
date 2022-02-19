@@ -21,6 +21,8 @@ lorom
 !samus_max_health      = $09c4
 !samus_reserve         = $09d6
 !samus_max_reserve     = $09d4
+!current_room          = $079b
+!tourian_eye_door_room = $aa5c
 
 ;;; connect Statues Hallway to Tourian Eye Door Room...
 org $8fa616
@@ -35,11 +37,22 @@ org $8fddeb
 org $839218
 	db $40
 
-;;; alternative door hit instruction that skips hit counter check
-org $848a6d ; end of some unused instruction
+
+org $848a59                     ; unused instruction
 alt_door_hit:
+        ;; test if current room is Tourian Door Room
+        lda !current_room
+        cmp !tourian_eye_door_room
+        bne .vanilla_door_hit
+	;; alternative door hit instruction that skips hit counter check
 	clc
 	bra .skip_check		; resume original routine
+
+warnpc $848a72
+
+org $848a91
+.vanilla_door_hit:
+
 org $848aa3
 .skip_check:
 

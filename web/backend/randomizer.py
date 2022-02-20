@@ -122,8 +122,14 @@ class Randomizer(object):
         defaultMultiValues = getDefaultMultiValues()
         for key in defaultMultiValues:
             keyMulti = key + 'MultiSelect'
-            if keyMulti in self.session.randomizer:
-                defaultMultiValues[key] = self.session.randomizer[keyMulti]
+            if key == "objective":
+                if key in self.session.randomizer:
+                    defaultMultiValues[key] = self.session.randomizer[key]
+                elif keyMulti in self.session.randomizer:
+                    defaultMultiValues[key] = self.session.randomizer[keyMulti]
+            else:
+                if keyMulti in self.session.randomizer:
+                    defaultMultiValues[key] = self.session.randomizer[keyMulti]
         return defaultMultiValues
 
     # race mode

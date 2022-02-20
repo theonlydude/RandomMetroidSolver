@@ -357,6 +357,7 @@ function randomize(evt, elemId) {
       e.style.display = "none";
       multi.style.display = "block";
       // chosen must be activated when it's visible, else it doesn't work...
+      $("#"+elemId+"MultiSelect").chosen("destroy");
       $("#"+elemId+"MultiSelect").chosen({ width: '100%' });
     } else {
       e.style.display = "block";
@@ -386,12 +387,26 @@ function randomizeMinimizer(evt) {
   }
 }
 
+function setMaxObjective(isRandom) {
+    if(isRandom) {
+        // no limit
+        $("#objectiveMultiSelect").chosen("destroy");
+        $("#objectiveMultiSelect").chosen({max_selected_options: Infinity, width: '100%'})
+    } else {
+        // limit to 5 objectives
+        $("#objectiveMultiSelect").chosen("destroy");
+        $("#objectiveMultiSelect").chosen({max_selected_options: 5, width: '100%'})
+    }
+}
+
 var objectiveBackup = ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"];
 function randomizeObjective(evt) {
     var isActive;
     if(isElemRandom(evt.currentTarget)) {
         evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
         isActive = false;
+
+        setMaxObjective(false);
 
         // restore previous value
         $("#objectiveMultiSelect").val(objectiveBackup).trigger("chosen:updated");
@@ -401,6 +416,8 @@ function randomizeObjective(evt) {
 
         // backup current value
         objectiveBackup = $("#objectiveMultiSelect").val();
+
+        setMaxObjective(true);
 
         // add all objectives for randomization
         $("#objectiveMultiSelect").val(defaultMultiValues["objective"]).trigger("chosen:updated");
@@ -458,7 +475,14 @@ function setObjective() {
     var multi = document.getElementById("objectiveMultiSelectDiv");
     select.style.display = "none";
     multi.style.display = "block";
-    $("#objectiveMultiSelect").chosen({ width: '100%' });
+    setMaxObjective(isElemRandom(document.getElementById("objectiveRandom")));
+
+    // at start all objectives are displayed as selected even though they're not...
+    var sessionObjectives = {{response.write(session.randomizer["objective"], escape=False)}};
+
+    $("#objectiveMultiSelect").val(sessionObjectives).trigger("chosen:updated");
+
+    $("#objectiveMultiSelect").trigger("chosen:updated");
 }
 
 function setComplexity() {

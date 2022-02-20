@@ -322,10 +322,12 @@ shipGlowCustomImg = baseImg.crop((176, 120, 184, 128))
 shipGlowCustomColor = [r, g, b]
 enableShipGlowCustom = sum(shipGlowCustomColor) > 0
 shipGlowCustomMinImg = baseImg.crop((176, 128, 184, 136))
-(r, g, b, a) = shipGlowCustomImg.getpixel((0, 0))
+(r, g, b, a) = shipGlowCustomMinImg.getpixel((0, 0))
 shipGlowCustomMinColor = [r, g, b]
 enableShipGlowMinCustom = sum(shipGlowCustomMinColor) > 0
 #shipImg.show()
+print("custom final glow color enabled: {}".format(enableShipGlowCustom))
+print("custom start glow color enabled: {}".format(enableShipGlowMinCustom))
 
 # extract hatch tiles, original palette, new palette
 hatchOrigPaletteBox = (56, 96, 96, 104)

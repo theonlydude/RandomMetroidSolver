@@ -107,6 +107,8 @@ load_credits_music_data:
 load_credits_music_track:
 	%loadMusicTrack(credits)
 
+warnpc $8bf8ff
+
 org $a9fc70
 load_escape_music_data:
 	%loadMusicData(escape)

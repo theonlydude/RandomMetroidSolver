@@ -653,6 +653,10 @@ class CommonSolver(object):
                         # we do it before rollbacks to avoid endless rollbacks.
                         if self.motherBrainCouldBeKilled:
                             self.log.debug("we're stucked but we could have killed MB before")
+                            # add MB loc for the spoiler log, remove its path as it's not the correct one
+                            # from when the loc was accessible
+                            mbLoc.path = [getAccessPoint('Golden Four')]
+                            self.visitedLocations.append(mbLoc)
                             self.motherBrainKilled = True
                             break
                         else:

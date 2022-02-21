@@ -1232,6 +1232,9 @@ class MusicPatcher(object):
             if track not in self.replaceableTracks:
                 raise RuntimeError("Cannot replace track %s" % track)
         trackList = self._getTrackList(tracks)
+        replacedVanilla = [t for t in self.replaceableTracks if t in trackList and t not in tracks]
+        for van in replacedVanilla:
+            tracks[van] = van
 #        print("trackList="+str(trackList))
         musicData = self._getMusicData(trackList)
 #        print("musicData="+str(musicData))

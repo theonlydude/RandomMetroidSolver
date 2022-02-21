@@ -485,12 +485,7 @@ function musicSelectChange() {
     var musicCustom = document.getElementById("musicCustomizer");
     if(elem.value == "Customize") {
         musicCustom.style.display = "block";
-        // custom music crashes on bsnes-hd
-        disableElement("widescreen", true);
     } else {
-        if(isRace == false) {
-            disableElement("widescreen", false);
-        }
         musicCustom.style.display = "none";
         stopSong();
     }
@@ -1013,11 +1008,6 @@ if seedInfo != None:
             }
         });
     }
-
-    // disable widescreen if custom music
-    if(document.getElementById("music").value == "Customize") {
-        disableElement("widescreen", true);
-    }
 }
 
 function switchGamepadMapping() {
@@ -1448,9 +1438,9 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
     {
       element: "#widescreenStep",
       title: "Widescreen support",
-      content: "<p>Add support for widescreen on <a href=\"https://github.com/DerKoun/bsnes-hd/releases\">bsnes-hd</a> emulator. A bso file containing emulator configuration is downloaded after the ROM file, you have to leave it in the same folder as the ROM file for bsnes-hd to work properly.</p>\
+      content: "<p>Add support for widescreen on <a href=\"https://github.com/DerKoun/bsnes-hd/releases\" target=\"_blank\">bsnes-hd emulator</a>. A bso file containing emulator configuration is downloaded after the ROM file, you have to leave it in the same folder as the ROM file for bsnes-hd to work properly.</p>\
 <p><b>Note: widescreen patch is not compatible with race mode</b></p>\
-<p><b>Note: bnes-hd is not compatible with custom music</b></p>\
+<p><b>Note: widescreen patch contains its own version of the fast doors/elevators patch</b></p>\
 <p>Patch developed by ocesse.</p>"
     },
     {
@@ -1791,7 +1781,7 @@ for name, values in musics["_dropdown"].items():
                 <tr id="widescreenStep">
                   <td colspan="2">
                     {{displayCheckbox("widescreen")}}
-                    <span id="widescreenText">Widescreen on bsnes-hd</span>
+                    <span id="widescreenText">Widescreen on  <a href="https://github.com/DerKoun/bsnes-hd/releases" target="_blank">bsnes-hd emulator</a></span>
                   </td>
                   <td><button type="button" onclick="startTheTour(16)">?</button></td>
                 </tr>

@@ -344,6 +344,14 @@ function updateROM(bytes, data, filename) {
 
     var blob = new Blob([bytes], {type: "octet/stream"});
     saveAs(blob, filename);
+
+    // check if widescreen patch was added
+    if(bytes[0xd8] == 0x40) {
+        // create blob to store bso configuration file
+        var blob = new Blob([getBSO()], {type: "text/plain;charset=utf-8"});
+        var bsoFilename = filename.slice(0, -3) + 'bso'
+        saveAs(blob, bsoFilename);
+    }
 }
 
 function AjaxCallCompleted(data) {
@@ -410,7 +418,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "Infinite_Space_Jump", "refill_before_save", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_doors_speed", "gamepadMapping"];
+      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_doors_speed", "gamepadMapping"];
 
     for(var i=0; i<elems.length; i++) {
         var elem = document.getElementById(elems[i]);
@@ -792,7 +800,7 @@ if seedInfo != None:
 }}
 
 function greyOutPatches(isRace, isVARIA, isVanilla) {
-    var buttons = ["itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save"];
+    var buttons = ["itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save", "widescreen"];
     for(var i=0; i<buttons.length; i++) {
         disableElement(buttons[i], isRace);
     }
@@ -805,6 +813,7 @@ function greyOutPatches(isRace, isVARIA, isVanilla) {
     // grey out random music when vanilla rom is detected as it'll crash
     if(isVanilla == true) {
         disableElement("random_music", true);
+        disableElement("widescreen", true);
     }
 
     // set noSpinAttack to on when a race seed is detected
@@ -820,7 +829,13 @@ function greyOutPatches(isRace, isVARIA, isVanilla) {
 
 var vanillaROMBytes = null;
 var romSize = 0x300000;
-var isRace = false;
+{{
+if seedInfo != None and seedInfo["raceMode"] == 'on':
+    response.write("var isRace = true;", escape=False)
+else:
+    response.write("var isRace = false;", escape=False)
+    pass
+}}
 window.onload = function(){
     //Check File API support
     if(window.File && window.FileList && window.FileReader) {
@@ -1282,6 +1297,28 @@ function displayMessage() {
 }}
 }
 
+function getBSO() {
+    var bso = `  %            SUPER METROID            %  
+  % ! with widescreen patch by ocesse ! %  
+w :    1    % Widescreen : all %
+W : 1609    % Aspect ratio : 16:9 %
+s :    1    % Widescreen sprites/objects : unsafe %
+b :    2    % Background layer 1 : autoHor&Ver %
+B :    1    % Background layer 2 : on %
+c : 2032    % Background layer 3 : widescreen below line 32 %
+C :    2    % Background layer 4 : autoHor&Ver %
+i :    0    % Ignore window : None %
+m :    0    % Widescreen markers : off %
+O :  200    % Overclock CPU : 200 percent %
+S :    2    % Stretch windowing effects : on %
+o :    0    % Show Overscan Area : off (affects RetroArch only) %
+p :    0    % Pixel Aspect Ratio Correction : off (affects RetroArch only) %
+l :    1    % PPU No sprite limit : on %
+f :    1    % HD Mode 7 Scale : 1x (this is only an optimization) %
+`
+    return bso;
+}
+
 function startTheTour(step=-1) {
   // the tour tutorial
   var tour = new Tour({
@@ -1397,6 +1434,14 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
       title: "Refill before save",
       content: "<p>Refill energy and ammo when saving.</p>\
 <p>This patch was developed by Adam.</p>"
+    },
+    {
+      element: "#widescreenStep",
+      title: "Widescreen support",
+      content: "<p>Add support for widescreen on <a href=\"https://github.com/DerKoun/bsnes-hd/releases\" target=\"_blank\">bsnes-hd emulator</a>. A bso file containing emulator configuration is downloaded after the ROM file, you have to leave it in the same folder as the ROM file for bsnes-hd to work properly.</p>\
+<p><b>Note: widescreen patch is not compatible with race mode</b></p>\
+<p><b>Note: widescreen patch contains its own version of the fast doors/elevators patch</b></p>\
+<p>Patch developed by ocesse.</p>"
     },
     {
       element: "#AimAnyButtonStep",
@@ -1733,26 +1778,33 @@ for name, values in musics["_dropdown"].items():
               </table>
               <table class="full">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
+                <tr id="widescreenStep">
+                  <td colspan="2">
+                    {{displayCheckbox("widescreen")}}
+                    <span id="widescreenText">Widescreen on  <a href="https://github.com/DerKoun/bsnes-hd/releases" target="_blank">bsnes-hd emulator</a></span>
+                  </td>
+                  <td><button type="button" onclick="startTheTour(16)">?</button></td>
+                </tr>
                 <tr id="AimAnyButtonStep">
                   <td colspan="2">
                     {{displayCheckbox("AimAnyButton")}}
                     <span id="AimAnyButtonText">Allows the aim buttons to be assigned to any button</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(16)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(17)">?</button></td>
                 </tr>
                 <tr id="max_ammo_displayStep">
                   <td colspan="2">
                     {{displayCheckbox("max_ammo_display")}}
                     <span id="max_ammo_displayText">Max Ammo Display</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(17)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(18)">?</button></td>
                 </tr>
                 <tr id="supermetroid_msu1Step">
                   <td colspan="2">
                     {{displayCheckbox("supermetroid_msu1")}}
                     <span id="supermetroid_msu1Text">Play music with MSU1 chip on SD2SNES</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(18)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(19)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -1766,14 +1818,14 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_itemsounds")}}
                     <span id="remove_itemsoundsText">Restore vanilla fanfare when picking up an item</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(19)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
                 <tr id="remove_ElevatorDoorsStep">
                   <td colspan="2">
                     {{displayCheckbox("remove_elevators_doors_speed")}}
                     <span id="remove_elevators_doors_speedText">Restore vanilla doors and elevators transitions</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(20)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(21)">?</button></td>
                 </tr>
               </table>
           </div>

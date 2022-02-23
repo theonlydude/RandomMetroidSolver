@@ -572,8 +572,8 @@ function changeComplexity(evt, name) {
   }
 
   else if(name == "medium") {
-    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility"];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility", "areaLayoutVisibility", "noPatchesVisibility", "objectivesVisibility"];
+    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility", "objectivesVisibility"];
+    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility", "areaLayoutVisibility", "noPatchesVisibility"];
     showHide(show, hide);
   }
 
@@ -1542,6 +1542,31 @@ Tournament presets:\
       content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\" target=\"_blank\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), tournament presets, or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p><p><b>Standard presets outlook:</b><br/><ul><li><b>newbie: </b>New to randomizers, but completed Super Metroid 100% and knows basic techniques (Wall Jump, Shinespark, Mid-air Morph)</li><li><b>casual:</b> occasional rando player. No hell runs or suitless Maridia, some easy to learn tricks in logic.</li><li><b>regular: </b>plays rando regularly. Knows tricks that are not too hard and open up the game: hell runs (generous energy requirements), suitless Maridia, lava dive, gate glitches, Alcatraz, Gauntlet...</li><li><b>veteran:</b> experienced rando player. Harder everything, some tougher tricks in logic.</li><li><b>expert: </b>knows almost all tricks: full suitless Maridia, Lower Norfair hell runs, hi-jumpless Lava Dive (mania difficulty only, so not by default in most rando settings)</li><li><b>master:</b> Everything on hardest, all tricks known.</li></ul></p>"
     },
     {
+      element: "#objectiveStep",
+      title: "Custom Objectives",
+      content: "<p>Choose which objectives are required to sink the <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statue</a> and to open access to <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a>.</p>\
+<p>You can choose from 0 to 5 objectives (4 if Majors Split is Scavenger Hunt):\
+<ul>\
+<li>Kill Kraid: kill boss <a href=\"https://metroid.fandom.com/wiki/Kraid\" target=\"_blank\">Kraid</a> (vanilla)</li>\
+<li>Kill Phantoon: kill boss <a href=\"https://metroid.fandom.com/wiki/Phantoon\" target=\"_blank\">Phantoon</a> (vanilla)</li>\
+<li>Kill Draygon: kill boss <a href=\"https://metroid.fandom.com/wiki/Draygon\" target=\"_blank\">Draygon</a> (vanilla)</li>\
+<li>Kill Ridley: kill boss <a href=\"https://metroid.fandom.com/wiki/Ridley\" target=\"_blank\">Ridley</a> (vanilla)</li>\
+<li>Kill G4: \"meta\" objective, kill Kraid & Phantoon & Draygon & Ridley</li>\
+<li>Kill Spore Spawn: kill mini boss <a href=\"https://metroid.fandom.com/wiki/Spore_Spawn\" target=\"_blank\">Spore Spawn</a></li>\
+<li>Kill Crocomire: kill mini boss <a href=\"https://metroid.fandom.com/wiki/Crocomire\" target=\"_blank\">Crocomire</a></li>\
+<li>Kill Botwoon: kill mini boss <a href=\"https://metroid.fandom.com/wiki/Botwoon\" target=\"_blank\">Botwoon</a></li>\
+<li>Kill Golden Torizo: kill mini boss <a href=\"https://metroid.fandom.com/wiki/Golden_Torizo\" target=\"_blank\">Golden Torizo</a></li>\
+<li>Kill Mini Bosses: \"meta\" objective, kill Spore Spawn & Crocomire & Botwoon & Golden Torizo</li>\
+</ul>\
+</p><p>\
+<b>Note:</b> If you leave the list empty no objective is required to access Tourian, ie. it's open.<br/>\
+<b>Note:</b> With Scavenger Hunt majors split only up to four objectives can be set as one mandatory objective is added: finish the Scavenger Hunt.<br/>\
+<b>Note:</b> With Scavenger Hunt majors split with escape sequence triggered at hunt's end you cannot use custom objectives (as you never go to Tourian). If custom objectives are set they are ignored.\
+</p>\
+<p>You can also <b>speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a></b> to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including Mother Brain 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">invicible Gadora</a> until all objectives are completed.</p>\
+<p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 5 objectives from the list (between 1 and 4 if Scavenger Hunt). To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
+    },
+    {
       element: "#StartLocationStep",
       title: "Start location",
       content: "<p>Choose where you want to start the game:\
@@ -1728,31 +1753,6 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
       element: "#energyQtyStep",
       title: "Quantity of Energy/Reserve Tanks available",
       content: "<p>Choose how many Energy/Reserve Tanks will be available, from 0-1 in ultra sparse, 4-6 in sparse, 8-12 in medium and 18 in vanilla.</p><p>In ultra sparse Mother Brain's rainbow beam only does 20 damage instead of 300.</p><p>Click on the dice button to randomly set this parameter.</p>"
-    },
-    {
-      element: "#objectiveStep",
-      title: "Custom Objectives",
-      content: "<p>Choose which objectives are required to sink the <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statue</a> and to open access to <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a>.</p>\
-<p>You can choose from 0 to 5 objectives (4 if Majors Split is Scavenger Hunt):\
-<ul>\
-<li>Kill Kraid: kill boss <a href=\"https://metroid.fandom.com/wiki/Kraid\" target=\"_blank\">Kraid</a> (vanilla)</li>\
-<li>Kill Phantoon: kill boss <a href=\"https://metroid.fandom.com/wiki/Phantoon\" target=\"_blank\">Phantoon</a> (vanilla)</li>\
-<li>Kill Draygon: kill boss <a href=\"https://metroid.fandom.com/wiki/Draygon\" target=\"_blank\">Draygon</a> (vanilla)</li>\
-<li>Kill Ridley: kill boss <a href=\"https://metroid.fandom.com/wiki/Ridley\" target=\"_blank\">Ridley</a> (vanilla)</li>\
-<li>Kill G4: \"meta\" objective, kill Kraid & Phantoon & Draygon & Ridley</li>\
-<li>Kill Spore Spawn: kill mini boss <a href=\"https://metroid.fandom.com/wiki/Spore_Spawn\" target=\"_blank\">Spore Spawn</a></li>\
-<li>Kill Crocomire: kill mini boss <a href=\"https://metroid.fandom.com/wiki/Crocomire\" target=\"_blank\">Crocomire</a></li>\
-<li>Kill Botwoon: kill mini boss <a href=\"https://metroid.fandom.com/wiki/Botwoon\" target=\"_blank\">Botwoon</a></li>\
-<li>Kill Golden Torizo: kill mini boss <a href=\"https://metroid.fandom.com/wiki/Golden_Torizo\" target=\"_blank\">Golden Torizo</a></li>\
-<li>Kill Mini Bosses: \"meta\" objective, kill Spore Spawn & Crocomire & Botwoon & Golden Torizo</li>\
-</ul>\
-</p><p>\
-<b>Note:</b> If you leave the list empty no objective is required to access Tourian so it's available from the start of the game.<br/>\
-<b>Note:</b> With Scavenger Hunt majors split only up to four objectives can be set as one mandatory objective is added: finish the Scavenger Hunt.<br/>\
-<b>Note:</b> With Scavenger Hunt majors split with escape sequence triggered at hunt's end you cannot use custom objectives (as you never go to Tourian). If custom objectives are set they are ignored.\
-</p>\
-<p>You can also <b>speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a></b> to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including Mother Brain 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">invicible Gadora</a> until all objectives are completed.</p>\
-<p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 5 objectives from the list (between 1 and 4 if Scavenger Hunt). To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
     },
     {
       element: "#areaRandomizationStep",
@@ -2356,17 +2356,30 @@ def displayNumber(id, min, max, default, step="1"):
                 <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="chzn-select"))}}</td>
                 <td id="presetStep"><button type="button" onclick="startTheTour(5)">?</button></td>
               </tr>
+            </table>
+            <table class="full" id="objectivesVisibility">
+              <colgroup><col class="small"/><col class="third" /><col class="third" /><col class="third" /><col class="small"/></colgroup>
+              <tr>
+                <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td><span id="objectiveText">Objectives to access Tourian:</span></td>
+                <td>{{displayMultiSelect("objective", currentMultiValues["objective"], "", defaultMultiValues["objective"])}}</td>
+                <td class="third paddingonleft">{{displayCheckbox("minimizerTourianObj")}} Speed up Tourian</td>
+                <td id="objectiveStep"><button type="button" onclick="startTheTour(6)">?</button></td>
+              </tr>
+            </table>
+            <table class="full">
+              <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
               <tr>
                 <td class="small"><div class="random"><button id="startLocationRandom" type="button" onclick="randomize(event, 'startLocation')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="startLocationText">Start location</span></td>
+                <td><span id="startLocationText">Start location:</span></td>
                 <td>{{displayMultiSelect("startLocation", currentMultiValues["startLocation"], "Landing Site", defaultMultiValues["startLocation"])}}</td>
-                <td id="StartLocationStep"><button type="button" onclick="startTheTour(6)">?</button></td>
+                <td id="StartLocationStep"><button type="button" onclick="startTheTour(7)">?</button></td>
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="majorsSplitRandom" type="button" onclick="randomize(event, 'majorsSplit')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="majorsSplitText">Majors Split</span></td>
+                <td><span id="majorsSplitText">Majors Split:</span></td>
                 <td>{{displayMultiSelect("majorsSplit", currentMultiValues["majorsSplit"], "Full", defaultMultiValues["majorsSplit"])}}</td>
-                <td id="majorsSplitStep"><button type="button" onclick="startTheTour(7)">?</button></td>
+                <td id="majorsSplitStep"><button type="button" onclick="startTheTour(8)">?</button></td>
               </tr>
             </table>
             <table class="full" id="scavengerParams">
@@ -2375,11 +2388,11 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="small"><div class="random"><button id="scavNumLocsRandom" type="button" onclick="randomize(event, 'scavNumLocs')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td id="scavNumLocsStep"><span id="scavNumLocsText">Mandatory locations to visit:</span></td>
                 <td>{{displayNumber("scavNumLocs", "4", "17", "10", "1")}}</td>
-                <td><button type="button" onclick="startTheTour(8)">?</button></td>
-                <td id="scavRandomizedStep">{{displayCheckbox("scavRandomized")}}Randomize items in mandatory locations</td>
                 <td><button type="button" onclick="startTheTour(9)">?</button></td>
-                <td id="scavEscapeStep">{{displayCheckbox("scavEscape")}}Trigger escape at hunt's end</td>
+                <td id="scavRandomizedStep">{{displayCheckbox("scavRandomized")}}Randomize items in mandatory locations</td>
                 <td><button type="button" onclick="startTheTour(10)">?</button></td>
+                <td id="scavEscapeStep">{{displayCheckbox("scavEscape")}}Trigger escape at hunt's end</td>
+                <td><button type="button" onclick="startTheTour(11)">?</button></td>
               </tr>
             </table>
             <table class="full">
@@ -2388,7 +2401,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="small"></td>
                 <td><span id="maxDifficultyText">Maximum difficulty for picking up an item:</span></td>
                 <td>{{displaySelect("maxDifficulty", ['no difficulty cap', 'easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'], "hardcore")}}</td>
-                <td id="maxDifficultyStep"><button type="button" onclick="startTheTour(11)">?</button></td>
+                <td id="maxDifficultyStep"><button type="button" onclick="startTheTour(12)">?</button></td>
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="progressionSpeedRandom" type="button" onclick="randomize(event, 'progressionSpeed')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -2396,29 +2409,29 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="half">
                   {{displayMultiSelect("progressionSpeed", currentMultiValues["progressionSpeed"], "medium", defaultMultiValues["progressionSpeed"])}}
                 </td>
-                <td id="progSpeedStep"><button type="button" onclick="startTheTour(12)">?</button></td>
+                <td id="progSpeedStep"><button type="button" onclick="startTheTour(13)">?</button></td>
               </tr>
               <tr id="progDiffVisibility">
                 <td class="small"><div class="random"><button id="progressionDifficultyRandom" type="button" onclick="randomize(event, 'progressionDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half"><span id="progressionDifficultyText">Progression difficulty:</span></td>
                 <td class="half">{{displayMultiSelect("progressionDifficulty", currentMultiValues["progressionDifficulty"], "normal", defaultMultiValues["progressionDifficulty"])}}</td>
-                <td id="progDiffStep"><button type="button" onclick="startTheTour(13)">?</button></td>
+                <td id="progDiffStep"><button type="button" onclick="startTheTour(14)">?</button></td>
               </tr>
               <tr id="morphPlacementVisibility">
                 <td class="small"><div class="random"><button id="morphPlacementRandom" type="button" onclick="randomize(event, 'morphPlacement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half"><span id="morphPlacementText">Morph Placement:</span></td>
                 <td class="half">{{displayMultiSelect("morphPlacement", currentMultiValues["morphPlacement"], "normal", defaultMultiValues["morphPlacement"])}}</td>
-                <td id="morphPlacementStep"><button type="button" onclick="startTheTour(14)">?</button></td>
+                <td id="morphPlacementStep"><button type="button" onclick="startTheTour(15)">?</button></td>
               </tr>
               <tr id="suitsRestrictionVisibility">
                 <td class="small"><div class="random"><button id="suitsRestrictionRandom" type="button" onclick="randomize(event, 'suitsRestriction')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td colspan="2">{{displayCheckbox("suitsRestriction")}}<span id="suitsRestrictionText">Suits restriction</span></td>
-                <td id="suitsRestrictionStep"><button type="button" onclick="startTheTour(15)">?</button></td>
+                <td id="suitsRestrictionStep"><button type="button" onclick="startTheTour(16)">?</button></td>
               </tr>
               <tr id="hideItemsVisibility">
                 <td class="small"><div class="random"><button id="hideItemsRandom" type="button" onclick="randomize(event, 'hideItems')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td colspan="2">{{displayCheckbox("hideItems")}}<span id="hideItemsText">Hide some items</span></td>
-                <td id="hideItemsStep"><button type="button" onclick="startTheTour(16)">?</button></td>
+                <td id="hideItemsStep"><button type="button" onclick="startTheTour(17)">?</button></td>
               </tr>
             </table>
             <div id="ammoVisibility">
@@ -2428,13 +2441,13 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr id="strictMinorsVisibility">
                   <td class="small"><div class="random"><button id="strictMinorsRandom" type="button" onclick="randomize(event, 'strictMinors')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td colspan="2">{{displayCheckbox("strictMinors")}}<span id="strictMinorsText">Strict Minors distribution</span></td>
-                  <td id="strictMinorsStep"><button type="button" onclick="startTheTour(17)">?</button></td>
+                  <td id="strictMinorsStep"><button type="button" onclick="startTheTour(18)">?</button></td>
                 </tr>
                 <tr id="missileQtyVisibility">
                   <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td><span id="missileQtyText">Proportion of Missiles:</span></td>
                   <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
-                  <td id="missileQtyStep"><button type="button" onclick="startTheTour(18)">?</button></td>
+                  <td id="missileQtyStep"><button type="button" onclick="startTheTour(19)">?</button></td>
                 </tr>
                 <tr id="superQtyVisibility">
                   <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -2450,31 +2463,16 @@ def displayNumber(id, min, max, default, step="1"):
                   <td class="small"><div class="random"><button id="minorQtyRandom" type="button" onclick="randomize(event, 'minorQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td><span id="minorQtyText">Percentage of minors available:</span></td>
                   <td>{{displayNumber("minorQty", "7", "100", "100")}}</td>
-                  <td id="minorQtyStep"><button type="button" onclick="startTheTour(19)">?</button></td>
+                  <td id="minorQtyStep"><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="energyQtyRandom" type="button" onclick="randomize(event, 'energyQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td><span id="energyQtyText">Quantity of Energy/Reserve Tanks available:</span></td>
                   <td>{{displayMultiSelect("energyQty", currentMultiValues["energyQty"], "vanilla", defaultMultiValues["energyQty"])}}</td>
-                  <td id="energyQtyStep"><button type="button" onclick="startTheTour(20)">?</button></td>
+                  <td id="energyQtyStep"><button type="button" onclick="startTheTour(21)">?</button></td>
                 </tr>
               </table>
             </div>
-
-            <div id="objectivesVisibility">
-              <h4>Objectives</h4>
-              <table class="full">
-                <colgroup><col class="small"/><col class="third" /><col class="third" /><col class="third" /><col class="small"/></colgroup>
-                <tr>
-                  <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td><span id="objectiveText">Objectives to access Tourian:</span></td>
-                  <td>{{displayMultiSelect("objective", currentMultiValues["objective"], "", defaultMultiValues["objective"])}}</td>
-                  <td class="third paddingonleft">{{displayCheckbox("minimizerTourianObj")}} Speed up Tourian</td>
-                  <td id="objectiveStep"><button type="button" onclick="startTheTour(21)">?</button></td>
-                </tr>
-              </table>
-            </div>
-
           </div>
           <div class="column">
             <h4>Areas Randomization</h4>

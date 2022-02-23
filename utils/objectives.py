@@ -172,8 +172,8 @@ class Objectives(object):
 
     # call from rando
     @staticmethod
-    def getAllGoals():
-        return [goal.name for goal in Objectives.goals.values() if goal.available]
+    def getAllGoals(removeNothing=False):
+        return [goal.name for goal in Objectives.goals.values() if goal.available and (not removeNothing or goal.name != "nothing")]
 
     # call from rando
     def setRandom(self, nbGoals, availableGoals):

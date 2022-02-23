@@ -269,7 +269,7 @@ def getDefaultMultiValues():
         'morphPlacement': ['early', 'late', 'normal'],
         'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla'],
         'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive'],
-        'objective': Objectives.getAllGoals()
+        'objective': Objectives.getAllGoals(removeNothing=True)
     }
     return defaultMultiValues
 
@@ -464,7 +464,7 @@ def getRandomizerDefaultParameters():
     defaultParams['minorQty'] = "100"
     defaultParams['energyQty'] = "vanilla"
     defaultParams['energyQtyMultiSelect'] = defaultMultiValues['energyQty']
-    defaultParams['objective'] = ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"]
+    defaultParams['objective'] = ["kill G4"]
     defaultParams['objectiveMultiSelect'] = defaultMultiValues['objective']
     defaultParams['areaRandomization'] = "off"
     defaultParams['areaLayout'] = "off"

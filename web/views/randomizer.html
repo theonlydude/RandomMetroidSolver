@@ -387,20 +387,21 @@ function randomizeMinimizer(evt) {
   }
 }
 
+var max_objectives = 5;
 function setMaxObjective(isRandom) {
     if(isRandom) {
         // no limit
         $("#objectiveMultiSelect").chosen("destroy");
         $("#objectiveMultiSelect").chosen({max_selected_options: Infinity, width: '100%'})
     } else {
-        // limit to 5 objectives
+        // limit to 5 objectives (4 in scav hunt)
         $("#objectiveMultiSelect").chosen("destroy");
-        $("#objectiveMultiSelect").chosen({max_selected_options: 5, width: '100%'})
+        $("#objectiveMultiSelect").chosen({max_selected_options: max_objectives, width: '100%'})
     }
 }
 
-var objectiveBackup = ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"];
-function randomizeObjective(evt) {
+var objectiveBackup = ["kill G4"];
+function randomizeObjective(evt, takeBackup=true) {
     var isActive;
     if(isElemRandom(evt.currentTarget)) {
         evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
@@ -415,7 +416,9 @@ function randomizeObjective(evt) {
         isActive = true;
 
         // backup current value
-        objectiveBackup = $("#objectiveMultiSelect").val();
+        if(takeBackup) {
+            objectiveBackup = $("#objectiveMultiSelect").val();
+        }
 
         setMaxObjective(true);
 
@@ -480,9 +483,11 @@ function setObjective() {
     // at start all objectives are displayed as selected even though they're not...
     var sessionObjectives = {{response.write(session.randomizer["objective"], escape=False)}};
 
-    $("#objectiveMultiSelect").val(sessionObjectives).trigger("chosen:updated");
-
-    $("#objectiveMultiSelect").trigger("chosen:updated");
+    if(sessionObjectives != "random") {
+        $("#objectiveMultiSelect").val(sessionObjectives).trigger("chosen:updated");
+    } else {
+        randomizeObjective({currentTarget: document.getElementById("objectiveRandom")}, false);
+    }
 }
 
 function setComplexity() {
@@ -782,7 +787,12 @@ function getSpecialValues(dataDict) {
         dataDict["objective"] = "random";
         dataDict["objectiveMultiSelect"] = $("#objectiveMultiSelect").val().join();
     } else {
-        dataDict["objective"] = $("#objectiveMultiSelect").val().join();
+        var objectives = $("#objectiveMultiSelect").val();
+        if(objectives.length == 0) {
+            dataDict["objective"] = "nothing";
+        } else {
+            dataDict["objective"] = objectives.join();
+        }
     }
 }
 
@@ -800,13 +810,9 @@ function validateObjectives() {
             return false;
         }
     } else {
-        // if not randomized, check that there's max 5 objectives in the list
-        if(nbObjectives > 5) {
-            alert("You can have maximum five objectives");
-            return false
-        }
-        if(nbObjectives == 0) {
-            alert("Objectives list is empty");
+        // if not randomized, check that there's max 5 objectives in the list (4 in scav hunt)
+        if(nbObjectives > max_objectives) {
+            alert("You can have maximum five objectives (four if major split is Scavenger Hunt)");
             return false
         }
     }
@@ -1223,8 +1229,18 @@ window.onload = function(){
             }
             var hud = document.getElementById("hud");
             setSwitchToOn(hud);
+
+            // update maximum number of allowed custom objectives
+            max_objectives = 4;
         } else {
             scavengerParams.style.display = "none";
+
+            // update maximum number of allowed custom objectives
+            max_objectives = 5;
+        }
+        // tell chosen about new maximum
+        if(!isElemRandom(document.getElementById("objectiveRandom"))) {
+            setMaxObjective(false);
         }
     }
     majorsSplit.onchange();
@@ -1653,7 +1669,7 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
       element: "#objectiveStep",
       title: "Custom Objectives",
       content: "<p>Choose which objectives are required to sink the <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statue</a> and to open access to <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a>.</p>\
-<p>You can choose from 1 to 5 objectives:\
+<p>You can choose from 0 to 5 objectives (4 if Majors Split is Scavenger Hunt):\
 <ul>\
 <li>Kill Kraid: kill boss <a href=\"https://metroid.fandom.com/wiki/Kraid\" target=\"_blank\">Kraid</a> (vanilla)</li>\
 <li>Kill Phantoon: kill boss <a href=\"https://metroid.fandom.com/wiki/Phantoon\" target=\"_blank\">Phantoon</a> (vanilla)</li>\
@@ -1665,13 +1681,14 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
 <li>Kill Botwoon: kill mini boss <a href=\"https://metroid.fandom.com/wiki/Botwoon\" target=\"_blank\">Botwoon</a></li>\
 <li>Kill Golden Torizo: kill mini boss <a href=\"https://metroid.fandom.com/wiki/Golden_Torizo\" target=\"_blank\">Golden Torizo</a></li>\
 <li>Kill Mini Bosses: \"meta\" objective, kill Spore Spawn & Crocomire & Botwoon & Golden Torizo</li>\
-<li>Nothing: unrestricted access to Tourian</li>\
 </ul>\
 </p><p>\
-<b>Note: With Scavenger Hunt majors split with escape sequence triggered at hunt's end you cannot use custom objectives (as you never go to Tourian). If custom objectives are set they are ignored.</b>\
+<b>Note:</b> If you leave the list empty no objective is required to access Tourian so it's available from the start of the game.<br/>\
+<b>Note:</b> With Scavenger Hunt majors split only up to four objectives can be set as one mandatory objective is added: finish the Scavenger Hunt.<br/>\
+<b>Note:</b> With Scavenger Hunt majors split with escape sequence triggered at hunt's end you cannot use custom objectives (as you never go to Tourian). If custom objectives are set they are ignored.\
 </p>\
 <p>You can also <b>speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a></b> to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including Mother Brain 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">invicible Gadora</a> until all objectives are completed.</p>\
-<p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 5 objectives from the list. To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
+<p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 5 objectives from the list (between 1 and 4 if Scavenger Hunt). To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
     },
     {
       element: "#areaRandomizationStep",

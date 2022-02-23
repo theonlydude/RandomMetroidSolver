@@ -188,6 +188,10 @@ class Objectives(object):
         bytesToRead = (Objectives.maxActiveGoals + terminator) * objectiveSize
         return [Objectives.objectivesList+i for i in range(0, bytesToRead+1)]
 
+    @staticmethod
+    def getExclusions():
+        return {goalName: goal.exclusionList for goalName, goal in Objectives.goals.items()}
+
     # call from rando check pool and solver
     @staticmethod
     def getMandatoryBosses():

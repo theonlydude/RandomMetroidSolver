@@ -387,6 +387,47 @@ function randomizeMinimizer(evt) {
   }
 }
 
+var objectives_exclusions = {{response.write(objectivesExclusions, escape=False)}};
+function objective_change(e, params) {
+    // if random is set do nothing
+    if(isElemIdRandom("objective")) {
+        return;
+    }
+
+    if(params.selected) {
+        var toExclude = objectives_exclusions[params.selected];
+        for(var i=0; i<toExclude.length; i++) {
+            $("#objectiveMultiSelect option[value='"+toExclude[i]+"']").remove();
+        }
+        $("#objectiveMultiSelect").trigger("chosen:updated");
+    } else if(params.deselected) {
+        var toInclude = objectives_exclusions[params.deselected];
+
+        var notSelectedArray = $("#objectiveMultiSelect").find('option').not(':selected').map(function () { return this.value; }).get();
+        var selectedArray = $("#objectiveMultiSelect").val();
+
+        for(var i=0; i<toInclude.length; i++) {
+            var toAdd = toInclude[i];
+            // don't add an objective already present in the list
+            if(!notSelectedArray.includes(toAdd)) {
+                // don't add an objective if another selected objective has it in its exclusion list
+                var canAdd = true;
+                for(var j=0; j<selectedArray.length; j++) {
+                    var toTest = selectedArray[j];
+                    if(objectives_exclusions[toTest].includes(toAdd)){
+                        canAdd = false;
+                        break;
+                    }
+                }
+                if(canAdd) {
+                    $("#objectiveMultiSelect").append("<option value=\""+toAdd+"\">"+toAdd+"</option>");
+                }
+            }
+        }
+        $("#objectiveMultiSelect").trigger("chosen:updated");
+    }
+}
+
 var max_objectives = 5;
 function setMaxObjective(isRandom) {
     if(isRandom) {
@@ -411,6 +452,12 @@ function randomizeObjective(evt, takeBackup=true) {
 
         // restore previous value
         $("#objectiveMultiSelect").val(objectiveBackup).trigger("chosen:updated");
+
+        // handle exclusions for currently selected values
+        var selectedArray = $("#objectiveMultiSelect").val();
+        for(var i=0; i<selectedArray.length; i++) {
+            objective_change(null, {selected: selectedArray[i]});
+        }
     } else {
         evt.currentTarget.className += " active";
         isActive = true;
@@ -422,7 +469,16 @@ function randomizeObjective(evt, takeBackup=true) {
 
         setMaxObjective(true);
 
-        // add all objectives for randomization
+        // add all objectives for randomization, as we may have removed some of them from the dropdown list
+        var notSelectedArray = $("#objectiveMultiSelect").find('option').not(':selected').map(function () { return this.value; }).get();
+        var selectedArray = $("#objectiveMultiSelect").val();
+
+        for(var i=0; i<defaultMultiValues["objective"].length; i++) {
+            var toAdd = defaultMultiValues["objective"][i];
+            if(!notSelectedArray.includes(toAdd) && !selectedArray.includes(toAdd)) {
+                $("#objectiveMultiSelect").append("<option value=\""+toAdd+"\">"+toAdd+"</option>");
+            }
+        }
         $("#objectiveMultiSelect").val(defaultMultiValues["objective"]).trigger("chosen:updated");
     }
 
@@ -485,9 +541,17 @@ function setObjective() {
 
     if(sessionObjectives != "random") {
         $("#objectiveMultiSelect").val(sessionObjectives).trigger("chosen:updated");
+
+        // handle exclusions for currently selected values
+        var selectedArray = $("#objectiveMultiSelect").val();
+        for(var i=0; i<selectedArray.length; i++) {
+            objective_change(null, {selected: selectedArray[i]});
+        }
     } else {
         randomizeObjective({currentTarget: document.getElementById("objectiveRandom")}, false);
     }
+
+    $("#objectiveMultiSelect").on('change', objective_change);
 }
 
 function setComplexity() {

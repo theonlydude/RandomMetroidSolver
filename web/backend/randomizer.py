@@ -7,6 +7,7 @@ from utils.utils import getRandomizerDefaultParameters, getDefaultMultiValues, P
 from graph.graph_utils import GraphUtils
 from utils.db import DB
 from logic.logic import Logic
+from utils.objectives import Objectives
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.html import OPTGROUP
@@ -73,6 +74,9 @@ class Randomizer(object):
         currentMultiValues = self.getCurrentMultiValues()
         defaultMultiValues = getDefaultMultiValues()
 
+        # objectives self exclusions
+        objectivesExclusions = Objectives.getExclusions()
+
         # check if we have a guid in the url
         url = self.request.env.request_uri.split('/')
         if len(url) > 0 and url[-1] != 'randomizer':
@@ -112,7 +116,7 @@ class Randomizer(object):
         return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                     randoPresets=randoPresets, tourRandoPresets=tourRandoPresets, randoPresetsDesc=randoPresetsDesc,
                     startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues,
-                    maxsize=sys.maxsize, displayNames=displayNames)
+                    maxsize=sys.maxsize, displayNames=displayNames, objectivesExclusions=objectivesExclusions)
 
     def initRandomizerSession(self):
         if self.session.randomizer is None:

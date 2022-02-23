@@ -525,6 +525,7 @@ if __name__ == "__main__":
                         args.objective = args.objective[0:maxActiveGoals]
                     for goal in args.objective:
                         objectivesManager.addGoal(goal)
+                objectivesManager.expandGoals()
             else:
                 objectivesManager.setVanilla()
 

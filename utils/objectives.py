@@ -37,7 +37,7 @@ class Synonyms(object):
         return verb
 
 class Goal(object):
-    def __init__(self, name, available, clearFunc, checkAddr, exclusionList, items, text, useSynonym):
+    def __init__(self, name, available, clearFunc, checkAddr, exclusionList, items, text, useSynonym, expandable):
         self.name = name
         self.available = available
         self.clearFunc = clearFunc
@@ -48,6 +48,7 @@ class Goal(object):
         self.items = items
         self.text = text
         self.useSynonym = useSynonym
+        self.expandable = expandable
 
     def setRank(self, rank):
         self.rank = rank
@@ -72,34 +73,34 @@ class Objectives(object):
     tourianRequired = True
     goals = {
         "kill kraid": Goal("kill kraid", True, lambda sm: Bosses.bossDead(sm, 'Kraid'), 0xF98F,
-                           ["kill G4"], ["Kraid"], "{} kraid", True),
+                           ["kill G4"], ["Kraid"], "{} kraid", True, False),
         "kill phantoon": Goal("kill phantoon", True, lambda sm: Bosses.bossDead(sm, 'Phantoon'), 0xF997,
-                              ["kill G4"], ["Phantoon"], "{} phantoon", True),
+                              ["kill G4"], ["Phantoon"], "{} phantoon", True, False),
         "kill draygon": Goal("kill draygon", True, lambda sm: Bosses.bossDead(sm, 'Draygon'), 0xF99F,
-                             ["kill G4"], ["Draygon"], "{} draygon", True),
+                             ["kill G4"], ["Draygon"], "{} draygon", True, False),
         "kill ridley": Goal("kill ridley", True, lambda sm: Bosses.bossDead(sm, 'Ridley'), 0xF9A7,
-                            ["kill G4"], ["Ridley"], "{} ridley", True),
+                            ["kill G4"], ["Ridley"], "{} ridley", True, False),
         "kill G4": Goal("kill G4", True, lambda sm: Bosses.allBossesDead(sm), 0xF9AF,
                         ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"],
                         ["Kraid", "Phantoon", "Draygon", "Ridley"],
-                        "{} golden four", True),
+                        "{} golden four", True, True),
         "kill spore spawn": Goal("kill spore spawn", True, lambda sm: Bosses.bossDead(sm, 'SporeSpawn'), 0xF9C5,
-                                 ["kill mini bosses"], ["SporeSpawn"], "{} spore spawn", True),
+                                 ["kill mini bosses"], ["SporeSpawn"], "{} spore spawn", True, False),
         "kill botwoon": Goal("kill botwoon", True, lambda sm: Bosses.bossDead(sm, 'Botwoon'), 0xF9CD,
-                             ["kill mini bosses"], ["Botwoon"], "{} botwoon", True),
+                             ["kill mini bosses"], ["Botwoon"], "{} botwoon", True, False),
         "kill crocomire": Goal("kill crocomire", True, lambda sm: Bosses.bossDead(sm, 'Crocomire'), 0xF9D5,
-                               ["kill mini bosses"], ["Crocomire"], "{} crocomire", True),
+                               ["kill mini bosses"], ["Crocomire"], "{} crocomire", True, False),
         "kill golden torizo": Goal("kill golden torizo", True, lambda sm: Bosses.bossDead(sm, 'GoldenTorizo'), 0xF9E5,
-                                   ["kill mini bosses"], ["GoldenTorizo"], "{} golden torizo", True),
+                                   ["kill mini bosses"], ["GoldenTorizo"], "{} golden torizo", True, False),
         "kill mini bosses": Goal("kill mini bosses", True, lambda sm: Bosses.allMiniBossesDead(sm), 0xF9ED,
                                  ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo"],
                                  ["SporeSpawn", "Botwoon", "Crocomire", "GoldenTorizo"],
-                                 "{} mini bosses", True),
+                                 "{} mini bosses", True, True),
         "shaktool cleared path": Goal("shaktool cleared path", False, None, 0xFA08,
-                                      [], [], "shaktool cleared its path", False),
+                                      [], [], "shaktool cleared its path", False, False),
         "finish scavenger hunt": Goal("finish scavenger hunt", False, lambda sm: SMBool(True), 0xFA10,
-                                      [], [], "finish scavenger hunt", False),
-        "nothing": Goal("nothing", True, lambda sm: SMBool(True), 0xFA27, ["kill kraid", "kill phantoon", "kill draygon", "kill ridley", "kill G4", "kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo", "kill mini bosses", "shaktool cleared path", "finish scavenger hunt"], [], "nothing", False)
+                                      [], [], "finish scavenger hunt", False, False),
+        "nothing": Goal("nothing", True, lambda sm: SMBool(True), 0xFA27, ["kill kraid", "kill phantoon", "kill draygon", "kill ridley", "kill G4", "kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo", "kill mini bosses", "shaktool cleared path", "finish scavenger hunt"], [], "nothing", False, False)
     }
 
     def resetGoals(self):
@@ -121,6 +122,10 @@ class Objectives(object):
         goal.setRank(Objectives.nbActiveGoals)
         Objectives.activeGoals.append(goal)
 
+    def removeGoal(self, goal):
+        Objectives.nbActiveGoals -= 1
+        Objectives.activeGoals.remove(goal)
+
     def setVanilla(self):
         self.addGoal("kill kraid")
         self.addGoal("kill phantoon")
@@ -136,6 +141,30 @@ class Objectives(object):
 
     def setScavengerHuntFunc(self, scavClearFunc):
         Objectives.goals["finish scavenger hunt"].clearFunc = scavClearFunc
+
+    def expandGoals(self):
+        # try to replace 'kill G4' with the four associated objectives.
+        # we need at least 3 empty objectives out of the max (-1 +4)
+        if Objectives.maxActiveGoals - Objectives.nbActiveGoals < 3:
+            return
+
+        expandable = None
+        for goal in Objectives.activeGoals:
+            if goal.expandable:
+                expandable = goal
+                break
+
+        if expandable is None:
+            return
+
+        LOG.debug("replace {} with {}".format(expandable.name, expandable.exclusionList))
+        self.removeGoal(expandable)
+        for name in expandable.exclusionList:
+            self.addGoal(name)
+
+        # rebuild ranks
+        for i, goal in enumerate(Objectives.activeGoals, 1):
+            goal.rank = i
 
     # call from logic
     @staticmethod

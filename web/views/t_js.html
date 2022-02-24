@@ -635,9 +635,15 @@ function updateLocations(jsonData) {
             locsInfo[locName]["visibility"] = locData["visibility"];
             locsInfo[locName]["accessPoint"] = locData["accessPoint"];
             locsInfo[locName]["path"] = locData["path"];
+            locsInfo[locName]["major"] = locData["major"];
 
             if(update) {
-                $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
+                if(locData["major"] == true) {
+                    var css_class = "marker_available_"+locData["difficulty"]+"_major";
+                } else {
+                    var css_class = "marker_available_"+locData["difficulty"];
+                }
+                $("#"+locName).attr("class", "baseLoc "+css_class);
                 var tooltip = getTooltip(locName, locData, "?", false);
                 $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
             }
@@ -729,6 +735,7 @@ function updateLocations(jsonData) {
             locsInfo[locName]["difficulty"] = locData["difficulty"];
             locsInfo[locName]["canHidden"] = locData["canHidden"];
             locsInfo[locName]["visibility"] = locData["visibility"];
+            locsInfo[locName]["major"] = locData["major"];
 
             if(update) {
                 // keep current loc zoomed
@@ -737,7 +744,11 @@ function updateLocations(jsonData) {
                     base = "baseLocOver";
                 }
 
-                var className = "marker_available_break";
+                if(locData["major"] == true) {
+                    var className = "marker_available_break_major";
+                } else {
+                    var className = "marker_available_break";
+                }
                 $("#"+locName).attr("class", base+" "+className);
                 var tooltip = getTooltip(locName, locData, "?", false);
                 $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');

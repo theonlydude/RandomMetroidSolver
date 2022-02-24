@@ -55,11 +55,11 @@ class SolverState(object):
         # string of last access point
         self.state["lastAP"] = solver.lastAP
         # dict {locNameWeb: {infos}, ...}
-        self.state["availableLocationsWeb"] = self.getAvailableLocationsWeb(solver.majorLocations)
+        self.state["availableLocationsWeb"] = self.getAvailableLocationsWeb(solver.majorLocations, solver.masterMajorsSplit)
         # dict {locNameWeb: {infos}, ...}
-        self.state["visitedLocationsWeb"] = self.getAvailableLocationsWeb(solver.visitedLocations)
+        self.state["visitedLocationsWeb"] = self.getAvailableLocationsWeb(solver.visitedLocations, solver.masterMajorsSplit)
         # dict {locNameWeb: {infos}, ...}
-        self.state["remainLocationsWeb"] = self.getRemainLocationsWeb(solver.majorLocations)
+        self.state["remainLocationsWeb"] = self.getRemainLocationsWeb(solver.majorLocations, solver.masterMajorsSplit)
         # string: standard/seedless/plando/race/debug
         self.state["mode"] = solver.mode
         # string:
@@ -228,7 +228,7 @@ class SolverState(object):
         transition = str(transition)
         return transition[0].lower() + removeChars(transition[1:], " ,()-")
 
-    def getAvailableLocationsWeb(self, locations):
+    def getAvailableLocationsWeb(self, locations, majorsSplit):
         ret = {}
         for loc in locations:
             if loc.difficulty is not None and loc.difficulty.bool == True:
@@ -240,7 +240,8 @@ class SolverState(object):
                                 "item": loc.itemName,
                                 "name": loc.Name,
                                 "canHidden": loc.CanHidden,
-                                "visibility": loc.Visibility}
+                                "visibility": loc.Visibility,
+                                "major": loc.isClass(majorsSplit)}
 
 #                if loc.locDifficulty is not None:
 #                    lDiff = loc.locDifficulty
@@ -261,7 +262,7 @@ class SolverState(object):
                         ret[locName]["distance"] = loc.distance
         return ret
 
-    def getRemainLocationsWeb(self, locations):
+    def getRemainLocationsWeb(self, locations, majorsSplit):
         ret = {}
         for loc in locations:
             if loc.difficulty is None or loc.difficulty.bool == False:
@@ -271,7 +272,8 @@ class SolverState(object):
                                 "knows": ["Sequence Break"],
                                 "items": [],
                                 "canHidden": loc.CanHidden,
-                                "visibility": loc.Visibility}
+                                "visibility": loc.Visibility,
+                                "major": loc.isClass(majorsSplit)}
                 if self.debug == True:
                     if loc.difficulty is not None:
                         ret[locName]["difficulty"] = str(loc.difficulty)

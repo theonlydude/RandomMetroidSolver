@@ -61,6 +61,11 @@ def skillPresetActionWebService():
     from web.backend.presets import Presets
     return Presets(session, request, cache).skillPresetActionWebService()
 
+def skillPresetListWebService():
+    session.forget(response)
+    from web.backend.presets import Presets
+    return Presets(session, request, cache).skillPresetListWebService()
+
 
 def tracker():
     from web.backend.tracker import Tracker

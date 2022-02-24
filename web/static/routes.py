@@ -16,6 +16,8 @@ routers = dict(
             'presets',
             'skillPresetActionWebService',
             'skillPresetActionWebService.json',
+            'skillPresetListWebService',
+            'skillPresetListWebService.json',
             'stats',
             'tracker',
             'plando',

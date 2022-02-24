@@ -131,9 +131,9 @@ class Presets(object):
         if IS_NOT_EMPTY()(preset)[1] is not None:
             return (False, "Preset name is empty")
         if IS_ALPHANUMERIC()(preset)[1] is not None:
-            return (False, "Preset name must be alphanumeric: {}".format(preset))
+            return (False, "Preset name must be alphanumeric")
         if IS_LENGTH(32)(preset)[1] is not None:
-            return (False, "Preset name must be max 32 chars: {}".format(preset))
+            return (False, "Preset name must be max 32 chars")
 
         if action in ['Create', 'Update']:
             if IS_NOT_EMPTY()(self.vars.password)[1] is not None:
@@ -504,3 +504,8 @@ class Presets(object):
                         paramsDict['Controller'][button] = value
 
         return paramsDict
+
+    def skillPresetListWebService(self):
+        # load presets list
+        (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
+        return json.dumps(stdPresets + tourPresets + comPresets)

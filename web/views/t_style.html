@@ -215,8 +215,17 @@ img {
     width: 1.8315018%;
     height: 2.4420024%;
 }
+@keyframes borderBlink {
+    from, to {
+        border-color: #fff;
+    }
+    50% {
+        border-color: #222;
+    }
+}
 .addBorder {
-    border: 1px solid #ddd;
+    border: 2px solid #ddd;
+    animation: borderBlink 0.5s linear infinite;
 }
 #lowerMushroomsLeft {
     left: 19.27%;

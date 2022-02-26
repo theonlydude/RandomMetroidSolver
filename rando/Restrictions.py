@@ -135,7 +135,7 @@ class Restrictions(object):
     def getCheckers(self):
         checkers = []
         self.log.debug("add bosses restriction")
-        checkers.append(lambda item, loc, cont: (item.Category != 'Boss' and not loc.isBoss()) or (item.Category == 'Boss' and item.Name == loc.Name))
+        checkers.append(lambda item, loc, cont: (item.Category not in ['Boss', 'MiniBoss'] and not loc.isBoss()) or (item.Category in ['Boss', 'MiniBoss'] and item.Type == loc.BossItemType))
         if self.split != 'Full':
             if self.split != 'Scavenger':
                 self.log.debug("add majorsSplit restriction")

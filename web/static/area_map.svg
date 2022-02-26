@@ -48,8 +48,8 @@
      borderlayer="true"
      inkscape:showpageshadow="false"
      inkscape:zoom="2"
-     inkscape:cx="772.89131"
-     inkscape:cy="486.75465"
+     inkscape:cx="490.87606"
+     inkscape:cy="109.76399"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -534,7 +534,7 @@
      inkscape:label="" />
   <path
      style="opacity:0.43600003;fill:#1956ce;fill-opacity:1;stroke:none;stroke-width:14.09282684;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-     d="M 259.75977 621.20703 L 259.75977 636.69727 L 259.75977 652.18945 L 259.75977 727.84375 L 246.39453 727.84375 L 246.39453 743.33594 L 289.35156 743.33594 L 289.35156 727.84375 L 275.25195 727.84375 L 275.25195 652.18945 L 303.16406 652.18945 L 303.16406 636.69727 L 315.16406 636.69727 L 359.06836 636.69727 L 359.06836 621.20703 L 315.16406 621.20703 L 259.75977 621.20703 z "
+     d="M 259.75977 621.20703 L 259.75977 636.69727 L 259.75977 652.18945 L 259.75977 727.84375 L 246.39453 727.84375 L 246.39453 743.33594 L 289.35156 743.33594 L 289.35156 727.84375 L 275.25195 727.84375 L 275.25195 652.18945 L 303.16406 652.18945 L 303.16406 636.69922 L 359.06836 636.69922 L 359.06836 621.20703 L 289.11914 621.20703 L 259.75977 621.20703 z "
      id="CrocomireSvg" />
   <rect
      style="opacity:0.43600003;fill:#195635;fill-opacity:1;stroke:none;stroke-width:16.08713913;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -662,9 +662,8 @@
      inkscape:label="" />
   <path
      style="opacity:0.43600003;fill:#ffc300;fill-opacity:1;stroke:none;stroke-width:16.23392296;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-     d="M 250.30859 385.62891 L 250.30859 401.11914 L 250.30078 401.11914 L 250.30078 431.83398 L 207.53516 431.83398 L 207.53516 447.32617 L 265.79297 447.32617 L 265.79297 431.83398 L 265.79297 401.12109 L 278.82422 401.12109 L 278.82422 508.53125 L 207.51172 508.53125 L 207.51172 524.02344 L 294.39453 524.02344 L 294.39453 508.53125 L 294.39453 401.12109 L 294.31641 401.12109 L 294.31641 385.62891 L 250.30859 385.62891 z "
-     id="SuperMissilepinkBrinstarSvg"
-     inkscape:label="" />
+     d="M 250.30859 385.62891 L 250.30859 401.11914 L 250.30078 401.11914 L 250.30078 431.83398 L 207.53516 431.83398 L 207.53516 447.32617 L 265.79297 447.32617 L 265.79297 431.83398 L 265.79297 401.12109 L 272.94336 401.12109 L 278.82422 401.12109 L 294.31641 401.12109 L 294.31641 385.62891 L 250.30859 385.62891 z "
+     id="SporeSpawnSvg" />
   <path
      style="opacity:0.43600003;fill:#e72400;fill-opacity:1;stroke:none;stroke-width:14.00893974;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
      d="M 207.51172 524.02344 L 207.51172 539.60352 L 207.53516 539.60352 L 207.53516 554.21094 L 236.74023 554.21094 L 236.74023 568.90625 L 265.02539 568.90625 L 265.02539 584.48633 L 294.35547 584.48633 L 294.35547 568.90625 L 294.35547 554.21094 L 250.91797 554.21094 L 250.91797 538.71875 L 235.96484 538.71875 L 235.96484 524.02344 L 207.51172 524.02344 z "
@@ -789,11 +788,11 @@
      id="CacatacAlleySvg"
      inkscape:label="" />
   <rect
-     style="opacity:0.34800002;vector-effect:none;fill:#04e22a;fill-opacity:1;stroke:none;stroke-width:18.84782982;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+     style="opacity:0.34800002;vector-effect:none;fill:#04e22a;fill-opacity:1;stroke:none;stroke-width:15.54939175;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
      id="postBotwoonSvg"
-     width="272.54034"
+     width="185.49615"
      height="15.594834"
-     x="1168.2008"
+     x="1255.245"
      y="322.81641"
      inkscape:label="" />
   <path
@@ -933,4 +932,16 @@
      d="M 355.36523 128.38086 L 355.36523 143.98633 L 304.35742 143.98633 L 304.35742 159.01367 L 355.36523 159.01367 L 370.39062 159.01367 L 370.39062 128.38086 L 355.36523 128.38086 z "
      id="lowerMushroomsLeftSvg"
      inkscape:label="" />
+  <rect
+     style="opacity:0.34800002;vector-effect:none;fill:#1186d4;fill-opacity:1;stroke:none;stroke-width:2.60031486;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+     id="BotwoonSvg"
+     width="87.043793"
+     height="15.595704"
+     x="1168.2012"
+     y="322.81641" />
+  <path
+     style="opacity:0.43600003;fill:#ff70d2;fill-opacity:1;stroke:none;stroke-width:16.23392296;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     d="m 278.7461,401.12109 v 107.41016 h -71.3125 v 15.49218 h 86.88281 V 508.53125 401.12109 h -0.0781 z"
+     id="SuperMissilepinkBrinstarSvg"
+     inkscape:connector-curvature="0" />
 </svg>

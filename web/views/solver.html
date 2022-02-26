@@ -761,6 +761,24 @@ if result is not None and result["difficulty"] != -1:
     <div id="timeline" style="height: 95px; width: 50%;"></div>
 
 {{
+  if result is not None and result["objectives"]:
+}}
+    <p>
+      Seed objectives:
+    </p>
+    <ul>
+{{
+    for objective in result["objectives"]:
+      response.write("<li>{}</li>".format(objective), escape=False)
+      pass
+}}
+    </ul>
+{{
+    pass
+}}
+
+
+{{
   if result is not None and len(result["patches"]) != 0:
 }}
     <p>

@@ -11,8 +11,7 @@
 ;;; - cycle through remaining required scav locs (the route) during pause
 ;;; - prevent the player to go to out of order scav locs
 ;;; - prevent the player to go through G4 if all required scav locs have
-;;;   not been collected. For this, it replaces g4_skip asm, so don't
-;;;   apply g4_skip when this patch is applied.
+;;;   not been collected.
 ;;; - alternatively, it can trigger the escape immediately after the last
 ;;;   item has been collected. If the option is enabled, rando_escape also
 ;;;   has to be applied
@@ -782,32 +781,3 @@ alt_set_event:
 	iny : iny
 	plx
 	rts
-
-org $838c5c
-	dw alt_g4_skip
-
-;;; same place as g4_skip patch door asm
-org $8ffe00
-alt_g4_skip:
-    ;; skip check if not in scavenger mode:
-    jsl scav_mode_check
-    bcc .g4_skip
-    ;; in scavenger mode, check if the hunt is over
-    and #$00ff : cmp !hunt_over_hud : bne +
-.g4_skip:
-    ;; original g4_skip code:
-    lda $7ed828
-    bit.w #$0100
-    beq +
-    lda $7ed82c
-    bit.w #$0001
-    beq +
-    lda $7ed82a
-    and.w #$0101
-    cmp.w #$0101
-    bne +
-    lda $7ed820
-    ora.w #$0400
-    sta $7ed820
-+
-    rts

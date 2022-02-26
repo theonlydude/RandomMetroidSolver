@@ -1,6 +1,7 @@
 import sys, json, os
 from solver.conf import Conf
 from solver.difficultyDisplayer import DifficultyDisplayer
+from utils.objectives import Objectives
 from utils.utils import fixEnergy
 
 class Out(object):
@@ -58,7 +59,7 @@ class OutWeb(Out):
                       pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
                       remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
                       skippedMajors=skippedMajors, unavailMajors=unavailMajors, collectedItems=collectedItems,
-                      scavengerOrder=scavengerOrder)
+                      scavengerOrder=scavengerOrder, objectives=Objectives.getGoalsList())
 
         with open(s.outputFileName, 'w') as jsonFile:
             json.dump(result, jsonFile)
@@ -73,28 +74,32 @@ class OutWeb(Out):
             'Phantoon': 1,
             'Draygon': 2,
             'Ridley': 3,
-            'Varia': 4,
-            'Gravity': 5,
-            'Morph': 6,
-            'Bomb': 7,
-            'SpringBall': 8,
-            'ScrewAttack': 9,
-            'HiJump': 10,
-            'SpaceJump': 11,
-            'SpeedBooster': 12,
-            'Charge': 13,
-            'Ice': 14,
-            'Wave': 15,
-            'Spazer': 16,
-            'Plasma': 17,
-            'Grapple': 18,
-            'XRayScope': 19,
-            'CrystalFlash': 20,
-            'ETank': 21,
-            'Reserve': 22,
-            'Missile': 23,
-            'Super': 24,
-            'PowerBomb': 25
+            'SporeSpawn': 4,
+            'Crocomire': 5,
+            'Botwoon': 6,
+            'GoldenTorizo': 7,
+            'Varia': 8,
+            'Gravity': 9,
+            'Morph': 10,
+            'Bomb': 11,
+            'SpringBall': 12,
+            'ScrewAttack': 13,
+            'HiJump': 14,
+            'SpaceJump': 15,
+            'SpeedBooster': 16,
+            'Charge': 17,
+            'Ice': 18,
+            'Wave': 19,
+            'Spazer': 20,
+            'Plasma': 21,
+            'Grapple': 22,
+            'XRayScope': 23,
+            'CrystalFlash': 24,
+            'ETank': 25,
+            'Reserve': 26,
+            'Missile': 27,
+            'Super': 28,
+            'PowerBomb': 29
         }
         key = lambda item: order[item[item.find('-')+1:]] if '-' in item else order[item]
         for loc in locations:
@@ -228,6 +233,7 @@ class OutConsole(Out):
         s = self.solver
 
         print("all patches: {}".format(s.romLoader.getAllPatches()))
+        print("objectives: {}".format(Objectives.getGoalsList()))
 
         # print generated path
         if Conf.displayGeneratedPath == True:

@@ -17,6 +17,7 @@
     "powerBombQty": "1",
     "minorQty": "100",
     "energyQty": "vanilla",
+    "objective": ["kill G4"],
     "areaRandomization": "off",
     "lightAreaRandomization": "off",
     "areaLayout": "off",

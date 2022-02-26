@@ -14,6 +14,8 @@ import random
 import utils.log
 
 fun = ['HiJump', 'SpeedBooster', 'Plasma', 'ScrewAttack', 'Wave', 'Spazer', 'SpringBall']
+maxLocs = 109
+bossesItems = ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain', 'SporeSpawn', 'Crocomire', 'Botwoon', 'GoldenTorizo']
 
 if __name__ == "__main__":
 #    utils.log.init(True) # debug mode
@@ -46,7 +48,7 @@ if __name__ == "__main__":
                     item = random.choice(funPick)
                     forbidden.append(item)
                     funPick.remove(item)
-            nLocs = 105
+            nLocs = maxLocs
             if random.random() < 0.25:
                 nLocs = random.randint(40, 80)
             missProb = random.randint(1, 9)
@@ -64,10 +66,10 @@ if __name__ == "__main__":
             }
             # get items
             splits = ['Full', 'Major', 'Chozo']
-            split = random.choice(splits) if nLocs == 105 else 'Full'
+            split = random.choice(splits) if nLocs == maxLocs else 'Full'
             # write params
             csvOut.write("%d;%s;%d;%d;%s;%d;%d;%d;%s;" % (nLocs, energyQty, minQty, len(forbidden), str(strictMinors), missProb, superProb, pbProb, split))
-            itemManager = ItemManager(split, qty, sm, nLocs, 100)
+            itemManager = ItemManager(split, qty, sm, nLocs, bossesItems, 100)
             itemPool = itemManager.createItemPool()
             itemPool = itemManager.removeForbiddenItems(forbidden)
             # compute stats

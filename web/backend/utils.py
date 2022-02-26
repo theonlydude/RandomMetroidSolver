@@ -6,6 +6,7 @@ from rom.romreader import RomReader
 from utils.doorsmanager import DoorsManager
 from utils.utils import getDefaultMultiValues, getPresetDir, removeChars
 from utils.parameters import Knows, isKnows, Controller, isButton
+from utils.objectives import Objectives
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import HTTP
@@ -82,6 +83,8 @@ def getAddressesToRead(plando=False):
     addresses["misc"].append(0x10F201)
     # random doors
     addresses["misc"] += DoorsManager.getAddressesToRead()
+    # objectives
+    addresses["misc"] += Objectives.getAddressesToRead()
 
     # ranges [low, high]
     ## doorasm
@@ -203,6 +206,17 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         seedInt = getInt(request, 'seed', isJson)
         if seedInt < 0 or seedInt > sys.maxsize:
             raiseHttp(400, "Wrong value for seed", isJson)
+
+    if 'objective' in others:
+        objective = request.vars.objective.split(',')
+        authorizedObjectives = defaultMultiValues['objective'] + ['random', 'nothing']
+        for value in objective:
+            if value not in authorizedObjectives:
+                raiseHttp(400, "Wrong value for objective", isJson)
+        if objective == ['random']:
+            for value in request.vars.objectiveMultiSelect.split(','):
+                if value not in authorizedObjectives:
+                    raiseHttp(400, "Wrong value for objectiveMultiSelect", isJson)
 
     preset = request.vars.preset
     if preset != None:

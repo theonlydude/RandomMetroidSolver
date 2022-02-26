@@ -5,10 +5,11 @@ from logic.smbool import SMBool, smboolFalse
 from logic.helpers import Bosses
 from logic.logic import Logic
 from utils.doorsmanager import DoorsManager
+from utils.objectives import Objectives
 from utils.parameters import Knows, isKnows
 
 class SMBoolManager(object):
-    items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'MotherBrain', 'Hyper'] + Bosses.Golden4()
+    items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'MotherBrain', 'Hyper'] + Bosses.Golden4() + Bosses.miniBosses()
     countItems = ['Missile', 'Super', 'PowerBomb', 'ETank', 'Reserve']
 
     def __init__(self):
@@ -22,6 +23,7 @@ class SMBoolManager(object):
 
         self.helpers = Logic.HelpersGraph(self)
         self.doorsManager = DoorsManager()
+        self.objectives = Objectives()
         self.createFacadeFunctions()
         self.createKnowsFunctions()
         self.resetItems()
@@ -139,6 +141,9 @@ class SMBoolManager(object):
 
     def traverse(self, doorName):
         return self.doorsManager.traverse(self, doorName)
+
+    def canPassG4(self):
+        return self.objectives.canClearGoals(self)
 
     def createKnowsFunctions(self):
         # for each knows we have a function knowsKnows (ex: knowsAlcatrazEscape()) which

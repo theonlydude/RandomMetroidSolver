@@ -357,6 +357,7 @@ function randomize(evt, elemId) {
       e.style.display = "none";
       multi.style.display = "block";
       // chosen must be activated when it's visible, else it doesn't work...
+      $("#"+elemId+"MultiSelect").chosen("destroy");
       $("#"+elemId+"MultiSelect").chosen({ width: '100%' });
     } else {
       e.style.display = "block";
@@ -367,7 +368,7 @@ function randomize(evt, elemId) {
 
 function randomizeMinimizer(evt) {
   // randomizer the number of locations between 30 and 60.
-  // click on random dice: click on miminizer if not already active
+  // click on random dice: click on mininizer if not already active
   var minimizer = document.getElementById("minimizer");
   var elemId = "minimizerQty"
   var e = document.getElementById(elemId);
@@ -380,10 +381,108 @@ function randomizeMinimizer(evt) {
       disableElement(elemId, false);
     }
   } else {
-    if(! minimizer.checked) { minimizer.click(); }
+    setSwitchToOn(minimizer);
     evt.currentTarget.className += " active";
     disableElement(elemId, true);
   }
+}
+
+var objectives_exclusions = {{response.write(objectivesExclusions, escape=False)}};
+function objective_change(e, params) {
+    // if random is set do nothing
+    if(isElemIdRandom("objective")) {
+        return;
+    }
+
+    if(params.selected) {
+        var toExclude = objectives_exclusions[params.selected];
+        for(var i=0; i<toExclude.length; i++) {
+            $("#objectiveMultiSelect option[value='"+toExclude[i]+"']").remove();
+        }
+        $("#objectiveMultiSelect").trigger("chosen:updated");
+    } else if(params.deselected) {
+        var toInclude = objectives_exclusions[params.deselected];
+
+        var notSelectedArray = $("#objectiveMultiSelect").find('option').not(':selected').map(function () { return this.value; }).get();
+        var selectedArray = $("#objectiveMultiSelect").val();
+
+        for(var i=0; i<toInclude.length; i++) {
+            var toAdd = toInclude[i];
+            // don't add an objective already present in the list
+            if(!notSelectedArray.includes(toAdd)) {
+                // don't add an objective if another selected objective has it in its exclusion list
+                var canAdd = true;
+                for(var j=0; j<selectedArray.length; j++) {
+                    var toTest = selectedArray[j];
+                    if(objectives_exclusions[toTest].includes(toAdd)){
+                        canAdd = false;
+                        break;
+                    }
+                }
+                if(canAdd) {
+                    $("#objectiveMultiSelect").append("<option value=\""+toAdd+"\">"+toAdd+"</option>");
+                }
+            }
+        }
+        $("#objectiveMultiSelect").trigger("chosen:updated");
+    }
+}
+
+var max_objectives = 5;
+function setMaxObjective(isRandom) {
+    if(isRandom) {
+        // no limit
+        $("#objectiveMultiSelect").chosen("destroy");
+        $("#objectiveMultiSelect").chosen({max_selected_options: Infinity, width: '100%'})
+    } else {
+        // limit to 5 objectives (4 in scav hunt)
+        $("#objectiveMultiSelect").chosen("destroy");
+        $("#objectiveMultiSelect").chosen({max_selected_options: max_objectives, width: '100%'})
+    }
+}
+
+var objectiveBackup = ["kill G4"];
+function randomizeObjective(evt, takeBackup=true) {
+    var isActive;
+    if(isElemRandom(evt.currentTarget)) {
+        evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
+        isActive = false;
+
+        setMaxObjective(false);
+
+        // restore previous value
+        $("#objectiveMultiSelect").val(objectiveBackup).trigger("chosen:updated");
+
+        // handle exclusions for currently selected values
+        var selectedArray = $("#objectiveMultiSelect").val();
+        for(var i=0; i<selectedArray.length; i++) {
+            objective_change(null, {selected: selectedArray[i]});
+        }
+    } else {
+        evt.currentTarget.className += " active";
+        isActive = true;
+
+        // backup current value
+        if(takeBackup) {
+            objectiveBackup = $("#objectiveMultiSelect").val();
+        }
+
+        setMaxObjective(true);
+
+        // add all objectives for randomization, as we may have removed some of them from the dropdown list
+        var notSelectedArray = $("#objectiveMultiSelect").find('option').not(':selected').map(function () { return this.value; }).get();
+        var selectedArray = $("#objectiveMultiSelect").val();
+
+        for(var i=0; i<defaultMultiValues["objective"].length; i++) {
+            var toAdd = defaultMultiValues["objective"][i];
+            if(!notSelectedArray.includes(toAdd) && !selectedArray.includes(toAdd)) {
+                $("#objectiveMultiSelect").append("<option value=\""+toAdd+"\">"+toAdd+"</option>");
+            }
+        }
+        $("#objectiveMultiSelect").val(defaultMultiValues["objective"]).trigger("chosen:updated");
+    }
+
+    disableElement("objective", isActive);
 }
 
 function disableElement(id, disable) {
@@ -429,6 +528,32 @@ function setRandom() {
 }}
 }
 
+function setObjective() {
+    // always display objectives multi select
+    var select = document.getElementById("objective");
+    var multi = document.getElementById("objectiveMultiSelectDiv");
+    select.style.display = "none";
+    multi.style.display = "block";
+    setMaxObjective(isElemRandom(document.getElementById("objectiveRandom")));
+
+    // at start all objectives are displayed as selected even though they're not...
+    var sessionObjectives = {{response.write(session.randomizer["objective"], escape=False)}};
+
+    if(sessionObjectives != "random") {
+        $("#objectiveMultiSelect").val(sessionObjectives).trigger("chosen:updated");
+
+        // handle exclusions for currently selected values
+        var selectedArray = $("#objectiveMultiSelect").val();
+        for(var i=0; i<selectedArray.length; i++) {
+            objective_change(null, {selected: selectedArray[i]});
+        }
+    } else {
+        randomizeObjective({currentTarget: document.getElementById("objectiveRandom")}, false);
+    }
+
+    $("#objectiveMultiSelect").on('change', objective_change);
+}
+
 function setComplexity() {
 {{
   if "complexity" in session.randomizer:
@@ -442,18 +567,18 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = ["noPatchesVisibility"];
-    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "areaLayoutVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "areaLayoutVisibility", "objectivesVisibility"];
     showHide(show, hide);
   }
 
   else if(name == "medium") {
-    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility"];
+    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility", "objectivesVisibility"];
     var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility", "areaLayoutVisibility", "noPatchesVisibility"];
     showHide(show, hide);
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "areaLayoutVisibility"];
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "areaLayoutVisibility", "objectivesVisibility"];
     var hide = ["noPatchesVisibility"];
     showHide(show, hide);
   }
@@ -518,6 +643,8 @@ function AjaxPresetCallCompleted(data) {
          dataDict[elemId] = document.getElementById(elemId).value;
        }
     }
+
+    getSpecialValues(dataDict);
 
     // if production server randomly use one of the two redirect webapps
     var prodUrls = ["varia.run", "www.varia.run"];
@@ -701,6 +828,8 @@ function AjaxRandomizerCallCompleted(data) {
        }
     }
 
+    getSpecialValues(dataDict);
+
     // call webservice to update the session
     var request = $.ajax({
       url: "{{=URL(f='sessionWebService')}}",
@@ -712,33 +841,79 @@ function AjaxRandomizerCallCompleted(data) {
     request.fail(ajaxFail);
 }
 
-function doSubmit() {
-  if(window.File && window.FileList && window.FileReader) {
+function getSpecialValues(dataDict) {
+    // special case for the 2nd minimizer tourian checkbox
+    var minimizerTourianObj = document.getElementById("minimizerTourianObj");
+    dataDict["minimizerTourian"] = minimizerTourianObj.value;
 
-    if(vanillaROMStored == false) {
-        alert("Please select a Super Metroid Vanilla ROM first");
-        return false;
+    // special case for objectives multiselect
+    if(isElemIdRandom("objective")) {
+        dataDict["objective"] = "random";
+        dataDict["objectiveMultiSelect"] = $("#objectiveMultiSelect").val().join();
+    } else {
+        var objectives = $("#objectiveMultiSelect").val();
+        if(objectives.length == 0) {
+            dataDict["objective"] = "nothing";
+        } else {
+            dataDict["objective"] = objectives.join();
+        }
+    }
+}
+
+function validateObjectives() {
+    //var objectives = document.getElementById("objectiveMultiSelect");
+    //console.log("objectiveMultiSelect: "+objectives.value);
+    var objectives = $("#objectiveMultiSelect");
+    var nbObjectives = objectives.val().length;
+    console.log("objectiveMultiSelect: "+objectives.val().join());
+
+    if(isElemIdRandom("objective")) {
+        // if objectives are randomized, check that there's at least one in the list
+        if(nbObjectives == 0) {
+            alert("Objectives are randomized but objectives list is empty");
+            return false;
+        }
+    } else {
+        // if not randomized, check that there's max 5 objectives in the list (4 in scav hunt)
+        if(nbObjectives > max_objectives) {
+            alert("You can have maximum five objectives (four if major split is Scavenger Hunt)");
+            return false
+        }
+    }
+    return true;
+}
+
+function doSubmit() {
+    if(window.File && window.FileList && window.FileReader) {
+
+        if(vanillaROMStored == false) {
+            alert("Please select a Super Metroid Vanilla ROM first");
+            return false;
+        }
+
+        if(! validateObjectives()) {
+            return false;
+        }
+
+        var dataDict = {"preset": document.getElementById("preset").value};
+
+        // call preset web service with parameters
+        var request = $.ajax({
+            url: "{{=URL(f='presetWebService')}}",
+            method: "POST",
+            data: dataDict,
+            dataType: "html"
+        });
+
+        request.done(AjaxPresetCallCompleted);
+        request.fail(ajaxFail);
+
+        // while WS is working, display "working" message
+        $('#overlay').show();
+        $('#loadingGIF').show();
     }
 
-    var dataDict = {"preset": document.getElementById("preset").value};
-
-    // call preset web service with parameters
-    var request = $.ajax({
-      url: "{{=URL(f='presetWebService')}}",
-      method: "POST",
-      data: dataDict,
-      dataType: "html"
-    });
-
-    request.done(AjaxPresetCallCompleted);
-    request.fail(ajaxFail);
-
-    // while WS is working, display "working" message
-    $('#overlay').show();
-    $('#loadingGIF').show();
-  }
-
-  return false;
+    return false;
 }
 
 function getRndInteger(max) {
@@ -901,22 +1076,20 @@ window.onload = function(){
             disableElement("areaLayout", false);
             disableElement("lightAreaRandomization", false);
 
-            if(! patches.checked){ patches.click(); }
-            if(! escapeRando.checked){ escapeRando.click(); }
+            setSwitchToOn(patches);
+            setSwitchToOn(escapeRando);
 
             // uncheck suits restrictions when late morph + area
             if(lateMorph.options[lateMorph.selectedIndex].text == "late"){
-                if(suits.checked){
-                    suits.click();
-                }
+                setSwitchToOff(suits);
             }
         } else {
-            if(patches.checked){ patches.click(); }
-            if(escapeRando.checked){ escapeRando.click(); }
+            setSwitchToOff(patches);
+            setSwitchToOff(escapeRando);
             var lightAreaRandomization = document.getElementById("lightAreaRandomization");
-            if(lightAreaRandomization.checked){ lightAreaRandomization.click(); }
+            setSwitchToOff(lightAreaRandomization);
             var minimizer = document.getElementById("minimizer");
-            if(minimizer.checked){ minimizer.click(); }
+            setSwitchToOff(minimizer);
 
             disableElement("areaLayout", true);
             disableElement("lightAreaRandomization", true);
@@ -932,7 +1105,7 @@ window.onload = function(){
     boss.onchange = function(){
         if(! boss.checked){
             var minimizer = document.getElementById("minimizer");
-            if(minimizer.checked){ minimizer.click(); }
+            setSwitchToOff(minimizer);
         }
         switchCheckbox("bossRandomization");
     }
@@ -945,9 +1118,9 @@ window.onload = function(){
         if(escapeRando.checked){
             disableElement("removeEscapeEnemies", false);
             disableElement("animals", true);
-            if(! removeEscapeEnemies.checked){ removeEscapeEnemies.click(); }
+            setSwitchToOn(removeEscapeEnemies);
         } else {
-            if(removeEscapeEnemies.checked){ removeEscapeEnemies.click(); }
+            setSwitchToOff(removeEscapeEnemies);
             disableElement("removeEscapeEnemies", true);
             disableElement("animals", false);
         }
@@ -969,9 +1142,7 @@ window.onload = function(){
 
         if(lateMorph.options[lateMorph.selectedIndex].text == "late"){
             if(area.checked){
-                if(suits.checked){
-                    suits.click();
-                }
+                setSwitchToOff(suits);
             }
         }
     }
@@ -990,10 +1161,7 @@ window.onload = function(){
         }
         if(progSpeed.value == 'fast' || progSpeed.value == 'fastest'){
             var suitsRestriction = document.getElementById("suitsRestriction");
-
-            if(suitsRestriction.checked){
-                suitsRestriction.click();
-            }
+            setSwitchToOff(suitsRestriction);
         }
     }
 
@@ -1015,24 +1183,14 @@ window.onload = function(){
                 // changing a value in js doesn't call onchange, so explicitly call it
                 majorsSplit.onchange();
             }
-            if(variaTweaks.checked == false) {
-                variaTweaks.click();
-            }
-            if(layoutPatches.checked == false) {
-                layoutPatches.click();
-            }
-            if(suitsRestriction.checked == true) {
-                suitsRestriction.click();
-            }
+            setSwitchToOn(variaTweaks);
+            setSwitchToOn(layoutPatches);
+            setSwitchToOff(suitsRestriction);
             if(selected == "Red Brinstar Elevator" || selected == "Golden Four") {
                 var areaRandomization = document.getElementById("areaRandomization");
                 var areaLayout = document.getElementById("areaLayout");
-                if(areaRandomization.checked == false) {
-                    areaRandomization.click();
-                }
-                if(areaLayout.checked == false) {
-                    areaLayout.click();
-                }
+                setSwitchToOn(areaRandomization);
+                setSwitchToOn(areaLayout);
             }
         }
     }
@@ -1059,15 +1217,18 @@ window.onload = function(){
         var boss = document.getElementById("bossRandomization");
         var area = document.getElementById("areaRandomization");
         var minimizerTourian = document.getElementById("minimizerTourian");
+        var minimizerTourianObj = document.getElementById("minimizerTourianObj");
 
         if(minimizer.checked) {
-            if(! boss.checked){ boss.click(); }
-            if(! area.checked){ area.click(); }
+            setSwitchToOn(boss);
+            setSwitchToOn(area);
             disableElement("minimizerQty", false);
             disableElement("minimizerTourian", false);
-            if(! minimizerTourian.checked){ minimizerTourian.click(); }
+            setSwitchToOn(minimizerTourian);
+            setSwitchToOn(minimizerTourianObj);
         } else {
-            if(minimizerTourian.checked){ minimizerTourian.click(); }
+            setSwitchToOff(minimizerTourian);
+            setSwitchToOff(minimizerTourianObj);
             disableElement("minimizerQty", true);
             disableElement("minimizerTourian", true);
             var minimizerRandom = document.getElementById("minimizerQtyRandom");
@@ -1089,6 +1250,30 @@ window.onload = function(){
         }
     }
 
+    // keep same value for both minimizer tourian checkboxes
+    var minimizerTourian = document.getElementById("minimizerTourian");
+    var minimizerTourianObj = document.getElementById("minimizerTourianObj");
+    minimizerTourian.onchange = function() {
+        var minimizerTourian = document.getElementById("minimizerTourian");
+        var minimizerTourianObj = document.getElementById("minimizerTourianObj");
+        if(minimizerTourian.checked) {
+            setSwitchToOn(minimizerTourianObj);
+        } else {
+            setSwitchToOff(minimizerTourianObj);
+        }
+        switchCheckbox("minimizerTourian");
+    }
+    minimizerTourianObj.onchange = function() {
+        var minimizerTourian = document.getElementById("minimizerTourian");
+        var minimizerTourianObj = document.getElementById("minimizerTourianObj");
+        if(minimizerTourianObj.checked) {
+            setSwitchToOn(minimizerTourian);
+        } else {
+            setSwitchToOff(minimizerTourian);
+        }
+        switchCheckbox("minimizerTourianObj");
+    }
+
     var majorsSplit = document.getElementById("majorsSplit");
     majorsSplit.onchange = function() {
         var scavengerParams = document.getElementById("scavengerParams");
@@ -1107,11 +1292,19 @@ window.onload = function(){
                 morphPlacement.value = "normal";
             }
             var hud = document.getElementById("hud");
-            if(! hud.checked) {
-                hud.click();
-            }
+            setSwitchToOn(hud);
+
+            // update maximum number of allowed custom objectives
+            max_objectives = 4;
         } else {
             scavengerParams.style.display = "none";
+
+            // update maximum number of allowed custom objectives
+            max_objectives = 5;
+        }
+        // tell chosen about new maximum
+        if(!isElemRandom(document.getElementById("objectiveRandom"))) {
+            setMaxObjective(false);
         }
     }
     majorsSplit.onchange();
@@ -1121,8 +1314,8 @@ window.onload = function(){
         var escapeRando = document.getElementById("escapeRando");
         var removeEscapeEnemies = document.getElementById("removeEscapeEnemies");
         if(scavEscape.checked) {
-            if(! escapeRando.checked){ escapeRando.click(); }
-            if(removeEscapeEnemies.checked){ removeEscapeEnemies.click(); }
+            setSwitchToOn(escapeRando);
+            setSwitchToOff(removeEscapeEnemies);
         }
         switchCheckbox("scavEscape");
     }
@@ -1142,6 +1335,8 @@ window.onload = function(){
     setComplexity();
 
     setRandom();
+
+    setObjective();
 
     $("#preset").chosen({ width: '100%' });
     $("#randoPreset").chosen({ width: '100%' });
@@ -1198,6 +1393,20 @@ function switchCheckbox(id, elems=[]) {
   }
 }
 
+function setSwitchToOn(elem) {
+    if(! elem.checked) {
+        elem.click();
+        elem.value = "on";
+    }
+}
+
+function setSwitchToOff(elem) {
+    if(elem.checked) {
+        elem.click();
+        elem.value = "off";
+    }
+}
+
 function loadRandoPreset() {
   console.log("loadRandoPreset: "+document.getElementById("randoPreset").value);
 
@@ -1216,48 +1425,70 @@ function loadRandoPreset() {
 }
 
 function loadRandoPresetOK(data) {
-  // instead of reloading the page which remove the sm ROM, update all fields manually
-  for(var key in data) {
-    value = data[key];
-    // console.log("loadRandoPresetOK "+key+": "+value);
-    var elem = document.getElementById(key);
-
-    var elemRandom = document.getElementById(key+"Random");
-    if(value == "random") {
-      // if not already set as random, set it
-      if(! isElemRandom(elemRandom)) {
-        randomize({currentTarget: elemRandom}, key);
-      }
-    } else {
-      // check if it was random before
-      if(elemRandom != null && isElemRandom(elemRandom)) {
-        randomize({currentTarget: elemRandom}, key);
-      }
-
-      // tell switchery for checkboxes
-      if(key in globalSwitchs) {
-        if(value != elem.value){
-          elem.click();
+    // instead of reloading the page which remove the sm ROM, update all fields manually
+    for(var key in data) {
+        if(key == "objective" || key == "objectiveMultiSelect") {
+            continue;
         }
-      }
+        value = data[key];
+        // console.log("loadRandoPresetOK "+key+": "+value);
+        var elem = document.getElementById(key);
 
-      elem.value = value;
-      if(chosenElements.includes(key)) {
-        $("#"+key).val(value).trigger("chosen:updated");
-      }
+        var elemRandom = document.getElementById(key+"Random");
+        if(value == "random") {
+            // if not already set as random, set it
+            if(! isElemRandom(elemRandom)) {
+                randomize({currentTarget: elemRandom}, key);
+            }
+        } else {
+            // check if it was random before
+            if(elemRandom != null && isElemRandom(elemRandom)) {
+                randomize({currentTarget: elemRandom}, key);
+            }
 
-      if(typeof elem.onchange === "function") {
-        elem.onchange();
-      }
+            // tell switchery for checkboxes
+            if(key in globalSwitchs) {
+                if(value != elem.value){
+                    elem.click();
+                }
+            }
+
+            elem.value = value;
+            if(chosenElements.includes(key)) {
+                $("#"+key).val(value).trigger("chosen:updated");
+            }
+
+            if(typeof elem.onchange === "function") {
+                elem.onchange();
+            }
+        }
     }
-  }
 
-  // check if multi select has been set by the rando preset, otherwise load default values
-  for(var key in defaultMultiValues) {
-      if(! (key+"MultiSelect" in data) ) {
-          $("#"+key+"MultiSelect").val(defaultMultiValues[key]).trigger("chosen:updated");
-      }
-  }
+    // check if multi select has been set by the rando preset, otherwise load default values
+    for(var key in defaultMultiValues) {
+        if(key == "objective") {
+            continue;
+        }
+        if(! (key+"MultiSelect" in data) ) {
+            $("#"+key+"MultiSelect").val(defaultMultiValues[key]).trigger("chosen:updated");
+        }
+    }
+
+    // objectives is special
+    var objectiveRandom = document.getElementById("objectiveRandom");
+    if(data["objective"] == "random") {
+        if(! isElemRandom(objectiveRandom)) {
+            randomizeObjective({currentTarget: objectiveRandom});
+        }
+        if("objectiveMultiSelect" in data) {
+            $("#objectiveMultiSelect").val(data["objectiveMultiSelect"]).trigger("chosen:updated");
+        }
+    } else {
+        if(isElemRandom(objectiveRandom)) {
+            randomizeObjective({currentTarget: objectiveRandom});
+        }
+        $("#objectiveMultiSelect").val(data["objective"]).trigger("chosen:updated");
+    }
 }
 
 function startTheTour(step=-1) {
@@ -1309,6 +1540,31 @@ Tournament presets:\
       element: "#presetStep",
       title: "Skills Preset",
       content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\" target=\"_blank\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), tournament presets, or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p><p><b>Standard presets outlook:</b><br/><ul><li><b>newbie: </b>New to randomizers, but completed Super Metroid 100% and knows basic techniques (Wall Jump, Shinespark, Mid-air Morph)</li><li><b>casual:</b> occasional rando player. No hell runs or suitless Maridia, some easy to learn tricks in logic.</li><li><b>regular: </b>plays rando regularly. Knows tricks that are not too hard and open up the game: hell runs (generous energy requirements), suitless Maridia, lava dive, gate glitches, Alcatraz, Gauntlet...</li><li><b>veteran:</b> experienced rando player. Harder everything, some tougher tricks in logic.</li><li><b>expert: </b>knows almost all tricks: full suitless Maridia, Lower Norfair hell runs, hi-jumpless Lava Dive (mania difficulty only, so not by default in most rando settings)</li><li><b>master:</b> Everything on hardest, all tricks known.</li></ul></p>"
+    },
+    {
+      element: "#objectiveStep",
+      title: "Custom Objectives",
+      content: "<p>Choose which objectives are required to sink the <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statue</a> and to open access to <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a>.</p>\
+<p>You can choose from 0 to 5 objectives (4 if Majors Split is Scavenger Hunt):\
+<ul>\
+<li>Kill Kraid: kill boss <a href=\"https://metroid.fandom.com/wiki/Kraid\" target=\"_blank\">Kraid</a> (vanilla)</li>\
+<li>Kill Phantoon: kill boss <a href=\"https://metroid.fandom.com/wiki/Phantoon\" target=\"_blank\">Phantoon</a> (vanilla)</li>\
+<li>Kill Draygon: kill boss <a href=\"https://metroid.fandom.com/wiki/Draygon\" target=\"_blank\">Draygon</a> (vanilla)</li>\
+<li>Kill Ridley: kill boss <a href=\"https://metroid.fandom.com/wiki/Ridley\" target=\"_blank\">Ridley</a> (vanilla)</li>\
+<li>Kill G4: \"meta\" objective, kill Kraid & Phantoon & Draygon & Ridley</li>\
+<li>Kill Spore Spawn: kill mini boss <a href=\"https://metroid.fandom.com/wiki/Spore_Spawn\" target=\"_blank\">Spore Spawn</a></li>\
+<li>Kill Crocomire: kill mini boss <a href=\"https://metroid.fandom.com/wiki/Crocomire\" target=\"_blank\">Crocomire</a></li>\
+<li>Kill Botwoon: kill mini boss <a href=\"https://metroid.fandom.com/wiki/Botwoon\" target=\"_blank\">Botwoon</a></li>\
+<li>Kill Golden Torizo: kill mini boss <a href=\"https://metroid.fandom.com/wiki/Golden_Torizo\" target=\"_blank\">Golden Torizo</a></li>\
+<li>Kill Mini Bosses: \"meta\" objective, kill Spore Spawn & Crocomire & Botwoon & Golden Torizo</li>\
+</ul>\
+</p><p>\
+<b>Note:</b> If you leave the list empty no objective is required to access Tourian, ie. it's open.<br/>\
+<b>Note:</b> With Scavenger Hunt majors split only up to four objectives can be set as one mandatory objective is added: finish the Scavenger Hunt.<br/>\
+<b>Note:</b> With Scavenger Hunt majors split with escape sequence triggered at hunt's end you cannot use custom objectives (as you never go to Tourian). If custom objectives are set they are ignored.\
+</p>\
+<p>You can also <b>speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a></b> to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including Mother Brain 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">invicible Gadora</a> until all objectives are completed.</p>\
+<p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 5 objectives from the list (between 1 and 4 if Scavenger Hunt). To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
     },
     {
       element: "#StartLocationStep",
@@ -2100,17 +2356,30 @@ def displayNumber(id, min, max, default, step="1"):
                 <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="chzn-select"))}}</td>
                 <td id="presetStep"><button type="button" onclick="startTheTour(5)">?</button></td>
               </tr>
+            </table>
+            <table class="full" id="objectivesVisibility">
+              <colgroup><col class="small"/><col class="third" /><col class="third" /><col class="third" /><col class="small"/></colgroup>
+              <tr>
+                <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td><span id="objectiveText">Objectives to access Tourian:</span></td>
+                <td>{{displayMultiSelect("objective", currentMultiValues["objective"], "", defaultMultiValues["objective"])}}</td>
+                <td class="third paddingonleft">{{displayCheckbox("minimizerTourianObj")}} Speed up Tourian</td>
+                <td id="objectiveStep"><button type="button" onclick="startTheTour(6)">?</button></td>
+              </tr>
+            </table>
+            <table class="full">
+              <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
               <tr>
                 <td class="small"><div class="random"><button id="startLocationRandom" type="button" onclick="randomize(event, 'startLocation')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="startLocationText">Start location</span></td>
+                <td><span id="startLocationText">Start location:</span></td>
                 <td>{{displayMultiSelect("startLocation", currentMultiValues["startLocation"], "Landing Site", defaultMultiValues["startLocation"])}}</td>
-                <td id="StartLocationStep"><button type="button" onclick="startTheTour(6)">?</button></td>
+                <td id="StartLocationStep"><button type="button" onclick="startTheTour(7)">?</button></td>
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="majorsSplitRandom" type="button" onclick="randomize(event, 'majorsSplit')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="majorsSplitText">Majors Split</span></td>
+                <td><span id="majorsSplitText">Majors Split:</span></td>
                 <td>{{displayMultiSelect("majorsSplit", currentMultiValues["majorsSplit"], "Full", defaultMultiValues["majorsSplit"])}}</td>
-                <td id="majorsSplitStep"><button type="button" onclick="startTheTour(7)">?</button></td>
+                <td id="majorsSplitStep"><button type="button" onclick="startTheTour(8)">?</button></td>
               </tr>
             </table>
             <table class="full" id="scavengerParams">
@@ -2119,11 +2388,11 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="small"><div class="random"><button id="scavNumLocsRandom" type="button" onclick="randomize(event, 'scavNumLocs')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td id="scavNumLocsStep"><span id="scavNumLocsText">Mandatory locations to visit:</span></td>
                 <td>{{displayNumber("scavNumLocs", "4", "17", "10", "1")}}</td>
-                <td><button type="button" onclick="startTheTour(8)">?</button></td>
-                <td id="scavRandomizedStep">{{displayCheckbox("scavRandomized")}}Randomize items in mandatory locations</td>
                 <td><button type="button" onclick="startTheTour(9)">?</button></td>
-                <td id="scavEscapeStep">{{displayCheckbox("scavEscape")}}Trigger escape at hunt's end</td>
+                <td id="scavRandomizedStep">{{displayCheckbox("scavRandomized")}}Randomize items in mandatory locations</td>
                 <td><button type="button" onclick="startTheTour(10)">?</button></td>
+                <td id="scavEscapeStep">{{displayCheckbox("scavEscape")}}Trigger escape at hunt's end</td>
+                <td><button type="button" onclick="startTheTour(11)">?</button></td>
               </tr>
             </table>
             <table class="full">
@@ -2132,7 +2401,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="small"></td>
                 <td><span id="maxDifficultyText">Maximum difficulty for picking up an item:</span></td>
                 <td>{{displaySelect("maxDifficulty", ['no difficulty cap', 'easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'], "hardcore")}}</td>
-                <td id="maxDifficultyStep"><button type="button" onclick="startTheTour(11)">?</button></td>
+                <td id="maxDifficultyStep"><button type="button" onclick="startTheTour(12)">?</button></td>
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="progressionSpeedRandom" type="button" onclick="randomize(event, 'progressionSpeed')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -2140,29 +2409,29 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="half">
                   {{displayMultiSelect("progressionSpeed", currentMultiValues["progressionSpeed"], "medium", defaultMultiValues["progressionSpeed"])}}
                 </td>
-                <td id="progSpeedStep"><button type="button" onclick="startTheTour(12)">?</button></td>
+                <td id="progSpeedStep"><button type="button" onclick="startTheTour(13)">?</button></td>
               </tr>
               <tr id="progDiffVisibility">
                 <td class="small"><div class="random"><button id="progressionDifficultyRandom" type="button" onclick="randomize(event, 'progressionDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half"><span id="progressionDifficultyText">Progression difficulty:</span></td>
                 <td class="half">{{displayMultiSelect("progressionDifficulty", currentMultiValues["progressionDifficulty"], "normal", defaultMultiValues["progressionDifficulty"])}}</td>
-                <td id="progDiffStep"><button type="button" onclick="startTheTour(13)">?</button></td>
+                <td id="progDiffStep"><button type="button" onclick="startTheTour(14)">?</button></td>
               </tr>
               <tr id="morphPlacementVisibility">
                 <td class="small"><div class="random"><button id="morphPlacementRandom" type="button" onclick="randomize(event, 'morphPlacement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half"><span id="morphPlacementText">Morph Placement:</span></td>
                 <td class="half">{{displayMultiSelect("morphPlacement", currentMultiValues["morphPlacement"], "normal", defaultMultiValues["morphPlacement"])}}</td>
-                <td id="morphPlacementStep"><button type="button" onclick="startTheTour(14)">?</button></td>
+                <td id="morphPlacementStep"><button type="button" onclick="startTheTour(15)">?</button></td>
               </tr>
               <tr id="suitsRestrictionVisibility">
                 <td class="small"><div class="random"><button id="suitsRestrictionRandom" type="button" onclick="randomize(event, 'suitsRestriction')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td colspan="2">{{displayCheckbox("suitsRestriction")}}<span id="suitsRestrictionText">Suits restriction</span></td>
-                <td id="suitsRestrictionStep"><button type="button" onclick="startTheTour(15)">?</button></td>
+                <td id="suitsRestrictionStep"><button type="button" onclick="startTheTour(16)">?</button></td>
               </tr>
               <tr id="hideItemsVisibility">
                 <td class="small"><div class="random"><button id="hideItemsRandom" type="button" onclick="randomize(event, 'hideItems')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td colspan="2">{{displayCheckbox("hideItems")}}<span id="hideItemsText">Hide some items</span></td>
-                <td id="hideItemsStep"><button type="button" onclick="startTheTour(16)">?</button></td>
+                <td id="hideItemsStep"><button type="button" onclick="startTheTour(17)">?</button></td>
               </tr>
             </table>
             <div id="ammoVisibility">
@@ -2172,13 +2441,13 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr id="strictMinorsVisibility">
                   <td class="small"><div class="random"><button id="strictMinorsRandom" type="button" onclick="randomize(event, 'strictMinors')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td colspan="2">{{displayCheckbox("strictMinors")}}<span id="strictMinorsText">Strict Minors distribution</span></td>
-                  <td id="strictMinorsStep"><button type="button" onclick="startTheTour(17)">?</button></td>
+                  <td id="strictMinorsStep"><button type="button" onclick="startTheTour(18)">?</button></td>
                 </tr>
                 <tr id="missileQtyVisibility">
                   <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td><span id="missileQtyText">Proportion of Missiles:</span></td>
                   <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
-                  <td id="missileQtyStep"><button type="button" onclick="startTheTour(18)">?</button></td>
+                  <td id="missileQtyStep"><button type="button" onclick="startTheTour(19)">?</button></td>
                 </tr>
                 <tr id="superQtyVisibility">
                   <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -2194,13 +2463,13 @@ def displayNumber(id, min, max, default, step="1"):
                   <td class="small"><div class="random"><button id="minorQtyRandom" type="button" onclick="randomize(event, 'minorQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td><span id="minorQtyText">Percentage of minors available:</span></td>
                   <td>{{displayNumber("minorQty", "7", "100", "100")}}</td>
-                  <td id="minorQtyStep"><button type="button" onclick="startTheTour(19)">?</button></td>
+                  <td id="minorQtyStep"><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="energyQtyRandom" type="button" onclick="randomize(event, 'energyQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td><span id="energyQtyText">Quantity of Energy/Reserve Tanks available:</span></td>
                   <td>{{displayMultiSelect("energyQty", currentMultiValues["energyQty"], "vanilla", defaultMultiValues["energyQty"])}}</td>
-                  <td id="energyQtyStep"><button type="button" onclick="startTheTour(20)">?</button></td>
+                  <td id="energyQtyStep"><button type="button" onclick="startTheTour(21)">?</button></td>
                 </tr>
               </table>
             </div>
@@ -2215,9 +2484,9 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td class="small"><div class="random"><button id="areaRandomizationRandom" type="button" onclick="randomize(event, 'areaRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}<span id="areaRandomizationText">Areas randomization</span></td>
-                <td><button type="button" onclick="startTheTour(21)">?</button></td>
-                <td class="full" id="lightAreaRandomizationStep">{{displayCheckbox("lightAreaRandomization")}}<span id="lightAreaRandomizationText">Light Areas randomization</span></td>
                 <td><button type="button" onclick="startTheTour(22)">?</button></td>
+                <td class="full" id="lightAreaRandomizationStep">{{displayCheckbox("lightAreaRandomization")}}<span id="lightAreaRandomizationText">Light Areas randomization</span></td>
+                <td><button type="button" onclick="startTheTour(23)">?</button></td>
               </tr>
             </table>
             <table id="areaLayoutVisibility" class="full">
@@ -2225,7 +2494,7 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td>
                 <td></td>
-                <td><button type="button" onclick="startTheTour(23)">?</button></td>
+                <td><button type="button" onclick="startTheTour(24)">?</button></td>
               </tr>
             </table>
 
@@ -2234,9 +2503,9 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td class="small"><div class="random"><button id="doorsColorsRandoRandom" type="button" onclick="randomize(event, 'doorsColorsRando')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half" id="doorsColorsRandoStep">{{displayCheckbox("doorsColorsRando")}}<span id="doorsColorsRandoText">Randomize the color of Red/Green/Yellow doors</span></td>
-                <td><button type="button" onclick="startTheTour(24)">?</button></td>
-                <td class="half" id="doorsColorsGreyStep">{{displayCheckbox("allowGreyDoors")}}Allow some doors to be randomized to grey doors</td>
                 <td><button type="button" onclick="startTheTour(25)">?</button></td>
+                <td class="half" id="doorsColorsGreyStep">{{displayCheckbox("allowGreyDoors")}}Allow some doors to be randomized to grey doors</td>
+                <td><button type="button" onclick="startTheTour(26)">?</button></td>
               </tr>
             </table>
             <h4>Bosses Randomization</h4>
@@ -2247,7 +2516,7 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td class="small"><div class="random"><button id="bossRandomizationRandom" type="button" onclick="randomize(event, 'bossRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td colspan="4" class="full" id="bossRandomizationStep">{{displayCheckbox("bossRandomization")}}<span id="bossRandomizationText">Bosses randomization</span></td>
-                <td><button type="button" onclick="startTheTour(26)">?</button></td>
+                <td><button type="button" onclick="startTheTour(27)">?</button></td>
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="minimizerQtyRandom" type="button" onclick="randomizeMinimizer(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -2255,7 +2524,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="sixth"><span id="minimizerQtyText">Number of locations:</span></td>
                 <td class="sixth">{{displayNumber("minimizerQty", "30", "100", "45", "1")}}</td>
                 <td class="third paddingonleft">{{displayCheckbox("minimizerTourian")}}<span id="minimizerTourianText">Speed up Tourian</span></td>
-                <td><button type="button" onclick="startTheTour(27)">?</button></td>
+                <td><button type="button" onclick="startTheTour(28)">?</button></td>
               </tr>
             </table>
             <div id="escapeRandoVisibility">
@@ -2264,9 +2533,9 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
                   <td class="small"><div class="random"><button id="escapeRandoRandom" type="button" onclick="randomize(event, 'escapeRando')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td class="half" id="escapeRandoStep">{{displayCheckbox("escapeRando", False)}}<span id="escapeRandoText">Randomize the escape sequence</span></td>
-                  <td><button type="button" onclick="startTheTour(28)">?</button></td>
-                  <td class="half" id="removeEscapeEnemiesStep">{{displayCheckbox("removeEscapeEnemies", False)}}<span id="removeEscapeEnemiesText">Remove enemies during randomized escape sequence</span></td>
                   <td><button type="button" onclick="startTheTour(29)">?</button></td>
+                  <td class="half" id="removeEscapeEnemiesStep">{{displayCheckbox("removeEscapeEnemies", False)}}<span id="removeEscapeEnemiesText">Remove enemies during randomized escape sequence</span></td>
+                  <td><button type="button" onclick="startTheTour(30)">?</button></td>
                 </tr>
               </table>
             </div>
@@ -2279,15 +2548,15 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
                   <td class="small" id="funCombatStep"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td class="third">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
-                  <td><button type="button" onclick="startTheTour(30)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(31)">?</button></td>
 
                   <td class="small" id="funMovementStep"><div class="random"><button id="funMovementRandom" type="button" onclick="randomize(event, 'funMovement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td class="third">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
-                  <td><button type="button" onclick="startTheTour(31)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(32)">?</button></td>
 
                   <td class="small" id="funSuitsStep"><div class="random"><button id="funSuitsRandom" type="button" onclick="randomize(event, 'funSuits')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td class="third">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
-                  <td><button type="button" onclick="startTheTour(32)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(33)">?</button></td>
                 </tr>
               </table>
             </div>
@@ -2296,7 +2565,7 @@ def displayNumber(id, min, max, default, step="1"):
               <p>Some patches are applied by default, use the 'advanced' tab to see them.</p>
             </div>
             <div id="patchesVisibility">
-              <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour(33)">?</button></span></h4>
+              <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour(34)">?</button></span></h4>
               <p id="mainPatchesTextVisibility">
                 The bug fix <a href="https://itemrando.supermetroid.run/information" target="_blank">patches</a> from Total Item Randomizer are included by default.
               </p>
@@ -2307,9 +2576,9 @@ def displayNumber(id, min, max, default, step="1"):
               <table class="full" id="mainPatchesVisibility">
                 <tr>
                   <td id="layoutPatchesStep" class="half">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches</td>
-                  <td><button type="button" onclick="startTheTour(34)">?</button></td>
-                  <td id="variaTweaksStep" class="half">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks</td>
                   <td><button type="button" onclick="startTheTour(35)">?</button></td>
+                  <td id="variaTweaksStep" class="half">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks</td>
+                  <td><button type="button" onclick="startTheTour(36)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="nerfedChargeVisibility">
@@ -2320,7 +2589,7 @@ def displayNumber(id, min, max, default, step="1"):
                     Nerfed Charge Beam available from the start
                   </td>
                   <td></td>
-                  <td><button type="button" onclick="startTheTour(36)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(37)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="gravityBehaviourVisibility">
@@ -2330,7 +2599,7 @@ def displayNumber(id, min, max, default, step="1"):
                   <td class="half">
                     {{displayMultiSelect("gravityBehaviour", currentMultiValues["gravityBehaviour"], "Balanced", defaultMultiValues["gravityBehaviour"])}}
                   </td>
-                  <td><button type="button" onclick="startTheTour(37)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(38)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -2343,12 +2612,12 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("itemsounds")}}
                     Remove fanfare when picking up an item
                   </td>
-                  <td><button type="button" onclick="startTheTour(38)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(39)">?</button></td>
                   <td id="ElevatorDoorsStep" class="half">
                     {{displayCheckbox("elevators_doors_speed")}}
                     Accelerate doors and elevators transitions
                   </td>
-                  <td><button type="button" onclick="startTheTour(39)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(40)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -2357,12 +2626,12 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("spinjumprestart")}}
                     Spin jump restart (a.k.a. Respin)
                   </td>
-                  <td><button type="button" onclick="startTheTour(40)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(41)">?</button></td>
                   <td id="rando_speedStep" class="half">
                     {{displayCheckbox("rando_speed")}}
                      Momentum conservation (a.k.a. Speedkeep)
                   </td>
-                  <td><button type="button" onclick="startTheTour(41)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(42)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="helperPatchesVisibility">
@@ -2371,19 +2640,19 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("Infinite_Space_Jump")}}
                     Infinite Space Jump
                   </td>
-                  <td><button type="button" onclick="startTheTour(42)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(43)">?</button></td>
                   <td id="refill_before_saveStep" class="half">
                     {{displayCheckbox("refill_before_save")}}
                      Refill energy and ammo when saving
                   </td>
-                  <td><button type="button" onclick="startTheTour(43)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(44)">?</button></td>
                 </tr>
                 <tr>
                   <td id="hudStep" class="half">
                     {{displayCheckbox("hud")}}
                      VARIA HUD
                   </td>
-                  <td><button type="button" onclick="startTheTour(44)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(45)">?</button></td>
                   <td class="half"></td>
                   <td></td>
                 </tr>
@@ -2400,7 +2669,7 @@ def displayNumber(id, min, max, default, step="1"):
                     <span id="animalsText">Save the animals surprise</span>
                   </td>
                   <td></td>
-                  <td><button type="button" onclick="startTheTour(45)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(46)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="musicVisibility">
@@ -2409,12 +2678,12 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("No_Music")}}
                     Disable background music
                   </td>
-                  <td><button type="button" onclick="startTheTour(46)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(47)">?</button></td>
                   <td id="random_musicStep" class="half">
                     {{displayCheckbox("random_music")}}
                     Randomize background music
                   </td>
-                  <td><button type="button" onclick="startTheTour(47)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(48)">?</button></td>
                 </tr>
               </table>
             </div>

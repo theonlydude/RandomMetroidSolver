@@ -7,6 +7,7 @@ from utils.utils import getRandomizerDefaultParameters, getDefaultMultiValues, P
 from graph.graph_utils import GraphUtils
 from utils.db import DB
 from logic.logic import Logic
+from utils.objectives import Objectives
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.html import OPTGROUP
@@ -73,6 +74,9 @@ class Randomizer(object):
         currentMultiValues = self.getCurrentMultiValues()
         defaultMultiValues = getDefaultMultiValues()
 
+        # objectives self exclusions
+        objectivesExclusions = Objectives.getExclusions()
+
         # check if we have a guid in the url
         url = self.request.env.request_uri.split('/')
         if len(url) > 0 and url[-1] != 'randomizer':
@@ -112,7 +116,7 @@ class Randomizer(object):
         return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                     randoPresets=randoPresets, tourRandoPresets=tourRandoPresets, randoPresetsDesc=randoPresetsDesc,
                     startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues,
-                    maxsize=sys.maxsize, displayNames=displayNames)
+                    maxsize=sys.maxsize, displayNames=displayNames, objectivesExclusions=objectivesExclusions)
 
     def initRandomizerSession(self):
         if self.session.randomizer is None:
@@ -122,8 +126,14 @@ class Randomizer(object):
         defaultMultiValues = getDefaultMultiValues()
         for key in defaultMultiValues:
             keyMulti = key + 'MultiSelect'
-            if keyMulti in self.session.randomizer:
-                defaultMultiValues[key] = self.session.randomizer[keyMulti]
+            if key == "objective":
+                if key in self.session.randomizer:
+                    defaultMultiValues[key] = self.session.randomizer[key]
+                elif keyMulti in self.session.randomizer:
+                    defaultMultiValues[key] = self.session.randomizer[keyMulti]
+            else:
+                if keyMulti in self.session.randomizer:
+                    defaultMultiValues[key] = self.session.randomizer[keyMulti]
         return defaultMultiValues
 
     # race mode
@@ -165,7 +175,7 @@ class Randomizer(object):
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty']
+        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize
@@ -227,6 +237,8 @@ class Randomizer(object):
         for var, value in randoPresetDict.items():
             if 'MultiSelect' in var:
                 randoPresetDict[var] = value.split(',')
+        randoPresetDict['objective'] = self.vars.objective.split(',')
+
         with open(jsonRandoPreset, 'w') as randoPresetFile:
             json.dump(randoPresetDict, randoPresetFile)
         params += ['--randoPreset', jsonRandoPreset]
@@ -337,7 +349,7 @@ class Randomizer(object):
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
-        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty']
+        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others)
 
         if self.session.randomizer is None:
@@ -387,6 +399,10 @@ class Randomizer(object):
         self.session.randomizer['scavNumLocs'] = self.vars.scavNumLocs
         self.session.randomizer['scavRandomized'] = self.vars.scavRandomized
         self.session.randomizer['scavEscape'] = self.vars.scavEscape
+        # objective is a special multi select
+        self.session.randomizer['objective'] = self.vars.objective.split(',')
+        if self.vars.objectiveMultiSelect is not None:
+            self.session.randomizer['objectiveMultiSelect'] = self.vars.objectiveMultiSelect.split(',')
 
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']

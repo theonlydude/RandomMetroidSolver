@@ -8,6 +8,7 @@ from solver.comeback import ComeBack
 from solver.standardSolver import StandardSolver
 from utils.parameters import easy
 from solver.out import Out
+from utils.objectives import Objectives
 import utils.log
 
 class RandoSolver(StandardSolver):
@@ -48,6 +49,8 @@ class RandoSolver(StandardSolver):
         self.startLocation = startLocation
         self.startArea = getAccessPoint(startLocation).Start['solveArea']
         self.areaGraph = areaGraph
+
+        self.objectives = Objectives()
 
         # store at each step how many locations are available
         self.nbAvailLocs = []

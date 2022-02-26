@@ -21,6 +21,8 @@ lorom
 !samus_max_health      = $09c4
 !samus_reserve         = $09d6
 !samus_max_reserve     = $09d4
+!current_room          = $079b
+!tourian_eye_door_room = $aa5c
 
 ;;; connect Statues Hallway to Tourian Eye Door Room...
 org $8fa616
@@ -35,11 +37,22 @@ org $8fddeb
 org $839218
 	db $40
 
-;;; alternative door hit instruction that skips hit counter check
-org $848a6d ; end of some unused instruction
+
+org $848a59                     ; unused instruction
 alt_door_hit:
+        ;; test if current room is Tourian Door Room
+        lda !current_room
+        cmp !tourian_eye_door_room
+        bne .vanilla_door_hit
+	;; alternative door hit instruction that skips hit counter check
 	clc
 	bra .skip_check		; resume original routine
+
+warnpc $848a72
+
+org $848a91
+.vanilla_door_hit:
+
 org $848aa3
 .skip_check:
 
@@ -87,6 +100,10 @@ enable_hyper:
 
 warnpc $91ffff
 
+;;; objectives_completed function from objectives_pause patch which is applied by default
+org $82fb6d
+objectives_completed:
+
 org $8ff730
 ;;; gadora door asm
 tourian_door:
@@ -101,18 +118,11 @@ tourian_door:
 
 ;;; statues door asm leading to gadora room
 pre_tourian_door:
-	;; check if all G4 are dead (g4 check borrowed from g4_skip patch)
-	lda $7ed828
-	bit.w #$0100
-	beq .end
-	lda $7ed82c
-	bit.w #$0001
-	beq .end
-	lda $7ed82a
-	and.w #$0101
-	cmp.w #$0101
-	bne .end
-	;; if they are dead, set door open for gadora
+	;; check if objectives are completed
+        jsl objectives_completed
+        bcc .end
+
+	;; if they are completed, set door open for gadora
 print "test pre_tourian_door: ", pc
 	phx
 	lda #$00a8 : jsl !bit_index

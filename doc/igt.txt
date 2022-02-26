@@ -1,0 +1,236 @@
+RAM:
+    $1A5D..7C: Cinematic sprite object spritemap pointers (bank $8C)
+    $1A7D..9C: Cinematic sprite object X positions (32 valeurs)
+    $1A9D..BC: Cinematic sprite object Y positions (32 valeurs)
+    $1ABD..DC: Cinematic sprite object palette index
+    $1ADD..FC: Cinematic sprite object variables
+    $1AFD..1B1C: Cinematic sprite object variables
+    $1B1D..3C: Cinematic sprite object instruction list pointers
+    $1B3D..5C: Cinematic sprite object pre-instructions
+    $1B5D..7C: Cinematic sprite object instruction timers
+    $1B7D..9C: Cinematic sprite object timers
+    $1B9D: Cinematic sprite object initialisation parameter(???)
+
+
+$1A5D:
+0000 0000 0000 0000
+0000 0000 0000 0000
+$1A6D:
+87B6 7BB6 6FB6 7BB6 7BB6: 1 0 : 0 0
+13B6: CLEAR TIME
+C7B3: COMPLETED SUCCESSFULLY
+D3AA: THE OPERATION WAS
+BC00 BCFF 0000 8000
+
+
+
+;;; $9799:  ;;; affichage de l'igt
+{
+$8B:9799 08          PHP
+$8B:979A C2 30       REP #$30
+$8B:979C 8B          PHB
+$8B:979D A2 1E 00    LDX #$001E
+
+$8B:97A0 BD 5D 1A    LDA $1A5D,x[$7E:1A7B] # charge dans A le pointeur vers la liste d'oam pour le char courant
+$8B:97A3 F0 40       BEQ $40    [$97E5]    # pas le cas ici, on a 0002 oam par char
+$8B:97A5 F4 00 8C    PEA $8C00             # passe sur la banque 8c
+$8B:97A8 AB          PLB
+$8B:97A9 AB          PLB
+$8B:97AA BC 5D 1A    LDY $1A5D,x[$7E:1A7B] # charge dans Y l'instruction
+$8B:97AD BD BD 1A    LDA $1ABD,x[$7E:1ADB] # charge la palette
+$8B:97B0 85 16       STA $16    [$7E:0016] # stocke la palette dans $16
+$8B:97B2 BD 7D 1A    LDA $1A7D,x[$7E:1A9B] # position X
+$8B:97B5 38          SEC                   # set carry
+$8B:97B6 ED 11 09    SBC $0911  [$7E:0911] # $0911: Layer 1 X position
+$8B:97B9 85 14       STA $14    [$7E:0014] # stocke la position X dans $14
+$8B:97BB BD 9D 1A    LDA $1A9D,x[$7E:1ABB] # position Y
+$8B:97BE 38          SEC                   # set carry
+$8B:97BF ED 15 09    SBC $0915  [$7E:0915] # $0915: Layer 1 Y position
+$8B:97C2 85 12       STA $12    [$7E:0012] # stocke la position Y dans $12
+$8B:97C4 89 00 FF    BIT #$FF00
+$8B:97C7 D0 0F       BNE $0F    [$97D8]    # si != 0 charge off screen
+$8B:97C9 18          CLC
+$8B:97CA 69 80 00    ADC #$0080
+$8B:97CD C9 FF 01    CMP #$01FF
+$8B:97D0 B0 13       BCS $13    [$97E5]    # ne charge pas l'oam
+$8B:97D2 22 9F 87 81 JSL $81879F[$81:879F]  ; Add spritemap to OAM
+$8B:97D6 80 0D       BRA $0D    [$97E5]
+
+$8B:97D8 18          CLC
+$8B:97D9 69 80 00    ADC #$0080
+$8B:97DC C9 FF 01    CMP #$01FF
+$8B:97DF B0 04       BCS $04    [$97E5]     ; Add spritemap to OAM off-screen
+$8B:97E1 22 53 88 81 JSL $818853[$81:8853]
+
+$8B:97E5 CA          DEX
+$8B:97E6 CA          DEX
+$8B:97E7 10 B7       BPL $B7    [$97A0]
+$8B:97E9 AB          PLB
+$8B:97EA AD 51 1F    LDA $1F51  [$7E:1F51]  ;\
+$8B:97ED C9 02 DA    CMP #$DA02             ;} If [cinematic function] < $DA02:
+$8B:97F0 10 03       BPL $03    [$97F5]     ;/
+$8B:97F2 20 D9 8E    JSR $8ED9  [$8B:8ED9]  ; Move unused sprites off-screen
+
+$8B:97F5 28          PLP
+$8B:97F6 60          RTS
+}
+
+
+# les characteres utilises pour afficher l'igt:
+;;; $B66F: ':' ;;;
+{
+$8C:B66F             dx 0002,
+                        01FC,00,B15A,
+                        01FC,F8,315A
+}
+
+
+;;; $B67B: '0' ;;;
+{
+$8C:B67B             dx 0002,
+                        01FC,00,3170,
+                        01FC,F8,3160
+}
+
+
+;;; $B687: '1' ;;;
+{
+$8C:B687             dx 0002,
+                        01FC,00,3171,
+                        01FC,F8,3161
+}
+
+
+;;; $B693: '2' ;;;
+{
+$8C:B693             dx 0002,
+                        01FC,00,3172,
+                        01FC,F8,3162
+}
+
+
+;;; $B69F: '3' ;;;
+{
+$8C:B69F             dx 0002,
+                        01FC,00,3173,
+                        01FC,F8,3163
+}
+
+
+;;; $B6AB: '4' ;;;
+{
+$8C:B6AB             dx 0002,
+                        01FC,00,3174,
+                        01FC,F8,3164
+}
+
+
+;;; $B6B7: '5' ;;;
+{
+$8C:B6B7             dx 0002,
+                        01FC,00,3175,
+                        01FC,F8,3165
+}
+
+
+;;; $B6C3: '6' ;;;
+{
+$8C:B6C3             dx 0002,
+                        01FC,00,3176,
+                        01FC,F8,3166
+}
+
+
+;;; $B6CF: '7' ;;;
+{
+$8C:B6CF             dx 0002,
+                        01FC,00,3177,
+                        01FC,F8,3167
+}
+
+
+;;; $B6DB: '8' ;;;
+{
+$8C:B6DB             dx 0002,
+                        01FC,00,3178,
+                        01FC,F8,3168
+}
+
+
+;;; $B6E7: '9' ;;;
+{
+$8C:B6E7             dx 0002,
+                        01FC,00,3179,
+                        01FC,F8,3169
+}
+
+
+
+
+timer en ram:
+    $09DA: Game time, frames
+    $09DC: Game time, seconds
+    $09DE: Game time, minutes
+    $09E0: Game time, hours (capped at 99:59:59.59)
+
+division:
+;;; 16/8 div => 16,16
+!dividend  = $4204
+!divisor   = $4206
+!quotient  = $4214
+!remainder = $4216
+
+
+;;; $F3CE:  ;;;
+{
+$8B:F3CE 5A          PHY
+$8B:F3CF A0 FD EE    LDY #$EEFD             ;\
+$8B:F3D2 20 8A 93    JSR $938A  [$8B:938A]  ;} Spawn cinematic sprite object $EEFD
+$8B:F3D5 AD E0 09    LDA $09E0  [$7E:09E0]  ; igt hours
+$8B:F3D8 8D 04 42    STA $4204  [$7E:4204]  ; division par 10
+$8B:F3DB E2 20       SEP #$20
+$8B:F3DD A9 0A       LDA #$0A
+$8B:F3DF 8D 06 42    STA $4206  [$7E:4206]
+$8B:F3E2 EA          NOP
+$8B:F3E3 EA          NOP
+$8B:F3E4 EA          NOP
+$8B:F3E5 EA          NOP
+$8B:F3E6 EA          NOP
+$8B:F3E7 EA          NOP
+$8B:F3E8 EA          NOP
+$8B:F3E9 C2 20       REP #$20
+$8B:F3EB AD 14 42    LDA $4214  [$7E:4214]
+$8B:F3EE 8D EC 0D    STA $0DEC  [$7E:0DEC]
+$8B:F3F1 AD 16 42    LDA $4216  [$7E:4216]
+$8B:F3F4 8D EE 0D    STA $0DEE  [$7E:0DEE]
+$8B:F3F7 AD DE 09    LDA $09DE  [$7E:09DE]  ; igt minutes
+$8B:F3FA 8D 04 42    STA $4204  [$7E:4204]  ; division par 10
+$8B:F3FD E2 20       SEP #$20
+$8B:F3FF A9 0A       LDA #$0A
+$8B:F401 8D 06 42    STA $4206  [$7E:4206]
+$8B:F404 EA          NOP
+$8B:F405 EA          NOP
+$8B:F406 EA          NOP
+$8B:F407 EA          NOP
+$8B:F408 EA          NOP
+$8B:F409 EA          NOP
+$8B:F40A EA          NOP
+$8B:F40B C2 20       REP #$20
+$8B:F40D AD 14 42    LDA $4214  [$7E:4214]
+$8B:F410 8D F0 0D    STA $0DF0  [$7E:0DF0]
+$8B:F413 AD 16 42    LDA $4216  [$7E:4216]
+$8B:F416 8D F2 0D    STA $0DF2  [$7E:0DF2]
+$8B:F419 7A          PLY
+$8B:F41A 60          RTS
+}
+
+
+espace libre en 8B:
+# 144 bytes
+;;; $8488: Unused. Modify mode 7 transformation with controller ;;;
+;;; $8518: Handle mode 7 transformation matrix - no rotation ;;;
+
+# 72 bytes
+;;; $CC63: Unused. Instruction list - cinematic sprite object $CE97 (space colony text) ;;;
+;;; $CCA3: Unused. Instruction list - cinematic sprite object $CE9D (space colony Japanese text) ;;;
+;;; $CCAB: Instruction list - cinematic sprite object $CEA3 (Zebes) ;;;

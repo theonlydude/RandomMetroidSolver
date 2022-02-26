@@ -53,7 +53,9 @@ class RomPatcher:
             # VARIA logo on startup screen
             'varia_logo.ips',
             # new nothing plm
-            'nothing_item_plm.ips'
+            'nothing_item_plm.ips',
+            # display objectives in pause manu
+            'objectives_pause.ips'
         ],
         # VARIA tweaks
         'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
@@ -152,7 +154,7 @@ class RomPatcher:
             'Scavenger': fullCheck,
             'Major': majChozoCheck,
             'Chozo': majChozoCheck,
-            'FullWithHUD': lambda itemLoc: itemLoc.Item.Category not in ['Energy', 'Ammo', 'Boss']
+            'FullWithHUD': lambda itemLoc: itemLoc.Item.Category not in ['Energy', 'Ammo', 'Boss', 'MiniBoss']
         }
         itemLocCheck = lambda itemLoc: itemLoc.Item.Category != "Nothing" and splitChecks[split](itemLoc)
         for area,addr in locIdsByAreaAddresses.items():
@@ -319,9 +321,7 @@ class RomPatcher:
             if area == True or doorsColorsRando == True:
                 stdPatches.append("Enable_Backup_Saves")
             if 'varia_hud.ips' in optionalPatches:
-                # varia hud has its own variant of g4_skip for scavenger mode,
-                # it can also make demos glitch out
-                stdPatches.remove("g4_skip.ips")
+                # varia hud can make demos glitch out
                 self.applyIPSPatch("no_demo.ips")
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
@@ -361,9 +361,9 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
             if minimizerN is not None:
                 self.applyIPSPatch('minimizer_bosses.ips')
-                if minimizerTourian == True:
-                    for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
-                        self.applyIPSPatch(patchName)
+            if minimizerTourian == True:
+                for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
+                    self.applyIPSPatch(patchName)
             doors = self.getStartDoors(plms, area, minimizerN)
             if doorsColorsRando == True:
                 for patchName in RomPatcher.IPSPatches['DoorsColors']:
@@ -1082,6 +1082,9 @@ class RomPatcher:
             DoorsManager.writeDoorsColor(self.romFile, doorsStart, self.romFile.writeWord)
         else:
             DoorsManager.writeDoorsColor(self.romFile, doorsStart, self.writePlmWord)
+
+    def writeObjectives(self, objectives):
+        objectives.writeGoals(self.romFile)
 
 # tile number in tileset
 char2tile = {

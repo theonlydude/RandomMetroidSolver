@@ -260,6 +260,7 @@ class PresetLoaderDict(PresetLoader):
 
 def getDefaultMultiValues():
     from graph.graph_utils import GraphUtils
+    from utils.objectives import Objectives
     defaultMultiValues = {
         'startLocation': GraphUtils.getStartAccessPointNames(),
         'majorsSplit': ['Full', 'FullWithHUD', 'Major', 'Chozo', 'Scavenger'],
@@ -267,7 +268,8 @@ def getDefaultMultiValues():
         'progressionDifficulty': ['easier', 'normal', 'harder'],
         'morphPlacement': ['early', 'late', 'normal'],
         'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla'],
-        'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive']
+        'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive'],
+        'objective': Objectives.getAllGoals(removeNothing=True)
     }
     return defaultMultiValues
 
@@ -410,13 +412,19 @@ def loadRandoPreset(randoPreset, args):
     if "energyQty" in randoParams:
         args.energyQty = randoParams["energyQty"]
 
+    if "objective" in randoParams:
+        if randoParams["objective"] == "random":
+            args.objective = ["random"]
+        else:
+            args.objective = randoParams["objective"]
+
     if randoParams.get("minimizer", "off") == "on" and "minimizerQty" in randoParams:
         args.minimizerN = randoParams["minimizerQty"]
-        if randoParams.get("minimizerTourian", "off") == "on":
-            args.minimizerTourian = True
+    if randoParams.get("minimizerTourian", "off") == "on":
+        args.minimizerTourian = True
 
     defaultMultiValues = getDefaultMultiValues()
-    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"]
+    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective"]
     for multiElem in multiElems:
         if multiElem+'MultiSelect' in randoParams:
             setattr(args, multiElem+'List', ','.join(randoParams[multiElem+'MultiSelect']))
@@ -456,6 +464,8 @@ def getRandomizerDefaultParameters():
     defaultParams['minorQty'] = "100"
     defaultParams['energyQty'] = "vanilla"
     defaultParams['energyQtyMultiSelect'] = defaultMultiValues['energyQty']
+    defaultParams['objective'] = ["kill G4"]
+    defaultParams['objectiveMultiSelect'] = defaultMultiValues['objective']
     defaultParams['areaRandomization'] = "off"
     defaultParams['areaLayout'] = "off"
     defaultParams['lightAreaRandomization'] = "off"

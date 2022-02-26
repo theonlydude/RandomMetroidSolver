@@ -122,7 +122,8 @@ org $828cea
 org $82939c
     jmp resuming_local
 
-org $82fc00
+// remapped at begining of $82 free space
+org $82f70E
 pausing_local:
     jml pausing
 resuming_local:

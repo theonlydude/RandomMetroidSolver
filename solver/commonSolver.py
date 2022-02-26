@@ -11,6 +11,7 @@ from solver.conf import Conf
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils, getAccessPoint
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
 from utils.doorsmanager import DoorsManager
+from utils.objectives import Objectives
 from logic.logic import Logic
 
 class CommonSolver(object):
@@ -45,24 +46,32 @@ class CommonSolver(object):
             DoorsManager.setDoorsColor()
             self.doorsRando = False
             self.hasNothing = False
+            self.objectives.setVanilla()
         else:
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
             Logic.factory(self.romLoader.readLogic())
-            self.romLoader.readNothingId()
             self.locations = Logic.locations
             (self.majorsSplit, self.masterMajorsSplit) = self.romLoader.assignItems(self.locations)
             (self.startLocation, self.startArea, startPatches) = self.romLoader.getStartAP()
             if not GraphUtils.isStandardStart(self.startLocation) and self.majorsSplit != 'Full':
                 # update major/chozo locs in non standard start
                 self.romLoader.updateSplitLocs(self.majorsSplit, self.locations)
-            (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches()
+            (self.areaRando, self.bossRando, self.escapeRando, hasObjectives) = self.romLoader.loadPatches()
             RomPatches.ActivePatches += startPatches
             self.escapeTimer = self.romLoader.getEscapeTimer()
             self.doorsRando = self.romLoader.loadDoorsColor()
             self.hasNothing = self.checkLocsForNothing()
             if self.majorsSplit == 'Scavenger':
                 self.scavengerOrder = self.romLoader.loadScavengerOrder(self.locations)
+            if hasObjectives:
+                self.romLoader.loadObjectives(self.objectives)
+            else:
+                if self.majorsSplit == "Scavenger":
+                    self.objectives.setScavengerHunt(self.romLoader.hasPatch('Escape_Scavenger'))
+                else:
+                    self.objectives.setVanilla()
+            self.objectives.setScavengerHuntFunc(self.scavengerHuntComplete)
 
             if interactive == False:
                 print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {} activePatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches()), sorted(RomPatches.ActivePatches)))
@@ -342,11 +351,15 @@ class CommonSolver(object):
         if len(locations) == 0:
             return []
 
+        mandatoryBosses = Objectives.getMandatoryBosses()
+
         # add nocomeback locations which has been selected by the comeback step (areaWeight == 1)
         around = [loc for loc in locations if( (loc.areaWeight is not None and loc.areaWeight == 1)
                                                or ((loc.SolveArea == self.lastArea or loc.distance < 3)
                                                    and loc.difficulty.difficulty <= threshold
-                                                   and not Bosses.areaBossDead(self.smbm, self.lastArea)
+                                                   and (not Bosses.areaBossDead(self.smbm, self.lastArea)
+                                                        and (self.lastArea not in Bosses.areaBosses
+                                                             or Bosses.areaBosses[self.lastArea] in mandatoryBosses))
                                                    and loc.comeBack is not None and loc.comeBack == True) )]
         outside = [loc for loc in locations if not loc in around]
 
@@ -539,10 +552,12 @@ class CommonSolver(object):
 
         raise Exception("Can't take a decision")
 
-    def checkMB(self, mbLoc, justCheck=False):
+    def checkMB(self, mbLoc, justCheck=False, justAdd=False):
         # add mother brain loc and check if it's accessible
         self.majorLocations.append(mbLoc)
         self.computeLocationsDifficulty(self.majorLocations)
+        if justAdd:
+            return
         if justCheck:
             self.majorLocations.remove(mbLoc)
             return mbLoc.difficulty == True
@@ -597,17 +612,23 @@ class CommonSolver(object):
             hasEnoughItems = hasEnoughMajors and hasEnoughMinors
             canEndGame = self.canEndGame()
             (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
-            if isEndPossible and hasEnoughItems and self.scavengerHuntComplete():
-                if endDifficulty <= diffThreshold:
-                    if self.checkMB(mbLoc):
-                        self.log.debug("checkMB: all end game checks are ok, END")
-                        break
-                    else:
-                        self.log.debug("checkMB: canEnd but MB loc not accessible")
+            if isEndPossible and hasEnoughItems:
+                if not self.objectives.tourianRequired:
+                    # add MB loc for non visited locs
+                    self.checkMB(mbLoc, justAdd=True)
+                    self.log.debug("no need to checkMB, END")
+                    break
                 else:
-                    if not self.motherBrainCouldBeKilled:
-                        self.motherBrainCouldBeKilled = self.checkMB(mbLoc, justCheck=True)
-                    self.log.debug("checkMB: end checks ok except MB difficulty, MB could be killed: {}".format(self.motherBrainCouldBeKilled))
+                    if endDifficulty <= diffThreshold:
+                        if self.checkMB(mbLoc):
+                            self.log.debug("checkMB: all end game checks are ok, END")
+                            break
+                        else:
+                            self.log.debug("checkMB: canEnd but MB loc not accessible")
+                    else:
+                        if not self.motherBrainCouldBeKilled:
+                            self.motherBrainCouldBeKilled = self.checkMB(mbLoc, justCheck=True)
+                        self.log.debug("checkMB: end checks ok except MB difficulty, MB could be killed: {}".format(self.motherBrainCouldBeKilled))
 
             # check time limit
             if self.runtimeLimit_s > 0:
@@ -717,11 +738,16 @@ class CommonSolver(object):
 
     def canEndGame(self):
         # to finish the game you must:
-        # - beat golden 4
+        # - finish objectives to open G4 (like beat golden 4 or mini bosses)
         # - defeat metroids
         # - destroy/skip the zebetites
         # - beat Mother Brain
-        return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
+        # if escape is triggered at the end of scav hunt you don't have to go to Tourian
+        canClearGoals = self.objectives.canClearGoals(self.smbm)
+        if self.objectives.tourianRequired:
+            return self.smbm.wand(canClearGoals, self.smbm.enoughStuffTourian())
+        else:
+            return canClearGoals
 
     def getAllLocs(self, majorsAvailable, minorsAvailable):
         if self.majorsSplit == 'Full':
@@ -730,7 +756,7 @@ class CommonSolver(object):
             return majorsAvailable+minorsAvailable
 
     def computeDifficultyValue(self):
-        if not self.canEndGame() or not self.motherBrainKilled:
+        if not self.canEndGame() or (not self.motherBrainKilled and self.objectives.tourianRequired):
             # we have aborted
             return (-1, False)
         else:
@@ -772,13 +798,13 @@ class CommonSolver(object):
 
         return majorsAvailable
 
-    def scavengerHuntComplete(self):
+    def scavengerHuntComplete(self, smbm=None):
         if self.majorsSplit != 'Scavenger':
-            return True
+            return SMBool(True)
         else:
             # check that last loc from the scavenger hunt list has been visited
             lastLoc = self.scavengerOrder[-1]
-            return lastLoc in self.visitedLocations
+            return SMBool(lastLoc in self.visitedLocations)
 
     def getPriorityArea(self):
         # if scav returns solve area of next loc in the hunt

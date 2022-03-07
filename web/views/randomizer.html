@@ -387,7 +387,206 @@ function randomizeMinimizer(evt) {
   }
 }
 
+function get_unselected_objectives() {
+    return $("#objectiveMultiSelect").find('option').not(':selected').map(function () { return this.value; }).get();
+}
+
+function get_selected_objectives() {
+    return $("#objectiveMultiSelect").val();
+}
+function remove_objective_from_unselected(objective) {
+    if( ! removed_objectives.includes(objective)) {
+        console.log("        !! remove objective from unselected: "+objective);
+        $("#objectiveMultiSelect option[value='"+objective+"']").remove();
+        removed_objectives.push(objective);
+    }
+}
+function add_objective_to_unselected(objective) {
+    // check if not already present
+    if(removed_objectives.includes(objective)) {
+        console.log("        !! add objective to unselected: "+objective);
+        $("#objectiveMultiSelect").append("<option value=\""+objective+"\">"+objective+"</option>");
+        var index = removed_objectives.indexOf(objective);
+        removed_objectives.splice(index, 1);
+    }
+}
+function is_limit_objective(objective) {
+    return "type" in objectives_exclusions[objective];
+}
+function get_limit_objective_type(objective) {
+    return objectives_exclusions[objective]["type"];
+}
+function get_limit_objective_limit(objective) {
+    return objectives_exclusions[objective]["limit"];
+}
+function is_count_objective(objective) {
+    for (const [key, value] of Object.entries(objectives_types)) {
+        if(value.includes(objective)) {
+            return true;
+        }
+    }
+    return false;
+}
+function get_count_objective_type(objective) {
+    for (const [key, value] of Object.entries(objectives_types)) {
+        if(value.includes(objective)) {
+            return key;
+        }
+    }
+}
+function is_objective_of_type(objective, type) {
+    return objectives_types[type].includes(objective);
+}
+function get_objectives_count(type, list) {
+    var count = 0;
+    for(var i=0; i<list.length; i++) {
+        console.log("        get_objectives_count: type: "+type+" check obj: "+list[i]);
+        if(is_objective_of_type(list[i], type)) {
+            console.log("        get_objectives_count: type: "+type+" checked obj: "+list[i]+" is of same type");
+            count++;
+        }
+    }
+    return count;
+}
+function can_add_to_unselected(toAdd) {
+    // 1. check if toAdd is in an exclusion list of the selected objectives
+    // 2. if toAdd is a limit objective
+    //    check count objectives already selected and if toAdd limit is not reached
+    // 3. if toAdd is a count objective
+    //    check limit objectives already selected and if toAdd would reach theirs limit
+
+    var selectedArray = get_selected_objectives();
+
+    // 1.
+    console.log("      test if "+toAdd+" is in the exclusion list of an already selected objective");
+    for(var i=0; i<selectedArray.length; i++) {
+        var objective = selectedArray[i];
+        var exclusion_list = objectives_exclusions[objective]["list"];
+        if(exclusion_list.includes(toAdd)) {
+            console.log("        can't add "+toAdd+" it's in the exclusion list of "+objective);
+            return false;
+        }
+    }
+
+    // 2.
+    if(is_limit_objective(toAdd)) {
+        console.log("      "+toAdd+" is a limit objective, test its limit");
+        var type = get_limit_objective_type(toAdd);
+        var count = get_objectives_count(type, selectedArray);
+        var limit = get_limit_objective_limit(toAdd);
+        if(count > limit) {
+            console.log("        can't add "+toAdd+" it's a limit objective with limit "+limit+" and there's already "+count+" objectives of type "+type+" selected");
+            return false;
+        } else {
+            console.log("        can add "+toAdd+" it's a limit objective with limit "+limit+" and there's only "+count+" objectives of type "+type+" selected");
+        }
+
+    // 3.
+    } else if(is_count_objective(toAdd)) {
+        var type = get_count_objective_type(toAdd);
+        var count = get_objectives_count(type, selectedArray);
+        console.log("      "+toAdd+" is a count objective of type "+type+", check limit objectives already selected");
+        for(var i=0; i<selectedArray.length; i++) {
+            var toTest = selectedArray[i];
+            console.log("        test selected objective: "+toTest);
+            if(is_limit_objective(toTest)) {
+                console.log("        selected objective: "+toTest+" is a limit objective");
+                if(get_limit_objective_type(toTest) == type) {
+                    var limit = get_limit_objective_limit(toTest);
+                    console.log("        selected objective: "+toTest+" is a limit objective of type: "+type+" with a limit: "+limit);
+                    if(count >= limit) {
+                        console.log("        selected objective: "+toTest+" limit is reached, can't add "+toAdd);
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+
+    console.log("    we can add "+toAdd);
+    return true;
+}
+function must_remove_from_unselected(toRemove) {
+    // 1. check if toRemove is in the exclusion list of the selected objectives
+    // 2. if toRemove is a limit objective
+    //    check count objectives already selected and if toRemove limit is reached
+    // 3. if toRemove is a count objective
+    //    check limit objectives already selected and if toRemove reach theirs limit
+
+    var selectedArray = get_selected_objectives();
+
+    // 1.
+    console.log("      test if "+toRemove+" is in the exclusion list of an already selected objective");
+    for(var i=0; i<selectedArray.length; i++) {
+        var objective = selectedArray[i];
+        var exclusion_list = objectives_exclusions[objective]["list"];
+        if(exclusion_list.includes(toRemove)) {
+            console.log("        must remove "+toRemove+" it's in the exclusion list of "+objective);
+            return true;
+        }
+    }
+
+    // 2.
+    if(is_limit_objective(toRemove)) {
+        console.log("      "+toRemove+" is a limit objective, test its limit");
+        var type = get_limit_objective_type(toRemove);
+        var count = get_objectives_count(type, selectedArray);
+        var limit = get_limit_objective_limit(toRemove);
+        if(count > limit) {
+            console.log("        must remove "+toRemove+" it's a limit objective with limit "+limit+" and there's already "+count+" objectives of type "+type+" selected");
+            return true;
+        } else {
+            console.log("        can keep "+toRemove+" it's a limit objective with limit "+limit+" and there's already "+count+" objectives of type "+type+" selected");
+        }
+
+    // 3.
+    } else if(is_count_objective(toRemove)) {
+        var type = get_count_objective_type(toRemove);
+        var count = get_objectives_count(type, selectedArray);
+        console.log("      "+toRemove+" is a count objective of type "+type+", check limit objectives already selected");
+        for(var i=0; i<selectedArray.length; i++) {
+            var toTest = selectedArray[i];
+            console.log("        test selected objective: "+toTest);
+            if(is_limit_objective(toTest)) {
+                console.log("        selected objective: "+toTest+" is a limit objective");
+                if(get_limit_objective_type(toTest) == type) {
+                    var limit = get_limit_objective_limit(toTest);
+                    console.log("        selected objective: "+toTest+" is a limit objective of type: "+type+" with a limit: "+limit);
+                    if(count >= limit) {
+                        console.log("        selected objective: "+toTest+" limit is reached, must remove "+toRemove);
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    console.log("    we don't have to remove "+toRemove);
+    return false;
+}
+function sort_objectives() {
+    var my_options = $("#objectiveMultiSelect option");
+    var selected = $("#objectiveMultiSelect").val();
+
+    my_options.sort(function(a, b) {
+        var index_a = objectives_sort.indexOf(a.value);
+        var index_b = objectives_sort.indexOf(b.value);
+        if (index_a > index_b) return 1;
+        if (index_a < index_b) return -1;
+        return 0
+    })
+
+    $("#objectiveMultiSelect").empty().append( my_options );
+    $("#objectiveMultiSelect").val(selected);
+}
+
 var objectives_exclusions = {{response.write(objectivesExclusions, escape=False)}};
+var objectives_types = {{response.write(objectivesTypes, escape=False)}};
+var objectives_sort = {{response.write(objectivesSort, escape=False)}};
+var removed_objectives = [];
+console.log("objectives_types: boss: "+objectives_types['boss']);
+console.log("objectives_types: miniboss: "+objectives_types['miniboss']);
+
 function objective_change(e, params) {
     // if random is set do nothing
     if(isElemIdRandom("objective")) {
@@ -395,37 +594,30 @@ function objective_change(e, params) {
     }
 
     if(params.selected) {
-        var toExclude = objectives_exclusions[params.selected];
-        for(var i=0; i<toExclude.length; i++) {
-            $("#objectiveMultiSelect option[value='"+toExclude[i]+"']").remove();
-        }
-        $("#objectiveMultiSelect").trigger("chosen:updated");
-    } else if(params.deselected) {
-        var toInclude = objectives_exclusions[params.deselected];
-
-        var notSelectedArray = $("#objectiveMultiSelect").find('option').not(':selected').map(function () { return this.value; }).get();
-        var selectedArray = $("#objectiveMultiSelect").val();
-
-        for(var i=0; i<toInclude.length; i++) {
-            var toAdd = toInclude[i];
-            // don't add an objective already present in the list
-            if(!notSelectedArray.includes(toAdd)) {
-                // don't add an objective if another selected objective has it in its exclusion list
-                var canAdd = true;
-                for(var j=0; j<selectedArray.length; j++) {
-                    var toTest = selectedArray[j];
-                    if(objectives_exclusions[toTest].includes(toAdd)){
-                        canAdd = false;
-                        break;
-                    }
-                }
-                if(canAdd) {
-                    $("#objectiveMultiSelect").append("<option value=\""+toAdd+"\">"+toAdd+"</option>");
-                }
+        console.log("* new objective selected: "+params.selected);
+        var unselected_objectives = get_unselected_objectives();
+        for(var j=0; j<unselected_objectives.length; j++) {
+            var toRemove = unselected_objectives[j];
+            console.log("  check to remove obj "+toRemove+" from unselected objectives");
+            if(must_remove_from_unselected(toRemove)) {
+                remove_objective_from_unselected(toRemove);
             }
         }
-        $("#objectiveMultiSelect").trigger("chosen:updated");
+    } else if(params.deselected) {
+        console.log("* new objective deselected: "+params.deselected);
+        var copy_removed_objectives = removed_objectives.slice();
+        for(var j=0; j<copy_removed_objectives.length; j++) {
+            var toAdd = copy_removed_objectives[j];
+            console.log("  check to add obj "+toAdd+" from removed objectives");
+            if(can_add_to_unselected(toAdd)) {
+                add_objective_to_unselected(toAdd);
+            }
+        }
     }
+
+    sort_objectives();
+
+    $("#objectiveMultiSelect").trigger("chosen:updated");
 }
 
 var max_objectives = 5;
@@ -441,7 +633,7 @@ function setMaxObjective(isRandom) {
     }
 }
 
-var objectiveBackup = ["kill G4"];
+var objectiveBackup = ["kill all G4"];
 function randomizeObjective(evt, takeBackup=true) {
     var isActive;
     if(isElemRandom(evt.currentTarget)) {
@@ -454,7 +646,7 @@ function randomizeObjective(evt, takeBackup=true) {
         $("#objectiveMultiSelect").val(objectiveBackup).trigger("chosen:updated");
 
         // handle exclusions for currently selected values
-        var selectedArray = $("#objectiveMultiSelect").val();
+        var selectedArray = get_selected_objectives();
         for(var i=0; i<selectedArray.length; i++) {
             objective_change(null, {selected: selectedArray[i]});
         }
@@ -464,14 +656,14 @@ function randomizeObjective(evt, takeBackup=true) {
 
         // backup current value
         if(takeBackup) {
-            objectiveBackup = $("#objectiveMultiSelect").val();
+            objectiveBackup = get_selected_objectives();
         }
 
         setMaxObjective(true);
 
         // add all objectives for randomization, as we may have removed some of them from the dropdown list
-        var notSelectedArray = $("#objectiveMultiSelect").find('option').not(':selected').map(function () { return this.value; }).get();
-        var selectedArray = $("#objectiveMultiSelect").val();
+        var notSelectedArray = get_unselected_objectives();
+        var selectedArray = get_selected_objectives();
 
         for(var i=0; i<defaultMultiValues["objective"].length; i++) {
             var toAdd = defaultMultiValues["objective"][i];
@@ -543,7 +735,7 @@ function setObjective() {
         $("#objectiveMultiSelect").val(sessionObjectives).trigger("chosen:updated");
 
         // handle exclusions for currently selected values
-        var selectedArray = $("#objectiveMultiSelect").val();
+        var selectedArray = get_selected_objectives();
         for(var i=0; i<selectedArray.length; i++) {
             objective_change(null, {selected: selectedArray[i]});
         }
@@ -851,7 +1043,7 @@ function getSpecialValues(dataDict) {
         dataDict["objective"] = "random";
         dataDict["objectiveMultiSelect"] = $("#objectiveMultiSelect").val().join();
     } else {
-        var objectives = $("#objectiveMultiSelect").val();
+        var objectives = get_selected_objectives();
         if(objectives.length == 0) {
             dataDict["objective"] = "nothing";
         } else {

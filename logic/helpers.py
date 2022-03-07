@@ -862,6 +862,16 @@ class Bosses:
                          Bosses.bossDead(smbm, 'Crocomire'),
                          Bosses.bossDead(smbm, 'GoldenTorizo'))
 
+    @staticmethod
+    def xBossesDead(smbm, target):
+        count = sum([1 for boss in Bosses.Golden4() if Bosses.bossDead(smbm, boss)])
+        return SMBool(count >= target)
+
+    @staticmethod
+    def xMiniBossesDead(smbm, target):
+        count = sum([1 for miniboss in Bosses.miniBosses() if Bosses.bossDead(smbm, miniboss)])
+        return SMBool(count >= target)
+
 def diffValue2txt(diff):
     last = 0
     for d in sorted(diff2text.keys()):

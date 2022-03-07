@@ -8,17 +8,14 @@ LOG = utils.log.get('Objectives')
 
 class Synonyms(object):
     killSynonyms = [
+        "defeat",
         "massacre",
         "slaughter",
         "slay",
         "wipe out",
-        "annihilate",
         "eradicate",
         "erase",
-        "exterminate",
         "finish",
-        "neutralize",
-        "obliterate",
         "destroy",
         "wreck",
         "smash",
@@ -37,18 +34,30 @@ class Synonyms(object):
         return verb
 
 class Goal(object):
-    def __init__(self, name, available, clearFunc, checkAddr, exclusionList, items, text, useSynonym, expandable):
+    def __init__(self, name, available, gtype, clearFunc, checkAddr, exclusion, items, text, useSynonym, expandable, expandableList=[]):
         self.name = name
         self.available = available
         self.clearFunc = clearFunc
         # in bank $82, see objectives_pause.asm
         self.checkAddr = checkAddr
         self.rank = -1
-        self.exclusionList = exclusionList
+        # possible values:
+        #  - boss
+        #  - miniboss
+        #  - other
+        self.gtype = gtype
+        # example for kill three g4
+        # {
+        #  "list": [list of objectives],
+        #  "type: "boss",
+        #  "limit": 2
+        # }
+        self.exclusion = exclusion
         self.items = items
         self.text = text
         self.useSynonym = useSynonym
         self.expandable = expandable
+        self.expandableList = expandableList
 
     def setRank(self, rank):
         self.rank = rank
@@ -62,7 +71,7 @@ class Goal(object):
             out += self.text.format(Synonyms.getVerb())
         else:
             out += self.text
-        assert len(out) <= 28, "Goal text is too long: {}, max 28".format(len(out))
+        assert len(out) <= 28, "Goal text '{}' is too long: {}, max 28".format(out, len(out))
         return out
 
 class Objectives(object):
@@ -72,51 +81,115 @@ class Objectives(object):
     maxActiveGoals = 5
     tourianRequired = True
     goals = {
-        "kill kraid": Goal("kill kraid", True, lambda sm: Bosses.bossDead(sm, 'Kraid'), 0xF98F,
-                           ["kill G4"], ["Kraid"], "{} kraid", True, False),
-        "kill phantoon": Goal("kill phantoon", True, lambda sm: Bosses.bossDead(sm, 'Phantoon'), 0xF997,
-                              ["kill G4"], ["Phantoon"], "{} phantoon", True, False),
-        "kill draygon": Goal("kill draygon", True, lambda sm: Bosses.bossDead(sm, 'Draygon'), 0xF99F,
-                             ["kill G4"], ["Draygon"], "{} draygon", True, False),
-        "kill ridley": Goal("kill ridley", True, lambda sm: Bosses.bossDead(sm, 'Ridley'), 0xF9A7,
-                            ["kill G4"], ["Ridley"], "{} ridley", True, False),
-        "kill G4": Goal("kill G4", True, lambda sm: Bosses.allBossesDead(sm), 0xF9AF,
-                        ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"],
-                        ["Kraid", "Phantoon", "Draygon", "Ridley"],
-                        "{} golden four", True, True),
-        "kill spore spawn": Goal("kill spore spawn", True, lambda sm: Bosses.bossDead(sm, 'SporeSpawn'), 0xF9C5,
-                                 ["kill mini bosses"], ["SporeSpawn"], "{} spore spawn", True, False),
-        "kill botwoon": Goal("kill botwoon", True, lambda sm: Bosses.bossDead(sm, 'Botwoon'), 0xF9CD,
-                             ["kill mini bosses"], ["Botwoon"], "{} botwoon", True, False),
-        "kill crocomire": Goal("kill crocomire", True, lambda sm: Bosses.bossDead(sm, 'Crocomire'), 0xF9D5,
-                               ["kill mini bosses"], ["Crocomire"], "{} crocomire", True, False),
-        "kill golden torizo": Goal("kill golden torizo", True, lambda sm: Bosses.bossDead(sm, 'GoldenTorizo'), 0xF9E5,
-                                   ["kill mini bosses"], ["GoldenTorizo"], "{} golden torizo", True, False),
-        "kill mini bosses": Goal("kill mini bosses", True, lambda sm: Bosses.allMiniBossesDead(sm), 0xF9ED,
-                                 ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo"],
-                                 ["SporeSpawn", "Botwoon", "Crocomire", "GoldenTorizo"],
-                                 "{} mini bosses", True, True),
-        "shaktool cleared path": Goal("shaktool cleared path", False, None, 0xFA08,
-                                      [], [], "shaktool cleared its path", False, False),
-        "finish scavenger hunt": Goal("finish scavenger hunt", False, lambda sm: SMBool(True), 0xFA10,
-                                      [], [], "finish scavenger hunt", False, False),
-        "nothing": Goal("nothing", True, lambda sm: SMBool(True), 0xFA27, ["kill kraid", "kill phantoon", "kill draygon", "kill ridley", "kill G4", "kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo", "kill mini bosses", "shaktool cleared path", "finish scavenger hunt"], [], "nothing", False, False)
+        "kill kraid": Goal("kill kraid", True, "boss", lambda sm: Bosses.bossDead(sm, 'Kraid'), 0xF98F,
+                           {"list": ["kill all G4", "kill one G4"]}, ["Kraid"], "{} kraid", True, False),
+        "kill phantoon": Goal("kill phantoon", True, "boss", lambda sm: Bosses.bossDead(sm, 'Phantoon'), 0xF997,
+                              {"list": ["kill all G4", "kill one G4"]}, ["Phantoon"], "{} phantoon", True, False),
+        "kill draygon": Goal("kill draygon", True, "boss", lambda sm: Bosses.bossDead(sm, 'Draygon'), 0xF99F,
+                             {"list": ["kill all G4", "kill one G4"]}, ["Draygon"], "{} draygon", True, False),
+        "kill ridley": Goal("kill ridley", True, "boss", lambda sm: Bosses.bossDead(sm, 'Ridley'), 0xF9A7,
+                            {"list": ["kill all G4", "kill one G4"]}, ["Ridley"], "{} ridley", True, False),
+        "kill one G4": Goal("kill one G4", True, "other", lambda sm: Bosses.xBossesDead(sm, 1), 0xFA54,
+                            {"list": ["kill kraid", "kill phantoon", "kill draygon", "kill ridley",
+                                      "kill all G4", "kill two G4", "kill three G4"]},
+                            ["Kraid", "Phantoon", "Draygon", "Ridley"], "{} one golden4", True, False),
+        "kill two G4": Goal("kill two G4", True, "other", lambda sm: Bosses.xBossesDead(sm, 2), 0xFA5D,
+                            {"list": ["kill all G4", "kill one G4", "kill three G4"],
+                             "type": "boss",
+                             "limit": 1},
+                            ["Kraid", "Phantoon", "Draygon", "Ridley"], "{} two golden4", True, False),
+        "kill three G4": Goal("kill three G4", True, "other", lambda sm: Bosses.xBossesDead(sm, 3), 0xFA66,
+                              {"list": ["kill all G4", "kill one G4", "kill two G4"],
+                               "type": "boss",
+                               "limit": 2},
+                              ["Kraid", "Phantoon", "Draygon", "Ridley"], "{} three golden4", True, False),
+        "kill all G4": Goal("kill all G4", True, "other", lambda sm: Bosses.allBossesDead(sm), 0xF9AF,
+                            {"list": ["kill kraid", "kill phantoon", "kill draygon", "kill ridley", "kill one G4", "kill two G4", "kill three G4"]},
+                            ["Kraid", "Phantoon", "Draygon", "Ridley"],
+                            "{} all golden4", True, True, ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"]),
+        "kill spore spawn": Goal("kill spore spawn", True, "miniboss", lambda sm: Bosses.bossDead(sm, 'SporeSpawn'), 0xF9C5,
+                                 {"list": ["kill all mini bosses", "kill one miniboss"]}, ["SporeSpawn"], "{} spore spawn", True, False),
+        "kill botwoon": Goal("kill botwoon", True, "miniboss", lambda sm: Bosses.bossDead(sm, 'Botwoon'), 0xF9CD,
+                             {"list": ["kill all mini bosses", "kill one miniboss"]}, ["Botwoon"], "{} botwoon", True, False),
+        "kill crocomire": Goal("kill crocomire", True, "miniboss", lambda sm: Bosses.bossDead(sm, 'Crocomire'), 0xF9D5,
+                               {"list": ["kill all mini bosses", "kill one miniboss"]}, ["Crocomire"], "{} crocomire", True, False),
+        "kill golden torizo": Goal("kill golden torizo", True, "miniboss", lambda sm: Bosses.bossDead(sm, 'GoldenTorizo'), 0xF9DD,
+                                   {"list": ["kill all mini bosses", "kill one miniboss"]}, ["GoldenTorizo"], "{} golden torizo", True, False),
+        "kill one miniboss": Goal("kill one miniboss", True, "other", lambda sm: Bosses.xMiniBossesDead(sm, 1), 0xFA6F,
+                                  {"list": ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo",
+                                            "kill all mini bosses", "kill two minibosses", "kill three minibosses"]},
+                                  ["SporeSpawn", "Botwoon", "Crocomire", "GoldenTorizo"], "{} one miniboss", True, False),
+        "kill two minibosses": Goal("kill two minibosses", True, "other", lambda sm: Bosses.xMiniBossesDead(sm, 2), 0xFA78,
+                                    {"list": ["kill all mini bosses", "kill one miniboss", "kill three minibosses"],
+                                     "type": "miniboss",
+                                     "limit": 1},
+                                    ["SporeSpawn", "Botwoon", "Crocomire", "GoldenTorizo"], "{} two minibosses", True, False),
+        "kill three minibosses": Goal("kill three minibosses", True, "other", lambda sm: Bosses.xMiniBossesDead(sm, 3), 0xFA81,
+                                      {"list": ["kill all mini bosses", "kill one miniboss", "kill two minibosses"],
+                                       "type": "miniboss",
+                                       "limit": 2},
+                                      ["SporeSpawn", "Botwoon", "Crocomire", "GoldenTorizo"], "{} three minibosses", True, False),
+        "kill all mini bosses": Goal("kill all mini bosses", True, "other", lambda sm: Bosses.allMiniBossesDead(sm), 0xF9E5,
+                                     {"list": ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo",
+                                               "kill one miniboss", "kill two minibosses", "kill three minibosses"]},
+                                     ["SporeSpawn", "Botwoon", "Crocomire", "GoldenTorizo"],
+                                     "{} all mini bosses", True, True, ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo"]),
+        "shaktool cleared path": Goal("shaktool cleared path", False, "other", None, 0xFAFB,
+                                      {"list": []}, [], "shaktool cleared its path", False, False),
+        "finish scavenger hunt": Goal("finish scavenger hunt", False, "other", lambda sm: SMBool(True), 0xFA03,
+                                      {"list": []}, [], "finish scavenger hunt", False, False),
+        "nothing": Goal("nothing", True, "other", lambda sm: SMBool(True), 0xFA1A,
+                        {"list": ["kill kraid", "kill phantoon", "kill draygon", "kill ridley", "kill all G4",
+                                  "kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo", "kill all mini bosses",
+                                  "shaktool cleared path", "finish scavenger hunt",
+                                  "kill one G4", "kill two G4", "kill three G4",
+                                  "kill one miniboss", "kill two minibosses", "kill three minibosses"]},
+                        [], "nothing", False, False),
     }
 
     def resetGoals(self):
         Objectives.activeGoals = []
         Objectives.nbActiveGoals = 0
 
-    def conflict(self, newGoalName):
+    def conflict(self, newGoal):
+        LOG.debug("check if new goal {} conflicts with existing active goals".format(newGoal.name))
+        count = 0
         for goal in Objectives.activeGoals:
-            if newGoalName in goal.exclusionList:
+            if newGoal.name in goal.exclusion["list"]:
+                LOG.debug("new goal {} in exclusion list of active goal {}".format(newGoal.name, goal.name))
                 return True
+            # count bosses/minibosses already active if new goal has a limit
+            if newGoal.exclusion.get("type") == goal.gtype:
+                count += 1
+                LOG.debug("new goal limit type: {} same as active goal {}. count: {}".format(newGoal.exclusion["type"], goal.name, count))
+        if count > newGoal.exclusion.get("limit", 0):
+            LOG.debug("new goal {} limit {} is lower than active goals of type: {}".format(newGoal.name, newGoal.exclusion["limit"], newGoal.exclusion["type"]))
+            return True
+        LOG.debug("no direct conflict detected for new goal {}".format(newGoal.name))
+
+        # if at least one active goal has a limit and new goal has the same type of one of the existing limit
+        # check that new goal doesn't exceed the limit
+        for goal in Objectives.activeGoals:
+            goalExclusionType = goal.exclusion.get("type")
+            if goalExclusionType is not None and goalExclusionType == newGoal.gtype:
+                count = 0
+                for lgoal in Objectives.activeGoals:
+                    if lgoal.gtype == newGoal.gtype:
+                        count += 1
+                # add new goal to the count
+                if count >= goal.exclusion["limit"]:
+                    LOG.debug("new Goal {} would excess limit {} of active goal {}".format(newGoal.name, goal.exclusion["limit"], goal.name))
+                    return True
+
+        LOG.debug("no backward conflict detected for new goal {}".format(newGoal.name))
+
         return False
 
     def addGoal(self, goalName):
-        if self.conflict(goalName):
-            return
+        LOG.debug("addGoal: {}".format(goalName))
         goal = Objectives.goals[goalName]
+        if self.conflict(goal):
+            return
         Objectives.nbActiveGoals += 1
         assert Objectives.nbActiveGoals <= Objectives.maxActiveGoals, "Too many active goals"
         goal.setRank(Objectives.nbActiveGoals)
@@ -143,7 +216,7 @@ class Objectives(object):
         Objectives.goals["finish scavenger hunt"].clearFunc = scavClearFunc
 
     def expandGoals(self):
-        # try to replace 'kill G4' with the four associated objectives.
+        # try to replace 'kill all G4' with the four associated objectives.
         # we need at least 3 empty objectives out of the max (-1 +4)
         if Objectives.maxActiveGoals - Objectives.nbActiveGoals < 3:
             return
@@ -157,9 +230,9 @@ class Objectives(object):
         if expandable is None:
             return
 
-        LOG.debug("replace {} with {}".format(expandable.name, expandable.exclusionList))
+        LOG.debug("replace {} with {}".format(expandable.name, expandable.expandableList))
         self.removeGoal(expandable)
-        for name in expandable.exclusionList:
+        for name in expandable.expandableList:
             self.addGoal(name)
 
         # rebuild ranks
@@ -190,7 +263,21 @@ class Objectives(object):
 
     @staticmethod
     def getExclusions():
-        return {goalName: goal.exclusionList for goalName, goal in Objectives.goals.items()}
+        # to compute exclusions in the front end
+        return {goalName: goal.exclusion for goalName, goal in Objectives.goals.items()}
+
+    @staticmethod
+    def getObjectivesTypes():
+        # to compute exclusions in the front end
+        types = {'boss': [], 'miniboss': []}
+        for goalName, goal in Objectives.goals.items():
+            if goal.gtype in types:
+                types[goal.gtype].append(goalName)
+        return types
+
+    @staticmethod
+    def getObjectivesSort():
+        return list(Objectives.goals.keys())
 
     # call from rando check pool and solver
     @staticmethod

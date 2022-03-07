@@ -149,46 +149,38 @@ all_g4_dead:
 ; event code is: (byte index << 3) + ln(boss bit), with byte index == area index + 8
 
 print "Spore Spawn is dead: ", pc
-spore_spawn_dead:
+spore_spawn_is_dead:
         lda #$0049
         jsl check_event
         rts
 
 print "Botwoon is dead: ", pc
-botwoon_dead:
+botwoon_is_dead:
         lda #$0061
         jsl check_event
         rts
 
 print "Crocomire is dead: ", pc
-crocomire_dead:
+crocomire_is_dead:
         lda #$0051
         jsl check_event
         rts
 
-print "Bomb Torizo is dead: ", pc
-bomb_torizo_dead:
-        lda #$0042
-        jsl check_event
-        rts
-
 print "Golden Torizo is dead: ", pc
-golden_torizo_dead:
+golden_torizo_is_dead:
         lda #$0052
         jsl check_event
         rts
 
 print "All mini bosses dead: ", pc
 all_mini_bosses_dead:
-        jsr spore_spawn_dead
+        jsr spore_spawn_is_dead
         bcc .no
-        jsr botwoon_dead
+        jsr botwoon_is_dead
         bcc .no
-        jsr crocomire_dead
+        jsr crocomire_is_dead
         bcc .no
-        jsr bomb_torizo_dead
-        bcc .no
-        jsr golden_torizo_dead
+        jsr golden_torizo_is_dead
         bcc .no
         sec
 .no
@@ -222,136 +214,103 @@ nothing_objective:
         sec
         rts
 
-print ""
-
-;;; new pointers list
-new_pause_actions_func_list:
-        dw $9120                ; map
-        dw $9142                ; equipment
-        dw $9156, $91AB, $9231  ; map2equip
-        dw $9186, $91D7, $9200  ; equip2map
-        dw func_objective_screen
-        dw func_map2obj_fading_out, func_map2obj_load_obj, func_map2obj_fading_in
-        dw func_obj2map_fading_out, $91D7, $9200
-
-new_pause_palettes_func_list:
-        dw $A796, $A6DF, $A628, update_palette_objective_screen
-
-update_palette_objective_screen:
-        PHP
-        REP #$30
-        jsr set_bg2_objective_screen
-        LDY #$000A
-        LDX #$0000
-.loop_top
-        LDA $7E364A,x
-        AND #$E3FF
-        ORA #$1400
-        STA $7E364A,x ;} Set tilemap palette indices at $7E:364A..53 to 5 (top of MAP)
-        INX : INX
-        DEY : DEY
-        BNE .loop_top
-
-        LDY #$000A
-        LDX #$0000
-.loop_bottom
-        LDA $7E368A,x
-        AND #$E3FF
-        ORA #$1400
-        STA $7E368A,x ;} Set tilemap palette indices at $7E:368A..93 to 5 (bottom of MAP)
-        INX : INX
-        DEY : DEY
-        BNE .loop_bottom
-        PLP
-        RTS
-
-func_objective_screen:
-        STZ $B1      ; BG1 X scroll = 0
-        STZ $B3      ; BG1 Y scroll = 0
-        JSR draw_completed_objectives_sprites
-        JSR $A505    ; Checks for L or R input during pause screens
-        JSR $A5B7    ; Checks for start input during pause screen
-        LDA !pause_screen_mode_obj ;\
-        STA !pause_screen_mode     ;} Pause screen mode = objective screen
-        RTS
-
-func_map2obj_fading_out:
-        JSL $82BB30  ; Display map elevator destinations
-        JSR $B9C8    ; Map screen - draw Samus position indicator
-        JSL $82B672  ; Draw map icons
-        JSR $A56D    ; Updates the flashing buttons when you change pause screens
-        JSL $808924  ; Handle fading out
-        SEP #$20
-        LDA $51      ;\
-        CMP #$80     ;} If not finished fading out: return
-        BNE .end     ;/
-        JSL $80834B  ; Enable NMI
-        REP #$20
-        STZ $0723    ; Screen fade delay = 0
-        STZ $0725    ; Screen fade counter = 0
-        INC !pause_index    ; Pause index = 6 (equipment screen to map screen - load map screen)
+print "nb_killed_bosses: ", pc
+nb_killed_bosses:
+        ;; return number of killed bosses in X
+        ldx #$0000
+.kraid
+        jsr kraid_is_dead
+        bcc .phantoon
+	inx
+.phantoon
+        jsr phantoon_is_dead
+        bcc .draygon
+	inx
+.draygon
+        jsr draygon_is_dead
+        bcc .ridley
+	inx
+.ridley
+        jsr ridley_is_dead
+        bcc .end
+        inx
 .end
-        RTS
+        rts
 
-func_map2obj_load_obj:
-        REP #$30
-        ;; backup map's scroll
-        LDA $B1
-        STA $BD  ;} BG4 X scroll = [BG1 X scroll]
-        LDA $B3
-        STA $BF  ;} BG4 Y scroll = [BG1 Y scroll]
-        ;; no scroll
-        STZ $B1      ; BG1 X scroll = 0
-        STZ $B3      ; BG1 Y scroll = 0
-        JSR transfert_objective_bg1  ; objective screen - transfer BG1 tilemap
-        JSR draw_completed_objectives_sprites
-        LDA !pause_screen_mode_obj   ;\
-        STA !pause_screen_mode       ;} Pause screen mode = objective screen
-        JSR $A615    ; Set pause screen button label palettes
-        STZ $073F    ; $073F = 0
-        LDA $C10C    ;\
-        STA $072B    ;} $072B = Fh
-        LDA #$0001   ;\
-        STA $0723    ;} Screen fade delay = 1
-        STA $0725    ; Screen fade counter = 1
-        INC !pause_index    ; Pause index = B (map screen to objective screen - fading in)
-        RTS
-
-func_map2obj_fading_in:
-        JSR draw_completed_objectives_sprites
-        LDA !pause_screen_mode_obj   ;\
-        STA !pause_screen_mode       ;} Pause screen mode = objective screen
-        JSL $80894D  ; Handle fading in
-        SEP #$20
-        LDA $51      ;\
-        CMP #$0F     ;} If not finished fading in: return
-        BNE .end     ;/
-        REP #$20
-        STZ $0723    ; Screen fade delay = 0
-        STZ $0725    ; Screen fade counter = 0
-        LDA !pause_screen_button_obj
-        STA !pause_screen_button_mode
-        LDA !pause_index_objective_screen ; index = objective
-        STA !pause_index    ;/
+print "nb_killed_minibosses: ", pc
+nb_killed_minibosses:
+        ;; return number of killed minibosses in X
+        ldx #$0000
+.spore_spawn
+        jsr spore_spawn_is_dead
+        bcc .botwoon
+	inx
+.botwoon
+        jsr botwoon_is_dead
+        bcc .crocomire
+	inx
+.crocomire
+        jsr crocomire_is_dead
+        bcc .golden_torizo
+	inx
+.golden_torizo
+        jsr golden_torizo_is_dead
+        bcc .end
+        inx
 .end
-        RTS
+        rts
 
-func_obj2map_fading_out:
-        ;; fade out to map
-        JSR draw_completed_objectives_sprites
-        JSR $A56D    ; Updates the flashing buttons when you change pause screens
-        JSL $808924  ; Handle fading out
-        SEP #$20
-        LDA $51      ;\
-        CMP #$80     ;} If not finished fading out: return
-        BNE .end     ;/
-        JSL $80834B  ; Enable NMI
-        REP #$20
-        STZ $0723    ; Screen fade delay = 0
-        STZ $0725    ; Screen fade counter = 0
-        INC !pause_index    ; Pause index = D (obj screen to map screen - load map screen)
-.end
-        RTS
+print "One boss is killed: ", pc
+one_boss_is_killed:
+	phx
+        jsr nb_killed_bosses
+	;; cpx set carry if greater or equal
+        cpx #$0001
+        plx
+        rts
+
+print "Two bosses are killed: ", pc
+two_bosses_are_killed:
+	phx
+        jsr nb_killed_bosses
+        cpx #$0002
+        plx
+        rts
+
+print "Three bosses are killed: ", pc
+three_bosses_are_killed:
+	phx
+        jsr nb_killed_bosses
+        cpx #$0003
+        plx
+        rts
+
+print "One miniboss is killed: ", pc
+one_miniboss_is_killed:
+	phx
+        jsr nb_killed_minibosses
+	;; cpx set carry if greater or equal
+        cpx #$0001
+        plx
+        rts
+
+print "Two minibosses are killed: ", pc
+two_minibosses_are_killed:
+	phx
+        jsr nb_killed_minibosses
+        cpx #$0002
+        plx
+        rts
+
+print "Three minibosses are killed: ", pc
+three_minibosses_are_killed:
+	phx
+        jsr nb_killed_minibosses
+        cpx #$0003
+        plx
+        rts
+
+print "End of objectives: ", pc
 
 ;;; seed display patch start
 print "Before seed display ($82fb6c): ", pc
@@ -695,6 +654,135 @@ draw_spritemap:
 
         PLB
         PLP
+        RTS
+
+;;; new pointers list
+new_pause_actions_func_list:
+        dw $9120                ; map
+        dw $9142                ; equipment
+        dw $9156, $91AB, $9231  ; map2equip
+        dw $9186, $91D7, $9200  ; equip2map
+        dw func_objective_screen
+        dw func_map2obj_fading_out, func_map2obj_load_obj, func_map2obj_fading_in
+        dw func_obj2map_fading_out, $91D7, $9200
+
+new_pause_palettes_func_list:
+        dw $A796, $A6DF, $A628, update_palette_objective_screen
+
+update_palette_objective_screen:
+        PHP
+        REP #$30
+        jsr set_bg2_objective_screen
+        LDY #$000A
+        LDX #$0000
+.loop_top
+        LDA $7E364A,x
+        AND #$E3FF
+        ORA #$1400
+        STA $7E364A,x ;} Set tilemap palette indices at $7E:364A..53 to 5 (top of MAP)
+        INX : INX
+        DEY : DEY
+        BNE .loop_top
+
+        LDY #$000A
+        LDX #$0000
+.loop_bottom
+        LDA $7E368A,x
+        AND #$E3FF
+        ORA #$1400
+        STA $7E368A,x ;} Set tilemap palette indices at $7E:368A..93 to 5 (bottom of MAP)
+        INX : INX
+        DEY : DEY
+        BNE .loop_bottom
+        PLP
+        RTS
+
+func_objective_screen:
+        STZ $B1      ; BG1 X scroll = 0
+        STZ $B3      ; BG1 Y scroll = 0
+        JSR draw_completed_objectives_sprites
+        JSR $A505    ; Checks for L or R input during pause screens
+        JSR $A5B7    ; Checks for start input during pause screen
+        LDA !pause_screen_mode_obj ;\
+        STA !pause_screen_mode     ;} Pause screen mode = objective screen
+        RTS
+
+func_map2obj_fading_out:
+        JSL $82BB30  ; Display map elevator destinations
+        JSR $B9C8    ; Map screen - draw Samus position indicator
+        JSL $82B672  ; Draw map icons
+        JSR $A56D    ; Updates the flashing buttons when you change pause screens
+        JSL $808924  ; Handle fading out
+        SEP #$20
+        LDA $51      ;\
+        CMP #$80     ;} If not finished fading out: return
+        BNE .end     ;/
+        JSL $80834B  ; Enable NMI
+        REP #$20
+        STZ $0723    ; Screen fade delay = 0
+        STZ $0725    ; Screen fade counter = 0
+        INC !pause_index    ; Pause index = 6 (equipment screen to map screen - load map screen)
+.end
+        RTS
+
+func_map2obj_load_obj:
+        REP #$30
+        ;; backup map's scroll
+        LDA $B1
+        STA $BD  ;} BG4 X scroll = [BG1 X scroll]
+        LDA $B3
+        STA $BF  ;} BG4 Y scroll = [BG1 Y scroll]
+        ;; no scroll
+        STZ $B1      ; BG1 X scroll = 0
+        STZ $B3      ; BG1 Y scroll = 0
+        JSR transfert_objective_bg1  ; objective screen - transfer BG1 tilemap
+        JSR draw_completed_objectives_sprites
+        LDA !pause_screen_mode_obj   ;\
+        STA !pause_screen_mode       ;} Pause screen mode = objective screen
+        JSR $A615    ; Set pause screen button label palettes
+        STZ $073F    ; $073F = 0
+        LDA $C10C    ;\
+        STA $072B    ;} $072B = Fh
+        LDA #$0001   ;\
+        STA $0723    ;} Screen fade delay = 1
+        STA $0725    ; Screen fade counter = 1
+        INC !pause_index    ; Pause index = B (map screen to objective screen - fading in)
+        RTS
+
+func_map2obj_fading_in:
+        JSR draw_completed_objectives_sprites
+        LDA !pause_screen_mode_obj   ;\
+        STA !pause_screen_mode       ;} Pause screen mode = objective screen
+        JSL $80894D  ; Handle fading in
+        SEP #$20
+        LDA $51      ;\
+        CMP #$0F     ;} If not finished fading in: return
+        BNE .end     ;/
+        REP #$20
+        STZ $0723    ; Screen fade delay = 0
+        STZ $0725    ; Screen fade counter = 0
+        LDA !pause_screen_button_obj
+        STA !pause_screen_button_mode
+        LDA !pause_index_objective_screen ; index = objective
+        STA !pause_index    ;/
+.end
+        RTS
+
+func_obj2map_fading_out:
+        ;; fade out to map
+        JSR draw_completed_objectives_sprites
+        JSR $A56D    ; Updates the flashing buttons when you change pause screens
+        JSL $808924  ; Handle fading out
+        SEP #$20
+        LDA $51      ;\
+        CMP #$80     ;} If not finished fading out: return
+        BNE .end     ;/
+        JSL $80834B  ; Enable NMI
+        REP #$20
+        STZ $0723    ; Screen fade delay = 0
+        STZ $0725    ; Screen fade counter = 0
+        INC !pause_index    ; Pause index = D (obj screen to map screen - load map screen)
+.end
         RTS
 
 print ""

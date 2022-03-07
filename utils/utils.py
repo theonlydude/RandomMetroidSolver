@@ -464,7 +464,7 @@ def getRandomizerDefaultParameters():
     defaultParams['minorQty'] = "100"
     defaultParams['energyQty'] = "vanilla"
     defaultParams['energyQtyMultiSelect'] = defaultMultiValues['energyQty']
-    defaultParams['objective'] = ["kill G4"]
+    defaultParams['objective'] = ["kill all G4"]
     defaultParams['objectiveMultiSelect'] = defaultMultiValues['objective']
     defaultParams['areaRandomization'] = "off"
     defaultParams['areaLayout'] = "off"

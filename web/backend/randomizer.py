@@ -76,6 +76,8 @@ class Randomizer(object):
 
         # objectives self exclusions
         objectivesExclusions = Objectives.getExclusions()
+        objectivesTypes = Objectives.getObjectivesTypes()
+        objectivesSort = Objectives.getObjectivesSort()
 
         # check if we have a guid in the url
         url = self.request.env.request_uri.split('/')
@@ -116,7 +118,8 @@ class Randomizer(object):
         return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                     randoPresets=randoPresets, tourRandoPresets=tourRandoPresets, randoPresetsDesc=randoPresetsDesc,
                     startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues,
-                    maxsize=sys.maxsize, displayNames=displayNames, objectivesExclusions=objectivesExclusions)
+                    maxsize=sys.maxsize, displayNames=displayNames, objectivesExclusions=objectivesExclusions,
+                    objectivesTypes=objectivesTypes, objectivesSort=objectivesSort)
 
     def initRandomizerSession(self):
         if self.session.randomizer is None:

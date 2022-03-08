@@ -644,6 +644,7 @@ function randomizeObjective(evt, takeBackup=true) {
 
         // restore previous value
         $("#objectiveMultiSelect").val(objectiveBackup).trigger("chosen:updated");
+        removed_objectives = [];
 
         // handle exclusions for currently selected values
         var selectedArray = get_selected_objectives();

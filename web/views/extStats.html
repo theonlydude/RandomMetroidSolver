@@ -155,9 +155,8 @@ function startTheTour(step=-1) {
 
 function drawDifficultiesHistogram() {
 {{
-  if difficulties == None or len(difficulties) == 0:
+  if difficulties is None or len(difficulties) == 0:
     response.write("  return;", escape=False)
-    pass
   else:
 }}
     // Define the chart to be drawn.
@@ -186,9 +185,8 @@ function drawDifficultiesHistogram() {
 
 function drawAvgLocsHistogram() {
 {{
-  if solverStats == None or "avgLocs" not in solverStats:
+  if solverStats is None or "avgLocs" not in solverStats:
     response.write("  return;", escape=False)
-    pass
   else:
 }}
     // Define the chart to be drawn.
@@ -212,9 +210,8 @@ function drawAvgLocsHistogram() {
 
 function drawOpennessHistogram() {
 {{
-  if solverStats == None or "open" not in solverStats:
+  if solverStats is None or "open" not in solverStats:
     response.write("  return;", escape=False)
-    pass
   else:
 }}
     // Define the chart to be drawn.

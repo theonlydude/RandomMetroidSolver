@@ -538,8 +538,8 @@ class WS_item_remove(WS):
         if self.itemName == None:
             if self.vars.count != None:
                 self.count = getInt(self.caller.request, "count", True)
-                if self.count > 105 or self.count < 1:
-                    raiseHttp(400, "Wrong value for count, must be in [1-105] ", True)
+                if self.count > 109 or self.count < 1:
+                    raiseHttp(400, "Wrong value for count, must be in [1-109] ", True)
             else:
                 self.count = 1
         else:

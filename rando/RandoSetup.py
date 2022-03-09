@@ -318,7 +318,8 @@ class RandoSetup(object):
                     # see if we can beat bosses with this equipment (infinity as max diff for a "onlyBossesLeft" type check
                     beatableBosses = sorted([loc.BossItemType for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if loc.isBoss()])
                     self.log.debug("checkPool. beatableBosses="+str(beatableBosses))
-                    ret = set(mandatoryBosses).issubset(set(beatableBosses))
+                    self.log.debug("checkPool. mandatoryBosses: {}".format(mandatoryBosses))
+                    ret = set(mandatoryBosses).issubset(set(beatableBosses)) and Objectives.checkLimitObjectives(beatableBosses)
                     if ret:
                         # check that we can then kill mother brain
                         self.sm.addItems(Bosses.Golden4() + Bosses.miniBosses())

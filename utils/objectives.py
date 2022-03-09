@@ -10,19 +10,15 @@ class Synonyms(object):
     killSynonyms = [
         "defeat",
         "massacre",
-        "slaughter",
         "slay",
         "wipe out",
-        "eradicate",
         "erase",
         "finish",
         "destroy",
         "wreck",
         "smash",
         "crush",
-        "end",
-        "eliminate",
-        "terminate"
+        "end"
     ]
     alreadyUsed = []
     @staticmethod
@@ -74,6 +70,9 @@ class Goal(object):
         assert len(out) <= 28, "Goal text '{}' is too long: {}, max 28".format(out, len(out))
         return out
 
+    def isLimit(self):
+        return "type" in self.exclusion
+
 class Objectives(object):
     objectivesList = snes_to_pc(0x82f983)
     activeGoals = []
@@ -92,17 +91,17 @@ class Objectives(object):
         "kill one G4": Goal("kill one G4", True, "other", lambda sm: Bosses.xBossesDead(sm, 1), 0xFA54,
                             {"list": ["kill kraid", "kill phantoon", "kill draygon", "kill ridley",
                                       "kill all G4", "kill two G4", "kill three G4"]},
-                            ["Kraid", "Phantoon", "Draygon", "Ridley"], "{} one golden4", True, False),
+                            [], "{} one golden4", True, False),
         "kill two G4": Goal("kill two G4", True, "other", lambda sm: Bosses.xBossesDead(sm, 2), 0xFA5D,
                             {"list": ["kill all G4", "kill one G4", "kill three G4"],
                              "type": "boss",
                              "limit": 1},
-                            ["Kraid", "Phantoon", "Draygon", "Ridley"], "{} two golden4", True, False),
+                            [], "{} two golden4", True, False),
         "kill three G4": Goal("kill three G4", True, "other", lambda sm: Bosses.xBossesDead(sm, 3), 0xFA66,
                               {"list": ["kill all G4", "kill one G4", "kill two G4"],
                                "type": "boss",
                                "limit": 2},
-                              ["Kraid", "Phantoon", "Draygon", "Ridley"], "{} three golden4", True, False),
+                              [], "{} three golden4", True, False),
         "kill all G4": Goal("kill all G4", True, "other", lambda sm: Bosses.allBossesDead(sm), 0xF9AF,
                             {"list": ["kill kraid", "kill phantoon", "kill draygon", "kill ridley", "kill one G4", "kill two G4", "kill three G4"]},
                             ["Kraid", "Phantoon", "Draygon", "Ridley"],
@@ -118,17 +117,17 @@ class Objectives(object):
         "kill one miniboss": Goal("kill one miniboss", True, "other", lambda sm: Bosses.xMiniBossesDead(sm, 1), 0xFA6F,
                                   {"list": ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo",
                                             "kill all mini bosses", "kill two minibosses", "kill three minibosses"]},
-                                  ["SporeSpawn", "Botwoon", "Crocomire", "GoldenTorizo"], "{} one miniboss", True, False),
+                                  [], "{} one miniboss", True, False),
         "kill two minibosses": Goal("kill two minibosses", True, "other", lambda sm: Bosses.xMiniBossesDead(sm, 2), 0xFA78,
                                     {"list": ["kill all mini bosses", "kill one miniboss", "kill three minibosses"],
                                      "type": "miniboss",
                                      "limit": 1},
-                                    ["SporeSpawn", "Botwoon", "Crocomire", "GoldenTorizo"], "{} two minibosses", True, False),
+                                    [], "{} two minibosses", True, False),
         "kill three minibosses": Goal("kill three minibosses", True, "other", lambda sm: Bosses.xMiniBossesDead(sm, 3), 0xFA81,
                                       {"list": ["kill all mini bosses", "kill one miniboss", "kill two minibosses"],
                                        "type": "miniboss",
                                        "limit": 2},
-                                      ["SporeSpawn", "Botwoon", "Crocomire", "GoldenTorizo"], "{} three minibosses", True, False),
+                                      [], "{} three minibosses", True, False),
         "kill all mini bosses": Goal("kill all mini bosses", True, "other", lambda sm: Bosses.allMiniBossesDead(sm), 0xF9E5,
                                      {"list": ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo",
                                                "kill one miniboss", "kill two minibosses", "kill three minibosses"]},
@@ -284,6 +283,19 @@ class Objectives(object):
     def getMandatoryBosses():
         r = [goal.items for goal in Objectives.activeGoals]
         return [item for items in r for item in items]
+
+    @staticmethod
+    def checkLimitObjectives(beatableBosses):
+        # check that there's enough bosses/minibosses for limit objectives
+        from logic.smboolmanager import SMBoolManager
+        smbm = SMBoolManager()
+        smbm.addItems(beatableBosses)
+        for goal in Objectives.activeGoals:
+            if not goal.isLimit():
+                continue
+            if not goal.clearFunc(smbm):
+                return False
+        return True
 
     # call from solver
     @staticmethod

@@ -860,6 +860,7 @@ if not args.no_layout:
         3: {"flipX": True,  "flipY": True},
         5: {"flipX": True,  "flipY": True},
         6: {"flipX": True,  "flipY": True},
+        7: {"flipX": True,  "flipY": True},
         18: {"flipX": True,  "flipY": True},
         20: {"flipX": True,  "flipY": True},
         21: {"flipX": True,  "flipY": True},

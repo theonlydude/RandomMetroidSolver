@@ -36,8 +36,6 @@ class RomPatcher:
             'seed_display.ips',
             # door ASM to wake zebes early in blue brinstar
             'wake_zebes.ips',
-            # door ASM to skip G4 cutscene when all 4 bosses are dead
-            'g4_skip.ips',
             # faster MB cutscene transitions
             'Mother_Brain_Cutscene_Edits',
             # "Balanced" suit mode
@@ -54,8 +52,8 @@ class RomPatcher:
             'varia_logo.ips',
             # new nothing plm
             'nothing_item_plm.ips',
-            # display objectives in pause manu
-            'objectives_pause.ips'
+            # objectives management and display
+            'objectives.ips'
         ],
         # VARIA tweaks
         'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],

@@ -71,6 +71,22 @@ scav_order:
 org $8ff700
 	rts
 
+;;; ; Room $99BD: Green Pirates Shaft, 3rd door, leading to Tourian
+org $838c5c
+        dw open_g4              ; add door asm ptr
+
+org $8ffe00
+open_g4:
+	;; check objectives
+	jsl objectives_completed
+	bcc .end
+	;; open g4
+        lda $7ed820
+        ora #$0400              ; set event Ah - entrance to Tourian is unlocked
+        sta $7ed820
+.end:
+        rts
+
 ;;; free space after tracking.ips and seed_display.ips
 org $82f983
 

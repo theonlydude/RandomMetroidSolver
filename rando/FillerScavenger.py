@@ -3,7 +3,7 @@ import random, sys, copy, logging, time
 from rando.Filler import Filler
 from rando.ItemLocContainer import getLocListStr
 from solver.randoSolver import RandoSolver
-from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity, Knows
+from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
 from logic.smbool import SMBool
 
 class ScavengerSolver(RandoSolver):
@@ -89,7 +89,7 @@ class ScavengerSolver(RandoSolver):
         if not any(loc.Name == "Space Jump" for loc in scavAvailable) or not any(loc.Name == "Plasma Beam" for loc in scavAvailable):
             return scavAvailable
         # check that Draygon CF is known
-        k = Knows.DraygonRoomCrystalFlash
+        k = self.smbm.knowsDraygonRoomCrystalFlash()
         if k.bool == False or k.difficulty > self.maxDiff:
             return scavAvailable
         self.log.debug("Space/Plasma special. Scav list: "+getLocListStr(scavAvailable))
@@ -102,7 +102,7 @@ class ScavengerSolver(RandoSolver):
         path = self.areaGraph.accessPath(self.smbm, "Draygon Room Bottom", "Toilet Top", self.maxDiff)
         self.log.debug("Space/Plasma special. Path:" + str(path))
         isRequired = (path is None)
-        self.smbm.changeKnows("DraygonRoomCrystalFlash", k)
+        self.smbm.restoreKnows('DraygonRoomCrystalFlash')
         self.areaGraph.resetCache()
         if isRequired == True:
             self.log.debug("Space/Plasma special. Filtering out plasma")

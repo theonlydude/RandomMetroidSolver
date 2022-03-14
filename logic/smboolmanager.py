@@ -149,18 +149,29 @@ class SMBoolManager(object):
         # for each knows we have a function knowsKnows (ex: knowsAlcatrazEscape()) which
         # take no parameter
         for knows in Knows.__dict__:
-            self.createKnowsFunction(knows)
+            if isKnows(knows):
+                self._createKnowsFunction(knows)
 
-    def createKnowsFunction(self, knows):
-        if isKnows(knows):
-            setattr(self, 'knows'+knows, lambda knows=knows: SMBool(Knows.__dict__[knows].bool,
-                                                                    Knows.__dict__[knows].difficulty,
-                                                                    knows=[knows]))
+    def _setKnowsFunction(self, knows, k):
+        setattr(self, 'knows'+knows, lambda: SMBool(k.bool, k.difficulty,
+                                                    knows=[knows]))
+
+    def _createKnowsFunction(self, knows):
+        self._setKnowsFunction(knows, Knows.__dict__[knows])
+
     def changeKnows(self, knows, newVal):
         if isKnows(knows):
-            setattr(Knows, knows, newVal)
-            self.createKnowsFunction(knows)
+            self._setKnowsFunction(knows, newVal)
             Cache.reset()
+        else:
+            raise ValueError("Invalid knows "+str(knows))
+
+    def restoreKnows(self, knows):
+        if isKnows(knows):
+            self._createKnowsFunction(knows)
+            Cache.reset()
+        else:
+            raise ValueError("Invalid knows "+str(knows))
 
     def isCountItem(self, item):
         return item in self.countItems

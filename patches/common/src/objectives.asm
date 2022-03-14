@@ -213,6 +213,7 @@ shaktool_cleared_path:
 print "Scavenger hunt completed: ", pc
 scavenger_hunt_completed:
         ;; TODO::to be replaced with an event
+        phx
         lda !scav_idx : asl : tax
         lda.l scav_order,x
         and #$00ff
@@ -223,6 +224,7 @@ scavenger_hunt_completed:
 .scav_not_completed
         clc
 .end
+        plx
 	rts
 
 print "Nothing objective: ", pc

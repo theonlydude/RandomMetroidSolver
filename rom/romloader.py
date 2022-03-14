@@ -104,7 +104,7 @@ class RomLoader(object):
             RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
 
         # objectives
-        hasObjectives = self.hasPatch('objectives_pause')
+        hasObjectives = self.hasPatch('objectives')
 
         return (isArea, isBoss, isEscape, hasObjectives)
 

@@ -102,7 +102,7 @@ class RomReader:
         'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'desc': "Beam doors"},
         'red_doors': {'address':0x20560, 'value':0xbd, 'desc': "Red doors open with one Missile and do not react to Super"},
         'rotation': {'address': 0x44DF, 'value': 0xD0, 'desc': "Rotation hack"},
-        'objectives_pause': {'address': 0x12822, 'value': 0x08, 'desc': "Objectives displayed in pause"},
+        'objectives': {'address': 0x12822, 'value': 0x08, 'desc': "Objectives displayed in pause"},
         'Escape_Scavenger': {'address': 0x10F5FE, 'value': 0x1, 'desc': "Trigger escape at end of Scavenger Hunt"}
     }
 
@@ -185,7 +185,7 @@ class RomReader:
         'nothing_item_plm': {'address': 0x23AD1, 'value': 0x24, 'vanillaValue': 0xb9},
         'vanilla_bugfixes': {'address': 0x33704, 'value': 0xF0, 'vanillaValue': 0xD0},
         'widescreen': {'address': 0xD8, 'value': 0x40, 'vanillaValue': 0x10},
-        'objectives_pause': {'address': 0x12822, 'value': 0x08, 'vanillaValue': 0x14}
+        'objectives': {'address': 0x12822, 'value': 0x08, 'vanillaValue': 0x14}
     }
 
     @staticmethod

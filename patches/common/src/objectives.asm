@@ -1,51 +1,44 @@
-;;; Add a new menu in pause to display objectives to finish the seed
+;;; Objectives management and display
 ;;;
-;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
-;;; or a variant of xkas that supports arch directive
+;;; Checks objectives regularly, and set an event when done. The event
+;;; is used to unlock G4 (auto sink all statues). Statues will never
+;;; individually sink, even if you kill G4 bosses.
+;;; Alternatively (ROM option), escape will be automatically triggered
+;;; when all objectives are completed.
+;;;
+;;; Add a new menu in pause to display objectives to finish the seed.
+;;;
+;;; compile with asar (https://github.com/RPGHacker/asar)
 
 lorom
 arch snes.cpu
 
-;;; pause state
-!pause_index = $0727
+;;; TODO hijack drops apparition for all bosses and disable elevator music queue if
+;;;      objectives are completed and escape is auto-triggered
 
-;;; pause index values
-!pause_index_map_screen = #$0000
-!pause_index_equipment_screen = #$0001
-!pause_index_map2equip_fading_out = #$0002
-!pause_index_map2equip_load_equip = #$0003
-!pause_index_map2equip_fading_in = #$0004
-!pause_index_equip2map_fading_out = #$0005
-!pause_index_equip2map_load_map = #$0006
-!pause_index_equip2map_fading_in = #$0007
-;;; new screen:
-!pause_index_objective_screen = #$0008
-!pause_index_map2obj_fading_out = #$0009
-!pause_index_map2obj_load_obj = #$000A
-!pause_index_map2obj_fading_in = #$000B
-!pause_index_obj2map_fading_out = #$000C
-!pause_index_obj2map_load_map = #$000D
-!pause_index_obj2map_fading_in = #$000E
+incsrc "event_list.asm"
 
+!timer = $05b8
+!obj_check_period = #$0020	; unit:frames, works only in powers of 2
 
-;;; pause screen button label mode
-!pause_screen_button_mode = $0753
-!pause_screen_button_map = #$0000     ; Map screen (SAMUS on the right, OBJ on the left)
-!pause_screen_button_nothing = #$0001 ; Unpausing (nothing)
-!pause_screen_button_equip = #$0002   ; Equipment screen (MAP on the left)
-;;; new button mode:
-!pause_screen_button_obj = #$0003     ; Objective screen (MAP on the right)
+;;; external routines
+!song_routine = $808fc1
+!fix_timer_gfx = $a1f2c0	; in new_game.asm (common routines section)
+!escape_setup = $8ff500		; in rando_escape.asm
 
+;;; custom music patch detection for escape music trigger
+!custom_music_marker = $8fe86b
+!custom_music_id = #$caca
+!custom_music_escape = $8fe871
 
-;;; Pause screen mode
-!pause_screen_mode = $0763
+org $A1F5FE
+;;; if non-zero trigger escape as soon as objectives are completed
+escape_option:
+	dw $0000
 
-;;; pause screen mode values
-!pause_screen_mode_map = #$0000
-!pause_screen_mode_equip = #$0001
-;;; new mode:
-!pause_screen_mode_obj = #$0002
-
+;;; hijack main ASM call to check objectives regularly
+org $828BA8
+	jsl periodic_obj_check
 
 ;;; replace pause mode code pointers list
 org $82910A
@@ -59,39 +52,17 @@ org $82A505
 org $82A61D
         jsr (new_pause_palettes_func_list,x)
 
-;;; vanilla function to check an event
-org $808233
-check_event:
-
-;;; scavenger hunt order in ROM
-org $A1F5D8
-scav_order:
-
 ;;; default "ship refill" if we have fast tourian but not area rando
 org $8ff700
 	rts
-
-;;; ; Room $99BD: Green Pirates Shaft, 3rd door, leading to Tourian
-org $838c5c
-        dw open_g4              ; add door asm ptr
-
-org $8ffe00
-open_g4:
-	;; check objectives
-	jsl objectives_completed
-	bcc .end
-	;; open g4
-        lda $7ed820
-        ora #$0400              ; set event Ah - entrance to Tourian is unlocked
-        sta $7ed820
-.end:
-        rts
 
 ;;; free space after tracking.ips and seed_display.ips
 org $82f983
 
 ;;; seed objectives checker functions pointers, max 5, list ends with $0000
+!max_objectives = #$0005
 print "objectives checker functions: ", pc
+objective_funcs:
 first_objective_func:
         dw kraid_is_dead
 second_objective_func:
@@ -107,30 +78,18 @@ fith_objective_func:
 ;;; objectives checker functions, set carry if objective is completed
 print ""
 
-;;; load boss dead event to check in A
-print "Kraid is dead: ", pc
-kraid_is_dead:
-        lda #$0048
-        jsl check_event
-        rts
+;;; helper macro to autodef simple event checker functions
+macro eventChecker(func_name, event)
+print "<func_name>: ", pc
+<func_name>:
+	lda <event> : jsl !check_event
+	rts
+endmacro
 
-print "Phantoon is dead: ", pc
-phantoon_is_dead:
-        lda #$0058
-        jsl check_event
-        rts
-
-print "Draygon is dead: ", pc
-draygon_is_dead:
-        lda #$0060
-        jsl check_event
-        rts
-
-print "Ridley is dead: ", pc
-ridley_is_dead:
-        lda #$0050
-        jsl check_event
-        rts
+%eventChecker(kraid_is_dead, !kraid_event)
+%eventChecker(phantoon_is_dead, !phantoon_event)
+%eventChecker(draygon_is_dead, !draygon_event)
+%eventChecker(ridley_is_dead, !ridley_event)
 
 print "All bosses dead: ", pc
 all_g4_dead:
@@ -146,47 +105,10 @@ all_g4_dead:
 .no
         rts
 
-; $7E:D828..2F: Boss bits. Indexed by area
-;     1: Area boss (Kraid, Phantoon, Draygon, both Ridleys)
-;     2: Area mini-boss (Spore Spawn, Botwoon, Crocomire, Mother Brain)
-;     4: Area torizo (Bomb Torizo, Golden Torizo)
-; 
-; $079F: Area index
-;     0: Crateria
-;     1: Brinstar
-;     2: Norfair
-;     3: Wrecked Ship
-;     4: Maridia
-;     5: Tourian
-;     6: Ceres
-;     7: Debug
-
-; event bytes start at $7ED820
-; event code is: (byte index << 3) + ln(boss bit), with byte index == area index + 8
-
-print "Spore Spawn is dead: ", pc
-spore_spawn_is_dead:
-        lda #$0049
-        jsl check_event
-        rts
-
-print "Botwoon is dead: ", pc
-botwoon_is_dead:
-        lda #$0061
-        jsl check_event
-        rts
-
-print "Crocomire is dead: ", pc
-crocomire_is_dead:
-        lda #$0051
-        jsl check_event
-        rts
-
-print "Golden Torizo is dead: ", pc
-golden_torizo_is_dead:
-        lda #$0052
-        jsl check_event
-        rts
+%eventChecker(spore_spawn_is_dead, !spospo_event)
+%eventChecker(botwoon_is_dead, !botwoon_event)
+%eventChecker(crocomire_is_dead, !croc_event)
+%eventChecker(golden_torizo_is_dead, !GT_event)
 
 print "All mini bosses dead: ", pc
 all_mini_bosses_dead:
@@ -202,30 +124,8 @@ all_mini_bosses_dead:
 .no
         rts
 
-print "Shaktool cleared the path: ", pc
-shaktool_cleared_path:
-        lda #$000D
-        jsl check_event
-        rts
-
-!scav_idx = $7ed86a
-!hunt_over_hud = #$0011
-print "Scavenger hunt completed: ", pc
-scavenger_hunt_completed:
-        ;; TODO::to be replaced with an event
-        phx
-        lda !scav_idx : asl : tax
-        lda.l scav_order,x
-        and #$00ff
-        cmp !hunt_over_hud
-        bne .scav_not_completed
-        sec
-        bra .end
-.scav_not_completed
-        clc
-.end
-        plx
-	rts
+%eventChecker(shaktool_cleared_path, !shaktool_cleared_path)
+%eventChecker(scavenger_hunt_completed, !hunt_over_event)
 
 print "Nothing objective: ", pc
 nothing_objective:
@@ -329,32 +229,162 @@ three_minibosses_are_killed:
         rts
 
 print "End of objectives: ", pc
-
 ;;; seed display patch start
-print "Before seed display ($82fb6c): ", pc
 warnpc $82fb6c
+
+;;; only sink the ground in G4 room if objectives are completed:
+org $878400			; Phantoon
+	dw alt_set_event
+
+org $878468			; Ridley
+	dw alt_set_event
+
+org $8784d0			; Kraid
+	dw alt_set_event
+
+org $878538			; Draygon
+	dw alt_set_event
+
+org $87d000
+;;; alternate instruction for statues objects:
+;;; set event in argument only if not in scavenger mode, or all scav locs collected
+alt_set_event:
+	lda !objectives_completed_event : jsl !check_event
+	bcc .end
+.set_event:
+	lda $0000,y : jsl !mark_event
+.end:
+	iny : iny
+	rts
 
 ;;; continue after InfoStr in seed_display.asm
 org $82FB6D
 
-;;; don't move, used by other patches: g4_skip, minimizer_tourian.
-;;; returns carry set if all objectives are completed, carry clear if not
+;;; set objectives_completed_event if objectives are completed
 objectives_completed:
         phx
         ldx #$0000
-.loop
-        lda.l first_objective_func, x
+.loop:
+        lda.l objective_funcs, x
         beq .objectives_ok      ; function not set
-        jsr (first_objective_func, x)
+        jsr (objective_funcs, x)
         bcc .end                ; objective not completed
         inx : inx
-        cpx #$000a              ; max five objective functions to check
+        cpx !max_objectives*2
         bne .loop
-.objectives_ok
-        sec
-.end
+.objectives_ok:
+        lda !objectives_completed_event : jsl !mark_event
+	lda.l escape_option : beq .end
+	jsr trigger_escape
+.end:
         plx
         rtl
+
+;;; checks for objectives periodically
+periodic_obj_check:
+	lda !timer : and !obj_check_period-1
+	cmp !obj_check_period-1 : bne .end
+	jsl objectives_completed
+.end:
+	JSL $8FE8BD		; hijacked code
+	rtl
+
+;;; copy-pasted from a PLM instruction
+clear_music_queue:
+	PHX
+	LDX #$000E
+	STZ $0619,x
+	STZ $0629,x
+	DEX
+	DEX
+	BPL $F6
+	PLX
+	LDA $0639
+	STA $063B
+	LDA #$0000
+	STA $063F
+	STA $063D
+	rts
+
+;;; copied from escape rooms setup asm
+room_earthquake:
+	LDA #$0018             ;\
+	STA $183E              ;} Earthquake type = BG1, BG2 and enemies; 3 pixel displacement, horizontal
+	LDA #$FFFF
+	STA $1840
+	rts
+
+trigger_escape:
+	phx : phy
+	jsl !escape_setup
+	jsr room_earthquake	; could not be called by setup asm since not in escape yet
+	; load timer graphics
+	lda #$000f : jsl $90f084
+	jsl !fix_timer_gfx
+	lda #$0002 : sta $0943	 ; set timer state to 2 (MB timer start)
+	jsr clear_music_queue
+	jsr trigger_escape_music
+	lda !escape_event : jsl !mark_event ; timebomb set event
+	ply : plx
+	rts
+
+trigger_escape_music:
+	lda !custom_music_marker
+	cmp !custom_music_id : beq .custom_music
+	lda #$ff24 : jsl !song_routine ; load boss 1 music data
+	lda #$0007 : jsl !song_routine ; load music track 2
+	bra .end
+.custom_music:
+	lda !custom_music_escape : ora #$ff00 : jsl !song_routine
+	lda !custom_music_escape+1 : and #$00ff : jsl !song_routine
+.end:
+	rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;
+;;; pause menu objectives display
+;;;
+
+;;; pause state
+!pause_index = $0727
+
+;;; pause index values
+!pause_index_map_screen = #$0000
+!pause_index_equipment_screen = #$0001
+!pause_index_map2equip_fading_out = #$0002
+!pause_index_map2equip_load_equip = #$0003
+!pause_index_map2equip_fading_in = #$0004
+!pause_index_equip2map_fading_out = #$0005
+!pause_index_equip2map_load_map = #$0006
+!pause_index_equip2map_fading_in = #$0007
+;;; new screen:
+!pause_index_objective_screen = #$0008
+!pause_index_map2obj_fading_out = #$0009
+!pause_index_map2obj_load_obj = #$000A
+!pause_index_map2obj_fading_in = #$000B
+!pause_index_obj2map_fading_out = #$000C
+!pause_index_obj2map_load_map = #$000D
+!pause_index_obj2map_fading_in = #$000E
+
+
+;;; pause screen button label mode
+!pause_screen_button_mode = $0753
+!pause_screen_button_map = #$0000     ; Map screen (SAMUS on the right, OBJ on the left)
+!pause_screen_button_nothing = #$0001 ; Unpausing (nothing)
+!pause_screen_button_equip = #$0002   ; Equipment screen (MAP on the left)
+;;; new button mode:
+!pause_screen_button_obj = #$0003     ; Objective screen (MAP on the right)
+
+;;; Pause screen mode
+!pause_screen_mode = $0763
+
+;;; pause screen mode values
+!pause_screen_mode_map = #$0000
+!pause_screen_mode_equip = #$0001
+;;; new mode:
+!pause_screen_mode_obj = #$0002
+
 
 !held_buttons = $05E1
 !l_button = #$0020

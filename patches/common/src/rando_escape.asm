@@ -6,9 +6,11 @@
 lorom
 arch snes.cpu
 
+incsrc "event_list.asm"
+
 ;;; carry set if escape flag on, carry clear if off
 macro checkEscape()
-    lda #$000e : jsl $808233
+    lda !escape_event : jsl !check_event
 endmacro
 
 ;;; see random_music.asm
@@ -225,7 +227,7 @@ escape_setup_l:
     cpx #$0008
     bcc -
     ;; open Maridia Tube
-    lda #$000b : jsl $8081fa
+    lda !maridia_tube_open : jsl !mark_event
 .end:
     rtl
 

@@ -34,23 +34,23 @@ class GraphBuilder(object):
         return AccessGraph(Logic.accessPoints, transitions, self.graphSettings.dotFile)
 
     # fills in escape transitions if escape rando is enabled
-    # scavEscape = None or (itemLocs, scavItemLocs) couple from filler
-    def escapeGraph(self, container, graph, maxDiff, scavEscape):
+    # escapeTrigger = None or (itemLocs, progItemlocs) couple from filler
+    def escapeGraph(self, container, graph, maxDiff, escapeTrigger):
         if not self.escapeRando:
             return True
         emptyContainer = copy.copy(container)
         emptyContainer.resetCollected(reassignItemLocs=True)
         dst = None
-        if scavEscape is None:
+        if escapeTrigger is None:
             possibleTargets, dst, path = self.getPossibleEscapeTargets(emptyContainer, graph, maxDiff)
             # update graph with escape transition
             graph.addTransition(escapeSource, dst)
         else:
-            possibleTargets, path = self.getScavengerEscape(emptyContainer, graph, maxDiff, scavEscape)
+            possibleTargets, path = self.getScavengerEscape(emptyContainer, graph, maxDiff, escapeTrigger)
             if path is None:
                 return False
         # get timer value
-        self.escapeTimer(graph, path, self.areaRando or scavEscape is not None)
+        self.escapeTimer(graph, path, self.areaRando or escapeTrigger is not None)
         self.log.debug("escapeGraph: ({}, {}) timer: {}".format(escapeSource, dst, graph.EscapeAttributes['Timer']))
         # animals
         GraphUtils.escapeAnimalsTransitions(graph, possibleTargets, dst)
@@ -80,9 +80,9 @@ class GraphBuilder(object):
         path = graph.accessPath(sm, dst, 'Landing Site', maxDiff)
         return (possibleTargets, dst, path)
 
-    def getScavengerEscape(self, emptyContainer, graph, maxDiff, scavEscape):
+    def getScavengerEscape(self, emptyContainer, graph, maxDiff, escapeTrigger):
         sm = emptyContainer.sm
-        itemLocs, lastScavItemLoc = scavEscape[0], scavEscape[1][-1]
+        itemLocs, lastScavItemLoc = escapeTrigger[0], escapeTrigger[1][-1]
         # collect all item/locations up until last scav
         for il in itemLocs:
             emptyContainer.collect(il)

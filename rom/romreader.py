@@ -103,7 +103,7 @@ class RomReader:
         'red_doors': {'address':0x20560, 'value':0xbd, 'desc': "Red doors open with one Missile and do not react to Super"},
         'rotation': {'address': 0x44DF, 'value': 0xD0, 'desc': "Rotation hack"},
         'objectives': {'address': 0x12822, 'value': 0x08, 'desc': "Objectives displayed in pause"},
-        'Escape_Scavenger': {'address': 0x10F5FE, 'value': 0x1, 'desc': "Trigger escape at end of Scavenger Hunt"}
+        'Escape_Trigger': {'address': 0x10F5FE, 'value': 0x1, 'desc': "Trigger escape when objectives are completed"}
     }
 
     # FIXME shouldn't be here

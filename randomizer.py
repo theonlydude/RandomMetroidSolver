@@ -179,9 +179,9 @@ if __name__ == "__main__":
     parser.add_argument('--scavRandomized',
                         help="For Scavenger split, decide whether mandatory major locs will have non-vanilla items",
                         dest='scavRandomized', nargs='?', const=True, default=False)
-    parser.add_argument('--scavEscape',
-                        help="For Scavenger split, decide whether escape sequence shall be triggered as soon as the hunt is over",
-                        dest='scavEscape', nargs='?', const=True, default=False)
+    parser.add_argument('--disableTourian',
+                        help="Decide whether escape sequence shall be triggered as soon as objectives are completed",
+                        dest='disableTourian', nargs='?', const=True, default=False)
     parser.add_argument('--suitsRestriction',
                         help="no suits in early game",
                         dest='suitsRestriction', nargs='?', const=True, default=False)
@@ -455,9 +455,10 @@ if __name__ == "__main__":
             forceArg('startLocation', "Landing Site", "Start Location forced to Landing Site because of Scavenger mode")
         if args.morphPlacement == 'late':
             forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
-        if args.scavEscape == True:
-            forceArg('escapeRando', True, "'Escape randomization' forced to on", webValue='on')
-            forceArg('noRemoveEscapeEnemies', True, "Enemies enabled during escape sequence", webArg='removeEscapeEnemies', webValue='off')
+    # use escape rando for auto escape trigger
+    if args.disableTourian == True:
+        forceArg('escapeRando', True, "'Escape randomization' forced to on", webValue='on')
+        forceArg('noRemoveEscapeEnemies', True, "Enemies enabled during escape sequence", webArg='removeEscapeEnemies', webValue='off')
     # random fill makes certain options unavailable
     if (progSpeed == 'speedrun' or progSpeed == 'basic') and args.majorsSplit != 'Scavenger':
         forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
@@ -508,27 +509,26 @@ if __name__ == "__main__":
     if args.patchOnly == False:
         print("SEED: " + str(seed))
 
-        objectivesManager = Objectives()
+        objectivesManager = Objectives(not args.disableTourian)
         addedObjectives = 0
         if args.majorsSplit == "Scavenger":
-            objectivesManager.setScavengerHunt(args.scavEscape)
+            objectivesManager.setScavengerHunt()
             addedObjectives = 1
 
-        if not (args.scavEscape and args.majorsSplit == "Scavenger"):
-            if args.objective:
-                maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
-                if "random" in args.objective:
-                    availableObjectives = args.objectiveList.replace('_', ' ').split(',') if args.objectiveList is not None else objectives
-                    nbObjectives = random.randint(1, min(maxActiveGoals, len(availableObjectives)))
-                    objectivesManager.setRandom(nbObjectives, availableObjectives)
-                else:
-                    if len(args.objective) > maxActiveGoals:
-                        args.objective = args.objective[0:maxActiveGoals]
-                    for goal in args.objective:
-                        objectivesManager.addGoal(goal)
-                objectivesManager.expandGoals()
+        if args.objective:
+            maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
+            if "random" in args.objective:
+                availableObjectives = args.objectiveList.replace('_', ' ').split(',') if args.objectiveList is not None else objectives
+                nbObjectives = random.randint(1, min(maxActiveGoals, len(availableObjectives)))
+                objectivesManager.setRandom(nbObjectives, availableObjectives)
             else:
-                objectivesManager.setVanilla()
+                if len(args.objective) > maxActiveGoals:
+                    args.objective = args.objective[0:maxActiveGoals]
+                for goal in args.objective:
+                    objectivesManager.addGoal(goal)
+            objectivesManager.expandGoals()
+        else:
+            objectivesManager.setVanilla()
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "doors": "normal" if not args.doorsColorsRando else "late" }
@@ -537,7 +537,8 @@ if __name__ == "__main__":
         scavNumLocs = int(args.scavNumLocs)
         if scavNumLocs == 0:
             scavNumLocs = random.randint(4,16)
-        restrictions["ScavengerParams"] = {'numLocs':scavNumLocs, 'vanillaItems':not args.scavRandomized, 'escape': args.scavEscape}
+        restrictions["ScavengerParams"] = {'numLocs':scavNumLocs, 'vanillaItems':not args.scavRandomized}
+    restrictions["EscapeTrigger"] = args.disableTourian
     seedCode = 'X'
     if majorsSplitRandom == False:
         if restrictions['MajorMinor'] == 'Full':
@@ -696,8 +697,8 @@ if __name__ == "__main__":
                     escapeAttr['patches'] = []
                     if args.noRemoveEscapeEnemies == True:
                         escapeAttr['patches'].append("Escape_Rando_Enable_Enemies")
-                    if args.majorsSplit == "Scavenger" and args.scavEscape == True:
-                        escapeAttr['patches'].append('Escape_Scavenger')
+                    if args.disableTourian == True:
+                        escapeAttr['patches'].append('Escape_Trigger')
                 if args.majorsSplit == 'Scavenger' and any(il for il in progItemLocs if il.Location.Name == "Ridley"):
                     args.patches.append("Blinking[RidleyRoomIn]")
         except Exception as e:

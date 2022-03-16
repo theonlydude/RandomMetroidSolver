@@ -14,11 +14,9 @@ class Restrictions(object):
         self.suitsRestrictions = settings.restrictions['Suits']
         self.scavLocs = None
         self.scavIsVanilla = False
-        self.scavEscape = False
         self.restrictionDictChecker = None
         if self.split == 'Scavenger':
             self.scavIsVanilla = settings.restrictions['ScavengerParams']['vanillaItems']
-            self.scavEscape = settings.restrictions['ScavengerParams']['escape']
         # checker function chain used by canPlaceAtLocation
         self.checkers = self.getCheckers()
         self.static = {}

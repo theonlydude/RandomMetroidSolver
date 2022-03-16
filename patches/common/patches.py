@@ -51,7 +51,7 @@ patches = {
     "Enable_Backup_Saves": {
         0xef20: [0x1]
     },
-    'Escape_Scavenger' : {
+    'Escape_Trigger' : {
         0x10F5FE: [0x1]
     },
     # for development/quickmet: disable clear save files on 1st boot

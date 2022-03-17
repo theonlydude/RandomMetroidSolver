@@ -185,7 +185,8 @@ class RomReader:
         'nothing_item_plm': {'address': 0x23AD1, 'value': 0x24, 'vanillaValue': 0xb9},
         'vanilla_bugfixes': {'address': 0x33704, 'value': 0xF0, 'vanillaValue': 0xD0},
         'widescreen': {'address': 0xD8, 'value': 0x40, 'vanillaValue': 0x10},
-        'objectives': {'address': 0x12822, 'value': 0x08, 'vanillaValue': 0x14}
+        'objectives': {'address': 0x12822, 'value': 0x08, 'vanillaValue': 0x14},
+        'percent': {'address': 0x17ffe, 'value': 0x60, 'vanillaValue': 0xff}
     }
 
     @staticmethod

@@ -53,7 +53,9 @@ class RomPatcher:
             # new nothing plm
             'nothing_item_plm.ips',
             # objectives management and display
-            'objectives.ips'
+            'objectives.ips',
+            # display collected items percentage in pause inventory menu
+            'percent.ips'
         ],
         # VARIA tweaks
         'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
@@ -223,7 +225,7 @@ class RomPatcher:
 
     def writeItemsNumber(self):
         # write total number of actual items for item percentage patch (patch the patch)
-        for addr in [0x5E64E, 0x5E6AB]:
+        for addr in [snes_to_pc(0x8BE656), snes_to_pc(0x8BE6B3)]:
             self.romFile.writeByte(self.nItems, addr)
 
     def addIPSPatches(self, patches):

@@ -143,7 +143,8 @@ class RomPatcher:
                 continue
             self.writeItem(itemLoc)
             if item.Category != 'Nothing':
-                self.nItems += 1
+                if not loc.restricted:
+                    self.nItems += 1
                 if loc.Name == 'Morphing Ball':
                     self.patchMorphBallEye(item)
 

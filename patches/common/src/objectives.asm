@@ -46,6 +46,8 @@ arch snes.cpu
 ;;; new mode:
 !pause_screen_mode_obj = #$0002
 
+;;; for items % objectives
+!CollectedItems  = $7ED86E
 
 ;;; replace pause mode code pointers list
 org $82910A
@@ -326,6 +328,34 @@ three_minibosses_are_killed:
         jsr nb_killed_minibosses
         cpx #$0003
         plx
+        rts
+
+print "collect 25% items: ", pc
+collect_25p_items:
+        lda !CollectedItems
+print "write in ROM 25% items value at pc+1: ", pc
+        cmp #$0019              ; set carry when A is >= value
+        rts
+
+print "collect 50% items: ", pc
+collect_50p_items:
+        lda !CollectedItems
+print "write in ROM 50% items value at pc+1: ", pc
+        cmp #$0032              ; set carry when A is >= value
+        rts
+
+print "collect 75% items: ", pc
+collect_75p_items:
+        lda !CollectedItems
+print "write in ROM 75% items value at pc+1: ", pc
+        cmp #$004b              ; set carry when A is >= value
+        rts
+
+print "collect 100% items: ", pc
+collect_100p_items:
+        lda !CollectedItems
+print "write in ROM 100% items value at pc+1: ", pc
+        cmp #$0064              ; set carry when A is >= value
         rts
 
 print "End of objectives: ", pc

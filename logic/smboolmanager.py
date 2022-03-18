@@ -11,7 +11,7 @@ from utils.parameters import Knows, isKnows
 class SMBoolManager(object):
     items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'MotherBrain', 'Hyper'] + Bosses.Golden4() + Bosses.miniBosses()
     countItems = ['Missile', 'Super', 'PowerBomb', 'ETank', 'Reserve']
-
+    percentItems = ['Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']
     def __init__(self):
         self._items = { }
         self._counts = { }
@@ -144,6 +144,15 @@ class SMBoolManager(object):
 
     def canPassG4(self):
         return self.objectives.canClearGoals(self)
+
+    def hasItemsPercent(self, percent):
+        totalItemsCount = self.objectives.getTotalItemsCount()
+        currentItemsCount = self.getCollectedItemsCount()
+        return SMBool(100*(currentItemsCount/totalItemsCount) >= percent)
+
+    def getCollectedItemsCount(self):
+        return (len([item for item in self._items if self.haveItem(item) and item in self.percentItems])
+                + sum([self.itemCount(item) for item in self._items if self.isCountItem(item)]))
 
     def createKnowsFunctions(self):
         # for each knows we have a function knowsKnows (ex: knowsAlcatrazEscape()) which

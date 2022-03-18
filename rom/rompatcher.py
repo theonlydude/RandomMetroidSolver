@@ -8,6 +8,7 @@ from utils.doorsmanager import DoorsManager
 from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
+from rom.addresses import Addresses
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir
 import utils.log
@@ -225,8 +226,12 @@ class RomPatcher:
 
     def writeItemsNumber(self):
         # write total number of actual items for item percentage patch (patch the patch)
-        for addr in [snes_to_pc(0x8BE656), snes_to_pc(0x8BE6B3)]:
+        for addr in Addresses.getAll('totalItems'):
             self.romFile.writeByte(self.nItems, addr)
+
+        # for X% collected items objectives, precompute values and write them in objectives functions
+        for percent, addr in zip([25, 50, 75, 100], Addresses.getAll('totalItemsPercent')):
+            self.romFile.writeWord((self.nItems * percent)//100, addr)
 
     def addIPSPatches(self, patches):
         for patchName in patches:

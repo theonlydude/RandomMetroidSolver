@@ -71,7 +71,7 @@ class CommonSolver(object):
                     self.objectives.setScavengerHunt(self.romLoader.hasPatch('Escape_Scavenger'))
                 else:
                     self.objectives.setVanilla()
-            self.objectives.setScavengerHuntFunc(self.scavengerHuntComplete)
+            self.objectives.setSolverMode(self.scavengerHuntComplete)
 
             if interactive == False:
                 print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {} activePatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches()), sorted(RomPatches.ActivePatches)))

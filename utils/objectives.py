@@ -1,5 +1,5 @@
 import random
-from rom.rom import snes_to_pc
+from rom.addresses import Addresses
 from logic.helpers import Bosses
 from logic.smbool import SMBool
 import utils.log, logging
@@ -74,11 +74,11 @@ class Goal(object):
         return "type" in self.exclusion
 
 class Objectives(object):
-    objectivesList = snes_to_pc(0x82f983)
     activeGoals = []
     nbActiveGoals = 0
     maxActiveGoals = 5
     tourianRequired = True
+    totalItemsCount = 100
     goals = {
         "kill kraid": Goal("kill kraid", True, "boss", lambda sm: Bosses.bossDead(sm, 'Kraid'), 0xF98F,
                            {"list": ["kill all G4", "kill one G4"]}, ["Kraid"], "{} kraid", True, False),
@@ -90,7 +90,9 @@ class Objectives(object):
                             {"list": ["kill all G4", "kill one G4"]}, ["Ridley"], "{} ridley", True, False),
         "kill one G4": Goal("kill one G4", True, "other", lambda sm: Bosses.xBossesDead(sm, 1), 0xFA56,
                             {"list": ["kill kraid", "kill phantoon", "kill draygon", "kill ridley",
-                                      "kill all G4", "kill two G4", "kill three G4"]},
+                                      "kill all G4", "kill two G4", "kill three G4"],
+                             "type": "boss",
+                             "limit": 0},
                             [], "{} one golden4", True, False),
         "kill two G4": Goal("kill two G4", True, "other", lambda sm: Bosses.xBossesDead(sm, 2), 0xFA5F,
                             {"list": ["kill all G4", "kill one G4", "kill three G4"],
@@ -116,7 +118,9 @@ class Objectives(object):
                                    {"list": ["kill all mini bosses", "kill one miniboss"]}, ["GoldenTorizo"], "{} golden torizo", True, False),
         "kill one miniboss": Goal("kill one miniboss", True, "other", lambda sm: Bosses.xMiniBossesDead(sm, 1), 0xFA71,
                                   {"list": ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo",
-                                            "kill all mini bosses", "kill two minibosses", "kill three minibosses"]},
+                                            "kill all mini bosses", "kill two minibosses", "kill three minibosses"],
+                                   "type": "miniboss",
+                                   "limit": 0},
                                   [], "{} one miniboss", True, False),
         "kill two minibosses": Goal("kill two minibosses", True, "other", lambda sm: Bosses.xMiniBossesDead(sm, 2), 0xFA7A,
                                     {"list": ["kill all mini bosses", "kill one miniboss", "kill three minibosses"],
@@ -142,8 +146,22 @@ class Objectives(object):
                                   "kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo", "kill all mini bosses",
                                   "shaktool cleared path", "finish scavenger hunt",
                                   "kill one G4", "kill two G4", "kill three G4",
-                                  "kill one miniboss", "kill two minibosses", "kill three minibosses"]},
+                                  "kill one miniboss", "kill two minibosses", "kill three minibosses",
+                                  "collect 25% items", "collect 50% items",
+                                  "collect 75% items", "collect 100% items"]},
                         [], "nothing", False, False),
+        "collect 25% items": Goal("collect 25% items", True, "items", lambda sm: SMBool(True), 0xFA8C,
+                                  {"list": ["collect 50% items", "collect 75% items", "collect 100% items"]},
+                                  [], "collect 25% items", False, False),
+        "collect 50% items": Goal("collect 50% items", True, "items", lambda sm: SMBool(True), 0xFA94,
+                                  {"list": ["collect 25% items", "collect 75% items", "collect 100% items"]},
+                                  [], "collect 50% items", False, False),
+        "collect 75% items": Goal("collect 75% items", True, "items", lambda sm: SMBool(True), 0xFA9C,
+                                  {"list": ["collect 25% items", "collect 50% items", "collect 100% items"]},
+                                  [], "collect 75% items", False, False),
+        "collect 100% items": Goal("collect 100% items", True, "items", lambda sm: SMBool(True), 0xFAA4,
+                                  {"list": ["collect 25% items", "collect 50% items", "collect 75% items"]},
+                                  [], "collect 100% items", False, False),
     }
 
     def resetGoals(self):
@@ -211,8 +229,13 @@ class Objectives(object):
 
         self.addGoal("finish scavenger hunt")
 
-    def setScavengerHuntFunc(self, scavClearFunc):
+    def setSolverMode(self, scavClearFunc):
         Objectives.goals["finish scavenger hunt"].clearFunc = scavClearFunc
+        # in rando we know the number of items after randomizing, so set the functions only for the solver
+        Objectives.goals["collect 25% items"].clearFunc = lambda sm: sm.hasItemsPercent(25)
+        Objectives.goals["collect 50% items"].clearFunc = lambda sm: sm.hasItemsPercent(50)
+        Objectives.goals["collect 75% items"].clearFunc = lambda sm: sm.hasItemsPercent(75)
+        Objectives.goals["collect 100% items"].clearFunc = lambda sm: sm.hasItemsPercent(100)
 
     def expandGoals(self):
         # try to replace 'kill all G4' with the four associated objectives.
@@ -252,13 +275,17 @@ class Objectives(object):
                 return goal
         assert True, "Goal with check function {} not found".format(hex(checkFunction))
 
+    @staticmethod
+    def getTotalItemsCount():
+        return Objectives.totalItemsCount
+
     # call from web
     @staticmethod
     def getAddressesToRead():
         terminator = 1
         objectiveSize = 2
         bytesToRead = (Objectives.maxActiveGoals + terminator) * objectiveSize
-        return [Objectives.objectivesList+i for i in range(0, bytesToRead+1)]
+        return [Addresses.getOne('objectivesList')+i for i in range(0, bytesToRead+1)] + Addresses.getWeb('totalItems')
 
     @staticmethod
     def getExclusions():
@@ -314,9 +341,10 @@ class Objectives(object):
             self.addGoal(goalName)
             availableGoals.remove(goalName)
 
+    # call from solver
     def readGoals(self, romReader):
         self.resetGoals()
-        romReader.romFile.seek(Objectives.objectivesList)
+        romReader.romFile.seek(Addresses.getOne('objectivesList'))
         checkFunction = romReader.romFile.readWord()
         checkScavEscape = False
         while checkFunction != 0x0000:
@@ -326,6 +354,9 @@ class Objectives(object):
             Objectives.activeGoals.append(goal)
             checkFunction = romReader.romFile.readWord()
 
+        # read number of available items for items % objectives
+        Objectives.totalItemsCount = romReader.romFile.readByte(Addresses.getOne('totalItems'))
+
         for goal in Objectives.activeGoals:
             LOG.debug("active goal: {}".format(goal.name))
 
@@ -333,9 +364,10 @@ class Objectives(object):
             Objectives.tourianRequired = not romReader.patchPresent('Escape_Scavenger')
             LOG.debug("tourianRequired: {}".format(Objectives.tourianRequired))
 
+    # call from rando
     def writeGoals(self, romFile):
         # write check functions
-        romFile.seek(Objectives.objectivesList)
+        romFile.seek(Addresses.getOne('objectivesList'))
         for goal in Objectives.activeGoals:
             romFile.writeWord(goal.checkAddr)
         # list terminator
@@ -362,19 +394,19 @@ class Objectives(object):
         lineLength = 32 * tileSize
         firstChar = 3 * tileSize
         # start at 8th line
-        baseAddr = 0xB6F200 + lineLength * 8 + firstChar
+        baseAddr = Addresses.getOne('objectivesText') + lineLength * 8 + firstChar
         # space between two lines of text
         space = 3 if Objectives.nbActiveGoals == 5 else 4
         for i, goal in enumerate(Objectives.activeGoals):
             addr = baseAddr + i * lineLength * space
             text = goal.getText()
-            romFile.seek(snes_to_pc(addr))
+            romFile.seek(addr)
             for c in text:
                 romFile.writeWord(0x3800 + char2tile[c])
 
         # write goal completed positions y in sprites OAM
         baseY = 0x40
-        addr = snes_to_pc(0x82FD40)
+        addr = Addresses.getOne('objectivesSpritesOAM')
         spritemapSize = 5 + 2
         for i, goal in enumerate(Objectives.activeGoals):
             y = baseY + i * space * 8

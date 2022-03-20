@@ -129,7 +129,12 @@ all_mini_bosses_dead:
 
 print "Nothing objective: ", pc
 nothing_objective:
+	;; complete objective only when in crateria, in case we trigger escape immediately
+	;; and we have custom start location.
+	;; if condition check is for Tourian access, it is in Crateria, so that still works.
+	lda $079f : bne .end	; crateria ID is 0
         sec
+.end:
         rts
 
 print "nb_killed_bosses: ", pc

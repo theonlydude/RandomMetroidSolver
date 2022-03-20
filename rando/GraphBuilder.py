@@ -46,7 +46,7 @@ class GraphBuilder(object):
             # update graph with escape transition
             graph.addTransition(escapeSource, dst)
         else:
-            possibleTargets, path = self.getScavengerEscape(emptyContainer, graph, maxDiff, escapeTrigger)
+            possibleTargets, path = self.escapeTrigger(emptyContainer, graph, maxDiff, escapeTrigger)
             if path is None:
                 return False
         # get timer value
@@ -80,17 +80,57 @@ class GraphBuilder(object):
         path = graph.accessPath(sm, dst, 'Landing Site', maxDiff)
         return (possibleTargets, dst, path)
 
-    def getScavengerEscape(self, emptyContainer, graph, maxDiff, escapeTrigger):
+    def escapeTrigger(self, emptyContainer, graph, maxDiff, escapeTrigger):
         sm = emptyContainer.sm
-        itemLocs, lastScavItemLoc = escapeTrigger[0], escapeTrigger[1][-1]
-        # collect all item/locations up until last scav
+        itemLocs = escapeTrigger[0]
+        # collect all item/locations up until we can pass G4
         for il in itemLocs:
             emptyContainer.collect(il)
-            if il == lastScavItemLoc:
+            if sm.canPassG4():
                 break
         possibleTargets = self._getTargets(sm, graph, maxDiff)
-        path = graph.accessPath(sm, lastScavItemLoc.Location.accessPoint, 'Landing Site', maxDiff)
+        # try to escape from all the possible objectives APs
+        possiblePaths = []
+        for goal in Objectives.activeGoals:
+            n, possibleAccessPoints = goal.escapeAccessPoints
+            count = 0
+            for ap in possibleAccessPoints:
+                path = graph.accessPath(sm, ap, 'Landing Site', maxDiff)
+                if path is not None:
+                    possiblePaths.append(path)
+                    count += 1
+            if count < n:
+                # there is a goal we cannot escape from
+                return (None, None)
+        # pick the longest possible path
+        path = max(possiblePaths, key=lambda p: self._computeTimer(graph, p))
         return (possibleTargets, path)
+
+    def _computeTimer(self, graph, path):
+        traversedAreas = list(set([ap.GraphArea for ap in path]))
+        self.log.debug("escapeTimer path: " + str([ap.Name for ap in path]))
+        self.log.debug("escapeTimer traversedAreas: " + str(traversedAreas))
+        # rough estimates of navigation within areas to reach "borders"
+        # (can obviously be completely off wrt to actual path, but on the generous side)
+        traversals = {
+            'Crateria':90,
+            'GreenPinkBrinstar':90,
+            'WreckedShip':120,
+            'LowerNorfair':135,
+            'WestMaridia':75,
+            'EastMaridia':100,
+            'RedBrinstar':75,
+            'Norfair': 120,
+            'Kraid': 40,
+            'Crocomire': 40,
+            # can't be on the path
+            'Tourian': 0,
+        }
+        t = 90 if self.areaRando else 0
+        for area in traversedAreas:
+            t += traversals[area]
+        t = max(t, 180)
+        return t
 
     # path: as returned by AccessGraph.accessPath
     def escapeTimer(self, graph, path, compute):
@@ -98,29 +138,7 @@ class GraphBuilder(object):
             if path[0].Name == 'Climb Bottom Left':
                 graph.EscapeAttributes['Timer'] = None
                 return
-            traversedAreas = list(set([ap.GraphArea for ap in path]))
-            self.log.debug("escapeTimer path: " + str([ap.Name for ap in path]))
-            self.log.debug("escapeTimer traversedAreas: " + str(traversedAreas))
-            # rough estimates of navigation within areas to reach "borders"
-            # (can obviously be completely off wrt to actual path, but on the generous side)
-            traversals = {
-                'Crateria':90,
-                'GreenPinkBrinstar':90,
-                'WreckedShip':120,
-                'LowerNorfair':135,
-                'WestMaridia':75,
-                'EastMaridia':100,
-                'RedBrinstar':75,
-                'Norfair': 120,
-                'Kraid': 40,
-                'Crocomire': 40,
-                # can't be on the path
-                'Tourian': 0,
-            }
-            t = 90 if self.areaRando else 0
-            for area in traversedAreas:
-                t += traversals[area]
-            t = max(t, 180)
+            t = self._computeTimer(graph, path)
         else:
             escapeTargetsTimer = {
                 'Climb Bottom Left': None, # vanilla

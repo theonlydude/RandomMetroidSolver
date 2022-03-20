@@ -102,7 +102,7 @@ all_g4_dead:
         jsr ridley_is_dead
         bcc .no
         sec
-.no
+.no:
         rts
 
 %eventChecker(spore_spawn_is_dead, !spospo_event)
@@ -121,7 +121,7 @@ all_mini_bosses_dead:
         jsr golden_torizo_is_dead
         bcc .no
         sec
-.no
+.no:
         rts
 
 %eventChecker(shaktool_cleared_path, !shaktool_cleared_path)
@@ -132,7 +132,10 @@ nothing_objective:
 	;; complete objective only when in crateria, in case we trigger escape immediately
 	;; and we have custom start location.
 	;; if condition check is for Tourian access, it is in Crateria, so that still works.
-	lda $079f : bne .end	; crateria ID is 0
+	lda $079f : beq .ok	; crateria ID is 0
+	clc
+	bra .end
+.ok:
         sec
 .end:
         rts
@@ -141,19 +144,19 @@ print "nb_killed_bosses: ", pc
 nb_killed_bosses:
         ;; return number of killed bosses in X
         ldx #$0000
-.kraid
+.kraid:
         jsr kraid_is_dead
         bcc .phantoon
 	inx
-.phantoon
+.phantoon:
         jsr phantoon_is_dead
         bcc .draygon
 	inx
-.draygon
+.draygon:
         jsr draygon_is_dead
         bcc .ridley
 	inx
-.ridley
+.ridley:
         jsr ridley_is_dead
         bcc .end
         inx
@@ -164,19 +167,19 @@ print "nb_killed_minibosses: ", pc
 nb_killed_minibosses:
         ;; return number of killed minibosses in X
         ldx #$0000
-.spore_spawn
+.spore_spawn:
         jsr spore_spawn_is_dead
         bcc .botwoon
 	inx
-.botwoon
+.botwoon:
         jsr botwoon_is_dead
         bcc .crocomire
 	inx
-.crocomire
+.crocomire:
         jsr crocomire_is_dead
         bcc .golden_torizo
 	inx
-.golden_torizo
+.golden_torizo:
         jsr golden_torizo_is_dead
         bcc .end
         inx
@@ -268,6 +271,8 @@ org $82FB6D
 ;;; set objectives_completed_event if objectives are completed
 objectives_completed:
         phx
+	;; don't check anything if objectives are already completed
+	lda !objectives_completed_event : jsl !check_event : bcs .end
         ldx #$0000
 .loop:
         lda.l objective_funcs, x
@@ -286,6 +291,7 @@ objectives_completed:
         rtl
 
 ;;; checks for objectives periodically
+print "periodic_obj_check: ", pc
 periodic_obj_check:
 	lda !timer : and !obj_check_period-1
 	cmp !obj_check_period-1 : bne .end
@@ -346,6 +352,8 @@ trigger_escape_music:
 	rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+print "Pause stuff: ", pc
 
 ;;;
 ;;; pause menu objectives display
@@ -409,7 +417,7 @@ check_l_r_pressed:
         BNE .press_R
         BRA .end
 
-.press_R
+.press_R:
         LDA !pause_screen_button_mode
         CMP !pause_screen_button_equip  ; if already equipment screen => end
         BEQ .end
@@ -423,21 +431,21 @@ check_l_r_pressed:
         CMP !pause_screen_button_obj
         BEQ .move_to_map_from_obj
 
-.move_to_equip_from_map
+.move_to_equip_from_map:
         LDA !pause_index_map2equip_fading_out
         STA !pause_index
         LDA !pause_screen_button_equip
         STA !pause_screen_button_mode
         BRA .play_sound
 
-.move_to_map_from_obj
+.move_to_map_from_obj:
         LDA !pause_index_obj2map_fading_out
         STA !pause_index
         LDA !pause_screen_button_map
         STA !pause_screen_button_mode   ; pause_screen_button_mode set to pause_screen_button_equip
         BRA .play_sound
 
-.press_L
+.press_L:
         LDA !pause_screen_button_mode  ; pause_screen_button_mode, 00 == map screen
         CMP !pause_screen_button_obj
         BEQ .end                ; if already on objective screen => end
@@ -451,24 +459,24 @@ check_l_r_pressed:
         CMP !pause_screen_button_map
         BEQ .move_to_obj_from_map   ; if on map screen and L pressed => objective screen
 
-.move_to_map_from_equip
+.move_to_map_from_equip:
         LDA !pause_index_equip2map_fading_out
         STA !pause_index
         STZ !pause_screen_button_mode  ; pause_screen_button_mode set to pause_screen_button_map
         BRA .play_sound
 
-.move_to_obj_from_map
+.move_to_obj_from_map:
         LDA !pause_index_map2obj_fading_out
         STA !pause_index
         LDA !pause_screen_button_obj
         STA !pause_screen_button_mode
         
-.play_sound
+.play_sound:
         JSR $A615   ; $A615: Set pause screen buttons label palettes to show/hide them
         LDA #$0038  ;\
         JSL $809049 ;} Queue sound 38h, sound library 1, max queued sounds allowed = 6 (menu option selected)
 
-.end
+.end:
         PLP
         RTS
 
@@ -502,15 +510,15 @@ display_unpause:
         BEQ .equip
         CMP !pause_screen_mode_obj
         BEQ .objective
-.map
+.map:
         JSL $82BB30  ; Display map elevator destinations
         JSL $82B672  ; Draw map icons
         JMP $B9C8    ; Map screen - draw Samus position indicator
-.equip
+.equip:
         JSR $B267    ; Draw item selector
         JSR $B2A2    ; Display reserve tank amount
         JMP $A56D    ; Updates the flashing buttons when you change pause screens
-.objective
+.objective:
         jsr draw_completed_objectives_sprites
         JMP $A56D    ; Updates the flashing buttons when you change pause screens
 
@@ -524,7 +532,7 @@ display_unpause:
 set_bg2_map_screen:
         LDY #$000A
         LDX #$0000
-.left_loop_top
+.left_loop_top:
         LDA obj_top,x
         STA !left_button_top,x
         INX : INX
@@ -533,7 +541,7 @@ set_bg2_map_screen:
 
         LDY #$000A
         LDX #$0000
-.left_loop_bottom
+.left_loop_bottom:
         LDA obj_bottom,x
         STA !left_button_bottom,x
         INX : INX
@@ -542,7 +550,7 @@ set_bg2_map_screen:
 
         LDY #$000A
         LDX #$0000
-.right_loop_top
+.right_loop_top:
         LDA samus_top,x
         STA !right_button_top,x
         INX : INX
@@ -551,7 +559,7 @@ set_bg2_map_screen:
 
         LDY #$000A
         LDX #$0000
-.right_loop_bottom
+.right_loop_bottom:
         LDA samus_bottom,x
         STA !right_button_bottom,x
         INX : INX
@@ -565,7 +573,7 @@ set_bg2_map_screen:
 set_bg2_equipment_screen:
         LDY #$000A
         LDX #$0000
-.loop_top
+.loop_top:
         LDA map_top,x
         STA !left_button_top,x
         INX : INX
@@ -574,7 +582,7 @@ set_bg2_equipment_screen:
 
         LDY #$000A
         LDX #$0000
-.loop_bottom
+.loop_bottom:
         LDA map_bottom,x
         STA !left_button_bottom,x
         INX : INX
@@ -587,7 +595,7 @@ set_bg2_equipment_screen:
 set_bg2_objective_screen:
         LDY #$000A
         LDX #$0000
-.loop_top
+.loop_top:
         LDA map_top,x
         STA !right_button_top,x
         INX : INX
@@ -596,7 +604,7 @@ set_bg2_objective_screen:
 
         LDY #$000A
         LDX #$0000
-.loop_bottom
+.loop_bottom:
         LDA map_bottom,x
         STA !right_button_bottom,x
         INX : INX
@@ -653,7 +661,7 @@ draw_completed_objectives_sprites:
         ldy #first_spritemap
         jsr draw_spritemap
 
-.second_objective
+.second_objective:
         lda second_objective_func
         beq .end
         ldx #$0000 : jsr (second_objective_func, x)
@@ -661,7 +669,7 @@ draw_completed_objectives_sprites:
         ldy #second_spritemap
         jsr draw_spritemap
 
-.third_objective
+.third_objective:
         lda third_objective_func
         beq .end
         ldx #$0000 : jsr (third_objective_func, x)
@@ -669,7 +677,7 @@ draw_completed_objectives_sprites:
         ldy #third_spritemap
         jsr draw_spritemap
 
-.fourth_objective
+.fourth_objective:
         lda fourth_objective_func
         beq .end
         ldx #$0000 : jsr (fourth_objective_func, x)
@@ -677,7 +685,7 @@ draw_completed_objectives_sprites:
         ldy #fourth_spritemap
         jsr draw_spritemap
 
-.fith_objective
+.fith_objective:
         lda fith_objective_func
         beq .end
         ldx #$0000 : jsr (fith_objective_func, x)
@@ -685,7 +693,7 @@ draw_completed_objectives_sprites:
         ldy #fith_spritemap
         jsr draw_spritemap
 
-.end
+.end:
         rts
 
 draw_spritemap:
@@ -728,7 +736,7 @@ update_palette_objective_screen:
         jsr set_bg2_objective_screen
         LDY #$000A
         LDX #$0000
-.loop_top
+.loop_top:
         LDA $7E364A,x
         AND #$E3FF
         ORA #$1400
@@ -739,7 +747,7 @@ update_palette_objective_screen:
 
         LDY #$000A
         LDX #$0000
-.loop_bottom
+.loop_bottom:
         LDA $7E368A,x
         AND #$E3FF
         ORA #$1400
@@ -775,7 +783,7 @@ func_map2obj_fading_out:
         STZ $0723    ; Screen fade delay = 0
         STZ $0725    ; Screen fade counter = 0
         INC !pause_index    ; Pause index = 6 (equipment screen to map screen - load map screen)
-.end
+.end:
         RTS
 
 func_map2obj_load_obj:
@@ -818,7 +826,7 @@ func_map2obj_fading_in:
         STA !pause_screen_button_mode
         LDA !pause_index_objective_screen ; index = objective
         STA !pause_index    ;/
-.end
+.end:
         RTS
 
 func_obj2map_fading_out:
@@ -835,7 +843,7 @@ func_obj2map_fading_out:
         STZ $0723    ; Screen fade delay = 0
         STZ $0725    ; Screen fade counter = 0
         INC !pause_index    ; Pause index = D (obj screen to map screen - load map screen)
-.end
+.end:
         RTS
 
 print ""

@@ -30,7 +30,7 @@ class Synonyms(object):
         return verb
 
 class Goal(object):
-    def __init__(self, name, available, gtype, clearFunc, checkAddr, escapeAccessPoints, exclusion, items, text, useSynonym, expandable, expandableList=[]):
+    def __init__(self, name, available, gtype, clearFunc, escapeAccessPoints, checkAddr, exclusion, items, text, useSynonym, expandable, expandableList=[]):
         self.name = name
         self.available = available
         self.clearFunc = clearFunc
@@ -243,7 +243,8 @@ class Objectives(object):
 
     def updateScavengerEscapeAccess(self, ap):
         assert self.isGoalActive("finish scavenger hunt")
-        Objectives.goals['finish scavenger hunt'].escapeAccess[1].append(ap)
+        (_, apList) = Objectives.goals['finish scavenger hunt'].escapeAccessPoints
+        apList.append(ap)
 
     def setScavengerHuntFunc(self, scavClearFunc):
         Objectives.goals["finish scavenger hunt"].clearFunc = scavClearFunc

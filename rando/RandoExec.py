@@ -101,7 +101,10 @@ class RandoExec(object):
             escapeTrigger = (ret[1], ret[2]) if self.randoSettings.restrictions["EscapeTrigger"] else None
             if escapeTrigger and split == "Scavenger":
                 # update escape access for scav with last scav loc
-                filler.container.sm.objectives.updateScavengerEscapeAccess(escapeTrigger[1][-1].accessPoint)
+                lastScavItemLoc = escapeTrigger[1][-1]
+                objectives = filler.container.sm.objectives
+                objectives.updateScavengerEscapeAccess(lastScavItemLoc.Location.accessPoint)
+                objectives.setScavengerHuntFunc(lambda sm: sm.haveItem(lastScavItemLoc.Item.Type))
             escapeOk = graphBuilder.escapeGraph(container, self.areaGraph, self.randoSettings.maxDiff, escapeTrigger)
             if not escapeOk:
                 self.errorMsg += "Could not find a solution for escape"

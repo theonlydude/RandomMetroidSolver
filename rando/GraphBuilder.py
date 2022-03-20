@@ -4,6 +4,8 @@ import utils.log, random, copy
 from graph.graph_utils import GraphUtils, vanillaTransitions, vanillaBossesTransitions, escapeSource, escapeTargets
 from logic.logic import Logic
 from graph.graph import AccessGraphRando as AccessGraph
+from utils.objectives import Objectives
+from rando.ItemLocContainer import getItemLocStr
 
 # creates graph and handles randomized escape
 class GraphBuilder(object):
@@ -81,10 +83,12 @@ class GraphBuilder(object):
         return (possibleTargets, dst, path)
 
     def escapeTrigger(self, emptyContainer, graph, maxDiff, escapeTrigger):
+        self.log.debug("escapeTrigger. collect locs until G4 access")
         sm = emptyContainer.sm
         itemLocs = escapeTrigger[0]
         # collect all item/locations up until we can pass G4
         for il in itemLocs:
+            self.log.debug("collecting " + getItemLocStr(il))
             emptyContainer.collect(il)
             if sm.canPassG4():
                 break
@@ -95,12 +99,14 @@ class GraphBuilder(object):
             n, possibleAccessPoints = goal.escapeAccessPoints
             count = 0
             for ap in possibleAccessPoints:
+                self.log.debug("escapeTrigger. testing AP " + ap)
                 path = graph.accessPath(sm, ap, 'Landing Site', maxDiff)
                 if path is not None:
                     possiblePaths.append(path)
                     count += 1
             if count < n:
                 # there is a goal we cannot escape from
+                self.log.debug("escapeTrigger. goal %s: found %d/%d possible escapes, abort" % (goal.name, count, n))
                 return (None, None)
         # pick the longest possible path
         path = max(possiblePaths, key=lambda p: self._computeTimer(graph, p))

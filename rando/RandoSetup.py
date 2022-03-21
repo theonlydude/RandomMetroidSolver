@@ -298,28 +298,22 @@ class RandoSetup(object):
         self.restoreBossChecks()
         # check if we can reach/beat all bosses
         if ret:
-            mandatoryBosses = Objectives.getMandatoryBosses()
-
             for loc in self.lastRestricted:
-                if loc.Name in self.bossesLocs and loc.BossItemType in mandatoryBosses:
+                if loc.Name in self.bossesLocs:
                     ret = False
-                    self.log.debug("unavail Mandatory Boss: " + loc.Name)
+                    self.log.debug("unavail Boss: " + loc.Name)
             if ret:
                 # revive bosses
                 self.sm.addItems([item.Type for item in contPool if item.Category != 'Boss'])
                 maxDiff = self.settings.maxDiff
                 # see if phantoon doesn't block himself, and if we can reach draygon if she's alive
-                ret = (("Phantoon" not in mandatoryBosses
-                        or self.areaGraph.canAccess(self.sm, self.startAP, 'PhantoonRoomIn', maxDiff))
-                       and
-                       ("Draygon" not in mandatoryBosses
-                        or self.areaGraph.canAccess(self.sm, self.startAP, 'DraygonRoomIn', maxDiff)))
+                ret = self.areaGraph.canAccess(self.sm, self.startAP, 'PhantoonRoomIn', maxDiff)\
+                      and self.areaGraph.canAccess(self.sm, self.startAP, 'DraygonRoomIn', maxDiff)
                 if ret:
                     # see if we can beat bosses with this equipment (infinity as max diff for a "onlyBossesLeft" type check
                     beatableBosses = sorted([loc.BossItemType for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if loc.isBoss()])
                     self.log.debug("checkPool. beatableBosses="+str(beatableBosses))
-                    self.log.debug("checkPool. mandatoryBosses: {}".format(mandatoryBosses))
-                    ret = set(mandatoryBosses).issubset(set(beatableBosses)) and Objectives.checkLimitObjectives(beatableBosses)
+                    ret = sorted(beatableBosses) == sorted(Bosses.Golden4() + Bosses.miniBosses())
                     if ret:
                         # check that we can then kill mother brain
                         self.sm.addItems(Bosses.Golden4() + Bosses.miniBosses())
@@ -398,7 +392,6 @@ class RandoSetup(object):
             else:
                 forb = []
         self.forbiddenItems += forb
-        self.checkPool()
         self.addRestricted()
         return len(forb)
 

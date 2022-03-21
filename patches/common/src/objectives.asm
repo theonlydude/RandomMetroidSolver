@@ -13,9 +13,6 @@
 lorom
 arch snes.cpu
 
-;;; TODO hijack drops apparition for all bosses and disable elevator music queue if
-;;;      objectives are completed and escape is auto-triggered
-
 incsrc "event_list.asm"
 
 !timer = $05b8
@@ -31,11 +28,16 @@ incsrc "event_list.asm"
 !custom_music_id = #$caca
 !custom_music_escape = $8fe871
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; ROM OPTIONS
 org $A1F5FE
 ;;; if non-zero trigger escape as soon as objectives are completed
 escape_option:
 	dw $0000
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; HIJACKS
 ;;; hijack main ASM call to check objectives regularly
 org $828BA8
 	jsl periodic_obj_check
@@ -56,9 +58,28 @@ org $82A61D
 org $8ff700
 	rts
 
+;;; For minimizer or scavenger with ridley as last loc, disable
+;;; elevator music change when boss drops appear if escape is
+;;; triggered.
+;;; (only handle G4, minibosses death flag is never set early)
+;; Kraid
+org $A7C81E
+	jsl boss_drops
+;; Phantoon
+org $A7DB94
+	jsl boss_drops
+;; Draygon
+org $A59256
+	jsl boss_drops
+;; Ridley
+org $A6C5ED
+	jsl boss_drops
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; CODE
+
 ;;; free space after tracking.ips and seed_display.ips
 org $82f983
-
 ;;; seed objectives checker functions pointers, max 5, list ends with $0000
 !max_objectives = #$0005
 print "objectives checker functions: ", pc
@@ -240,7 +261,9 @@ print "End of objectives: ", pc
 ;;; seed display patch start
 warnpc $82fb6c
 
-;;; only sink the ground in G4 room if objectives are completed:
+;;; only sink the ground in G4 room if objectives are completed.
+;;; otherwise you'd just have to beat G4 and go to statues room
+;;; to have vanilla behaviour and Tourian access open
 org $878400			; Phantoon
 	dw alt_set_event
 
@@ -255,7 +278,7 @@ org $878538			; Draygon
 
 org $87d000
 ;;; alternate instruction for statues objects:
-;;; set event in argument only if not in scavenger mode, or all scav locs collected
+;;; set event in argument only if objectives are completed
 alt_set_event:
 	lda !objectives_completed_event : jsl !check_event
 	bcc .end
@@ -351,7 +374,13 @@ trigger_escape_music:
 .end:
 	rts
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; when escape is trigerred, avoid changing music when boss drops appear
+boss_drops:
+	lda !escape_event : jsl !check_event ;if escape flag is off:
+	bcs .end
+	lda #$0003 : jsl $808FC1 	     ;  Queue elevator music track
+.end:				 	     ;else do nothing
+	rtl
 
 print "Pause stuff: ", pc
 
@@ -639,19 +668,6 @@ samus_bottom:
 glowing_LR_animation:
         dw $002A, $002A, $002A, $002A
 
-;;; sprites for completed objectives.
-;;; an oam entry is made of five bytes: (s000000 xxxxxxxxx) (yyyyyyyy) (YXppPPPt tttttttt)
-print "completed spritemaps: ", pc
-first_spritemap:
-        dw $0001, $0000 : db $00 : dw $3E8C
-second_spritemap:
-        dw $0001, $0000 : db $00 : dw $3E8C
-third_spritemap:
-        dw $0001, $0000 : db $00 : dw $3E8C
-fourth_spritemap:
-        dw $0001, $0000 : db $00 : dw $3E8C
-fith_spritemap:
-        dw $0001, $0000 : db $00 : dw $3E8C
 
 draw_completed_objectives_sprites:
         lda first_objective_func
@@ -845,6 +861,23 @@ func_obj2map_fading_out:
         INC !pause_index    ; Pause index = D (obj screen to map screen - load map screen)
 .end:
         RTS
+
+warnpc $82FFCF
+
+;;; sprites for completed objectives.
+;;; an oam entry is made of five bytes: (s000000 xxxxxxxxx) (yyyyyyyy) (YXppPPPt tttttttt)
+org $82FFD0	; fixed position to avoid updating if when code above changes
+print "completed spritemaps: ", pc
+first_spritemap:
+        dw $0001, $0000 : db $00 : dw $3E8C
+second_spritemap:
+        dw $0001, $0000 : db $00 : dw $3E8C
+third_spritemap:
+        dw $0001, $0000 : db $00 : dw $3E8C
+fourth_spritemap:
+        dw $0001, $0000 : db $00 : dw $3E8C
+fith_spritemap:
+        dw $0001, $0000 : db $00 : dw $3E8C
 
 print ""
 print "The end: ", pc

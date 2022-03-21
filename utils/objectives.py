@@ -29,6 +29,7 @@ class Synonyms(object):
         Synonyms.alreadyUsed.append(verb)
         return verb
 
+
 class Goal(object):
     def __init__(self, name, available, gtype, clearFunc, escapeAccessPoints, checkAddr, exclusion, items, text, useSynonym, expandable, expandableList=[]):
         self.name = name
@@ -409,7 +410,7 @@ class Objectives(object):
 
         # write goal completed positions y in sprites OAM
         baseY = 0x40
-        addr = snes_to_pc(0x82FDF2)
+        addr = snes_to_pc(0x82FFD0)
         spritemapSize = 5 + 2
         for i, goal in enumerate(Objectives.activeGoals):
             y = baseY + i * space * 8

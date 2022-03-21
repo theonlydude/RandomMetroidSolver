@@ -583,11 +583,11 @@ scav_ridley_dead:
 	cmp !ridley_id : bne .dead
 	;; Ridley was indeed the next scav location
 	jsr found_next_scav
-	plx
 	bra .dead
 .not_dead:
 	jml ridley_still_dying
 .dead:
+	plx
 	jml ridley_dead
 
 item_pickup:

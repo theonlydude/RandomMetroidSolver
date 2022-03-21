@@ -298,6 +298,9 @@ class RandoSetup(object):
         self.restoreBossChecks()
         # check if we can reach/beat all bosses
         if ret:
+            # always add G4 to mandatory bosses, even if not required by objectives
+            mandatoryBosses = set(Objectives.getMandatoryBosses() + Bosses.Golden4())
+
             for loc in self.lastRestricted:
                 if loc.Name in self.bossesLocs:
                     ret = False
@@ -313,7 +316,8 @@ class RandoSetup(object):
                     # see if we can beat bosses with this equipment (infinity as max diff for a "onlyBossesLeft" type check
                     beatableBosses = sorted([loc.BossItemType for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if loc.isBoss()])
                     self.log.debug("checkPool. beatableBosses="+str(beatableBosses))
-                    ret = sorted(beatableBosses) == sorted(Bosses.Golden4() + Bosses.miniBosses())
+                    self.log.debug("checkPool. mandatoryBosses: {}".format(mandatoryBosses))
+                    ret = mandatoryBosses.issubset(set(beatableBosses)) and Objectives.checkLimitObjectives(beatableBosses)
                     if ret:
                         # check that we can then kill mother brain
                         self.sm.addItems(Bosses.Golden4() + Bosses.miniBosses())

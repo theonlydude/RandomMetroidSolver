@@ -68,9 +68,7 @@ org $A7C81E
 ;; Phantoon
 org $A7DB94
 	jsl boss_drops
-;; Draygon
-org $A59256
-	jsl boss_drops
+;; Draygon handled directly in minimizer_bosses, as elevator music is triggered early enough
 ;; Ridley
 org $A6C5ED
 	jsl boss_drops

@@ -14,7 +14,7 @@ org $A7AFAD
 org $A7DDBC
 	jsl phantoon_death
 
-org $A59621
+org $A5927B
 	jsl draygon_death
 
 org $A6C590

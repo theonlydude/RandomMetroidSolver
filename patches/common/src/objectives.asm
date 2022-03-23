@@ -28,6 +28,8 @@ incsrc "event_list.asm"
 !custom_music_id = #$caca
 !custom_music_escape = $8fe871
 
+;;; for items % objectives
+!CollectedItems  = $7ED86E
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; ROM OPTIONS
@@ -80,7 +82,7 @@ org $A6C5ED
 org $82f983
 ;;; seed objectives checker functions pointers, max 5, list ends with $0000
 !max_objectives = #$0005
-print "objectives checker functions: ", pc
+print "--- objectives checker functions: ", pc, " ---"
 objective_funcs:
 first_objective_func:
         dw kraid_is_dead
@@ -95,7 +97,6 @@ fith_objective_func:
         dw $0000
 
 ;;; objectives checker functions, set carry if objective is completed
-print ""
 
 ;;; helper macro to autodef simple event checker functions
 macro eventChecker(func_name, event)
@@ -159,7 +160,6 @@ nothing_objective:
 .end:
         rts
 
-print "nb_killed_bosses: ", pc
 nb_killed_bosses:
         ;; return number of killed bosses in X
         ldx #$0000
@@ -182,7 +182,6 @@ nb_killed_bosses:
 .end
         rts
 
-print "nb_killed_minibosses: ", pc
 nb_killed_minibosses:
         ;; return number of killed minibosses in X
         ldx #$0000
@@ -205,58 +204,45 @@ nb_killed_minibosses:
 .end
         rts
 
-print "One boss is killed: ", pc
-one_boss_is_killed:
+macro nbBossChecker(n, bossType)
+print "<n> <bossType> killed: ", pc
+<bossType>_<n>_killed:
 	phx
-        jsr nb_killed_bosses
+        jsr nb_killed_<bossType>es
 	;; cpx set carry if greater or equal
-        cpx #$0001
+        cpx.w #<n>
         plx
         rts
+endmacro
 
-print "Two bosses are killed: ", pc
-two_bosses_are_killed:
-	phx
-        jsr nb_killed_bosses
-        cpx #$0002
-        plx
+%nbBossChecker(1,boss)
+%nbBossChecker(2,boss)
+%nbBossChecker(3,boss)
+
+%nbBossChecker(1,miniboss)
+%nbBossChecker(2,miniboss)
+%nbBossChecker(3,miniboss)
+
+macro itemPercentChecker(percent)
+print "collect <percent>% items: ", pc
+collect_<percent>_items:
+	lda !CollectedItems
+print "    write in ROM <percent>% items value at: ",hex(.cmpval+1)
+.cmpval:
+        cmp.w #<percent>              ; set carry when A is >= value
         rts
+endmacro
 
-print "Three bosses are killed: ", pc
-three_bosses_are_killed:
-	phx
-        jsr nb_killed_bosses
-        cpx #$0003
-        plx
-        rts
+%itemPercentChecker(25)
+%itemPercentChecker(50)
+%itemPercentChecker(75)
+%itemPercentChecker(100)
 
-print "One miniboss is killed: ", pc
-one_miniboss_is_killed:
-	phx
-        jsr nb_killed_minibosses
-	;; cpx set carry if greater or equal
-        cpx #$0001
-        plx
-        rts
-
-print "Two minibosses are killed: ", pc
-two_minibosses_are_killed:
-	phx
-        jsr nb_killed_minibosses
-        cpx #$0002
-        plx
-        rts
-
-print "Three minibosses are killed: ", pc
-three_minibosses_are_killed:
-	phx
-        jsr nb_killed_minibosses
-        cpx #$0003
-        plx
-        rts
-
-print "End of objectives: ", pc
+obj_end:
+print "--- 0x", hex(obj_max-obj_end), " bytes left for objectives checkers ---"
 ;;; seed display patch start
+org $82fb6c
+obj_max:
 warnpc $82fb6c
 
 ;;; only sink the ground in G4 room if objectives are completed.
@@ -286,33 +272,14 @@ alt_set_event:
 	iny : iny
 	rts
 
-;;; continue after InfoStr in seed_display.asm
-org $82FB6D
-
-;;; set objectives_completed_event if objectives are completed
-objectives_completed:
-        phx
-	;; don't check anything if objectives are already completed
-	lda !objectives_completed_event : jsl !check_event : bcs .end
-        ldx #$0000
-.loop:
-        lda.l objective_funcs, x
-        beq .objectives_ok      ; function not set
-        jsr (objective_funcs, x)
-        bcc .end                ; objective not completed
-        inx : inx
-        cpx !max_objectives*2
-        bne .loop
-.objectives_ok:
-        lda !objectives_completed_event : jsl !mark_event
-	lda.l escape_option : beq .end
-	jsr trigger_escape
-.end:
-        plx
-        rtl
-
+;;; put some stuff in bank A1 to save space in 82:
+;;; a bunch of the code as it is must stay in 82 because the
+;;; objective checker functions are called locally from pause menu,
+;;; and the pause menu stuff itself handle function pointers in bank 82.
+;;; the main checker func does jsr (addr,x) so it must stay in 82 as well
+org $a1f980
 ;;; checks for objectives periodically
-print "periodic_obj_check: ", pc
+print "A1 start: ", pc
 periodic_obj_check:
 	lda !timer : and !obj_check_period-1
 	cmp !obj_check_period-1 : bne .end
@@ -358,7 +325,7 @@ trigger_escape:
 	jsr trigger_escape_music
 	lda !escape_event : jsl !mark_event ; timebomb set event
 	ply : plx
-	rts
+	rtl
 
 trigger_escape_music:
 	lda !custom_music_marker
@@ -379,6 +346,34 @@ boss_drops:
 	lda #$0003 : jsl $808FC1 	     ;  Queue elevator music track
 .end:				 	     ;else do nothing
 	rtl
+	
+print "A1 end: ", pc
+warnpc $a1faff
+
+;;; continue in 82 after InfoStr in seed_display.asm
+org $82FB6D
+
+;;; set objectives_completed_event if objectives are completed
+objectives_completed:
+        phx
+	;; don't check anything if objectives are already completed
+	lda !objectives_completed_event : jsl !check_event : bcs .end
+        ldx #$0000
+.loop:
+        lda.l objective_funcs, x
+        beq .objectives_ok      ; function not set
+        jsr (objective_funcs, x)
+        bcc .end                ; objective not completed
+        inx : inx
+        cpx !max_objectives*2
+        bne .loop
+.objectives_ok:
+        lda !objectives_completed_event : jsl !mark_event
+	lda.l escape_option : beq .end
+	jsl trigger_escape
+.end:
+        plx
+        rtl
 
 print "Pause stuff: ", pc
 
@@ -860,12 +855,10 @@ func_obj2map_fading_out:
 .end:
         RTS
 
-warnpc $82FFCF
 
 ;;; sprites for completed objectives.
 ;;; an oam entry is made of five bytes: (s000000 xxxxxxxxx) (yyyyyyyy) (YXppPPPt tttttttt)
-org $82FFD0	; fixed position to avoid updating if when code above changes
-print "completed spritemaps: ", pc
+print "*** completed spritemaps: ", pc
 first_spritemap:
         dw $0001, $0000 : db $00 : dw $3E8C
 second_spritemap:
@@ -878,10 +871,10 @@ fith_spritemap:
         dw $0001, $0000 : db $00 : dw $3E8C
 
 print ""
-print "The end: ", pc
+print "82 end: ", pc
 
-;;; end of bank
-warnpc $82ffff
+;;; start of percent patch
+warnpc $82ffbf
 
 ;;; keep 'MAP' left button visible on map screen by keeping palette 2 instead of palette 5 (grey one)
 org $82A820

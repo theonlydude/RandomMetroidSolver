@@ -8,6 +8,7 @@ from utils.doorsmanager import DoorsManager
 from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
+from rom.addresses import Addresses
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir
 import utils.log
@@ -53,7 +54,9 @@ class RomPatcher:
             # new nothing plm
             'nothing_item_plm.ips',
             # objectives management and display
-            'objectives.ips'
+            'objectives.ips',
+            # display collected items percentage in pause inventory menu
+            'percent.ips'
         ],
         # VARIA tweaks
         'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
@@ -140,7 +143,8 @@ class RomPatcher:
                 continue
             self.writeItem(itemLoc)
             if item.Category != 'Nothing':
-                self.nItems += 1
+                if not loc.restricted:
+                    self.nItems += 1
                 if loc.Name == 'Morphing Ball':
                     self.patchMorphBallEye(item)
 
@@ -223,8 +227,12 @@ class RomPatcher:
 
     def writeItemsNumber(self):
         # write total number of actual items for item percentage patch (patch the patch)
-        for addr in [0x5E64E, 0x5E6AB]:
+        for addr in Addresses.getAll('totalItems'):
             self.romFile.writeByte(self.nItems, addr)
+
+        # for X% collected items objectives, precompute values and write them in objectives functions
+        for percent, addr in zip([25, 50, 75, 100], Addresses.getAll('totalItemsPercent')):
+            self.romFile.writeWord((self.nItems * percent)//100, addr)
 
     def addIPSPatches(self, patches):
         for patchName in patches:

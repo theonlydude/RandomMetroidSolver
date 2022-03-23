@@ -128,6 +128,9 @@ if (hs.registerOverlay) {
 }
 .subarea {
 }
+.uncollectedItem {
+    background-color: #ccc;
+}
 </style>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -815,6 +818,11 @@ if result is not None and result["difficulty"] != -1:
 
 {{
 if result is not None:
+  def setUncollected(item):
+    if item not in result["collectedItems"]:
+      response.write("data-img-class=\"uncollectedItem\"", escape=False)
+      pass
+    pass
 }}
     <input id="displayPath" name="displayPath" type="checkbox" onClick="showPath()">
     Display the generated path (spoilers)
@@ -824,7 +832,7 @@ if result is not None:
       <div class="popupArea" style="display:none;">PopupArea</div>
       <div class="popupSubArea" style="display:none;">PopupSubArea</div>
       <br/>
-      <p class="centerTable">Click on items to highlight them in the spoiler:</p>
+      <p class="centerTable">Click on items to highlight them in the spoiler, grey background items aren't present:</p>
 
       <div class="centerTable">
       <select multiple="multiple" id="item" name="item">
@@ -832,35 +840,35 @@ if result is not None:
           <option data-img-src="/solver/static/images/tracker/inventory/Nothing.png" value="Nothing">Nothing</option>
         </optgroup>
         <optgroup label="Ammo">
-          <option data-img-src="/solver/static/images/tracker/inventory/Missile.png" value="Missile">Missile</option>
-          <option data-img-src="/solver/static/images/tracker/inventory/Super.png" value="Super">Super Missile</option>
-          <option data-img-src="/solver/static/images/tracker/inventory/PowerBomb.png" value="PowerBomb">Power Bomb</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Missile.png" value="Missile" {{=setUncollected("Missile")}}>Missile</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Super.png" value="Super" {{=setUncollected("Super")}}>Super Missile</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/PowerBomb.png" value="PowerBomb" {{=setUncollected("PowerBomb")}}>Power Bomb</option>
         </optgroup>
         <optgroup label="Energy">
-          <option data-img-src="/solver/static/images/tracker/inventory/ETank.png" value="ETank">Energy Tank</option>
-            <option data-img-src="/solver/static/images/tracker/inventory/Reserve.png" value="Reserve">Reserve Tank</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/ETank.png" value="ETank" {{=setUncollected("ETank")}}>Energy Tank</option>
+            <option data-img-src="/solver/static/images/tracker/inventory/Reserve.png" value="Reserve" {{=setUncollected("Reserve")}}>Reserve Tank</option>
         </optgroup>
         <optgroup label="Beams">
-          <option data-img-src="/solver/static/images/tracker/inventory/Charge.png" value="Charge">Charge Beam</option>
-          <option data-img-src="/solver/static/images/tracker/inventory/Ice.png" value="Ice">Ice Beam</option>
-          <option data-img-src="/solver/static/images/tracker/inventory/Wave.png" value="Wave">Wave Beam</option>
-          <option data-img-src="/solver/static/images/tracker/inventory/Spazer.png" value="Spazer">Spazer</option>
-          <option data-img-src="/solver/static/images/tracker/inventory/Plasma.png" value="Plasma">Plasma Beam</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Charge.png" value="Charge" {{=setUncollected("Charge")}}>Charge Beam</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Ice.png" value="Ice" {{=setUncollected("Ice")}}>Ice Beam</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Wave.png" value="Wave" {{=setUncollected("Wave")}}>Wave Beam</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Spazer.png" value="Spazer" {{=setUncollected("Spazer")}}>Spazer</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Plasma.png" value="Plasma" {{=setUncollected("Plasma")}}>Plasma Beam</option>
         </optgroup>
         <optgroup label="Suits">
-          <option data-img-src="/solver/static/images/tracker/inventory/Varia.png" value="Varia">Varia Suit</option>
-          <option data-img-src="/solver/static/images/tracker/inventory/Gravity.png" value="Gravity">Gravity Suit</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Varia.png" value="Varia" {{=setUncollected("Varia")}}>Varia Suit</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Gravity.png" value="Gravity" {{=setUncollected("Gravity")}}>Gravity Suit</option>
         </optgroup>
         <optgroup label="Items">
-          <option data-img-src="/solver/static/images/tracker/inventory/Morph.png" value="Morph">Morph Ball</option>
-          <option data-img-src="/solver/static/images/tracker/inventory/Bomb.png" value="Bomb">Bomb</option>
-          <option data-img-src="/solver/static/images/tracker/inventory/SpringBall.png" value="SpringBall">Spring Ball</option>
-          <option data-img-src="/solver/static/images/tracker/inventory/ScrewAttack.png" value="ScrewAttack">Screw Attack</option>
-          <option data-img-src="/solver/static/images/tracker/inventory/HiJump.png" value="HiJump">Hi-Jump Boots</option>
-          <option data-img-src="/solver/static/images/tracker/inventory/SpaceJump.png" value="SpaceJump">Space Jump</option>
-          <option data-img-src="/solver/static/images/tracker/inventory/SpeedBooster.png" value="SpeedBooster">Speed Booster</option>
-          <option data-img-src="/solver/static/images/tracker/inventory/Grapple.png" value="Grapple">Grapple Beam</option>
-          <option data-img-src="/solver/static/images/tracker/inventory/XRayScope.png" value="XRayScope">X-Ray Scope</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Morph.png" value="Morph" {{=setUncollected("Morph")}}>Morph Ball</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Bomb.png" value="Bomb" {{=setUncollected("Bomb")}}>Bomb</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/SpringBall.png" value="SpringBall" {{=setUncollected("SpringBall")}}>Spring Ball</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/ScrewAttack.png" value="ScrewAttack" {{=setUncollected("ScrewAttack")}}>Screw Attack</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/HiJump.png" value="HiJump" {{=setUncollected("HiJump")}}>Hi-Jump Boots</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/SpaceJump.png" value="SpaceJump" {{=setUncollected("SpaceJump")}}>Space Jump</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/SpeedBooster.png" value="SpeedBooster" {{=setUncollected("SpeedBooster")}}>Speed Booster</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Grapple.png" value="Grapple" {{=setUncollected("Grapple")}}>Grapple Beam</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/XRayScope.png" value="XRayScope" {{=setUncollected("XRayScope")}}>X-Ray Scope</option>
         </optgroup>
       </select>
       </div>

@@ -243,6 +243,12 @@ class Solver(object):
 
         return """<img alt="{}" class="imageItem" src="/solver/static/images/solver/marker_{}.png" title="{}" />""".format(diffName, diffName, diffName)
 
+    def genCollectedItems(self, locations):
+        items = set()
+        for _, _, _, item, _, _, _, _, _, _, _, _ in locations:
+            items.add(item)
+        return items
+
     def prepareResult(self):
         if self.session.solver['result'] is not None:
             result = self.session.solver['result']
@@ -262,6 +268,7 @@ class Solver(object):
             result['pathremainMinors'] = self.genPathTable(result['remainMinors'], result['scavengerOrder'], False)
             result['pathskippedMajors'] = self.genPathTable(result['skippedMajors'], result['scavengerOrder'], False)
             result['pathunavailMajors'] = self.genPathTable(result['unavailMajors'], result['scavengerOrder'], False)
+            result['collectedItems'] = self.genCollectedItems(result['generatedPath'])
 
             # display the result only once
             self.session.solver['result'] = None

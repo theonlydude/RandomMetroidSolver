@@ -48,6 +48,7 @@ class GraphBuilder(object):
             # update graph with escape transition
             graph.addTransition(escapeSource, dst)
         else:
+            objectives = container.sm.objectives            
             possibleTargets, path = self.escapeTrigger(emptyContainer, graph, maxDiff, escapeTrigger)
             if path is None:
                 return False
@@ -83,15 +84,26 @@ class GraphBuilder(object):
         return (possibleTargets, dst, path)
 
     def escapeTrigger(self, emptyContainer, graph, maxDiff, escapeTrigger):
-        self.log.debug("escapeTrigger. collect locs until G4 access")
         sm = emptyContainer.sm
-        itemLocs = escapeTrigger[0]
+        itemLocs,progItemLocs,split = escapeTrigger[0],escapeTrigger[1],escapeTrigger[2]
+        # update item% objectives
+        ilCheck = lambda il: not il.Location.isBoss() and not il.Location.restricted and il.Item.Category != "Nothing"
+        nAccessibleItems = len([il for il in itemLocs if ilCheck(il)])
+        sm.objectives.setItemPercentFuncs(nAccessibleItems)
+        if split == "Scavenger":
+            # update escape access for scav with last scav loc
+            lastScavItemLoc = progItemLocs[-1]
+            sm.objectives.updateScavengerEscapeAccess(lastScavItemLoc.Location.accessPoint)
+            sm.objectives.setScavengerHuntFunc(lambda sm: sm.haveItem(lastScavItemLoc.Item.Type))
+        self.log.debug("escapeTrigger. collect locs until G4 access")        
         # collect all item/locations up until we can pass G4
         for il in itemLocs:
             self.log.debug("collecting " + getItemLocStr(il))
             emptyContainer.collect(il)
             if sm.canPassG4():
                 break
+        # final update of item% obj
+        sm.objectives.updateItemPercentEscapeAccess(list({il.Location.accessPoint for il in emptyContainer.itemLocations}))
         possibleTargets = self._getTargets(sm, graph, maxDiff)
         # try to escape from all the possible objectives APs
         possiblePaths = []

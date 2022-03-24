@@ -179,21 +179,21 @@ class Objectives(object):
                                   "collect 25% items", "collect 50% items",
                                   "collect 75% items", "collect 100% items"]},
                         [], "nothing", False, False),
-        # For escape APs, we don't know statically  how many items there is, or how many APs are accessible
+        # For escape APs, we don't know statically how many APs are accessible
         "collect 25% items": Goal("collect 25% items", True, "items", lambda sm: SMBool(True),
-                                  (None, []), 0xFA88,
+                                  (1, []), 0xFA83,
                                   {"list": ["collect 50% items", "collect 75% items", "collect 100% items"]},
                                   [], "collect 25% items", False, False),
         "collect 50% items": Goal("collect 50% items", True, "items", lambda sm: SMBool(True),
-                                  (None, []), 0xFA90,
+                                  (1, []), 0xFA8B,
                                   {"list": ["collect 25% items", "collect 75% items", "collect 100% items"]},
                                   [], "collect 50% items", False, False),
         "collect 75% items": Goal("collect 75% items", True, "items", lambda sm: SMBool(True),
-                                  (None, []), 0xFA98,
+                                  (1, []), 0xFA93,
                                   {"list": ["collect 25% items", "collect 50% items", "collect 100% items"]},
                                   [], "collect 75% items", False, False),
         "collect 100% items": Goal("collect 100% items", True, "items", lambda sm: SMBool(True),
-                                  (None, []), 0xFAA0,
+                                  (1, []), 0xFA9B,
                                   {"list": ["collect 25% items", "collect 50% items", "collect 75% items"]},
                                   [], "collect 100% items", False, False),
     }
@@ -270,16 +270,24 @@ class Objectives(object):
         (_, apList) = Objectives.goals['finish scavenger hunt'].escapeAccessPoints
         apList.append(ap)
 
+    def updateItemPercentEscapeAccess(self, collectedLocsAccessPoints):
+        for pct in [25,50,75,100]:
+            goal = 'collect %d%% items' % pct
+            (_, apList) = Objectives.goals[goal].escapeAccessPoints
+            apList += collectedLocsAccessPoints
+
     def setScavengerHuntFunc(self, scavClearFunc):
-        self.setSolverMode(scavClearFunc)
+        Objectives.goals["finish scavenger hunt"].clearFunc = scavClearFunc
+
+    def setItemPercentFuncs(self, totalItemsCount=None):
+        for pct in [25,50,75,100]:
+            goal = 'collect %d%% items' % pct
+            Objectives.goals[goal].clearFunc = lambda sm: sm.hasItemsPercent(pct, totalItemsCount)
 
     def setSolverMode(self, scavClearFunc):
-        Objectives.goals["finish scavenger hunt"].clearFunc = scavClearFunc
+        self.setScavengerHuntFunc(scavClearFunc)
         # in rando we know the number of items after randomizing, so set the functions only for the solver
-        Objectives.goals["collect 25% items"].clearFunc = lambda sm: sm.hasItemsPercent(25)
-        Objectives.goals["collect 50% items"].clearFunc = lambda sm: sm.hasItemsPercent(50)
-        Objectives.goals["collect 75% items"].clearFunc = lambda sm: sm.hasItemsPercent(75)
-        Objectives.goals["collect 100% items"].clearFunc = lambda sm: sm.hasItemsPercent(100)
+        self.setItemPercentFuncs()
 
     def expandGoals(self):
         # try to replace 'kill all G4' with the four associated objectives.

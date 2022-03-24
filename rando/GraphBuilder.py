@@ -48,7 +48,6 @@ class GraphBuilder(object):
             # update graph with escape transition
             graph.addTransition(escapeSource, dst)
         else:
-            objectives = container.sm.objectives            
             possibleTargets, path = self.escapeTrigger(emptyContainer, graph, maxDiff, escapeTrigger)
             if path is None:
                 return False
@@ -95,7 +94,7 @@ class GraphBuilder(object):
             lastScavItemLoc = progItemLocs[-1]
             sm.objectives.updateScavengerEscapeAccess(lastScavItemLoc.Location.accessPoint)
             sm.objectives.setScavengerHuntFunc(lambda sm: sm.haveItem(lastScavItemLoc.Item.Type))
-        self.log.debug("escapeTrigger. collect locs until G4 access")        
+        self.log.debug("escapeTrigger. collect locs until G4 access")
         # collect all item/locations up until we can pass G4
         for il in itemLocs:
             self.log.debug("collecting " + getItemLocStr(il))

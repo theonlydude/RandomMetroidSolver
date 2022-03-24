@@ -135,6 +135,3 @@ class RandoExec(object):
         for loc in unfilledLocs:
             loc.restricted = True
             itemLocs.append(ItemLocation(nothing, loc, False))
-
-    def countAccessibleItems(self, itemLocs):
-        return 

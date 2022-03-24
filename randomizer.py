@@ -103,9 +103,6 @@ if __name__ == "__main__":
     parser.add_argument('--minimizer', help="minimizer mode: area and boss mixed together. arg is number of non boss locations",
                         dest='minimizerN', nargs='?', const=35, default=None,
                         choices=[str(i) for i in range(30,101)]+["random"])
-    parser.add_argument('--minimizerTourian',
-                        help="Tourian speedup in minimizer mode",
-                        dest='minimizerTourian', nargs='?', const=True, default=False)
     parser.add_argument('--startLocation', help="Name of the Access Point to start from",
                         dest='startLocation', nargs='?', default="Landing Site",
                         choices=['random'] + GraphUtils.getStartAccessPointNames())
@@ -179,9 +176,6 @@ if __name__ == "__main__":
     parser.add_argument('--scavRandomized',
                         help="For Scavenger split, decide whether mandatory major locs will have non-vanilla items",
                         dest='scavRandomized', nargs='?', const=True, default=False)
-    parser.add_argument('--disableTourian',
-                        help="Decide whether escape sequence shall be triggered as soon as objectives are completed",
-                        dest='disableTourian', nargs='?', const=True, default=False)
     parser.add_argument('--suitsRestriction',
                         help="no suits in early game",
                         dest='suitsRestriction', nargs='?', const=True, default=False)
@@ -294,8 +288,9 @@ if __name__ == "__main__":
                         choices=Objectives.getAllGoals()+["random"])
     parser.add_argument('--objectiveList', help="list to choose from when random",
                         dest='objectiveList', nargs='?', default=None)
-
-
+    parser.add_argument('--tourian', help="Tourian mode",
+                        dest='tourian', nargs='?', default='Vanilla',
+                        choices=['Vanilla', 'Fast', 'Disabled'])
     # parse args
     args = parser.parse_args()
 
@@ -456,7 +451,7 @@ if __name__ == "__main__":
         if args.morphPlacement == 'late':
             forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal instead of late")
     # use escape rando for auto escape trigger
-    if args.disableTourian == True:
+    if args.tourian == 'Disabled':
         forceArg('escapeRando', True, "'Escape randomization' forced to on", webValue='on')
         forceArg('noRemoveEscapeEnemies', True, "Enemies enabled during escape sequence", webArg='removeEscapeEnemies', webValue='off')
     # random fill makes certain options unavailable
@@ -509,7 +504,7 @@ if __name__ == "__main__":
     if args.patchOnly == False:
         print("SEED: " + str(seed))
 
-        objectivesManager = Objectives(not args.disableTourian)
+        objectivesManager = Objectives(args.tourian != 'Disabled')
         addedObjectives = 0
         if args.majorsSplit == "Scavenger":
             objectivesManager.setScavengerHunt()
@@ -538,7 +533,7 @@ if __name__ == "__main__":
         if scavNumLocs == 0:
             scavNumLocs = random.randint(4,16)
         restrictions["ScavengerParams"] = {'numLocs':scavNumLocs, 'vanillaItems':not args.scavRandomized}
-    restrictions["EscapeTrigger"] = args.disableTourian
+    restrictions["EscapeTrigger"] = args.tourian == 'Disabled'
     seedCode = 'X'
     if majorsSplitRandom == False:
         if restrictions['MajorMinor'] == 'Full':
@@ -582,7 +577,7 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.VariaTweaks
     if minimizerN is not None:
         RomPatches.ActivePatches.append(RomPatches.NoGadoras)
-    if args.minimizerTourian == True:
+    if args.tourian == 'Fast':
         RomPatches.ActivePatches += RomPatches.MinimizerTourian
     missileQty = float(args.missileQty)
     superQty = float(args.superQty)
@@ -697,7 +692,7 @@ if __name__ == "__main__":
                     escapeAttr['patches'] = []
                     if args.noRemoveEscapeEnemies == True:
                         escapeAttr['patches'].append("Escape_Rando_Enable_Enemies")
-                    if args.disableTourian == True:
+                    if args.tourian == 'Disabled':
                         escapeAttr['patches'].append('Escape_Trigger')
                 if args.majorsSplit == 'Scavenger' and any(il for il in progItemLocs if il.Location.Name == "Ridley"):
                     args.patches.append("Blinking[RidleyRoomIn]")
@@ -801,7 +796,7 @@ if __name__ == "__main__":
                                        args.noLayout, gravityBehaviour,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
-                                       escapeAttr, minimizerN, args.minimizerTourian,
+                                       escapeAttr, minimizerN, args.tourian == 'Fast',
                                        args.doorsColorsRando)
         else:
             # from customizer permalink, apply previously generated seed ips first

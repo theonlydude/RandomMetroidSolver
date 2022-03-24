@@ -1,5 +1,6 @@
 import os, random, re, json
 
+from math import ceil
 from enum import IntFlag
 from rando.Items import ItemManager
 from rom.compression import Compressor
@@ -232,7 +233,7 @@ class RomPatcher:
 
         # for X% collected items objectives, precompute values and write them in objectives functions
         for percent, addr in zip([25, 50, 75, 100], Addresses.getAll('totalItemsPercent')):
-            self.romFile.writeWord((self.nItems * percent)//100, addr)
+            self.romFile.writeWord(ceil((self.nItems * percent)/100), addr)
 
     def addIPSPatches(self, patches):
         for patchName in patches:

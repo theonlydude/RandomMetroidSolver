@@ -131,6 +131,38 @@ if (hs.registerOverlay) {
 .uncollectedItem {
     background-color: #ccc;
 }
+#spoilerCredits {
+    font-family: courier, courier new, serif;
+    font-weight: bold;
+    background-color: black;
+    width: 19em;
+    display: none;
+    margin: 0 auto;
+    margin-top: 1em;
+}
+#spoilerButton {
+    display: none;
+}
+.spoilerItem {
+    color: #e7e700;
+    border-bottom: 0px;
+    text-align: left;
+    padding-top: 0.5em;
+}
+.spoilerLoc {
+    color: #ff8408;
+    border-bottom: 0px;
+    text-align: left;
+}
+.spoilerTitle {
+    color: #e700e7;
+    border-bottom: 0px;
+    text-align: center;
+}
+.spoilerEmpty {
+    margin-top: 0.5em;
+    border-bottom: 0px;
+}
 </style>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -482,6 +514,8 @@ window.onload = function(){
                 select.value = option.value;
 
                 setGuessedPreset(file.name);
+
+                extractSpoiler(bytes);
             }
 
             reader.readAsArrayBuffer(file);
@@ -530,6 +564,145 @@ window.onload = function(){
         }
         $(".popupSubArea").hide();
     });
+}
+
+function displaySpoiler() {
+    var elem = document.getElementById("spoilerCredits");
+    var current = elem.style.display;
+    if(current == "none" || current == "") {
+        elem.style.display = "block";
+    } else {
+        elem.style.display = "none";
+    }
+}
+
+function extractSpoiler(data) {
+    var isVARIA = false;
+    var isRace = false;
+    if(data[0x175ca] == 0x60 && data[0x19E1] == 0xEA && data[0xF27] == 0x20) {
+        isVARIA = true;
+    }
+    for(var addr=0x1C0200; addr<0x1C0210; addr++) {
+        if(data[addr] != 0xff) {
+            isRace = true;
+            break;
+        }
+    }
+
+    // hide spoiler
+    document.getElementById("spoilerCredits").style.display = "none";
+    if(! isVARIA || isRace) {
+        document.getElementById("spoilerButton").style.display = "none";
+        return;
+    } else {
+        document.getElementById("spoilerButton").style.display = "block";
+    }
+
+    var spoiler = Array(19*2);
+    for(var i=0; i<19; i++) {
+        var locStart = 0x2f5240+i*0x80+0x40;
+        var itemStart = 0x2f5240+i*0x80;
+
+        var locArray = Array(32);
+        var itemArray = Array(32);
+
+        for(var j=0; j<32; j++) {
+            //console.log("loc "+j+": "+toChar(data[locStart+j*2]).charCodeAt(0));
+            locArray[j] = toChar(data[locStart+j*2]);
+            itemArray[j] = toChar(data[itemStart+j*2]);
+        }
+
+        var locString = locArray.join("");
+        var itemString = itemArray.join("");
+
+        spoiler[i*2+1] = locString;
+        spoiler[i*2] = itemString;
+    }
+
+    document.getElementById("spoilerCredits").innerHTML = `
+<table class="center">
+<tr><td class="spoilerTitle">ITEM LOCATIONS</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[0]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[1]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[2]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[3]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[4]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[5]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[6]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[7]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[8]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[9]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[10]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[11]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[12]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[13]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[14]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[15]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[16]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[17]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[18]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[19]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[20]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[21]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[22]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[23]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[24]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[25]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[26]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[27]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[28]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[29]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[30]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[31]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[32]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[33]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[34]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[35]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[36]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[37]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+</table>
+`;
+}
+
+function toChar(b) {
+    //console.log("byte is: "+b);
+    if(b == 0x7f) {
+        return ' ';
+    } else if(b == 0x1f) {
+        return '!';
+    } else if(b == 0x1e) {
+        return ':'
+    } else if(b == 0x1d) {
+        return '\\'
+    } else if(b == 0x1c) {
+        return '_'
+    } else if(b == 0x1b) {
+        return ','
+    } else if(b == 0x1a) {
+        return '.'
+    } else {
+        return String.fromCharCode(b + 0x41)
+    }
 }
 
 function getMeta(url, popup, callback) {
@@ -606,6 +779,11 @@ function startTheTour(step=-1) {
 <li>Any%: No requirements on the items as long as the seed is finishable.</li>\
 </ul>",
       placement: "auto left"
+    },
+    {
+      element: "#spoilerButton",
+      title: "Display credits spoiler",
+      content: "Extract the spoiler logs from the in-game credits and display it."
     },
     {
       element: "#forbiddenItemsStep",
@@ -720,13 +898,17 @@ if session.solver["pickupStrategy"] == "all":
               </td>
               <td><button type="button" onclick="startTheTour(4)">?</button></td>
             </tr>
+            <tr id="spoilerButton">
+              <td><button type="button" onclick="displaySpoiler()">Display credits spoiler</button></td><td></td>
+              <td><button type="button" onclick="startTheTour(5)">?</button></td>
+            </tr>
           </table>
         </div>
       </div>
       <input id="romJson" name="romJson" style="display:none" type="text"/>
 
       <div id="forbiddenItemsVisibility">
-        <h3>Items not picked up <button  id="forbiddenItemsStep" type="button" onclick="startTheTour(5)">?</button></h3>
+        <h3>Items not picked up <button  id="forbiddenItemsStep" type="button" onclick="startTheTour(6)">?</button></h3>
         <table class="full">
           <tr>
 {{
@@ -748,9 +930,12 @@ if session.solver["pickupStrategy"] == "all":
         </table>
       </div>
       <input id="complexity" name="complexity" style="display:none" type="text"/>
+      <div>
+        <div id="spoilerCredits">
+        </div>
+      </div>
       {{=INPUT(_type="submit", _value="Solve", _name="action", _class="btn btn-default buttonRandom")}}
     </form>
-
 
 {{
 if result is not None:

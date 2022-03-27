@@ -242,7 +242,7 @@ addExtraAddress("East Maridia", pcAddress=512849)
 # Plasma Climb: forces track one because of item room
 addExtraAddress("East Maridia", pcAddress=512920)
 
-# finally, add extra addresses for area/boss rando
+# add extra addresses for area/boss rando
 from graph.vanilla.graph_access import accessPoints
 
 for ap in accessPoints:
@@ -256,6 +256,81 @@ for ap in accessPoints:
             trackMeta[key] = []
         trackMeta[key] += [0x70000 | a for a in ap.RoomInfo['songs']]
 
+import copy
+
+# expand boss music tracks to individual tracks and remove addresses
+def expandBossTracks(track, bossTracks):
+    meta = metadata[track]
+    if 'pc_addresses' in metadata[track]:
+        del meta['pc_addresses']
+    for boss in bossTracks:
+        metadata["Boss fight - "+boss] = copy.copy(meta)
+    del metadata[track]
+
+expandBossTracks("Boss fight - BT/Ridley/Draygon", ["Bomb/Golden Torizo", "Ridley", "Draygon"])
+expandBossTracks("Boss fight - Kraid/Phantoon/Croc", ["Kraid", "Phantoon", "Crocomire"])
+expandBossTracks("Boss fight - Spore Spawn/Botwoon", ["Spore Spawn", "Botwoon"])
+
+def getBossMeta(boss):
+    return metadata["Boss fight - "+boss]
+
+# add extra metadata to be able to change individual boss music fights
+meta = getBossMeta("Bomb/Golden Torizo")
+meta["static_patches"] = {
+    snes_to_pc(0x84D3C8): [0x04],
+    snes_to_pc(0xAAB096): [0x04]
+}
+meta["dynamic_patches"] = {
+    "data_id": [
+        snes_to_pc(0x8F981F),
+        snes_to_pc(0x8FB299)
+    ],
+    "track_id": [
+        snes_to_pc(0xAAB098)
+    ]
+}
+
+meta = getBossMeta("Ridley")
+meta["dynamic_patches"] = {
+    "data_id": [
+        snes_to_pc(0x8FB344),
+        snes_to_pc(0x8FE0CB)
+    ],
+    "track_id": [
+        snes_to_pc(0xA6A44E)
+    ]
+}
+
+meta = getBossMeta("Draygon")
+meta["pc_addresses"] = [snes_to_pc(0x8FDA76)]
+
+meta = getBossMeta("Kraid")
+meta["static_patches"] = {
+    snes_to_pc(0x8FA5B6): [0x04]
+}
+meta["dynamic_patches"] = {
+    "data_id": [snes_to_pc(0x8FA5B5)],
+    "track_id": [snes_to_pc(0xA7C8B0)]
+}
+
+meta = getBossMeta("Phantoon")
+meta["static_patches"] = {
+    snes_to_pc(0x8FCD2A): [0x04]
+}
+meta["dynamic_patches"] = {
+    "data_id": [snes_to_pc(0x8FCD29)],
+    "track_id": [snes_to_pc(0xA7D543)]
+}
+
+meta = getBossMeta("Crocomire")
+meta["pc_addresses"] = [snes_to_pc(0x8FA9A3)]
+
+meta = getBossMeta("Spore Spawn")
+meta["pc_addresses"] = [499165]
+
+meta = getBossMeta("Botwoon")
+meta["pc_addresses"] = [514420]
+        
 print("Writing %s ..." % json_path)
 with open(json_path, 'w') as fp:
     json.dump(metadata, fp, indent=4)

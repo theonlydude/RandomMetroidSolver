@@ -63,6 +63,9 @@ org $a9b1fe
 org $a9b282
 	jsr load_escape_music_track
 
+org $A6C0B6
+	jsl ceres_escape
+
 org $a9cc65
 	jsr load_mb3_music_data
 
@@ -127,3 +130,12 @@ load_mb2_music_data:
 
 load_mb2_music_track:
 	%loadMusicTrack(mb2)
+
+ceres_escape:
+	lda.l escape
+	ora #$ff00
+	jsl !song_routine
+	lda.l escape
+	and #$00ff
+	jsl !song_routine
+	rtl

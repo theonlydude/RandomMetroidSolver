@@ -1230,13 +1230,13 @@ class MusicPatcher(object):
         self.musicDataTableMaxSize = 45 # to avoid overwriting useful data in bank 8F
 
     # tracks: dict with track name to replace as key, and replacing track name as value
-    # updateRoomStates: change room state headers and special tracks. may be False if you're patching a rom hack or something
+    # updateReferences: change room state headers and special tracks. may be False if you're patching a rom hack or something
     # output: if not None, dump a JSON file with what was done 
     # replaced tracks must be in
     # replaceableTracks, and new tracks must be in allTracks
     # tracks not in the dict will be kept vanilla
     # raise RuntimeError if not possible
-    def replace(self, tracks, updateRoomStates=True, output=None):
+    def replace(self, tracks, updateReferences=True, output=None):
         for track in tracks:
             if track not in self.replaceableTracks:
                 raise RuntimeError("Cannot replace track %s" % track)
@@ -1252,8 +1252,8 @@ class MusicPatcher(object):
         musicDataAddresses = self._getMusicDataAddresses(musicData)
         self._writeMusicData(musicDataAddresses)
         self._writeMusicDataTable(musicData, musicDataAddresses)
-        if updateRoomStates == True:
-            self._updateRoomStateHeaders(trackList, musicData, tracks)
+        if updateReferences == True:
+            self._updateReferences(trackList, musicData, tracks)
         if output is not None:
             self._dump(output, trackList, musicData, musicDataAddresses)
 
@@ -1345,7 +1345,13 @@ class MusicPatcher(object):
             addr = pc_to_snes(musicDataAddresses[dataFile]) if dataFile in musicDataAddresses else 0
             self.rom.writeLong(addr)
 
-    def _updateRoomStateHeaders(self, trackList, musicData, replacedTracks):
+    def _getDataId(self, musicData, track):
+        return (musicData.index(self._nspc_path(self.allTracks[track]['nspc_path']))+1)*3
+
+    def _getTrackId(self, track):
+        return self.allTracks[track]['track_index'] + 5
+
+    def _updateReferences(self, trackList, musicData, replacedTracks):
         trackAddresses = {}
         def addAddresses(track, vanillaTrackData, prio=False):
             nonlocal trackAddresses
@@ -1375,12 +1381,35 @@ class MusicPatcher(object):
             else:
                 addAddresses(track, self.vanillaTracks[track])
         for track in trackList:
-            dataId = (musicData.index(self._nspc_path(self.allTracks[track]['nspc_path']))+1)*3
-            trackId = self.allTracks[track]['track_index'] + 5
+            dataId = self._getDataId(musicData, track)
+            trackId = self._getTrackId(track)
             for addr in trackAddresses[track]:
                 self.rom.seek(addr)
                 self.rom.writeByte(dataId)
                 self.rom.writeByte(trackId)
+        self._writeSpecialReferences(replacedTracks, musicData)
+
+    # write special (boss) data
+    def _writeSpecialReferences(self, replacedTracks, musicData):
+        for track,replacement in replacedTracks.items():
+            if track == replacement:
+                continue
+            staticPatches = self.vanillaTracks[track].get("static_patches", None)
+            dynamicPatches = self.vanillaTracks[track].get("dynamic_patches", None)
+            if staticPatches:
+                for addr,bytez in staticPatches.items():
+                    self.rom.seek(int(addr))
+                    for b in bytez:
+                        self.rom.writeByte(b)
+            if dynamicPatches:
+                dataId = self._getDataId(musicData, replacement)
+                trackId = self._getTrackId(replacement)
+                dataIdAddrs = dynamicPatches.get("data_id", [])
+                trackIdAddrs = dynamicPatches.get("track_id", [])
+                for addr in dataIdAddrs:
+                    self.rom.writeByte(dataId, addr)
+                for addr in trackIdAddrs:
+                    self.rom.writeByte(trackId, addr)
 
     def _dump(self, output, trackList, musicData, musicDataAddresses):
         music={}

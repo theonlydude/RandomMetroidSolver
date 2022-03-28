@@ -861,7 +861,7 @@ if __name__ == "__main__":
             PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
         if musicPatcher is not None:
             musicPatcher.replace(musicMapping,
-                                 updateRoomStates=musicParams.get('room_states', True),
+                                 updateReferences=musicParams.get('room_states', True),
                                  output=musicParams.get("output", None))
         # web mode, generate only one ips at the end
         if args.rom == None:

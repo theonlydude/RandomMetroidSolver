@@ -132,10 +132,11 @@ load_mb2_music_track:
 	%loadMusicTrack(mb2)
 
 ceres_escape:
+	lda #$0000 : jsl !song_routine
 	lda.l escape
 	ora #$ff00
 	jsl !song_routine
-	lda.l escape
+	lda.l escape+1
 	and #$00ff
 	jsl !song_routine
 	rtl

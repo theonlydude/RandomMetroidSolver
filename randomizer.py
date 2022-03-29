@@ -816,10 +816,8 @@ if __name__ == "__main__":
             # don't color randomize custom ships
             args.shift_ship_palette = False
 
-        # we have to write ips to ROM before doing our direct modifications which will rewrite some parts (like in credits),
-        # but in web mode we only want to generate a global ips at the end
-        if args.rom != None:
-            romPatcher.commitIPS()
+        # we have to write ips to ROM before doing our direct modifications which will rewrite some parts (like in credits)
+        romPatcher.commitIPS()
         if args.patchOnly == False:
             romPatcher.writeObjectives(objectivesManager)
             romPatcher.writeItemsLocs(itemLocs)
@@ -863,9 +861,6 @@ if __name__ == "__main__":
             musicPatcher.replace(musicMapping,
                                  updateReferences=musicParams.get('room_states', True),
                                  output=musicParams.get("output", None))
-        # web mode, generate only one ips at the end
-        if args.rom == None:
-            romPatcher.commitIPS()
         romPatcher.end()
         if args.patchOnly == False:
             if len(optErrMsgs) > 0:

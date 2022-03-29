@@ -108,6 +108,7 @@ class RomPatcher:
         }
 
     def end(self):
+        self.romFile.fillToNextBank()
         self.romFile.close()
 
     def writeItemCode(self, item, visibility, address):

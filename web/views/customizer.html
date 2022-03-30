@@ -47,7 +47,7 @@ extend 'layout.html'
     border: 1px solid #ddd;
 }
 .player_table {
-    height: 60em;
+    height: {{=len(musics["_list"])*2*1.5}}em;
     overflow-y: auto;
     overflow-x: hidden;
     border-top: 2px solid #aaa;
@@ -1658,7 +1658,7 @@ def displayCheckbox(id, defaultTrue=False):
                 <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr><th>Track to replace</th><th class="align_center">Music Player</th></tr>
                 <tr><th class="align_right">Replace with</th><th></th></tr>
-                <tr><td></td><td rowspan="46">
+                <tr><td></td><td rowspan={{=1+len(musics["_list"])*2}}>
                     <div id="spc_player" class="spc_player lighter">
                       <table>
                         <tr>

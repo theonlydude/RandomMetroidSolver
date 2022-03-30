@@ -1393,9 +1393,10 @@ class MusicPatcher(object):
     # write special (boss) data
     def _writeSpecialReferences(self, replacedTracks, musicData):
         for track,replacement in replacedTracks.items():
-            if track == replacement:
-                continue
-            staticPatches = self.vanillaTracks[track].get("static_patches", None)
+            if track != replacement:
+                staticPatches = self.vanillaTracks[track].get("static_patches", None)
+            else:
+                staticPatches = None
             dynamicPatches = self.vanillaTracks[track].get("dynamic_patches", None)
             if staticPatches:
                 for addr,bytez in staticPatches.items():

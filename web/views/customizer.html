@@ -1885,7 +1885,6 @@ if seedInfo != None:
 {{    if seedParams["majorsSplit"] == "Scavenger":}}
               <tr {{=setBold("scavNumLocs")}}><td>Major locations in the mandatory route</td><td>{{=seedParams["scavNumLocs"]}}</td></tr>
               <tr {{=setBold("scavRandomized")}}><td>Non-vanilla items in mandatory major locs</td><td>{{=seedParams["scavRandomized"]}}</td></tr>
-              <tr {{=setBold("scavEscape")}}><td>Trigger escape at hunt's end</td><td>{{=seedParams["scavEscape"]}}</td></tr>
 {{        pass}}
               <tr {{=setBold("maxDifficulty")}}><td>Maximum difficulty for picking an item </td><td>{{=seedParams["maxDifficulty"]}}</td></tr>
               <tr {{=setBold("progressionSpeed")}}><td>Progression speed</td><td>{{=seedParams["progressionSpeed"]}}</td></tr>
@@ -1925,7 +1924,7 @@ if seedInfo != None:
 {{    if seedParams["objective"] == "random":}}
               <tr><td>Objectives pool</td><td>{{=seedParams["objectiveMultiSelect"]}}</td></tr>
 {{        pass}}
-              <tr {{=setBold("minimizerTourian")}}><td>Speed up Tourian</td><td>{{=seedParams["minimizerTourian"]}}</td></tr>
+              <tr {{=setBold("tourian")}}><td>Tourian</td><td>{{=seedParams["tourian"]}}</td></tr>
             </table>
 
             <h4>Areas/Doors/Bosses/Escape Randomization</h4>
@@ -1939,7 +1938,6 @@ if seedInfo != None:
               <tr {{=setBold("bossRandomization")}}><td>Bosses randomization</td><td>{{=seedParams["bossRandomization"]}}</td></tr>
               <tr {{=setBold("minimizer")}}><td>Bosses rush, aka Minimizer</td><td>{{=seedParams["minimizer"]}}</td></tr>
               <tr {{=setBold("minimizerQty")}}><td>Number of locations</td><td>{{=seedParams["minimizerQty"]}}</td></tr>
-              <tr {{=setBold("minimizerTourian")}}><td>Speed up Tourian</td><td>{{=seedParams["minimizerTourian"]}}</td></tr>
               <tr {{=setBold("escapeRando")}}><td>Randomize the escape sequence</td><td>{{=seedParams["escapeRando"]}}</td></tr>
               <tr {{=setBold("removeEscapeEnemies")}}><td>Remove enemies during randomized escape sequence</td><td>{{=seedParams["removeEscapeEnemies"]}}</td></tr>
             </table>

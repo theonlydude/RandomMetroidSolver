@@ -71,9 +71,10 @@ TWEAKS=("" "--novariatweaks")
 LAYOUTS=("" "--nolayout")
 STARTAPS=("" "--startLocation random")
 AREAS=("" "" "--area" "--area --areaLayoutBase")
-MINIMIZERS=("--bosses random" "--bosses random" "--bosses random" "--area --bosses --minimizer " "--area --bosses --minimizerTourian --minimizer ")
+MINIMIZERS=("--bosses random" "--bosses random" "--bosses random" "--area --bosses --minimizer ")
 DOORS=("" "--doorsColorsRando random")
 MAJORSSPLITS=("random" "random" "random" "Scavenger")
+TOURIANS=("Vanilla" "Fast" "Disabled")
 
 function generate_random_list {
     FIRST=0
@@ -125,16 +126,15 @@ function generate_params {
     DOOR=${DOORS[$S]}
     let S=$RANDOM%${#MAJORSSPLITS[@]}
     MAJORSSPLIT=${MAJORSSPLITS[$S]}
+    let S=$RANDOM%${#TOURIANS[@]}
+    TOURIAN=${TOURIANS[$S]}
 
     if(echo "${MAJORSSPLIT}" | grep -q "Scavenger"); then
         MAJORS_SPLIT_LIST=""
         SCAV_RANDOMS=("" "--scavRandomized")
         let S=$RANDOM%${#SCAV_RANDOMS[@]}
         SCAV_RANDOM=${SCAV_RANDOMS[$S]}
-	SCAV_ESCAPES=("" "--scavEscape")
-        let S=$RANDOM%${#SCAV_ESCAPES[@]}
-        SCAV_ESCAPE=${SCAV_ESCAPES[$S]}
-        SCAVENGER="--scavNumLocs 0 ${SCAV_RANDOM} ${SCAV_ESCAPE}"
+        SCAVENGER="--scavNumLocs 0 ${SCAV_RANDOM}"
     else
         MAJORS_SPLIT_LIST=$(generate_multi_select "majorsSplit" 'Full' 'Major' 'Chozo' 'FullWithHUD')
         SCAVENGER=""
@@ -150,7 +150,7 @@ function generate_params {
 
     OBJECTIVES_LIST=$(generate_multi_select "objective" "kill_kraid" "kill_phantoon" "kill_draygon" "kill_ridley" "kill_one_G4" "kill_two_G4" "kill_three_G4" "kill_all_G4" "kill_spore_spawn" "kill_botwoon" "kill_crocomire" "kill_golden_torizo" "kill_one_miniboss" "kill_two_minibosses" "kill_three_minibosses" "kill_all_mini_bosses" "nothing" "collect_25%_items" "collect_50%_items" "collect_75%_items" "collect_100%_items")
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random ${MORPH_PLACEMENT_LIST} --progressionDifficulty random ${PROGRESSION_DIFFICULTY_LIST} --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random ${ENERGY_QTY_LIST} --majorsSplit ${MAJORSSPLIT} ${MAJORS_SPLIT_LIST} ${SCAVENGER} --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random --gravityBehaviour random ${GRAVITY_BEHAVIOUR_LIST} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${START_LOCATION_LIST} ${AREA} ${MINIMIZER} ${DOOR} --objective random --objectiveList  ${OBJECTIVES_LIST} --jm"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random ${MORPH_PLACEMENT_LIST} --progressionDifficulty random ${PROGRESSION_DIFFICULTY_LIST} --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random ${ENERGY_QTY_LIST} --majorsSplit ${MAJORSSPLIT} ${MAJORS_SPLIT_LIST} ${SCAVENGER} --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random --gravityBehaviour random ${GRAVITY_BEHAVIOUR_LIST} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${START_LOCATION_LIST} ${AREA} ${MINIMIZER} ${DOOR} --objective random --objectiveList  ${OBJECTIVES_LIST} --tourian ${TOURIAN} --jm"
 }
 
 function computeSeed {

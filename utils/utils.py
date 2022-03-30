@@ -379,8 +379,6 @@ def loadRandoPreset(randoPreset, args):
                     args.scavNumLocs = randoParams["scavNumLocs"]
             if "scavRandomized" in randoParams:
                 args.scavRandomized = randoParams["scavRandomized"] == "on"
-            if "scavEscape" in randoParams:
-                args.scavEscape = randoParams["scavEscape"] == "on"
     if "startLocation" in randoParams:
         args.startLocation = randoParams["startLocation"]
     if "progressionDifficulty" in randoParams:
@@ -418,10 +416,11 @@ def loadRandoPreset(randoPreset, args):
         else:
             args.objective = randoParams["objective"]
 
+    if "tourian" in randoParams:
+        args.tourian = randoParams["tourian"]
+
     if randoParams.get("minimizer", "off") == "on" and "minimizerQty" in randoParams:
         args.minimizerN = randoParams["minimizerQty"]
-    if randoParams.get("minimizerTourian", "off") == "on":
-        args.minimizerTourian = True
 
     defaultMultiValues = getDefaultMultiValues()
     multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective"]
@@ -445,7 +444,6 @@ def getRandomizerDefaultParameters():
     defaultParams['majorsSplitMultiSelect'] = defaultMultiValues['majorsSplit']
     defaultParams['scavNumLocs'] = "10"
     defaultParams['scavRandomized'] = "off"
-    defaultParams['scavEscape'] = "off"
     defaultParams['startLocation'] = "Landing Site"
     defaultParams['startLocationMultiSelect'] = defaultMultiValues['startLocation']
     defaultParams['maxDifficulty'] = 'hardcore'
@@ -466,6 +464,7 @@ def getRandomizerDefaultParameters():
     defaultParams['energyQtyMultiSelect'] = defaultMultiValues['energyQty']
     defaultParams['objective'] = ["kill all G4"]
     defaultParams['objectiveMultiSelect'] = defaultMultiValues['objective']
+    defaultParams['tourian'] = "Vanilla"
     defaultParams['areaRandomization'] = "off"
     defaultParams['areaLayout'] = "off"
     defaultParams['lightAreaRandomization'] = "off"
@@ -476,7 +475,6 @@ def getRandomizerDefaultParameters():
     defaultParams['bossRandomization'] = "off"
     defaultParams['minimizer'] = "off"
     defaultParams['minimizerQty'] = "45"
-    defaultParams['minimizerTourian'] = "off"
     defaultParams['funCombat'] = "off"
     defaultParams['funMovement'] = "off"
     defaultParams['funSuits'] = "off"

@@ -13,7 +13,6 @@ arch snes.cpu
 lorom
 
 !full_refill = $f700    ; short ptr in bank 8F (see area_rando_doors.asm)
-!mark_event  = $8081fa
 !bit_index   = $80818e  ; returns X=byte index, $05e7=bitmask
 !refill_f    = $7fff36	; health refill during hyper beam acquisition
 !hyper_animation_2frames = #$9d	; nb of frames of hyper animation/2 (because divisor has to be 8-bits)
@@ -23,6 +22,8 @@ lorom
 !samus_max_reserve     = $09d4
 !current_room          = $079b
 !tourian_eye_door_room = $aa5c
+
+incsrc "event_list.asm"
 
 ;;; connect Statues Hallway to Tourian Eye Door Room...
 org $8fa616
@@ -100,10 +101,6 @@ enable_hyper:
 
 warnpc $91ffff
 
-;;; objectives_completed function from objectives_pause patch which is applied by default
-org $82fb6d
-objectives_completed:
-
 org $8ff730
 ;;; gadora door asm
 tourian_door:
@@ -119,9 +116,8 @@ tourian_door:
 ;;; statues door asm leading to gadora room
 pre_tourian_door:
 	;; check if objectives are completed
-        jsl objectives_completed
+	lda !objectives_completed_event : jsl !check_event
         bcc .end
-
 	;; if they are completed, set door open for gadora
 print "test pre_tourian_door: ", pc
 	phx

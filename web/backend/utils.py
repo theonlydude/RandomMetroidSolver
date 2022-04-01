@@ -218,6 +218,10 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
                 if value not in authorizedObjectives:
                     raiseHttp(400, "Wrong value for objectiveMultiSelect", isJson)
 
+    if 'tourian' in others:
+        if request.vars['tourian'] not in ['Vanilla', 'Fast', 'Disabled']:
+            raiseHttp(400, "Wrong value fro tourian, authorized values: Vanilla/Fast/Disabled", isJson)
+
     preset = request.vars.preset
     if preset != None:
         if IS_ALPHANUMERIC()(preset)[1] is not None:

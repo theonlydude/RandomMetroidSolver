@@ -145,8 +145,9 @@ class SMBoolManager(object):
     def canPassG4(self):
         return self.objectives.canClearGoals(self)
 
-    def hasItemsPercent(self, percent):
-        totalItemsCount = self.objectives.getTotalItemsCount()
+    def hasItemsPercent(self, percent, totalItemsCount=None):
+        if totalItemsCount is None:
+            totalItemsCount = self.objectives.getTotalItemsCount()
         currentItemsCount = self.getCollectedItemsCount()
         return SMBool(100*(currentItemsCount/totalItemsCount) >= percent)
 

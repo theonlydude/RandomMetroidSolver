@@ -68,7 +68,8 @@ class CommonSolver(object):
                 self.romLoader.loadObjectives(self.objectives)
             else:
                 if self.majorsSplit == "Scavenger":
-                    self.objectives.setScavengerHunt(self.romLoader.hasPatch('Escape_Scavenger'))
+                    self.objectives.setScavengerHunt()
+                    self.objectives.tourianRequired = not self.romLoader.hasPatch('Escape_Trigger')
                 else:
                     self.objectives.setVanilla()
             self.objectives.setSolverMode(self.scavengerHuntComplete)

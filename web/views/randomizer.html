@@ -805,7 +805,7 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "minimizerTourian", "allowGreyDoors", "hud", "scavRandomized", "scavEscape"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"];
 
@@ -995,7 +995,7 @@ function AjaxRandomizerCallCompleted(data) {
     document.getElementById("submitBtn").data = "Randomize";
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "minimizerTourian", "allowGreyDoors", "hud", "scavRandomized", "scavEscape"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"];
 
@@ -1036,10 +1036,6 @@ function AjaxRandomizerCallCompleted(data) {
 }
 
 function getSpecialValues(dataDict) {
-    // special case for the 2nd minimizer tourian checkbox
-    var minimizerTourianObj = document.getElementById("minimizerTourianObj");
-    dataDict["minimizerTourian"] = minimizerTourianObj.value;
-
     // special case for objectives multiselect
     if(isElemIdRandom("objective")) {
         dataDict["objective"] = "random";
@@ -1366,7 +1362,6 @@ window.onload = function(){
 
         var selected = startLocation.value; //startLocation.options[startLocation.selectedIndex].text;
         if(selected != "Ceres" && selected != "Landing Site"){
-            var morphPlacement = document.getElementById("morphPlacement");
             var majorsSplit = document.getElementById("majorsSplit");
             var variaTweaks = document.getElementById("variaTweaks");
             var layoutPatches = document.getElementById("layoutPatches");
@@ -1410,21 +1405,15 @@ window.onload = function(){
     minimizer.onchange = function() {
         var boss = document.getElementById("bossRandomization");
         var area = document.getElementById("areaRandomization");
-        var minimizerTourian = document.getElementById("minimizerTourian");
-        var minimizerTourianObj = document.getElementById("minimizerTourianObj");
+        var tourian = document.getElementById("tourian");
 
         if(minimizer.checked) {
             setSwitchToOn(boss);
             setSwitchToOn(area);
             disableElement("minimizerQty", false);
-            disableElement("minimizerTourian", false);
-            setSwitchToOn(minimizerTourian);
-            setSwitchToOn(minimizerTourianObj);
+            tourian.value = "Fast";
         } else {
-            setSwitchToOff(minimizerTourian);
-            setSwitchToOff(minimizerTourianObj);
             disableElement("minimizerQty", true);
-            disableElement("minimizerTourian", true);
             var minimizerRandom = document.getElementById("minimizerQtyRandom");
             if(isElemRandom(minimizerRandom)) {
                 minimizerRandom.className = minimizerRandom.className.replace(" active", "");
@@ -1434,38 +1423,12 @@ window.onload = function(){
     }
     if(minimizer.checked) {
         disableElement("minimizerQty", false);
-        disableElement("minimizerTourian", false);
     } else {
         disableElement("minimizerQty", true);
-        disableElement("minimizerTourian", true);
         var minimizerRandom = document.getElementById("minimizerQtyRandom");
         if(isElemRandom(minimizerRandom)) {
             minimizerRandom.className = minimizerRandom.className.replace(" active", "");
         }
-    }
-
-    // keep same value for both minimizer tourian checkboxes
-    var minimizerTourian = document.getElementById("minimizerTourian");
-    var minimizerTourianObj = document.getElementById("minimizerTourianObj");
-    minimizerTourian.onchange = function() {
-        var minimizerTourian = document.getElementById("minimizerTourian");
-        var minimizerTourianObj = document.getElementById("minimizerTourianObj");
-        if(minimizerTourian.checked) {
-            setSwitchToOn(minimizerTourianObj);
-        } else {
-            setSwitchToOff(minimizerTourianObj);
-        }
-        switchCheckbox("minimizerTourian");
-    }
-    minimizerTourianObj.onchange = function() {
-        var minimizerTourian = document.getElementById("minimizerTourian");
-        var minimizerTourianObj = document.getElementById("minimizerTourianObj");
-        if(minimizerTourianObj.checked) {
-            setSwitchToOn(minimizerTourian);
-        } else {
-            setSwitchToOff(minimizerTourian);
-        }
-        switchCheckbox("minimizerTourianObj");
     }
 
     var majorsSplit = document.getElementById("majorsSplit");
@@ -1502,18 +1465,6 @@ window.onload = function(){
         }
     }
     majorsSplit.onchange();
-
-    var scavEscape = document.getElementById("scavEscape");
-    scavEscape.onchange = function() {
-        var escapeRando = document.getElementById("escapeRando");
-        var removeEscapeEnemies = document.getElementById("removeEscapeEnemies");
-        if(scavEscape.checked) {
-            setSwitchToOn(escapeRando);
-            setSwitchToOff(removeEscapeEnemies);
-        }
-        switchCheckbox("scavEscape");
-    }
-    scavEscape.onchange();
 
     var inputs = document.getElementsByTagName("input");
     for(var i = 0; i < inputs.length; i++) {
@@ -1764,12 +1715,21 @@ Tournament presets:\
 </ul>\
 </p><p>\
 <b>Note:</b> If you leave the list empty no objective is required to access Tourian, ie. it's open.<br/>\
+<b>Note:</b> See the Tourian parameter to enable fast Tourian or trigger the escape when all objectives are completed.<br/>\
 <b>Note:</b> With Scavenger Hunt majors split only up to four objectives can be set as one mandatory objective is added: finish the Scavenger Hunt.<br/>\
-<b>Note:</b> With Scavenger Hunt majors split with escape sequence triggered at hunt's end you cannot use custom objectives (as you never go to Tourian). If custom objectives are set they are ignored.<br/>\
 <b>Note:</b> Current percentage of collected items is displayed in the inventory pause menu.\
 </p>\
-<p>You can also <b>speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a></b> to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including Mother Brain 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">invicible Gadora</a> until all objectives are completed.</p>\
 <p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 5 objectives from the list (between 1 and 4 if Scavenger Hunt). To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
+    },
+    {
+      element: "#tourianStep",
+      title: "Endgame Tourian",
+      content: "<p>Choose endgame <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> behaviour:\
+<ul>\
+<li><b>Vanilla:</b> regular vanilla <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a></li>\
+<li><b>Fast:</b> speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including Mother Brain 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">invicible Gadora</a> until all objectives are completed.</li>\
+<li><b>Disabled:</b> skip <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> entirely, ie. escape sequence is triggered as soon as all objectives are completed.</li>\
+</ul></p>"
     },
     {
       element: "#StartLocationStep",
@@ -1880,12 +1840,12 @@ Tournament presets:\
     {
       element: "#majorsSplitStep",
       title: "Majors Split",
-      content: "<p>Choose how you want to split the Majors and the Minors items:\
+      content: "<p>Choose how you want to split Majors and Minors items:\
 <ul><li><b>Full</b>: All items are shuffled in all locations</li>\
 <li><b>Full Countdown</b>: Randomize like Full and display in the HUD the number of remaining unique upgrades (everything but energy and ammo) in the current area. See \"VARIA HUD\" comfort patch help in the advanced tab for more information about it.</li>\
 <li><b>Majors/Minors</b>: Use major (unique upgrades and energy) and minor (ammo) item pools.</p><p><b>Note:</b> High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.</li>\
 <li><b>Chozo</b>: Put all unique upgrades as well as minimal ammo/energy to finish the seed in the Chozo locations. These are Chozo statues, Morph Ball and boss item locations (Right Super in Wrecked Ship, Varia Suit, Ridley ETank). Depending on progression speed and item distribution settings, you will be able to 'sequence break' by going to other locations as well.</li>\
-<li><b>Scavenger</b>: You must visit a given number of locations in a mandatory order in a scavenger hunt, and collect items there. The scavenger locations are the 16 locations where a unique upgrade is in the vanilla game, plus Ridley. By default items in the mandatory locations will be vanilla. Other unique upgrades will be randomized between the remaining scavenger locations. By default, you will have to collect all items in the mandatory locations to access Tourian (on top of killing the Golden 4 bosses). You can also choose to trigger the escape immediately after the hunt is over.<br/>The next mandatory location will be displayed in the HUD, and the whole route will be displayed in the HUD during pause (see \"VARIA HUD\" comfort patch help in the advanced tab for more information).</li></ul></p>\
+<li><b>Scavenger</b>: You must visit a given number of locations in a mandatory order in a scavenger hunt, and collect items there. The scavenger locations are the 16 locations where a unique upgrade is in the vanilla game, plus Ridley. By default items in the mandatory locations will be vanilla. Other unique upgrades will be randomized between the remaining scavenger locations. By default, you will have to collect all items in the mandatory locations to access Tourian (on top of finishing other objectives). You can also choose to trigger the escape immediately after the hunt is over by setting Tourian parameter to 'Disabled'.<br/>The next mandatory location will be displayed in the HUD, and the whole route will be displayed in the HUD during pause (see \"VARIA HUD\" comfort patch help in the advanced tab for more information).</li></ul></p>\
 <p>Check the map for the list of Majors, Chozo and Scavenger locations and items:<br/><a href=\"/solver/static/images/help/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"chozoThumb\" src=\"/solver/static/images/help/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p>\
 <p>Using a non-standard or randomized start location and any other split than 'Full' will enable the VARIA HUD, as Major/Chozo locations are slightly modified depending on the start location.</p>\
 <p>Click on the dice button to randomly set this parameter.</p>"
@@ -1899,11 +1859,6 @@ Tournament presets:\
       element: "#scavRandomizedStep",
         title: "Randomize items in mandatory scavenger hunt locations",
       content: "By default items in scavenger hunt locations are vanilla, you can decide to also randomize what items will be in the mandatory locations."
-    },
-    {
-      element: "#scavEscapeStep",
-        title: "Trigger escape at hunt's end",
-      content: "After collecting the last item in the scavenger hunt the escape sequence is triggered, hurry back to your ship."
     },
     {
       element: "#maxDifficultyStep",
@@ -2114,7 +2069,7 @@ Click on the dice button to randomly set this parameter.",
 You can generate anything from a densely packed game with just Crateria, Wrecked Ship, and bosses, to a full area+boss rando<br/>\
 <b>Boss and Area transitions are mixed together</b>, Gadoras are removed, and you can <b>exit boss fights</b> at any point (they are also considered dead as soon as they start exploding instead of when the drops appear).</p>\
 <p>\
-You can also <b>speed up Tourian</b> (on by default), to skip Metroids, Zebetites, and all cutscenes (including Mother Brain 3 fight). Golden Four statues are replaced by an invicible Gadora until all bosses are dead. It also adds a layout patch to open the Zebetites to pass them without Morph, allowing the creation of morphless plandos.\
+You can also <b>speed up Tourian</b> (on by default: sets the Tourian parameter to 'Fast'), to skip Metroids, Zebetites, and all cutscenes (including Mother Brain 3 fight). Golden Four statues are replaced by an invicible Gadora until all objectives are completed. It also adds a layout patch to open the Zebetites to pass them without Morph, allowing the creation of morphless plandos.\
 </p>\
 <p>Minimizer layout example:<a href=\"/solver/static/images/help/minimizer_example.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"minimizerThumb\" src=\"/solver/static/images/help/minimizer_example_thumbnail.png\" alt=\"Minimizer example\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p>\
 <b>Note:</b> will set Area and Boss randomization.<br/>\
@@ -2563,40 +2518,43 @@ def displayNumber(id, min, max, default, step="1"):
               </tr>
             </table>
             <table class="full" id="objectivesVisibility">
-              <colgroup><col class="small"/><col class="third" /><col class="third" /><col class="third" /><col class="small"/></colgroup>
+              <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
               <tr>
                 <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="objectiveText">Objectives to access Tourian:</span></td>
                 <td>{{displayMultiSelect("objective", currentMultiValues["objective"], "", defaultMultiValues["objective"])}}</td>
-                <td class="third paddingonleft">{{displayCheckbox("minimizerTourianObj")}} Speed up Tourian</td>
                 <td id="objectiveStep"><button type="button" onclick="startTheTour(6)">?</button></td>
               </tr>
             </table>
             <table class="full">
               <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
               <tr>
+                <td class="small"></td>
+                <td><span id="tourianText">Endgame behaviour with Tourian:</span></td>
+                <td>{{displaySelect("tourian", ["Vanilla", "Fast", "Disabled"], "Vanilla")}}</td>
+                <td id="tourianStep"><button type="button" onclick="startTheTour(7)">?</button></td>
+              </tr>
+              <tr>
                 <td class="small"><div class="random"><button id="startLocationRandom" type="button" onclick="randomize(event, 'startLocation')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="startLocationText">Start location:</span></td>
                 <td>{{displayMultiSelect("startLocation", currentMultiValues["startLocation"], "Landing Site", defaultMultiValues["startLocation"])}}</td>
-                <td id="StartLocationStep"><button type="button" onclick="startTheTour(7)">?</button></td>
+                <td id="StartLocationStep"><button type="button" onclick="startTheTour(8)">?</button></td>
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="majorsSplitRandom" type="button" onclick="randomize(event, 'majorsSplit')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="majorsSplitText">Majors Split:</span></td>
                 <td>{{displayMultiSelect("majorsSplit", currentMultiValues["majorsSplit"], "Full", defaultMultiValues["majorsSplit"])}}</td>
-                <td id="majorsSplitStep"><button type="button" onclick="startTheTour(8)">?</button></td>
+                <td id="majorsSplitStep"><button type="button" onclick="startTheTour(9)">?</button></td>
               </tr>
             </table>
             <table class="full" id="scavengerParams">
-              <colgroup><col class="small"/><col class="sixth" /><col class="sixth" /><col class="small"/><col class="third"/><col class="small"/><col class="third"/><col class="small"/></colgroup>
+              <colgroup><col class="small"/><col class="quarter" /><col class="quarter" /><col class="small"/><col class="half"/><col class="small"/></colgroup>
               <tr>
                 <td class="small"><div class="random"><button id="scavNumLocsRandom" type="button" onclick="randomize(event, 'scavNumLocs')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td id="scavNumLocsStep"><span id="scavNumLocsText">Mandatory locations to visit:</span></td>
                 <td>{{displayNumber("scavNumLocs", "4", "17", "10", "1")}}</td>
-                <td><button type="button" onclick="startTheTour(9)">?</button></td>
-                <td id="scavRandomizedStep">{{displayCheckbox("scavRandomized")}}Randomize items in mandatory locations</td>
                 <td><button type="button" onclick="startTheTour(10)">?</button></td>
-                <td id="scavEscapeStep">{{displayCheckbox("scavEscape")}}Trigger escape at hunt's end</td>
+                <td id="scavRandomizedStep">{{displayCheckbox("scavRandomized")}}Randomize items in mandatory locations</td>
                 <td><button type="button" onclick="startTheTour(11)">?</button></td>
               </tr>
             </table>
@@ -2720,15 +2678,14 @@ def displayNumber(id, min, max, default, step="1"):
             <table class="full">
               <tr>
                 <td class="small"><div class="random"><button id="bossRandomizationRandom" type="button" onclick="randomize(event, 'bossRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td colspan="4" class="full" id="bossRandomizationStep">{{displayCheckbox("bossRandomization")}}<span id="bossRandomizationText">Bosses randomization</span></td>
+                <td colspan="3" class="full" id="bossRandomizationStep">{{displayCheckbox("bossRandomization")}}<span id="bossRandomizationText">Bosses randomization</span></td>
                 <td><button type="button" onclick="startTheTour(27)">?</button></td>
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="minimizerQtyRandom" type="button" onclick="randomizeMinimizer(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td id="minimizerStep" class="third">{{displayCheckbox("minimizer")}}<span id="minimizerText">Boss rush, aka Minimizer</span></td>
-                <td class="sixth"><span id="minimizerQtyText">Number of locations:</span></td>
-                <td class="sixth">{{displayNumber("minimizerQty", "30", "100", "45", "1")}}</td>
-                <td class="third paddingonleft">{{displayCheckbox("minimizerTourian")}}<span id="minimizerTourianText">Speed up Tourian</span></td>
+                <td id="minimizerStep" class="half">{{displayCheckbox("minimizer")}}<span id="minimizerText">Boss rush, aka Minimizer</span></td>
+                <td class="quarter"><span id="minimizerQtyText">Number of locations:</span></td>
+                <td class="quarter">{{displayNumber("minimizerQty", "30", "100", "45", "1")}}</td>
                 <td><button type="button" onclick="startTheTour(28)">?</button></td>
               </tr>
             </table>

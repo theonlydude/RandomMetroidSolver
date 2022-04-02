@@ -106,6 +106,7 @@ class Addresses(object):
         'plandoAddresses': ValueRange(0xdee000, length=128),
         'plandoTransitions': ValueSingle(0xdee100),
         'escapeTimer': ValueSingle(0x809e21),
+        'escapeTimerTable': ValueSingle(0xA1F0AA),
         'startAP': ValueSingle(0xa1f200),
         'customDoorsAsm': ValueSingle(0x8ff800),
         'locIdsByArea': ValueRange(0xA1F568, end=0xA1F5D7)

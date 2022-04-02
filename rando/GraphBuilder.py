@@ -4,6 +4,7 @@ import utils.log, random, copy
 from graph.graph_utils import GraphUtils, vanillaTransitions, vanillaBossesTransitions, escapeSource, escapeTargets
 from logic.logic import Logic
 from graph.graph import AccessGraphRando as AccessGraph
+from graph.graph_utils import graphAreas
 from utils.objectives import Objectives
 from rando.ItemLocContainer import getItemLocStr
 
@@ -47,12 +48,13 @@ class GraphBuilder(object):
             possibleTargets, dst, path = self.getPossibleEscapeTargets(emptyContainer, graph, maxDiff)
             # update graph with escape transition
             graph.addTransition(escapeSource, dst)
+            paths = [path]
         else:
-            possibleTargets, path = self.escapeTrigger(emptyContainer, graph, maxDiff, escapeTrigger)
-            if path is None:
+            possibleTargets, paths = self.escapeTrigger(emptyContainer, graph, maxDiff, escapeTrigger)
+            if paths is None:
                 return False
         # get timer value
-        self.escapeTimer(graph, path, self.areaRando or escapeTrigger is not None)
+        self.escapeTimer(graph, paths, self.areaRando or escapeTrigger is not None)
         self.log.debug("escapeGraph: ({}, {}) timer: {}".format(escapeSource, dst, graph.EscapeAttributes['Timer']))
         # animals
         GraphUtils.escapeAnimalsTransitions(graph, possibleTargets, dst)
@@ -83,12 +85,13 @@ class GraphBuilder(object):
         return (possibleTargets, dst, path)
 
     def escapeTrigger(self, emptyContainer, graph, maxDiff, escapeTrigger):
-        sm = emptyContainer.sm
-        itemLocs,progItemLocs,split = escapeTrigger[0],escapeTrigger[1],escapeTrigger[2]
+        container = emptyContainer
+        sm = container.sm
+        allItemLocs,progItemLocs,split = escapeTrigger[0],escapeTrigger[1],escapeTrigger[2]
         # filter garbage itemLocs
         ilCheck = lambda il: not il.Location.isBoss() and not il.Location.restricted and il.Item.Category != "Nothing"
         # update item% objectives
-        nAccessibleItems = len([il for il in itemLocs if ilCheck(il)])
+        nAccessibleItems = len([il for il in allItemLocs if ilCheck(il)])
         sm.objectives.setItemPercentFuncs(nAccessibleItems)
         if split == "Scavenger":
             # update escape access for scav with last scav loc
@@ -96,16 +99,16 @@ class GraphBuilder(object):
             sm.objectives.updateScavengerEscapeAccess(lastScavItemLoc.Location.accessPoint)
             sm.objectives.setScavengerHuntFunc(lambda sm: sm.haveItem(lastScavItemLoc.Item.Type))
         self.log.debug("escapeTrigger. collect locs until G4 access")
-        # collect all item/locations up until we can pass G4
-        for il in itemLocs:
+        # collect all item/locations up until we can pass G4 (the escape triggers)
+        itemLocs = allItemLocs[:]
+        while len(itemLocs) > 0 and not sm.canPassG4():
+            il = itemLocs.pop(0)
             if il.Location.restricted:
                 continue
             self.log.debug("collecting " + getItemLocStr(il))
-            emptyContainer.collect(il)
-            if sm.canPassG4():
-                break
+            container.collect(il)
         # final update of item% obj
-        collectedLocsAccessPoints = {il.Location.accessPoint for il in emptyContainer.itemLocations}
+        collectedLocsAccessPoints = {il.Location.accessPoint for il in container.itemLocations}
         sm.objectives.updateItemPercentEscapeAccess(list(collectedLocsAccessPoints))
         possibleTargets = self._getTargets(sm, graph, maxDiff)
         # try to escape from all the possible objectives APs
@@ -117,15 +120,46 @@ class GraphBuilder(object):
                 self.log.debug("escapeTrigger. testing AP " + ap)
                 path = graph.accessPath(sm, ap, 'Landing Site', maxDiff)
                 if path is not None:
+                    self.log.debug("escapeTrigger. add path from "+ap)
                     possiblePaths.append(path)
                     count += 1
             if count < n:
                 # there is a goal we cannot escape from
                 self.log.debug("escapeTrigger. goal %s: found %d/%d possible escapes, abort" % (goal.name, count, n))
                 return (None, None)
-        # pick the longest possible path
-        path = max(possiblePaths, key=lambda p: self._computeTimer(graph, p))
-        return (possibleTargets, path)
+        # try and get a path from all possible areas
+        self.log.debug("escapeTrigger. completing paths")
+        allAreas = {il.Location.GraphArea for il in allItemLocs if not il.Location.restricted and not il.Location.GraphArea in ["Tourian", "Ceres"]}
+        def getStartArea(path):
+            return path[0].GraphArea
+        def apCheck(ap):
+            nonlocal graph, possiblePaths
+            apObj = graph.accessPoints[ap]
+            return apObj.GraphArea not in [getStartArea(path) for path in possiblePaths]
+        escapeAPs = [ap for ap in collectedLocsAccessPoints if apCheck(ap)]
+        for ap in escapeAPs:
+            path = graph.accessPath(sm, ap, 'Landing Site', maxDiff)
+            if path is not None:
+                self.log.debug("escapeTrigger. add path from "+ap)
+                possiblePaths.append(path)
+        def areaPathCheck():
+            nonlocal allAreas, possiblePaths
+            startAreas = {getStartArea(path) for path in possiblePaths}
+            return len(allAreas - startAreas) == 0
+        while not areaPathCheck() and len(itemLocs) > 0:
+            il = itemLocs.pop(0)
+            if il.Location.restricted:
+                continue
+            self.log.debug("collecting " + getItemLocStr(il))
+            container.collect(il)
+            ap = il.Location.accessPoint
+            if apCheck(ap):
+                path = graph.accessPath(sm, ap, 'Landing Site', maxDiff)
+                if path is not None:
+                    self.log.debug("escapeTrigger. add path from "+ap)
+                    possiblePaths.append(path)
+
+        return (possibleTargets, possiblePaths)
 
     def _computeTimer(self, graph, path):
         traversedAreas = list(set([ap.GraphArea for ap in path]))
@@ -154,20 +188,35 @@ class GraphBuilder(object):
         return t
 
     # path: as returned by AccessGraph.accessPath
-    def escapeTimer(self, graph, path, compute):
-        if compute == True:
-            if path[0].Name == 'Climb Bottom Left':
-                graph.EscapeAttributes['Timer'] = None
-                return
-            t = self._computeTimer(graph, path)
+    def escapeTimer(self, graph, paths, compute):
+        if len(paths) == 1:
+            path = paths.pop()
+            if compute == True:
+                if path[0].Name == 'Climb Bottom Left':
+                    graph.EscapeAttributes['Timer'] = None
+                    return
+                t = self._computeTimer(graph, path)
+            else:
+                escapeTargetsTimer = {
+                    'Climb Bottom Left': None, # vanilla
+                    'Green Brinstar Main Shaft Top Left': 210, # brinstar
+                    'Basement Left': 210, # wrecked ship
+                    'Business Center Mid Left': 270, # norfair
+                    'Crab Hole Bottom Right': 270 # maridia
+                }
+                t = escapeTargetsTimer[path[0].Name]
+            self.log.debug("escapeTimer. t="+str(t))
+            graph.EscapeAttributes['Timer'] = t
         else:
-            escapeTargetsTimer = {
-                'Climb Bottom Left': None, # vanilla
-                'Green Brinstar Main Shaft Top Left': 210, # brinstar
-                'Basement Left': 210, # wrecked ship
-                'Business Center Mid Left': 270, # norfair
-                'Crab Hole Bottom Right': 270 # maridia
-            }
-            t = escapeTargetsTimer[path[0].Name]
-        self.log.debug("escapeTimer. t="+str(t))
-        graph.EscapeAttributes['Timer'] = t
+            assert compute
+            graph.EscapeAttributes['Timer'] = 0
+            timerValues = {}
+            graph.EscapeAttributes['TimerTable'] = timerValues
+            for path in paths:
+                area = path[0].GraphArea
+                prev = timerValues.get(area, 0)
+                timerValues[area] = max(prev, self._computeTimer(graph, path))
+            for area in graphAreas[1:-1]:  # no Ceres or Tourian
+                if area not in timerValues:
+                    # area not in graph most probably, still write a 10 minute "ultra failsafe" value
+                    timerValues[area] = 600

@@ -6,7 +6,7 @@ from rando.Items import ItemManager
 from rom.compression import Compressor
 from rom.ips import IPS_Patch
 from utils.doorsmanager import DoorsManager
-from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
+from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses, graphAreas
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
 from rom.addresses import Addresses
@@ -450,11 +450,22 @@ class RomPatcher:
         # timer
         escapeTimer = escapeAttr['Timer']
         if escapeTimer is not None:
-            minute = int(escapeTimer / 60)
-            second = escapeTimer % 60
-            minute = int(minute / 10) * 16 + minute % 10
-            second = int(second / 10) * 16 + second % 10
-            patchDict = {'Escape_Timer': {Addresses.getOne('escapeTimer'): [second, minute]}}
+            patchDict = { 'Escape_Timer': {} }
+            timerPatch = patchDict["Escape_Timer"]
+            def getTimerBytes(t):
+                minute = int(t / 60)
+                second = t % 60
+                minute = int(minute / 10) * 16 + minute % 10
+                second = int(second / 10) * 16 + second % 10
+                return [second, minute]
+            timerPatch[Addresses.getOne('escapeTimer')] = getTimerBytes(escapeTimer)
+            # timer table for Disabled Tourian escape
+            if 'TimerTable' in escapeAttr:
+                tableBytes = []
+                timerPatch[Addresses.getOne('escapeTimerTable')] = tableBytes
+                for area in graphAreas[1:-1]: # no Ceres or Tourian
+                    t = escapeAttr['TimerTable'][area]
+                    tableBytes += getTimerBytes(t)
             self.applyIPSPatch('Escape_Timer', patchDict)
         # animals door to open
         if escapeAttr['Animals'] is not None:

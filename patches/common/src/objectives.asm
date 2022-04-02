@@ -36,7 +36,10 @@ incsrc "event_list.asm"
 org $A1F5FE
 ;;; if non-zero trigger escape as soon as objectives are completed
 escape_option:
-	dw $0000
+	db $00
+;;; if escape option is non-zero, trigger escape only in crateria
+escape_option_crateria:
+	db $01
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; HIJACKS
@@ -149,9 +152,10 @@ all_mini_bosses_dead:
 
 print "Nothing objective: ", pc
 nothing_objective:
-	;; complete objective only when in crateria, in case we trigger escape immediately
+	;; if option enbled (default) complete objective only when in crateria, in case we trigger escape immediately
 	;; and we have custom start location.
 	;; if condition check is for Tourian access, it is in Crateria, so that still works.
+	lda.l escape_option_crateria : and #$00ff : beq .ok
 	lda $079f : beq .ok	; crateria ID is 0
 	clc
 	bra .end
@@ -369,7 +373,7 @@ objectives_completed:
         bne .loop
 .objectives_ok:
         lda !objectives_completed_event : jsl !mark_event
-	lda.l escape_option : beq .end
+	lda.l escape_option : and #$00ff : beq .end
 	jsl trigger_escape
 .end:
         plx

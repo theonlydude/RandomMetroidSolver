@@ -74,7 +74,7 @@ class Addresses(object):
 
     addresses = {
         'totalItems': ValueList([0x8BE656, 0x8BE6B3], storage=Byte),
-        'totalItemsPercent': ValueList([0x82FA88, 0x82FA90, 0x82FA98, 0x82FAA0]),
+        'totalItemsPercent': ValueList([0x82FA8C, 0x82FA99, 0x82FAA1, 0x82FAA9]),
         'objectivesList': ValueSingle(0x82f983),
         'objectivesSpritesOAM': ValueSingle(0x82FEF7),
         'objectivesText': ValueSingle(0xB6F200),

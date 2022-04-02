@@ -54,6 +54,15 @@ patches = {
     'Escape_Trigger' : {
         0x10F5FE: [0x1]
     },
+    'Escape_Trigger_Disable' : {
+        0x10F5FE: [0x0]
+    },
+    'Escape_Trigger_Nothing_Objective_Crateria' : {
+        0x10F5FF: [0x1]
+    },
+    'Escape_Trigger_Nothing_Objective_Anywhere' : {
+        0x10F5FF: [0x0]
+    },
     # for development/quickmet: disable clear save files on 1st boot
     "Disable_Clear_Save_Boot": {
         0x7E26: [0x4c, 0x40, 0xfe]

@@ -87,9 +87,8 @@ class GraphBuilder(object):
         itemLocs,progItemLocs,split = escapeTrigger[0],escapeTrigger[1],escapeTrigger[2]
         # filter garbage itemLocs
         ilCheck = lambda il: not il.Location.isBoss() and not il.Location.restricted and il.Item.Category != "Nothing"
-        itemLocs = [il for il in itemLocs if ilCheck(il)]
         # update item% objectives
-        nAccessibleItems = len(itemLocs)
+        nAccessibleItems = len([il for il in itemLocs if ilCheck(il)])
         sm.objectives.setItemPercentFuncs(nAccessibleItems)
         if split == "Scavenger":
             # update escape access for scav with last scav loc
@@ -99,12 +98,15 @@ class GraphBuilder(object):
         self.log.debug("escapeTrigger. collect locs until G4 access")
         # collect all item/locations up until we can pass G4
         for il in itemLocs:
+            if il.Location.restricted:
+                continue
             self.log.debug("collecting " + getItemLocStr(il))
             emptyContainer.collect(il)
             if sm.canPassG4():
                 break
         # final update of item% obj
-        sm.objectives.updateItemPercentEscapeAccess(list({il.Location.accessPoint for il in emptyContainer.itemLocations}))
+        collectedLocsAccessPoints = {il.Location.accessPoint for il in emptyContainer.itemLocations}
+        sm.objectives.updateItemPercentEscapeAccess(list(collectedLocsAccessPoints))
         possibleTargets = self._getTargets(sm, graph, maxDiff)
         # try to escape from all the possible objectives APs
         possiblePaths = []

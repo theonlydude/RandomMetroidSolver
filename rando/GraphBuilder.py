@@ -85,9 +85,11 @@ class GraphBuilder(object):
     def escapeTrigger(self, emptyContainer, graph, maxDiff, escapeTrigger):
         sm = emptyContainer.sm
         itemLocs,progItemLocs,split = escapeTrigger[0],escapeTrigger[1],escapeTrigger[2]
-        # update item% objectives
+        # filter garbage itemLocs
         ilCheck = lambda il: not il.Location.isBoss() and not il.Location.restricted and il.Item.Category != "Nothing"
-        nAccessibleItems = len([il for il in itemLocs if ilCheck(il)])
+        itemLocs = [il for il in itemLocs if ilCheck(il)]
+        # update item% objectives
+        nAccessibleItems = len(itemLocs)
         sm.objectives.setItemPercentFuncs(nAccessibleItems)
         if split == "Scavenger":
             # update escape access for scav with last scav loc

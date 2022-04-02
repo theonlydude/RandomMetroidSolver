@@ -75,6 +75,9 @@ class Goal(object):
     def isLimit(self):
         return "type" in self.exclusion
 
+    def __repr__(self):
+        return self.name
+
 def getBossEscapeAccessPoint(boss):
     return (1, [Bosses.accessPoints[boss]])
 
@@ -290,6 +293,7 @@ class Objectives(object):
         self.setItemPercentFuncs()
 
     def expandGoals(self):
+        LOG.debug("Active goals:"+str(Objectives.activeGoals))
         # try to replace 'kill all G4' with the four associated objectives.
         # we need at least 3 empty objectives out of the max (-1 +4)
         if Objectives.maxActiveGoals - Objectives.nbActiveGoals < 3:

@@ -150,20 +150,6 @@ all_mini_bosses_dead:
 %eventChecker(shaktool_cleared_path, !shaktool_cleared_path)
 %eventChecker(scavenger_hunt_completed, !hunt_over_event)
 
-print "Nothing objective: ", pc
-nothing_objective:
-	;; if option enbled (default) complete objective only when in crateria, in case we trigger escape immediately
-	;; and we have custom start location.
-	;; if condition check is for Tourian access, it is in Crateria, so that still works.
-	lda.l escape_option_crateria : and #$00ff : beq .ok
-	lda $079f : beq .ok	; crateria ID is 0
-	clc
-	bra .end
-.ok:
-        sec
-.end:
-        rts
-
 nb_killed_bosses:
         ;; return number of killed bosses in X
         ldx #$0000
@@ -241,6 +227,27 @@ endmacro
 %itemPercentChecker(50)
 %itemPercentChecker(75)
 %itemPercentChecker(100)
+
+print "Nothing objective: ", pc
+nothing_objective:
+	;; if option enabled, complete objective only when in
+	;; crateria/blue brin, in case we trigger escape immediately
+	;; and we have custom start location.
+	lda.l escape_option : and #$00ff : beq .ok
+	lda.l escape_option_crateria : and #$00ff : beq .ok
+	;; determine current graph area in special byte in room state header
+	phx
+	ldx $07bb
+	lda $8f0010,x
+	plx
+	;; crateria ID is 1
+	cmp #$0001 : beq .ok
+	clc
+	bra .end
+.ok:
+        sec
+.end:
+        rts
 
 obj_end:
 print "--- 0x", hex(obj_max-obj_end), " bytes left for objectives checkers ---"

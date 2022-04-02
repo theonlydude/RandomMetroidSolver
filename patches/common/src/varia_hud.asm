@@ -28,6 +28,7 @@
 ;;; RAM for current index in scav list order in scavenger
 !scav_idx = $7ed86a		; saved to SRAM automatically
 !scav_tmp  = $7fff40		; temp RAM used for a lot of stuff in scavenger
+!hud_special = $7fff42		; temp RAM used to draw temporary stuff in the HUD (prompt, notification)
 ;;; item split written by randomizer
 !seed_type = $82fb6c
 ;;; vanilla bit array to keep track of collected items
@@ -41,7 +42,7 @@
 !game_state = $0998		; used to check pause/unpause
 !hunt_over_hud = #$0011		; HUD ID of the fake loc 'HUNT OVER'
 !hunt_over_hud8 = #$11		; same as above, for 8-bits mode
-!press_xy_hud = #$8000		; fake scav_idx value telling we shall write 'PRESS X-Y' in scavenger hunt pause
+!press_xy_hud = #$0001		; hud_special value telling we shall write 'PRESS X-Y' in scavenger hunt pause
 !ridley_id = #$00aa
 !area_index = $079f
 !norfair = #$0002
@@ -189,9 +190,16 @@ draw_info:
 	phy
 	php
 
-	;; first, determine if we should show next scav loc or area/items
+	;; determine if we should show some special state
+	lda !hud_special
+	bne .special
+	;; normal display
+.normal:
+	;; check if an objective has recently been completed
+	;; if so, !hud_special will be set with a special value for next frame
+	jsl check_objectives
+	;; check if we should show scav loc/index or area/items
 	lda !scav_idx
-	bmi .special
 	asl : tax
 	lda.l scav_order,x
 	cmp #$ffff : bne .draw_next_scav
@@ -199,14 +207,18 @@ draw_info:
 
 .special:
 	;; special values
+	bmi .draw_objective
 	cmp !press_xy_hud : beq .draw_press_xy
-	bra .draw_next_scav
+	lda !scav_idx
+	bra .normal
 .draw_press_xy:
 	cmp !previous : beq .scav_setup_next
 	sta !previous
 	ldy #press_xy-scav_names
 	bra .draw_scav_text
-
+.draw_objective:
+	;; TODO !
+	bra .normal
 .draw_next_scav:
 	and #$00ff
 	cmp !previous : beq .scav_setup_next
@@ -224,9 +236,8 @@ draw_info:
 	bra .draw_scav_loop
 .maj_index:
 	;; don't show index if showing special stuff
-	lda !previous
-	cmp !hunt_over_hud : beq .scav_setup_next
-	cmp !press_xy_hud : beq .scav_setup_next
+	lda !hud_special : bne .scav_setup_next
+	lda !previous : cmp !hunt_over_hud : beq .scav_setup_next
 	;; show current index in required scav list
 	lda #$2C0F : sta !split_locs_hud-2 ; blank before numbers for cleanup
 	lda !scav_idx : inc : jsr draw_two
@@ -254,7 +265,7 @@ draw_info:
 	lda #$00 : sta !scav_tmp+1	; current increment=0
 	rep #$20
 	;; show "PRESS X-Y" next frame
-	lda !press_xy_hud : sta !scav_idx
+	lda !press_xy_hud : sta !hud_special
 	jmp .end
 .pause_end:
 	lda !scav_tmp
@@ -263,6 +274,7 @@ draw_info:
 .pause_deinit:
 	lda !scav_tmp : and #$00ff : sta !scav_idx
 	lda #$ffff : sta !scav_tmp
+	lda #$0000 : sta !hud_special
 	jmp .end
 .pause:
 	sep #$20
@@ -288,7 +300,7 @@ draw_info:
 	;; just displaying the first item (works with either button)
 	pha
 	rep #$20
-	lda !scav_idx : cmp !press_xy_hud : beq .pause_first_scav
+	lda !hud_special : cmp !press_xy_hud : beq .pause_first_scav
 	sep #$20
 	pla
 	;; add action increment (1 or -1) to scav_idx
@@ -302,6 +314,7 @@ draw_info:
 	lda !scav_idx : dec : sta !scav_idx
 	bra .pause_next_scav_end
 .pause_first_scav:
+	lda #$0000 : sta !hud_special
 	sep #$20
 	pla
 .pause_first_scav_store:
@@ -458,9 +471,16 @@ scav_names:
 	dw "HUNT OVER "
 	dw $0000
 
+;; special values
 press_xy:
 	dw "PRESS X-Y "
 	dw $0000
+
+objective_completed:
+	dw "OBJ   OK! "
+
+all_objectives_completed:
+	dw " OBJS OK! "
 
 cleartable
 
@@ -661,6 +681,32 @@ compute_n_items:
 	ply
 	plx
 	rts
+
+;;; checks if the HUD shall draw an objective, if so update !hud_special
+check_objectives:
+	lda !game_state : cmp #$0008 : bne .end
+	;; check objectives when in normal gameplay
+	ldx.w (!max_objectives+1)*2
+.loop:
+	dex : dex
+	bmi .end
+	lda.l objective_completed_events,x : jsl !check_event
+	bcc .loop
+	;; objective completed, check notification
+	lda.l objective_notified_events,x : jsl !check_event
+	bcs .loop
+	;; objective completed but not displayed yet
+	;; TODO
+.end:
+	rtl
+
+objective_completed_events:
+	dw !objectives_completed_event
+%objectivesCompletedEventArray()
+
+objective_notified_events:
+	dw !objectives_completed_event_notified
+%objectivesNotifiedEventArray()
 
 print "a1 end: ", pc
 warnpc $a1f8ff

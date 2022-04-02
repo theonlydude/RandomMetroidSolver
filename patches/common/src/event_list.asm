@@ -1,5 +1,7 @@
 include
 
+math pri on
+
 ;;; event routines
 !mark_event = $8081FA
 !check_event = $808233
@@ -38,5 +40,34 @@ include
 !GT_event = #$0052
 
 ;;; VARIA events
-!objectives_completed_event = !tourian_open_event ; reuse tourian entrance event
+;; scavenger hunt completion
 !hunt_over_event = #$0080
+
+;; objectives events : a global objectives completed event for endgame
+;; and individual events for each objective :
+;; - is it completed?
+;; - if completed, was the user notified in the HUD?
+;;   (can never be set if HUD is disabled)
+!objectives_completed_event = !tourian_open_event ; reuse tourian entrance event
+!objectives_completed_event_notified = #$0081
+
+!max_objectives = 5
+!objectives_event_base = #$0082
+
+;; declare an array with all the "objective completed" events
+macro objectivesCompletedEventArray()
+!obj_idx = 0
+while !obj_idx < !max_objectives
+	dw !objectives_event_base+2*!obj_idx
+!obj_idx #= !obj_idx+1
+endif
+endmacro
+
+;; declare an array with all the "objective notified" events
+macro objectivesNotifiedEventArray()
+!obj_idx = 0
+while !obj_idx < !max_objectives
+	dw !objectives_event_base+2*!obj_idx+1
+!obj_idx #= !obj_idx+1
+endif
+endmacro

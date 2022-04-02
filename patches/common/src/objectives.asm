@@ -84,7 +84,6 @@ org $A6C5ED
 ;;; free space after tracking.ips and seed_display.ips
 org $82f983
 ;;; seed objectives checker functions pointers, max 5, list ends with $0000
-!max_objectives = #$0005
 print "--- objectives checker functions: ", pc, " ---"
 objective_funcs:
 first_objective_func:
@@ -350,7 +349,27 @@ boss_drops:
 	lda #$0003 : jsl $808FC1 	     ;  Queue elevator music track
 .end:				 	     ;else do nothing
 	rtl
-	
+
+;;; check if all objectives are completed
+;;; (really a subroutine of objectives_completed, here to save space in 82)
+;;; input X : last loop index in objective check event, gives objective list size
+check_objectives_events:
+.loop:
+	dex : dex
+	bmi .completed
+	lda.l objective_events,x
+	jsl !check_event : bcc .end
+	bra .loop
+.completed:
+        lda !objectives_completed_event : jsl !mark_event
+	lda.l escape_option : and #$00ff : beq .end
+	jsl trigger_escape
+.end:
+	rtl
+
+objective_events:
+%objectivesCompletedEventArray()
+
 print "A1 end: ", pc
 warnpc $a1faff
 
@@ -365,16 +384,17 @@ objectives_completed:
         ldx #$0000
 .loop:
         lda.l objective_funcs, x
-        beq .objectives_ok      ; function not set
+        beq .end_loop      ; checkers function list end
         jsr (objective_funcs, x)
-        bcc .end                ; objective not completed
+	bcc .next
+	;; objective completed
+	lda.l objective_events, x : jsl !mark_event
+.next:
         inx : inx
-        cpx !max_objectives*2
+        cpx.w !max_objectives*2
         bne .loop
-.objectives_ok:
-        lda !objectives_completed_event : jsl !mark_event
-	lda.l escape_option : and #$00ff : beq .end
-	jsl trigger_escape
+.end_loop:
+	jsl check_objectives_events
 .end:
         plx
         rtl

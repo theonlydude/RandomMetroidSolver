@@ -1,7 +1,5 @@
 from rom.rom import snes_to_pc
 
-# TODO::use it to get web addresses to read
-# TODO::handle addresses ranges
 # TODO::add patches
 
 class Byte(object):
@@ -56,6 +54,25 @@ class ValueList(object):
             out += self.storage(value).expand()
         return out
 
+class ValueRange(object):
+    def __init__(self, start, length=-1, end=-1):
+        self.start = snes_to_pc(start)
+        if length != -1:
+            self.end = self.start + length
+            self.length = length
+        else:
+            self.end = end
+            self.length = self.end - self.start
+
+    def getOne(self):
+        return self.start
+
+    def getAll(self):
+        return [self.start+i for i in range(self.length)]
+
+    def getWeb(self):
+        return [self.start, self.end]
+
 class Addresses(object):
     @staticmethod
     def getOne(key):
@@ -72,10 +89,24 @@ class Addresses(object):
         value = Addresses.addresses[key]
         return value.getWeb()
 
+    @staticmethod
+    def getRange(key):
+        value = Addresses.addresses[key]
+        return value.getWeb()
+
     addresses = {
         'totalItems': ValueList([0x8BE656, 0x8BE6B3], storage=Byte),
         'totalItemsPercent': ValueList([0x82FA88, 0x82FA90, 0x82FA98, 0x82FAA0]),
         'objectivesList': ValueSingle(0x82f983),
         'objectivesSpritesOAM': ValueSingle(0x82FEF7),
         'objectivesText': ValueSingle(0xB6F200),
+        'majorsSplit': ValueSingle(0x82fb6c, storage=Byte),
+        # scavenger hunt items list (17 prog items (including ridley) + hunt over + terminator, each is a word)
+        'scavengerOrder': ValueRange(0xA1F5D8, length=(17+1+1)*2),
+        'plandoAddresses': ValueRange(0xdee000, length=128),
+        'plandoTransitions': ValueSingle(0xdee100),
+        'escapeTimer': ValueSingle(0x809e21),
+        'startAP': ValueSingle(0xa1f200),
+        'customDoorsAsm': ValueSingle(0x8ff800),
+        'locIdsByArea': ValueRange(0xA1F568, end=0xA1F5D7)
     }

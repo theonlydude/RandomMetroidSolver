@@ -238,7 +238,7 @@ nothing_objective:
 	;; determine current graph area in special byte in room state header
 	phx
 	ldx $07bb
-	lda $8f0010,x
+	lda $8f0010,x : and #$00ff
 	plx
 	;; crateria ID is 1
 	cmp #$0001 : beq .ok

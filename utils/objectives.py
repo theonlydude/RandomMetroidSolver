@@ -277,6 +277,7 @@ class Objectives(object):
         for pct in [25,50,75,100]:
             goal = 'collect %d%% items' % pct
             (_, apList) = Objectives.goals[goal].escapeAccessPoints
+            apList.clear()
             apList += collectedLocsAccessPoints
 
     def setScavengerHuntFunc(self, scavClearFunc):

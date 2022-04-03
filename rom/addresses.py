@@ -1,4 +1,4 @@
-from rom.rom import snes_to_pc
+from rom.rom import snes_to_pc, pc_to_snes
 
 # TODO::add patches
 
@@ -61,7 +61,7 @@ class ValueRange(object):
             self.end = self.start + length
             self.length = length
         else:
-            self.end = end
+            self.end = snes_to_pc(end)
             self.length = self.end - self.start
 
     def getOne(self):

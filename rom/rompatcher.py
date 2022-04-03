@@ -1365,8 +1365,6 @@ class MusicPatcher(object):
         return self.allTracks[track]['track_index'] + 5
 
     def _updateReferences(self, trackList, musicData, replacedTracks):
-        # do this first as some of it (pre-Kraid rooms) can be overwritten by replaced tracks
-        self._writeSpecialReferences(replacedTracks, musicData, static=True)
         trackAddresses = {}
         def addAddresses(track, vanillaTrackData, prio=False):
             nonlocal trackAddresses
@@ -1402,11 +1400,10 @@ class MusicPatcher(object):
                 self.rom.seek(addr)
                 self.rom.writeByte(dataId)
                 self.rom.writeByte(trackId)
-        # do this last, because it can rewrite some room headers above
-        self._writeSpecialReferences(replacedTracks, musicData, dynamic=True)
+        self._writeSpecialReferences(replacedTracks, musicData)
 
-    # write special (boss) data (use static and dynamic args to actually do something)
-    def _writeSpecialReferences(self, replacedTracks, musicData, static=False, dynamic=False):
+    # write special (boss) data
+    def _writeSpecialReferences(self, replacedTracks, musicData, static=True, dynamic=True):
         for track,replacement in replacedTracks.items():
             # static patches are needed only when replacing tracks
             if track != replacement:

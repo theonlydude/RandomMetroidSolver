@@ -306,9 +306,7 @@ meta["pc_addresses"] = [snes_to_pc(0x8FDA76)]
 
 meta = getBossMeta("Kraid")
 meta["static_patches"] = {
-    snes_to_pc(0x8FA5B6): [0x04],
-    snes_to_pc(0x8FA57C): [0x00, 0x04],
-    snes_to_pc(0x8FA537): [0x00, 0x04]
+    snes_to_pc(0x8FA5B6): [0x04]
 }
 meta["dynamic_patches"] = {
     "data_id": [snes_to_pc(0x8FA5B5)],

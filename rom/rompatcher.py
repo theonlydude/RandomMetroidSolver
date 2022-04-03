@@ -1354,7 +1354,7 @@ class MusicPatcher(object):
 
     def _updateReferences(self, trackList, musicData, replacedTracks):
         # do this first as some of it (pre-Kraid rooms) can be overwritten by replaced tracks
-        self._writeSpecialReferences(replacedTracks, musicData)
+        self._writeSpecialReferences(replacedTracks, musicData, static=True)
         trackAddresses = {}
         def addAddresses(track, vanillaTrackData, prio=False):
             nonlocal trackAddresses
@@ -1390,24 +1390,26 @@ class MusicPatcher(object):
                 self.rom.seek(addr)
                 self.rom.writeByte(dataId)
                 self.rom.writeByte(trackId)
+        # do this last, because it can rewrite some room headers above
+        self._writeSpecialReferences(replacedTracks, musicData, dynamic=True)
 
-    # write special (boss) data
-    def _writeSpecialReferences(self, replacedTracks, musicData):
+    # write special (boss) data (use static and dynamic args to actually do something)
+    def _writeSpecialReferences(self, replacedTracks, musicData, static=False, dynamic=False):
         for track,replacement in replacedTracks.items():
             # static patches are needed only when replacing tracks
-            if track != replacement:                
+            if track != replacement:
                 staticPatches = self.vanillaTracks[track].get("static_patches", None)
             else:
                 staticPatches = None
             # dynamic patches are similar to pc_addresses*, and must be written also
             # when track is vanilla, as music data table is changed
             dynamicPatches = self.vanillaTracks[track].get("dynamic_patches", None)
-            if staticPatches:
+            if static and staticPatches:
                 for addr,bytez in staticPatches.items():
                     self.rom.seek(int(addr))
                     for b in bytez:
                         self.rom.writeByte(b)
-            if dynamicPatches:
+            if dynamic and dynamicPatches:
                 dataId = self._getDataId(musicData, replacement)
                 trackId = self._getTrackId(replacement)
                 dataIdAddrs = dynamicPatches.get("data_id", [])

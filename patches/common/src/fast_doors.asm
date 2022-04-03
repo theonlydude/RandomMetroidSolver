@@ -1,8 +1,6 @@
 
 arch snes.cpu
-
-;;; add Kejardon faster decompression patch (has lorom directive)
-incsrc "decompression.asm"
+lorom
 
 ;;; Door Transition Speed by kazuto + extra code to fix samus initial position
 ;;; just double the speed, discard configurability due to the extra code

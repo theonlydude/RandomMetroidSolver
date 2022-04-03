@@ -152,7 +152,7 @@ class RomPatcher:
 
     def writeSplitLocs(self, split, itemLocs, progItemLocs):
         majChozoCheck = lambda itemLoc: itemLoc.Item.Class == split and itemLoc.Location.isClass(split)
-        fullCheck = lambda itemLoc: itemLoc.Location.Id is not None
+        fullCheck = lambda itemLoc: itemLoc.Location.Id is not None and itemLoc.Location.BossItemType is None
         splitChecks = {
             'Full': fullCheck,
             'Scavenger': fullCheck,

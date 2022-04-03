@@ -830,6 +830,17 @@ class Bosses:
         'WreckedShip Top': 'Phantoon'
     }
 
+    accessPoints = {
+        "Kraid": "KraidRoomIn",
+        "Phantoon": "PhantoonRoomIn",
+        "Draygon": "Draygon Room Bottom",
+        "Ridley": "RidleyRoomIn",
+        "SporeSpawn": "Big Pink",
+        "Crocomire": "Crocomire Room Top",
+        "Botwoon": "Aqueduct Bottom",
+        "GoldenTorizo": "Screw Attack Bottom"
+    }
+
     @staticmethod
     def Golden4():
         return ['Draygon', 'Kraid', 'Phantoon', 'Ridley']

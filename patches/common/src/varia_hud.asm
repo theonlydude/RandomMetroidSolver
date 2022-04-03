@@ -12,10 +12,8 @@
 ;;; - prevent the player to go to out of order scav locs
 ;;; - prevent the player to go through G4 if all required scav locs have
 ;;;   not been collected.
-;;; - alternatively, it can trigger the escape immediately after the last
-;;;   item has been collected. If the option is enabled, rando_escape also
-;;;   has to be applied
-;;; When all required scav locs have been collected, the HUD displays 'HUNT OVER'
+;;; When all required scav locs have been collected, the HUD displays 'HUNT OVER',
+;;; and the !hunt_over_event is set
 
 ;;; Includes etank bar combine by lioran
 
@@ -39,12 +37,6 @@
 ;;; RAM area to write to for split/locs in HUD
 !split_locs_hud = $7ec618
 
-;;; external routines
-!mark_event = $8081FA
-!song_routine = $808fc1
-!fix_timer_gfx = $a1f2c0	; in new_game.asm (common routines section)
-!escape_setup = $8ff500		; in rando_escape.asm
-
 ;;; scavenger stuff
 !game_state = $0998		; used to check pause/unpause
 !hunt_over_hud = #$0011		; HUD ID of the fake loc 'HUNT OVER'
@@ -54,13 +46,9 @@
 !area_index = $079f
 !norfair = #$0002
 !ridley_timer = $0FB2
-!scav_escape = #$eeee
 !scav_next_found = #$aaaa
 
-;;; custom music patch detection for escape music trigger
-!custom_music_marker = $8fe86b
-!custom_music_id = #$caca
-!custom_music_escape = $8fe871
+incsrc "event_list.asm"
 
 lorom
 
@@ -82,8 +70,7 @@ item_resume_pickup:
 org $8488AF
 item_abort_pickup:
 
-;;; a bunch of hijacks post item collection to count items or trigger the escape after last item
-;;; in scavenger hunt if option is set (has to be done after item_pickup because of music management)
+;;; a bunch of hijacks post item collection to count items
 org $8488de			; Beams
 	nop : nop : nop
 	jsl item_post_collect
@@ -133,9 +120,6 @@ org $A6C550
 ridley_still_dying:
 org $A6C590			; would have been simpler to just hijack here, but already done by minimizer bosses patch
 ridley_dead:
-
-org $A6C5ED
-	jsl scav_ridley_drops
 
 ;;; skip top row of auto reserve to have more room (HUD draw main routine)
 org $809B61
@@ -496,10 +480,10 @@ incsrc "locs_by_areas.asm"
 scav_order:
 	fillbyte $ff : fill 38	; (17 max scav locs+"HUNT OVER"+terminator)*2
 
-print "option_end: ", pc
-;;; set to non-zero to trigger escape on last item pickup
-option_end:
-	dw $0000
+;;; ROM option for auto escape trigger when objectives are completed (see objectives.asm)
+print "escape_option: ", pc
+escape_option:
+	skip 2			; value written in objectives.asm
 
 load_state:
 	lda #$ffff
@@ -558,14 +542,12 @@ found_next_scav:
 	lda !scav_idx : inc : sta !scav_idx
 	asl : tax
 	lda.l scav_order,x : and #$00ff
-	cmp !hunt_over_hud : bne .pickup_end_noescape
-	;; last item pickup : check if we shall trigger the escape
-	lda.l option_end : beq .pickup_end_noescape
-	lda !scav_escape : sta !scav_tmp ; place marker to trigger escape a bit later (needed because of music change)
+	cmp !hunt_over_hud : bne .end
+	;; last item pickup : set scav hunt event
+	lda !hunt_over_event : jsl !mark_event
 	bra .end
-.pickup_end_noescape:
-	lda #$ffff : sta !scav_tmp
 .end:
+	lda #$ffff : sta !scav_tmp
 	rts
 
 scav_ridley_check:
@@ -601,23 +583,12 @@ scav_ridley_dead:
 	cmp !ridley_id : bne .dead
 	;; Ridley was indeed the next scav location
 	jsr found_next_scav
-	lda !scav_tmp
-	cmp !scav_escape : bne .dead
-	jsr trigger_escape
 	bra .dead
 .not_dead:
 	jml ridley_still_dying
 .dead:
 	plx
 	jml ridley_dead
-
-;;; checks whether Ridley was last on scav list with escape option enabled
-scav_ridley_drops:
-	lda #$000e : jsl $808233 ;if escape flag is off:
-	bcs .end
-	lda #$0003 : jsl $808FC1 ;  Queue elevator music track
-.end:				 ;else do nothing
-	rtl
 
 item_pickup:
 	phy
@@ -655,66 +626,9 @@ item_pickup:
 
 item_post_collect:
 	jsr compute_n_items
-	lda !scav_tmp
-	cmp !scav_escape : bne .normal_pickup
-	jsr trigger_escape
-	bra .end
-.normal_pickup:
 	LDA #$0168 : JSL $82E118 ;} Play room music track after 6 seconds
 .end:
 	rtl
-
-;;; copy-pasted from a PLM instruction
-clear_music_queue:
-	PHX
-	LDX #$000E
-	STZ $0619,x
-	STZ $0629,x
-	DEX
-	DEX
-	BPL $F6
-	PLX
-	LDA $0639
-	STA $063B
-	LDA #$0000
-	STA $063F
-	STA $063D
-	rts
-
-;;; copied from escape rooms setup asm
-room_earthquake:
-	LDA #$0018             ;\
-	STA $183E              ;} Earthquake type = BG1, BG2 and enemies; 3 pixel displacement, horizontal
-	LDA #$FFFF
-	STA $1840
-	rts
-
-trigger_escape:
-	lda #$ffff : sta !scav_tmp
-	phx : phy
-	jsl !escape_setup
-	jsr room_earthquake	; could not be called by setup asm since not in escape yet
-	; load timer graphics
-	lda #$000f : jsl $90f084
-	jsl !fix_timer_gfx
-	lda #$0002 : sta $0943	 ; set timer state to 2 (MB timer start)
-	jsr clear_music_queue
-	jsr trigger_escape_music
-	lda #$000e : jsl !mark_event ; timebomb set event
-	ply : plx
-	rts
-
-trigger_escape_music:
-	lda !custom_music_marker
-	cmp !custom_music_id : beq .custom_music
-	lda #$ff24 : jsl !song_routine ; load boss 1 music data
-	lda #$0007 : jsl !song_routine ; load music track 2
-	bra .end
-.custom_music:
-	lda !custom_music_escape : ora #$ff00 : jsl !song_routine
-	lda !custom_music_escape+1 : and #$00ff : jsl !song_routine
-.end:
-	rts
 
 compute_n_items:
 	phx
@@ -750,34 +664,3 @@ compute_n_items:
 
 print "a1 end: ", pc
 warnpc $a1f8ff
-
-;;; make golden statues instructions check for scavenger collection
-;;; in scavenger mode :
-org $878400			; Phantoon
-	dw alt_set_event
-
-org $878468			; Ridley
-	dw alt_set_event
-
-org $8784d0			; Kraid
-	dw alt_set_event
-
-org $878538			; Draygon
-	dw alt_set_event
-
-org $87d000
-;;; alternate instruction for statues objects:
-;;; set event in argument only if not in scavenger mode, or all scav locs collected
-alt_set_event:
-	phx
-	;; skip check if not in scavenger mode:
-	jsl scav_mode_check
-	bcc .set_event
-	;; in scavenger mode, check if the hunt is over
-	and #$00ff : cmp !hunt_over_hud : bne .end
-.set_event:
-	lda $0000,y : jsl !mark_event
-.end:
-	iny : iny
-	plx
-	rts

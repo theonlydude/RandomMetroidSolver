@@ -169,7 +169,7 @@ class Randomizer(object):
         switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
                    'areaRandomization', 'areaLayout', 'lightAreaRandomization',
                    'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
-                   'bossRandomization', 'minimizer', 'minimizerTourian',
+                   'bossRandomization', 'minimizer',
                    'funCombat', 'funMovement', 'funSuits',
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
                    'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
@@ -178,7 +178,7 @@ class Randomizer(object):
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective']
+        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'tourian']
         validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize
@@ -343,12 +343,12 @@ class Randomizer(object):
         switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
                    'areaRandomization', 'areaLayout', 'lightAreaRandomization',
                    'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
-                   'bossRandomization', 'minimizer', 'minimizerTourian',
+                   'bossRandomization', 'minimizer',
                    'funCombat', 'funMovement', 'funSuits',
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
                    'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
-                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized", "scavEscape"]
+                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized"]
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
@@ -382,7 +382,6 @@ class Randomizer(object):
         self.session.randomizer['bossRandomization'] = self.vars.bossRandomization
         self.session.randomizer['minimizer'] = self.vars.minimizer
         self.session.randomizer['minimizerQty'] = self.vars.minimizerQty
-        self.session.randomizer['minimizerTourian'] = self.vars.minimizerTourian
         self.session.randomizer['funCombat'] = self.vars.funCombat
         self.session.randomizer['funMovement'] = self.vars.funMovement
         self.session.randomizer['funSuits'] = self.vars.funSuits
@@ -401,7 +400,7 @@ class Randomizer(object):
         self.session.randomizer['hud'] = self.vars.hud
         self.session.randomizer['scavNumLocs'] = self.vars.scavNumLocs
         self.session.randomizer['scavRandomized'] = self.vars.scavRandomized
-        self.session.randomizer['scavEscape'] = self.vars.scavEscape
+        self.session.randomizer['tourian'] = self.vars.tourian
         # objective is a special multi select
         self.session.randomizer['objective'] = self.vars.objective.split(',')
         if self.vars.objectiveMultiSelect is not None:

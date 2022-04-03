@@ -1356,6 +1356,7 @@ save_stats_at:
 // save stats both in standard and last areas
 // arg: A = 0 if we just want to save last stats
 //      A != 0 save all stats (save stations)
+// used by gameend.asm, update address it in if moved
 print "save_stats: ", org
 save_stats:
     phx

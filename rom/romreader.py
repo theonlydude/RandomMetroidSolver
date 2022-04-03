@@ -2,6 +2,7 @@ import copy
 
 from rom.compression import Compressor
 from rom.rom import snes_to_pc
+from rom.addresses import Addresses
 from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
 from logic.logic import Logic
 
@@ -103,7 +104,7 @@ class RomReader:
         'red_doors': {'address':0x20560, 'value':0xbd, 'desc': "Red doors open with one Missile and do not react to Super"},
         'rotation': {'address': 0x44DF, 'value': 0xD0, 'desc': "Rotation hack"},
         'objectives': {'address': 0x12822, 'value': 0x08, 'desc': "Objectives displayed in pause"},
-        'Escape_Scavenger': {'address': 0x10F5FE, 'value': 0x1, 'desc': "Trigger escape at end of Scavenger Hunt"}
+        'Escape_Trigger': {'address': 0x10F5FE, 'value': 0x1, 'desc': "Trigger escape when objectives are completed"}
     }
 
     # FIXME shouldn't be here
@@ -213,7 +214,7 @@ class RomReader:
         self.race = None
         # default to morph ball location
         self.nothingId = 0x1a
-        self.nothingAddr = 0x786DE
+        self.nothingAddr = snes_to_pc(0x8f86de)
         if magic is not None:
             from rom.race_mode import RaceModeReader
             self.race = RaceModeReader(self, magic)
@@ -273,7 +274,7 @@ class RomReader:
             return itemCode
 
     def getMajorsSplit(self):
-        address = 0x17B6C
+        address = Addresses.getOne('majorsSplit')
         split = chr(self.romFile.readByte(address))
         splits = {
             'F': 'Full',
@@ -314,7 +315,7 @@ class RomReader:
     def loadScavengerOrder(self, locations):
         order = []
         locIdsDict = self.genLocIdsDict(locations)
-        self.romFile.seek(snes_to_pc(0xA1F5D8))
+        self.romFile.seek(Addresses.getOne('scavengerOrder'))
         while True:
             data = self.romFile.readWord()
             locId = (data & 0xFF00) >> 8
@@ -450,7 +451,7 @@ class RomReader:
         return sorted(ret)
 
     def getPlandoAddresses(self):
-        self.romFile.seek(0x2F6000)
+        self.romFile.seek(Address.getOne('plandoAddresses'))
         addresses = []
         for i in range(128):
             address = self.romFile.readWord()
@@ -461,7 +462,7 @@ class RomReader:
         return addresses
 
     def getPlandoTransitions(self, maxTransitions):
-        self.romFile.seek(0x2F6100)
+        self.romFile.seek(Address.getOne('plandoTransitions'))
         addresses = []
         for i in range(maxTransitions):
             srcDoorPtr = self.romFile.readWord()
@@ -477,7 +478,7 @@ class RomReader:
         return Compressor().decompress(self.romFile, address)
 
     def getEscapeTimer(self):
-        second = self.romFile.readByte(0x1E21)
+        second = self.romFile.readByte(Addresses.getOne('escapeTimer'))
         minute = self.romFile.readByte()
 
         second = int(second / 16)*10 + second%16
@@ -495,7 +496,7 @@ class RomReader:
         objectives.readGoals(self)
 
     def getStartAP(self):
-        address = 0x10F200
+        address = Addresses.getOne('startAP')
         value = self.romFile.readWord(address)
 
         startLocation = 'Landing Site'

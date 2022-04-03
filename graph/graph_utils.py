@@ -399,6 +399,7 @@ class GraphUtils:
     def escapeAnimalsTransitions(graph, possibleTargets, firstEscape):
         n = len(possibleTargets)
         assert (n < 4 and firstEscape is not None) or (n <= 4 and firstEscape is None), "Invalid possibleTargets list: " + str(possibleTargets)
+        GraphUtils.log.debug("escapeAnimalsTransitions. possibleTargets="+str(possibleTargets)+", firstEscape="+str(firstEscape))
         # first get our list of 4 entries for escape patch
         if n >= 1:
             # get actual animals: pick one of the remaining targets
@@ -409,8 +410,13 @@ class GraphUtils:
             if firstEscape is not None:
                 possibleTargets.append(firstEscape)
             poss = possibleTargets[:]
+            GraphUtils.log.debug("escapeAnimalsTransitions. poss="+str(poss))
             while len(possibleTargets) < 4:
-                possibleTargets.append(poss.pop(random.randint(0, len(poss)-1)))
+                if len(poss) > 1:
+                    possibleTargets.append(poss.pop(random.randint(0, len(poss)-1)))
+                else:
+                    # no more possible variety, spam the last possible escape
+                    possibleTargets.append(poss[0])
         else:
             # failsafe: if not enough targets left, abort and do vanilla animals
             animalsAccess = 'Flyway Right'

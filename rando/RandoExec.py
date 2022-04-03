@@ -98,8 +98,9 @@ class RandoExec(object):
         self.log.debug("ItemLocContainer dump before filling:\n"+container.dump())
         ret = filler.generateItems(vcr=vcr)
         if not ret[0]:
-            scavEscape = (ret[1], ret[2]) if self.restrictions.scavEscape else None
-            escapeOk = graphBuilder.escapeGraph(container, self.areaGraph, self.randoSettings.maxDiff, scavEscape)
+            itemLocs, progItemLocs = (ret[1], ret[2])
+            escapeTrigger = (itemLocs, progItemLocs, split) if self.randoSettings.restrictions["EscapeTrigger"] else None
+            escapeOk = graphBuilder.escapeGraph(container, self.areaGraph, self.randoSettings.maxDiff, escapeTrigger)
             if not escapeOk:
                 self.errorMsg += "Could not find a solution for escape"
                 ret = (True, ret[1], ret[2])

@@ -29,13 +29,15 @@ class Synonyms(object):
         Synonyms.alreadyUsed.append(verb)
         return verb
 
+
 class Goal(object):
-    def __init__(self, name, available, gtype, clearFunc, checkAddr, exclusion, items, text, useSynonym, expandable, expandableList=[]):
+    def __init__(self, name, available, gtype, clearFunc, escapeAccessPoints, checkAddr, exclusion, items, text, useSynonym, expandable, expandableList=[]):
         self.name = name
         self.available = available
         self.clearFunc = clearFunc
-        # in bank $82, see objectives_pause.asm
+        # in bank $82, see objectives.asm
         self.checkAddr = checkAddr
+        self.escapeAccessPoints = escapeAccessPoints
         self.rank = -1
         # possible values:
         #  - boss
@@ -73,75 +75,105 @@ class Goal(object):
     def isLimit(self):
         return "type" in self.exclusion
 
+    def __repr__(self):
+        return self.name
+
+def getBossEscapeAccessPoint(boss):
+    return (1, [Bosses.accessPoints[boss]])
+
+def getG4EscapeAccessPoints(n):
+    return (n, [Bosses.accessPoints[boss] for boss in Bosses.Golden4()])
+
+def getMiniBossesEscapeAccessPoints(n):
+    return (n, [Bosses.accessPoints[boss] for boss in Bosses.miniBosses()])
+
 class Objectives(object):
     activeGoals = []
     nbActiveGoals = 0
     maxActiveGoals = 5
-    tourianRequired = True
     totalItemsCount = 100
     goals = {
-        "kill kraid": Goal("kill kraid", True, "boss", lambda sm: Bosses.bossDead(sm, 'Kraid'), 0xF98F,
+        "kill kraid": Goal("kill kraid", True, "boss", lambda sm: Bosses.bossDead(sm, 'Kraid'),
+                           getBossEscapeAccessPoint("Kraid"), 0xF98F,
                            {"list": ["kill all G4", "kill one G4"]}, ["Kraid"], "{} kraid", True, False),
-        "kill phantoon": Goal("kill phantoon", True, "boss", lambda sm: Bosses.bossDead(sm, 'Phantoon'), 0xF997,
+        "kill phantoon": Goal("kill phantoon", True, "boss", lambda sm: Bosses.bossDead(sm, 'Phantoon'),
+                              getBossEscapeAccessPoint("Phantoon"), 0xF997,
                               {"list": ["kill all G4", "kill one G4"]}, ["Phantoon"], "{} phantoon", True, False),
-        "kill draygon": Goal("kill draygon", True, "boss", lambda sm: Bosses.bossDead(sm, 'Draygon'), 0xF99F,
+        "kill draygon": Goal("kill draygon", True, "boss", lambda sm: Bosses.bossDead(sm, 'Draygon'),
+                             getBossEscapeAccessPoint("Draygon"), 0xF99F,
                              {"list": ["kill all G4", "kill one G4"]}, ["Draygon"], "{} draygon", True, False),
-        "kill ridley": Goal("kill ridley", True, "boss", lambda sm: Bosses.bossDead(sm, 'Ridley'), 0xF9A7,
+        "kill ridley": Goal("kill ridley", True, "boss", lambda sm: Bosses.bossDead(sm, 'Ridley'),
+                            getBossEscapeAccessPoint("Ridley"), 0xF9A7,
                             {"list": ["kill all G4", "kill one G4"]}, ["Ridley"], "{} ridley", True, False),
-        "kill one G4": Goal("kill one G4", True, "other", lambda sm: Bosses.xBossesDead(sm, 1), 0xFA56,
+        "kill one G4": Goal("kill one G4", True, "other", lambda sm: Bosses.xBossesDead(sm, 1),
+                            getG4EscapeAccessPoints(1), 0xFA43,
                             {"list": ["kill kraid", "kill phantoon", "kill draygon", "kill ridley",
                                       "kill all G4", "kill two G4", "kill three G4"],
                              "type": "boss",
                              "limit": 0},
                             [], "{} one golden4", True, False),
-        "kill two G4": Goal("kill two G4", True, "other", lambda sm: Bosses.xBossesDead(sm, 2), 0xFA5F,
+        "kill two G4": Goal("kill two G4", True, "other", lambda sm: Bosses.xBossesDead(sm, 2),
+                            getG4EscapeAccessPoints(2), 0xFA4C,
                             {"list": ["kill all G4", "kill one G4", "kill three G4"],
                              "type": "boss",
                              "limit": 1},
                             [], "{} two golden4", True, False),
-        "kill three G4": Goal("kill three G4", True, "other", lambda sm: Bosses.xBossesDead(sm, 3), 0xFA68,
+        "kill three G4": Goal("kill three G4", True, "other", lambda sm: Bosses.xBossesDead(sm, 3),
+                              getG4EscapeAccessPoints(3), 0xFA55,
                               {"list": ["kill all G4", "kill one G4", "kill two G4"],
                                "type": "boss",
                                "limit": 2},
                               [], "{} three golden4", True, False),
-        "kill all G4": Goal("kill all G4", True, "other", lambda sm: Bosses.allBossesDead(sm), 0xF9AF,
+        "kill all G4": Goal("kill all G4", True, "other", lambda sm: Bosses.allBossesDead(sm),
+                            getG4EscapeAccessPoints(4), 0xF9AF,
                             {"list": ["kill kraid", "kill phantoon", "kill draygon", "kill ridley", "kill one G4", "kill two G4", "kill three G4"]},
                             ["Kraid", "Phantoon", "Draygon", "Ridley"],
                             "{} all golden4", True, True, ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"]),
-        "kill spore spawn": Goal("kill spore spawn", True, "miniboss", lambda sm: Bosses.bossDead(sm, 'SporeSpawn'), 0xF9C5,
+        "kill spore spawn": Goal("kill spore spawn", True, "miniboss", lambda sm: Bosses.bossDead(sm, 'SporeSpawn'),
+                                 getBossEscapeAccessPoint("SporeSpawn"), 0xF9C5,
                                  {"list": ["kill all mini bosses", "kill one miniboss"]}, ["SporeSpawn"], "{} spore spawn", True, False),
-        "kill botwoon": Goal("kill botwoon", True, "miniboss", lambda sm: Bosses.bossDead(sm, 'Botwoon'), 0xF9CD,
+        "kill botwoon": Goal("kill botwoon", True, "miniboss", lambda sm: Bosses.bossDead(sm, 'Botwoon'),
+                             getBossEscapeAccessPoint("Botwoon"), 0xF9CD,
                              {"list": ["kill all mini bosses", "kill one miniboss"]}, ["Botwoon"], "{} botwoon", True, False),
-        "kill crocomire": Goal("kill crocomire", True, "miniboss", lambda sm: Bosses.bossDead(sm, 'Crocomire'), 0xF9D5,
+        "kill crocomire": Goal("kill crocomire", True, "miniboss", lambda sm: Bosses.bossDead(sm, 'Crocomire'),
+                               getBossEscapeAccessPoint("Crocomire"), 0xF9D5,
                                {"list": ["kill all mini bosses", "kill one miniboss"]}, ["Crocomire"], "{} crocomire", True, False),
-        "kill golden torizo": Goal("kill golden torizo", True, "miniboss", lambda sm: Bosses.bossDead(sm, 'GoldenTorizo'), 0xF9DD,
+        "kill golden torizo": Goal("kill golden torizo", True, "miniboss", lambda sm: Bosses.bossDead(sm, 'GoldenTorizo'),
+                                   getBossEscapeAccessPoint("GoldenTorizo"), 0xF9DD,
                                    {"list": ["kill all mini bosses", "kill one miniboss"]}, ["GoldenTorizo"], "{} golden torizo", True, False),
-        "kill one miniboss": Goal("kill one miniboss", True, "other", lambda sm: Bosses.xMiniBossesDead(sm, 1), 0xFA71,
+        "kill one miniboss": Goal("kill one miniboss", True, "other", lambda sm: Bosses.xMiniBossesDead(sm, 1),
+                                  getMiniBossesEscapeAccessPoints(1), 0xFA5E,
                                   {"list": ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo",
                                             "kill all mini bosses", "kill two minibosses", "kill three minibosses"],
                                    "type": "miniboss",
                                    "limit": 0},
                                   [], "{} one miniboss", True, False),
-        "kill two minibosses": Goal("kill two minibosses", True, "other", lambda sm: Bosses.xMiniBossesDead(sm, 2), 0xFA7A,
+        "kill two minibosses": Goal("kill two minibosses", True, "other", lambda sm: Bosses.xMiniBossesDead(sm, 2),
+                                    getMiniBossesEscapeAccessPoints(2), 0xFA67,
                                     {"list": ["kill all mini bosses", "kill one miniboss", "kill three minibosses"],
                                      "type": "miniboss",
                                      "limit": 1},
                                     [], "{} two minibosses", True, False),
-        "kill three minibosses": Goal("kill three minibosses", True, "other", lambda sm: Bosses.xMiniBossesDead(sm, 3), 0xFA83,
+        "kill three minibosses": Goal("kill three minibosses", True, "other", lambda sm: Bosses.xMiniBossesDead(sm, 3),
+                                      getMiniBossesEscapeAccessPoints(3), 0xFA70,
                                       {"list": ["kill all mini bosses", "kill one miniboss", "kill two minibosses"],
                                        "type": "miniboss",
                                        "limit": 2},
                                       [], "{} three minibosses", True, False),
-        "kill all mini bosses": Goal("kill all mini bosses", True, "other", lambda sm: Bosses.allMiniBossesDead(sm), 0xF9E5,
+        "kill all mini bosses": Goal("kill all mini bosses", True, "other", lambda sm: Bosses.allMiniBossesDead(sm),
+                                     getMiniBossesEscapeAccessPoints(4), 0xF9E5,
                                      {"list": ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo",
                                                "kill one miniboss", "kill two minibosses", "kill three minibosses"]},
                                      ["SporeSpawn", "Botwoon", "Crocomire", "GoldenTorizo"],
                                      "{} all mini bosses", True, True, ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo"]),
-        "shaktool cleared path": Goal("shaktool cleared path", False, "other", None, 0xF9FB,
+        "shaktool cleared path": Goal("shaktool cleared path", False, "other", None,
+                                      (1, ["Oasis Bottom"]), 0xF9FB,
                                       {"list": []}, [], "shaktool cleared its path", False, False),
-        "finish scavenger hunt": Goal("finish scavenger hunt", False, "other", lambda sm: SMBool(True), 0xFA03,
+        "finish scavenger hunt": Goal("finish scavenger hunt", False, "other", lambda sm: SMBool(True),
+                                      (1, []), 0xFA03, # AP of last loc in scav list is not statically known
                                       {"list": []}, [], "finish scavenger hunt", False, False),
-        "nothing": Goal("nothing", True, "other", lambda sm: SMBool(True), 0xFA1C,
+        "nothing": Goal("nothing", True, "other", lambda sm: SMBool(True),
+                        (1, ["Landing Site"]), 0xFA99, # with no objectives at all, escape auto triggers only in crateria
                         {"list": ["kill kraid", "kill phantoon", "kill draygon", "kill ridley", "kill all G4",
                                   "kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo", "kill all mini bosses",
                                   "shaktool cleared path", "finish scavenger hunt",
@@ -150,19 +182,27 @@ class Objectives(object):
                                   "collect 25% items", "collect 50% items",
                                   "collect 75% items", "collect 100% items"]},
                         [], "nothing", False, False),
-        "collect 25% items": Goal("collect 25% items", True, "items", lambda sm: SMBool(True), 0xFA8C,
+        # For escape APs, we don't know statically how many APs are accessible
+        "collect 25% items": Goal("collect 25% items", True, "items", lambda sm: SMBool(True),
+                                  (1, []), 0xFA79,
                                   {"list": ["collect 50% items", "collect 75% items", "collect 100% items"]},
                                   [], "collect 25% items", False, False),
-        "collect 50% items": Goal("collect 50% items", True, "items", lambda sm: SMBool(True), 0xFA94,
+        "collect 50% items": Goal("collect 50% items", True, "items", lambda sm: SMBool(True),
+                                  (1, []), 0xFA81,
                                   {"list": ["collect 25% items", "collect 75% items", "collect 100% items"]},
                                   [], "collect 50% items", False, False),
-        "collect 75% items": Goal("collect 75% items", True, "items", lambda sm: SMBool(True), 0xFA9C,
+        "collect 75% items": Goal("collect 75% items", True, "items", lambda sm: SMBool(True),
+                                  (1, []), 0xFA89,
                                   {"list": ["collect 25% items", "collect 50% items", "collect 100% items"]},
                                   [], "collect 75% items", False, False),
-        "collect 100% items": Goal("collect 100% items", True, "items", lambda sm: SMBool(True), 0xFAA4,
+        "collect 100% items": Goal("collect 100% items", True, "items", lambda sm: SMBool(True),
+                                  (1, []), 0xFA91,
                                   {"list": ["collect 25% items", "collect 50% items", "collect 75% items"]},
                                   [], "collect 100% items", False, False),
     }
+
+    def __init__(self, tourianRequired=True):
+        self.tourianRequired = tourianRequired
 
     def resetGoals(self):
         Objectives.activeGoals = []
@@ -216,28 +256,45 @@ class Objectives(object):
         Objectives.nbActiveGoals -= 1
         Objectives.activeGoals.remove(goal)
 
+    def isGoalActive(self, goalName):
+        return Objectives.goals[goalName] in Objectives.activeGoals
+
     def setVanilla(self):
         self.addGoal("kill kraid")
         self.addGoal("kill phantoon")
         self.addGoal("kill draygon")
         self.addGoal("kill ridley")
 
-    def setScavengerHunt(self, triggerEscape):
-        if triggerEscape:
-            LOG.debug("triggerEscape: {}, tourian not required")
-            Objectives.tourianRequired = False
-
+    def setScavengerHunt(self):
         self.addGoal("finish scavenger hunt")
 
-    def setSolverMode(self, scavClearFunc):
+    def updateScavengerEscapeAccess(self, ap):
+        assert self.isGoalActive("finish scavenger hunt")
+        (_, apList) = Objectives.goals['finish scavenger hunt'].escapeAccessPoints
+        apList.append(ap)
+
+    def updateItemPercentEscapeAccess(self, collectedLocsAccessPoints):
+        for pct in [25,50,75,100]:
+            goal = 'collect %d%% items' % pct
+            (_, apList) = Objectives.goals[goal].escapeAccessPoints
+            apList.clear()
+            apList += collectedLocsAccessPoints
+
+    def setScavengerHuntFunc(self, scavClearFunc):
         Objectives.goals["finish scavenger hunt"].clearFunc = scavClearFunc
+
+    def setItemPercentFuncs(self, totalItemsCount=None):
+        for pct in [25,50,75,100]:
+            goal = 'collect %d%% items' % pct
+            Objectives.goals[goal].clearFunc = lambda sm: sm.hasItemsPercent(pct, totalItemsCount)
+
+    def setSolverMode(self, scavClearFunc):
+        self.setScavengerHuntFunc(scavClearFunc)
         # in rando we know the number of items after randomizing, so set the functions only for the solver
-        Objectives.goals["collect 25% items"].clearFunc = lambda sm: sm.hasItemsPercent(25)
-        Objectives.goals["collect 50% items"].clearFunc = lambda sm: sm.hasItemsPercent(50)
-        Objectives.goals["collect 75% items"].clearFunc = lambda sm: sm.hasItemsPercent(75)
-        Objectives.goals["collect 100% items"].clearFunc = lambda sm: sm.hasItemsPercent(100)
+        self.setItemPercentFuncs()
 
     def expandGoals(self):
+        LOG.debug("Active goals:"+str(Objectives.activeGoals))
         # try to replace 'kill all G4' with the four associated objectives.
         # we need at least 3 empty objectives out of the max (-1 +4)
         if Objectives.maxActiveGoals - Objectives.nbActiveGoals < 3:
@@ -361,8 +418,8 @@ class Objectives(object):
             LOG.debug("active goal: {}".format(goal.name))
 
         if checkScavEscape:
-            Objectives.tourianRequired = not romReader.patchPresent('Escape_Scavenger')
-            LOG.debug("tourianRequired: {}".format(Objectives.tourianRequired))
+            self.tourianRequired = not romReader.patchPresent('Escape_Trigger')
+            LOG.debug("tourianRequired: {}".format(self.tourianRequired))
 
     # call from rando
     def writeGoals(self, romFile):

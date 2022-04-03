@@ -2,7 +2,9 @@ import sys, os, json
 
 from graph.vanilla.graph_locations import locations
 from graph.vanilla.graph_access import accessPoints
+from rom.rom import snes_to_pc
 from rom.romreader import RomReader
+from rom.addresses import Addresses
 from utils.doorsmanager import DoorsManager
 from utils.utils import getDefaultMultiValues, getPresetDir, removeChars
 from utils.parameters import Knows, isKnows, Controller, isButton
@@ -72,36 +74,31 @@ def getAddressesToRead(plando=False):
 
     # misc
     # majors split
-    addresses["misc"].append(0x17B6C)
+    addresses["misc"] += Addresses.getWeb('majorsSplit')
     # escape timer
-    addresses["misc"].append(0x1E21)
-    addresses["misc"].append(0x1E22)
-    # nothing id
-    addresses["misc"].append(0x17B6D)
+    addresses["misc"] += Addresses.getWeb('escapeTimer')
     # start ap
-    addresses["misc"].append(0x10F200)
-    addresses["misc"].append(0x10F201)
+    addresses["misc"] += Addresses.getWeb('startAP')
     # random doors
     addresses["misc"] += DoorsManager.getAddressesToRead()
     # objectives
     addresses["misc"] += Objectives.getAddressesToRead()
 
     # ranges [low, high]
-    ## doorasm
-    addresses["ranges"] += [0x7EB00, 0x7ee60]
-    # for next release doorasm addresses will be relocated
+    ## old doorasm for old seeds
+    addresses["ranges"] += [snes_to_pc(0x8feb00), snes_to_pc(0x8fee60)]
     maxDoorAsmPatchLen = 22
-    addresses["ranges"] += [0x7F800, 0x7F800+(maxDoorAsmPatchLen * len([ap for ap in accessPoints if ap.Internal == False]))]
+    customDoorsAsm = Addresses.getOne('customDoorsAsm')
+    addresses["ranges"] += [customDoorsAsm, customDoorsAsm+(maxDoorAsmPatchLen * len([ap for ap in accessPoints if ap.Internal == False]))]
     # split locs
-    addresses["ranges"] += [0x10F550, 0x10F5D8]
-    # scavenger hunt items list (16 prog items + hunt over + terminator, each is a word)
-    scavengerListSize = 36
-    addresses["ranges"] += [0x10F5D8, 0x10F5D8+scavengerListSize]
+    addresses["ranges"] += Addresses.getRange('locIdsByArea')
+    addresses["ranges"] += Addresses.getRange('scavengerOrder')
     if plando == True:
         # plando addresses
-        addresses["ranges"] += [0x2F6000, 0x2F6100]
+        addresses["ranges"] += Addresses.getRange('plandoAddresses')
         # plando transitions (4 bytes per transitions, ap#/2 transitions)
-        addresses["ranges"] += [0x2F6100, 0x2F6100+((len(addresses["transitions"])/2) * 4)]
+        plandoTransitions = Addresses.getOne('plandoTransitions')
+        addresses["ranges"] += [plandoTransitions, plandoTransitions+((len(addresses["transitions"])/2) * 4)]
 
     return addresses
 
@@ -217,6 +214,10 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
             for value in request.vars.objectiveMultiSelect.split(','):
                 if value not in authorizedObjectives:
                     raiseHttp(400, "Wrong value for objectiveMultiSelect", isJson)
+
+    if 'tourian' in others:
+        if request.vars['tourian'] not in ['Vanilla', 'Fast', 'Disabled']:
+            raiseHttp(400, "Wrong value fro tourian, authorized values: Vanilla/Fast/Disabled", isJson)
 
     preset = request.vars.preset
     if preset != None:

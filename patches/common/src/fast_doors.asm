@@ -1,8 +1,6 @@
 
 arch snes.cpu
-
-;;; add Kejardon faster decompression patch (has lorom directive)
-incsrc "decompression.asm"
+lorom
 
 ;;; Door Transition Speed by kazuto + extra code to fix samus initial position
 ;;; just double the speed, discard configurability due to the extra code
@@ -71,11 +69,11 @@ org $82DE50
 	ASL A		;Uncomment only if S equals $0008
 
 org $82e3c5
-	jsr fix_samus_pos
+	jml fix_samus_pos
 
 ;;; Door centering speed by Kazuto:
 !Speed = 2	;Pixels per-frame to slide the screen, default $01
-!FreeSpace = $82F70F	;Safe to move anywhere in ROM
+!FreeSpace = $A1FB00	;Safe to move anywhere in ROM
 
 org $82E325	;Horizontal doors
 	NOP
@@ -148,7 +146,7 @@ fix_samus_pos:
 	lda !samus_sx : sec : sbc #$C800 : sta !samus_sx
 	lda !samus_x : sbc #$0004 : sta !samus_x
 .end:
-	lda !samus_x		; hijacked code
-	rts
+	lda !samus_x : and #$00ff		; hijacked code
+	jml $82e3cb
 
-warnpc $82f7ff
+warnpc !FreeSpace+$A0

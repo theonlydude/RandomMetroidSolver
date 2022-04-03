@@ -372,7 +372,7 @@ class Customizer(object):
             vanilla = json.load(jsonFile)
         with open('music/_constraints/vanilla.json', 'r', encoding='utf-8') as jsonFile:
             constraints = json.load(jsonFile)
-        musics["_list"] = [(song, removeChars(song, " ,()-/")) for song in vanilla.keys() if song not in constraints["preserve"]]
+        musics["_list"] = [(song, removeChars(song, " ,()-/")) for song in vanilla.keys() if song not in constraints["preserve"] and song not in constraints["discard"]]
         return musics
 
     def getSpcFile(self):

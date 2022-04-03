@@ -607,6 +607,7 @@ scav_ridley_dead:
 .not_dead:
 	jml ridley_still_dying
 .dead:
+	lda !ridley_event : jsl !mark_event
 	plx
 	jml ridley_dead
 

@@ -6,7 +6,7 @@ from rando.Items import ItemManager
 from rom.compression import Compressor
 from rom.ips import IPS_Patch
 from utils.doorsmanager import DoorsManager
-from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
+from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses, graphAreas
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
 from rom.addresses import Addresses
@@ -109,6 +109,7 @@ class RomPatcher:
         }
 
     def end(self):
+        self.romFile.fillToNextBank()
         self.romFile.close()
 
     def writeItemCode(self, item, visibility, address):
@@ -151,7 +152,7 @@ class RomPatcher:
 
     def writeSplitLocs(self, split, itemLocs, progItemLocs):
         majChozoCheck = lambda itemLoc: itemLoc.Item.Class == split and itemLoc.Location.isClass(split)
-        fullCheck = lambda itemLoc: itemLoc.Location.Id is not None
+        fullCheck = lambda itemLoc: itemLoc.Location.Id is not None and itemLoc.Location.BossItemType is None
         splitChecks = {
             'Full': fullCheck,
             'Scavenger': fullCheck,
@@ -170,7 +171,7 @@ class RomPatcher:
             self.romFile.writeByte(0xff)
         if split == "Scavenger":
             # write required major item order
-            self.romFile.seek(snes_to_pc(0xA1F5D8))
+            self.romFile.seek(Addresses.getOne('scavengerOrder'))
             for itemLoc in progItemLocs:
                 self.romFile.writeWord((itemLoc.Location.Id << 8) | itemLoc.Location.HUD)
             # bogus loc ID | "HUNT OVER" index
@@ -216,8 +217,8 @@ class RomPatcher:
             operand = item.BeamBits
         else:
             operand = item.ItemBits
-        self.patchMorphBallCheck(0x1410E6, cat, comp, operand, branch) # eye main AI
-        self.patchMorphBallCheck(0x1468B2, cat, comp, operand, branch) # head main AI
+        self.patchMorphBallCheck(snes_to_pc(0xa890e6), cat, comp, operand, branch) # eye main AI
+        self.patchMorphBallCheck(snes_to_pc(0xa8e8b2), cat, comp, operand, branch) # head main AI
 
     def patchMorphBallCheck(self, offset, cat, comp, operand, branch):
         # actually patch enemy AI
@@ -428,9 +429,9 @@ class RomPatcher:
         if 'doors' in ap.Start:
             doors += ap.Start['doors']
         doors.append(0x0)
-        addr = 0x10F200
+        addr = Addresses.getOne('startAP')
         patch = [w0, w1] + doors
-        assert (addr + len(patch)) < 0x10F210, "Stopped before new_game overwrite"
+        assert (addr + len(patch)) < addr + 0x10, "Stopped before new_game overwrite"
         patchDict = {
             'StartAP': {
                 addr: patch
@@ -450,11 +451,22 @@ class RomPatcher:
         # timer
         escapeTimer = escapeAttr['Timer']
         if escapeTimer is not None:
-            minute = int(escapeTimer / 60)
-            second = escapeTimer % 60
-            minute = int(minute / 10) * 16 + minute % 10
-            second = int(second / 10) * 16 + second % 10
-            patchDict = {'Escape_Timer': {0x1E21:[second, minute]}}
+            patchDict = { 'Escape_Timer': {} }
+            timerPatch = patchDict["Escape_Timer"]
+            def getTimerBytes(t):
+                minute = int(t / 60)
+                second = t % 60
+                minute = int(minute / 10) * 16 + minute % 10
+                second = int(second / 10) * 16 + second % 10
+                return [second, minute]
+            timerPatch[Addresses.getOne('escapeTimer')] = getTimerBytes(escapeTimer)
+            # timer table for Disabled Tourian escape
+            if 'TimerTable' in escapeAttr:
+                tableBytes = []
+                timerPatch[Addresses.getOne('escapeTimerTable')] = tableBytes
+                for area in graphAreas[1:-1]: # no Ceres or Tourian
+                    t = escapeAttr['TimerTable'][area]
+                    tableBytes += getTimerBytes(t)
             self.applyIPSPatch('Escape_Timer', patchDict)
         # animals door to open
         if escapeAttr['Animals'] is not None:
@@ -500,9 +512,9 @@ class RomPatcher:
                 for locName, locIndex in locList:
                     plmLocs[(k, locIndex)] = locName
         # make two patches out of this dict
-        plmTblAddr = 0x7E9A0 # moves downwards
+        plmTblAddr = snes_to_pc(0x8fe9a0) # moves downwards
         plmPatchData = []
-        roomTblAddr = 0x7EC00 # moves upwards
+        roomTblAddr = snes_to_pc(0x8fec00) # moves upwards
         roomPatchData = []
         plmTblOffset = plmTblAddr
         def appendPlmBytes(bytez):
@@ -548,7 +560,7 @@ class RomPatcher:
         random.seed(seed)
         seedInfo = random.randint(0, 0xFFFF)
         seedInfo2 = random.randint(0, 0xFFFF)
-        self.romFile.writeWord(seedInfo, 0x2FFF00)
+        self.romFile.writeWord(seedInfo, snes_to_pc(0xdfff00))
         self.romFile.writeWord(seedInfo2)
 
     def writeMagic(self):
@@ -556,7 +568,7 @@ class RomPatcher:
             self.race.writeMagic()
 
     def writeMajorsSplit(self, majorsSplit):
-        address = 0x17B6C
+        address = Addresses.getOne('majorsSplit')
         splits = {
             'Chozo': 'Z',
             'Major': 'M',
@@ -597,7 +609,7 @@ class RomPatcher:
         totalNothing = sum(1 for il in itemLocs if il.Accessible and il.Item.Category == 'Nothing')
         totalEnergy = self.getItemQty(itemLocs, 'ETank')+self.getItemQty(itemLocs, 'Reserve')
         totalMajors = max(totalItemLocs - totalEnergy - totalAmmo - totalNothing, 0)
-        address = 0x2736C0
+        address = snes_to_pc(0xceb6c0)
         value = "{:>2}".format(totalItemLocs)
         line = " ITEM LOCATIONS              %s " % value
         self.writeCreditsStringBig(address, line, top=True)
@@ -675,7 +687,7 @@ class RomPatcher:
         address += 0x40
 
         # write ammo/energy pct
-        address = 0x273C40
+        address = snes_to_pc(0xcebc40)
         (ammoPct, energyPct) = (int(self.getAmmoPct(dist)), int(100*totalEnergy/18))
         line = " AVAILABLE AMMO {:>3}% ENERGY {:>3}%".format(ammoPct, energyPct)
         self.writeCreditsStringBig(address, line, top=True)
@@ -719,7 +731,7 @@ class RomPatcher:
             return s
 
         isRace = self.race is not None
-        startCreditAddress = 0x2f5240
+        startCreditAddress = snes_to_pc(0xded240)
         address = startCreditAddress
         if isRace:
             addr = address - 0x40
@@ -880,7 +892,7 @@ class RomPatcher:
     #   property shall point to this custom ASM.
     # * if not, just write doorAsmPtr as the door property directly.
     def writeDoorConnections(self, doorConnections):
-        asmAddress = 0x7F800
+        asmAddress = Addresses.getOne('customDoorsAsm')
         for conn in doorConnections:
             # write door ASM for transition doors (code and pointers)
             doorPtr = conn['DoorPtr']
@@ -965,7 +977,7 @@ class RomPatcher:
 
     # change BG table to avoid scrolling sky bug when transitioning to west ocean
     def patchWestOcean(self, doorPtr):
-        self.romFile.writeWord(doorPtr, 0x7B7BB)
+        self.romFile.writeWord(doorPtr, snes_to_pc(0x8fb7bb))
 
     # forces CRE graphics refresh when exiting kraid's or croc room
     def forceRoomCRE(self, roomPtr, creFlag=0x2):
@@ -1008,7 +1020,7 @@ class RomPatcher:
                 self.romFile.writeByte(RomPatcher.buttons[button][1])
 
     def writePlandoAddresses(self, locations):
-        self.romFile.seek(0x2F6000)
+        self.romFile.seek(Addresses.getOne('plandoAddresses'))
         for loc in locations:
             self.romFile.writeWord(loc.Address & 0xFFFF)
 
@@ -1018,7 +1030,7 @@ class RomPatcher:
             self.romFile.writeWord(0xFFFF)
 
     def writePlandoTransitions(self, transitions, doorsPtrs, maxTransitions):
-        self.romFile.seek(0x2F6100)
+        self.romFile.seek(Addresses.getOne('plandoTransitions'))
 
         for (src, dest) in transitions:
             self.romFile.writeWord(doorsPtrs[src])
@@ -1031,7 +1043,7 @@ class RomPatcher:
 
     def enableMoonWalk(self):
         # replace STZ with STA since A is non-zero at this point
-        self.romFile.writeByte(0x8D, 0xB35D)
+        self.romFile.writeByte(0x8D, snes_to_pc(0x81b35d))
 
     def compress(self, address, data):
         # data: [] of 256 int
@@ -1062,8 +1074,8 @@ class RomPatcher:
         # max 32 chars
 
         # new oamlist address in free space at the end of bank 8C
-        self.romFile.writeWord(0xF3E9, 0x5a0e3)
-        self.romFile.writeWord(0xF3E9, 0x5a0e9)
+        self.romFile.writeWord(0xF3E9, snes_to_pc(0x8ba0e3))
+        self.romFile.writeWord(0xF3E9, snes_to_pc(0x8ba0e9))
 
         # string length
         versionLength = len(version)
@@ -1072,7 +1084,7 @@ class RomPatcher:
             length = versionLength + rotationLength
         else:
             length = versionLength
-        self.romFile.writeWord(length, 0x0673e9)
+        self.romFile.writeWord(length, snes_to_pc(0x8cf3e9))
         versionMiddle = int(versionLength / 2) + versionLength % 2
 
         # oams
@@ -1117,7 +1129,7 @@ class MessageBox(object):
 
         # add 0x0c/0x06 to offsets as there's 12/6 bytes before the strings, string length is either 0x13/0x1a
         self.offsets = {
-            'ETank': (0x2877f+0x0c, 0x13),
+            'ETank': (snes_to_pc(0x85877f)+0x0c, 0x13),
             'Missile': (0x287bf+0x06, 0x1a),
             'Super': (0x288bf+0x06, 0x1a),
             'PowerBomb': (0x289bf+0x06, 0x1a),
@@ -1231,13 +1243,13 @@ class MusicPatcher(object):
         self.musicDataTableMaxSize = 45 # to avoid overwriting useful data in bank 8F
 
     # tracks: dict with track name to replace as key, and replacing track name as value
-    # updateRoomStates: change room state headers and special tracks. may be False if you're patching a rom hack or something
+    # updateReferences: change room state headers and special tracks. may be False if you're patching a rom hack or something
     # output: if not None, dump a JSON file with what was done 
     # replaced tracks must be in
     # replaceableTracks, and new tracks must be in allTracks
     # tracks not in the dict will be kept vanilla
     # raise RuntimeError if not possible
-    def replace(self, tracks, updateRoomStates=True, output=None):
+    def replace(self, tracks, updateReferences=True, output=None):
         for track in tracks:
             if track not in self.replaceableTracks:
                 raise RuntimeError("Cannot replace track %s" % track)
@@ -1253,8 +1265,8 @@ class MusicPatcher(object):
         musicDataAddresses = self._getMusicDataAddresses(musicData)
         self._writeMusicData(musicDataAddresses)
         self._writeMusicDataTable(musicData, musicDataAddresses)
-        if updateRoomStates == True:
-            self._updateRoomStateHeaders(trackList, musicData, tracks)
+        if updateReferences == True:
+            self._updateReferences(trackList, musicData, tracks)
         if output is not None:
             self._dump(output, trackList, musicData, musicDataAddresses)
 
@@ -1346,7 +1358,13 @@ class MusicPatcher(object):
             addr = pc_to_snes(musicDataAddresses[dataFile]) if dataFile in musicDataAddresses else 0
             self.rom.writeLong(addr)
 
-    def _updateRoomStateHeaders(self, trackList, musicData, replacedTracks):
+    def _getDataId(self, musicData, track):
+        return (musicData.index(self._nspc_path(self.allTracks[track]['nspc_path']))+1)*3
+
+    def _getTrackId(self, track):
+        return self.allTracks[track]['track_index'] + 5
+
+    def _updateReferences(self, trackList, musicData, replacedTracks):
         trackAddresses = {}
         def addAddresses(track, vanillaTrackData, prio=False):
             nonlocal trackAddresses
@@ -1376,12 +1394,39 @@ class MusicPatcher(object):
             else:
                 addAddresses(track, self.vanillaTracks[track])
         for track in trackList:
-            dataId = (musicData.index(self._nspc_path(self.allTracks[track]['nspc_path']))+1)*3
-            trackId = self.allTracks[track]['track_index'] + 5
+            dataId = self._getDataId(musicData, track)
+            trackId = self._getTrackId(track)
             for addr in trackAddresses[track]:
                 self.rom.seek(addr)
                 self.rom.writeByte(dataId)
                 self.rom.writeByte(trackId)
+        self._writeSpecialReferences(replacedTracks, musicData)
+
+    # write special (boss) data
+    def _writeSpecialReferences(self, replacedTracks, musicData, static=True, dynamic=True):
+        for track,replacement in replacedTracks.items():
+            # static patches are needed only when replacing tracks
+            if track != replacement:
+                staticPatches = self.vanillaTracks[track].get("static_patches", None)
+            else:
+                staticPatches = None
+            # dynamic patches are similar to pc_addresses*, and must be written also
+            # when track is vanilla, as music data table is changed
+            dynamicPatches = self.vanillaTracks[track].get("dynamic_patches", None)
+            if static and staticPatches:
+                for addr,bytez in staticPatches.items():
+                    self.rom.seek(int(addr))
+                    for b in bytez:
+                        self.rom.writeByte(b)
+            if dynamic and dynamicPatches:
+                dataId = self._getDataId(musicData, replacement)
+                trackId = self._getTrackId(replacement)
+                dataIdAddrs = dynamicPatches.get("data_id", [])
+                trackIdAddrs = dynamicPatches.get("track_id", [])
+                for addr in dataIdAddrs:
+                    self.rom.writeByte(dataId, addr)
+                for addr in trackIdAddrs:
+                    self.rom.writeByte(trackId, addr)
 
     def _dump(self, output, trackList, musicData, musicDataAddresses):
         music={}

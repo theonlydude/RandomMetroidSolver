@@ -20,15 +20,19 @@ endmacro
 !current_escape      = $7fff34
 !door_sz             = 12
 !door_list_ptr       = $07b5
+;;; number of areas to define Disabled Tourian escape timer table size
+!nb_areas = 10 			; (count out Ceres and Tourian)
 
 ;;; external definitions
 !fix_timer_gfx	     = $a1f2c0	; in new_game.asm (common routines section)
-!scavenger_escape_flag = $a1f5fe ; in varia_hud.asm (option flag)
+!disabled_tourian_escape_flag = $a1f5fe ; in objectives.asm (option flag)
 
 org $809E21
 print "timer_value: ", pc
 timer_value:
-;   dw #$1030
+	;; dw #$1030
+	skip 2
+	jsl set_timer_value
 
 ;;; HIJACKS
 org $82df38
@@ -102,8 +106,8 @@ escape_hyper_check:
     lda $0c18,x
     bit #$0008                  ; check for plasma (hyper = wave+plasma)
     beq .nohit
-    ;; avoid having actual plasma beam destroy blocks in scavenger mode escape
-    lda !scavenger_escape_flag
+    ;; avoid having actual plasma beam destroy blocks in Disabled Tourian escape
+    lda !disabled_tourian_escape_flag
     cmp #$0001 : beq .nohit
     lda #$0000                  ; set zero flag
     bra .end
@@ -368,6 +372,11 @@ one_elev_list_4:
     dw $D73F,$0480,$02A2,$0000,$2C00,$0000,$0001,$0018,$ffff
     db $00
 
+;;; Timer Values indexed by area ID for Disabled Tourian escape
+;;; (written by randomizer)
+print "timer_values_by_area_id: ", pc
+timer_values_by_area_id:
+	skip !nb_areas*2
 
 ;;; CODE (in bank A1 free space)
 
@@ -458,6 +467,21 @@ music_and_enemies:
 .end:
     jml $82df5c
 
+;;; set escape timer from an area-id indexed table if value is set to 0 in ROM
+;;; (Disabled Tourian escape from anywhere)
+set_timer_value:
+	bne .end
+	;; get current area id
+	ldx $07bb
+	lda $8f0010,x : and #$00ff
+	dec			; first area (Crateria) has ID 1 because Ceres is 0
+	asl : tax
+	lda.l timer_values_by_area_id, x
+.end:
+	JSL $809E8C		; hijacked code: set timer to value in A
+	rtl
+
+print "A1 end: ", pc
 warnpc $a1f1ff
 
 ;; ;;; TEST

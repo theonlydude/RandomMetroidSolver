@@ -98,7 +98,7 @@ class Addresses(object):
         'totalItems': ValueList([0x8BE656, 0x8BE6B3], storage=Byte),
         'totalItemsPercent': ValueList([0x82FA7E, 0x82FA86, 0x82FA8E, 0x82FA96]),
         'objectivesList': ValueSingle(0x82f983),
-        'objectivesSpritesOAM': ValueSingle(0x82FEF2),
+        'objectivesSpritesOAM': ValueSingle(0x82FEB0),
         'objectivesText': ValueSingle(0xB6F200),
         'majorsSplit': ValueSingle(0x82fb6c, storage=Byte),
         # scavenger hunt items list (17 prog items (including ridley) + hunt over + terminator, each is a word)

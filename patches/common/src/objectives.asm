@@ -692,48 +692,20 @@ samus_bottom:
 glowing_LR_animation:
         dw $002A, $002A, $002A, $002A
 
-
 draw_completed_objectives_sprites:
-        lda first_objective_func
-        beq .end
-        ldx #$0000 : jsr (first_objective_func, x)
-        bcc .second_objective
-        ldy #first_spritemap
-        jsr draw_spritemap
-
-.second_objective:
-        lda second_objective_func
-        beq .end
-        ldx #$0000 : jsr (second_objective_func, x)
-        bcc .third_objective
-        ldy #second_spritemap
-        jsr draw_spritemap
-
-.third_objective:
-        lda third_objective_func
-        beq .end
-        ldx #$0000 : jsr (third_objective_func, x)
-        bcc .fourth_objective
-        ldy #third_spritemap
-        jsr draw_spritemap
-
-.fourth_objective:
-        lda fourth_objective_func
-        beq .end
-        ldx #$0000 : jsr (fourth_objective_func, x)
-        bcc .fith_objective
-        ldy #fourth_spritemap
-        jsr draw_spritemap
-
-.fith_objective:
-        lda fith_objective_func
-        beq .end
-        ldx #$0000 : jsr (fith_objective_func, x)
-        bcc .end
-        ldy #fith_spritemap
-        jsr draw_spritemap
-
+	phx : phy
+	ldx.w #!max_objectives*2
+.loop:
+	dex : dex
+	bmi .end
+	lda.l objective_events,x : jsl !check_event
+	bcc .loop
+	;; draw objective completed sprite
+	ldy completed_spritemaps,x
+	jsr draw_spritemap
+	bra .loop
 .end:
+	ply : plx
         rts
 
 draw_spritemap:
@@ -898,8 +870,11 @@ third_spritemap:
         dw $0001, $0000 : db $00 : dw $3E8C
 fourth_spritemap:
         dw $0001, $0000 : db $00 : dw $3E8C
-fith_spritemap:
+fifth_spritemap:
         dw $0001, $0000 : db $00 : dw $3E8C
+
+completed_spritemaps:
+	dw first_spritemap, second_spritemap, third_spritemap, fourth_spritemap, fifth_spritemap
 
 print ""
 print "82 end: ", pc

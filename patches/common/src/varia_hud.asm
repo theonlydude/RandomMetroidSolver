@@ -19,6 +19,8 @@
 
 ;;; Compile with "asar" (https://github.com/RPGHacker/asar/releases)
 
+!game_state = $0998		; used to check pause/unpause
+
 !hudposition = #$0006
 ;;; RAM used to store previous values to see whether we must draw
 ;;; area/item counter or next scav display
@@ -39,16 +41,19 @@
 ;;; RAM area to write to for split/locs in HUD
 !split_locs_hud = $7ec618
 
-;;; scavenger stuff
-!game_state = $0998		; used to check pause/unpause
-!hunt_over_hud = #$0011		; HUD ID of the fake loc 'HUNT OVER'
-!hunt_over_hud8 = #$11		; same as above, for 8-bits mode
+;;; special HUD display state mask, by priority
 !press_xy_hud_mask = $8000	; hud_special bit telling we shall write 'PRESS X-Y' in scavenger hunt pause
 !all_objectives_hud_mask = $4000 ; hud_special bit telling we shall write 'OBJS OK!'
 !objective_hud_mask = $2000     ; hud_special bit telling we shall write an individual objective
+
+;;; objectives notifications display
 !objective_global_mask = !all_objectives_hud_mask|!objective_hud_mask
-!objective_clear_mask = ~!objective_global_mask & $FF00
+!objective_clear_mask = ~!objective_global_mask&$FF00
 !notification_display_frames = #300 ; 5 seconds
+
+;;; scavenger stuff
+!hunt_over_hud = #$0011		; HUD ID of the fake loc 'HUNT OVER'
+!hunt_over_hud8 = #$11		; same as above, for 8-bits mode
 !ridley_id = #$00aa
 !area_index = $079f
 !norfair = #$0002
@@ -196,14 +201,15 @@ draw_info:
 	phy
 	php
 
+	;; check if an objective has recently been completed
+	;; if so, !hud_special will be set with a special value
+	jsl check_objectives
 	;; determine if we should show some special state
 	lda !hud_special
 	bne .special
+
 	;; normal display
 .normal:
-	;; check if an objective has recently been completed
-	;; if so, !hud_special will be set with a special value for next frame
-	jsl check_objectives
 	;; check if we should show scav loc/index or area/items
 	lda !scav_idx
 	asl : tax
@@ -211,8 +217,8 @@ draw_info:
 	cmp #$ffff : bne .draw_next_scav
 	jmp .draw_area
 
-.special:
 	;; special values by priority :
+.special:
 	;; - "PRESS X-Y" prompt in scavenger
 	bmi .draw_press_xy
 	;; - all objectives completed notification
@@ -222,51 +228,47 @@ draw_info:
 	;; unkown
 	bra .normal
 .draw_press_xy:
-	cmp !previous : beq .scav_setup_next
-	sta !previous
-	ldy #press_xy-scav_names
-	bra .draw_scav_text
+	ldy #press_xy-hud_text
+	jsr draw_text
+	bra .game_state_check
 .draw_objective:
-	ldy #objective_completed-scav_names
-	bra .draw_scav_text
+	ldy #objective_completed-hud_text
+	jsr draw_text
+	;; draw objective index
+	lda !hud_special : and #$00ff : inc : jsr draw_one
+	jmp .end
 .draw_all_objectives_ok:
-	ldy #all_objectives_completed-scav_names
-	bra .draw_scav_text
+	ldy #all_objectives_completed-hud_text
+	jsr draw_text
+	jmp .end
+
+	;; Display scavenger hunt status
 .draw_next_scav:
 	and #$00ff
 	cmp !previous : beq .scav_setup_next
 	sta !previous
 	asl : asl : asl : asl
+	clc : adc #scav_names-hud_text
 	tay
-.draw_scav_text:
-	ldx !hudposition
-.draw_scav_loop:
-	lda scav_names,y
-	beq .maj_index
-	sta $7ec602,x
-	iny : iny
-	inx : inx
-	bra .draw_scav_loop
-.maj_index:
+	jsr draw_text
+.draw_scav_index:
 	;; don't show index if showing special stuff
 	lda !previous : cmp !hunt_over_hud : beq .scav_setup_next
-	lda !hud_special
-	bmi .scav_setup_next
-	bit #!all_objectives_hud_mask : bne .scav_setup_next
-	;; TODO individual objective index
 	;; show current index in required scav list
 	lda #$2C0F : sta !split_locs_hud-2 ; blank before numbers for cleanup
 	lda !scav_idx : inc : jsr draw_two
 .scav_setup_next:
 	lda !previous : cmp !hunt_over_hud : bne .game_state_check
 	jmp .end
-.game_state_check:
+
+	;; Scavenger pause:
 	;; when pausing, we allow the user to press X/Y to
 	;; cycle through the remaining items.
 	;; during this phase, scav_tmp is used to store
 	;; maj_index backup in its low byte, and current
 	;; increment due to button pressed its high byte
 	;; scav_tmp is set to ffff when not in pause
+.game_state_check:
 	lda !game_state
 	cmp #$000f : beq .pause_start_check
 	cmp #$0010 : beq .pause_end
@@ -344,6 +346,7 @@ draw_info:
 	rep #$20
 	jmp .end
 
+	;; Draw current area name and remaining items in it
 .draw_area:
 	;; determine current graph area
 	ldx $07bb
@@ -357,16 +360,10 @@ draw_info:
 	;; get text address
 	and #$00ff
 	asl : asl : asl : asl
+	clc : adc #area_names-hud_text
 	tay
 	;; draw text
-	ldx !hudposition
-.draw_area_loop:
-	lda area_names,y
-	beq .items
-	sta $7ec602,x
-	iny : iny
-	inx : inx
-	bra .draw_area_loop
+	jsr draw_text
 .items:
 	;; check if we must draw remaining items counter
 	sep #$20
@@ -419,12 +416,25 @@ draw_one:			; A=remaining items (1 digit)
 NumberGFXTable:
 	DW #$0C09,#$0C00,#$0C01,#$0C02,#$0C03,#$0C04,#$0C05,#$0C06,#$0C07,#$0C08
 
+;;; Y ptr to string, relative to hud_text
+draw_text:
+	ldx !hudposition
+.loop:
+	lda hud_text,y
+	beq .end
+	sta $7ec602,x
+	iny : iny
+	inx : inx
+	bra .loop
+.end:
+	rts
+
 ;; ;; Inverse video numbers
 ;; NumberGFXTable:
 ;; 	DW #$0C45,#$0C3C,#$0C3D,#$0C3E,#$0C3F,#$0C40,#$0C41,#$0C42,#$0C43,#$0C44
 
 table "tables/hud_chars.txt"
-
+hud_text:
 area_names:
 	dw " CERES "
 	dw $0000
@@ -495,10 +505,12 @@ press_xy:
 	dw $0000
 
 objective_completed:
-	dw "OBJ OK!"
+	dw " OBJ OK!  "
+	dw $0000
 
 all_objectives_completed:
 	dw " OBJS OK! "
+	dw $0000
 
 cleartable
 
@@ -706,26 +718,39 @@ compute_n_items:
 check_objectives:
 	;; check if we're drawing stuff
 	lda !hud_special
+	;; press x-y should be drawn, do nothing
+	bmi .ret
 	bit #!objective_global_mask : beq .check_all
-	;; handle timer. in pause, 
+	;; draw objective notification:
+	;; when in pause, cancel
+	lda !game_state : cmp #$000f : beq .stop_draw
+	;; handle timer
 	lda !hud_special_timer : dec : sta !hud_special_timer
-	bne .end
+	beq .stop_draw
+.ret:
+	rtl
+.stop_draw:
 	;; timer is 0: clear both draw flags, as all objectives has priority
 	lda #!objective_clear_mask : and !hud_special
 	lda !objectives_completed_event : jsl !check_event : bcs .all_notified
 	;; it was an individual objective, get index and set notification event
-	lda !hud_special : and #$000f : asl : tax
+	lda !hud_special : and #$00ff : asl : tax
 	lda.l objective_notified_events,x : jsl !mark_event
 	bra .end
 .all_notified:
 	lda !objectives_completed_event_notified : jsl !mark_event
 	bra .end
+	;; check objectives
 .check_all:
+	;; when in pause, don't check anything
+	lda !game_state : cmp #$000f : beq .end
+	;; check if all objectives are completed and if we should notify
 	lda !objectives_completed_event_notified : jsl !check_event : bcs .end
 	lda !objectives_completed_event : jsl !check_event : bcc .check_indiv
 	;; notify all objectives completed
 	lda #!all_objectives_hud_mask : ora !hud_special
 	bra .notify
+	;; check individual objectives
 .check_indiv:
 	ldx.w (!max_objectives+1)*2
 .loop:

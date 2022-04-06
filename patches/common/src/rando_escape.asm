@@ -107,7 +107,7 @@ escape_hyper_check:
     bit #$0008                  ; check for plasma (hyper = wave+plasma)
     beq .nohit
     ;; avoid having actual plasma beam destroy blocks in Disabled Tourian escape
-    lda !disabled_tourian_escape_flag
+    lda !disabled_tourian_escape_flag : and #$00ff
     cmp #$0001 : beq .nohit
     lda #$0000                  ; set zero flag
     bra .end
@@ -156,7 +156,7 @@ save_station:
     jmp $8cf6
 
 print "B84 end: ", pc
-warnpc $84f8bb                  ; explicitly right there, to remember needed race mode update
+warnpc $84f8ff
 
 ;;; DATA, bank 8F. makes map stations doors in norfair/brin/maridia/ws
 ;;; permanently grey

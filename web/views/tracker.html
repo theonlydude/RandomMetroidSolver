@@ -257,6 +257,8 @@ function switchStreamingInventory() {
     }
 }
 
+// to switch between grid/black stream map
+var area_stream="standard";
 function switchStreamingMap() {
     if(loaded == false || init == false) {
         return;
@@ -268,19 +270,35 @@ function switchStreamingMap() {
     var classicMap = document.getElementById("classic_map");
     var streamMap = document.getElementById("stream_map");
     var RTA = document.getElementById("rtaTimerDiv");
-    if(linePrefix == "s") {
+    var smap = document.getElementById("smap");
+    if(area_stream == "standard") {
+        // switch to stream grid
+        area_stream = "grid";
+        linePrefix = "s";
+        classicMap.style.display = "none";
+        smap.src = "/solver/static/images/tracker/area_map_stream.png";
+        streamMap.style.display = "block";
+        $("#rtaTimerDiv").removeClass("rtaTimerClassic");
+        $("#rtaTimerDiv").addClass("rtaTimerStream");
+    } else if(area_stream == "grid") {
+        // switch to stream black
+        area_stream = "black";
+        linePrefix = "s";
+        classicMap.style.display = "none";
+        smap.src = "/solver/static/images/tracker/area_map_stream_black.png";
+        streamMap.style.display = "block";
+        $("#rtaTimerDiv").removeClass("rtaTimerClassic");
+        $("#rtaTimerDiv").addClass("rtaTimerStream");
+    } else {
+        // switch to standard
+        area_stream = "standard";
         linePrefix = "";
         classicMap.style.display = "block";
         streamMap.style.display = "none";
         $("#rtaTimerDiv").removeClass("rtaTimerStream");
         $("#rtaTimerDiv").addClass("rtaTimerClassic");
-    } else {
-        linePrefix = "s";
-        classicMap.style.display = "none";
-        streamMap.style.display = "block";
-        $("#rtaTimerDiv").removeClass("rtaTimerClassic");
-        $("#rtaTimerDiv").addClass("rtaTimerStream");
     }
+
     // reset lines
     switchLines();
     firstClick = "";

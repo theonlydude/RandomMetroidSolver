@@ -48,8 +48,10 @@
 
 ;;; objectives notifications display
 !objective_global_mask = !all_objectives_hud_mask|!objective_hud_mask
-!objective_clear_mask = ~!objective_global_mask&$FF00
+!objective_clear_mask = ~(!objective_global_mask&$FF00)
 !notification_display_frames = #300 ; 5 seconds
+!timer = $05b8
+!obj_check_period = #$0020	; unit:frames, works only in powers of 2
 
 ;;; scavenger stuff
 !hunt_over_hud = #$11		; HUD ID of the fake loc 'HUNT OVER'
@@ -723,7 +725,7 @@ check_objectives:
 	lda !hud_special
 	;; press x-y should be drawn, do nothing
 	bmi .ret
-	bit #!objective_global_mask : beq .check_all
+	bit #!objective_global_mask : beq .check
 	;; draw objective notification:
 	;; when in pause, cancel
 	lda !game_state : cmp #$000f : beq .stop_draw
@@ -733,7 +735,7 @@ check_objectives:
 .ret:
 	rtl
 .stop_draw:
-	;; timer is 0: clear both draw flags, as all objectives has priority
+	;; clear both draw flags, as "all objectives" has priority
 	lda #!objective_clear_mask : and !hud_special : sta !hud_special
 	;; reset previous value to trigger redraw
 	lda #$ffff : sta !previous
@@ -746,9 +748,13 @@ check_objectives:
 	lda !objectives_completed_event_notified : jsl !mark_event
 	bra .end
 	;; check objectives
-.check_all:
+.check:
 	;; when in pause, don't check anything
 	lda !game_state : cmp #$000f : beq .end
+	;; align check prequency with objectives (check one frame later)
+	lda !timer : and !obj_check_period-1
+	bne .end
+.check_all:
 	;; check if all objectives are completed and if we should notify
 	lda !objectives_completed_event_notified : jsl !check_event : bcs .end
 	lda !objectives_completed_event : jsl !check_event : bcc .check_indiv
@@ -757,7 +763,7 @@ check_objectives:
 	bra .notify
 	;; check individual objectives
 .check_indiv:
-	ldx.w #(!max_objectives+1)*2
+	ldx.w #!max_objectives*2
 .loop:
 	dex : dex
 	bmi .end
@@ -776,11 +782,9 @@ check_objectives:
 	rtl
 
 objective_completed_events:
-	dw !objectives_completed_event
 %objectivesCompletedEventArray()
 
 objective_notified_events:
-	dw !objectives_completed_event_notified
 %objectivesNotifiedEventArray()
 
 print "a1 end: ", pc

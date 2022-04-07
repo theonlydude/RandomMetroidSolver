@@ -47,8 +47,7 @@
 !objective_hud_mask = $2000     ; hud_special bit telling we shall write an individual objective
 
 ;;; objectives notifications display
-!objective_global_mask = !all_objectives_hud_mask|!objective_hud_mask
-!objective_clear_mask = ~(!objective_global_mask&$FF00)
+!objective_global_mask = (!all_objectives_hud_mask|!objective_hud_mask)
 !notification_display_frames = #300 ; 5 seconds
 !timer = $05b8
 !obj_check_period = #$0020	; unit:frames, works only in powers of 2
@@ -736,7 +735,7 @@ check_objectives:
 	rtl
 .stop_draw:
 	;; clear both draw flags, as "all objectives" has priority
-	lda #!objective_clear_mask : and !hud_special : sta !hud_special
+	lda #~!objective_global_mask : and !hud_special : sta !hud_special
 	;; reset previous value to trigger redraw
 	lda #$ffff : sta !previous
 	lda !objectives_completed_event : jsl !check_event : bcs .all_notified
@@ -773,6 +772,7 @@ check_objectives:
 	lda.l objective_completed_events,x : jsl !check_event
 	bcc .loop
 	;; notify objective completed but not displayed yet
+	lda #$ff00 : and !hud_special : sta !hud_special
 	txa : lsr : ora !hud_special
 	;; display mask in hi byte, objective number in low byte
 	ora #!objective_hud_mask : sta !hud_special

@@ -406,7 +406,9 @@ class GraphUtils:
             animalsAccess = possibleTargets.pop()
             graph.EscapeAttributes['Animals'] = animalsAccess
             # we now have at most 3 targets left, fill up to fill cycling 4 targets for animals suprise
-            possibleTargets.append('Climb Bottom Left')
+            if not any(t[1].Name == 'Climb Bottom Left' for t in graph.InterAreaTransitions):
+                # add standard Climb if not already in graph: it can be in Crateria-less minimizer + Disabled Tourian case
+                possibleTargets.append('Climb Bottom Left')
             if firstEscape is not None:
                 possibleTargets.append(firstEscape)
             poss = possibleTargets[:]

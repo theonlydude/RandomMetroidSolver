@@ -72,10 +72,10 @@ class GraphBuilder(object):
 
     def getPossibleEscapeTargets(self, emptyContainer, graph, maxDiff):
         sm = emptyContainer.sm
-        # setup smbm with item pool
-        # Ice not usable because of hyper beam
-        # remove energy to avoid hell runs
-        # (will add bosses as well)
+        # setup smbm with item pool:
+        # - Ice not usable because of hyper beam
+        # - remove energy to avoid hell runs
+        # - (will add bosses as well)
         sm.addItems([item.Type for item in emptyContainer.itemPool if item.Type != 'Ice' and item.Category != 'Energy'])
         sm.addItem('Hyper')
         possibleTargets = self._getTargets(sm, graph, maxDiff)
@@ -88,6 +88,16 @@ class GraphBuilder(object):
         container = emptyContainer
         sm = container.sm
         allItemLocs,progItemLocs,split = escapeTrigger[0],escapeTrigger[1],escapeTrigger[2]
+        # check if crateria is connected, if not replace Tourian
+        # connection with Climb and add special escape patch to Climb
+        if not any(il.Location.GraphArea == "Crateria" for il in allItemLocs):
+            escapeAttr = graph.EscapeAttributes
+            if "patches" not in escapeAttr:
+                escapeAttr['patches'] = []
+            escapeAttr['patches'].append('climb_disable_bomb_blocks.ips')
+            src, _ = next(t for t in graph.InterAreaTransitions if t[1].Name == "Golden Four")
+            graph.removeTransitions("Golden Four")
+            graph.addTransition(src.Name, "Climb Bottom Left")
         # filter garbage itemLocs
         ilCheck = lambda il: not il.Location.isBoss() and not il.Location.restricted and il.Item.Category != "Nothing"
         # update item% objectives

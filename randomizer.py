@@ -689,7 +689,8 @@ if __name__ == "__main__":
                                                       args.escapeRando if not stuck else False)
                 escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
                 if escapeAttr is not None:
-                    escapeAttr['patches'] = []
+                    if "patches" not in escapeAttr:
+                        escapeAttr['patches'] = []
                     if args.noRemoveEscapeEnemies == True:
                         escapeAttr['patches'].append("Escape_Rando_Enable_Enemies")
                     if args.tourian == 'Disabled':

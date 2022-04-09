@@ -94,7 +94,7 @@ class GraphBuilder(object):
             escapeAttr = graph.EscapeAttributes
             if "patches" not in escapeAttr:
                 escapeAttr['patches'] = []
-            escapeAttr['patches'].append('climb_disable_bomb_blocks.ips')
+            escapeAttr['patches'] += ['climb_disable_bomb_blocks.ips', "Climb_Asleep"]
             src, _ = next(t for t in graph.InterAreaTransitions if t[1].Name == "Golden Four")
             graph.removeTransitions("Golden Four")
             graph.addTransition(src.Name, "Climb Bottom Left")

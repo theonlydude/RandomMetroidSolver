@@ -330,12 +330,20 @@ patches = {
         0x78A34: [0x48, 0xc8, 0x01, 0x16, 0x47, 0x8c],
         0x109F37: [0x0]
     },
+    # only set blinking in "zebes asleep" room state to avoid having
+    # the door blink when not needed
+    # (only needed for escape peek in Crateria-less minimizer with disabled Tourian)
     'Blinking[Climb Bottom Left]': {
         0x782FE: [0x48, 0xc8, 0x01, 0x86, 0x12, 0x8c],
-        0x108683: [0x0],
-        0x783AE: [0x48, 0xc8, 0x01, 0x86, 0x17, 0x8c],
-        0x1085D4: [0x0],
-        0x10897B: [0x0]
+        0x108683: [0x0]
+    },
+    # Climb always in "zebes asleep" state, except during escape
+    # (for escape peek in Crateria-less minimizer with disabled Tourian)
+    'Climb_Asleep': {
+        # replace "zebes awake" event ID with an unused event
+        0x796CC: [0x7F],
+        # put "Statues Hall" tension music
+        0x796D6: [0x04]
     }
 }
 

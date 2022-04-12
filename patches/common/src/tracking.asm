@@ -62,6 +62,9 @@ org $82e176
 org $82e764
     jml door_exited
 
+org $89AD0A
+    jsl touched_ceres_elevator
+
 // Door starts adjusting
 org $82e309
     jml door_adjust_start
@@ -419,5 +422,13 @@ resuming:
     // run hijacked code and return
     inc $0998
     jml $82939f
+
+// correctly count Ceres and Crateria timers
+touched_ceres_elevator:
+	JSL $90F084 // hijacked code
+	jsr update_region_time
+	lda #$0000
+	sta {region_tmp}
+	rtl
 
 warnpc $a1efff

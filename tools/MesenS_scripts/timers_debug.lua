@@ -1,4 +1,4 @@
-﻿
+
 local statsRamAddr = 0x1fc00
 
 local timerData = {
@@ -44,7 +44,7 @@ local function printRTA()
   local x,y=0,0
   local function printTime(title, frames)
      emu.drawString(x+2, y+2, title .. ":", FG, BG, 1)
-     emu.drawString(x+2+X_OFF//2, y+2, getTimeStr(frames), fg, BG, 1)
+     emu.drawString(x+2+X_OFF//2, y+2, getTimeStr(frames), FG, BG, 1)
   end
   local regionTotal=0
   for i,info in pairs(timerData) do

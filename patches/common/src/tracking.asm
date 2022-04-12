@@ -291,12 +291,7 @@ door_adjust_stop:
 
 // samus is dead
 death:
-    jsr update_region_time
-    lda #$0000
-    sta {region_tmp}
-    lda {stat_deaths}
-    jsl {inc_stat}
-    jsl {save_last_stats}
+    jsr count_death
     // hijacked code
     stz $18aa
     inc $0998
@@ -304,14 +299,20 @@ death:
 
 // timer is up (equivalent to death)
 time_up:
-    jsr update_region_time
-    lda {stat_deaths}
-    jsl {inc_stat}
-    jsl {save_last_stats}
+    jsr count_death
     // hijacked code
     lda #$0024
     sta $0998
     rtl
+
+count_death:
+    jsr update_region_time
+    lda #$0000
+    sta {region_tmp}
+    lda {stat_deaths}
+    jsl {inc_stat}
+    jsl {save_last_stats}
+    rts
 
 // uncharged Beam Fire
 uncharged_beam:

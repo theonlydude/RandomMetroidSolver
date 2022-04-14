@@ -669,11 +669,21 @@ function randomizeObjective(evt, takeBackup=true) {
 
         for(var i=0; i<defaultMultiValues["objective"].length; i++) {
             var toAdd = defaultMultiValues["objective"][i];
+            // don't add 'collect 100% items' to the random list as it's a special objective
+            if(toAdd == "collect 100% items") {
+                continue;
+            }
             if(!notSelectedArray.includes(toAdd) && !selectedArray.includes(toAdd)) {
                 $("#objectiveMultiSelect").append("<option value=\""+toAdd+"\">"+toAdd+"</option>");
             }
         }
-        $("#objectiveMultiSelect").val(defaultMultiValues["objective"]).trigger("chosen:updated");
+        var all_objectives = Array.from(defaultMultiValues["objective"]);
+        var index = all_objectives.indexOf("collect 100% items");
+        if(index > -1) {
+            all_objectives.splice(index, 1);
+        }
+
+        $("#objectiveMultiSelect").val(all_objectives).trigger("chosen:updated");
     }
 
     disableElement("objective", isActive);
@@ -1717,7 +1727,8 @@ Tournament presets:\
 <b>Note:</b> If you leave the list empty no objective is required to access Tourian, ie. it's open.<br/>\
 <b>Note:</b> See the Tourian parameter to enable fast Tourian or trigger the escape when all objectives are completed.<br/>\
 <b>Note:</b> With Scavenger Hunt majors split only up to four objectives can be set as one mandatory objective is added: finish the Scavenger Hunt.<br/>\
-<b>Note:</b> Current percentage of collected items is displayed in the inventory pause menu.\
+<b>Note:</b> Current percentage of collected items is displayed in the inventory pause menu.<br/>\
+<b>Note:</b> Collect 100% items is excluded by default when randomizing the objectives list as it requires you to complete all the objectives.\
 </p>\
 <p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 5 objectives from the list (between 1 and 4 if Scavenger Hunt). To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
     },

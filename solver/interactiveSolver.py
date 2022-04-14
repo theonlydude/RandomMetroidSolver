@@ -409,6 +409,8 @@ class InteractiveSolver(CommonSolver):
         if DoorsManager.isRandom():
             patches += RomPatcher.IPSPatches['DoorsColors']
             patches.append("Enable_Backup_Saves")
+        if self.areaRando:
+            patches.append("Enable_Backup_Saves")
         if magic != None:
             patches.insert(0, 'race_mode.ips')
             patches.append('race_mode_post.ips')

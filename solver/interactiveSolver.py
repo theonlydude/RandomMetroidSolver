@@ -122,6 +122,9 @@ class InteractiveSolver(CommonSolver):
         state.fromJson(stateJson)
         state.toSolver(self)
 
+        # save current AP
+        previousAP = self.lastAP
+
         self.loadPreset(self.presetFileName)
 
         # add already collected items to smbm
@@ -207,7 +210,10 @@ class InteractiveSolver(CommonSolver):
                     break
                 else:
                     loc = self.visitedLocations[-i]
-                    if loc.difficulty.difficulty == -1:
+                    # check that the ap of the loc is available from the previous ap,
+                    # else it may set loc diff to easy
+                    if (loc.difficulty.difficulty == -1 and
+                        self.areaGraph.canAccess(self.smbm, previousAP, loc.accessPoint, Conf.difficultyTarget)):
                         lastVisitedLocs.append(loc)
 
             for loc in lastVisitedLocs:

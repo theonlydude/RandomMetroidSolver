@@ -61,8 +61,7 @@ class Randomizer(object):
             "Season_Races": "rando league races (Majors/Minors split)",
             "SGLive2021": "SGLive 2021 Super Metroid randomizer tournament",
             "SMRAT2021": "Super Metroid Randomizer Accessible Tournament 2021",
-            "VARIA_Weekly": "Casual logic community races",
-            "Torneio_SGPT2": "Super Metroid Randomizer da Speedgaming Português Tournament 2021"
+            "VARIA_Weekly": "Casual logic community races"
         }
 
         startAPs = GraphUtils.getStartAccessPointNamesCategory()

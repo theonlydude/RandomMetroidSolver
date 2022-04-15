@@ -23,7 +23,7 @@ def loadPresetsList(cache):
 
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master']
-    tourPresets = ['Season_Races', 'SMRAT2021', 'Torneio_SGPT2']
+    tourPresets = ['Season_Races', 'SMRAT2021']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
 
     presets['stdPresets'] = stdPresets
@@ -35,7 +35,7 @@ def loadPresetsList(cache):
 def loadRandoPresetsList(cache, filter=False):
     presets = cache.ram('randoPresets', lambda:dict(), time_expire=None)
     if not presets:
-        tourPresets = ['Season_Races', 'SGLive2021', 'SMRAT2021', 'VARIA_Weekly', 'Torneio_SGPT2']
+        tourPresets = ['Season_Races', 'SGLive2021', 'SMRAT2021', 'VARIA_Weekly']
         files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
         randoPresets = [os.path.splitext(file)[0] for file in files]
         randoPresets = [preset for preset in randoPresets if preset not in tourPresets]

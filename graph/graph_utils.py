@@ -400,17 +400,24 @@ class GraphUtils:
         n = len(possibleTargets)
         assert (n < 4 and firstEscape is not None) or (n <= 4 and firstEscape is None), "Invalid possibleTargets list: " + str(possibleTargets)
         GraphUtils.log.debug("escapeAnimalsTransitions. possibleTargets="+str(possibleTargets)+", firstEscape="+str(firstEscape))
-        # first get our list of 4 entries for escape patch
         if n >= 1:
-            # get actual animals: pick one of the remaining targets
-            animalsAccess = possibleTargets.pop()
-            graph.EscapeAttributes['Animals'] = animalsAccess
-            # we now have at most 3 targets left, fill up to fill cycling 4 targets for animals suprise
+            # complete possibleTargets. we need at least 2: one to
+            # hide the animals in, and one to connect the vanilla
+            # animals door to
             if not any(t[1].Name == 'Climb Bottom Left' for t in graph.InterAreaTransitions):
                 # add standard Climb if not already in graph: it can be in Crateria-less minimizer + Disabled Tourian case
                 possibleTargets.append('Climb Bottom Left')
+            # make the escape possibilities loop by adding back the first escape
             if firstEscape is not None:
                 possibleTargets.append(firstEscape)
+        n = len(possibleTargets)
+        # check if we can both hide the animals and connect the vanilla animals door to a cycling escape
+        if n >= 2:
+            # get actual animals: pick the first of the remaining targets (will contain a map room AP)
+            animalsAccess = possibleTargets.pop(0)
+            graph.EscapeAttributes['Animals'] = animalsAccess
+            # poss will contain the remaining map room AP(s) + optional AP(s) added above, to
+            # get the cycling 4 escapes from vanilla animals room
             poss = possibleTargets[:]
             GraphUtils.log.debug("escapeAnimalsTransitions. poss="+str(poss))
             while len(possibleTargets) < 4:

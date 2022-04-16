@@ -114,6 +114,9 @@ save_station_check:
 	pla
 	jmp search_loop_found
 
+;;; Kraid vomit fix by PJBoy. Avoids garbage tiles in Kraid room when
+;;; he's dead and fast doors are enabled.
+
 ;;; During horizontal door transitions, the "ready for NMI" flag is set by
 ;;; IRQ at the bottom of the door as an optimisation,
 ;;; but the PLM drawing routine hasn't necessarily finished processing

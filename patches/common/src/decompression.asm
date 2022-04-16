@@ -1,6 +1,6 @@
 ;$30FF-$3265
 
-;;; Decompression optimization by Kejardon
+;;; Decompression optimization by Kejardon, fixed by PJBoy
 
 ;Compression format: One byte(XXX YYYYY) or two byte (111 XXX YY-YYYYYYYY) headers
 ;XXX = instruction, YYYYYYYYYY = counter
@@ -144,6 +144,7 @@ BRANCH_THETA:
 	JMP NextByte
 
 BRANCH_IOTA:
+	REP #$20 : TXA : LSR : TAX : SEP #$20 ; PJ: X /= 2 and set carry if X was odd
 
 	LDA ($47)	;X = 2: Copy the next two bytes, one at a time, for the next Y bytes.
 	INC $47
@@ -166,14 +167,17 @@ BRANCH_IOTA:
 
 	STA [$4C], Y
 	INY
-	DEX
-	BEQ ++
+;	DEX ; PJ: don't need these anymore
+;	BEQ ++
 	INY
 	DEX
 	BNE -
 
-++
+;++
 	SEP #$20
+
+	BCC + : STA [$4C], Y : INY : + ; PJ: If carry was set, store that last byte
+
 	JMP NextByte
 
 
@@ -280,3 +284,5 @@ IncrementBank2:
 	PLA
 +
 	RTS
+
+warnpc $80B266

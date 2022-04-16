@@ -4,16 +4,16 @@
 arch snes.cpu
 lorom
 
-; Fix the crash that occurs when you kill an eye door whilst a eye door projectile is alive
-; See the comments in the bank logs for $86:B6B9 for details on the bug
-; The fix here is setting the X register to the enemy projectile index,
-; which can be done without free space due to an unnecessary RTS in the original code
+;;; Fix the crash that occurs when you kill an eye door whilst a eye door projectile is alive
+;;; See the comments in the bank logs for $86:B6B9 for details on the bug
+;;; The fix here is setting the X register to the enemy projectile index,
+;;; which can be done without free space due to an unnecessary RTS in the original code
 org $86B704
-BEQ ret
-TYX
-
+fix_gadora_crash:
+	BEQ .ret
+	TYX
 org $86B713
-ret:
+.ret:
 
 ;;; skips suits acquisition animation
 org $848717
@@ -75,14 +75,17 @@ warnpc $a0f830
 ;;; allow all possible save slots (needed for area rando extra stations)
 org $848d0c
 	and #$001f
-;;; For an unknown reason, the save station we put in main street
-;;; sometimes (circumstances unclear) spawn two detection PLMs
+
+;;; Save station PLM code has a bug where it can spawn two detection PLMs
 ;;; instead of one. These PLMs are supposed to precisely detect
 ;;; when Samus is standing on the save. When Samus does, it looks
 ;;; for a PLM at the same coordinates as itself, which is normally
 ;;; the actual save station PLM.
-;;; But when two detection blocks are spawn, it detects the other detection
+;;; But when two detection blocks are spawn, it can detect the other detection
 ;;; block as being the save, and the save station doesn't work.
+;;; That can happen when there are item PLMs in the room with PLM index
+;;; lower than the one of the save station. The detection PLMs are then spawned
+;;; before the save itself in the PLM list.
 ;;; Therefore, we add an extra check on PLM type to double check it has
 ;;; actually found the save station PLM.
 
@@ -111,5 +114,33 @@ save_station_check:
 	pla
 	jmp search_loop_found
 
+;;; During horizontal door transitions, the "ready for NMI" flag is set by
+;;; IRQ at the bottom of the door as an optimisation,
+;;; but the PLM drawing routine hasn't necessarily finished processing
+;;; yet.
+;;; The Kraid quick kill vomit happens because NMI actually interrupts the
+;;; PLM drawing routine for the PLM that clears the spike floor,
+;;; *whilst* it's in the middle of writing entries to the $D0 table, which
+;;; the NMI processes.
+;;; This fix simply clears this NMI-ready flag for the duration of the PLM
+;;; drawinging routine.
+
+;;; Continue in the unused PLM space
+drawPlmSafe:
+	stz.w $05B4 ; Not ready for NMI
+	jsr $8DAA   ; Draw PLM
+	inc.w $05B4 ; Ready for NMI
+	rts
+
 ;;; end of unused space
 warnpc $8485b2
+
+; Patch calls to draw PLM
+org $84861a ; End of PLM processing. Probably the only particularly important one to patch
+	jsr drawPlmSafe
+
+; org $848b50 ; End of block respawn instruction. Shouldn't need patching
+; 	jsr drawPlmSafe
+
+org $84e094 ; End of animated PLM drawing instruction. Could theoretically happen...
+	jsr drawPlmSafe

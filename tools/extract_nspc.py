@@ -324,6 +324,14 @@ meta["dynamic_patches"] = {
 
 meta = getBossMeta("Crocomire")
 meta["pc_addresses"] = [snes_to_pc(0x8FA9A3)]
+meta["static_patches"] = {
+    snes_to_pc(0xA490AB): [0x04],
+    snes_to_pc(0xA49B87): [0x03],
+    snes_to_pc(0xA49B9F): [0x03]
+}
+meta["dynamic_patches"] = {
+    "track_id": [snes_to_pc(0xA497DE)]
+}
 
 meta = getBossMeta("Spore Spawn")
 meta["pc_addresses"] = [499165]

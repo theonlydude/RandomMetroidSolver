@@ -81,6 +81,8 @@ class RomPatches:
     NerfedRainbowBeam       = 1005
     # Red doors open with one missile, and don't react to supers: part of door color rando
     RedDoorsMissileOnly     = 1006
+    # Escape auto-trigger on objectives completion (no Tourian)
+    NoTourian               = 1007
 
     ### Hacks
     # rotation hack

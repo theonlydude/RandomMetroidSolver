@@ -94,14 +94,18 @@ class RomLoader(object):
         # minimizer
         if self.hasPatch("minimizer_bosses"):
             RomPatches.ActivePatches.append(RomPatches.NoGadoras)
-        if self.hasPatch("minimizer_tourian"):
-            RomPatches.ActivePatches.append(RomPatches.TourianSpeedup)
         if self.hasPatch("open_zebetites"):
             RomPatches.ActivePatches.append(RomPatches.OpenZebetites)
 
         # red doors
         if self.hasPatch('red_doors'):
             RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
+
+        # Tourian
+        if self.hasPatch("minimizer_tourian"):
+            RomPatches.ActivePatches.append(RomPatches.TourianSpeedup)
+        if self.hasPatch("Escape_Trigger"):
+            RomPatches.ActivePatches.append(RomPatches.NoTourian)
 
         # objectives
         hasObjectives = self.hasPatch('objectives')

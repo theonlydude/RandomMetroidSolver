@@ -579,6 +579,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches.append(RomPatches.NoGadoras)
     if args.tourian == 'Fast':
         RomPatches.ActivePatches += RomPatches.MinimizerTourian
+    elif args.tourian == 'Disabled':
+        RomPatches.ActivePatches.append(RomPatches.NoTourian)
     missileQty = float(args.missileQty)
     superQty = float(args.superQty)
     powerBombQty = float(args.powerBombQty)

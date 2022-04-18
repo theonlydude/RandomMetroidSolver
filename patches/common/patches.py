@@ -581,4 +581,113 @@ additional_PLMs = {
             [0x48, 0xc8, 0x01, 0x16, 0x63, 0x8c]
         ]
     },
+    # Indicator PLM IDs set to ffff because they're set dynamically
+    'Indicator[LandingSiteRight]': {
+        'room': 0x948c,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x2e, 0x06, 0x00, 0x00]
+        ]
+    },
+    'Indicator[KihunterBottom]': {
+        'room': 0x962a,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x06, 0x02, 0x0e, 0x00]
+        ]
+    },
+    'Indicator[KihunterRight]': {
+        'room': 0x95ff,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x01, 0x06, 0x0d, 0x00]
+        ]
+    },
+    'Indicator[GreenHillZoneTopRight]': {
+        'room': 0x9e9f,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x01, 0x26, 0x30, 0x00]
+        ]
+    },
+    'Indicator[NoobBridgeRight]': {
+        'room': 0xa253,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x01, 0x46, 0x33, 0x00]
+        ]
+    },
+    'Indicator[MainShaftBottomRight]': {
+        'room': 0x9cb3,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x01, 0x06, 0x22, 0x00]
+        ]
+    },
+    'Indicator[BigPinkBottomRight]': {
+        'room': 0x9e52,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x01, 0x06, 0x29, 0x00]
+        ]
+    },
+    'Indicator[RedTowerElevatorLeft]': {
+        'room': 0xa2f7,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x2e, 0x06, 0x3c, 0x00]
+        ]
+    },
+    'Indicator[WestOceanRight]': {
+        'room': 0xca08,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x01, 0x06, 0x0c, 0x00]
+        ]
+    },
+    'Indicator[LeCoudeBottom]': {
+        'room': 0x94cc,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x06, 0x02, 0x0f, 0x00]
+        ]
+    },
+    'Indicator[WreckedShipMainShaftBottom]': {
+        'room': 0xcc6f,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x26, 0x02, 0x84, 0x00]
+        ]
+    },
+    'Indicator[CathedralEntranceRight]': {
+        'room': 0xa788,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x01, 0x06, 0x4a, 0x00]
+        ]
+    },
+    'Indicator[CathedralRight]': {
+        'room': 0xafa3,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x01, 0x06, 0x49, 0x00]
+        ]
+    },
+    'Indicator[RedKihunterShaftBottom]': {
+        'room': 0xb5d5,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x56, 0x02, 0x5e, 0x00]
+        ]
+    },
+    'Indicator[WastelandLeft]': {
+        'room': 0xb62b,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x2e, 0x06, 0x5f, 0x00]
+        ]
+    },
+    'Indicator[MainStreetBottomRight]': {
+        'room': 0xd08a,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x01, 0x06, 0x8d, 0x00]
+        ]
+    },
+    'Indicator[CrabShaftRight]': {
+        'room': 0xd5a7,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x01, 0x16, 0x8f, 0x00]
+        ]
+    },
+    'Indicator[ColosseumBottomRight]': {
+        'room': 0xd78f,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x01, 0x06, 0x9a, 0x00]
+        ]
+    }
 }

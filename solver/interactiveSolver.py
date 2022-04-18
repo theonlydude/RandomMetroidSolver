@@ -412,7 +412,8 @@ class InteractiveSolver(CommonSolver):
             magic = None
         romPatcher = RomPatcher(magic=magic)
         patches = ['credits_varia.ips', 'tracking.ips', "Escape_Animals_Disable", "Escape_Trigger_Nothing_Objective_Anywhere"]
-        if DoorsManager.isRandom():
+        doorsColors = DoorsManager.isRandom()
+        if doorsColors:
             patches += RomPatcher.IPSPatches['DoorsColors']
             patches.append("Enable_Backup_Saves")
         if self.areaRando:
@@ -436,7 +437,7 @@ class InteractiveSolver(CommonSolver):
                 romPatcher.applyEscapeAttributes({'Timer': escapeTimer, 'Animals': None, 'patches': []}, plms)
 
         # write plm table & random doors
-        romPatcher.writePlmTable(plms, self.areaRando, self.bossRando, self.startLocation)
+        romPatcher.writePlmTable(plms, self.areaRando, self.bossRando, doorsColors, self.startLocation)
 
         romPatcher.writeItemsLocs(itemLocs)
         romPatcher.writeItemsNumber()

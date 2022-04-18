@@ -114,6 +114,9 @@ save_station_check:
 	pla
 	jmp search_loop_found
 
+;;; end of unused space
+warnpc $8485b2
+
 ;;; Kraid vomit fix by PJBoy. Avoids garbage tiles in Kraid room when
 ;;; he's dead and fast doors are enabled.
 
@@ -128,15 +131,17 @@ save_station_check:
 ;;; This fix simply clears this NMI-ready flag for the duration of the PLM
 ;;; drawinging routine.
 
-;;; Continue in the unused PLM space
+;;; other unused bank 84 space
+org $8486D1
 drawPlmSafe:
+	lda.w $05B4 : pha ; Back up NMI ready flag
 	stz.w $05B4 ; Not ready for NMI
 	jsr $8DAA   ; Draw PLM
-	inc.w $05B4 ; Ready for NMI
+	pla : sta.w $05B4 ; Restore NMI ready flag
 	rts
 
 ;;; end of unused space
-warnpc $8485b2
+warnpc $84870B
 
 ; Patch calls to draw PLM
 org $84861a ; End of PLM processing. Probably the only particularly important one to patch

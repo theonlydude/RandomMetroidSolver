@@ -70,7 +70,7 @@ draw_none_bottom:
 ;;; Colored doors indicators: new door PLM that acts like a blue door,
 ;;; but blinks a door color while the matching door on the other side
 ;;; is closed (using equal PLM room argument for both doors).
-!blink_frames_blue = 12
+!blink_frames_blue = 9
 !blink_frames_colored = !blink_frames_blue
 
 macro closeListIndicator_left()

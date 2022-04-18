@@ -585,7 +585,7 @@ additional_PLMs = {
     'Indicator[LandingSiteRight]': {
         'room': 0x948c,
         'plm_bytes_list': [
-            [0xff, 0xff, 0x2e, 0x06, 0x00, 0x00]
+            [0xff, 0xff, 0x01, 0x06, 0x00, 0x00]
         ]
     },
     'Indicator[KihunterBottom]': {

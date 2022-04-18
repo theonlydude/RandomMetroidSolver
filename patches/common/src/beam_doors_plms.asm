@@ -6,16 +6,11 @@
 arch snes.cpu
 lorom
 
-org $84C34E
-open_left:
-org $84C3B0
-open_right:
-org $84C412
-open_top:
-org $84C474
-open_bottom:
+incsrc "doors_plms_common.asm"
 
+;;; Free space after itemsounds.asm
 ORG $84F037
+;;; Common functions to set doors open
 set_open_left:
 	dw $8A91
 	db $01
@@ -33,7 +28,13 @@ set_open_bottom:
 	db $01
 	dw open_bottom
 
-   end_list_wave_left: dw $0008,$A677,$0002,$A90B,$8C19     ;  
+;;; Beam Doors: disassembled and simplified from original patch
+;;; Foregoes all the copy pasted door open stuff from missile doors and just
+;;; point to open blue door instead (no specific opening graphics).
+;;; Also removed the copy-pasted "blink when shot" loop, useless as only one shot is
+;;; needed to open doors.
+
+   close_list_wave_left: dw $0008,$A677,$0002,$A90B,$8C19     ;  
                        db $15                               ;  
                        dw $0002,$A8FF,$0002,$A8F3,$0001     ;  
                        dw draw_wave_left                    ; ptr to draw instructions
@@ -45,8 +46,9 @@ set_open_bottom:
                        dw $0001                             ;  
                        dw draw_wave_left                    ; ptr to draw instructions
         DATA16_84F05E: dw $86B4                             ;  
-                                                            ;  
-   end_list_wave_right: dw $0008,$A683,$0002,$A93B,$8C19     ;  
+                                ;
+
+   close_list_wave_right: dw $0008,$A683,$0002,$A93B,$8C19     ;  
                        db $15                               ;  
                        dw $0002,$A92F,$0002,$A923,$0001     ;  
                        dw draw_wave_right                    ; ptr to draw instructions
@@ -59,7 +61,7 @@ set_open_bottom:
                        dw draw_wave_right                    ; ptr to draw instructions
         DATA16_84F0C0: dw $86B4                             ;  
                                                             ;  
-   end_list_wave_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;  
+   close_list_wave_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;  
                        db $08                               ;  
                        dw $0002,$A95F,$0002,$A953,$0001     ;  
                        dw draw_wave_top                    ; ptr to draw instructions
@@ -72,7 +74,7 @@ set_open_bottom:
                        dw draw_wave_top                    ; ptr to draw instructions
         DATA16_84F122: dw $86B4                             ;  
                                                             ;  
-   end_list_wave_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;  
+   close_list_wave_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;  
                        db $08                               ;  
                        dw $0002,$A98F,$0002,$A983,$0001     ;  
                        dw draw_wave_bottom                    ; ptr to draw instructions
@@ -85,7 +87,7 @@ set_open_bottom:
                        dw draw_wave_bottom                    ; ptr to draw instructions
         DATA16_84F184: dw $86B4                             ;  
                                                             ;  
-    end_list_ice_left: dw $0008,$A677,$0002,$A90B,$8C19     ;  
+    close_list_ice_left: dw $0008,$A677,$0002,$A90B,$8C19     ;  
                        db $15                               ;  
                        dw $0002,$A8FF,$0002,$A8F3,$0001     ;  
                        dw draw_ice_left                     ; ptr to draw instructions
@@ -98,7 +100,7 @@ set_open_bottom:
                        dw draw_ice_left                     ; ptr to draw instructions
         DATA16_84F1E6: dw $86B4                             ;  
                                                             ;  
-    end_list_ice_right: dw $0008,$A683,$0002,$A93B,$8C19     ;  
+    close_list_ice_right: dw $0008,$A683,$0002,$A93B,$8C19     ;  
                        db $15                               ;  
                        dw $0002,$A92F,$0002,$A923,$0001     ;  
                        dw draw_ice_right                     ; ptr to draw instructions
@@ -111,7 +113,7 @@ set_open_bottom:
                        dw draw_ice_right                     ; ptr to draw instructions
         DATA16_84F248: dw $86B4                             ;  
                                                             ;  
-    end_list_ice_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;  
+    close_list_ice_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;  
                        db $08                               ;  
                        dw $0002,$A95F,$0002,$A953,$0001     ;  
                        dw draw_ice_top                     ; ptr to draw instructions
@@ -124,7 +126,7 @@ set_open_bottom:
                        dw draw_ice_top                     ; ptr to draw instructions
         DATA16_84F2AA: dw $86B4                             ;  
                                                             ;  
-    end_list_ice_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;  
+    close_list_ice_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;  
                        db $08                               ;  
                        dw $0002,$A98F,$0002,$A983,$0001     ;  
                        dw draw_ice_bottom                     ; ptr to draw instructions
@@ -137,7 +139,7 @@ set_open_bottom:
                        dw draw_ice_bottom                     ; ptr to draw instructions
         DATA16_84F30C: dw $86B4                             ;  
                                                             ;  
-   end_list_spazer_left: dw $0008,$A677,$0002,$A90B,$8C19     ;  
+   close_list_spazer_left: dw $0008,$A677,$0002,$A90B,$8C19     ;  
                        db $15                               ;  
                        dw $0002,$A8FF,$0002,$A8F3,$0001     ;  
                        dw draw_spazer_left                    ; ptr to draw instructions
@@ -150,7 +152,7 @@ set_open_bottom:
                        dw draw_spazer_left                    ; ptr to draw instructions
         DATA16_84F36E: dw $86B4                             ;  
                                                             ;  
-   end_list_spazer_right: dw $0008,$A683,$0002,$A93B,$8C19     ;  
+   close_list_spazer_right: dw $0008,$A683,$0002,$A93B,$8C19     ;  
                        db $15                               ;  
                        dw $0002,$A92F,$0002,$A923,$0001     ;  
                        dw draw_spazer_right                    ; ptr to draw instructions
@@ -163,7 +165,7 @@ set_open_bottom:
                        dw draw_spazer_right                    ; ptr to draw instructions
         DATA16_84F3D0: dw $86B4                             ;  
                                                             ;  
-   end_list_spazer_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;  
+   close_list_spazer_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;  
                        db $08                               ;  
                        dw $0002,$A95F,$0002,$A953,$0001     ;  
                        dw draw_spazer_top                    ; ptr to draw instructions
@@ -176,7 +178,7 @@ set_open_bottom:
                        dw draw_spazer_top                    ; ptr to draw instructions
         DATA16_84F432: dw $86B4                             ;  
                                                             ;  
-   end_list_spazer_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;  
+   close_list_spazer_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;  
                        db $08                               ;  
                        dw $0002,$A98F,$0002,$A983,$0001     ;  
                        dw draw_spazer_bottom                    ; ptr to draw instructions
@@ -189,7 +191,7 @@ set_open_bottom:
                        dw draw_spazer_bottom                    ; ptr to draw instructions
         DATA16_84F494: dw $86B4                             ;  
                                                             ;  
-   end_list_plasma_left: dw $0008,$A677,$0002,$A90B,$8C19     ;  
+   close_list_plasma_left: dw $0008,$A677,$0002,$A90B,$8C19     ;  
                        db $15                               ;  
                        dw $0002,$A8FF,$0002,$A8F3,$0001     ;  
                        dw draw_plasma_left                    ; ptr to draw instructions
@@ -202,7 +204,7 @@ set_open_bottom:
                        dw draw_plasma_left                    ; ptr to draw instructions
         DATA16_84F4F6: dw $86B4                             ;  
                                                             ;  
-   end_list_plasma_right: dw $0008,$A683,$0002,$A93B,$8C19     ;  
+   close_list_plasma_right: dw $0008,$A683,$0002,$A93B,$8C19     ;  
                        db $15                               ;  
                        dw $0002,$A92F,$0002,$A923,$0001     ;  
                        dw draw_plasma_right                    ; ptr to draw instructions
@@ -215,7 +217,7 @@ set_open_bottom:
                        dw draw_plasma_right                    ; ptr to draw instructions
         DATA16_84F558: dw $86B4                             ;  
                                                             ;  
-   end_list_plasma_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;  
+   close_list_plasma_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;  
                        db $08                               ;  
                        dw $0002,$A95F,$0002,$A953,$0001     ;  
                        dw draw_plasma_top                    ; ptr to draw instructions
@@ -228,7 +230,7 @@ set_open_bottom:
                        dw draw_plasma_top                    ; ptr to draw instructions
         DATA16_84F5BA: dw $86B4                             ;  
                                                             ;  
-   end_list_plasma_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;  
+   close_list_plasma_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;  
                        db $08                               ;  
                        dw $0002,$A98F,$0002,$A983,$0001     ;  
                        dw draw_plasma_bottom                    ; ptr to draw instructions
@@ -240,7 +242,9 @@ set_open_bottom:
                        dw $0001                             ;  
                        dw draw_plasma_bottom                    ; ptr to draw instructions
         DATA16_84F61C: dw $86B4                             ;  
-                                                            ;  
+
+;; Beam Doors checker functions, disassembled and factorized from original patch.
+;; Added extra check for spazer/plasma doors to avoid beam switching
            check_wave: jsr check_beam : beq no_hit
                        LDA.W $1D77,X                        ;  
                        bit #$0001                         ;  
@@ -290,73 +294,108 @@ check_beam:
                        CMP.W #$0500                         ;  
 		       rts
 
+;;; Define instructions lists and PLMs for beam door indicators
+%defineIndicator(wave,left)
+%defineIndicator(wave,right)
+%defineIndicator(wave,top)
+%defineIndicator(wave,bottom)
+%defineIndicator(plasma,left)
+%defineIndicator(plasma,right)
+%defineIndicator(plasma,top)
+%defineIndicator(plasma,bottom)
+%defineIndicator(spazer,left)
+%defineIndicator(spazer,right)
+%defineIndicator(spazer,top)
+%defineIndicator(spazer,bottom)
+%defineIndicator(ice,left)
+%defineIndicator(ice,right)
+%defineIndicator(ice,top)
+%defineIndicator(ice,bottom)
+
+%defineIndicatorPLM(wave,left)
+%defineIndicatorPLM(wave,right)
+%defineIndicatorPLM(wave,top)
+%defineIndicatorPLM(wave,bottom)
+%defineIndicatorPLM(plasma,left)
+%defineIndicatorPLM(plasma,right)
+%defineIndicatorPLM(plasma,top)
+%defineIndicatorPLM(plasma,bottom)
+%defineIndicatorPLM(spazer,left)
+%defineIndicatorPLM(spazer,right)
+%defineIndicatorPLM(spazer,top)
+%defineIndicatorPLM(spazer,bottom)
+%defineIndicatorPLM(ice,left)
+%defineIndicatorPLM(ice,right)
+%defineIndicatorPLM(ice,top)
+%defineIndicatorPLM(ice,bottom)
+
 print "Instruction lists end: ", pc
 warnpc $84f70e
 
 org $84f70f                                ;  
         plm_wave_top: dw $C7B1                             ;  
                        dw main_list_wave_top               ;  
-                       dw end_list_wave_top                ;  
+                       dw close_list_wave_top                ;  
                                                             ;  
         plm_wave_bottom: dw $C7B1                             ;  
                        dw main_list_wave_bottom               ;  
-                       dw end_list_wave_bottom                ;  
+                       dw close_list_wave_bottom                ;  
                                                             ;  
          plm_ice_left: dw $C7B1                             ;  
                        dw main_list_ice_left                ;  
-                       dw end_list_ice_left                 ;  
+                       dw close_list_ice_left                 ;  
                                                             ;  
          plm_ice_right: dw $C7B1                             ;  
                        dw main_list_ice_right                ;  
-                       dw end_list_ice_right                 ;  
+                       dw close_list_ice_right                 ;  
                                                             ;  
          plm_ice_top: dw $C7B1                             ;  
                        dw main_list_ice_top                ;  
-                       dw end_list_ice_top                 ;  
+                       dw close_list_ice_top                 ;  
                                                             ;  
          plm_ice_bottom: dw $C7B1                             ;  
                        dw main_list_ice_bottom                ;  
-                       dw end_list_ice_bottom                 ;  
+                       dw close_list_ice_bottom                 ;  
                                                             ;  
       plm_spazer_left: dw $C7B1                             ;  
                        dw main_list_spazer_left               ;  
-                       dw end_list_spazer_left                ;  
+                       dw close_list_spazer_left                ;  
                                                             ;  
       plm_spazer_right: dw $C7B1                             ;  
                        dw main_list_spazer_right               ;  
-                       dw end_list_spazer_right                ;  
+                       dw close_list_spazer_right                ;  
                                                             ;  
       plm_spazer_top: dw $C7B1                             ;  
                        dw main_list_spazer_top               ;  
-                       dw end_list_spazer_top                ;  
+                       dw close_list_spazer_top                ;  
                                                             ;  
       plm_spazer_bottom: dw $C7B1                             ;  
                        dw main_list_spazer_bottom               ;  
-                       dw end_list_spazer_bottom                ;  
+                       dw close_list_spazer_bottom                ;  
                                                             ;  
       plm_plasma_left: dw $C7B1                             ;  
                        dw main_list_plasma_left               ;  
-                       dw end_list_plasma_left                ;  
+                       dw close_list_plasma_left                ;  
                                                             ;  
       plm_plasma_right: dw $C7B1                             ;  
                        dw main_list_plasma_right               ;  
-                       dw end_list_plasma_right                ;  
+                       dw close_list_plasma_right                ;  
                                                             ;  
       plm_plasma_top: dw $C7B1                             ;  
                        dw main_list_plasma_top               ;  
-                       dw end_list_plasma_top                ;  
+                       dw close_list_plasma_top                ;  
                                                             ;  
       plm_plasma_bottom: dw $C7B1                             ;  
                        dw main_list_plasma_bottom               ;  
-                       dw end_list_plasma_bottom                ;  
+                       dw close_list_plasma_bottom                ;  
                                                             ;  
         plm_wave_left: dw $C7B1                             ;  
                        dw main_list_wave_left               ;  
-                       dw end_list_wave_left                ;  
+                       dw close_list_wave_left                ;  
                                                             ;  
         plm_wave_right: dw $C7B1                             ;  
                        dw main_list_wave_right               ;  
-                       dw end_list_wave_right                ;  
+                       dw close_list_wave_right                ;  
                                                             ;  
        draw_wave_left: dw $8004,$C0E0,$D0E1,$D8E1,$D8E0,$0000;  
                                                             ;  
@@ -390,10 +429,9 @@ org $84f70f                                ;
                                                             ;  
        draw_plasma_bottom: dw $0004,$CCEF,$5CEE,$58EE,$58EF,$0000;  
 
-print "bank 84 end: ", pc
-warnpc $84ffff
+warnpc $84F82F			; start of endingtotals.asm
 
-;;; alterations to vanilla door open animations (blue door open for all)
+;;; alterations to vanilla door open/close animations (blue door open for all)
 org $84a6b5
         db $0d
 org $84a6b7

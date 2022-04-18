@@ -109,5 +109,7 @@ class Addresses(object):
         'escapeTimerTable': ValueSingle(0xA1F0AA),
         'startAP': ValueSingle(0xa1f200),
         'customDoorsAsm': ValueSingle(0x8ff800),
-        'locIdsByArea': ValueRange(0xA1F568, end=0xA1F5D7)
+        'locIdsByArea': ValueRange(0xA1F568, end=0xA1F5D7),
+        'plmSpawnTable': ValueSingle(0x8fe9a0),
+        'plmSpawnRoomTable': ValueSingle(0x8ff000)
     }

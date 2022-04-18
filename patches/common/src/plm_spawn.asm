@@ -37,9 +37,9 @@ plm_lists:
 
 ;;; *** Non-overlap in this space has to be handled at ROM generation ***
 
-org $8febf8
+org $8feff8
 
-;;; Additional PLM definitions for rooms *going upwards* (written at ROM generation)
+;;; Additional PLM definitions for rooms *going upwards* (written a t ROM generation)
 ;;; 
 ;;; PLM lists are indexed by (Room ptr, Room State ptr, Entry Door ptr) and terminated by $0000
 ;;;

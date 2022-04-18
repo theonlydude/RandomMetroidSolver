@@ -20,6 +20,10 @@ org $84f900
 %defineIndicator(PB,right)
 %defineIndicator(PB,top)
 %defineIndicator(PB,bottom)
+%defineIndicator(none,left)
+%defineIndicator(none,right)
+%defineIndicator(none,top)
+%defineIndicator(none,bottom)
 %defineIndicatorPLM(missile,left)
 %defineIndicatorPLM(missile,right)
 %defineIndicatorPLM(missile,top)
@@ -32,6 +36,10 @@ org $84f900
 %defineIndicatorPLM(PB,right)
 %defineIndicatorPLM(PB,top)
 %defineIndicatorPLM(PB,bottom)
+%defineIndicatorPLM(none,left)
+%defineIndicatorPLM(none,right)
+%defineIndicatorPLM(none,top)
+%defineIndicatorPLM(none,bottom)
 
 print "bank 84 end: ", pc
-warnpc $84fbff
+warnpc $84fc1f

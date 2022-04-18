@@ -58,6 +58,14 @@ org $84A947
 draw_missile_top:
 org $84A977
 draw_missile_bottom:
+org $84A6A7
+draw_none_left:
+org $84A6D7
+draw_none_right:
+org $84A707
+draw_none_top:
+org $84A737
+draw_none_bottom:
 
 ;;; Colored doors indicators: new door PLM that acts like a blue door,
 ;;; but blinks a door color while the matching door on the other side

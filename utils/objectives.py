@@ -403,11 +403,8 @@ class Objectives(object):
         self.resetGoals()
         romReader.romFile.seek(Addresses.getOne('objectivesList'))
         checkFunction = romReader.romFile.readWord()
-        checkScavEscape = False
         while checkFunction != 0x0000:
             goal = self.getGoalFromCheckFunction(checkFunction)
-            if goal.name == 'finish scavenger hunt':
-                checkScavEscape = True
             Objectives.activeGoals.append(goal)
             checkFunction = romReader.romFile.readWord()
 
@@ -417,9 +414,8 @@ class Objectives(object):
         for goal in Objectives.activeGoals:
             LOG.debug("active goal: {}".format(goal.name))
 
-        if checkScavEscape:
-            self.tourianRequired = not romReader.patchPresent('Escape_Trigger')
-            LOG.debug("tourianRequired: {}".format(self.tourianRequired))
+        self.tourianRequired = not romReader.patchPresent('Escape_Trigger')
+        LOG.debug("tourianRequired: {}".format(self.tourianRequired))
 
     # call from rando
     def writeGoals(self, romFile):

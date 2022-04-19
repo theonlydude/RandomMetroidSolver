@@ -344,6 +344,13 @@ patches = {
         0x796CC: [0x7F],
         # put "Statues Hall" tension music
         0x796D6: [0x04]
+    },
+    # Indicator PLM IDs set to ffff because they're set dynamically
+    'Indicator[KihunterBottom]': {
+        0x78256: [0xff, 0xff, 0x06, 0x02, 0x0e, 0x00]
+    },
+    'Indicator[GreenHillZoneTopRight]': {
+        0x78746: [0xff, 0xff, 0x01, 0x26, 0x30, 0x00]
     }
 }
 
@@ -588,22 +595,10 @@ additional_PLMs = {
             [0xff, 0xff, 0x01, 0x06, 0x00, 0x00]
         ]
     },
-    'Indicator[KihunterBottom]': {
-        'room': 0x962a,
-        'plm_bytes_list': [
-            [0xff, 0xff, 0x06, 0x02, 0x0e, 0x00]
-        ]
-    },
     'Indicator[KihunterRight]': {
         'room': 0x95ff,
         'plm_bytes_list': [
             [0xff, 0xff, 0x01, 0x06, 0x0d, 0x00]
-        ]
-    },
-    'Indicator[GreenHillZoneTopRight]': {
-        'room': 0x9e9f,
-        'plm_bytes_list': [
-            [0xff, 0xff, 0x01, 0x26, 0x30, 0x00]
         ]
     },
     'Indicator[NoobBridgeRight]': {

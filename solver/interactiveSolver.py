@@ -213,6 +213,7 @@ class InteractiveSolver(CommonSolver):
                     # check that the ap of the loc is available from the previous ap,
                     # else it may set loc diff to easy
                     if (loc.difficulty.difficulty == -1 and
+                        loc.accessPoint is not None and
                         self.areaGraph.canAccess(self.smbm, previousAP, loc.accessPoint, Conf.difficultyTarget)):
                         lastVisitedLocs.append(loc)
 

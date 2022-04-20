@@ -13,6 +13,7 @@ from utils.parameters import easy, medium, hard, harder, hardcore, mania, infini
 from utils.doorsmanager import DoorsManager
 from utils.objectives import Objectives
 from logic.logic import Logic
+from graph.location import define_location
 
 class CommonSolver(object):
     def loadRom(self, rom, interactive=False, magic=None, startLocation=None):
@@ -554,12 +555,10 @@ class CommonSolver(object):
 
         raise Exception("Can't take a decision")
 
-    def checkMB(self, mbLoc, justCheck=False, justAdd=False):
+    def checkMB(self, mbLoc, justCheck=False):
         # add mother brain loc and check if it's accessible
         self.majorLocations.append(mbLoc)
         self.computeLocationsDifficulty(self.majorLocations)
-        if justAdd:
-            return
         if justCheck:
             self.majorLocations.remove(mbLoc)
             return mbLoc.difficulty == True
@@ -572,6 +571,35 @@ class CommonSolver(object):
             self.majorLocations.remove(mbLoc)
             self.motherBrainKilled = False
         return self.motherBrainKilled
+
+    def checkEscape(self):
+        # add gunship location and try to go back to it
+        gunship = define_location(
+            Area="Crateria",
+            GraphArea="Crateria",
+            SolveArea="Crateria Landing Site",
+            Name="Gunship",
+            Class=["Minor"],
+            CanHidden=False,
+            Address=-1,
+            Id=None,
+            Visibility="Hidden",
+            Room='Landing Site',
+            AccessFrom = {
+                'Landing Site': lambda sm: SMBool(True)
+            }
+        )
+        gunship.Available = lambda sm: SMBool(True)
+        gunship.itemName = 'Nothing'
+        self.majorLocations.append(gunship)
+        self.computeLocationsDifficulty(self.majorLocations)
+        if gunship.difficulty == True:
+            self.log.debug("Escape to gunship ok")
+            self.collectMajor(gunship)
+        else:
+            self.log.debug("Can't escape to gunship")
+            self.majorLocations.remove(gunship)
+        return gunship.difficulty
 
     def computeDifficulty(self):
         # loop on the available locations depending on the collected items.
@@ -616,10 +644,11 @@ class CommonSolver(object):
             (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
             if isEndPossible and hasEnoughItems:
                 if not self.objectives.tourianRequired:
-                    # add MB loc for non visited locs
-                    self.checkMB(mbLoc, justAdd=True)
-                    self.log.debug("no need to checkMB, END")
-                    break
+                    if self.checkEscape():
+                        self.log.debug("checkMB: disabled, can escape to gunship, END")
+                        break
+                    else:
+                        self.log.debug("checkMB: disabled, can't escape to gunship")
                 else:
                     if endDifficulty <= diffThreshold:
                         if self.checkMB(mbLoc):

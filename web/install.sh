@@ -739,6 +739,7 @@ mkdir -p ~/web2py/applications/solver/static/images/tracker/inventory/
 [ -L ~/web2py/applications/solver/static/images/tracker/inventory/XRayScope.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/XRayScope.png ~/web2py/applications/solver/static/images/tracker/inventory/XRayScope.png
 [ -L ~/web2py/applications/solver/static/images/tracker/inventory/Nothing.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Nothing.png ~/web2py/applications/solver/static/images/tracker/inventory/Nothing.png
 [ -L ~/web2py/applications/solver/static/images/tracker/inventory/CrystalFlash.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/CrystalFlash.png ~/web2py/applications/solver/static/images/tracker/inventory/CrystalFlash.png
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/Gunship.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Gunship.png ~/web2py/applications/solver/static/images/tracker/inventory/Gunship.png
 
 [ -L ~/web2py/applications/solver/static/images/tracker/inventory/SporeSpawn.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/SporeSpawn.png ~/web2py/applications/solver/static/images/tracker/inventory/SporeSpawn.png
 [ -L ~/web2py/applications/solver/static/images/tracker/inventory/Crocomire.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Crocomire.png ~/web2py/applications/solver/static/images/tracker/inventory/Crocomire.png

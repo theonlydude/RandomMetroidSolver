@@ -579,7 +579,8 @@ class CommonSolver(object):
             GraphArea="Crateria",
             SolveArea="Crateria Landing Site",
             Name="Gunship",
-            Class=["Minor"],
+            # to display bigger gunship image in spoiler log
+            Class=["Boss"],
             CanHidden=False,
             Address=-1,
             Id=None,
@@ -596,6 +597,8 @@ class CommonSolver(object):
         if gunship.difficulty == True:
             self.log.debug("Escape to gunship ok")
             self.collectMajor(gunship)
+            # to display gunship image in the spoiler log
+            gunship.itemName = 'Gunship'
         else:
             self.log.debug("Can't escape to gunship")
             self.majorLocations.remove(gunship)

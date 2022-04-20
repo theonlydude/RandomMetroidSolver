@@ -49,6 +49,10 @@ class StandardSolver(CommonSolver):
 
         self.loadRom(rom, magic=magic)
 
+        # if tourian is disabled force item pickup to any%
+        if self.tourian == 'Disabled':
+            Conf.itemsPickup = 'any'
+
         self.presetFileName = presetFileName
         self.loadPreset(self.presetFileName)
 

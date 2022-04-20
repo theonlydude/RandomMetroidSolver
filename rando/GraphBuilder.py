@@ -98,6 +98,10 @@ class GraphBuilder(object):
             src, _ = next(t for t in graph.InterAreaTransitions if t[1].Name == "Golden Four")
             graph.removeTransitions("Golden Four")
             graph.addTransition(src.Name, "Climb Bottom Left")
+            # disconnect the other side of G4
+            graph.addTransition("Golden Four", "Golden Four")
+        # remove vanilla escape transition
+        graph.addTransition('Tourian Escape Room 4 Top Right', 'Tourian Escape Room 4 Top Right')
         # filter garbage itemLocs
         ilCheck = lambda il: not il.Location.isBoss() and not il.Location.restricted and il.Item.Category != "Nothing"
         # update item% objectives

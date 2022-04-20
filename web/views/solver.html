@@ -976,20 +976,31 @@ if result is not None and result["difficulty"] != -1:
   if result["patches"]:
 }}
     <h4>Detected patches:</h4>
-    <table class="full">
+    <div class="row">
+      <div class="column">
+        <ul>
 {{
     for i, patch in enumerate(sorted(result["patches"])):
       if i % 2 == 0:
-        response.write("<tr><td>{}</td>".format(patch), escape=False)
-      else:
-        response.write("<td>{}</td></tr>".format(patch), escape=False)
+        response.write("<li>{}</li>".format(patch), escape=False)
         pass
       pass
-    if i % 2 == 0:
-      response.write("<td></td></tr>", escape=False)
+}}
+        </ul>
+      </div>
+      <div class="column">
+        <ul>
+{{
+    for i, patch in enumerate(sorted(result["patches"])):
+      if i % 2 == 1:
+        response.write("<li>{}</li>".format(patch), escape=False)
+        pass
       pass
 }}
-    </table>
+        </ul>
+      </div>
+    </div>
+
     </div>
     </div>
 {{

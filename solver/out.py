@@ -39,6 +39,7 @@ class OutWeb(Out):
         generatedPath = self.getPath(s.visitedLocations)
         collectedItems = s.smbm.getItems()
         scavengerOrder = [loc.Name for loc in s.scavengerOrder]
+        tourian = s.tourian
 
         if s.difficulty == -1:
             remainTry = self.getPath(s.tryRemainingLocs())
@@ -59,7 +60,7 @@ class OutWeb(Out):
                       pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
                       remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
                       skippedMajors=skippedMajors, unavailMajors=unavailMajors, collectedItems=collectedItems,
-                      scavengerOrder=scavengerOrder, objectives=Objectives.getGoalsList())
+                      scavengerOrder=scavengerOrder, objectives=Objectives.getGoalsList(), tourian=tourian)
 
         with open(s.outputFileName, 'w') as jsonFile:
             json.dump(result, jsonFile)

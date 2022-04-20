@@ -47,6 +47,7 @@ class CommonSolver(object):
             self.doorsRando = False
             self.hasNothing = False
             self.objectives.setVanilla()
+            self.tourian = 'Vanilla'
         else:
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
@@ -57,7 +58,7 @@ class CommonSolver(object):
             if not GraphUtils.isStandardStart(self.startLocation) and self.majorsSplit != 'Full':
                 # update major/chozo locs in non standard start
                 self.romLoader.updateSplitLocs(self.majorsSplit, self.locations)
-            (self.areaRando, self.bossRando, self.escapeRando, hasObjectives) = self.romLoader.loadPatches()
+            (self.areaRando, self.bossRando, self.escapeRando, hasObjectives, self.tourian) = self.romLoader.loadPatches()
             RomPatches.ActivePatches += startPatches
             self.escapeTimer = self.romLoader.getEscapeTimer()
             self.doorsRando = self.romLoader.loadDoorsColor()

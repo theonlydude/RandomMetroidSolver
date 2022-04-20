@@ -102,15 +102,18 @@ class RomLoader(object):
             RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
 
         # Tourian
+        tourian = 'Vanilla'
         if self.hasPatch("minimizer_tourian"):
             RomPatches.ActivePatches.append(RomPatches.TourianSpeedup)
+            tourian = 'Fast'
         if self.hasPatch("Escape_Trigger"):
             RomPatches.ActivePatches.append(RomPatches.NoTourian)
+            tourian = 'Disabled'
 
         # objectives
         hasObjectives = self.hasPatch('objectives')
 
-        return (isArea, isBoss, isEscape, hasObjectives)
+        return (isArea, isBoss, isEscape, hasObjectives, tourian)
 
     def getPatches(self):
         return self.romReader.getPatches()

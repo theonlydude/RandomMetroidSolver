@@ -451,7 +451,7 @@ class RomReader:
         return sorted(ret)
 
     def getPlandoAddresses(self):
-        self.romFile.seek(Address.getOne('plandoAddresses'))
+        self.romFile.seek(Addresses.getOne('plandoAddresses'))
         addresses = []
         for i in range(128):
             address = self.romFile.readWord()
@@ -462,7 +462,7 @@ class RomReader:
         return addresses
 
     def getPlandoTransitions(self, maxTransitions):
-        self.romFile.seek(Address.getOne('plandoTransitions'))
+        self.romFile.seek(Addresses.getOne('plandoTransitions'))
         addresses = []
         for i in range(maxTransitions):
             srcDoorPtr = self.romFile.readWord()

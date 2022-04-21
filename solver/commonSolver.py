@@ -219,7 +219,7 @@ class CommonSolver(object):
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             print("---------------------------------------------------------------")
-            print("collectItem: {:<16} at {:<48}".format(item, loc.Name))
+            print("collectItem: {:<16} at {:<48} diff {}".format(item, loc.Name, loc.difficulty))
             print("---------------------------------------------------------------")
 
         # last loc is used as root node for the graph.

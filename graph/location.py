@@ -64,6 +64,8 @@ class Location:
             smbm.removeItem(self.itemName)
 
             self.difficulty = self.difficulty & postAvailable
+            if self.locDifficulty is not None:
+                self.locDifficulty = self.locDifficulty & postAvailable
 
     def evalComeBack(self, smbm, areaGraph, ap):
         if self.difficulty.bool == True:

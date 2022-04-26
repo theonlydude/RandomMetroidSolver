@@ -1421,7 +1421,9 @@ window.onload = function(){
             setSwitchToOn(boss);
             setSwitchToOn(area);
             disableElement("minimizerQty", false);
-            tourian.value = "Fast";
+            if(tourian.value == "Vanilla") {
+                tourian.value = "Fast";
+            }
         } else {
             disableElement("minimizerQty", true);
             var minimizerRandom = document.getElementById("minimizerQtyRandom");

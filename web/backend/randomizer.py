@@ -58,6 +58,13 @@ class Randomizer(object):
             "way_of_chozo": "chozo split with boss randomization",
             "where_am_i": "Area mode with random start location and early morph",
             "where_is_morph": "Area mode with late Morph",
+            "Multi_Category_Randomizer_Week_1": "Multi-Category Randomizer Tournament week 1",
+            "Multi_Category_Randomizer_Week_2": "Multi-Category Randomizer Tournament week 2",
+            "Multi_Category_Randomizer_Week_3": "Multi-Category Randomizer Tournament week 3",
+            "Multi_Category_Randomizer_Week_4": "Multi-Category Randomizer Tournament week 4",
+            "Multi_Category_Randomizer_Week_5": "Multi-Category Randomizer Tournament week 5",
+            "Multi_Category_Randomizer_Week_6": "Multi-Category Randomizer Tournament week 6",
+            "Multi_Category_Randomizer_Week_7": "Multi-Category Randomizer Tournament week 7",
             "Season_Races": "rando league races (Majors/Minors split)",
             "SGLive2021": "SGLive 2021 Super Metroid randomizer tournament",
             "SMRAT2021": "Super Metroid Randomizer Accessible Tournament 2021",
@@ -483,6 +490,6 @@ class Randomizer(object):
 
                 return json.dumps(params)
             except Exception as e:
-                raiseHttp(400, "Can't load the rando preset")
+                raiseHttp(400, "Can't load the rando preset: {}".format(e))
         else:
             raiseHttp(400, "Rando preset not found")

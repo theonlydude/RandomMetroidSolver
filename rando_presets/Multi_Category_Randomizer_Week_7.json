@@ -18,8 +18,9 @@
     "areaLayout": "on",
     "bossRandomization": "on",
     "layoutPatches": "on",
-    "variaTweaks": "off",
+    "variaTweaks": "on",
     "itemsounds": "off",
     "elevators_doors_speed": "off",
+    "suitsRestriction": "off",
     "hud": "on"
 }

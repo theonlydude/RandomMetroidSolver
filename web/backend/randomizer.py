@@ -121,7 +121,10 @@ class Randomizer(object):
                             elif key in defaultMultiValues:
                                 keyMulti = key + 'MultiSelect'
                                 if keyMulti in seedInfo:
-                                    self.session.randomizer[key] = seedInfo[key]
+                                    if key == 'objective' and value == 'nothing':
+                                        self.session.randomizer[key] = ""
+                                    else:
+                                        self.session.randomizer[key] = seedInfo[key]
                                     valueMulti = seedInfo[keyMulti]
                                     if type(valueMulti) == str:
                                         valueMulti = valueMulti.split(',')

@@ -27,9 +27,6 @@ class Randomizer(object):
         self.initRandomizerSession()
 
         (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
-        (randoPresets, tourRandoPresets) = loadRandoPresetsList(self.cache)
-        # add empty entry for default value
-        randoPresets.append("")
 
         randoPresetsDesc = {
             "all_random": "all the parameters set to random",
@@ -69,6 +66,18 @@ class Randomizer(object):
             "SGLive2021": "SGLive 2021 Super Metroid randomizer tournament",
             "SMRAT2021": "Super Metroid Randomizer Accessible Tournament 2021",
             "VARIA_Weekly": "Casual logic community races"
+        }
+
+        randoPresetsCategories = {
+            "Standard": ["", "default", "Chozo_Speedrun", "free", "haste", "vanilla"],
+            "Hud": ["hud", "hud_hard", "hud_start"],
+            "Scavenger": ["scavenger_hard", "scavenger_random", "scavenger_speedrun", "scavenger_vanilla_but_not"],
+            "Area": ["way_of_chozo", "where_am_i", "where_is_morph"],
+            "Doors": ["doors_long", "doors_short"],
+            "Minimizer": ["minimizer", "minimizer_hardcore", "minimizer_maximizer"],
+            "Hard": ["hardway2hell", "highway2hell", "stupid_hard"],
+            "Random": ["all_random", "quite_random", "surprise"],
+            "Tournament": ["Season_Races", "SGLive2021", "SMRAT2021", "VARIA_Weekly", "Multi_Category_Randomizer_Week_1", "Multi_Category_Randomizer_Week_2", "Multi_Category_Randomizer_Week_3", "Multi_Category_Randomizer_Week_4", "Multi_Category_Randomizer_Week_5", "Multi_Category_Randomizer_Week_6", "Multi_Category_Randomizer_Week_7"]
         }
 
         startAPs = GraphUtils.getStartAccessPointNamesCategory()
@@ -122,7 +131,7 @@ class Randomizer(object):
                                 self.session.randomizer[key] = value
 
         return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
-                    randoPresets=randoPresets, tourRandoPresets=tourRandoPresets, randoPresetsDesc=randoPresetsDesc,
+                    randoPresetsDesc=randoPresetsDesc, randoPresetsCategories=randoPresetsCategories,
                     startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues,
                     maxsize=sys.maxsize, displayNames=displayNames, objectivesExclusions=objectivesExclusions,
                     objectivesTypes=objectivesTypes, objectivesSort=objectivesSort)

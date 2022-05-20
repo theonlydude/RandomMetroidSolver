@@ -1668,19 +1668,20 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
     {
       element: "#randoPresetStep",
       title: "Settings Preset",
-      content: "Choose from a list of typical Randomizer usages. They're independent from skills preset, and settings can still be changed after loading the preset:<ul>\
-{{for preset in randoPresets:
-    if preset == "":
-      continue
-    response.write("<li>{}: {}</li>\\\n".format(preset, randoPresetsDesc.get(preset, "")), escape=False)
-    pass}}\
-</ul>\
-Tournament presets:\
-<ul>\
-{{for preset in tourRandoPresets:
-    response.write("<li>{}: {}</li>\\\n".format(preset, randoPresetsDesc.get(preset, "")), escape=False)
-    pass}}\
-</ul>"
+      content: "<p>Choose from a list of typical Randomizer usages. They're independent from skills preset, and settings can still be changed after loading the preset.</p>\
+{{
+  for categorie, presets in randoPresetsCategories.items():
+    response.write('{} presets:\\\n<ul>'.format(categorie), escape=False)
+    for preset in presets:
+      if preset == "":
+        continue
+      else:
+        response.write('<li>{}: {}</li>\\\n'.format(preset, randoPresetsDesc.get(preset, '')), escape=False)
+        pass
+      pass
+    response.write('</ul>\\\n', escape=False)
+    pass
+}}"
     },
     {
       element: "#raceStep",
@@ -2485,24 +2486,18 @@ def displayNumber(id, min, max, default, step="1"):
                 <td>Settings Preset:</td>
                 <td>
                   <select class="chzn-select" id="randoPreset" name="randoPreset" onchange="loadRandoPreset()">
-                    <optgroup label="Standard presets">
 {{
-  for preset in randoPresets:
-    if preset == "":
-      response.write('<option selected="selected" value="{}">{}</option>\\\n'.format(preset, preset), escape=False)
-    else:
-      response.write('<option value="{}">{}: {}</option>\\\n'.format(preset, preset, randoPresetsDesc.get(preset, "")), escape=False)
+  for categorie, presets in randoPresetsCategories.items():
+    response.write('<optgroup label="{} presets">'.format(categorie), escape=False)
+    for preset in presets:
+      if preset == "":
+        response.write('<option selected="selected" value="{}">{}</option>\\\n'.format(preset, preset), escape=False)
+      else:
+        response.write('<option value="{}">{}: {}</option>\\\n'.format(preset, preset, randoPresetsDesc.get(preset, "")), escape=False)
+        pass
       pass
     pass
 }}
-                    </optgroup>
-                    <optgroup label="Tournament presets">
-{{
-  for preset in tourRandoPresets:
-    response.write('<option value="{}">{}: {}</option>\\\n'.format(preset, preset, randoPresetsDesc.get(preset, "")), escape=False)
-    pass
-}}
-                </optgroup>
                 </select>
                 </td>
                 <td id="randoPresetStep"><button type="button" onclick="startTheTour(2)">?</button></td>

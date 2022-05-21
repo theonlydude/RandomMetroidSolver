@@ -571,7 +571,7 @@ function updateLines(jsonData, reset) {
     for(var i=0; i<arrayLength; i++) {
         var startPoint = jsonData["linesSeq"][i][0];
         var endPoint = jsonData["linesSeq"][i][1];
-        if(! (startPoint in lines)) {
+        if(! (startPoint in lines) && startPoint != endPoint) {
             addLine(startPoint, endPoint);
         }
     }

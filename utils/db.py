@@ -471,7 +471,7 @@ order by 1,2;"""
                 value = row[1]
                 if arg == 'seed':
                     seed = value
-                if arg.find("MultiSelect") != -1:
+                if arg.find("MultiSelect") != -1 or arg == 'objective':
                     value = '["{}"]'.format('", "'.join(value.split(',')))
                 else:
                     value = '"{}"'.format(value)

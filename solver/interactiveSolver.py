@@ -1028,10 +1028,21 @@ class InteractiveSolver(CommonSolver):
                         if transition[0] not in availAPs and transition[1] not in availAPs:
                             self.curGraphTransitions.remove(transition)
 
+                    # for fast check of current transitions
+                    fastTransCheck = {}
+                    for transition in self.curGraphTransitions:
+                        fastTransCheck[transition[0]] = transition[1]
+                        fastTransCheck[transition[1]] = transition[0]
+
                     # add new transitions
                     for transition in possibleTransitions:
-                        if transition[0] in availAPs and transition[1] in availAPs:
-                            self.curGraphTransitions.append(transition)
+                        start = transition[0]
+                        end = transition[1]
+                        # available transition
+                        if start in availAPs and end in availAPs:
+                            # transition not already in current transitions
+                            if start not in fastTransCheck and end not in fastTransCheck:
+                                self.curGraphTransitions.append(transition)
 
                 if self.hasNothing:
                     # get locs with nothing

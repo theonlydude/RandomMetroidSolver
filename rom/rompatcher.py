@@ -1046,7 +1046,14 @@ class RomPatcher:
 
     def enableMoonWalk(self):
         # replace STZ with STA since A is non-zero at this point
-        self.romFile.writeByte(0x8D, snes_to_pc(0x81b35d))
+        self.romFile.writeByte(0x8D, Addresses.getOne('moonwalk'))
+
+    def writeAdditionalETanks(self, additionalETanks):
+        self.romFile.writeByte(additionalETanks, Addresses.getOne("additionalETanks"))
+
+    def writeHellrunRate(self, hellrunRatePct):
+        hellrunRateVal = min(int(0x40*float(hellrunRatePct)/100.0), 0xff)
+        self.romFile.writeByte(hellrunRateVal, Addresses.getOne("hellrunRate"))
 
     def compress(self, address, data):
         # data: [] of 256 int

@@ -138,7 +138,7 @@ if __name__ == "__main__":
                                  'max_ammo_display.ips', 'supermetroid_msu1.ips', 'Infinite_Space_Jump',
                                  'refill_before_save.ips', 'remove_elevators_doors_speed.ips',
                                  'remove_itemsounds.ips', 'vanilla_music.ips', 'custom_ship.ips',
-                                 'Ship_Takeoff_Disable_Hide_Samus', 'widescreen.ips'])
+                                 'Ship_Takeoff_Disable_Hide_Samus', 'widescreen.ips', 'hell.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -291,6 +291,10 @@ if __name__ == "__main__":
     parser.add_argument('--tourian', help="Tourian mode",
                         dest='tourian', nargs='?', default='Vanilla',
                         choices=['Vanilla', 'Fast', 'Disabled'])
+    parser.add_argument('--hellrun', help="Hellrun damage rate in %, between 0 and 400 (default 100)",
+                        dest='hellrunRate', default=100, type=int)
+    parser.add_argument('--etanks', help="Additional ETanks, between 0 (default) and 18",
+                        dest='additionalEtanks', default=0, type=int)
     # parse args
     args = parser.parse_args()
 
@@ -303,6 +307,14 @@ if __name__ == "__main__":
 
     if args.plandoRando != None and args.output == None:
         print("plandoRando param requires output param")
+        sys.exit(-1)
+
+    if args.additionalEtanks < 0 or args.additionalEtanks > 18:
+        print("additionalEtanks must be between 0 and 18")
+        sys.exit(-1)
+
+    if args.hellrunRate < 0 or args.hellrunRate > 400:
+        print("hellrunRate must be between 0 and 400")
         sys.exit(-1)
 
     utils.log.init(args.debug)
@@ -379,7 +391,6 @@ if __name__ == "__main__":
         threshold = mania - epsilon
     maxDifficulty = threshold
     logger.debug("maxDifficulty: {}".format(maxDifficulty))
-
     # handle random parameters with dynamic pool of values
     (_, progSpeed) = randomMulti(args.__dict__, "progressionSpeed", speeds)
     (_, progDiff) = randomMulti(args.__dict__, "progressionDifficulty", progDiffs)
@@ -834,6 +845,8 @@ if __name__ == "__main__":
         if args.patchOnly == False:
             romPatcher.writeMagic()
             romPatcher.writeMajorsSplit(args.majorsSplit)
+        romPatcher.writeAdditionalETanks(args.additionalEtanks)
+        romPatcher.writeHellrunRate(args.hellrunRate)
         if args.palette == True:
             paletteSettings = {
                 "global_shift": None,

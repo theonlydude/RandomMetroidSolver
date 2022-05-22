@@ -57,6 +57,12 @@ define current_save_slot	$7e0952
 define area_index		$079f
 define load_station_index	$078b
 
+define igt_sram_off	#$0038
+define igt_frames       $7E09DA
+define igt_seconds      $7E09DC
+define igt_minutes      $7E09DE
+define igt_hours        $7E09E0
+
 // some scratch space in RAM for backup save system
 define backup_counter	$7fff38
 define backup_candidate $7fff3a
@@ -301,7 +307,6 @@ save_index:
 
 warnpc $80ffbf
 
-
 	// Rolling backup save mechanism:
 	//
 	// Additional data in saves :
@@ -321,6 +326,10 @@ warnpc $80ffbf
 	//	- priority: empty save, old backup, recent backup
 	//	- ignore save files with player flag set (was loaded once)
 	//	- ignore backup files from different slots
+
+// vanilla array of save slots offsets in bank 70
+org $81812b
+slots_sram_offsets:
 
 // Patch load and save routines
 // a save will always be performed when starting a new game (see new_game.asm)
@@ -524,13 +533,13 @@ backup_save:
 	lda {current_save_slot}
 	asl
 	tax
-	lda $81812b,x // get SRAM offset in bank 70 for slot
+	lda slots_sram_offsets,x // get SRAM offset in bank 70 for slot
 	sta $47
 	// destination slot is in backup_candidate
 	lda {backup_candidate}
 	asl
 	tax
-	lda $81812b,x // get SRAM offset in bank 70 for slot
+	lda slots_sram_offsets,x // get SRAM offset in bank 70 for slot
 	sta $4a
 	// copy save file
 	ldy #$0000
@@ -602,6 +611,13 @@ backup_save:
 
 patch_save_start:
 	pha	// save A, it is used as arg in hijacked function
+	// copy RTA timer to RAM stats and IGT RAM
+	lda {timer1}
+	sta {stats_timer}
+	lda {timer2}
+	sta {stats_timer}+2
+	jsl update_igt
+	// backup saves management:
 	lda.l opt_backup
 	beq .end
 	jsl {check_new_game}
@@ -612,15 +628,13 @@ patch_save_start:
 	bcc .end
 	jsr backup_save
 .end:
+	// restore $14 to 0 as it is written by update_igt
+	stz $14
 	pla
 	and #0003	// hijacked code
 	rts
 
 patch_save_end:
-    lda {timer1}
-    sta {stats_timer}
-    lda {timer2}
-    sta {stats_timer}+2
     lda #$0001
     jsl save_stats
 .end:
@@ -1362,6 +1376,9 @@ save_stats:
     phx
     phy
     pha
+    // copy RTA timer from RAM stats to IGT RAM
+    jsl update_igt
+    // actually save stats now
     lda {current_save_slot}
     clc
     adc #$0010
@@ -1981,63 +1998,44 @@ stats:
     dw 41,      {row}*174,  1, 0    // resets
     dw 0,               0,  0, 0    // end of table
 
-print "credits end : ", org
-
 // load RTA in IGT
-// update values in:
-//    $09DE: Game time, minutes
-//    $09E0: Game time, hours (capped at 99:59:59.59)
 update_igt:
-    phx
-    lda {current_save_slot}
-    asl
-    tax
-    lda save_slots,x
-    tax
-    lda $700000, x // rta timer in sram is the first value in stats
-    sta $16
-    lda $700002, x
-    sta $14
-    lda #$003c
-    sta $12
-    lda #$ffff
-    sta $1a
-    jsr div32 // frames in $14, rest in $16
-    lda $16  // RTA in seconds
-    sta $004204 // divide by 60 to get minutes
-    sep #$20
-    lda #$ff
-    sta $1a
-    lda #$3c
-    sta $004206
-    pha; pla; pha; pla; rep #$20
-    lda $004214 // hours/minutes
-    sta $004204 // divide by 60 to get hours and minutes
-    sep #$20
-    lda #$3c
-    sta $004206
-    pha; pla; pha; pla; rep #$20
-    lda $004216 // rta minutes
-    sta $0009DE // replace igt minutes
-    lda $004214 // rta hours
-    sta $0009E0 // replace igt hours
-    plx
-    // vanilla code
-    sta $004204
-    rtl
+	// divide total frames in 32 bits by 60 to have total seconds in 16 bits
+	// (so even if the actual 32 bits frame value is correct and can go up to 1100+ hours,
+	//  we can actually display correctly only times up to 18:12:15)
+	lda {stats_timer}
+	sta $16
+	lda {stats_timer}+2
+	sta $14
+	lda #$003c
+	sta $12
+	jsr div32 // frames in $14, rest in $16
+	lda $14
+	sta {igt_frames} // replace igt frames
+	lda $16  // RTA in seconds
+	sta $004204 // divide by 60 to get minutes
+	sep #$20
+	lda #$3c
+	sta $004206
+	pha; pla; pha; pla; rep #$20
+	lda $004216 // rta seconds
+	sta {igt_seconds} // replace igt seconds
+	lda $004214 // hours/minutes
+	sta $004204 // divide by 60 to get hours and minutes
+	sep #$20
+	lda #$3c
+	sta $004206
+	pha; pla; pha; pla; rep #$20
+	lda $004216 // rta minutes
+	sta {igt_minutes} // replace igt minutes
+	lda $004214 // rta hours
+	sta {igt_hours} // replace igt hours
+	rtl
 
-print "after IGT hijack : ", org
+print "bank DF end : ", org
 
 // palette rando stores its relocated palette there
 warnpc $dfe1ff
-
-// hijack to load RTA in IGT RAM
-// vanilla code:
-//  $8B:F3D5 AD E0 09    LDA $09E0  [$7E:09E0]
-//  $8B:F3D8 8D 04 42    STA $4204  [$7E:4204]
-org $8bF3D5
-jsl update_igt
-nop; nop
 
 // Relocated credits tilemap to free space in bank CE
 org $ceb240

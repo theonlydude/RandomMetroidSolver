@@ -24,8 +24,8 @@ class RomLoader(object):
     def assignItems(self, locations):
         return self.romReader.loadItems(locations)
 
-    def getTransitions(self):
-        return self.romReader.loadTransitions()
+    def getTransitions(self, tourian):
+        return self.romReader.loadTransitions(tourian)
 
     def hasPatch(self, patchName):
         return self.romReader.patchPresent(patchName)

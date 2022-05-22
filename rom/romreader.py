@@ -328,7 +328,7 @@ class RomReader:
             assert loc.itemName != "Nothing", "Nothing detected in scav loc {}".format(loc.Name)
         return order
 
-    def loadTransitions(self):
+    def loadTransitions(self, tourian):
         # return the transitions
         rooms = GraphUtils.getRooms()
         bossTransitions = {}
@@ -360,7 +360,10 @@ class RomReader:
             return [(t, transitions[t]) for t in transitions]
 
         # get escape transition
-        escapeSrcAP = getAccessPoint('Tourian Escape Room 4 Top Right')
+        if tourian == 'Disabled':
+            escapeSrcAP = getAccessPoint('Climb Bottom Left')
+        else:
+            escapeSrcAP = getAccessPoint('Tourian Escape Room 4 Top Right')
         key = self.getTransition(escapeSrcAP.ExitInfo['DoorPtr'])
         # may not be set in plandomizer
         if key in rooms:

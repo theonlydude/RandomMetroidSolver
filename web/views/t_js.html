@@ -71,12 +71,16 @@ function clickPortal(elemId) {
 
     isEscape = isEscapeAP(elemId);
 
-    // prevent clicking on escape portals
-    if(isEscape == true && (escapeRando == false || mode != "plando")) {
+    // prevent clicking on escape portals, allow it in plando with escape rando or tracker with disabled tourian
+    if(isEscape == true && (escapeRando == false || (mode != "plando" && tourian != "Disabled"))) {
         return;
     }
 
-    escapeStart = "tourianEscapeRoom4TopRight"
+    if(tourian != "Disabled") {
+        escapeStart = "tourianEscapeRoom4TopRight";
+    } else {
+        escapeStart = "climbBottomLeft";
+    }
     escapeLine = escapeStart in lines;
     if(escapeLine == true) {
         escapeEnd = lines[escapeStart]
@@ -98,7 +102,7 @@ function clickPortal(elemId) {
     } else if(secondClick == "" && elemId != firstClick) {
         isFirstEscape = isEscapeAP(firstClick);
 
-        if(isFirstEscape != isEscape) {
+        if(tourian != "Disabled" && isFirstEscape != isEscape) {
             // no mixing escape ap with other aps
             return;
         }
@@ -112,13 +116,13 @@ function clickPortal(elemId) {
             if(! ((firstClick in lines) || (elemId in lines))) {
                 // add new line
 
-                if(isEscape == true) {
+                if(isEscape == true || isFirstEscape == true) {
                     // escape aps, one must be tourian exit
                     if(firstClick != escapeStart && elemId != escapeStart) {
                         alert("For escape one node must be Tourian escape.");
                         return;
                     }
-                } else if(checkCompatibleAPs(firstClick, elemId) == false) {
+                } else if(checkCompatibleAPs(firstClick, elemId) == false && mode != "plando") {
                     alert("Warning:\n\tYou are mixing an Areas access point and a Bosses access point.\n\tIt's an invalid transition except for Plando seeds.");
                 }
 
@@ -547,6 +551,7 @@ function updateGlobal(jsonData) {
     preset = jsonData["preset"];
     doorsRando = jsonData["doorsRando"];
     hasNothing = jsonData["hasNothing"];
+    tourian = jsonData["tourian"];
     init = true;
 
     document.getElementById("mode").value = mode;
@@ -810,6 +815,7 @@ var doorsRando = false;
 var autoTrackInProgress = false;
 var hasNothing = false;
 var g4 = ["Kraid", "Phantoon", "Draygon", "Ridley"];
+var tourian = "Vanilla";
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "break"]

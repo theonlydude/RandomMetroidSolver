@@ -120,7 +120,10 @@ class WS(object):
                 "allDoorsRevealed": state["allDoorsRevealed"],
 
                 # plando scav hunt
-                "plandoScavengerOrder": state["plandoScavengerOrder"]
+                "plandoScavengerOrder": state["plandoScavengerOrder"],
+
+                # tourian
+                "tourian": state["tourian"]
             })
         else:
             raiseHttp(200, "OK", True)

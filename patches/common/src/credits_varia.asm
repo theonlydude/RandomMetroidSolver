@@ -331,6 +331,10 @@ warnpc $80ffbf
 org $81812b
 slots_sram_offsets:
 
+// vanilla array of bitmasks to check used save slots
+org $819af4
+slots_bitmasks:
+
 // Patch load and save routines
 // a save will always be performed when starting a new game (see new_game.asm)
 org $81ef20
@@ -351,7 +355,7 @@ new_save:
 	asl
 	tax
 	lda {used_slots_mask}
-	ora $819af4,x	// bitmask index table in ROM
+	ora.l slots_bitmasks,x	// bitmask index table in ROM
 	sta {used_slots_mask}
 
 	// init backup save data :
@@ -533,13 +537,13 @@ backup_save:
 	lda {current_save_slot}
 	asl
 	tax
-	lda slots_sram_offsets,x // get SRAM offset in bank 70 for slot
+	lda.l slots_sram_offsets,x // get SRAM offset in bank 70 for slot
 	sta $47
 	// destination slot is in backup_candidate
 	lda {backup_candidate}
 	asl
 	tax
-	lda slots_sram_offsets,x // get SRAM offset in bank 70 for slot
+	lda.l slots_sram_offsets,x // get SRAM offset in bank 70 for slot
 	sta $4a
 	// copy save file
 	ldy #$0000
@@ -605,7 +609,7 @@ backup_save:
 	asl
 	tax
 	lda {used_slots_mask}
-	ora $819af4,x	// bitmask index table in ROM
+	ora.l slots_bitmasks,x	// bitmask index table in ROM
 	sta {used_slots_mask}
 	rts
 
@@ -755,7 +759,7 @@ load_menu_file:
 	pha
 	asl
 	tax
-	lda $819af4,x	// bitmask index table in ROM
+	lda.l slots_bitmasks,x	// bitmask index table in ROM
 	and {used_slots_mask}
 	beq .nochange
 .load_slot:
@@ -835,7 +839,7 @@ patch_clear:
 	lda $19b7
 	asl
 	tax
-	lda $819af4,x	// bitmask index table in ROM
+	lda.l slots_bitmasks,x	// bitmask index table in ROM
 	eor #$ffff
 	and {used_slots_mask}
 	sta {used_slots_mask}
@@ -997,6 +1001,65 @@ game_end:
     rtl
 
 warnpc $8bf88f
+
+// configurable hh:mm values for samus animations at the end
+org $8bf900
+samus_times:
+// "good time" limit: 1h30m
+samus_good_time_h:
+	dw $0001
+samus_good_time_m:
+	dw $001e
+// "average time" limit: 3h
+samus_avg_time_h:
+	dw $0003
+samus_avg_time_m:
+	dw $0000
+
+check_samus_good_time:
+	lda {igt_hours}
+	cmp samus_good_time_h
+	bne .end
+	lda {igt_minutes}
+	cmp samus_good_time_m
+.end:
+	rts
+
+check_samus_avg_time:
+	lda {igt_hours}
+	cmp samus_avg_time_h
+	bne .end
+	lda {igt_minutes}
+	cmp samus_avg_time_m
+.end:
+	rts
+
+// hijacks for samus ending animations
+org $8BE00D
+	jsr check_samus_good_time
+org $8BE1E3
+	jsr check_samus_good_time
+org $8BE1E8
+	jsr check_samus_avg_time
+org $8BE279
+	jsr check_samus_good_time
+org $8BE2E7
+	jsr check_samus_good_time
+org $8BE2EC
+	jsr check_samus_avg_time
+org $8BE328
+	jsr check_samus_good_time
+org $8BE36F
+	jsr check_samus_good_time
+org $8BE374
+	jsr check_samus_avg_time
+org $8BF558
+	jsr check_samus_avg_time
+org $8BF59A
+	jsr check_samus_avg_time
+org $8BF5BD
+	jsr check_samus_avg_time
+
 
 org $dfd4f0
 // Draw full time as hh:mm:ss:ff

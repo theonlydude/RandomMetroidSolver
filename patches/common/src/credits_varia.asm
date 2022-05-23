@@ -89,9 +89,7 @@ org $808268
 
 // Patch load/save/copy
 org $81800d
-	jsr patch_save_start
-org $81807f
-    jmp patch_save_end
+	jsr patch_save
 
 org $81A24A
     jsl patch_load // patch load from menu only
@@ -613,41 +611,35 @@ backup_save:
 	sta {used_slots_mask}
 	rts
 
-patch_save_start:
+patch_save:
 	pha	// save A, it is used as arg in hijacked function
+	// backup saves management:
+	jsl {check_new_game}
+	beq .stats
+	lda.l opt_backup
+	beq .stats
+	// we have backup saves enabled, and it is not the 1st save:
+	// check if we shall backup the save
+	jsr is_backup_needed
+	bcc .stats
+	jsr backup_save
+	// handle timer/stats after backup
+.stats:
 	// copy RTA timer to RAM stats and IGT RAM
 	lda {timer1}
 	sta {stats_timer}
 	lda {timer2}
 	sta {stats_timer}+2
 	jsl update_igt
-	// backup saves management:
-	lda.l opt_backup
-	beq .end
-	jsl {check_new_game}
-	beq .end
-	// we have backup saves enabled, and it is not the 1st save:
-	// check if we shall backup the save
-	jsr is_backup_needed
-	bcc .end
-	jsr backup_save
-.end:
-	// restore $14 to 0 as it is written by update_igt
+	// save all stats
+	lda #$0001
+	jsl save_stats
+	// hijacked code :
+	// restore $14 to 0 as it is written by update_igt, and restore A
 	stz $14
 	pla
-	and #0003	// hijacked code
+	and #0003
 	rts
-
-patch_save_end:
-    lda #$0001
-    jsl save_stats
-.end:
-    ply
-    plx
-    clc
-    plb
-    plp
-    rtl
 
 print "patch_load: ", org
 patch_load:

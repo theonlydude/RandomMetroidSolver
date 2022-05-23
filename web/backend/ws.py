@@ -642,13 +642,13 @@ class WS_dump_import(WS):
         jsonData = {"stateDataOffsets": json.loads(self.vars.stateDataOffsets),
                     "currentState": json.loads(self.vars.currentState),
                     "newAP": webAPs[newAP]}
-        if len(jsonData["currentState"]) > 1320 or len(jsonData["stateDataOffsets"]) > 3:
-            raiseHttp(400, "Wrong state", True)
+        if len(jsonData["currentState"]) > 1576 or len(jsonData["stateDataOffsets"]) > 3:
+            raiseHttp(400, "Wrong state size", True)
         for key, value in jsonData["stateDataOffsets"].items():
             if len(key) > 1 or type(value) != int:
-                raiseHttp(400, "Wrong state", True)
+                raiseHttp(400, "Wrong state type", True)
         if any([d for d in jsonData["currentState"] if type(d) != int]):
-            raiseHttp(400, "Wrong state", True)
+            raiseHttp(400, "Wrong cur state type", True)
         #print(jsonData)
 
         with os.fdopen(self.fd, "w") as jsonFile:

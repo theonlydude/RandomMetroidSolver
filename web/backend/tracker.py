@@ -59,6 +59,7 @@ class Tracker(object):
                     curSession=self.session.tracker, addresses=addresses, startAPs=startAPs,
                     areaAccessPoints=InteractiveSolver.areaAccessPoints,
                     bossAccessPoints=InteractiveSolver.bossAccessPoints,
+                    escapeAccessPoints=InteractiveSolver.escapeAccessPoints,
                     nothingScreens=InteractiveSolver.nothingScreens,
                     doorsScreen=InteractiveSolver.doorsScreen,
                     bossBitMasks=InteractiveSolver.bossBitMasks,

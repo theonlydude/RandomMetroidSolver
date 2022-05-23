@@ -769,6 +769,15 @@ class InteractiveSolver(CommonSolver):
         "DraygonRoomIn": {"byteIndex": 169, "bitMask": 128, "room": 0xda60, "area": "Maridia"}
     }
 
+    escapeAccessPoints = {
+        'Tourian Escape Room 4 Top Right': {"byteIndex": 74, "bitMask": 8, "room": 0xdede, "area": "Tourian"},
+        'Climb Bottom Left': {"byteIndex": 74, "bitMask": 32, "room": 0x96ba, "area": "Crateria"},
+        'Green Brinstar Main Shaft Top Left': {"byteIndex": 21, "bitMask": 64, "room": 0x9ad9, "area": "Brinstar"},
+        'Basement Left': {"byteIndex": 81, "bitMask": 2, "room": 0xcc6f, "area": "WreckedShip"},
+        'Business Center Mid Left': {"byteIndex": 21, "bitMask": 32, "room": 0xa7de, "area": "Norfair"},
+        'Crab Hole Bottom Right': {"byteIndex": 74, "bitMask": 128, "room": 0xd21c, "area": "Maridia"}
+    }
+
     nothingScreens = {
         "Energy Tank, Gauntlet": {"byteIndex": 14, "bitMask": 64, "room": 0x965b, "area": "Crateria"},
         "Bomb": {"byteIndex": 31, "bitMask": 64, "room": 0x9804, "area": "Crateria"},
@@ -941,7 +950,8 @@ class InteractiveSolver(CommonSolver):
         "Brinstar": 0x100,
         "Norfair": 0x200,
         "WreckedShip": 0x300,
-        "Maridia": 0x400
+        "Maridia": 0x400,
+        "Tourian": 0x500
     }
 
     def importDump(self, dumpFileName):
@@ -967,8 +977,9 @@ class InteractiveSolver(CommonSolver):
             if dataType == dataEnum["items"]:
                 # get item data, loop on all locations to check if they have been visited
                 for loc in self.locations:
-                    # loc id is used to index in the items data, boss locations don't have an Id
-                    if loc.Id is None:
+                    # loc id is used to index in the items data, boss locations don't have an Id.
+                    # for scav hunt ridley loc now have an id, so also check if loc is a boss loc.
+                    if loc.Id is None or loc.isBoss():
                         continue
                     # nothing locs are handled later
                     if loc.itemName == 'Nothing':
@@ -995,12 +1006,15 @@ class InteractiveSolver(CommonSolver):
                         if loc in self.visitedLocations:
                             self.removeItemAt(self.locNameInternal2Web(loc.Name))
             elif dataType == dataEnum["map"]:
-                if self.areaRando or self.bossRando:
+                if self.areaRando or self.bossRando or self.escapeRando:
                     availAPs = set()
                     for apName, apData in self.areaAccessPoints.items():
                         if self.isElemAvailable(currentState, offset, apData):
                             availAPs.add(apName)
                     for apName, apData in self.bossAccessPoints.items():
+                        if self.isElemAvailable(currentState, offset, apData):
+                            availAPs.add(apName)
+                    for apName, apData in self.escapeAccessPoints.items():
                         if self.isElemAvailable(currentState, offset, apData):
                             availAPs.add(apName)
 
@@ -1014,8 +1028,13 @@ class InteractiveSolver(CommonSolver):
                     elif self.bossRando == True:
                         staticTransitions = self.areaTransitions[:]
                         possibleTransitions = self.bossTransitions[:]
+                    else:
+                        staticTransitions = self.bossTransitions + self.areaTransitions
+                        possibleTransitions = []
                     if self.escapeRando == False:
                         staticTransitions += self.escapeTransition
+                    else:
+                        possibleTransitions += self.escapeTransition
 
                     # remove static transitions from current transitions
                     dynamicTransitions = self.curGraphTransitions[:]

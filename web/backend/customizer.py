@@ -123,6 +123,10 @@ class Customizer(object):
             self.session.customizer['remove_fast_doors'] = "off"
             self.session.customizer['remove_Infinite_Space_Jump'] = "off"
             self.session.customizer['remove_rando_speed'] = "off"
+            self.session.customizer['lava_acid_physics'] = "off"
+            self.session.customizer['hell'] = "off"
+            self.session.customizer['hellrun_rate'] = 100
+            self.session.customizer['etanks'] = 0
             self.session.customizer['music'] = "Don't touch"
 
             musics = self.loadMusics()
@@ -144,9 +148,10 @@ class Customizer(object):
                    'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save',
                    'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
                    'remove_elevators_speed', 'remove_fast_doors', 'remove_Infinite_Space_Jump',
-                   'remove_rando_speed', 'remove_spinjumprestart', 'gamepadMapping', 'widescreen']
+                   'remove_rando_speed', 'remove_spinjumprestart', 'gamepadMapping', 'widescreen',
+                   'hell', 'lava_acid_physics']
         others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
-                  'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
+                  'bossesPalettes', 'minDegree', 'maxDegree', 'invert', 'hellrun_rate', 'etanks']
         validateWebServiceParams(self.request, switchs, [], [], others, isJson=True)
         if self.vars.customSpriteEnable == 'on':
             if self.vars.customSprite not in customSprites:
@@ -197,6 +202,10 @@ class Customizer(object):
         self.session.customizer['remove_spinjumprestart'] = self.vars.remove_spinjumprestart
         self.session.customizer['remove_Infinite_Space_Jump'] = self.vars.remove_Infinite_Space_Jump
         self.session.customizer['remove_rando_speed'] = self.vars.remove_rando_speed
+        self.session.customizer['lava_acid_physics'] = self.vars.lava_acid_physics
+        self.session.customizer['hell'] = self.vars.hell
+        self.session.customizer['hellrun_rate'] = self.vars.hellrun_rate
+        self.session.customizer['etanks'] = self.vars.etanks
         self.session.customizer['music'] = self.vars.music
 
         if self.vars.music == 'Customize':
@@ -252,6 +261,12 @@ class Customizer(object):
             params += ['-c', 'random_music.ips']
         if self.vars.music == 'Restore':
             params += ['-c', 'vanilla_music.ips']
+        if self.vars.lava_acid_physics == 'on':
+            params += ['-c', 'lava_acid_physics.ips']
+        if self.vars.hell == 'on':
+            params += ['-c', 'hell.ips']
+        params += ['--hellrun', self.vars.hellrun_rate]
+        params += ['--etanks', self.vars.etanks]
 
         if self.vars.colorsRandomization == 'on':
             params.append('--palette')

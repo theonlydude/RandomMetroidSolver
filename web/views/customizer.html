@@ -418,7 +418,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping"];
+      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "hellrun_rate", "etanks"];
 
     for(var i=0; i<elems.length; i++) {
         var elem = document.getElementById(elems[i]);
@@ -978,6 +978,21 @@ window.onload = function(){
     var spinjumprestart = document.getElementById("spinjumprestart");
     spinjumprestart.onchange = switchOpposite;
 
+    var hell = document.getElementById("hell");
+    hell.onchange = function() {
+        var hell = document.getElementById("hell");
+        var hellrun_rate = document.getElementById("hellrun_rate");
+        var etanks = document.getElementById("etanks");
+        if(hell.checked) {
+            hellrun_rate.value = 25;
+            etanks.value = 3;
+        } else {
+            hellrun_rate.value = 100;
+            etanks.value = 0;
+        }
+        switchCheckbox("hell")
+    }
+
     initSlider();
     $("#preset").chosen({ width: '100%' });
 
@@ -1464,6 +1479,20 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
 <p>This patch was developed by Adam.</p>"
     },
     {
+      element: "#hellStep",
+      title: "Challenges",
+      content: "<p>Permanent lava physics: Samus physic is always as she's in lava until Gravity Suit is found</p>\
+<p>Permanent hell run: Samus life is drained constently in non heated rooms until heat protected suit is found. In heated rooms life is drained twice as fast.</p>\
+<b>Warning:</b>Not taken into account by the logic, may render the seed unfinishable.\
+<p>Patches developed by flo.</p>"
+    },
+    {
+      element: "#hellOptionsStep",
+      title: "Challenges options",
+      content: "<p>Customize the amount of energy removed during hellruns, from 0% (no damage) to 400% (4 times vanila damage). Usefull with permanent hellrun to reduce the amount of energy removed, but can be used independently for easier/harder hellruns.</p>\
+<p>Set the number of Etanks available from start. Between 0 and 14. Usefull with permanent hellrun but can be used independently for easier seeds.</p>"
+    },
+    {
       element: "#widescreenStep",
       title: "Widescreen support",
       content: "<p>Add support for widescreen on <a href=\"https://github.com/DerKoun/bsnes-hd/releases\" target=\"_blank\">bsnes-hd emulator</a>. A bso file containing emulator configuration is downloaded after the ROM file, you have to leave it in the same folder as the ROM file for bsnes-hd to work properly.</p>\
@@ -1531,6 +1560,18 @@ def displayCheckbox(id, defaultTrue=False):
     {{=INPUT(_id=id, _name=id, _type="checkbox", _value="off", _class="js-switch", _onchange="switchCheckbox('{}')".format(id))}}
     {{pass}}
   {{pass}}
+
+{{
+def displayNumber(id, min, max, default, step="1"):
+  if id in session.customizer:
+    value = session.customizer[id]
+  else:
+    value = default
+    pass
+
+  response.write("<input name=\"{}\" id=\"{}\" type=\"number\" value=\"{}\" min=\"{}\" max=\"{}\" step=\"{}\" class=\"full\" required>".format(id, id, value, min, max, step), escape=False)
+  pass
+}}
 <body>
   <div class="fixed">
     <div class="menu">
@@ -1809,6 +1850,41 @@ for name, values in musics["_dropdown"].items():
                   <td><button type="button" onclick="startTheTour(15)">?</button></td>
                 </tr>
               </table>
+
+              <table class="full">
+                <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+                <tr><td colspan="2"><h5 class="center"><b>Challenges</b></h5></td><td></td></tr>
+              </table>
+              <table class="full">
+                <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter" /></colgroup>
+                <tr id="hellStep">
+                  <td colspan="2">
+                    {{displayCheckbox("lava_acid_physics")}}
+                    <span id="lava_acid_physicsText">Permanent lava physics</span>
+                  </td>
+                  <td colspan="2">
+                    {{displayCheckbox("hell")}}
+                    <span id="hellText">Permanent hell run</span>
+                  </td>
+                  <td><button type="button" onclick="startTheTour(16)">?</button></td>
+                </tr>
+                <tr id="hellOptionsStep">
+                  <td>
+                    <span id="hellrun_rateText">Hell run rate percentage</span>
+                  </td>
+                  <td>
+                    {{displayNumber("hellrun_rate", "0", "400", "100", "1")}}
+                  </td>
+                  <td>
+                    <span id="etanksText">Additional ETanks</span>
+                  </td>
+                  <td>
+                    {{displayNumber("etanks", "0", "14", "0", "1")}}
+                  </td>
+                  <td><button type="button" onclick="startTheTour(17)">?</button></td>
+                </tr>
+              </table>
+
               <table class="full">
                 <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
                 <tr><td colspan="2"><h5 class="center"><b>Miscellaneous</b></h5></td><td></td></tr>
@@ -1820,30 +1896,31 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("widescreen")}}
                     <span id="widescreenText">Widescreen on  <a href="https://github.com/DerKoun/bsnes-hd/releases" target="_blank">bsnes-hd emulator</a></span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(16)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(18)">?</button></td>
                 </tr>
                 <tr id="AimAnyButtonStep">
                   <td colspan="2">
                     {{displayCheckbox("AimAnyButton")}}
                     <span id="AimAnyButtonText">Allows the aim buttons to be assigned to any button</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(17)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(19)">?</button></td>
                 </tr>
                 <tr id="max_ammo_displayStep">
                   <td colspan="2">
                     {{displayCheckbox("max_ammo_display")}}
                     <span id="max_ammo_displayText">Max Ammo Display</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(18)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
                 <tr id="supermetroid_msu1Step">
                   <td colspan="2">
                     {{displayCheckbox("supermetroid_msu1")}}
                     <span id="supermetroid_msu1Text">Play music with MSU1 chip on SD2SNES</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(19)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(21)">?</button></td>
                 </tr>
               </table>
+
               <table class="full">
                 <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
                 <tr><td colspan="2"><h5 class="center"><b>Restore vanilla behaviour</b></h5></td><td></td></tr>
@@ -1859,7 +1936,7 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_Infinite_Space_Jump")}}
                     <span id="remove_Infinite_Space_JumpText">Restore vanilla Space Jump</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(20)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(22)">?</button></td>
                 </tr>
                 <tr id="remove_ElevatorDoorsStep">
                   <td>
@@ -1870,7 +1947,7 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_fast_doors")}}
                     <span id="remove_fast_doorsText">Restore vanilla doors transitions</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(21)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(23)">?</button></td>
                 </tr>
                 <tr id="remove_rando_speedStep">
                   <td>
@@ -1881,7 +1958,7 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_spinjumprestart")}}
                     <span id="remove_spinjumprestartText">Restore vanilla spin jump</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(22)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(24)">?</button></td>
                 </tr>
               </table>
           </div>

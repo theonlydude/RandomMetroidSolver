@@ -119,6 +119,10 @@ class Customizer(object):
             self.session.customizer['supermetroid_msu1'] = "off"
             self.session.customizer['remove_itemsounds'] = "off"
             self.session.customizer['remove_spinjumprestart'] = "off"
+            self.session.customizer['remove_elevators_speed'] = "off"
+            self.session.customizer['remove_fast_doors'] = "off"
+            self.session.customizer['remove_Infinite_Space_Jump'] = "off"
+            self.session.customizer['remove_rando_speed'] = "off"
             self.session.customizer['music'] = "Don't touch"
 
             musics = self.loadMusics()
@@ -139,7 +143,8 @@ class Customizer(object):
         switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_speed', 'fast_doors',
                    'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save',
                    'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
-                   'remove_elevators_speed', 'remove_fast_doors', 'gamepadMapping', 'widescreen']
+                   'remove_elevators_speed', 'remove_fast_doors', 'remove_Infinite_Space_Jump',
+                   'remove_rando_speed', 'remove_spinjumprestart', 'gamepadMapping', 'widescreen']
         others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
                   'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
         validateWebServiceParams(self.request, switchs, [], [], others, isJson=True)
@@ -189,6 +194,9 @@ class Customizer(object):
         self.session.customizer['remove_itemsounds'] = self.vars.remove_itemsounds
         self.session.customizer['remove_elevators_speed'] = self.vars.remove_elevators_speed
         self.session.customizer['remove_fast_doors'] = self.vars.remove_fast_doors
+        self.session.customizer['remove_spinjumprestart'] = self.vars.remove_spinjumprestart
+        self.session.customizer['remove_Infinite_Space_Jump'] = self.vars.remove_Infinite_Space_Jump
+        self.session.customizer['remove_rando_speed'] = self.vars.remove_rando_speed
         self.session.customizer['music'] = self.vars.music
 
         if self.vars.music == 'Customize':
@@ -232,6 +240,12 @@ class Customizer(object):
             params += ['-c', 'remove_elevators_speed.ips']
         if self.vars.remove_fast_doors == 'on':
             params += ['-c', 'remove_fast_doors.ips']
+        if self.vars.remove_rando_speed == 'on':
+            params += ['-c', 'remove_rando_speed.ips']
+        if self.vars.remove_spinjumprestart == 'on':
+            params += ['-c', 'remove_spinjumprestart.ips']
+        if self.vars.remove_Infinite_Space_Jump == 'on':
+            params += ['-c', 'remove_Infinite_Space_Jump.ips']
         if self.vars.music == 'Disable':
             params += ['-c', 'No_Music']
         if self.vars.music == 'Randomize':

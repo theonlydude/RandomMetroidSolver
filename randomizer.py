@@ -136,7 +136,9 @@ if __name__ == "__main__":
                                  'fast_doors.ips', 'elevators_speed.ips', 'elevators_doors_speed.ips',
                                  'spinjumprestart.ips', 'rando_speed.ips', 'No_Music', 'AimAnyButton.ips',
                                  'max_ammo_display.ips', 'supermetroid_msu1.ips', 'Infinite_Space_Jump',
-                                 'refill_before_save.ips', 'remove_elevators_doors_speed.ips',
+                                 'refill_before_save.ips', 'remove_elevators_speed.ips',
+                                 'remove_fast_doors.ips', 'remove_Infinite_Space_Jump.ips',
+                                 'remove_rando_speed.ips', 'remove_spinjumprestart.ips',
                                  'remove_itemsounds.ips', 'vanilla_music.ips', 'custom_ship.ips',
                                  'Ship_Takeoff_Disable_Hide_Samus', 'widescreen.ips',
                                  'hell.ips', 'lava_acid_physics.ips'])

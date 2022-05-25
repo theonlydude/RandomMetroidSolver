@@ -418,7 +418,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "gamepadMapping"];
+      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping"];
 
     for(var i=0; i<elems.length; i++) {
         var elem = document.getElementById(elems[i]);
@@ -965,6 +965,19 @@ window.onload = function(){
     var itemsounds = document.getElementById("itemsounds");
     itemsounds.onchange = switchOpposite;
 
+    var remove_Infinite_Space_Jump = document.getElementById("remove_Infinite_Space_Jump");
+    remove_Infinite_Space_Jump.onchange = switchOpposite;
+    var Infinite_Space_Jump = document.getElementById("Infinite_Space_Jump");
+    Infinite_Space_Jump.onchange = switchOpposite;
+    var remove_rando_speed = document.getElementById("remove_rando_speed");
+    remove_rando_speed.onchange = switchOpposite;
+    var rando_speed = document.getElementById("rando_speed");
+    rando_speed.onchange = switchOpposite;
+    var remove_spinjumprestart = document.getElementById("remove_spinjumprestart");
+    remove_spinjumprestart.onchange = switchOpposite;
+    var spinjumprestart = document.getElementById("spinjumprestart");
+    spinjumprestart.onchange = switchOpposite;
+
     initSlider();
     $("#preset").chosen({ width: '100%' });
 
@@ -1278,7 +1291,13 @@ function switchOpposite() {
         "elevators_speed": ["remove_elevators_speed"],
         "remove_elevators_speed": ["elevators_speed"],
         "fast_doors": ["remove_fast_doors"],
-        "remove_fast_doors": ["fast_doors"]
+        "remove_fast_doors": ["fast_doors"],
+        "Infinite_Space_Jump": ["remove_Infinite_Space_Jump"],
+        "remove_Infinite_Space_Jump": ["Infinite_Space_Jump"],
+        "rando_speed": ["remove_rando_speed"],
+        "remove_rando_speed": ["rando_speed"],
+        "spinjumprestart": ["remove_spinjumprestart"],
+        "remove_spinjumprestart": ["spinjumprestart"]
     };
     var oppositeIds = opposites[this.id];
     for(var i=0; i<oppositeIds.length; i++) {
@@ -1472,13 +1491,18 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
     },
     {
       element: "#remove_itemsoundsStep",
-      title: "Restore Fanfare",
-      content: "<p>Restore vanilla fanfare played when picking up an item.</p>"
+      title: "Restore Vanilla 1/3",
+      content: "<p>Restore vanilla fanfare played when picking up an item.</p><p>Restore vanilla Space Jump behaviour.</p>"
     },
     {
       element: "#remove_ElevatorDoorsStep",
-      title: "Restore Transitions",
+      title: "Restore Vanilla 2/3",
       content: "<p>Restore vanilla doors and/or elevators transitions</p>"
+    },
+    {
+      element: "#remove_rando_speedStep",
+      title: "Restore Vanilla 3/3",
+      content: "<p>Restore vanilla momentum loss on landing.</p><p>Restore vanilla spin jump.</p>"
     }
   ]});
 
@@ -1827,9 +1851,13 @@ for name, values in musics["_dropdown"].items():
               <table class="full">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr id="remove_itemsoundsStep">
-                  <td colspan="2">
+                  <td>
                     {{displayCheckbox("remove_itemsounds")}}
                     <span id="remove_itemsoundsText">Restore vanilla fanfare when picking up an item</span>
+                  </td>
+                  <td>
+                    {{displayCheckbox("remove_Infinite_Space_Jump")}}
+                    <span id="remove_Infinite_Space_JumpText">Restore vanilla Space Jump</span>
                   </td>
                   <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
@@ -1843,6 +1871,17 @@ for name, values in musics["_dropdown"].items():
                     <span id="remove_fast_doorsText">Restore vanilla doors transitions</span>
                   </td>
                   <td><button type="button" onclick="startTheTour(21)">?</button></td>
+                </tr>
+                <tr id="remove_rando_speedStep">
+                  <td>
+                    {{displayCheckbox("remove_rando_speed")}}
+                    <span id="remove_rando_speedText">Restore vanilla momentum loss on landing</span>
+                  </td>
+                  <td>
+                    {{displayCheckbox("remove_spinjumprestart")}}
+                    <span id="remove_spinjumprestartText">Restore vanilla spin jump</span>
+                  </td>
+                  <td><button type="button" onclick="startTheTour(22)">?</button></td>
                 </tr>
               </table>
           </div>

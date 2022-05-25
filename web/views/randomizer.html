@@ -744,7 +744,7 @@ function setObjective() {
     setMaxObjective(isElemRandom(document.getElementById("objectiveRandom")));
 
     // at start all objectives are displayed as selected even though they're not...
-    var sessionObjectives = {{response.write(session.randomizer["objective"] if session.randomizer["objective"] else '[]', escape=False)}};
+    var sessionObjectives = {{response.write(session.randomizer["objective"].split(',') if session.randomizer["objective"] else '[]', escape=False)}};
 
     if(sessionObjectives != "random") {
         $("#objectiveMultiSelect").val(sessionObjectives).trigger("chosen:updated");
@@ -818,7 +818,7 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"];
 
@@ -1008,7 +1008,7 @@ function AjaxRandomizerCallCompleted(data) {
     document.getElementById("submitBtn").data = "Randomize";
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"];
 
@@ -2272,7 +2272,7 @@ Click on the dice button to randomly set this parameter.",
     {
       element: "#ElevatorDoorsStep",
       title: "Transitions",
-      content: "<p>Accelerate doors and elevators transitions</p>\
+      content: "<p>Accelerate doors and/or elevators transitions</p>\
 <p>Doors patch developed by Rakki and elevators patch by Lioran.</p>",
       placement: "auto left"
     },
@@ -2786,9 +2786,13 @@ def displayNumber(id, min, max, default, step="1"):
                     Remove fanfare when picking up an item
                   </td>
                   <td><button type="button" onclick="startTheTour(39)">?</button></td>
-                  <td id="ElevatorDoorsStep" class="half">
-                    {{displayCheckbox("elevators_doors_speed")}}
-                    Accelerate doors and elevators transitions
+                  <td id="ElevatorDoorsStep" class="quarter">
+                    {{displayCheckbox("fast_doors")}}
+                    Accelerate doors
+                  </td>
+                  <td class="quarter">
+                    {{displayCheckbox("elevators_speed")}}
+                    Accelerate elevators
                   </td>
                   <td><button type="button" onclick="startTheTour(40)">?</button></td>
                 </tr>

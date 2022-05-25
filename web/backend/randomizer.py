@@ -190,7 +190,7 @@ class Randomizer(object):
                    'bossRandomization', 'minimizer',
                    'funCombat', 'funMovement', 'funSuits',
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
-                   'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
+                   'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
                    'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized"]
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
@@ -364,7 +364,7 @@ class Randomizer(object):
                    'bossRandomization', 'minimizer',
                    'funCombat', 'funMovement', 'funSuits',
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
-                   'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
+                   'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
                    'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized"]
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
@@ -407,7 +407,8 @@ class Randomizer(object):
         self.session.randomizer['variaTweaks'] = self.vars.variaTweaks
         self.session.randomizer['nerfedCharge'] = self.vars.nerfedCharge
         self.session.randomizer['itemsounds'] = self.vars.itemsounds
-        self.session.randomizer['elevators_doors_speed'] = self.vars.elevators_doors_speed
+        self.session.randomizer['elevators_speed'] = self.vars.elevators_speed
+        self.session.randomizer['fast_doors'] = self.vars.fast_doors
         self.session.randomizer['spinjumprestart'] = self.vars.spinjumprestart
         self.session.randomizer['rando_speed'] = self.vars.rando_speed
         self.session.randomizer['animals'] = self.vars.animals

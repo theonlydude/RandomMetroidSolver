@@ -418,7 +418,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_doors_speed", "gamepadMapping"];
+      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "gamepadMapping"];
 
     for(var i=0; i<elems.length; i++) {
         var elem = document.getElementById(elems[i]);
@@ -802,7 +802,7 @@ if seedInfo != None:
 }}
 
 function greyOutPatches(isRace, isVARIA, isVanilla) {
-    var buttons = ["itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save", "widescreen"];
+    var buttons = ["itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save", "widescreen"];
     for(var i=0; i<buttons.length; i++) {
         disableElement(buttons[i], isRace);
     }
@@ -951,12 +951,17 @@ window.onload = function(){
     var customShipEnable = document.getElementById("customShipEnable");
     customShipEnable.onchange = enableCustomShipDropdown;
 
-    var remove_elevators_doors_speed = document.getElementById("remove_elevators_doors_speed");
-    remove_elevators_doors_speed.onchange = switchOpposite;
+    var remove_elevators_speed = document.getElementById("remove_elevators_speed");
+    remove_elevators_speed.onchange = switchOpposite;
+    var elevators_speed = document.getElementById("elevators_speed");
+    elevators_speed.onchange = switchOpposite;
+    var remove_fast_foors = document.getElementById("remove_fast_doors");
+    remove_fast_doors.onchange = switchOpposite;
+    var fast_doors = document.getElementById("fast_doors");
+    fast_doors.onchange = switchOpposite;
+
     var remove_itemsounds = document.getElementById("remove_itemsounds");
     remove_itemsounds.onchange = switchOpposite;
-    var elevators_doors_speed = document.getElementById("elevators_doors_speed");
-    elevators_doors_speed.onchange = switchOpposite;
     var itemsounds = document.getElementById("itemsounds");
     itemsounds.onchange = switchOpposite;
 
@@ -1270,8 +1275,10 @@ function switchOpposite() {
     var opposites = {
         "itemsounds": ["remove_itemsounds"],
         "remove_itemsounds": ["itemsounds"],
-        "elevators_doors_speed": ["remove_elevators_doors_speed"],
-        "remove_elevators_doors_speed": ["elevators_doors_speed"]
+        "elevators_speed": ["remove_elevators_speed"],
+        "remove_elevators_speed": ["elevators_speed"],
+        "fast_doors": ["remove_fast_doors"],
+        "remove_fast_doors": ["fast_doors"]
     };
     var oppositeIds = opposites[this.id];
     for(var i=0; i<oppositeIds.length; i++) {
@@ -1410,7 +1417,7 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
     {
       element: "#ElevatorDoorsStep",
       title: "Transitions",
-      content: "<p>Accelerate doors and elevators transitions</p>\
+      content: "<p>Accelerate doors and/or elevators transitions</p>\
 <p>Doors patch developed by Rakki and elevators patch by Lioran.</p>"
     },
     {
@@ -1471,7 +1478,7 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
     {
       element: "#remove_ElevatorDoorsStep",
       title: "Restore Transitions",
-      content: "<p>Restore vanilla doors and elevators transitions</p>"
+      content: "<p>Restore vanilla doors and/or elevators transitions</p>"
     }
   ]});
 
@@ -1739,9 +1746,13 @@ for name, values in musics["_dropdown"].items():
                   <td><button type="button" onclick="startTheTour(10)">?</button></td>
                 </tr>
                 <tr id="ElevatorDoorsStep">
-                  <td colspan="2">
-                    {{displayCheckbox("elevators_doors_speed")}}
-                    <span id="elevators_doors_speedText">Accelerate doors and elevators transitions</span>
+                  <td>
+                    {{displayCheckbox("elevators_speed")}}
+                    <span id="elevators_speedText">Accelerate elevators transitions</span>
+                  </td>
+                  <td>
+                    {{displayCheckbox("fast_doors")}}
+                    <span id="fast_doorsText">Accelerate doors transitions</span>
                   </td>
                   <td><button type="button" onclick="startTheTour(11)">?</button></td>
                 </tr>
@@ -1823,9 +1834,13 @@ for name, values in musics["_dropdown"].items():
                   <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
                 <tr id="remove_ElevatorDoorsStep">
-                  <td colspan="2">
-                    {{displayCheckbox("remove_elevators_doors_speed")}}
-                    <span id="remove_elevators_doors_speedText">Restore vanilla doors and elevators transitions</span>
+                  <td>
+                    {{displayCheckbox("remove_elevators_speed")}}
+                    <span id="remove_elevators_speedText">Restore vanilla elevators transitions</span>
+                  </td>
+                  <td>
+                    {{displayCheckbox("remove_fast_doors")}}
+                    <span id="remove_fast_doorsText">Restore vanilla doors transitions</span>
                   </td>
                   <td><button type="button" onclick="startTheTour(21)">?</button></td>
                 </tr>
@@ -1963,7 +1978,8 @@ if seedInfo != None:
               <tr><td>Suits properties pool</td><td>{{=seedParams["gravityBehaviourMultiSelect"]}}</td></tr>
 {{        pass}}
               <tr {{=setBold("itemsounds")}}><td>Remove fanfare when picking up an item</td><td>{{=seedParams["itemsounds"]}}</td></tr>
-              <tr {{=setBold("elevators_doors_speed")}}><td>Accelerate doors and elevators transitions</td><td>{{=seedParams["elevators_doors_speed"]}}</td></tr>
+              <tr {{=setBold("elevators_speed")}}><td>Accelerate elevators transitions</td><td>{{=seedParams["elevators_speed"]}}</td></tr>
+              <tr {{=setBold("fast_doors")}}><td>Accelerate doors transitions</td><td>{{=seedParams["fast_doors"]}}</td></tr>
               <tr {{=setBold("spinjumprestart")}}><td>Spin jump restart (a.k.a. Respin)</td><td>{{=seedParams["spinjumprestart"]}}</td></tr>
               <tr {{=setBold("rando_speed")}}><td>Momentum conservation (a.k.a. Speedkeep)</td><td>{{=seedParams["rando_speed"]}}</td></tr>
               <tr {{=setBold("Infinite_Space_Jump")}}><td>Infinite Space Jump</td><td>{{=seedParams["Infinite_Space_Jump"]}}</td></tr>

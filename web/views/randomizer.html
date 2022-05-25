@@ -744,7 +744,18 @@ function setObjective() {
     setMaxObjective(isElemRandom(document.getElementById("objectiveRandom")));
 
     // at start all objectives are displayed as selected even though they're not...
-    var sessionObjectives = {{response.write(session.randomizer["objective"].split(',') if session.randomizer["objective"] else '[]', escape=False)}};
+    var sessionObjectives = {{
+if session.randomizer["objective"]:
+    if type(session.randomizer["objective"]) == list:
+        response.write(session.randomizer["objective"], escape=False)
+    else:
+        response.write(session.randomizer["objective"].split(','), escape=False)
+        pass
+else:
+    response.write("[]", escape=False)
+    pass
+}};
+
 
     if(sessionObjectives != "random") {
         $("#objectiveMultiSelect").val(sessionObjectives).trigger("chosen:updated");

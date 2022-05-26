@@ -42,10 +42,6 @@ function checkCompatibleAPs(startAP, endAP) {
   response.write("  var vanillaBossesAPs = {};\n".format(vanillaBossesAPs), escape=False)
 }}
 
-  if(mode == "plando") {
-    return true;
-  }
-
   if(hasMixedTransitions == true) {
     return true;
   }
@@ -122,8 +118,11 @@ function clickPortal(elemId) {
                         alert("For escape one node must be Tourian escape.");
                         return;
                     }
-                } else if(checkCompatibleAPs(firstClick, elemId) == false && mode != "plando") {
-                    alert("Warning:\n\tYou are mixing an Areas access point and a Bosses access point.\n\tIt's an invalid transition except for Plando seeds.");
+                } else if(checkCompatibleAPs(firstClick, elemId) == false) {
+                    if(mode == "plando") {
+                        alert("Warning:\n\tYou are mixing an Areas access point and a Bosses access point.\n\tIt's an invalid transition, use a minimizer seed as base seed to do it.");
+                    }
+                    return;
                 }
 
                 if(init == true) {

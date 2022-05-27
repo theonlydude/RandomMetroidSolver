@@ -429,11 +429,9 @@ accessPoints = [
        entryInfo = {'SamusX':0x134, 'SamusY':0x288, 'song': 0x15},
        dotOrientation = 'se'),
     AccessPoint('Crocomire Speedway Bottom', 'Norfair', {
-        'Business Center': Cache.ldeco(lambda sm: sm.wor(sm.wand(sm.canPassFrogSpeedwayRightToLeft(),
-                                                                 sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Norfair Entrance'])),
-                                                         sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Norfair Entrance']),
-                                                                 sm.canGrappleEscape(),
-                                                                 sm.haveItem('Super')))),
+        'Grapple Escape': lambda sm: sm.canGrappleEscape(),
+        'Business Center': Cache.ldeco(lambda sm: sm.wand(sm.canPassFrogSpeedwayRightToLeft(),
+                                                          sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Norfair Entrance']))),
         'Bubble Mountain Bottom': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Bubble Mountain'])),
         'Kronic Boost Room Bottom Left': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
                                                                         sm.haveItem('Morph')))
@@ -443,6 +441,10 @@ accessPoints = [
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0xc57, 'SamusY':0x2b8},
        dotOrientation = 'se'),
+    AccessPoint('Grapple Escape', 'Norfair', {
+        'Business Center': lambda sm: sm.haveItem('Super'),
+        'Crocomire Speedway Bottom': lambda sm: sm.canHellRunBackFromGrappleEScape()
+    }, internal=True),
     AccessPoint('Bubble Mountain', 'Norfair', {
         'Business Center': lambda sm: sm.canExitCathedral(Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Entrance']),
         'Bubble Mountain Top': lambda sm: sm.canClimbBubbleMountain(),

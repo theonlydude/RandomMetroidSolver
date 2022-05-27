@@ -690,10 +690,10 @@ locationsDict["Missile (below Ice Beam)"].Available = (
     lambda sm: SMBool(True)
 )
 locationsDict["Missile (above Crocomire)"].AccessFrom = {
-    'Crocomire Speedway Bottom': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Grapple Escape Missiles'])
+    'Grapple Escape': lambda sm: SMBool(True)
 }
 locationsDict["Missile (above Crocomire)"].Available = (
-    lambda sm: sm.canGrappleEscape()
+    lambda sm: SMBool(True)
 )
 locationsDict["Missile (Hi-Jump Boots)"].AccessFrom = {
     'Business Center': lambda sm: sm.wor(RomPatches.has(RomPatches.HiJumpAreaBlueDoor), sm.traverse('BusinessCenterBottomLeft'))

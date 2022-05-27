@@ -272,16 +272,39 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canGrappleEscape(self):
         sm = self.smbm
-        return sm.wor(sm.wor(sm.haveItem('SpaceJump'),
-                             sm.wand(sm.canInfiniteBombJump(), # IBJ from lava...either have grav or freeze the enemy there if hellrunning (otherwise single DBJ at the end)
-                                     sm.wor(sm.heatProof(),
-                                            sm.haveItem('Gravity'),
-                                            sm.haveItem('Ice')))),
-                      sm.haveItem('Grapple'),
-                      sm.wand(sm.haveItem('SpeedBooster'),
-                              sm.wor(sm.haveItem('HiJump'), # jump from the blocks below
-                                     sm.knowsShortCharge())), # spark from across the grapple blocks
-                      sm.wand(sm.haveItem('HiJump'), sm.canSpringBallJump())) # jump from the blocks below
+        access = sm.wor(sm.wor(sm.haveItem('SpaceJump'),
+                               sm.wand(sm.canInfiniteBombJump(), # IBJ from lava...either have grav or freeze the enemy there if hellrunning (otherwise single DBJ at the end)
+                                       sm.wor(sm.heatProof(),
+                                              sm.haveItem('Gravity'),
+                                              sm.haveItem('Ice')))),
+                        sm.haveItem('Grapple'),
+                        sm.wand(sm.haveItem('SpeedBooster'),
+                                sm.wor(sm.haveItem('HiJump'), # jump from the blocks below
+                                       sm.knowsShortCharge())), # spark from across the grapple blocks
+                        sm.wand(sm.haveItem('HiJump'), sm.canSpringBallJump())) # jump from the blocks below
+        hellrun = 'MainUpperNorfair'
+        tbl = Settings.hellRunsTable[hellrun]['Croc -> Norfair Entrance']
+        mult = tbl['mult']
+        minE = tbl['minE']
+        if 'InfiniteBombJump' in access.knows or 'ShortCharge' in access.knows:
+            mult *= 0.7
+        elif 'SpaceJump' in access.items:
+            mult *= 1.5
+        elif 'Grapple' in access.items:
+            mult *= 1.25
+        return sm.wand(access,
+                       sm.canHellRun(hellrun, mult, minE))
+
+    @Cache.decorator
+    def canHellRunBackFromGrappleEScape(self):
+        sm = self.smbm
+        # require more health to count 1st hell run from croc speedway bottom to here+hellrun back (which is faster)
+        hellrun = 'MainUpperNorfair'
+        tbl = Settings.hellRunsTable[hellrun]['Croc -> Norfair Entrance']
+        mult = tbl['mult']
+        minE = tbl['minE']
+        mult *= 0.6
+        return sm.canHellRun(hellrun, mult, minE)
 
     @Cache.decorator
     def canPassFrogSpeedwayRightToLeft(self):

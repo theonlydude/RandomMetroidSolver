@@ -1113,32 +1113,31 @@ class RomPatcher:
             DoorsManager.writeDoorsColor(self.romFile, doorsStart, self.writePlmWord)
 
     def writeDoorIndicators(self, plms, area, door):
-        indicatorFlags = (IndicatorFlag.AreaRando if area else 0) | (IndicatorFlag.DoorRando if door else 0)
-        if indicatorFlags != 0:
-            patchDict = self.patchAccess.getDictPatches()
-            additionalPLMs = self.patchAccess.getAdditionalPLMs()
-            def updateIndicatorPLM(door, doorType):
-                nonlocal additionalPLMs, patchDict
-                plmName = 'Indicator[%s]' % door
-                addPlm = False
-                if plmName in patchDict:
-                    for addr,bytez in patchDict[plmName].items():
-                        plmBytes = bytez
-                        break
-                else:   
-                    plmBytes = additionalPLMs[plmName]['plm_bytes_list'][0]
-                    addPlm = True
-                w = getWord(doorType)
-                plmBytes[0] = w[0]
-                plmBytes[1] = w[1]
-                return plmName, addPlm
-            indicatorPLMs = DoorsManager.getIndicatorPLMs(indicatorFlags)
-            for doorName,plmType in indicatorPLMs.items():
-                plmName,addPlm = updateIndicatorPLM(doorName, plmType)
-                if addPlm:
-                    plms.append(plmName)
-                else:
-                    self.applyIPSPatch(plmName)
+        indicatorFlags = IndicatorFlag.Standard | (IndicatorFlag.AreaRando if area else 0) | (IndicatorFlag.DoorRando if door else 0)
+        patchDict = self.patchAccess.getDictPatches()
+        additionalPLMs = self.patchAccess.getAdditionalPLMs()
+        def updateIndicatorPLM(door, doorType):
+            nonlocal additionalPLMs, patchDict
+            plmName = 'Indicator[%s]' % door
+            addPlm = False
+            if plmName in patchDict:
+                for addr,bytez in patchDict[plmName].items():
+                    plmBytes = bytez
+                    break
+            else:
+                plmBytes = additionalPLMs[plmName]['plm_bytes_list'][0]
+                addPlm = True
+            w = getWord(doorType)
+            plmBytes[0] = w[0]
+            plmBytes[1] = w[1]
+            return plmName, addPlm
+        indicatorPLMs = DoorsManager.getIndicatorPLMs(indicatorFlags)
+        for doorName,plmType in indicatorPLMs.items():
+            plmName,addPlm = updateIndicatorPLM(doorName, plmType)
+            if addPlm:
+                plms.append(plmName)
+            else:
+                self.applyIPSPatch(plmName)
 
     def writeObjectives(self, objectives):
         objectives.writeGoals(self.romFile)

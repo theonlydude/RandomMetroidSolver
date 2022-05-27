@@ -67,10 +67,14 @@ colors2plmIndicator = {
 }
 
 class IndicatorFlag(IntFlag):
-    AreaRando = 1
-    DoorRando = 2
+    Standard = 1
+    AreaRando = 2
+    DoorRando = 4
 
-IndicatorAll = IndicatorFlag.AreaRando | IndicatorFlag.DoorRando
+# indicator always there
+IndicatorAll = IndicatorFlag.Standard | IndicatorFlag.AreaRando | IndicatorFlag.DoorRando
+# indicator there when not in area rando
+IndicatorDoor = IndicatorFlag.Standard | IndicatorFlag.DoorRando
 
 class Door(object):
     __slots__ = ('name', 'address', 'vanillaColor', 'color', 'forced', 'facing', 'hidden', 'id', 'canGrey', 'forbiddenColors','indicator')
@@ -223,7 +227,7 @@ class DoorsManager():
         # crateria
         'LandingSiteRight': Door('LandingSiteRight', 0x78018, 'green', Facing.Left, canGrey=True, indicator=IndicatorAll),
         'LandingSiteTopRight': Door('LandingSiteTopRight', 0x07801e, 'yellow', Facing.Left),
-        'KihunterBottom': Door('KihunterBottom', 0x78228, 'yellow', Facing.Top, canGrey=True, indicator=IndicatorFlag.DoorRando),
+        'KihunterBottom': Door('KihunterBottom', 0x78228, 'yellow', Facing.Top, canGrey=True, indicator=IndicatorDoor),
         'KihunterRight': Door('KihunterRight', 0x78222, 'yellow', Facing.Left, canGrey=True, indicator=IndicatorAll),
         'FlywayRight': Door('FlywayRight', 0x78420, 'red', Facing.Left),
         'GreenPiratesShaftBottomRight': Door('GreenPiratesShaftBottomRight', 0x78470, 'red', Facing.Left, canGrey=True),
@@ -233,7 +237,7 @@ class DoorsManager():
         'ConstructionZoneRight': Door('ConstructionZoneRight', 0x78784, 'red', Facing.Left),
         # green brinstar
         'GreenHillZoneTopRight': Door('GreenHillZoneTopRight', 0x78670, 'yellow', Facing.Left, canGrey=True, indicator=IndicatorFlag.DoorRando),
-        'NoobBridgeRight': Door('NoobBridgeRight', 0x787a6, 'green', Facing.Left, canGrey=True, indicator=IndicatorFlag.DoorRando),
+        'NoobBridgeRight': Door('NoobBridgeRight', 0x787a6, 'green', Facing.Left, canGrey=True, indicator=IndicatorDoor),
         'MainShaftRight': Door('MainShaftRight', 0x784be, 'red', Facing.Left),
         'MainShaftBottomRight': Door('MainShaftBottomRight', 0x784c4, 'red', Facing.Left, canGrey=True, indicator=IndicatorAll),
         'EarlySupersRight': Door('EarlySupersRight', 0x78512, 'red', Facing.Left),
@@ -252,7 +256,7 @@ class DoorsManager():
         'BelowSpazerTopRight': Door('BelowSpazerTopRight', 0x78966, 'green', Facing.Left),
         # Wrecked ship
         'WestOceanRight': Door('WestOceanRight', 0x781e2, 'green', Facing.Left, canGrey=True, indicator=IndicatorAll),
-        'LeCoudeBottom': Door('LeCoudeBottom', 0x7823e, 'yellow', Facing.Top, canGrey=True, indicator=IndicatorFlag.DoorRando),
+        'LeCoudeBottom': Door('LeCoudeBottom', 0x7823e, 'yellow', Facing.Top, canGrey=True, indicator=IndicatorDoor),
         'WreckedShipMainShaftBottom': Door('WreckedShipMainShaftBottom', 0x7c277, 'green', Facing.Top, indicator=IndicatorFlag.AreaRando),
         'ElectricDeathRoomTopLeft': Door('ElectricDeathRoomTopLeft', 0x7c32f, 'red', Facing.Right),
         # Upper Norfair
@@ -276,7 +280,7 @@ class DoorsManager():
         # Maridia
         'MainStreetBottomRight': Door('MainStreetBottomRight', 0x7c431, 'red', Facing.Left, indicator=IndicatorAll),
         'FishTankRight': Door('FishTankRight', 0x7c475, 'red', Facing.Left),
-        'CrabShaftRight': Door('CrabShaftRight', 0x7c4fb, 'green', Facing.Left, indicator=IndicatorFlag.DoorRando),
+        'CrabShaftRight': Door('CrabShaftRight', 0x7c4fb, 'green', Facing.Left, indicator=IndicatorDoor),
         'ColosseumBottomRight': Door('ColosseumBottomRight', 0x7c6fb, 'green', Facing.Left, indicator=IndicatorFlag.AreaRando),
         'PlasmaSparkBottom': Door('PlasmaSparkBottom', 0x7c577, 'green', Facing.Top),
         'OasisTop': Door('OasisTop', 0x7c5d3, 'green', Facing.Bottom),

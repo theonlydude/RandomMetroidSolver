@@ -57,7 +57,9 @@ class RomPatcher:
             # objectives management and display
             'objectives.ips',
             # display collected items percentage in pause inventory menu
-            'percent.ips'
+            'percent.ips',
+            # new PLMs for indicating the color of the door on the other side
+            'door_indicators_plms.ips'
         ],
         # VARIA tweaks
         'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
@@ -68,8 +70,7 @@ class RomPatcher:
         # base patchset+optional layout for area rando
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
-                 'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street', 'no_demo.ips',
-                 'door_indicators_plms.ips'],
+                 'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street', 'no_demo.ips'],
         # patches for boss rando
         'Bosses': ['door_transition.ips', 'no_demo.ips'],
         # patches for escape rando
@@ -77,7 +78,7 @@ class RomPatcher:
         # patches for  minimizer with fast Tourian
         'MinimizerTourian': ['minimizer_tourian.ips', 'open_zebetites.ips'],
         # patches for door color rando
-        'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips', 'door_indicators_plms.ips']
+        'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips']
     }
 
     def __init__(self, romFileName=None, magic=None):

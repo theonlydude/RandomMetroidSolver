@@ -265,8 +265,10 @@ class Customizer(object):
             params += ['-c', 'lava_acid_physics.ips']
         if self.vars.hell == 'on':
             params += ['-c', 'hell.ips']
-        params += ['--hellrun', self.vars.hellrun_rate]
-        params += ['--etanks', self.vars.etanks]
+        if self.vars.hellrun_rate != 'off':
+            params += ['--hellrun', self.vars.hellrun_rate]
+        if self.vars.etanks != 'off':
+            params += ['--etanks', self.vars.etanks]
 
         if self.vars.colorsRandomization == 'on':
             params.append('--palette')

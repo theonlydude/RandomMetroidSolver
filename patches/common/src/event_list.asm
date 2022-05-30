@@ -40,8 +40,16 @@ math pri on
 !GT_event = #$0052
 
 ;;; VARIA events
+!VARIA_event_base = $0080
+!cur_VARIA_event #= !VARIA_event_base
+
+macro defineVARIAevent(event_name)
+!<event_name> = #!cur_VARIA_event
+!cur_VARIA_event #= !cur_VARIA_event+1
+endmacro
+
 ;; scavenger hunt completion
-!hunt_over_event = #$0080
+%defineVARIAevent(hunt_over_event)
 
 ;; objectives events : a global objectives completed event for endgame
 ;; and individual events for each objective :
@@ -49,17 +57,20 @@ math pri on
 ;; - if completed, was the user notified in the HUD?
 ;;   (can never be set if HUD is disabled)
 !objectives_completed_event = !tourian_open_event ; reuse tourian entrance event
-!objectives_completed_event_notified = #$0081
+%defineVARIAevent(objectives_completed_event_notified)
 
+%defineVARIAevent(fish_tickled_event)
+
+;;; Keep these macros at the end as they depend on cur_VARIA_event, which depends on custom events definitions above:
 !max_objectives = 5
-!objectives_event_base = #$0082
+!objectives_event_base = !cur_VARIA_event
 
 ;; declare an array with all the "objective completed" events
 macro objectivesCompletedEventArray()
 !obj_idx = 0
 while !obj_idx < !max_objectives
 	dw !objectives_event_base+2*!obj_idx
-!obj_idx #= !obj_idx+1
+	!obj_idx #= !obj_idx+1
 endif
 endmacro
 
@@ -68,6 +79,6 @@ macro objectivesNotifiedEventArray()
 !obj_idx = 0
 while !obj_idx < !max_objectives
 	dw !objectives_event_base+2*!obj_idx+1
-!obj_idx #= !obj_idx+1
+	!obj_idx #= !obj_idx+1
 endif
 endmacro

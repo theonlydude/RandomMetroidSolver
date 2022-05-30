@@ -199,6 +199,10 @@ class Objectives(object):
                                   (1, []), 0xFA91,
                                   {"list": ["collect 25% items", "collect 50% items", "collect 75% items"]},
                                   [], "collect 100% items", False, False),
+        "tickle the red fish": Goal("tickle the red fish", True, "other", None,
+                                    (1, ["Red Fish Room Left"]), 0xFAC0,
+                                    {"list": []},
+                                    [], "tickle the red fish", False, False),
     }
 
     def __init__(self, tourianRequired=True):

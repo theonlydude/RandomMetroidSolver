@@ -86,15 +86,10 @@ org $82f983
 ;;; seed objectives checker functions pointers, max 5, list ends with $0000
 print "--- objectives checker functions: ", pc, " ---"
 objective_funcs:
-first_objective_func:
         dw kraid_is_dead
-second_objective_func:
         dw phantoon_is_dead
-third_objective_func:
         dw draygon_is_dead
-fourth_objective_func:
         dw ridley_is_dead
-fith_objective_func:
         dw $0000
         dw $0000
 
@@ -248,6 +243,8 @@ nothing_objective:
 .end:
         rts
 
+%eventChecker(fish_tickled, !fish_tickled_event)
+
 obj_end:
 print "--- 0x", hex(obj_max-obj_end), " bytes left for objectives checkers ---"
 ;;; seed display patch start
@@ -282,11 +279,22 @@ alt_set_event:
 	iny : iny
 	rts
 
+;;; overwrite fish grapple AI to check if we're in red fish room
+org $a0d719
+	dw check_red_fish_tickle
+
+org $a3f350
+check_red_fish_tickle:
+	lda $079b : cmp #$d104 : bne .end
+	;; we're using grapple on a fish, in red fish room:
+	lda !fish_tickled_event : jsl !mark_event
+.end:
+	jmp $8000 		; original AI
+
+warnpc $a3f36f
+
 ;;; put some stuff in bank A1 to save space in 82:
-;;; a bunch of the code as it is must stay in 82 because the
-;;; objective checker functions are called locally from pause menu,
-;;; and the pause menu stuff itself handle function pointers in bank 82.
-;;; the main checker func does jsr (addr,x) so it must stay in 82 as well
+;;; TODO pretty much everything but pause menu stuff can be in A1 (or elsewhere) now if we need space
 org $a1f980
 ;;; checks for objectives periodically
 print "A1 start: ", pc

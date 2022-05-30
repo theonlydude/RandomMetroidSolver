@@ -31,7 +31,7 @@ class Synonyms(object):
 
 class Goal(object):
     def __init__(self, name, gtype, clearFunc, checkAddr,
-                 escapeAccessPoints=None, exclusion={"list": []}, items=[], text=None, available=True, expandableList=[]):
+                 escapeAccessPoints=None, exclusion=None, items=None, text=None, available=True, expandableList=None):
         self.name = name
         self.available = available
         self.clearFunc = clearFunc
@@ -53,11 +53,17 @@ class Goal(object):
         #  "limit": 2
         # }
         self.exclusion = exclusion
+        if self.exclusion is None:
+            self.exclusion = {"list": []}
         self.items = items
+        if self.items is None:
+            self.items = []
         self.text = name if text is None else text
         self.useSynonym = text is not None
-        self.expandable = len(expandableList) > 0
         self.expandableList = expandableList
+        if self.expandableList is None:
+            self.expandableList = []
+        self.expandable = len(expandableList) > 0
 
     def setRank(self, rank):
         self.rank = rank
@@ -187,8 +193,7 @@ _goalsList = [
     Goal("finish scavenger hunt", "other", lambda sm: SMBool(True), 0xFA03,
          available=False),
     Goal("nothing", "other", lambda sm: SMBool(True), 0xFA99,
-         escapeAccessPoints=(1, ["Landing Site"]), # with no objectives at all, escape auto triggers only in crateria
-         exclusion={"list": None}),
+         escapeAccessPoints=(1, ["Landing Site"])), # with no objectives at all, escape auto triggers only in crateria
     Goal("collect 25% items", "items", lambda sm: SMBool(True), 0xFA79,
          exclusion={"list": ["collect 50% items", "collect 75% items", "collect 100% items"]}),
     Goal("collect 50% items", "items", lambda sm: SMBool(True), 0xFA81,

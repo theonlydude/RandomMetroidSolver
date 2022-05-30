@@ -39,7 +39,7 @@ class Goal(object):
         self.checkAddr = checkAddr
         self.escapeAccessPoints = escapeAccessPoints
         if self.escapeAccessPoints is None:
-            self.escapeAccessPoints =(1, [])
+            self.escapeAccessPoints = (1, [])
         self.rank = -1
         # possible values:
         #  - boss
@@ -63,7 +63,7 @@ class Goal(object):
         self.expandableList = expandableList
         if self.expandableList is None:
             self.expandableList = []
-        self.expandable = len(expandableList) > 0
+        self.expandable = len(self.expandableList) > 0
 
     def setRank(self, rank):
         self.rank = rank

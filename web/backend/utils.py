@@ -223,12 +223,12 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         if request.vars['tourian'] not in ['Vanilla', 'Fast', 'Disabled']:
             raiseHttp(400, "Wrong value fro tourian, authorized values: Vanilla/Fast/Disabled", isJson)
 
-    if 'hellrun_rate' in others:
+    if 'hellrun_rate' in others and request.vars.hellrun_rate != 'off':
         hellrun_rate = getInt(request, 'hellrun_rate', isJson)
         if hellrun_rate < 0 or hellrun_rate > 400:
             raiseHttp(400, "Wrong value for hellrun_rate", isJson)
 
-    if 'etanks' in others:
+    if 'etanks' in others and request.vars.etanks != 'off':
         etanks = getInt(request, 'etanks', isJson)
         if etanks < 0 or etanks > 14:
             raiseHttp(400, "Wrong value for etanks", isJson)

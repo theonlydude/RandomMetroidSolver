@@ -202,11 +202,10 @@ _goalsList = [
          exclusion={"list": ["collect 25% items", "collect 50% items", "collect 100% items"]}),
     Goal("collect 100% items", "items", lambda sm, ap: SMBool(True), 0xFA91,
          exclusion={"list": ["collect 25% items", "collect 50% items", "collect 75% items"]}),
-    # TODO add AP at the bottom of the room
     Goal("tickle the red fish", "other",
-         lambda sm, ap: sm.wand(sm.haveItem('Grapple'), Objectives.canAccess(sm, ap, "Red Fish Room Left")),
+         lambda sm, ap: sm.wand(sm.haveItem('Grapple'), Objectives.canAccess(sm, ap, "Red Fish Room Bottom")),
          0xFAC0,
-         escapeAccessPoints=(1, ["Red Fish Room Left"])),
+         escapeAccessPoints=(1, ["Red Fish Room Bottom"])),
 ]
 
 _goals = {goal.name:goal for goal in _goalsList}

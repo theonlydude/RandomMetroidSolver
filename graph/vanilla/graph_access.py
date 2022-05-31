@@ -502,8 +502,7 @@ accessPoints = [
        dotOrientation = 'se'),
     ### West Maridia
     AccessPoint('Main Street Bottom', 'WestMaridia', {
-        'Red Fish Room Left': Cache.ldeco(lambda sm: sm.wand(sm.canGoUpMtEverest(),
-                                                             sm.haveItem('Morph'))),
+        'Red Fish Room Bottom': lambda sm: sm.canGoUpMtEverest(),
         'Crab Hole Bottom Left': Cache.ldeco(lambda sm: sm.wand(sm.haveItem('Morph'),
                                                                 sm.canTraverseCrabTunnelLeftToRight())),
         # this transition leads to EastMaridia directly
@@ -540,12 +539,17 @@ accessPoints = [
        entryInfo = {'SamusX':0x28, 'SamusY':0x188},
        dotOrientation = 'se'),
     AccessPoint('Red Fish Room Left', 'WestMaridia', {
-        'Main Street Bottom': Cache.ldeco(lambda sm: sm.haveItem('Morph')) # just go down
+        'Red Fish Room Bottom': Cache.ldeco(lambda sm: sm.haveItem('Morph')) # just go down
     }, roomInfo = {'RoomPtr':0xd104, "area": 0x4},
        exitInfo = {'DoorPtr':0xa480, 'direction': 0x5, "cap": (0x2e, 0x36), "bitFlag": 0x40,
                    "screen": (0x2, 0x3), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe367},
        entryInfo = {'SamusX':0x34, 'SamusY':0x88},
        dotOrientation = 'w'),
+    AccessPoint('Red Fish Room Bottom', 'WestMaridia', {
+        'Main Street Bottom': Cache.ldeco(lambda sm: sm.haveItem('Morph')), # just go down
+        'Red Fish Room Left': Cache.ldeco(lambda sm: sm.wand(sm.haveItem('Morph'),
+                                                             sm.canJumpUnderwater()))
+    }, internal=True),
     AccessPoint('Crab Shaft Left', 'WestMaridia', {
         'Main Street Bottom': lambda sm: SMBool(True), # fall down
         'Beach': lambda sm: sm.canDoOuterMaridia(),

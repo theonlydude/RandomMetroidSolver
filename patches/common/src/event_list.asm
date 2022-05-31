@@ -40,12 +40,16 @@ math pri on
 !GT_event = #$0052
 
 ;;; VARIA events
-!VARIA_event_base = $0080
-!cur_VARIA_event #= !VARIA_event_base
+!VARIA_event_base = #$0080
+!cur_VARIA_event = !VARIA_event_base
 
 macro defineVARIAevent(event_name)
-!<event_name> = #!cur_VARIA_event
-!cur_VARIA_event #= !cur_VARIA_event+1
+!<event_name> = !cur_VARIA_event
+;; this leads to pretty inefficient "math" by text-replacing +1+1+1 etc,
+;; but it is necessary to keep proper hex 16 bits formattings and avoid
+;; suffixing instructions manipulating event constants with .w like we would
+;; have to do if actual asar math were used
+!cur_VARIA_event := !cur_VARIA_event+1
 endmacro
 
 ;; scavenger hunt completion

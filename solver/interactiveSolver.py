@@ -98,14 +98,14 @@ class InteractiveSolver(CommonSolver):
             if fill == True:
                 # load the source seed transitions and items/locations
                 self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
-                self.areaGraph = AccessGraph(Logic.accessPoints, self.curGraphTransitions)
+                self.buildGraph()
                 self.fillPlandoLocs()
             else:
                 if self.areaRando == True or self.bossRando == True:
                     plandoTrans = self.loadPlandoTransitions()
                     if len(plandoTrans) > 0:
                         self.curGraphTransitions = plandoTrans
-                    self.areaGraph = AccessGraph(Logic.accessPoints, self.curGraphTransitions)
+                    self.buildGraph()
 
                 self.loadPlandoLocs()
 
@@ -191,7 +191,7 @@ class InteractiveSolver(CommonSolver):
             if action == 'import':
                 self.importDump(params["dump"])
 
-        self.areaGraph = AccessGraph(Logic.accessPoints, self.curGraphTransitions)
+        self.buildGraph()
 
         if scope == 'common':
             if action == 'save':

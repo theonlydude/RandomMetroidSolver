@@ -443,7 +443,7 @@ accessPoints = [
        dotOrientation = 'se'),
     AccessPoint('Grapple Escape', 'Norfair', {
         'Business Center': lambda sm: sm.haveItem('Super'),
-        'Crocomire Speedway Bottom': lambda sm: sm.canHellRunBackFromGrappleEScape()
+        'Crocomire Speedway Bottom': lambda sm: sm.canHellRunBackFromGrappleEscape()
     }, internal=True),
     AccessPoint('Bubble Mountain', 'Norfair', {
         'Business Center': lambda sm: sm.canExitCathedral(Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Entrance']),

@@ -143,7 +143,7 @@ class SMBoolManager(object):
         return self.doorsManager.traverse(self, doorName)
 
     def canPassG4(self):
-        return self.objectives.canClearGoals(self)
+        return self.objectives.canClearGoals(self, 'Golden Four')
 
     def hasItemsPercent(self, percent, totalItemsCount=None):
         if totalItemsCount is None:

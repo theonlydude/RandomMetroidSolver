@@ -19,7 +19,7 @@ class GraphBuilder(object):
         self.log = utils.log.get('GraphBuilder')
 
     # builds everything but escape transitions
-    def createGraph(self):
+    def createGraph(self, maxDiff):
         transitions = self.graphSettings.plandoRandoTransitions
         if transitions is None:
             transitions = []
@@ -34,7 +34,9 @@ class GraphBuilder(object):
                     transitions += vanillaTransitions
                 else:
                     transitions += GraphUtils.createAreaTransitions(self.graphSettings.lightAreaRando)
-        return AccessGraph(Logic.accessPoints, transitions, self.graphSettings.dotFile)
+        ret = AccessGraph(Logic.accessPoints, transitions, self.graphSettings.dotFile)
+        Objectives.setGraph(ret, maxDiff)
+        return ret
 
     # fills in escape transitions if escape rando is enabled
     # escapeTrigger = None or (itemLocs, progItemlocs) couple from filler
@@ -111,7 +113,7 @@ class GraphBuilder(object):
             # update escape access for scav with last scav loc
             lastScavItemLoc = progItemLocs[-1]
             sm.objectives.updateScavengerEscapeAccess(lastScavItemLoc.Location.accessPoint)
-            sm.objectives.setScavengerHuntFunc(lambda sm: sm.haveItem(lastScavItemLoc.Item.Type))
+            sm.objectives.setScavengerHuntFunc(lambda sm, ap: sm.haveItem(lastScavItemLoc.Item.Type))
         self.log.debug("escapeTrigger. collect locs until G4 access")
         # collect all item/locations up until we can pass G4 (the escape triggers)
         itemLocs = allItemLocs[:]

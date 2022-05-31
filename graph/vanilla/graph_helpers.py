@@ -296,7 +296,7 @@ class HelpersGraph(Helpers):
                        sm.canHellRun(hellrun, mult, minE))
 
     @Cache.decorator
-    def canHellRunBackFromGrappleEScape(self):
+    def canHellRunBackFromGrappleEscape(self):
         sm = self.smbm
         # require more health to count 1st hell run from croc speedway bottom to here+hellrun back (which is faster)
         hellrun = 'MainUpperNorfair'

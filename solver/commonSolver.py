@@ -98,7 +98,7 @@ class CommonSolver(object):
                 self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
 
         self.smbm = SMBoolManager()
-        self.areaGraph = AccessGraph(Logic.accessPoints, self.curGraphTransitions)
+        self.buildGraph()
 
         # store at each step how many locations are available
         self.nbAvailLocs = []
@@ -107,6 +107,10 @@ class CommonSolver(object):
             self.log.debug("Display items at locations:")
             for loc in self.locations:
                 self.log.debug('{:>50}: {:>16}'.format(loc.Name, loc.itemName))
+
+    def buildGraph(self):
+        self.areaGraph = AccessGraph(Logic.accessPoints, self.curGraphTransitions)
+        Objectives.setGraph(self.areaGraph, infinity)
 
     def loadPreset(self, presetFileName):
         presetLoader = PresetLoader.factory(presetFileName)
@@ -777,7 +781,7 @@ class CommonSolver(object):
         # - destroy/skip the zebetites
         # - beat Mother Brain
         # if escape is triggered at the end of scav hunt you don't have to go to Tourian
-        canClearGoals = self.objectives.canClearGoals(self.smbm)
+        canClearGoals = self.objectives.canClearGoals(self.smbm, self.lastAP)
         if self.objectives.tourianRequired:
             return self.smbm.wand(canClearGoals, self.smbm.enoughStuffTourian())
         else:
@@ -832,7 +836,7 @@ class CommonSolver(object):
 
         return majorsAvailable
 
-    def scavengerHuntComplete(self, smbm=None):
+    def scavengerHuntComplete(self, smbm=None, ap=None):
         if self.majorsSplit != 'Scavenger':
             return SMBool(True)
         else:

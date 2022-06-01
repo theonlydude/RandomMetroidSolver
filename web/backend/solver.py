@@ -239,9 +239,9 @@ class Solver(object):
         return itemImg
 
     def getDiffImg(self, diff):
-        diffName = diff4solver(float(diff))
+        diffId, diffName = diff4solver(float(diff))
 
-        return """<img alt="{}" class="imageItem" src="/solver/static/images/solver/marker_{}.png" title="{}" />""".format(diffName, diffName, diffName)
+        return """<img alt="{}" class="imageItem" src="/solver/static/images/solver/marker_{}.png" title="{}" />""".format(diffName, diffId, diffName)
 
     def genCollectedItems(self, locations):
         items = set()

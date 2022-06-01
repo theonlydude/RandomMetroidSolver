@@ -546,7 +546,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x34, 'SamusY':0x88},
        dotOrientation = 'w'),
     AccessPoint('Red Fish Room Bottom', 'WestMaridia', {
-        'Main Street Bottom': Cache.ldeco(lambda sm: sm.haveItem('Morph')), # just go down
+        'Main Street Bottom': lambda sm: SMBool(True), # just go down
         'Red Fish Room Left': Cache.ldeco(lambda sm: sm.wand(sm.haveItem('Morph'),
                                                              sm.canJumpUnderwater()))
     }, internal=True),

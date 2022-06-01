@@ -568,7 +568,7 @@ function must_remove_from_unselected(toRemove) {
     console.log("    we don't have to remove "+toRemove);
     return false;
 }
-function sort_objectives() {
+function sort_objectives_and_add_optgroups() {
     var my_options = $("#objectiveMultiSelect option");
     var selected = $("#objectiveMultiSelect").val();
 
@@ -580,13 +580,41 @@ function sort_objectives() {
         return 0
     })
 
-    $("#objectiveMultiSelect").empty().append( my_options );
+    $("#objectiveMultiSelect").empty()
+
+    var current_group_name = undefined;
+    var current_group = undefined;
+    for(var i=0; i<my_options.length; i++) {
+        var option = my_options[i];
+        var option_group_name = objectives_categories[option.value];
+
+        if(current_group_name == undefined) {
+            current_group_name = option_group_name;
+            current_group = document.createElement("optgroup");
+            current_group.setAttribute("label", current_group_name);
+        } else if(current_group_name != option_group_name) {
+            $("#objectiveMultiSelect").append(current_group);
+
+            current_group_name = option_group_name;
+            current_group = document.createElement("optgroup");
+            current_group.setAttribute("label", current_group_name);
+        }
+
+        current_group.appendChild(option);
+    }
+    if(current_group != undefined) {
+        $("#objectiveMultiSelect").append(current_group);
+    }
+
     $("#objectiveMultiSelect").val(selected);
+
+    $("#objectiveMultiSelect").trigger("chosen:updated");
 }
 
 var objectives_exclusions = {{response.write(objectivesExclusions, escape=False)}};
 var objectives_types = {{response.write(objectivesTypes, escape=False)}};
 var objectives_sort = {{response.write(objectivesSort, escape=False)}};
+var objectives_categories = {{response.write(objectivesCategories, escape=False)}};
 var removed_objectives = [];
 console.log("objectives_types: boss: "+objectives_types['boss']);
 console.log("objectives_types: miniboss: "+objectives_types['miniboss']);
@@ -619,9 +647,7 @@ function objective_change(e, params) {
         }
     }
 
-    sort_objectives();
-
-    $("#objectiveMultiSelect").trigger("chosen:updated");
+    sort_objectives_and_add_optgroups();
 }
 
 var max_objectives = 5;
@@ -686,8 +712,10 @@ function randomizeObjective(evt, takeBackup=true) {
             all_objectives.splice(index, 1);
         }
 
-        $("#objectiveMultiSelect").val(all_objectives).trigger("chosen:updated");
+        $("#objectiveMultiSelect").val(all_objectives);
     }
+
+    sort_objectives_and_add_optgroups();
 
     disableElement("objective", isActive);
 }
@@ -1508,6 +1536,8 @@ window.onload = function(){
     setRandom();
 
     setObjective();
+    // in case we're in nothing objectives
+    sort_objectives_and_add_optgroups();
 
     $("#preset").chosen({ width: '100%' });
     $("#randoPreset").chosen({ width: '100%' });

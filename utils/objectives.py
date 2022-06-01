@@ -204,8 +204,15 @@ _goalsList = [
          exclusion={"list": ["collect 25% items", "collect 50% items", "collect 75% items"]}),
     Goal("tickle the red fish", "other",
          lambda sm, ap: sm.wand(sm.haveItem('Grapple'), Objectives.canAccess(sm, ap, "Red Fish Room Bottom")),
-         0xFAC0,
+         0xFAC1,
          escapeAccessPoints=(1, ["Red Fish Room Bottom"])),
+    Goal("kill the orange geemer", "other",
+         lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Bowling"), # XXX this unnecessarily adds canPassBowling as requirement
+                                sm.wor(sm.haveItem('Wave'), sm.canUsePowerBombs())),
+         0xFAC9,
+         escapeAccessPoints=(1, ["Bowling"]),
+         text="{} orange geemer",
+         available=False),
 ]
 
 _goals = {goal.name:goal for goal in _goalsList}

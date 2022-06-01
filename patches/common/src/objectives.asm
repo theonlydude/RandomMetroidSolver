@@ -17,6 +17,7 @@ incsrc "event_list.asm"
 
 !timer = $05b8
 !obj_check_period = #$0020	; unit:frames, works only in powers of 2
+!current_room = $079b
 
 ;;; external routines
 !song_routine = $808fc1
@@ -244,6 +245,7 @@ nothing_objective:
         rts
 
 %eventChecker(fish_tickled, !fish_tickled_event)
+%eventChecker(orange_geemer, !orange_geemer_event)
 
 obj_end:
 print "--- 0x", hex(obj_max-obj_end), " bytes left for objectives checkers ---"
@@ -283,15 +285,27 @@ alt_set_event:
 org $a0d719
 	dw check_red_fish_tickle
 
+;;; overwrite orange geemer various AIs to check for death
+org $a0dc57
+	dw check_orange_geemer
+
 org $a3f350
 check_red_fish_tickle:
-	lda $079b : cmp #$d104 : bne .end
+	lda !current_room : cmp #$d104 : bne .end
 	;; we're using grapple on a fish, in red fish room:
 	lda !fish_tickled_event : jsl !mark_event
 .end:
 	jmp $8000 		; original AI
 
-warnpc $a3f36f
+check_orange_geemer:
+	jsl $a3e08b		; call original AI
+	lda $0F8C : bpl .end	; if enemy 0 health is positive, do nothing
+	;; we killed orange geemer
+	lda !orange_geemer_event : jsl !mark_event
+.end:
+	rtl
+
+warnpc $a3f37f
 
 ;;; put some stuff in bank A1 to save space in 82:
 ;;; TODO pretty much everything but pause menu stuff can be in A1 (or elsewhere) now if we need space

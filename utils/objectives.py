@@ -236,7 +236,6 @@ _goalsList = [
          0xFAC9,
          escapeAccessPoints=(1, ["Bowling"]),
          text="{} orange geemer",
-         available=False,
          category="Memes"),
 ]
 

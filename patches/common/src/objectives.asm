@@ -286,8 +286,14 @@ org $a0d719
 	dw check_red_fish_tickle
 
 ;;; overwrite orange geemer various AIs to check for death
-org $a0dc57
-	dw check_orange_geemer
+org $a0dc59
+	dw check_orange_geemer_grapple
+org $a0dc67
+	dw check_orange_geemer_PB
+org $a0dc6f
+	dw check_orange_geemer_touch
+org $a0dc71
+	dw check_orange_geemer_shot
 
 org $a3f350
 check_red_fish_tickle:
@@ -297,15 +303,30 @@ check_red_fish_tickle:
 .end:
 	jmp $8000 		; original AI
 
+check_orange_geemer_PB:
+	jsl $a38037
+	bra check_orange_geemer
+
+check_orange_geemer_shot:
+	jsl $a3802d
+	bra check_orange_geemer
+
+check_orange_geemer_touch:
+	jsl $a38023
+	bra check_orange_geemer
+
+check_orange_geemer_grapple:
+	jsl $a3800a
+	bra check_orange_geemer
+
 check_orange_geemer:
-	jsl $a3e08b		; call original AI
-	lda $0F8C : bpl .end	; if enemy 0 health is positive, do nothing
+	lda $0F8C : bne .end	; if enemy 0 health is positive, do nothing
 	;; we killed orange geemer
 	lda !orange_geemer_event : jsl !mark_event
 .end:
 	rtl
 
-warnpc $a3f37f
+warnpc $a3f38f
 
 ;;; put some stuff in bank A1 to save space in 82:
 ;;; TODO pretty much everything but pause menu stuff can be in A1 (or elsewhere) now if we need space

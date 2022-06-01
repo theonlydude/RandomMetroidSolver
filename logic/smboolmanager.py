@@ -193,6 +193,12 @@ class SMBoolManager(object):
     def haveItem(self, item):
         return self._items[item]
 
+    def haveItems(self, items):
+        for item in items:
+            if not self.haveItem(item):
+                return smboolFalse
+        return SMBool(True)
+
     wand = staticmethod(SMBool.wand)
     wandmax = staticmethod(SMBool.wandmax)
     wor = staticmethod(SMBool.wor)

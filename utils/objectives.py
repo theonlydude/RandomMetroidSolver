@@ -244,7 +244,9 @@ _goalsList = [
          0xFAD1,
          escapeAccessPoints=(1, ["Oasis Bottom"]),
          text="{} shaktool",
-         category="Memes")
+         category="Memes"),    
+    Goal("collect all upgrades", "items", lambda sm, ap: SMBool(True), 0xFADD,
+         category="Items")
 ]
 
 _goals = {goal.name:goal for goal in _goalsList}
@@ -341,20 +343,27 @@ class Objectives(object):
         (_, apList) = Objectives.goals['finish scavenger hunt'].escapeAccessPoints
         apList.append(ap)
 
+    def _replaceEscapeAccessPoints(self, goal, aps):
+        (_, apList) = Objectives.goals[goal].escapeAccessPoints
+        apList.clear()
+        apList += aps
+    
     def updateItemPercentEscapeAccess(self, collectedLocsAccessPoints):
         for pct in [25,50,75,100]:
             goal = 'collect %d%% items' % pct
-            (_, apList) = Objectives.goals[goal].escapeAccessPoints
-            apList.clear()
-            apList += collectedLocsAccessPoints
+            self._replaceEscapeAccessPoints(goal, collectedLocsAccessPoints)
+        # not exactly accurate, but player has all upgrades to escape
+        self._replaceEscapeAccessPoints("collect all upgrades", collectedLocsAccessPoints)
 
     def setScavengerHuntFunc(self, scavClearFunc):
         Objectives.goals["finish scavenger hunt"].clearFunc = scavClearFunc
 
-    def setItemPercentFuncs(self, totalItemsCount=None):
+    def setItemPercentFuncs(self, totalItemsCount=None, allUpgradeTypes=None):
         for pct in [25,50,75,100]:
             goal = 'collect %d%% items' % pct
             Objectives.goals[goal].clearFunc = lambda sm, ap: sm.hasItemsPercent(pct, totalItemsCount)
+        if allUpgradeTypes is not None:
+            Objectives.goals["collect all upgrades"].clearFunc = lambda sm, ap: sm.haveItems(allUpgradeTypes)
 
     def setSolverMode(self, scavClearFunc):
         self.setScavengerHuntFunc(scavClearFunc)

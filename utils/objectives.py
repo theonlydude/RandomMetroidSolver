@@ -414,7 +414,7 @@ class Objectives(object):
         for goal in Objectives.activeGoals:
             if not goal.isLimit():
                 continue
-            if not goal.clearFunc(smbm):
+            if not goal.canClearGoal(smbm):
                 return False
         return True
 

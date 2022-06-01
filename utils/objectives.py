@@ -68,7 +68,8 @@ class Goal(object):
     def setRank(self, rank):
         self.rank = rank
 
-    def canClearGoal(self, smbm, ap):
+    def canClearGoal(self, smbm, ap=None):
+        # not all objectives require an ap (like limit objectives)
         return self.clearFunc(smbm, ap)
 
     def getText(self):

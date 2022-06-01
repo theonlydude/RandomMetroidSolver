@@ -65,6 +65,7 @@ endmacro
 
 %defineVARIAevent(fish_tickled_event)
 %defineVARIAevent(orange_geemer_event)
+%defineVARIAevent(shak_dead_event)
 
 ;;; Keep these macros at the end as they depend on cur_VARIA_event, which depends on custom events definitions above:
 !max_objectives = 5

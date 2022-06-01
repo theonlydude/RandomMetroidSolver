@@ -237,6 +237,14 @@ _goalsList = [
          escapeAccessPoints=(1, ["Bowling"]),
          text="{} orange geemer",
          category="Memes"),
+    Goal("kill shaktool", "other",
+         lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Oasis Bottom"),
+                                sm.canTraverseSandPits(),
+                                sm.canAccessShaktoolFromPantsRoom()),
+         0xFAD1,
+         escapeAccessPoints=(1, ["Oasis Bottom"]),
+         text="{} shaktool",
+         category="Memes")
 ]
 
 _goals = {goal.name:goal for goal in _goalsList}

@@ -246,6 +246,7 @@ nothing_objective:
 
 %eventChecker(fish_tickled, !fish_tickled_event)
 %eventChecker(orange_geemer, !orange_geemer_event)
+%eventChecker(shak_dead, !shak_dead_event)
 
 obj_end:
 print "--- 0x", hex(obj_max-obj_end), " bytes left for objectives checkers ---"
@@ -295,6 +296,12 @@ org $a0dc6f
 org $a0dc71
 	dw check_orange_geemer_shot
 
+;;; overwrite Shaktool various AIs to check for death
+org $a0f0af
+	dw check_shak_touch
+org $a0f0b1
+	dw check_shak_shot
+
 org $a3f350
 check_red_fish_tickle:
 	lda !current_room : cmp #$d104 : bne .end
@@ -327,6 +334,25 @@ check_orange_geemer:
 	rtl
 
 warnpc $a3f38f
+
+org $aaf800
+
+check_shak_shot:
+	jsl $aadf34
+	bra check_shak
+
+check_shak_touch:
+	jsl $aadf2f
+	bra check_shak
+
+check_shak:
+	lda $0F8C,x : bne .end	; if current enemy health is positive, do nothing
+	;; we killed shak
+	lda !shak_dead_event : jsl !mark_event
+.end:
+	rtl
+
+warnpc $aaf82f
 
 ;;; put some stuff in bank A1 to save space in 82:
 ;;; TODO pretty much everything but pause menu stuff can be in A1 (or elsewhere) now if we need space

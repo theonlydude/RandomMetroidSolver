@@ -352,27 +352,8 @@ locationsDict["Spring Ball"].AccessFrom = {
     'Oasis Bottom': lambda sm: sm.canTraverseSandPits()
 }
 locationsDict["Spring Ball"].Available = (
-    lambda sm: sm.wand(sm.canUsePowerBombs(), # in Shaktool room to let Shaktool access the sand blocks
-                       sm.wor(sm.wand(sm.haveItem('Ice'), # puyo clip
-                                      sm.wor(sm.wand(sm.haveItem('Gravity'),
-                                                     sm.knowsPuyoClip()),
-                                             sm.wand(sm.haveItem('Gravity'),
-                                                     sm.haveItem('XRayScope'),
-                                                     sm.knowsPuyoClipXRay()),
-                                             sm.knowsSuitlessPuyoClip())),
-                              sm.wand(sm.haveItem('Grapple'), # go through grapple block
-                                      sm.wor(sm.wand(sm.haveItem('Gravity'),
-                                                     sm.wor(sm.wor(sm.wand(sm.haveItem('HiJump'), sm.knowsAccessSpringBallWithHiJump()),
-                                                                   sm.haveItem('SpaceJump')),
-                                                            sm.knowsAccessSpringBallWithGravJump(),
-                                                            sm.wand(sm.haveItem('Bomb'),
-                                                                    sm.wor(sm.knowsAccessSpringBallWithBombJumps(),
-                                                                           sm.wand(sm.haveItem('SpringBall'),
-                                                                                   sm.knowsAccessSpringBallWithSpringBallBombJumps()))),
-                                                            sm.wand(sm.haveItem('SpringBall'), sm.knowsAccessSpringBallWithSpringBallJump()))),
-                                             sm.wand(sm.haveItem('SpaceJump'), sm.knowsAccessSpringBallWithFlatley()))),
-                              sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb()), # XRay climb
-                              sm.canCrystalFlashClip()),
+    lambda sm: sm.wand(sm.canAccessShaktoolFromPantsRoom(),
+                       sm.canUsePowerBombs(), # in Shaktool room to let Shaktool access the sand blocks
                        sm.wor(sm.haveItem('Gravity'), sm.canUseSpringBall())) # acess the item in spring ball room
 )
 locationsDict["Spring Ball"].PostAvailable = (

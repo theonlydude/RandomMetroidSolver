@@ -63,7 +63,9 @@ class Randomizer(object):
             "Multi_Category_Randomizer_Week_6": "Multi-Category Randomizer Tournament week 6",
             "Multi_Category_Randomizer_Week_7": "Multi-Category Randomizer Tournament week 7",
             "Season_Races": "rando league races (Majors/Minors split)",
-            "SGLive2021": "SGLive 2021 Super Metroid randomizer tournament",
+            "SGLive2022_Race_1": "SGLive 2022 Super Metroid randomizer tournament race 1",
+            "SGLive2022_Race_2": "SGLive 2022 Super Metroid randomizer tournament race 2",
+            "SGLive2022_Race_3": "SGLive 2022 Super Metroid randomizer tournament race 3",
             "SMRAT2021": "Super Metroid Randomizer Accessible Tournament 2021",
             "VARIA_Weekly": "Casual logic community races"
         }
@@ -77,7 +79,7 @@ class Randomizer(object):
             "Minimizer": ["minimizer", "minimizer_hardcore", "minimizer_maximizer"],
             "Hard": ["hardway2hell", "highway2hell", "stupid_hard"],
             "Random": ["all_random", "quite_random", "surprise"],
-            "Tournament": ["Season_Races", "SGLive2021", "SMRAT2021", "VARIA_Weekly", "Multi_Category_Randomizer_Week_1", "Multi_Category_Randomizer_Week_2", "Multi_Category_Randomizer_Week_3", "Multi_Category_Randomizer_Week_4", "Multi_Category_Randomizer_Week_5", "Multi_Category_Randomizer_Week_6", "Multi_Category_Randomizer_Week_7"]
+            "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "SGLive2022_Race_1", "SGLive2022_Race_2", "SGLive2022_Race_3", "Multi_Category_Randomizer_Week_1", "Multi_Category_Randomizer_Week_2", "Multi_Category_Randomizer_Week_3", "Multi_Category_Randomizer_Week_4", "Multi_Category_Randomizer_Week_5", "Multi_Category_Randomizer_Week_6", "Multi_Category_Randomizer_Week_7"]
         }
 
         startAPs = GraphUtils.getStartAccessPointNamesCategory()

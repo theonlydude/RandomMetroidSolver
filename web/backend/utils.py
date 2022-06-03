@@ -35,7 +35,8 @@ def loadPresetsList(cache):
 def loadRandoPresetsList(cache, filter=False):
     presets = cache.ram('randoPresets', lambda:dict(), time_expire=None)
     if not presets:
-        tourPresets = ['Season_Races', 'SGLive2021', 'SMRAT2021', 'VARIA_Weekly',
+        tourPresets = ['Season_Races', 'SMRAT2021', 'VARIA_Weekly',
+                       'SGLive2022_Race_1', 'SGLive2022_Race_2', 'SGLive2022_Race_3',
                        'Multi_Category_Randomizer_Week_1', 'Multi_Category_Randomizer_Week_2',
                        'Multi_Category_Randomizer_Week_3', 'Multi_Category_Randomizer_Week_4',
                        'Multi_Category_Randomizer_Week_5', 'Multi_Category_Randomizer_Week_6',

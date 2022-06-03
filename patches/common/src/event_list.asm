@@ -41,19 +41,6 @@ math pri on
 
 ;;; VARIA events
 !VARIA_event_base = #$0080
-!cur_VARIA_event = !VARIA_event_base
-
-macro defineVARIAevent(event_name)
-!<event_name> = !cur_VARIA_event
-;; this leads to pretty inefficient "math" by text-replacing +1+1+1 etc,
-;; but it is necessary to keep proper hex 16 bits formattings and avoid
-;; suffixing instructions manipulating event constants with .w like we would
-;; have to do if actual asar math were used
-!cur_VARIA_event := !cur_VARIA_event+1
-endmacro
-
-;; scavenger hunt completion
-%defineVARIAevent(hunt_over_event)
 
 ;; objectives events : a global objectives completed event for endgame
 ;; and individual events for each objective :
@@ -61,15 +48,19 @@ endmacro
 ;; - if completed, was the user notified in the HUD?
 ;;   (can never be set if HUD is disabled)
 !objectives_completed_event = !tourian_open_event ; reuse tourian entrance event
-%defineVARIAevent(objectives_completed_event_notified)
+!objectives_completed_event_notified = !VARIA_event_base+0
 
-%defineVARIAevent(fish_tickled_event)
-%defineVARIAevent(orange_geemer_event)
-%defineVARIAevent(shak_dead_event)
+;; scavenger hunt completion
+!hunt_over_event = !VARIA_event_base+1
 
-;;; Keep these macros at the end as they depend on cur_VARIA_event, which depends on custom events definitions above:
+;; memes
+!fish_tickled_event = !VARIA_event_base+2
+!orange_geemer_event = !VARIA_event_base+3
+!shak_dead_event = !VARIA_event_base+4
+
+;;; Keep these macros at the end as they depend on current event index:
 !max_objectives = 5
-!objectives_event_base = !cur_VARIA_event
+!objectives_event_base = !VARIA_event_base+5
 
 ;; declare an array with all the "objective completed" events
 macro objectivesCompletedEventArray()

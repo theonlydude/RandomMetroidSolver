@@ -56,6 +56,7 @@ class CommonSolver(object):
             self.locations = Logic.locations
             (self.majorsSplit, self.masterMajorsSplit) = self.romLoader.assignItems(self.locations)
             (self.startLocation, self.startArea, startPatches) = self.romLoader.getStartAP()
+            self.majorUpgrades = self.romLoader.loadMajorUpgrades()
             if not GraphUtils.isStandardStart(self.startLocation) and self.majorsSplit != 'Full':
                 # update major/chozo locs in non standard start
                 self.romLoader.updateSplitLocs(self.majorsSplit, self.locations)
@@ -74,7 +75,7 @@ class CommonSolver(object):
                     self.objectives.tourianRequired = not self.romLoader.hasPatch('Escape_Trigger')
                 else:
                     self.objectives.setVanilla()
-            self.objectives.setSolverMode(self.scavengerHuntComplete)
+            self.objectives.setSolverMode(self.scavengerHuntComplete, self.majorUpgrades)
 
             if interactive == False:
                 print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {} activePatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches()), sorted(RomPatches.ActivePatches)))

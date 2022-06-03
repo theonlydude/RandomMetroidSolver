@@ -832,7 +832,7 @@ if __name__ == "__main__":
         # we have to write ips to ROM before doing our direct modifications which will rewrite some parts (like in credits)
         romPatcher.commitIPS()
         if args.patchOnly == False:
-            romPatcher.writeObjectives(objectivesManager)
+            romPatcher.writeObjectives(objectivesManager, itemLocs)
             romPatcher.writeItemsLocs(itemLocs)
             romPatcher.writeSplitLocs(args.majorsSplit, itemLocs, progItemLocs)
             romPatcher.writeItemsNumber()

@@ -244,7 +244,7 @@ _goalsList = [
          0xFAD1,
          escapeAccessPoints=(1, ["Oasis Bottom"]),
          text="{} shaktool",
-         category="Memes"),    
+         category="Memes"),
     Goal("collect all upgrades", "items", lambda sm, ap: SMBool(True), 0xFADD,
          category="Items")
 ]
@@ -347,7 +347,7 @@ class Objectives(object):
         (_, apList) = Objectives.goals[goal].escapeAccessPoints
         apList.clear()
         apList += aps
-    
+
     def updateItemPercentEscapeAccess(self, collectedLocsAccessPoints):
         for pct in [25,50,75,100]:
             goal = 'collect %d%% items' % pct
@@ -365,10 +365,10 @@ class Objectives(object):
         if allUpgradeTypes is not None:
             Objectives.goals["collect all upgrades"].clearFunc = lambda sm, ap: sm.haveItems(allUpgradeTypes)
 
-    def setSolverMode(self, scavClearFunc):
+    def setSolverMode(self, scavClearFunc, majorUpgrades):
         self.setScavengerHuntFunc(scavClearFunc)
         # in rando we know the number of items after randomizing, so set the functions only for the solver
-        self.setItemPercentFuncs()
+        self.setItemPercentFuncs(allUpgradeTypes=majorUpgrades)
 
     def expandGoals(self):
         LOG.debug("Active goals:"+str(Objectives.activeGoals))

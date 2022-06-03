@@ -107,8 +107,9 @@ class GraphBuilder(object):
         # filter garbage itemLocs
         ilCheck = lambda il: not il.Location.isBoss() and not il.Location.restricted and il.Item.Category != "Nothing"
         # update item% objectives
-        nAccessibleItems = len([il for il in allItemLocs if ilCheck(il)])
-        sm.objectives.setItemPercentFuncs(nAccessibleItems)
+        accessibleItems = [il.Item for il in allItemLocs if ilCheck(il)]
+        majorUpgrades = [item.Type for item in accessibleItems if item.BeamBits != 0 or item.ItemBits != 0]
+        sm.objectives.setItemPercentFuncs(len(accessibleItems), majorUpgrades)
         if split == "Scavenger":
             # update escape access for scav with last scav loc
             lastScavItemLoc = progItemLocs[-1]

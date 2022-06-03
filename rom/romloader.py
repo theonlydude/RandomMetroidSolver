@@ -178,6 +178,32 @@ class RomLoader(object):
     def loadScavengerOrder(self, locations):
         return self.romReader.loadScavengerOrder(locations)
 
+    def loadMajorUpgrades(self):
+        itemsMask, beamsMask = self.romReader.readItemMasks()
+        itemBits = {
+            'Bomb':0x1000,
+            'HiJump':0x100,
+            'SpeedBooster':0x2000,
+            'SpringBall':0x2,
+            'Varia':0x1,
+            'Grapple':0x4000,
+            'Morph':0x4,
+            'Gravity':0x20,
+            'XRayScope':0x8000,
+            'SpaceJump':0x200,
+            'ScrewAttack':0x8
+        }
+        beamBits = {
+            'Charge':0x1000,
+            'Ice':0x2,
+            'Wave':0x1,
+            'Spazer':0x4,
+            'Plasma':0x8
+        }
+        upgrades = [item for item,mask in itemBits.items() if itemsMask & mask != 0]
+        upgrades += [item for item,mask in beamBits.items() if beamsMask & mask != 0]
+        return upgrades
+
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)
     def __init__(self, romFileName, magic=None):

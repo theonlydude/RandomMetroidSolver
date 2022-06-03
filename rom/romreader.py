@@ -498,6 +498,11 @@ class RomReader:
     def readObjectives(self, objectives):
         objectives.readGoals(self)
 
+    def readItemMasks(self):
+        itemsMask = self.romFile.readWord(Addresses.getOne('itemsMask'))
+        beamsMask = self.romFile.readWord(Addresses.getOne('beamsMask'))
+        return itemsMask, beamsMask
+
     def getStartAP(self):
         address = Addresses.getOne('startAP')
         value = self.romFile.readWord(address)

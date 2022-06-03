@@ -1142,6 +1142,9 @@ class RomPatcher:
 
     def writeObjectives(self, objectives, itemLocs):
         objectives.writeGoals(self.romFile)
+        self.writeItemsMasks(itemLocs)
+
+    def writeItemsMasks(self, itemLocs):
         # write items/beams masks for "collect all major" objective
         itemsMask = 0
         beamsMask = 0

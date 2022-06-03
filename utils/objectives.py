@@ -419,7 +419,7 @@ class Objectives(object):
         terminator = 1
         objectiveSize = 2
         bytesToRead = (Objectives.maxActiveGoals + terminator) * objectiveSize
-        return [Addresses.getOne('objectivesList')+i for i in range(0, bytesToRead+1)] + Addresses.getWeb('totalItems')
+        return [Addresses.getOne('objectivesList')+i for i in range(0, bytesToRead+1)] + Addresses.getWeb('totalItems') + Addresses.getWeb("itemsMask") + Addresses.getWeb("beamsMask")
 
     @staticmethod
     def getExclusions():

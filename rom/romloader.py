@@ -5,6 +5,7 @@ from rom.rom import RealROM, FakeROM
 from rom.romreader import RomReader
 from utils.doorsmanager import DoorsManager
 from graph.graph_utils import getAccessPoint
+from collections import defaultdict
 
 class RomLoader(object):
     @staticmethod
@@ -166,7 +167,10 @@ class RomLoader(object):
         self.romReader.readObjectives(objectives)
 
     def updateSplitLocs(self, split, locations):
-        locIds = self.romReader.getLocationsIds()
+        locIdsByArea = self.romReader.getLocationsIds()
+        locIds = []
+        for area, ids in locIdsByArea.items():
+            locIds += ids
         for loc in locations:
             if loc.isBoss():
                 continue
@@ -174,6 +178,15 @@ class RomLoader(object):
                 loc.setClass([split])
             else:
                 loc.setClass(["Minor"])
+
+    def getSplitLocsByArea(self, locations):
+        locIdsByArea = self.romReader.getLocationsIds()
+        locsByArea = defaultdict(list)
+        for area, locIds in locIdsByArea.items():
+            for loc in locations:
+                if loc.Id in locIds:
+                    locsByArea[area].append(loc)
+        return locsByArea
 
     def loadScavengerOrder(self, locations):
         return self.romReader.loadScavengerOrder(locations)

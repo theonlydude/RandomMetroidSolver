@@ -425,7 +425,6 @@ class Objectives(object):
         goalsByArea = {goal.area:goal for goalName, goal in Objectives.goals.items()}
         for area, func in funcsByArea.items():
             if area in goalsByArea:
-                print("setting clearFunc " + str(func) + " for area "+area)
                 goalsByArea[area].clearFunc = func
 
     def setSolverMode(self, scavClearFunc, majorUpgrades):

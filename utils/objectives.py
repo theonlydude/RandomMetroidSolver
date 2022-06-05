@@ -2,6 +2,7 @@ import random
 from rom.addresses import Addresses
 from logic.helpers import Bosses
 from logic.smbool import SMBool
+from logic.logic import Logic
 import utils.log, logging
 
 LOG = utils.log.get('Objectives')
@@ -32,7 +33,7 @@ class Synonyms(object):
 class Goal(object):
     def __init__(self, name, gtype, clearFunc, checkAddr,
                  escapeAccessPoints=None, exclusion=None, items=None, text=None,
-                 available=True, expandableList=None, category=None):
+                 available=True, expandableList=None, category=None, area=None):
         self.name = name
         self.available = available
         self.clearFunc = clearFunc
@@ -66,6 +67,7 @@ class Goal(object):
             self.expandableList = []
         self.expandable = len(self.expandableList) > 0
         self.category = category
+        self.area = area
 
     def setRank(self, rank):
         self.rank = rank
@@ -97,6 +99,9 @@ def getG4EscapeAccessPoints(n):
 
 def getMiniBossesEscapeAccessPoints(n):
     return (n, [Bosses.accessPoints[boss] for boss in Bosses.miniBosses()])
+
+def getAreaEscapeAccessPoints(area):
+    return (1, list({list(loc.AccessFrom.keys())[0] for loc in Logic.locations if loc.GraphArea == area}))
 
 _goalsList = [
     Goal("kill kraid", "boss", lambda sm, ap: Bosses.bossDead(sm, 'Kraid'), 0xF98F,
@@ -246,7 +251,47 @@ _goalsList = [
          text="{} shaktool",
          category="Memes"),
     Goal("collect all upgrades", "items", lambda sm, ap: SMBool(True), 0xFADD,
-         category="Items")
+         category="Items"),
+    Goal("clear crateria", "items", lambda sm, ap: SMBool(True), 0xFAF4,
+         category="Items",
+         area="Crateria",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear green brinstar", "items", lambda sm, ap: SMBool(True), 0xFAFC,
+         category="Items",
+         area="GreenPinkBrinstar",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear red brinstar", "items", lambda sm, ap: SMBool(True), 0xFB04,
+         category="Items",
+         area="RedBrinstar",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear wrecked ship", "items", lambda sm, ap: SMBool(True), 0xFB0C,
+         category="Items",
+         area="WreckedShip",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear kraid's lair", "items", lambda sm, ap: SMBool(True), 0xFB14,
+         category="Items",
+         area="Kraid",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear upper norfair", "items", lambda sm, ap: SMBool(True), 0xFB1C,
+         category="Items",
+         area="Norfair",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear croc's lair", "items", lambda sm, ap: SMBool(True), 0xFB24,
+         category="Items",
+         area="Crocomire",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear lower norfair", "items", lambda sm, ap: SMBool(True), 0xFB2C,
+         category="Items",
+         area="LowerNorfair",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear west maridia", "items", lambda sm, ap: SMBool(True), 0xFB34,
+         category="Items",
+         area="WestMaridia",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear east maridia", "items", lambda sm, ap: SMBool(True), 0xFB3C,
+         category="Items",
+         area="EastMaridia",
+         exclusion={"list": ["finish scavenger hunt"]})
 ]
 
 _goals = {goal.name:goal for goal in _goalsList}
@@ -324,10 +369,21 @@ class Objectives(object):
     def setGraph(graph, maxDiff):
         Objectives.graph = graph
         Objectives.maxDiff = maxDiff
+        for goalName, goal in Objectives.goals.items():
+            if goal.area is not None:
+                goal.escapeAccessPoints = getAreaEscapeAccessPoints(goal.area)
 
     @staticmethod
     def canAccess(sm, src, dst):
         return SMBool(Objectives.graph.canAccess(sm, src, dst, Objectives.maxDiff))
+
+    @staticmethod
+    def canAccessLocations(sm, ap, locs):
+        availLocs = Objectives.graph.getAvailableLocations(Logic.locations, sm, Objectives.maxDiff, ap)
+        for loc in locs:
+            if loc not in availLocs:
+                return SMBool(False)
+        return SMBool(True)
 
     def setVanilla(self):
         self.addGoal("kill kraid")
@@ -364,6 +420,13 @@ class Objectives(object):
             Objectives.goals[goal].clearFunc = lambda sm, ap: sm.hasItemsPercent(pct, totalItemsCount)
         if allUpgradeTypes is not None:
             Objectives.goals["collect all upgrades"].clearFunc = lambda sm, ap: sm.haveItems(allUpgradeTypes)
+
+    def setAreaFuncs(self, funcsByArea):
+        goalsByArea = {goal.area:goal for goalName, goal in Objectives.goals.items()}
+        for area, func in funcsByArea.items():
+            if area in goalsByArea:
+                print("setting clearFunc " + str(func) + " for area "+area)
+                goalsByArea[area].clearFunc = func
 
     def setSolverMode(self, scavClearFunc, majorUpgrades):
         self.setScavengerHuntFunc(scavClearFunc)

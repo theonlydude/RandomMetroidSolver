@@ -265,6 +265,17 @@ all_major_items:
 .end:
 	rts
 
+%eventChecker(crateria_cleared, !crateria_cleared_event)
+%eventChecker(green_brin_cleared, !green_brin_cleared_event)
+%eventChecker(red_brin_cleared, !red_brin_cleared_event)
+%eventChecker(ws_cleared, !ws_cleared_event)
+%eventChecker(kraid_cleared, !kraid_cleared_event)
+%eventChecker(upper_norfair_cleared, !upper_norfair_cleared_event)
+%eventChecker(croc_cleared, !croc_cleared_event)
+%eventChecker(lower_norfair_cleared, !lower_norfair_cleared_event)
+%eventChecker(west_maridia_cleared, !west_maridia_cleared_event)
+%eventChecker(east_maridia_cleared, !east_maridia_cleared_event)
+
 obj_end:
 print "--- 0x", hex(obj_max-obj_end), " bytes left for objectives checkers ---"
 ;;; seed display patch start

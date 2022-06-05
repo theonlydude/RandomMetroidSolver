@@ -538,6 +538,8 @@ if __name__ == "__main__":
             objectivesManager.expandGoals()
         else:
             objectivesManager.setVanilla()
+        if any(goal for goal in Objectives.activeGoals if goal.name.startswith("clear")):
+            forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "doors": "normal" if not args.doorsColorsRando else "late" }

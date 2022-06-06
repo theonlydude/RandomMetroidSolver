@@ -231,7 +231,7 @@ _goalsList = [
          exclusion={"list": ["collect 25% items", "collect 50% items", "collect 100% items"]},
          category="Items"),
     Goal("collect 100% items", "items", lambda sm, ap: SMBool(True), 0xFA91,
-         exclusion={"list": ["collect 25% items", "collect 50% items", "collect 75% items"]},
+         exclusion={"list": ["collect 25% items", "collect 50% items", "collect 75% items", "collect all upgrades"]},
          category="Memes"),
     Goal("tickle the red fish", "other",
          lambda sm, ap: sm.wand(sm.haveItem('Grapple'), Objectives.canAccess(sm, ap, "Red Fish Room Bottom")),

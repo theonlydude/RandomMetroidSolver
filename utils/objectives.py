@@ -598,6 +598,8 @@ class Objectives(object):
             text = goal.getText()
             romFile.seek(addr)
             for c in text:
+                if c not in char2tile:
+                    continue
                 romFile.writeWord(0x3800 + char2tile[c])
 
         # write goal completed positions y in sprites OAM

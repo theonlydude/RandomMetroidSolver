@@ -538,6 +538,8 @@ if __name__ == "__main__":
             objectivesManager.expandGoals()
         else:
             objectivesManager.setVanilla()
+        if any(goal for goal in Objectives.activeGoals if goal.name.startswith("clear")):
+            forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "doors": "normal" if not args.doorsColorsRando else "late" }
@@ -832,7 +834,7 @@ if __name__ == "__main__":
         # we have to write ips to ROM before doing our direct modifications which will rewrite some parts (like in credits)
         romPatcher.commitIPS()
         if args.patchOnly == False:
-            romPatcher.writeObjectives(objectivesManager)
+            romPatcher.writeObjectives(objectivesManager, itemLocs)
             romPatcher.writeItemsLocs(itemLocs)
             romPatcher.writeSplitLocs(args.majorsSplit, itemLocs, progItemLocs)
             romPatcher.writeItemsNumber()

@@ -282,17 +282,26 @@ class RandoSetup(object):
         self.areaGraph.useCache(False)
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
         self.log.debug("restricted=" + str([loc.Name for loc in self.lastRestricted]))
-
+        # check if objectives are compatible with accessible APs
+        availAPs = [ap.Name for ap in self.areaGraph.getAccessibleAccessPoints(self.startAP)]
+        for goal in Objectives.activeGoals:
+            n, aps = goal.escapeAccessPoints
+            if len(aps) == 0:
+                continue
+            if len([ap for ap in aps if ap in availAPs]) < n:
+                self.log.debug("checkPool. goal "+goal.name+" impossible to complete due to area layout")
+                ret = False
         # check if all inter-area APs can reach each other
-        interAPs = [ap for ap in self.areaGraph.getAccessibleAccessPoints(self.startAP) if not ap.isInternal() and not ap.isLoop()]
-        for startAp in interAPs:
-            availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.settings.maxDiff)
-            for ap in interAPs:
-                if not ap in availAccessPoints:
-                    self.log.debug("checkPool: ap {} non accessible from {}".format(ap.Name, startAp.Name))
-                    ret = False
-        if not ret:
-            self.log.debug("checkPool. inter-area APs check failed")
+        if ret:
+            interAPs = [ap for ap in self.areaGraph.getAccessibleAccessPoints(self.startAP) if not ap.isInternal() and not ap.isLoop()]
+            for startAp in interAPs:
+                availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.settings.maxDiff)
+                for ap in interAPs:
+                    if not ap in availAccessPoints:
+                        self.log.debug("checkPool: ap {} non accessible from {}".format(ap.Name, startAp.Name))
+                        ret = False
+            if not ret:
+                self.log.debug("checkPool. inter-area APs check failed")
         # cleanup
         self.sm.resetItems()
         self.restoreBossChecks()

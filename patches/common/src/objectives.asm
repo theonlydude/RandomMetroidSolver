@@ -248,6 +248,34 @@ nothing_objective:
 %eventChecker(orange_geemer, !orange_geemer_event)
 %eventChecker(shak_dead, !shak_dead_event)
 
+print "all_items_mask: ", pc
+all_items_mask:
+	dw $f32f
+print "all_beams_mask: ", pc
+all_beams_mask:
+	dw $100f
+print "all_major_items: ", pc
+all_major_items:
+	lda $09A4 : cmp.l all_items_mask : bne .not
+	lda $09A8 : cmp.l all_beams_mask : bne .not
+	sec
+	bra .end
+.not:
+	clc
+.end:
+	rts
+
+%eventChecker(crateria_cleared, !crateria_cleared_event)
+%eventChecker(green_brin_cleared, !green_brin_cleared_event)
+%eventChecker(red_brin_cleared, !red_brin_cleared_event)
+%eventChecker(ws_cleared, !ws_cleared_event)
+%eventChecker(kraid_cleared, !kraid_cleared_event)
+%eventChecker(upper_norfair_cleared, !upper_norfair_cleared_event)
+%eventChecker(croc_cleared, !croc_cleared_event)
+%eventChecker(lower_norfair_cleared, !lower_norfair_cleared_event)
+%eventChecker(west_maridia_cleared, !west_maridia_cleared_event)
+%eventChecker(east_maridia_cleared, !east_maridia_cleared_event)
+
 obj_end:
 print "--- 0x", hex(obj_max-obj_end), " bytes left for objectives checkers ---"
 ;;; seed display patch start

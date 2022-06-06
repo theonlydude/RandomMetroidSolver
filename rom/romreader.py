@@ -5,6 +5,7 @@ from rom.rom import snes_to_pc
 from rom.addresses import Addresses
 from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
 from logic.logic import Logic
+from collections import defaultdict
 
 class RomReader:
     nothings = ['0xbae9', '0xbaed']
@@ -498,6 +499,11 @@ class RomReader:
     def readObjectives(self, objectives):
         objectives.readGoals(self)
 
+    def readItemMasks(self):
+        itemsMask = self.romFile.readWord(Addresses.getOne('itemsMask'))
+        beamsMask = self.romFile.readWord(Addresses.getOne('beamsMask'))
+        return itemsMask, beamsMask
+
     def getStartAP(self):
         address = Addresses.getOne('startAP')
         value = self.romFile.readWord(address)
@@ -515,14 +521,14 @@ class RomReader:
 
         return (startLocation, startArea, startPatches)
 
-    # go read all location IDs for item split. used to get major/chozo locs in non standard start
+    # go read all location IDs by area for item split
     def getLocationsIds(self):
-        ret = []
+        ret = defaultdict(list)
         for area,addr in locIdsByAreaAddresses.items():
             self.romFile.seek(addr)
             while True:
                idByte = self.romFile.readByte()
                if idByte == 0xff:
                    break
-               ret.append(idByte)
+               ret[area].append(idByte)
         return ret

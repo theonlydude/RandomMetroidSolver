@@ -1140,8 +1140,21 @@ class RomPatcher:
             else:
                 self.applyIPSPatch(plmName)
 
-    def writeObjectives(self, objectives):
+    def writeObjectives(self, objectives, itemLocs):
         objectives.writeGoals(self.romFile)
+        self.writeItemsMasks(itemLocs)
+
+    def writeItemsMasks(self, itemLocs):
+        # write items/beams masks for "collect all major" objective
+        itemsMask = 0
+        beamsMask = 0
+        for il in itemLocs:
+            if not il.Location.restricted:
+                item = il.Item
+                itemsMask |= item.ItemBits
+                beamsMask |= item.BeamBits
+        self.romFile.writeWord(itemsMask, Addresses.getOne('itemsMask'))
+        self.romFile.writeWord(beamsMask, Addresses.getOne('beamsMask'))
 
 # tile number in tileset
 char2tile = {

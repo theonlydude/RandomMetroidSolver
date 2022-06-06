@@ -3,10 +3,12 @@ import utils.log, random, copy
 
 from graph.graph_utils import GraphUtils, vanillaTransitions, vanillaBossesTransitions, escapeSource, escapeTargets
 from logic.logic import Logic
+from logic.smbool import SMBool
 from graph.graph import AccessGraphRando as AccessGraph
 from graph.graph_utils import graphAreas
 from utils.objectives import Objectives
 from rando.ItemLocContainer import getItemLocStr
+from collections import defaultdict
 
 # creates graph and handles randomized escape
 class GraphBuilder(object):
@@ -107,13 +109,22 @@ class GraphBuilder(object):
         # filter garbage itemLocs
         ilCheck = lambda il: not il.Location.isBoss() and not il.Location.restricted and il.Item.Category != "Nothing"
         # update item% objectives
-        nAccessibleItems = len([il for il in allItemLocs if ilCheck(il)])
-        sm.objectives.setItemPercentFuncs(nAccessibleItems)
+        accessibleItems = [il.Item for il in allItemLocs if ilCheck(il)]
+        majorUpgrades = [item.Type for item in accessibleItems if item.BeamBits != 0 or item.ItemBits != 0]
+        sm.objectives.setItemPercentFuncs(len(accessibleItems), majorUpgrades)
         if split == "Scavenger":
             # update escape access for scav with last scav loc
             lastScavItemLoc = progItemLocs[-1]
             sm.objectives.updateScavengerEscapeAccess(lastScavItemLoc.Location.accessPoint)
             sm.objectives.setScavengerHuntFunc(lambda sm, ap: sm.haveItem(lastScavItemLoc.Item.Type))
+        else:
+            # update "collect all items in areas" funcs
+            availLocsByArea=defaultdict(list)
+            for itemLoc in allItemLocs:
+                if ilCheck(itemLoc) and (split.startswith("Full") or itemLoc.Location.isClass(split)):
+                    availLocsByArea[itemLoc.Location.GraphArea].append(itemLoc.Location.Name)
+            self.log.debug("escapeTrigger. availLocsByArea="+str(availLocsByArea))
+            sm.objectives.setAreaFuncs({area:lambda sm,ap:SMBool(len(container.getLocs(lambda loc: loc.Name in availLocsByArea[area]))==0) for area in availLocsByArea})
         self.log.debug("escapeTrigger. collect locs until G4 access")
         # collect all item/locations up until we can pass G4 (the escape triggers)
         itemLocs = allItemLocs[:]

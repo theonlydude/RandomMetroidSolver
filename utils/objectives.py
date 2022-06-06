@@ -2,6 +2,7 @@ import random
 from rom.addresses import Addresses
 from logic.helpers import Bosses
 from logic.smbool import SMBool
+from logic.logic import Logic
 import utils.log, logging
 
 LOG = utils.log.get('Objectives')
@@ -32,7 +33,7 @@ class Synonyms(object):
 class Goal(object):
     def __init__(self, name, gtype, clearFunc, checkAddr,
                  escapeAccessPoints=None, exclusion=None, items=None, text=None,
-                 available=True, expandableList=None, category=None):
+                 available=True, expandableList=None, category=None, area=None):
         self.name = name
         self.available = available
         self.clearFunc = clearFunc
@@ -66,6 +67,7 @@ class Goal(object):
             self.expandableList = []
         self.expandable = len(self.expandableList) > 0
         self.category = category
+        self.area = area
 
     def setRank(self, rank):
         self.rank = rank
@@ -97,6 +99,9 @@ def getG4EscapeAccessPoints(n):
 
 def getMiniBossesEscapeAccessPoints(n):
     return (n, [Bosses.accessPoints[boss] for boss in Bosses.miniBosses()])
+
+def getAreaEscapeAccessPoints(area):
+    return (1, list({list(loc.AccessFrom.keys())[0] for loc in Logic.locations if loc.GraphArea == area}))
 
 _goalsList = [
     Goal("kill kraid", "boss", lambda sm, ap: Bosses.bossDead(sm, 'Kraid'), 0xF98F,
@@ -210,6 +215,9 @@ _goalsList = [
          escapeAccessPoints=(1, ["Oasis Bottom"]),
          available=False),
     Goal("finish scavenger hunt", "other", lambda sm, ap: SMBool(True), 0xFA03,
+         exclusion={"list":
+             ["clear crateria", "clear green brinstar", "clear red brinstar", "clear wrecked ship", "clear kraid's lair",
+              "clear upper norfair", "clear croc's lair", "clear lower norfair", "clear west maridia", "clear east maridia"]},
          available=False),
     Goal("nothing", "other", lambda sm, ap: Objectives.canAccess(sm, ap, "Landing Site"), 0xFA99,
          escapeAccessPoints=(1, ["Landing Site"])), # with no objectives at all, escape auto triggers only in crateria
@@ -223,7 +231,7 @@ _goalsList = [
          exclusion={"list": ["collect 25% items", "collect 50% items", "collect 100% items"]},
          category="Items"),
     Goal("collect 100% items", "items", lambda sm, ap: SMBool(True), 0xFA91,
-         exclusion={"list": ["collect 25% items", "collect 50% items", "collect 75% items"]},
+         exclusion={"list": ["collect 25% items", "collect 50% items", "collect 75% items", "collect all upgrades"]},
          category="Memes"),
     Goal("tickle the red fish", "other",
          lambda sm, ap: sm.wand(sm.haveItem('Grapple'), Objectives.canAccess(sm, ap, "Red Fish Room Bottom")),
@@ -244,7 +252,49 @@ _goalsList = [
          0xFAD1,
          escapeAccessPoints=(1, ["Oasis Bottom"]),
          text="{} shaktool",
-         category="Memes")
+         category="Memes"),
+    Goal("collect all upgrades", "items", lambda sm, ap: SMBool(True), 0xFADD,
+         category="Items"),
+    Goal("clear crateria", "items", lambda sm, ap: SMBool(True), 0xFAF4,
+         category="Items",
+         area="Crateria",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear green brinstar", "items", lambda sm, ap: SMBool(True), 0xFAFC,
+         category="Items",
+         area="GreenPinkBrinstar",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear red brinstar", "items", lambda sm, ap: SMBool(True), 0xFB04,
+         category="Items",
+         area="RedBrinstar",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear wrecked ship", "items", lambda sm, ap: SMBool(True), 0xFB0C,
+         category="Items",
+         area="WreckedShip",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear kraid's lair", "items", lambda sm, ap: SMBool(True), 0xFB14,
+         category="Items",
+         area="Kraid",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear upper norfair", "items", lambda sm, ap: SMBool(True), 0xFB1C,
+         category="Items",
+         area="Norfair",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear croc's lair", "items", lambda sm, ap: SMBool(True), 0xFB24,
+         category="Items",
+         area="Crocomire",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear lower norfair", "items", lambda sm, ap: SMBool(True), 0xFB2C,
+         category="Items",
+         area="LowerNorfair",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear west maridia", "items", lambda sm, ap: SMBool(True), 0xFB34,
+         category="Items",
+         area="WestMaridia",
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("clear east maridia", "items", lambda sm, ap: SMBool(True), 0xFB3C,
+         category="Items",
+         area="EastMaridia",
+         exclusion={"list": ["finish scavenger hunt"]})
 ]
 
 _goals = {goal.name:goal for goal in _goalsList}
@@ -322,10 +372,21 @@ class Objectives(object):
     def setGraph(graph, maxDiff):
         Objectives.graph = graph
         Objectives.maxDiff = maxDiff
+        for goalName, goal in Objectives.goals.items():
+            if goal.area is not None:
+                goal.escapeAccessPoints = getAreaEscapeAccessPoints(goal.area)
 
     @staticmethod
     def canAccess(sm, src, dst):
         return SMBool(Objectives.graph.canAccess(sm, src, dst, Objectives.maxDiff))
+
+    @staticmethod
+    def canAccessLocations(sm, ap, locs):
+        availLocs = Objectives.graph.getAvailableLocations(Logic.locations, sm, Objectives.maxDiff, ap)
+        for loc in locs:
+            if loc not in availLocs:
+                return SMBool(False)
+        return SMBool(True)
 
     def setVanilla(self):
         self.addGoal("kill kraid")
@@ -341,25 +402,38 @@ class Objectives(object):
         (_, apList) = Objectives.goals['finish scavenger hunt'].escapeAccessPoints
         apList.append(ap)
 
+    def _replaceEscapeAccessPoints(self, goal, aps):
+        (_, apList) = Objectives.goals[goal].escapeAccessPoints
+        apList.clear()
+        apList += aps
+
     def updateItemPercentEscapeAccess(self, collectedLocsAccessPoints):
         for pct in [25,50,75,100]:
             goal = 'collect %d%% items' % pct
-            (_, apList) = Objectives.goals[goal].escapeAccessPoints
-            apList.clear()
-            apList += collectedLocsAccessPoints
+            self._replaceEscapeAccessPoints(goal, collectedLocsAccessPoints)
+        # not exactly accurate, but player has all upgrades to escape
+        self._replaceEscapeAccessPoints("collect all upgrades", collectedLocsAccessPoints)
 
     def setScavengerHuntFunc(self, scavClearFunc):
         Objectives.goals["finish scavenger hunt"].clearFunc = scavClearFunc
 
-    def setItemPercentFuncs(self, totalItemsCount=None):
+    def setItemPercentFuncs(self, totalItemsCount=None, allUpgradeTypes=None):
         for pct in [25,50,75,100]:
             goal = 'collect %d%% items' % pct
             Objectives.goals[goal].clearFunc = lambda sm, ap: sm.hasItemsPercent(pct, totalItemsCount)
+        if allUpgradeTypes is not None:
+            Objectives.goals["collect all upgrades"].clearFunc = lambda sm, ap: sm.haveItems(allUpgradeTypes)
 
-    def setSolverMode(self, scavClearFunc):
+    def setAreaFuncs(self, funcsByArea):
+        goalsByArea = {goal.area:goal for goalName, goal in Objectives.goals.items()}
+        for area, func in funcsByArea.items():
+            if area in goalsByArea:
+                goalsByArea[area].clearFunc = func
+
+    def setSolverMode(self, scavClearFunc, majorUpgrades):
         self.setScavengerHuntFunc(scavClearFunc)
         # in rando we know the number of items after randomizing, so set the functions only for the solver
-        self.setItemPercentFuncs()
+        self.setItemPercentFuncs(allUpgradeTypes=majorUpgrades)
 
     def expandGoals(self):
         LOG.debug("Active goals:"+str(Objectives.activeGoals))
@@ -410,7 +484,7 @@ class Objectives(object):
         terminator = 1
         objectiveSize = 2
         bytesToRead = (Objectives.maxActiveGoals + terminator) * objectiveSize
-        return [Addresses.getOne('objectivesList')+i for i in range(0, bytesToRead+1)] + Addresses.getWeb('totalItems')
+        return [Addresses.getOne('objectivesList')+i for i in range(0, bytesToRead+1)] + Addresses.getWeb('totalItems') + Addresses.getWeb("itemsMask") + Addresses.getWeb("beamsMask")
 
     @staticmethod
     def getExclusions():
@@ -527,6 +601,8 @@ class Objectives(object):
             text = goal.getText()
             romFile.seek(addr)
             for c in text:
+                if c not in char2tile:
+                    continue
                 romFile.writeWord(0x3800 + char2tile[c])
 
         # write goal completed positions y in sprites OAM

@@ -58,9 +58,22 @@ math pri on
 !orange_geemer_event = !VARIA_event_base+3
 !shak_dead_event = !VARIA_event_base+4
 
+;; clear area events : events based on area index, from 1 (crateria) to 10 (east maridia),
+!area_clear_event_base = !VARIA_event_base+4
+!crateria_cleared_event = !VARIA_event_base+5
+!green_brin_cleared_event = !VARIA_event_base+6
+!red_brin_cleared_event = !VARIA_event_base+7
+!ws_cleared_event = !VARIA_event_base+8
+!kraid_cleared_event = !VARIA_event_base+9
+!upper_norfair_cleared_event = !VARIA_event_base+10
+!croc_cleared_event = !VARIA_event_base+11
+!lower_norfair_cleared_event = !VARIA_event_base+12
+!west_maridia_cleared_event = !VARIA_event_base+13
+!east_maridia_cleared_event = !VARIA_event_base+14
+
 ;;; Keep these macros at the end as they depend on current event index:
 !max_objectives = 5
-!objectives_event_base = !VARIA_event_base+5
+!objectives_event_base = !VARIA_event_base+15
 
 ;; declare an array with all the "objective completed" events
 macro objectivesCompletedEventArray()

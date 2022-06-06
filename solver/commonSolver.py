@@ -77,7 +77,12 @@ class CommonSolver(object):
             majorUpgrades = self.romLoader.loadMajorUpgrades()
             self.objectives.setSolverMode(self.scavengerHuntComplete, majorUpgrades)
             splitLocsByArea = self.romLoader.getSplitLocsByArea(self.locations)
-            self.objectives.setAreaFuncs({area:lambda sm,ap: SMBool(all(loc in self.visitedLocations for loc in splitLocsByArea[area])) for area in splitLocsByArea})
+            def getObjAreaFunc(area):
+                def f(sm, ap):
+                    nonlocal splitLocsByArea, area
+                    return SMBool(all(loc in self.visitedLocations for loc in splitLocsByArea[area]))
+                return f
+            self.objectives.setAreaFuncs({area:getObjAreaFunc(area) for area in splitLocsByArea})
 
             if interactive == False:
                 print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {} activePatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches()), sorted(RomPatches.ActivePatches)))

@@ -215,6 +215,9 @@ _goalsList = [
          escapeAccessPoints=(1, ["Oasis Bottom"]),
          available=False),
     Goal("finish scavenger hunt", "other", lambda sm, ap: SMBool(True), 0xFA03,
+         exclusion={"list":
+             ["clear crateria", "clear green brinstar", "clear red brinstar", "clear wrecked ship", "clear kraid's lair",
+              "clear upper norfair", "clear croc's lair", "clear lower norfair", "clear west maridia", "clear east maridia"]},
          available=False),
     Goal("nothing", "other", lambda sm, ap: Objectives.canAccess(sm, ap, "Landing Site"), 0xFA99,
          escapeAccessPoints=(1, ["Landing Site"])), # with no objectives at all, escape auto triggers only in crateria

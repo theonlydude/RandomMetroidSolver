@@ -820,7 +820,13 @@ function greyOutPatches(isRace, isVARIA, isVanilla) {
 
 var vanillaROMBytes = null;
 var romSize = 0x300000;
-var isRace = false;
+{{
+if seedInfo != None and seedInfo["raceMode"] == 'on':
+    response.write("var isRace = true;", escape=False)
+else:
+    response.write("var isRace = false;", escape=False)
+    pass
+}}
 window.onload = function(){
     //Check File API support
     if(window.File && window.FileList && window.FileReader) {

@@ -10,6 +10,7 @@ from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses,
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
 from rom.addresses import Addresses
+from rom.rom_patches import RomPatches
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir
 import utils.log
@@ -1143,6 +1144,14 @@ class RomPatcher:
     def writeObjectives(self, objectives, itemLocs):
         objectives.writeGoals(self.romFile)
         self.writeItemsMasks(itemLocs)
+        # hack bomb_torizo.ips to wake BT in all cases if necessary, ie chozo bots objective is on, and nothing at bombs
+        if objectives.isGoalActive("activate chozo robots") and RomPatches.has(RomPatches.BombTorizoWake):
+            bomb = next((il for il in itemLocs if il.Location.Name == "Bomb"), None)
+            if bomb is not None and bomb.Item.Category == "Nothing":
+                for addrName in ["BTtweaksHack1", "BTtweaksHack2"]:
+                    self.romFile.seek(Addresses.getOne(addrName))
+                    for b in [0xA9,0x00,0x00]: # LDA #$0000 ; set zero flag to wake BT
+                        self.romFile.writeByte(b)
 
     def writeItemsMasks(self, itemLocs):
         # write items/beams masks for "collect all major" objective

@@ -116,5 +116,7 @@ class Addresses(object):
         'additionalETanks': ValueSingle(0xA1F470),
         'hellrunRate': ValueSingle(0x8DE387),
         'itemsMask': ValueSingle(0x82FAD9),
-        'beamsMask': ValueSingle(0x82FADB)
+        'beamsMask': ValueSingle(0x82FADB),
+        'BTtweaksHack1': ValueSingle(0x84ba6f+3),
+        'BTtweaksHack2': ValueSingle(0x84d33b+3)
     }

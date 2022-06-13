@@ -83,6 +83,8 @@ class RomPatches:
     RedDoorsMissileOnly     = 1006
     # Escape auto-trigger on objectives completion (no Tourian)
     NoTourian               = 1007
+    # BT wakes up on its item instead of bombs
+    BombTorizoWake          = 1008
 
     ### Hacks
     # rotation hack
@@ -109,7 +111,7 @@ class RomPatches:
     AreaSet = AreaBaseSet + AreaComfortSet
 
     # VARIA specific patch set
-    VariaTweaks = [ WsEtankPhantoonAlive, LNChozoSJCheckDisabled ]
+    VariaTweaks = [ WsEtankPhantoonAlive, LNChozoSJCheckDisabled, BombTorizoWake ]
 
     # Tourian speedup in minimizer mode
     MinimizerTourian = [ TourianSpeedup, OpenZebetites ]

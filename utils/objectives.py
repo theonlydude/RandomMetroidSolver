@@ -3,6 +3,7 @@ from rom.addresses import Addresses
 from logic.helpers import Bosses
 from logic.smbool import SMBool
 from logic.logic import Logic
+from graph.location import locationsDict
 import utils.log, logging
 
 LOG = utils.log.get('Objectives')
@@ -294,7 +295,15 @@ _goalsList = [
     Goal("clear east maridia", "items", lambda sm, ap: SMBool(True), 0xFB3C,
          category="Items",
          area="EastMaridia",
-         exclusion={"list": ["finish scavenger hunt"]})
+         exclusion={"list": ["finish scavenger hunt"]}),
+    Goal("activate chozo robots", "other", lambda sm, ap: sm.wand(Objectives.canAccessLocation(sm, ap, "Bomb"),
+                                                                  Objectives.canAccessLocation(sm, ap, "Gravity Suit"),
+                                                                  Objectives.canAccessLocation(sm, ap, "Golden Torizo"),
+                                                                  sm.canPassLowerNorfairChozo()), # graph access implied by GT loc
+         0xFB44,
+         category="Memes",
+         escapeAccessPoints=(3, ["Landing Site", "Screw Attack Bottom", "Bowling"]),
+         exclusion={"list": ["kill golden torizo"]})
 ]
 
 _goals = {goal.name:goal for goal in _goalsList}
@@ -307,9 +316,16 @@ class Objectives(object):
     totalItemsCount = 100
     goals = _goals
     graph = None
+    _tourianRequired = None
 
     def __init__(self, tourianRequired=True):
-        self.tourianRequired = tourianRequired
+        if Objectives._tourianRequired is None:
+            Objectives._tourianRequired = tourianRequired
+
+    @property
+    def tourianRequired(self):
+        assert Objectives._tourianRequired is not None
+        return Objectives._tourianRequired
 
     def resetGoals(self):
         Objectives.activeGoals = []
@@ -363,7 +379,8 @@ class Objectives(object):
         Objectives.nbActiveGoals -= 1
         Objectives.activeGoals.remove(goal)
 
-    def isGoalActive(self, goalName):
+    @staticmethod
+    def isGoalActive(goalName):
         return Objectives.goals[goalName] in Objectives.activeGoals
 
     # having graph as a global sucks but Objectives instances are all over the place,
@@ -381,12 +398,10 @@ class Objectives(object):
         return SMBool(Objectives.graph.canAccess(sm, src, dst, Objectives.maxDiff))
 
     @staticmethod
-    def canAccessLocations(sm, ap, locs):
-        availLocs = Objectives.graph.getAvailableLocations(Logic.locations, sm, Objectives.maxDiff, ap)
-        for loc in locs:
-            if loc not in availLocs:
-                return SMBool(False)
-        return SMBool(True)
+    def canAccessLocation(sm, ap, locName):
+        loc = locationsDict[locName]
+        availLocs = Objectives.graph.getAvailableLocations([loc], sm, Objectives.maxDiff, ap)
+        return SMBool(loc in availLocs)
 
     def setVanilla(self):
         self.addGoal("kill kraid")
@@ -398,7 +413,7 @@ class Objectives(object):
         self.addGoal("finish scavenger hunt")
 
     def updateScavengerEscapeAccess(self, ap):
-        assert self.isGoalActive("finish scavenger hunt")
+        assert Objectives.isGoalActive("finish scavenger hunt")
         (_, apList) = Objectives.goals['finish scavenger hunt'].escapeAccessPoints
         apList.append(ap)
 

@@ -358,7 +358,7 @@ order by s.id;"""
 
         sql = """select rr.return_code,
 r.id, r.action_time, r.guid, rr.return_code, lpad(round(rr.duration, 2), 5, '0'), rr.error_msg,
-group_concat("'", rp.name, "': '", rp.value, "'" order by rp.name)
+group_concat("'", rp.name, "': \"", rp.value, "\"" order by rp.name)
 from randomizer r
   left join randomizer_params rp on r.id = rp.randomizer_id
   left join randomizer_result rr on r.id = rr.randomizer_id

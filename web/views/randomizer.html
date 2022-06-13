@@ -1916,9 +1916,9 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
       content: "<p>Choose how you want to split Majors and Minors items:\
 <ul><li><b>Full</b>: All items are shuffled in all locations</li>\
 <li><b>Full Countdown</b>: Randomize like Full and display in the HUD the number of remaining unique upgrades (everything but energy and ammo) in the current area. See \"VARIA HUD\" comfort patch help in the advanced tab for more information about it.</li>\
-<li><b>Majors/Minors</b>: Use major (unique upgrades and energy) and minor (ammo) item pools.</p><p><b>Note:</b> High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.</li>\
-<li><b>Chozo</b>: Put all unique upgrades as well as minimal ammo/energy to finish the seed in the Chozo locations. These are Chozo statues, Morph Ball and boss item locations (Right Super in Wrecked Ship, Varia Suit, Ridley ETank). Depending on progression speed and item distribution settings, you will be able to 'sequence break' by going to other locations as well.</li>\
-<li><b>Scavenger</b>: You must visit a given number of locations in a mandatory order in a scavenger hunt, and collect items there. The scavenger locations are the 16 locations where a unique upgrade is in the vanilla game, plus Ridley. By default items in the mandatory locations will be vanilla. Other unique upgrades will be randomized between the remaining scavenger locations. By default, you will have to collect all items in the mandatory locations to access Tourian (on top of finishing other objectives). You can also choose to trigger the escape immediately after the hunt is over by setting Tourian parameter to 'Disabled'.<br/>The next mandatory location will be displayed in the HUD, and the whole route will be displayed in the HUD during pause (see \"VARIA HUD\" comfort patch help in the advanced tab for more information).</li></ul></p>\
+<li><b>Majors/Minors</b>: Use major (unique upgrades and energy) and minor (ammo) item pools.</p><p><b>Note:</b> <a href=\"https://wiki.supermetroid.run/Hi_Jump_Energy_Tank_Room\" target=\"_blank\">High-Jump boots Energy Tank location</a> is considered minor, and <a href=\"https://wiki.supermetroid.run/Wrecked_Ship_East_Super_Room\" target=\"_blank\">right Super Missile in Wrecked ship</a> is considered major for balancing purposes.</li>\
+<li><b>Chozo</b>: Put all unique upgrades as well as minimal ammo/energy to finish the seed in the Chozo locations. These are <a href=\"https://metroid.fandom.com/wiki/Chozo_Statue\" target=\"_blank\">Chozo statues</a>, <a href=\"https://wiki.supermetroid.run/Morph_Ball_Room\" target=\"_blank\">Morph Ball</a> and boss item locations (<a href=\"https://wiki.supermetroid.run/Wrecked_Ship_East_Super_Room\" target=\"_blank\">Right Super in Wrecked Ship</a>, <a href=\"https://wiki.supermetroid.run/Varia_Suit_Room\" target=\"_blank\">Varia Suit</a>, <a href=\"https://wiki.supermetroid.run/Ridley_Tank_Room\" target=\"_blank\">Ridley ETank</a>). Depending on progression speed and item distribution settings, you will be able to <a href=\"https://metroid.fandom.com/wiki/Sequence_Breaking\" target=\"_blank\">'sequence break'</a> by going to other locations as well.</li>\
+<li><b>Scavenger</b>: You must visit a given number of locations in a mandatory order in a scavenger hunt, and collect items there. The scavenger locations are the 16 locations where a unique upgrade is in the vanilla game, plus <a href=\"https://wiki.supermetroid.run/Ridley\" target=\"_blank\">Ridley</a>. By default items in the mandatory locations will be vanilla. Other unique upgrades will be randomized between the remaining scavenger locations. By default, you will have to collect all items in the mandatory locations to access <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> (on top of finishing other objectives). You can also choose to trigger the escape immediately after the hunt is over by setting Tourian parameter to 'Disabled'.<br/>The next mandatory location will be displayed in the HUD, and the whole route will be displayed in the HUD during pause (see \"VARIA HUD\" comfort patch help in the advanced tab for more information).</li></ul></p>\
 <p>Check the map for the list of Majors, Chozo and Scavenger locations and items:<br/><a href=\"/solver/static/images/help/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"chozoThumb\" src=\"/solver/static/images/help/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p>\
 <p>Using a non-standard or randomized start location and any other split than 'Full' will enable the VARIA HUD, as Major/Chozo locations are slightly modified depending on the start location.</p>\
 <p>Click on the dice button to randomly set this parameter.</p>"
@@ -1926,7 +1926,7 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
     {
       element: "#scavNumLocsStep",
         title: "Mandatory locations to visit",
-      content: "You can choose between 4 and 17 major locations to be included in the scavenger hunt, 10 being the default.<br/>Ridley is a scavenger hunt location.<br/>Click on the dice button to randomize the quantity of major locations."
+      content: "You can choose between 4 and 17 major locations to be included in the scavenger hunt, 10 being the default.<br/><a href=\"https://wiki.supermetroid.run/Ridley\" target=\"_blank\">Ridley</a> is a scavenger hunt location.<br/>Click on the dice button to randomize the quantity of major locations."
     },
     {
       element: "#scavRandomizedStep",
@@ -1942,7 +1942,7 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
       element: "#progSpeedStep",
       title: "Progression speed",
       content: "<p>A progression item can be a suit, a movement item, or any item that opens up new locations. This parameter influences how fast progression items are likely to be found.<br/>\
-Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progression items as possible, to <b>fastest</b>, where you will be able to visit Zebes pretty shortly.</p><p><b>VARIAble</b> speed will randomly change internal progression speed while placing items, creating seeds that are more unpredictable.</p><p>You can also pick <b>basic</b>, in which case VARIA will place the items exactly like Dessyreqt Randomizer, or Total Randomizer in its Normal/Casual setting (ie: front fill placement).</p>\
+Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progression items as possible, to <b>fastest</b>, where you will be able to visit <a href=\"https://metroid.fandom.com/wiki/Zebes\" target=\"_blank\">Zebes</a> pretty shortly.</p><p><b>VARIAble</b> speed will randomly change internal progression speed while placing items, creating seeds that are more unpredictable.</p><p>You can also pick <b>basic</b>, in which case VARIA will place the items exactly like Dessyreqt Randomizer, or Total Randomizer in its Normal/Casual setting (ie: front fill placement).</p>\
 <p>The <b>speedrun</b> progression speed uses a random fill algorithm, which allows for a more uniform placement of items. Good setting for racing, item hunts are less likely.</p>\
 <p>Click on the dice button to access <b>random progression speed</b> mode where you can choose on which progression speeds the randomization will take place.</p>\
 <p><b>Note:</b> usually, slower settings will result in more difficult seeds, and faster settings in easier seeds. Basic progression speed usually results in easy/fast seeds, but not always.</p>"
@@ -1955,26 +1955,41 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
     {
       element: "#morphPlacementStep",
       title: "Morph Placement",
-      content: "<p>Influences where VARIA will place Morphing Ball :<ul><li><b>early</b> (default): Morph will be placed as soon as possible</li><li><b>normal</b>: Morph will be placed randomly</li><li><b>late</b>: Prevents Morph to be placed in the first available locations of the game. Best suited when used along area randomization, to find Morph in peculiar places.<br/><b>Warning: </b>In Chozo Majors Split, or when using a non-standard or randomized start location, <b>late</b> will be replace by <b>normal</b></li></ul></p><p>Click on the dice button to randomly set this parameter.</p>"
+      content: "<p>Influences where VARIA will place <a href=\"https://metroid.fandom.com/wiki/Morph_Ball\" target=\"_blank\">Morphing Ball</a>:<ul>\
+<li><b>early</b> (default): Morph will be placed as soon as possible</li>\
+<li><b>normal</b>: Morph will be placed randomly</li>\
+<li><b>late</b>: Prevents Morph to be placed in the first available locations of the game. Best suited when used along area randomization, to find Morph in peculiar places.<br/>\
+<b>Warning: </b>In Chozo Majors Split, or when using a non-standard or randomized start location, <b>late</b> will be replace by <b>normal</b></li></ul></p>\
+<p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#suitsRestrictionStep",
       title: "Suits restriction",
-      content: "<p>Prevent Gravity or Varia suits to be placed early in the game (Crateria/Blue Brinstar). Using a non-standard or randomized start location will force this setting off.</p><p>Click on the dice button to randomly set this parameter.</p>"
+      content: "<p>Prevent Gravity <img src=\"/solver/static/images/tracker/inventory/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> or Varia <img src=\"/solver/static/images/tracker/inventory/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> suits to be placed early in the game (<a href=\"https://metroid.fandom.com/wiki/Crateria\" target=\"_blank\">Crateria</a>/Blue <a href=\"https://metroid.fandom.com/wiki/Brinstar\" target=\"_blank\">Brinstar</a>). Using a non-standard or randomized start location will force this setting off.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#hideItemsStep",
       title: "Hide Items",
-      content: "<p>Hides half of the visible items.<br/>Items always visible:<ul><li>Energy Tank, Gauntlet</li><li>Energy Tank, Terminator</li><li>Morphing Ball</li><li>Missile (Crateria moat)</li><li>Missile (green Brinstar below super missile)</li><li>Missile (above Crocomire)</li><li>Power Bomb (lower Norfair above fire flea room)</li><li>Missile (Gravity Suit)</li><li>Missile (green Maridia shinespark)</li></ul></p><p>Click on the dice button to randomly set this parameter.</p>"
+      content: "<p>Hides half of the visible items.<br/>Items always visible:<ul>\
+<li><a href=\"https://wiki.supermetroid.run/Gauntlet_Energy_Tank_Room\" target=\"_blank\">Energy Tank, Gauntlet</a></li>\
+<li><a href=\"https://wiki.supermetroid.run/Terminator_Room\" target=\"_blank\">Energy Tank, Terminator</a></li>\
+<li><a href=\"https://wiki.supermetroid.run/Morph_Ball_Room\" target=\"_blank\">Morphing Ball</a></li>\
+<li><a href=\"https://wiki.supermetroid.run/The_Moat\" target=\"_blank\">Missile (Crateria moat)</a></li>\
+<li><a href=\"https://wiki.supermetroid.run/Early_Supers_Room\" target=\"_blank\">Missile (green Brinstar below super missile)</a></li>\
+<li><a href=\"https://wiki.supermetroid.run/Crocomire_Escape\" target=\"_blank\">Missile (above Crocomire)</a></li>\
+<li><a href=\"https://wiki.supermetroid.run/Lower_Norfair_Escape_Power_Bomb_Room\" target=\"_blank\">Power Bomb (lower Norfair above fire flea room)</a></li>\
+<li><a href=\"https://wiki.supermetroid.run/Bowling_Alley\" target=\"_blank\">Missile (Gravity Suit)</a></li>\
+<li><a href=\"https://wiki.supermetroid.run/Main_Street\" target=\"_blank\">Missile (green Maridia shinespark)</a></li></ul></p>\
+<p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#strictMinorsStep",
       title: "Strict ammo distribution",
-      content: "<p>Instead of using the Minors proportions as probabilities, enforce a strict distribution to match the proportions as exactly as possible.</p><p>Click on the dice button to randomly set this parameter.</p>"
+      content: "<p>Instead of using the Minors proportions as probabilities, enforce a strict distribution to match the proportions as exactly as possible. Use it when you want to mimick vanilla proportions (4.6/1/1).</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#missileQtyStep",
-      title: "Proportion of Missiles/Super Missiles/Power Bombs",
+      title: "Proportion of <img src=\"/solver/static/images/tracker/inventory/Missile.png\" class=\"width: 32px\"/>/<img src=\"/solver/static/images/tracker/inventory/Super.png\" class=\"width: 32px\"/>/<img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/>",
       content: "<p>For each minor types, the higher the number the higher the probability of choosing it when placing a minor.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
@@ -1985,7 +2000,8 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
     {
       element: "#energyQtyStep",
       title: "Quantity of Energy/Reserve Tanks available",
-      content: "<p>Choose how many Energy/Reserve Tanks will be available, from 0-1 in ultra sparse, 4-6 in sparse, 8-12 in medium and 18 in vanilla.</p><p>In ultra sparse Mother Brain's rainbow beam only does 20 damage instead of 300.</p><p>Click on the dice button to randomly set this parameter.</p>"
+      content: "<p>Choose how many Energy <img src=\"/solver/static/images/tracker/inventory/ETank.png\" class=\"width: 32px\"/> / Reserve Tanks <img src=\"/solver/static/images/tracker/inventory/Reserve.png\" class=\"width: 32px\"/> will be available, from 0-1 in ultra sparse, 4-6 in sparse, 8-12 in medium and 18 in vanilla.</p>\
+<p>In ultra sparse <a href=\"https://metroid.fandom.com/wiki/Mother_Brain\" target=\"_blank\">Mother Brain's</a> <a href=\"https://metroid.fandom.com/wiki/Laser_Brain_Attack\" target=\"_blank\">rainbow beam</a> only does 20 damage instead of 300.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#areaRandomizationStep",
@@ -2676,29 +2692,29 @@ def displayNumber(id, min, max, default, step="1"):
                 </tr>
                 <tr id="missileQtyVisibility">
                   <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td><span id="missileQtyText">Proportion of Missiles:</span></td>
+                  <td><span id="missileQtyText">Proportion of Missiles <img src="/solver/static/images/tracker/inventory/Missile.png" class="width: 32px"/>:</span></td>
                   <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
                   <td id="missileQtyStep"><button type="button" onclick="startTheTour(19)">?</button></td>
                 </tr>
                 <tr id="superQtyVisibility">
                   <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td><span id="superQtyText">Proportion of Super Missiles:</span></td>
+                  <td><span id="superQtyText">Proportion of Super Missiles <img src="/solver/static/images/tracker/inventory/Super.png" class="width: 32px"/>:</span></td>
                   <td>{{displayNumber("superQty", "1", "9", "3", "0.1")}}</td>
                 </tr>
                 <tr id="powerBombQtyVisibility">
                   <td class="small"><div class="random"><button id="powerBombQtyRandom" type="button" onclick="randomize(event, 'powerBombQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td><span id="powerBombQtyText">Proportion of Power Bombs:</span></td>
+                  <td><span id="powerBombQtyText">Proportion of Power Bombs <img src="/solver/static/images/tracker/inventory/PowerBomb.png" class="width: 32px"/>:</span></td>
                   <td>{{displayNumber("powerBombQty", "1", "9", "1", "0.1")}}</td>
                 </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="minorQtyRandom" type="button" onclick="randomize(event, 'minorQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td><span id="minorQtyText">Percentage of minors available:</span></td>
+                  <td><span id="minorQtyText">Percentage of minors (<img src="/solver/static/images/tracker/inventory/Missile.png" class="width: 32px"/>/<img src="/solver/static/images/tracker/inventory/Super.png" class="width: 32px"/>/<img src="/solver/static/images/tracker/inventory/PowerBomb.png" class="width: 32px"/>) available:</span></td>
                   <td>{{displayNumber("minorQty", "7", "100", "100")}}</td>
                   <td id="minorQtyStep"><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="energyQtyRandom" type="button" onclick="randomize(event, 'energyQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td><span id="energyQtyText">Quantity of Energy/Reserve Tanks available:</span></td>
+                  <td><span id="energyQtyText">Quantity of Energy <img src="/solver/static/images/tracker/inventory/ETank.png" class="width: 32px"/> / Reserve Tanks <img src="/solver/static/images/tracker/inventory/Reserve.png" class="width: 32px"/> available:</span></td>
                   <td>{{displayMultiSelect("energyQty", currentMultiValues["energyQty"], "vanilla", defaultMultiValues["energyQty"])}}</td>
                   <td id="energyQtyStep"><button type="button" onclick="startTheTour(21)">?</button></td>
                 </tr>

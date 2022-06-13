@@ -297,11 +297,8 @@ class RandoSetup(object):
                 self.log.debug("checkPool. goal '"+goal.name+"' impossible to complete due to area layout")
                 ret = False
                 continue
-            if self.sm.objectives.tourianRequired:
-                self.log.debug("tourianRequired")
-                continue
             for ap in escAPs:
-                if not self.areaGraph.canAccess(self.sm, ap, "Landing Site", self.settings.maxDiff):
+                if not self.areaGraph.canAccess(self.sm, ap, "Golen Four", self.settings.maxDiff):
                     self.log.debug("checkPool. goal '"+goal.name+"' impossible to complete due to area layout")
                     ret = False
                     break

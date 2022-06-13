@@ -53,13 +53,8 @@ math pri on
 ;; scavenger hunt completion
 !hunt_over_event = !VARIA_event_base+1
 
-;; memes
-!fish_tickled_event = !VARIA_event_base+2
-!orange_geemer_event = !VARIA_event_base+3
-!shak_dead_event = !VARIA_event_base+4
-
 ;; clear area events : events based on area index, from 1 (crateria) to 10 (east maridia),
-!area_clear_event_base = !VARIA_event_base+4
+!area_clear_event_base = !VARIA_event_base+4 ; has to be unused, will be set as ceres cleared if ceres start
 !crateria_cleared_event = !VARIA_event_base+5
 !green_brin_cleared_event = !VARIA_event_base+6
 !red_brin_cleared_event = !VARIA_event_base+7
@@ -72,9 +67,14 @@ math pri on
 !east_maridia_cleared_event = !VARIA_event_base+14
 !tourian_cleared_event = !VARIA_event_base+15 ; not useful, here as a placeholder bc it will be set entering tourian
 
+;; memes
+!fish_tickled_event = !VARIA_event_base+2
+!orange_geemer_event = !VARIA_event_base+3
+!shak_dead_event = !VARIA_event_base+16
+
 ;;; Keep these macros at the end as they depend on current event index:
 !max_objectives = 5
-!objectives_event_base = !VARIA_event_base+16
+!objectives_event_base = !VARIA_event_base+17
 
 ;; declare an array with all the "objective completed" events
 macro objectivesCompletedEventArray()

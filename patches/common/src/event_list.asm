@@ -10,6 +10,7 @@ math pri on
 !tourian_open_event = #$000a
 !escape_event = #$000e
 !maridia_tube_open = #$000b
+!LN_chozo_lowered_acid_event = #$000c
 !shaktool_cleared_path = $000d
 
 ;;; vanilla boss events
@@ -38,6 +39,7 @@ math pri on
 !botwoon_event = #$0061
 !croc_event = #$0051
 !GT_event = #$0052
+!BT_event = #$0042
 
 ;;; VARIA events
 !VARIA_event_base = #$0080
@@ -53,11 +55,6 @@ math pri on
 ;; scavenger hunt completion
 !hunt_over_event = !VARIA_event_base+1
 
-;; memes
-!fish_tickled_event = !VARIA_event_base+2
-!orange_geemer_event = !VARIA_event_base+3
-!shak_dead_event = !VARIA_event_base+4
-
 ;; clear area events : events based on area index, from 1 (crateria) to 10 (east maridia),
 !area_clear_event_base = !VARIA_event_base+4
 !crateria_cleared_event = !VARIA_event_base+5
@@ -71,9 +68,15 @@ math pri on
 !west_maridia_cleared_event = !VARIA_event_base+13
 !east_maridia_cleared_event = !VARIA_event_base+14
 
+;; memes
+!fish_tickled_event = !VARIA_event_base+2
+!orange_geemer_event = !VARIA_event_base+3
+!shak_dead_event = !VARIA_event_base+4
+!bowling_chozo_event = !VARIA_event_base+15
+
 ;;; Keep these macros at the end as they depend on current event index:
 !max_objectives = 5
-!objectives_event_base = !VARIA_event_base+15
+!objectives_event_base = !VARIA_event_base+16
 
 ;; declare an array with all the "objective completed" events
 macro objectivesCompletedEventArray()

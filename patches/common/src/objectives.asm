@@ -276,6 +276,16 @@ all_major_items:
 %eventChecker(west_maridia_cleared, !west_maridia_cleared_event)
 %eventChecker(east_maridia_cleared, !east_maridia_cleared_event)
 
+print "all_chozo_robots: ", pc
+all_chozo_robots:
+	jsr golden_torizo_is_dead : bcc .end
+	lda !BT_event : jsl !check_event : bcc .end
+	lda !bowling_chozo_event : jsl !check_event : bcc .end
+	lda !LN_chozo_lowered_acid_event : jsl !check_event
+.end:
+	rts
+
+
 obj_end:
 print "--- 0x", hex(obj_max-obj_end), " bytes left for objectives checkers ---"
 ;;; seed display patch start
@@ -363,6 +373,10 @@ check_orange_geemer:
 
 warnpc $a3f38f
 
+;; hijack when bowling chozo gives control back to samus
+org $AAE706
+	jsr set_bowling_event
+
 org $aaf800
 
 check_shak_shot:
@@ -379,6 +393,11 @@ check_shak:
 	lda !shak_dead_event : jsl !mark_event
 .end:
 	rtl
+
+set_bowling_event:
+	lda !bowling_chozo_event : jsl !mark_event
+	LDA #$0001		; hijacked code
+	rts
 
 warnpc $aaf82f
 

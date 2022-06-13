@@ -21,7 +21,7 @@ lorom
 !samus_reserve         = $09d6
 !samus_max_reserve     = $09d4
 !current_room          = $079b
-!tourian_eye_door_room = #$aa5c
+!tourian_eye_door_room = #$ddc4
 
 incsrc "event_list.asm"
 

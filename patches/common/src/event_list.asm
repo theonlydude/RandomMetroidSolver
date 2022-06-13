@@ -70,10 +70,11 @@ math pri on
 !lower_norfair_cleared_event = !VARIA_event_base+12
 !west_maridia_cleared_event = !VARIA_event_base+13
 !east_maridia_cleared_event = !VARIA_event_base+14
+!tourian_cleared_event = !VARIA_event_base+15 ; not useful, here as a placeholder bc it will be set entering tourian
 
 ;;; Keep these macros at the end as they depend on current event index:
 !max_objectives = 5
-!objectives_event_base = !VARIA_event_base+15
+!objectives_event_base = !VARIA_event_base+16
 
 ;; declare an array with all the "objective completed" events
 macro objectivesCompletedEventArray()

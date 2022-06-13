@@ -73,11 +73,11 @@ math pri on
 !fish_tickled_event = !VARIA_event_base+2
 !orange_geemer_event = !VARIA_event_base+3
 !shak_dead_event = !VARIA_event_base+4
-!bowling_chozo_event = !VARIA_event_base+15
+!bowling_chozo_event = !VARIA_event_base+16
 
 ;;; Keep these macros at the end as they depend on current event index:
 !max_objectives = 5
-!objectives_event_base = !VARIA_event_base+16
+!objectives_event_base = !VARIA_event_base+17
 
 ;; declare an array with all the "objective completed" events
 macro objectivesCompletedEventArray()

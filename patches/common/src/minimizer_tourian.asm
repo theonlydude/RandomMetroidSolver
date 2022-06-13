@@ -21,7 +21,7 @@ lorom
 !samus_reserve         = $09d6
 !samus_max_reserve     = $09d4
 !current_room          = $079b
-!tourian_eye_door_room = $aa5c
+!tourian_eye_door_room = #$ddc4
 
 incsrc "event_list.asm"
 
@@ -40,12 +40,12 @@ org $839218
 
 
 org $848a59                     ; unused instruction
+;;; alternative door hit instruction that skips hit counter check
 alt_door_hit:
         ;; test if current room is Tourian Door Room
         lda !current_room
         cmp !tourian_eye_door_room
         bne .vanilla_door_hit
-	;; alternative door hit instruction that skips hit counter check
 	clc
 	bra .skip_check		; resume original routine
 
@@ -58,8 +58,7 @@ org $848aa3
 .skip_check:
 
 ;;; Replace door hit instruction with alternative one for
-;;; all left facing gadoras (it's ok since other gadoras are
-;;; removed in minimizer mode)
+;;; all left facing gadoras
 org $84d887
 	dw alt_door_hit
 

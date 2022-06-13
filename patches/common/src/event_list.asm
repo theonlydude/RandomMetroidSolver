@@ -67,6 +67,7 @@ math pri on
 !lower_norfair_cleared_event = !VARIA_event_base+12
 !west_maridia_cleared_event = !VARIA_event_base+13
 !east_maridia_cleared_event = !VARIA_event_base+14
+!tourian_cleared_event = !VARIA_event_base+15 ; not useful, here as a placeholder bc it will be set entering tourian
 
 ;; memes
 !fish_tickled_event = !VARIA_event_base+2

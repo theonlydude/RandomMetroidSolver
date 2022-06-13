@@ -380,7 +380,7 @@ class RomPatcher:
             if doorsColorsRando == True:
                 for patchName in RomPatcher.IPSPatches['DoorsColors']:
                     self.applyIPSPatch(patchName)
-                self.writeDoorsColor(doors)
+            self.writeDoorsColor(doors)
             self.writeDoorIndicators(plms, area, doorsColorsRando)
             self.applyStartAP(startLocation, plms, doors)
             self.applyPLMs(plms)

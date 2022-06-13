@@ -128,12 +128,14 @@ class GraphBuilder(object):
         self.log.debug("escapeTrigger. collect locs until G4 access")
         # collect all item/locations up until we can pass G4 (the escape triggers)
         itemLocs = allItemLocs[:]
-        while len(itemLocs) > 0 and not sm.canPassG4():
+        ap = "Landing Site" # dummy value it'll be overwritten at first collection
+        while len(itemLocs) > 0 and not (sm.canPassG4() and graph.canAccess(sm, ap, "Landing Site", maxDiff)):
             il = itemLocs.pop(0)
             if il.Location.restricted:
                 continue
             self.log.debug("collecting " + getItemLocStr(il))
             container.collect(il)
+            ap = il.Location.accessPoint
         # final update of item% obj
         collectedLocsAccessPoints = {il.Location.accessPoint for il in container.itemLocations}
         sm.objectives.updateItemPercentEscapeAccess(list(collectedLocsAccessPoints))

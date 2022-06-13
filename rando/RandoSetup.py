@@ -12,6 +12,7 @@ from rando.Chozo import isChozoItem
 from rando.Restrictions import Restrictions
 from utils.objectives import Objectives
 from utils.parameters import infinity
+from rom.rom_patches import RomPatches
 
 # checks init conditions for the randomizer: processes super fun settings, graph, start location, special restrictions
 # the entry point is createItemLocContainer
@@ -283,14 +284,27 @@ class RandoSetup(object):
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
         self.log.debug("restricted=" + str([loc.Name for loc in self.lastRestricted]))
         # check if objectives are compatible with accessible APs
-        availAPs = [ap.Name for ap in self.areaGraph.getAccessibleAccessPoints(self.startAP)]
+        startAP = self.areaGraph.accessPoints[self.startAP]
+        availAPs = [ap.Name for ap in self.areaGraph.getAvailableAccessPoints(startAP, self.sm, self.settings.maxDiff)]
+        self.log.debug("availAPs="+str(availAPs))
         for goal in Objectives.activeGoals:
             n, aps = goal.escapeAccessPoints
             if len(aps) == 0:
                 continue
-            if len([ap for ap in aps if ap in availAPs]) < n:
-                self.log.debug("checkPool. goal "+goal.name+" impossible to complete due to area layout")
+            escAPs = [ap for ap in aps if ap in availAPs]
+            self.log.debug("escAPs="+str(escAPs))
+            if len(escAPs) < n:
+                self.log.debug("checkPool. goal '"+goal.name+"' impossible to complete due to area layout")
                 ret = False
+                continue
+            if self.sm.objectives.tourianRequired:
+                self.log.debug("tourianRequired")
+                continue
+            for ap in escAPs:
+                if not self.areaGraph.canAccess(self.sm, ap, "Landing Site", self.settings.maxDiff):
+                    self.log.debug("checkPool. goal '"+goal.name+"' impossible to complete due to area layout")
+                    ret = False
+                    break
         # check if all inter-area APs can reach each other
         if ret:
             interAPs = [ap for ap in self.areaGraph.getAccessibleAccessPoints(self.startAP) if not ap.isInternal() and not ap.isLoop()]
@@ -429,6 +443,9 @@ class RandoSetup(object):
     def getForbiddenMovement(self):
         self.log.debug("getForbiddenMovement BEGIN. forbidden="+str(self.forbiddenItems))
         removableMovement = [mvt for mvt in self.movementItems if self.checkPool([mvt])]
+        if 'Bomb' in removableMovement and not RomPatches.has(RomPatches.BombTorizoWake) and Objectives.isGoalActive("activate chozo robots"):
+            # in this objective, without VARIA tweaks, BT has to wake so give bombs
+            removableMovement.remove('Bomb')
         self.log.debug("getForbiddenMovement removable="+str(removableMovement))
         if len(removableMovement) > 0:
             # remove at least the most important

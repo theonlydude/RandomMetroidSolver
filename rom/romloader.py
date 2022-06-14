@@ -5,6 +5,7 @@ from rom.rom import RealROM, FakeROM
 from rom.romreader import RomReader
 from utils.doorsmanager import DoorsManager
 from graph.graph_utils import getAccessPoint
+from collections import defaultdict
 
 class RomLoader(object):
     @staticmethod
@@ -24,8 +25,8 @@ class RomLoader(object):
     def assignItems(self, locations):
         return self.romReader.loadItems(locations)
 
-    def getTransitions(self):
-        return self.romReader.loadTransitions()
+    def getTransitions(self, tourian):
+        return self.romReader.loadTransitions(tourian)
 
     def hasPatch(self, patchName):
         return self.romReader.patchPresent(patchName)
@@ -166,7 +167,10 @@ class RomLoader(object):
         self.romReader.readObjectives(objectives)
 
     def updateSplitLocs(self, split, locations):
-        locIds = self.romReader.getLocationsIds()
+        locIdsByArea = self.romReader.getLocationsIds()
+        locIds = []
+        for area, ids in locIdsByArea.items():
+            locIds += ids
         for loc in locations:
             if loc.isBoss():
                 continue
@@ -175,8 +179,43 @@ class RomLoader(object):
             else:
                 loc.setClass(["Minor"])
 
+    def getSplitLocsByArea(self, locations):
+        locIdsByArea = self.romReader.getLocationsIds()
+        locsByArea = defaultdict(list)
+        for area, locIds in locIdsByArea.items():
+            for loc in locations:
+                if loc.Id in locIds:
+                    locsByArea[area].append(loc)
+        return locsByArea
+
     def loadScavengerOrder(self, locations):
         return self.romReader.loadScavengerOrder(locations)
+
+    def loadMajorUpgrades(self):
+        itemsMask, beamsMask = self.romReader.readItemMasks()
+        itemBits = {
+            'Bomb':0x1000,
+            'HiJump':0x100,
+            'SpeedBooster':0x2000,
+            'SpringBall':0x2,
+            'Varia':0x1,
+            'Grapple':0x4000,
+            'Morph':0x4,
+            'Gravity':0x20,
+            'XRayScope':0x8000,
+            'SpaceJump':0x200,
+            'ScrewAttack':0x8
+        }
+        beamBits = {
+            'Charge':0x1000,
+            'Ice':0x2,
+            'Wave':0x1,
+            'Spazer':0x4,
+            'Plasma':0x8
+        }
+        upgrades = [item for item,mask in itemBits.items() if itemsMask & mask != 0]
+        upgrades += [item for item,mask in beamBits.items() if beamsMask & mask != 0]
+        return upgrades
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

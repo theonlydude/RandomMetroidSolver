@@ -111,5 +111,10 @@ class Addresses(object):
         'customDoorsAsm': ValueSingle(0x8ff800),
         'locIdsByArea': ValueRange(0xA1F568, end=0xA1F5D7),
         'plmSpawnTable': ValueSingle(0x8fe9a0),
-        'plmSpawnRoomTable': ValueSingle(0x8ff000)
+        'plmSpawnRoomTable': ValueSingle(0x8ff000),
+        'moonwalk': ValueSingle(0x81b35d),
+        'additionalETanks': ValueSingle(0xA1F470),
+        'hellrunRate': ValueSingle(0x8DE387),
+        'itemsMask': ValueSingle(0x82FAD9),
+        'beamsMask': ValueSingle(0x82FADB)
     }

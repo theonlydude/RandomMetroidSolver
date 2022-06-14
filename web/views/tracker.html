@@ -398,7 +398,7 @@ var dataEnum = {
 
 // 2. map:
 // used for area/boss transitions - doors - nothing
-// CD52 -> D251: map tiles for: Crateria + Brinstar + Norfair + Wrecked Ship + Maridia
+// CD52 -> D351: map tiles for: Crateria + Brinstar + Norfair + Wrecked Ship + Maridia + Tourian
 
 // 3. curmap:
 // 07F7..08F6: map tiles for current area
@@ -438,7 +438,7 @@ var dataToAsk = {
         {"address": "E01400", "size": 0x4},
         {"address": "E01700", "size": 0x4},
         {"address": "E01A00", "size": 0x4}],
-    2: [{"address": "F5CD52", "size": 0x500}],
+    2: [{"address": "F5CD52", "size": 0x600}],
     3: [{"address": "F507F7", "size": 0x100}],
     4: [{"address": "F50AF6", "size": 0x2},
         {"address": "F50AFA", "size": 0x2},
@@ -468,7 +468,8 @@ var mapOffsetEnum = {
     "Brinstar": 0x100,
     "Norfair": 0x200,
     "WreckedShip": 0x300,
-    "Maridia": 0x400
+    "Maridia": 0x400,
+    "Tourian": 0x500
 }
 
 // samus
@@ -497,6 +498,7 @@ var areaEnum = {
 // bit masks for all datas
 var areaAccessPoints = {{response.write(areaAccessPoints, escape=False)}};
 var bossAccessPoints = {{response.write(bossAccessPoints, escape=False)}};
+var escapeAccessPoints = {{response.write(escapeAccessPoints, escape=False)}};
 var bossBitMasks = {{response.write(bossBitMasks, escape=False)}};
 var nothingScreens = {{response.write(nothingScreens, escape=False)}};
 var doorsScreen = {{response.write(doorsScreen, escape=False)}};
@@ -1261,7 +1263,7 @@ function handleData(data) {
             // replace current map data in map data
             var areaIndex = readWord(samusData, samusEnum.areaIndex);
             var tourianAreaIndex = 5;
-            if(areaIndex < tourianAreaIndex) {
+            if(areaIndex <= tourianAreaIndex) {
                 var mapOffset = mapOffsetEnum[areaEnum[areaIndex]];
                 var mapSize = 0x100;
 
@@ -1501,7 +1503,7 @@ function initDataChain() {
     dataToAskChain.push(dataEnum.samus);
 
     // ask optional map data
-    if(area || boss || doorsRando || hasNothing) {
+    if(area || boss || doorsRando || hasNothing || escapeRando) {
         dataToAskChain.push(dataEnum.map);
         stateDataOffsets[dataEnum.map] = curOffset;
         curOffset += getDataSize(dataEnum.map);
@@ -1562,6 +1564,12 @@ function computeStateBitMasks() {
                 for(var locName in nothingScreens) {
                     var locData = nothingScreens[locName];
                     stateBitMasks[curOffset + locData["byteIndex"] + mapOffsetEnum[locData["area"]]] |= locData["bitMask"];
+                }
+            }
+            if(escapeRando) {
+                for(var apName in escapeAccessPoints) {
+                    var apData = escapeAccessPoints[apName];
+                    stateBitMasks[curOffset + apData["byteIndex"] + mapOffsetEnum[apData["area"]]] |= apData["bitMask"];
                 }
             }
         }

@@ -17,6 +17,7 @@ incsrc "event_list.asm"
 
 !timer = $05b8
 !obj_check_period = #$0020	; unit:frames, works only in powers of 2
+!current_room = $079b
 
 ;;; external routines
 !song_routine = $808fc1
@@ -86,15 +87,10 @@ org $82f983
 ;;; seed objectives checker functions pointers, max 5, list ends with $0000
 print "--- objectives checker functions: ", pc, " ---"
 objective_funcs:
-first_objective_func:
         dw kraid_is_dead
-second_objective_func:
         dw phantoon_is_dead
-third_objective_func:
         dw draygon_is_dead
-fourth_objective_func:
         dw ridley_is_dead
-fith_objective_func:
         dw $0000
         dw $0000
 
@@ -248,6 +244,38 @@ nothing_objective:
 .end:
         rts
 
+%eventChecker(fish_tickled, !fish_tickled_event)
+%eventChecker(orange_geemer, !orange_geemer_event)
+%eventChecker(shak_dead, !shak_dead_event)
+
+print "all_items_mask: ", pc
+all_items_mask:
+	dw $f32f
+print "all_beams_mask: ", pc
+all_beams_mask:
+	dw $100f
+print "all_major_items: ", pc
+all_major_items:
+	lda $09A4 : cmp.l all_items_mask : bne .not
+	lda $09A8 : cmp.l all_beams_mask : bne .not
+	sec
+	bra .end
+.not:
+	clc
+.end:
+	rts
+
+%eventChecker(crateria_cleared, !crateria_cleared_event)
+%eventChecker(green_brin_cleared, !green_brin_cleared_event)
+%eventChecker(red_brin_cleared, !red_brin_cleared_event)
+%eventChecker(ws_cleared, !ws_cleared_event)
+%eventChecker(kraid_cleared, !kraid_cleared_event)
+%eventChecker(upper_norfair_cleared, !upper_norfair_cleared_event)
+%eventChecker(croc_cleared, !croc_cleared_event)
+%eventChecker(lower_norfair_cleared, !lower_norfair_cleared_event)
+%eventChecker(west_maridia_cleared, !west_maridia_cleared_event)
+%eventChecker(east_maridia_cleared, !east_maridia_cleared_event)
+
 obj_end:
 print "--- 0x", hex(obj_max-obj_end), " bytes left for objectives checkers ---"
 ;;; seed display patch start
@@ -282,11 +310,80 @@ alt_set_event:
 	iny : iny
 	rts
 
+;;; overwrite fish grapple AI to check if we're in red fish room
+org $a0d719
+	dw check_red_fish_tickle
+
+;;; overwrite orange geemer various AIs to check for death
+org $a0dc59
+	dw check_orange_geemer_grapple
+org $a0dc67
+	dw check_orange_geemer_PB
+org $a0dc6f
+	dw check_orange_geemer_touch
+org $a0dc71
+	dw check_orange_geemer_shot
+
+;;; overwrite Shaktool various AIs to check for death
+org $a0f0af
+	dw check_shak_touch
+org $a0f0b1
+	dw check_shak_shot
+
+org $a3f350
+check_red_fish_tickle:
+	lda !current_room : cmp #$d104 : bne .end
+	;; we're using grapple on a fish, in red fish room:
+	lda !fish_tickled_event : jsl !mark_event
+.end:
+	jmp $8000 		; original AI
+
+check_orange_geemer_PB:
+	jsl $a38037
+	bra check_orange_geemer
+
+check_orange_geemer_shot:
+	jsl $a3802d
+	bra check_orange_geemer
+
+check_orange_geemer_touch:
+	jsl $a38023
+	bra check_orange_geemer
+
+check_orange_geemer_grapple:
+	jsl $a3800a
+	bra check_orange_geemer
+
+check_orange_geemer:
+	lda $0F8C : bne .end	; if enemy 0 health is positive, do nothing
+	;; we killed orange geemer
+	lda !orange_geemer_event : jsl !mark_event
+.end:
+	rtl
+
+warnpc $a3f38f
+
+org $aaf800
+
+check_shak_shot:
+	jsl $aadf34
+	bra check_shak
+
+check_shak_touch:
+	jsl $aadf2f
+	bra check_shak
+
+check_shak:
+	lda $0F8C,x : bne .end	; if current enemy health is positive, do nothing
+	;; we killed shak
+	lda !shak_dead_event : jsl !mark_event
+.end:
+	rtl
+
+warnpc $aaf82f
+
 ;;; put some stuff in bank A1 to save space in 82:
-;;; a bunch of the code as it is must stay in 82 because the
-;;; objective checker functions are called locally from pause menu,
-;;; and the pause menu stuff itself handle function pointers in bank 82.
-;;; the main checker func does jsr (addr,x) so it must stay in 82 as well
+;;; TODO pretty much everything but pause menu stuff can be in A1 (or elsewhere) now if we need space
 org $a1f980
 ;;; checks for objectives periodically
 print "A1 start: ", pc

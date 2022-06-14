@@ -40,8 +40,7 @@ math pri on
 !GT_event = #$0052
 
 ;;; VARIA events
-;; scavenger hunt completion
-!hunt_over_event = #$0080
+!VARIA_event_base = #$0080
 
 ;; objectives events : a global objectives completed event for endgame
 ;; and individual events for each objective :
@@ -49,17 +48,40 @@ math pri on
 ;; - if completed, was the user notified in the HUD?
 ;;   (can never be set if HUD is disabled)
 !objectives_completed_event = !tourian_open_event ; reuse tourian entrance event
-!objectives_completed_event_notified = #$0081
+!objectives_completed_event_notified = !VARIA_event_base+0
 
+;; scavenger hunt completion
+!hunt_over_event = !VARIA_event_base+1
+
+;; clear area events : events based on area index, from 1 (crateria) to 10 (east maridia),
+!area_clear_event_base = !VARIA_event_base+4 ; has to be unused, will be set as ceres cleared if ceres start
+!crateria_cleared_event = !VARIA_event_base+5
+!green_brin_cleared_event = !VARIA_event_base+6
+!red_brin_cleared_event = !VARIA_event_base+7
+!ws_cleared_event = !VARIA_event_base+8
+!kraid_cleared_event = !VARIA_event_base+9
+!upper_norfair_cleared_event = !VARIA_event_base+10
+!croc_cleared_event = !VARIA_event_base+11
+!lower_norfair_cleared_event = !VARIA_event_base+12
+!west_maridia_cleared_event = !VARIA_event_base+13
+!east_maridia_cleared_event = !VARIA_event_base+14
+!tourian_cleared_event = !VARIA_event_base+15 ; not useful, here as a placeholder bc it will be set entering tourian
+
+;; memes
+!fish_tickled_event = !VARIA_event_base+2
+!orange_geemer_event = !VARIA_event_base+3
+!shak_dead_event = !VARIA_event_base+16
+
+;;; Keep these macros at the end as they depend on current event index:
 !max_objectives = 5
-!objectives_event_base = #$0082
+!objectives_event_base = !VARIA_event_base+17
 
 ;; declare an array with all the "objective completed" events
 macro objectivesCompletedEventArray()
 !obj_idx = 0
 while !obj_idx < !max_objectives
 	dw !objectives_event_base+2*!obj_idx
-!obj_idx #= !obj_idx+1
+	!obj_idx #= !obj_idx+1
 endif
 endmacro
 
@@ -68,6 +90,6 @@ macro objectivesNotifiedEventArray()
 !obj_idx = 0
 while !obj_idx < !max_objectives
 	dw !objectives_event_base+2*!obj_idx+1
-!obj_idx #= !obj_idx+1
+	!obj_idx #= !obj_idx+1
 endif
 endmacro

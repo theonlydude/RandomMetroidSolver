@@ -358,7 +358,7 @@ order by s.id;"""
 
         sql = """select rr.return_code,
 r.id, r.action_time, r.guid, rr.return_code, lpad(round(rr.duration, 2), 5, '0'), rr.error_msg,
-group_concat("'", rp.name, "': '", rp.value, "'" order by rp.name)
+group_concat("'", rp.name, "': \"", rp.value, "\"" order by rp.name)
 from randomizer r
   left join randomizer_params rp on r.id = rp.randomizer_id
   left join randomizer_result rr on r.id = rr.randomizer_id
@@ -421,7 +421,7 @@ order by 1,2;"""
             'Randomizer parameters': ['preset', 'startLocation', 'majorsSplit', 'scavNumLocs', 'scavRandomized', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'progressionDifficulty', 'suitsRestriction', 'hideItems', 'objective', 'tourian'],
             'Ammo and Energy': ['minorQty', 'energyQty', 'strictMinors', 'missileQty', 'superQty', 'powerBombQty'],
             'Areas and Fun': ['areaRandomization', 'lightAreaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits'],
-            'Patches': ['layoutPatches', 'variaTweaks', 'nerfedCharge', 'gravityBehaviour', 'itemsounds', 'elevators_doors_speed', 'spinjumprestart', 'rando_speed', 'Infinite_Space_Jump', 'refill_before_save', 'hud', 'animals', 'No_Music', 'random_music']
+            'Patches': ['layoutPatches', 'variaTweaks', 'nerfedCharge', 'gravityBehaviour', 'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart', 'rando_speed', 'Infinite_Space_Jump', 'refill_before_save', 'hud', 'animals', 'No_Music', 'random_music']
         }
 
         result = {}
@@ -471,7 +471,7 @@ order by 1,2;"""
                 value = row[1]
                 if arg == 'seed':
                     seed = value
-                if arg.find("MultiSelect") != -1:
+                if arg.find("MultiSelect") != -1 or arg == 'objective':
                     value = '["{}"]'.format('", "'.join(value.split(',')))
                 else:
                     value = '"{}"'.format(value)

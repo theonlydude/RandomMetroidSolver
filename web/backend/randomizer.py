@@ -27,9 +27,6 @@ class Randomizer(object):
         self.initRandomizerSession()
 
         (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
-        (randoPresets, tourRandoPresets) = loadRandoPresetsList(self.cache)
-        # add empty entry for default value
-        randoPresets.append("")
 
         randoPresetsDesc = {
             "all_random": "all the parameters set to random",
@@ -58,10 +55,31 @@ class Randomizer(object):
             "way_of_chozo": "chozo split with boss randomization",
             "where_am_i": "Area mode with random start location and early morph",
             "where_is_morph": "Area mode with late Morph",
+            "Multi_Category_Randomizer_Week_1": "Multi-Category Randomizer Tournament week 1",
+            "Multi_Category_Randomizer_Week_2": "Multi-Category Randomizer Tournament week 2",
+            "Multi_Category_Randomizer_Week_3": "Multi-Category Randomizer Tournament week 3",
+            "Multi_Category_Randomizer_Week_4": "Multi-Category Randomizer Tournament week 4",
+            "Multi_Category_Randomizer_Week_5": "Multi-Category Randomizer Tournament week 5",
+            "Multi_Category_Randomizer_Week_6": "Multi-Category Randomizer Tournament week 6",
+            "Multi_Category_Randomizer_Week_7": "Multi-Category Randomizer Tournament week 7",
             "Season_Races": "rando league races (Majors/Minors split)",
-            "SGLive2021": "SGLive 2021 Super Metroid randomizer tournament",
+            "SGLive2022_Race_1": "SGLive 2022 Super Metroid randomizer tournament race 1",
+            "SGLive2022_Race_2": "SGLive 2022 Super Metroid randomizer tournament race 2",
+            "SGLive2022_Race_3": "SGLive 2022 Super Metroid randomizer tournament race 3",
             "SMRAT2021": "Super Metroid Randomizer Accessible Tournament 2021",
             "VARIA_Weekly": "Casual logic community races"
+        }
+
+        randoPresetsCategories = {
+            "Standard": ["", "default", "Chozo_Speedrun", "free", "haste", "vanilla"],
+            "Hud": ["hud", "hud_hard", "hud_start"],
+            "Scavenger": ["scavenger_hard", "scavenger_random", "scavenger_speedrun", "scavenger_vanilla_but_not"],
+            "Area": ["way_of_chozo", "where_am_i", "where_is_morph"],
+            "Doors": ["doors_long", "doors_short"],
+            "Minimizer": ["minimizer", "minimizer_hardcore", "minimizer_maximizer"],
+            "Hard": ["hardway2hell", "highway2hell", "stupid_hard"],
+            "Random": ["all_random", "quite_random", "surprise"],
+            "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "SGLive2022_Race_1", "SGLive2022_Race_2", "SGLive2022_Race_3", "Multi_Category_Randomizer_Week_1", "Multi_Category_Randomizer_Week_2", "Multi_Category_Randomizer_Week_3", "Multi_Category_Randomizer_Week_4", "Multi_Category_Randomizer_Week_5", "Multi_Category_Randomizer_Week_6", "Multi_Category_Randomizer_Week_7"]
         }
 
         startAPs = GraphUtils.getStartAccessPointNamesCategory()
@@ -77,6 +95,7 @@ class Randomizer(object):
         objectivesExclusions = Objectives.getExclusions()
         objectivesTypes = Objectives.getObjectivesTypes()
         objectivesSort = Objectives.getObjectivesSort()
+        objectivesCategories = Objectives.getObjectivesCategories()
 
         # check if we have a guid in the url
         url = self.request.env.request_uri.split('/')
@@ -105,7 +124,10 @@ class Randomizer(object):
                             elif key in defaultMultiValues:
                                 keyMulti = key + 'MultiSelect'
                                 if keyMulti in seedInfo:
-                                    self.session.randomizer[key] = seedInfo[key]
+                                    if key == 'objective' and value == 'nothing':
+                                        self.session.randomizer[key] = ""
+                                    else:
+                                        self.session.randomizer[key] = seedInfo[key]
                                     valueMulti = seedInfo[keyMulti]
                                     if type(valueMulti) == str:
                                         valueMulti = valueMulti.split(',')
@@ -115,10 +137,11 @@ class Randomizer(object):
                                 self.session.randomizer[key] = value
 
         return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
-                    randoPresets=randoPresets, tourRandoPresets=tourRandoPresets, randoPresetsDesc=randoPresetsDesc,
+                    randoPresetsDesc=randoPresetsDesc, randoPresetsCategories=randoPresetsCategories,
                     startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues,
                     maxsize=sys.maxsize, displayNames=displayNames, objectivesExclusions=objectivesExclusions,
-                    objectivesTypes=objectivesTypes, objectivesSort=objectivesSort)
+                    objectivesTypes=objectivesTypes, objectivesSort=objectivesSort,
+                    objectivesCategories=objectivesCategories)
 
     def initRandomizerSession(self):
         if self.session.randomizer is None:
@@ -171,7 +194,7 @@ class Randomizer(object):
                    'bossRandomization', 'minimizer',
                    'funCombat', 'funMovement', 'funSuits',
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
-                   'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
+                   'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
                    'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized"]
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
@@ -345,7 +368,7 @@ class Randomizer(object):
                    'bossRandomization', 'minimizer',
                    'funCombat', 'funMovement', 'funSuits',
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
-                   'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
+                   'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
                    'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized"]
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
@@ -388,7 +411,8 @@ class Randomizer(object):
         self.session.randomizer['variaTweaks'] = self.vars.variaTweaks
         self.session.randomizer['nerfedCharge'] = self.vars.nerfedCharge
         self.session.randomizer['itemsounds'] = self.vars.itemsounds
-        self.session.randomizer['elevators_doors_speed'] = self.vars.elevators_doors_speed
+        self.session.randomizer['elevators_speed'] = self.vars.elevators_speed
+        self.session.randomizer['fast_doors'] = self.vars.fast_doors
         self.session.randomizer['spinjumprestart'] = self.vars.spinjumprestart
         self.session.randomizer['rando_speed'] = self.vars.rando_speed
         self.session.randomizer['animals'] = self.vars.animals
@@ -483,6 +507,6 @@ class Randomizer(object):
 
                 return json.dumps(params)
             except Exception as e:
-                raiseHttp(400, "Can't load the rando preset")
+                raiseHttp(400, "Can't load the rando preset: {}".format(e))
         else:
             raiseHttp(400, "Rando preset not found")

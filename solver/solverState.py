@@ -91,6 +91,8 @@ class SolverState(object):
         self.state["roomsVisibility"] = self.getRoomsVisibility(solver, solver.areaGraph, solver.smbm)
         # for plando scav hunt, store the list of scav locs
         self.state["plandoScavengerOrder"] = solver.plandoScavengerOrder
+        # for disabled tourian
+        self.state["tourian"] = solver.tourian
 
     def toSolver(self, solver):
         solver.majorsSplit = self.state["majorsSplit"]
@@ -122,6 +124,7 @@ class SolverState(object):
         DoorsManager.unserialize(self.state["doors"])
         solver.doorsRando = self.state["doorsRando"]
         solver.plandoScavengerOrder = self.state["plandoScavengerOrder"]
+        solver.tourian = self.state["tourian"]
 
     def getRoomsVisibility(self, solver, areaGraph, sm):
         # add graph access points

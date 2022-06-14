@@ -272,16 +272,39 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canGrappleEscape(self):
         sm = self.smbm
-        return sm.wor(sm.wor(sm.haveItem('SpaceJump'),
-                             sm.wand(sm.canInfiniteBombJump(), # IBJ from lava...either have grav or freeze the enemy there if hellrunning (otherwise single DBJ at the end)
-                                     sm.wor(sm.heatProof(),
-                                            sm.haveItem('Gravity'),
-                                            sm.haveItem('Ice')))),
-                      sm.haveItem('Grapple'),
-                      sm.wand(sm.haveItem('SpeedBooster'),
-                              sm.wor(sm.haveItem('HiJump'), # jump from the blocks below
-                                     sm.knowsShortCharge())), # spark from across the grapple blocks
-                      sm.wand(sm.haveItem('HiJump'), sm.canSpringBallJump())) # jump from the blocks below
+        access = sm.wor(sm.wor(sm.haveItem('SpaceJump'),
+                               sm.wand(sm.canInfiniteBombJump(), # IBJ from lava...either have grav or freeze the enemy there if hellrunning (otherwise single DBJ at the end)
+                                       sm.wor(sm.heatProof(),
+                                              sm.haveItem('Gravity'),
+                                              sm.haveItem('Ice')))),
+                        sm.haveItem('Grapple'),
+                        sm.wand(sm.haveItem('SpeedBooster'),
+                                sm.wor(sm.haveItem('HiJump'), # jump from the blocks below
+                                       sm.knowsShortCharge())), # spark from across the grapple blocks
+                        sm.wand(sm.haveItem('HiJump'), sm.canSpringBallJump())) # jump from the blocks below
+        hellrun = 'MainUpperNorfair'
+        tbl = Settings.hellRunsTable[hellrun]['Croc -> Norfair Entrance']
+        mult = tbl['mult']
+        minE = tbl['minE']
+        if 'InfiniteBombJump' in access.knows or 'ShortCharge' in access.knows:
+            mult *= 0.7
+        elif 'SpaceJump' in access.items:
+            mult *= 1.5
+        elif 'Grapple' in access.items:
+            mult *= 1.25
+        return sm.wand(access,
+                       sm.canHellRun(hellrun, mult, minE))
+
+    @Cache.decorator
+    def canHellRunBackFromGrappleEscape(self):
+        sm = self.smbm
+        # require more health to count 1st hell run from croc speedway bottom to here+hellrun back (which is faster)
+        hellrun = 'MainUpperNorfair'
+        tbl = Settings.hellRunsTable[hellrun]['Croc -> Norfair Entrance']
+        mult = tbl['mult']
+        minE = tbl['minE']
+        mult *= 0.6
+        return sm.canHellRun(hellrun, mult, minE)
 
     @Cache.decorator
     def canPassFrogSpeedwayRightToLeft(self):
@@ -784,3 +807,27 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.traverse('MainStreetBottomRight'),
                        sm.wor(sm.haveItem('Super'),
                               RomPatches.has(RomPatches.AreaRandoGatesOther)))
+
+    @Cache.decorator
+    def canAccessShaktoolFromPantsRoom(self):
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.haveItem('Ice'), # puyo clip
+                              sm.wor(sm.wand(sm.haveItem('Gravity'),
+                                             sm.knowsPuyoClip()),
+                                     sm.wand(sm.haveItem('Gravity'),
+                                             sm.haveItem('XRayScope'),
+                                             sm.knowsPuyoClipXRay()),
+                                     sm.knowsSuitlessPuyoClip())),
+                      sm.wand(sm.haveItem('Grapple'), # go through grapple block
+                              sm.wor(sm.wand(sm.haveItem('Gravity'),
+                                             sm.wor(sm.wor(sm.wand(sm.haveItem('HiJump'), sm.knowsAccessSpringBallWithHiJump()),
+                                                           sm.haveItem('SpaceJump')),
+                                                    sm.knowsAccessSpringBallWithGravJump(),
+                                                    sm.wand(sm.haveItem('Bomb'),
+                                                            sm.wor(sm.knowsAccessSpringBallWithBombJumps(),
+                                                                   sm.wand(sm.haveItem('SpringBall'),
+                                                                           sm.knowsAccessSpringBallWithSpringBallBombJumps()))),
+                                                    sm.wand(sm.haveItem('SpringBall'), sm.knowsAccessSpringBallWithSpringBallJump()))),
+                                     sm.wand(sm.haveItem('SpaceJump'), sm.knowsAccessSpringBallWithFlatley()))),
+                      sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb()), # XRay climb
+                      sm.canCrystalFlashClip())

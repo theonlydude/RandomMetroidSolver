@@ -57,7 +57,9 @@ class RomPatcher:
             # objectives management and display
             'objectives.ips',
             # display collected items percentage in pause inventory menu
-            'percent.ips'
+            'percent.ips',
+            # new PLMs for indicating the color of the door on the other side
+            'door_indicators_plms.ips'
         ],
         # VARIA tweaks
         'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
@@ -68,8 +70,7 @@ class RomPatcher:
         # base patchset+optional layout for area rando
         'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips',
-                 'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street', 'no_demo.ips',
-                 'door_indicators_plms.ips'],
+                 'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street', 'no_demo.ips'],
         # patches for boss rando
         'Bosses': ['door_transition.ips', 'no_demo.ips'],
         # patches for escape rando
@@ -77,7 +78,7 @@ class RomPatcher:
         # patches for  minimizer with fast Tourian
         'MinimizerTourian': ['minimizer_tourian.ips', 'open_zebetites.ips'],
         # patches for door color rando
-        'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips', 'door_indicators_plms.ips']
+        'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips']
     }
 
     def __init__(self, romFileName=None, magic=None):
@@ -378,7 +379,7 @@ class RomPatcher:
             if doorsColorsRando == True:
                 for patchName in RomPatcher.IPSPatches['DoorsColors']:
                     self.applyIPSPatch(patchName)
-                self.writeDoorsColor(doors)
+            self.writeDoorsColor(doors)
             self.writeDoorIndicators(plms, area, doorsColorsRando)
             self.applyStartAP(startLocation, plms, doors)
             self.applyPLMs(plms)
@@ -1046,7 +1047,14 @@ class RomPatcher:
 
     def enableMoonWalk(self):
         # replace STZ with STA since A is non-zero at this point
-        self.romFile.writeByte(0x8D, snes_to_pc(0x81b35d))
+        self.romFile.writeByte(0x8D, Addresses.getOne('moonwalk'))
+
+    def writeAdditionalETanks(self, additionalETanks):
+        self.romFile.writeByte(additionalETanks, Addresses.getOne("additionalETanks"))
+
+    def writeHellrunRate(self, hellrunRatePct):
+        hellrunRateVal = min(int(0x40*float(hellrunRatePct)/100.0), 0xff)
+        self.romFile.writeByte(hellrunRateVal, Addresses.getOne("hellrunRate"))
 
     def compress(self, address, data):
         # data: [] of 256 int
@@ -1106,35 +1114,47 @@ class RomPatcher:
             DoorsManager.writeDoorsColor(self.romFile, doorsStart, self.writePlmWord)
 
     def writeDoorIndicators(self, plms, area, door):
-        indicatorFlags = (IndicatorFlag.AreaRando if area else 0) | (IndicatorFlag.DoorRando if door else 0)
-        if indicatorFlags != 0:
-            patchDict = self.patchAccess.getDictPatches()
-            additionalPLMs = self.patchAccess.getAdditionalPLMs()
-            def updateIndicatorPLM(door, doorType):
-                nonlocal additionalPLMs, patchDict
-                plmName = 'Indicator[%s]' % door
-                addPlm = False
-                if plmName in patchDict:
-                    for addr,bytez in patchDict[plmName].items():
-                        plmBytes = bytez
-                        break
-                else:   
-                    plmBytes = additionalPLMs[plmName]['plm_bytes_list'][0]
-                    addPlm = True
-                w = getWord(doorType)
-                plmBytes[0] = w[0]
-                plmBytes[1] = w[1]
-                return plmName, addPlm
-            indicatorPLMs = DoorsManager.getIndicatorPLMs(indicatorFlags)
-            for doorName,plmType in indicatorPLMs.items():
-                plmName,addPlm = updateIndicatorPLM(doorName, plmType)
-                if addPlm:
-                    plms.append(plmName)
-                else:
-                    self.applyIPSPatch(plmName)
+        indicatorFlags = IndicatorFlag.Standard | (IndicatorFlag.AreaRando if area else 0) | (IndicatorFlag.DoorRando if door else 0)
+        patchDict = self.patchAccess.getDictPatches()
+        additionalPLMs = self.patchAccess.getAdditionalPLMs()
+        def updateIndicatorPLM(door, doorType):
+            nonlocal additionalPLMs, patchDict
+            plmName = 'Indicator[%s]' % door
+            addPlm = False
+            if plmName in patchDict:
+                for addr,bytez in patchDict[plmName].items():
+                    plmBytes = bytez
+                    break
+            else:
+                plmBytes = additionalPLMs[plmName]['plm_bytes_list'][0]
+                addPlm = True
+            w = getWord(doorType)
+            plmBytes[0] = w[0]
+            plmBytes[1] = w[1]
+            return plmName, addPlm
+        indicatorPLMs = DoorsManager.getIndicatorPLMs(indicatorFlags)
+        for doorName,plmType in indicatorPLMs.items():
+            plmName,addPlm = updateIndicatorPLM(doorName, plmType)
+            if addPlm:
+                plms.append(plmName)
+            else:
+                self.applyIPSPatch(plmName)
 
-    def writeObjectives(self, objectives):
+    def writeObjectives(self, objectives, itemLocs):
         objectives.writeGoals(self.romFile)
+        self.writeItemsMasks(itemLocs)
+
+    def writeItemsMasks(self, itemLocs):
+        # write items/beams masks for "collect all major" objective
+        itemsMask = 0
+        beamsMask = 0
+        for il in itemLocs:
+            if not il.Location.restricted:
+                item = il.Item
+                itemsMask |= item.ItemBits
+                beamsMask |= item.BeamBits
+        self.romFile.writeWord(itemsMask, Addresses.getOne('itemsMask'))
+        self.romFile.writeWord(beamsMask, Addresses.getOne('beamsMask'))
 
 # tile number in tileset
 char2tile = {

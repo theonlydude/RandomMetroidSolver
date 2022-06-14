@@ -72,7 +72,7 @@ class RandoExec(object):
             self.restrictions = Restrictions(self.randoSettings)
             if self.graphSettings.doorsColorsRando == True:
                 DoorsManager.randomize(self.graphSettings.allowGreyDoors)
-            self.areaGraph = graphBuilder.createGraph()
+            self.areaGraph = graphBuilder.createGraph(self.randoSettings.maxDiff)
             services = RandoServices(self.areaGraph, self.restrictions)
             setup = RandoSetup(self.graphSettings, Logic.locations, services)
             container = setup.createItemLocContainer(endDate, vcr)

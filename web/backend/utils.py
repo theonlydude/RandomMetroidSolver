@@ -35,7 +35,12 @@ def loadPresetsList(cache):
 def loadRandoPresetsList(cache, filter=False):
     presets = cache.ram('randoPresets', lambda:dict(), time_expire=None)
     if not presets:
-        tourPresets = ['Season_Races', 'SGLive2021', 'SMRAT2021', 'VARIA_Weekly']
+        tourPresets = ['Season_Races', 'SMRAT2021', 'VARIA_Weekly',
+                       'SGLive2022_Race_1', 'SGLive2022_Race_2', 'SGLive2022_Race_3',
+                       'Multi_Category_Randomizer_Week_1', 'Multi_Category_Randomizer_Week_2',
+                       'Multi_Category_Randomizer_Week_3', 'Multi_Category_Randomizer_Week_4',
+                       'Multi_Category_Randomizer_Week_5', 'Multi_Category_Randomizer_Week_6',
+                       'Multi_Category_Randomizer_Week_7']
         files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
         randoPresets = [os.path.splitext(file)[0] for file in files]
         randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
@@ -218,6 +223,16 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
     if 'tourian' in others:
         if request.vars['tourian'] not in ['Vanilla', 'Fast', 'Disabled']:
             raiseHttp(400, "Wrong value fro tourian, authorized values: Vanilla/Fast/Disabled", isJson)
+
+    if 'hellrun_rate' in others and request.vars.hellrun_rate != 'off':
+        hellrun_rate = getInt(request, 'hellrun_rate', isJson)
+        if hellrun_rate < 0 or hellrun_rate > 400:
+            raiseHttp(400, "Wrong value for hellrun_rate", isJson)
+
+    if 'etanks' in others and request.vars.etanks != 'off':
+        etanks = getInt(request, 'etanks', isJson)
+        if etanks < 0 or etanks > 14:
+            raiseHttp(400, "Wrong value for etanks", isJson)
 
     preset = request.vars.preset
     if preset != None:

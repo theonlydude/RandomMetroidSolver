@@ -25,8 +25,9 @@ print "Green_Brinstar"
 %silence($3F84)
 ;;; Etecoon cry
 %silence($3F8C)
-;;; (we preserve Etecoons theme, as it usually sounds funny)
-	
+;;; Etecoons theme
+%silence($3FA1)
+
 endif	
 
 if defined("Upper_Norfair")
@@ -35,7 +36,7 @@ print "Upper_Norfair"
 %silence($3BC3)
 %silence($3BE9)
 %silence($3C0A)
-;;; Fune spits
+;;; Fune/Namihe spits
 %silence($3D9D)
 
 endif
@@ -57,6 +58,9 @@ if defined("Lower_Norfair")
 print "Lower_Norfair"
 ;;; Desgeega shot (also Croc destroys wall, so that'll get disabled as well...)
 %silence($3F60)
+;;; Fune/Namihe spits
+%silence($3D9D)
+
 endif
 
 

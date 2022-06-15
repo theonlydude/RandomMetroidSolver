@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 
-import sys, os, json
+import sys, os, json, re
 
 # we're in directory 'tools/' we have to update sys.path
 sys.path.append(os.path.dirname(sys.path[0]))
+
+# To run from VARIA base dir
 
 # extract vanilla soundtrack as nspc files. args:
 # - vanilla ROM
@@ -15,6 +17,7 @@ sys.path.append(os.path.dirname(sys.path[0]))
 # stored in the JSON metadata
 
 from rom.rom import RealROM, snes_to_pc
+from rom.ips import IPS_Patch
 
 vanilla=sys.argv[1]
 nspc_dir=sys.argv[2]
@@ -338,7 +341,23 @@ meta["pc_addresses"] = [499165]
 
 meta = getBossMeta("Botwoon")
 meta["pc_addresses"] = [514420]
-        
+
+# Add patches to silence song-specific sfx that don't work anymore when changed,
+# and can generate horrible sounds or crashes
+patchDir = os.path.abspath(sys.path[0])+"/../patches/common/ips/custom_music_specific"
+assert os.path.exists(patchDir)
+
+for trackName, trackData in metadata.items():
+    patchName = re.sub('[^a-zA-Z0-9\._]', '_', trackName)
+    patchPath = os.path.join(patchDir, patchName+".ips")
+    if os.path.exists(patchPath):
+        print("Adding SFX patch for track "+trackName)
+        patch = IPS_Patch.load(patchPath)
+        if "static_patches" not in trackData:
+            trackData["static_patches"] = {}
+        trackData["static_patches"].update(patch.toDict())
+
+
 print("Writing %s ..." % json_path)
 with open(json_path, 'w') as fp:
     json.dump(metadata, fp, indent=4)

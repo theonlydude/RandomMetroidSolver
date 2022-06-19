@@ -404,8 +404,8 @@ visited_animals:
 	lda !visited_etecoons_event : jsl !check_event : bcc .etecoons
 	lda !visited_dachora_event : jsl !check_event : bcs .end
 .etecoons:
-	lda !current_room : cmp #$9ad9 : bne .dachora
-	lda !samus_y : cmp #$0b80 : bcc .end ; if Y >= (lower) #$0680:
+	lda !current_room : cmp #$9ad9 : bne .dachora	
+	lda !samus_x : cmp #$0225 : bcc .end ; if X >= (further right) #$0225:
 	lda !visited_etecoons_event : jsl !mark_event
 	bra .not
 .dachora:

@@ -298,7 +298,7 @@ class RandoSetup(object):
                 ret = False
                 continue
             for ap in escAPs:
-                if not self.areaGraph.canAccess(self.sm, ap, "Golen Four", self.settings.maxDiff):
+                if not self.areaGraph.canAccess(self.sm, ap, "Golden Four", self.settings.maxDiff):
                     self.log.debug("checkPool. goal '"+goal.name+"' impossible to complete due to area layout")
                     ret = False
                     break

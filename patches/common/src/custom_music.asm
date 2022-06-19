@@ -36,12 +36,6 @@ print "mb2: ", pc
 mb2:
 	db $21, $05
 
-org $A98810
-    rep 4 : nop	    ; disables MB2 "no music" before fight, as cutscene is sped up
-
-org $88B446
-    rep 4 : nop     ; disables lava sounds to avoid weird noises in Norfair
-
 org $8b9b6c
 	jsr load_title_screen_music_data
 

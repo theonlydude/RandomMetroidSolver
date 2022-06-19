@@ -289,7 +289,12 @@ _goalsList = [
          "all_chozo_robots",
          category="Memes",
          escapeAccessPoints=(3, ["Landing Site", "Screw Attack Bottom", "Bowling"]),
-         exclusion={"list": ["kill golden torizo"]})
+         exclusion={"list": ["kill golden torizo"]}),
+    Goal("visit the animals", "other", lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Big Pink"), sm.haveItem("SpeedBooster"), # dachora
+                                                              Objectives.canAccess(sm, ap, "Etecoons Bottom")), # Etecoons
+         "visited_animals",
+         category="Memes",
+         escapeAccessPoints=(2, ["Big Pink", "Etecoons Bottom"]))
 ]
 
 

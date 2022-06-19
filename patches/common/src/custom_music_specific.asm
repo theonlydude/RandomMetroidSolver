@@ -150,7 +150,8 @@ print "Wrecked_Ship___Power_off"
 endif
 
 if defined("Wrecked_Ship___Power_on")
-;;; TODO find robot?
+;;; Robot
+%silence($4424)
 endif
 
 

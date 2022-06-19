@@ -18,6 +18,8 @@ incsrc "event_list.asm"
 !timer = $05b8
 !obj_check_period = #$0020	; unit:frames, works only in powers of 2
 !current_room = $079b
+!samus_x = $0AF6
+!samus_y = $0AFA
 
 ;;; external routines
 !song_routine = $808fc1
@@ -82,8 +84,9 @@ org $A6C5ED
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; CODE
 
-;;; free space after tracking.ips and seed_display.ips
-org $82f983
+org $a1fa80
+;;; checks for objectives periodically
+print "A1 start: ", pc
 ;;; seed objectives checker functions pointers, max 5, list ends with $0000
 print "--- objectives checker functions: ", pc, " ---"
 objective_funcs:
@@ -93,6 +96,118 @@ objective_funcs:
         dw ridley_is_dead
         dw $0000
         dw $0000
+
+periodic_obj_check:
+	lda !timer : and !obj_check_period-1
+	cmp !obj_check_period-1 : bne .end
+	jsr objectives_completed
+.end:
+	JSL $8FE8BD		; hijacked code
+	rtl
+
+;;; checks for all individual objectives and sets their events if completed
+;;; if all are completed, sets objectives_completed_event
+objectives_completed:
+        phx
+	;; don't check anything if objectives are already completed
+	lda !objectives_completed_event : jsl !check_event : bcs .end
+        ldx #$0000
+.loop:
+        lda.l objective_funcs, x
+        beq .end_loop      ; checkers function list end
+        jsr (objective_funcs, x)
+	bcc .next
+	;; objective completed
+	lda.l objective_events, x : jsl !mark_event
+.next:
+        inx : inx
+        cpx.w !max_objectives*2
+        bne .loop
+.end_loop:
+	jsr check_objectives_events
+.end:
+        plx
+        rts
+
+;;; check if all objectives events are set, sets objectives_completed_event if so
+;;; (subroutine of objectives_completed)
+;;; input X : last loop index in objective check event, gives objective list size
+check_objectives_events:
+.loop:
+	dex : dex
+	bmi .completed
+	lda.l objective_events,x
+	jsl !check_event : bcc .end
+	bra .loop
+.completed:
+        lda !objectives_completed_event : jsl !mark_event
+	lda.l escape_option : and #$00ff : beq .end
+	jsr trigger_escape
+.end:
+	rts
+
+objective_events:
+%objectivesCompletedEventArray()
+
+
+;;; copy-pasted from a PLM instruction
+clear_music_queue:
+	PHX
+	LDX #$000E
+	STZ $0619,x
+	STZ $0629,x
+	DEX
+	DEX
+	BPL $F6
+	PLX
+	LDA $0639
+	STA $063B
+	LDA #$0000
+	STA $063F
+	STA $063D
+	rts
+
+;;; copied from escape rooms setup asm
+room_earthquake:
+	LDA #$0018             ;\
+	STA $183E              ;} Earthquake type = BG1, BG2 and enemies; 3 pixel displacement, horizontal
+	LDA #$FFFF
+	STA $1840
+	rts
+
+trigger_escape:
+	phx : phy
+	jsl !escape_setup
+	jsr room_earthquake	; could not be called by setup asm since not in escape yet
+	; load timer graphics
+	lda #$000f : jsl $90f084
+	jsl !fix_timer_gfx
+	lda #$0002 : sta $0943	 ; set timer state to 2 (MB timer start)
+	jsr clear_music_queue
+	jsr trigger_escape_music
+	lda !escape_event : jsl !mark_event ; timebomb set event
+	ply : plx
+	rts
+
+trigger_escape_music:
+	lda !custom_music_marker
+	cmp !custom_music_id : beq .custom_music
+	lda #$ff24 : jsl !song_routine ; load boss 1 music data
+	lda #$0007 : jsl !song_routine ; load music track 2
+	bra .end
+.custom_music:
+	lda !custom_music_escape : ora #$ff00 : jsl !song_routine
+	lda !custom_music_escape+1 : and #$00ff : jsl !song_routine
+.end:
+	rts
+
+;;; when escape is trigerred, avoid changing music when boss drops appear
+boss_drops:
+	lda !escape_event : jsl !check_event ;if escape flag is off:
+	bcs .end
+	lda #$0003 : jsl $808FC1 	     ;  Queue elevator music track
+.end:				 	     ;else do nothing
+	rtl
 
 ;;; objectives checker functions, set carry if objective is completed
 
@@ -109,7 +224,7 @@ endmacro
 %eventChecker(draygon_is_dead, !draygon_event)
 %eventChecker(ridley_is_dead, !ridley_event)
 
-print "All bosses dead: ", pc
+print "all_g4_dead: ", pc
 all_g4_dead:
         jsr kraid_is_dead
         bcc .no
@@ -128,7 +243,7 @@ all_g4_dead:
 %eventChecker(crocomire_is_dead, !croc_event)
 %eventChecker(golden_torizo_is_dead, !GT_event)
 
-print "All mini bosses dead: ", pc
+print "all_mini_bosses_dead: ", pc
 all_mini_bosses_dead:
         jsr spore_spawn_is_dead
         bcc .no
@@ -142,7 +257,6 @@ all_mini_bosses_dead:
 .no:
         rts
 
-%eventChecker(shaktool_cleared_path, !shaktool_cleared_path)
 %eventChecker(scavenger_hunt_completed, !hunt_over_event)
 
 nb_killed_bosses:
@@ -190,7 +304,7 @@ nb_killed_minibosses:
         rts
 
 macro nbBossChecker(n, bossType)
-print "<n> <bossType> killed: ", pc
+print "<bossType>_<n>_killed: ", pc
 <bossType>_<n>_killed:
 	phx
         jsr nb_killed_<bossType>es
@@ -209,7 +323,7 @@ endmacro
 %nbBossChecker(3,miniboss)
 
 macro itemPercentChecker(percent)
-print "collect <percent>% items: ", pc
+print "collect_<percent>_items: ", pc
 collect_<percent>_items:
 	lda !CollectedItems
 print "    write in ROM <percent>% items value at: ",hex(.cmpval+1)
@@ -223,7 +337,7 @@ endmacro
 %itemPercentChecker(75)
 %itemPercentChecker(100)
 
-print "Nothing objective: ", pc
+print "nothing_objective: ", pc
 nothing_objective:
 	;; if option enabled, complete objective only when in
 	;; crateria/blue brin, in case we trigger escape immediately
@@ -285,13 +399,28 @@ all_chozo_robots:
 .end:
 	rts
 
+print "visited_animals: ", pc
+visited_animals:
+	lda !visited_etecoons_event : jsl !check_event : bcc .etecoons
+	lda !visited_dachora_event : jsl !check_event : bcs .end
+.etecoons:
+	lda !current_room : cmp #$9ad9 : bne .dachora
+	lda !samus_y : cmp #$0b80 : bcc .end ; if Y >= (lower) #$0680:
+	lda !visited_etecoons_event : jsl !mark_event
+	bra .not
+.dachora:
+	;; check dachora
+	lda !current_room : cmp #$9CB3 : bne .not
+	lda !samus_y : cmp #$0680 : bcc .end ; if Y >= (lower) #$0680
+	lda !samus_x : cmp #$0100 : bcs .not ;    and X < (further left) #$0100 :
+	lda !visited_dachora_event : jsl !mark_event ; mark dachora event
+.not:
+	clc
+.end:
+	rts
 
-obj_end:
-print "--- 0x", hex(obj_max-obj_end), " bytes left for objectives checkers ---"
-;;; seed display patch start
-org $82fb6c
-obj_max:
-warnpc $82fb6c
+print "A1 end: ", pc
+;; warnpc $a1faff
 
 ;;; only sink the ground in G4 room if objectives are completed.
 ;;; otherwise you'd just have to beat G4 and go to statues room
@@ -401,126 +530,8 @@ set_bowling_event:
 
 warnpc $aaf82f
 
-;;; put some stuff in bank A1 to save space in 82:
-;;; TODO pretty much everything but pause menu stuff can be in A1 (or elsewhere) now if we need space
-org $a1f980
-;;; checks for objectives periodically
-print "A1 start: ", pc
-periodic_obj_check:
-	lda !timer : and !obj_check_period-1
-	cmp !obj_check_period-1 : bne .end
-	jsl objectives_completed
-.end:
-	JSL $8FE8BD		; hijacked code
-	rtl
-
-;;; copy-pasted from a PLM instruction
-clear_music_queue:
-	PHX
-	LDX #$000E
-	STZ $0619,x
-	STZ $0629,x
-	DEX
-	DEX
-	BPL $F6
-	PLX
-	LDA $0639
-	STA $063B
-	LDA #$0000
-	STA $063F
-	STA $063D
-	rts
-
-;;; copied from escape rooms setup asm
-room_earthquake:
-	LDA #$0018             ;\
-	STA $183E              ;} Earthquake type = BG1, BG2 and enemies; 3 pixel displacement, horizontal
-	LDA #$FFFF
-	STA $1840
-	rts
-
-trigger_escape:
-	phx : phy
-	jsl !escape_setup
-	jsr room_earthquake	; could not be called by setup asm since not in escape yet
-	; load timer graphics
-	lda #$000f : jsl $90f084
-	jsl !fix_timer_gfx
-	lda #$0002 : sta $0943	 ; set timer state to 2 (MB timer start)
-	jsr clear_music_queue
-	jsr trigger_escape_music
-	lda !escape_event : jsl !mark_event ; timebomb set event
-	ply : plx
-	rtl
-
-trigger_escape_music:
-	lda !custom_music_marker
-	cmp !custom_music_id : beq .custom_music
-	lda #$ff24 : jsl !song_routine ; load boss 1 music data
-	lda #$0007 : jsl !song_routine ; load music track 2
-	bra .end
-.custom_music:
-	lda !custom_music_escape : ora #$ff00 : jsl !song_routine
-	lda !custom_music_escape+1 : and #$00ff : jsl !song_routine
-.end:
-	rts
-
-;;; when escape is trigerred, avoid changing music when boss drops appear
-boss_drops:
-	lda !escape_event : jsl !check_event ;if escape flag is off:
-	bcs .end
-	lda #$0003 : jsl $808FC1 	     ;  Queue elevator music track
-.end:				 	     ;else do nothing
-	rtl
-
-;;; check if all objectives are completed
-;;; (really a subroutine of objectives_completed, here to save space in 82)
-;;; input X : last loop index in objective check event, gives objective list size
-check_objectives_events:
-.loop:
-	dex : dex
-	bmi .completed
-	lda.l objective_events,x
-	jsl !check_event : bcc .end
-	bra .loop
-.completed:
-        lda !objectives_completed_event : jsl !mark_event
-	lda.l escape_option : and #$00ff : beq .end
-	jsl trigger_escape
-.end:
-	rtl
-
-objective_events:
-%objectivesCompletedEventArray()
-
-print "A1 end: ", pc
-warnpc $a1faff
-
 ;;; continue in 82 after InfoStr in seed_display.asm
 org $82FB6D
-
-;;; set objectives_completed_event if objectives are completed
-objectives_completed:
-        phx
-	;; don't check anything if objectives are already completed
-	lda !objectives_completed_event : jsl !check_event : bcs .end
-        ldx #$0000
-.loop:
-        lda.l objective_funcs, x
-        beq .end_loop      ; checkers function list end
-        jsr (objective_funcs, x)
-	bcc .next
-	;; objective completed
-	lda.l objective_events, x : jsl !mark_event
-.next:
-        inx : inx
-        cpx.w !max_objectives*2
-        bne .loop
-.end_loop:
-	jsl check_objectives_events
-.end:
-        plx
-        rtl
 
 print "Pause stuff: ", pc
 

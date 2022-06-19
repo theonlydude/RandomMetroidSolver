@@ -75,7 +75,7 @@ org $82e3c5
 
 ;;; Door centering speed by Kazuto:
 !Speed = 2	;Pixels per-frame to slide the screen, default $01
-!FreeSpace = $A1FB00	;Safe to move anywhere in ROM
+!FreeSpace = $A1F980	;Safe to move anywhere in ROM
 
 org $82E325	;Horizontal doors
 	NOP

@@ -216,9 +216,7 @@ _goalsList = [
          escapeAccessPoints=(1, ["Oasis Bottom"]),
          available=False),
     Goal("finish scavenger hunt", "other", lambda sm, ap: SMBool(True), 0xFA03,
-         exclusion={"list":
-             ["clear crateria", "clear green brinstar", "clear red brinstar", "clear wrecked ship", "clear kraid's lair",
-              "clear upper norfair", "clear croc's lair", "clear lower norfair", "clear west maridia", "clear east maridia"]},
+         exclusion={"list": []}, # will be auto-completed
          available=False),
     Goal("nothing", "other", lambda sm, ap: Objectives.canAccess(sm, ap, "Landing Site"), 0xFA99,
          escapeAccessPoints=(1, ["Landing Site"])), # with no objectives at all, escape auto triggers only in crateria
@@ -238,44 +236,34 @@ _goalsList = [
          category="Items"),
     Goal("clear crateria", "items", lambda sm, ap: SMBool(True), 0xFAF4,
          category="Items",
-         area="Crateria",
-         exclusion={"list": ["finish scavenger hunt"]}),
+         area="Crateria"),
     Goal("clear green brinstar", "items", lambda sm, ap: SMBool(True), 0xFAFC,
          category="Items",
-         area="GreenPinkBrinstar",
-         exclusion={"list": ["finish scavenger hunt"]}),
+         area="GreenPinkBrinstar"),
     Goal("clear red brinstar", "items", lambda sm, ap: SMBool(True), 0xFB04,
          category="Items",
-         area="RedBrinstar",
-         exclusion={"list": ["finish scavenger hunt"]}),
+         area="RedBrinstar"),
     Goal("clear wrecked ship", "items", lambda sm, ap: SMBool(True), 0xFB0C,
          category="Items",
-         area="WreckedShip",
-         exclusion={"list": ["finish scavenger hunt"]}),
+         area="WreckedShip"),
     Goal("clear kraid's lair", "items", lambda sm, ap: SMBool(True), 0xFB14,
          category="Items",
-         area="Kraid",
-         exclusion={"list": ["finish scavenger hunt"]}),
+         area="Kraid"),
     Goal("clear upper norfair", "items", lambda sm, ap: SMBool(True), 0xFB1C,
          category="Items",
-         area="Norfair",
-         exclusion={"list": ["finish scavenger hunt"]}),
+         area="Norfair"),
     Goal("clear croc's lair", "items", lambda sm, ap: SMBool(True), 0xFB24,
          category="Items",
-         area="Crocomire",
-         exclusion={"list": ["finish scavenger hunt"]}),
+         area="Crocomire"),
     Goal("clear lower norfair", "items", lambda sm, ap: SMBool(True), 0xFB2C,
          category="Items",
-         area="LowerNorfair",
-         exclusion={"list": ["finish scavenger hunt"]}),
+         area="LowerNorfair"),
     Goal("clear west maridia", "items", lambda sm, ap: SMBool(True), 0xFB34,
          category="Items",
-         area="WestMaridia",
-         exclusion={"list": ["finish scavenger hunt"]}),
+         area="WestMaridia"),
     Goal("clear east maridia", "items", lambda sm, ap: SMBool(True), 0xFB3C,
          category="Items",
-         area="EastMaridia",
-         exclusion={"list": ["finish scavenger hunt"]}),
+         area="EastMaridia"),
     Goal("tickle the red fish", "other",
          lambda sm, ap: sm.wand(sm.haveItem('Grapple'), Objectives.canAccess(sm, ap, "Red Fish Room Bottom")),
          0xFAC1,
@@ -306,8 +294,19 @@ _goalsList = [
          exclusion={"list": ["kill golden torizo"]})
 ]
 
+
 _goals = {goal.name:goal for goal in _goalsList}
-_goals["nothing"].exclusion["list"] = [goal.name for goal in _goalsList]
+
+def completeGoalData():
+    # "nothing" is incompatible with everything
+    _goals["nothing"].exclusion["list"] = [goal.name for goal in _goalsList]
+    areaGoals = [goal.name for goal in _goalsList if goal.area is not None]
+    # if we need 100% items, don't require "clear area", as it covers those
+    _goals["collect 100% items"].exclusion["list"] += areaGoals[:]
+    # if we have scav hunt, don't require "clear area" (HUD behaviour incompatibility)
+    _goals["finish scavenger hunt"].exclusion["list"] += areaGoals[:]
+
+completeGoalData()
 
 class Objectives(object):
     activeGoals = []

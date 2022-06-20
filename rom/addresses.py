@@ -96,7 +96,7 @@ class Addresses(object):
 
     addresses = {
         'totalItems': ValueList([0x8BE656, 0x8BE6B3], storage=Byte),
-        'totalItemsPercent': ValueList([0xA1FC72, 0xA1FC7A, 0xA1FC82, 0xA1FC8A]),
+        'totalItemsPercent': ValueList([0xA1FC77, 0xA1FC7F, 0xA1FC87, 0xA1FC8F]),
 
         'objectivesList': ValueSingle(0xA1FA80),
         'objectivesSpritesOAM': ValueSingle(0x82FE83),

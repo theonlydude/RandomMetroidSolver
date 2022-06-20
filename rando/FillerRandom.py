@@ -232,7 +232,7 @@ class FillerRandomSpeedrun(FillerRandom):
         # keep only first minors
         firstMinors = {"Missile": False, "Super": False, "PowerBomb": False}
         for loc in solver.visitedLocations:
-            if loc.itemName in ["ETank", "Reserve"]:
+            if loc.itemName in ["ETank", "Reserve", "Gunship"]:
                 continue
             if loc.itemName in firstMinors:
                 if firstMinors[loc.itemName] == True:

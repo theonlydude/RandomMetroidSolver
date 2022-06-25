@@ -354,7 +354,7 @@ def loadRandoPreset(randoPreset, args):
         else:
             args.superFun.append("SuitsRandom")
 
-    ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "refill_before_save"]
+    ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "refill_before_save", "relaxed_round_robin_cf"]
     for patch in ipsPatches:
         if randoParams.get(patch, "off") == "on":
             args.patches.append(patch + '.ips')
@@ -491,6 +491,7 @@ def getRandomizerDefaultParameters():
     defaultParams['Infinite_Space_Jump'] = "off"
     defaultParams['refill_before_save'] = "off"
     defaultParams['hud'] = "off"
+    defaultParams['relaxed_round_robin_cf'] = "off"
     defaultParams['animals'] = "off"
     defaultParams['No_Music'] = "off"
     defaultParams['random_music'] = "off"

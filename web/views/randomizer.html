@@ -857,7 +857,7 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian", "relaxed_round_robin_cf"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"];
 
@@ -1047,7 +1047,7 @@ function AjaxRandomizerCallCompleted(data) {
     document.getElementById("submitBtn").data = "Randomize";
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian", "relaxed_round_robin_cf"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"];
 
@@ -2412,6 +2412,12 @@ This patch is automatically enabled when using Full Countdown item split, or Maj
       placement: "auto left"
     },
     {
+      element: "#relaxed_round_robin_cfStep",
+      title: "Relaxed Round Robin Crystal Flash",
+      content: "<p>Changes crystal flash behavior and requirements as follows:</p><p><ul><li>You can perform a crystal flash with any amount of ammo, but you need at least one powerbomb to begin the process.</li><li>After consuming 1 ammo, Samus gains 50 energy, and it will try a different ammo type next. Cycling through missiles, supers, and power bombs as available. The cycling is to keep the consumption even between ammo types.</li><li>If one of your ammo types is at 0, it will be skipped.</li><li>The crystal flash ends when Samus is out of ammo or a total of 30 ammo has been consumed.</li></p><p>This patch was developed by Dagit.</p>",
+      placement: "auto left"
+    },
+    {
       element: "#animalsStep",
       title: "Animals surprise",
       content: "<p>Replace saving the animals in the escape sequence by a random surprise.<br/><b>Note:</b> This setting is not available when Escape Randomization is enabled, as it is replaced by Animals Challenges (see Escape Randomization help for more information).</p>\
@@ -2912,8 +2918,11 @@ def displayNumber(id, min, max, default, step="1"):
                      VARIA HUD
                   </td>
                   <td><button type="button" onclick="startTheTour(45)">?</button></td>
-                  <td class="half"></td>
-                  <td></td>
+                  <td id="relaxed_round_robin_cfStep" class="half">
+                    {{displayCheckbox("relaxed_round_robin_cf")}}
+                    Relaxed Round Robin Crystal Flash
+                  </td>
+                  <td><button type="button" onclick="startTheTour(46)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -2928,7 +2937,7 @@ def displayNumber(id, min, max, default, step="1"):
                     <span id="animalsText">Save the animals surprise</span>
                   </td>
                   <td></td>
-                  <td><button type="button" onclick="startTheTour(46)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(47)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="musicVisibility">
@@ -2937,12 +2946,12 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("No_Music")}}
                     Disable background music
                   </td>
-                  <td><button type="button" onclick="startTheTour(47)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(48)">?</button></td>
                   <td id="random_musicStep" class="half">
                     {{displayCheckbox("random_music")}}
                     Randomize background music
                   </td>
-                  <td><button type="button" onclick="startTheTour(48)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(49)">?</button></td>
                 </tr>
               </table>
             </div>

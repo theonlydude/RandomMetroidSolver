@@ -418,7 +418,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "hellrun_rate", "etanks"];
+      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "hellrun_rate", "etanks", "relaxed_round_robin_cf"];
 
     for(var i=0; i<elems.length; i++) {
         var elem = document.getElementById(elems[i]);
@@ -802,7 +802,7 @@ if seedInfo != None:
 }}
 
 function greyOutPatches(isRace, isVARIA, isVanilla) {
-    var buttons = ["itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save", "widescreen", "lava_acid_physics", "hell", "hellrun_rate", "etanks"];
+    var buttons = ["itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save", "widescreen", "lava_acid_physics", "hell", "hellrun_rate", "etanks", "relaxed_round_robin_cf"];
     for(var i=0; i<buttons.length; i++) {
         disableElement(buttons[i], isRace);
     }
@@ -1479,6 +1479,11 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
 <p>This patch was developed by Adam.</p>"
     },
     {
+      element: "#relaxed_round_robin_cfStep",
+      title: "Relaxed Round Robin Crystal Flash",
+      content: "<p>Changes crystal flash behavior and requirements as follows:</p><p><ul><li>You can perform a crystal flash with any amount of ammo, but you need at least one powerbomb to begin the process.</li><li>After consuming 1 ammo, Samus gains 50 energy, and it will try a different ammo type next. Cycling through missiles, supers, and power bombs as available. The cycling is to keep the consumption even between ammo types.</li><li>If one of your ammo types is at 0, it will be skipped.</li><li>The crystal flash ends when Samus is out of ammo or a total of 30 ammo has been consumed.</li></p><p>This patch was developed by Dagit.</p>"
+    },
+    {
       element: "#hellStep",
       title: "Challenges",
       content: "<p>Permanent lava physics: Samus physic is always as she's in lava until Gravity Suit is found</p>\
@@ -1849,6 +1854,13 @@ for name, values in musics["_dropdown"].items():
                   </td>
                   <td><button type="button" onclick="startTheTour(15)">?</button></td>
                 </tr>
+                <tr id="relaxed_round_robin_cfStep">
+                  <td colspan="2">
+                    {{displayCheckbox("relaxed_round_robin_cf")}}
+                     <span id="relaxed_round_robin_cfText">Relaxed Round Robin Crystal Flash</span>
+                  </td>
+                  <td><button type="button" onclick="startTheTour(16)">?</button></td>
+                </tr>
               </table>
 
               <table class="full">
@@ -1866,7 +1878,7 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("hell")}}
                     <span id="hellText">Permanent hell run</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(16)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(17)">?</button></td>
                 </tr>
                 <tr id="hellOptionsStep">
                   <td>
@@ -1881,7 +1893,7 @@ for name, values in musics["_dropdown"].items():
                   <td>
                     {{displayNumber("etanks", "0", "14", "0", "1")}}
                   </td>
-                  <td><button type="button" onclick="startTheTour(17)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(18)">?</button></td>
                 </tr>
               </table>
 
@@ -1896,28 +1908,28 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("widescreen")}}
                     <span id="widescreenText">Widescreen on  <a href="https://github.com/DerKoun/bsnes-hd/releases" target="_blank">bsnes-hd emulator</a></span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(18)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(19)">?</button></td>
                 </tr>
                 <tr id="AimAnyButtonStep">
                   <td colspan="2">
                     {{displayCheckbox("AimAnyButton")}}
                     <span id="AimAnyButtonText">Allows the aim buttons to be assigned to any button</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(19)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
                 <tr id="max_ammo_displayStep">
                   <td colspan="2">
                     {{displayCheckbox("max_ammo_display")}}
                     <span id="max_ammo_displayText">Max Ammo Display</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(20)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(21)">?</button></td>
                 </tr>
                 <tr id="supermetroid_msu1Step">
                   <td colspan="2">
                     {{displayCheckbox("supermetroid_msu1")}}
                     <span id="supermetroid_msu1Text">Play music with MSU1 chip on SD2SNES</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(21)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(22)">?</button></td>
                 </tr>
               </table>
 
@@ -1936,7 +1948,7 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_Infinite_Space_Jump")}}
                     <span id="remove_Infinite_Space_JumpText">Restore vanilla Space Jump</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(22)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(23)">?</button></td>
                 </tr>
                 <tr id="remove_ElevatorDoorsStep">
                   <td>
@@ -1947,7 +1959,7 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_fast_doors")}}
                     <span id="remove_fast_doorsText">Restore vanilla doors transitions</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(23)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(24)">?</button></td>
                 </tr>
                 <tr id="remove_rando_speedStep">
                   <td>
@@ -1958,7 +1970,7 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_spinjumprestart")}}
                     <span id="remove_spinjumprestartText">Restore vanilla spin jump</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(24)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(25)">?</button></td>
                 </tr>
               </table>
           </div>
@@ -2101,6 +2113,7 @@ if seedInfo != None:
               <tr {{=setBold("Infinite_Space_Jump")}}><td>Infinite Space Jump</td><td>{{=seedParams["Infinite_Space_Jump"]}}</td></tr>
               <tr {{=setBold("refill_before_save")}}><td>Refill before save</td><td>{{=seedParams["refill_before_save"]}}</td></tr>
               <tr {{=setBold("hud")}}><td>Display items count in the HUD</td><td>{{=seedParams["hud"]}}</td></tr>
+              <tr {{=setBold("relaxed_round_robin_cf")}}><td>Relaxed Round Robin Crytal Flash</td><td>{{=seedParams["relaxed_round_robin_cf"]}}</td></tr>
               <tr {{=setBold("animals")}}><td>Save the animals surprise</td><td>{{=seedParams["animals"]}}</td></tr>
               <tr {{=setBold("No_Music")}}><td>Disable background music</td><td>{{=seedParams["No_Music"]}}</td></tr>
               <tr {{=setBold("random_music")}}><td>Randomize background music</td><td>{{=seedParams["random_music"]}}</td></tr>

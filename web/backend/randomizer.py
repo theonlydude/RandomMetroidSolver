@@ -196,7 +196,8 @@ class Randomizer(object):
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
                    'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
-                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized"]
+                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized",
+                   'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
@@ -370,7 +371,8 @@ class Randomizer(object):
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
                    'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
-                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized"]
+                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized",
+                   'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
@@ -421,6 +423,7 @@ class Randomizer(object):
         self.session.randomizer['Infinite_Space_Jump'] = self.vars.Infinite_Space_Jump
         self.session.randomizer['refill_before_save'] = self.vars.refill_before_save
         self.session.randomizer['hud'] = self.vars.hud
+        self.session.randomizer['relaxed_round_robin_cf'] = self.vars.relaxed_round_robin_cf
         self.session.randomizer['scavNumLocs'] = self.vars.scavNumLocs
         self.session.randomizer['scavRandomized'] = self.vars.scavRandomized
         self.session.randomizer['tourian'] = self.vars.tourian

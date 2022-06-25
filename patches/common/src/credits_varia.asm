@@ -110,6 +110,10 @@ org $819f46
 org $819f7c
 	jsr load_menu_3rd_file
 
+// hijack menu display to show save area instead of energy if backup saves are enabled
+org $81A09B
+	jsr menu_show_save_data
+
 // Hijack loading new game to reset stats
 org $82805f
     jsl clear_values
@@ -249,7 +253,7 @@ boot2:
     lda {timer_backup1}
     sta {timer1}
     lda {timer_backup2}
-    sta {timer2}
+    sta {timer2}	
     // clear temp variables
     ldx {tmp_area_sz}
     lda #$0000
@@ -258,7 +262,7 @@ boot2:
     dex
     dex
     bpl -
-
+    // resume vanilla code
     jml $8084af
 
 //// save related routines
@@ -839,8 +843,203 @@ patch_clear:
 	lda $19b7	// hijacked code
 	rts
 
-//print "b81 end: ", org
-warnpc $81f29f
+// show save area and station instead of energy when backup saves are enabled
+menu_show_save_data:
+	lda.l opt_backup
+	beq .energy
+	// draw save area: find station in table
+	ldx #$0000
+.loop:
+	lda save_area_text_table, x
+	cmp #$ffff
+	beq .energy
+	cmp {area_index}
+	bne .next
+	lda save_area_text_table+2, x
+	cmp {load_station_index}
+	beq .draw
+.next:
+	txa
+	clc
+	adc #$0008
+	tax
+	bra .loop
+.draw:
+	phx
+	// 1st line
+	lda save_area_text_table+4, x
+	tay
+	ldx $1A
+	jsr $B3E2
+	// 2nd line
+	plx
+	lda save_area_text_table+6, x
+	tay
+	lda $1A
+	clc
+	adc #$0040
+	tax
+	jsr $B3E2
+	// goto routine return
+	pla // discard return address
+	pea $A14D // go back here instead
+	rts
+.energy:
+	LDY #$B496 // hijacked energy tilemap address load
+	rts
+
+// area index, save station index, 1st line addr, 2nd line addr
+save_area_text_table:
+	dw $0000, $0000, .crateria, .ship
+	dw $0000, $0001, .crateria, .parlor
+	dw $0000, $0006, .crateria, .gauntlet
+	dw $0000, $0007, .tourian, .g4_hall
+	dw $0001, $0000, .green_brin, .spore_spawn
+	dw $0001, $0001, .green_brin, .main_shaft
+	dw $0001, $0002, .green_brin, .etecoons
+	dw $0001, $0003, .kraid, .notext
+	dw $0001, $0004, .red_brin, .tower_top
+	dw $0001, $0007, .green_brin, .etecoons
+	dw $0001, $0008, .green_brin, .elevator
+	dw $0001, $000A, .red_brin, .elevator
+	dw $0002, $0000, .crocomire, .notext
+	dw $0002, $0001, .upper_norfair, .bubble_mountain
+	dw $0002, $0002, .upper_norfair, .business_center
+	dw $0002, $0003, .upper_norfair, .pre_croc
+	dw $0002, $0004, .lower_norfair, .elevator
+	dw $0002, $0005, .lower_norfair, .ridley
+	dw $0002, $0007, .lower_norfair, .firefleas
+	dw $0002, $0008, .upper_norfair, .elevator
+	dw $0003, $0000, .wrecked, .ship
+	dw $0004, $0000, .red_brin, .tube
+	dw $0004, $0001, .east_maridia, .forgotten_highway
+	dw $0004, $0002, .east_maridia, .aqueduct
+	dw $0004, $0003, .east_maridia, .draygon
+	dw $0004, $0005, .east_maridia, .aqueduct
+	dw $0004, $0006, .west_maridia, .mama_turtle
+	dw $0004, $0007, .west_maridia, .watering_hole
+	dw $0004, $0009, .west_maridia, .crab_shaft
+	dw $0004, $000A, .west_maridia, .main_street
+	dw $0005, $0000, .tourian, .mother_brain
+	dw $0005, $0001, .tourian, .entrance
+	dw $0006, $0000, .ceres, .elevator
+	// table terminator
+	dw $ffff
+
+table "tables/menu.tbl"
+// max 11 char strings ending with ffff terminator
+.crateria:
+	dw " CRATERIA"
+.notext:
+	dw $ffff
+.green_brin:
+	dw "GREEN BRIN"
+	dw $ffff
+.red_brin:
+	dw " RED BRIN"
+	dw $ffff
+.upper_norfair:
+	dw "UPPER NORF"
+	dw $ffff
+.lower_norfair:
+	dw "LOWER NORF"
+	dw $ffff
+.east_maridia:
+	dw "E MARIDIA"
+	dw $ffff
+.west_maridia:
+	dw "W MARIDIA"
+	dw $ffff
+.tourian:
+	dw "  TOURIAN"
+	dw $ffff
+.ceres:
+	dw "   CERES"
+	dw $ffff
+.wrecked:
+	dw "  WRECKED"
+	dw $ffff
+.ship:
+	dw "   SHIP"
+	dw $ffff
+.parlor:
+	dw "  PARLOR"
+	dw $ffff
+.gauntlet:
+	dw " GAUNTLET"
+	dw $ffff
+.g4_hall:
+	dw " GOLDEN 4"
+	dw $ffff
+.spore_spawn:
+	dw "SPORE SPAWN"
+	dw $ffff
+.main_shaft:
+	dw "MAIN SHAFT"
+	dw $ffff
+.etecoons:
+	dw " ETECOONS"
+	dw $ffff
+.kraid:
+	dw "   KRAID"
+	dw $ffff
+.tower_top:
+	dw "TOWER TOP"
+	dw $ffff
+.elevator:
+	dw " ELEVATOR"
+	dw $ffff
+.crocomire:
+	dw "CROCOMIRE"
+	dw $ffff
+.bubble_mountain:
+	dw "BUBBLE MTN."
+	dw $ffff
+.business_center:
+	dw "BIZ CENTER"
+	dw $ffff
+.pre_croc:
+	dw "BEFORE CROC"
+	dw $ffff
+.ridley:
+	dw "  RIDLEY"
+	dw $ffff
+.firefleas:
+	dw " FIREFLEAS"
+	dw $ffff
+.tube:
+	dw "   TUBE"
+	dw $ffff
+.forgotten_highway:
+	dw "  HIGHWAY"
+	dw $ffff
+.aqueduct:
+	dw " AQUEDUCT"
+	dw $ffff
+.draygon:
+	dw "  DRAYGON"
+	dw $ffff
+.mama_turtle:
+	dw "MAMA TURTLE"
+	dw $ffff
+.watering_hole:
+	dw "WATER HOLE"
+	dw $ffff
+.crab_shaft:
+	dw "CRAB SHAFT"
+	dw $ffff
+.main_street:
+	dw "MAIN STREET"
+	dw $ffff
+.mother_brain:
+	dw "  M BRAIN"
+	dw $ffff
+.entrance:
+	dw " ENTRANCE"
+	dw $ffff
+
+print "b81 end: ", org
+warnpc $81f6ff
 ////////////////////////// CREDITS /////////////////////////////
 
 // Hijack after decompression of regular credits tilemaps

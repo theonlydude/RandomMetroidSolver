@@ -288,7 +288,7 @@ if __name__ == "__main__":
     parser.add_argument('--objective',
                         help="objectives to open G4",
                         dest='objective', nargs='?', default=[], action='append',
-                        choices=Objectives.getAllGoals()+["random"])
+                        choices=Objectives.getAllGoals()+["random"]+[str(i) for i in range(6)])
     parser.add_argument('--objectiveList', help="list to choose from when random",
                         dest='objectiveList', nargs='?', default=None)
     parser.add_argument('--tourian', help="Tourian mode",
@@ -526,9 +526,16 @@ if __name__ == "__main__":
 
         if args.objective:
             maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
-            if "random" in args.objective:
+            try:
+                nbObjectives = int(args.objective[0])
+            except:
+                nbObjectives = 0 if "random" in args.objective else None
+            if nbObjectives is not None:
                 availableObjectives = args.objectiveList.replace('_', ' ').split(',') if args.objectiveList is not None else objectives
-                nbObjectives = random.randint(1, min(maxActiveGoals, len(availableObjectives)))
+                if nbObjectives > 0:
+                    nbObjectives = min(nbObjectives, maxActiveGoals, len(availableObjectives))
+                else:
+                    nbObjectives = random.randint(1, min(maxActiveGoals, len(availableObjectives)))
                 objectivesManager.setRandom(nbObjectives, availableObjectives)
             else:
                 if len(args.objective) > maxActiveGoals:

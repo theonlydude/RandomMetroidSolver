@@ -14,11 +14,13 @@ CWD=$(pwd)
 BRANCH="master"
 DUMP=""
 GITHUB_TOKEN=""
-while getopts "b:d:t:" ARG; do
+LOCAL=1
+while getopts "b:d:t:l" ARG; do
     case ${ARG} in
         b) export BRANCH="${OPTARG}";;
         d) export DUMP="${OPTARG}";;
         t) export GITHUB_TOKEN="${OPTARG}";;
+        l) export LOCAL=0;;
 	*) echo "Unknown option ${ARG}"; exit 0;;
     esac
 done
@@ -42,6 +44,12 @@ docker build --tag varia-mysql -f mysql/Dockerfile mysql/ &&
 if [ -n "${GITHUB_TOKEN}" ]; then
     GITHUB_TOKEN=$(cat ${GITHUB_TOKEN})
 fi
-docker build --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -f web2py/Dockerfile web2py/ &&
+rm -f web2py/RandomMetroidSolver.tar.gz
+if [ ${LOCAL} -eq 0 ]; then
+    tar zcf web2py/RandomMetroidSolver.tar.gz --exclude=RandomMetroidSolver.tar.gz --exclude=.git --exclude=*.pyc ../..
+else
+    touch web2py/RandomMetroidSolver.tar.gz
+fi
+docker build --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} --build-arg LOCAL=${LOCAL} -f web2py/Dockerfile web2py/ &&
 
-rm -f mysql/*.sql
+rm -f mysql/*.sql web2py/RandomMetroidSolver.tar.gz

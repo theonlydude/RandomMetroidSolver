@@ -5,7 +5,7 @@
 # -d dump: optional dump to import in db to populate it with data
 # -t token_file: optional github token to git clone and git pull.
 #                if not provided download the repo as a zip.
-# -l local: if set, the docker image will use the local files isntead of cloning
+# -l local: if set, the docker image will use the local files instead of cloning
 #           the repository from github
 
 # cd to root dir

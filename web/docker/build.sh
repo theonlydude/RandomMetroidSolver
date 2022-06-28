@@ -1,10 +1,12 @@
 #!/bin/bash
 # build mysql & varia docker images
-# ./build.sh -b master [-d path/to/dump.sql] [-t path/to/token_file]
+# ./build.sh -b master [-d path/to/dump.sql] [-t path/to/token_file] [-l true]
 # -b branch: optional  branch to checkout on varia git repo (default to master)
 # -d dump: optional dump to import in db to populate it with data
 # -t token_file: optional github token to git clone and git pull.
 #                if not provided download the repo as a zip.
+# -l local: if set, the docker image will use the local files isntead of cloning
+#           the repository from github
 
 # cd to root dir
 CWD=$(dirname $0)
@@ -14,11 +16,13 @@ CWD=$(pwd)
 BRANCH="master"
 DUMP=""
 GITHUB_TOKEN=""
-while getopts "b:d:t:" ARG; do
+LOCAL=""
+while getopts "b:d:t:l:" ARG; do
     case ${ARG} in
         b) export BRANCH="${OPTARG}";;
         d) export DUMP="${OPTARG}";;
         t) export GITHUB_TOKEN="${OPTARG}";;
+        l) export LOCAL="${OPTARG}";;
 	*) echo "Unknown option ${ARG}"; exit 0;;
     esac
 done
@@ -42,6 +46,13 @@ docker build --tag varia-mysql -f mysql/Dockerfile mysql/ &&
 if [ -n "${GITHUB_TOKEN}" ]; then
     GITHUB_TOKEN=$(cat ${GITHUB_TOKEN})
 fi
-docker build --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -f web2py/Dockerfile web2py/ &&
+
+if [ -n "${LOCAL}" ]; then
+    echo "local mode"
+    docker build --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -f web2py/Dockerfile.local ../../
+else
+    echo "production mode"
+    docker build --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -f web2py/Dockerfile web2py/
+fi
 
 rm -f mysql/*.sql

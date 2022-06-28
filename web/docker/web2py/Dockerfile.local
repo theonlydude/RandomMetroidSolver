@@ -6,8 +6,6 @@ ENV CERT_PASS web2py
 ENV CERT_DOMAIN web2py.local
 #password web2py admin
 ENV PW admin
-ARG BRANCH=master
-ARG GITHUB_TOKEN
 
 EXPOSE 443 80 8000
 
@@ -68,7 +66,6 @@ RUN mkdir -p js graph fonts images/sprite_sheets css
 # varia install
 RUN /root/RandomMetroidSolver/web/install.sh
 RUN /root/RandomMetroidSolver/varia_custom_sprites/install.sh
-# RUN if [ -n "${GITHUB_TOKEN}" ]; then VARIA_DIR=/root/RandomMetroidSolver /root/varia-race-mode/install.sh; fi
 
 # add db conf
 RUN echo "dbParams = dict(host='varia-mysql', user='varia', database='varia', password='varia', port=3306)" > /root/RandomMetroidSolver/db_params.py

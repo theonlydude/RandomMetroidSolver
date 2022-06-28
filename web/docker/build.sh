@@ -49,7 +49,7 @@ fi
 
 if [ -n "${LOCAL}" ]; then
     echo "local mode"
-    docker build --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -f web2py/Dockerfile.local ../../
+    docker build --tag varia-${BRANCH} -f web2py/Dockerfile.local ../../
 else
     echo "production mode"
     docker build --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -f web2py/Dockerfile web2py/

@@ -13,6 +13,15 @@ CWD=$(dirname $0)
 cd ${CWD}
 CWD=$(pwd)
 
+get_dir() {
+  DIR=$(pwd)
+  GIT_TOP_LEVEL=$(git rev-parse --show-toplevel)
+  if [ -n "${GIT_TOP_LEVEL}" ]; then
+      DIR=$GIT_TOP_LEVEL
+  fi
+  echo $DIR
+}
+
 BRANCH="master"
 DUMP=""
 GITHUB_TOKEN=""
@@ -48,10 +57,8 @@ if [ -n "${GITHUB_TOKEN}" ]; then
 fi
 
 if [ -n "${LOCAL}" ]; then
-    echo "local mode"
-    docker build --tag varia-${BRANCH} -f web2py/Dockerfile.local ../../
+    docker build --tag varia-${BRANCH} -f web2py/Dockerfile.local $(get_dir)
 else
-    echo "production mode"
     docker build --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -f web2py/Dockerfile web2py/
 fi
 

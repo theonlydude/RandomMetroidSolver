@@ -25,13 +25,13 @@ get_dir() {
 BRANCH="master"
 DUMP=""
 GITHUB_TOKEN=""
-LOCAL=""
-while getopts "b:d:t:l:" ARG; do
+LOCAL=1
+while getopts "b:d:t:l" ARG; do
     case ${ARG} in
         b) export BRANCH="${OPTARG}";;
         d) export DUMP="${OPTARG}";;
         t) export GITHUB_TOKEN="${OPTARG}";;
-        l) export LOCAL="${OPTARG}";;
+        l) export LOCAL=0;;
 	*) echo "Unknown option ${ARG}"; exit 0;;
     esac
 done
@@ -56,10 +56,10 @@ if [ -n "${GITHUB_TOKEN}" ]; then
     GITHUB_TOKEN=$(cat ${GITHUB_TOKEN})
 fi
 
-if [ -n "${LOCAL}" ]; then
+if [ ${LOCAL} -eq 0 ]; then
     docker build --tag varia-${BRANCH} -f web2py/Dockerfile.local $(get_dir)
 else
-    docker build --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -f web2py/Dockerfile web2py/
+    docker build --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} --build-arg LOCAL=${LOCAL} -f web2py/Dockerfile web2py/
 fi
 
 rm -f mysql/*.sql

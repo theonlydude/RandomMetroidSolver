@@ -8,7 +8,6 @@ ENV CERT_DOMAIN web2py.local
 ENV PW admin
 ARG BRANCH=master
 ARG GITHUB_TOKEN
-ARG LOCAL
 
 EXPOSE 443 80 8000
 
@@ -48,10 +47,6 @@ WORKDIR /root
 COPY RandomMetroidSolver.tar.gz /root/RandomMetroidSolver.tar.gz
 RUN if [ -n "${GITHUB_TOKEN}" ]; then \
     git clone --recurse-submodules -b ${BRANCH} https://${GITHUB_TOKEN}:x-oauth-basic@github.com/theonlydude/RandomMetroidSolver.git; \
-elif [ "${LOCAL}" -eq 0 ]; then \
-    mkdir RandomMetroidSolver; \
-    cd RandomMetroidSolver; \
-    tar zxf ../RandomMetroidSolver.tar.gz; \
 else \
     wget https://github.com/theonlydude/RandomMetroidSolver/archive/${BRANCH}.zip && unzip ${BRANCH}.zip && mv RandomMetroidSolver-${BRANCH} RandomMetroidSolver && rm -f ${BRANCH}.zip; \
     cd RandomMetroidSolver; \

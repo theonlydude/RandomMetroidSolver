@@ -44,7 +44,6 @@ RUN openssl genrsa -passout pass:$CERT_PASS 2048 > web2py.key && \
 
 # add VARIA source, use /root as HOME
 WORKDIR /root
-COPY RandomMetroidSolver.tar.gz /root/RandomMetroidSolver.tar.gz
 RUN if [ -n "${GITHUB_TOKEN}" ]; then \
     git clone --recurse-submodules -b ${BRANCH} https://${GITHUB_TOKEN}:x-oauth-basic@github.com/theonlydude/RandomMetroidSolver.git; \
 else \

@@ -187,3 +187,23 @@ root@computer:/home/dude/RandomMetroidSolver/web/docker# ./run.sh -b minimizer
 ```
 
 There's other scripts to start/stop the containers: start.sh / stop.sh, delete the containers/images: rm.sh and update the git repository in an image: update.sh -b branch .
+
+# Local Development
+To run your local code in a Docker container for development, you will need to pass the `-l` argument in the Docker `build` and `run` scripts to enable local mode. When using local mode, you do not need to rebuild the containers for any HTML, CSS or Javascript changes. Any changes to the Python code will require you to stop and restart. Any changes to the database will require a full rebuild of the container.
+
+```sh
+# Build the local containers
+$ ./web/docker/build.sh -l
+
+# Run the local containers
+$ ./web/docker/run.sh -l
+
+# Stop
+$ ./web/docker/stop.sh
+
+# Start
+$ ./web/docker/start.sh
+
+# Remove
+$ ./web/docker/rm.sh
+```

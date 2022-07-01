@@ -6,8 +6,6 @@ ENV CERT_PASS web2py
 ENV CERT_DOMAIN web2py.local
 #password web2py admin
 ENV PW admin
-ARG BRANCH=master
-ARG GITHUB_TOKEN
 
 EXPOSE 443 80 8000
 
@@ -32,7 +30,7 @@ RUN python3 -c "from gluon.main import save_password; save_password('$PW',80)" &
     python3 -c "from gluon.main import save_password; save_password('$PW',8000)"
 
 # copy nginx config
-ADD web2py /etc/nginx/conf.d/default.conf
+ADD web/docker/web2py/web2py /etc/nginx/conf.d/default.conf
 
 RUN mkdir /certs
 
@@ -42,18 +40,11 @@ RUN openssl genrsa -passout pass:$CERT_PASS 2048 > web2py.key && \
     openssl req -new -x509 -nodes -sha1 -days 1780 -subj "/C=US/ST=Denial/L=Chicago/O=Dis/CN=$CERT_DOMAIN" -key web2py.key > web2py.crt && \
     openssl x509 -noout -fingerprint -text < web2py.crt > web2py.info
 
-# add VARIA source, use /root as HOME
-WORKDIR /root
-RUN if [ -n "${GITHUB_TOKEN}" ]; then \
-    git clone --recurse-submodules -b ${BRANCH} https://${GITHUB_TOKEN}:x-oauth-basic@github.com/theonlydude/RandomMetroidSolver.git; \
-else \
-    wget https://github.com/theonlydude/RandomMetroidSolver/archive/${BRANCH}.zip && unzip ${BRANCH}.zip && mv RandomMetroidSolver-${BRANCH} RandomMetroidSolver && rm -f ${BRANCH}.zip; \
-    cd RandomMetroidSolver; \
-    rm -rf varia_custom_sprites && wget https://github.com/theonlydude/varia_custom_sprites/archive/main.zip && unzip main.zip && mv varia_custom_sprites-main varia_custom_sprites && rm -f main.zip; \
-fi
+# add VARIA local source, use /root as HOME
+ADD ./ /root/RandomMetroidSolver
 
-# fetch race mode, only through github because private repo
-RUN if [ -n "${GITHUB_TOKEN}" ]; then git clone https://${GITHUB_TOKEN}:x-oauth-basic@github.com/theonlydude/varia-race-mode; fi
+WORKDIR /root
+RUN cd RandomMetroidSolver; rm -rf varia_custom_sprites && wget https://github.com/theonlydude/varia_custom_sprites/archive/main.zip && unzip main.zip && mv varia_custom_sprites-main varia_custom_sprites && rm -f main.zip;
 
 # add communitry presets
 WORKDIR /root/web2py
@@ -75,7 +66,6 @@ RUN mkdir -p js graph fonts images/sprite_sheets css
 # varia install
 RUN /root/RandomMetroidSolver/web/install.sh
 RUN /root/RandomMetroidSolver/varia_custom_sprites/install.sh
-RUN if [ -n "${GITHUB_TOKEN}" ]; then VARIA_DIR=/root/RandomMetroidSolver /root/varia-race-mode/install.sh; fi
 
 # add db conf
 RUN echo "dbParams = dict(host='varia-mysql', user='varia', database='varia', password='varia', port=3306)" > /root/RandomMetroidSolver/db_params.py
@@ -84,6 +74,6 @@ RUN echo "dbParams = dict(host='varia-mysql', user='varia', database='varia', pa
 
 WORKDIR /
 
-COPY nginx.conf /etc/supervisor/conf.d/nginx.conf
-COPY web2py.conf /etc/supervisor/conf.d/web2py.conf
+COPY web/docker/web2py/nginx.conf /etc/supervisor/conf.d/nginx.conf
+COPY web/docker/web2py/web2py.conf /etc/supervisor/conf.d/web2py.conf
 CMD ["supervisord", "-n"]

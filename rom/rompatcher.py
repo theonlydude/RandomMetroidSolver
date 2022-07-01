@@ -330,7 +330,7 @@ class RomPatcher:
                 plms.append('WS_Save_Blinking_Door')
             if bosses == True:
                 stdPatches.append("Phantoon_Eye_Door")
-            if area == True or doorsColorsRando == True:
+            if area == True or doorsColorsRando == True or not GraphUtils.isStandardStart(startLocation):
                 stdPatches.append("Enable_Backup_Saves")
             if 'varia_hud.ips' in optionalPatches:
                 # varia hud can make demos glitch out

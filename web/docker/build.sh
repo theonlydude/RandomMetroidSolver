@@ -25,13 +25,13 @@ get_dir() {
 BRANCH="master"
 DUMP=""
 GITHUB_TOKEN=""
-LOCAL=1
+LOCAL=0
 while getopts "b:d:t:l" ARG; do
     case ${ARG} in
         b) export BRANCH="${OPTARG}";;
         d) export DUMP="${OPTARG}";;
         t) export GITHUB_TOKEN="${OPTARG}";;
-        l) export LOCAL=0;;
+        l) export LOCAL=1;;
 	*) echo "Unknown option ${ARG}"; exit 0;;
     esac
 done
@@ -57,9 +57,10 @@ if [ -n "${GITHUB_TOKEN}" ]; then
 fi
 
 if [ ${LOCAL} -eq 0 ]; then
-    docker build --tag varia-${BRANCH} -f web2py/Dockerfile.local $(get_dir)
+    docker build --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -f web2py/Dockerfile web2py/
+    rm -f web2py/RandomMetroidSolver.tar.gz
 else
-    docker build --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} --build-arg LOCAL=${LOCAL} -f web2py/Dockerfile web2py/
+    docker build --tag varia-${BRANCH} -f web2py/Dockerfile.local $(get_dir)
 fi
 
 rm -f mysql/*.sql

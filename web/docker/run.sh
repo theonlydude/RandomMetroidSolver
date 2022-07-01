@@ -14,11 +14,11 @@ get_dir() {
 }
 
 BRANCH="master"
-LOCAL=""
-while getopts "b:l:" ARG; do
+LOCAL=0
+while getopts "b:l" ARG; do
     case ${ARG} in
         b) export BRANCH="${OPTARG}";;
-        l) export LOCAL="${OPTARG}";;
+        l) export LOCAL=1;;
 	*) echo "Unknown option ${ARG}"; exit 0;;
     esac
 done
@@ -26,10 +26,10 @@ done
 # mysql image run
 docker run --network varia-network --link varia-mysql:varia-mysql --name varia-mysql --publish 0.0.0.0:3366:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=varia -e MYSQL_USER=varia -e MYSQL_PASSWORD=varia -d varia-mysql
 
-if [ -n "${LOCAL}" ]; then
-    docker run -v $(get_dir)/web:/root/RandomMetroidSolver/web --network varia-network --link varia-${BRANCH}:varia-${BRANCH} -d --publish 0.0.0.0:8000:8000 --name varia-${BRANCH} varia-${BRANCH}
-else
+if [ ${LOCAL} -eq 0 ]; then
     docker run --network varia-network --link varia-${BRANCH}:varia-${BRANCH} -d --publish 0.0.0.0:8000:8000 --name varia-${BRANCH} varia-${BRANCH}
+else
+    docker run -v $(get_dir)/web:/root/RandomMetroidSolver/web --network varia-network --link varia-${BRANCH}:varia-${BRANCH} -d --publish 0.0.0.0:8000:8000 --name varia-${BRANCH} varia-${BRANCH}
 fi
 
 # to check web2py logs:

@@ -5,6 +5,7 @@ extend 'layout.html'
 <meta name="description" content="Palettizer for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
 <script src="{{=URL('static','js/FileSaver.js')}}"></script>
+<script src="{{=URL('static', 'js/customizer.js')}}"></script>
 
 <link rel="stylesheet" type="text/css" href={{=URL('static','dist/switchery.css')}} media="screen"/>
 <script src="{{=URL('static','dist/switchery.js')}}"></script>
@@ -864,6 +865,11 @@ window.onload = function(){
                 }
 
                 romSize = file.size;
+
+                if(romSize == 3146240) {
+                    console.log("headered ROM detected, removing first 512 bytes of the header");
+                }
+
                 if( romSize > 4*1024*1024 ) {
                     document.getElementById("uploadFile").value = "";
                     alert("wrong rom file size: "+romSize.toString());

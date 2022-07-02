@@ -880,9 +880,7 @@ menu_show_save_data:
 	adc #$0040
 	tax
 	jsr $B3E2
-	// goto routine return
-	pla // discard return address
-	pea $A14D // go back here instead
+	pla // discard return address : return to previous caller, we have nothing left to do in hijacked routine
 	rts
 .energy:
 	LDY #$B496 // hijacked energy tilemap address load
@@ -927,28 +925,29 @@ save_area_text_table:
 	dw $ffff
 
 table "tables/menu.tbl"
-// max 11 char strings ending with ffff terminator
+// strings ending with ffff terminator
+// 13 chars max on top line, 11 on bottom
 .crateria:
-	dw " CRATERIA"
+	dw "  CRATERIA"
 .notext:
 	dw $ffff
 .green_brin:
-	dw "GREEN BRIN"
+	dw "GREEN BRIN."
 	dw $ffff
 .red_brin:
-	dw " RED BRIN"
+	dw "RED BRINSTAR"
 	dw $ffff
 .upper_norfair:
-	dw "UPPER NORF"
+	dw "UPPER NORFAIR"
 	dw $ffff
 .lower_norfair:
-	dw "LOWER NORF"
+	dw "LOWER NORFAIR"
 	dw $ffff
 .east_maridia:
-	dw "E MARIDIA"
+	dw "EAST MARIDIA"
 	dw $ffff
 .west_maridia:
-	dw "W MARIDIA"
+	dw "WEST MARIDIA"
 	dw $ffff
 .tourian:
 	dw "  TOURIAN"

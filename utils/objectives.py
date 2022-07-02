@@ -284,7 +284,7 @@ _goalsList = [
          category="Memes"),
     Goal("activate chozo robots", "other", lambda sm, ap: sm.wand(Objectives.canAccessLocation(sm, ap, "Bomb"),
                                                                   Objectives.canAccessLocation(sm, ap, "Gravity Suit"),
-                                                                  Objectives.canAccessLocation(sm, ap, "Golden Torizo"),
+                                                                  sm.haveItem("GoldenTorizo"),
                                                                   sm.canPassLowerNorfairChozo()), # graph access implied by GT loc
          "all_chozo_robots",
          category="Memes",

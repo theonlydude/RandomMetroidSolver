@@ -294,7 +294,12 @@ _goalsList = [
                                                               Objectives.canAccess(sm, ap, "Etecoons Bottom")), # Etecoons
          "visited_animals",
          category="Memes",
-         escapeAccessPoints=(2, ["Big Pink", "Etecoons Bottom"]))
+         escapeAccessPoints=(2, ["Big Pink", "Etecoons Bottom"])),
+    Goal("kill king cacatac", "other",
+         lambda sm, ap: Objectives.canAccess(sm, ap, 'Bubble Mountain Top'),
+         "king_cac_dead",
+         category="Memes",
+         escapeAccessPoints=(1, ['Bubble Mountain Top']))
 ]
 
 

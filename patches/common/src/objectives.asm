@@ -419,6 +419,8 @@ visited_animals:
 .end:
 	rts
 
+%eventChecker(king_cac_dead, !king_cac_event)
+
 print "A1 end: ", pc
 ;; warnpc $a1faff
 
@@ -468,6 +470,42 @@ org $a0f0af
 	dw check_shak_touch
 org $a0f0b1
 	dw check_shak_shot
+
+;;; overwrite Cacatac various AIs to check for King Cac death
+org $a0d019
+	dw check_cac_grapple
+org $a0d027
+	dw check_cac_PB
+org $a0d02f
+	dw check_cac_touch
+org $a0d031
+	dw check_cac_shot
+
+org $a2f4a0
+check_cac_grapple:
+	jsl $a2800A
+	bra check_cac
+
+check_cac_PB:
+	jsl $a28037
+	bra check_cac
+
+check_cac_touch:
+	jsl $a28023
+	bra check_cac
+
+check_cac_shot:
+	jsl $a2802d
+	bra check_cac
+
+check_cac:
+	lda !current_room : cmp #$acb3 : bne .end
+	;; we're in bubble mountain, check for cac death
+	lda $0F8C,x : bne .end	; if current enemy health is positive, do nothing
+	;; king cac is dead
+	lda !king_cac_event : jsl !mark_event
+.end:
+	rtl
 
 org $a3f350
 check_red_fish_tickle:

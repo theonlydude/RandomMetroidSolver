@@ -140,6 +140,7 @@ class Addresses(object):
         'objective[east_maridia_cleared]': ValueSingle(0xA1FD35),
         'objective[all_chozo_robots]': ValueSingle(0xA1FD3D),
         'objective[visited_animals]': ValueSingle(0xA1FD5C),
+        'objective[king_cac_dead]': ValueSingle(0xA1FDA8),
 
         'majorsSplit': ValueSingle(0x82fb6c, storage=Byte),
         # scavenger hunt items list (17 prog items (including ridley) + hunt over + terminator, each is a word)

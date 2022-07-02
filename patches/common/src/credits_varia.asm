@@ -928,7 +928,7 @@ table "tables/menu.tbl"
 // strings ending with ffff terminator
 // 13 chars max on top line, 11 on bottom
 .crateria:
-	dw "  CRATERIA"
+	dw " CRATERIA"
 .notext:
 	dw $ffff
 .green_brin:

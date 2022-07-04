@@ -4,7 +4,7 @@ async function main() {
   new vanillaRom()
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('load', () => {
   main()
     .catch((err) => {
       console.error(err)

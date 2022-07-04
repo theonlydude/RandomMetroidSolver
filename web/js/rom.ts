@@ -1,5 +1,7 @@
 import hasFileReader from './helpers/hasFileReader'
 import Settings from './helpers/settings'
+import Crc32 from './helpers/crc32'
+import { VANILLA_CRC32 } from './constants'
 
 const VALID_EXTENSIONS = ['sfc', 'smc']
 
@@ -14,13 +16,35 @@ class VanillaROM {
     const settings = Settings()
     const selector = settings.permalink ? 'vanillaUploadFile' : 'uploadFile'
     this.el = document.getElementById(selector)
-    const readFile = this.readFile.bind(this)
+    const useFile = this.useFile.bind(this)
     this.el?.addEventListener('change', (evt: Event) => {
       const file = (<HTMLInputElement>evt.target).files?.[0]
       if (file) {
-        readFile(file)
+        useFile(file)
       }
     })
+  }
+
+  validateChecksum(content) {
+    const fileSize = content.byteLength
+    if (fileSize === 3146240) {
+      console.log('potential headered ROM')
+      content = content.slice(512)
+    } else if (fileSize > 4*1024*1024) {
+      throw Error(`Filesize is too big: ${content.size.toString()}`)
+    } else {
+      console.log('correct size')
+    }
+    
+    const crc32 = new Crc32()
+    crc32.update(content)
+    const checksum = crc32.digest()
+    
+    if (checksum !== VANILLA_CRC32) {
+      throw Error('Non-Vanilla ROM detected')
+    }
+
+    return true
   }
 
   validateFileExtension(name: string) {
@@ -32,9 +56,18 @@ class VanillaROM {
     throw Error(`Unsupported file extension: ${extension}`)
   }
 
-  readFile(file: File) {
+  readFile(evt) {
+    const content = evt.target.result
+    this.validateChecksum(content)
+  }
+
+  useFile(file: File) {
     this.validateFileExtension(file.name)
-    console.log('valid file extension')
+
+    const reader = new FileReader()
+    const onLoad = this.readFile.bind(this)
+    reader.addEventListener('load', onLoad)
+    reader.readAsArrayBuffer(file)
   }
 }
 

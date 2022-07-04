@@ -23,12 +23,9 @@ class VanillaROM {
     })
   }
 
-  getFileExtension(name) {
+  validateFileExtension(name: string) {
     const lastDot = name.lastIndexOf('.')
-    return name.substring(lastDot + 1).toLowerCase()
-  }
-
-  validateFileExtension(extension) {
+    const extension = name.substring(lastDot + 1).toLowerCase()
     if (VALID_EXTENSIONS.includes(extension)) {
       return true
     }
@@ -36,8 +33,7 @@ class VanillaROM {
   }
 
   readFile(file: File) {
-    const extension = this.getFileExtension(file.name)
-    this.validateFileExtension(extension)
+    this.validateFileExtension(file.name)
     console.log('valid file extension')
   }
 }

@@ -33,19 +33,16 @@
         }
       });
     }
-    getFileExtension(name) {
+    validateFileExtension(name) {
       const lastDot = name.lastIndexOf(".");
-      return name.substring(lastDot + 1).toLowerCase();
-    }
-    validateFileExtension(extension) {
+      const extension = name.substring(lastDot + 1).toLowerCase();
       if (VALID_EXTENSIONS.includes(extension)) {
         return true;
       }
       throw Error(`Unsupported file extension: ${extension}`);
     }
     readFile(file) {
-      const extension = this.getFileExtension(file.name);
-      this.validateFileExtension(extension);
+      this.validateFileExtension(file.name);
       console.log("valid file extension");
     }
   };

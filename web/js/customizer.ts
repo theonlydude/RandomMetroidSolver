@@ -1,11 +1,12 @@
-import handleROM from './rom'
+import vanillaRom from './rom'
 
 async function main() {
-  console.log('sup its main')
-  handleROM()
+  new vanillaRom()
 }
 
-main()
-  .catch((err) => {
-    console.error(err)
-  })
+document.addEventListener('DOMContentLoaded', () => {
+  main()
+    .catch((err) => {
+      console.error(err)
+    })
+})

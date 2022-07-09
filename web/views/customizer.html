@@ -418,7 +418,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "hellrun_rate", "etanks"];
+      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell"];
 
     for(var i=0; i<elems.length; i++) {
         var elem = document.getElementById(elems[i]);
@@ -428,6 +428,10 @@ function doSubmit() {
             dataDict[elems[i]] = elem.value;
         }
     }
+
+    // disabled for race seeds, but we don't want the 'off' value set for disabled elements as they're numbers
+    dataDict["hellrun_rate"] = document.getElementById("hellrun_rate").value;
+    dataDict["etanks"] = document.getElementById("etanks").value;
 
     dataDict["minDegree"] = $("#degree_slider_range").slider("values", 0);
     dataDict["maxDegree"] = $("#degree_slider_range").slider("values", 1);
@@ -1563,12 +1567,7 @@ def displayCheckbox(id, defaultTrue=False):
 
 {{
 def displayNumber(id, min, max, default, step="1"):
-  if id in session.customizer:
-    value = session.customizer[id]
-  else:
-    value = default
-    pass
-
+  value = session.customizer.get(id, default)
   response.write("<input name=\"{}\" id=\"{}\" type=\"number\" value=\"{}\" min=\"{}\" max=\"{}\" step=\"{}\" class=\"full\" required>".format(id, id, value, min, max, step), escape=False)
   pass
 }}

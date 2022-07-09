@@ -30,17 +30,14 @@ export password=$(get_db_param "password")
 
 KEYS=$(get_pending_seeds)
 
-# add them to git
+# set to uploaded
 for KEY in ${KEYS}; do
-    git add ${KEY}
     update_seed_status "${KEY}" "uploaded"
 done
-git commit -m "daily commit" .
-git push
 
-# delete non git older than retention
-RETENTION_DAYS=7
-git status . | grep -E '[0-9a-z\-]+/' | while read KEY; do
+# delete older than retention
+RETENTION_DAYS=365
+ls -1 | grep -E '[0-9a-z\-]+' | while read KEY; do
     if [ -n "$(find "${KEY}" -mtime +${RETENTION_DAYS})" ]; then
         echo "delete ${KEY}"
         rm -rf "${KEY}"

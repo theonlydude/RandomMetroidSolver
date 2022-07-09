@@ -93,6 +93,8 @@ class SolverState(object):
         self.state["plandoScavengerOrder"] = solver.plandoScavengerOrder
         # for disabled tourian
         self.state["tourian"] = solver.tourian
+        # custom objectives
+        self.state["objectives"] = solver.objectives.getState()
 
     def toSolver(self, solver):
         solver.majorsSplit = self.state["majorsSplit"]
@@ -125,6 +127,7 @@ class SolverState(object):
         solver.doorsRando = self.state["doorsRando"]
         solver.plandoScavengerOrder = self.state["plandoScavengerOrder"]
         solver.tourian = self.state["tourian"]
+        solver.objectives.setState(self.state["objectives"])
 
     def getRoomsVisibility(self, solver, areaGraph, sm):
         # add graph access points

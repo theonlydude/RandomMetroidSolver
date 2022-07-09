@@ -70,6 +70,8 @@ class Goal(object):
         self.expandable = len(self.expandableList) > 0
         self.category = category
         self.area = area
+        # used by solver/isolver to know if a goal has been completed
+        self.completed = False
 
     def setRank(self, rank):
         self.rank = rank
@@ -372,7 +374,7 @@ class Objectives(object):
 
         return False
 
-    def addGoal(self, goalName):
+    def addGoal(self, goalName, completed=False):
         LOG.debug("addGoal: {}".format(goalName))
         goal = Objectives.goals[goalName]
         if self.conflict(goal):
@@ -380,6 +382,7 @@ class Objectives(object):
         Objectives.nbActiveGoals += 1
         assert Objectives.nbActiveGoals <= Objectives.maxActiveGoals, "Too many active goals"
         goal.setRank(Objectives.nbActiveGoals)
+        goal.completed = completed
         Objectives.activeGoals.append(goal)
 
     def removeGoal(self, goal):
@@ -553,6 +556,14 @@ class Objectives(object):
     @staticmethod
     def getGoalsList():
         return [goal.name for goal in Objectives.activeGoals]
+
+    # call from interactivesolver
+    def getState(self):
+        return {goal.name: goal.completed for goal in Objectives.activeGoals}
+
+    def setState(self, state):
+        for goalName, completed in state.items():
+            self.addGoal(goalName, completed)
 
     # call from rando
     @staticmethod

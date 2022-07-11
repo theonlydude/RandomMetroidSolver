@@ -455,10 +455,18 @@ class Objectives(object):
             if area in goalsByArea:
                 goalsByArea[area].clearFunc = func
 
-    def setSolverMode(self, scavClearFunc, majorUpgrades):
-        self.setScavengerHuntFunc(scavClearFunc)
+    def setSolverMode(self, solver):
+        self.setScavengerHuntFunc(solver.scavengerHuntComplete)
         # in rando we know the number of items after randomizing, so set the functions only for the solver
-        self.setItemPercentFuncs(allUpgradeTypes=majorUpgrades)
+        self.setItemPercentFuncs(allUpgradeTypes=solver.majorUpgrades)
+
+        def getObjAreaFunc(area):
+            def f(sm, ap):
+                nonlocal solver, area
+                visitedLocs = set([loc.Name for loc in solver.visitedLocations])
+                return SMBool(all(locName in visitedLocs for locName in solver.splitLocsByArea[area]))
+            return f
+        self.setAreaFuncs({area:getObjAreaFunc(area) for area in solver.splitLocsByArea})
 
     def expandGoals(self):
         LOG.debug("Active goals:"+str(Objectives.activeGoals))

@@ -185,7 +185,7 @@ class RomLoader(object):
         for area, locIds in locIdsByArea.items():
             for loc in locations:
                 if loc.Id in locIds:
-                    locsByArea[area].append(loc)
+                    locsByArea[area].append(loc.Name)
         return locsByArea
 
     def loadScavengerOrder(self, locations):

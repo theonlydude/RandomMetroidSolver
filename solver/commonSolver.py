@@ -74,15 +74,9 @@ class CommonSolver(object):
                     self.objectives.tourianRequired = not self.romLoader.hasPatch('Escape_Trigger')
                 else:
                     self.objectives.setVanilla()
-            majorUpgrades = self.romLoader.loadMajorUpgrades()
-            self.objectives.setSolverMode(self.scavengerHuntComplete, majorUpgrades)
-            splitLocsByArea = self.romLoader.getSplitLocsByArea(self.locations)
-            def getObjAreaFunc(area):
-                def f(sm, ap):
-                    nonlocal splitLocsByArea, area
-                    return SMBool(all(loc in self.visitedLocations for loc in splitLocsByArea[area]))
-                return f
-            self.objectives.setAreaFuncs({area:getObjAreaFunc(area) for area in splitLocsByArea})
+            self.majorUpgrades = self.romLoader.loadMajorUpgrades()
+            self.splitLocsByArea = self.romLoader.getSplitLocsByArea(self.locations)
+            self.objectives.setSolverMode(self)
 
             if interactive == False:
                 print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {} activePatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches()), sorted(RomPatches.ActivePatches)))

@@ -415,7 +415,7 @@ if not args.no_ship:
     print("ship colors: {}".format(shipColors))
     maxColors = 16
     if len(shipColors) >= maxColors:
-        print("Too many colors in the image, convert it to 16 colors using ImageMagick for example:")
+        print("Too many colors in the image: {}, convert it to 16 colors using ImageMagick for example:".format(len(shipColors)))
         print("convert {} +dither -colors 16 - | convert - PNG32:{}".format(args.ship_template, args.ship_template))
         sys.exit(1)
 

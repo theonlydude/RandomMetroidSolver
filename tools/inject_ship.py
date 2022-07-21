@@ -221,9 +221,9 @@ def createColor(r, g, b):
 def applyMergePercent(percent, startColor, endColor):
     startColor = extractColors(startColor)
     endColor = extractColors(endColor)
-    r = min(startColor[0] + (endColor[0] * percent)//100, 31)
-    g = min(startColor[1] + (endColor[1] * percent)//100, 31)
-    b = min(startColor[2] + (endColor[2] * percent)//100, 31)
+    r = min(startColor[0] + (endColor[0] * percent)//100, endColor[0])
+    g = min(startColor[1] + (endColor[1] * percent)//100, endColor[1])
+    b = min(startColor[2] + (endColor[2] * percent)//100, endColor[2])
     return createColor(r, g, b)
 
 def applyPercent(percent, basePalette):

@@ -1,4 +1,4 @@
-import os, json, urllib, tempfile, subprocess, base64
+import os, json, urllib, tempfile, subprocess, base64, random
 from datetime import datetime
 from collections import defaultdict
 
@@ -24,8 +24,8 @@ class Customizer(object):
         self.vars = self.request.vars
 
     def run(self):
-        self.initCustomizerSession()
         self.initCustomSprites()
+        self.initCustomizerSession()
         musics = self.loadMusics()
         (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
 
@@ -100,10 +100,12 @@ class Customizer(object):
             self.session.customizer['globalShift'] = "on"
             self.session.customizer['customSpriteEnable'] = "off"
             self.session.customizer['customSprite'] = "samus"
+            self.session.customizer['customSpriteMultiSelect'] = list(customSprites.keys())
             self.session.customizer['customItemsEnable'] = "off"
             self.session.customizer['noSpinAttack'] = "off"
             self.session.customizer['customShipEnable'] = "off"
             self.session.customizer['customShip'] = "Red-M0nk3ySMShip1"
+            self.session.customizer['customShipMultiSelect'] = list(customShips.keys())
             self.session.customizer['gamepadMapping'] = "off"
             self.session.customizer['preset'] = ""
             self.session.customizer['itemsounds'] = "off"
@@ -154,11 +156,20 @@ class Customizer(object):
                   'bossesPalettes', 'minDegree', 'maxDegree', 'invert', 'hellrun_rate', 'etanks']
         validateWebServiceParams(self.request, switchs, [], [], others, isJson=True)
         if self.vars.customSpriteEnable == 'on':
-            if self.vars.customSprite not in customSprites:
+            if self.vars.customSprite == 'random':
+                for sprite in self.vars.customSpriteMultiSelect.split(','):
+                    if sprite not in customSprites:
+                        raiseHttp(400, "Wrong value for customSpriteMultiSelect", True)
+            elif self.vars.customSprite not in customSprites:
                 raiseHttp(400, "Wrong value for customSprite", True)
         if self.vars.customShipEnable == 'on':
-            if self.vars.customShip not in customShips:
+            if self.vars.customShip  == 'random':
+                for ship in self.vars.customShipMultiSelect.split(','):
+                    if ship not in customShips:
+                        raiseHttp(400, "Wrong value for customShipMultiSelect", True)
+            elif self.vars.customShip not in customShips:
                 raiseHttp(400, "Wrong value for customShip", True)
+
         if self.vars.music not in ["Don't touch", "Disable", "Randomize", "Customize", "Restore"]:
             raiseHttp(400, "Wrong value for music", True)
 
@@ -178,10 +189,14 @@ class Customizer(object):
         self.session.customizer['globalShift'] = self.vars.globalShift
         self.session.customizer['customSpriteEnable'] = self.vars.customSpriteEnable
         self.session.customizer['customSprite'] = self.vars.customSprite
+        if self.vars.customSprite == 'random':
+            self.session.customizer['customSpriteMultiSelect'] = self.vars.customSpriteMultiSelect.split(',')
         self.session.customizer['customItemsEnable'] = self.vars.customItemsEnable
         self.session.customizer['noSpinAttack'] = self.vars.noSpinAttack
         self.session.customizer['customShipEnable'] = self.vars.customShipEnable
         self.session.customizer['customShip'] = self.vars.customShip
+        if self.vars.customShip == 'random':
+            self.session.customizer['customShipMultiSelect'] = self.vars.customShipMultiSelect.split(',')
         self.session.customizer['gamepadMapping'] = self.vars.gamepadMapping
         if self.session.customizer['gamepadMapping'] == "on":
             self.session.customizer['preset'] = self.vars.preset
@@ -294,20 +309,30 @@ class Customizer(object):
                 params.append('--no_blue_door_palette')
 
         if self.vars.customSpriteEnable == 'on':
-            params += ['--sprite', "{}.ips".format(self.vars.customSprite)]
+            if self.vars.customSprite == 'random':
+                sprite = random.choice(self.session.customizer['customSpriteMultiSelect'])
+            else:
+                sprite = self.vars.customSprite
+
+            params += ['--sprite', "{}.ips".format(sprite)]
             with DB() as db:
-                db.addSprite(self.vars.customSprite)
+                db.addSprite(sprite)
             if self.vars.customItemsEnable == 'on':
                 params.append('--customItemNames')
             if self.vars.noSpinAttack == 'on':
                 params.append('--no_spin_attack')
         if self.vars.customShipEnable == 'on':
-            params += ['--ship', "{}.ips".format(self.vars.customShip)]
+            if self.vars.customShip == 'random':
+                ship = random.choice(self.session.customizer['customShipMultiSelect'])
+            else:
+                ship = self.vars.customShip
+
+            params += ['--ship', "{}.ips".format(ship)]
             with DB() as db:
-                db.addShip(self.vars.customShip)
-            if customShips[self.vars.customShip].get("hideSamus", False):
+                db.addShip(ship)
+            if customShips[ship].get("hideSamus", False):
                 params += ['-c', 'custom_ship.ips']
-            if customShips[self.vars.customShip].get("showSamusAtTakeoff", False):
+            if customShips[ship].get("showSamusAtTakeoff", False):
                 params += ['-c', 'Ship_Takeoff_Disable_Hide_Samus']
         if self.vars.seedKey != None:
             with DB() as db:

@@ -597,6 +597,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.MinimizerTourian
     elif args.tourian == 'Disabled':
         RomPatches.ActivePatches.append(RomPatches.NoTourian)
+    if 'relaxed_round_robin_cf.ips' in args.patches:
+        RomPatches.ActivePatches.append(RomPatches.RoundRobinCF)
     missileQty = float(args.missileQty)
     superQty = float(args.superQty)
     powerBombQty = float(args.powerBombQty)

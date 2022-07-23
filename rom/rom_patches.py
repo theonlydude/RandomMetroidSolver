@@ -85,6 +85,8 @@ class RomPatches:
     NoTourian               = 1007
     # BT wakes up on its item instead of bombs
     BombTorizoWake          = 1008
+    # Round-Robin Crystal Flash patch
+    RoundRobinCF            = 1009
 
     ### Hacks
     # rotation hack

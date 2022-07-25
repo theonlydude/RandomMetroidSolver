@@ -823,7 +823,7 @@ if __name__ == "__main__":
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
                                        escapeAttr, minimizerN, args.tourian == 'Fast',
-                                       args.doorsColorsRando)
+                                       args.doorsColorsRando, objectivesManager.isVanilla())
         else:
             # from customizer permalink, apply previously generated seed ips first
             if args.seedIps != None:

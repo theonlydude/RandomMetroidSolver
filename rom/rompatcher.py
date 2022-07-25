@@ -309,7 +309,7 @@ class RomPatcher:
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
                         escapeAttr=None, minimizerN=None, minimizerTourian=True,
-                        doorsColorsRando=False):
+                        doorsColorsRando=False, vanillaObjectives=True):
         try:
             # apply standard patches
             stdPatches = []
@@ -337,7 +337,8 @@ class RomPatcher:
                 self.applyIPSPatch("no_demo.ips")
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
-
+            if not vanillaObjectives:
+                self.applyIPSPatch("Objectives_sfx")
             if noLayout == False:
                 # apply layout patches
                 for patchName in RomPatcher.IPSPatches['Layout']:

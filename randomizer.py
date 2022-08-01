@@ -294,7 +294,7 @@ if __name__ == "__main__":
     parser.add_argument('--tourian', help="Tourian mode",
                         dest='tourian', nargs='?', default='Vanilla',
                         choices=['Vanilla', 'Fast', 'Disabled'])
-    parser.add_argument('--hellrun', help="Hellrun damage rate in %, between 0 and 400 (default 100)",
+    parser.add_argument('--hellrun', help="Hellrun damage rate in percentage, between 0 and 400 (default 100)",
                         dest='hellrunRate', default=100, type=int)
     parser.add_argument('--etanks', help="Additional ETanks, between 0 (default) and 18",
                         dest='additionalEtanks', default=0, type=int)

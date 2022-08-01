@@ -96,13 +96,13 @@ macro printObjectiveFunction(func)
 endmacro
 
 macro printSpecialAddr(entry, addr)
-print "    '__<entry>': 0x",pc,","
+print "    '__<entry>': 0x",<addr>,","
 endmacro
 
 org $a1fa80
 ;;; checks for objectives periodically
 print "from rom.addressTypes import ValueList, ValueSingle"
-print "# generated from asar output"	
+print "# generated from asar output"
 print "# A1 start: ", pc
 print "objectivesAddr = {"
 ;;; seed objectives checker functions pointers, max 5, list ends with $0000
@@ -1054,7 +1054,7 @@ func_obj2map_fading_out:
 ;;; sprites for completed objectives.
 ;;; an oam entry is made of five bytes: (s000000 xxxxxxxxx) (yyyyyyyy) (YXppPPPt tttttttt)
 print "    # *** completed spritemaps: ", pc
-%printAddrEntry(objectivesSpritesOAM)	
+%printAddrEntry(objectivesSpritesOAM)
 first_spritemap:
         dw $0001, $0000 : db $00 : dw $3E8C
 second_spritemap:
@@ -1110,7 +1110,7 @@ org $B695E0
 
 ;;; blank objective screen from B6F200 to B6FA00
 org $B6F200
-%printAddrEntry(objectivesText)	
+%printAddrEntry(objectivesText)
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
@@ -1149,6 +1149,6 @@ print "}"
 ;;; update special value totalItemsPercent
 print "_pctList = []"
 print "for pct in [25,50,75,100]:"
-print "    _pctList.append(objectivesAddr['__pct%d' % pct])"	
+print "    _pctList.append(objectivesAddr['__pct%d' % pct])"
 print "    del objectivesAddr['__pct%d' % pct]"
 print "objectivesAddr['totalItemsPercent'] = ValueList(_pctList)"

@@ -315,6 +315,10 @@ def completeGoalData():
     _goals["collect 100% items"].exclusion["list"] += areaGoals[:]
     # if we have scav hunt, don't require "clear area" (HUD behaviour incompatibility)
     _goals["finish scavenger hunt"].exclusion["list"] += areaGoals[:]
+    # remove clear area goals if disabled tourian, as escape can trigger as soon as an area is cleared,
+    # even if ship is not currently reachable
+    for goal in areaGoals:
+        _goals[goal].exclusion['tourian'] = "Disabled"
 
 completeGoalData()
 
@@ -342,6 +346,9 @@ class Objectives(object):
         Objectives.nbActiveGoals = 0
 
     def conflict(self, newGoal):
+        if newGoal.exclusion.get('tourian') == "Disabled" and self.tourianRequired == False:
+            LOG.debug("new goal %s conflicts with disabled Tourian" % newGoal.name)
+            return True
         LOG.debug("check if new goal {} conflicts with existing active goals".format(newGoal.name))
         count = 0
         for goal in Objectives.activeGoals:

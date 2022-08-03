@@ -135,6 +135,9 @@ objectives_completed:
 .loop:
         lda.l objective_funcs, x
         beq .end_loop      ; checkers function list end
+	;; check objective if not already completed 
+	lda.l objective_events, x : jsl !check_event
+	bcs .next
         jsr (objective_funcs, x)
 	bcc .next
 	;; objective completed

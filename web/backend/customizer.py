@@ -113,7 +113,6 @@ class Customizer(object):
             self.session.customizer['fast_doors'] = "off"
             self.session.customizer['Infinite_Space_Jump'] = "off"
             self.session.customizer['refill_before_save'] = "off"
-            self.session.customizer['relaxed_round_robin_cf'] = "off"
             self.session.customizer['widescreen'] = "off"
             self.session.customizer['AimAnyButton'] = "off"
             self.session.customizer['max_ammo_display'] = "off"
@@ -150,7 +149,7 @@ class Customizer(object):
                    'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
                    'remove_elevators_speed', 'remove_fast_doors', 'remove_Infinite_Space_Jump',
                    'remove_rando_speed', 'remove_spinjumprestart', 'gamepadMapping', 'widescreen',
-                   'hell', 'lava_acid_physics', 'relaxed_round_robin_cf']
+                   'hell', 'lava_acid_physics']
         others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
                   'bossesPalettes', 'minDegree', 'maxDegree', 'invert', 'hellrun_rate', 'etanks']
         validateWebServiceParams(self.request, switchs, [], [], others, isJson=True)
@@ -208,7 +207,6 @@ class Customizer(object):
         self.session.customizer['hellrun_rate'] = self.vars.hellrun_rate
         self.session.customizer['etanks'] = self.vars.etanks
         self.session.customizer['music'] = self.vars.music
-        self.session.customizer['relaxed_round_robin_cf'] = self.vars.relaxed_round_robin_cf
 
         if self.vars.music == 'Customize':
             musics = self.loadMusics()
@@ -243,8 +241,6 @@ class Customizer(object):
             params += ['-c', 'Infinite_Space_Jump']
         if self.vars.refill_before_save == 'on':
             params += ['-c', 'refill_before_save.ips']
-        if self.vars.relaxed_round_robin_cf == 'on':
-            params += ['-c', 'relaxed_round_robin_cf.ips']
         if self.vars.widescreen == 'on':
             params += ['-c', 'widescreen.ips']
         if self.vars.remove_itemsounds == 'on':

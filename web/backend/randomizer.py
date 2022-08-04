@@ -412,6 +412,7 @@ class Randomizer(object):
         self.session.randomizer['layoutPatches'] = self.vars.layoutPatches
         self.session.randomizer['variaTweaks'] = self.vars.variaTweaks
         self.session.randomizer['nerfedCharge'] = self.vars.nerfedCharge
+        self.session.randomizer['relaxed_round_robin_cf'] = self.vars.relaxed_round_robin_cf
         self.session.randomizer['itemsounds'] = self.vars.itemsounds
         self.session.randomizer['elevators_speed'] = self.vars.elevators_speed
         self.session.randomizer['fast_doors'] = self.vars.fast_doors
@@ -423,7 +424,6 @@ class Randomizer(object):
         self.session.randomizer['Infinite_Space_Jump'] = self.vars.Infinite_Space_Jump
         self.session.randomizer['refill_before_save'] = self.vars.refill_before_save
         self.session.randomizer['hud'] = self.vars.hud
-        self.session.randomizer['relaxed_round_robin_cf'] = self.vars.relaxed_round_robin_cf
         self.session.randomizer['scavNumLocs'] = self.vars.scavNumLocs
         self.session.randomizer['scavRandomized'] = self.vars.scavRandomized
         self.session.randomizer['tourian'] = self.vars.tourian

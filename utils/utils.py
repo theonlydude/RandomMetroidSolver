@@ -483,6 +483,7 @@ def getRandomizerDefaultParameters():
     defaultParams['gravityBehaviour'] = "Balanced"
     defaultParams['gravityBehaviourMultiSelect'] = defaultMultiValues['gravityBehaviour']
     defaultParams['nerfedCharge'] = "off"
+    defaultParams['relaxed_round_robin_cf'] = "off"
     defaultParams['itemsounds'] = "on"
     defaultParams['elevators_speed'] = "on"
     defaultParams['fast_doors'] = "on"
@@ -491,7 +492,6 @@ def getRandomizerDefaultParameters():
     defaultParams['Infinite_Space_Jump'] = "off"
     defaultParams['refill_before_save'] = "off"
     defaultParams['hud'] = "off"
-    defaultParams['relaxed_round_robin_cf'] = "off"
     defaultParams['animals'] = "off"
     defaultParams['No_Music'] = "off"
     defaultParams['random_music'] = "off"

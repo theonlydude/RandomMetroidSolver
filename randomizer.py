@@ -488,9 +488,7 @@ if __name__ == "__main__":
         possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty, args.morphPlacement)
         if args.startLocation == 'random':
             if args.startLocationList != None:
-                # to be able to give the list in jm we had to replace ' ' with '_', do the opposite operation
-                startLocationList = args.startLocationList.replace('_', ' ')
-                startLocationList = startLocationList.split(',')
+                startLocationList = args.startLocationList.split(',')
                 # intersection between user whishes and reality
                 possibleStartAPs = sorted(list(set(possibleStartAPs).intersection(set(startLocationList))))
                 if len(possibleStartAPs) == 0:
@@ -531,7 +529,7 @@ if __name__ == "__main__":
             except:
                 nbObjectives = 0 if "random" in args.objective else None
             if nbObjectives is not None:
-                availableObjectives = args.objectiveList.replace('_', ' ').split(',') if args.objectiveList is not None else objectives
+                availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
                 if nbObjectives > 0:
                     nbObjectives = min(nbObjectives, maxActiveGoals, len(availableObjectives))
                 else:
@@ -621,9 +619,7 @@ if __name__ == "__main__":
         minorQty = random.randint(25, 100)
     if energyQty == 'random':
         if args.energyQtyList != None:
-            # with jm can't have a list with space in it
-            energyQtyList = args.energyQtyList.replace('_', ' ')
-            energyQties = energyQtyList.split(',')
+            energyQties = args.energyQtyList.split(',')
         energyQty = random.choice(energyQties)
     if energyQty == 'ultra sparse':
         # add nerfed rainbow beam patch

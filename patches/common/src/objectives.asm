@@ -135,7 +135,7 @@ objectives_completed:
 .loop:
         lda.l objective_funcs, x
         beq .end_loop      ; checkers function list end
-	;; check objective if not already completed 
+	;; check objective if not already completed
 	lda.l objective_events, x : jsl !check_event
 	bcs .next
         jsr (objective_funcs, x)
@@ -174,6 +174,7 @@ check_objectives_events:
         lda !objectives_completed_event : jsl !mark_event
 	lda.l escape_option : and #$00ff : beq .end
 	jsr trigger_escape
+	stz !temp		; disable notification sfx
 .end:
 	rts
 
@@ -221,6 +222,7 @@ trigger_escape:
 	rts
 
 trigger_escape_music:
+	lda #$0000 : jsl !song_routine ; stop current music
 	lda !custom_music_marker
 	cmp !custom_music_id : beq .custom_music
 	lda #$ff24 : jsl !song_routine ; load boss 1 music data

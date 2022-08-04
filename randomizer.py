@@ -141,7 +141,7 @@ if __name__ == "__main__":
                                  'remove_rando_speed.ips', 'remove_spinjumprestart.ips',
                                  'remove_itemsounds.ips', 'vanilla_music.ips', 'custom_ship.ips',
                                  'Ship_Takeoff_Disable_Hide_Samus', 'widescreen.ips',
-                                 'hell.ips', 'lava_acid_physics.ips'])
+                                 'hell.ips', 'lava_acid_physics.ips', 'relaxed_round_robin_cf.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -604,6 +604,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.MinimizerTourian
     elif args.tourian == 'Disabled':
         RomPatches.ActivePatches.append(RomPatches.NoTourian)
+    if 'relaxed_round_robin_cf.ips' in args.patches:
+        RomPatches.ActivePatches.append(RomPatches.RoundRobinCF)
     missileQty = float(args.missileQty)
     superQty = float(args.superQty)
     powerBombQty = float(args.powerBombQty)

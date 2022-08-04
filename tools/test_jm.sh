@@ -66,26 +66,16 @@ function get_time {
 TIME=$(get_time)
 
 PRESETS=("regular" "newbie" "master")
-CHARGES=("" "--nerfedCharge")
-TWEAKS=("" "--novariatweaks")
-LAYOUTS=("" "--nolayout")
-CF=("" "-c relaxed_round_robin_cf.ips")
-STARTAPS=("" "--startLocation random")
-AREAS=("" "" "--area" "--area --areaLayoutBase")
-MINIMIZERS=("--bosses random" "--bosses random" "--bosses random" "--area --bosses --minimizer ")
-DOORS=("" "--doorsColorsRando random")
-MAJORSSPLITS=("random" "random" "random" "Scavenger")
-TOURIANS=("Vanilla" "Fast" "Disabled")
 
 function generate_random_list {
     FIRST=0
     while [ $# -ne 0 ]; do
-        if [ ${RANDOM} -gt 10000 ]; then
+        if [ ${RANDOM} -ge 16384 ]; then
             if [ ${FIRST} -eq 0 ]; then
                 FIRST=1
-                echo -en "${1}"
+                echo -en "\"${1}\""
             else
-                echo -en ",${1}"
+                echo -en ", \"${1}\""
             fi
         fi
         shift
@@ -96,71 +86,115 @@ function generate_multi_select {
     NAME="${1}"
     shift
 
-    MULTISELECTLIST=$(generate_random_list $*)
+    # have to use '_' for values with space in them
+    MULTISELECTLIST=$(generate_random_list $* | sed -e 's+_+ +g')
 
     if [ -n "${MULTISELECTLIST}" ]; then
-        echo "--${NAME}List ${MULTISELECTLIST}"
+        echo "\"${NAME}MultiSelect\": [${MULTISELECTLIST}],"
     fi
 }
 
 function generate_params {
-    SEED="$1"
-    PRESET="$2"
+    local SEED="$1"
+    local PRESET="$2"
+    local RANDO_PRESET="$3"
 
-    # optional patches
-    let S=$RANDOM%${#CHARGES[@]}
-    CHARGE=${CHARGES[$S]}
-    let S=$RANDOM%${#TWEAKS[@]}
-    TWEAK=${TWEAKS[$S]}
-    let S=$RANDOM%${#LAYOUTS[@]}
-    LAYOUT=${LAYOUTS[$S]}
-    let S=$RANDOM%${#STARTAPS[@]}
-    STARTAP=${STARTAPS[$S]}
-    let S=$RANDOM%${#AREAS[@]}
-    AREA=${AREAS[$S]}
-    let S=$RANDOM%${#MINIMIZERS[@]}
-    MINIMIZER=${MINIMIZERS[$S]}
-    if(echo "${MINIMIZER}" | grep -q minimizer); then
-        MINIMIZER="${MINIMIZER} $(echo 35+$RANDOM%65 | bc)"
-    fi
-    let S=$RANDOM%${#DOORS[@]}
-    DOOR=${DOORS[$S]}
-    let S=$RANDOM%${#MAJORSSPLITS[@]}
-    MAJORSSPLIT=${MAJORSSPLITS[$S]}
-    let S=$RANDOM%${#TOURIANS[@]}
-    TOURIAN=${TOURIANS[$S]}
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --randoPreset ${RANDO_PRESET} --jm --runtime 20"
+}
 
-    if(echo "${MAJORSSPLIT}" | grep -q "Scavenger"); then
-        MAJORS_SPLIT_LIST=""
-        SCAV_RANDOMS=("" "--scavRandomized")
-        let S=$RANDOM%${#SCAV_RANDOMS[@]}
-        SCAV_RANDOM=${SCAV_RANDOMS[$S]}
-        SCAVENGER="--scavNumLocs 0 ${SCAV_RANDOM}"
+function random_switch {
+    if [ ${RANDOM} -ge 16384 ]; then
+        echo -en "on"
     else
-        MAJORS_SPLIT_LIST=$(generate_multi_select "majorsSplit" 'Full' 'Major' 'Chozo' 'FullWithHUD')
-        SCAVENGER=""
+        echo -en "off"
     fi
-    PROGRESSION_DIFFICULTY_LIST=$(generate_multi_select "progressionDifficulty" 'easier' 'normal' 'harder')
-    MORPH_PLACEMENT_LIST=$(generate_multi_select "morphPlacement" 'early' 'late' 'normal')
-    ENERGY_QTY_LIST=$(generate_multi_select "energyQty" 'ultra_sparse' 'sparse' 'medium' 'vanilla')
-    GRAVITY_BEHAVIOUR_LIST=$(generate_multi_select "gravityBehaviour" 'Vanilla' 'Balanced' 'Progressive')
+}
 
-    if [ -n "${STARTAP}" ]; then
-        START_LOCATION_LIST=$(generate_multi_select "startLocation" "Ceres" "Landing_Site" "Gauntlet_Top" "Green_Brinstar_Elevator" "Big_Pink" "Etecoons_Supers" "Wrecked_Ship_Main" "Firefleas_Top" "Business_Center" "Bubble_Mountain" "Mama_Turtle" "Watering_Hole" "Aqueduct" "Red_Brinstar_Elevator" "Golden_Four")
-    fi
+function random_select {
+    local MIN=1
+    local MAX=$#
+    local CHOICE=$(shuf -i ${MIN}-${MAX} -n 1)
+    echo "\"`eval echo \"$\"\"$CHOICE\"`\""
+}
 
-    OBJECTIVES_LIST=$(generate_multi_select "objective" "kill_kraid" "kill_phantoon" "kill_draygon" "kill_ridley" "kill_one_G4" "kill_two_G4" "kill_three_G4" "kill_all_G4" "kill_spore_spawn" "kill_botwoon" "kill_crocomire" "kill_golden_torizo" "kill_one_miniboss" "kill_two_minibosses" "kill_three_minibosses" "kill_all_mini_bosses" "nothing" "collect_25%_items" "collect_50%_items" "collect_75%_items" "collect_100%_items")
+function generate_rando_presets {
+    local SEED="$1"
+    local PRESET="$2"
+    local RANDO_PRESET=$(mktemp)
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random ${MORPH_PLACEMENT_LIST} --progressionDifficulty random ${PROGRESSION_DIFFICULTY_LIST} --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random ${ENERGY_QTY_LIST} --majorsSplit ${MAJORSSPLIT} ${MAJORS_SPLIT_LIST} ${SCAVENGER} --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --escapeRando random --gravityBehaviour random ${GRAVITY_BEHAVIOUR_LIST} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${START_LOCATION_LIST} ${AREA} ${MINIMIZER} ${DOOR} --objective random --objectiveList  ${OBJECTIVES_LIST} --tourian ${TOURIAN} --jm"
+    cat > ${RANDO_PRESET} <<EOF
+{
+    "seed": "${SEED}",
+    "preset": "${PRESET}",
+    "startLocation": "random",
+    $(generate_multi_select "startLocation" "Ceres" "Landing_Site" "Gauntlet_Top" "Green_Brinstar_Elevator" "Big_Pink" "Etecoons_Supers" "Wrecked_Ship_Main" "Firefleas_Top" "Business_Center" "Bubble_Mountain" "Mama_Turtle" "Watering_Hole" "Aqueduct" "Red_Brinstar_Elevator" "Golden_Four")
+    "majorsSplit": "random",
+    $(generate_multi_select "majorsSplit" 'Full' 'Major' 'Chozo' 'FullWithHUD')
+    "scavNumLocs": "$(shuf -i 4-10 -n 1)",
+    "scavRandomized": "$(random_switch)",
+    "maxDifficulty": "random",
+    "progressionSpeed": "random",
+    $(generate_multi_select "progressionSpeed" 'slowest' 'slow' 'medium' 'fast' 'fastest' 'VARIAble' 'speedrun')
+    "progressionDifficulty": "random",
+    $(generate_multi_select "progressionDifficulty" 'easier' 'normal' 'harder')
+    "morphPlacement": "random",
+    $(generate_multi_select "morphPlacement" 'early' 'late' 'normal')
+    "suitsRestriction": "$(random_switch)",
+    "hideItems": "$(random_switch)",
+    "strictMinors": "$(random_switch)",
+    "missileQty": "0",
+    "superQty": "0",
+    "powerBombQty": "0",
+    "minorQty": "0",
+    "energyQty": "random",
+    $(generate_multi_select "energyQty" 'ultra_sparse' 'sparse' 'medium' 'vanilla')
+    "objective": "random",
+    $(generate_multi_select "objective" "kill_kraid" "kill_phantoon" "kill_draygon" "kill_ridley" "kill_one_G4" "kill_two_G4" "kill_three_G4" "kill_all_G4" "kill_spore_spawn" "kill_botwoon" "kill_crocomire" "kill_golden_torizo" "kill_one_miniboss" "kill_two_minibosses" "kill_three_minibosses" "kill_all_mini_bosses" "nothing" "collect_25%_items" "collect_50%_items" "collect_75%_items" "collect_100%_items" "collect_all_upgrades" "clear_crateria" "clear_green_brinstar" "clear_red_brinstar" "clear_wrecked_ship" "clear_kraid's_lair" "clear_upper_norfair" "clear_croc's_lair" "clear_lower_norfair" "clear_west_maridia" "clear_east_maridia" "tickle_the_red_fish" "kill_the_orange_geemer" "kill_shaktool" "activate_chozo_robots" "visit_the_animals" "kill_king_cacatac")
+    "areaRandomization": "$(random_switch)",
+    "lightAreaRandomization": "$(random_switch)",
+    "areaLayout": "$(random_switch)",
+    "doorsColorsRando": "$(random_switch)",
+    "allowGreyDoors": "$(random_switch)",
+    "bossRandomization": "$(random_switch)",
+    "minimizer": "$(random_switch)",
+    "minimizerQty": "$(shuf -i 35-100 -n 1)",
+    "tourian": $(random_select 'Vanilla' 'Fast' 'Disabled'),
+    "escapeRando": "$(random_switch)",
+    "removeEscapeEnemies": "$(random_switch)",
+    "funCombat": "$(random_switch)",
+    "funMovement": "$(random_switch)",
+    "funSuits": "$(random_switch)",
+    "layoutPatches": "$(random_switch)",
+    "variaTweaks": "$(random_switch)",
+    "nerfedCharge": "$(random_switch)",
+    "relaxed_round_robin_cf": "$(random_switch)",
+    "gravityBehaviour":  "random",
+    $(generate_multi_select "gravityBehaviour" 'Vanilla' 'Balanced' 'Progressive')
+    "itemsounds": "$(random_switch)",
+    "elevators_speed": "$(random_switch)",
+    "fast_doors": "$(random_switch)",
+    "spinjumprestart": "$(random_switch)",
+    "rando_speed": "$(random_switch)",
+    "Infinite_Space_Jump": "$(random_switch)",
+    "refill_before_save": "$(random_switch)",
+    "hud": "$(random_switch)",
+    "animals": "$(random_switch)",
+    "No_Music": "$(random_switch)",
+    "random_music": "$(random_switch)"
+}
+EOF
+
+    echo -en "${RANDO_PRESET}"
 }
 
 function computeSeed {
     # generate seed
     let P=$RANDOM%${#PRESETS[@]}
-    PRESET=${PRESETS[$P]}
-    SEED="$RANDOM$RANDOM$RANDOM$RANDOM"
+    local PRESET=${PRESETS[$P]}
+    local SEED="$RANDOM$RANDOM$RANDOM$RANDOM"
 
-    PARAMS=$(generate_params "${SEED}" "${PRESET}")
+    local RANDO_PRESET=$(generate_rando_presets "${SEED}" "${PRESET}")
+    local PARAMS=$(generate_params "${SEED}" "${PRESET}" "${RANDO_PRESET}")
 
     if [ ${COMPARE} -eq 0 ]; then
 	OLD_MD5="old n/a"
@@ -193,6 +227,8 @@ function computeSeed {
     MAJORSSPLIT_NEW=$(echo "${RANDO_OUT}" | grep majorsSplit | cut -d ':' -f 2)
     MORPH_NEW=$(echo "${RANDO_OUT}" | grep morphPlacement | cut -d ':' -f 2)
 
+    RANDO_PRESET_NEW="${SEED}_${PRESET}_${PROGSPEED_NEW}.json"
+
     if [ "${OLD_MD5}" != "${NEW_MD5}" -a ${COMPARE} -eq 0 ]; then
 	if [ "${OLD_MD5}" = "old n/a" ] && [ "${NEW_MD5}" = "new n/a" ]; then
 	    MD5="n/a"
@@ -211,14 +247,18 @@ function computeSeed {
     # solve seed
     ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}*.sfc)
     if [ $? -ne 0 ]; then
-	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
+	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};" | tee -a ${CSV}
+        mv ${RANDO_PRESET} ${RANDO_PRESET_NEW}
 	exit 0
     fi
+
+    RANDO_PRESET_NEW="${ROM_GEN}.json"
+    mv ${RANDO_PRESET} ${RANDO_PRESET_NEW}
 
     if [ ${COMPARE} -eq 0 ]; then
 	SOLVER_OUT=$(${TIME} -f "\t%E real" $OLD_PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor --runtime 10 --pickupStrategy any 2>&1)
 	if [ $? -ne 0 ]; then
-            echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
+            echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
             echo "${RANDO_OUT}" >> ${LOG}
             echo "${SOLVER_OUT}" >> ${LOG}
@@ -236,7 +276,7 @@ function computeSeed {
 
     SOLVER_OUT=$(${TIME} -f "\t%E real" $PYTHON ~/RandomMetroidSolver/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor --runtime 10 --pickupStrategy any 2>&1)
     if [ $? -ne 0 ]; then
-        echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
+        echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};" | tee -a ${CSV}
         echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
         echo "${RANDO_OUT}" >> ${LOG}
         echo "${SOLVER_OUT}" >> ${LOG}
@@ -255,19 +295,19 @@ function computeSeed {
     if [ ${DUP_NEW} -eq 0 -o ${DUP_OLD} -eq 0 ]; then
 	DUP="dup major detected"
     fi
-    echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${DUP}" | tee -a ${CSV}
+    echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${DUP}" | tee -a ${CSV}
 
     if [ ${COMPARE} -eq 0 ]; then
 	DIFF=$(diff ${ROM_GEN}.old ${ROM_GEN}.new)
 
 	if [ -z "${DIFF}" ]; then
-	    rm -f ${ROM_GEN} ${ROM_GEN}.new ${ROM_GEN}.old
+	    rm -f ${ROM_GEN} ${ROM_GEN}.new ${ROM_GEN}.old ${RANDO_PRESET_NEW}
 	    echo "${SEED};${ROM_GEN};SOLVER;${PRESET};OK;" | tee -a ${CSV}
 	else
 	    echo "${SEED};${ROM_GEN};SOLVER;${PRESET};NOK;" | tee -a ${CSV}
 	fi
     else
-	rm -f ${ROM_GEN}
+	rm -f ${ROM_GEN} ${ROM_GEN}.json
     fi
 }
 

@@ -20,6 +20,7 @@ incsrc "event_list.asm"
 !current_room = $079b
 !samus_x = $0AF6
 !samus_y = $0AFA
+!temp = $0743
 
 ;;; external routines
 !song_routine = $808fc1
@@ -40,8 +41,9 @@ org $A1F5FE
 ;;; if non-zero trigger escape as soon as objectives are completed
 escape_option:
 	db $00
-;;; if escape option is non-zero, trigger escape only in crateria
-escape_option_crateria:
+;;; low bit: with nothing objective, trigger escape only in crateria
+;;; high bit: play sfx on objective completion (don't use for vanilla objectives)
+objectives_options_mask:
 	db $01
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -84,11 +86,28 @@ org $A6C5ED
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; CODE
 
+;;; helper macros to generate python addresses dict
+macro printAddrEntry(entry)
+print "    '<entry>': ValueSingle(0x",pc,"),"
+endmacro
+
+macro printObjectiveFunction(func)
+%printAddrEntry(objective[<func>])
+endmacro
+
+macro printSpecialAddr(entry, addr)
+print "    '__<entry>': 0x",<addr>,","
+endmacro
+
 org $a1fa80
 ;;; checks for objectives periodically
-print "A1 start: ", pc
+print "from rom.addressTypes import ValueList, ValueSingle"
+print "# generated from asar output"
+print "# A1 start: ", pc
+print "objectivesAddr = {"
 ;;; seed objectives checker functions pointers, max 5, list ends with $0000
-print "--- objectives checker functions: ", pc, " ---"
+print "    # --- objectives checker functions: ", pc, " ---"
+%printAddrEntry(objectivesList)
 objective_funcs:
         dw kraid_is_dead
         dw phantoon_is_dead
@@ -111,20 +130,32 @@ objectives_completed:
         phx
 	;; don't check anything if objectives are already completed
 	lda !objectives_completed_event : jsl !check_event : bcs .end
+	stz !temp
         ldx #$0000
 .loop:
         lda.l objective_funcs, x
         beq .end_loop      ; checkers function list end
+	;; check objective if not already completed
+	lda.l objective_events, x : jsl !check_event
+	bcs .next
         jsr (objective_funcs, x)
 	bcc .next
 	;; objective completed
 	lda.l objective_events, x : jsl !mark_event
+	;; store a non-zero value in temp if an obj is completed
+	lda #$0001 : sta !temp
 .next:
         inx : inx
         cpx.w !max_objectives*2
         bne .loop
 .end_loop:
 	jsr check_objectives_events
+	;; check if we should play an sfx upon objective completion
+	lda !temp : beq .end 	; do nothing anyway if no obj completed
+	lda.l objectives_options_mask : bit #$0080 : beq .end
+.sfx:
+	;; play G4 particle sfx
+	lda #$0019 : jsl $8090A3
 .end:
         plx
         rts
@@ -143,6 +174,7 @@ check_objectives_events:
         lda !objectives_completed_event : jsl !mark_event
 	lda.l escape_option : and #$00ff : beq .end
 	jsr trigger_escape
+	stz !temp		; disable notification sfx
 .end:
 	rts
 
@@ -190,6 +222,7 @@ trigger_escape:
 	rts
 
 trigger_escape_music:
+	lda #$0000 : jsl !song_routine ; stop current music
 	lda !custom_music_marker
 	cmp !custom_music_id : beq .custom_music
 	lda #$ff24 : jsl !song_routine ; load boss 1 music data
@@ -210,10 +243,9 @@ boss_drops:
 	rtl
 
 ;;; objectives checker functions, set carry if objective is completed
-
 ;;; helper macro to autodef simple event checker functions
 macro eventChecker(func_name, event)
-print "<func_name>: ", pc
+%printObjectiveFunction(<func_name>)
 <func_name>:
 	lda <event> : jsl !check_event
 	rts
@@ -224,7 +256,7 @@ endmacro
 %eventChecker(draygon_is_dead, !draygon_event)
 %eventChecker(ridley_is_dead, !ridley_event)
 
-print "all_g4_dead: ", pc
+%printObjectiveFunction(all_g4_dead)
 all_g4_dead:
         jsr kraid_is_dead
         bcc .no
@@ -243,7 +275,7 @@ all_g4_dead:
 %eventChecker(crocomire_is_dead, !croc_event)
 %eventChecker(golden_torizo_is_dead, !GT_event)
 
-print "all_mini_bosses_dead: ", pc
+%printObjectiveFunction(all_mini_bosses_dead)
 all_mini_bosses_dead:
         jsr spore_spawn_is_dead
         bcc .no
@@ -304,7 +336,7 @@ nb_killed_minibosses:
         rts
 
 macro nbBossChecker(n, bossType)
-print "<bossType>_<n>_killed: ", pc
+%printObjectiveFunction(<bossType>_<n>_killed)
 <bossType>_<n>_killed:
 	phx
         jsr nb_killed_<bossType>es
@@ -323,10 +355,10 @@ endmacro
 %nbBossChecker(3,miniboss)
 
 macro itemPercentChecker(percent)
-print "collect_<percent>_items: ", pc
+%printObjectiveFunction(collect_<percent>_items)
 collect_<percent>_items:
 	lda !CollectedItems
-print "    write in ROM <percent>% items value at: ",hex(.cmpval+1)
+%printSpecialAddr(pct<percent>, hex(.cmpval+1))
 .cmpval:
         cmp.w #<percent>              ; set carry when A is >= value
         rts
@@ -337,13 +369,13 @@ endmacro
 %itemPercentChecker(75)
 %itemPercentChecker(100)
 
-print "nothing_objective: ", pc
+%printObjectiveFunction(nothing_objective)
 nothing_objective:
 	;; if option enabled, complete objective only when in
 	;; crateria/blue brin, in case we trigger escape immediately
 	;; and we have custom start location.
 	lda.l escape_option : and #$00ff : beq .ok
-	lda.l escape_option_crateria : and #$00ff : beq .ok
+	lda.l objectives_options_mask : and #$0001 : beq .ok
 	;; determine current graph area in special byte in room state header
 	phx
 	ldx $07bb
@@ -362,13 +394,13 @@ nothing_objective:
 %eventChecker(orange_geemer, !orange_geemer_event)
 %eventChecker(shak_dead, !shak_dead_event)
 
-print "all_items_mask: ", pc
+%printAddrEntry(itemsMask)
 all_items_mask:
 	dw $f32f
-print "all_beams_mask: ", pc
+%printAddrEntry(beamsMask)
 all_beams_mask:
 	dw $100f
-print "all_major_items: ", pc
+%printObjectiveFunction(all_major_items)
 all_major_items:
 	lda $09A4 : cmp.l all_items_mask : bne .not
 	lda $09A8 : cmp.l all_beams_mask : bne .not
@@ -390,7 +422,7 @@ all_major_items:
 %eventChecker(west_maridia_cleared, !west_maridia_cleared_event)
 %eventChecker(east_maridia_cleared, !east_maridia_cleared_event)
 
-print "all_chozo_robots: ", pc
+%printObjectiveFunction(all_chozo_robots)
 all_chozo_robots:
 	jsr golden_torizo_is_dead : bcc .end
 	lda !BT_event : jsl !check_event : bcc .end
@@ -399,7 +431,7 @@ all_chozo_robots:
 .end:
 	rts
 
-print "visited_animals: ", pc
+%printObjectiveFunction(visited_animals)
 visited_animals:
 	lda !visited_etecoons_event : jsl !check_event : bcc .etecoons
 	lda !visited_dachora_event : jsl !check_event : bcs .end
@@ -421,7 +453,7 @@ visited_animals:
 
 %eventChecker(king_cac_dead, !king_cac_event)
 
-print "A1 end: ", pc
+print "    # A1 end: ", pc
 ;; warnpc $a1faff
 
 ;;; only sink the ground in G4 room if objectives are completed.
@@ -571,7 +603,7 @@ warnpc $aaf82f
 ;;; continue in 82 after InfoStr in seed_display.asm
 org $82FB6D
 
-print "Pause stuff: ", pc
+print "    # Pause stuff: ", pc
 
 ;;;
 ;;; pause menu objectives display
@@ -1026,7 +1058,8 @@ func_obj2map_fading_out:
 
 ;;; sprites for completed objectives.
 ;;; an oam entry is made of five bytes: (s000000 xxxxxxxxx) (yyyyyyyy) (YXppPPPt tttttttt)
-print "*** completed spritemaps: ", pc
+print "    # *** completed spritemaps: ", pc
+%printAddrEntry(objectivesSpritesOAM)
 first_spritemap:
         dw $0001, $0000 : db $00 : dw $3E8C
 second_spritemap:
@@ -1041,8 +1074,7 @@ fifth_spritemap:
 completed_spritemaps:
 	dw first_spritemap, second_spritemap, third_spritemap, fourth_spritemap, fifth_spritemap
 
-print ""
-print "82 end: ", pc
+print "    # 82 end: ", pc
 
 ;;; start of percent patch
 warnpc $82ffbf
@@ -1083,6 +1115,7 @@ org $B695E0
 
 ;;; blank objective screen from B6F200 to B6FA00
 org $B6F200
+%printAddrEntry(objectivesText)
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
@@ -1116,3 +1149,11 @@ org $B6F200
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+
+print "}"
+;;; update special value totalItemsPercent
+print "_pctList = []"
+print "for pct in [25,50,75,100]:"
+print "    _pctList.append(objectivesAddr['__pct%d' % pct])"
+print "    del objectivesAddr['__pct%d' % pct]"
+print "objectivesAddr['totalItemsPercent'] = ValueList(_pctList)"

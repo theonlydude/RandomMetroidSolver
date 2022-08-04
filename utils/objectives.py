@@ -315,6 +315,10 @@ def completeGoalData():
     _goals["collect 100% items"].exclusion["list"] += areaGoals[:]
     # if we have scav hunt, don't require "clear area" (HUD behaviour incompatibility)
     _goals["finish scavenger hunt"].exclusion["list"] += areaGoals[:]
+    # remove clear area goals if disabled tourian, as escape can trigger as soon as an area is cleared,
+    # even if ship is not currently reachable
+    for goal in areaGoals:
+        _goals[goal].exclusion['tourian'] = "Disabled"
 
 completeGoalData()
 
@@ -326,6 +330,7 @@ class Objectives(object):
     goals = _goals
     graph = None
     _tourianRequired = None
+    vanillaGoals = ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"]
 
     def __init__(self, tourianRequired=True):
         if Objectives._tourianRequired is None:
@@ -341,6 +346,9 @@ class Objectives(object):
         Objectives.nbActiveGoals = 0
 
     def conflict(self, newGoal):
+        if newGoal.exclusion.get('tourian') == "Disabled" and self.tourianRequired == False:
+            LOG.debug("new goal %s conflicts with disabled Tourian" % newGoal.name)
+            return True
         LOG.debug("check if new goal {} conflicts with existing active goals".format(newGoal.name))
         count = 0
         for goal in Objectives.activeGoals:
@@ -389,6 +397,10 @@ class Objectives(object):
         Objectives.nbActiveGoals -= 1
         Objectives.activeGoals.remove(goal)
 
+    def clearGoals(self):
+        Objectives.nbActiveGoals = 0
+        Objectives.activeGoals.clear()
+
     @staticmethod
     def isGoalActive(goalName):
         return Objectives.goals[goalName] in Objectives.activeGoals
@@ -414,10 +426,17 @@ class Objectives(object):
         return SMBool(loc in availLocs)
 
     def setVanilla(self):
-        self.addGoal("kill kraid")
-        self.addGoal("kill phantoon")
-        self.addGoal("kill draygon")
-        self.addGoal("kill ridley")
+        self.clearGoals()
+        for goal in Objectives.vanillaGoals:
+            self.addGoal(goal)
+
+    def isVanilla(self):
+        if Objectives.nbActiveGoals != len(Objectives.vanillaGoals):
+            return False
+        for goal in Objectives.activeGoals:
+            if goal not in Objectives.vanillaGoals:
+                return False
+        return True
 
     def setScavengerHunt(self):
         self.addGoal("finish scavenger hunt")

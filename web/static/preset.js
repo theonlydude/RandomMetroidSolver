@@ -13,19 +13,11 @@ function loadPresetOk(data) {
         document.getElementById(key).value = value;
     })
 
-    const levels = [];
-    const is_checked = {};
-    const not_checked = {};
     Object.entries(data.Knows).forEach(([key, value]) => {
         const [checked, level] = value;
         const checkbox = document.getElementById(key + "_bool");
         if (checkbox.disabled) {
             return;
-        }
-        if (!checked) {
-            is_checked[level] = true;
-        } else {
-            not_checked[level] = true;
         }
         checkbox.value = checked ? 'on' : 'off';
         checkbox.checked = checked;
@@ -36,17 +28,18 @@ function loadPresetOk(data) {
         const selector = `#${key}_diff + .br-widget [data-rating-value="${difficulty}"]`;
         const bar = document.querySelector(selector);
         bar.click();
+    })
 
-        Object.entries(data.Controller).forEach(([key, value]) => {
-            if (key === "Moonwalk") {
-                document.getElementById("Moonwalk").checked = value === "on";
-                return;
-            }
-            const select = document.getElementById(key);
-            select.value = value;
-            select.dispatchEvent(new Event('change'));
-        })
-
+    Object.entries(data.Controller).forEach(([key, value]) => {
+        if (key === "Moonwalk") {
+            const checkbox = document.getElementById("Moonwalk");
+            checkbox.checked = value;
+            checkbox.value = value ? 'on' : 'off';
+            return;
+        }
+        const select = document.getElementById(key);
+        select.value = value;
+        select.dispatchEvent(new Event('change'));
     })
 
     loadSkillBar(data.skillBarData);
@@ -123,7 +116,7 @@ function loadSkillBar(skillBarData) {
     const id_texts = [
         ['skill-bar__title', skillBarData.custom[0]],
         ['skill-bar__score', skillBarData.custom[1]],
-        ['skill-bar__knowns-known', skillBarData.knownsKnown],
+        ['skill-bar__knows-known', skillBarData.knowsKnown],
         ['skill-bar__last-action', skillBarData.lastAction],
     ];
     id_texts.forEach(([id, text]) => {

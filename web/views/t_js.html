@@ -606,6 +606,10 @@ function updateDebugLines(jsonData) {
         var lineName = `${start}-${end}`;
         if(debugLines.indexOf(lineName) == -1) {
             addDebugLine(start, end, difficulty);
+        } else {
+            // path diff could have change
+            var line = debugLeaderLines[lineName];
+            line.setOptions({color: debugColors[difficulty]});
         }
         lines.add(lineName);
     }
@@ -1615,17 +1619,22 @@ function getTooltip(locName, locData, item, visited) {
         // sequence break
         if(locData["knows"].length > 0 && locData["knows"][0] == "Sequence Break") {
             return tooltip+"<center>Sequence Break</center>"
-                // debug data
-                +("path" in locData ? "<br>Path: "+locData["path"] : "")
-                +("distance" in locData ? "<br>Distance: "+locData["distance"] : "");
+                +(debug == true ?
+                  ("path" in locData ? "<br>Path: "+locData["path"] : "")
+                  +("distance" in locData ? "<br>Distance: "+locData["distance"] : "")
+                  : "");
         } else {
             return tooltip
-                   +"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")
-                   +"<br>Items: "+(locData["items"].length > 0 ? getItemsImages(locData["items"]) : "None")
-                   +("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "")
-                   +("difficulty" in locData ? "<br>Difficulty: "+locData["difficulty"][1] : "")
-                   // debug data
-                   +("distance" in locData ? "<br>Distance: "+locData["distance"] : "");
+                +"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")
+                +"<br>Items: "+(locData["items"].length > 0 ? getItemsImages(locData["items"]) : "None")
+                +("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "")
+                +("difficulty" in locData ? "<br>Difficulty: "+locData["difficulty"][1] : "")
+                +(debug == true ?
+                  ("distance" in locData ? "<br>Distance: "+locData["distance"] : "")
+                  +("path" in locData ? "<br>Path: "+locData["path"].join(' ') : "")
+                  +("locDifficulty" in locData ? "<br>locDiff: ["+locData["locDifficulty"][0]+"] ["+locData["locDifficulty"][1]+"] ["+locData["locDifficulty"][2]+"]" : "")
+                  +("pathDifficulty" in locData ? "<br>pathDiff: ["+locData["pathDifficulty"][0]+"] ["+locData["pathDifficulty"][1]+"] ["+locData["pathDifficulty"][2]+"]" : "")
+                  : "");
         }
     }
 }

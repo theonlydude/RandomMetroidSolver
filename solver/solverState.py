@@ -253,13 +253,6 @@ class SolverState(object):
                                 "visibility": loc.Visibility,
                                 "major": loc.isClass(majorsSplit)}
 
-#                if loc.locDifficulty is not None:
-#                    lDiff = loc.locDifficulty
-#                    ret[locName]["locDifficulty"] = [diff4solver(lDiff.difficulty), self.knows2isolver(lDiff.knows), list(set(lDiff.items))]
-#                if loc.pathDifficulty is not None:
-#                    pDiff = loc.pathDifficulty
-#                    ret[locName]["pathDifficulty"] = [diff4solver(pDiff.difficulty), self.knows2isolver(pDiff.knows), list(set(pDiff.items))]
-
                 if loc.comeBack is not None:
                     ret[locName]["comeBack"] = loc.comeBack
                 if loc.accessPoint is not None:
@@ -270,6 +263,13 @@ class SolverState(object):
                 if self.debug == True:
                     if loc.distance is not None:
                         ret[locName]["distance"] = loc.distance
+                    if loc.locDifficulty is not None:
+                        lDiff = loc.locDifficulty
+                        ret[locName]["locDifficulty"] = [diff4solver(lDiff.difficulty)[0], self.knows2isolver(lDiff.knows), list(set(lDiff.items))]
+                    if loc.pathDifficulty is not None:
+                        pDiff = loc.pathDifficulty
+                        ret[locName]["pathDifficulty"] = [diff4solver(pDiff.difficulty)[0], self.knows2isolver(pDiff.knows), list(set(pDiff.items))]
+
         return ret
 
     def getRemainLocationsWeb(self, locations, majorsSplit):

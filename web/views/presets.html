@@ -17,6 +17,7 @@ extend 'layout.html'
 <script src="{{=URL('static','barrating/jquery.barrating.min.js')}}"></script>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" src="{{=URL('static','preset.js')}}"></script>
 
 <style>
 {{include 'solver_web/varia.css'}}
@@ -290,10 +291,7 @@ function setGauntletEnergy(gauntletSetting, bombItem) {
   }
 }
 
-function ajaxPresetActionCall(action) {
-    // store the action to retreive it after the ajax call is completed
-    document.getElementById("stored_action").value = action;
-
+function getPresetDataDict(action) {
     var dataDict = {
         action: action,
         currenttab: document.getElementById("currenttab").value,
@@ -335,6 +333,15 @@ function ajaxPresetActionCall(action) {
     } else {
         dataDict["Moonwalk"] = "off";
     }
+
+    return dataDict
+}
+
+function ajaxPresetActionCall(action) {
+    // store the action to retreive it after the ajax call is completed
+    document.getElementById("stored_action").value = action;
+
+    var dataDict = getPresetDataDict(action);
 
     // call web service with parameters
     var request = $.ajax({
@@ -646,7 +653,7 @@ pass
         <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter"></colgroup>
         <tr>
           <td>Preset:</td>
-          <td colspan="3">{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.presets["preset"], _class="chzn-select"))}}</td>
+          <td colspan="3">{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.presets["preset"], _class="chzn-select", _onChange="loadPreset()"))}}</td>
           <td id="presetStep"><button type="button" onclick="startTheTour(0)">?</button></td>
         </tr>
         <tr>

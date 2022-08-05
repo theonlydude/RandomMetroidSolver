@@ -398,11 +398,13 @@ class Presets(object):
             preset = self.vars.preset
 
         # check if the presets file already exists
-        password = self.vars['password']
+        password = self.vars['password'] or ""
         password = password.encode('utf-8')
         passwordSHA256 = hashlib.sha256(password).hexdigest()
         fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
         if os.path.isfile(fullPath):
+            if self.vars.action == 'load':
+                return json.dumps(PresetLoader.factory(fullPath).params)
             # load it
             end = False
             try:

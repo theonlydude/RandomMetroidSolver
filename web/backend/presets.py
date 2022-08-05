@@ -404,7 +404,13 @@ class Presets(object):
         fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
         if os.path.isfile(fullPath):
             if self.vars.action == 'load':
-                return json.dumps(PresetLoader.factory(fullPath).params)
+                self.session.presets['preset'] = self.vars.preset
+                self.session.presets['currentTab'] = self.vars.currenttab
+                skillBarData = self.getSkillLevelBarData(self.session.presets['preset'])
+                out = PresetLoader.factory(fullPath).params
+                out.pop('password', None)
+                out['skillBarData']= skillBarData
+                return json.dumps(out)
             # load it
             end = False
             try:

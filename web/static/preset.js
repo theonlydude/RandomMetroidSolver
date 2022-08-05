@@ -27,8 +27,10 @@ function loadPresetOk(data) {
     } else {
       not_checked[level] = true
     }
+    checkbox.value = checked ? 'on' : 'off'
     checkbox.checked = checked
     checkbox.dispatchEvent(new Event('change'));
+    checkbox.dispatchEvent(new Event('click'));
 
     const difficulty = difficulty_by_level[level]
     const selector = `#${key}_diff + .br-widget [data-rating-value="${difficulty}"]`
@@ -46,6 +48,9 @@ function loadPresetOk(data) {
     })
 
   })
+
+  loadSkillBar(data.skillBarData);
+  drawSkillChart(data.skillBarData);
   verifyPreset(data)
 }
 
@@ -113,3 +118,82 @@ function loadPreset() {
   request.done(loadPresetOk)
   request.fail((e) => console.error(e));
 }
+
+function loadSkillBar(skillBarData) {
+  const id_texts = [
+    ['skill-bar__title', skillBarData.custom[0]],
+    ['skill-bar__score', skillBarData.custom[1]],
+    ['skill-bar__knowns-known', skillBarData.knownsKnown],
+    ['skill-bar__last-action', skillBarData.lastAction],
+  ]
+  id_texts.forEach(([id, text]) => {
+    $("#"+id).text(text)
+  })
+}
+
+
+function drawSkillChart(skillBarData) {
+  const rows = []
+
+  const mult = 2
+  const score = 100 + skillBarData["custom"][1] * mult
+  const lower = 100 + skillBarData["standards"]["newbie"] * mult
+  const upper = 100 + skillBarData["standards"]["samus"] * mult
+
+  let previousStdScore = lower
+  let previousPreset = 'newbie'
+  let stop = false
+  const presets = ['casual', 'regular', 'veteran', 'expert', 'master', 'samus']
+  presets.forEach((preset) => {
+    if (stop) {
+      return
+    }
+    const stdScore = 100 + skillBarData["standards"][preset] * mult
+    if (stdScore <= score) {
+      rows.push([ 'Skill', previousPreset, new Date(previousStdScore), new Date(stdScore)])
+    } else {
+      rows.push([ 'Skill', previousPreset, new Date(previousStdScore), new Date(score)])
+      stop = true
+    }
+    previousStdScore = stdScore
+    previousPreset = preset
+  })
+
+  var container = document.getElementById('timeline');
+  container.innerHTML = ""
+  var chart = new google.visualization.Timeline(container);
+  var dataTable = new google.visualization.DataTable();
+
+  dataTable.addColumn({ type: 'string', id: 'Role' });
+  dataTable.addColumn({ type: 'string', id: 'Difficulty' });
+  dataTable.addColumn({ type: 'date', id: 'Start' });
+  dataTable.addColumn({ type: 'date', id: 'End' });
+  dataTable.addRows(rows)
+
+  var options = {
+    hAxis: {
+      minValue: new Date(lower),
+      maxValue: new Date(upper),
+    },
+    timeline: { groupByRowLabel: true},
+    tooltip: { trigger: 'none' },
+    colors: ['#6daa53', '#C1B725', '#e69235', '#d13434', '#123456', '#000000'],
+    avoidOverlappingGridLines: false
+  };
+
+  window.google.visualization.events.addListener(chart, 'ready', function () {
+    // remove haxis label
+    var labels = container.getElementsByTagName('text');
+
+    for (let i = 0; i < labels.length; i++) {
+      if (labels[i].textContent.substring(0,1) == '0' || labels[i].textContent.substring(0,1) == '1') {
+        labels[i].parentNode.removeChild(labels[i]);
+        i--;
+      }
+    }
+
+  });
+  chart.draw(dataTable, options);
+}
+
+

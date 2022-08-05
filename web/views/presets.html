@@ -663,9 +663,7 @@ pass
         </tr>
         <tr>
           <td></td>
-          <td>
-            <input class="full" name="action" type="submit" value="Load"/>
-          </td>
+          <td></td>
           <td>
             <input class="full btn btn-default" onclick="askPassword('Update');" value="Update"/>
           </td>
@@ -683,20 +681,20 @@ pass
       <table class="full">
         <tr>
           <td>
-            <h3 class="center">{{=skillBarData["custom"][0]}}</h3>
+            <h3 id="skill-bar__title" class="center">{{=skillBarData["custom"][0]}}</h3>
           </td>
         </tr>
       </table>
       <table class="full">
         <tr>
           <td>Techniques known:</td>
-          <td>{{=skillBarData["knowsKnown"]}}</td>
+          <td id="skill-bar__knowns-known">{{=skillBarData["knowsKnown"]}}</td>
           <td>Skill score:</td>
-          <td>{{=skillBarData["custom"][1]}}</td>
+          <td id="skill-bar__score">{{=skillBarData["custom"][1]}}</td>
         </tr>
         <tr>
           <td>Last updated:</td>
-          <td>{{=skillBarData["lastAction"]}}</td>
+          <td id="skill-bar__last-action">{{=skillBarData["lastAction"]}}</td>
           <td></td>
           <td></td>
         </tr>

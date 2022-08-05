@@ -9,6 +9,7 @@ const difficulty_by_level = {
 }
 
 function loadPresetOk(data) {
+    $('#presetActionBox').removeClass('preset-loading');
     Object.entries(data.Settings).forEach(([key, value]) => {
         document.getElementById(key).value = value;
     })
@@ -95,6 +96,7 @@ function verifyPreset(data_in) {
 }
 
 function loadPreset() {
+    $('#presetActionBox').addClass('preset-loading');
     var dataDict = {
         preset: document.getElementById("preset").value,
         action: "load",

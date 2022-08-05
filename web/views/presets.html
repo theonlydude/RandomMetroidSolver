@@ -21,6 +21,17 @@ extend 'layout.html'
 
 <style>
 {{include 'solver_web/varia.css'}}
+.preset-loading {
+  position: relative;
+}
+.preset-loading:before {
+  background: rgba(255, 255, 255, 0.5);
+  content: "";
+  display: block;
+  inset: 0;
+  position:absolute;
+  z-index: 1;
+}
 .column {
     padding-right: 10px;
 }
@@ -648,7 +659,7 @@ pass
 <div class="main">
 <form id="presetForm" class="presetform" method="post">
   <div class="row">
-    <div class="columnThird">
+    <div class="columnThird" id="presetActionBox">
       <table class="full">
         <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter"></colgroup>
         <tr>

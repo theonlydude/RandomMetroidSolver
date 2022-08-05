@@ -50,6 +50,7 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/favicon.ico ] || ln -s ~/RandomMetroidSolver/web/static/favicon.ico ~/web2py/applications/solver/static/favicon.ico
 [ -L ~/web2py/applications/solver/static/favicon.png ] || ln -s ~/RandomMetroidSolver/web/static/favicon.png ~/web2py/applications/solver/static/favicon.png
 
+[ -L ~/web2py/applications/solver/static/preset.js ] || ln -s ~/RandomMetroidSolver/web/static/preset.js ~/web2py/applications/solver/static/preset.js
 [ -L ~/web2py/applications/solver/static/css/bootstrap-tour.min.css ] || ln -s ~/RandomMetroidSolver/web/static/bootstrap-tour.min.css ~/web2py/applications/solver/static/css/bootstrap-tour.min.css
 [ -L ~/web2py/applications/solver/static/barrating ] || ln -s ~/RandomMetroidSolver/web/static/barrating ~/web2py/applications/solver/static/barrating
 [ -L ~/web2py/applications/solver/static/js/bootstrap-tour.min.js ] || ln -s ~/RandomMetroidSolver/web/static/bootstrap-tour.min.js ~/web2py/applications/solver/static/js/bootstrap-tour.min.js

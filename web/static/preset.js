@@ -11,7 +11,9 @@ const difficulty_by_level = {
 function loadPresetOk(data) {
     $('#presetActionBox').removeClass('preset-loading');
     Object.entries(data.Settings).forEach(([key, value]) => {
-        document.getElementById(key).value = value;
+        var setting = document.getElementById(key);
+        setting.value = value;
+        setting.dispatchEvent(new Event('change'));
     })
 
     Object.entries(data.Knows).forEach(([key, value]) => {

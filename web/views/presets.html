@@ -661,19 +661,18 @@ pass
   <div class="row">
     <div class="columnThird" id="presetActionBox">
       <table class="full">
-        <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter"></colgroup>
+        <colgroup><col class="third" /><col class="third" /><col class="third" /></colgroup>
         <tr>
           <td>Preset:</td>
-          <td colspan="3">{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.presets["preset"], _class="chzn-select", _onChange="loadPreset()"))}}</td>
+          <td colspan="2">{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.presets["preset"], _class="chzn-select", _onChange="loadPreset()"))}}</td>
           <td id="presetStep"><button type="button" onclick="startTheTour(0)">?</button></td>
         </tr>
         <tr>
           <td>New preset:</td>
-          <td colspan="3"><input class="full" id="presetCreate", name="presetCreate" type="text"/></td>
+          <td colspan="2"><input class="full" id="presetCreate", name="presetCreate" type="text"/></td>
           <td id="presetCreateStep"><button type="button" onclick="startTheTour(1)">?</button></td>
         </tr>
         <tr>
-          <td></td>
           <td></td>
           <td>
             <input class="full btn btn-default" onclick="askPassword('Update');" value="Update"/>

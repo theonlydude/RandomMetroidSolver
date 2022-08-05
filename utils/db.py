@@ -486,9 +486,9 @@ order by 1,2;"""
 
         sql = "select max(action_time) from preset_action where preset = %s;"
         data = self.execSelect(sql, (preset,))
-        if data == None:
+        if data is None:
             return 'N/A'
-        data = data[0][0] if data[0][0] != None else 'N/A'
+        data = data[0][0].strftime("%Y-%m-%d %H:%M:%S") if data[0][0] is not None else 'N/A'
         return data
 
         return self.execSelect(sql % (id,))

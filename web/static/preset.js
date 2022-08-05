@@ -96,6 +96,7 @@ function verifyPreset(data_in) {
 }
 
 function loadPreset() {
+    $('#flash').hide();
     $('#presetActionBox').addClass('preset-loading');
     var dataDict = {
         preset: document.getElementById("preset").value,
@@ -111,7 +112,11 @@ function loadPreset() {
     });
 
     request.done(loadPresetOk);
-    request.fail((e) => console.error(e));
+    request.fail((e) => {
+        const flash = $("#flash");
+        flash.text("An error occurred while loading preset. Please refresh the page and try again.");
+        flash.show();
+    })
 }
 
 function loadSkillBar(skillBarData) {

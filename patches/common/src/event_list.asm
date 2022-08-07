@@ -76,10 +76,11 @@ math pri on
 !bowling_chozo_event = !VARIA_event_base+17
 !visited_dachora_event = !VARIA_event_base+18
 !visited_etecoons_event = !VARIA_event_base+19
+!king_cac_event = !VARIA_event_base+20
 
 ;;; Keep these macros at the end as they depend on current event index:
 !max_objectives = 5
-!objectives_event_base = !VARIA_event_base+20
+!objectives_event_base = !VARIA_event_base+21
 
 ;; declare an array with all the "objective completed" events
 macro objectivesCompletedEventArray()

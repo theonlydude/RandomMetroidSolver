@@ -158,7 +158,7 @@ class Knows:
     SpringBallJump = SMBool(True, hard, ['SpringBallJump'])
     desc['SpringBallJump'] = {'display': 'SpringBall-Jump',
                               'title': 'Do a SpringBall Jump from a jump to Access to Wrecked Ship Etank without anything else, Suitless Maridia navigation',
-                              'href': 'https://www.youtube.com/watch?v=8ldQUIgBavw&t=49s',
+                              'href': 'https://www.twitch.tv/videos/147442861',
                               'rooms': ['Sponge Bath', 'East Ocean',
                                         'Main Street', 'Crab Shaft', 'Pseudo Plasma Spark Room',
                                         'Mama Turtle Room', 'The Precious Room', 'Spring Ball Room', 'East Sand Hole',

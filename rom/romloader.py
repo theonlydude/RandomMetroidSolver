@@ -114,6 +114,10 @@ class RomLoader(object):
         # objectives
         hasObjectives = self.hasPatch('objectives')
 
+        # Round robin CF
+        if self.hasPatch('round_robin_cf'):
+            RomPatches.ActivePatches.append(RomPatches.RoundRobinCF)
+
         return (isArea, isBoss, isEscape, hasObjectives, tourian)
 
     def getPatches(self):
@@ -185,7 +189,7 @@ class RomLoader(object):
         for area, locIds in locIdsByArea.items():
             for loc in locations:
                 if loc.Id in locIds:
-                    locsByArea[area].append(loc)
+                    locsByArea[area].append(loc.Name)
         return locsByArea
 
     def loadScavengerOrder(self, locations):

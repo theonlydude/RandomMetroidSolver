@@ -416,84 +416,107 @@ if seedInfo != None:
 }
 
 function doSubmit() {
-  if(window.File && window.FileList && window.FileReader) {
+    if(window.File && window.FileList && window.FileReader) {
 
-    if(permalink == true) {
-        if(vanillaROMBytes == null) {
-            alert("Please select a vanilla ROM first");
-            return false;
-        }
-    } else {
-        var inputName = "uploadFile";
-        var filesInput = document.getElementById(inputName);
-        var file = filesInput.files[0]
-        if (file === undefined) {
-            alert("Please select a VARIA seed first");
-            return false;
-        }
-    }
-
-    var dataDict = {};
-      var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite", "customItemsEnable", "noSpinAttack", "customShipEnable", "customShip", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "hellrun_rate", "etanks"];
-
-    for(var i=0; i<elems.length; i++) {
-        var elem = document.getElementById(elems[i]);
-        if(elem.disabled == true) {
-            dataDict[elems[i]] = "off";
+        if(permalink == true) {
+            if(vanillaROMBytes == null) {
+                alert("Please select a vanilla ROM first");
+                return false;
+            }
         } else {
-            dataDict[elems[i]] = elem.value;
+            var inputName = "uploadFile";
+            var filesInput = document.getElementById(inputName);
+            var file = filesInput.files[0]
+            if (file === undefined) {
+                alert("Please select a VARIA seed first");
+                return false;
+            }
         }
-    }
 
-    dataDict["minDegree"] = $("#degree_slider_range").slider("values", 0);
-    dataDict["maxDegree"] = $("#degree_slider_range").slider("values", 1);
+        var dataDict = {};
+        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell"];
 
-    if(invertSlider == true) {
-      dataDict["invert"] = "on";
-    } else {
-      dataDict["invert"] = "off";
-    }
-
-    if(permalink == true) {
-      dataDict["seedKey"] = seedKey;
-    }
-
-    if(beamDoorsPatch == true) {
-      dataDict["no_blue_door_palette"] = "on";
-    } else {
-      dataDict["no_blue_door_palette"] = "off";
-    }
-
-    dataDict["music"] = document.getElementById("music").value;
-    if(dataDict["music"] == "Customize") {
-        for(var i=0; i<musicIds.length; i++) {
-            var id = musicIds[i];
-            dataDict[id] = document.getElementById(id).innerHTML;
+        for(var i=0; i<elems.length; i++) {
+            var elem = document.getElementById(elems[i]);
+            if(elem.disabled == true) {
+                dataDict[elems[i]] = "off";
+            } else {
+                dataDict[elems[i]] = elem.value;
+            }
         }
-        dataDict["varia"] = isVARIA;
-        dataDict["area"] = isArea;
-        dataDict["boss"] = isBoss;
+
+        var multiElems = ["customSprite", "customShip"];
+        for(var i=0; i<multiElems.length; i++) {
+            var elemId = multiElems[i];
+            // check if elem is disabled
+            var elem = document.getElementById(elemId);
+            if(elem.disabled == true) {
+                dataDict[elems[i]] = "off";
+            } else {
+                // check if random dice is checked
+                if(isElemIdRandom(elemId)) {
+                    dataDict[elemId] = "random";
+                    multiElemId = elemId+"MultiSelect";
+                    dataDict[multiElemId] = $('#'+elemId).data('picker').selected_values().join();
+                } else {
+                    dataDict[elemId] = elem.value;
+                }
+            }
+        }
+
+        // disabled for race seeds, but we don't want the 'off' value set for disabled elements as they're numbers
+        dataDict["hellrun_rate"] = document.getElementById("hellrun_rate").value;
+        dataDict["etanks"] = document.getElementById("etanks").value;
+
+        dataDict["minDegree"] = $("#degree_slider_range").slider("values", 0);
+        dataDict["maxDegree"] = $("#degree_slider_range").slider("values", 1);
+
+        if(invertSlider == true) {
+            dataDict["invert"] = "on";
+        } else {
+            dataDict["invert"] = "off";
+        }
+
+        if(permalink == true) {
+            dataDict["seedKey"] = seedKey;
+        }
+
+        if(beamDoorsPatch == true) {
+            dataDict["no_blue_door_palette"] = "on";
+        } else {
+            dataDict["no_blue_door_palette"] = "off";
+        }
+
+        dataDict["music"] = document.getElementById("music").value;
+        if(dataDict["music"] == "Customize") {
+            for(var i=0; i<musicIds.length; i++) {
+                var id = musicIds[i];
+                dataDict[id] = document.getElementById(id).innerHTML;
+            }
+            dataDict["varia"] = isVARIA;
+            dataDict["area"] = isArea;
+            dataDict["boss"] = isBoss;
+        }
+
+        if(dataDict["gamepadMapping"] == "on") {
+            dataDict["preset"] = document.getElementById("preset").value;
+        }
+
+        console.log("before customizer web service call");
+
+        // call customizer web service with parameters
+        var request = $.ajax({
+            url: "{{=URL(f='customWebService')}}",
+            method: "POST",
+            data: dataDict,
+            dataType: "json"
+        });
+
+        request.done(AjaxCallCompleted);
+        request.fail(ajaxFail);
     }
 
-    if(dataDict["gamepadMapping"] == "on") {
-      dataDict["preset"] = document.getElementById("preset").value;
-    }
-
-    console.log("before customizer web service call");
-
-    // call customizer web service with parameters
-    var request = $.ajax({
-      url: "{{=URL(f='customWebService')}}",
-      method: "POST",
-      data: dataDict,
-      dataType: "json"
-    });
-
-    request.done(AjaxCallCompleted);
-    request.fail(ajaxFail);
-  }
-
-  return false;
+    return false;
 }
 
 function musicSelectChange() {
@@ -845,6 +868,68 @@ function greyOutPatches(isRace, isVARIA, isVanilla) {
     }
 }
 
+// for random sprites/ships
+var customSpriteMultiSelect = {{response.write(session.customizer["customSpriteMultiSelect"], escape=False)}};
+var customShipMultiSelect = {{response.write(session.customizer["customShipMultiSelect"], escape=False)}};
+
+function isElemRandom(elem) {
+    return elem.className.search("active") != -1;
+}
+
+function isElemIdRandom(elemId) {
+    return isElemRandom(document.getElementById(elemId+"Random"));
+}
+
+function randomizeTarget(evt, elemId) {
+    var e = document.getElementById(elemId);
+
+    var isActive;
+    if(isElemRandom(evt.currentTarget)) {
+        evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
+        isActive = false;
+
+        // store multiple selected values for next time the dice is pressed
+        var selected_values = $('#'+elemId).data('picker').selected_values();
+        if(elemId == "customSprite") {
+            customSpriteMultiSelect = selected_values;
+        } else {
+            customShipMultiSelect = selected_values;
+        }
+        // go back to single selection
+        $('#'+elemId).prop('multiple', false);
+    } else {
+        evt.currentTarget.className += " active";
+        isActive = true;
+        $('#'+elemId).prop('multiple', true);
+
+        // set selected values, default to all selected
+        if(elemId == "customSprite") {
+            $('#'+elemId).val(customSpriteMultiSelect);
+        } else {
+            $('#'+elemId).val(customShipMultiSelect);
+        }
+    }
+
+    // recreate select with updated multiple
+    $('#'+elemId).data('picker').destroy();
+    var params = {};
+    if(elemId == "customSprite") {
+        params = {show_label: true};
+    }
+    $('#'+elemId).imagepicker(params);
+}
+
+function setRandom() {
+{{
+    for id in ["customSprite", "customShip"]:
+      if session.customizer.get(id, None)  == "random":
+        response.write("  document.getElementById(\"{}Random\").click();\n".format(id), escape=False)
+        pass
+      pass
+}}
+}
+
+
 var vanillaROMBytes = null;
 var romSize = 0x300000;
 {{
@@ -1030,13 +1115,13 @@ if session.customizer["invert"] == "on":
 }}
 
     setColorRando();
-    enableCustomSpriteDropdown()
 
     $("#customSprite").imagepicker({show_label: true});
     $("#customShip").imagepicker();
 
     enableCustomSpriteDropdown();
     enableCustomShipDropdown();
+    setRandom();
 
     permalinkCustomization(permalink);
 
@@ -1115,6 +1200,7 @@ function enableCustomSpriteDropdown() {
     var itemsText = document.getElementById("customItemsEnableText");
     var noSpinAttack = document.getElementById("noSpinAttack");
     var noSpinAttackText = document.getElementById("noSpinAttackText");
+    var spriteRandom = document.getElementById("customSpriteRandom");
     if(customSpriteEnable.checked) {
       customSpriteEnable.value = "on";
       text.className = "";
@@ -1129,6 +1215,7 @@ function enableCustomSpriteDropdown() {
       if(isRace && noSpinAttack.value == "off") {
         noSpinAttack.click();
       }
+      spriteRandom.disabled = false;
       $("#customSprite").siblings(".image_picker_selector").removeClass("toDisable");
     } else {
       customSpriteEnable.value = "off";
@@ -1141,6 +1228,7 @@ function enableCustomSpriteDropdown() {
       }
       customItemsEnable.disabled = true;
       noSpinAttack.disabled = true;
+      spriteRandom.disabled = true;
       $("#customSprite").siblings(".image_picker_selector").addClass("toDisable");
     }
 
@@ -1159,13 +1247,16 @@ function enableCustomSpriteDropdown() {
 function enableCustomShipDropdown() {
     var customShipEnable = document.getElementById("customShipEnable");
     var text = document.getElementById("customShipEnableText");
+    var shipRandom = document.getElementById("customShipRandom");
     if(customShipEnable.checked) {
       customShipEnable.value = "on";
       text.className = "";
+      shipRandom.disabled = false;
       $("#customShip").siblings(".image_picker_selector").removeClass("toDisable");
     } else {
       customShipEnable.value = "off";
       text.className = "disabledText";
+      shipRandom.disabled = true;
       $("#customShip").siblings(".image_picker_selector").addClass("toDisable");
     }
 }
@@ -1584,12 +1675,7 @@ def displayCheckbox(id, defaultTrue=False):
 
 {{
 def displayNumber(id, min, max, default, step="1"):
-  if id in session.customizer:
-    value = session.customizer[id]
-  else:
-    value = default
-    pass
-
+  value = session.customizer.get(id, default)
   response.write("<input name=\"{}\" id=\"{}\" type=\"number\" value=\"{}\" min=\"{}\" max=\"{}\" step=\"{}\" class=\"full\" required>".format(id, id, value, min, max, step), escape=False)
   pass
 }}
@@ -1684,7 +1770,7 @@ def displayNumber(id, min, max, default, step="1"):
                   <td><button type="button" onclick="startTheTour(5)" id="noSpinAttackStep">?</button></td>
                 </tr>
                 <tr>
-                  <td></td>
+                  <td class="small"><div class="random"><button id="customSpriteRandom" type="button" onclick="randomizeTarget(event, 'customSprite')" class="small center"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td>
                     <div class="border">
                       <select class="filldropdown" id="customSprite" name="customSprite">
@@ -1711,7 +1797,7 @@ def displayNumber(id, min, max, default, step="1"):
                   <td><button type="button" onclick="startTheTour(6)" id="customShipStep">?</button></td>
                 </tr>
                 <tr>
-                  <td></td>
+                  <td class="small"><div class="random"><button id="customShipRandom" type="button" onclick="randomizeTarget(event, 'customShip')" class="small center"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td>
                     <div class="border">
                       <select class="filldropdown" id="customShip" name="customShip">
@@ -2110,6 +2196,7 @@ if seedInfo != None:
               <tr {{=setBold("layoutPatches")}}><td>Anti-softlock layout patches</td><td>{{=seedParams["layoutPatches"]}}</td></tr>
               <tr {{=setBold("variaTweaks")}}><td>VARIA tweaks</td><td>{{=seedParams["variaTweaks"]}}</td></tr>
               <tr {{=setBold("nerfedCharge")}}><td>Nerfed Charge Beam available from the start</td><td>{{=seedParams["nerfedCharge"]}}</td></tr>
+              <tr {{=setBold("relaxed_round_robin_cf")}}><td>Relaxed Round Robin Crytal Flash</td><td>{{=seedParams["relaxed_round_robin_cf"]}}</td></tr>
               <tr {{=setBold("gravityBehaviour")}}><td>Suits properties</td><td>{{=seedParams["gravityBehaviour"]}}</td></tr>
 {{    if seedParams["gravityBehaviour"] == "random":}}
               <tr><td>Suits properties pool</td><td>{{=seedParams["gravityBehaviourMultiSelect"]}}</td></tr>

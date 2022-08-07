@@ -115,9 +115,7 @@ class PlandoRepo(object):
 
     def removeHtmlTags(self, text):
         clean = re.compile('<.*?>')
-        text = re.sub(clean, '', text)
-        # also double the ' for db insertion
-        return text.replace("'", "''")
+        return re.sub(clean, '', text)
 
     def generateUpdateKey(self):
         # 8 chars string

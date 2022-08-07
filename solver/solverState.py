@@ -93,6 +93,10 @@ class SolverState(object):
         self.state["plandoScavengerOrder"] = solver.plandoScavengerOrder
         # for disabled tourian
         self.state["tourian"] = solver.tourian
+        # custom objectives
+        self.state["objectives"] = solver.objectives.getState()
+        self.state["majorUpgrades"] = solver.majorUpgrades
+        self.state["splitLocsByArea"] = solver.splitLocsByArea
 
     def toSolver(self, solver):
         solver.majorsSplit = self.state["majorsSplit"]
@@ -125,6 +129,9 @@ class SolverState(object):
         solver.doorsRando = self.state["doorsRando"]
         solver.plandoScavengerOrder = self.state["plandoScavengerOrder"]
         solver.tourian = self.state["tourian"]
+        solver.objectives.setState(self.state["objectives"])
+        solver.majorUpgrades = self.state["majorUpgrades"]
+        solver.splitLocsByArea = self.state["splitLocsByArea"]
 
     def getRoomsVisibility(self, solver, areaGraph, sm):
         # add graph access points
@@ -246,13 +253,6 @@ class SolverState(object):
                                 "visibility": loc.Visibility,
                                 "major": loc.isClass(majorsSplit)}
 
-#                if loc.locDifficulty is not None:
-#                    lDiff = loc.locDifficulty
-#                    ret[locName]["locDifficulty"] = [diff4solver(lDiff.difficulty), self.knows2isolver(lDiff.knows), list(set(lDiff.items))]
-#                if loc.pathDifficulty is not None:
-#                    pDiff = loc.pathDifficulty
-#                    ret[locName]["pathDifficulty"] = [diff4solver(pDiff.difficulty), self.knows2isolver(pDiff.knows), list(set(pDiff.items))]
-
                 if loc.comeBack is not None:
                     ret[locName]["comeBack"] = loc.comeBack
                 if loc.accessPoint is not None:
@@ -263,6 +263,13 @@ class SolverState(object):
                 if self.debug == True:
                     if loc.distance is not None:
                         ret[locName]["distance"] = loc.distance
+                    if loc.locDifficulty is not None:
+                        lDiff = loc.locDifficulty
+                        ret[locName]["locDifficulty"] = [diff4solver(lDiff.difficulty)[0], self.knows2isolver(lDiff.knows), list(set(lDiff.items))]
+                    if loc.pathDifficulty is not None:
+                        pDiff = loc.pathDifficulty
+                        ret[locName]["pathDifficulty"] = [diff4solver(pDiff.difficulty)[0], self.knows2isolver(pDiff.knows), list(set(pDiff.items))]
+
         return ret
 
     def getRemainLocationsWeb(self, locations, majorsSplit):

@@ -221,9 +221,9 @@ def createColor(r, g, b):
 def applyMergePercent(percent, startColor, endColor):
     startColor = extractColors(startColor)
     endColor = extractColors(endColor)
-    r = min(startColor[0] + (endColor[0] * percent)//100, 31)
-    g = min(startColor[1] + (endColor[1] * percent)//100, 31)
-    b = min(startColor[2] + (endColor[2] * percent)//100, 31)
+    r = min(startColor[0] + (endColor[0] * percent)//100, endColor[0])
+    g = min(startColor[1] + (endColor[1] * percent)//100, endColor[1])
+    b = min(startColor[2] + (endColor[2] * percent)//100, endColor[2])
     return createColor(r, g, b)
 
 def applyPercent(percent, basePalette):
@@ -415,7 +415,7 @@ if not args.no_ship:
     print("ship colors: {}".format(shipColors))
     maxColors = 16
     if len(shipColors) >= maxColors:
-        print("Too many colors in the image, convert it to 16 colors using ImageMagick for example:")
+        print("Too many colors in the image: {}, convert it to 16 colors using ImageMagick for example:".format(len(shipColors)))
         print("convert {} +dither -colors 16 - | convert - PNG32:{}".format(args.ship_template, args.ship_template))
         sys.exit(1)
 

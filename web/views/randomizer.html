@@ -857,7 +857,7 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian", "relaxed_round_robin_cf"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"];
 
@@ -1047,7 +1047,7 @@ function AjaxRandomizerCallCompleted(data) {
     document.getElementById("submitBtn").data = "Randomize";
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian", "relaxed_round_robin_cf"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"];
 
@@ -1785,7 +1785,7 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
 <li>Collect 75% items: collect 75% of available items</li>\
 <li>Collect 100% items: collect 100% of available items</li>\
 <li>Collect all upgrades: collect all available suit upgrades (all items but energy/ammo)</li>\
-<li>Clear 'area': collect all available items <b>of the current major split</b> in 'area'. Forces VARIA HUD on to see how many are left in each area. Incompatible with Scavenger Hunt.</li>\
+<li>Clear 'area': collect all available items <b>of the current major split</b> in 'area'. Forces VARIA HUD on to see how many are left in each area. <b>Incompatible with Scavenger Hunt and Disabled Tourian.</b></li>\
 </ul></p>\
 <p><b>Memes:</b><ul>\
 <li>Tickle the Red Fish: use grapple on the <a href=\"https://wiki.supermetroid.run/Red_Fish_Room\" target=\"_blank\">Red Fish</a></li>\
@@ -1793,6 +1793,7 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
 <li>Kill Shaktool: pay a \"visit\" to <a href=\"https://wiki.supermetroid.run/Shaktool_Room\">Shaktool</a></li>\
 <li>Activate Chozo robots: kill <a href=\"https://wiki.supermetroid.run/Bomb_Torizo_Room\">Bomb Torizo</a>, <a href=\"https://wiki.supermetroid.run/Golden_Torizo%27s_Room\">Golden Torizo</a>, activate the <a href=\"https://wiki.supermetroid.run/Acid_Statue_Room\">Lower Norfair Chozo</a>, and the <a href=\"https://wiki.supermetroid.run/Bowling_Alley\">Bowling Chozo</a> (note: VARIA tweaks being enabled or not changes Bomb Torizo and Lower Norfair Chozo requirements considerably, check the option's help for more information)</li>\
 <li>Visit the animals: go visit the <a href=\"https://wiki.supermetroid.run/Green_Brinstar_Main_Shaft\">Etecoons</a> and the <a href=\"https://wiki.supermetroid.run/Dachora_Room\">Dachora</a></li>\
+<li>Kill King Cacatac: kill the most evil boss of Super Metroid, contemplating its subjects from the top of <a href=\"https://wiki.supermetroid.run/Bubble_Mountain\">Bubble Mountain</a></li>\
 </ul></p>\
 </p><p>\
 <b>Note:</b> If you leave the list empty no objective is required to access Tourian, ie. it's open.<br/>\
@@ -1809,7 +1810,7 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
       content: "<p>Choose endgame <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> behaviour:\
 <ul>\
 <li><b>Vanilla:</b> regular vanilla <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a></li>\
-<li><b>Fast:</b> speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including Mother Brain 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">invicible Gadora</a> until all objectives are completed.</li>\
+<li><b>Fast:</b> speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including Mother Brain 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">invincible Gadora</a> until all objectives are completed.</li>\
 <li><b>Disabled:</b> skip <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> entirely, ie. escape sequence is triggered as soon as all objectives are completed.</li>\
 </ul></p>"
     },
@@ -1925,9 +1926,9 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
       content: "<p>Choose how you want to split Majors and Minors items:\
 <ul><li><b>Full</b>: All items are shuffled in all locations</li>\
 <li><b>Full Countdown</b>: Randomize like Full and display in the HUD the number of remaining unique upgrades (everything but energy and ammo) in the current area. See \"VARIA HUD\" comfort patch help in the advanced tab for more information about it.</li>\
-<li><b>Majors/Minors</b>: Use major (unique upgrades and energy) and minor (ammo) item pools.</p><p><b>Note:</b> <a href=\"https://wiki.supermetroid.run/Hi_Jump_Energy_Tank_Room\" target=\"_blank\">High-Jump boots Energy Tank location</a> is considered minor, and <a href=\"https://wiki.supermetroid.run/Wrecked_Ship_East_Super_Room\" target=\"_blank\">right Super Missile in Wrecked ship</a> is considered major for balancing purposes.</li>\
+<li><b>Majors/Minors</b>: Use major (unique upgrades and energy) and minor (ammo) item pools.</p><p><b>Note:</b> <a href=\"https://wiki.supermetroid.run/Hi_Jump_Energy_Tank_Room\" target=\"_blank\">High-Jump boots Energy Tank location</a> is considered minor, and <a href=\"https://wiki.supermetroid.run/Wrecked_Ship_East_Super_Room\" target=\"_blank\">right Super Missile in Wrecked ship</a> is considered major to balance the number of major items between Norfair and Wrecked Ship.</li>\
 <li><b>Chozo</b>: Put all unique upgrades as well as minimal ammo/energy to finish the seed in the Chozo locations. These are <a href=\"https://metroid.fandom.com/wiki/Chozo_Statue\" target=\"_blank\">Chozo statues</a>, <a href=\"https://wiki.supermetroid.run/Morph_Ball_Room\" target=\"_blank\">Morph Ball</a> and boss item locations (<a href=\"https://wiki.supermetroid.run/Wrecked_Ship_East_Super_Room\" target=\"_blank\">Right Super in Wrecked Ship</a>, <a href=\"https://wiki.supermetroid.run/Varia_Suit_Room\" target=\"_blank\">Varia Suit</a>, <a href=\"https://wiki.supermetroid.run/Ridley_Tank_Room\" target=\"_blank\">Ridley ETank</a>). Depending on progression speed and item distribution settings, you will be able to <a href=\"https://metroid.fandom.com/wiki/Sequence_Breaking\" target=\"_blank\">'sequence break'</a> by going to other locations as well.</li>\
-<li><b>Scavenger</b>: You must visit a given number of locations in a mandatory order in a scavenger hunt, and collect items there. The scavenger locations are the 16 locations where a unique upgrade is in the vanilla game, plus <a href=\"https://wiki.supermetroid.run/Ridley\" target=\"_blank\">Ridley</a>. By default items in the mandatory locations will be vanilla. Other unique upgrades will be randomized between the remaining scavenger locations. By default, you will have to collect all items in the mandatory locations to access <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> (on top of finishing other objectives). You can also choose to trigger the escape immediately after the hunt is over by setting Tourian parameter to 'Disabled'.<br/>The next mandatory location will be displayed in the HUD, and the whole route will be displayed in the HUD during pause (see \"VARIA HUD\" comfort patch help in the advanced tab for more information).</li></ul></p>\
+<li><b>Scavenger</b>: You must visit a given number of locations in a mandatory order in a scavenger hunt, and collect items there. The scavenger locations are the 16 locations where a unique upgrade is in the vanilla game, plus <a href=\"https://wiki.supermetroid.run/Ridley\" target=\"_blank\">Ridley</a>. By default items in the mandatory locations will be vanilla. Other unique upgrades will be randomized between the remaining scavenger locations, and can be collected at any time. By default, you will have to collect all items in the mandatory locations to access <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> (on top of finishing other objectives). You can also choose to trigger the escape immediately after the hunt is over by setting Tourian parameter to 'Disabled'.<br/>The next mandatory location will be displayed in the HUD, and the whole route will be displayed in the HUD during pause (see \"VARIA HUD\" comfort patch help in the advanced tab for more information).</li></ul></p>\
 <p>Check the map for the list of Majors, Chozo and Scavenger locations and items:<br/><a href=\"/solver/static/images/help/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"chozoThumb\" src=\"/solver/static/images/help/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p>\
 <p>Using a non-standard or randomized start location and any other split than 'Full' will enable the VARIA HUD, as Major/Chozo locations are slightly modified depending on the start location.</p>\
 <p>Click on the dice button to randomly set this parameter.</p>"
@@ -2168,7 +2169,7 @@ Click on the dice button to randomly set this parameter.",
 You can generate anything from a densely packed game with just <a href=\"https://metroid.fandom.com/wiki/Crateria\" target=\"_blank\">Crateria</a>, <a href=\"https://metroid.fandom.com/wiki/Wrecked_Ship\" target=\"_blank\">Wrecked Ship</a>, and bosses, to a full area+boss rando<br/>\
 <b>Boss and Area transitions are mixed together</b>, <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">Gadoras</a> are removed, and you can <b>exit boss fights</b> at any point (they are also considered dead as soon as they start exploding instead of when the drops appear).</p>\
 <p>\
-You can also <b>speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a></b> (on by default: sets the Tourian parameter to 'Fast'), to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including <a href=\"https://metroid.fandom.com/wiki/Mother_Brain\" target=\"_blank\">Mother Brain</a> 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an invicible <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">Gadora</a> until all objectives are completed. It also adds a layout patch to open <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a> to pass them without Morph <img src=\"/solver/static/images/tracker/inventory/Morph.png\" class=\"width: 32px\"/>, allowing the creation of morphless plandos.\
+You can also <b>speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a></b> (on by default: sets the Tourian parameter to 'Fast'), to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including <a href=\"https://metroid.fandom.com/wiki/Mother_Brain\" target=\"_blank\">Mother Brain</a> 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an invincible <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">Gadora</a> until all objectives are completed. It also adds a layout patch to open <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a> to pass them without Morph <img src=\"/solver/static/images/tracker/inventory/Morph.png\" class=\"width: 32px\"/>, allowing the creation of morphless plandos.\
 </p>\
 <p>Minimizer layout example:<a href=\"/solver/static/images/help/minimizer_example.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"minimizerThumb\" src=\"/solver/static/images/help/minimizer_example_thumbnail.png\" alt=\"Minimizer example\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p>\
 <b>Note:</b> will set Area and Boss randomization.<br/>\
@@ -2178,21 +2179,21 @@ Click on the dice button to randomly set the number of locations (between 30 and
     {
       element: "#escapeRandoStep",
       title: "Escape sequence randomization",
-      content: "<p>When leaving Tourian, get teleported to the exit of a random Map station (between Brinstar/Maridia/Norfair/Wrecked Ship).<br/>You then have to find your way to the ship in the remaining time. Allotted time depends on area layout, but not on skill settings and is pretty generous.</p>\
+      content: "<p>When leaving <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a>, get teleported to the exit of a random <a href=\"https://metroid.fandom.com/wiki/Map_Station\" target=\"_blank\">Map station</a> (between <a href=\"https://metroid.fandom.com/wiki/Brinstar\" target=\"_blank\">Brinstar</a>/<a href=\"https://metroid.fandom.com/wiki/Maridia\" target=\"_blank\">Maridia</a>/<a href=\"https://metroid.fandom.com/wiki/Norfair\" target=\"_blank\">Norfair</a>/<a href=\"https://metroid.fandom.com/wiki/Wrecked_Ship\" target=\"_blank\">Wrecked Ship</a>).<br/>You then have to find your way to the <a href=\"https://metroid.fandom.com/wiki/Samus's_Gunship\" target=\"_blank\">ship</a> in the remaining time. Allotted time depends on area layout, but not on skill settings and is pretty generous.</p>\
 During the escape sequence:\
 <ul>\
 <li>All doors are opened</li>\
-<li>Maridia tube is opened</li>\
-<li>The Hyper Beam can destroy Bomb, Power Bomb and Super Missile blocks and open blue/green gates from both sides</li>\
+<li><a href=\"https://wiki.supermetroid.run/Glass_Tunnel\" target=\"_blank\">Maridia tube</a> is opened</li>\
+<li>The <a href=\"https://metroid.fandom.com/wiki/Hyper_Beam_(Super_Metroid)\" target=\"_blank\">Hyper Beam</a> can destroy Bomb <img src=\"/solver/static/images/tracker/inventory/Bomb.png\" class=\"width: 32px\"/>, Power Bomb <img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/> and Super Missile <img src=\"/solver/static/images/tracker/inventory/Super.png\" class=\"width: 32px\"/> blocks and open blue/green gates from both sides</li>\
 <li>All mini bosses are defeated</li>\
 <li>All minor enemies are removed to allow you to move faster and remove lag</li>\
 </ul>\
-<p>During regular game only Crateria Map station door can be opened and activating the station will act as if all map stations were activated at once.</p>\
+<p>During regular game only <a href=\"https://wiki.supermetroid.run/Crateria_Map_Room\" target=\"_blank\">Crateria Map station</a> door can be opened and activating the station will act as if all map stations were activated at once.</p>\
 <b>Animals Challenges:</b>\
 <p>You can use the extra available time to:\
 <ul>\
-<li>find the animals that are hidden behind a (now blue) map station door</li>\
-<li>go the vanilla animals door to cycle through the 4 available escapes, and complete as many escapes as you can</li>\
+<li>find the <a href=\"https://metroid.fandom.com/wiki/Dachora\" target=\"_blank\">animals</a> that are hidden behind a (now blue) map station door</li>\
+<li>go to the <a href=\"https://wiki.supermetroid.run/Flyway\" target=\"_blank\">vanilla animals door</a> to cycle through the 4 available escapes, and complete as many escapes as you can</li>\
 </ul>\
 Pick your challenge, or try to do both, but watch your timer!</p>",
       placement: "auto left"
@@ -2200,7 +2201,7 @@ Pick your challenge, or try to do both, but watch your timer!</p>",
     {
       element: "#removeEscapeEnemiesStep",
       title: "Remove enemies during escape",
-      content: "<p>Remove enemies during escape sequence, disable it to blast through enemies with your Hyper Beam and cause lag.</p>",
+      content: "<p>Remove enemies during escape sequence, disable it to blast through enemies with your <a href=\"https://metroid.fandom.com/wiki/Hyper_Beam_(Super_Metroid)\" target=\"_blank\">Hyper Beam</a> and cause lag.</p>",
       placement: "auto left"
     },
     {
@@ -2243,8 +2244,8 @@ Click on the dice button to randomly set this parameter.",
 <ul>\
 <li>Allows the aim buttons to be assigned to any button (by Kejardon)</li>\
 <li>Max Ammo Display (by Personitis)</li>\
-<li>Play music with MSU1 chip on SD2SNES (by DarkShock)</li>\
-<li>Red Brinstar elevator door is blue (by Flo)</li>\
+<li>Play music with <a href=\"https://www.zeldix.net/t1607-msu1-getting-started-guide\" target=\"_blank\">MSU1 chip</a> on <a href=\"https://www.retrorgb.com/fxpakpro.html\" target=\"_blank\">SD2SNES/FXPak</a> and compatible emulators (by DarkShock)</li>\
+<li><a href=\"https://wiki.supermetroid.run/Red_Brinstar_Elevator_Room\" target=\"_blank\">Red Brinstar elevator</a> door is blue (by Flo)</li>\
 </ul>",
       placement: "auto left"
     },
@@ -2254,10 +2255,10 @@ Click on the dice button to randomly set this parameter.",
       content: "Include the anti-softlock layout patches. Disable at your own softlocking risk!\
 <table class=\"full\">\
 <tr>\
-<td class=\"knowsUsed\"><p class=\"top\">Disable respawning blocks at Dachora Pit:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Escape from below early Super bridge without Bombs:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Escape from below early Super bridge:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before Hi-Jump:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\">Disable respawning blocks at <a href=\"https://wiki.supermetroid.run/Dachora_Room\" target=\"_blank\">Dachora Pit</a>:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\">Escape from below <a href=\"https://wiki.supermetroid.run/Early_Supers_Room\" target=\"_blank\">early Super bridge</a> without Bombs:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\">Escape from below <a href=\"https://wiki.supermetroid.run/Early_Supers_Room\" target=\"_blank\">early Super bridge</a>:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before <a href=\"https://wiki.supermetroid.run/Hi_Jump_Energy_Tank_Room\" target=\"_blank\">Hi-Jump:</p></td>\
 </tr>\
 <tr>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/help/dachora.png\" alt=\"dachora\" title=\"dachora\" class=\"full\"/></td>\
@@ -2266,10 +2267,10 @@ Click on the dice button to randomly set this parameter.",
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/help/high_jump.png\" alt=\"high_jump\" title=\"high_jump\" class=\"full\"/></td>\
 </tr>\
 <tr>\
-<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks at Moat:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">First heated Norfair room without High-Jump:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Always be able to get back up from bottom Red Tower:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before Spazer:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks at <a href=\"https://wiki.supermetroid.run/The_Moat\" target=\"_blank\">Moat</a>:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\"><a href=\"https://wiki.supermetroid.run/Cathedral_Entrance\" target=\"_blank\">First heated Norfair room</a> without High-Jump:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\">Always be able to get back up from bottom <a href=\"https://wiki.supermetroid.run/Red_Tower\" target=\"_blank\">Red Tower</a>:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before <a href=\"https://wiki.supermetroid.run/Below_Spazer\" target=\"_blank\">Spazer</a>:</p></td>\
 </tr>\
 <tr>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/help/moat.png\" alt=\"moat\" title=\"moat\" class=\"full\"/></td>\
@@ -2278,10 +2279,10 @@ Click on the dice button to randomly set this parameter.",
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/help/spazer_block.png\" alt=\"spazer_block\" title=\"spazer_block\" class=\"full\"/></td>\
 </tr>\
 <tr>\
-<td class=\"knowsUsed\"><p class=\"top\">Remove grey door at Brinstar map stations:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Spore Spawn save station is always available:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before Kraid save:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks at Pink Brinstar Power Bomb Room:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\">Remove grey door at <a href=\"https://wiki.supermetroid.run/Brinstar_Pre-Map_Room\" target=\"_blank\">Brinstar map station</a>:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\"><a href=\"https://wiki.supermetroid.run/Big_Pink\" target=\"_blank\">Spore Spawn save station</a> is always available:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before <a href=\"https://wiki.supermetroid.run/Warehouse_Kihunter_Room\" target=\"_blank\">Kraid save</a>:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks at <a href=\"https://wiki.supermetroid.run/Pink_Brinstar_Power_Bomb_Room\" target=\"_blank\">Pink Brinstar Power Bomb Room</a>:</p></td>\
 </tr>\
 <tr>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/help/bt_map.png\" alt=\"bt_map\" title=\"bt_map\" class=\"full\"/></td>\
@@ -2300,9 +2301,9 @@ Click on the dice button to randomly set this parameter.",
       content: "<p>Include minor tweaks for the game to behave 'as it should' in a randomizer context:</p>\
 <table class=\"full\">\
 <tr>\
-<td class=\"quarter\"><p class=\"top\">Bomb Torizo fight is triggered when picking up the item he's holding, not by having Bomb:</p></td>\
-<td class=\"quarter\"><p class=\"top\">Access item at Wrecked Ship Etank location without killing Phantoon (via Forgotten Highway):</p></td>\
-<td class=\"quarter\"><p class=\"top\">Activate Lower Norfair Chozo (left of entrance) without Space Jump:</p></td>\
+<td class=\"quarter\"><p class=\"top\"><a href=\"https://metroid.fandom.com/wiki/Torizo#Crateria\" target=\"_blank\">Bomb Torizo</a> fight is triggered when picking up the item he's holding, not by having Bomb <img src=\"/solver/static/images/tracker/inventory/Bomb.png\" class=\"width: 32px\"/>:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Access item at <a href=\"https://wiki.supermetroid.run/Wrecked_Ship_Energy_Tank_Room\" target=\"_blank\">Wrecked Ship Etank location</a> without killing <a href=\"https://metroid.fandom.com/wiki/Phantoon\" target=\"_blank\">Phantoon</a> (via <a href=\"https://wiki.supermetroid.run/Forgotten_Highway_Kago_Room\" target=\"_blank\">Forgotten Highway</a>):</p></td>\
+<td class=\"quarter\"><p class=\"top\">Activate <a href=\"https://wiki.supermetroid.run/Acid_Statue_Room\" target=\"_blank\">Lower Norfair Chozo</a> (left of entrance) without Space Jump <img src=\"/solver/static/images/tracker/inventory/SpaceJump.png\" class=\"width: 32px\"/>:</p></td>\
 </tr>\
 <tr>\
 <td class=\"quarter\"><img src=\"/solver/static/images/help/bomb_torizo.png\" alt=\"bomb_torizo\" title=\"bomb_torizo\" class=\"full\"/></td>\
@@ -2324,6 +2325,17 @@ Click on the dice button to randomly set this parameter.",
 <li>Once the Charge Beam <img src=\"/solver/static/images/tracker/inventory/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> item has been collected, it does full damage and special attacks are back to normal.</li>\
 </ul>\
 <p>Patch developed by Smiley and Flo.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#relaxed_round_robin_cfStep",
+      title: "Relaxed Round Robin Crystal Flash",
+      content: "<p>Changes <a href=\"https://metroid.fandom.com/wiki/Crystal_Flash\" target=\"_blank\">Crystal Flashes</a> <img src=\"/solver/static/images/preset/crystal_flash.png\" alt=\"CF.png\" title=\"CF.png\" class=\"width: 32px\"/> behavior and requirements as follows:</p>\
+<p><ul><li>You can perform a Crystal Flash with any amount of ammo, but you need at least one Power Bomb <img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/> to begin the process.</li>\
+<li>After consuming 1 ammo, Samus gains 50 energy, and it will try a different ammo type next. Cycling through Missiles <img src=\"/solver/static/images/tracker/inventory/Missile.png\" class=\"width: 32px\"/>, Supers <img src=\"/solver/static/images/tracker/inventory/Super.png\" class=\"width: 32px\"/>, and Power Bombs <img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/> as available. The cycling is to keep the consumption even between ammo types.</li>\
+<li>If one of your ammo types is at 0, it will be skipped.</li>\
+<li>The Crystal Flash ends when Samus is out of ammo or a total of 30 ammo has been consumed.</li></ul></p>\
+<p>Patch developed by Dagit.</p>",
       placement: "auto left"
     },
     {
@@ -2837,14 +2849,17 @@ def displayNumber(id, min, max, default, step="1"):
                 </tr>
               </table>
               <table class="full" id="nerfedChargeVisibility">
-                <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr id="nerfedChargeStep">
-                  <td>
+                  <td class="half">
                     {{displayCheckbox("nerfedCharge")}}
                     Nerfed Charge Beam available from the start
                   </td>
-                  <td></td>
                   <td><button type="button" onclick="startTheTour(37)">?</button></td>
+                  <td id="relaxed_round_robin_cfStep" class="half">
+                    {{displayCheckbox("relaxed_round_robin_cf")}}
+                    Relaxed Round Robin Crystal Flash
+                  </td>
+                  <td><button type="button" onclick="startTheTour(38)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="gravityBehaviourVisibility">
@@ -2854,7 +2869,7 @@ def displayNumber(id, min, max, default, step="1"):
                   <td class="half">
                     {{displayMultiSelect("gravityBehaviour", currentMultiValues["gravityBehaviour"], "Balanced", defaultMultiValues["gravityBehaviour"])}}
                   </td>
-                  <td><button type="button" onclick="startTheTour(38)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(39)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -2867,7 +2882,7 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("itemsounds")}}
                     Remove fanfare when picking up an item
                   </td>
-                  <td><button type="button" onclick="startTheTour(39)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(40)">?</button></td>
                   <td id="ElevatorDoorsStep" class="quarter">
                     {{displayCheckbox("fast_doors")}}
                     Accelerate doors
@@ -2876,7 +2891,7 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("elevators_speed")}}
                     Accelerate elevators
                   </td>
-                  <td><button type="button" onclick="startTheTour(40)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(41)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -2885,12 +2900,12 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("spinjumprestart")}}
                     Spin jump restart (a.k.a. Respin)
                   </td>
-                  <td><button type="button" onclick="startTheTour(41)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(42)">?</button></td>
                   <td id="rando_speedStep" class="half">
                     {{displayCheckbox("rando_speed")}}
                      Momentum conservation (a.k.a. Speedkeep)
                   </td>
-                  <td><button type="button" onclick="startTheTour(42)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(43)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="helperPatchesVisibility">
@@ -2899,20 +2914,20 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("Infinite_Space_Jump")}}
                     Infinite Space Jump
                   </td>
-                  <td><button type="button" onclick="startTheTour(43)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(44)">?</button></td>
                   <td id="refill_before_saveStep" class="half">
                     {{displayCheckbox("refill_before_save")}}
                      Refill energy and ammo when saving
                   </td>
-                  <td><button type="button" onclick="startTheTour(44)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(45)">?</button></td>
                 </tr>
                 <tr>
                   <td id="hudStep" class="half">
                     {{displayCheckbox("hud")}}
                      VARIA HUD
                   </td>
-                  <td><button type="button" onclick="startTheTour(45)">?</button></td>
-                  <td class="half"></td>
+                  <td><button type="button" onclick="startTheTour(46)">?</button></td>
+                  <td></td>
                   <td></td>
                 </tr>
               </table>
@@ -2928,7 +2943,7 @@ def displayNumber(id, min, max, default, step="1"):
                     <span id="animalsText">Save the animals surprise</span>
                   </td>
                   <td></td>
-                  <td><button type="button" onclick="startTheTour(46)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(47)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="musicVisibility">
@@ -2937,12 +2952,12 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("No_Music")}}
                     Disable background music
                   </td>
-                  <td><button type="button" onclick="startTheTour(47)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(48)">?</button></td>
                   <td id="random_musicStep" class="half">
                     {{displayCheckbox("random_music")}}
                     Randomize background music
                   </td>
-                  <td><button type="button" onclick="startTheTour(48)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(49)">?</button></td>
                 </tr>
               </table>
             </div>

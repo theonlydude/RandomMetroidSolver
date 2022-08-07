@@ -70,6 +70,8 @@ class Goal(object):
         self.expandable = len(self.expandableList) > 0
         self.category = category
         self.area = area
+        # used by solver/isolver to know if a goal has been completed
+        self.completed = False
 
     def setRank(self, rank):
         self.rank = rank
@@ -284,7 +286,7 @@ _goalsList = [
          category="Memes"),
     Goal("activate chozo robots", "other", lambda sm, ap: sm.wand(Objectives.canAccessLocation(sm, ap, "Bomb"),
                                                                   Objectives.canAccessLocation(sm, ap, "Gravity Suit"),
-                                                                  Objectives.canAccessLocation(sm, ap, "Golden Torizo"),
+                                                                  sm.haveItem("GoldenTorizo"),
                                                                   sm.canPassLowerNorfairChozo()), # graph access implied by GT loc
          "all_chozo_robots",
          category="Memes",
@@ -294,7 +296,12 @@ _goalsList = [
                                                               Objectives.canAccess(sm, ap, "Etecoons Bottom")), # Etecoons
          "visited_animals",
          category="Memes",
-         escapeAccessPoints=(2, ["Big Pink", "Etecoons Bottom"]))
+         escapeAccessPoints=(2, ["Big Pink", "Etecoons Bottom"])),
+    Goal("kill king cacatac", "other",
+         lambda sm, ap: Objectives.canAccess(sm, ap, 'Bubble Mountain Top'),
+         "king_cac_dead",
+         category="Memes",
+         escapeAccessPoints=(1, ['Bubble Mountain Top']))
 ]
 
 
@@ -308,6 +315,10 @@ def completeGoalData():
     _goals["collect 100% items"].exclusion["list"] += areaGoals[:]
     # if we have scav hunt, don't require "clear area" (HUD behaviour incompatibility)
     _goals["finish scavenger hunt"].exclusion["list"] += areaGoals[:]
+    # remove clear area goals if disabled tourian, as escape can trigger as soon as an area is cleared,
+    # even if ship is not currently reachable
+    for goal in areaGoals:
+        _goals[goal].exclusion['tourian'] = "Disabled"
 
 completeGoalData()
 
@@ -319,6 +330,7 @@ class Objectives(object):
     goals = _goals
     graph = None
     _tourianRequired = None
+    vanillaGoals = ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"]
 
     def __init__(self, tourianRequired=True):
         if Objectives._tourianRequired is None:
@@ -334,6 +346,9 @@ class Objectives(object):
         Objectives.nbActiveGoals = 0
 
     def conflict(self, newGoal):
+        if newGoal.exclusion.get('tourian') == "Disabled" and self.tourianRequired == False:
+            LOG.debug("new goal %s conflicts with disabled Tourian" % newGoal.name)
+            return True
         LOG.debug("check if new goal {} conflicts with existing active goals".format(newGoal.name))
         count = 0
         for goal in Objectives.activeGoals:
@@ -367,7 +382,7 @@ class Objectives(object):
 
         return False
 
-    def addGoal(self, goalName):
+    def addGoal(self, goalName, completed=False):
         LOG.debug("addGoal: {}".format(goalName))
         goal = Objectives.goals[goalName]
         if self.conflict(goal):
@@ -375,11 +390,16 @@ class Objectives(object):
         Objectives.nbActiveGoals += 1
         assert Objectives.nbActiveGoals <= Objectives.maxActiveGoals, "Too many active goals"
         goal.setRank(Objectives.nbActiveGoals)
+        goal.completed = completed
         Objectives.activeGoals.append(goal)
 
     def removeGoal(self, goal):
         Objectives.nbActiveGoals -= 1
         Objectives.activeGoals.remove(goal)
+
+    def clearGoals(self):
+        Objectives.nbActiveGoals = 0
+        Objectives.activeGoals.clear()
 
     @staticmethod
     def isGoalActive(goalName):
@@ -406,10 +426,17 @@ class Objectives(object):
         return SMBool(loc in availLocs)
 
     def setVanilla(self):
-        self.addGoal("kill kraid")
-        self.addGoal("kill phantoon")
-        self.addGoal("kill draygon")
-        self.addGoal("kill ridley")
+        self.clearGoals()
+        for goal in Objectives.vanillaGoals:
+            self.addGoal(goal)
+
+    def isVanilla(self):
+        if Objectives.nbActiveGoals != len(Objectives.vanillaGoals):
+            return False
+        for goal in Objectives.activeGoals:
+            if goal not in Objectives.vanillaGoals:
+                return False
+        return True
 
     def setScavengerHunt(self):
         self.addGoal("finish scavenger hunt")
@@ -447,10 +474,18 @@ class Objectives(object):
             if area in goalsByArea:
                 goalsByArea[area].clearFunc = func
 
-    def setSolverMode(self, scavClearFunc, majorUpgrades):
-        self.setScavengerHuntFunc(scavClearFunc)
+    def setSolverMode(self, solver):
+        self.setScavengerHuntFunc(solver.scavengerHuntComplete)
         # in rando we know the number of items after randomizing, so set the functions only for the solver
-        self.setItemPercentFuncs(allUpgradeTypes=majorUpgrades)
+        self.setItemPercentFuncs(allUpgradeTypes=solver.majorUpgrades)
+
+        def getObjAreaFunc(area):
+            def f(sm, ap):
+                nonlocal solver, area
+                visitedLocs = set([loc.Name for loc in solver.visitedLocations])
+                return SMBool(all(locName in visitedLocs for locName in solver.splitLocsByArea[area]))
+            return f
+        self.setAreaFuncs({area:getObjAreaFunc(area) for area in solver.splitLocsByArea})
 
     def expandGoals(self):
         LOG.debug("Active goals:"+str(Objectives.activeGoals))
@@ -548,6 +583,14 @@ class Objectives(object):
     @staticmethod
     def getGoalsList():
         return [goal.name for goal in Objectives.activeGoals]
+
+    # call from interactivesolver
+    def getState(self):
+        return {goal.name: goal.completed for goal in Objectives.activeGoals}
+
+    def setState(self, state):
+        for goalName, completed in state.items():
+            self.addGoal(goalName, completed)
 
     # call from rando
     @staticmethod

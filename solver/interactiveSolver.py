@@ -121,6 +121,7 @@ class InteractiveSolver(CommonSolver):
         state = SolverState()
         state.fromJson(stateJson)
         state.toSolver(self)
+        self.objectives.setSolverMode(self)
 
         # save current AP
         previousAP = self.lastAP

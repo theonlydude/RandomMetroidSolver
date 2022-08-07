@@ -37,6 +37,7 @@ morphPlacements = defaultMultiValues['morphPlacement']
 majorsSplits = defaultMultiValues['majorsSplit']
 gravityBehaviours = defaultMultiValues['gravityBehaviour']
 objectives = defaultMultiValues['objective']
+tourians = defaultMultiValues['tourian']
 
 def randomMulti(args, param, defaultMultiValues):
     value = args[param]
@@ -293,7 +294,9 @@ if __name__ == "__main__":
                         dest='objectiveList', nargs='?', default=None)
     parser.add_argument('--tourian', help="Tourian mode",
                         dest='tourian', nargs='?', default='Vanilla',
-                        choices=['Vanilla', 'Fast', 'Disabled'])
+                        choices=tourians+['random'])
+    parser.add_argument('--tourianList', help="list to choose from when random",
+                        dest='tourianList', nargs='?', default=None)
     parser.add_argument('--hellrun', help="Hellrun damage rate in %, between 0 and 400 (default 100)",
                         dest='hellrunRate', default=100, type=int)
     parser.add_argument('--etanks', help="Additional ETanks, between 0 (default) and 18",
@@ -399,6 +402,7 @@ if __name__ == "__main__":
     (_, progDiff) = randomMulti(args.__dict__, "progressionDifficulty", progDiffs)
     (majorsSplitRandom, args.majorsSplit) = randomMulti(args.__dict__, "majorsSplit", majorsSplits)
     (_, gravityBehaviour) = randomMulti(args.__dict__, "gravityBehaviour", gravityBehaviours)
+    (_, args.tourian) = randomMulti(args.__dict__, "tourian", tourians)
     if args.minDifficulty:
         minDifficulty = text2diff[args.minDifficulty]
         if progSpeed != "speedrun":

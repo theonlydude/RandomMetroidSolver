@@ -7,7 +7,13 @@ org $8ba592
 	lda #$a66f 		; cinematic function = setup intro text page 1 (skips "the last metroid...")
 
 ;;; cinematic object definition : page 1 text
-org $8cc38b
+org $8cc383
+	;; skip vanilla japanese text handling
+	;; vanilla 1 frame delay, probably necessary
+	dw $0001
+	db $01
+	db $01
+	dw $D683
 print "page1_text: ", pc
 	;; format :
 	;;  dw frame_delay    ; vanilla is $0005
@@ -61,14 +67,14 @@ endmacro
 	%printChar($00, $17, $d75d)
 	%printChar($1f, $17, $d75d)
 	;; custom text END: put this at the end of the text to end the script
-        dw $ae5b 		; tweaked end of page 1 start
+        dw $ae5b 		; tweaked end of page 1 routine start
         dw $9698 ; Delete
 
 
 ;;; tweaked page 1 end, spills a bit into page 2 stuff, not a problem here
 org $8bae61
 introtxt_end:
-	bra .skip			; ignore japanes text handling
+	bra .skip			; ignore japanese text handling
 org $8BAE72
 .skip:
 	lda #input_check : sta $1f51	; cinematic function=input check

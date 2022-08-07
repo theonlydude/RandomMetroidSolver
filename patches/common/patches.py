@@ -359,6 +359,10 @@ patches = {
     },
     'Indicator[GreenHillZoneTopRight]': {
         0x78746: [0xff, 0xff, 0x01, 0x26, 0x30, 0x00]
+    },
+    # cancels the gamestate change by new_game.asm
+    "Restore_Intro": {
+        0x16EDA: [0x1E]
     }
 }
 

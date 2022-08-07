@@ -824,7 +824,7 @@ if __name__ == "__main__":
                                        args.noLayout, gravityBehaviour,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
-                                       escapeAttr, minimizerN, args.tourian == 'Fast',
+                                       escapeAttr, minimizerN, args.tourian,
                                        args.doorsColorsRando, objectivesManager.isVanilla())
         else:
             # from customizer permalink, apply previously generated seed ips first
@@ -843,7 +843,7 @@ if __name__ == "__main__":
         # we have to write ips to ROM before doing our direct modifications which will rewrite some parts (like in credits)
         romPatcher.commitIPS()
         if args.patchOnly == False:
-            romPatcher.writeObjectives(objectivesManager, itemLocs)
+            romPatcher.writeObjectives(objectivesManager, itemLocs, args.tourian)
             romPatcher.writeItemsLocs(itemLocs)
             romPatcher.writeSplitLocs(args.majorsSplit, itemLocs, progItemLocs)
             romPatcher.writeItemsNumber()

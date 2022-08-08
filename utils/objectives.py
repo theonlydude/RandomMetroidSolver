@@ -1,4 +1,4 @@
-import random, re
+import random
 from rom.addresses import Addresses
 from rom.rom import pc_to_snes
 from logic.helpers import Bosses
@@ -693,17 +693,12 @@ class Objectives(object):
             return
         # objectives or tourian are not vanilla, prepare intro text
         # two \n for an actual newline
-        text = "MISSION OBJECTIVES"
-        if self.isVanilla():
-            text += " ARE VANILLA"
-        else:
-            text += "\n"
-            for i,goal in enumerate(Objectives.activeGoals):
-                text += "\n\n%s" % goal.getIntroText()
-        text += "\n\n\nTOURIAN IS %s" % tourian
-        if not self.isVanilla():
-            text += "\n\n\nCHECK OBJECTIVES STATUS IN\n\n"
-            text += "THE PAUSE SCREEN"
+        text = "MISSION OBJECTIVES\n"
+        for goal in Objectives.activeGoals:
+            text += "\n\n%s" % goal.getIntroText()
+        text += "\n\n\nTOURIAN IS %s\n\n\n" % tourian
+        text += "CHECK OBJECTIVES STATUS IN\n\n"
+        text += "THE PAUSE SCREEN"
         # actually write text in ROM
         self._writeIntroText(rom, text.upper())
 
@@ -725,7 +720,6 @@ class Objectives(object):
         addCharRange('1', '9', '0')
         # actually write chars
         x, y = startX, startY
-        validChar = re.compile("[A-Z0-9 .!']")
         def writeChar(c, frameDelay=2):
             nonlocal rom, x, y
             assert x <= 0x1F and y <= 0x18, "Intro text formatting error (x=0x%x, y=0x%x):\n%s" % (x, y, text)
@@ -733,7 +727,7 @@ class Objectives(object):
                 x = startX
                 y += 1
             else:
-                assert validChar.match(c), "Invalid intro char "+c
+                assert c in charCodes, "Invalid intro char "+c
                 rom.writeWord(frameDelay)
                 rom.writeByte(x)
                 rom.writeByte(y)

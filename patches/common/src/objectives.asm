@@ -179,6 +179,7 @@ check_objectives_events:
 	rts
 
 objective_events:
+%printAddrEntry(objectiveEventsArray)
 %objectivesCompletedEventArray()
 
 

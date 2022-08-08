@@ -768,16 +768,20 @@ class Helpers(object):
 class Pickup:
     def __init__(self, itemsPickup):
         self.itemsPickup = itemsPickup
+        self.endGameLocations = ["Mother Brain", "Gunship"]
 
+    # don't count end game location in the mix as it's now in the available locations
     def enoughMinors(self, smbm, minorLocations):
-        if self.itemsPickup == 'all':
-            return len(minorLocations) == 0
+        if self.itemsPickup in ('all', 'all_strict'):
+            return (len(minorLocations) == 0
+                    or (len(minorLocations) == 1 and minorLocations[0].Name in self.endGameLocations))
         else:
             return True
 
     def enoughMajors(self, smbm, majorLocations):
-        if self.itemsPickup == 'all':
-            return len(majorLocations) == 0
+        if self.itemsPickup in ('all', 'all_strict'):
+            return (len(majorLocations) == 0
+                    or (len(majorLocations) == 1 and majorLocations[0].Name in self.endGameLocations))
         else:
             return True
 

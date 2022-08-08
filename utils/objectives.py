@@ -541,6 +541,31 @@ class Objectives(object):
             result = smbm.wand(result, goal.canClearGoal(smbm, ap))
         return result
 
+    # call from solver
+    def checkGoals(self, smbm, ap):
+        ret = {}
+
+        for goal in Objectives.activeGoals:
+            if goal.completed is True:
+                continue
+            # check if goal can be completed
+            ret[goal.name] = goal.canClearGoal(smbm, ap)
+
+        return ret
+
+    def setGoalCompleted(self, goalName, completed):
+        for goal in Objectives.activeGoals:
+            if goal.name == goalName:
+                goal.completed = completed
+                return
+        assert False, "Can't set goal {} completion to {}, goal not active".format(goalName, completed)
+
+    def allGoalsCompleted(self):
+        for goal in Objectives.activeGoals:
+            if goal.completed is False:
+                return False
+        return True
+
     def getGoalFromCheckFunction(self, checkFunction):
         for name, goal in Objectives.goals.items():
             if goal.checkAddr == checkFunction:

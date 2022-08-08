@@ -22,7 +22,7 @@ class RandoSolver(StandardSolver):
         self.log = utils.log.get('Solver')
 
         # default conf
-        self.setConf(easy, 'all', [], False)
+        self.setConf(easy, 'all_strict', [], False)
 
         self.firstLogFile = None
 

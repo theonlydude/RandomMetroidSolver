@@ -1,4 +1,5 @@
 import utils.log
+from collections import defaultdict
 
 class ComeBack(object):
     # object to handle the decision to choose the next area when all locations have the "no comeback" flag.
@@ -12,28 +13,29 @@ class ComeBack(object):
 
     def handleNoComeBack(self, locations, cur):
         # return True if a rewind is needed. choose the next area to use
-        solveAreas = {}
+        solveAreas = defaultdict(int)
         locsCount = 0
         for loc in locations:
             if self.solver.majorsSplit != 'Full':
                 if loc.isClass(self.solver.majorsSplit) or loc.isBoss():
-                    if loc.comeBack is None:
-                        return False
-                    elif loc.comeBack == True:
+                    if loc.comeBack is None or loc.comeBack:
                         return False
             else:
-                if loc.comeBack is None:
-                    return False
-                if loc.comeBack == True:
+                if loc.comeBack is None or loc.comeBack:
                     return False
             locsCount += 1
-            if loc.SolveArea in solveAreas:
-                solveAreas[loc.SolveArea] += 1
-            else:
-                solveAreas[loc.SolveArea] = 1
+            solveAreas[loc.SolveArea] += 1
+
+        # check if end game loc could be available in relaxed end
+        if not self.solver.endGameLoc.difficulty and self.solver.canRelaxEnd():
+            self.log.debug("handleNoComeBack: use relaxed end")
+            locations.append(self.solver.endGameLoc)
+            locsCount += 1
+            solveAreas[self.solver.endGameLoc.SolveArea] += 1
 
         # only minors locations, or just one major, no need for a rewind step
-        if locsCount < 2:
+        if locsCount <= 1:
+            self.log.debug("handleNoComeBack: only {} location".format(locsCount))
             return False
 
         # only one solve area, no need for come back
@@ -118,8 +120,6 @@ class ComeBack(object):
             self.log.debug("Can't rewind, it's buggy here !")
             return False
         self.solver.cancelLastItems(count)
-        # we've rewind, we may no longer be able to kill mother brain
-        self.solver.motherBrainCouldBeKilled = False
         self.log.debug("Rewind {} items to {}".format(count, lastStep.cur))
         return True
 

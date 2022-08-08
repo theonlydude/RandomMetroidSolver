@@ -313,7 +313,7 @@ function randomize(evt, elemId) {
     evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
     isActive = false;
 
-    defaultValues = {"missileQty": 3, "superQty": 2, "powerBombQty": 1, "minorQty": 100, "scavNumLocs": 10};
+    defaultValues = {"missileQty": 3, "superQty": 2, "powerBombQty": 1, "minorQty": 100, "scavNumLocs": 10, "nbObjective": 4};
 
     if(e.value.length == 0 && elemId in defaultValues) {
       e.value = defaultValues[elemId];
@@ -752,7 +752,7 @@ function getComplexity() {
 
 function setRandom() {
 {{
-    for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "startLocation", "minimizerQty", "gravityBehaviour", "scavNumLocs", "tourian"]:
+    for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "startLocation", "minimizerQty", "gravityBehaviour", "scavNumLocs", "tourian", "nbObjective"]:
       if id in session.randomizer and session.randomizer[id] == "random":
         response.write("  document.getElementById(\"{}Random\").click();\n".format(id), escape=False)
         if "{}MultiSelect".format(id) in session.randomizer:
@@ -858,7 +858,7 @@ function AjaxPresetCallCompleted(data) {
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
     var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "nbObjective"];
     var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian"];
 
     for(var i=0; i<elems.length; i++) {
@@ -1048,7 +1048,7 @@ function AjaxRandomizerCallCompleted(data) {
 
     var dataDict = {"complexity": getComplexity()};
     var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "nbObjective"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian"];
 
     for(var i=0; i<elems.length; i++) {
@@ -2444,6 +2444,11 @@ This patch is automatically enabled when using Full Countdown item split, or Maj
       content: "<p>Randomize the background music.</p>\
 <p>Patch developed by dude & flo.</p>",
       placement: "auto left"
+    },
+    {
+      element: "#nbObjectiveStep",
+      title: "Number of Objectives to access Tourian",
+      content: "<p>By default you need to complete 4 objectives from the list to access Tourian. You can choose 1-5 or enter 0 to make the number random.</p>",
     }
  ]});
 
@@ -2630,6 +2635,12 @@ def displayNumber(id, min, max, default, step="1"):
                 <td><span id="objectiveText">Objectives to access Tourian:</span></td>
                 <td>{{displayMultiSelect("objective", currentMultiValues["objective"], "", defaultMultiValues["objective"])}}</td>
                 <td id="objectiveStep"><button type="button" onclick="startTheTour(6)">?</button></td>
+              </tr>
+              <tr>
+                <td class="small"><div class="random"><button id="nbObjectiveRandom" type="button" onclick="randomize(event, 'nbObjective')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td><span id="nbObjectiveText">Number of objectives:</span></td>
+                <td>{{displayNumber("nbObjective", "1", "5", "4", "1")}}</td>
+                <td id="nbObjectiveStep"><button type="button" onclick="startTheTour(50)">?</button></td>
               </tr>
             </table>
             <table class="full">

@@ -34,11 +34,13 @@ class Synonyms(object):
 
 class Goal(object):
     def __init__(self, name, gtype, logicClearFunc, romClearFunc,
-                 escapeAccessPoints=None, exclusion=None, items=None, text=None, introText=None,
+                 escapeAccessPoints=None, objCompletedFuncAPs=lambda ap: [ap],
+                 exclusion=None, items=None, text=None, introText=None,
                  available=True, expandableList=None, category=None, area=None):
         self.name = name
         self.available = available
         self.clearFunc = logicClearFunc
+        self.objCompletedFuncAPs = objCompletedFuncAPs
         # SNES addr in bank A1, see objectives.asm
         self.checkAddr = pc_to_snes(Addresses.getOne("objective[%s]" % romClearFunc)) & 0xffff
         self.escapeAccessPoints = escapeAccessPoints
@@ -281,12 +283,14 @@ _goalsList = [
          lambda sm, ap: sm.wand(sm.haveItem('Grapple'), Objectives.canAccess(sm, ap, "Red Fish Room Bottom")),
          "fish_tickled",
          escapeAccessPoints=(1, ["Red Fish Room Bottom"]),
+         objCompletedFuncAPs=lambda ap: ["Red Fish Room Bottom"],
          category="Memes"),
     Goal("kill the orange geemer", "other",
          lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Bowling"), # XXX this unnecessarily adds canPassBowling as requirement
                                 sm.wor(sm.haveItem('Wave'), sm.canUsePowerBombs())),
          "orange_geemer",
          escapeAccessPoints=(1, ["Bowling"]),
+         objCompletedFuncAPs=lambda ap: ["Bowling"],
          text="{} orange geemer",
          category="Memes"),
     Goal("kill shaktool", "other",
@@ -295,6 +299,7 @@ _goalsList = [
                                 sm.canAccessShaktoolFromPantsRoom()),
          "shak_dead",
          escapeAccessPoints=(1, ["Oasis Bottom"]),
+         objCompletedFuncAPs=lambda ap: ["Oasis Bottom"],
          text="{} shaktool",
          category="Memes"),
     Goal("activate chozo robots", "other", lambda sm, ap: sm.wand(Objectives.canAccessLocation(sm, ap, "Bomb"),
@@ -304,17 +309,20 @@ _goalsList = [
          "all_chozo_robots",
          category="Memes",
          escapeAccessPoints=(3, ["Landing Site", "Screw Attack Bottom", "Bowling"]),
+         objCompletedFuncAPs=lambda ap: ["Landing Site", "Screw Attack Bottom", "Bowling"],
          exclusion={"list": ["kill golden torizo"]}),
     Goal("visit the animals", "other", lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Big Pink"), sm.haveItem("SpeedBooster"), # dachora
                                                               Objectives.canAccess(sm, ap, "Etecoons Bottom")), # Etecoons
          "visited_animals",
          category="Memes",
-         escapeAccessPoints=(2, ["Big Pink", "Etecoons Bottom"])),
+         escapeAccessPoints=(2, ["Big Pink", "Etecoons Bottom"]),
+         objCompletedFuncAPs=lambda ap: ["Big Pink", "Etecoons Bottom"]),
     Goal("kill king cacatac", "other",
          lambda sm, ap: Objectives.canAccess(sm, ap, 'Bubble Mountain Top'),
          "king_cac_dead",
          category="Memes",
-         escapeAccessPoints=(1, ['Bubble Mountain Top']))
+         escapeAccessPoints=(1, ['Bubble Mountain Top']),
+         objCompletedFuncAPs=lambda ap: ['Bubble Mountain Top'])
 ]
 
 

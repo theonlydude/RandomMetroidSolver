@@ -2477,6 +2477,16 @@ This patch is automatically enabled when using Full Countdown item split, or Maj
 function DoPost(){
     $.redirect("/presets", { action: "Load", currenttab: "Techniques1", preset: document.getElementById("preset").value }, "POST", "_blank");
 }
+
+$(() => {
+    $('#objectiveMultiSelect').chosen().change(e => {
+        if ($('#objectiveMultiSelect').chosen().val().length > 1) {
+            $("#nbObjectiveVisiblity").show()
+        } else {
+            $("#nbObjectiveVisiblity").hide()
+        }
+    })
+})
 </script>
 {{
 def displayCheckbox(id, defaultTrue=False):
@@ -2648,7 +2658,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <td>{{displayMultiSelect("objective", currentMultiValues["objective"], "", defaultMultiValues["objective"])}}</td>
                 <td id="objectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
-              <tr>
+              <tr id="nbObjectiveVisiblity">
                 <td class="small"><div class="random"><button id="nbObjectiveRandom" type="button" onclick="randomize(event, 'nbObjective')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="nbObjectiveText">Number of objectives:</span></td>
                 <td>{{displayNumber("nbObjective", "1", "5", "4", "1")}}</td>

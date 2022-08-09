@@ -2481,11 +2481,12 @@ function DoPost(){
 $(() => {
     $('#objectiveMultiSelect').chosen().change(e => {
         if ($('#objectiveMultiSelect').chosen().val().length > 1) {
-            $("#nbObjectiveVisiblity").show()
+            $("#nbObjectiveVisiblity").show();
         } else {
-            $("#nbObjectiveVisiblity").hide()
+            $("#nbObjectiveVisiblity").hide();
         }
     })
+    $('#objectiveMultiSelect').chosen().change();
 })
 </script>
 {{

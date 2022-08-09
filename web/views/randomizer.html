@@ -656,10 +656,12 @@ function setMaxObjective(isRandom) {
         // no limit
         $("#objectiveMultiSelect").chosen("destroy");
         $("#objectiveMultiSelect").chosen({max_selected_options: Infinity, width: '100%'})
+        $("#nbObjectiveVisiblity").show();
     } else {
         // limit to 5 objectives (4 in scav hunt)
         $("#objectiveMultiSelect").chosen("destroy");
         $("#objectiveMultiSelect").chosen({max_selected_options: max_objectives, width: '100%'})
+        $("#nbObjectiveVisiblity").hide();
     }
 }
 
@@ -2477,17 +2479,6 @@ This patch is automatically enabled when using Full Countdown item split, or Maj
 function DoPost(){
     $.redirect("/presets", { action: "Load", currenttab: "Techniques1", preset: document.getElementById("preset").value }, "POST", "_blank");
 }
-
-$(() => {
-    $('#objectiveMultiSelect').chosen().change(e => {
-        if ($('#objectiveMultiSelect').chosen().val().length > 1) {
-            $("#nbObjectiveVisiblity").show();
-        } else {
-            $("#nbObjectiveVisiblity").hide();
-        }
-    })
-    $('#objectiveMultiSelect').chosen().change();
-})
 </script>
 {{
 def displayCheckbox(id, defaultTrue=False):

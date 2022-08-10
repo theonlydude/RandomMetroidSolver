@@ -710,8 +710,12 @@ compute_n_items:
 .end:
 	;; here, n_items contain collected items, and Y number of items
 	;; make it so, n_items contains remaining items:
-	;; n_items = Y - n_items
-	tya : sec : sbc !n_items : sta !n_items
+	;; n_items = max(0, Y - n_items) ; handle < 0 for some restricted locs cases
+	tya : sec : sbc !n_items
+        bpl .store
+        lda #$0000
+.store:
+        sta !n_items
 	bne .ret
 	;; 0 items left, trigger appropriate event : current graph area idx+area_clear_event_base
 	ldx $07bb : lda $8f0010,x

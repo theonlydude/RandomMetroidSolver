@@ -165,7 +165,7 @@ class RomPatcher:
         }
         itemLocCheck = lambda itemLoc: itemLoc.Item.Category != "Nothing" and splitChecks[split](itemLoc)
         for area,addr in locIdsByAreaAddresses.items():
-            locs = [il.Location for il in itemLocs if itemLocCheck(il) and il.Location.GraphArea == area]
+            locs = [il.Location for il in itemLocs if itemLocCheck(il) and il.Location.GraphArea == area and not il.Location.restricted]
             self.log.debug("writeSplitLocs. area="+area)
             self.log.debug(str([loc.Name for loc in locs]))
             self.romFile.seek(addr)

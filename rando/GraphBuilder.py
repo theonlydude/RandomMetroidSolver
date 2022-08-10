@@ -26,7 +26,12 @@ class GraphBuilder(object):
         if transitions is None:
             transitions = []
             if self.minimizerN is not None:
-                transitions = GraphUtils.createMinimizerTransitions(self.graphSettings.startAP, self.minimizerN)
+                # if no Crateria and auto escape trigger, we connect door connected to G4 to climb instead (see below).
+                # This wouldn't work here, as Tourian is isolated in the resulting seed (see below again)
+                # (well we could do two different transitions on both sides of doors, but that would just be confusing)
+                # so we force crateria to be in the graph (it'll be connected to Tourian immediately)
+                forceCrateria = self.graphSettings.startAP == "Golden Four" and self.graphSettings.tourian == "Disabled"
+                transitions = GraphUtils.createMinimizerTransitions(self.graphSettings.startAP, self.minimizerN, forceCrateria)
             else:
                 if not self.bossRando:
                     transitions += vanillaBossesTransitions

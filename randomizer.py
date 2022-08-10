@@ -704,7 +704,8 @@ if __name__ == "__main__":
     if args.doorsColorsRando == True:
         RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
     graphSettings = GraphSettings(args.startLocation, args.area, args.lightArea, args.bosses,
-                                  args.escapeRando, minimizerN, dotFile, args.doorsColorsRando, args.allowGreyDoors,
+                                  args.escapeRando, minimizerN, dotFile,
+                                  args.doorsColorsRando, args.allowGreyDoors, args.tourian,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
 
     if args.plandoRando is None:

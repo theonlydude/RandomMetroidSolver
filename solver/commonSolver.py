@@ -718,7 +718,12 @@ class CommonSolver(object):
             # check if we're stuck
             if len(majorsAvailable) == 0 and len(minorsAvailable) == 0:
                 self.log.debug("STUCK MAJORS and MINORS")
-                if self.comeBack.rewind(len(self.collectedItems)) == True:
+
+                if not self.endGameLoc.difficulty and self.canRelaxEnd():
+                    self.log.debug("Can't collect 100% but Mother Brain is available in relax end")
+                    majorsAvailable.append(self.endGameLoc)
+                elif self.comeBack.rewind(len(self.collectedItems)) == True:
+                    self.log.debug("Rewind as we're stuck")
                     continue
                 else:
                     # we're really stucked
@@ -727,7 +732,7 @@ class CommonSolver(object):
                     break
 
             # handle no comeback locations
-            rewindRequired = self.comeBack.handleNoComeBack(self.getAllLocs(majorsAvailable, minorsAvailable),
+            rewindRequired = self.comeBack.handleNoComeBack(majorsAvailable, minorsAvailable,
                                                             len(self.collectedItems))
             if rewindRequired == True:
                 if self.comeBack.rewind(len(self.collectedItems)) == True:

@@ -11,7 +11,12 @@ class ComeBack(object):
         self.solver = solver
         self.log = utils.log.get('Rewind')
 
-    def handleNoComeBack(self, locations, cur):
+    def handleNoComeBack(self, majorsAvailable, minorsAvailable, cur):
+        if self.solver.majorsSplit == 'Full':
+            locations = majorsAvailable
+        else:
+            locations = majorsAvailable + minorsAvailable
+
         # return True if a rewind is needed. choose the next area to use
         solveAreas = defaultdict(int)
         locsCount = 0
@@ -25,7 +30,11 @@ class ComeBack(object):
         # check if end game loc could be available in relaxed end
         if not self.solver.endGameLoc.difficulty and self.solver.canRelaxEnd():
             self.log.debug("handleNoComeBack: use relaxed end")
-            locations.append(self.solver.endGameLoc)
+            # add it so that it's available in the solver
+            majorsAvailable.append(self.solver.endGameLoc)
+            # add it for the rest of the function
+            if self.solver.majorsSplit != 'Full':
+                locations.append(self.solver.endGameLoc)
             locsCount += 1
             solveAreas[self.solver.endGameLoc.SolveArea] += 1
 

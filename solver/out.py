@@ -235,6 +235,7 @@ class OutConsole(Out):
 
         print("all patches: {}".format(s.romLoader.getAllPatches()))
         print("objectives: {}".format(Objectives.getGoalsList()))
+        print("tourian: {}".format(s.tourian))
 
         # print generated path
         if Conf.displayGeneratedPath == True:

@@ -79,6 +79,11 @@ class ChozoWrapperFiller(Filler):
         if isStuck:
             self.errorMsg = filler.errorMsg
             return (isStuck, itemLocations, progItemLocs)
+
+        # remove first phase restrictions as it causes issue with powerbombs on 2nd phase when
+        # progspeed is speedrun and start loc is etecoons.
+        filler.restrictions.setPlacementRestrictions(None)
+
         filler = self.prepareSecondPhase(filler.container, progItemLocs)
         (isStuck, itemLocations, secondProg) = filler.generateItems(vcr=vcr)
         self.errorMsg = filler.errorMsg

@@ -691,6 +691,8 @@ if __name__ == "__main__":
         print("morphPlacement:{}".format(args.morphPlacement))
         print("gravity:{}".format(gravityBehaviour))
         print("maxDifficulty:{}".format(maxDifficulty))
+        print("tourian:{}".format(args.tourian))
+        print("objectives:{}".format([g.name for g in Objectives.activeGoals]))
 
     dotFile = None
     if args.area == True:

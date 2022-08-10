@@ -243,6 +243,17 @@ class FillerRandomSpeedrun(FillerRandom):
             orderedItemLocations.append(itemLoc)
         self.progressionItemLocs = orderedItemLocations
 
+        # also sort regular itemLocs (used by graph builder to create escape when tourian is disabled)
+        def indexInVisited(itemLoc):
+            nonlocal solver
+            ret = len(solver.visitedLocations)
+            try:
+                ret = solver.visitedLocations.index(itemLoc.Location)
+            except ValueError:
+                pass
+            return ret
+        self.container.itemLocations.sort(key=indexInVisited)
+
     def getHelp(self):
         if time.process_time() > self.runtimeSteps[self.nFrontFillSteps]:
             # store the step for debug purpose

@@ -344,6 +344,12 @@ class CommonSolver(object):
                 if item not in self.collectedItems:
                     self.smbm.removeItem(item)
 
+    def cancelObjectives(self, cur):
+        while self.completedObjectives and self.completedObjectives[-1][0] > cur:
+            goalCur, goalName = self.completedObjectives.pop()
+            self.log.debug("rollback objective {}".format(goalName))
+            self.objectives.setGoalCompleted(goalName, False)
+
     def printLocs(self, locs, phase):
         if len(locs) > 0:
             print("{}:".format(phase))
@@ -668,11 +674,11 @@ class CommonSolver(object):
 
         self.log.debug("{}: available major: {}, available minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
 
-        isEndPossible = False
         endDifficulty = mania
         diffThreshold = self.getDiffThreshold()
         self.relaxedEndCheck = False
         self.aborted = False
+        self.completedObjectives = []
 
         while self.endGameLoc not in self.visitedLocations:
             # check time limit
@@ -686,13 +692,12 @@ class CommonSolver(object):
             # check if a new objective can be completed
             goals = self.objectives.checkGoals(self.smbm, self.lastAP)
             if any([possible for possible in goals.values()]):
-                # get the first completed goal TODO::choose better ?
                 for goalName, possible in goals.items():
                     if possible:
                         self.log.debug("complete objective {}".format(goalName))
                         self.objectives.setGoalCompleted(goalName, True)
+                        self.completedObjectives.append((len(self.collectedItems), goalName))
                         break
-                # TODO::find a way to add the completed objective in visited locations
                 continue
 
             # compute the difficulty of all the locations
@@ -712,15 +717,14 @@ class CommonSolver(object):
 
             # check if we're stuck
             if len(majorsAvailable) == 0 and len(minorsAvailable) == 0:
-                if not isEndPossible:
-                    self.log.debug("STUCK MAJORS and MINORS")
-                    if self.comeBack.rewind(len(self.collectedItems)) == True:
-                        continue
-                    else:
-                        # we're really stucked
-                        self.log.debug("STUCK CAN'T REWIND")
-                        self.aborted = True
-                        break
+                self.log.debug("STUCK MAJORS and MINORS")
+                if self.comeBack.rewind(len(self.collectedItems)) == True:
+                    continue
+                else:
+                    # we're really stucked
+                    self.log.debug("STUCK CAN'T REWIND")
+                    self.aborted = True
+                    break
 
             # handle no comeback locations
             rewindRequired = self.comeBack.handleNoComeBack(self.getAllLocs(majorsAvailable, minorsAvailable),

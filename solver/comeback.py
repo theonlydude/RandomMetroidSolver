@@ -16,13 +16,9 @@ class ComeBack(object):
         solveAreas = defaultdict(int)
         locsCount = 0
         for loc in locations:
-            if self.solver.majorsSplit != 'Full':
-                if loc.isClass(self.solver.majorsSplit) or loc.isBoss():
-                    if loc.comeBack is None or loc.comeBack:
-                        return False
-            else:
-                if loc.comeBack is None or loc.comeBack:
-                    return False
+            if loc.comeBack is None or loc.comeBack:
+                self.log.debug("handleNoComeBack: found a loc with comeback true: {}".format(loc.Name))
+                return False
             locsCount += 1
             solveAreas[loc.SolveArea] += 1
 
@@ -120,6 +116,7 @@ class ComeBack(object):
             self.log.debug("Can't rewind, it's buggy here !")
             return False
         self.solver.cancelLastItems(count)
+        self.solver.cancelObjectives(lastStep.cur)
         self.log.debug("Rewind {} items to {}".format(count, lastStep.cur))
         return True
 

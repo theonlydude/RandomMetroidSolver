@@ -21,7 +21,8 @@ class ComeBack(object):
         solveAreas = defaultdict(int)
         locsCount = 0
         for loc in locations:
-            if loc.comeBack is None or loc.comeBack:
+            # always consider phantoon as a no combeback because once phantoon is dead WS Etank could no longer be available
+            if (loc.comeBack is None or loc.comeBack) and loc.Name != 'Phantoon':
                 self.log.debug("handleNoComeBack: found a loc with comeback true: {}".format(loc.Name))
                 return False
             locsCount += 1

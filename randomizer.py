@@ -548,7 +548,8 @@ if __name__ == "__main__":
                     objectivesManager.addGoal(goal)
             objectivesManager.expandGoals()
         else:
-            objectivesManager.setVanilla()
+            if not (args.majorsSplit == "Scavenger" and args.tourian == 'Disabled'):
+                objectivesManager.setVanilla()
         if len(Objectives.activeGoals) == 0:
             objectivesManager.addGoal('nothing')
         if any(goal for goal in Objectives.activeGoals if goal.area is not None):

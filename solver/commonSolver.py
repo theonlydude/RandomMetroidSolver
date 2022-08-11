@@ -70,9 +70,14 @@ class CommonSolver(object):
                 self.romLoader.loadObjectives(self.objectives)
             else:
                 if self.majorsSplit == "Scavenger":
+                    # add scav hunt
                     self.objectives.setScavengerHunt()
                     self.objectives.tourianRequired = not self.romLoader.hasPatch('Escape_Trigger')
+                    if self.objectives.tourianRequired:
+                        # add G4 on top of scav hunt
+                        self.objectives.setVanilla()
                 else:
+                    # only G4
                     self.objectives.setVanilla()
             self.majorUpgrades = self.romLoader.loadMajorUpgrades()
             self.splitLocsByArea = self.romLoader.getSplitLocsByArea(self.locations)

@@ -352,6 +352,7 @@ class Objectives(object):
     graph = None
     _tourianRequired = None
     vanillaGoals = ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"]
+    scavHuntGoal = ["finish scavenger hunt"]
 
     def __init__(self, tourianRequired=True):
         if Objectives._tourianRequired is None:
@@ -447,17 +448,28 @@ class Objectives(object):
         return SMBool(loc in availLocs)
 
     def setVanilla(self):
-        self.clearGoals()
         for goal in Objectives.vanillaGoals:
             self.addGoal(goal)
 
     def isVanilla(self):
-        if Objectives.nbActiveGoals != len(Objectives.vanillaGoals):
+        # kill G4 and/or scav hunt
+        if len(Objectives.activeGoals) == 1:
+            for goal in Objectives.activeGoals:
+                if goal.name not in Objectives.scavHuntGoal:
+                    return False
+            return True
+        elif len(Objectives.activeGoals) == 4:
+            for goal in Objectives.activeGoals:
+                if goal.name not in Objectives.vanillaGoals:
+                    return False
+            return True
+        elif len(Objectives.activeGoals) == 5:
+            for goal in Objectives.activeGoals:
+                if goal.name not in Objectives.vanillaGoals + Objectives.scavHuntGoal:
+                    return False
+            return True
+        else:
             return False
-        for goal in Objectives.activeGoals:
-            if goal.name not in Objectives.vanillaGoals:
-                return False
-        return True
 
     def setScavengerHunt(self):
         self.addGoal("finish scavenger hunt")

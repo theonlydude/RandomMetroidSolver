@@ -402,6 +402,20 @@ for PRESET in "regular" "newbie" "master"; do
 
 done
 
+echo ""
+echo "Parameters combinations failure"
+for PROGSPEED in "speedrun" "slowest" "slow" "medium" "fast" "fastest" "VARIAble"; do
+    for MAJORSPLIT in "Major" "Full" "Chozo" "FullWithHUD" "Scavenger"; do
+        TOTAL=$(grep ";${MAJORSPLIT};" ${CSV} | grep ";${PROGSPEED};" | wc -l)
+        ERROR=$(grep ";${MAJORSPLIT};" ${CSV} | grep ";${PROGSPEED};" | grep -E '^error' | wc -l)
+        if [ ${TOTAL} -ne 0 -a ${ERROR} -ne 0 ]; then
+            PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+            printf "%-24s" "${PROGSPEED}:${MAJORSPLIT}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+        fi
+    done
+done
+
+
 TOTAL_COUNT=$(wc -l ${CSV} | awk '{print $1}')
 echo "total: ${TOTAL_COUNT}"
 ERRORS_COUNT=$(grep -E "^error" ${CSV} | wc -l)

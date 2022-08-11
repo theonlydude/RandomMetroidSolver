@@ -372,6 +372,7 @@ class CommonSolver(object):
             return []
 
         mandatoryBosses = Objectives.getMandatoryBosses()
+        escapeLoc = "Gunship"
 
         # add nocomeback locations which has been selected by the comeback step (areaWeight == 1)
         around = [loc for loc in locations if( (loc.areaWeight is not None and loc.areaWeight == 1)
@@ -380,7 +381,8 @@ class CommonSolver(object):
                                                    and (not Bosses.areaBossDead(self.smbm, self.lastArea)
                                                         and (self.lastArea not in Bosses.areaBosses
                                                              or Bosses.areaBosses[self.lastArea] in mandatoryBosses))
-                                                   and loc.comeBack is not None and loc.comeBack == True) )]
+                                                   and loc.comeBack is not None and loc.comeBack == True)
+                                               or (loc.Name == escapeLoc) )]
         outside = [loc for loc in locations if not loc in around]
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
@@ -388,14 +390,14 @@ class CommonSolver(object):
             self.printLocs(outside, "outside1")
 
         around.sort(key=lambda loc: (
+            # end game loc
+            0 if loc.Name == escapeLoc else 1,
             # locs in the same area
-            0 if loc.SolveArea == self.lastArea
-            else 1,
+            0 if loc.SolveArea == self.lastArea else 1,
             # nearest locs
             loc.distance,
             # beating a boss
-            0 if loc.isBoss()
-            else 1,
+            0 if loc.isBoss() else 1,
             # easiest first
             loc.difficulty.difficulty
             )

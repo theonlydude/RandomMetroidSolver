@@ -198,10 +198,10 @@ class Randomizer(object):
                    'rando_speed', 'animals', 'No_Music', 'random_music',
                    'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized",
                    'relaxed_round_robin_cf']
-        quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs", 'nbObjective']
+        quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'nbObjective']
+        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize
@@ -264,10 +264,6 @@ class Randomizer(object):
             if 'MultiSelect' in var:
                 randoPresetDict[var] = value.split(',')
         randoPresetDict['objective'] = self.vars.objective.split(',')
-
-        if randoPresetDict.get('nbObjective'):
-            randoPresetDict['objectiveMultiSelect'] = randoPresetDict['objective']
-            randoPresetDict['objective'] = randoPresetDict.pop('nbObjective')
 
         with open(jsonRandoPreset, 'w') as randoPresetFile:
             json.dump(randoPresetDict, randoPresetFile)
@@ -379,7 +375,7 @@ class Randomizer(object):
                    'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
-                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
+                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour', 'objective']
         others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others)
 
@@ -432,7 +428,6 @@ class Randomizer(object):
         self.session.randomizer['scavRandomized'] = self.vars.scavRandomized
         # objective is a special multi select
         self.session.randomizer['objective'] = self.vars.objective.split(',')
-        self.session.randomizer['nbObjective'] = self.vars.nbObjective
 
         if self.vars.objectiveMultiSelect is not None:
             self.session.randomizer['objectiveMultiSelect'] = self.vars.objectiveMultiSelect.split(',')

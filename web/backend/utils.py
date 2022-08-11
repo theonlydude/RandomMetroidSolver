@@ -212,7 +212,12 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
             raiseHttp(400, "Wrong value for seed", isJson)
 
     if 'objective' in others:
-        objective = request.vars.objective.split(',')
+        if request.vars.objective.isdigit():
+            if not int(request.vars.objective) in range(6):
+                raiseHttp(400, "Number of objectives must be 0-5", isJson)
+            objective = request.vars.objectiveMultiSelect.split(',')
+        else:
+            objective = request.vars.objective.split(',')
         authorizedObjectives = defaultMultiValues['objective'] + ['random', 'nothing']
         for value in objective:
             if value not in authorizedObjectives:

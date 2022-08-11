@@ -860,8 +860,8 @@ function AjaxPresetCallCompleted(data) {
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
     var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "nbObjective"];
-    var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
+    var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian", "objective"];
 
     for(var i=0; i<elems.length; i++) {
         // if element is disabled set it to off
@@ -1050,8 +1050,8 @@ function AjaxRandomizerCallCompleted(data) {
 
     var dataDict = {"complexity": getComplexity()};
     var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "nbObjective"];
-    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
+    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "tourian"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -1092,8 +1092,13 @@ function AjaxRandomizerCallCompleted(data) {
 function getSpecialValues(dataDict) {
     // special case for objectives multiselect
     if(isElemIdRandom("objective")) {
+      // Number of objectives can be controlled when objectives is random
+      if (!isElemIdRandom("nbObjective")) {
+        dataDict.objective = document.getElementById("nbObjective").value
+      } else {
         dataDict["objective"] = "random";
         dataDict["objectiveMultiSelect"] = $("#objectiveMultiSelect").val().join();
+      }
     } else {
         var objectives = get_selected_objectives();
         if(objectives.length == 0) {

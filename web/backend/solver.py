@@ -144,6 +144,10 @@ class Solver(object):
 
         currentSuit = 'Power'
         for location, area, subarea, item, locDiff, locTechniques, locItems, pathDiff, pathTechniques, pathItems, path, _class in locations:
+            if _class == "objective":
+                pathTable += """<tr><td colspan="7" class="center objective">{}</td></tr>""".format(location)
+                continue
+
             if path is not None:
                 lastAP = path[-1]
                 if displayAPs == True and not (len(path) == 1 and path[0] == lastAP):

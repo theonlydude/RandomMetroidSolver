@@ -400,12 +400,12 @@ class Helpers(object):
             chargeDamage *= 3.0
             beams.append('Charge')
         # missile 100 damages, super missile 300 damages, PBs 200 dmg, 5 in each extension
-        missilesAmount = (sm.itemCount('Missile') - missilesOffset) * 5
+        missilesAmount = max(0, (sm.itemCount('Missile') - missilesOffset)) * 5
         if ignoreMissiles == True:
             missilesDamage = 0
         else:
             missilesDamage = missilesAmount * 100
-        supersAmount = (sm.itemCount('Super') - supersOffset) * 5
+        supersAmount = max(0, (sm.itemCount('Super') - supersOffset)) * 5
         if ignoreSupers == True:
             oneSuper = 0
         else:
@@ -416,7 +416,7 @@ class Helpers(object):
         powerDamage = 0
         powerAmount = 0
         if power == True and sm.haveItem('PowerBomb') == True:
-            powerAmount = (sm.itemCount('PowerBomb') - powerBombsOffset) * 5
+            powerAmount = max(0, (sm.itemCount('PowerBomb') - powerBombsOffset)) * 5
             powerDamage = powerAmount * 200
         canBeatBoss = chargeDamage > 0 or givesDrops or (missilesDamage + supersDamage + powerDamage) >= bossEnergy
         if not canBeatBoss:

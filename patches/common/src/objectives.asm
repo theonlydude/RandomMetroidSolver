@@ -46,6 +46,16 @@ escape_option:
 objectives_options_mask:
 	db $01
 
+;;; Change G4 SFX priority to 1, because we play it on obj completion (when non-vanilla objectives)
+!SPC_Engine_Base = $CF6C08
+
+macro orgSPC(addr)
+org !SPC_Engine_Base+<addr>
+endmacro
+
+%orgSPC($38D0)
+        dw $39A8
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; HIJACKS
 ;;; hijack main ASM call to check objectives regularly

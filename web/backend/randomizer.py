@@ -196,7 +196,8 @@ class Randomizer(object):
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
                    'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
-                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized"]
+                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized",
+                   'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
@@ -370,7 +371,8 @@ class Randomizer(object):
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
                    'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
-                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized"]
+                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized",
+                   'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
@@ -410,6 +412,7 @@ class Randomizer(object):
         self.session.randomizer['layoutPatches'] = self.vars.layoutPatches
         self.session.randomizer['variaTweaks'] = self.vars.variaTweaks
         self.session.randomizer['nerfedCharge'] = self.vars.nerfedCharge
+        self.session.randomizer['relaxed_round_robin_cf'] = self.vars.relaxed_round_robin_cf
         self.session.randomizer['itemsounds'] = self.vars.itemsounds
         self.session.randomizer['elevators_speed'] = self.vars.elevators_speed
         self.session.randomizer['fast_doors'] = self.vars.fast_doors

@@ -290,10 +290,16 @@ class Helpers(object):
 
     def canCrystalFlash(self, n=1):
         sm = self.smbm
-        ret = sm.wand(sm.canUsePowerBombs(),
-                      sm.itemCountOk('Missile', 2*n),
-                      sm.itemCountOk('Super', 2*n),
-                      sm.itemCountOk('PowerBomb', 2*n+1))
+        if not RomPatches.has(RomPatches.RoundRobinCF).bool:
+            ret = sm.wand(sm.canUsePowerBombs(),
+                          sm.itemCountOk('Missile', 2*n),
+                          sm.itemCountOk('Super', 2*n),
+                          sm.itemCountOk('PowerBomb', 2*n+1))
+        else:
+            # simplified view of actual patch behavior: only count full refills to stick with base CF logic
+            nAmmo = 5 * (sm.itemCount('Missile') + sm.itemCount('Super') + sm.itemCount('PowerBomb'))
+            ret = sm.wand(sm.canUsePowerBombs(),
+                          SMBool(nAmmo >= 30*n))
         if ret:
             ret._items.append("{}-CrystalFlash".format(n))
         return ret

@@ -142,7 +142,7 @@ if __name__ == "__main__":
                                  'remove_rando_speed.ips', 'remove_spinjumprestart.ips',
                                  'remove_itemsounds.ips', 'vanilla_music.ips', 'custom_ship.ips',
                                  'Ship_Takeoff_Disable_Hide_Samus', 'widescreen.ips',
-                                 'hell.ips', 'lava_acid_physics.ips'])
+                                 'hell.ips', 'lava_acid_physics.ips', 'relaxed_round_robin_cf.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -297,7 +297,7 @@ if __name__ == "__main__":
                         choices=tourians+['random'])
     parser.add_argument('--tourianList', help="list to choose from when random",
                         dest='tourianList', nargs='?', default=None)
-    parser.add_argument('--hellrun', help="Hellrun damage rate in %, between 0 and 400 (default 100)",
+    parser.add_argument('--hellrun', help="Hellrun damage rate in percentage, between 0 and 400 (default 100)",
                         dest='hellrunRate', default=100, type=int)
     parser.add_argument('--etanks', help="Additional ETanks, between 0 (default) and 18",
                         dest='additionalEtanks', default=0, type=int)
@@ -492,9 +492,7 @@ if __name__ == "__main__":
         possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty, args.morphPlacement)
         if args.startLocation == 'random':
             if args.startLocationList != None:
-                # to be able to give the list in jm we had to replace ' ' with '_', do the opposite operation
-                startLocationList = args.startLocationList.replace('_', ' ')
-                startLocationList = startLocationList.split(',')
+                startLocationList = args.startLocationList.split(',')
                 # intersection between user whishes and reality
                 possibleStartAPs = sorted(list(set(possibleStartAPs).intersection(set(startLocationList))))
                 if len(possibleStartAPs) == 0:
@@ -535,7 +533,7 @@ if __name__ == "__main__":
             except:
                 nbObjectives = 0 if "random" in args.objective else None
             if nbObjectives is not None:
-                availableObjectives = args.objectiveList.replace('_', ' ').split(',') if args.objectiveList is not None else objectives
+                availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
                 if nbObjectives > 0:
                     nbObjectives = min(nbObjectives, maxActiveGoals, len(availableObjectives))
                 else:
@@ -611,6 +609,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.MinimizerTourian
     elif args.tourian == 'Disabled':
         RomPatches.ActivePatches.append(RomPatches.NoTourian)
+    if 'relaxed_round_robin_cf.ips' in args.patches:
+        RomPatches.ActivePatches.append(RomPatches.RoundRobinCF)
     missileQty = float(args.missileQty)
     superQty = float(args.superQty)
     powerBombQty = float(args.powerBombQty)
@@ -626,9 +626,7 @@ if __name__ == "__main__":
         minorQty = random.randint(25, 100)
     if energyQty == 'random':
         if args.energyQtyList != None:
-            # with jm can't have a list with space in it
-            energyQtyList = args.energyQtyList.replace('_', ' ')
-            energyQties = energyQtyList.split(',')
+            energyQties = args.energyQtyList.split(',')
         energyQty = random.choice(energyQties)
     if energyQty == 'ultra sparse':
         # add nerfed rainbow beam patch

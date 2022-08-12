@@ -49,6 +49,8 @@ class CommonSolver(object):
             self.hasNothing = False
             self.objectives.setVanilla()
             self.tourian = 'Vanilla'
+            self.majorUpgrades = []
+            self.splitLocsByArea = {}
         else:
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)

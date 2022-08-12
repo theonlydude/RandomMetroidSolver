@@ -114,6 +114,10 @@ class RomLoader(object):
         # objectives
         hasObjectives = self.hasPatch('objectives')
 
+        # Round robin CF
+        if self.hasPatch('round_robin_cf'):
+            RomPatches.ActivePatches.append(RomPatches.RoundRobinCF)
+
         return (isArea, isBoss, isEscape, hasObjectives, tourian)
 
     def getPatches(self):

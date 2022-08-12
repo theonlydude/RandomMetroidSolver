@@ -857,7 +857,7 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian", "relaxed_round_robin_cf"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"];
 
@@ -1047,7 +1047,7 @@ function AjaxRandomizerCallCompleted(data) {
     document.getElementById("submitBtn").data = "Randomize";
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "tourian", "relaxed_round_robin_cf"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"];
 
@@ -1810,7 +1810,7 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
       content: "<p>Choose endgame <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> behaviour:\
 <ul>\
 <li><b>Vanilla:</b> regular vanilla <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a></li>\
-<li><b>Fast:</b> speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including Mother Brain 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">invicible Gadora</a> until all objectives are completed.</li>\
+<li><b>Fast:</b> speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including Mother Brain 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">invincible Gadora</a> until all objectives are completed.</li>\
 <li><b>Disabled:</b> skip <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> entirely, ie. escape sequence is triggered as soon as all objectives are completed.</li>\
 </ul></p>"
     },
@@ -1926,7 +1926,7 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
       content: "<p>Choose how you want to split Majors and Minors items:\
 <ul><li><b>Full</b>: All items are shuffled in all locations</li>\
 <li><b>Full Countdown</b>: Randomize like Full and display in the HUD the number of remaining unique upgrades (everything but energy and ammo) in the current area. See \"VARIA HUD\" comfort patch help in the advanced tab for more information about it.</li>\
-<li><b>Majors/Minors</b>: Use major (unique upgrades and energy) and minor (ammo) item pools.</p><p><b>Note:</b> <a href=\"https://wiki.supermetroid.run/Hi_Jump_Energy_Tank_Room\" target=\"_blank\">High-Jump boots Energy Tank location</a> is considered minor, and <a href=\"https://wiki.supermetroid.run/Wrecked_Ship_East_Super_Room\" target=\"_blank\">right Super Missile in Wrecked ship</a> is considered major for balancing purposes.</li>\
+<li><b>Majors/Minors</b>: Use major (unique upgrades and energy) and minor (ammo) item pools.</p><p><b>Note:</b> <a href=\"https://wiki.supermetroid.run/Hi_Jump_Energy_Tank_Room\" target=\"_blank\">High-Jump boots Energy Tank location</a> is considered minor, and <a href=\"https://wiki.supermetroid.run/Wrecked_Ship_East_Super_Room\" target=\"_blank\">right Super Missile in Wrecked ship</a> is considered major to balance the number of major items between Norfair and Wrecked Ship.</li>\
 <li><b>Chozo</b>: Put all unique upgrades as well as minimal ammo/energy to finish the seed in the Chozo locations. These are <a href=\"https://metroid.fandom.com/wiki/Chozo_Statue\" target=\"_blank\">Chozo statues</a>, <a href=\"https://wiki.supermetroid.run/Morph_Ball_Room\" target=\"_blank\">Morph Ball</a> and boss item locations (<a href=\"https://wiki.supermetroid.run/Wrecked_Ship_East_Super_Room\" target=\"_blank\">Right Super in Wrecked Ship</a>, <a href=\"https://wiki.supermetroid.run/Varia_Suit_Room\" target=\"_blank\">Varia Suit</a>, <a href=\"https://wiki.supermetroid.run/Ridley_Tank_Room\" target=\"_blank\">Ridley ETank</a>). Depending on progression speed and item distribution settings, you will be able to <a href=\"https://metroid.fandom.com/wiki/Sequence_Breaking\" target=\"_blank\">'sequence break'</a> by going to other locations as well.</li>\
 <li><b>Scavenger</b>: You must visit a given number of locations in a mandatory order in a scavenger hunt, and collect items there. The scavenger locations are the 16 locations where a unique upgrade is in the vanilla game, plus <a href=\"https://wiki.supermetroid.run/Ridley\" target=\"_blank\">Ridley</a>. By default items in the mandatory locations will be vanilla. Other unique upgrades will be randomized between the remaining scavenger locations, and can be collected at any time. By default, you will have to collect all items in the mandatory locations to access <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> (on top of finishing other objectives). You can also choose to trigger the escape immediately after the hunt is over by setting Tourian parameter to 'Disabled'.<br/>The next mandatory location will be displayed in the HUD, and the whole route will be displayed in the HUD during pause (see \"VARIA HUD\" comfort patch help in the advanced tab for more information).</li></ul></p>\
 <p>Check the map for the list of Majors, Chozo and Scavenger locations and items:<br/><a href=\"/solver/static/images/help/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"chozoThumb\" src=\"/solver/static/images/help/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p>\
@@ -2169,7 +2169,7 @@ Click on the dice button to randomly set this parameter.",
 You can generate anything from a densely packed game with just <a href=\"https://metroid.fandom.com/wiki/Crateria\" target=\"_blank\">Crateria</a>, <a href=\"https://metroid.fandom.com/wiki/Wrecked_Ship\" target=\"_blank\">Wrecked Ship</a>, and bosses, to a full area+boss rando<br/>\
 <b>Boss and Area transitions are mixed together</b>, <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">Gadoras</a> are removed, and you can <b>exit boss fights</b> at any point (they are also considered dead as soon as they start exploding instead of when the drops appear).</p>\
 <p>\
-You can also <b>speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a></b> (on by default: sets the Tourian parameter to 'Fast'), to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including <a href=\"https://metroid.fandom.com/wiki/Mother_Brain\" target=\"_blank\">Mother Brain</a> 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an invicible <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">Gadora</a> until all objectives are completed. It also adds a layout patch to open <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a> to pass them without Morph <img src=\"/solver/static/images/tracker/inventory/Morph.png\" class=\"width: 32px\"/>, allowing the creation of morphless plandos.\
+You can also <b>speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a></b> (on by default: sets the Tourian parameter to 'Fast'), to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including <a href=\"https://metroid.fandom.com/wiki/Mother_Brain\" target=\"_blank\">Mother Brain</a> 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an invincible <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">Gadora</a> until all objectives are completed. It also adds a layout patch to open <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a> to pass them without Morph <img src=\"/solver/static/images/tracker/inventory/Morph.png\" class=\"width: 32px\"/>, allowing the creation of morphless plandos.\
 </p>\
 <p>Minimizer layout example:<a href=\"/solver/static/images/help/minimizer_example.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"minimizerThumb\" src=\"/solver/static/images/help/minimizer_example_thumbnail.png\" alt=\"Minimizer example\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p>\
 <b>Note:</b> will set Area and Boss randomization.<br/>\
@@ -2325,6 +2325,17 @@ Click on the dice button to randomly set this parameter.",
 <li>Once the Charge Beam <img src=\"/solver/static/images/tracker/inventory/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> item has been collected, it does full damage and special attacks are back to normal.</li>\
 </ul>\
 <p>Patch developed by Smiley and Flo.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#relaxed_round_robin_cfStep",
+      title: "Relaxed Round Robin Crystal Flash",
+      content: "<p>Changes <a href=\"https://metroid.fandom.com/wiki/Crystal_Flash\" target=\"_blank\">Crystal Flashes</a> <img src=\"/solver/static/images/preset/crystal_flash.png\" alt=\"CF.png\" title=\"CF.png\" class=\"width: 32px\"/> behavior and requirements as follows:</p>\
+<p><ul><li>You can perform a Crystal Flash with any amount of ammo, but you need at least one Power Bomb <img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/> to begin the process.</li>\
+<li>After consuming 1 ammo, Samus gains 50 energy, and it will try a different ammo type next. Cycling through Missiles <img src=\"/solver/static/images/tracker/inventory/Missile.png\" class=\"width: 32px\"/>, Supers <img src=\"/solver/static/images/tracker/inventory/Super.png\" class=\"width: 32px\"/>, and Power Bombs <img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/> as available. The cycling is to keep the consumption even between ammo types.</li>\
+<li>If one of your ammo types is at 0, it will be skipped.</li>\
+<li>The Crystal Flash ends when Samus is out of ammo or a total of 30 ammo has been consumed.</li></ul></p>\
+<p>Patch developed by Dagit.</p>",
       placement: "auto left"
     },
     {
@@ -2838,14 +2849,17 @@ def displayNumber(id, min, max, default, step="1"):
                 </tr>
               </table>
               <table class="full" id="nerfedChargeVisibility">
-                <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr id="nerfedChargeStep">
-                  <td>
+                  <td class="half">
                     {{displayCheckbox("nerfedCharge")}}
                     Nerfed Charge Beam available from the start
                   </td>
-                  <td></td>
                   <td><button type="button" onclick="startTheTour(37)">?</button></td>
+                  <td id="relaxed_round_robin_cfStep" class="half">
+                    {{displayCheckbox("relaxed_round_robin_cf")}}
+                    Relaxed Round Robin Crystal Flash
+                  </td>
+                  <td><button type="button" onclick="startTheTour(38)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="gravityBehaviourVisibility">
@@ -2855,7 +2869,7 @@ def displayNumber(id, min, max, default, step="1"):
                   <td class="half">
                     {{displayMultiSelect("gravityBehaviour", currentMultiValues["gravityBehaviour"], "Balanced", defaultMultiValues["gravityBehaviour"])}}
                   </td>
-                  <td><button type="button" onclick="startTheTour(38)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(39)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -2868,7 +2882,7 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("itemsounds")}}
                     Remove fanfare when picking up an item
                   </td>
-                  <td><button type="button" onclick="startTheTour(39)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(40)">?</button></td>
                   <td id="ElevatorDoorsStep" class="quarter">
                     {{displayCheckbox("fast_doors")}}
                     Accelerate doors
@@ -2877,7 +2891,7 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("elevators_speed")}}
                     Accelerate elevators
                   </td>
-                  <td><button type="button" onclick="startTheTour(40)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(41)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -2886,12 +2900,12 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("spinjumprestart")}}
                     Spin jump restart (a.k.a. Respin)
                   </td>
-                  <td><button type="button" onclick="startTheTour(41)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(42)">?</button></td>
                   <td id="rando_speedStep" class="half">
                     {{displayCheckbox("rando_speed")}}
                      Momentum conservation (a.k.a. Speedkeep)
                   </td>
-                  <td><button type="button" onclick="startTheTour(42)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(43)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="helperPatchesVisibility">
@@ -2900,20 +2914,20 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("Infinite_Space_Jump")}}
                     Infinite Space Jump
                   </td>
-                  <td><button type="button" onclick="startTheTour(43)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(44)">?</button></td>
                   <td id="refill_before_saveStep" class="half">
                     {{displayCheckbox("refill_before_save")}}
                      Refill energy and ammo when saving
                   </td>
-                  <td><button type="button" onclick="startTheTour(44)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(45)">?</button></td>
                 </tr>
                 <tr>
                   <td id="hudStep" class="half">
                     {{displayCheckbox("hud")}}
                      VARIA HUD
                   </td>
-                  <td><button type="button" onclick="startTheTour(45)">?</button></td>
-                  <td class="half"></td>
+                  <td><button type="button" onclick="startTheTour(46)">?</button></td>
+                  <td></td>
                   <td></td>
                 </tr>
               </table>
@@ -2929,7 +2943,7 @@ def displayNumber(id, min, max, default, step="1"):
                     <span id="animalsText">Save the animals surprise</span>
                   </td>
                   <td></td>
-                  <td><button type="button" onclick="startTheTour(46)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(47)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="musicVisibility">
@@ -2938,12 +2952,12 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("No_Music")}}
                     Disable background music
                   </td>
-                  <td><button type="button" onclick="startTheTour(47)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(48)">?</button></td>
                   <td id="random_musicStep" class="half">
                     {{displayCheckbox("random_music")}}
                     Randomize background music
                   </td>
-                  <td><button type="button" onclick="startTheTour(48)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(49)">?</button></td>
                 </tr>
               </table>
             </div>

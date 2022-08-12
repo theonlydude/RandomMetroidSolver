@@ -17,9 +17,21 @@ extend 'layout.html'
 <script src="{{=URL('static','barrating/jquery.barrating.min.js')}}"></script>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" src="{{=URL('static','preset.js')}}"></script>
 
 <style>
 {{include 'solver_web/varia.css'}}
+.preset-loading {
+  position: relative;
+}
+.preset-loading:before {
+  background: rgba(255, 255, 255, 0.5);
+  content: "";
+  display: block;
+  inset: 0;
+  position:absolute;
+  z-index: 1;
+}
 .column {
     padding-right: 10px;
 }
@@ -290,10 +302,7 @@ function setGauntletEnergy(gauntletSetting, bombItem) {
   }
 }
 
-function ajaxPresetActionCall(action) {
-    // store the action to retreive it after the ajax call is completed
-    document.getElementById("stored_action").value = action;
-
+function getPresetDataDict(action) {
     var dataDict = {
         action: action,
         currenttab: document.getElementById("currenttab").value,
@@ -335,6 +344,15 @@ function ajaxPresetActionCall(action) {
     } else {
         dataDict["Moonwalk"] = "off";
     }
+
+    return dataDict
+}
+
+function ajaxPresetActionCall(action) {
+    // store the action to retreive it after the ajax call is completed
+    document.getElementById("stored_action").value = action;
+
+    var dataDict = getPresetDataDict(action);
 
     // call web service with parameters
     var request = $.ajax({
@@ -385,7 +403,7 @@ function startTheTour(step=-1) {
     {
       element: "#presetStep",
       title: "Preset",
-      content: "The standard presets are base presets to create yours upon.<br/>Select one of the standard presets (sorted in increased difficulty), or you own from community presets, then click on the Load button.<br/>Check out what are the tricks required for popular tournaments by loading a tournament preset.<br/><br/><b>Standard presets outlook:</b><br/><ul><li><b>newbie: </b>New to randomizers, but completed Super Metroid 100% and knows basic techniques (Wall Jump, Shinespark, Mid-air Morph)</li><li><b>casual:</b> occasional rando player. No hell runs or suitless Maridia, some easy to learn tricks in logic.</li><li><b>regular: </b>plays rando regularly. Knows tricks that are not too hard and open up the game: hell runs (generous energy requirements), suitless Maridia, lava dive, gate glitches, Alcatraz, Gauntlet...</li><li><b>veteran:</b> experienced rando player. Harder everything, some tougher tricks in logic.</li><li><b>expert: </b>knows almost all tricks: full suitless Maridia, Lower Norfair hell runs, hi-jumpless Lava Dive (mania difficulty only, so not by default in most rando settings)</li><li><b>master:</b> Everything on hardest, all tricks known.</li></ul>"
+      content: "The standard presets are base presets to create yours upon.<br/>Select one of the standard presets (sorted in increased difficulty), or you own from community presets.<br/>Check out what are the tricks required for popular tournaments by loading a tournament preset.<br/><br/><b>Standard presets outlook:</b><br/><ul><li><b>newbie: </b>New to randomizers, but completed Super Metroid 100% and knows basic techniques (Wall Jump, Shinespark, Mid-air Morph)</li><li><b>casual:</b> occasional rando player. No hell runs or suitless Maridia, some easy to learn tricks in logic.</li><li><b>regular: </b>plays rando regularly. Knows tricks that are not too hard and open up the game: hell runs (generous energy requirements), suitless Maridia, lava dive, gate glitches, Alcatraz, Gauntlet...</li><li><b>veteran:</b> experienced rando player. Harder everything, some tougher tricks in logic.</li><li><b>expert: </b>knows almost all tricks: full suitless Maridia, Lower Norfair hell runs, hi-jumpless Lava Dive (mania difficulty only, so not by default in most rando settings)</li><li><b>master:</b> Everything on hardest, all tricks known.</li></ul>"
     },
     {
       element: "#presetCreateStep",
@@ -395,7 +413,7 @@ function startTheTour(step=-1) {
     {
       element: "#buttonsStep",
       title: "Actions",
-      content: "<ul><li><b>Load</b>: Load your preset or one of the predefined ones</li><li><b>Update</b>: Update your preset after you've mastered a new technique</li><li><b>Create</b>: create your own preset based on the currently loaded one.</li></ul>"
+      content: "<ul><li><b>Update</b>: Update your preset after you've mastered a new technique</li><li><b>Create</b>: create your own preset based on the currently loaded one.</li></ul>"
     },
     {
       element: "#xrayStep",
@@ -641,24 +659,21 @@ pass
 <div class="main">
 <form id="presetForm" class="presetform" method="post">
   <div class="row">
-    <div class="columnThird">
+    <div class="columnThird" id="presetActionBox">
       <table class="full">
-        <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter"></colgroup>
+        <colgroup><col class="third" /><col class="third" /><col class="third" /></colgroup>
         <tr>
           <td>Preset:</td>
-          <td colspan="3">{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.presets["preset"], _class="chzn-select"))}}</td>
+          <td colspan="2">{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.presets["preset"], _class="chzn-select", _onChange="loadPreset()"))}}</td>
           <td id="presetStep"><button type="button" onclick="startTheTour(0)">?</button></td>
         </tr>
         <tr>
           <td>New preset:</td>
-          <td colspan="3"><input class="full" id="presetCreate", name="presetCreate" type="text"/></td>
+          <td colspan="2"><input class="full" id="presetCreate", name="presetCreate" type="text"/></td>
           <td id="presetCreateStep"><button type="button" onclick="startTheTour(1)">?</button></td>
         </tr>
         <tr>
           <td></td>
-          <td>
-            <input class="full" name="action" type="submit" value="Load"/>
-          </td>
           <td>
             <input class="full btn btn-default" onclick="askPassword('Update');" value="Update"/>
           </td>
@@ -676,20 +691,20 @@ pass
       <table class="full">
         <tr>
           <td>
-            <h3 class="center">{{=skillBarData["custom"][0]}}</h3>
+            <h3 id="skill-bar__title" class="center">{{=skillBarData["custom"][0]}}</h3>
           </td>
         </tr>
       </table>
       <table class="full">
         <tr>
           <td>Techniques known:</td>
-          <td>{{=skillBarData["knowsKnown"]}}</td>
+          <td id="skill-bar__knows-known">{{=skillBarData["knowsKnown"]}}</td>
           <td>Skill score:</td>
-          <td>{{=skillBarData["custom"][1]}}</td>
+          <td id="skill-bar__score">{{=skillBarData["custom"][1]}}</td>
         </tr>
         <tr>
           <td>Last updated:</td>
-          <td>{{=skillBarData["lastAction"]}}</td>
+          <td id="skill-bar__last-action">{{=skillBarData["lastAction"]}}</td>
           <td></td>
           <td></td>
         </tr>

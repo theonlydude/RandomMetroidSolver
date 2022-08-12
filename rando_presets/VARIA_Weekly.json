@@ -31,7 +31,7 @@
   "funMovement": "off",
   "funSuits": "off",
   "layoutPatches": "on",
-  "variaTweaks": "off",
+  "variaTweaks": "on",
   "gravityBehaviour": "Balanced",
   "nerfedCharge": "off",
   "itemsounds": "on",

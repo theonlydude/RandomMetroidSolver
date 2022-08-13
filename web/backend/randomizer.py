@@ -151,14 +151,8 @@ class Randomizer(object):
         defaultMultiValues = getDefaultMultiValues()
         for key in defaultMultiValues:
             keyMulti = key + 'MultiSelect'
-            if key == "objective":
-                if key in self.session.randomizer:
-                    defaultMultiValues[key] = self.session.randomizer[key]
-                elif keyMulti in self.session.randomizer:
-                    defaultMultiValues[key] = self.session.randomizer[keyMulti]
-            else:
-                if keyMulti in self.session.randomizer:
-                    defaultMultiValues[key] = self.session.randomizer[keyMulti]
+            if keyMulti in self.session.randomizer:
+                defaultMultiValues[key] = self.session.randomizer[keyMulti]
         return defaultMultiValues
 
     # race mode
@@ -375,7 +369,7 @@ class Randomizer(object):
                    'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
-                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour', 'objective']
+                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
         others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others)
 

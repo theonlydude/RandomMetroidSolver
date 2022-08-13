@@ -754,7 +754,7 @@ function getComplexity() {
 
 function setRandom() {
 {{
-    for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "startLocation", "minimizerQty", "gravityBehaviour", "scavNumLocs", "tourian", "nbObjective"]:
+    for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "startLocation", "minimizerQty", "gravityBehaviour", "scavNumLocs", "tourian"]:
       if id in session.randomizer and session.randomizer[id] == "random":
         response.write("  document.getElementById(\"{}Random\").click();\n".format(id), escape=False)
         if "{}MultiSelect".format(id) in session.randomizer:
@@ -774,30 +774,29 @@ function setObjective() {
     setMaxObjective(isElemRandom(document.getElementById("objectiveRandom")));
 
     // at start all objectives are displayed as selected even though they're not...
-    var sessionObjectives = {{
-if session.randomizer["objective"]:
-    if type(session.randomizer["objective"]) == list:
-        response.write(session.randomizer["objective"], escape=False)
-    else:
-        response.write(session.randomizer["objective"].split(','), escape=False)
-        pass
-else:
-    response.write("[]", escape=False)
-    pass
-}};
+    var objective = {{response.write(session.randomizer.get('objective', []), escape=False)}}
+    var objective_multi = {{response.write(session.randomizer.get("objectiveMultiSelect", []), escape=False)}}
+    var objective_random = false
 
+    if (['0', 'random'].includes(objective[0])) {
+        document.getElementById('nbObjectiveRandom').click()
+        objective_random = true
+    } else if (['1', '2', '3','4','5'].includes(objective[0])) {
+        document.getElementById('nbObjective').value = objective[0]
+        objective_random = true
+    } else {
+        objective_multi = objective
+    }
 
-    if(sessionObjectives != "random") {
-        $("#objectiveMultiSelect").val(sessionObjectives).trigger("chosen:updated");
-
+    if (objective_random) {
         // handle exclusions for currently selected values
+        document.getElementById('objectiveRandom').click()
         var selectedArray = get_selected_objectives();
         for(var i=0; i<selectedArray.length; i++) {
             objective_change(null, {selected: selectedArray[i]});
         }
-    } else {
-        randomizeObjective({currentTarget: document.getElementById("objectiveRandom")}, false);
     }
+    $("#objectiveMultiSelect").val(objective_multi).trigger("chosen:updated");
 
     $("#objectiveMultiSelect").on('change', objective_change);
 }

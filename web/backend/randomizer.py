@@ -151,8 +151,14 @@ class Randomizer(object):
         defaultMultiValues = getDefaultMultiValues()
         for key in defaultMultiValues:
             keyMulti = key + 'MultiSelect'
-            if keyMulti in self.session.randomizer:
-                defaultMultiValues[key] = self.session.randomizer[keyMulti]
+            if key == "objective":
+                if key in self.session.randomizer:
+                    defaultMultiValues[key] = self.session.randomizer[key]
+                elif keyMulti in self.session.randomizer:
+                    defaultMultiValues[key] = self.session.randomizer[keyMulti]
+            else:
+                if keyMulti in self.session.randomizer:
+                    defaultMultiValues[key] = self.session.randomizer[keyMulti]
         return defaultMultiValues
 
     # race mode
@@ -422,7 +428,6 @@ class Randomizer(object):
         self.session.randomizer['scavRandomized'] = self.vars.scavRandomized
         # objective is a special multi select
         self.session.randomizer['objective'] = self.vars.objective.split(',')
-
         if self.vars.objectiveMultiSelect is not None:
             self.session.randomizer['objectiveMultiSelect'] = self.vars.objectiveMultiSelect.split(',')
 

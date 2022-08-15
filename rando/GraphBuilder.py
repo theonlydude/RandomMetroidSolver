@@ -249,7 +249,9 @@ class GraphBuilder(object):
             for path in paths:
                 area = path[0].GraphArea
                 prev = timerValues.get(area, 0)
-                timerValues[area] = max(prev, self._computeTimer(graph, path))
+                t = max(prev, self._computeTimer(graph, path))
+                timerValues[area] = t
+                self.log.debug("escapeTimer. area=%s, t=%d" % (area, t))
             for area in graphAreas[1:-1]:  # no Ceres or Tourian
                 if area not in timerValues:
                     # area not in graph most probably, still write a 10 minute "ultra failsafe" value

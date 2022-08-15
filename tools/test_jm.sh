@@ -222,10 +222,11 @@ function computeSeed {
 	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
 	fi
     fi
-    STARTAP_NEW=$(echo "${RANDO_OUT}" | grep startLocation | cut -d ':' -f 2)
-    PROGSPEED_NEW=$(echo "${RANDO_OUT}" | grep progressionSpeed | cut -d ':' -f 2)
-    MAJORSSPLIT_NEW=$(echo "${RANDO_OUT}" | grep majorsSplit | cut -d ':' -f 2)
-    MORPH_NEW=$(echo "${RANDO_OUT}" | grep morphPlacement | cut -d ':' -f 2)
+    STARTAP_NEW=$(echo "${RANDO_OUT}" | grep ^startLocation | cut -d ':' -f 2)
+    PROGSPEED_NEW=$(echo "${RANDO_OUT}" | grep ^progressionSpeed | cut -d ':' -f 2)
+    MAJORSSPLIT_NEW=$(echo "${RANDO_OUT}" | grep ^majorsSplit | cut -d ':' -f 2)
+    MORPH_NEW=$(echo "${RANDO_OUT}" | grep ^morphPlacement | cut -d ':' -f 2)
+    OBJECTIVES=$(echo "${RANDO_OUT}" | grep ^objectives | cut -d ':' -f 2)
 
     RANDO_PRESET_NEW="${SEED}_${PRESET}_${PROGSPEED_NEW}.json"
 
@@ -247,7 +248,7 @@ function computeSeed {
     # solve seed
     ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}*.sfc)
     if [ $? -ne 0 ]; then
-	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PRESET}" | tee -a ${CSV}
+	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PRESET};${OBJECTIVES}" | tee -a ${CSV}
         mv ${RANDO_PRESET} ${RANDO_PRESET_NEW}
 	exit 0
     fi
@@ -258,7 +259,7 @@ function computeSeed {
     if [ ${COMPARE} -eq 0 ]; then
 	SOLVER_OUT=$(${TIME} -f "\t%E real" $OLD_PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor --runtime 10 --pickupStrategy all 2>&1)
 	if [ $? -ne 0 ]; then
-            echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PRESET}" | tee -a ${CSV}
+            echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PRESET};${OBJECTIVES}" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
             echo "${RANDO_OUT}" >> ${LOG}
             echo "${SOLVER_OUT}" >> ${LOG}
@@ -295,7 +296,7 @@ function computeSeed {
     if [ ${DUP_NEW} -eq 0 -o ${DUP_OLD} -eq 0 ]; then
 	DUP="dup major detected"
     fi
-    echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${DUP};${PRESET}" | tee -a ${CSV}
+    echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${DUP};${PRESET};${OBJECTIVES}" | tee -a ${CSV}
 
     if [ ${COMPARE} -eq 0 ]; then
 	DIFF=$(diff ${ROM_GEN}.old ${ROM_GEN}.new)
@@ -393,13 +394,20 @@ for MORPH in "early" "normal" "late"; do
     printf "%-24s" "${MORPH}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
 done
 echo ""
+echo "Objectives"
+for OBJ in "kill kraid" "kill phantoon" "kill draygon" "kill ridley" "kill one G4" "kill two G4" "kill three G4" "kill all G4" "kill spore spawn" "kill botwoon" "kill crocomire" "kill golden torizo" "kill one miniboss" "kill two minibosses" "kill three minibosses" "kill all mini bosses" "collect 25% items" "collect 50% items" "collect 75% items" "collect 100% items" "collect all upgrades" "clear crateria" "clear green brinstar" "clear red brinstar" "clear wrecked ship" "clear kraid's lair" "clear upper norfair" "clear croc's lair" "clear lower norfair" "clear west maridia" "clear east maridia" "tickle the red fish" "kill the orange geemer" "kill shaktool" "activate chozo robots" "visit the animals" "kill king cacatac"; do
+    TOTAL=$(grep "${OBJ}" ${CSV}  | wc -l)
+    ERROR=$(grep "${OBJ}" ${CSV} | grep -E '^error' | wc -l)
+    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
+    printf "%-24s" "${OBJ}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+done
+echo ""
 echo "Skill preset"
 for PRESET in "regular" "newbie" "master"; do
     TOTAL=$(grep "${PRESET}" ${CSV}  | wc -l)
     ERROR=$(grep "${PRESET}" ${CSV} | grep -E '^error' | wc -l)
     [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
     printf "%-24s" "${PRESET}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
-
 done
 
 echo ""

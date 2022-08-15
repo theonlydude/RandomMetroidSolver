@@ -32,6 +32,8 @@ define scroll_speed $7fffe8
 // RTA timer RAM updated during NMI
 define timer1 $05b8
 define timer2 $05ba
+// timer integrity protection
+define timer_xor $7eff00
 
 define stats_sram_sz_b  #$0080
 define full_stats_area_sz_b  #$0300
@@ -157,18 +159,16 @@ org $809602 // overwrite lag handling to count lag in global counter
     // handle 32 bit counter :
 org $808FA3 // overwrite unused routine
 .inc:
-    // protect timer integrity against reset in this section
     rep #$30
-    lda {magic_flag}
-    sta {softreset}
     // actually increment 32-bit timer
     inc {timer1}
     bne .end
     inc {timer2}
 .end:
-    // end critical section
-    lda {reset_flag}
-    sta {softreset}
+    // timer integrity protection
+    lda {timer1}
+    eor {timer2}
+    sta {timer_xor}
     ply
     plx
     pla
@@ -181,6 +181,14 @@ warnpc $808FC2 // next used routine start
 // Patch boot to init stuff
 org $80fe00
 boot1:
+    // check timer integrity: if not ok disable soft reset flag
+    lda {timer1}
+    eor {timer2}
+    cmp {timer_xor}
+    beq +
+    lda {magic_flag}
+    sta {softreset}
++
     lda #$0000
     sta {timer_backup1}
     sta {timer_backup2}

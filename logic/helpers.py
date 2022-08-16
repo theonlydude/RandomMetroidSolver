@@ -42,12 +42,12 @@ class Helpers(object):
 
         return result
 
-    def energyReserveCountOkLavaBath(self, bathName, mult=1.0):
-        difficulties = Logic.Settings.baths[bathName]
+    def energyReserveCountOkBath(self, bathName, mult=1.0, type):
+        difficulties = Logic.Settings.baths[type][bathName]
         result = self.energyReserveCountOkDiff(difficulties, mult)
 
         if result == True:
-            result.knows = [bathName+'LavaBath']
+            result.knows = [bathName.replace(' ', '')+'{}Bath'.format(type)]
 
         return result
 
@@ -118,6 +118,13 @@ class Helpers(object):
         sm = self.smbm
         return sm.wor(sm.haveItem('Charge'), RomPatches.has(RomPatches.NerfedCharge))
 
+    def canAcidBath(self, bath, bathMult):
+        # varia and gravity are required
+        sm = self.smbm
+        return sm.wand(sm.heatProof(),
+                       sm.haveItem('Gravity'),
+                       sm.energyReserveCountOkBath(bath, bathMult, 'Acid'))
+
     def canLavaBath(self, bath, bathMult, hellrun, mult=1.0, minE=2):
         # hellrun in lava in rotation:
         #  TODO::check gravity lava protection for progressive and balanced
@@ -133,7 +140,7 @@ class Helpers(object):
             return sm.wand(isHeatProof, hasGravity)
         elif isHeatProof:
             # no need to hellrun, but energy required for lava bath
-            return sm.wand(isHeatProof, sm.energyReserveCountOkLavaBath(bath, bathMult))
+            return sm.wand(isHeatProof, sm.energyReserveCountOkBath(bath, bathMult, 'Lava'))
         elif hasGravity:
             # hellrun required, protected against lava bath
             return sm.wand(hasGravity, sm.canHellRun(hellrun, mult, minE))

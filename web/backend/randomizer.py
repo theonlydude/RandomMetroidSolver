@@ -263,7 +263,12 @@ class Randomizer(object):
         for var, value in randoPresetDict.items():
             if 'MultiSelect' in var:
                 randoPresetDict[var] = value.split(',')
-        randoPresetDict['objective'] = self.vars.objective.split(',')
+
+        if self.vars.objectiveRandom:
+            randoPresetDict['objective'] = self.vars.nbObjective # 0-5 or "random"
+            randoPresetDict['objectiveMultiSelect'] = self.vars.objective.split(',')
+        else:
+            randoPresetDict['objective'] = self.vars.objective.split(',')
 
         with open(jsonRandoPreset, 'w') as randoPresetFile:
             json.dump(randoPresetDict, randoPresetFile)
@@ -426,10 +431,15 @@ class Randomizer(object):
         self.session.randomizer['hud'] = self.vars.hud
         self.session.randomizer['scavNumLocs'] = self.vars.scavNumLocs
         self.session.randomizer['scavRandomized'] = self.vars.scavRandomized
+        self.session.randomizer['tourian'] = self.vars.tourian
+
         # objective is a special multi select
-        self.session.randomizer['objective'] = self.vars.objective.split(',')
-        if self.vars.objectiveMultiSelect is not None:
-            self.session.randomizer['objectiveMultiSelect'] = self.vars.objectiveMultiSelect.split(',')
+        self.session.randomizer['objectiveRandom'] = self.vars.objectiveRandom
+        if self.vars.objectiveRandom == 'true':
+            self.session.randomizer['objectiveMultiSelect'] = self.vars.objective.split(',')
+            self.session.randomizer['nbObjective'] = self.vars.nbObjective
+        else:
+            self.session.randomizer['objective'] = self.vars.objective.split(',')
 
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']

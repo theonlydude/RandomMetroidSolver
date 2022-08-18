@@ -665,17 +665,32 @@ function setMaxObjective(isRandom) {
     }
 }
 
-var objectiveBackup = ["kill all G4"];
+var objectiveBackup = {
+    true: {{ response.write("{}".format(session.randomizer.get('objectiveMultiSelect',[])), escape=False) }},
+    false: {{ response.write("{}".format(session.randomizer.get('objective', [])), escape=False) }},
+}
+
 function randomizeObjective(evt, takeBackup=true) {
     var isActive;
-    if(isElemRandom(evt.currentTarget)) {
+    var wasRandom = isElemRandom(evt.currentTarget)
+
+    // backup current value
+    if (takeBackup) {
+        objectiveBackup[wasRandom] = get_selected_objectives()
+    }
+
+    if(wasRandom) {
         evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
         isActive = false;
 
         setMaxObjective(false);
 
         // restore previous value
-        $("#objectiveMultiSelect").val(objectiveBackup).trigger("chosen:updated");
+        var backup_values = objectiveBackup.false
+        if (backup_values.length === 0) {
+            backup_values = ['kill all g4']
+        }
+        $("#objectiveMultiSelect").val(backup_values).trigger("chosen:updated");
         removed_objectives = [];
 
         // handle exclusions for currently selected values
@@ -686,40 +701,39 @@ function randomizeObjective(evt, takeBackup=true) {
     } else {
         evt.currentTarget.className += " active";
         isActive = true;
-
-        // backup current value
-        if(takeBackup) {
-            objectiveBackup = get_selected_objectives();
-        }
-
         setMaxObjective(true);
-
-        // add all objectives for randomization, as we may have removed some of them from the dropdown list
-        var notSelectedArray = get_unselected_objectives();
-        var selectedArray = get_selected_objectives();
-
-        for(var i=0; i<defaultMultiValues["objective"].length; i++) {
-            var toAdd = defaultMultiValues["objective"][i];
-            // don't add 'collect 100% items' to the random list as it's a special objective
-            if(toAdd == "collect 100% items") {
-                continue;
-            }
-            if(!notSelectedArray.includes(toAdd) && !selectedArray.includes(toAdd)) {
-                $("#objectiveMultiSelect").append("<option value=\""+toAdd+"\">"+toAdd+"</option>");
-            }
+        var backup_values = objectiveBackup.true
+        if (backup_values.length === 0) {
+            backup_values = getAllObjectives()
         }
-        var all_objectives = Array.from(defaultMultiValues["objective"]);
-        var index = all_objectives.indexOf("collect 100% items");
-        if(index > -1) {
-            all_objectives.splice(index, 1);
-        }
-
-        $("#objectiveMultiSelect").val(all_objectives);
+        $("#objectiveMultiSelect").val(backup_values).trigger("chosen:updated");
     }
 
     sort_objectives_and_add_optgroups();
 
     disableElement("objective", isActive);
+}
+
+function getAllObjectives() {
+    // add all objectives for randomization, as we may have removed some of them from the dropdown list
+    var notSelectedArray = get_unselected_objectives();
+    var selectedArray = get_selected_objectives();
+    for(var i=0; i<defaultMultiValues["objective"].length; i++) {
+        var toAdd = defaultMultiValues["objective"][i];
+        // don't add 'collect 100% items' to the random list as it's a special objective
+        if(toAdd == "collect 100% items") {
+            continue;
+        }
+        if(!notSelectedArray.includes(toAdd) && !selectedArray.includes(toAdd)) {
+            $("#objectiveMultiSelect").append("<option value=\""+toAdd+"\">"+toAdd+"</option>");
+        }
+    }
+    var all_objectives = Array.from(defaultMultiValues["objective"]);
+    var index = all_objectives.indexOf("collect 100% items");
+    if(index > -1) {
+        all_objectives.splice(index, 1);
+    }
+    return all_objectives
 }
 
 function disableElement(id, disable) {
@@ -1089,41 +1103,34 @@ function AjaxRandomizerCallCompleted(data) {
 }
 
 function getSpecialValues(dataDict) {
-    // special case for objectives multiselect
-    if(isElemIdRandom("objective")) {
-      // Number of objectives can be controlled when objectives is random
-      if (!isElemIdRandom("nbObjective")) {
-        dataDict.objective = document.getElementById("nbObjective").value
-      } else {
-        dataDict["objective"] = "random";
-        dataDict["objectiveMultiSelect"] = $("#objectiveMultiSelect").val().join();
-      }
+    dataDict["objectiveRandom"] = isElemIdRandom("objective")
+
+    // Note both objective and objectiveMultiSelect are passed via dataDict.objective
+    // The backend decides to use this for one or the other
+    var values = $("#objectiveMultiSelect").val().join(",");
+    dataDict["objective"] = values ? values : "nothing"
+
+    if (isElemIdRandom("nbObjective")) {
+        dataDict["nbObjective"] = "random"
     } else {
-        var objectives = get_selected_objectives();
-        if(objectives.length == 0) {
-            dataDict["objective"] = "nothing";
-        } else {
-            dataDict["objective"] = objectives.join();
-        }
+        dataDict["nbObjective"] = document.getElementById("nbObjective").value
     }
 }
 
 function validateObjectives() {
     //var objectives = document.getElementById("objectiveMultiSelect");
     //console.log("objectiveMultiSelect: "+objectives.value);
-    var objectives = $("#objectiveMultiSelect");
-    var nbObjectives = objectives.val().length;
-    console.log("objectiveMultiSelect: "+objectives.val().join());
+    var values = $("#objectiveMultiSelect").val();
 
     if(isElemIdRandom("objective")) {
         // if objectives are randomized, check that there's at least one in the list
-        if(nbObjectives == 0) {
+        if(values.length == 0) {
             alert("Objectives are randomized but objectives list is empty");
             return false;
         }
     } else {
         // if not randomized, check that there's max 5 objectives in the list (4 in scav hunt)
-        if(nbObjectives > max_objectives) {
+        if(values.length > max_objectives) {
             alert("You can have maximum five objectives (four if major split is Scavenger Hunt)");
             return false
         }
@@ -1683,7 +1690,7 @@ function loadRandoPresetOK(data) {
 
     // objectives is special
     var objectiveRandom = document.getElementById("objectiveRandom");
-    if(data["objective"] == "random") {
+    if(data["objectiveRandom"] == "true") {
         if(! isElemRandom(objectiveRandom)) {
             randomizeObjective({currentTarget: objectiveRandom});
         }
@@ -2512,6 +2519,14 @@ def displaySelect(id, values, default):
 
 {{
 def displayMultiSelect(id, selectedValues, default, multipleValues):
+  # values for objective are stored differently
+  if id == "objective":
+    if session.randomizer.get("objectiveRandom"):
+      selectedValues = session.randomizer["objectiveMultiSelect"]
+    else:
+      selectedValues = session.randomizer["objective"] or ["kill all g4"]
+      pass
+    pass
   displaySelect(id, multipleValues, default)
 
   response.write("<div id=\"{}MultiSelectDiv\" style=\"display:none\">".format(id), escape=False)
@@ -2533,6 +2548,9 @@ def displayMultiSelect(id, selectedValues, default, multipleValues):
 def displayNumber(id, min, max, default, step="1"):
   if id in session.randomizer:
     value = session.randomizer[id]
+    if value == 'random' and id == 'nbObjective':
+      value = 0
+      pass
   else:
     value = default
     pass
@@ -2651,13 +2669,13 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="objectiveText">Objectives to access Tourian:</span></td>
-                <td>{{displayMultiSelect("objective", currentMultiValues["objective"], "", defaultMultiValues["objective"])}}</td>
+                <td>{{displayMultiSelect("objective", "objective is special!", "", defaultMultiValues["objective"])}}</td>
                 <td id="objectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr id="nbObjectiveVisiblity">
                 <td class="small"><div class="random"><button id="nbObjectiveRandom" type="button" onclick="randomize(event, 'nbObjective')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="nbObjectiveText">Number of objectives:</span></td>
-                <td>{{displayNumber("nbObjective", "1", "5", "4", "1")}}</td>
+                <td>{{displayNumber("nbObjective", "0", "5", "4", "1")}}</td>
                 <td id="nbObjectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
             </table>

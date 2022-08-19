@@ -229,7 +229,7 @@ async function save(lock) {
     }
 
     // check if escape rando is on that tourian transition is set, display an alert otherwise
-    if(escapeRando == true && ( (tourian != "Disabled" && !("tourianEscapeRoom4TopRight" in lines)) || (tourian == "Disabled" && !("climbBottomLeft" in lines)) )) {
+    if(escapeRando == true && (tourian != "Disabled" && !("tourianEscapeRoom4TopRight" in lines)) ) {
         alert("Tourian escape transition is not set, you have to set it before playing or the game will crash during the escape sequence");
     }
 

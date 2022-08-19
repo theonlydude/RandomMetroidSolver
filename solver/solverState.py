@@ -95,6 +95,7 @@ class SolverState(object):
         self.state["tourian"] = solver.tourian
         # custom objectives
         self.state["objectives"] = solver.objectives.getState()
+        self.state["newlyCompletedObjectives"] = solver.newlyCompletedObjectives
         self.state["majorUpgrades"] = solver.majorUpgrades
         self.state["splitLocsByArea"] = solver.splitLocsByArea
 
@@ -108,7 +109,7 @@ class SolverState(object):
         RomPatches.ActivePatches = self.state["patches"]
         solver.startLocation = self.state["startLocation"]
         solver.startArea = self.state["startArea"]
-        self.setLocsData(solver.locations)
+        self.setLocsData(solver.locations, self.state["tourian"])
         solver.areaTransitions = self.state["areaTransitions"]
         solver.bossTransitions = self.state["bossTransitions"]
         solver.escapeTransition = self.state["escapeTransition"]
@@ -120,7 +121,7 @@ class SolverState(object):
         solver.collectedItems = self.state["collectedItems"]
         (solver.visitedLocations, solver.majorLocations) = self.setLocations(self.state["visitedLocations"],
                                                                              self.state["availableLocations"],
-                                                                             solver.locations)
+                                                                             solver.locations, self.state["tourian"])
         solver.lastAP = self.state["lastAP"]
         solver.mode = self.state["mode"]
         solver.seed = self.state["seed"]
@@ -183,8 +184,10 @@ class SolverState(object):
                 ret[loc.Name]["accessPoint"] = loc.accessPoint
         return ret
 
-    def setLocsData(self, locations):
+    def setLocsData(self, locations, tourian):
         for loc in locations:
+            if tourian == 'Disabled' and loc.Name == 'Mother Brain':
+                continue
             loc.itemName = self.state["locsData"][loc.Name]["itemName"]
             if "accessPoint" in self.state["locsData"][loc.Name]:
                 loc.accessPoint = self.state["locsData"][loc.Name]["accessPoint"]
@@ -201,10 +204,12 @@ class SolverState(object):
             i += 1
         return ret
 
-    def setLocations(self, visitedLocations, availableLocations, locations):
+    def setLocations(self, visitedLocations, availableLocations, locations, tourian):
         retVis = []
         retMaj = []
         for loc in locations:
+            if tourian == 'Disabled' and loc.Name == 'Mother Brain':
+                continue
             if loc.Name in visitedLocations:
                 # visitedLocations contains an index
                 diff = visitedLocations[loc.Name]["difficulty"]

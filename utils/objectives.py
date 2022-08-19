@@ -650,6 +650,10 @@ class Objectives(object):
         for goalName, completed in state.items():
             self.addGoal(goalName, completed)
 
+    def resetGoals(self):
+        for goal in Objectives.activeGoals:
+            goal.completed = False
+
     # call from rando
     @staticmethod
     def getAllGoals(removeNothing=False):

@@ -109,8 +109,14 @@ class InteractiveSolver(CommonSolver):
 
                 self.loadPlandoLocs()
 
+        # if tourian is disabled remove mother brain location
+        if self.tourian == 'Disabled':
+            mbLoc = self.getLoc('Mother Brain')
+            self.locations.remove(mbLoc)
+
         # compute new available locations
         self.computeLocationsDifficulty(self.majorLocations)
+        self.checkGoals()
 
         self.dumpState()
 
@@ -256,8 +262,21 @@ class InteractiveSolver(CommonSolver):
             self.clearLocs(self.majorLocations)
             self.computeLocationsDifficulty(self.majorLocations)
 
+        # autotracker handles objectives
+        if not (scope == 'dump' and action == 'import'):
+            self.checkGoals()
+
         # return them
         self.dumpState()
+
+    def checkGoals(self):
+        # check if objectives can be completed
+        self.newlyCompletedObjectives = []
+        goals = self.objectives.checkGoals(self.smbm, self.lastAP)
+        for goalName, canClear in goals.items():
+            if canClear:
+                self.objectives.setGoalCompleted(goalName, True)
+                self.newlyCompletedObjectives.append("Completed objective: {}".format(goalName))
 
     def getLocNameFromAddress(self, address):
         return self.locsAddressName[address]
@@ -286,16 +305,11 @@ class InteractiveSolver(CommonSolver):
         self.comeBack = ComeBack(self)
 
         # backup
-        mbLoc = self.getLoc("Mother Brain")
         locationsBck = self.locations[:]
 
         self.lastAP = self.startLocation
         self.lastArea = self.startArea
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
-
-        # put back mother brain location
-        if mbLoc not in self.majorLocations and mbLoc not in self.visitedLocations:
-            self.majorLocations.append(mbLoc)
 
         if self.itemsOk == False:
             # add remaining locs as sequence break
@@ -338,6 +352,7 @@ class InteractiveSolver(CommonSolver):
         for loc in self.visitedLocations:
             plandoLocsItems[loc.Name] = loc.itemName
 
+        # TODO::add objectives
         plandoCurrent = {
             "locsItems": plandoLocsItems,
             "transitions": self.fillGraph(),
@@ -613,6 +628,7 @@ class InteractiveSolver(CommonSolver):
             for loc in self.majorLocations:
                 loc.difficulty = None
         self.smbm.resetItems()
+        self.objectives.resetGoals()
 
     def updatePlandoScavengerOrder(self, plandoScavengerOrder):
         self.plandoScavengerOrder = plandoScavengerOrder

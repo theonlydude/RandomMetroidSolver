@@ -530,3 +530,9 @@ def fixEnergy(items):
             items.remove(cf)
         items.append('{}-CrystalFlash'.format(maxCf))
     return items
+
+def dumpErrorMsg(outFileName, msg):
+    print("DIAG: " + msg)
+    if outFileName is not None:
+        with open(outFileName, 'w') as jsonFile:
+            json.dump({"errorMsg": msg}, jsonFile)

@@ -233,8 +233,8 @@ class Customizer(object):
 
         # call the randomizer
         (fd, jsonFileName) = tempfile.mkstemp()
-        params = [getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
-                  '--output', jsonFileName, '--patchOnly']
+        params = [getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/customizer.py"),
+                  '--output', jsonFileName]
 
         if self.vars.itemsounds == 'on':
             params += ['-c', 'itemsounds.ips']

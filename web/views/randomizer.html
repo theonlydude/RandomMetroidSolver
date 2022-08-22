@@ -619,9 +619,10 @@ var removed_objectives = [];
 console.log("objectives_types: boss: "+objectives_types['boss']);
 console.log("objectives_types: miniboss: "+objectives_types['miniboss']);
 
-function objective_change(e, params) {
+function objective_change(e, params, force) {
     // if random is set do nothing
-    if(isElemIdRandom("objective")) {
+    // force is used when the objective is changed to random and we need to unselect everything
+    if(isElemIdRandom("objective") && !force) {
         return;
     }
 
@@ -641,7 +642,7 @@ function objective_change(e, params) {
         for(var j=0; j<copy_removed_objectives.length; j++) {
             var toAdd = copy_removed_objectives[j];
             console.log("  check to add obj "+toAdd+" from removed objectives");
-            if(can_add_to_unselected(toAdd)) {
+            if(can_add_to_unselected(toAdd) || force) {
                 add_objective_to_unselected(toAdd);
             }
         }
@@ -670,7 +671,9 @@ var objectiveBackup = {
     false: {{ response.write("{}".format(session.randomizer.get('objective', [])), escape=False) }},
 }
 
-function randomizeObjective(evt, takeBackup=true) {
+var takeBackup = false;
+
+function randomizeObjective(evt) {
     var isActive;
     var wasRandom = isElemRandom(evt.currentTarget)
 
@@ -679,6 +682,8 @@ function randomizeObjective(evt, takeBackup=true) {
         objectiveBackup[wasRandom] = get_selected_objectives()
     }
 
+    takeBackup = true;
+    var selectedArray = get_selected_objectives();
     if(wasRandom) {
         evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
         isActive = false;
@@ -694,7 +699,6 @@ function randomizeObjective(evt, takeBackup=true) {
         removed_objectives = [];
 
         // handle exclusions for currently selected values
-        var selectedArray = get_selected_objectives();
         for(var i=0; i<selectedArray.length; i++) {
             objective_change(null, {selected: selectedArray[i]});
         }
@@ -703,6 +707,12 @@ function randomizeObjective(evt, takeBackup=true) {
         isActive = true;
         setMaxObjective(true);
         var backup_values = objectiveBackup.true
+
+        // undo exclusions since random allows for all objectives
+        for(var i=0; i<selectedArray.length; i++) {
+            objective_change(null, {deselected: selectedArray[i]}, true);
+        }
+
         if (backup_values.length === 0) {
             backup_values = getAllObjectives()
         }
@@ -780,38 +790,35 @@ function setRandom() {
 }
 
 function setObjective() {
+    // called once when page loads to load objective values into form
     // always display objectives multi select
     var select = document.getElementById("objective");
     var multi = document.getElementById("objectiveMultiSelectDiv");
+
     select.style.display = "none";
     multi.style.display = "block";
     setMaxObjective(isElemRandom(document.getElementById("objectiveRandom")));
 
     // at start all objectives are displayed as selected even though they're not...
-    var objective = {{response.write(session.randomizer.get('objective', []), escape=False)}}
-    var objective_multi = {{response.write(session.randomizer.get("objectiveMultiSelect", []), escape=False)}}
-    var objective_random = false
+    var objective_random = "{{response.write(session.randomizer.get("objectiveRandom"))}}" == "true"
+    var objective_number = "{{response.write(session.randomizer.get("nbObjective", 4))}}"
 
-    if (['0', 'random'].includes(objective[0])) {
-        document.getElementById('nbObjectiveRandom').click()
-        objective_random = true
-    } else if (['1', '2', '3','4','5'].includes(objective[0])) {
-        document.getElementById('nbObjective').value = objective[0]
-        objective_random = true
-    } else {
-        objective_multi = objective
-    }
-
+    var selected_objectives = objectiveBackup[objective_random]
     if (objective_random) {
         // handle exclusions for currently selected values
         document.getElementById('objectiveRandom').click()
-        var selectedArray = get_selected_objectives();
-        for(var i=0; i<selectedArray.length; i++) {
-            objective_change(null, {selected: selectedArray[i]});
+        for(var i=0; i<selected_objectives.length; i++) {
+            objective_change(null, {selected: selected_objectives[i]});
         }
     }
-    $("#objectiveMultiSelect").val(objective_multi).trigger("chosen:updated");
 
+    if (['0', 'random'].includes(objective_number)) {
+        document.getElementById('nbObjectiveRandom').click()
+    } else {
+        document.getElementById('nbObjective').value = objective_number
+    }
+
+    $("#objectiveMultiSelect").val(selected_objectives).trigger("chosen:updated");
     $("#objectiveMultiSelect").on('change', objective_change);
 }
 
@@ -2548,8 +2555,10 @@ def displayMultiSelect(id, selectedValues, default, multipleValues):
 def displayNumber(id, min, max, default, step="1"):
   if id in session.randomizer:
     value = session.randomizer[id]
-    if value == 'random' and id == 'nbObjective':
-      value = 0
+    if value in ['0', 'random'] and id == 'nbObjective':
+      # "random" for this is actually 0, but the input field is 1-5
+      # since the value only matters when the dice is not checked, set to the default value: 4
+      value = 4
       pass
   else:
     value = default
@@ -2675,7 +2684,7 @@ def displayNumber(id, min, max, default, step="1"):
               <tr id="nbObjectiveVisiblity">
                 <td class="small"><div class="random"><button id="nbObjectiveRandom" type="button" onclick="randomize(event, 'nbObjective')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="nbObjectiveText">Number of objectives:</span></td>
-                <td>{{displayNumber("nbObjective", "0", "5", "4", "1")}}</td>
+                <td>{{displayNumber("nbObjective", "1", "5", "4", "1")}}</td>
                 <td id="nbObjectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
             </table>

@@ -352,13 +352,14 @@ class InteractiveSolver(CommonSolver):
         for loc in self.visitedLocations:
             plandoLocsItems[loc.Name] = loc.itemName
 
-        # TODO::add objectives
         plandoCurrent = {
             "locsItems": plandoLocsItems,
             "transitions": self.fillGraph(),
             "patches": RomPatches.ActivePatches,
             "doors": DoorsManager.serialize(),
-            "forbiddenItems": parameters["forbiddenItems"]
+            "forbiddenItems": parameters["forbiddenItems"],
+            "objectives": self.objectives.getGoalsList(),
+            "tourian": self.tourian
         }
 
         plandoCurrentJson = json.dumps(plandoCurrent)
@@ -392,6 +393,11 @@ class InteractiveSolver(CommonSolver):
 
             # create a copy because we need self.locations to be full, else the state will be empty
             self.majorLocations = self.locations[:]
+
+            # if tourian is disabled remove mother brain from itemsLocs if the rando added it
+            if self.tourian == 'Disabled':
+                if itemsLocs and itemsLocs[-1]["Location"]["Name"] == "Mother Brain":
+                    itemsLocs.pop()
 
             for itemLoc in itemsLocs:
                 locName = itemLoc["Location"]["Name"]

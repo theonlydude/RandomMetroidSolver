@@ -457,38 +457,45 @@ if __name__ == "__main__":
 
     print("SEED: " + str(seed))
 
-    objectivesManager = Objectives(args.tourian != 'Disabled')
-    addedObjectives = 0
-    if args.majorsSplit == "Scavenger":
-        objectivesManager.setScavengerHunt()
-        addedObjectives = 1
+    if args.plandoRando is None:
+        objectivesManager = Objectives(args.tourian != 'Disabled')
+        addedObjectives = 0
+        if args.majorsSplit == "Scavenger":
+            objectivesManager.setScavengerHunt()
+            addedObjectives = 1
 
-    if args.objective:
-        maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
-        try:
-            nbObjectives = int(args.objective[0])
-        except:
-            nbObjectives = 0 if "random" in args.objective else None
-        if nbObjectives is not None:
-            availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
-            if nbObjectives > 0:
-                nbObjectives = min(nbObjectives, maxActiveGoals, len(availableObjectives))
+        if args.objective:
+            maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
+            try:
+                nbObjectives = int(args.objective[0])
+            except:
+                nbObjectives = 0 if "random" in args.objective else None
+            if nbObjectives is not None:
+                availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
+                if nbObjectives > 0:
+                    nbObjectives = min(nbObjectives, maxActiveGoals, len(availableObjectives))
+                else:
+                    nbObjectives = random.randint(1, min(maxActiveGoals, len(availableObjectives)))
+                objectivesManager.setRandom(nbObjectives, availableObjectives)
             else:
-                nbObjectives = random.randint(1, min(maxActiveGoals, len(availableObjectives)))
-            objectivesManager.setRandom(nbObjectives, availableObjectives)
+                if len(args.objective) > maxActiveGoals:
+                    args.objective = args.objective[0:maxActiveGoals]
+                for goal in args.objective:
+                    objectivesManager.addGoal(goal)
+            objectivesManager.expandGoals()
         else:
-            if len(args.objective) > maxActiveGoals:
-                args.objective = args.objective[0:maxActiveGoals]
-            for goal in args.objective:
-                objectivesManager.addGoal(goal)
-        objectivesManager.expandGoals()
+            if not (args.majorsSplit == "Scavenger" and args.tourian == 'Disabled'):
+                objectivesManager.setVanilla()
+        if len(Objectives.activeGoals) == 0:
+            objectivesManager.addGoal('nothing')
+        if any(goal for goal in Objectives.activeGoals if goal.area is not None):
+            forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
     else:
-        if not (args.majorsSplit == "Scavenger" and args.tourian == 'Disabled'):
-            objectivesManager.setVanilla()
-    if len(Objectives.activeGoals) == 0:
-        objectivesManager.addGoal('nothing')
-    if any(goal for goal in Objectives.activeGoals if goal.area is not None):
-        forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
+        args.plandoRando = json.loads(args.plandoRando)
+        args.tourian = args.plandoRando["tourian"]
+        objectivesManager = Objectives(args.tourian != 'Disabled')
+        for goal in args.plandoRando["objectives"]:
+            objectivesManager.addGoal(goal)
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "doors": "normal" if not args.doorsColorsRando else "late" }
@@ -608,7 +615,6 @@ if __name__ == "__main__":
         forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
         forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = 'normal'
-        args.plandoRando = json.loads(args.plandoRando)
         RomPatches.ActivePatches = args.plandoRando["patches"]
         DoorsManager.unserialize(args.plandoRando["doors"])
         plandoSettings = {"locsItems": args.plandoRando['locsItems'], "forbiddenItems": args.plandoRando['forbiddenItems']}

@@ -70,6 +70,9 @@ class CommonSolver(object):
                 self.scavengerOrder = self.romLoader.loadScavengerOrder(self.locations)
             if hasObjectives:
                 self.romLoader.loadObjectives(self.objectives)
+                if interactive:
+                    # load event bit masks for auto tracker
+                    self.eventsBitMasks = self.romLoader.loadEventBitMasks()
             else:
                 if self.majorsSplit == "Scavenger":
                     # add scav hunt

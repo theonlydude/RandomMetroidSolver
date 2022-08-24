@@ -741,6 +741,8 @@ class InteractiveSolver(CommonSolver):
         "Golden Torizo": {"byteIndex": 0x02, "bitMask": 0x04}
     }
 
+    eventsBitMasks = {}
+
     areaAccessPoints = {
         "Lower Mushrooms Left": {"byteIndex": 36, "bitMask": 1, "room": 0x9969, "area": "Crateria"},
         "Green Pirates Shaft Bottom Right": {"byteIndex": 37, "bitMask": 16, "room": 0x99bd, "area": "Crateria"},
@@ -985,7 +987,8 @@ class InteractiveSolver(CommonSolver):
             "curMap": '3',
             "samus": '4',
             "items": '5',
-            "boss": '6'
+            "boss": '6',
+            "events": '7'
         }
 
         currentState = dumpData["currentState"]
@@ -1110,6 +1113,28 @@ class InteractiveSolver(CommonSolver):
                         doorData = self.doorsScreen[doorName]
                         if not self.isElemAvailable(currentState, offset, doorData):
                             DoorsManager.switchVisibility(doorName)
+            elif dataType == dataEnum["events"]:
+                self.newlyCompletedObjectives = []
+                goalsList = self.objectives.getGoalsList()
+                goalsCompleted = self.objectives.getState()
+                goalsCompleted = list(goalsCompleted.values())
+                for i, (event, eventData) in enumerate(self.eventsBitMasks.items()):
+                    assert str(i) == event, "{}th event has code {} instead of {}".format(i, event, i)
+                    if i >= len(goalsList):
+                        continue
+                    byteIndex = eventData["byteIndex"]
+                    bitMask = eventData["bitMask"]
+                    goalName = goalsList[i]
+                    goalCompleted = goalsCompleted[i]
+                    if currentState[offset + byteIndex] & bitMask != 0:
+                        # set goal completed
+                        if not goalCompleted:
+                            self.objectives.setGoalCompleted(goalName, True)
+                            self.newlyCompletedObjectives.append("Completed objective: {}".format(goalName))
+                    else:
+                        # set goal uncompleted
+                        if goalCompleted:
+                            self.objectives.setGoalCompleted(goalName, False)
 
     def isElemAvailable(self, currentState, offset, apData):
         byteIndex = apData["byteIndex"]

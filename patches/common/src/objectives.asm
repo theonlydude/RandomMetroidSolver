@@ -101,6 +101,10 @@ macro printAddrEntry(entry)
 print "    '<entry>': ValueSingle(0x",pc,"),"
 endmacro
 
+macro printAddrRange(entry, len)
+print "    '<entry>': ValueRange(0x",pc,", length=<len>),"
+endmacro
+
 macro printObjectiveFunction(func)
 %printAddrEntry(objective[<func>])
 endmacro
@@ -111,7 +115,7 @@ endmacro
 
 org $a1fa80
 ;;; checks for objectives periodically
-print "from rom.addressTypes import ValueList, ValueSingle"
+print "from rom.addressTypes import ValueList, ValueSingle, ValueRange"
 print "# generated from asar output"
 print "# A1 start: ", pc
 print "objectivesAddr = {"
@@ -189,7 +193,7 @@ check_objectives_events:
 	rts
 
 objective_events:
-%printAddrEntry(objectiveEventsArray)
+%printAddrRange(objectiveEventsArray, 10)
 %objectivesCompletedEventArray()
 
 

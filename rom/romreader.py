@@ -533,3 +533,14 @@ class RomReader:
                    break
                ret[area].append(idByte)
         return ret
+
+    def loadEventBitMasks(self):
+        address = Addresses.getOne('objectiveEventsArray')
+        ret = {}
+        for i in range(5):
+            self.romFile.seek(address + i*2)
+            event = self.romFile.readWord()
+            byteIndex = event >> 3
+            bitMask = 1 << (event & 7)
+            ret[i] = {"byteIndex": byteIndex, "bitMask": bitMask}
+        return ret

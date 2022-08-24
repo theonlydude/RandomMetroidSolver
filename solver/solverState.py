@@ -98,6 +98,7 @@ class SolverState(object):
         self.state["newlyCompletedObjectives"] = solver.newlyCompletedObjectives
         self.state["majorUpgrades"] = solver.majorUpgrades
         self.state["splitLocsByArea"] = solver.splitLocsByArea
+        self.state["eventsBitMasks"] = solver.eventsBitMasks
 
     def toSolver(self, solver):
         solver.majorsSplit = self.state["majorsSplit"]
@@ -133,6 +134,7 @@ class SolverState(object):
         solver.objectives.setState(self.state["objectives"])
         solver.majorUpgrades = self.state["majorUpgrades"]
         solver.splitLocsByArea = self.state["splitLocsByArea"]
+        solver.eventsBitMasks = self.state["eventsBitMasks"]
 
     def getRoomsVisibility(self, solver, areaGraph, sm):
         # add graph access points

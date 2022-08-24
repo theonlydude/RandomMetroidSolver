@@ -126,7 +126,8 @@ class WS(object):
                 "tourian": state["tourian"],
 
                 # completed objectives
-                "newlyCompletedObjectives": state["newlyCompletedObjectives"]
+                "newlyCompletedObjectives": state["newlyCompletedObjectives"],
+                "eventsBitMasks": state["eventsBitMasks"]
             })
         else:
             raiseHttp(200, "OK", True)

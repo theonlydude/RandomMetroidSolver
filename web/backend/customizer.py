@@ -151,9 +151,9 @@ class Customizer(object):
                    'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
                    'remove_elevators_speed', 'remove_fast_doors', 'remove_Infinite_Space_Jump',
                    'remove_rando_speed', 'remove_spinjumprestart', 'gamepadMapping', 'widescreen',
-                   'hell', 'lava_acid_physics']
-        others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
-                  'bossesPalettes', 'minDegree', 'maxDegree', 'invert', 'hellrun_rate', 'etanks']
+                   'hell', 'lava_acid_physics', 'colorsRandomization', 'suitsPalettes', 'beamsPalettes',
+                   'tilesPalettes', 'enemiesPalettes', 'bossesPalettes', 'invert']
+        others = ['minDegree', 'maxDegree', 'hellrun_rate', 'etanks']
         validateWebServiceParams(self.request, switchs, [], [], others, isJson=True)
         if self.vars.customSpriteEnable == 'on':
             if self.vars.customSprite == 'random':

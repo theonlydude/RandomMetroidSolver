@@ -222,9 +222,15 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
                 if value not in authorizedObjectives:
                     raiseHttp(400, "Wrong value for objectiveMultiSelect", isJson)
 
-    if 'tourian' in others:
-        if request.vars['tourian'] not in ['Vanilla', 'Fast', 'Disabled']:
-            raiseHttp(400, "Wrong value fro tourian, authorized values: Vanilla/Fast/Disabled", isJson)
+    if 'minDegree' in others:
+        minDegree = getInt(request, 'minDegree', isJson)
+        if minDegree < -180 or minDegree > 180:
+            raiseHttp(400, "Wrong value for minDegree", isJson)
+
+    if 'maxDegree' in others:
+        maxDegree = getInt(request, 'maxDegree', isJson)
+        if maxDegree < -180 or maxDegree > 180:
+            raiseHttp(400, "Wrong value for maxDegree", isJson)
 
     if 'hellrun_rate' in others and request.vars.hellrun_rate != 'off':
         hellrun_rate = getInt(request, 'hellrun_rate', isJson)

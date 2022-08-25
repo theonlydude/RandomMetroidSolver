@@ -199,9 +199,9 @@ class Randomizer(object):
                    'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized",
                    'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
-        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
+        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'tourian']
+        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize
@@ -374,7 +374,7 @@ class Randomizer(object):
                    'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized",
                    'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
-        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
+        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
         others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others)
@@ -426,13 +426,12 @@ class Randomizer(object):
         self.session.randomizer['hud'] = self.vars.hud
         self.session.randomizer['scavNumLocs'] = self.vars.scavNumLocs
         self.session.randomizer['scavRandomized'] = self.vars.scavRandomized
-        self.session.randomizer['tourian'] = self.vars.tourian
         # objective is a special multi select
         self.session.randomizer['objective'] = self.vars.objective.split(',')
         if self.vars.objectiveMultiSelect is not None:
             self.session.randomizer['objectiveMultiSelect'] = self.vars.objectiveMultiSelect.split(',')
 
-        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
+        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
         for multi in multis:
             self.session.randomizer[multi] = self.vars[multi]

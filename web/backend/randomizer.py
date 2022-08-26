@@ -264,7 +264,7 @@ class Randomizer(object):
             if 'MultiSelect' in var:
                 randoPresetDict[var] = value.split(',')
 
-        if self.vars.objectiveRandom:
+        if self.vars.objectiveRandom == 'true':
             randoPresetDict['objective'] = self.vars.nbObjective # 0-5 or "random"
             randoPresetDict['objectiveMultiSelect'] = self.vars.objective.split(',')
         else:

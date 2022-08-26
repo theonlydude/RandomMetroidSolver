@@ -221,6 +221,9 @@ class RomLoader(object):
         upgrades += [item for item,mask in beamBits.items() if beamsMask & mask != 0]
         return upgrades
 
+    def loadEventBitMasks(self):
+        return self.romReader.loadEventBitMasks()
+
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)
     def __init__(self, romFileName, magic=None):

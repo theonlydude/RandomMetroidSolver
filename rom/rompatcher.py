@@ -165,7 +165,7 @@ class RomPatcher:
         }
         itemLocCheck = lambda itemLoc: itemLoc.Item.Category != "Nothing" and splitChecks[split](itemLoc)
         for area,addr in locIdsByAreaAddresses.items():
-            locs = [il.Location for il in itemLocs if itemLocCheck(il) and il.Location.GraphArea == area]
+            locs = [il.Location for il in itemLocs if itemLocCheck(il) and il.Location.GraphArea == area and not il.Location.restricted]
             self.log.debug("writeSplitLocs. area="+area)
             self.log.debug(str([loc.Name for loc in locs]))
             self.romFile.seek(addr)
@@ -308,7 +308,7 @@ class RomPatcher:
                         optionalPatches=[], noLayout=False, suitsMode="Balanced",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
-                        escapeAttr=None, minimizerN=None, minimizerTourian=True,
+                        escapeAttr=None, minimizerN=None, tourian="Vanilla",
                         doorsColorsRando=False, vanillaObjectives=True):
         try:
             # apply standard patches
@@ -339,6 +339,11 @@ class RomPatcher:
                 self.applyIPSPatch(patchName)
             if not vanillaObjectives:
                 self.applyIPSPatch("Objectives_sfx")
+            # show objectives and Tourian status in a shortened intro sequence
+            # if not full vanilla objectives+tourian
+            if not vanillaObjectives or tourian != "Vanilla":
+                self.applyIPSPatch("Restore_Intro") # important to apply this after new_game.ips
+                self.applyIPSPatch("intro_text.ips")
             if noLayout == False:
                 # apply layout patches
                 for patchName in RomPatcher.IPSPatches['Layout']:
@@ -374,7 +379,7 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
             if minimizerN is not None:
                 self.applyIPSPatch('minimizer_bosses.ips')
-            if minimizerTourian == True:
+            if tourian == "Fast":
                 for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
                     self.applyIPSPatch(patchName)
             doors = self.getStartDoors(plms, area, minimizerN)
@@ -1142,8 +1147,9 @@ class RomPatcher:
             else:
                 self.applyIPSPatch(plmName)
 
-    def writeObjectives(self, objectives, itemLocs):
+    def writeObjectives(self, objectives, itemLocs, tourian):
         objectives.writeGoals(self.romFile)
+        objectives.writeIntroObjectives(self.romFile, tourian)
         self.writeItemsMasks(itemLocs)
         # hack bomb_torizo.ips to wake BT in all cases if necessary, ie chozo bots objective is on, and nothing at bombs
         if objectives.isGoalActive("activate chozo robots") and RomPatches.has(RomPatches.BombTorizoWake):

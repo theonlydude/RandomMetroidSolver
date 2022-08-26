@@ -61,15 +61,16 @@ check_new_game:
 
 print "startup: ", pc
 startup:
-    jsl check_new_game      : bne .end
-    lda.l start_location    : beq .zebes
-    cmp #$fffe              : beq .ceres
-    ;; custom start point on Zebes
+    jsl check_new_game : bne .end
+    lda.l start_location
+    cmp #$fffe : beq .ceres
+    ;; start point on Zebes
     pha
     and #$ff00 : xba : sta $079f ; hi byte is area
-    pla
+    pla : pha
     and #$00ff : sta $078b      ; low byte is save index
-    lda #$0000 : jsl $8081fa    ; wake zebes
+    pla : beq .zebes
+    lda #$0000 : jsl $8081fa    ; wake zebes if not ship start
 .zebes:
     lda #$0005 : bra .store_state
 .ceres:

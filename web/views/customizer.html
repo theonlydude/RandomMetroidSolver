@@ -2148,6 +2148,9 @@ if seedInfo != None:
               <tr><td>Objectives pool</td><td>{{=seedParams["objectiveMultiSelect"]}}</td></tr>
 {{        pass}}
               <tr {{=setBold("tourian")}}><td>Tourian</td><td>{{=seedParams["tourian"]}}</td></tr>
+{{    if seedParams["tourian"] == "random":}}
+              <tr><td>Tourian pool pool</td><td>{{=seedParams["tourianMultiSelect"]}}</td></tr>
+{{        pass}}
             </table>
 
             <h4>Areas/Doors/Bosses/Escape Randomization</h4>

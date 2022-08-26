@@ -238,7 +238,8 @@ class GraphUtils:
         for ap in unusedAPs:
             transitions.append((ap.Name, ap.Name))
 
-    def createMinimizerTransitions(startApName, locLimit):
+    # crateria can be forced in corner cases
+    def createMinimizerTransitions(startApName, locLimit, forceCrateria=False):
         if startApName == 'Ceres':
             startApName = 'Landing Site'
         startAp = getAccessPoint(startApName)
@@ -275,7 +276,11 @@ class GraphUtils:
                 fromAreas = [area for area in fromAreas if getNLocs(lambda loc: loc.GraphArea == area) == minLocs]
             elif len(openTransitions()) <= 1: # dont' get stuck by adding dead ends
                 fromAreas = [area for area in fromAreas if len(GraphUtils.getAPs(lambda ap: ap.GraphArea == area and not ap.isInternal())) > 1]
-            nextArea = random.choice(fromAreas)
+            if forceCrateria and 'Crateria' not in areas:
+                assert 'Crateria' in fromAreas
+                nextArea = 'Crateria'
+            else:
+                nextArea = random.choice(fromAreas)
             GraphUtils.log.debug("nextArea="+str(nextArea))
             apCheck = lambda ap: not ap.isInternal() and not inBossCheck(ap) and ap not in usedAPs
             possibleSources = GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and apCheck(ap))

@@ -89,7 +89,11 @@ class RandoSetup(object):
             self.log.debug("createItemLocContainer: checkStart fail")
             return None
         self.settings.collectAlreadyPlacedItemLocations(self.container)
-        self.fillRestrictedLocations()
+        try:
+            self.fillRestrictedLocations()
+        except RuntimeError as e:
+            self.log.debug("createItemLocContainer: "+str(e))
+            return None
         if self.restrictions.split == 'Scavenger':
             # initScavenger will actually fill up the container using random fill,
             # the scavenger "filler" will focus on determining mandatory route

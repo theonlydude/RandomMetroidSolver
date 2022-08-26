@@ -382,7 +382,8 @@ var dataEnum = {
     "curMap": 3,
     "samus": 4,
     "items": 5,
-    "boss": 6
+    "boss": 6,
+    "events": 7
 }
 // 1. state:
 // $0998: Game state
@@ -430,6 +431,9 @@ var dataEnum = {
 //     5: Tourian
 //     6: Ceres
 //     7: Debug
+
+// 7. events
+// $7E:D820..39
 var dataToAsk = {
     1: [{"address": "F50998", "size": 0x2},
         {"address": "F505D1", "size": 0x2},
@@ -444,7 +448,8 @@ var dataToAsk = {
         {"address": "F50AFA", "size": 0x2},
         {"address": "F5079B", "size": 0x0a}],
     5: [{"address": "F5D870", "size": 0x20}],
-    6: [{"address": "F5D828", "size": 0x8}]
+    6: [{"address": "F5D828", "size": 0x8}],
+    7: [{"address": "F5D820", "size": 0x20}]
 }
 // use an array listing the data to retrieve, the chain is init at auto tracker start
 var dataToAskChain = [];
@@ -502,6 +507,7 @@ var escapeAccessPoints = {{response.write(escapeAccessPoints, escape=False)}};
 var bossBitMasks = {{response.write(bossBitMasks, escape=False)}};
 var nothingScreens = {{response.write(nothingScreens, escape=False)}};
 var doorsScreen = {{response.write(doorsScreen, escape=False)}};
+var eventsBitMasks = {};
 
 // in js dict keys are strings
 var itemsBitMasks = {
@@ -1328,6 +1334,14 @@ function handleData(data) {
             bossData = concatArrays(dataEnum.boss);
 
             askNextData();
+        } else if(dataToAskChain[dataToAskStep] == dataEnum.events) {
+            var duration = Date.now() - transfertStart;
+            console.log(`\u2705 Events data received in ${duration}ms`);
+
+            // concatenate all arrays
+            eventsData = concatArrays(dataEnum.events);
+
+            askNextData();
         }
     }
 }
@@ -1502,6 +1516,11 @@ function initDataChain() {
     // ask samus position to know the current map area
     dataToAskChain.push(dataEnum.samus);
 
+    // ask for events
+    dataToAskChain.push(dataEnum.events);
+    stateDataOffsets[dataEnum.events] = curOffset;
+    curOffset += getDataSize(dataEnum.events);
+
     // ask optional map data
     if(area || boss || doorsRando || hasNothing || escapeRando) {
         dataToAskChain.push(dataEnum.map);
@@ -1572,6 +1591,11 @@ function computeStateBitMasks() {
                     stateBitMasks[curOffset + apData["byteIndex"] + mapOffsetEnum[apData["area"]]] |= apData["bitMask"];
                 }
             }
+        } else if(dataToAskChain[i] == dataEnum.events) {
+            var curOffset = stateDataOffsets[dataEnum.events];
+            for(var event in eventsBitMasks) {
+                stateBitMasks[curOffset + eventsBitMasks[event]["byteIndex"]] |= eventsBitMasks[event]["bitMask"];
+            }
         }
     }
 }
@@ -1588,6 +1612,10 @@ function setActiveHook(mode, majorsSplit, area, boss, escape) {
 }
 
 function updateGlobalHook(jsonData) {
+    // get eventsBitMasks if preset
+    if("eventsBitMasks" in jsonData) {
+        eventsBitMasks = jsonData["eventsBitMasks"];
+    }
 }
 
 function resetNextDataChain() {
@@ -1681,6 +1709,11 @@ function populateCurrentState() {
             var curOffset = stateDataOffsets[dataEnum.map];
             for(var i=0; i<mapData.length; i++) {
                 currentState[curOffset + i] = mapData[i] & stateBitMasks[curOffset + i];
+            }
+        } else if(dataToAskChain[j] == dataEnum.events) {
+            var curOffset = stateDataOffsets[dataEnum.events];
+            for(var i=0; i<eventsData.length; i++) {
+                currentState[curOffset + i] = eventsData[i] & stateBitMasks[curOffset + i];
             }
         }
     }

@@ -34,11 +34,13 @@ class Synonyms(object):
 
 class Goal(object):
     def __init__(self, name, gtype, logicClearFunc, romClearFunc,
-                 escapeAccessPoints=None, exclusion=None, items=None, text=None,
+                 escapeAccessPoints=None, objCompletedFuncAPs=lambda ap: [ap],
+                 exclusion=None, items=None, text=None, introText=None,
                  available=True, expandableList=None, category=None, area=None):
         self.name = name
         self.available = available
         self.clearFunc = logicClearFunc
+        self.objCompletedFuncAPs = objCompletedFuncAPs
         # SNES addr in bank A1, see objectives.asm
         self.checkAddr = pc_to_snes(Addresses.getOne("objective[%s]" % romClearFunc)) & 0xffff
         self.escapeAccessPoints = escapeAccessPoints
@@ -63,6 +65,7 @@ class Goal(object):
         if self.items is None:
             self.items = []
         self.text = name if text is None else text
+        self.introText = introText
         self.useSynonym = text is not None
         self.expandableList = expandableList
         if self.expandableList is None:
@@ -87,7 +90,15 @@ class Goal(object):
         else:
             out += self.text
         assert len(out) <= 28, "Goal text '{}' is too long: {}, max 28".format(out, len(out))
+        if self.introText is not None:
+            self.introText = "%d. %s" % (self.rank, self.introText)
+        else:
+            self.introText = out
         return out
+
+    def getIntroText(self):
+        assert self.introText is not None
+        return self.introText
 
     def isLimit(self):
         return "type" in self.exclusion
@@ -222,16 +233,20 @@ _goalsList = [
          escapeAccessPoints=(1, ["Landing Site"])), # with no objectives at all, escape auto triggers only in crateria
     Goal("collect 25% items", "items", lambda sm, ap: SMBool(True), "collect_25_items",
          exclusion={"list": ["collect 50% items", "collect 75% items", "collect 100% items"]},
-         category="Items"),
+         category="Items",
+         introText="collect 25 percent of items"),
     Goal("collect 50% items", "items", lambda sm, ap: SMBool(True), "collect_50_items",
          exclusion={"list": ["collect 25% items", "collect 75% items", "collect 100% items"]},
-         category="Items"),
+         category="Items",
+         introText="collect 50 percent of items"),
     Goal("collect 75% items", "items", lambda sm, ap: SMBool(True), "collect_75_items",
          exclusion={"list": ["collect 25% items", "collect 50% items", "collect 100% items"]},
-         category="Items"),
+         category="Items",
+         introText="collect 75 percent of items"),
     Goal("collect 100% items", "items", lambda sm, ap: SMBool(True), "collect_100_items",
          exclusion={"list": ["collect 25% items", "collect 50% items", "collect 75% items", "collect all upgrades"]},
-         category="Items"),
+         category="Items",
+         introText="collect all items"),
     Goal("collect all upgrades", "items", lambda sm, ap: SMBool(True), "all_major_items",
          category="Items"),
     Goal("clear crateria", "items", lambda sm, ap: SMBool(True), "crateria_cleared",
@@ -268,12 +283,14 @@ _goalsList = [
          lambda sm, ap: sm.wand(sm.haveItem('Grapple'), Objectives.canAccess(sm, ap, "Red Fish Room Bottom")),
          "fish_tickled",
          escapeAccessPoints=(1, ["Red Fish Room Bottom"]),
+         objCompletedFuncAPs=lambda ap: ["Red Fish Room Bottom"],
          category="Memes"),
     Goal("kill the orange geemer", "other",
          lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Bowling"), # XXX this unnecessarily adds canPassBowling as requirement
                                 sm.wor(sm.haveItem('Wave'), sm.canUsePowerBombs())),
          "orange_geemer",
          escapeAccessPoints=(1, ["Bowling"]),
+         objCompletedFuncAPs=lambda ap: ["Bowling"],
          text="{} orange geemer",
          category="Memes"),
     Goal("kill shaktool", "other",
@@ -282,6 +299,7 @@ _goalsList = [
                                 sm.canAccessShaktoolFromPantsRoom()),
          "shak_dead",
          escapeAccessPoints=(1, ["Oasis Bottom"]),
+         objCompletedFuncAPs=lambda ap: ["Oasis Bottom"],
          text="{} shaktool",
          category="Memes"),
     Goal("activate chozo robots", "other", lambda sm, ap: sm.wand(Objectives.canAccessLocation(sm, ap, "Bomb"),
@@ -291,17 +309,20 @@ _goalsList = [
          "all_chozo_robots",
          category="Memes",
          escapeAccessPoints=(3, ["Landing Site", "Screw Attack Bottom", "Bowling"]),
+         objCompletedFuncAPs=lambda ap: ["Landing Site", "Screw Attack Bottom", "Bowling"],
          exclusion={"list": ["kill golden torizo"]}),
     Goal("visit the animals", "other", lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Big Pink"), sm.haveItem("SpeedBooster"), # dachora
                                                               Objectives.canAccess(sm, ap, "Etecoons Bottom")), # Etecoons
          "visited_animals",
          category="Memes",
-         escapeAccessPoints=(2, ["Big Pink", "Etecoons Bottom"])),
+         escapeAccessPoints=(2, ["Big Pink", "Etecoons Bottom"]),
+         objCompletedFuncAPs=lambda ap: ["Big Pink", "Etecoons Bottom"]),
     Goal("kill king cacatac", "other",
          lambda sm, ap: Objectives.canAccess(sm, ap, 'Bubble Mountain Top'),
          "king_cac_dead",
          category="Memes",
-         escapeAccessPoints=(1, ['Bubble Mountain Top']))
+         escapeAccessPoints=(1, ['Bubble Mountain Top']),
+         objCompletedFuncAPs=lambda ap: ['Bubble Mountain Top'])
 ]
 
 
@@ -331,6 +352,7 @@ class Objectives(object):
     graph = None
     _tourianRequired = None
     vanillaGoals = ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"]
+    scavHuntGoal = ["finish scavenger hunt"]
 
     def __init__(self, tourianRequired=True):
         if Objectives._tourianRequired is None:
@@ -426,17 +448,28 @@ class Objectives(object):
         return SMBool(loc in availLocs)
 
     def setVanilla(self):
-        self.clearGoals()
         for goal in Objectives.vanillaGoals:
             self.addGoal(goal)
 
     def isVanilla(self):
-        if Objectives.nbActiveGoals != len(Objectives.vanillaGoals):
+        # kill G4 and/or scav hunt
+        if len(Objectives.activeGoals) == 1:
+            for goal in Objectives.activeGoals:
+                if goal.name not in Objectives.scavHuntGoal:
+                    return False
+            return True
+        elif len(Objectives.activeGoals) == 4:
+            for goal in Objectives.activeGoals:
+                if goal.name not in Objectives.vanillaGoals:
+                    return False
+            return True
+        elif len(Objectives.activeGoals) == 5:
+            for goal in Objectives.activeGoals:
+                if goal.name not in Objectives.vanillaGoals + Objectives.scavHuntGoal:
+                    return False
+            return True
+        else:
             return False
-        for goal in Objectives.activeGoals:
-            if goal not in Objectives.vanillaGoals:
-                return False
-        return True
 
     def setScavengerHunt(self):
         self.addGoal("finish scavenger hunt")
@@ -520,6 +553,31 @@ class Objectives(object):
             result = smbm.wand(result, goal.canClearGoal(smbm, ap))
         return result
 
+    # call from solver
+    def checkGoals(self, smbm, ap):
+        ret = {}
+
+        for goal in Objectives.activeGoals:
+            if goal.completed is True:
+                continue
+            # check if goal can be completed
+            ret[goal.name] = goal.canClearGoal(smbm, ap)
+
+        return ret
+
+    def setGoalCompleted(self, goalName, completed):
+        for goal in Objectives.activeGoals:
+            if goal.name == goalName:
+                goal.completed = completed
+                return
+        assert False, "Can't set goal {} completion to {}, goal not active".format(goalName, completed)
+
+    def allGoalsCompleted(self):
+        for goal in Objectives.activeGoals:
+            if goal.completed is False:
+                return False
+        return True
+
     def getGoalFromCheckFunction(self, checkFunction):
         for name, goal in Objectives.goals.items():
             if goal.checkAddr == checkFunction:
@@ -591,6 +649,10 @@ class Objectives(object):
     def setState(self, state):
         for goalName, completed in state.items():
             self.addGoal(goalName, completed)
+
+    def resetGoals(self):
+        for goal in Objectives.activeGoals:
+            goal.completed = False
 
     # call from rando
     @staticmethod
@@ -674,3 +736,55 @@ class Objectives(object):
             # sprite center is at 128
             y = (y - 128) & 0xFF
             romFile.writeByte(y, addr+4 + i*spritemapSize)
+
+    def writeIntroObjectives(self, rom, tourian):
+        if self.isVanilla() and tourian == "Vanilla":
+            return
+        # objectives or tourian are not vanilla, prepare intro text
+        # two \n for an actual newline
+        text = "MISSION OBJECTIVES\n"
+        for goal in Objectives.activeGoals:
+            text += "\n\n%s" % goal.getIntroText()
+        text += "\n\n\nTOURIAN IS %s\n\n\n" % tourian
+        text += "CHECK OBJECTIVES STATUS IN\n\n"
+        text += "THE PAUSE SCREEN"
+        # actually write text in ROM
+        self._writeIntroText(rom, text.upper())
+
+    def _writeIntroText(self, rom, text, startX=1, startY=2):
+        # for character translation
+        charCodes = {
+            ' ': 0xD67D,
+            '.': 0xD75D,
+            '!': 0xD77B,
+            "'": 0xD76F,
+            '0': 0xD721,
+            'A': 0xD685
+        }
+        def addCharRange(start, end, base): # inclusive range
+            for c in range(ord(start), ord(end)+1):
+                offset = c - ord(base)
+                charCodes[chr(c)] = charCodes[base]+offset*6
+        addCharRange('B', 'Z', 'A')
+        addCharRange('1', '9', '0')
+        # actually write chars
+        x, y = startX, startY
+        def writeChar(c, frameDelay=2):
+            nonlocal rom, x, y
+            assert x <= 0x1F and y <= 0x18, "Intro text formatting error (x=0x%x, y=0x%x):\n%s" % (x, y, text)
+            if c == '\n':
+                x = startX
+                y += 1
+            else:
+                assert c in charCodes, "Invalid intro char "+c
+                rom.writeWord(frameDelay)
+                rom.writeByte(x)
+                rom.writeByte(y)
+                rom.writeWord(charCodes[c])
+                x += 1
+        rom.seek(Addresses.getOne('introText'))
+        for c in text:
+            writeChar(c)
+        # write trailer, see intro_text.asm
+        rom.writeWord(0xAE5B)
+        rom.writeWord(0x9698)

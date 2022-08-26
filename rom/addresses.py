@@ -43,7 +43,9 @@ class Addresses(object):
         'additionalETanks': ValueSingle(0xA1F470),
         'hellrunRate': ValueSingle(0x8DE387),
         'BTtweaksHack1': ValueSingle(0x84ba6f+3),
-        'BTtweaksHack2': ValueSingle(0x84d33b+3)
+        'BTtweaksHack2': ValueSingle(0x84d33b+3),
+        # in intro_text.ips
+        'introText': ValueSingle(0x8cc389)
     }
 
 Addresses.addresses.update(objectivesAddr)

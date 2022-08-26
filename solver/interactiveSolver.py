@@ -109,8 +109,14 @@ class InteractiveSolver(CommonSolver):
 
                 self.loadPlandoLocs()
 
+        # if tourian is disabled remove mother brain location
+        if self.tourian == 'Disabled':
+            mbLoc = self.getLoc('Mother Brain')
+            self.locations.remove(mbLoc)
+
         # compute new available locations
         self.computeLocationsDifficulty(self.majorLocations)
+        self.checkGoals()
 
         self.dumpState()
 
@@ -256,8 +262,21 @@ class InteractiveSolver(CommonSolver):
             self.clearLocs(self.majorLocations)
             self.computeLocationsDifficulty(self.majorLocations)
 
+        # autotracker handles objectives
+        if not (scope == 'dump' and action == 'import'):
+            self.checkGoals()
+
         # return them
         self.dumpState()
+
+    def checkGoals(self):
+        # check if objectives can be completed
+        self.newlyCompletedObjectives = []
+        goals = self.objectives.checkGoals(self.smbm, self.lastAP)
+        for goalName, canClear in goals.items():
+            if canClear:
+                self.objectives.setGoalCompleted(goalName, True)
+                self.newlyCompletedObjectives.append("Completed objective: {}".format(goalName))
 
     def getLocNameFromAddress(self, address):
         return self.locsAddressName[address]
@@ -286,16 +305,11 @@ class InteractiveSolver(CommonSolver):
         self.comeBack = ComeBack(self)
 
         # backup
-        mbLoc = self.getLoc("Mother Brain")
         locationsBck = self.locations[:]
 
         self.lastAP = self.startLocation
         self.lastArea = self.startArea
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
-
-        # put back mother brain location
-        if mbLoc not in self.majorLocations and mbLoc not in self.visitedLocations:
-            self.majorLocations.append(mbLoc)
 
         if self.itemsOk == False:
             # add remaining locs as sequence break
@@ -343,7 +357,9 @@ class InteractiveSolver(CommonSolver):
             "transitions": self.fillGraph(),
             "patches": RomPatches.ActivePatches,
             "doors": DoorsManager.serialize(),
-            "forbiddenItems": parameters["forbiddenItems"]
+            "forbiddenItems": parameters["forbiddenItems"],
+            "objectives": self.objectives.getGoalsList(),
+            "tourian": self.tourian
         }
 
         plandoCurrentJson = json.dumps(plandoCurrent)
@@ -377,6 +393,11 @@ class InteractiveSolver(CommonSolver):
 
             # create a copy because we need self.locations to be full, else the state will be empty
             self.majorLocations = self.locations[:]
+
+            # if tourian is disabled remove mother brain from itemsLocs if the rando added it
+            if self.tourian == 'Disabled':
+                if itemsLocs and itemsLocs[-1]["Location"]["Name"] == "Mother Brain":
+                    itemsLocs.pop()
 
             for itemLoc in itemsLocs:
                 locName = itemLoc["Location"]["Name"]
@@ -613,6 +634,7 @@ class InteractiveSolver(CommonSolver):
             for loc in self.majorLocations:
                 loc.difficulty = None
         self.smbm.resetItems()
+        self.objectives.resetGoals()
 
     def updatePlandoScavengerOrder(self, plandoScavengerOrder):
         self.plandoScavengerOrder = plandoScavengerOrder
@@ -724,6 +746,8 @@ class InteractiveSolver(CommonSolver):
         "Botwoon": {"byteIndex": 0x04, "bitMask": 0x02},
         "Golden Torizo": {"byteIndex": 0x02, "bitMask": 0x04}
     }
+
+    eventsBitMasks = {}
 
     areaAccessPoints = {
         "Lower Mushrooms Left": {"byteIndex": 36, "bitMask": 1, "room": 0x9969, "area": "Crateria"},
@@ -969,7 +993,8 @@ class InteractiveSolver(CommonSolver):
             "curMap": '3',
             "samus": '4',
             "items": '5',
-            "boss": '6'
+            "boss": '6',
+            "events": '7'
         }
 
         currentState = dumpData["currentState"]
@@ -1094,6 +1119,28 @@ class InteractiveSolver(CommonSolver):
                         doorData = self.doorsScreen[doorName]
                         if not self.isElemAvailable(currentState, offset, doorData):
                             DoorsManager.switchVisibility(doorName)
+            elif dataType == dataEnum["events"]:
+                self.newlyCompletedObjectives = []
+                goalsList = self.objectives.getGoalsList()
+                goalsCompleted = self.objectives.getState()
+                goalsCompleted = list(goalsCompleted.values())
+                for i, (event, eventData) in enumerate(self.eventsBitMasks.items()):
+                    assert str(i) == event, "{}th event has code {} instead of {}".format(i, event, i)
+                    if i >= len(goalsList):
+                        continue
+                    byteIndex = eventData["byteIndex"]
+                    bitMask = eventData["bitMask"]
+                    goalName = goalsList[i]
+                    goalCompleted = goalsCompleted[i]
+                    if currentState[offset + byteIndex] & bitMask != 0:
+                        # set goal completed
+                        if not goalCompleted:
+                            self.objectives.setGoalCompleted(goalName, True)
+                            self.newlyCompletedObjectives.append("Completed objective: {}".format(goalName))
+                    else:
+                        # set goal uncompleted
+                        if goalCompleted:
+                            self.objectives.setGoalCompleted(goalName, False)
 
     def isElemAvailable(self, currentState, offset, apData):
         byteIndex = apData["byteIndex"]

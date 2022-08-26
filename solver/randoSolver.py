@@ -1,4 +1,4 @@
-import time
+import time, copy
 
 from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
 from logic.helpers import Pickup
@@ -22,7 +22,7 @@ class RandoSolver(StandardSolver):
         self.log = utils.log.get('Solver')
 
         # default conf
-        self.setConf(easy, 'all', [], False)
+        self.setConf(easy, 'all_strict', [], False)
 
         self.firstLogFile = None
 
@@ -33,7 +33,8 @@ class RandoSolver(StandardSolver):
         self.output = Out.factory(self.type, self)
         self.outputFileName = None
 
-        self.locations = locations
+        # create a copy as solver can add gunship or update mother brain functions
+        self.locations = copy.deepcopy(locations)
 
         self.smbm = SMBoolManager()
 

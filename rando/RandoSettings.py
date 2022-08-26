@@ -67,7 +67,10 @@ class RandoSettings(object):
 
 # Holds settings and utiliy functions related to graph layout
 class GraphSettings(object):
-    def __init__(self, startAP, areaRando, lightAreaRando, bossRando, escapeRando, minimizerN, dotFile, doorsColorsRando, allowGreyDoors, plandoRandoTransitions):
+    def __init__(self, startAP, areaRando, lightAreaRando,
+                 bossRando, escapeRando, minimizerN, dotFile,
+                 doorsColorsRando, allowGreyDoors, tourian,
+                 plandoRandoTransitions):
         self.startAP = startAP
         self.areaRando = areaRando
         self.lightAreaRando = lightAreaRando
@@ -77,6 +80,7 @@ class GraphSettings(object):
         self.dotFile = dotFile
         self.doorsColorsRando = doorsColorsRando
         self.allowGreyDoors = allowGreyDoors
+        self.tourian = tourian
         self.plandoRandoTransitions = plandoRandoTransitions
 
     def isMinimizer(self):

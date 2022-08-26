@@ -391,7 +391,7 @@ class Helpers(object):
     #
     # - list of used items in the simulated fight. includes beams, and ammo packs
     #   (for instance ["Charge", "Plasma", "Super", "Super", "Super"])
-    def canInflictEnoughDamages(self, bossEnergy, doubleSuper=False, charge=True, power=False, givesDrops=True, ignoreMissiles=False, ignoreSupers=False):
+    def canInflictEnoughDamages(self, bossEnergy, doubleSuper=False, charge=True, power=False, givesDrops=True, ignoreMissiles=False, ignoreSupers=False, missilesOffset=0, supersOffset=0, powerBombsOffset=0):
         # TODO: handle special beam attacks ? (http://deanyd.net/sm/index.php?title=Charge_Beam_Combos)
         sm = self.smbm
         items = []
@@ -406,12 +406,12 @@ class Helpers(object):
             chargeDamage *= 3.0
             beams.append('Charge')
         # missile 100 damages, super missile 300 damages, PBs 200 dmg, 5 in each extension
-        missilesAmount = sm.itemCount('Missile') * 5
+        missilesAmount = max(0, (sm.itemCount('Missile') - missilesOffset)) * 5
         if ignoreMissiles == True:
             missilesDamage = 0
         else:
             missilesDamage = missilesAmount * 100
-        supersAmount = sm.itemCount('Super') * 5
+        supersAmount = max(0, (sm.itemCount('Super') - supersOffset)) * 5
         if ignoreSupers == True:
             oneSuper = 0
         else:
@@ -422,7 +422,7 @@ class Helpers(object):
         powerDamage = 0
         powerAmount = 0
         if power == True and sm.haveItem('PowerBomb') == True:
-            powerAmount = sm.itemCount('PowerBomb') * 5
+            powerAmount = max(0, (sm.itemCount('PowerBomb') - powerBombsOffset)) * 5
             powerDamage = powerAmount * 200
         canBeatBoss = chargeDamage > 0 or givesDrops or (missilesDamage + supersDamage + powerDamage) >= bossEnergy
         if not canBeatBoss:
@@ -638,7 +638,9 @@ class Helpers(object):
         # some ammo to destroy the turrets during the fight
         if not sm.haveMissileOrSuper():
             return smboolFalse
-        (ammoMargin, secs, ammoItems) = self.canInflictEnoughDamages(6000)
+        (ammoMargin, secs, ammoItems) = self.canInflictEnoughDamages(6000,
+                                                                     # underestimate missiles/supers in case a CF exit is needed
+                                                                     missilesOffset=2, supersOffset=2)
         # print('DRAY', ammoMargin, secs)
         if ammoMargin > 0:
             (diff, defenseItems) = self.computeBossDifficulty(ammoMargin, secs,
@@ -774,16 +776,20 @@ class Helpers(object):
 class Pickup:
     def __init__(self, itemsPickup):
         self.itemsPickup = itemsPickup
+        self.endGameLocations = ["Mother Brain", "Gunship"]
 
+    # don't count end game location in the mix as it's now in the available locations
     def enoughMinors(self, smbm, minorLocations):
-        if self.itemsPickup == 'all':
-            return len(minorLocations) == 0
+        if self.itemsPickup in ('all', 'all_strict'):
+            return (len(minorLocations) == 0
+                    or (len(minorLocations) == 1 and minorLocations[0].Name in self.endGameLocations))
         else:
             return True
 
     def enoughMajors(self, smbm, majorLocations):
-        if self.itemsPickup == 'all':
-            return len(majorLocations) == 0
+        if self.itemsPickup in ('all', 'all_strict'):
+            return (len(majorLocations) == 0
+                    or (len(majorLocations) == 1 and majorLocations[0].Name in self.endGameLocations))
         else:
             return True
 

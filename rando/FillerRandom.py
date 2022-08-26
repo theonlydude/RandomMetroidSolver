@@ -4,7 +4,7 @@ import random, sys, copy, logging, time
 from rando.Filler import Filler, FrontFiller
 from rando.Choice import ItemThenLocChoice
 from rando.MiniSolver import MiniSolver
-from rando.ItemLocContainer import ContainerSoftBackup, ItemLocation
+from rando.ItemLocContainer import ContainerSoftBackup, ItemLocation, getItemLocationsStr
 from rando.RandoServices import ComebackCheckType
 from solver.randoSolver import RandoSolver
 from utils.parameters import infinity
@@ -232,16 +232,30 @@ class FillerRandomSpeedrun(FillerRandom):
         # keep only first minors
         firstMinors = {"Missile": False, "Super": False, "PowerBomb": False}
         for loc in solver.visitedLocations:
-            if loc.itemName in ["ETank", "Reserve", "Gunship"]:
+            if loc.itemName == "Gunship":
+                continue
+            itemLoc = self.container.getItemLoc(loc)
+            if itemLoc.Item.Category in ['Boss', 'MiniBoss', 'Nothing', 'Energy']:
                 continue
             if loc.itemName in firstMinors:
                 if firstMinors[loc.itemName] == True:
                     continue
                 else:
                     firstMinors[loc.itemName] = True
-            itemLoc = self.container.getItemLoc(loc)
             orderedItemLocations.append(itemLoc)
         self.progressionItemLocs = orderedItemLocations
+        self.log.debug("orderedItemLocations(%d)=%s" % (len(orderedItemLocations), getItemLocationsStr(orderedItemLocations)))
+
+        # also sort regular itemLocs (used by graph builder to create escape when tourian is disabled)
+        def indexInVisited(itemLoc):
+            nonlocal solver
+            ret = len(solver.visitedLocations)
+            try:
+                ret = solver.visitedLocations.index(itemLoc.Location)
+            except ValueError:
+                pass
+            return ret
+        self.container.itemLocations.sort(key=indexInVisited)
 
     def getHelp(self):
         if time.process_time() > self.runtimeSteps[self.nFrontFillSteps]:

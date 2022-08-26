@@ -35,6 +35,7 @@ morphPlacements = defaultMultiValues['morphPlacement']
 majorsSplits = defaultMultiValues['majorsSplit']
 gravityBehaviours = defaultMultiValues['gravityBehaviour']
 objectives = defaultMultiValues['objective']
+tourians = defaultMultiValues['tourian']
 
 def randomMulti(args, param, defaultMultiValues):
     value = args[param]
@@ -242,7 +243,9 @@ if __name__ == "__main__":
                         dest='objectiveList', nargs='?', default=None)
     parser.add_argument('--tourian', help="Tourian mode",
                         dest='tourian', nargs='?', default='Vanilla',
-                        choices=['Vanilla', 'Fast', 'Disabled'])
+                        choices=tourians+['random'])
+    parser.add_argument('--tourianList', help="list to choose from when random",
+                        dest='tourianList', nargs='?', default=None)
     # parse args
     args = parser.parse_args()
 
@@ -336,6 +339,7 @@ if __name__ == "__main__":
     (_, progDiff) = randomMulti(args.__dict__, "progressionDifficulty", progDiffs)
     (majorsSplitRandom, args.majorsSplit) = randomMulti(args.__dict__, "majorsSplit", majorsSplits)
     (_, gravityBehaviour) = randomMulti(args.__dict__, "gravityBehaviour", gravityBehaviours)
+    (_, args.tourian) = randomMulti(args.__dict__, "tourian", tourians)
     if args.minDifficulty:
         minDifficulty = text2diff[args.minDifficulty]
         if progSpeed != "speedrun":
@@ -453,37 +457,45 @@ if __name__ == "__main__":
 
     print("SEED: " + str(seed))
 
-    objectivesManager = Objectives(args.tourian != 'Disabled')
-    addedObjectives = 0
-    if args.majorsSplit == "Scavenger":
-        objectivesManager.setScavengerHunt()
-        addedObjectives = 1
+    if args.plandoRando is None:
+        objectivesManager = Objectives(args.tourian != 'Disabled')
+        addedObjectives = 0
+        if args.majorsSplit == "Scavenger":
+            objectivesManager.setScavengerHunt()
+            addedObjectives = 1
 
-    if args.objective:
-        maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
-        try:
-            nbObjectives = int(args.objective[0])
-        except:
-            nbObjectives = 0 if "random" in args.objective else None
-        if nbObjectives is not None:
-            availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
-            if nbObjectives > 0:
-                nbObjectives = min(nbObjectives, maxActiveGoals, len(availableObjectives))
+        if args.objective:
+            maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
+            try:
+                nbObjectives = int(args.objective[0])
+            except:
+                nbObjectives = 0 if "random" in args.objective else None
+            if nbObjectives is not None:
+                availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
+                if nbObjectives > 0:
+                    nbObjectives = min(nbObjectives, maxActiveGoals, len(availableObjectives))
+                else:
+                    nbObjectives = random.randint(1, min(maxActiveGoals, len(availableObjectives)))
+                objectivesManager.setRandom(nbObjectives, availableObjectives)
             else:
-                nbObjectives = random.randint(1, min(maxActiveGoals, len(availableObjectives)))
-            objectivesManager.setRandom(nbObjectives, availableObjectives)
+                if len(args.objective) > maxActiveGoals:
+                    args.objective = args.objective[0:maxActiveGoals]
+                for goal in args.objective:
+                    objectivesManager.addGoal(goal)
+            objectivesManager.expandGoals()
         else:
-            if len(args.objective) > maxActiveGoals:
-                args.objective = args.objective[0:maxActiveGoals]
-            for goal in args.objective:
-                objectivesManager.addGoal(goal)
-        objectivesManager.expandGoals()
+            if not (args.majorsSplit == "Scavenger" and args.tourian == 'Disabled'):
+                objectivesManager.setVanilla()
+        if len(Objectives.activeGoals) == 0:
+            objectivesManager.addGoal('nothing')
+        if any(goal for goal in Objectives.activeGoals if goal.area is not None):
+            forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
     else:
-        objectivesManager.setVanilla()
-    if len(Objectives.activeGoals) == 0:
-        objectivesManager.addGoal('nothing')
-    if any(goal for goal in Objectives.activeGoals if goal.area is not None):
-        forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
+        args.plandoRando = json.loads(args.plandoRando)
+        args.tourian = args.plandoRando["tourian"]
+        objectivesManager = Objectives(args.tourian != 'Disabled')
+        for goal in args.plandoRando["objectives"]:
+            objectivesManager.addGoal(goal)
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "doors": "normal" if not args.doorsColorsRando else "late" }
@@ -603,7 +615,6 @@ if __name__ == "__main__":
         forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
         forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = 'normal'
-        args.plandoRando = json.loads(args.plandoRando)
         RomPatches.ActivePatches = args.plandoRando["patches"]
         DoorsManager.unserialize(args.plandoRando["doors"])
         plandoSettings = {"locsItems": args.plandoRando['locsItems'], "forbiddenItems": args.plandoRando['forbiddenItems']}
@@ -619,6 +630,8 @@ if __name__ == "__main__":
         print("morphPlacement:{}".format(args.morphPlacement))
         print("gravity:{}".format(gravityBehaviour))
         print("maxDifficulty:{}".format(maxDifficulty))
+        print("tourian:{}".format(args.tourian))
+        print("objectives:{}".format([g.name for g in Objectives.activeGoals]))
 
     dotFile = None
     if args.area == True:
@@ -630,7 +643,8 @@ if __name__ == "__main__":
     if args.doorsColorsRando == True:
         RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
     graphSettings = GraphSettings(args.startLocation, args.area, args.lightArea, args.bosses,
-                                  args.escapeRando, minimizerN, dotFile, args.doorsColorsRando, args.allowGreyDoors,
+                                  args.escapeRando, minimizerN, dotFile,
+                                  args.doorsColorsRando, args.allowGreyDoors, args.tourian,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
 
     if args.plandoRando is None:
@@ -728,12 +742,12 @@ if __name__ == "__main__":
                                    args.noLayout, gravityBehaviour,
                                    args.area, args.bosses, args.areaLayoutBase,
                                    args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
-                                   escapeAttr, minimizerN, args.tourian == 'Fast',
+                                   escapeAttr, minimizerN, args.tourian,
                                    args.doorsColorsRando, objectivesManager.isVanilla())
 
         romPatcher.commitIPS()
 
-        romPatcher.writeObjectives(objectivesManager, itemLocs)
+        romPatcher.writeObjectives(objectivesManager, itemLocs, args.tourian)
         romPatcher.writeItemsLocs(itemLocs)
         romPatcher.writeSplitLocs(args.majorsSplit, itemLocs, progItemLocs)
         romPatcher.writeItemsNumber()
@@ -742,6 +756,7 @@ if __name__ == "__main__":
         romPatcher.writeRandoSettings(randoSettings, itemLocs)
         romPatcher.writeDoorConnections(doors)
         romPatcher.writeVersion(displayedVersion)
+
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
         if args.moonWalk == True:

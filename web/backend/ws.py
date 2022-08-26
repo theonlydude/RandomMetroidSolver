@@ -123,7 +123,11 @@ class WS(object):
                 "plandoScavengerOrder": state["plandoScavengerOrder"],
 
                 # tourian
-                "tourian": state["tourian"]
+                "tourian": state["tourian"],
+
+                # completed objectives
+                "newlyCompletedObjectives": state["newlyCompletedObjectives"],
+                "eventsBitMasks": state["eventsBitMasks"]
             })
         else:
             raiseHttp(200, "OK", True)

@@ -269,7 +269,8 @@ def getDefaultMultiValues():
         'morphPlacement': ['early', 'late', 'normal'],
         'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla'],
         'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive'],
-        'objective': Objectives.getAllGoals(removeNothing=True)
+        'objective': Objectives.getAllGoals(removeNothing=True),
+        'tourian': ['Vanilla', 'Fast', 'Disabled']
     }
     return defaultMultiValues
 

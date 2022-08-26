@@ -158,7 +158,8 @@ function generate_rando_presets {
     "bossRandomization": "$(random_switch)",
     "minimizer": "$(random_switch)",
     "minimizerQty": "$(shuf -i 35-100 -n 1)",
-    "tourian": $(random_select 'Vanilla' 'Fast' 'Disabled'),
+    "tourian": "random",
+    $(generate_multi_select "tourian" "Vanilla" "Fast" "Disabled")
     "escapeRando": "$(random_switch)",
     "removeEscapeEnemies": "$(random_switch)",
     "funCombat": "$(random_switch)",

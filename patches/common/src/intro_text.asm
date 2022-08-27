@@ -91,18 +91,19 @@ input_check:
 org $8bb763
 skip_space_colony:
 	lda #$C100 : sta $1F51	; start gameplay
-	rts
+        jsr reset_time
+        rts
 warnpc $8bb772
 
-org $8BC11A
-;;; append code to start gameplay routine (spills into now unused cinematic code)
-start_gameplay_end:
-	;; reset IGT to 0
+;;; now unused space (page 2+ instructions)
+org $8bb336
+reset_time:
+        ;; reset IGT to 0
 	stz $09DA
 	stz $09DC
 	stz $09DE
 	stz $09E0
-	;; reset RTA to 0
+        ;; reset RTA to 0
 	stz $05b8
 	stz $05ba
 	rts

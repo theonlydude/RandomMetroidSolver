@@ -53,6 +53,7 @@ check_new_game:
     ;; check that Game time and frames is equal zero for new game
     ;; (Thanks Smiley and P.JBoy from metconst)
     lda $09DA
+    and #$fffe                  ; consider 1 IGT frame as 0 (workaround for start game with intro text)
     ora $09DC
     ora $09DE
     ora $09E0

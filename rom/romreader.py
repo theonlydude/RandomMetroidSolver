@@ -6,6 +6,7 @@ from rom.addresses import Addresses
 from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
 from logic.logic import Logic
 from collections import defaultdict
+from utils.objectives import Objectives
 
 class RomReader:
     nothings = ['0xbae9', '0xbaed']
@@ -537,7 +538,7 @@ class RomReader:
     def loadEventBitMasks(self):
         address = Addresses.getOne('objectiveEventsArray')
         ret = {}
-        for i in range(5):
+        for i in range(Objectives.maxActiveGoals):
             self.romFile.seek(address + i*2)
             event = self.romFile.readWord()
             byteIndex = event >> 3

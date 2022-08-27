@@ -193,9 +193,9 @@ check_objectives_events:
 	rts
 
 objective_events:
-%printAddrRange(objectiveEventsArray, 10)
+%printAddrRange(objectiveEventsArray, 2*!max_objectives)
 %objectivesCompletedEventArray()
-
+.end:
 
 ;;; copy-pasted from a PLM instruction
 clear_music_queue:

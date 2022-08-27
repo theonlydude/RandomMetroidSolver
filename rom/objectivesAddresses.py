@@ -4,7 +4,7 @@ from rom.addressTypes import ValueList, ValueSingle, ValueRange
 objectivesAddr = {
     # --- objectives checker functions: A1FA80 ---
     'objectivesList': ValueSingle(0xA1FA80),
-    'objectiveEventsArray': ValueRange(0xA1FB1A, length=10),
+    'objectiveEventsArray': ValueRange(0xA1FB1A, length=2*5),
     'objective[kraid_is_dead]': ValueSingle(0xA1FBC2),
     'objective[phantoon_is_dead]': ValueSingle(0xA1FBCA),
     'objective[draygon_is_dead]': ValueSingle(0xA1FBD2),

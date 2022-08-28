@@ -1,3 +1,5 @@
+import zlib
+
 from web.backend.utils import raiseHttp, loadPresetsList, transition2isolver, locName4isolver, getAddressesToRead
 from web.backend.ws import WS
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
@@ -8,10 +10,11 @@ from logic.logic import Logic
 from gluon.html import OPTGROUP
 
 class Tracker(object):
-    def __init__(self, session, request, cache):
+    def __init__(self, session, request, cache, response):
         self.session = session
         self.request = request
         self.cache = cache
+        self.response = response
         # required for GraphUtils access to access points
         Logic.factory('vanilla')
 
@@ -75,4 +78,8 @@ class Tracker(object):
             # return something
             raiseHttp(200, "OK", True)
         else:
-            return ret
+            if 'deflate' in self.request.env.http_accept_encoding:
+                self.response.headers['Content-Encoding'] = 'deflate'
+                return zlib.compress(ret.encode())
+            else:
+                return ret

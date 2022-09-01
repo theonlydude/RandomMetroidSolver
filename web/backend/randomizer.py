@@ -300,6 +300,9 @@ class Randomizer(object):
             if self.storeLocalIps(guid, locsItems["fileName"], locsItems["ips"]):
                 db.addRandoUploadResult(id, guid, locsItems["fileName"])
                 locsItems['seedKey'] = guid
+                if self.vars.get('wantsCustomize') == 'true':
+                    # don't send the ips if they requested a redirect to the customize page
+                    locsItems.pop('ips')
             db.close()
 
             os.close(fd1)

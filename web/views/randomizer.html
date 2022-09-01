@@ -713,8 +713,12 @@ function randomizeObjective(evt) {
             objective_change(null, {deselected: selectedArray[i]}, true);
         }
 
+        var all_objectives = getAllObjectives();
         if (backup_values.length === 0) {
-            backup_values = getAllObjectives()
+            backup_values = all_objectives
+        }
+        if (backup_values.length >= all_objectives.length) {
+            backup_values = backup_values.filter(s => s !== 'collect 100% items');
         }
         $("#objectiveMultiSelect").val(backup_values).trigger("chosen:updated");
     }

@@ -465,19 +465,17 @@ if __name__ == "__main__":
             addedObjectives = 1
 
         if args.objective:
-            maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
             try:
                 nbObjectives = int(args.objective[0])
             except:
                 nbObjectives = 0 if "random" in args.objective else None
             if nbObjectives is not None:
                 availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
-                if nbObjectives > 0:
-                    nbObjectives = min(nbObjectives, maxActiveGoals, len(availableObjectives))
-                else:
-                    nbObjectives = random.randint(1, min(maxActiveGoals, len(availableObjectives)))
+                if nbObjectives == 0:
+                    nbObjectives = random.randint(1, min(Objectives.maxActiveGoals, len(availableObjectives)))
                 objectivesManager.setRandom(nbObjectives, availableObjectives)
             else:
+                maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
                 if len(args.objective) > maxActiveGoals:
                     args.objective = args.objective[0:maxActiveGoals]
                 for goal in args.objective:

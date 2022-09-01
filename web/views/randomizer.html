@@ -1041,6 +1041,9 @@ function AjaxRandomizerCallCompleted(data) {
         var seedKey = data['seedKey'];
         var link = encodeURI(host+"/customizer/"+seedKey);
         document.getElementById("permalink").innerHTML = "<a href=\""+link+"\" target=\"_blank\">"+link+"</a>";
+        if (wantsCustomize) {
+            window.location = link
+        }
     }
 
     // set backup button text to Randomize
@@ -1125,7 +1128,11 @@ function validateObjectives() {
     return true;
 }
 
+var wantsCustomize = false
+
 function doSubmit() {
+    wantsCustomize = document.activeElement === document.getElementById('customizeBtn')
+
     if(window.File && window.FileList && window.FileReader) {
 
         if(vanillaROMStored == false) {
@@ -2968,6 +2975,7 @@ def displayNumber(id, min, max, default, step="1"):
           <a href="/customizer" target="_blank">You can randomize in-game colors and use a custom Samus sprite on the Customizer page</a>.
         </p>
         {{=INPUT(_type="submit", _value="Randomize", _id="submitBtn", _class="btn btn-default buttonRandom")}}
+        {{=INPUT(_type="submit", _value="Randomize + Customize", _id="customizeBtn", _class="btn btn-default buttonRandom")}}
     </form>
   </div>
 </body>

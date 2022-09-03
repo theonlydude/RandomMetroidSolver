@@ -4,6 +4,7 @@ from collections import defaultdict
 
 from web.backend.utils import raiseHttp, loadPresetsList, updateParameterDisplay
 from web.backend.utils import validateWebServiceParams, localIpsDir, getCustomMapping
+from urllib.parse import urlparse, parse_qs
 from utils.utils import getRandomizerDefaultParameters, removeChars, getPresetDir, PresetLoader, getPythonExec
 from utils.db import DB
 from logic.logic import Logic
@@ -29,7 +30,7 @@ class Customizer(object):
         musics = self.loadMusics()
         (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
 
-        url = self.request.env.request_uri.split('/')
+        url = self.request.env.request_uri.split("?")[0].split('/')
         msg = ""
         seedInfo = None
         seedParams = None
@@ -80,6 +81,14 @@ class Customizer(object):
                     elif seedInfo["upload_status"] == 'local':
                         with DB() as db:
                             db.updateSeedUploadStatus(key, 'pending')
+
+        query = parse_qs(urlparse(self.request.env.request_uri).query)
+        if query.get('msg'):
+            query_msg = query['msg'][0]
+            if query_msg and msg and not query_msg.endswith('<br/>'):
+                # make sure they are on separate lines if a previous msg exists
+                query_msg += '<br />'
+            msg = query_msg + msg
 
         return dict(customSprites=customSprites, customShips=customShips, musics=musics, comPresets=comPresets,
                     seedInfo=seedInfo, seedParams=seedParams, msg=msg, defaultParams=defaultParams)

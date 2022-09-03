@@ -1051,7 +1051,11 @@ function AjaxRandomizerCallCompleted(data) {
         var link = encodeURI(host+"/customizer/"+seedKey);
         document.getElementById("permalink").innerHTML = "<a href=\""+link+"\" target=\"_blank\">"+link+"</a>";
         if (wantsCustomize) {
-            window.location = link
+            var target = link
+            if (data['errorMsg']) {
+                 target += `?msg=${data['errorMsg']}`
+            }
+            window.location = target
         }
     }
 

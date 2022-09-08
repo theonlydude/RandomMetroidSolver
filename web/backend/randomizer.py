@@ -57,18 +57,26 @@ class Randomizer(object):
             "way_of_chozo": "chozo split with boss randomization",
             "where_am_i": "Area mode with random start location and early morph",
             "where_is_morph": "Area mode with late Morph",
-            "Multi_Category_Randomizer_Week_1": "Multi-Category Randomizer Tournament week 1",
-            "Multi_Category_Randomizer_Week_2": "Multi-Category Randomizer Tournament week 2",
-            "Multi_Category_Randomizer_Week_3": "Multi-Category Randomizer Tournament week 3",
-            "Multi_Category_Randomizer_Week_4": "Multi-Category Randomizer Tournament week 4",
-            "Multi_Category_Randomizer_Week_5": "Multi-Category Randomizer Tournament week 5",
-            "Multi_Category_Randomizer_Week_6": "Multi-Category Randomizer Tournament week 6",
-            "Multi_Category_Randomizer_Week_7": "Multi-Category Randomizer Tournament week 7",
             "Season_Races": "rando league races (Majors/Minors split)",
-            "SGLive2021": "SGLive 2021 Super Metroid randomizer tournament",
-            "SMRAT2021": "Super Metroid Randomizer Accessible Tournament 2021",
-            "VARIA_Weekly": "Casual logic community races",
-            "Torneio_SGPT2": "Super Metroid Randomizer da Speedgaming Português Tournament 2021"
+            "Torneio_SGPT3_stage1": "SG Português Tournament 2022 group stage",
+            "Torneio_SGPT3_stage2": "SG Português Tournament 2022 playoff stage",
+            "SGLive2022_Game_1": "SGLive 2022 Randomizer Tournament race 1",
+            "SGLive2022_Game_2": "SGLive 2022 Randomizer Tournament race 2",
+            "SGLive2022_Game_3": "SGLive 2022 Randomizer Tournament race 3",
+            "SMRAT2021": "Randomizer Accessible Tournament 2021",
+            "VARIA_Weekly": "Casual logic community races"
+        }
+
+        randoPresetsCategories = {
+            "Standard": ["", "default", "Chozo_Speedrun", "free", "haste", "vanilla"],
+            "Hud": ["hud", "hud_hard", "hud_start"],
+            "Scavenger": ["scavenger_hard", "scavenger_random", "scavenger_speedrun", "scavenger_vanilla_but_not"],
+            "Area": ["way_of_chozo", "where_am_i", "where_is_morph"],
+            "Doors": ["doors_long", "doors_short"],
+            "Minimizer": ["minimizer", "minimizer_hardcore", "minimizer_maximizer"],
+            "Hard": ["hardway2hell", "highway2hell", "stupid_hard"],
+            "Random": ["all_random", "quite_random", "surprise"],
+            "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2", "SGLive2022_Game_1", "SGLive2022_Game_2", "SGLive2022_Game_3"]
         }
 
         startAPs = GraphUtils.getStartAccessPointNamesCategory()

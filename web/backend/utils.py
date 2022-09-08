@@ -36,11 +36,8 @@ def loadRandoPresetsList(cache, filter=False):
     presets = cache.ram('randoPresets', lambda:dict(), time_expire=None)
     if not presets:
         tourPresets = ['Season_Races', 'SMRAT2021', 'VARIA_Weekly',
-                       'SGLive2022_Race_1', 'SGLive2022_Race_2', 'SGLive2022_Race_3',
-                       'Multi_Category_Randomizer_Week_1', 'Multi_Category_Randomizer_Week_2',
-                       'Multi_Category_Randomizer_Week_3', 'Multi_Category_Randomizer_Week_4',
-                       'Multi_Category_Randomizer_Week_5', 'Multi_Category_Randomizer_Week_6',
-                       'Multi_Category_Randomizer_Week_7']
+                       'Torneio_SGPT3_stage1', 'Torneio_SGPT3_stage2',
+                       'SGLive2022_Game_1', 'SGLive2022_Game_2', 'SGLive2022_Game_3']
         files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
         randoPresets = [os.path.splitext(file)[0] for file in files]
         randoPresets = [preset for preset in randoPresets if preset not in tourPresets]

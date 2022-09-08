@@ -1,0 +1,13 @@
+{
+    "preset": "Torneio_SGPT3",
+    "majorsSplit": "Full",
+    "maxDifficulty": "harder",
+    "progressionSpeed": "VARIAble",
+    "missileQty": "3.5",
+    "bossRandomization": "on",
+    "gravityBehaviour": "Progressive",
+    "itemsounds": "off",
+    "elevators_speed": "off",
+    "fast_doors": "off",
+    "elevators_doors_speed": "off"
+}

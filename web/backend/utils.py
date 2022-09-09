@@ -23,7 +23,7 @@ def loadPresetsList(cache):
 
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master']
-    tourPresets = ['Season_Races', 'SMRAT2021']
+    tourPresets = ['Season_Races', 'SMRAT2021', 'Torneio_SGPT3']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
 
     presets['stdPresets'] = stdPresets

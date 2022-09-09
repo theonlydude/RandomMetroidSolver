@@ -899,6 +899,8 @@ function AjaxPresetCallCompleted(data) {
         url = window.location.protocol+"//"+prodUrls[Math.floor(Math.random() * 2)]+"/randomizerWebService";
     }
 
+    dataDict.wantsCustomize = wantsCustomize
+
     // call web service with parameters
     var request = $.ajax({
       url: url,
@@ -948,28 +950,7 @@ function unpack_2bytes(ips, i) {
   return (b1*256) + b2;
 }
 
-function AjaxRandomizerCallCompleted(data) {
-    console.log("AjaxRandomizerCallCompleted");
-
-    $('#overlay').hide();
-    $('#loadingGIF').hide();
-
-    // info message to display ?
-    if("errorMsg" in data && data["errorMsg"].length > 0) {
-        document.getElementById("flash").innerHTML = data["errorMsg"];
-        $('#flash').show();
-    }
-
-    if("status" in data) {
-        var status = data["status"];
-        if(status != "OK") {
-            return;
-        }
-    } else {
-        document.getElementById("flash").innerHTML = "Something wrong happened or the VARIA randomizer aborted: please try again.";
-        return;
-    }
-
+function applyIpsAndDownload(data) {
     // with items/Locations patch the local rom in memory
     // always make a copy to avoid modifying vanilla rom buffer from local storage
     var bytes_temp = new Uint8Array(vanillaROM);
@@ -1031,6 +1012,34 @@ function AjaxRandomizerCallCompleted(data) {
 
     var outFileName = data['fileName'];
     saveAs(blob, outFileName);
+}
+
+function AjaxRandomizerCallCompleted(data) {
+    console.log("AjaxRandomizerCallCompleted");
+
+    $('#overlay').hide();
+    $('#loadingGIF').hide();
+
+    // info message to display ?
+    if("errorMsg" in data && data["errorMsg"].length > 0) {
+        document.getElementById("flash").innerHTML = data["errorMsg"];
+        $('#flash').show();
+    }
+
+    if("status" in data) {
+        var status = data["status"];
+        if(status != "OK") {
+            return;
+        }
+    } else {
+        document.getElementById("flash").innerHTML = "Something wrong happened or the VARIA randomizer aborted: please try again.";
+        return;
+    }
+
+    if (data["ips"]) {
+        // If data is missing ips it is most likely because they hit "Randomize + Customize"
+        applyIpsAndDownload(data);
+    }
 
     // add permalink
     if('seedKey' in data) {
@@ -1042,7 +1051,11 @@ function AjaxRandomizerCallCompleted(data) {
         var link = encodeURI(host+"/customizer/"+seedKey);
         document.getElementById("permalink").innerHTML = "<a href=\""+link+"\" target=\"_blank\">"+link+"</a>";
         if (wantsCustomize) {
-            window.location = link
+            var target = link
+            if (data['errorMsg']) {
+                 target += `?msg=${data['errorMsg']}`
+            }
+            window.location = target
         }
     }
 

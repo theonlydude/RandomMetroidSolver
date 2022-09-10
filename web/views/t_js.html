@@ -291,6 +291,7 @@ function ajaxFailJSON(jqXHR, textStatus) {
 }
 
 var lastAction = null;
+var lastTime = null;
 function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
     if(!("mode" in dataDict)) {
       dataDict["mode"] = document.getElementById("mode").value;
@@ -305,6 +306,7 @@ function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
     webServInProgress = true;
 
     lastAction = dataDict;
+    lastTime = new Date();
     var request = $.ajax({
       url: "{{=URL(f='trackerWebService')}}",
       method: "POST",
@@ -362,6 +364,10 @@ function setWSIcon(icon) {
 }
 
 function ajaxOkGet(jsonData, status, dummy, chained=false) {
+    var curTime = new Date();
+    console.log("ajax call took "+(curTime - lastTime)+"ms");
+    lastTime = curTime;
+
     if(chained == false) {
         webServInProgress = false;
     }
@@ -371,7 +377,6 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     $('#loadingGIF').hide();
 
     // get dicts availableLocations and visitedLocations
-    console.log("json received: [ "+jsonData+" ]");
     if(jsonData == "OK") {
         setWSIcon("checkmark");
         return;
@@ -423,6 +428,9 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
             }
         }
     }
+
+    curTime = new Date();
+    console.log("state loading took "+(curTime - lastTime)+"ms");
 }
 
 function isSeedless(mode) {

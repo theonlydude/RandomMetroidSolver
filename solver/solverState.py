@@ -317,20 +317,8 @@ class SolverState(object):
                 ret[loc.Name] = (diff.bool, diff.difficulty, diff.knows, diff.items)
         return ret
 
-    def fromJson(self, stateJsonFileName):
-        with open(stateJsonFileName, 'r') as jsonFile:
-            self.state = json.load(jsonFile)
-#        print("Loaded Json State:")
-#        for key in self.state:
-#            if key in ["availableLocationsWeb", "visitedLocationsWeb", "collectedItems", "availableLocations", "visitedLocations"]:
-#                print("{}: {}".format(key, self.state[key]))
-#        print("")
+    def set(self, state):
+        self.state = state
 
-    def toJson(self, outputFileName):
-        with open(outputFileName, 'w') as jsonFile:
-            json.dump(self.state, jsonFile)
-#        print("Dumped Json State:")
-#        for key in self.state:
-#            if key in ["availableLocationsWeb", "visitedLocationsWeb", "collectedItems", "visitedLocations"]:
-#                print("{}: {}".format(key, self.state[key]))
-#        print("")
+    def get(self):
+        return self.state

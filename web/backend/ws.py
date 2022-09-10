@@ -7,6 +7,7 @@ from graph.graph_utils import GraphUtils
 from utils.utils import removeChars, getPresetDir, getPythonExec
 from utils.doorsmanager import DoorsManager
 from utils.db import DB
+from utils.shm import SHM
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_NOT_EMPTY
 
@@ -137,14 +138,12 @@ class WS(object):
         if "state" not in self.session:
             raiseHttp(400, "Missing Solver state in the session", True)
 
-        (fd1, jsonInFileName) = tempfile.mkstemp()
-        (fd2, jsonOutFileName) = tempfile.mkstemp()
-        (fd3, errFile) = tempfile.mkstemp()
+        # use shared memory to communicate with backend as creating files on pythonanywhere is super slow
+        shm = SHM()
         params = [
             getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
             '--interactive',
-            '--state',  jsonInFileName,
-            '--output', jsonOutFileName,
+            '--shm',  shm.name(),
             '--action', action,
             '--mode', self.mode,
             '--scope', scope
@@ -194,75 +193,59 @@ class WS(object):
             params += ['--plandoScavengerOrder', ','.join(parameters['plandoScavengerOrder'])]
 
         # dump state as input
-        with open(jsonInFileName, 'w') as jsonFile:
-            json.dump(self.session["state"], jsonFile)
+        shm.writeMsgJson(self.session["state"])
 
         print("before calling isolver: {}".format(params))
         start = datetime.now()
-        ret = subprocess.call(params, stderr=fd3)
+        output = subprocess.run(params, capture_output=True)
         end = datetime.now()
-        duration = (end - start).total_seconds()
-        print("ret: {}, duration: {}s".format(ret, duration))
+        duration = (end - start).total_seconds() * 1000
+        print("ret: {}, subprocess duration: {}ms".format(output.returncode, duration))
 
-        if ret == 0:
-            with open(jsonOutFileName) as jsonFile:
-                state = json.load(jsonFile)
-            os.close(fd1)
-            os.remove(jsonInFileName)
-            os.close(fd2)
-            os.remove(jsonOutFileName)
-            os.close(fd3)
-            os.remove(errFile)
+        state = shm.readMsgJson()
+        shm.finish(True)
+
+        if output.returncode == 0:
             if action == 'save':
                 return json.dumps(state)
             else:
                 if action == 'randomize':
                     with DB() as db:
-                        db.addPlandoRando(ret, duration, state.get("errorMsg", ""))
+                        db.addPlandoRando(output.returncode, duration, state.get("errorMsg", ""))
 
                 # save the escape timer at every step to avoid loosing its value
-                if self.vars.escapeTimer != None:
+                if self.vars.escapeTimer is not None:
                     state["escapeTimer"] = self.vars.escapeTimer
 
                 self.session["state"] = state
-                return self.returnState()
+                ret = self.returnState()
+
+                return ret
         else:
             msg = "Something wrong happened while iteratively solving the ROM"
             try:
-                self.addError(jsonInFileName, params, errFile)
-                with open(jsonOutFileName, 'r') as jsonFile:
-                    data = json.load(jsonFile)
-                    if "errorMsg" in data:
-                        msg = data["errorMsg"]
+                self.addError(params, output.stderr.decode("utf-8"))
+                if "errorMsg" in state:
+                    msg = state["errorMsg"]
             except Exception as e:
                 # happen when jsonOutFileName is empty
                 pass
 
             if action == 'randomize':
                 with DB() as db:
-                    db.addPlandoRando(ret, duration, msg)
+                    db.addPlandoRando(output.returncode, duration, msg)
 
-            os.close(fd1)
-            os.remove(jsonInFileName)
-            os.close(fd2)
-            os.remove(jsonOutFileName)
-            os.close(fd3)
-            os.remove(errFile)
             raiseHttp(400, msg, True)
 
-    def addError(self, state, params, tmpErr):
+    def addError(self, params, errContent):
         errDir = os.path.expanduser("~/web2py/applications/solver/errors")
         if os.path.isdir(errDir):
             errFile = '{}.{}.{}'.format(self.caller.request.client,
-                                        datetime.now().strftime('%Y-%m-%d.%H-%M-%S'), str(uuid.uuid4()))
+                                        datetime.now().strftime('%Y-%m-%d.%H-%M-%S'),
+                                        str(uuid.uuid4()))
             errFile = os.path.join(errDir, errFile)
-            with open(state) as f:
-                stateContent = f.read()
-            with open(tmpErr) as f:
-                errContent = f.read()
             with open(errFile, 'w') as f:
                 f.write(str(params)+'\n')
-                f.write(str(stateContent)+'\n')
                 f.write(errContent)
 
     def name4isolver(self, locName):
@@ -340,11 +323,11 @@ class WS_common_init(WS):
         return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, fill, startLocation)
 
     def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, fill, startLocation):
-        (fd, jsonOutFileName) = tempfile.mkstemp()
+        shm = SHM()
         params = [
             getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
             '--preset', presetFileName,
-            '--output', jsonOutFileName,
+            '--shm', shm.name(),
             '--action', "init",
             '--interactive',
             '--mode', mode,
@@ -371,15 +354,12 @@ class WS_common_init(WS):
             with DB() as db:
                 db.addISolver(preset, 'plando' if mode == 'plando' else 'tracker', romFileName)
 
-            with open(jsonOutFileName) as jsonFile:
-                state = json.load(jsonFile)
-            os.close(fd)
-            os.remove(jsonOutFileName)
+            state = shm.readMsgJson()
+            shm.finish(True)
             self.session["state"] = state
             return self.returnState()
         else:
-            os.close(fd)
-            os.remove(jsonOutFileName)
+            shm.finish(True)
             raiseHttp(400, "Something wrong happened while initializing the ISolver", True)
 
 class WS_common_get(WS):

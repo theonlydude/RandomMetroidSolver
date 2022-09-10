@@ -21,14 +21,16 @@ from utils.objectives import Objectives
 import utils.log
 
 class InteractiveSolver(CommonSolver):
-    def __init__(self, output, logic):
+    def __init__(self, shm, logic):
         self.interactive = True
         self.errorMsg = ""
         self.checkDuplicateMajor = False
         self.vcr = None
         self.log = utils.log.get('Solver')
 
-        self.outputFileName = output
+        # only available since python 3.8, so import it here to keep >= 3.6 compatibility for CLI
+        from utils.shm import SHM
+        self.shm = SHM(shm)
         self.firstLogFile = None
 
         Logic.factory(logic)
@@ -67,7 +69,8 @@ class InteractiveSolver(CommonSolver):
         state = SolverState(self.debug)
         state.fromSolver(self)
 
-        state.toJson(self.outputFileName)
+        self.shm.writeMsgJson(state.get())
+        self.shm.finish(False)
 
     def initialize(self, mode, rom, presetFileName, magic, fill, startLocation):
         # load rom and preset, return first state
@@ -120,12 +123,12 @@ class InteractiveSolver(CommonSolver):
 
         self.dumpState()
 
-    def iterate(self, stateJson, scope, action, params):
+    def iterate(self, scope, action, params):
         self.debug = params["debug"]
         self.smbm = SMBoolManager()
 
         state = SolverState()
-        state.fromJson(stateJson)
+        state.set(self.shm.readMsgJson())
         state.toSolver(self)
         self.objectives.setSolverMode(self)
 

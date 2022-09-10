@@ -72,8 +72,8 @@ class Tracker(object):
         # unified web service for item/area trackers
         ws = WS.factory(self)
         ws.validate()
-        ret = ws.action()
 
+        ret = ws.action()
         if ret is None:
             # return something
             raiseHttp(200, "OK", True)

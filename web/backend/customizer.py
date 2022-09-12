@@ -139,6 +139,7 @@ class Customizer(object):
             self.session.customizer['hellrun_rate'] = 100
             self.session.customizer['etanks'] = 0
             self.session.customizer['music'] = "Don't touch"
+            self.session.customizer['color_blind'] = "off"
 
             musics = self.loadMusics()
             for song, songId in musics["_list"]:
@@ -161,7 +162,7 @@ class Customizer(object):
                    'remove_elevators_speed', 'remove_fast_doors', 'remove_Infinite_Space_Jump',
                    'remove_rando_speed', 'remove_spinjumprestart', 'gamepadMapping', 'widescreen',
                    'hell', 'lava_acid_physics', 'colorsRandomization', 'suitsPalettes', 'beamsPalettes',
-                   'tilesPalettes', 'enemiesPalettes', 'bossesPalettes', 'invert']
+                   'tilesPalettes', 'enemiesPalettes', 'bossesPalettes', 'invert', 'color_blind']
         others = ['minDegree', 'maxDegree', 'hellrun_rate', 'etanks']
         validateWebServiceParams(self.request, switchs, [], [], others, isJson=True)
         if self.vars.customSpriteEnable == 'on':
@@ -231,6 +232,7 @@ class Customizer(object):
         self.session.customizer['hellrun_rate'] = self.vars.hellrun_rate
         self.session.customizer['etanks'] = self.vars.etanks
         self.session.customizer['music'] = self.vars.music
+        self.session.customizer['color_blind'] = self.vars.color_blind
 
         if self.vars.music == 'Customize':
             musics = self.loadMusics()
@@ -293,6 +295,8 @@ class Customizer(object):
             params += ['--hellrun', self.vars.hellrun_rate]
         if self.vars.etanks != 'off':
             params += ['--etanks', self.vars.etanks]
+        if self.vars.color_blind == 'on':
+            params += ['-c', 'color_blind.ips']
 
         if self.vars.colorsRandomization == 'on':
             params.append('--palette')

@@ -41,7 +41,7 @@ if __name__ == "__main__":
                                  'remove_rando_speed.ips', 'remove_spinjumprestart.ips',
                                  'remove_itemsounds.ips', 'vanilla_music.ips', 'custom_ship.ips',
                                  'Ship_Takeoff_Disable_Hide_Samus', 'widescreen.ips',
-                                 'hell.ips', 'lava_acid_physics.ips'])
+                                 'hell.ips', 'lava_acid_physics.ips', 'color_blind.ips'])
     parser.add_argument('--controls',
                         help="specify controls, comma-separated, in that order: Shoot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
                         dest='controls')
@@ -208,7 +208,7 @@ if __name__ == "__main__":
             }
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)
-            PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
+            PaletteRando(romPatcher, paletteSettings, args.sprite, 'color_blind.ips' in args.patches).randomize()
         if musicPatcher is not None:
             musicPatcher.replace(musicMapping,
                                  updateReferences=musicParams.get('room_states', True),

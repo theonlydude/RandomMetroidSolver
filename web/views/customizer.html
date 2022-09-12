@@ -418,7 +418,7 @@ function doSubmit() {
         }
 
         var dataDict = {};
-        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell"];
+        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "color_blind"];
 
         for(var i=0; i<elems.length; i++) {
             var elem = document.getElementById(elems[i]);
@@ -1574,6 +1574,12 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
 <p>This patch was developed by Adam.</p>"
     },
     {
+      element: "#color_blindStep",
+      title: "Color blind friendly colors for doors",
+      content: "<p>Color blind friendly colors for Missile, Super and Power Bomb doors.</p>\
+<p>This patch was developed by Colors and theonlydude.</p>"
+    },
+    {
       element: "#hellStep",
       title: "Challenges",
       content: "<p>Permanent lava physics: Samus physic is always as she's in lava until Gravity Suit is found</p>\
@@ -1887,6 +1893,7 @@ for name, values in musics["_dropdown"].items():
                   <td><button type="button" onclick="startTheTour(9)">?</button></td>
                 </tr>
               </table>
+
               <table class="full">
                 <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
                 <tr><td colspan="2"><h5 class="center"><b>Game comfort</b></h5></td><td></td></tr>
@@ -1943,6 +1950,21 @@ for name, values in musics["_dropdown"].items():
 
               <table class="full">
                 <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+                <tr><td colspan="2"><h5 class="center"><b>Accessibility</b></h5></td><td></td></tr>
+              </table>
+              <table class="full">
+                <colgroup><col class="half" /><col class="half" /></colgroup>
+                <tr id="color_blindStep">
+                  <td colspan="2">
+                    {{displayCheckbox("color_blind")}}
+                    <span id="color_blindText">Color blind friendly colors for doors</span>
+                  </td>
+                  <td><button type="button" onclick="startTheTour(16)">?</button></td>
+                </tr>
+              </table>
+
+              <table class="full">
+                <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
                 <tr><td colspan="2"><h5 class="center"><b>Challenges</b></h5></td><td></td></tr>
               </table>
               <table class="full">
@@ -1956,7 +1978,7 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("hell")}}
                     <span id="hellText">Permanent hell run</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(16)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(17)">?</button></td>
                 </tr>
                 <tr id="hellOptionsStep">
                   <td>
@@ -1971,7 +1993,7 @@ for name, values in musics["_dropdown"].items():
                   <td>
                     {{displayNumber("etanks", "0", "14", "0", "1")}}
                   </td>
-                  <td><button type="button" onclick="startTheTour(17)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(18)">?</button></td>
                 </tr>
               </table>
 
@@ -1986,28 +2008,28 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("widescreen")}}
                     <span id="widescreenText">Widescreen on  <a href="https://github.com/DerKoun/bsnes-hd/releases" target="_blank">bsnes-hd emulator</a></span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(18)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(19)">?</button></td>
                 </tr>
                 <tr id="AimAnyButtonStep">
                   <td colspan="2">
                     {{displayCheckbox("AimAnyButton")}}
                     <span id="AimAnyButtonText">Allows the aim buttons to be assigned to any button</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(19)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
                 <tr id="max_ammo_displayStep">
                   <td colspan="2">
                     {{displayCheckbox("max_ammo_display")}}
                     <span id="max_ammo_displayText">Max Ammo Display</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(20)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(21)">?</button></td>
                 </tr>
                 <tr id="supermetroid_msu1Step">
                   <td colspan="2">
                     {{displayCheckbox("supermetroid_msu1")}}
                     <span id="supermetroid_msu1Text">Play music with MSU1 chip on SD2SNES</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(21)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(22)">?</button></td>
                 </tr>
               </table>
 
@@ -2026,7 +2048,7 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_Infinite_Space_Jump")}}
                     <span id="remove_Infinite_Space_JumpText">Restore vanilla Space Jump</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(22)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(23)">?</button></td>
                 </tr>
                 <tr id="remove_ElevatorDoorsStep">
                   <td>
@@ -2037,7 +2059,7 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_fast_doors")}}
                     <span id="remove_fast_doorsText">Restore vanilla doors transitions</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(23)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(24)">?</button></td>
                 </tr>
                 <tr id="remove_rando_speedStep">
                   <td>
@@ -2048,7 +2070,7 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_spinjumprestart")}}
                     <span id="remove_spinjumprestartText">Restore vanilla spin jump</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(24)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(25)">?</button></td>
                 </tr>
               </table>
           </div>

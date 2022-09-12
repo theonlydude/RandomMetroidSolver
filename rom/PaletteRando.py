@@ -102,12 +102,15 @@ import utils.log
 
 
 class PaletteRando(object):
-    def __init__(self, romPatcher, settings, sprite):
+    def __init__(self, romPatcher, settings, sprite, color_blind):
         self.logger = utils.log.get('Palette')
 
         self.romPatcher = romPatcher
         if sprite is not None:
             palettes.update(sprite_palettes[sprite])
+        if color_blind:
+            from rando.color_palettes import color_palettes
+            palettes.update(color_palettes)
         self.romLoader = RomLoader.factory(palettes)
         self.palettesROM = self.romLoader.getROM()
         self.outFile = romPatcher.romFile

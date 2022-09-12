@@ -626,7 +626,7 @@ class WS_dump_import(WS):
         jsonData = {"stateDataOffsets": json.loads(self.vars.stateDataOffsets),
                     "currentState": json.loads(self.vars.currentState),
                     "newAP": webAPs[newAP]}
-        if len(jsonData["currentState"]) > 1576 or len(jsonData["stateDataOffsets"]) > 3:
+        if len(jsonData["currentState"]) > 1608 or len(jsonData["stateDataOffsets"]) > 4:
             raiseHttp(400, "Wrong state size", True)
         for key, value in jsonData["stateDataOffsets"].items():
             if len(key) > 1 or type(value) != int:

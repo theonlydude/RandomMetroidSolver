@@ -99,6 +99,8 @@ class SolverState(object):
         self.state["majorUpgrades"] = solver.majorUpgrades
         self.state["splitLocsByArea"] = solver.splitLocsByArea
         self.state["eventsBitMasks"] = solver.eventsBitMasks
+        # scav hunt locations
+        self.state["scavengerOrder"] = self.getScavengerOrder(solver)
 
     def toSolver(self, solver):
         solver.majorsSplit = self.state["majorsSplit"]
@@ -135,6 +137,7 @@ class SolverState(object):
         solver.majorUpgrades = self.state["majorUpgrades"]
         solver.splitLocsByArea = self.state["splitLocsByArea"]
         solver.eventsBitMasks = self.state["eventsBitMasks"]
+        solver.scavengerOrder = self.setScavengerOrder(solver, self.state["scavengerOrder"])
 
     def getRoomsVisibility(self, solver, areaGraph, sm):
         # add graph access points
@@ -316,6 +319,17 @@ class SolverState(object):
                 diff = loc.difficulty
                 ret[loc.Name] = (diff.bool, diff.difficulty, diff.knows, diff.items)
         return ret
+
+    def getScavengerOrder(self, solver):
+        return [loc.Name for loc in solver.scavengerOrder]
+
+    def getLoc(self, locName, locations):
+        for loc in locations:
+            if loc.Name == locName:
+                return loc
+
+    def setScavengerOrder(self, solver, order):
+        return [self.getLoc(locName, solver.locations) for locName in order]
 
     def set(self, state):
         self.state = state

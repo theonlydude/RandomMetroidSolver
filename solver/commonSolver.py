@@ -848,7 +848,7 @@ class CommonSolver(object):
         return majorsAvailable
 
     def scavengerHuntComplete(self, smbm=None, ap=None):
-        if self.majorsSplit != 'Scavenger':
+        if self.masterMajorsSplit != 'Scavenger':
             return SMBool(True)
         else:
             # check that last loc from the scavenger hunt list has been visited

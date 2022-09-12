@@ -495,9 +495,15 @@ class Objectives(object):
         Objectives.goals["finish scavenger hunt"].clearFunc = scavClearFunc
 
     def setItemPercentFuncs(self, totalItemsCount=None, allUpgradeTypes=None):
+        def getPctFunc(pct, totalItemsCount):
+            def f(sm, ap):
+                nonlocal pct, totalItemsCount
+                return sm.hasItemsPercent(pct, totalItemsCount)
+            return f
+
         for pct in [25,50,75,100]:
             goal = 'collect %d%% items' % pct
-            Objectives.goals[goal].clearFunc = lambda sm, ap: sm.hasItemsPercent(pct, totalItemsCount)
+            Objectives.goals[goal].clearFunc = getPctFunc(pct, totalItemsCount)
         if allUpgradeTypes is not None:
             Objectives.goals["collect all upgrades"].clearFunc = lambda sm, ap: sm.haveItems(allUpgradeTypes)
 

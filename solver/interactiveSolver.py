@@ -519,8 +519,9 @@ class InteractiveSolver(CommonSolver):
         data["fileName"] = fileName
         # error msg in json to be displayed by the web site
         data["errorMsg"] = errorMsg
-        with open(self.outputFileName, 'w') as jsonFile:
-            json.dump(data, jsonFile)
+
+        self.shm.writeMsgJson(data)
+        self.shm.finish(False)
 
     def locNameInternal2Web(self, locName):
         return removeChars(locName, " ,()-")

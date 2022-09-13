@@ -1,4 +1,4 @@
-import sys, json, os
+import sys, json, os, tempfile
 
 from solver.commonSolver import CommonSolver
 from logic.smbool import SMBool
@@ -367,12 +367,15 @@ class InteractiveSolver(CommonSolver):
 
         plandoCurrentJson = json.dumps(plandoCurrent)
 
+        (fd, jsonOutFileName) = tempfile.mkstemp()
+        os.close(fd)
+
         from utils.utils import getPythonExec
         params = [
             getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
             '--runtime', '10',
             '--param', self.presetFileName,
-            '--output', self.outputFileName,
+            '--output', jsonOutFileName,
             '--plandoRando', plandoCurrentJson,
             '--progressionSpeed', 'speedrun',
             '--minorQty', parameters["minorQty"],
@@ -384,8 +387,9 @@ class InteractiveSolver(CommonSolver):
         import subprocess
         subprocess.call(params)
 
-        with open(self.outputFileName, 'r') as jsonFile:
+        with open(jsonOutFileName, 'r') as jsonFile:
             data = json.load(jsonFile)
+        os.remove(jsonOutFileName)
 
         self.errorMsg = data["errorMsg"]
 

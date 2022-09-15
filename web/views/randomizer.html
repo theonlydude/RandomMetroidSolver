@@ -401,7 +401,7 @@ function get_selected_objectives() {
 function remove_objective_from_unselected(objective) {
     if( ! removed_objectives.includes(objective)) {
         console.log("        !! remove objective from unselected: "+objective);
-        $("#objectiveMultiSelect option[value='"+objective+"']").remove();
+        $('#objectiveMultiSelect option[value="'+objective+'"]').remove();
         removed_objectives.push(objective);
     }
 }

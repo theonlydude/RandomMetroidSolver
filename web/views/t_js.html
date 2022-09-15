@@ -806,7 +806,13 @@ function displayCompletedObjectives(jsonData) {
     var newlyCompletedObjectives = jsonData["newlyCompletedObjectives"];
     var objectivesPopup = document.getElementById("objectivesPopup");
     if(newlyCompletedObjectives.length > 0) {
-        objectivesPopup.innerHTML = newlyCompletedObjectives.join("<br/>");
+        if(hideTimeout == null) {
+            objectivesPopup.innerHTML = newlyCompletedObjectives.join("<br/>");
+        } else {
+            // objectives popup is already displayed
+            clearTimeout(hideTimeout);
+            objectivesPopup.innerHTML = objectivesPopup.innerHTML + "<br/>" + newlyCompletedObjectives.join("<br/>");
+        }
         objectivesPopup.style.display = "block";
         // arm time to hide popup if user doesn't click on it
         hideTimeout = setTimeout(hideObjectivePopup, 3000);

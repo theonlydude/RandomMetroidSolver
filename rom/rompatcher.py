@@ -315,6 +315,9 @@ class RomPatcher:
             stdPatches = []
             plms = []
             stdPatches += RomPatcher.IPSPatches['Standard'][:]
+            if noLayout:
+                # when disabling anti softlock protection also disable doors indicators
+                stdPatches.remove('door_indicators_plms.ips')
             if self.race is not None:
                 stdPatches.append('race_mode_post.ips')
             if suitsMode != "Balanced":
@@ -387,7 +390,8 @@ class RomPatcher:
                 for patchName in RomPatcher.IPSPatches['DoorsColors']:
                     self.applyIPSPatch(patchName)
             self.writeDoorsColor(doors)
-            self.writeDoorIndicators(plms, area, doorsColorsRando)
+            if noLayout == False:
+                self.writeDoorIndicators(plms, area, doorsColorsRando)
             self.applyStartAP(startLocation, plms, doors)
             self.applyPLMs(plms)
         except Exception as e:

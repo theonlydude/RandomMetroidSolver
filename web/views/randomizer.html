@@ -2221,7 +2221,7 @@ Missile doors can no longer be opened with a Super Missile <img src=\"/solver/st
 For Plasma/Spazer doors, when you have both beams collected and one equipped you can open both door types.<br/>\
 Colored doors to save stations / refills / map stations are excluded from randomization.<br/>\
 Colored doors to save / refill stations are forced to blue.<br/>\
-Blue doors with a colored door on the other side will blink in the matching color.<br/>\
+Blue doors with a colored door on the other side will blink in the matching color (you can disable it by disabling 'Anti-softlock layout patches').<br/>\
 The fill algorithm will be more trolly about ammo/beam if you use slower progression speed.</p>\
 <p>In this mode there are seven distinct door keys, and sometimes (especially with non standard starting location or area rando), if you go through a blue door you can end up locked on the other side if you don't have or find the item required to come back. If you save in that situation, your save file will be hardlocked. To avoid this, a rolling backup save system is enabled. When you save at a different save station than the last time, a backup of your previous save is done, using an empty save, or an older backup of the same game. You can identify backups in the load menu, as they will have the same slot letter as the original save :</p>\
 <img src=\"/solver/static/images/help/backup_saves.png\" alt=\"backup_saves.png\" title=\"Backup Saves menu example\" class=\"third center_img\"/>\
@@ -2342,7 +2342,8 @@ Click on the dice button to randomly set this parameter.",
     {
       element: "#layoutPatchesStep",
       title: "Anti-softlock Layout patches",
-      content: "Include the anti-softlock layout patches. Disable at your own softlocking risk!\
+      content: "Include the anti-softlock layout patches. Disable at your own softlocking risk!<br/>\
+Disabling it will also disable blinking blue doors with a color door on the other side (see Doors Colors Randomization).\
 <table class=\"full\">\
 <tr>\
 <td class=\"knowsUsed\"><p class=\"top\">Disable respawning blocks at <a href=\"https://wiki.supermetroid.run/Dachora_Room\" target=\"_blank\">Dachora Pit</a>:</p></td>\

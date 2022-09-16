@@ -202,7 +202,7 @@ if __name__ == "__main__":
     parser.add_argument('--runtime',
                         help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit.",
                         dest='runtimeLimit_s', nargs='?', default=0, type=int)
-    parser.add_argument('--dump', help="dump file with autotracker state (used in interactive mode)",
+    parser.add_argument('--dump', help="dump shm with autotracker state (used in interactive mode)",
                         dest="dump", nargs="?", default=None)
     parser.add_argument('--plandoScavengerOrder', help="list of plando scavenger hunt locations (used in interactive mode)",
                         dest="plandoScavengerOrder", nargs="?", default=None)

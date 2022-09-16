@@ -620,8 +620,7 @@ class WS_dump_import(WS):
         if newAP not in webAPs:
             raiseHttp(400, "Wrong AP", True)
 
-        # create json file
-        (self.fd, self.jsonDumpName) = tempfile.mkstemp()
+        self.shm = SHM()
 
         jsonData = {"stateDataOffsets": json.loads(self.vars.stateDataOffsets),
                     "currentState": json.loads(self.vars.currentState),
@@ -633,12 +632,10 @@ class WS_dump_import(WS):
                 raiseHttp(400, "Wrong state type", True)
         if any([d for d in jsonData["currentState"] if type(d) != int]):
             raiseHttp(400, "Wrong cur state type", True)
-        #print(jsonData)
 
-        with os.fdopen(self.fd, "w") as jsonFile:
-            json.dump(jsonData, jsonFile)
+        self.shm.writeMsgJson(jsonData)
 
     def action(self):
-        ret = self.callSolverAction("dump", "import", {"dump": self.jsonDumpName})
-        os.remove(self.jsonDumpName)
+        ret = self.callSolverAction("dump", "import", {"dump": self.shm.name()})
+        self.shm.finish(True)
         return ret

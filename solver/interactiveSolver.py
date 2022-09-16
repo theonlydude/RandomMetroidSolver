@@ -988,9 +988,11 @@ class InteractiveSolver(CommonSolver):
         "Tourian": 0x500
     }
 
-    def importDump(self, dumpFileName):
-        with open(dumpFileName, 'r') as jsonFile:
-            dumpData = json.load(jsonFile)
+    def importDump(self, shmName):
+        from utils.shm import SHM
+        shm = SHM(shmName)
+        dumpData = shm.readMsgJson()
+        shm.finish(False)
 
         # first update current access point
         self.lastAP = dumpData["newAP"]

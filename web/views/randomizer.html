@@ -452,14 +452,21 @@ function get_objectives_count(type, list) {
     }
     return count;
 }
+function is_clear_area_objective(objective) {
+    return "tourian" in objectives_exclusions[objective];
+}
 function can_add_to_unselected(toAdd) {
     // 1. check if toAdd is in an exclusion list of the selected objectives
     // 2. if toAdd is a limit objective
     //    check count objectives already selected and if toAdd limit is not reached
     // 3. if toAdd is a count objective
     //    check limit objectives already selected and if toAdd would reach theirs limit
+    // 4. if toAdd is a clear area objective
+    //    check if Tourian is not set to disabled and majors split is not set to scavenger
 
     var selectedArray = get_selected_objectives();
+    var tourian = document.getElementById("tourian");
+    var majorsSplit = document.getElementById("majorsSplit");
 
     // 1.
     console.log("      test if "+toAdd+" is in the exclusion list of an already selected objective");
@@ -505,6 +512,15 @@ function can_add_to_unselected(toAdd) {
                 }
             }
         }
+    } else if(is_clear_area_objective(toAdd)) {
+        if(tourian.value == "Disabled") {
+            console.log("        can't add "+toAdd+" it's a clear area objective and tourian is Disabled");
+            return false;
+        }
+        if(majorsSplit.value == "Scavenger") {
+            console.log("        can't add "+toAdd+" it's a clear area objective and majors split is scav");
+            return false;
+        }
     }
 
     console.log("    we can add "+toAdd);
@@ -516,8 +532,12 @@ function must_remove_from_unselected(toRemove) {
     //    check count objectives already selected and if toRemove limit is reached
     // 3. if toRemove is a count objective
     //    check limit objectives already selected and if toRemove reach theirs limit
+    // 4. if toRemove is a clear area objective
+    //    remove from list if Tourian is set to disabled or majors split is set to scavenger
 
     var selectedArray = get_selected_objectives();
+    var tourian = document.getElementById("tourian");
+    var majorsSplit = document.getElementById("majorsSplit");
 
     // 1.
     console.log("      test if "+toRemove+" is in the exclusion list of an already selected objective");
@@ -562,6 +582,16 @@ function must_remove_from_unselected(toRemove) {
                     }
                 }
             }
+        }
+    // 4.
+    } else if(is_clear_area_objective(toRemove)) {
+        if(tourian.value == "Disabled") {
+            console.log("        must remove "+toRemove+" it's a clear area objective and tourian is disabled");
+            return true;
+        }
+        if(majorsSplit.value == "Scavenger") {
+            console.log("        must remove "+toRemove+" it's a clear area objective and majors split is scav");
+            return true;
         }
     }
 
@@ -636,7 +666,8 @@ function objective_change(e, params, force) {
                 remove_objective_from_unselected(toRemove);
             }
         }
-    } else if(params.deselected) {
+    }
+    if(params.deselected) {
         console.log("* new objective deselected: "+params.deselected);
         var copy_removed_objectives = removed_objectives.slice();
         for(var j=0; j<copy_removed_objectives.length; j++) {
@@ -1530,6 +1561,12 @@ window.onload = function(){
         }
     }
 
+    var tourian = document.getElementById("tourian");
+    tourian.onchange = function() {
+        // update available objectives
+        objective_change(undefined, {selected: {}, deselected: {}})
+    }
+
     var majorsSplit = document.getElementById("majorsSplit");
     majorsSplit.onchange = function() {
         var scavengerParams = document.getElementById("scavengerParams");
@@ -1562,6 +1599,8 @@ window.onload = function(){
         if(!isElemRandom(document.getElementById("objectiveRandom"))) {
             setMaxObjective(false);
         }
+        // update available objectives
+        objective_change(undefined, {selected: {}, deselected: {}})
     }
     majorsSplit.onchange();
 

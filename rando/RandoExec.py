@@ -78,7 +78,6 @@ class RandoExec(object):
             container = setup.createItemLocContainer(endDate, vcr)
             if container is None:
                 sys.stdout.write('*')
-                sys.stdout.flush()
                 i += 1
             else:
                 self.errorMsg += '\n'.join(setup.errorMsgs)

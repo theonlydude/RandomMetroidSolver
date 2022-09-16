@@ -69,7 +69,6 @@ class FillerRandom(Filler):
         # pool is exhausted, use mini solver to see if it is beatable
         if self.isBeatable():
             sys.stdout.write('o')
-            sys.stdout.flush()
         else:
             if self.diffSteps > 0 and self.settings.maxDiff < infinity:
                 if self.nSteps < self.diffSteps:
@@ -83,7 +82,6 @@ class FillerRandom(Filler):
                     difficulty = self.beatableBackup[1]
                     self.errorMsg += "Could not find a solution compatible with max difficulty. Estimated seed difficulty: "+diffValue2txt(difficulty)
                     sys.stdout.write('O')
-                    sys.stdout.flush()
                     return True
                 else:
                     return False
@@ -91,7 +89,6 @@ class FillerRandom(Filler):
             self.resetHelpingContainer()
             if (self.nSteps + 1) % 100 == 0:
                 sys.stdout.write('x')
-                sys.stdout.flush()
 
             # help speedrun filler
             self.getHelp()
@@ -120,7 +117,6 @@ class FillerRandomItems(Filler):
         itemLoc = ItemLocation(item, loc)
         self.container.collect(itemLoc, pickup=False)
         sys.stdout.write('.')
-        sys.stdout.flush()
         return True
 
 class FrontFillerNoCopy(FrontFiller):
@@ -208,7 +204,6 @@ class FillerRandomSpeedrun(FillerRandom):
         self.container.cleanLocsAfterSolver()
         if diff < minDiff: # minDiff is 0 if unspecified: that covers "unsolvable" (-1)
             sys.stdout.write('X')
-            sys.stdout.flush()
 
             # remove vcr data
             if self.vcr is not None:
@@ -217,7 +212,6 @@ class FillerRandomSpeedrun(FillerRandom):
             return False
         now = time.process_time()
         sys.stdout.write('S({}/{}ms)'.format(self.nSteps+1, int((now-self.startDate)*1000)))
-        sys.stdout.flush()
 
         # order item locations with the order used by the solver
         self.orderItemLocations(solver)
@@ -261,7 +255,6 @@ class FillerRandomSpeedrun(FillerRandom):
         if time.process_time() > self.runtimeSteps[self.nFrontFillSteps]:
             # store the step for debug purpose
             sys.stdout.write('n({})'.format(self.nSteps))
-            sys.stdout.flush()
             # help the random fill with a bit of frontfill
             self.nFrontFillSteps += self.stepIncr
             self.createBaseLists(updateBase=False)

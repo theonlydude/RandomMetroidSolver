@@ -36,7 +36,6 @@ class RandoServices(object):
         container.collect(itemLoc, pickup=pickup)
         self.log.debug("COLLECT "+itemLoc.Item.Type+" at "+itemLoc.Location.Name)
         sys.stdout.write('.')
-        sys.stdout.flush()
         return itemLoc.Location.accessPoint if pickup == True else ap
 
     # gives all the possible theoretical locations for a given item

@@ -172,7 +172,6 @@ class FillerProgSpeed(Filler):
         self.log.debug("accesLoc {}".format([loc.Name for loc in accessibleLocations]))
         if len(accessibleLocations) <= self.locLimit:
             sys.stdout.write('|')
-            sys.stdout.flush()
             return False
         # check that there is room left in all main areas
         room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0 }
@@ -186,7 +185,6 @@ class FillerProgSpeed(Filler):
         for r in room.values():
             if r > 0 and r <= self.locLimit:
                 sys.stdout.write('|')
-                sys.stdout.flush()
                 return False
         return True
 
@@ -257,7 +255,6 @@ class FillerProgSpeed(Filler):
         isStuck = itemLoc is None
         if not isStuck:
             sys.stdout.write('-')
-            sys.stdout.flush()
             self.collect(itemLoc)
         return isStuck
 
@@ -331,7 +328,6 @@ class FillerProgSpeed(Filler):
             if self.vcr != None:
                 self.vcr.addRollback(nStatesAtStart)
             sys.stdout.write('<'*nStatesAtStart)
-            sys.stdout.flush()
             return None
         # to stay consistent in case no solution is found as states list was popped in init
         fallbackState = self.getFallbackState()
@@ -357,7 +353,6 @@ class FillerProgSpeed(Filler):
             if len(possibleStates) == 0 and i >= 0:
                 if len(self.progressionStatesIndices) > 0:
                     sys.stdout.write('!')
-                    sys.stdout.flush()
                     self.progressionStatesIndices.pop()
                 else:
                     break
@@ -376,7 +371,6 @@ class FillerProgSpeed(Filler):
             if self.vcr != None:
                 self.vcr.addRollback(1)
         sys.stdout.write('<'*(nStatesAtStart - len(self.states)))
-        sys.stdout.flush()
         self.log.debug("rollback END: {}".format(len(self.container.currentItems)))
         return ret
 

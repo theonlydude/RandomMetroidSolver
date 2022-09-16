@@ -418,8 +418,10 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         // debug: highlight next VCR loc
         postAjaxHook();
     } else {
-        // if no available locations, display a popup telling you're stuck
-        if(Object.keys(jsonData["availableLocations"]).length == 0 && chained == false) {
+        // if no available locations, display a popup telling you're stuck.
+        // in race protected seeds we can't load transitions as they're encrypted,
+        // so allTransitions var don't behave correctly.
+        if(Object.keys(jsonData["availableLocations"]).length == 0 && chained == false && mode != "race") {
             if(jsonData["allTransitions"] == true
                && jsonData["allDoorsRevealed"] == true
                && tourian != "Disabled"

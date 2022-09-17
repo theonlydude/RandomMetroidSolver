@@ -234,6 +234,18 @@ Install QUsb2snes on your computer and configure your sd2snes/snes mini/emulator
   // Initialize the tour
   tour.init();
 
+  if (typeof step === "object") {
+    // step is an event, not a number. Get ID from parent element
+    let parent = event.target.parentNode
+    step = parent.id
+    while (!step) {
+        parent = parent.previousElementSibling
+        step = parent.id
+    }
+  }
+  if (typeof step === 'string') {
+    step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
+  }
   // Start the tour
   if(step != -1) {
     tour.goTo(step);
@@ -1772,7 +1784,7 @@ function sendAutoTrackerMessage(data, newState) {
     <div id="binItem" class="binItem"><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearLocs(false)" data-toggle="tooltip" title="Remove all visited locations and doors" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <!-- tracker help -->
-    <div id="help" class="help"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the help" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="help" class="help"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the help" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <!-- auto tracker -->
     <div id="titleAutoTracker">AUTO TRACKER</div>
@@ -1782,7 +1794,7 @@ function sendAutoTrackerMessage(data, newState) {
       <img id="stopAutoTracker" src="/solver/static/images/ui/shut_down.svg" alt="Stop AutoTracker" style="display: none" onclick="stopAutoTracker()" data-toggle="tooltip" title="Stop the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
     </div>
 
-    <div id="helpAutoTracker"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(1)" data-toggle="tooltip" title="Display the AutoTracker help" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="helpAutoTracker"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the AutoTracker help" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="statusAutoTracker">
       <img id="statusKO" src="/solver/static/images/ui/record_ko.svg" alt="statusKO" style="display: none" data-toggle="tooltip" title="AutoTracker status OK" data-placement="bottom" data-container="body" data-html="true">
       <img id="statusOK" src="/solver/static/images/ui/record_ok.svg" alt="statusOK" style="display: none" data-toggle="tooltip" title="AutoTracker status KO" data-placement="bottom" data-container="body" data-html="true">

@@ -537,6 +537,18 @@ Using a base seed with Escape randomization allows you to edit the escape transi
   // Initialize the tour
   tour.init();
 
+  if (typeof step === "object") {
+    // step is an event, not a number. Get ID from parent element
+    let parent = event.target.parentNode
+    step = parent.id
+    while (!step) {
+        parent = parent.previousElementSibling
+        step = parent.id
+    }
+  }
+  if (typeof step === 'string') {
+    step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
+  }
   // Start the tour
   if(step != -1) {
     tour.goTo(step);
@@ -1244,7 +1256,7 @@ def displayNumber(id, min, max, default, step="1"):
     <div id="binPlando" class="binPlando"><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearLocs(true)" data-toggle="tooltip" title="Remove all placed items" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="savePlando" class="savePlando"><img src="/solver/static/images/ui/save.svg" alt="Save" onclick="save('save')" data-toggle="tooltip" title="Download plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="lockPlando" class="lockPlando"><img src="/solver/static/images/ui/locked.svg" alt="Lock" onclick="save('lock')" data-toggle="tooltip" title="Download locked plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="helpPlando" class="helpPlando"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the Plando help" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="helpPlando" class="helpPlando"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the Plando help" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="randoPlando" class="randoPlando"><img src="/solver/static/images/ui/games.svg" alt="Randomize" onclick="displayRandoPopup()" data-toggle="tooltip" title="Randomize the remaining items/locations" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <!-- to open the debug popup -->

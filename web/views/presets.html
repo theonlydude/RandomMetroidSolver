@@ -457,6 +457,18 @@ Also the Varia Suit environmental protection is increased to match vanilla Gravi
   // Initialize the tour
   tour.init();
 
+  if (typeof step === "object") {
+    // step is an event, not a number. Get ID from parent element
+    let parent = event.target.parentNode
+    step = parent.id
+    while (!step) {
+        parent = parent.previousElementSibling
+        step = parent.id
+    }
+  }
+  if (typeof step === 'string') {
+    step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
+  }
   // Start the tour
   if(step != -1) {
     tour.goTo(step);
@@ -665,12 +677,12 @@ pass
         <tr>
           <td>Preset:</td>
           <td colspan="2">{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.presets["preset"], _class="chzn-select", _onChange="loadPreset()"))}}</td>
-          <td id="presetStep"><button type="button" onclick="startTheTour(0)">?</button></td>
+          <td id="presetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
         </tr>
         <tr>
           <td>New preset:</td>
           <td colspan="2"><input class="full" id="presetCreate", name="presetCreate" type="text"/></td>
-          <td id="presetCreateStep"><button type="button" onclick="startTheTour(1)">?</button></td>
+          <td id="presetCreateStep"><button type="button" onclick="startTheTour(event)">?</button></td>
         </tr>
         <tr>
           <td></td>
@@ -680,7 +692,7 @@ pass
           <td>
             <input class="full btn btn-default" onclick="askPassword('Create')" value="Create"/>
           </td>
-          <td id="buttonsStep"><button type="button" onclick="startTheTour(2)">?</button></td>
+          <td id="buttonsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
         </tr>
       </table>
       <input id="password" name="password" style="display:none" type="text"/>
@@ -746,7 +758,7 @@ if skillBarData is not None:
           <td><a href="https://wiki.supermetroid.run/Red_Brinstar_Fireflea_Room" target="_blank">X-Ray:</a></td>
           <td>{{xray = ["Aarghh", "I don't like spikes", "Default", "I don't mind spikes", "D-Boost master"]
                 displaySelect("X-Ray", xray, settings["X-Ray"])}}</td>
-          <td id="xrayStep"><button type="button" onclick="startTheTour(3)">?</button></td>
+          <td id="xrayStep"><button type="button" onclick="startTheTour(event)">?</button></td>
         </tr>
         <tr>
           <td><a href="https://wiki.supermetroid.run/Gauntlet_Entrance" target="_blank">Gauntlet:</a></td>
@@ -757,7 +769,7 @@ if skillBarData is not None:
     </div>
     <div class="column">
       <!-- display real etank requirements -->
-      <h3 id="requirementStep">Hard rooms energy requirements<span class="rightStep"><button type="button" onclick="startTheTour(4)">?</button></span></h3>
+      <h3>Hard rooms energy requirements<span class="rightStep" id="requirementStep"><button type="button" onclick="startTheTour(event)">?</button></span></h3>
       <h4>X-Ray</h4>
       <table class="full">
         <colgroup><col class="sixteen"/><col class="sixteen" /><col/><col/><col/><col/><col/><col/></colgroup>
@@ -804,14 +816,14 @@ if skillBarData is not None:
   </div>
   <div class="row">
     <div class="column">
-      <h3 id="iceStep">Hellruns</h3>
+      <h3>Hellruns</h3>
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
         <tr>
           <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=15m11s" target="_blank">Ice:</a></td>
           <td>{{hellruns = ['No thanks', 'Gimme energy', 'Default', 'Bring the heat', 'I run RBO']
                 displaySelect("Ice", hellruns, settings['Ice'])}}</td>
-          <td><button type="button" onclick="startTheTour(5)">?</button></td>
+          <td id="iceStep"><button type="button" onclick="startTheTour(event)">?</button></td>
         </tr>
         <tr>
           <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=16m44s" target="_blank">Main Upper Norfair:</a></td>
@@ -825,7 +837,7 @@ if skillBarData is not None:
       </table>
     </div>
     <div class="column">
-      <h3 id="hellRunsEnergyStep">Hellruns energy requirements<span class="rightStep"><button id="requirementStep" type="button" onclick="startTheTour(6)">?</button></span></h3>
+      <h3>Hellruns energy requirements<span class="rightStep" id="hellRunsEnergyStep"><button type="button" onclick="startTheTour(event)">?</button></span></h3>
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
         <tr>
@@ -925,7 +937,7 @@ if skillBarData is not None:
           <td><img src="/solver/static/images/tracker/inventory/Kraid.png" alt="Kraid" title="Kraid" class="imageBoss"/></td>
           <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
             displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
-          <td><button id="bossStep" type="button" onclick="startTheTour(7)">?</button></td>
+          <td id="bossStep"><button type="button" onclick="startTheTour(event)">?</button></td>
         </tr>
         <tr>
           <td><a href="https://wiki.supermetroid.run/Draygon" target="_blank">Draygon:</a></td>

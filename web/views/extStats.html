@@ -106,6 +106,9 @@ if (hs.registerOverlay) {
 .strike {
     text-decoration: line-through;
 }
+.fifth {
+    width: 20%;
+}
 </style>
 
 <script type="text/javascript">
@@ -147,6 +150,18 @@ function startTheTour(step=-1) {
     // Initialize the tour
     tour.init();
 
+    if (typeof step === "object") {
+        // step is an event, not a number. Get ID from parent element
+        let parent = event.target.parentNode
+        step = parent.id
+        while (!step) {
+            parent = parent.previousElementSibling
+            step = parent.id
+        }
+    }
+    if (typeof step === 'string') {
+        step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
+    }
     // Start the tour
     if(step != -1) {
         tour.goTo(step);
@@ -300,13 +315,14 @@ function ajaxFail(jqXHR, textStatus) {
   <div class="tabcontent">
     <form id="mainform" name="mainform">
       <table class="full">
+        <colgroup><col class="fifth"/><col class="fifth"/><col class="small"/><col class="fifth"/><col class="fifth"/><col class="small"/><col class="fifth"/></colgroup>
         <tr>
           <td>Settings Preset:</td>
           <td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.extStats["randoPreset"], _class="chzn-select", _onchange="loadRandoPreset()"))}}</td>
-          <td><button id="randoPresetStep" type="button" onclick="startTheTour(0)">?</button></td>
+          <td id="randoPresetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
           <td>Skills Preset:</td>
           <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), **dict(_name="preset", _id="preset", value=session.extStats["preset"], _class="chzn-select"))}}</td>
-          <td><button id="presetStep" type="button" onclick="startTheTour(1)">?</button></td>
+          <td id="presetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
           <td>{{=INPUT(_type="submit", _value="Load", _name="action", _class="btn btn-default")}}</td>
         </tr>
       </table>

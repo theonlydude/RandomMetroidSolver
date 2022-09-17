@@ -770,13 +770,13 @@ function startTheTour(step=-1) {
       content: "The preset is used by the Solver to know which techniques are available to reach the items locations.<br/>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\" target=\"_blank\">Presets part of the website</a>.<br/>Load one of the standard presets (sorted in increased difficulty), tournament presets, or you own from the community presets."
     },
     {
-      element: "#difficultyTarget",
+      element: "#difficultyTargetStep",
       title: "Difficulty Target",
       content: "The maximum difficulty for picking up an item in the current area before moving to another area.<br/><b>Warning</b>: selecting a too hard difficulty may produce unrealistic results.",
       placement: "auto left"
     },
     {
-      element: "#pickupStrategy",
+      element: "#pickupStrategyStep",
       title: "Pickup Strategy",
       content: "Strategy for picking up major and minor items.<br/>\
 <ul>\
@@ -786,7 +786,7 @@ function startTheTour(step=-1) {
       placement: "auto left"
     },
     {
-      element: "#spoilerButton",
+      element: "#spoilerButtonStep",
       title: "Display credits spoiler",
       content: "Extract the spoiler logs from the in-game credits and display it."
     },
@@ -799,6 +799,18 @@ function startTheTour(step=-1) {
   // Initialize the tour
   tour.init();
 
+  if (typeof step === "object") {
+    // step is an event, not a number. Get ID from parent element
+    let parent = event.target.parentNode
+    step = parent.id
+    while (!step) {
+        parent = parent.previousElementSibling
+        step = parent.id
+    }
+  }
+  if (typeof step === 'string') {
+    step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
+  }
   // Start the tour
   if(step != -1) {
     tour.goTo(step);
@@ -863,17 +875,17 @@ function DoPost(){
             <tr>
               <td>Randomized Super Metroid ROM: </td>
               <td><input id="uploadFile" name="uploadFile" type="file"/></td>
-              <td id="uploadFileStep"><button type="button" onclick="startTheTour(0)">?</button></td>
+              <td id="uploadFileStep"><button type="button" onclick="startTheTour(event)">?</button></td>
             </tr>
             <tr>
               <td>Already uploaded ROMs in this session: </td>
               <td>{{=SELECT(*roms, **dict(_name="romFile", _id="romFile", value=lastRomFile, _class="filldropdown", _onchange="lastRomFileChanged(this);"))}}</td>
-              <td id="romFileStep"><button type="button" onclick="startTheTour(1)">?</button></td>
+              <td id="romFileStep"><button type="button" onclick="startTheTour(event)">?</button></td>
             </tr>
             <tr>
               <td>Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a></td>
               <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.solver["preset"], _class="chzn-select"))}}</td>
-              <td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
+              <td id="presetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
             </tr>
           </table>
         </div>
@@ -883,7 +895,7 @@ function DoPost(){
           <tr>
             <td>Difficulty target:</td>
             <td>{{=SELECT("easy", "medium", "hard", "very hard", "hardcore", "mania", _id="difficultyTarget", _name="difficultyTarget", _class="full", value=difficulties[session.solver["difficultyTarget"]])}}</td>
-            <td><button type="button" onclick="startTheTour(3)">?</button></td>
+            <td id="difficultyTargetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
           </tr>
             <tr>
               <td>Pickup strategy:</td>
@@ -901,11 +913,11 @@ if session.solver["pickupStrategy"] == "all":
 }} value="all">100%</option>
                   </select>
               </td>
-              <td><button type="button" onclick="startTheTour(4)">?</button></td>
+              <td id="pickupStrategyStep"><button type="button" onclick="startTheTour(event)">?</button></td>
             </tr>
             <tr id="spoilerButton">
               <td><button type="button" onclick="displaySpoiler()">Display credits spoiler</button></td><td></td>
-              <td><button type="button" onclick="startTheTour(5)">?</button></td>
+              <td id="spoilerButtonStep"><button type="button" onclick="startTheTour(event)">?</button></td>
             </tr>
           </table>
         </div>
@@ -913,7 +925,7 @@ if session.solver["pickupStrategy"] == "all":
       <input id="romJson" name="romJson" style="display:none" type="text"/>
 
       <div id="forbiddenItemsVisibility">
-        <h3>Items not picked up <button  id="forbiddenItemsStep" type="button" onclick="startTheTour(6)">?</button></h3>
+        <h3>Items not picked up <span id="forbiddenItemsStep"><button type="button" onclick="startTheTour(event)">?</button></span></h3>
         <table class="full">
           <tr>
 {{

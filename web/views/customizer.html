@@ -1639,6 +1639,18 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
   // Initialize the tour
   tour.init();
 
+  if (typeof step === "object") {
+    // step is an event, not a number. Get ID from parent element
+    let parent = event.target.parentNode
+    step = parent.id
+    while (!step) {
+        parent = parent.previousElementSibling
+        step = parent.id
+    }
+  }
+  if (typeof step === 'string') {
+    step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
+  }
   // Start the tour
   if(step != -1) {
     tour.goTo(step);
@@ -1705,7 +1717,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
                   <td>ROM:</td>
                   <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile", _class="full")}}</td>
-                  <td><button type="button" onclick="startTheTour(0)" id="uploadFileStep">?</button></td>
+                  <td id="uploadFileStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
             </div>
@@ -1718,7 +1730,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="third">{{displayCheckbox("colorsRandomization")}}Colors Randomization</td>
                 <td class="full"><span id="textLeft" class="floatleft">-180</span><div id="degree_slider_range" class="sixty floatleft"></div><span id="textRight">180</span></td>
                 <td><button id="invert" type="button" onclick="invertFunc()">Invert</button></td>
-                <td><button type="button" onclick="startTheTour(2)" id="colorsRandomizationStep">?</button></td>
+                <td id="colorsRandomizationStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr>
                 <td colspan="4">{{displayCheckbox("globalShift")}}<span id="globalShiftText">Use the same degree to randomize all the elements</span></td>
@@ -1746,17 +1758,17 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
                   <td>{{displayCheckbox("customSpriteEnable")}}</td>
                   <td><span id="customSpriteEnableText">Replace Samus sprite with a custom one.</span></td>
-                  <td><button type="button" onclick="startTheTour(3)" id="customSpriteStep">?</button></td>
+                  <td id="customSpriteStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
                 <tr>
                   <td>{{displayCheckbox("customItemsEnable")}}</td>
                   <td><span id="customItemsEnableText">Replace some items names to match the custom sprite universe.</span></td>
-                  <td><button type="button" onclick="startTheTour(4)" id="customItemsStep">?</button></td>
+                  <td id="customItemsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
                 <tr>
                   <td>{{displayCheckbox("noSpinAttack")}}</td>
                   <td><span id="noSpinAttackText">Use the same animation for Screw Attack with or without Space Jump.</span></td>
-                  <td><button type="button" onclick="startTheTour(5)" id="noSpinAttackStep">?</button></td>
+                  <td id="noSpinAttackStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="customSpriteRandom" type="button" onclick="randomizeTarget(event, 'customSprite')" class="small center"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -1783,7 +1795,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
                   <td>{{displayCheckbox("customShipEnable")}}</td>
                   <td><span id="customShipEnableText">Replace Samus Ship sprite with a custom one.</span></td>
-                  <td><button type="button" onclick="startTheTour(6)" id="customShipStep">?</button></td>
+                  <td id="customShipStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="customShipRandom" type="button" onclick="randomizeTarget(event, 'customShip')" class="small center"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -1808,7 +1820,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
                   <td><span id="customMusicEnableText">Music</span></td>
                   <td>{{=SELECT(*["Don't touch", "Disable", "Randomize", "Customize", "Restore"], **dict(_id="music", _class="full", _onchange="musicSelectChange()", value=session.customizer["music"]))}}</td>
-                  <td><button type="button" onclick="startTheTour(7)" id="customMusicStep">?</button></td>
+                  <td id="customMusicStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
             <div id="musicCustomizer" class="margin_top">
@@ -1871,7 +1883,7 @@ for name, values in musics["_dropdown"].items():
 }}
               </table>
             </div>
-            <h4>Patches<span class="right"><button type="button" onclick="startTheTour(8)" id="patchesStep">?</button></span></h4>
+            <h4>Patches<span class="right" id="patchesStep"><button type="button" onclick="startTheTour(event)">?</button></span></h4>
             <p>
               Patches to customize your ROM.
             </p>
@@ -1882,7 +1894,7 @@ for name, values in musics["_dropdown"].items():
               </table>
               <table class="full">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
-                <tr id="gamepadMappingStep">
+                <tr>
                   <td>
                     {{displayCheckbox("gamepadMapping")}}
                     <span id="gamepadMappingText">Use gamepad mapping from preset: </span>
@@ -1890,7 +1902,7 @@ for name, values in musics["_dropdown"].items():
                   <td>
                     {{=SELECT(OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.customizer["preset"], _class="chzn-select"))}}
                   </td>
-                  <td><button type="button" onclick="startTheTour(9)">?</button></td>
+                  <td id="gamepadMappingStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
 
@@ -1900,14 +1912,14 @@ for name, values in musics["_dropdown"].items():
               </table>
               <table class="full">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
-                <tr id="itemsoundsStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("itemsounds")}}
                     <span id="itemsoundsText">Remove fanfare when picking up an item</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(10)">?</button></td>
+                  <td id="itemsoundsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="ElevatorDoorsStep">
+                <tr>
                   <td>
                     {{displayCheckbox("elevators_speed")}}
                     <span id="elevators_speedText">Accelerate elevators transitions</span>
@@ -1916,35 +1928,35 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("fast_doors")}}
                     <span id="fast_doorsText">Accelerate doors transitions</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(11)">?</button></td>
+                  <td id="ElevatorDoorsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="spinjumprestartStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("spinjumprestart")}}
                     <span id="spinjumprestartText">Spin jump restart (a.k.a. Respin)</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(12)">?</button></td>
+                  <td id="spinjumprestartStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="rando_speedStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("rando_speed")}}
                      <span id="rando_speedText">Momentum conservation (a.k.a. Speedkeep)</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(13)">?</button></td>
+                  <td id="rando_speedStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="Infinite_Space_JumpStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("Infinite_Space_Jump")}}
                      <span id="Infinite_Space_JumpText">Infinite Space Jump</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(14)">?</button></td>
+                  <td id="Infinite_Space_JumpStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="refill_before_saveStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("refill_before_save")}}
                      <span id="refill_before_saveText">Refill energy and ammo when saving</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(15)">?</button></td>
+                  <td id="refill_before_saveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
 
@@ -1954,12 +1966,12 @@ for name, values in musics["_dropdown"].items():
               </table>
               <table class="full">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
-                <tr id="color_blindStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("color_blind")}}
                     <span id="color_blindText">Color blind friendly colors for doors</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(16)">?</button></td>
+                  <td id="color_blindStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
 
@@ -1969,7 +1981,7 @@ for name, values in musics["_dropdown"].items():
               </table>
               <table class="full">
                 <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter" /></colgroup>
-                <tr id="hellStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("lava_acid_physics")}}
                     <span id="lava_acid_physicsText">Permanent lava physics</span>
@@ -1978,9 +1990,9 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("hell")}}
                     <span id="hellText">Permanent hell run</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(17)">?</button></td>
+                  <td id="hellStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="hellOptionsStep">
+                <tr>
                   <td>
                     <span id="hellrun_rateText">Hell run rate percentage</span>
                   </td>
@@ -1993,7 +2005,7 @@ for name, values in musics["_dropdown"].items():
                   <td>
                     {{displayNumber("etanks", "0", "14", "0", "1")}}
                   </td>
-                  <td><button type="button" onclick="startTheTour(18)">?</button></td>
+                  <td id="hellOptionsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
 
@@ -2003,33 +2015,33 @@ for name, values in musics["_dropdown"].items():
               </table>
               <table class="full">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
-                <tr id="widescreenStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("widescreen")}}
                     <span id="widescreenText">Widescreen on  <a href="https://github.com/DerKoun/bsnes-hd/releases" target="_blank">bsnes-hd emulator</a></span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(19)">?</button></td>
+                  <td id="widescreenStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="AimAnyButtonStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("AimAnyButton")}}
                     <span id="AimAnyButtonText">Allows the aim buttons to be assigned to any button</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(20)">?</button></td>
+                  <td id="AimAnyButtonStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="max_ammo_displayStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("max_ammo_display")}}
                     <span id="max_ammo_displayText">Max Ammo Display</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(21)">?</button></td>
+                  <td id="max_ammo_displayStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="supermetroid_msu1Step">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("supermetroid_msu1")}}
                     <span id="supermetroid_msu1Text">Play music with MSU1 chip on SD2SNES</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(22)">?</button></td>
+                  <td id="supermetroid_msu1Step"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
 
@@ -2039,7 +2051,7 @@ for name, values in musics["_dropdown"].items():
               </table>
               <table class="full">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
-                <tr id="remove_itemsoundsStep">
+                <tr>
                   <td>
                     {{displayCheckbox("remove_itemsounds")}}
                     <span id="remove_itemsoundsText">Restore vanilla fanfare when picking up an item</span>
@@ -2048,9 +2060,9 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_Infinite_Space_Jump")}}
                     <span id="remove_Infinite_Space_JumpText">Restore vanilla Space Jump</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(23)">?</button></td>
+                  <td id="remove_itemsoundsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="remove_ElevatorDoorsStep">
+                <tr>
                   <td>
                     {{displayCheckbox("remove_elevators_speed")}}
                     <span id="remove_elevators_speedText">Restore vanilla elevators transitions</span>
@@ -2059,9 +2071,9 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_fast_doors")}}
                     <span id="remove_fast_doorsText">Restore vanilla doors transitions</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(24)">?</button></td>
+                  <td id="remove_ElevatorDoorsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="remove_rando_speedStep">
+                <tr>
                   <td>
                     {{displayCheckbox("remove_rando_speed")}}
                     <span id="remove_rando_speedText">Restore vanilla momentum loss on landing</span>
@@ -2070,7 +2082,7 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_spinjumprestart")}}
                     <span id="remove_spinjumprestartText">Restore vanilla spin jump</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(25)">?</button></td>
+                  <td id="remove_rando_speedStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
           </div>
@@ -2095,7 +2107,7 @@ if seedInfo != None:
             </table>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
-              <tr id="vanillaUploadFileStep">
+              <tr>
                 <td>Vanilla ROM:</td>
                 <td>
                   <div id="vanillaROMVisibility">
@@ -2105,7 +2117,7 @@ if seedInfo != None:
                     Vanilla ROM already loaded
                   </div>
                 </td>
-                <td><button type="button" onclick="startTheTour(1)">?</button></td>
+                <td id="vanillaUploadFileStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
             </table>
             <h4>Game Details</h4>

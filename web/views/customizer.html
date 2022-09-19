@@ -1784,7 +1784,7 @@ def displayNumber(id, min, max, default, step="1"):
       response.write("</optgroup>\n", escape=False)
       response.write("<optgroup label=\"{}\">\n".format(group), escape=False)
       pass
-    response.write("  <option data-img-src=\"/solver/static/images/{}.png\" data-img-label=\"{}\" value=\"{}\" {}>{}</option>\n".format(key, customSprites[key]["name"], key, 'selected="selected"' if key == session.customizer['customSprite'] else "", key), escape=False)
+    response.write("  <option data-img-src=\"/solver/static/images/sprites/{}.png\" data-img-label=\"{}\" value=\"{}\" {}>{}</option>\n".format(key, customSprites[key]["name"], key, 'selected="selected"' if key == session.customizer['customSprite'] else "", key), escape=False)
     pass
 }}
                         </optgroup>
@@ -1804,7 +1804,7 @@ def displayNumber(id, min, max, default, step="1"):
                       <select class="filldropdown" id="customShip" name="customShip">
 {{
   for (key, value) in sorted(customShips.items(), key=lambda x: x[1]['index']):
-    response.write("  <option data-img-src=\"/solver/static/images/{}.png\" data-img-label=\"{}\" value=\"{}\" {}>{}</option>\n".format(key, customShips[key]["name"], key, 'selected="selected"' if key == session.customizer['customShip'] else "", key), escape=False)
+    response.write("  <option data-img-src=\"/solver/static/images/ships/{}.png\" data-img-label=\"{}\" value=\"{}\" {}>{}</option>\n".format(key, customShips[key]["name"], key, 'selected="selected"' if key == session.customizer['customShip'] else "", key), escape=False)
     pass
 }}
                         </optgroup>

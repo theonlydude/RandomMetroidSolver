@@ -37,7 +37,7 @@ def loadRandoPresetsList(cache, filter=False):
     if not presets:
         tourPresets = ['Season_Races', 'SMRAT2021', 'VARIA_Weekly',
                        'Torneio_SGPT3_stage1', 'Torneio_SGPT3_stage2',
-                       'SGLive2022_Game_1', 'SGLive2022_Game_2', 'SGLive2022_Game_3']
+                       'SGLive2022_Game_1', 'SGLive2022_Game_2', 'SGLive2022_Game_3', 'Boyz_League_SM_Rando']
         files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
         randoPresets = [os.path.splitext(file)[0] for file in files]
         randoPresets = [preset for preset in randoPresets if preset not in tourPresets]

@@ -62,7 +62,8 @@ class Randomizer(object):
             "SGLive2022_Game_2": "SGLive 2022 Randomizer Tournament race 2",
             "SGLive2022_Game_3": "SGLive 2022 Randomizer Tournament race 3",
             "SMRAT2021": "Randomizer Accessible Tournament 2021",
-            "VARIA_Weekly": "Casual logic community races"
+            "VARIA_Weekly": "Casual logic community races",
+            "Boyz_League_SM_Rando": "Boyz League Tournament"
         }
 
         randoPresetsCategories = {
@@ -74,7 +75,7 @@ class Randomizer(object):
             "Minimizer": ["minimizer", "minimizer_hardcore", "minimizer_maximizer"],
             "Hard": ["hardway2hell", "highway2hell", "stupid_hard"],
             "Random": ["all_random", "quite_random", "surprise"],
-            "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2", "SGLive2022_Game_1", "SGLive2022_Game_2", "SGLive2022_Game_3"]
+            "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2", "SGLive2022_Game_1", "SGLive2022_Game_2", "SGLive2022_Game_3", "Boyz_League_SM_Rando"]
         }
 
         startAPs = GraphUtils.getStartAccessPointNamesCategory()

@@ -229,7 +229,7 @@ function computeSeed {
     MORPH_NEW=$(echo "${RANDO_OUT}" | grep ^morphPlacement | cut -d ':' -f 2)
     OBJECTIVES=$(echo "${RANDO_OUT}" | grep ^objectives | cut -d ':' -f 2)
 
-    RANDO_PRESET_NEW="${SEED}_${PRESET}_${PROGSPEED_NEW}.json"
+    RANDO_PRESET_NEW="logs/${SEED}_${PRESET}_${PROGSPEED_NEW}.json"
 
     if [ "${OLD_MD5}" != "${NEW_MD5}" -a ${COMPARE} -eq 0 ]; then
 	if [ "${OLD_MD5}" = "old n/a" ] && [ "${NEW_MD5}" = "new n/a" ]; then
@@ -254,7 +254,7 @@ function computeSeed {
 	exit 0
     fi
 
-    RANDO_PRESET_NEW="${ROM_GEN}.json"
+    RANDO_PRESET_NEW="logs/${ROM_GEN}.json"
     mv ${RANDO_PRESET} ${RANDO_PRESET_NEW}
 
     if [ ${COMPARE} -eq 0 ]; then

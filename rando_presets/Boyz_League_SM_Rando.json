@@ -1,0 +1,13 @@
+{
+    "preset": "Season_Races",
+    "majorsSplit": "Major",
+    "progressionSpeed": "speedrun",
+    "areaRandomization": "on",
+    "areaLayout": "on",
+    "bossRandomization": "on",
+    "variaTweaks": "off",
+    "itemsounds": "off",
+    "elevators_speed": "off",
+    "fast_doors": "off",
+    "elevators_doors_speed": "off"
+}

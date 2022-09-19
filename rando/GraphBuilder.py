@@ -5,7 +5,7 @@ from graph.graph_utils import GraphUtils, vanillaTransitions, vanillaBossesTrans
 from logic.logic import Logic
 from logic.smbool import SMBool
 from graph.graph import AccessGraphRando as AccessGraph
-from graph.graph_utils import graphAreas
+from graph.graph_utils import graphAreas, getAccessPoint
 from utils.objectives import Objectives
 from rando.ItemLocContainer import getItemLocStr
 from collections import defaultdict
@@ -26,12 +26,32 @@ class GraphBuilder(object):
         if transitions is None:
             transitions = []
             if self.minimizerN is not None:
+                forcedAreas = set()
                 # if no Crateria and auto escape trigger, we connect door connected to G4 to climb instead (see below).
                 # This wouldn't work here, as Tourian is isolated in the resulting seed (see below again)
                 # (well we could do two different transitions on both sides of doors, but that would just be confusing)
-                # so we force crateria to be in the graph (it'll be connected to Tourian immediately)
-                forceCrateria = self.graphSettings.startAP == "Golden Four" and self.graphSettings.tourian == "Disabled"
-                transitions = GraphUtils.createMinimizerTransitions(self.graphSettings.startAP, self.minimizerN, forceCrateria)
+                # so we force crateria to be in the graph
+                if self.graphSettings.startAP == "Golden Four" and self.graphSettings.tourian == "Disabled":
+                    forcedAreas.add('Crateria')
+                # force areas required by objectives
+                # 1st the 'clear area' ones
+                forcedAreas = forcedAreas.union({goal.area for goal in Objectives.activeGoals if goal.area is not None})
+                # for the rest, base ourselves on escapeAccessPoints :
+                # - if only "1 of n" pick an area, preferably one already forced
+                # - filter out G4 AP (always there)
+                for goal in Objectives.activeGoals:
+                    if goal.area is None:
+                        n, apNames = goal.escapeAccessPoints
+                        aps = [getAccessPoint(apName) for apName in apNames]
+                        if len(aps) >= n:
+                            n -= len([ap for ap in aps if ap.Boss])
+                            escAreas = {ap.GraphArea for ap in aps if not ap.Boss}
+                            objForced = forcedAreas.intersection(escAreas)
+                            escAreasList = list(escAreas)
+                            while len(objForced) < n and len(escAreasList) > 0:
+                                objForced.add(escAreasList.pop(random.randint(0, len(escAreasList)-1)))
+                            forcedAreas = forcedAreas.union(objForced)
+                transitions = GraphUtils.createMinimizerTransitions(self.graphSettings.startAP, self.minimizerN, list(forcedAreas))
             else:
                 if not self.bossRando:
                     transitions += vanillaBossesTransitions

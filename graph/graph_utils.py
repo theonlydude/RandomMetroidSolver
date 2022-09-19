@@ -239,7 +239,9 @@ class GraphUtils:
             transitions.append((ap.Name, ap.Name))
 
     # crateria can be forced in corner cases
-    def createMinimizerTransitions(startApName, locLimit, forceCrateria=False):
+    def createMinimizerTransitions(startApName, locLimit, forcedAreas=None):
+        if forcedAreas is None:
+            forcedAreas = []
         if startApName == 'Ceres':
             startApName = 'Landing Site'
         startAp = getAccessPoint(startApName)
@@ -250,7 +252,10 @@ class GraphUtils:
             return len([loc for loc in locList if locsPredicate(loc) == True and not loc.SolveArea.endswith(" Boss") and not loc.isBoss()])
         availAreas = list(sorted({ap.GraphArea for ap in Logic.accessPoints if ap.GraphArea != startAp.GraphArea and getNLocs(lambda loc: loc.GraphArea == ap.GraphArea) > 0}))
         areas = [startAp.GraphArea]
+        if startAp.GraphArea in forcedAreas:
+            forcedAreas.remove(startAp.GraphArea)
         GraphUtils.log.debug("availAreas: {}".format(availAreas))
+        GraphUtils.log.debug("forcedAreas: {}".format(forcedAreas))
         GraphUtils.log.debug("areas: {}".format(areas))
         inBossCheck = lambda ap: ap.Boss and ap.Name.endswith("In")
         nLocs = 0
@@ -261,26 +266,27 @@ class GraphUtils:
         def openTransitions():
             nonlocal areas, inBossCheck, usedAPs
             return GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and not ap.isInternal() and not inBossCheck(ap) and not ap in usedAPs)
-        while nLocs < locLimit or len(openTransitions()) < trLimit:
+        while nLocs < locLimit or len(openTransitions()) < trLimit or len(forcedAreas) > 0:
             GraphUtils.log.debug("openTransitions="+str([ap.Name for ap in openTransitions()]))
             fromAreas = availAreas
-            if nLocs >= locLimit:
+            if len(openTransitions()) <= 1: # dont' get stuck by adding dead ends
+                GraphUtils.log.debug("avoid being stuck")
+                fromAreas = [area for area in fromAreas if len(GraphUtils.getAPs(lambda ap: ap.GraphArea == area and not ap.isInternal())) > 1]
+            elif len(forcedAreas) > 0: # no risk to get stuck, we can pick a forced area if necessary
+                GraphUtils.log.debug("add forced area")
+                fromAreas = forcedAreas
+            elif nLocs >= locLimit: # we just need transitions, avoid adding a huge area
                 GraphUtils.log.debug("not enough open transitions")
-                # we just need transitions, avoid adding a huge area
                 fromAreas = []
                 n = trLimit - len(openTransitions())
                 while len(fromAreas) == 0:
                     fromAreas = [area for area in availAreas if len(GraphUtils.getAPs(lambda ap: not ap.isInternal())) > n]
                     n -= 1
-                minLocs = min([getNLocs(lambda loc: loc.GraphArea == area) for area in fromAreas])
+                    minLocs = min([getNLocs(lambda loc: loc.GraphArea == area) for area in fromAreas])
                 fromAreas = [area for area in fromAreas if getNLocs(lambda loc: loc.GraphArea == area) == minLocs]
-            elif len(openTransitions()) <= 1: # dont' get stuck by adding dead ends
-                fromAreas = [area for area in fromAreas if len(GraphUtils.getAPs(lambda ap: ap.GraphArea == area and not ap.isInternal())) > 1]
-            if forceCrateria and 'Crateria' not in areas:
-                assert 'Crateria' in fromAreas
-                nextArea = 'Crateria'
-            else:
-                nextArea = random.choice(fromAreas)
+            nextArea = random.choice(fromAreas)
+            if nextArea in forcedAreas:
+                forcedAreas.remove(nextArea)
             GraphUtils.log.debug("nextArea="+str(nextArea))
             apCheck = lambda ap: not ap.isInternal() and not inBossCheck(ap) and ap not in usedAPs
             possibleSources = GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and apCheck(ap))

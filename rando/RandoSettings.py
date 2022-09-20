@@ -67,13 +67,12 @@ class RandoSettings(object):
 
 # Holds settings and utiliy functions related to graph layout
 class GraphSettings(object):
-    def __init__(self, startAP, areaRando, lightAreaRando,
+    def __init__(self, startAP, areaRando,
                  bossRando, escapeRando, minimizerN, dotFile,
                  doorsColorsRando, allowGreyDoors, tourian,
                  plandoRandoTransitions):
         self.startAP = startAP
         self.areaRando = areaRando
-        self.lightAreaRando = lightAreaRando
         self.bossRando = bossRando
         self.escapeRando = escapeRando
         self.minimizerN = minimizerN

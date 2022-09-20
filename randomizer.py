@@ -33,6 +33,7 @@ energyQties = defaultMultiValues['energyQty']
 progDiffs = defaultMultiValues['progressionDifficulty']
 morphPlacements = defaultMultiValues['morphPlacement']
 majorsSplits = defaultMultiValues['majorsSplit']
+areaRandomizations = defaultMultiValues['areaRandomization']
 gravityBehaviours = defaultMultiValues['gravityBehaviour']
 objectives = defaultMultiValues['objective']
 tourians = defaultMultiValues['tourian']
@@ -76,12 +77,13 @@ if __name__ == "__main__":
                         help="generate dot file with area graph",
                         action='store_true',dest='dot', default=False)
     parser.add_argument('--area', help="area mode",
-                        dest='area', nargs='?', const=True, default=False)
+                        dest='area', nargs='?', default=None,
+                        choices=['random'] + areaRandomizations)
+    parser.add_argument('--areaList', help="list to choose from when random",
+                        dest='areaList', nargs='?', default=None)
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)
-    parser.add_argument('--lightArea', help="keep number of transitions between vanilla areas", action='store_true',
-                        dest='lightArea', default=False)
     parser.add_argument('--escapeRando',
                         help="Randomize the escape sequence",
                         dest='escapeRando', nargs='?', const=True, default=False)
@@ -340,6 +342,7 @@ if __name__ == "__main__":
     (majorsSplitRandom, args.majorsSplit) = randomMulti(args.__dict__, "majorsSplit", majorsSplits)
     (_, gravityBehaviour) = randomMulti(args.__dict__, "gravityBehaviour", gravityBehaviours)
     (_, args.tourian) = randomMulti(args.__dict__, "tourian", tourians)
+    (areaRandom, args.area) = randomMulti(args.__dict__, "area", areaRandomizations)
     if args.minDifficulty:
         minDifficulty = text2diff[args.minDifficulty]
         if progSpeed != "speedrun":
@@ -347,7 +350,7 @@ if __name__ == "__main__":
     else:
         minDifficulty = 0
 
-    if args.area == True and args.bosses == True and args.minimizerN is not None:
+    if args.area in ['light', 'full'] and args.bosses == True and args.minimizerN is not None:
         if args.minimizerN == "random":
             minimizerN = random.randint(30, 60)
             logger.debug("minimizerN: {}".format(minimizerN))
@@ -357,11 +360,6 @@ if __name__ == "__main__":
             forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full. Use 100 locations on your minimizer to use a non-Full split.", altValue='FullWithHUD')
     else:
         minimizerN = None
-    areaRandom = False
-    if args.area == 'random':
-        areaRandom = True
-        args.area = bool(random.getrandbits(1))
-    logger.debug("area: {}".format(args.area))
 
     doorsColorsRandom = False
     if args.doorsColorsRando == 'random':
@@ -518,7 +516,7 @@ if __name__ == "__main__":
         seedCode = 'B'+seedCode
     if args.doorsColorsRando == True and doorsColorsRandom == False:
         seedCode = 'D'+seedCode
-    if args.area == True and areaRandom == False:
+    if args.area in ['full', 'light'] and areaRandom == False:
         seedCode = 'A'+seedCode
 
     # output ROM name
@@ -640,7 +638,7 @@ if __name__ == "__main__":
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
     if args.doorsColorsRando == True:
         RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
-    graphSettings = GraphSettings(args.startLocation, args.area, args.lightArea, args.bosses,
+    graphSettings = GraphSettings(args.startLocation, args.area, args.bosses,
                                   args.escapeRando, minimizerN, dotFile,
                                   args.doorsColorsRando, args.allowGreyDoors, args.tourian,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)

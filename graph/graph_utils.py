@@ -180,8 +180,8 @@ class GraphUtils:
                 transitions.append((src,dst))
         return transitions
 
-    def createAreaTransitions(lightAreaRando=False):
-        if lightAreaRando:
+    def createAreaTransitions(areaRando=None):
+        if areaRando == 'light':
             return GraphUtils.createLightAreaTransitions()
         else:
             return GraphUtils.createRegularAreaTransitions()

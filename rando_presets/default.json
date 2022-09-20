@@ -18,7 +18,6 @@
     "energyQty": "vanilla",
     "objective": ["kill all G4"],
     "areaRandomization": "off",
-    "lightAreaRandomization": "off",
     "areaLayout": "off",
     "doorsColorsRando": "off",
     "allowGreyDoors": "off",

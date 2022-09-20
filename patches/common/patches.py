@@ -73,7 +73,7 @@ patches = {
     },
     # for development/quickmet: disable clear save files on 1st boot
     "Disable_Clear_Save_Boot": {
-        0x7E26: [0x4c, 0x40, 0xfe]
+        0x7E39: [0x4c, 0x7c, 0xfe]
     },
     # vanilla data to restore setup asm for plandos
     "Escape_Animals_Disable": {

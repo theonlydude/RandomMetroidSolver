@@ -266,8 +266,6 @@ class Randomizer(object):
         else:
             randoPresetDict['objective'] = self.vars.objective.split(',')
 
-        _log(randoPresetDict)
-
         with open(jsonRandoPreset, 'w') as randoPresetFile:
             json.dump(randoPresetDict, randoPresetFile)
         params += ['--randoPreset', jsonRandoPreset]

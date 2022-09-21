@@ -72,7 +72,12 @@ class RandoSetup(object):
         for loc in self.restrictedLocs:
             self.log.debug("createItemLocContainer: loc is restricted: {}".format(loc.Name))
             loc.restricted = True
+
+        # checkDoorBeams calls checkPool, so save error messages
+        errorMsgsBck = self.errorMsgs[:]
         self.checkDoorBeams()
+        self.errorMsgs = errorMsgsBck
+
         self.container = ItemLocContainer(self.sm, self.getItemPool(), self.locations)
         if self.restrictions.isLateMorph():
             self.restrictions.lateMorphInit(self.startAP, self.container, self.services)

@@ -80,17 +80,19 @@ class RandoExec(object):
                 sys.stdout.write('*')
                 i += 1
             else:
-                self.errorMsg += '\n'.join(setup.errorMsgs)
+                self.errorMsg += '; '.join(setup.errorMsgs)
             now = time.process_time()
         if container is None:
             if self.graphSettings.areaRando:
-                self.errorMsg += "Could not find an area layout with these settings\n"
+                self.errorMsg += "Could not find an area layout with these settings; "
             if self.graphSettings.doorsColorsRando:
-                self.errorMsg += "Could not find a door color combination with these settings\n"
+                self.errorMsg += "Could not find a door color combination with these settings; "
             if split == "Scavenger":
-                self.errorMsg += "Scavenger seed generation timed out\n"
+                self.errorMsg += "Scavenger seed generation timed out; "
+            if setup.errorMsgs:
+                self.errorMsg += '; '.join(setup.errorMsgs)
             if self.errorMsg == "":
-                self.errorMsg += "Unable to process settings\n"
+                self.errorMsg += "Unable to process settings; "
             return (True, [], [])
         self.areaGraph.printGraph()
         filler = self.createFiller(container, endDate)
@@ -101,9 +103,9 @@ class RandoExec(object):
             escapeTrigger = (itemLocs, progItemLocs, split) if self.randoSettings.restrictions["EscapeTrigger"] else None
             escapeOk = graphBuilder.escapeGraph(container, self.areaGraph, self.randoSettings.maxDiff, escapeTrigger)
             if not escapeOk:
-                self.errorMsg += "Could not find a solution for escape"
+                self.errorMsg += ("; " if self.errorMsg else "")+"Could not find a solution for escape"
                 ret = (True, ret[1], ret[2])
-        self.errorMsg += filler.errorMsg
+        self.errorMsg += ("; " if self.errorMsg else "")+filler.errorMsg
         return ret
 
     def updateLocationsClass(self, split):

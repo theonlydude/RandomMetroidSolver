@@ -10,5 +10,7 @@ length = int(sys.argv[3], 16)
 
 with open(rom, 'rb') as romFile:
     romFile.seek(address)
+    data = []
     for i in range(length):
-        print("{}: {},".format(hex(address+i), hex(struct.unpack("B", romFile.read(1))[0])))
+        data.append(struct.unpack("B", romFile.read(1))[0])
+    print("{}: {},".format(address, data))

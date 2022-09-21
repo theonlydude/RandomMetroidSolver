@@ -1,6 +1,7 @@
 import colorsys, random
 from rom.rom import pc_to_snes
 from rom.romloader import RomLoader
+from rom.palette import expand_palette
 from rando.palettes import palettes
 from varia_custom_sprites.sprite_palettes import sprite_palettes
 import utils.log
@@ -106,12 +107,13 @@ class PaletteRando(object):
         self.logger = utils.log.get('Palette')
 
         self.romPatcher = romPatcher
+        expanded_palettes = expand_palette(palettes)
         if sprite is not None:
-            palettes.update(sprite_palettes[sprite])
+            expanded_palettes.update(expand_palette(sprite_palettes[sprite]))
         if color_blind:
             from rando.color_palettes import color_palettes
-            palettes.update(color_palettes)
-        self.romLoader = RomLoader.factory(palettes)
+            expanded_palettes.update(expand_palette(color_palettes))
+        self.romLoader = RomLoader.factory(expanded_palettes)
         self.palettesROM = self.romLoader.getROM()
         self.outFile = romPatcher.romFile
 

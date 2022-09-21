@@ -252,6 +252,10 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         if etanks < 0 or etanks > 14:
             raiseHttp(400, "Wrong value for etanks", isJson)
 
+    if 'maxDifficulty' in others:
+        if request.vars.maxDifficulty not in ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random']:
+            raiseHttp(400, "Wrong value for max difficulty", isJson)
+
     preset = request.vars.preset
     if preset != None:
         if IS_ALPHANUMERIC()(preset)[1] is not None:

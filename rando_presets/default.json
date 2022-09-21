@@ -17,6 +17,7 @@
     "minorQty": "100",
     "energyQty": "vanilla",
     "objective": ["kill all G4"],
+    "objectiveRandom": "false",
     "areaRandomization": "off",
     "lightAreaRandomization": "off",
     "areaLayout": "off",

@@ -89,6 +89,8 @@ class RandoExec(object):
                 self.errorMsg += "Could not find a door color combination with these settings\n"
             if split == "Scavenger":
                 self.errorMsg += "Scavenger seed generation timed out\n"
+            if setup.errorMsgs:
+                self.errorMsg += '\n'.join(setup.errorMsgs)
             if self.errorMsg == "":
                 self.errorMsg += "Unable to process settings\n"
             return (True, [], [])
@@ -101,9 +103,9 @@ class RandoExec(object):
             escapeTrigger = (itemLocs, progItemLocs, split) if self.randoSettings.restrictions["EscapeTrigger"] else None
             escapeOk = graphBuilder.escapeGraph(container, self.areaGraph, self.randoSettings.maxDiff, escapeTrigger)
             if not escapeOk:
-                self.errorMsg += "Could not find a solution for escape"
+                self.errorMsg += " Could not find a solution for escape"
                 ret = (True, ret[1], ret[2])
-        self.errorMsg += filler.errorMsg
+        self.errorMsg += " "+filler.errorMsg
         return ret
 
     def updateLocationsClass(self, split):

@@ -2191,6 +2191,10 @@ if seedInfo != None:
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr {{=setBold("areaRandomization")}}><td>Areas randomization</td><td>{{=seedParams["areaRandomization"]}}</td></tr>
+{{    if seedParams["areaRandomization"] == "random":}}
+              <tr><td>Area Randomization pool</td><td>{{=seedParams["areaRandomizationMultiSelect"]}}</td></tr>
+{{        pass}}
+
               <tr {{=setBold("areaLayout")}}><td>Additional layout patches for easier navigation</td><td>{{=seedParams["areaLayout"]}}</td></tr>
               <tr {{=setBold("doorsColorsRando")}}><td>Doors Colors randomization</td><td>{{=seedParams["doorsColorsRando"]}}</td></tr>
               <tr {{=setBold("allowGreyDoors")}}><td>Allow some doors to be grey</td><td>{{=seedParams["allowGreyDoors"]}}</td></tr>

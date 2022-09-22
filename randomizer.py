@@ -78,6 +78,8 @@ if __name__ == "__main__":
                         action='store_true',dest='dot', default=False)
     parser.add_argument('--area', help="area mode",
                         dest='area', nargs='?', const=True, choices=["random"]+areaRandomizations, default='off')
+    parser.add_argument('--areaList', help="list to choose from when random",
+                        dest='areaList', nargs='?', default=None)
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)

@@ -440,8 +440,6 @@ class Randomizer(object):
         else:
             self.session.randomizer['objective'] = self.vars.objective.split(',')
 
-        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
-                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
         for multi in multis:
             self.session.randomizer[multi] = self.vars[multi]
             if self.vars[multi] == 'random':

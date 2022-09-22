@@ -40,7 +40,7 @@ class GraphBuilder(object):
                 if not self.areaRando:
                     transitions += vanillaTransitions
                 else:
-                    transitions += GraphUtils.createAreaTransitions(self.graphSettings.areaRando)
+                    transitions += GraphUtils.createAreaTransitions(self.graphSettings.lightAreaRando)
         ret = AccessGraph(Logic.accessPoints, transitions, self.graphSettings.dotFile)
         Objectives.setGraph(ret, maxDiff)
         return ret

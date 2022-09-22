@@ -290,8 +290,6 @@ class RomPatcher:
                 messageBox.updateMessage(messageKey, newMessage, doVFlip, doHFlip)
 
     def writePlmTable(self, plms, area, bosses, doorsColors, startLocation):
-        if isinstance(area, str):
-            area = area in ['light', 'full']
         # called when saving a plando
         try:
             if bosses == True or area == True:
@@ -312,8 +310,6 @@ class RomPatcher:
                         noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
                         escapeAttr=None, minimizerN=None, tourian="Vanilla",
                         doorsColorsRando=False, vanillaObjectives=True):
-        if isinstance(area, str):
-            area = area in ['light', 'full']
         try:
             # apply standard patches
             stdPatches = []

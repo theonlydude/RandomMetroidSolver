@@ -33,10 +33,10 @@ energyQties = defaultMultiValues['energyQty']
 progDiffs = defaultMultiValues['progressionDifficulty']
 morphPlacements = defaultMultiValues['morphPlacement']
 majorsSplits = defaultMultiValues['majorsSplit']
-areaRandomizations = defaultMultiValues['areaRandomization']
 gravityBehaviours = defaultMultiValues['gravityBehaviour']
 objectives = defaultMultiValues['objective']
 tourians = defaultMultiValues['tourian']
+areaRandomizations = defaultMultiValues['areaRandomization']
 
 def randomMulti(args, param, defaultMultiValues):
     value = args[param]
@@ -77,10 +77,7 @@ if __name__ == "__main__":
                         help="generate dot file with area graph",
                         action='store_true',dest='dot', default=False)
     parser.add_argument('--area', help="area mode",
-                        dest='area', nargs='?', default=None,
-                        choices=['random'] + areaRandomizations)
-    parser.add_argument('--areaList', help="list to choose from when random",
-                        dest='areaList', nargs='?', default=None)
+                        dest='area', nargs='?', const=True, choices=["random"]+areaRandomizations, default='off')
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)
@@ -343,6 +340,9 @@ if __name__ == "__main__":
     (_, gravityBehaviour) = randomMulti(args.__dict__, "gravityBehaviour", gravityBehaviours)
     (_, args.tourian) = randomMulti(args.__dict__, "tourian", tourians)
     (areaRandom, args.area) = randomMulti(args.__dict__, "area", areaRandomizations)
+    areaRandomization = args.area in ['light', 'full']
+    lightArea = args.area == 'light'
+
     if args.minDifficulty:
         minDifficulty = text2diff[args.minDifficulty]
         if progSpeed != "speedrun":
@@ -350,7 +350,7 @@ if __name__ == "__main__":
     else:
         minDifficulty = 0
 
-    if args.area in ['light', 'full'] and args.bosses == True and args.minimizerN is not None:
+    if areaRandomization == True and args.bosses == True and args.minimizerN is not None:
         if args.minimizerN == "random":
             minimizerN = random.randint(30, 60)
             logger.debug("minimizerN: {}".format(minimizerN))
@@ -381,7 +381,7 @@ if __name__ == "__main__":
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
 
     if args.suitsRestriction == 'random':
-        if args.morphPlacement == 'late' and args.area == True:
+        if args.morphPlacement == 'late' and areaRandomization == True:
             forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
         else:
             args.suitsRestriction = bool(random.getrandbits(1))
@@ -424,7 +424,7 @@ if __name__ == "__main__":
         forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", webValue='on')
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
         forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", webValue='on')
-        possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty, args.morphPlacement)
+        possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(areaRandomization, maxDifficulty, args.morphPlacement)
         if args.startLocation == 'random':
             if args.startLocationList != None:
                 startLocationList = args.startLocationList.split(',')
@@ -516,7 +516,7 @@ if __name__ == "__main__":
         seedCode = 'B'+seedCode
     if args.doorsColorsRando == True and doorsColorsRandom == False:
         seedCode = 'D'+seedCode
-    if args.area in ['full', 'light'] and areaRandom == False:
+    if areaRandomization == True and areaRandom == False:
         seedCode = 'A'+seedCode
 
     # output ROM name
@@ -630,7 +630,7 @@ if __name__ == "__main__":
         print("objectives:{}".format([g.name for g in Objectives.activeGoals]))
 
     dotFile = None
-    if args.area == True:
+    if areaRandomization == True:
         if args.dot == True:
             dotFile = args.directory + '/' + seedName + '.dot'
         RomPatches.ActivePatches += RomPatches.AreaBaseSet
@@ -638,7 +638,7 @@ if __name__ == "__main__":
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
     if args.doorsColorsRando == True:
         RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
-    graphSettings = GraphSettings(args.startLocation, args.area, args.bosses,
+    graphSettings = GraphSettings(args.startLocation, areaRandomization, lightArea, args.bosses,
                                   args.escapeRando, minimizerN, dotFile,
                                   args.doorsColorsRando, args.allowGreyDoors, args.tourian,
                                   args.plandoRando["transitions"] if args.plandoRando != None else None)
@@ -653,7 +653,7 @@ if __name__ == "__main__":
         # and getDoorConnections will crash if random escape is activated.
         if not stuck or args.vcr == True:
             doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
-                                                  args.area, args.bosses,
+                                                  areaRandomization, args.bosses,
                                                   args.escapeRando if not stuck else False)
             escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
             if escapeAttr is not None:
@@ -736,7 +736,7 @@ if __name__ == "__main__":
 
         romPatcher.applyIPSPatches(args.startLocation, args.patches,
                                    args.noLayout, gravityBehaviour,
-                                   args.area, args.bosses, args.areaLayoutBase,
+                                   areaRandomization, args.bosses, args.areaLayoutBase,
                                    args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
                                    escapeAttr, minimizerN, args.tourian,
                                    args.doorsColorsRando, objectivesManager.isVanilla())

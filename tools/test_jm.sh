@@ -232,10 +232,10 @@ function computeSeed {
     RANDO_PRESET_NEW="logs/${SEED}_${PRESET}_${PROGSPEED_NEW}.json"
 
     if [ "${OLD_MD5}" != "${NEW_MD5}" -a ${COMPARE} -eq 0 ]; then
-	if [ "${OLD_MD5}" = "old n/a" ] && [ "${NEW_MD5}" = "new n/a" ]; then
+	if [ "${OLD_MD5}" == "old n/a" ] && [ "${NEW_MD5}" == "new n/a" ]; then
 	    MD5="n/a"
 	else
-            if [ "${OLD_MD5}" = "old n/a" ]; then
+            if [ "${OLD_MD5}" == "old n/a" ]; then
                 MD5="old too slow"
             else
 	        MD5="mismatch"

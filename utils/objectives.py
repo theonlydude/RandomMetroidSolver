@@ -5,6 +5,7 @@ from logic.helpers import Bosses
 from logic.smbool import SMBool
 from logic.logic import Logic
 from graph.location import locationsDict
+from utils.parameters import Knows
 import utils.log, logging
 
 LOG = utils.log.get('Objectives')
@@ -36,7 +37,8 @@ class Goal(object):
     def __init__(self, name, gtype, logicClearFunc, romClearFunc,
                  escapeAccessPoints=None, objCompletedFuncAPs=lambda ap: [ap],
                  exclusion=None, items=None, text=None, introText=None,
-                 available=True, expandableList=None, category=None, area=None):
+                 available=True, expandableList=None, category=None, area=None,
+                 conflictFunc=None):
         self.name = name
         self.available = available
         self.clearFunc = logicClearFunc
@@ -73,6 +75,7 @@ class Goal(object):
         self.expandable = len(self.expandableList) > 0
         self.category = category
         self.area = area
+        self.conflictFunc = conflictFunc
         # used by solver/isolver to know if a goal has been completed
         self.completed = False
 
@@ -195,7 +198,8 @@ _goalsList = [
          exclusion={"list": ["kill all mini bosses", "kill one miniboss"]},
          items=["GoldenTorizo"],
          text="{} golden torizo",
-         category="Minibosses"),
+         category="Minibosses",
+         conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and not Knows.LowStuffGT),
     Goal("kill one miniboss", "other", lambda sm, ap: Bosses.xMiniBossesDead(sm, 1), "miniboss_1_killed",
          escapeAccessPoints=getMiniBossesEscapeAccessPoints(1),
          exclusion={"list": ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo",
@@ -225,7 +229,8 @@ _goalsList = [
          items=["SporeSpawn", "Botwoon", "Crocomire", "GoldenTorizo"],
          text="{} all mini bosses",
          expandableList=["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo"],
-         category="Minibosses"),
+         category="Minibosses",
+         conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and not Knows.LowStuffGT),
     Goal("finish scavenger hunt", "other", lambda sm, ap: SMBool(True), "scavenger_hunt_completed",
          exclusion={"list": []}, # will be auto-completed
          available=False),
@@ -310,7 +315,8 @@ _goalsList = [
          category="Memes",
          escapeAccessPoints=(3, ["Landing Site", "Screw Attack Bottom", "Bowling"]),
          objCompletedFuncAPs=lambda ap: ["Landing Site", "Screw Attack Bottom", "Bowling"],
-         exclusion={"list": ["kill golden torizo"]}),
+         exclusion={"list": ["kill golden torizo"]},
+         conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and not Knows.LowStuffGT),
     Goal("visit the animals", "other", lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Big Pink"), sm.haveItem("SpeedBooster"), # dachora
                                                               Objectives.canAccess(sm, ap, "Etecoons Bottom")), # Etecoons
          "visited_animals",
@@ -354,9 +360,10 @@ class Objectives(object):
     vanillaGoals = ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"]
     scavHuntGoal = ["finish scavenger hunt"]
 
-    def __init__(self, tourianRequired=True):
+    def __init__(self, tourianRequired=True, randoSettings=None):
         if Objectives._tourianRequired is None:
             Objectives._tourianRequired = tourianRequired
+        self.randoSettings = randoSettings
 
     @property
     def tourianRequired(self):
@@ -401,6 +408,12 @@ class Objectives(object):
                     return True
 
         LOG.debug("no backward conflict detected for new goal {}".format(newGoal.name))
+
+        if self.randoSettings is not None and newGoal.conflictFunc is not None:
+            if newGoal.conflictFunc(self.randoSettings):
+                LOG.debug("new Goal {} is conflicting with rando settings".format(newGoal.name))
+                return True
+            LOG.debug("no conflict with rando settings detected for new goal {}".format(newGoal.name))
 
         return False
 

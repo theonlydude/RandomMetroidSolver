@@ -457,44 +457,6 @@ if __name__ == "__main__":
 
     print("SEED: " + str(seed))
 
-    if args.plandoRando is None:
-        objectivesManager = Objectives(args.tourian != 'Disabled')
-        addedObjectives = 0
-        if args.majorsSplit == "Scavenger":
-            objectivesManager.setScavengerHunt()
-            addedObjectives = 1
-
-        if args.objective:
-            try:
-                nbObjectives = int(args.objective[0])
-            except:
-                nbObjectives = 0 if "random" in args.objective else None
-            if nbObjectives is not None:
-                availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
-                if nbObjectives == 0:
-                    nbObjectives = random.randint(1, min(Objectives.maxActiveGoals, len(availableObjectives)))
-                objectivesManager.setRandom(nbObjectives, availableObjectives)
-            else:
-                maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
-                if len(args.objective) > maxActiveGoals:
-                    args.objective = args.objective[0:maxActiveGoals]
-                for goal in args.objective:
-                    objectivesManager.addGoal(goal)
-            objectivesManager.expandGoals()
-        else:
-            if not (args.majorsSplit == "Scavenger" and args.tourian == 'Disabled'):
-                objectivesManager.setVanilla()
-        if len(Objectives.activeGoals) == 0:
-            objectivesManager.addGoal('nothing')
-        if any(goal for goal in Objectives.activeGoals if goal.area is not None):
-            forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
-    else:
-        args.plandoRando = json.loads(args.plandoRando)
-        args.tourian = args.plandoRando["tourian"]
-        objectivesManager = Objectives(args.tourian != 'Disabled')
-        for goal in args.plandoRando["objectives"]:
-            objectivesManager.addGoal(goal)
-
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "doors": "normal" if not args.doorsColorsRando else "late" }
     restrictions['MajorMinor'] = 'Full' if args.majorsSplit == 'FullWithHUD' else args.majorsSplit
@@ -620,17 +582,6 @@ if __name__ == "__main__":
                                   restrictions, args.superFun, args.runtimeLimit_s,
                                   plandoSettings, minDifficulty)
 
-    # print some parameters for jm's stats
-    if args.jm == True:
-        print("startLocation:{}".format(args.startLocation))
-        print("progressionSpeed:{}".format(progSpeed))
-        print("majorsSplit:{}".format(args.majorsSplit))
-        print("morphPlacement:{}".format(args.morphPlacement))
-        print("gravity:{}".format(gravityBehaviour))
-        print("maxDifficulty:{}".format(maxDifficulty))
-        print("tourian:{}".format(args.tourian))
-        print("objectives:{}".format([g.name for g in Objectives.activeGoals]))
-
     dotFile = None
     if args.area == True:
         if args.dot == True:
@@ -647,6 +598,56 @@ if __name__ == "__main__":
 
     if args.plandoRando is None:
         DoorsManager.setDoorsColor()
+
+    if args.plandoRando is None:
+        objectivesManager = Objectives(args.tourian != 'Disabled', randoSettings)
+        addedObjectives = 0
+        if args.majorsSplit == "Scavenger":
+            objectivesManager.setScavengerHunt()
+            addedObjectives = 1
+
+        if args.objective:
+            try:
+                nbObjectives = int(args.objective[0])
+            except:
+                nbObjectives = 0 if "random" in args.objective else None
+            if nbObjectives is not None:
+                availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
+                if nbObjectives == 0:
+                    nbObjectives = random.randint(1, min(Objectives.maxActiveGoals, len(availableObjectives)))
+                objectivesManager.setRandom(nbObjectives, availableObjectives)
+            else:
+                maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
+                if len(args.objective) > maxActiveGoals:
+                    args.objective = args.objective[0:maxActiveGoals]
+                for goal in args.objective:
+                    objectivesManager.addGoal(goal)
+            objectivesManager.expandGoals()
+        else:
+            if not (args.majorsSplit == "Scavenger" and args.tourian == 'Disabled'):
+                objectivesManager.setVanilla()
+        if len(Objectives.activeGoals) == 0:
+            objectivesManager.addGoal('nothing')
+        if any(goal for goal in Objectives.activeGoals if goal.area is not None):
+            forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
+    else:
+        args.plandoRando = json.loads(args.plandoRando)
+        args.tourian = args.plandoRando["tourian"]
+        objectivesManager = Objectives(args.tourian != 'Disabled')
+        for goal in args.plandoRando["objectives"]:
+            objectivesManager.addGoal(goal)
+
+    # print some parameters for jm's stats
+    if args.jm == True:
+        print("startLocation:{}".format(args.startLocation))
+        print("progressionSpeed:{}".format(progSpeed))
+        print("majorsSplit:{}".format(args.majorsSplit))
+        print("morphPlacement:{}".format(args.morphPlacement))
+        print("gravity:{}".format(gravityBehaviour))
+        print("maxDifficulty:{}".format(maxDifficulty))
+        print("tourian:{}".format(args.tourian))
+        print("objectives:{}".format([g.name for g in Objectives.activeGoals]))
+        print("energyQty:{}".format(energyQty))
 
     try:
         randoExec = RandoExec(seedName, args.vcr, randoSettings, graphSettings)

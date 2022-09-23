@@ -199,7 +199,7 @@ _goalsList = [
          items=["GoldenTorizo"],
          text="{} golden torizo",
          category="Minibosses",
-         conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and not Knows.LowStuffGT),
+         conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))),
     Goal("kill one miniboss", "other", lambda sm, ap: Bosses.xMiniBossesDead(sm, 1), "miniboss_1_killed",
          escapeAccessPoints=getMiniBossesEscapeAccessPoints(1),
          exclusion={"list": ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo",
@@ -230,7 +230,7 @@ _goalsList = [
          text="{} all mini bosses",
          expandableList=["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo"],
          category="Minibosses",
-         conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and not Knows.LowStuffGT),
+         conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))),
     Goal("finish scavenger hunt", "other", lambda sm, ap: SMBool(True), "scavenger_hunt_completed",
          exclusion={"list": []}, # will be auto-completed
          available=False),
@@ -316,7 +316,7 @@ _goalsList = [
          escapeAccessPoints=(3, ["Landing Site", "Screw Attack Bottom", "Bowling"]),
          objCompletedFuncAPs=lambda ap: ["Landing Site", "Screw Attack Bottom", "Bowling"],
          exclusion={"list": ["kill golden torizo"]},
-         conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and not Knows.LowStuffGT),
+         conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))),
     Goal("visit the animals", "other", lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Big Pink"), sm.haveItem("SpeedBooster"), # dachora
                                                               Objectives.canAccess(sm, ap, "Etecoons Bottom")), # Etecoons
          "visited_animals",

@@ -2139,7 +2139,15 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
     {
       element: "#areaRandomizationStep",
       title: "Areas randomization",
-      content: "<p>Randomize areas together using bidirectional access portals:</p>\
+      content: "<p>Randomize areas together using bidirectional access portals.</p>\
+<p><b>Off:</b> No change. All rooms are connected the same as in the original game.</p>\
+<p><b>Full:</b> All doors connecting the areas will be randomized.</p>\
+<p><b>Light:</b> We keep the same number of transitions between areas as in vanilla.<br/>\
+So <a href=\"https://metroid.fandom.com/wiki/Crocomire\" target=\"_blank\">Crocomire</a> area will always be connected to Upper <a href=\"https://metroid.fandom.com/wiki/Norfair\" target=\"_blank\">Norfair</a>, there'll always be two transitions between <a href=\"https://metroid.fandom.com/wiki/Crateria\" target=\"_blank\">Crateria</a>/blue <a href=\"https://metroid.fandom.com/wiki/Brinstar\" target=\"_blank\">Brinstar</a> and green/pink <a href=\"https://metroid.fandom.com/wiki/Brinstar\" target=\"_blank\">Brinstar</a>, ...<br/>\
+This mode can be use as an introduction before doing full Area Randomization or to get less lost when you don't use the <a href=\"/tracker\" target=\"_blank\">Area Tracker</a>.</p>\
+<p>When 'Areas randomization' dice button is on, Light Area Randomization is greyed and it's not used.</p>\
+<hr />\
+<h3>Area Randomization Details</h3>\
 <a href=\"/solver/static/images/common/area_map_20200112.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/help/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a>\
 <p>It is recommended to use the <a href=\"/solver/solver_web/tracker\" target=\"_blank\">Area Tracker</a> to find your way more easily.</p>\
 <p>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).</p>\
@@ -2189,15 +2197,6 @@ To have a self contained <a href=\"https://metroid.fandom.com/wiki/Maridia\" tar
 </p>\
 <p>Even with all layout modifications, it is still possible to softlock in some occurrences. To avoid softlocking your save file, an automatic rolling backup save system is enabled. See doors colors randomization option help for more details.</p>\
 Click on the dice button to randomly set this parameter.",
-      placement: "auto left"
-    },
-    {
-      element: "#lightAreaRandomizationStep",
-      title: "Light Area Randomization",
-      content: "<p>In Light Area Randomization we keep the same number of transitions between areas as in vanilla.<br/>\
-So <a href=\"https://metroid.fandom.com/wiki/Crocomire\" target=\"_blank\">Crocomire</a> area will always be connected to Upper <a href=\"https://metroid.fandom.com/wiki/Norfair\" target=\"_blank\">Norfair</a>, there'll always be two transitions between <a href=\"https://metroid.fandom.com/wiki/Crateria\" target=\"_blank\">Crateria</a>/blue <a href=\"https://metroid.fandom.com/wiki/Brinstar\" target=\"_blank\">Brinstar</a> and green/pink <a href=\"https://metroid.fandom.com/wiki/Brinstar\" target=\"_blank\">Brinstar</a>, ...<br/>\
-This mode can be use as an introduction before doing full Area Randomization or to get less lost when you don't use the <a href=\"/tracker\" target=\"_blank\">Area Tracker</a>.</p>\
-<p>When 'Areas randomization' dice button is on, Light Area Randomization is greyed and it's not used.</p>",
       placement: "auto left"
     },
     {

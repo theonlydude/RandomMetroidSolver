@@ -1527,8 +1527,20 @@ window.onload = function(){
             if(selected == "Red Brinstar Elevator" || selected == "Golden Four") {
                 var areaRandomization = document.getElementById("areaRandomization");
                 var areaLayout = document.getElementById("areaLayout");
-                <!-- setSwitchToOn(areaRandomization); -->
-                <!-- setSwitchToOn(areaLayout); -->
+                var areaRandom = document.getElementById('areaRandomizationRandom');
+                if (isElemRandom(areaRandom)) {
+                    const multiselect = $("#areaRandomizationMultiSelect")
+                    const val = multiselect.val().filter(v => v !== 'off')
+                    if (val.length === 0) {
+                        val.append('full')
+                    }
+                    multiselect.val(val)
+                    multiselect.trigger("chosen:updated");
+                } else if ($("#areaRandomization").val()) {
+                    $("#areaRandomization").val('full')
+                    $("#areaRandomization").change()
+                }
+                setSwitchToOn(areaLayout);
             }
         }
     }

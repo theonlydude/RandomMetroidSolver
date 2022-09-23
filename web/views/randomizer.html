@@ -1536,7 +1536,7 @@ window.onload = function(){
                     }
                     multiselect.val(val)
                     multiselect.trigger("chosen:updated");
-                } else if ($("#areaRandomization").val()) {
+                } else if ($("#areaRandomization").val() === 'off') {
                     $("#areaRandomization").val('full')
                     $("#areaRandomization").change()
                 }

@@ -467,7 +467,19 @@ class CommonSolver(object):
         for key in ["areaWeight", "easy", "medium", "hard", "harder", "hardcore", "mania", "noComeBack"]:
             outside += ranged[key]
 
-        return around + outside
+        locs = around + outside
+
+        # special case for newbie like presets and VARIA tweaks, when both Phantoon and WS Etank are available,
+        # if phantoon is visited first then WS Etank is no longer available as newbie can't pass sponge bath.
+        if locs and locs[0].Name == 'Phantoon':
+            for i, loc in enumerate(locs):
+                if loc.Name == 'Energy Tank, Wrecked Ship':
+                    self.log.debug("switch Phantoon and WS Etank")
+                    locs[i] = locs[0]
+                    locs[0] = loc
+                    break
+
+        return locs
 
     def nextDecision(self, majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold):
         # first take end game location to end the run

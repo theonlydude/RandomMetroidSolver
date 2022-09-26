@@ -192,7 +192,7 @@ function computeSeed {
     # generate seed
     let P=$RANDOM%${#PRESETS[@]}
     local PRESET=${PRESETS[$P]}
-    local SEED="$RANDOM$RANDOM$RANDOM$RANDOM"
+    local SEED=$(od -vAn -N8 -t u8 < /dev/urandom | awk '{print $1}')
 
     local RANDO_PRESET=$(generate_rando_presets "${SEED}" "${PRESET}")
     local PARAMS=$(generate_params "${SEED}" "${PRESET}" "${RANDO_PRESET}")

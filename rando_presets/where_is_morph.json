@@ -11,7 +11,7 @@
   "missileQty": "3",
   "morphPlacement": "late",
   "progressionSpeed": "VARIAble",
-  "areaRandomization": "on",
+  "areaRandomization": "full",
   "escapeRando": "on",
   "removeEscapeEnemies": "on",
   "maxDifficulty": "hardcore",

@@ -18,7 +18,7 @@
   "missileQty": "3",
   "morphPlacement": "early",
   "progressionSpeed": "speedrun",
-  "areaRandomization": "on",
+  "areaRandomization": "full",
   "maxDifficulty": "hardcore",
   "powerBombQty": "1",
   "minorQty": "100",

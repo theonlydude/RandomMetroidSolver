@@ -269,6 +269,7 @@ def getDefaultMultiValues():
         'morphPlacement': ['early', 'late', 'normal'],
         'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla'],
         'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive'],
+        'areaRandomization': ['off', 'full', 'light'],
         'objective': Objectives.getAllGoals(removeNothing=True),
         'tourian': ['Vanilla', 'Fast', 'Disabled']
     }
@@ -327,10 +328,12 @@ def loadRandoPreset(randoPreset, args):
     if randoParams.get("nerfedCharge", "off") == "on":
         args.nerfedCharge = True
 
-    args.area = convertParam(randoParams, "areaRandomization")
-    if args.area == True:
+    args.area = randoParams["areaRandomization"]
+    if args.area == "on":
+        # DEPRECATED previously areaRandomization was on/off, now it's off, full, or light
+        args.area == "full"
+    if args.area != "off":
         args.areaLayoutBase = convertParam(randoParams, "areaLayout", inverse=True)
-        args.lightArea = convertParam(randoParams, "lightAreaRandomization")
     args.escapeRando = convertParam(randoParams, "escapeRando")
     if args.escapeRando == True:
         args.noRemoveEscapeEnemies = convertParam(randoParams, "removeEscapeEnemies", inverse=True)
@@ -468,7 +471,6 @@ def getRandomizerDefaultParameters():
     defaultParams['tourian'] = "Vanilla"
     defaultParams['areaRandomization'] = "off"
     defaultParams['areaLayout'] = "off"
-    defaultParams['lightAreaRandomization'] = "off"
     defaultParams['doorsColorsRando'] = "off"
     defaultParams['allowGreyDoors'] = "off"
     defaultParams['escapeRando'] = "off"

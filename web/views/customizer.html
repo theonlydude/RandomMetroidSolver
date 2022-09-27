@@ -819,7 +819,7 @@ if seedInfo != None:
     response.write("permalink = true;", escape=False)
     response.write("seedKey = '{}';".format(seedInfo["key"]), escape=False)
     response.write("isVARIA = true;", escape=False)
-    response.write("isArea = {};".format("true" if seedParams["areaRandomization"] in ["on", "random"] else "false"), escape=False)
+    response.write("isArea = {};".format("true" if seedParams["areaRandomization"] in ["full", "light", "random"] else "false"), escape=False)
     response.write("isBoss = {};".format("true" if seedParams["bossRandomization"] in ["on", "random"] else "false"), escape=False)
     pass
 }}
@@ -2191,8 +2191,11 @@ if seedInfo != None:
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr {{=setBold("areaRandomization")}}><td>Areas randomization</td><td>{{=seedParams["areaRandomization"]}}</td></tr>
+{{    if seedParams["areaRandomization"] == "random":}}
+              <tr><td>Area Randomization pool</td><td>{{=seedParams["areaRandomizationMultiSelect"]}}</td></tr>
+{{        pass}}
+
               <tr {{=setBold("areaLayout")}}><td>Additional layout patches for easier navigation</td><td>{{=seedParams["areaLayout"]}}</td></tr>
-              <tr {{=setBold("lightAreaRandomization")}}><td>Light Areas randomization</td><td>{{=seedParams["lightAreaRandomization"]}}</td></tr>
               <tr {{=setBold("doorsColorsRando")}}><td>Doors Colors randomization</td><td>{{=seedParams["doorsColorsRando"]}}</td></tr>
               <tr {{=setBold("allowGreyDoors")}}><td>Allow some doors to be grey</td><td>{{=seedParams["allowGreyDoors"]}}</td></tr>
               <tr {{=setBold("bossRandomization")}}><td>Bosses randomization</td><td>{{=seedParams["bossRandomization"]}}</td></tr>

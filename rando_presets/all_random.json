@@ -11,6 +11,7 @@
   "progressionSpeed": "random",
   "objective": "random",
   "areaRandomization": "random",
+  "areaLayout": "on",
   "bossRandomization": "random",
   "maxDifficulty": "hardcore",
   "powerBombQty": "random",

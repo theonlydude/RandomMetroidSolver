@@ -37,6 +37,9 @@ else
     COMPARE=1
 fi
 
+HAVE_URAND=1
+[[ -f /dev/urandom ]] && HAVE_URAND=0
+
 # get git head
 if [ ${COMPARE} -eq 0 ]; then
     TEMP_DIR=$(mktemp)
@@ -187,11 +190,19 @@ EOF
     echo -en "${RANDO_PRESET}"
 }
 
+function getseed {
+    if [[ "${HAVE_URAND}" -eq 0 ]]; then
+        od -vAn -N8 -t u8 < /dev/urandom | awk '{print $1}'
+    else
+        echo "${RANDOM}${RANDOM}${RANDOM}${RANDOM}"
+    fi
+}
+
 function computeSeed {
     # generate seed
     let P=$RANDOM%${#PRESETS[@]}
     local PRESET=${PRESETS[$P]}
-    local SEED=$(od -vAn -N8 -t u8 < /dev/urandom | awk '{print $1}')
+    local SEED=$(getseed)
 
     local RANDO_PRESET=$(generate_rando_presets "${SEED}" "${PRESET}")
     local PARAMS=$(generate_params "${SEED}" "${PRESET}" "${RANDO_PRESET}")

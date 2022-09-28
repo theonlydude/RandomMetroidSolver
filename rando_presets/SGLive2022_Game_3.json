@@ -12,7 +12,6 @@
         "speedrun"
     ],
     "areaRandomization": "full",
-    "areaLayout": "on",
     "bossRandomization": "on",
     "variaTweaks": "off",
     "itemsounds": "off",

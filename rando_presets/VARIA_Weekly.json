@@ -22,7 +22,6 @@
   "minorQty": "100",
   "energyQty": "vanilla",
   "areaRandomization": "off",
-  "areaLayout": "off",
   "escapeRando": "off",
   "removeEscapeEnemies": "off",
   "bossRandomization": "off",

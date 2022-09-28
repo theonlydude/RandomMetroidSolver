@@ -1480,7 +1480,7 @@ window.onload = function(){
         var suits = document.getElementById("suitsRestriction");
 
         if(lateMorph.options[lateMorph.selectedIndex].text == "late"){
-            if(area.checked){
+            if (['light', 'full'].includes(area.value)) {
                 setSwitchToOff(suits);
             }
         }
@@ -1494,7 +1494,7 @@ window.onload = function(){
             var suitsRestriction = document.getElementById("suitsRestriction");
             var lateMorph = document.getElementById("morphPlacement");
             var area = document.getElementById("areaRandomization");
-            if(! suitsRestriction.checked && ! (area.checked && lateMorph.options[lateMorph.selectedIndex].text == "late")){
+            if(! suitsRestriction.checked && ! (['light', 'full'].includes(area.value) && lateMorph.options[lateMorph.selectedIndex].text == "late")){
                 suitsRestriction.click();
             }
         }
@@ -1565,12 +1565,14 @@ window.onload = function(){
     var minimizer = document.getElementById("minimizer");
     minimizer.onchange = function() {
         var boss = document.getElementById("bossRandomization");
-        var area = document.getElementById("areaRandomization");
         var tourian = document.getElementById("tourian");
 
         if(minimizer.checked) {
             setSwitchToOn(boss);
-            setSwitchToOn(area);
+            if ($("#areaRandomization").val() === 'off') {
+                $("#areaRandomization").val('full')
+                $("#areaRandomization").change()
+            }
             disableElement("minimizerQty", false);
             if(tourian.value == "Vanilla") {
                 tourian.value = "Fast";
@@ -2909,7 +2911,7 @@ def displayNumber(id, min, max, default, step="1"):
                   <div class="areaRandoDiv">
                     <span id="areaRandomizationText">Area Randomization:</span>
                     <div>
-                      {{displayMultiSelect("areaRandomization", currentMultiValues["areaRandomization"], "normal", defaultMultiValues["areaRandomization"])}}
+                      {{displayMultiSelect("areaRandomization", currentMultiValues["areaRandomization"], "off", defaultMultiValues["areaRandomization"])}}
                     </div>
                   </div>
                 </td>

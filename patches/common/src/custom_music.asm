@@ -106,7 +106,7 @@ load_credits_music_track:
 
 warnpc $8bf8ff
 
-org $a9fc70
+org $a9fc80
 load_escape_music_data:
 	%loadMusicData(escape)
 

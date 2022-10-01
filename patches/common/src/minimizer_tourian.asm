@@ -170,8 +170,16 @@ org $a9cfdb
 
 org $a9fc00
 hyper_start:
-	jsr reset_samus_palette
-	lda #$8000 : sta $0a4a	; set rainbow samus
+        ;; clear current charging beam to avoid vanilla bug related to flares
+        STZ $0CD0
+        STZ $0CD6
+        STZ $0CD8
+        STZ $0CDA
+        STZ $0CDC
+        STZ $0CDE
+        STZ $0CE0
+        ;; set rainbow samus
+	lda #$8000 : sta $0a4a
 	jsl enable_hyper
 	;; compute health increase per frame: health to refill/nb frames
 	lda !samus_max_health
@@ -211,4 +219,4 @@ reset_samus_palette:
 	stz $0b62
 	rts
 
-warnpc $a9fc6f
+warnpc $a9fc7f

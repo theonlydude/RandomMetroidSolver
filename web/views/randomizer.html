@@ -278,6 +278,16 @@ if (hs.registerOverlay) {
 .chosen-drop .chosen-results {
     max-height: 40em;
 }
+.areaRandoDiv {
+  display: flex;
+  align-items: center;
+}
+.areaRandoDiv .full{
+  width: 60px;
+}
+#areaRandomizationText {
+  flex-grow: 1;
+}
 </style>
 
 <script type="text/javascript">
@@ -287,7 +297,7 @@ $(document).ready(function(){
 });
 
 // chosen elements need a special method to update their value
-var chosenElements = ["preset", "startLocationMultiSelect", "majorsSplitMultiSelect", "progressionSpeedMultiSelect", "progressionDifficultyMultiSelect", "morphPlacementMultiSelect", "energyQtyMultiSelect", "gravityBehaviourMultiSelect", "tourianMultiSelect"];
+var chosenElements = ["preset", "startLocationMultiSelect", "majorsSplitMultiSelect", "progressionSpeedMultiSelect", "progressionDifficultyMultiSelect", "morphPlacementMultiSelect", "energyQtyMultiSelect", "gravityBehaviourMultiSelect", "tourianMultiSelect", "areaRandomizationMultiSelect"];
 var currentMultiValues = {{response.write(currentMultiValues, escape=False)}};
 var defaultMultiValues = {{response.write(defaultMultiValues, escape=False)}};
 
@@ -327,8 +337,7 @@ function randomize(evt, elemId) {
   disableElement(elemId, isActive);
 
   // disable elements on the same line
-  var additionnal = {"areaRandomization": ["areaLayout", "lightAreaRandomization"],
-                     "escapeRando": ["removeEscapeEnemies"]};
+  var additionnal = {"escapeRando": ["removeEscapeEnemies"]};
   if(elemId in additionnal) {
       for(var i=0; i<additionnal[elemId].length; i++) {
           // disable it if isActive is false
@@ -367,6 +376,14 @@ function randomize(evt, elemId) {
       e.style.display = "block";
       multi.style.display = "none";
     }
+  }
+
+  if (e.id === 'areaRandomization') {
+     if (isActive) {
+        $("#areaRandomizationMultiSelect").change();
+     } else {
+        e.onchange();
+     }
   }
 }
 
@@ -871,18 +888,18 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = ["noPatchesVisibility"];
-    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "areaLayoutVisibility", "objectivesVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility"];
     showHide(show, hide);
   }
 
   else if(name == "medium") {
     var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility", "objectivesVisibility"];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility", "areaLayoutVisibility", "noPatchesVisibility"];
+    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility", "noPatchesVisibility"];
     showHide(show, hide);
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "areaLayoutVisibility", "objectivesVisibility"];
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility"];
     var hide = ["noPatchesVisibility"];
     showHide(show, hide);
   }
@@ -915,9 +932,9 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
-    var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian", "objective"];
+    var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian", "objective", "areaRandomization"];
 
     for(var i=0; i<elems.length; i++) {
         // if element is disabled set it to off
@@ -1121,9 +1138,9 @@ function AjaxRandomizerCallCompleted(data) {
     document.getElementById("submitBtn").data = "Randomize";
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "lightAreaRandomization", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
-    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "tourian"];
+    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "tourian", "areaRandomization"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -1382,17 +1399,14 @@ window.onload = function(){
         alert("This website requires the HTML5 File API, please upgrade your browser to a newer version.");
     }
 
-    var area = document.getElementById("areaRandomization");
-    area.onchange = function(){
-        var area = document.getElementById("areaRandomization");
+    function triggerArea(is_on) {
         var patches = document.getElementById("areaLayout");
         var lateMorph = document.getElementById("morphPlacement");
         var suits = document.getElementById("suitsRestriction");
         var escapeRando = document.getElementById("escapeRando");
 
-        if(area.checked){
+        if(is_on){
             disableElement("areaLayout", false);
-            disableElement("lightAreaRandomization", false);
 
             setSwitchToOn(patches);
             setSwitchToOn(escapeRando);
@@ -1404,20 +1418,27 @@ window.onload = function(){
         } else {
             setSwitchToOff(patches);
             setSwitchToOff(escapeRando);
-            var lightAreaRandomization = document.getElementById("lightAreaRandomization");
-            setSwitchToOff(lightAreaRandomization);
             var minimizer = document.getElementById("minimizer");
             setSwitchToOff(minimizer);
 
             disableElement("areaLayout", true);
-            disableElement("lightAreaRandomization", true);
         }
-        switchCheckbox("areaRandomization");
-    };
-    if(! area.checked){
-        disableElement("areaLayout", true);
-        disableElement("lightAreaRandomization", true);
     }
+
+    var area = document.getElementById("areaRandomization");
+    area.onchange = function(){
+        var area = document.getElementById("areaRandomization");
+        var is_on = ['light', 'full'].includes(area.value);
+        triggerArea(is_on);
+    };
+
+    area.onchange()
+
+    $('#areaRandomizationMultiSelect').change(e => {
+        var values = $('#areaRandomizationMultiSelect').val();
+        var is_on = values.includes('full') || values.includes('light');
+        triggerArea(is_on);
+    })
 
     var boss = document.getElementById("bossRandomization");
     boss.onchange = function(){
@@ -1459,7 +1480,7 @@ window.onload = function(){
         var suits = document.getElementById("suitsRestriction");
 
         if(lateMorph.options[lateMorph.selectedIndex].text == "late"){
-            if(area.checked){
+            if (['light', 'full'].includes(area.value)) {
                 setSwitchToOff(suits);
             }
         }
@@ -1473,7 +1494,7 @@ window.onload = function(){
             var suitsRestriction = document.getElementById("suitsRestriction");
             var lateMorph = document.getElementById("morphPlacement");
             var area = document.getElementById("areaRandomization");
-            if(! suitsRestriction.checked && ! (area.checked && lateMorph.options[lateMorph.selectedIndex].text == "late")){
+            if(! suitsRestriction.checked && ! (['light', 'full'].includes(area.value) && lateMorph.options[lateMorph.selectedIndex].text == "late")){
                 suitsRestriction.click();
             }
         }
@@ -1506,7 +1527,19 @@ window.onload = function(){
             if(selected == "Red Brinstar Elevator" || selected == "Golden Four") {
                 var areaRandomization = document.getElementById("areaRandomization");
                 var areaLayout = document.getElementById("areaLayout");
-                setSwitchToOn(areaRandomization);
+                var areaRandom = document.getElementById('areaRandomizationRandom');
+                if (isElemRandom(areaRandom)) {
+                    const multiselect = $("#areaRandomizationMultiSelect")
+                    const val = multiselect.val().filter(v => v !== 'off')
+                    if (val.length === 0) {
+                        val.append('full')
+                    }
+                    multiselect.val(val)
+                    multiselect.trigger("chosen:updated");
+                } else if ($("#areaRandomization").val() === 'off') {
+                    $("#areaRandomization").val('full')
+                    $("#areaRandomization").change()
+                }
                 setSwitchToOn(areaLayout);
             }
         }
@@ -1532,12 +1565,14 @@ window.onload = function(){
     var minimizer = document.getElementById("minimizer");
     minimizer.onchange = function() {
         var boss = document.getElementById("bossRandomization");
-        var area = document.getElementById("areaRandomization");
         var tourian = document.getElementById("tourian");
 
         if(minimizer.checked) {
             setSwitchToOn(boss);
-            setSwitchToOn(area);
+            if ($("#areaRandomization").val() === 'off') {
+                $("#areaRandomization").val('full')
+                $("#areaRandomization").change()
+            }
             disableElement("minimizerQty", false);
             if(tourian.value == "Vanilla") {
                 tourian.value = "Fast";
@@ -2106,7 +2141,15 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
     {
       element: "#areaRandomizationStep",
       title: "Areas randomization",
-      content: "<p>Randomize areas together using bidirectional access portals:</p>\
+      content: "<p>Randomize areas together using bidirectional access portals.</p>\
+<p><b>Off:</b> No change. All rooms are connected the same as in the original game.</p>\
+<p><b>Full:</b> All doors connecting the areas will be randomized.</p>\
+<p><b>Light:</b> We keep the same number of transitions between areas as in vanilla.<br/>\
+So <a href=\"https://metroid.fandom.com/wiki/Crocomire\" target=\"_blank\">Crocomire</a> area will always be connected to Upper <a href=\"https://metroid.fandom.com/wiki/Norfair\" target=\"_blank\">Norfair</a>, there'll always be two transitions between <a href=\"https://metroid.fandom.com/wiki/Crateria\" target=\"_blank\">Crateria</a>/blue <a href=\"https://metroid.fandom.com/wiki/Brinstar\" target=\"_blank\">Brinstar</a> and green/pink <a href=\"https://metroid.fandom.com/wiki/Brinstar\" target=\"_blank\">Brinstar</a>, ...<br/>\
+This mode can be use as an introduction before doing full Area Randomization or to get less lost when you don't use the <a href=\"/tracker\" target=\"_blank\">Area Tracker</a>.</p>\
+<p>When 'Areas randomization' dice button is on, Light Area Randomization is greyed and it's not used.</p>\
+<hr />\
+<h3>Area Randomization Details</h3>\
 <a href=\"/solver/static/images/common/area_map_20200112.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/help/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a>\
 <p>It is recommended to use the <a href=\"/solver/solver_web/tracker\" target=\"_blank\">Area Tracker</a> to find your way more easily.</p>\
 <p>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).</p>\
@@ -2156,15 +2199,6 @@ To have a self contained <a href=\"https://metroid.fandom.com/wiki/Maridia\" tar
 </p>\
 <p>Even with all layout modifications, it is still possible to softlock in some occurrences. To avoid softlocking your save file, an automatic rolling backup save system is enabled. See doors colors randomization option help for more details.</p>\
 Click on the dice button to randomly set this parameter.",
-      placement: "auto left"
-    },
-    {
-      element: "#lightAreaRandomizationStep",
-      title: "Light Area Randomization",
-      content: "<p>In Light Area Randomization we keep the same number of transitions between areas as in vanilla.<br/>\
-So <a href=\"https://metroid.fandom.com/wiki/Crocomire\" target=\"_blank\">Crocomire</a> area will always be connected to Upper <a href=\"https://metroid.fandom.com/wiki/Norfair\" target=\"_blank\">Norfair</a>, there'll always be two transitions between <a href=\"https://metroid.fandom.com/wiki/Crateria\" target=\"_blank\">Crateria</a>/blue <a href=\"https://metroid.fandom.com/wiki/Brinstar\" target=\"_blank\">Brinstar</a> and green/pink <a href=\"https://metroid.fandom.com/wiki/Brinstar\" target=\"_blank\">Brinstar</a>, ...<br/>\
-This mode can be use as an introduction before doing full Area Randomization or to get less lost when you don't use the <a href=\"/tracker\" target=\"_blank\">Area Tracker</a>.</p>\
-<p>When 'Areas randomization' dice button is on, Light Area Randomization is greyed and it's not used.</p>",
       placement: "auto left"
     },
     {
@@ -2871,18 +2905,18 @@ def displayNumber(id, min, max, default, step="1"):
               Check the help button for the map of the areas and the access points between them.
             </p>
             <table class="full">
-              <tr>
+              <tr id="areaRandomizationStep">
                 <td class="small"><div class="random"><button id="areaRandomizationRandom" type="button" onclick="randomize(event, 'areaRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td class="half" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}<span id="areaRandomizationText">Areas randomization</span></td>
-                <td><button type="button" onclick="startTheTour(event)">?</button></td>
-                <td class="full" id="lightAreaRandomizationStep">{{displayCheckbox("lightAreaRandomization")}}<span id="lightAreaRandomizationText">Light Areas randomization</span></td>
-                <td><button type="button" onclick="startTheTour(event)">?</button></td>
-              </tr>
-            </table>
-            <table id="areaLayoutVisibility" class="full">
-              <colgroup><col class="half" /><col class="half" /></colgroup>
-              <tr>
-                <td id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td>
+                <td class="half">
+                  <div class="areaRandoDiv">
+                    <span id="areaRandomizationText">Area Randomization:</span>
+                    <div>
+                      {{displayMultiSelect("areaRandomization", currentMultiValues["areaRandomization"], "off", defaultMultiValues["areaRandomization"])}}
+                    </div>
+                  </div>
+                </td>
+                <td><button type="button" onclick="startTheTour('areaRandomizationStep')">?</button></td>
+                <td class="half" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td>
                 <td></td>
                 <td><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>

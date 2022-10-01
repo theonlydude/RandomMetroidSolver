@@ -24,12 +24,11 @@
       "VARIAble",
       "speedrun"
   ],
-  "areaRandomization": "on",
+  "areaRandomization": "full",
   "maxDifficulty": "hardcore",
   "powerBombQty": "1",
   "minorQty": "100",
   "suitsRestriction": "off",
-  "areaLayout": "on",
   "superQty": "2",
   "energyQty": "vanilla",
   "funSuits": "off",

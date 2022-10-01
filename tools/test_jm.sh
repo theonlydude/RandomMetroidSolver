@@ -37,6 +37,9 @@ else
     COMPARE=1
 fi
 
+HAVE_URAND=1
+[[ -f /dev/urandom ]] && HAVE_URAND=0
+
 # get git head
 if [ ${COMPARE} -eq 0 ]; then
     TEMP_DIR=$(mktemp)
@@ -150,8 +153,7 @@ function generate_rando_presets {
     $(generate_multi_select "energyQty" 'ultra_sparse' 'sparse' 'medium' 'vanilla')
     "objective": "random",
     $(generate_multi_select "objective" "kill_kraid" "kill_phantoon" "kill_draygon" "kill_ridley" "kill_one_G4" "kill_two_G4" "kill_three_G4" "kill_all_G4" "kill_spore_spawn" "kill_botwoon" "kill_crocomire" "kill_golden_torizo" "kill_one_miniboss" "kill_two_minibosses" "kill_three_minibosses" "kill_all_mini_bosses" "nothing" "collect_25%_items" "collect_50%_items" "collect_75%_items" "collect_100%_items" "collect_all_upgrades" "clear_crateria" "clear_green_brinstar" "clear_red_brinstar" "clear_wrecked_ship" "clear_kraid's_lair" "clear_upper_norfair" "clear_croc's_lair" "clear_lower_norfair" "clear_west_maridia" "clear_east_maridia" "tickle_the_red_fish" "kill_the_orange_geemer" "kill_shaktool" "activate_chozo_robots" "visit_the_animals" "kill_king_cacatac")
-    "areaRandomization": "$(random_switch)",
-    "lightAreaRandomization": "$(random_switch)",
+    "areaRandomization": "random",
     "areaLayout": "$(random_switch)",
     "doorsColorsRando": "$(random_switch)",
     "allowGreyDoors": "$(random_switch)",
@@ -188,11 +190,19 @@ EOF
     echo -en "${RANDO_PRESET}"
 }
 
+function getseed {
+    if [[ "${HAVE_URAND}" -eq 0 ]]; then
+        od -vAn -N8 -t u8 < /dev/urandom | awk '{print $1}'
+    else
+        echo "${RANDOM}${RANDOM}${RANDOM}${RANDOM}"
+    fi
+}
+
 function computeSeed {
     # generate seed
     let P=$RANDOM%${#PRESETS[@]}
     local PRESET=${PRESETS[$P]}
-    local SEED="$RANDOM$RANDOM$RANDOM$RANDOM"
+    local SEED=$(getseed)
 
     local RANDO_PRESET=$(generate_rando_presets "${SEED}" "${PRESET}")
     local PARAMS=$(generate_params "${SEED}" "${PRESET}" "${RANDO_PRESET}")

@@ -185,7 +185,7 @@ class Randomizer(object):
 
         # check validity of all parameters
         switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-                   'areaRandomization', 'areaLayout', 'lightAreaRandomization',
+                   'areaLayout',
                    'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
                    'bossRandomization', 'minimizer',
                    'funCombat', 'funMovement', 'funSuits',
@@ -196,7 +196,8 @@ class Randomizer(object):
                    'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
-                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
+                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
+                  'areaRandomization']
         others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
@@ -368,7 +369,7 @@ class Randomizer(object):
     def sessionWebService(self):
         # web service to update the session
         switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-                   'areaRandomization', 'areaLayout', 'lightAreaRandomization',
+                   'areaLayout',
                    'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
                    'bossRandomization', 'minimizer',
                    'funCombat', 'funMovement', 'funSuits',
@@ -379,7 +380,8 @@ class Randomizer(object):
                    'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
-                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
+                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
+                  'areaRandomization']
         others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others)
 
@@ -402,7 +404,6 @@ class Randomizer(object):
         self.session.randomizer['minorQty'] = self.vars.minorQty
         self.session.randomizer['areaRandomization'] = self.vars.areaRandomization
         self.session.randomizer['areaLayout'] = self.vars.areaLayout
-        self.session.randomizer['lightAreaRandomization'] = self.vars.lightAreaRandomization
         self.session.randomizer['doorsColorsRando'] = self.vars.doorsColorsRando
         self.session.randomizer['allowGreyDoors'] = self.vars.allowGreyDoors
         self.session.randomizer['escapeRando'] = self.vars.escapeRando
@@ -440,8 +441,6 @@ class Randomizer(object):
         else:
             self.session.randomizer['objective'] = self.vars.objective.split(',')
 
-        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
-                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
         for multi in multis:
             self.session.randomizer[multi] = self.vars[multi]
             if self.vars[multi] == 'random':

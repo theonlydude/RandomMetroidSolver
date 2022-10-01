@@ -1,5 +1,5 @@
 
-import utils.log, copy, random, sys, logging
+import utils.log, copy, random, sys, logging, os
 from enum import Enum, unique
 from utils.parameters import infinity
 from rando.ItemLocContainer import getLocListStr, getItemListStr, getItemLocStr, ItemLocation
@@ -25,6 +25,13 @@ class RandoServices(object):
         self.cache = cache
         self.log = utils.log.get('RandoServices')
 
+    @staticmethod
+    def printProgress(s):
+        sys.stdout.write(s)
+        # avoid flushing I/O on pythonanywhere, as they are very slow
+        if os.getenv("PYTHONANYWHERE_DOMAIN") is None:
+            sys.stdout.flush()
+
     # collect an item/loc with logic in a container from a given AP
     # return new AP
     def collect(self, ap, container, itemLoc, pickup=True):
@@ -35,7 +42,7 @@ class RandoServices(object):
             self.currentLocations(ap, container)
         container.collect(itemLoc, pickup=pickup)
         self.log.debug("COLLECT "+itemLoc.Item.Type+" at "+itemLoc.Location.Name)
-        sys.stdout.write('.')
+        RandoServices.printProgress('.')
         return itemLoc.Location.accessPoint if pickup == True else ap
 
     # gives all the possible theoretical locations for a given item

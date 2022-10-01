@@ -5,7 +5,7 @@ from rando.Filler import Filler, FrontFiller
 from rando.Choice import ItemThenLocChoice
 from rando.MiniSolver import MiniSolver
 from rando.ItemLocContainer import ContainerSoftBackup, ItemLocation, getItemLocationsStr
-from rando.RandoServices import ComebackCheckType
+from rando.RandoServices import ComebackCheckType, RandoServices
 from solver.randoSolver import RandoSolver
 from utils.parameters import infinity
 from logic.helpers import diffValue2txt
@@ -68,7 +68,7 @@ class FillerRandom(Filler):
             return False
         # pool is exhausted, use mini solver to see if it is beatable
         if self.isBeatable():
-            sys.stdout.write('o')
+            RandoServices.printProgress('o')
         else:
             if self.diffSteps > 0 and self.settings.maxDiff < infinity:
                 if self.nSteps < self.diffSteps:
@@ -81,14 +81,14 @@ class FillerRandom(Filler):
                     self.container.itemLocations = self.beatableBackup[0]
                     difficulty = self.beatableBackup[1]
                     self.errorMsg += "Could not find a solution compatible with max difficulty. Estimated seed difficulty: "+diffValue2txt(difficulty)
-                    sys.stdout.write('O')
+                    RandoServices.printProgress('O')
                     return True
                 else:
                     return False
             # reset container to force a retry
             self.resetHelpingContainer()
             if (self.nSteps + 1) % 100 == 0:
-                sys.stdout.write('x')
+                RandoServices.printProgress('x')
 
             # help speedrun filler
             self.getHelp()
@@ -116,7 +116,7 @@ class FillerRandomItems(Filler):
         loc = random.choice(locs)
         itemLoc = ItemLocation(item, loc)
         self.container.collect(itemLoc, pickup=False)
-        sys.stdout.write('.')
+        RandoServices.printProgress('.')
         return True
 
 class FrontFillerNoCopy(FrontFiller):
@@ -193,7 +193,7 @@ class FillerRandomSpeedrun(FillerRandom):
         miniOk = self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)
         if miniOk == False:
             return False
-        sys.stdout.write('s')
+        RandoServices.printProgress('s')
         if maxDiff is None:
             maxDiff = self.settings.maxDiff
         minDiff = self.settings.minDiff
@@ -203,7 +203,7 @@ class FillerRandomSpeedrun(FillerRandom):
         diff = solver.solveRom()
         self.container.cleanLocsAfterSolver()
         if diff < minDiff: # minDiff is 0 if unspecified: that covers "unsolvable" (-1)
-            sys.stdout.write('X')
+            RandoServices.printProgress('X')
 
             # remove vcr data
             if self.vcr is not None:
@@ -211,7 +211,7 @@ class FillerRandomSpeedrun(FillerRandom):
 
             return False
         now = time.process_time()
-        sys.stdout.write('S({}/{}ms)'.format(self.nSteps+1, int((now-self.startDate)*1000)))
+        RandoServices.printProgress('S({}/{}ms)'.format(self.nSteps+1, int((now-self.startDate)*1000)))
 
         # order item locations with the order used by the solver
         self.orderItemLocations(solver)
@@ -254,7 +254,7 @@ class FillerRandomSpeedrun(FillerRandom):
     def getHelp(self):
         if time.process_time() > self.runtimeSteps[self.nFrontFillSteps]:
             # store the step for debug purpose
-            sys.stdout.write('n({})'.format(self.nSteps))
+            RandoServices.printProgress('n({})'.format(self.nSteps))
             # help the random fill with a bit of frontfill
             self.nFrontFillSteps += self.stepIncr
             self.createBaseLists(updateBase=False)

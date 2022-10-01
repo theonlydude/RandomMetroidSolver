@@ -4,7 +4,7 @@ import copy, random, sys
 from rando.Filler import Filler
 from rando.FillerRandom import FillerRandom, FillerRandomItems
 from rando.Choice import ItemThenLocChoiceProgSpeed, ItemThenLocChoice
-from rando.RandoServices import ComebackCheckType
+from rando.RandoServices import ComebackCheckType, RandoServices
 from rando.Items import ItemManager
 from rando.ItemLocContainer import ItemLocContainer, getLocListStr, getItemListStr, getItemLocationsStr, getItemLocStr
 from rando.RandoSettings import ProgSpeedParameters
@@ -171,7 +171,7 @@ class FillerProgSpeed(Filler):
                 accessibleLocations.append(loc)
         self.log.debug("accesLoc {}".format([loc.Name for loc in accessibleLocations]))
         if len(accessibleLocations) <= self.locLimit:
-            sys.stdout.write('|')
+            RandoServices.printProgress('|')
             return False
         # check that there is room left in all main areas
         room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0 }
@@ -184,7 +184,7 @@ class FillerProgSpeed(Filler):
                 room[loc.Area] += 1
         for r in room.values():
             if r > 0 and r <= self.locLimit:
-                sys.stdout.write('|')
+                RandoServices.printProgress('|')
                 return False
         return True
 
@@ -254,7 +254,7 @@ class FillerProgSpeed(Filler):
         itemLoc = self.generateItemFromStandardPool()
         isStuck = itemLoc is None
         if not isStuck:
-            sys.stdout.write('-')
+            RandoServices.printProgress('-')
             self.collect(itemLoc)
         return isStuck
 
@@ -327,7 +327,7 @@ class FillerProgSpeed(Filler):
             self.log.debug("rollback END initState apply, nCurLocs="+str(len(self.currentLocations())))
             if self.vcr != None:
                 self.vcr.addRollback(nStatesAtStart)
-            sys.stdout.write('<'*nStatesAtStart)
+            RandoServices.printProgress('<'*nStatesAtStart)
             return None
         # to stay consistent in case no solution is found as states list was popped in init
         fallbackState = self.getFallbackState()
@@ -352,7 +352,7 @@ class FillerProgSpeed(Filler):
             # nothing, let's rollback further a progression item
             if len(possibleStates) == 0 and i >= 0:
                 if len(self.progressionStatesIndices) > 0:
-                    sys.stdout.write('!')
+                    RandoServices.printProgress('!')
                     self.progressionStatesIndices.pop()
                 else:
                     break
@@ -370,7 +370,7 @@ class FillerProgSpeed(Filler):
             fallbackState.apply(self)
             if self.vcr != None:
                 self.vcr.addRollback(1)
-        sys.stdout.write('<'*(nStatesAtStart - len(self.states)))
+        RandoServices.printProgress('<'*(nStatesAtStart - len(self.states)))
         self.log.debug("rollback END: {}".format(len(self.container.currentItems)))
         return ret
 

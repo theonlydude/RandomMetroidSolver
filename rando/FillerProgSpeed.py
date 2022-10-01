@@ -307,11 +307,6 @@ class FillerProgSpeed(Filler):
         if (len(self.lastFallbackStates) > 0 and curState == self.lastFallbackStates[-1]):
             self.log.debug("getFallbackState. rewind fallback")
             return fallbackState
-        # n = sum(1 for state in self.lastFallbackStates if state == fallbackState)
-        # if n >= 3:
-        #     self.log.debug("getFallbackState. kickstart needed")
-        #     self.lastFallbackStates = None
-        #     return None
         return curState
 
     # goes back in the previous states to find one where
@@ -331,8 +326,6 @@ class FillerProgSpeed(Filler):
             return None
         # to stay consistent in case no solution is found as states list was popped in init
         fallbackState = self.getFallbackState()
-        # if fallbackState is None: # kickstart needed
-        #     return None
         self.lastFallbackStates.append(fallbackState)
         i = 0
         possibleStates = []
@@ -374,18 +367,6 @@ class FillerProgSpeed(Filler):
         self.log.debug("rollback END: {}".format(len(self.container.currentItems)))
         return ret
 
-    # def kickStart(self):
-    #     self.initState.apply(self)
-    #     self.lastFallbackStates = []
-    #     pairItemLocDict = self.services.getStartupProgItemsPairs(self.ap, self.container)
-    #     if pairItemLocDict == None:
-    #         # no pair found
-    #         self.log.debug("kickStart KO")
-    #         return False
-    #     self.collectPair(pairItemLocDict)
-    #     self.log.debug("kickStart OK")
-    #     return True
-
     def step(self, onlyBossCheck=False):
         self.cache.reset()
         if self.services.can100percent(self.ap, self.container) and self.settings.progSpeed not in ['slowest', 'slow']:
@@ -418,9 +399,6 @@ class FillerProgSpeed(Filler):
                 if not self.services.can100percent(self.ap, self.container):
                     # stuck, rollback to make progress if we can't access everything yet
                     itemLoc = self.rollback()
-                    # if itemLoc is None and self.lastFallbackStates is None:
-                    #     # kickstart needed
-                    #     return self.kickStart()
                 if itemLoc is not None:
                     self.collect(itemLoc)
                     isStuck = False

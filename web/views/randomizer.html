@@ -1873,6 +1873,17 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
 <li><b>master:</b> Everything on hardest, all tricks known.</li></ul></p>"
     },
     {
+      element: "#tourianStep",
+      title: "Endgame Tourian",
+      content: "<p>Choose endgame <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> behaviour:\
+<ul>\
+<li><b>Vanilla:</b> regular vanilla <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a></li>\
+<li><b>Fast:</b> speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including Mother Brain 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">invincible Gadora</a> until all objectives are completed.</li>\
+<li><b>Disabled:</b> skip <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> entirely, ie. escape sequence is triggered as soon as all objectives are completed.</li>\
+</ul></p>\
+<p>Click on the dice button to randomly set this parameter.</p>"
+    },
+    {
       element: "#objectiveStep",
       title: "Custom Objectives",
       content: "<p>Choose which objectives are required to sink the <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statue</a> and to open access to <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a>.</p>\
@@ -1927,17 +1938,6 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
       element: "#nbObjectiveStep",
       title: "Number of Objectives to access Tourian",
       content: "<p>By default you need to complete 4 objectives from the list to access Tourian. You can choose 1-5 or enter 0 to make the number random.</p>",
-    },
-    {
-      element: "#tourianStep",
-      title: "Endgame Tourian",
-      content: "<p>Choose endgame <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> behaviour:\
-<ul>\
-<li><b>Vanilla:</b> regular vanilla <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a></li>\
-<li><b>Fast:</b> speed up <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> to skip Metroids, <a href=\"https://metroid.fandom.com/wiki/Zebetite\" target=\"_blank\">Zebetites</a>, and all cutscenes (including Mother Brain 3 fight). <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statues</a> are replaced by an <a href=\"https://metroid.fandom.com/wiki/Gadora\" target=\"_blank\">invincible Gadora</a> until all objectives are completed.</li>\
-<li><b>Disabled:</b> skip <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a> entirely, ie. escape sequence is triggered as soon as all objectives are completed.</li>\
-</ul></p>\
-<p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#StartLocationStep",
@@ -2772,6 +2772,14 @@ def displayNumber(id, min, max, default, step="1"):
                 <td id="presetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
             </table>
+            <table class="full">
+              <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
+              <tr>
+                <td class="small"><div class="random"><button id="tourianRandom" type="button" onclick="randomize(event, 'tourian')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td><span id="tourianText">Endgame behaviour with Tourian:</span></td>
+                <td>{{displayMultiSelect("tourian", currentMultiValues["tourian"], "Vanilla", defaultMultiValues["tourian"])}}</td>
+                <td id="tourianStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+              </tr>
             <table class="full" id="objectivesVisibility">
               <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
               <tr>
@@ -2789,12 +2797,6 @@ def displayNumber(id, min, max, default, step="1"):
             </table>
             <table class="full">
               <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
-              <tr>
-                <td class="small"><div class="random"><button id="tourianRandom" type="button" onclick="randomize(event, 'tourian')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="tourianText">Endgame behaviour with Tourian:</span></td>
-                <td>{{displayMultiSelect("tourian", currentMultiValues["tourian"], "Vanilla", defaultMultiValues["tourian"])}}</td>
-                <td id="tourianStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-              </tr>
               <tr>
                 <td class="small"><div class="random"><button id="startLocationRandom" type="button" onclick="randomize(event, 'startLocation')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="startLocationText">Start location:</span></td>

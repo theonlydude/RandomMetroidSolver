@@ -1884,6 +1884,11 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
 <p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
+      element: "#nbObjectiveStep",
+      title: "Number of Objectives to access Tourian",
+      content: "<p>By default you need to complete 4 objectives from the list to access Tourian. You can choose 1-5 or enter 0 to make the number random.</p>",
+    },
+    {
       element: "#objectiveStep",
       title: "Custom Objectives",
       content: "<p>Choose which objectives are required to sink the <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statue</a> and to open access to <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a>.</p>\
@@ -1933,11 +1938,6 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
 <b>Note:</b> Collect 100% items is excluded by default when randomizing the objectives list as it requires you to complete all the objectives.\
 </p>\
 <p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 5 objectives from the list (between 1 and 4 if Scavenger Hunt). To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
-    },
-    {
-      element: "#nbObjectiveStep",
-      title: "Number of Objectives to access Tourian",
-      content: "<p>By default you need to complete 4 objectives from the list to access Tourian. You can choose 1-5 or enter 0 to make the number random.</p>",
     },
     {
       element: "#StartLocationStep",
@@ -2782,17 +2782,17 @@ def displayNumber(id, min, max, default, step="1"):
               </tr>
             <table class="full" id="objectivesVisibility">
               <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
-              <tr>
-                <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="objectiveText">Objectives to access Tourian:</span></td>
-                <td>{{displayMultiSelect("objective", "objective is special!", "", defaultMultiValues["objective"])}}</td>
-                <td id="objectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-              </tr>
               <tr id="nbObjectiveVisiblity">
                 <td class="small"><div class="random"><button id="nbObjectiveRandom" type="button" onclick="randomize(event, 'nbObjective')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="nbObjectiveText">Number of objectives:</span></td>
                 <td>{{displayNumber("nbObjective", "1", "5", "4", "1")}}</td>
                 <td id="nbObjectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+              </tr>
+              <tr>
+                <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td><span id="objectiveText">Objectives to access Tourian:</span></td>
+                <td>{{displayMultiSelect("objective", "objective is special!", "", defaultMultiValues["objective"])}}</td>
+                <td id="objectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
             </table>
             <table class="full">

@@ -65,6 +65,12 @@ define igt_frames       $7E09DA
 define igt_seconds      $7E09DC
 define igt_minutes      $7E09DE
 define igt_hours        $7E09E0
+define end_seconds_1    $0DF8
+define end_seconds_2    $0DFA
+define sprite_colon_x   #$00B4
+define sprite_second_1x #$00BC
+define sprite_second_2x #$00C4
+
 
 // some scratch space in RAM for backup save system
 define backup_counter	$7fff38
@@ -1242,6 +1248,8 @@ check_samus_avg_time:
 	cmp samus_avg_time_m
 .end:
 	rts
+
+warnpc $8bf92f
 
 // hijacks for samus ending animations
 org $8BE00D
@@ -2486,115 +2494,246 @@ itemlocations:
 org $8cb49b
 // 'R'
         dw $0002
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB4A7
 // 'RE'
         dw $0004
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB4BD
 // 'REA'
         dw $0006
-        dw $01D0; db $00; dw $3130
-        dw $01D0; db $F8; dw $3120
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01C8; db $00; dw $3130
+        dw $01C8; db $F8; dw $3120
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB4DD
 // 'REAL'
         dw $0008
-        dw $01D8; db $00; dw $313B
-        dw $01D8; db $F8; dw $312B
-        dw $01D0; db $00; dw $3130
-        dw $01D0; db $F8; dw $3120
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01D0; db $00; dw $313B
+        dw $01D0; db $F8; dw $312B
+        dw $01C8; db $00; dw $3130
+        dw $01C8; db $F8; dw $3120
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB507
 // 'REAL'
         dw $0008
-        dw $01D8; db $00; dw $313B
-        dw $01D8; db $F8; dw $312B
-        dw $01D0; db $00; dw $3130
-        dw $01D0; db $F8; dw $3120
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01D0; db $00; dw $313B
+        dw $01D0; db $F8; dw $312B
+        dw $01C8; db $00; dw $3130
+        dw $01C8; db $F8; dw $3120
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB53B
-// 'REAL  T'
+// 'REAL T'
         dw $000A
-        dw $01F0; db $00; dw $3153
-        dw $01F0; db $F8; dw $3143
-        dw $01D8; db $00; dw $313B
-        dw $01D8; db $F8; dw $312B
-        dw $01D0; db $00; dw $3130
-        dw $01D0; db $F8; dw $3120
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01E0; db $00; dw $3153
+        dw $01E0; db $F8; dw $3143
+        dw $01D0; db $00; dw $313B
+        dw $01D0; db $F8; dw $312B
+        dw $01C8; db $00; dw $3130
+        dw $01C8; db $F8; dw $3120
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB579
-// 'REAL  TI'
+// 'REAL TI'
         dw $000C
-        dw $01F8; db $00; dw $3138
-        dw $01F8; db $F8; dw $3128
-        dw $01F0; db $00; dw $3153
-        dw $01F0; db $F8; dw $3143
-        dw $01D8; db $00; dw $313B
-        dw $01D8; db $F8; dw $312B
-        dw $01D0; db $00; dw $3130
-        dw $01D0; db $F8; dw $3120
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01E8; db $00; dw $3138
+        dw $01E8; db $F8; dw $3128
+        dw $01E0; db $00; dw $3153
+        dw $01E0; db $F8; dw $3143
+        dw $01D0; db $00; dw $313B
+        dw $01D0; db $F8; dw $312B
+        dw $01C8; db $00; dw $3130
+        dw $01C8; db $F8; dw $3120
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB5C1
-// 'REAL  TIM'
+// 'REAL TIM'
         dw $000E
-        dw $0000; db $00; dw $313C
-        dw $0000; db $F8; dw $312C
-        dw $01F8; db $00; dw $3138
-        dw $01F8; db $F8; dw $3128
-        dw $01F0; db $00; dw $3153
-        dw $01F0; db $F8; dw $3143
-        dw $01D8; db $00; dw $313B
-        dw $01D8; db $F8; dw $312B
-        dw $01D0; db $00; dw $3130
-        dw $01D0; db $F8; dw $3120
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01F0; db $00; dw $313C
+        dw $01F0; db $F8; dw $312C
+        dw $01E8; db $00; dw $3138
+        dw $01E8; db $F8; dw $3128
+        dw $01E0; db $00; dw $3153
+        dw $01E0; db $F8; dw $3143
+        dw $01D0; db $00; dw $313B
+        dw $01D0; db $F8; dw $312B
+        dw $01C8; db $00; dw $3130
+        dw $01C8; db $F8; dw $3120
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB613
-// 'REAL  TIME'
+// 'REAL TIME'
         dw $0010
-        dw $0008; db $00; dw $3134
-        dw $0008; db $F8; dw $3124
-        dw $0000; db $00; dw $313C
-        dw $0000; db $F8; dw $312C
-        dw $01F8; db $00; dw $3138
-        dw $01F8; db $F8; dw $3128
-        dw $01F0; db $00; dw $3153
-        dw $01F0; db $F8; dw $3143
-        dw $01D8; db $00; dw $313B
-        dw $01D8; db $F8; dw $312B
-        dw $01D0; db $00; dw $3130
-        dw $01D0; db $F8; dw $3120
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01F8; db $00; dw $3134
+        dw $01F8; db $F8; dw $3124
+        dw $01F0; db $00; dw $313C
+        dw $01F0; db $F8; dw $312C
+        dw $01E8; db $00; dw $3138
+        dw $01E8; db $F8; dw $3128
+        dw $01E0; db $00; dw $3153
+        dw $01E0; db $F8; dw $3143
+        dw $01D0; db $00; dw $313B
+        dw $01D0; db $F8; dw $312B
+        dw $01C8; db $00; dw $3130
+        dw $01C8; db $F8; dw $3120
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
+
+
+// draw RTA seconds at ship end
+org $8beefd+4
+        dw instruction_list_time
+
+org $8bf416
+        jsr hijack_push_rta
+
+// update X pos for hour1 hour2 : min1 min2
+org $8bF065
+        dw $008C
+org $8bF074
+        dw $0094
+org $8bF07D
+        dw $009C
+org $8bF08C
+        dw $00A4
+org $8bF09B
+        dw $00AC
+
+org $8bf92f
+hijack_push_rta:
+	// vanilla
+        STA $0DF2
+
+	// load RTA seconds
+        LDA {igt_seconds}
+        STA $4204
+        SEP #$20
+        LDA #$0A
+        STA $4206
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        REP #$20
+        LDA $4214
+	// use unused RAM to store seconds next to hours/minutes
+        STA {end_seconds_1}
+        LDA $4216
+        STA {end_seconds_2}
+	RTS
+
+// add :xx at the end of displayed time to display seconds
+instruction_list_time:
+        dw $0008, $B49B
+        dw $0008, $B4A7
+        dw $0008, $B4BD
+        dw $0008, $B4DD
+        dw $000F, $B507
+        dw $0008, $B53B
+        dw $0008, $B579
+        dw $0008, $B5C1
+	// hour
+        dw $000F, $B613, $F41B
+        dw $0008, $B613, $F424
+	// :
+        dw $0008, $B613, $F42D
+	// minute
+        dw $0008, $B613, $F436
+        dw $0008, $B613, $F43F
+	// :
+        dw $0008, $B613, display_second_colon
+	// second
+        dw $0008, $B613, display_second_1
+        dw $0008, $B613, display_second_2
+
+        dw $0080, $B613, $F448
+loop:
+        dw $000F, $B613
+	// goto loop
+        dw $94BC, loop
+
+display_second_colon:
+        PHY
+        LDY #sprite_colon
+        JSR $938A // Spawn cinematic sprite object
+        PLY
+        RTS
+
+display_second_1:
+        PHY
+        LDY #sprite_second_1
+        JSR $938A // Spawn cinematic sprite object
+        PLY
+        RTS
+
+display_second_2:
+        PHY
+        LDY #sprite_second_2
+        JSR $938A // Spawn cinematic sprite object
+        PLY
+        RTS
+
+//          _____________ Initialisation function
+//         |                      ________ Pre-instruction
+//         |                     |       ___ Instruction list
+//         |                     |      |
+sprite_colon:
+        dw init_sprite_colon,    $F3B9, $ECD1
+sprite_second_1:
+        dw init_sprite_second_1, $F3B9, $EC81
+sprite_second_2:
+        dw init_sprite_second_2, $F3B9, $EC81
+
+init_sprite_colon:
+        LDA {sprite_colon_x}
+        STA $1A7D,y
+        JMP $F051
+
+init_sprite_second_1:
+        LDA {end_seconds_1}
+        JSR $F0A3
+        LDA {sprite_second_1x}
+        STA $1A7D,y
+        JMP $F051
+
+init_sprite_second_2:
+        LDA {end_seconds_2}
+        JSR $F0A3
+        LDA {sprite_second_2x}
+        STA $1A7D,y
+        JMP $F051
+
+print "bank 8B end : ", org
+warnpc $8bfa09
+

@@ -1,0 +1,263 @@
+;;; $F3CE:  ;;;
+{
+$8B:F3CE 5A          PHY
+$8B:F3CF A0 FD EE    LDY #$EEFD             ;\
+$8B:F3D2 20 8A 93    JSR $938A  [$8B:938A]  ;} Spawn cinematic sprite object $EEFD
+$8B:F3D5 AD E0 09    LDA $09E0  [$7E:09E0]
+$8B:F3D8 8D 04 42    STA $4204  [$7E:4204]
+$8B:F3DB E2 20       SEP #$20
+$8B:F3DD A9 0A       LDA #$0A
+$8B:F3DF 8D 06 42    STA $4206  [$7E:4206]
+$8B:F3E2 EA          NOP
+$8B:F3E3 EA          NOP
+$8B:F3E4 EA          NOP
+$8B:F3E5 EA          NOP
+$8B:F3E6 EA          NOP
+$8B:F3E7 EA          NOP
+$8B:F3E8 EA          NOP
+$8B:F3E9 C2 20       REP #$20
+$8B:F3EB AD 14 42    LDA $4214  [$7E:4214]
+$8B:F3EE 8D EC 0D    STA $0DEC  [$7E:0DEC]
+$8B:F3F1 AD 16 42    LDA $4216  [$7E:4216]
+$8B:F3F4 8D EE 0D    STA $0DEE  [$7E:0DEE]
+$8B:F3F7 AD DE 09    LDA $09DE  [$7E:09DE]
+$8B:F3FA 8D 04 42    STA $4204  [$7E:4204]
+$8B:F3FD E2 20       SEP #$20
+$8B:F3FF A9 0A       LDA #$0A
+$8B:F401 8D 06 42    STA $4206  [$7E:4206]
+$8B:F404 EA          NOP
+$8B:F405 EA          NOP
+$8B:F406 EA          NOP
+$8B:F407 EA          NOP
+$8B:F408 EA          NOP
+$8B:F409 EA          NOP
+$8B:F40A EA          NOP
+$8B:F40B C2 20       REP #$20
+$8B:F40D AD 14 42    LDA $4214  [$7E:4214]
+$8B:F410 8D F0 0D    STA $0DF0  [$7E:0DF0]
+$8B:F413 AD 16 42    LDA $4216  [$7E:4216]
+$8B:F416 8D F2 0D    STA $0DF2  [$7E:0DF2]
+$8B:F419 7A          PLY
+$8B:F41A 60          RTS
+}
+
+;;; $EE9D: Cinematic sprite object definitions ;;;
+{
+;                        _____________ Initialisation function
+;                       |     ________ Pre-instruction
+;                       |    |     ___ Instruction list
+;                       |    |    |
+$8B:EEFD             dw F03E,F3B9,EC35
+
+
+;;; $F03E:  ;;;
+{
+$8B:F03E A9 80 00    LDA #$0080
+$8B:F041 99 7D 1A    STA $1A7D,y[$7E:1A97]
+$8B:F044 A9 A0 00    LDA #$00A0
+$8B:F047 99 9D 1A    STA $1A9D,y[$7E:1AB7]
+$8B:F04A A9 00 02    LDA #$0200
+$8B:F04D 99 BD 1A    STA $1ABD,y[$7E:1AD7]
+$8B:F050 60          RTS
+
+$8B:F051 A9 A0 00    LDA #$00A0
+$8B:F054 99 9D 1A    STA $1A9D,y[$7E:1AB5]
+$8B:F057 A9 00 00    LDA #$0000
+$8B:F05A 99 BD 1A    STA $1ABD,y[$7E:1AD5]
+$8B:F05D 60          RTS
+}
+
+
+    $1A5D..7C: Cinematic sprite object spritemap pointers (bank $8C)
+    $1A7D..9C: Cinematic sprite object X positions
+    $1A9D..BC: Cinematic sprite object Y positions
+    $1ABD..DC: Cinematic sprite object palette indices
+    $1ADD..FC: Cinematic sprite object variables
+    $1AFD..1B1C: Cinematic sprite object variables
+    $1B1D..3C: Cinematic sprite object instruction list pointers
+    $1B3D..5C: Cinematic sprite object pre-instructions
+    $1B5D..7C: Cinematic sprite object instruction timers
+    $1B7D..9C: Cinematic sprite object timers
+    $1B9D: Cinematic sprite object initialisation parameter(???)
+
+
+
+;;; $F3B9:  ;;;
+{
+$8B:F3B9 AD 51 1F    LDA $1F51  [$7E:1F51]
+$8B:F3BC C9 80 DE    CMP #$DE80
+$8B:F3BF D0 0C       BNE $0C    [$F3CD]
+$8B:F3C1 A9 01 00    LDA #$0001
+$8B:F3C4 9D 5D 1B    STA $1B5D,x[$7E:1B7B]
+$8B:F3C7 A9 9B EE    LDA #$EE9B
+$8B:F3CA 9D 1D 1B    STA $1B1D,x[$7E:1B3B]
+
+$8B:F3CD 60          RTS
+}
+
+
+;;; $EC35: Instruction list - cinematic sprite object $EEFD ;;;
+{
+$8B:EC35             dx 0008,B49B,
+                        0008,B4A7,
+                        0008,B4BD,
+EC41                    0008,B4DD,
+                        000F,B507,
+                        0008,B53B,
+                        0008,B579,
+EC51                    0008,B5C1,
+                        000F,B613,
+EC59                    F41B,       ; ???
+                        0008,B613,
+                        F424,       ; ???
+EC61                    0008,B613,
+                        F42D,       ; ???
+                        0008,B613,
+                        F436,       ; ???
+                        0008,B613,
+EC71                    F43F,       ; ???
+                        0080,B613,
+                        F448,       ; ???
+EC79                    000F,B613,
+                        94BC,EC79   ; Go to $EC79
+}
+
+    ;;; $B49B: 'C' ;;;
+    ;;; $B4A7: 'CL' ;;;
+    ;;; $B4BD: 'CLE' ;;;
+    ;;; $B4DD: 'CLEA' ;;;
+    ;;; $B507: 'CLEAR' ;;;
+    ;;; $B53B: 'CLEAR T' ;;;
+    ;;; $B579: 'CLEAR TI' ;;;
+    ;;; $B5C1: 'CLEAR TIM' ;;;
+    ;;; $B613: 'CLEAR TIME' ;;;
+    ;;; $B66F: ':' ;;;
+    ;;; $B67B: '0' ;;;
+    ;;; $B687: '1' ;;;
+    ;;; $B693: '2' ;;;
+    ;;; $B69F: '3' ;;;
+    ;;; $B6AB: '4' ;;;
+    ;;; $B6B7: '5' ;;;
+    ;;; $B6C3: '6' ;;;
+    ;;; $B6CF: '7' ;;;
+    ;;; $B6DB: '8' ;;;
+    ;;; $B6E7: '9' ;;;
+
+
+;;; $F41B:  ;;;
+{
+$8B:F41B 5A          PHY
+$8B:F41C A0 03 EF    LDY #$EF03             ;\
+$8B:F41F 20 8A 93    JSR $938A  [$8B:938A]  ;} Spawn cinematic sprite object $EF03
+$8B:F422 7A          PLY
+$8B:F423 60          RTS
+}
+
+
+;;; $F424:  ;;;
+{
+$8B:F424 5A          PHY
+$8B:F425 A0 09 EF    LDY #$EF09             ;\
+$8B:F428 20 8A 93    JSR $938A  [$8B:938A]  ;} Spawn cinematic sprite object $EF09
+$8B:F42B 7A          PLY
+$8B:F42C 60          RTS
+}
+
+
+;;; $F42D:  ;;;
+{
+$8B:F42D 5A          PHY
+$8B:F42E A0 0F EF    LDY #$EF0F             ;\
+$8B:F431 20 8A 93    JSR $938A  [$8B:938A]  ;} Spawn cinematic sprite object $EF0F
+$8B:F434 7A          PLY
+$8B:F435 60          RTS
+}
+
+
+;;; $F436:  ;;;
+{
+$8B:F436 5A          PHY
+$8B:F437 A0 15 EF    LDY #$EF15             ;\
+$8B:F43A 20 8A 93    JSR $938A  [$8B:938A]  ;} Spawn cinematic sprite object $EF15
+$8B:F43D 7A          PLY
+$8B:F43E 60          RTS
+}
+
+
+;;; $F43F:  ;;;
+{
+$8B:F43F 5A          PHY
+$8B:F440 A0 1B EF    LDY #$EF1B             ;\
+$8B:F443 20 8A 93    JSR $938A  [$8B:938A]  ;} Spawn cinematic sprite object $EF1B
+$8B:F446 7A          PLY
+$8B:F447 60          RTS
+}
+
+
+;;; $F448:  ;;;
+{
+$8B:F448 9C 23 07    STZ $0723  [$7E:0723]
+$8B:F44B 9C 25 07    STZ $0725  [$7E:0725]
+$8B:F44E A9 64 DE    LDA #$DE64
+$8B:F451 8D 51 1F    STA $1F51  [$7E:1F51]
+$8B:F454 60          RTS
+}
+
+;;; $EE9D: Cinematic sprite object definitions ;;;
+{
+;                        _____________ Initialisation function
+;                       |     ________ Pre-instruction
+;                       |    |     ___ Instruction list
+;                       |    |    |
+$8B:EF03             dw F05E,F3B9,EC81
+$8B:EF09             dw F06D,F3B9,EC81
+$8B:EF0F             dw F07C,F3B9,ECD1
+$8B:EF15             dw F085,F3B9,EC81
+$8B:EF1B             dw F094,F3B9,EC81
+
+;;; $F05E:  ;;;
+{
+$8B:F05E AD EC 0D    LDA $0DEC  [$7E:0DEC]
+$8B:F061 20 A3 F0    JSR $F0A3  [$8B:F0A3]
+$8B:F064 A9 9C 00    LDA #$009C
+$8B:F067 99 7D 1A    STA $1A7D,y[$7E:1A95]
+$8B:F06A 4C 51 F0    JMP $F051  [$8B:F051]
+}
+
+
+;;; $F06D:  ;;;
+{
+$8B:F06D AD EE 0D    LDA $0DEE  [$7E:0DEE]
+$8B:F070 20 A3 F0    JSR $F0A3  [$8B:F0A3]
+$8B:F073 A9 A4 00    LDA #$00A4
+$8B:F076 99 7D 1A    STA $1A7D,y[$7E:1A93]
+$8B:F079 4C 51 F0    JMP $F051  [$8B:F051]
+}
+
+
+;;; $F07C:  ;;;
+{
+$8B:F07C A9 AC 00    LDA #$00AC
+$8B:F07F 99 7D 1A    STA $1A7D,y[$7E:1A91]
+$8B:F082 4C 51 F0    JMP $F051  [$8B:F051]
+}
+
+
+;;; $F085:  ;;;
+{
+$8B:F085 AD F0 0D    LDA $0DF0  [$7E:0DF0]
+$8B:F088 20 A3 F0    JSR $F0A3  [$8B:F0A3]
+$8B:F08B A9 B4 00    LDA #$00B4
+$8B:F08E 99 7D 1A    STA $1A7D,y[$7E:1A8F]
+$8B:F091 4C 51 F0    JMP $F051  [$8B:F051]
+}
+
+
+;;; $F094:  ;;;
+{
+$8B:F094 AD F2 0D    LDA $0DF2  [$7E:0DF2]
+$8B:F097 20 A3 F0    JSR $F0A3  [$8B:F0A3]
+$8B:F09A A9 BC 00    LDA #$00BC
+$8B:F09D 99 7D 1A    STA $1A7D,y[$7E:1A8D]
+$8B:F0A0 4C 51 F0    JMP $F051  [$8B:F051]
+}

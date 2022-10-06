@@ -175,18 +175,29 @@ function addLine(startPoint, endPoint) {
         return;
     }
 
-    var line = new LeaderLine(startPointElem, endPointElem,
-                              {startPlug: 'disc',
-                               endPlug: 'disc',
-                               dropShadow: true,
-                               startPlugColor: colors[nextColor],
-                               endPlugColor: colors[nextColor],
-                               size: 2,
-                               color: colors[nextColor],
-                               outlineColor: 'rgb(255, 255, 255)',
-                               outline: true,
-                               outlineSize: 0.10,
-                               path: 'straight'});
+
+    const options = {
+        startPlug: 'disc',
+        endPlug: 'disc',
+        dropShadow: true,
+        startPlugColor: colors[nextColor],
+        endPlugColor: colors[nextColor],
+        size: 4,
+        color: colors[nextColor],
+        outlineColor: 'rgb(255, 255, 255)',
+        outline: true,
+        outlineSize: 0.10,
+        path: 'straight',
+    };
+    const xy = {
+        x: '50%',
+        y: '50%',
+    }
+    var line = new LeaderLine(
+      LeaderLine.pointAnchor(startPointElem, xy),
+      LeaderLine.pointAnchor(endPointElem, xy),
+      options
+    )
 
     nextColor += 1;
     $("#"+linePrefix+startPoint).removeClass("addBorder");

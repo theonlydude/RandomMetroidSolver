@@ -1036,7 +1036,8 @@ class InteractiveSolver(CommonSolver):
                     bitMask = bossData["bitMask"]
                     loc = self.getLoc(boss)
                     if currentState[offset + byteIndex] & bitMask != 0:
-                        if loc not in self.visitedLocations:
+                        # in tourian disabled mother brain is not available, but it gets auto killed during escape
+                        if loc not in self.visitedLocations and loc in self.majorLocations:
                             self.pickItemAt(self.locNameInternal2Web(loc.Name))
                             self.locDelta += 1
                     else:

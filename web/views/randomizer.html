@@ -2627,7 +2627,7 @@ def displaySelect(id, values, default):
 def displayMultiSelect(id, selectedValues, default, multipleValues):
   # values for objective are stored differently
   if id == "objective":
-    if session.randomizer.get("objectiveRandom"):
+    if session.randomizer.get("objectiveRandom") == 'true':
       selectedValues = session.randomizer["objectiveMultiSelect"]
     else:
       selectedValues = session.randomizer["objective"] or ["kill all g4"]

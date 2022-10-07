@@ -2627,6 +2627,10 @@ org $8bF08C
 org $8bF09B
         dw $00AC
 
+// no longer let the game update IGT
+org $82dbb2
+        rts
+
 org $8bf92f
 hijack_push_rta:
 	// vanilla

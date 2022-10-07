@@ -579,7 +579,8 @@ class InteractiveSolver(CommonSolver):
         if hide == True:
             loc.Visibility = 'Hidden'
 
-        self.collectMajor(loc, itemName)
+        if loc in self.majorLocations:
+            self.collectMajor(loc, itemName)
 
     def replaceItemAt(self, locName, itemName, hide):
         # replace itemName at locName

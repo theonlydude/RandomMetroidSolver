@@ -143,6 +143,10 @@ org $8b9a08
 org $8b9a19
     jml patch4
 
+// no longer let the game update IGT: we sync IGT to take RTA value at stats save
+// org $82dbb2
+//         rts
+
 // Hijack when samus is in the ship and ready to leave the planet
 org $a2ab0d
 	jsl game_end
@@ -1146,6 +1150,7 @@ copy:
     ldx #$0000
 -
     lda.l itemlocations, x
+    nop;nop;nop;nop
     cmp #$0000
     beq +
     sta $7fa000, x
@@ -2627,11 +2632,7 @@ org $8bF08C
 org $8bF09B
         dw $00AC
 
-// no longer let the game update IGT
-org $82dbb2
-        rts
-
-org $8bf92f
+org $8bf930
 hijack_push_rta:
 	// vanilla
         STA $0DF2
@@ -2739,5 +2740,4 @@ init_sprite_second_2:
         JMP $F051
 
 print "bank 8B end : ", org
-warnpc $8bfa09
-
+warnpc $8bfa0f

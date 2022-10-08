@@ -1508,7 +1508,8 @@ write_stats:
     ply
     rtl
 
-// 32-bit by 16-bit division routine I found somewhere
+// 32-bit by 16-bit division routine total found somewhere
+// ($14$16)/$12 : result in $16, remainder in $14
 div32:
     phy
     phx
@@ -2285,38 +2286,50 @@ stats:
     dw 0,               0,  0, 0    // end of table
 
 // load RTA in IGT
+print "update_igt: ", org
 update_igt:
-	// divide total frames in 32 bits by 60 to have total seconds in 16 bits
-	// (so even if the actual 32 bits frame value is correct and can go up to 1100+ hours,
-	//  we can actually display correctly only times up to 18:12:15)
+	// divide total frames in 32 bits by 3600 to have 16bits minutes and remaining frames,
+        // to correctly handle times up to 99:59:59.59 like vanilla
 	lda {stats_timer}
 	sta $16
 	lda {stats_timer}+2
 	sta $14
-	lda #$003c
+	lda #3600
 	sta $12
-	jsr div32 // frames in $14, rest in $16
+	jsr div32
 	lda $14
-	sta {igt_frames} // replace igt frames
-	lda $16  // RTA in seconds
-	sta $004204 // divide by 60 to get minutes
-	sep #$20
-	lda #$3c
-	sta $004206
-	pha; pla; pha; pla; rep #$20
-	lda $004216 // rta seconds
-	sta {igt_seconds} // replace igt seconds
-	lda $004214 // hours/minutes
-	sta $004204 // divide by 60 to get hours and minutes
+	sta {igt_frames} // store remainder to igt frames
+	lda $16  // RTA in minutes
+	sta $004204 // divide by 60 to get hours
 	sep #$20
 	lda #$3c
 	sta $004206
 	pha; pla; pha; pla; rep #$20
 	lda $004216 // rta minutes
 	sta {igt_minutes} // replace igt minutes
-	lda $004214 // rta hours
-	sta {igt_hours} // replace igt hours
+	lda $004214 // hours
+        sta {igt_hours} // replace igt hours
+        cmp #$0064 // if < 100 hours, continue
+        bpl .overflow
+        lda {igt_frames} // frames remainder after initial division to get minutes
+	sta $004204 // divide by 60 to get seconds and frames
+	sep #$20
+	lda #$3c
+	sta $004206
+	pha; pla; pha; pla; rep #$20
+	lda $004216 // rta frames
+	sta {igt_frames} // replace igt frames
+	lda $004214 // rta seconds
+        sta {igt_seconds} // replace igt seconds
 	rtl
+.overflow: // IGT = 99:59:59.59
+        lda #$0063
+        sta {igt_hours}
+        lda #$003b
+        sta {igt_minutes}
+        sta {igt_seconds}
+        sta {igt_frames}
+        rtl
 
 print "bank DF end : ", org
 

@@ -144,8 +144,9 @@ org $8b9a19
     jml patch4
 
 // no longer let the game update IGT: we sync IGT to take RTA value at stats save
-// org $82dbb2
-//         rts
+org $82dbb2
+        plp
+        rts
 
 // Hijack when samus is in the ship and ready to leave the planet
 org $a2ab0d

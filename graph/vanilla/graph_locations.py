@@ -221,10 +221,9 @@ locationsDict["Wave Beam"].Available = (
 )
 locationsDict["Wave Beam"].PostAvailable = (
     lambda sm: sm.wor(sm.haveItem('Morph'), # exit through lower passage under the spikes
-                      sm.wand(sm.wor(sm.haveItem('SpaceJump'), # exit through blue gate
-                                     sm.haveItem('Grapple')),
-                              sm.wor(sm.wand(sm.canBlueGateGlitch(), sm.heatProof()), # hell run + green gate glitch is too much
-                                     sm.haveItem('Wave'))))
+                      sm.wand(sm.haveItem('Wave'), # exit through blue gate
+                              sm.wor(sm.haveItem('SpaceJump'),
+                                     sm.haveItem('Grapple'))))
 )
 locationsDict["Ridley"].AccessFrom = {
     'RidleyRoomIn': lambda sm: SMBool(True)

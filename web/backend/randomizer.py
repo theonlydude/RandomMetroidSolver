@@ -44,6 +44,12 @@ class Randomizer(object):
             "minimizer":"Typical 'boss rush' settings with random start and nerfed charge",
             "minimizer_hardcore":"Have fun 'rushing' bosses with no equipment on a tiny map",
             "minimizer_maximizer":"No longer a boss rush",
+            "objectives_all_bosses":"Kill all bosses/minibosses",
+            "objectives_clear_areas":"Clear 5 random areas and end with fast Tourian",
+            "objectives_hard_heat":"All Norfair-related objectives, possibly without a suit",
+            "objectives_hard_water":"All Maridia-related objectives, possibly without a suit",
+            "objectives_memes":"Do all the memes and rush to the ship",
+            "objectives_robots_notweaks":"Collect Bomb and Space Jump to activate the robots, then rush to the ship",
             "quite_random": "randomizes a few significant settings to have various seeds",
             "scavenger_hard":"Pretty hostile Scavenger mode",
             "scavenger_random":"Randomize everything within Scavenger mode",
@@ -73,7 +79,8 @@ class Randomizer(object):
             "Area": ["way_of_chozo", "where_am_i", "where_is_morph"],
             "Doors": ["doors_long", "doors_short"],
             "Minimizer": ["minimizer", "minimizer_hardcore", "minimizer_maximizer"],
-            "Hard": ["hardway2hell", "highway2hell", "stupid_hard"],
+            "Objectives": ["objectives_all_bosses", "objectives_clear_areas", "objectives_memes", "objectives_robots_notweaks"],
+            "Hard": ["hardway2hell", "highway2hell", "stupid_hard", "objectives_hard_heat", "objectives_hard_water"],
             "Random": ["all_random", "quite_random", "surprise"],
             "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2", "SGLive2022_Game_1", "SGLive2022_Game_2", "SGLive2022_Game_3", "Boyz_League_SM_Rando"]
         }

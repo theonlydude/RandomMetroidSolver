@@ -384,6 +384,9 @@ class Objectives(object):
             if newGoal.name in goal.exclusion["list"]:
                 LOG.debug("new goal {} in exclusion list of active goal {}".format(newGoal.name, goal.name))
                 return True
+            if goal.name in newGoal.exclusion["list"]:
+                LOG.debug("active goal {} in exclusion list of new goal {}".format(goal.name, newGoal.name))
+                return True
             # count bosses/minibosses already active if new goal has a limit
             if newGoal.exclusion.get("type") == goal.gtype:
                 count += 1

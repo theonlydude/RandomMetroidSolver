@@ -1206,11 +1206,12 @@ game_end:
     lda #$0000  // if carry clear this will subtract one from the high byte of timer
     sbc {timer2}
 
-    // save timer in stats
+    // save timer in stats and IGT
     lda {timer1}
     sta {stats_timer}
     lda {timer2}
     sta {stats_timer}+2
+    jsl update_igt
 
     // save stats to SRAM
     lda #$0001
@@ -1663,8 +1664,6 @@ save_stats:
     phx
     phy
     pha
-    // copy RTA timer from RAM stats to IGT RAM
-    jsl update_igt
     // actually save stats now
     lda {current_save_slot}
     clc

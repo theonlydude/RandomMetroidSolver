@@ -253,6 +253,19 @@ class HelpersGraph(Helpers):
                                      sm.knowsDoubleChamberWallJump()),
                               sm.canHellRun(hellRun['hellRun'], hellRun['mult']*0.8, hellRun['minE'])))
 
+    @Cache.decorator
+    def canExitWaveBeam(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Morph'), # exit through lower passage under the spikes
+                      sm.wand(sm.wor(sm.haveItem('SpaceJump'), # exit through blue gate
+                                     sm.haveItem('Grapple')),
+                              sm.wor(sm.haveItem('Wave'),
+                                     sm.wand(sm.heatProof(), # hell run + green gate glitch is too much
+                                             sm.canBlueGateGlitch(),
+                                             # if missiles were required to open the door, require two packs as no farming around
+                                             sm.wor(sm.wnot(SMBool('Missile' in sm.traverse('DoubleChamberRight').items)),
+                                                    sm.itemCountOk("Missile", 2))))))
+
     def canExitCathedral(self, hellRun):
         # from top: can use bomb/powerbomb jumps
         # from bottom: can do a shinespark or use space jump

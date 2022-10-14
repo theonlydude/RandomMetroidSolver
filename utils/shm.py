@@ -2,7 +2,7 @@ import json
 
 class SHM(object):
     msgHeader = 3
-    bufSize = 100*1024
+    bufSize = 200*1024
 
     def __init__(self, shmName=None):
         # temporary bugfix while not fixed in python

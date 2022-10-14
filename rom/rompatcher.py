@@ -127,8 +127,7 @@ class RomPatcher:
         self.writeRandoSettings(self.settings["randoSettings"], self.settings["itemLocs"])
         self.writeDoorConnections(self.settings["doors"])
 
-        if not self.settings["isPlando"]:
-            self.writeVersion(self.settings["displayedVersion"])
+        self.writeVersion(self.settings["displayedVersion"])
         if self.settings["ctrlDict"] is not None:
             self.writeControls(self.settings["ctrlDict"])
         if self.settings["moonWalk"] == True:

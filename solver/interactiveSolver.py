@@ -481,6 +481,8 @@ class InteractiveSolver(CommonSolver):
         doors = GraphUtils.getDoorConnections(AccessGraph(Logic.accessPoints, self.fillGraph()), self.areaRando,
                                               self.bossRando, self.escapeRando, False)
 
+        from utils.version import displayedVersion
+
         patcherSettings = {
             "isPlando": True,
             "majorsSplit": majorsSplit,
@@ -504,7 +506,7 @@ class InteractiveSolver(CommonSolver):
             "seed": None,
             "randoSettings": randoSettings,
             "doors": doors,
-            "displayedVersion": None,
+            "displayedVersion": displayedVersion,
             "itemLocs": itemLocs,
             "progItemLocs": progItemLocs,
             "plando": {

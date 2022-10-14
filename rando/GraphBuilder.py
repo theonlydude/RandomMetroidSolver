@@ -47,11 +47,11 @@ class GraphBuilder(object):
                             n -= len([ap for ap in aps if ap.Boss])
                             escAreas = {ap.GraphArea for ap in aps if not ap.Boss}
                             objForced = forcedAreas.intersection(escAreas)
-                            escAreasList = list(escAreas)
+                            escAreasList = sorted(list(escAreas))
                             while len(objForced) < n and len(escAreasList) > 0:
                                 objForced.add(escAreasList.pop(random.randint(0, len(escAreasList)-1)))
                             forcedAreas = forcedAreas.union(objForced)
-                transitions = GraphUtils.createMinimizerTransitions(self.graphSettings.startAP, self.minimizerN, list(sorted(forcedAreas)))
+                transitions = GraphUtils.createMinimizerTransitions(self.graphSettings.startAP, self.minimizerN, sorted(list(forcedAreas)))
             else:
                 if not self.bossRando:
                     transitions += vanillaBossesTransitions

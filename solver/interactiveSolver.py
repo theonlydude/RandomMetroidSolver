@@ -476,7 +476,7 @@ class InteractiveSolver(CommonSolver):
         else:
             suitsMode = "Vanilla"
 
-        patches = ['credits_varia.ips', 'tracking.ips', "Escape_Animals_Disable", "Escape_Trigger_Nothing_Objective_Anywhere"]
+        patches = ["Escape_Animals_Disable", "Escape_Trigger_Nothing_Objective_Anywhere"]
 
         doors = GraphUtils.getDoorConnections(AccessGraph(Logic.accessPoints, self.fillGraph()), self.areaRando,
                                               self.bossRando, self.escapeRando, False)

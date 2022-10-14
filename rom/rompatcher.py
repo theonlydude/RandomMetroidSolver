@@ -6,6 +6,7 @@ from rando.Items import ItemManager
 from rom.compression import Compressor
 from rom.ips import IPS_Patch
 from utils.doorsmanager import DoorsManager, IndicatorFlag
+from utils.objectives import Objectives
 from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses, graphAreas
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
@@ -82,8 +83,9 @@ class RomPatcher:
         'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips']
     }
 
-    def __init__(self, romFileName=None, magic=None):
+    def __init__(self, settings=None, romFileName=None, magic=None):
         self.log = utils.log.get('RomPatcher')
+        self.settings = settings
         self.romFileName = romFileName
         self.patchAccess = PatchAccess()
         self.race = None
@@ -110,6 +112,38 @@ class RomPatcher:
             # get out of croc room: reload CRE
             0x93ea: self.forceRoomCRE
         }
+
+    def patchRom(self):
+        self.applyIPSPatches()
+        self.commitIPS()
+
+        self.writeObjectives(self.settings["itemLocs"], self.settings["tourian"])
+        self.writeItemsLocs(self.settings["itemLocs"])
+        self.writeSplitLocs(self.settings["majorsSplit"], self.settings["itemLocs"], self.settings["progItemLocs"])
+        self.writeItemsNumber()
+        if not self.settings["isPlando"]:
+            self.writeSeed(self.settings["seed"]) # lol if race mode
+        self.writeSpoiler(self.settings["itemLocs"], self.settings["progItemLocs"])
+        self.writeRandoSettings(self.settings["randoSettings"], self.settings["itemLocs"])
+        self.writeDoorConnections(self.settings["doors"])
+
+        if not self.settings["isPlando"]:
+            self.writeVersion(self.settings["displayedVersion"])
+        if self.settings["ctrlDict"] is not None:
+            self.writeControls(self.settings["ctrlDict"])
+        if self.settings["moonWalk"] == True:
+            self.enableMoonWalk()
+
+        self.writeMagic()
+        self.writeMajorsSplit(self.settings["majorsSplit"])
+
+        if self.settings["isPlando"] and self.race is None:
+            doorsPtrs = GraphUtils.getAps2DoorsPtrs()
+            self.writePlandoTransitions(self.settings["plando"]["graphTrans"], doorsPtrs,
+                                        self.settings["plando"]["maxTransitions"])
+            self.writePlandoAddresses(self.settings["plando"]["visitedLocations"])
+
+        self.end()
 
     def end(self):
         self.romFile.fillToNextBank()
@@ -289,87 +323,69 @@ class RomPatcher:
             for (messageKey, newMessage) in messageBoxes[sprite].items():
                 messageBox.updateMessage(messageKey, newMessage, doVFlip, doHFlip)
 
-    def writePlmTable(self, plms, area, bosses, doorsColors, startLocation):
-        # called when saving a plando
-        try:
-            if bosses == True or area == True:
-                plms.append('WS_Save_Blinking_Door')
-
-            doors = self.getStartDoors(plms, area, None)
-            self.writeDoorsColor(doors)
-            self.writeDoorIndicators(plms, area, doorsColors)
-            self.applyStartAP(startLocation, plms, doors)
-
-            self.applyPLMs(plms)
-        except Exception as e:
-            raise Exception("Error patching {}. ({})".format(self.romFileName, e))
-
-    def applyIPSPatches(self, startLocation="Landing Site",
-                        optionalPatches=[], noLayout=False, suitsMode="Balanced",
-                        area=False, bosses=False, areaLayoutBase=False,
-                        noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
-                        escapeAttr=None, minimizerN=None, tourian="Vanilla",
-                        doorsColorsRando=False, vanillaObjectives=True):
+    def applyIPSPatches(self):
         try:
             # apply standard patches
             stdPatches = []
             plms = []
             stdPatches += RomPatcher.IPSPatches['Standard'][:]
-            if noLayout:
+            if not self.settings["layout"]:
                 # when disabling anti softlock protection also disable doors indicators
                 stdPatches.remove('door_indicators_plms.ips')
             if self.race is not None:
                 stdPatches.append('race_mode_post.ips')
-            if suitsMode != "Balanced":
+            if self.settings["suitsMode"] != "Balanced":
                 stdPatches.remove('Removes_Gravity_Suit_heat_protection')
-            if suitsMode == "Progressive":
+            if self.settings["suitsMode"] == "Progressive":
                 stdPatches.append('progressive_suits.ips')
-            if nerfedCharge == True:
+            if self.settings["nerfedCharge"] == True:
                 stdPatches.append('nerfed_charge.ips')
-            if nerfedRainbowBeam == True:
+            if self.settings["nerfedRainbowBeam"] == True:
                 stdPatches.append('nerfed_rainbow_beam.ips')
-            if bosses == True or area == True:
+            if self.settings["boss"] == True or self.settings["area"] == True:
                 stdPatches += ["WS_Main_Open_Grey", "WS_Save_Active"]
                 plms.append('WS_Save_Blinking_Door')
-            if bosses == True:
+            if self.settings["boss"] == True:
                 stdPatches.append("Phantoon_Eye_Door")
-            if area == True or doorsColorsRando == True or not GraphUtils.isStandardStart(startLocation):
+            if (self.settings["area"] == True
+                or self.settings["doorsColorsRando"] == True
+                or not GraphUtils.isStandardStart(self.settings["startLocation"])):
                 stdPatches.append("Enable_Backup_Saves")
-            if 'varia_hud.ips' in optionalPatches:
+            if 'varia_hud.ips' in self.settings["optionalPatches"]:
                 # varia hud can make demos glitch out
                 self.applyIPSPatch("no_demo.ips")
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
-            if not vanillaObjectives:
+            if not self.settings["vanillaObjectives"]:
                 self.applyIPSPatch("Objectives_sfx")
             # show objectives and Tourian status in a shortened intro sequence
             # if not full vanilla objectives+tourian
-            if not vanillaObjectives or tourian != "Vanilla":
+            if not self.settings["vanillaObjectives"] or self.settings["tourian"] != "Vanilla":
                 self.applyIPSPatch("Restore_Intro") # important to apply this after new_game.ips
                 self.applyIPSPatch("intro_text.ips")
-            if noLayout == False:
+            if self.settings["layout"]:
                 # apply layout patches
                 for patchName in RomPatcher.IPSPatches['Layout']:
                     self.applyIPSPatch(patchName)
-            if noVariaTweaks == False:
+            if self.settings["variaTweaks"]:
                 # VARIA tweaks
                 for patchName in RomPatcher.IPSPatches['VariaTweaks']:
                     self.applyIPSPatch(patchName)
 
             # apply optional patches
-            for patchName in optionalPatches:
+            for patchName in self.settings["optionalPatches"]:
                 self.applyIPSPatch(patchName)
 
             # random escape
-            if escapeAttr is not None:
+            if self.settings["escapeAttr"] is not None:
                 for patchName in RomPatcher.IPSPatches['Escape']:
                     self.applyIPSPatch(patchName)
                 # animals and timer
-                self.applyEscapeAttributes(escapeAttr, plms)
+                self.applyEscapeAttributes(self.settings["escapeAttr"], plms)
 
             # apply area patches
-            if area == True:
-                if areaLayoutBase == True:
+            if self.settings["area"] == True:
+                if not self.settings["areaLayout"]:
                     for p in ['area_rando_layout.ips', 'Sponge_Bath_Blinking_Door', 'east_ocean.ips']:
                        RomPatcher.IPSPatches['Area'].remove(p)
                     RomPatcher.IPSPatches['Area'].append('area_rando_layout_base.ips')
@@ -377,22 +393,22 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
             else:
                 self.applyIPSPatch('area_ids_alt.ips')
-            if bosses == True:
+            if self.settings["boss"] == True:
                 for patchName in RomPatcher.IPSPatches['Bosses']:
                     self.applyIPSPatch(patchName)
-            if minimizerN is not None:
+            if self.settings["minimizerN"] is not None:
                 self.applyIPSPatch('minimizer_bosses.ips')
-            if tourian == "Fast":
+            if self.settings["tourian"] == "Fast":
                 for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
                     self.applyIPSPatch(patchName)
-            doors = self.getStartDoors(plms, area, minimizerN)
-            if doorsColorsRando == True:
+            doors = self.getStartDoors(plms, self.settings["area"], self.settings["minimizerN"])
+            if self.settings["doorsColorsRando"] == True:
                 for patchName in RomPatcher.IPSPatches['DoorsColors']:
                     self.applyIPSPatch(patchName)
             self.writeDoorsColor(doors)
-            if noLayout == False:
-                self.writeDoorIndicators(plms, area, doorsColorsRando)
-            self.applyStartAP(startLocation, plms, doors)
+            if self.settings["layout"]:
+                self.writeDoorIndicators(plms, self.settings["area"], self.settings["doorsColorsRando"])
+            self.applyStartAP(self.settings["startLocation"], plms, doors)
             self.applyPLMs(plms)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
@@ -1151,7 +1167,8 @@ class RomPatcher:
             else:
                 self.applyIPSPatch(plmName)
 
-    def writeObjectives(self, objectives, itemLocs, tourian):
+    def writeObjectives(self, itemLocs, tourian):
+        objectives = Objectives()
         objectives.writeGoals(self.romFile)
         objectives.writeIntroObjectives(self.romFile, tourian)
         self.writeItemsMasks(itemLocs)

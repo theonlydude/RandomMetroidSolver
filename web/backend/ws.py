@@ -201,6 +201,7 @@ class WS(object):
         end = datetime.now()
         duration = (end - start).total_seconds() * 1000
         print("ret: {}, subprocess duration: {}ms".format(output.returncode, duration))
+        print(output.stdout.decode("utf-8"))
 
         state = shm.readMsgJson()
         shm.finish(True)
@@ -223,9 +224,10 @@ class WS(object):
                 return ret
         else:
             msg = "Something wrong happened while iteratively solving the ROM"
+            print(output.stderr.decode("utf-8"))
             try:
                 self.addError(params, output.stderr.decode("utf-8"))
-                if "errorMsg" in state:
+                if "errorMsg" in state and state["errorMsg"]:
                     msg = state["errorMsg"]
             except Exception as e:
                 # happen when jsonOutFileName is empty

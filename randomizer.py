@@ -721,6 +721,39 @@ if __name__ == "__main__":
             db.DB.dumpExtStatsItems(skillPreset, randoPreset, locsItems, extStatsFile)
 
     try:
+        if args.hud == True or args.majorsSplit == "FullWithHUD":
+            args.patches.append("varia_hud.ips")
+        if args.debug == True:
+            args.patches.append("Disable_Clear_Save_Boot")
+
+        patcherSettings = {
+            "isPlando": False,
+            "majorsSplit": args.majorsSplit,
+            "startLocation": args.startLocation,
+            "optionalPatches": args.patches,
+            "layout": not args.noLayout,
+            "suitsMode": gravityBehaviour,
+            "area": areaRandomization,
+            "boss": args.bosses,
+            "areaLayout": not args.areaLayoutBase,
+            "variaTweaks": not args.noVariaTweaks,
+            "nerfedCharge": args.nerfedCharge,
+            "nerfedRainbowBeam": energyQty == 'ultra sparse',
+            "escapeAttr": escapeAttr,
+            "minimizerN": minimizerN,
+            "tourian": args.tourian,
+            "doorsColorsRando": args.doorsColorsRando,
+            "vanillaObjectives": objectivesManager.isVanilla(),
+            "ctrlDict": ctrlDict,
+            "moonWalk": args.moonWalk,
+            "seed": seed,
+            "randoSettings": randoSettings,
+            "doors": doors,
+            "displayedVersion": displayedVersion,
+            "itemLocs": itemLocs,
+            "progItemLocs": progItemLocs,
+        }
+
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source
         # args.output is not None: generate local json named args.output
         if args.rom is not None:
@@ -728,41 +761,12 @@ if __name__ == "__main__":
             romFileName = args.rom
             outFileName = fileName + '.sfc'
             shutil.copyfile(romFileName, outFileName)
-            romPatcher = RomPatcher(outFileName, magic=args.raceMagic)
+            romPatcher = RomPatcher(settings=patcherSettings, romFileName=outFileName, magic=args.raceMagic)
         else:
             outFileName = args.output
-            romPatcher = RomPatcher(magic=args.raceMagic)
-        if args.hud == True or args.majorsSplit == "FullWithHUD":
-            args.patches.append("varia_hud.ips")
-        if args.debug == True:
-            args.patches.append("Disable_Clear_Save_Boot")
+            romPatcher = RomPatcher(settings=patcherSettings, magic=args.raceMagic)
 
-        romPatcher.applyIPSPatches(args.startLocation, args.patches,
-                                   args.noLayout, gravityBehaviour,
-                                   areaRandomization, args.bosses, args.areaLayoutBase,
-                                   args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
-                                   escapeAttr, minimizerN, args.tourian,
-                                   args.doorsColorsRando, objectivesManager.isVanilla())
-
-        romPatcher.commitIPS()
-
-        romPatcher.writeObjectives(objectivesManager, itemLocs, args.tourian)
-        romPatcher.writeItemsLocs(itemLocs)
-        romPatcher.writeSplitLocs(args.majorsSplit, itemLocs, progItemLocs)
-        romPatcher.writeItemsNumber()
-        romPatcher.writeSeed(seed) # lol if race mode
-        romPatcher.writeSpoiler(itemLocs, progItemLocs)
-        romPatcher.writeRandoSettings(randoSettings, itemLocs)
-        romPatcher.writeDoorConnections(doors)
-        romPatcher.writeVersion(displayedVersion)
-
-        if ctrlDict is not None:
-            romPatcher.writeControls(ctrlDict)
-        if args.moonWalk == True:
-            romPatcher.enableMoonWalk()
-        romPatcher.writeMagic()
-        romPatcher.writeMajorsSplit(args.majorsSplit)
-        romPatcher.end()
+        romPatcher.patchRom()
 
         if len(optErrMsgs) > 0:
             optErrMsgs.append(randoExec.errorMsg)

@@ -437,44 +437,26 @@ class InteractiveSolver(CommonSolver):
         # patch the ROM
         if lock == True:
             import random
-            magic = random.randint(1, 0xffff)
+            magic = random.randint(1, sys.maxsize)
         else:
             magic = None
-        romPatcher = RomPatcher(magic=magic)
-        patches = ['credits_varia.ips', 'tracking.ips', "Escape_Animals_Disable", "Escape_Trigger_Nothing_Objective_Anywhere"]
-        doorsColors = DoorsManager.isRandom()
-        if doorsColors:
-            patches += RomPatcher.IPSPatches['DoorsColors']
-            patches.append("Enable_Backup_Saves")
-        if self.areaRando:
-            patches.append("Enable_Backup_Saves")
-        if magic != None:
-            patches.insert(0, 'race_mode.ips')
-            patches.append('race_mode_post.ips')
-        romPatcher.addIPSPatches(patches)
 
-        plms = []
-        if self.areaRando == True or self.bossRando == True or self.escapeRando == True:
-            doors = GraphUtils.getDoorConnections(AccessGraph(Logic.accessPoints, self.fillGraph()), self.areaRando, self.bossRando, self.escapeRando, False)
-            romPatcher.writeDoorConnections(doors)
-            if magic == None:
-                doorsPtrs = GraphUtils.getAps2DoorsPtrs()
-                romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
-                                                  len(vanillaBossesTransitions) + len(vanillaTransitions))
-            if self.escapeRando == True and escapeTimer != None:
-                # convert from '03:00' to number of seconds
-                escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
-                romPatcher.applyEscapeAttributes({'Timer': escapeTimer, 'Animals': None, 'patches': []}, plms)
-
-        # write plm table & random doors
-        romPatcher.writePlmTable(plms, self.areaRando, self.bossRando, doorsColors, self.startLocation)
-
-        romPatcher.writeItemsLocs(itemLocs)
-        romPatcher.writeItemsNumber()
-        romPatcher.writeSpoiler(itemLocs)
-        romPatcher.writeItemsMasks(itemLocs)
         # plando is considered Full
         majorsSplit = self.masterMajorsSplit if self.masterMajorsSplit in ["FullWithHUD", "Scavenger"] else "Full"
+        class FakeRandoSettings:
+            def __init__(self):
+                self.qty = {'energy': 'plando'}
+                self.progSpeed = 'plando'
+                self.progDiff = 'plando'
+                self.restrictions = {'Suits': False, 'Morph': 'plando'}
+                self.superFun = {}
+        randoSettings = FakeRandoSettings()
+
+        escapeAttr = None
+        if self.escapeRando == True and escapeTimer != None:
+            # convert from '03:00' to number of seconds
+            escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
+            escapeAttr = {'Timer': escapeTimer, 'Animals': None, 'patches': []}
 
         progItemLocs = []
         if majorsSplit == "Scavenger":
@@ -486,24 +468,54 @@ class InteractiveSolver(CommonSolver):
                 progItemLocs.append(ItemLocation(Location=getLoc(locName)))
                 if locName not in locsItems:
                     errorMsg = "Nothing at a Scavenger location, seed is unfinishable"
-        romPatcher.writeSplitLocs(majorsSplit, itemLocs, progItemLocs)
-        romPatcher.writeMajorsSplit(majorsSplit)
-        class FakeRandoSettings:
-            def __init__(self):
-                self.qty = {'energy': 'plando'}
-                self.progSpeed = 'plando'
-                self.progDiff = 'plando'
-                self.restrictions = {'Suits': False, 'Morph': 'plando'}
-                self.superFun = {}
-        randoSettings = FakeRandoSettings()
-        romPatcher.writeRandoSettings(randoSettings, itemLocs)
-        if magic != None:
-            romPatcher.writeMagic()
-        else:
-            romPatcher.writePlandoAddresses(self.visitedLocations)
 
-        romPatcher.commitIPS()
-        romPatcher.end()
+        if RomPatches.ProgressiveSuits in RomPatches.ActivePatches:
+            suitsMode = "Progressive"
+        elif RomPatches.NoGravityEnvProtection in RomPatches.ActivePatches:
+            suitsMode = "Balanced"
+        else:
+            suitsMode = "Vanilla"
+
+        patches = ['credits_varia.ips', 'tracking.ips', "Escape_Animals_Disable", "Escape_Trigger_Nothing_Objective_Anywhere"]
+
+        doors = GraphUtils.getDoorConnections(AccessGraph(Logic.accessPoints, self.fillGraph()), self.areaRando,
+                                              self.bossRando, self.escapeRando, False)
+
+        patcherSettings = {
+            "isPlando": True,
+            "majorsSplit": majorsSplit,
+            "startLocation": self.startLocation,
+            "optionalPatches": patches,
+            "layout": RomPatches.MoatShotBlock in RomPatches.ActivePatches,
+            "suitsMode": suitsMode,
+            "area": self.areaRando,
+            "boss": self.bossRando,
+            "areaLayout": RomPatches.AreaRandoGatesOther in RomPatches.ActivePatches,
+            "variaTweaks": False,
+            "nerfedCharge": False,
+            "nerfedRainbowBeam": False,
+            "escapeAttr": escapeAttr,
+            "minimizerN": None,
+            "tourian": self.tourian,
+            "doorsColorsRando": DoorsManager.isRandom(),
+            "vanillaObjectives": self.objectives.isVanilla(),
+            "ctrlDict": None,
+            "moonWalk": False,
+            "seed": None,
+            "randoSettings": randoSettings,
+            "doors": doors,
+            "displayedVersion": None,
+            "itemLocs": itemLocs,
+            "progItemLocs": progItemLocs,
+            "plando": {
+                "graphTrans": self.curGraphTransitions,
+                "maxTransitions": len(vanillaBossesTransitions) + len(vanillaTransitions),
+                "visitedLocations": self.visitedLocations
+            }
+        }
+
+        romPatcher = RomPatcher(settings=patcherSettings, magic=magic)
+        romPatcher.patchRom()
 
         data = romPatcher.romFile.data
         preset = os.path.splitext(os.path.basename(self.presetFileName))[0]

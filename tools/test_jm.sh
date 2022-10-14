@@ -250,6 +250,7 @@ function computeSeed {
             else
 	        MD5="mismatch"
 	        echo "OLD: ${OLD_MD5} NEW: ${NEW_MD5}"
+                mv ${RANDO_PRESET} ${RANDO_PRESET_NEW}
             fi
 	fi
     else

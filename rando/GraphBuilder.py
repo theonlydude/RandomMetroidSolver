@@ -51,7 +51,7 @@ class GraphBuilder(object):
                             while len(objForced) < n and len(escAreasList) > 0:
                                 objForced.add(escAreasList.pop(random.randint(0, len(escAreasList)-1)))
                             forcedAreas = forcedAreas.union(objForced)
-                transitions = GraphUtils.createMinimizerTransitions(self.graphSettings.startAP, self.minimizerN, list(forcedAreas))
+                transitions = GraphUtils.createMinimizerTransitions(self.graphSettings.startAP, self.minimizerN, list(sorted(forcedAreas)))
             else:
                 if not self.bossRando:
                     transitions += vanillaBossesTransitions

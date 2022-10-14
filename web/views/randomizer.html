@@ -714,9 +714,20 @@ function setMaxObjective(isRandom) {
     }
 }
 
+{{
+def writeObjectiveList(key):
+    value = session.randomizer.get(key, [])
+    if isinstance(value, str):
+        value = value.split(',')
+        pass
+    response.write("{}".format(value), escape=False)
+    pass
+}}
+
+
 var objectiveBackup = {
-    true: {{ response.write("{}".format(session.randomizer.get('objectiveMultiSelect',[])), escape=False) }},
-    false: {{ response.write("{}".format(session.randomizer.get('objective', [])), escape=False) }},
+    true: {{ writeObjectiveList('objectiveMultiSelect') }},
+    false: {{ writeObjectiveList('objective') }},
 }
 
 var takeBackup = false;

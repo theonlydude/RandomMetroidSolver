@@ -1,4 +1,5 @@
 {
+    "objectiveRandom": "true",
     "objective": [5],
     "objectiveMultiSelect": ["clear crateria", "clear green brinstar", "clear red brinstar", "clear wrecked ship", "clear kraid's lair", "clear upper norfair", "clear croc's lair", "clear lower norfair", "clear west maridia", "clear east maridia"],
     "tourian": "Fast"

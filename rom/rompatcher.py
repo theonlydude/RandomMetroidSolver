@@ -400,6 +400,8 @@ class RomPatcher:
             if self.settings["tourian"] == "Fast":
                 for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
                     self.applyIPSPatch(patchName)
+            elif self.settings["tourian"] == "Disabled":
+                self.applyIPSPatch("Escape_Trigger")
             doors = self.getStartDoors(plms, self.settings["area"], self.settings["minimizerN"])
             if self.settings["doorsColorsRando"] == True:
                 for patchName in RomPatcher.IPSPatches['DoorsColors']:

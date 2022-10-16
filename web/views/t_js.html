@@ -1026,7 +1026,7 @@ window.onload = function(){
           var ext = re.exec(file.name)[1];
         if( ! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC") ) {
             document.getElementById("uploadFile").value = "";
-            alert("wrong extension: "+ext);
+            alert("Wrong extension: "+ext);
             return false;
         }
 
@@ -1045,13 +1045,13 @@ window.onload = function(){
             return false;
         } else if( fileSize == 3146240) {
             document.getElementById("uploadFile").value = "";
-            alert("headered ROM detected, please use an unheadered ROM");
+            alert("Headered ROM detected, please use an unheadered ROM");
             return false;
         } else if(mode == "plando" && fileSize == 4*1024*1024) {
             alert("Warning: You won't be able to upload a Sprite customized seed in the Plandository (hosting space constraints)");
         } else if(mode == "plando" && digest == "d63ed5f8") {
             document.getElementById("uploadFile").value = "";
-            alert("vanilla ROM detected, use an already randomized VARIA ROM");
+            alert("Vanilla ROM detected, use an already randomized VARIA ROM");
             return false;
         }
 
@@ -1064,7 +1064,7 @@ window.onload = function(){
             if(bytes[addr] != 0xff) {
                 if(mode == "plando" && debug == false) {
                     clearInputSeed();
-                    alert("race protected seed detected");
+                    alert("Race protected seed detected");
                     return false;
                 } else {
                     romIsRaceProtected = true;
@@ -1080,7 +1080,7 @@ window.onload = function(){
             if (length == 4) {
                 if (version != "beta") {
                     clearInputSeed();
-                    alert("base seed is a beta seed, use a seed generated on production");
+                    alert("Base seed is a beta seed, use a seed generated on production");
                     return false;
                 }
             } else if (length == 12) {
@@ -1090,12 +1090,21 @@ window.onload = function(){
                 }
                 if(seedVersion != version) {
                     clearInputSeed();
-                    alert("base seed's version is "+seedVersion+" but current version is "+version+", use a base seed generated with the current version");
+                    alert("Base seed's version is "+seedVersion+" but current version is "+version+", use a base seed generated with the current version");
                     return false;
                 }
             } else {
                 clearInputSeed();
-                alert("base seed's is not a VARIA one, use a base seed generated on the randomizer page");
+                alert("Base seed's is not a VARIA one, use a base seed generated on the randomizer page");
+                return false;
+            }
+
+            // check if base seed is a minimizer without crateria.
+            // prevent it as it can cause issues if the user connect crateria afterward.
+            // detect if Climb_Asleep patch is present.
+            if(bytes[0x796CC] == 0x7f) {
+                clearInputSeed();
+                alert("Use a minimizer with 100 locations as your base seed");
                 return false;
             }
 

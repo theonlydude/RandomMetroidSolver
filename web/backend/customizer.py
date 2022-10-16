@@ -140,6 +140,8 @@ class Customizer(object):
             self.session.customizer['etanks'] = 0
             self.session.customizer['music'] = "Don't touch"
             self.session.customizer['color_blind'] = "off"
+            self.session.customizer['disable_screen_shake'] = "off"
+            self.session.customizer['noflashing'] = "off"
 
             musics = self.loadMusics()
             for song, songId in musics["_list"]:
@@ -162,7 +164,8 @@ class Customizer(object):
                    'remove_elevators_speed', 'remove_fast_doors', 'remove_Infinite_Space_Jump',
                    'remove_rando_speed', 'remove_spinjumprestart', 'gamepadMapping', 'widescreen',
                    'hell', 'lava_acid_physics', 'colorsRandomization', 'suitsPalettes', 'beamsPalettes',
-                   'tilesPalettes', 'enemiesPalettes', 'bossesPalettes', 'invert', 'color_blind']
+                   'tilesPalettes', 'enemiesPalettes', 'bossesPalettes', 'invert',
+                   'color_blind', 'disable_screen_shake', 'noflashing']
         others = ['minDegree', 'maxDegree', 'hellrun_rate', 'etanks']
         validateWebServiceParams(self.request, switchs, [], [], others, isJson=True)
         if self.vars.customSpriteEnable == 'on':
@@ -233,6 +236,8 @@ class Customizer(object):
         self.session.customizer['etanks'] = self.vars.etanks
         self.session.customizer['music'] = self.vars.music
         self.session.customizer['color_blind'] = self.vars.color_blind
+        self.session.customizer['disable_screen_shake'] = self.vars.disable_screen_shake
+        self.session.customizer['noflashing'] = self.vars.noflashing
 
         if self.vars.music == 'Customize':
             musics = self.loadMusics()
@@ -297,6 +302,10 @@ class Customizer(object):
             params += ['--etanks', self.vars.etanks]
         if self.vars.color_blind == 'on':
             params += ['-c', 'color_blind.ips']
+        if self.vars.disable_screen_shake == 'on':
+            params += ['-c', 'disable_screen_shake.ips']
+        if self.vars.noflashing == 'on':
+            params += ['-c', 'noflashing.ips']
 
         if self.vars.colorsRandomization == 'on':
             params.append('--palette')

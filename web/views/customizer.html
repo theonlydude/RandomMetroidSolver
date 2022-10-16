@@ -418,7 +418,7 @@ function doSubmit() {
         }
 
         var dataDict = {};
-        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "color_blind"];
+        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "color_blind", "disable_screen_shake", "noflashing"];
 
         for(var i=0; i<elems.length; i++) {
             var elem = document.getElementById(elems[i]);
@@ -1575,9 +1575,17 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
     },
     {
       element: "#color_blindStep",
-      title: "Color blind friendly colors for doors",
+      title: "Color blind friendly colors for doors / Disable screen shake",
       content: "<p>Color blind friendly colors for Missile, Super and Power Bomb doors.</p>\
-<p>This patch was developed by Colors and theonlydude.</p>"
+<p>This patch was developed by Colors and theonlydude.</p>\
+<p>Disable screen shake during escape and during lava/acid rising earthquake.</p>\
+<p>This patch was developed by Kara.</p>"
+    },
+    {
+      element: "#noflashingStep",
+      title: "Disable flashing",
+      content: "<p>Disable bosses, escape and power bomb flashing, Landing Site lightning, ...</p>\
+<p>This patch was developed by Kara.</p>"
     },
     {
       element: "#hellStep",
@@ -1967,11 +1975,22 @@ for name, values in musics["_dropdown"].items():
               <table class="full">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr>
-                  <td colspan="2">
+                  <td>
                     {{displayCheckbox("color_blind")}}
                     <span id="color_blindText">Color blind friendly colors for doors</span>
                   </td>
+                  <td>
+                    {{displayCheckbox("disable_screen_shake")}}
+                    <span id="disable_screen_shakeText">Disable screen shake during escape</span>
+                  </td>
                   <td id="color_blindStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    {{displayCheckbox("noflashing")}}
+                    <span id="noflashingText">Remove flashing</span>
+                  </td>
+                  <td id="noflashingStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
 

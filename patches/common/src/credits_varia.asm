@@ -143,16 +143,15 @@ org $8b9a08
 org $8b9a19
     jml patch4
 
-// no longer let the game update IGT: we sync IGT to take RTA value at stats save
-org $82dbb2
-        plp
-        rts
-
 // Hijack when samus is in the ship and ready to leave the planet
 org $a2ab0d
 	jsl game_end
 	nop
 	nop
+
+// end gamestate hijack to resync IGT from RTA that stopped ~6 seconds earlier
+org $8284D3
+        jsl igt_end
 
 // Patch NMI to skip resetting 05ba and instead use that as an extra time counter
 org $8095e5
@@ -1067,6 +1066,12 @@ table "tables/menu.tbl"
 	dw " ENTRANCE"
 	dw $ffff
 
+// resync IGT when game transitions away from gameplay state
+igt_end:
+        jsl update_igt
+        jsl $80834B // hijacked code
+        rtl
+
 print "b81 end: ", org
 warnpc $81f6ff
 ////////////////////////// CREDITS /////////////////////////////
@@ -1211,7 +1216,6 @@ game_end:
     sta {stats_timer}
     lda {timer2}
     sta {stats_timer}+2
-    jsl update_igt
 
     // save stats to SRAM
     lda #$0001
@@ -2287,6 +2291,8 @@ stats:
 // load RTA in IGT
 print "update_igt: ", org
 update_igt:
+        php
+        rep #$30
 	// divide total frames in 32 bits by 3600 to have 16bits minutes and remaining frames,
         // to correctly handle times up to 99:59:59.59 like vanilla
 	lda {stats_timer}
@@ -2320,7 +2326,7 @@ update_igt:
 	sta {igt_frames} // replace igt frames
 	lda $004214 // rta seconds
         sta {igt_seconds} // replace igt seconds
-	rtl
+        bra .end
 .overflow: // IGT = 99:59:59.59
         lda #$0063
         sta {igt_hours}
@@ -2328,6 +2334,8 @@ update_igt:
         sta {igt_minutes}
         sta {igt_seconds}
         sta {igt_frames}
+.end:
+        plp
         rtl
 
 print "bank DF end : ", org

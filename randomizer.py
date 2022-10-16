@@ -664,8 +664,6 @@ if __name__ == "__main__":
                     escapeAttr['patches'] = []
                 if args.noRemoveEscapeEnemies == True:
                     escapeAttr['patches'].append("Escape_Rando_Enable_Enemies")
-            if args.majorsSplit == 'Scavenger' and any(il for il in progItemLocs if il.Location.Name == "Ridley"):
-                args.patches.append("Blinking[RidleyRoomIn]")
     except Exception as e:
         import traceback
         traceback.print_exc(file=sys.stdout)

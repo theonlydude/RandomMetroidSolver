@@ -370,6 +370,10 @@ class RomPatcher:
                 # VARIA tweaks
                 for patchName in RomPatcher.IPSPatches['VariaTweaks']:
                     self.applyIPSPatch(patchName)
+            if (self.settings["majorsSplit"] == 'Scavenger'
+                and any(il for il in self.settings["progItemLocs"] if il.Location.Name == "Ridley")):
+                # ridley as scav loc
+                self.applyIPSPatch("Blinking[RidleyRoomIn]")
 
             # apply optional patches
             for patchName in self.settings["optionalPatches"]:

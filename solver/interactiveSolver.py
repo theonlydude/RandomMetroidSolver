@@ -465,9 +465,13 @@ class InteractiveSolver(CommonSolver):
                     if loc.Name == locName:
                         return loc
             for locName in self.plandoScavengerOrder:
-                progItemLocs.append(ItemLocation(Location=getLoc(locName)))
-                if locName not in locsItems:
+                loc = getLoc(locName)
+                if locName in locsItems:
+                    item = ItemManager.getItem(loc.itemName)
+                else:
+                    item = ItemManager.getItem("Nothing")
                     errorMsg = "Nothing at a Scavenger location, seed is unfinishable"
+                progItemLocs.append(ItemLocation(Location=loc, Item=item))
 
         if RomPatches.ProgressiveSuits in RomPatches.ActivePatches:
             suitsMode = "Progressive"

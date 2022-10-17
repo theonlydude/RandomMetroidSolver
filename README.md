@@ -118,7 +118,7 @@ To add one or more patches use --patch, the available patches are available in c
 
 Example:
 ```
-dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./customizer.py -r VARIA_Randomizer_FX1097821_Season_Races_medium.sfc --sprite megaman.ips --patch itemsounds.ips --patch No_Music
+dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./customizer.py -r VARIA_Randomizer_FX1097821_Season_Races_medium.sfc --sprite megaman --patch itemsounds.ips --patch No_Music
 Apply patch itemsounds.ips
 Apply patch No_Music
 Apply patch megaman.ips
@@ -149,7 +149,7 @@ The parameters:
 
 Example:
 ```
-dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./customizer.py -r VARIA_Randomizer_AFX8258621_Season_Races_VARIAble.sfc --sprite megaman.ips --patch itemsounds.ips --palette --min_degree -75 --max_degree 25 --invert
+dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./customizer.py -r VARIA_Randomizer_AFX8258621_Season_Races_VARIAble.sfc --sprite megaman --patch itemsounds.ips --palette --min_degree -75 --max_degree 25 --invert
 Apply patch itemsounds.ips
 Apply patch megaman.ips
 Customized Rom generated: Custom_VARIA_Randomizer_AFX8258621_Season_Races_VARIAble.sfc

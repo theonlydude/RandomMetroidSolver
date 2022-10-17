@@ -3,7 +3,6 @@ from rom.rom import pc_to_snes
 from rom.romloader import RomLoader
 from rom.palette import expand_palette
 from rando.palettes import palettes
-from varia_custom_sprites.sprite_palettes import sprite_palettes
 import utils.log
 
 #Palette Hue Shift
@@ -109,7 +108,9 @@ class PaletteRando(object):
         self.romPatcher = romPatcher
         expanded_palettes = expand_palette(palettes)
         if sprite is not None:
-            expanded_palettes.update(expand_palette(sprite_palettes[sprite]))
+            import importlib
+            sprite_palettes = importlib.import_module("varia_custom_sprites.sprite_palettes.{}".format(sprite)).palettes
+            expanded_palettes.update(expand_palette(sprite_palettes))
         if color_blind:
             from rando.color_palettes import color_palettes
             expanded_palettes.update(expand_palette(color_palettes))

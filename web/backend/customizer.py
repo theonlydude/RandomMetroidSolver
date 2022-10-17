@@ -336,7 +336,7 @@ class Customizer(object):
             else:
                 sprite = self.vars.customSprite
 
-            params += ['--sprite', "{}.ips".format(sprite)]
+            params += ['--sprite', sprite]
             with DB() as db:
                 db.addSprite(sprite)
             if self.vars.customItemsEnable == 'on':

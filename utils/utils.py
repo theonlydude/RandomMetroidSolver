@@ -414,11 +414,11 @@ def loadRandoPreset(randoPreset, args):
     if "energyQty" in randoParams:
         args.energyQty = randoParams["energyQty"]
 
-    if "objective" in randoParams:
-        if randoParams["objective"] == "random":
-            args.objective = ["random"]
-        else:
-            args.objective = randoParams["objective"]
+    if randoParams.get("objectiveRandom", "false") == "true":
+        nbObjective = randoParams.get("nbObjective", 4)
+        args.objective = [nbObjective]
+    elif "objective" in randoParams:
+        args.objective = randoParams["objective"]
 
     if "tourian" in randoParams:
         args.tourian = randoParams["tourian"]

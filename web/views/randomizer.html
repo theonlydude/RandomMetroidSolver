@@ -1820,6 +1820,7 @@ function loadRandoPresetOK(data) {
         }
         $("#objectiveMultiSelect").val(data["objective"]).trigger("chosen:updated");
     }
+    objective_change(null, { deselected: true, selected: true });
 }
 
 function startTheTour(step=-1) {

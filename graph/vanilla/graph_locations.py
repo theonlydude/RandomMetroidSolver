@@ -756,6 +756,9 @@ locationsDict["Missile (Speed Booster)"].AccessFrom = {
 locationsDict["Missile (Speed Booster)"].Available = (
     lambda sm: sm.canHellRunToSpeedBooster()
 )
+locationsDict["Missile (Speed Booster)"].PostAvailable = (
+    lambda sm: sm.canHellRunBackFromSpeedBoosterMissile()
+)
 locationsDict["Missile (Wave Beam)"].AccessFrom = {
     'Bubble Mountain Top': lambda sm: sm.canAccessDoubleChamberItems()
 }

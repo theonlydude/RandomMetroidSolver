@@ -241,6 +241,21 @@ class HelpersGraph(Helpers):
         sm = self.smbm
         return sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Speed Booster w/Speed' if sm.haveItem('SpeedBooster') else 'Bubble -> Speed Booster'])
 
+    # with door color rando, there can be situations where you have to come back from the missile
+    # loc without being able to open the speed booster door
+    @Cache.decorator
+    def canHellRunBackFromSpeedBoosterMissile(self):
+        sm = self.smbm
+        # require more health to count 1st hell run + way back is slower
+        hellrun = 'MainUpperNorfair'
+        tbl = Settings.hellRunsTable[hellrun]['Bubble -> Speed Booster']
+        mult = tbl['mult']
+        minE = tbl['minE']
+        mult *= 0.66 if sm.haveItem('SpeedBooster') else 0.33 # speed booster usable for 1st hell run
+        return sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoors),
+                      sm.traverse('SpeedBoosterHallRight'),
+                      sm.canHellRun(hellrun, mult, minE))
+
     @Cache.decorator
     def canAccessDoubleChamberItems(self):
         sm = self.smbm

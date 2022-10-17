@@ -598,7 +598,9 @@ accessPoints = [
        dotOrientation = 'ne'),
     ### East Maridia
     AccessPoint('Aqueduct Top Left', 'EastMaridia', {
-        'Aqueduct Bottom': lambda sm: sm.canUsePowerBombs()
+        'Aqueduct Bottom': lambda sm: sm.wor(sm.wand(RomPatches.has(RomPatches.AqueductBombBlocks),
+                                                     sm.canDestroyBombWallsUnderwater()),
+                                             sm.canUsePowerBombs())
     }, roomInfo = {'RoomPtr':0xd5a7, "area": 0x4},
        exitInfo = {'DoorPtr':0xa708, 'direction': 0x5, "cap": (0x1e, 0x36), "bitFlag": 0x0,
                    "screen": (0x1, 0x3), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe398},

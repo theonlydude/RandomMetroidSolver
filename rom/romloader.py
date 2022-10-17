@@ -85,6 +85,8 @@ class RomLoader(object):
             RomPatches.ActivePatches.append(RomPatches.AreaRandoGatesOther)
         if self.hasPatch("traverseWreckedShip"):
             RomPatches.ActivePatches += [RomPatches.EastOceanPlatforms, RomPatches.SpongeBathBlueDoor]
+        if self.hasPatch("aqueductBombBlocks"):
+            RomPatches.ActivePatches.append(RomPatches.AqueductBombBlocks)
 
         # check boss rando
         isBoss = self.isBoss()

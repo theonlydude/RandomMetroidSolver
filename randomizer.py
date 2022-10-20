@@ -257,7 +257,7 @@ if __name__ == "__main__":
         print("Can't have both --output and --rom parameters")
         sys.exit(-1)
 
-    if args.plandoRando != None and args.output == None:
+    if args.plandoRando is not None and args.output is None:
         print("plandoRando param requires output param")
         sys.exit(-1)
 
@@ -569,15 +569,16 @@ if __name__ == "__main__":
 
     plandoSettings = None
     if args.plandoRando is not None:
+        plandoRando = json.loads(args.plandoRando)
         forceArg('progressionSpeed', 'speedrun', "'Progression Speed' forced to speedrun")
         progSpeed = 'speedrun'
         forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
         forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
         forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = 'normal'
-        RomPatches.ActivePatches = args.plandoRando["patches"]
-        DoorsManager.unserialize(args.plandoRando["doors"])
-        plandoSettings = {"locsItems": args.plandoRando['locsItems'], "forbiddenItems": args.plandoRando['forbiddenItems']}
+        RomPatches.ActivePatches = plandoRando["patches"]
+        DoorsManager.unserialize(plandoRando["doors"])
+        plandoSettings = {"locsItems": plandoRando['locsItems'], "forbiddenItems": plandoRando['forbiddenItems']}
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty,
                                   restrictions, args.superFun, args.runtimeLimit_s,
                                   plandoSettings, minDifficulty)
@@ -594,12 +595,12 @@ if __name__ == "__main__":
     graphSettings = GraphSettings(args.startLocation, areaRandomization, lightArea, args.bosses,
                                   args.escapeRando, minimizerN, dotFile,
                                   args.doorsColorsRando, args.allowGreyDoors, args.tourian,
-                                  args.plandoRando["transitions"] if args.plandoRando != None else None)
+                                  plandoRando["transitions"] if plandoSettings is not None else None)
 
-    if args.plandoRando is None:
+    if plandoSettings is None:
         DoorsManager.setDoorsColor()
 
-    if args.plandoRando is None:
+    if plandoSettings is None:
         objectivesManager = Objectives(args.tourian != 'Disabled', randoSettings)
         addedObjectives = 0
         if args.majorsSplit == "Scavenger":
@@ -631,10 +632,9 @@ if __name__ == "__main__":
         if any(goal for goal in Objectives.activeGoals if goal.area is not None):
             forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
     else:
-        args.plandoRando = json.loads(args.plandoRando)
-        args.tourian = args.plandoRando["tourian"]
+        args.tourian = plandoRando["tourian"]
         objectivesManager = Objectives(args.tourian != 'Disabled')
-        for goal in args.plandoRando["objectives"]:
+        for goal in plandoRando["objectives"]:
             objectivesManager.addGoal(goal)
 
     # print some parameters for jm's stats
@@ -701,7 +701,7 @@ if __name__ == "__main__":
         for loc in sorted(locsItems.keys()):
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
-    if args.plandoRando != None:
+    if plandoSettings is not None:
         with open(args.output, 'w') as jsonFile:
             json.dump({"itemLocs": [il.json() for il in itemLocs], "errorMsg": randoExec.errorMsg}, jsonFile)
         sys.exit(0)

@@ -44,7 +44,7 @@ def randomMulti(args, param, defaultMultiValues):
     isRandom = False
     if value == "random":
         isRandom = True
-        if args[param+"List"] != None:
+        if args[param+"List"] is not None:
             # use provided list
             choices = args[param+"List"].split(',')
             value = random.choice(choices)
@@ -277,12 +277,12 @@ if __name__ == "__main__":
 
         if argDict[arg] not in okValues:
             argDict[arg] = value
-            forcedArgs[webArg if webArg != None else arg] = webValue if webValue != None else value
+            forcedArgs[webArg if webArg is not None else arg] = webValue if webValue is not None else value
             print(msg)
             optErrMsgs.append(msg)
 
     # if rando preset given, load it first
-    if args.randoPreset != None:
+    if args.randoPreset is not None:
         preset = loadRandoPreset(args.randoPreset, args)
         # use the skill preset from the rando preset
         if preset is not None and args.paramsFileName is None:
@@ -393,7 +393,7 @@ if __name__ == "__main__":
         args.hideItems = bool(random.getrandbits(1))
 
     if args.morphPlacement == 'random':
-        if args.morphPlacementList != None:
+        if args.morphPlacementList is not None:
             morphPlacements = args.morphPlacementList.split(',')
         args.morphPlacement = random.choice(morphPlacements)
     # Scavenger Hunt constraints
@@ -428,7 +428,7 @@ if __name__ == "__main__":
         forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", webValue='on')
         possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(areaRandomization, maxDifficulty, args.morphPlacement)
         if args.startLocation == 'random':
-            if args.startLocationList != None:
+            if args.startLocationList is not None:
                 startLocationList = args.startLocationList.split(',')
                 # intersection between user whishes and reality
                 possibleStartAPs = sorted(list(set(possibleStartAPs).intersection(set(startLocationList))))
@@ -526,7 +526,7 @@ if __name__ == "__main__":
     if minorQty < 1:
         minorQty = random.randint(25, 100)
     if energyQty == 'random':
-        if args.energyQtyList != None:
+        if args.energyQtyList is not None:
             energyQties = args.energyQtyList.split(',')
         energyQty = random.choice(energyQties)
     if energyQty == 'ultra sparse':
@@ -707,7 +707,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     # generate extended stats
-    if args.extStatsFilename != None:
+    if args.extStatsFilename is not None:
         with open(args.extStatsFilename, 'a') as extStatsFile:
             skillPreset = os.path.splitext(os.path.basename(args.paramsFileName))[0]
             if args.fakeRandoPreset is not None:

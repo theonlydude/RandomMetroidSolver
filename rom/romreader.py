@@ -545,3 +545,7 @@ class RomReader:
             bitMask = 1 << (event & 7)
             ret[i] = {"byteIndex": byteIndex, "bitMask": bitMask}
         return ret
+
+    def getAdditionalEtanks(self):
+        address = Addresses.getOne('additionalETanks')
+        return self.romFile.readByte(address)

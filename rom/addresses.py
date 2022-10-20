@@ -40,7 +40,7 @@ class Addresses(object):
         'plmSpawnTable': ValueSingle(0x8fe9a0),
         'plmSpawnRoomTable': ValueSingle(0x8ff000),
         'moonwalk': ValueSingle(0x81b35d),
-        'additionalETanks': ValueSingle(0xA1F470),
+        'additionalETanks': ValueSingle(0xA1F470, storage=Byte),
         'hellrunRate': ValueSingle(0x8DE387),
         'BTtweaksHack1': ValueSingle(0x84ba6f+3),
         'BTtweaksHack2': ValueSingle(0x84d33b+3),

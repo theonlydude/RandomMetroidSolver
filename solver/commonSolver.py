@@ -19,8 +19,9 @@ class CommonSolver(object):
     def loadRom(self, rom, interactive=False, magic=None, startLocation=None):
         self.scavengerOrder = []
         self.plandoScavengerOrder = []
+        self.additionalETanks = 0
         # startLocation param is only use for seedless
-        if rom == None:
+        if rom is None:
             # TODO::add a --logic parameter for seedless
             Logic.factory('vanilla')
             self.romFileName = 'seedless'
@@ -87,6 +88,8 @@ class CommonSolver(object):
             self.majorUpgrades = self.romLoader.loadMajorUpgrades()
             self.splitLocsByArea = self.romLoader.getSplitLocsByArea(self.locations)
             self.objectives.setSolverMode(self)
+            if self.mode == 'plando':
+                self.additionalETanks = self.romLoader.getAdditionalEtanks()
 
             if interactive == False:
                 print("ROM {}\nmajors: {} area: {} boss: {} escape: {}\npatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches())))

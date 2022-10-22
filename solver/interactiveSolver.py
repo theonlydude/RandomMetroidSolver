@@ -516,7 +516,8 @@ class InteractiveSolver(CommonSolver):
             "plando": {
                 "graphTrans": self.curGraphTransitions,
                 "maxTransitions": len(vanillaBossesTransitions) + len(vanillaTransitions),
-                "visitedLocations": self.visitedLocations
+                "visitedLocations": self.visitedLocations,
+                "additionalETanks": self.additionalETanks
             }
         }
 

@@ -2196,9 +2196,13 @@ if seedInfo != None:
             <h4>Objectives</h4>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
-              <tr {{=setBold("objective")}}><td>Objectives to access Tourian</td><td>{{=seedParams["objective"]}}</td></tr>
-{{    if seedParams["objective"] == "random":}}
+              <tr {{=setBold("objective")}}><td>Objectives to access Tourian</td>
+{{    if seedParams["objectiveRandom"] == "true":}}
+                <td>random</td></tr>
+              <tr {{=setBold("nbObjective")}}><td>Number of Objectives</td><td>{{=seedParams["nbObjective"]}}</td></tr>
               <tr><td>Objectives pool</td><td>{{=seedParams["objectiveMultiSelect"]}}</td></tr>
+{{    else:}}
+                <td>{{=seedParams["objective"]}}</td></tr>
 {{        pass}}
               <tr {{=setBold("tourian")}}><td>Tourian</td><td>{{=seedParams["tourian"]}}</td></tr>
 {{    if seedParams["tourian"] == "random":}}

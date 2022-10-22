@@ -101,6 +101,8 @@ def getAddressesToRead(plando=False):
         # plando transitions (4 bytes per transitions, ap#/2 transitions)
         plandoTransitions = Addresses.getOne('plandoTransitions')
         addresses["ranges"] += [plandoTransitions, plandoTransitions+((len(addresses["transitions"])/2) * 4)]
+        # starting etanks added in the customizer
+        addresses["misc"] += Addresses.getWeb('additionalETanks')
     # events array for autotracker
     addresses["ranges"] += Addresses.getRange('objectiveEventsArray')
 

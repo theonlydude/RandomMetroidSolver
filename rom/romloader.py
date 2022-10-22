@@ -226,6 +226,9 @@ class RomLoader(object):
     def loadEventBitMasks(self):
         return self.romReader.loadEventBitMasks()
 
+    def getAdditionalEtanks(self):
+        return self.romReader.getAdditionalEtanks()
+
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)
     def __init__(self, romFileName, magic=None):

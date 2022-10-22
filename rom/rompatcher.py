@@ -141,6 +141,8 @@ class RomPatcher:
             self.writePlandoTransitions(self.settings["plando"]["graphTrans"], doorsPtrs,
                                         self.settings["plando"]["maxTransitions"])
             self.writePlandoAddresses(self.settings["plando"]["visitedLocations"])
+        if self.settings["isPlando"] and self.settings["plando"]["additionalETanks"] != 0:
+            self.writeAdditionalETanks(self.settings["plando"]["additionalETanks"])
 
         self.end()
 

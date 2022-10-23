@@ -14,9 +14,29 @@ arch snes.cpu
 org $80805d
 	dw #$ffff
 
+;;; disable data load in some elevator rooms (custom music will change
+;;; tracks in rooms around them instead)
+
+;;; [Elevator to Maridia]
+org $8f94dd
+        db $00
+;;; [Elevator to Green Brinstar]
+org $8f9949
+        db $00
+;;; Warehouse Entrance
+org $8fa6b2
+        db $00
+;;; Bowling Alley
+org $8fc9be
+        db $00
+org $8fc9a4
+        db $00
+
 ;;; end of custom music data table. accounted for by MusicPatcher
 org $8fe86b
 	dw $caca		; identifier that we have custom music
+
+;;; load custom music in special places
 print "title_screen_intro: ", pc
 title_screen_intro:
 	db $03, $05

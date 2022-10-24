@@ -81,7 +81,7 @@ class Randomizer(object):
             "Area": ["way_of_chozo", "where_am_i", "where_is_morph"],
             "Doors": ["doors_long", "doors_short"],
             "Minimizer": ["minimizer", "minimizer_hardcore", "minimizer_maximizer"],
-            "Objectives": ["objectives_all_bosses", "objectives_clear_areas", "objectives_memes", "objectives_robots_notweaks"],
+            "Objectives": ["objectives_all_bosses", "objectives_clear_areas", "objectives_memes", "objectives_short", "objectives_long", "objectives_robots_notweaks"],
             "Hard": ["hardway2hell", "highway2hell", "stupid_hard", "objectives_hard_heat", "objectives_hard_water"],
             "Random": ["all_random", "quite_random", "surprise"],
             "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2", "SGLive2022_Game_1", "SGLive2022_Game_2", "SGLive2022_Game_3", "Boyz_League_SM_Rando"]

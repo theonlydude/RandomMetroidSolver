@@ -2,5 +2,7 @@
     "objectiveRandom": "true",
     "nbObjective": 3,
     "objectiveMultiSelect": ["kill one G4", "kill two G4", "kill one miniboss", "kill two minibosses", "collect 25% items", "collect 50% items", "kill the orange geemer", "visit the animals", "kill king cacatac"],
+    "progressionSpeed": "speedrun",
+    "nerfedCharge": "on",
     "tourian": "Disabled"
 }

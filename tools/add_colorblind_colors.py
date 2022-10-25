@@ -135,7 +135,7 @@ for palette, address in palettes.items():
 #    print_palette_color(data)
 
     # recompress and check if it fits in original place
-    compressed = Compressor(256).compress(data)
+    compressed = Compressor().compress(data)
     new_length = len(compressed)
     print("recompressed palette length: {}".format(new_length))
 

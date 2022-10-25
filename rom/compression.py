@@ -2,6 +2,7 @@
 import logging
 import utils.log
 from enum import IntEnum
+from collections import defaultdict
 
 class Command(IntEnum):
     DirectCopy = 0b000
@@ -16,9 +17,8 @@ class Command(IntEnum):
     End = 0xff
 
 class Compressor:
-    def __init__(self, computeLimit=5):
+    def __init__(self):
         self.log = utils.log.get('Compressor')
-        self.computeLimit = computeLimit
 
     def _concatBytes(self, b0, b1):
         return b0 + (b1 << 8)
@@ -139,64 +139,58 @@ class Compressor:
     def compress(self, inputData):
         # compress the data in input array, return array of compressed bytes
         self.inputData = inputData
+        self.length = len(self.inputData)
         self.output = []
 
-        # brute force all the cases for every byte in the input.
-        # For every inputData address, these arrays save the max number of bytes that can be
-        # compressed with a single chunk, starting at that address.
-        self._computeByteFill(inputData)
-        self._computeWordFill(inputData)
-        self._computeByteIncrement(inputData)
-        self._computeCopy(inputData)
-        self._computeCopyXor(inputData)
+        # for each possible value store the positions of the value in the input data
+        self.start = defaultdict(list)
+        for i in range(self.length-1):
+            self.start[self.inputData[i]].append(i)
+
+        min_length = 4
 
         i = 0
-        while i < len(inputData):
-            length = max(self.byteFillLengths[i],
-                         self.wordFillLengths[i],
-                         self.byteIncrementLengths[i],
-                         self.copyLengths[i].length,
-                         self.copyLengthsXor[i].length)
+        while i < self.length:
+            value = self.inputData[i]
+            lengths = self._computeNext(i)
 
-            if self.log.getEffectiveLevel() == logging.DEBUG:
-                self.log.debug("i:{} bf: {} wf: {} bi: {} c: {}".format(i, self.byteFillLengths[i], self.wordFillLengths[i], self.byteIncrementLengths[i], self.copyLengths[i].length))
+            length, command = lengths['best']
 
-            if length < 3:
-                j = i
-                while j < len(inputData) and length < 3:
-                    length = max(self.byteFillLengths[j],
-                                 self.wordFillLengths[j],
-                                 self.byteIncrementLengths[j],
-                                 self.copyLengths[j].length)
+            if length < min_length:
+                j = i+1
+                while j < self.length and length < min_length:
+                    lengths = self._computeNext(j)
+                    length = lengths['best'][0]
                     j += 1
-                length = j - i if j == len(inputData) else j - i - 1
-                self._writeUncompressed(inputData, i, length)
+                length = j - i if j == self.length else j - i - 1
+                self._writeUncompressed(i, length)
 
-            elif length == self.byteFillLengths[i]:
+            elif command == Command.ByteFill:
                 length = min(length, 1024)
-                self._writeByteFill(inputData[i], length)
+                self._writeByteFill(value, length)
 
-            elif length == self.wordFillLengths[i]:
+            elif command == Command.WordFill:
                 length = min(length, 1024)
-                self._writeWordFill(inputData[i], inputData[i+1], length)
+                self._writeWordFill(value, self.inputData[i+1], length)
 
-            elif length == self.byteIncrementLengths[i]:
+            elif command == Command.SigmaFill:
                 length = min(length, 1024)
-                self._writeByteIncrement(inputData[i], length)
+                self._writeByteIncrement(value, length)
 
-            elif length == self.copyLengths[i].length:
+            elif command == Command.LibraryCopy:
                 length = min(length, 1024)
-                if i - self.copyLengths[i].address < 0xFF:
-                    self._writeNegativeCopy(i, i - self.copyLengths[i].address, length)
+                address = lengths[Command.LibraryCopy][1]
+                if i - address < 0xFF:
+                    self._writeNegativeCopy(i, i - address, length)
                 else:
-                    self._writeCopy(self.copyLengths[i].address, length)
+                    self._writeCopy(address, length)
 
-            elif length == self.copyLengthsXor[i].length:
-                length = min(length, 1024)
-                if i - self.copyLengthsXor[i].address < 0xFF:
-                    self._writeNegativeCopyXor(i, i - self.copyLengthsXor[i].address, length)
-                else:
-                    self._writeCopyXor(self.copyLengthsXor[i].address, length)
+#            elif length == self.copyLengthsXor[i].length:
+#                length = min(length, 1024)
+#                if i - self.copyLengthsXor[i].address < 0xFF:
+#                    self._writeNegativeCopyXor(i, i - self.copyLengthsXor[i].address, length)
+#                else:
+#                    self._writeCopyXor(self.copyLengthsXor[i].address, length)
 
             i += length
 
@@ -224,11 +218,11 @@ class Compressor:
             if self.log.getEffectiveLevel() == logging.DEBUG:
                 self.log.debug("_writeChunkHeader: long cmd: {} len: {} value: {} {}".format(bin(type), length, 0b11100000 | type << 2 | length >> 8, length & 0xFF))
 
-    def _writeUncompressed(self, inputData, index, length):
+    def _writeUncompressed(self, index, length):
         self._writeChunkHeader(Command.DirectCopy, length)
-        self.output += inputData[index:index+length]
+        self.output += self.inputData[index:index+length]
         if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("_writeUncompressed: len: {} index: {} data: {}".format(length, index, inputData[index:index+length]))
+            self.log.debug("_writeUncompressed: len: {} index: {} data: {}".format(length, index, self.inputData[index:index+length]))
 
     def _writeByteFill(self, byte, length):
         self._writeChunkHeader(Command.ByteFill, length)
@@ -277,124 +271,132 @@ class Compressor:
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("_writeNegativeCopy: len: {} address: {}: {}".format(length, address, self.inputData[i-address:i-address+length]))
 
-    def _computeByteFill(self, inputData):
-        self.byteFillLengths = []
-        carry = 0
-        for i in range(len(inputData)):
-            if carry == 0:
-                value = inputData[i]
-                # count how many repeating value we have
-                while i + carry < len(inputData) and inputData[i + carry] == value:
-                    carry += 1
-            self.byteFillLengths.append(carry)
-            carry -= 1
+    def _computeStart(self):
+        # remove too close values
+        for k, l in self.start.items():
+            pass
 
-    def _computeWordFill(self, inputData):
-        self.wordFillLengths = []
+    def _computeNext(self, pos):
+        ret = {}
+        bestLength = 0
+        bestCommand = 0
+
+        length = self._computeByteFill(pos)
+        ret[Command.ByteFill] = length
+        if length > bestLength:
+            bestLength = length
+            bestCommand = Command.ByteFill
+
+        length = self._computeWordFill(pos)
+        ret[Command.WordFill] = length
+        if length > bestLength:
+            bestLength = length
+            bestCommand = Command.WordFill
+
+        length = self._computeByteIncrement(pos)
+        ret[Command.SigmaFill] = length
+        if length > bestLength:
+            bestLength = length
+            bestCommand = Command.SigmaFill
+
+        (length, address) = self._computeCopy(pos)
+        ret[Command.LibraryCopy] = (length, address)
+        if length > bestLength:
+            bestLength = length
+            bestCommand = Command.LibraryCopy
+
+        ret["best"] = (bestLength, bestCommand)
+
+        return ret
+
+    def _computeByteFill(self, pos):
+        carry = 0
+        i = pos
+        value = self.inputData[i]
+        # count how many repeating value we have
+        while i + carry < self.length and self.inputData[i + carry] == value:
+            carry += 1
+        return carry
+
+    def _computeWordFill(self, pos):
+        if pos+1 >= self.length:
+            return 0
+
+        i = pos
         carry = 1
-        for i in range(len(inputData)-1):
-            if carry == 1:
-                value = (inputData[i], inputData[i+1])
-                while i + carry < len(inputData) and inputData[i + carry] == value[carry & 1]:
-                    carry += 1
-            if carry < 4:
-                # no compression when replacing [b0, b1, b0] with [cmd, b0, b1]
-                self.wordFillLengths.append(2)
-            else:
-                self.wordFillLengths.append(carry)
-            carry -= 1
-        # missing last value
-        self.wordFillLengths.append(carry)
+        value = (self.inputData[i], self.inputData[i+1])
+        while i + carry < self.length and self.inputData[i + carry] == value[carry & 1]:
+            carry += 1
+        return carry
 
-    def _computeByteIncrement(self, inputData):
-        self.byteIncrementLengths = []
+    def _computeByteIncrement(self, pos):
         carry = 0
-        for i in range(len(inputData)):
-            if carry == 0:
-                value = inputData[i]
-                while i + carry < len(inputData) and inputData[i + carry] == value:
-                    carry += 1
-                    value += 1
-            self.byteIncrementLengths.append(carry)
-            carry -= 1
+        i = pos
+        value = self.inputData[i]
+        while i + carry < self.length and self.inputData[i + carry] == value:
+            carry += 1
+            value += 1
+        return carry
 
-    class _Interval:
-        def __init__(self, address, length):
-            self.address = address
-            self.length = length
-
-        def __repr__(self):
-            return "({},{})".format(self.address, self.length)
-
-    def _computeCopy(self, inputData):
-        self.copyLengths = []
-
-        # for each possible value store the positions of the value in the input data
-        start = [[] for i in range(len(inputData))]
-        for i in range(len(inputData)-1):
-            start[inputData[i]].append(i)
-
-        for i, value in enumerate(inputData, start=0):
-            maxLength = 0
-            maxAddress = -1
-            for j, address in enumerate(start[inputData[i]], start=0):
-                # for performance reasons limit the number of addresses
-                if j >= self.computeLimit:
-                    break
-                # only in previous addresses
-                if address >= i:
-                    break
-                length = self._matchSubSequences(address, i, inputData)
-                if length > maxLength:
-                    maxLength = length
-                    maxAddress = address
-            self.copyLengths.append(Compressor._Interval(maxAddress, maxLength))
+    def _computeCopy(self, pos):
+        value = self.inputData[pos]
+        maxLength = 0
+        maxAddress = -1
+        for j, address in enumerate(self.start[value], start=0):
+            # only in previous addresses
+            if address >= pos:
+                break
+            length = self._matchSubSequences(address, pos)
+            if length > maxLength:
+                maxLength = length
+                maxAddress = address
+        #self.log.debug("i: {} cc addr: {} len: {} data: {}".format(i, maxAddress, maxLength, inputData[i:i+maxLength]))
+        return (maxLength, maxAddress)
 
     # Find the max length of two matching sequences starting at a and b in Input array.
-    # Make sure that 0 <= a < b, otherwise bad stuff will happen.
-    def _matchSubSequences(self, a, b, inputData):
-        if a >= b:
-            return 0
-
+    def _matchSubSequences(self, a, b):
         i = 0
-        length = len(inputData)
-        while b+i < length and inputData[a+i] == inputData[b+i]:
+        last_equal = True
+        # max data in chunk is 1024 bytes in long commands
+        max_search = self.length-b if self.length-b < 1024 else 1024
+        for i in range(max_search):
+            if self.inputData[a+i] != self.inputData[b+i]:
+                last_equal = False
+                break
+        if last_equal:
             i += 1
-        #self.log.debug("_matchSubSequences a: {} b: {} i: {}".format(a,b,i))
+
         return i
 
-    # same for xor values
-    def _computeCopyXor(self, inputData):
-        self.copyLengthsXor = []
-
-        # for each possible value store the positions of the value in the input data
-        start = [[] for i in range(len(inputData))]
-        for i in range(len(inputData)-1):
-            start[inputData[i] ^ 0xff].append(i)
-
-        for i, value in enumerate(inputData, start=0):
-            maxLength = 0
-            maxAddress = -1
-            for j, address in enumerate(start[inputData[i] ^ 0xff], start=0):
-                # for performance reasons limit the number of addresses
-                if j >= self.computeLimit:
-                    break
-                # only in previous addresses
-                if address >= i:
-                    break
-                length = self._matchSubSequencesXor(address, i, inputData)
-                if length > maxLength:
-                    maxLength = length
-                    maxAddress = address
-            self.copyLengthsXor.append(Compressor._Interval(maxAddress, maxLength))
-
-    def _matchSubSequencesXor(self, a, b, inputData):
-        if a >= b:
-            return 0
-
-        i = 0
-        length = len(inputData)
-        while b+i < length and (inputData[a+i] ^ 0xff) == inputData[b+i]:
-            i += 1
-        #self.log.debug("_matchSubSequences a: {} b: {} i: {}".format(a,b,i))
-        return i
+#    # same for xor values
+#    def _computeCopyXor(self, inputData):
+#        self.copyLengthsXor = []
+#
+#        # for each possible value store the positions of the value in the input data
+#        start = [[] for i in range(len(inputData))]
+#        for i in range(len(inputData)-1):
+#            start[inputData[i] ^ 0xff].append(i)
+#
+#        lenInput = len(inputData)
+#        for i, value in enumerate(inputData, start=0):
+#            maxLength = 0
+#            maxAddress = -1
+#            for j, address in enumerate(start[inputData[i] ^ 0xff], start=0):
+#                # only in previous addresses
+#                if address >= i:
+#                    break
+#                length = self._matchSubSequencesXor(address, i, inputData, lenInput)
+#                if length > maxLength:
+#                    maxLength = length
+#                    maxAddress = address
+#            self.copyLengthsXor.append(Compressor._Interval(maxAddress, maxLength))
+#
+#    def _matchSubSequencesXor(self, a, b, inputData, length):
+#        if a >= b:
+#            return 0
+#
+#        i = 0
+#        while b+i < length and (inputData[a+i] ^ 0xff) == inputData[b+i]:
+#            i += 1
+#        #self.log.debug("_matchSubSequences a: {} b: {} i: {}".format(a,b,i))
+#        return i

@@ -810,7 +810,7 @@ if enableMode7 and not args.no_mode7:
 
     # compress
     print("compressing tilemap")
-    compressedData = Compressor(computeLimit=128).compress(tilemapData)
+    compressedData = Compressor().compress(tilemapData)
     recompressedDataSize = len(compressedData)
     vanillaSize = 171
     if recompressedDataSize > vanillaSize:
@@ -834,7 +834,7 @@ if enableMode7 and not args.no_mode7:
         vanillaRom.writeByte(byte)
 
     print("compressing tiles, {}".format(len(tileData)))
-    compressedData = Compressor(computeLimit=4096).compress(tileData)
+    compressedData = Compressor().compress(tileData)
     vanillaSize = 10330
     recompressedDataSize = len(compressedData)
     print("recompressedDataSize: {} vanillaSize: {}".format(recompressedDataSize, vanillaSize))

@@ -562,7 +562,7 @@ class LevelData(object):
         print("rawData len: {}".format(len(rawData)))
 
         # recompress data
-        compressedData = Compressor(computeLimit=128).compress(rawData)
+        compressedData = Compressor().compress(rawData)
         recompressedDataSize = len(compressedData)
         vanillaSize = 5165
         print("compressedData len: {} (old: {}, vanilla: {})".format(recompressedDataSize, self.compressedSize, vanillaSize))

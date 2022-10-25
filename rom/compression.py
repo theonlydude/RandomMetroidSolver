@@ -330,7 +330,7 @@ class Compressor:
             bestLength = length
             bestCommand = Command.LibraryCopy
 
-        (length, address) = self._computeCopyXor(pos)
+        (length, address) = self._computeCopy(pos, 0xff)
         ret[Command.EORedCopy] = (length, address)
         if length > bestLength:
             bestLength = length
@@ -369,15 +369,15 @@ class Compressor:
             value += 1
         return carry
 
-    def _computeCopy(self, pos):
-        value = self.inputData[pos]
+    def _computeCopy(self, pos, xor=0x00):
+        value = self.inputData[pos] ^ xor
         maxLength = 0
         maxAddress = -1
         for j, address in enumerate(self.start[value], start=0):
             # only in previous addresses
             if address >= pos:
                 break
-            length = self._matchSubSequences(address, pos)
+            length = self._matchSubSequences(address, pos, xor)
             if length > maxLength:
                 maxLength = length
                 maxAddress = address
@@ -385,44 +385,13 @@ class Compressor:
         return (maxLength, maxAddress)
 
     # Find the max length of two matching sequences starting at a and b in Input array.
-    def _matchSubSequences(self, a, b):
+    def _matchSubSequences(self, a, b, xor):
         i = 0
         last_equal = True
         # max data in chunk is 1024 bytes in long commands
         max_search = self.length-b if self.length-b < 1024 else 1024
         for i in range(max_search):
-            if self.inputData[a+i] != self.inputData[b+i]:
-                last_equal = False
-                break
-        if last_equal:
-            i += 1
-
-        return i
-
-    # same for xor values
-    def _computeCopyXor(self, pos):
-        value = self.inputData[pos] ^ 0xff
-        maxLength = 0
-        maxAddress = -1
-        for j, address in enumerate(self.start[value], start=0):
-            # only in previous addresses
-            if address >= pos:
-                break
-            length = self._matchSubSequencesXor(address, pos)
-            if length > maxLength:
-                maxLength = length
-                maxAddress = address
-        #self.log.debug("i: {} cc addr: {} len: {} data: {}".format(i, maxAddress, maxLength, inputData[i:i+maxLength]))
-        return (maxLength, maxAddress)
-
-    # Find the max length of two matching sequences starting at a and b in Input array.
-    def _matchSubSequencesXor(self, a, b):
-        i = 0
-        last_equal = True
-        # max data in chunk is 1024 bytes in long commands
-        max_search = self.length-b if self.length-b < 1024 else 1024
-        for i in range(max_search):
-            if (self.inputData[a+i] ^ 0xff) != self.inputData[b+i]:
+            if (self.inputData[a+i] ^ xor) != self.inputData[b+i]:
                 last_equal = False
                 break
         if last_equal:

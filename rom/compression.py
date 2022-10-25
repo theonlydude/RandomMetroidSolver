@@ -18,7 +18,7 @@ class Command(IntEnum):
 
 # profile:
 #  Fast: fastest but sometimes bigger than vanilla
-#  Slow: most compression, guaranteed smaller than vanilla
+#  Slow: most compression, almost always guaranteed smaller than vanilla
 class Compressor:
     def __init__(self, profile='Fast'):
         self.log = utils.log.get('Compressor')

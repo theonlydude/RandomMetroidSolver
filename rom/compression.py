@@ -19,6 +19,8 @@ class Command(IntEnum):
 class Compressor:
     def __init__(self):
         self.log = utils.log.get('Compressor')
+        # for debug purpose
+        self.stats = defaultdict(int)
 
     def _concatBytes(self, b0, b1):
         return b0 + (b1 << 8)
@@ -45,7 +47,9 @@ class Compressor:
             command = curByte >> 5
             length = (curByte & 0b11111) + 1
 
-            self.log.debug("@: {} curByte: {} cmd: {} len: {}".format(curAddress-startAddress-1, curByte, bin(command), length))
+            if self.log.getEffectiveLevel() == logging.DEBUG:
+                self.log.debug("@: {} curByte: {} cmd: {} len: {}".format(curAddress-startAddress-1, curByte, bin(command), length))
+                self.stats[command] += length
 
             while True:
                 isLongLength = False
@@ -144,13 +148,13 @@ class Compressor:
 
         self._computeStart()
 
+        # to use a command it must replace 4 bytes of input data, else just copy uncompressed
         min_length = 4
 
         i = 0
         while i < self.length:
             value = self.inputData[i]
             lengths = self._computeNext(i)
-
             length, command = lengths['best']
 
             if length < min_length:
@@ -182,12 +186,13 @@ class Compressor:
                 else:
                     self._writeCopy(address, length)
 
-#            elif length == self.copyLengthsXor[i].length:
-#                length = min(length, 1024)
-#                if i - self.copyLengthsXor[i].address < 0xFF:
-#                    self._writeNegativeCopyXor(i, i - self.copyLengthsXor[i].address, length)
-#                else:
-#                    self._writeCopyXor(self.copyLengthsXor[i].address, length)
+            elif command == Command.EORedCopy:
+                length = min(length, 1024)
+                address = lengths[Command.EORedCopy][1]
+                if i - address < 0xFF:
+                    self._writeNegativeCopyXor(i, i - address, length)
+                else:
+                    self._writeCopyXor(address, length)
 
             i += length
 
@@ -202,6 +207,9 @@ class Compressor:
         return self.output[:]
 
     def _writeChunkHeader(self, type, length):
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.stats[type] += length
+
         length -= 1
         if length < 32 and type != Command.EORedMinusCopy:
             # regular command
@@ -274,34 +282,24 @@ class Compressor:
         for i in range(self.length-1):
             self.start[self.inputData[i]].append(i)
 
-        # display occurence
-        #print(sorted([(hex(v), len(x)) for v,x in self.start.items() if len(x) > 1], key=lambda t: t[1]))
-        #print("0xff: {}".format(self.start[0xff]))
-
         # remove too close values
-        min_step = self.length / 256
+        min_length = self.length / 256
+        min_step = self.length / 64
         for k, l in self.start.items():
             line_lenght = len(l)
-            if line_lenght <= min_step:
+            if line_lenght <= min_length:
                 continue
-            #print("len(l): {} l: {}".format(line_lenght, l))
             filtered = []
             i = 0
             j = 1
             filtered.append(l[i])
             while j < line_lenght:
-                #print("i: {} j: {} l[i]: {} l[j]: ".format(i, j, l[i], l[j]))
                 while j<line_lenght-1 and l[j] - l[i] < min_step:
-                    #print("skip j: {} l[i]: {} l[j]: {} diff: {}".format(j, l[i], l[j], l[j] - l[i]))
                     j += 1
-                #print("add j: {} l[j]: {}".format(j, l[j]))
                 filtered.append(l[j])
                 i = j
                 j=i+1
             self.start[k] = filtered
-
-        # display occurence after filter
-        #print(sorted([(hex(v), len(x)) for v,x in self.start.items() if len(x) > 1], key=lambda t: t[1]))
 
     def _computeNext(self, pos):
         ret = {}
@@ -331,6 +329,12 @@ class Compressor:
         if length > bestLength:
             bestLength = length
             bestCommand = Command.LibraryCopy
+
+        (length, address) = self._computeCopyXor(pos)
+        ret[Command.EORedCopy] = (length, address)
+        if length > bestLength:
+            bestLength = length
+            bestCommand = Command.EORedCopy
 
         ret["best"] = (bestLength, bestCommand)
 
@@ -395,35 +399,33 @@ class Compressor:
 
         return i
 
-#    # same for xor values
-#    def _computeCopyXor(self, inputData):
-#        self.copyLengthsXor = []
-#
-#        # for each possible value store the positions of the value in the input data
-#        start = [[] for i in range(len(inputData))]
-#        for i in range(len(inputData)-1):
-#            start[inputData[i] ^ 0xff].append(i)
-#
-#        lenInput = len(inputData)
-#        for i, value in enumerate(inputData, start=0):
-#            maxLength = 0
-#            maxAddress = -1
-#            for j, address in enumerate(start[inputData[i] ^ 0xff], start=0):
-#                # only in previous addresses
-#                if address >= i:
-#                    break
-#                length = self._matchSubSequencesXor(address, i, inputData, lenInput)
-#                if length > maxLength:
-#                    maxLength = length
-#                    maxAddress = address
-#            self.copyLengthsXor.append(Compressor._Interval(maxAddress, maxLength))
-#
-#    def _matchSubSequencesXor(self, a, b, inputData, length):
-#        if a >= b:
-#            return 0
-#
-#        i = 0
-#        while b+i < length and (inputData[a+i] ^ 0xff) == inputData[b+i]:
-#            i += 1
-#        #self.log.debug("_matchSubSequences a: {} b: {} i: {}".format(a,b,i))
-#        return i
+    # same for xor values
+    def _computeCopyXor(self, pos):
+        value = self.inputData[pos] ^ 0xff
+        maxLength = 0
+        maxAddress = -1
+        for j, address in enumerate(self.start[value], start=0):
+            # only in previous addresses
+            if address >= pos:
+                break
+            length = self._matchSubSequencesXor(address, pos)
+            if length > maxLength:
+                maxLength = length
+                maxAddress = address
+        #self.log.debug("i: {} cc addr: {} len: {} data: {}".format(i, maxAddress, maxLength, inputData[i:i+maxLength]))
+        return (maxLength, maxAddress)
+
+    # Find the max length of two matching sequences starting at a and b in Input array.
+    def _matchSubSequencesXor(self, a, b):
+        i = 0
+        last_equal = True
+        # max data in chunk is 1024 bytes in long commands
+        max_search = self.length-b if self.length-b < 1024 else 1024
+        for i in range(max_search):
+            if (self.inputData[a+i] ^ 0xff) != self.inputData[b+i]:
+                last_equal = False
+                break
+        if last_equal:
+            i += 1
+
+        return i

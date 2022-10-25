@@ -364,19 +364,12 @@ else:
     output = Compressor().decompress(rom, snes_to_pc(decomp_address))
     vanilla_compressed_length, data = output
 
-    #print("")
-    #print("#"*128)
-    #print("")
-
     start = datetime.now()
-    compressed = Compressor().compress(data)
+    c = Compressor()
+    compressed = c.compress(data)
     end = datetime.now()
     duration = (end - start).total_seconds() * 1000
     recompressed_length = len(compressed)
-
-    #print("")
-    #print("#"*128)
-    #print("")
 
     # decompress again to validate same data
     pc_address = snes_to_pc(decomp_address)
@@ -384,7 +377,7 @@ else:
     _, ddata = Compressor().decompress(fake, pc_address)
     assert data == ddata, "{} Buggy compression !".format(decomp_name)
 
-    print("{:>48} | {:>8} | {:>8} | {:>8} | {}{} {}ms".format(decomp_name, hex(decomp_address),
-                                                              vanilla_compressed_length, len(data),
-                                                              "XX " if recompressed_length > vanilla_compressed_length else "",
-                                                              recompressed_length, round(duration, 2)))
+    print("{:>48} | {:>8} | {:>8} | {:>8} | {}{} {}ms | {}".format(decomp_name, hex(decomp_address),
+                                                                   vanilla_compressed_length, len(data),
+                                                                   "XX " if recompressed_length > vanilla_compressed_length else "",
+                                                                   recompressed_length, round(duration, 2), None)) #, c.stats))

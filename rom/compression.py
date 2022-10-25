@@ -16,9 +16,13 @@ class Command(IntEnum):
     Long = 0b111
     End = 0xff
 
+# profile:
+#  Fast: fastest but sometimes bigger than vanilla
+#  Slow: most compression, guaranteed smaller than vanilla
 class Compressor:
-    def __init__(self):
+    def __init__(self, profile='Fast'):
         self.log = utils.log.get('Compressor')
+        self.profile = profile
         # for debug purpose
         self.stats = defaultdict(int)
 
@@ -282,9 +286,19 @@ class Compressor:
         for i in range(self.length-1):
             self.start[self.inputData[i]].append(i)
 
+        if self.profile == 'Slow':
+            return
+
+        settings = {
+            'Fast': {
+                'length': 256,
+                'step': 64
+            }
+        }
+
         # remove too close values
-        min_length = self.length / 256
-        min_step = self.length / 64
+        min_length = self.length / settings[self.profile]['length']
+        min_step = self.length / settings[self.profile]['step']
         for k, l in self.start.items():
             line_lenght = len(l)
             if line_lenght <= min_length:

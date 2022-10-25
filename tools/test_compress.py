@@ -9,6 +9,7 @@ sys.path.append(dir_path)
 
 from rom.rom import snes_to_pc, RealROM, FakeROM
 from rom.compression import Compressor
+from utils.utils import getPythonExec
 from utils.log import init
 
 romFile = sys.argv[1]
@@ -348,7 +349,7 @@ if decomp_name is None:
 
     processes = []
     for name, address in addresses.items():
-        p = subprocess.Popen(['pyston', os.path.join(dir_path, 'tools', 'test_compress.py'),
+        p = subprocess.Popen([getPythonExec(), os.path.join(dir_path, 'tools', 'test_compress.py'),
                               romFile, name, str(address)])
         processes.append(p)
 

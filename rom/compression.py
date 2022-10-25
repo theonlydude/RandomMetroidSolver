@@ -142,10 +142,7 @@ class Compressor:
         self.length = len(self.inputData)
         self.output = []
 
-        # for each possible value store the positions of the value in the input data
-        self.start = defaultdict(list)
-        for i in range(self.length-1):
-            self.start[self.inputData[i]].append(i)
+        self._computeStart()
 
         min_length = 4
 
@@ -272,9 +269,39 @@ class Compressor:
             self.log.debug("_writeNegativeCopy: len: {} address: {}: {}".format(length, address, self.inputData[i-address:i-address+length]))
 
     def _computeStart(self):
+        # for each possible value store the positions of the value in the input data
+        self.start = defaultdict(list)
+        for i in range(self.length-1):
+            self.start[self.inputData[i]].append(i)
+
+        # display occurence
+        #print(sorted([(hex(v), len(x)) for v,x in self.start.items() if len(x) > 1], key=lambda t: t[1]))
+        #print("0xff: {}".format(self.start[0xff]))
+
         # remove too close values
+        min_step = self.length / 256
         for k, l in self.start.items():
-            pass
+            line_lenght = len(l)
+            if line_lenght <= min_step:
+                continue
+            #print("len(l): {} l: {}".format(line_lenght, l))
+            filtered = []
+            i = 0
+            j = 1
+            filtered.append(l[i])
+            while j < line_lenght:
+                #print("i: {} j: {} l[i]: {} l[j]: ".format(i, j, l[i], l[j]))
+                while j<line_lenght-1 and l[j] - l[i] < min_step:
+                    #print("skip j: {} l[i]: {} l[j]: {} diff: {}".format(j, l[i], l[j], l[j] - l[i]))
+                    j += 1
+                #print("add j: {} l[j]: {}".format(j, l[j]))
+                filtered.append(l[j])
+                i = j
+                j=i+1
+            self.start[k] = filtered
+
+        # display occurence after filter
+        #print(sorted([(hex(v), len(x)) for v,x in self.start.items() if len(x) > 1], key=lambda t: t[1]))
 
     def _computeNext(self, pos):
         ret = {}

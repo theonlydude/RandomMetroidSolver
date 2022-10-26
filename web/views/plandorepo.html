@@ -794,19 +794,19 @@ function dragElement(elmnt, headerId) {
 
 const sortTable = (id, n) => {
     const table = document.getElementById(id);
-    const rows = Array.from(table.querySelectorAll('.collapsible')).map((row) => ({
+    const rows = Array.from(table.querySelectorAll('.collapsible')).map((row, index) => ({
+        index,
         element: row,
         details: row.nextElementSibling,
-        value: row.getElementsByTagName("TD")[n].innerText.toLowerCase(),
+        value: row.getElementsByTagName("TD")[n].innerHTML.toLowerCase(),
     }))
 
+    rows.sort((a, b) => a.value.localeCompare(b.value, undefined, {numeric: true, sensitivity: 'base'}))
     let changed = false
-    rows.sort((a, b) => {
-        const v = b.value.localeCompare(a.value, undefined, {numeric: true, sensitivity: 'base'})
-        if (v === -1) {
+    rows.forEach((row, index) => {
+        if (index !== row.index) {
             changed = true
         }
-        return v
     })
     if (!changed) {
         // The table was already sorted, flip it upside down

@@ -38,11 +38,12 @@ port=$(getDBParam "port")
 # truncate tables
 rm -rf ${CWD}/sql ${CWD}/logs
 
-SQL="truncate table difficulties;
-truncate table extended_stats;
-truncate table item_locs;
-truncate table solver_stats;
-truncate table techniques;"
+SQL="drop table difficulties;
+drop table extended_stats;
+drop table item_locs;
+drop table solver_stats;
+drop table techniques;
+source ${CWD}/web/database/create_extended_stats.sql"
 echo "${SQL}" | mysql -h ${host} -u ${user} -p${password} -P${port} ${database}
 
 #################

@@ -701,9 +701,6 @@ set @last_id = last_insert_id();
                 sql = "insert into solver_stats (ext_id, name, value) values (@last_id, '%s', %d);\n"
                 sqlFile.write(sql % (stat, value))
 
-            # to avoid // issues
-            sqlFile.write("commit;\n")
-
     def getExtStat(self, skillPreset, randoPreset):
         if self.dbAvailable == False:
             return (None, None, None, None)

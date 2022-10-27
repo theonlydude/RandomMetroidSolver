@@ -32,9 +32,7 @@ port=$(getDBParam "port")
 info "Start loading extended stats"
 
 for SQL in $(ls -1 ${SQL_DIR}/extStatsOut_*.sql); do
-    echo "source ${SQL};" | mysql -h ${host} -u ${user} -p${password} -P${port} ${database} > ${LOG_DIR}/$(basename ${SQL}).log 2>&1 &
+    echo "source ${SQL};" | mysql -h ${host} -u ${user} -p${password} -P${port} ${database} > ${LOG_DIR}/$(basename ${SQL}).log
 done
-
-wait
 
 info "Done"

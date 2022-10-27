@@ -812,10 +812,11 @@ const sortTable = (id, n) => {
         // The table was already sorted, flip it upside down
         rows.reverse()
     }
+    var tbodyRef = table.getElementsByTagName('tbody')[0];
     rows.forEach(row => {
         // appendChild removes the node
-        table.appendChild(row.element)
-        table.appendChild(row.details)
+        tbodyRef.appendChild(row.element)
+        tbodyRef.appendChild(row.details)
     })
 }
 

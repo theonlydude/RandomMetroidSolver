@@ -474,9 +474,11 @@ class CommonSolver(object):
 
         # special case for newbie like presets and VARIA tweaks, when both Phantoon and WS Etank are available,
         # if phantoon is visited first then WS Etank is no longer available as newbie can't pass sponge bath.
+        # do the switch only if phantoon and ws etank have the same comeback, in boss rando we can have
+        # phantoon comeback and ws etank nocomeback and it would fail to solve in that case.
         if locs and locs[0].Name == 'Phantoon':
             for i, loc in enumerate(locs):
-                if loc.Name == 'Energy Tank, Wrecked Ship':
+                if loc.Name == 'Energy Tank, Wrecked Ship' and locs[0].comeBack == loc.comeBack:
                     self.log.debug("switch Phantoon and WS Etank")
                     locs[i] = locs[0]
                     locs[0] = loc

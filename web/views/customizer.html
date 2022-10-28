@@ -2219,7 +2219,8 @@ if seedInfo != None:
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr {{=setBold("areaRandomization")}}><td>Areas randomization</td><td>{{=seedParams["areaRandomization"]}}</td></tr>
 {{    if seedParams["areaRandomization"] == "random":}}
-              <tr><td>Area Randomization pool</td><td>{{=seedParams["areaRandomizationMultiSelect"]}}</td></tr>
+              <!-- area wasn't a multiselect so there's still seeds in the db generated with area random but no multiselect -->
+              <tr><td>Area Randomization pool</td><td>{{=seedParams.get("areaRandomizationMultiSelect", "off, full")}}</td></tr>
 {{        pass}}
 
               <tr {{=setBold("areaLayout")}}><td>Additional layout patches for easier navigation</td><td>{{=seedParams["areaLayout"]}}</td></tr>

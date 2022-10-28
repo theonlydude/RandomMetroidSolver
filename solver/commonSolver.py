@@ -309,13 +309,10 @@ class CommonSolver(object):
                 return
 
             loc = self.visitedLocations.pop()
-            if self.majorsSplit == 'Full':
+            if self.majorsSplit == 'Full' or loc.isClass(self.majorsSplit) or loc.isBoss():
                 self.majorLocations.append(loc)
             else:
-                if loc.isClass(self.majorsSplit) or loc.isBoss():
-                    self.majorLocations.append(loc)
-                else:
-                    self.minorLocations.append(loc)
+                self.minorLocations.append(loc)
 
             # access point
             if len(self.visitedLocations) == 0:
@@ -340,15 +337,15 @@ class CommonSolver(object):
 
             # item
             item = loc.itemName
-            if item != self.collectedItems[-1]:
+            if item == self.collectedItems[-1]:
+                self.collectedItems.pop()
+            else:
                 raise Exception("Item of last collected loc {}: {} is different from last collected item: {}".format(loc.Name, item, self.collectedItems[-1]))
 
             # in plando we have to remove the last added item,
             # else it could be used in computing the postAvailable of a location
             if self.mode in ['plando', 'seedless', 'race', 'debug']:
                 loc.itemName = 'Nothing'
-
-            self.collectedItems.pop()
 
             # if multiple majors in plando mode, remove it from smbm only when it's the last occurence of it
             if self.smbm.isCountItem(item):

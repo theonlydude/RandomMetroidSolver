@@ -32,6 +32,10 @@ incsrc "event_list.asm"
 !custom_music_id = #$caca
 !custom_music_escape = $8fe871
 
+;;; no screen shake patch detection for escape music trigger
+!disable_earthquake_marker = $8f919c
+!disable_earthquake_id = #$0060
+
 ;;; for items % objectives
 !CollectedItems  = $7ED86E
 
@@ -215,10 +219,14 @@ clear_music_queue:
 
 ;;; copied from escape rooms setup asm
 room_earthquake:
+        ;; don't trigger if no screen shake patch if detected
+        lda !disable_earthquake_marker : and #$00ff
+        cmp !disable_earthquake_id : beq .end
 	LDA #$0018             ;\
 	STA $183E              ;} Earthquake type = BG1, BG2 and enemies; 3 pixel displacement, horizontal
 	LDA #$FFFF
 	STA $1840
+.end:
 	rts
 
 trigger_escape:

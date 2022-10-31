@@ -9,7 +9,10 @@ org $8f919c
         rts
 
 org $8f91bd
-        rts
+landing_site:
+        bra .skip
+org $8F91C9
+.skip:
 
 org $8FC127
         rts

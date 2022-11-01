@@ -144,10 +144,14 @@ class Solver(object):
 
         currentSuit = 'Power'
         for location, area, subarea, item, locDiff, locTechniques, locItems, pathDiff, pathTechniques, pathItems, path, _class in locations:
+            if _class == "objective":
+                pathTable += """<tr><td colspan="7" class="center objective">{}</td></tr>""".format(location)
+                continue
+
             if path is not None:
                 lastAP = path[-1]
                 if displayAPs == True and not (len(path) == 1 and path[0] == lastAP):
-                    pathTable += """<tr class="grey"><td colspan="3">{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>\n""".format(" -&gt; ".join(path), """<img alt="samus" class="imageItem" src="/solver/static/images/samus_run_{}.gif" title="samus" />""".format(currentSuit), self.getDiffImg(pathDiff), self.getTechniques(pathTechniques), self.getItems(pathItems))
+                    pathTable += """<tr class="grey"><td colspan="3">{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>\n""".format(" -&gt; ".join(path), """<img alt="samus" class="imageItem" src="/solver/static/images/solver/samus_run_{}.gif" title="samus" />""".format(currentSuit), self.getDiffImg(pathDiff), self.getTechniques(pathTechniques), self.getItems(pathItems))
 
             (name, room) = location
 
@@ -202,7 +206,7 @@ class Solver(object):
     def getRoomLink(self, name, room):
         roomUrl = room.replace(' ', '_').replace("'", '%27')
         roomImg = room.replace(' ', '').replace('-', '').replace("'", '')
-        return """<a target="_blank" href="https://wiki.supermetroid.run/{}" data-thumbnail-src="/solver/static/images/{}.png" class="room">{}</a>""".format(roomUrl, roomImg, name)
+        return """<a target="_blank" href="https://wiki.supermetroid.run/{}" data-thumbnail-src="/solver/static/images/rooms/{}.png" class="room">{}</a>""".format(roomUrl, roomImg, name)
 
     def getAreaLink(self, name):
         if name == "WreckedShip":
@@ -212,14 +216,14 @@ class Solver(object):
         else:
             url = name
 
-        return """<a target="_blank" href="https://metroid.fandom.com/wiki/{}" data-thumbnail-src="/solver/static/images/{}.png" class="area">{}</a>""".format(url, name, name)
+        return """<a target="_blank" href="https://metroid.fandom.com/wiki/{}" class="area">{}</a>""".format(url, name)
 
     def getSubArea(self, subarea):
         img = subarea.replace(' ', '')
         if img in ["Kraid", "Tourian"]:
             # kraid is already the image for kraid boss
             img += "SubArea"
-        return """<span data-thumbnail-src="/solver/static/images/{}.png" class="subarea">{}</span>""".format(img, subarea)
+        return """<span data-thumbnail-src="/solver/static/images/rooms/{}.png" class="subarea">{}</span>""".format(img, subarea)
 
     def getItemImg(self, item, location=None, scavengerOrder=[], small=False, boss=False):
         if boss:
@@ -228,20 +232,26 @@ class Solver(object):
             _class = "imageItems"
         else:
             _class = "imageItem"
-        itemImg = """<img alt="{}" class="{}" src="/solver/static/images/{}.png" title="{}" />""".format(item, _class, item.replace(' ', ''), item)
+        itemImg = """<img alt="{}" class="{}" src="/solver/static/images/tracker/inventory/{}.png" title="{}" />""".format(item, _class, item.replace(' ', ''), item)
 
         if location is not None and len(scavengerOrder) > 0 and location in scavengerOrder:
             index = scavengerOrder.index(location) + 1
             if index >= 10:
-                itemImg += """<img class="imageItems" src="/solver/static/images/1.png"/>"""
+                itemImg += """<img class="imageItems" src="/solver/static/images/tracker/inventory/1.png"/>"""
             index %= 10
-            itemImg += """<img class="imageItems" src="/solver/static/images/{}.png"/>""".format(index)
+            itemImg += """<img class="imageItems" src="/solver/static/images/tracker/inventory/{}.png"/>""".format(index)
         return itemImg
 
     def getDiffImg(self, diff):
-        diffName = diff4solver(float(diff))
+        diffId, diffName = diff4solver(float(diff))
 
-        return """<img alt="{}" class="imageItem" src="/solver/static/images/marker_{}.png" title="{}" />""".format(diffName, diffName, diffName)
+        return """<img alt="{}" class="imageItem" src="/solver/static/images/solver/marker_{}.png" title="{}" />""".format(diffName, diffId, diffName)
+
+    def genCollectedItems(self, locations):
+        items = set()
+        for _, _, _, item, _, _, _, _, _, _, _, _ in locations:
+            items.add(item)
+        return items
 
     def prepareResult(self):
         if self.session.solver['result'] is not None:
@@ -262,6 +272,7 @@ class Solver(object):
             result['pathremainMinors'] = self.genPathTable(result['remainMinors'], result['scavengerOrder'], False)
             result['pathskippedMajors'] = self.genPathTable(result['skippedMajors'], result['scavengerOrder'], False)
             result['pathunavailMajors'] = self.genPathTable(result['unavailMajors'], result['scavengerOrder'], False)
+            result['collectedItems'] = self.genCollectedItems(result['generatedPath'])
 
             # display the result only once
             self.session.solver['result'] = None

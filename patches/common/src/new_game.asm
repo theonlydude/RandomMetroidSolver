@@ -53,6 +53,7 @@ check_new_game:
     ;; check that Game time and frames is equal zero for new game
     ;; (Thanks Smiley and P.JBoy from metconst)
     lda $09DA
+    and #$fffe                  ; consider 1 IGT frame as 0 (workaround for start game with intro text)
     ora $09DC
     ora $09DE
     ora $09E0
@@ -61,15 +62,16 @@ check_new_game:
 
 print "startup: ", pc
 startup:
-    jsl check_new_game      : bne .end
-    lda.l start_location    : beq .zebes
-    cmp #$fffe              : beq .ceres
-    ;; custom start point on Zebes
+    jsl check_new_game : bne .end
+    lda.l start_location
+    cmp #$fffe : beq .ceres
+    ;; start point on Zebes
     pha
     and #$ff00 : xba : sta $079f ; hi byte is area
-    pla
+    pla : pha
     and #$00ff : sta $078b      ; low byte is save index
-    lda #$0000 : jsl $8081fa    ; wake zebes
+    pla : beq .zebes
+    lda #$0000 : jsl $8081fa    ; wake zebes if not ship start
 .zebes:
     lda #$0005 : bra .store_state
 .ceres:
@@ -98,7 +100,7 @@ gameplay_start:
 .save:
     ;; Call the save code to create a new file
     plx
-    jsl !new_save		; see credits_varia
+    jsr add_etanks_and_save
 .end:
     rtl
 
@@ -125,6 +127,8 @@ rand:
     ply
     rtl
 
+warnpc $a1f2bf
+
 org $a1f2c0
 ;;; courtesy of Smiley
 fix_timer_gfx:
@@ -145,8 +149,28 @@ fix_timer_gfx:
 
 warnpc $a1f2ff
 
-;;; patch morph+missile room state check
+org $a1f470
+print "additional_etanks: ", pc
+additional_etanks:
+	db $00
+
+add_etanks_and_save:
+	sep #$20
+	lda.l additional_etanks : sta $4202
+	lda #$64 : sta $4203
+	pha : pla : xba : xba
+	rep #$20
+	lda $4216 : clc : adc #$0063
+	sta $09c4
+	sta $09c2
+	jsl !new_save		; see credits_varia
+	rts
+
+warnpc $a1f4ff
+
+;;; patch pit and climb room states
 org $8fe652
+;;; pit room: in vanilla, checks for morph+missiles collection
 morph_missile_check:
     ;; check that zebes is awake instead: works with both standard
     ;; start with wake_zebes.ips, and non standard start with wake
@@ -158,3 +182,14 @@ org $8fe65f
 .awake:
 org $8fe666
 .not_awake:
+
+;;; Enemies gray doors set zebes awake when unlocking.
+;;; Disable that, as the event is set in blue brin by
+;;; wake_zebes patch (or right away if random start),
+;;; and we don't want it to be set if we encounter
+;;; Climb flashing portal door (enemy door set at 0)
+org $84BE0B
+skip_wake_zebes:
+	bra .skip
+org $84BE12
+.skip:

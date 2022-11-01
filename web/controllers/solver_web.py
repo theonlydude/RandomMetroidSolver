@@ -52,11 +52,6 @@ def randoParamsWebService():
     from web.backend.randomizer import Randomizer
     return Randomizer(session, request, response, cache).randoParamsWebService()
 
-def randoParamsWebServiceAPI():
-    session.forget(response)
-    from web.backend.randomizer import Randomizer
-    return Randomizer(session, request, response, cache).randoParamsWebServiceAPI()
-
 
 def presets():
     from web.backend.presets import Presets
@@ -66,10 +61,15 @@ def skillPresetActionWebService():
     from web.backend.presets import Presets
     return Presets(session, request, cache).skillPresetActionWebService()
 
+def skillPresetListWebService():
+    session.forget(response)
+    from web.backend.presets import Presets
+    return Presets(session, request, cache).skillPresetListWebService()
+
 
 def tracker():
     from web.backend.tracker import Tracker
-    return Tracker(session, request, cache).run()
+    return Tracker(session, request, cache, response).run()
 
 def plando():
     from web.backend.plando import Plando
@@ -77,7 +77,7 @@ def plando():
 
 def trackerWebService():
     from web.backend.tracker import Tracker
-    return Tracker(session, request, cache).trackerWebService()
+    return Tracker(session, request, cache, response).trackerWebService()
 
 
 def customizer():

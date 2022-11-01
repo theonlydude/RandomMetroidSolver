@@ -1,6 +1,7 @@
 import sys, json, os
 from solver.conf import Conf
 from solver.difficultyDisplayer import DifficultyDisplayer
+from utils.objectives import Objectives
 from utils.utils import fixEnergy
 
 class Out(object):
@@ -35,9 +36,10 @@ class OutWeb(Out):
 
         randomizedRom = os.path.basename(os.path.splitext(s.romFileName)[0])+'.sfc'
         diffPercent = DifficultyDisplayer(s.difficulty).percent()
-        generatedPath = self.getPath(s.visitedLocations)
+        generatedPath = self.getPath(s.visitedLocations, s.completedObjectives)
         collectedItems = s.smbm.getItems()
         scavengerOrder = [loc.Name for loc in s.scavengerOrder]
+        tourian = s.tourian
 
         if s.difficulty == -1:
             remainTry = self.getPath(s.tryRemainingLocs())
@@ -58,12 +60,12 @@ class OutWeb(Out):
                       pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
                       remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
                       skippedMajors=skippedMajors, unavailMajors=unavailMajors, collectedItems=collectedItems,
-                      scavengerOrder=scavengerOrder)
+                      scavengerOrder=scavengerOrder, objectives=Objectives.getGoalsList(), tourian=tourian)
 
         with open(s.outputFileName, 'w') as jsonFile:
             json.dump(result, jsonFile)
 
-    def getPath(self, locations):
+    def getPath(self, locations, objectives=None):
         if locations is None:
             return None
 
@@ -73,31 +75,35 @@ class OutWeb(Out):
             'Phantoon': 1,
             'Draygon': 2,
             'Ridley': 3,
-            'Varia': 4,
-            'Gravity': 5,
-            'Morph': 6,
-            'Bomb': 7,
-            'SpringBall': 8,
-            'ScrewAttack': 9,
-            'HiJump': 10,
-            'SpaceJump': 11,
-            'SpeedBooster': 12,
-            'Charge': 13,
-            'Ice': 14,
-            'Wave': 15,
-            'Spazer': 16,
-            'Plasma': 17,
-            'Grapple': 18,
-            'XRayScope': 19,
-            'CrystalFlash': 20,
-            'ETank': 21,
-            'Reserve': 22,
-            'Missile': 23,
-            'Super': 24,
-            'PowerBomb': 25
+            'SporeSpawn': 4,
+            'Crocomire': 5,
+            'Botwoon': 6,
+            'GoldenTorizo': 7,
+            'Varia': 8,
+            'Gravity': 9,
+            'Morph': 10,
+            'Bomb': 11,
+            'SpringBall': 12,
+            'ScrewAttack': 13,
+            'HiJump': 14,
+            'SpaceJump': 15,
+            'SpeedBooster': 16,
+            'Charge': 17,
+            'Ice': 18,
+            'Wave': 19,
+            'Spazer': 20,
+            'Plasma': 21,
+            'Grapple': 22,
+            'XRayScope': 23,
+            'CrystalFlash': 24,
+            'ETank': 25,
+            'Reserve': 26,
+            'Missile': 27,
+            'Super': 28,
+            'PowerBomb': 29
         }
         key = lambda item: order[item[item.find('-')+1:]] if '-' in item else order[item]
-        for loc in locations:
+        for step, loc in enumerate(locations, start=1):
             if loc.locDifficulty is not None:
                 # draygon fight is in it's path
                 if loc.Name == 'Draygon':
@@ -126,6 +132,13 @@ class OutWeb(Out):
                             '0.00', [], [],
                             [ap.Name for ap in loc.path] if loc.path is not None else None,
                             loc.Class])
+
+            if objectives is not None:
+                for objStep, objName in objectives:
+                    if objStep == step:
+                        out.append(["Objective completed: {}".format(objName), None, None, None,
+                                    None, None, None, None, None, None, None,
+                                    "objective"])
 
         return out
 
@@ -173,13 +186,13 @@ class OutConsole(Out):
         else:
             sys.exit(1)
 
-    def printPath(self, message, locations, displayAPs=True):
+    def printPath(self, message, locations, displayAPs=True, objectives=None):
         print("")
         print(message)
         print('{} {:>48} {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format("Z", "Location Name", "Area", "Sub Area", "Distance", "Item", "Difficulty", "Knows used", "Items used"))
         print('-'*150)
         lastAP = None
-        for loc in locations:
+        for step, loc in enumerate(locations, start=1):
             if displayAPs == True and loc.path is not None:
                 path = [ap.Name for ap in loc.path]
                 lastAP = path[-1]
@@ -224,18 +237,25 @@ class OutConsole(Out):
                                   'nc',
                                   'nc'))
 
+            if objectives is not None:
+                for objStep, objName in objectives:
+                    if objStep == step:
+                        print(" Objective completed: {} ".format(objName).center(160, '='))
+
     def displayOutput(self):
         s = self.solver
 
         print("all patches: {}".format(s.romLoader.getAllPatches()))
+        print("objectives: {}".format(Objectives.getGoalsList()))
+        print("tourian: {}".format(s.tourian))
 
         # print generated path
         if Conf.displayGeneratedPath == True:
-            self.printPath("Generated path ({}/101):".format(len(s.visitedLocations)), s.visitedLocations)
+            self.printPath("Generated path ({}/101):".format(len(s.visitedLocations)), s.visitedLocations, displayAPs=True, objectives=s.completedObjectives)
 
             # if we've aborted, display missing techniques and remaining locations
             if s.difficulty == -1:
-                self.printPath("Next locs which could have been available if more techniques were known:", s.tryRemainingLocs())
+                self.printPath("Next locs which could have been available if more techniques were known:", s.tryRemainingLocs(), displayAPs=True)
 
                 remainMajors = s.getRemainMajors()
                 if len(remainMajors) > 0:

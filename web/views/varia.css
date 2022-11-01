@@ -288,6 +288,9 @@ p {
     left: 46%;
     top: 40%;
     z-index: 2;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    padding: 0.5%;
 }
 .presetform {
     margin-top: 0.5em;

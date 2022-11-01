@@ -42,10 +42,6 @@ function checkCompatibleAPs(startAP, endAP) {
   response.write("  var vanillaBossesAPs = {};\n".format(vanillaBossesAPs), escape=False)
 }}
 
-  if(mode == "plando") {
-    return true;
-  }
-
   if(hasMixedTransitions == true) {
     return true;
   }
@@ -71,12 +67,16 @@ function clickPortal(elemId) {
 
     isEscape = isEscapeAP(elemId);
 
-    // prevent clicking on escape portals
-    if(isEscape == true && (escapeRando == false || mode != "plando")) {
+    // prevent clicking on escape portals, allow it in plando with escape rando or tracker with disabled tourian
+    if(isEscape == true && (escapeRando == false || (mode != "plando" && tourian != "Disabled"))) {
         return;
     }
 
-    escapeStart = "tourianEscapeRoom4TopRight"
+    if(tourian != "Disabled") {
+        escapeStart = "tourianEscapeRoom4TopRight";
+    } else {
+        escapeStart = "climbBottomLeft";
+    }
     escapeLine = escapeStart in lines;
     if(escapeLine == true) {
         escapeEnd = lines[escapeStart]
@@ -98,7 +98,7 @@ function clickPortal(elemId) {
     } else if(secondClick == "" && elemId != firstClick) {
         isFirstEscape = isEscapeAP(firstClick);
 
-        if(isFirstEscape != isEscape) {
+        if(tourian != "Disabled" && isFirstEscape != isEscape) {
             // no mixing escape ap with other aps
             return;
         }
@@ -112,14 +112,17 @@ function clickPortal(elemId) {
             if(! ((firstClick in lines) || (elemId in lines))) {
                 // add new line
 
-                if(isEscape == true) {
+                if(isEscape == true || isFirstEscape == true) {
                     // escape aps, one must be tourian exit
                     if(firstClick != escapeStart && elemId != escapeStart) {
                         alert("For escape one node must be Tourian escape.");
                         return;
                     }
                 } else if(checkCompatibleAPs(firstClick, elemId) == false) {
-                    alert("Warning:\n\tYou are mixing an Areas access point and a Bosses access point.\n\tIt's an invalid transition except for Plando seeds.");
+                    if(mode == "plando") {
+                        alert("Warning:\n\tYou are mixing an Areas access point and a Bosses access point.\n\tIt's an invalid transition, use a minimizer seed as base seed to do it.");
+                    }
+                    return;
                 }
 
                 if(init == true) {
@@ -172,18 +175,29 @@ function addLine(startPoint, endPoint) {
         return;
     }
 
-    var line = new LeaderLine(startPointElem, endPointElem,
-                              {startPlug: 'disc',
-                               endPlug: 'disc',
-                               dropShadow: true,
-                               startPlugColor: colors[nextColor],
-                               endPlugColor: colors[nextColor],
-                               size: 2,
-                               color: colors[nextColor],
-                               outlineColor: 'rgb(255, 255, 255)',
-                               outline: true,
-                               outlineSize: 0.10,
-                               path: 'straight'});
+
+    const options = {
+        startPlug: 'disc',
+        endPlug: 'disc',
+        dropShadow: true,
+        startPlugColor: colors[nextColor],
+        endPlugColor: colors[nextColor],
+        size: 4,
+        color: colors[nextColor],
+        outlineColor: 'rgb(255, 255, 255)',
+        outline: true,
+        outlineSize: 0.10,
+        path: 'straight',
+    };
+    const xy = {
+        x: '50%',
+        y: '50%',
+    }
+    var line = new LeaderLine(
+      LeaderLine.pointAnchor(startPointElem, xy),
+      LeaderLine.pointAnchor(endPointElem, xy),
+      options
+    )
 
     nextColor += 1;
     $("#"+linePrefix+startPoint).removeClass("addBorder");
@@ -288,6 +302,7 @@ function ajaxFailJSON(jqXHR, textStatus) {
 }
 
 var lastAction = null;
+var lastTime = null;
 function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
     if(!("mode" in dataDict)) {
       dataDict["mode"] = document.getElementById("mode").value;
@@ -302,6 +317,7 @@ function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
     webServInProgress = true;
 
     lastAction = dataDict;
+    lastTime = new Date();
     var request = $.ajax({
       url: "{{=URL(f='trackerWebService')}}",
       method: "POST",
@@ -359,6 +375,10 @@ function setWSIcon(icon) {
 }
 
 function ajaxOkGet(jsonData, status, dummy, chained=false) {
+    var curTime = new Date();
+    console.log("ajax call took "+(curTime - lastTime)+"ms");
+    lastTime = curTime;
+
     if(chained == false) {
         webServInProgress = false;
     }
@@ -368,7 +388,6 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     $('#loadingGIF').hide();
 
     // get dicts availableLocations and visitedLocations
-    console.log("json received: [ "+jsonData+" ]");
     if(jsonData == "OK") {
         setWSIcon("checkmark");
         return;
@@ -401,6 +420,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     updateInventory(jsonData);
     updateGps(jsonData);
     displayDoors(jsonData);
+    displayCompletedObjectives(jsonData);
 
     setWSIcon("checkmark");
 
@@ -409,13 +429,21 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         // debug: highlight next VCR loc
         postAjaxHook();
     } else {
-        // if no available locations, display a popup telling you're stuck
-        if(Object.keys(jsonData["availableLocations"]).length == 0 && chained == false) {
-            if(jsonData["allTransitions"] == true && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited") && jsonData["allDoorsRevealed"] == true) {
+        // if no available locations, display a popup telling you're stuck.
+        // in race protected seeds we can't load transitions as they're encrypted,
+        // so allTransitions var don't behave correctly.
+        if(Object.keys(jsonData["availableLocations"]).length == 0 && chained == false && mode != "race") {
+            if(jsonData["allTransitions"] == true
+               && jsonData["allDoorsRevealed"] == true
+               && tourian != "Disabled"
+               && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited") ) {
                 alert("You're stuck, you can't finish this seed with the given preset.");
             }
         }
     }
+
+    curTime = new Date();
+    console.log("state loading took "+(curTime - lastTime)+"ms");
 }
 
 function isSeedless(mode) {
@@ -547,6 +575,7 @@ function updateGlobal(jsonData) {
     preset = jsonData["preset"];
     doorsRando = jsonData["doorsRando"];
     hasNothing = jsonData["hasNothing"];
+    tourian = jsonData["tourian"];
     init = true;
 
     document.getElementById("mode").value = mode;
@@ -571,7 +600,7 @@ function updateLines(jsonData, reset) {
     for(var i=0; i<arrayLength; i++) {
         var startPoint = jsonData["linesSeq"][i][0];
         var endPoint = jsonData["linesSeq"][i][1];
-        if(! (startPoint in lines)) {
+        if(! (startPoint in lines) && startPoint != endPoint) {
             addLine(startPoint, endPoint);
         }
     }
@@ -596,12 +625,16 @@ function updateDebugLines(jsonData) {
     var arrayLength = jsonData["innerTransitions"].length;
     for(var i=0; i<arrayLength; i++) {
         var start = jsonData["innerTransitions"][i][0];
-        var end = jsonData["innerTransitions"][i][1]
-        var difficulty = jsonData['innerTransitions'][i][2]
+        var end = jsonData["innerTransitions"][i][1];
+        var difficulty = jsonData['innerTransitions'][i][2][0];
 
         var lineName = `${start}-${end}`;
         if(debugLines.indexOf(lineName) == -1) {
             addDebugLine(start, end, difficulty);
+        } else {
+            // path diff could have change
+            var line = debugLeaderLines[lineName];
+            line.setOptions({color: debugColors[difficulty]});
         }
         lines.add(lineName);
     }
@@ -628,16 +661,22 @@ function updateLocations(jsonData) {
         for(var locName in jsonData["availableLocations"]) {
             // console.log(locName+" is available");
             var locData = jsonData["availableLocations"][locName];
-            var update = (locsInfo[locName]["difficulty"] != locData["difficulty"] || locsInfo[locName]["state"] != "available");
+            var update = (locsInfo[locName]["difficulty"] == undefined || locsInfo[locName]["difficulty"][0] != locData["difficulty"][0] || locsInfo[locName]["state"] != "available" || "comeBack" in locData);
             locsInfo[locName]["state"] = "available";
             locsInfo[locName]["difficulty"] = locData["difficulty"];
             locsInfo[locName]["canHidden"] = locData["canHidden"];
             locsInfo[locName]["visibility"] = locData["visibility"];
             locsInfo[locName]["accessPoint"] = locData["accessPoint"];
             locsInfo[locName]["path"] = locData["path"];
+            locsInfo[locName]["major"] = locData["major"];
 
             if(update) {
-                $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
+                if(locData["major"] == true) {
+                    var css_class = "marker_available_"+locData["difficulty"][0]+"_major";
+                } else {
+                    var css_class = "marker_available_"+locData["difficulty"][0];
+                }
+                $("#"+locName).attr("class", "baseLoc "+css_class);
                 var tooltip = getTooltip(locName, locData, "?", false);
                 $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
             }
@@ -647,7 +686,7 @@ function updateLocations(jsonData) {
             // check if a boss was at that location
             if("boss" in locsInfo[locName]) {
                 var bossName = locsInfo[locName]["boss"];
-                if(bossName != "MotherBrain") {
+                if(g4.includes(bossName)) {
                     document.getElementById(bossName+"G4").style.display = "none";
                 }
             }
@@ -673,7 +712,7 @@ function updateLocations(jsonData) {
                     base = "baseLocOver";
                 }
 
-                var className = "marker_visited_"+locData["difficulty"]+"_"+locData["item"];
+                var className = "marker_visited_"+locData["difficulty"][0]+"_"+locData["item"];
                 $("#"+locName).attr("class", base+" "+className);
                 var tooltip = getTooltip(locName, locData, locData["item"], true);
                 $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
@@ -681,7 +720,7 @@ function updateLocations(jsonData) {
                 // check if a boss was at that location
                 if("boss" in locsInfo[locName]) {
                     var bossName = locsInfo[locName]["boss"];
-                    if(bossName != "MotherBrain") {
+                    if(g4.includes(bossName)) {
                         document.getElementById(bossName+"G4").style.display = "block";
                     }
                 }
@@ -705,6 +744,13 @@ function updateLocations(jsonData) {
             var tooltip = tooltip + ": "+jsonData["last"]["item"]+" at "+jsonData["last"]["loc"];
         }
         $("#"+elem+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+
+        // if tourian is disabled hide mother brain loc
+        if(tourian == 'Disabled') {
+            document.getElementById("MotherBrain").style.display = "none";
+        } else {
+            document.getElementById("MotherBrain").style.display = "block";
+        }
     }
 
     if(isSeedless(mode)) {
@@ -729,6 +775,7 @@ function updateLocations(jsonData) {
             locsInfo[locName]["difficulty"] = locData["difficulty"];
             locsInfo[locName]["canHidden"] = locData["canHidden"];
             locsInfo[locName]["visibility"] = locData["visibility"];
+            locsInfo[locName]["major"] = locData["major"];
 
             if(update) {
                 // keep current loc zoomed
@@ -737,7 +784,11 @@ function updateLocations(jsonData) {
                     base = "baseLocOver";
                 }
 
-                var className = "marker_available_break";
+                if(locData["major"] == true) {
+                    var className = "marker_available_break_major";
+                } else {
+                    var className = "marker_available_break";
+                }
                 $("#"+locName).attr("class", base+" "+className);
                 var tooltip = getTooltip(locName, locData, "?", false);
                 $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
@@ -745,7 +796,7 @@ function updateLocations(jsonData) {
                 // check if a boss was at that location
                 if("boss" in locsInfo[locName]) {
                     var bossName = locsInfo[locName]["boss"];
-                    if(bossName != "MotherBrain") {
+                    if(g4.includes(bossName)) {
                         document.getElementById(bossName+"G4").style.display = "none";
                     }
                 }
@@ -761,6 +812,26 @@ function updateInventory(jsonData) {
     setItemCount("Super");
     setItemCount("PowerBomb");
     setReserveCount();
+}
+
+var hideTimeout = null;
+function displayCompletedObjectives(jsonData) {
+    var newlyCompletedObjectives = jsonData["newlyCompletedObjectives"];
+    var objectivesPopup = document.getElementById("objectivesPopup");
+    if(newlyCompletedObjectives.length > 0) {
+        if(hideTimeout == null) {
+            objectivesPopup.innerHTML = newlyCompletedObjectives.join("<br/>");
+        } else {
+            // objectives popup is already displayed
+            clearTimeout(hideTimeout);
+            objectivesPopup.innerHTML = objectivesPopup.innerHTML + "<br/>" + newlyCompletedObjectives.join("<br/>");
+        }
+        objectivesPopup.style.display = "block";
+        // arm time to hide popup if user doesn't click on it
+        hideTimeout = setTimeout(hideObjectivePopup, 3000);
+    } else {
+        objectivesPopup.style.display = "none";
+    }
 }
 
 function isActive(elemId) {
@@ -798,6 +869,8 @@ var webServInProgress = false;
 var doorsRando = false;
 var autoTrackInProgress = false;
 var hasNothing = false;
+var g4 = ["Kraid", "Phantoon", "Draygon", "Ridley"];
+var tourian = "Vanilla";
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "break"]
@@ -907,7 +980,12 @@ var locsInfo = {
   Ridley: {left: 76.6, top: 95.25, boss: "Ridley"},
   Phantoon: {left: 78.8, top: 21.65, boss: "Phantoon"},
   Draygon: {left: 93.8, top: 48.68, boss: "Draygon"},
-  MotherBrain: {left: 21.92, top: 44.24, boss: "MotherBrain"}
+  MotherBrain: {left: 21.92, top: 44.24, boss: "MotherBrain"},
+  SporeSpawn: {top: 55.67, left: 16.73, boss: "SporeSpawn"},
+  Crocomire: {left: 22.96, top: 82.86, boss: "Crocomire"},
+  Botwoon: {left: 81.72, top: 43.06, boss: "Botwoon"},
+  GoldenTorizo: {left: 75.41, top: 90.65, boss: "GoldenTorizo"},
+  Gunship: {left: 38.1, top: 7}
 };
 
 var tile2char = {243: '.', 244: '0', 207: '-', 208: 'a', 209: 'b', 210: 'c', 211: 'd', 212: 'e', 213: 'f', 214: 'g', 215: 'h', 216: 'i', 217: 'j', 218: 'k', 219: 'l', 220: 'm', 221: 'n', 222: 'o', 223: 'p', 224: 'q', 225: 'r', 226: 's', 227: 't', 228: 'u', 229: 'v', 230: 'w', 231: 'x', 232: 'y', 233: 'z', 245: '1', 246: '2', 247: '3', 248: '4', 249: '5', 250: '6', 251: '7', 252: '8', 253: '9'};
@@ -948,7 +1026,7 @@ window.onload = function(){
           var ext = re.exec(file.name)[1];
         if( ! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC") ) {
             document.getElementById("uploadFile").value = "";
-            alert("wrong extension: "+ext);
+            alert("Wrong extension: "+ext);
             return false;
         }
 
@@ -967,13 +1045,13 @@ window.onload = function(){
             return false;
         } else if( fileSize == 3146240) {
             document.getElementById("uploadFile").value = "";
-            alert("headered ROM detected, please use an unheadered ROM");
+            alert("Headered ROM detected, please use an unheadered ROM");
             return false;
         } else if(mode == "plando" && fileSize == 4*1024*1024) {
             alert("Warning: You won't be able to upload a Sprite customized seed in the Plandository (hosting space constraints)");
         } else if(mode == "plando" && digest == "d63ed5f8") {
             document.getElementById("uploadFile").value = "";
-            alert("vanilla ROM detected, use an already randomized VARIA ROM");
+            alert("Vanilla ROM detected, use an already randomized VARIA ROM");
             return false;
         }
 
@@ -986,7 +1064,7 @@ window.onload = function(){
             if(bytes[addr] != 0xff) {
                 if(mode == "plando" && debug == false) {
                     clearInputSeed();
-                    alert("race protected seed detected");
+                    alert("Race protected seed detected");
                     return false;
                 } else {
                     romIsRaceProtected = true;
@@ -1002,7 +1080,7 @@ window.onload = function(){
             if (length == 4) {
                 if (version != "beta") {
                     clearInputSeed();
-                    alert("base seed is a beta seed, use a seed generated on production");
+                    alert("Base seed is a beta seed, use a seed generated on production");
                     return false;
                 }
             } else if (length == 12) {
@@ -1012,12 +1090,21 @@ window.onload = function(){
                 }
                 if(seedVersion != version) {
                     clearInputSeed();
-                    alert("base seed's version is "+seedVersion+" but current version is "+version+", use a base seed generated with the current version");
+                    alert("Base seed's version is "+seedVersion+" but current version is "+version+", use a base seed generated with the current version");
                     return false;
                 }
             } else {
                 clearInputSeed();
-                alert("base seed's is not a VARIA one, use a base seed generated on the randomizer page");
+                alert("Base seed's is not a VARIA one, use a base seed generated on the randomizer page");
+                return false;
+            }
+
+            // check if base seed is a minimizer without crateria.
+            // prevent it as it can cause issues if the user connect crateria afterward.
+            // detect if Climb_Asleep patch is present.
+            if(bytes[0x796CC] == 0x7f) {
+                clearInputSeed();
+                alert("Use a minimizer with 100 locations as your base seed");
                 return false;
             }
 
@@ -1113,7 +1200,20 @@ window.onload = function(){
 
   addTooltipCallback();
 
+  var objectivesPopup = document.getElementById("objectivesPopup");
+  objectivesPopup.onclick = function(event) {
+      hideObjectivePopup();
+  }
+
   loaded = true;
+}
+
+function hideObjectivePopup() {
+    $("#objectivesPopup").fadeOut();
+    if(hideTimeout != null) {
+        clearTimeout(hideTimeout);
+        hideTimeout = null;
+    }
 }
 
 function addTooltipCallback() {
@@ -1212,8 +1312,8 @@ function mouseOver(elem) {
     $(elem).addClass("baseLocOver");
 
     if(locsInfo[locName]["state"] == "available") {
-      var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
-      var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
+      var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"][0];
+      var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"][0];
       $(elem).removeClass(className);
       $(elem).addClass(classNameOver);
     }
@@ -1232,8 +1332,8 @@ function mouseOut(elem) {
     $(elem).addClass("baseLoc");
 
     if(locsInfo[locName]["state"] == "available"){
-      var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
-      var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
+      var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"][0];
+      var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"][0];
       $(elem).removeClass(classNameOver);
       $(elem).addClass(className);
     }
@@ -1330,61 +1430,57 @@ function handleHide(locName) {
 }
 
 function clickLoc(elem) {
-  if(interfaceIsFrozen()) {
-    return;
-  }
-
-  var locName = elem.id;
-
-  if(mode == "plando") {
-    // we put an item in boss locations which is the boss' name
-    if("boss" in locsInfo[locName]) {
-      // check that lock is in the available list
-      if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
-        ajaxCall({action: "add", scope: "item", locName: locName, itemName: locsInfo[locName]["boss"]}, "upload");
-
-        if(locName == "MotherBrain") {
-          alert("SEE YOU NEXT MISSION");
-        }
-      }
-      return;
+    if(interfaceIsFrozen()) {
+        return;
     }
 
-    if("state" in locsInfo[locName] && locsInfo[locName]["state"] == "visited") {
-      document.getElementById("itemPopupText").innerHTML = "Replace item at "+locName+":";
-      $("#item").val(locsInfo[locName]["item"]);
-    } else if(mode == "plando") {
-      document.getElementById("itemPopupText").innerHTML = "Item to place at "+locName+":";
-    } else {
-      document.getElementById("itemPopupText").innerHTML = "Item picked up at "+locName+":";
-    }
-    document.getElementById("locName").value = locName;
+    var locName = elem.id;
 
     if(mode == "plando") {
-      handleHide(locName);
-    }
+        // we put an item in boss locations which is the boss' name
+        if("boss" in locsInfo[locName]) {
+            // check that lock is in the available list
+            if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
+                ajaxCall({action: "add", scope: "item", locName: locName, itemName: locsInfo[locName]["boss"]}, "upload");
 
-    // display item selector
-    document.getElementById("itemPopup").style.display = "block";
-    $("#item").imagepicker();
-    document.getElementById("placeItemButton").focus();
-  } else {
-    // check that lock is in the available list
-    if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
-      // call webservice
-      console.log("add item loc: "+locName);
-      ajaxCall({action: "add", scope: "item", locName: locName}, "upload");
-  
-      // if mother brain loc, display end message
-     if(locName == "MotherBrain") {
-       alert("SEE YOU NEXT MISSION");
-     }
+                if(locName == "MotherBrain") {
+                    alert("SEE YOU NEXT MISSION");
+                }
+            }
+            return;
+        }
+
+        if("state" in locsInfo[locName] && locsInfo[locName]["state"] == "visited") {
+            document.getElementById("itemPopupText").innerHTML = "Replace item at "+locName+":";
+            $("#item").val(locsInfo[locName]["item"]);
+        } else {
+            document.getElementById("itemPopupText").innerHTML = "Item to place at "+locName+":";
+        }
+        document.getElementById("locName").value = locName;
+
+        handleHide(locName);
+
+        // display item selector
+        document.getElementById("itemPopup").style.display = "block";
+        $("#item").imagepicker();
+        document.getElementById("placeItemButton").focus();
     } else {
-        // uncollect it
-        console.log("remove item loc: "+locName);
-        ajaxCall({action: "remove", scope: "item", locName: locName}, "upload");
+        // check that lock is in the available list
+        if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
+            // call webservice
+            console.log("add item loc: "+locName);
+            ajaxCall({action: "add", scope: "item", locName: locName}, "upload");
+
+            // if mother brain loc, display end message
+            if(locName == "MotherBrain") {
+                alert("SEE YOU NEXT MISSION");
+            }
+        } else {
+            // uncollect it
+            console.log("remove item loc: "+locName);
+            ajaxCall({action: "remove", scope: "item", locName: locName}, "upload");
+        }
     }
-  }
 }
 
 var selectedDoor = null;
@@ -1598,17 +1694,22 @@ function getTooltip(locName, locData, item, visited) {
         // sequence break
         if(locData["knows"].length > 0 && locData["knows"][0] == "Sequence Break") {
             return tooltip+"<center>Sequence Break</center>"
-                // debug data
-                +("path" in locData ? "<br>Path: "+locData["path"] : "")
-                +("distance" in locData ? "<br>Distance: "+locData["distance"] : "");
+                +(debug == true ?
+                  ("path" in locData ? "<br>Path: "+locData["path"] : "")
+                  +("distance" in locData ? "<br>Distance: "+locData["distance"] : "")
+                  : "");
         } else {
             return tooltip
-                   +"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")
-                   +"<br>Items: "+(locData["items"].length > 0 ? getItemsImages(locData["items"]) : "None")
-                   +("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "")
-                   +("difficulty" in locData ? "<br>Difficulty: "+locData["difficulty"] : "")
-                   // debug data
-                   +("distance" in locData ? "<br>Distance: "+locData["distance"] : "");
+                +"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")
+                +"<br>Items: "+(locData["items"].length > 0 ? getItemsImages(locData["items"]) : "None")
+                +("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "")
+                +("difficulty" in locData ? "<br>Difficulty: "+locData["difficulty"][1] : "")
+                +(debug == true ?
+                  ("distance" in locData ? "<br>Distance: "+locData["distance"] : "")
+                  +("path" in locData ? "<br>Path: "+locData["path"].join(' ') : "")
+                  +("locDifficulty" in locData ? "<br>locDiff: ["+locData["locDifficulty"][0]+"] ["+locData["locDifficulty"][1]+"] ["+locData["locDifficulty"][2]+"]" : "")
+                  +("pathDifficulty" in locData ? "<br>pathDiff: ["+locData["pathDifficulty"][0]+"] ["+locData["pathDifficulty"][1]+"] ["+locData["pathDifficulty"][2]+"]" : "")
+                  : "");
         }
     }
 }
@@ -1625,9 +1726,9 @@ function getItemsImages(items) {
             var hyphen = item.indexOf('-');
             var count = item.substring(0, hyphen);
             var item = item.substring(hyphen+1, item.length);
-            out += "<span>"+count+"-"+'<img class="imageItems" src="/solver/static/images/'+item+'.png" />'+"</span>";
+            out += "<span>"+count+"-"+'<img class="imageItems" src="/solver/static/images/tracker/inventory/'+item+'.png" />'+"</span>";
         } else {
-            out += '<img class="imageItems" src="/solver/static/images/'+items[i]+'.png" />';
+            out += '<img class="imageItems" src="/solver/static/images/tracker/inventory/'+items[i]+'.png" />';
         }
     }
     return out;
@@ -1669,39 +1770,38 @@ function resetItems() {
       document.getElementById(items[item]+"_pause").style.display = "none";
   }
 
-  var bosses = ["Kraid", "Phantoon", "Draygon", "Ridley"];
-  for(var boss in bosses) {
-    document.getElementById(bosses[boss]+"_stream_img").style.display = "block";
-    document.getElementById("No"+bosses[boss]+"_stream_img").style.display = "none";
+  for(var boss in g4) {
+    document.getElementById(g4[boss]+"_stream_img").style.display = "block";
+    document.getElementById("No"+g4[boss]+"_stream_img").style.display = "none";
   }
 }
 
-var bosses = ["Kraid", "Phantoon", "Draygon", "Ridley", "MotherBrain"];
 function addItem(itemName) {
-  if(itemName == "Nothing" || itemName == "NoEnergy") {
-    return;
-  }
-  if(itemName in itemCount) {
-    itemCount[itemName] += 1
-    if(itemName == "Missile" || itemName == "Super" || itemName == "PowerBomb") {
-      if(! isSeedless(mode)) {
-        document.getElementById(itemName+"_pause").style.display = "block";
-      }
+    var bosses = ["Kraid", "Phantoon", "Draygon", "Ridley", "MotherBrain", "SporeSpawn", "Crocomire", "Botwoon", "GoldenTorizo"];
+    if(itemName == "Nothing" || itemName == "NoEnergy" || itemName == "Gunship") {
+        return;
+    }
+    if(itemName in itemCount) {
+        itemCount[itemName] += 1
+        if(itemName == "Missile" || itemName == "Super" || itemName == "PowerBomb") {
+            if(! isSeedless(mode)) {
+                document.getElementById(itemName+"_pause").style.display = "block";
+            }
+        } else {
+            if(itemName == "ETank") {
+                var count = Math.min(14, itemCount[itemName]);
+                document.getElementById(itemName+"_"+count+"_pause").style.display = "block";
+            } else {
+                var count = Math.min(4, itemCount[itemName]);
+                document.getElementById(itemName+"_"+count+"_pause").style.display = "block";
+            }
+        }
     } else {
-      if(itemName == "ETank") {
-        var count = Math.min(14, itemCount[itemName]);
-        document.getElementById(itemName+"_"+count+"_pause").style.display = "block";
-      } else {
-        var count = Math.min(4, itemCount[itemName]);
-        document.getElementById(itemName+"_"+count+"_pause").style.display = "block";
-      }
-    }
-  } else {
-    if(! bosses.includes(itemName)) {
-      document.getElementById(itemName+"_pause_img").style.display = "block";
-    }
-    if(itemName != "Grapple" && itemName != "XRayScope") {
-        if(itemName != "MotherBrain") {
+        if(! bosses.includes(itemName)) {
+            document.getElementById(itemName+"_pause_img").style.display = "block";
+        }
+        var noStream = ["Grapple", "XRayScope", "MotherBrain", "SporeSpawn", "Crocomire", "Botwoon", "GoldenTorizo"];
+        if(! noStream.includes(itemName)) {
             if(bosses.includes(itemName)) {
                 document.getElementById(itemName+"_stream_img").style.display = "none";
                 document.getElementById("No"+itemName+"_stream_img").style.display = "block";
@@ -1711,7 +1811,6 @@ function addItem(itemName) {
             }
         }
     }
-  }
 }
 
 function pad(x, n) {

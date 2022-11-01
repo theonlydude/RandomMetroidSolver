@@ -10,15 +10,19 @@ import json, argparse, sys, random, os, os.path, base64, shutil, tempfile
 from requests import Session
 from rom.rom import RealROM
 from rom.ips import IPS_Patch
+from logic.logic import Logic
 from utils.utils import getRandomizerDefaultParameters
 
 if __name__ == "__main__":
+    Logic.factory('vanilla')
+
     parser = argparse.ArgumentParser(description="Random Metroid Randomizer webservice client")
     parser.add_argument('--skillPreset', help="skill preset file", dest='skillPreset', nargs='?', default=None)
     parser.add_argument('--rom', help="vanilla ROM file", dest='rom', nargs='?', default=None)
     parser.add_argument('--randoPreset', help="rando preset file", dest="randoPreset", nargs='?', default=None)
     parser.add_argument('--seed', help="seed number (optional)", dest="seed", nargs='?', default=0, type=int)
     parser.add_argument('--remoteUrl', help="remote url to connect to", dest="remoteUrl", nargs='?', default='local', choices=['local', 'beta', 'production'])
+    parser.add_argument('--port', help="custom port", dest='port', nargs='?', default=8000)
 
     # parse args
     args = parser.parse_args()
@@ -59,7 +63,7 @@ if __name__ == "__main__":
 
     # call web service
     if args.remoteUrl == 'local':
-        baseUrl = 'http://127.0.0.1:8000/'
+        baseUrl = 'http://127.0.0.1:{}/'.format(args.port)
     elif args.remoteUrl == 'beta':
         baseUrl = 'http://variabeta.pythonanywhere.com/'
     elif args.remoteUrl == 'production':
@@ -86,6 +90,10 @@ if __name__ == "__main__":
 
     # the output is a dict
     data = eval(response.text)
+
+    if data.get('status') == 'NOK':
+        print("An error occured when calling the randomizer webservice. Error: {}".format(data.get('errorMsg')))
+        exit(-1)
 
     # generate randomized rom
     romFileName = args.rom

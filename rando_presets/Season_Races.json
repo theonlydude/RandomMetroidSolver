@@ -1,5 +1,6 @@
 {
-  "elevators_doors_speed": "off",
+  "elevators_speed": "off",
+  "fast_doors": "off",
   "progressionDifficulty": "normal",
   "funMovement": "off",
   "startLocation": "Landing Site",
@@ -22,7 +23,7 @@
   ],
   "No_Music": "off",
   "areaRandomization": "off",
-  "escapeRando": "off",    
+  "escapeRando": "off",
   "maxDifficulty": "harder",
   "powerBombQty": "1",
   "minorQty": "100",

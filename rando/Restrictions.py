@@ -14,11 +14,9 @@ class Restrictions(object):
         self.suitsRestrictions = settings.restrictions['Suits']
         self.scavLocs = None
         self.scavIsVanilla = False
-        self.scavEscape = False
         self.restrictionDictChecker = None
         if self.split == 'Scavenger':
             self.scavIsVanilla = settings.restrictions['ScavengerParams']['vanillaItems']
-            self.scavEscape = settings.restrictions['ScavengerParams']['escape']
         # checker function chain used by canPlaceAtLocation
         self.checkers = self.getCheckers()
         self.static = {}
@@ -135,7 +133,7 @@ class Restrictions(object):
     def getCheckers(self):
         checkers = []
         self.log.debug("add bosses restriction")
-        checkers.append(lambda item, loc, cont: (item.Category != 'Boss' and not loc.isBoss()) or (item.Category == 'Boss' and item.Name == loc.Name))
+        checkers.append(lambda item, loc, cont: (item.Category not in ['Boss', 'MiniBoss'] and not loc.isBoss()) or (item.Category in ['Boss', 'MiniBoss'] and item.Type == loc.BossItemType))
         if self.split != 'Full':
             if self.split != 'Scavenger':
                 self.log.debug("add majorsSplit restriction")

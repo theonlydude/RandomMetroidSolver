@@ -18,15 +18,33 @@ def snes_to_pc(B):
 
     return (A_1 << 16) | A_2
 
+VANILLA_ROM_SIZE = 3145728
+BANK_SIZE = 0x8000
+
 class ROM(object):
     def __init__(self, data={}):
         self.address = 0
+        self.maxAddress = VANILLA_ROM_SIZE
+
+    def close(self):
+        pass
 
     def seek(self, address):
+        if address > self.maxAddress:
+            self.maxAddress = address
         self.address = address
 
     def tell(self):
+        if self.address > self.maxAddress:
+            self.maxAddress = self.address
         return self.address
+
+    def inc(self, n=1):
+        self.address += n
+        self.tell()
+
+    def read(self, byteCount):
+        pass
 
     def readWord(self, address=None):
         return self.readBytes(2, address)
@@ -42,6 +60,9 @@ class ROM(object):
             self.seek(address)
         return int.from_bytes(self.read(size), byteorder='little')
 
+    def write(self, bytes):
+        pass
+
     def writeWord(self, word, address=None):
         self.writeBytes(word, 2, address)
 
@@ -56,34 +77,41 @@ class ROM(object):
             self.seek(address)
         self.write(value.to_bytes(size, byteorder='little'))
 
+    def ipsPatch(self, ipsPatches):
+        pass
+
+    def fillToNextBank(self):
+        off = self.maxAddress % BANK_SIZE
+        if off > 0:
+            self.seek(self.maxAddress + BANK_SIZE - off - 1)
+            self.writeByte(0xff)
+        assert (self.maxAddress % BANK_SIZE) == 0
+
 class FakeROM(ROM):
     # to have the same code for real ROM and the webservice
     def __init__(self, data={}):
         super(FakeROM, self).__init__()
         self.data = data
+        self.ipsPatches = []
 
     def write(self, bytes):
         for byte in bytes:
             self.data[self.address] = byte
-            self.address += 1
+            self.inc()
 
     def read(self, byteCount):
         bytes = []
         for i in range(byteCount):
             bytes.append(self.data[self.address])
-            self.address += 1
+            self.inc()
 
         return bytes
 
-    def close(self):
-        pass
-
     def ipsPatch(self, ipsPatches):
-        mergedIPS = IPS_Patch()
-        for ips in ipsPatches:
-            mergedIPS.append(ips)
+        self.ipsPatches += ipsPatches
 
-        # generate records for ips from self data
+    # generate ips from self data
+    def ips(self):
         groupedData = {}
         startAddress = -1
         prevAddress = -1
@@ -101,8 +129,14 @@ class FakeROM(ROM):
         if startAddress != -1:
             groupedData[startAddress] = curData
 
-        patch = IPS_Patch(groupedData)
-        mergedIPS.append(patch)
+        return IPS_Patch(groupedData)
+
+    # generate final IPS for web patching with first the IPS patches, then written data
+    def close(self):
+        mergedIPS = IPS_Patch()
+        for ips in self.ipsPatches:
+            mergedIPS.append(ips)
+        mergedIPS.append(self.ips())
         patchData = mergedIPS.encode()
         self.data = {}
         self.data["ips"] = base64.b64encode(patchData).decode()
@@ -121,13 +155,16 @@ class RealROM(ROM):
 
     def tell(self):
         self.address = self.romFile.tell()
-        return self.address
+        return super(RealROM, self).tell()
 
     def write(self, bytes):
         self.romFile.write(bytes)
+        self.tell()
 
     def read(self, byteCount):
-        return self.romFile.read(byteCount)
+        ret = self.romFile.read(byteCount)
+        self.tell()
+        return ret
 
     def close(self):
         self.romFile.close()

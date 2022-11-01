@@ -9,6 +9,7 @@ from solver.comeback import ComeBack
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
 from utils.parameters import Knows, isKnows, Settings
 from logic.logic import Logic
+from utils.objectives import Objectives
 import utils.log
 
 class StandardSolver(CommonSolver):
@@ -44,7 +45,13 @@ class StandardSolver(CommonSolver):
         self.output = Out.factory(self.type, self)
         self.outputFileName = outputFileName
 
+        self.objectives = Objectives()
+
         self.loadRom(rom, magic=magic)
+
+        # if tourian is disabled force item pickup to any%
+        if self.tourian == 'Disabled':
+            Conf.itemsPickup = 'any'
 
         self.presetFileName = presetFileName
         self.loadPreset(self.presetFileName)

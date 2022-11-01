@@ -16,6 +16,8 @@ routers = dict(
             'presets',
             'skillPresetActionWebService',
             'skillPresetActionWebService.json',
+            'skillPresetListWebService',
+            'skillPresetListWebService.json',
             'stats',
             'tracker',
             'plando',
@@ -41,8 +43,6 @@ routers = dict(
             'deletePlandoWebService.json',
             'updatePlandoWebService',
             'updatePlandoWebService.json',
-            'randoParamsWebServiceAPI',
-            'randoParamsWebServiceAPI.json',
             'getSpcFile',
             'getSpcFile.json'
         ]

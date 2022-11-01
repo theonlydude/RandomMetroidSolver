@@ -5,12 +5,13 @@ from logic.smbool import SMBool, smboolFalse
 from logic.helpers import Bosses
 from logic.logic import Logic
 from utils.doorsmanager import DoorsManager
+from utils.objectives import Objectives
 from utils.parameters import Knows, isKnows
 
 class SMBoolManager(object):
-    items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'MotherBrain', 'Hyper'] + Bosses.Golden4()
+    items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'MotherBrain', 'Hyper', 'Gunship'] + Bosses.Golden4() + Bosses.miniBosses()
     countItems = ['Missile', 'Super', 'PowerBomb', 'ETank', 'Reserve']
-
+    percentItems = ['Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']
     def __init__(self):
         self._items = { }
         self._counts = { }
@@ -22,6 +23,7 @@ class SMBoolManager(object):
 
         self.helpers = Logic.HelpersGraph(self)
         self.doorsManager = DoorsManager()
+        self.objectives = Objectives()
         self.createFacadeFunctions()
         self.createKnowsFunctions()
         self.resetItems()
@@ -140,14 +142,46 @@ class SMBoolManager(object):
     def traverse(self, doorName):
         return self.doorsManager.traverse(self, doorName)
 
+    def canPassG4(self):
+        return self.objectives.canClearGoals(self, 'Golden Four')
+
+    def hasItemsPercent(self, percent, totalItemsCount=None):
+        if totalItemsCount is None:
+            totalItemsCount = self.objectives.getTotalItemsCount()
+        currentItemsCount = self.getCollectedItemsCount()
+        return SMBool(100*(currentItemsCount/totalItemsCount) >= percent)
+
+    def getCollectedItemsCount(self):
+        return (len([item for item in self._items if self.haveItem(item) and item in self.percentItems])
+                + sum([self.itemCount(item) for item in self._items if self.isCountItem(item)]))
+
     def createKnowsFunctions(self):
         # for each knows we have a function knowsKnows (ex: knowsAlcatrazEscape()) which
         # take no parameter
         for knows in Knows.__dict__:
             if isKnows(knows):
-                setattr(self, 'knows'+knows, lambda knows=knows: SMBool(Knows.__dict__[knows].bool,
-                                                                        Knows.__dict__[knows].difficulty,
-                                                                        knows=[knows]))
+                self._createKnowsFunction(knows)
+
+    def _setKnowsFunction(self, knows, k):
+        setattr(self, 'knows'+knows, lambda: SMBool(k.bool, k.difficulty,
+                                                    knows=[knows]))
+
+    def _createKnowsFunction(self, knows):
+        self._setKnowsFunction(knows, Knows.__dict__[knows])
+
+    def changeKnows(self, knows, newVal):
+        if isKnows(knows):
+            self._setKnowsFunction(knows, newVal)
+            Cache.reset()
+        else:
+            raise ValueError("Invalid knows "+str(knows))
+
+    def restoreKnows(self, knows):
+        if isKnows(knows):
+            self._createKnowsFunction(knows)
+            Cache.reset()
+        else:
+            raise ValueError("Invalid knows "+str(knows))
 
     def isCountItem(self, item):
         return item in self.countItems
@@ -158,6 +192,12 @@ class SMBoolManager(object):
 
     def haveItem(self, item):
         return self._items[item]
+
+    def haveItems(self, items):
+        for item in items:
+            if not self.haveItem(item):
+                return smboolFalse
+        return SMBool(True)
 
     wand = staticmethod(SMBool.wand)
     wandmax = staticmethod(SMBool.wandmax)

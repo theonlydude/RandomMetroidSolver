@@ -4,7 +4,7 @@ import copy, random, sys
 from rando.Filler import Filler
 from rando.FillerRandom import FillerRandom, FillerRandomItems
 from rando.Choice import ItemThenLocChoiceProgSpeed, ItemThenLocChoice
-from rando.RandoServices import ComebackCheckType
+from rando.RandoServices import ComebackCheckType, RandoServices
 from rando.Items import ItemManager
 from rando.ItemLocContainer import ItemLocContainer, getLocListStr, getItemListStr, getItemLocationsStr, getItemLocStr
 from rando.RandoSettings import ProgSpeedParameters
@@ -171,8 +171,7 @@ class FillerProgSpeed(Filler):
                 accessibleLocations.append(loc)
         self.log.debug("accesLoc {}".format([loc.Name for loc in accessibleLocations]))
         if len(accessibleLocations) <= self.locLimit:
-            sys.stdout.write('|')
-            sys.stdout.flush()
+            RandoServices.printProgress('|')
             return False
         # check that there is room left in all main areas
         room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0 }
@@ -185,8 +184,7 @@ class FillerProgSpeed(Filler):
                 room[loc.Area] += 1
         for r in room.values():
             if r > 0 and r <= self.locLimit:
-                sys.stdout.write('|')
-                sys.stdout.flush()
+                RandoServices.printProgress('|')
                 return False
         return True
 
@@ -256,8 +254,7 @@ class FillerProgSpeed(Filler):
         itemLoc = self.generateItemFromStandardPool()
         isStuck = itemLoc is None
         if not isStuck:
-            sys.stdout.write('-')
-            sys.stdout.flush()
+            RandoServices.printProgress('-')
             self.collect(itemLoc)
         return isStuck
 
@@ -310,11 +307,6 @@ class FillerProgSpeed(Filler):
         if (len(self.lastFallbackStates) > 0 and curState == self.lastFallbackStates[-1]):
             self.log.debug("getFallbackState. rewind fallback")
             return fallbackState
-        # n = sum(1 for state in self.lastFallbackStates if state == fallbackState)
-        # if n >= 3:
-        #     self.log.debug("getFallbackState. kickstart needed")
-        #     self.lastFallbackStates = None
-        #     return None
         return curState
 
     # goes back in the previous states to find one where
@@ -330,13 +322,10 @@ class FillerProgSpeed(Filler):
             self.log.debug("rollback END initState apply, nCurLocs="+str(len(self.currentLocations())))
             if self.vcr != None:
                 self.vcr.addRollback(nStatesAtStart)
-            sys.stdout.write('<'*nStatesAtStart)
-            sys.stdout.flush()
+            RandoServices.printProgress('<'*nStatesAtStart)
             return None
         # to stay consistent in case no solution is found as states list was popped in init
         fallbackState = self.getFallbackState()
-        # if fallbackState is None: # kickstart needed
-        #     return None
         self.lastFallbackStates.append(fallbackState)
         i = 0
         possibleStates = []
@@ -356,8 +345,7 @@ class FillerProgSpeed(Filler):
             # nothing, let's rollback further a progression item
             if len(possibleStates) == 0 and i >= 0:
                 if len(self.progressionStatesIndices) > 0:
-                    sys.stdout.write('!')
-                    sys.stdout.flush()
+                    RandoServices.printProgress('!')
                     self.progressionStatesIndices.pop()
                 else:
                     break
@@ -375,22 +363,9 @@ class FillerProgSpeed(Filler):
             fallbackState.apply(self)
             if self.vcr != None:
                 self.vcr.addRollback(1)
-        sys.stdout.write('<'*(nStatesAtStart - len(self.states)))
-        sys.stdout.flush()
+        RandoServices.printProgress('<'*(nStatesAtStart - len(self.states)))
         self.log.debug("rollback END: {}".format(len(self.container.currentItems)))
         return ret
-
-    # def kickStart(self):
-    #     self.initState.apply(self)
-    #     self.lastFallbackStates = []
-    #     pairItemLocDict = self.services.getStartupProgItemsPairs(self.ap, self.container)
-    #     if pairItemLocDict == None:
-    #         # no pair found
-    #         self.log.debug("kickStart KO")
-    #         return False
-    #     self.collectPair(pairItemLocDict)
-    #     self.log.debug("kickStart OK")
-    #     return True
 
     def step(self, onlyBossCheck=False):
         self.cache.reset()
@@ -424,9 +399,6 @@ class FillerProgSpeed(Filler):
                 if not self.services.can100percent(self.ap, self.container):
                     # stuck, rollback to make progress if we can't access everything yet
                     itemLoc = self.rollback()
-                    # if itemLoc is None and self.lastFallbackStates is None:
-                    #     # kickstart needed
-                    #     return self.kickStart()
                 if itemLoc is not None:
                     self.collect(itemLoc)
                     isStuck = False

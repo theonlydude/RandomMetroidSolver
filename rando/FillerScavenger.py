@@ -4,7 +4,7 @@ from rando.Filler import Filler
 from rando.ItemLocContainer import getLocListStr
 from solver.randoSolver import RandoSolver
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
-
+from logic.smbool import SMBool
 
 class ScavengerSolver(RandoSolver):
     def __init__(self, startAP, areaGraph, locations, scavLocs, maxDiff, progDiff, vcr):
@@ -62,6 +62,7 @@ class ScavengerSolver(RandoSolver):
             nextMinor = random.choice(minorsAvailable)
             ret = self.collectMajor(nextMinor)
         elif len(scavAvailable) > 0:
+            scavAvailable = self.filterScavAvailable(scavAvailable)
             self.log.debug("scavAvailable: "+getLocListStr(scavAvailable))
             nextScav = self.chooseNextScavLoc(scavAvailable)
             self.pickupScav(nextScav)
@@ -74,6 +75,40 @@ class ScavengerSolver(RandoSolver):
         if ret is not None:
             self.visited.append(ret)
         return ret
+
+    def filterScavAvailable(self, scavAvailable):
+        # special case of Space Jump/Plasma :
+        #
+        # If both are available (i.e. they are both in the list, Dray is dead and Plasma is accessible),
+        # and the only way out of draygon/precious we have is CF, we must pick up space before plasma.
+        # Indeed, we cannot CF exit a second time, we need Draygon for that.
+        #
+        # This is kind of a global logic issue, but it only ever causes trouble in scavenger when pickup
+        # order is forced in-game. Indeed in other cases, even if the solver or rando can get/place something
+        # outside draygon's lair before space jump, the player can pick up space jump loc first anyway.
+        if not any(loc.Name == "Space Jump" for loc in scavAvailable) or not any(loc.Name == "Plasma Beam" for loc in scavAvailable):
+            return scavAvailable
+        # check that Draygon CF is known
+        k = self.smbm.knowsDraygonRoomCrystalFlash()
+        if k.bool == False or k.difficulty > self.maxDiff:
+            return scavAvailable
+        self.log.debug("Space/Plasma special. Scav list: "+getLocListStr(scavAvailable))
+        # check that Draygon CF is required by removing it from known tech
+        self.smbm.changeKnows("DraygonRoomCrystalFlash", SMBool(False))
+        # (check only AP path to remove current loc/AP constraints,
+        # indeed we could have picked up any minor loc after draygon
+        # and be anywhere)
+        self.areaGraph.resetCache()
+        path = self.areaGraph.accessPath(self.smbm, "Draygon Room Bottom", "Toilet Top", self.maxDiff)
+        self.log.debug("Space/Plasma special. Path:" + str(path))
+        isRequired = (path is None)
+        self.smbm.restoreKnows('DraygonRoomCrystalFlash')
+        self.areaGraph.resetCache()
+        if isRequired == True:
+            self.log.debug("Space/Plasma special. Filtering out plasma")
+            # filter out plasma until space jump is placed
+            return [loc for loc in scavAvailable if loc.Name != 'Plasma Beam']
+        return scavAvailable
 
     def cancelLastItems(self, count):
         # remove locs from scavOrder

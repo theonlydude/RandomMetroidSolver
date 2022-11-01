@@ -131,9 +131,9 @@ class Presets(object):
         if IS_NOT_EMPTY()(preset)[1] is not None:
             return (False, "Preset name is empty")
         if IS_ALPHANUMERIC()(preset)[1] is not None:
-            return (False, "Preset name must be alphanumeric: {}".format(preset))
+            return (False, "Preset name must be alphanumeric")
         if IS_LENGTH(32)(preset)[1] is not None:
-            return (False, "Preset name must be max 32 chars: {}".format(preset))
+            return (False, "Preset name must be max 32 chars")
 
         if action in ['Create', 'Update']:
             if IS_NOT_EMPTY()(self.vars.password)[1] is not None:
@@ -398,11 +398,19 @@ class Presets(object):
             preset = self.vars.preset
 
         # check if the presets file already exists
-        password = self.vars['password']
+        password = self.vars['password'] or ""
         password = password.encode('utf-8')
         passwordSHA256 = hashlib.sha256(password).hexdigest()
         fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
         if os.path.isfile(fullPath):
+            if self.vars.action == 'load':
+                self.session.presets['preset'] = self.vars.preset
+                self.session.presets['currentTab'] = self.vars.currenttab
+                skillBarData = self.getSkillLevelBarData(self.session.presets['preset'])
+                out = PresetLoader.factory(fullPath).params
+                out.pop('password', None)
+                out['skillBarData']= skillBarData
+                return json.dumps(out)
             # load it
             end = False
             try:
@@ -504,3 +512,8 @@ class Presets(object):
                         paramsDict['Controller'][button] = value
 
         return paramsDict
+
+    def skillPresetListWebService(self):
+        # load presets list
+        (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
+        return json.dumps(stdPresets + tourPresets + comPresets)

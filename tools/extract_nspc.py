@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 
-import sys, os, json
+import sys, os, json, re
 
 # we're in directory 'tools/' we have to update sys.path
 sys.path.append(os.path.dirname(sys.path[0]))
+
+# To run from VARIA base dir
 
 # extract vanilla soundtrack as nspc files. args:
 # - vanilla ROM
@@ -14,11 +16,12 @@ sys.path.append(os.path.dirname(sys.path[0]))
 # also lists the extra pointers for area rando, all of this
 # stored in the JSON metadata
 
-from rom.rom import RealROM, snes_to_pc
+from rom.rom import RealROM, snes_to_pc, pc_to_snes
+from rom.ips import IPS_Patch
 
-vanilla=sys.argv[1]
-nspc_dir=sys.argv[2]
-json_path=sys.argv[3]
+vanilla=sys.argv[1] if len(sys.argv) > 1 else "vanilla.sfc"
+nspc_dir=sys.argv[2] if len(sys.argv) > 2 else "varia_custom_sprites/music/vanilla"
+json_path=sys.argv[3] if len(sys.argv) > 3 else "varia_custom_sprites/music/_metadata/vanilla.json"
 
 rom=RealROM(vanilla)
 musicDataTable = snes_to_pc(0x8FE7E4)
@@ -155,11 +158,14 @@ for room in rooms:
         rom.seek(pc_addr)
         dataId = int(rom.readByte())
         trackId = int(rom.readByte())
-        if dataId == 0x0 and trackId >= 0x5:
+        isLoneTrack = dataId == 0x0 and trackId >= 0x5
+        isLoneData = dataId != 0x0 and trackId < 0x5
+        if isLoneData or isLoneTrack:
             # helper to have addresses of special rooms to be input by hand below.
             # indeed, there is no way to guess the intended dataId, as it will be
             # in a nearby room.
-            print("Special - %s (SMILE ID %X) : %d" % (room['Name'], room['Address'], pc_addr))
+            special = "Lone Track" if isLoneTrack else "Lone Data"
+            print("%s - %s (SMILE ID %X) : 0x%x (PC) $%06x (SNES)" % (special, room['Name'], room['Address'], pc_addr, pc_to_snes(pc_addr)))
         if dataId > 0 and trackId >= 0x5 and trackId != 0x80:
             track = tracksByMusicId[(dataId, trackId)]
             trackMeta = metadata[track]
@@ -242,7 +248,7 @@ addExtraAddress("East Maridia", pcAddress=512849)
 # Plasma Climb: forces track one because of item room
 addExtraAddress("East Maridia", pcAddress=512920)
 
-# finally, add extra addresses for area/boss rando
+# add extra addresses for area/boss rando
 from graph.vanilla.graph_access import accessPoints
 
 for ap in accessPoints:
@@ -255,6 +261,105 @@ for ap in accessPoints:
         if key not in trackMeta:
             trackMeta[key] = []
         trackMeta[key] += [0x70000 | a for a in ap.RoomInfo['songs']]
+
+import copy
+
+# expand boss music tracks to individual tracks and remove addresses
+def expandBossTracks(track, bossTracks):
+    meta = metadata[track]
+    if 'pc_addresses' in metadata[track]:
+        del meta['pc_addresses']
+    for boss in bossTracks:
+        metadata["Boss fight - "+boss] = copy.copy(meta)
+    del metadata[track]
+
+expandBossTracks("Boss fight - BT/Ridley/Draygon", ["Bomb/Golden Torizo", "Ridley", "Draygon"])
+expandBossTracks("Boss fight - Kraid/Phantoon/Croc", ["Kraid", "Phantoon", "Crocomire"])
+expandBossTracks("Boss fight - Spore Spawn/Botwoon", ["Spore Spawn", "Botwoon"])
+
+def getBossMeta(boss):
+    return metadata["Boss fight - "+boss]
+
+# add extra metadata to be able to change individual boss music fights
+meta = getBossMeta("Bomb/Golden Torizo")
+meta["static_patches"] = {
+    snes_to_pc(0x84D3C8): [0x04],
+    snes_to_pc(0xAAB096): [0x04]
+}
+meta["dynamic_patches"] = {
+    "data_id": [
+        snes_to_pc(0x8F981F),
+        snes_to_pc(0x8FB299)
+    ],
+    "track_id": [
+        snes_to_pc(0xAAB098)
+    ]
+}
+
+meta = getBossMeta("Ridley")
+meta["dynamic_patches"] = {
+    "data_id": [
+        snes_to_pc(0x8FB344),
+        snes_to_pc(0x8FE0CB)
+    ],
+    "track_id": [
+        snes_to_pc(0xA6A44E)
+    ]
+}
+
+meta = getBossMeta("Draygon")
+meta["pc_addresses"] = [snes_to_pc(0x8FDA76)]
+
+meta = getBossMeta("Kraid")
+meta["static_patches"] = {
+    snes_to_pc(0x8FA5B6): [0x04]
+}
+meta["dynamic_patches"] = {
+    "data_id": [snes_to_pc(0x8FA5B5)],
+    "track_id": [snes_to_pc(0xA7C8B0)]
+}
+
+meta = getBossMeta("Phantoon")
+meta["static_patches"] = {
+    snes_to_pc(0x8FCD2A): [0x04]
+}
+meta["dynamic_patches"] = {
+    "data_id": [snes_to_pc(0x8FCD29)],
+    "track_id": [snes_to_pc(0xA7D543)]
+}
+
+meta = getBossMeta("Crocomire")
+meta["pc_addresses"] = [snes_to_pc(0x8FA9A3)]
+meta["static_patches"] = {
+    snes_to_pc(0xA490AB): [0x04],
+    snes_to_pc(0xA49B87): [0x03],
+    snes_to_pc(0xA49B9F): [0x03]
+}
+meta["dynamic_patches"] = {
+    "track_id": [snes_to_pc(0xA497DE)]
+}
+
+meta = getBossMeta("Spore Spawn")
+meta["pc_addresses"] = [499165]
+
+meta = getBossMeta("Botwoon")
+meta["pc_addresses"] = [514420]
+
+# Add patches to silence song-specific sfx that don't work anymore when changed,
+# and can generate horrible sounds or crashes
+patchDir = os.path.abspath(sys.path[0])+"/../patches/common/ips/custom_music_specific"
+assert os.path.exists(patchDir)
+
+for trackName, trackData in metadata.items():
+    patchName = re.sub('[^a-zA-Z0-9\._]', '_', trackName)
+    patchPath = os.path.join(patchDir, patchName+".ips")
+    if os.path.exists(patchPath):
+        print("Adding SFX patch for track "+trackName)
+        patch = IPS_Patch.load(patchPath)
+        if "static_patches" not in trackData:
+            trackData["static_patches"] = {}
+        trackData["static_patches"].update(patch.toDict())
+
 
 print("Writing %s ..." % json_path)
 with open(json_path, 'w') as fp:

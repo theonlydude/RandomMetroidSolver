@@ -229,7 +229,7 @@ async function save(lock) {
     }
 
     // check if escape rando is on that tourian transition is set, display an alert otherwise
-    if(escapeRando == true && !("tourianEscapeRoom4TopRight" in lines)) {
+    if(escapeRando == true && (tourian != "Disabled" && !("tourianEscapeRoom4TopRight" in lines)) ) {
         alert("Tourian escape transition is not set, you have to set it before playing or the game will crash during the escape sequence");
     }
 
@@ -490,7 +490,7 @@ function startTheTour(step=-1) {
 <p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.</p>\
 <p>Please check the help on the <a href=\"{{=URL(f="tracker")}}\" target=\"_blank\">Tracker page</a> first, since the Plandomizer interface is based on the Tracker interface.</p>\
 <h4>Start</h4>\
-<p>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button, a popup will be displayed:\
+<p>To use it, click on the <img src=\"/solver/static/images/ui/play.svg\" alt=\"Start\" style=\"width: 32px\"> button, a popup will be displayed:\
 </p>\
 <p>As a base for your Plando ROM generate a seed on the <a href=\"/randomizer\" target=\"_blank\">Randomizer page</a> with all the optional patches that you need and the start location of your choice.</p>\
 <p><b>Hint:</b>You can load the base ROM locations and transitions by checking the \"Populate your plando with the items and transitions from the base ROM\" checkbox.</p>\
@@ -503,32 +503,32 @@ function startTheTour(step=-1) {
 </p>\
 <p><b>Hint:</b>You can put the same major item at several locations.</p>\
 <p><b>Hint:</b>You can hide a visible item by checking the 'Hide this item' checkbox in the popup.</p>\
-<p>When you're done click on the <img src=\"/solver/static/images/save.svg\"alt=\"Save\" style=\"width: 32px\"> button to save the Plando ROM on your Computer. You can resume working on it later by uploading the saved Plando ROM.</p>\
+<p>When you're done click on the <img src=\"/solver/static/images/ui/save.svg\"alt=\"Save\" style=\"width: 32px\"> button to save the Plando ROM on your Computer. You can resume working on it later by uploading the saved Plando ROM.</p>\
 \
 <p><b>Hint:</b>You can change the item of a location by clicking on it to choose another item (<b>Warning:</b> it could make some previously accessible locations inaccessible. When reloading the saved plando ROM these locations will be displayed as sequence break).</p>\
 <h4>Bosses</h4>\
 <p>You have to click on a boss location to tell the plandomizer that you killed it, it'll open the locations which are only available after the boss' death (like \"Energy Tank, Kraid\" after killing Kraid).</p>\
 <h4>Areas/Bosses Transitions</h4>\
 <p>Choose an Areas and/or Bosses seed as your base ROM to use the Plando Generator in items and areas/bosses mode, aka you choose the transitions between the areas/bosses.<br/>\
-<b>Hint:</b>You can mix Area portals <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 20px\"> and Boss portals <img src=\"/solver/static/images/portal_boss.png\" alt=\"Boss Portal\" style=\"width: 20px\">.<br/>\
-Using a base seed with Escape randomization allows you to edit the escape transition (<img src=\"/solver/static/images/portal_escape.png\" alt=\"Escape Portal\" style=\"width: 20px\">), it must start from Tourian escape portal. You can also set the escape timer by entering the time in the input just under Tourian escape portal (displayed only when the base seed is an escape randomization one) (the am/pm is ignored).</p>\
+<b>Hint:</b>You can mix Area portals <img src=\"/solver/static/images/tracker/help/portal.png\" alt=\"Portal\" style=\"width: 20px\"> and Boss portals <img src=\"/solver/static/images/tracker/help/portal_boss.png\" alt=\"Boss Portal\" style=\"width: 20px\">.<br/>\
+Using a base seed with Escape randomization allows you to edit the escape transition (<img src=\"/solver/static/images/tracker/help/portal_escape.png\" alt=\"Escape Portal\" style=\"width: 20px\">), it must start from Tourian escape portal. You can also set the escape timer by entering the time in the input just under Tourian escape portal (displayed only when the base seed is an escape randomization one) (the am/pm is ignored).</p>\
 <h4>Doors</h4>\
 <p>Even if the base seed is not doors colors randomized the doors are displayed and you can click on them to display a popup to change their colors. Changing a door's color on a non doors colors randomized seed will set save / refill stations' doors to blue. For technical reasons you can't set a colored door to blue.</p>\
 <h4>Scavenger Hunt</h4>\
-<p>When the base seed is a Scavenger Hunt you can edit which items is in the Scavenger Hunt by clicking on the puzzle button <img src=\"/solver/static/images/puzzle.svg\" alt=\"Scav\" style=\"width: 32px\"></p>\
+<p>When the base seed is a Scavenger Hunt you can edit which items is in the Scavenger Hunt by clicking on the puzzle button <img src=\"/solver/static/images/ui/puzzle.svg\" alt=\"Scav\" style=\"width: 32px\"></p>\
 <p><b>WARNING:</b> Puting a Nothing item at a Scavenger Hunt location will result in an unfinishable seed.</p>\
 <p><b>Note:</b> You can't use the Plandomizer Randomizer when the base seed is a Scavenger Hunt seed.</p>\
 <h4>Unused locations/transitions</h4>\
 <p>If you don't set an item to a location it'll be empty. Portals with no transitions will be looping on themselves.</p>\
 <h4>Randomization</h4>\
-<p>You can use the <img src=\"/solver/static/images/games.svg\" alt=\"Random\" style=\"width: 32px\"> button to let the VARIA Randomizer fill all the empty remaining locations of your plando.</p>\
+<p>You can use the <img src=\"/solver/static/images/ui/games.svg\" alt=\"Random\" style=\"width: 32px\"> button to let the VARIA Randomizer fill all the empty remaining locations of your plando.</p>\
 <p>It'll display a popup where you can choose the Randomizer parameters, the speedrun progression speed is used to randomize (random fill).</p>\
 <p>You can tell the randomizer to not add some items to the pool of items to randomize. Items already placed at locations in the plando are not concerned.</p>\
 <p><b>Hint:</b>In areas/bosses mode you don't have to add all the transitions, the VARIA randomizer will limit itself to the connected locations (like a Minimizer).</p>\
 <p><b>Hint:</b>You can add items in sequence break locations, the VARIA randomizer will fill in the gaps.</p>\
 <h4>Lock</h4>\
-<p>When your Plando seed is completed you can lock it (prevent it from being solved on the VARIA website, and not showing items in SMILE or other editors) if you want. To do so click on the <img src=\"/solver/static/images/locked.svg\" alt=\"Lock\" style=\"width: 32px\"> button.</p>\
-<p><b>WARNING:</b>You won't be able to modify a locked seed, so save it with <img src=\"/solver/static/images/save.svg\"alt=\"Save\" style=\"width: 32px\"> first.</p>\
+<p>When your Plando seed is completed you can lock it (prevent it from being solved on the VARIA website, and not showing items in SMILE or other editors) if you want. To do so click on the <img src=\"/solver/static/images/ui/locked.svg\" alt=\"Lock\" style=\"width: 32px\"> button.</p>\
+<p><b>WARNING:</b>You won't be able to modify a locked seed, so save it with <img src=\"/solver/static/images/ui/save.svg\"alt=\"Save\" style=\"width: 32px\"> first.</p>\
 <h4>Thanks to</h4>\
 <ul><li>Animated location icons by Djlo</li><li>Location icons from Alli_Cat's <a href='https://github.com/allibear17/Super-Metroid-Location-Tracker' target=\"_blank\">Location Tracker</a></li><li>G4 sprite from Crossproduct's <a href=\"https://www.twitch.tv/crossproduct\" target=\"_blank\">smrandohelper</a></li><li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set' target=\"_blank\">Dryicons</a></li></ul>"
     }]
@@ -537,6 +537,18 @@ Using a base seed with Escape randomization allows you to edit the escape transi
   // Initialize the tour
   tour.init();
 
+  if (typeof step === "object") {
+    // step is an event, not a number. Get ID from parent element
+    let parent = event.target.parentNode
+    step = parent.id
+    while (!step) {
+        parent = parent.previousElementSibling
+        step = parent.id
+    }
+  }
+  if (typeof step === 'string') {
+    step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
+  }
   // Start the tour
   if(step != -1) {
     tour.goTo(step);
@@ -706,7 +718,7 @@ function updateGlobalHook(jsonData) {
         var item = getLocItem(locName);
         scavLocs[i] = "d"+item;
 
-        document.getElementById("hunt"+i).innerHTML = "<img src=\"/solver/static/images/"+item+".png\" class=\"imageItems\"> "+locName;
+        document.getElementById("hunt"+i).innerHTML = "<img src=\"/solver/static/images/tracker/inventory/"+item+".png\" class=\"imageItems\"> "+locName;
         $("#d"+item).addClass("placedLoc");
     }
 }
@@ -1083,27 +1095,27 @@ def displayNumber(id, min, max, default, step="1"):
       <tr>
       <td>Items not to place</td>
         <td>
-          <nobr><input id="Charge_bool" name="Charge_bool" type="checkbox" ><img src="/solver/static/images/Charge.png" alt="Charge.png" title="Charge.png" class="rightMargin"/></nobr>
-          <nobr><input id="Ice_bool" name="Ice_bool" type="checkbox" ><img src="/solver/static/images/Ice.png" alt="Ice.png" title="Ice.png" class="rightMargin"/></nobr>
-          <nobr><input id="Wave_bool" name="Wave_bool" type="checkbox" ><img src="/solver/static/images/Wave.png" alt="Wave.png" title="Wave.png" class="rightMargin"/></nobr>
-          <nobr><input id="Spazer_bool" name="Spazer_bool" type="checkbox" ><img src="/solver/static/images/Spazer.png" alt="Spazer.png" title="Spazer.png" class="rightMargin"/></nobr>
-          <nobr><input id="Plasma_bool" name="Plasma_bool" type="checkbox" ><img src="/solver/static/images/Plasma.png" alt="Plasma.png" title="Plasma.png" class="rightMargin"/></nobr>
-          <nobr><input id="Varia_bool" name="Varia_bool" type="checkbox" ><img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="rightMargin"/></nobr>
-          <nobr><input id="Gravity_bool" name="Gravity_bool" type="checkbox" ><img src="/solver/static/images/Gravity.png" alt="Gravity.png" title="Gravity.png" class="rightMargin"/></nobr>
-          <nobr><input id="Morph_bool" name="Morph_bool" type="checkbox" ><img src="/solver/static/images/Morph.png" alt="Morph.png" title="Morph.png" class="rightMargin"/></nobr>
-          <nobr><input id="Bomb_bool" name="Bomb_bool" type="checkbox" ><img src="/solver/static/images/Bomb.png" alt="Bomb.png" title="Bomb.png" class="rightMargin"/></nobr>
-          <nobr><input id="SpringBall_bool" name="SpringBall_bool" type="checkbox" ><img src="/solver/static/images/SpringBall.png" alt="SpringBall.png" title="SpringBall.png" class="rightMargin"/></nobr>
-          <nobr><input id="ScrewAttack_bool" name="ScrewAttack_bool" type="checkbox" ><img src="/solver/static/images/ScrewAttack.png" alt="ScrewAttack.png" title="ScrewAttack.png" class="rightMargin"/></nobr>
-          <nobr><input id="HiJump_bool" name="HiJump_bool" type="checkbox" ><img src="/solver/static/images/HiJump.png" alt="HiJump.png" title="HiJump.png" class="rightMargin"/></nobr>
-          <nobr><input id="SpaceJump_bool" name="SpaceJump_bool" type="checkbox" ><img src="/solver/static/images/SpaceJump.png" alt="SpaceJump.png" title="SpaceJump.png" class="rightMargin"/></nobr>
-          <nobr><input id="SpeedBooster_bool" name="SpeedBooster_bool" type="checkbox" ><img src="/solver/static/images/SpeedBooster.png" alt="SpeedBooster.png" title="SpeedBooster.png" class="rightMargin"/></nobr>
-          <nobr><input id="Grapple_bool" name="Grapple_bool" type="checkbox" ><img src="/solver/static/images/Grapple.png" alt="Grapple.png" title="Grapple.png" class="rightMargin"/></nobr>
-          <nobr><input id="XRayScope_bool" name="XRayScope_bool" type="checkbox" ><img src="/solver/static/images/XRayScope.png" alt="XRayScope.png" title="XRayScope.png" class="rightMargin"/></nobr>
-          <nobr><input id="ETank_bool" name="ETank_bool" type="checkbox" ><img src="/solver/static/images/ETank.png" alt="ETank.png" title="ETank.png" class="rightMargin"/></nobr>
-          <nobr><input id="Reserve_bool" name="Reserve_bool" type="checkbox" ><img src="/solver/static/images/Reserve.png" alt="Reserve.png" title="Reserve.png" class="rightMargin"/></nobr>
-          <nobr><input id="Missile_bool" name="Missile_bool" type="checkbox" ><img src="/solver/static/images/Missile.png" alt="Missile.png" title="Missile.png" class="rightMargin"/></nobr>
-          <nobr><input id="Super_bool" name="Super_bool" type="checkbox" ><img src="/solver/static/images/Super.png" alt="Super.png" title="Super.png" class="rightMargin"/></nobr>
-          <nobr><input id="PowerBomb_bool" name="PowerBomb_bool" type="checkbox" ><img src="/solver/static/images/PowerBomb.png" alt="PowerBomb.png" title="PowerBomb.png" class="rightMargin"/></nobr>
+          <nobr><input id="Charge_bool" name="Charge_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Charge.png" alt="Charge.png" title="Charge.png" class="rightMargin"/></nobr>
+          <nobr><input id="Ice_bool" name="Ice_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Ice.png" alt="Ice.png" title="Ice.png" class="rightMargin"/></nobr>
+          <nobr><input id="Wave_bool" name="Wave_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Wave.png" alt="Wave.png" title="Wave.png" class="rightMargin"/></nobr>
+          <nobr><input id="Spazer_bool" name="Spazer_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Spazer.png" alt="Spazer.png" title="Spazer.png" class="rightMargin"/></nobr>
+          <nobr><input id="Plasma_bool" name="Plasma_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Plasma.png" alt="Plasma.png" title="Plasma.png" class="rightMargin"/></nobr>
+          <nobr><input id="Varia_bool" name="Varia_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Varia.png" alt="Varia.png" title="Varia.png" class="rightMargin"/></nobr>
+          <nobr><input id="Gravity_bool" name="Gravity_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Gravity.png" alt="Gravity.png" title="Gravity.png" class="rightMargin"/></nobr>
+          <nobr><input id="Morph_bool" name="Morph_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Morph.png" alt="Morph.png" title="Morph.png" class="rightMargin"/></nobr>
+          <nobr><input id="Bomb_bool" name="Bomb_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Bomb.png" alt="Bomb.png" title="Bomb.png" class="rightMargin"/></nobr>
+          <nobr><input id="SpringBall_bool" name="SpringBall_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/SpringBall.png" alt="SpringBall.png" title="SpringBall.png" class="rightMargin"/></nobr>
+          <nobr><input id="ScrewAttack_bool" name="ScrewAttack_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/ScrewAttack.png" alt="ScrewAttack.png" title="ScrewAttack.png" class="rightMargin"/></nobr>
+          <nobr><input id="HiJump_bool" name="HiJump_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/HiJump.png" alt="HiJump.png" title="HiJump.png" class="rightMargin"/></nobr>
+          <nobr><input id="SpaceJump_bool" name="SpaceJump_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/SpaceJump.png" alt="SpaceJump.png" title="SpaceJump.png" class="rightMargin"/></nobr>
+          <nobr><input id="SpeedBooster_bool" name="SpeedBooster_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/SpeedBooster.png" alt="SpeedBooster.png" title="SpeedBooster.png" class="rightMargin"/></nobr>
+          <nobr><input id="Grapple_bool" name="Grapple_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Grapple.png" alt="Grapple.png" title="Grapple.png" class="rightMargin"/></nobr>
+          <nobr><input id="XRayScope_bool" name="XRayScope_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/XRayScope.png" alt="XRayScope.png" title="XRayScope.png" class="rightMargin"/></nobr>
+          <nobr><input id="ETank_bool" name="ETank_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/ETank.png" alt="ETank.png" title="ETank.png" class="rightMargin"/></nobr>
+          <nobr><input id="Reserve_bool" name="Reserve_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Reserve.png" alt="Reserve.png" title="Reserve.png" class="rightMargin"/></nobr>
+          <nobr><input id="Missile_bool" name="Missile_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Missile.png" alt="Missile.png" title="Missile.png" class="rightMargin"/></nobr>
+          <nobr><input id="Super_bool" name="Super_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Super.png" alt="Super.png" title="Super.png" class="rightMargin"/></nobr>
+          <nobr><input id="PowerBomb_bool" name="PowerBomb_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/PowerBomb.png" alt="PowerBomb.png" title="PowerBomb.png" class="rightMargin"/></nobr>
         </td>
       </tr>
       <tr><td colspan=2 class="blankLastRow"></td></tr>
@@ -1151,25 +1163,25 @@ def displayNumber(id, min, max, default, step="1"):
     <table>
       <tr>
         <td>
-          <div id="start" class="popupButton flip greyed"><img src="/solver/static/images/fast_forward.svg" alt="start" onclick="gotoStart()" data-toggle="tooltip" title="Cancel all actions" data-placement="bottom" data-container="body" data-html="true"></div>
+          <div id="start" class="popupButton flip greyed"><img src="/solver/static/images/ui/fast_forward.svg" alt="start" onclick="gotoStart()" data-toggle="tooltip" title="Cancel all actions" data-placement="bottom" data-container="body" data-html="true"></div>
         </td>
         <td>
-          <div id="previous" class="popupButton flip greyed"><img src="/solver/static/images/play.svg" alt="end" onclick="previousAction()" data-toggle="tooltip" title="Cancel last action" data-placement="bottom" data-container="body" data-html="true"></div>
+          <div id="previous" class="popupButton flip greyed"><img src="/solver/static/images/ui/play.svg" alt="end" onclick="previousAction()" data-toggle="tooltip" title="Cancel last action" data-placement="bottom" data-container="body" data-html="true"></div>
         </td>
         <td>
-          <div id="next" class="popupButton greyed"><img src="/solver/static/images/play.svg" alt="end" onclick="nextAction()" data-toggle="tooltip" title="Apply next action" data-placement="bottom" data-container="body" data-html="true"></div>
+          <div id="next" class="popupButton greyed"><img src="/solver/static/images/ui/play.svg" alt="end" onclick="nextAction()" data-toggle="tooltip" title="Apply next action" data-placement="bottom" data-container="body" data-html="true"></div>
         </td>
         <td>
-          <div id="nextRollback" class="popupButton greyed"><img src="/solver/static/images/skip_forward.svg" alt="goto" onclick="gotoEnd(true)" data-toggle="tooltip" title="Goto next rollback" data-placement="bottom" data-container="body" data-html="true"></div>
+          <div id="nextRollback" class="popupButton greyed"><img src="/solver/static/images/ui/skip_forward.svg" alt="goto" onclick="gotoEnd(true)" data-toggle="tooltip" title="Goto next rollback" data-placement="bottom" data-container="body" data-html="true"></div>
         </td>
         <td>
-          <div id="end" class="popupButton greyed"><img src="/solver/static/images/fast_forward.svg" alt="end" onclick="gotoEnd(false)" data-toggle="tooltip" title="Apply all actions" data-placement="bottom" data-container="body" data-html="true"></div>
+          <div id="end" class="popupButton greyed"><img src="/solver/static/images/ui/fast_forward.svg" alt="end" onclick="gotoEnd(false)" data-toggle="tooltip" title="Apply all actions" data-placement="bottom" data-container="body" data-html="true"></div>
         </td>
         <td>
           <input name="gotoAction" id="gotoAction" type="number" value="1" min="1" max="1024" step="1" class="gotoAction">
         </td>
         <td>
-          <div id="goto" class="popupButton greyed"><img src="/solver/static/images/right_arrow.svg" alt="goto" onclick="gotoX()" data-toggle="tooltip" title="Goto X actions from start" data-placement="bottom" data-container="body" data-html="true"></div>
+          <div id="goto" class="popupButton greyed"><img src="/solver/static/images/ui/right_arrow.svg" alt="goto" onclick="gotoX()" data-toggle="tooltip" title="Goto X actions from start" data-placement="bottom" data-container="body" data-html="true"></div>
         </td>
       </tr>
       <tr><td colspan=3 class="blankLastRow"></td></tr>
@@ -1206,23 +1218,23 @@ def displayNumber(id, min, max, default, step="1"):
       <tr><td colspan=5 class="blankRow"></td></tr>
 
       <tr><th colspan=4>Locations in the Hunt</th><th colspan=1>Available item locations</th></tr>
-      <tr><td>1: </td><td id="hunt0" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(0)" class="scavBin"></td><td class="emptyScav"></td><td id="dCharge" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Charge.png" class="imageItems"> Charge Beam</td></tr>
-      <tr><td>2: </td><td id="hunt1" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(1)" class="scavBin"></td><td class="emptyScav"></td><td id="dIce" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Ice.png" class="imageItems"> Ice Beam</td></tr>
-      <tr><td>3: </td><td id="hunt2" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(2)" class="scavBin"></td><td class="emptyScav"></td><td id="dWave" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Wave.png" class="imageItems"> Wave Beam</td></tr>
-      <tr><td>4: </td><td id="hunt3" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(3)" class="scavBin"></td><td class="emptyScav"></td><td id="dSpazer" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Spazer.png" class="imageItems"> Spazer</td></tr>
-      <tr><td>5: </td><td id="hunt4" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(4)" class="scavBin"></td><td class="emptyScav"></td><td id="dPlasma" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Plasma.png" class="imageItems"> Plasma Beam</td></tr>
-      <tr><td>6: </td><td id="hunt5" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(5)" class="scavBin"></td><td class="emptyScav"></td><td id="dVaria" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Varia.png" class="imageItems"> Varia Suit</td></tr>
-      <tr><td>7: </td><td id="hunt6" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(6)" class="scavBin"></td><td class="emptyScav"></td><td id="dGravity" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Gravity.png" class="imageItems"> Gravity Suit</td></tr>
-      <tr><td>8: </td><td id="hunt7" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(7)" class="scavBin"></td><td class="emptyScav"></td><td id="dMorph" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Morph.png" class="imageItems"> Morphing Ball</td></tr>
-      <tr><td>9: </td><td id="hunt8" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(8)" class="scavBin"></td><td class="emptyScav"></td><td id="dBomb" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Bomb.png" class="imageItems"> Bomb</td></tr>
-      <tr><td>10: </td><td id="hunt9" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(9)" class="scavBin"></td><td class="emptyScav"></td><td id="dSpringBall" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/SpringBall.png" class="imageItems"> Spring Ball</td></tr>
-      <tr><td>11: </td><td id="hunt10" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(10)" class="scavBin"></td><td class="emptyScav"></td><td id="dScrewAttack" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/ScrewAttack.png" class="imageItems"> Screw Attack</td></tr>
-      <tr><td>12: </td><td id="hunt11" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(11)" class="scavBin"></td><td class="emptyScav"></td><td id="dHiJump" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/HiJump.png" class="imageItems"> Hi-Jump Boots</td></tr>
-      <tr><td>13: </td><td id="hunt12" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(12)" class="scavBin"></td><td class="emptyScav"></td><td id="dSpaceJump" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/SpaceJump.png" class="imageItems"> Space Jump</td></tr>
-      <tr><td>14: </td><td id="hunt13" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(13)" class="scavBin"></td><td class="emptyScav"></td><td id="dSpeedBooster" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/SpeedBooster.png" class="imageItems"> Speed Booster</td></tr>
-      <tr><td>15: </td><td id="hunt14" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(14)" class="scavBin"></td><td class="emptyScav"></td><td id="dGrapple" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Grapple.png" class="imageItems"> Grapple Beam</td></tr>
-      <tr><td>16: </td><td id="hunt15" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(15)" class="scavBin"></td><td class="emptyScav"></td><td id="dXRayScope" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/XRayScope.png" class="imageItems"> X-Ray Scope</td></tr>
-      <tr><td>17: </td><td id="hunt16" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearScavLoc(16)" class="scavBin"></td><td class="emptyScav"></td><td id="dRidley" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/Ridley.png" class="imageItems"> Ridley</td></tr>
+      <tr><td>1: </td><td id="hunt0" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(0)" class="scavBin"></td><td class="emptyScav"></td><td id="dCharge" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/Charge.png" class="imageItems"> Charge Beam</td></tr>
+      <tr><td>2: </td><td id="hunt1" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(1)" class="scavBin"></td><td class="emptyScav"></td><td id="dIce" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/Ice.png" class="imageItems"> Ice Beam</td></tr>
+      <tr><td>3: </td><td id="hunt2" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(2)" class="scavBin"></td><td class="emptyScav"></td><td id="dWave" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/Wave.png" class="imageItems"> Wave Beam</td></tr>
+      <tr><td>4: </td><td id="hunt3" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(3)" class="scavBin"></td><td class="emptyScav"></td><td id="dSpazer" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/Spazer.png" class="imageItems"> Spazer</td></tr>
+      <tr><td>5: </td><td id="hunt4" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(4)" class="scavBin"></td><td class="emptyScav"></td><td id="dPlasma" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/Plasma.png" class="imageItems"> Plasma Beam</td></tr>
+      <tr><td>6: </td><td id="hunt5" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(5)" class="scavBin"></td><td class="emptyScav"></td><td id="dVaria" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/Varia.png" class="imageItems"> Varia Suit</td></tr>
+      <tr><td>7: </td><td id="hunt6" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(6)" class="scavBin"></td><td class="emptyScav"></td><td id="dGravity" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/Gravity.png" class="imageItems"> Gravity Suit</td></tr>
+      <tr><td>8: </td><td id="hunt7" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(7)" class="scavBin"></td><td class="emptyScav"></td><td id="dMorph" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/Morph.png" class="imageItems"> Morphing Ball</td></tr>
+      <tr><td>9: </td><td id="hunt8" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(8)" class="scavBin"></td><td class="emptyScav"></td><td id="dBomb" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/Bomb.png" class="imageItems"> Bomb</td></tr>
+      <tr><td>10: </td><td id="hunt9" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(9)" class="scavBin"></td><td class="emptyScav"></td><td id="dSpringBall" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/SpringBall.png" class="imageItems"> Spring Ball</td></tr>
+      <tr><td>11: </td><td id="hunt10" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(10)" class="scavBin"></td><td class="emptyScav"></td><td id="dScrewAttack" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/ScrewAttack.png" class="imageItems"> Screw Attack</td></tr>
+      <tr><td>12: </td><td id="hunt11" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(11)" class="scavBin"></td><td class="emptyScav"></td><td id="dHiJump" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/HiJump.png" class="imageItems"> Hi-Jump Boots</td></tr>
+      <tr><td>13: </td><td id="hunt12" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(12)" class="scavBin"></td><td class="emptyScav"></td><td id="dSpaceJump" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/SpaceJump.png" class="imageItems"> Space Jump</td></tr>
+      <tr><td>14: </td><td id="hunt13" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(13)" class="scavBin"></td><td class="emptyScav"></td><td id="dSpeedBooster" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/SpeedBooster.png" class="imageItems"> Speed Booster</td></tr>
+      <tr><td>15: </td><td id="hunt14" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(14)" class="scavBin"></td><td class="emptyScav"></td><td id="dGrapple" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/Grapple.png" class="imageItems"> Grapple Beam</td></tr>
+      <tr><td>16: </td><td id="hunt15" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(15)" class="scavBin"></td><td class="emptyScav"></td><td id="dXRayScope" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/XRayScope.png" class="imageItems"> X-Ray Scope</td></tr>
+      <tr><td>17: </td><td id="hunt16" class="drop_target" ondrop="drop(event)" ondragover="allowDrop(event)" draggable="true" ondragstart="drag(event)"></td><td><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearScavLoc(16)" class="scavBin"></td><td class="emptyScav"></td><td id="dRidley" draggable="true" ondragstart="drag(event)" class="drop_src"><img src="/solver/static/images/tracker/inventory/Ridley.png" class="imageItems"> Ridley</td></tr>
       <tr><td colspan=5 class="blankLastRow"></td></tr>
     </table>
     <table>
@@ -1238,17 +1250,17 @@ def displayNumber(id, min, max, default, step="1"):
 
     <!-- plando buttons -->
     <div id="titlePlando" class="titlePlando">PLANDO</div>
-    <div id="scavPlando" class="scavPlando"><img src="/solver/static/images/puzzle.svg" alt="Scavenger" onclick="displayScavPopup()" data-toggle="tooltip" title="Scavenger Hunt locations" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="startPlando" class="startPlando"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup(true)" data-toggle="tooltip" title="Start the Plando creator" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="repeatPlando" class="repeatPlando"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc(true)" data-toggle="tooltip" title="Remove last placed item" data-placement="bottom" data-container="body" data-html="true" id="repeatPlandoImg"></div>
-    <div id="binPlando" class="binPlando"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs(true)" data-toggle="tooltip" title="Remove all placed items" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="savePlando" class="savePlando"><img src="/solver/static/images/save.svg" alt="Save" onclick="save('save')" data-toggle="tooltip" title="Download plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="lockPlando" class="lockPlando"><img src="/solver/static/images/locked.svg" alt="Lock" onclick="save('lock')" data-toggle="tooltip" title="Download locked plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="helpPlando" class="helpPlando"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the Plando help" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="randoPlando" class="randoPlando"><img src="/solver/static/images/games.svg" alt="Randomize" onclick="displayRandoPopup()" data-toggle="tooltip" title="Randomize the remaining items/locations" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="scavPlando" class="scavPlando"><img src="/solver/static/images/ui/puzzle.svg" alt="Scavenger" onclick="displayScavPopup()" data-toggle="tooltip" title="Scavenger Hunt locations" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="startPlando" class="startPlando"><img src="/solver/static/images/ui/play.svg" alt="Start" onclick="displayPopup(true)" data-toggle="tooltip" title="Start the Plando creator" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="repeatPlando" class="repeatPlando"><img src="/solver/static/images/ui/repeat.svg" alt="Cancel Last" onclick="deleteLoc(true)" data-toggle="tooltip" title="Remove last placed item" data-placement="bottom" data-container="body" data-html="true" id="repeatPlandoImg"></div>
+    <div id="binPlando" class="binPlando"><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearLocs(true)" data-toggle="tooltip" title="Remove all placed items" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="savePlando" class="savePlando"><img src="/solver/static/images/ui/save.svg" alt="Save" onclick="save('save')" data-toggle="tooltip" title="Download plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="lockPlando" class="lockPlando"><img src="/solver/static/images/ui/locked.svg" alt="Lock" onclick="save('lock')" data-toggle="tooltip" title="Download locked plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="helpPlando" class="helpPlando"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the Plando help" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="randoPlando" class="randoPlando"><img src="/solver/static/images/ui/games.svg" alt="Randomize" onclick="displayRandoPopup()" data-toggle="tooltip" title="Randomize the remaining items/locations" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <!-- to open the debug popup -->
-    <div id="startDebug" class="startDebug"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayDebugPopup()" data-toggle="tooltip" title="Start the debug popup" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="startDebug" class="startDebug"><img src="/solver/static/images/ui/play.svg" alt="Start" onclick="displayDebugPopup()" data-toggle="tooltip" title="Start the debug popup" data-placement="bottom" data-container="body" data-html="true"></div>
   </div>
 
   <!-- info on current loaded seed -->

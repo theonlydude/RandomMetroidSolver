@@ -2,8 +2,11 @@ import copy
 
 from rom.compression import Compressor
 from rom.rom import snes_to_pc
+from rom.addresses import Addresses
 from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
 from logic.logic import Logic
+from collections import defaultdict
+from utils.objectives import Objectives
 
 class RomReader:
     nothings = ['0xbae9', '0xbaed']
@@ -92,6 +95,7 @@ class RomReader:
         'area': {'address': 0x788A0, 'value': 0x2B, 'desc': "Area layout modifications"},
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
         'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"},
+        'aqueductBombBlocks': {'address': 0x2602d6, 'value': 0x44, 'desc': "Aqueduct entrance bomb blocks instead of power bombs"},
         'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"},
         'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"},
         'nerfedRainbowBeam': {'address': 0x14BA2E, 'value': 0x13, 'desc': 'nerfed rainbow beam'},
@@ -101,10 +105,12 @@ class RomReader:
         'open_zebetites': {'address': 0x26DF22, 'value': 0xc3, 'desc': "Zebetites without morph"},
         'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'desc': "Beam doors"},
         'red_doors': {'address':0x20560, 'value':0xbd, 'desc': "Red doors open with one Missile and do not react to Super"},
-        'rotation': {'address': 0x44DF, 'value': 0xD0, 'desc': "Rotation hack"}
+        'rotation': {'address': 0x44DF, 'value': 0xD0, 'desc': "Rotation hack"},
+        'objectives': {'address': 0x12822, 'value': 0x08, 'desc': "Objectives displayed in pause"},
+        'Escape_Trigger': {'address': 0x10F5FE, 'value': 0x1, 'desc': "Trigger escape when objectives are completed"},
+        'round_robin_cf': {'address': 0x855D6, 'value': 0x0, 'desc': "Round robin Crystal Flash"}
     }
 
-    # FIXME shouldn't be here
     allPatches = {
         'AimAnyButton': {'address': 0x175ca, 'value': 0x60, 'vanillaValue': 0xad},
         'animal_enemies': {'address': 0x78418, 'value': 0x3B, 'vanillaValue': 0x48},
@@ -181,7 +187,10 @@ class RomReader:
         'no_demo': {'address': 0x59F2C, 'value': 0x80, 'vanillaValue': 0xf0},
         'varia_hud': {'address': 0x15EF7, 'value': 0x5C, 'vanillaValue': 0xAE},
         'nothing_item_plm': {'address': 0x23AD1, 'value': 0x24, 'vanillaValue': 0xb9},
-        'vanilla_bugfixes': {'address': 0x33704, 'value': 0xF0, 'vanillaValue': 0xD0}
+        'vanilla_bugfixes': {'address': 0x33704, 'value': 0xF0, 'vanillaValue': 0xD0},
+        'widescreen': {'address': 0xD8, 'value': 0x40, 'vanillaValue': 0x10},
+        'objectives': {'address': 0x12822, 'value': 0x08, 'vanillaValue': 0x14},
+        'percent': {'address': 0x17ffe, 'value': 0x60, 'vanillaValue': 0xff}
     }
 
     @staticmethod
@@ -208,7 +217,7 @@ class RomReader:
         self.race = None
         # default to morph ball location
         self.nothingId = 0x1a
-        self.nothingAddr = 0x786DE
+        self.nothingAddr = snes_to_pc(0x8f86de)
         if magic is not None:
             from rom.race_mode import RaceModeReader
             self.race = RaceModeReader(self, magic)
@@ -268,7 +277,7 @@ class RomReader:
             return itemCode
 
     def getMajorsSplit(self):
-        address = 0x17B6C
+        address = Addresses.getOne('majorsSplit')
         split = chr(self.romFile.readByte(address))
         splits = {
             'F': 'Full',
@@ -309,7 +318,7 @@ class RomReader:
     def loadScavengerOrder(self, locations):
         order = []
         locIdsDict = self.genLocIdsDict(locations)
-        self.romFile.seek(snes_to_pc(0xA1F5D8))
+        self.romFile.seek(Addresses.getOne('scavengerOrder'))
         while True:
             data = self.romFile.readWord()
             locId = (data & 0xFF00) >> 8
@@ -322,7 +331,7 @@ class RomReader:
             assert loc.itemName != "Nothing", "Nothing detected in scav loc {}".format(loc.Name)
         return order
 
-    def loadTransitions(self):
+    def loadTransitions(self, tourian):
         # return the transitions
         rooms = GraphUtils.getRooms()
         bossTransitions = {}
@@ -354,7 +363,10 @@ class RomReader:
             return [(t, transitions[t]) for t in transitions]
 
         # get escape transition
-        escapeSrcAP = getAccessPoint('Tourian Escape Room 4 Top Right')
+        if tourian == 'Disabled':
+            escapeSrcAP = getAccessPoint('Climb Bottom Left')
+        else:
+            escapeSrcAP = getAccessPoint('Tourian Escape Room 4 Top Right')
         key = self.getTransition(escapeSrcAP.ExitInfo['DoorPtr'])
         # may not be set in plandomizer
         if key in rooms:
@@ -445,7 +457,7 @@ class RomReader:
         return sorted(ret)
 
     def getPlandoAddresses(self):
-        self.romFile.seek(0x2F6000)
+        self.romFile.seek(Addresses.getOne('plandoAddresses'))
         addresses = []
         for i in range(128):
             address = self.romFile.readWord()
@@ -456,7 +468,7 @@ class RomReader:
         return addresses
 
     def getPlandoTransitions(self, maxTransitions):
-        self.romFile.seek(0x2F6100)
+        self.romFile.seek(Addresses.getOne('plandoTransitions'))
         addresses = []
         for i in range(maxTransitions):
             srcDoorPtr = self.romFile.readWord()
@@ -472,7 +484,7 @@ class RomReader:
         return Compressor().decompress(self.romFile, address)
 
     def getEscapeTimer(self):
-        second = self.romFile.readByte(0x1E21)
+        second = self.romFile.readByte(Addresses.getOne('escapeTimer'))
         minute = self.romFile.readByte()
 
         second = int(second / 16)*10 + second%16
@@ -480,26 +492,22 @@ class RomReader:
 
         return "{:02d}:{:02d}".format(minute, second)
 
-    def readNothingId(self):
-        address = 0x17B6D
-        value = self.romFile.readByte(address)
-        if value != 0xff:
-            self.nothingId = value
-
-        # find the associated location to get its address
-        for loc in Logic.locations:
-            if loc.Id == self.nothingId:
-                self.nothingAddr = 0x70000 | loc.Address
-                break
-
     def readLogic(self):
         if self.patchPresent('rotation'):
             return 'rotation'
         else:
             return 'vanilla'
 
+    def readObjectives(self, objectives):
+        objectives.readGoals(self)
+
+    def readItemMasks(self):
+        itemsMask = self.romFile.readWord(Addresses.getOne('itemsMask'))
+        beamsMask = self.romFile.readWord(Addresses.getOne('beamsMask'))
+        return itemsMask, beamsMask
+
     def getStartAP(self):
-        address = 0x10F200
+        address = Addresses.getOne('startAP')
         value = self.romFile.readWord(address)
 
         startLocation = 'Landing Site'
@@ -515,14 +523,29 @@ class RomReader:
 
         return (startLocation, startArea, startPatches)
 
-    # go read all location IDs for item split. used to get major/chozo locs in non standard start
+    # go read all location IDs by area for item split
     def getLocationsIds(self):
-        ret = []
+        ret = defaultdict(list)
         for area,addr in locIdsByAreaAddresses.items():
             self.romFile.seek(addr)
             while True:
                idByte = self.romFile.readByte()
                if idByte == 0xff:
                    break
-               ret.append(idByte)
+               ret[area].append(idByte)
         return ret
+
+    def loadEventBitMasks(self):
+        address = Addresses.getOne('objectiveEventsArray')
+        ret = {}
+        for i in range(Objectives.maxActiveGoals):
+            self.romFile.seek(address + i*2)
+            event = self.romFile.readWord()
+            byteIndex = event >> 3
+            bitMask = 1 << (event & 7)
+            ret[i] = {"byteIndex": byteIndex, "bitMask": bitMask}
+        return ret
+
+    def getAdditionalEtanks(self):
+        address = Addresses.getOne('additionalETanks')
+        return self.romFile.readByte(address)

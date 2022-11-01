@@ -14,9 +14,29 @@ arch snes.cpu
 org $80805d
 	dw #$ffff
 
+;;; disable data load in some elevator rooms (custom music will change
+;;; tracks in rooms around them instead)
+
+;;; [Elevator to Maridia]
+org $8f94dd
+        db $00
+;;; [Elevator to Green Brinstar]
+org $8f9949
+        db $00
+;;; Warehouse Entrance
+org $8fa6b2
+        db $00
+;;; Bowling Alley
+org $8fc9be
+        db $00
+org $8fc9a4
+        db $00
+
 ;;; end of custom music data table. accounted for by MusicPatcher
 org $8fe86b
 	dw $caca		; identifier that we have custom music
+
+;;; load custom music in special places
 print "title_screen_intro: ", pc
 title_screen_intro:
 	db $03, $05
@@ -35,12 +55,6 @@ mb3:
 print "mb2: ", pc
 mb2:
 	db $21, $05
-
-org $A98810
-    rep 4 : nop	    ; disables MB2 "no music" before fight, as cutscene is sped up
-
-org $88B446
-    rep 4 : nop     ; disables lava sounds to avoid weird noises in Norfair
 
 org $8b9b6c
 	jsr load_title_screen_music_data
@@ -62,6 +76,9 @@ org $a9b1fe
 
 org $a9b282
 	jsr load_escape_music_track
+
+org $A6C0B6
+	jsl ceres_escape
 
 org $a9cc65
 	jsr load_mb3_music_data
@@ -107,7 +124,9 @@ load_credits_music_data:
 load_credits_music_track:
 	%loadMusicTrack(credits)
 
-org $a9fc70
+warnpc $8bf8ff
+
+org $a9fc80
 load_escape_music_data:
 	%loadMusicData(escape)
 
@@ -125,3 +144,13 @@ load_mb2_music_data:
 
 load_mb2_music_track:
 	%loadMusicTrack(mb2)
+
+ceres_escape:
+	lda #$0000 : jsl !song_routine
+	lda.l escape
+	ora #$ff00
+	jsl !song_routine
+	lda.l escape+1
+	and #$00ff
+	jsl !song_routine
+	rtl

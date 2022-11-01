@@ -1,4 +1,4 @@
-import time
+import time, copy
 
 from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
 from logic.helpers import Pickup
@@ -8,6 +8,7 @@ from solver.comeback import ComeBack
 from solver.standardSolver import StandardSolver
 from utils.parameters import easy
 from solver.out import Out
+from utils.objectives import Objectives
 import utils.log
 
 class RandoSolver(StandardSolver):
@@ -21,7 +22,7 @@ class RandoSolver(StandardSolver):
         self.log = utils.log.get('Solver')
 
         # default conf
-        self.setConf(easy, 'all', [], False)
+        self.setConf(easy, 'all_strict', [], False)
 
         self.firstLogFile = None
 
@@ -32,7 +33,8 @@ class RandoSolver(StandardSolver):
         self.output = Out.factory(self.type, self)
         self.outputFileName = None
 
-        self.locations = locations
+        # create a copy as solver can add gunship or update mother brain functions
+        self.locations = copy.deepcopy(locations)
 
         self.smbm = SMBoolManager()
 
@@ -48,6 +50,8 @@ class RandoSolver(StandardSolver):
         self.startLocation = startLocation
         self.startArea = getAccessPoint(startLocation).Start['solveArea']
         self.areaGraph = areaGraph
+
+        self.objectives = Objectives()
 
         # store at each step how many locations are available
         self.nbAvailLocs = []

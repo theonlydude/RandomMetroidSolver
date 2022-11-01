@@ -2,12 +2,12 @@
 
 [ -z "$SPRITE_SOMETHING" ] && SPRITE_SOMETHING=../SpriteSomething
 [ -z "$VANILLA" ] && VANILLA=vanilla.sfc
-[ -z "$SPRITE_PATCHES" ] && SPRITE_PATCHES=rando/patches/sprites
+[ -z "$SPRITE_PATCHES" ] && SPRITE_PATCHES=varia_custom_sprites/patches
 [ -z "$MAKE_IPS" ] && MAKE_IPS=tools/make_ips.py
 
 sheets=$*
 
-[ -z "$sheets" ] && sheets=web/static/sprite_sheets/*.png
+[ -z "$sheets" ] && sheets=varia_custom_sprites/sprite_sheets/*.png
 
 set -e
 

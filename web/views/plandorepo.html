@@ -159,6 +159,7 @@ extend 'layout.html'
     image-rendering: -o-crisp-edges; /* Opera */
     image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
     image-rendering: crisp-edges;
+    image-rendering: pixelated;
     -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
 }
 </style>
@@ -560,7 +561,7 @@ function ratePlando(plando, purePlando) {
 
 function addImage(parent, name) {
     var DOM_img = document.createElement("img");
-    DOM_img.src = "/solver/static/images/"+name+".png";
+    DOM_img.src = "/solver/static/images/tracker/inventory/"+name+".png";
     DOM_img.class = "imageItem";
     parent.appendChild(DOM_img);
 }
@@ -791,61 +792,32 @@ function dragElement(elmnt, headerId) {
   }
 }
 
-// https://www.w3schools.com/howto/howto_js_sort_table.asp
-function sortTable(id, n) {
-    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-    table = document.getElementById(id);
-    switching = true;
-    // Set the sorting direction to ascending:
-    dir = "asc";
-    /* Make a loop that will continue until
-       no switching has been done: */
-    while (switching) {
-        // Start by saying: no switching is done:
-        switching = false;
-        rows = table.rows;
-        /* Loop through all table rows (except the first, which contains table headers): */
-        // sort only one every two lines (as first line is summary and second line is long desc)
-        for (i = 1; i < rows.length - 3; i+=2) {
-            // Start by saying there should be no switching:
-            shouldSwitch = false;
-            /* Get the two elements you want to compare,
-               one from current row and one from the next: */
-            x = rows[i].getElementsByTagName("TD")[n];
-            y = rows[i + 2].getElementsByTagName("TD")[n];
-            /* Check if the two rows should switch place,
-               based on the direction, asc or desc: */
-            if (dir == "asc") {
-                if (x.innerHTML.toLowerCase().localeCompare(y.innerHTML.toLowerCase(), undefined, {numeric: true, sensitivity: 'base'}) > 0) {
-                    // If so, mark as a switch and break the loop:
-                    shouldSwitch = true;
-                    break;
-                }
-            } else if (dir == "desc") {
-                if (x.innerHTML.toLowerCase().localeCompare(y.innerHTML.toLowerCase(), undefined, {numeric: true, sensitivity: 'base'}) < 0) {
-                    // If so, mark as a switch and break the loop:
-                    shouldSwitch = true;
-                    break;
-                }
-            }
+const sortTable = (id, n) => {
+    const table = document.getElementById(id);
+    const rows = Array.from(table.querySelectorAll('.collapsible')).map((row, index) => ({
+        index,
+        element: row,
+        details: row.nextElementSibling,
+        value: row.getElementsByTagName("TD")[n].innerHTML.toLowerCase(),
+    }))
+
+    rows.sort((a, b) => a.value.localeCompare(b.value, undefined, {numeric: true, sensitivity: 'base'}))
+    let changed = false
+    rows.forEach((row, index) => {
+        if (index !== row.index) {
+            changed = true
         }
-        if (shouldSwitch) {
-            /* If a switch has been marked, make the switch
-               and mark that a switch has been done: */
-            rows[i].parentNode.insertBefore(rows[i + 2], rows[i]);
-            rows[i].parentNode.insertBefore(rows[i + 3], rows[i+1]);
-            switching = true;
-            // Each time a switch is done, increase this count by 1:
-            switchcount ++;
-        } else {
-            /* If no switching has been done AND the direction is "asc",
-               set the direction to "desc" and run the while loop again. */
-            if (switchcount == 0 && dir == "asc") {
-                dir = "desc";
-                switching = true;
-            }
-        }
+    })
+    if (!changed) {
+        // The table was already sorted, flip it upside down
+        rows.reverse()
     }
+    var tbodyRef = table.getElementsByTagName('tbody')[0];
+    rows.forEach(row => {
+        // appendChild removes the node
+        tbodyRef.appendChild(row.element)
+        tbodyRef.appendChild(row.details)
+    })
 }
 
 function filter_plandos() {
@@ -1093,18 +1065,18 @@ function setGuessedPreset(romName){
             else:
                 rating = float(rating)
                 for i in range(math.floor(rating)):
-                    response.write("<img src='/solver/static/images/Varia.png' alt='Varia' border='0' class='imageItem'>", escape=False)
+                    response.write("<img src='/solver/static/images/tracker/inventory/Varia.png' alt='Varia' border='0' class='imageItem'>", escape=False)
                     pass
                 decimal = rating - math.floor(rating)
                 if decimal > 0.0 and decimal < 0.25 and rating < 5.0:
-                    response.write("<img src='/solver/static/images/No_Varia.png' alt='No_Varia' border='0' class='imageItem'>", escape=False)
+                    response.write("<img src='/solver/static/images/tracker/inventory/No_Varia.png' alt='No_Varia' border='0' class='imageItem'>", escape=False)
                 elif decimal >= 0.25 and decimal < 0.75:
-                    response.write("<img src='/solver/static/images/Half_Varia.png' alt='Half_Varia' border='0' class='imageItem'>", escape=False)
+                    response.write("<img src='/solver/static/images/tracker/inventory/Half_Varia.png' alt='Half_Varia' border='0' class='imageItem'>", escape=False)
                 elif decimal >= 0.75:
-                    response.write("<img src='/solver/static/images/Varia.png' alt='Varia' border='0' class='imageItem'>", escape=False)
+                    response.write("<img src='/solver/static/images/tracker/inventory/Varia.png' alt='Varia' border='0' class='imageItem'>", escape=False)
                     pass
                 for i in range(5 - math.ceil(rating)):
-                    response.write("<img src='/solver/static/images/No_Varia.png' alt='Varia' border='0' class='imageItem'>", escape=False)
+                    response.write("<img src='/solver/static/images/tracker/inventory/No_Varia.png' alt='Varia' border='0' class='imageItem'>", escape=False)
                     pass
                 pass
                 response.write(" ({})       </div>".format(ratingCount), escape=False)
@@ -1120,9 +1092,9 @@ function setGuessedPreset(romName){
 <tr>\
 <td>\
 <div class=\"left\">\
-<img class=\"plandoButton\" src=\"/solver/static/images/refresh.svg\" alt=\"Update\" onclick=\"displayUpdatePopup('{}', '{}')\" title=\"Update your plando\">\
-<img class=\"plandoButton\" src=\"/solver/static/images/bin.svg\" alt=\"Delete\" onclick=\"displayDeletePopup('{}')\" title=\"Delete your plando\">\
-<img class=\"plandoButton\" src=\"/solver/static/images/link.svg\" alt=\"Get Permalink\" onclick=\"getPermaLink('{}')\" title=\"Get permanent link\">\
+<img class=\"plandoButton\" src=\"/solver/static/images/ui/refresh.svg\" alt=\"Update\" onclick=\"displayUpdatePopup('{}', '{}')\" title=\"Update your plando\">\
+<img class=\"plandoButton\" src=\"/solver/static/images/ui/bin.svg\" alt=\"Delete\" onclick=\"displayDeletePopup('{}')\" title=\"Delete your plando\">\
+<img class=\"plandoButton\" src=\"/solver/static/images/ui/link.svg\" alt=\"Get Permalink\" onclick=\"getPermaLink('{}')\" title=\"Get permanent link\">\
 </div>\
 <button class=\"downloadButton\" onclick=\"downloadPlando('{}')\">Download ({})</button>\
 <div class=\"right\"><select id=\"rate{}\" name=\"rate\"><option value=\"1\">1</option><option value=\"2\">2</option><option value=\"3\">3</option><option value=\"4\">4</option><option value=\"5\">5</option></select> <button onclick=\"ratePlando('{}', '{}')\">Rate</button></div></td>\

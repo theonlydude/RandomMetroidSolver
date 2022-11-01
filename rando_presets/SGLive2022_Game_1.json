@@ -11,9 +11,7 @@
         "VARIAble",
         "speedrun"
     ],
-    "areaRandomization": "on",
-    "lightAreaRandomization": "off",
-    "areaLayout": "on",
+    "areaRandomization": "full",
     "bossRandomization": "off",
     "variaTweaks": "off",
     "itemsounds": "off",

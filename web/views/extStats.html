@@ -80,6 +80,7 @@ if (hs.registerOverlay) {
     image-rendering: -o-crisp-edges; /* Opera */
     image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
     image-rendering: crisp-edges;
+    image-rendering: pixelated;
     -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
 }
 .grey {
@@ -104,6 +105,9 @@ if (hs.registerOverlay) {
 }
 .strike {
     text-decoration: line-through;
+}
+.fifth {
+    width: 20%;
 }
 </style>
 
@@ -146,6 +150,18 @@ function startTheTour(step=-1) {
     // Initialize the tour
     tour.init();
 
+    if (typeof step === "object") {
+        // step is an event, not a number. Get ID from parent element
+        let parent = event.target.parentNode
+        step = parent.id
+        while (!step) {
+            parent = parent.previousElementSibling
+            step = parent.id
+        }
+    }
+    if (typeof step === 'string') {
+        step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
+    }
     // Start the tour
     if(step != -1) {
         tour.goTo(step);
@@ -155,9 +171,8 @@ function startTheTour(step=-1) {
 
 function drawDifficultiesHistogram() {
 {{
-  if difficulties == None or len(difficulties) == 0:
+  if difficulties is None or len(difficulties) == 0:
     response.write("  return;", escape=False)
-    pass
   else:
 }}
     // Define the chart to be drawn.
@@ -186,9 +201,8 @@ function drawDifficultiesHistogram() {
 
 function drawAvgLocsHistogram() {
 {{
-  if solverStats == None or "avgLocs" not in solverStats:
+  if solverStats is None or "avgLocs" not in solverStats:
     response.write("  return;", escape=False)
-    pass
   else:
 }}
     // Define the chart to be drawn.
@@ -212,9 +226,8 @@ function drawAvgLocsHistogram() {
 
 function drawOpennessHistogram() {
 {{
-  if solverStats == None or "open" not in solverStats:
+  if solverStats is None or "open" not in solverStats:
     response.write("  return;", escape=False)
-    pass
   else:
 }}
     // Define the chart to be drawn.
@@ -302,13 +315,14 @@ function ajaxFail(jqXHR, textStatus) {
   <div class="tabcontent">
     <form id="mainform" name="mainform">
       <table class="full">
+        <colgroup><col class="fifth"/><col class="fifth"/><col class="small"/><col class="fifth"/><col class="fifth"/><col class="small"/><col class="fifth"/></colgroup>
         <tr>
           <td>Settings Preset:</td>
           <td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.extStats["randoPreset"], _class="chzn-select", _onchange="loadRandoPreset()"))}}</td>
-          <td><button id="randoPresetStep" type="button" onclick="startTheTour(0)">?</button></td>
+          <td id="randoPresetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
           <td>Skills Preset:</td>
           <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), **dict(_name="preset", _id="preset", value=session.extStats["preset"], _class="chzn-select"))}}</td>
-          <td><button id="presetStep" type="button" onclick="startTheTour(1)">?</button></td>
+          <td id="presetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
           <td>{{=INPUT(_type="submit", _value="Load", _name="action", _class="btn btn-default")}}</td>
         </tr>
       </table>
@@ -332,29 +346,25 @@ function ajaxFail(jqXHR, textStatus) {
 }}
     <tr class="border">
       <th class="border">Location</th>
-      <th class="border"><img src="/solver/static/images/Missile.png" alt="Missile.png" title="Missile.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/Super.png" alt="Super.png" title="Super.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/PowerBomb.png" alt="PowerBomb.png" title="PowerBomb.png" class="centerIcon"/></th>
-      <!--
-      <th class="border"><img src="/solver/static/images/ETank.png" alt="ETank.png" title="ETank.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/Reserve.png" alt="Reserve.png" title="Reserve.png" class="centerIcon"/></th>
-      -->
-      <th class="border"><img src="/solver/static/images/Morph.png" alt="Morph.png" title="Morph.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/Bomb.png" alt="Bomb.png" title="Bomb.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/SpringBall.png" alt="SpringBall.png" title="SpringBall.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/ScrewAttack.png" alt="ScrewAttack.png" title="ScrewAttack.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/Gravity.png" alt="Gravity.png" title="Gravity.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/HiJump.png" alt="HiJump.png" title="HiJump.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/SpaceJump.png" alt="SpaceJump.png" title="SpaceJump.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/SpeedBooster.png" alt="SpeedBooster.png" title="SpeedBooster.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/Charge.png" alt="Charge.png" title="Charge.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/Ice.png" alt="Ice.png" title="Ice.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/Wave.png" alt="Wave.png" title="Wave.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/Spazer.png" alt="Spazer.png" title="Spazer.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/Plasma.png" alt="Plasma.png" title="Plasma.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/Grapple.png" alt="Grapple.png" title="Grapple.png" class="centerIcon"/></th>
-      <th class="border"><img src="/solver/static/images/XRayScope.png" alt="XRayScope.png" title="XRayScope.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/Missile.png" alt="Missile.png" title="Missile.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/Super.png" alt="Super.png" title="Super.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/PowerBomb.png" alt="PowerBomb.png" title="PowerBomb.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/Morph.png" alt="Morph.png" title="Morph.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/Bomb.png" alt="Bomb.png" title="Bomb.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/SpringBall.png" alt="SpringBall.png" title="SpringBall.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/ScrewAttack.png" alt="ScrewAttack.png" title="ScrewAttack.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/Varia.png" alt="Varia.png" title="Varia.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/Gravity.png" alt="Gravity.png" title="Gravity.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/HiJump.png" alt="HiJump.png" title="HiJump.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/SpaceJump.png" alt="SpaceJump.png" title="SpaceJump.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/SpeedBooster.png" alt="SpeedBooster.png" title="SpeedBooster.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/Charge.png" alt="Charge.png" title="Charge.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/Ice.png" alt="Ice.png" title="Ice.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/Wave.png" alt="Wave.png" title="Wave.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/Spazer.png" alt="Spazer.png" title="Spazer.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/Plasma.png" alt="Plasma.png" title="Plasma.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/Grapple.png" alt="Grapple.png" title="Grapple.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/tracker/inventory/XRayScope.png" alt="XRayScope.png" title="XRayScope.png" class="centerIcon"/></th>
     <tr>
 {{
     pass

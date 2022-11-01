@@ -7,6 +7,7 @@ from utils.utils import getRandomizerDefaultParameters, getDefaultMultiValues, P
 from graph.graph_utils import GraphUtils
 from utils.db import DB
 from logic.logic import Logic
+from utils.objectives import Objectives
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.html import OPTGROUP
@@ -26,9 +27,6 @@ class Randomizer(object):
         self.initRandomizerSession()
 
         (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
-        (randoPresets, tourRandoPresets) = loadRandoPresetsList(self.cache)
-        # add empty entry for default value
-        randoPresets.append("")
 
         randoPresetsDesc = {
             "all_random": "all the parameters set to random",
@@ -46,6 +44,14 @@ class Randomizer(object):
             "minimizer":"Typical 'boss rush' settings with random start and nerfed charge",
             "minimizer_hardcore":"Have fun 'rushing' bosses with no equipment on a tiny map",
             "minimizer_maximizer":"No longer a boss rush",
+            "objectives_all_bosses":"Kill all bosses/minibosses",
+            "objectives_clear_areas":"Clear 5 random areas and end with fast Tourian",
+            "objectives_hard_heat":"All Norfair-related objectives, possibly without a suit",
+            "objectives_hard_water":"All Maridia-related objectives, possibly without a suit",
+            "objectives_long": "5 random long objectives and Vanilla Tourian",
+            "objectives_memes":"Do all the memes and rush to the ship",
+            "objectives_robots_notweaks":"Collect Bomb and Space Jump to activate the robots, then rush to the ship",
+            "objectives_short": "3 random short objectives and Disabled Tourian",
             "quite_random": "randomizes a few significant settings to have various seeds",
             "scavenger_hard":"Pretty hostile Scavenger mode",
             "scavenger_random":"Randomize everything within Scavenger mode",
@@ -75,7 +81,8 @@ class Randomizer(object):
             "Area": ["way_of_chozo", "where_am_i", "where_is_morph"],
             "Doors": ["doors_long", "doors_short"],
             "Minimizer": ["minimizer", "minimizer_hardcore", "minimizer_maximizer"],
-            "Hard": ["hardway2hell", "highway2hell", "stupid_hard"],
+            "Objectives": ["objectives_all_bosses", "objectives_clear_areas", "objectives_memes", "objectives_short", "objectives_long", "objectives_robots_notweaks"],
+            "Hard": ["hardway2hell", "highway2hell", "stupid_hard", "objectives_hard_heat", "objectives_hard_water"],
             "Random": ["all_random", "quite_random", "surprise"],
             "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2", "SGLive2022_Game_1", "SGLive2022_Game_2", "SGLive2022_Game_3", "Boyz_League_SM_Rando"]
         }
@@ -88,6 +95,12 @@ class Randomizer(object):
         # get multi
         currentMultiValues = self.getCurrentMultiValues()
         defaultMultiValues = getDefaultMultiValues()
+
+        # objectives self exclusions
+        objectivesExclusions = Objectives.getExclusions()
+        objectivesTypes = Objectives.getObjectivesTypes()
+        objectivesSort = Objectives.getObjectivesSort()
+        objectivesCategories = Objectives.getObjectivesCategories()
 
         # check if we have a guid in the url
         url = self.request.env.request_uri.split('/')
@@ -116,7 +129,10 @@ class Randomizer(object):
                             elif key in defaultMultiValues:
                                 keyMulti = key + 'MultiSelect'
                                 if keyMulti in seedInfo:
-                                    self.session.randomizer[key] = seedInfo[key]
+                                    if key == 'objective' and value == 'nothing':
+                                        self.session.randomizer[key] = ""
+                                    else:
+                                        self.session.randomizer[key] = seedInfo[key]
                                     valueMulti = seedInfo[keyMulti]
                                     if type(valueMulti) == str:
                                         valueMulti = valueMulti.split(',')
@@ -126,9 +142,11 @@ class Randomizer(object):
                                 self.session.randomizer[key] = value
 
         return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
-                    randoPresets=randoPresets, tourRandoPresets=tourRandoPresets, randoPresetsDesc=randoPresetsDesc,
+                    randoPresetsDesc=randoPresetsDesc, randoPresetsCategories=randoPresetsCategories,
                     startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues,
-                    maxsize=sys.maxsize, displayNames=displayNames)
+                    maxsize=sys.maxsize, displayNames=displayNames, objectivesExclusions=objectivesExclusions,
+                    objectivesTypes=objectivesTypes, objectivesSort=objectivesSort,
+                    objectivesCategories=objectivesCategories)
 
     def initRandomizerSession(self):
         if self.session.randomizer is None:
@@ -138,8 +156,14 @@ class Randomizer(object):
         defaultMultiValues = getDefaultMultiValues()
         for key in defaultMultiValues:
             keyMulti = key + 'MultiSelect'
-            if keyMulti in self.session.randomizer:
-                defaultMultiValues[key] = self.session.randomizer[keyMulti]
+            if key == "objective":
+                if key in self.session.randomizer:
+                    defaultMultiValues[key] = self.session.randomizer[key]
+                elif keyMulti in self.session.randomizer:
+                    defaultMultiValues[key] = self.session.randomizer[keyMulti]
+            else:
+                if keyMulti in self.session.randomizer:
+                    defaultMultiValues[key] = self.session.randomizer[keyMulti]
         return defaultMultiValues
 
     # race mode
@@ -170,18 +194,20 @@ class Randomizer(object):
 
         # check validity of all parameters
         switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-                   'areaRandomization', 'areaLayout', 'lightAreaRandomization',
+                   'areaLayout',
                    'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
-                   'bossRandomization', 'minimizer', 'minimizerTourian',
+                   'bossRandomization', 'minimizer',
                    'funCombat', 'funMovement', 'funSuits',
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
-                   'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
+                   'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
-                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized"]
+                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized",
+                   'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
-        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
-                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty']
+        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
+                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
+                  'areaRandomization']
+        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize
@@ -243,6 +269,13 @@ class Randomizer(object):
         for var, value in randoPresetDict.items():
             if 'MultiSelect' in var:
                 randoPresetDict[var] = value.split(',')
+
+        if self.vars.objectiveRandom == 'true':
+            randoPresetDict['objective'] = self.vars.nbObjective # 0-5 or "random"
+            randoPresetDict['objectiveMultiSelect'] = self.vars.objective.split(',')
+        else:
+            randoPresetDict['objective'] = self.vars.objective.split(',')
+
         with open(jsonRandoPreset, 'w') as randoPresetFile:
             json.dump(randoPresetDict, randoPresetFile)
         params += ['--randoPreset', jsonRandoPreset]
@@ -278,6 +311,9 @@ class Randomizer(object):
             if self.storeLocalIps(guid, locsItems["fileName"], locsItems["ips"]):
                 db.addRandoUploadResult(id, guid, locsItems["fileName"])
                 locsItems['seedKey'] = guid
+                if self.vars.get('wantsCustomize') == 'true':
+                    # don't send the ips if they requested a redirect to the customize page
+                    locsItems.pop('ips')
             db.close()
 
             os.close(fd1)
@@ -342,18 +378,20 @@ class Randomizer(object):
     def sessionWebService(self):
         # web service to update the session
         switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-                   'areaRandomization', 'areaLayout', 'lightAreaRandomization',
+                   'areaLayout',
                    'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
-                   'bossRandomization', 'minimizer', 'minimizerTourian',
+                   'bossRandomization', 'minimizer',
                    'funCombat', 'funMovement', 'funSuits',
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
-                   'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
+                   'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
-                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized", "scavEscape"]
+                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized",
+                   'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
-        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
-                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
-        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty']
+        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
+                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
+                  'areaRandomization']
+        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others)
 
         if self.session.randomizer is None:
@@ -375,7 +413,6 @@ class Randomizer(object):
         self.session.randomizer['minorQty'] = self.vars.minorQty
         self.session.randomizer['areaRandomization'] = self.vars.areaRandomization
         self.session.randomizer['areaLayout'] = self.vars.areaLayout
-        self.session.randomizer['lightAreaRandomization'] = self.vars.lightAreaRandomization
         self.session.randomizer['doorsColorsRando'] = self.vars.doorsColorsRando
         self.session.randomizer['allowGreyDoors'] = self.vars.allowGreyDoors
         self.session.randomizer['escapeRando'] = self.vars.escapeRando
@@ -383,15 +420,16 @@ class Randomizer(object):
         self.session.randomizer['bossRandomization'] = self.vars.bossRandomization
         self.session.randomizer['minimizer'] = self.vars.minimizer
         self.session.randomizer['minimizerQty'] = self.vars.minimizerQty
-        self.session.randomizer['minimizerTourian'] = self.vars.minimizerTourian
         self.session.randomizer['funCombat'] = self.vars.funCombat
         self.session.randomizer['funMovement'] = self.vars.funMovement
         self.session.randomizer['funSuits'] = self.vars.funSuits
         self.session.randomizer['layoutPatches'] = self.vars.layoutPatches
         self.session.randomizer['variaTweaks'] = self.vars.variaTweaks
         self.session.randomizer['nerfedCharge'] = self.vars.nerfedCharge
+        self.session.randomizer['relaxed_round_robin_cf'] = self.vars.relaxed_round_robin_cf
         self.session.randomizer['itemsounds'] = self.vars.itemsounds
-        self.session.randomizer['elevators_doors_speed'] = self.vars.elevators_doors_speed
+        self.session.randomizer['elevators_speed'] = self.vars.elevators_speed
+        self.session.randomizer['fast_doors'] = self.vars.fast_doors
         self.session.randomizer['spinjumprestart'] = self.vars.spinjumprestart
         self.session.randomizer['rando_speed'] = self.vars.rando_speed
         self.session.randomizer['animals'] = self.vars.animals
@@ -402,10 +440,16 @@ class Randomizer(object):
         self.session.randomizer['hud'] = self.vars.hud
         self.session.randomizer['scavNumLocs'] = self.vars.scavNumLocs
         self.session.randomizer['scavRandomized'] = self.vars.scavRandomized
-        self.session.randomizer['scavEscape'] = self.vars.scavEscape
+        self.session.randomizer['tourian'] = self.vars.tourian
 
-        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
-                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
+        # objective is a special multi select
+        self.session.randomizer['objectiveRandom'] = self.vars.objectiveRandom
+        if self.vars.objectiveRandom == 'true':
+            self.session.randomizer['objectiveMultiSelect'] = self.vars.objective.split(',')
+            self.session.randomizer['nbObjective'] = self.vars.nbObjective
+        else:
+            self.session.randomizer['objective'] = self.vars.objective.split(',')
+
         for multi in multis:
             self.session.randomizer[multi] = self.vars[multi]
             if self.vars[multi] == 'random':
@@ -429,32 +473,6 @@ class Randomizer(object):
             (seed, params) = db.getRandomizerSeedParams(seed)
 
         return json.dumps({"seed": seed, "params": params})
-
-    # from https://www.geeksforgeeks.org/how-to-validate-guid-globally-unique-identifier-using-regular-expres
-    def isValidGUID(self, str):
-        regex = "^[{]?[0-9a-fA-F]{8}" + "-([0-9a-fA-F]{4}-)" + "{3}[0-9a-fA-F]{12}[}]?$"
-        p = re.compile(regex)
-
-        if str is None:
-            return False
-
-        return re.search(p, str)
-
-    def randoParamsWebServiceAPI(self):
-        # get a json string of the randomizer parameters for a given guid
-        if self.vars.guid is None:
-            raiseHttp(400, "Missing parameter guid", True)
-
-        guid = self.vars.guid
-
-        # guid is: 8bc77c97-3e0f-4c19-817a-08f0668ade56
-        if not self.isValidGUID(guid):
-            raiseHttp(400, "Guid is not valid", True)
-
-        with DB() as db:
-            params = db.getRandomizerSeedParamsAPI(guid)
-
-        return json.dumps(params)
 
     def updateRandoSession(self, randoPreset):
         for key, value in randoPreset.items():

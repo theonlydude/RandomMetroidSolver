@@ -1,0 +1,7 @@
+{
+    "objective": ["clear croc's lair", "clear upper norfair", "clear lower norfair", "kill ridley", "kill king cacatac"],
+    "tourian": "random",
+    "preset": "expert",
+    "funSuits": "on",
+    "progressionSpeed": "slow"
+}

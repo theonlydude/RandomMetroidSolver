@@ -4,16 +4,16 @@
 arch snes.cpu
 lorom
 
-; Fix the crash that occurs when you kill an eye door whilst a eye door projectile is alive
-; See the comments in the bank logs for $86:B6B9 for details on the bug
-; The fix here is setting the X register to the enemy projectile index,
-; which can be done without free space due to an unnecessary RTS in the original code
+;;; Fix the crash that occurs when you kill an eye door whilst a eye door projectile is alive
+;;; See the comments in the bank logs for $86:B6B9 for details on the bug
+;;; The fix here is setting the X register to the enemy projectile index,
+;;; which can be done without free space due to an unnecessary RTS in the original code
 org $86B704
-BEQ ret
-TYX
-
+fix_gadora_crash:
+	BEQ .ret
+	TYX
 org $86B713
-ret:
+.ret:
 
 ;;; skips suits acquisition animation
 org $848717
@@ -47,6 +47,26 @@ org $82b000
 	;; tested last the selection will be set on suits.
 	bcc $64
 
+;;; Spring ball menu crash fix by strotlog.
+;;; Fix obscure vanilla bug where: turning off spring ball while bouncing, can crash in $91:EA07,
+;;; or exactly the same way as well in $91:F1FC:
+;;; Fix buffer overrun. Overwrite nearby unreachable code at $91:fc4a (due to pose 0x65
+;;; not existing) as our "free space". Translate RAM $0B20 values:
+;;; #$0601 (spring ball specific value) --> #$0001
+;;; #$0602 (spring ball specific value) --> #$0002
+;;; thus loading a valid jump table array index for these two buggy functions.
+org $91ea07
+	jsr fix_spring_ball_crash
+org $91f1fc
+	jsr fix_spring_ball_crash
+org $91fc4a
+fix_spring_ball_crash:
+	lda $0B20    ; $0B20: Used for bouncing as a ball when you land
+	and #$00ff
+	rts
+warnpc $91fc54 ; ensure we don't write past the point where vanilla-accessible code resumes
+
+
 ;;; fix morph ball in hidden chozo PLM
 org $84e8ce
 	db $04
@@ -75,14 +95,17 @@ warnpc $a0f830
 ;;; allow all possible save slots (needed for area rando extra stations)
 org $848d0c
 	and #$001f
-;;; For an unknown reason, the save station we put in main street
-;;; sometimes (circumstances unclear) spawn two detection PLMs
+
+;;; Save station PLM code has a bug where it can spawn two detection PLMs
 ;;; instead of one. These PLMs are supposed to precisely detect
 ;;; when Samus is standing on the save. When Samus does, it looks
 ;;; for a PLM at the same coordinates as itself, which is normally
 ;;; the actual save station PLM.
-;;; But when two detection blocks are spawn, it detects the other detection
+;;; But when two detection blocks are spawn, it can detect the other detection
 ;;; block as being the save, and the save station doesn't work.
+;;; That can happen when there are item PLMs in the room with PLM index
+;;; lower than the one of the save station. The detection PLMs are then spawned
+;;; before the save itself in the PLM list.
 ;;; Therefore, we add an extra check on PLM type to double check it has
 ;;; actually found the save station PLM.
 
@@ -113,3 +136,39 @@ save_station_check:
 
 ;;; end of unused space
 warnpc $8485b2
+
+;;; Kraid vomit fix by PJBoy. Avoids garbage tiles in Kraid room when
+;;; he's dead and fast doors are enabled.
+
+;;; During horizontal door transitions, the "ready for NMI" flag is set by
+;;; IRQ at the bottom of the door as an optimisation,
+;;; but the PLM drawing routine hasn't necessarily finished processing
+;;; yet.
+;;; The Kraid quick kill vomit happens because NMI actually interrupts the
+;;; PLM drawing routine for the PLM that clears the spike floor,
+;;; *whilst* it's in the middle of writing entries to the $D0 table, which
+;;; the NMI processes.
+;;; This fix simply clears this NMI-ready flag for the duration of the PLM
+;;; drawinging routine.
+
+;;; other unused bank 84 space
+org $8486D1
+drawPlmSafe:
+	lda.w $05B4 : pha ; Back up NMI ready flag
+	stz.w $05B4 ; Not ready for NMI
+	jsr $8DAA   ; Draw PLM
+	pla : sta.w $05B4 ; Restore NMI ready flag
+	rts
+
+;;; end of unused space
+warnpc $84870B
+
+; Patch calls to draw PLM
+org $84861a ; End of PLM processing. Probably the only particularly important one to patch
+	jsr drawPlmSafe
+
+; org $848b50 ; End of block respawn instruction. Shouldn't need patching
+; 	jsr drawPlmSafe
+
+org $84e094 ; End of animated PLM drawing instruction. Could theoretically happen...
+	jsr drawPlmSafe

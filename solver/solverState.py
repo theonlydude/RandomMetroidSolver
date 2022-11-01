@@ -55,11 +55,11 @@ class SolverState(object):
         # string of last access point
         self.state["lastAP"] = solver.lastAP
         # dict {locNameWeb: {infos}, ...}
-        self.state["availableLocationsWeb"] = self.getAvailableLocationsWeb(solver.majorLocations)
+        self.state["availableLocationsWeb"] = self.getAvailableLocationsWeb(solver.majorLocations, solver.masterMajorsSplit)
         # dict {locNameWeb: {infos}, ...}
-        self.state["visitedLocationsWeb"] = self.getAvailableLocationsWeb(solver.visitedLocations)
+        self.state["visitedLocationsWeb"] = self.getAvailableLocationsWeb(solver.visitedLocations, solver.masterMajorsSplit)
         # dict {locNameWeb: {infos}, ...}
-        self.state["remainLocationsWeb"] = self.getRemainLocationsWeb(solver.majorLocations)
+        self.state["remainLocationsWeb"] = self.getRemainLocationsWeb(solver.majorLocations, solver.masterMajorsSplit)
         # string: standard/seedless/plando/race/debug
         self.state["mode"] = solver.mode
         # string:
@@ -91,6 +91,17 @@ class SolverState(object):
         self.state["roomsVisibility"] = self.getRoomsVisibility(solver, solver.areaGraph, solver.smbm)
         # for plando scav hunt, store the list of scav locs
         self.state["plandoScavengerOrder"] = solver.plandoScavengerOrder
+        # for disabled tourian
+        self.state["tourian"] = solver.tourian
+        # custom objectives
+        self.state["objectives"] = solver.objectives.getState()
+        self.state["newlyCompletedObjectives"] = solver.newlyCompletedObjectives
+        self.state["majorUpgrades"] = solver.majorUpgrades
+        self.state["splitLocsByArea"] = solver.splitLocsByArea
+        self.state["eventsBitMasks"] = solver.eventsBitMasks
+        # scav hunt locations
+        self.state["scavengerOrder"] = self.getScavengerOrder(solver)
+        self.state["additionalETanks"] = solver.additionalETanks
 
     def toSolver(self, solver):
         solver.majorsSplit = self.state["majorsSplit"]
@@ -102,7 +113,7 @@ class SolverState(object):
         RomPatches.ActivePatches = self.state["patches"]
         solver.startLocation = self.state["startLocation"]
         solver.startArea = self.state["startArea"]
-        self.setLocsData(solver.locations)
+        self.setLocsData(solver.locations, self.state["tourian"])
         solver.areaTransitions = self.state["areaTransitions"]
         solver.bossTransitions = self.state["bossTransitions"]
         solver.escapeTransition = self.state["escapeTransition"]
@@ -114,7 +125,7 @@ class SolverState(object):
         solver.collectedItems = self.state["collectedItems"]
         (solver.visitedLocations, solver.majorLocations) = self.setLocations(self.state["visitedLocations"],
                                                                              self.state["availableLocations"],
-                                                                             solver.locations)
+                                                                             solver.locations, self.state["tourian"])
         solver.lastAP = self.state["lastAP"]
         solver.mode = self.state["mode"]
         solver.seed = self.state["seed"]
@@ -122,6 +133,13 @@ class SolverState(object):
         DoorsManager.unserialize(self.state["doors"])
         solver.doorsRando = self.state["doorsRando"]
         solver.plandoScavengerOrder = self.state["plandoScavengerOrder"]
+        solver.tourian = self.state["tourian"]
+        solver.objectives.setState(self.state["objectives"])
+        solver.majorUpgrades = self.state["majorUpgrades"]
+        solver.splitLocsByArea = self.state["splitLocsByArea"]
+        solver.eventsBitMasks = self.state["eventsBitMasks"]
+        solver.scavengerOrder = self.setScavengerOrder(solver, self.state["scavengerOrder"])
+        solver.additionalETanks = self.state["additionalETanks"]
 
     def getRoomsVisibility(self, solver, areaGraph, sm):
         # add graph access points
@@ -173,8 +191,10 @@ class SolverState(object):
                 ret[loc.Name]["accessPoint"] = loc.accessPoint
         return ret
 
-    def setLocsData(self, locations):
+    def setLocsData(self, locations, tourian):
         for loc in locations:
+            if tourian == 'Disabled' and loc.Name == 'Mother Brain':
+                continue
             loc.itemName = self.state["locsData"][loc.Name]["itemName"]
             if "accessPoint" in self.state["locsData"][loc.Name]:
                 loc.accessPoint = self.state["locsData"][loc.Name]["accessPoint"]
@@ -191,10 +211,12 @@ class SolverState(object):
             i += 1
         return ret
 
-    def setLocations(self, visitedLocations, availableLocations, locations):
+    def setLocations(self, visitedLocations, availableLocations, locations, tourian):
         retVis = []
         retMaj = []
         for loc in locations:
+            if tourian == 'Disabled' and loc.Name == 'Mother Brain':
+                continue
             if loc.Name in visitedLocations:
                 # visitedLocations contains an index
                 diff = visitedLocations[loc.Name]["difficulty"]
@@ -228,7 +250,7 @@ class SolverState(object):
         transition = str(transition)
         return transition[0].lower() + removeChars(transition[1:], " ,()-")
 
-    def getAvailableLocationsWeb(self, locations):
+    def getAvailableLocationsWeb(self, locations, majorsSplit):
         ret = {}
         for loc in locations:
             if loc.difficulty is not None and loc.difficulty.bool == True:
@@ -240,14 +262,8 @@ class SolverState(object):
                                 "item": loc.itemName,
                                 "name": loc.Name,
                                 "canHidden": loc.CanHidden,
-                                "visibility": loc.Visibility}
-
-#                if loc.locDifficulty is not None:
-#                    lDiff = loc.locDifficulty
-#                    ret[locName]["locDifficulty"] = [diff4solver(lDiff.difficulty), self.knows2isolver(lDiff.knows), list(set(lDiff.items))]
-#                if loc.pathDifficulty is not None:
-#                    pDiff = loc.pathDifficulty
-#                    ret[locName]["pathDifficulty"] = [diff4solver(pDiff.difficulty), self.knows2isolver(pDiff.knows), list(set(pDiff.items))]
+                                "visibility": loc.Visibility,
+                                "major": loc.isClass(majorsSplit)}
 
                 if loc.comeBack is not None:
                     ret[locName]["comeBack"] = loc.comeBack
@@ -259,9 +275,16 @@ class SolverState(object):
                 if self.debug == True:
                     if loc.distance is not None:
                         ret[locName]["distance"] = loc.distance
+                    if loc.locDifficulty is not None:
+                        lDiff = loc.locDifficulty
+                        ret[locName]["locDifficulty"] = [diff4solver(lDiff.difficulty)[0], self.knows2isolver(lDiff.knows), list(set(lDiff.items))]
+                    if loc.pathDifficulty is not None:
+                        pDiff = loc.pathDifficulty
+                        ret[locName]["pathDifficulty"] = [diff4solver(pDiff.difficulty)[0], self.knows2isolver(pDiff.knows), list(set(pDiff.items))]
+
         return ret
 
-    def getRemainLocationsWeb(self, locations):
+    def getRemainLocationsWeb(self, locations, majorsSplit):
         ret = {}
         for loc in locations:
             if loc.difficulty is None or loc.difficulty.bool == False:
@@ -271,7 +294,8 @@ class SolverState(object):
                                 "knows": ["Sequence Break"],
                                 "items": [],
                                 "canHidden": loc.CanHidden,
-                                "visibility": loc.Visibility}
+                                "visibility": loc.Visibility,
+                                "major": loc.isClass(majorsSplit)}
                 if self.debug == True:
                     if loc.difficulty is not None:
                         ret[locName]["difficulty"] = str(loc.difficulty)
@@ -298,20 +322,19 @@ class SolverState(object):
                 ret[loc.Name] = (diff.bool, diff.difficulty, diff.knows, diff.items)
         return ret
 
-    def fromJson(self, stateJsonFileName):
-        with open(stateJsonFileName, 'r') as jsonFile:
-            self.state = json.load(jsonFile)
-#        print("Loaded Json State:")
-#        for key in self.state:
-#            if key in ["availableLocationsWeb", "visitedLocationsWeb", "collectedItems", "availableLocations", "visitedLocations"]:
-#                print("{}: {}".format(key, self.state[key]))
-#        print("")
+    def getScavengerOrder(self, solver):
+        return [loc.Name for loc in solver.scavengerOrder]
 
-    def toJson(self, outputFileName):
-        with open(outputFileName, 'w') as jsonFile:
-            json.dump(self.state, jsonFile)
-#        print("Dumped Json State:")
-#        for key in self.state:
-#            if key in ["availableLocationsWeb", "visitedLocationsWeb", "collectedItems", "visitedLocations"]:
-#                print("{}: {}".format(key, self.state[key]))
-#        print("")
+    def getLoc(self, locName, locations):
+        for loc in locations:
+            if loc.Name == locName:
+                return loc
+
+    def setScavengerOrder(self, solver, order):
+        return [self.getLoc(locName, solver.locations) for locName in order]
+
+    def set(self, state):
+        self.state = state
+
+    def get(self):
+        return self.state

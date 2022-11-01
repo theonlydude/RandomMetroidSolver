@@ -8,7 +8,7 @@ from rando.ItemLocContainer import ItemLocContainer, getItemListStr, getLocListS
 
 # to filter item pools
 def isChozoItem(item):
-    return item.Class == 'Chozo' or item.Category == 'Boss'
+    return item.Class == 'Chozo' or item.Category in ['Boss', 'MiniBoss']
 
 # provides factory methods to instantate fillers for chozo first and second phase
 class ChozoFillerFactory(object):
@@ -60,9 +60,14 @@ class ChozoWrapperFiller(Filler):
         self.log.debug("prepareFirstPhase. secondPhaseItems="+getItemListStr(secondPhaseItems))
         self.log.debug("prepareFirstPhase. secondPhaseLocs="+getLocListStr(secondPhaseLocs))
         self.secondPhaseContainer = ItemLocContainer(cont.sm, secondPhaseItems, secondPhaseLocs)
-        return self.fillerFactory.createFirstPhaseFiller(cont)
+        filler = self.fillerFactory.createFirstPhaseFiller(cont)
+        self.restrictions = filler.restrictions
+        return filler
 
     def prepareSecondPhase(self, firstCont, progItemLocs):
+        # remove first phase restrictions as they were computed with chozo locs only,
+        # and logical placement is already done
+        self.restrictions.setPlacementRestrictions(None)
         # restore knows and max diff
         for k,b in self.changedKnows.items():
             setattr(Knows, k, b)

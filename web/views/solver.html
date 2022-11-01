@@ -70,6 +70,7 @@ if (hs.registerOverlay) {
     image-rendering: -o-crisp-edges; /* Opera */
     image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
     image-rendering: crisp-edges;
+    image-rendering: pixelated;
     -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
 }
 .imageItems {
@@ -78,6 +79,7 @@ if (hs.registerOverlay) {
     image-rendering: -o-crisp-edges; /* Opera */
     image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
     image-rendering: crisp-edges;
+    image-rendering: pixelated;
     -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
     margin-right: 0.5em;
 }
@@ -87,6 +89,7 @@ if (hs.registerOverlay) {
     image-rendering: -o-crisp-edges; /* Opera */
     image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
     image-rendering: crisp-edges;
+    image-rendering: pixelated;
     -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
 }
 .imageBoss {
@@ -95,6 +98,7 @@ if (hs.registerOverlay) {
     image-rendering: -o-crisp-edges; /* Opera */
     image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
     image-rendering: crisp-edges;
+    image-rendering: pixelated;
     -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
 }
 .popupRoom {
@@ -123,6 +127,46 @@ if (hs.registerOverlay) {
     max-width: 75%;
 }
 .subarea {
+}
+.uncollectedItem {
+    background-color: #ccc;
+}
+#spoilerCredits {
+    font-family: courier, courier new, serif;
+    font-weight: bold;
+    background-color: black;
+    width: 19em;
+    display: none;
+    margin: 0 auto;
+    margin-top: 1em;
+}
+#spoilerButton {
+    display: none;
+}
+.spoilerItem {
+    color: #e7e700;
+    border-bottom: 0px;
+    text-align: left;
+    padding-top: 0.5em;
+}
+.spoilerLoc {
+    color: #ff8408;
+    border-bottom: 0px;
+    text-align: left;
+}
+.spoilerTitle {
+    color: #e700e7;
+    border-bottom: 0px;
+    text-align: center;
+}
+.spoilerEmpty {
+    margin-top: 0.5em;
+    border-bottom: 0px;
+}
+.objective {
+    background-color: #1234;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
 }
 </style>
 
@@ -475,6 +519,8 @@ window.onload = function(){
                 select.value = option.value;
 
                 setGuessedPreset(file.name);
+
+                extractSpoiler(bytes);
             }
 
             reader.readAsArrayBuffer(file);
@@ -523,6 +569,145 @@ window.onload = function(){
         }
         $(".popupSubArea").hide();
     });
+}
+
+function displaySpoiler() {
+    var elem = document.getElementById("spoilerCredits");
+    var current = elem.style.display;
+    if(current == "none" || current == "") {
+        elem.style.display = "block";
+    } else {
+        elem.style.display = "none";
+    }
+}
+
+function extractSpoiler(data) {
+    var isVARIA = false;
+    var isRace = false;
+    if(data[0x175ca] == 0x60 && data[0x19E1] == 0xEA && data[0xF27] == 0x20) {
+        isVARIA = true;
+    }
+    for(var addr=0x1C0200; addr<0x1C0210; addr++) {
+        if(data[addr] != 0xff) {
+            isRace = true;
+            break;
+        }
+    }
+
+    // hide spoiler
+    document.getElementById("spoilerCredits").style.display = "none";
+    if(! isVARIA || isRace) {
+        document.getElementById("spoilerButton").style.display = "none";
+        return;
+    } else {
+        document.getElementById("spoilerButton").style.display = "block";
+    }
+
+    var spoiler = Array(19*2);
+    for(var i=0; i<19; i++) {
+        var locStart = 0x2f5240+i*0x80+0x40;
+        var itemStart = 0x2f5240+i*0x80;
+
+        var locArray = Array(32);
+        var itemArray = Array(32);
+
+        for(var j=0; j<32; j++) {
+            //console.log("loc "+j+": "+toChar(data[locStart+j*2]).charCodeAt(0));
+            locArray[j] = toChar(data[locStart+j*2]);
+            itemArray[j] = toChar(data[itemStart+j*2]);
+        }
+
+        var locString = locArray.join("");
+        var itemString = itemArray.join("");
+
+        spoiler[i*2+1] = locString;
+        spoiler[i*2] = itemString;
+    }
+
+    document.getElementById("spoilerCredits").innerHTML = `
+<table class="center">
+<tr><td class="spoilerTitle">ITEM LOCATIONS</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[0]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[1]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[2]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[3]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[4]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[5]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[6]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[7]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[8]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[9]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[10]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[11]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[12]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[13]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[14]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[15]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[16]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[17]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[18]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[19]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[20]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[21]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[22]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[23]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[24]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[25]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[26]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[27]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[28]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[29]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[30]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[31]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[32]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[33]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[34]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[35]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+<tr><td class="spoilerItem">${spoiler[36]}</td></tr>
+<tr><td class="spoilerLoc">${spoiler[37]}</td></tr>
+<tr><td class="spoilerEmpty"></td></tr>
+</table>
+`;
+}
+
+function toChar(b) {
+    //console.log("byte is: "+b);
+    if(b == 0x7f) {
+        return ' ';
+    } else if(b == 0x1f) {
+        return '!';
+    } else if(b == 0x1e) {
+        return ':'
+    } else if(b == 0x1d) {
+        return '\\'
+    } else if(b == 0x1c) {
+        return '_'
+    } else if(b == 0x1b) {
+        return ','
+    } else if(b == 0x1a) {
+        return '.'
+    } else {
+        return String.fromCharCode(b + 0x41)
+    }
 }
 
 function getMeta(url, popup, callback) {
@@ -585,13 +770,13 @@ function startTheTour(step=-1) {
       content: "The preset is used by the Solver to know which techniques are available to reach the items locations.<br/>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\" target=\"_blank\">Presets part of the website</a>.<br/>Load one of the standard presets (sorted in increased difficulty), tournament presets, or you own from the community presets."
     },
     {
-      element: "#difficultyTarget",
+      element: "#difficultyTargetStep",
       title: "Difficulty Target",
       content: "The maximum difficulty for picking up an item in the current area before moving to another area.<br/><b>Warning</b>: selecting a too hard difficulty may produce unrealistic results.",
       placement: "auto left"
     },
     {
-      element: "#pickupStrategy",
+      element: "#pickupStrategyStep",
       title: "Pickup Strategy",
       content: "Strategy for picking up major and minor items.<br/>\
 <ul>\
@@ -599,6 +784,11 @@ function startTheTour(step=-1) {
 <li>Any%: No requirements on the items as long as the seed is finishable.</li>\
 </ul>",
       placement: "auto left"
+    },
+    {
+      element: "#spoilerButtonStep",
+      title: "Display credits spoiler",
+      content: "Extract the spoiler logs from the in-game credits and display it."
     },
     {
       element: "#forbiddenItemsStep",
@@ -609,6 +799,18 @@ function startTheTour(step=-1) {
   // Initialize the tour
   tour.init();
 
+  if (typeof step === "object") {
+    // step is an event, not a number. Get ID from parent element
+    let parent = event.target.parentNode
+    step = parent.id
+    while (!step) {
+        parent = parent.previousElementSibling
+        step = parent.id
+    }
+  }
+  if (typeof step === 'string') {
+    step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
+  }
   // Start the tour
   if(step != -1) {
     tour.goTo(step);
@@ -673,17 +875,17 @@ function DoPost(){
             <tr>
               <td>Randomized Super Metroid ROM: </td>
               <td><input id="uploadFile" name="uploadFile" type="file"/></td>
-              <td id="uploadFileStep"><button type="button" onclick="startTheTour(0)">?</button></td>
+              <td id="uploadFileStep"><button type="button" onclick="startTheTour(event)">?</button></td>
             </tr>
             <tr>
               <td>Already uploaded ROMs in this session: </td>
               <td>{{=SELECT(*roms, **dict(_name="romFile", _id="romFile", value=lastRomFile, _class="filldropdown", _onchange="lastRomFileChanged(this);"))}}</td>
-              <td id="romFileStep"><button type="button" onclick="startTheTour(1)">?</button></td>
+              <td id="romFileStep"><button type="button" onclick="startTheTour(event)">?</button></td>
             </tr>
             <tr>
               <td>Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a></td>
               <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.solver["preset"], _class="chzn-select"))}}</td>
-              <td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
+              <td id="presetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
             </tr>
           </table>
         </div>
@@ -693,7 +895,7 @@ function DoPost(){
           <tr>
             <td>Difficulty target:</td>
             <td>{{=SELECT("easy", "medium", "hard", "very hard", "hardcore", "mania", _id="difficultyTarget", _name="difficultyTarget", _class="full", value=difficulties[session.solver["difficultyTarget"]])}}</td>
-            <td><button type="button" onclick="startTheTour(3)">?</button></td>
+            <td id="difficultyTargetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
           </tr>
             <tr>
               <td>Pickup strategy:</td>
@@ -711,7 +913,11 @@ if session.solver["pickupStrategy"] == "all":
 }} value="all">100%</option>
                   </select>
               </td>
-              <td><button type="button" onclick="startTheTour(4)">?</button></td>
+              <td id="pickupStrategyStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+            </tr>
+            <tr id="spoilerButton">
+              <td><button type="button" onclick="displaySpoiler()">Display credits spoiler</button></td><td></td>
+              <td id="spoilerButtonStep"><button type="button" onclick="startTheTour(event)">?</button></td>
             </tr>
           </table>
         </div>
@@ -719,7 +925,7 @@ if session.solver["pickupStrategy"] == "all":
       <input id="romJson" name="romJson" style="display:none" type="text"/>
 
       <div id="forbiddenItemsVisibility">
-        <h3>Items not picked up <button  id="forbiddenItemsStep" type="button" onclick="startTheTour(5)">?</button></h3>
+        <h3>Items not picked up <span id="forbiddenItemsStep"><button type="button" onclick="startTheTour(event)">?</button></span></h3>
         <table class="full">
           <tr>
 {{
@@ -732,7 +938,7 @@ if session.solver["pickupStrategy"] == "all":
       pass
     response.write("      <td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {}>".format(item, item, checked), escape=False)
 
-    response.write("<img src=\"/solver/static/images/{}.png\" alt=\"{}.png\" title=\"{}.png\" class=\"width: 32px\"/>".format(item, item, item), escape=False)
+    response.write("<img src=\"/solver/static/images/tracker/inventory/{}.png\" alt=\"{}.png\" title=\"{}.png\" class=\"width: 32px\"/>".format(item, item, item), escape=False)
     response.write("</td>\n", escape=False)
 
     pass
@@ -741,38 +947,84 @@ if session.solver["pickupStrategy"] == "all":
         </table>
       </div>
       <input id="complexity" name="complexity" style="display:none" type="text"/>
+      <div>
+        <div id="spoilerCredits">
+        </div>
+      </div>
       {{=INPUT(_type="submit", _value="Solve", _name="action", _class="btn btn-default buttonRandom")}}
     </form>
 
-
 {{
 if result is not None:
-  =result["resultText"]
-
-  response.write("</table>", escape=False)
-
-  response.write("<br/>", escape=False)
+}}
+    <div class="row">
+      <div class="column">
+{{
+  response.write(result["resultText"]+"<br/>", escape=False)
   pass
 }}
 
 {{
 if result is not None and result["difficulty"] != -1:
 }}
-    <div id="timeline" style="height: 95px; width: 50%;"></div>
+        <div id="timeline" style="height: 3em; width: 100%;"></div>
 
+        <div class="row">
+          <div class="column">
+            <h4 style="padding-left: 0.5em;">Seed objectives:</h4>
+            <ul>
 {{
-  if result is not None and len(result["patches"]) != 0:
-}}
-    <p>
-      Detected patches:
-    </p>
-    <ul>
-{{
-    for patch in sorted(result["patches"]):
-      response.write("<li>{}</li>".format(patch), escape=False)
+    for objective in result["objectives"]:
+      response.write("<li>{}</li>".format(objective), escape=False)
       pass
 }}
-    </ul>
+            </ul>
+          </div>
+          <div class="column">
+            <h4>Tourian:</h4>
+            <ul>
+              <li>{{=result["tourian"]}}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="column">
+{{
+  if result["patches"]:
+}}
+    <h4>Detected patches:</h4>
+    <div class="row">
+      <div class="column">
+        <ul>
+{{
+    for i, patch in enumerate(sorted(result["patches"])):
+      if i % 2 == 0:
+        response.write("<li>{}</li>".format(patch), escape=False)
+        pass
+      pass
+}}
+        </ul>
+      </div>
+      <div class="column">
+        <ul>
+{{
+    for i, patch in enumerate(sorted(result["patches"])):
+      if i % 2 == 1:
+        response.write("<li>{}</li>".format(patch), escape=False)
+        pass
+      pass
+}}
+        </ul>
+      </div>
+    </div>
+
+    </div>
+    </div>
+{{
+  else:
+}}
+    </div>
+    </div>
 {{
     pass
 }}
@@ -788,11 +1040,21 @@ if result is not None and result["difficulty"] != -1:
 
 {{
     pass
+else:
+}}
+    </div>
+    </div>
+{{
   pass
 }}
 
 {{
 if result is not None:
+  def setUncollected(item):
+    if item not in result["collectedItems"]:
+      response.write("data-img-class=\"uncollectedItem\"", escape=False)
+      pass
+    pass
 }}
     <input id="displayPath" name="displayPath" type="checkbox" onClick="showPath()">
     Display the generated path (spoilers)
@@ -802,43 +1064,43 @@ if result is not None:
       <div class="popupArea" style="display:none;">PopupArea</div>
       <div class="popupSubArea" style="display:none;">PopupSubArea</div>
       <br/>
-      <p class="centerTable">Click on items to highlight them in the spoiler:</p>
+      <p class="centerTable">Click on items to highlight them in the spoiler, grey background items aren't present:</p>
 
       <div class="centerTable">
       <select multiple="multiple" id="item" name="item">
         <optgroup label="Nothing">
-          <option data-img-src="/solver/static/images/Nothing.png" value="Nothing">Nothing</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Nothing.png" value="Nothing">Nothing</option>
         </optgroup>
         <optgroup label="Ammo">
-          <option data-img-src="/solver/static/images/Missile.png" value="Missile">Missile</option>
-          <option data-img-src="/solver/static/images/Super.png" value="Super">Super Missile</option>
-          <option data-img-src="/solver/static/images/PowerBomb.png" value="PowerBomb">Power Bomb</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Missile.png" value="Missile" {{=setUncollected("Missile")}}>Missile</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Super.png" value="Super" {{=setUncollected("Super")}}>Super Missile</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/PowerBomb.png" value="PowerBomb" {{=setUncollected("PowerBomb")}}>Power Bomb</option>
         </optgroup>
         <optgroup label="Energy">
-          <option data-img-src="/solver/static/images/ETank.png" value="ETank">Energy Tank</option>
-            <option data-img-src="/solver/static/images/Reserve.png" value="Reserve">Reserve Tank</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/ETank.png" value="ETank" {{=setUncollected("ETank")}}>Energy Tank</option>
+            <option data-img-src="/solver/static/images/tracker/inventory/Reserve.png" value="Reserve" {{=setUncollected("Reserve")}}>Reserve Tank</option>
         </optgroup>
         <optgroup label="Beams">
-          <option data-img-src="/solver/static/images/Charge.png" value="Charge">Charge Beam</option>
-          <option data-img-src="/solver/static/images/Ice.png" value="Ice">Ice Beam</option>
-          <option data-img-src="/solver/static/images/Wave.png" value="Wave">Wave Beam</option>
-          <option data-img-src="/solver/static/images/Spazer.png" value="Spazer">Spazer</option>
-          <option data-img-src="/solver/static/images/Plasma.png" value="Plasma">Plasma Beam</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Charge.png" value="Charge" {{=setUncollected("Charge")}}>Charge Beam</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Ice.png" value="Ice" {{=setUncollected("Ice")}}>Ice Beam</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Wave.png" value="Wave" {{=setUncollected("Wave")}}>Wave Beam</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Spazer.png" value="Spazer" {{=setUncollected("Spazer")}}>Spazer</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Plasma.png" value="Plasma" {{=setUncollected("Plasma")}}>Plasma Beam</option>
         </optgroup>
         <optgroup label="Suits">
-          <option data-img-src="/solver/static/images/Varia.png" value="Varia">Varia Suit</option>
-          <option data-img-src="/solver/static/images/Gravity.png" value="Gravity">Gravity Suit</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Varia.png" value="Varia" {{=setUncollected("Varia")}}>Varia Suit</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Gravity.png" value="Gravity" {{=setUncollected("Gravity")}}>Gravity Suit</option>
         </optgroup>
         <optgroup label="Items">
-          <option data-img-src="/solver/static/images/Morph.png" value="Morph">Morph Ball</option>
-          <option data-img-src="/solver/static/images/Bomb.png" value="Bomb">Bomb</option>
-          <option data-img-src="/solver/static/images/SpringBall.png" value="SpringBall">Spring Ball</option>
-          <option data-img-src="/solver/static/images/ScrewAttack.png" value="ScrewAttack">Screw Attack</option>
-          <option data-img-src="/solver/static/images/HiJump.png" value="HiJump">Hi-Jump Boots</option>
-          <option data-img-src="/solver/static/images/SpaceJump.png" value="SpaceJump">Space Jump</option>
-          <option data-img-src="/solver/static/images/SpeedBooster.png" value="SpeedBooster">Speed Booster</option>
-          <option data-img-src="/solver/static/images/Grapple.png" value="Grapple">Grapple Beam</option>
-          <option data-img-src="/solver/static/images/XRayScope.png" value="XRayScope">X-Ray Scope</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Morph.png" value="Morph" {{=setUncollected("Morph")}}>Morph Ball</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Bomb.png" value="Bomb" {{=setUncollected("Bomb")}}>Bomb</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/SpringBall.png" value="SpringBall" {{=setUncollected("SpringBall")}}>Spring Ball</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/ScrewAttack.png" value="ScrewAttack" {{=setUncollected("ScrewAttack")}}>Screw Attack</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/HiJump.png" value="HiJump" {{=setUncollected("HiJump")}}>Hi-Jump Boots</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/SpaceJump.png" value="SpaceJump" {{=setUncollected("SpaceJump")}}>Space Jump</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/SpeedBooster.png" value="SpeedBooster" {{=setUncollected("SpeedBooster")}}>Speed Booster</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/Grapple.png" value="Grapple" {{=setUncollected("Grapple")}}>Grapple Beam</option>
+          <option data-img-src="/solver/static/images/tracker/inventory/XRayScope.png" value="XRayScope" {{=setUncollected("XRayScope")}}>X-Ray Scope</option>
         </optgroup>
       </select>
       </div>

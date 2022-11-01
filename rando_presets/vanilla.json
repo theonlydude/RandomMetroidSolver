@@ -1,5 +1,6 @@
 {
-  "elevators_doors_speed": "off",
+  "elevators_speed": "off",
+  "fast_doors": "off",
   "progressionDifficulty": "normal",
   "funMovement": "off",
   "startLocation": "Ceres",
@@ -21,7 +22,6 @@
   "minorQty": "100",
   "suitsRestriction": "off",
   "spinjumprestart": "off",
-  "areaLayout": "off",
   "superQty": "1",
   "animals": "off",
   "itemsounds": "off",

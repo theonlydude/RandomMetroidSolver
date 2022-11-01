@@ -7,6 +7,7 @@ from graph.graph_utils import GraphUtils
 from utils.utils import removeChars, getPresetDir, getPythonExec
 from utils.doorsmanager import DoorsManager
 from utils.db import DB
+from utils.shm import SHM
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_NOT_EMPTY
 
@@ -120,7 +121,14 @@ class WS(object):
                 "allDoorsRevealed": state["allDoorsRevealed"],
 
                 # plando scav hunt
-                "plandoScavengerOrder": state["plandoScavengerOrder"]
+                "plandoScavengerOrder": state["plandoScavengerOrder"],
+
+                # tourian
+                "tourian": state["tourian"],
+
+                # completed objectives
+                "newlyCompletedObjectives": state["newlyCompletedObjectives"],
+                "eventsBitMasks": state["eventsBitMasks"]
             })
         else:
             raiseHttp(200, "OK", True)
@@ -130,14 +138,12 @@ class WS(object):
         if "state" not in self.session:
             raiseHttp(400, "Missing Solver state in the session", True)
 
-        (fd1, jsonInFileName) = tempfile.mkstemp()
-        (fd2, jsonOutFileName) = tempfile.mkstemp()
-        (fd3, errFile) = tempfile.mkstemp()
+        # use shared memory to communicate with backend as creating files on pythonanywhere is super slow
+        shm = SHM()
         params = [
             getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
             '--interactive',
-            '--state',  jsonInFileName,
-            '--output', jsonOutFileName,
+            '--shm',  shm.name(),
             '--action', action,
             '--mode', self.mode,
             '--scope', scope
@@ -187,75 +193,61 @@ class WS(object):
             params += ['--plandoScavengerOrder', ','.join(parameters['plandoScavengerOrder'])]
 
         # dump state as input
-        with open(jsonInFileName, 'w') as jsonFile:
-            json.dump(self.session["state"], jsonFile)
+        shm.writeMsgJson(self.session["state"])
 
         print("before calling isolver: {}".format(params))
         start = datetime.now()
-        ret = subprocess.call(params, stderr=fd3)
+        output = subprocess.run(params, capture_output=True)
         end = datetime.now()
-        duration = (end - start).total_seconds()
-        print("ret: {}, duration: {}s".format(ret, duration))
+        duration = (end - start).total_seconds() * 1000
+        print("ret: {}, subprocess duration: {}ms".format(output.returncode, duration))
+        print(output.stdout.decode("utf-8"))
 
-        if ret == 0:
-            with open(jsonOutFileName) as jsonFile:
-                state = json.load(jsonFile)
-            os.close(fd1)
-            os.remove(jsonInFileName)
-            os.close(fd2)
-            os.remove(jsonOutFileName)
-            os.close(fd3)
-            os.remove(errFile)
+        state = shm.readMsgJson()
+        shm.finish(True)
+
+        if output.returncode == 0:
             if action == 'save':
                 return json.dumps(state)
             else:
                 if action == 'randomize':
                     with DB() as db:
-                        db.addPlandoRando(ret, duration, state.get("errorMsg", ""))
+                        db.addPlandoRando(output.returncode, duration, state.get("errorMsg", ""))
 
                 # save the escape timer at every step to avoid loosing its value
-                if self.vars.escapeTimer != None:
+                if self.vars.escapeTimer is not None:
                     state["escapeTimer"] = self.vars.escapeTimer
 
                 self.session["state"] = state
-                return self.returnState()
+                ret = self.returnState()
+
+                return ret
         else:
             msg = "Something wrong happened while iteratively solving the ROM"
+            print(output.stderr.decode("utf-8"))
             try:
-                self.addError(jsonInFileName, params, errFile)
-                with open(jsonOutFileName, 'r') as jsonFile:
-                    data = json.load(jsonFile)
-                    if "errorMsg" in data:
-                        msg = data["errorMsg"]
+                self.addError(params, output.stderr.decode("utf-8"))
+                if "errorMsg" in state and state["errorMsg"]:
+                    msg = state["errorMsg"]
             except Exception as e:
                 # happen when jsonOutFileName is empty
                 pass
 
             if action == 'randomize':
                 with DB() as db:
-                    db.addPlandoRando(ret, duration, msg)
+                    db.addPlandoRando(output.returncode, duration, msg)
 
-            os.close(fd1)
-            os.remove(jsonInFileName)
-            os.close(fd2)
-            os.remove(jsonOutFileName)
-            os.close(fd3)
-            os.remove(errFile)
             raiseHttp(400, msg, True)
 
-    def addError(self, state, params, tmpErr):
+    def addError(self, params, errContent):
         errDir = os.path.expanduser("~/web2py/applications/solver/errors")
         if os.path.isdir(errDir):
             errFile = '{}.{}.{}'.format(self.caller.request.client,
-                                        datetime.now().strftime('%Y-%m-%d.%H-%M-%S'), str(uuid.uuid4()))
+                                        datetime.now().strftime('%Y-%m-%d.%H-%M-%S'),
+                                        str(uuid.uuid4()))
             errFile = os.path.join(errDir, errFile)
-            with open(state) as f:
-                stateContent = f.read()
-            with open(tmpErr) as f:
-                errContent = f.read()
             with open(errFile, 'w') as f:
                 f.write(str(params)+'\n')
-                f.write(str(stateContent)+'\n')
                 f.write(errContent)
 
     def name4isolver(self, locName):
@@ -333,11 +325,11 @@ class WS_common_init(WS):
         return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, fill, startLocation)
 
     def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, fill, startLocation):
-        (fd, jsonOutFileName) = tempfile.mkstemp()
+        shm = SHM()
         params = [
             getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
             '--preset', presetFileName,
-            '--output', jsonOutFileName,
+            '--shm', shm.name(),
             '--action', "init",
             '--interactive',
             '--mode', mode,
@@ -364,15 +356,12 @@ class WS_common_init(WS):
             with DB() as db:
                 db.addISolver(preset, 'plando' if mode == 'plando' else 'tracker', romFileName)
 
-            with open(jsonOutFileName) as jsonFile:
-                state = json.load(jsonFile)
-            os.close(fd)
-            os.remove(jsonOutFileName)
+            state = shm.readMsgJson()
+            shm.finish(True)
             self.session["state"] = state
             return self.returnState()
         else:
-            os.close(fd)
-            os.remove(jsonOutFileName)
+            shm.finish(True)
             raiseHttp(400, "Something wrong happened while initializing the ISolver", True)
 
 class WS_common_get(WS):
@@ -468,8 +457,8 @@ class WS_area_clear(WS):
     def action(self):
         return self.callSolverAction("area", "clear", {})
 
-validItemsList = [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']
-validLocsList = ['EnergyTankGauntlet', 'Bomb', 'EnergyTankTerminator', 'ReserveTankBrinstar', 'ChargeBeam', 'MorphingBall', 'EnergyTankBrinstarCeiling', 'EnergyTankEtecoons', 'EnergyTankWaterway', 'EnergyTankBrinstarGate', 'XRayScope', 'Spazer', 'EnergyTankKraid', 'VariaSuit', 'IceBeam', 'EnergyTankCrocomire', 'HiJumpBoots', 'GrappleBeam', 'ReserveTankNorfair', 'SpeedBooster', 'WaveBeam', 'EnergyTankRidley', 'ScrewAttack', 'EnergyTankFirefleas', 'ReserveTankWreckedShip', 'EnergyTankWreckedShip', 'RightSuperWreckedShip', 'GravitySuit', 'EnergyTankMamaturtle', 'PlasmaBeam', 'ReserveTankMaridia', 'SpringBall', 'EnergyTankBotwoon', 'SpaceJump', 'PowerBombCrateriasurface', 'MissileoutsideWreckedShipbottom', 'MissileoutsideWreckedShiptop', 'MissileoutsideWreckedShipmiddle', 'MissileCrateriamoat', 'MissileCrateriabottom', 'MissileCrateriagauntletright', 'MissileCrateriagauntletleft', 'SuperMissileCrateria', 'MissileCrateriamiddle', 'PowerBombgreenBrinstarbottom', 'SuperMissilepinkBrinstar', 'MissilegreenBrinstarbelowsupermissile', 'SuperMissilegreenBrinstartop', 'MissilegreenBrinstarbehindmissile', 'MissilegreenBrinstarbehindreservetank', 'MissilepinkBrinstartop', 'MissilepinkBrinstarbottom', 'PowerBombpinkBrinstar', 'MissilegreenBrinstarpipe', 'PowerBombblueBrinstar', 'MissileblueBrinstarmiddle', 'SuperMissilegreenBrinstarbottom', 'MissileblueBrinstarbottom', 'MissileblueBrinstartop', 'MissileblueBrinstarbehindmissile', 'PowerBombredBrinstarsidehopperroom', 'PowerBombredBrinstarspikeroom', 'MissileredBrinstarspikeroom', 'MissileKraid', 'Missilelavaroom', 'MissilebelowIceBeam', 'MissileaboveCrocomire', 'MissileHiJumpBoots', 'EnergyTankHiJumpBoots', 'PowerBombCrocomire', 'MissilebelowCrocomire', 'MissileGrappleBeam', 'MissileNorfairReserveTank', 'MissilebubbleNorfairgreendoor', 'MissilebubbleNorfair', 'MissileSpeedBooster', 'MissileWaveBeam', 'MissileGoldTorizo', 'SuperMissileGoldTorizo', 'MissileMickeyMouseroom', 'MissilelowerNorfairabovefireflearoom', 'PowerBomblowerNorfairabovefireflearoom', 'PowerBombPowerBombsofshame', 'MissilelowerNorfairnearWaveBeam', 'MissileWreckedShipmiddle', 'MissileGravitySuit', 'MissileWreckedShiptop', 'SuperMissileWreckedShipleft', 'MissilegreenMaridiashinespark', 'SuperMissilegreenMaridia', 'MissilegreenMaridiatatori', 'SuperMissileyellowMaridia', 'MissileyellowMaridiasupermissile', 'MissileyellowMaridiafalsewall', 'MissileleftMaridiasandpitroom', 'MissilerightMaridiasandpitroom', 'PowerBombrightMaridiasandpitroom', 'MissilepinkMaridia', 'SuperMissilepinkMaridia', 'MissileDraygon', 'Kraid', 'Ridley', 'Phantoon', 'Draygon', 'MotherBrain']
+validItemsList = [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain', 'SporeSpawn', 'Crocomire', 'Botwoon', 'GoldenTorizo']
+validLocsList = ['EnergyTankGauntlet', 'Bomb', 'EnergyTankTerminator', 'ReserveTankBrinstar', 'ChargeBeam', 'MorphingBall', 'EnergyTankBrinstarCeiling', 'EnergyTankEtecoons', 'EnergyTankWaterway', 'EnergyTankBrinstarGate', 'XRayScope', 'Spazer', 'EnergyTankKraid', 'VariaSuit', 'IceBeam', 'EnergyTankCrocomire', 'HiJumpBoots', 'GrappleBeam', 'ReserveTankNorfair', 'SpeedBooster', 'WaveBeam', 'EnergyTankRidley', 'ScrewAttack', 'EnergyTankFirefleas', 'ReserveTankWreckedShip', 'EnergyTankWreckedShip', 'RightSuperWreckedShip', 'GravitySuit', 'EnergyTankMamaturtle', 'PlasmaBeam', 'ReserveTankMaridia', 'SpringBall', 'EnergyTankBotwoon', 'SpaceJump', 'PowerBombCrateriasurface', 'MissileoutsideWreckedShipbottom', 'MissileoutsideWreckedShiptop', 'MissileoutsideWreckedShipmiddle', 'MissileCrateriamoat', 'MissileCrateriabottom', 'MissileCrateriagauntletright', 'MissileCrateriagauntletleft', 'SuperMissileCrateria', 'MissileCrateriamiddle', 'PowerBombgreenBrinstarbottom', 'SuperMissilepinkBrinstar', 'MissilegreenBrinstarbelowsupermissile', 'SuperMissilegreenBrinstartop', 'MissilegreenBrinstarbehindmissile', 'MissilegreenBrinstarbehindreservetank', 'MissilepinkBrinstartop', 'MissilepinkBrinstarbottom', 'PowerBombpinkBrinstar', 'MissilegreenBrinstarpipe', 'PowerBombblueBrinstar', 'MissileblueBrinstarmiddle', 'SuperMissilegreenBrinstarbottom', 'MissileblueBrinstarbottom', 'MissileblueBrinstartop', 'MissileblueBrinstarbehindmissile', 'PowerBombredBrinstarsidehopperroom', 'PowerBombredBrinstarspikeroom', 'MissileredBrinstarspikeroom', 'MissileKraid', 'Missilelavaroom', 'MissilebelowIceBeam', 'MissileaboveCrocomire', 'MissileHiJumpBoots', 'EnergyTankHiJumpBoots', 'PowerBombCrocomire', 'MissilebelowCrocomire', 'MissileGrappleBeam', 'MissileNorfairReserveTank', 'MissilebubbleNorfairgreendoor', 'MissilebubbleNorfair', 'MissileSpeedBooster', 'MissileWaveBeam', 'MissileGoldTorizo', 'SuperMissileGoldTorizo', 'MissileMickeyMouseroom', 'MissilelowerNorfairabovefireflearoom', 'PowerBomblowerNorfairabovefireflearoom', 'PowerBombPowerBombsofshame', 'MissilelowerNorfairnearWaveBeam', 'MissileWreckedShipmiddle', 'MissileGravitySuit', 'MissileWreckedShiptop', 'SuperMissileWreckedShipleft', 'MissilegreenMaridiashinespark', 'SuperMissilegreenMaridia', 'MissilegreenMaridiatatori', 'SuperMissileyellowMaridia', 'MissileyellowMaridiasupermissile', 'MissileyellowMaridiafalsewall', 'MissileleftMaridiasandpitroom', 'MissilerightMaridiasandpitroom', 'PowerBombrightMaridiasandpitroom', 'MissilepinkMaridia', 'SuperMissilepinkMaridia', 'MissileDraygon', 'Kraid', 'Ridley', 'Phantoon', 'Draygon', 'MotherBrain', 'SporeSpawn', 'Crocomire', 'Botwoon', 'GoldenTorizo']
 
 class WS_item_add(WS):
     def validate(self):
@@ -502,7 +491,7 @@ class WS_item_add(WS):
 
         # in seedless mode we have to had boss items instead of nothing
         if self.vars.mode in ["seedless", "race", "debug"]:
-            if locName in ['Kraid', 'Ridley', 'Phantoon', 'Draygon', 'MotherBrain']:
+            if locName in ['Kraid', 'Ridley', 'Phantoon', 'Draygon', 'MotherBrain', 'SporeSpawn', 'Crocomire', 'Botwoon', 'GoldenTorizo']:
                 item = locName
 
         params = {"item": item, "hide": self.vars.hide == "true"}
@@ -538,8 +527,8 @@ class WS_item_remove(WS):
         if self.itemName == None:
             if self.vars.count != None:
                 self.count = getInt(self.caller.request, "count", True)
-                if self.count > 105 or self.count < 1:
-                    raiseHttp(400, "Wrong value for count, must be in [1-105] ", True)
+                if self.count > 109 or self.count < 1:
+                    raiseHttp(400, "Wrong value for count, must be in [1-109] ", True)
             else:
                 self.count = 1
         else:
@@ -633,25 +622,22 @@ class WS_dump_import(WS):
         if newAP not in webAPs:
             raiseHttp(400, "Wrong AP", True)
 
-        # create json file
-        (self.fd, self.jsonDumpName) = tempfile.mkstemp()
+        self.shm = SHM()
 
         jsonData = {"stateDataOffsets": json.loads(self.vars.stateDataOffsets),
                     "currentState": json.loads(self.vars.currentState),
                     "newAP": webAPs[newAP]}
-        if len(jsonData["currentState"]) > 1320 or len(jsonData["stateDataOffsets"]) > 3:
-            raiseHttp(400, "Wrong state", True)
+        if len(jsonData["currentState"]) > 1608 or len(jsonData["stateDataOffsets"]) > 4:
+            raiseHttp(400, "Wrong state size", True)
         for key, value in jsonData["stateDataOffsets"].items():
             if len(key) > 1 or type(value) != int:
-                raiseHttp(400, "Wrong state", True)
+                raiseHttp(400, "Wrong state type", True)
         if any([d for d in jsonData["currentState"] if type(d) != int]):
-            raiseHttp(400, "Wrong state", True)
-        #print(jsonData)
+            raiseHttp(400, "Wrong cur state type", True)
 
-        with os.fdopen(self.fd, "w") as jsonFile:
-            json.dump(jsonData, jsonFile)
+        self.shm.writeMsgJson(jsonData)
 
     def action(self):
-        ret = self.callSolverAction("dump", "import", {"dump": self.jsonDumpName})
-        os.remove(self.jsonDumpName)
+        ret = self.callSolverAction("dump", "import", {"dump": self.shm.name()})
+        self.shm.finish(True)
         return ret

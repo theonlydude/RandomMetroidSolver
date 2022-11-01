@@ -32,6 +32,8 @@ define scroll_speed $7fffe8
 // RTA timer RAM updated during NMI
 define timer1 $05b8
 define timer2 $05ba
+// timer integrity protection
+define timer_xor $7eff00
 
 define stats_sram_sz_b  #$0080
 define full_stats_area_sz_b  #$0300
@@ -52,10 +54,23 @@ define backup_sram_slot1       $19f8
 define backup_sram_slot2       $1cf8
 define last_stats_save_ok_off  #$02fc
 define magic_flag 	       #$caca
+define reset_flag              #$babe
 
 define current_save_slot	$7e0952
 define area_index		$079f
 define load_station_index	$078b
+
+define igt_sram_off	#$0038
+define igt_frames       $7E09DA
+define igt_seconds      $7E09DC
+define igt_minutes      $7E09DE
+define igt_hours        $7E09E0
+define end_seconds_1    $0DF8
+define end_seconds_2    $0DFA
+define sprite_colon_x   #$00B4
+define sprite_second_1x #$00BC
+define sprite_second_2x #$00C4
+
 
 // some scratch space in RAM for backup save system
 define backup_counter	$7fff38
@@ -83,9 +98,7 @@ org $808268
 
 // Patch load/save/copy
 org $81800d
-	jsr patch_save_start
-org $81807f
-    jmp patch_save_end
+	jsr patch_save
 
 org $81A24A
     jsl patch_load // patch load from menu only
@@ -105,6 +118,10 @@ org $819f46
 	jsr load_menu_2nd_file
 org $819f7c
 	jsr load_menu_3rd_file
+
+// hijack menu display to show save area instead of energy if backup saves are enabled
+org $81A09B
+	jsr menu_show_save_data
 
 // Hijack loading new game to reset stats
 org $82805f
@@ -132,26 +149,36 @@ org $a2ab0d
 	nop
 	nop
 
+// end gamestate hijack to resync IGT from RTA that stopped ~6 seconds earlier
+org $8284D3
+        jsl igt_end
+
 // Patch NMI to skip resetting 05ba and instead use that as an extra time counter
 org $8095e5
 nmi:
+    // copy from vanilla routine without lag counter reset
     ldx #$00
     stx $05b4
     ldx $05b5
     inx
     stx $05b5
     inc $05b6
+    jmp .inc
+org $809602 // overwrite lag handling to count lag in global counter
+    jmp .inc
+    // handle 32 bit counter :
+org $808FA3 // overwrite unused routine
 .inc:
     rep #$30
-    inc $05b8
-    bne +
-    inc $05ba
-+
-    bra .end
-
-org $809602
-    bra .inc
+    // actually increment 32-bit timer
+    inc {timer1}
+    bne .end
+    inc {timer2}
 .end:
+    // timer integrity protection
+    lda {timer1}
+    eor {timer2}
+    sta {timer_xor}
     ply
     plx
     pla
@@ -159,9 +186,19 @@ org $809602
     plb
     rti
 
+warnpc $808FC2 // next used routine start
+
 // Patch boot to init stuff
 org $80fe00
 boot1:
+    // check timer integrity: if not ok disable soft reset flag
+    lda {timer1}
+    eor {timer2}
+    cmp {timer_xor}
+    beq +
+    lda {magic_flag}
+    sta {softreset}
++
     lda #$0000
     sta {timer_backup1}
     sta {timer_backup2}
@@ -198,7 +235,7 @@ boot1:
 .check_reset:
     // check if soft reset, if so, restore RAM timer
     lda {softreset}
-    cmp #$babe
+    cmp {reset_flag}
     bne .cont
     lda {timer1}
     sta {timer_backup1}
@@ -245,7 +282,7 @@ boot2:
     lda {timer_backup1}
     sta {timer1}
     lda {timer_backup2}
-    sta {timer2}
+    sta {timer2}	
     // clear temp variables
     ldx {tmp_area_sz}
     lda #$0000
@@ -254,7 +291,7 @@ boot2:
     dex
     dex
     bpl -
-
+    // resume vanilla code
     jml $8084af
 
 //// save related routines
@@ -301,7 +338,6 @@ save_index:
 
 warnpc $80ffbf
 
-
 	// Rolling backup save mechanism:
 	//
 	// Additional data in saves :
@@ -321,6 +357,14 @@ warnpc $80ffbf
 	//	- priority: empty save, old backup, recent backup
 	//	- ignore save files with player flag set (was loaded once)
 	//	- ignore backup files from different slots
+
+// vanilla array of save slots offsets in bank 70
+org $81812b
+slots_sram_offsets:
+
+// vanilla array of bitmasks to check used save slots
+org $819af4
+slots_bitmasks:
 
 // Patch load and save routines
 // a save will always be performed when starting a new game (see new_game.asm)
@@ -342,7 +386,7 @@ new_save:
 	asl
 	tax
 	lda {used_slots_mask}
-	ora $819af4,x	// bitmask index table in ROM
+	ora.l slots_bitmasks,x	// bitmask index table in ROM
 	sta {used_slots_mask}
 
 	// init backup save data :
@@ -524,13 +568,13 @@ backup_save:
 	lda {current_save_slot}
 	asl
 	tax
-	lda $81812b,x // get SRAM offset in bank 70 for slot
+	lda.l slots_sram_offsets,x // get SRAM offset in bank 70 for slot
 	sta $47
 	// destination slot is in backup_candidate
 	lda {backup_candidate}
 	asl
 	tax
-	lda $81812b,x // get SRAM offset in bank 70 for slot
+	lda.l slots_sram_offsets,x // get SRAM offset in bank 70 for slot
 	sta $4a
 	// copy save file
 	ldy #$0000
@@ -596,40 +640,39 @@ backup_save:
 	asl
 	tax
 	lda {used_slots_mask}
-	ora $819af4,x	// bitmask index table in ROM
+	ora.l slots_bitmasks,x	// bitmask index table in ROM
 	sta {used_slots_mask}
 	rts
 
-patch_save_start:
+patch_save:
 	pha	// save A, it is used as arg in hijacked function
-	lda.l opt_backup
-	beq .end
+	// backup saves management:
 	jsl {check_new_game}
-	beq .end
+	beq .stats
+	lda.l opt_backup
+	beq .stats
 	// we have backup saves enabled, and it is not the 1st save:
 	// check if we shall backup the save
 	jsr is_backup_needed
-	bcc .end
+	bcc .stats
 	jsr backup_save
-.end:
+	// handle timer/stats after backup
+.stats:
+	// copy RTA timer to RAM stats and IGT RAM
+	lda {timer1}
+	sta {stats_timer}
+	lda {timer2}
+	sta {stats_timer}+2
+	jsl update_igt
+	// save all stats
+	lda #$0001
+	jsl save_stats
+	// hijacked code :
+	// restore $14 to 0 as it is written by update_igt, and restore A
+	stz $14
 	pla
-	and #0003	// hijacked code
+	and #0003
 	rts
-
-patch_save_end:
-    lda {timer1}
-    sta {stats_timer}
-    lda {timer2}
-    sta {stats_timer}+2
-    lda #$0001
-    jsl save_stats
-.end:
-    ply
-    plx
-    clc
-    plb
-    plp
-    rtl
 
 print "patch_load: ", org
 patch_load:
@@ -664,7 +707,7 @@ patch_load:
 	// n flag not set, we're loading a backup
 	// check if we're soft resetting: if so, will take stats from RAM
 	lda {softreset}
-	cmp #$babe
+	cmp {reset_flag}
 	beq .load_backup_end
 	// load stats from original save SRAM
 	lda $700000,x	// save slot in SRAM
@@ -700,7 +743,7 @@ patch_load:
     bne .load
     // we're loading the same save that's played last
     lda {softreset}
-    cmp #$babe
+    cmp {reset_flag}
     beq .end_ok     // soft reset, use stats and timer from RAM
     // TODO add menu time to pause stat and make it a general menus stat?
 .load:
@@ -713,7 +756,7 @@ patch_load:
     sta {timer2}
 .end_ok:
     // place marker for resets
-    lda #$babe
+    lda {reset_flag}
     sta {softreset}
     // increment reset count
     lda {stat_resets}
@@ -741,7 +784,7 @@ load_menu_file:
 	pha
 	asl
 	tax
-	lda $819af4,x	// bitmask index table in ROM
+	lda.l slots_bitmasks,x	// bitmask index table in ROM
 	and {used_slots_mask}
 	beq .nochange
 .load_slot:
@@ -821,7 +864,7 @@ patch_clear:
 	lda $19b7
 	asl
 	tax
-	lda $819af4,x	// bitmask index table in ROM
+	lda.l slots_bitmasks,x	// bitmask index table in ROM
 	eor #$ffff
 	and {used_slots_mask}
 	sta {used_slots_mask}
@@ -829,8 +872,208 @@ patch_clear:
 	lda $19b7	// hijacked code
 	rts
 
-//print "b81 end: ", org
-warnpc $81f29f
+// show save area and station instead of energy when backup saves are enabled
+menu_show_save_data:
+	lda.l opt_backup
+	beq .energy
+	// draw save area: find station in table
+	ldx #$0000
+.loop:
+	lda save_area_text_table, x
+	cmp #$ffff
+	beq .energy
+	cmp {area_index}
+	bne .next
+	lda save_area_text_table+2, x
+	cmp {load_station_index}
+	beq .draw
+.next:
+	txa
+	clc
+	adc #$0008
+	tax
+	bra .loop
+.draw:
+	phx
+	// 1st line
+	lda save_area_text_table+4, x
+	tay
+	ldx $1A
+	jsr $B3E2
+	// 2nd line
+	plx
+	lda save_area_text_table+6, x
+	tay
+	lda $1A
+	clc
+	adc #$0040
+	tax
+	jsr $B3E2
+	pla // discard return address : return to previous caller, we have nothing left to do in hijacked routine
+	rts
+.energy:
+	LDY #$B496 // hijacked energy tilemap address load
+	rts
+
+// area index, save station index, 1st line addr, 2nd line addr
+save_area_text_table:
+	dw $0000, $0000, .crateria, .ship
+	dw $0000, $0001, .crateria, .parlor
+	dw $0000, $0006, .crateria, .gauntlet
+	dw $0000, $0007, .tourian, .g4_hall
+	dw $0001, $0000, .green_brin, .spore_spawn
+	dw $0001, $0001, .green_brin, .main_shaft
+	dw $0001, $0002, .green_brin, .etecoons
+	dw $0001, $0003, .kraid, .notext
+	dw $0001, $0004, .red_brin, .tower_top
+	dw $0001, $0007, .green_brin, .etecoons
+	dw $0001, $0008, .green_brin, .elevator
+	dw $0001, $000A, .red_brin, .elevator
+	dw $0002, $0000, .crocomire, .notext
+	dw $0002, $0001, .upper_norfair, .bubble_mountain
+	dw $0002, $0002, .upper_norfair, .business_center
+	dw $0002, $0003, .upper_norfair, .pre_croc
+	dw $0002, $0004, .lower_norfair, .elevator
+	dw $0002, $0005, .lower_norfair, .ridley
+	dw $0002, $0007, .lower_norfair, .firefleas
+	dw $0002, $0008, .upper_norfair, .elevator
+	dw $0003, $0000, .wrecked, .ship
+	dw $0004, $0000, .red_brin, .tube
+	dw $0004, $0001, .east_maridia, .forgotten_highway
+	dw $0004, $0002, .east_maridia, .aqueduct
+	dw $0004, $0003, .east_maridia, .draygon
+	dw $0004, $0005, .east_maridia, .aqueduct
+	dw $0004, $0006, .west_maridia, .mama_turtle
+	dw $0004, $0007, .west_maridia, .watering_hole
+	dw $0004, $0009, .west_maridia, .crab_shaft
+	dw $0004, $000A, .west_maridia, .main_street
+	dw $0005, $0000, .tourian, .mother_brain
+	dw $0005, $0001, .tourian, .entrance
+	dw $0006, $0000, .ceres, .elevator
+	// table terminator
+	dw $ffff
+
+table "tables/menu.tbl"
+// strings ending with ffff terminator
+// 13 chars max on top line, 11 on bottom
+.crateria:
+	dw " CRATERIA"
+.notext:
+	dw $ffff
+.green_brin:
+	dw "GREEN BRIN."
+	dw $ffff
+.red_brin:
+	dw "RED BRINSTAR"
+	dw $ffff
+.upper_norfair:
+	dw "UPPER NORFAIR"
+	dw $ffff
+.lower_norfair:
+	dw "LOWER NORFAIR"
+	dw $ffff
+.east_maridia:
+	dw "EAST MARIDIA"
+	dw $ffff
+.west_maridia:
+	dw "WEST MARIDIA"
+	dw $ffff
+.tourian:
+	dw "  TOURIAN"
+	dw $ffff
+.ceres:
+	dw "   CERES"
+	dw $ffff
+.wrecked:
+	dw "  WRECKED"
+	dw $ffff
+.ship:
+	dw "   SHIP"
+	dw $ffff
+.parlor:
+	dw "  PARLOR"
+	dw $ffff
+.gauntlet:
+	dw " GAUNTLET"
+	dw $ffff
+.g4_hall:
+	dw " GOLDEN 4"
+	dw $ffff
+.spore_spawn:
+	dw "SPORE SPAWN"
+	dw $ffff
+.main_shaft:
+	dw "MAIN SHAFT"
+	dw $ffff
+.etecoons:
+	dw " ETECOONS"
+	dw $ffff
+.kraid:
+	dw "   KRAID"
+	dw $ffff
+.tower_top:
+	dw "TOWER TOP"
+	dw $ffff
+.elevator:
+	dw " ELEVATOR"
+	dw $ffff
+.crocomire:
+	dw "CROCOMIRE"
+	dw $ffff
+.bubble_mountain:
+	dw "BUBBLE MTN."
+	dw $ffff
+.business_center:
+	dw "BIZ CENTER"
+	dw $ffff
+.pre_croc:
+	dw "BEFORE CROC"
+	dw $ffff
+.ridley:
+	dw "  RIDLEY"
+	dw $ffff
+.firefleas:
+	dw " FIREFLEAS"
+	dw $ffff
+.tube:
+	dw "   TUBE"
+	dw $ffff
+.forgotten_highway:
+	dw "  HIGHWAY"
+	dw $ffff
+.aqueduct:
+	dw " AQUEDUCT"
+	dw $ffff
+.draygon:
+	dw "  DRAYGON"
+	dw $ffff
+.mama_turtle:
+	dw "MAMA TURTLE"
+	dw $ffff
+.watering_hole:
+	dw "WATER HOLE"
+	dw $ffff
+.crab_shaft:
+	dw "CRAB SHAFT"
+	dw $ffff
+.main_street:
+	dw "MAIN STREET"
+	dw $ffff
+.mother_brain:
+	dw "  M BRAIN"
+	dw $ffff
+.entrance:
+	dw " ENTRANCE"
+	dw $ffff
+
+// resync IGT when game transitions away from gameplay state
+igt_end:
+        jsl update_igt
+        jsl $80834B // hijacked code
+        rtl
+
+print "b81 end: ", org
+warnpc $81f6ff
 ////////////////////////// CREDITS /////////////////////////////
 
 // Hijack after decompression of regular credits tilemaps
@@ -913,6 +1156,7 @@ copy:
     ldx #$0000
 -
     lda.l itemlocations, x
+    nop;nop;nop;nop
     cmp #$0000
     beq +
     sta $7fa000, x
@@ -948,7 +1192,7 @@ clear_values:
     sta {timer1}
     sta {timer2}
     // place marker for resets
-    lda #$babe
+    lda {reset_flag}
     sta {softreset}
 .ret:
     plp
@@ -967,7 +1211,7 @@ game_end:
     lda #$0000  // if carry clear this will subtract one from the high byte of timer
     sbc {timer2}
 
-    // save timer in stats
+    // save timer in stats and IGT
     lda {timer1}
     sta {stats_timer}
     lda {timer2}
@@ -983,6 +1227,67 @@ game_end:
     rtl
 
 warnpc $8bf88f
+
+// configurable hh:mm values for samus animations at the end
+org $8bf900
+samus_times:
+// "good time" limit: 1h30m
+samus_good_time_h:
+	dw $0001
+samus_good_time_m:
+	dw $001e
+// "average time" limit: 3h
+samus_avg_time_h:
+	dw $0003
+samus_avg_time_m:
+	dw $0000
+
+check_samus_good_time:
+	lda {igt_hours}
+	cmp samus_good_time_h
+	bne .end
+	lda {igt_minutes}
+	cmp samus_good_time_m
+.end:
+	rts
+
+check_samus_avg_time:
+	lda {igt_hours}
+	cmp samus_avg_time_h
+	bne .end
+	lda {igt_minutes}
+	cmp samus_avg_time_m
+.end:
+	rts
+
+warnpc $8bf92f
+
+// hijacks for samus ending animations
+org $8BE00D
+	jsr check_samus_good_time
+org $8BE1E3
+	jsr check_samus_good_time
+org $8BE1E8
+	jsr check_samus_avg_time
+org $8BE279
+	jsr check_samus_good_time
+org $8BE2E7
+	jsr check_samus_good_time
+org $8BE2EC
+	jsr check_samus_avg_time
+org $8BE328
+	jsr check_samus_good_time
+org $8BE36F
+	jsr check_samus_good_time
+org $8BE374
+	jsr check_samus_avg_time
+org $8BF558
+	jsr check_samus_avg_time
+org $8BF59A
+	jsr check_samus_avg_time
+org $8BF5BD
+	jsr check_samus_avg_time
+
 
 org $dfd4f0
 // Draw full time as hh:mm:ss:ff
@@ -1208,7 +1513,8 @@ write_stats:
     ply
     rtl
 
-// 32-bit by 16-bit division routine I found somewhere
+// 32-bit by 16-bit division routine total found somewhere
+// ($14$16)/$12 : result in $16, remainder in $14
 div32:
     phy
     phx
@@ -1356,11 +1662,13 @@ save_stats_at:
 // save stats both in standard and last areas
 // arg: A = 0 if we just want to save last stats
 //      A != 0 save all stats (save stations)
+// used by gameend.asm, update address it in if moved
 print "save_stats: ", org
 save_stats:
     phx
     phy
     pha
+    // actually save stats now
     lda {current_save_slot}
     clc
     adc #$0010
@@ -1980,63 +2288,60 @@ stats:
     dw 41,      {row}*174,  1, 0    // resets
     dw 0,               0,  0, 0    // end of table
 
-print "credits end : ", org
-
 // load RTA in IGT
-// update values in:
-//    $09DE: Game time, minutes
-//    $09E0: Game time, hours (capped at 99:59:59.59)
+print "update_igt: ", org
 update_igt:
-    phx
-    lda {current_save_slot}
-    asl
-    tax
-    lda save_slots,x
-    tax
-    lda $700000, x // rta timer in sram is the first value in stats
-    sta $16
-    lda $700002, x
-    sta $14
-    lda #$003c
-    sta $12
-    lda #$ffff
-    sta $1a
-    jsr div32 // frames in $14, rest in $16
-    lda $16  // RTA in seconds
-    sta $004204 // divide by 60 to get minutes
-    sep #$20
-    lda #$ff
-    sta $1a
-    lda #$3c
-    sta $004206
-    pha; pla; pha; pla; rep #$20
-    lda $004214 // hours/minutes
-    sta $004204 // divide by 60 to get hours and minutes
-    sep #$20
-    lda #$3c
-    sta $004206
-    pha; pla; pha; pla; rep #$20
-    lda $004216 // rta minutes
-    sta $0009DE // replace igt minutes
-    lda $004214 // rta hours
-    sta $0009E0 // replace igt hours
-    plx
-    // vanilla code
-    sta $004204
-    rtl
+        php
+        rep #$30
+	// divide total frames in 32 bits by 3600 to have 16bits minutes and remaining frames,
+        // to correctly handle times up to 99:59:59.59 like vanilla
+	lda {stats_timer}
+	sta $16
+	lda {stats_timer}+2
+	sta $14
+	lda #3600
+	sta $12
+	jsr div32
+	lda $14
+	sta {igt_frames} // store remainder to igt frames
+	lda $16  // RTA in minutes
+	sta $004204 // divide by 60 to get hours
+	sep #$20
+	lda #$3c
+	sta $004206
+	pha; pla; pha; pla; rep #$20
+	lda $004216 // rta minutes
+	sta {igt_minutes} // replace igt minutes
+	lda $004214 // hours
+        sta {igt_hours} // replace igt hours
+        cmp #$0064 // if < 100 hours, continue
+        bpl .overflow
+        lda {igt_frames} // frames remainder after initial division to get minutes
+	sta $004204 // divide by 60 to get seconds and frames
+	sep #$20
+	lda #$3c
+	sta $004206
+	pha; pla; pha; pla; rep #$20
+	lda $004216 // rta frames
+	sta {igt_frames} // replace igt frames
+	lda $004214 // rta seconds
+        sta {igt_seconds} // replace igt seconds
+        bra .end
+.overflow: // IGT = 99:59:59.59
+        lda #$0063
+        sta {igt_hours}
+        lda #$003b
+        sta {igt_minutes}
+        sta {igt_seconds}
+        sta {igt_frames}
+.end:
+        plp
+        rtl
 
-print "after IGT hijack : ", org
+print "bank DF end : ", org
 
 // palette rando stores its relocated palette there
 warnpc $dfe1ff
-
-// hijack to load RTA in IGT RAM
-// vanilla code:
-//  $8B:F3D5 AD E0 09    LDA $09E0  [$7E:09E0]
-//  $8B:F3D8 8D 04 42    STA $4204  [$7E:4204]
-org $8bF3D5
-jsl update_igt
-nop; nop
 
 // Relocated credits tilemap to free space in bank CE
 org $ceb240
@@ -2060,8 +2365,8 @@ credits:
     {purple}
     dw "          CONTRIBUTORS          " // 134
     {big}
-    dw "         RAND 0   COUT          " // 135
-    dw "         rand }   cout          " // 136
+    dw "    RAND 0   COUT   CHRISC      " // 135
+    dw "    rand }   cout   chrisc      " // 136
     dw "        DJLO   PRANKARD         " // 137
     dw "        djlo   prankard         " // 138
     {cyan}
@@ -2215,115 +2520,245 @@ itemlocations:
 org $8cb49b
 // 'R'
         dw $0002
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB4A7
 // 'RE'
         dw $0004
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB4BD
 // 'REA'
         dw $0006
-        dw $01D0; db $00; dw $3130
-        dw $01D0; db $F8; dw $3120
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01C8; db $00; dw $3130
+        dw $01C8; db $F8; dw $3120
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB4DD
 // 'REAL'
         dw $0008
-        dw $01D8; db $00; dw $313B
-        dw $01D8; db $F8; dw $312B
-        dw $01D0; db $00; dw $3130
-        dw $01D0; db $F8; dw $3120
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01D0; db $00; dw $313B
+        dw $01D0; db $F8; dw $312B
+        dw $01C8; db $00; dw $3130
+        dw $01C8; db $F8; dw $3120
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB507
 // 'REAL'
         dw $0008
-        dw $01D8; db $00; dw $313B
-        dw $01D8; db $F8; dw $312B
-        dw $01D0; db $00; dw $3130
-        dw $01D0; db $F8; dw $3120
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01D0; db $00; dw $313B
+        dw $01D0; db $F8; dw $312B
+        dw $01C8; db $00; dw $3130
+        dw $01C8; db $F8; dw $3120
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB53B
-// 'REAL  T'
+// 'REAL T'
         dw $000A
-        dw $01F0; db $00; dw $3153
-        dw $01F0; db $F8; dw $3143
-        dw $01D8; db $00; dw $313B
-        dw $01D8; db $F8; dw $312B
-        dw $01D0; db $00; dw $3130
-        dw $01D0; db $F8; dw $3120
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01E0; db $00; dw $3153
+        dw $01E0; db $F8; dw $3143
+        dw $01D0; db $00; dw $313B
+        dw $01D0; db $F8; dw $312B
+        dw $01C8; db $00; dw $3130
+        dw $01C8; db $F8; dw $3120
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB579
-// 'REAL  TI'
+// 'REAL TI'
         dw $000C
-        dw $01F8; db $00; dw $3138
-        dw $01F8; db $F8; dw $3128
-        dw $01F0; db $00; dw $3153
-        dw $01F0; db $F8; dw $3143
-        dw $01D8; db $00; dw $313B
-        dw $01D8; db $F8; dw $312B
-        dw $01D0; db $00; dw $3130
-        dw $01D0; db $F8; dw $3120
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01E8; db $00; dw $3138
+        dw $01E8; db $F8; dw $3128
+        dw $01E0; db $00; dw $3153
+        dw $01E0; db $F8; dw $3143
+        dw $01D0; db $00; dw $313B
+        dw $01D0; db $F8; dw $312B
+        dw $01C8; db $00; dw $3130
+        dw $01C8; db $F8; dw $3120
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB5C1
-// 'REAL  TIM'
+// 'REAL TIM'
         dw $000E
-        dw $0000; db $00; dw $313C
-        dw $0000; db $F8; dw $312C
-        dw $01F8; db $00; dw $3138
-        dw $01F8; db $F8; dw $3128
-        dw $01F0; db $00; dw $3153
-        dw $01F0; db $F8; dw $3143
-        dw $01D8; db $00; dw $313B
-        dw $01D8; db $F8; dw $312B
-        dw $01D0; db $00; dw $3130
-        dw $01D0; db $F8; dw $3120
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01F0; db $00; dw $313C
+        dw $01F0; db $F8; dw $312C
+        dw $01E8; db $00; dw $3138
+        dw $01E8; db $F8; dw $3128
+        dw $01E0; db $00; dw $3153
+        dw $01E0; db $F8; dw $3143
+        dw $01D0; db $00; dw $313B
+        dw $01D0; db $F8; dw $312B
+        dw $01C8; db $00; dw $3130
+        dw $01C8; db $F8; dw $3120
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
 
 org $8CB613
-// 'REAL  TIME'
+// 'REAL TIME'
         dw $0010
-        dw $0008; db $00; dw $3134
-        dw $0008; db $F8; dw $3124
-        dw $0000; db $00; dw $313C
-        dw $0000; db $F8; dw $312C
-        dw $01F8; db $00; dw $3138
-        dw $01F8; db $F8; dw $3128
-        dw $01F0; db $00; dw $3153
-        dw $01F0; db $F8; dw $3143
-        dw $01D8; db $00; dw $313B
-        dw $01D8; db $F8; dw $312B
-        dw $01D0; db $00; dw $3130
-        dw $01D0; db $F8; dw $3120
-        dw $01C8; db $00; dw $3134
-        dw $01C8; db $F8; dw $3124
-        dw $01C0; db $00; dw $3151
-        dw $01C0; db $F8; dw $3141
+        dw $01F8; db $00; dw $3134
+        dw $01F8; db $F8; dw $3124
+        dw $01F0; db $00; dw $313C
+        dw $01F0; db $F8; dw $312C
+        dw $01E8; db $00; dw $3138
+        dw $01E8; db $F8; dw $3128
+        dw $01E0; db $00; dw $3153
+        dw $01E0; db $F8; dw $3143
+        dw $01D0; db $00; dw $313B
+        dw $01D0; db $F8; dw $312B
+        dw $01C8; db $00; dw $3130
+        dw $01C8; db $F8; dw $3120
+        dw $01C0; db $00; dw $3134
+        dw $01C0; db $F8; dw $3124
+        dw $01B8; db $00; dw $3151
+        dw $01B8; db $F8; dw $3141
+
+
+// draw RTA seconds at ship end
+org $8beefd+4
+        dw instruction_list_time
+
+org $8bf416
+        jsr hijack_push_rta
+
+// update X pos for hour1 hour2 : min1 min2
+org $8bF065
+        dw $008C
+org $8bF074
+        dw $0094
+org $8bF07D
+        dw $009C
+org $8bF08C
+        dw $00A4
+org $8bF09B
+        dw $00AC
+
+org $8bf930
+hijack_push_rta:
+	// vanilla
+        STA $0DF2
+
+	// load RTA seconds
+        LDA {igt_seconds}
+        STA $4204
+        SEP #$20
+        LDA #$0A
+        STA $4206
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        REP #$20
+        LDA $4214
+	// use unused RAM to store seconds next to hours/minutes
+        STA {end_seconds_1}
+        LDA $4216
+        STA {end_seconds_2}
+	RTS
+
+// add :xx at the end of displayed time to display seconds
+instruction_list_time:
+        dw $0008, $B49B
+        dw $0008, $B4A7
+        dw $0008, $B4BD
+        dw $0008, $B4DD
+        dw $000F, $B507
+        dw $0008, $B53B
+        dw $0008, $B579
+        dw $0008, $B5C1
+	// hour
+        dw $000F, $B613, $F41B
+        dw $0008, $B613, $F424
+	// :
+        dw $0008, $B613, $F42D
+	// minute
+        dw $0008, $B613, $F436
+        dw $0008, $B613, $F43F
+	// :
+        dw $0008, $B613, display_second_colon
+	// second
+        dw $0008, $B613, display_second_1
+        dw $0008, $B613, display_second_2
+
+        dw $0080, $B613, $F448
+loop:
+        dw $000F, $B613
+	// goto loop
+        dw $94BC, loop
+
+display_second_colon:
+        PHY
+        LDY #sprite_colon
+        JSR $938A // Spawn cinematic sprite object
+        PLY
+        RTS
+
+display_second_1:
+        PHY
+        LDY #sprite_second_1
+        JSR $938A // Spawn cinematic sprite object
+        PLY
+        RTS
+
+display_second_2:
+        PHY
+        LDY #sprite_second_2
+        JSR $938A // Spawn cinematic sprite object
+        PLY
+        RTS
+
+//          _____________ Initialisation function
+//         |                      ________ Pre-instruction
+//         |                     |       ___ Instruction list
+//         |                     |      |
+sprite_colon:
+        dw init_sprite_colon,    $F3B9, $ECD1
+sprite_second_1:
+        dw init_sprite_second_1, $F3B9, $EC81
+sprite_second_2:
+        dw init_sprite_second_2, $F3B9, $EC81
+
+init_sprite_colon:
+        LDA {sprite_colon_x}
+        STA $1A7D,y
+        JMP $F051
+
+init_sprite_second_1:
+        LDA {end_seconds_1}
+        JSR $F0A3
+        LDA {sprite_second_1x}
+        STA $1A7D,y
+        JMP $F051
+
+init_sprite_second_2:
+        LDA {end_seconds_2}
+        JSR $F0A3
+        LDA {sprite_second_2x}
+        STA $1A7D,y
+        JMP $F051
+
+print "bank 8B end : ", org
+warnpc $8bfa0f

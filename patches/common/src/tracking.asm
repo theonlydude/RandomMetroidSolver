@@ -62,6 +62,9 @@ org $82e176
 org $82e764
     jml door_exited
 
+org $89AD0A
+    jsl touched_ceres_elevator
+
 // Door starts adjusting
 org $82e309
     jml door_adjust_start
@@ -122,7 +125,8 @@ org $828cea
 org $82939c
     jmp resuming_local
 
-org $82fc00
+// remapped at begining of $82 free space
+org $82f70E
 pausing_local:
     jml pausing
 resuming_local:
@@ -224,6 +228,10 @@ door_entered:
     // Number of door transitions
     lda {stat_nb_door_transitions}
     jsl {inc_stat}
+    // update time spent in current region
+    // (time spent in door transition will count as part
+    // of destination area)
+    jsl update_and_store_region_time
     // Save RTA time to temp variable
     lda {timer1}
     sta {door_timer_tmp}
@@ -253,9 +261,6 @@ door_exited:
     lda {door_timer_tmp}
     ldx {stat_rta_door_transitions}
     jsr add_time
-    // update time spent in region since last store_region_time call,
-    jsr update_region_time
-    jsr store_region_time
 
     // Run hijacked code and return
     lda #$0008
@@ -286,9 +291,7 @@ door_adjust_stop:
 
 // samus is dead
 death:
-    lda {stat_deaths}
-    jsl {inc_stat}
-    jsl {save_last_stats}
+    jsr count_death
     // hijacked code
     stz $18aa
     inc $0998
@@ -296,13 +299,20 @@ death:
 
 // timer is up (equivalent to death)
 time_up:
-    lda {stat_deaths}
-    jsl {inc_stat}
-    jsl {save_last_stats}
+    jsr count_death
     // hijacked code
     lda #$0024
     sta $0998
     rtl
+
+count_death:
+    jsr update_region_time
+    lda #$0000
+    sta {region_tmp}
+    lda {stat_deaths}
+    jsl {inc_stat}
+    jsl {save_last_stats}
+    rts
 
 // uncharged Beam Fire
 uncharged_beam:
@@ -413,5 +423,13 @@ resuming:
     // run hijacked code and return
     inc $0998
     jml $82939f
+
+// correctly count Ceres and Crateria timers
+touched_ceres_elevator:
+	JSL $90F084 // hijacked code
+	jsr update_region_time
+	lda #$0000
+	sta {region_tmp}
+	rtl
 
 warnpc $a1efff

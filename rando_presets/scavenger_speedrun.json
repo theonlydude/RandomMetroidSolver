@@ -5,7 +5,7 @@
     "hud": "on",
     "progressionSpeed":"speedrun",
     "scavRandomized": "on",
-    "scavEscape": "on",
+    "tourian": "Disabled",
     "escapeRando": "on",
     "removeEscapeEnemies": "off"
 }

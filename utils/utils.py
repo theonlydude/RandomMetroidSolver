@@ -260,6 +260,7 @@ class PresetLoaderDict(PresetLoader):
 
 def getDefaultMultiValues():
     from graph.graph_utils import GraphUtils
+    from utils.objectives import Objectives
     defaultMultiValues = {
         'startLocation': GraphUtils.getStartAccessPointNames(),
         'majorsSplit': ['Full', 'FullWithHUD', 'Major', 'Chozo', 'Scavenger'],
@@ -267,7 +268,10 @@ def getDefaultMultiValues():
         'progressionDifficulty': ['easier', 'normal', 'harder'],
         'morphPlacement': ['early', 'late', 'normal'],
         'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla'],
-        'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive']
+        'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive'],
+        'areaRandomization': ['off', 'full', 'light'],
+        'objective': Objectives.getAllGoals(removeNothing=True),
+        'tourian': ['Vanilla', 'Fast', 'Disabled']
     }
     return defaultMultiValues
 
@@ -324,10 +328,12 @@ def loadRandoPreset(randoPreset, args):
     if randoParams.get("nerfedCharge", "off") == "on":
         args.nerfedCharge = True
 
-    args.area = convertParam(randoParams, "areaRandomization")
-    if args.area == True:
+    args.area = randoParams["areaRandomization"]
+    if args.area == "on":
+        # DEPRECATED previously areaRandomization was on/off, now it's off, full, or light
+        args.area == "full"
+    if args.area != "off":
         args.areaLayoutBase = convertParam(randoParams, "areaLayout", inverse=True)
-        args.lightArea = convertParam(randoParams, "lightAreaRandomization")
     args.escapeRando = convertParam(randoParams, "escapeRando")
     if args.escapeRando == True:
         args.noRemoveEscapeEnemies = convertParam(randoParams, "removeEscapeEnemies", inverse=True)
@@ -352,7 +358,7 @@ def loadRandoPreset(randoPreset, args):
         else:
             args.superFun.append("SuitsRandom")
 
-    ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "refill_before_save"]
+    ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "refill_before_save", "relaxed_round_robin_cf"]
     for patch in ipsPatches:
         if randoParams.get(patch, "off") == "on":
             args.patches.append(patch + '.ips')
@@ -377,8 +383,6 @@ def loadRandoPreset(randoPreset, args):
                     args.scavNumLocs = randoParams["scavNumLocs"]
             if "scavRandomized" in randoParams:
                 args.scavRandomized = randoParams["scavRandomized"] == "on"
-            if "scavEscape" in randoParams:
-                args.scavEscape = randoParams["scavEscape"] == "on"
     if "startLocation" in randoParams:
         args.startLocation = randoParams["startLocation"]
     if "progressionDifficulty" in randoParams:
@@ -410,13 +414,20 @@ def loadRandoPreset(randoPreset, args):
     if "energyQty" in randoParams:
         args.energyQty = randoParams["energyQty"]
 
+    if randoParams.get("objectiveRandom", "false") == "true":
+        nbObjective = randoParams.get("nbObjective", 4)
+        args.objective = [nbObjective]
+    elif "objective" in randoParams:
+        args.objective = randoParams["objective"]
+
+    if "tourian" in randoParams:
+        args.tourian = randoParams["tourian"]
+
     if randoParams.get("minimizer", "off") == "on" and "minimizerQty" in randoParams:
         args.minimizerN = randoParams["minimizerQty"]
-        if randoParams.get("minimizerTourian", "off") == "on":
-            args.minimizerTourian = True
 
     defaultMultiValues = getDefaultMultiValues()
-    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour"]
+    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective"]
     for multiElem in multiElems:
         if multiElem+'MultiSelect' in randoParams:
             setattr(args, multiElem+'List', ','.join(randoParams[multiElem+'MultiSelect']))
@@ -437,7 +448,6 @@ def getRandomizerDefaultParameters():
     defaultParams['majorsSplitMultiSelect'] = defaultMultiValues['majorsSplit']
     defaultParams['scavNumLocs'] = "10"
     defaultParams['scavRandomized'] = "off"
-    defaultParams['scavEscape'] = "off"
     defaultParams['startLocation'] = "Landing Site"
     defaultParams['startLocationMultiSelect'] = defaultMultiValues['startLocation']
     defaultParams['maxDifficulty'] = 'hardcore'
@@ -456,9 +466,13 @@ def getRandomizerDefaultParameters():
     defaultParams['minorQty'] = "100"
     defaultParams['energyQty'] = "vanilla"
     defaultParams['energyQtyMultiSelect'] = defaultMultiValues['energyQty']
+    defaultParams['objectiveRandom'] = "off"
+    defaultParams['nbObjective'] = "4"
+    defaultParams['objective'] = ["kill all G4"]
+    defaultParams['objectiveMultiSelect'] = defaultMultiValues['objective']
+    defaultParams['tourian'] = "Vanilla"
     defaultParams['areaRandomization'] = "off"
     defaultParams['areaLayout'] = "off"
-    defaultParams['lightAreaRandomization'] = "off"
     defaultParams['doorsColorsRando'] = "off"
     defaultParams['allowGreyDoors'] = "off"
     defaultParams['escapeRando'] = "off"
@@ -466,7 +480,6 @@ def getRandomizerDefaultParameters():
     defaultParams['bossRandomization'] = "off"
     defaultParams['minimizer'] = "off"
     defaultParams['minimizerQty'] = "45"
-    defaultParams['minimizerTourian'] = "off"
     defaultParams['funCombat'] = "off"
     defaultParams['funMovement'] = "off"
     defaultParams['funSuits'] = "off"
@@ -475,8 +488,10 @@ def getRandomizerDefaultParameters():
     defaultParams['gravityBehaviour'] = "Balanced"
     defaultParams['gravityBehaviourMultiSelect'] = defaultMultiValues['gravityBehaviour']
     defaultParams['nerfedCharge'] = "off"
+    defaultParams['relaxed_round_robin_cf'] = "off"
     defaultParams['itemsounds'] = "on"
-    defaultParams['elevators_doors_speed'] = "on"
+    defaultParams['elevators_speed'] = "on"
+    defaultParams['fast_doors'] = "on"
     defaultParams['spinjumprestart'] = "off"
     defaultParams['rando_speed'] = "off"
     defaultParams['Infinite_Space_Jump'] = "off"
@@ -520,3 +535,9 @@ def fixEnergy(items):
             items.remove(cf)
         items.append('{}-CrystalFlash'.format(maxCf))
     return items
+
+def dumpErrorMsg(outFileName, msg):
+    print("DIAG: " + msg)
+    if outFileName is not None:
+        with open(outFileName, 'w') as jsonFile:
+            json.dump({"errorMsg": msg}, jsonFile)

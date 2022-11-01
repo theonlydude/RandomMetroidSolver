@@ -42,7 +42,7 @@ class ExtStats(object):
                     randoPresetContent = json.load(jsonFile)
             except Exception as e:
                 raiseHttp(400, "Can't load the rando preset: {}".format(e))
-            majorsSplit = randoPresetContent["majorsSplit"]
+            majorsSplit = randoPresetContent.get("majorsSplit", "Full")
 
             # load skill preset
             fullPath = '{}/{}.json'.format(getPresetDir(skillPreset), skillPreset)
@@ -69,8 +69,8 @@ class ExtStats(object):
 
             # check that all items are present in the stats:
             nbItems = 19
-            nbLocs = 105
-            if itemsStats != None and len(itemsStats) > 0 and len(itemsStats) != nbItems:
+            nbLocs = 109
+            if itemsStats and len(itemsStats) != nbItems:
                 for i, item in enumerate(['Bomb', 'Charge', 'Grapple', 'Gravity', 'HiJump', 'Ice', 'Missile', 'Morph',
                                           'Plasma', 'PowerBomb', 'ScrewAttack', 'SpaceJump', 'Spazer', 'SpeedBooster',
                                           'SpringBall', 'Super', 'Varia', 'Wave', 'XRayScope']):

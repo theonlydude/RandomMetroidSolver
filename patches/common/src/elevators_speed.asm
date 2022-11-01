@@ -31,6 +31,8 @@ STA $0F7E, x
 +
 RTL
 
+warnpc $a3f34f
+
 ;set other elevator speed to !speed aswell those dont need to have a fix to it
 org $A395D2
 DB !speed

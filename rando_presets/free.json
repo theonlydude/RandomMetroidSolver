@@ -1,5 +1,4 @@
 {
-  "elevators_doors_speed": "on",
   "progressionDifficulty": "easier",
   "funMovement": "off",
   "startLocation": "Landing Site",
@@ -31,6 +30,7 @@
   "rando_speed": "on",
   "Infinite_Space_Jump": "on",
   "refill_before_save": "on",
+  "relaxed_round_robin_cf": "on",
   "hud": "on",
   "doorsColorsRando": "off"
 }

@@ -1,5 +1,5 @@
 # base dockerfile from git@github.com:cabildocl/web2py-docker.git
-FROM nginx:1.19
+FROM nginx:latest
 MAINTAINER VARIA "varia@varia.run"
 
 ENV CERT_PASS web2py
@@ -44,7 +44,13 @@ RUN openssl genrsa -passout pass:$CERT_PASS 2048 > web2py.key && \
 
 # add VARIA source, use /root as HOME
 WORKDIR /root
-RUN if [ -n "${GITHUB_TOKEN}" ]; then git clone --recurse-submodules -b ${BRANCH} https://${GITHUB_TOKEN}:x-oauth-basic@github.com/theonlydude/RandomMetroidSolver.git; else wget https://github.com/theonlydude/RandomMetroidSolver/archive/${BRANCH}.zip && unzip ${BRANCH}.zip && mv RandomMetroidSolver-${BRANCH} RandomMetroidSolver && rm -f ${BRANCH}.zip; cd RandomMetroidSolver; rm -rf varia_custom_sprites && wget https://github.com/theonlydude/varia_custom_sprites/archive/main.zip && unzip main.zip && mv varia_custom_sprites-main varia_custom_sprites && rm -f main.zip; fi
+RUN if [ -n "${GITHUB_TOKEN}" ]; then \
+    git clone --recurse-submodules -b ${BRANCH} https://${GITHUB_TOKEN}:x-oauth-basic@github.com/theonlydude/RandomMetroidSolver.git; \
+else \
+    wget https://github.com/theonlydude/RandomMetroidSolver/archive/${BRANCH}.zip && unzip ${BRANCH}.zip && mv RandomMetroidSolver-${BRANCH} RandomMetroidSolver && rm -f ${BRANCH}.zip; \
+    cd RandomMetroidSolver; \
+    rm -rf varia_custom_sprites && wget https://github.com/theonlydude/varia_custom_sprites/archive/main.zip && unzip main.zip && mv varia_custom_sprites-main varia_custom_sprites && rm -f main.zip; \
+fi
 
 # fetch race mode, only through github because private repo
 RUN if [ -n "${GITHUB_TOKEN}" ]; then git clone https://${GITHUB_TOKEN}:x-oauth-basic@github.com/theonlydude/varia-race-mode; fi

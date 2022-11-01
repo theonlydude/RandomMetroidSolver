@@ -358,7 +358,7 @@ order by s.id;"""
 
         sql = """select rr.return_code,
 r.id, r.action_time, r.guid, rr.return_code, lpad(round(rr.duration, 2), 5, '0'), rr.error_msg,
-group_concat("'", rp.name, "': '", rp.value, "'" order by rp.name)
+group_concat("'", rp.name, "': '", replace(rp.value, "'", ' '), "'" order by rp.name)
 from randomizer r
   left join randomizer_params rp on r.id = rp.randomizer_id
   left join randomizer_result rr on r.id = rr.randomizer_id
@@ -391,7 +391,7 @@ order by r.id;"""
 
         # custom sort of the params
         paramsHead = []
-        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'minimizerTourian', 'majorsSplit', 'majorsSplitMultiSelect', 'scavNumLocs', 'scavRandomized', 'scavEscape', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
+        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'majorsSplit', 'majorsSplitMultiSelect', 'scavNumLocs', 'scavRandomized', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'objective', 'objectiveMultiSelect', 'tourian', 'tourianMultiSelect', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
             if param in paramsSet:
                 paramsHead.append(param)
                 paramsSet.remove(param)
@@ -418,10 +418,10 @@ order by 1,2;"""
         #     (param1, count1, count2, 0, ...)
         #     (param2, 0, 0, count3, ...)]
         groups = {
-            'Randomizer parameters': ['preset', 'startLocation', 'majorsSplit', 'scavNumLocs', 'scavRandomized', 'scavEscape', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'progressionDifficulty', 'suitsRestriction', 'hideItems'],
+            'Randomizer parameters': ['preset', 'startLocation', 'majorsSplit', 'scavNumLocs', 'scavRandomized', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'progressionDifficulty', 'suitsRestriction', 'hideItems', 'objective', 'tourian'],
             'Ammo and Energy': ['minorQty', 'energyQty', 'strictMinors', 'missileQty', 'superQty', 'powerBombQty'],
-            'Areas and Fun': ['areaRandomization', 'lightAreaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'minimizerTourian', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits'],
-            'Patches': ['layoutPatches', 'variaTweaks', 'nerfedCharge', 'gravityBehaviour', 'itemsounds', 'elevators_doors_speed', 'spinjumprestart', 'rando_speed', 'Infinite_Space_Jump', 'refill_before_save', 'hud', 'animals', 'No_Music', 'random_music']
+            'Areas and Fun': ['areaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits'],
+            'Patches': ['layoutPatches', 'variaTweaks', 'nerfedCharge', 'gravityBehaviour', 'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart', 'rando_speed', 'Infinite_Space_Jump', 'refill_before_save', 'hud', 'animals', 'No_Music', 'random_music', 'relaxed_round_robin_cf']
         }
 
         result = {}
@@ -454,29 +454,6 @@ order by 1,2;"""
 
         return result
 
-    def getRandomizerSeedParamsAPI(self, guid):
-        if self.dbAvailable == False:
-            return None
-
-        sql = "select rp.name, rp.value from randomizer_params rp join randomizer r on rp.randomizer_id = r.id where r.guid = %s order by rp.name;"
-        data = self.execSelect(sql, (guid,))
-        if data == None:
-            return ""
-        else:
-            ret = "{"
-            tmp = []
-            for row in data:
-                arg = row[0]
-                value = row[1]
-                if arg.find("MultiSelect") != -1:
-                    value = '["{}"]'.format('", "'.join(value.split(',')))
-                else:
-                    value = '"{}"'.format(value)
-                tmp.append('"{}": {}'.format(arg, value))
-            ret += ','.join(tmp)
-            ret += "}"
-            return ret
-
     def getRandomizerSeedParams(self, randomizer_id):
         if self.dbAvailable == False:
             return None
@@ -494,7 +471,7 @@ order by 1,2;"""
                 value = row[1]
                 if arg == 'seed':
                     seed = value
-                if arg.find("MultiSelect") != -1:
+                if arg.find("MultiSelect") != -1 or arg == 'objective':
                     value = '["{}"]'.format('", "'.join(value.split(',')))
                 else:
                     value = '"{}"'.format(value)
@@ -509,9 +486,9 @@ order by 1,2;"""
 
         sql = "select max(action_time) from preset_action where preset = %s;"
         data = self.execSelect(sql, (preset,))
-        if data == None:
+        if data is None:
             return 'N/A'
-        data = data[0][0] if data[0][0] != None else 'N/A'
+        data = data[0][0].strftime("%Y-%m-%d %H:%M:%S") if data[0][0] is not None else 'N/A'
         return data
 
         return self.execSelect(sql % (id,))
@@ -673,8 +650,6 @@ order by init_time;"""
     @staticmethod
     def dumpItemLocs(locsItems, sqlFile):
         for (location, item) in locsItems.items():
-            if item == 'Boss':
-                continue
             # we can't have special chars in columns names
             location = removeChars(location, " ,()-")
             sql = "insert into item_locs (ext_id, item, {}) values (@last_id, '%s', 1) on duplicate key update {} = {} + 1;\n".format(location, location, location)
@@ -726,16 +701,13 @@ set @last_id = last_insert_id();
                 sql = "insert into solver_stats (ext_id, name, value) values (@last_id, '%s', %d);\n"
                 sqlFile.write(sql % (stat, value))
 
-            # to avoid // issues
-            sqlFile.write("commit;\n")
-
     def getExtStat(self, skillPreset, randoPreset):
         if self.dbAvailable == False:
             return (None, None, None, None)
 
-        sqlItems = """select sum(e.count), i.item, round(100*sum(i.EnergyTankGauntlet)/sum(e.count), 1), round(100*sum(i.Bomb)/sum(e.count), 1), round(100*sum(i.EnergyTankTerminator)/sum(e.count), 1), round(100*sum(i.ReserveTankBrinstar)/sum(e.count), 1), round(100*sum(i.ChargeBeam)/sum(e.count), 1), round(100*sum(i.MorphingBall)/sum(e.count), 1), round(100*sum(i.EnergyTankBrinstarCeiling)/sum(e.count), 1), round(100*sum(i.EnergyTankEtecoons)/sum(e.count), 1), round(100*sum(i.EnergyTankWaterway)/sum(e.count), 1), round(100*sum(i.EnergyTankBrinstarGate)/sum(e.count), 1), round(100*sum(i.XRayScope)/sum(e.count), 1), round(100*sum(i.Spazer)/sum(e.count), 1), round(100*sum(i.EnergyTankKraid)/sum(e.count), 1), round(100*sum(i.Kraid)/sum(e.count), 1), round(100*sum(i.VariaSuit)/sum(e.count), 1), round(100*sum(i.IceBeam)/sum(e.count), 1), round(100*sum(i.EnergyTankCrocomire)/sum(e.count), 1), round(100*sum(i.HiJumpBoots)/sum(e.count), 1), round(100*sum(i.GrappleBeam)/sum(e.count), 1), round(100*sum(i.ReserveTankNorfair)/sum(e.count), 1), round(100*sum(i.SpeedBooster)/sum(e.count), 1), round(100*sum(i.WaveBeam)/sum(e.count), 1), round(100*sum(i.Ridley)/sum(e.count), 1), round(100*sum(i.EnergyTankRidley)/sum(e.count), 1), round(100*sum(i.ScrewAttack)/sum(e.count), 1), round(100*sum(i.EnergyTankFirefleas)/sum(e.count), 1), round(100*sum(i.ReserveTankWreckedShip)/sum(e.count), 1), round(100*sum(i.EnergyTankWreckedShip)/sum(e.count), 1), round(100*sum(i.Phantoon)/sum(e.count), 1), round(100*sum(i.RightSuperWreckedShip)/sum(e.count), 1), round(100*sum(i.GravitySuit)/sum(e.count), 1), round(100*sum(i.EnergyTankMamaturtle)/sum(e.count), 1), round(100*sum(i.PlasmaBeam)/sum(e.count), 1), round(100*sum(i.ReserveTankMaridia)/sum(e.count), 1), round(100*sum(i.SpringBall)/sum(e.count), 1), round(100*sum(i.EnergyTankBotwoon)/sum(e.count), 1), round(100*sum(i.Draygon)/sum(e.count), 1), round(100*sum(i.SpaceJump)/sum(e.count), 1), round(100*sum(i.MotherBrain)/sum(e.count), 1), round(100*sum(i.PowerBombCrateriasurface)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShipbottom)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShiptop)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShipmiddle)/sum(e.count), 1), round(100*sum(i.MissileCrateriamoat)/sum(e.count), 1), round(100*sum(i.MissileCrateriabottom)/sum(e.count), 1), round(100*sum(i.MissileCrateriagauntletright)/sum(e.count), 1), round(100*sum(i.MissileCrateriagauntletleft)/sum(e.count), 1), round(100*sum(i.SuperMissileCrateria)/sum(e.count), 1), round(100*sum(i.MissileCrateriamiddle)/sum(e.count), 1), round(100*sum(i.PowerBombgreenBrinstarbottom)/sum(e.count), 1), round(100*sum(i.SuperMissilepinkBrinstar)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbelowsupermissile)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenBrinstartop)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbehindmissile)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbehindreservetank)/sum(e.count), 1), round(100*sum(i.MissilepinkBrinstartop)/sum(e.count), 1), round(100*sum(i.MissilepinkBrinstarbottom)/sum(e.count), 1), round(100*sum(i.PowerBombpinkBrinstar)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarpipe)/sum(e.count), 1), round(100*sum(i.PowerBombblueBrinstar)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarmiddle)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenBrinstarbottom)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarbottom)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstartop)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarbehindmissile)/sum(e.count), 1), round(100*sum(i.PowerBombredBrinstarsidehopperroom)/sum(e.count), 1), round(100*sum(i.PowerBombredBrinstarspikeroom)/sum(e.count), 1), round(100*sum(i.MissileredBrinstarspikeroom)/sum(e.count), 1), round(100*sum(i.MissileKraid)/sum(e.count), 1), round(100*sum(i.Missilelavaroom)/sum(e.count), 1), round(100*sum(i.MissilebelowIceBeam)/sum(e.count), 1), round(100*sum(i.MissileaboveCrocomire)/sum(e.count), 1), round(100*sum(i.MissileHiJumpBoots)/sum(e.count), 1), round(100*sum(i.EnergyTankHiJumpBoots)/sum(e.count), 1), round(100*sum(i.PowerBombCrocomire)/sum(e.count), 1), round(100*sum(i.MissilebelowCrocomire)/sum(e.count), 1), round(100*sum(i.MissileGrappleBeam)/sum(e.count), 1), round(100*sum(i.MissileNorfairReserveTank)/sum(e.count), 1), round(100*sum(i.MissilebubbleNorfairgreendoor)/sum(e.count), 1), round(100*sum(i.MissilebubbleNorfair)/sum(e.count), 1), round(100*sum(i.MissileSpeedBooster)/sum(e.count), 1), round(100*sum(i.MissileWaveBeam)/sum(e.count), 1), round(100*sum(i.MissileGoldTorizo)/sum(e.count), 1), round(100*sum(i.SuperMissileGoldTorizo)/sum(e.count), 1), round(100*sum(i.MissileMickeyMouseroom)/sum(e.count), 1), round(100*sum(i.MissilelowerNorfairabovefireflearoom)/sum(e.count), 1), round(100*sum(i.PowerBomblowerNorfairabovefireflearoom)/sum(e.count), 1), round(100*sum(i.PowerBombPowerBombsofshame)/sum(e.count), 1), round(100*sum(i.MissilelowerNorfairnearWaveBeam)/sum(e.count), 1), round(100*sum(i.MissileWreckedShipmiddle)/sum(e.count), 1), round(100*sum(i.MissileGravitySuit)/sum(e.count), 1), round(100*sum(i.MissileWreckedShiptop)/sum(e.count), 1), round(100*sum(i.SuperMissileWreckedShipleft)/sum(e.count), 1), round(100*sum(i.MissilegreenMaridiashinespark)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenMaridia)/sum(e.count), 1), round(100*sum(i.MissilegreenMaridiatatori)/sum(e.count), 1), round(100*sum(i.SuperMissileyellowMaridia)/sum(e.count), 1), round(100*sum(i.MissileyellowMaridiasupermissile)/sum(e.count), 1), round(100*sum(i.MissileyellowMaridiafalsewall)/sum(e.count), 1), round(100*sum(i.MissileleftMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.MissilerightMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.PowerBombrightMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.MissilepinkMaridia)/sum(e.count), 1), round(100*sum(i.SuperMissilepinkMaridia)/sum(e.count), 1), round(100*sum(i.MissileDraygon)/sum(e.count), 1)
+        sqlItems = """select sum(e.count), i.item, round(100*sum(i.EnergyTankGauntlet)/sum(e.count), 1), round(100*sum(i.Bomb)/sum(e.count), 1), round(100*sum(i.EnergyTankTerminator)/sum(e.count), 1), round(100*sum(i.ReserveTankBrinstar)/sum(e.count), 1), round(100*sum(i.ChargeBeam)/sum(e.count), 1), round(100*sum(i.MorphingBall)/sum(e.count), 1), round(100*sum(i.EnergyTankBrinstarCeiling)/sum(e.count), 1), round(100*sum(i.EnergyTankEtecoons)/sum(e.count), 1), round(100*sum(i.EnergyTankWaterway)/sum(e.count), 1), round(100*sum(i.EnergyTankBrinstarGate)/sum(e.count), 1), round(100*sum(i.XRayScope)/sum(e.count), 1), round(100*sum(i.Spazer)/sum(e.count), 1), round(100*sum(i.EnergyTankKraid)/sum(e.count), 1), round(100*sum(i.Kraid)/sum(e.count), 1), round(100*sum(i.VariaSuit)/sum(e.count), 1), round(100*sum(i.IceBeam)/sum(e.count), 1), round(100*sum(i.EnergyTankCrocomire)/sum(e.count), 1), round(100*sum(i.HiJumpBoots)/sum(e.count), 1), round(100*sum(i.GrappleBeam)/sum(e.count), 1), round(100*sum(i.ReserveTankNorfair)/sum(e.count), 1), round(100*sum(i.SpeedBooster)/sum(e.count), 1), round(100*sum(i.WaveBeam)/sum(e.count), 1), round(100*sum(i.Ridley)/sum(e.count), 1), round(100*sum(i.EnergyTankRidley)/sum(e.count), 1), round(100*sum(i.ScrewAttack)/sum(e.count), 1), round(100*sum(i.EnergyTankFirefleas)/sum(e.count), 1), round(100*sum(i.ReserveTankWreckedShip)/sum(e.count), 1), round(100*sum(i.EnergyTankWreckedShip)/sum(e.count), 1), round(100*sum(i.Phantoon)/sum(e.count), 1), round(100*sum(i.RightSuperWreckedShip)/sum(e.count), 1), round(100*sum(i.GravitySuit)/sum(e.count), 1), round(100*sum(i.EnergyTankMamaturtle)/sum(e.count), 1), round(100*sum(i.PlasmaBeam)/sum(e.count), 1), round(100*sum(i.ReserveTankMaridia)/sum(e.count), 1), round(100*sum(i.SpringBall)/sum(e.count), 1), round(100*sum(i.EnergyTankBotwoon)/sum(e.count), 1), round(100*sum(i.Draygon)/sum(e.count), 1), round(100*sum(i.SpaceJump)/sum(e.count), 1), round(100*sum(i.MotherBrain)/sum(e.count), 1), round(100*sum(i.SporeSpawn)/sum(e.count), 1), round(100*sum(i.Botwoon)/sum(e.count), 1), round(100*sum(i.Crocomire)/sum(e.count), 1), round(100*sum(i.GoldenTorizo)/sum(e.count), 1), round(100*sum(i.PowerBombCrateriasurface)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShipbottom)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShiptop)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShipmiddle)/sum(e.count), 1), round(100*sum(i.MissileCrateriamoat)/sum(e.count), 1), round(100*sum(i.MissileCrateriabottom)/sum(e.count), 1), round(100*sum(i.MissileCrateriagauntletright)/sum(e.count), 1), round(100*sum(i.MissileCrateriagauntletleft)/sum(e.count), 1), round(100*sum(i.SuperMissileCrateria)/sum(e.count), 1), round(100*sum(i.MissileCrateriamiddle)/sum(e.count), 1), round(100*sum(i.PowerBombgreenBrinstarbottom)/sum(e.count), 1), round(100*sum(i.SuperMissilepinkBrinstar)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbelowsupermissile)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenBrinstartop)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbehindmissile)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbehindreservetank)/sum(e.count), 1), round(100*sum(i.MissilepinkBrinstartop)/sum(e.count), 1), round(100*sum(i.MissilepinkBrinstarbottom)/sum(e.count), 1), round(100*sum(i.PowerBombpinkBrinstar)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarpipe)/sum(e.count), 1), round(100*sum(i.PowerBombblueBrinstar)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarmiddle)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenBrinstarbottom)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarbottom)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstartop)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarbehindmissile)/sum(e.count), 1), round(100*sum(i.PowerBombredBrinstarsidehopperroom)/sum(e.count), 1), round(100*sum(i.PowerBombredBrinstarspikeroom)/sum(e.count), 1), round(100*sum(i.MissileredBrinstarspikeroom)/sum(e.count), 1), round(100*sum(i.MissileKraid)/sum(e.count), 1), round(100*sum(i.Missilelavaroom)/sum(e.count), 1), round(100*sum(i.MissilebelowIceBeam)/sum(e.count), 1), round(100*sum(i.MissileaboveCrocomire)/sum(e.count), 1), round(100*sum(i.MissileHiJumpBoots)/sum(e.count), 1), round(100*sum(i.EnergyTankHiJumpBoots)/sum(e.count), 1), round(100*sum(i.PowerBombCrocomire)/sum(e.count), 1), round(100*sum(i.MissilebelowCrocomire)/sum(e.count), 1), round(100*sum(i.MissileGrappleBeam)/sum(e.count), 1), round(100*sum(i.MissileNorfairReserveTank)/sum(e.count), 1), round(100*sum(i.MissilebubbleNorfairgreendoor)/sum(e.count), 1), round(100*sum(i.MissilebubbleNorfair)/sum(e.count), 1), round(100*sum(i.MissileSpeedBooster)/sum(e.count), 1), round(100*sum(i.MissileWaveBeam)/sum(e.count), 1), round(100*sum(i.MissileGoldTorizo)/sum(e.count), 1), round(100*sum(i.SuperMissileGoldTorizo)/sum(e.count), 1), round(100*sum(i.MissileMickeyMouseroom)/sum(e.count), 1), round(100*sum(i.MissilelowerNorfairabovefireflearoom)/sum(e.count), 1), round(100*sum(i.PowerBomblowerNorfairabovefireflearoom)/sum(e.count), 1), round(100*sum(i.PowerBombPowerBombsofshame)/sum(e.count), 1), round(100*sum(i.MissilelowerNorfairnearWaveBeam)/sum(e.count), 1), round(100*sum(i.MissileWreckedShipmiddle)/sum(e.count), 1), round(100*sum(i.MissileGravitySuit)/sum(e.count), 1), round(100*sum(i.MissileWreckedShiptop)/sum(e.count), 1), round(100*sum(i.SuperMissileWreckedShipleft)/sum(e.count), 1), round(100*sum(i.MissilegreenMaridiashinespark)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenMaridia)/sum(e.count), 1), round(100*sum(i.MissilegreenMaridiatatori)/sum(e.count), 1), round(100*sum(i.SuperMissileyellowMaridia)/sum(e.count), 1), round(100*sum(i.MissileyellowMaridiasupermissile)/sum(e.count), 1), round(100*sum(i.MissileyellowMaridiafalsewall)/sum(e.count), 1), round(100*sum(i.MissileleftMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.MissilerightMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.PowerBombrightMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.MissilepinkMaridia)/sum(e.count), 1), round(100*sum(i.SuperMissilepinkMaridia)/sum(e.count), 1), round(100*sum(i.MissileDraygon)/sum(e.count), 1)
 from extended_stats e join item_locs i on e.id = i.ext_id
-where item not in ('Nothing', 'NoEnergy', 'ETank', 'Reserve', 'Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain')
+where item not in ('Nothing', 'NoEnergy', 'ETank', 'Reserve', 'Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain', 'SporeSpawn', 'Botwoon', 'Crocomire', 'GoldenTorizo')
   and e.skillPreset = %s and e.randoPreset = %s
 group by i.item
 order by i.item;"""

@@ -13,7 +13,6 @@ arch snes.cpu
 lorom
 
 !full_refill = $f700    ; short ptr in bank 8F (see area_rando_doors.asm)
-!mark_event  = $8081fa
 !bit_index   = $80818e  ; returns X=byte index, $05e7=bitmask
 !refill_f    = $7fff36	; health refill during hyper beam acquisition
 !hyper_animation_2frames = #$9d	; nb of frames of hyper animation/2 (because divisor has to be 8-bits)
@@ -21,6 +20,10 @@ lorom
 !samus_max_health      = $09c4
 !samus_reserve         = $09d6
 !samus_max_reserve     = $09d4
+!current_room          = $079b
+!tourian_eye_door_room = #$ddc4
+
+incsrc "event_list.asm"
 
 ;;; connect Statues Hallway to Tourian Eye Door Room...
 org $8fa616
@@ -35,17 +38,27 @@ org $8fddeb
 org $839218
 	db $40
 
+
+org $848a59                     ; unused instruction
 ;;; alternative door hit instruction that skips hit counter check
-org $848a6d ; end of some unused instruction
 alt_door_hit:
+        ;; test if current room is Tourian Door Room
+        lda !current_room
+        cmp !tourian_eye_door_room
+        bne .vanilla_door_hit
 	clc
 	bra .skip_check		; resume original routine
+
+warnpc $848a72
+
+org $848a91
+.vanilla_door_hit:
+
 org $848aa3
 .skip_check:
 
 ;;; Replace door hit instruction with alternative one for
-;;; all left facing gadoras (it's ok since other gadoras are
-;;; removed in minimizer mode)
+;;; all left facing gadoras
 org $84d887
 	dw alt_door_hit
 
@@ -101,18 +114,10 @@ tourian_door:
 
 ;;; statues door asm leading to gadora room
 pre_tourian_door:
-	;; check if all G4 are dead (g4 check borrowed from g4_skip patch)
-	lda $7ed828
-	bit.w #$0100
-	beq .end
-	lda $7ed82c
-	bit.w #$0001
-	beq .end
-	lda $7ed82a
-	and.w #$0101
-	cmp.w #$0101
-	bne .end
-	;; if they are dead, set door open for gadora
+	;; check if objectives are completed
+	lda !objectives_completed_event : jsl !check_event
+        bcc .end
+	;; if they are completed, set door open for gadora
 print "test pre_tourian_door: ", pc
 	phx
 	lda #$00a8 : jsl !bit_index
@@ -165,8 +170,16 @@ org $a9cfdb
 
 org $a9fc00
 hyper_start:
-	jsr reset_samus_palette
-	lda #$8000 : sta $0a4a	; set rainbow samus
+        ;; clear current charging beam to avoid vanilla bug related to flares
+        STZ $0CD0
+        STZ $0CD6
+        STZ $0CD8
+        STZ $0CDA
+        STZ $0CDC
+        STZ $0CDE
+        STZ $0CE0
+        ;; set rainbow samus
+	lda #$8000 : sta $0a4a
 	jsl enable_hyper
 	;; compute health increase per frame: health to refill/nb frames
 	lda !samus_max_health
@@ -206,4 +219,4 @@ reset_samus_palette:
 	stz $0b62
 	rts
 
-warnpc $a9fc6f
+warnpc $a9fc7f

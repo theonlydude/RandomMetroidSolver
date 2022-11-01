@@ -1,0 +1,529 @@
+
+; ;;; $9142: Pause index 1 - equipment screen ;;;
+; {
+; $82:9142 64 B1       STZ $B1    [$7E:00B1]  ; BG1 X scroll = 0
+; $82:9144 64 B3       STZ $B3    [$7E:00B3]  ; BG1 Y scroll = 0
+; $82:9146 20 4F AC    JSR $AC4F  [$82:AC4F]  ; Equipment screen - main
+; $82:9149 20 05 A5    JSR $A505  [$82:A505]  ; Checks for L or R input during pause screens
+; $82:914C 20 B7 A5    JSR $A5B7  [$82:A5B7]  ; Checks for start input during pause screen
+; $82:914F A9 01 00    LDA #$0001             ;\
+; $82:9152 8D 63 07    STA $0763  [$7E:0763]  ;} Pause screen mode = equipment screen
+; $82:9155 60          RTS
+; }
+; 
+; 
+; 
+; ;;; $9120: Pause index 0 - map screen ;;;
+; {
+; $82:9120 C2 30       REP #$30
+; $82:9122 20 05 A5    JSR $A505  [$82:A505]  ; Checks for L or R input during pause screens
+; $82:9125 20 B7 A5    JSR $A5B7  [$82:A5B7]  ; Checks for start input during pause screen
+; $82:9128 22 34 B9 82 JSL $82B934[$82:B934]  ; Handle map scroll arrows
+; $82:912C 22 5D 92 82 JSL $82925D[$82:925D]  ; Map scrolling
+; $82:9130 20 C8 B9    JSR $B9C8  [$82:B9C8]  ; Map screen - draw Samus position indicator
+; $82:9133 22 72 B6 82 JSL $82B672[$82:B672]  ; Draw map icons
+; $82:9137 22 30 BB 82 JSL $82BB30[$82:BB30]  ; Display map elevator destinations
+; $82:913B A9 00 00    LDA #$0000             ;\
+; $82:913E 8D 63 07    STA $0763  [$7E:0763]  ;} Pause screen mode = map screen
+; $82:9141 60          RTS
+; }
+; 
+; ;;; $A505: Checks for L or R input during pause screens ;;;
+; {
+; $82:A505 20 0C A5    JSR $A50C  [$82:A50C]
+; $82:A508 20 9A A5    JSR $A59A  [$82:A59A]
+; $82:A50B 60          RTS
+; }
+; 
+; ;;; $A59A: Equipment screen - draw L/R highlight ;;;
+; {
+; $82:A59A 08          PHP
+; $82:A59B C2 30       REP #$30
+; $82:A59D A0 D0 00    LDY #$00D0 ; y pos + 1
+; $82:A5A0 A2 18 00    LDX #$0018 ; x pos
+; $82:A5A3 A9 02 00    LDA #$0002 ; animation id + 1
+; $82:A5A6 20 81 A8    JSR $A881  [$82:A881] ; Draw pause screen spritemap
+; $82:A5A9 A0 D0 00    LDY #$00D0
+; $82:A5AC A2 E8 00    LDX #$00E8
+; $82:A5AF A9 02 00    LDA #$0002
+; $82:A5B2 20 81 A8    JSR $A881  [$82:A881]
+; $82:A5B5 28          PLP
+; $82:A5B6 60          RTS
+; }
+; 
+
+
+
+; ;;; $A615: Set pause screen button label palettes ;;;
+; {
+; $82:A615 08          PHP
+; $82:A616 C2 30       REP #$30
+; $82:A618 AD 53 07    LDA $0753  [$7E:0753] ; pause_screen_button_mode
+; $82:A61B 0A          ASL A
+; $82:A61C AA          TAX
+; $82:A61D FC 22 A6    JSR ($A622,x)[$82:A6DF]
+; $82:A620 28          PLP
+; $82:A621 60          RTS
+; 
+; $82:A622             dw A796, A6DF, A628
+; }
+; 
+; 
+; ;;; TODO::check dans mesen a quoi correspondent ces palettes et ces tiles
+; 
+; ;;; $A628: Set pause screen button label palettes - equipment screen ;;;
+; {
+; $82:A63D 9F 4A 36 7E STA $7E364A,x[$7E:364A];} Set tilemap palette indices at $7E:364A..53 to 2 (top of MAP)
+; $82:A65B 9F 8A 36 7E STA $7E368A,x[$7E:368A];} Set tilemap palette indices at $7E:368A..93 to 2 (bottom of MAP)
+; $82:A679 9F 58 36 7E STA $7E3658,x[$7E:3658];} Set tilemap palette indices at $7E:3658..5F to 2 (top of EXIT)
+; $82:A697 9F 98 36 7E STA $7E3698,x[$7E:3698];} Set tilemap palette indices at $7E:3698..9F to 2 (bottom of EXIT)
+; $82:A6B5 9F 6C 36 7E STA $7E366C,x[$7E:366C];} Set tilemap palette indices at $7E:366C..75 to 5 (top of SAMUS)
+; $82:A6D3 9F AC 36 7E STA $7E36AC,x[$7E:36AC];} Set tilemap palette indices at $7E:36AC..B5 to 5 (bottom of SAMUS)
+; 
+; ; Someone liked pushing and pulling operations >_>
+; $82:A628 C2 30       REP #$30
+; $82:A62A 08          PHP
+; $82:A62B C2 30       REP #$30
+; $82:A62D A0 0A 00    LDY #$000A             ;\
+; $82:A630 A2 00 00    LDX #$0000             ;|
+;                                             ;|
+; $82:A633 BF 4A 36 7E LDA $7E364A,x[$7E:364A];|
+; $82:A637 29 FF E3    AND #$E3FF             ;|
+; $82:A63A 09 00 08    ORA #$0800             ;|
+; $82:A63D 9F 4A 36 7E STA $7E364A,x[$7E:364A];} Set tilemap palette indices at $7E:364A..53 to 2 (top of MAP)
+; $82:A641 E8          INX                    ;|
+; $82:A642 E8          INX                    ;|
+; $82:A643 88          DEY                    ;|
+; $82:A644 88          DEY                    ;|
+; $82:A645 D0 EC       BNE $EC    [$A633]     ;/
+; $82:A647 28          PLP
+; 
+; 
+; 
+; 
+; ;;; $A796: Set pause screen button label palettes - map screen ;;;
+; {
+; $82:A7AB 9F 6C 36 7E STA $7E366C,x[$7E:366C];} Set tilemap palette indices at $7E:366C..75 to 2 (top of SAMUS)
+; $82:A7C9 9F AC 36 7E STA $7E36AC,x[$7E:36AC];} Set tilemap palette indices at $7E:36AC..B5 to 2 (bottom of SAMUS)
+; $82:A7E7 9F 58 36 7E STA $7E3658,x[$7E:3658];} Set tilemap palette indices at $7E:3658..5F to 2 (top of EXIT)
+; $82:A805 9F 98 36 7E STA $7E3698,x[$7E:3698];} Set tilemap palette indices at $7E:3698..9F to 2 (bottom of EXIT)
+; $82:A823 9F 4A 36 7E STA $7E364A,x[$7E:364A];} Set tilemap palette indices at $7E:364A..53 to 5 (top of MAP)
+; $82:A841 9F 8A 36 7E STA $7E368A,x[$7E:368A];} Set tilemap palette indices at $7E:368A..93 to 5 (bottom of MAP)
+;         
+; $82:A813 A0 0A 00    LDY #$000A             ;\
+; $82:A816 A2 00 00    LDX #$0000             ;|
+;                                             ;|
+; $82:A819 BF 4A 36 7E LDA $7E364A,x[$7E:364A];|
+; $82:A81D 29 FF E3    AND #$E3FF             ;|
+; $82:A820 09 00 14    ORA #$1400             ;|
+; $82:A823 9F 4A 36 7E STA $7E364A,x[$7E:364A];} Set tilemap palette indices at $7E:364A..53 to 5 (top of MAP)
+; $82:A827 E8          INX                    ;|
+; $82:A828 E8          INX                    ;|
+; $82:A829 88          DEY                    ;|
+; $82:A82A 88          DEY                    ;|
+; $82:A82B D0 EC       BNE $EC    [$A819]     ;/
+;         
+; ;;; $A6DF: Set pause screen button label palettes - unpausing ;;;
+; $82:A6F4 9F 58 36 7E STA $7E3658,x[$7E:3658];} Set tilemap palette indices at $7E:3658..5F to 2 (top of EXIT)
+; $82:A712 9F 98 36 7E STA $7E3698,x[$7E:3698];} Set tilemap palette indices at $7E:3698..9F to 2 (bottom of EXIT)
+; $82:A730 9F 4A 36 7E STA $7E364A,x[$7E:364A];} Set tilemap palette indices at $7E:364A..53 to 5 (top of MAP)
+; $82:A74E 9F 8A 36 7E STA $7E368A,x[$7E:368A];} Set tilemap palette indices at $7E:368A..93 to 5 (bottom of MAP)
+; $82:A76C 9F 6C 36 7E STA $7E366C,x[$7E:366C];} Set tilemap palette indices at $7E:366C..75 to 5 (top of SAMUS)
+; $82:A78A 9F AC 36 7E STA $7E36AC,x[$7E:36AC];} Set tilemap palette indices at $7E:36AC..B5 to 5 (bottom of SAMUS)
+; 
+; 
+; 
+; ;;; gere en binaire les deux ecrans de pause de pause_index
+; on s'en fout, fonction appelee au debut de la pause et le jeu affiche tjs la map
+; TODO::ya moyen de la raccourcir du coup si besoin de recuperer 17 bytes
+; ;;; $B62B:  ;;;
+; {
+; $82:B62B 08          PHP
+; $82:B62C 8B          PHB
+; $82:B62D 4B          PHK
+; $82:B62E AB          PLB
+; $82:B62F C2 30       REP #$30
+; $82:B631 AD 53 07    LDA $0753  [$7E:0753]  ; >_<;
+; $82:B634 AD 27 07    LDA $0727  [$7E:0727]
+; $82:B637 F0 09       BEQ $09    [$B642]
+; $82:B639 20 67 B2    JSR $B267  [$82:B267]
+; $82:B63C 20 A2 B2    JSR $B2A2  [$82:B2A2]
+; $82:B63F AB          PLB
+; $82:B640 28          PLP
+; $82:B641 6B          RTL
+; 
+; $82:B642 20 C8 B9    JSR $B9C8  [$82:B9C8]  ; Map screen - draw Samus position indicator
+; $82:B645 22 72 B6 82 JSL $82B672[$82:B672]  ; Draw map icons
+; $82:B649 22 30 BB 82 JSL $82BB30[$82:BB30]  ; Display map elevator destinations
+; $82:B64D AB          PLB
+; $82:B64E 28          PLP
+; $82:B64F 6B          RTL
+; }
+;         
+; 	
+; 
+; 
+; ;;; $91AB: Pause index 3 - map screen to equipment screen - load equipment screen ;;;
+; {
+; $82:91AB C2 30       REP #$30
+; $82:91AD 22 30 BB 82 JSL $82BB30[$82:BB30]  ; Display map elevator destinations
+; $82:91B1 20 47 AB    JSR $AB47  [$82:AB47]  ; Equipment screen - set up reserve mode and determine initial selection
+; $82:91B4 22 22 AC 82 JSL $82AC22[$82:AC22]  ; Equipment screen - transfer BG1 tilemap
+; $82:91B8 A9 01 00    LDA #$0001             ;\
+; $82:91BB 8D 63 07    STA $0763  [$7E:0763]  ;} Pause screen mode = equipment screen
+; $82:91BE 20 15 A6    JSR $A615  [$82:A615]  ; Set pause screen button label palettes
+; $82:91C1 9C 3F 07    STZ $073F  [$7E:073F]  ; $073F = 0
+; $82:91C4 AD 0C C1    LDA $C10C  [$82:C10C]  ;\
+; $82:91C7 8D 2B 07    STA $072B  [$7E:072B]  ;} $072B = Fh
+; $82:91CA A9 01 00    LDA #$0001             ;\
+; $82:91CD 8D 23 07    STA $0723  [$7E:0723]  ;} Screen fade delay = 1
+; $82:91D0 8D 25 07    STA $0725  [$7E:0725]  ; Screen fade counter = 1
+; $82:91D3 EE 27 07    INC $0727  [$7E:0727]  ; Pause index = 4 (map screen to equipment screen - fading in)
+; $82:91D6 60          RTS
+; }
+; 
+; 
+; ;;; $91D7: Pause index 6 - equipment screen to map screen - load map screen ;;;
+; {
+; $82:91D7 C2 30       REP #$30
+; $82:91D9 22 30 BB 82 JSL $82BB30[$82:BB30]  ; Display map elevator destinations
+; $82:91DD 22 C3 93 82 JSL $8293C3[$82:93C3]  ; Updates the area and map in the map screen
+; $82:91E1 20 15 A6    JSR $A615  [$82:A615]  ; Set pause screen button label palettes
+; $82:91E4 9C 3F 07    STZ $073F  [$7E:073F]  ; $073F = 0
+; $82:91E7 AD 0C C1    LDA $C10C  [$82:C10C]  ;\
+; $82:91EA 8D 2B 07    STA $072B  [$7E:072B]  ;} $072B = Fh
+; $82:91ED A9 01 00    LDA #$0001             ;\
+; $82:91F0 8D 23 07    STA $0723  [$7E:0723]  ;} Screen fade delay = 1
+; $82:91F3 8D 25 07    STA $0725  [$7E:0725]  ; Screen fade counter = 1
+; $82:91F6 A9 00 00    LDA #$0000             ;\
+; $82:91F9 8D 63 07    STA $0763  [$7E:0763]  ;} Pause screen mode = map screen
+; $82:91FC EE 27 07    INC $0727  [$7E:0727]  ; Pause index = equipment screen to map screen - fading in
+; $82:91FF 60          RTS
+; }
+; 
+; 
+; ;;; $AC22: Equipment screen - transfer BG1 tilemap ;;;
+; {
+; $82:AC22 08          PHP
+; $82:AC23 8B          PHB
+; $82:AC24 4B          PHK
+; $82:AC25 AB          PLB
+; $82:AC26 E2 30       SEP #$30
+; $82:AC28 A9 00       LDA #$00               ;\
+; $82:AC2A 8D 16 21    STA $2116  [$7E:2116]  ;| VRAM Address Registers (Low) - This sets the address for $2118/9
+; $82:AC2D A9 30       LDA #$30               ;|
+; $82:AC2F 8D 17 21    STA $2117  [$7E:2117]  ;| VRAM Address Registers (High) - This sets the address for $2118/9 => $3000
+; $82:AC32 A9 80       LDA #$80               ;|
+; $82:AC34 8D 15 21    STA $2115  [$7E:2115]  ;} Video Port Control Register - Set VRAM transfer mode to word-access, increment by 1. 0x80 == 0b10000000 => i---ffrr => i=1 (increment when $2119 is accessed), ff=0 (full graphic ??), rr=0 (increment by 2 bytes)
+; $82:AC37 22 A9 91 80 JSL $8091A9[$80:91A9]  ;|
+;         ;; DMA Channel: 01, DMA option: 01: write 2 bytes
+;         ;; DMA target: 18: write to 2118
+;         ;; DMA source: ppu 3800, size: 0800
+; $82:AC3B             dx 01,01,18,7E3800,0800;| DMA: VRAM $3000..33FF = [$7E:3800..3FFF]
+; $82:AC43 A9 02       LDA #$02               ;| dans mesen le BG1 a sa 1er tile a l'adresse 6000 (le BG2 a 7000)
+; $82:AC45 8D 0B 42    STA $420B  [$7E:420B]  ;/
+; $82:AC48 64 B3       STZ $B3    [$7E:00B3]  ;\
+; $82:AC4A 64 B4       STZ $B4    [$7E:00B4]  ;} BG1 Y scroll = 0
+; $82:AC4C AB          PLB
+; $82:AC4D 28          PLP
+; $82:AC4E 6B          RTL
+; }
+; 
+; 
+; ;;; $93C3: Updates the area and map in the map screen ;;;
+; {
+; $82:93C3 08          PHP
+; $82:93C4 8B          PHB
+; $82:93C5 4B          PHK
+; $82:93C6 AB          PLB
+; $82:93C7 C2 30       REP #$30
+; $82:93C9 A5 BD       LDA $BD    [$7E:00BD]
+; $82:93CB 85 B1       STA $B1    [$7E:00B1]
+; $82:93CD A5 BF       LDA $BF    [$7E:00BF]
+; $82:93CF 85 B3       STA $B3    [$7E:00B3]
+; $82:93D1 E2 30       SEP #$30
+; $82:93D3 A9 00       LDA #$00
+; $82:93D5 8D 16 21    STA $2116  [$7E:2116]
+; $82:93D8 A9 30       LDA #$30
+; $82:93DA 8D 17 21    STA $2117  [$7E:2117]
+; $82:93DD A9 80       LDA #$80
+; $82:93DF 8D 15 21    STA $2115  [$7E:2115]
+; $82:93E2 20 3D 94    JSR $943D  [$82:943D]
+; $82:93E5 22 A9 91 80 JSL $8091A9[$80:91A9]  ; Set up a (H)DMA transfer
+; $82:93E9             dx 01,01,18,7E4000,1000
+; $82:93F1 A9 02       LDA #$02
+; $82:93F3 8D 0B 42    STA $420B  [$7E:420B]
+; $82:93F6 A9 AA       LDA #$AA
+; $82:93F8 8D 16 21    STA $2116  [$7E:2116]
+; $82:93FB A9 38       LDA #$38
+; $82:93FD 8D 17 21    STA $2117  [$7E:2117]
+; $82:9400 A9 80       LDA #$80
+; $82:9402 8D 15 21    STA $2115  [$7E:2115]
+; $82:9405 A9 01       LDA #$01
+; $82:9407 8D 10 43    STA $4310  [$7E:4310]
+; $82:940A A9 18       LDA #$18
+; $82:940C 8D 11 43    STA $4311  [$7E:4311]
+; $82:940F A9 18       LDA #$18
+; $82:9411 8D 15 43    STA $4315  [$7E:4315]
+; $82:9414 A9 00       LDA #$00
+; $82:9416 8D 16 43    STA $4316  [$7E:4316]
+; $82:9419 C2 30       REP #$30
+; $82:941B AD 9F 07    LDA $079F  [$7E:079F]
+; $82:941E C9 07 00    CMP #$0007
+; $82:9421 30 03       BMI $03    [$9426]
+; $82:9423 A9 00 00    LDA #$0000
+; 
+; $82:9426 0A          ASL A
+; $82:9427 AA          TAX
+; $82:9428 BD 5F 96    LDA $965F,x[$82:9661]
+; $82:942B 8D 12 43    STA $4312  [$7E:4312]
+; $82:942E E2 20       SEP #$20
+; $82:9430 A9 82       LDA #$82
+; $82:9432 8D 14 43    STA $4314  [$7E:4314]
+; $82:9435 A9 02       LDA #$02
+; $82:9437 8D 0B 42    STA $420B  [$7E:420B]
+; $82:943A AB          PLB
+; $82:943B 28          PLP
+; $82:943C 6B          RTL
+; }
+; 
+; 
+; 
+; 
+; 
+; ;;; B6
+; ;;; $E000: Tilemap - BG2 pause screen ;;;
+; 	
+; ;;; $F200: Free space ;;;
+; {
+; $B6:F200             fillto $B78000, $FF
+; 
+; ;;; taille d'un ecran de tile map pour le BG1 0x800 => B6F200 -> B6FA00-1, y'a la place dans le free space de B6
+; 
+; ;;; https://wiki.superfamicom.org/registers
+; ;;; https://wiki.superfamicom.org/grog%27s-guide-to-dma-and-hdma-on-the-snes
+; ;;; https://wiki.superfamicom.org/working-with-vram-initializing-tiles-and-tile-maps
+; 
+; 
+; ;;; fonction qui charge les tilemaps du bg2:
+; ;;; $8EDA:  ;;;
+; {
+; $82:8EDA 08          PHP
+; $82:8EDB E2 30       SEP #$30
+; $82:8EDD A9 00       LDA #$00
+; $82:8EDF 8D 16 21    STA $2116  [$7E:2116] ; VRAM Address Registers (Low) - This sets the address for $2118/9
+; $82:8EE2 A9 38       LDA #$38
+; $82:8EE4 8D 17 21    STA $2117  [$7E:2117] ; VRAM Address Registers (High) - This sets the address for $2118/9 => $3800
+; $82:8EE7 A9 80       LDA #$80
+; $82:8EE9 8D 15 21    STA $2115  [$7E:2115] ; Video Port Control Register - Set VRAM transfer mode to word-access, increment by 1. 0x80 == 0b10000000 => i---ffrr => i=1 (increment when $2119 is accessed), ff=0 (full graphic ??), rr=0 (increment by 2 bytes)
+; $82:8EEC 22 A9 91 80 JSL $8091A9[$80:91A9] ; Set up a (H)DMA transfer
+; 	;; DMA options: AB0CDEEE A: transfert direction 0 == CPU -> PPU, B HDMA addressing mode 0 == absolute, C CPU addr Auto inc/dec selection 0 == Increment, D CPU addr Auto inc/dec enable 0 == Enable, EEE DMA Transfer Word Select 1 == Write 2 bytes, B0->$21xx B1->$21XX+1
+;         ;; DMA target: $43x1: nnnnnnnn    PPU register selection [BBADx]
+;         ;;   The byte written here is ORed with $2100 to form the destination address for the DMA transfer. This is the "$21XX" in the description of the DMA Transfer Word Select for $43x0.
+;         ;; here write to $2118: VRAM Data Write Registers (Low) (and $2119 as we write words: VRAM Data Write Registers (High))
+; 	;;              DMA channel, DMA options, DMA target, Source address, Size (in bytes)
+; $82:8EF0             dx 01,          01,          18,         B6E000,         0800
+; $82:8EF8 A9 02       LDA #$02
+; $82:8EFA 8D 0B 42    STA $420B  [$7E:420B] ; $420B: DMA Enable Register, start transfert on channel 1: 76543210 => 7/6/5/4/3/2/1/0 = Enable the selected HDMA channels
+; 	
+; 
+; $82:8EFD A9 00       LDA #$00
+; $82:8EFF 8D 81 21    STA $2181  [$7E:2181] ; WRAM Address Registers, low
+; $82:8F02 A9 34       LDA #$34
+; $82:8F04 8D 82 21    STA $2182  [$7E:2182] ; middle
+; $82:8F07 A9 7E       LDA #$7E
+; $82:8F09 8D 83 21    STA $2183  [$7E:2183] ; high => 7E3400
+; $82:8F0C 22 A9 91 80 JSL $8091A9[$80:91A9]  ; Set up a (H)DMA transfer
+; 	;; DMA option 00: Write 1 byte, B0->$21xx
+; 	;; DMA target 80: write to $2180: WRAM Data Register
+; $82:8F10             dx 01,00,80,B6E400,0400
+; $82:8F18 A9 02       LDA #$02
+; $82:8F1A 8D 0B 42    STA $420B  [$7E:420B] ; start DMA transfert
+;
+;
+; $82:8F1D A9 00       LDA #$00
+; $82:8F1F 8D 81 21    STA $2181  [$7E:2181]
+; $82:8F22 A9 38       LDA #$38
+; $82:8F24 8D 82 21    STA $2182  [$7E:2182]
+; $82:8F27 A9 7E       LDA #$7E
+; $82:8F29 8D 83 21    STA $2183  [$7E:2183] ; => 7E3800
+; $82:8F2C 22 A9 91 80 JSL $8091A9[$80:91A9]  ; Set up a (H)DMA transfer
+; $82:8F30             dx 01,00,80,B6E800,0800
+; $82:8F38 A9 02       LDA #$02
+; $82:8F3A 8D 0B 42    STA $420B  [$7E:420B] ; start transfert
+; 	
+; 
+; $82:8F3D C2 30       REP #$30
+; $82:8F3F A0 39 C6    LDY #$C639
+; $82:8F42 A2 D8 01    LDX #$01D8
+; $82:8F45 A9 11 00    LDA #$0011
+; $82:8F48 85 14       STA $14    [$7E:0014]
+; 
+; $82:8F4A A9 08 00    LDA #$0008
+; $82:8F4D 85 12       STA $12    [$7E:0012]
+; 
+; $82:8F4F B9 00 00    LDA $0000,y[$82:C639]
+; $82:8F52 9F 00 30 7E STA $7E3000,x[$7E:31D8]
+; $82:8F56 E8          INX
+; $82:8F57 E8          INX
+; $82:8F58 C8          INY
+; $82:8F59 C8          INY
+; $82:8F5A C6 12       DEC $12    [$7E:0012]
+; $82:8F5C D0 F1       BNE $F1    [$8F4F]
+; $82:8F5E 8A          TXA
+; $82:8F5F 18          CLC
+; $82:8F60 69 10 00    ADC #$0010
+; $82:8F63 AA          TAX
+; $82:8F64 C6 14       DEC $14    [$7E:0014]
+; $82:8F66 D0 E2       BNE $E2    [$8F4A]
+; $82:8F68 20 0C B2    JSR $B20C  [$82:B20C]  ; Equipment screen - write Samus wireframe tilemap
+; $82:8F6B 20 70 8F    JSR $8F70  [$82:8F70]  ; Writes the number next to your reserve amount in the pause screen
+; $82:8F6E 28          PLP
+; $82:8F6F 6B          RTL	
+; 
+; 
+; 
+; ;;; $91A9: Set up a (H)DMA transfer ;;;
+; {
+; ;; Parameters:
+; ;;     [[S] + 1] + 1: DMA channel
+; ;;     [[S] + 1] + 2: DMA options
+; ;;     [[S] + 1] + 3: DMA target
+; ;;     [[S] + 1] + 4: Source address (24-bit)
+; ;;     [[S] + 1] + 7: Size (in bytes)
+; 
+; ; Called by lots of places (TODO)
+; $80:91A9 08          PHP
+; $80:91AA 8B          PHB
+; $80:91AB C2 30       REP #$30
+; $80:91AD A3 04       LDA $04,s  [$7E:1FF9]  ;\
+; $80:91AF 48          PHA                    ;|
+; $80:91B0 AB          PLB                    ;} DB = caller bank
+; $80:91B1 AB          PLB                    ;/
+; $80:91B2 A3 03       LDA $03,s  [$7E:1FF8]  ;\
+; $80:91B4 A8          TAY                    ;} Y = return address
+; $80:91B5 B9 01 00    LDA $0001,y[$8B:92B9]  ;\  DMA channel 0 -> 7
+; $80:91B8 29 FF 00    AND #$00FF             ;|
+; $80:91BB AA          TAX                    ;} X = [return address + 1] * 10h
+; $80:91BC BF E6 91 80 LDA $8091E6,x[$80:91E7];|
+; $80:91C0 29 FF 00    AND #$00FF             ;/
+; $80:91C3 AA          TAX                    ;   DMA channel offset 10 -> 70 in $43x0
+; $80:91C4 B9 02 00    LDA $0002,y[$8B:92BA]  ;\  DMA options (1 byte) DMA target (1 byte)
+; $80:91C7 9D 00 43    STA $4300,x[$7E:4310]  ;|
+; $80:91CA B9 04 00    LDA $0004,y[$8B:92BC]  ;|  DMA source address
+; $80:91CD 9D 02 43    STA $4302,x[$7E:4312]  ;|
+; $80:91D0 B9 06 00    LDA $0006,y[$8B:92BE]  ;} ($4300 + [X])..($4306 + [X]) = [(return address + 2)..(return address + 8)]
+; $80:91D3 9D 04 43    STA $4304,x[$7E:4314]  ;|
+; $80:91D6 B9 07 00    LDA $0007,y[$8B:92BF]  ;|  DMA transfert size
+; $80:91D9 9D 05 43    STA $4305,x[$7E:4315]  ;/
+; $80:91DC 98          TYA                    ;\
+; $80:91DD 18          CLC                    ;|
+; $80:91DE 69 08 00    ADC #$0008             ;} Return address += 8
+; $80:91E1 83 03       STA $03,s  [$7E:1FF8]  ;/
+; $80:91E3 AB          PLB
+; $80:91E4 28          PLP
+; $80:91E5 6B          RTL
+; 
+; $80:91E6             db 00, 10, 20, 30, 40, 50, 60, 70
+; }
+
+
+
+# la spritemap qui glow autour de L/R
+; Spritemap 2Ah
+$82:C465             dx 0008, 0008,00,7451, 0000,00,3443, 01F8,00,3443, 01F0,00,3451, 0000,F8,743D, 0008,F8,743C, 01F8,F8,343D, 01F0,F8,343C
+
+
+;;; $C569: Spritemap pointers ;;;
+{
+; Spawned by $81:891F
+$82:C569             dw C22B, C224, C216, C21D, C256, C24A, C232, C23E, C385, C38C, C393, C39A, C3AF, C3B6, C3BD, C3C4,
+                        C262, C27D, C298, C37E, C29F, C2B7, C2F5, C3A8, C3CB, C2A6, C369, C35B, C362, C370, C377, C369,
+                        C3D9, C3E0, C3E7, C3EE, C3F5, C3FC, C403, C40A, C48F, C4A0, C465, C4B1, CAE9, CAFF, CB15, CB2B,
+                        CB4B, CB6B, CB8B, CBAB, CBCB, CBD7, CBE3, CBEF, CBFB, CC6B, CC95, CCBF, CD2E, CD09, CCE4, CD67,
+                        CDCD, CE15, CE5D, CECD, CF3D, CF53, CF5F, CF66, D00B, D0AD, D177, D24B, D2F7, D41B, C3A1, C411,
+                        C418, C41F, C426, C42D, C434, C43B, C442, C449, C450, C4DB, C4F1, C507, C549, C533, C51D, CF7C,
+                        CF92, CFA8, CFBE, CFD4, CFE0, CFF6, CFFD, D004
+}
+
+
+;;; $A59A: Equipment screen - draw L/R highlight ;;;
+{
+$82:A59A 08          PHP
+$82:A59B C2 30       REP #$30
+$82:A59D A0 D0 00    LDY #$00D0
+$82:A5A0 A2 18 00    LDX #$0018
+$82:A5A3 A9 02 00    LDA #$0002               ; animation id -1 => C1FC => spritemap 2A: glowing L/R
+$82:A5A6 20 81 A8    JSR $A881  [$82:A881]
+$82:A5A9 A0 D0 00    LDY #$00D0
+$82:A5AC A2 E8 00    LDX #$00E8
+$82:A5AF A9 02 00    LDA #$0002
+$82:A5B2 20 81 A8    JSR $A881  [$82:A881]
+$82:A5B5 28          PLP
+$82:A5B6 60          RTS
+}
+
+; Pointers to animation spriteset indices
+$82:C1E4             dw C1F6, C1FC, C202, C20A, C20C, C20E, C210, C212, C214
+
+$82:C1F6             dw 0000,0028,0029
+$82:C1FC             dw 002A,002A,002A
+
+
+;;; $A881: Draw pause screen spritemap ;;;
+{
+;; Parameters:
+;;     A: Animation ID + 1
+;;     X: X position
+;;     Y: Y position + 1
+
+; [$C0B2 + (animation ID)]: Animation timer pointer (in RAM, $0729..3A)
+; [$C0C4 + (animation ID)]: Animation index pointer (in RAM, $073D..4E)
+; [$C0E8 + (animation ID)]: Animation data pointer (in bank $82)
+
+
+;;; $891F: Add spritemap from $82:C569 table to OAM ;;;
+{
+;; Parameters:
+;;     A   = Index into $82:C569 table
+;;     Y   = Y position of spritemap centre
+;;     X   = X position of spritemap centre
+;;     $03 = palette bits of sprite (palette * 200h)
+
+
+
+; chargement du bg1 d'equipment screen depuis le ROM vers la VRAM
+;;; $8EDA:  ;;;
+{
+$82:8EDA 08          PHP
+$82:8EDB E2 30       SEP #$30
+$82:8EDD A9 00       LDA #$00
+$82:8EDF 8D 16 21    STA $2116  [$7E:2116]
+$82:8EE2 A9 38       LDA #$38
+$82:8EE4 8D 17 21    STA $2117  [$7E:2117]
+$82:8EE7 A9 80       LDA #$80
+$82:8EE9 8D 15 21    STA $2115  [$7E:2115]
+$82:8EEC 22 A9 91 80 JSL $8091A9[$80:91A9]  ; Set up a (H)DMA transfer
+$82:8EF0             dx 01,01,18,B6E000,0800
+$82:8EF8 A9 02       LDA #$02
+$82:8EFA 8D 0B 42    STA $420B  [$7E:420B]
+$82:8EFD A9 00       LDA #$00
+$82:8EFF 8D 81 21    STA $2181  [$7E:2181]
+$82:8F02 A9 34       LDA #$34
+$82:8F04 8D 82 21    STA $2182  [$7E:2182]
+$82:8F07 A9 7E       LDA #$7E
+$82:8F09 8D 83 21    STA $2183  [$7E:2183]
+$82:8F0C 22 A9 91 80 JSL $8091A9[$80:91A9]  ; Set up a (H)DMA transfer
+$82:8F10             dx 01,00,80,B6E400,0400
+$82:8F18 A9 02       LDA #$02
+$82:8F1A 8D 0B 42    STA $420B  [$7E:420B]
+$82:8F1D A9 00       LDA #$00
+$82:8F1F 8D 81 21    STA $2181  [$7E:2181]
+$82:8F22 A9 38       LDA #$38
+$82:8F24 8D 82 21    STA $2182  [$7E:2182]
+$82:8F27 A9 7E       LDA #$7E
+$82:8F29 8D 83 21    STA $2183  [$7E:2183]
+$82:8F2C 22 A9 91 80 JSL $8091A9[$80:91A9]  ; Set up a (H)DMA transfer
+$82:8F30             dx 01,00,80,B6E800,0800
+$82:8F38 A9 02       LDA #$02
+$82:8F3A 8D 0B 42    STA $420B  [$7E:420B]

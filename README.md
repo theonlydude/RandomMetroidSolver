@@ -27,7 +27,7 @@ dude@computer:~/RandomMetroidSolver (production)$
 
 You need Python >= 3.6, it has been tested on Linux and CYGWIN.
 
-As VARIA Randomizer has a lot of options, the easiest way to use it is with a Randomizer preset (--randoPreset), you also need a skill preset to tell the Randomizer which tricks he can use to acces the locations (--param) and a vanilla ROM (-r), you can optionally give a seed number (--seed), if not a random one is chosen:
+As VARIA Randomizer has a lot of options, the only supported way of using it is with a Randomizer preset (--randoPreset), you also need a skill preset to tell the Randomizer which tricks he can use to acces the locations (--param) and a vanilla ROM (-r), you can optionally give a seed number (--seed), if not a random one is chosen:
 
 ```
 dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./randomizer.py -r ~/metroid/SuperMetroid.sfc --param standard_presets/Season_Races.json --randoPreset rando_presets/default.json --seed 1097821
@@ -110,36 +110,22 @@ dude@computer:~/RandomMetroidSolver (master)$ python3.7 randomizer_webservice.py
 
 # CLI Customizer
 
-To change Samus sprite or apply patches or randomize palettes on an existing seed you have to call the Randomizer with the --patchOnly parameter. It'll generate a new ROM: VARIA.sfc
+To change Samus sprite or apply patches or randomize palettes on an existing seed you have to call the Customizer. It'll generate a new ROM prefixed with: Custom_
 
-To add a sprite use --sprite, the available sprites are in itemrandomizerweb/patches/sprites/:
-```
-dude@computer:~/RandomMetroidSolver (master)$ ls itemrandomizerweb/patches/sprites/
-alucard.ips  fed_trooper.ips         hack_ascent.ips    hack_escape2.ips  hack_nature.ips  hack_redesign.ips  hitbox_helper.ips  marga.ips    samus.ips           win95_cursor.ips
-bailey.ips   hack_ancient_chozo.ips  hack_decision.ips  hack_hyper.ips    hack_phazon.ips  hack_szm.ips       luigi.ips          megaman.ips  super_controid.ips
-```
+To add a sprite use --sprite, the available sprites are in varia_custom_sprites submodule.
 
-To add one or more patches use --patch, the available patches listed in the same order as on the Customizer page:
-```
-itemsounds.ips
-elevators_doors_speed.ips
-spinjumprestart.ips
-rando_speed.ips
-No_Music
-random_music.ips
-```
+To add one or more patches use --patch, the available patches are available in customizer.py.
 
 Example:
 ```
-dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./randomizer.py -r VARIA_Randomizer_FX1097821_Season_Races_medium.sfc --patchOnly --sprite megaman.ips --patch itemsounds.ips --patch No_Music
-startLocation:Landing Site
+dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./customizer.py -r VARIA_Randomizer_FX1097821_Season_Races_medium.sfc --sprite megaman --patch itemsounds.ips --patch No_Music
 Apply patch itemsounds.ips
 Apply patch No_Music
 Apply patch megaman.ips
-Rom generated: VARIA
+Customzied Rom generated: Custom_VARIA_Randomizer_FX1097821_Season_Races_medium.sfc
 ```
 
-**Note**: To apply colors randomization to an existing seed you have to add the colors randomization parameters to the randomizer on top of --patchOnly.
+To add colors randomization:
 
 The parameters:
 ```
@@ -163,11 +149,10 @@ The parameters:
 
 Example:
 ```
-dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./randomizer.py -r VARIA_Randomizer_AFX8258621_Season_Races_VARIAble.sfc  --patchOnly --sprite megaman.ips --patch itemsounds.ips --palette --min_degree -75 --max_degree 25 --invert
-startLocation:Landing Site
+dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./customizer.py -r VARIA_Randomizer_AFX8258621_Season_Races_VARIAble.sfc --sprite megaman --patch itemsounds.ips --palette --min_degree -75 --max_degree 25 --invert
 Apply patch itemsounds.ips
 Apply patch megaman.ips
-Rom generated: VARIA
+Customized Rom generated: Custom_VARIA_Randomizer_AFX8258621_Season_Races_VARIAble.sfc
 ```
 
 # Web with Docker
@@ -187,3 +172,23 @@ root@computer:/home/dude/RandomMetroidSolver/web/docker# ./run.sh -b minimizer
 ```
 
 There's other scripts to start/stop the containers: start.sh / stop.sh, delete the containers/images: rm.sh and update the git repository in an image: update.sh -b branch .
+
+# Local Development
+To run your local code in a Docker container for development, you will need to pass the `-l` argument in the Docker `build` and `run` scripts to enable local mode. When using local mode, you do not need to rebuild the containers for any HTML, CSS or Javascript changes. Any changes to the Python code will require you to stop and restart. Any changes to the database will require a full rebuild of the container.
+
+```sh
+# Build the local containers
+$ ./web/docker/build.sh -l
+
+# Run the local containers
+$ ./web/docker/run.sh -l
+
+# Stop
+$ ./web/docker/stop.sh
+
+# Start
+$ ./web/docker/start.sh
+
+# Remove
+$ ./web/docker/rm.sh
+```

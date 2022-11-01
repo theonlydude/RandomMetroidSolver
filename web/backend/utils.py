@@ -2,10 +2,13 @@ import sys, os, json
 
 from graph.vanilla.graph_locations import locations
 from graph.vanilla.graph_access import accessPoints
+from rom.rom import snes_to_pc
 from rom.romreader import RomReader
+from rom.addresses import Addresses
 from utils.doorsmanager import DoorsManager
 from utils.utils import getDefaultMultiValues, getPresetDir, removeChars
 from utils.parameters import Knows, isKnows, Controller, isButton
+from utils.objectives import Objectives
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import HTTP
@@ -73,34 +76,35 @@ def getAddressesToRead(plando=False):
 
     # misc
     # majors split
-    addresses["misc"].append(0x17B6C)
+    addresses["misc"] += Addresses.getWeb('majorsSplit')
     # escape timer
-    addresses["misc"].append(0x1E21)
-    addresses["misc"].append(0x1E22)
-    # nothing id
-    addresses["misc"].append(0x17B6D)
+    addresses["misc"] += Addresses.getWeb('escapeTimer')
     # start ap
-    addresses["misc"].append(0x10F200)
-    addresses["misc"].append(0x10F201)
+    addresses["misc"] += Addresses.getWeb('startAP')
     # random doors
     addresses["misc"] += DoorsManager.getAddressesToRead()
+    # objectives
+    addresses["misc"] += Objectives.getAddressesToRead()
 
     # ranges [low, high]
-    ## doorasm
-    addresses["ranges"] += [0x7EB00, 0x7ee60]
-    # for next release doorasm addresses will be relocated
+    ## old doorasm for old seeds
+    addresses["ranges"] += [snes_to_pc(0x8feb00), snes_to_pc(0x8fee60)]
     maxDoorAsmPatchLen = 22
-    addresses["ranges"] += [0x7F800, 0x7F800+(maxDoorAsmPatchLen * len([ap for ap in accessPoints if ap.Internal == False]))]
+    customDoorsAsm = Addresses.getOne('customDoorsAsm')
+    addresses["ranges"] += [customDoorsAsm, customDoorsAsm+(maxDoorAsmPatchLen * len([ap for ap in accessPoints if ap.Internal == False]))]
     # split locs
-    addresses["ranges"] += [0x10F550, 0x10F5D8]
-    # scavenger hunt items list (16 prog items + hunt over + terminator, each is a word)
-    scavengerListSize = 36
-    addresses["ranges"] += [0x10F5D8, 0x10F5D8+scavengerListSize]
+    addresses["ranges"] += Addresses.getRange('locIdsByArea')
+    addresses["ranges"] += Addresses.getRange('scavengerOrder')
     if plando == True:
         # plando addresses
-        addresses["ranges"] += [0x2F6000, 0x2F6100]
+        addresses["ranges"] += Addresses.getRange('plandoAddresses')
         # plando transitions (4 bytes per transitions, ap#/2 transitions)
-        addresses["ranges"] += [0x2F6100, 0x2F6100+((len(addresses["transitions"])/2) * 4)]
+        plandoTransitions = Addresses.getOne('plandoTransitions')
+        addresses["ranges"] += [plandoTransitions, plandoTransitions+((len(addresses["transitions"])/2) * 4)]
+        # starting etanks added in the customizer
+        addresses["misc"] += Addresses.getWeb('additionalETanks')
+    # events array for autotracker
+    addresses["ranges"] += Addresses.getRange('objectiveEventsArray')
 
     return addresses
 
@@ -205,6 +209,54 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         seedInt = getInt(request, 'seed', isJson)
         if seedInt < 0 or seedInt > sys.maxsize:
             raiseHttp(400, "Wrong value for seed", isJson)
+
+    if 'objective' in others:
+        value = request.vars.objectiveRandom
+        if not request.vars.objectiveRandom in ['true', 'false']:
+            raiseHttp(400, "objectiveRandom must be either true or false", isJson)
+
+        objective = request.vars.objective.split(',')
+        authorizedObjectives = defaultMultiValues['objective'] + ['nothing']
+        for value in objective:
+            if value not in authorizedObjectives:
+                raiseHttp(400, "Wrong value for objective", isJson)
+
+
+        if request.vars.objectiveRandom == 'true':
+            nbObjective = request.vars.nbObjective
+            if nbObjective.isdigit():
+                if not int(nbObjective) in range(6):
+                    raiseHttp(400, "Number of objectives must be 0-5", isJson)
+            elif nbObjective != "random":
+                raiseHttp(400, "Number of objectives must be 0-5 or \"random\"", isJson)
+        else:
+            if len(objective) > 5:
+                raiseHttp(400, "You cannot choose more than 5 objectives", isJson)
+
+
+    if 'minDegree' in others:
+        minDegree = getInt(request, 'minDegree', isJson)
+        if minDegree < -180 or minDegree > 180:
+            raiseHttp(400, "Wrong value for minDegree", isJson)
+
+    if 'maxDegree' in others:
+        maxDegree = getInt(request, 'maxDegree', isJson)
+        if maxDegree < -180 or maxDegree > 180:
+            raiseHttp(400, "Wrong value for maxDegree", isJson)
+
+    if 'hellrun_rate' in others and request.vars.hellrun_rate != 'off':
+        hellrun_rate = getInt(request, 'hellrun_rate', isJson)
+        if hellrun_rate < 0 or hellrun_rate > 400:
+            raiseHttp(400, "Wrong value for hellrun_rate", isJson)
+
+    if 'etanks' in others and request.vars.etanks != 'off':
+        etanks = getInt(request, 'etanks', isJson)
+        if etanks < 0 or etanks > 14:
+            raiseHttp(400, "Wrong value for etanks", isJson)
+
+    if 'maxDifficulty' in others:
+        if request.vars.maxDifficulty not in ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random']:
+            raiseHttp(400, "Wrong value for max difficulty", isJson)
 
     preset = request.vars.preset
     if preset != None:

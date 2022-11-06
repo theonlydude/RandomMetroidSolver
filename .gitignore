@@ -1,1 +1,5 @@
 *.py[oc]
+*~
+*.log
+**/build/
+**/include/sym/

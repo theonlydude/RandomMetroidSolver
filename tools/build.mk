@@ -43,9 +43,9 @@ clean:
 	@rm -rf $(BUILD_DIR)
 	@rm -f $(IPS_FILES) $(SYM_ASM_FILES) $(MESEN_DEBUG_FILE)
 
--include $(DEP_FILES)
+include $(DEP_FILES)
 
-$(DEP_DIR)/.%.d:	$(SRC_DIR)/%.asm
+$(DEP_DIR)/.%.d:       $(SRC_DIR)/%.asm
 	@$(DEP_TOOL) $< > $@
 
 $(IPS_DIR)/%.ips:	$(SRC_DIR)/%.asm

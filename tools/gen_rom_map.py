@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 
 # prereq:
 #  git clone git@github.com:tewtal/sm_banklog_parser.git

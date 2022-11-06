@@ -57,7 +57,7 @@ $(SYM_DIR)/%.sym:	$(IPS_DIR)/%.ips
 
 $(SRC_SYM_DIR)/%.asm:	$(SRC_DIR)/%.asm $(IPS_DIR)/%.ips
 	@echo "Generating exported symbols asm $@ ..."
-	@$(SYM_TOOL) $< > $@
+	@$(SYM_TOOL) $@
 
 $(MESEN_DEBUG_FILE):	$(SYM_WLA_FILES)
 	@echo "Updating debug file $@ ..."

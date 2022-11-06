@@ -16,4 +16,4 @@ for inc in ${includes}; do
         }
     done
 done
-printf "\n"
+printf "\n\t@touch ${src}\n"

@@ -83,9 +83,11 @@ vanilla_map = gen_vanilla_map(vanilla)
 
 # get all addresses modified by the patch
 modified = defaultdict(int)
+ranges = defaultdict(set)
 for r in ips.getRanges():
     for i in r:
         modified[vanilla_map[pc_to_snes(i)]] += 1
+        ranges[vanilla_map[pc_to_snes(i)]].add(r)
 
 print("patch {} has modifications in:".format(patch))
 print("")
@@ -93,4 +95,4 @@ print("Address  | Bytes | Label")
 print("-"*128)
 modifiedKeys = sorted(list(modified.keys()))
 for address in modifiedKeys:
-    print("{} | {:>5} | {}".format(hex(address), modified[address], vanilla[address]))
+    print("{} | {:>5} | {} | {}".format(hex(address), modified[address], vanilla[address], ["[{}-{}]".format(hex(pc_to_snes(r.start)), hex(pc_to_snes(r.stop))) for r in sorted(ranges[address], key=lambda x: x.start)]))

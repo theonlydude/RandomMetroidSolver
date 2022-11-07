@@ -11,12 +11,12 @@ SRC_DIR=src
 INCLUDE_DIR=$(SRC_DIR)/include
 IPS_DIR=ips
 BUILD_DIR=build
-SYM_DIR=$(BUILD_DIR)
+SYM_DIR=sym
 SRC_SYM_DIR=$(INCLUDE_DIR)/sym
 DEBUG_DIR=$(ROOT_DIR)/patches/debug
 DEP_DIR=$(BUILD_DIR)
 
-DUMMY:=$(shell mkdir -p $(BUILD_DIR) $(SRC_SYM_DIR))
+DUMMY:=$(shell mkdir -p $(BUILD_DIR) $(SRC_SYM_DIR) $(SYM_DIR))
 
 INCLUDE_DIRS+=$(INCLUDE_DIR)
 

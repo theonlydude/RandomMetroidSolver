@@ -3,8 +3,8 @@ ASAR?=asar
 ASAR_OPTS?=--fix-checksum=off
 MAKE_IPS?=$(ROOT_DIR)/tools/make_ips.sh
 DEP_TOOL?=$(ROOT_DIR)/tools/gen_asm_dep.sh
-MSL_TOOL?=cat # TODO actually make the tool
-SYM_TOOL?=touch # TODO actually make the tool
+MSL_TOOL?=$(ROOT_DIR)/tools/gen_msl.py
+SYM_TOOL?=$(ROOT_DIR)/tools/gen_asm_sym.py
 
 # dirs
 SRC_DIR=src
@@ -52,14 +52,15 @@ $(IPS_DIR)/%.ips:	$(SRC_DIR)/%.asm
 	@echo "Building $@ ..."
 	@ASAR_OPTS="$(ASAR_OPTS) --symbols-path=$(patsubst $(SRC_DIR)/%.asm,$(SYM_DIR)/%.sym,$<)" $(MAKE_IPS) $< > $(BUILD_DIR)/$$(basename $<).log
 
+# already generated along with ips, just add this rule to enforce dependency order
 $(SYM_DIR)/%.sym:	$(IPS_DIR)/%.ips
 	@true
 
-$(SRC_SYM_DIR)/%.asm:	$(SRC_DIR)/%.asm $(IPS_DIR)/%.ips
+$(SRC_SYM_DIR)/%.asm:	$(SYM_DIR)/%.sym
 	@echo "Generating exported symbols asm $@ ..."
-	@$(SYM_TOOL) $@
+	@$(SYM_TOOL) $@ $<
 
 $(MESEN_DEBUG_FILE):	$(SYM_WLA_FILES)
 	@echo "Updating debug file $@ ..."
 	@cp $(DEBUG_DIR)/vanilla.msl $@
-	@$(MSL_TOOL) $^ >> $@ # TODO
+	@$(MSL_TOOL) $@ $^

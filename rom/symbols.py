@@ -55,8 +55,11 @@ class Symbols(object):
                     self.addSymbol(namespace, m.group('label'), addr)
 
     def appendToMSL(self, mslPath, symbolsAbsolute=None):
+        if symbolsAbsolute is None:
+            symbolsAbsolute = self.getAbsoluteSymbols()
         with open(mslPath, "a") as msl:
-            for sym,addr in self._symbolsAbsolute.items():
+            for sym in symbolsAbsolute:
+                addr = self._symbolsAbsolute[sym]
                 msl.write("PRG:%X:%s\n" % (snes_to_pc(addr), sym))
 
     @staticmethod

@@ -89,5 +89,8 @@ class Symbols(object):
             return None
         return addr
 
+    def getAddresses(self, absoluteSymbolRegexPattern):
+        return [self._symbolsAbsolute[sym] for sym in self._symbolsAbsolute if re.match(absoluteSymbolRegexPattern, sym)]
+
     def getAbsoluteSymbols(self):
         return self._symbolsAbsolute.keys()

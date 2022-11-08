@@ -87,7 +87,7 @@ ips="${1}"
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x6db91 0x6dc95 replace
 # Instruction list - palette FX object $E1F8 (Samus loading - varia suit)
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x6dcf7 0x6ddfb replace
-#  Instruction list - palette FX object $E1FC (Samus loading - gravity suit)
+# Instruction list - palette FX object $E1FC (Samus loading - gravity suit)
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x6de5d 0x6df61 replace
 # Instruction list - Samus in heat - power suit
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x6e48c 0x6e670 replace
@@ -105,7 +105,7 @@ ips="${1}"
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x80483 0x8048b replace
 # Function pointer table - check if Samus bottom half drawn
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x8064e 0x80686 replace
-#  Flag that Samus bottom half is not drawn
+# Flag that Samus bottom half is not drawn
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x80688 0x806ff replace
 # Determine if Samus bottom half is drawn - standing
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x80688 0x806ff replace
@@ -145,3 +145,5 @@ ips="${1}"
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x1bdb80 0x1bdb8e replace
 # Extra bank (samus new tiles from sprite something)
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x300000 0x400000 replace
+# bank 8f
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x78000 0x7ffff replace

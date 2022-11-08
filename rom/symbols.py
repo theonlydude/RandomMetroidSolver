@@ -1,5 +1,5 @@
 
-import re, os
+import re, os, json
 
 from collections import defaultdict
 from rom.addressTypes import ValueSingle
@@ -24,8 +24,11 @@ class Symbols(object):
         for d in self._patchAccess.symbolsDirs:
             try:
                 for f in os.listdir(d):
+                    fullPath = os.path.join(d, f)
                     if os.path.splitext(f)[1] == ".sym":
-                        self.loadWLA(os.path.join(d, f))
+                        self.loadWLA(fullPath)
+                    elif os.path.splitext(f)[1] == ".json":
+                        self.loadJSON(fullPath)
             except FileNotFoundError:
                 self.log.debug("Symbols path "+d+" does not exist")
 
@@ -55,6 +58,15 @@ class Symbols(object):
                     addr = int(m.group('bank'), 16) << 16 | int(m.group('offset'), 16)
                     self.addSymbol(namespace, m.group('label'), addr)
 
+    def loadJSON(self, jsonPath, namespace=None):
+        if namespace is None:
+            namespace = os.path.splitext(os.path.basename(jsonPath))[0]
+            self.log.debug("* Loading symbols from %s into namespace %s ..." % (jsonPath, namespace))
+            with open(jsonPath, "r") as f:
+                syms = json.load(f)
+                for sym,addr in syms.items():
+                    self.addSymbol(namespace, sym, addr)
+
     def appendToMSL(self, mslPath, symbolsAbsolute=None):
         if symbolsAbsolute is None:
             symbolsAbsolute = self.getAbsoluteSymbols()
@@ -74,6 +86,12 @@ class Symbols(object):
             asm.write("include\n\n")
             for label,addr in self._symbols[namespace].items():
                 asm.write("org $%06x\n%s:\n\n" % (addr, Symbols.getAbsoluteSymbolName(namespace, label)))
+
+    def writeSymbolsJSON(self, jsonPath, namespace=None):
+        if namespace is None:
+            namespace = os.path.splitext(os.path.basename(jsonPath))[0]
+        with open(jsonPath, "w") as f:
+            json.dump(self._symbols[namespace], f, indent=4)
 
     def addSymbol(self, namespace, label, addr):
         self.log.debug("- adding label %s to namespace %s : $%06x" % (label, namespace, addr))

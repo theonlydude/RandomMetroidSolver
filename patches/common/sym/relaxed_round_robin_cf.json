@@ -1,0 +1,10 @@
+{
+    "DecrementAmmo": 9492242,
+    "DecrementAmmo_check_count": 9492250,
+    "DecrementAmmo_continue": 9492267,
+    "DecrementAmmo_return": 9492291,
+    "SamusMovementHandler": 9492174,
+    "SamusMovementHandler_cf_done": 9492206,
+    "SamusMovementHandler_cf_step": 9492232,
+    "SamusMovementHandler_return": 9492241
+}

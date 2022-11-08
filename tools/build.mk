@@ -4,7 +4,7 @@ ASAR_OPTS?=--fix-checksum=off
 MAKE_IPS?=$(ROOT_DIR)/tools/make_ips.sh
 DEP_TOOL?=$(ROOT_DIR)/tools/gen_asm_dep.sh
 MSL_TOOL?=$(ROOT_DIR)/tools/gen_msl.py
-SYM_TOOL?=$(ROOT_DIR)/tools/gen_asm_sym.py
+SYM_TOOL?=$(ROOT_DIR)/tools/gen_syms.py
 
 # dirs
 SRC_DIR=src
@@ -23,7 +23,8 @@ INCLUDE_DIRS+=$(INCLUDE_DIR)
 # files
 SRC_FILES:=$(wildcard $(SRC_DIR)/*.asm)
 IPS_FILES:=$(patsubst $(SRC_DIR)/%.asm,$(IPS_DIR)/%.ips,$(SRC_FILES))
-SYM_WLA_FILES:=$(patsubst $(SRC_DIR)/%.asm,$(SYM_DIR)/%.sym,$(SRC_FILES))
+SYM_WLA_FILES:=$(patsubst $(SRC_DIR)/%.asm,$(BUILD_DIR)/%.sym,$(SRC_FILES))
+SYM_JSON_FILES:=$(patsubst $(SRC_DIR)/%.asm,$(SYM_DIR)/%.json,$(SRC_FILES))
 SYM_ASM_FILES:=$(patsubst $(SRC_DIR)/%.asm,$(SRC_SYM_DIR)/%.asm,$(SRC_FILES))
 DEP_FILES:=$(patsubst $(SRC_DIR)/%.asm,$(DEP_DIR)/.%.d,$(SRC_FILES))
 MESEN_DEBUG_FILE=$(DEBUG_DIR)/VARIA$(FLAVOR).msl
@@ -36,7 +37,7 @@ export INCLUDE_DIRS
 export ASAR
 
 # rules
-all:	$(IPS_FILES) $(SYM_ASM_FILES) $(MESEN_DEBUG_FILE)
+all:	$(IPS_FILES) $(SYM_ASM_FILES) $(SYM_JSON_FILES) $(MESEN_DEBUG_FILE)
 
 clean:
 	@echo "Cleaning ..."
@@ -50,15 +51,19 @@ $(DEP_DIR)/.%.d:       $(SRC_DIR)/%.asm
 
 $(IPS_DIR)/%.ips:	$(SRC_DIR)/%.asm
 	@echo "Building $@ ..."
-	@ASAR_OPTS="$(ASAR_OPTS) --symbols-path=$(patsubst $(SRC_DIR)/%.asm,$(SYM_DIR)/%.sym,$<)" $(MAKE_IPS) $< > $(BUILD_DIR)/$$(basename $<).log
+	@ASAR_OPTS="$(ASAR_OPTS) --symbols-path=$(patsubst $(SRC_DIR)/%.asm,$(BUILD_DIR)/%.sym,$<)" $(MAKE_IPS) $< > $(BUILD_DIR)/$$(basename $<).log
 
 # already generated along with ips, just add this rule to enforce dependency order
-$(SYM_DIR)/%.sym:	$(IPS_DIR)/%.ips
+$(BUILD_DIR)/%.sym:	$(IPS_DIR)/%.ips
 	@true
 
-$(SRC_SYM_DIR)/%.asm:	$(SYM_DIR)/%.sym
-	@echo "Generating exported symbols asm $@ ..."
-	@$(SYM_TOOL) $@ $<
+$(SRC_SYM_DIR)/%.asm:	$(BUILD_DIR)/%.sym
+	@echo "Exporting ASM and JSON symbols from $< ..."
+	@$(SYM_TOOL) $(patsubst $(BUILD_DIR)/%.sym,$(SYM_DIR)/%.json,$<) $@ $<
+
+# same as above, JSON are generated at the same time as asm
+$(SYM_DIR)/%.json:	$(SRC_SYM_DIR)/%.asm	
+	@true
 
 $(MESEN_DEBUG_FILE):	$(SYM_WLA_FILES)
 	@echo "Updating debug file $@ ..."

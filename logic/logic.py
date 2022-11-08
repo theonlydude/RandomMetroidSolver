@@ -23,4 +23,14 @@ class Logic(object):
             Logic.HelpersGraph = HelpersGraph
             Logic.patches = implementation
             Logic.LocationsHelper = LocationsHelper
+        elif implementation == 'mirror':
+            from graph.mirror.graph_helpers import HelpersGraphMirror as HelpersGraph
+            from graph.mirror.graph_access import accessPoints
+            from graph.mirror.graph_locations import locations
+            from graph.mirror.graph_locations import LocationsHelper
+            Logic.locations = locations
+            Logic.accessPoints = accessPoints
+            Logic.HelpersGraph = HelpersGraph
+            Logic.patches = implementation
+            Logic.LocationsHelper = LocationsHelper
         Logic.implementation = implementation

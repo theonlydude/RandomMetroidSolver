@@ -523,6 +523,7 @@ def print_room_header(out, rom, address, length):
     out.write("    db {} ; height\n".format(bhex(height)))
     out.write("    db {} ; up scroller\n".format(bhex(upScroller)))
     out.write("    db {} ; down scroller\n".format(bhex(downScroller)))
+    out.write("    db {} ; special graphics bitflag\n".format(bhex(specialGfxBitflag)))
     out.write("    dw {} ; doors pointer\n".format(whex(doorsPtr)))
 
     roomstateTypes = {

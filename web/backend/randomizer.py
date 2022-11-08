@@ -128,6 +128,8 @@ class Randomizer(object):
                                 continue
                             elif key in defaultMultiValues:
                                 keyMulti = key + 'MultiSelect'
+                                if key == 'areaRandomization':
+                                    self.session.randomizer[key] = value
                                 if keyMulti in seedInfo:
                                     if key == 'objective' and value == 'nothing':
                                         self.session.randomizer[key] = ""

@@ -3,6 +3,8 @@ import copy
 from rom.compression import Compressor
 from rom.rom import snes_to_pc
 from rom.addresses import Addresses
+from rom.symbols import Symbols
+from patches.patchaccess import PatchAccess
 from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
 from logic.logic import Logic
 from collections import defaultdict
@@ -221,6 +223,11 @@ class RomReader:
         if magic is not None:
             from rom.race_mode import RaceModeReader
             self.race = RaceModeReader(self, magic)
+
+    def loadSymbols(self):
+        self.symbols = Symbols(PatchAccess())
+        self.symbols.loadAllSymbols()
+        Addresses.updateFromSymbols(self.symbols)
 
     def readPlmWord(self, address):
         if self.race is None:

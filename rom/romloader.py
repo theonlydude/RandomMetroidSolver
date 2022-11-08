@@ -22,6 +22,9 @@ class RomLoader(object):
         elif type(rom) is dict:
             return RomLoaderDict(rom, magic)
 
+    def loadSymbols(self):
+        self.romReader.loadSymbols()
+
     def assignItems(self, locations):
         return self.romReader.loadItems(locations)
 

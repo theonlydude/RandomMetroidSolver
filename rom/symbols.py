@@ -85,12 +85,10 @@ class Symbols(object):
             addr = self._symbolsAbsolute.get(namespaceOrAbsoluteSymbol)
         else:
             addr = self._symbols[namespaceOrAbsoluteSymbol].get(localSymbol)
-        if addr is None:
-            return None
         return addr
 
     def getAddresses(self, absoluteSymbolRegexPattern):
-        return [self._symbolsAbsolute[sym] for sym in self._symbolsAbsolute if re.match(absoluteSymbolRegexPattern, sym)]
+        return {sym:self._symbolsAbsolute[sym] for sym in self._symbolsAbsolute if re.match(absoluteSymbolRegexPattern, sym)}
 
     def getAbsoluteSymbols(self):
         return self._symbolsAbsolute.keys()

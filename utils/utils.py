@@ -471,7 +471,9 @@ def getRandomizerDefaultParameters():
     defaultParams['objective'] = ["kill all G4"]
     defaultParams['objectiveMultiSelect'] = defaultMultiValues['objective']
     defaultParams['tourian'] = "Vanilla"
+    defaultParams['tourianMultiSelect'] = defaultMultiValues['tourian']
     defaultParams['areaRandomization'] = "off"
+    defaultParams['areaRandomizationMultiSelect'] = defaultMultiValues['areaRandomization']
     defaultParams['areaLayout'] = "off"
     defaultParams['doorsColorsRando'] = "off"
     defaultParams['allowGreyDoors'] = "off"

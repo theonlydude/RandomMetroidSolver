@@ -87,6 +87,8 @@ A1:F5D7 locs_Tourian
 A1:F5C3 locs_WestMaridia
 A1:F592 locs_WreckedShip
 A1:F550 locs_by_areas
+A1:F5D8 locs_end
+A1:F568 locs_start
 80:D56C objective_completed
 A1:F865 objective_completed_events
 A1:F86F objective_notified_events

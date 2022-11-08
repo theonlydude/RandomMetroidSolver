@@ -7,6 +7,7 @@
 8B:AE61 introtxt_end
 8B:AE78 introtxt_end_end
 8B:AE72 introtxt_end_skip
+8C:C389 page1_text
 8B:B336 reset_time
 8B:A3C2 skip_restore_default_controls
 8B:A3B0 skip_samus_900_missiles
@@ -14,7 +15,7 @@
 8B:B763 skip_space_colony
 
 [source files]
-0000 8b40adf0 src/intro_text.asm
+0000 46453c58 src/intro_text.asm
 
 [rom checksum]
 984d9c3d

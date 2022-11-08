@@ -6,13 +6,15 @@
 8F:F625 :neg_2_1
 90:F70C :pos_1_0
 8F:F7F0 boss_exit_fix
+8F:F800 generated_door_asm
+8F:FCFF generated_door_asm_end
 8F:F640 giveiframes
 8F:F600 incompatible_doors
 8F:F640 incompatible_doors_end
 90:F700 shinespark_end
 
 [source files]
-0000 a0a12e22 src/door_transition.asm
+0000 5a3cc0f8 src/door_transition.asm
 
 [rom checksum]
 5b997c2e

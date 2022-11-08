@@ -39,12 +39,16 @@ warnpc $84f860
 
 ;;; overwrite BT grey door PLM instruction (bomb check)
 org $84ba6f
+bt_grey_door_instr:
     jsr btcheck
+.nops:
     nop : nop : nop
     bne $03	                ; orig: BEQ $03    ; return if no bombs
 
 ;;; overwrite BT PLM pre-instruction (bomb check)
 org $84d33b
+bt_instr:
     jsr btcheck
+.nops:
     nop : nop : nop
     bne $13			; orig: BEQ $13    ; return if no bombs

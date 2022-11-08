@@ -198,7 +198,7 @@ if __name__ == "__main__":
                         dest="doorName", nargs="?", default=None)
     parser.add_argument('--newColor', help="new color for door (used in interactive mode)",
                         dest="newColor", nargs="?", default=None)
-    parser.add_argument('--logic', help='logic to use (used in interactive mode)', dest='logic', nargs='?', default="vanilla", choices=["vanilla", "rotation"])
+    parser.add_argument('--logic', help='logic to use (used in interactive mode)', dest='logic', nargs='?', default="vanilla", choices=["vanilla", "rotation", "mirror"])
     parser.add_argument('--runtime',
                         help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit.",
                         dest='runtimeLimit_s', nargs='?', default=0, type=int)

@@ -78,7 +78,7 @@ class AccessPoint(object):
             self.transitions[destName] = self.traverse
             self.ConnectedTo = destName
         else:
-            raise RuntimeError("Cannot add an internal access point as inter-are transition")
+            raise RuntimeError("Cannot add an internal access point as inter-area transition")
         self.transitions = self.sortTransitions()
 
     def disconnect(self):
@@ -92,6 +92,18 @@ class AccessPoint(object):
     # tells if this node is to connect areas together
     def isArea(self):
         return not self.Internal and not self.Boss and not self.Escape
+
+    # used by non vanilla logic, add or update internal transition
+    def connectInternal(self, nodeName, func):
+        self.intraTransitions[nodeName] = func
+        self.intraTransitions = self.sortTransitions(self.intraTransitions)
+        self.transitions = copy.copy(self.intraTransitions)
+
+    # used by non vanilla logic, remove internal transition
+    def disconnectInternal(self, nodeName):
+        del self.intraTransitions[nodeName]
+        self.intraTransitions = self.sortTransitions(self.intraTransitions)
+        self.transitions = copy.copy(self.intraTransitions)
 
     # used by the solver to get area and boss APs
     def isInternal(self):

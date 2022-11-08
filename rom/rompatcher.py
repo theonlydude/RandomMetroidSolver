@@ -11,6 +11,7 @@ from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses,
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
 from rom.addresses import Addresses
+from rom.symbols import Symbols
 from rom.rom_patches import RomPatches
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir
@@ -88,6 +89,9 @@ class RomPatcher:
         self.settings = settings
         self.romFileName = romFileName
         self.patchAccess = PatchAccess()
+        self.symbols = Symbols(self.patchAccess)
+        self.symbols.loadAllSymbols()
+        Addresses.updateFromSymbols(self.symbols)
         self.race = None
         if romFileName == None:
             self.romFile = FakeROM()

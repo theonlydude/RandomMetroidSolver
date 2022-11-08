@@ -3,6 +3,7 @@ import re, os
 
 from collections import defaultdict
 from rom.addressTypes import ValueSingle
+from rom.addresses import Addresses
 from rom.rom import snes_to_pc
 
 import utils.log
@@ -86,7 +87,7 @@ class Symbols(object):
             addr = self._symbols[namespaceOrAbsoluteSymbol].get(localSymbol)
         if addr is None:
             return None
-        return ValueSingle(addr)
+        return addr
 
     def getAbsoluteSymbols(self):
         return self._symbolsAbsolute.keys()

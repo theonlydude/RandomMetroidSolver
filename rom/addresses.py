@@ -25,27 +25,36 @@ class Addresses(object):
         value = Addresses.addresses[key]
         return value.getWeb()
 
+    @staticmethod
+    def updateFromSymbols(symbols):
+        addrs = Addresses.addresses
+        addrs.update({sym:ValueSingle(symbols.getAddress(sym)) for sym in symbols.getAbsoluteSymbols()})
+        # for more readable names and complex values:
+        addrs.update({
+            'totalItems': ValueSingle(symbols.getAddress('endingtotals', 'total_items'), storage=Byte),
+            'majorsSplit': ValueSingle(symbols.getAddress('seed_display', 'InfoStr'), storage=Byte),
+            # scavenger hunt items list (17 prog items (including ridley) + hunt over + terminator, each is a word)
+            'scavengerOrder': ValueRange(symbols.getAddress('varia_hud', 'scav_order'), length=(17+1+1)*2),
+            'escapeTimer': ValueSingle(symbols.getAddress('rando_escape', 'timer_value')),
+            'escapeTimerTable': ValueSingle(symbols.getAddress('rando_escape', 'timer_values_by_area_id')),
+            'startAP': ValueSingle(symbols.getAddress('new_game', 'start_location')),
+            'customDoorsAsm': ValueRange(symbols.getAddress('door_transition', 'generated_door_asm'),
+                                         end=symbols.getAddress('door_transition', 'generated_door_asm_end')),
+            'locIdsByArea': ValueRange(symbols.getAddress('varia_hud', 'locs_start'),
+                                       end=symbols.getAddress('varia_hud', 'locs_end')),
+            'plmSpawnTable': ValueSingle(symbols.getAddress('plm_spawn', 'plm_lists')),
+            'plmSpawnRoomTable': ValueSingle(symbols.getAddress('plm_spawn', 'room_plms_upwards')),
+            'additionalETanks': ValueSingle(symbols.getAddress('new_game', 'additional_etanks'), storage=Byte),
+            'BTtweaksHack1': ValueSingle(symbols.getAddress('bomb_torizo', 'bt_grey_door_instr_nops')),
+            'BTtweaksHack2': ValueSingle(symbols.getAddress('bomb_torizo', 'bt_instr_nops')),
+            'introText': ValueSingle(symbols.getAddress('intro_text', 'page1_text'))
+        })
+
     addresses = {
-        'totalItems': ValueList([0x8BE656, 0x8BE6B3], storage=Byte),
-        'majorsSplit': ValueSingle(0x82fb6c, storage=Byte),
-        # scavenger hunt items list (17 prog items (including ridley) + hunt over + terminator, each is a word)
-        'scavengerOrder': ValueRange(0xA1F5D8, length=(17+1+1)*2),
         'plandoAddresses': ValueRange(0xdee000, length=128),
         'plandoTransitions': ValueSingle(0xdee100),
-        'escapeTimer': ValueSingle(0x809e21),
-        'escapeTimerTable': ValueSingle(0xA1F0AA),
-        'startAP': ValueSingle(0xa1f200),
-        'customDoorsAsm': ValueSingle(0x8ff800),
-        'locIdsByArea': ValueRange(0xA1F568, end=0xA1F5D7),
-        'plmSpawnTable': ValueSingle(0x8fe9a0),
-        'plmSpawnRoomTable': ValueSingle(0x8ff000),
         'moonwalk': ValueSingle(0x81b35d),
-        'additionalETanks': ValueSingle(0xA1F470, storage=Byte),
-        'hellrunRate': ValueSingle(0x8DE387),
-        'BTtweaksHack1': ValueSingle(0x84ba6f+3),
-        'BTtweaksHack2': ValueSingle(0x84d33b+3),
-        # in intro_text.ips
-        'introText': ValueSingle(0x8cc389)
+        'hellrunRate': ValueSingle(0x8DE387)
     }
 
 Addresses.addresses.update(objectivesAddr)

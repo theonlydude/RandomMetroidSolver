@@ -497,9 +497,11 @@ class RomPatcher:
                 minute = int(minute / 10) * 16 + minute % 10
                 second = int(second / 10) * 16 + second % 10
                 return [second, minute]
-            timerPatch[Addresses.getOne('escapeTimer')] = getTimerBytes(escapeTimer)
-            # timer table for Disabled Tourian escape
-            if 'TimerTable' in escapeAttr:
+            if 'TimerTable' not in escapeAttr:
+                timerPatch[Addresses.getOne('escapeTimer')] = getTimerBytes(escapeTimer)
+            else:
+                # timer table for Disabled Tourian escape: write 0 time as marker to use the table
+                timerPatch[Addresses.getOne('escapeTimer')] = [0,0]
                 tableBytes = []
                 timerPatch[Addresses.getOne('escapeTimerTable')] = tableBytes
                 for area in graphAreas[1:-1]: # no Ceres or Tourian

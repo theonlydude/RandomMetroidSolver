@@ -276,3 +276,4 @@ class GraphBuilder(object):
                 if area not in timerValues:
                     # area not in graph most probably, still write a 10 minute "ultra failsafe" value
                     timerValues[area] = 600
+            self.log.debug("escapeTimer. final table: "+str(timerValues))

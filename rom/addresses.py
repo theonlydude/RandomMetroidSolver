@@ -1,5 +1,4 @@
 from rom.addressTypes import ValueList, ValueSingle, ValueRange, Byte, Word, Long
-from rom.objectivesAddresses import objectivesAddr
 
 # TODO::add patches
 
@@ -47,7 +46,14 @@ class Addresses(object):
             'additionalETanks': ValueSingle(symbols.getAddress('new_game', 'additional_etanks'), storage=Byte),
             'BTtweaksHack1': ValueSingle(symbols.getAddress('bomb_torizo', 'bt_grey_door_instr_nops')),
             'BTtweaksHack2': ValueSingle(symbols.getAddress('bomb_torizo', 'bt_instr_nops')),
-            'introText': ValueSingle(symbols.getAddress('intro_text', 'page1_text'))
+            'introText': ValueSingle(symbols.getAddress('intro_text', 'page1_text')),
+            'objectivesList': ValueSingle(symbols.getAddress('objectives', 'objective_funcs')),
+            'objectiveEventsArray': ValueRange(symbols.getAddress('objectives', 'objective_events'), length=2*5),
+            'itemsMask': ValueSingle(symbols.getAddress('objectives', 'all_items_mask')),
+            'beamsMask': ValueSingle(symbols.getAddress('objectives', 'all_beams_mask')),
+            'objectivesSpritesOAM': ValueSingle(symbols.getAddress('objectives', 'first_spritemap')),
+            'objectivesText': ValueSingle(symbols.getAddress('objectives', 'objectivesText')),
+            'totalItemsPercent': ValueList([symbols.getAddress('objectives', 'collect_%d_items_pct' % pct) for pct in [25,50,75,100]])
         })
 
     addresses = {
@@ -56,5 +62,3 @@ class Addresses(object):
         'moonwalk': ValueSingle(0x81b35d),
         'hellrunRate': ValueSingle(0x8DE387)
     }
-
-Addresses.addresses.update(objectivesAddr)

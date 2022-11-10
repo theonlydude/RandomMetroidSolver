@@ -1,10 +1,12 @@
 # config:
+VANILLA?=$(ROOT_DIR)/vanilla.sfc
 ASAR?=asar
 ASAR_OPTS?=--fix-checksum=off
 MAKE_IPS?=$(ROOT_DIR)/tools/make_ips.sh
 DEP_TOOL?=$(ROOT_DIR)/tools/gen_asm_dep.sh
 MSL_TOOL?=$(ROOT_DIR)/tools/gen_msl.py
 SYM_TOOL?=$(ROOT_DIR)/tools/gen_syms.py
+IPS_CHECK_TOOL?=$(ROOT_DIR)/tools/ips_check.py
 
 # dirs
 SRC_DIR=src
@@ -33,16 +35,27 @@ MESEN_DEBUG_FILE=$(DEBUG_DIR)/VARIA$(FLAVOR).msl
 ASAR_OPTS+=$(patsubst %,-I%,$(INCLUDE_DIRS))
 ASAR_OPTS+=--symbols=wla
 
+export VANILLA
 export INCLUDE_DIRS
 export ASAR
 
 # rules
 all:	$(IPS_FILES) $(SYM_ASM_FILES) $(SYM_JSON_FILES) $(MESEN_DEBUG_FILE)
 
+check:	all
+	@$(IPS_CHECK_TOOL) $(VANILLA) $(IPS_FILES)
+
 clean:
 	@echo "Cleaning ..."
 	@rm -rf $(BUILD_DIR)
 	@rm -f $(IPS_FILES) $(SYM_ASM_FILES) $(MESEN_DEBUG_FILE)
+
+help:
+	@echo "- all (default) : builds IPS patches, symbols and debug files"
+	@echo "- clean : removes everything 'all' builds"
+	@echo "- check : all, then check IPS patches overlap"
+
+.PHONY:	all check clean help
 
 include $(DEP_FILES)
 

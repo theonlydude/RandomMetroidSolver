@@ -1,0 +1,20 @@
+{
+    "ceres_escape": 11140272,
+    "credits": 9431155,
+    "escape": 9431153,
+    "load_credits_music_data": 9173178,
+    "load_credits_music_track": 9173186,
+    "load_escape_music_data": 11140224,
+    "load_escape_music_track": 11140232,
+    "load_mb2_music_data": 11140256,
+    "load_mb2_music_track": 11140264,
+    "load_mb3_music_data": 11140240,
+    "load_mb3_music_track": 11140248,
+    "load_menu_music": 9173152,
+    "load_title_screen_music_data": 9173136,
+    "load_title_screen_music_track": 9173144,
+    "mb2": 9431159,
+    "mb3": 9431157,
+    "menu": 9431151,
+    "title_screen_intro": 9431149
+}

@@ -1,0 +1,18 @@
+{
+    "alt_door_hit": 8686169,
+    "alt_door_hit_skip_check": 8686243,
+    "alt_door_hit_vanilla_door_hit": 8686225,
+    "enable_hyper": 9568238,
+    "hyper_end": 11140167,
+    "hyper_start": 11140096,
+    "hyper_start_store_refill": 11140159,
+    "mb_room_main": 9434998,
+    "mb_room_main_add": 9435020,
+    "mb_room_main_end": 9435023,
+    "mb_room_main_max": 9435017,
+    "mb_room_setup": 9434990,
+    "pre_tourian_door": 9434960,
+    "pre_tourian_door_end": 9434989,
+    "reset_samus_palette": 11140200,
+    "tourian_door": 9434928
+}

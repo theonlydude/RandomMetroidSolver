@@ -5,7 +5,6 @@
 ;Adds a single decimal point value, to give more accurate results to random item ammounts
 
 !CollectedItems  = $7ED86E
-!TotalItems      = #$64 ;TOTAL number if items in the game. This includes ALL items: missiles, upgrades, etc
 
 lorom
 arch snes.cpu
@@ -51,9 +50,8 @@ compute_percent:
         LDA $4216                                       ;Load number of (collected items * 100)
         STA $4204                                       ;Store to devisor A
         SEP #$20
-print "1st TotaItems (add 1) : ", pc
-        LDA !TotalItems                                 ;Load total number of game items ; FLO: this has to be changed at ROM patch phase
-        STA $4206                                       ;Store to devisor B
+        LDA.l total_items
+        STA $4206                                      ;Store to devisor B
         PHA : PLA : XBA : XBA
         REP #$20
         LDA $4214                                       ;Load ((collected items * 100)/Total items) ie Item percent
@@ -88,8 +86,7 @@ print "1st TotaItems (add 1) : ", pc
         LDA $4216                                       ;Load (remainder * 10) and use it to divide by number of items
         STA $4204
         SEP #$20
-print "2nd TotaItems (add 1) : ", pc
-        LDA !TotalItems                                 ; FLO : patch this value to have accurate decimal point
+        LDA.l total_items
         STA $4206
         PHA : PLA : XBA : XBA                           ;Divide remainder*10 by number of items
         REP #$20
@@ -141,6 +138,10 @@ draw_digit_end:
         inx : inx
         ply
         rts
+
+;write TOTAL number if items in the game here
+total_items:
+        db 100
 
 print "End of endingtotals: ", pc
 warnpc $8be740

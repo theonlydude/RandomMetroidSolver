@@ -1,0 +1,12 @@
+{
+    "check_invisible_offset": 10615078,
+    "check_invisible_offset_end": 10615096,
+    "check_invisible_offset_visible": 10615093,
+    "hide_samus": 10615098,
+    "landing_descent": 10615040,
+    "lower_samus": 10615048,
+    "raise_samus": 10615071,
+    "raise_samus_land": 10615067,
+    "raise_samus_save": 10615061,
+    "show_samus": 10615105
+}

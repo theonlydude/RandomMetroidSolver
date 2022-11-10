@@ -105,4 +105,6 @@ warnpc $8ff7ff
 
 ;;; "reserve" area for generated door asm, to mark it as used
 org $8ff800
+generated_door_asm:
 	padbyte $ca : pad $8ffcff
+generated_door_asm_end:

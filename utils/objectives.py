@@ -43,8 +43,7 @@ class Goal(object):
         self.available = available
         self.clearFunc = logicClearFunc
         self.objCompletedFuncAPs = objCompletedFuncAPs
-        # SNES addr in bank A1, see objectives.asm
-        self.checkAddr = pc_to_snes(Addresses.getOne("objective[%s]" % romClearFunc)) & 0xffff
+        self.symbol = "objectives_%s" % romClearFunc
         self.escapeAccessPoints = escapeAccessPoints
         if self.escapeAccessPoints is None:
             self.escapeAccessPoints = (1, [])
@@ -78,6 +77,10 @@ class Goal(object):
         self.conflictFunc = conflictFunc
         # used by solver/isolver to know if a goal has been completed
         self.completed = False
+
+    @property
+    def checkAddr(self):
+        return pc_to_snes(Addresses.getOne(self.symbol)) & 0xffff
 
     def setRank(self, rank):
         self.rank = rank

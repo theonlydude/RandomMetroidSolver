@@ -1,0 +1,23 @@
+{
+    "add_etanks_and_save": 10613873,
+    "additional_etanks": 10613872,
+    "check_new_game": 10613264,
+    "check_new_game_end": 10613288,
+    "fix_timer_gfx": 10613440,
+    "gameplay_start": 10613347,
+    "gameplay_start_end": 10613390,
+    "gameplay_start_save": 10613386,
+    "morph_missile_check": 9430610,
+    "morph_missile_check_awake": 9430623,
+    "morph_missile_check_not_awake": 9430630,
+    "opt_doors": 10613250,
+    "rand": 10613408,
+    "skip_wake_zebes": 8699403,
+    "skip_wake_zebes_skip": 8699410,
+    "start_location": 10613248,
+    "startup": 10613289,
+    "startup_ceres": 10613335,
+    "startup_end": 10613342,
+    "startup_store_state": 10613338,
+    "startup_zebes": 10613330
+}

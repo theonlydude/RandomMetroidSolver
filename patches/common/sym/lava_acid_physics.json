@@ -1,0 +1,21 @@
+{
+    "animation_frame_lava_acid_branch": 9567062,
+    "bomb_jump_lava_acid_branch": 9476705,
+    "grapple_x_speed_lava_acid_branch": 9477206,
+    "jump_lava_acid_branch": 9476340,
+    "knockback_lava_acid_branch": 9476622,
+    "local_samus_submerged_lava_acid": 9470088,
+    "misc_physics_1_liquid_branch": 9565892,
+    "misc_physics_2_liquid_branch": 9565989,
+    "misc_physics_3_liquid_branch": 9566920,
+    "run_speed_branch_submerged": 9475950,
+    "samus_submerged_lava_acid": 9470540,
+    "samus_submerged_lava_acid_fully_submerged": 9470659,
+    "screw_palette_liquid_branch": 9558517,
+    "set_lava_acid_physics": 9473603,
+    "spin_jump_liquid_branch": 9479265,
+    "wall_jump_branch_submerged": 9471058,
+    "wall_jump_lava_acid_branch": 9476481,
+    "x_speed_lava_acid_branch": 9477126,
+    "y_accel_lava_acid_branch": 9477279
+}

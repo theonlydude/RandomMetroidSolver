@@ -1,0 +1,116 @@
+
+;;; replace:
+
+; room 9804: Bomb Torizo Room
+Room_9804_state_9835_PLM:
+Door_1B_Room_9804_PLM_BAF4:
+    ; Bomb Torizo grey door
+    dw $BAF4 : db $0e : db $06 : dw $081b
+    ; Bombs, chozo orb
+    dw $ef3b : db $06 : db $0a : dw $0007 
+    ; Bomb Torizo's crumbling chozo
+    dw $d6ea : db $07 : db $0b : dw $0000 
+    dw $0000
+
+;;; remove (redefined in freespace):
+Door_87_Room_C98E_PLM_C842
+Door_4F_Room_A98D_PLM_C854
+
+;;; remove (door in escape has same id as door in landing site)
+Door_00_Room_DE4D_PLM_C8CA
+
+;;; replace:
+
+org $8ff000
+FreeSpace_00:
+    ; Scroll data
+    db $19,$01,$80
+FreeSpace_01:
+    ; Scroll data
+    db $01,$01,$80
+FreeSpace_06:
+    ; Scroll data
+    db $00,$02,$15,$02,$80
+FreeSpace_07:
+    ; Scroll data
+    db $1a,$01,$80
+FreeSpace_08:
+    ; Scroll data
+    db $02,$02,$05,$01,$80
+FreeSpace_09:
+    ; Scroll data
+    db $02,$01,$05,$00,$80,$03,$02,$80
+FreeSpace_0A:
+    ; Scroll data
+    db $0a,$02,$80
+FreeSpace_0B:
+    ; Scroll data
+    db $0a,$00,$80
+FreeSpace_0D:
+    ; Scroll data
+    db $1b,$02,$80
+FreeSpace_0E:
+    ; Scroll data
+    db $01,$00,$02,$00,$03,$00,$06,$00,$10,$00,$80
+FreeSpace_0F:
+    ; Scroll data
+    db $07,$00,$08,$00,$09,$00,$0a,$00,$0b,$00,$80
+FreeSpace_10:
+    ; PLM Set
+    ; Scroll PLM
+    dw $b703 : db $40 : db $2d : dw Room_C98E_state_C9BA_PLM_index_0_PLM_scroll_data 
+    ; Scroll PLM
+    dw $b703 : db $14 : db $16 : dw $a286 
+    ; Scroll PLM
+    dw $b703 : db $5d : db $19 : dw FreeSpace_0E 
+    ; Scroll PLM
+    dw $b703 : db $1e : db $28 : dw Room_C98E_state_C9BA_PLM_index_3_PLM_scroll_data 
+    ; Reserve tank, chozo orb
+    dw $ef7b : db $0c : db $0b : dw $0081 
+    ; Missile tank
+    dw $eedb : db $23 : db $26 : dw $0082 
+Door_87_Room_C98E_PLM_C842:
+    ; Door. Grey door facing left
+    dw $c842 : db $5e : db $16 : dw $9087
+    ; Chain block (relocated)
+    dw $fc1f : db $14 : db $17 : dw $020b
+    ; Chain block (relocated)
+    dw $fc1f : db $13 : db $17 : dw $0436
+    ; Chain block (relocated)
+    dw $fc1f : db $13 : db $1b : dw $0105
+    ; Chain block (relocated)
+    dw $fc1f : db $12 : db $1d : dw $0132
+    ; Chain block (relocated)
+    dw $fc1f : db $13 : db $18 : dw $0105
+    ; Scroll PLM
+    dw $b703 : db $44 : db $23 : dw FreeSpace_0F
+    dw $0000
+FreeSpace_11:
+    ; PLM Set
+    ; Scroll PLM
+    dw $b703 : db $02 : db $0a : dw FreeSpace_13 
+    ; Scroll PLM
+    dw $b703 : db $3d : db $0a : dw FreeSpace_13 
+    dw $0000
+FreeSpace_12:
+    ; Scroll data
+    db $02,$00,$80
+FreeSpace_13:
+    ; Scroll data
+    db $00,$01,$01,$01,$02,$01,$03,$01,$80
+FreeSpace_14:
+    ; Scroll data
+    db $00,$00,$02,$00,$19,$00,$80
+FreeSpace_15:
+    ; PLM Set
+Door_4F_Room_A98D_PLM_C854:
+    ; Door. Grey door facing down
+    dw $c854 : db $36 : db $02 : dw $044f 
+    ; Energy tank
+    dw $eed7 : db $02 : db $06 : dw $0034 
+Door_EE_Room_A98D_PLM_C842:
+    ; Door. Grey door facing left
+    dw $c842 : db $7e : db $06 : dw $04ee 
+    dw $0000
+
+warnpc $8fff00

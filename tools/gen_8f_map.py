@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 
 # prereq:
 # start with bank_8F.asm from total's banklog parser.
@@ -15,7 +15,7 @@ from collections import defaultdict
 # we're in directory 'tools/' we have to update sys.path
 sys.path.append(os.path.dirname(sys.path[0]))
 
-from rom.bank8f_addresses import bank_8f
+from patches.vanilla.sym.reverse.bank8f_addresses import bank_8f
 from rom.ips import IPS_Patch
 from rom.rom import pc_to_snes, snes_to_pc, RealROM
 from tools.rooms import rooms

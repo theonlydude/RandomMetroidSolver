@@ -15,9 +15,10 @@ import utils.log
 class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty
 
-    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console',
-                 firstItemsLog=None, extStatsFilename=None, extStatsStep=None, displayGeneratedPath=False,
-                 outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False, runtimeLimit_s=0):
+    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[],
+                 type='console', firstItemsLog=None, extStatsFilename=None, extStatsStep=None,
+                 displayGeneratedPath=False, outputFileName=None, magic=None, checkDuplicateMajor=False,
+                 vcr=False, runtimeLimit_s=0):
         self.interactive = False
         self.checkDuplicateMajor = checkDuplicateMajor
         if vcr == True:

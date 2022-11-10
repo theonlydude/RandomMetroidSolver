@@ -4,6 +4,7 @@ import sys, argparse
 from solver.interactiveSolver import InteractiveSolver
 from solver.standardSolver import StandardSolver
 from solver.conf import Conf
+from logic.logic import Logic
 import utils.log
 
 def interactiveSolver(args):
@@ -218,6 +219,8 @@ if __name__ == "__main__":
             sys.exit(-1)
 
     utils.log.init(args.debug)
+
+    Logic.factory(args.logic)
 
     if args.interactive == True:
         interactiveSolver(args)

@@ -133,6 +133,14 @@ for r in ips.getRanges():
             modified[address] += 1
             ranges[address].add(r)
 
+# add all plms population as we need all door id labels even if not modified by the patch
+for r in [range(0x8f8000, 0x8f9194), range(0x8fc215, 0x8fc8c7)]:
+    for i in r:
+        address = bank8f_map[i]
+        if address != -1:
+            modified[address] += 1
+            ranges[address].add(r)
+
 print("patch {} has modifications in bank 8f:".format(patch))
 print("")
 print("Address  | Bytes | Label")

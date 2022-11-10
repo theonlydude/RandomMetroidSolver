@@ -81,7 +81,12 @@ class RomPatcher:
         # patches for  minimizer with fast Tourian
         'MinimizerTourian': ['minimizer_tourian.ips', 'open_zebetites.ips'],
         # patches for door color rando
-        'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips']
+        'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips'],
+        # patches for each "logic" to convert vanilla ROM to "logic" base ROM
+        'Logic': {
+            "vanilla": [],
+            "mirror": ['mirrortroid.ips', 'bank_8f.ips', 'bomb_torizo_door.ips', 'chainblocks.ips']
+        }
     }
 
     def __init__(self, settings=None, romFileName=None, magic=None):
@@ -331,7 +336,7 @@ class RomPatcher:
     def applyIPSPatches(self):
         try:
             # apply standard patches
-            stdPatches = []
+            stdPatches = RomPatcher.IPSPatches['Logic'][Logic.implementation][:]
             plms = []
             stdPatches += RomPatcher.IPSPatches['Standard'][:]
             if not self.settings["layout"]:

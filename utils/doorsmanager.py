@@ -100,7 +100,7 @@ class Door(object):
         # labels are: Door_95_Room_D48E_PLM_C884, need namespace as prefix: bank_8f
         labelRegex = 'bank_8f_Door_{0:0{1}X}_Room_[0-9A-Z]*_PLM_[0-9A-Z]*'.format(self.id, 2)
         addresses = symbols.getAddresses(labelRegex)
-        assert len(addresses) == 1, "Multiple or no labels found: {} for door id: {} label re: {} labels: {}".format(len(addresses), hex(self.id), labelRegex, list(addresses.keys()))
+        assert len(addresses) == 1, "Multiple or no labels found: {} for door id: {}".format(len(addresses), hex(self.id))
         label = list(addresses.keys())[0]
         addr = list(addresses.values())[0]
 

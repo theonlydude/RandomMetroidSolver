@@ -7826,7 +7826,7 @@ Room_E06B_Header:
     db $01 ; event
     dw $e097 ; room state pointer
     dw $e5e6 ; room state standard
-org $8ff000
+org $8ffd40
 FreeSpace_00:
     ; Scroll data
     db $19,$01,$80
@@ -7918,4 +7918,4 @@ Door_EE_Room_A98D_PLM_C842:
     dw $c842 : db $7e : db $06 : dw $04ee 
     dw $0000
 
-warnpc $8fff00
+warnpc $8FFDFF

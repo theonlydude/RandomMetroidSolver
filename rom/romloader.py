@@ -165,9 +165,9 @@ class RomLoader(object):
     def loadDoorsColor(self):
         rom = self.getROM()
         if self.romReader.race is None:
-            return DoorsManager.loadDoorsColor(rom, rom.readWord)
+            return DoorsManager().loadDoorsColor(rom, rom.readWord)
         else:
-            return DoorsManager.loadDoorsColor(rom, self.romReader.readPlmWord)
+            return DoorsManager().loadDoorsColor(rom, self.romReader.readPlmWord)
 
     def readLogic(self):
         return self.romReader.readLogic()

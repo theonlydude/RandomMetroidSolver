@@ -60,5 +60,18 @@ class Addresses(object):
         'plandoAddresses': ValueRange(0xdee000, length=128),
         'plandoTransitions': ValueSingle(0xdee100),
         'moonwalk': ValueSingle(0x81b35d),
-        'hellrunRate': ValueSingle(0x8DE387)
+        'hellrunRate': ValueSingle(0x8DE387),
+        'morphEyeAI': ValueSingle(0xa890e6),
+        'morphHeadAI': ValueSingle(0xa8e8b2),
+        'paletteShip_1': ValueSingle(0xA2A59E),
+        'paletteShip_2': ValueSingle(0xA2A5BE),
+        'paletteShip7_1': ValueSingle(0x8DD6BA),
+        'paletteShip7_2': ValueSingle(0x8DD900),
+        'paletteShipGlow_1': ValueSingle(0x8DCA4E),
+        'paletteShipGlow_2': ValueSingle(0x8DCAAA),
+        'westOceanScrollingSky': ValueSingle(0x8fb7bb),
+        'versionOamListPtr1': ValueSingle(0x8ba0e3),
+        'versionOamListPtr2': ValueSingle(0x8ba0e9),
+        'versionOamList': ValueSingle(0x8CF3E9),
+        'musicDataTable': ValueSingle(0x8FE7E4)
     }

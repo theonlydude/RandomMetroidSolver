@@ -259,8 +259,8 @@ class RomPatcher:
             operand = item.BeamBits
         else:
             operand = item.ItemBits
-        self.patchMorphBallCheck(snes_to_pc(0xa890e6), cat, comp, operand, branch) # eye main AI
-        self.patchMorphBallCheck(snes_to_pc(0xa8e8b2), cat, comp, operand, branch) # head main AI
+        self.patchMorphBallCheck(Addresses.getOne('morphEyeAI'), cat, comp, operand, branch)
+        self.patchMorphBallCheck(Addresses.getOne('morphHeadAI'), cat, comp, operand, branch)
 
     def patchMorphBallCheck(self, offset, cat, comp, operand, branch):
         # actually patch enemy AI
@@ -287,9 +287,9 @@ class RomPatcher:
 
     def purgeSprite(self):
         # custom sprites are also modifying ship palettes, so remove these records from the custom sprite
-        paletteShip = [snes_to_pc(0xA2A59E), snes_to_pc(0xA2A5BE)]
-        paletteShip7 = [snes_to_pc(0x8DD6BA), snes_to_pc(0x8DD900)]
-        paletteShipGlow = [snes_to_pc(0x8DCA4E), snes_to_pc(0x8DCAAA)]
+        paletteShip = [Addresses.getOne('paletteShip_1'), Addresses.getOne('paletteShip_2')]
+        paletteShip7 = [Addresses.getOne('paletteShip7_1'), Addresses.getOne('paletteShip7_2')]
+        paletteShipGlow = [Addresses.getOne('paletteShipGlow_1'), Addresses.getOne('paletteShipGlow_2')]
         spriteIps = self.ipsPatches[-1]
         spriteIps = spriteIps.toDict()
         filteredDict ={}
@@ -604,7 +604,7 @@ class RomPatcher:
         random.seed(seed)
         seedInfo = random.randint(0, 0xFFFF)
         seedInfo2 = random.randint(0, 0xFFFF)
-        self.romFile.writeWord(seedInfo, snes_to_pc(0xdfff00))
+        self.romFile.writeWord(seedInfo, Addresses.getOne('seed_display_seed_value'))
         self.romFile.writeWord(seedInfo2)
 
     def writeMagic(self):
@@ -653,7 +653,7 @@ class RomPatcher:
         totalNothing = sum(1 for il in itemLocs if il.Accessible and il.Item.Category == 'Nothing')
         totalEnergy = self.getItemQty(itemLocs, 'ETank')+self.getItemQty(itemLocs, 'Reserve')
         totalMajors = max(totalItemLocs - totalEnergy - totalAmmo - totalNothing, 0)
-        address = snes_to_pc(0xceb6c0)
+        address = Addresses.getOne("credits_varia_credits_items_distrib")
         value = "{:>2}".format(totalItemLocs)
         line = " ITEM LOCATIONS              %s " % value
         self.writeCreditsStringBig(address, line, top=True)
@@ -731,7 +731,7 @@ class RomPatcher:
         address += 0x40
 
         # write ammo/energy pct
-        address = snes_to_pc(0xcebc40)
+        address = Addresses.getOne("credits_varia_credits_items_distrib_continued")
         (ammoPct, energyPct) = (int(self.getAmmoPct(dist)), int(100*totalEnergy/18))
         line = " AVAILABLE AMMO {:>3}% ENERGY {:>3}%".format(ammoPct, energyPct)
         self.writeCreditsStringBig(address, line, top=True)
@@ -775,7 +775,7 @@ class RomPatcher:
             return s
 
         isRace = self.race is not None
-        startCreditAddress = snes_to_pc(0xded240)
+        startCreditAddress = Addresses.getOne('credits_varia_itemlocations_start')
         address = startCreditAddress
         if isRace:
             addr = address - 0x40
@@ -1021,7 +1021,7 @@ class RomPatcher:
 
     # change BG table to avoid scrolling sky bug when transitioning to west ocean
     def patchWestOcean(self, doorPtr):
-        self.romFile.writeWord(doorPtr, snes_to_pc(0x8fb7bb))
+        self.romFile.writeWord(doorPtr, Addresses.getOne('westOceanScrollingSky'))
 
     # forces CRE graphics refresh when exiting kraid's or croc room
     def forceRoomCRE(self, roomPtr, creFlag=0x2):
@@ -1125,8 +1125,9 @@ class RomPatcher:
         # max 32 chars
 
         # new oamlist address in free space at the end of bank 8C
-        self.romFile.writeWord(0xF3E9, snes_to_pc(0x8ba0e3))
-        self.romFile.writeWord(0xF3E9, snes_to_pc(0x8ba0e9))
+        ptr = pc_to_snes(Addresses.getOne('versionOamList')) & 0xffff
+        self.romFile.writeWord(ptr, Addresses.getOne('versionOamListPtr1'))
+        self.romFile.writeWord(ptr, Addresses.getOne('versionOamListPtr2'))
 
         # string length
         versionLength = len(version)
@@ -1135,7 +1136,7 @@ class RomPatcher:
             length = versionLength + rotationLength
         else:
             length = versionLength
-        self.romFile.writeWord(length, snes_to_pc(0x8cf3e9))
+        self.romFile.writeWord(length, Addresses.getOne('versionOamList'))
         versionMiddle = int(versionLength / 2) + versionLength % 2
 
         # oams
@@ -1340,7 +1341,6 @@ class MusicPatcher(object):
                 self.vanillaTracks = meta
         assert self.vanillaTracks is not None, "MusicPatcher: missing vanilla JSON descriptor"
         self.replaceableTracks = [track for track in self.vanillaTracks if track not in self.constraints['preserve'] and track not in self.constraints['discard']]
-        self.musicDataTableAddress = snes_to_pc(0x8FE7E4)
         self.musicDataTableMaxSize = 45 # to avoid overwriting useful data in bank 8F
 
     # tracks: dict with track name to replace as key, and replacing track name as value
@@ -1454,7 +1454,7 @@ class MusicPatcher(object):
                 self.rom.write(f.read())
 
     def _writeMusicDataTable(self, musicData, musicDataAddresses):
-        self.rom.seek(self.musicDataTableAddress)
+        self.rom.seek(Addresses.getOne('musicDataTable'))
         for dataFile in musicData:
             addr = pc_to_snes(musicDataAddresses[dataFile]) if dataFile in musicDataAddresses else 0
             self.rom.writeLong(addr)

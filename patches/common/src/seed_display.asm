@@ -3,6 +3,9 @@
 arch snes.cpu
 lorom
 
+org $dfff00
+seed_value:
+
 ;; Inject new menu graphic data after decompression
 org $82ecbb
 	jsr seed_display
@@ -15,7 +18,7 @@ seed_display:
         php
         rep #$30                ;; sets A, X and Y to 16-bit mode
 
-        lda $dfff00             ;; first seed value in ROM
+        lda seed_value          ;; first seed value in ROM
         and #$001f              ;; keep only [0 -> 31] value as there's 32 values in the table
         asl                     ;; multiply by 8 as each entry is 8 bytes long
         asl
@@ -168,5 +171,5 @@ print "InfoStr : ", pc
 InfoStr:
     db 0
 
-print "The end : ", pc
-        
+print "82 end : ", pc
+

@@ -428,13 +428,13 @@ class GraphUtils:
         GraphUtils.log.debug("escapeAnimalsTransitions. animalsAccess="+animalsAccess)
         assert len(possibleTargets) == 4, "Invalid possibleTargets list: " + str(possibleTargets)
         # actually add the 4 connections for successive escapes challenge
-        sym_base = "rando_escape_flyway_door_lists_list"
+        sym_base = "rando_escape_flyway_door_lists_door"
         btDoor = getAccessPoint('Flyway Right')
         for i in range(len(possibleTargets)):
             ap = copy.copy(btDoor)
             ap.Name += " " + str(i)
             ap.ExitInfo['DoorPtr'] = None
-            ap.ExitInfo['DoorPtrSym'] = sym_base+str(i+1)
+            ap.ExitInfo['DoorPtrSym'] = sym_base+str(i)
             graph.addAccessPoint(ap)
             target = possibleTargets[i]
             graph.addTransition(ap.Name, target)

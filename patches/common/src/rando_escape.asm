@@ -72,9 +72,10 @@ org $83aaf6
     dw escape_setup
 
 ;;; alternate flyway (= pre BT) door lists for escape animals surprise
-macro FlywayDoorList()
+macro FlywayDoorList(n)
     ;; door to parlor
     db $FD, $92, $00, $05, $3E, $26, $03, $02, $00, $80, $A2, $B9
+.door<n>:
     ;; placeholder for BT door to be filled in by randomizer
     db $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca
 endmacro
@@ -82,10 +83,10 @@ endmacro
 org $83ADA0
 print "flyway_door_lists : ", pc
 flyway_door_lists:
-%FlywayDoorList()
-%FlywayDoorList()
-%FlywayDoorList()
-%FlywayDoorList()
+%FlywayDoorList(0)
+%FlywayDoorList(1)
+%FlywayDoorList(2)
+%FlywayDoorList(3)
 
 print "bt_door_list : ", pc
 bt_door_list:

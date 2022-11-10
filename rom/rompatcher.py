@@ -1150,9 +1150,9 @@ class RomPatcher:
 
     def writeDoorsColor(self, doorsStart):
         if self.race is None:
-            DoorsManager.writeDoorsColor(self.romFile, doorsStart, self.romFile.writeWord)
+            DoorsManager().writeDoorsColor(self.romFile, doorsStart, self.romFile.writeWord)
         else:
-            DoorsManager.writeDoorsColor(self.romFile, doorsStart, self.writePlmWord)
+            DoorsManager().writeDoorsColor(self.romFile, doorsStart, self.writePlmWord)
 
     def writeDoorIndicators(self, plms, area, door):
         indicatorFlags = IndicatorFlag.Standard | (IndicatorFlag.AreaRando if area else 0) | (IndicatorFlag.DoorRando if door else 0)

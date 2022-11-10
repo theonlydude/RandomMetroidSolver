@@ -409,7 +409,7 @@ class DoorsManager():
     @staticmethod
     def setRefillSaveToBlue():
         for door in DoorsManager.doors.values():
-            if door.id is not None:
+            if not door.canRandom:
                 door.forceBlue()
 
     @staticmethod
@@ -424,7 +424,7 @@ class DoorsManager():
         for door in DoorsManager.doors.values():
             door.writeColor(rom, writeWordFunc)
             # also set save/refill doors to blue
-            if door.id is not None:
+            if not door.canRandom:
                 doors.append(door.id)
 
     # returns a dict {'DoorName': indicatorPlmType }

@@ -1,7 +1,5 @@
 org $8f8018
 Door_00_Room_91F8_PLM_C872:
-org $8fc881
-Door_00_Room_DE4D_PLM_C8CA:
 org $8f801e
 Door_01_Room_91F8_PLM_C85A:
 org $8f8044

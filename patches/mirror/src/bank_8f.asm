@@ -40,6 +40,10 @@ Door_04_Room_91F8_PLM_C842:
     ; Door. Grey door facing left
     dw $c842 : db $8e : db $26 : dw $9004 
     dw $0000
+org $8f8058
+; room 92B3: Gauntlet Entrance
+Room_92B3_state_92DF_PLM:
+    dw $0000
 org $8f805a
 ; room 92FD: Parlor and Alcatraz
 Room_92FD_state_932E_PLM:
@@ -204,6 +208,10 @@ Door_0C_Room_93FE_PLM_C878:
     ; Missile tank
     dw $eedb : db $7e : db $2f : dw $0003 
     dw $0000
+org $8f81fc
+; room 9461: Bowling Alley Path
+Room_9461_state_946E_PLM:
+    dw $0000
 org $8f81fe
 ; room 948C: Crateria Keyhunter Room
 Room_948C_state_9499_PLM:
@@ -226,11 +234,49 @@ Door_0E_Room_948C_PLM_C866:
     ; Door. Yellow door facing up
     dw $c866 : db $16 : db $2d : dw $000e 
     dw $0000
+org $8f8230
+; room 94CC: [Elevator to Maridia]
+Room_94CC_state_94D9_PLM:
+    ; Scroll PLM
+    dw $b703 : db $08 : db $0d : dw $94fa 
+    dw $0000
+org $8f8238
+; room 94FD: East Ocean
+Room_94FD_state_950A_PLM:
+    dw $0000
+org $8f823a
+; room 9552: Forgotten Highway Kago Room
+Room_9552_state_955F_PLM:
+    dw $0000
+org $8f823c
+; room 957D: Crab Maze
+Room_957D_state_958A_PLM:
+    dw $0000
+org $8f823e
+; room 95A8: [Crab Maze to Elevator]
+Room_95A8_state_95B5_PLM:
+Door_0F_Room_95A8_PLM_C866:
+    ; Door. Yellow door facing up
+    dw $c866 : db $06 : db $0d : dw $000f 
+    dw $0000
+org $8f8246
+; room 95D4: Crateria Tube
+Room_95D4_state_95E1_PLM:
+    dw $0000
 org $8f8248
 ; room 95FF: The Moat
 Room_95FF_state_960C_PLM:
     ; Missile tank
     dw $eedb : db $11 : db $09 : dw $0004 
+    dw $0000
+org $8f8250
+; room 962A: [Elevator to Red Brinstar]
+Room_962A_state_9637_PLM:
+    ; Scroll PLM
+    dw $b703 : db $08 : db $0d : dw $9658 
+Door_10_Room_962A_PLM_C86C:
+    ; Door. Yellow door facing down
+    dw $c86c : db $06 : db $02 : dw $0010 
     dw $0000
 org $8f825e
 ; room 965B: Gauntlet Energy Tank Room
@@ -239,6 +285,10 @@ Room_965B_state_9668_PLM:
     dw $b703 : db $0b : db $00 : dw FreeSpace_01 
     ; Energy tank
     dw $eed7 : db $0c : db $08 : dw $0005 
+    dw $0000
+org $8f826c
+; room 968F: [West Ocean Geemer Corridor]
+Room_968F_state_969C_PLM:
     dw $0000
 org $8f826e
 ; room 96BA: Climb
@@ -394,6 +444,12 @@ Door_1A_Room_975C_PLM_C848:
     ; Missile tank
     dw $eedb : db $2a : db $1a : dw $0006 
     dw $0000
+org $8f83f6
+; room 97B5: [Elevator to Blue Brinstar]
+Room_97B5_state_97E0_PLM:
+    ; Scroll PLM
+    dw $b703 : db $07 : db $0d : dw $9801 
+    dw $0000
 org $8f83fe
 ; room 9804: Bomb Torizo Room
 Room_9804_state_9835_PLM:
@@ -421,11 +477,31 @@ Door_1D_Room_9879_PLM_C890:
     ; Door. Red door facing right
     dw $c890 : db $01 : db $06 : dw $001d 
     dw $0000
+org $8f8428
+; room 9879: Flyway
+Room_9879_state_98C4_PLM:
+    ; Sets Metroids cleared states when required
+    dw $db44 : db $08 : db $08 : dw $0010 
+    dw $0000
+org $8f8430
+; room 98E2: Pre-Map Flyway
+Room_98E2_state_98EF_PLM:
+    dw $0000
 org $8f8432
 ; room 990D: Terminator Room
 Room_990D_state_991A_PLM:
     ; Energy tank
     dw $eed7 : db $58 : db $2a : dw $0008 
+    dw $0000
+org $8f843a
+; room 9938: [Elevator to Green Brinstar]
+Room_9938_state_9945_PLM:
+    ; Scroll PLM
+    dw $b703 : db $07 : db $0d : dw $9966 
+    dw $0000
+org $8f8442
+; room 9969: Lower Mushrooms
+Room_9969_state_9976_PLM:
     dw $0000
 org $8f8444
 ; room 9994: Crateria Map Room
@@ -457,6 +533,18 @@ org $8f8478
 Room_99F9_state_9A06_PLM:
     ; Super missile tank
     dw $eedf : db $04 : db $09 : dw $000b 
+    dw $0000
+org $8f8480
+; room 9A44: Final Missile Bombway
+Room_9A44_state_9A56_PLM:
+    dw $0000
+org $8f8482
+; room 9A44: Final Missile Bombway
+Room_9A44_state_9A70_PLM:
+    dw $0000
+org $8f8484
+; room 9A90: The Final Missile
+Room_9A90_state_9AA2_PLM:
     dw $0000
 org $8f8486
 ; room 9A90: The Final Missile
@@ -553,6 +641,13 @@ org $8f8540
 Room_9C35_state_9C42_PLM:
     ; Map station
     dw $b6d3 : db $0b : db $0a : dw $8000 
+    dw $0000
+org $8f8548
+; room 9C5E: Green Brinstar Fireflea Room
+Room_9C5E_state_9C6B_PLM:
+Door_27_Room_9C5E_PLM_C878:
+    ; Door. Green door facing right
+    dw $c878 : db $01 : db $26 : dw $0027 
     dw $0000
 org $8f8550
 ; room 9C89: [Green Brinstar Missile Station]
@@ -653,6 +748,13 @@ Door_2C_Room_9D9C_PLM_C842:
 Door_2D_Room_9D9C_PLM_C854:
     ; Door. Grey door facing down
     dw $c854 : db $06 : db $03 : dw $0c2d 
+    dw $0000
+org $8f8642
+; room 9DC7: Spore Spawn Room
+Room_9DC7_state_9DF3_PLM:
+Door_2E_Room_9DC7_PLM_C87E:
+    ; Door. Green door facing up
+    dw $c87e : db $06 : db $2e : dw $002e 
     dw $0000
 org $8f864a
 ; room 9E11: Pink Brinstar Power Bomb Room
@@ -801,6 +903,10 @@ Door_33_Room_9FBA_PLM_C878:
     ; Door. Green door facing right
     dw $c878 : db $01 : db $06 : dw $0033 
     dw $0000
+org $8f87ae
+; room 9FE5: Green Brinstar Beetom Room
+Room_9FE5_state_9FF2_PLM:
+    dw $0000
 org $8f87b0
 ; room A011: Etecoon Energy Tank Room
 Room_A011_state_A01E_PLM:
@@ -879,6 +985,10 @@ Room_A184_state_A191_PLM:
     ; Save station
     dw $b76f : db $09 : db $0b : dw $0000 
     dw $0000
+org $8f8834
+; room A1AD: Blue Brinstar Boulder Room
+Room_A1AD_state_A1BA_PLM:
+    dw $0000
 org $8f8836
 ; room A1D8: Blue Brinstar Double Missile Room
 Room_A1D8_state_A1E5_PLM:
@@ -925,6 +1035,10 @@ org $8f8876
 Room_A2CE_state_A2DB_PLM:
     ; X-ray scope, chozo orb
     dw $ef63 : db $1a : db $07 : dw $0026 
+    dw $0000
+org $8f887e
+; room A2F7: Hellway
+Room_A2F7_state_A304_PLM:
     dw $0000
 org $8f8880
 ; room A322: Caterpillar Room
@@ -991,6 +1105,10 @@ Room_A3AE_state_A3BB_PLM:
     dw $ef37 : db $1b : db $09 : dw $0028 
     ; Missile tank
     dw $eedb : db $2d : db $08 : dw $0029 
+    dw $0000
+org $8f891c
+; room A3DD: Bat Room
+Room_A3DD_state_A3EA_PLM:
     dw $0000
 org $8f891e
 ; room A408: Below Spazer
@@ -1083,6 +1201,16 @@ Room_A4DA_state_A4E7_PLM:
     ; Missile tank, shot block
     dw $ef83 : db $11 : db $08 : dw $002c 
     dw $0000
+org $8f89f4
+; room A521: Baby Kraid Room
+Room_A521_state_A54D_PLM:
+Door_42_Room_A521_PLM_C842:
+    ; Door. Grey door facing left
+    dw $c842 : db $5e : db $06 : dw $0c42 
+Door_43_Room_A521_PLM_C848:
+    ; Door. Grey door facing right
+    dw $c848 : db $01 : db $06 : dw $0c43 
+    dw $0000
 org $8f8a02
 ; room A56B: Kraid Eye Door Room
 Room_A56B_state_A578_PLM:
@@ -1102,6 +1230,20 @@ Door_45_Room_A56B_PLM_DB4C:
     dw $db52 : db $01 : db $19 : dw $0045 
     ; Eye door eye, facing right
     dw $db48 : db $01 : db $17 : dw $0045 
+    dw $0000
+org $8f8a2e
+; room A59F: Kraid Room
+Room_A59F_state_A5CB_PLM:
+Door_46_Room_A59F_PLM_C842:
+    ; Door. Grey door facing left
+    dw $c842 : db $1e : db $16 : dw $0046 
+Door_47_Room_A59F_PLM_C848:
+    ; Door. Grey door facing right
+    dw $c848 : db $01 : db $16 : dw $0047 
+    dw $0000
+org $8f8a3c
+; room A5ED: Statues Hallway
+Room_A5ED_state_A5FA_PLM:
     dw $0000
 org $8f8a3e
 ; room A618: [Red Tower Energy Charge Station]
@@ -1164,6 +1306,28 @@ Room_A6A1_state_A6AE_PLM:
     ; Upwards extension
     dw $b647 : db $1b : db $04 : dw $8000 
     dw $0000
+org $8f8aca
+; room A6E2: Varia Suit Room
+Room_A6E2_state_A6EF_PLM:
+    ; Varia suit, chozo orb
+    dw $ef5b : db $07 : db $09 : dw $0030 
+    dw $0000
+org $8f8ad2
+; room A70B: [Kraid Save Room]
+Room_A70B_state_A718_PLM:
+    ; Save station
+    dw $b76f : db $07 : db $0b : dw $0003 
+    dw $0000
+org $8f8ada
+; room A734: [Caterpillar Save Room]
+Room_A734_state_A741_PLM:
+    ; Save station
+    dw $b76f : db $07 : db $0b : dw $0004 
+    dw $0000
+org $8f8ae2
+; room A75D: Ice Beam Acid Room
+Room_A75D_state_A76A_PLM:
+    dw $0000
 org $8f8ae4
 ; room A788: Cathedral
 Room_A788_state_A795_PLM:
@@ -1194,6 +1358,18 @@ Door_4C_Room_A7DE_PLM_C85A:
 Door_4D_Room_A7DE_PLM_C88A:
     ; Door. Red door facing left
     dw $c88a : db $0e : db $56 : dw $004d 
+    dw $0000
+org $8f8b14
+; room A815: Ice Beam Gate Room
+Room_A815_state_A822_PLM:
+    ; Scroll PLM
+    dw $b703 : db $37 : db $2d : dw $a860 
+    ; Rightwards extension
+    dw $b63b : db $38 : db $2d : dw $8000 
+    dw $0000
+org $8f8b22
+; room A865: Ice Beam Tutorial Room
+Room_A865_state_A872_PLM:
     dw $0000
 org $8f8b24
 ; room A890: Ice Beam Room
@@ -1300,6 +1476,12 @@ Door_51_Room_AA82_PLM_C88A:
     ; Door. Red door facing left
     dw $c88a : db $1e : db $06 : dw $0051 
     dw $0000
+org $8f8bfc
+; room AAB5: [Post Crocomire Save Room]
+Room_AAB5_state_AAC2_PLM:
+    ; Save station
+    dw $b76f : db $07 : db $0b : dw $0000 
+    dw $0000
 org $8f8c04
 ; room AADE: Post Crocomire Power Bomb Room
 Room_AADE_state_AAEB_PLM:
@@ -1332,6 +1514,14 @@ org $8f8c2a
 Room_AB8F_state_AB9C_PLM:
     ; Missile tank
     dw $eedb : db $3c : db $09 : dw $003b 
+    dw $0000
+org $8f8c32
+; room ABD2: Grapple Tutorial Room 2
+Room_ABD2_state_ABDF_PLM:
+    dw $0000
+org $8f8c34
+; room AC00: Grapple Tutorial Room 1
+Room_AC00_state_AC0D_PLM:
     dw $0000
 org $8f8c36
 ; room AC2B: Grapple Beam Room
@@ -1420,6 +1610,10 @@ Room_ADDE_state_ADEB_PLM:
     ; Wave beam, chozo orb
     dw $ef4f : db $04 : db $06 : dw $0044 
     dw $0000
+org $8f8cd2
+; room AE07: Spiky Platforms Tunnel
+Room_AE07_state_AE14_PLM:
+    dw $0000
 org $8f8cd4
 ; room AE32: Volcano Room
 Room_AE32_state_AE3F_PLM:
@@ -1471,6 +1665,36 @@ Door_58_Room_AE74_PLM_C85A:
     ; Door. Yellow door facing left
     dw $c85a : db $0e : db $26 : dw $0058 
     dw $0000
+org $8f8d56
+; room AEB4: Magdollite Tunnel
+Room_AEB4_state_AEC1_PLM:
+    dw $0000
+org $8f8d58
+; room AEDF: Purple Shaft
+Room_AEDF_state_AEEC_PLM:
+    ; Scroll PLM
+    dw $b703 : db $02 : db $0b : dw $af0f 
+    ; Rightwards extension
+    dw $b63b : db $03 : db $0b : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $04 : db $0b : dw $8000 
+    ; Scroll PLM
+    dw $b703 : db $0b : db $0b : dw $af0f 
+    ; Rightwards extension
+    dw $b63b : db $0c : db $0b : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $0d : db $0b : dw $8000 
+    dw $0000
+org $8f8d7e
+; room AF14: Lava Dive Room
+Room_AF14_state_AF21_PLM:
+    dw $0000
+org $8f8d80
+; room AF3F: [Elevator to Lower Norfair]
+Room_AF3F_state_AF4C_PLM:
+    ; Scroll PLM
+    dw $b703 : db $08 : db $0b : dw $af6f 
+    dw $0000
 org $8f8d88
 ; room AF72: Upper Norfair Farming Room
 Room_AF72_state_AF7F_PLM:
@@ -1479,11 +1703,27 @@ Room_AF72_state_AF7F_PLM:
     ; Downwards gate shotblock
     dw $c836 : db $19 : db $15 : dw $0002 
     dw $0000
+org $8f8d96
+; room AFA3: Rising Tide
+Room_AFA3_state_AFB0_PLM:
+    dw $0000
+org $8f8d98
+; room AFCE: Acid Snakes Tunnel
+Room_AFCE_state_AFDB_PLM:
+    dw $0000
+org $8f8d9a
+; room AFFB: Spiky Acid Snakes Tunnel
+Room_AFFB_state_B008_PLM:
+    dw $0000
 org $8f8d9c
 ; room B026: [Crocomire Recharge Room]
 Room_B026_state_B033_PLM:
     ; Energy station
     dw $b6df : db $08 : db $0a : dw $0045 
+    dw $0000
+org $8f8da4
+; room B051: Purple Farming Room
+Room_B051_state_B05E_PLM:
     dw $0000
 org $8f8da6
 ; room B07A: Bat Cave
@@ -1516,6 +1756,26 @@ org $8f8de0
 Room_B0DD_state_B0EA_PLM:
     ; Save station
     dw $b76f : db $09 : db $0b : dw $0001 
+    dw $0000
+org $8f8de8
+; room B106: Frog Speedway
+Room_B106_state_B113_PLM:
+    dw $0000
+org $8f8dea
+; room B139: Red Pirate Shaft
+Room_B139_state_B146_PLM:
+    dw $0000
+org $8f8dec
+; room B167: [Business Center Save Room]
+Room_B167_state_B174_PLM:
+    ; Save station
+    dw $b76f : db $07 : db $0b : dw $0002 
+    dw $0000
+org $8f8df4
+; room B192: [Crocomire Save Room]
+Room_B192_state_B19F_PLM:
+    ; Save station
+    dw $b76f : db $07 : db $0b : dw $0003 
     dw $0000
 org $8f8dfc
 ; room B1BB: [Elevator Save Room]
@@ -1611,6 +1871,22 @@ Door_5C_Room_B37A_PLM_DB5A:
     ; Eye door eye, facing left
     dw $db56 : db $2e : db $07 : dw $005c 
     dw $0000
+org $8f8eba
+; room B3A5: Fast Pillars Setup Room
+Room_B3A5_state_B3B2_PLM:
+    ; Scroll PLM
+    dw $b703 : db $07 : db $21 : dw $b3d9 
+    ; Rightwards extension
+    dw $b63b : db $08 : db $21 : dw $8000 
+    ; Scroll PLM
+    dw $b703 : db $07 : db $1b : dw $b3dc 
+    ; Rightwards extension
+    dw $b63b : db $08 : db $1b : dw $8000 
+    dw $0000
+org $8f8ed4
+; room B3E1: Unknown Room
+Room_B3E1_state_B3EE_PLM:
+    dw $0000
 org $8f8ed6
 ; room B40A: Mickey Mouse Room
 Room_B40A_state_B417_PLM:
@@ -1647,6 +1923,42 @@ Door_5D_Room_B40A_PLM_C842:
     dw $c842 : db $3e : db $36 : dw $0c5d 
     ; Missile tank
     dw $eedb : db $18 : db $1b : dw $0049 
+    dw $0000
+org $8f8f38
+; room B457: Pillar Room
+Room_B457_state_B464_PLM:
+    dw $0000
+org $8f8f3a
+; room B482: Plowerhouse Room
+Room_B482_state_B48F_PLM:
+    dw $0000
+org $8f8f3c
+; room B4AD: The Worst Room In The Game
+Room_B4AD_state_B4BA_PLM:
+    ; Scroll PLM
+    dw $b703 : db $03 : db $10 : dw $b4e0 
+    ; Rightwards extension
+    dw $b63b : db $04 : db $10 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $05 : db $10 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $06 : db $10 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $07 : db $10 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $08 : db $10 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $09 : db $10 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $0a : db $10 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $0b : db $10 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $0c : db $10 : dw $8000 
+    dw $0000
+org $8f8f7a
+; room B4E5: Amphitheatre
+Room_B4E5_state_B4F2_PLM:
     dw $0000
 org $8f8f7c
 ; room B510: Lower Norfair Spring Ball Maze Room
@@ -1856,6 +2168,12 @@ Room_B6EE_state_B6FB_PLM:
     dw $b703 : db $14 : db $0b : dw $b73c 
     ; Energy tank
     dw $eed7 : db $05 : db $51 : dw $0050 
+    dw $0000
+org $8f918c
+; room B741: [Red Keyhunter Shaft Save Room]
+Room_B741_state_B74E_PLM:
+    ; Save station
+    dw $b76f : db $07 : db $0b : dw $0005 
     dw $0000
 org $8f91a9
 SetupAsmAutoDestroyTheWallDuringEscape:
@@ -4797,6 +5115,26 @@ Room_C98E_state_C9A0_PLM:
     ; Scroll PLM
     dw $b703 : db $16 : db $1d : dw $a286 
     dw $0000
+org $8fc22f
+; room CA08: Wrecked Ship Entrance
+Room_CA08_state_CA1A_PLM:
+    dw $0000
+org $8fc231
+; room CA52: Attic
+Room_CA52_state_CA64_PLM:
+Door_80_Room_CA52_PLM_C848:
+    ; Door. Grey door facing right
+    dw $c848 : db $01 : db $06 : dw $0080 
+Door_81_Room_CA52_PLM_C842:
+    ; Door. Grey door facing left
+    dw $c842 : db $6e : db $06 : dw $0081 
+    ; Wrecked Ship attic
+    dw $bb05 : db $08 : db $08 : dw $8000 
+    dw $0000
+org $8fc245
+; room CAAE: Wrecked Ship East Missile Room
+Room_CAAE_state_CAC0_PLM:
+    dw $0000
 org $8fc247
 ; room CAF6: Wrecked Ship Main Shaft
 Room_CAF6_state_CB22_PLM:
@@ -4822,6 +5160,22 @@ Door_84_Room_CAF6_PLM_C87E:
     ; Door. Green door facing up
     dw $c87e : db $16 : db $7d : dw $0084 
     dw $0000
+org $8fc27f
+; room CB8B: Spiky Death Room
+Room_CB8B_state_CB9D_PLM:
+    dw $0000
+org $8fc281
+; room CBD5: Electric Death Room
+Room_CBD5_state_CBE7_PLM:
+    ; Scroll PLM
+    dw $b703 : db $07 : db $10 : dw $cc24 
+    ; Rightwards extension
+    dw $b63b : db $08 : db $10 : dw $8000 
+    dw $0000
+org $8fc28f
+; room CC27: Wrecked Ship Energy Tank Room
+Room_CC27_state_CC39_PLM:
+    dw $0000
 org $8fc291
 ; room CC6F: Basement
 Room_CC6F_state_CC81_PLM:
@@ -4837,6 +5191,10 @@ Door_85_Room_CC6F_PLM_DB4C:
     ; Eye door eye, facing right
     dw $db48 : db $01 : db $07 : dw $0085 
     dw $0000
+org $8fc2b1
+; room CCCB: Wrecked Ship Map Room
+Room_CCCB_state_CCDD_PLM:
+    dw $0000
 org $8fc2b3
 ; room CD13: Phantoon's Room
 Room_CD13_state_CD3F_PLM:
@@ -4844,11 +5202,29 @@ Door_86_Room_CD13_PLM_C842:
     ; Door. Grey door facing left
     dw $c842 : db $0e : db $06 : dw $0086 
     dw $0000
+org $8fc2bb
+; room CD5C: Sponge Bath
+Room_CD5C_state_CD6E_PLM:
+    dw $0000
+org $8fc2bd
+; room CDA8: Wrecked Ship West Super Room
+Room_CDA8_state_CDBA_PLM:
+    dw $0000
 org $8fc2bf
 ; room CDF1: Wrecked Ship East Super Room
 Room_CDF1_state_CE03_PLM:
     ; Scroll PLM
     dw $b703 : db $10 : db $07 : dw Room_CDF1_state_CE1D_PLM_index_0_PLM_scroll_data 
+    dw $0000
+org $8fc2c7
+; room CE8A: [Wrecked Ship Save Room]
+Room_CE8A_state_CE9C_PLM:
+    dw $0000
+org $8fc2c9
+; room CE8A: [Wrecked Ship Save Room]
+Room_CE8A_state_CEB6_PLM:
+    ; Save station
+    dw $b76f : db $07 : db $0b : dw $0000 
     dw $0000
 org $8fc2d1
 ; room C98E: Bowling Alley
@@ -4867,6 +5243,10 @@ Room_C98E_state_C9BA_PLM:
     dw $eedb : db $23 : db $26 : dw $0082 
     ; Door. Grey door facing left
     dw $c842 : db $5e : db $16 : dw $9087 
+    dw $0000
+org $8fc2fd
+; room CA08: Wrecked Ship Entrance
+Room_CA08_state_CA34_PLM:
     dw $0000
 org $8fc2ff
 ; room CA52: Attic
@@ -4888,6 +5268,10 @@ org $8fc319
 Room_CAAE_state_CADA_PLM:
     ; Missile tank
     dw $eedb : db $02 : db $08 : dw $0083 
+    dw $0000
+org $8fc321
+; room CB8B: Spiky Death Room
+Room_CB8B_state_CBB7_PLM:
     dw $0000
 org $8fc323
 ; room CBD5: Electric Death Room
@@ -4920,6 +5304,10 @@ Room_CCCB_state_CCF7_PLM:
     ; Map station
     dw $b6d3 : db $0b : db $0a : dw $8000 
     dw $0000
+org $8fc355
+; room CD5C: Sponge Bath
+Room_CD5C_state_CD88_PLM:
+    dw $0000
 org $8fc357
 ; room CDA8: Wrecked Ship West Super Room
 Room_CDA8_state_CDD4_PLM:
@@ -4933,6 +5321,18 @@ Room_CDF1_state_CE1D_PLM:
     dw $b703 : db $10 : db $07 : dw Room_CDF1_state_CE1D_PLM_index_0_PLM_scroll_data 
     ; Super missile tank
     dw $eedf : db $07 : db $09 : dw $0086 
+    dw $0000
+org $8fc36d
+; room CE40: Gravity Suit Room
+Room_CE40_state_CE6C_PLM:
+    ; Gravity suit, chozo orb
+    dw $ef5f : db $07 : db $09 : dw $0087 
+    dw $0000
+org $8fc375
+; room CED2: [Glass Tunnel Save Room]
+Room_CED2_state_CEDF_PLM:
+    ; Save station
+    dw $b76f : db $07 : db $0b : dw $0000 
     dw $0000
 org $8fc37d
 ; room CEFB: Glass Tunnel
@@ -4970,6 +5370,10 @@ Room_CEFB_state_CF27_PLM:
 Door_8C_Room_CEFB_PLM_C890:
     ; Door. Red door facing right
     dw $c890 : db $01 : db $26 : dw $008c 
+    dw $0000
+org $8fc3df
+; room CF54: West Tunnel
+Room_CF54_state_CF61_PLM:
     dw $0000
 org $8fc3e1
 ; room CF80: East Tunnel
@@ -5050,6 +5454,10 @@ Room_D08A_state_D097_PLM:
     dw $c82a : db $31 : db $07 : dw $8000 
     ; Downwards gate shotblock
     dw $c836 : db $31 : db $07 : dw $000a 
+    dw $0000
+org $8fc499
+; room D0B9: Mt. Everest
+Room_D0B9_state_D0C6_PLM:
     dw $0000
 org $8fc49b
 ; room D104: Red Fish Room
@@ -5133,6 +5541,14 @@ Door_90_Room_D21C_PLM_C890:
     ; Door. Red door facing right
     dw $c890 : db $01 : db $16 : dw $0090 
     dw $0000
+org $8fc54f
+; room D252: [Tunnel to West Sand Hall]
+Room_D252_state_D25F_PLM:
+    dw $0000
+org $8fc551
+; room D27E: Plasma Tutorial Room
+Room_D27E_state_D28B_PLM:
+    dw $0000
 org $8fc553
 ; room D2AA: Plasma Room
 Room_D2AA_state_D2B7_PLM:
@@ -5141,6 +5557,10 @@ Door_91_Room_D2AA_PLM_C842:
     dw $c842 : db $1e : db $06 : dw $0c91 
     ; Plasma beam, chozo orb
     dw $ef67 : db $06 : db $26 : dw $008f 
+    dw $0000
+org $8fc561
+; room D2D9: Thread The Needle Room
+Room_D2D9_state_D2E6_PLM:
     dw $0000
 org $8fc563
 ; room D30B: Maridia Elevator Room
@@ -5161,11 +5581,64 @@ Door_94_Room_D340_PLM_C87E:
     ; Door. Green door facing up
     dw $c87e : db $36 : db $2d : dw $0094 
     dw $0000
+org $8fc57f
+; room D387: Plasma Climb
+Room_D387_state_D394_PLM:
+    dw $0000
 org $8fc581
 ; room D3B6: Maridia Map Room
 Room_D3B6_state_D3C3_PLM:
     ; Map station
     dw $b6d3 : db $05 : db $0a : dw $8000 
+    dw $0000
+org $8fc589
+; room D3DF: [Maridia Elevator Save Room]
+Room_D3DF_state_D3EC_PLM:
+    ; Save station
+    dw $b76f : db $07 : db $0b : dw $0001 
+    dw $0000
+org $8fc591
+; room D408: [Vertical Tube]
+Room_D408_state_D415_PLM:
+    dw $0000
+org $8fc593
+; room D433: Bug Sand Hole
+Room_D433_state_D440_PLM:
+    dw $0000
+org $8fc595
+; room D461: West Sand Hall
+Room_D461_state_D46E_PLM:
+    dw $0000
+org $8fc597
+; room D48E: Oasis
+Room_D48E_state_D49B_PLM:
+    ; Scroll PLM
+    dw $b703 : db $03 : db $14 : dw $d4bd 
+    ; Rightwards extension
+    dw $b63b : db $04 : db $14 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $05 : db $14 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $06 : db $14 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $07 : db $14 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $08 : db $14 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $09 : db $14 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $0a : db $14 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $0b : db $14 : dw $8000 
+    ; Rightwards extension
+    dw $b63b : db $0c : db $14 : dw $8000 
+Door_95_Room_D48E_PLM_C884:
+    ; Door. Green door facing down
+    dw $c884 : db $06 : db $02 : dw $0095 
+    dw $0000
+org $8fc5db
+; room D4C2: East Sand Hall
+Room_D4C2_state_D4CF_PLM:
     dw $0000
 org $8fc5dd
 ; room D4EF: West Sand Hole
@@ -5182,6 +5655,14 @@ Room_D51E_state_D52B_PLM:
     dw $eedb : db $1c : db $07 : dw $0092 
     ; Power bomb tank
     dw $eee3 : db $06 : db $10 : dw $0093 
+    dw $0000
+org $8fc5f9
+; room D54D: [West Sand Fall]
+Room_D54D_state_D55A_PLM:
+    dw $0000
+org $8fc5fb
+; room D57A: [East Sand Fall]
+Room_D57A_state_D587_PLM:
     dw $0000
 org $8fc5fd
 ; room D5A7: Aqueduct
@@ -5200,6 +5681,10 @@ Room_D5EC_state_D5F9_PLM:
 Door_97_Room_D5EC_PLM_C848:
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $0097 
+    dw $0000
+org $8fc619
+; room D617: Botwoon Hallway
+Room_D617_state_D624_PLM:
     dw $0000
 org $8fc61b
 ; room D646: Pants Room
@@ -5281,6 +5766,10 @@ Room_D6D0_state_D6DD_PLM:
     ; Spring ball, chozo orb
     dw $ef57 : db $07 : db $16 : dw $0096 
     dw $0000
+org $8fc6ed
+; room D6FD: Below Botwoon Energy Tank
+Room_D6FD_state_D70A_PLM:
+    dw $0000
 org $8fc6ef
 ; room D72A: Colosseum
 Room_D72A_state_D737_PLM:
@@ -5335,11 +5824,29 @@ Room_D7E4_state_D7F1_PLM:
     ; Energy tank
     dw $eed7 : db $3d : db $05 : dw $0098 
     dw $0000
+org $8fc75d
+; room D81A: [Colosseum Save Room]
+Room_D81A_state_D827_PLM:
+    ; Save station
+    dw $b76f : db $07 : db $0b : dw $0003 
+    dw $0000
 org $8fc765
 ; room D845: [Halfie Climb Missile Station]
 Room_D845_state_D852_PLM:
     ; Missile station
     dw $b6eb : db $07 : db $0a : dw $0099 
+    dw $0000
+org $8fc76d
+; room D86E: [Bug Sand Fall]
+Room_D86E_state_D87B_PLM:
+    dw $0000
+org $8fc76f
+; room D898: [Botwoon Sand Fall]
+Room_D898_state_D8A5_PLM:
+    dw $0000
+org $8fc771
+; room D8C5: Shaktool Room
+Room_D8C5_state_D8F1_PLM:
     dw $0000
 org $8fc773
 ; room D913: Halfie Climb Room
@@ -5360,6 +5867,13 @@ Door_9C_Room_D913_PLM_C842:
     ; Door. Grey door facing left
     dw $c842 : db $4e : db $16 : dw $009c 
     dw $0000
+org $8fc79f
+; room D95E: Botwoon's Room
+Room_D95E_state_D98A_PLM:
+Door_9D_Room_D95E_PLM_C848:
+    ; Door. Grey door facing right
+    dw $c848 : db $01 : db $06 : dw $049d 
+    dw $0000
 org $8fc7a7
 ; room D9AA: Space Jump Room
 Room_D9AA_state_D9B7_PLM:
@@ -5371,6 +5885,14 @@ org $8fc7af
 Room_D9D4_state_D9E1_PLM:
     ; Energy station
     dw $b6df : db $07 : db $0a : dw $009b 
+    dw $0000
+org $8fc7b7
+; room D9FE: Cactus Alley [West]
+Room_D9FE_state_DA0B_PLM:
+    dw $0000
+org $8fc7b9
+; room DA2B: Cactus Alley [East]
+Room_DA2B_state_DA38_PLM:
     dw $0000
 org $8fc7bb
 ; room DA60: Draygon's Room
@@ -5389,6 +5911,12 @@ Door_9F_Room_DA60_PLM_C842:
     dw $df59 : db $02 : db $0f : dw $8806 
     ; Draygon cannon, with shield, facing right
     dw $df59 : db $02 : db $15 : dw $8808 
+    dw $0000
+org $8fc7e1
+; room DAAE: Tourian First Room
+Room_DAAE_state_DABB_PLM:
+    ; Elevator platform
+    dw $b70b : db $06 : db $2c : dw $8000 
     dw $0000
 org $8fc7e9
 ; room DAE1: Metroid Room 1
@@ -5417,11 +5945,97 @@ Door_A2_Room_DB7D_PLM_C848:
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $0ca2 
     dw $0000
+org $8fc813
+; room DBCD: Metroid Room 4
+Room_DBCD_state_DBF9_PLM:
+    ; Sets Metroids cleared states when required
+    dw $db44 : db $08 : db $08 : dw $0018 
+Door_A3_Room_DBCD_PLM_C84E:
+    ; Door. Grey door facing up
+    dw $c84e : db $06 : db $1e : dw $0ca3 
+    dw $0000
+org $8fc821
+; room DC19: Blue Hopper Room
+Room_DC19_state_DC45_PLM:
+    dw $0000
+org $8fc823
+; room DC65: Dust Torizo Room
+Room_DC65_state_DC91_PLM:
+Door_A4_Room_DC65_PLM_C842:
+    ; Door. Grey door facing left
+    dw $c842 : db $1e : db $06 : dw $90a4 
+Door_A5_Room_DC65_PLM_C848:
+    ; Door. Grey door facing right
+    dw $c848 : db $01 : db $06 : dw $0ca5 
+    dw $0000
+org $8fc831
+; room DCB1: Big Boy Room
+Room_DCB1_state_DCDD_PLM:
+Door_A6_Room_DCB1_PLM_C842:
+    ; Door. Grey door facing left
+    dw $c842 : db $3e : db $06 : dw $90a6 
+    dw $0000
+org $8fc839
+; room DCFF: Seaweed Room
+Room_DCFF_state_DD0C_PLM:
+Door_A7_Room_DCFF_PLM_C88A:
+    ; Door. Red door facing left
+    dw $c88a : db $0e : db $16 : dw $00a7 
+    dw $0000
+org $8fc841
+; room DD2E: Tourian Recharge Room
+Room_DD2E_state_DD3B_PLM:
+    ; Missile station
+    dw $b6eb : db $08 : db $0a : dw $009c 
+    ; Energy station
+    dw $b6df : db $06 : db $0a : dw $009d 
+    dw $0000
+org $8fc84f
+; room DD58: Mother Brain Room
+Room_DD58_state_DDA2_PLM:
+    ; Mother Brain's glass
+    dw $d6de : db $09 : db $05 : dw $8000 
+    dw $0000
+org $8fc857
+; room DDC4: Tourian Eye Door Room
+Room_DDC4_state_DDD1_PLM:
+Door_A8_Room_DDC4_PLM_DB5A:
+    ; Door. Eye door, facing left
+    dw $db5a : db $3e : db $06 : dw $00a8 
+    ; Eye door bottom, facing left
+    dw $db60 : db $3e : db $09 : dw $00a8 
+    ; Eye door eye, facing left
+    dw $db56 : db $3e : db $07 : dw $00a8 
+    dw $0000
+org $8fc86b
+; room DDF3: Rinka Shaft
+Room_DDF3_state_DE00_PLM:
+Door_A9_Room_DDF3_PLM_C890:
+    ; Door. Red door facing right
+    dw $c890 : db $01 : db $26 : dw $00a9 
+    dw $0000
 org $8fc873
 ; room DE23: [Mother Brain Save Room]
 Room_DE23_state_DE30_PLM:
     ; Save station
     dw $b76f : db $07 : db $0b : dw $0000 
+    dw $0000
+org $8fc87b
+; room DE4D: Tourian Escape Room 1
+Room_DE4D_state_DE5A_PLM:
+    ; Sets Metroids cleared states when required
+    dw $db44 : db $08 : db $08 : dw $0000 
+    ; Door. Gate that closes during escape in room after Mother Brain
+    dw $c8ca : db $1f : db $06 : dw $8000 
+    dw $0000
+org $8fc889
+; room DE7A: Tourian Escape Room 2
+Room_DE7A_state_DE87_PLM:
+    ; Sets Metroids cleared states when required
+    dw $db44 : db $08 : db $08 : dw $0002 
+Door_AA_Room_DE7A_PLM_C854:
+    ; Door. Grey door facing down
+    dw $c854 : db $06 : db $03 : dw $90aa 
     dw $0000
 org $8fc897
 ; room DEA7: Tourian Escape Room 3
@@ -5440,6 +6054,36 @@ Room_DEDE_state_DEEB_PLM:
 Door_AC_Room_DEDE_PLM_C842:
     ; Door. Grey door facing left
     dw $c842 : db $2e : db $36 : dw $90ac 
+    dw $0000
+org $8fc8b3
+; room DF1B: [Tourian First Save Room]
+Room_DF1B_state_DF28_PLM:
+    ; Save station
+    dw $b76f : db $07 : db $0b : dw $0001 
+    dw $0000
+org $8fc8bb
+; room DF45: [Ceres Elevator Room]
+Room_DF45_state_DF71_PLM:
+    dw $0000
+org $8fc8bd
+; room DF8D: [Ceres Jump Tutorial Room]
+Room_DF8D_state_DFB9_PLM:
+    dw $0000
+org $8fc8bf
+; room DFD7: [Ceres Staircase Room]
+Room_DFD7_state_E003_PLM:
+    dw $0000
+org $8fc8c1
+; room E021: [Ceres Dead Scientists Room]
+Room_E021_state_E04D_PLM:
+    dw $0000
+org $8fc8c3
+; room E06B: [Ceres Last Corridor]
+Room_E06B_state_E097_PLM:
+    dw $0000
+org $8fc8c5
+; room E0B5: [Ceres Ridley Room]
+Room_E0B5_state_E0E1_PLM:
     dw $0000
 org $8fc98e
 RoomHeadersScrollDataDoorout:
@@ -5538,7 +6182,7 @@ Room_CA52_state_CA64_Header:
     dw $ca9e ; Room Scrolls pointer
     dw $0000 ; Unused pointer
     dw $0000 ; Main ASM pointer
-    dw $c231 ; PLM Set pointer
+    dw Room_CA52_state_CA64_PLM ; PLM Set pointer
     dw $e168 ; Background pointer
     dw $c8c7 ; Setup ASM pointer
 org $8fca7e

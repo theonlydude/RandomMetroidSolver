@@ -3,7 +3,6 @@ import random
 from logic.logic import Logic
 from utils.parameters import Knows
 from graph.location import locationsDict
-from rom.rom import snes_to_pc
 import utils.log
 
 # order expected by ROM patches
@@ -67,21 +66,6 @@ vanillaEscapeAnimalsTransitions = [
 
 escapeSource = 'Tourian Escape Room 4 Top Right'
 escapeTargets = ['Green Brinstar Main Shaft Top Left', 'Basement Left', 'Business Center Mid Left', 'Crab Hole Bottom Right']
-
-locIdsByAreaAddresses = {
-    "Ceres": snes_to_pc(0xA1F568),
-    "Crateria": snes_to_pc(0xA1F569),
-    "GreenPinkBrinstar": snes_to_pc(0xA1F57B),
-    "RedBrinstar": snes_to_pc(0xA1F58C),
-    "WreckedShip": snes_to_pc(0xA1F592),
-    "Kraid": snes_to_pc(0xA1F59E),
-    "Norfair": snes_to_pc(0xA1F5A2),
-    "Crocomire": snes_to_pc(0xA1F5B2),
-    "LowerNorfair": snes_to_pc(0xA1F5B8),
-    "WestMaridia": snes_to_pc(0xA1F5C3),
-    "EastMaridia": snes_to_pc(0xA1F5CB),
-    "Tourian": snes_to_pc(0xA1F5D7)
-}
 
 def getAccessPoint(apName, apList=None):
     if apList is None:
@@ -444,12 +428,13 @@ class GraphUtils:
         GraphUtils.log.debug("escapeAnimalsTransitions. animalsAccess="+animalsAccess)
         assert len(possibleTargets) == 4, "Invalid possibleTargets list: " + str(possibleTargets)
         # actually add the 4 connections for successive escapes challenge
-        basePtr = 0xADAC
+        sym_base = "rando_escape_flyway_door_lists_list"
         btDoor = getAccessPoint('Flyway Right')
         for i in range(len(possibleTargets)):
             ap = copy.copy(btDoor)
             ap.Name += " " + str(i)
-            ap.ExitInfo['DoorPtr'] = basePtr + i*24
+            ap.ExitInfo['DoorPtr'] = None
+            ap.ExitInfo['DoorPtrSym'] = sym_base+str(i+1)
             graph.addAccessPoint(ap)
             target = possibleTargets[i]
             graph.addTransition(ap.Name, target)
@@ -457,7 +442,8 @@ class GraphUtils:
         bt = getAccessPoint('Bomb Torizo Room Left')
         btCpy = copy.copy(bt)
         btCpy.Name += " Animals"
-        btCpy.ExitInfo['DoorPtr'] = 0xAE00
+        btCpy.ExitInfo['DoorPtr'] = None
+        btCpy.ExitInfo['DoorPtrSym'] = "rando_escape_bt_door_list"
         graph.addAccessPoint(btCpy)
         graph.addTransition(animalsAccess, btCpy.Name)
 
@@ -530,6 +516,8 @@ class GraphUtils:
 #            print(conn['ID'])
             # where to write
             conn['DoorPtr'] = src.ExitInfo['DoorPtr']
+            if 'DoorPtrSym' in src.ExitInfo:
+                conn['DoorPtrSym'] = src.ExitInfo['DoorPtrSym']
             # door properties
             conn['RoomPtr'] = dst.RoomInfo['RoomPtr']
             conn['doorAsmPtr'] = dst.EntryInfo['doorAsmPtr']

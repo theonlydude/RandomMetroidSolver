@@ -5,7 +5,7 @@ from rom.rom import snes_to_pc
 from rom.addresses import Addresses
 from rom.symbols import Symbols
 from patches.patchaccess import PatchAccess
-from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
+from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas
 from logic.logic import Logic
 from collections import defaultdict
 from utils.objectives import Objectives
@@ -533,7 +533,8 @@ class RomReader:
     # go read all location IDs by area for item split
     def getLocationsIds(self):
         ret = defaultdict(list)
-        for area,addr in locIdsByAreaAddresses.items():
+        for area in graphAreas:
+            addr = Addresses.getOne('varia_hud_locs_'+area)
             self.romFile.seek(addr)
             while True:
                idByte = self.romFile.readByte()

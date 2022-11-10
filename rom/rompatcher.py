@@ -7,7 +7,7 @@ from rom.compression import Compressor
 from rom.ips import IPS_Patch
 from utils.doorsmanager import DoorsManager, IndicatorFlag
 from utils.objectives import Objectives
-from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses, graphAreas
+from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
 from rom.addresses import Addresses
@@ -203,10 +203,11 @@ class RomPatcher:
             'FullWithHUD': lambda itemLoc: itemLoc.Item.Category not in ['Energy', 'Ammo', 'Boss', 'MiniBoss']
         }
         itemLocCheck = lambda itemLoc: itemLoc.Item.Category != "Nothing" and splitChecks[split](itemLoc)
-        for area,addr in locIdsByAreaAddresses.items():
+        for area in graphAreas:
             locs = [il.Location for il in itemLocs if itemLocCheck(il) and il.Location.GraphArea == area and not il.Location.restricted]
             self.log.debug("writeSplitLocs. area="+area)
             self.log.debug(str([loc.Name for loc in locs]))
+            addr = Addresses.getOne('varia_hud_locs_'+area)
             self.romFile.seek(addr)
             for loc in locs:
                 self.romFile.writeByte(loc.Id)
@@ -928,7 +929,7 @@ class RomPatcher:
     # write area randomizer transitions to ROM
     # doorConnections : a list of connections. each connection is a dictionary describing
     # - where to write in the ROM :
-    # DoorPtr : door pointer to write to
+    # DoorPtr or DoorPtrSym : door pointer to write to, in direct address or symbol form
     # - what to write in the ROM :
     # RoomPtr, direction, bitflag, cap, screen, distanceToSpawn : door properties
     # * if SamusX and SamusY are defined in the dict, custom ASM has to be written
@@ -937,9 +938,23 @@ class RomPatcher:
     # * if not, just write doorAsmPtr as the door property directly.
     def writeDoorConnections(self, doorConnections):
         asmAddress = Addresses.getOne('customDoorsAsm')
+        def getWordBytes(addr):
+            w = getWord(addr & 0xffff)
+            return [w[0], w[1]]
+        def loadDoorTransitionShortPtrBytes(label):
+            ptr = self.symbols.getAddress('door_transition', label)
+            return getWordBytes(ptr)
+        def symbolWordBytes(symbol):
+            ptr = self.symbols.getAddress(symbol)
+            return getWordBytes(ptr)
+        incompatible_doors = loadDoorTransitionShortPtrBytes("incompatible_doors")
+        giveiframes = loadDoorTransitionShortPtrBytes("giveiframes")
         for conn in doorConnections:
             # write door ASM for transition doors (code and pointers)
-            doorPtr = conn['DoorPtr']
+            if 'DoorPtrSym' not in conn:
+                doorPtr = conn['DoorPtr']
+            else:
+                doorPtr = self.symbols.getAddress(conn['DoorPtrSym']) & 0xffff
             roomPtr = conn['RoomPtr']
 #            print('Writing door connection ' + conn['ID'] + ". doorPtr="+hex(doorPtr))
             if doorPtr in self.doorConnectionSpecific:
@@ -976,28 +991,26 @@ class RomPatcher:
             # call original door asm ptr if needed
             if conn['doorAsmPtr'] != 0x0000:
                 # endian convert
-                (D0, D1) = (conn['doorAsmPtr'] & 0x00FF, (conn['doorAsmPtr'] & 0xFF00) >> 8)
-                asmPatch += [ 0x20, D0, D1 ]        # JSR $doorAsmPtr
+                doorAsmPtr = getWordBytes(conn['doorAsmPtr'])
+                asmPatch += [ 0x20 ] + doorAsmPtr         # JSR $doorAsmPtr
             # special ASM hook point for VARIA needs when taking the door (used for animals)
-            if 'exitAsmPtr' in conn:
+            if 'exitAsm' in conn:
                 # endian convert
-                (D0, D1) = (conn['exitAsmPtr'] & 0x00FF, (conn['exitAsmPtr'] & 0xFF00) >> 8)
-                asmPatch += [ 0x20, D0, D1 ]        # JSR $exitAsmPtr
+                exitAsm = symbolWordBytes(conn['exitAsm'])
+                asmPatch += [ 0x20 ] + exitAsm            # JSR exitAsm
             # incompatible transition
             if 'SamusX' in conn:
-                # endian convert
-                (X0, X1) = (conn['SamusX'] & 0x00FF, (conn['SamusX'] & 0xFF00) >> 8)
-                (Y0, Y1) = (conn['SamusY'] & 0x00FF, (conn['SamusY'] & 0xFF00) >> 8)
+                SamusX = getWordBytes(conn['SamusX'])
+                SamusY = getWordBytes(conn['SamusY'])
                 # force samus position
-                # see door_transition.asm. assemble it to print routines SNES addresses.
-                asmPatch += [ 0x20, 0x00, 0xF6 ]    # JSR incompatible_doors
-                asmPatch += [ 0xA9, X0,   X1   ]    # LDA #$SamusX        ; fixed Samus X position
-                asmPatch += [ 0x8D, 0xF6, 0x0A ]    # STA $0AF6           ; update Samus X position in memory
-                asmPatch += [ 0xA9, Y0,   Y1   ]    # LDA #$SamusY        ; fixed Samus Y position
-                asmPatch += [ 0x8D, 0xFA, 0x0A ]    # STA $0AFA           ; update Samus Y position in memory
+                asmPatch += [ 0x20 ] + incompatible_doors # JSR incompatible_doors
+                asmPatch += [ 0xA9 ] + SamusX             # LDA #$SamusX        ; fixed Samus X position
+                asmPatch += [ 0x8D, 0xF6, 0x0A ]          # STA $0AF6           ; update Samus X position in memory
+                asmPatch += [ 0xA9 ] + SamusY             # LDA #$SamusY        ; fixed Samus Y position
+                asmPatch += [ 0x8D, 0xFA, 0x0A ]          # STA $0AFA           ; update Samus Y position in memory
             else:
                 # still give I-frames
-                asmPatch += [ 0x20, 0x40, 0xF6 ]    # JSR giveiframes
+                asmPatch += [ 0x20 ] + giveiframes        # JSR giveiframes
             # return
             asmPatch += [ 0x60 ]   # RTS
             self.romFile.writeWord(asmAddress & 0xFFFF)

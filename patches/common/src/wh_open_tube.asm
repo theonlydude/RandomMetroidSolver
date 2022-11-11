@@ -1,7 +1,7 @@
 ;;; Opens Maridia Tube for Watering Hole start to have more varied seed starts
 ;;;
 ;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
-;;; or a variant of xkas that supports arch directive
+
 
 arch 65816
 lorom

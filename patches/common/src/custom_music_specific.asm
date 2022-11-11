@@ -1,6 +1,6 @@
 ;;; Patches to apply when specific tracks are customized, disable certain sound effects that rely on vanilla music.
 ;;; 
-;;; compile with asar
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 ;;; 
 ;;; Define desired vanilla song(s) on the command line with -D
 

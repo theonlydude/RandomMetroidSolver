@@ -3,7 +3,7 @@
 ;;; data is laid out as in room state header, so the addresses can be
 ;;; added to pc_addresses entry in vanilla JSON track metadata
 ;;;
-;;; compile with asar
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 lorom
 arch 65816

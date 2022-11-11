@@ -1,4 +1,4 @@
-;;; assemble with asar
+;;; assemble with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 lorom
 arch 65816

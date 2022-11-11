@@ -1,6 +1,6 @@
 ;;; To apply on top of some custom ships where samus is visible inside the ship
 ;;; 
-;;; Compile with "asar" (https://github.com/RPGHacker/asar/releases)
+;;; Compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 lorom
 arch 65816

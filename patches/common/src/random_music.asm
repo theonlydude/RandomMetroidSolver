@@ -6,7 +6,7 @@
 ;;; Uses RNG routine but does not alter current RNG number.
 ;;; Uses tracking patch RTA timer to seed RNG.
 ;;;
-;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 ;;; or a variant of xkas that supports arch directive
 
 lorom

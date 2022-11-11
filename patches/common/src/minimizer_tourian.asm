@@ -7,7 +7,7 @@
 ;;; - skips MB3 fight and baby cutscene: MB dies at the end of MB2,
 ;;;   and you get hyper+refill for the escape
 ;;;
-;;; Compiles with asar
+;;; Compiles with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 arch 65816
 lorom

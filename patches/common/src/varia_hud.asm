@@ -17,7 +17,7 @@
 
 ;;; Includes etank bar combine by lioran
 
-;;; Compile with "asar" (https://github.com/RPGHacker/asar/releases)
+;;; Compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 !game_state = $0998		; used to check pause/unpause
 

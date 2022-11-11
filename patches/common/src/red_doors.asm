@@ -1,5 +1,5 @@
 ;;; makes it so that red doors are only openable with 1 missile, instead of 5 missiles or 1 super
-;;; compile with asar
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 arch 65816
 lorom	

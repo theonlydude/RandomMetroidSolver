@@ -1,5 +1,5 @@
 ;;; Some vanilla bugfixes included in all VARIA seeds
-;;; compile with asar
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 arch 65816
 lorom

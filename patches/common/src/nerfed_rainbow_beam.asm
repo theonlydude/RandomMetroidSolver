@@ -1,6 +1,6 @@
 ;;; Reduce rainbow beam from 300 damage to 20 (for ultra sparse energy seeds)
 ;;;
-;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 ;;; or a variant of xkas that supports arch directive
 
 lorom

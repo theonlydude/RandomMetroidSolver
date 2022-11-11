@@ -1,8 +1,9 @@
 #!/bin/bash
 
 src=$1
+ips=$2
 
-printf "${src}:\t"
+printf "${ips}:\t${src}"
 
 function add_deps() {
     incdirs="$(dirname $1) ${INCLUDE_DIRS}"
@@ -24,5 +25,3 @@ function add_deps() {
 }
 
 add_deps $src
-
-printf "\n\t@touch ${src}\n"

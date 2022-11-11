@@ -46,12 +46,6 @@ all:	$(IPS_FILES) $(SYM_ASM_FILES) $(SYM_JSON_FILES) $(MESEN_DEBUG_FILE)
 check:	all
 	@$(IPS_CHECK_TOOL) $(VANILLA) $(IPS_FILES)
 
-# FIXME Doing make clean twice will actually rebuild patches on which other patches depend :
-#       .d files are considered part of the Makefile, and depends on the source to be generated.
-#       They add a dependency on the source, to depend from symbol files not yet generated (since we cleaned them).
-#       So the Makefile itself ends up depending on symbol files, therefore on IPS generation, whether we just want to clean or not.
-#       This is the drawback of generating the "header files" for the ASM source, when compiling it.
-#       It's analogous to C source files depending on object files directly instead of headers.
 clean:
 	@echo "Cleaning ..."
 	@rm -rf $(BUILD_DIR)
@@ -67,7 +61,7 @@ help:
 -include $(DEP_FILES)
 
 $(DEP_DIR)/.%.d:       $(SRC_DIR)/%.asm
-	@$(DEP_TOOL) $< > $@
+	@$(DEP_TOOL) $< $(patsubst $(SRC_DIR)/%.asm,$(IPS_DIR)/%.ips,$<) > $@
 
 $(IPS_DIR)/%.ips:	$(SRC_DIR)/%.asm
 	@echo "Building $@ ..."

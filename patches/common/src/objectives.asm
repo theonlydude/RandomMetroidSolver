@@ -15,6 +15,11 @@ arch snes.cpu
 
 incsrc "event_list.asm"
 
+incsrc "sym/new_game.asm"
+incsrc "sym/rando_escape.asm"
+incsrc "sym/custom_music.asm"
+incsrc "sym/disable_screen_shake.asm"
+
 !timer = $05b8
 !obj_check_period = #$0020	; unit:frames, works only in powers of 2
 !current_room = $079b
@@ -24,16 +29,11 @@ incsrc "event_list.asm"
 
 ;;; external routines
 !song_routine = $808fc1
-!fix_timer_gfx = $a1f2c0	; in new_game.asm (common routines section)
-!escape_setup = $8ff500		; in rando_escape.asm
 
 ;;; custom music patch detection for escape music trigger
-!custom_music_marker = $8fe86b
 !custom_music_id = #$caca
-!custom_music_escape = $8fe871
 
 ;;; no screen shake patch detection for escape music trigger
-!disable_earthquake_marker = $8f919c
 !disable_earthquake_id = #$0060
 
 ;;; for items % objectives
@@ -197,7 +197,7 @@ clear_music_queue:
 ;;; copied from escape rooms setup asm
 room_earthquake:
         ;; don't trigger if no screen shake patch if detected
-        lda !disable_earthquake_marker : and #$00ff
+        lda.l disable_screen_shake_marker : and #$00ff
         cmp !disable_earthquake_id : beq .end
 	LDA #$0018             ;\
 	STA $183E              ;} Earthquake type = BG1, BG2 and enemies; 3 pixel displacement, horizontal
@@ -208,11 +208,11 @@ room_earthquake:
 
 trigger_escape:
 	phx : phy
-	jsl !escape_setup
+	jsl rando_escape_escape_setup_l
 	jsr room_earthquake	; could not be called by setup asm since not in escape yet
 	; load timer graphics
 	lda #$000f : jsl $90f084
-	jsl !fix_timer_gfx
+	jsl new_game_fix_timer_gfx
 	lda #$0002 : sta $0943	 ; set timer state to 2 (MB timer start)
 	jsr clear_music_queue
 	jsr trigger_escape_music
@@ -222,14 +222,14 @@ trigger_escape:
 
 trigger_escape_music:
 	lda #$0000 : jsl !song_routine ; stop current music
-	lda !custom_music_marker
+	lda.l custom_music_marker
 	cmp !custom_music_id : beq .custom_music
 	lda #$ff24 : jsl !song_routine ; load boss 1 music data
 	lda #$0007 : jsl !song_routine ; load music track 2
 	bra .end
 .custom_music:
-	lda !custom_music_escape : ora #$ff00 : jsl !song_routine
-	lda !custom_music_escape+1 : and #$00ff : jsl !song_routine
+	lda custom_music_escape : ora #$ff00 : jsl !song_routine
+	lda custom_music_escape+1 : and #$00ff : jsl !song_routine
 .end:
 	rts
 

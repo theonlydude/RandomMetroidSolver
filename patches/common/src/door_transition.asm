@@ -107,4 +107,4 @@ warnpc $8ff7ff
 org $8ff800
 generated_door_asm:
 	padbyte $ca : pad $8ffcff
-generated_door_asm_end:
+.end:

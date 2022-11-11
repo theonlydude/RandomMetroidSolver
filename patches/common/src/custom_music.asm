@@ -34,6 +34,7 @@ org $8fc9a4
 
 ;;; end of custom music data table. accounted for by MusicPatcher
 org $8fe86b
+marker:
 	dw $caca		; identifier that we have custom music
 
 ;;; load custom music in special places

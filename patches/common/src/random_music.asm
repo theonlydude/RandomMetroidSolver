@@ -12,6 +12,8 @@
 lorom
 arch snes.cpu
 
+incsrc "sym/new_game.asm"
+
 ;;; CONSTANTS
 !tracks_tbl_sz	= #$0018    ; table size, in bytes, for unique tracks
 !nb_tracks_8b	= #$15      ; nb of tracks total, including duplicates
@@ -19,10 +21,10 @@ arch snes.cpu
 !last_music_rnd = $7fff32	; RAM address to store our random music
 !room_music  	= $07cb
 !room_track 	= $07c9
-!rand           = $a1f2a0   ; see new_game.asm
 
 ;;; HIJACKS
 org $82DF3E
+hook:
     ;; hijack room state header load to replace music/track
     ;; area escape rando hijacks before and returns control after,
     ;; so it has to call a function here
@@ -91,7 +93,7 @@ is_music_to_randomize:
 ;;; gets a random data/track couple from table, and store it in last_music_rnd (and A)
 get_random_music:
     ;; call RNG, result in A
-    jsl !rand
+    jsl new_game_rand
     ;; A = A % nb_tracks
     sta $4204
     ;; switch to 8-bit mode for divisor
@@ -174,7 +176,8 @@ load_room_music_no_escape_rando:
 
 warnpc $a1f3ef
 
-org $a1f3f0		 ; fixed position used in area_rando_escape
+org $a1f3f0
+
 load_room_music_escape_rando:
     lda $0004,x : and #$00ff ; reload music data index (needed by load_room_music)
     jsr load_room_music

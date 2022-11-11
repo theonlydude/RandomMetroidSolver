@@ -6,6 +6,8 @@
 lorom
 arch snes.cpu
 
+incsrc "sym/random_music.asm"
+incsrc "sym/new_game.asm"
 incsrc "event_list.asm"
 
 ;;; carry set if escape flag on, carry clear if off
@@ -13,9 +15,6 @@ macro checkEscape()
     lda !escape_event : jsl !check_event
 endmacro
 
-;;; see random_music.asm
-!random_music_hook   = $82df3e
-!random_music 	     = $a1f3f0
 ;;; where we are in current escapes cycle (for animals)
 !current_escape      = $7fff34
 !door_sz             = 12
@@ -24,8 +23,7 @@ endmacro
 !nb_areas = 10 			; (count out Ceres and Tourian)
 
 ;;; external definitions
-!fix_timer_gfx	     = $a1f2c0	; in new_game.asm (common routines section)
-!disabled_tourian_escape_flag = $a1f5fe ; in objectives.asm (option flag)
+!disabled_tourian_escape_flag = $a1f5fe ; FIXME circular dependency with objectives.asm (option flag)
 
 org $809E21
 print "timer_value: ", pc
@@ -251,7 +249,7 @@ room_setup:
     plb
     jsr $919c                   ; sets up room shaking
     plb
-    jsl !fix_timer_gfx
+    jsl new_game_fix_timer_gfx
 .end:
     ;; goes back to vanilla setup asm call
     lda $0018,x
@@ -411,10 +409,10 @@ music_and_enemies:
     jsl check_ext_escape : bcs .escape
     ;; vanilla
     ;; check presence of random music patch
-    lda.l !random_music_hook
+    lda.l random_music_hook
     and #$00ff : cmp #$005c	; JML instruction
     bne .vanilla_music
-    jsl !random_music
+    jsl random_music_load_room_music_escape_rando
     bra .vanilla_enemies
 .vanilla_music:
     lda $0004,x ;\

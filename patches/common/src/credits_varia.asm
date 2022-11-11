@@ -4,6 +4,10 @@
 arch snes.cpu
 lorom
 
+incsrc "sym/new_game.asm"
+incsrc "sym/tracking.asm"
+incsrc "sym/seed_display.asm"
+
 ;; Defines for the script and credits data
 !speed = $f770
 !set = $9a17
@@ -77,14 +81,6 @@ lorom
 !backup_candidate = $7fff3a
 
 !stat_resets = #$0029
-
-;; External
-;; routine in new_game.asm
-!check_new_game = $A1F210
-;; routine in tracking.asm
-!update_and_store_region_time = $A1EC00
-;; seed 32bits ID (see seed_display.asm)
-!seed_id = $dfff00
 
 ;; Patch boot to init our stuff
 org $80844B
@@ -204,10 +200,10 @@ boot1:
     sta !timer_backup2
     ;; check if first boot ever by checking magic 32-bit value in SRAM
     lda !was_started_flag32
-    cmp !seed_id
+    cmp seed_display_seed_value
     bne .first
     lda !was_started_flag32+2
-    cmp !seed_id+2
+    cmp seed_display_seed_value+2
     beq .check_reset
 .first:
     ;; no game was ever saved:
@@ -226,9 +222,9 @@ boot1:
     dex
     bpl .clear_loop
     ;; write magic number
-    lda !seed_id
+    lda seed_display_seed_value
     sta !was_started_flag32
-    lda !seed_id+2
+    lda seed_display_seed_value+2
     sta !was_started_flag32+2
     ;; skip soft reset check, since it's the 1st boot
     bra .cont
@@ -647,7 +643,7 @@ backup_save:
 patch_save:
 	pha	;; save A, it is used as arg in hijacked function
 	;; backup saves management:
-	jsl !check_new_game
+	jsl new_game_check_new_game
 	beq .stats
 	lda.l opt_backup
 	beq .stats
@@ -1176,7 +1172,7 @@ copy:
 clear_values:
     php
     rep #$30
-    jsl !check_new_game
+    jsl new_game_check_new_game
     bne .ret
 
     ldx #$0000
@@ -1202,7 +1198,7 @@ clear_values:
 ;; Game has ended, save RTA timer to RAM and copy all stats to SRAM a final time
 game_end:
     ;; update region time (will be slightly off, but avoids dealing with negative substraction result, see below)
-    jsl !update_and_store_region_time
+    jsl tracking_update_and_store_region_time
     ;; Subtract frames from pressing down at ship to this code running
     lda !timer1
     sec

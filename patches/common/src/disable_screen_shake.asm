@@ -6,6 +6,7 @@ lorom
 
 ;;; disable earthquake in various escape setup/main asm (also covers random escape)
 org $8f919c
+marker:
         rts
 
 org $8f91bd

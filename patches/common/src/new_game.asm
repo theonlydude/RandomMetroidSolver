@@ -8,6 +8,7 @@ lorom
 
 ;;; CONSTANTS
 !GameStartState = $7ED914
+;;; FIXME circular dep new_game<>credits_varia
 !new_save	= $81ef22
 
 ;;; HIJACKS (bank 82 init routines)

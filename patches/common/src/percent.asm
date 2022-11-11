@@ -7,9 +7,7 @@
 lorom
 arch snes.cpu
 
-;;; see endingtotal.asm
-org $8BE62F
-compute_percent:
+incsrc "sym/endingtotals.asm"
 
 org $828F6B
         JSR display_item_count_menu
@@ -17,7 +15,7 @@ org $828F6B
 ; Free space at end of bank 82 (0x40 bytes)
 org $82FFBF
 display_item_count_menu:
-        jsl compute_percent
+        jsl endingtotals_compute_percent
         jsr display_menu
         JSR $8F70               ;//vanilla
         rts

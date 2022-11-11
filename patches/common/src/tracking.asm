@@ -4,6 +4,7 @@ arch snes.cpu
 lorom
 
 ;; Addresses to helper functions for stat tracking
+;; FIXME circular dependency with credits_varia
 !inc_stat = $dfd810         ;; Inc stat, stat id in A
 !dec_stat = $dfd840         ;; Dec stat, stat id in A
 !store_stat = $dfd880       ;; Store stat, value in A, stat id in X
@@ -136,7 +137,6 @@ resuming_local:
 ;; CODE (using bank A1 free space)
 ;; -------------------------------
 org $a1ec00
-;; fixed loc for outside access
 update_and_store_region_time:
 	phx
 	jsr update_region_time

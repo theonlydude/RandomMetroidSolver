@@ -6,14 +6,15 @@
 arch snes.cpu
 lorom
 
+incsrc "sym/tracking.asm"
+incsrc "sym/credits_varia.asm"
+
 org $838BCC
     db $20, $ff
 
-!update_and_store_region_time = $A1EC00
 !timer1 = $05b8
 !timer2 = $05ba
 !stats_timer = $7ffc00
-!save_stats = $dfd7bf
 
 org $8FFF20
 gameend:
@@ -24,7 +25,7 @@ gameend:
         STA $7E0998 ; stores gamestate as game end trigger
 
         ;; update region time
-        jsl !update_and_store_region_time
+        jsl tracking_update_and_store_region_time
         ;; save timer in stats
         lda !timer1
         sta !stats_timer
@@ -33,7 +34,6 @@ gameend:
 
         ;; save stats to SRAM
         lda #$0001
-        jsl !save_stats
-
-.quit
+        jsl credits_varia_save_stats
+.quit:
         RTS

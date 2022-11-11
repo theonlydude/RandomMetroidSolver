@@ -6,7 +6,7 @@
 ;;; compile with asar
 
 lorom
-arch snes.cpu
+arch 65816
 
 !song_routine = $808fc1
 

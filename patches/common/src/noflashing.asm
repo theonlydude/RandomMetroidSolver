@@ -1,7 +1,7 @@
 ;;; Avoids flashing in-game
 ;;; Author: kara
 
-arch snes.cpu
+arch 65816
 lorom
 
 incsrc "noflash/power_bomb.asm"

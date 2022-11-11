@@ -11,7 +11,7 @@
 ;;; compile with asar (https://github.com/RPGHacker/asar)
 
 lorom
-arch snes.cpu
+arch 65816
 
 incsrc "event_list.asm"
 

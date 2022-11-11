@@ -6,7 +6,7 @@
 ;;; or a variant of xkas that supports arch directive
 
 lorom
-arch snes.cpu
+arch 65816
 
 ;;; Constants :
 ;;; For spark hijack

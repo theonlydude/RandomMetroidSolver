@@ -4,7 +4,7 @@
 ;;; or a variant of xkas that supports arch directive
 
 lorom
-arch snes.cpu
+arch 65816
 
 ;;; use this 35 bytes unused plms space for the nothing item plm instructions lists:
 ;;; $BAD1: Unused. Setup ;;;

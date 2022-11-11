@@ -1,6 +1,6 @@
 ;;; Define indicator PLMs for vanilla door colors. Indicators for beam doors are directly in the beam doors patch
 
-arch snes.cpu
+arch 65816
 lorom
 
 incsrc "doors_plms_common.asm"

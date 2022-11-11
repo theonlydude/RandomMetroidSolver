@@ -6,7 +6,7 @@
 ;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
 
 lorom
-arch snes.cpu
+arch 65816
 
 ;;; For refill
 !samus_health          = $09c2

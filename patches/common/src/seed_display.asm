@@ -1,6 +1,6 @@
 ;; compile with asar
 
-arch snes.cpu
+arch 65816
 lorom
 
 org $dfff00

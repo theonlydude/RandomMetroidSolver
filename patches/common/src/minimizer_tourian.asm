@@ -9,7 +9,7 @@
 ;;;
 ;;; Compiles with asar
 
-arch snes.cpu
+arch 65816
 lorom
 
 !full_refill = $f700    ; short ptr in bank 8F (see area_rando_doors.asm)

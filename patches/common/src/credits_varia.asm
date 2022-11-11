@@ -1,7 +1,7 @@
 ;; compile with asar
 
 ;; custom credits
-arch snes.cpu
+arch 65816
 lorom
 
 incsrc "sym/new_game.asm"

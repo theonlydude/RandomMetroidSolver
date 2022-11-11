@@ -1,7 +1,7 @@
 ;;; makes it so that red doors are only openable with 1 missile, instead of 5 missiles or 1 super
 ;;; compile with asar
 
-arch snes.cpu
+arch 65816
 lorom	
 
 ;;; duplicate of door hit PLM instruction used for

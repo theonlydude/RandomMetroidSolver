@@ -7,7 +7,7 @@
 !CollectedItems  = $7ED86E
 
 lorom
-arch snes.cpu
+arch 65816
 
 org $84889F
         JSL COLLECTTANK

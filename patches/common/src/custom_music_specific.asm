@@ -4,7 +4,7 @@
 ;;; 
 ;;; Define desired vanilla song(s) on the command line with -D
 
-arch snes.cpu
+arch 65816
 lorom
 
 !SPC_Engine_Base = $CF6C08

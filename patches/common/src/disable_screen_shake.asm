@@ -1,7 +1,7 @@
 ;;; Disables excessive screen shaking
 ;;; compile with asar
 
-arch snes.cpu
+arch 65816
 lorom
 
 ;;; disable earthquake in various escape setup/main asm (also covers random escape)

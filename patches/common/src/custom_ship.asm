@@ -3,7 +3,7 @@
 ;;; Compile with "asar" (https://github.com/RPGHacker/asar/releases)
 
 lorom
-arch snes.cpu
+arch 65816
 
 !temp = $0743		; from pause screen RAM
 

@@ -15,7 +15,7 @@
 ;;; or a variant of xkas that supports arch directive
 
 lorom
-arch snes.cpu
+arch 65816
 
 ;;; full heat protection with varia instead of varia or gravity
 org $8de37d

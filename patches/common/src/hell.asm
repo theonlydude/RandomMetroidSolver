@@ -2,7 +2,7 @@
 ;;; compile with asar
 
 lorom
-arch snes.cpu
+arch 65816
 
 org $8fe893
 	jsr add_heat_fx		; setup asm call

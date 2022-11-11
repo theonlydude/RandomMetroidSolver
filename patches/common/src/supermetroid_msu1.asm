@@ -1,7 +1,7 @@
 ;;; assemble with asar
 
 lorom
-arch snes.cpu
+arch 65816
 
 ;;; MSU memory map I/O
 !MSU_STATUS = $2000

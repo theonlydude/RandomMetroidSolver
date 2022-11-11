@@ -3,7 +3,7 @@
 ;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
 ;;; or a variant of xkas that supports arch directive
 
-arch snes.cpu
+arch 65816
 lorom
 
 incsrc "sym/tracking.asm"

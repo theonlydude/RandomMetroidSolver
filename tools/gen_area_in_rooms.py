@@ -34,7 +34,7 @@ statesChecksArgSize = {
 }
 
 with open(asm, "w") as src:
-    src.write("lorom\narch snes.cpu\n\n")
+    src.write("lorom\narch 65816\n\n")
     for room in rooms:
 #        print(room["Name"])
         def processState(stateWordAddr):

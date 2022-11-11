@@ -12,7 +12,7 @@
 ;;; or a variant of xkas that supports arch directive
 
 lorom
-arch snes.cpu
+arch 65816
 
 ;;; divides projectile damage by 3
 macro divprojdmg3()

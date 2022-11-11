@@ -4,7 +4,7 @@
 ;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
 
 lorom
-arch snes.cpu
+arch 65816
 
 incsrc "sym/random_music.asm"
 incsrc "sym/new_game.asm"

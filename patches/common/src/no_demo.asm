@@ -2,7 +2,7 @@
 ;;; compile with asar
 
 lorom
-arch snes.cpu
+arch 65816
 	
 ;;; original code, timer in $1F53:
 ;;; $8B:9F29 CE 53 1F    DEC $1F53  [$7E:1F53]

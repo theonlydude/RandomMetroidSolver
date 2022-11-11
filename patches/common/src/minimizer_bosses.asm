@@ -3,7 +3,7 @@
 ;;;
 ;;; Compiles with asar
 
-arch snes.cpu
+arch 65816
 lorom
 
 !mark_boss = $8081a6

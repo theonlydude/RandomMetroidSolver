@@ -1,0 +1,26 @@
+
+Circular deps :
+
+rando_escape <> objectives: remove r > o, just an option flag)
+new_game <> credits_varia: move new/save/load game stuff from credits into new dedicated patch
+tracking <> credits_varia: merge stats stuff from credits_varia into tracking
+
+Refactor:
+
+Objectives :
+
+- credits_varia should contain only credits, move everything else away from it
+- stats/credits patch should be usable on a vanilla ROM (with VARIA specific sections filled with default values from patch)
+
+New patches/includes :
+- all VARIA base RAM/SRAM and ROM options as defines in common include
+- varia_common.asm : common routines formerly in new_game.asm except check_new_game
+- varia_base.asm : boot, save/load/backup management
+- varia_start.asm : custom start/varia specific stuff from new_game.asm
+
+Modifications :
+- new_game.asm : removed, split into varia_common and varia_start
+- credits_varia.asm : heaviliy stripped of everything but credits, rename varia_credits
+- tracking.asm : augmented with stats stuff from credits_varia, rename varia_stats
+
+To apply tracking/credits on a vanilla ROM, apply varia_common, varia_base, varia_tracking, varia_credits

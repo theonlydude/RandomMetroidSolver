@@ -6,8 +6,8 @@
 arch 65816
 lorom
 
-incsrc "sym/tracking.asm"
-incsrc "sym/credits_varia.asm"
+incsrc "sym/base.asm"
+incsrc "sym/stats.asm"
 
 org $838BCC
     db $20, $ff
@@ -25,7 +25,7 @@ gameend:
         STA $7E0998 ; stores gamestate as game end trigger
 
         ;; update region time
-        jsl tracking_update_and_store_region_time
+        jsl stats_update_and_store_region_time
         ;; save timer in stats
         lda !timer1
         sta !stats_timer
@@ -34,6 +34,6 @@ gameend:
 
         ;; save stats to SRAM
         lda #$0001
-        jsl credits_varia_save_stats
+        jsl base_save_stats
 .quit:
         RTS

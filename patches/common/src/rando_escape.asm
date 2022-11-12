@@ -7,7 +7,7 @@ lorom
 arch 65816
 
 incsrc "sym/random_music.asm"
-incsrc "sym/new_game.asm"
+incsrc "sym/utils.asm"
 incsrc "event_list.asm"
 
 ;;; carry set if escape flag on, carry clear if off
@@ -249,7 +249,7 @@ room_setup:
     plb
     jsr $919c                   ; sets up room shaking
     plb
-    jsl new_game_fix_timer_gfx
+    jsl utils_fix_timer_gfx
 .end:
     ;; goes back to vanilla setup asm call
     lda $0018,x

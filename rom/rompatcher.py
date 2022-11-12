@@ -26,18 +26,22 @@ class RomPatcher:
     IPSPatches = {
         # applied on all seeds
         'Standard': [
+            # common utility routines
+            'utils.ips',
+            # boot, save files and backup management, stats infrastructure
+            'base.ips',
             # handles starting location and start blue doors
-            'new_game.ips',
+            'start.ips',
             # generic PLM spawner used for extra saves, blinking doors etc.
             'plm_spawn.ips',
             # needed fixes for VARIA
             'vanilla_bugfixes.ips',
             # use a byte in a unused room state header field to store area ID in the VARIA sense
             'area_ids.ips',
-            # custom credits, backup save system, base tracking code
-            'credits_varia.ips',
+            # custom credits
+            'credits.ips',
             # actual game hijacks to update tracking stats
-            'tracking.ips',
+            'stats.ips',
             # enemy names in menu for seed ID
             'seed_display.ips',
             # door ASM to wake zebes early in blue brinstar
@@ -371,7 +375,7 @@ class RomPatcher:
             # show objectives and Tourian status in a shortened intro sequence
             # if not full vanilla objectives+tourian
             if not self.settings["vanillaObjectives"] or self.settings["tourian"] != "Vanilla":
-                self.applyIPSPatch("Restore_Intro") # important to apply this after new_game.ips
+                self.applyIPSPatch("Restore_Intro") # important to apply this after start.ips
                 self.applyIPSPatch("intro_text.ips")
             if self.settings["layout"]:
                 # apply layout patches
@@ -471,17 +475,17 @@ class RomPatcher:
         # this PLM ensures the item will be here whenever zebes awakes
         plms.append('Morph_Zebes_Awake')
         (w0, w1) = getWord(ap.Start['spawn'])
+        patchDict = {
+            'StartAP': {
+                Addresses.getOne('startAP'): [w0, w1]
+            }
+        }
         if 'doors' in ap.Start:
             doors += ap.Start['doors']
         doors.append(0x0)
-        addr = Addresses.getOne('startAP')
-        patch = [w0, w1] + doors
-        assert (addr + len(patch)) < addr + 0x10, "Stopped before new_game overwrite"
-        patchDict = {
-            'StartAP': {
-                addr: patch
-            },
-        }
+        doorsAddr = Addresses.getOne('start_opt_doors')
+        assert (doorsAddr + len(doors)) < Addresses.getOne('start_startup'), "Stopped before start code overwrite"
+        patchDict["StartAP"][doorsAddr] = doors
         self.applyIPSPatch('StartAP', patchDict)
         # handle custom saves
         if 'save' in ap.Start:
@@ -657,7 +661,7 @@ class RomPatcher:
         totalNothing = sum(1 for il in itemLocs if il.Accessible and il.Item.Category == 'Nothing')
         totalEnergy = self.getItemQty(itemLocs, 'ETank')+self.getItemQty(itemLocs, 'Reserve')
         totalMajors = max(totalItemLocs - totalEnergy - totalAmmo - totalNothing, 0)
-        address = Addresses.getOne("credits_varia_credits_items_distrib")
+        address = Addresses.getOne("credits_credits_items_distrib")
         value = "{:>2}".format(totalItemLocs)
         line = " ITEM LOCATIONS              %s " % value
         self.writeCreditsStringBig(address, line, top=True)
@@ -735,7 +739,7 @@ class RomPatcher:
         address += 0x40
 
         # write ammo/energy pct
-        address = Addresses.getOne("credits_varia_credits_items_distrib_continued")
+        address = Addresses.getOne("credits_credits_items_distrib_continued")
         (ammoPct, energyPct) = (int(self.getAmmoPct(dist)), int(100*totalEnergy/18))
         line = " AVAILABLE AMMO {:>3}% ENERGY {:>3}%".format(ammoPct, energyPct)
         self.writeCreditsStringBig(address, line, top=True)
@@ -779,7 +783,7 @@ class RomPatcher:
             return s
 
         isRace = self.race is not None
-        startCreditAddress = Addresses.getOne('credits_varia_itemlocations_start')
+        startCreditAddress = Addresses.getOne('credits_itemlocations_start')
         address = startCreditAddress
         if isRace:
             addr = address - 0x40

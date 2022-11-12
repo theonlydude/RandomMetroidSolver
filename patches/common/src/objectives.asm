@@ -15,7 +15,7 @@ arch 65816
 
 incsrc "event_list.asm"
 
-incsrc "sym/new_game.asm"
+incsrc "sym/utils.asm"
 incsrc "sym/rando_escape.asm"
 incsrc "sym/custom_music.asm"
 incsrc "sym/disable_screen_shake.asm"
@@ -212,7 +212,7 @@ trigger_escape:
 	jsr room_earthquake	; could not be called by setup asm since not in escape yet
 	; load timer graphics
 	lda #$000f : jsl $90f084
-	jsl new_game_fix_timer_gfx
+	jsl utils_fix_timer_gfx
 	lda #$0002 : sta $0943	 ; set timer state to 2 (MB timer start)
 	jsr clear_music_queue
 	jsr trigger_escape_music

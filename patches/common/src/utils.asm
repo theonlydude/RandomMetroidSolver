@@ -5,10 +5,10 @@
 arch 65816
 lorom
 
+incsrc "constants.asm"
+
 !RNG		= $808111	; RNG function
 !RNG_seed	= $05e5
-!RTA_timer	= $05b8		; see tracking.asm
-
 
 org $a1f2a0
 ;;; single use (will give the same result if called several times in the same frame)
@@ -17,7 +17,7 @@ org $a1f2a0
 rand:
     phy
     lda !RNG_seed : pha             ; save current rand seed
-    eor !RTA_timer : sta !RNG_seed  ; alter seed with frame counter
+    eor !timer1 : sta !RNG_seed     ; alter seed with frame counter
     jsl !RNG : tay                  ; call RNG and save result to Y
     pla : sta !RNG_seed             ; restore current rand seed
     tya                             ; get RNG result in A
@@ -81,3 +81,7 @@ div32:
     plx
     ply
     rtl
+
+warnpc $A1F31F
+
+print "A1 end: ", pc

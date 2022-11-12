@@ -10,7 +10,7 @@ seed_value:
 org $82ecbb
 	jsr seed_display
 
-;; in $82 free space after tracking.ips
+;; in $82 free space after stats.ips
 org $82F717
 seed_display:
 	pha

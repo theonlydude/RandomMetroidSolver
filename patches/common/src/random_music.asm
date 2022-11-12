@@ -12,7 +12,7 @@
 lorom
 arch 65816
 
-incsrc "sym/new_game.asm"
+incsrc "sym/utils.asm"
 
 ;;; CONSTANTS
 !tracks_tbl_sz	= #$0018    ; table size, in bytes, for unique tracks
@@ -37,7 +37,7 @@ org $88B446
     rep 4 : nop     ; disables lava sounds to avoid weird noises in Norfair
 
 ;;; DATA
-org $A1F300
+org $A1F320
 musics_list:
     ;; music set index. unique tracks to randomize between themselves
     ;; hi: music data index
@@ -93,7 +93,7 @@ is_music_to_randomize:
 ;;; gets a random data/track couple from table, and store it in last_music_rnd (and A)
 get_random_music:
     ;; call RNG, result in A
-    jsl new_game_rand
+    jsl utils_rand
     ;; A = A % nb_tracks
     sta $4204
     ;; switch to 8-bit mode for divisor
@@ -174,13 +174,11 @@ load_room_music_no_escape_rando:
     jsr load_room_music
     jml $82DF4A
 
-warnpc $a1f3ef
-
-org $a1f3f0
-
 load_room_music_escape_rando:
     lda $0004,x : and #$00ff ; reload music data index (needed by load_room_music)
     jsr load_room_music
     rtl
 
 warnpc $a1f3ff
+
+print "A1 end: ", pc

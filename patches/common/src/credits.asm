@@ -222,7 +222,7 @@ check_samus_avg_time:
 
 warnpc $8bf92f
 
-org $dfd4f0
+org $dfd6f0
 ;; Draw full time as hh:mm:ss:ff
 ;; Pointer to first byte of RAM in A
 draw_full_time:
@@ -451,7 +451,10 @@ numbers_top:
 numbers_bot:
     dw $0070, $0071, $0072, $0073, $0074, $0075, $0076, $0077, $0078, $0079, $007a, $007b, $007c, $007d, $007e, $007f
 
-;;; New credits script in free space of bank $DF
+print "DF code end: ", pc
+warnpc $dfd91a
+;; New credits script in free space of bank $DF
+org $dfd91b
 script:
     dw !set, $0002
 -

@@ -659,11 +659,6 @@ if __name__ == "__main__":
                                                   areaRandomization, args.bosses,
                                                   args.escapeRando if not stuck else False)
             escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
-            if escapeAttr is not None:
-                if "patches" not in escapeAttr:
-                    escapeAttr['patches'] = []
-                if args.noRemoveEscapeEnemies == True:
-                    escapeAttr['patches'].append("Escape_Rando_Enable_Enemies")
     except Exception as e:
         import traceback
         traceback.print_exc(file=sys.stdout)
@@ -736,6 +731,7 @@ if __name__ == "__main__":
             "nerfedCharge": args.nerfedCharge,
             "nerfedRainbowBeam": energyQty == 'ultra sparse',
             "escapeAttr": escapeAttr,
+            "escapeRandoRemoveEnemies": not args.noRemoveEscapeEnemies,
             "minimizerN": minimizerN,
             "tourian": args.tourian,
             "doorsColorsRando": args.doorsColorsRando,
@@ -747,7 +743,7 @@ if __name__ == "__main__":
             "doors": doors,
             "displayedVersion": displayedVersion,
             "itemLocs": itemLocs,
-            "progItemLocs": progItemLocs,
+            "progItemLocs": progItemLocs
         }
 
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source

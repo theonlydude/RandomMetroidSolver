@@ -707,7 +707,7 @@ class Objectives(object):
         for goal in Objectives.activeGoals:
             LOG.debug("active goal: {}".format(goal.name))
 
-        Objectives._tourianRequired = not romReader.patchPresent('Escape_Trigger')
+        Objectives._tourianRequired = not bool(romReader.romOptions.read('escapeTrigger'))
         LOG.debug("tourianRequired: {}".format(self.tourianRequired))
 
     # call from rando

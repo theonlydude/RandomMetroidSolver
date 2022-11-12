@@ -35,10 +35,6 @@ patches = {
         0x14b20c: [0x03,0x00]},
     "No_Music":{
         0x278413: [0x6f]},
-    "Escape_Rando_Enable_Enemies":{
-        0x10F000: [0x0, 0x0]},
-    "Escape_Rando_Disable_Enemies":{
-        0x10F000: [0x1]},
     "Escape_Animals_Open_Brinstar": {
         0x784BD: [0x10]
     },
@@ -47,29 +43,6 @@ patches = {
     },
     "Escape_Animals_Open_Maridia": {
         0x7C54C: [0x10]
-    },
-    "Enable_Backup_Saves": {
-        0xef20: [0x1]
-    },
-    'Escape_Trigger' : {
-        0x10F5FE: [0x1]
-    },
-    'Escape_Trigger_Disable' : {
-        0x10F5FE: [0x0]
-    },
-    # actually a bitmask:
-    # high bit is for sfx play on obj completion, low bit for trigger escape
-    # only in crateria (standard in rando, default in the patch) for nothing objectives.
-    # we want to play sfx on objective completion only with non-standard objectives
-    'Objectives_sfx' : {
-        0x10F5FF: [0x81]
-    },
-    # see above, used in plandos so trigger escape whatever the start loc is
-    # with nothing objective. With this, we'll play sfx even in plandos
-    # with standard objectives, but it'll prevent to handle these patches
-    # as anything else that just bytes.
-    'Escape_Trigger_Nothing_Objective_Anywhere' : {
-        0x10F5FF: [0x80]
     },
     # for development/quickmet: disable clear save files on 1st boot
     "Disable_Clear_Save_Boot": {

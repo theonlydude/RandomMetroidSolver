@@ -13,6 +13,7 @@ from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
 from rom.addresses import Addresses
 from rom.symbols import Symbols
 from rom.rom_patches import RomPatches
+from rom.rom_options import RomOptions
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir
 import utils.log
@@ -97,6 +98,7 @@ class RomPatcher:
             self.romFile = FakeROM()
         else:
             self.romFile = RealROM(romFileName)
+        self.romOptions = RomOptions(self.romFile, self.symbols)
         if magic is not None:
             from rom.race_mode import RaceModePatcher
             self.race = RaceModePatcher(self, magic)
@@ -118,9 +120,17 @@ class RomPatcher:
         }
 
     def patchRom(self):
+        # apply patches first
         self.applyIPSPatches()
         self.commitIPS()
-
+        # apply ROM options on top of patches
+        self.romOptions.write('escapeTrigger', int(self.settings["tourian"] == "Disabled"))
+        self.romOptions.write('escapeTriggerCrateria', int(not self.settings['isPlando']))
+        self.romOptions.write('escapeRandoRemoveEnemies', int(self.settings['escapeRandoRemoveEnemies']))
+        self.romOptions.write('objectivesSFX', 0 if self.settings['vanillaObjectives'] else 0x80)
+        backupSaves = self.settings["area"] == True or self.settings["doorsColorsRando"] == True or not GraphUtils.isStandardStart(self.settings["startLocation"])
+        self.romOptions.write("backupSaves", int(backupSaves))
+        # write seed data
         self.writeObjectives(self.settings["itemLocs"], self.settings["tourian"])
         self.writeItemsLocs(self.settings["itemLocs"])
         self.writeSplitLocs(self.settings["majorsSplit"], self.settings["itemLocs"], self.settings["progItemLocs"])
@@ -353,17 +363,11 @@ class RomPatcher:
                 plms.append('WS_Save_Blinking_Door')
             if self.settings["boss"] == True:
                 stdPatches.append("Phantoon_Eye_Door")
-            if (self.settings["area"] == True
-                or self.settings["doorsColorsRando"] == True
-                or not GraphUtils.isStandardStart(self.settings["startLocation"])):
-                stdPatches.append("Enable_Backup_Saves")
             if 'varia_hud.ips' in self.settings["optionalPatches"]:
                 # varia hud can make demos glitch out
                 self.applyIPSPatch("no_demo.ips")
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
-            if not self.settings["vanillaObjectives"]:
-                self.applyIPSPatch("Objectives_sfx")
             # show objectives and Tourian status in a shortened intro sequence
             # if not full vanilla objectives+tourian
             if not self.settings["vanillaObjectives"] or self.settings["tourian"] != "Vanilla":
@@ -411,8 +415,6 @@ class RomPatcher:
             if self.settings["tourian"] == "Fast":
                 for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
                     self.applyIPSPatch(patchName)
-            elif self.settings["tourian"] == "Disabled":
-                self.applyIPSPatch("Escape_Trigger")
             doors = self.getStartDoors(plms, self.settings["area"], self.settings["minimizerN"])
             if self.settings["doorsColorsRando"] == True:
                 for patchName in RomPatcher.IPSPatches['DoorsColors']:
@@ -528,8 +530,9 @@ class RomPatcher:
         else:
             plms.append("WS_Map_Grey_Door")
         # optional patches (enemies, scavenger)
-        for patch in escapeAttr['patches']:
-            self.applyIPSPatch(patch)
+        if 'patches' in escapeAttr:
+            for patch in escapeAttr['patches']:
+                self.applyIPSPatch(patch)
 
     # adds ad-hoc "IPS patches" for additional PLM tables
     def applyPLMs(self, plms):

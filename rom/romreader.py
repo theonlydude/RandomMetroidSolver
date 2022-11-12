@@ -4,6 +4,7 @@ from rom.compression import Compressor
 from rom.rom import snes_to_pc
 from rom.addresses import Addresses
 from rom.symbols import Symbols
+from rom.rom_options import RomOptions
 from patches.patchaccess import PatchAccess
 from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas
 from logic.logic import Logic
@@ -85,6 +86,7 @@ class RomReader:
         '0xbaed': {'name': 'Nothing'}  # new hidden Nothing
     }
 
+    # FIXME use symbols/names addresses here
     patches = {
         'startCeres': {'address': 0x7F1F, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
         'startLS': {'address': 0x7F17, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
@@ -113,6 +115,7 @@ class RomReader:
         'round_robin_cf': {'address': 0x855D6, 'value': 0x0, 'desc': "Round robin Crystal Flash"}
     }
 
+    # FIXME use symbols/names addresses here
     allPatches = {
         'AimAnyButton': {'address': 0x175ca, 'value': 0x60, 'vanillaValue': 0xad},
         'animal_enemies': {'address': 0x78418, 'value': 0x3B, 'vanillaValue': 0x48},
@@ -228,6 +231,7 @@ class RomReader:
         self.symbols = Symbols(PatchAccess())
         self.symbols.loadAllSymbols()
         Addresses.updateFromSymbols(self.symbols)
+        self.romOptions = RomOptions(self.romFile, self.symbols)
 
     def readPlmWord(self, address):
         if self.race is None:

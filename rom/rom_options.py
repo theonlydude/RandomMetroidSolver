@@ -31,8 +31,8 @@ class RomOptions(object):
 
     def read(self, name):
         opt = self._options[name]
-        val = self.rom.readByte(opt.addr)
-        self._values[addr] = val
+        val = self._rom.readByte(opt.addr)
+        self._values[opt.addr] = val
         return val & opt.mask
 
     def write(self, name, value):

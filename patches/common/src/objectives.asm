@@ -14,14 +14,14 @@ lorom
 arch 65816
 
 incsrc "event_list.asm"
+incsrc "constants.asm"
 
 incsrc "sym/utils.asm"
 incsrc "sym/rando_escape.asm"
 incsrc "sym/custom_music.asm"
 incsrc "sym/disable_screen_shake.asm"
 
-!timer = $05b8
-!obj_check_period = #$0020	; unit:frames, works only in powers of 2
+!timer = !timer1
 !current_room = $079b
 !samus_x = $0AF6
 !samus_y = $0AFA
@@ -41,7 +41,7 @@ incsrc "sym/disable_screen_shake.asm"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; ROM OPTIONS
-org $A1F5FE
+org !disabled_tourian_escape_flag
 ;;; if non-zero trigger escape as soon as objectives are completed
 escape_option:
 	db $00
@@ -77,10 +77,6 @@ org $82A505
 ;;; replace pause screen button label palettes functions
 org $82A61D
         jsr (new_pause_palettes_func_list,x)
-
-;;; default "ship refill" if we have fast tourian but not area rando
-org $8ff700
-	rts
 
 ;;; For minimizer or scavenger with ridley as last loc, disable
 ;;; elevator music change when boss drops appear if escape is

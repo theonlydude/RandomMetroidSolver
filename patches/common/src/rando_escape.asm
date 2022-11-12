@@ -8,7 +8,9 @@ arch 65816
 
 incsrc "sym/random_music.asm"
 incsrc "sym/utils.asm"
+
 incsrc "event_list.asm"
+incsrc "constants.asm"
 
 ;;; carry set if escape flag on, carry clear if off
 macro checkEscape()
@@ -22,8 +24,6 @@ endmacro
 ;;; number of areas to define Disabled Tourian escape timer table size
 !nb_areas = 10 			; (count out Ceres and Tourian)
 
-;;; external definitions
-!disabled_tourian_escape_flag = $a1f5fe ; FIXME circular dependency with objectives.asm (option flag)
 
 org $809E21
 print "timer_value: ", pc

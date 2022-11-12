@@ -20,6 +20,7 @@ class RomOptions(object):
         self.addOption("escapeTrigger", "objectives", "escape_option")
         self.addOption("escapeTriggerCrateria", "objectives", "objectives_options_mask", mask=0x1)
         self.addOption("objectivesSFX", "objectives", "objectives_options_mask", mask=0x80)
+        self.addOption("fastTourianSkipRefill", "area_rando_doors", "full_refill")
 
     def _getAddress(self, namespace, label):
         return snes_to_pc(self._symbols.getAddress(namespace, label))

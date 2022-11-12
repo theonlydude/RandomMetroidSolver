@@ -2,6 +2,18 @@
 
 include
 
+;; shared ROM options addresses
+!disabled_tourian_escape_flag = $a1f5fe
+
+;; shared constants
+!obj_check_period = #$0020	; unit:frames, works only in powers of 2
+
+;;; IGT vanilla RAM
+!igt_frames = $7E09DA
+!igt_seconds = $7E09DC
+!igt_minutes = $7E09DE
+!igt_hours = $7E09E0
+
 ;; RTA timer RAM updated during NMI
 !timer1 = $05b8
 !timer2 = $05ba
@@ -26,9 +38,3 @@ include
 !stat_rta_menu = #$0026
 !stat_deaths = #$0028
 !stat_resets = #$0029
-
-;;; IGT vanilla RAM
-!igt_frames = $7E09DA
-!igt_seconds = $7E09DC
-!igt_minutes = $7E09DE
-!igt_hours = $7E09E0

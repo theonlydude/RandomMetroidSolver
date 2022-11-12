@@ -134,6 +134,10 @@ class RomPatcher:
         self.romOptions.write('objectivesSFX', 0 if self.settings['vanillaObjectives'] else 0x80)
         backupSaves = self.settings["area"] == True or self.settings["doorsColorsRando"] == True or not GraphUtils.isStandardStart(self.settings["startLocation"])
         self.romOptions.write("backupSaves", int(backupSaves))
+        if self.settings["tourian"] == "Fast" and self.settings["area"] == False:
+            # skip Tourian entrance full refill if not area rando
+            # (we actually overwrite code, so we actually decide the condition before writing this time)
+            self.romOptions.write("fastTourianSkipRefill", 0x60) # RTS
         # write seed data
         self.writeObjectives(self.settings["itemLocs"], self.settings["tourian"])
         self.writeItemsLocs(self.settings["itemLocs"])

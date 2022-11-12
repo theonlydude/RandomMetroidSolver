@@ -19,6 +19,12 @@
 
 ;;; Compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
+lorom
+arch 65816
+
+incsrc "constants.asm"
+incsrc "event_list.asm"
+
 !game_state = $0998		; used to check pause/unpause
 
 !hudposition = #$0006
@@ -49,8 +55,7 @@
 ;;; objectives notifications display
 !objective_global_mask = (!all_objectives_hud_mask|!objective_hud_mask)
 !notification_display_frames = #300 ; 5 seconds
-!timer = $05b8
-!obj_check_period = #$0020	; unit:frames, works only in powers of 2
+!timer = !timer1
 
 ;;; scavenger stuff
 !hunt_over_hud = #$11		; HUD ID of the fake loc 'HUNT OVER'
@@ -59,10 +64,6 @@
 !norfair = #$0002
 !ridley_timer = $0FB2
 !scav_next_found = #$aaaa
-
-incsrc "event_list.asm"
-
-lorom
 
 ;;; hijack the start of health handling in the HUD to draw area or
 ;;; remaining items if necessary
@@ -760,7 +761,7 @@ check_objectives:
 .check:
 	;; when in pause, don't check anything
 	lda !game_state : cmp #$000f : beq .end
-	;; align check prequency with objectives (check one frame later)
+	;; align check period with objectives (check one frame later)
 	lda !timer : and !obj_check_period-1
 	bne .end
 .check_all:

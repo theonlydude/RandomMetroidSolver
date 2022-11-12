@@ -63,6 +63,7 @@
     "patch_load_load_backup": 8515949,
     "patch_load_load_backup_end": 8515996,
     "patch_save": 8515854,
+    "patch_save_save_stats": 8515893,
     "patch_save_stats": 8515875,
     "save_area_text_table": 8516315,
     "save_area_text_table_aqueduct": 8517181,

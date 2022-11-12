@@ -1162,8 +1162,13 @@ itemlocations:
     !pink
     dw "         ITEM LOCATIONS         " ;; 640
 .start:
-    padbyte $ca
-    pad $dedbcf
+;; pad with spaces to mark space as used + to apply the patch on a vanilla ROM
+!counter = 0
+while !counter < 1239
+        dw $007F
+        !counter #= !counter+1
+endif
+        dw $0000
 
 ;; update 'clear time' to display 'real  time'
 org $8cb49b

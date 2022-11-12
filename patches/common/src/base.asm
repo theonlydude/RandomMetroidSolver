@@ -580,7 +580,7 @@ patch_save:
 	pha	;; save A, it is used as arg in hijacked function
 	;; backup saves management:
 	jsl check_new_game
-	beq .stats
+	beq .save_stats
 	lda.l opt_backup
 	beq .stats
 	;; we have backup saves enabled, and it is not the 1st save:
@@ -596,6 +596,7 @@ patch_save:
 	lda !timer2
 	sta !stats_timer+2
 	jsl update_igt
+.save_stats:
 	;; save all stats
 	lda #$0001
 	jsl save_stats
@@ -606,7 +607,7 @@ patch_save:
 	and #$0003
 	rts
 
-print "patch_load: ", pc
+
 patch_load:
     phb
     phx

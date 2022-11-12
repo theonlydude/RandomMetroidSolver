@@ -480,7 +480,7 @@ class InteractiveSolver(CommonSolver):
         else:
             suitsMode = "Vanilla"
 
-        patches = ["Escape_Animals_Disable", "Escape_Trigger_Nothing_Objective_Anywhere"]
+        patches = ["Escape_Animals_Disable"]
 
         doors = GraphUtils.getDoorConnections(AccessGraph(Logic.accessPoints, self.fillGraph()), self.areaRando,
                                               self.bossRando, self.escapeRando, False)
@@ -501,6 +501,7 @@ class InteractiveSolver(CommonSolver):
             "nerfedCharge": False,
             "nerfedRainbowBeam": False,
             "escapeAttr": escapeAttr,
+            "escapeRandoRemoveEnemies": False,
             "minimizerN": None,
             "tourian": self.tourian,
             "doorsColorsRando": DoorsManager.isRandom(),

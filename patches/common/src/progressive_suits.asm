@@ -12,7 +12,7 @@
 ;;; * Heat damage : full protection for Varia, half for gravity
 
 ;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
-;;; or a variant of xkas that supports arch directive
+
 
 lorom
 arch 65816

@@ -1,7 +1,7 @@
 ;;; door asm of bt/animal room during escape
 ;;;
 ;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
-;;; or a variant of xkas that supports arch directive
+
 
 arch 65816
 lorom

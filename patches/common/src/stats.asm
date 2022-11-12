@@ -1,59 +1,35 @@
+;;; stats hijacks and tracking
+;;;
 ;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 arch 65816
 lorom
 
-;; Addresses to helper functions for stat tracking
-;; FIXME circular dependency with credits_varia
-!inc_stat = $dfd810         ;; Inc stat, stat id in A
-!dec_stat = $dfd840         ;; Dec stat, stat id in A
-!store_stat = $dfd880       ;; Store stat, value in A, stat id in X
-!load_stat = $dfd8b0        ;; Load stat, stat id in A, value returned in A
-!save_last_stats = $dfd820  ;; save stats to "last stats" area in SRAM
+incsrc "sym/base.asm"
 
-;; RTA Timer (timer 1 is frames, and timer 2 is number of times frames rolled over)
-!timer1 = $05b8
-!timer2 = $05ba
+;;; -------------------------------
+;;; CONSTANTS ;;;
+;;; -------------------------------
 
-;; beggining of stats region
-!stats = $7ffc00
+incsrc "constants.asm"
 
-;; Temp variables (define here to make sure they're not reused, make sure they're 2 bytes apart)
-;; These variables are cleared to 0x00 on hard and soft reset
+;; Temp variables
 !door_timer_tmp = $7fff00
 !door_adjust_tmp = $7fff02
-
 !add_time_tmp = $7fff04
-
 !region_timer_tmp = $7fff06
 !region_tmp = $7fff08
+!add_time_32_tmp_lo = $7fff0e
+!add_time_32_tmp_hi = $7fff1a
 
+;; pause menu time stat RAM
 !pause_timer_idx = #$ff0a
 !pause_timer_lo = $7fff0a
 !pause_timer_hi = $7fff0c
 
-!add_time_32_tmp_lo = $7fff0e
-!add_time_32_tmp_hi = $7fff1a
-
-;; tracked stats (see tracking.txt)
-!stat_nb_door_transitions = #$0002
-!stat_rta_door_transitions = #$0003
-!stat_rta_door_align = #$0005
-!stat_rta_regions = #$0007
-!stat_uncharged_shots = #$001f
-!stat_charged_shots = #$0020
-!stat_SBAs = #$0021
-!stat_missiles = #$0022
-!stat_supers = #$0023
-!stat_PBs = #$0024
-!stat_bombs = #$0025
-!stat_rta_menu = #$0026
-!stat_deaths = #$0028
-!stat_resets = #$0029
-
-;; -------------------------------
+;;; -------------------------------
 ;; HIJACKS
-;; -------------------------------
+;;; -------------------------------
 
 ;; Samus hit a door block (Gamestate change to $09 just before hitting $0a)
 org $82e176
@@ -133,6 +109,12 @@ pausing_local:
 resuming_local:
     jml resuming
 
+;; Hijack when samus is in the ship and ready to leave the planet
+org $a2ab0d
+	jsl game_end
+	nop
+	nop
+
 ;; -------------------------------
 ;; CODE (using bank A1 free space)
 ;; -------------------------------
@@ -153,16 +135,16 @@ add_time:
     sbc !add_time_tmp
     sta !add_time_tmp
     txa
-    jsl !load_stat
+    jsl base_load_stat
     clc
     adc !add_time_tmp
     bcc +
-    jsl !store_stat    ;; If carry set, increase the high bits
+    jsl base_store_stat    ;; If carry set, increase the high bits
     inx
     txa
-    jsl !inc_stat
+    jsl base_inc_stat
 +
-    jsl !store_stat
+    jsl base_store_stat
     rts
 
 ;; same as above, using 32bits date for couting long times (> 65535 frames, ~18min)
@@ -186,15 +168,15 @@ add_time_32:
     tya
     asl
     tax
-    lda !stats,x
+    lda !stats_ram,x
     clc				;; clear carry
     adc !add_time_32_tmp_lo	;; add LSBs
-    sta !stats,x
+    sta !stats_ram,x
     inx
     inx
-    lda !stats,x
+    lda !stats_ram,x
     adc !add_time_32_tmp_hi	;; add the MSBs using carry
-    sta !stats,x
+    sta !stats_ram,x
     rts
 
 ;; ran when loading state header, to have up to date region stat
@@ -224,10 +206,10 @@ load_state:
 ;; Samus hit a door block (Gamestate change to $09 just before hitting $0a)
 door_entered:
     ;; save last stats to resist power cycle
-    jsl !save_last_stats
+    jsl base_save_last_stats
     ;; Number of door transitions
     lda !stat_nb_door_transitions
-    jsl !inc_stat
+    jsl base_inc_stat
     ;; update time spent in current region
     ;; (time spent in door transition will count as part
     ;; of destination area)
@@ -310,8 +292,8 @@ count_death:
     lda #$0000
     sta !region_tmp
     lda !stat_deaths
-    jsl !inc_stat
-    jsl !save_last_stats
+    jsl base_inc_stat
+    jsl base_save_last_stats
     rts
 
 ;; uncharged Beam Fire
@@ -319,7 +301,7 @@ uncharged_beam:
     sta $0ccc ;; execute first part of hijacked code, to freely use A
 
     lda !stat_uncharged_shots
-    jsl !inc_stat
+    jsl base_inc_stat
     ;; do the vanilla check, done in both auto and normal fire
     pla
     bit #$0001
@@ -333,7 +315,7 @@ hyper_shot:
     sta $0cd0 ;; execute first part of hijacked code, to freely use A
 
     lda !stat_uncharged_shots
-    jsl !inc_stat
+    jsl base_inc_stat
 
     plp ;; execute last instr of hijacked code
     jml $90bd63 ;; return
@@ -341,7 +323,7 @@ hyper_shot:
 ;; Charged Beam Fire
 charged_beam:
     lda !stat_charged_shots
-    jsl !inc_stat
+    jsl base_inc_stat
     ;; Run hijacked code and return
     LDX #$0000
     LDA $0c2c, x
@@ -354,7 +336,7 @@ fire_sba:
     beq .end
     pha
     lda !stat_SBAs
-    jsl !inc_stat
+    jsl base_inc_stat
     pla
     ;; Run hijacked code and return
 .end:
@@ -368,12 +350,12 @@ missiles_fired:
     beq .super
     dec $09c6
     lda !stat_missiles
-    jsl !inc_stat
+    jsl base_inc_stat
     bra .end
 .super:
     dec $09ca
     lda !stat_supers
-    jsl !inc_stat
+    jsl base_inc_stat
 .end:
     jml $90bec7
 
@@ -387,7 +369,7 @@ bombs_laid:
 .power_bomb:
     lda !stat_PBs
 .end:
-    jsl !inc_stat
+    jsl base_inc_stat
     ;;run hijacked code and return
     lda $0cd2
     inc
@@ -396,7 +378,7 @@ bombs_laid:
 ;; stopped fading out, game state about to change to 0Dh
 pausing:
     ;; save last stats to resist power cycle
-    jsl !save_last_stats
+    jsl base_save_last_stats
     ;; Save RTA time to temp variable
     lda !timer1
     sta !pause_timer_lo
@@ -419,7 +401,7 @@ resuming:
     ;; don't count  time spent in pause in region counters
     jsr store_region_time
     ;; save last stats to resist power cycle
-    jsl !save_last_stats
+    jsl base_save_last_stats
     ;; run hijacked code and return
     inc $0998
     jml $82939f
@@ -431,5 +413,32 @@ touched_ceres_elevator:
 	lda #$0000
 	sta !region_tmp
 	rtl
+
+;; Game has ended, save RTA timer to RAM and copy all stats to SRAM a final time
+game_end:
+    ;; update region time (will be slightly off, but avoids dealing with negative substraction result, see below)
+    jsl update_and_store_region_time
+    ;; Subtract frames from pressing down at ship to this code running
+    lda !timer1
+    sec
+    sbc #$013d
+    sta !timer1
+    lda #$0000  ;; if carry clear this will subtract one from the high byte of timer
+    sbc !timer2
+
+    ;; save timer in stats
+    lda !timer1
+    sta !stats_timer
+    lda !timer2
+    sta !stats_timer+2
+
+    ;; save stats to SRAM
+    lda #$0001
+    jsl base_save_stats
+
+    ;; hijacked code
+    stz $0df2
+    lda #$000a
+    rtl
 
 warnpc $a1efff

@@ -5,10 +5,10 @@
 arch 65816
 lorom
 
+incsrc "sym/base.asm"
+
 ;;; CONSTANTS
 !GameStartState = $7ED914
-;;; FIXME circular dep new_game<>credits_varia
-!new_save	= $81ef22
 
 ;;; HIJACKS (bank 82 init routines)
 
@@ -25,7 +25,6 @@ org $82eeda
 ;;; DATA in bank A1 (start options)
 
 org $a1f200
-print "start_location: ", pc
 start_location:
     ;; start location: $0000=Zebes Landing site, $fffe=Ceres,
     ;; otherwise hi byte is area and low is save index.
@@ -39,30 +38,10 @@ opt_doors:
     db $10,$32			; defaults to red tower top+construction zone
     db $00
 
-warnpc $a1f20f
-
 ;;; CODE in bank A1
-org $a1f210
-;;; zero flag set if we're starting a new game
-;;; called from credits_varia as well
-print "check_new_game: ", pc
-check_new_game:
-    ;; Make sure game mode is 1f
-    lda $7e0998
-    cmp #$001f : bne .end
-    ;; check that Game time and frames is equal zero for new game
-    ;; (Thanks Smiley and P.JBoy from metconst)
-    lda $09DA
-    and #$fffe                  ; consider 1 IGT frame as 0 (workaround for start game with intro text)
-    ora $09DC
-    ora $09DE
-    ora $09E0
-.end:
-    rtl
-
-print "startup: ", pc
+org $a1f220
 startup:
-    jsl check_new_game : bne .end
+    jsl base_check_new_game : bne .end
     lda.l start_location
     cmp #$fffe : beq .ceres
     ;; start point on Zebes
@@ -84,7 +63,7 @@ startup:
     rtl
 
 gameplay_start:
-    jsl check_new_game  : bne .end
+    jsl base_check_new_game  : bne .end
     ;; Set doors to blue if necessary
     phx
     ldx #$0000
@@ -106,51 +85,7 @@ gameplay_start:
 
 warnpc $a1f28f
 
-;;; since this patch is always included, we can put utility
-;;; routines for other patches here (in fixed locations)
-
-!RNG		= $808111	; RNG function
-!RNG_seed	= $05e5
-!RTA_timer	= $05b8		; see tracking.asm
-
-org $a1f2a0
-;;; single use (will give the same result if called several times in the same frame)
-;;; random function that leaves game rng untouched
-;;; result in A
-rand:
-    phy
-    lda !RNG_seed : pha             ; save current rand seed
-    eor !RTA_timer : sta !RNG_seed  ; alter seed with frame counter
-    jsl !RNG : tay                  ; call RNG and save result to Y
-    pla : sta !RNG_seed             ; restore current rand seed
-    tya                             ; get RNG result in A
-    ply
-    rtl
-
-warnpc $a1f2bf
-
-org $a1f2c0
-;;; courtesy of Smiley
-fix_timer_gfx:
-    PHX
-    LDX $0330						;get index for the table
-    LDA #$0400 : STA $D0,x  				;Size
-    INX : INX						;inc X for next entry (twice because 2 bytes)
-    LDA #$C000 : STA $D0,x					;source address
-    INX : INX						;inc again
-    SEP #$20 : LDA #$B0 : STA $D0,x : REP #$20  		;Source bank $B0
-    INX							;inc once, because the bank is stored in one byte only
-    ;; VRAM destination (in word addresses, basically take the byte
-    ;; address from the RAM map and and devide them by 2)
-    LDA #$7E00	: STA $D0,x
-    INX : INX : STX $0330 					;storing index
-    PLX
-    RTL							;done. return
-
-warnpc $a1f2ff
-
 org $a1f470
-print "additional_etanks: ", pc
 additional_etanks:
 	db $00
 
@@ -163,7 +98,7 @@ add_etanks_and_save:
 	lda $4216 : clc : adc #$0063
 	sta $09c4
 	sta $09c2
-	jsl !new_save		; see credits_varia
+	jsl base_new_save
 	rts
 
 warnpc $a1f4ff

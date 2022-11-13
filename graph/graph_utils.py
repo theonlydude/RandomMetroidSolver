@@ -521,8 +521,8 @@ class GraphUtils:
             # door properties
             conn['RoomPtr'] = dst.RoomInfo['RoomPtr']
             conn['doorAsmPtr'] = dst.EntryInfo['doorAsmPtr']
-            if 'exitAsmPtr' in src.ExitInfo:
-                conn['exitAsmPtr'] = src.ExitInfo['exitAsmPtr']
+            if 'exitAsm' in src.ExitInfo:
+                conn['exitAsm'] = src.ExitInfo['exitAsm']
             conn['direction'] = GraphUtils.getDirection(src, dst)
             conn['bitFlag'] = GraphUtils.getBitFlag(src.RoomInfo['area'], dst.RoomInfo['area'],
                                                     dst.EntryInfo['bitFlag'])

@@ -6,6 +6,8 @@ from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vani
 from graph.vanilla.graph_access import accessPoints
 from solver.interactiveSolver import InteractiveSolver
 from logic.logic import Logic
+from patches.patchaccess import PatchAccess
+from rom.symbols import Symbols
 
 from gluon.html import OPTGROUP
 
@@ -16,7 +18,7 @@ class Tracker(object):
         self.cache = cache
         self.response = response
         # required for GraphUtils access to access points
-        Logic.factory('vanilla')
+        Logic.factory('vanilla') # TODO will have to be changed when handling mirror/rotation etc
 
     def run(self):
         # init session
@@ -47,8 +49,10 @@ class Tracker(object):
             escapeAPs += [transition2isolver(src), transition2isolver(dest)]
 
         # generate list of addresses to read in the ROM
+        symbols = Symbols(PatchAccess())
+        symbols.loadAllSymbols()
+        Addresses.updateFromSymbols(symbols)
         addresses = getAddressesToRead()
-
         startAPs = GraphUtils.getStartAccessPointNamesCategory()
         startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),
                     OPTGROUP(_label="Custom", *startAPs["custom"]),

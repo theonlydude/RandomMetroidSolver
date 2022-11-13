@@ -11,7 +11,7 @@ class Plando(object):
         self.request = request
         self.cache = cache
         # required for GraphUtils access to access points
-        Logic.factory('vanilla')
+        Logic.factory('vanilla') # TODO will have to be changed when handling mirror/rotation etc
 
     def run(self):
         # init session
@@ -46,6 +46,9 @@ class Plando(object):
             escapeAPs += [transition2isolver(src), transition2isolver(dest)]
 
         # generate list of addresses to read in the ROM
+        symbols = Symbols(PatchAccess())
+        symbols.loadAllSymbols()
+        Addresses.updateFromSymbols(symbols)
         addresses = getAddressesToRead(plando=True)
 
         startAPs = GraphUtils.getStartAccessPointNamesCategory()

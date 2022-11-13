@@ -17,7 +17,8 @@ class Solver(object):
         self.session = session
         self.request = request
         self.cache = cache
-
+        # required for symbols
+        Logic.factory('vanilla') # TODO will have to be changed when handling mirror/rotation etc
         self.vars = self.request.vars
 
     def run(self):
@@ -83,6 +84,9 @@ class Solver(object):
         (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
 
         # generate list of addresses to read in the ROM
+        symbols = Symbols(PatchAccess())
+        symbols.loadAllSymbols()
+        Addresses.updateFromSymbols(symbols)
         addresses = getAddressesToRead()
 
         # send values to view

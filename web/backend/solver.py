@@ -8,6 +8,8 @@ from utils.utils import getPresetDir, getPythonExec
 from utils.db import DB
 from solver.conf import Conf
 from logic.logic import Logic
+from patches.patchaccess import PatchAccess
+from rom.symbols import Symbols
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import redirect

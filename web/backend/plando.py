@@ -1,6 +1,8 @@
 from web.backend.utils import loadPresetsList, transition2isolver, getAddressesToRead
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
 from logic.logic import Logic
+from patches.patchaccess import PatchAccess
+from rom.symbols import Symbols
 from utils.version import displayedVersion
 
 from gluon.html import OPTGROUP

@@ -176,7 +176,7 @@ vlevelData.displaySubScreen(vShipScreen, hShipBottom.spritemap.boundingRect)
 print("")
 
 if not fixEscape:
-    vlevelData.write()
+    vlevelData.write(5165)
 
 for name, addrRange in addresses.items():
     print("check {} at {}".format(name, hex(addrRange["vanilla"][0])))

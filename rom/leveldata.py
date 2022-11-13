@@ -2,6 +2,8 @@
 
 import sys
 
+import logging
+import utils.log
 from rom.rom import snes_to_pc, pc_to_snes
 from rom.compression import Compressor
 
@@ -417,6 +419,7 @@ class RoomState(object):
 
 class LevelData(object):
     def __init__(self, rom, dataAddr, size):
+        self.log = utils.log.get('LevelData')
         self.rom = rom
         self.dataAddr = dataAddr
         # [width, height] in screens
@@ -519,6 +522,12 @@ class LevelData(object):
                 print("add missing byte in layer2 data")
                 self.rawData.append(0x3)
 
+        # validate that raw data is ok
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            for i, r in enumerate(self.rawData):
+                if r >= 0x100:
+                    assert False, "byte in rawData at {} is too big: {}".format(i, hex(r))
+
         layer1Counter = 2
         btsCounter = 2 + self.layer1Size
         layer2Counter = 2 + self.layer1Size + self.btsSize
@@ -556,15 +565,14 @@ class LevelData(object):
         print("len rawData: {}".format(len(rawData)))
         return rawData
 
-    def write(self):
+    def write(self, vanillaSize):
         # rebuild raw data
         rawData = self.unload()
         print("rawData len: {}".format(len(rawData)))
 
         # recompress data
-        compressedData = Compressor().compress(rawData)
+        compressedData = Compressor(profile='Slow').compress(rawData)
         recompressedDataSize = len(compressedData)
-        vanillaSize = 5165
         print("compressedData len: {} (old: {}, vanilla: {})".format(recompressedDataSize, self.compressedSize, vanillaSize))
         assert recompressedDataSize <= vanillaSize
         # write compress data
@@ -643,3 +651,49 @@ class LevelData(object):
             for j in range(width):
                 self.layer1[rowBase+j] = defaultLayer
                 self.bts[rowBase+j] = defaultBts
+
+    def getTileAddr(self, screen, tx, ty):
+        (sx, sy) = screen
+        base = sx * 16 + sy * self.size[0] * 256
+        nextRow = self.size[0] * 16
+
+        rowBase = base + ty * nextRow
+        return rowBase + tx
+
+    def getTileAddrInv(self, i):
+        rowLength = self.size[0] * 16
+        y = i // rowLength
+        sy = y // 16
+        ty = y % 16
+
+        x = i % rowLength
+        sx = x // 16
+        tx = x % 16
+
+        return (sx, sy, tx, ty)
+
+    def getTile(self, screen, tx, ty):
+        addr = self.getTileAddr(screen, tx, ty)
+        return (self.layer1[addr], self.bts[addr])
+
+    def updateTile(self, screen, tx, ty, newTile, newBTS):
+        tileAddr = self.getTileAddr(screen, tx, ty)
+        self.layer1[tileAddr] = newTile
+        self.bts[tileAddr] = newBTS
+
+    def getModifiedTiles(self, patch):
+        modified = set()
+        for i, (oTile, pTile) in enumerate(zip(self.layer1, patch.layer1)):
+            if oTile != pTile:
+                modified.add(i)
+        for i, (oBTS, pBTS) in enumerate(zip(self.bts, patch.bts)):
+            if oBTS != pBTS:
+                modified.add(i)
+
+        ret = []
+        for i in modified:
+            # transform i into (sx, sy, tx, ty)
+            (sx, sy, tx, ty) = self.getTileAddrInv(i)
+            ret.append((sx, sy, tx, ty))
+
+        return ret

@@ -52,7 +52,7 @@ class Compressor:
             length = (curByte & 0b11111) + 1
 
             if self.log.getEffectiveLevel() == logging.DEBUG:
-                self.log.debug("@: {} curByte: {} cmd: {} len: {}".format(curAddress-startAddress-1, curByte, bin(command), length))
+                self.log.debug("@: {} curByte: {} cmd: {} len: {}".format(curAddress-startAddress-1, hex(curByte), bin(command), length))
                 self.stats[command] += length
 
             while True:
@@ -64,7 +64,7 @@ class Compressor:
                         output.append(self._nextByte())
                     curAddress += length
                     if self.log.getEffectiveLevel() == logging.DEBUG:
-                        self.log.debug("Uncompressed: {}".format(output[-length:]))
+                        self.log.debug("Uncompressed: {}".format([hex(b) for b in output[-length:]]))
 
                 elif command == Command.ByteFill:
                     # Repeat one byte <length> times
@@ -73,7 +73,7 @@ class Compressor:
                     for i in range(length):
                         output.append(copyByte)
                     if self.log.getEffectiveLevel() == logging.DEBUG:
-                        self.log.debug("Repeat: {}".format(output[-length:]))
+                        self.log.debug("Repeat: {}".format([hex(b) for b in output[-length:]]))
 
                 elif command == Command.WordFill:
                     # Alternate between two bytes <length> times
@@ -83,7 +83,7 @@ class Compressor:
                     for i in range(length):
                       output.append(copyByte1 if i % 2 == 0 else copyByte2)
                     if self.log.getEffectiveLevel() == logging.DEBUG:
-                        self.log.debug("Word: {}".format(output[-length:]))
+                        self.log.debug("Word: {}".format([hex(b) for b in output[-length:]]))
 
                 elif command == Command.SigmaFill:
                     # Sequence of increasing bytes
@@ -91,9 +91,10 @@ class Compressor:
                     curAddress += 1
                     for i in range(length):
                         output.append(copyByte)
-                        copyByte += 1
+                        # 0xff + 1 => 0x00
+                        copyByte = (copyByte + 1) & 0xff
                     if self.log.getEffectiveLevel() == logging.DEBUG:
-                        self.log.debug("Increment: {}".format(output[-length:]))
+                        self.log.debug("Increment: {}".format([hex(b) for b in output[-length:]]))
 
                 elif command == Command.LibraryCopy:
                     # Copy from output stream
@@ -102,7 +103,7 @@ class Compressor:
                     for i in range(length):
                         output.append(output[outAddress + i])
                     if self.log.getEffectiveLevel() == logging.DEBUG:
-                        self.log.debug("Copy: {}".format(output[-length:]))
+                        self.log.debug("Copy: {}".format([hex(b) for b in output[-length:]]))
 
                 elif command == Command.EORedCopy:
                     # Copy from output stream, flip bits
@@ -111,7 +112,7 @@ class Compressor:
                     for i in range(length):
                         output.append(output[outAddress + i] ^ 0xFF)
                     if self.log.getEffectiveLevel() == logging.DEBUG:
-                        self.log.debug("CopyXOR: {}".format(output[-length:]))
+                        self.log.debug("CopyXOR: {}".format([hex(b) for b in output[-length:]]))
 
                 elif command == Command.MinusCopy:
                     # Copy from output stream, relative to current index
@@ -120,7 +121,7 @@ class Compressor:
                     for i in range(length):
                         output.append(output[outAddress + i])
                     if self.log.getEffectiveLevel() == logging.DEBUG:
-                        self.log.debug("RelativeCopy: {}".format(output[-length:]))
+                        self.log.debug("RelativeCopy: {}".format([hex(b) for b in output[-length:]]))
 
                 elif command == Command.Long:
                     # Long length (10 bits) command
@@ -136,7 +137,7 @@ class Compressor:
                         for i in range(length):
                             output.append(output[outAddress + i] ^ 0xFF)
                         if self.log.getEffectiveLevel() == logging.DEBUG:
-                            self.log.debug("LongRelativeCopyXOR: {}".format(output[-length:]))
+                            self.log.debug("LongRelativeCopyXOR: {}".format([hex(b) for b in output[-length:]]))
                     else:
                         isLongLength = True;
 
@@ -219,38 +220,38 @@ class Compressor:
             # regular command
             self.output.append(type << 5 | length)
             if self.log.getEffectiveLevel() == logging.DEBUG:
-                self.log.debug("_writeChunkHeader: cmd: {} len: {} value: {}".format(bin(type), length, type << 5 | length))
+                self.log.debug("_writeChunkHeader: cmd: {} len: {} value: {}".format(bin(type), length, hex(type << 5 | length)))
         else:
             # long command or relative xor copy
             self.output.append(0b11100000 | type << 2 | length >> 8)
             self.output.append(length & 0xFF)
             if self.log.getEffectiveLevel() == logging.DEBUG:
-                self.log.debug("_writeChunkHeader: long cmd: {} len: {} value: {} {}".format(bin(type), length, 0b11100000 | type << 2 | length >> 8, length & 0xFF))
+                self.log.debug("_writeChunkHeader: long cmd: {} len: {} value: {} {}".format(bin(type), length, hex(0b11100000 | type << 2 | length >> 8), hex(length & 0xFF)))
 
     def _writeUncompressed(self, index, length):
         self._writeChunkHeader(Command.DirectCopy, length)
         self.output += self.inputData[index:index+length]
         if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("_writeUncompressed: len: {} index: {} data: {}".format(length, index, self.inputData[index:index+length]))
+            self.log.debug("_writeUncompressed: len: {} index: {} data: {}".format(length, index, [hex(b) for b in self.inputData[index:index+length]]))
 
     def _writeByteFill(self, byte, length):
         self._writeChunkHeader(Command.ByteFill, length)
         self.output.append(byte)
         if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("_writeByteFill: len: {} byte: {}: {}".format(length, byte, [byte for i in range(length)]))
+            self.log.debug("_writeByteFill: len: {} byte: {}: {}".format(length, hex(byte), [byte for i in range(length)]))
 
     def _writeWordFill(self, b0, b1, length):
         self._writeChunkHeader(Command.WordFill, length)
         self.output.append(b0)
         self.output.append(b1)
         if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("_writeWordFill: len: {} b0: {} b1: {}: {}".format(length, b0, b1, [b0 if i%2==0 else b1 for i in range(length)]))
+            self.log.debug("_writeWordFill: len: {} b0: {} b1: {}: {}".format(length, hex(b0), hex(b1), [hex(b0) if i%2==0 else hex(b1) for i in range(length)]))
 
     def _writeByteIncrement(self, byte, length):
         self._writeChunkHeader(Command.SigmaFill, length)
         self.output.append(byte)
         if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("_writeByteIncrement: len: {} byte: {}: {}".format(length, byte, [byte+i for i in range(length)]))
+            self.log.debug("_writeByteIncrement: len: {} byte: {}: {}".format(length, hex(byte), [hex(byte+i) for i in range(length)]))
 
     def _writeCopy(self, address, length):
         self._writeChunkHeader(Command.LibraryCopy, length)
@@ -258,7 +259,7 @@ class Compressor:
         self.output.append(address >> 8)
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("_writeCopy: {}".format(self.output[-3:]))
-            self.log.debug("_writeCopy: len: {} address: {}: {}".format(length, address, self.inputData[address:address+length]))
+            self.log.debug("_writeCopy: len: {} address: {}: {}".format(length, address, [hex(b) for b in self.inputData[address:address+length]]))
 
     def _writeCopyXor(self, address, length):
         self._writeChunkHeader(Command.EORedCopy, length)
@@ -266,19 +267,19 @@ class Compressor:
         self.output.append(address >> 8)
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("_writeCopyXor: {}".format(self.output[-3:]))
-            self.log.debug("_writeCopyXor: len: {} address: {}: {}".format(length, address, self.inputData[address:address+length]))
+            self.log.debug("_writeCopyXor: len: {} address: {}: {}".format(length, address, [hex(b) for b in self.inputData[address:address+length]]))
 
     def _writeNegativeCopy(self, i, address, length):
         self._writeChunkHeader(Command.MinusCopy, length)
         self.output.append(address)
         if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("_writeNegativeCopy: len: {} address: {}: {}".format(length, address, self.inputData[i-address:i-address+length]))
+            self.log.debug("_writeNegativeCopy: len: {} address: {}: {}".format(length, address, [hex(b) for b in self.inputData[i-address:i-address+length]]))
 
     def _writeNegativeCopyXor(self, i, address, length):
         self._writeChunkHeader(Command.EORedMinusCopy, length)
         self.output.append(address)
         if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("_writeNegativeCopy: len: {} address: {}: {}".format(length, address, self.inputData[i-address:i-address+length]))
+            self.log.debug("_writeNegativeCopy: len: {} address: {}: {}".format(length, address, [hex(b) for b in self.inputData[i-address:i-address+length]]))
 
     def _computeStart(self):
         # for each possible value store the positions of the value in the input data
@@ -380,7 +381,7 @@ class Compressor:
         value = self.inputData[i]
         while i + carry < self.length and self.inputData[i + carry] == value:
             carry += 1
-            value += 1
+            value = (value + 1) & 0xff
         return carry
 
     def _computeCopy(self, pos, xor=0x00):

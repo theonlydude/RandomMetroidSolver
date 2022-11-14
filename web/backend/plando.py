@@ -3,6 +3,7 @@ from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vani
 from logic.logic import Logic
 from patches.patchaccess import PatchAccess
 from rom.symbols import Symbols
+from rom.addresses import Addresses
 from utils.version import displayedVersion
 
 from gluon.html import OPTGROUP

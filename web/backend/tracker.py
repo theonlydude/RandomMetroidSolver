@@ -8,6 +8,7 @@ from solver.interactiveSolver import InteractiveSolver
 from logic.logic import Logic
 from patches.patchaccess import PatchAccess
 from rom.symbols import Symbols
+from rom.addresses import Addresses
 
 from gluon.html import OPTGROUP
 

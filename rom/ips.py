@@ -63,8 +63,10 @@ class IPS_Patch(object):
         patch = IPS_Patch()
 
         run_in_progress = False
+        run_between_in_progress = False
         current_run_start = 0
         current_run_data = bytearray()
+        current_between_run_data = bytearray()
 
         runs = []
 
@@ -80,13 +82,25 @@ class IPS_Patch(object):
         for index, (original, patched) in enumerate(zip(original_data, patched_data)):
             if not run_in_progress:
                 if original != patched:
+                    # not worth creating a new run, concat to previous run and continue it
+                    if run_between_in_progress and len(current_between_run_data) <= 5:
+                        previous_run = runs.pop()
+                        current_run_start = previous_run[0]
+                        current_between_run_data.append(patched)
+                        current_run_data = previous_run[1] + current_between_run_data
+                    else:
+                        current_run_start = index
+                        current_run_data = bytearray([patched])
                     run_in_progress = True
-                    current_run_start = index
-                    current_run_data = bytearray([patched])
+                    run_between_in_progress = False
+                elif run_between_in_progress:
+                    current_between_run_data.append(patched)
             else:
                 if original == patched:
                     runs.append((current_run_start, current_run_data))
                     run_in_progress = False
+                    run_between_in_progress = True
+                    current_between_run_data = bytearray([patched])
                 else:
                     current_run_data.append(patched)
         if run_in_progress:

@@ -103,8 +103,8 @@ if __name__ == "__main__":
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',
                         help="the maximum difficulty generated seed will be for given parameters",
-                        dest='maxDifficulty', nargs='?', default=None,
-                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random'])
+                        dest='maxDifficulty', nargs='?', default='infinity',
+                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'infinity', 'random'])
     parser.add_argument('--minDifficulty',
                         help="the minimum difficulty generated seed will be for given parameters (speedrun prog speed required)",
                         dest='minDifficulty', nargs='?', default=None,
@@ -312,14 +312,11 @@ if __name__ == "__main__":
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
     # if no max diff, set it very high
-    if args.maxDifficulty:
-        if args.maxDifficulty == 'random':
-            diffs = ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania']
-            maxDifficulty = text2diff[random.choice(diffs)]
-        else:
-            maxDifficulty = text2diff[args.maxDifficulty]
+    if args.maxDifficulty == 'random':
+        diffs = ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania']
+        maxDifficulty = text2diff[random.choice(diffs)]
     else:
-        maxDifficulty = infinity
+        maxDifficulty = text2diff[args.maxDifficulty]
     # same as solver, increase max difficulty
     threshold = maxDifficulty
     epsilon = 0.001

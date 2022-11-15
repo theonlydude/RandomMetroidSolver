@@ -2635,11 +2635,7 @@ def displayCheckbox(id, defaultTrue=False):
 
 {{
 def displaySelect(id, values, default):
-  if id in session.randomizer:
-    value = session.randomizer[id]
-  else:
-    value = default
-    pass
+  value = session.randomizer.get(id, default)
 }}
   {{
    =SELECT(*[OPTION(displayNames.get(value, value), _value=value) for value in values],
@@ -2850,7 +2846,7 @@ def displayNumber(id, min, max, default, step="1"):
               <tr id="maxDiffVisibility">
                 <td class="small"></td>
                 <td><span id="maxDifficultyText">Maximum difficulty for picking up an item:</span></td>
-                <td>{{displaySelect("maxDifficulty", ['no difficulty cap', 'easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'], "hardcore")}}</td>
+                <td>{{displaySelect("maxDifficulty", ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'infinity'], "hardcore")}}</td>
                 <td id="maxDifficultyStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr>

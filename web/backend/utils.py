@@ -109,7 +109,11 @@ def getAddressesToRead(plando=False):
     return addresses
 
 # if we have an internal parameter value different from its display value
-displayNames = {"FullWithHUD": "Full Countdown"}
+displayNames = {
+    "FullWithHUD": "Full Countdown",
+    "harder": "very hard",
+    "infinity": "no difficulty cap"
+}
 
 def updateParameterDisplay(value):
     for internal, display in displayNames.items():
@@ -255,7 +259,7 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
             raiseHttp(400, "Wrong value for etanks", isJson)
 
     if 'maxDifficulty' in others:
-        if request.vars.maxDifficulty not in ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random']:
+        if request.vars.maxDifficulty not in ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'infinity', 'random']:
             raiseHttp(400, "Wrong value for max difficulty", isJson)
 
     preset = request.vars.preset

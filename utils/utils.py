@@ -303,7 +303,7 @@ def loadRandoPreset(randoPreset, args):
         args.animals = True
     if randoParams.get("variaTweaks", "on") == "off":
         args.noVariaTweaks = True
-    if randoParams.get("maxDifficulty", "no difficulty cap") != "no difficulty cap":
+    if randoParams.get("maxDifficulty", "infinity") != "infinity":
         args.maxDifficulty = randoParams["maxDifficulty"]
     if randoParams.get("suitsRestriction", "off") != "off":
         if randoParams["suitsRestriction"] == "on":

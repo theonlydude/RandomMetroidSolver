@@ -28,7 +28,7 @@ if __name__ == "__main__":
     parser.add_argument('--output',
                         help="to choose the name of the generated json (for the webservice)",
                         dest='output', nargs='?', default=None)
-    parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="varia", choices=["varia", "rotation"])
+    parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="vanilla", choices=["vanilla", "rotation", "mirror"])
     parser.add_argument('--patch', '-c',
                         help="optional patches to add",
                         dest='patches', nargs='?', default=[], action='append',

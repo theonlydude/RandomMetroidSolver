@@ -230,7 +230,7 @@ if __name__ == "__main__":
                         nargs='?', const=True, default=False)
     parser.add_argument('--allowGreyDoors', help='add grey color in doors colors pool', dest='allowGreyDoors',
                         nargs='?', const=True, default=False)
-    parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="varia", choices=["varia", "rotation", "mirror"])
+    parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="vanilla", choices=["vanilla", "rotation", "mirror"])
     parser.add_argument('--hud', help='Enable VARIA hud', dest='hud',
                         nargs='?', const=True, default=False)
     parser.add_argument('--music',

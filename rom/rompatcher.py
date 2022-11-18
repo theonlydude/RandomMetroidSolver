@@ -70,10 +70,19 @@ class RomPatcher:
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips',
                    'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips'],
-        # base patchset+optional layout for area rando
-        'Area': ['area_rando_layout.ips', 'door_transition.ips', 'area_rando_doors.ips',
-                 'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'area_rando_warp_door.ips', 'aqueduct_bomb_blocks.ips',
-                 'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street', 'no_demo.ips'],
+        # base patchset for area rando
+        'AreaBaseSet': [
+            'area_rando_gate_caterpillar.ips', 'area_rando_gate_east_tunnel.ips'
+            'area_layout_caterpillar.ips', 'area_layout_ln_exit.ips', 'area_layout_east_tunnel.ips',
+            'door_transition.ips', 'area_rando_doors.ips', 'area_rando_warp_door.ips',
+            'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street', 'no_demo.ips'
+        ],
+        # optional layout for area rando
+        'AreaComfortSet': [
+            'area_rando_gate_crab_tunnel.ips', 'area_rando_gate_greenhillzone.ips',
+            'area_layout_greenhillzone.ips', 'area_layout_crabe_tunnel.ips',
+            'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'aqueduct_bomb_blocks.ips'
+        ],
         # patches for boss rando
         'Bosses': ['door_transition.ips', 'no_demo.ips'],
         # patches for escape rando
@@ -399,12 +408,11 @@ class RomPatcher:
 
             # apply area patches
             if self.settings["area"] == True:
-                if not self.settings["areaLayout"]:
-                    for p in ['area_rando_layout.ips', 'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'aqueduct_bomb_blocks.ips']:
-                       RomPatcher.IPSPatches['Area'].remove(p)
-                    RomPatcher.IPSPatches['Area'].append('area_rando_layout_base.ips')
-                for patchName in RomPatcher.IPSPatches['Area']:
+                for patchName in RomPatcher.IPSPatches['AreaBaseSet']:
                     self.applyIPSPatch(patchName)
+                if self.settings["areaLayout"]:
+                    for patchName in RomPatcher.IPSPatches['AreaComfortSet']:
+                        self.applyIPSPatch(patchName)
             else:
                 self.applyIPSPatch('area_ids_alt.ips')
             if self.settings["boss"] == True:
@@ -544,6 +552,7 @@ class RomPatcher:
         plmLocs = {} # room key above => loc name
         additionalPLMs = self.patchAccess.getAdditionalPLMs()
         for p in plms:
+            print("Apply plm {}".format(p))
             plm = additionalPLMs[p]
             room = plm['room']
             state = 0

@@ -12,7 +12,7 @@ from utils.log import init
 
 vanillaRom = RealROM(sys.argv[1])
 mirrorRomName = sys.argv[2]
-# varia rom with layout patches
+# varia rom with layout patches, varia tweaks, area layout
 variaRom = RealROM(sys.argv[3])
 ipsPath = sys.argv[4]
 
@@ -39,6 +39,7 @@ def transformPos(sx, sy, tx, ty, screenSize):
 
 patches = [
     # patch name, room addr
+    # layout
     ('dachora',   0x8f9cb3),
     ('early_super_bridge', 0x8f9BC8),
     ('high_jump', 0x8fAA41),
@@ -49,6 +50,15 @@ patches = [
     ('spazer',    0x8fa408),
     ('kraid_save', 0x8fA4DA),
     ('mission_impossible', 0x8f9e11),
+    # VARIA tweaks
+    ('ln_chozo_platform', 0x8fb1e5),
+    # area layout
+    ('area_rando_warp_door', 0x8fd6fd),
+    ('crab_shaft', 0x8fd1a3),
+    ('area_layout_caterpillar', 0x8fa322),
+    ('area_layout_ln_exit', 0x8fad5e),
+    ('area_layout_east_tunnel', 0x8fcf80),
+    # area additional layout
 ]
 
 for (patch, roomAddr) in patches:

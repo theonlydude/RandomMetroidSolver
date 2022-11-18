@@ -47,6 +47,14 @@ for name, data in patches.items():
                     y = mirror.readByte()
                     bytes[2] = x
                     bytes[3] = y
+
+                    # change plm facing for bliking grey door
+                    if bytes[1] == 0xc8:
+                        if bytes[0] == 0x42:
+                            bytes[0] = 0x48
+                        elif bytes[0] == 0x48:
+                            bytes[0] = 0x42
+
                     print("        # door {} x/y updated".format(label))
                     print("        snes_to_pc({}): [{}],".format(hex(mirror_snes_addr), ', '.join([hex(b) for b in bytes])))
                 else:

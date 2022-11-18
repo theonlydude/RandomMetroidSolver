@@ -29,16 +29,6 @@ for apName, ap in accessPointsDict.items():
     DistanceFromDoor = "0x{0:0{1}X}".format(rom.readWord(), 4)
     CustomDoorASM = "0x{0:0{1}X}".format(rom.readWord(), 4)
 
-    exitInfo = {
-        'DoorPtr':0x8c22,
-        'direction': 0x5,
-        "cap": (0xe, 0x6),
-        "bitFlag": 0x0,
-        "screen": (0x0, 0x0),
-        "distanceToSpawn": 0x8000,
-        "doorAsmPtr": 0x0000
-    }
-
     print("""accessPointsDict['{}'].ExitInfo = {{
     'DoorPtr': {},
     'direction': {},
@@ -48,3 +38,21 @@ for apName, ap in accessPointsDict.items():
     'distanceToSpawn': {},
     'doorAsmPtr': {}
 }}""".format(apName, DoorPtr, Direction, XposLow, YPosLow, BitFlag, XPosHigh, YPosHigh, DistanceFromDoor, CustomDoorASM))
+
+
+    roomAddr = snes_to_pc(0x8f0000 | ap.RoomInfo['RoomPtr'])
+    # read room size in screens
+    rom.seek(roomAddr + 4)
+    swidth = rom.readByte()
+    sheight = rom.readByte()
+    # a screen is 256 pixels long
+    pwidth = swidth * 256
+
+    samusX = ap.EntryInfo['SamusX']
+    samusX = pwidth - 1 - samusX
+    samusY = ap.EntryInfo['SamusY']
+
+    print("""accessPointsDict['{}'].EntryInfo = {{
+    'SamusX': {},
+    'SamusY': {}
+}}""".format(apName, hex(samusX), hex(samusY)))

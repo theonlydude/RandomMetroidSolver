@@ -33,16 +33,16 @@ class Symbols(object):
                 self.log.debug("Symbols path "+d+" does not exist")
         self.cleanup()
 
-    # removes duplicate symbols, by keeping only the one with the shorter name,
-    # to avoid duplicate "imported" symbols.
+    # removes duplicate "imported" symbols, with prepended namespaces
     # cleans up only absolute symbols
     def cleanup(self):
         dups = self._findDuplicates()
         for addr, syms in dups.items():
-            shortest = min(syms, key=len)
             for sym in syms:
-                if sym != shortest:
-                    del self._symbolsAbsolute[sym]
+                included = [other for other in syms if other in self._symbolsAbsolute and other.endswith("_"+sym)]
+                for inc in included:
+                    self.log.debug("Deleting absolute symbol "+inc)
+                    del self._symbolsAbsolute[inc]
 
     def _findDuplicates(self):
         return {address:[sym for sym,addr in self._symbolsAbsolute.items() if addr == address] for address in self._symbolsAbsolute.values()}
@@ -109,9 +109,10 @@ class Symbols(object):
             json.dump(self._symbols[namespace], f, indent=4)
 
     def addSymbol(self, namespace, label, addr):
-        self.log.debug("- adding label %s to namespace %s : $%06x" % (label, namespace, addr))
+        absSymName = Symbols.getAbsoluteSymbolName(namespace, label)
+        self.log.debug("- adding label %s to namespace %s (absolute name: %s) : $%06x" % (label, namespace, absSymName, addr))
         self._symbols[namespace][label] = addr
-        self._symbolsAbsolute[Symbols.getAbsoluteSymbolName(namespace, label)] = addr
+        self._symbolsAbsolute[absSymName] = addr
 
     def getAddress(self, namespaceOrAbsoluteSymbol, localSymbol=None):
         if localSymbol is None:

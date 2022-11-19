@@ -721,7 +721,7 @@ accessPointsDict['Red Tower Top Left'].EntryInfo = {
     'SamusY': 0x488
 }
 accessPointsDict['Caterpillar Room Top Right'].EntryInfo = {
-    'SamusX': 0x32,
+    'SamusX': 0x2e,
     'SamusY': 0x388
 }
 accessPointsDict['Red Brinstar Elevator'].EntryInfo = {

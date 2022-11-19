@@ -1187,6 +1187,7 @@ class RomPatcher:
                 self.setOamTile(i, rotationMiddle, char2tile[char], y=0x8e)
 
     def writeDoorsColor(self, doorsStart):
+        DoorsManager.setDoorsAddress(self.symbols)
         if self.race is None:
             DoorsManager().writeDoorsColor(self.romFile, doorsStart, self.romFile.writeWord)
         else:

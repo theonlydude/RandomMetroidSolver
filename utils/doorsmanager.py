@@ -313,22 +313,13 @@ class DoorsManager():
         'GreenBrinstarMissileRefill': Door('GreenBrinstarMissileRefill', False, 'red', id=0x23)
     }
 
-    # need symbols to get doors addresses
-    symbols = None
-
     def __init__(self):
-        if DoorsManager.symbols is None:
-            patchAccess = PatchAccess()
-            DoorsManager.symbols = Symbols(patchAccess)
-            DoorsManager.symbols.loadAllSymbols()
-
-            # get doors address and facing
-            DoorsManager.setDoorsAddress()
+        pass
 
     @staticmethod
-    def setDoorsAddress():
+    def setDoorsAddress(symbols):
         for door in DoorsManager.doors.values():
-            door.setAddress(DoorsManager.symbols)
+            door.setAddress(symbols)
 
     # call from logic
     def traverse(self, smbm, doorName):

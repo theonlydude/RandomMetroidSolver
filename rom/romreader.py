@@ -10,6 +10,7 @@ from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas
 from logic.logic import Logic
 from collections import defaultdict
 from utils.objectives import Objectives
+from utils.doorsmanager import DoorsManager
 
 class RomReader:
     nothings = ['0xbae9', '0xbaed']
@@ -231,6 +232,7 @@ class RomReader:
         self.symbols = Symbols(PatchAccess())
         self.symbols.loadAllSymbols()
         Addresses.updateFromSymbols(self.symbols)
+        DoorsManager.setDoorsAddress(self.symbols)
         self.romOptions = RomOptions(self.romFile, self.symbols)
 
     def readPlmWord(self, address):

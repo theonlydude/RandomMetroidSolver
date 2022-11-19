@@ -8,6 +8,7 @@ from solver.interactiveSolver import InteractiveSolver
 from logic.logic import Logic
 from patches.patchaccess import PatchAccess
 from rom.symbols import Symbols
+from utils.doorsmanager import DoorsManager
 from rom.addresses import Addresses
 
 from gluon.html import OPTGROUP
@@ -53,6 +54,7 @@ class Tracker(object):
         symbols = Symbols(PatchAccess())
         symbols.loadAllSymbols()
         Addresses.updateFromSymbols(symbols)
+        DoorsManager.setDoorsAddress(symbols)
         addresses = getAddressesToRead()
         startAPs = GraphUtils.getStartAccessPointNamesCategory()
         startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),

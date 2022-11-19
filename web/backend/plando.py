@@ -3,6 +3,7 @@ from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vani
 from logic.logic import Logic
 from patches.patchaccess import PatchAccess
 from rom.symbols import Symbols
+from utils.doorsmanager import DoorsManager
 from rom.addresses import Addresses
 from utils.version import displayedVersion
 
@@ -51,6 +52,7 @@ class Plando(object):
         # generate list of addresses to read in the ROM
         symbols = Symbols(PatchAccess())
         symbols.loadAllSymbols()
+        DoorsManager.setDoorsAddress(symbols)
         Addresses.updateFromSymbols(symbols)
         addresses = getAddressesToRead(plando=True)
 

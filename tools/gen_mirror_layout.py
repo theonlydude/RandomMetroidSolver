@@ -25,7 +25,7 @@ def transformTile(t):
     # invert hflip
     hflip = 1 - hflip
 
-    return (tile) | (hflip << 10) | (vflip << 10) | (btsType << 12)
+    return (tile) | (hflip << 10) | (vflip << 11) | (btsType << 12)
 
 def transformPos(sx, sy, tx, ty, screenSize):
     # in vanilla tile is in screen (0, 0) at pos (6, 6)

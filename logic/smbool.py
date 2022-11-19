@@ -6,12 +6,13 @@ def flatten(l):
 
 # super metroid boolean
 class SMBool:
-    __slots__ = ('bool', 'difficulty', '_knows', '_items')
-    def __init__(self, boolean, difficulty=0, knows=[], items=[]):
+    __slots__ = ('bool', 'difficulty', '_knows', '_items', 'logics')
+    def __init__(self, boolean, difficulty=0, knows=[], items=[], logics=None):
         self.bool = boolean
         self.difficulty = difficulty
         self._knows = knows
         self._items = items
+        self.logics = logics
 
     @property
     def knows(self):
@@ -64,6 +65,7 @@ class SMBool:
             return self.bool
 
     def __copy__(self):
+        # no need to copy the logic list, it's just used for knows definitions
         return SMBool(self.bool, self.difficulty, self._knows, self._items)
 
     def json(self):

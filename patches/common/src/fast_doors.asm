@@ -1,5 +1,5 @@
 
-arch snes.cpu
+arch 65816
 lorom
 
 ;; incsrc "decompression.asm"

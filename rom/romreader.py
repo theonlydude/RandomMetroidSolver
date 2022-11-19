@@ -4,8 +4,9 @@ from rom.compression import Compressor
 from rom.rom import snes_to_pc
 from rom.addresses import Addresses
 from rom.symbols import Symbols
+from rom.rom_options import RomOptions
 from patches.patchaccess import PatchAccess
-from graph.graph_utils import GraphUtils, getAccessPoint, locIdsByAreaAddresses
+from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas
 from logic.logic import Logic
 from collections import defaultdict
 from utils.objectives import Objectives
@@ -85,6 +86,7 @@ class RomReader:
         '0xbaed': {'name': 'Nothing'}  # new hidden Nothing
     }
 
+    # we could use symbols/names addresses here, but the bytes are chosen in vanilla ROM space (hijacks)
     patches = {
         'startCeres': {'address': 0x7F1F, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
         'startLS': {'address': 0x7F17, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
@@ -92,7 +94,8 @@ class RomReader:
         'casual': {'address': 0x22E87A, 'value': 0x9F, 'desc': "Switch Blue Brinstar Etank and missile"},
         'gravityNoHeatProtection': {'address': 0x0869dd, 'value': 0x01, 'desc': "Gravity suit heat protection removed"},
         'progressiveSuits': {'address':0x869df, 'value': 0xF0, 'desc': "Progressive suits"},
-        'nerfedCharge': {'address':0x83821, 'value': 0x80, 'desc': "Nerfed charge beam from the start of the game"}, # this value works for both DASH and VARIA variants
+        # nerfed charge taken in vanilla ROM space value works for both DASH and VARIA variants
+        'nerfedCharge': {'address':0x83821, 'value': 0x80, 'desc': "Nerfed charge beam from the start of the game"},
         'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
         'area': {'address': 0x788A0, 'value': 0x2B, 'desc': "Area layout modifications"},
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
@@ -102,17 +105,17 @@ class RomReader:
         'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"},
         'nerfedRainbowBeam': {'address': 0x14BA2E, 'value': 0x13, 'desc': 'nerfed rainbow beam'},
         'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'desc': "Crocomire in its own area"},
-        'minimizer_bosses': {'address': 0x10F500, 'value': 0xAD, 'desc': "Minimizer"},
-        'minimizer_tourian': {'address': 0x7F730, 'value': 0xA9, 'desc': "Fast Tourian"},
+        'minimizer_bosses': {'address': 0x13DDBC, 'value': 0x22, 'desc': "Minimizer"},
+        'minimizer_tourian': {'address': 0x14B90E, 'value': 0xCF, 'desc': "Fast Tourian"},
         'open_zebetites': {'address': 0x26DF22, 'value': 0xc3, 'desc': "Zebetites without morph"},
         'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'desc': "Beam doors"},
-        'red_doors': {'address':0x20560, 'value':0xbd, 'desc': "Red doors open with one Missile and do not react to Super"},
+        'red_doors': {'address':0x2432C, 'value':0x01, 'desc': "Red doors open with one Missile and do not react to Super"},
         'rotation': {'address': 0x44DF, 'value': 0xD0, 'desc': "Rotation hack"},
         'objectives': {'address': 0x12822, 'value': 0x08, 'desc': "Objectives displayed in pause"},
-        'Escape_Trigger': {'address': 0x10F5FE, 'value': 0x1, 'desc': "Trigger escape when objectives are completed"},
         'round_robin_cf': {'address': 0x855D6, 'value': 0x0, 'desc': "Round robin Crystal Flash"}
     }
 
+    # FIXME use symbols/names addresses here?
     allPatches = {
         'AimAnyButton': {'address': 0x175ca, 'value': 0x60, 'vanillaValue': 0xad},
         'animal_enemies': {'address': 0x78418, 'value': 0x3B, 'vanillaValue': 0x48},
@@ -228,6 +231,7 @@ class RomReader:
         self.symbols = Symbols(PatchAccess())
         self.symbols.loadAllSymbols()
         Addresses.updateFromSymbols(self.symbols)
+        self.romOptions = RomOptions(self.romFile, self.symbols)
 
     def readPlmWord(self, address):
         if self.race is None:
@@ -533,7 +537,8 @@ class RomReader:
     # go read all location IDs by area for item split
     def getLocationsIds(self):
         ret = defaultdict(list)
-        for area,addr in locIdsByAreaAddresses.items():
+        for area in graphAreas:
+            addr = Addresses.getOne('varia_hud_locs_'+area)
             self.romFile.seek(addr)
             while True:
                idByte = self.romFile.readByte()

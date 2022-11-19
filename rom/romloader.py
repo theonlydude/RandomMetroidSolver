@@ -34,6 +34,9 @@ class RomLoader(object):
     def hasPatch(self, patchName):
         return self.romReader.patchPresent(patchName)
 
+    def readOption(self, name):
+        return self.romReader.romOptions.read(name)
+
     def loadPatches(self):
         RomPatches.ActivePatches = []
         isArea = False
@@ -112,7 +115,7 @@ class RomLoader(object):
         if self.hasPatch("minimizer_tourian"):
             RomPatches.ActivePatches.append(RomPatches.TourianSpeedup)
             tourian = 'Fast'
-        if self.hasPatch("Escape_Trigger"):
+        if bool(self.readOption("escapeTrigger")):
             RomPatches.ActivePatches.append(RomPatches.NoTourian)
             tourian = 'Disabled'
 

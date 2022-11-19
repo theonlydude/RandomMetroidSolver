@@ -1,21 +1,22 @@
 ;;; Randomized escape sequence
 ;;;
 ;;;
-;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 lorom
-arch snes.cpu
+arch 65816
+
+incsrc "sym/random_music.asm"
+incsrc "sym/utils.asm"
 
 incsrc "event_list.asm"
+incsrc "constants.asm"
 
 ;;; carry set if escape flag on, carry clear if off
 macro checkEscape()
     lda !escape_event : jsl !check_event
 endmacro
 
-;;; see random_music.asm
-!random_music_hook   = $82df3e
-!random_music 	     = $a1f3f0
 ;;; where we are in current escapes cycle (for animals)
 !current_escape      = $7fff34
 !door_sz             = 12
@@ -23,9 +24,6 @@ endmacro
 ;;; number of areas to define Disabled Tourian escape timer table size
 !nb_areas = 10 			; (count out Ceres and Tourian)
 
-;;; external definitions
-!fix_timer_gfx	     = $a1f2c0	; in new_game.asm (common routines section)
-!disabled_tourian_escape_flag = $a1f5fe ; in objectives.asm (option flag)
 
 org $809E21
 print "timer_value: ", pc
@@ -72,9 +70,10 @@ org $83aaf6
     dw escape_setup
 
 ;;; alternate flyway (= pre BT) door lists for escape animals surprise
-macro FlywayDoorList()
+macro FlywayDoorList(n)
     ;; door to parlor
     db $FD, $92, $00, $05, $3E, $26, $03, $02, $00, $80, $A2, $B9
+.door<n>:
     ;; placeholder for BT door to be filled in by randomizer
     db $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca
 endmacro
@@ -82,10 +81,10 @@ endmacro
 org $83ADA0
 print "flyway_door_lists : ", pc
 flyway_door_lists:
-%FlywayDoorList()
-%FlywayDoorList()
-%FlywayDoorList()
-%FlywayDoorList()
+%FlywayDoorList(0)
+%FlywayDoorList(1)
+%FlywayDoorList(2)
+%FlywayDoorList(3)
 
 print "bt_door_list : ", pc
 bt_door_list:
@@ -250,7 +249,7 @@ room_setup:
     plb
     jsr $919c                   ; sets up room shaking
     plb
-    jsl !fix_timer_gfx
+    jsl utils_fix_timer_gfx
 .end:
     ;; goes back to vanilla setup asm call
     lda $0018,x
@@ -410,10 +409,10 @@ music_and_enemies:
     jsl check_ext_escape : bcs .escape
     ;; vanilla
     ;; check presence of random music patch
-    lda.l !random_music_hook
+    lda.l random_music_hook
     and #$00ff : cmp #$005c	; JML instruction
     bne .vanilla_music
-    jsl !random_music
+    jsl random_music_load_room_music_escape_rando
     bra .vanilla_enemies
 .vanilla_music:
     lda $0004,x ;\

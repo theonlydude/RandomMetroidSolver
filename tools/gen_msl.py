@@ -17,5 +17,6 @@ mslPath = sys.argv[1]
 
 for wla in sys.argv[2:]:
     symbols.loadWLA(wla)
+symbols.cleanup()
 
 symbols.appendToMSL(mslPath)

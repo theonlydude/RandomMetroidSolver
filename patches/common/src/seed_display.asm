@@ -1,6 +1,6 @@
-;; compile with asar
+;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
-arch snes.cpu
+arch 65816
 lorom
 
 org $dfff00
@@ -10,7 +10,7 @@ seed_value:
 org $82ecbb
 	jsr seed_display
 
-;; in $82 free space after tracking.ips
+;; in $82 free space after stats.ips
 org $82F717
 seed_display:
 	pha

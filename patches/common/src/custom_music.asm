@@ -3,10 +3,10 @@
 ;;; data is laid out as in room state header, so the addresses can be
 ;;; added to pc_addresses entry in vanilla JSON track metadata
 ;;;
-;;; compile with asar
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 lorom
-arch snes.cpu
+arch 65816
 
 !song_routine = $808fc1
 
@@ -34,6 +34,7 @@ org $8fc9a4
 
 ;;; end of custom music data table. accounted for by MusicPatcher
 org $8fe86b
+marker:
 	dw $caca		; identifier that we have custom music
 
 ;;; load custom music in special places

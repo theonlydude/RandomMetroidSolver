@@ -12,7 +12,7 @@ def writeAsm(patch, outAsm):
     print("Writing " + outAsm + "...")
     p=IPS_Patch.load(patch).toDict()
     with open(outAsm, 'w') as f:
-        f.write("lorom\narch snes.cpu\n\n")
+        f.write("lorom\narch 65816\n\n")
         for addr,bytez in p.items():
             f.write("org $%06x\nprint pc\n" % pc_to_snes(addr))
             for i in range(0, len(bytez), 8):

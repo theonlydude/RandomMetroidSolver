@@ -3,7 +3,7 @@
 ;;; the item he's holding, whatever it is
 
 lorom
-arch snes.cpu
+arch 65816
 
 !CurrentRoom = $7e079b
 !BTRoom      = #$9804

@@ -1,15 +1,13 @@
 ;;; Changes how the end percentage in calculated. Original patch by Sadiztyk Fish.
 ;;; Display item percent in inventory pause menu
 ;;;
-;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
-;;; or a variant of xkas that supports arch directive
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
+
 
 lorom
-arch snes.cpu
+arch 65816
 
-;;; see endingtotal.asm
-org $8BE62F
-compute_percent:
+incsrc "sym/endingtotals.asm"
 
 org $828F6B
         JSR display_item_count_menu
@@ -17,7 +15,7 @@ org $828F6B
 ; Free space at end of bank 82 (0x40 bytes)
 org $82FFBF
 display_item_count_menu:
-        jsl compute_percent
+        jsl endingtotals_compute_percent
         jsr display_menu
         JSR $8F70               ;//vanilla
         rts

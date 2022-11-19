@@ -7,9 +7,9 @@
 ;;; - skips MB3 fight and baby cutscene: MB dies at the end of MB2,
 ;;;   and you get hyper+refill for the escape
 ;;;
-;;; Compiles with asar
+;;; Compiles with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
-arch snes.cpu
+arch 65816
 lorom
 
 !full_refill = $f700    ; short ptr in bank 8F (see area_rando_doors.asm)

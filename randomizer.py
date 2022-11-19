@@ -103,8 +103,8 @@ if __name__ == "__main__":
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',
                         help="the maximum difficulty generated seed will be for given parameters",
-                        dest='maxDifficulty', nargs='?', default=None,
-                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random'])
+                        dest='maxDifficulty', nargs='?', default='infinity',
+                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'infinity', 'random'])
     parser.add_argument('--minDifficulty',
                         help="the minimum difficulty generated seed will be for given parameters (speedrun prog speed required)",
                         dest='minDifficulty', nargs='?', default=None,
@@ -312,14 +312,11 @@ if __name__ == "__main__":
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
     # if no max diff, set it very high
-    if args.maxDifficulty:
-        if args.maxDifficulty == 'random':
-            diffs = ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania']
-            maxDifficulty = text2diff[random.choice(diffs)]
-        else:
-            maxDifficulty = text2diff[args.maxDifficulty]
+    if args.maxDifficulty == 'random':
+        diffs = ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania']
+        maxDifficulty = text2diff[random.choice(diffs)]
     else:
-        maxDifficulty = infinity
+        maxDifficulty = text2diff[args.maxDifficulty]
     # same as solver, increase max difficulty
     threshold = maxDifficulty
     epsilon = 0.001
@@ -659,11 +656,6 @@ if __name__ == "__main__":
                                                   areaRandomization, args.bosses,
                                                   args.escapeRando if not stuck else False)
             escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
-            if escapeAttr is not None:
-                if "patches" not in escapeAttr:
-                    escapeAttr['patches'] = []
-                if args.noRemoveEscapeEnemies == True:
-                    escapeAttr['patches'].append("Escape_Rando_Enable_Enemies")
     except Exception as e:
         import traceback
         traceback.print_exc(file=sys.stdout)
@@ -736,6 +728,7 @@ if __name__ == "__main__":
             "nerfedCharge": args.nerfedCharge,
             "nerfedRainbowBeam": energyQty == 'ultra sparse',
             "escapeAttr": escapeAttr,
+            "escapeRandoRemoveEnemies": not args.noRemoveEscapeEnemies,
             "minimizerN": minimizerN,
             "tourian": args.tourian,
             "doorsColorsRando": args.doorsColorsRando,
@@ -747,7 +740,7 @@ if __name__ == "__main__":
             "doors": doors,
             "displayedVersion": displayedVersion,
             "itemLocs": itemLocs,
-            "progItemLocs": progItemLocs,
+            "progItemLocs": progItemLocs
         }
 
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source

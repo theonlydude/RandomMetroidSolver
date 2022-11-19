@@ -1,6 +1,9 @@
 from web.backend.utils import loadPresetsList, transition2isolver, getAddressesToRead
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
 from logic.logic import Logic
+from patches.patchaccess import PatchAccess
+from rom.symbols import Symbols
+from rom.addresses import Addresses
 from utils.version import displayedVersion
 
 from gluon.html import OPTGROUP
@@ -11,7 +14,7 @@ class Plando(object):
         self.request = request
         self.cache = cache
         # required for GraphUtils access to access points
-        Logic.factory('vanilla')
+        Logic.factory('vanilla') # TODO will have to be changed when handling mirror/rotation etc
 
     def run(self):
         # init session
@@ -46,6 +49,9 @@ class Plando(object):
             escapeAPs += [transition2isolver(src), transition2isolver(dest)]
 
         # generate list of addresses to read in the ROM
+        symbols = Symbols(PatchAccess())
+        symbols.loadAllSymbols()
+        Addresses.updateFromSymbols(symbols)
         addresses = getAddressesToRead(plando=True)
 
         startAPs = GraphUtils.getStartAccessPointNamesCategory()

@@ -1,7 +1,7 @@
 ;;; Shows a single page of text and start the game
 
 lorom
-arch snes.cpu
+arch 65816
 
 org $8ba592
 	lda #$a66f 		; cinematic function = setup intro text page 1 (skips "the last metroid...")

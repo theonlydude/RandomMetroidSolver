@@ -2,11 +2,11 @@
 ;;; - for incompatible transitions, cancel samus movement
 ;;; - for all transitions, give I-frames
 ;;;
-;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
-;;; or a variant of xkas that supports arch directive
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
+
 
 lorom
-arch snes.cpu
+arch 65816
 
 ;;; Constants :
 ;;; For spark hijack
@@ -107,4 +107,4 @@ warnpc $8ff7ff
 org $8ff800
 generated_door_asm:
 	padbyte $ca : pad $8ffcff
-generated_door_asm_end:
+.end:

@@ -1,11 +1,12 @@
 ;;; Disables excessive screen shaking
-;;; compile with asar
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
-arch snes.cpu
+arch 65816
 lorom
 
 ;;; disable earthquake in various escape setup/main asm (also covers random escape)
 org $8f919c
+marker:
         rts
 
 org $8f91bd

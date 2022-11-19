@@ -1,5 +1,5 @@
 lorom
-arch snes.cpu
+arch 65816
 
 org $8f9271
 	db $01

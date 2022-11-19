@@ -12,7 +12,7 @@
   "missileQty": "9",
   "morphPlacement": "early",
   "progressionSpeed": "slowest",
-  "maxDifficulty": "no difficulty cap",
+  "maxDifficulty": "infinity",
   "powerBombQty": "1",
   "minorQty": "7",
   "suitsRestriction": "on",

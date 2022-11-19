@@ -1,7 +1,7 @@
-;;; assemble with asar
+;;; assemble with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 lorom
-arch snes.cpu
+arch 65816
 
 ;;; MSU memory map I/O
 !MSU_STATUS = $2000

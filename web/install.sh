@@ -16,6 +16,7 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/community_presets -o -d ~/web2py/community_presets ] || ln -s ~/RandomMetroidSolver/community_presets ~/web2py/community_presets
 [ -L ~/web2py/rando_presets ] || ln -s ~/RandomMetroidSolver/rando_presets ~/web2py/rando_presets
 [ -L ~/web2py/music ] || ln -s ~/RandomMetroidSolver/varia_custom_sprites/music ~/web2py/music
+[ -L ~/web2py/patches ] || ln -s ~/RandomMetroidSolver/patches ~/web2py/patches
 
 # views
 [ -L ~/web2py/applications/solver/views/solver_web/home.html ] || ln -s ~/RandomMetroidSolver/web/views/home.html ~/web2py/applications/solver/views/solver_web/home.html

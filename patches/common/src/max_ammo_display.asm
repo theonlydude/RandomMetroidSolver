@@ -1,10 +1,10 @@
 ;;; Display in HUD the maximum number of ammo that samus can carry
 ;;;
-;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
-;;; or a variant of xkas that supports arch directive
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
+
 
 lorom
-arch snes.cpu
+arch 65816
 
 ;;; $9D98: Draw two HUD digits ;;;
 ;;; Parameters:

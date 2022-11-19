@@ -31,6 +31,21 @@ class Symbols(object):
                         self.loadJSON(fullPath)
             except FileNotFoundError:
                 self.log.debug("Symbols path "+d+" does not exist")
+        self.cleanup()
+
+    # removes duplicate symbols, by keeping only the one with the shorter name,
+    # to avoid duplicate "imported" symbols.
+    # cleans up only absolute symbols
+    def cleanup(self):
+        dups = self._findDuplicates()
+        for addr, syms in dups.items():
+            shortest = min(syms, key=len)
+            for sym in syms:
+                if sym != shortest:
+                    del self._symbolsAbsolute[sym]
+
+    def _findDuplicates(self):
+        return {address:[sym for sym,addr in self._symbolsAbsolute.items() if addr == address] for address in self._symbolsAbsolute.values()}
 
     def loadWLA(self, wlaPath, namespace=None):
         if namespace is None:

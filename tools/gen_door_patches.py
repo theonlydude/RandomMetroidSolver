@@ -112,7 +112,7 @@ for name, data in additional_PLMs.items():
     sheight = mirror.readByte()
 
     vanilla_door_x = plm_bytes_list[2]
-    mirror_door_x = (swidth * 32) - 1 - vanilla_door_x
+    mirror_door_x = (swidth * 16) - 1 - vanilla_door_x
     plm_bytes_list[2] = mirror_door_x
 
     # plms are one tile lower than expected...

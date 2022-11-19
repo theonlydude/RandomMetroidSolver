@@ -94,7 +94,8 @@ patches = {
     },
     'Blinking[Le Coude Right]': {
         # door Door_0F_Room_95A8_PLM_ x/y updated
-        snes_to_pc(0x8f823e): [0x48, 0xc8, 0x6, 0xd, 0x63, 0x8c],
+        # we use yellow plm from bottom door as blinking plm for entrance door
+        snes_to_pc(0x8f823e): [0x48, 0xc8, 0x1, 0x6, 0x63, 0x8c],
         snes_to_pc(0xa185dd): [0x0],
     },
     'Blinking[DraygonRoomOut]': {

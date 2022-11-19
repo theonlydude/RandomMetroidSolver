@@ -564,7 +564,7 @@ accessPointsDict['Climb Bottom Left'].EntryInfo = {
     'SamusY': 0x888
 }
 accessPointsDict['Flyway Right'].EntryInfo = {
-    'SamusX': -0xfd00,
+    'SamusX': 0xffff,
     'SamusY': 0xffff
 }
 accessPointsDict['Bomb Torizo Room Left'].EntryInfo = {
@@ -588,7 +588,7 @@ accessPointsDict['Green Brinstar Main Shaft Top Left'].EntryInfo = {
     'SamusY': 0x488
 }
 accessPointsDict['Brinstar Pre-Map Room Right'].EntryInfo = {
-    'SamusX': -0xfd00,
+    'SamusX': 0xffff,
     'SamusY': 0xffff
 }
 accessPointsDict['West Ocean Left'].EntryInfo = {
@@ -612,7 +612,7 @@ accessPointsDict['Basement Left'].EntryInfo = {
     'SamusY': 0x88
 }
 accessPointsDict['Wrecked Ship Map Room'].EntryInfo = {
-    'SamusX': -0xff00,
+    'SamusX': 0xffff,
     'SamusY': 0xffff
 }
 accessPointsDict['Lava Dive Right'].EntryInfo = {
@@ -669,7 +669,7 @@ accessPointsDict['Business Center Mid Left'].EntryInfo = {
     'SamusY': 0x488
 }
 accessPointsDict['Norfair Map Room'].EntryInfo = {
-    'SamusX': -0xff00,
+    'SamusX': 0xffff,
     'SamusY': 0xffff
 }
 accessPointsDict['Crocomire Room Top'].EntryInfo = {
@@ -697,7 +697,7 @@ accessPointsDict['Crab Hole Bottom Right'].EntryInfo = {
     'SamusY': 0x188
 }
 accessPointsDict['Maridia Map Room'].EntryInfo = {
-    'SamusX': -0xff00,
+    'SamusX': 0xffff,
     'SamusY': 0xffff
 }
 accessPointsDict['Aqueduct Top Left'].EntryInfo = {
@@ -745,7 +745,7 @@ accessPointsDict['Golden Four'].EntryInfo = {
     'SamusY': 0x88
 }
 accessPointsDict['Tourian Escape Room 4 Top Right'].EntryInfo = {
-    'SamusX': -0xfd00,
+    'SamusX': 0xffff,
     'SamusY': 0xffff
 }
 

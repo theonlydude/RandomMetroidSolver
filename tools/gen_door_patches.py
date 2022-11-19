@@ -115,11 +115,6 @@ for name, data in additional_PLMs.items():
     mirror_door_x = (swidth * 16) - 1 - vanilla_door_x
     plm_bytes_list[2] = mirror_door_x
 
-    # plms are one tile lower than expected...
-    vanilla_door_y = plm_bytes_list[3]
-    plm_bytes_list[3] = vanilla_door_y - 1
-
-
     # change plm facing for bliking grey door
     if plm_bytes_list[1] == 0xc8:
         if plm_bytes_list[0] == 0x42:

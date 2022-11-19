@@ -1,3 +1,12 @@
+;;; add header:
+;;; compile with asar
+
+arch snes.cpu
+lorom
+
+
+;;; add include for changing scroll set by doors
+incsrc "bank_8f_area_door_scroll.asm"
 
 ;;; replace:
 
@@ -18,6 +27,10 @@ Door_4F_Room_A98D_PLM_C854
 
 ;;; remove (door in escape has same id as door in landing site)
 Door_00_Room_DE4D_PLM_C8CA
+
+;;; change Room_CF80_state_CF8D_Scroll
+Room_CF80_state_CF8D_Scroll:
+    db $01,$01,$01,$01,$00,$00,$00,$01
 
 ;;; replace:
 

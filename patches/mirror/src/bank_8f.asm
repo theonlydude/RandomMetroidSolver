@@ -1,3 +1,10 @@
+;;; compile with asar
+
+arch snes.cpu
+lorom
+
+incsrc "bank_8f_area_door_scroll.asm"
+
 org $8f8000
 ; room 91F8: Landing Site
 Room_91F8_state_9247_PLM:
@@ -6529,7 +6536,7 @@ Room_CF80_Header:
 org $8fcfad
 ; room CF80: East Tunnel
 Room_CF80_state_CF8D_Scroll:
-    db $01,$01,$01,$00,$00,$00,$00,$01
+    db $01,$01,$01,$01,$00,$00,$00,$01
 org $8fcfb5
 ; room CF80: East Tunnel
 Room_CF80_state_CF8D_PLM_index_0_PLM_scroll_data:

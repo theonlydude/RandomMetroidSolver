@@ -61,6 +61,8 @@ patches = [
     # area additional layout
     ('area_layout_greenhillzone', 0x8f9e52),
     ('area_layout_crabe_tunnel', 0x8fd08a),
+    ('east_ocean', 0x8f94fd),
+    ('aqueduct_bomb_blocks', 0x8fd5a7),
 ]
 
 for (patch, roomAddr) in patches:

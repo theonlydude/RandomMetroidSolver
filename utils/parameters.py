@@ -301,17 +301,23 @@ class Knows:
                               'href': 'https://www.youtube.com/watch?v=XSBeLJJafjY',
                               'rooms': ['Parlor and Alcatraz']}
 
-    ReverseGateGlitch = SMBool(True, medium, ['ReverseGateGlitch'])
+    ReverseGateGlitch = SMBool(True, medium, ['ReverseGateGlitch'], logics=['vanilla'])
     desc['ReverseGateGlitch'] = {'display': 'Reverse Gate Glitch',
                                  'title': 'Open wave gate in Pink Brinstar from bottom left corner with Hi-Jump',
                                  'href': 'https://wiki.supermetroid.run/Pink_Brinstar_Hopper_Room',
                                  'rooms': ['Pink Brinstar Hopper Room']}
 
-    ReverseGateGlitchHiJumpLess = SMBool(False, 0, ['ReverseGateGlitchHiJumpLess'])
+    ReverseGateGlitchHiJumpLess = SMBool(False, 0, ['ReverseGateGlitchHiJumpLess'], logics=['vanilla'])
     desc['ReverseGateGlitchHiJumpLess'] = {'display': 'Reverse Gate Glitch w/o Hi-Jump',
                                            'title': 'Open wave gate in Pink Brinstar from bottom left corner without Hi-Jump',
                                            'href': 'https://wiki.supermetroid.run/Pink_Brinstar_Hopper_Room',
                                            'rooms': ['Pink Brinstar Hopper Room']}
+
+    WaveGateGlitchMirror = SMBool(True, medium, ['ReverseGateGlitch'], logics=['mirror'])
+    desc['WaveGateGlitchMirror'] = {'display': 'Mirrored Wave Gate Glitch',
+                                    'title': 'Open wave gate in Pink Brinstar by doing a GGG out of a wall jump',
+                                    'href': 'https://youtu.be/CZK5tyDI87A',
+                                    'rooms': ['Pink Brinstar Hopper Room']}
 
     EarlyKraid = SMBool(True, easy, ['EarlyKraid'])
     desc['EarlyKraid'] = {'display': 'Early Kraid',
@@ -683,7 +689,7 @@ class Knows:
             {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess', 'LowGauntlet', 'OldMBWithSpeed'],
              'title': 'Crateria'},
             {'knows': ['CeilingDBoost', 'BillyMays', 'EarlyKraid',
-                       'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess',
+                       'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 'WaveGateGlitchMirror',
                        'RedTowerClimb', 'XrayDboost', 'XrayIce',
                        'RonPopeilScrew', 'Moondance'],
              'title': 'Brinstar'}

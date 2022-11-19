@@ -415,7 +415,7 @@ additional_PLMs = {
     'Blinking[Main Street Bottom]': {
         'room': 0xcfc9,
         'plm_bytes_list': [
-            [0x4e, 0xc8, 0x19, 0x7d, 0x63, 0x8c],
+            [0x4e, 0xc8, 0x16, 0x7d, 0x63, 0x8c],
         ],
     },
     'Blinking[Red Fish Room Left]': {
@@ -439,7 +439,7 @@ additional_PLMs = {
     'Blinking[Glass Tunnel Top]': {
         'room': 0xcefb,
         'plm_bytes_list': [
-            [0x54, 0xc8, 0x9, 0x2, 0x63, 0x8c],
+            [0x54, 0xc8, 0x6, 0x2, 0x63, 0x8c],
         ],
     },
     'Blinking[Red Tower Top Left]': {

@@ -111,16 +111,21 @@ for name, data in additional_PLMs.items():
     swidth = mirror.readByte()
     sheight = mirror.readByte()
 
-    vanilla_door_x = plm_bytes_list[2]
-    mirror_door_x = (swidth * 16) - 1 - vanilla_door_x
-    plm_bytes_list[2] = mirror_door_x
-
     # change plm facing for bliking grey door
+    door_length = 1
     if plm_bytes_list[1] == 0xc8:
         if plm_bytes_list[0] == 0x42:
             plm_bytes_list[0] = 0x48
         elif plm_bytes_list[0] == 0x48:
             plm_bytes_list[0] = 0x42
+        else:
+            door_length = 4
+
+    vanilla_door_x = plm_bytes_list[2]
+    mirror_door_x = (swidth * 16) - door_length - vanilla_door_x
+    plm_bytes_list[2] = mirror_door_x
+
+
     print("        'room': {},".format(hex(data['room'])))
     if 'state' in data:
         print("        'state': {},".format(hex(data['state'])))

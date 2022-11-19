@@ -583,12 +583,12 @@ Door_20_Room_9AD9_PLM_C890:
 Door_21_Room_9AD9_PLM_C88A:
     ; Door. Red door facing left
     dw $c88a : db $3e : db $46 : dw $0021 
-Door_22_Room_9AD9_PLM_C88A:
+Door_23_Room_9AD9_PLM_C88A:
     ; Door. Red door facing left
-    dw $c88a : db $3e : db $66 : dw $0022 
-Door_23_Room_9AD9_PLM_C890:
+    dw $c88a : db $3e : db $66 : dw $0023
+Door_22_Room_9AD9_PLM_C890:
     ; Door. Red door facing right
-    dw $c890 : db $31 : db $66 : dw $0023 
+    dw $c890 : db $31 : db $66 : dw $0022
 Door_24_Room_9AD9_PLM_C848:
     ; Door. Grey door facing right
     dw $c848 : db $31 : db $76 : dw $9024 

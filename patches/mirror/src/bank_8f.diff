@@ -32,6 +32,15 @@ Door_00_Room_DE4D_PLM_C8CA
 Room_CF80_state_CF8D_Scroll:
     db $01,$01,$01,$01,$00,$00,$00,$01
 
+;;; exchange doors 0x22 and 0x23 at bt mainshaft for doors rando && indicators to work like in vanilla
+Door_23_Room_9AD9_PLM_C88A:
+    ; Door. Red door facing left
+    dw $c88a : db $3e : db $66 : dw $0023
+Door_22_Room_9AD9_PLM_C890:
+    ; Door. Red door facing right
+    dw $c890 : db $31 : db $66 : dw $0022
+
+
 ;;; replace:
 
 org $8ffd40

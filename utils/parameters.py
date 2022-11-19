@@ -313,7 +313,7 @@ class Knows:
                                            'href': 'https://wiki.supermetroid.run/Pink_Brinstar_Hopper_Room',
                                            'rooms': ['Pink Brinstar Hopper Room']}
 
-    WaveGateGlitchMirror = SMBool(True, medium, ['ReverseGateGlitch'], logics=['mirror'])
+    WaveGateGlitchMirror = SMBool(False, 0, ['WaveGateGlitchMirror'], logics=['mirror'])
     desc['WaveGateGlitchMirror'] = {'display': 'Mirrored Wave Gate Glitch',
                                     'title': 'Open wave gate in Pink Brinstar by doing a GGG out of a wall jump',
                                     'href': 'https://youtu.be/CZK5tyDI87A',

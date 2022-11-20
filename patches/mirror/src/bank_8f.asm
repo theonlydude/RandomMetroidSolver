@@ -6660,7 +6660,7 @@ Room_D104_state_D111_Scroll:
 org $8fd135
 ; room D104: Red Fish Room
 Room_D104_state_D111_PLM_index_0_PLM_scroll_data:
-    db $01,$00,$80
+    db $00,$02,$80
 org $8fd138
 ; room D104: Red Fish Room
 Room_D104_state_D111_PLM_index_1_PLM_scroll_data:

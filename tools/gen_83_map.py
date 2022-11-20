@@ -187,8 +187,7 @@ def print_door(out, rom, address, rooms_name):
     DistanceFromDoor = rom.readWord()
     CustomDoorASM = rom.readWord()
 
-    # TODO::fix room name retrieval
-    out.write("    dw {} ; Destination room header pointer (bank $8F): {}\n".format(whex(DestinationRoomHeaderPointer), rooms_name.get(hex(DestinationRoomHeaderPointer)[2:], "Unknown Room")))
+    out.write("    dw {} ; Destination room header pointer (bank $8F): {}\n".format(whex(DestinationRoomHeaderPointer), rooms_name.get(hex(DestinationRoomHeaderPointer)[2:].upper(), "Unknown Room")))
     out.write("    db {} ; Bit Flag (Elevator properties)\n".format(bhex(BitFlag)))
     out.write("    db {} ; Direction\n".format(bhex(Direction)))
     out.write("    db {} ; X cap\n".format(bhex(XposLow)))

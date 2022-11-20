@@ -147,3 +147,5 @@ ips="${1}"
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x300000 0x400000 replace
 # bank 8f
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x78000 0x7ffff replace
+# bank 83
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x18000 0x1ffff replace

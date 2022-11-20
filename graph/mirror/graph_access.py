@@ -482,7 +482,7 @@ accessPointsDict['Caterpillar Room Top Right'].ExitInfo = {
     'bitFlag': 0x40,
     'screen': (0x02, 0x00),
     'distanceToSpawn': 0x8000,
-    'doorAsmPtr': 0x0000
+    'doorAsmPtr': 0xBDAF
 }
 accessPointsDict['Red Brinstar Elevator'].ExitInfo = {
     'DoorPtr': 0x8AF6,

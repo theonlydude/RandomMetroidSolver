@@ -35,3 +35,16 @@ org $8fe345
         STA $7ECD27
         PLP
         RTS
+
+;;; $BDAF: Door ASM: scroll 1 = blue, 2 = red ;;;
+; Room $A322, door list index 4: Door
+;;; Room caterpillar, door leading to red fish room
+org $8fbdaf
+        PHP
+        SEP #$20
+        LDA #$01
+        STA $7ECD21
+        LDA #$00
+        STA $7ECD20
+        PLP
+        RTS

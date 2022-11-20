@@ -1,4 +1,4 @@
-;;; compile with asar
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 ;;; Super Metroid save/load routine expansion v1.0
 ;;; Made by Scyzer
@@ -18,19 +18,17 @@
 ;;; 		Any ram here will apply to ALL 3 save game files (including if you clear all save games). Deleting the .srm file will remove these changes.
 
 lorom
-arch snes.cpu
-
 
 org $819A47		;Fix File Copy for the new SRAM files
-	LDA.l SRAMAddressTable,X : Skip 7 : LDA.l SRAMAddressTable,X : Skip 11 : CPY #$0A00
+	LDA.l SRAMAddressTable,X : skip 7 : LDA.l SRAMAddressTable,X : skip 11 : CPY #$0A00
 org $819CAE		;Fix File Clear for the new SRAM files
-	LDA.l SRAMAddressTable,X : Skip 12 : CPY #$0A00
-	
+	LDA.l SRAMAddressTable,X : skip 12 : CPY #$0A00
+
 org $818000
 	JMP SaveGame
 org $818085
 	JMP LoadGame
-	
+
 ;;; relocate after credits_varia
 org $81f6ff
 SRAMAddressTable:
@@ -45,7 +43,7 @@ SaveMap: LDA $07F7,Y : STA $CD50,X : DEX : DEX : DEY : DEY : BPL SaveMap		;Saves
 SaveItems: LDA $09A2,Y : STA $D7C0,Y : DEY : DEY : BPL SaveItems				;Saves current equipment	
 	LDA $078B : STA $D916		;Current save for the area
 	LDA $079F : STA $D918		;Current Area
-	LDX $12 : LDA.l SRAMAddressTable,X : TAX : LDY #$0000		;How much data to save for items and event bits
+	LDX $12 : LDA.l SRAMAddressTable,X : TAX : LDY #$0000		;Where to save for items and event bits
 SaveSRAMItems: LDA $D7C0,Y : STA $700000,X : JSR CheckSumAdd : INX : INX : INY : INY : CPY #$0160 : BNE SaveSRAMItems	
 	LDY #$06FE		;How much data to save for maps
 SaveSRAMMaps: LDA $CD52,Y : STA $700000,X : INX : INX : DEY : DEY : BPL SaveSRAMMaps	

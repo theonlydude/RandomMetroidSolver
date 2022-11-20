@@ -1,6 +1,5 @@
-;;; compile with asar
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
-arch snes.cpu
 lorom
 
 ;;; make bomb torizo door facing left

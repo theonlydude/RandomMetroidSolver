@@ -68,7 +68,15 @@ for name, data in patches.items():
             # load point in 0x80
             if bank == 0x80:
                 print("        # {} load point entry - x/y updated".format(hex(snes_addr)))
-                room_addr = snes_to_pc((0x8f << 16) | toWord(bytes[0], bytes[1]))
+                room_ptr = toWord(bytes[0], bytes[1])
+                door_ptr = toWord(bytes[2], bytes[3])
+                door_bts = toWord(bytes[4], bytes[5])
+                screenX = toWord(bytes[6], bytes[7])
+                screenY = toWord(bytes[8], bytes[9])
+                samusYoffset = toWord(bytes[10], bytes[11]) # relative to screen top
+                samusXoffset = toWord(bytes[12], bytes[13]) # relative to screen center
+
+                room_addr = snes_to_pc((0x8f << 16) | room_ptr)
                 # read room size in screens
                 mirror.seek(room_addr + 4)
                 swidth = mirror.readByte()
@@ -77,13 +85,14 @@ for name, data in patches.items():
                 pwidth = swidth * 256
 
                 # in pixel from top left of the room
-                vanilla_save_x = toWord(bytes[6], bytes[7])
+                vanilla_save_x = screenX
                 mirror_save_x = pwidth - 256 - vanilla_save_x
-                # in pixel from top left of the screen
-                vanilla_samus_x = toWord(bytes[10], bytes[11])
-                mirror_samus_x = 256 - vanilla_samus_x
+                # in pixel from top center of the screen
+                vanilla_samus_x = samusXoffset
+                # 2 complement
+                mirror_samus_x = ((~vanilla_samus_x)+1) & 0xffff
                 bytes[6], bytes[7] = toBytes(mirror_save_x)
-                bytes[10], bytes[11] = toBytes(mirror_samus_x)
+                bytes[12], bytes[13] = toBytes(mirror_samus_x)
                 print("        snes_to_pc({}): [{}],".format(hex(snes_addr), ', '.join([hex(b) for b in bytes])))
             # music in 0x8f
             elif bank == 0x8f:

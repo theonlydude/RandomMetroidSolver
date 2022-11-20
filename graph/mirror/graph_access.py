@@ -673,7 +673,7 @@ accessPointsDict['Norfair Map Room'].EntryInfo = {
     'SamusY': 0xffff
 }
 accessPointsDict['Crocomire Room Top'].EntryInfo = {
-    'SamusX': 0x47c,
+    'SamusX': 0x383,
     'SamusY': 0x98
 }
 accessPointsDict['Main Street Bottom'].EntryInfo = {

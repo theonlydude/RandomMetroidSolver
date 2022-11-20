@@ -120,6 +120,9 @@ for name, data in additional_PLMs.items():
             plm_bytes_list[0] = 0x42
         else:
             door_length = 4
+    elif plm_bytes_list[0] == 0x6f and plm_bytes_list[1] == 0xb7:
+        # save station is two tiles long
+        door_length = 2
 
     vanilla_door_x = plm_bytes_list[2]
     mirror_door_x = (swidth * 16) - door_length - vanilla_door_x

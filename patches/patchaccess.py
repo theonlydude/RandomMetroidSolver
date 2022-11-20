@@ -4,16 +4,18 @@ from patches.common.patches import patches, additional_PLMs
 from utils.parameters import appDir
 
 class PatchAccess(object):
-    def __init__(self):
+    def __init__(self, baseDir = None):
         # load all ips patches
         self.patchesPath = {}
         self.symbolsDirs = []
-        commonDir = os.path.join(appDir, 'patches/common/ips/')
-        self.symbolsDirs.append(os.path.join(appDir, 'patches/common/sym/'))
+        if baseDir is None:
+            baseDir = appDir
+        commonDir = os.path.join(baseDir, 'patches/common/ips/')
+        self.symbolsDirs.append(os.path.join(baseDir, 'patches/common/sym/'))
         for patch in os.listdir(commonDir):
             self.patchesPath[patch] = commonDir
-        logicDir = os.path.join(appDir, 'patches/{}/ips/'.format(Logic.patches))
-        self.symbolsDirs.append(os.path.join(appDir, 'patches/{}/sym/'.format(Logic.patches)))
+        logicDir = os.path.join(baseDir, 'patches/{}/ips/'.format(Logic.patches))
+        self.symbolsDirs.append(os.path.join(baseDir, 'patches/{}/sym/'.format(Logic.patches)))
         for patch in os.listdir(logicDir):
             self.patchesPath[patch] = logicDir
 

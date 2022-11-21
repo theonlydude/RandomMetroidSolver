@@ -4,8 +4,14 @@ import sys, os, json
 
 # we're in directory 'tools/' we have to update sys.path
 sys.path.append(os.path.dirname(sys.path[0]))
+sys.path.insert(0, os.path.dirname(sys.path[0]))
 
 from rom.rom import pc_to_snes, snes_to_pc, RealROM
+from utils.doorsmanager import DoorsManager, Facing
+from logic.logic import Logic
+from rom.addresses import Addresses
+from rom.symbols import Symbols
+from patches.patchaccess import PatchAccess
 
 def toWord(b1, b2):
     return (b2 << 8) | b1
@@ -108,6 +114,13 @@ print("}")
 
 print("")
 
+Logic.factory('mirror')
+symbols = Symbols(PatchAccess())
+symbols.loadAllSymbols()
+Addresses.updateFromSymbols(symbols)
+doorsManager = DoorsManager()
+doorsManager.setDoorsAddress(symbols)
+
 print("additional_PLMs = {")
 for name, data in additional_PLMs.items():
     print("    '{}': {{".format(name))
@@ -132,6 +145,13 @@ for name, data in additional_PLMs.items():
     elif plm_bytes_list[0] == 0x6f and plm_bytes_list[1] == 0xb7:
         # save station is two tiles long
         door_length = 2
+    elif plm_bytes_list[0] == 0xff and plm_bytes_list[1] == 0xff and name.startswith('Indicator'):
+        door_name = name[len('Indicator['):-1]
+        door = doorsManager.doors[door_name]
+        if door.facing in (Facing.Left, Facing.Right):
+            door_length = 1
+        else:
+            door_length = 4
 
     vanilla_door_x = plm_bytes_list[2]
     mirror_door_x = (swidth * 16) - door_length - vanilla_door_x

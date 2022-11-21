@@ -517,13 +517,13 @@ additional_PLMs = {
     'Indicator[LeCoudeBottom]': {
         'room': 0x94cc,
         'plm_bytes_list': [
-            [0xff, 0xff, 0x9, 0x2, 0xf, 0x0],
+            [0xff, 0xff, 0x6, 0x2, 0xf, 0x0],
         ],
     },
     'Indicator[WreckedShipMainShaftBottom]': {
         'room': 0xcc6f,
         'plm_bytes_list': [
-            [0xff, 0xff, 0x29, 0x2, 0x84, 0x0],
+            [0xff, 0xff, 0x26, 0x2, 0x84, 0x0],
         ],
     },
     'Indicator[CathedralEntranceRight]': {
@@ -541,7 +541,7 @@ additional_PLMs = {
     'Indicator[RedKihunterShaftBottom]': {
         'room': 0xb5d5,
         'plm_bytes_list': [
-            [0xff, 0xff, 0x9, 0x2, 0x5e, 0x0],
+            [0xff, 0xff, 0x6, 0x2, 0x5e, 0x0],
         ],
     },
     'Indicator[WastelandLeft]': {

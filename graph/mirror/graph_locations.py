@@ -1,5 +1,6 @@
 from graph.vanilla.graph_locations import locationsDict
 from graph.vanilla.graph_locations import LocationsHelper
+from rom.rom import snes_to_pc
 
 # regular gate glitchs no longer available,
 # but now avaible for the previously unavailable ones.
@@ -27,5 +28,8 @@ locationsDict["Missile (Grapple Beam)"].Available = (
                                              sm.wor(sm.knowsShortCharge(),
                                                     sm.canUsePowerBombs())))))
 )
+
+# croc room plm's have been relocated in 8f freespace
+locationsDict["Energy Tank, Crocomire"].Address = snes_to_pc(0x8ffdf1)
 
 locations = [loc for loc in locationsDict.values()]

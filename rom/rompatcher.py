@@ -80,7 +80,7 @@ class RomPatcher:
             'area_rando_gate_caterpillar.ips', 'area_rando_gate_east_tunnel.ips',
             'area_layout_caterpillar.ips', 'area_layout_ln_exit.ips', 'area_layout_east_tunnel.ips',
             'door_transition.ips', 'area_rando_doors.ips', 'area_rando_warp_door.ips',
-            'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street', 'no_demo.ips'
+            'area_door_west_sand_hall.ips', 'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street', 'no_demo.ips'
         ],
         # optional layout for area rando
         'AreaComfortSet': [

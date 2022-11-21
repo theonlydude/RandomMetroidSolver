@@ -48,3 +48,16 @@ org $8fbdaf
         STA $7ECD20
         PLP
         RTS
+
+;;; for incompatible transition leading to WS basement phantoon out door
+;;; add in freespace
+org $8ffdff
+PhantoonRoomOut_DoorAsmPtr:
+        PHP
+        SEP #$20
+        LDA #$01
+        STA $7ECD20
+        PLP
+        RTS
+
+warnpc $8ffe0a

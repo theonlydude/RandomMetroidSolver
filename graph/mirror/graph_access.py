@@ -212,7 +212,7 @@ accessPointsDict['PhantoonRoomOut'].ExitInfo = {
     'bitFlag': 0x00,
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
-    'doorAsmPtr': 0x0000
+    'doorAsmPtr': 0xfdff
 }
 accessPointsDict['PhantoonRoomIn'].ExitInfo = {
     'DoorPtr': 0xA2C4,

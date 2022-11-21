@@ -5,6 +5,8 @@
 arch 65816
 lorom
 
+math pri on
+
 incsrc "sym/seed_display.asm"
 incsrc "sym/utils.asm"
 
@@ -14,12 +16,36 @@ incsrc "sym/utils.asm"
 
 incsrc "constants.asm"
 
+;;; normal game SRAM
+!regular_save_size = $0900      ; expanded by saveload patch (modified, A00 in original patch)
+!regular_save_sram = $0010      ; after checksum
+!regular_save_sram_slot0 = !regular_save_sram
+!regular_save_sram_slot1 #= !regular_save_sram+!regular_save_size
+!regular_save_sram_slot2 #= !regular_save_sram+!regular_save_size*2
+!sram_station_info_offset = $0156 ; offset in a save file where current save station and area are stored
+;;; stats SRAM
+!stats_sram_sz_b = $0080
+!stats_sram_sz_w = !stats_sram_sz_b/2
+!full_stats_area_sz_b #= 2*!stats_sram_sz_b+$20   ; twice the size of stats to account for last stats + $20 extra SRAM
+!stats_sram_slot0 #= !regular_save_sram+!regular_save_size*3
+!stats_sram_slot1 #= !stats_sram_slot0+!full_stats_area_sz_b
+!stats_sram_slot2 #= !stats_sram_slot1+!full_stats_area_sz_b
+!last_stats_save_ok_off #= !full_stats_area_sz_b-4
+
+;;; backup saves
+!backup_save_data_off #= !full_stats_area_sz_b-8
+!backup_sram_slot0 #= !stats_sram_slot0+!backup_save_data_off
+!backup_sram_slot1 #= !stats_sram_slot1+!backup_save_data_off
+!backup_sram_slot2 #= !stats_sram_slot2+!backup_save_data_off
+!backup_counter = $7fff38
+!backup_candidate = $7fff3a
+
 ;;; boot and RTA timer
 ;; store last save slot and used saves in unused SRAM
-!last_saveslot = $701dfa
-!used_slots_mask = $701df8
+!last_saveslot #= $700000+!stats_sram_slot0+3*!full_stats_area_sz_b
+!used_slots_mask #= !last_saveslot+2
 ;; SRAM magic set to seed ID to check if we ever booted the seed
-!was_started_flag32 = $701dfc
+!was_started_flag32 #= !last_saveslot+4
 ;; special value here to check on boot if console was just reset
 !softreset = $7fffe6
 !reset_flag = #$babe
@@ -31,31 +57,8 @@ incsrc "constants.asm"
 ;; timer integrity protection
 !timer_xor = $7eff00
 
-;;; stats
-!stats_sram_sz_b = #$0080
-!full_stats_area_sz_b = #$0300
-!stats_sram_sz_w = #$0040
+;;; temp ram used
 !tmp_area_sz = #$00df
-!stats_sram_slot0 = $1400
-!stats_sram_slot1 = $1700
-!stats_sram_slot2 = $1a00
-
-;;; backup saves
-!backup_save_data_off = #$02f8
-!backup_sram_slot0 = $16f8
-!backup_sram_slot1 = $19f8
-!backup_sram_slot2 = $1cf8
-!last_stats_save_ok_off = #$02fc
-!backup_counter = $7fff38
-!backup_candidate = $7fff3a
-
-;; vanilla array of save slots offsets in bank 70
-org $81812b
-slots_sram_offsets:
-
-;; vanilla array of bitmasks to check used save slots
-org $819af4
-slots_bitmasks:
 
 ;;; save-related vanilla RAM
 !area_index = $079f
@@ -65,6 +68,15 @@ slots_bitmasks:
 ;;; -------------------------------
 ;;; HIJACKS ;;;
 ;;; -------------------------------
+
+;; vanilla array of save slots offsets in bank 70
+org $81812b
+slots_sram_offsets:
+        dw !regular_save_sram_slot0,!regular_save_sram_slot1,!regular_save_sram_slot2
+
+;; vanilla array of bitmasks to check used save slots
+org $819af4
+slots_bitmasks:
 
 ;; Patch boot to init our stuff
 org $80844B
@@ -77,19 +89,26 @@ org $808268
     jmp $8294
 
 ;; Patch load/save/copy
-org $81800d
-	jsr patch_save
+org $818000
+        jmp SaveGame            ; in saveload included patch
+
+org $818085
+        jmp LoadGame            ; in saveload included patch
 
 org $81A24A
     jsl patch_load ;; patch load from menu only
 
-;; patch copy routine to copy SRAM stats
+;; patch copy routine to copy SRAM stats, and fix save slot size
 org $819A66
     jsr copy_stats
+org $819A62
+        dw !regular_save_size
 
-;; patch clear routine to update used save slots bitmask in SRAM
+;; patch clear routine to update used save slots bitmask in SRAM, and fix save slot size
 org $819cc3
 	jsr patch_clear
+org $819CBF
+        dw !regular_save_size
 
 ;; hijack menu display for backup saves
 org $819f13
@@ -323,12 +342,12 @@ new_save:
 
 	;; first, get offset in SRAM, using save_index routine,
 	;; which is based on last_saveslot value, which is correct,
-	;; since we juste saved stats (through patch_save_end)
+	;; since we juste saved stats (through patch_save)
 	jsl save_index		;; A is non-0, so get standard stats addr
 	;; x += backup_save_data_off
 	txa
 	clc
-	adc !backup_save_data_off
+	adc.w #!backup_save_data_off
 	tax
 	;; store current save slot in the save itself (useful if we reload
 	;; a backup save, to copy over stats from original save)
@@ -345,13 +364,13 @@ new_save:
 ;; (SRAM addresses are offsets in bank $70)
 slots_data:
 slot0_data:
-	dw $0000,$0001,!backup_sram_slot0,$0166
+	dw $0000,$0001,!backup_sram_slot0,!regular_save_sram_slot0+!sram_station_info_offset
 
 slot1_data:
-	dw $0001,$0002,!backup_sram_slot1,$07c2
+	dw $0001,$0002,!backup_sram_slot1,!regular_save_sram_slot1+!sram_station_info_offset
 
 slot2_data:
-	dw $0002,$0004,!backup_sram_slot2,$0e1e
+	dw $0002,$0004,!backup_sram_slot2,!regular_save_sram_slot2+!sram_station_info_offset
 
 ;; backup is needed if no existing backup of current save slot
 ;; or last backup is at a different save station than this one
@@ -555,12 +574,12 @@ backup_save:
 	sta [$4a],y
 	iny
 	iny
-	cpy !full_stats_area_sz_b
+	cpy.w #!full_stats_area_sz_b
 	bcc -
 	;; clear player flag in backup data area
 	lda $4a		;; still has destination slot SRAM offset
 	clc
-	adc !backup_save_data_off
+	adc.w #!backup_save_data_off
 	tax
 	lda $700002,x
 	and #$7fff
@@ -574,10 +593,10 @@ backup_save:
 	sta !used_slots_mask
 	rts
 
+incsrc "saveload.asm"
 
 ;; Patch load and save routines
-patch_save:
-	pha	;; save A, it is used as arg in hijacked function
+patch_save:                     ; called from saveload patch
 	;; backup saves management:
 	jsl check_new_game
 	beq .save_stats
@@ -600,13 +619,7 @@ patch_save:
 	;; save all stats
 	lda #$0001
 	jsl save_stats
-	;; hijacked code :
-	;; restore $14 to 0 as it is written by update_igt, and restore A
-	stz $14
-	pla
-	and #$0003
 	rts
-
 
 patch_load:
     phb
@@ -616,7 +629,7 @@ patch_load:
     plb
     plb
     ;; call load routine
-    jsl $818085
+    jsl LoadGame
     bcc .backup_check
     ;; skip to end if new file or SRAM corrupt
     jmp .end
@@ -731,7 +744,7 @@ copy_stats:
     sta [$03],y
     iny
     iny
-    cpy !full_stats_area_sz_b
+    cpy.w #!full_stats_area_sz_b
     bcc .loop
     ;; disable save slot check. if data is copied we cannot rely on RAM contents
     lda #$0000
@@ -1020,7 +1033,7 @@ clear_values:
 -
     jsl store_stat
     inx
-    cpx !stats_sram_sz_w
+    cpx #!stats_sram_sz_w
     bne -
 
     ;; Clear RTA Timer
@@ -1046,19 +1059,19 @@ save_index:
     cmp #$0011
     beq .slot1
 .slot2:
-    ldx #!stats_sram_slot2
+    ldx.w #!stats_sram_slot2
     bra .last
 .slot0:
-    ldx #!stats_sram_slot0
+    ldx.w #!stats_sram_slot0
     bra .last
 .slot1:
-    ldx #!stats_sram_slot1
+    ldx.w #!stats_sram_slot1
 .last:
     pla
     bne .end
     txa
     clc
-    adc !stats_sram_sz_b
+    adc #!stats_sram_sz_b
     tax
 .end:
     rtl
@@ -1096,7 +1109,7 @@ load_stats_at:
     iny
     inx
     inx
-    cpy !stats_sram_sz_b
+    cpy #!stats_sram_sz_b
     bcc .loop
     plb
     plx
@@ -1110,7 +1123,7 @@ is_last_save_flag_ok:
     jsl save_index
     txa
     clc
-    adc !last_stats_save_ok_off
+    adc.w #!last_stats_save_ok_off
     tax
     lda !magic_flag
     cmp $700000,x
@@ -1133,7 +1146,7 @@ set_last_save_ok_flag:
     jsl save_index
     txa
     clc
-    adc !last_stats_save_ok_off
+    adc.w #!last_stats_save_ok_off
     tax
     pla
     sta $700000,x
@@ -1155,7 +1168,7 @@ save_stats_at:
     iny
     inx
     inx
-    cpy !stats_sram_sz_b
+    cpy #!stats_sram_sz_b
     bcc .loop
     plb
     plx

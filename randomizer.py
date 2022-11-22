@@ -8,6 +8,7 @@ from graph.graph_utils import GraphUtils, getAccessPoint
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity, text2diff, appDir
 from rom.rom_patches import RomPatches
 from rom.rompatcher import RomPatcher
+from rom.flavor import RomFlavor
 from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir
 from utils.version import displayedVersion
 from utils.doorsmanager import DoorsManager
@@ -265,6 +266,7 @@ if __name__ == "__main__":
     logger = utils.log.get('Rando')
 
     Logic.factory(args.logic)
+    RomFlavor.factory()
 
     # service to force an argument value and notify it
     argDict = vars(args)

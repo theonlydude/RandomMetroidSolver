@@ -13,6 +13,7 @@ from utils.parameters import easy, medium, hard, harder, hardcore, mania, infini
 from utils.doorsmanager import DoorsManager
 from utils.objectives import Objectives
 from logic.logic import Logic
+from rom.flavor import RomFlavor
 from graph.location import define_location
 
 class CommonSolver(object):
@@ -56,6 +57,7 @@ class CommonSolver(object):
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
             Logic.factory(self.romLoader.readLogic())
+            RomFlavor.factory()
             self.romLoader.loadSymbols()
             self.locations = Logic.locations
             (self.majorsSplit, self.masterMajorsSplit) = self.romLoader.assignItems(self.locations)

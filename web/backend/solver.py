@@ -8,10 +8,7 @@ from utils.utils import getPresetDir, getPythonExec
 from utils.db import DB
 from solver.conf import Conf
 from logic.logic import Logic
-from patches.patchaccess import PatchAccess
-from rom.symbols import Symbols
-from utils.doorsmanager import DoorsManager
-from rom.addresses import Addresses
+from rom.flavor import RomFlavor
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import redirect
@@ -23,7 +20,10 @@ class Solver(object):
         self.request = request
         self.cache = cache
         # required for symbols
-        Logic.factory('vanilla') # TODO will have to be changed when handling mirror/rotation etc
+        # TODO will have to be changed when handling mirror/rotation etc
+        flavor = "vanilla"
+        Logic.factory(flavor)
+        RomFlavor.factory()
         self.vars = self.request.vars
 
     def run(self):
@@ -89,10 +89,6 @@ class Solver(object):
         (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
 
         # generate list of addresses to read in the ROM
-        symbols = Symbols(PatchAccess())
-        symbols.loadAllSymbols()
-        Addresses.updateFromSymbols(symbols)
-        DoorsManager.setDoorsAddress(symbols)
         addresses = getAddressesToRead()
 
         # send values to view

@@ -11,9 +11,9 @@ from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
 from rom.addresses import Addresses
-from rom.symbols import Symbols
 from rom.rom_patches import RomPatches
 from rom.rom_options import RomOptions
+from rom.flavor import RomFlavor
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir
 import utils.log
@@ -107,10 +107,8 @@ class RomPatcher:
         self.log = utils.log.get('RomPatcher')
         self.settings = settings
         self.romFileName = romFileName
-        self.patchAccess = PatchAccess()
-        self.symbols = Symbols(self.patchAccess)
-        self.symbols.loadAllSymbols()
-        Addresses.updateFromSymbols(self.symbols)
+        self.patchAccess = RomFlavor.patchAccess
+        self.symbols = RomFlavor.symbols
         self.race = None
         if romFileName == None:
             self.romFile = FakeROM()
@@ -1187,7 +1185,6 @@ class RomPatcher:
                 self.setOamTile(i, rotationMiddle, char2tile[char], y=0x8e)
 
     def writeDoorsColor(self, doorsStart):
-        DoorsManager.setDoorsAddress(self.symbols)
         if self.race is None:
             DoorsManager().writeDoorsColor(self.romFile, doorsStart, self.romFile.writeWord)
         else:

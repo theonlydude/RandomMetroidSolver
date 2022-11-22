@@ -6,6 +6,7 @@ from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
 from logic.helpers import Pickup
 from rom.rompatcher import RomPatcher
 from rom.rom_patches import RomPatches
+from rom.flavor import RomFlavor
 from graph.graph import AccessGraphSolver as AccessGraph
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
 from graph.location import define_location
@@ -34,6 +35,7 @@ class InteractiveSolver(CommonSolver):
         self.firstLogFile = None
 
         Logic.factory(logic)
+        RomFlavor.factory()
         self.locations = Logic.locations
 
         (self.locsAddressName, self.locsWeb2Internal) = self.initLocsAddressName()

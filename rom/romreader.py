@@ -3,8 +3,8 @@ import copy
 from rom.compression import Compressor
 from rom.rom import snes_to_pc
 from rom.addresses import Addresses
-from rom.symbols import Symbols
 from rom.rom_options import RomOptions
+from rom.flavor import RomFlavor
 from patches.patchaccess import PatchAccess
 from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas
 from logic.logic import Logic
@@ -229,10 +229,7 @@ class RomReader:
             self.race = RaceModeReader(self, magic)
 
     def loadSymbols(self):
-        self.symbols = Symbols(PatchAccess())
-        self.symbols.loadAllSymbols()
-        Addresses.updateFromSymbols(self.symbols)
-        DoorsManager.setDoorsAddress(self.symbols)
+        self.symbols = RomFlavor.symbols
         self.romOptions = RomOptions(self.romFile, self.symbols)
 
     def readPlmWord(self, address):

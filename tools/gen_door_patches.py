@@ -7,11 +7,8 @@ sys.path.append(os.path.dirname(sys.path[0]))
 sys.path.insert(0, os.path.dirname(sys.path[0]))
 
 from rom.rom import pc_to_snes, snes_to_pc, RealROM
-from utils.doorsmanager import DoorsManager, Facing
 from logic.logic import Logic
-from rom.addresses import Addresses
-from rom.symbols import Symbols
-from patches.patchaccess import PatchAccess
+from rom.flavor import RomFlavor
 
 def toWord(b1, b2):
     return (b2 << 8) | b1
@@ -115,11 +112,7 @@ print("}")
 print("")
 
 Logic.factory('mirror')
-symbols = Symbols(PatchAccess())
-symbols.loadAllSymbols()
-Addresses.updateFromSymbols(symbols)
-doorsManager = DoorsManager()
-doorsManager.setDoorsAddress(symbols)
+RomFlavor.factory()
 
 print("additional_PLMs = {")
 for name, data in additional_PLMs.items():

@@ -60,8 +60,6 @@ incsrc "event_list.asm"
 ;;; scavenger stuff
 !hunt_over_hud = #$11		; HUD ID of the fake loc 'HUNT OVER'
 !ridley_id = #$00aa
-!area_index = $079f
-!norfair = #$0002
 !ridley_timer = $0FB2
 !scav_next_found = #$aaaa
 
@@ -609,7 +607,7 @@ scav_ridley_check:
 	dec !ridley_timer
 	bne .continue
 	;; here, Ridley is supposed to show up
-	lda !area_index : cmp !norfair : bne .show ; don't check Ceres Ridley
+	lda !area_index : cmp #!norfair : bne .show ; don't check Ceres Ridley
 	jsl scav_mode_check
 	bcc .show				   ; not in scav mode
 	;; scav_tmp = loc ID to check against

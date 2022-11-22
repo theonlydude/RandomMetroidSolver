@@ -38,3 +38,8 @@ include
 !stat_rta_menu = #$0026
 !stat_deaths = #$0028
 !stat_resets = #$0029
+
+;; vanilla area check
+!area_index = $079f
+!brinstar = $0001
+!norfair = $0002

@@ -416,23 +416,35 @@ all_chozo_robots:
 .end:
 	rts
 
+macro defineMapTile(tile, addr, mask)
+map_tile_<tile>:
+.addr:
+        dw <addr>
+.mask:
+        dw <mask>
+endmacro
+
+macro checkMapTile(tile)
+        lda.l map_tile_<tile>_addr : tax
+        lda.l map_tile_<tile>_mask
+        bit $0000,x
+endmacro
+
+%defineMapTile(etecoons, $0828, $0010)
+%defineMapTile(dachora, $082c, $0020)
+
 visited_animals:
-	lda !visited_etecoons_event : jsl !check_event : bcc .etecoons
-	lda !visited_dachora_event : jsl !check_event : bcs .end
-.etecoons:
-	lda !current_room : cmp #$9ad9 : bne .dachora	
-	lda !samus_x : cmp #$0225 : bcc .end ; if X >= (further right) #$0225:
-	lda !visited_etecoons_event : jsl !mark_event
-	bra .not
-.dachora:
-	;; check dachora
-	lda !current_room : cmp #$9CB3 : bne .not
-	lda !samus_y : cmp #$0680 : bcc .end ; if Y >= (lower) #$0680
-	lda !samus_x : cmp #$0100 : bcs .not ;    and X < (further left) #$0100 :
-	lda !visited_dachora_event : jsl !mark_event ; mark dachora event
+        phx
+	lda !area_index : cmp #!brinstar : bne .not
+        %checkMapTile(etecoons) : beq .not
+        %checkMapTile(dachora) : beq .not
+.ok:
+        sec
+        bra .end
 .not:
 	clc
 .end:
+        plx
 	rts
 
 %eventChecker(king_cac_dead, !king_cac_event)

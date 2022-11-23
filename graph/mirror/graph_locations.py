@@ -6,7 +6,9 @@ from rom.rom import snes_to_pc
 # but now avaible for the previously unavailable ones.
 locationsDict["Energy Tank, Brinstar Gate"].Available = (
     lambda sm: sm.wand(sm.traverse('BigPinkRight'),
-                       sm.haveItem('Wave'))
+                       sm.wor(sm.haveItem('Wave'),
+                              sm.wand(sm.haveMissileOrSuper(),
+                                      sm.knowsWaveGateGlitchMirror())))
 )
 locationsDict["Grapple Beam"].Available = (
     lambda sm: sm.wand(sm.haveItem('Crocomire'),

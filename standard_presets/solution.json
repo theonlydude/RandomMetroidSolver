@@ -196,6 +196,10 @@
       true,
       50
     ],
+    "WaveGateGlitchMirror": [
+      true,
+      50
+    ],
     "DraygonRoomCrystalFlash": [
       true,
       100

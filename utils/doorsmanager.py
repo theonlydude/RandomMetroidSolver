@@ -4,6 +4,7 @@ from logic.smbool import SMBool
 from rom.rom_patches import RomPatches
 from patches.patchaccess import PatchAccess
 from rom.symbols import Symbols
+from rom.rom import snes_to_pc
 import utils.log, logging
 
 LOG = utils.log.get('DoorsManager')
@@ -176,11 +177,11 @@ class Door(object):
         if self.isBlue() or self.isRefillSave():
             return
 
-        writeWordFunc(colors2plm[self.color][self.facing], self.address)
+        writeWordFunc(colors2plm[self.color][self.facing], snes_to_pc(self.address))
 
         # also set plm args high byte to never opened, even during escape
         if self.color == 'grey':
-            rom.writeByte(0x90, self.address+5)
+            rom.writeByte(0x90, snes_to_pc(self.address+5))
 
     def readColor(self, rom, readWordFunc):
         if self.forced or self.isRefillSave():

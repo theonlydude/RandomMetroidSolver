@@ -1222,6 +1222,24 @@ class RomPatcher:
         objectives.writeGoals(self.romFile)
         objectives.writeIntroObjectives(self.romFile, tourian)
         self.writeItemsMasks(itemLocs)
+        # change etecoons/dachora map tiles depending on ROM flavor
+        if objectives.isGoalActive("visit the animals"):
+            animals = {
+                'vanilla': {
+                    'dachora': (0x082C, 0x10),
+                    'etecoons': (0x0828, 0x20)
+                },
+                'mirror': {
+                    'dachora': (0x08AD,0x4),
+                    'etecoons': (0x08A9,0x8)
+                }
+            }
+            for animal,entry in animals[RomFlavor.flavor].items():
+                offset, mask = entry
+                addr = Addresses.getOne("objectives_map_tile_%s_addr" % animal)
+                self.romFile.writeWord(offset, addr)
+                addr = Addresses.getOne("objectives_map_tile_%s_mask" % animal)
+                self.romFile.writeWord(mask, addr)
         # hack bomb_torizo.ips to wake BT in all cases if necessary, ie chozo bots objective is on, and nothing at bombs
         if objectives.isGoalActive("activate chozo robots") and RomPatches.has(RomPatches.BombTorizoWake):
             bomb = next((il for il in itemLocs if il.Location.Name == "Bomb"), None)

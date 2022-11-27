@@ -328,11 +328,11 @@ def loadRandoPreset(randoPreset, args):
     if randoParams.get("nerfedCharge", "off") == "on":
         args.nerfedCharge = True
 
-    args.area = randoParams["areaRandomization"]
-    if args.area == "on":
+    args.areaRandomization = randoParams["areaRandomization"]
+    if args.areaRandomization == "on":
         # DEPRECATED previously areaRandomization was on/off, now it's off, full, or light
-        args.area == "full"
-    if args.area != "off":
+        args.areaRandomization == "full"
+    if args.areaRandomization != "off":
         args.areaLayoutBase = convertParam(randoParams, "areaLayout", inverse=True)
     args.escapeRando = convertParam(randoParams, "escapeRando")
     if args.escapeRando == True:
@@ -427,7 +427,7 @@ def loadRandoPreset(randoPreset, args):
         args.minimizerN = randoParams["minimizerQty"]
 
     defaultMultiValues = getDefaultMultiValues()
-    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective"]
+    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "areaRandomization"]
     for multiElem in multiElems:
         if multiElem+'MultiSelect' in randoParams:
             setattr(args, multiElem+'List', ','.join(randoParams[multiElem+'MultiSelect']))

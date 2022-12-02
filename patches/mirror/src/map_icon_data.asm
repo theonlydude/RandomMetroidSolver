@@ -87,7 +87,7 @@ org $82c83b
         dw $ffff
 ; Map stations
 ;       dw 0068,00A0,   FFFF
-        dw $0148,$009f, $ffff
+        dw $0147,$00a0, $ffff
 ; Save points
 ;       dw 0088,0078,   FFFE,FFFE,   FFFE,FFFE,   FFFE,FFFE,   FFFE,FFFE,   FFFE,FFFE,   FFFE,FFFE,   FFFE,FFFE
         dw $0127,$0077, $fffe,$fffe, $fffe,$fffe, $fffe,$fffe, $fffe,$fffe, $fffe,$fffe, $fffe,$fffe, $fffe,$fffe

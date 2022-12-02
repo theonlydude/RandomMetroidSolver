@@ -104,10 +104,10 @@ org $82c83b
         dw $00d3,$0053, $ffff
 ; Missile stations
 ;       dw 0130,0048,   FFFF
-        dw $00e0,$0047, $ffff
+        dw $00e0,$0049, $ffff
 ; Energy station
 ;       dw 0150,0038,   FFFF
-        dw $00bf,$0037, $ffff
+        dw $00c0,$0039, $ffff
 ; Map stations
 ;       dw 0088,0090,   FFFF
         dw $0188,$0090, $ffff

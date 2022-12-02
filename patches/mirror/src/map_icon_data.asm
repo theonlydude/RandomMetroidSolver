@@ -34,7 +34,7 @@ org $82c83b
         dw $003c,$009b, $ffff
 ; Missile stations
 ;       dw 0028,0040, FFFF
-        dw $01d0,$003f, $ffff
+        dw $01cf,$0040, $ffff
 ; Energy stations
 ;       dw 0048,0068,   0100,0098,   01B0,0098,   FFFF
         dw $01ae,$0068, $00f7,$0097, $0048,$0098, $ffff

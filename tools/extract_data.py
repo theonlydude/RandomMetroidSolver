@@ -20,6 +20,17 @@ try:
 except:
     display = None
 
+def whex(v):
+    hex_part = hex(v)[2:]
+    if len(hex_part) == 1:
+        return "$000{}".format(hex_part)
+    elif len(hex_part) == 2:
+        return "$00{}".format(hex_part)
+    elif len(hex_part) == 3:
+        return "$0{}".format(hex_part)
+    else:
+        return "${}".format(hex_part)
+
 with open(rom, 'rb') as romFile:
     romFile.seek(address)
     data = []
@@ -31,4 +42,4 @@ with open(rom, 'rb') as romFile:
     else:
         for i in range(length):
             if i % 2 == 0:
-                print("{}: {}".format(hex(address+i), hex(data[i] + (data[i+1] << 8))))
+                print("{}: {}".format(hex(pc_to_snes(address+i)), whex(data[i] + (data[i+1] << 8))))

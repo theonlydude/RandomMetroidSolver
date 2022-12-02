@@ -99,7 +99,7 @@ class RomPatcher:
         # patches for each "logic" to convert vanilla ROM to "logic" base ROM
         'Logic': {
             "vanilla": [],
-            "mirror": ['mirrortroid.ips', 'bank_8f.ips', 'bank_83.ips', 'fix_save.ips']
+            "mirror": ['mirrortroid.ips', 'bank_8f.ips', 'bank_83.ips', 'map_icon_data.ips']
         }
     }
 

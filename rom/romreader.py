@@ -113,7 +113,8 @@ class RomReader:
         'red_doors': {'address':0x2432C, 'value':0x01, 'desc': "Red doors open with one Missile and do not react to Super"},
         'rotation': {'address': 0x44DF, 'value': 0xD0, 'desc': "Rotation hack"},
         'objectives': {'address': 0x12822, 'value': 0x08, 'desc': "Objectives displayed in pause"},
-        'round_robin_cf': {'address': 0x855D6, 'value': 0x0, 'desc': "Round robin Crystal Flash"}
+        'round_robin_cf': {'address': 0x855D6, 'value': 0x0, 'desc': "Round robin Crystal Flash"},
+        'mirrortroid': {'address': snes_to_pc(0x84d650), 'value': 0x29, 'desc': "MirrorTroid hack"},
     }
 
     # FIXME use symbols/names addresses here?
@@ -505,6 +506,8 @@ class RomReader:
     def readLogic(self):
         if self.patchPresent('rotation'):
             return 'rotation'
+        elif self.patchPresent('mirrortroid'):
+            return 'mirror'
         else:
             return 'vanilla'
 

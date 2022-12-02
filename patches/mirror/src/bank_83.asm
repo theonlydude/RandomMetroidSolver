@@ -28,21 +28,6 @@ Room_92FD_state_9314_FX:
     db $00 ; Palette FX bitset
     db $00 ; Animated tiles bitset
     db $62 ; Palette blend
-org $8385e0
-; room ACF0: Speed Booster Hall
-Room_ACF0_state_ACFD_FX:
-    dw $95be ; Door pointer
-    dw $01da ; Base Y position
-    dw $00b0 ; Target Y position
-    dw $0000 ; Y velocity
-    db $f0 ; Timer
-    db $02 ; Type (foreground layer 3)
-    db $02 ; Default layer blending configuration (FX A)
-    db $1e ; FX layer 3 layer blending configuration (FX B)
-    db $0b ; FX liquid options (FX C)
-    db $1f ; Palette FX bitset
-    db $02 ; Animated tiles bitset
-    db $02 ; Palette blend
 org $83876a
 ; room B1E5: Acid Statue Room
 Room_B1E5_state_B1F2_FX:
@@ -6238,6 +6223,222 @@ Room_DBCD_door_list_index_0_Door:
     db $00 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
     dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83a9fc
+; room DBCD: Metroid Room 4
+Room_DBCD_door_list_index_1_Door:
+    dw $dc19 ; Destination room header pointer (bank $8F): Blue Hopper Room
+    db $00 ; Bit Flag (Elevator properties)
+    db $06 ; Direction
+    db $06 ; X cap
+    db $03 ; Y cap
+    db $00 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aa14
+; room DC19: Blue Hopper Room
+Room_DC19_door_list_index_1_Door:
+    dw $dc65 ; Destination room header pointer (bank $8F): Dust Torizo Room
+    db $00 ; Bit Flag (Elevator properties)
+    db $04 ; Direction
+    db $01 ; X cap
+    db $06 ; Y cap
+    db $00 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aa20
+; room DC65: Dust Torizo Room
+Room_DC65_door_list_index_0_Door:
+    dw $dc19 ; Destination room header pointer (bank $8F): Blue Hopper Room
+    db $00 ; Bit Flag (Elevator properties)
+    db $05 ; Direction
+    db $1e ; X cap
+    db $06 ; Y cap
+    db $01 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aa2c
+; room DC65: Dust Torizo Room
+Room_DC65_door_list_index_1_Door:
+    dw $dcb1 ; Destination room header pointer (bank $8F): Big Boy Room
+    db $00 ; Bit Flag (Elevator properties)
+    db $04 ; Direction
+    db $21 ; X cap
+    db $06 ; Y cap
+    db $02 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aa38
+; room DCB1: Big Boy Room
+Room_DCB1_door_list_index_0_Door:
+    dw $dc65 ; Destination room header pointer (bank $8F): Dust Torizo Room
+    db $00 ; Bit Flag (Elevator properties)
+    db $05 ; Direction
+    db $1e ; X cap
+    db $06 ; Y cap
+    db $01 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aa44
+; room DCB1: Big Boy Room
+Room_DCB1_door_list_index_1_Door:
+    dw $dcff ; Destination room header pointer (bank $8F): Seaweed Room
+    db $00 ; Bit Flag (Elevator properties)
+    db $00 ; Direction
+    db $02 ; X cap
+    db $06 ; Y cap
+    db $00 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aa50
+; room DCFF: Seaweed Room
+Room_DCFF_door_list_index_0_Door:
+    dw $dcb1 ; Destination room header pointer (bank $8F): Big Boy Room
+    db $00 ; Bit Flag (Elevator properties)
+    db $01 ; Direction
+    db $5e ; X cap
+    db $06 ; Y cap
+    db $05 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aa5c
+; room DCFF: Seaweed Room
+Room_DCFF_door_list_index_1_Door:
+    dw $ddc4 ; Destination room header pointer (bank $8F): Tourian Eye Door Room
+    db $00 ; Bit Flag (Elevator properties)
+    db $05 ; Direction
+    db $3e ; X cap
+    db $06 ; Y cap
+    db $03 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aa68
+; room DCFF: Seaweed Room
+Room_DCFF_door_list_index_2_Door:
+    dw $dd2e ; Destination room header pointer (bank $8F): Tourian Recharge Room
+    db $00 ; Bit Flag (Elevator properties)
+    db $04 ; Direction
+    db $01 ; X cap
+    db $06 ; Y cap
+    db $00 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aa74
+; room DD2E: Tourian Recharge Room
+Room_DD2E_door_list_index_0_Door:
+    dw $dcff ; Destination room header pointer (bank $8F): Seaweed Room
+    db $00 ; Bit Flag (Elevator properties)
+    db $05 ; Direction
+    db $0e ; X cap
+    db $16 ; Y cap
+    db $00 ; X screen
+    db $01 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aa80
+; room DD58: Mother Brain Room
+Room_DD58_door_list_index_0_Door:
+    dw $ddf3 ; Destination room header pointer (bank $8F): Rinka Shaft
+    db $00 ; Bit Flag (Elevator properties)
+    db $05 ; Direction
+    db $0e ; X cap
+    db $26 ; Y cap
+    db $00 ; X screen
+    db $02 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aa8c
+; room DD58: Mother Brain Room
+Room_DD58_door_list_index_1_Door:
+    dw $de4d ; Destination room header pointer (bank $8F): Tourian Escape Room 1
+    db $00 ; Bit Flag (Elevator properties)
+    db $00 ; Direction
+    db $02 ; X cap
+    db $06 ; Y cap
+    db $00 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aa98
+; room DDC4: Tourian Eye Door Room
+Room_DDC4_door_list_index_0_Door:
+    dw $dcff ; Destination room header pointer (bank $8F): Seaweed Room
+    db $00 ; Bit Flag (Elevator properties)
+    db $04 ; Direction
+    db $01 ; X cap
+    db $16 ; Y cap
+    db $00 ; X screen
+    db $01 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aaa4
+; room DDC4: Tourian Eye Door Room
+Room_DDC4_door_list_index_1_Door:
+    dw $ddf3 ; Destination room header pointer (bank $8F): Rinka Shaft
+    db $00 ; Bit Flag (Elevator properties)
+    db $05 ; Direction
+    db $0e ; X cap
+    db $06 ; Y cap
+    db $00 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aab0
+; room DDF3: Rinka Shaft
+Room_DDF3_door_list_index_0_Door:
+    dw $ddc4 ; Destination room header pointer (bank $8F): Tourian Eye Door Room
+    db $00 ; Bit Flag (Elevator properties)
+    db $04 ; Direction
+    db $01 ; X cap
+    db $06 ; Y cap
+    db $00 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aabc
+; room DDF3: Rinka Shaft
+Room_DDF3_door_list_index_1_Door:
+    dw $de23 ; Destination room header pointer (bank $8F): [Mother Brain Save Room]
+    db $00 ; Bit Flag (Elevator properties)
+    db $04 ; Direction
+    db $01 ; X cap
+    db $06 ; Y cap
+    db $00 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aac8
+; room DDF3: Rinka Shaft
+Room_DDF3_door_list_index_2_Door:
+    dw $dd58 ; Destination room header pointer (bank $8F): Mother Brain Room
+    db $00 ; Bit Flag (Elevator properties)
+    db $04 ; Direction
+    db $11 ; X cap
+    db $06 ; Y cap
+    db $01 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83aad4
+; room DE23: [Mother Brain Save Room]
+Room_DE23_door_list_index_0_Door:
+    dw $ddf3 ; Destination room header pointer (bank $8F): Rinka Shaft
+    db $00 ; Bit Flag (Elevator properties)
+    db $05 ; Direction
+    db $0e ; X cap
+    db $16 ; Y cap
+    db $00 ; X screen
+    db $01 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
 org $83ab04
 ; room DE7A: Tourian Escape Room 2
 Room_DE7A_door_list_index_1_Door:
@@ -6425,6 +6626,18 @@ Room_E0B5_door_list_index_0_Door:
     db $00 ; Bit Flag (Elevator properties)
     db $00 ; Direction
     db $01 ; X cap
+    db $06 ; Y cap
+    db $00 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
+org $83ad66  ; start of bank 83 freespace
+;;; new door pointers for Mother Brain
+Room_DD58_door_list_index_2_Door:
+    dw $FDF1 ; Destination room header pointer (bank $8F): [new MB room] in 8f freespace
+    db $00 ; Bit Flag (Elevator properties)
+    db $00 ; Direction
+    db $02 ; X cap
     db $06 ; Y cap
     db $00 ; X screen
     db $00 ; Y screen

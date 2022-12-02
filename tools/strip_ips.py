@@ -15,12 +15,13 @@ try:
 except:
     pass
 
-if replace is None:
-    low=snes_to_pc(int(sys.argv[2], 16))
-    high=snes_to_pc(int(sys.argv[3], 16))
-else:
-    low=int(sys.argv[2], 16)
-    high=int(sys.argv[3], 16)
+# handle both pc and snes addresses
+low=int(sys.argv[2], 16)
+high=int(sys.argv[3], 16)
+if low >= 0x800000:
+    low = snes_to_pc(low)
+if high >= 0x80000:
+    high = snes_to_pc(high)
 
 ext = os.path.splitext(ips)[-1].lower()
 

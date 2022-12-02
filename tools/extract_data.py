@@ -2,10 +2,18 @@
 
 # ./extract_data.py ~/supermetroid_random/super_metroid.smc 0x12E3D9 0x8F > spore.pal
 
-import sys, struct
+import sys, os
+
+# now that we're in directory 'tools/' we have to update sys.path
+sys.path.append(os.path.dirname(sys.path[0]))
+
+import struct
+from rom.rom import snes_to_pc, pc_to_snes
 
 rom = sys.argv[1]
 address = int(sys.argv[2], 16)
+if address >= 0x800000:
+    address = snes_to_pc(address)
 length = int(sys.argv[3], 16)
 try:
     display = sys.argv[4]

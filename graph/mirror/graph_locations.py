@@ -32,6 +32,7 @@ locationsDict["Missile (Grapple Beam)"].Available = (
 )
 
 # croc room plm's have been relocated in 8f freespace
-locationsDict["Energy Tank, Crocomire"].Address = snes_to_pc(0x8ffdf1)
+# TODO::use symbol Energy_Tank_Crocomire in bank_8f to get its address
+locationsDict["Energy Tank, Crocomire"].Address = snes_to_pc(0x8FFE63)
 
 locations = [loc for loc in locationsDict.values()]

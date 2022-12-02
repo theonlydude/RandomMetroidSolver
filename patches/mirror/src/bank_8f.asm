@@ -3,13 +3,14 @@
 arch 65816
 lorom
 
+;;; add include for changing scroll set by doors
 incsrc "bank_8f_area_door_scroll.asm"
 
 org $8f8000
 ; room 91F8: Landing Site
 Room_91F8_state_9247_PLM:
     ; Scroll PLM
-    dw $b703 : db $71 : db $28 : dw FreeSpace_00 
+    dw $b703 : db $71 : db $28 : dw Room_91F8_state_9261_PLM_index_0_PLM_scroll_data
     ; Upwards extension
     dw $b647 : db $78 : db $1c : dw $8000 
 Door_00_Room_91F8_PLM_C878:
@@ -289,7 +290,7 @@ org $8f825e
 ; room 965B: Gauntlet Energy Tank Room
 Room_965B_state_9668_PLM:
     ; Scroll PLM
-    dw $b703 : db $0b : db $00 : dw FreeSpace_01 
+    dw $b703 : db $0b : db $00 : dw Room_965B_state_9668_PLM_index_0_PLM_scroll_data
     ; Energy tank
     dw $eed7 : db $0c : db $08 : dw $0005 
     dw $0000
@@ -303,11 +304,11 @@ Room_96BA_state_96EB_PLM:
     ; Scroll PLM
     dw $b703 : db $12 : db $05 : dw Room_96BA_state_9705_PLM_index_0_PLM_scroll_data 
     ; Scroll PLM
-    dw $b703 : db $02 : db $05 : dw FreeSpace_06 
+    dw $b703 : db $02 : db $05 : dw Room_96BA_state_9705_PLM_scroll_data_FS
     ; Scroll PLM
     dw $b703 : db $12 : db $76 : dw Room_96BA_state_9705_PLM_index_2_PLM_scroll_data 
     ; Scroll PLM
-    dw $b703 : db $02 : db $76 : dw FreeSpace_06 
+    dw $b703 : db $02 : db $76 : dw Room_96BA_state_9705_PLM_scroll_data_FS
     ; Rightwards extension
     dw $b63b : db $1d : db $85 : dw $8000 
     ; Rightwards extension
@@ -329,7 +330,7 @@ Room_96BA_state_96EB_PLM:
     ; Upwards extension
     dw $b647 : db $27 : db $7d : dw $8000 
     ; Scroll PLM
-    dw $b703 : db $20 : db $86 : dw FreeSpace_07 
+    dw $b703 : db $20 : db $86 : dw Room_96BA_state_9705_PLM_index_E_PLM_scroll_data
     ; Upwards extension
     dw $b647 : db $0d : db $86 : dw $8000 
     ; Upwards extension
@@ -345,7 +346,7 @@ Room_96BA_state_96EB_PLM:
     ; Upwards extension
     dw $b647 : db $08 : db $88 : dw $8000 
     ; Scroll PLM
-    dw $b703 : db $27 : db $81 : dw FreeSpace_14 
+    dw $b703 : db $27 : db $81 : dw Room_96BA_PLM_scroll_data_FS
 Door_11_Room_96BA_PLM_C848:
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $9011 
@@ -404,7 +405,7 @@ Room_96BA_state_9705_PLM:
     ; Upwards extension
     dw $b647 : db $10 : db $89 : dw $8000 
     ; Scroll PLM
-    dw $b703 : db $27 : db $86 : dw FreeSpace_14 
+    dw $b703 : db $27 : db $86 : dw Room_96BA_PLM_scroll_data_FS
     ; Sets Metroids cleared states when required
     dw $db44 : db $08 : db $08 : dw $000c 
 Door_14_Room_96BA_PLM_C848:
@@ -437,11 +438,11 @@ org $8f83d0
 ; room 975C: Pit Room [Old Mother Brain Room]
 Room_975C_state_9787_PLM:
     ; Scroll PLM
-    dw $b703 : db $2b : db $0f : dw FreeSpace_08 
+    dw $b703 : db $2b : db $0f : dw Room_975C_state_9787_PLM_scroll_data_FS_1
     ; Scroll PLM
-    dw $b703 : db $29 : db $0f : dw FreeSpace_08 
+    dw $b703 : db $29 : db $0f : dw Room_975C_state_9787_PLM_scroll_data_FS_1
     ; Scroll PLM
-    dw $b703 : db $2a : db $09 : dw FreeSpace_09 
+    dw $b703 : db $2a : db $09 : dw Room_975C_state_9787_PLM_scroll_data_FS_2
 Door_19_Room_975C_PLM_C842:
     ; Door. Grey door facing left
     dw $c842 : db $2e : db $06 : dw $0c19 
@@ -696,7 +697,7 @@ Room_9CB3_state_9CC0_PLM:
     ; Rightwards extension
     dw $b63b : db $47 : db $38 : dw $8000 
     ; Scroll PLM
-    dw $b703 : db $6d : db $06 : dw FreeSpace_12 
+    dw $b703 : db $6d : db $06 : dw Room_9CB3_PLM_scroll_data_FS
     ; Rightwards extension
     dw $b63b : db $41 : db $01 : dw $8000 
     ; Rightwards extension
@@ -815,15 +816,15 @@ Room_9E9F_state_9EB1_PLM:
     ; Rightwards extension
     dw $b63b : db $28 : db $21 : dw $8000 
     ; Scroll PLM
-    dw $b703 : db $27 : db $25 : dw FreeSpace_0B 
+    dw $b703 : db $27 : db $25 : dw Room_9E9F_state_9ECB_PLM_index_F_PLM_scroll_data
     ; Rightwards extension
     dw $b63b : db $28 : db $0a : dw $8000 
     ; Scroll PLM
-    dw $b703 : db $27 : db $0a : dw FreeSpace_0A 
+    dw $b703 : db $27 : db $0a : dw Room_9E9F_state_9ECB_PLM_index_D_PLM_scroll_data
     ; Rightwards extension
     dw $b63b : db $28 : db $25 : dw $8000 
     ; Scroll PLM
-    dw $b703 : db $27 : db $21 : dw FreeSpace_0A 
+    dw $b703 : db $27 : db $21 : dw Room_9E9F_state_9ECB_PLM_index_D_PLM_scroll_data
     ; Morph ball
     dw $ef23 : db $3a : db $29 : dw $001a 
     dw $0000
@@ -1406,7 +1407,7 @@ org $8f8b4e
 ; room A923: Crocomire Speedway
 Room_A923_state_A930_PLM:
     ; Scroll PLM
-    dw $b703 : db $31 : db $28 : dw FreeSpace_0D 
+    dw $b703 : db $31 : db $28 : dw Room_A923_state_A930_PLM_index_0_PLM_scroll_data
     ; Upwards extension
     dw $b647 : db $31 : db $27 : dw $8000 
     ; Upwards extension
@@ -2182,6 +2183,9 @@ Room_B741_state_B74E_PLM:
     ; Save station
     dw $b76f : db $07 : db $0b : dw $0005 
     dw $0000
+org $8f9194
+SetupAsm:
+    db $22,$d7,$83,$84,$0d,$0b,$30,$bb,$a9,$18,$00,$8d,$3e,$18,$a9,$ff,$ff,$8d,$40,$18,$60
 org $8f91a9
 SetupAsmAutoDestroyTheWallDuringEscape:
     db $22,$d7,$83,$84,$1e,$87,$64,$b9,$60
@@ -2483,7 +2487,7 @@ Room_965B_state_9668_Scroll:
 org $8f968c
 ; room 965B: Gauntlet Energy Tank Room
 Room_965B_state_9668_PLM_index_0_PLM_scroll_data:
-    db $04,$01,$80
+    db $01,$01,$80
 org $8f968f
 ; room 968F: [West Ocean Geemer Corridor]
 Room_968F_Header:
@@ -3371,11 +3375,11 @@ Room_A253_Header:
 org $8fa284
 ; room A253: Red Tower
 Room_A253_state_A260_Scroll:
-    db $ff,$ff,$07,$02,$08,$02,$09,$02,$0a,$02
+    db $02,$02,$02,$02,$02,$02,$02,$02,$02,$01
 org $8fa28e
 ; room A253: Red Tower
 Room_A253_state_A260_PLM_index_0_PLM_scroll_data:
-    db $0b,$01,$10,$01,$80
+    db $0a,$00,$80,$ff,$ff
 org $8fa293
 ; room A293: Red Brinstar Fireflea Room
 Room_A293_Header:
@@ -3960,6 +3964,10 @@ org $8fa954
 ; room A923: Crocomire Speedway
 Room_A923_state_A930_Scroll:
     db $02,$00,$00,$00,$00,$00,$00,$02,$02,$02,$02,$02,$02,$02,$00,$00,$00,$00,$00,$02,$02,$02,$02,$00,$00,$00,$02,$00,$02,$02,$02,$02,$02,$02,$00,$00,$00,$00,$00,$19,$02,$26,$02,$80
+org $8fa980
+; Room A923: Crocomire Speedway
+Room_A923_state_A930_PLM_index_0_PLM_scroll_data:
+    db $1b,$02,$80
 org $8fa987
 ; room A923: Crocomire Speedway
 Room_A923_state_A930_PLM_index_5_PLM_scroll_data:
@@ -3999,7 +4007,7 @@ Room_A98D_state_A99F_Header:
     dw $a9d7 ; Room Scrolls pointer
     dw $0000 ; Unused pointer
     dw $e8cd ; Main ASM pointer
-    dw FreeSpace_15 ; PLM Set pointer
+    dw Room_A98D_PLM ; PLM Set pointer (in freespace)
     dw $b84d ; Background pointer
     dw $91f6 ; Setup ASM pointer
 org $8fa9e5
@@ -4666,6 +4674,20 @@ RoomPtr_B1BB:
     db $00 ; special graphics bitflag
     dw $b1e2 ; doors pointer
     dw $e5e6 ; room state standard
+org $8fb1e5
+; room B1E5: Acid Statue Room
+Room_B1E5_Header:
+    db $35 ; room index
+    db $02 ; area
+    db $2d ; map X
+    db $0d ; map Y
+    db $03 ; width
+    db $03 ; height
+    db $90 ; up scroller
+    db $a0 ; down scroller
+    db $00 ; special graphics bitflag
+    dw $b20c ; doors pointer
+    dw $e5e6 ; room state standard
 org $8fb210
 ; room B1E5: Acid Statue Room
 Room_B1E5_state_B1F2_Scroll:
@@ -5232,24 +5254,6 @@ org $8fc2c9
 Room_CE8A_state_CEB6_PLM:
     ; Save station
     dw $b76f : db $07 : db $0b : dw $0000 
-    dw $0000
-org $8fc2d1
-; room C98E: Bowling Alley
-Room_C98E_state_C9BA_PLM:
-    ; Scroll PLM
-    dw $b703 : db $40 : db $2d : dw Room_C98E_state_C9BA_PLM_index_0_PLM_scroll_data 
-    ; Scroll PLM
-    dw $b703 : db $16 : db $1d : dw $a286 
-    ; Scroll PLM
-    dw $b703 : db $5d : db $19 : dw FreeSpace_0E 
-    ; Scroll PLM
-    dw $b703 : db $1e : db $28 : dw Room_C98E_state_C9BA_PLM_index_3_PLM_scroll_data 
-    ; Reserve tank, chozo orb
-    dw $ef7b : db $0c : db $0b : dw $0081 
-    ; Missile tank
-    dw $eedb : db $23 : db $26 : dw $0082 
-    ; Door. Grey door facing left
-    dw $c842 : db $5e : db $16 : dw $9087 
     dw $0000
 org $8fc2fd
 ; room CA08: Wrecked Ship Entrance
@@ -5968,64 +5972,64 @@ Room_DC19_state_DC45_PLM:
 org $8fc823
 ; room DC65: Dust Torizo Room
 Room_DC65_state_DC91_PLM:
-Door_A4_Room_DC65_PLM_C842:
-    ; Door. Grey door facing left
-    dw $c842 : db $1e : db $06 : dw $90a4 
-Door_A5_Room_DC65_PLM_C848:
+Door_A4_Room_DC65_PLM_C848:
     ; Door. Grey door facing right
-    dw $c848 : db $01 : db $06 : dw $0ca5 
+    dw $c848 : db $01 : db $06 : dw $90a4 
+Door_A5_Room_DC65_PLM_C842:
+    ; Door. Grey door facing left
+    dw $c842 : db $1e : db $06 : dw $0ca5 
     dw $0000
 org $8fc831
 ; room DCB1: Big Boy Room
 Room_DCB1_state_DCDD_PLM:
-Door_A6_Room_DCB1_PLM_C842:
-    ; Door. Grey door facing left
-    dw $c842 : db $3e : db $06 : dw $90a6 
+Door_A6_Room_DCB1_PLM_C848:
+    ; Door. Grey door facing right
+    dw $c848 : db $21 : db $06 : dw $90a6 
     dw $0000
 org $8fc839
 ; room DCFF: Seaweed Room
 Room_DCFF_state_DD0C_PLM:
-Door_A7_Room_DCFF_PLM_C88A:
-    ; Door. Red door facing left
-    dw $c88a : db $0e : db $16 : dw $00a7 
+Door_A7_Room_DCFF_PLM_C890:
+    ; Door. Red door facing right
+    dw $c890 : db $01 : db $16 : dw $00a7 
     dw $0000
 org $8fc841
 ; room DD2E: Tourian Recharge Room
 Room_DD2E_state_DD3B_PLM:
     ; Missile station
-    dw $b6eb : db $08 : db $0a : dw $009c 
+    dw $b6eb : db $07 : db $0a : dw $009c 
     ; Energy station
-    dw $b6df : db $06 : db $0a : dw $009d 
+    dw $b6df : db $09 : db $0a : dw $009d 
     dw $0000
 org $8fc84f
 ; room DD58: Mother Brain Room
 Room_DD58_state_DDA2_PLM:
     ; Mother Brain's glass
-    dw $d6de : db $09 : db $05 : dw $8000 
+    dw $d6de : db $06 : db $05 : dw $8000 
     dw $0000
 org $8fc857
 ; room DDC4: Tourian Eye Door Room
 Room_DDC4_state_DDD1_PLM:
-Door_A8_Room_DDC4_PLM_DB5A:
-    ; Door. Eye door, facing left
-    dw $db5a : db $3e : db $06 : dw $00a8 
-    ; Eye door bottom, facing left
-    dw $db60 : db $3e : db $09 : dw $00a8 
-    ; Eye door eye, facing left
-    dw $db56 : db $3e : db $07 : dw $00a8 
+Door_A8_Room_DDC4_PLM_DB4C:
+    ; Door. Eye door, facing right
+    dw $db4c : db $01 : db $06 : dw $00a8 
+    ; Eye door bottom, facing right
+    dw $db52 : db $01 : db $09 : dw $00a8 
+    ; Eye door eye, facing right
+    dw $db48 : db $01 : db $07 : dw $00a8 
     dw $0000
 org $8fc86b
 ; room DDF3: Rinka Shaft
 Room_DDF3_state_DE00_PLM:
-Door_A9_Room_DDF3_PLM_C890:
-    ; Door. Red door facing right
-    dw $c890 : db $01 : db $26 : dw $00a9 
+Door_A9_Room_DDF3_PLM_C88A:
+    ; Door. Red door facing left
+    dw $c88a : db $0e : db $26 : dw $00a9 
     dw $0000
 org $8fc873
 ; room DE23: [Mother Brain Save Room]
 Room_DE23_state_DE30_PLM:
     ; Save station
-    dw $b76f : db $07 : db $0b : dw $0000 
+    dw $b76f : db $09 : db $0b : dw $0000 
     dw $0000
 org $8fc87b
 ; room DE4D: Tourian Escape Room 1
@@ -6033,7 +6037,7 @@ Room_DE4D_state_DE5A_PLM:
     ; Sets Metroids cleared states when required
     dw $db44 : db $08 : db $08 : dw $0000 
     ; Door. Gate that closes during escape in room after Mother Brain
-    dw $c8ca : db $1f : db $06 : dw $8000 
+    dw $c8ca : db $00 : db $06 : dw $8000 
     dw $0000
 org $8fc889
 ; room DE7A: Tourian Escape Room 2
@@ -6109,7 +6113,7 @@ Room_C98E_state_C9A0_Header:
     dw $c9da ; Room Scrolls pointer
     dw $0000 ; Unused pointer
     dw $0000 ; Main ASM pointer
-    dw FreeSpace_10 ; PLM Set pointer
+    dw Room_C98E_PLM ; PLM Set pointer
     dw $0000 ; Background pointer
     dw $c8c7 ; Setup ASM pointer
 org $8fc9ba
@@ -6126,7 +6130,7 @@ Room_C98E_state_C9BA_Header:
     dw $c9da ; Room Scrolls pointer
     dw $0000 ; Unused pointer
     dw $0000 ; Main ASM pointer
-    dw FreeSpace_10 ; PLM Set pointer
+    dw Room_C98E_PLM ; PLM Set pointer
     dw $0000 ; Background pointer
     dw $c8c7 ; Setup ASM pointer
 org $8fc9da
@@ -7299,7 +7303,7 @@ Room_D8C5_state_D8D7_Header:
     dw $d90f ; Room Scrolls pointer
     dw $0000 ; Unused pointer
     dw $0000 ; Main ASM pointer
-    dw FreeSpace_11 ; PLM Set pointer
+    dw Room_D8C5_PLM ; PLM Set pointer (in freespace)
     dw $0000 ; Background pointer
     dw $c8d3 ; Setup ASM pointer
 org $8fd8f1
@@ -7316,7 +7320,7 @@ Room_D8C5_state_D8F1_Header:
     dw $d90f ; Room Scrolls pointer
     dw $0000 ; Unused pointer
     dw $0000 ; Main ASM pointer
-    dw FreeSpace_11 ; PLM Set pointer
+    dw Room_D8C5_PLM ; PLM Set pointer (in freespace)
     dw $0000 ; Background pointer
     dw $c8dc ; Setup ASM pointer
 org $8fd913
@@ -7526,7 +7530,7 @@ org $8fdc19
 Room_DC19_Header:
     db $05 ; room index
     db $05 ; area
-    db $2a ; map X
+    db $2b ; map X
     db $0f ; map Y
     db $02 ; width
     db $01 ; height
@@ -7543,7 +7547,7 @@ org $8fdc65
 Room_DC65_Header:
     db $06 ; room index
     db $05 ; area
-    db $28 ; map X
+    db $2d ; map X
     db $0f ; map Y
     db $02 ; width
     db $01 ; height
@@ -7560,9 +7564,9 @@ org $8fdcb1
 Room_DCB1_Header:
     db $07 ; room index
     db $05 ; area
-    db $24 ; map X
+    db $2d ; map X
     db $0f ; map Y
-    db $04 ; width
+    db $06 ; width
     db $01 ; height
     db $70 ; up scroller
     db $a0 ; down scroller
@@ -7572,12 +7576,29 @@ Room_DCB1_Header:
     db $14 ; event
     dw $dcdd ; room state pointer
     dw $e5e6 ; room state standard
+org $8fdcc3
+; room DCB1: Big Boy Room
+Room_DCB1_state_DCC3_Header:
+    dl $cdd930 ; Level data pointer
+    db $0d ; Tileset
+    db $00 ; Song Set
+    db $00 ; Play Index
+    dw $a074 ; FX pointer
+    dw $e26e ; Enemy Set pointer
+    dw $90ec ; Enemy GFX pointer
+    dw $c1c1 ; Background X/Y scrolling
+    dw Room_DCB1_Room_Scrolls_Pointer ; Room Scrolls pointer
+    dw $0000 ; Unused pointer
+    dw $0000 ; Main ASM pointer
+    dw Room_DCB1_state_DCDD_PLM ; PLM Set pointer
+    dw $e41e ; Background pointer
+    dw $c91e ; Setup ASM pointer
 org $8fdcff
 ; room DCFF: Seaweed Room
 Room_DCFF_Header:
     db $08 ; room index
     db $05 ; area
-    db $23 ; map X
+    db $33 ; map X
     db $0f ; map Y
     db $01 ; width
     db $02 ; height
@@ -7591,7 +7612,7 @@ org $8fdd2e
 Room_DD2E_Header:
     db $09 ; room index
     db $05 ; area
-    db $22 ; map X
+    db $34 ; map X
     db $10 ; map Y
     db $01 ; width
     db $01 ; height
@@ -7605,26 +7626,47 @@ org $8fdd58
 Room_DD58_Header:
     db $0a ; room index
     db $05 ; area
-    db $24 ; map X
+    db $2e ; map X
     db $12 ; map Y
     db $04 ; width
     db $01 ; height
     db $70 ; up scroller
     db $a0 ; down scroller
     db $00 ; special graphics bitflag
-    dw $ddbc ; doors pointer
+    dw Room_DD58_Doors_List ; doors pointer (in freespace)
     dw $e5ff ; room state TourianBoss
     dw $dda2 ; room state pointer
     dw $e612 ; room state Events
     db $02 ; event
     dw $dd88 ; room state pointer
     dw $e5e6 ; room state standard
+org $8fdd6e
+; room DD58: Mother Brain Room
+Room_DD58_state_DD6E_Header:
+    dl $cddede ; Level data pointer
+    db $0e ; Tileset
+    db $00 ; Song Set
+    db $00 ; Play Index
+    dw $a0a4 ; FX pointer
+    dw $e321 ; Enemy Set pointer
+    dw $9102 ; Enemy GFX pointer
+    dw $c1c1 ; Background X/Y scrolling
+    dw Room_DD58_Room_Scrolls_Pointer ; Room Scrolls pointer (in freespace)
+    dw $0000 ; Unused pointer
+    dw $0000 ; Main ASM pointer
+    dw Room_DD58_state_DDA2_PLM ; PLM Set pointer
+    dw $e48a ; Background pointer
+    dw $c91e ; Setup ASM pointer
+org $8fddc0
+; room DD58: Mother Brain Room
+Room_DD58_state_DDA2_Scroll:
+    db $01,$ff,$ff,$ff
 org $8fddc4
 ; room DDC4: Tourian Eye Door Room
 Room_DDC4_Header:
     db $0b ; room index
     db $05 ; area
-    db $24 ; map X
+    db $2f ; map X
     db $10 ; map Y
     db $04 ; width
     db $01 ; height
@@ -7638,7 +7680,7 @@ org $8fddf3
 RoomPtr_DDF3:
     db $0c ; room index
     db $05 ; area
-    db $28 ; map X
+    db $2e ; map X
     db $10 ; map Y
     db $01 ; width
     db $03 ; height
@@ -7652,7 +7694,7 @@ org $8fde23
 RoomPtr_DE23:
     db $0d ; room index
     db $05 ; area
-    db $27 ; map X
+    db $2f ; map X
     db $11 ; map Y
     db $01 ; width
     db $01 ; height
@@ -7661,29 +7703,12 @@ RoomPtr_DE23:
     db $00 ; special graphics bitflag
     dw $de4a ; doors pointer
     dw $e5e6 ; room state standard
-org $8fde30
-; room DE23: [Mother Brain Save Room]
-Room_DE23_state_DE30_Header:
-    dl $ce95c2 ; Level data pointer
-    db $19 ; Tileset
-    db $1e ; Song Set
-    db $05 ; Play Index
-    dw $a0f4 ; FX pointer
-    dw $e1d5 ; Enemy Set pointer
-    dw $90c2 ; Enemy GFX pointer
-    dw $0000 ; Background X/Y scrolling
-    dw $de4c ; Room Scrolls pointer
-    dw $0000 ; Unused pointer
-    dw $0000 ; Main ASM pointer
-    dw Room_DE23_state_DE30_PLM ; PLM Set pointer
-    dw $0000 ; Background pointer
-    dw $c91e ; Setup ASM pointer
 org $8fde4d
 ; room DE4D: Tourian Escape Room 1
 Room_DE4D_Header:
     db $0e ; room index
     db $05 ; area
-    db $22 ; map X
+    db $33 ; map X
     db $12 ; map Y
     db $02 ; width
     db $01 ; height
@@ -7697,7 +7722,7 @@ org $8fde7a
 Room_DE7A_Header:
     db $0f ; room index
     db $05 ; area
-    db $22 ; map X
+    db $34 ; map X
     db $13 ; map Y
     db $01 ; width
     db $02 ; height
@@ -7711,7 +7736,7 @@ org $8fdea7
 Room_DEA7_Header:
     db $10 ; room index
     db $05 ; area
-    db $1c ; map X
+    db $2e ; map X
     db $13 ; map Y
     db $06 ; width
     db $02 ; height
@@ -7725,7 +7750,7 @@ org $8fdede
 Room_DEDE_Header:
     db $11 ; room index
     db $05 ; area
-    db $19 ; map X
+    db $2b ; map X
     db $10 ; map Y
     db $03 ; width
     db $06 ; height
@@ -7833,48 +7858,48 @@ Room_E06B_Header:
     db $01 ; event
     dw $e097 ; room state pointer
     dw $e5e6 ; room state standard
-org $8ffd40
-FreeSpace_00:
-    ; Scroll data
-    db $19,$01,$80
-FreeSpace_01:
-    ; Scroll data
-    db $01,$01,$80
-FreeSpace_06:
+org $8ffd40  ; freespace
+; room 96BA: Climb
+Room_96BA_state_9705_PLM_scroll_data_FS:
     ; Scroll data
     db $00,$02,$15,$02,$80
-FreeSpace_07:
-    ; Scroll data
-    db $1a,$01,$80
-FreeSpace_08:
+; room 975C: Pit Room [Old Mother Brain Room]
+Room_975C_state_9787_PLM_scroll_data_FS_1:
     ; Scroll data
     db $02,$02,$05,$01,$80
-FreeSpace_09:
+; room 975C: Pit Room [Old Mother Brain Room]
+Room_975C_state_9787_PLM_scroll_data_FS_2:
     ; Scroll data
     db $02,$01,$05,$00,$80,$03,$02,$80
-FreeSpace_0A:
-    ; Scroll data
-    db $0a,$02,$80
-FreeSpace_0B:
-    ; Scroll data
-    db $0a,$00,$80
-FreeSpace_0D:
-    ; Scroll data
-    db $1b,$02,$80
-FreeSpace_0E:
+; room C98E: Bowling Alley
+Room_C98E_PLM_scroll_data_FS_1:
     ; Scroll data
     db $01,$00,$02,$00,$03,$00,$06,$00,$10,$00,$80
-FreeSpace_0F:
+; room DCB1: Big Boy Room
+Room_DCB1_Room_Scrolls_Pointer:
+    db $00,$00,$01,$01,$01,$01
+; room C98E: Bowling Alley
+Room_C98E_PLM_scroll_data_FS_2:
     ; Scroll data
-    db $07,$00,$08,$00,$09,$00,$0a,$00,$0b,$00,$80
-FreeSpace_10:
+    db $07,$00,$08,$00,$09,$00,$0a,$00,$0b,$00,$0d,$00,$0f,$00,$10,$01,$80
+; room DD58: Mother Brain Room
+Room_DD58_Doors_List:
+    dw $aa80                    ; bank 83: Room_DD58_door_list_index_0_Door
+    dw $aa8c                    ; bank 83: Room_DD58_door_list_index_1_Door
+    dw $ad66                    ; bank 83: Room_DD58_door_list_index_2_Door (new door in freespace)
+    dw $0000
+; room DD58: Mother Brain Room
+Room_DD58_Room_Scrolls_Pointer:
+    db $00,$01,$01,$01
+; room C98E: Bowling Alley
+Room_C98E_PLM:
     ; PLM Set
     ; Scroll PLM
     dw $b703 : db $40 : db $2d : dw Room_C98E_state_C9BA_PLM_index_0_PLM_scroll_data 
     ; Scroll PLM
-    dw $b703 : db $14 : db $16 : dw $a286 
+    dw $b703 : db $3d : db $06 : dw $a286 
     ; Scroll PLM
-    dw $b703 : db $5d : db $19 : dw FreeSpace_0E 
+    dw $b703 : db $5d : db $19 : dw Room_C98E_PLM_scroll_data_FS_1
     ; Scroll PLM
     dw $b703 : db $1e : db $28 : dw Room_C98E_state_C9BA_PLM_index_3_PLM_scroll_data 
     ; Reserve tank, chozo orb
@@ -7883,41 +7908,117 @@ FreeSpace_10:
     dw $eedb : db $23 : db $26 : dw $0082 
 Door_87_Room_C98E_PLM_C842:
     ; Door. Grey door facing left
-    dw $c842 : db $5e : db $16 : dw $9087
-    ; Chain block (relocated)
-    dw $fc1f : db $14 : db $17 : dw $020b
-    ; Chain block (relocated)
-    dw $fc1f : db $13 : db $17 : dw $0436
-    ; Chain block (relocated)
-    dw $fc1f : db $13 : db $1b : dw $0105
-    ; Chain block (relocated)
-    dw $fc1f : db $12 : db $1d : dw $0132
-    ; Chain block (relocated)
-    dw $fc1f : db $13 : db $18 : dw $0105
+    dw $c842 : db $5e : db $16 : dw $9087 
+    ; Rightwards extension
+    dw $b63b : db $54 : db $02 : dw $020b 
+    ; Rightwards extension
+    dw $b63b : db $54 : db $04 : dw $0436 
+    ; Rightwards extension
+    dw $b63b : db $54 : db $08 : dw $0105 
+    ; Rightwards extension
+    dw $b63b : db $54 : db $0a : dw $0132 
+    ; Rightwards extension
+    dw $b63b : db $54 : db $06 : dw $0105 
     ; Scroll PLM
-    dw $b703 : db $44 : db $23 : dw FreeSpace_0F
+    dw $b703 : db $4d : db $26 : dw Room_C98E_PLM_scroll_data_FS_2
     dw $0000
-FreeSpace_11:
+; room D8C5: Shaktool Room
+Room_D8C5_PLM:
     ; PLM Set
     ; Scroll PLM
-    dw $b703 : db $02 : db $0a : dw FreeSpace_13 
+    dw $b703 : db $02 : db $0a : dw Room_D8C5_PLM_scroll_data_FS
     ; Scroll PLM
-    dw $b703 : db $3d : db $0a : dw FreeSpace_13 
+    dw $b703 : db $3d : db $0a : dw Room_D8C5_PLM_scroll_data_FS
     dw $0000
-FreeSpace_12:
+; room 9CB3: Dachora Room
+Room_9CB3_PLM_scroll_data_FS:
     ; Scroll data
     db $02,$00,$80
-FreeSpace_13:
+; room D8C5: Shaktool Room
+Room_D8C5_PLM_scroll_data_FS:
     ; Scroll data
     db $00,$01,$01,$01,$02,$01,$03,$01,$80
-FreeSpace_14:
+; room 96BA: Climb
+Room_96BA_PLM_scroll_data_FS:
     ; Scroll data
     db $00,$00,$02,$00,$19,$00,$80
-FreeSpace_15:
+
+;;; new MB room (referenced in bank 83 at Room_DD58_door_list_index_2_Door)
+Room_FDF1_Header:
+    db $13 ; room index
+    db $05 ; area
+    db $32 ; map X
+    db $12 ; map Y
+    db $01 ; width
+    db $01 ; height
+    db $70 ; up scroller
+    db $a0 ; down scroller
+    db $00 ; special graphics bitflag
+    dw Room_DD58_Doors_List ; doors pointer (in freespace)
+    dw $e5ff ; room state TourianBoss
+    dw $dda2 ; room state pointer
+    dw $e612 ; room state Events
+    db $02 ; event
+    dw $dd88 ; room state pointer
+    dw $e5e6 ; room state standard
+Room_FDF1_state_FE07_Header:
+    dl $ce8000 ; Level data pointer
+    db $0e ; Tileset
+    db $00 ; Song Set
+    db $05 ; Play Index
+    dw $0000 ; FX pointer (in 83)
+    dw $e321 ; Enemy Set pointer (in a1)
+    dw $9102 ; Enemy GFX pointer (in b4)
+    dw $c1c1 ; Background X/Y scrolling
+    dw $ddc0 ; Room Scrolls pointer (in 8f)
+    dw $0000 ; Unused pointer
+    dw $0000 ; Main ASM pointer (in 8f)
+    dw $c84f ; PLM Set pointer (in 8f)
+    dw $e48a ; Background pointer (in 8f)
+    dw $c91e ; Setup ASM pointer (in 8f)
+Room_FDF1_state_FE21_Header:
+    dl $cddede ; Level data pointer
+    db $0e ; Tileset
+    db $00 ; Song Set
+    db $00 ; Play Index
+    dw $a0a4 ; FX pointer
+    dw $e321 ; Enemy Set pointer
+    dw $9102 ; Enemy GFX pointer
+    dw $c1c1 ; Background X/Y scrolling
+    dw $ddc0 ; Room Scrolls pointer
+    dw $0000 ; Unused pointer
+    dw $0000 ; Main ASM pointer
+    dw $c84f ; PLM Set pointer
+    dw $e48a ; Background pointer
+    dw $c91e ; Setup ASM pointer
+Room_FDF1_state_FE3B_Header:
+    dl $cddede ; Level data pointer
+    db $0e ; Tileset
+    db $00 ; Song Set
+    db $03 ; Play Index
+    dw $a188 ; FX pointer
+    dw $8000 ; Enemy Set pointer
+    dw $8000 ; Enemy GFX pointer
+    dw $c1c1 ; Background X/Y scrolling
+    dw $ddc0 ; Room Scrolls pointer
+    dw $0000 ; Unused pointer
+    dw $0000 ; Main ASM pointer
+    dw $c84f ; PLM Set pointer
+    dw $e48a ; Background pointer
+    dw $c91e ; Setup ASM pointer
+Room_FDF1_Door_List:
+    dw $aa80
+    dw $aa8c
+Room_FDF1_Scroll:
+    db $01,$01,$01,$01
+
+; room A98D: Crocomire's Room
+Room_A98D_PLM:
     ; PLM Set
 Door_4F_Room_A98D_PLM_C854:
     ; Door. Grey door facing down
     dw $c854 : db $36 : db $02 : dw $044f 
+Energy_Tank_Crocomire:
     ; Energy tank
     dw $eed7 : db $02 : db $06 : dw $0034 
 Door_EE_Room_A98D_PLM_C842:
@@ -7925,4 +8026,5 @@ Door_EE_Room_A98D_PLM_C842:
     dw $c842 : db $7e : db $06 : dw $04ee 
     dw $0000
 
-warnpc $8FFDFF
+End_FreeSpace_8F:
+warnpc $8FFE71

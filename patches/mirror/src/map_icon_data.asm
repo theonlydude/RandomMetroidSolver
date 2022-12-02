@@ -61,7 +61,7 @@ org $82c83b
         dw $ffff
 ; Energy stations
 ;       dw 00A0,0050,   00A8,0080,   FFFF
-        dw $014f,$004e, $0146,$0080, $ffff
+        dw $014f,$0050, $0146,$0080, $ffff
 ; Map stations
 ;       dw 0048,0028,   FFFF
         dw $01a8,$0028, $ffff

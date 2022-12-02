@@ -33,15 +33,16 @@ org $82c83b
 ;       dw 01BC,009C,   FFFF
         dw $003c,$009b, $ffff
 ; Missile stations
-;       dw 0028,0040, FFFF
+;       dw 0028,0040,   FFFF
         dw $01cf,$0040, $ffff
 ; Energy stations
+;          dachora      red tower    kraid
 ;       dw 0048,0068,   0100,0098,   01B0,0098,   FFFF
-        dw $01ae,$0068, $00f7,$0097, $0048,$0098, $ffff
+        dw $01b0,$0068, $00f8,$0098, $0048,$0098, $ffff
 ; Map stations
 ;       dw 0028,0028,   FFFF
         dw $01cf,$0028, $ffff
-; Save points
+; Save points: spore    green shaft  eteecoons    kraid        red tower
 ;       dw 0078,0028,   0040,0030,   0028,0060,   0188,0098,   0130,0048,   FFFE,FFFE,   FFFE,FFFE,   FFFE,FFFE
         dw $017e,$0027, $01b7,$002f, $01cf,$0060, $006e,$0097, $00c8,$0047, $fffe,$fffe, $fffe,$fffe, $fffe,$fffe
 ; Debug elevator markers

@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.dirname(sys.path[0]))
 from rom.rom import pc_to_snes, snes_to_pc, RealROM
 from logic.logic import Logic
 from rom.flavor import RomFlavor
+from utils.doorsmanager import DoorsManager, Facing
 
 def toWord(b1, b2):
     return (b2 << 8) | b1
@@ -103,7 +104,10 @@ for name, data in patches.items():
                 print("        snes_to_pc({}): [{}],".format(hex(snes_addr), ', '.join([hex(b) for b in bytes])))
             # map icon x/y in 0x82
             elif bank == 0x82:
-                print("        # TODO map icon X/Y")
+                x = toWord(bytes[0], bytes[1])
+                x = 512 - 16 - x
+                bytes[0], bytes[1] = toBytes(x)
+                print("        # map icon X/Y")
                 print("        snes_to_pc({}): [{}],".format(hex(snes_addr), ', '.join([hex(b) for b in bytes])))
 
     print("    },")
@@ -140,7 +144,7 @@ for name, data in additional_PLMs.items():
         door_length = 2
     elif plm_bytes_list[0] == 0xff and plm_bytes_list[1] == 0xff and name.startswith('Indicator'):
         door_name = name[len('Indicator['):-1]
-        door = doorsManager.doors[door_name]
+        door = DoorsManager.doors[door_name]
         if door.facing in (Facing.Left, Facing.Right):
             door_length = 1
         else:

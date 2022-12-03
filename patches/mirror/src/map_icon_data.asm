@@ -179,3 +179,11 @@ org $80ca2f
 ;      |     |     |     |     |     |     |
 ; Fix Tourian load station, samus X offset
     dw $DE23,$AABC,$0000,$0000,$0000,$0098,$0020 ; 0: Pre Mother Brain save station
+
+org $80c63f
+; Fix green brinstar elevator start
+    dw $9AD9,$8D42,$0001,$0300,$0200,$00A8,$0000 ; 8: Green Brinstar mainstreet from Pre Brinstar map room hall
+
+org $80c65b
+; Fix red brinstar elevator start
+    dw $A322,$908A,$0000,$0200,$0200,$00A8,$0000 ; Ah: Red Brinstar -> Crateria elevator from Red Brinstar damage boost hall

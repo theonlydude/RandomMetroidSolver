@@ -63,6 +63,9 @@ patches = [
     ('area_layout_crabe_tunnel', 0x8fd08a),
     ('east_ocean', 0x8f94fd),
     ('aqueduct_bomb_blocks', 0x8fd5a7),
+    # custom start locations
+    ('mama_save', 0x8fD055),
+    ('firefleas_shot_block', 0x8fB55A),
 ]
 
 for (patch, roomAddr) in patches:

@@ -11,20 +11,6 @@ ips="${1}"
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x818000 0x81f0aa replace
 # Area label tilemaps
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x829670 0x829717 replace
-# crateria
-~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x82972d 0x8297f8 replace
-# brinstar
-~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x82982c 0x829936 replace
-# norfair
-~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x8298ef 0x8299f3 replace
-# WS
-~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x829a54 0x829af9 replace
-# maridia
-~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x829b2e 0x829bfa replace
-# tourian
-~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x829c4d 0x829cf5 replace
-# ceres
-~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x829d54 0x829d6f replace
 # bank 83
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x838000 0x83ffff replace
 # items plm (palette update)
@@ -104,7 +90,8 @@ ips="${1}"
 # zebes and stars tilemap
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x8edc00 0x8edd24 replace
 # bank 8f
-~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x8f8000 0x8fffff replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x8f8000 0x8f9187 replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x8f91fa 0x8fffff replace
 # Handle Samus animation delay
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x90832e 0x908330 replace
 # Animation delay instruction Bh - select animation delay sequence for wall-jump

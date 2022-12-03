@@ -187,7 +187,7 @@ class Door(object):
         if self.forced or self.isRefillSave():
             return
 
-        plm = readWordFunc(self.address)
+        plm = readWordFunc(snes_to_pc(self.address))
         if plm in plmRed:
             self.setColor('red')
         elif plm in plmGreen:

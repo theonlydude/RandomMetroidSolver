@@ -166,3 +166,16 @@ org $82c83b
 ; (Debug save points)
 ;       dw FFFF
         dw $FFFF
+
+
+org $80ca2f
+;       _______________________________ Room pointer
+;      |      __________________________ Door pointer
+;      |     |      _____________________ Door BTS
+;      |     |     |      ________________ Screen X position
+;      |     |     |     |      ___________ Screen Y position
+;      |     |     |     |     |      ______ Samus Y offset (relative to screen top)
+;      |     |     |     |     |     |      _ Samus X offset (relative to screen centre)
+;      |     |     |     |     |     |     |
+; Fix Tourian load station, samus X offset
+    dw $DE23,$AABC,$0000,$0000,$0000,$0098,$0020 ; 0: Pre Mother Brain save station

@@ -78,12 +78,11 @@ class RomLoader(object):
         if self.hasPatch("area"):
             RomPatches.ActivePatches += [RomPatches.SingleChamberNoCrumble,
                                          RomPatches.AreaRandoGatesBase,
-                                         RomPatches.AreaRandoBlueDoors]
-            if self.hasPatch("newGame"):
-                RomPatches.ActivePatches.append(RomPatches.AreaRandoMoreBlueDoors)
-            # use croc patch for separate croc and maridia split in two
-            if self.hasPatch("croc_area"):
-                RomPatches.ActivePatches += [RomPatches.CrocBlueDoors, RomPatches.CrabShaftBlueDoor, RomPatches.MaridiaSandWarp]
+                                         RomPatches.AreaRandoBlueDoors,
+                                         RomPatches.CrocBlueDoors,
+                                         RomPatches.CrabShaftBlueDoor,
+                                         RomPatches.MaridiaSandWarp,
+                                         RomPatches.AreaRandoMoreBlueDoors]
             isArea = True
 
         # check area layout

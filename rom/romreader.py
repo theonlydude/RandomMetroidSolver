@@ -89,32 +89,40 @@ class RomReader:
 
     # we could use symbols/names addresses here, but the bytes are chosen in vanilla ROM space (hijacks)
     patches = {
-        'startCeres': {'address': 0x7F1F, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
-        'startLS': {'address': 0x7F17, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
-        'layout': {'address': 0x21BD80, 'value': 0xD5, 'desc': "Anti soft lock layout modifications"},
-        'casual': {'address': 0x22E87A, 'value': 0x9F, 'desc': "Switch Blue Brinstar Etank and missile"},
-        'gravityNoHeatProtection': {'address': 0x0869dd, 'value': 0x01, 'desc': "Gravity suit heat protection removed"},
-        'progressiveSuits': {'address':0x869df, 'value': 0xF0, 'desc': "Progressive suits"},
-        # nerfed charge taken in vanilla ROM space value works for both DASH and VARIA variants
-        'nerfedCharge': {'address':0x83821, 'value': 0x80, 'desc': "Nerfed charge beam from the start of the game"},
-        'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
-        'area': {'address': 0x788A0, 'value': 0x2B, 'desc': "Area layout modifications"},
-        'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
-        'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"},
-        'aqueductBombBlocks': {'address': 0x2602d6, 'value': 0x44, 'desc': "Aqueduct entrance bomb blocks instead of power bombs"},
-        'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"},
-        'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"},
-        'nerfedRainbowBeam': {'address': 0x14BA2E, 'value': 0x13, 'desc': 'nerfed rainbow beam'},
-        'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'desc': "Crocomire in its own area"},
-        'minimizer_bosses': {'address': 0x13DDBC, 'value': 0x22, 'desc': "Minimizer"},
-        'minimizer_tourian': {'address': 0x14B90E, 'value': 0xCF, 'desc': "Fast Tourian"},
-        'open_zebetites': {'address': 0x26DF22, 'value': 0xc3, 'desc': "Zebetites without morph"},
-        'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'desc': "Beam doors"},
-        'red_doors': {'address':0x2432C, 'value':0x01, 'desc': "Red doors open with one Missile and do not react to Super"},
-        'rotation': {'address': 0x44DF, 'value': 0xD0, 'desc': "Rotation hack"},
-        'objectives': {'address': 0x12822, 'value': 0x08, 'desc': "Objectives displayed in pause"},
-        'round_robin_cf': {'address': 0x855D6, 'value': 0x0, 'desc': "Round robin Crystal Flash"},
-        'mirrortroid': {'address': snes_to_pc(0x84d650), 'value': 0x29, 'desc': "MirrorTroid hack"},
+        'common': {
+            'startCeres': {'address': 0x7F1F, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
+            'startLS': {'address': 0x7F17, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
+            'casual': {'address': 0x22E87A, 'value': 0x9F, 'desc': "Switch Blue Brinstar Etank and missile"},
+            'gravityNoHeatProtection': {'address': 0x0869dd, 'value': 0x01, 'desc': "Gravity suit heat protection removed"},
+            'progressiveSuits': {'address':0x869df, 'value': 0xF0, 'desc': "Progressive suits"},
+            # nerfed charge taken in vanilla ROM space value works for both DASH and VARIA variants
+            'nerfedCharge': {'address':0x83821, 'value': 0x80, 'desc': "Nerfed charge beam from the start of the game"},
+            'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
+            'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"},
+            'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"},
+            'nerfedRainbowBeam': {'address': 0x14BA2E, 'value': 0x13, 'desc': 'nerfed rainbow beam'},
+            'minimizer_bosses': {'address': 0x13AFAD, 'value': 0x5C, 'desc': "Minimizer"},
+            'minimizer_tourian': {'address': 0x14B90E, 'value': 0xCF, 'desc': "Fast Tourian"},
+            'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'desc': "Beam doors"},
+            'red_doors': {'address':0x2432C, 'value':0x01, 'desc': "Red doors open with one Missile and do not react to Super"},
+            'objectives': {'address': 0x12822, 'value': 0x08, 'desc': "Objectives displayed in pause"},
+            'round_robin_cf': {'address': 0x855D6, 'value': 0x0, 'desc': "Round robin Crystal Flash"}
+        },
+        'vanilla': {
+            'layout': {'address': 0x21BD80, 'value': 0xD5, 'desc': "Anti soft lock layout modifications"},
+            'area': {'address': 0x788A0, 'value': 0x2B, 'desc': "Area layout modifications"},
+            'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
+            'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"},
+            'aqueductBombBlocks': {'address': 0x2602d6, 'value': 0x44, 'desc': "Aqueduct entrance bomb blocks instead of power bombs"},
+            'open_zebetites': {'address': 0x26DF22, 'value': 0xc3, 'desc': "Zebetites without morph"}
+        },
+        'mirror': {
+            # TODO add layout patches
+        }
+    }
+
+    flavorPatches = {
+        'mirror': {'address': snes_to_pc(0x84d650), 'value': 0x29, 'desc': "MirrorTroid hack"}
     }
 
     # FIXME use symbols/names addresses here?
@@ -205,8 +213,8 @@ class RomReader:
         # called by the isolver in seedless mode
         # activate only layout patch (the most common one) and blue bt/red tower blue doors
         ret = {}
-        for patch in RomReader.patches:
-            if patch in ['layout', 'startLS']:
+        for patch in RomReader.patches['common']:
+            if patch in ['layout', 'startLS']:  # FIXME layout patch varies depending on flavor
                 ret[RomReader.patches[patch]['address']] = RomReader.patches[patch]['value']
             else:
                 ret[RomReader.patches[patch]['address']] = 0xFF
@@ -430,16 +438,26 @@ class RomReader:
         else:
             return (roomPtr, (sx, sy), direction)
 
+    def _patchPresent(self, patchName, patchDict):
+        if patchName not in patchDict:
+            return False
+        value = self.romFile.readByte(patchDict[patchName]['address'])
+        return value == patchDict[patchName]['value']
+
     def patchPresent(self, patchName):
-        value = self.romFile.readByte(self.patches[patchName]['address'])
-        return value == self.patches[patchName]['value']
+        return self._patchPresent(patchName, self.patches['common']) or self._patchPresent(patchName, self.patches[RomFlavor.flavor])
 
     def getPatches(self):
         # for display in the solver
         result = []
-        for patch in self.patches:
-            if self.patchPresent(patch) == True:
-                result.append(self.patches[patch]['desc'])
+        def getPatchesFromDict(patchDict):
+            nonlocal result
+            for patch, patchEntry in patchDict.items():
+                if self._patchPresent(patch, patchDict) == True:
+                    result.append(patchEntry['desc'])
+        getPatchesFromDict(self.flavorPatches)
+        getPatchesFromDict(self.patches['common'])
+        getPatchesFromDict(self.patches[RomFlavor.flavor])
         return result
 
     def getRawPatches(self):
@@ -504,12 +522,10 @@ class RomReader:
         return "{:02d}:{:02d}".format(minute, second)
 
     def readLogic(self):
-        if self.patchPresent('rotation'):
-            return 'rotation'
-        elif self.patchPresent('mirrortroid'):
-            return 'mirror'
-        else:
-            return 'vanilla'
+        for flavor in self.flavorPatches:
+            if self._patchPresent(flavor, self.flavorPatches):
+                return flavor
+        return 'vanilla'
 
     def readObjectives(self, objectives):
         objectives.readGoals(self)

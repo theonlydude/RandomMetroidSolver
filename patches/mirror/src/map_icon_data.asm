@@ -130,13 +130,13 @@ org $82c83b
         dw $ffff
 ; Energy station
 ;       dw 0058,0088,   FFFF
-        dw $010f,$0088, $ffff
+        dw $019e,$0087, $ffff
 ; Map stations
 ;       dw FFFF
         dw $ffff
 ; Save points
 ;       dw 0080,0090,   00A8,0068,   FFFE,FFFE,   FFFE,FFFE,   FFFE,FFFE,   FFFE,FFFE,   FFFE,FFFE,   FFFE,FFFE
-        dw $0136,$008f, $014e,$0067, $fffe,$fffe, $fffe,$fffe, $fffe,$fffe, $fffe,$fffe, $fffe,$fffe, $fffe,$fffe
+        dw $0176,$008f, $014e,$0067, $fffe,$fffe, $fffe,$fffe, $fffe,$fffe, $fffe,$fffe, $fffe,$fffe, $fffe,$fffe
 ; Debug elevator markers
 ;       dw 00A0,0060,   FFFE,FFFE,   FFFE,FFFE,   FFFE,FFFE,   FFFE,FFFE,   FFFE,FFFE,   FFFE,FFFE,   FFFE,FFFE
         dw $00A0,$0060, $FFFE,$FFFE, $FFFE,$FFFE, $FFFE,$FFFE, $FFFE,$FFFE, $FFFE,$FFFE, $FFFE,$FFFE, $FFFE,$FFFE

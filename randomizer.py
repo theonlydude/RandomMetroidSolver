@@ -19,15 +19,8 @@ from utils.utils import dumpErrorMsg
 import utils.log
 import utils.db as db
 
-# we need to know the logic before doing anything else
-def getLogic():
-    # check if --logic is there
-    logic = 'vanilla'
-    for i, param in enumerate(sys.argv):
-        if param == '--logic' and i+1 < len(sys.argv):
-            logic = sys.argv[i+1]
-    return logic
-Logic.factory(getLogic())
+# use vanilla logic to get default start locations
+Logic.factory('vanilla')
 defaultMultiValues = getDefaultMultiValues()
 speeds = defaultMultiValues['progressionSpeed']
 energyQties = defaultMultiValues['energyQty']
@@ -38,6 +31,7 @@ gravityBehaviours = defaultMultiValues['gravityBehaviour']
 objectives = defaultMultiValues['objective']
 tourians = defaultMultiValues['tourian']
 areaRandomizations = defaultMultiValues['areaRandomization']
+startLocations = defaultMultiValues['startLocation']
 
 def randomMulti(args, param, defaultMultiValues):
     value = args[param]
@@ -97,7 +91,7 @@ if __name__ == "__main__":
                         choices=[str(i) for i in range(30,101)]+["random"])
     parser.add_argument('--startLocation', help="Name of the Access Point to start from",
                         dest='startLocation', nargs='?', default="Landing Site",
-                        choices=['random'] + GraphUtils.getStartAccessPointNames())
+                        choices=['random'] + startLocations)
     parser.add_argument('--startLocationList', help="list to choose from when random",
                         dest='startLocationList', nargs='?', default=None)
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
@@ -265,9 +259,6 @@ if __name__ == "__main__":
     utils.log.init(args.debug)
     logger = utils.log.get('Rando')
 
-    Logic.factory(args.logic)
-    RomFlavor.factory()
-
     # service to force an argument value and notify it
     argDict = vars(args)
     forcedArgs = {}
@@ -301,6 +292,10 @@ if __name__ == "__main__":
         preset = 'default'
 
     logger.debug("preset: {}".format(preset))
+
+    # logic can be set in rando preset
+    Logic.factory(args.logic)
+    RomFlavor.factory()
 
     # if no seed given, choose one
     if args.seed == 0:

@@ -296,7 +296,10 @@ def loadRandoPreset(randoPreset, args):
     defaultParams.update(randoParams)
     randoParams = defaultParams
 
-    if randoParams.get("seed") != None:
+    if randoParams.get("logic") is not None:
+        args.logic = randoParams["logic"]
+
+    if randoParams.get("seed") is not None:
         args.seed = int(randoParams["seed"])
 
     if randoParams.get("animals", "off") == "on":

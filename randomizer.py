@@ -483,7 +483,7 @@ if __name__ == "__main__":
         seedCode = 'A'+seedCode
 
     # output ROM name
-    fileName = 'VARIA_Randomizer_' + seedCode + str(seed) + '_' + preset
+    fileName = "VARIA_Randomizer_{}{}_{}".format(seedCode, seed, preset)
     if args.progressionSpeed != "random":
         fileName += "_" + args.progressionSpeed
     seedName = fileName

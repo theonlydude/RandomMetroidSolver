@@ -90,34 +90,39 @@ class RomReader:
     # we could use symbols/names addresses here, but the bytes are chosen in vanilla ROM space (hijacks)
     patches = {
         'common': {
-            'startCeres': {'address': 0x7F1F, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
-            'startLS': {'address': 0x7F17, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
-            'casual': {'address': 0x22E87A, 'value': 0x9F, 'desc': "Switch Blue Brinstar Etank and missile"},
-            'gravityNoHeatProtection': {'address': 0x0869dd, 'value': 0x01, 'desc': "Gravity suit heat protection removed"},
-            'progressiveSuits': {'address':0x869df, 'value': 0xF0, 'desc': "Progressive suits"},
+            'startCeres': {'address': snes_to_pc(0x80ff1f), 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
+            'startLS': {'address': snes_to_pc(0x80ff17), 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
+            'casual': {'address': snes_to_pc(0xc5e87a), 'value': 0x9F, 'desc': "Switch Blue Brinstar Etank and missile"},
+            'gravityNoHeatProtection': {'address': snes_to_pc(0x90e9dd), 'value': 0x01, 'desc': "Gravity suit heat protection removed"},
+            'progressiveSuits': {'address': snes_to_pc(0x90e9df), 'value': 0xF0, 'desc': "Progressive suits"},
             # nerfed charge taken in vanilla ROM space value works for both DASH and VARIA variants
-            'nerfedCharge': {'address':0x83821, 'value': 0x80, 'desc': "Nerfed charge beam from the start of the game"},
-            'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
-            'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"},
-            'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"},
-            'nerfedRainbowBeam': {'address': 0x14BA2E, 'value': 0x13, 'desc': 'nerfed rainbow beam'},
-            'minimizer_bosses': {'address': 0x13AFAD, 'value': 0x5C, 'desc': "Minimizer"},
-            'minimizer_tourian': {'address': 0x14B90E, 'value': 0xCF, 'desc': "Fast Tourian"},
-            'beam_doors': {'address': 0x226e5, 'value': 0x0D, 'desc': "Beam doors"},
-            'red_doors': {'address':0x2432C, 'value':0x01, 'desc': "Red doors open with one Missile and do not react to Super"},
-            'objectives': {'address': 0x12822, 'value': 0x08, 'desc': "Objectives displayed in pause"},
-            'round_robin_cf': {'address': 0x855D6, 'value': 0x0, 'desc': "Round robin Crystal Flash"}
+            'nerfedCharge': {'address': snes_to_pc(0x90b821), 'value': 0x80, 'desc': "Nerfed charge beam from the start of the game"},
+            'variaTweaks': {'address': snes_to_pc(0x8fcc4d), 'value': 0x37, 'desc': "VARIA tweaks"},
+            'areaEscape': {'address': snes_to_pc(0x848c91), 'value': 0x4C, 'desc': "Area escape randomization"},
+            'newGame': {'address': snes_to_pc(0x82801d), 'value': 0x22, 'desc': "Custom new game"},
+            'nerfedRainbowBeam': {'address': snes_to_pc(0xa9ba2e), 'value': 0x13, 'desc': 'nerfed rainbow beam'},
+            'minimizer_bosses': {'address': snes_to_pc(0xa7afad), 'value': 0x5C, 'desc': "Minimizer"},
+            'minimizer_tourian': {'address': snes_to_pc(0xa9b90e), 'value': 0xCF, 'desc': "Fast Tourian"},
+            'beam_doors': {'address': snes_to_pc(0x84a6e5), 'value': 0x0D, 'desc': "Beam doors"},
+            'red_doors': {'address': snes_to_pc(0x84c32c), 'value':0x01, 'desc': "Red doors open with one Missile and do not react to Super"},
+            'objectives': {'address': snes_to_pc(0x82a822), 'value': 0x08, 'desc': "Objectives displayed in pause"},
+            'round_robin_cf': {'address': snes_to_pc(0x90d5d6), 'value': 0x0, 'desc': "Round robin Crystal Flash"}
         },
         'vanilla': {
-            'layout': {'address': 0x21BD80, 'value': 0xD5, 'desc': "Anti soft lock layout modifications"},
-            'area': {'address': 0x788A0, 'value': 0x2B, 'desc': "Area layout modifications"},
-            'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
-            'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"},
-            'aqueductBombBlocks': {'address': 0x2602d6, 'value': 0x44, 'desc': "Aqueduct entrance bomb blocks instead of power bombs"},
-            'open_zebetites': {'address': 0x26DF22, 'value': 0xc3, 'desc': "Zebetites without morph"}
+            'layout': {'address': snes_to_pc(0xc3bd80), 'value': 0xD5, 'desc': "Anti soft lock layout modifications"},
+            'area': {'address': snes_to_pc(0x8f88a0), 'value': 0x2B, 'desc': "Area layout modifications"},
+            'areaLayout': {'address': snes_to_pc(0xcaafa7), 'value': 0xF8, 'desc': "Area layout additional modifications"},
+            'traverseWreckedShip': {'address': snes_to_pc(0xc39dbf), 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"},
+            'aqueductBombBlocks': {'address': snes_to_pc(0xcc82d6), 'value': 0x44, 'desc': "Aqueduct entrance bomb blocks instead of power bombs"},
+            'open_zebetites': {'address': snes_to_pc(0xcddf22), 'value': 0xc3, 'desc': "Zebetites without morph"}
         },
         'mirror': {
-            # TODO add layout patches
+            'layout': {'address': snes_to_pc(0xc3bd80), 'value': 0x32, 'desc': "Anti soft lock layout modifications"},
+            'area': {'address': snes_to_pc(0x8f88a0), 'value': 0x04, 'desc': "Area layout modifications"},
+            'areaLayout': {'address': snes_to_pc(0xcaafa7), 'value': 0x03, 'desc': "Area layout additional modifications"},
+            'traverseWreckedShip': {'address': snes_to_pc(0xc39df6), 'value': 0x84, 'desc': "Area layout additional access to east Wrecked Ship"},
+            'aqueductBombBlocks': {'address': snes_to_pc(0xcc82d6), 'value': 0x6c, 'desc': "Aqueduct entrance bomb blocks instead of power bombs"},
+            #'open_zebetites': {'address': snes_to_pc(0xcddf22), 'value': 0xc3, 'desc': "Zebetites without morph"}
         }
     }
 

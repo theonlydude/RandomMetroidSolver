@@ -100,6 +100,10 @@ class CommonSolver(object):
                 print("majors: {} area: {} boss: {} escape: {}".format(self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando))
 
             (self.areaTransitions, self.bossTransitions, self.escapeTransition, self.hasMixedTransitions) = self.romLoader.getTransitions(self.tourian)
+            self.log.debug("area transitions: {}".format(self.areaTransitions))
+            self.log.debug("boss transitions: {}".format(self.bossTransitions))
+            self.log.debug("escape transitions: {}".format(self.escapeTransition))
+
             if interactive == True and self.debug == False:
                 # in interactive area mode we build the graph as we play along
                 if self.areaRando == True and self.bossRando == True:

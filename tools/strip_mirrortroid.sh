@@ -22,7 +22,7 @@ ips="${1}"
 # Small message box top/bottom border tilemap
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x858051 0x858054 replace
 # special buttons tilemaps
-~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x8583d1 0x858754 replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x858427 0x85876e replace
 # Message tilemaps
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x858793 0x8595aa replace
 # Item PLM graphics - bombs

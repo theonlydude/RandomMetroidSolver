@@ -412,10 +412,14 @@ class DoorsManager():
 
     # call from rom patcher
     @staticmethod
-    def writeDoorsColor(rom, doors, writeWordFunc):
+    def writeDoorsColor(rom, writeWordFunc):
         for door in DoorsManager.doors.values():
             door.writeColor(rom, writeWordFunc)
-            # also set save/refill doors to blue
+
+    @staticmethod
+    def getBlueDoors(doors):
+        for door in DoorsManager.doors.values():
+            # set save/refill doors to blue
             if not door.canRandom:
                 doors.append(door.id)
 

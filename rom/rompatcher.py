@@ -161,6 +161,7 @@ class RomPatcher:
         self.writeSpoiler(self.settings["itemLocs"], self.settings["progItemLocs"])
         self.writeRandoSettings(self.settings["randoSettings"], self.settings["itemLocs"])
         self.writeDoorConnections(self.settings["doors"])
+        self.writeDoorsColor()
 
         self.writeVersion(self.settings["displayedVersion"])
         if self.settings["ctrlDict"] is not None:
@@ -439,7 +440,7 @@ class RomPatcher:
             if self.settings["doorsColorsRando"] == True:
                 for patchName in RomPatcher.IPSPatches['DoorsColors']:
                     self.applyIPSPatch(patchName)
-            self.writeDoorsColor(doors)
+            DoorsManager.getBlueDoors(doors)
             if self.settings["layout"]:
                 self.writeDoorIndicators(plms, self.settings["area"], self.settings["doorsColorsRando"])
             self.applyStartAP(self.settings["startLocation"], plms, doors)
@@ -1185,11 +1186,11 @@ class RomPatcher:
             for (i, char) in enumerate('rotation'):
                 self.setOamTile(i, rotationMiddle, char2tile[char], y=0x8e)
 
-    def writeDoorsColor(self, doorsStart):
+    def writeDoorsColor(self):
         if self.race is None:
-            DoorsManager().writeDoorsColor(self.romFile, doorsStart, self.romFile.writeWord)
+            DoorsManager().writeDoorsColor(self.romFile, self.romFile.writeWord)
         else:
-            DoorsManager().writeDoorsColor(self.romFile, doorsStart, self.writePlmWord)
+            DoorsManager().writeDoorsColor(self.romFile, self.writePlmWord)
 
     def writeDoorIndicators(self, plms, area, door):
         indicatorFlags = IndicatorFlag.Standard | (IndicatorFlag.AreaRando if area else 0) | (IndicatorFlag.DoorRando if door else 0)

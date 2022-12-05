@@ -66,6 +66,9 @@ patches = [
     # custom start locations
     ('mama_save', 0x8fD055),
     ('firefleas_shot_block', 0x8fB55A),
+    # fast tourian
+    # can't generate it 
+    #('open_zebetites', 0x8fdd58),
 ]
 
 for (patch, roomAddr) in patches:

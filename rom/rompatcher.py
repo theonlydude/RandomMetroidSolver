@@ -93,7 +93,7 @@ class RomPatcher:
         # patches for escape rando
         'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips', 'door_transition.ips'],
         # patches for  minimizer with fast Tourian
-        'MinimizerTourian': ['minimizer_tourian.ips', 'open_zebetites.ips'],
+        'MinimizerTourian': ['minimizer_tourian_common.ips', 'minimizer_tourian.ips', 'open_zebetites.ips'],
         # patches for door color rando
         'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips'],
         # patches for each "logic" to convert vanilla ROM to "logic" base ROM

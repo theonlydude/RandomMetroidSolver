@@ -1,0 +1,18 @@
+{
+    "minimizer_tourian_common_alt_door_hit": 8686169,
+    "minimizer_tourian_common_alt_door_hit_skip_check": 8686243,
+    "minimizer_tourian_common_alt_door_hit_vanilla_door_hit": 8686225,
+    "minimizer_tourian_common_enable_hyper": 9568238,
+    "minimizer_tourian_common_hyper_end": 11140167,
+    "minimizer_tourian_common_hyper_start": 11140096,
+    "minimizer_tourian_common_hyper_start_store_refill": 11140159,
+    "minimizer_tourian_common_mb_room_main": 9434998,
+    "minimizer_tourian_common_mb_room_main_add": 9435020,
+    "minimizer_tourian_common_mb_room_main_end": 9435023,
+    "minimizer_tourian_common_mb_room_main_max": 9435017,
+    "minimizer_tourian_common_mb_room_setup": 9434990,
+    "minimizer_tourian_common_pre_tourian_door": 9434960,
+    "minimizer_tourian_common_pre_tourian_door_end": 9434989,
+    "minimizer_tourian_common_reset_samus_palette": 11140200,
+    "minimizer_tourian_common_tourian_door": 9434928
+}

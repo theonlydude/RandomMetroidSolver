@@ -57,11 +57,6 @@ org $848a91
 org $848aa3
 .skip_check:
 
-;;; Replace door hit instruction with alternative one for
-;;; all left facing gadoras
-org $84d887
-	dw alt_door_hit
-
 ;;; door asm ptr for Tourian eye door
 org $83aaae
 	dw tourian_door
@@ -71,27 +66,6 @@ org $83aa66
 	dw pre_tourian_door
 	;; dw $f76e
 
-
-;;; overwrite setup/main asm ptrs for all room states
-;;; (not sure if it's necessary, at least one state seems
-;;;  useless)
-org $8fdd80
-	dw mb_room_main
-
-org $8fdd86
-	dw mb_room_setup
-
-org $8fdd9a
-	dw mb_room_main
-
-org $8fdda0
-	dw mb_room_setup
-
-org $8fddb4
-	dw mb_room_main
-
-org $8fddba
-	dw mb_room_setup
 
 org $91ffee
 enable_hyper:

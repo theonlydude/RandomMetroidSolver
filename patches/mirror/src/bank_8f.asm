@@ -7642,7 +7642,7 @@ Room_DD58_Header:
     dw $e5e6 ; room state standard
 org $8fdd6e
 ; room DD58: Mother Brain Room
-Room_DD58_state_DD6E_Header:
+Room_DD58_state_DD6E_Header:       ; regular state
     dl $cddede ; Level data pointer
     db $0e ; Tileset
     db $00 ; Song Set
@@ -7651,7 +7651,39 @@ Room_DD58_state_DD6E_Header:
     dw $e321 ; Enemy Set pointer
     dw $9102 ; Enemy GFX pointer
     dw $c1c1 ; Background X/Y scrolling
-    dw Room_DD58_Room_Scrolls_Pointer ; Room Scrolls pointer (in freespace)
+    dw Room_DD58_state_DDA2_Scroll ; Room Scrolls pointer
+    dw $0000 ; Unused pointer
+    dw $0000 ; Main ASM pointer
+    dw Room_DD58_state_DDA2_PLM ; PLM Set pointer
+    dw $e48a ; Background pointer
+    dw $c91e ; Setup ASM pointer
+org $8fdd88
+Room_DD58_state_DD88_Header:       ; when MB glass is broken (event 2)
+    dl $cddede ; Level data pointer
+    db $0e ; Tileset
+    db $00 ; Song Set
+    db $00 ; Play Index
+    dw $a0a4 ; FX pointer
+    dw $e321 ; Enemy Set pointer
+    dw $9102 ; Enemy GFX pointer
+    dw $c1c1 ; Background X/Y scrolling
+    dw Room_DD58_state_DDA2_Scroll ; Room Scrolls pointer
+    dw $0000 ; Unused pointer
+    dw $0000 ; Main ASM pointer
+    dw Room_DD58_state_DDA2_PLM ; PLM Set pointer
+    dw $e48a ; Background pointer
+    dw $c91e ; Setup ASM pointer
+org $8fdda2
+Room_DD58_state_DDA2_Header:       ; returning to the room after MB is dead
+    dl $cddede ; Level data pointer
+    db $0e ; Tileset
+    db $00 ; Song Set
+    db $03 ; Play Index
+    dw $a188 ; FX pointer
+    dw $8000 ; Enemy Set pointer
+    dw $8000 ; Enemy GFX pointer
+    dw $c1c1 ; Background X/Y scrolling
+    dw Room_DD58_state_DDA2_Scroll ; Room Scrolls pointer
     dw $0000 ; Unused pointer
     dw $0000 ; Main ASM pointer
     dw Room_DD58_state_DDA2_PLM ; PLM Set pointer
@@ -7660,7 +7692,7 @@ Room_DD58_state_DD6E_Header:
 org $8fddc0
 ; room DD58: Mother Brain Room
 Room_DD58_state_DDA2_Scroll:
-    db $01,$ff,$ff,$ff
+    db $00,$01,$01,$01
 org $8fddc4
 ; room DDC4: Tourian Eye Door Room
 Room_DDC4_Header:
@@ -7859,6 +7891,81 @@ Room_E06B_Header:
     dw $e097 ; room state pointer
     dw $e5e6 ; room state standard
 org $8ffd40  ; freespace
+
+
+;;; moved at begining of freespace to no longer change its address
+;;; new MB room (referenced in bank 83 at Room_DD58_door_list_index_2_Door)
+Room_FD40_Header:
+    db $13 ; room index
+    db $05 ; area
+    db $32 ; map X
+    db $12 ; map Y
+    db $01 ; width
+    db $01 ; height
+    db $70 ; up scroller
+    db $a0 ; down scroller
+    db $00 ; special graphics bitflag
+    dw Room_DD58_Doors_List ; doors pointer (in freespace)
+    dw $e5ff ; room state TourianBoss
+    dw Room_FD40_state_FD8A_Header ; room state pointer
+    dw $e612 ; room state Events
+    db $02 ; event
+    dw Room_FD40_state_FD70_Header ; room state pointer (the one called in fast tourian)
+    dw $e5e6 ; room state standard
+Room_FD40_state_FD56_Header:    ; regular state
+    dl $ce8000 ; Level data pointer
+    db $0e ; Tileset
+    db $00 ; Song Set
+    db $05 ; Play Index
+    dw $0000 ; FX pointer (in 83)
+    dw $e321 ; Enemy Set pointer (in a1)
+    dw $9102 ; Enemy GFX pointer (in b4)
+    dw $c1c1 ; Background X/Y scrolling
+    dw Room_FD40_Scroll ; Room Scrolls pointer (in 8f)
+    dw $0000 ; Unused pointer
+    dw $0000 ; Main ASM pointer (in 8f)
+    dw $c84f ; PLM Set pointer (in 8f)
+    dw $e48a ; Background pointer (in 8f)
+Room_FD40_state_FD56_Setup:
+    dw $c91e ; Setup ASM pointer (in 8f)
+Room_FD40_state_FD70_Header:    ; when MB glass is broken (in fast tourian)
+    dl $ce8000 ; Level data pointer
+    db $0e ; Tileset
+    db $00 ; Song Set
+    db $05 ; Play Index
+    dw $0000 ; FX pointer (in 83)
+    dw $e321 ; Enemy Set pointer (in a1)
+    dw $9102 ; Enemy GFX pointer (in b4)
+    dw $c1c1 ; Background X/Y scrolling
+    dw Room_FD40_Scroll ; Room Scrolls pointer (in 8f)
+    dw $0000 ; Unused pointer
+    dw $0000 ; Main ASM pointer (in 8f)
+    dw $c84f ; PLM Set pointer (in 8f)
+    dw $e48a ; Background pointer (in 8f)
+Room_FD40_state_FD70_Setup:
+    dw $c91e ; Setup ASM pointer (in 8f)
+Room_FD40_state_FD8A_Header:    ; returning to the room after MB is dead
+    dl $cddede ; Level data pointer
+    db $0e ; Tileset
+    db $00 ; Song Set
+    db $03 ; Play Index
+    dw $a188 ; FX pointer
+    dw $8000 ; Enemy Set pointer
+    dw $8000 ; Enemy GFX pointer
+    dw $c1c1 ; Background X/Y scrolling
+    dw Room_FD40_Scroll ; Room Scrolls pointer (in 8f)
+    dw $0000 ; Unused pointer
+    dw $0000 ; Main ASM pointer (in 8f)
+    dw $c84f ; PLM Set pointer (in 8f)
+    dw $e48a ; Background pointer (in 8f)
+Room_FD40_state_FD8A_Setup:
+    dw $c91e ; Setup ASM pointer (in 8f)
+Room_FD40_Door_List:
+    dw $aa80
+    dw $aa8c
+Room_FD40_Scroll:
+     db $01,$ff,$ff,$ff
+
 ; room 96BA: Climb
 Room_96BA_state_9705_PLM_scroll_data_FS:
     ; Scroll data
@@ -7888,9 +7995,6 @@ Room_DD58_Doors_List:
     dw $aa8c                    ; bank 83: Room_DD58_door_list_index_1_Door
     dw $ad66                    ; bank 83: Room_DD58_door_list_index_2_Door (new door in freespace)
     dw $0000
-; room DD58: Mother Brain Room
-Room_DD58_Room_Scrolls_Pointer:
-    db $00,$01,$01,$01
 ; room C98E: Bowling Alley
 Room_C98E_PLM:
     ; PLM Set
@@ -7942,75 +8046,6 @@ Room_D8C5_PLM_scroll_data_FS:
 Room_96BA_PLM_scroll_data_FS:
     ; Scroll data
     db $00,$00,$02,$00,$19,$00,$80
-
-;;; new MB room (referenced in bank 83 at Room_DD58_door_list_index_2_Door)
-Room_FDF1_Header:
-    db $13 ; room index
-    db $05 ; area
-    db $32 ; map X
-    db $12 ; map Y
-    db $01 ; width
-    db $01 ; height
-    db $70 ; up scroller
-    db $a0 ; down scroller
-    db $00 ; special graphics bitflag
-    dw Room_DD58_Doors_List ; doors pointer (in freespace)
-    dw $e5ff ; room state TourianBoss
-    dw $dda2 ; room state pointer
-    dw $e612 ; room state Events
-    db $02 ; event
-    dw $dd88 ; room state pointer
-    dw $e5e6 ; room state standard
-Room_FDF1_state_FE07_Header:
-    dl $ce8000 ; Level data pointer
-    db $0e ; Tileset
-    db $00 ; Song Set
-    db $05 ; Play Index
-    dw $0000 ; FX pointer (in 83)
-    dw $e321 ; Enemy Set pointer (in a1)
-    dw $9102 ; Enemy GFX pointer (in b4)
-    dw $c1c1 ; Background X/Y scrolling
-    dw $ddc0 ; Room Scrolls pointer (in 8f)
-    dw $0000 ; Unused pointer
-    dw $0000 ; Main ASM pointer (in 8f)
-    dw $c84f ; PLM Set pointer (in 8f)
-    dw $e48a ; Background pointer (in 8f)
-    dw $c91e ; Setup ASM pointer (in 8f)
-Room_FDF1_state_FE21_Header:
-    dl $cddede ; Level data pointer
-    db $0e ; Tileset
-    db $00 ; Song Set
-    db $00 ; Play Index
-    dw $a0a4 ; FX pointer
-    dw $e321 ; Enemy Set pointer
-    dw $9102 ; Enemy GFX pointer
-    dw $c1c1 ; Background X/Y scrolling
-    dw $ddc0 ; Room Scrolls pointer
-    dw $0000 ; Unused pointer
-    dw $0000 ; Main ASM pointer
-    dw $c84f ; PLM Set pointer
-    dw $e48a ; Background pointer
-    dw $c91e ; Setup ASM pointer
-Room_FDF1_state_FE3B_Header:
-    dl $cddede ; Level data pointer
-    db $0e ; Tileset
-    db $00 ; Song Set
-    db $03 ; Play Index
-    dw $a188 ; FX pointer
-    dw $8000 ; Enemy Set pointer
-    dw $8000 ; Enemy GFX pointer
-    dw $c1c1 ; Background X/Y scrolling
-    dw $ddc0 ; Room Scrolls pointer
-    dw $0000 ; Unused pointer
-    dw $0000 ; Main ASM pointer
-    dw $c84f ; PLM Set pointer
-    dw $e48a ; Background pointer
-    dw $c91e ; Setup ASM pointer
-Room_FDF1_Door_List:
-    dw $aa80
-    dw $aa8c
-Room_FDF1_Scroll:
-    db $01,$01,$01,$01
 
 ; room A98D: Crocomire's Room
 Room_A98D_PLM:

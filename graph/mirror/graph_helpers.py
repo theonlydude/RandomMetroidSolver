@@ -8,13 +8,6 @@ class HelpersGraphMirror(HelpersGraph):
         self.smbm = smbm
 
     @Cache.decorator
-    def canPassMaridiaToRedTowerNode(self):
-        sm = self.smbm
-        return sm.wand(sm.haveItem('Morph'),
-                       sm.wor(RomPatches.has(RomPatches.AreaRandoGatesBase),
-                              sm.haveItem('Super')))
-
-    @Cache.decorator
     def canPassRedTowerToMaridiaNode(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'),
@@ -28,3 +21,10 @@ class HelpersGraphMirror(HelpersGraph):
                       sm.wand(sm.wor(sm.haveItem('SpaceJump'), # exit through blue gate
                                      sm.haveItem('Grapple')),
                               sm.haveItem('Wave')))
+
+    # (this is actually Left to Right in mirror)
+    # the trick with spazer/plasma+wave doesn't work in mirror
+    @Cache.decorator
+    def canPassFrogSpeedwayRightToLeft(self):
+        sm = self.smbm
+        return sm.haveItem('SpeedBooster')

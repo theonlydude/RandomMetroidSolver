@@ -18,10 +18,10 @@ assembler_stdout=$2
 tdir=$(dirname $patch)
 [ -d "${tdir}/../ips" ] && tdir=${tdir}/../ips
 target=${tdir}/$(basename $patch asm)ips
-
+tmp_rom=$(mktemp)
 assembler=asar
 
-echo "Assembling $patch with $assembler ..."
+echo "Assembling ${patch} with ${assembler} ..."
 
 function call_assembler() {
     if [ -z "$assembler_stdout" ]; then
@@ -31,13 +31,15 @@ function call_assembler() {
     fi
 }
 
-cmd="$ASAR $ASAR_OPTS --ips $target $patch"
+cmd="$ASAR $ASAR_OPTS --ips ${target} ${patch} ${tmp_rom}"
 call_assembler
 
 [ $? -ne 0 ] && {
     echo "$assembler failed" >&2
     exit 1
 }
+
+rm -f ${tmp_rom}
 
 echo
 echo "Done"

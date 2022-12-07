@@ -76,11 +76,11 @@ class Symbols(object):
     def loadJSON(self, jsonPath, namespace=None):
         if namespace is None:
             namespace = os.path.splitext(os.path.basename(jsonPath))[0]
-            self.log.debug("* Loading symbols from %s into namespace %s ..." % (jsonPath, namespace))
-            with open(jsonPath, "r") as f:
-                syms = json.load(f)
-                for sym,addr in syms.items():
-                    self.addSymbol(namespace, sym, addr)
+        self.log.debug("* Loading symbols from %s into namespace %s ..." % (jsonPath, namespace))
+        with open(jsonPath, "r") as f:
+            syms = json.load(f)
+            for sym,addr in syms.items():
+                self.addSymbol(namespace, sym, addr)
 
     def appendToMSL(self, mslPath, symbolsAbsolute=None):
         if symbolsAbsolute is None:

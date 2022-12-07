@@ -7991,9 +7991,9 @@ Room_C98E_PLM_scroll_data_FS_2:
     db $07,$00,$08,$00,$09,$00,$0a,$00,$0b,$00,$0d,$00,$0f,$00,$10,$01,$80
 ; room DD58: Mother Brain Room
 Room_DD58_Doors_List:
-    dw $aa80                    ; bank 83: Room_DD58_door_list_index_0_Door
-    dw $aa8c                    ; bank 83: Room_DD58_door_list_index_1_Door
-    dw $ad66                    ; bank 83: Room_DD58_door_list_index_2_Door (new door in freespace)
+    dw $aa80                    ; bank 83: Room_DD58_door_list_index_0_Door: Rinka Shaft
+    dw $aa8c                    ; bank 83: Room_DD58_door_list_index_1_Door: Tourian Escape Room 1
+    dw $ad66                    ; bank 83: Room_DD58_door_list_index_2_Door: [new MB room] (new door in freespace)
     dw $0000
 ; room C98E: Bowling Alley
 Room_C98E_PLM:

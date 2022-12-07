@@ -1,7 +1,7 @@
 # config:
 VANILLA?=$(ROOT_DIR)/vanilla.sfc
 ASAR?=asar
-ASAR_OPTS?=--fix-checksum=off
+ASAR_OPTS?=--fix-checksum=off -wnofeature_deprecated --no-title-check
 MAKE_IPS?=$(ROOT_DIR)/tools/make_ips.sh
 DEP_TOOL?=$(ROOT_DIR)/tools/gen_asm_dep.sh
 MSL_TOOL?=$(ROOT_DIR)/tools/gen_msl.py
@@ -62,7 +62,8 @@ $(DEP_DIR)/.%.d:       $(SRC_DIR)/%.asm
 
 $(IPS_DIR)/%.ips:	$(SRC_DIR)/%.asm
 	@echo "Building $@ ..."
-	@ASAR_OPTS="$(ASAR_OPTS) --symbols-path=$(patsubst $(SRC_DIR)/%.asm,$(BUILD_DIR)/%.sym,$<)" $(MAKE_IPS) $< > $(BUILD_DIR)/$$(basename $<).log
+	@$(ASAR) $(ASAR_OPTS) --ips $@ --symbols-path=$(patsubst $(SRC_DIR)/%.asm,$(BUILD_DIR)/%.sym,$<) $< > $(BUILD_DIR)/$$(basename $<).log
+	@-rm -f $(patsubst $(SRC_DIR)/%.asm,$(SRC_DIR)/%.sfc,$<)
 
 # already generated along with ips, just add this rule to enforce dependency order
 $(BUILD_DIR)/%.sym:	$(IPS_DIR)/%.ips

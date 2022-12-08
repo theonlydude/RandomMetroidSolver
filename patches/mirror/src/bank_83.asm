@@ -1,3 +1,10 @@
+;;; compile with thedopefish asar
+
+arch 65816
+lorom
+
+incsrc "sym/bank_8f.asm"
+
 org $838000
 ; room 91F8: Landing Site
 Room_91F8_state_9261_FX:
@@ -6634,7 +6641,7 @@ Room_E0B5_door_list_index_0_Door:
 org $83ad66  ; start of bank 83 freespace
 ;;; new door pointers for Mother Brain
 Room_DD58_door_list_index_2_Door:
-    dw $FD40 ; Destination room header pointer (bank $8F): [new MB room] in 8f freespace
+    dw bank_8f_Room_FD40_Header ; Destination room header pointer (bank $8F): [new MB room] in 8f freespace
     db $00 ; Bit Flag (Elevator properties)
     db $00 ; Direction
     db $02 ; X cap

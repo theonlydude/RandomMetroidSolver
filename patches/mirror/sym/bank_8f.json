@@ -910,11 +910,8 @@
     "Room_FD40_Header": 9436480,
     "Room_FD40_Scroll": 9436584,
     "Room_FD40_state_FD56_Header": 9436502,
-    "Room_FD40_state_FD56_Setup": 9436526,
     "Room_FD40_state_FD70_Header": 9436528,
-    "Room_FD40_state_FD70_Setup": 9436552,
     "Room_FD40_state_FD8A_Header": 9436554,
-    "Room_FD40_state_FD8A_Setup": 9436578,
     "SetupAsm": 9408916,
     "SetupAsmAutoDestroyTheWallDuringEscape": 9408937,
     "SetupAsmTurnWallIntoShotblocksDuringEscape": 9408946

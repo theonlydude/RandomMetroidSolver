@@ -1,6 +1,8 @@
 lorom
 arch 65816
 
+incsrc "sym/bank_8f.asm"
+
 org $8f9271
 	db $01
 org $8f9257
@@ -646,9 +648,9 @@ org $8fe0f1
 org $8fe0d7
 	db $00
 ;;; new MB room
-org $8ffe17
+org bank_8f_Room_FD40_state_FD56_Header+16
         db $0b
-org $8ffe31
+org bank_8f_Room_FD40_state_FD70_Header+16
         db $0b
-org $8ffe4b
+org bank_8f_Room_FD40_state_FD8A_Header+16
         db $0b

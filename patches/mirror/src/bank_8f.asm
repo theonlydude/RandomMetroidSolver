@@ -7926,7 +7926,6 @@ Room_FD40_state_FD56_Header:    ; regular state
     dw $0000 ; Main ASM pointer (in 8f)
     dw $c84f ; PLM Set pointer (in 8f)
     dw $e48a ; Background pointer (in 8f)
-Room_FD40_state_FD56_Setup:
     dw $c91e ; Setup ASM pointer (in 8f)
 Room_FD40_state_FD70_Header:    ; when MB glass is broken (in fast tourian)
     dl $ce8000 ; Level data pointer
@@ -7942,7 +7941,6 @@ Room_FD40_state_FD70_Header:    ; when MB glass is broken (in fast tourian)
     dw $0000 ; Main ASM pointer (in 8f)
     dw $c84f ; PLM Set pointer (in 8f)
     dw $e48a ; Background pointer (in 8f)
-Room_FD40_state_FD70_Setup:
     dw $c91e ; Setup ASM pointer (in 8f)
 Room_FD40_state_FD8A_Header:    ; returning to the room after MB is dead
     dl $cddede ; Level data pointer
@@ -7958,7 +7956,6 @@ Room_FD40_state_FD8A_Header:    ; returning to the room after MB is dead
     dw $0000 ; Main ASM pointer (in 8f)
     dw $c84f ; PLM Set pointer (in 8f)
     dw $e48a ; Background pointer (in 8f)
-Room_FD40_state_FD8A_Setup:
     dw $c91e ; Setup ASM pointer (in 8f)
 Room_FD40_Door_List:
     dw $aa80

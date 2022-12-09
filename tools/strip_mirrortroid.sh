@@ -90,8 +90,7 @@ ips="${1}"
 # zebes and stars tilemap
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x8edc00 0x8edd24 replace
 # bank 8f
-~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x8f8000 0x8f9187 replace
-~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x8f91fa 0x8fffff replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x8f8000 0x8fffff replace
 # Handle Samus animation delay
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x90832e 0x908330 replace
 # Animation delay instruction Bh - select animation delay sequence for wall-jump

@@ -142,6 +142,8 @@
     "Door_AB_Room_DEA7_PLM_C842": 9423005,
     "Door_AC_Room_DEDE_PLM_C842": 9423019,
     "Door_EE_Room_A98D_PLM_C842": 9436773,
+    "EarthquakeTimer": 8263744,
+    "EarthquakeType": 8263742,
     "End_FreeSpace_8F": 9436781,
     "Energy_Tank_Crocomire": 9436767,
     "PhantoonRoomOut_DoorAsmPtr": 9436785,
@@ -914,5 +916,6 @@
     "Room_FD40_state_FD8A_Header": 9436554,
     "SetupAsm": 9408916,
     "SetupAsmAutoDestroyTheWallDuringEscape": 9408937,
-    "SetupAsmTurnWallIntoShotblocksDuringEscape": 9408946
+    "SetupAsmTurnWallIntoShotblocksDuringEscape": 9408946,
+    "SpawnHardCodedPlm": 8684503
 }

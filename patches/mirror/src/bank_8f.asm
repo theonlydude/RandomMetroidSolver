@@ -2183,15 +2183,40 @@ Room_B741_state_B74E_PLM:
     ; Save station
     dw $b76f : db $07 : db $0b : dw $0005 
     dw $0000
+
+org $8483D7
+SpawnHardCodedPlm:
+EarthquakeType = $7E183E
+EarthquakeTimer = $7E1840
+
 org $8f9194
+;;; $9194: Setup ASM: clear a few blocks after saving animals and shake screen ;;;
+; Room $92FD, state $9348. Crateria mainstreet, Zebes timebomb set
 SetupAsm:
-    db $22,$d7,$83,$84,$0d,$0b,$30,$bb,$a9,$18,$00,$8d,$3e,$18,$a9,$ff,$ff,$8d,$40,$18,$60
+    JSL.l SpawnHardCodedPlm
+    db $0D,$0B : dw $BB30
+    LDA.w #$0018
+    STA.w EarthquakeType           ; Earthquake type = BG1, BG2 and enemies; 3 pixel displacement, horizontal
+    LDA.w #$FFFF
+    STA.w EarthquakeTimer
+    RTS
+
 org $8f91a9
+;;; $91A9: Setup ASM: auto-destroy the wall during escape ;;;
+; Room $96BA, state $9705. Old Tourian escape shaft, Zebes timebomb set
 SetupAsmAutoDestroyTheWallDuringEscape:
-    db $22,$d7,$83,$84,$1e,$87,$64,$b9,$60
+    JSL.l SpawnHardCodedPlm
+    db $1e,$87 : dw $B964
+    RTS
+
 org $8f91b2
+;;; $91B2: Setup ASM: turn wall into shotblocks during escape ;;;
+; Room $9804, state $984F. Bomb Torizo's room, Zebes timebomb set
 SetupAsmTurnWallIntoShotblocksDuringEscape:
-    db $22,$d7,$83,$84,$00,$0a,$ed,$b9,$60
+    JSL.l SpawnHardCodedPlm
+    db $00,$0A : dw $B9ED
+    RTS
+
 org $8f91f8
 RoomHeadersScrollDataDooroutData:
     db $00,$00,$1f,$00,$09,$05,$70,$a0,$00,$7b,$92,$12,$e6,$0e,$61,$92,$69,$e6,$47,$92,$12,$e6,$00,$2d,$92,$e6,$e5

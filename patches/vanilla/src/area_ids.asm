@@ -64,7 +64,7 @@ org $8f97f0
 org $8f97d6
 	db $01
 org $8f985f
-	db $01
+	dw $0001
 org $8f9845
 	db $01
 org $8f982b

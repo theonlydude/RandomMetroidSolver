@@ -1,0 +1,15 @@
+{
+    "BRA_B3E6AD": 11789997,
+    "ChecksEventAHasHappened": 8421939,
+    "FacingRight": 11789963,
+    "FacingRightSpritemap": 11789994,
+    "InstructionTimer": 8261524,
+    "MoveEnemyHorizontal": 10536619,
+    "MoveEnemyVertical": 10536838,
+    "NoWallCollision": 11790015,
+    "PositionX": 8261498,
+    "SpriteMapList": 8261522,
+    "SubPositionX": 8261500,
+    "VelocityX": 8261544,
+    "WallNotOpened": 11790015
+}

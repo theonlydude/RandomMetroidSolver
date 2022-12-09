@@ -53,7 +53,12 @@ room_plms:
 ;; room_plms:
 ;;     dw  $99bd, $99ca, $8b1a, plm_lists
 ;;; 
-print "upwards room_plms table start: ", pc
+room_plms_upwards:
+
+;;; fill plm table with placeholder data to detect colisions with other patches
+org plm_lists
+    padbyte $CA : pad room_plms_upwards
+
 ;;; CODE in bank 8F
 org $8ff300
 

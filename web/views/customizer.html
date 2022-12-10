@@ -4,7 +4,23 @@ extend 'layout.html'
 
 <meta name="description" content="Palettizer for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
+
+{{ if seedInfo is not None: }}
+<script type="text/javascript">
+  window.VARIA_SETTINGS = {
+    permalink: '{{=seedInfo["key"] }}'
+  }
+</script>
+{{ else:}}
+<script type="text/javascript">
+  window.VARIA_SETTINGS = {
+    permalink: null
+  }
+</script>
+{{ pass }}
+
 <script src="{{=URL('static','js/FileSaver.js')}}"></script>
+<script async defer src="{{=URL('static', 'js/customizer.js')}}"></script>
 
 <link rel="stylesheet" type="text/css" href={{=URL('static','dist/switchery.css')}} media="screen"/>
 <script src="{{=URL('static','dist/switchery.js')}}"></script>
@@ -929,78 +945,65 @@ else:
 }}
 window.onload = function(){
     //Check File API support
-    if(window.File && window.FileList && window.FileReader) {
-        if(permalink == true) {
-            var inputName = "vanillaUploadFile";
-        } else {
-            var inputName = "uploadFile";
-        }
-        var filesInput = document.getElementById(inputName);
-        filesInput.addEventListener("change", function(event){
-            var files = event.target.files; //It returns a FileList object
-            var file = files[0];
+    // if(window.File && window.FileList && window.FileReader) {
+    //     if(permalink == true) {
+    //         var inputName = "vanillaUploadFile";
+    //     } else {
+    //         var inputName = "uploadFile";
+    //     }
+    //     var filesInput = document.getElementById(inputName);
+    //     filesInput.addEventListener("change", function(event){
+    //         var files = event.target.files; //It returns a FileList object
+    //         var file = files[0];
 
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                // check sfc or smc extention
-                var re = /(?:\.([^.]+))?$/;
-                var ext = re.exec(file.name)[1];
-                console.log("ext: "+ext)
-                if( ! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC") ) {
-                    document.getElementById("uploadFile").value = "";
-                    alert("wrong extension: "+ext);
-                    return false;
-                }
+    //         var reader = new FileReader();
+    //         reader.onload = function(e) {
+    //             // check sfc or smc extention
+    //             var re = /(?:\.([^.]+))?$/;
+    //             var ext = re.exec(file.name)[1];
+    //             console.log("ext: "+ext)
+    //             if( ! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC") ) {
+    //                 document.getElementById("uploadFile").value = "";
+    //                 alert("wrong extension: "+ext);
+    //                 return false;
+    //             }
 
-                romSize = file.size;
-                if( romSize > 4*1024*1024 ) {
-                    document.getElementById("uploadFile").value = "";
-                    alert("wrong rom file size: "+romSize.toString());
-                    return false;
-                }
+    //             romSize = file.size;
 
-                var crc32 = new Crc32();
-                crc32.update(e.target.result);
-                var digest = crc32.digest();
-                console.log("crc32: "+digest);
-                var isVanilla = digest == "d63ed5f8";
+    //             if(romSize == 3146240) {
+    //                 console.log("headered ROM detected, removing first 512 bytes of the header");
+    //             }
 
-                if(permalink == true) {
-                    if(! isVanilla) {
-                        alert("Non vanilla ROM detected");
-                        document.getElementById(inputName).value = "";
-                        return false;
-                    }
+    //             if( romSize > 4*1024*1024 ) {
+    //                 document.getElementById("uploadFile").value = "";
+    //                 alert("wrong rom file size: "+romSize.toString());
+    //                 return false;
+    //             }
 
-                    // store file in localforage
-                    localforage.setItem('vanillaROM', e.target.result, function(err, value) {
-                        if(err != null) {
-                            console.log("error detected with local storage: "+err);
-                            clearLocalStorage();
-                        } else {
-                            console.log("vanilla ROM stored in local storage");
-                            vanillaROMBytes = new Uint8Array(value);
-                            displayROMInput(false);
-                        }
-                    });
+    //             var crc32 = new Crc32();
+    //             crc32.update(e.target.result);
+    //             var digest = crc32.digest();
+    //             console.log("crc32: "+digest);
+    //             var isVanilla = digest == "d63ed5f8";
 
-                } else {
-                    // detect race mode patch
-                    isRace = false;
-                    var bytes = new Uint8Array(e.target.result);
-                    for(var addr=0x1C0200; addr<0x1C0210; addr++) {
-                        if(bytes[addr] != 0xff) {
-                            isRace = true;
-                            console.log("race mode detected");
-                            break;
-                        }
-                    }
+    //             if(permalink == true) {
+    //                 if(! isVanilla) {
+    //                     alert("Non vanilla ROM detected");
+    //                     document.getElementById(inputName).value = "";
+    //                     return false;
+    //                 }
 
-                    // detect varia default patches
-                    isVARIA = false;
-                    if(bytes[0x175ca] == 0x60 && bytes[0x19E1] == 0xEA && bytes[0xF27] == 0x20) {
-                        isVARIA = true;
-                    }
+    //                 // store file in localforage
+    //                 localforage.setItem('vanillaROM', e.target.result, function(err, value) {
+    //                     if(err != null) {
+    //                         console.log("error detected with local storage: "+err);
+    //                         clearLocalStorage();
+    //                     } else {
+    //                         console.log("vanilla ROM stored in local storage");
+    //                         vanillaROMBytes = new Uint8Array(value);
+    //                         displayROMInput(false);
+    //                     }
+    //                 });
 
                     // detect beam doors patch from seed to customize
                     beamDoorsPatch = bytes[0x226e5] == 0x0D;
@@ -1011,16 +1014,27 @@ window.onload = function(){
 
                     console.log("isArea: "+isArea+" isBoss: "+isBoss+" isVARIA: "+isVARIA+" isRace: "+isRace);
 
-                    greyOutPatches(isRace, isVARIA, isVanilla);
-                }
-            }
+    //                 // detect varia default patches
+    //                 isVARIA = false;
+    //                 if(bytes[0x175ca] == 0x60 && bytes[0x19E1] == 0xEA && bytes[0xF27] == 0x20) {
+    //                     isVARIA = true;
+    //                 }
 
-            reader.readAsArrayBuffer(file)
+    //                 // detect beam doors patch from seed to customize
+    //                 beamDoorsPatch = bytes[0x226e5] == 0x0D;
+    //                 isArea = bytes[0x788A0] == 0x2b;
+    //                 isBoss = bytes[0x1a2b6] != 0x00;
 
-        }, false);
-    } else {
-        alert("This website requires the HTML5 File API, please upgrade your browser to a newer version.");
-    }
+    //                 greyOutPatches(isRace, isVARIA, isVanilla);
+    //             }
+    //         }
+
+    //         reader.readAsArrayBuffer(file)
+
+    //     }, false);
+    // } else {
+    //     alert("This website requires the HTML5 File API, please upgrade your browser to a newer version.");
+    // }
 
 
     var inputs = document.getElementsByTagName("input");
@@ -2134,7 +2148,7 @@ if seedInfo != None:
                 <td>Vanilla ROM:</td>
                 <td>
                   <div id="vanillaROMVisibility">
-                   {{=INPUT(_type="file", _name="vanillaUploadFile", _id="vanillaUploadFile", _class="full")}}
+                   {{=INPUT(_type="file", _accept=".smc,.sfc", _name="vanillaUploadFile", _id="vanillaUploadFile", _class="full")}}
                   </div>
                   <div id="vanillaROMOKVisibility">
                     Vanilla ROM already loaded

@@ -79,6 +79,7 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/js/localforage.nopromises.min.js ] || ln -s ~/RandomMetroidSolver/web/static/localforage.nopromises.min.js ~/web2py/applications/solver/static/js/localforage.nopromises.min.js
 [ -L ~/web2py/applications/solver/static/js/spc_snes.js ] || ln -s ~/RandomMetroidSolver/web/static/spc_js/spc_snes.js ~/web2py/applications/solver/static/js/spc_snes.js
 [ -L ~/web2py/applications/solver/static/js/spc_snes.js.mem ] || ln -s ~/RandomMetroidSolver/web/static/spc_js/spc_snes.js.mem ~/web2py/applications/solver/static/js/spc_snes.js.mem
+[ -L ~/web2py/applications/solver/static/js/customizer.js ] || ln -s ~/RandomMetroidSolver/web/static/customizer.js ~/web2py/applications/solver/static/js/customizer.js
 
 mkdir -p ~/web2py/applications/solver/static/images/common/
 [ -L ~/web2py/applications/solver/static/images/common/area_map_20200112.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map.png ~/web2py/applications/solver/static/images/common/area_map_20200112.png

@@ -1,0 +1,13 @@
+{
+  "name": "varia-web",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "esbuild js/customizer.ts --bundle --outdir=static"
+  },
+  "devDependencies": {
+    "esbuild": "^0.14.48"
+  },
+  "dependencies": {}
+}

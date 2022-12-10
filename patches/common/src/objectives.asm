@@ -17,7 +17,7 @@ incsrc "event_list.asm"
 incsrc "constants.asm"
 
 incsrc "sym/utils.asm"
-incsrc "sym/rando_escape.asm"
+incsrc "sym/rando_escape_common.asm"
 incsrc "sym/custom_music.asm"
 incsrc "sym/disable_screen_shake.asm"
 
@@ -204,7 +204,7 @@ room_earthquake:
 
 trigger_escape:
 	phx : phy
-	jsl rando_escape_escape_setup_l
+	jsl rando_escape_common_escape_setup_l
 	jsr room_earthquake	; could not be called by setup asm since not in escape yet
 	; load timer graphics
 	lda #$000f : jsl $90f084

@@ -34,8 +34,8 @@ class Addresses(object):
             'majorsSplit': ValueSingle(symbols.getAddress('seed_display', 'InfoStr'), storage=Byte),
             # scavenger hunt items list (17 prog items (including ridley) + hunt over + terminator, each is a word)
             'scavengerOrder': ValueRange(symbols.getAddress('varia_hud', 'scav_order'), length=(17+1+1)*2),
-            'escapeTimer': ValueSingle(symbols.getAddress('rando_escape', 'timer_value')),
-            'escapeTimerTable': ValueSingle(symbols.getAddress('rando_escape', 'timer_values_by_area_id')),
+            'escapeTimer': ValueSingle(symbols.getAddress('rando_escape_common', 'timer_value')),
+            'escapeTimerTable': ValueSingle(symbols.getAddress('rando_escape_common', 'timer_values_by_area_id')),
             'startAP': ValueSingle(symbols.getAddress('start', 'start_location')),
             'customDoorsAsm': ValueRange(symbols.getAddress('door_transition', 'generated_door_asm'),
                                          end=symbols.getAddress('door_transition', 'generated_door_asm_end')),

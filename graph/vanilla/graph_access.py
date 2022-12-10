@@ -100,7 +100,7 @@ accessPointsDict = {
        roomInfo = {'RoomPtr':0x9879, "area": 0x0},
        exitInfo = {'DoorPtr':0x8bc2, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000,
-                   "exitAsm": "rando_escape_setup_next_escape"},
+                   "exitAsm": "rando_escape_common_setup_next_escape"},
        entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}, # unused
        escape = True),
     'Bomb Torizo Room Left':

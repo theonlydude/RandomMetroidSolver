@@ -40,38 +40,40 @@ def transformPos(sx, sy, tx, ty, screenSize):
 patches = [
     # patch name, room addr
     # layout
-    ('dachora',   0x8f9cb3),
-    ('early_super_bridge', 0x8f9BC8),
-    ('high_jump', 0x8fAA41),
-    ('moat',      0x8f95FF),
-    ('spospo_save', 0x8f9D19),
-    ('nova_boost_platform', 0x8fa7b3),
-    ('red_tower', 0x8fa253),
-    ('spazer',    0x8fa408),
-    ('kraid_save', 0x8fA4DA),
-    ('mission_impossible', 0x8f9e11),
+    ('dachora',   0x8f9cb3, None),
+    ('early_super_bridge', 0x8f9BC8, None),
+    ('high_jump', 0x8fAA41, None),
+    ('moat',      0x8f95FF, None),
+    ('spospo_save', 0x8f9D19, None),
+    ('nova_boost_platform', 0x8fa7b3, None),
+    ('red_tower', 0x8fa253, None),
+    ('spazer',    0x8fa408, None),
+    ('kraid_save', 0x8fA4DA, None),
+    ('mission_impossible', 0x8f9e11, None),
     # VARIA tweaks
-    ('ln_chozo_platform', 0x8fb1e5),
+    ('ln_chozo_platform', 0x8fb1e5, None),
     # area layout
-    ('area_rando_warp_door', 0x8fd6fd),
-    ('crab_shaft', 0x8fd1a3),
-    ('area_layout_caterpillar', 0x8fa322),
-    ('area_layout_ln_exit', 0x8fad5e),
-    ('area_layout_east_tunnel', 0x8fcf80),
+    ('area_rando_warp_door', 0x8fd6fd, None),
+    ('crab_shaft', 0x8fd1a3, None),
+    ('area_layout_caterpillar', 0x8fa322, None),
+    ('area_layout_ln_exit', 0x8fad5e, None),
+    ('area_layout_east_tunnel', 0x8fcf80, None),
     # area additional layout
-    ('area_layout_greenhillzone', 0x8f9e52),
-    ('area_layout_crabe_tunnel', 0x8fd08a),
-    ('east_ocean', 0x8f94fd),
-    ('aqueduct_bomb_blocks', 0x8fd5a7),
+    ('area_layout_greenhillzone', 0x8f9e52, None),
+    ('area_layout_crabe_tunnel', 0x8fd08a, None),
+    ('east_ocean', 0x8f94fd, None),
+    ('aqueduct_bomb_blocks', 0x8fd5a7, None),
     # custom start locations
-    ('mama_save', 0x8fD055),
-    ('firefleas_shot_block', 0x8fB55A),
+    ('mama_save', 0x8fD055, None),
+    ('firefleas_shot_block', 0x8fB55A, None),
     # fast tourian
-    # can't generate it 
-    #('open_zebetites', 0x8fdd58),
+    # can't generate it as room is changed beyond mirroring
+    #('open_zebetites', 0x8fdd58, None),
+    # escape
+    ('rando_escape_ws_fix', 0x8fCAF6, 0x8FCB22),
 ]
 
-for (patch, roomAddr) in patches:
+for (patch, roomAddr, stateAddr) in patches:
     print("create patch {} at room {}".format(patch, hex(roomAddr)))
     print("-"*64)
     patchRomName = "{}.sfc".format(patch)
@@ -82,9 +84,14 @@ for (patch, roomAddr) in patches:
     vRoom = Room(vanillaRom, roomAddr)
     vaRoom = Room(variaRom, roomAddr)
     mRoom = Room(patchRom, roomAddr)
-    vLevelDataAddr = vRoom.defaultRoomState.levelDataPtr
-    vaLevelDataAddr = vaRoom.defaultRoomState.levelDataPtr
-    mLevelDataAddr = mRoom.defaultRoomState.levelDataPtr
+    if stateAddr is not None:
+        vLevelDataAddr = vRoom.roomStates[stateAddr].levelDataPtr
+        vaLevelDataAddr = vaRoom.roomStates[stateAddr].levelDataPtr
+        mLevelDataAddr = mRoom.roomStates[stateAddr].levelDataPtr
+    else:
+        vLevelDataAddr = vRoom.defaultRoomState.levelDataPtr
+        vaLevelDataAddr = vaRoom.defaultRoomState.levelDataPtr
+        mLevelDataAddr = mRoom.defaultRoomState.levelDataPtr
     screenSize = (vRoom.width, vRoom.height)
     print("")
     print("load vanilla data")

@@ -157,23 +157,6 @@ save_station:
 print "B84 end: ", pc
 warnpc $84f8ff
 
-;;; DATA, bank 8F. makes map stations doors in norfair/brin/maridia/ws
-;;; permanently grey
-org $8f8b06                     ; norfair map
-    dw $C848
-    db $01,$46
-    dw $904C
-
-org $8fc547                     ; maridia map
-    dw $C842
-    db $0E,$16
-    dw $9090
-
-org $8f84b8                     ; brinstar map
-    dw $C848
-    db $01,$46
-    dw $9020
-
 ;;; other door tweaks
 ;; open Tourian grey doors to disable one way
 org $8fc828
@@ -182,7 +165,7 @@ org $8fc828
 org $8fc836
     db $0c
 
-;; open crateria doors to open path for animais searching
+;; open crateria doors to open path for animals searching
 org $8f81b1
     db $10
 

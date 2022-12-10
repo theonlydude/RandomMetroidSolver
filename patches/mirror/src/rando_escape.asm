@@ -4,6 +4,7 @@ arch 65816
 lorom
 
 incsrc "sym/rando_escape_common.asm"
+incsrc "sym/bank_8f.asm"
 
 ;;; elevator for business center
 org rando_escape_common_elevator_business_center
@@ -34,3 +35,19 @@ org rando_escape_common_elevator_morph_room
 org rando_escape_common_elevator_ln_main_hall
     dw $D73F,$0380,$02A2,$0000,$2C00,$0000,$0001,$0018,$ffff
     db $00
+
+;;; DATA, bank 8F. makes map stations doors in norfair/brin/maridia/ws permanently grey
+org bank_8f_Door_4C_Room_A7DE_PLM_C85A    ; norfair map
+    dw $C842
+    db $0e,$46
+    dw $904C
+
+org bank_8f_Door_90_Room_D21C_PLM_C890    ; maridia map
+    dw $C848
+    db $01,$16
+    dw $9090
+
+org bank_8f_Door_20_Room_9AD9_PLM_C88A    ; brinstar map
+    dw $C842
+    db $3e,$46
+    dw $9020

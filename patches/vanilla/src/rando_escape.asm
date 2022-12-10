@@ -34,3 +34,20 @@ org rando_escape_common_elevator_morph_room
 org rando_escape_common_elevator_ln_main_hall
     dw $D73F,$0480,$02A2,$0000,$2C00,$0000,$0001,$0018,$ffff
     db $00
+
+;;; DATA, bank 8F. makes map stations doors in norfair/brin/maridia/ws
+;;; permanently grey
+org $8f8b06                     ; norfair map
+    dw $C848
+    db $01,$46
+    dw $904C
+
+org $8fc547                     ; maridia map
+    dw $C842
+    db $0E,$16
+    dw $9090
+
+org $8f84b8                     ; brinstar map
+    dw $C848
+    db $01,$46
+    dw $9020

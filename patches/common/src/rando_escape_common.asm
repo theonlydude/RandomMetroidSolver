@@ -337,38 +337,47 @@ opt_remove_enemies:
 
 ;;; room ID, enemy population in bank a1, enemy GFX in bank b4
 enemy_table:
-    dw $a7de,one_elev_list_1,$8aed  ; business center
+    dw $a7de,elevator_business_center,$8aed ; business center
     dw $a6a1,$98e4,$8529            ; warehouse (vanilla data)
     dw $a98d,$bb0e,$8b11            ; croc room (vanilla "croc dead" data)
     dw $962a,$89DF,$81F3            ; red brin elevator (vanilla data)
-    dw $a322,one_elev_list_1,$863F  ; red tower top
+    dw $a322,elevator_red_tower_top,$863F ; red tower top
     dw $94cc,$8B74,$8255            ; forgotten hiway elevator (vanilla data)
-    dw $d30b,one_elev_list_2,$8d85  ; forgotten hiway
-    dw $9e9f,one_elev_list_3,$83b5  ; morph room
+    dw $d30b,elevator_forgotten_highway,$8d85 ; forgotten hiway
+    dw $9e9f,elevator_morph_room,$83b5 ; morph room
     dw $97b5,$8b61,$824b            ; blue brin elevator (vanilla data)
-    dw $9ad9,one_elev_list_1,$8541  ; green brin shaft
+    dw $9ad9,elevator_green_bt_shaft,$8541 ; green brin shaft
     dw $9938,$8573,$80d3            ; green brin elevator (vanilla data)
     dw $af3f,$a544,$873d            ; LN elevator (vanilla data)
-    dw $b236,one_elev_list_4,$893d  ; LN main hall
+    dw $b236,elevator_ln_main_hall,$893d ; LN main hall
     dw $d95e,$de5a,$9028            ; botwoon room (vanilla "botwoon dead" data)
     dw $a66a,$9081,$8333            ; G4 (G4?) (vanilla data)
     ;; table terminator
     dw $ffff
 
-one_elev_list_1:
-    dw $D73F,$0080,$02C2,$0000,$2C00,$0000,$0001,$0018,$ffff
+;;; placeholder data
+elevator_business_center:
+    dw $ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff
     db $00
 
-one_elev_list_2:
-    dw $D73F,$0080,$02C0,$0000,$2C00,$0000,$0001,$0018,$ffff
+elevator_red_tower_top:
+    dw $ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff
     db $00
 
-one_elev_list_3:
-    dw $D73F,$0580,$02C2,$0000,$2C00,$0000,$0001,$0018,$ffff
+elevator_green_bt_shaft:
+    dw $ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff
     db $00
 
-one_elev_list_4:
-    dw $D73F,$0480,$02A2,$0000,$2C00,$0000,$0001,$0018,$ffff
+elevator_forgotten_highway:
+    dw $ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff
+    db $00
+
+elevator_morph_room:
+    dw $ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff
+    db $00
+
+elevator_ln_main_hall:
+    dw $ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff
     db $00
 
 ;;; Timer Values indexed by area ID for Disabled Tourian escape

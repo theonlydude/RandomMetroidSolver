@@ -3,3 +3,4 @@
 *.log
 **/build/
 **/include/sym/
+db_params.py

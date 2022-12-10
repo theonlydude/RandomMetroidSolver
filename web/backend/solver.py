@@ -7,6 +7,10 @@ from utils.parameters import easy, medium, hard, harder, hardcore, mania
 from utils.utils import getPresetDir, getPythonExec
 from utils.db import DB
 from solver.conf import Conf
+from logic.logic import Logic
+from patches.patchaccess import PatchAccess
+from rom.symbols import Symbols
+from rom.addresses import Addresses
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import redirect
@@ -17,7 +21,8 @@ class Solver(object):
         self.session = session
         self.request = request
         self.cache = cache
-
+        # required for symbols
+        Logic.factory('vanilla') # TODO will have to be changed when handling mirror/rotation etc
         self.vars = self.request.vars
 
     def run(self):
@@ -83,6 +88,9 @@ class Solver(object):
         (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
 
         # generate list of addresses to read in the ROM
+        symbols = Symbols(PatchAccess())
+        symbols.loadAllSymbols()
+        Addresses.updateFromSymbols(symbols)
         addresses = getAddressesToRead()
 
         # send values to view
@@ -144,6 +152,10 @@ class Solver(object):
 
         currentSuit = 'Power'
         for location, area, subarea, item, locDiff, locTechniques, locItems, pathDiff, pathTechniques, pathItems, path, _class in locations:
+            if _class == "objective":
+                pathTable += """<tr><td colspan="7" class="center objective">{}</td></tr>""".format(location)
+                continue
+
             if path is not None:
                 lastAP = path[-1]
                 if displayAPs == True and not (len(path) == 1 and path[0] == lastAP):

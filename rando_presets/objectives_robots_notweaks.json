@@ -1,0 +1,7 @@
+{
+    "objective": ["activate chozo robots"],
+    "variaTweaks": "off",
+    "tourian": "Disabled",
+    "escapeRando": "on",
+    "removeEscapeEnemies": "off"
+}

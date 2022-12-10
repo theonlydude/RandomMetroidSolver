@@ -1,4 +1,13 @@
 
+local function readWord(ramAddr)
+  return emu.readWord(ramAddr, emu.memType.workRam)
+end
+
+local function readIGT()
+  local frames,seconds,minutes,hours = readWord(0x09DA),readWord(0x09DC),readWord(0x09DE),readWord(0x09E0)
+  return frames + 60*seconds + 60*60*minutes + 60*60*60*hours
+end
+
 local statsRamAddr = 0x1fc00
 
 local timerData = {
@@ -16,13 +25,22 @@ local timerData = {
   {"West Mar", addr=statsRamAddr+25*2},
   {"East Mar", addr=statsRamAddr+27*2},
   {"Tourian", addr=statsRamAddr+29*2},
-  {"Pause", addr=statsRamAddr+38*2}
+  {"Pause", addr=statsRamAddr+38*2},
+  {"IGT",addr=readIGT,region=false}
 }
 
 local function readTime(ramAddr)
-  local lo = emu.readWord(ramAddr, emu.memType.workRam)
-  local hi = emu.readWord(ramAddr+2, emu.memType.workRam)
+  local lo = readWord(ramAddr)
+  local hi = readWord(ramAddr+2)
   return hi << 16 | lo
+end
+
+local function getTime(addrEntry)
+  if type(addrEntry) == "function" then
+    return addrEntry()
+  else
+    return readTime(addrEntry)
+  end
 end
 
 local function getTimeStr(frames)
@@ -49,7 +67,7 @@ local function printRTA()
   local regionTotal=0
   for i,info in pairs(timerData) do
      local area = info[1]
-     local frames = readTime(info.addr)
+     local frames = getTime(info.addr)
      printTime(area, frames)
      if i % 2 == 1 then
        x = X_OFF

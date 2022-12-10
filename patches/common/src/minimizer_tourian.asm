@@ -7,9 +7,9 @@
 ;;; - skips MB3 fight and baby cutscene: MB dies at the end of MB2,
 ;;;   and you get hyper+refill for the escape
 ;;;
-;;; Compiles with asar
+;;; Compiles with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
-arch snes.cpu
+arch 65816
 lorom
 
 !full_refill = $f700    ; short ptr in bank 8F (see area_rando_doors.asm)
@@ -170,8 +170,16 @@ org $a9cfdb
 
 org $a9fc00
 hyper_start:
-	jsr reset_samus_palette
-	lda #$8000 : sta $0a4a	; set rainbow samus
+        ;; clear current charging beam to avoid vanilla bug related to flares
+        STZ $0CD0
+        STZ $0CD6
+        STZ $0CD8
+        STZ $0CDA
+        STZ $0CDC
+        STZ $0CDE
+        STZ $0CE0
+        ;; set rainbow samus
+	lda #$8000 : sta $0a4a
 	jsl enable_hyper
 	;; compute health increase per frame: health to refill/nb frames
 	lda !samus_max_health
@@ -211,4 +219,4 @@ reset_samus_palette:
 	stz $0b62
 	rts
 
-warnpc $a9fc6f
+warnpc $a9fc7f

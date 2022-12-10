@@ -44,6 +44,14 @@ class Randomizer(object):
             "minimizer":"Typical 'boss rush' settings with random start and nerfed charge",
             "minimizer_hardcore":"Have fun 'rushing' bosses with no equipment on a tiny map",
             "minimizer_maximizer":"No longer a boss rush",
+            "objectives_all_bosses":"Kill all bosses/minibosses",
+            "objectives_clear_areas":"Clear 5 random areas and end with fast Tourian",
+            "objectives_hard_heat":"All Norfair-related objectives, possibly without a suit",
+            "objectives_hard_water":"All Maridia-related objectives, possibly without a suit",
+            "objectives_long": "5 random long objectives and Vanilla Tourian",
+            "objectives_memes":"Do all the memes and rush to the ship",
+            "objectives_robots_notweaks":"Collect Bomb and Space Jump to activate the robots, then rush to the ship",
+            "objectives_short": "3 random short objectives and Disabled Tourian",
             "quite_random": "randomizes a few significant settings to have various seeds",
             "scavenger_hard":"Pretty hostile Scavenger mode",
             "scavenger_random":"Randomize everything within Scavenger mode",
@@ -55,19 +63,15 @@ class Randomizer(object):
             "way_of_chozo": "chozo split with boss randomization",
             "where_am_i": "Area mode with random start location and early morph",
             "where_is_morph": "Area mode with late Morph",
-            "Multi_Category_Randomizer_Week_1": "Multi-Category Randomizer Tournament week 1",
-            "Multi_Category_Randomizer_Week_2": "Multi-Category Randomizer Tournament week 2",
-            "Multi_Category_Randomizer_Week_3": "Multi-Category Randomizer Tournament week 3",
-            "Multi_Category_Randomizer_Week_4": "Multi-Category Randomizer Tournament week 4",
-            "Multi_Category_Randomizer_Week_5": "Multi-Category Randomizer Tournament week 5",
-            "Multi_Category_Randomizer_Week_6": "Multi-Category Randomizer Tournament week 6",
-            "Multi_Category_Randomizer_Week_7": "Multi-Category Randomizer Tournament week 7",
             "Season_Races": "rando league races (Majors/Minors split)",
-            "SGLive2022_Race_1": "SGLive 2022 Super Metroid randomizer tournament race 1",
-            "SGLive2022_Race_2": "SGLive 2022 Super Metroid randomizer tournament race 2",
-            "SGLive2022_Race_3": "SGLive 2022 Super Metroid randomizer tournament race 3",
-            "SMRAT2021": "Super Metroid Randomizer Accessible Tournament 2021",
-            "VARIA_Weekly": "Casual logic community races"
+            "Torneio_SGPT3_stage1": "SG Português Tournament 2022 group stage",
+            "Torneio_SGPT3_stage2": "SG Português Tournament 2022 playoff stage",
+            "SGLive2022_Game_1": "SGLive 2022 Randomizer Tournament race 1",
+            "SGLive2022_Game_2": "SGLive 2022 Randomizer Tournament race 2",
+            "SGLive2022_Game_3": "SGLive 2022 Randomizer Tournament race 3",
+            "SMRAT2021": "Randomizer Accessible Tournament 2021",
+            "VARIA_Weekly": "Casual logic community races",
+            "Boyz_League_SM_Rando": "Boyz League Tournament"
         }
 
         randoPresetsCategories = {
@@ -77,9 +81,10 @@ class Randomizer(object):
             "Area": ["way_of_chozo", "where_am_i", "where_is_morph"],
             "Doors": ["doors_long", "doors_short"],
             "Minimizer": ["minimizer", "minimizer_hardcore", "minimizer_maximizer"],
-            "Hard": ["hardway2hell", "highway2hell", "stupid_hard"],
+            "Objectives": ["objectives_all_bosses", "objectives_clear_areas", "objectives_memes", "objectives_short", "objectives_long", "objectives_robots_notweaks"],
+            "Hard": ["hardway2hell", "highway2hell", "stupid_hard", "objectives_hard_heat", "objectives_hard_water"],
             "Random": ["all_random", "quite_random", "surprise"],
-            "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "SGLive2022_Race_1", "SGLive2022_Race_2", "SGLive2022_Race_3", "Multi_Category_Randomizer_Week_1", "Multi_Category_Randomizer_Week_2", "Multi_Category_Randomizer_Week_3", "Multi_Category_Randomizer_Week_4", "Multi_Category_Randomizer_Week_5", "Multi_Category_Randomizer_Week_6", "Multi_Category_Randomizer_Week_7"]
+            "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2", "SGLive2022_Game_1", "SGLive2022_Game_2", "SGLive2022_Game_3", "Boyz_League_SM_Rando"]
         }
 
         startAPs = GraphUtils.getStartAccessPointNamesCategory()
@@ -189,7 +194,7 @@ class Randomizer(object):
 
         # check validity of all parameters
         switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-                   'areaRandomization', 'areaLayout', 'lightAreaRandomization',
+                   'areaLayout',
                    'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
                    'bossRandomization', 'minimizer',
                    'funCombat', 'funMovement', 'funSuits',
@@ -199,9 +204,10 @@ class Randomizer(object):
                    'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized",
                    'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
-        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
-                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'tourian']
+        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
+                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
+                  'areaRandomization']
+        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize
@@ -263,7 +269,12 @@ class Randomizer(object):
         for var, value in randoPresetDict.items():
             if 'MultiSelect' in var:
                 randoPresetDict[var] = value.split(',')
-        randoPresetDict['objective'] = self.vars.objective.split(',')
+
+        if self.vars.objectiveRandom == 'true':
+            randoPresetDict['objective'] = self.vars.nbObjective # 0-5 or "random"
+            randoPresetDict['objectiveMultiSelect'] = self.vars.objective.split(',')
+        else:
+            randoPresetDict['objective'] = self.vars.objective.split(',')
 
         with open(jsonRandoPreset, 'w') as randoPresetFile:
             json.dump(randoPresetDict, randoPresetFile)
@@ -300,6 +311,9 @@ class Randomizer(object):
             if self.storeLocalIps(guid, locsItems["fileName"], locsItems["ips"]):
                 db.addRandoUploadResult(id, guid, locsItems["fileName"])
                 locsItems['seedKey'] = guid
+                if self.vars.get('wantsCustomize') == 'true':
+                    # don't send the ips if they requested a redirect to the customize page
+                    locsItems.pop('ips')
             db.close()
 
             os.close(fd1)
@@ -364,7 +378,7 @@ class Randomizer(object):
     def sessionWebService(self):
         # web service to update the session
         switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-                   'areaRandomization', 'areaLayout', 'lightAreaRandomization',
+                   'areaLayout',
                    'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
                    'bossRandomization', 'minimizer',
                    'funCombat', 'funMovement', 'funSuits',
@@ -374,8 +388,9 @@ class Randomizer(object):
                    'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized",
                    'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
-        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
-                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
+        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
+                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
+                  'areaRandomization']
         others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others)
 
@@ -398,7 +413,6 @@ class Randomizer(object):
         self.session.randomizer['minorQty'] = self.vars.minorQty
         self.session.randomizer['areaRandomization'] = self.vars.areaRandomization
         self.session.randomizer['areaLayout'] = self.vars.areaLayout
-        self.session.randomizer['lightAreaRandomization'] = self.vars.lightAreaRandomization
         self.session.randomizer['doorsColorsRando'] = self.vars.doorsColorsRando
         self.session.randomizer['allowGreyDoors'] = self.vars.allowGreyDoors
         self.session.randomizer['escapeRando'] = self.vars.escapeRando
@@ -427,13 +441,15 @@ class Randomizer(object):
         self.session.randomizer['scavNumLocs'] = self.vars.scavNumLocs
         self.session.randomizer['scavRandomized'] = self.vars.scavRandomized
         self.session.randomizer['tourian'] = self.vars.tourian
-        # objective is a special multi select
-        self.session.randomizer['objective'] = self.vars.objective.split(',')
-        if self.vars.objectiveMultiSelect is not None:
-            self.session.randomizer['objectiveMultiSelect'] = self.vars.objectiveMultiSelect.split(',')
 
-        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
-                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour']
+        # objective is a special multi select
+        self.session.randomizer['objectiveRandom'] = self.vars.objectiveRandom
+        if self.vars.objectiveRandom == 'true':
+            self.session.randomizer['objectiveMultiSelect'] = self.vars.objective.split(',')
+            self.session.randomizer['nbObjective'] = self.vars.nbObjective
+        else:
+            self.session.randomizer['objective'] = self.vars.objective.split(',')
+
         for multi in multis:
             self.session.randomizer[multi] = self.vars[multi]
             if self.vars[multi] == 'random':

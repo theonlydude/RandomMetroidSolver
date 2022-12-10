@@ -1,4 +1,4 @@
-import sys, json, os
+import sys, json, os, tempfile
 
 from solver.commonSolver import CommonSolver
 from logic.smbool import SMBool
@@ -21,14 +21,16 @@ from utils.objectives import Objectives
 import utils.log
 
 class InteractiveSolver(CommonSolver):
-    def __init__(self, output, logic):
+    def __init__(self, shm, logic):
         self.interactive = True
         self.errorMsg = ""
         self.checkDuplicateMajor = False
         self.vcr = None
         self.log = utils.log.get('Solver')
 
-        self.outputFileName = output
+        # only available since python 3.8, so import it here to keep >= 3.6 compatibility for CLI
+        from utils.shm import SHM
+        self.shm = SHM(shm)
         self.firstLogFile = None
 
         Logic.factory(logic)
@@ -67,7 +69,8 @@ class InteractiveSolver(CommonSolver):
         state = SolverState(self.debug)
         state.fromSolver(self)
 
-        state.toJson(self.outputFileName)
+        self.shm.writeMsgJson(state.get())
+        self.shm.finish(False)
 
     def initialize(self, mode, rom, presetFileName, magic, fill, startLocation):
         # load rom and preset, return first state
@@ -109,17 +112,23 @@ class InteractiveSolver(CommonSolver):
 
                 self.loadPlandoLocs()
 
+        # if tourian is disabled remove mother brain location
+        if self.tourian == 'Disabled':
+            mbLoc = self.getLoc('Mother Brain')
+            self.locations.remove(mbLoc)
+
         # compute new available locations
         self.computeLocationsDifficulty(self.majorLocations)
+        self.checkGoals()
 
         self.dumpState()
 
-    def iterate(self, stateJson, scope, action, params):
+    def iterate(self, scope, action, params):
         self.debug = params["debug"]
         self.smbm = SMBoolManager()
 
         state = SolverState()
-        state.fromJson(stateJson)
+        state.set(self.shm.readMsgJson())
         state.toSolver(self)
         self.objectives.setSolverMode(self)
 
@@ -256,8 +265,21 @@ class InteractiveSolver(CommonSolver):
             self.clearLocs(self.majorLocations)
             self.computeLocationsDifficulty(self.majorLocations)
 
+        # autotracker handles objectives
+        if not (scope == 'dump' and action == 'import'):
+            self.checkGoals()
+
         # return them
         self.dumpState()
+
+    def checkGoals(self):
+        # check if objectives can be completed
+        self.newlyCompletedObjectives = []
+        goals = self.objectives.checkGoals(self.smbm, self.lastAP)
+        for goalName, canClear in goals.items():
+            if canClear:
+                self.objectives.setGoalCompleted(goalName, True)
+                self.newlyCompletedObjectives.append("Completed objective: {}".format(goalName))
 
     def getLocNameFromAddress(self, address):
         return self.locsAddressName[address]
@@ -286,16 +308,11 @@ class InteractiveSolver(CommonSolver):
         self.comeBack = ComeBack(self)
 
         # backup
-        mbLoc = self.getLoc("Mother Brain")
         locationsBck = self.locations[:]
 
         self.lastAP = self.startLocation
         self.lastArea = self.startArea
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
-
-        # put back mother brain location
-        if mbLoc not in self.majorLocations and mbLoc not in self.visitedLocations:
-            self.majorLocations.append(mbLoc)
 
         if self.itemsOk == False:
             # add remaining locs as sequence break
@@ -343,17 +360,22 @@ class InteractiveSolver(CommonSolver):
             "transitions": self.fillGraph(),
             "patches": RomPatches.ActivePatches,
             "doors": DoorsManager.serialize(),
-            "forbiddenItems": parameters["forbiddenItems"]
+            "forbiddenItems": parameters["forbiddenItems"],
+            "objectives": self.objectives.getGoalsList(),
+            "tourian": self.tourian
         }
 
         plandoCurrentJson = json.dumps(plandoCurrent)
+
+        (fd, jsonOutFileName) = tempfile.mkstemp()
+        os.close(fd)
 
         from utils.utils import getPythonExec
         params = [
             getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
             '--runtime', '10',
             '--param', self.presetFileName,
-            '--output', self.outputFileName,
+            '--output', jsonOutFileName,
             '--plandoRando', plandoCurrentJson,
             '--progressionSpeed', 'speedrun',
             '--minorQty', parameters["minorQty"],
@@ -365,8 +387,9 @@ class InteractiveSolver(CommonSolver):
         import subprocess
         subprocess.call(params)
 
-        with open(self.outputFileName, 'r') as jsonFile:
+        with open(jsonOutFileName, 'r') as jsonFile:
             data = json.load(jsonFile)
+        os.remove(jsonOutFileName)
 
         self.errorMsg = data["errorMsg"]
 
@@ -377,6 +400,11 @@ class InteractiveSolver(CommonSolver):
 
             # create a copy because we need self.locations to be full, else the state will be empty
             self.majorLocations = self.locations[:]
+
+            # if tourian is disabled remove mother brain from itemsLocs if the rando added it
+            if self.tourian == 'Disabled':
+                if itemsLocs and itemsLocs[-1]["Location"]["Name"] == "Mother Brain":
+                    itemsLocs.pop()
 
             for itemLoc in itemsLocs:
                 locName = itemLoc["Location"]["Name"]
@@ -409,57 +437,12 @@ class InteractiveSolver(CommonSolver):
         # patch the ROM
         if lock == True:
             import random
-            magic = random.randint(1, 0xffff)
+            magic = random.randint(1, sys.maxsize)
         else:
             magic = None
-        romPatcher = RomPatcher(magic=magic)
-        patches = ['credits_varia.ips', 'tracking.ips', "Escape_Animals_Disable", "Escape_Trigger_Nothing_Objective_Anywhere"]
-        doorsColors = DoorsManager.isRandom()
-        if doorsColors:
-            patches += RomPatcher.IPSPatches['DoorsColors']
-            patches.append("Enable_Backup_Saves")
-        if self.areaRando:
-            patches.append("Enable_Backup_Saves")
-        if magic != None:
-            patches.insert(0, 'race_mode.ips')
-            patches.append('race_mode_post.ips')
-        romPatcher.addIPSPatches(patches)
 
-        plms = []
-        if self.areaRando == True or self.bossRando == True or self.escapeRando == True:
-            doors = GraphUtils.getDoorConnections(AccessGraph(Logic.accessPoints, self.fillGraph()), self.areaRando, self.bossRando, self.escapeRando, False)
-            romPatcher.writeDoorConnections(doors)
-            if magic == None:
-                doorsPtrs = GraphUtils.getAps2DoorsPtrs()
-                romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
-                                                  len(vanillaBossesTransitions) + len(vanillaTransitions))
-            if self.escapeRando == True and escapeTimer != None:
-                # convert from '03:00' to number of seconds
-                escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
-                romPatcher.applyEscapeAttributes({'Timer': escapeTimer, 'Animals': None, 'patches': []}, plms)
-
-        # write plm table & random doors
-        romPatcher.writePlmTable(plms, self.areaRando, self.bossRando, doorsColors, self.startLocation)
-
-        romPatcher.writeItemsLocs(itemLocs)
-        romPatcher.writeItemsNumber()
-        romPatcher.writeSpoiler(itemLocs)
-        romPatcher.writeItemsMasks(itemLocs)
         # plando is considered Full
         majorsSplit = self.masterMajorsSplit if self.masterMajorsSplit in ["FullWithHUD", "Scavenger"] else "Full"
-
-        progItemLocs = []
-        if majorsSplit == "Scavenger":
-            def getLoc(locName):
-                for loc in self.locations:
-                    if loc.Name == locName:
-                        return loc
-            for locName in self.plandoScavengerOrder:
-                progItemLocs.append(ItemLocation(Location=getLoc(locName)))
-                if locName not in locsItems:
-                    errorMsg = "Nothing at a Scavenger location, seed is unfinishable"
-        romPatcher.writeSplitLocs(majorsSplit, itemLocs, progItemLocs)
-        romPatcher.writeMajorsSplit(majorsSplit)
         class FakeRandoSettings:
             def __init__(self):
                 self.qty = {'energy': 'plando'}
@@ -468,14 +451,79 @@ class InteractiveSolver(CommonSolver):
                 self.restrictions = {'Suits': False, 'Morph': 'plando'}
                 self.superFun = {}
         randoSettings = FakeRandoSettings()
-        romPatcher.writeRandoSettings(randoSettings, itemLocs)
-        if magic != None:
-            romPatcher.writeMagic()
-        else:
-            romPatcher.writePlandoAddresses(self.visitedLocations)
 
-        romPatcher.commitIPS()
-        romPatcher.end()
+        escapeAttr = None
+        if self.escapeRando == True and escapeTimer != None:
+            # convert from '03:00' to number of seconds
+            escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
+            escapeAttr = {'Timer': escapeTimer, 'Animals': None, 'patches': []}
+
+        progItemLocs = []
+        if majorsSplit == "Scavenger":
+            def getLoc(locName):
+                for loc in self.locations:
+                    if loc.Name == locName:
+                        return loc
+            for locName in self.plandoScavengerOrder:
+                loc = getLoc(locName)
+                if locName in locsItems:
+                    item = ItemManager.getItem(loc.itemName)
+                else:
+                    item = ItemManager.getItem("Nothing")
+                    errorMsg = "Nothing at a Scavenger location, seed is unfinishable"
+                progItemLocs.append(ItemLocation(Location=loc, Item=item))
+
+        if RomPatches.ProgressiveSuits in RomPatches.ActivePatches:
+            suitsMode = "Progressive"
+        elif RomPatches.NoGravityEnvProtection in RomPatches.ActivePatches:
+            suitsMode = "Balanced"
+        else:
+            suitsMode = "Vanilla"
+
+        patches = ["Escape_Animals_Disable"]
+
+        doors = GraphUtils.getDoorConnections(AccessGraph(Logic.accessPoints, self.fillGraph()), self.areaRando,
+                                              self.bossRando, self.escapeRando, False)
+
+        from utils.version import displayedVersion
+
+        patcherSettings = {
+            "isPlando": True,
+            "majorsSplit": majorsSplit,
+            "startLocation": self.startLocation,
+            "optionalPatches": patches,
+            "layout": RomPatches.MoatShotBlock in RomPatches.ActivePatches,
+            "suitsMode": suitsMode,
+            "area": self.areaRando,
+            "boss": self.bossRando,
+            "areaLayout": RomPatches.AreaRandoGatesOther in RomPatches.ActivePatches,
+            "variaTweaks": False,
+            "nerfedCharge": False,
+            "nerfedRainbowBeam": False,
+            "escapeAttr": escapeAttr,
+            "escapeRandoRemoveEnemies": False,
+            "minimizerN": None,
+            "tourian": self.tourian,
+            "doorsColorsRando": DoorsManager.isRandom(),
+            "vanillaObjectives": self.objectives.isVanilla(),
+            "ctrlDict": None,
+            "moonWalk": False,
+            "seed": None,
+            "randoSettings": randoSettings,
+            "doors": doors,
+            "displayedVersion": displayedVersion,
+            "itemLocs": itemLocs,
+            "progItemLocs": progItemLocs,
+            "plando": {
+                "graphTrans": self.curGraphTransitions,
+                "maxTransitions": len(vanillaBossesTransitions) + len(vanillaTransitions),
+                "visitedLocations": self.visitedLocations,
+                "additionalETanks": self.additionalETanks
+            }
+        }
+
+        romPatcher = RomPatcher(settings=patcherSettings, magic=magic)
+        romPatcher.patchRom()
 
         data = romPatcher.romFile.data
         preset = os.path.splitext(os.path.basename(self.presetFileName))[0]
@@ -491,8 +539,9 @@ class InteractiveSolver(CommonSolver):
         data["fileName"] = fileName
         # error msg in json to be displayed by the web site
         data["errorMsg"] = errorMsg
-        with open(self.outputFileName, 'w') as jsonFile:
-            json.dump(data, jsonFile)
+
+        self.shm.writeMsgJson(data)
+        self.shm.finish(False)
 
     def locNameInternal2Web(self, locName):
         return removeChars(locName, " ,()-")
@@ -550,7 +599,8 @@ class InteractiveSolver(CommonSolver):
         if hide == True:
             loc.Visibility = 'Hidden'
 
-        self.collectMajor(loc, itemName)
+        if loc in self.majorLocations:
+            self.collectMajor(loc, itemName)
 
     def replaceItemAt(self, locName, itemName, hide):
         # replace itemName at locName
@@ -613,6 +663,7 @@ class InteractiveSolver(CommonSolver):
             for loc in self.majorLocations:
                 loc.difficulty = None
         self.smbm.resetItems()
+        self.objectives.resetGoals()
 
     def updatePlandoScavengerOrder(self, plandoScavengerOrder):
         self.plandoScavengerOrder = plandoScavengerOrder
@@ -724,6 +775,8 @@ class InteractiveSolver(CommonSolver):
         "Botwoon": {"byteIndex": 0x04, "bitMask": 0x02},
         "Golden Torizo": {"byteIndex": 0x02, "bitMask": 0x04}
     }
+
+    eventsBitMasks = {}
 
     areaAccessPoints = {
         "Lower Mushrooms Left": {"byteIndex": 36, "bitMask": 1, "room": 0x9969, "area": "Crateria"},
@@ -956,9 +1009,11 @@ class InteractiveSolver(CommonSolver):
         "Tourian": 0x500
     }
 
-    def importDump(self, dumpFileName):
-        with open(dumpFileName, 'r') as jsonFile:
-            dumpData = json.load(jsonFile)
+    def importDump(self, shmName):
+        from utils.shm import SHM
+        shm = SHM(shmName)
+        dumpData = shm.readMsgJson()
+        shm.finish(False)
 
         # first update current access point
         self.lastAP = dumpData["newAP"]
@@ -969,7 +1024,8 @@ class InteractiveSolver(CommonSolver):
             "curMap": '3',
             "samus": '4',
             "items": '5',
-            "boss": '6'
+            "boss": '6',
+            "events": '7'
         }
 
         currentState = dumpData["currentState"]
@@ -1001,7 +1057,8 @@ class InteractiveSolver(CommonSolver):
                     bitMask = bossData["bitMask"]
                     loc = self.getLoc(boss)
                     if currentState[offset + byteIndex] & bitMask != 0:
-                        if loc not in self.visitedLocations:
+                        # in tourian disabled mother brain is not available, but it gets auto killed during escape
+                        if loc not in self.visitedLocations and loc in self.majorLocations:
                             self.pickItemAt(self.locNameInternal2Web(loc.Name))
                             self.locDelta += 1
                     else:
@@ -1094,6 +1151,28 @@ class InteractiveSolver(CommonSolver):
                         doorData = self.doorsScreen[doorName]
                         if not self.isElemAvailable(currentState, offset, doorData):
                             DoorsManager.switchVisibility(doorName)
+            elif dataType == dataEnum["events"]:
+                self.newlyCompletedObjectives = []
+                goalsList = self.objectives.getGoalsList()
+                goalsCompleted = self.objectives.getState()
+                goalsCompleted = list(goalsCompleted.values())
+                for i, (event, eventData) in enumerate(self.eventsBitMasks.items()):
+                    assert str(i) == event, "{}th event has code {} instead of {}".format(i, event, i)
+                    if i >= len(goalsList):
+                        continue
+                    byteIndex = eventData["byteIndex"]
+                    bitMask = eventData["bitMask"]
+                    goalName = goalsList[i]
+                    goalCompleted = goalsCompleted[i]
+                    if currentState[offset + byteIndex] & bitMask != 0:
+                        # set goal completed
+                        if not goalCompleted:
+                            self.objectives.setGoalCompleted(goalName, True)
+                            self.newlyCompletedObjectives.append("Completed objective: {}".format(goalName))
+                    else:
+                        # set goal uncompleted
+                        if goalCompleted:
+                            self.objectives.setGoalCompleted(goalName, False)
 
     def isElemAvailable(self, currentState, offset, apData):
         byteIndex = apData["byteIndex"]

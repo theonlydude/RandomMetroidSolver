@@ -1,8 +1,8 @@
 ;;; permanent hell run
-;;; compile with asar
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 lorom
-arch snes.cpu
+arch 65816
 
 org $8fe893
 	jsr add_heat_fx		; setup asm call

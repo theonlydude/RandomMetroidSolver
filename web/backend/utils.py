@@ -23,7 +23,7 @@ def loadPresetsList(cache):
 
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master']
-    tourPresets = ['Season_Races', 'SMRAT2021']
+    tourPresets = ['Season_Races', 'SMRAT2021', 'Torneio_SGPT3']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
 
     presets['stdPresets'] = stdPresets
@@ -36,11 +36,8 @@ def loadRandoPresetsList(cache, filter=False):
     presets = cache.ram('randoPresets', lambda:dict(), time_expire=None)
     if not presets:
         tourPresets = ['Season_Races', 'SMRAT2021', 'VARIA_Weekly',
-                       'SGLive2022_Race_1', 'SGLive2022_Race_2', 'SGLive2022_Race_3',
-                       'Multi_Category_Randomizer_Week_1', 'Multi_Category_Randomizer_Week_2',
-                       'Multi_Category_Randomizer_Week_3', 'Multi_Category_Randomizer_Week_4',
-                       'Multi_Category_Randomizer_Week_5', 'Multi_Category_Randomizer_Week_6',
-                       'Multi_Category_Randomizer_Week_7']
+                       'Torneio_SGPT3_stage1', 'Torneio_SGPT3_stage2',
+                       'SGLive2022_Game_1', 'SGLive2022_Game_2', 'SGLive2022_Game_3', 'Boyz_League_SM_Rando']
         files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
         randoPresets = [os.path.splitext(file)[0] for file in files]
         randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
@@ -104,11 +101,19 @@ def getAddressesToRead(plando=False):
         # plando transitions (4 bytes per transitions, ap#/2 transitions)
         plandoTransitions = Addresses.getOne('plandoTransitions')
         addresses["ranges"] += [plandoTransitions, plandoTransitions+((len(addresses["transitions"])/2) * 4)]
+        # starting etanks added in the customizer
+        addresses["misc"] += Addresses.getWeb('additionalETanks')
+    # events array for autotracker
+    addresses["ranges"] += Addresses.getRange('objectiveEventsArray')
 
     return addresses
 
 # if we have an internal parameter value different from its display value
-displayNames = {"FullWithHUD": "Full Countdown"}
+displayNames = {
+    "FullWithHUD": "Full Countdown",
+    "harder": "very hard",
+    "infinity": "no difficulty cap"
+}
 
 def updateParameterDisplay(value):
     for internal, display in displayNames.items():
@@ -210,19 +215,38 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
             raiseHttp(400, "Wrong value for seed", isJson)
 
     if 'objective' in others:
+        value = request.vars.objectiveRandom
+        if not request.vars.objectiveRandom in ['true', 'false']:
+            raiseHttp(400, "objectiveRandom must be either true or false", isJson)
+
         objective = request.vars.objective.split(',')
-        authorizedObjectives = defaultMultiValues['objective'] + ['random', 'nothing']
+        authorizedObjectives = defaultMultiValues['objective'] + ['nothing']
         for value in objective:
             if value not in authorizedObjectives:
                 raiseHttp(400, "Wrong value for objective", isJson)
-        if objective == ['random']:
-            for value in request.vars.objectiveMultiSelect.split(','):
-                if value not in authorizedObjectives:
-                    raiseHttp(400, "Wrong value for objectiveMultiSelect", isJson)
 
-    if 'tourian' in others:
-        if request.vars['tourian'] not in ['Vanilla', 'Fast', 'Disabled']:
-            raiseHttp(400, "Wrong value fro tourian, authorized values: Vanilla/Fast/Disabled", isJson)
+
+        if request.vars.objectiveRandom == 'true':
+            nbObjective = request.vars.nbObjective
+            if nbObjective.isdigit():
+                if not int(nbObjective) in range(6):
+                    raiseHttp(400, "Number of objectives must be 0-5", isJson)
+            elif nbObjective != "random":
+                raiseHttp(400, "Number of objectives must be 0-5 or \"random\"", isJson)
+        else:
+            if len(objective) > 5:
+                raiseHttp(400, "You cannot choose more than 5 objectives", isJson)
+
+
+    if 'minDegree' in others:
+        minDegree = getInt(request, 'minDegree', isJson)
+        if minDegree < -180 or minDegree > 180:
+            raiseHttp(400, "Wrong value for minDegree", isJson)
+
+    if 'maxDegree' in others:
+        maxDegree = getInt(request, 'maxDegree', isJson)
+        if maxDegree < -180 or maxDegree > 180:
+            raiseHttp(400, "Wrong value for maxDegree", isJson)
 
     if 'hellrun_rate' in others and request.vars.hellrun_rate != 'off':
         hellrun_rate = getInt(request, 'hellrun_rate', isJson)
@@ -233,6 +257,10 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         etanks = getInt(request, 'etanks', isJson)
         if etanks < 0 or etanks > 14:
             raiseHttp(400, "Wrong value for etanks", isJson)
+
+    if 'maxDifficulty' in others:
+        if request.vars.maxDifficulty not in ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'infinity', 'random']:
+            raiseHttp(400, "Wrong value for max difficulty", isJson)
 
     preset = request.vars.preset
     if preset != None:

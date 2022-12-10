@@ -67,7 +67,10 @@ class RandoSettings(object):
 
 # Holds settings and utiliy functions related to graph layout
 class GraphSettings(object):
-    def __init__(self, startAP, areaRando, lightAreaRando, bossRando, escapeRando, minimizerN, dotFile, doorsColorsRando, allowGreyDoors, plandoRandoTransitions):
+    def __init__(self, startAP, areaRando, lightAreaRando,
+                 bossRando, escapeRando, minimizerN, dotFile,
+                 doorsColorsRando, allowGreyDoors, tourian,
+                 plandoRandoTransitions):
         self.startAP = startAP
         self.areaRando = areaRando
         self.lightAreaRando = lightAreaRando
@@ -77,6 +80,7 @@ class GraphSettings(object):
         self.dotFile = dotFile
         self.doorsColorsRando = doorsColorsRando
         self.allowGreyDoors = allowGreyDoors
+        self.tourian = tourian
         self.plandoRandoTransitions = plandoRandoTransitions
 
     def isMinimizer(self):
@@ -123,9 +127,15 @@ class ProgSpeedParameters(object):
             return 0.33
         return 0
 
+    # chozo/slowest can make seed generation fail often, not much
+    # of a gameplay difference between slow/slowest in Chozo anyway,
+    # so we merge slow and slowest for some params
+    def isSlow(self, progSpeed):
+        return progSpeed == "slow" or (progSpeed == "slowest" and self.restrictions.split == "Chozo")
+
     def getItemLimit(self, progSpeed):
         itemLimit = self.nLocs
-        if progSpeed == 'slow':
+        if self.isSlow(progSpeed):
             itemLimit = int(self.nLocs*0.209) # 21 for 105
         elif progSpeed == 'medium':
             itemLimit = int(self.nLocs*0.095) # 9 for 105
@@ -143,7 +153,7 @@ class ProgSpeedParameters(object):
 
     def getLocLimit(self, progSpeed):
         locLimit = -1
-        if progSpeed == 'slow':
+        if self.isSlow(progSpeed):
             locLimit = 1
         elif progSpeed == 'medium':
             locLimit = 2
@@ -158,12 +168,12 @@ class ProgSpeedParameters(object):
         if self.restrictions.isLateDoors():
             progTypes += ['Wave','Spazer','Plasma']
         progTypes.append('Charge')
-        if progSpeed == 'slowest':
+        if progSpeed == 'slowest' and self.restrictions.split != "Chozo":
             return progTypes
         else:
             progTypes.remove('HiJump')
             progTypes.remove('Charge')
-        if progSpeed == 'slow':
+        if self.isSlow(progSpeed):
             return progTypes
         else:
             progTypes.remove('Bomb')

@@ -1,4 +1,20 @@
 {{include 'solver_web/varia.css'}}
+.lh-fix {
+    line-height: 0;
+}
+.objectivesPopup {
+    position: absolute;
+    top: 0%;
+    right: 0%;
+    width: 100%;
+    cursor: pointer;
+    z-index: 1001;
+    background-color: #F8B000;
+    color: #000000;
+    padding: 0.5em;
+    text-align: center;
+    opacity: 0.9;
+}
 .doorPopup {
     background-color: #ffffff;
     position: absolute;
@@ -170,6 +186,7 @@ img {
     font-weight: bold;
 }
 .repeatArea {
+    line-height: 0;
     cursor: pointer;
     position: absolute;
     z-index: 2;
@@ -179,6 +196,7 @@ img {
     left: 13.25%;
 }
 .binArea {
+    line-height: 0;
     cursor: pointer;
     position: absolute;
     z-index: 2;
@@ -2322,7 +2340,7 @@ img {
     position: absolute;
     z-index: 1;
     left: 2.35%;
-    top: 28.3%;
+    top: 28.4%;
     width: 2.9375%;
     height: 1.1%;
 }
@@ -2340,7 +2358,7 @@ img {
     position: absolute;
     z-index: 1;
     left: 2.35%;
-    top: 30.5%;
+    top: 30.6%;
     width: 2.9375%;
     height: 1.1%;
 }
@@ -2369,7 +2387,7 @@ img {
     /* left: 12.4%;
     top: 15.4%; */
     left: 12.35%;
-    top: 20%;
+    top: 20.1%;
     width: 5.2875%;
     height: 1.1%;
 }
@@ -2390,7 +2408,7 @@ img {
     position: absolute;
     z-index: 1;
     left: 12.35%;
-    top: 24.7%;
+    top: 24.8%;
     width: 5.2875%;
     height: 1.1%;
 }
@@ -2417,7 +2435,7 @@ img {
     position: absolute;
     z-index: 1;
     left: 12.35%;
-    top: 28.24%;
+    top: 28.1%;
     width: 5.2875%;
     height: 1.1%;
 }
@@ -2468,6 +2486,7 @@ img {
     height: 2.2%;
 }
 .Missile_pause {
+    line-height: 0;
     position: absolute;
     display: none;
     z-index: 1;
@@ -2494,6 +2513,7 @@ img {
     height: 2.2%;
 }
 .Super_pause {
+    line-height: 0;
     position: absolute;
     display: none;
     z-index: 1;
@@ -2520,6 +2540,7 @@ img {
     height: 2.2%;
 }
 .PowerBomb_pause {
+    line-height: 0;
     position: absolute;
     display: none;
     z-index: 1;
@@ -2564,11 +2585,20 @@ img {
     height: 1.1%;
 }
 .Energy_pause {
+    line-height: 0;
     position: absolute;
     z-index: 1;
     left: 0.6%;
-    top: 12.4%;
+    top: 13.075%;
     width: 2.35%;
+}
+.energy_row_1 {
+    line-height: 0;
+    top: 11.85%;
+}
+.energy_row_2 {
+    line-height: 0;
+    top: 10.525%;
 }
 .Energy_90_pause {
     position: absolute;
@@ -2589,7 +2619,6 @@ img {
     display: none;
     z-index: 1;
     left: 0.6%;
-    top: 11%;
     width: 0.44%;
 }
 .ETank_2_pause {
@@ -2597,7 +2626,6 @@ img {
     display: none;
     z-index: 1;
     left: 1.2%;
-    top: 11%;
     width: 0.44%;
 }
 .ETank_3_pause {
@@ -2605,7 +2633,6 @@ img {
     display: none;
     z-index: 1;
     left: 1.8%;
-    top: 11%;
     width: 0.44%;
 }
 .ETank_4_pause {
@@ -2613,7 +2640,6 @@ img {
     display: none;
     z-index: 1;
     left: 2.4%;
-    top: 11%;
     width: 0.44%;
 }
 .ETank_5_pause {
@@ -2621,7 +2647,6 @@ img {
     display: none;
     z-index: 1;
     left: 3%;
-    top: 11%;
     width: 0.44%;
 }
 .ETank_6_pause {
@@ -2629,7 +2654,6 @@ img {
     display: none;
     z-index: 1;
     left: 3.6%;
-    top: 11%;
     width: 0.44%;
 }
 .ETank_7_pause {
@@ -2637,7 +2661,6 @@ img {
     display: none;
     z-index: 1;
     left: 4.2%;
-    top: 11%;
     width: 0.44%;
 }
 .ETank_8_pause {
@@ -2645,7 +2668,6 @@ img {
     display: none;
     z-index: 1;
     left: 0.6%;
-    top: 9.7%;
     width: 0.44%;
 }
 .ETank_9_pause {
@@ -2653,7 +2675,6 @@ img {
     display: none;
     z-index: 1;
     left: 1.2%;
-    top: 9.7%;
     width: 0.44%;
 }
 .ETank_10_pause {
@@ -2661,7 +2682,6 @@ img {
     display: none;
     z-index: 1;
     left: 1.8%;
-    top: 9.7%;
     width: 0.44%;
 }
 .ETank_11_pause {
@@ -2669,7 +2689,6 @@ img {
     display: none;
     z-index: 1;
     left: 2.4%;
-    top: 9.7%;
     width: 0.44%;
 }
 .ETank_12_pause {
@@ -2677,7 +2696,6 @@ img {
     display: none;
     z-index: 1;
     left: 3%;
-    top: 9.7%;
     width: 0.44%;
 }
 .ETank_13_pause {
@@ -2685,7 +2703,6 @@ img {
     display: none;
     z-index: 1;
     left: 3.6%;
-    top: 9.7%;
     width: 0.44%;
 }
 .ETank_14_pause {
@@ -2693,15 +2710,17 @@ img {
     display: none;
     z-index: 1;
     left: 4.2%;
-    top: 9.7%;
     width: 0.44%;
+}
+.reserve_tank {
+    line-height: 0;
+    top: 23.9%;
 }
 .Reserve_1_pause {
     position: absolute;
     display: none;
     z-index: 1;
     left: 1.75%;
-    top: 23.1%;
     width: 0.66%;
 }
 .Reserve_2_pause {
@@ -2709,7 +2728,6 @@ img {
     display: none;
     z-index: 1;
     left: 2.35%;
-    top: 23.1%;
     width: 0.66%;
 }
 .Reserve_3_pause {
@@ -2717,7 +2735,6 @@ img {
     display: none;
     z-index: 1;
     left: 2.9%;
-    top: 23.1%;
     width: 0.66%;
 }
 .Reserve_4_pause {
@@ -2725,15 +2742,17 @@ img {
     display: none;
     z-index: 1;
     left: 3.5%;
-    top: 23.1%;
     width: 0.66%;
+}
+.ammo_text {
+    line-height: 0;
+    top: 13.1%;
 }
 .Missile_900_0_pause {
     position: absolute;
     display: none;
     z-index: 1;
     left: 6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_900_1_pause {
@@ -2741,7 +2760,6 @@ img {
     display: none;
     z-index: 1;
     left: 6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_900_2_pause {
@@ -2749,7 +2767,6 @@ img {
     display: none;
     z-index: 1;
     left: 6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_900_3_pause {
@@ -2757,7 +2774,6 @@ img {
     display: none;
     z-index: 1;
     left: 6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_900_4_pause {
@@ -2765,7 +2781,6 @@ img {
     display: none;
     z-index: 1;
     left: 6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_900_5_pause {
@@ -2773,7 +2788,6 @@ img {
     display: none;
     z-index: 1;
     left: 6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_900_6_pause {
@@ -2781,7 +2795,6 @@ img {
     display: none;
     z-index: 1;
     left: 6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_900_7_pause {
@@ -2789,7 +2802,6 @@ img {
     display: none;
     z-index: 1;
     left: 6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_900_8_pause {
@@ -2797,7 +2809,6 @@ img {
     display: none;
     z-index: 1;
     left: 6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_900_9_pause {
@@ -2805,7 +2816,6 @@ img {
     display: none;
     z-index: 1;
     left: 6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_90_0_pause {
@@ -2813,7 +2823,6 @@ img {
     display: none;
     z-index: 1;
     left: 6.6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_90_1_pause {
@@ -2821,7 +2830,6 @@ img {
     display: none;
     z-index: 1;
     left: 6.6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_90_2_pause {
@@ -2829,7 +2837,6 @@ img {
     display: none;
     z-index: 1;
     left: 6.6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_90_3_pause {
@@ -2837,7 +2844,6 @@ img {
     display: none;
     z-index: 1;
     left: 6.6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_90_4_pause {
@@ -2845,7 +2851,6 @@ img {
     display: none;
     z-index: 1;
     left: 6.6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_90_5_pause {
@@ -2853,7 +2858,6 @@ img {
     display: none;
     z-index: 1;
     left: 6.6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_90_6_pause {
@@ -2861,7 +2865,6 @@ img {
     display: none;
     z-index: 1;
     left: 6.6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_90_7_pause {
@@ -2869,7 +2872,6 @@ img {
     display: none;
     z-index: 1;
     left: 6.6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_90_8_pause {
@@ -2877,7 +2879,6 @@ img {
     z-index: 1;
     display: none;
     left: 6.6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_90_9_pause {
@@ -2885,7 +2886,6 @@ img {
     z-index: 1;
     display: none;
     left: 6.6%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_9_0_pause {
@@ -2893,7 +2893,6 @@ img {
     z-index: 1;
     display: none;
     left: 7.2%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_9_1_pause {
@@ -2901,7 +2900,6 @@ img {
     display: none;
     z-index: 1;
     left: 7.2%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_9_2_pause {
@@ -2909,7 +2907,6 @@ img {
     display: none;
     z-index: 1;
     left: 7.2%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_9_3_pause {
@@ -2917,7 +2914,6 @@ img {
     display: none;
     z-index: 1;
     left: 7.2%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_9_4_pause {
@@ -2925,7 +2921,6 @@ img {
     display: none;
     z-index: 1;
     left: 7.2%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_9_5_pause {
@@ -2933,7 +2928,6 @@ img {
     display: none;
     z-index: 1;
     left: 7.2%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_9_6_pause {
@@ -2941,7 +2935,6 @@ img {
     display: none;
     z-index: 1;
     left: 7.2%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_9_7_pause {
@@ -2949,7 +2942,6 @@ img {
     display: none;
     z-index: 1;
     left: 7.2%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_9_8_pause {
@@ -2957,7 +2949,6 @@ img {
     display: none;
     z-index: 1;
     left: 7.2%;
-    top: 12.5%;
     width: 0.5875%;
 }
 .Missile_9_9_pause {
@@ -2965,7 +2956,6 @@ img {
     display: none;
     z-index: 1;
     left: 7.2%;
-    top: 12.5%;
     width: 0.5875%;
 }
 
@@ -2973,7 +2963,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.05%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -2981,7 +2970,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.05%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -2989,7 +2977,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.05%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -2997,7 +2984,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.05%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3005,7 +2991,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.05%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3013,7 +2998,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.05%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3021,7 +3005,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.05%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3029,7 +3012,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.05%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3037,7 +3019,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.05%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3045,7 +3026,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.05%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3053,7 +3033,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.6%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3061,7 +3040,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.6%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3069,7 +3047,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.6%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3077,7 +3054,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.6%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3085,7 +3061,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.6%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3093,7 +3068,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.6%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3101,7 +3075,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.6%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3109,7 +3082,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.6%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3117,7 +3089,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.6%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3125,7 +3096,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 8.6%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3133,7 +3103,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.15%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3141,7 +3110,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.15%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3149,7 +3117,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.15%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3157,7 +3124,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.15%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3165,7 +3131,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.15%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3173,7 +3138,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.15%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3181,7 +3145,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.15%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3189,7 +3152,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.15%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3197,7 +3159,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.15%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3205,7 +3166,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.15%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3214,7 +3174,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.9%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3222,7 +3181,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.9%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3230,7 +3188,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.9%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3238,7 +3195,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.9%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3246,7 +3202,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.9%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3254,7 +3209,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.9%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3262,7 +3216,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.9%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3270,7 +3223,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.9%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3278,7 +3230,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.9%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3286,7 +3237,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 9.9%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3294,7 +3244,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 10.45%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3302,7 +3251,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 10.45%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3310,7 +3258,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 10.45%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3318,7 +3265,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 10.45%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3326,7 +3272,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 10.45%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3334,7 +3279,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 10.45%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3342,7 +3286,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 10.45%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3350,7 +3293,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 10.45%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3358,7 +3300,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 10.45%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3366,7 +3307,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 10.45%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3374,7 +3314,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 11%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3382,7 +3321,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 11%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3390,7 +3328,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 11%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3398,7 +3335,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 11%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3406,7 +3342,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 11%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3414,7 +3349,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 11%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3422,7 +3356,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 11%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3430,7 +3363,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 11%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3438,7 +3370,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 11%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3446,7 +3377,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 11%;
-    top: 12.5%;
     width: 0.5875%;
     display: none;
 }
@@ -3470,6 +3400,7 @@ img {
     height: 1.1%;
 }
 .auto {
+    line-height: 0;
     position: absolute;
     z-index: 1;
     left: 5%;
@@ -3478,6 +3409,7 @@ img {
     display: none;
 }
 .reserve_text {
+    line-height: 0;
     position: absolute;
     z-index: 1;
     left: 1.7%;
@@ -3490,7 +3422,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 5.9%;
-    top: 23.1%;
     width: 0.5875%;
     display: none;
 }
@@ -3498,15 +3429,17 @@ img {
     position: absolute;
     z-index: 1;
     left: 5.2%;
-    top: 23.1%;
     width: 0.5875%;
     display: none;
+}
+.reserve_number {
+    line-height: 0;
+    top: 23.7%;
 }
 .reserve_1 {
     position: absolute;
     z-index: 1;
     left: 4.55%;
-    top: 23.1%;
     width: 0.5875%;
     display: none;
 }
@@ -3514,7 +3447,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 4.55%;
-    top: 23.1%;
     width: 0.5875%;
     display: none;
 }
@@ -3522,7 +3454,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 4.55%;
-    top: 23.1%;
     width: 0.5875%;
     display: none;
 }
@@ -3530,7 +3461,6 @@ img {
     position: absolute;
     z-index: 1;
     left: 4.55%;
-    top: 23.1%;
     width: 0.5875%;
     display: none;
 }
@@ -4230,4 +4160,7 @@ img {
     width: 1.5em;
     height: 1.5em;
     display: none;
+}
+.leader-line-line-path {
+    stroke-width: 0.2vw;
 }

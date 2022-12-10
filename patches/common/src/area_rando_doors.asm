@@ -3,10 +3,10 @@
 ;;; - maridia sand warp
 ;;; - croc area exit bugfix
 ;;;
-;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 lorom
-arch snes.cpu
+arch 65816
 
 ;;; For refill
 !samus_health          = $09c2

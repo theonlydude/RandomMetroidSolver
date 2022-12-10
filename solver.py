@@ -13,15 +13,15 @@ def interactiveSolver(args):
     # to iterate, requires interactive/state/[startPoint]/[endPoint]/action/output parameters in area scope
     if args.action == 'init':
         # init
-        if args.mode != 'seedless' and args.romFileName == None:
+        if args.mode != 'seedless' and args.romFileName is None:
             print("Missing romFileName parameter for {} mode".format(args.mode))
             sys.exit(1)
 
-        if args.presetFileName == None or args.output == None:
-            print("Missing preset or output parameter")
+        if args.presetFileName is None or args.shm is None:
+            print("Missing preset or shm parameter")
             sys.exit(1)
 
-        solver = InteractiveSolver(args.output, args.logic)
+        solver = InteractiveSolver(args.shm, args.logic)
         solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, fill=args.fill, startLocation=args.startLocation)
     else:
         # iterate
@@ -35,15 +35,15 @@ def interactiveSolver(args):
                 params["energyQty"] = args.energyQty
                 params["forbiddenItems"] = args.forbiddenItems.split(',') if args.forbiddenItems is not None else []
         elif args.scope == 'item':
-            if args.state == None or args.action == None or args.output == None:
-                print("Missing state/action/output parameter")
+            if args.action is None or args.shm is None:
+                print("Missing action/shm parameter")
                 sys.exit(1)
             if args.action in ["add", "replace"]:
-                if args.mode not in ['seedless', 'race', 'debug'] and args.loc == None:
+                if args.mode not in ['seedless', 'race', 'debug'] and args.loc is None:
                     print("Missing loc parameter when using action add for item")
                     sys.exit(1)
                 if args.mode == 'plando':
-                    if args.item == None:
+                    if args.item is None:
                         print("Missing item parameter when using action add in plando/suitless mode")
                         sys.exit(1)
                 params = {'loc': args.loc, 'item': args.item, 'hide': args.hide}
@@ -59,19 +59,19 @@ def interactiveSolver(args):
             elif args.action == "upload_scav":
                 params = {'plandoScavengerOrder': args.plandoScavengerOrder.split(',') if args.plandoScavengerOrder is not None else []}
         elif args.scope == 'area':
-            if args.state == None or args.action == None or args.output == None:
-                print("Missing state/action/output parameter")
+            if args.action is None or args.shm is None:
+                print("Missing action/shm parameter")
                 sys.exit(1)
             if args.action == "add":
-                if args.startPoint == None or args.endPoint == None:
+                if args.startPoint is None or args.endPoint is None:
                     print("Missing start or end point parameter when using action add for item")
                     sys.exit(1)
                 params = {'startPoint': args.startPoint, 'endPoint': args.endPoint}
             if args.action == "remove" and args.startPoint != None:
                 params = {'startPoint': args.startPoint}
         elif args.scope == 'door':
-            if args.state == None or args.action == None or args.output == None:
-                print("Missing state/action/output parameter")
+            if args.action is None or args.shm is None:
+                print("Missing action/shm parameter")
                 sys.exit(1)
             if args.action == "replace":
                 if args.doorName is None or args.newColor is None:
@@ -90,8 +90,8 @@ def interactiveSolver(args):
                 params = {'dump': args.dump}
         params["debug"] = args.mode == 'debug'
 
-        solver = InteractiveSolver(args.output, args.logic)
-        solver.iterate(args.state, args.scope, args.action, params)
+        solver = InteractiveSolver(args.shm, args.logic)
+        solver.iterate(args.scope, args.action, params)
 
 def standardSolver(args):
     if args.romFileName is None:
@@ -161,6 +161,8 @@ if __name__ == "__main__":
                         dest='interactive', action='store_true')
     parser.add_argument('--state', help="JSON file of the Solver state (used in interactive mode)",
                         dest="state", nargs='?', default=None)
+    parser.add_argument('--shm', help="Shared memory name to communicate with backend (used in interactive mode)",
+                        dest="shm", nargs='?', default=None)
     parser.add_argument('--loc', help="Name of the location to action on (used in interactive mode)",
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
@@ -200,7 +202,7 @@ if __name__ == "__main__":
     parser.add_argument('--runtime',
                         help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit.",
                         dest='runtimeLimit_s', nargs='?', default=0, type=int)
-    parser.add_argument('--dump', help="dump file with autotracker state (used in interactive mode)",
+    parser.add_argument('--dump', help="dump shm with autotracker state (used in interactive mode)",
                         dest="dump", nargs="?", default=None)
     parser.add_argument('--plandoScavengerOrder', help="list of plando scavenger hunt locations (used in interactive mode)",
                         dest="plandoScavengerOrder", nargs="?", default=None)

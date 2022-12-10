@@ -1,9 +1,9 @@
 ;;; Spawns additional PLMs into rooms without needing to repoint anything
 ;;;
-;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
-;;; or a variant of xkas that supports arch directive
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
-arch snes.cpu
+
+arch 65816
 lorom
 
 ;;; HIJACKS (room load routines in bank 82)
@@ -53,7 +53,12 @@ room_plms:
 ;; room_plms:
 ;;     dw  $99bd, $99ca, $8b1a, plm_lists
 ;;; 
-print "upwards room_plms table start: ", pc
+room_plms_upwards:
+
+;;; fill plm table with placeholder data to detect colisions with other patches
+org plm_lists
+    padbyte $CA : pad room_plms_upwards
+
 ;;; CODE in bank 8F
 org $8ff300
 

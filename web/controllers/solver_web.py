@@ -69,7 +69,7 @@ def skillPresetListWebService():
 
 def tracker():
     from web.backend.tracker import Tracker
-    return Tracker(session, request, cache).run()
+    return Tracker(session, request, cache, response).run()
 
 def plando():
     from web.backend.plando import Plando
@@ -77,7 +77,7 @@ def plando():
 
 def trackerWebService():
     from web.backend.tracker import Tracker
-    return Tracker(session, request, cache).trackerWebService()
+    return Tracker(session, request, cache, response).trackerWebService()
 
 
 def customizer():

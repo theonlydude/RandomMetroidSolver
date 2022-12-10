@@ -6,11 +6,13 @@
 ;;; Uses RNG routine but does not alter current RNG number.
 ;;; Uses tracking patch RTA timer to seed RNG.
 ;;;
-;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
-;;; or a variant of xkas that supports arch directive
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
+
 
 lorom
-arch snes.cpu
+arch 65816
+
+incsrc "sym/utils.asm"
 
 ;;; CONSTANTS
 !tracks_tbl_sz	= #$0018    ; table size, in bytes, for unique tracks
@@ -19,10 +21,10 @@ arch snes.cpu
 !last_music_rnd = $7fff32	; RAM address to store our random music
 !room_music  	= $07cb
 !room_track 	= $07c9
-!rand           = $a1f2a0   ; see new_game.asm
 
 ;;; HIJACKS
 org $82DF3E
+hook:
     ;; hijack room state header load to replace music/track
     ;; area escape rando hijacks before and returns control after,
     ;; so it has to call a function here
@@ -35,7 +37,7 @@ org $88B446
     rep 4 : nop     ; disables lava sounds to avoid weird noises in Norfair
 
 ;;; DATA
-org $A1F300
+org $A1F320
 musics_list:
     ;; music set index. unique tracks to randomize between themselves
     ;; hi: music data index
@@ -91,7 +93,7 @@ is_music_to_randomize:
 ;;; gets a random data/track couple from table, and store it in last_music_rnd (and A)
 get_random_music:
     ;; call RNG, result in A
-    jsl !rand
+    jsl utils_rand
     ;; A = A % nb_tracks
     sta $4204
     ;; switch to 8-bit mode for divisor
@@ -172,12 +174,11 @@ load_room_music_no_escape_rando:
     jsr load_room_music
     jml $82DF4A
 
-warnpc $a1f3ef
-
-org $a1f3f0		 ; fixed position used in area_rando_escape
 load_room_music_escape_rando:
     lda $0004,x : and #$00ff ; reload music data index (needed by load_room_music)
     jsr load_room_music
     rtl
 
 warnpc $a1f3ff
+
+print "A1 end: ", pc

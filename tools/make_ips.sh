@@ -19,7 +19,7 @@ assembler_stdout=$2
 tdir=$(dirname $patch)
 [ -d "${tdir}/../ips" ] && tdir=${tdir}/../ips
 target=${tdir}/$(basename $patch asm)ips
-tmprom=sm.sfc
+tmprom=$(mktemp)
 
 cp $VANILLA $tmprom
 

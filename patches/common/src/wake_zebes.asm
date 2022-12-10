@@ -1,4 +1,4 @@
-arch snes.cpu
+arch 65816
 lorom
 
 ;;; Door ASM pointer (Door into small corridor before construction zone)

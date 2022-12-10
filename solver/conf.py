@@ -7,7 +7,8 @@ class Conf:
     # display the generated path (spoilers!)
     displayGeneratedPath = False
 
-    # choose how many items are required (possible value: all (100%)/any (any%))
+    # choose how many items are required (possible value: all (100%)/any (any%)).
+    # for rando solver only: all_strict to fail if 100% is not possible.
     itemsPickup = 'any'
 
     # the list of items to not pick up

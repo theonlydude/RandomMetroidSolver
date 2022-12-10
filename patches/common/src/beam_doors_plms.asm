@@ -3,7 +3,7 @@
 ;;; Disassembled from the IPS patch by Mettyk25jigsaw using DiztinGUIsh
 ;;; Factorized code and added extra check for spazer/plasma doors to avoid beam switching
 
-arch snes.cpu
+arch 65816
 lorom
 
 incsrc "doors_plms_common.asm"

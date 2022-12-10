@@ -1,5 +1,5 @@
 lorom
-arch snes.cpu
+arch 65816
 
 org $8f98d8
 	dw pre_bt_escape_plm_set

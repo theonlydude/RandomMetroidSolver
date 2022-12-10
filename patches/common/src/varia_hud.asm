@@ -17,7 +17,13 @@
 
 ;;; Includes etank bar combine by lioran
 
-;;; Compile with "asar" (https://github.com/RPGHacker/asar/releases)
+;;; Compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
+
+lorom
+arch 65816
+
+incsrc "constants.asm"
+incsrc "event_list.asm"
 
 !game_state = $0998		; used to check pause/unpause
 
@@ -49,8 +55,7 @@
 ;;; objectives notifications display
 !objective_global_mask = (!all_objectives_hud_mask|!objective_hud_mask)
 !notification_display_frames = #300 ; 5 seconds
-!timer = $05b8
-!obj_check_period = #$0020	; unit:frames, works only in powers of 2
+!timer = !timer1
 
 ;;; scavenger stuff
 !hunt_over_hud = #$11		; HUD ID of the fake loc 'HUNT OVER'
@@ -59,10 +64,6 @@
 !norfair = #$0002
 !ridley_timer = $0FB2
 !scav_next_found = #$aaaa
-
-incsrc "event_list.asm"
-
-lorom
 
 ;;; hijack the start of health handling in the HUD to draw area or
 ;;; remaining items if necessary
@@ -710,8 +711,12 @@ compute_n_items:
 .end:
 	;; here, n_items contain collected items, and Y number of items
 	;; make it so, n_items contains remaining items:
-	;; n_items = Y - n_items
-	tya : sec : sbc !n_items : sta !n_items
+	;; n_items = max(0, Y - n_items) ; handle < 0 for some restricted locs cases
+	tya : sec : sbc !n_items
+        bpl .store
+        lda #$0000
+.store:
+        sta !n_items
 	bne .ret
 	;; 0 items left, trigger appropriate event : current graph area idx+area_clear_event_base
 	ldx $07bb : lda $8f0010,x
@@ -756,7 +761,7 @@ check_objectives:
 .check:
 	;; when in pause, don't check anything
 	lda !game_state : cmp #$000f : beq .end
-	;; align check prequency with objectives (check one frame later)
+	;; align check period with objectives (check one frame later)
 	lda !timer : and !obj_check_period-1
 	bne .end
 .check_all:

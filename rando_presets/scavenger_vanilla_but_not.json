@@ -1,8 +1,7 @@
 {
     "startLocation": "Landing Site",
     "majorsSplit": "Scavenger",
-    "areaRandomization": "on",
-    "areaLayout": "on",
+    "areaRandomization": "full",
     "escapeRando": "on",
     "removeEscapeEnemies": "on",
     "bossRandomization": "on",

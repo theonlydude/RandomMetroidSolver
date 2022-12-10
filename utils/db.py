@@ -391,7 +391,7 @@ order by r.id;"""
 
         # custom sort of the params
         paramsHead = []
-        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'lightAreaRandomization', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'majorsSplit', 'majorsSplitMultiSelect', 'scavNumLocs', 'scavRandomized', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'objective', 'objectiveMultiSelect', 'tourian', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
+        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'majorsSplit', 'majorsSplitMultiSelect', 'scavNumLocs', 'scavRandomized', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'objective', 'objectiveMultiSelect', 'tourian', 'tourianMultiSelect', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
             if param in paramsSet:
                 paramsHead.append(param)
                 paramsSet.remove(param)
@@ -420,7 +420,7 @@ order by 1,2;"""
         groups = {
             'Randomizer parameters': ['preset', 'startLocation', 'majorsSplit', 'scavNumLocs', 'scavRandomized', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'progressionDifficulty', 'suitsRestriction', 'hideItems', 'objective', 'tourian'],
             'Ammo and Energy': ['minorQty', 'energyQty', 'strictMinors', 'missileQty', 'superQty', 'powerBombQty'],
-            'Areas and Fun': ['areaRandomization', 'lightAreaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits'],
+            'Areas and Fun': ['areaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits'],
             'Patches': ['layoutPatches', 'variaTweaks', 'nerfedCharge', 'gravityBehaviour', 'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart', 'rando_speed', 'Infinite_Space_Jump', 'refill_before_save', 'hud', 'animals', 'No_Music', 'random_music', 'relaxed_round_robin_cf']
         }
 
@@ -700,9 +700,6 @@ set @last_id = last_insert_id();
             for (stat, value) in solverStats.items():
                 sql = "insert into solver_stats (ext_id, name, value) values (@last_id, '%s', %d);\n"
                 sqlFile.write(sql % (stat, value))
-
-            # to avoid // issues
-            sqlFile.write("commit;\n")
 
     def getExtStat(self, skillPreset, randoPreset):
         if self.dbAvailable == False:

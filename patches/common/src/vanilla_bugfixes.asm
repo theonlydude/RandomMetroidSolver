@@ -1,7 +1,7 @@
 ;;; Some vanilla bugfixes included in all VARIA seeds
-;;; compile with asar
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
-arch snes.cpu
+arch 65816
 lorom
 
 ;;; Fix the crash that occurs when you kill an eye door whilst a eye door projectile is alive

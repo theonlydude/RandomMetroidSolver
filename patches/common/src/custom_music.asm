@@ -3,10 +3,10 @@
 ;;; data is laid out as in room state header, so the addresses can be
 ;;; added to pc_addresses entry in vanilla JSON track metadata
 ;;;
-;;; compile with asar
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 lorom
-arch snes.cpu
+arch 65816
 
 !song_routine = $808fc1
 
@@ -14,9 +14,30 @@ arch snes.cpu
 org $80805d
 	dw #$ffff
 
+;;; disable data load in some elevator rooms (custom music will change
+;;; tracks in rooms around them instead)
+
+;;; [Elevator to Maridia]
+org $8f94dd
+        db $00
+;;; [Elevator to Green Brinstar]
+org $8f9949
+        db $00
+;;; Warehouse Entrance
+org $8fa6b2
+        db $00
+;;; Bowling Alley
+org $8fc9be
+        db $00
+org $8fc9a4
+        db $00
+
 ;;; end of custom music data table. accounted for by MusicPatcher
 org $8fe86b
+marker:
 	dw $caca		; identifier that we have custom music
+
+;;; load custom music in special places
 print "title_screen_intro: ", pc
 title_screen_intro:
 	db $03, $05
@@ -106,7 +127,7 @@ load_credits_music_track:
 
 warnpc $8bf8ff
 
-org $a9fc70
+org $a9fc80
 load_escape_music_data:
 	%loadMusicData(escape)
 

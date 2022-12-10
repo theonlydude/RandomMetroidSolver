@@ -17,6 +17,7 @@
 # hints:
 #  -you should set the GIMP grid to 16x16 when you're working on the in-game ship and to 8x8 when you're working on the mode-7 ship.
 #  -a slopes.png file is generated, you can import it in the GIMP in the upper right box as a base if you need to override some slopes.
+#   you can use the red override to force an empty slope and the purple one to force a solid block.
 #   in the example_ship.xcf it's imported in the 'am2r gen slopes' layer.
 #   don't forget to hide this layer before exporting the GIMP file to png.
 #   you can load the updated ROM in SMILE to see if there're errors in the generated slopes (displayed in red in SMILE).
@@ -809,7 +810,7 @@ if enableMode7 and not args.no_mode7:
 
     # compress
     print("compressing tilemap")
-    compressedData = Compressor(computeLimit=128).compress(tilemapData)
+    compressedData = Compressor('Slow').compress(tilemapData)
     recompressedDataSize = len(compressedData)
     vanillaSize = 171
     if recompressedDataSize > vanillaSize:
@@ -833,7 +834,7 @@ if enableMode7 and not args.no_mode7:
         vanillaRom.writeByte(byte)
 
     print("compressing tiles, {}".format(len(tileData)))
-    compressedData = Compressor(computeLimit=4096).compress(tileData)
+    compressedData = Compressor('Slow').compress(tileData)
     vanillaSize = 10330
     recompressedDataSize = len(compressedData)
     print("recompressedDataSize: {} vanillaSize: {}".format(recompressedDataSize, vanillaSize))
@@ -902,19 +903,22 @@ if not args.no_layout:
     width = 7
     height = 5
     forceEmpty = -1
+    forceSolid = -2
     slopesOverideMatrix = [ [ None for x in range(width) ] for y in range(height) ]
     for tileY in range(height):
         for tileX in range(width):
             if not emptyMatrix[tileY][tileX]:
-                # first check for empty slope force (color 0xcc3535)
+                # first check for empty slope force (color 0xcc3535) and solid (color 0x700030)
                 r, g, b, a = slopesOverideImg.getpixel((tileX*16, tileY*16))
                 if r == 0xcc and g == 0x35 and b == 0x35:
                     slopesOverideMatrix[tileY][tileX] = forceEmpty
+                elif r == 0x70 and g == 0x00 and b == 0x30:
+                    slopesOverideMatrix[tileY][tileX] = forceSolid
 
     # convert slopes overide to 1bit per pixel image
     for tileY in range(height):
         for tileX in range(width):
-            if not emptyMatrix[tileY][tileX] and slopesOverideMatrix[tileY][tileX] is None:
+            if slopesOverideMatrix[tileY][tileX] is None:
                 slope = slopesOverideImg.crop((tileX*16, tileY*16, (tileX+1)*16, (tileY+1)*16))
                 if not isEmpty(slope, (0, 0, 16, 16)):
                     slope = slope.getchannel('A').convert('1')
@@ -962,6 +966,8 @@ if not args.no_layout:
                 overide = slopesOverideMatrix[tileY][tileX]
                 if overide == forceEmpty:
                     slopesMatrix[tileY][tileX] = {"isSolid": False, "bts": None}
+                elif overide == forceSolid:
+                    slopesMatrix[tileY][tileX] = {"isSolid": True, "bts": None}
                 else:
                     slopesMatrix[tileY][tileX] = {"isSolid": False, "bts": overide}
             elif emptyMatrix[tileY][tileX]:

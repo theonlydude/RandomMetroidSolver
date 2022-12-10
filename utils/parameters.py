@@ -117,7 +117,7 @@ class Knows:
 
     Mockball = SMBool(True, easy, ['Mockball'])
     desc['Mockball'] = {'display': 'Mockball',
-                        'title': 'Morph from runing without loosing momentum to get Early Super and Ice Beam',
+                        'title': 'Morph from running without loosing momentum to get Early Super and Ice Beam',
                         'href': 'https://wiki.supermetroid.run/index.php?title=Mockball',
                         'rooms': ['Early Supers Room', 'Ice Beam Gate Room']}
 

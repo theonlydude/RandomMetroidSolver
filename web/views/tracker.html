@@ -10,6 +10,7 @@
 {{include 'solver_web/t_style.html'}}
 
 .switchInventory {
+    line-height: 0;
     cursor: pointer;
     position: absolute;
     z-index: 2;
@@ -19,6 +20,7 @@
     left: 1.5%;
 }
 .switchMap {
+    line-height: 0;
     cursor: pointer;
     position: absolute;
     z-index: 2;
@@ -28,6 +30,7 @@
     left: 18.75%;
 }
 .help {
+    line-height: 0;
     cursor: pointer;
     position: absolute;
     z-index: 2;
@@ -37,6 +40,7 @@
     left: 2.75%;
 }
 .titleItem {
+    line-height: 0;
     position: absolute;
     z-index: 2;
     width: 10%;
@@ -48,6 +52,7 @@
     font-weight: bold;
 }
 .startItem {
+    line-height: 0;
     cursor: pointer;
     position: absolute;
     z-index: 2;
@@ -57,6 +62,7 @@
     left: 10.5%;
 }
 .repeatItem {
+    line-height: 0;
     cursor: pointer;
     position: absolute;
     z-index: 2;
@@ -66,6 +72,7 @@
     left: 13.25%;
 }
 .binItem {
+    line-height: 0;
     cursor: pointer;
     position: absolute;
     z-index: 2;
@@ -227,6 +234,18 @@ Install QUsb2snes on your computer and configure your sd2snes/snes mini/emulator
   // Initialize the tour
   tour.init();
 
+  if (typeof step === "object") {
+    // step is an event, not a number. Get ID from parent element
+    let parent = event.target.parentNode
+    step = parent.id
+    while (!step) {
+        parent = parent.previousElementSibling
+        step = parent.id
+    }
+  }
+  if (typeof step === 'string') {
+    step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
+  }
   // Start the tour
   if(step != -1) {
     tour.goTo(step);
@@ -382,7 +401,8 @@ var dataEnum = {
     "curMap": 3,
     "samus": 4,
     "items": 5,
-    "boss": 6
+    "boss": 6,
+    "events": 7
 }
 // 1. state:
 // $0998: Game state
@@ -430,6 +450,9 @@ var dataEnum = {
 //     5: Tourian
 //     6: Ceres
 //     7: Debug
+
+// 7. events
+// $7E:D820..39
 var dataToAsk = {
     1: [{"address": "F50998", "size": 0x2},
         {"address": "F505D1", "size": 0x2},
@@ -444,7 +467,8 @@ var dataToAsk = {
         {"address": "F50AFA", "size": 0x2},
         {"address": "F5079B", "size": 0x0a}],
     5: [{"address": "F5D870", "size": 0x20}],
-    6: [{"address": "F5D828", "size": 0x8}]
+    6: [{"address": "F5D828", "size": 0x8}],
+    7: [{"address": "F5D820", "size": 0x20}]
 }
 // use an array listing the data to retrieve, the chain is init at auto tracker start
 var dataToAskChain = [];
@@ -502,6 +526,7 @@ var escapeAccessPoints = {{response.write(escapeAccessPoints, escape=False)}};
 var bossBitMasks = {{response.write(bossBitMasks, escape=False)}};
 var nothingScreens = {{response.write(nothingScreens, escape=False)}};
 var doorsScreen = {{response.write(doorsScreen, escape=False)}};
+var eventsBitMasks = {};
 
 // in js dict keys are strings
 var itemsBitMasks = {
@@ -1328,6 +1353,14 @@ function handleData(data) {
             bossData = concatArrays(dataEnum.boss);
 
             askNextData();
+        } else if(dataToAskChain[dataToAskStep] == dataEnum.events) {
+            var duration = Date.now() - transfertStart;
+            console.log(`\u2705 Events data received in ${duration}ms`);
+
+            // concatenate all arrays
+            eventsData = concatArrays(dataEnum.events);
+
+            askNextData();
         }
     }
 }
@@ -1502,6 +1535,11 @@ function initDataChain() {
     // ask samus position to know the current map area
     dataToAskChain.push(dataEnum.samus);
 
+    // ask for events
+    dataToAskChain.push(dataEnum.events);
+    stateDataOffsets[dataEnum.events] = curOffset;
+    curOffset += getDataSize(dataEnum.events);
+
     // ask optional map data
     if(area || boss || doorsRando || hasNothing || escapeRando) {
         dataToAskChain.push(dataEnum.map);
@@ -1572,6 +1610,11 @@ function computeStateBitMasks() {
                     stateBitMasks[curOffset + apData["byteIndex"] + mapOffsetEnum[apData["area"]]] |= apData["bitMask"];
                 }
             }
+        } else if(dataToAskChain[i] == dataEnum.events) {
+            var curOffset = stateDataOffsets[dataEnum.events];
+            for(var event in eventsBitMasks) {
+                stateBitMasks[curOffset + eventsBitMasks[event]["byteIndex"]] |= eventsBitMasks[event]["bitMask"];
+            }
         }
     }
 }
@@ -1588,6 +1631,10 @@ function setActiveHook(mode, majorsSplit, area, boss, escape) {
 }
 
 function updateGlobalHook(jsonData) {
+    // get eventsBitMasks if preset
+    if("eventsBitMasks" in jsonData) {
+        eventsBitMasks = jsonData["eventsBitMasks"];
+    }
 }
 
 function resetNextDataChain() {
@@ -1682,6 +1729,11 @@ function populateCurrentState() {
             for(var i=0; i<mapData.length; i++) {
                 currentState[curOffset + i] = mapData[i] & stateBitMasks[curOffset + i];
             }
+        } else if(dataToAskChain[j] == dataEnum.events) {
+            var curOffset = stateDataOffsets[dataEnum.events];
+            for(var i=0; i<eventsData.length; i++) {
+                currentState[curOffset + i] = eventsData[i] & stateBitMasks[curOffset + i];
+            }
         }
     }
 }
@@ -1732,7 +1784,7 @@ function sendAutoTrackerMessage(data, newState) {
     <div id="binItem" class="binItem"><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearLocs(false)" data-toggle="tooltip" title="Remove all visited locations and doors" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <!-- tracker help -->
-    <div id="help" class="help"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the help" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="help" class="help"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the help" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <!-- auto tracker -->
     <div id="titleAutoTracker">AUTO TRACKER</div>
@@ -1742,7 +1794,7 @@ function sendAutoTrackerMessage(data, newState) {
       <img id="stopAutoTracker" src="/solver/static/images/ui/shut_down.svg" alt="Stop AutoTracker" style="display: none" onclick="stopAutoTracker()" data-toggle="tooltip" title="Stop the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
     </div>
 
-    <div id="helpAutoTracker"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(1)" data-toggle="tooltip" title="Display the AutoTracker help" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="helpAutoTracker"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the AutoTracker help" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="statusAutoTracker">
       <img id="statusKO" src="/solver/static/images/ui/record_ko.svg" alt="statusKO" style="display: none" data-toggle="tooltip" title="AutoTracker status OK" data-placement="bottom" data-container="body" data-html="true">
       <img id="statusOK" src="/solver/static/images/ui/record_ok.svg" alt="statusOK" style="display: none" data-toggle="tooltip" title="AutoTracker status KO" data-placement="bottom" data-container="body" data-html="true">

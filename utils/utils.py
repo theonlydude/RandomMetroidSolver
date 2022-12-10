@@ -12,7 +12,7 @@ def getPythonExec():
     return pythonExec
 
 def isStdPreset(preset):
-    return preset in ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master', 'samus', 'solution', 'Season_Races', 'SMRAT2021']
+    return preset in ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master', 'samus', 'solution', 'Season_Races', 'SMRAT2021', 'Torneio_SGPT3']
 
 def getPresetDir(preset):
     if isStdPreset(preset):
@@ -269,7 +269,9 @@ def getDefaultMultiValues():
         'morphPlacement': ['early', 'late', 'normal'],
         'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla'],
         'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive'],
-        'objective': Objectives.getAllGoals(removeNothing=True)
+        'areaRandomization': ['off', 'full', 'light'],
+        'objective': Objectives.getAllGoals(removeNothing=True),
+        'tourian': ['Vanilla', 'Fast', 'Disabled']
     }
     return defaultMultiValues
 
@@ -301,7 +303,7 @@ def loadRandoPreset(randoPreset, args):
         args.animals = True
     if randoParams.get("variaTweaks", "on") == "off":
         args.noVariaTweaks = True
-    if randoParams.get("maxDifficulty", "no difficulty cap") != "no difficulty cap":
+    if randoParams.get("maxDifficulty", "infinity") != "infinity":
         args.maxDifficulty = randoParams["maxDifficulty"]
     if randoParams.get("suitsRestriction", "off") != "off":
         if randoParams["suitsRestriction"] == "on":
@@ -326,10 +328,12 @@ def loadRandoPreset(randoPreset, args):
     if randoParams.get("nerfedCharge", "off") == "on":
         args.nerfedCharge = True
 
-    args.area = convertParam(randoParams, "areaRandomization")
-    if args.area == True:
+    args.areaRandomization = randoParams["areaRandomization"]
+    if args.areaRandomization == "on":
+        # DEPRECATED previously areaRandomization was on/off, now it's off, full, or light
+        args.areaRandomization == "full"
+    if args.areaRandomization != "off":
         args.areaLayoutBase = convertParam(randoParams, "areaLayout", inverse=True)
-        args.lightArea = convertParam(randoParams, "lightAreaRandomization")
     args.escapeRando = convertParam(randoParams, "escapeRando")
     if args.escapeRando == True:
         args.noRemoveEscapeEnemies = convertParam(randoParams, "removeEscapeEnemies", inverse=True)
@@ -410,11 +414,11 @@ def loadRandoPreset(randoPreset, args):
     if "energyQty" in randoParams:
         args.energyQty = randoParams["energyQty"]
 
-    if "objective" in randoParams:
-        if randoParams["objective"] == "random":
-            args.objective = ["random"]
-        else:
-            args.objective = randoParams["objective"]
+    if randoParams.get("objectiveRandom", "false") == "true":
+        nbObjective = randoParams.get("nbObjective", 4)
+        args.objective = [nbObjective]
+    elif "objective" in randoParams:
+        args.objective = randoParams["objective"]
 
     if "tourian" in randoParams:
         args.tourian = randoParams["tourian"]
@@ -423,7 +427,7 @@ def loadRandoPreset(randoPreset, args):
         args.minimizerN = randoParams["minimizerQty"]
 
     defaultMultiValues = getDefaultMultiValues()
-    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective"]
+    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "areaRandomization"]
     for multiElem in multiElems:
         if multiElem+'MultiSelect' in randoParams:
             setattr(args, multiElem+'List', ','.join(randoParams[multiElem+'MultiSelect']))
@@ -462,12 +466,15 @@ def getRandomizerDefaultParameters():
     defaultParams['minorQty'] = "100"
     defaultParams['energyQty'] = "vanilla"
     defaultParams['energyQtyMultiSelect'] = defaultMultiValues['energyQty']
+    defaultParams['objectiveRandom'] = "off"
+    defaultParams['nbObjective'] = "4"
     defaultParams['objective'] = ["kill all G4"]
     defaultParams['objectiveMultiSelect'] = defaultMultiValues['objective']
     defaultParams['tourian'] = "Vanilla"
+    defaultParams['tourianMultiSelect'] = defaultMultiValues['tourian']
     defaultParams['areaRandomization'] = "off"
+    defaultParams['areaRandomizationMultiSelect'] = defaultMultiValues['areaRandomization']
     defaultParams['areaLayout'] = "off"
-    defaultParams['lightAreaRandomization'] = "off"
     defaultParams['doorsColorsRando'] = "off"
     defaultParams['allowGreyDoors'] = "off"
     defaultParams['escapeRando'] = "off"
@@ -530,3 +537,9 @@ def fixEnergy(items):
             items.remove(cf)
         items.append('{}-CrystalFlash'.format(maxCf))
     return items
+
+def dumpErrorMsg(outFileName, msg):
+    print("DIAG: " + msg)
+    if outFileName is not None:
+        with open(outFileName, 'w') as jsonFile:
+            json.dump({"errorMsg": msg}, jsonFile)

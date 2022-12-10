@@ -16,12 +16,12 @@ sys.path.append(os.path.dirname(sys.path[0]))
 # also lists the extra pointers for area rando, all of this
 # stored in the JSON metadata
 
-from rom.rom import RealROM, snes_to_pc
+from rom.rom import RealROM, snes_to_pc, pc_to_snes
 from rom.ips import IPS_Patch
 
-vanilla=sys.argv[1]
-nspc_dir=sys.argv[2]
-json_path=sys.argv[3]
+vanilla=sys.argv[1] if len(sys.argv) > 1 else "vanilla.sfc"
+nspc_dir=sys.argv[2] if len(sys.argv) > 2 else "varia_custom_sprites/music/vanilla"
+json_path=sys.argv[3] if len(sys.argv) > 3 else "varia_custom_sprites/music/_metadata/vanilla.json"
 
 rom=RealROM(vanilla)
 musicDataTable = snes_to_pc(0x8FE7E4)
@@ -158,11 +158,14 @@ for room in rooms:
         rom.seek(pc_addr)
         dataId = int(rom.readByte())
         trackId = int(rom.readByte())
-        if dataId == 0x0 and trackId >= 0x5:
+        isLoneTrack = dataId == 0x0 and trackId >= 0x5
+        isLoneData = dataId != 0x0 and trackId < 0x5
+        if isLoneData or isLoneTrack:
             # helper to have addresses of special rooms to be input by hand below.
             # indeed, there is no way to guess the intended dataId, as it will be
             # in a nearby room.
-            print("Special - %s (SMILE ID %X) : %d" % (room['Name'], room['Address'], pc_addr))
+            special = "Lone Track" if isLoneTrack else "Lone Data"
+            print("%s - %s (SMILE ID %X) : 0x%x (PC) $%06x (SNES)" % (special, room['Name'], room['Address'], pc_addr, pc_to_snes(pc_addr)))
         if dataId > 0 and trackId >= 0x5 and trackId != 0x80:
             track = tracksByMusicId[(dataId, trackId)]
             trackMeta = metadata[track]

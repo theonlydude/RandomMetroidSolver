@@ -48,6 +48,7 @@
       <li>Djlo: awesome VARIA Randomizer logo and animated location icons</li>
       <li>Rand(0): palettes Randomizer</li>
       <li>cout: optimizations and refactoring</li>
+      <li>Chrisc: various frontend contributions</li>
       <li>Prankard and Sirkura: beam door graphics</li>
     </ul>
   </p>
@@ -68,6 +69,80 @@
   <a name="latest"></a>
   <h2>Change Log</h2>
   <ul>
+    <li>
+      <h4>2022/11/01</h4>
+      <p>Hello @randomizer,</p>
+      <p>We've (finally!) released a new version of the VARIA Randomizer, Solver, Tracker, Plandomizer and Customizer (http://varia.run/). This is a pretty humongous one.</p>
+      <p>You can now choose the objectives required to trigger the endgame. The endgame itself can be Vanilla Tourian, Fast Tourian, or just trigger the escape sequence. It is of course possible to randomize these settings, and they are fully supported in the Solver/Tracker/Plandomizer as well.</p>
+      <p>Objective settings are in the Medium or Advanced tab of the Randomizer page. Choose or randomize from 0 to 5 objectives, from a pool of 37 possible goals about bosses, mini-bosses, area/item completion, or memes! Be sure to use the help (?) button of the setting for details.</p>
+      <p>At any point, objectives status can be checked in the pause screen, along with an item% indicator (useful for item% related objectives). When objectives are not vanilla, the G4 statue sound effect is played when an objective is completed, and a notification is displayed if VARIA HUD is enabled. Objectives and Tourian status are also recalled before starting the game when they are not vanilla.
+</p>
+      <p>Special thanks @chrisc for your contributions to the web front-end! </p>
+      Other new stuff:
+      <h4>rando:</h4>
+      <ul>
+	<li>new door color indicators: some doors that were previously blue now blink to tell you the color of the door on the other side</li>
+	<li>area rando: the PB blocks at the entrance of Aqueduct are now bomb blocks to prevent some softlock scenarios</li>
+	<li>web: new 'randomize & customize' button to display the generated seed in the customizer</li>
+	<li>rolling saves are now enabled in custom start location seeds with vanilla map</li>
+	<li>display save locations in the load menu when rolling saves are enabled</li>
+	<li>RTA time is shown instead of IGT in the load menu</li>
+	<li>triggers for Samus animation at credits end are now 1:30 and 3:00 RTA instead of vanilla 3:00 and 10:00 IGT</li>
+	<li>patches: fast doors and fast elevators are now distinct. Samus fast door exit position has been fixed</li>
+	<li>patches: option for relaxed round robin crystal flash by @dagit (use any ammo to perform a crystal flash)</li>
+      </ul>
+      <h4>solver:</h4>
+      <ul>
+	<li>objective completion is shown in solver spoiler log</li>
+        <li>new button to show credits spoiler log</li>
+      </ul>
+      <h4>tracker:</h4>
+      <ul>
+	<li>objectives and completion are now displayed in tracker/autotracker</li>
+	<li>major/chozo/scavenger locations have a Samus icon on them for easy spotting</li>
+	<li>improve responsiveness</li>
+      </ul>
+      <h4>customizer:</h4>
+      <ul>
+	<li>accessibility patches:</li>
+        <ul>
+	  <li>color blind friendly colors for doors</li>
+	  <li>disable screen shake during escape</li>
+	  <li>remove flashing</li>
+        </ul>
+	<li>many new custom sprites and ships</li>
+	<li>randomly choose custom sprites and ships</li>
+	<li>challenge options:</li>
+        <ul>
+	  <li>permanent lava physics</li>
+	  <li>permanent hell run</li>
+	  <li>hell run rate change</li>
+	  <li>give additional etanks at the start</li>
+        </ul>
+	<li>music: individual bosses tracks can now be customized</li>
+	<li>music: disabled music-dependent sound effects on customized tracks</li>
+	<li>widescreen patch for bsnes-hd by @ocesse_sm</li>
+	<li>individual comfort patches can now be reset to vanilla</li>
+      </ul>
+      <h4>presets:</h4>
+      <ul>
+	<li>auto load of presets when selected in the list</li>
+      </ul>
+      <h4>logic fixes:</h4>
+      <ul>
+	<li>take into account fight ammo for CF exit in suitless Draygon fight</li>
+	<li>fixed hell run requirements for Crocomire escape item without supers to pass the gate</li>
+	<li>fixed hell run requirements for returning from Speed Booster Missile when unable to open Speed Booster room door</li>
+      </ul>
+      <h4>other fixes:</h4>
+      <ul>
+	<li>fixed Lower Norfair HUD item counter in full rando (was off by one)</li>
+	<li>fixed slowdown when obtaining Hyper Beam while charging a shot in Fast Tourian</li>
+	<li>added vanilla bugfix by @PJBoy for corrupted graphics in Kraid room with fast doors</li>
+	<li>added vanilla bugfix by @strotlog for a rare Spring Ball related crash</li>
+	<li>probably more...</li>
+      </ul>
+    </li>
     <li>
       <h4>2021/11/01</h4>
       <p>Hello @randomizer,</p>

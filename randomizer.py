@@ -4,18 +4,16 @@ import argparse, os.path, json, sys, shutil, random
 
 from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
-from rom.PaletteRando import PaletteRando
-from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, GraphUtils, getAccessPoint
-from utils.parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text, appDir
+from graph.graph_utils import GraphUtils, getAccessPoint
+from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity, text2diff, appDir
 from rom.rom_patches import RomPatches
-from rom.rompatcher import RomPatcher, MusicPatcher, RomTypeForMusic
-from rom.rom import FakeROM
+from rom.rompatcher import RomPatcher
 from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir
 from utils.version import displayedVersion
-from logic.smbool import SMBool
 from utils.doorsmanager import DoorsManager
 from logic.logic import Logic
 from utils.objectives import Objectives
+from utils.utils import dumpErrorMsg
 
 import utils.log
 import utils.db as db
@@ -37,6 +35,8 @@ morphPlacements = defaultMultiValues['morphPlacement']
 majorsSplits = defaultMultiValues['majorsSplit']
 gravityBehaviours = defaultMultiValues['gravityBehaviour']
 objectives = defaultMultiValues['objective']
+tourians = defaultMultiValues['tourian']
+areaRandomizations = defaultMultiValues['areaRandomization']
 
 def randomMulti(args, param, defaultMultiValues):
     value = args[param]
@@ -44,7 +44,7 @@ def randomMulti(args, param, defaultMultiValues):
     isRandom = False
     if value == "random":
         isRandom = True
-        if args[param+"List"] != None:
+        if args[param+"List"] is not None:
             # use provided list
             choices = args[param+"List"].split(',')
             value = random.choice(choices)
@@ -53,12 +53,6 @@ def randomMulti(args, param, defaultMultiValues):
             value = random.choice(defaultMultiValues)
 
     return (isRandom, value)
-
-def dumpErrorMsg(outFileName, msg):
-    print("DIAG: " + msg)
-    if outFileName is not None:
-        with open(outFileName, 'w') as jsonFile:
-            json.dump({"errorMsg": msg}, jsonFile)
 
 def dumpErrorMsgs(outFileName, msgs):
     dumpErrorMsg(outFileName, joinErrorMsgs(msgs))
@@ -74,9 +68,6 @@ def restricted_float(x):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
-    parser.add_argument('--patchOnly',
-                        help="only apply patches, do not perform any randomization", action='store_true',
-                        dest='patchOnly', default=False)
     parser.add_argument('--param', '-p', help="the input parameters",
                         default=None, dest='paramsFileName')
     parser.add_argument('--dir',
@@ -85,13 +76,13 @@ if __name__ == "__main__":
     parser.add_argument('--dot',
                         help="generate dot file with area graph",
                         action='store_true',dest='dot', default=False)
-    parser.add_argument('--area', help="area mode",
-                        dest='area', nargs='?', const=True, default=False)
+    parser.add_argument('--areaRandomization', help="area mode",
+                        dest='areaRandomization', nargs='?', const=True, choices=["random"]+areaRandomizations, default='off')
+    parser.add_argument('--areaRandomizationList', help="list to choose from when random",
+                        dest='areaRandomizationList', nargs='?', default=None)
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)
-    parser.add_argument('--lightArea', help="keep number of transitions between vanilla areas", action='store_true',
-                        dest='lightArea', default=False)
     parser.add_argument('--escapeRando',
                         help="Randomize the escape sequence",
                         dest='escapeRando', nargs='?', const=True, default=False)
@@ -112,8 +103,8 @@ if __name__ == "__main__":
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',
                         help="the maximum difficulty generated seed will be for given parameters",
-                        dest='maxDifficulty', nargs='?', default=None,
-                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random'])
+                        dest='maxDifficulty', nargs='?', default='infinity',
+                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'infinity', 'random'])
     parser.add_argument('--minDifficulty',
                         help="the minimum difficulty generated seed will be for given parameters (speedrun prog speed required)",
                         dest='minDifficulty', nargs='?', default=None,
@@ -133,15 +124,10 @@ if __name__ == "__main__":
                         help="optional patches to add",
                         dest='patches', nargs='?', default=[], action='append',
                         choices=['itemsounds.ips', 'random_music.ips',
-                                 'fast_doors.ips', 'elevators_speed.ips', 'elevators_doors_speed.ips',
+                                 'fast_doors.ips', 'elevators_speed.ips',
                                  'spinjumprestart.ips', 'rando_speed.ips', 'No_Music', 'AimAnyButton.ips',
                                  'max_ammo_display.ips', 'supermetroid_msu1.ips', 'Infinite_Space_Jump',
-                                 'refill_before_save.ips', 'remove_elevators_speed.ips',
-                                 'remove_fast_doors.ips', 'remove_Infinite_Space_Jump.ips',
-                                 'remove_rando_speed.ips', 'remove_spinjumprestart.ips',
-                                 'remove_itemsounds.ips', 'vanilla_music.ips', 'custom_ship.ips',
-                                 'Ship_Takeoff_Disable_Hide_Samus', 'widescreen.ips',
-                                 'hell.ips', 'lava_acid_physics.ips', 'relaxed_round_robin_cf.ips'])
+                                 'refill_before_save.ips', 'relaxed_round_robin_cf.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -234,46 +220,11 @@ if __name__ == "__main__":
     parser.add_argument('--race', help="Race mode magic number", dest='raceMagic',
                         type=int)
     parser.add_argument('--vcr', help="Generate VCR output file", dest='vcr', action='store_true')
-    parser.add_argument('--palette', help="Randomize the palettes", dest='palette', action='store_true')
-    parser.add_argument('--individual_suit_shift', help="palette param", action='store_true',
-                        dest='individual_suit_shift', default=False)
-    parser.add_argument('--individual_tileset_shift', help="palette param", action='store_true',
-                        dest='individual_tileset_shift', default=False)
-    parser.add_argument('--no_match_ship_and_power', help="palette param", action='store_false',
-                        dest='match_ship_and_power', default=True)
-    parser.add_argument('--seperate_enemy_palette_groups', help="palette param", action='store_true',
-                        dest='seperate_enemy_palette_groups', default=False)
-    parser.add_argument('--no_match_room_shift_with_boss', help="palette param", action='store_false',
-                        dest='match_room_shift_with_boss', default=True)
-    parser.add_argument('--no_shift_tileset_palette', help="palette param", action='store_false',
-                        dest='shift_tileset_palette', default=True)
-    parser.add_argument('--no_shift_boss_palettes', help="palette param", action='store_false',
-                        dest='shift_boss_palettes', default=True)
-    parser.add_argument('--no_shift_suit_palettes', help="palette param", action='store_false',
-                        dest='shift_suit_palettes', default=True)
-    parser.add_argument('--no_shift_enemy_palettes', help="palette param", action='store_false',
-                        dest='shift_enemy_palettes', default=True)
-    parser.add_argument('--no_shift_beam_palettes', help="palette param", action='store_false',
-                        dest='shift_beam_palettes', default=True)
-    parser.add_argument('--no_shift_ship_palette', help="palette param", action='store_false',
-                        dest='shift_ship_palette', default=True)
-    parser.add_argument('--min_degree', help="min hue shift", dest='min_degree', nargs='?', default=-180, type=int)
-    parser.add_argument('--max_degree', help="max hue shift", dest='max_degree', nargs='?', default=180, type=int)
-    parser.add_argument('--no_global_shift', help="", action='store_false', dest='global_shift', default=True)
-    parser.add_argument('--invert', help="invert color range", dest='invert', action='store_true', default=False)
-    parser.add_argument('--no_blue_door_palette', help="palette param", action='store_true',
-                        dest='no_blue_door_palette', default=False)
     parser.add_argument('--ext_stats', help="dump extended stats SQL", nargs='?', default=None, dest='extStatsFilename')
     parser.add_argument('--randoPreset', help="rando preset file", dest="randoPreset", nargs='?', default=None)
     parser.add_argument('--fakeRandoPreset', help="for prog speed stats", dest="fakeRandoPreset", nargs='?', default=None)
     parser.add_argument('--plandoRando', help="json string with already placed items/locs", dest="plandoRando",
                         nargs='?', default=None)
-    parser.add_argument('--sprite', help='use a custom sprite for Samus', dest='sprite', default=None)
-    parser.add_argument('--no_spin_attack', help='when using a custom sprite, use the same animation for screw attack with or without Space Jump', dest='noSpinAttack', action='store_true', default=False)
-    parser.add_argument('--customItemNames', help='add custom item names for some of them, related to the custom sprite',
-                        dest='customItemNames', action='store_true', default=False)
-    parser.add_argument('--ship', help='use a custom sprite for Samus ship', dest='ship', default=None)
-    parser.add_argument('--seedIps', help='ips generated from previous seed', dest='seedIps', default=None)
     parser.add_argument('--jm,', help="display data used by jm for its stats", dest='jm', action='store_true', default=False)
     parser.add_argument('--doorsColorsRando', help='randomize color of colored doors', dest='doorsColorsRando',
                         nargs='?', const=True, default=False)
@@ -293,11 +244,9 @@ if __name__ == "__main__":
                         dest='objectiveList', nargs='?', default=None)
     parser.add_argument('--tourian', help="Tourian mode",
                         dest='tourian', nargs='?', default='Vanilla',
-                        choices=['Vanilla', 'Fast', 'Disabled'])
-    parser.add_argument('--hellrun', help="Hellrun damage rate in percentage, between 0 and 400 (default 100)",
-                        dest='hellrunRate', default=100, type=int)
-    parser.add_argument('--etanks', help="Additional ETanks, between 0 (default) and 18",
-                        dest='additionalEtanks', default=0, type=int)
+                        choices=tourians+['random'])
+    parser.add_argument('--tourianList', help="list to choose from when random",
+                        dest='tourianList', nargs='?', default=None)
     # parse args
     args = parser.parse_args()
 
@@ -308,16 +257,8 @@ if __name__ == "__main__":
         print("Can't have both --output and --rom parameters")
         sys.exit(-1)
 
-    if args.plandoRando != None and args.output == None:
+    if args.plandoRando is not None and args.output is None:
         print("plandoRando param requires output param")
-        sys.exit(-1)
-
-    if args.additionalEtanks < 0 or args.additionalEtanks > 18:
-        print("additionalEtanks must be between 0 and 18")
-        sys.exit(-1)
-
-    if args.hellrunRate < 0 or args.hellrunRate > 400:
-        print("hellrunRate must be between 0 and 400")
         sys.exit(-1)
 
     utils.log.init(args.debug)
@@ -336,12 +277,12 @@ if __name__ == "__main__":
 
         if argDict[arg] not in okValues:
             argDict[arg] = value
-            forcedArgs[webArg if webArg != None else arg] = webValue if webValue != None else value
+            forcedArgs[webArg if webArg is not None else arg] = webValue if webValue is not None else value
             print(msg)
             optErrMsgs.append(msg)
 
     # if rando preset given, load it first
-    if args.randoPreset != None:
+    if args.randoPreset is not None:
         preset = loadRandoPreset(args.randoPreset, args)
         # use the skill preset from the rando preset
         if preset is not None and args.paramsFileName is None:
@@ -371,14 +312,11 @@ if __name__ == "__main__":
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
     # if no max diff, set it very high
-    if args.maxDifficulty:
-        if args.maxDifficulty == 'random':
-            diffs = ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania']
-            maxDifficulty = text2diff[random.choice(diffs)]
-        else:
-            maxDifficulty = text2diff[args.maxDifficulty]
+    if args.maxDifficulty == 'random':
+        diffs = ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania']
+        maxDifficulty = text2diff[random.choice(diffs)]
     else:
-        maxDifficulty = infinity
+        maxDifficulty = text2diff[args.maxDifficulty]
     # same as solver, increase max difficulty
     threshold = maxDifficulty
     epsilon = 0.001
@@ -399,6 +337,11 @@ if __name__ == "__main__":
     (_, progDiff) = randomMulti(args.__dict__, "progressionDifficulty", progDiffs)
     (majorsSplitRandom, args.majorsSplit) = randomMulti(args.__dict__, "majorsSplit", majorsSplits)
     (_, gravityBehaviour) = randomMulti(args.__dict__, "gravityBehaviour", gravityBehaviours)
+    (_, args.tourian) = randomMulti(args.__dict__, "tourian", tourians)
+    (areaRandom, args.areaRandomization) = randomMulti(args.__dict__, "areaRandomization", areaRandomizations)
+    areaRandomization = args.areaRandomization in ['light', 'full']
+    lightArea = args.areaRandomization == 'light'
+
     if args.minDifficulty:
         minDifficulty = text2diff[args.minDifficulty]
         if progSpeed != "speedrun":
@@ -406,7 +349,7 @@ if __name__ == "__main__":
     else:
         minDifficulty = 0
 
-    if args.area == True and args.bosses == True and args.minimizerN is not None:
+    if areaRandomization == True and args.bosses == True and args.minimizerN is not None:
         if args.minimizerN == "random":
             minimizerN = random.randint(30, 60)
             logger.debug("minimizerN: {}".format(minimizerN))
@@ -416,11 +359,6 @@ if __name__ == "__main__":
             forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full. Use 100 locations on your minimizer to use a non-Full split.", altValue='FullWithHUD')
     else:
         minimizerN = None
-    areaRandom = False
-    if args.area == 'random':
-        areaRandom = True
-        args.area = bool(random.getrandbits(1))
-    logger.debug("area: {}".format(args.area))
 
     doorsColorsRandom = False
     if args.doorsColorsRando == 'random':
@@ -442,7 +380,7 @@ if __name__ == "__main__":
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
 
     if args.suitsRestriction == 'random':
-        if args.morphPlacement == 'late' and args.area == True:
+        if args.morphPlacement == 'late' and areaRandomization == True:
             forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
         else:
             args.suitsRestriction = bool(random.getrandbits(1))
@@ -452,7 +390,7 @@ if __name__ == "__main__":
         args.hideItems = bool(random.getrandbits(1))
 
     if args.morphPlacement == 'random':
-        if args.morphPlacementList != None:
+        if args.morphPlacementList is not None:
             morphPlacements = args.morphPlacementList.split(',')
         args.morphPlacement = random.choice(morphPlacements)
     # Scavenger Hunt constraints
@@ -485,9 +423,9 @@ if __name__ == "__main__":
         forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", webValue='on')
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
         forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", webValue='on')
-        possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty, args.morphPlacement)
+        possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(areaRandomization, maxDifficulty, args.morphPlacement)
         if args.startLocation == 'random':
-            if args.startLocationList != None:
+            if args.startLocationList is not None:
                 startLocationList = args.startLocationList.split(',')
                 # intersection between user whishes and reality
                 possibleStartAPs = sorted(list(set(possibleStartAPs).intersection(set(startLocationList))))
@@ -513,40 +451,8 @@ if __name__ == "__main__":
                 forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for custom start location")
         if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
             forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal for Chozo")
-    if args.patchOnly == False:
-        print("SEED: " + str(seed))
 
-        objectivesManager = Objectives(args.tourian != 'Disabled')
-        addedObjectives = 0
-        if args.majorsSplit == "Scavenger":
-            objectivesManager.setScavengerHunt()
-            addedObjectives = 1
-
-        if args.objective:
-            maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
-            try:
-                nbObjectives = int(args.objective[0])
-            except:
-                nbObjectives = 0 if "random" in args.objective else None
-            if nbObjectives is not None:
-                availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
-                if nbObjectives > 0:
-                    nbObjectives = min(nbObjectives, maxActiveGoals, len(availableObjectives))
-                else:
-                    nbObjectives = random.randint(1, min(maxActiveGoals, len(availableObjectives)))
-                objectivesManager.setRandom(nbObjectives, availableObjectives)
-            else:
-                if len(args.objective) > maxActiveGoals:
-                    args.objective = args.objective[0:maxActiveGoals]
-                for goal in args.objective:
-                    objectivesManager.addGoal(goal)
-            objectivesManager.expandGoals()
-        else:
-            objectivesManager.setVanilla()
-        if len(Objectives.activeGoals) == 0:
-            objectivesManager.addGoal('nothing')
-        if any(goal for goal in Objectives.activeGoals if goal.area is not None):
-            forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
+    print("SEED: " + str(seed))
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, "doors": "normal" if not args.doorsColorsRando else "late" }
@@ -571,16 +477,13 @@ if __name__ == "__main__":
         seedCode = 'B'+seedCode
     if args.doorsColorsRando == True and doorsColorsRandom == False:
         seedCode = 'D'+seedCode
-    if args.area == True and areaRandom == False:
+    if areaRandomization == True and areaRandom == False:
         seedCode = 'A'+seedCode
 
     # output ROM name
-    if args.patchOnly == False:
-        fileName = 'VARIA_Randomizer_' + seedCode + str(seed) + '_' + preset
-        if args.progressionSpeed != "random":
-            fileName += "_" + args.progressionSpeed
-    else:
-        fileName = 'VARIA' # TODO : find better way to name the file (argument?)
+    fileName = 'VARIA_Randomizer_' + seedCode + str(seed) + '_' + preset
+    if args.progressionSpeed != "random":
+        fileName += "_" + args.progressionSpeed
     seedName = fileName
     if args.directory != '.':
         fileName = args.directory + '/' + fileName
@@ -620,7 +523,7 @@ if __name__ == "__main__":
     if minorQty < 1:
         minorQty = random.randint(25, 100)
     if energyQty == 'random':
-        if args.energyQtyList != None:
+        if args.energyQtyList is not None:
             energyQties = args.energyQtyList.split(',')
         energyQty = random.choice(energyQties)
     if energyQty == 'ultra sparse':
@@ -663,19 +566,73 @@ if __name__ == "__main__":
 
     plandoSettings = None
     if args.plandoRando is not None:
+        plandoRando = json.loads(args.plandoRando)
         forceArg('progressionSpeed', 'speedrun', "'Progression Speed' forced to speedrun")
         progSpeed = 'speedrun'
         forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
         forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
         forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = 'normal'
-        args.plandoRando = json.loads(args.plandoRando)
-        RomPatches.ActivePatches = args.plandoRando["patches"]
-        DoorsManager.unserialize(args.plandoRando["doors"])
-        plandoSettings = {"locsItems": args.plandoRando['locsItems'], "forbiddenItems": args.plandoRando['forbiddenItems']}
+        RomPatches.ActivePatches = plandoRando["patches"]
+        DoorsManager.unserialize(plandoRando["doors"])
+        plandoSettings = {"locsItems": plandoRando['locsItems'], "forbiddenItems": plandoRando['forbiddenItems']}
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty,
                                   restrictions, args.superFun, args.runtimeLimit_s,
                                   plandoSettings, minDifficulty)
+
+    dotFile = None
+    if areaRandomization == True:
+        if args.dot == True:
+            dotFile = args.directory + '/' + seedName + '.dot'
+        RomPatches.ActivePatches += RomPatches.AreaBaseSet
+        if args.areaLayoutBase == False:
+            RomPatches.ActivePatches += RomPatches.AreaComfortSet
+    if args.doorsColorsRando == True:
+        RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
+    graphSettings = GraphSettings(args.startLocation, areaRandomization, lightArea, args.bosses,
+                                  args.escapeRando, minimizerN, dotFile,
+                                  args.doorsColorsRando, args.allowGreyDoors, args.tourian,
+                                  plandoRando["transitions"] if plandoSettings is not None else None)
+
+    if plandoSettings is None:
+        DoorsManager.setDoorsColor()
+
+    if plandoSettings is None:
+        objectivesManager = Objectives(args.tourian != 'Disabled', randoSettings)
+        addedObjectives = 0
+        if args.majorsSplit == "Scavenger":
+            objectivesManager.setScavengerHunt()
+            addedObjectives = 1
+
+        if args.objective:
+            try:
+                nbObjectives = int(args.objective[0])
+            except:
+                nbObjectives = 0 if "random" in args.objective else None
+            if nbObjectives is not None:
+                availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
+                if nbObjectives == 0:
+                    nbObjectives = random.randint(1, min(Objectives.maxActiveGoals, len(availableObjectives)))
+                objectivesManager.setRandom(nbObjectives, availableObjectives)
+            else:
+                maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
+                if len(args.objective) > maxActiveGoals:
+                    args.objective = args.objective[0:maxActiveGoals]
+                for goal in args.objective:
+                    objectivesManager.addGoal(goal)
+            objectivesManager.expandGoals()
+        else:
+            if not (args.majorsSplit == "Scavenger" and args.tourian == 'Disabled'):
+                objectivesManager.setVanilla()
+        if len(Objectives.activeGoals) == 0:
+            objectivesManager.addGoal('nothing')
+        if any(goal for goal in Objectives.activeGoals if goal.area is not None):
+            forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
+    else:
+        args.tourian = plandoRando["tourian"]
+        objectivesManager = Objectives(args.tourian != 'Disabled')
+        for goal in plandoRando["objectives"]:
+            objectivesManager.addGoal(goal)
 
     # print some parameters for jm's stats
     if args.jm == True:
@@ -685,60 +642,35 @@ if __name__ == "__main__":
         print("morphPlacement:{}".format(args.morphPlacement))
         print("gravity:{}".format(gravityBehaviour))
         print("maxDifficulty:{}".format(maxDifficulty))
+        print("tourian:{}".format(args.tourian))
+        print("objectives:{}".format([g.name for g in Objectives.activeGoals]))
+        print("energyQty:{}".format(energyQty))
 
-    dotFile = None
-    if args.area == True:
-        if args.dot == True:
-            dotFile = args.directory + '/' + seedName + '.dot'
-        RomPatches.ActivePatches += RomPatches.AreaBaseSet
-        if args.areaLayoutBase == False:
-            RomPatches.ActivePatches += RomPatches.AreaComfortSet
-    if args.doorsColorsRando == True:
-        RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
-    graphSettings = GraphSettings(args.startLocation, args.area, args.lightArea, args.bosses,
-                                  args.escapeRando, minimizerN, dotFile, args.doorsColorsRando, args.allowGreyDoors,
-                                  args.plandoRando["transitions"] if args.plandoRando != None else None)
+    try:
+        randoExec = RandoExec(seedName, args.vcr, randoSettings, graphSettings)
+        (stuck, itemLocs, progItemLocs) = randoExec.randomize()
+        # if we couldn't find an area layout then the escape graph is not created either
+        # and getDoorConnections will crash if random escape is activated.
+        if not stuck or args.vcr == True:
+            doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
+                                                  areaRandomization, args.bosses,
+                                                  args.escapeRando if not stuck else False)
+            escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
+    except Exception as e:
+        import traceback
+        traceback.print_exc(file=sys.stdout)
+        dumpErrorMsg(args.output, "Error: {}".format(e))
+        sys.exit(-1)
 
-    if args.plandoRando is None:
-        DoorsManager.setDoorsColor()
-
-    if not args.patchOnly:
-        try:
-            randoExec = RandoExec(seedName, args.vcr, randoSettings, graphSettings)
-            (stuck, itemLocs, progItemLocs) = randoExec.randomize()
-            # if we couldn't find an area layout then the escape graph is not created either
-            # and getDoorConnections will crash if random escape is activated.
-            if not stuck or args.vcr == True:
-                doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
-                                                      args.area, args.bosses,
-                                                      args.escapeRando if not stuck else False)
-                escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
-                if escapeAttr is not None:
-                    if "patches" not in escapeAttr:
-                        escapeAttr['patches'] = []
-                    if args.noRemoveEscapeEnemies == True:
-                        escapeAttr['patches'].append("Escape_Rando_Enable_Enemies")
-                    if args.tourian == 'Disabled':
-                        escapeAttr['patches'].append('Escape_Trigger')
-                if args.majorsSplit == 'Scavenger' and any(il for il in progItemLocs if il.Location.Name == "Ridley"):
-                    args.patches.append("Blinking[RidleyRoomIn]")
-        except Exception as e:
-            import traceback
-            traceback.print_exc(file=sys.stdout)
-            dumpErrorMsg(args.output, "Error: {}".format(e))
-            sys.exit(-1)
-    else:
-        stuck = False
-        itemLocs = []
-        progItemLocs = None
     if stuck == True:
         dumpErrorMsg(args.output, randoExec.errorMsg)
         print("Can't generate " + fileName + " with the given parameters: {}".format(randoExec.errorMsg))
         # in vcr mode we still want the seed to be generated to analyze it
         if args.vcr == False:
             sys.exit(-1)
-    if args.patchOnly == False:
-        randoExec.postProcessItemLocs(itemLocs, args.hideItems)
+
+    randoExec.postProcessItemLocs(itemLocs, args.hideItems)
+
     # choose on animal patch
     if args.animals == True:
         animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
@@ -761,13 +693,13 @@ if __name__ == "__main__":
         for loc in sorted(locsItems.keys()):
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
-    if args.plandoRando != None:
+    if plandoSettings is not None:
         with open(args.output, 'w') as jsonFile:
             json.dump({"itemLocs": [il.json() for il in itemLocs], "errorMsg": randoExec.errorMsg}, jsonFile)
         sys.exit(0)
 
     # generate extended stats
-    if args.extStatsFilename != None:
+    if args.extStatsFilename is not None:
         with open(args.extStatsFilename, 'a') as extStatsFile:
             skillPreset = os.path.splitext(os.path.basename(args.paramsFileName))[0]
             if args.fakeRandoPreset is not None:
@@ -777,6 +709,40 @@ if __name__ == "__main__":
             db.DB.dumpExtStatsItems(skillPreset, randoPreset, locsItems, extStatsFile)
 
     try:
+        if args.hud == True or args.majorsSplit == "FullWithHUD":
+            args.patches.append("varia_hud.ips")
+        if args.debug == True:
+            args.patches.append("Disable_Clear_Save_Boot")
+
+        patcherSettings = {
+            "isPlando": False,
+            "majorsSplit": args.majorsSplit,
+            "startLocation": args.startLocation,
+            "optionalPatches": args.patches,
+            "layout": not args.noLayout,
+            "suitsMode": gravityBehaviour,
+            "area": areaRandomization,
+            "boss": args.bosses,
+            "areaLayout": not args.areaLayoutBase,
+            "variaTweaks": not args.noVariaTweaks,
+            "nerfedCharge": args.nerfedCharge,
+            "nerfedRainbowBeam": energyQty == 'ultra sparse',
+            "escapeAttr": escapeAttr,
+            "escapeRandoRemoveEnemies": not args.noRemoveEscapeEnemies,
+            "minimizerN": minimizerN,
+            "tourian": args.tourian,
+            "doorsColorsRando": args.doorsColorsRando,
+            "vanillaObjectives": objectivesManager.isVanilla(),
+            "ctrlDict": ctrlDict,
+            "moonWalk": args.moonWalk,
+            "seed": seed,
+            "randoSettings": randoSettings,
+            "doors": doors,
+            "displayedVersion": displayedVersion,
+            "itemLocs": itemLocs,
+            "progItemLocs": progItemLocs
+        }
+
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source
         # args.output is not None: generate local json named args.output
         if args.rom is not None:
@@ -784,116 +750,19 @@ if __name__ == "__main__":
             romFileName = args.rom
             outFileName = fileName + '.sfc'
             shutil.copyfile(romFileName, outFileName)
-            romPatcher = RomPatcher(outFileName, magic=args.raceMagic)
+            romPatcher = RomPatcher(settings=patcherSettings, romFileName=outFileName, magic=args.raceMagic)
         else:
             outFileName = args.output
-            romPatcher = RomPatcher(magic=args.raceMagic)
-        musicPatcher = None
-        if args.music is not None:
-            args.patches.append('custom_music.ips')
-            romType = 0
-            with open(args.music, "r") as f:
-                music = json.load(f)
-            musicParams = music.get('params', {})
-            musicMapping = music.get('mapping', {})
-            if args.patchOnly == False:
-                romType |= RomTypeForMusic.VariaSeed
-                if args.area == True:
-                    romType |= RomTypeForMusic.AreaSeed
-                if args.bosses == True:
-                    romType |= RomTypeForMusic.BossSeed
-            else:
-                variaSeed = musicParams.get('varia', False)
-                areaSeed = musicParams.get('area', False)
-                bossSeed = musicParams.get('boss', False)
-                if variaSeed == True:
-                    romType |= RomTypeForMusic.VariaSeed
-                if areaSeed == True:
-                    romType |= RomTypeForMusic.AreaSeed
-                if bossSeed == True:
-                    romType |= RomTypeForMusic.BossSeed
-            musicPatcher = MusicPatcher(romPatcher.romFile, romType)
-        if args.hud == True or args.majorsSplit == "FullWithHUD":
-            args.patches.append("varia_hud.ips")
-        if args.debug == True:
-            args.patches.append("Disable_Clear_Save_Boot")
-        if args.patchOnly == False:
-            romPatcher.applyIPSPatches(args.startLocation, args.patches,
-                                       args.noLayout, gravityBehaviour,
-                                       args.area, args.bosses, args.areaLayoutBase,
-                                       args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
-                                       escapeAttr, minimizerN, args.tourian == 'Fast',
-                                       args.doorsColorsRando, objectivesManager.isVanilla())
-        else:
-            # from customizer permalink, apply previously generated seed ips first
-            if args.seedIps != None:
-                romPatcher.applyIPSPatch(args.seedIps)
+            romPatcher = RomPatcher(settings=patcherSettings, magic=args.raceMagic)
 
-            romPatcher.addIPSPatches(args.patches)
-        if args.sprite is not None:
-            purge = args.ship is not None
-            romPatcher.customSprite(args.sprite, args.customItemNames, args.noSpinAttack, purge) # adds another IPS
-        if args.ship is not None:
-            romPatcher.customShip(args.ship) # adds another IPS
-            # don't color randomize custom ships
-            args.shift_ship_palette = False
+        romPatcher.patchRom()
 
-        # we have to write ips to ROM before doing our direct modifications which will rewrite some parts (like in credits)
-        romPatcher.commitIPS()
-        if args.patchOnly == False:
-            romPatcher.writeObjectives(objectivesManager, itemLocs)
-            romPatcher.writeItemsLocs(itemLocs)
-            romPatcher.writeSplitLocs(args.majorsSplit, itemLocs, progItemLocs)
-            romPatcher.writeItemsNumber()
-            romPatcher.writeSeed(seed) # lol if race mode
-            romPatcher.writeSpoiler(itemLocs, progItemLocs)
-            romPatcher.writeRandoSettings(randoSettings, itemLocs)
-            romPatcher.writeDoorConnections(doors)
-            romPatcher.writeVersion(displayedVersion)
-        if ctrlDict is not None:
-            romPatcher.writeControls(ctrlDict)
-        if args.moonWalk == True:
-            romPatcher.enableMoonWalk()
-        if args.patchOnly == False:
-            romPatcher.writeMagic()
-            romPatcher.writeMajorsSplit(args.majorsSplit)
-        romPatcher.writeAdditionalETanks(args.additionalEtanks)
-        romPatcher.writeHellrunRate(args.hellrunRate)
-        if args.palette == True:
-            paletteSettings = {
-                "global_shift": None,
-                "individual_suit_shift": None,
-                "individual_tileset_shift": None,
-                "match_ship_and_power": None,
-                "seperate_enemy_palette_groups": None,
-                "match_room_shift_with_boss": None,
-                "shift_tileset_palette": None,
-                "shift_boss_palettes": None,
-                "shift_suit_palettes": None,
-                "shift_enemy_palettes": None,
-                "shift_beam_palettes": None,
-                "shift_ship_palette": None,
-                "min_degree": None,
-                "max_degree": None,
-                "invert": None,
-                "no_blue_door_palette": None
-            }
-            for param in paletteSettings:
-                paletteSettings[param] = getattr(args, param)
-            PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
-        if musicPatcher is not None:
-            musicPatcher.replace(musicMapping,
-                                 updateReferences=musicParams.get('room_states', True),
-                                 output=musicParams.get("output", None))
-        romPatcher.end()
-        if args.patchOnly == False:
-            if len(optErrMsgs) > 0:
-                optErrMsgs.append(randoExec.errorMsg)
-                msg = joinErrorMsgs(optErrMsgs)
-            else:
-                msg = randoExec.errorMsg
+        if len(optErrMsgs) > 0:
+            optErrMsgs.append(randoExec.errorMsg)
+            msg = joinErrorMsgs(optErrMsgs)
         else:
-            msg = ''
+            msg = randoExec.errorMsg
+
         if args.rom is None: # web mode
             data = romPatcher.romFile.data
             fileName = '{}.sfc'.format(fileName)

@@ -1,2 +1,6 @@
 *.py[oc]
+*~
+*.log
+**/build/
+**/include/sym/
 web/node_modules

@@ -88,7 +88,7 @@ accessPoints = [
        roomInfo = {'RoomPtr':0x9879, "area": 0x0},
        exitInfo = {'DoorPtr':0x8bc2, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000,
-                   "exitAsmPtr": 0xf030}, # setup_next_escape in rando_escape.asm
+                   "exitAsm": "rando_escape_setup_next_escape"},
        entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}, # unused
        escape = True),
     AccessPoint('Bomb Torizo Room Left', 'Crateria', {},
@@ -211,7 +211,7 @@ accessPoints = [
        roomInfo = {'RoomPtr':0xcd13, "area": 0x3},
        exitInfo = {'DoorPtr':0xa2c4, 'direction': 0x5, "cap": (0x4e, 0x6), "bitFlag": 0x0,
                    "screen": (0x4, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe1fe,
-                   "exitAsmPtr": 0xf7f0},
+                   "exitAsm": "door_transition_boss_exit_fix"},
        entryInfo = {'SamusX':0x2e, 'SamusY':0xb8},
        dotOrientation = 's'),
     AccessPoint('Basement Left', 'WreckedShip', {
@@ -497,7 +497,7 @@ accessPoints = [
        roomInfo = {'RoomPtr':0xa98d, "area": 0x2, 'songs':[0xa9bd]},
        exitInfo = {'DoorPtr':0x93ea, 'direction': 0x7, "cap": (0xc6, 0x2d), "bitFlag": 0x0,
                    "screen": (0xc, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0x0000,
-                   "exitAsmPtr": 0xf7f0},
+                   "exitAsm": "door_transition_boss_exit_fix"},
        entryInfo = {'SamusX':0x383, 'SamusY':0x98, 'song': 0x15},
        dotOrientation = 'se'),
     ### West Maridia
@@ -598,7 +598,9 @@ accessPoints = [
        dotOrientation = 'ne'),
     ### East Maridia
     AccessPoint('Aqueduct Top Left', 'EastMaridia', {
-        'Aqueduct Bottom': lambda sm: sm.canUsePowerBombs()
+        'Aqueduct Bottom': lambda sm: sm.wor(sm.wand(RomPatches.has(RomPatches.AqueductBombBlocks),
+                                                     sm.canDestroyBombWallsUnderwater()),
+                                             sm.canUsePowerBombs())
     }, roomInfo = {'RoomPtr':0xd5a7, "area": 0x4},
        exitInfo = {'DoorPtr':0xa708, 'direction': 0x5, "cap": (0x1e, 0x36), "bitFlag": 0x0,
                    "screen": (0x1, 0x3), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe398},
@@ -696,7 +698,7 @@ accessPoints = [
        roomInfo = {'RoomPtr':0xda60, "area": 0x4},
        exitInfo = {'DoorPtr':0xa96c, 'direction': 0x4, "cap": (0x1, 0x26), "bitFlag": 0x0,
                    "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe3d9,
-                   "exitAsmPtr": 0xf7f0},
+                   "exitAsm": "door_transition_boss_exit_fix"},
        entryInfo = {'SamusX':0x1c8, 'SamusY':0x88},
        dotOrientation = 'e'),
     AccessPoint('Draygon Room Bottom', 'EastMaridia', {

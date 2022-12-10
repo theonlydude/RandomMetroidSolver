@@ -22,6 +22,9 @@ class RomLoader(object):
         elif type(rom) is dict:
             return RomLoaderDict(rom, magic)
 
+    def loadSymbols(self):
+        self.romReader.loadSymbols()
+
     def assignItems(self, locations):
         return self.romReader.loadItems(locations)
 
@@ -30,6 +33,9 @@ class RomLoader(object):
 
     def hasPatch(self, patchName):
         return self.romReader.patchPresent(patchName)
+
+    def readOption(self, name):
+        return self.romReader.romOptions.read(name)
 
     def loadPatches(self):
         RomPatches.ActivePatches = []
@@ -85,6 +91,8 @@ class RomLoader(object):
             RomPatches.ActivePatches.append(RomPatches.AreaRandoGatesOther)
         if self.hasPatch("traverseWreckedShip"):
             RomPatches.ActivePatches += [RomPatches.EastOceanPlatforms, RomPatches.SpongeBathBlueDoor]
+        if self.hasPatch("aqueductBombBlocks"):
+            RomPatches.ActivePatches.append(RomPatches.AqueductBombBlocks)
 
         # check boss rando
         isBoss = self.isBoss()
@@ -107,7 +115,7 @@ class RomLoader(object):
         if self.hasPatch("minimizer_tourian"):
             RomPatches.ActivePatches.append(RomPatches.TourianSpeedup)
             tourian = 'Fast'
-        if self.hasPatch("Escape_Trigger"):
+        if bool(self.readOption("escapeTrigger")):
             RomPatches.ActivePatches.append(RomPatches.NoTourian)
             tourian = 'Disabled'
 
@@ -220,6 +228,12 @@ class RomLoader(object):
         upgrades = [item for item,mask in itemBits.items() if itemsMask & mask != 0]
         upgrades += [item for item,mask in beamBits.items() if beamsMask & mask != 0]
         return upgrades
+
+    def loadEventBitMasks(self):
+        return self.romReader.loadEventBitMasks()
+
+    def getAdditionalEtanks(self):
+        return self.romReader.getAdditionalEtanks()
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

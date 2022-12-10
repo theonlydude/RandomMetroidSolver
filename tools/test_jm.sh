@@ -37,6 +37,9 @@ else
     COMPARE=1
 fi
 
+HAVE_URAND=1
+[[ -f /dev/urandom ]] && HAVE_URAND=0
+
 # get git head
 if [ ${COMPARE} -eq 0 ]; then
     TEMP_DIR=$(mktemp)
@@ -129,7 +132,7 @@ function generate_rando_presets {
     "startLocation": "random",
     $(generate_multi_select "startLocation" "Ceres" "Landing_Site" "Gauntlet_Top" "Green_Brinstar_Elevator" "Big_Pink" "Etecoons_Supers" "Wrecked_Ship_Main" "Firefleas_Top" "Business_Center" "Bubble_Mountain" "Mama_Turtle" "Watering_Hole" "Aqueduct" "Red_Brinstar_Elevator" "Golden_Four")
     "majorsSplit": "random",
-    $(generate_multi_select "majorsSplit" 'Full' 'Major' 'Chozo' 'FullWithHUD')
+    $(generate_multi_select "majorsSplit" 'Full' 'Major' 'Chozo' 'FullWithHUD' 'Scavenger')
     "scavNumLocs": "$(shuf -i 4-10 -n 1)",
     "scavRandomized": "$(random_switch)",
     "maxDifficulty": "random",
@@ -150,15 +153,15 @@ function generate_rando_presets {
     $(generate_multi_select "energyQty" 'ultra_sparse' 'sparse' 'medium' 'vanilla')
     "objective": "random",
     $(generate_multi_select "objective" "kill_kraid" "kill_phantoon" "kill_draygon" "kill_ridley" "kill_one_G4" "kill_two_G4" "kill_three_G4" "kill_all_G4" "kill_spore_spawn" "kill_botwoon" "kill_crocomire" "kill_golden_torizo" "kill_one_miniboss" "kill_two_minibosses" "kill_three_minibosses" "kill_all_mini_bosses" "nothing" "collect_25%_items" "collect_50%_items" "collect_75%_items" "collect_100%_items" "collect_all_upgrades" "clear_crateria" "clear_green_brinstar" "clear_red_brinstar" "clear_wrecked_ship" "clear_kraid's_lair" "clear_upper_norfair" "clear_croc's_lair" "clear_lower_norfair" "clear_west_maridia" "clear_east_maridia" "tickle_the_red_fish" "kill_the_orange_geemer" "kill_shaktool" "activate_chozo_robots" "visit_the_animals" "kill_king_cacatac")
-    "areaRandomization": "$(random_switch)",
-    "lightAreaRandomization": "$(random_switch)",
+    "areaRandomization": "random",
     "areaLayout": "$(random_switch)",
     "doorsColorsRando": "$(random_switch)",
     "allowGreyDoors": "$(random_switch)",
     "bossRandomization": "$(random_switch)",
     "minimizer": "$(random_switch)",
     "minimizerQty": "$(shuf -i 35-100 -n 1)",
-    "tourian": $(random_select 'Vanilla' 'Fast' 'Disabled'),
+    "tourian": "random",
+    $(generate_multi_select "tourian" "Vanilla" "Fast" "Disabled")
     "escapeRando": "$(random_switch)",
     "removeEscapeEnemies": "$(random_switch)",
     "funCombat": "$(random_switch)",
@@ -187,11 +190,19 @@ EOF
     echo -en "${RANDO_PRESET}"
 }
 
+function getseed {
+    if [[ "${HAVE_URAND}" -eq 0 ]]; then
+        od -vAn -N8 -t u8 < /dev/urandom | awk '{print $1}'
+    else
+        echo "${RANDOM}${RANDOM}${RANDOM}${RANDOM}"
+    fi
+}
+
 function computeSeed {
     # generate seed
     let P=$RANDOM%${#PRESETS[@]}
     local PRESET=${PRESETS[$P]}
-    local SEED="$RANDOM$RANDOM$RANDOM$RANDOM"
+    local SEED=$(getseed)
 
     local RANDO_PRESET=$(generate_rando_presets "${SEED}" "${PRESET}")
     local PARAMS=$(generate_params "${SEED}" "${PRESET}" "${RANDO_PRESET}")
@@ -222,22 +233,24 @@ function computeSeed {
 	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
 	fi
     fi
-    STARTAP_NEW=$(echo "${RANDO_OUT}" | grep startLocation | cut -d ':' -f 2)
-    PROGSPEED_NEW=$(echo "${RANDO_OUT}" | grep progressionSpeed | cut -d ':' -f 2)
-    MAJORSSPLIT_NEW=$(echo "${RANDO_OUT}" | grep majorsSplit | cut -d ':' -f 2)
-    MORPH_NEW=$(echo "${RANDO_OUT}" | grep morphPlacement | cut -d ':' -f 2)
+    STARTAP_NEW=$(echo "${RANDO_OUT}" | grep ^startLocation | cut -d ':' -f 2)
+    PROGSPEED_NEW=$(echo "${RANDO_OUT}" | grep ^progressionSpeed | cut -d ':' -f 2)
+    MAJORSSPLIT_NEW=$(echo "${RANDO_OUT}" | grep ^majorsSplit | cut -d ':' -f 2)
+    MORPH_NEW=$(echo "${RANDO_OUT}" | grep ^morphPlacement | cut -d ':' -f 2)
+    OBJECTIVES=$(echo "${RANDO_OUT}" | grep ^objectives | cut -d ':' -f 2)
 
-    RANDO_PRESET_NEW="${SEED}_${PRESET}_${PROGSPEED_NEW}.json"
+    RANDO_PRESET_NEW="logs/${SEED}_${PRESET}_${PROGSPEED_NEW}.json"
 
     if [ "${OLD_MD5}" != "${NEW_MD5}" -a ${COMPARE} -eq 0 ]; then
-	if [ "${OLD_MD5}" = "old n/a" ] && [ "${NEW_MD5}" = "new n/a" ]; then
+	if [ "${OLD_MD5}" == "old n/a" ] && [ "${NEW_MD5}" == "new n/a" ]; then
 	    MD5="n/a"
 	else
-            if [ "${OLD_MD5}" = "old n/a" ]; then
+            if [ "${OLD_MD5}" == "old n/a" ]; then
                 MD5="old too slow"
             else
 	        MD5="mismatch"
 	        echo "OLD: ${OLD_MD5} NEW: ${NEW_MD5}"
+                mv ${RANDO_PRESET} ${RANDO_PRESET_NEW}
             fi
 	fi
     else
@@ -247,18 +260,18 @@ function computeSeed {
     # solve seed
     ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}*.sfc)
     if [ $? -ne 0 ]; then
-	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};" | tee -a ${CSV}
+	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PRESET};${OBJECTIVES}" | tee -a ${CSV}
         mv ${RANDO_PRESET} ${RANDO_PRESET_NEW}
 	exit 0
     fi
 
-    RANDO_PRESET_NEW="${ROM_GEN}.json"
+    RANDO_PRESET_NEW="logs/${ROM_GEN}.json"
     mv ${RANDO_PRESET} ${RANDO_PRESET_NEW}
 
     if [ ${COMPARE} -eq 0 ]; then
-	SOLVER_OUT=$(${TIME} -f "\t%E real" $OLD_PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor --runtime 10 --pickupStrategy any 2>&1)
+	SOLVER_OUT=$(${TIME} -f "\t%E real" $OLD_PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor --runtime 10 --pickupStrategy all 2>&1)
 	if [ $? -ne 0 ]; then
-            echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};" | tee -a ${CSV}
+            echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PRESET};${OBJECTIVES}" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
             echo "${RANDO_OUT}" >> ${LOG}
             echo "${SOLVER_OUT}" >> ${LOG}
@@ -274,9 +287,9 @@ function computeSeed {
 	DUP_OLD=1
     fi
 
-    SOLVER_OUT=$(${TIME} -f "\t%E real" $PYTHON ~/RandomMetroidSolver/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor --runtime 10 --pickupStrategy any 2>&1)
+    SOLVER_OUT=$(${TIME} -f "\t%E real" $PYTHON ~/RandomMetroidSolver/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor --runtime 10 --pickupStrategy all 2>&1)
     if [ $? -ne 0 ]; then
-        echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};" | tee -a ${CSV}
+        echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PRESET}" | tee -a ${CSV}
         echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
         echo "${RANDO_OUT}" >> ${LOG}
         echo "${SOLVER_OUT}" >> ${LOG}
@@ -295,7 +308,7 @@ function computeSeed {
     if [ ${DUP_NEW} -eq 0 -o ${DUP_OLD} -eq 0 ]; then
 	DUP="dup major detected"
     fi
-    echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${DUP}" | tee -a ${CSV}
+    echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${DUP};${PRESET};${OBJECTIVES}" | tee -a ${CSV}
 
     if [ ${COMPARE} -eq 0 ]; then
 	DIFF=$(diff ${ROM_GEN}.old ${ROM_GEN}.new)
@@ -393,14 +406,35 @@ for MORPH in "early" "normal" "late"; do
     printf "%-24s" "${MORPH}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
 done
 echo ""
+echo "Objectives"
+for OBJ in "kill kraid" "kill phantoon" "kill draygon" "kill ridley" "kill one G4" "kill two G4" "kill three G4" "kill all G4" "kill spore spawn" "kill botwoon" "kill crocomire" "kill golden torizo" "kill one miniboss" "kill two minibosses" "kill three minibosses" "kill all mini bosses" "collect 25% items" "collect 50% items" "collect 75% items" "collect 100% items" "collect all upgrades" "clear crateria" "clear green brinstar" "clear red brinstar" "clear wrecked ship" "clear kraid's lair" "clear upper norfair" "clear croc's lair" "clear lower norfair" "clear west maridia" "clear east maridia" "tickle the red fish" "kill the orange geemer" "kill shaktool" "activate chozo robots" "visit the animals" "kill king cacatac"; do
+    TOTAL=$(grep "${OBJ}" ${CSV}  | wc -l)
+    ERROR=$(grep "${OBJ}" ${CSV} | grep -E '^error' | wc -l)
+    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
+    printf "%-24s" "${OBJ}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+done
+echo ""
 echo "Skill preset"
 for PRESET in "regular" "newbie" "master"; do
-    TOTAL=$(grep "${PRESET}.json" ${CSV}  | wc -l)
-    ERROR=$(grep "${PRESET}.json" ${CSV} | grep -E '^error' | wc -l)
+    TOTAL=$(grep "${PRESET}" ${CSV}  | wc -l)
+    ERROR=$(grep "${PRESET}" ${CSV} | grep -E '^error' | wc -l)
     [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
     printf "%-24s" "${PRESET}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
-
 done
+
+echo ""
+echo "Parameters combinations failure"
+for PROGSPEED in "speedrun" "slowest" "slow" "medium" "fast" "fastest" "VARIAble"; do
+    for MAJORSPLIT in "Major" "Full" "Chozo" "FullWithHUD" "Scavenger"; do
+        TOTAL=$(grep ";${MAJORSPLIT};" ${CSV} | grep ";${PROGSPEED};" | wc -l)
+        ERROR=$(grep ";${MAJORSPLIT};" ${CSV} | grep ";${PROGSPEED};" | grep -E '^error' | wc -l)
+        if [ ${TOTAL} -ne 0 -a ${ERROR} -ne 0 ]; then
+            PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+            printf "%-24s" "${PROGSPEED}:${MAJORSPLIT}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+        fi
+    done
+done
+
 
 TOTAL_COUNT=$(wc -l ${CSV} | awk '{print $1}')
 echo "total: ${TOTAL_COUNT}"

@@ -8,15 +8,20 @@
 ;;;
 ;;; Add a new menu in pause to display objectives to finish the seed.
 ;;;
-;;; compile with asar (https://github.com/RPGHacker/asar)
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 lorom
-arch snes.cpu
+arch 65816
 
 incsrc "event_list.asm"
+incsrc "constants.asm"
 
-!timer = $05b8
-!obj_check_period = #$0020	; unit:frames, works only in powers of 2
+incsrc "sym/utils.asm"
+incsrc "sym/rando_escape.asm"
+incsrc "sym/custom_music.asm"
+incsrc "sym/disable_screen_shake.asm"
+
+!timer = !timer1
 !current_room = $079b
 !samus_x = $0AF6
 !samus_y = $0AFA
@@ -24,20 +29,19 @@ incsrc "event_list.asm"
 
 ;;; external routines
 !song_routine = $808fc1
-!fix_timer_gfx = $a1f2c0	; in new_game.asm (common routines section)
-!escape_setup = $8ff500		; in rando_escape.asm
 
 ;;; custom music patch detection for escape music trigger
-!custom_music_marker = $8fe86b
 !custom_music_id = #$caca
-!custom_music_escape = $8fe871
+
+;;; no screen shake patch detection for escape music trigger
+!disable_earthquake_id = #$0060
 
 ;;; for items % objectives
 !CollectedItems  = $7ED86E
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; ROM OPTIONS
-org $A1F5FE
+org !disabled_tourian_escape_flag
 ;;; if non-zero trigger escape as soon as objectives are completed
 escape_option:
 	db $00
@@ -45,6 +49,16 @@ escape_option:
 ;;; high bit: play sfx on objective completion (don't use for vanilla objectives)
 objectives_options_mask:
 	db $01
+
+;;; Change G4 SFX priority to 1, because we play it on obj completion (when non-vanilla objectives)
+!SPC_Engine_Base = $CF6C08
+
+macro orgSPC(addr)
+org !SPC_Engine_Base+<addr>
+endmacro
+
+%orgSPC($38D0)
+        dw $39A8
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; HIJACKS
@@ -64,10 +78,6 @@ org $82A505
 org $82A61D
         jsr (new_pause_palettes_func_list,x)
 
-;;; default "ship refill" if we have fast tourian but not area rando
-org $8ff700
-	rts
-
 ;;; For minimizer or scavenger with ridley as last loc, disable
 ;;; elevator music change when boss drops appear if escape is
 ;;; triggered.
@@ -85,29 +95,11 @@ org $A6C5ED
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; CODE
-
-;;; helper macros to generate python addresses dict
-macro printAddrEntry(entry)
-print "    '<entry>': ValueSingle(0x",pc,"),"
-endmacro
-
-macro printObjectiveFunction(func)
-%printAddrEntry(objective[<func>])
-endmacro
-
-macro printSpecialAddr(entry, addr)
-print "    '__<entry>': 0x",<addr>,","
-endmacro
-
 org $a1fa80
+print "A1 start: ", pc
 ;;; checks for objectives periodically
-print "from rom.addressTypes import ValueList, ValueSingle"
-print "# generated from asar output"
-print "# A1 start: ", pc
-print "objectivesAddr = {"
 ;;; seed objectives checker functions pointers, max 5, list ends with $0000
-print "    # --- objectives checker functions: ", pc, " ---"
-%printAddrEntry(objectivesList)
+print " --- objectives checker functions: ", pc, " ---"
 objective_funcs:
         dw kraid_is_dead
         dw phantoon_is_dead
@@ -181,7 +173,6 @@ check_objectives_events:
 objective_events:
 %objectivesCompletedEventArray()
 
-
 ;;; copy-pasted from a PLM instruction
 clear_music_queue:
 	PHX
@@ -201,19 +192,23 @@ clear_music_queue:
 
 ;;; copied from escape rooms setup asm
 room_earthquake:
+        ;; don't trigger if no screen shake patch if detected
+        lda.l disable_screen_shake_marker : and #$00ff
+        cmp !disable_earthquake_id : beq .end
 	LDA #$0018             ;\
 	STA $183E              ;} Earthquake type = BG1, BG2 and enemies; 3 pixel displacement, horizontal
 	LDA #$FFFF
 	STA $1840
+.end:
 	rts
 
 trigger_escape:
 	phx : phy
-	jsl !escape_setup
+	jsl rando_escape_escape_setup_l
 	jsr room_earthquake	; could not be called by setup asm since not in escape yet
 	; load timer graphics
 	lda #$000f : jsl $90f084
-	jsl !fix_timer_gfx
+	jsl utils_fix_timer_gfx
 	lda #$0002 : sta $0943	 ; set timer state to 2 (MB timer start)
 	jsr clear_music_queue
 	jsr trigger_escape_music
@@ -223,14 +218,14 @@ trigger_escape:
 
 trigger_escape_music:
 	lda #$0000 : jsl !song_routine ; stop current music
-	lda !custom_music_marker
+	lda.l custom_music_marker
 	cmp !custom_music_id : beq .custom_music
 	lda #$ff24 : jsl !song_routine ; load boss 1 music data
 	lda #$0007 : jsl !song_routine ; load music track 2
 	bra .end
 .custom_music:
-	lda !custom_music_escape : ora #$ff00 : jsl !song_routine
-	lda !custom_music_escape+1 : and #$00ff : jsl !song_routine
+	lda custom_music_escape : ora #$ff00 : jsl !song_routine
+	lda custom_music_escape+1 : and #$00ff : jsl !song_routine
 .end:
 	rts
 
@@ -245,7 +240,6 @@ boss_drops:
 ;;; objectives checker functions, set carry if objective is completed
 ;;; helper macro to autodef simple event checker functions
 macro eventChecker(func_name, event)
-%printObjectiveFunction(<func_name>)
 <func_name>:
 	lda <event> : jsl !check_event
 	rts
@@ -256,7 +250,6 @@ endmacro
 %eventChecker(draygon_is_dead, !draygon_event)
 %eventChecker(ridley_is_dead, !ridley_event)
 
-%printObjectiveFunction(all_g4_dead)
 all_g4_dead:
         jsr kraid_is_dead
         bcc .no
@@ -275,7 +268,6 @@ all_g4_dead:
 %eventChecker(crocomire_is_dead, !croc_event)
 %eventChecker(golden_torizo_is_dead, !GT_event)
 
-%printObjectiveFunction(all_mini_bosses_dead)
 all_mini_bosses_dead:
         jsr spore_spawn_is_dead
         bcc .no
@@ -336,7 +328,6 @@ nb_killed_minibosses:
         rts
 
 macro nbBossChecker(n, bossType)
-%printObjectiveFunction(<bossType>_<n>_killed)
 <bossType>_<n>_killed:
 	phx
         jsr nb_killed_<bossType>es
@@ -355,13 +346,12 @@ endmacro
 %nbBossChecker(3,miniboss)
 
 macro itemPercentChecker(percent)
-%printObjectiveFunction(collect_<percent>_items)
 collect_<percent>_items:
 	lda !CollectedItems
-%printSpecialAddr(pct<percent>, hex(.cmpval+1))
-.cmpval:
-        cmp.w #<percent>              ; set carry when A is >= value
+        cmp.l .pct              ; set carry when A is >= value
         rts
+.pct:
+        dw <percent>
 endmacro
 
 %itemPercentChecker(25)
@@ -369,7 +359,6 @@ endmacro
 %itemPercentChecker(75)
 %itemPercentChecker(100)
 
-%printObjectiveFunction(nothing_objective)
 nothing_objective:
 	;; if option enabled, complete objective only when in
 	;; crateria/blue brin, in case we trigger escape immediately
@@ -394,13 +383,10 @@ nothing_objective:
 %eventChecker(orange_geemer, !orange_geemer_event)
 %eventChecker(shak_dead, !shak_dead_event)
 
-%printAddrEntry(itemsMask)
 all_items_mask:
 	dw $f32f
-%printAddrEntry(beamsMask)
 all_beams_mask:
 	dw $100f
-%printObjectiveFunction(all_major_items)
 all_major_items:
 	lda $09A4 : cmp.l all_items_mask : bne .not
 	lda $09A8 : cmp.l all_beams_mask : bne .not
@@ -422,7 +408,6 @@ all_major_items:
 %eventChecker(west_maridia_cleared, !west_maridia_cleared_event)
 %eventChecker(east_maridia_cleared, !east_maridia_cleared_event)
 
-%printObjectiveFunction(all_chozo_robots)
 all_chozo_robots:
 	jsr golden_torizo_is_dead : bcc .end
 	lda !BT_event : jsl !check_event : bcc .end
@@ -431,7 +416,6 @@ all_chozo_robots:
 .end:
 	rts
 
-%printObjectiveFunction(visited_animals)
 visited_animals:
 	lda !visited_etecoons_event : jsl !check_event : bcc .etecoons
 	lda !visited_dachora_event : jsl !check_event : bcs .end
@@ -453,7 +437,7 @@ visited_animals:
 
 %eventChecker(king_cac_dead, !king_cac_event)
 
-print "    # A1 end: ", pc
+print "A1 end: ", pc
 ;; warnpc $a1faff
 
 ;;; only sink the ground in G4 room if objectives are completed.
@@ -603,7 +587,7 @@ warnpc $aaf82f
 ;;; continue in 82 after InfoStr in seed_display.asm
 org $82FB6D
 
-print "    # Pause stuff: ", pc
+print "Pause stuff: ", pc
 
 ;;;
 ;;; pause menu objectives display
@@ -1058,8 +1042,7 @@ func_obj2map_fading_out:
 
 ;;; sprites for completed objectives.
 ;;; an oam entry is made of five bytes: (s000000 xxxxxxxxx) (yyyyyyyy) (YXppPPPt tttttttt)
-print "    # *** completed spritemaps: ", pc
-%printAddrEntry(objectivesSpritesOAM)
+print " *** completed spritemaps: ", pc
 first_spritemap:
         dw $0001, $0000 : db $00 : dw $3E8C
 second_spritemap:
@@ -1074,7 +1057,7 @@ fifth_spritemap:
 completed_spritemaps:
 	dw first_spritemap, second_spritemap, third_spritemap, fourth_spritemap, fifth_spritemap
 
-print "    # 82 end: ", pc
+print "82 end: ", pc
 
 ;;; start of percent patch
 warnpc $82ffbf
@@ -1115,7 +1098,7 @@ org $B695E0
 
 ;;; blank objective screen from B6F200 to B6FA00
 org $B6F200
-%printAddrEntry(objectivesText)
+objectivesText:
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
@@ -1149,11 +1132,3 @@ org $B6F200
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
-
-print "}"
-;;; update special value totalItemsPercent
-print "_pctList = []"
-print "for pct in [25,50,75,100]:"
-print "    _pctList.append(objectivesAddr['__pct%d' % pct])"
-print "    del objectivesAddr['__pct%d' % pct]"
-print "objectivesAddr['totalItemsPercent'] = ValueList(_pctList)"

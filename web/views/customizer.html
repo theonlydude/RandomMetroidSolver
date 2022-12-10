@@ -434,7 +434,7 @@ function doSubmit() {
         }
 
         var dataDict = {};
-        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell"];
+        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "color_blind", "disable_screen_shake", "noflashing"];
 
         for(var i=0; i<elems.length; i++) {
             var elem = document.getElementById(elems[i]);
@@ -785,7 +785,11 @@ function loadPlaylistCallbak(e) {
             for(var i=0; i<keys.length; i++) {
                 var id = keys[i];
                 var song = data[id];
-                document.getElementById(id).innerHTML = song;
+                var elem = document.getElementById(id);
+                // don't crash if song in playlist is not in the GUI
+                if(elem) {
+                    elem.innerHTML = song;
+                }
             }
         })();
     }
@@ -835,7 +839,7 @@ if seedInfo != None:
     response.write("permalink = true;", escape=False)
     response.write("seedKey = '{}';".format(seedInfo["key"]), escape=False)
     response.write("isVARIA = true;", escape=False)
-    response.write("isArea = {};".format("true" if seedParams["areaRandomization"] in ["on", "random"] else "false"), escape=False)
+    response.write("isArea = {};".format("true" if seedParams["areaRandomization"] in ["full", "light", "random"] else "false"), escape=False)
     response.write("isBoss = {};".format("true" if seedParams["bossRandomization"] in ["on", "random"] else "false"), escape=False)
     pass
 }}
@@ -1001,17 +1005,14 @@ window.onload = function(){
     //                     }
     //                 });
 
-    //             } else {
-    //                 // detect race mode patch
-    //                 isRace = false;
-    //                 var bytes = new Uint8Array(e.target.result);
-    //                 for(var addr=0x1C0200; addr<0x1C0210; addr++) {
-    //                     if(bytes[addr] != 0xff) {
-    //                         isRace = true;
-    //                         console.log("race mode detected");
-    //                         break;
-    //                     }
-    //                 }
+                    // detect beam doors patch from seed to customize
+                    beamDoorsPatch = bytes[0x226e5] == 0x0D;
+                    // detect area layout patch
+                    isArea = bytes[0x788A0] == 0x2b;
+                    // detect Phantoon_Eye_Door patch
+                    isBoss = bytes[0x7ccaf] == 0x91;
+
+                    console.log("isArea: "+isArea+" isBoss: "+isBoss+" isVARIA: "+isVARIA+" isRace: "+isRace);
 
     //                 // detect varia default patches
     //                 isVARIA = false;
@@ -1591,9 +1592,23 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
 <p>This patch was developed by Adam.</p>"
     },
     {
+      element: "#color_blindStep",
+      title: "Color blind friendly colors for doors / Disable screen shake",
+      content: "<p>Color blind friendly colors for Missile, Super and Power Bomb doors.</p>\
+<p>This patch was developed by Colors and theonlydude.</p>\
+<p>Disable screen shake during escape and lava/acid rising earthquake.</p>\
+<p>This patch was developed by flo.</p>"
+    },
+    {
+      element: "#noflashingStep",
+      title: "Disable flashing",
+      content: "<p>Disable bosses, escape and power bomb flashing, Landing Site lightning, ...</p>\
+<p>This patch was developed by Kara.</p>"
+    },
+    {
       element: "#hellStep",
       title: "Challenges",
-      content: "<p>Permanent lava physics: Samus physic is always as she's in lava until Gravity Suit is found</p>\
+      content: "<p>Permanent lava physics: Samus physics behave as she's in lava/acid until Gravity Suit is found</p>\
 <p>Permanent hell run: Samus life is drained constently in non heated rooms until heat protected suit is found. In heated rooms life is drained twice as fast.</p>\
 <b>Warning:</b>Not taken into account by the logic, may render the seed unfinishable.\
 <p>Patches developed by flo.</p>"
@@ -1601,8 +1616,8 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
     {
       element: "#hellOptionsStep",
       title: "Challenges options",
-      content: "<p>Customize the amount of energy removed during hellruns, from 0% (no damage) to 400% (4 times vanila damage). Usefull with permanent hellrun to reduce the amount of energy removed, but can be used independently for easier/harder hellruns.</p>\
-<p>Set the number of Etanks available from start. Between 0 and 14. Usefull with permanent hellrun but can be used independently for easier seeds.</p>"
+      content: "<p>Customize the amount of energy removed during hellruns, from 0% (no damage) to 400% (4 times vanila damage). Useful with permanent hellrun to reduce the amount of energy removed, but can be used independently for easier/harder hellruns.</p>\
+<p>Set the number of Etanks available from start. Between 0 and 14. Useful with permanent hellrun but can be used independently for easier seeds.</p>"
     },
     {
       element: "#widescreenStep",
@@ -1650,6 +1665,18 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
   // Initialize the tour
   tour.init();
 
+  if (typeof step === "object") {
+    // step is an event, not a number. Get ID from parent element
+    let parent = event.target.parentNode
+    step = parent.id
+    while (!step) {
+        parent = parent.previousElementSibling
+        step = parent.id
+    }
+  }
+  if (typeof step === 'string') {
+    step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
+  }
   // Start the tour
   if(step != -1) {
     tour.goTo(step);
@@ -1715,8 +1742,8 @@ def displayNumber(id, min, max, default, step="1"):
                 <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr>
                   <td>ROM:</td>
-                  <td>{{=INPUT(_type="file", _accept=".smc,.sfc", _name="uploadFile", _id="uploadFile", _class="full")}}</td>
-                  <td><button type="button" onclick="startTheTour(0)" id="uploadFileStep">?</button></td>
+                  <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile", _class="full")}}</td>
+                  <td id="uploadFileStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
             </div>
@@ -1729,7 +1756,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="third">{{displayCheckbox("colorsRandomization")}}Colors Randomization</td>
                 <td class="full"><span id="textLeft" class="floatleft">-180</span><div id="degree_slider_range" class="sixty floatleft"></div><span id="textRight">180</span></td>
                 <td><button id="invert" type="button" onclick="invertFunc()">Invert</button></td>
-                <td><button type="button" onclick="startTheTour(2)" id="colorsRandomizationStep">?</button></td>
+                <td id="colorsRandomizationStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr>
                 <td colspan="4">{{displayCheckbox("globalShift")}}<span id="globalShiftText">Use the same degree to randomize all the elements</span></td>
@@ -1757,17 +1784,17 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
                   <td>{{displayCheckbox("customSpriteEnable")}}</td>
                   <td><span id="customSpriteEnableText">Replace Samus sprite with a custom one.</span></td>
-                  <td><button type="button" onclick="startTheTour(3)" id="customSpriteStep">?</button></td>
+                  <td id="customSpriteStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
                 <tr>
                   <td>{{displayCheckbox("customItemsEnable")}}</td>
                   <td><span id="customItemsEnableText">Replace some items names to match the custom sprite universe.</span></td>
-                  <td><button type="button" onclick="startTheTour(4)" id="customItemsStep">?</button></td>
+                  <td id="customItemsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
                 <tr>
                   <td>{{displayCheckbox("noSpinAttack")}}</td>
                   <td><span id="noSpinAttackText">Use the same animation for Screw Attack with or without Space Jump.</span></td>
-                  <td><button type="button" onclick="startTheTour(5)" id="noSpinAttackStep">?</button></td>
+                  <td id="noSpinAttackStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="customSpriteRandom" type="button" onclick="randomizeTarget(event, 'customSprite')" class="small center"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -1783,7 +1810,7 @@ def displayNumber(id, min, max, default, step="1"):
       response.write("</optgroup>\n", escape=False)
       response.write("<optgroup label=\"{}\">\n".format(group), escape=False)
       pass
-    response.write("  <option data-img-src=\"/solver/static/images/{}.png\" data-img-label=\"{}\" value=\"{}\" {}>{}</option>\n".format(key, customSprites[key]["name"], key, 'selected="selected"' if key == session.customizer['customSprite'] else "", key), escape=False)
+    response.write("  <option data-img-src=\"/solver/static/images/sprites/{}.png\" data-img-label=\"{}\" value=\"{}\" {}>{}</option>\n".format(key, customSprites[key]["name"], key, 'selected="selected"' if key == session.customizer['customSprite'] else "", key), escape=False)
     pass
 }}
                         </optgroup>
@@ -1794,7 +1821,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
                   <td>{{displayCheckbox("customShipEnable")}}</td>
                   <td><span id="customShipEnableText">Replace Samus Ship sprite with a custom one.</span></td>
-                  <td><button type="button" onclick="startTheTour(6)" id="customShipStep">?</button></td>
+                  <td id="customShipStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="customShipRandom" type="button" onclick="randomizeTarget(event, 'customShip')" class="small center"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -1803,7 +1830,7 @@ def displayNumber(id, min, max, default, step="1"):
                       <select class="filldropdown" id="customShip" name="customShip">
 {{
   for (key, value) in sorted(customShips.items(), key=lambda x: x[1]['index']):
-    response.write("  <option data-img-src=\"/solver/static/images/{}.png\" data-img-label=\"{}\" value=\"{}\" {}>{}</option>\n".format(key, customShips[key]["name"], key, 'selected="selected"' if key == session.customizer['customShip'] else "", key), escape=False)
+    response.write("  <option data-img-src=\"/solver/static/images/ships/{}.png\" data-img-label=\"{}\" value=\"{}\" {}>{}</option>\n".format(key, customShips[key]["name"], key, 'selected="selected"' if key == session.customizer['customShip'] else "", key), escape=False)
     pass
 }}
                         </optgroup>
@@ -1819,7 +1846,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
                   <td><span id="customMusicEnableText">Music</span></td>
                   <td>{{=SELECT(*["Don't touch", "Disable", "Randomize", "Customize", "Restore"], **dict(_id="music", _class="full", _onchange="musicSelectChange()", value=session.customizer["music"]))}}</td>
-                  <td><button type="button" onclick="startTheTour(7)" id="customMusicStep">?</button></td>
+                  <td id="customMusicStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
             <div id="musicCustomizer" class="margin_top">
@@ -1882,7 +1909,7 @@ for name, values in musics["_dropdown"].items():
 }}
               </table>
             </div>
-            <h4>Patches<span class="right"><button type="button" onclick="startTheTour(8)" id="patchesStep">?</button></span></h4>
+            <h4>Patches<span class="right" id="patchesStep"><button type="button" onclick="startTheTour(event)">?</button></span></h4>
             <p>
               Patches to customize your ROM.
             </p>
@@ -1893,7 +1920,7 @@ for name, values in musics["_dropdown"].items():
               </table>
               <table class="full">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
-                <tr id="gamepadMappingStep">
+                <tr>
                   <td>
                     {{displayCheckbox("gamepadMapping")}}
                     <span id="gamepadMappingText">Use gamepad mapping from preset: </span>
@@ -1901,23 +1928,24 @@ for name, values in musics["_dropdown"].items():
                   <td>
                     {{=SELECT(OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.customizer["preset"], _class="chzn-select"))}}
                   </td>
-                  <td><button type="button" onclick="startTheTour(9)">?</button></td>
+                  <td id="gamepadMappingStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
+
               <table class="full">
                 <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
                 <tr><td colspan="2"><h5 class="center"><b>Game comfort</b></h5></td><td></td></tr>
               </table>
               <table class="full">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
-                <tr id="itemsoundsStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("itemsounds")}}
                     <span id="itemsoundsText">Remove fanfare when picking up an item</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(10)">?</button></td>
+                  <td id="itemsoundsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="ElevatorDoorsStep">
+                <tr>
                   <td>
                     {{displayCheckbox("elevators_speed")}}
                     <span id="elevators_speedText">Accelerate elevators transitions</span>
@@ -1926,35 +1954,61 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("fast_doors")}}
                     <span id="fast_doorsText">Accelerate doors transitions</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(11)">?</button></td>
+                  <td id="ElevatorDoorsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="spinjumprestartStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("spinjumprestart")}}
                     <span id="spinjumprestartText">Spin jump restart (a.k.a. Respin)</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(12)">?</button></td>
+                  <td id="spinjumprestartStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="rando_speedStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("rando_speed")}}
                      <span id="rando_speedText">Momentum conservation (a.k.a. Speedkeep)</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(13)">?</button></td>
+                  <td id="rando_speedStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="Infinite_Space_JumpStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("Infinite_Space_Jump")}}
                      <span id="Infinite_Space_JumpText">Infinite Space Jump</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(14)">?</button></td>
+                  <td id="Infinite_Space_JumpStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="refill_before_saveStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("refill_before_save")}}
                      <span id="refill_before_saveText">Refill energy and ammo when saving</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(15)">?</button></td>
+                  <td id="refill_before_saveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+              </table>
+
+              <table class="full">
+                <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+                <tr><td colspan="2"><h5 class="center"><b>Accessibility</b></h5></td><td></td></tr>
+              </table>
+              <table class="full">
+                <colgroup><col class="half" /><col class="half" /></colgroup>
+                <tr>
+                  <td>
+                    {{displayCheckbox("color_blind")}}
+                    <span id="color_blindText">Color blind friendly colors for doors</span>
+                  </td>
+                  <td>
+                    {{displayCheckbox("disable_screen_shake")}}
+                    <span id="disable_screen_shakeText">Disable screen shake during escape</span>
+                  </td>
+                  <td id="color_blindStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    {{displayCheckbox("noflashing")}}
+                    <span id="noflashingText">Remove flashing</span>
+                  </td>
+                  <td id="noflashingStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
 
@@ -1964,7 +2018,7 @@ for name, values in musics["_dropdown"].items():
               </table>
               <table class="full">
                 <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter" /></colgroup>
-                <tr id="hellStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("lava_acid_physics")}}
                     <span id="lava_acid_physicsText">Permanent lava physics</span>
@@ -1973,9 +2027,9 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("hell")}}
                     <span id="hellText">Permanent hell run</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(16)">?</button></td>
+                  <td id="hellStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="hellOptionsStep">
+                <tr>
                   <td>
                     <span id="hellrun_rateText">Hell run rate percentage</span>
                   </td>
@@ -1988,7 +2042,7 @@ for name, values in musics["_dropdown"].items():
                   <td>
                     {{displayNumber("etanks", "0", "14", "0", "1")}}
                   </td>
-                  <td><button type="button" onclick="startTheTour(17)">?</button></td>
+                  <td id="hellOptionsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
 
@@ -1998,33 +2052,33 @@ for name, values in musics["_dropdown"].items():
               </table>
               <table class="full">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
-                <tr id="widescreenStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("widescreen")}}
                     <span id="widescreenText">Widescreen on  <a href="https://github.com/DerKoun/bsnes-hd/releases" target="_blank">bsnes-hd emulator</a></span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(18)">?</button></td>
+                  <td id="widescreenStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="AimAnyButtonStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("AimAnyButton")}}
                     <span id="AimAnyButtonText">Allows the aim buttons to be assigned to any button</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(19)">?</button></td>
+                  <td id="AimAnyButtonStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="max_ammo_displayStep">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("max_ammo_display")}}
                     <span id="max_ammo_displayText">Max Ammo Display</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(20)">?</button></td>
+                  <td id="max_ammo_displayStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="supermetroid_msu1Step">
+                <tr>
                   <td colspan="2">
                     {{displayCheckbox("supermetroid_msu1")}}
                     <span id="supermetroid_msu1Text">Play music with MSU1 chip on SD2SNES</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(21)">?</button></td>
+                  <td id="supermetroid_msu1Step"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
 
@@ -2034,7 +2088,7 @@ for name, values in musics["_dropdown"].items():
               </table>
               <table class="full">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
-                <tr id="remove_itemsoundsStep">
+                <tr>
                   <td>
                     {{displayCheckbox("remove_itemsounds")}}
                     <span id="remove_itemsoundsText">Restore vanilla fanfare when picking up an item</span>
@@ -2043,9 +2097,9 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_Infinite_Space_Jump")}}
                     <span id="remove_Infinite_Space_JumpText">Restore vanilla Space Jump</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(22)">?</button></td>
+                  <td id="remove_itemsoundsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="remove_ElevatorDoorsStep">
+                <tr>
                   <td>
                     {{displayCheckbox("remove_elevators_speed")}}
                     <span id="remove_elevators_speedText">Restore vanilla elevators transitions</span>
@@ -2054,9 +2108,9 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_fast_doors")}}
                     <span id="remove_fast_doorsText">Restore vanilla doors transitions</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(23)">?</button></td>
+                  <td id="remove_ElevatorDoorsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-                <tr id="remove_rando_speedStep">
+                <tr>
                   <td>
                     {{displayCheckbox("remove_rando_speed")}}
                     <span id="remove_rando_speedText">Restore vanilla momentum loss on landing</span>
@@ -2065,7 +2119,7 @@ for name, values in musics["_dropdown"].items():
                     {{displayCheckbox("remove_spinjumprestart")}}
                     <span id="remove_spinjumprestartText">Restore vanilla spin jump</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(24)">?</button></td>
+                  <td id="remove_rando_speedStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
           </div>
@@ -2090,7 +2144,7 @@ if seedInfo != None:
             </table>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
-              <tr id="vanillaUploadFileStep">
+              <tr>
                 <td>Vanilla ROM:</td>
                 <td>
                   <div id="vanillaROMVisibility">
@@ -2100,7 +2154,7 @@ if seedInfo != None:
                     Vanilla ROM already loaded
                   </div>
                 </td>
-                <td><button type="button" onclick="startTheTour(1)">?</button></td>
+                <td id="vanillaUploadFileStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
             </table>
             <h4>Game Details</h4>
@@ -2160,19 +2214,30 @@ if seedInfo != None:
             <h4>Objectives</h4>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
-              <tr {{=setBold("objective")}}><td>Objectives to access Tourian</td><td>{{=seedParams["objective"]}}</td></tr>
-{{    if seedParams["objective"] == "random":}}
+              <tr {{=setBold("objective")}}><td>Objectives to access Tourian</td>
+{{    if seedParams["objectiveRandom"] == "true":}}
+                <td>random</td></tr>
+              <tr {{=setBold("nbObjective")}}><td>Number of Objectives</td><td>{{=seedParams["nbObjective"]}}</td></tr>
               <tr><td>Objectives pool</td><td>{{=seedParams["objectiveMultiSelect"]}}</td></tr>
+{{    else:}}
+                <td>{{=seedParams["objective"]}}</td></tr>
 {{        pass}}
               <tr {{=setBold("tourian")}}><td>Tourian</td><td>{{=seedParams["tourian"]}}</td></tr>
+{{    if seedParams["tourian"] == "random":}}
+              <tr><td>Tourian pool pool</td><td>{{=seedParams["tourianMultiSelect"]}}</td></tr>
+{{        pass}}
             </table>
 
             <h4>Areas/Doors/Bosses/Escape Randomization</h4>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr {{=setBold("areaRandomization")}}><td>Areas randomization</td><td>{{=seedParams["areaRandomization"]}}</td></tr>
+{{    if seedParams["areaRandomization"] == "random":}}
+              <!-- area wasn't a multiselect so there's still seeds in the db generated with area random but no multiselect -->
+              <tr><td>Area Randomization pool</td><td>{{=seedParams.get("areaRandomizationMultiSelect", "off, full")}}</td></tr>
+{{        pass}}
+
               <tr {{=setBold("areaLayout")}}><td>Additional layout patches for easier navigation</td><td>{{=seedParams["areaLayout"]}}</td></tr>
-              <tr {{=setBold("lightAreaRandomization")}}><td>Light Areas randomization</td><td>{{=seedParams["lightAreaRandomization"]}}</td></tr>
               <tr {{=setBold("doorsColorsRando")}}><td>Doors Colors randomization</td><td>{{=seedParams["doorsColorsRando"]}}</td></tr>
               <tr {{=setBold("allowGreyDoors")}}><td>Allow some doors to be grey</td><td>{{=seedParams["allowGreyDoors"]}}</td></tr>
               <tr {{=setBold("bossRandomization")}}><td>Bosses randomization</td><td>{{=seedParams["bossRandomization"]}}</td></tr>

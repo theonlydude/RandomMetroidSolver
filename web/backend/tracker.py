@@ -1,19 +1,25 @@
+import zlib
+
 from web.backend.utils import raiseHttp, loadPresetsList, transition2isolver, locName4isolver, getAddressesToRead
 from web.backend.ws import WS
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
 from graph.vanilla.graph_access import accessPoints
 from solver.interactiveSolver import InteractiveSolver
 from logic.logic import Logic
+from patches.patchaccess import PatchAccess
+from rom.symbols import Symbols
+from rom.addresses import Addresses
 
 from gluon.html import OPTGROUP
 
 class Tracker(object):
-    def __init__(self, session, request, cache):
+    def __init__(self, session, request, cache, response):
         self.session = session
         self.request = request
         self.cache = cache
+        self.response = response
         # required for GraphUtils access to access points
-        Logic.factory('vanilla')
+        Logic.factory('vanilla') # TODO will have to be changed when handling mirror/rotation etc
 
     def run(self):
         # init session
@@ -44,8 +50,10 @@ class Tracker(object):
             escapeAPs += [transition2isolver(src), transition2isolver(dest)]
 
         # generate list of addresses to read in the ROM
+        symbols = Symbols(PatchAccess())
+        symbols.loadAllSymbols()
+        Addresses.updateFromSymbols(symbols)
         addresses = getAddressesToRead()
-
         startAPs = GraphUtils.getStartAccessPointNamesCategory()
         startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),
                     OPTGROUP(_label="Custom", *startAPs["custom"]),
@@ -69,10 +77,14 @@ class Tracker(object):
         # unified web service for item/area trackers
         ws = WS.factory(self)
         ws.validate()
-        ret = ws.action()
 
+        ret = ws.action()
         if ret is None:
             # return something
             raiseHttp(200, "OK", True)
         else:
-            return ret
+            if 'deflate' in self.request.env.http_accept_encoding:
+                self.response.headers['Content-Encoding'] = 'deflate'
+                return zlib.compress(ret.encode())
+            else:
+                return ret

@@ -1,0 +1,7 @@
+{
+    "objective": ["clear west maridia", "clear east maridia", "kill draygon", "kill botwoon", "kill shaktool"],
+    "tourian": "random",
+    "preset": "expert",
+    "funSuits": "on",
+    "progressionSpeed": "slow"
+}

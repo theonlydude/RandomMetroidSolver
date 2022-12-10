@@ -241,6 +241,21 @@ class HelpersGraph(Helpers):
         sm = self.smbm
         return sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Speed Booster w/Speed' if sm.haveItem('SpeedBooster') else 'Bubble -> Speed Booster'])
 
+    # with door color rando, there can be situations where you have to come back from the missile
+    # loc without being able to open the speed booster door
+    @Cache.decorator
+    def canHellRunBackFromSpeedBoosterMissile(self):
+        sm = self.smbm
+        # require more health to count 1st hell run + way back is slower
+        hellrun = 'MainUpperNorfair'
+        tbl = Settings.hellRunsTable[hellrun]['Bubble -> Speed Booster']
+        mult = tbl['mult']
+        minE = tbl['minE']
+        mult *= 0.66 if sm.haveItem('SpeedBooster') else 0.33 # speed booster usable for 1st hell run
+        return sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoors),
+                      sm.traverse('SpeedBoosterHallRight'),
+                      sm.canHellRun(hellrun, mult, minE))
+
     @Cache.decorator
     def canAccessDoubleChamberItems(self):
         sm = self.smbm
@@ -252,6 +267,19 @@ class HelpersGraph(Helpers):
                                      sm.canFly(),
                                      sm.knowsDoubleChamberWallJump()),
                               sm.canHellRun(hellRun['hellRun'], hellRun['mult']*0.8, hellRun['minE'])))
+
+    @Cache.decorator
+    def canExitWaveBeam(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Morph'), # exit through lower passage under the spikes
+                      sm.wand(sm.wor(sm.haveItem('SpaceJump'), # exit through blue gate
+                                     sm.haveItem('Grapple')),
+                              sm.wor(sm.haveItem('Wave'),
+                                     sm.wand(sm.heatProof(), # hell run + green gate glitch is too much
+                                             sm.canBlueGateGlitch(),
+                                             # if missiles were required to open the door, require two packs as no farming around
+                                             sm.wor(sm.wnot(SMBool('Missile' in sm.traverse('DoubleChamberRight').items)),
+                                                    sm.itemCountOk("Missile", 2))))))
 
     def canExitCathedral(self, hellRun):
         # from top: can use bomb/powerbomb jumps

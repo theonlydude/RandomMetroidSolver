@@ -42,7 +42,7 @@ class ExtStats(object):
                     randoPresetContent = json.load(jsonFile)
             except Exception as e:
                 raiseHttp(400, "Can't load the rando preset: {}".format(e))
-            majorsSplit = randoPresetContent["majorsSplit"]
+            majorsSplit = randoPresetContent.get("majorsSplit", "Full")
 
             # load skill preset
             fullPath = '{}/{}.json'.format(getPresetDir(skillPreset), skillPreset)

@@ -4,6 +4,7 @@ from collections import defaultdict
 
 from web.backend.utils import raiseHttp, loadPresetsList, updateParameterDisplay
 from web.backend.utils import validateWebServiceParams, localIpsDir, getCustomMapping
+from urllib.parse import urlparse, parse_qs
 from utils.utils import getRandomizerDefaultParameters, removeChars, getPresetDir, PresetLoader, getPythonExec
 from utils.db import DB
 from logic.logic import Logic
@@ -29,7 +30,7 @@ class Customizer(object):
         musics = self.loadMusics()
         (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
 
-        url = self.request.env.request_uri.split('/')
+        url = self.request.env.request_uri.split("?")[0].split('/')
         msg = ""
         seedInfo = None
         seedParams = None
@@ -81,6 +82,14 @@ class Customizer(object):
                         with DB() as db:
                             db.updateSeedUploadStatus(key, 'pending')
 
+        query = parse_qs(urlparse(self.request.env.request_uri).query)
+        if query.get('msg'):
+            query_msg = query['msg'][0]
+            if query_msg and msg and not query_msg.endswith('<br/>'):
+                # make sure they are on separate lines if a previous msg exists
+                query_msg += '<br />'
+            msg = query_msg + msg
+
         return dict(customSprites=customSprites, customShips=customShips, musics=musics, comPresets=comPresets,
                     seedInfo=seedInfo, seedParams=seedParams, msg=msg, defaultParams=defaultParams)
 
@@ -130,6 +139,9 @@ class Customizer(object):
             self.session.customizer['hellrun_rate'] = 100
             self.session.customizer['etanks'] = 0
             self.session.customizer['music'] = "Don't touch"
+            self.session.customizer['color_blind'] = "off"
+            self.session.customizer['disable_screen_shake'] = "off"
+            self.session.customizer['noflashing'] = "off"
 
             musics = self.loadMusics()
             for song, songId in musics["_list"]:
@@ -151,9 +163,10 @@ class Customizer(object):
                    'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
                    'remove_elevators_speed', 'remove_fast_doors', 'remove_Infinite_Space_Jump',
                    'remove_rando_speed', 'remove_spinjumprestart', 'gamepadMapping', 'widescreen',
-                   'hell', 'lava_acid_physics']
-        others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
-                  'bossesPalettes', 'minDegree', 'maxDegree', 'invert', 'hellrun_rate', 'etanks']
+                   'hell', 'lava_acid_physics', 'colorsRandomization', 'suitsPalettes', 'beamsPalettes',
+                   'tilesPalettes', 'enemiesPalettes', 'bossesPalettes', 'invert',
+                   'color_blind', 'disable_screen_shake', 'noflashing']
+        others = ['minDegree', 'maxDegree', 'hellrun_rate', 'etanks']
         validateWebServiceParams(self.request, switchs, [], [], others, isJson=True)
         if self.vars.customSpriteEnable == 'on':
             if self.vars.customSprite == 'random':
@@ -222,6 +235,9 @@ class Customizer(object):
         self.session.customizer['hellrun_rate'] = self.vars.hellrun_rate
         self.session.customizer['etanks'] = self.vars.etanks
         self.session.customizer['music'] = self.vars.music
+        self.session.customizer['color_blind'] = self.vars.color_blind
+        self.session.customizer['disable_screen_shake'] = self.vars.disable_screen_shake
+        self.session.customizer['noflashing'] = self.vars.noflashing
 
         if self.vars.music == 'Customize':
             musics = self.loadMusics()
@@ -233,8 +249,8 @@ class Customizer(object):
 
         # call the randomizer
         (fd, jsonFileName) = tempfile.mkstemp()
-        params = [getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
-                  '--output', jsonFileName, '--patchOnly']
+        params = [getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/customizer.py"),
+                  '--output', jsonFileName]
 
         if self.vars.itemsounds == 'on':
             params += ['-c', 'itemsounds.ips']
@@ -284,6 +300,12 @@ class Customizer(object):
             params += ['--hellrun', self.vars.hellrun_rate]
         if self.vars.etanks != 'off':
             params += ['--etanks', self.vars.etanks]
+        if self.vars.color_blind == 'on':
+            params += ['-c', 'color_blind.ips']
+        if self.vars.disable_screen_shake == 'on':
+            params += ['-c', 'disable_screen_shake.ips']
+        if self.vars.noflashing == 'on':
+            params += ['-c', 'noflashing.ips']
 
         if self.vars.colorsRandomization == 'on':
             params.append('--palette')
@@ -314,7 +336,7 @@ class Customizer(object):
             else:
                 sprite = self.vars.customSprite
 
-            params += ['--sprite', "{}.ips".format(sprite)]
+            params += ['--sprite', sprite]
             with DB() as db:
                 db.addSprite(sprite)
             if self.vars.customItemsEnable == 'on':

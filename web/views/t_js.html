@@ -175,18 +175,29 @@ function addLine(startPoint, endPoint) {
         return;
     }
 
-    var line = new LeaderLine(startPointElem, endPointElem,
-                              {startPlug: 'disc',
-                               endPlug: 'disc',
-                               dropShadow: true,
-                               startPlugColor: colors[nextColor],
-                               endPlugColor: colors[nextColor],
-                               size: 2,
-                               color: colors[nextColor],
-                               outlineColor: 'rgb(255, 255, 255)',
-                               outline: true,
-                               outlineSize: 0.10,
-                               path: 'straight'});
+
+    const options = {
+        startPlug: 'disc',
+        endPlug: 'disc',
+        dropShadow: true,
+        startPlugColor: colors[nextColor],
+        endPlugColor: colors[nextColor],
+        size: 4,
+        color: colors[nextColor],
+        outlineColor: 'rgb(255, 255, 255)',
+        outline: true,
+        outlineSize: 0.10,
+        path: 'straight',
+    };
+    const xy = {
+        x: '50%',
+        y: '50%',
+    }
+    var line = new LeaderLine(
+      LeaderLine.pointAnchor(startPointElem, xy),
+      LeaderLine.pointAnchor(endPointElem, xy),
+      options
+    )
 
     nextColor += 1;
     $("#"+linePrefix+startPoint).removeClass("addBorder");
@@ -291,6 +302,7 @@ function ajaxFailJSON(jqXHR, textStatus) {
 }
 
 var lastAction = null;
+var lastTime = null;
 function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
     if(!("mode" in dataDict)) {
       dataDict["mode"] = document.getElementById("mode").value;
@@ -305,6 +317,7 @@ function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
     webServInProgress = true;
 
     lastAction = dataDict;
+    lastTime = new Date();
     var request = $.ajax({
       url: "{{=URL(f='trackerWebService')}}",
       method: "POST",
@@ -362,6 +375,10 @@ function setWSIcon(icon) {
 }
 
 function ajaxOkGet(jsonData, status, dummy, chained=false) {
+    var curTime = new Date();
+    console.log("ajax call took "+(curTime - lastTime)+"ms");
+    lastTime = curTime;
+
     if(chained == false) {
         webServInProgress = false;
     }
@@ -371,7 +388,6 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     $('#loadingGIF').hide();
 
     // get dicts availableLocations and visitedLocations
-    console.log("json received: [ "+jsonData+" ]");
     if(jsonData == "OK") {
         setWSIcon("checkmark");
         return;
@@ -404,6 +420,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     updateInventory(jsonData);
     updateGps(jsonData);
     displayDoors(jsonData);
+    displayCompletedObjectives(jsonData);
 
     setWSIcon("checkmark");
 
@@ -412,13 +429,21 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         // debug: highlight next VCR loc
         postAjaxHook();
     } else {
-        // if no available locations, display a popup telling you're stuck
-        if(Object.keys(jsonData["availableLocations"]).length == 0 && chained == false) {
-            if(jsonData["allTransitions"] == true && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited") && jsonData["allDoorsRevealed"] == true) {
+        // if no available locations, display a popup telling you're stuck.
+        // in race protected seeds we can't load transitions as they're encrypted,
+        // so allTransitions var don't behave correctly.
+        if(Object.keys(jsonData["availableLocations"]).length == 0 && chained == false && mode != "race") {
+            if(jsonData["allTransitions"] == true
+               && jsonData["allDoorsRevealed"] == true
+               && tourian != "Disabled"
+               && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited") ) {
                 alert("You're stuck, you can't finish this seed with the given preset.");
             }
         }
     }
+
+    curTime = new Date();
+    console.log("state loading took "+(curTime - lastTime)+"ms");
 }
 
 function isSeedless(mode) {
@@ -719,6 +744,13 @@ function updateLocations(jsonData) {
             var tooltip = tooltip + ": "+jsonData["last"]["item"]+" at "+jsonData["last"]["loc"];
         }
         $("#"+elem+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+
+        // if tourian is disabled hide mother brain loc
+        if(tourian == 'Disabled') {
+            document.getElementById("MotherBrain").style.display = "none";
+        } else {
+            document.getElementById("MotherBrain").style.display = "block";
+        }
     }
 
     if(isSeedless(mode)) {
@@ -780,6 +812,26 @@ function updateInventory(jsonData) {
     setItemCount("Super");
     setItemCount("PowerBomb");
     setReserveCount();
+}
+
+var hideTimeout = null;
+function displayCompletedObjectives(jsonData) {
+    var newlyCompletedObjectives = jsonData["newlyCompletedObjectives"];
+    var objectivesPopup = document.getElementById("objectivesPopup");
+    if(newlyCompletedObjectives.length > 0) {
+        if(hideTimeout == null) {
+            objectivesPopup.innerHTML = newlyCompletedObjectives.join("<br/>");
+        } else {
+            // objectives popup is already displayed
+            clearTimeout(hideTimeout);
+            objectivesPopup.innerHTML = objectivesPopup.innerHTML + "<br/>" + newlyCompletedObjectives.join("<br/>");
+        }
+        objectivesPopup.style.display = "block";
+        // arm time to hide popup if user doesn't click on it
+        hideTimeout = setTimeout(hideObjectivePopup, 3000);
+    } else {
+        objectivesPopup.style.display = "none";
+    }
 }
 
 function isActive(elemId) {
@@ -932,7 +984,8 @@ var locsInfo = {
   SporeSpawn: {top: 55.67, left: 16.73, boss: "SporeSpawn"},
   Crocomire: {left: 22.96, top: 82.86, boss: "Crocomire"},
   Botwoon: {left: 81.72, top: 43.06, boss: "Botwoon"},
-  GoldenTorizo: {left: 75.41, top: 90.65, boss: "GoldenTorizo"}
+  GoldenTorizo: {left: 75.41, top: 90.65, boss: "GoldenTorizo"},
+  Gunship: {left: 38.1, top: 7}
 };
 
 var tile2char = {243: '.', 244: '0', 207: '-', 208: 'a', 209: 'b', 210: 'c', 211: 'd', 212: 'e', 213: 'f', 214: 'g', 215: 'h', 216: 'i', 217: 'j', 218: 'k', 219: 'l', 220: 'm', 221: 'n', 222: 'o', 223: 'p', 224: 'q', 225: 'r', 226: 's', 227: 't', 228: 'u', 229: 'v', 230: 'w', 231: 'x', 232: 'y', 233: 'z', 245: '1', 246: '2', 247: '3', 248: '4', 249: '5', 250: '6', 251: '7', 252: '8', 253: '9'};
@@ -973,7 +1026,7 @@ window.onload = function(){
           var ext = re.exec(file.name)[1];
         if( ! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC") ) {
             document.getElementById("uploadFile").value = "";
-            alert("wrong extension: "+ext);
+            alert("Wrong extension: "+ext);
             return false;
         }
 
@@ -992,13 +1045,13 @@ window.onload = function(){
             return false;
         } else if( fileSize == 3146240) {
             document.getElementById("uploadFile").value = "";
-            alert("headered ROM detected, please use an unheadered ROM");
+            alert("Headered ROM detected, please use an unheadered ROM");
             return false;
         } else if(mode == "plando" && fileSize == 4*1024*1024) {
             alert("Warning: You won't be able to upload a Sprite customized seed in the Plandository (hosting space constraints)");
         } else if(mode == "plando" && digest == "d63ed5f8") {
             document.getElementById("uploadFile").value = "";
-            alert("vanilla ROM detected, use an already randomized VARIA ROM");
+            alert("Vanilla ROM detected, use an already randomized VARIA ROM");
             return false;
         }
 
@@ -1011,7 +1064,7 @@ window.onload = function(){
             if(bytes[addr] != 0xff) {
                 if(mode == "plando" && debug == false) {
                     clearInputSeed();
-                    alert("race protected seed detected");
+                    alert("Race protected seed detected");
                     return false;
                 } else {
                     romIsRaceProtected = true;
@@ -1027,7 +1080,7 @@ window.onload = function(){
             if (length == 4) {
                 if (version != "beta") {
                     clearInputSeed();
-                    alert("base seed is a beta seed, use a seed generated on production");
+                    alert("Base seed is a beta seed, use a seed generated on production");
                     return false;
                 }
             } else if (length == 12) {
@@ -1037,12 +1090,21 @@ window.onload = function(){
                 }
                 if(seedVersion != version) {
                     clearInputSeed();
-                    alert("base seed's version is "+seedVersion+" but current version is "+version+", use a base seed generated with the current version");
+                    alert("Base seed's version is "+seedVersion+" but current version is "+version+", use a base seed generated with the current version");
                     return false;
                 }
             } else {
                 clearInputSeed();
-                alert("base seed's is not a VARIA one, use a base seed generated on the randomizer page");
+                alert("Base seed's is not a VARIA one, use a base seed generated on the randomizer page");
+                return false;
+            }
+
+            // check if base seed is a minimizer without crateria.
+            // prevent it as it can cause issues if the user connect crateria afterward.
+            // detect if Climb_Asleep patch is present.
+            if(bytes[0x796CC] == 0x7f) {
+                clearInputSeed();
+                alert("Use a minimizer with 100 locations as your base seed");
                 return false;
             }
 
@@ -1138,7 +1200,20 @@ window.onload = function(){
 
   addTooltipCallback();
 
+  var objectivesPopup = document.getElementById("objectivesPopup");
+  objectivesPopup.onclick = function(event) {
+      hideObjectivePopup();
+  }
+
   loaded = true;
+}
+
+function hideObjectivePopup() {
+    $("#objectivesPopup").fadeOut();
+    if(hideTimeout != null) {
+        clearTimeout(hideTimeout);
+        hideTimeout = null;
+    }
 }
 
 function addTooltipCallback() {
@@ -1703,7 +1778,7 @@ function resetItems() {
 
 function addItem(itemName) {
     var bosses = ["Kraid", "Phantoon", "Draygon", "Ridley", "MotherBrain", "SporeSpawn", "Crocomire", "Botwoon", "GoldenTorizo"];
-    if(itemName == "Nothing" || itemName == "NoEnergy") {
+    if(itemName == "Nothing" || itemName == "NoEnergy" || itemName == "Gunship") {
         return;
     }
     if(itemName in itemCount) {

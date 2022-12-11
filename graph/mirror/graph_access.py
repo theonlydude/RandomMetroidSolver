@@ -220,7 +220,8 @@ accessPointsDict['PhantoonRoomIn'].ExitInfo.update({
     'bitFlag': 0x00,
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
-    'doorAsmPtr': 0x0000
+    # TODO::use symbol
+    'doorAsmPtr': 0xfe71
 })
 accessPointsDict['Basement Left'].ExitInfo.update({
     'DoorPtr': 0xA2A0,

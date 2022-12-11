@@ -51,3 +51,28 @@ org bank_8f_Door_20_Room_9AD9_PLM_C88A    ; brinstar map
     dw $C842
     db $3e,$46
     dw $9020
+
+
+;;; alternate flyway (= pre BT) door lists for escape animals surprise
+macro FlywayDoorList(n)
+    ;; door to parlor
+    dw $92FD ; Destination room header pointer (bank $8F): Parlor and Alcatraz
+    db $00   ; Bit Flag (Elevator properties)
+    db $04   ; Direction
+    db $11   ; X cap
+    db $26   ; Y cap
+    db $01   ; X screen
+    db $02   ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $B9A2 ; Custom door ASM to execute (bank $8F)
+.door<n>:
+    ;; placeholder for BT door to be filled in by randomizer
+    db $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca
+endmacro
+
+org rando_escape_common_flyway_door_lists
+flyway_door_lists:
+%FlywayDoorList(0)
+%FlywayDoorList(1)
+%FlywayDoorList(2)
+%FlywayDoorList(3)

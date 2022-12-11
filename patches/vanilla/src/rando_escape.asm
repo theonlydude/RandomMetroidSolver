@@ -51,3 +51,20 @@ org $8f84b8                     ; brinstar map
     dw $C848
     db $01,$46
     dw $9020
+
+
+;;; alternate flyway (= pre BT) door lists for escape animals surprise
+macro FlywayDoorList(n)
+    ;; door to parlor
+    db $FD, $92, $00, $05, $3E, $26, $03, $02, $00, $80, $A2, $B9
+.door<n>:
+    ;; placeholder for BT door to be filled in by randomizer
+    db $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca
+endmacro
+
+org rando_escape_common_flyway_door_lists
+flyway_door_lists:
+%FlywayDoorList(0)
+%FlywayDoorList(1)
+%FlywayDoorList(2)
+%FlywayDoorList(3)

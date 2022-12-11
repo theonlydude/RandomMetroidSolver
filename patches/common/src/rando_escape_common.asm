@@ -69,23 +69,12 @@ org $8fe8bd
 org $83aaf6
     dw escape_setup
 
-;;; alternate flyway (= pre BT) door lists for escape animals surprise
-macro FlywayDoorList(n)
-    ;; door to parlor
-    db $FD, $92, $00, $05, $3E, $26, $03, $02, $00, $80, $A2, $B9
-.door<n>:
-    ;; placeholder for BT door to be filled in by randomizer
-    db $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca
-endmacro
 
 org $83ADA0
 print "flyway_door_lists : ", pc
-flyway_door_lists:
-%FlywayDoorList(0)
-%FlywayDoorList(1)
-%FlywayDoorList(2)
-%FlywayDoorList(3)
+flyway_door_lists:              ; defined in flavor rando_escape.asm
 
+org $83AE00
 print "bt_door_list : ", pc
 bt_door_list:
 	;; placeholder for inside BT door to get back from animals during escape
@@ -338,7 +327,7 @@ enemy_table:
     ;; table terminator
     dw $ffff
 
-;;; placeholder data
+;;; placeholder data, defined in rom flavor rando_escape.asm
 elevator_business_center:
     dw $ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff
     db $00

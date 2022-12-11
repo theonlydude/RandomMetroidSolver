@@ -296,8 +296,39 @@
   // js/constants.ts
   var VANILLA_CRC32 = "d63ed5f8";
 
+  // node_modules/idb-keyval/dist/index.js
+  function promisifyRequest(request) {
+    return new Promise((resolve, reject) => {
+      request.oncomplete = request.onsuccess = () => resolve(request.result);
+      request.onabort = request.onerror = () => reject(request.error);
+    });
+  }
+  function createStore(dbName, storeName) {
+    const request = indexedDB.open(dbName);
+    request.onupgradeneeded = () => request.result.createObjectStore(storeName);
+    const dbp = promisifyRequest(request);
+    return (txMode, callback) => dbp.then((db) => callback(db.transaction(storeName, txMode).objectStore(storeName)));
+  }
+  var defaultGetStoreFunc;
+  function defaultGetStore() {
+    if (!defaultGetStoreFunc) {
+      defaultGetStoreFunc = createStore("keyval-store", "keyval");
+    }
+    return defaultGetStoreFunc;
+  }
+  function get(key, customStore = defaultGetStore()) {
+    return customStore("readonly", (store) => promisifyRequest(store.get(key)));
+  }
+  function set(key, value, customStore = defaultGetStore()) {
+    return customStore("readwrite", (store) => {
+      store.put(value, key);
+      return promisifyRequest(store.transaction);
+    });
+  }
+
   // js/rom.ts
   var VALID_EXTENSIONS = ["sfc", "smc"];
+  var VANILLA_ROM_KEY = "vanillaROM";
   var VanillaROM = class {
     constructor() {
       if (!hasFileReader_default()) {
@@ -305,6 +336,15 @@
         return;
       }
       const settings = settings_default();
+      if (settings.permalink) {
+        const hasROMLoaded = this.getROM().then((value) => {
+          if (!value) {
+            return false;
+          }
+          const validated = this.validateChecksum(value);
+          return validated;
+        });
+      }
       const selector = settings.permalink ? "vanillaUploadFile" : "uploadFile";
       this.el = document.getElementById(selector);
       const useFile = this.useFile.bind(this);
@@ -315,23 +355,26 @@
         }
       });
     }
-    validateChecksum(content) {
+    getUnheaderedContent(content) {
       const fileSize = content.byteLength;
       const isHeadered = fileSize === 3146240;
+      return isHeadered ? content.slice(512) : content;
+    }
+    validateChecksum(content) {
+      const fileSize = content.byteLength;
       const isTooLarge = fileSize > 4 * 1024 * 1024;
-      if (isHeadered) {
-        content = content.slice(512);
-      } else if (isTooLarge) {
-        throw Error(`Filesize is too big: ${content.size.toString()}`);
+      if (isTooLarge) {
+        console.warn(`Filesize is too big: ${content.size.toString()}`);
+        return false;
       }
       const crc32 = new crc32_default();
       crc32.update(content);
       const checksum = crc32.digest();
-      if (checksum !== VANILLA_CRC32) {
-        console.error("Non-Vanilla ROM detected");
-        return false;
+      if (checksum === VANILLA_CRC32) {
+        return true;
       }
-      return true;
+      console.warn("Non-Vanilla ROM detected");
+      return false;
     }
     validateFileExtension(name) {
       const lastDot = name.lastIndexOf(".");
@@ -341,12 +384,14 @@
       }
       throw Error(`Unsupported file extension: ${extension}`);
     }
-    readFile(evt) {
-      const content = evt.target.result;
+    async readFile(evt) {
+      let content = this.getUnheaderedContent(evt.target.result);
       const validated = this.validateChecksum(content);
       if (!validated) {
         return alert("The file you have provided is not a valid Vanilla ROM.");
       }
+      const data = new Uint8Array(content);
+      await this.setROM(content);
     }
     useFile(file) {
       this.validateFileExtension(file.name);
@@ -354,6 +399,17 @@
       const onLoad = this.readFile.bind(this);
       reader.addEventListener("load", onLoad);
       reader.readAsArrayBuffer(file);
+    }
+    getROM() {
+      return get(VANILLA_ROM_KEY);
+    }
+    setROM(content) {
+      try {
+        const value = set(VANILLA_ROM_KEY, content);
+        return value;
+      } catch (err) {
+        console.error("Could not set Vanilla ROM", err);
+      }
     }
   };
   var rom_default = VanillaROM;

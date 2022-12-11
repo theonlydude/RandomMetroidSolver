@@ -2,8 +2,10 @@ import hasFileReader from './helpers/hasFileReader'
 import Settings from './helpers/settings'
 import Crc32 from './helpers/crc32'
 import { VANILLA_CRC32 } from './constants'
+import { get, set } from 'idb-keyval'
 
 const VALID_EXTENSIONS = ['sfc', 'smc']
+const VANILLA_ROM_KEY = 'vanillaROM'
 
 class VanillaROM {
   el: HTMLElement | null
@@ -19,6 +21,15 @@ class VanillaROM {
     //          - then show that ROM is stored
     //        - else
     //          - show correct upload button
+    if (settings.permalink) {
+      const hasROMLoaded = this.getROM().then((value) => {
+        if (!value) {
+          return false
+        }
+        const validated = this.validateChecksum(value)
+        return validated
+      })
+    }
 
     const selector = settings.permalink ? 'vanillaUploadFile' : 'uploadFile'
     this.el = document.getElementById(selector)
@@ -31,26 +42,30 @@ class VanillaROM {
     })
   }
 
-  validateChecksum(content) {
+  getUnheaderedContent(content) {
     const fileSize = content.byteLength
     const isHeadered = fileSize === 3146240
+    return isHeadered ? content.slice(512) : content
+  }
+
+  validateChecksum(content) {
+    const fileSize = content.byteLength
     const isTooLarge = fileSize > 4*1024*1024
-    if (isHeadered) {
-      content = content.slice(512)
-    } else if (isTooLarge) {
-      throw Error(`Filesize is too big: ${content.size.toString()}`)
+    if (isTooLarge) {
+      console.warn(`Filesize is too big: ${content.size.toString()}`)
+      return false
     }
     
     const crc32 = new Crc32()
     crc32.update(content)
     const checksum = crc32.digest()
     
-    if (checksum !== VANILLA_CRC32) {
-      console.error('Non-Vanilla ROM detected')
-      return false
+    if (checksum === VANILLA_CRC32) {
+      return true
     }
 
-    return true
+    console.warn('Non-Vanilla ROM detected')
+    return false
   }
 
   validateFileExtension(name: string) {
@@ -62,13 +77,14 @@ class VanillaROM {
     throw Error(`Unsupported file extension: ${extension}`)
   }
 
-  readFile(evt) {
-    const content = evt.target.result
+  async readFile(evt) {
+    let content = this.getUnheaderedContent(evt.target.result)
     const validated = this.validateChecksum(content)
     if (!validated) {
       return alert('The file you have provided is not a valid Vanilla ROM.')
     }
-    // save with localForage
+    const data = new Uint8Array(content)
+    await this.setROM(content)
   }
 
   useFile(file: File) {
@@ -78,6 +94,20 @@ class VanillaROM {
     const onLoad = this.readFile.bind(this)
     reader.addEventListener('load', onLoad)
     reader.readAsArrayBuffer(file)
+  }
+
+  getROM() {
+    return get(VANILLA_ROM_KEY)
+  }
+
+  setROM(content: Uint8Array) {
+    try {
+      const value = set(VANILLA_ROM_KEY, content)
+      return value
+    } catch (err) {
+      console.error('Could not set Vanilla ROM', err)
+    }
+    
   }
 }
 

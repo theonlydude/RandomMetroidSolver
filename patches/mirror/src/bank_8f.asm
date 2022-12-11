@@ -1242,12 +1242,12 @@ Door_45_Room_A56B_PLM_DB4C:
 org $8f8a2e
 ; room A59F: Kraid Room
 Room_A59F_state_A5CB_PLM:
-Door_46_Room_A59F_PLM_C842:
+Door_46_Room_A59F_PLM_C848:     ; door to varia
     ; Door. Grey door facing left
-    dw $c842 : db $1e : db $16 : dw $0046 
-Door_47_Room_A59F_PLM_C848:
+    dw $c848 : db $01 : db $16 : dw $0046 
+Door_47_Room_A59F_PLM_C842:     ; door to warehouse
     ; Door. Grey door facing right
-    dw $c848 : db $01 : db $16 : dw $0047 
+    dw $c842 : db $1e : db $16 : dw $0047 
     dw $0000
 org $8f8a3c
 ; room A5ED: Statues Hallway

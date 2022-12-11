@@ -164,7 +164,7 @@ patches = {
     },
     'Blinking[KraidRoomIn]': {
         # door Door_47_Room_A59F_PLM_ x/y updated
-        snes_to_pc(0x8f8a34): [0x42, 0xc8, 0x1, 0x16, 0x47, 0x8c],
+        snes_to_pc(0x8f8a34): [0x42, 0xc8, 0x1e, 0x16, 0x47, 0x8c],
         snes_to_pc(0xa19f37): [0x0],
     },
     'Indicator[KihunterBottom]': {

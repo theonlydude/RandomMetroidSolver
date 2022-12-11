@@ -14,6 +14,12 @@ class VanillaROM {
       return
     }
     const settings = Settings()
+    // TODO:  - if permalink
+    //          - and valid contents
+    //          - then show that ROM is stored
+    //        - else
+    //          - show correct upload button
+
     const selector = settings.permalink ? 'vanillaUploadFile' : 'uploadFile'
     this.el = document.getElementById(selector)
     const useFile = this.useFile.bind(this)
@@ -27,13 +33,12 @@ class VanillaROM {
 
   validateChecksum(content) {
     const fileSize = content.byteLength
-    if (fileSize === 3146240) {
-      console.log('potential headered ROM')
+    const isHeadered = fileSize === 3146240
+    const isTooLarge = fileSize > 4*1024*1024
+    if (isHeadered) {
       content = content.slice(512)
-    } else if (fileSize > 4*1024*1024) {
+    } else if (isTooLarge) {
       throw Error(`Filesize is too big: ${content.size.toString()}`)
-    } else {
-      console.log('correct size')
     }
     
     const crc32 = new Crc32()
@@ -41,7 +46,8 @@ class VanillaROM {
     const checksum = crc32.digest()
     
     if (checksum !== VANILLA_CRC32) {
-      throw Error('Non-Vanilla ROM detected')
+      console.error('Non-Vanilla ROM detected')
+      return false
     }
 
     return true
@@ -58,7 +64,11 @@ class VanillaROM {
 
   readFile(evt) {
     const content = evt.target.result
-    this.validateChecksum(content)
+    const validated = this.validateChecksum(content)
+    if (!validated) {
+      return alert('The file you have provided is not a valid Vanilla ROM.')
+    }
+    // save with localForage
   }
 
   useFile(file: File) {

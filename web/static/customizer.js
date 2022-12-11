@@ -21,20 +21,19 @@
     }
     update(data) {
       var dataView = new Uint8Array(data, 0);
-      var len = dataView.length;
-      for (var i = 0; i < len; i++) {
-        this.crc = this.crc >>> 8 ^ Crc32.lookup[(this.crc ^ dataView[i]) & 255];
+      var length = dataView.length;
+      for (var i = 0; i < length; i++) {
+        this.crc = this.crc >>> 8 ^ LOOKUP[(this.crc ^ dataView[i]) & 255];
       }
     }
-    digest(s) {
-      s = s || 16;
+    digest(size = 16) {
       var buffer = new ArrayBuffer(4);
-      var dv = new DataView(buffer);
-      dv.setUint32(0, ~this.crc >>> 0, false);
-      return dv.getUint32(0).toString(s);
+      var dataView = new DataView(buffer);
+      dataView.setUint32(0, ~this.crc >>> 0, false);
+      return dataView.getUint32(0).toString(size);
     }
   };
-  Crc32.lookup = [
+  var LOOKUP = [
     0,
     1996959894,
     3993919788,
@@ -318,19 +317,19 @@
     }
     validateChecksum(content) {
       const fileSize = content.byteLength;
-      if (fileSize === 3146240) {
-        console.log("potential headered ROM");
+      const isHeadered = fileSize === 3146240;
+      const isTooLarge = fileSize > 4 * 1024 * 1024;
+      if (isHeadered) {
         content = content.slice(512);
-      } else if (fileSize > 4 * 1024 * 1024) {
+      } else if (isTooLarge) {
         throw Error(`Filesize is too big: ${content.size.toString()}`);
-      } else {
-        console.log("correct size");
       }
       const crc32 = new crc32_default();
       crc32.update(content);
       const checksum = crc32.digest();
       if (checksum !== VANILLA_CRC32) {
-        throw Error("Non-Vanilla ROM detected");
+        console.error("Non-Vanilla ROM detected");
+        return false;
       }
       return true;
     }
@@ -344,7 +343,10 @@
     }
     readFile(evt) {
       const content = evt.target.result;
-      this.validateChecksum(content);
+      const validated = this.validateChecksum(content);
+      if (!validated) {
+        return alert("The file you have provided is not a valid Vanilla ROM.");
+      }
     }
     useFile(file) {
       this.validateFileExtension(file.name);

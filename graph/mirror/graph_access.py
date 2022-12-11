@@ -540,215 +540,215 @@ accessPointsDict['Tourian Escape Room 4 Top Right'].ExitInfo.update({
 })
 
 
-accessPointsDict['Lower Mushrooms Left'].EntryInfo = {
+accessPointsDict['Lower Mushrooms Left'].EntryInfo.update({
     'SamusX': 0x3c9,
     'SamusY': 0x88
-}
-accessPointsDict['Green Pirates Shaft Bottom Right'].EntryInfo = {
+})
+accessPointsDict['Green Pirates Shaft Bottom Right'].EntryInfo.update({
     'SamusX': 0x33,
     'SamusY': 0x688
-}
-accessPointsDict['Moat Right'].EntryInfo = {
+})
+accessPointsDict['Moat Right'].EntryInfo.update({
     'SamusX': 0x30,
     'SamusY': 0x88
-}
-accessPointsDict['Keyhunter Room Bottom'].EntryInfo = {
+})
+accessPointsDict['Keyhunter Room Bottom'].EntryInfo.update({
     'SamusX': 0x1b3,
     'SamusY': 0x2b8
-}
-accessPointsDict['Morph Ball Room Left'].EntryInfo = {
+})
+accessPointsDict['Morph Ball Room Left'].EntryInfo.update({
     'SamusX': 0x7cb,
     'SamusY': 0x288
-}
-accessPointsDict['Climb Bottom Left'].EntryInfo = {
+})
+accessPointsDict['Climb Bottom Left'].EntryInfo.update({
     'SamusX': 0x2cb,
     'SamusY': 0x888
-}
-accessPointsDict['Flyway Right'].EntryInfo = {
+})
+accessPointsDict['Flyway Right'].EntryInfo.update({
     'SamusX': 0xffff,
     'SamusY': 0xffff
-}
-accessPointsDict['Bomb Torizo Room Left'].EntryInfo = {
+})
+accessPointsDict['Bomb Torizo Room Left'].EntryInfo.update({
     'SamusX': 0xcb,
     'SamusY': 0xb8
-}
-accessPointsDict['Green Brinstar Elevator'].EntryInfo = {
+})
+accessPointsDict['Green Brinstar Elevator'].EntryInfo.update({
     'SamusX': 0x33,
     'SamusY': 0x88
-}
-accessPointsDict['Green Hill Zone Top Right'].EntryInfo = {
+})
+accessPointsDict['Green Hill Zone Top Right'].EntryInfo.update({
     'SamusX': 0x638,
     'SamusY': 0x88
-}
-accessPointsDict['Noob Bridge Right'].EntryInfo = {
+})
+accessPointsDict['Noob Bridge Right'].EntryInfo.update({
     'SamusX': 0x31,
     'SamusY': 0x88
-}
-accessPointsDict['Green Brinstar Main Shaft Top Left'].EntryInfo = {
+})
+accessPointsDict['Green Brinstar Main Shaft Top Left'].EntryInfo.update({
     'SamusX': 0x3cb,
     'SamusY': 0x488
-}
-accessPointsDict['Brinstar Pre-Map Room Right'].EntryInfo = {
+})
+accessPointsDict['Brinstar Pre-Map Room Right'].EntryInfo.update({
     'SamusX': 0xffff,
     'SamusY': 0xffff
-}
-accessPointsDict['West Ocean Left'].EntryInfo = {
+})
+accessPointsDict['West Ocean Left'].EntryInfo.update({
     'SamusX': 0x7cb,
     'SamusY': 0x488
-}
-accessPointsDict['Crab Maze Left'].EntryInfo = {
+})
+accessPointsDict['Crab Maze Left'].EntryInfo.update({
     'SamusX': 0x3cb,
     'SamusY': 0x188
-}
-accessPointsDict['PhantoonRoomOut'].EntryInfo = {
+})
+accessPointsDict['PhantoonRoomOut'].EntryInfo.update({
     'SamusX': 0x60,
     'SamusY': 0xb8
-}
-accessPointsDict['PhantoonRoomIn'].EntryInfo = {
+})
+accessPointsDict['PhantoonRoomIn'].EntryInfo.update({
     'SamusX': 0xd1,
     'SamusY': 0xb8
-}
-accessPointsDict['Basement Left'].EntryInfo = {
+})
+accessPointsDict['Basement Left'].EntryInfo.update({
     'SamusX': 0x4d1,
     'SamusY': 0x88
-}
-accessPointsDict['Wrecked Ship Map Room'].EntryInfo = {
+})
+accessPointsDict['Wrecked Ship Map Room'].EntryInfo.update({
     'SamusX': 0xffff,
     'SamusY': 0xffff
-}
-accessPointsDict['Lava Dive Right'].EntryInfo = {
+})
+accessPointsDict['Lava Dive Right'].EntryInfo.update({
     'SamusX': 0x2f,
     'SamusY': 0x88
-}
-accessPointsDict['Three Muskateers Room Left'].EntryInfo = {
+})
+accessPointsDict['Three Muskateers Room Left'].EntryInfo.update({
     'SamusX': 0x2cb,
     'SamusY': 0x88
-}
-accessPointsDict['RidleyRoomOut'].EntryInfo = {
+})
+accessPointsDict['RidleyRoomOut'].EntryInfo.update({
     'SamusX': 0x2d1,
     'SamusY': 0x98
-}
-accessPointsDict['RidleyRoomIn'].EntryInfo = {
+})
+accessPointsDict['RidleyRoomIn'].EntryInfo.update({
     'SamusX': 0x40,
     'SamusY': 0x198
-}
-accessPointsDict['Warehouse Zeela Room Left'].EntryInfo = {
+})
+accessPointsDict['Warehouse Zeela Room Left'].EntryInfo.update({
     'SamusX': 0x1cb,
     'SamusY': 0x88
-}
-accessPointsDict['KraidRoomOut'].EntryInfo = {
+})
+accessPointsDict['KraidRoomOut'].EntryInfo.update({
     'SamusX': 0x32,
     'SamusY': 0x188
-}
-accessPointsDict['KraidRoomIn'].EntryInfo = {
+})
+accessPointsDict['KraidRoomIn'].EntryInfo.update({
     'SamusX': 0x1cb,
     'SamusY': 0x188
-}
-accessPointsDict['Warehouse Entrance Left'].EntryInfo = {
+})
+accessPointsDict['Warehouse Entrance Left'].EntryInfo.update({
     'SamusX': 0x2cb,
     'SamusY': 0x88
-}
-accessPointsDict['Warehouse Entrance Right'].EntryInfo = {
+})
+accessPointsDict['Warehouse Entrance Right'].EntryInfo.update({
     # spawns Samus closer to the door to activate the scroll PLM
     'SamusX': 0x2e,
     'SamusY': 0x98
-}
-accessPointsDict['Single Chamber Top Right'].EntryInfo = {
+})
+accessPointsDict['Single Chamber Top Right'].EntryInfo.update({
     'SamusX': 0x30,
     'SamusY': 0x88
-}
-accessPointsDict['Kronic Boost Room Bottom Left'].EntryInfo = {
+})
+accessPointsDict['Kronic Boost Room Bottom Left'].EntryInfo.update({
     'SamusX': 0xcb,
     'SamusY': 0x288
-}
-accessPointsDict['Crocomire Speedway Bottom'].EntryInfo = {
+})
+accessPointsDict['Crocomire Speedway Bottom'].EntryInfo.update({
     'SamusX': 0xa8,
     'SamusY': 0x2b8
-}
-accessPointsDict['Business Center Mid Left'].EntryInfo = {
+})
+accessPointsDict['Business Center Mid Left'].EntryInfo.update({
     'SamusX': 0xcb,
     'SamusY': 0x488
-}
-accessPointsDict['Norfair Map Room'].EntryInfo = {
+})
+accessPointsDict['Norfair Map Room'].EntryInfo.update({
     'SamusX': 0xffff,
     'SamusY': 0xffff
-}
-accessPointsDict['Crocomire Room Top'].EntryInfo = {
+})
+accessPointsDict['Crocomire Room Top'].EntryInfo.update({
     'SamusX': 0x383,
     'SamusY': 0x98
-}
-accessPointsDict['Main Street Bottom'].EntryInfo = {
+})
+accessPointsDict['Main Street Bottom'].EntryInfo.update({
     'SamusX': 0x1b5,
     'SamusY': 0x7a8
-}
-accessPointsDict['Crab Hole Bottom Left'].EntryInfo = {
+})
+accessPointsDict['Crab Hole Bottom Left'].EntryInfo.update({
     'SamusX': 0xd7,
     'SamusY': 0x188
-}
-accessPointsDict['Red Fish Room Left'].EntryInfo = {
+})
+accessPointsDict['Red Fish Room Left'].EntryInfo.update({
     'SamusX': 0x2cb,
     'SamusY': 0x88
-}
-accessPointsDict['Crab Shaft Right'].EntryInfo = {
+})
+accessPointsDict['Crab Shaft Right'].EntryInfo.update({
     'SamusX': 0x2a,
     'SamusY': 0x388
-}
-accessPointsDict['Crab Hole Bottom Right'].EntryInfo = {
+})
+accessPointsDict['Crab Hole Bottom Right'].EntryInfo.update({
     'SamusX': 0x28,
     'SamusY': 0x188
-}
-accessPointsDict['Maridia Map Room'].EntryInfo = {
+})
+accessPointsDict['Maridia Map Room'].EntryInfo.update({
     'SamusX': 0xffff,
     'SamusY': 0xffff
-}
-accessPointsDict['Aqueduct Top Left'].EntryInfo = {
+})
+accessPointsDict['Aqueduct Top Left'].EntryInfo.update({
     'SamusX': 0x5cb,
     'SamusY': 0x188
-}
-accessPointsDict['Le Coude Right'].EntryInfo = {
+})
+accessPointsDict['Le Coude Right'].EntryInfo.update({
     'SamusX': 0x2e,
     'SamusY': 0x88
-}
-accessPointsDict['DraygonRoomOut'].EntryInfo = {
+})
+accessPointsDict['DraygonRoomOut'].EntryInfo.update({
     'SamusX': 0x1cb,
     'SamusY': 0x288
-}
-accessPointsDict['DraygonRoomIn'].EntryInfo = {
+})
+accessPointsDict['DraygonRoomIn'].EntryInfo.update({
     'SamusX': 0x37,
     'SamusY': 0x88
-}
-accessPointsDict['Red Tower Top Left'].EntryInfo = {
+})
+accessPointsDict['Red Tower Top Left'].EntryInfo.update({
     'SamusX': 0xd0,
     'SamusY': 0x488
-}
-accessPointsDict['Caterpillar Room Top Right'].EntryInfo = {
+})
+accessPointsDict['Caterpillar Room Top Right'].EntryInfo.update({
     'SamusX': 0x2e,
     'SamusY': 0x388
-}
-accessPointsDict['Red Brinstar Elevator'].EntryInfo = {
+})
+accessPointsDict['Red Brinstar Elevator'].EntryInfo.update({
     'SamusX': 0x7f,
     'SamusY': 0x58
-}
-accessPointsDict['East Tunnel Right'].EntryInfo = {
+})
+accessPointsDict['East Tunnel Right'].EntryInfo.update({
     'SamusX': 0x331,
     'SamusY': 0x188
-}
-accessPointsDict['East Tunnel Top Right'].EntryInfo = {
+})
+accessPointsDict['East Tunnel Top Right'].EntryInfo.update({
     'SamusX': 0x39,
     'SamusY': 0x88
-}
-accessPointsDict['Glass Tunnel Top'].EntryInfo = {
+})
+accessPointsDict['Glass Tunnel Top'].EntryInfo.update({
     'SamusX': 0x7e,
     'SamusY': 0x78
-}
-accessPointsDict['Golden Four'].EntryInfo = {
+})
+accessPointsDict['Golden Four'].EntryInfo.update({
     'SamusX': 0x4cb,
     'SamusY': 0x88
-}
-accessPointsDict['Tourian Escape Room 4 Top Right'].EntryInfo = {
+})
+accessPointsDict['Tourian Escape Room 4 Top Right'].EntryInfo.update({
     'SamusX': 0xffff,
     'SamusY': 0xffff
-}
+})
 
 accessPoints = [ap for ap in accessPointsDict.values()]
 

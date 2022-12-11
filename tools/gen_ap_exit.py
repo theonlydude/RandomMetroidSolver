@@ -56,7 +56,7 @@ for apName, ap in accessPointsDict.items():
     samusX = pwidth - 1 - samusX
     samusY = ap.EntryInfo['SamusY']
 
-    print("""accessPointsDict['{}'].EntryInfo = {{
+    print("""accessPointsDict['{}'].EntryInfo.update({{
     'SamusX': {},
     'SamusY': {}
-}}""".format(apName, hex(samusX), hex(samusY)))
+}})""".format(apName, hex(samusX), hex(samusY)))

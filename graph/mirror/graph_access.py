@@ -69,7 +69,7 @@ accessPointsDict['West Sand Hall Left'].connectInternal(
 )
 
 # exit infos (from tools/gen_ap_exit.py)
-accessPointsDict['Lower Mushrooms Left'].ExitInfo = {
+accessPointsDict['Lower Mushrooms Left'].ExitInfo.update({
     'DoorPtr': 0x8C22,
     'direction': 0x04,
     'cap': (0x01, 0x06),
@@ -77,9 +77,8 @@ accessPointsDict['Lower Mushrooms Left'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-
-accessPointsDict['Green Pirates Shaft Bottom Right'].ExitInfo = {
+})
+accessPointsDict['Green Pirates Shaft Bottom Right'].ExitInfo.update({
     'DoorPtr': 0x8C52,
     'direction': 0x05,
     'cap': (0x4E, 0x06),
@@ -87,8 +86,8 @@ accessPointsDict['Green Pirates Shaft Bottom Right'].ExitInfo = {
     'screen': (0x04, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Moat Right'].ExitInfo = {
+})
+accessPointsDict['Moat Right'].ExitInfo.update({
     'DoorPtr': 0x8AEA,
     'direction': 0x05,
     'cap': (0x7E, 0x46),
@@ -96,8 +95,8 @@ accessPointsDict['Moat Right'].ExitInfo = {
     'screen': (0x07, 0x04),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Keyhunter Room Bottom'].ExitInfo = {
+})
+accessPointsDict['Keyhunter Room Bottom'].ExitInfo.update({
     'DoorPtr': 0x8A42,
     'direction': 0x06,
     'cap': (0x06, 0x02),
@@ -105,8 +104,8 @@ accessPointsDict['Keyhunter Room Bottom'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Morph Ball Room Left'].ExitInfo = {
+})
+accessPointsDict['Morph Ball Room Left'].ExitInfo.update({
     'DoorPtr': 0x8E9E,
     'direction': 0x04,
     'cap': (0x61, 0x06),
@@ -114,8 +113,8 @@ accessPointsDict['Morph Ball Room Left'].ExitInfo = {
     'screen': (0x06, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Climb Bottom Left'].ExitInfo = {
+})
+accessPointsDict['Climb Bottom Left'].ExitInfo.update({
     'DoorPtr': 0x8B6E,
     'direction': 0x04,
     'cap': (0x01, 0x16),
@@ -123,8 +122,8 @@ accessPointsDict['Climb Bottom Left'].ExitInfo = {
     'screen': (0x00, 0x01),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Flyway Right'].ExitInfo = {
+})
+accessPointsDict['Flyway Right'].ExitInfo.update({
     'DoorPtr': 0x8BC2,
     'direction': 0x05,
     'cap': (0x0E, 0x06),
@@ -132,8 +131,8 @@ accessPointsDict['Flyway Right'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Bomb Torizo Room Left'].ExitInfo = {
+})
+accessPointsDict['Bomb Torizo Room Left'].ExitInfo.update({
     'DoorPtr': 0x8BAA,
     'direction': 0x04,
     'cap': (0x01, 0x06),
@@ -141,8 +140,8 @@ accessPointsDict['Bomb Torizo Room Left'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Green Brinstar Elevator'].ExitInfo = {
+})
+accessPointsDict['Green Brinstar Elevator'].ExitInfo.update({
     'DoorPtr': 0x8BFE,
     'direction': 0x05,
     'cap': (0x3E, 0x06),
@@ -150,8 +149,8 @@ accessPointsDict['Green Brinstar Elevator'].ExitInfo = {
     'screen': (0x03, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Green Hill Zone Top Right'].ExitInfo = {
+})
+accessPointsDict['Green Hill Zone Top Right'].ExitInfo.update({
     'DoorPtr': 0x8E86,
     'direction': 0x05,
     'cap': (0x7E, 0x26),
@@ -159,8 +158,8 @@ accessPointsDict['Green Hill Zone Top Right'].ExitInfo = {
     'screen': (0x07, 0x02),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Noob Bridge Right'].ExitInfo = {
+})
+accessPointsDict['Noob Bridge Right'].ExitInfo.update({
     'DoorPtr': 0x8F0A,
     'direction': 0x05,
     'cap': (0x0E, 0x46),
@@ -168,8 +167,8 @@ accessPointsDict['Noob Bridge Right'].ExitInfo = {
     'screen': (0x00, 0x04),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Green Brinstar Main Shaft Top Left'].ExitInfo = {
+})
+accessPointsDict['Green Brinstar Main Shaft Top Left'].ExitInfo.update({
     'DoorPtr': 0x8CB2,
     'direction': 0x04,
     'cap': (0x01, 0x06),
@@ -177,8 +176,8 @@ accessPointsDict['Green Brinstar Main Shaft Top Left'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Brinstar Pre-Map Room Right'].ExitInfo = {
+})
+accessPointsDict['Brinstar Pre-Map Room Right'].ExitInfo.update({
     'DoorPtr': 0x8D42,
     'direction': 0x05,
     'cap': (0x3E, 0x46),
@@ -186,8 +185,8 @@ accessPointsDict['Brinstar Pre-Map Room Right'].ExitInfo = {
     'screen': (0x03, 0x04),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['West Ocean Left'].ExitInfo = {
+})
+accessPointsDict['West Ocean Left'].ExitInfo.update({
     'DoorPtr': 0x89CA,
     'direction': 0x04,
     'cap': (0x01, 0x06),
@@ -195,8 +194,8 @@ accessPointsDict['West Ocean Left'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Crab Maze Left'].ExitInfo = {
+})
+accessPointsDict['Crab Maze Left'].ExitInfo.update({
     'DoorPtr': 0x8AAE,
     'direction': 0x04,
     'cap': (0x01, 0x06),
@@ -204,17 +203,17 @@ accessPointsDict['Crab Maze Left'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['PhantoonRoomOut'].ExitInfo = {
+})
+accessPointsDict['PhantoonRoomOut'].ExitInfo.update({
     'DoorPtr': 0xA2AC,
     'direction': 0x05,
     'cap': (0x0E, 0x06),
     'bitFlag': 0x00,
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
-    'doorAsmPtr': 0xfdff
-}
-accessPointsDict['PhantoonRoomIn'].ExitInfo = {
+    'doorAsmPtr': 0x0000
+})
+accessPointsDict['PhantoonRoomIn'].ExitInfo.update({
     'DoorPtr': 0xA2C4,
     'direction': 0x04,
     'cap': (0x01, 0x06),
@@ -222,8 +221,8 @@ accessPointsDict['PhantoonRoomIn'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Basement Left'].ExitInfo = {
+})
+accessPointsDict['Basement Left'].ExitInfo.update({
     'DoorPtr': 0xA2A0,
     'direction': 0x04,
     'cap': (0x01, 0x06),
@@ -231,8 +230,8 @@ accessPointsDict['Basement Left'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Wrecked Ship Map Room'].ExitInfo = {
+})
+accessPointsDict['Wrecked Ship Map Room'].ExitInfo.update({
     'DoorPtr': 0xA2B8,
     'direction': 0x05,
     'cap': (0x4E, 0x06),
@@ -240,8 +239,8 @@ accessPointsDict['Wrecked Ship Map Room'].ExitInfo = {
     'screen': (0x04, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Lava Dive Right'].ExitInfo = {
+})
+accessPointsDict['Lava Dive Right'].ExitInfo.update({
     'DoorPtr': 0x96D2,
     'direction': 0x05,
     'cap': (0x0E, 0x26),
@@ -249,8 +248,8 @@ accessPointsDict['Lava Dive Right'].ExitInfo = {
     'screen': (0x00, 0x02),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Three Muskateers Room Left'].ExitInfo = {
+})
+accessPointsDict['Three Muskateers Room Left'].ExitInfo.update({
     'DoorPtr': 0x9A4A,
     'direction': 0x04,
     'cap': (0x01, 0x06),
@@ -258,8 +257,8 @@ accessPointsDict['Three Muskateers Room Left'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['RidleyRoomOut'].ExitInfo = {
+})
+accessPointsDict['RidleyRoomOut'].ExitInfo.update({
     'DoorPtr': 0x98CA,
     'direction': 0x04,
     'cap': (0x01, 0x06),
@@ -267,8 +266,8 @@ accessPointsDict['RidleyRoomOut'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['RidleyRoomIn'].ExitInfo = {
+})
+accessPointsDict['RidleyRoomIn'].ExitInfo.update({
     'DoorPtr': 0x98BE,
     'direction': 0x05,
     'cap': (0x2E, 0x06),
@@ -276,8 +275,8 @@ accessPointsDict['RidleyRoomIn'].ExitInfo = {
     'screen': (0x02, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Warehouse Zeela Room Left'].ExitInfo = {
+})
+accessPointsDict['Warehouse Zeela Room Left'].ExitInfo.update({
     'DoorPtr': 0x913E,
     'direction': 0x04,
     'cap': (0x01, 0x06),
@@ -285,8 +284,8 @@ accessPointsDict['Warehouse Zeela Room Left'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['KraidRoomOut'].ExitInfo = {
+})
+accessPointsDict['KraidRoomOut'].ExitInfo.update({
     'DoorPtr': 0x91B6,
     'direction': 0x01,
     'cap': (0x1E, 0x16),
@@ -294,8 +293,8 @@ accessPointsDict['KraidRoomOut'].ExitInfo = {
     'screen': (0x01, 0x01),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['KraidRoomIn'].ExitInfo = {
+})
+accessPointsDict['KraidRoomIn'].ExitInfo.update({
     'DoorPtr': 0x91CE,
     'direction': 0x04,
     'cap': (0x01, 0x16),
@@ -303,8 +302,8 @@ accessPointsDict['KraidRoomIn'].ExitInfo = {
     'screen': (0x00, 0x01),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Warehouse Entrance Left'].ExitInfo = {
+})
+accessPointsDict['Warehouse Entrance Left'].ExitInfo.update({
     'DoorPtr': 0x922E,
     'direction': 0x04,
     'cap': (0x31, 0x16),
@@ -312,8 +311,8 @@ accessPointsDict['Warehouse Entrance Left'].ExitInfo = {
     'screen': (0x03, 0x01),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0xBDD1
-}
-accessPointsDict['Warehouse Entrance Right'].ExitInfo = {
+})
+accessPointsDict['Warehouse Entrance Right'].ExitInfo.update({
     'DoorPtr': 0x923A,
     'direction': 0x05,
     'cap': (0x1E, 0x06),
@@ -321,8 +320,8 @@ accessPointsDict['Warehouse Entrance Right'].ExitInfo = {
     'screen': (0x01, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Single Chamber Top Right'].ExitInfo = {
+})
+accessPointsDict['Single Chamber Top Right'].ExitInfo.update({
     'DoorPtr': 0x95FA,
     'direction': 0x05,
     'cap': (0x2E, 0x06),
@@ -330,8 +329,8 @@ accessPointsDict['Single Chamber Top Right'].ExitInfo = {
     'screen': (0x02, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Kronic Boost Room Bottom Left'].ExitInfo = {
+})
+accessPointsDict['Kronic Boost Room Bottom Left'].ExitInfo.update({
     'DoorPtr': 0x967E,
     'direction': 0x04,
     'cap': (0x01, 0x06),
@@ -339,8 +338,8 @@ accessPointsDict['Kronic Boost Room Bottom Left'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Crocomire Speedway Bottom'].ExitInfo = {
+})
+accessPointsDict['Crocomire Speedway Bottom'].ExitInfo.update({
     'DoorPtr': 0x93D2,
     'direction': 0x06,
     'cap': (0x36, 0x02),
@@ -348,8 +347,8 @@ accessPointsDict['Crocomire Speedway Bottom'].ExitInfo = {
     'screen': (0x03, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Business Center Mid Left'].ExitInfo = {
+})
+accessPointsDict['Business Center Mid Left'].ExitInfo.update({
     'DoorPtr': 0x9306,
     'direction': 0x04,
     'cap': (0x01, 0x06),
@@ -357,8 +356,8 @@ accessPointsDict['Business Center Mid Left'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Norfair Map Room'].ExitInfo = {
+})
+accessPointsDict['Norfair Map Room'].ExitInfo.update({
     'DoorPtr': 0x97C2,
     'direction': 0x05,
     'cap': (0x0E, 0x46),
@@ -366,8 +365,8 @@ accessPointsDict['Norfair Map Room'].ExitInfo = {
     'screen': (0x00, 0x04),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Crocomire Room Top'].ExitInfo = {
+})
+accessPointsDict['Crocomire Room Top'].ExitInfo.update({
     'DoorPtr': 0x93EA,
     'direction': 0x07,
     'cap': (0x06, 0x2D),
@@ -375,8 +374,8 @@ accessPointsDict['Crocomire Room Top'].ExitInfo = {
     'screen': (0x00, 0x02),
     'distanceToSpawn': 0x01C0,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Main Street Bottom'].ExitInfo = {
+})
+accessPointsDict['Main Street Bottom'].ExitInfo.update({
     'DoorPtr': 0xA39C,
     'direction': 0x06,
     'cap': (0x06, 0x02),
@@ -384,8 +383,8 @@ accessPointsDict['Main Street Bottom'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x0170,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Crab Hole Bottom Left'].ExitInfo = {
+})
+accessPointsDict['Crab Hole Bottom Left'].ExitInfo.update({
     'DoorPtr': 0xA510,
     'direction': 0x04,
     'cap': (0x01, 0x06),
@@ -393,8 +392,8 @@ accessPointsDict['Crab Hole Bottom Left'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Red Fish Room Left'].ExitInfo = {
+})
+accessPointsDict['Red Fish Room Left'].ExitInfo.update({
     'DoorPtr': 0xA480,
     'direction': 0x04,
     'cap': (0x01, 0x36),
@@ -402,8 +401,8 @@ accessPointsDict['Red Fish Room Left'].ExitInfo = {
     'screen': (0x00, 0x03),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Crab Shaft Right'].ExitInfo = {
+})
+accessPointsDict['Crab Shaft Right'].ExitInfo.update({
     'DoorPtr': 0xA4C8,
     'direction': 0x05,
     'cap': (0x5E, 0x16),
@@ -411,8 +410,8 @@ accessPointsDict['Crab Shaft Right'].ExitInfo = {
     'screen': (0x05, 0x01),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Crab Hole Bottom Right'].ExitInfo = {
+})
+accessPointsDict['Crab Hole Bottom Right'].ExitInfo.update({
     'DoorPtr': 0xA51C,
     'direction': 0x05,
     'cap': (0x0E, 0x06),
@@ -420,8 +419,8 @@ accessPointsDict['Crab Hole Bottom Right'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Maridia Map Room'].ExitInfo = {
+})
+accessPointsDict['Maridia Map Room'].ExitInfo.update({
     'DoorPtr': 0xA5E8,
     'direction': 0x04,
     'cap': (0x01, 0x16),
@@ -429,8 +428,8 @@ accessPointsDict['Maridia Map Room'].ExitInfo = {
     'screen': (0x00, 0x01),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0xE356
-}
-accessPointsDict['Aqueduct Top Left'].ExitInfo = {
+})
+accessPointsDict['Aqueduct Top Left'].ExitInfo.update({
     'DoorPtr': 0xA708,
     'direction': 0x04,
     'cap': (0x01, 0x36),
@@ -438,8 +437,8 @@ accessPointsDict['Aqueduct Top Left'].ExitInfo = {
     'screen': (0x00, 0x03),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0xE398
-}
-accessPointsDict['Le Coude Right'].ExitInfo = {
+})
+accessPointsDict['Le Coude Right'].ExitInfo.update({
     'DoorPtr': 0x8AA2,
     'direction': 0x05,
     'cap': (0x3E, 0x16),
@@ -447,8 +446,8 @@ accessPointsDict['Le Coude Right'].ExitInfo = {
     'screen': (0x03, 0x01),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['DraygonRoomOut'].ExitInfo = {
+})
+accessPointsDict['DraygonRoomOut'].ExitInfo.update({
     'DoorPtr': 0xA840,
     'direction': 0x04,
     'cap': (0x01, 0x06),
@@ -456,8 +455,8 @@ accessPointsDict['DraygonRoomOut'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['DraygonRoomIn'].ExitInfo = {
+})
+accessPointsDict['DraygonRoomIn'].ExitInfo.update({
     'DoorPtr': 0xA96C,
     'direction': 0x05,
     'cap': (0x1E, 0x26),
@@ -465,8 +464,8 @@ accessPointsDict['DraygonRoomIn'].ExitInfo = {
     'screen': (0x01, 0x02),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Red Tower Top Left'].ExitInfo = {
+})
+accessPointsDict['Red Tower Top Left'].ExitInfo.update({
     'DoorPtr': 0x902A,
     'direction': 0x04,
     'cap': (0x01, 0x06),
@@ -474,17 +473,17 @@ accessPointsDict['Red Tower Top Left'].ExitInfo = {
     'screen': (0x00, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Caterpillar Room Top Right'].ExitInfo = {
+})
+accessPointsDict['Caterpillar Room Top Right'].ExitInfo.update({
     'DoorPtr': 0x90C6,
     'direction': 0x05,
     'cap': (0x2E, 0x06),
     'bitFlag': 0x40,
     'screen': (0x02, 0x00),
     'distanceToSpawn': 0x8000,
-    'doorAsmPtr': 0xBDAF
-}
-accessPointsDict['Red Brinstar Elevator'].ExitInfo = {
+    'doorAsmPtr': 0x0000
+})
+accessPointsDict['Red Brinstar Elevator'].ExitInfo.update({
     'DoorPtr': 0x8AF6,
     'direction': 0x07,
     'cap': (0x16, 0x2D),
@@ -492,8 +491,8 @@ accessPointsDict['Red Brinstar Elevator'].ExitInfo = {
     'screen': (0x01, 0x02),
     'distanceToSpawn': 0x01C0,
     'doorAsmPtr': 0xB9F1
-}
-accessPointsDict['East Tunnel Right'].ExitInfo = {
+})
+accessPointsDict['East Tunnel Right'].ExitInfo.update({
     'DoorPtr': 0xA384,
     'direction': 0x05,
     'cap': (0x2E, 0x06),
@@ -501,8 +500,8 @@ accessPointsDict['East Tunnel Right'].ExitInfo = {
     'screen': (0x02, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['East Tunnel Top Right'].ExitInfo = {
+})
+accessPointsDict['East Tunnel Top Right'].ExitInfo.update({
     'DoorPtr': 0xA390,
     'direction': 0x05,
     'cap': (0x0E, 0x16),
@@ -510,8 +509,8 @@ accessPointsDict['East Tunnel Top Right'].ExitInfo = {
     'screen': (0x00, 0x01),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0xE356
-}
-accessPointsDict['Glass Tunnel Top'].ExitInfo = {
+})
+accessPointsDict['Glass Tunnel Top'].ExitInfo.update({
     'DoorPtr': 0xA330,
     'direction': 0x07,
     'cap': (0x16, 0x7D),
@@ -519,8 +518,8 @@ accessPointsDict['Glass Tunnel Top'].ExitInfo = {
     'screen': (0x01, 0x07),
     'distanceToSpawn': 0x0200,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Golden Four'].ExitInfo = {
+})
+accessPointsDict['Golden Four'].ExitInfo.update({
     'DoorPtr': 0x91E6,
     'direction': 0x04,
     'cap': (0x01, 0x66),
@@ -528,8 +527,8 @@ accessPointsDict['Golden Four'].ExitInfo = {
     'screen': (0x00, 0x06),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
-accessPointsDict['Tourian Escape Room 4 Top Right'].ExitInfo = {
+})
+accessPointsDict['Tourian Escape Room 4 Top Right'].ExitInfo.update({
     'DoorPtr': 0xAB34,
     'direction': 0x05,
     'cap': (0x2E, 0x86),
@@ -537,7 +536,8 @@ accessPointsDict['Tourian Escape Room 4 Top Right'].ExitInfo = {
     'screen': (0x02, 0x08),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
-}
+})
+
 
 accessPointsDict['Lower Mushrooms Left'].EntryInfo = {
     'SamusX': 0x3c9,

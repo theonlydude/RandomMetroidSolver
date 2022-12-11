@@ -29,7 +29,7 @@ for apName, ap in accessPointsDict.items():
     DistanceFromDoor = "0x{0:0{1}X}".format(rom.readWord(), 4)
     CustomDoorASM = "0x{0:0{1}X}".format(rom.readWord(), 4)
 
-    print("""accessPointsDict['{}'].ExitInfo = {{
+    print("""accessPointsDict['{}'].ExitInfo.update({{
     'DoorPtr': {},
     'direction': {},
     'cap': ({}, {}),
@@ -37,8 +37,12 @@ for apName, ap in accessPointsDict.items():
     'screen': ({}, {}),
     'distanceToSpawn': {},
     'doorAsmPtr': {}
-}}""".format(apName, DoorPtr, Direction, XposLow, YPosLow, BitFlag, XPosHigh, YPosHigh, DistanceFromDoor, CustomDoorASM))
+}})""".format(apName, DoorPtr, Direction, XposLow, YPosLow, BitFlag, XPosHigh, YPosHigh, DistanceFromDoor, CustomDoorASM))
 
+
+for apName, ap in accessPointsDict.items():
+    if ap.Internal:
+        continue
 
     roomAddr = snes_to_pc(0x8f0000 | ap.RoomInfo['RoomPtr'])
     # read room size in screens

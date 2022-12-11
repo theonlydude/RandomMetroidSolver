@@ -1861,12 +1861,12 @@ Room_B305_state_B312_PLM:
 org $8f8e98
 ; room B32E: Ridley's Room
 Room_B32E_state_B35A_PLM:
-Door_5A_Room_B32E_PLM_C842:
+Door_5A_Room_B32E_PLM_C848:
     ; Door. Grey door facing left
-    dw $c842 : db $0e : db $16 : dw $005a 
-Door_5B_Room_B32E_PLM_C848:
+    dw $c848 : db $01 : db $06 : dw $005a 
+Door_5B_Room_B32E_PLM_C842:
     ; Door. Grey door facing right
-    dw $c848 : db $01 : db $06 : dw $005b 
+    dw $c842 : db $0e : db $16 : dw $005b 
     dw $0000
 org $8f8ea6
 ; room B37A: Lower Norfair Farming Room

@@ -149,7 +149,7 @@ patches = {
     },
     'Blinking[RidleyRoomIn]': {
         # door Door_5A_Room_B32E_PLM_ x/y updated
-        snes_to_pc(0x8f8e98): [0x48, 0xc8, 0xe, 0x16, 0x5a, 0x8c],
+        snes_to_pc(0x8f8e98): [0x48, 0xc8, 0x1, 0x06, 0x5a, 0x8c],
         snes_to_pc(0xa1a638): [0x0],
     },
     'Blinking[DraygonRoomIn]': {

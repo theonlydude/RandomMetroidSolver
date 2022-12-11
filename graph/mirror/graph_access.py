@@ -690,7 +690,7 @@ accessPointsDict['Red Fish Room Left'].EntryInfo = {
     'SamusY': 0x88
 }
 accessPointsDict['Crab Shaft Right'].EntryInfo = {
-    'SamusX': 0x35,
+    'SamusX': 0x2a,
     'SamusY': 0x388
 }
 accessPointsDict['Crab Hole Bottom Right'].EntryInfo = {

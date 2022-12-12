@@ -4,7 +4,6 @@ import sys, argparse
 from solver.interactiveSolver import InteractiveSolver
 from solver.standardSolver import StandardSolver
 from solver.conf import Conf
-from logic.logic import Logic
 from rom.flavor import RomFlavor
 import utils.log
 

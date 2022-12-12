@@ -1,7 +1,5 @@
 import sys, os, json
 
-from graph.vanilla.graph_locations import locations
-from graph.vanilla.graph_access import accessPoints
 from rom.rom import snes_to_pc
 from rom.romreader import RomReader
 from rom.addresses import Addresses
@@ -9,6 +7,8 @@ from utils.doorsmanager import DoorsManager
 from utils.utils import getDefaultMultiValues, getPresetDir, removeChars
 from utils.parameters import Knows, isKnows, Controller, isButton
 from utils.objectives import Objectives
+from logic.logic import Logic
+from rom.flavor import RomFlavor
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import HTTP
@@ -60,19 +60,35 @@ def loadRandoPresetsList(cache, filter=False):
 def getAddressesToRead(plando=False):
     addresses = {"locations": [], "patches": [], "transitions": [], "misc": [], "ranges": []}
 
-    # locations
-    for loc in locations:
-        addresses["locations"].append(loc.Address)
+    for logic in ['mirror', 'vanilla']:
+        Logic.factory(logic)
+        RomFlavor.factory()
+
+        # locations
+        for loc in Logic.locations:
+            addresses["locations"].append(loc.Address)
+
+        # doors
+        addresses["misc"] += DoorsManager.getAddressesToRead()
+
+        # transitions
+        for ap in Logic.accessPoints:
+            if ap.Internal == True:
+                continue
+            addresses["transitions"].append(0x10000 | ap.ExitInfo['DoorPtr'])
+
+        maxDoorAsmPatchLen = 22
+        customDoorsAsm = Addresses.getOne('customDoorsAsm')
+        addresses["ranges"] += [customDoorsAsm, customDoorsAsm+(maxDoorAsmPatchLen * len([ap for ap in Logic.accessPoints if ap.Internal == False]))]
 
     # patches
-    for (patch, values) in RomReader.patches.items():
-        addresses["patches"].append(values["address"])
+    for (_class, patches) in RomReader.patches.items():
+        for patch, values in patches.items():
+            addresses["patches"].append(values["address"])
 
-    # transitions
-    for ap in accessPoints:
-        if ap.Internal == True:
-            continue
-        addresses["transitions"].append(0x10000 | ap.ExitInfo['DoorPtr'])
+    # flavor patches
+    for patch, values in RomReader.flavorPatches.items():
+        addresses["patches"].append(values["address"])
 
     # misc
     # majors split
@@ -81,17 +97,12 @@ def getAddressesToRead(plando=False):
     addresses["misc"] += Addresses.getWeb('escapeTimer')
     # start ap
     addresses["misc"] += Addresses.getWeb('startAP')
-    # random doors
-    addresses["misc"] += DoorsManager.getAddressesToRead()
     # objectives
     addresses["misc"] += Objectives.getAddressesToRead()
 
     # ranges [low, high]
     ## old doorasm for old seeds
     addresses["ranges"] += [snes_to_pc(0x8feb00), snes_to_pc(0x8fee60)]
-    maxDoorAsmPatchLen = 22
-    customDoorsAsm = Addresses.getOne('customDoorsAsm')
-    addresses["ranges"] += [customDoorsAsm, customDoorsAsm+(maxDoorAsmPatchLen * len([ap for ap in accessPoints if ap.Internal == False]))]
     # split locs
     addresses["ranges"] += Addresses.getRange('locIdsByArea')
     addresses["ranges"] += Addresses.getRange('scavengerOrder')

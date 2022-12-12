@@ -1135,21 +1135,6 @@ if seedInfo != None:
     pass
 }}
 
-    if(permalink == true) {
-        // check if a vanilla ROM is already in local storage
-        localforage.getItem('vanillaROM', function(err, value) {
-            if(err != null) {
-                clearLocalStorage();
-            } else {
-                if(value != null) {
-                    displayROMInput(false);
-                    vanillaROMBytes = new Uint8Array(value);
-                } else {
-                    clearLocalStorage();
-                }
-            }
-        });
-    }
 }
 
 function switchGamepadMapping() {
@@ -1173,12 +1158,6 @@ function displayROMInput(show) {
         document.getElementById("vanillaROMVisibility").style.display = "none";
         document.getElementById("vanillaROMOKVisibility").style.display = "block";
     }
-}
-
-function clearLocalStorage() {
-    displayROMInput(true);
-    localforage.clear();
-    vanillaROMBytes = null;
 }
 
 function permalinkCustomization(permalink) {

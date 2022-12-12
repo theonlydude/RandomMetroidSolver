@@ -325,6 +325,12 @@
       return promisifyRequest(store.transaction);
     });
   }
+  function del(key, customStore = defaultGetStore()) {
+    return customStore("readwrite", (store) => {
+      store.delete(key);
+      return promisifyRequest(store.transaction);
+    });
+  }
 
   // js/rom.ts
   var VALID_EXTENSIONS = ["sfc", "smc"];
@@ -335,16 +341,18 @@
         alert("This website requires the HTML5 File API, please upgrade your browser to a newer version.");
         return;
       }
+      const checkForStoredFile = this.checkForStoredFile.bind(this);
+      const bindEvents = this.bindEvents;
+      checkForStoredFile().then((hasFile) => {
+        if (hasFile) {
+          console.log("Vanilla ROM loaded from storage");
+        } else {
+          bindEvents();
+        }
+      });
+    }
+    bindEvents() {
       const settings = settings_default();
-      if (settings.permalink) {
-        const hasROMLoaded = this.getROM().then((value) => {
-          if (!value) {
-            return false;
-          }
-          const validated = this.validateChecksum(value);
-          return validated;
-        });
-      }
       const selector = settings.permalink ? "vanillaUploadFile" : "uploadFile";
       this.el = document.getElementById(selector);
       const useFile = this.useFile.bind(this);
@@ -355,10 +363,50 @@
         }
       });
     }
+    checkForStoredFile() {
+      return new Promise((resolve, _reject) => {
+        this.getROM().then((value) => {
+          if (!value) {
+            resolve(false);
+            return;
+          }
+          const validated = this.validateChecksum(value);
+          if (validated) {
+            this.broadcastROMStatus(value);
+            resolve(true);
+            return;
+          }
+          throw Error("Invalid Vanilla ROM value stored");
+        }).catch((err) => {
+          console.error(err);
+          del(VANILLA_ROM_KEY);
+          resolve(false);
+        });
+      });
+    }
+    displayStatus(hasROM = false) {
+      const formEl = document.getElementById("vanillaROMVisibility");
+      const okEl = document.getElementById("vanillaROMOKVisibility");
+      if (!formEl || !okEl) {
+        return;
+      }
+      if (hasROM) {
+        formEl.style.display = "none";
+        okEl.style.display = "block";
+      } else {
+        formEl.style.display = "block";
+        okEl.style.display = "none";
+      }
+    }
     getUnheaderedContent(content) {
       const fileSize = content.byteLength;
       const isHeadered = fileSize === 3146240;
       return isHeadered ? content.slice(512) : content;
+    }
+    broadcastROMStatus(content) {
+      const hasROM = content !== null && content.byteLength > 0;
+      this.displayStatus(hasROM);
+      this.setLegacyROMToBrowser(content);
     }
     validateChecksum(content) {
       const fileSize = content.byteLength;
@@ -391,7 +439,10 @@
         return alert("The file you have provided is not a valid Vanilla ROM.");
       }
       const data = new Uint8Array(content);
-      await this.setROM(content);
+      const saved = await this.setROM(data);
+      if (saved) {
+        this.broadcastROMStatus(data);
+      }
     }
     useFile(file) {
       this.validateFileExtension(file.name);
@@ -405,11 +456,16 @@
     }
     setROM(content) {
       try {
-        const value = set(VANILLA_ROM_KEY, content);
-        return value;
+        set(VANILLA_ROM_KEY, content);
+        return true;
       } catch (err) {
         console.error("Could not set Vanilla ROM", err);
+        return false;
       }
+    }
+    setLegacyROMToBrowser(content) {
+      window.vanillaROMBytes = content;
+      window.vanillaROM = content;
     }
   };
   var rom_default = VanillaROM;

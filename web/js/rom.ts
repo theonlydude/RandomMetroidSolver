@@ -26,12 +26,14 @@ class VanillaROM {
     }
 
     const checkForStoredFile = this.checkForStoredFile.bind(this)
-    const bindEvents = this.bindEvents
+    const bindEvents = this.bindEvents.bind(this)
+    const broadcastROMStatus = this.broadcastROMStatus.bind(this)
     checkForStoredFile()
       .then((hasFile) => {
         if (hasFile) {
           console.log('Vanilla ROM loaded from storage')
         } else {
+          broadcastROMStatus(null)
           bindEvents()
         }
       })

@@ -89,7 +89,7 @@ class Solver(object):
         (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
 
         # generate list of addresses to read in the ROM
-        addresses = getAddressesToRead()
+        addresses = getAddressesToRead(self.cache)
 
         # send values to view
         return dict(desc=Knows.desc, stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets, roms=ROMs,

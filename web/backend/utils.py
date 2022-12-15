@@ -57,8 +57,16 @@ def loadRandoPresetsList(cache, filter=False):
 
     return (randoPresets, tourPresets)
 
-def getAddressesToRead(plando=False):
-    addresses = {"locations": [], "patches": [], "transitions": [], "misc": [], "ranges": []}
+def getAddressesToRead(cache):
+    addresses = cache.ram('addresses', lambda:dict(), time_expire=None)
+    if addresses:
+        return addresses
+
+    addresses["locations"] = []
+    addresses["patches"] = []
+    addresses["transitions"] = []
+    addresses["misc"] = []
+    addresses["ranges"] = []
 
     for logic in ['mirror', 'vanilla']:
         Logic.factory(logic)
@@ -106,14 +114,13 @@ def getAddressesToRead(plando=False):
     # split locs
     addresses["ranges"] += Addresses.getRange('locIdsByArea')
     addresses["ranges"] += Addresses.getRange('scavengerOrder')
-    if plando == True:
-        # plando addresses
-        addresses["ranges"] += Addresses.getRange('plandoAddresses')
-        # plando transitions (4 bytes per transitions, ap#/2 transitions)
-        plandoTransitions = Addresses.getOne('plandoTransitions')
-        addresses["ranges"] += [plandoTransitions, plandoTransitions+((len(addresses["transitions"])/2) * 4)]
-        # starting etanks added in the customizer
-        addresses["misc"] += Addresses.getWeb('additionalETanks')
+    # plando addresses
+    addresses["ranges"] += Addresses.getRange('plandoAddresses')
+    # plando transitions (4 bytes per transitions, ap#/2 transitions)
+    plandoTransitions = Addresses.getOne('plandoTransitions')
+    addresses["ranges"] += [plandoTransitions, plandoTransitions+((len(addresses["transitions"])/2) * 4)]
+    # starting etanks added in the customizer
+    addresses["misc"] += Addresses.getWeb('additionalETanks')
     # events array for autotracker
     addresses["ranges"] += Addresses.getRange('objectiveEventsArray')
 

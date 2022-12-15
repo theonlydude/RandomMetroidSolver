@@ -50,7 +50,7 @@ class Plando(object):
             escapeAPs += [transition2isolver(src), transition2isolver(dest)]
 
         # generate list of addresses to read in the ROM
-        addresses = getAddressesToRead(plando=True)
+        addresses = getAddressesToRead(self.cache)
 
         startAPs = GraphUtils.getStartAccessPointNamesCategory()
         startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),

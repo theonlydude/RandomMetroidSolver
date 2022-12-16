@@ -716,7 +716,7 @@ accessPointsDict['Le Coude Right'].EntryInfo.update({
     'SamusY': 0x88
 })
 accessPointsDict['DraygonRoomOut'].EntryInfo.update({
-    'SamusX': 0x1cb,
+    'SamusX': 0x1d1,
     'SamusY': 0x288
 })
 accessPointsDict['DraygonRoomIn'].EntryInfo.update({

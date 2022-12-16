@@ -505,7 +505,7 @@ class InteractiveSolver(CommonSolver):
             "nerfedRainbowBeam": False,
             "escapeAttr": escapeAttr,
             "escapeRandoRemoveEnemies": False,
-            "minimizerN": None,
+            "minimizerN": 100 if RomPatches.NoGadoras else None,
             "tourian": self.tourian,
             "doorsColorsRando": DoorsManager.isRandom(),
             "vanillaObjectives": self.objectives.isVanilla(),

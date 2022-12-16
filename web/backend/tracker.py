@@ -7,6 +7,7 @@ from graph.vanilla.graph_access import accessPoints
 from solver.interactiveSolver import InteractiveSolver
 from logic.logic import Logic
 from rom.flavor import RomFlavor
+from rom.romreader import RomReader
 
 from gluon.html import OPTGROUP
 
@@ -30,6 +31,7 @@ class Tracker(object):
                 "preset": "regular",
                 "seed": None,
                 "startLocation": "Landing Site",
+                "logic": "vanilla",
                 # set to False in tracker.html
                 "firstTime": True
             }
@@ -69,7 +71,7 @@ class Tracker(object):
                     nothingScreens=InteractiveSolver.nothingScreens,
                     doorsScreen=InteractiveSolver.doorsScreen,
                     bossBitMasks=InteractiveSolver.bossBitMasks,
-                    apsGraphArea=apsGraphArea)
+                    apsGraphArea=apsGraphArea, flavorPatches=RomReader.flavorPatches)
 
     def trackerWebService(self):
         # unified web service for item/area trackers

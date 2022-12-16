@@ -42,6 +42,10 @@
         <td>Start location:</td>
         <td colspan=2>{{=SELECT(*startAPs, **dict(_name="startLocation", _id="startLocation", value=curSession["startLocation"], _class="filldropdown"))}}</td>
       </tr>
+      <tr id="logicVisibility">
+        <td>Logic:</td>
+        <td colspan=2>{{=SELECT(["vanilla", "mirror"], **dict(_name="logic", _id="logic", value=curSession["logic"], _class="filldropdown"))}}</td>
+      </tr>
       <tr><td colspan=3 class="blankLastRow"></td></tr>
     </table>
     <table>

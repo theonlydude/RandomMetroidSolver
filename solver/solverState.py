@@ -14,6 +14,8 @@ class SolverState(object):
     def fromSolver(self, solver):
         self.state = {}
         # string
+        self.state["logic"] = solver.logic
+        # string
         self.state["majorsSplit"] = solver.majorsSplit
         # string
         self.state["masterMajorsSplit"] = solver.masterMajorsSplit
@@ -104,6 +106,7 @@ class SolverState(object):
         self.state["additionalETanks"] = solver.additionalETanks
 
     def toSolver(self, solver):
+        solver.logic = self.state["logic"]
         solver.majorsSplit = self.state["majorsSplit"]
         solver.masterMajorsSplit = self.state["masterMajorsSplit"]
         solver.areaRando = self.state["areaRando"]

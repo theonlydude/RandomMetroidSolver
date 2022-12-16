@@ -34,7 +34,8 @@ class InteractiveSolver(CommonSolver):
         self.shm = SHM(shm)
         self.firstLogFile = None
 
-        Logic.factory(logic)
+        self.logic = logic
+        Logic.factory(self.logic)
         RomFlavor.factory()
         self.locations = Logic.locations
 

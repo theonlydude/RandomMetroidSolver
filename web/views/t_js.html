@@ -307,6 +307,9 @@ function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
     if(!("mode" in dataDict)) {
       dataDict["mode"] = document.getElementById("mode").value;
     }
+    if(!("logic" in dataDict)) {
+      dataDict["logic"] = logic;
+    }
 
     // always store the timer
     if(escapeRando == true && mode == "plando") {
@@ -565,6 +568,7 @@ function displayDoors(jsonData) {
 }
 
 function updateGlobal(jsonData) {
+    logic = jsonData["logic"];
     mode = jsonData["mode"];
     majorsSplit = jsonData["majorsSplit"];
     area = jsonData["areaRando"];
@@ -858,6 +862,7 @@ function isActive(elemId) {
 // ITEMS TRACKER
 
 var lastAP = "landingSite";
+var logic = "vanilla";
 var mode = "standard";
 var majorsSplit = "Full";
 var area = true;
@@ -1118,6 +1123,14 @@ window.onload = function(){
             });
         }
 
+        // detect logic
+        logic = "vanilla";
+{{
+    for logic, values in flavorPatches.items():
+        response.write("        if(bytes["+str(values['address'])+"] == "+str(values['value'])+") { logic = '"+logic+"'; }\n", escape=False)
+        pass
+}}
+
         var romData = {};
   
         // locations items
@@ -1185,6 +1198,7 @@ window.onload = function(){
         setGuessedPreset(file.name);
 
         document.getElementById("startLocationVisibility").style.display = "none";
+        document.getElementById("logicVisibility").style.display = "none";
     }
   
     reader.readAsArrayBuffer(file);
@@ -1403,6 +1417,11 @@ function initSolver() {
   // reset everything
   resetLocsInfo();
 
+  // for seedless get the logic from the dropdown
+  if(mode == "seedless") {
+    logic = document.getElementById("logic").value;
+  }
+
   // prepare parameters for WS
   ajaxCall({action: "init",
             scope: "common",
@@ -1411,7 +1430,7 @@ function initSolver() {
             fileName: document.getElementById("fileName").value,
             fill: document.getElementById("fillPlando").checked,
             startLocation: document.getElementById("startLocation").value,
-            mode: mode}, "download");
+            mode: mode, logic: logic}, "download");
 
   hidePopup();
   $('#hideRandoOverlay').hide();
@@ -1873,6 +1892,7 @@ function clearInputSeed() {
   document.getElementById("fileName").value = "";
   if(mode != "plando") {
     document.getElementById("startLocationVisibility").style.display = "table-row";
+    document.getElementById("logicVisibility").style.display = "table-row";
   }
 }
 

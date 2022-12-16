@@ -2,6 +2,7 @@ from web.backend.utils import loadPresetsList, transition2isolver, getAddressesT
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
 from logic.logic import Logic
 from rom.flavor import RomFlavor
+from rom.romreader import RomReader
 from utils.version import displayedVersion
 
 from gluon.html import OPTGROUP
@@ -60,4 +61,4 @@ class Plando(object):
         return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                     vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
                     curSession=self.session.plando, addresses=addresses, startAPs=startAPs,
-                    version=displayedVersion)
+                    version=displayedVersion, flavorPatches=RomReader.flavorPatches)

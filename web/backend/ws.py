@@ -26,13 +26,18 @@ class WS(object):
         if mode not in ["standard", "seedless", "plando", "race", "debug"]:
             raiseHttp(400, "Unknown mode, must be standard/seedless/plando/race/debug", True)
 
+        logic = caller.request.vars.logic
+        if logic not in ["vanilla", "mirror"]:
+            raiseHttp(400, "Unknown logic, must be vanilla/mirror", True)
+
         try:
             WSClass = globals()["WS_{}_{}".format(scope, action)]
-            return WSClass(mode, caller)
+            return WSClass(logic, mode, caller)
         except Exception as e:
             raiseHttp(400, "{}".format(e.body if "body" in e.__dict__ else e).replace('"', ''), True)
 
-    def __init__(self, mode, caller):
+    def __init__(self, logic, mode, caller):
+        self.logic = logic
         self.mode = mode
         self.caller = caller
         self.vars = self.caller.request.vars
@@ -101,6 +106,7 @@ class WS(object):
                 "roomsVisibility": state["roomsVisibility"],
 
                 # infos on seed
+                "logic": state["logic"],
                 "mode": state["mode"],
                 "majorsSplit": state["masterMajorsSplit"],
                 "areaRando": state["areaRando"],
@@ -146,7 +152,8 @@ class WS(object):
             '--shm',  shm.name(),
             '--action', action,
             '--mode', self.mode,
-            '--scope', scope
+            '--scope', scope,
+            '--logic', self.logic
         ]
         if action in ['add', 'replace']:
             if scope == 'item':
@@ -300,6 +307,7 @@ class WS_common_init(WS):
 
     def action(self):
         mode = self.vars.mode
+        logic = self.vars.logic
         if mode != 'seedless':
             try:
                 (base, jsonRomFileName) = generateJsonROM(self.vars.romJson)
@@ -315,6 +323,7 @@ class WS_common_init(WS):
         preset = self.vars.preset
         presetFileName = '{}/{}.json'.format(getPresetDir(preset), preset)
 
+        self.session["logic"] = logic
         self.session["seed"] = seed
         self.session["preset"] = preset
         self.session["mode"] = mode
@@ -322,9 +331,9 @@ class WS_common_init(WS):
 
         fill = self.vars.fill == "true"
 
-        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, fill, startLocation)
+        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, logic, mode, fill, startLocation)
 
-    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, fill, startLocation):
+    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, logic, mode, fill, startLocation):
         shm = SHM()
         params = [
             getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
@@ -332,6 +341,7 @@ class WS_common_init(WS):
             '--shm', shm.name(),
             '--action', "init",
             '--interactive',
+            '--logic', logic,
             '--mode', mode,
             '--scope', 'common'
         ]

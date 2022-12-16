@@ -68,7 +68,7 @@ def getAddressesToRead(cache):
     addresses["misc"] = []
     addresses["ranges"] = []
 
-    for logic in ['mirror', 'vanilla']:
+    for logic in ['vanilla', 'mirror']:
         Logic.factory(logic)
         RomFlavor.factory()
 

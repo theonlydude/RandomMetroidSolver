@@ -42,6 +42,7 @@ patches = {
         snes_to_pc(0xa19451): [0x0],
     },
     'Blinking[KraidRoomOut]': {
+        # removes gadora by ending PLM list
         # door Door_45_Room_A56B_PLM_ x/y updated
         snes_to_pc(0x8f8a1a): [0x48, 0xc8, 0x1, 0x16, 0x63, 0x8c, 0x0, 0x0],
         snes_to_pc(0xa1a056): [0x0],

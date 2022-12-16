@@ -386,8 +386,8 @@ class GraphUtils:
             rooms[(roomPtr, entryInfo['screen'], (ap.EntryInfo['SamusX'], ap.EntryInfo['SamusY']))] = ap
             # for boss rando with incompatible ridley transition, also register this one
             if ap.Name == 'RidleyRoomIn':
-                rooms[(roomPtr, (0x0, 0x1), 0x5)] = ap
-                rooms[(roomPtr, (0x0, 0x1), (0xbf, 0x198))] = ap
+                rooms[(roomPtr, (0x0, 0x1), entryInfo['direction'])] = ap
+                rooms[(roomPtr, (0x0, 0x1), (ap.EntryInfo['SamusX'], ap.EntryInfo['SamusY']))] = ap
 
         return rooms
 

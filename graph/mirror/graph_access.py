@@ -68,6 +68,12 @@ accessPointsDict['West Sand Hall Left'].connectInternal(
     )
 )
 
+# directions:
+# no door closes behind Samus:
+#    00 = right, 01 = left, 02 = down, 03 = up.
+# door closes behind Samus:
+#    04 = right, 05 = left, 06 = down, 07 = up.
+
 # exit infos (from tools/gen_ap_exit.py)
 accessPointsDict['Lower Mushrooms Left'].ExitInfo.update({
     'DoorPtr': 0x8C22,
@@ -288,7 +294,7 @@ accessPointsDict['Warehouse Zeela Room Left'].ExitInfo.update({
 })
 accessPointsDict['KraidRoomOut'].ExitInfo.update({
     'DoorPtr': 0x91B6,
-    'direction': 0x01,
+    'direction': 0x05,
     'cap': (0x1E, 0x16),
     'bitFlag': 0x00,
     'screen': (0x01, 0x01),

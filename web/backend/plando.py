@@ -26,6 +26,7 @@ class Plando(object):
                 "preset": "regular",
                 "seed": None,
                 "startLocation": "Landing Site",
+                "logic": "vanilla",
 
                 # rando params
                 "rando": {},

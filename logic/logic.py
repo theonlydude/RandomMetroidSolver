@@ -33,4 +33,6 @@ class Logic(object):
             Logic.HelpersGraph = HelpersGraph
             Logic.patches = implementation
             Logic.LocationsHelper = LocationsHelper
+        else:
+            raise ValueError("Unknown logic type : "+str(implementation))
         Logic.implementation = implementation

@@ -424,8 +424,8 @@ var dataEnum = {
 // 07F7..08F6: map tiles for current area
 
 // 4. samus:
-// $0AF6: Samus X position (inside current screen)
-// $0AFA: Samus Y position (inside current screen)
+// $0AF6: Samus X position (inside current room)
+// $0AFA: Samus Y position (inside current room)
 // 
 // $079B: Room pointer
 // $079F: Area index
@@ -1318,22 +1318,22 @@ function handleData(data) {
             newAP = getNewAP(roomPointer, x, y);
 
             // uncomment to display current samus position in map in console
-            // // compute (byte, bit) index in map data for current samus screen
-            // // Let
-            // //     x = [room X co-ordinate] + [$12] / 100h
-            // //     y = [room Y co-ordinate] + [$18] / 100h
-            // // Then
-            // //     $07FB + (y + (x & 20h)) * 4 + (x & 1Fh) / 8 |= 80h >> (x & 7)
-            // var areaIndex = readWord(samusData, samusEnum.areaIndex);
-            // var roomX = readWord(samusData, samusEnum.roomX);
-            // var roomY = readWord(samusData, samusEnum.roomY);
-            // var x = roomX + Math.floor(samusX / 0x100);
-            // var y = roomY + Math.floor(samusY / 0x100);
-            // var byteIndex = (y + (x & 0x20)) * 4 + Math.floor((x & 0x1F) / 8);
-            // // first line of map is unused, so add 4 to ignore it (8 bytes per lines, but 4 in each page)
-            // byteIndex += 4;
-            // var bitMask = 0x80 >> (x & 7);
-            // console.log(`cur byteIndex: ${byteIndex} bitMask: ${bitMask} room: ${roomPointer} area: ${areaEnum[areaIndex]}`);
+            // compute (byte, bit) index in map data for current samus screen
+            // Let
+            //     x = [room X co-ordinate] + [$12] / 100h
+            //     y = [room Y co-ordinate] + [$18] / 100h
+            // Then
+            //     $07FB + (y + (x & 20h)) * 4 + (x & 1Fh) / 8 |= 80h >> (x & 7)
+            var areaIndex = readWord(samusData, samusEnum.areaIndex);
+            var roomX = readWord(samusData, samusEnum.roomX);
+            var roomY = readWord(samusData, samusEnum.roomY);
+            var x = roomX + Math.floor(samusX / 0x100);
+            var y = roomY + Math.floor(samusY / 0x100);
+            var byteIndex = (y + (x & 0x20)) * 4 + Math.floor((x & 0x1F) / 8);
+            // first line of map is unused, so add 4 to ignore it (8 bytes per lines, but 4 in each page)
+            byteIndex += 4;
+            var bitMask = 0x80 >> (x & 7);
+            console.log(`cur byteIndex: ${byteIndex} bitMask: ${bitMask} room: ${roomPointer} area: ${areaEnum[areaIndex]}`);
             // displaySamusOnDebugMap(byteIndex, bitMask);
 
             askNextData();
@@ -1580,33 +1580,33 @@ function computeStateBitMasks() {
             var curOffset = stateDataOffsets[dataEnum.map];
             if(area) {
                 // loop on areaAccessPoints
-                for(var apName in areaAccessPoints) {
-                    var apData = areaAccessPoints[apName];
+                for(var apName in areaAccessPoints[logic]) {
+                    var apData = areaAccessPoints[logic][apName];
                     stateBitMasks[curOffset + apData["byteIndex"] + mapOffsetEnum[apData["area"]]] |= apData["bitMask"];
                 }
             }
             if(boss) {
                 // loop on bossAccessPoints
-                for(var apName in bossAccessPoints) {
-                    var apData = bossAccessPoints[apName];
+                for(var apName in bossAccessPoints[logic]) {
+                    var apData = bossAccessPoints[logic][apName];
                     stateBitMasks[curOffset + apData["byteIndex"] + mapOffsetEnum[apData["area"]]] |= apData["bitMask"];
                 }
             }
             if(doorsRando) {
-                for(var doorName in doorsScreen) {
-                    var doorData = doorsScreen[doorName];
+                for(var doorName in doorsScreen[logic]) {
+                    var doorData = doorsScreen[logic][doorName];
                     stateBitMasks[curOffset + doorData["byteIndex"] + mapOffsetEnum[doorData["area"]]] |= doorData["bitMask"];
                 }
             }
             if(hasNothing) {
-                for(var locName in nothingScreens) {
-                    var locData = nothingScreens[locName];
+                for(var locName in nothingScreens[logic]) {
+                    var locData = nothingScreens[logic][locName];
                     stateBitMasks[curOffset + locData["byteIndex"] + mapOffsetEnum[locData["area"]]] |= locData["bitMask"];
                 }
             }
             if(escapeRando) {
-                for(var apName in escapeAccessPoints) {
-                    var apData = escapeAccessPoints[apName];
+                for(var apName in escapeAccessPoints[logic]) {
+                    var apData = escapeAccessPoints[logic][apName];
                     stateBitMasks[curOffset + apData["byteIndex"] + mapOffsetEnum[apData["area"]]] |= apData["bitMask"];
                 }
             }

@@ -6,6 +6,10 @@ import logging
 import utils.log
 from rom.rom import snes_to_pc, pc_to_snes
 from rom.compression import Compressor
+from utils.doorsmanager import plmRed, plmGreen, plmYellow, plmGrey, Facing
+from rom.romreader import RomReader
+
+doorPlms = plmRed + plmGreen + plmYellow + plmGrey
 
 class Ship(object):
     # plm sleep instruction
@@ -286,7 +290,7 @@ class Room(object):
         self.roomIndex = self.rom.readByte()
         self.area = self.rom.readByte()
         self.mapX = self.rom.readByte()
-        self.MapY = self.rom.readByte()
+        self.mapY = self.rom.readByte()
         self.width = self.rom.readByte()
         self.height = self.rom.readByte()
         self.upScroller = self.rom.readByte()
@@ -329,7 +333,7 @@ class Room(object):
         for enemySetPtr in enemySetPtrs:
             self.rom.seek(enemySetPtr)
             enemyId = 0
-            for i in range(32):
+            for _ in range(32):
                 enemyId = self.rom.readWord()
                 if enemyId == 0xFFFF:
                     break
@@ -349,6 +353,41 @@ class Room(object):
             enemy = Enemy(self.rom, dataAddr, enemyId, Xpos, Ypos)
             self.enemies.append(enemy)
             #enemy.debug()
+
+    def loadPLMs(self):
+        # loop on room state then on plm set
+        self.plms = {}
+        plmSetPtrs = set()
+
+        for roomStateHeader in self.roomStateHeaders:
+            plmSetPtrs.add(self.roomStates[roomStateHeader.roomStatePtr].plmSetPtr)
+
+        #print("room: {}".format(hex(pc_to_snes(self.dataAddr))))
+        #print("plmSetPtrs: {}".format([hex(p) for p in plmSetPtrs]))
+        plmSize = 6
+        for plmSetPtr in plmSetPtrs:
+            self.rom.seek(snes_to_pc(plmSetPtr))
+            plmId = 0
+            for i in range(40):
+                plmId = self.rom.readWord()
+                plmAddr = plmSetPtr + i*plmSize
+                if plmId == 0x0000:
+                    break
+                Xpos = self.rom.readByte()
+                Ypos = self.rom.readByte()
+                plmParam = self.rom.readWord()
+                self.plms[plmAddr] = (plmId, Xpos, Ypos, plmParam)
+
+        #print("plms: {}".format([(hex(a), hex(i), hex(x), hex(y), hex(p)) for a, (i, x, y, p) in self.plms.items()]))
+        self.doors = []
+        self.items = []
+        for plmAddr, (plmId, Xpos, Ypos, plmParam) in self.plms.items():
+            if hex(plmId).lower() in RomReader.items:
+                #print("{}: item {} at ({}, {})".format(hex(plmAddr), hex(plmId), hex(Xpos), hex(Ypos)))
+                self.items.append(plmAddr)
+            elif plmId in doorPlms:
+                #print("{}: door {} at ({}, {})".format(hex(plmAddr), hex(plmId), hex(Xpos), hex(Ypos)))
+                self.doors.append(plmAddr)
 
 class StateType:
     Standard = 0xE5E6

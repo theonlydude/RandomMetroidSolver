@@ -8028,8 +8028,10 @@ Room_C98E_PLM:
     dw $b703 : db $5d : db $19 : dw Room_C98E_PLM_scroll_data_FS_1
     ; Scroll PLM
     dw $b703 : db $1e : db $28 : dw Room_C98E_state_C9BA_PLM_index_3_PLM_scroll_data 
+Room_C98E_Reserve:
     ; Reserve tank, chozo orb
     dw $ef7b : db $0c : db $0b : dw $0081 
+Room_C98E_Missile:
     ; Missile tank
     dw $eedb : db $23 : db $26 : dw $0082 
 Door_87_Room_C98E_PLM_C842:

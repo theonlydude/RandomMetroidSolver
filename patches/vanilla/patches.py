@@ -362,13 +362,13 @@ additional_PLMs = {
     'Blinking[Warehouse Entrance Right]': {
         'room': 0xa6a1,
         'plm_bytes_list': [
-            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+            [0x42, 0xc8, 0x2e, 0x06, 0x63, 0x8c]
         ]
     },
     'Blinking[Warehouse Entrance Left]': {
         'room': 0xa6a1,
         'plm_bytes_list': [
-            [0x42, 0xc8, 0x2e, 0x06, 0x63, 0x8c]
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
         ]
     },
     'Blinking[Single Chamber Top Right]': {

@@ -319,6 +319,10 @@ class Room(object):
             if roomStateHeader.headerType == StateType.Standard:
                 self.defaultRoomState = roomState
 
+        self.loadEnemies()
+        self.loadPLMs()
+        self.loadVariaArea()
+
     def loadEnemies(self):
         # loop on room state then on enemy set
         self.enemyIds = set()
@@ -329,7 +333,7 @@ class Room(object):
             if roomStateHeader.headerType == StateType.Standard:
                 enemySetPtrs.add(snes_to_pc(self.roomStates[roomStateHeader.roomStatePtr].enemySetPtr))
 
-        print("enemySetPtrs: {}".format([hex(p) for p in enemySetPtrs]))
+        #print("enemySetPtrs: {}".format([hex(p) for p in enemySetPtrs]))
         for enemySetPtr in enemySetPtrs:
             self.rom.seek(enemySetPtr)
             enemyId = 0
@@ -346,7 +350,7 @@ class Room(object):
                 param2 = self.rom.readWord()
                 self.enemyIds.add((enemyId, Xpos, Ypos))
 
-        print("enemy ids: {}".format([(hex(i), hex(j), hex(k)) for i, j, k in self.enemyIds]))
+        #print("enemy ids: {}".format([(hex(i), hex(j), hex(k)) for i, j, k in self.enemyIds]))
         self.enemies = []
         for enemyId, Xpos, Ypos in self.enemyIds:
             dataAddr = snes_to_pc(0xA00000+enemyId)
@@ -388,6 +392,12 @@ class Room(object):
             elif plmId in doorPlms:
                 #print("{}: door {} at ({}, {})".format(hex(plmAddr), hex(plmId), hex(Xpos), hex(Ypos)))
                 self.doors.append(plmAddr)
+
+    def loadVariaArea(self):
+        for roomStateHeader in self.roomStateHeaders:
+            # only standard state
+            if roomStateHeader.headerType == StateType.Standard:
+                self.variaArea = self.roomStates[roomStateHeader.roomStatePtr].unusedPtr & 0xffff
 
 class StateType:
     Standard = 0xE5E6
@@ -450,7 +460,7 @@ class RoomState(object):
         self.enemyGfxPtr         = 0xB40000 + self.rom.readWord()
         self.backgroundScrolling = self.rom.readWord()
         self.scrollSetPtr        = 0x8F0000 + self.rom.readWord()
-        self.unusedPtr           = 0x8F0000 + self.rom.readWord()
+        self.unusedPtr           = 0x8F0000 + self.rom.readWord() # in VARIA store area id
         self.mainAsmPtr          = 0x8F0000 + self.rom.readWord()
         self.plmSetPtr           = 0x8F0000 + self.rom.readWord()
         self.backgroundPtr       = 0x8F0000 + self.rom.readWord()

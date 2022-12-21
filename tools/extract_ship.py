@@ -78,9 +78,6 @@ print("vanilla landing site addr: {} size: {}".format(hex(vLevelDataAddr), vRoom
 vlevelData = LevelData(vanillaRom, snes_to_pc(vLevelDataAddr), vRoomScreenSize)
 hlevelData = LevelData(hackRom, snes_to_pc(hLevelDataAddr), hRoomScreenSize)
 
-vLandingSite.loadEnemies()
-hLandingSite.loadEnemies()
-
 # search for ship in loaded enemies
 shipTopInitAi = 0xA644
 shipBottomInitAi = 0xA6D2

@@ -71,10 +71,10 @@ if __name__ == "__main__":
     parser.add_argument('--dot',
                         help="generate dot file with area graph",
                         action='store_true',dest='dot', default=False)
-    parser.add_argument('--area', help="area mode",
-                        dest='area', nargs='?', const=True, choices=["random"]+areaRandomizations, default='off')
-    parser.add_argument('--areaList', help="list to choose from when random",
-                        dest='areaList', nargs='?', default=None)
+    parser.add_argument('--areaRandomization', help="area mode",
+                        dest='areaRandomization', nargs='?', const=True, choices=["random"]+areaRandomizations, default='off')
+    parser.add_argument('--areaRandomizationList', help="list to choose from when random",
+                        dest='areaRandomizationList', nargs='?', default=None)
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)
@@ -335,9 +335,9 @@ if __name__ == "__main__":
     (majorsSplitRandom, args.majorsSplit) = randomMulti(args.__dict__, "majorsSplit", majorsSplits)
     (_, gravityBehaviour) = randomMulti(args.__dict__, "gravityBehaviour", gravityBehaviours)
     (_, args.tourian) = randomMulti(args.__dict__, "tourian", tourians)
-    (areaRandom, args.area) = randomMulti(args.__dict__, "area", areaRandomizations)
-    areaRandomization = args.area in ['light', 'full']
-    lightArea = args.area == 'light'
+    (areaRandom, args.areaRandomization) = randomMulti(args.__dict__, "areaRandomization", areaRandomizations)
+    areaRandomization = args.areaRandomization in ['light', 'full']
+    lightArea = args.areaRandomization == 'light'
 
     if args.minDifficulty:
         minDifficulty = text2diff[args.minDifficulty]

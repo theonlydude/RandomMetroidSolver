@@ -180,6 +180,8 @@ class RomPatcher:
             self.writePlandoAddresses(self.settings["plando"]["visitedLocations"])
         if self.settings["isPlando"] and self.settings["plando"]["additionalETanks"] != 0:
             self.writeAdditionalETanks(self.settings["plando"]["additionalETanks"])
+        if self.settings["isPlando"] and self.settings["escapeAttr"] is not None:
+            self.removeAnimalsHunt()
 
         self.end()
 
@@ -317,7 +319,10 @@ class RomPatcher:
             self.applyIPSPatch(patchName)
 
     def customShip(self, ship):
-        self.applyIPSPatch(ship, ipsDir='varia_custom_sprites/patches')
+        # gfx
+        self.applyIPSPatch(ship, ipsDir='varia_custom_sprites/patches/ship')
+        # layout
+        self.applyIPSPatch(ship, ipsDir='varia_custom_sprites/patches/ship/{}'.format(Logic.implementation))
 
     def purgeSprite(self):
         # custom sprites are also modifying ship palettes, so remove these records from the custom sprite
@@ -337,7 +342,7 @@ class RomPatcher:
         self.ipsPatches[-1] = IPS_Patch(filteredDict)
 
     def customSprite(self, sprite, customNames, noSpinAttack, purge):
-        self.applyIPSPatch("{}.ips".format(sprite), ipsDir='varia_custom_sprites/patches')
+        self.applyIPSPatch("{}.ips".format(sprite), ipsDir='varia_custom_sprites/patches/samus')
 
         if purge:
             self.purgeSprite()
@@ -1263,6 +1268,13 @@ class RomPatcher:
                 beamsMask |= item.BeamBits
         self.romFile.writeWord(itemsMask, Addresses.getOne('itemsMask'))
         self.romFile.writeWord(beamsMask, Addresses.getOne('beamsMask'))
+
+    def removeAnimalsHunt(self):
+        # remove custom door asm ptr used by animals hunt as their target is overwritten by door_transition patch
+        flyway = getAccessPoint("Flyway Right")
+        self.romFile.writeWord(0x0000, snes_to_pc(0x830000 + flyway.ExitInfo['DoorPtr'] + 0x0a))
+        bombTorizo = getAccessPoint("Bomb Torizo Room Left")
+        self.romFile.writeWord(0x0000, snes_to_pc(0x830000 + bombTorizo.ExitInfo['DoorPtr'] + 0x0a))
 
 # tile number in tileset
 char2tile = {

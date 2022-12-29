@@ -729,7 +729,7 @@ var objectiveBackup = {
     true: {{ writeObjectiveList('objectiveMultiSelect') }},
     false: {{ writeObjectiveList('objective') }},
 }
-
+var appIsReady = false;
 var takeBackup = false;
 
 function randomizeObjective(evt) {
@@ -1698,6 +1698,7 @@ window.onload = function(){
             }
         }
     });
+    appIsReady = true;
 }
 
 function displayROMInput(show) {
@@ -1731,14 +1732,14 @@ function switchCheckbox(id, elems=[]) {
 }
 
 function setSwitchToOn(elem) {
-    if(! elem.checked) {
+    if(appIsReady && ! elem.checked) {
         elem.click();
         elem.value = "on";
     }
 }
 
 function setSwitchToOff(elem) {
-    if(elem.checked) {
+    if(appIsReady && elem.checked) {
         elem.click();
         elem.value = "off";
     }

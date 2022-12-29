@@ -6,19 +6,10 @@ from logic.logic import Logic
 from rom.PaletteRando import PaletteRando
 from rom.rompatcher import RomPatcher, MusicPatcher, RomTypeForMusic
 from utils.utils import dumpErrorMsg
+from rom.flavor import RomFlavor
 
 import utils.log
 import utils.db as db
-
-# we need to know the logic before doing anything else
-def getLogic():
-    # check if --logic is there
-    logic = 'vanilla'
-    for i, param in enumerate(sys.argv):
-        if param == '--logic' and i+1 < len(sys.argv):
-            logic = sys.argv[i+1]
-    return logic
-Logic.factory(getLogic())
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
@@ -91,6 +82,7 @@ if __name__ == "__main__":
                         dest='hellrunRate', default=100, type=int)
     parser.add_argument('--etanks', help="Additional ETanks, between 0 (default) and 18",
                         dest='additionalEtanks', default=0, type=int)
+
     # parse args
     args = parser.parse_args()
 
@@ -111,6 +103,9 @@ if __name__ == "__main__":
 
     utils.log.init(False)
     logger = utils.log.get('Custo')
+
+    Logic.factory(args.logic)
+    RomFlavor.factory()
 
     ctrlDict = None
     if args.controls:
@@ -136,7 +131,7 @@ if __name__ == "__main__":
             romFile = os.path.basename(inFileName)
             outFileName = os.path.join(romDir, 'Custom_' + romFile)
             shutil.copyfile(inFileName, outFileName)
-            romPatcher = RomPatcher(outFileName)
+            romPatcher = RomPatcher(romFileName=outFileName)
         else:
             # web mode
             outFileName = args.output
@@ -214,6 +209,7 @@ if __name__ == "__main__":
             musicPatcher.replace(musicMapping,
                                  updateReferences=musicParams.get('room_states', True),
                                  output=musicParams.get("output", None))
+
         romPatcher.end()
 
         if args.rom is None:

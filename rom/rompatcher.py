@@ -304,7 +304,10 @@ class RomPatcher:
             self.applyIPSPatch(patchName)
 
     def customShip(self, ship):
-        self.applyIPSPatch(ship, ipsDir='varia_custom_sprites/patches')
+        # gfx
+        self.applyIPSPatch(ship, ipsDir='varia_custom_sprites/patches/ship')
+        # layout
+        self.applyIPSPatch(ship, ipsDir='varia_custom_sprites/patches/ship/{}'.format(Logic.implementation))
 
     def purgeSprite(self):
         # custom sprites are also modifying ship palettes, so remove these records from the custom sprite
@@ -324,7 +327,7 @@ class RomPatcher:
         self.ipsPatches[-1] = IPS_Patch(filteredDict)
 
     def customSprite(self, sprite, customNames, noSpinAttack, purge):
-        self.applyIPSPatch("{}.ips".format(sprite), ipsDir='varia_custom_sprites/patches')
+        self.applyIPSPatch("{}.ips".format(sprite), ipsDir='varia_custom_sprites/patches/samus')
 
         if purge:
             self.purgeSprite()

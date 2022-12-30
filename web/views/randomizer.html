@@ -12,6 +12,9 @@ extend 'layout.html'
 <link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
 <script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
 
+<link rel="stylesheet" type="text/css" href="{{=URL('static','image-picker/image-picker.css')}}">
+<script src="{{=URL('static', 'image-picker/image-picker.js')}}" type="text/javascript"></script>
+
 <script type="text/javascript" src="{{=URL('static', '/highslide/highslide.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "/highslide/highslide.css")}} />
 <script type="text/javascript">
@@ -943,7 +946,7 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
+    var elems = ["logic", "seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
     var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian", "objective", "areaRandomization"];
 
@@ -1149,7 +1152,7 @@ function AjaxRandomizerCallCompleted(data) {
     document.getElementById("submitBtn").data = "Randomize";
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
+    var elems = ["logic", "seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "tourian", "areaRandomization"];
 
@@ -1698,6 +1701,9 @@ window.onload = function(){
             }
         }
     });
+
+    $("#logic").imagepicker({show_label: true});
+
     appIsReady = true;
 }
 
@@ -1846,6 +1852,19 @@ function startTheTour(step=-1) {
       title: "Vanilla Super Metroid ROM",
       content: "<p>Use an American/Japan ROM of Super Metroid.<br/>\
 The vanilla ROM is stored in the browser local storage and is never sent to our server, all the patching is done locally in the browser.</p>"
+    },
+
+    {
+      element: "#logicStep",
+      title: "Flavor",
+      content: "<p>Choose which flavor of Super Metroid you want to randomize:\
+<ul>\
+<li>Super Metroid: The original vanilla Super Metroid game</li>\
+<li>Super Mirrortroid: The map and rooms are mirrored horizontally</li>\
+</ul>\
+You still provide the vanilla Super Metroid ROM, VARIA handles patching it to the desired flavor.\
+</p><p>\
+Flavor hacks by BuggMann.</p>"
     },
     {
       element: "#randoPresetStep",
@@ -2576,7 +2595,9 @@ This patch is automatically enabled when using Full Countdown item split, or Maj
     {
       element: "#animalsStep",
       title: "Animals surprise",
-      content: "<p>Replace saving the animals in the escape sequence by a random surprise.<br/><b>Note:</b> This setting is not available when Escape Randomization is enabled, as it is replaced by Animals Challenges (see Escape Randomization help for more information).</p>\
+      content: "<p>Replace saving the animals in the escape sequence by a random surprise.<br/>\
+<b>Note:</b> This setting is not available when Escape Randomization is enabled, as it is replaced by Animals Challenges (see Escape Randomization help for more information).<br/>\
+<b>Note:</b> This setting is not available when using non vanilla flavor like Super Mirrortroid.</p>\
 <p>Patch developed by Foosda.</p>",
       placement: "auto left"
     },
@@ -2749,6 +2770,22 @@ def displayNumber(id, min, max, default, step="1"):
                    </div>
                 </td>
                 <td id="romStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+              </tr>
+              <tr>
+                <td>Flavor:</td>
+                <td>
+                    <div class="border">
+                      <select class="filldropdown" id="logic" name="logic">
+{{
+  for (logic, name) in logics:
+    response.write("  <option data-img-src=\"/solver/static/images/rando/{}.png\" data-img-label=\"{}\" value=\"{}\" {}>{}</option>\n".format(logic, name, logic, 'selected="selected"' if logic == session.randomizer['logic'] else "", name), escape=False)
+    pass
+}}
+                        </optgroup>
+                      </select>
+                    </div>
+                </td>
+                <td id="logicStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr>
                 <td>Settings Preset:</td>

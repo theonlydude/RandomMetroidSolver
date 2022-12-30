@@ -443,6 +443,7 @@ def getRandomizerDefaultParameters():
     defaultParams = {}
     defaultMultiValues = getDefaultMultiValues()
 
+    defaultParams['logic'] = "vanilla"
     defaultParams['complexity'] = "simple"
     defaultParams['preset'] = 'regular'
     defaultParams['randoPreset'] = ""

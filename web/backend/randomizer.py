@@ -141,12 +141,17 @@ class Randomizer(object):
                             elif key in self.session.randomizer and 'MultiSelect' not in key:
                                 self.session.randomizer[key] = value
 
+        logics = [
+            ("vanilla", "Super Metroid"),
+            ("mirror", "Super Mirrortroid")
+        ]
+
         return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                     randoPresetsDesc=randoPresetsDesc, randoPresetsCategories=randoPresetsCategories,
                     startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues,
                     maxsize=sys.maxsize, displayNames=displayNames, objectivesExclusions=objectivesExclusions,
                     objectivesTypes=objectivesTypes, objectivesSort=objectivesSort,
-                    objectivesCategories=objectivesCategories)
+                    objectivesCategories=objectivesCategories, logics=logics)
 
     def initRandomizerSession(self):
         if self.session.randomizer is None:
@@ -207,7 +212,7 @@ class Randomizer(object):
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
                   'areaRandomization']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective']
+        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'logic']
         validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize
@@ -241,7 +246,8 @@ class Randomizer(object):
                   '--runtime', '20',
                   '--output', jsonFileName,
                   '--param', presetFileName,
-                  '--preset', preset]
+                  '--preset', preset,
+                  '--logic', self.vars.logic]
 
         if useRace == True:
             params += ['--race', str(magic)]
@@ -391,13 +397,14 @@ class Randomizer(object):
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
                   'areaRandomization']
-        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective']
+        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective', 'logic']
         validateWebServiceParams(self.request, switchs, quantities, multis, others)
 
         if self.session.randomizer is None:
             self.session.randomizer = {}
 
         self.session.randomizer['complexity'] = self.vars.complexity
+        self.session.randomizer['logic'] = self.vars.logic
         self.session.randomizer['preset'] = self.vars.preset
         # after selecting a rando preset and changing an option users can end up
         # generating a seed with the rando preset selected but not with all

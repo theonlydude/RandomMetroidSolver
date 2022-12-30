@@ -99,6 +99,8 @@ mkdir -p ~/web2py/applications/solver/static/images/preset/
 mkdir -p ~/web2py/applications/solver/static/images/rando/
 [ -L ~/web2py/applications/solver/static/images/rando/donate_randomizer.png ] || ln -s ~/RandomMetroidSolver/web/static/donate_randomizer.png ~/web2py/applications/solver/static/images/rando/donate_randomizer.png
 [ -L ~/web2py/applications/solver/static/images/rando/ajax-loader.gif ] || ln -s ~/RandomMetroidSolver/web/static/ajax-loader.gif ~/web2py/applications/solver/static/images/rando/ajax-loader.gif
+[ -L ~/web2py/applications/solver/static/images/rando/vanilla.png ] || ln -s ~/RandomMetroidSolver/web/static/vanilla.png ~/web2py/applications/solver/static/images/rando/vanilla.png
+[ -L ~/web2py/applications/solver/static/images/rando/mirror.png ] || ln -s ~/RandomMetroidSolver/web/static/mirror.png ~/web2py/applications/solver/static/images/rando/mirror.png
 
 # rando - help
 mkdir -p ~/web2py/applications/solver/static/images/help/

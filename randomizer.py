@@ -668,16 +668,20 @@ if __name__ == "__main__":
 
     randoExec.postProcessItemLocs(itemLocs, args.hideItems)
 
-    # choose on animal patch
+    # choose on animal patch (only for vanilla flavor)
     if args.animals == True:
-        animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
-                          'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
-                          'phantoonimals.ips', 'ridleyimals.ips']
-        if args.escapeRando == False:
-            args.patches.append(random.choice(animalsPatches))
-            args.patches.append("Escape_Animals_Change_Event")
+        if args.logic != "vanilla":
+            optErrMsgs.append("Ignored animals surprise because of non vanilla ROM flavor")
         else:
-            optErrMsgs.append("Ignored animals surprise because of escape randomization")
+            animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
+                              'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
+                              'phantoonimals.ips', 'ridleyimals.ips']
+            if args.escapeRando == False:
+                args.patches.append(random.choice(animalsPatches))
+                args.patches.append("Escape_Animals_Change_Event")
+            else:
+                optErrMsgs.append("Ignored animals surprise because of escape randomization")
+
     # transform itemLocs in our usual dict(location, item), exclude minors, we'll get them with the solver
     locsItems = {}
     for itemLoc in itemLocs:

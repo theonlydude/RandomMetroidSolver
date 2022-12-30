@@ -301,23 +301,26 @@ class Knows:
                               'href': 'https://www.youtube.com/watch?v=XSBeLJJafjY',
                               'rooms': ['Parlor and Alcatraz']}
 
-    ReverseGateGlitch = SMBool(True, medium, ['ReverseGateGlitch'], logics=['vanilla'])
+    ReverseGateGlitch = SMBool(True, medium, ['ReverseGateGlitch'])
     desc['ReverseGateGlitch'] = {'display': 'Reverse Gate Glitch',
                                  'title': 'Open wave gate in Pink Brinstar from bottom left corner with Hi-Jump',
                                  'href': 'https://wiki.supermetroid.run/Pink_Brinstar_Hopper_Room',
-                                 'rooms': ['Pink Brinstar Hopper Room']}
+                                 'rooms': ['Pink Brinstar Hopper Room'],
+                                 'logics': ['vanilla']}
 
-    ReverseGateGlitchHiJumpLess = SMBool(False, 0, ['ReverseGateGlitchHiJumpLess'], logics=['vanilla'])
+    ReverseGateGlitchHiJumpLess = SMBool(False, 0, ['ReverseGateGlitchHiJumpLess'])
     desc['ReverseGateGlitchHiJumpLess'] = {'display': 'Reverse Gate Glitch w/o Hi-Jump',
                                            'title': 'Open wave gate in Pink Brinstar from bottom left corner without Hi-Jump',
                                            'href': 'https://wiki.supermetroid.run/Pink_Brinstar_Hopper_Room',
-                                           'rooms': ['Pink Brinstar Hopper Room']}
+                                           'rooms': ['Pink Brinstar Hopper Room'],
+                                           'logics': ['vanilla']}
 
-    WaveGateGlitchMirror = SMBool(False, 0, ['WaveGateGlitchMirror'], logics=['mirror'])
+    WaveGateGlitchMirror = SMBool(False, 0, ['WaveGateGlitchMirror'])
     desc['WaveGateGlitchMirror'] = {'display': 'Mirrored Wave Gate Glitch',
                                     'title': 'Open wave gate in Pink Brinstar by doing a GGG out of a wall jump',
                                     'href': 'https://youtu.be/CZK5tyDI87A',
-                                    'rooms': ['Pink Brinstar Hopper Room']}
+                                    'rooms': ['Pink Brinstar Hopper Room'],
+                                    'logics': ['mirror']}
 
     EarlyKraid = SMBool(True, easy, ['EarlyKraid'])
     desc['EarlyKraid'] = {'display': 'Early Kraid',
@@ -434,11 +437,12 @@ class Knows:
                                   'href': 'https://clips.twitch.tv/CrackyConfidentMomEagleEye',
                                   'rooms': ['Crocomire Speedway']}
 
-    FrogSpeedwayWithoutSpeed = SMBool(False, 0, ['FrogSpeedwayWithoutSpeed'], logics=['vanilla'])
+    FrogSpeedwayWithoutSpeed = SMBool(False, 0, ['FrogSpeedwayWithoutSpeed'])
     desc['FrogSpeedwayWithoutSpeed'] = {'display': 'Frog speedway without speed',
                                         'title': 'Traverse frog speedway from right to left, without Speed Booster, but with Wave and either Spazer or Plasma',
                                         'href': 'https://puu.sh/CvsCT/7757bb4f62.mp4',
-                                        'rooms': ['Frog Speedway']}
+                                        'rooms': ['Frog Speedway'],
+                                        'logics': ['vanilla']}
 
     LavaDive = SMBool(True, harder, ['LavaDive'])
     desc['LavaDive'] = {'display': 'Lava Dive',

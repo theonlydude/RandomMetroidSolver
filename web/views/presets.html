@@ -616,6 +616,8 @@ def displayKnow(know):
     pass
   response.write("</select>\n", escape=False)
 
+  response.write("  <td>{}</td>".format(', '.join(desc[know].get('logics', ['all']))), escape=False)
+
   response.write("  <td>{}</td>".format(desc[know]['title']), escape=False)
 
   response.write("  <td>", escape=False)
@@ -639,9 +641,9 @@ def displayCategory(category):
   response.write("<h2>{}</h2>\n".format(category['title']), escape=False)
   response.write("<table class=\"full\">\n", escape=False)
 
-  response.write("<colgroup><col class=\"check\" /><col class=\"name\" /><col class=\"diff\" /><col class=\"desc\" /><col class=\"rooms\" />", escape=False)
+  response.write("<colgroup><col class=\"check\" /><col class=\"name\" /><col class=\"diff\" /><col class=\"logic\" /><col class=\"desc\" /><col class=\"rooms\" />", escape=False)
 
-  response.write("  <tr><th></th><th>Technique</th><th>Difficulty</th><th>Description</th><th>Used in rooms</th></tr>", escape=False)
+  response.write("  <tr><th></th><th>Technique</th><th>Difficulty</th><th>Flavors</th><th>Description</th><th>Used in rooms</th></tr>", escape=False)
   for know in category['knows']:
     displayKnow(know)
     pass

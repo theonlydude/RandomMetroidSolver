@@ -418,6 +418,7 @@ function doSubmit() {
         }
 
         var dataDict = {};
+        dataDict["logic"] = logic;
         var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "color_blind", "disable_screen_shake", "noflashing"];
 
         for(var i=0; i<elems.length; i++) {
@@ -818,6 +819,7 @@ var seedKey = null;
 var isVARIA = false;
 var isArea = false;
 var isBoss = false;
+var logic = "vanilla";
 {{
 if seedInfo != None:
     response.write("permalink = true;", escape=False)
@@ -825,6 +827,7 @@ if seedInfo != None:
     response.write("isVARIA = true;", escape=False)
     response.write("isArea = {};".format("true" if seedParams["areaRandomization"] in ["full", "light", "random"] else "false"), escape=False)
     response.write("isBoss = {};".format("true" if seedParams["bossRandomization"] in ["on", "random"] else "false"), escape=False)
+    response.write("logic = '{}';".format(seedParams.get("logic", "vanilla")), escape=False)
     pass
 }}
 
@@ -1009,7 +1012,14 @@ window.onload = function(){
                     // detect Phantoon_Eye_Door patch
                     isBoss = bytes[0x7ccaf] == 0x91;
 
-                    console.log("isArea: "+isArea+" isBoss: "+isBoss+" isVARIA: "+isVARIA+" isRace: "+isRace);
+                    // detect logic
+                    logic = "vanilla";
+{{
+    for logic, values in flavorPatches.items():
+        response.write("                    if(bytes["+str(values['address'])+"] == "+str(values['value'])+") { logic = '"+logic+"'; }\n", escape=False)
+        pass
+}}
+                    console.log("isArea: "+isArea+" isBoss: "+isBoss+" isVARIA: "+isVARIA+" isRace: "+isRace+" logic: "+logic);
 
                     greyOutPatches(isRace, isVARIA, isVanilla);
                 }
@@ -2146,6 +2156,7 @@ if seedInfo != None:
             <h4>Game Details</h4>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
+              <tr><td>Logic</td><td>{{=seedParams.get("logic", "vanilla")}}</td></tr>
               <tr><td>Skills preset</td><td>{{=seedInfo["preset"]}}</td></tr>
               <tr><td>Seed</td><td>{{=seedInfo["seed"]}}</td></tr>
               <tr><td>Created</td><td>{{=seedInfo["time"]}}</td></tr>

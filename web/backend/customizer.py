@@ -8,6 +8,7 @@ from urllib.parse import urlparse, parse_qs
 from utils.utils import getRandomizerDefaultParameters, removeChars, getPresetDir, PresetLoader, getPythonExec
 from utils.db import DB
 from logic.logic import Logic
+from rom.romreader import RomReader
 # custom sprites data
 from varia_custom_sprites.custom_sprites import customSprites, customSpritesOrder
 from varia_custom_sprites.custom_ships import customShips, customShipsOrder
@@ -91,12 +92,14 @@ class Customizer(object):
             msg = query_msg + msg
 
         return dict(customSprites=customSprites, customShips=customShips, musics=musics, comPresets=comPresets,
-                    seedInfo=seedInfo, seedParams=seedParams, msg=msg, defaultParams=defaultParams)
+                    seedInfo=seedInfo, seedParams=seedParams, msg=msg, defaultParams=defaultParams,
+                    flavorPatches=RomReader.flavorPatches)
 
     def initCustomizerSession(self):
         if self.session.customizer is None:
             self.session.customizer = {}
 
+            self.session.customizer['logic'] = "vanilla"
             self.session.customizer['colorsRandomization'] = "off"
             self.session.customizer['suitsPalettes'] = "on"
             self.session.customizer['beamsPalettes'] = "on"
@@ -166,7 +169,7 @@ class Customizer(object):
                    'hell', 'lava_acid_physics', 'colorsRandomization', 'suitsPalettes', 'beamsPalettes',
                    'tilesPalettes', 'enemiesPalettes', 'bossesPalettes', 'invert',
                    'color_blind', 'disable_screen_shake', 'noflashing']
-        others = ['minDegree', 'maxDegree', 'hellrun_rate', 'etanks']
+        others = ['minDegree', 'maxDegree', 'hellrun_rate', 'etanks', 'logic']
         validateWebServiceParams(self.request, switchs, [], [], others, isJson=True)
         if self.vars.customSpriteEnable == 'on':
             if self.vars.customSprite == 'random':
@@ -186,10 +189,14 @@ class Customizer(object):
         if self.vars.music not in ["Don't touch", "Disable", "Randomize", "Customize", "Restore"]:
             raiseHttp(400, "Wrong value for music", True)
 
-        if self.session.customizer == None:
+        if self.vars.logic is None:
+            raiseHttp(400, "Missing logic parameter", True)
+
+        if self.session.customizer is None:
             self.session.customizer = {}
 
         # update session
+        self.session.customizer['logic'] = self.vars.logic
         self.session.customizer['colorsRandomization'] = self.vars.colorsRandomization
         self.session.customizer['suitsPalettes'] = self.vars.suitsPalettes
         self.session.customizer['beamsPalettes'] = self.vars.beamsPalettes
@@ -250,7 +257,7 @@ class Customizer(object):
         # call the randomizer
         (fd, jsonFileName) = tempfile.mkstemp()
         params = [getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/customizer.py"),
-                  '--output', jsonFileName]
+                  '--output', jsonFileName, '--logic' , self.vars.logic]
 
         if self.vars.itemsounds == 'on':
             params += ['-c', 'itemsounds.ips']

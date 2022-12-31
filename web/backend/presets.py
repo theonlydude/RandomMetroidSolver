@@ -45,7 +45,8 @@ class Presets(object):
 
             preset = self.vars.preset
 
-        # in web2py.js, in disableElement, remove 'working...' to have action with correct value
+        # in web2py.js, in disableElement, remove 'working...' to have action with correct value.
+        # called when using "What's in the logic for this skills preset ?" from another page.
         if self.vars.action == 'Load':
             # check that the presets file exists
             fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
@@ -203,7 +204,7 @@ class Presets(object):
     def updatePresetsSession(self):
         if self.vars.action == 'Create':
             self.session.presets['preset'] = self.vars.presetCreate
-        elif self.vars.preset == None:
+        elif self.vars.preset is None:
             self.session.presets['preset'] = 'regular'
         else:
             self.session.presets['preset'] = self.vars.preset
@@ -408,6 +409,8 @@ class Presets(object):
                 self.session.presets['currentTab'] = self.vars.currenttab
                 skillBarData = self.getSkillLevelBarData(self.session.presets['preset'])
                 out = PresetLoader.factory(fullPath).params
+                # add missing knows/settings
+                completePreset(out)
                 out.pop('password', None)
                 out['skillBarData']= skillBarData
                 return json.dumps(out)

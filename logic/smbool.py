@@ -71,6 +71,10 @@ class SMBool:
         # as we have slots instead of dict
         return {'bool': self.bool, 'difficulty': self.difficulty, 'knows': self.knows, 'items': self.items}
 
+    def toPreset(self):
+        # when completing a preset for missing knows
+        return [self.bool, self.difficulty]
+
     def wand(*args):
         # looping here is faster than using "if ... in" construct
         for smb in args:

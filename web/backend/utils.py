@@ -337,7 +337,7 @@ def completePreset(params):
     for know in Knows.__dict__:
         if isKnows(know):
             if know not in params['Knows'].keys():
-                params['Knows'][know] = Knows.__dict__[know]
+                params['Knows'][know] = Knows.__dict__[know].toPreset()
 
     # add missing settings
     for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:

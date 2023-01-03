@@ -11,6 +11,26 @@ from rom.romreader import RomReader
 
 from gluon.html import OPTGROUP
 
+import json
+
+def get_app_files():
+    with open('applications/solver/static/client/manifest.json', 'r') as manifest:
+        data = json.loads(manifest.read())
+    js = [
+        "app.js",
+        "chunk-vendors.js",
+    ]
+    css = [
+        "app.css",
+        "chunk-vendors.css",
+    ]
+    fa = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"
+    return '\n'.join([
+        *[f'<script src="{data[f]}"></script>' for f in js],
+        *[f'<link href="{data[f]}" rel="stylesheet" />' for f in css],
+        f'<link href="{fa}" rel="stylesheet" />',
+    ])
+
 class Tracker(object):
     def __init__(self, session, request, cache, response):
         self.session = session
@@ -71,7 +91,8 @@ class Tracker(object):
                     nothingScreens=InteractiveSolver.nothingScreens,
                     doorsScreen=InteractiveSolver.doorsScreen,
                     bossBitMasks=InteractiveSolver.bossBitMasks,
-                    apsGraphArea=apsGraphArea, flavorPatches=RomReader.flavorPatches)
+                    apsGraphArea=apsGraphArea, flavorPatches=RomReader.flavorPatches,
+                    app_files=get_app_files())
 
     def trackerWebService(self):
         # unified web service for item/area trackers

@@ -661,6 +661,7 @@ function updateDebugLines(jsonData) {
 }
 
 function updateLocations(jsonData) {
+    window.$tracker.setJsonData(jsonData)
     if("availableLocations" in jsonData) {
         for(var locName in jsonData["availableLocations"]) {
             // console.log(locName+" is available");

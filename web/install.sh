@@ -826,3 +826,5 @@ mkdir -p ~/web2py/applications/solver/static/images/tracker/
 [ -L ~/web2py/applications/solver/static/images/tracker/samusIcon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/samusIcon.png ~/web2py/applications/solver/static/images/tracker/samusIcon.png
 [ -L ~/web2py/applications/solver/static/images/tracker/area_map_stream.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map_stream.png ~/web2py/applications/solver/static/images/tracker/area_map_stream.png
 [ -L ~/web2py/applications/solver/static/images/tracker/area_map_stream_black.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map_stream_black.png ~/web2py/applications/solver/static/images/tracker/area_map_stream_black.png
+
+[ -L ~/web2py/applications/solver/static/client ] || ln -s ~/RandomMetroidSolver/web/client/ ~/web2py/applications/solver/static/

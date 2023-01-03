@@ -2034,6 +2034,7 @@ function sendAutoTrackerMessage(data, newState) {
   </div>
 </div>
 
+<div id="app"></div>
 <div class="main">
 {{include 'solver_web/t_main.html'}}
 
@@ -2085,3 +2086,5 @@ function sendAutoTrackerMessage(data, newState) {
   <p class="white">Current Preset:</p>
   <input type="text" name="cur_preset" id="cur_preset" value="n/a" readonly class="full">
 </div>
+
+{{ response.write(app_files, escape=False) }}

@@ -1,4 +1,4 @@
-import itertools, math
+import itertools, math, lzma
 
 from utils.utils import range_union
 
@@ -33,7 +33,16 @@ class IPS_Patch(object):
         with open(filename, 'rb') as file:
             header = file.read(5)
             if header != b'PATCH':
-                raise Exception('Not a valid IPS patch file!')
+                # check if file is xz compressed
+                if header == b'\xfd7zXZ':
+                    # reopen file as a lzma compressed file
+                    file.close()
+                    file = lzma.LZMAFile(filename, 'rb')
+                    header = file.read(5)
+                    if header != b'PATCH':
+                        raise Exception('Not a valid compressed IPS patch file!')
+                else:
+                    raise Exception('Not a valid IPS patch file!')
             while True:
                 address_bytes = file.read(3)
                 if address_bytes == b'EOF':

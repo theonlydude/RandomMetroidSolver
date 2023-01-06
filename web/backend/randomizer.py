@@ -1,4 +1,4 @@
-import sys, os, urllib, tempfile, random, subprocess, base64, json, uuid
+import sys, os, urllib, tempfile, random, subprocess, base64, json, uuid, lzma
 from datetime import datetime
 
 from web.backend.utils import loadPresetsList, loadRandoPresetsList, displayNames
@@ -186,7 +186,7 @@ class Randomizer(object):
             # write ips as key/fileName.ips
             ipsFileName = fileName.replace('sfc', 'ips')
             ipsLocal = os.path.join(ipsDir, ipsFileName)
-            with open(ipsLocal, 'wb') as f:
+            with lzma.LZMAFile(ipsLocal, 'wb') as f:
                 f.write(ips)
 
             return True

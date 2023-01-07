@@ -10,6 +10,17 @@ for base in ['~/RandomMetroidSolver', '~/web2py']:
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
 response.title = 'Super Metroid VARIA Randomizer, Solver and Trackers'
 
+# launch symbol servers if not running yet
+symSrv = cache.ram('symbolsServer', lambda:dict(), time_expire=None)
+if not symSrv.get('started'):
+    from multiprocessing import Process
+    from symbolsd import symbolsServer
+    srv = Process(target=symbolsServer, args=('vanilla',), daemon=True)
+    srv.start()
+    srv = Process(target=symbolsServer, args=('mirror',), daemon=True)
+    srv.start()
+    symSrv['started'] = True
+
 def home():
     session.forget(response)
     return dict()

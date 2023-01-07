@@ -23,7 +23,7 @@ class Solver(object):
         # TODO will have to be changed when handling mirror/rotation etc
         flavor = "vanilla"
         Logic.factory(flavor)
-        RomFlavor.factory()
+        RomFlavor.factory(remote=True)
         self.vars = self.request.vars
 
     def run(self):

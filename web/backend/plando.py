@@ -16,7 +16,7 @@ class Plando(object):
         # TODO will have to be changed when handling mirror/rotation etc
         flavor = "vanilla"
         Logic.factory(flavor)
-        RomFlavor.factory()
+        RomFlavor.factory(remote=True)
 
     def run(self):
         # init session

@@ -15,10 +15,24 @@ symSrv = cache.ram('symbolsServer', lambda:dict(), time_expire=None)
 if not symSrv.get('started'):
     from multiprocessing import Process
     from symbolsd import symbolsServer
-    srv = Process(target=symbolsServer, args=('vanilla',), daemon=True)
-    srv.start()
-    srv = Process(target=symbolsServer, args=('mirror',), daemon=True)
-    srv.start()
+    from time import sleep
+    from logic.logic import Logic
+    from rom.flavor import RomFlavor
+    def checkFlavor(flavor):
+        ret = True
+        Logic.factory(flavor)
+        try:
+            RomFlavor.factory(remote=True)
+        except ConnectionRefusedError:
+            ret = False
+        return ret
+    def launchSymServer(flavor):
+        srv = Process(target=symbolsServer, args=(flavor,), daemon=True)
+        srv.start()
+        while not checkFlavor(flavor):
+            sleep(0.1)
+    for flavor in ['vanilla', 'mirror']:
+        launchSymServer(flavor)
     symSrv['started'] = True
 
 def home():

@@ -105,7 +105,7 @@ if __name__ == "__main__":
     logger = utils.log.get('Custo')
 
     Logic.factory(args.logic)
-    RomFlavor.factory()
+    RomFlavor.factory(remote=(args.output is not None)) # web mode has symbols server
 
     ctrlDict = None
     if args.controls:

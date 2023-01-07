@@ -36,7 +36,7 @@ class InteractiveSolver(CommonSolver):
 
         self.logic = logic
         Logic.factory(self.logic)
-        RomFlavor.factory()
+        RomFlavor.factory(remote=True) # web mode has symbols server
         self.locations = Logic.locations
 
         (self.locsAddressName, self.locsWeb2Internal) = self.initLocsAddressName()

@@ -5201,7 +5201,7 @@ Room_CAF6_state_CB22_PLM:
     ; Scroll PLM
     dw $b703 : db $11 : db $69 : dw Room_CAF6_state_CB22_PLM_index_3_PLM_scroll_data 
     ; Scroll PLM
-    dw $b703 : db $19 : db $7c : dw Room_CAF6_state_CB22_PLM_index_4_PLM_scroll_data 
+    dw $b703 : db $18 : db $6d : dw Room_CAF6_state_CB22_PLM_index_4_PLM_scroll_data
     ; Missile tank
     dw $eedb : db $5d : db $59 : dw $0080 
 Door_82_Room_CAF6_PLM_C842:

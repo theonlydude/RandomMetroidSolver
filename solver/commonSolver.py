@@ -57,7 +57,8 @@ class CommonSolver(object):
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
             Logic.factory(self.romLoader.readLogic())
-            RomFlavor.factory(remote=(self.type == "web"))
+            if not interactive:
+                RomFlavor.factory(remote=(self.type == "web"))
             self.romLoader.loadSymbols()
             self.locations = Logic.locations
             (self.majorsSplit, self.masterMajorsSplit) = self.romLoader.assignItems(self.locations)

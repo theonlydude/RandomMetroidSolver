@@ -22,7 +22,19 @@ org $8fbdd1
         STA $7ECD27
         PLP
         RTS
-	
+
+org $8fe21a
+;;; $E21A: Door ASM: scroll 28h,2E = green ;;;
+; Room $CC6F, door list index 0: Door
+;;; WS basement, door leading to WS main
+        PHP
+        SEP #$20
+        LDA #$02
+        STA $7ECD45
+        STA $7ECD4B
+        PLP
+        RTS
+
 org $8fe345
 ;;; $E345: Door ASM: scroll 0 = red, 4 = blue ;;;
 ; Room $CEFB, door list index 2: Door

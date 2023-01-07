@@ -4609,7 +4609,7 @@ Room_CC6F_door_list_index_0_Door:
     db $01 ; X screen
     db $07 ; Y screen
     dw $01c0 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $e21a ; Custom door ASM to execute (bank $8F)
 org $83a2a0
 ; room CC6F: Basement
 Room_CC6F_door_list_index_1_Door:

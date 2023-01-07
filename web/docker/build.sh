@@ -57,10 +57,10 @@ if [ -n "${GITHUB_TOKEN}" ]; then
 fi
 
 if [ ${LOCAL} -eq 1 ]; then
-    docker build --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -f web2py/Dockerfile web2py/
+    docker build --network=host --tag varia-${BRANCH} --build-arg BRANCH=${BRANCH} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -f web2py/Dockerfile web2py/
     rm -f web2py/RandomMetroidSolver.tar.gz
 else
-    docker build --tag varia-${BRANCH} -f web2py/Dockerfile.local $(get_dir)
+    docker build --network=host --tag varia-${BRANCH} -f web2py/Dockerfile.local $(get_dir)
 fi
 
 rm -f mysql/*.sql

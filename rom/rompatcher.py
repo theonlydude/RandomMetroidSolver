@@ -301,7 +301,8 @@ class RomPatcher:
         self.ipsPatches[-1] = IPS_Patch(filteredDict)
 
     def customSprite(self, sprite, customNames, noSpinAttack, purge):
-        self.applyIPSPatch("{}.ips".format(sprite), ipsDir='varia_custom_sprites/patches')
+        sprite = "{}.ips".format(sprite)
+        self.applyIPSPatch(sprite, ipsDir='varia_custom_sprites/patches')
 
         if purge:
             self.purgeSprite()

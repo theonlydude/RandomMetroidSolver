@@ -510,7 +510,8 @@ locationsDict["Super Missile (pink Brinstar)"].Available = (
     lambda sm: sm.wor(sm.wand(sm.traverse('BigPinkTopRight'),
                               sm.haveItem('SporeSpawn')),
                       # back way into spore spawn
-                      sm.wand(sm.canOpenGreenDoors(),
+                      sm.wand(sm.knowsSporeSpawnBackDoor(),
+                              sm.canOpenGreenDoors(),
                               sm.canPassBombPassages()))
 )
 locationsDict["Super Missile (pink Brinstar)"].PostAvailable = (

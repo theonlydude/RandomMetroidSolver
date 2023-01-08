@@ -371,6 +371,10 @@
     "DoubleChamberWallJump": [
       true,
       1
+    ],
+    "SporeSpawnBackDoor": [
+      true,
+      1
     ]
   },
   "Settings": {

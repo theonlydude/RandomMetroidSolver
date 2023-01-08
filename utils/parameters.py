@@ -301,6 +301,12 @@ class Knows:
                               'href': 'https://www.youtube.com/watch?v=XSBeLJJafjY',
                               'rooms': ['Parlor and Alcatraz']}
 
+    SporeSpawnBackDoor = SMBool(True, medium, ['SporeSpawnBackDoor'])
+    desc['SporeSpawnBackDoor'] = {'display': 'Backdoor to Spore Spawn item',
+                                  'title': 'Break the Spore Spawn exit super block from Big Pink to access the item',
+                                  'href': 'https://www.youtube.com/watch?v=4sxzkz4AAts',
+                                  'rooms': ['Big Pink']}
+
     ReverseGateGlitch = SMBool(True, medium, ['ReverseGateGlitch'])
     desc['ReverseGateGlitch'] = {'display': 'Reverse Gate Glitch',
                                  'title': 'Open wave gate in Pink Brinstar from bottom left corner with Hi-Jump',
@@ -693,7 +699,7 @@ class Knows:
             {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess', 'LowGauntlet', 'OldMBWithSpeed'],
              'title': 'Crateria'},
             {'knows': ['CeilingDBoost', 'BillyMays', 'EarlyKraid',
-                       'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 'WaveGateGlitchMirror',
+                       'SporeSpawnBackDoor', 'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 'WaveGateGlitchMirror',
                        'RedTowerClimb', 'XrayDboost', 'XrayIce',
                        'RonPopeilScrew', 'Moondance'],
              'title': 'Brinstar'}

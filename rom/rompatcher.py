@@ -102,7 +102,7 @@ class RomPatcher:
             "vanilla": [],
             "mirror": ['mirrortroid.ips', 'bank_8f.ips', 'bank_83.ips', 'map_icon_data.ips',
                        'baby_room.ips', 'baby_remove_blocks.ips', 'escape_animals.ips',
-                       'snails.ips']
+                       'snails.ips', 'boulders.ips']
         }
     }
 

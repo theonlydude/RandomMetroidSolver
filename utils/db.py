@@ -18,7 +18,7 @@ class DB:
             return
 
         try:
-            self.conn = mysql.connector.connect(**dbParams)
+            self.conn = mysql.connector.connect(pool_name="varia", **dbParams)
             self.cursor = self.conn.cursor()
         except Exception as e:
             print("DB.__init__::error connect/create cursor: {}".format(e))

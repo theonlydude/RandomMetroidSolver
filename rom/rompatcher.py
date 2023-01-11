@@ -46,8 +46,6 @@ class RomPatcher:
             'seed_display.ips',
             # door ASM to wake zebes early in blue brinstar
             'wake_zebes.ips',
-            # faster MB cutscene transitions
-            'Mother_Brain_Cutscene_Edits',
             # "Balanced" suit mode
             'Removes_Gravity_Suit_heat_protection',
             # use any button for angle up/down
@@ -99,7 +97,10 @@ class RomPatcher:
         'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips'],
         # patches for each "logic" to convert vanilla ROM to "logic" base ROM
         'Logic': {
-            "vanilla": [],
+            "vanilla": [
+                # faster MB cutscene transitions
+                'Mother_Brain_Cutscene_Edits',
+            ],
             "mirror": ['mirrortroid.ips', 'bank_8f.ips', 'bank_83.ips', 'map_icon_data.ips',
                        'baby_room.ips', 'baby_remove_blocks.ips', 'escape_animals.ips',
                        'snails.ips', 'boulders.ips', 'rinkas.ips']

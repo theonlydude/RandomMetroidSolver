@@ -36,7 +36,7 @@ for KEY in ${KEYS}; do
 done
 
 # delete older than retention
-RETENTION_DAYS=240
+RETENTION_DAYS=200
 ls -1 | grep -E '[0-9a-z\-]+' | while read KEY; do
     if [ -n "$(find "${KEY}" -mtime +${RETENTION_DAYS})" ]; then
         echo "delete ${KEY}"

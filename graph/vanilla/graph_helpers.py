@@ -344,6 +344,11 @@ class HelpersGraph(Helpers):
                                      sm.haveItem('Plasma'))))
 
     @Cache.decorator
+    def canPassFrogSpeedwayLeftToRight(self):
+        sm = self.smbm
+        return sm.haveItem('SpeedBooster')
+
+    @Cache.decorator
     def canEnterNorfairReserveAreaFromBubbleMoutain(self):
         sm = self.smbm
         return sm.wand(sm.traverse('BubbleMountainTopLeft'),

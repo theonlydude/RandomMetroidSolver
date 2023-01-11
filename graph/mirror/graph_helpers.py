@@ -23,8 +23,9 @@ class HelpersGraphMirror(HelpersGraph):
                               sm.haveItem('Wave')))
 
     # (this is actually Left to Right in mirror)
-    # the trick with spazer/plasma+wave doesn't work in mirror
-    @Cache.decorator
     def canPassFrogSpeedwayRightToLeft(self):
-        sm = self.smbm
-        return sm.haveItem('SpeedBooster')
+        return super().canPassFrogSpeedwayLeftToRight()
+
+    # (this is actually Right to Left in mirror)
+    def canPassFrogSpeedwayLeftToRight(self):
+        return super().canPassFrogSpeedwayRightToLeft()

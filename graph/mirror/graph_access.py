@@ -20,7 +20,7 @@ accessPointsDict['Business Center'].connectInternal(
     'Crocomire Speedway Bottom',
     Cache.ldeco(lambda sm: sm.wor(
         # frog speedway
-        sm.wand(sm.haveItem('SpeedBooster'),
+        sm.wand(sm.canPassFrogSpeedwayLeftToRight(),
                 sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Croc via Frog w/Wave']),
                 sm.haveItem('Wave')),
         # below ice

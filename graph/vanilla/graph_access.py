@@ -435,8 +435,8 @@ accessPointsDict = {
         'Bubble Mountain': Cache.ldeco(# go through cathedral
                                        lambda sm: sm.wand(sm.traverse('CathedralRight'),
                                                           sm.canEnterCathedral(Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Bubble']['mult']))),
-        'Bubble Mountain Bottom': Cache.ldeco(lambda sm: sm.haveItem('SpeedBooster')), # frog speedway
-        'Crocomire Speedway Bottom': Cache.ldeco(lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
+        'Bubble Mountain Bottom': lambda sm: sm.canPassFrogSpeedwayLeftToRight(),
+        'Crocomire Speedway Bottom': Cache.ldeco(lambda sm: sm.wor(sm.wand(sm.canPassFrogSpeedwayLeftToRight(),
                                                                            sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Croc via Frog w/Wave' if sm.haveItem('Wave') else 'Norfair Entrance -> Croc via Frog']),
                                                                            sm.wor(sm.canBlueGateGlitch(),
                                                                                   sm.haveItem('Wave'))),

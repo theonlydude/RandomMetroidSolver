@@ -360,6 +360,11 @@ class PaletteRando(object):
         G = ((SNESColor//32  ) % 32) * 8
         B = ((SNESColor//1024) % 32) * 8
 
+        # span to 255 (limited to 248 otherwise)
+        R = R + R // 32
+        G = G + G // 32
+        B = B + B // 32
+
         return (R,G,B)
 
     def read_word(self, address):

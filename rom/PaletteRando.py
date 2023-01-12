@@ -122,6 +122,8 @@ class PaletteRando(object):
         self.min_degree = settings["min_degree"]
         self.invert = settings["invert"]
 
+        self.adjust_luminance = False
+
         #boss_tileset_palettes = [0x213510,0x213798,0x213A2C,0x213BC1]
         #boss_pointer_addresses = [0x7E792,0x7E79B,0x7E7A4,0x7E726]
         #gray doors + hud elements [0x28,0x2A,0x2C,0x2E]
@@ -317,22 +319,39 @@ class PaletteRando(object):
         self.varia_palette_offsets = [0x0D9520,0x0D9920,0x0D9940,0x0D9960,0x0D9980,0x0D99A0,0x0D99C0,0x0D99E0,0x0D9A00,0x0D9D20,0x0D9D40,0x0D9D60,0x0D9D80,0x0D9DA0,0x0D9DC0,0x0D9DE0,0x0D9E00,0x0D9E20,0x0D9E40,0x0D9E60,0x0D9E80,0x0D9EA0,0x0D9EC0,0x0D9EE0,0x0D9F00,0x6DCD1, 0x6DD20, 0x6DD6F, 0x6DDBE, 0x6DE0A,0x6E692, 0x6E6B4, 0x6E6D6, 0x6E6F8, 0x6E71A, 0x6E73C, 0x6E75E, 0x6E780, 0x6E7A2, 0x6E7C4, 0x6E7E6, 0x6E808, 0x6E82A, 0x6E84C, 0x6E86E, 0x6E890,0x6DCF5,0x6DD44,0x6DD93,0x6DDE2]
         self.gravity_palette_offsets = [0x0D9540,0x0D9560,0x0D9580,0x0D95A0,0x0D95C0,0x0D95E0,0x0D9600,0x0D9620,0x0D9640,0x0D9660,0x0D9680,0x0D96A0,0x0D9780,0x0D97A0,0x0D97C0,0x0D97E0,0x0D9800,0x0D9A20,0x0D9A40,0x0D9A60,0x0D9A80,0x0D9AA0,0x0D9AC0,0x0D9AE0,0x0D9B00,0x0D9F20,0x0D9F40,0x0D9F60,0x0D9F80,0x0D9FA0,0x0D9FC0,0x0D9FE0,0x0DA000,0x0DA020,0x0DA040,0x0DA060,0x0DA080,0x0DA0A0,0x0DA0C0,0x0DA0E0,0x0DA100,0x6DE37, 0x6DE86, 0x6DED5, 0x6DF24, 0x6DF70,0x6E8BE, 0x6E8E0, 0x6E902, 0x6E924, 0x6E946, 0x6E968, 0x6E98A, 0x6E9AC, 0x6E9CE, 0x6E9F0, 0x6EA12, 0x6EA34, 0x6EA56, 0x6EA78, 0x6EA9A, 0x6EABC,0x6DE5B,0x6DEAA,0x6DEF9,0x6DF48]
 
+    def human_luminance(self, r, g, b):
+        # color green is perceived more by human eye
+        return 0.2126*r + 0.7152*g + 0.0722*b
+
     def update_hue(self, int_value_LE, degree):
         #Convert 15bit RGB to 24bit RGB
         rgb_value_24 = self.RGB_15_to_24(int_value_LE)
+        (r, g, b) = rgb_value_24
+
+        if self.adjust_luminance:
+            human_luminance_before = self.human_luminance(r, g, b)
 
         #24bit RGB to HLS
-        hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255.0,
-                                      rgb_value_24[1]/255.0,
-                                      rgb_value_24[2]/255.0)
+        hls_col = colorsys.rgb_to_hls(r, g, b)
 
         #Generate new hue based on degree
-        new_hue = self.adjust_hue_degree(hls_col, degree)/360.0
+        new_hue = self.adjust_hue_degree(hls_col, degree)
 
         rgb_final = colorsys.hls_to_rgb(new_hue, hls_col[1], hls_col[2])
+        (r, g, b) = rgb_final
+
+        if self.adjust_luminance:
+            human_luminance_after = self.human_luminance(r, g, b)
+
+            # if we've lost some human luminance, put it back
+            luminance_diff = human_luminance_before - human_luminance_after
+            if luminance_diff > 0:
+                new_luminance = min(hls_col[1] + luminance_diff, 1.0)
+                rgb_final = colorsys.hls_to_rgb(new_hue, new_luminance, hls_col[2])
+                (r, g, b) = rgb_final
 
         #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
-        rgb_final = (int(rgb_final[0]*255), int(rgb_final[1]*255), int(rgb_final[2]*255))
+        rgb_final = (int(r*255), int(g*255), int(b*255))
 
         BE_hex_color = self.RGB_24_to_15(rgb_final)
 
@@ -345,7 +364,7 @@ class PaletteRando(object):
         self.logger.debug("Adjusted hue: {}".format(hue_adj))
         self.logger.debug("Degree: {}".format(degree))
 
-        return hue_adj
+        return hue_adj/360.0
 
     def RGB_24_to_15(self, color_tuple):
         R_adj = int(color_tuple[0])//8
@@ -365,7 +384,7 @@ class PaletteRando(object):
         G = G + G // 32
         B = B + B // 32
 
-        return (R,G,B)
+        return (R/255.0, G/255.0, B/255.0)
 
     def read_word(self, address):
         return self.palettesROM.readWord(address)
@@ -453,6 +472,9 @@ class PaletteRando(object):
             self.write_word(read_address, BE_hex_color)
 
     def hue_shift_tileset_palette(self, degree):
+        # adjust luminance for tilesets
+        self.adjust_luminance = True
+
         count=-1
         for address in self.tileset_palette_offsets:
             count = count+1
@@ -496,7 +518,8 @@ class PaletteRando(object):
 
             #Recompress palette and re-insert at offset
             self.compress(insert_address, data)
-        return
+
+        self.adjust_luminance = False
 
     def boss_palette_shift(self, degree):
         if self.settings["global_shift"] == True:

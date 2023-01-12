@@ -122,7 +122,7 @@ class RomReader:
             'areaLayout': {'address': snes_to_pc(0xcaafa7), 'value': 0x03, 'desc': "Area layout additional modifications"},
             'traverseWreckedShip': {'address': snes_to_pc(0xc39df6), 'value': 0x84, 'desc': "Area layout additional access to east Wrecked Ship"},
             'aqueductBombBlocks': {'address': snes_to_pc(0xcc82d6), 'value': 0x6c, 'desc': "Aqueduct entrance bomb blocks instead of power bombs"},
-            #'open_zebetites': {'address': snes_to_pc(0xcddf22), 'value': 0xc3, 'desc': "Zebetites without morph"}
+            'open_zebetites': {'address': snes_to_pc(0xcddf22), 'value': 0x48, 'desc': "Zebetites without morph"}
         }
     }
 

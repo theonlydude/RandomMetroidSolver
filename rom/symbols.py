@@ -125,8 +125,8 @@ class Symbols(object):
             addr = self._symbols[namespaceOrAbsoluteSymbol].get(localSymbol)
         return addr
 
-    def getAddresses(self, absoluteSymbolRegexPattern):
-        return {sym:self._symbolsAbsolute[sym] for sym in self._symbolsAbsolute if re.match(absoluteSymbolRegexPattern, sym)}
+    def getAddresses(self, namespace, localSymbolRegexPattern):
+        return {sym:self._symbols[namespace][sym] for sym in self._symbols[namespace] if re.match(localSymbolRegexPattern, sym)}
 
     def getAbsoluteSymbols(self):
         return self._symbolsAbsolute.keys()

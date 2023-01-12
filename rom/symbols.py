@@ -45,7 +45,11 @@ class Symbols(object):
                     del self._symbolsAbsolute[inc]
 
     def _findDuplicates(self):
-        return {address:[sym for sym,addr in self._symbolsAbsolute.items() if addr == address] for address in self._symbolsAbsolute.values()}
+        # build reverse dict using defaultdict to read symbols only once
+        addrs = defaultdict(list)
+        for sym,addr in self._symbolsAbsolute.items():
+            addrs[addr].append(sym)
+        return addrs
 
     def loadWLA(self, wlaPath, namespace=None):
         if namespace is None:

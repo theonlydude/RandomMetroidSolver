@@ -317,6 +317,27 @@ class PaletteRando(object):
         self.varia_palette_offsets = [0x0D9520,0x0D9920,0x0D9940,0x0D9960,0x0D9980,0x0D99A0,0x0D99C0,0x0D99E0,0x0D9A00,0x0D9D20,0x0D9D40,0x0D9D60,0x0D9D80,0x0D9DA0,0x0D9DC0,0x0D9DE0,0x0D9E00,0x0D9E20,0x0D9E40,0x0D9E60,0x0D9E80,0x0D9EA0,0x0D9EC0,0x0D9EE0,0x0D9F00,0x6DCD1, 0x6DD20, 0x6DD6F, 0x6DDBE, 0x6DE0A,0x6E692, 0x6E6B4, 0x6E6D6, 0x6E6F8, 0x6E71A, 0x6E73C, 0x6E75E, 0x6E780, 0x6E7A2, 0x6E7C4, 0x6E7E6, 0x6E808, 0x6E82A, 0x6E84C, 0x6E86E, 0x6E890,0x6DCF5,0x6DD44,0x6DD93,0x6DDE2]
         self.gravity_palette_offsets = [0x0D9540,0x0D9560,0x0D9580,0x0D95A0,0x0D95C0,0x0D95E0,0x0D9600,0x0D9620,0x0D9640,0x0D9660,0x0D9680,0x0D96A0,0x0D9780,0x0D97A0,0x0D97C0,0x0D97E0,0x0D9800,0x0D9A20,0x0D9A40,0x0D9A60,0x0D9A80,0x0D9AA0,0x0D9AC0,0x0D9AE0,0x0D9B00,0x0D9F20,0x0D9F40,0x0D9F60,0x0D9F80,0x0D9FA0,0x0D9FC0,0x0D9FE0,0x0DA000,0x0DA020,0x0DA040,0x0DA060,0x0DA080,0x0DA0A0,0x0DA0C0,0x0DA0E0,0x0DA100,0x6DE37, 0x6DE86, 0x6DED5, 0x6DF24, 0x6DF70,0x6E8BE, 0x6E8E0, 0x6E902, 0x6E924, 0x6E946, 0x6E968, 0x6E98A, 0x6E9AC, 0x6E9CE, 0x6E9F0, 0x6EA12, 0x6EA34, 0x6EA56, 0x6EA78, 0x6EA9A, 0x6EABC,0x6DE5B,0x6DEAA,0x6DEF9,0x6DF48]
 
+    def update_hue(self, int_value_LE, degree):
+        #Convert 15bit RGB to 24bit RGB
+        rgb_value_24 = self.RGB_15_to_24(int_value_LE)
+
+        #24bit RGB to HLS
+        hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255.0,
+                                      rgb_value_24[1]/255.0,
+                                      rgb_value_24[2]/255.0)
+
+        #Generate new hue based on degree
+        new_hue = self.adjust_hue_degree(hls_col, degree)/360.0
+
+        rgb_final = colorsys.hls_to_rgb(new_hue, hls_col[1], hls_col[2])
+
+        #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
+        rgb_final = (int(rgb_final[0]*255), int(rgb_final[1]*255), int(rgb_final[2]*255))
+
+        BE_hex_color = self.RGB_24_to_15(rgb_final)
+
+        return BE_hex_color
+
     def adjust_hue_degree(self, hsl_color, degree):
         hue = hsl_color[0] * 360
         hue_adj = (hue + degree) % 360
@@ -325,24 +346,6 @@ class PaletteRando(object):
         self.logger.debug("Degree: {}".format(degree))
 
         return hue_adj
-
-    def adjust_sat(self, hsl_color, adjustment):
-        sat = hsl_color[1] * 100
-        sat_adj = (sat+ adjustment) % 100
-        self.logger.debug("Original sat: {}".format(sat))
-        self.logger.debug("Adjusted sat: {}".format(sat_adj))
-        self.logger.debug("Adjustment: {}".format(adjustment))
-
-        return sat_adj
-
-    def adjust_light(self, hsl_color, adjustment):
-        lit = hsl_color[2] * 100
-        lit_adj = (lit + adjustment) % 100
-        self.logger.debug("Original lit: {}".format(lit))
-        self.logger.debug("Adjusted lit: {}".format(lit_adj))
-        self.logger.debug("Adjustment: {}".format(adjustment))
-
-        return lit_adj
 
     def RGB_24_to_15(self, color_tuple):
         R_adj = int(color_tuple[0])//8
@@ -404,23 +407,7 @@ class PaletteRando(object):
                 read_address = address + (i*2)
                 int_value_LE = self.read_word(read_address)
 
-                #Convert 15bit RGB to 24bit RGB
-                rgb_value_24 = self.RGB_15_to_24(int_value_LE)
-
-                #24bit RGB to HLS
-                hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255.0,
-                                              rgb_value_24[1]/255.0,
-                                              rgb_value_24[2]/255.0)
-
-                #Generate new hue based on degree
-                new_hue = self.adjust_hue_degree(hls_col, degree)/360.0
-
-                rgb_final = colorsys.hls_to_rgb(new_hue, hls_col[1], hls_col[2])
-
-                #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
-                rgb_final = (int(rgb_final[0]*255), int(rgb_final[1]*255), int(rgb_final[2]*255))
-
-                BE_hex_color = self.RGB_24_to_15(rgb_final)
+                BE_hex_color = self.update_hue(int_value_LE, degree)
 
                 self.write_word(read_address, BE_hex_color)
 
@@ -436,27 +423,7 @@ class PaletteRando(object):
             #Convert from LE to BE
             int_value_LE = self.get_word(data, offset)
 
-            #Convert 15bit RGB to 24bit RGB
-            rgb_value_24 = self.RGB_15_to_24(int_value_LE)
-
-            self.logger.debug("24RGB: {}".format(rgb_value_24))
-
-            #24bit RGB to HLS
-            hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255.0,rgb_value_24[1]/255.0,rgb_value_24[2]/255.0)
-
-            self.logger.debug("hls_col: {}".format(hls_col))
-
-            #Generate new hue based on degree
-            new_hue = self.adjust_hue_degree(hls_col, degree)/360.0
-
-            rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
-
-            #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
-            rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
-
-            self.logger.debug("New 24RGB 1 {}".format(rgb_final))
-
-            BE_hex_color = self.RGB_24_to_15(rgb_final)
+            BE_hex_color = self.update_hue(int_value_LE, degree)
 
             self.logger.debug("15bit BE_hex_color: {}".format(hex(BE_hex_color)))
 
@@ -476,21 +443,7 @@ class PaletteRando(object):
             read_address=base_address+(i*2)
             int_value_LE = self.read_word(read_address)
 
-            #Convert 15bit RGB to 24bit RGB
-            rgb_value_24 = self.RGB_15_to_24(int_value_LE)
-
-            #24bit RGB to HLS
-            hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255.0, rgb_value_24[1]/255.0, rgb_value_24[2]/255.0)
-
-            #Generate new hue based on degree
-            new_hue = self.adjust_hue_degree(hls_col, degree)/360.0
-
-            rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
-
-            #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
-            rgb_final = (int(rgb_final[0]*255), int(rgb_final[1]*255), int(rgb_final[2]*255))
-
-            BE_hex_color = self.RGB_24_to_15(rgb_final)
+            BE_hex_color = self.update_hue(int_value_LE, degree)
 
             self.write_word(read_address, BE_hex_color)
 
@@ -523,25 +476,7 @@ class PaletteRando(object):
                     #Convert from LE to BE
                     int_value_LE = self.get_word(data, subset+(j*2))
 
-                    #Convert 15bit RGB to 24bit RGB
-                    rgb_value_24 = self.RGB_15_to_24(int_value_LE)
-
-                    self.logger.debug("24RGB: {}".format(rgb_value_24))
-
-                    #24bit RGB to HLS
-                    hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255.0,rgb_value_24[1]/255.0,rgb_value_24[2]/255.0)
-
-                    #Generate new hue based on degree
-                    new_hue = self.adjust_hue_degree(hls_col, degree)/360.0
-
-                    rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
-
-                    #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
-                    rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
-
-                    self.logger.debug("New 24RGB 2: {}".format(rgb_final))
-
-                    BE_hex_color = self.RGB_24_to_15(rgb_final)
+                    BE_hex_color = self.update_hue(int_value_LE, degree)
 
                     self.logger.debug("15bit BE_hex_color: {}".format(hex(BE_hex_color)))
 
@@ -635,25 +570,7 @@ class PaletteRando(object):
                     #Convert from LE to BE
                     int_value_LE = self.get_word(data, subset+(j*2))
 
-                    #Convert 15bit RGB to 24bit RGB
-                    rgb_value_24 = self.RGB_15_to_24(int_value_LE)
-
-                    self.logger.debug("24RGB: {}".format(rgb_value_24))
-
-                    #24bit RGB to HLS
-                    hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255.0,rgb_value_24[1]/255.0,rgb_value_24[2]/255.0)
-
-                    #Generate new hue based on degree
-                    new_hue = self.adjust_hue_degree(hls_col, degree)/360.0
-
-                    rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
-
-                    #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
-                    rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
-
-                    self.logger.debug("New 24RGB 3: {}".format(rgb_final))
-
-                    BE_hex_color = self.RGB_24_to_15(rgb_final)
+                    BE_hex_color = self.update_hue(int_value_LE, degree)
 
                     self.logger.debug("15bit BE_hex_color: {}".format(hex(BE_hex_color)))
 

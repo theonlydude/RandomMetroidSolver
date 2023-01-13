@@ -13,6 +13,7 @@ class Logic(object):
             Logic.HelpersGraph = HelpersGraph
             Logic.patches = implementation
             Logic.LocationsHelper = LocationsHelper
+            Logic.postSymbolsLoad = lambda: None
         elif implementation == 'rotation':
             from graph.rotation.graph_helpers import HelpersGraph
             from graph.rotation.graph_access import accessPoints
@@ -26,13 +27,13 @@ class Logic(object):
         elif implementation == 'mirror':
             from graph.mirror.graph_helpers import HelpersGraphMirror as HelpersGraph
             from graph.mirror.graph_access import accessPoints
-            from graph.mirror.graph_locations import locations
-            from graph.mirror.graph_locations import LocationsHelper
+            from graph.mirror.graph_locations import locations, LocationsHelper, fixLocAddresses
             Logic.locations = locations
             Logic.accessPoints = accessPoints
             Logic.HelpersGraph = HelpersGraph
             Logic.patches = implementation
             Logic.LocationsHelper = LocationsHelper
+            Logic.postSymbolsLoad = fixLocAddresses
         else:
             raise ValueError("Unknown logic type : "+str(implementation))
         Logic.implementation = implementation

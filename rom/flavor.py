@@ -33,3 +33,4 @@ class RomFlavor(object):
             RomFlavor.symbols = RomFlavor.manager.Symbols()
         Addresses.updateFromSymbols(RomFlavor.symbols)
         DoorsManager.setDoorsAddress(RomFlavor.symbols)
+        Logic.postSymbolsLoad()

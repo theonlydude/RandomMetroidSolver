@@ -1,6 +1,6 @@
 from graph.vanilla.graph_locations import locationsDict
 from graph.vanilla.graph_locations import LocationsHelper
-from rom.rom import snes_to_pc
+from rom.addresses import Addresses
 
 # regular gate glitchs no longer available,
 # but now avaible for the previously unavailable ones.
@@ -31,13 +31,10 @@ locationsDict["Missile (Grapple Beam)"].Available = (
                                                     sm.canUsePowerBombs())))))
 )
 
-# croc room plm's have been relocated in 8f freespace
-# TODO::use symbol Energy_Tank_Crocomire in bank_8f to get its address
-locationsDict["Energy Tank, Crocomire"].Address = snes_to_pc(0x8ffe5f)
-# TODO::use symbol Room_C98E_Reserve in bank_8f to get its address
-locationsDict["Reserve Tank, Wrecked Ship"].Address = snes_to_pc(0x8ffe00)
-# TODO::use symbol Room_C98E_Missile in bank_8f to get its address
-locationsDict["Missile (Gravity Suit)"].Address = snes_to_pc(0x8ffe06)
-
+def fixLocAddresses():
+    # some PLMs have been relocated in 8f freespace
+    locationsDict["Energy Tank, Crocomire"].Address = Addresses.getOne("bank_8f_Energy_Tank_Crocomire")
+    locationsDict["Reserve Tank, Wrecked Ship"].Address = Addresses.getOne("bank_8f_Room_C98E_Reserve")
+    locationsDict["Missile (Gravity Suit)"].Address = Addresses.getOne("bank_8f_Room_C98E_Missile")
 
 locations = [loc for loc in locationsDict.values()]

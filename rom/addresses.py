@@ -2,34 +2,43 @@ from rom.addressTypes import ValueList, ValueSingle, ValueRange, Byte, Word, Lon
 
 # TODO::add patches
 
-
 class Addresses(object):
+    # load symbol on the fly when needed
+    @staticmethod
+    def get(key):
+        value = Addresses.addresses.get(key)
+        if value is None:
+            value = ValueSingle(Addresses.symbols.getAddress(key))
+            Addresses.addresses[key] = value
+
+        return value
+
     @staticmethod
     def getOne(key):
-        value = Addresses.addresses[key]
+        value = Addresses.get(key)
         return value.getOne()
 
     @staticmethod
     def getAll(key):
-        value = Addresses.addresses[key]
+        value = Addresses.get(key)
         return value.getAll()
 
     @staticmethod
     def getWeb(key):
-        value = Addresses.addresses[key]
+        value = Addresses.get(key)
         return value.getWeb()
 
     @staticmethod
     def getRange(key):
-        value = Addresses.addresses[key]
+        value = Addresses.get(key)
         return value.getWeb()
 
     @staticmethod
     def updateFromSymbols(symbols):
-        addrs = Addresses.addresses
-        addrs.update({sym:ValueSingle(symbols.getAddress(sym)) for sym in symbols.getAbsoluteSymbols()})
+        Addresses.symbols = symbols
+
         # for more readable names and complex values:
-        addrs.update({
+        Addresses.addresses.update({
             'totalItems': ValueSingle(symbols.getAddress('endingtotals', 'total_items'), storage=Byte),
             'majorsSplit': ValueSingle(symbols.getAddress('seed_display', 'InfoStr'), storage=Byte),
             # scavenger hunt items list (17 prog items (including ridley) + hunt over + terminator, each is a word)

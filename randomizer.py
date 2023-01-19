@@ -712,8 +712,6 @@ if __name__ == "__main__":
     try:
         if args.hud == True or args.majorsSplit == "FullWithHUD":
             args.patches.append("varia_hud.ips")
-        if args.debug == True:
-            args.patches.append("Disable_Clear_Save_Boot")
 
         patcherSettings = {
             "isPlando": False,

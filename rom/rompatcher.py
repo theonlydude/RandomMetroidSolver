@@ -106,7 +106,7 @@ class RomPatcher:
                        'snails.ips', 'boulders.ips', 'rinkas.ips']
         },
         # add debug tools
-        'Debug': ['Debug_Full.ips']
+        'Debug': ['Debug_Full.ips', 'Disable_Clear_Save_Boot']
     }
 
     def __init__(self, settings=None, romFileName=None, magic=None):

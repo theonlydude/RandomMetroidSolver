@@ -517,6 +517,7 @@ class InteractiveSolver(CommonSolver):
             "displayedVersion": displayedVersion,
             "itemLocs": itemLocs,
             "progItemLocs": progItemLocs,
+            "debug": False,
             "plando": {
                 "graphTrans": self.curGraphTransitions,
                 "maxTransitions": len(vanillaBossesTransitions) + len(vanillaTransitions),

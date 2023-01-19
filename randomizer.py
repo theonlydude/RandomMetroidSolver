@@ -741,7 +741,8 @@ if __name__ == "__main__":
             "doors": doors,
             "displayedVersion": displayedVersion,
             "itemLocs": itemLocs,
-            "progItemLocs": progItemLocs
+            "progItemLocs": progItemLocs,
+            "debug": args.debug
         }
 
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source

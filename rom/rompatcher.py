@@ -104,7 +104,9 @@ class RomPatcher:
             "mirror": ['mirrortroid.ips', 'bank_8f.ips', 'bank_83.ips', 'map_icon_data.ips',
                        'baby_room.ips', 'baby_remove_blocks.ips', 'escape_animals.ips',
                        'snails.ips', 'boulders.ips', 'rinkas.ips']
-        }
+        },
+        # add debug tools
+        'Debug': ['Debug_Full.ips']
     }
 
     def __init__(self, settings=None, romFileName=None, magic=None):
@@ -454,6 +456,11 @@ class RomPatcher:
                 self.writeDoorIndicators(plms, self.settings["area"], self.settings["doorsColorsRando"])
             self.applyStartAP(self.settings["startLocation"], plms, doors)
             self.applyPLMs(plms)
+
+            # debug tools
+            if self.settings["debug"]:
+                for patchName in RomPatcher.IPSPatches['Debug']:
+                    self.applyIPSPatch(patchName)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 

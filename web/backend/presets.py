@@ -70,7 +70,7 @@ class Presets(object):
             self.session.flash = "S:Error loading the preset: {}".format(e)
             error = True
         if error == True:
-            redirect(URL(r=request, f='presets'))
+            redirect(URL(r=self.request, f='presets'))
 
         # load presets list
         (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
@@ -461,7 +461,7 @@ class Presets(object):
                 except Exception as e:
                     msg = "Error writing the preset {}: {}".format(preset, e)
                     raiseHttp(400, json.dumps(msg))
-                redirect(URL(r=request, f='presets'))
+                redirect(URL(r=self.request, f='presets'))
             else:
                 msg = "Sorry, maximum number of presets reached, can't add more"
                 raiseHttp(400, json.dumps(msg))

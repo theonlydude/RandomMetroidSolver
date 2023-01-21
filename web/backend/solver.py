@@ -305,44 +305,44 @@ class Solver(object):
         # check that preset exists
         fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
         if not os.path.isfile(fullPath):
-            return (False, "Unknown preset: {}".format(preset))
+            return (False, "Unknown preset")
 
         difficultyTargetChoices = ["easy", "medium", "hard", "very hard", "hardcore", "mania"]
         if self.vars.difficultyTarget not in difficultyTargetChoices:
-            return (False, "Wrong value for difficultyTarget: {}, authorized values: {}".format(self.vars.difficultyTarget, difficultyTargetChoices))
+            return (False, "Wrong value for difficultyTarget, authorized values: {}".format(difficultyTargetChoices))
 
         pickupStrategyChoices = ["all", "any"]
         if self.vars.pickupStrategy not in pickupStrategyChoices:
-            return (False, "Wrong value for pickupStrategy: {}, authorized values: {}".format(self.vars.pickupStrategy, pickupStrategyChoice))
+            return (False, "Wrong value for pickupStrategy, authorized values: {}".format(pickupStrategyChoice))
 
         complexityChoices = ["simple", "advanced"]
         if self.vars.complexity not in complexityChoices:
-            return (False, "Wrong value for complexity: {}, authorized values: {}".format(self.vars.complexity, complexityChoices))
+            return (False, "Wrong value for complexity, authorized values: {}".format(complexityChoices))
 
         itemsForbidden = []
         for item in ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:
             boolvar = self.vars[item+"_bool"]
             if boolvar is not None:
                 if boolvar != 'on':
-                    return (False, "Wrong value for {}: {}, authorized values: on/off".format(item, boolvar))
+                    return (False, "Wrong value for {}: authorized values: on/off".format(item))
 
         if self.vars.romJson is None and self.vars.uploadFile is None and self.vars.romFile is None:
             return (False, "Missing ROM to solve")
 
         if self.vars.romFile is not None:
             if IS_LENGTH(maxsize=255, minsize=1)(self.vars.romFile)[1] is not None:
-                return (False, "Wrong length for romFile, name must be between 1 and 256 characters: {}".format(request.vars.romFile))
+                return (False, "Wrong length for romFile, name must be between 1 and 256 characters")
 
         if self.vars.romJson is not None and len(self.vars.romJson) > 0:
             try:
                 json.loads(self.vars.romJson)
             except:
-                return (False, "Wrong value for romJson, must be a JSON string: [{}]".format(self.vars.romJson))
+                return (False, "Wrong value for romJson, must be a JSON string")
 
         if self.vars.uploadFile is not None:
             if type(self.vars.uploadFile) == str:
-                if IS_MATCH('[a-zA-Z0-9_\.() ,\-]*', strict=True)(request.vars.uploadFile)[1] is not None:
-                    return (False, "Wrong value for uploadFile, must be a valid file name: {}".format(self.vars.uploadFile))
+                if IS_MATCH('[a-zA-Z0-9_\.() ,\-]*', strict=True)(self.request.vars.uploadFile)[1] is not None:
+                    return (False, "Wrong value for uploadFile, must be a valid file name")
 
                 if IS_LENGTH(maxsize=256, minsize=1)(self.vars.uploadFile)[1] is not None:
                     return (False, "Wrong length for uploadFile, name must be between 1 and 255 characters")

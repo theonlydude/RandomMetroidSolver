@@ -82,53 +82,42 @@
     left: 16%;
 }
 
-#titleAutoTracker {
+.auto-tracker {
+    right: 0.5rem;
     position: absolute;
-    z-index: 2;
-    width: 15.5%;
-    height: 3.75%;
-    top: 0%;
-    left: 84.5%;
+    top: 0;
+    z-index: 50;
+}
+.auto-tracker__contents {
+    display: flex;
+    gap: 0.25vw;
+}
+#titleAutoTracker {
     color: #ffffff;
     font-size: 1.25vw;
     font-weight: bold;
+    text-align: center;
 }
 #startStopAutoTracker {
     cursor: pointer;
-    position: absolute;
-    z-index: 2;
-    width: 2.5%;
-    height: 5%;
-    top: 4%;
-    left: 79%;
+    width: 2.5vw;
 }
 #statusAutoTracker {
-    position: absolute;
-    z-index: 2;
-    width: 2.5%;
-    height: 5%;
-    top: 4%;
-    left: 81.75%;
+    width: 2.5vw;
 }
 #helpAutoTracker {
     cursor: pointer;
-    position: absolute;
-    z-index: 2;
-    width: 2.5%;
-    height: 5%;
-    top: 4%;
-    left: 84.50%;
+    width: 2.5vw;
 }
 #logAutoTracker {
-    position: absolute;
-    z-index: 2;
-    width: 12%;
-    height: 16%;
-    top: 4%;
-    left: 88%;
+    background-color: #a7a7a7;
+    color: black;
+    width: 12vw;
+    height: 16vh;
     resize: none;
     font-size: 0.5vw;
 }
+
 #debugMap {
     position: absolute;
     top: 20%;
@@ -2037,38 +2026,27 @@ function sendAutoTrackerMessage(data, newState) {
 <div class="main">
 {{include 'solver_web/t_main.html'}}
 
-    <!-- map display switch -->
-    <div id="switchMap" class="switchMap"><img src="/solver/static/images/ui/television.svg" alt="Switch" onclick="switchStreamingMap()" data-toggle="tooltip" title="Switch to streaming map" data-placement="bottom" data-container="body" data-html="true"></div>
-
-    <!-- inventory display switch -->
-    <div id="switchInventory" class="switchInventory"><img src="/solver/static/images/ui/television.svg" alt="Switch" onclick="switchStreamingInventory()" data-toggle="tooltip" title="Switch to streaming inventory" data-placement="bottom" data-container="body" data-html="true"></div>
-
-    <!-- item tracker buttons -->
-    <div id="titleItem" class="titleItem">ITEM</div>
-    <div id="startItem" class="startItem"><img src="/solver/static/images/ui/play.svg" alt="Start" onclick="displayPopup(false)" data-toggle="tooltip" title="Start the Interactive Solver" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="repeatItem" class="repeatItem"><img src="/solver/static/images/ui/repeat.svg" alt="Cancel Last" onclick="deleteLoc(false)" data-toggle="tooltip" title="Remove last visited location" data-placement="bottom" data-container="body" data-html="true" id="repeatItemImg"></div>
-    <div id="binItem" class="binItem"><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearLocs(false)" data-toggle="tooltip" title="Remove all visited locations and doors" data-placement="bottom" data-container="body" data-html="true"></div>
-
-    <!-- tracker help -->
-    <div id="help" class="help"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the help" data-placement="bottom" data-container="body" data-html="true"></div>
-
     <!-- auto tracker -->
-    <div id="titleAutoTracker">AUTO TRACKER</div>
+    <div class="auto-tracker">
+      <div id="titleAutoTracker">AUTO TRACKER</div>
 
-    <div id="startStopAutoTracker">
-      <img id="startAutoTracker" src="/solver/static/images/ui/play.svg" alt="Start AutoTracker" onclick="startAutoTracker()" data-toggle="tooltip" title="Start the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
-      <img id="stopAutoTracker" src="/solver/static/images/ui/shut_down.svg" alt="Stop AutoTracker" style="display: none" onclick="stopAutoTracker()" data-toggle="tooltip" title="Stop the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
+      <div class="auto-tracker__contents">
+        <div id="startStopAutoTracker">
+          <img id="startAutoTracker" src="/solver/static/images/ui/play.svg" alt="Start AutoTracker" onclick="startAutoTracker()" data-toggle="tooltip" title="Start the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
+          <img id="stopAutoTracker" src="/solver/static/images/ui/shut_down.svg" alt="Stop AutoTracker" style="display: none" onclick="stopAutoTracker()" data-toggle="tooltip" title="Stop the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
+        </div>
+
+        <div id="statusAutoTracker">
+          <img id="statusKO" src="/solver/static/images/ui/record_ko.svg" alt="statusKO" style="display: none" data-toggle="tooltip" title="AutoTracker status OK" data-placement="bottom" data-container="body" data-html="true">
+          <img id="statusOK" src="/solver/static/images/ui/record_ok.svg" alt="statusOK" style="display: none" data-toggle="tooltip" title="AutoTracker status KO" data-placement="bottom" data-container="body" data-html="true">
+          <img id="statusLoad" src="/solver/static/images/ui/record_load.svg" alt="statusLoad" style="display: none" data-toggle="tooltip" title="AutoTracker status Load" data-placement="bottom" data-container="body" data-html="true">
+          <img id="statusNA" src="/solver/static/images/ui/record.svg" alt="statusNA" data-toggle="tooltip" title="AutoTracker status NA" data-placement="bottom" data-container="body" data-html="true">
+        </div>
+        <div id="helpAutoTracker"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the AutoTracker help" data-placement="bottom" data-container="body" data-html="true"></div>
+        <textarea id="logAutoTracker" disabled></textarea>
+      </div>
+
     </div>
-
-    <div id="helpAutoTracker"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the AutoTracker help" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="statusAutoTracker">
-      <img id="statusKO" src="/solver/static/images/ui/record_ko.svg" alt="statusKO" style="display: none" data-toggle="tooltip" title="AutoTracker status OK" data-placement="bottom" data-container="body" data-html="true">
-      <img id="statusOK" src="/solver/static/images/ui/record_ok.svg" alt="statusOK" style="display: none" data-toggle="tooltip" title="AutoTracker status KO" data-placement="bottom" data-container="body" data-html="true">
-      <img id="statusLoad" src="/solver/static/images/ui/record_load.svg" alt="statusLoad" style="display: none" data-toggle="tooltip" title="AutoTracker status Load" data-placement="bottom" data-container="body" data-html="true">
-      <img id="statusNA" src="/solver/static/images/ui/record.svg" alt="statusNA" data-toggle="tooltip" title="AutoTracker status NA" data-placement="bottom" data-container="body" data-html="true">
-    </div>
-
-    <textarea id="logAutoTracker" disabled></textarea>
 
     <!-- debug canvas pink color: de3994 -->
     <canvas id="debugMap" width="512" height="256"></canvas>

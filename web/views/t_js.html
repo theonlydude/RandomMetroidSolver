@@ -367,14 +367,8 @@ function ajaxOkChained(jsonData) {
 }
 
 function setWSIcon(icon) {
-  var names = ["checkmark", "warning", "download", "upload", "refresh"];
-  for(var i=0; i<names.length; i++) {
-    if(names[i] == icon){
-      document.getElementById(names[i]).style.display = "block";
-    } else {
-      document.getElementById(names[i]).style.display = "none";
-    }
-  }
+  // ws_icon is the "websocket icon" used to communicate connection status
+  $tracker.setVaria({ ws_icon: icon });
 }
 
 function ajaxOkGet(jsonData, status, dummy, chained=false) {
@@ -395,6 +389,10 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         setWSIcon("checkmark");
         return;
     }
+
+    // This is the main action to connecting the data to the new vue app
+    // Everything else should eventually be folded into this
+    window.$tracker.setJsonData(jsonData)
 
     if(jsonData["errorMsg"] != "") {
         document.getElementById("flash").innerHTML = jsonData["errorMsg"];
@@ -417,6 +415,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     if(mode == "debug") {
         updateDebugLines(jsonData);
     }
+
     resetItems();
     updateRoomsVisibility(jsonData);
     updateLocations(jsonData);
@@ -481,50 +480,15 @@ function setActive(mode, majorsSplit, area, boss, escape) {
             $("#"+areaElems[i]).addClass("greyed");
         }
     }
-    if(isSeedless(mode)) {
-        document.getElementById("pause_background").style.display = "none";
-        document.getElementById("pause_background_seedless").style.display = "block";
-    } else {
-        document.getElementById("pause_background").style.display = "block";
-        document.getElementById("pause_background_seedless").style.display = "none";
-    }
     setActiveHook(mode, majorsSplit, area, boss, escape);
 }
 
 function updateRoomsVisibility(jsonData) {
-    // console.log("roomsVisibility: "+jsonData["roomsVisibility"])
-
-    // use a set for faster lookup
-    const roomsVisibility = new Set(jsonData["roomsVisibility"]);
-
-    // there's also svg for the lines, so search only in the rooms visibility svg
-    var svgObject = document.getElementById('roomsVisibilitySvg');
-
-    // in our svg there's paths and rectangles only
-    var paths = svgObject.getElementsByTagName('path');
-    for(var i=0; i<paths.length; i++) {
-        if(roomsVisibility.has(paths[i].id)) {
-            paths[i].style.display = "block";
-        } else {
-            paths[i].style.display = "none";
-        }
-    }
-    var rects = svgObject.getElementsByTagName('rect');
-    for(var i=0; i<rects.length; i++) {
-        if(roomsVisibility.has(rects[i].id)) {
-            rects[i].style.display = "block";
-        } else {
-            rects[i].style.display = "none";
-        }
-    }
+    // DEPRECATED handled by new tracker
 }
 
 function updateGps(jsonData) {
-    if("lastAP" in jsonData) {
-        lastAP = jsonData["lastAP"];
-    }
-    $("#lastAP").attr("class", "lastAP "+lastAP+"Gps");
-    $("#gps"+'[data-toggle="tooltip"]').attr("title", lastAP).tooltip('fixTitle');
+    console.warn('TODO gps')
 }
 
 function updateTimer(jsonData) {
@@ -539,32 +503,7 @@ function updateTimer(jsonData) {
 }
 
 function displayDoors(jsonData) {
-    // display doors
-    for(doorName in jsonData["doors"]) {
-        // doorData is (color, facing), facing is 0: left, 1: right, 2: top, 3: bottom
-        var doorData = jsonData["doors"][doorName];
-        var color = doorData[0];
-        var facing = doorData[1];
-        var hidden = doorData[2];
-        if(hidden == true) {
-            color = 'white';
-        }
-        var css = "";
-        if(facing == 0) {
-            css = color+"Door"+"VL";
-        } else if(facing == 1) {
-            css = color+"Door"+"VR";
-        } else if(facing == 2) {
-            css = color+"Door"+"HT";
-        } else if(facing == 3) {
-            css = color+"Door"+"HB";
-        }
-        $("#"+doorName).attr("class", doorName+" "+css);
-
-        var tooltip = color+" door";
-        $("#"+doorName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
-        // dragElement(document.getElementById(doorName), doorName);
-    }
+    console.warn("TODO doors")
 }
 
 function updateGlobal(jsonData) {
@@ -582,11 +521,9 @@ function updateGlobal(jsonData) {
     tourian = jsonData["tourian"];
     init = true;
 
-    document.getElementById("mode").value = mode;
-    document.getElementById("cur_seed").value = seed;
-    document.getElementById("cur_preset").value = preset;
-
     setActive(mode, majorsSplit, area, boss, escapeRando);
+
+    document.getElementById("mode").value = mode;
 
     updateGlobalHook(jsonData);
 }
@@ -661,182 +598,14 @@ function updateDebugLines(jsonData) {
 }
 
 function updateLocations(jsonData) {
-    window.$tracker.setJsonData(jsonData)
-    if("availableLocations" in jsonData) {
-        for(var locName in jsonData["availableLocations"]) {
-            // console.log(locName+" is available");
-            var locData = jsonData["availableLocations"][locName];
-            var update = (locsInfo[locName]["difficulty"] == undefined || locsInfo[locName]["difficulty"][0] != locData["difficulty"][0] || locsInfo[locName]["state"] != "available" || "comeBack" in locData);
-            locsInfo[locName]["state"] = "available";
-            locsInfo[locName]["difficulty"] = locData["difficulty"];
-            locsInfo[locName]["canHidden"] = locData["canHidden"];
-            locsInfo[locName]["visibility"] = locData["visibility"];
-            locsInfo[locName]["accessPoint"] = locData["accessPoint"];
-            locsInfo[locName]["path"] = locData["path"];
-            locsInfo[locName]["major"] = locData["major"];
-
-            if(update) {
-                if(locData["major"] == true) {
-                    var css_class = "marker_available_"+locData["difficulty"][0]+"_major";
-                } else {
-                    var css_class = "marker_available_"+locData["difficulty"][0];
-                }
-                $("#"+locName).attr("class", "baseLoc "+css_class);
-                var tooltip = getTooltip(locName, locData, "?", false);
-                $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
-            }
-
-            // dragElement(document.getElementById(locName), locName);
-
-            // check if a boss was at that location
-            if("boss" in locsInfo[locName]) {
-                var bossName = locsInfo[locName]["boss"];
-                if(g4.includes(bossName)) {
-                    document.getElementById(bossName+"G4").style.display = "none";
-                }
-            }
-        }
-    }
-
-    if("visitedLocations" in jsonData) {
-        for(var locName in jsonData["visitedLocations"]) {
-            // console.log(locName+" is visited");
-            var locData = jsonData["visitedLocations"][locName];
-            var update = (locsInfo[locName]["state"] != "visited" || locsInfo[locName]["item"] != locData["item"]);
-            locsInfo[locName]["state"] = "visited";
-            locsInfo[locName]["difficulty"] = locData["difficulty"];
-            locsInfo[locName]["canHidden"] = locData["canHidden"];
-            locsInfo[locName]["visibility"] = locData["visibility"];
-            locsInfo[locName]["item"] = locData["item"];
-            locsInfo[locName]["accessPoint"] = locData["accessPoint"];
-
-            if(update) {
-                // keep current loc zoomed
-                var base = "baseLoc";
-                if($("#"+locName).hasClass("baseLocOver")) {
-                    base = "baseLocOver";
-                }
-
-                var className = "marker_visited_"+locData["difficulty"][0]+"_"+locData["item"];
-                $("#"+locName).attr("class", base+" "+className);
-                var tooltip = getTooltip(locName, locData, locData["item"], true);
-                $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
-
-                // check if a boss was at that location
-                if("boss" in locsInfo[locName]) {
-                    var bossName = locsInfo[locName]["boss"];
-                    if(g4.includes(bossName)) {
-                        document.getElementById(bossName+"G4").style.display = "block";
-                    }
-                }
-            }
-
-            // dragElement(document.getElementById(locName), locName);
-
-            if(! isSeedless(mode)) {
-                // add item
-                addItem(locData["item"]);
-            }
-        }
-
-        if(mode == "plando") {
-            var elem = "repeatPlandoImg";
-        } else {
-            var elem = "repeatItemImg";
-        }
-        var tooltip = "Remove last placed item";
-        if(Object.keys(jsonData["visitedLocations"]).length > 0) {
-            var tooltip = tooltip + ": "+jsonData["last"]["item"]+" at "+jsonData["last"]["loc"];
-        }
-        $("#"+elem+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
-
-        // if tourian is disabled hide mother brain loc
-        if(tourian == 'Disabled') {
-            document.getElementById("MotherBrain").style.display = "none";
-        } else {
-            document.getElementById("MotherBrain").style.display = "block";
-        }
-    }
-
-    if(isSeedless(mode)) {
-        // load items as all locs contain Nothing
-        var collectedItems = jsonData["collectedItems"];
-        for(var i=0; i<collectedItems.length; i++) {
-            var item = collectedItems[i];
-            if(item != "Nothing") {
-                addItem(item);
-            }
-        }
-    }
-
-    // set remaining locations as sequence breakable
-    if("remainLocations" in jsonData) {
-        for(var locName in jsonData["remainLocations"]) {
-            // console.log(locName+": sequence breakable");
-            var locData = jsonData["remainLocations"][locName];
-            var update = locsInfo[locName]["state"] != "break";
-
-            locsInfo[locName]["state"] = "break";
-            locsInfo[locName]["difficulty"] = locData["difficulty"];
-            locsInfo[locName]["canHidden"] = locData["canHidden"];
-            locsInfo[locName]["visibility"] = locData["visibility"];
-            locsInfo[locName]["major"] = locData["major"];
-
-            if(update) {
-                // keep current loc zoomed
-                var base = "baseLoc";
-                if($("#"+locName).hasClass("baseLocOver")) {
-                    base = "baseLocOver";
-                }
-
-                if(locData["major"] == true) {
-                    var className = "marker_available_break_major";
-                } else {
-                    var className = "marker_available_break";
-                }
-                $("#"+locName).attr("class", base+" "+className);
-                var tooltip = getTooltip(locName, locData, "?", false);
-                $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
-
-                // check if a boss was at that location
-                if("boss" in locsInfo[locName]) {
-                    var bossName = locsInfo[locName]["boss"];
-                    if(g4.includes(bossName)) {
-                        document.getElementById(bossName+"G4").style.display = "none";
-                    }
-                }
-            }
-
-            // dragElement(document.getElementById(locName), locName);
-        }
-    }
 }
 
 function updateInventory(jsonData) {
-    setItemCount("Missile");
-    setItemCount("Super");
-    setItemCount("PowerBomb");
-    setReserveCount();
 }
 
 var hideTimeout = null;
 function displayCompletedObjectives(jsonData) {
-    var newlyCompletedObjectives = jsonData["newlyCompletedObjectives"];
-    var objectivesPopup = document.getElementById("objectivesPopup");
-    if(newlyCompletedObjectives.length > 0) {
-        if(hideTimeout == null) {
-            objectivesPopup.innerHTML = newlyCompletedObjectives.join("<br/>");
-        } else {
-            // objectives popup is already displayed
-            clearTimeout(hideTimeout);
-            objectivesPopup.innerHTML = objectivesPopup.innerHTML + "<br/>" + newlyCompletedObjectives.join("<br/>");
-        }
-        objectivesPopup.style.display = "block";
-        // arm time to hide popup if user doesn't click on it
-        hideTimeout = setTimeout(hideObjectivePopup, 3000);
-    } else {
-        objectivesPopup.style.display = "none";
-    }
+    console.warn('TODO completed objectives')
 }
 
 function isActive(elemId) {
@@ -1482,19 +1251,19 @@ function clickLoc(elem) {
         document.getElementById("placeItemButton").focus();
     } else {
         // check that lock is in the available list
-        if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
-            // call webservice
-            console.log("add item loc: "+locName);
-            ajaxCall({action: "add", scope: "item", locName: locName}, "upload");
-
-            // if mother brain loc, display end message
-            if(locName == "MotherBrain") {
-                alert("SEE YOU NEXT MISSION");
-            }
-        } else {
+        // if mother brain loc, display end message
+        if(locName == "MotherBrain") {
+            alert("SEE YOU NEXT MISSION");
+            return;
+        }
+        if($tracker.json_data.visitedLocations[locName]) {
             // uncollect it
             console.log("remove item loc: "+locName);
             ajaxCall({action: "remove", scope: "item", locName: locName}, "upload");
+        } else {
+            // call webservice
+            console.log("add item loc: "+locName);
+            ajaxCall({action: "add", scope: "item", locName: locName}, "upload");
         }
     }
 }
@@ -1759,124 +1528,15 @@ var itemCount = {
 }
 
 function resetItems() {
-  itemCount["ETank"] = 0;
-  itemCount["Reserve"] = 0;
-  itemCount["Missile"] = 0;
-  itemCount["Super"] = 0;
-  itemCount["PowerBomb"] = 0;
-
-  for(var i=1; i<=14; i++) {
-    document.getElementById("ETank_"+i+"_pause").style.display = "none";
-  }
-  for(var i=1; i<=4; i++) {
-    document.getElementById("Reserve_"+i+"_pause").style.display = "none";
-  }
-
-  var items = ["Charge", "Ice", "Wave", "Spazer", "Plasma", "Varia", "Gravity", "Morph", "Bomb", "SpringBall", "ScrewAttack", "HiJump", "SpaceJump", "SpeedBooster", "Grapple", "XRayScope"];
-  for(var item in items) {
-    document.getElementById(items[item]+"_pause_img").style.display = "none";
-    if(items[item] != "Grapple" && items[item] != "XRayScope") {
-      document.getElementById(items[item]+"_stream_img").style.display = "none";
-      document.getElementById("No"+items[item]+"_stream_img").style.display = "block";
-    }
-  }
-
-  var items = ["Missile", "Super", "PowerBomb"];
-  for(var item in items) {
-      document.getElementById(items[item]+"_pause").style.display = "none";
-  }
-
-  for(var boss in g4) {
-    document.getElementById(g4[boss]+"_stream_img").style.display = "block";
-    document.getElementById("No"+g4[boss]+"_stream_img").style.display = "none";
-  }
+    // DEPRECATED handled by tracker
 }
 
 function addItem(itemName) {
-    var bosses = ["Kraid", "Phantoon", "Draygon", "Ridley", "MotherBrain", "SporeSpawn", "Crocomire", "Botwoon", "GoldenTorizo"];
-    if(itemName == "Nothing" || itemName == "NoEnergy" || itemName == "Gunship") {
-        return;
-    }
-    if(itemName in itemCount) {
-        itemCount[itemName] += 1
-        if(itemName == "Missile" || itemName == "Super" || itemName == "PowerBomb") {
-            if(! isSeedless(mode)) {
-                document.getElementById(itemName+"_pause").style.display = "block";
-            }
-        } else {
-            if(itemName == "ETank") {
-                var count = Math.min(14, itemCount[itemName]);
-                document.getElementById(itemName+"_"+count+"_pause").style.display = "block";
-            } else {
-                var count = Math.min(4, itemCount[itemName]);
-                document.getElementById(itemName+"_"+count+"_pause").style.display = "block";
-            }
-        }
-    } else {
-        if(! bosses.includes(itemName)) {
-            document.getElementById(itemName+"_pause_img").style.display = "block";
-        }
-        var noStream = ["Grapple", "XRayScope", "MotherBrain", "SporeSpawn", "Crocomire", "Botwoon", "GoldenTorizo"];
-        if(! noStream.includes(itemName)) {
-            if(bosses.includes(itemName)) {
-                document.getElementById(itemName+"_stream_img").style.display = "none";
-                document.getElementById("No"+itemName+"_stream_img").style.display = "block";
-            } else {
-                document.getElementById(itemName+"_stream_img").style.display = "block";
-                document.getElementById("No"+itemName+"_stream_img").style.display = "none";
-            }
-        }
-    }
+    // DEPRECATED handled by tracker
 }
 
 function pad(x, n) {
   return ('' + (1000 + x)).substring(4-n, x.length);
-}
-
-function setReserveCount() {
-  for(var i=1; i<=4; i++) {
-    document.getElementById("reserve_"+i).style.display = "none";
-  }
-  document.getElementById("auto").style.display = "none";
-  document.getElementById("reserve_text").style.display = "none";
-  document.getElementById("reserve_0").style.display = "none";
-  document.getElementById("reserve_00").style.display = "none";
-
-  if(itemCount["Reserve"] == 0) {
-    return;
-  }
-
-  document.getElementById("auto").style.display = "block";
-  document.getElementById("reserve_text").style.display = "block";
-  document.getElementById("reserve_0").style.display = "block";
-  document.getElementById("reserve_00").style.display = "block";
-
-  var count = Math.min(4, itemCount["Reserve"]);
-  document.getElementById("reserve_"+count).style.display = "block";
-}
-
-function setItemCount(itemName) {
-  var count = itemCount[itemName]*5;
-
-  // reset everything to display none
-  for(var i=0; i<=9; i++) {
-    for(var j=9; j<=900; j*=10) {
-      document.getElementById(itemName+"_"+j+"_"+i+"_pause").style.display = "none";
-    }
-  }
-
-  if(count == 0) {
-    return;
-  }
-
-  count = pad(count, 3);
-
-  // display current count
-  for(var j=9; j<=900; j*=10) {
-    var i = Math.ceil(Math.log10(j));
-    document.getElementById(itemName+"_"+j+"_"+count[count.length-i]+"_pause").style.display = "block";
-  }
-
 }
 
 $(window).scroll(function(){

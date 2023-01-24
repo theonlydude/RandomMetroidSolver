@@ -2034,7 +2034,6 @@ function sendAutoTrackerMessage(data, newState) {
   </div>
 </div>
 
-<div id="app"></div>
 <div class="main">
 {{include 'solver_web/t_main.html'}}
 
@@ -2080,11 +2079,6 @@ function sendAutoTrackerMessage(data, newState) {
     </div>
   </div>
 
-  <!-- info on current loaded seed -->
-  <p class="white">Current Seed:</p>
-  <input type="text" name="cur_seed" id="cur_seed" value="n/a" readonly class="full">
-  <p class="white">Current Preset:</p>
-  <input type="text" name="cur_preset" id="cur_preset" value="n/a" readonly class="full">
 </div>
-
+<div id="app"></div>
 {{ response.write(app_files, escape=False) }}

@@ -19,23 +19,6 @@ function interfaceIsFrozen() {
 //-----------------------------------------------------------
 // AREAS TRACKER
 
-var firstClick = "";
-var secondClick = "";
-
-var lines = {};
-var leaderLines = {};
-var nextColor = 0;
-
-// to display inter area lines in debug mode
-var debugLines = [];
-var debugLeaderLines = {};
-
-var colors = ['grey', 'lime', 'pink',  'fuchsia', 'orange', 'yellow', 'purple', 'aqua', 'red', '#bfef45', 'white', 'cyan', 'magenta', 'olive', 'green', 'blue', 'maroon', 'teal'];
-var debugColors = {easy: '#6daa53', medium: '#C1B725', hard: '#e69235', harder: '#d13434', hardcore: '#123456', mania: '#ffffff'};
-
-// for streaming area view
-var linePrefix = "";
-
 function checkCompatibleAPs(startAP, endAP) {
 {{
   response.write("  var vanillaAPs = {};\n".format(vanillaAPs), escape=False)
@@ -57,229 +40,26 @@ function isEscapeAP(ap) {
     return escapeAPs.includes(ap);
 }
 
-function clickPortal(elemId) {
-    if(interfaceIsFrozen()) {
-        return;
-    }
-
-    // dragElement(document.getElementById(elemId), elemId);
-    // console.log("clickPortal "+elemId+" is escape ? "+isEscapeAP(elemId)+" escape mode ? "+escapeRando);
-
-    isEscape = isEscapeAP(elemId);
-
-    // prevent clicking on escape portals, allow it in plando with escape rando or tracker with disabled tourian
-    if(isEscape == true && (escapeRando == false || (mode != "plando" && tourian != "Disabled"))) {
-        return;
-    }
-
-    if(tourian != "Disabled") {
-        escapeStart = "tourianEscapeRoom4TopRight";
-    } else {
-        escapeStart = "climbBottomLeft";
-    }
-    escapeLine = escapeStart in lines;
-    if(escapeLine == true) {
-        escapeEnd = lines[escapeStart]
-    }
-
-    if(firstClick == ""){
-        if(isEscape == true && escapeLine == true && elemId != escapeStart && elemId != escapeEnd){
-            // escape line already there, allow only to select a portal of the escape line
-            return;
-        }
-
-        // highlight first element, allow highlight of already linked portals for link removal
-        firstClick = elemId;
-        $("#"+linePrefix+firstClick).addClass("addBorder");
-    } else if(firstClick == elemId){
-        // click back on same portal
-        $("#"+linePrefix+firstClick).removeClass("addBorder");
-        firstClick = "";
-    } else if(secondClick == "" && elemId != firstClick) {
-        isFirstEscape = isEscapeAP(firstClick);
-
-        if(tourian != "Disabled" && isFirstEscape != isEscape) {
-            // no mixing escape ap with other aps
-            return;
-        }
-
-        if(firstClick in lines) {
-            // first portal was an already connected one, replace the selection
-            $("#"+linePrefix+firstClick).removeClass("addBorder");
-            firstClick = elemId;
-            $("#"+linePrefix+firstClick).addClass("addBorder");
-        } else {
-            if(! ((firstClick in lines) || (elemId in lines))) {
-                // add new line
-
-                if(isEscape == true || isFirstEscape == true) {
-                    // escape aps, one must be tourian exit
-                    if(firstClick != escapeStart && elemId != escapeStart) {
-                        alert("For escape one node must be Tourian escape.");
-                        return;
-                    }
-                } else if(checkCompatibleAPs(firstClick, elemId) == false) {
-                    if(mode == "plando") {
-                        alert("Warning:\n\tYou are mixing an Areas access point and a Bosses access point.\n\tIt's an invalid transition, use a minimizer seed as base seed to do it.");
-                    }
-                    return;
-                }
-
-                if(init == true) {
-                    secondClick = elemId;
-                    ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
-                    firstClick = "";
-                    secondClick = "";
-                } else {
-                    // warn the user that he have to click on '>' first
-                    alert("Please initialize the tracker/plando first by clicking on the Play button.");
-                }
-            }
-        }
-    }
+function addPortal(startPoint, endPoint) {
+  ajaxCall({action: "add", scope: "area", startPoint: startPoint, endPoint: endPoint}, "upload");
 }
 
-function addDebugLine(startPoint, endPoint, difficulty) {
-    // console.log("addDebugLine: "+startPoint+" -> "+endPoint+": "+difficulty);
-
-    var startPointElem = document.getElementById(startPoint);
-    var endPointElem = document.getElementById(endPoint);
-
-    if(startPointElem == null || endPointElem == null) {
-        console.log("addDebugLine startPointElem "+startPointElem+" or endPointElem "+endPointElem+" is null");
-    }
-
-    var line = new LeaderLine(startPointElem, endPointElem,
-                              {color: debugColors[difficulty],
-                               size: 2,
-                               startPlug: 'disc',
-                               endPlug: 'disc',
-                               path: 'straight'});
-    if(! (startPoint in lines)) {
-        line.setOptions({startSocket: 'bottom'});
-    }
-    if(! (endPoint in lines)) {
-        line.setOptions({endSocket: 'bottom'});
-    }
-
-    var lineName = `${startPoint}-${endPoint}`;
-    debugLines.push(lineName);
-    debugLeaderLines[lineName] = line;
-}
-
-function addLine(startPoint, endPoint) {
-    // console.log("addLine: "+startPoint+" "+endPoint);
-    var startPointElem = document.getElementById(linePrefix+startPoint);
-    var endPointElem = document.getElementById(linePrefix+endPoint);
-    if(startPointElem == null || endPointElem == null) {
-        return;
-    }
-
-
-    const options = {
-        startPlug: 'disc',
-        endPlug: 'disc',
-        dropShadow: true,
-        startPlugColor: colors[nextColor],
-        endPlugColor: colors[nextColor],
-        size: 4,
-        color: colors[nextColor],
-        outlineColor: 'rgb(255, 255, 255)',
-        outline: true,
-        outlineSize: 0.10,
-        path: 'straight',
-    };
-    const xy = {
-        x: '50%',
-        y: '50%',
-    }
-    var line = new LeaderLine(
-      LeaderLine.pointAnchor(startPointElem, xy),
-      LeaderLine.pointAnchor(endPointElem, xy),
-      options
-    )
-
-    nextColor += 1;
-    $("#"+linePrefix+startPoint).removeClass("addBorder");
-
-    lines[startPoint] = endPoint;
-    lines[endPoint] = startPoint;
-
-    leaderLines[startPoint] = line;
-    leaderLines[endPoint] = line;
-}
-
-function removeLine(startPoint, endPoint) {
-    // console.log("removeLine: "+startPoint+" "+endPoint);
-    nextColor -= 1;
-
-    delete lines[startPoint];
-    delete lines[endPoint];
-
-    leaderLines[startPoint].remove();
-    delete leaderLines[startPoint];
-    delete leaderLines[endPoint];
-}
-
-function removeDebugLine(startPoint, endPoint) {
-    // console.log("removeDebugLine: "+startPoint+" "+endPoint);
-    var lineName = `${startPoint}-${endPoint}`;
-    debugLines.splice(debugLines.indexOf(lineName), 1);
-    debugLeaderLines[lineName].remove();
-    delete debugLeaderLines[`${startPoint} ${endPoint}`];
-}
-
-function clearLines() {
+function removePortal(startPoint) {
   if(interfaceIsFrozen()) {
     return;
   }
 
-  if(! isActive("binArea")) {
-    return;
-  }
+  // TODO not sure what this is about
+  // if(! isActive("repeatArea")) {
+  //   return;
+  // }
 
-  var result = confirm("Reset seed transitions ?");
-  if(result == false){
-    return;
-  }
-
-  ajaxCall({action: "clear", scope: "area"}, "upload");
+  ajaxCall({action: "remove", scope: "area", startPoint: startPoint}, "upload");
 }
 
-function deleteLine() {
-  if(interfaceIsFrozen()) {
-    return;
-  }
-
-  if(! isActive("repeatArea")) {
-    return;
-  }
-
-  // check if a portal linked to an existing line is selected
-  if(firstClick != "" && firstClick in lines) {
-    $("#"+linePrefix+firstClick).removeClass("addBorder");
-    ajaxCall({action: "remove", scope: "area", startPoint: firstClick}, "upload");
-    firstClick = "";
-  } else {
-    ajaxCall({action: "remove", scope: "area"}, "upload");
-  }
+function resetPortals() {
+  ajaxCall({action: "remove", scope: "area" }, "upload");
 }
-
-function startAnimation(elem) {
-  if(elem.id in leaderLines) {
-    var line = leaderLines[elem.id];
-    line.dash = {animation: true};
-  }
-}
-
-function stopAnimation(elem) {
-  if(elem.id in leaderLines) {
-    var line = leaderLines[elem.id];
-    line.dash = false;
-  }
-}
-
-
 
 //-----------------------------------------------------------
 // COMMON
@@ -404,16 +184,10 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     }
 
     if(lastAction != null && lastAction["action"] != "init" && (lastAction["scope"] == "area" || lastAction["scope"] == "dump")) {
-        updateLines(jsonData, false);
     } else {
         // load everything
         updateGlobal(jsonData);
-        updateLines(jsonData, true);
         updateTimer(jsonData);
-    }
-
-    if(mode == "debug") {
-        updateDebugLines(jsonData);
     }
 
     resetItems();
@@ -438,8 +212,8 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
             if(jsonData["allTransitions"] == true
                && jsonData["allDoorsRevealed"] == true
                && tourian != "Disabled"
-               && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited") ) {
-                alert("You're stuck, you can't finish this seed with the given preset.");
+               && !$tracker.json_data.visitedLocations.MotherBrain) {
+                  alert("You're stuck, you can't finish this seed with the given preset.");
             }
         }
     }
@@ -528,75 +302,6 @@ function updateGlobal(jsonData) {
     updateGlobalHook(jsonData);
 }
 
-function updateLines(jsonData, reset) {
-    if(reset) {
-        for(var startPoint in lines) {
-            // updating a dict while looping on it ?? let's try
-            removeLine(startPoint, lines[startPoint]);
-        }
-    }
-
-    // add missing area transitions
-    var arrayLength = jsonData["linesSeq"].length;
-    for(var i=0; i<arrayLength; i++) {
-        var startPoint = jsonData["linesSeq"][i][0];
-        var endPoint = jsonData["linesSeq"][i][1];
-        if(! (startPoint in lines) && startPoint != endPoint) {
-            addLine(startPoint, endPoint);
-        }
-    }
-
-    // delete removed transitions
-    for(var startPoint in lines) {
-        if(! (startPoint in jsonData["lines"])) {
-            var endPoint = lines[startPoint]
-            removeLine(startPoint, endPoint);
-        }
-    }
-
-//    for(var startPoint in lines) {
-//        var endPoint = lines[startPoint]
-//        dragElement(document.getElementById(linePrefix+startPoint), linePrefix+startPoint);
-//        dragElement(document.getElementById(linePrefix+endPoint), linePrefix+endPoint);
-//    }
-}
-
-function updateDebugLines(jsonData) {
-    var lines = new Set();
-    var arrayLength = jsonData["innerTransitions"].length;
-    for(var i=0; i<arrayLength; i++) {
-        var start = jsonData["innerTransitions"][i][0];
-        var end = jsonData["innerTransitions"][i][1];
-        var difficulty = jsonData['innerTransitions'][i][2][0];
-
-        var lineName = `${start}-${end}`;
-        if(debugLines.indexOf(lineName) == -1) {
-            addDebugLine(start, end, difficulty);
-        } else {
-            // path diff could have change
-            var line = debugLeaderLines[lineName];
-            line.setOptions({color: debugColors[difficulty]});
-        }
-        lines.add(lineName);
-    }
-
-    var toRemove = [];
-    for(var i=0; i<debugLines.length; i++) {
-        var lineName = debugLines[i];
-        if(! lines.has(lineName)) {
-            toRemove.push(lineName);
-        }
-    }
-
-    for(var i=0; i<toRemove.length; i++) {
-        var lineName = toRemove[i];
-        var middle = lineName.indexOf('-');
-        var start = lineName.substring(0, middle);
-        var end = lineName.substring(middle+1);
-        removeDebugLine(start, end);
-    }
-}
-
 function updateLocations(jsonData) {
 }
 
@@ -646,122 +351,6 @@ var autoTrackInProgress = false;
 var hasNothing = false;
 var g4 = ["Kraid", "Phantoon", "Draygon", "Ridley"];
 var tourian = "Vanilla";
-
-// can add more variables:
-//  -state: posible values: ["available", "visited", "break"]
-//  -difficulty: possible values: ["easy", "medium", "hard", "harder", "hardcore", "mania"]
-var locsInfo = {
-  EnergyTankGauntlet: {left: 29.35, top: 7.18},
-  Bomb: {left: 36.99, top: 15.1},
-  EnergyTankTerminator: {left: 24.87, top: 15.1},
-  ReserveTankBrinstar: {left: 8.08, top: 57.55},
-  ChargeBeam: {left: 11.96, top: 71.81},
-  MorphingBall: {left: 34.14, top: 66},
-  EnergyTankBrinstarCeiling: {left: 39.78, top: 66},
-  EnergyTankEtecoons: {left: 1.84, top: 69.9},
-  EnergyTankWaterway: {left: 3.37, top: 75.92},
-  EnergyTankBrinstarGate: {left: 15.7, top: 65.79},
-  XRayScope: {left: 42.68, top: 54.8},
-  Spazer: {left: 57.01, top: 58.82},
-  EnergyTankKraid: {left: 50.74, top: 68.64},
-  VariaSuit: {left: 67.51, top: 70.01},
-  IceBeam: {left: 38.52, top: 79.62},
-  EnergyTankCrocomire: {left: 25.8, top: 82.68},
-  HiJumpBoots: {left: 40.45, top: 87.75},
-  GrappleBeam: {left: 10.59, top: 94.93},
-  ReserveTankNorfair: {left: 50.83, top: 79.62},
-  SpeedBooster: {left: 69.1, top: 79.51},
-  WaveBeam: {left: 61.5, top: 83.53},
-  EnergyTankRidley: {left: 75.6, top: 96.52},
-  ScrewAttack: {left: 76.4, top: 90.71},
-  EnergyTankFirefleas: {left: 92.45, top: 80.46},
-  ReserveTankWreckedShip: {left: 71.75, top: 7.6},
-  EnergyTankWreckedShip: {left: 74.71, top: 9.71},
-  RightSuperWreckedShip: {left: 77.4, top: 17.74},
-  GravitySuit: {left: 66.95, top: 9.61},
-  EnergyTankMamaturtle: {left: 73.65, top: 51.11},
-  PlasmaBeam: {left: 85.43, top: 30.62},
-  ReserveTankMaridia: {left: 78.83, top: 57.34},
-  SpringBall: {left: 90.3, top: 59.24},
-  EnergyTankBotwoon: {left: 86.54, top: 43.08},
-  SpaceJump: {left: 92.4, top: 49.74},
-  PowerBombCrateriasurface: {left: 44.57, top: 5.17},
-  MissileoutsideWreckedShipbottom: {left: 61.35, top: 13.52},
-  MissileoutsideWreckedShiptop: {left: 62.1, top: 3.59},
-  MissileoutsideWreckedShipmiddle: {left: 61.35, top: 7.60},
-  MissileCrateriamoat: {left: 47.9, top: 11.19},
-  MissileCrateriabottom: {left: 32.19, top: 39.6},
-  MissileCrateriagauntletright: {left: 24.08, top: 9.19},
-  MissileCrateriagauntletleft: {left: 23.08, top: 9.19},
-  SuperMissileCrateria: {left: 35.99, top: 21.22},
-  MissileCrateriamiddle: {left: 28.35, top: 17.21},
-  PowerBombgreenBrinstarbottom: {left: 7.11, top: 63.78},
-  SuperMissilepinkBrinstar: {left: 18.6, top: 67.79},
-  MissilegreenBrinstarbelowsupermissile: {left: 6.16, top: 57.55},
-  SuperMissilegreenBrinstartop: {left: 5.22, top: 55.65},
-  MissilegreenBrinstarbehindmissile: {left: 9.29, top: 56.49},
-  MissilegreenBrinstarbehindreservetank: {left: 9.13, top: 58.50},
-  MissilepinkBrinstartop: {left: 11.91, top: 63.78},
-  MissilepinkBrinstarbottom: {left: 11.96, top: 69.69},
-  PowerBombpinkBrinstar: {left: 10.01, top: 65.68},
-  MissilegreenBrinstarpipe: {left: 16.6, top: 72.02},
-  PowerBombblueBrinstar: {left: 32.19, top: 66.0},
-  MissileblueBrinstarmiddle: {left: 40.83, top: 66},
-  SuperMissilegreenBrinstarbottom: {left: 0.32, top: 69.9},
-  MissileblueBrinstarbottom: {left: 36.93, top: 68},
-  MissileblueBrinstartop: {left: 37.93, top: 61.03},
-  MissileblueBrinstarbehindmissile: {left: 37.93, top: 63.04},
-  PowerBombredBrinstarsidehopperroom: {left: 54.22, top: 40.55},
-  PowerBombredBrinstarspikeroom: {left: 54.22, top: 46.67},
-  MissileredBrinstarspikeroom: {left: 53.17, top: 46.67},
-  MissileKraid: {left: 54.65, top: 66.63},
-  Missilelavaroom: {left: 48, top: 83.42},
-  MissilebelowIceBeam: {left: 35.7, top: 83.63},
-  MissileaboveCrocomire: {left: 45.2, top: 87.75},
-  MissileHiJumpBoots: {left: 41.4, top: 85.74},
-  EnergyTankHiJumpBoots: {left: 42.4, top: 85.74},
-  PowerBombCrocomire: {left: 16.3, top: 82.79},
-  MissilebelowCrocomire: {left: 21, top: 92.93},
-  MissileGrappleBeam: {left: 15.36, top: 93.14},
-  MissileNorfairReserveTank: {left: 51.9, top: 79.62},
-  MissilebubbleNorfairgreendoor: {left: 53.8, top: 79.62},
-  MissilebubbleNorfair: {left: 55.7, top: 85.53},
-  MissileSpeedBooster: {left: 67.6, top: 79.51},
-  MissileWaveBeam: {left: 58.55, top: 83.74},
-  MissileGoldTorizo: {left: 74.5, top: 88.7},
-  SuperMissileGoldTorizo: {left: 75.5, top: 88.7},
-  MissileMickeyMouseroom: {left: 84.1, top: 78.56},
-  MissilelowerNorfairabovefireflearoom: {left: 90.75, top: 68.53},
-  PowerBomblowerNorfairabovefireflearoom: {left: 92.6, top: 70.43},
-  PowerBombPowerBombsofshame: {left: 87.9, top: 86.69},
-  MissilelowerNorfairnearWaveBeam: {left: 85, top: 68.43},
-  MissileWreckedShipmiddle: {left: 68.9, top: 15.63},
-  MissileGravitySuit: {left: 69.9, top: 9.61},
-  MissileWreckedShiptop: {left: 77.4, top: 3.48},
-  SuperMissileWreckedShipleft: {left: 71.8, top: 17.74},
-  MissilegreenMaridiashinespark: {left: 66, top: 50.9},
-  SuperMissilegreenMaridia: {left: 66.9, top: 49},
-  MissilegreenMaridiatatori: {left: 74.5, top: 53.01},
-  SuperMissileyellowMaridia: {left: 67.37, top: 38.65},
-  MissileyellowMaridiasupermissile: {left: 68.37, top: 38.65},
-  MissileyellowMaridiafalsewall: {left: 75.4, top: 38.65},
-  MissileleftMaridiasandpitroom: {left: 77.95, top: 55.4},
-  MissilerightMaridiasandpitroom: {left: 80.8, top: 55.4},
-  PowerBombrightMaridiasandpitroom: {left: 81.7, top: 57.23},
-  MissilepinkMaridia: {left: 81.7, top: 45.2},
-  SuperMissilepinkMaridia: {left: 82.7, top: 45.2},
-  MissileDraygon: {left: 98.85, top: 41.08},
-  Kraid: {left: 66.16, top: 68.95, boss: "Kraid"},
-  Ridley: {left: 76.6, top: 95.25, boss: "Ridley"},
-  Phantoon: {left: 78.8, top: 21.65, boss: "Phantoon"},
-  Draygon: {left: 93.8, top: 48.68, boss: "Draygon"},
-  MotherBrain: {left: 21.92, top: 44.24, boss: "MotherBrain"},
-  SporeSpawn: {top: 55.67, left: 16.73, boss: "SporeSpawn"},
-  Crocomire: {left: 22.96, top: 82.86, boss: "Crocomire"},
-  Botwoon: {left: 81.72, top: 43.06, boss: "Botwoon"},
-  GoldenTorizo: {left: 75.41, top: 90.65, boss: "GoldenTorizo"},
-  Gunship: {left: 38.1, top: 7}
-};
 
 var tile2char = {243: '.', 244: '0', 207: '-', 208: 'a', 209: 'b', 210: 'c', 211: 'd', 212: 'e', 213: 'f', 214: 'g', 215: 'h', 216: 'i', 217: 'j', 218: 'k', 219: 'l', 220: 'm', 221: 'n', 222: 'o', 223: 'p', 224: 'q', 225: 'r', 226: 's', 227: 't', 228: 'u', 229: 'v', 230: 'w', 231: 'x', 232: 'y', 233: 'z', 245: '1', 246: '2', 247: '3', 248: '4', 249: '5', 250: '6', 251: '7', 252: '8', 253: '9'};
 
@@ -982,8 +571,6 @@ window.onload = function(){
 
   $("#placeItemButton").keypress(onEnterKey);
 
-  addTooltipCallback();
-
   var objectivesPopup = document.getElementById("objectivesPopup");
   objectivesPopup.onclick = function(event) {
       hideObjectivePopup();
@@ -998,49 +585,6 @@ function hideObjectivePopup() {
         clearTimeout(hideTimeout);
         hideTimeout = null;
     }
-}
-
-function addTooltipCallback() {
-    // display the next ap while the tooltip is displayed
-    $("[data-toggle=tooltip]").on('show.bs.tooltip', function (callbackData) {
-        var locName = callbackData.target.id;
-        if(locName in locsInfo) {
-            var locData = locsInfo[locName];
-
-            // display next ap
-            if("accessPoint" in locData) {
-                // display path
-                if(nextAP != lastAP && "path" in locData) {
-                    var path = locData["path"];
-                    for(var i=0; i<path.length; i++) {
-                        var gps = "gps_"+(i+1);
-                        var ap = path[i];
-
-                        $("#"+gps).attr("class", "nextAP "+ap+"Gps");
-                        document.getElementById(gps).style.display = "block";
-                    }
-                    document.getElementById("lastAP").style.display = "none";
-                    document.getElementById("nextAP").style.display = "none";
-                } else {
-                    var nextAP = locData["accessPoint"];
-                    $("#nextAP").attr("class", "nextAP "+nextAP+"Gps");
-                    document.getElementById("nextAP").style.display = "block";
-                    $("#nextgps"+'[data-toggle="tooltip"]').attr("title", nextAP).tooltip('fixTitle');
-                }
-            }
-        }
-    });
-    $("[data-toggle=tooltip]").on('hide.bs.tooltip', function (a) {
-        document.getElementById("lastAP").style.display = "block";
-
-        // hide next ap
-        document.getElementById("nextAP").style.display = "none";
-
-        // hide path aps
-        for(var i=1; i<=32; i++) {
-            document.getElementById("gps_"+i).style.display = "none";
-        }
-    });
 }
 
 function onEnterKey(event) {
@@ -1081,46 +625,6 @@ function guessVARIAPreset(filename) {
     }
   } else {
     return null;
-  }
-}
-
-function mouseOver(elem) {
-  var locName = elem.id;
-
-  if("state" in locsInfo[locName]) {
-    $(elem).removeClass("baseLoc");
-    $(elem).addClass("baseLocOver");
-
-    if(locsInfo[locName]["state"] == "available") {
-      var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"][0];
-      var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"][0];
-      $(elem).removeClass(className);
-      $(elem).addClass(classNameOver);
-    }
-
-    var newTop = locsInfo[locName].top - 1;
-    var newLeft = locsInfo[locName].left - 0.5;
-    $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
-  }
-}
-
-function mouseOut(elem) {
-  var locName = elem.id;
-
-  if("state" in locsInfo[locName]) {
-    $(elem).removeClass("baseLocOver");
-    $(elem).addClass("baseLoc");
-
-    if(locsInfo[locName]["state"] == "available"){
-      var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"][0];
-      var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"][0];
-      $(elem).removeClass(classNameOver);
-      $(elem).addClass(className);
-    }
-
-    var newTop = locsInfo[elem.id].top;
-    var newLeft = locsInfo[elem.id].left;
-    $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
   }
 }
 
@@ -1180,9 +684,6 @@ function initSolver() {
       }
   }
 
-  // reset everything
-  resetLocsInfo();
-
   // for seedless get the logic from the dropdown
   if(mode == "seedless") {
     logic = document.getElementById("logic").value;
@@ -1202,18 +703,6 @@ function initSolver() {
   $('#hideRandoOverlay').hide();
 }
 
-function handleHide(locName) {
-  // console.log("handleHide locName: "+locName+" canHidden: "+locsInfo[locName]["canHidden"]);
-
-  if("canHidden" in locsInfo[locName] && locsInfo[locName]["canHidden"] == true) {
-    document.getElementById("hideItemVisibility").style.display = "block";
-    document.getElementById("hideItem").checked = locsInfo[locName]["visibility"] == "Hidden";
-  } else {
-    document.getElementById("hideItemVisibility").style.display = "none";
-    document.getElementById("hideItem").checked = false;
-  }
-}
-
 function clickLoc(elem) {
     if(interfaceIsFrozen()) {
         return;
@@ -1222,6 +711,7 @@ function clickLoc(elem) {
     var locName = elem.id;
 
     if(mode == "plando") {
+        alert('TODO! plando')
         // we put an item in boss locations which is the boss' name
         if("boss" in locsInfo[locName]) {
             // check that lock is in the available list
@@ -1243,8 +733,6 @@ function clickLoc(elem) {
         }
         document.getElementById("locName").value = locName;
 
-        handleHide(locName);
-
         // display item selector
         document.getElementById("itemPopup").style.display = "block";
         $("#item").imagepicker();
@@ -1252,10 +740,6 @@ function clickLoc(elem) {
     } else {
         // check that lock is in the available list
         // if mother brain loc, display end message
-        if(locName == "MotherBrain") {
-            alert("SEE YOU NEXT MISSION");
-            return;
-        }
         if($tracker.json_data.visitedLocations[locName]) {
             // uncollect it
             console.log("remove item loc: "+locName);
@@ -1264,6 +748,9 @@ function clickLoc(elem) {
             // call webservice
             console.log("add item loc: "+locName);
             ajaxCall({action: "add", scope: "item", locName: locName}, "upload");
+            if(locName == "MotherBrain") {
+                alert("SEE YOU NEXT MISSION");
+            }
         }
     }
 }
@@ -1404,25 +891,7 @@ function deleteLoc(isPlando) {
     return;
   }
 
-  // reset everything
-  resetLocsInfo();
-
   ajaxCall({action: "remove", scope: "item"}, "upload");
-}
-
-function resetLocsInfo() {
-  // remove some info to update all locs
-  var keys = ["state", "difficulty"];
-  for(var locName in locsInfo) {
-    for(var i in keys) {
-      var key = keys[i];
-      // console.log("is "+keys[key]+" in locsInfo["+locName+"] ?");
-      if(key in locsInfo[locName]) {
-        // console.log("delete locsInfo["+locName+"]["+key+"]");
-        delete locsInfo[locName][key];
-      }
-    }
-  }
 }
 
 function clearLocs(isPlando) {
@@ -1451,8 +920,6 @@ function clearLocs(isPlando) {
         return;
     }
 
-    resetLocsInfo();
-
     if(isPlando == false && doorsRando == true) {
         ajaxChainedActions.push({action: "clear", scope: "item"});
         ajaxChainedActions.push({action: "clear", scope: "door"});
@@ -1461,70 +928,6 @@ function clearLocs(isPlando) {
         // reset the state server side
         ajaxCall({action: "clear", scope: "item"}, "upload");
     }
-}
-
-function getTooltip(locName, locData, item, visited) {
-    var tooltip = "<center>"+locData["name"]+"</center>";
-
-    if("boss" in locsInfo[locName]) {
-        tooltip += "<center>Boss: "+locsInfo[locName]["boss"]+"</center>";
-        if(visited == true) {
-            return tooltip;
-        }
-    }
-
-    if(visited == true) {
-        return tooltip+"<center>Item: "+item+"</center>";
-    } else {
-        // sequence break
-        if(locData["knows"].length > 0 && locData["knows"][0] == "Sequence Break") {
-            return tooltip+"<center>Sequence Break</center>"
-                +(debug == true ?
-                  ("path" in locData ? "<br>Path: "+locData["path"] : "")
-                  +("distance" in locData ? "<br>Distance: "+locData["distance"] : "")
-                  : "");
-        } else {
-            return tooltip
-                +"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")
-                +"<br>Items: "+(locData["items"].length > 0 ? getItemsImages(locData["items"]) : "None")
-                +("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "")
-                +("difficulty" in locData ? "<br>Difficulty: "+locData["difficulty"][1] : "")
-                +(debug == true ?
-                  ("distance" in locData ? "<br>Distance: "+locData["distance"] : "")
-                  +("path" in locData ? "<br>Path: "+locData["path"].join(' ') : "")
-                  +("locDifficulty" in locData ? "<br>locDiff: ["+locData["locDifficulty"][0]+"] ["+locData["locDifficulty"][1]+"] ["+locData["locDifficulty"][2]+"]" : "")
-                  +("pathDifficulty" in locData ? "<br>pathDiff: ["+locData["pathDifficulty"][0]+"] ["+locData["pathDifficulty"][1]+"] ["+locData["pathDifficulty"][2]+"]" : "")
-                  : "");
-        }
-    }
-}
-
-function getItemsImages(items) {
-    var out = "";
-    for(var i=0; i<items.length; i++) {
-        if(i%8 == 0 && i > 0) {
-            out += "<br/>";
-        }
-        var item = items[i];
-        if(item[0] >= '0' && item[0] <= '9') {
-            // for etanks and reserves
-            var hyphen = item.indexOf('-');
-            var count = item.substring(0, hyphen);
-            var item = item.substring(hyphen+1, item.length);
-            out += "<span>"+count+"-"+'<img class="imageItems" src="/solver/static/images/tracker/inventory/'+item+'.png" />'+"</span>";
-        } else {
-            out += '<img class="imageItems" src="/solver/static/images/tracker/inventory/'+items[i]+'.png" />';
-        }
-    }
-    return out;
-}
-
-var itemCount = {
-  "ETank": 0,
-  "Reserve": 0,
-  "Missile": 0,
-  "Super": 0,
-  "PowerBomb": 0
 }
 
 function resetItems() {

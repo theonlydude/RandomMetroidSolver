@@ -35,116 +35,14 @@
     right: 0;
     bottom: 0;
     background-color: rgba(0,0,0,0.9);
-    z-index: 6;
+    z-index: 199;
     cursor: pointer;
-}
-.repeatArea {
-    cursor: pointer;
-    position: absolute;
-    z-index: 7;
-    width: 2.5%;
-    height: 3.75%;
-    top: 0%;
-    left: 11.875%;
-}
-.binArea {
-    cursor: pointer;
-    position: absolute;
-    z-index: 7;
-    width: 2.5%;
-    height: 3.75%;
-    top: 0%;
-    left: 14.625%;
 }
 
-.titlePlando {
-    position: absolute;
-    z-index: 7;
-    width: 10%;
-    height: 3.75%;
-    top: 5.2%;
-    left: 4.3%;
-    color: #ffffff;
-    font-size: 1.25vw;
-    font-weight: bold;
-}
-.scavPlando {
-    display: none;
-    cursor: pointer;
-    position: absolute;
-    z-index: 7;
-    width: 2.5%;
-    height: 3.75%;
-    top: 0%;
-    left: 18.75%;
-}
-.startPlando {
-    cursor: pointer;
-    position: absolute;
-    z-index: 7;
-    width: 2.5%;
-    height: 3.75%;
-    top: 4.75%;
-    left: 10.5%;
-}
-.repeatPlando {
-    cursor: pointer;
-    position: absolute;
-    z-index: 7;
-    width: 2.5%;
-    height: 3.75%;
-    top: 4.75%;
-    left: 13.25%;
-}
-.binPlando {
-    cursor: pointer;
-    position: absolute;
-    z-index: 7;
-    width: 2.5%;
-    height: 3.75%;
-    top: 4.75%;
-    left: 16%;
-}
-.savePlando {
-    cursor: pointer;
-    position: absolute;
-    z-index: 7;
-    width: 2.5%;
-    height: 3.75%;
-    top: 4.75%;
-    left: 18.75%;
-}
-.randoPlando {
-    cursor: pointer;
-    position: absolute;
-    z-index: 7;
-    width: 2.5%;
-    height: 3.75%;
-    top: 0%;
-    left: 18.75%;
-}
-.lockPlando {
-    cursor: pointer;
-    position: absolute;
-    z-index: 7;
-    width: 2.5%;
-    height: 3.75%;
-    top: 10%;
-    left: 18.75%;
-}
-.helpPlando {
-    cursor: pointer;
-    position: absolute;
-    z-index: 7;
-    width: 2.5%;
-    height: 3.75%;
-    top: 0%;
-    left: 2.75%;
-}
 .startDebug {
     cursor: pointer;
     position: absolute;
-    z-index: 7;
+    z-index: 200;
     width: 2.5%;
     height: 3.75%;
     top: 0.5%;
@@ -162,8 +60,8 @@
 }
 .debugPopup {
     background-color: #ffffff;
-    position: absolute;
-    z-index: 4;
+    position: fixed;
+    z-index: 200;
     height: auto;
     top: 17%;
     left: 51%;
@@ -174,12 +72,12 @@
 }
 .scavPopup {
     background-color: #ffffff;
-    position: absolute;
-    z-index: 4;
+    position: fixed;
+    z-index: 200;
     height: auto;
     top: 17%;
-    left: 51%;
-    width: 20%;
+    left: 50%;
+    transform: translate(-50%, 0);
     display: none;
     padding: 0.5%;
     border: 2px solid gray;
@@ -188,12 +86,10 @@
     width: 4em;
 }
 .timer {
-    position: absolute;
-    z-index: 7;
-    /* width: 2.5%; */
-    /* height: 3.75%; */
-    top: 29.3%;
-    left: 22%;
+    position: fixed;
+    left: 50%;
+    top: 30px;
+    transform: translate(-50%, 0);
 }
 .rightMargin {
     margin-right: 0.75em;

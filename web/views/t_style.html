@@ -3,7 +3,7 @@
     line-height: 0;
 }
 .objectivesPopup {
-    position: absolute;
+    position: fixed;
     top: 0%;
     right: 0%;
     width: 100%;
@@ -17,8 +17,8 @@
 }
 .doorPopup {
     background-color: #ffffff;
-    position: absolute;
-    z-index: 7;
+    position: fixed;
+    z-index: 200;
     height: auto;
     top: 2em;
     left: 45%;
@@ -144,27 +144,27 @@ img {
 }
 .solverPopup {
     background-color: #ffffff;
-    position: absolute;
-    z-index: 7;
-    width: 40%;
+    position: fixed;
+    z-index: 200;
     height: auto;
     top: 2em;
-    left: 30%;
+    left: 50%;
     display: none;
     padding: 0.5%;
     border: 2px solid gray;
+    transform: translate(-50%, 0);
 }
 .itemPopup {
     background-color: #ffffff;
-    position: absolute;
-    z-index: 7;
-    width: 35%;
+    position: fixed;
+    z-index: 200;
     height: auto;
     top: 2em;
-    left: 32.5%;
+    left: 50%;
     display: none;
     padding: 0.5%;
     border: 2px solid gray;
+    transform: translate(-50%, 0);
 }
 .cloud {
     position: absolute;
@@ -173,37 +173,6 @@ img {
     height: 5%;
     top: 0%;
     left: 0.1%;
-}
-.titleArea {
-    position: absolute;
-    z-index: 2;
-    width: 10%;
-    height: 3.75%;
-    top: 1%;
-    left: 6%;
-    color: #ffffff;
-    font-size: 1.25vw;
-    font-weight: bold;
-}
-.repeatArea {
-    line-height: 0;
-    cursor: pointer;
-    position: absolute;
-    z-index: 2;
-    width: 2.5%;
-    height: 5%;
-    top: 0%;
-    left: 13.25%;
-}
-.binArea {
-    line-height: 0;
-    cursor: pointer;
-    position: absolute;
-    z-index: 2;
-    width: 2.5%;
-    height: 5%;
-    top: 0%;
-    left: 16%;
 }
 
 .sbaseButton {

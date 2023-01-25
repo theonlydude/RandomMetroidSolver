@@ -103,7 +103,7 @@ class RomPatcher:
             ],
             "mirror": ['mirrortroid.ips', 'bank_8f.ips', 'bank_83.ips', 'map_icon_data.ips',
                        'baby_room.ips', 'baby_remove_blocks.ips', 'escape_animals.ips',
-                       'snails.ips', 'boulders.ips', 'rinkas.ips', 'etecoons.ips']
+                       'snails.ips', 'boulders.ips', 'rinkas.ips', 'etecoons.ips', 'crab_main_street.ips']
         },
         # add debug tools
         'Debug': ['Debug_Full.ips', 'Disable_Clear_Save_Boot']

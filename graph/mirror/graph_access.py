@@ -6,7 +6,7 @@ from utils.parameters import Settings
 # can now ggg
 accessPointsDict['Business Center'].connectInternal(
     'Grapple Escape',
-    Cache.ldeco(lambda sm: sm.wor(
+    Cache.ldeco(lambda sm: sm.wand(
         sm.canGreenGateGlitch(),
         sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Bubble']))
     )

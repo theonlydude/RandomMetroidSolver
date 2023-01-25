@@ -166,6 +166,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
 
     // get dicts availableLocations and visitedLocations
     if(jsonData == "OK") {
+        console.log('TODO: no rom loaded. Show popup?');
         setWSIcon("checkmark");
         return;
     }
@@ -225,37 +226,6 @@ function isSeedless(mode) {
     return mode == "seedless" || mode == "debug" || mode == "race"
 }
 
-function setActive(mode, majorsSplit, area, boss, escape) {
-    var itemElems = ["repeatItem", "binItem"];
-    var plandoElems = ["repeatPlando", "binPlando", "savePlando"];
-    var areaElems = ["repeatArea", "binArea"];
-    if(mode != "plando") {
-        for(var i=0; i<itemElems.length; i++) {
-            $("#"+itemElems[i]).removeClass("greyed");
-        }
-        for(var i=0; i<plandoElems.length; i++) {
-            $("#"+plandoElems[i]).addClass("greyed");
-        }
-    } else {
-        for(var i=0; i<itemElems.length; i++) {
-            $("#"+itemElems[i]).addClass("greyed");
-        }
-        for(var i=0; i<plandoElems.length; i++) {
-            $("#"+plandoElems[i]).removeClass("greyed");
-        }
-    }
-    if(area == true || boss == true || (escape == true && mode == "plando")) {
-        for(var i=0; i<areaElems.length; i++) {
-            $("#"+areaElems[i]).removeClass("greyed");
-        }
-    } else {
-        for(var i=0; i<areaElems.length; i++) {
-            $("#"+areaElems[i]).addClass("greyed");
-        }
-    }
-    setActiveHook(mode, majorsSplit, area, boss, escape);
-}
-
 function updateRoomsVisibility(jsonData) {
     // DEPRECATED handled by new tracker
 }
@@ -289,8 +259,6 @@ function updateGlobal(jsonData) {
     hasNothing = jsonData["hasNothing"];
     tourian = jsonData["tourian"];
     init = true;
-
-    setActive(mode, majorsSplit, area, boss, escapeRando);
 
     document.getElementById("mode").value = mode;
 
@@ -706,13 +674,14 @@ function clickLoc(elem) {
     var locName = elem.id;
 
     if(mode == "plando") {
-        alert('TODO! plando')
+        const { visitedLocations } = $tracker.json_data
         // we put an item in boss locations which is the boss' name
-        if("boss" in locsInfo[locName]) {
-            // check that lock is in the available list
-            if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
-                ajaxCall({action: "add", scope: "item", locName: locName, itemName: locsInfo[locName]["boss"]}, "upload");
 
+        if($tracker.location_type_map[locName] === 'boss') {
+            // clicking on a boss in plando reveals which boss it is
+            // check that lock is in the available list
+            if(!visitedLocations[locName]) {
+                ajaxCall({action: "add", scope: "item", locName: locName, itemName: locName}, "upload");
                 if(locName == "MotherBrain") {
                     alert("SEE YOU NEXT MISSION");
                 }
@@ -720,11 +689,12 @@ function clickLoc(elem) {
             return;
         }
 
-        if("state" in locsInfo[locName] && locsInfo[locName]["state"] == "visited") {
+        if(visitedLocations[locName]) {
             document.getElementById("itemPopupText").innerHTML = "Replace item at "+locName+":";
-            $("#item").val(locsInfo[locName]["item"]);
+            $("#item").val(visitedLocations[locName].item);
         } else {
             document.getElementById("itemPopupText").innerHTML = "Item to place at "+locName+":";
+            $("#item").val(null);
         }
         document.getElementById("locName").value = locName;
 
@@ -864,11 +834,11 @@ function placeItem() {
   var hide = document.getElementById("hideItem").checked;
 
   // check that lock is in the available list
-  if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
-    ajaxCall({action: "add", scope: "item", locName: locName, itemName: item, hide: hide}, "upload");
-  } else {
-    ajaxCall({action: "replace", scope: "item", locName: locName, itemName: item, hide: hide}, "upload");
+  const data = { action: "add", scope: "item", locName, itemName: item, hide };
+  if($tracker.json_data.visitedLocations[locName]) {
+    data.action = 'replace';
   }
+  ajaxCall(data, "upload");
 }
 
 function hideItemPopup() {

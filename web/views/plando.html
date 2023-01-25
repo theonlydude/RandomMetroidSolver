@@ -499,7 +499,6 @@ function onloadHook() {
 
           vcrData = JSON.parse(jsonStr);
           gotoStart(true);
-          hidePlandoButtons();
 
           document.getElementById("gotoAction").setAttribute("max", vcrData.length);
       }
@@ -512,14 +511,6 @@ function onloadHook() {
   dragElement(document.getElementById("savePopup"), "SaveGrab");
   dragElement(document.getElementById("randomizerPopup"), "RandoGrab");
   dragElement(document.getElementById("scavPopup"), "ScavGrab");
-}
-
-function hidePlandoButtons() {
-  // to avoid using them in debug mode
-  var plandoElems = ["repeatPlando", "binPlando", "savePlando", "lockPlando", "randoPlando", "repeatArea", "binArea"];
-  for(var i=0; i<plandoElems.length; i++) {
-    document.getElementById(plandoElems[i]).style.display = "none";
-  }
 }
 
 function displayDebugPopup() {
@@ -559,21 +550,6 @@ function uploadScavList() {
     ajaxCall(data, "upload");
 
     document.getElementById("scavPopup").style.display = "none";
-}
-
-function setActiveHook(mode, majorsSplit, area, boss, escape) {
-    // for scavenger hunt plandos, to display the puzzle button
-    if(mode == "plando") {
-        var scavPlando = document.getElementById("scavPlando");
-        var randoPlando  = document.getElementById("randoPlando");
-        if(majorsSplit == "Scavenger") {
-            scavPlando.style.display = "block";
-            randoPlando.style.display = "none";
-        } else {
-            scavPlando.style.display = "none";
-            randoPlando.style.display = "block";
-        }
-    }
 }
 
 var loc2item = {
@@ -973,7 +949,7 @@ def displayNumber(id, min, max, default, step="1"):
 <div class="main">
   <div id="randomizerPopup" class="itemPopup">
     <table class="full">
-      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <colgroup><col style="width: 67%;" /><col style="width: 33%" /></colgroup>
       <tr><td colspan=2></td></tr>
       <tr><td id="RandoGrab" colspan=2 class="center greyRow"><p>Plando Randomizer parameters</p></td></tr>
       <tr><td colspan=2 class="blankRow"></td></tr>
@@ -990,8 +966,8 @@ def displayNumber(id, min, max, default, step="1"):
         <td><input id="hideRando" name="hideRando" type="checkbox"></td>
       </tr>
       <tr>
-      <td>Items not to place</td>
-        <td>
+        <td colspan="2">
+          <div>Items not to place:</div>
           <nobr><input id="Charge_bool" name="Charge_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Charge.png" alt="Charge.png" title="Charge.png" class="rightMargin"/></nobr>
           <nobr><input id="Ice_bool" name="Ice_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Ice.png" alt="Ice.png" title="Ice.png" class="rightMargin"/></nobr>
           <nobr><input id="Wave_bool" name="Wave_bool" type="checkbox" ><img src="/solver/static/images/tracker/inventory/Wave.png" alt="Wave.png" title="Wave.png" class="rightMargin"/></nobr>
@@ -1145,26 +1121,11 @@ def displayNumber(id, min, max, default, step="1"):
 
 {{include 'solver_web/t_main.html'}}
 
-    <!-- plando buttons -->
-    <div id="titlePlando" class="titlePlando">PLANDO</div>
-    <div id="scavPlando" class="scavPlando"><img src="/solver/static/images/ui/puzzle.svg" alt="Scavenger" onclick="displayScavPopup()" data-toggle="tooltip" title="Scavenger Hunt locations" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="startPlando" class="startPlando"><img src="/solver/static/images/ui/play.svg" alt="Start" onclick="displayPopup(true)" data-toggle="tooltip" title="Start the Plando creator" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="repeatPlando" class="repeatPlando"><img src="/solver/static/images/ui/repeat.svg" alt="Cancel Last" onclick="deleteLoc(true)" data-toggle="tooltip" title="Remove last placed item" data-placement="bottom" data-container="body" data-html="true" id="repeatPlandoImg"></div>
-    <div id="binPlando" class="binPlando"><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearLocs(true)" data-toggle="tooltip" title="Remove all placed items" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="savePlando" class="savePlando"><img src="/solver/static/images/ui/save.svg" alt="Save" onclick="save('save')" data-toggle="tooltip" title="Download plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="lockPlando" class="lockPlando"><img src="/solver/static/images/ui/locked.svg" alt="Lock" onclick="save('lock')" data-toggle="tooltip" title="Download locked plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="helpPlando" class="helpPlando"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the Plando help" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="randoPlando" class="randoPlando"><img src="/solver/static/images/ui/games.svg" alt="Randomize" onclick="displayRandoPopup()" data-toggle="tooltip" title="Randomize the remaining items/locations" data-placement="bottom" data-container="body" data-html="true"></div>
-
     <!-- to open the debug popup -->
     <div id="startDebug" class="startDebug"><img src="/solver/static/images/ui/play.svg" alt="Start" onclick="displayDebugPopup()" data-toggle="tooltip" title="Start the debug popup" data-placement="bottom" data-container="body" data-html="true"></div>
   </div>
 
   <!-- info on current loaded seed -->
-  <p class="white">Current Seed:</p>
-  <input type="text" name="cur_seed" id="cur_seed" value="n/a" readonly class="full">
-  <p class="white">Current Preset:</p>
-  <input type="text" name="cur_preset" id="cur_preset" value="n/a" readonly class="full">
 </div>
 
 <div id="app"></div>

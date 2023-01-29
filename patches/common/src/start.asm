@@ -6,6 +6,7 @@ arch 65816
 lorom
 
 incsrc "sym/base.asm"
+incsrc "macros.asm"
 
 ;;; CONSTANTS
 !GameStartState = $7ED914
@@ -25,13 +26,13 @@ org $82eeda
 ;;; DATA in bank A1 (start options)
 
 org $a1f200
-start_location:
+%export(start_location)
     ;; start location: $0000=Zebes Landing site, $fffe=Ceres,
     ;; otherwise hi byte is area and low is save index.
     ;; (use FFFE as Ceres special value because FFFF can be mistaken
     ;; for free space by solver/tracker)
     dw $0000			; defaults to landing site
-opt_doors:
+%export(opt_doors)
     ;; optional doors to open.
     ;; door ID is low byte PLM argument when editing doors in SMILE
     ;; terminate with $00
@@ -40,7 +41,7 @@ opt_doors:
 
 ;;; CODE in bank A1
 org $a1f220
-startup:
+%export(startup)
     jsl base_check_new_game : bne .end
     lda.l start_location
     cmp #$fffe : beq .ceres
@@ -86,7 +87,7 @@ gameplay_start:
 warnpc $a1f28f
 
 org $a1f470
-additional_etanks:
+%export(additional_etanks)
 	db $00
 
 add_etanks_and_save:

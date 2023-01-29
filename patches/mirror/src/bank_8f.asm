@@ -5,6 +5,7 @@ lorom
 
 ;;; add include for changing scroll set by doors
 incsrc "bank_8f_area_door_scroll.asm"
+incsrc "macros.asm"
 
 org $8f8000
 ; room 91F8: Landing Site
@@ -13,10 +14,10 @@ Room_91F8_state_9247_PLM:
     dw $b703 : db $71 : db $28 : dw Room_91F8_state_9261_PLM_index_0_PLM_scroll_data
     ; Upwards extension
     dw $b647 : db $78 : db $1c : dw $8000 
-Door_00_Room_91F8_PLM_C878:
+%export(Door_00_Room_91F8_PLM_C878)
     ; Door. Green door facing right
     dw $c878 : db $01 : db $46 : dw $0000 
-Door_01_Room_91F8_PLM_C860:
+%export(Door_01_Room_91F8_PLM_C860)
     ; Door. Yellow door facing right
     dw $c860 : db $01 : db $16 : dw $0001 
     ; plms terminates before vanilla
@@ -38,13 +39,13 @@ Room_91F8_state_9261_PLM:
     dw $b647 : db $1e : db $25 : dw $8000 
     ; Sets Metroids cleared states when required
     dw $db44 : db $08 : db $08 : dw $0008 
-Door_02_Room_91F8_PLM_C848:
+%export(Door_02_Room_91F8_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $16 : dw $9002 
-Door_03_Room_91F8_PLM_C848:
+%export(Door_03_Room_91F8_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $46 : dw $9003 
-Door_04_Room_91F8_PLM_C842:
+%export(Door_04_Room_91F8_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $8e : db $26 : dw $9004 
     dw $0000
@@ -109,7 +110,7 @@ Room_92FD_state_932E_PLM:
     dw $b63b : db $0c : db $15 : dw $8000 
     ; Scroll PLM
     dw $b703 : db $1b : db $0d : dw Room_92FD_state_9348_PLM_index_1A_PLM_scroll_data 
-Door_05_Room_92FD_PLM_C890:
+%export(Door_05_Room_92FD_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $31 : db $36 : dw $0005 
     dw $0000
@@ -172,19 +173,19 @@ Room_92FD_state_9348_PLM:
     dw $b703 : db $1b : db $0d : dw Room_92FD_state_9348_PLM_index_1A_PLM_scroll_data 
     ; Sets Metroids cleared states when required
     dw $db44 : db $08 : db $08 : dw $000a 
-Door_06_Room_92FD_PLM_C842:
+%export(Door_06_Room_92FD_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $4e : db $06 : dw $9006 
-Door_07_Room_92FD_PLM_C842:
+%export(Door_07_Room_92FD_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $3e : db $26 : dw $9007 
-Door_08_Room_92FD_PLM_C848:
+%export(Door_08_Room_92FD_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $31 : db $36 : dw $9008 
-Door_09_Room_92FD_PLM_C842:
+%export(Door_09_Room_92FD_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $3e : db $36 : dw $9009 
-Door_0A_Room_92FD_PLM_C84E:
+%export(Door_0A_Room_92FD_PLM_C84E)
     ; Door. Grey door facing up
     dw $c84e : db $36 : db $4d : dw $900a 
     dw $0000
@@ -203,10 +204,10 @@ Room_93D5_state_93E2_PLM:
 org $8f81dc
 ; room 93FE: West Ocean
 Room_93FE_state_940B_PLM:
-Door_0B_Room_93FE_PLM_C848:
+%export(Door_0B_Room_93FE_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $21 : db $36 : dw $900b 
-Door_0C_Room_93FE_PLM_C878:
+%export(Door_0C_Room_93FE_PLM_C878)
     ; Door. Green door facing right
     dw $c878 : db $01 : db $46 : dw $000c 
     ; Missile tank
@@ -235,10 +236,10 @@ Room_948C_state_9499_PLM:
     dw $b63b : db $18 : db $0c : dw $8000 
     ; Rightwards extension
     dw $b63b : db $19 : db $0c : dw $8000 
-Door_0D_Room_948C_PLM_C860:
+%export(Door_0D_Room_948C_PLM_C860)
     ; Door. Yellow door facing right
     dw $c860 : db $01 : db $06 : dw $000d 
-Door_0E_Room_948C_PLM_C866:
+%export(Door_0E_Room_948C_PLM_C866)
     ; Door. Yellow door facing up
     dw $c866 : db $16 : db $2d : dw $000e 
     dw $0000
@@ -263,7 +264,7 @@ Room_957D_state_958A_PLM:
 org $8f823e
 ; room 95A8: [Crab Maze to Elevator]
 Room_95A8_state_95B5_PLM:
-Door_0F_Room_95A8_PLM_C866:
+%export(Door_0F_Room_95A8_PLM_C866)
     ; Door. Yellow door facing up
     dw $c866 : db $06 : db $0d : dw $000f 
     dw $0000
@@ -282,7 +283,7 @@ org $8f8250
 Room_962A_state_9637_PLM:
     ; Scroll PLM
     dw $b703 : db $08 : db $0d : dw $9658 
-Door_10_Room_962A_PLM_C86C:
+%export(Door_10_Room_962A_PLM_C86C)
     ; Door. Yellow door facing down
     dw $c86c : db $06 : db $02 : dw $0010 
     dw $0000
@@ -347,13 +348,13 @@ Room_96BA_state_96EB_PLM:
     dw $b647 : db $08 : db $88 : dw $8000 
     ; Scroll PLM
     dw $b703 : db $27 : db $81 : dw Room_96BA_PLM_scroll_data_FS
-Door_11_Room_96BA_PLM_C848:
+%export(Door_11_Room_96BA_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $9011 
-Door_12_Room_96BA_PLM_C842:
+%export(Door_12_Room_96BA_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $2e : db $86 : dw $9012 
-Door_13_Room_96BA_PLM_C860:
+%export(Door_13_Room_96BA_PLM_C860)
     ; Door. Yellow door facing right
     dw $c860 : db $01 : db $76 : dw $0013 
     dw $0000
@@ -408,16 +409,16 @@ Room_96BA_state_9705_PLM:
     dw $b703 : db $27 : db $86 : dw Room_96BA_PLM_scroll_data_FS
     ; Sets Metroids cleared states when required
     dw $db44 : db $08 : db $08 : dw $000c 
-Door_14_Room_96BA_PLM_C848:
+%export(Door_14_Room_96BA_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $9014 
-Door_15_Room_96BA_PLM_C848:
+%export(Door_15_Room_96BA_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $76 : dw $9015 
-Door_16_Room_96BA_PLM_C842:
+%export(Door_16_Room_96BA_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $2e : db $86 : dw $9016 
-Door_17_Room_96BA_PLM_C848:
+%export(Door_17_Room_96BA_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $11 : db $86 : dw $9017 
     dw $0000
@@ -430,7 +431,7 @@ Room_975C_state_976D_PLM:
     dw $b703 : db $29 : db $0f : dw Room_975C_state_9787_PLM_index_1_PLM_scroll_data 
     ; Scroll PLM
     dw $b703 : db $2a : db $09 : dw Room_975C_state_9787_PLM_index_2_PLM_scroll_data 
-Door_18_Room_975C_PLM_C842:
+%export(Door_18_Room_975C_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $2e : db $06 : dw $9018 
     dw $0000
@@ -443,10 +444,10 @@ Room_975C_state_9787_PLM:
     dw $b703 : db $29 : db $0f : dw Room_975C_state_9787_PLM_scroll_data_FS_1
     ; Scroll PLM
     dw $b703 : db $2a : db $09 : dw Room_975C_state_9787_PLM_scroll_data_FS_2
-Door_19_Room_975C_PLM_C842:
+%export(Door_19_Room_975C_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $2e : db $06 : dw $0c19 
-Door_1A_Room_975C_PLM_C848:
+%export(Door_1A_Room_975C_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $0c1a 
     ; Missile tank
@@ -461,7 +462,7 @@ Room_97B5_state_97E0_PLM:
 org $8f83fe
 ; room 9804: Bomb Torizo Room
 Room_9804_state_9835_PLM:
-Door_1B_Room_9804_PLM_BAF4:
+%export(Door_1B_Room_9804_PLM_BAF4)
     ; Bomb Torizo grey door
     dw $BAF4 : db $0e : db $06 : dw $081b
     ; Bombs, chozo orb
@@ -474,14 +475,14 @@ org $8f8412
 Room_9804_state_984F_PLM:
     ; Sets Metroids cleared states when required
     dw $db44 : db $08 : db $08 : dw $000e 
-Door_1C_Room_9804_PLM_C842:
+%export(Door_1C_Room_9804_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $0e : db $06 : dw $181c 
     dw $0000
 org $8f8420
 ; room 9879: Flyway
 Room_9879_state_98AA_PLM:
-Door_1D_Room_9879_PLM_C890:
+%export(Door_1D_Room_9879_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $01 : db $06 : dw $001d 
     dw $0000
@@ -532,7 +533,7 @@ Room_99BD_state_99CA_PLM:
     dw $eedb : db $0d : db $1b : dw $0009 
     ; Missile tank
     dw $eedb : db $02 : db $1b : dw $000a 
-Door_1E_Room_99BD_PLM_C890:
+%export(Door_1E_Room_99BD_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $01 : db $66 : dw $001e 
     dw $0000
@@ -575,22 +576,22 @@ Room_9AD9_state_9AE6_PLM:
     dw $b70b : db $36 : db $2c : dw $8000 
     ; Power bomb tank, chozo orb
     dw $ef37 : db $03 : db $7a : dw $000d 
-Door_1F_Room_9AD9_PLM_C88A:
+%export(Door_1F_Room_9AD9_PLM_C88A)
     ; Door. Red door facing left
     dw $c88a : db $3e : db $56 : dw $001f 
-Door_21_Room_9AD9_PLM_C890:
+%export(Door_21_Room_9AD9_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $31 : db $46 : dw $0021
-Door_20_Room_9AD9_PLM_C88A:
+%export(Door_20_Room_9AD9_PLM_C88A)
     ; Door. Red door facing left
     dw $c88a : db $3e : db $46 : dw $0020
-Door_23_Room_9AD9_PLM_C88A:
+%export(Door_23_Room_9AD9_PLM_C88A)
     ; Door. Red door facing left
     dw $c88a : db $3e : db $66 : dw $0023
-Door_22_Room_9AD9_PLM_C890:
+%export(Door_22_Room_9AD9_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $31 : db $66 : dw $0022
-Door_24_Room_9AD9_PLM_C848:
+%export(Door_24_Room_9AD9_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $31 : db $76 : dw $9024 
     dw $0000
@@ -607,7 +608,7 @@ Room_9B5B_state_9B68_PLM:
 org $8f84ec
 ; room 9B9D: Brinstar Pre-Map Room
 Room_9B9D_state_9BAA_PLM:
-Door_25_Room_9B9D_PLM_C848:
+%export(Door_25_Room_9B9D_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $0c25 
     dw $0000
@@ -624,7 +625,7 @@ Room_9BC8_state_9BD5_PLM:
     dw $b703 : db $2b : db $13 : dw $9c00 
     ; Scroll PLM
     dw $b703 : db $04 : db $10 : dw $9bf9 
-Door_26_Room_9BC8_PLM_C890:
+%export(Door_26_Room_9BC8_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $01 : db $16 : dw $0026 
     ; Missile tank
@@ -653,7 +654,7 @@ Room_9C35_state_9C42_PLM:
 org $8f8548
 ; room 9C5E: Green Brinstar Fireflea Room
 Room_9C5E_state_9C6B_PLM:
-Door_27_Room_9C5E_PLM_C878:
+%export(Door_27_Room_9C5E_PLM_C878)
     ; Door. Green door facing right
     dw $c878 : db $01 : db $26 : dw $0027 
     dw $0000
@@ -734,33 +735,33 @@ Room_9D19_state_9D26_PLM:
     dw $eedb : db $2d : db $67 : dw $0016 
     ; Charge beam, chozo orb
     dw $ef3f : db $2a : db $76 : dw $0017 
-Door_28_Room_9D19_PLM_C860:
+%export(Door_28_Room_9D19_PLM_C860)
     ; Door. Yellow door facing right
     dw $c860 : db $11 : db $46 : dw $0028 
-Door_29_Room_9D19_PLM_C878:
+%export(Door_29_Room_9D19_PLM_C878)
     ; Door. Green door facing right
     dw $c878 : db $11 : db $66 : dw $0029 
-Door_2A_Room_9D19_PLM_C890:
+%export(Door_2A_Room_9D19_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $11 : db $06 : dw $002a 
-Door_2B_Room_9D19_PLM_C88A:
+%export(Door_2B_Room_9D19_PLM_C88A)
     ; Door. Red door facing left
     dw $c88a : db $4e : db $96 : dw $002b 
     dw $0000
 org $8f8634
 ; room 9D9C: Spore Spawn Keyhunter Room
 Room_9D9C_state_9DA9_PLM:
-Door_2C_Room_9D9C_PLM_C842:
+%export(Door_2C_Room_9D9C_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $3e : db $06 : dw $0c2c 
-Door_2D_Room_9D9C_PLM_C854:
+%export(Door_2D_Room_9D9C_PLM_C854)
     ; Door. Grey door facing down
     dw $c854 : db $06 : db $03 : dw $0c2d 
     dw $0000
 org $8f8642
 ; room 9DC7: Spore Spawn Room
 Room_9DC7_state_9DF3_PLM:
-Door_2E_Room_9DC7_PLM_C87E:
+%export(Door_2E_Room_9DC7_PLM_C87E)
     ; Door. Green door facing up
     dw $c87e : db $06 : db $2e : dw $002e 
     dw $0000
@@ -771,7 +772,7 @@ Room_9E11_state_9E1E_PLM:
     dw $b703 : db $17 : db $0e : dw Room_9E11_state_9E1E_PLM_index_0_PLM_scroll_data 
     ; Scroll PLM
     dw $b703 : db $17 : db $0b : dw $9e49 
-Door_2F_Room_9E11_PLM_C848:
+%export(Door_2F_Room_9E11_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $0c2f 
     ; Power bomb tank
@@ -784,7 +785,7 @@ Room_9E52_state_9E5F_PLM:
     dw $c82a : db $1b : db $37 : dw $8000 
     ; Downwards gate shotblock
     dw $c836 : db $1b : db $37 : dw $0002 
-Door_30_Room_9E52_PLM_C860:
+%export(Door_30_Room_9E52_PLM_C860)
     ; Door. Yellow door facing right
     dw $c860 : db $61 : db $06 : dw $0030 
     ; Missile tank
@@ -863,7 +864,7 @@ Room_9E9F_state_9ECB_PLM:
     dw $b63b : db $28 : db $26 : dw $8000 
     ; Scroll PLM
     dw $b703 : db $27 : db $26 : dw Room_9E9F_state_9ECB_PLM_index_F_PLM_scroll_data 
-Door_31_Room_9E9F_PLM_C842:
+%export(Door_31_Room_9E9F_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $7e : db $26 : dw $0c31 
     ; Power bomb tank
@@ -888,7 +889,7 @@ Room_9F11_state_9F3D_PLM:
     dw $b63b : db $0a : db $0b : dw $8000 
     ; Rightwards extension
     dw $b63b : db $0b : db $0b : dw $8000 
-Door_32_Room_9F11_PLM_C890:
+%export(Door_32_Room_9F11_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $01 : db $06 : dw $0032 
     dw $0000
@@ -907,7 +908,7 @@ Room_9F64_state_9F90_PLM:
 org $8f87a6
 ; room 9FBA: Noob Bridge
 Room_9FBA_state_9FC7_PLM:
-Door_33_Room_9FBA_PLM_C878:
+%export(Door_33_Room_9FBA_PLM_C878)
     ; Door. Green door facing right
     dw $c878 : db $01 : db $06 : dw $0033 
     dw $0000
@@ -926,7 +927,7 @@ Room_A011_state_A01E_PLM:
     dw $b63b : db $21 : db $04 : dw $8000 
     ; Energy tank
     dw $eed7 : db $49 : db $09 : dw $001e 
-Door_34_Room_A011_PLM_C872:
+%export(Door_34_Room_A011_PLM_C872)
     ; Door. Green door facing left
     dw $c872 : db $4e : db $06 : dw $0034 
     dw $0000
@@ -945,7 +946,7 @@ Room_A07B_state_A088_PLM:
 org $8f87e0
 ; room A0A4: Spore Spawn Farming Room
 Room_A0A4_state_A0B1_PLM:
-Door_35_Room_A0A4_PLM_C872:
+%export(Door_35_Room_A0A4_PLM_C872)
     ; Door. Green door facing left
     dw $c872 : db $2e : db $06 : dw $0035 
     dw $0000
@@ -974,10 +975,10 @@ Room_A130_state_A13D_PLM:
     dw $c82a : db $0e : db $04 : dw $8000 
     ; Downwards gate shotblock
     dw $c836 : db $0e : db $04 : dw $0000 
-Door_36_Room_A130_PLM_C848:
+%export(Door_36_Room_A130_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $16 : dw $0c36 
-Door_37_Room_A130_PLM_C842:
+%export(Door_37_Room_A130_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $1e : db $16 : dw $0c37 
     dw $0000
@@ -1024,17 +1025,17 @@ Room_A253_state_A260_PLM:
     dw $b703 : db $05 : db $6a : dw Room_A253_state_A260_PLM_index_0_PLM_scroll_data 
     ; Rightwards extension
     dw $b63b : db $06 : db $6a : dw $8000 
-Door_38_Room_A253_PLM_C872:
+%export(Door_38_Room_A253_PLM_C872)
     ; Door. Green door facing left
     dw $c872 : db $0e : db $96 : dw $0038 
-Door_39_Room_A253_PLM_C85A:
+%export(Door_39_Room_A253_PLM_C85A)
     ; Door. Yellow door facing left
     dw $c85a : db $0e : db $66 : dw $0039 
     dw $0000
 org $8f886e
 ; room A293: Red Brinstar Fireflea Room
 Room_A293_state_A2A0_PLM:
-Door_3A_Room_A293_PLM_C88A:
+%export(Door_3A_Room_A293_PLM_C88A)
     ; Door. Red door facing left
     dw $c88a : db $7e : db $06 : dw $003a 
     dw $0000
@@ -1065,13 +1066,13 @@ Room_A322_state_A32F_PLM:
     dw $c82a : db $09 : db $35 : dw $8000 
     ; Downwards gate shotblock
     dw $c836 : db $09 : db $35 : dw $0008 
-Door_3B_Room_A322_PLM_C872:
+%export(Door_3B_Room_A322_PLM_C872)
     ; Door. Green door facing left
     dw $c872 : db $2e : db $36 : dw $003b 
-Door_3C_Room_A322_PLM_C85A:
+%export(Door_3C_Room_A322_PLM_C85A)
     ; Door. Yellow door facing left
     dw $c85a : db $2e : db $56 : dw $003c 
-Door_3D_Room_A322_PLM_C872:
+%export(Door_3D_Room_A322_PLM_C872)
     ; Door. Green door facing left
     dw $c872 : db $2e : db $76 : dw $003d 
     dw $0000
@@ -1084,7 +1085,7 @@ Room_A37C_state_A389_PLM:
     dw $b63b : db $18 : db $0e : dw $8000 
     ; Power bomb tank
     dw $eee3 : db $1b : db $13 : dw $0027 
-Door_3E_Room_A37C_PLM_C848:
+%export(Door_3E_Room_A37C_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $0c3e 
     dw $0000
@@ -1145,7 +1146,7 @@ Room_A408_state_A415_PLM:
     dw $b703 : db $1d : db $11 : dw $a439 
     ; Scroll PLM
     dw $b703 : db $1d : db $14 : dw $a43e 
-Door_3F_Room_A408_PLM_C878:
+%export(Door_3F_Room_A408_PLM_C878)
     ; Door. Green door facing right
     dw $c878 : db $01 : db $06 : dw $003f 
     dw $0000
@@ -1166,14 +1167,14 @@ Room_A471_state_A47E_PLM:
     dw $b703 : db $0a : db $19 : dw Room_A471_state_A47E_PLM_index_2_PLM_scroll_data 
     ; Scroll PLM
     dw $b703 : db $18 : db $19 : dw Room_A471_state_A47E_PLM_index_3_PLM_scroll_data 
-Door_40_Room_A471_PLM_C842:
+%export(Door_40_Room_A471_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $1e : db $16 : dw $0040 
     dw $0000
 org $8f8996
 ; room A4B1: Warehouse Energy Tank Room
 Room_A4B1_state_A4BE_PLM:
-Door_41_Room_A4B1_PLM_C848:
+%export(Door_41_Room_A4B1_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $0c41 
     ; Energy tank, shot block
@@ -1212,10 +1213,10 @@ Room_A4DA_state_A4E7_PLM:
 org $8f89f4
 ; room A521: Baby Kraid Room
 Room_A521_state_A54D_PLM:
-Door_42_Room_A521_PLM_C842:
+%export(Door_42_Room_A521_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $5e : db $06 : dw $0c42 
-Door_43_Room_A521_PLM_C848:
+%export(Door_43_Room_A521_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $0c43 
     dw $0000
@@ -1228,10 +1229,10 @@ Room_A56B_state_A578_PLM:
     dw $b63b : db $1b : db $12 : dw $8000 
     ; Rightwards extension
     dw $b63b : db $1c : db $12 : dw $8000 
-Door_44_Room_A56B_PLM_C878:
+%export(Door_44_Room_A56B_PLM_C878)
     ; Door. Green door facing right
     dw $c878 : db $11 : db $06 : dw $0044 
-Door_45_Room_A56B_PLM_DB4C:
+%export(Door_45_Room_A56B_PLM_DB4C)
     ; Door. Eye door, facing right
     dw $db4c : db $01 : db $16 : dw $0045 
     ; Eye door bottom, facing right
@@ -1242,10 +1243,10 @@ Door_45_Room_A56B_PLM_DB4C:
 org $8f8a2e
 ; room A59F: Kraid Room
 Room_A59F_state_A5CB_PLM:
-Door_46_Room_A59F_PLM_C848:     ; door to varia
+%export(Door_46_Room_A59F_PLM_C848)     ; door to varia
     ; Door. Grey door facing left
     dw $c848 : db $01 : db $16 : dw $0046 
-Door_47_Room_A59F_PLM_C842:     ; door to warehouse
+%export(Door_47_Room_A59F_PLM_C842)     ; door to warehouse
     ; Door. Grey door facing right
     dw $c842 : db $1e : db $16 : dw $0047 
     dw $0000
@@ -1270,7 +1271,7 @@ Room_A641_state_A64E_PLM:
 org $8f8a54
 ; room A66A: Statues Room
 Room_A66A_state_A677_PLM:
-Door_48_Room_A66A_PLM_C842:
+%export(Door_48_Room_A66A_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $0e : db $06 : dw $9448 
     dw $0000
@@ -1341,14 +1342,14 @@ org $8f8ae4
 Room_A788_state_A795_PLM:
     ; Missile tank, shot block
     dw $ef83 : db $0d : db $1c : dw $0031 
-Door_49_Room_A788_PLM_C878:
+%export(Door_49_Room_A788_PLM_C878)
     ; Door. Green door facing right
     dw $c878 : db $01 : db $16 : dw $0049 
     dw $0000
 org $8f8af2
 ; room A7B3: Cathedral Entrance
 Room_A7B3_state_A7C0_PLM:
-Door_4A_Room_A7B3_PLM_C890:
+%export(Door_4A_Room_A7B3_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $01 : db $06 : dw $004a 
     dw $0000
@@ -1357,13 +1358,13 @@ org $8f8afa
 Room_A7DE_state_A7EB_PLM:
     ; Elevator platform
     dw $b70b : db $06 : db $2c : dw $8000 
-Door_4B_Room_A7DE_PLM_C872:
+%export(Door_4B_Room_A7DE_PLM_C872)
     ; Door. Green door facing left
     dw $c872 : db $0e : db $36 : dw $004b 
-Door_4C_Room_A7DE_PLM_C85A:
+%export(Door_4C_Room_A7DE_PLM_C85A)
     ; Door. Yellow door facing left
     dw $c85a : db $0e : db $46 : dw $004c 
-Door_4D_Room_A7DE_PLM_C88A:
+%export(Door_4D_Room_A7DE_PLM_C88A)
     ; Door. Red door facing left
     dw $c88a : db $0e : db $56 : dw $004d 
     dw $0000
@@ -1430,7 +1431,7 @@ Room_A923_state_A930_PLM:
     dw $b647 : db $c2 : db $27 : dw $8000 
     ; Upwards extension
     dw $b647 : db $c2 : db $26 : dw $8000 
-Door_4E_Room_A923_PLM_C87E:
+%export(Door_4E_Room_A923_PLM_C87E)
     ; Door. Green door facing up
     dw $c87e : db $06 : db $2d : dw $004e 
     dw $0000
@@ -1469,7 +1470,7 @@ Room_AA41_state_AA4E_PLM:
     dw $b703 : db $17 : db $1c : dw Room_AA41_state_AA4E_PLM_index_2_PLM_scroll_data 
     ; Scroll PLM
     dw $b703 : db $14 : db $12 : dw Room_AA41_state_AA4E_PLM_index_3_PLM_scroll_data 
-Door_50_Room_AA41_PLM_C848:
+%export(Door_50_Room_AA41_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $0c50 
     ; Missile tank
@@ -1480,7 +1481,7 @@ Door_50_Room_AA41_PLM_C848:
 org $8f8bf4
 ; room AA82: Post Crocomire Farming Room
 Room_AA82_state_AA8F_PLM:
-Door_51_Room_AA82_PLM_C88A:
+%export(Door_51_Room_AA82_PLM_C88A)
     ; Door. Red door facing left
     dw $c88a : db $1e : db $06 : dw $0051 
     dw $0000
@@ -1499,7 +1500,7 @@ Room_AADE_state_AAEB_PLM:
 org $8f8c0c
 ; room AB07: Post Crocomire Shaft
 Room_AB07_state_AB14_PLM:
-Door_52_Room_AB07_PLM_C890:
+%export(Door_52_Room_AB07_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $01 : db $36 : dw $0052 
     dw $0000
@@ -1556,10 +1557,10 @@ Room_AC83_state_AC90_PLM:
 org $8f8c5a
 ; room ACB3: Bubble Mountain
 Room_ACB3_state_ACC0_PLM:
-Door_53_Room_ACB3_PLM_C878:
+%export(Door_53_Room_ACB3_PLM_C878)
     ; Door. Green door facing right
     dw $c878 : db $01 : db $06 : dw $0053 
-Door_54_Room_ACB3_PLM_C872:
+%export(Door_54_Room_ACB3_PLM_C872)
     ; Door. Green door facing left
     dw $c872 : db $1e : db $06 : dw $0054 
     ; Missile tank
@@ -1572,7 +1573,7 @@ Room_ACF0_state_ACFD_PLM:
     dw $b8ac : db $b1 : db $19 : dw $8000 
     ; Missile tank, shot block
     dw $ef83 : db $03 : db $13 : dw $0041 
-Door_55_Room_ACF0_PLM_C890:
+%export(Door_55_Room_ACF0_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $01 : db $16 : dw $0055 
     dw $0000
@@ -1595,7 +1596,7 @@ Room_AD5E_state_AD6B_PLM:
     dw $b647 : db $12 : db $0b : dw $8000 
     ; Scroll PLM
     dw $b703 : db $12 : db $0c : dw Room_AD5E_state_AD6B_PLM_index_4_PLM_scroll_data 
-Door_56_Room_AD5E_PLM_C890:
+%export(Door_56_Room_AD5E_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $51 : db $16 : dw $0056 
     dw $0000
@@ -1608,7 +1609,7 @@ Room_ADAD_state_ADBA_PLM:
     dw $c836 : db $25 : db $05 : dw $0002 
     ; Missile tank
     dw $eedb : db $20 : db $09 : dw $0043 
-Door_57_Room_ADAD_PLM_C890:
+%export(Door_57_Room_ADAD_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $01 : db $06 : dw $0057 
     dw $0000
@@ -1669,7 +1670,7 @@ Room_AE74_state_AE81_PLM:
     dw $c82a : db $18 : db $14 : dw $8000 
     ; Downwards gate shotblock
     dw $c836 : db $18 : db $14 : dw $0002 
-Door_58_Room_AE74_PLM_C85A:
+%export(Door_58_Room_AE74_PLM_C85A)
     ; Door. Yellow door facing left
     dw $c85a : db $0e : db $26 : dw $0058 
     dw $0000
@@ -1840,7 +1841,7 @@ Room_B283_state_B2AF_PLM:
     dw $eedb : db $12 : db $08 : dw $0046 
     ; Super missile tank, shot block
     dw $ef87 : db $0a : db $08 : dw $0047 
-Door_59_Room_B283_PLM_C848:
+%export(Door_59_Room_B283_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $16 : dw $0859 
     dw $0000
@@ -1861,17 +1862,17 @@ Room_B305_state_B312_PLM:
 org $8f8e98
 ; room B32E: Ridley's Room
 Room_B32E_state_B35A_PLM:
-Door_5A_Room_B32E_PLM_C848:
+%export(Door_5A_Room_B32E_PLM_C848)
     ; Door. Grey door facing left
     dw $c848 : db $01 : db $06 : dw $005a 
-Door_5B_Room_B32E_PLM_C842:
+%export(Door_5B_Room_B32E_PLM_C842)
     ; Door. Grey door facing right
     dw $c842 : db $0e : db $16 : dw $005b 
     dw $0000
 org $8f8ea6
 ; room B37A: Lower Norfair Farming Room
 Room_B37A_state_B387_PLM:
-Door_5C_Room_B37A_PLM_DB5A:
+%export(Door_5C_Room_B37A_PLM_DB5A)
     ; Door. Eye door, facing left
     dw $db5a : db $2e : db $06 : dw $005c 
     ; Eye door bottom, facing left
@@ -1926,7 +1927,7 @@ Room_B40A_state_B417_PLM:
     dw $b63b : db $03 : db $34 : dw $8000 
     ; Scroll PLM
     dw $b703 : db $02 : db $34 : dw Room_B40A_state_B417_PLM_index_D_PLM_scroll_data 
-Door_5D_Room_B40A_PLM_C842:
+%export(Door_5D_Room_B40A_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $3e : db $36 : dw $0c5d 
     ; Missile tank
@@ -2037,7 +2038,7 @@ Room_B585_state_B592_PLM:
     dw $b63b : db $28 : db $0b : dw $8000 
     ; Rightwards extension
     dw $b63b : db $29 : db $0b : dw $8000 
-Door_5E_Room_B585_PLM_C866:
+%export(Door_5E_Room_B585_PLM_C866)
     ; Door. Yellow door facing up
     dw $c866 : db $06 : db $4d : dw $005e 
     dw $0000
@@ -2088,7 +2089,7 @@ Room_B5D5_state_B5E2_PLM:
     dw $b647 : db $55 : db $06 : dw $8000 
     ; Upwards extension
     dw $b647 : db $55 : db $05 : dw $8000 
-Door_5F_Room_B5D5_PLM_C872:
+%export(Door_5F_Room_B5D5_PLM_C872)
     ; Door. Green door facing left
     dw $c872 : db $4e : db $26 : dw $005f 
     ; Power bomb tank
@@ -2097,7 +2098,7 @@ Door_5F_Room_B5D5_PLM_C872:
 org $8f90c8
 ; room B62B: Metal Pirates Room
 Room_B62B_state_B638_PLM:
-Door_60_Room_B62B_PLM_C842:
+%export(Door_60_Room_B62B_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $2e : db $06 : dw $0c60 
     dw $0000
@@ -5176,10 +5177,10 @@ Room_CA08_state_CA1A_PLM:
 org $8fc231
 ; room CA52: Attic
 Room_CA52_state_CA64_PLM:
-Door_80_Room_CA52_PLM_C848:
+%export(Door_80_Room_CA52_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $0080 
-Door_81_Room_CA52_PLM_C842:
+%export(Door_81_Room_CA52_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $6e : db $06 : dw $0081 
     ; Wrecked Ship attic
@@ -5204,13 +5205,13 @@ Room_CAF6_state_CB22_PLM:
     dw $b703 : db $18 : db $6d : dw Room_CAF6_state_CB22_PLM_index_4_PLM_scroll_data
     ; Missile tank
     dw $eedb : db $5d : db $59 : dw $0080 
-Door_82_Room_CAF6_PLM_C842:
+%export(Door_82_Room_CAF6_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $1e : db $66 : dw $0082 
-Door_83_Room_CAF6_PLM_C848:
+%export(Door_83_Room_CAF6_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $11 : db $46 : dw $0083 
-Door_84_Room_CAF6_PLM_C87E:
+%export(Door_84_Room_CAF6_PLM_C87E)
     ; Door. Green door facing up
     dw $c87e : db $16 : db $7d : dw $0084 
     dw $0000
@@ -5237,7 +5238,7 @@ Room_CC6F_state_CC81_PLM:
     dw $b703 : db $0f : db $0f : dw Room_CC6F_state_CC9B_PLM_index_0_PLM_scroll_data 
     ; Scroll PLM
     dw $b703 : db $08 : db $0c : dw Room_CC6F_state_CC9B_PLM_index_1_PLM_scroll_data 
-Door_85_Room_CC6F_PLM_DB4C:
+%export(Door_85_Room_CC6F_PLM_DB4C)
     ; Door. Eye door, facing right
     dw $db4c : db $01 : db $06 : dw $0085 
     ; Eye door bottom, facing right
@@ -5252,7 +5253,7 @@ Room_CCCB_state_CCDD_PLM:
 org $8fc2b3
 ; room CD13: Phantoon's Room
 Room_CD13_state_CD3F_PLM:
-Door_86_Room_CD13_PLM_C842:
+%export(Door_86_Room_CD13_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $0e : db $06 : dw $0086 
     dw $0000
@@ -5287,13 +5288,13 @@ Room_CA08_state_CA34_PLM:
 org $8fc2ff
 ; room CA52: Attic
 Room_CA52_state_CA7E_PLM:
-Door_88_Room_CA52_PLM_C848:
+%export(Door_88_Room_CA52_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $0c88 
-Door_89_Room_CA52_PLM_C842:
+%export(Door_89_Room_CA52_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $6e : db $06 : dw $0c89 
-Door_8A_Room_CA52_PLM_C84E:
+%export(Door_8A_Room_CA52_PLM_C84E)
     ; Door. Grey door facing up
     dw $c84e : db $26 : db $0e : dw $0c8a 
     ; Wrecked Ship attic
@@ -5316,7 +5317,7 @@ Room_CBD5_state_CC01_PLM:
     dw $b703 : db $07 : db $10 : dw $cc24 
     ; Rightwards extension
     dw $b63b : db $08 : db $10 : dw $8000 
-Door_8B_Room_CBD5_PLM_C88A:
+%export(Door_8B_Room_CBD5_PLM_C88A)
     ; Door. Red door facing left
     dw $c88a : db $0e : db $06 : dw $008b 
     dw $0000
@@ -5403,7 +5404,7 @@ Room_CEFB_state_CF27_PLM:
     dw $b63b : db $0a : db $1d : dw $8000 
     ; n00b tube
     dw $d70c : db $02 : db $15 : dw $0080 
-Door_8C_Room_CEFB_PLM_C890:
+%export(Door_8C_Room_CEFB_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $01 : db $26 : dw $008c 
     dw $0000
@@ -5444,7 +5445,7 @@ org $8fc42b
 Room_CFC9_state_CFD6_PLM:
     ; Scroll PLM
     dw $b703 : db $0a : db $29 : dw $d012 
-Door_8D_Room_CFC9_PLM_C890:
+%export(Door_8D_Room_CFC9_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $11 : db $76 : dw $008d 
     ; Missile tank
@@ -5471,7 +5472,7 @@ Room_D017_state_D024_PLM:
     dw $b647 : db $30 : db $28 : dw $8000 
     ; Scroll PLM
     dw $b703 : db $0f : db $29 : dw Room_D017_state_D024_PLM_index_7_PLM_scroll_data 
-Door_8E_Room_D017_PLM_C890:
+%export(Door_8E_Room_D017_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $01 : db $26 : dw $008e 
     dw $0000
@@ -5540,7 +5541,7 @@ Room_D1A3_state_D1B0_PLM:
     dw $b703 : db $18 : db $2d : dw Room_D1A3_state_D1B0_PLM_index_0_PLM_scroll_data 
     ; Rightwards extension
     dw $b63b : db $1e : db $2d : dw $8000 
-Door_8F_Room_D1A3_PLM_C878:
+%export(Door_8F_Room_D1A3_PLM_C878)
     ; Door. Green door facing right
     dw $c878 : db $01 : db $36 : dw $008f 
     dw $0000
@@ -5573,7 +5574,7 @@ Room_D21C_state_D229_PLM:
     dw $b703 : db $07 : db $0e : dw $d24d 
     ; Scroll PLM
     dw $b703 : db $07 : db $11 : dw $d24d 
-Door_90_Room_D21C_PLM_C890:
+%export(Door_90_Room_D21C_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $01 : db $16 : dw $0090 
     dw $0000
@@ -5588,7 +5589,7 @@ Room_D27E_state_D28B_PLM:
 org $8fc553
 ; room D2AA: Plasma Room
 Room_D2AA_state_D2B7_PLM:
-Door_91_Room_D2AA_PLM_C842:
+%export(Door_91_Room_D2AA_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $1e : db $06 : dw $0c91 
     ; Plasma beam, chozo orb
@@ -5603,17 +5604,17 @@ org $8fc563
 Room_D30B_state_D318_PLM:
     ; Elevator platform
     dw $b70b : db $06 : db $2c : dw $8000 
-Door_92_Room_D30B_PLM_C890:
+%export(Door_92_Room_D30B_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $01 : db $46 : dw $0092 
     dw $0000
 org $8fc571
 ; room D340: Plasma Spark Room
 Room_D340_state_D34D_PLM:
-Door_93_Room_D340_PLM_C848:
+%export(Door_93_Room_D340_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $11 : db $16 : dw $0093 
-Door_94_Room_D340_PLM_C87E:
+%export(Door_94_Room_D340_PLM_C87E)
     ; Door. Green door facing up
     dw $c87e : db $36 : db $2d : dw $0094 
     dw $0000
@@ -5668,7 +5669,7 @@ Room_D48E_state_D49B_PLM:
     dw $b63b : db $0b : db $14 : dw $8000 
     ; Rightwards extension
     dw $b63b : db $0c : db $14 : dw $8000 
-Door_95_Room_D48E_PLM_C884:
+%export(Door_95_Room_D48E_PLM_C884)
     ; Door. Green door facing down
     dw $c884 : db $06 : db $02 : dw $0095 
     dw $0000
@@ -5703,7 +5704,7 @@ Room_D57A_state_D587_PLM:
 org $8fc5fd
 ; room D5A7: Aqueduct
 Room_D5A7_state_D5B4_PLM:
-Door_96_Room_D5A7_PLM_C88A:
+%export(Door_96_Room_D5A7_PLM_C88A)
     ; Door. Red door facing left
     dw $c88a : db $5e : db $26 : dw $0096 
     ; Missile tank
@@ -5714,7 +5715,7 @@ Door_96_Room_D5A7_PLM_C88A:
 org $8fc611
 ; room D5EC: Butterfly Room
 Room_D5EC_state_D5F9_PLM:
-Door_97_Room_D5EC_PLM_C848:
+%export(Door_97_Room_D5EC_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $0097 
     dw $0000
@@ -5809,13 +5810,13 @@ Room_D6FD_state_D70A_PLM:
 org $8fc6ef
 ; room D72A: Colosseum
 Room_D72A_state_D737_PLM:
-Door_98_Room_D72A_PLM_C890:
+%export(Door_98_Room_D72A_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $01 : db $06 : dw $0098 
-Door_99_Room_D72A_PLM_C872:
+%export(Door_99_Room_D72A_PLM_C872)
     ; Door. Green door facing left
     dw $c872 : db $4e : db $26 : dw $0099 
-Door_9A_Room_D72A_PLM_C878:
+%export(Door_9A_Room_D72A_PLM_C878)
     ; Door. Green door facing right
     dw $c878 : db $01 : db $16 : dw $009a 
     dw $0000
@@ -5844,7 +5845,7 @@ Room_D78F_state_D7BB_PLM:
     dw $b63b : db $1a : db $0e : dw $8000 
     ; Rightwards extension
     dw $b63b : db $1b : db $0e : dw $8000 
-Door_9B_Room_D78F_PLM_DB5A:
+%export(Door_9B_Room_D78F_PLM_DB5A)
     ; Door. Eye door, facing left
     dw $db5a : db $1e : db $26 : dw $009b 
     ; Eye door bottom, facing left
@@ -5899,14 +5900,14 @@ Room_D913_state_D920_PLM:
     dw $b647 : db $43 : db $26 : dw $8000 
     ; Scroll PLM
     dw $b703 : db $41 : db $29 : dw Room_D913_state_D920_PLM_index_5_PLM_scroll_data 
-Door_9C_Room_D913_PLM_C842:
+%export(Door_9C_Room_D913_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $4e : db $16 : dw $009c 
     dw $0000
 org $8fc79f
 ; room D95E: Botwoon's Room
 Room_D95E_state_D98A_PLM:
-Door_9D_Room_D95E_PLM_C848:
+%export(Door_9D_Room_D95E_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $049d 
     dw $0000
@@ -5933,10 +5934,10 @@ Room_DA2B_state_DA38_PLM:
 org $8fc7bb
 ; room DA60: Draygon's Room
 Room_DA60_state_DA8C_PLM:
-Door_9E_Room_DA60_PLM_C848:
+%export(Door_9E_Room_DA60_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $009e 
-Door_9F_Room_DA60_PLM_C842:
+%export(Door_9F_Room_DA60_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $1e : db $16 : dw $009f 
     ; Dragon cannon, facing left
@@ -5959,7 +5960,7 @@ org $8fc7e9
 Room_DAE1_state_DB0D_PLM:
     ; Sets Metroids cleared states when required
     dw $db44 : db $08 : db $08 : dw $0012 
-Door_A0_Room_DAE1_PLM_C842:
+%export(Door_A0_Room_DAE1_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $5e : db $06 : dw $0ca0 
     dw $0000
@@ -5968,7 +5969,7 @@ org $8fc7f7
 Room_DB31_state_DB5D_PLM:
     ; Sets Metroids cleared states when required
     dw $db44 : db $08 : db $08 : dw $0014 
-Door_A1_Room_DB31_PLM_C848:
+%export(Door_A1_Room_DB31_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $16 : dw $0ca1 
     dw $0000
@@ -5977,7 +5978,7 @@ org $8fc805
 Room_DB7D_state_DBA9_PLM:
     ; Sets Metroids cleared states when required
     dw $db44 : db $08 : db $08 : dw $0016 
-Door_A2_Room_DB7D_PLM_C848:
+%export(Door_A2_Room_DB7D_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $0ca2 
     dw $0000
@@ -5986,7 +5987,7 @@ org $8fc813
 Room_DBCD_state_DBF9_PLM:
     ; Sets Metroids cleared states when required
     dw $db44 : db $08 : db $08 : dw $0018 
-Door_A3_Room_DBCD_PLM_C84E:
+%export(Door_A3_Room_DBCD_PLM_C84E)
     ; Door. Grey door facing up
     dw $c84e : db $06 : db $1e : dw $0ca3 
     dw $0000
@@ -5997,24 +5998,24 @@ Room_DC19_state_DC45_PLM:
 org $8fc823
 ; room DC65: Dust Torizo Room
 Room_DC65_state_DC91_PLM:
-Door_A4_Room_DC65_PLM_C848:
+%export(Door_A4_Room_DC65_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $01 : db $06 : dw $90a4 
-Door_A5_Room_DC65_PLM_C842:
+%export(Door_A5_Room_DC65_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $1e : db $06 : dw $0ca5 
     dw $0000
 org $8fc831
 ; room DCB1: Big Boy Room
 Room_DCB1_state_DCDD_PLM:
-Door_A6_Room_DCB1_PLM_C848:
+%export(Door_A6_Room_DCB1_PLM_C848)
     ; Door. Grey door facing right
     dw $c848 : db $21 : db $06 : dw $90a6 
     dw $0000
 org $8fc839
 ; room DCFF: Seaweed Room
 Room_DCFF_state_DD0C_PLM:
-Door_A7_Room_DCFF_PLM_C890:
+%export(Door_A7_Room_DCFF_PLM_C890)
     ; Door. Red door facing right
     dw $c890 : db $01 : db $16 : dw $00a7 
     dw $0000
@@ -6035,7 +6036,7 @@ Room_DD58_state_DDA2_PLM:
 org $8fc857
 ; room DDC4: Tourian Eye Door Room
 Room_DDC4_state_DDD1_PLM:
-Door_A8_Room_DDC4_PLM_DB4C:
+%export(Door_A8_Room_DDC4_PLM_DB4C)
     ; Door. Eye door, facing right
     dw $db4c : db $01 : db $06 : dw $00a8 
     ; Eye door bottom, facing right
@@ -6046,7 +6047,7 @@ Door_A8_Room_DDC4_PLM_DB4C:
 org $8fc86b
 ; room DDF3: Rinka Shaft
 Room_DDF3_state_DE00_PLM:
-Door_A9_Room_DDF3_PLM_C88A:
+%export(Door_A9_Room_DDF3_PLM_C88A)
     ; Door. Red door facing left
     dw $c88a : db $0e : db $26 : dw $00a9 
     dw $0000
@@ -6069,7 +6070,7 @@ org $8fc889
 Room_DE7A_state_DE87_PLM:
     ; Sets Metroids cleared states when required
     dw $db44 : db $08 : db $08 : dw $0002 
-Door_AA_Room_DE7A_PLM_C854:
+%export(Door_AA_Room_DE7A_PLM_C854)
     ; Door. Grey door facing down
     dw $c854 : db $06 : db $03 : dw $90aa 
     dw $0000
@@ -6078,7 +6079,7 @@ org $8fc897
 Room_DEA7_state_DEB4_PLM:
     ; Sets Metroids cleared states when required
     dw $db44 : db $08 : db $08 : dw $0004 
-Door_AB_Room_DEA7_PLM_C842:
+%export(Door_AB_Room_DEA7_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $5e : db $16 : dw $90ab 
     dw $0000
@@ -6087,7 +6088,7 @@ org $8fc8a5
 Room_DEDE_state_DEEB_PLM:
     ; Sets Metroids cleared states when required
     dw $db44 : db $08 : db $08 : dw $0006 
-Door_AC_Room_DEDE_PLM_C842:
+%export(Door_AC_Room_DEDE_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $2e : db $36 : dw $90ac 
     dw $0000
@@ -8031,13 +8032,13 @@ Room_C98E_PLM:
     dw $b703 : db $5d : db $19 : dw Room_C98E_PLM_scroll_data_FS_1
     ; Scroll PLM
     dw $b703 : db $1e : db $28 : dw Room_C98E_state_C9BA_PLM_index_3_PLM_scroll_data 
-Room_C98E_Reserve:
+%export(Room_C98E_Reserve)
     ; Reserve tank, chozo orb
     dw $ef7b : db $0c : db $0b : dw $0081 
-Room_C98E_Missile:
+%export(Room_C98E_Missile)
     ; Missile tank
     dw $eedb : db $23 : db $26 : dw $0082 
-Door_87_Room_C98E_PLM_C842:
+%export(Door_87_Room_C98E_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $5e : db $16 : dw $9087 
     ; Rightwards extension
@@ -8077,13 +8078,13 @@ Room_96BA_PLM_scroll_data_FS:
 ; room A98D: Crocomire's Room
 Room_A98D_PLM:
     ; PLM Set
-Door_4F_Room_A98D_PLM_C854:
+%export(Door_4F_Room_A98D_PLM_C854)
     ; Door. Grey door facing down
     dw $c854 : db $36 : db $02 : dw $044f 
-Energy_Tank_Crocomire:
+%export(Energy_Tank_Crocomire)
     ; Energy tank
     dw $eed7 : db $02 : db $06 : dw $0034 
-Door_EE_Room_A98D_PLM_C842:
+%export(Door_EE_Room_A98D_PLM_C842)
     ; Door. Grey door facing left
     dw $c842 : db $7e : db $06 : dw $04ee 
     dw $0000

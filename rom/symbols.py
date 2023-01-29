@@ -16,6 +16,7 @@ class Symbols(object):
         self._symbolsAbsolute = {}
         self._reSymbol = re.compile(r"^(?P<bank>[0-9a-fA-F]{2}):(?P<offset>[0-9a-fA-F]{4})\s+(?P<label>[a-zA-Z]\w*)")
         self._reSection = re.compile(r"^\[\w+\]$")
+        self._reExport = re.compile(r"^export__([A-Za-z0-9_]+)$")
 
     def loadAllSymbols(self):
         if self._patchAccess is None:
@@ -31,7 +32,6 @@ class Symbols(object):
                         self.loadJSON(fullPath)
             except FileNotFoundError:
                 self.log.debug("Symbols path "+d+" does not exist")
-        self.cleanup()
 
     # removes duplicate "imported" symbols, with prepended namespaces
     # cleans up only absolute symbols
@@ -98,19 +98,24 @@ class Symbols(object):
     def getAbsoluteSymbolName(namespace, label):
         return "%s_%s" % (namespace, label)
 
-    def writeSymbolsASM(self, asmPath, namespace=None):
+    def _filterExport(self, namespace):
+        return {self._reExport.sub(r"\1", sym):addr for sym,addr in self._symbols[namespace].items() if self._reExport.match(sym)}
+
+    def writeSymbolsASM(self, asmPath, namespace=None, export=False):
         if namespace is None:
             namespace = os.path.splitext(os.path.basename(asmPath))[0]
         with open(asmPath, "w") as asm:
             asm.write("include\n\n")
-            for label,addr in self._symbols[namespace].items():
+            syms = self._symbols[namespace] if not export else self._filterExport(namespace)
+            for label,addr in syms.items():
                 asm.write("org $%06x\n%s:\n\n" % (addr, Symbols.getAbsoluteSymbolName(namespace, label)))
 
-    def writeSymbolsJSON(self, jsonPath, namespace=None):
+    def writeSymbolsJSON(self, jsonPath, namespace=None, export=True):
         if namespace is None:
             namespace = os.path.splitext(os.path.basename(jsonPath))[0]
         with open(jsonPath, "w") as f:
-            json.dump(self._symbols[namespace], f, indent=4)
+            syms = self._symbols[namespace] if not export else self._filterExport(namespace)
+            json.dump(syms, f, indent=4)
 
     def addSymbol(self, namespace, label, addr):
         absSymName = Symbols.getAbsoluteSymbolName(namespace, label)

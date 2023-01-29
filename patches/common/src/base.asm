@@ -10,6 +10,8 @@ math pri on
 incsrc "sym/seed_display.asm"
 incsrc "sym/utils.asm"
 
+incsrc "macros.asm"
+
 ;;; -------------------------------
 ;;; CONSTANTS ;;;
 ;;; -------------------------------
@@ -305,7 +307,7 @@ org $81ef20
 ;;	- ignore backup files from different slots
 
 ;; make optional to auto backup save, set this flag to non-zero in ROM to enable the feature
-opt_backup:
+%export(opt_backup)
 	dw $0000
 
 ;;; zero flag set if we're starting a new game

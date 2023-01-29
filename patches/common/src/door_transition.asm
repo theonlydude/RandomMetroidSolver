@@ -8,6 +8,8 @@
 lorom
 arch 65816
 
+incsrc "macros.asm"
+
 ;;; Constants :
 ;;; For spark hijack
 !spark_flag            = $0741  ; free ram (used from pause screen stuff) to store global shinespark cancel flag
@@ -44,7 +46,7 @@ print "incompatible_doors:"
 print pc
 ;;; routine called from door ASM when connecting two incompatible doors
 ;;; stops samus, forces her in elevator pose and gives iframes
-incompatible_doors:
+%export(incompatible_doors)
 	;; cancel samus movement:
 	stz $0b2c ; VY subpix
 	stz $0b2e ; VY pix
@@ -82,7 +84,7 @@ print "giveiframes:"
 print pc
 ;;; gives 128 I-frames to samus
 ;;; also called from door ASM when connecting compatible doors
-giveiframes:
+%export(giveiframes)
 	lda #$0080
 	sta !iframes
 	rts
@@ -97,7 +99,7 @@ warnpc $8ff6ff
 ;;; non-0 and some garbage resulting from room tiles decompression
 ;;; of door transition is copied to BG2 tilemap in the next room.
 org $8ff7f0
-boss_exit_fix:
+%export(boss_exit_fix)
     stz $0e1e	; clear the flag to disable enemy BG2 tilemap routine
     rts
 
@@ -105,6 +107,6 @@ warnpc $8ff7ff
 
 ;;; "reserve" area for generated door asm, to mark it as used
 org $8ff800
-generated_door_asm:
+%export(generated_door_asm)
 	padbyte $ca : pad $8ffcff
-.end:
+%export(generated_door_asm_end)

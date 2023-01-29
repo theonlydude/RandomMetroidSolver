@@ -1,12 +1,1 @@
-{
-    "charge": 9500320,
-    "charge_end": 9500353,
-    "nochargesba": 9500688,
-    "pseudo": 10549248,
-    "pseudo_charge": 10549257,
-    "pseudo_end": 10549265,
-    "pseudo_nocharge": 10549262,
-    "sba_ammo": 9500712,
-    "sba_ammo_nocharge": 9500726,
-    "sba_ammo_notenough": 9500738
-}
+{}

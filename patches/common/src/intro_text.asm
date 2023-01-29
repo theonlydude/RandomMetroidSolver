@@ -3,6 +3,8 @@
 lorom
 arch 65816
 
+incsrc "macros.asm"
+
 org $8ba592
 	lda #$a66f 		; cinematic function = setup intro text page 1 (skips "the last metroid...")
 
@@ -14,7 +16,7 @@ org $8cc383
 	db $01
 	db $01
 	dw $D683
-page1_text:
+%export(page1_text)
 	;; format :
 	;;  dw frame_delay    ; vanilla is $0005
 	;;  db $xx,$yy	; letter coordinates. x++ to go right ($01-$1E, 00 and 1F possible as last resort)

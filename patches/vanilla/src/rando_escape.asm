@@ -5,6 +5,8 @@ lorom
 
 incsrc "sym/rando_escape_common.asm"
 
+incsrc "macros.asm"
+
 ;;; elevator for business center
 org rando_escape_common_elevator_business_center
     dw $D73F,$0080,$02C2,$0000,$2C00,$0000,$0001,$0018,$ffff
@@ -57,7 +59,7 @@ org $8f84b8                     ; brinstar map
 macro FlywayDoorList(n)
     ;; door to parlor
     db $FD, $92, $00, $05, $3E, $26, $03, $02, $00, $80, $A2, $B9
-.door<n>:
+%export(flyway_door_lists_door<n>)
     ;; placeholder for BT door to be filled in by randomizer
     db $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca
 endmacro

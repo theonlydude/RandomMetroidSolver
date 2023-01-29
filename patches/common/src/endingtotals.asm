@@ -4,10 +4,12 @@
 ;Allows an uneven or random number of items (up to 255 separate item pickups)
 ;Adds a single decimal point value, to give more accurate results to random item ammounts
 
-!CollectedItems  = $7ED86E
-
 lorom
 arch 65816
+
+incsrc "macros.asm"
+
+!CollectedItems  = $7ED86E
 
 org $84889F
         JSL COLLECTTANK
@@ -140,7 +142,7 @@ draw_digit_end:
         rts
 
 ;write TOTAL number if items in the game here
-total_items:
+%export(total_items)
         db 100
 
 print "End of endingtotals: ", pc

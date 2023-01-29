@@ -11,6 +11,7 @@ incsrc "sym/utils.asm"
 
 incsrc "event_list.asm"
 incsrc "constants.asm"
+incsrc "macros.asm"
 
 ;;; carry set if escape flag on, carry clear if off
 macro checkEscape()
@@ -26,8 +27,7 @@ endmacro
 
 
 org $809E21
-print "timer_value: ", pc
-timer_value:
+%export(timer_value)
 	;; dw #$1030
 	skip 2
 	jsl set_timer_value
@@ -72,11 +72,11 @@ org $83aaf6
 
 org $83ADA0
 print "flyway_door_lists : ", pc
-flyway_door_lists:              ; defined in flavor rando_escape.asm
+%export(flyway_door_lists)              ; defined in flavor rando_escape.asm
 
 org $83AE00
 print "bt_door_list : ", pc
-bt_door_list:
+%export(bt_door_list)
 	;; placeholder for inside BT door to get back from animals during escape
 	db $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca
 
@@ -279,7 +279,7 @@ warnpc $8ff02f
 
 ;; to call during BT door asm
 org $8ff030
-setup_next_escape:
+%export(setup_next_escape)
     %checkEscape() : bcc .end
     ;; current_escape = (current_escape + 1) % 4
     lda !current_escape : inc : and #$0003 : sta !current_escape
@@ -302,7 +302,7 @@ org $a1f000
 
 ;;; OPTIONS
 print "opt_remove_enemies: ", pc
-opt_remove_enemies:
+%export(opt_remove_enemies)
     dw $0001
 
 ;;; custom enemy populations for some rooms
@@ -355,7 +355,7 @@ elevator_ln_main_hall:
 ;;; Timer Values indexed by area ID for Disabled Tourian escape
 ;;; (written by randomizer)
 print "timer_values_by_area_id: ", pc
-timer_values_by_area_id:
+%export(timer_values_by_area_id)
 	skip !nb_areas*2
 
 ;;; CODE (in bank A1 free space)

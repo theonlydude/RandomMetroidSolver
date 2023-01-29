@@ -1,10 +1,1 @@
-{
-    "door_from_phantoon": 8629688,
-    "door_ptr_bt": 9433088,
-    "door_ptr_phantoon": 9433143,
-    "door_to_parlor": 8629664,
-    "door_to_phantoon": 8629676,
-    "quit": 9433139,
-    "setup_asm_bt": 9433094,
-    "setup_asm_phantoon": 9433112
-}
+{}

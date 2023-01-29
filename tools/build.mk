@@ -2,7 +2,6 @@
 VANILLA?=$(ROOT_DIR)/vanilla.sfc
 ASAR?=asar
 ASAR_OPTS?=--fix-checksum=off -wnofeature_deprecated --no-title-check
-MAKE_IPS?=$(ROOT_DIR)/tools/make_ips.sh
 DEP_TOOL?=$(ROOT_DIR)/tools/gen_asm_dep.sh
 MSL_TOOL?=$(ROOT_DIR)/tools/gen_msl.py
 SYM_TOOL?=$(ROOT_DIR)/tools/gen_syms.py

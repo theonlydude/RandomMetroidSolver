@@ -23,6 +23,7 @@ lorom
 arch 65816
 
 incsrc "constants.asm"
+incsrc "macros.asm"
 incsrc "event_list.asm"
 
 !game_state = $0998		; used to check pause/unpause
@@ -529,7 +530,7 @@ incsrc "locs_by_areas.asm"
 ;;; hi byte: location ID as in item bit array (same IDs used in locs_by_areas)
 ;;; lo byte: item/location index in scav_names list for HUD display
 ;;; #$ffff=scav list terminator
-scav_order:
+%export(scav_order)
 	fillbyte $ff : fill 38	; (17 max scav locs+"HUNT OVER"+terminator)*2
 
 ;;; ROM option for auto escape trigger when objectives are completed (see objectives.asm)

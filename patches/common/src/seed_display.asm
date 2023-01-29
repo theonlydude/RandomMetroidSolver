@@ -3,8 +3,10 @@
 arch 65816
 lorom
 
+incsrc "macros.asm"
+
 org $dfff00
-seed_value:
+%export(seed_value)
 
 ;; Inject new menu graphic data after decompression
 org $82ecbb
@@ -168,7 +170,7 @@ print "After seed display : ", pc
 org $82fb6c
 ;; place holder for VARIA seed type
 print "InfoStr : ", pc
-InfoStr:
+%export(InfoStr)
     db 0
 
 print "82 end : ", pc

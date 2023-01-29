@@ -15,6 +15,7 @@ arch 65816
 
 incsrc "event_list.asm"
 incsrc "constants.asm"
+incsrc "macros.asm"
 
 incsrc "sym/utils.asm"
 incsrc "sym/rando_escape_common.asm"
@@ -43,11 +44,11 @@ incsrc "sym/disable_screen_shake.asm"
 ;;; ROM OPTIONS
 org !disabled_tourian_escape_flag
 ;;; if non-zero trigger escape as soon as objectives are completed
-escape_option:
+%export(escape_option)
 	db $00
 ;;; low bit: with nothing objective, trigger escape only in crateria
 ;;; high bit: play sfx on objective completion (don't use for vanilla objectives)
-objectives_options_mask:
+%export(objectives_options_mask)
 	db $01
 
 ;;; Change G4 SFX priority to 1, because we play it on obj completion (when non-vanilla objectives)
@@ -100,7 +101,7 @@ print "A1 start: ", pc
 ;;; checks for objectives periodically
 ;;; seed objectives checker functions pointers, max 5, list ends with $0000
 print " --- objectives checker functions: ", pc, " ---"
-objective_funcs:
+%export(objective_funcs)
         dw kraid_is_dead
         dw phantoon_is_dead
         dw draygon_is_dead
@@ -170,7 +171,7 @@ check_objectives_events:
 .end:
 	rts
 
-objective_events:
+%export(objective_events)
 %objectivesCompletedEventArray()
 
 ;;; copy-pasted from a PLM instruction
@@ -240,7 +241,7 @@ boss_drops:
 ;;; objectives checker functions, set carry if objective is completed
 ;;; helper macro to autodef simple event checker functions
 macro eventChecker(func_name, event)
-<func_name>:
+%export(<func_name>)
 	lda <event> : jsl !check_event
 	rts
 endmacro
@@ -250,7 +251,7 @@ endmacro
 %eventChecker(draygon_is_dead, !draygon_event)
 %eventChecker(ridley_is_dead, !ridley_event)
 
-all_g4_dead:
+%export(all_g4_dead)
         jsr kraid_is_dead
         bcc .no
         jsr phantoon_is_dead
@@ -268,7 +269,7 @@ all_g4_dead:
 %eventChecker(crocomire_is_dead, !croc_event)
 %eventChecker(golden_torizo_is_dead, !GT_event)
 
-all_mini_bosses_dead:
+%export(all_mini_bosses_dead)
         jsr spore_spawn_is_dead
         bcc .no
         jsr botwoon_is_dead
@@ -302,7 +303,7 @@ nb_killed_bosses:
         jsr ridley_is_dead
         bcc .end
         inx
-.end
+.end:
         rts
 
 nb_killed_minibosses:
@@ -324,11 +325,11 @@ nb_killed_minibosses:
         jsr golden_torizo_is_dead
         bcc .end
         inx
-.end
+.end:
         rts
 
 macro nbBossChecker(n, bossType)
-<bossType>_<n>_killed:
+%export(<bossType>_<n>_killed)
 	phx
         jsr nb_killed_<bossType>es
 	;; cpx set carry if greater or equal
@@ -346,11 +347,11 @@ endmacro
 %nbBossChecker(3,miniboss)
 
 macro itemPercentChecker(percent)
-collect_<percent>_items:
+%export(collect_<percent>_items)
 	lda !CollectedItems
         cmp.l .pct              ; set carry when A is >= value
         rts
-.pct:
+%export(collect_<percent>_items_pct)
         dw <percent>
 endmacro
 
@@ -359,7 +360,7 @@ endmacro
 %itemPercentChecker(75)
 %itemPercentChecker(100)
 
-nothing_objective:
+%export(nothing_objective)
 	;; if option enabled, complete objective only when in
 	;; crateria/blue brin, in case we trigger escape immediately
 	;; and we have custom start location.
@@ -383,11 +384,11 @@ nothing_objective:
 %eventChecker(orange_geemer, !orange_geemer_event)
 %eventChecker(shak_dead, !shak_dead_event)
 
-all_items_mask:
+%export(all_items_mask)
 	dw $f32f
-all_beams_mask:
+%export(all_beams_mask)
 	dw $100f
-all_major_items:
+%export(all_major_items)
 	lda $09A4 : cmp.l all_items_mask : bne .not
 	lda $09A8 : cmp.l all_beams_mask : bne .not
 	sec
@@ -408,7 +409,7 @@ all_major_items:
 %eventChecker(west_maridia_cleared, !west_maridia_cleared_event)
 %eventChecker(east_maridia_cleared, !east_maridia_cleared_event)
 
-all_chozo_robots:
+%export(all_chozo_robots)
 	jsr golden_torizo_is_dead : bcc .end
 	lda !BT_event : jsl !check_event : bcc .end
 	lda !bowling_chozo_event : jsl !check_event : bcc .end
@@ -417,7 +418,7 @@ all_chozo_robots:
 	rts
 
 macro defineMapTile(tile, addr, mask)
-map_tile_<tile>:
+%export(map_tile_<tile>)
 .addr:
         dw <addr>
 .mask:
@@ -433,7 +434,7 @@ endmacro
 %defineMapTile(etecoons, $0828, $0010)
 %defineMapTile(dachora, $082c, $0020)
 
-visited_animals:
+%export(visited_animals)
         phx
 	lda !area_index : cmp #!brinstar : bne .not
         %checkMapTile(etecoons) : beq .not
@@ -1055,6 +1056,7 @@ func_obj2map_fading_out:
 ;;; sprites for completed objectives.
 ;;; an oam entry is made of five bytes: (s000000 xxxxxxxxx) (yyyyyyyy) (YXppPPPt tttttttt)
 print " *** completed spritemaps: ", pc
+%export(completed_spritemaps_start)
 first_spritemap:
         dw $0001, $0000 : db $00 : dw $3E8C
 second_spritemap:
@@ -1110,7 +1112,7 @@ org $B695E0
 
 ;;; blank objective screen from B6F200 to B6FA00
 org $B6F200
-objectivesText:
+%export(objectivesText)
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000

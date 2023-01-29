@@ -6,6 +6,8 @@ lorom
 incsrc "sym/rando_escape_common.asm"
 incsrc "sym/bank_8f.asm"
 
+incsrc "macros.asm"
+
 ;;; elevator for business center
 org rando_escape_common_elevator_business_center
     dw $D73F,$0080,$02C2,$0000,$2C00,$0000,$0001,$0018,$ffff
@@ -65,7 +67,7 @@ macro FlywayDoorList(n)
     db $02   ; Y screen
     dw $8000 ; Distance from door to spawn Samus
     dw $B9A2 ; Custom door ASM to execute (bank $8F)
-.door<n>:
+%export(flyway_door_lists_door<n>)
     ;; placeholder for BT door to be filled in by randomizer
     db $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca
 endmacro

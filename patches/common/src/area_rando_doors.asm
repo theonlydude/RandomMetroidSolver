@@ -7,6 +7,8 @@
 lorom
 arch 65816
 
+incsrc "macros.asm"
+
 ;;; For refill
 !samus_health          = $09c2
 !samus_max_health      = $09c4
@@ -23,7 +25,7 @@ arch 65816
 
 org $8ff700
 ;;; "ship refill" for tourian elevator
-full_refill:
+%export(full_refill)
 	lda !samus_max_health
 	sta !samus_health
 	lda !samus_max_reserve

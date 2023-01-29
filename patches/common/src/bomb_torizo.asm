@@ -5,6 +5,8 @@
 lorom
 arch 65816
 
+incsrc "macros.asm"
+
 !CurrentRoom = $7e079b
 !BTRoom      = #$9804
 !BTRoomFlag  = $7ed86c		; some free RAM for the flag
@@ -41,7 +43,7 @@ warnpc $84f860
 org $84ba6f
 bt_grey_door_instr:
     jsr btcheck
-.nops:
+%export(bt_grey_door_instr_nops)
     nop : nop : nop
     bne $03	                ; orig: BEQ $03    ; return if no bombs
 
@@ -49,6 +51,6 @@ bt_grey_door_instr:
 org $84d33b
 bt_instr:
     jsr btcheck
-.nops:
+%export(bt_instr_nops)
     nop : nop : nop
     bne $13			; orig: BEQ $13    ; return if no bombs

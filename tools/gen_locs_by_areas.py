@@ -16,10 +16,10 @@ def getLocIdsByArea(area):
     return [loc.Id for loc in locationsDict.values() if loc.Id is not None and not loc.isBoss() and loc.GraphArea == area] + [0xff]
 
 with open(asm, "w") as src:
-    src.write("include\n\nlocs_by_areas:\n\tdw "+','.join(["locs_"+area for area in areas]))
-    src.write("\nlocs_start:")
+    src.write("include\n\n%export(locs_by_areas)\n\tdw "+','.join(["locs_"+area for area in areas]))
+    src.write("\n%export(locs_start)")
     for area in areas:
-        src.write("\nlocs_"+area+":\n")
+        src.write("\n%export(locs_"+area+")\n")
         locIds = getLocIdsByArea(area)
         src.write("\tdb "+','.join(["$%02x" % locId for locId in locIds]))
-    src.write("\nlocs_end:\n")
+    src.write("\n%export(locs_end)\n")

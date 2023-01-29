@@ -7,6 +7,8 @@ lorom
 incsrc "sym/utils.asm"
 incsrc "sym/base.asm"
 
+incsrc "macros.asm"
+
 ;;; -------------------------------
 ;;; CONSTANTS ;;;
 ;;; -------------------------------
@@ -1030,7 +1032,7 @@ credits:
     dw "     RANDOMIZER PARAMETERS      " ;; 145
     !big
     ;; item distribution data start
-.items_distrib:
+%export(credits_items_distrib)
     dw " ITEM LOCATIONS              XX " ;; 146
     dw " item locations............. xx " ;; 147
     dw "  MAJ XX EN XX AMMO XX BLANK XX " ;; 148
@@ -1064,7 +1066,7 @@ credits:
     !big
     dw "        PJBOY    KEJARDON       " ;; 166
     dw "        pjboy    kejardon       " ;; 167
-.items_distrib_continued:
+%export(credits_items_distrib_continued)
 ;; stats continued
     dw " AVAILABLE AMMO XXX% ENERGY XXX%" ;; 168
     dw " available ammo xxx> energy xxx>" ;; 169
@@ -1161,7 +1163,7 @@ org $ded200
 itemlocations:
     !pink
     dw "         ITEM LOCATIONS         " ;; 640
-.start:
+%export(itemlocations_start)
 ;; pad with spaces to mark space as used + to apply the patch on a vanilla ROM
 !counter = 0
 while !counter < 1239

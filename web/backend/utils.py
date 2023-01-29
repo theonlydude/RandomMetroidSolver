@@ -15,11 +15,16 @@ from gluon.http import HTTP
 
 localIpsDir = 'varia_repository'
 
-def loadPresetsList(cache):
+def loadPresetsList(cache, emptyFirst=False):
     # use a cache to avoid reading the files everytime
     presets = cache.ram('skillPresets', lambda:dict(), time_expire=None)
-    if presets:
-        return presets.values()
+    if presets and not emptyFirst:
+        return (presets['stdPresets'], presets['tourPresets'], presets['comPresets'])
+
+    if emptyFirst:
+        # we empty the cache by calling it with None as 2nd param
+        cache.ram('skillPresets', None)
+        presets = cache.ram('skillPresets', lambda:dict(), time_expire=None)
 
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['newbie', 'casual', 'regular', 'veteran', 'expert', 'master']
@@ -30,7 +35,7 @@ def loadPresetsList(cache):
     presets['tourPresets'] = tourPresets
     presets['comPresets'] = comPresets
 
-    return presets.values()
+    return (presets['stdPresets'], presets['tourPresets'], presets['comPresets'])
 
 def loadRandoPresetsList(cache, filter=False):
     presets = cache.ram('randoPresets', lambda:dict(), time_expire=None)

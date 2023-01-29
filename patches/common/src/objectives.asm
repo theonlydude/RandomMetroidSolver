@@ -419,9 +419,9 @@ endmacro
 
 macro defineMapTile(tile, addr, mask)
 %export(map_tile_<tile>)
-.addr:
+%export(map_tile_<tile>_addr)
         dw <addr>
-.mask:
+%export(map_tile_<tile>_mask)
         dw <mask>
 endmacro
 

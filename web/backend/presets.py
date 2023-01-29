@@ -451,10 +451,8 @@ class Presets(object):
                         db.addPresetAction(preset, 'create')
                     self.updatePresetsSession()
 
-                    # add new preset in cache
-                    (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
-                    comPresets.append(preset)
-                    comPresets.sort(key=lambda v: v.upper())
+                    # reload cache
+                    loadPresetsList(self.cache, emptyFirst=True)
 
                     msg = "Preset {} created".format(preset)
                     return json.dumps(msg)

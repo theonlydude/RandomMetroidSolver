@@ -304,11 +304,11 @@ Room_96BA_state_96EB_PLM:
     ; Scroll PLM
     dw $b703 : db $12 : db $05 : dw Room_96BA_state_9705_PLM_index_0_PLM_scroll_data 
     ; Scroll PLM
-    dw $b703 : db $02 : db $05 : dw Room_96BA_state_9705_PLM_scroll_data_FS
+    dw $b703 : db $02 : db $05 : dw Room_96BA_state_9705_PLM_scroll_data_FS_upper_door
     ; Scroll PLM
     dw $b703 : db $12 : db $76 : dw Room_96BA_state_9705_PLM_index_2_PLM_scroll_data 
     ; Scroll PLM
-    dw $b703 : db $02 : db $76 : dw Room_96BA_state_9705_PLM_scroll_data_FS
+    dw $b703 : db $02 : db $76 : dw Room_96BA_state_9705_PLM_scroll_data_FS_lower_door
     ; Rightwards extension
     dw $b63b : db $1d : db $85 : dw $8000 
     ; Rightwards extension
@@ -7989,9 +7989,12 @@ Room_FD40_Scroll:
      db $01,$ff,$ff,$ff
 
 ; room 96BA: Climb
-Room_96BA_state_9705_PLM_scroll_data_FS:
+Room_96BA_state_9705_PLM_scroll_data_FS_upper_door:
     ; Scroll data
-    db $00,$02,$15,$02,$80
+    db $00,$02,$80
+Room_96BA_state_9705_PLM_scroll_data_FS_lower_door:
+    ; Scroll data
+    db $15,$02,$80
 ; room 975C: Pit Room [Old Mother Brain Room]
 Room_975C_state_9787_PLM_scroll_data_FS_1:
     ; Scroll data

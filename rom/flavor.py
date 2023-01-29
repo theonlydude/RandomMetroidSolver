@@ -3,10 +3,6 @@ from patches.patchaccess import PatchAccess
 from rom.symbols import Symbols
 from rom.addresses import Addresses
 from utils.doorsmanager import DoorsManager
-from multiprocessing.managers import BaseManager
-
-class SymbolsManager(BaseManager):
-    pass
 
 class RomFlavor(object):
     flavor = None

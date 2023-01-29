@@ -295,7 +295,7 @@ if __name__ == "__main__":
 
     # logic can be set in rando preset
     Logic.factory(args.logic)
-    RomFlavor.factory(remote=(args.output is not None)) # web mode has symbols server
+    RomFlavor.factory()
 
     # if no seed given, choose one
     if args.seed == 0:

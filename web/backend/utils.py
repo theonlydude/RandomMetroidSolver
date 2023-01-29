@@ -70,7 +70,7 @@ def getAddressesToRead(cache):
 
     for logic in ['vanilla', 'mirror']:
         Logic.factory(logic)
-        RomFlavor.factory(remote=True)
+        RomFlavor.factory()
 
         # locations
         for loc in Logic.locations:

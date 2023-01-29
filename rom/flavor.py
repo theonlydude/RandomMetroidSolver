@@ -14,23 +14,12 @@ class RomFlavor(object):
     patchAccess = None
     manager = None
 
-    ports = {
-        "vanilla": 25001,
-        "mirror": 25002
-    }
-
     @staticmethod
-    def factory(remote=False):
+    def factory():
         RomFlavor.flavor = Logic.implementation
         RomFlavor.patchAccess = PatchAccess()
-        if not remote:
-            RomFlavor.symbols = Symbols(RomFlavor.patchAccess)
-            RomFlavor.symbols.loadAllSymbols()
-        else:
-            RomFlavor.manager = SymbolsManager(address=("localhost", RomFlavor.ports[RomFlavor.flavor]), authkey=b'password')
-            RomFlavor.manager.register("Symbols")
-            RomFlavor.manager.connect()
-            RomFlavor.symbols = RomFlavor.manager.Symbols()
+        RomFlavor.symbols = Symbols(RomFlavor.patchAccess)
+        RomFlavor.symbols.loadAllSymbols()
         Addresses.updateFromSymbols(RomFlavor.symbols)
         DoorsManager.setDoorsAddress(RomFlavor.symbols)
         Logic.postSymbolsLoad()

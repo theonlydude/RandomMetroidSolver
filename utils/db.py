@@ -1,13 +1,15 @@
 # check if a stats db is available
 try:
-    # python3.7 -m pip install pip
-    # pip3.7 install mysql-connector-python --user
+    # python3 -m pip install pip
+    # pip3 install mysql-connector-python --user
     import mysql.connector
+    from mysql.connector.errors import PoolError
     from db_params import dbParams
     dbAvailable = True
 except:
     dbAvailable = False
 
+import time
 from utils.parameters import medium, hard, harder, hardcore, mania
 from utils.utils import removeChars
 
@@ -17,11 +19,27 @@ class DB:
         if self.dbAvailable == False:
             return
 
-        try:
-            self.conn = mysql.connector.connect(pool_name="varia", **dbParams)
-            self.cursor = self.conn.cursor()
-        except Exception as e:
-            print("DB.__init__::error connect/create cursor: {}".format(e))
+        # if the pool is full try 10 times during 1s
+        for _ in range(10):
+            connOk = True
+            try:
+                self.conn = mysql.connector.connect(pool_name="varia", **dbParams)
+                self.cursor = self.conn.cursor()
+            except PoolError as e:
+                connOk = False
+            except Exception as e:
+                print("DB.__init__::error connect/create cursor: {}".format(e))
+                self.dbAvailable = False
+                return
+
+            if connOk:
+                break
+
+            # wait 1/10s
+            time.sleep(0.1)
+
+        if not connOk:
+            print("DB.__init__::error can't get connection from pool")
             self.dbAvailable = False
 
     def close(self):

@@ -105,13 +105,10 @@ class Symbols(object):
         if namespace is None:
             namespace = os.path.splitext(os.path.basename(asmPath))[0]
         syms = self._symbols[namespace] if not export else self._filterExport(namespace)
-        if not syms:
-            return False
         with open(asmPath, "w") as asm:
             asm.write("include\n\n")
             for label,addr in syms.items():
                 asm.write("org $%06x\n%s:\n\n" % (addr, Symbols.getAbsoluteSymbolName(namespace, label)))
-        return True
 
     def writeSymbolsJSON(self, jsonPath, namespace=None, export=True):
         if namespace is None:

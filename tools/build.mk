@@ -41,12 +41,12 @@ export SYM_ASM_FILES
 export ASAR
 
 # rules
-all:	$(IPS_FILES) $(SYM_ASM_FILES) $(SYM_JSON_FILES) $(MESEN_DEBUG_FILE_TARGET)
+all:	$(IPS_FILES) $(SYM_ASM_FILES) $(MESEN_DEBUG_FILE_TARGET)
 
 clean:
 	@echo "Cleaning ..."
 	@rm -rf $(BUILD_DIR)
-	@rm -f $(IPS_FILES) $(SYM_ASM_FILES) $(MESEN_DEBUG_FILE)
+	@rm -f $(IPS_FILES) $(SYM_ASM_FILES) $(MESEN_DEBUG_FILE) $(SYM_JSON_FILES)
 
 help:
 	@echo "- all (default) : builds IPS patches, symbols and debug files"
@@ -71,10 +71,6 @@ $(BUILD_DIR)/%.sym:	$(IPS_DIR)/%.ips
 $(SRC_SYM_DIR)/%.asm:	$(BUILD_DIR)/%.sym
 	@echo "Exporting ASM and JSON symbols from $< ..."
 	@$(SYM_TOOL) $(patsubst $(BUILD_DIR)/%.sym,$(SYM_DIR)/%.json,$<) $@ $<
-
-# same as above, JSON are generated at the same time as asm
-$(SYM_DIR)/%.json:	$(SRC_SYM_DIR)/%.asm
-	@true
 
 $(MESEN_DEBUG_FILE_TARGET):	$(SYM_WLA_FILES)
 	@echo "Updating debug file $@ ..."

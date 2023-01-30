@@ -63,6 +63,7 @@ $(IPS_DIR)/%.ips:	$(SRC_DIR)/%.asm
 	@echo "Building $@ ..."
 	@$(ASAR) $(ASAR_OPTS) --ips $@ --symbols-path=$(patsubst $(SRC_DIR)/%.asm,$(BUILD_DIR)/%.sym,$<) $< > $(BUILD_DIR)/$$(basename $<).log
 	@-rm -f $(patsubst $(SRC_DIR)/%.asm,$(SRC_DIR)/%.sfc,$<)
+	@[ ! -f $@ ] && touch $@ || true
 
 # already generated along with ips, just add this rule to enforce dependency order
 $(BUILD_DIR)/%.sym:	$(IPS_DIR)/%.ips

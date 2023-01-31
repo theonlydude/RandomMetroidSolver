@@ -125,8 +125,12 @@ async function save(lock) {
     }
 
     // check if escape rando is on that tourian transition is set, display an alert otherwise
-    if(escapeRando == true && (tourian != "Disabled" && !("tourianEscapeRoom4TopRight" in lines)) ) {
-        alert("Tourian escape transition is not set, you have to set it before playing or the game will crash during the escape sequence");
+    const { lines, tourian, escapeRando } = $tracker.json_data
+    if (escapeRando && tourian !== "Disabled" && !lines.tourianEscapeRoom4TopRight) {
+        const confirmed = confirm("Tourian escape transition is not set, you have to set it before playing or the game will crash during the escape sequence. Would you like to continue?");
+      if (!confirmed) {
+          return
+      }
     }
 
     var dataDict = {action: "save", scope: "common", lock: g_lock};

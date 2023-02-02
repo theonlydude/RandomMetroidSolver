@@ -614,7 +614,10 @@ class LevelData(object):
         print("len rawData: {}".format(len(rawData)))
         return rawData
 
-    def write(self, vanillaSize):
+    def write(self, vanillaSize=None):
+        if vanillaSize is None:
+            vanillaSize = self.compressedSize
+
         # rebuild raw data
         rawData = self.unload()
         print("rawData len: {}".format(len(rawData)))

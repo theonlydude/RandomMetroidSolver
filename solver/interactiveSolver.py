@@ -782,6 +782,30 @@ class InteractiveSolver(CommonSolver):
 
     eventsBitMasks = {}
 
+    inventoryBitMasks = {
+        'Varia': {"byteIndex": 0x0, "bitMask": 0x1},
+        'SpringBall': {"byteIndex": 0x0, "bitMask": 0x2},
+        'Morph': {"byteIndex": 0x0, "bitMask": 0x4},
+        'ScrewAttack': {"byteIndex": 0x0, "bitMask": 0x8},
+        'Gravity': {"byteIndex": 0x0, "bitMask": 0x20},
+        'HiJump': {"byteIndex": 0x1, "bitMask": 0x1},
+        'SpaceJump': {"byteIndex": 0x1, "bitMask": 0x2 },
+        'Bomb': {"byteIndex": 0x1, "bitMask": 0x10},
+        'SpeedBooster': {"byteIndex": 0x1, "bitMask": 0x20},
+        'Grapple': {"byteIndex": 0x1, "bitMask": 0x40},
+        'XRayScope': {"byteIndex": 0x1, "bitMask": 0x80},
+        'Wave': {"byteIndex": 0x4, "bitMask": 0x1},
+        'Ice': {"byteIndex": 0x4, "bitMask": 0x2},
+        'Spazer': {"byteIndex": 0x4, "bitMask": 0x4},
+        'Plasma': {"byteIndex": 0x4, "bitMask": 0x8},
+        'Charge': {"byteIndex": 0x5, "bitMask": 0x10},
+        'ETank': {"byteIndex": 0x6},
+        'Missile': {"byteIndex": 0xA},
+        'Super': {"byteIndex": 0xE},
+        'PowerBomb': {"byteIndex": 0x12},
+        'Reserve': {"byteIndex": 0x16},
+    }
+
     areaAccessPoints = {
         "vanilla": {
             "Lower Mushrooms Left": {"byteIndex": 36, "bitMask": 1, "room": 0x9969, "area": "Crateria"},
@@ -1254,7 +1278,8 @@ class InteractiveSolver(CommonSolver):
             "samus": '4',
             "items": '5',
             "boss": '6',
-            "events": '7'
+            "events": '7',
+            "inventory": '8',
         }
 
         currentState = dumpData["currentState"]
@@ -1293,6 +1318,44 @@ class InteractiveSolver(CommonSolver):
                     else:
                         if loc in self.visitedLocations:
                             self.removeItemAt(self.locNameInternal2Web(loc.Name))
+
+            # Inventory
+            elif dataType == dataEnum["inventory"]:
+                # Clear collected items if loading from game state.
+                self.collectedItems.clear()
+                self.smbm.resetItems()
+
+                for item, itemData in self.inventoryBitMasks.items():
+                    if item not in Conf.itemsForbidden:
+                        byteIndex = itemData["byteIndex"]
+                        loc = offset + byteIndex
+                        # For two byte values, read little endian value.
+                        if item in ("ETank", "Reserve", "Missile", "Super", "PowerBomb"):
+                            val = currentState[loc] + (currentState[loc + 1] * 256)
+                        else:
+                            val = currentState[loc]
+
+                        if item == "ETank":
+                            tanks = int((val - 99) / 100)
+                            for _ in range(tanks):
+                                self.collectedItems.append(item)
+                                self.smbm.addItem(item)
+                        elif item == "Reserve":
+                            tanks = int(val / 100)
+                            for _ in range(tanks):
+                                self.collectedItems.append(item)
+                                self.smbm.addItem(item)
+                        elif item in ("Missile", "Super", "PowerBomb"):
+                            packs = int(val / 5)
+                            for _ in range(packs):
+                                self.collectedItems.append(item)
+                                self.smbm.addItem(item)
+                        else:
+                            bitMask = itemData["bitMask"]
+                            if val & bitMask != 0:
+                                self.collectedItems.append(item)
+                                self.smbm.addItem(item)
+
             elif dataType == dataEnum["map"]:
                 if self.areaRando or self.bossRando or self.escapeRando:
                     availAPs = set()

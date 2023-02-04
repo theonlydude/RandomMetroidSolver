@@ -4,8 +4,6 @@
 
 <title>Super Metroid VARIA Randomizer Tracker</title>
 
-<script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
-
 <style>
 {{include 'solver_web/t_style.html'}}
 
@@ -351,6 +349,8 @@ var itemsData = undefined;
 var bossData = undefined;
 var mapData = undefined;
 var samusData = undefined;
+let eventsData = undefined;
+let inventoryData = undefined;
 
 // different data that we ask
 var dataEnum = {
@@ -360,7 +360,8 @@ var dataEnum = {
     "samus": 4,
     "items": 5,
     "boss": 6,
-    "events": 7
+    "events": 7,
+    "inventory": 8
 }
 // 1. state:
 // $0998: Game state
@@ -411,6 +412,10 @@ var dataEnum = {
 
 // 7. events
 // $7E:D820..39
+
+// 8. Inventory
+// $7#:09A4..AA
+// $7#:09C4..D6
 var dataToAsk = {
     1: [{"address": "F50998", "size": 0x2},
         {"address": "F505D1", "size": 0x2},
@@ -426,7 +431,9 @@ var dataToAsk = {
         {"address": "F5079B", "size": 0x0a}],
     5: [{"address": "F5D870", "size": 0x20}],
     6: [{"address": "F5D828", "size": 0x8}],
-    7: [{"address": "F5D820", "size": 0x20}]
+    7: [{"address": "F5D820", "size": 0x20}],
+    8: [{"address": "F509A4", "size": 0x6},
+        {"address": "F509C4", "size": 0x12}]
 }
 // use an array listing the data to retrieve, the chain is init at auto tracker start
 var dataToAskChain = [];
@@ -485,6 +492,7 @@ var bossBitMasks = {{response.write(bossBitMasks, escape=False)}};
 var nothingScreens = {{response.write(nothingScreens, escape=False)}};
 var doorsScreen = {{response.write(doorsScreen, escape=False)}};
 var eventsBitMasks = {};
+let inventoryBitMasks = {{response.write(inventoryBitMasks, escape=False)}};
 
 // in js dict keys are strings
 var itemsBitMasks = {
@@ -1571,6 +1579,14 @@ function handleData(data) {
             eventsData = concatArrays(dataEnum.events);
 
             askNextData();
+        } else if (dataToAskChain[dataToAskStep] === dataEnum.inventory) {
+            let duration = Date.now() - transfertStart;
+            console.log(`\u2705 Inventory data received in ${duration}ms`);
+
+            // concatenate all arrays
+            inventoryData = concatArrays(dataEnum.inventory);
+
+            askNextData();
         }
     }
 }
@@ -1682,6 +1698,11 @@ function initDataChain() {
     stateDataOffsets[dataEnum.events] = curOffset;
     curOffset += getDataSize(dataEnum.events);
 
+    // ask for inventory
+    dataToAskChain.push(dataEnum.inventory);
+    stateDataOffsets[dataEnum.inventory] = curOffset;
+    curOffset += getDataSize(dataEnum.inventory);
+
     // ask optional map data
     if(area || boss || doorsRando || hasNothing || escapeRando) {
         dataToAskChain.push(dataEnum.map);
@@ -1756,6 +1777,19 @@ function computeStateBitMasks() {
             var curOffset = stateDataOffsets[dataEnum.events];
             for(var event in eventsBitMasks) {
                 stateBitMasks[curOffset + eventsBitMasks[event]["byteIndex"]] |= eventsBitMasks[event]["bitMask"];
+            }
+        } else if(dataToAskChain[i] === dataEnum.inventory) {
+            let curOffset = stateDataOffsets[dataEnum.inventory];
+            for(let item in inventoryBitMasks) {
+                // If no bit mask defined, this is a two byte quantity (missiles, energy, etc.)
+                if (inventoryBitMasks[item]["bitMask"]) {
+                    stateBitMasks[curOffset + inventoryBitMasks[item]["byteIndex"]] |= inventoryBitMasks[item]["bitMask"];
+                }
+                else {
+                    let bitOffset = curOffset + inventoryBitMasks[item]["byteIndex"];
+                    stateBitMasks[bitOffset] |= 0xFF;
+                    stateBitMasks[bitOffset + 1] |= 0xFF;
+                }
             }
         }
     }
@@ -1872,6 +1906,11 @@ function populateCurrentState() {
             var curOffset = stateDataOffsets[dataEnum.events];
             for(var i=0; i<eventsData.length; i++) {
                 currentState[curOffset + i] = eventsData[i] & stateBitMasks[curOffset + i];
+            }
+        } else if(dataToAskChain[j] === dataEnum.inventory) {
+            let curOffset = stateDataOffsets[dataEnum.inventory];
+            for(let i=0; i<inventoryData.length; i++) {
+                currentState[curOffset + i] = inventoryData[i] & stateBitMasks[curOffset + i];
             }
         }
     }

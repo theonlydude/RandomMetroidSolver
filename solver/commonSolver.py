@@ -284,11 +284,8 @@ class CommonSolver(object):
         # item
         item = loc.itemName
 
-        if self.mode in ['seedless', 'race', 'debug']:
-            # in seedless remove the first nothing found as collectedItems is not ordered
+        if item in self.collectedItems:
             self.collectedItems.remove(item)
-        else:
-            self.collectedItems.pop(locIndex)
 
         # if multiple majors in plando mode, remove it from smbm only when it's the last occurence of it
         if self.smbm.isCountItem(item):

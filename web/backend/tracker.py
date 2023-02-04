@@ -66,6 +66,7 @@ class Tracker(object):
                     nothingScreens=InteractiveSolver.nothingScreens,
                     doorsScreen=InteractiveSolver.doorsScreen,
                     bossBitMasks=InteractiveSolver.bossBitMasks,
+                    inventoryBitMasks=InteractiveSolver.inventoryBitMasks,
                     apsGraphArea=apsGraphArea)
 
     def trackerWebService(self):

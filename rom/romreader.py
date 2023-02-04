@@ -302,7 +302,7 @@ class RomReader:
                 loc.itemName = self.items[item]["name"]
             except:
                 # race seeds
-                loc.itemName = "SpringBall"
+                loc.itemName = "NoEnergy"
                 item = '0x0'
 
         return (majorsSplit if majorsSplit != 'FullWithHUD' else 'Full', majorsSplit)

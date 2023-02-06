@@ -2,6 +2,7 @@ import os, importlib
 from logic.logic import Logic
 from patches.common.patches import patches, additional_PLMs
 from utils.parameters import appDir
+from rom.addresses import Addresses
 
 class PatchAccess(object):
     def __init__(self, baseDir = None):
@@ -45,3 +46,14 @@ class PatchAccess(object):
 
     def getAdditionalPLMs(self):
         return self.additionalPLMs
+
+    def postSymbolsLoad(self):
+        # allow patches to have a label instead of an address
+        replacements = {}
+        for name, patches in self.dictPatches.items():
+            for symbol, values in patches.items():
+                if type(symbol) == str:
+                    replacements[name] = [symbol, Addresses.getOne(symbol)]
+        for name, replace in replacements.items():
+            self.dictPatches[name][replace[1]] = self.dictPatches[name][replace[0]]
+            del self.dictPatches[name][replace[0]]

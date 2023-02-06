@@ -19,3 +19,4 @@ class RomFlavor(object):
         Addresses.updateFromSymbols(RomFlavor.symbols)
         DoorsManager.setDoorsAddress(RomFlavor.symbols)
         Logic.postSymbolsLoad()
+        RomFlavor.patchAccess.postSymbolsLoad()

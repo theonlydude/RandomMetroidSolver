@@ -3,9 +3,8 @@
 arch 65816
 lorom
 
-;;; add include for changing scroll set by doors
+;;; add include for changing scroll set by doors, already includes macros.asm
 incsrc "bank_8f_area_door_scroll.asm"
-incsrc "macros.asm"
 
 org $8f8000
 ; room 91F8: Landing Site
@@ -8090,4 +8089,4 @@ Room_A98D_PLM:
     dw $0000
 
 End_FreeSpace_8F:
-warnpc $8FFE71
+warnpc $8FFE6f

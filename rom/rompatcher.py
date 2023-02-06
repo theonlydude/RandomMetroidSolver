@@ -1032,8 +1032,12 @@ class RomPatcher:
             asmPatch = []
             # call original door asm ptr if needed
             if conn['doorAsmPtr'] != 0x0000:
-                # endian convert
-                doorAsmPtr = getWordBytes(conn['doorAsmPtr'])
+                # may be a symbol
+                if type(conn['doorAsmPtr']) is str:
+                    doorAsmPtr = symbolWordBytes(conn['doorAsmPtr'])
+                else:
+                    # endian convert
+                    doorAsmPtr = getWordBytes(conn['doorAsmPtr'])
                 asmPatch += [ 0x20 ] + doorAsmPtr         # JSR $doorAsmPtr
             # special ASM hook point for VARIA needs when taking the door (used for animals)
             if 'exitAsm' in conn:

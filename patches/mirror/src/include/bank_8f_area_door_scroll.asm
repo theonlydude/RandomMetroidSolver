@@ -4,6 +4,7 @@ arch 65816
 lorom
 
 ;;; update scroll set by door ptr
+incsrc "macros.asm"
 
 ;;; Red (00): prevents the camera from being able to see certain screens, either permanently, or until a scroll PLM or a door's ASM pointer changes it to blue or green.
 ;;; Blue (01): Samus can explore these freely. Blue scrolls display all but the very top and bottom two rows of the current screen, which is ideal for hallways.
@@ -64,7 +65,7 @@ org $8fbdaf
 ;;; for incompatible transition leading to WS basement phantoon out door
 ;;; add in freespace
 org $8FFE71
-PhantoonRoomOut_DoorAsmPtr:
+%export(PhantoonRoomOut_DoorAsmPtr)
         PHP
         SEP #$20
         LDA #$01

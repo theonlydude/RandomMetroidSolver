@@ -53,6 +53,6 @@ for rg in sorted(ips_ranges, key=lambda r:r['range'].start):
     lstop = last['range'].stop
 
 for k,v in overlaps.items():
-    pc_addresses = ["(0x%x, 0x%x)" % a for a in v]
-    snes_addresses = ["($%06x, $%06x)" % (pc_to_snes(a[0]), pc_to_snes(a[1])) for a in v]
+    pc_addresses = ["(0x%x, 0x%x)" % (a[1], a[0]) for a in v]
+    snes_addresses = ["($%06x, $%06x)" % (pc_to_snes(a[1]), pc_to_snes(a[0])) for a in v]
     print("%s and %s overlap!\n\tPC:\t%s\n\tSNES:\t%s" % (k[0], k[1], pc_addresses, snes_addresses))

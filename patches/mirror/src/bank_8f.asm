@@ -1556,12 +1556,12 @@ Room_AC83_state_AC90_PLM:
 org $8f8c5a
 ; room ACB3: Bubble Mountain
 Room_ACB3_state_ACC0_PLM:
-%export(Door_53_Room_ACB3_PLM_C878)
+%export(Door_54_Room_ACB3_PLM_C878)
     ; Door. Green door facing right
-    dw $c878 : db $01 : db $06 : dw $0053 
-%export(Door_54_Room_ACB3_PLM_C872)
+    dw $c878 : db $01 : db $06 : dw $0054
+%export(Door_53_Room_ACB3_PLM_C872)
     ; Door. Green door facing left
-    dw $c872 : db $1e : db $06 : dw $0054 
+    dw $c872 : db $1e : db $06 : dw $0053
     ; Missile tank
     dw $eedb : db $0b : db $3c : dw $0040 
     dw $0000

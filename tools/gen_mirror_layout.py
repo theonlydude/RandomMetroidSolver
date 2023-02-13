@@ -67,8 +67,7 @@ patches = [
     ('mama_save', 0x8fD055, None),
     ('firefleas_shot_block', 0x8fB55A, None),
     # fast tourian
-    # can't generate it as room is changed beyond mirroring
-    #('open_zebetites', 0x8fdd58, None),
+    ('open_zebetites', 0x8fdd58, None),
     # escape
     ('rando_escape_ws_fix', 0x8fCAF6, 0x8FCB22),
 ]
@@ -80,31 +79,29 @@ for (patch, roomAddr, stateAddr) in patches:
     copyfile(mirrorRomName, patchRomName)
     patchRom = RealROM(patchRomName)
 
-    roomAddr = snes_to_pc(roomAddr)
+    print("load vanilla room")
     vRoom = Room(vanillaRom, roomAddr)
+    print("load VARIA room")
     vaRoom = Room(variaRom, roomAddr)
+    print("load mirror room")
     mRoom = Room(patchRom, roomAddr)
-    if stateAddr is not None:
-        vLevelDataAddr = vRoom.roomStates[stateAddr].levelDataPtr
-        vaLevelDataAddr = vaRoom.roomStates[stateAddr].levelDataPtr
-        mLevelDataAddr = mRoom.roomStates[stateAddr].levelDataPtr
-    else:
-        vLevelDataAddr = vRoom.defaultRoomState.levelDataPtr
-        vaLevelDataAddr = vaRoom.defaultRoomState.levelDataPtr
-        mLevelDataAddr = mRoom.defaultRoomState.levelDataPtr
-    screenSize = (vRoom.width, vRoom.height)
-    print("")
-    print("load vanilla data")
-    vLevelData = LevelData(vanillaRom, snes_to_pc(vLevelDataAddr), screenSize)
-    print("")
-    print("load varia data")
-    vaLevelData = LevelData(variaRom, snes_to_pc(vLevelDataAddr), screenSize)
-    print("")
-    print("load {} data".format(mirrorRomName))
-    mLevelData = LevelData(patchRom, snes_to_pc(mLevelDataAddr), screenSize)
 
     print("")
+    if stateAddr is not None:
+        vLevelData = vRoom.levelData[vRoom.roomStates[stateAddr].levelDataPtr]
+    else:
+        vLevelData = vRoom.levelData[vRoom.defaultRoomState.levelDataPtr]
+    if stateAddr is not None:
+        vaLevelData = vaRoom.levelData[vaRoom.roomStates[stateAddr].levelDataPtr]
+    else:
+        vaLevelData = vaRoom.levelData[vaRoom.defaultRoomState.levelDataPtr]
+    if stateAddr is not None:
+        mLevelData = mRoom.levelData[mRoom.roomStates[stateAddr].levelDataPtr]
+    else:
+        mLevelData = mRoom.levelData[mRoom.defaultRoomState.levelDataPtr]
+
     print("update tiles")
+    screenSize = (vRoom.width, vRoom.height)
     tiles = vLevelData.getModifiedTiles(vaLevelData)
     for (sx, sy, tx, ty) in tiles:
         print("update tile at screen ({}, {}) pos ({}, {})".format(sx, sy, tx, ty))

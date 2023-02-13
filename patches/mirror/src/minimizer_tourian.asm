@@ -17,20 +17,20 @@ org $84d9be
 ;;; overwrite setup/main asm ptrs for all room states
 ;;; (not sure if it's necessary, at least one state seems
 ;;;  useless)
-org bank_8f_Room_FD40_state_FD56_Header+18
+org bank_8f_Room_DD58_state_DD6E_Header+18
 	dw minimizer_tourian_common_mb_room_main
 
-org bank_8f_Room_FD40_state_FD56_Header+24
+org bank_8f_Room_DD58_state_DD6E_Header+24
 	dw minimizer_tourian_common_mb_room_setup
 
-org bank_8f_Room_FD40_state_FD70_Header+18
+org bank_8f_Room_DD58_state_DD88_Header+18
 	dw minimizer_tourian_common_mb_room_main
 
-org bank_8f_Room_FD40_state_FD70_Header+24
+org bank_8f_Room_DD58_state_DD88_Header+24
 	dw minimizer_tourian_common_mb_room_setup
 
-org bank_8f_Room_FD40_state_FD8A_Header+18
+org bank_8f_Room_DD58_state_DDA2_Header+18
 	dw minimizer_tourian_common_mb_room_main
 
-org bank_8f_Room_FD40_state_FD8A_Header+24
+org bank_8f_Room_DD58_state_DDA2_Header+24
 	dw minimizer_tourian_common_mb_room_setup

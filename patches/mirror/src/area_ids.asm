@@ -647,10 +647,13 @@ org $8fe0f1
 	db $00
 org $8fe0d7
 	db $00
-;;; new MB room
-org bank_8f_Room_FD40_state_FD56_Header+16
+;;; MB room
+org bank_8f_Room_DD58_state_DD6E_Header+16
+	print "pc1: ", pc
         db $0b
-org bank_8f_Room_FD40_state_FD70_Header+16
+org bank_8f_Room_DD58_state_DD88_Header+16
+	print "pc1: ", pc
         db $0b
-org bank_8f_Room_FD40_state_FD8A_Header+16
+org bank_8f_Room_DD58_state_DDA2_Header+16
+	print "pc1: ", pc
         db $0b

@@ -167,3 +167,33 @@ ips="${1}"
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xBFD414 0xC0860A replace
 # Extra bank in pc addresses (samus new tiles from sprite something)
 ~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xe08000 0xffffff replace
+
+# regular MB room layout
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xCDDEDE 0xCDE20e replace
+
+# MB stuff now in mother_brain.ips
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0x86be89 0x86bea1 replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa2b75b 0xa2b79d replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa6fc1b 0xa6fc23 replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa988ad 0xa988ae replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa98c8b 0xa98c8c replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa98c93 0xa98c94 replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa98ca2 0xa98ca3 replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa98caa 0xa98cab replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa98cb9 0xa98cba replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa98cc1 0xa98cc2 replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa98cd0 0xa98cd1 replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa98cd8 0xa98cd9 replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa98ce7 0xa98ce8 replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa98cef 0xa98cf0 replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa98cfe 0xa98cff replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa98d06 0xa98d07 replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xa9b337 0xa9b338 replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xade3c2 0xade3c3 replace
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xade3ca 0xade3cb replace
+
+# mb room enemy population
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xA1E321 0xA1E383 replace
+
+# new mb room layout to remove
+~/RandomMetroidSolver/tools/strip_ips.py ${ips} 0xCE8000 0xce8108 replace

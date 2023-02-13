@@ -1,4 +1,10 @@
 
+;;; Credits:
+;; Devaliah
+;; Sirkura
+;; Quote
+;; Phosphodile
+
 arch 65816
 lorom
 

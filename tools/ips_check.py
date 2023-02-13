@@ -31,15 +31,14 @@ def loadPatchPy():
             addRanges(name, IPS_Patch(patch))
 
 for patch in sys.argv[2:]:
+    if os.path.getsize(patch) == 0:
+        continue
     baseName = os.path.basename(patch)
     if baseName == "patches.py":
         if patchAccess is None:
             loadPatchPy()
-    elif patchNameFilter is None or not re.match(patchNameFilter, baseName):
-        try:
-            addRanges(baseName, IPS_Patch.load(patch))
-        except Exception:
-            pass
+    elif patchNameFilter is None or not re.match(patchNameFilter, baseName) :
+        addRanges(baseName, IPS_Patch.load(patch))
 
 overlaps = {}
 last, lstop = None, -1

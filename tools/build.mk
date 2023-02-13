@@ -18,13 +18,16 @@ SRC_SYM_DIR=$(INCLUDE_DIR)/sym
 DEBUG_DIR=$(ROOT_DIR)/patches/debug
 DEP_DIR=$(BUILD_DIR)
 
-DUMMY:=$(shell mkdir -p $(BUILD_DIR) $(SRC_SYM_DIR) $(SYM_DIR))
-
 INCLUDE_DIRS+=$(INCLUDE_DIR)
 
 # files
 SRC_FILES:=$(wildcard $(SRC_DIR)/*.asm)
 IPS_FILES:=$(patsubst $(SRC_DIR)/%.asm,$(IPS_DIR)/%.ips,$(SRC_FILES))
+# remove IPS files if we don't have a build dir (heuristic to detect a fresh clone
+# where make has never been ran but we have the built IPS files)
+DUMMY:=$(shell [ ! -d $(BUILD_DIR) ] && rm -f $(IPS_FILES))
+# build dirs where we'll generate files if necessary
+DUMMY:=$(shell mkdir -p $(BUILD_DIR) $(SRC_SYM_DIR) $(SYM_DIR))
 SYM_WLA_FILES:=$(patsubst $(SRC_DIR)/%.asm,$(BUILD_DIR)/%.sym,$(SRC_FILES))
 SYM_JSON_FILES:=$(patsubst $(SRC_DIR)/%.asm,$(SYM_DIR)/%.json,$(SRC_FILES))
 SYM_ASM_FILES:=$(patsubst $(SRC_DIR)/%.asm,$(SRC_SYM_DIR)/%.asm,$(SRC_FILES))

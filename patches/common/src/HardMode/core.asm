@@ -112,18 +112,18 @@ HardMode:		;//checks for hard mode ($0E bytes)
 org $A0A45E		;//suit damage division ($19 bytes)
 	STA $12
 	JSR HardMode
-;//COMMENT REST OF ROUTINE FOR VANILLA DIVISOR
-	BIT #$0001			;//checks for varia, branches if NOT equipped
-	BEQ +		
-	LSR $12				;//varia equipped, divide damage by 2
-+
-	BIT #$0020			;//checks for gravity, branches if NOT equipped
-	BEQ ++		
-	LSR $12				;//gravity equipped, divide damage by 2
-++
-	LDA $12				;//loads the resulting damage to A and returns
-	RTL				;//return
-	NOP : NOP : NOP			;//nice
+;; ;//COMMENT REST OF ROUTINE FOR VANILLA DIVISOR
+;; 	BIT #$0001			;//checks for varia, branches if NOT equipped
+;; 	BEQ +
+;; 	LSR $12				;//varia equipped, divide damage by 2
+;; +
+;; 	BIT #$0020			;//checks for gravity, branches if NOT equipped
+;; 	BEQ ++		
+;; 	LSR $12				;//gravity equipped, divide damage by 2
+;; ++
+;; 	LDA $12				;//loads the resulting damage to A and returns
+;; 	RTL				;//return
+;; 	NOP : NOP : NOP			;//nice
 ;--------------------------------------------------------------
 
 ;==============================================================

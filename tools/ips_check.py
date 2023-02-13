@@ -36,7 +36,10 @@ for patch in sys.argv[2:]:
         if patchAccess is None:
             loadPatchPy()
     elif patchNameFilter is None or not re.match(patchNameFilter, baseName):
-        addRanges(baseName, IPS_Patch.load(patch))
+        try:
+            addRanges(baseName, IPS_Patch.load(patch))
+        except Exception:
+            pass
 
 overlaps = {}
 last, lstop = None, -1

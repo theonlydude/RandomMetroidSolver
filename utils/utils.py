@@ -271,7 +271,8 @@ def getDefaultMultiValues():
         'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive'],
         'areaRandomization': ['off', 'full', 'light'],
         'objective': Objectives.getAllGoals(removeNothing=True),
-        'tourian': ['Vanilla', 'Fast', 'Disabled']
+        'tourian': ['Vanilla', 'Fast', 'Disabled'],
+        'logic': ['vanilla', 'mirror']
     }
     return defaultMultiValues
 

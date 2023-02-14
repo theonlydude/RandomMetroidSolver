@@ -32,6 +32,7 @@ objectives = defaultMultiValues['objective']
 tourians = defaultMultiValues['tourian']
 areaRandomizations = defaultMultiValues['areaRandomization']
 startLocations = defaultMultiValues['startLocation']
+logics = defaultMultiValues['logic']
 
 def randomMulti(args, param, defaultMultiValues):
     value = args[param]
@@ -39,13 +40,11 @@ def randomMulti(args, param, defaultMultiValues):
     isRandom = False
     if value == "random":
         isRandom = True
+        choices = defaultMultiValues
         if args[param+"List"] is not None:
             # use provided list
-            choices = args[param+"List"].split(',')
-            value = random.choice(choices)
-        else:
-            # use default list
-            value = random.choice(defaultMultiValues)
+            choices = [choice for choice in args[param+"List"].split(',') if choice in defaultMultiValues]
+        value = random.choice(choices)
 
     return (isRandom, value)
 
@@ -225,7 +224,9 @@ if __name__ == "__main__":
                         nargs='?', const=True, default=False)
     parser.add_argument('--allowGreyDoors', help='add grey color in doors colors pool', dest='allowGreyDoors',
                         nargs='?', const=True, default=False)
-    parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="vanilla", choices=["vanilla", "rotation", "mirror"])
+    parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', const=True, default="vanilla", choices=logics+['random'])
+    parser.add_argument('--logicList', help="list to choose from when randomizing logic",
+                        dest='logicList', nargs='?', default=None)
     parser.add_argument('--hud', help='Enable VARIA hud', dest='hud',
                         nargs='?', const=True, default=False)
     parser.add_argument('--music',
@@ -293,6 +294,17 @@ if __name__ == "__main__":
 
     logger.debug("preset: {}".format(preset))
 
+    # handle random parameters with dynamic pool of values
+    (_, progSpeed) = randomMulti(args.__dict__, "progressionSpeed", speeds)
+    (_, progDiff) = randomMulti(args.__dict__, "progressionDifficulty", progDiffs)
+    (majorsSplitRandom, args.majorsSplit) = randomMulti(args.__dict__, "majorsSplit", majorsSplits)
+    (_, gravityBehaviour) = randomMulti(args.__dict__, "gravityBehaviour", gravityBehaviours)
+    (_, args.tourian) = randomMulti(args.__dict__, "tourian", tourians)
+    (areaRandom, args.areaRandomization) = randomMulti(args.__dict__, "areaRandomization", areaRandomizations)
+    (logicRandom, args.logic) = randomMulti(args.__dict__, "logic", logics)
+    areaRandomization = args.areaRandomization in ['light', 'full']
+    lightArea = args.areaRandomization == 'light'
+
     # logic can be set in rando preset
     Logic.factory(args.logic)
     RomFlavor.factory()
@@ -329,15 +341,6 @@ if __name__ == "__main__":
         threshold = mania - epsilon
     maxDifficulty = threshold
     logger.debug("maxDifficulty: {}".format(maxDifficulty))
-    # handle random parameters with dynamic pool of values
-    (_, progSpeed) = randomMulti(args.__dict__, "progressionSpeed", speeds)
-    (_, progDiff) = randomMulti(args.__dict__, "progressionDifficulty", progDiffs)
-    (majorsSplitRandom, args.majorsSplit) = randomMulti(args.__dict__, "majorsSplit", majorsSplits)
-    (_, gravityBehaviour) = randomMulti(args.__dict__, "gravityBehaviour", gravityBehaviours)
-    (_, args.tourian) = randomMulti(args.__dict__, "tourian", tourians)
-    (areaRandom, args.areaRandomization) = randomMulti(args.__dict__, "areaRandomization", areaRandomizations)
-    areaRandomization = args.areaRandomization in ['light', 'full']
-    lightArea = args.areaRandomization == 'light'
 
     if args.minDifficulty:
         minDifficulty = text2diff[args.minDifficulty]
@@ -476,9 +479,16 @@ if __name__ == "__main__":
         seedCode = 'D'+seedCode
     if areaRandomization == True and areaRandom == False:
         seedCode = 'A'+seedCode
-
+    logicCode = ""
+    if logicRandom == False:
+        if args.logic == "vanilla":
+            logicCode = "Randomizer_"
+        elif args.logic == "mirror":
+            logicCode = "Mirror_"
+        else:
+            raise ValueError("Invalid logic name "+args.logic)
     # output ROM name
-    fileName = "VARIA_Randomizer_{}{}_{}".format(seedCode, seed, preset)
+    fileName = "VARIA_{}{}{}_{}".format(logicCode, seedCode, seed, preset)
     if args.progressionSpeed != "random":
         fileName += "_" + args.progressionSpeed
     seedName = fileName

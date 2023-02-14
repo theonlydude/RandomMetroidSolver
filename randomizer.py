@@ -484,7 +484,7 @@ if __name__ == "__main__":
         if args.logic == "vanilla":
             logicCode = "Randomizer_"
         elif args.logic == "mirror":
-            logicCode = "Mirror_"
+            logicCode = "Mirrortroid_"
         else:
             raise ValueError("Invalid logic name "+args.logic)
     # output ROM name

@@ -58,6 +58,11 @@ ${CWD}/tools/genExtStats.sh ${ROM} 900 Season_Races Season_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 SGLive2022_Game_1 Season_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 SGLive2022_Game_2 Season_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 SGLive2022_Game_3 Season_Races
+${CWD}/tools/genExtStats.sh ${ROM} 900 RLS4W2.json Season_Races
+${CWD}/tools/genExtStats.sh ${ROM} 900 RLS4W3.json Season_Races
+${CWD}/tools/genExtStats.sh ${ROM} 900 RLS4W4.json Season_Races
+${CWD}/tools/genExtStats.sh ${ROM} 900 RLS4W5.json Season_Races
+${CWD}/tools/genExtStats.sh ${ROM} 900 RLS4W7.json Season_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 SMRAT2021 SMRAT2021
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Torneio_SGPT3_stage1 Torneio_SGPT3
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Torneio_SGPT3_stage2 Torneio_SGPT3

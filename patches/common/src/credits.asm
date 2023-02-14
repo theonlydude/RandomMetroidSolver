@@ -677,6 +677,12 @@ script:
     dw !draw, !row*138
     dw !draw, !blank
     dw !draw, !blank
+    dw !draw, !row*238 ;; ROTATED SUPER METROID HACKS
+    dw !draw, !blank
+    dw !draw, !row*239 ;; BUGGMANN
+    dw !draw, !row*240
+    dw !draw, !blank
+    dw !draw, !blank
     dw !draw, !row*139 ;; SPECIAL THANKS TO
     dw !draw, !blank
     dw !draw, !row*140 ;; SMILEY SUKU
@@ -916,16 +922,10 @@ script:
     dw !draw, !blank
     dw !draw, !blank
     dw !draw, !blank
-    dw !draw, !blank
-    dw !draw, !blank
-    dw !draw, !blank
 
     dw !draw, !row*217 ;; Final Time
     dw !draw, !row*218
 
-    dw !draw, !blank
-    dw !draw, !blank
-    dw !draw, !blank
     dw !draw, !blank
     dw !draw, !blank
     dw !draw, !blank
@@ -1153,6 +1153,12 @@ credits:
     dw " east maridia       }} }} }} }} " ;; 235
     dw " TOURIAN            00'00'00^00 " ;; 236
     dw " tourian            }} }} }} }} " ;; 237
+    ;; credits once again
+    !purple
+    dw "  ROTATED SUPER METROID HACKS   " ;; 238
+    !big
+    dw "           BUGGMANN             " ;; 239
+    dw "           buggmann             " ;; 240
 
     dw $0000                              ;; End of credits tilemap
 

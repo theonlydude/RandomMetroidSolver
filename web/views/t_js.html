@@ -1292,10 +1292,6 @@ function setGuessedPreset(romName){
 function guessVARIAPreset(filename) {
   var re = /VARIA_[A-Za-z_]+[A]?[D]?[B]?[F]?[M]?[Z]?[S]?X\d+_(\w+)/;
   var match = filename.match(re);
-  if(match == null) {
-    re = /VARIA_Plandomizer_[A]?[B]?FX\d+_(\w+)/;
-    match = filename.match(re);
-  }
   if(match != null) {
     var data = match[1];
     console.log(data);

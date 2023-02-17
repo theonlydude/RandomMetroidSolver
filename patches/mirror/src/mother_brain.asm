@@ -565,16 +565,15 @@ handle_samus_X_displacement:
         bra .end
 
 .phase_1
+	pla
 	;; first phase, push samus to the left
 	stz $0A54
-	pla
-	;; negate X displacement
-        EOR #$FFFF
-        INC A
+	;; force a big knockback to avoid samus being stucked into mother brain
+        lda #$FFF0
 
 .end
         ;; go back to vanilla
 	sta $0B58
         jmp $B4C6
 
-warnpc $A9C303
+warnpc $A9C302

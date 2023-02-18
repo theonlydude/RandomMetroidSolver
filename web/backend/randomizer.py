@@ -216,8 +216,8 @@ class Randomizer(object):
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
-                  'areaRandomization']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'logic']
+                  'areaRandomization', 'logic']
+        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize
@@ -401,15 +401,14 @@ class Randomizer(object):
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
-                  'areaRandomization']
-        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective', 'logic']
+                  'areaRandomization', 'logic']
+        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective']
         validateWebServiceParams(self.request, switchs, quantities, multis, others)
 
         if self.session.randomizer is None:
             self.session.randomizer = {}
 
         self.session.randomizer['complexity'] = self.vars.complexity
-        self.session.randomizer['logic'] = self.vars.logic
         self.session.randomizer['preset'] = self.vars.preset
         # after selecting a rando preset and changing an option users can end up
         # generating a seed with the rando preset selected but not with all

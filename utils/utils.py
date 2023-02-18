@@ -431,7 +431,7 @@ def loadRandoPreset(randoPreset, args):
         args.minimizerN = randoParams["minimizerQty"]
 
     defaultMultiValues = getDefaultMultiValues()
-    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "areaRandomization"]
+    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "areaRandomization", "logic"]
     for multiElem in multiElems:
         if multiElem+'MultiSelect' in randoParams:
             setattr(args, multiElem+'List', ','.join(randoParams[multiElem+'MultiSelect']))
@@ -445,6 +445,7 @@ def getRandomizerDefaultParameters():
     defaultMultiValues = getDefaultMultiValues()
 
     defaultParams['logic'] = "vanilla"
+    defaultParams['logicMultiSelect'] = defaultMultiValues['logic']
     defaultParams['complexity'] = "simple"
     defaultParams['preset'] = 'regular'
     defaultParams['randoPreset'] = ""

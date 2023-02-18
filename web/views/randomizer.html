@@ -303,6 +303,8 @@ $(document).ready(function(){
 var chosenElements = ["preset", "startLocationMultiSelect", "majorsSplitMultiSelect", "progressionSpeedMultiSelect", "progressionDifficultyMultiSelect", "morphPlacementMultiSelect", "energyQtyMultiSelect", "gravityBehaviourMultiSelect", "tourianMultiSelect", "areaRandomizationMultiSelect"];
 var currentMultiValues = {{response.write(currentMultiValues, escape=False)}};
 var defaultMultiValues = {{response.write(defaultMultiValues, escape=False)}};
+// not a regular multi select
+var logicMultiSelect = {{response.write(currentMultiValues["logic"], escape=False)}};
 
 function resizeChosen() {
    $(".chosen-container").each(function() {
@@ -316,6 +318,33 @@ function isElemRandom(elem) {
 
 function isElemIdRandom(elemId) {
     return isElemRandom(document.getElementById(elemId+"Random"));
+}
+
+function randomizeTarget(evt, elemId) {
+    var e = document.getElementById(elemId);
+
+    var isActive;
+    if(isElemRandom(evt.currentTarget)) {
+        evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
+        isActive = false;
+
+        // store multiple selected values for next time the dice is pressed
+        logicMultiSelect = $('#'+elemId).data('picker').selected_values();
+        // go back to single selection
+        $('#'+elemId).prop('multiple', false);
+    } else {
+        evt.currentTarget.className += " active";
+        isActive = true;
+        $('#'+elemId).prop('multiple', true);
+
+        // set selected values, default to all selected
+        $('#'+elemId).val(logicMultiSelect);
+    }
+
+    // recreate select with updated multiple
+    $('#'+elemId).data('picker').destroy();
+    var params = {show_label: true};
+    $('#'+elemId).imagepicker(params);
 }
 
 function randomize(evt, elemId) {
@@ -852,6 +881,16 @@ function setRandom() {
           pass
         pass
       pass
+
+    for id in ["logic"]:
+      if id in session.randomizer and session.randomizer[id] == "random":
+        response.write("  document.getElementById(\"{}Random\").click();\n".format(id), escape=False)
+        if "{}MultiSelect".format(id) in session.randomizer:
+          response.write("  $(\"#{}MultiSelect\").val({});\n".format(id, session.randomizer["{}MultiSelect".format(id)]), escape=False)
+          pass
+        pass
+      pass
+
 }}
 }
 
@@ -946,9 +985,10 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["logic", "seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
     var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian", "objective", "areaRandomization"];
+    var imgPickers = ["logic"];
 
     for(var i=0; i<elems.length; i++) {
         // if element is disabled set it to off
@@ -974,6 +1014,17 @@ function AjaxPresetCallCompleted(data) {
          dataDict[elemId] = "random";
          multiElemId = elemId+"MultiSelect";
          dataDict[multiElemId] = $("#"+multiElemId).val().join();
+       } else {
+         dataDict[elemId] = document.getElementById(elemId).value;
+       }
+    }
+    for(var i=0; i<imgPickers.length; i++) {
+       // check if random dice is checked
+       var elemId = imgPickers[i];
+       if(isElemIdRandom(elemId)) {
+         dataDict[elemId] = "random";
+         multiElemId = elemId+"MultiSelect";
+           dataDict[multiElemId] = $("#"+elemId).data('picker').selected_values().join();
        } else {
          dataDict[elemId] = document.getElementById(elemId).value;
        }
@@ -1152,9 +1203,10 @@ function AjaxRandomizerCallCompleted(data) {
     document.getElementById("submitBtn").data = "Randomize";
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["logic", "seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "tourian", "areaRandomization"];
+    var imgPickers = ["logic"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -1174,6 +1226,17 @@ function AjaxRandomizerCallCompleted(data) {
          dataDict[elemId] = "random";
          multiElemId = elemId+"MultiSelect";
          dataDict[multiElemId] = $("#"+multiElemId).val().join();
+       } else {
+         dataDict[elemId] = document.getElementById(elemId).value;
+       }
+    }
+    for(var i=0; i<imgPickers.length; i++) {
+       // check if random dice is checked
+       var elemId = imgPickers[i];
+       if(isElemIdRandom(elemId)) {
+         dataDict[elemId] = "random";
+         multiElemId = elemId+"MultiSelect";
+           dataDict[multiElemId] = $("#"+elemId).data('picker').selected_values().join();
        } else {
          dataDict[elemId] = document.getElementById(elemId).value;
        }
@@ -1864,7 +1927,8 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
 </ul>\
 You still provide the vanilla Super Metroid ROM, VARIA handles patching it to the desired flavor.\
 </p><p>\
-Flavor hacks by BuggMann.</p>"
+Flavor hacks by BuggMann.</p><p>\
+Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#randoPresetStep",
@@ -2755,11 +2819,13 @@ def displayNumber(id, min, max, default, step="1"):
           <div class="column">
             <p>The Very Adaptive Randomizer of Items and Area (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset.</p>
             <table class="full">
-              <colgroup><col class="half" /><col class="half" /></colgroup>
+              <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
               <tr>
-              <td>Last generated seed permalink:</td><td><span id="permalink"></span></td><td id="permalinkStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                <td class="small"></td>
+                <td>Last generated seed permalink:</td><td><span id="permalink"></span></td><td id="permalinkStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr>
+                <td class="small"></td>
                 <td>Vanilla Super Metroid ROM:</td>
                 <td>
                    <div id="uploadFileVisibility">
@@ -2772,7 +2838,8 @@ def displayNumber(id, min, max, default, step="1"):
                 <td id="romStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr>
-                <td>Flavor:</td>
+                <td class="small"><div class="random"><button id="logicRandom" type="button" onclick="randomizeTarget(event, 'logic')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td><span id="logicText">Flavor:</span></td>
                 <td>
                     <div class="border">
                       <select class="filldropdown" id="logic" name="logic">
@@ -2788,6 +2855,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <td id="logicStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr>
+                <td class="small"></td>
                 <td>Settings Preset:</td>
                 <td>
                   <select class="chzn-select" id="randoPreset" name="randoPreset" onchange="loadRandoPreset()">
@@ -2808,6 +2876,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <td id="randoPresetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr id="raceModeVisibility">
+                <td class="small"></td>
                 <td>{{displayCheckbox("raceMode")}}<span id="raceModeText">Race Mode</span></td>
                 <td></td>
                 <td id="raceStep"><button type="button" onclick="startTheTour(event)">?</button></td>

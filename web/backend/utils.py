@@ -219,10 +219,6 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         if minorQtyInt < 7 or minorQtyInt > 100:
             raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", isJson)
 
-    if 'logic' in others:
-        if request.vars.logic not in ['vanilla', 'mirror']:
-            raiseHttp(400, "Wrong value for logic", isJson)
-
     if 'gravityBehaviour' in others:
         if request.vars.gravityBehaviour not in ['Balanced', 'Progressive', 'Vanilla']:
             raiseHttp(400, "Wrong value for gravityBehaviour", isJson)

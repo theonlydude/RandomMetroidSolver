@@ -2157,6 +2157,9 @@ if seedInfo != None:
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr><td>Logic</td><td>{{=seedParams.get("logic", "vanilla")}}</td></tr>
+{{    if seedParams["logic"] == "random":}}
+              <tr><td>Logic pool</td><td>{{=seedParams["logicMultiSelect"]}}</td></tr>
+{{        pass}}
               <tr><td>Skills preset</td><td>{{=seedInfo["preset"]}}</td></tr>
               <tr><td>Seed</td><td>{{=seedInfo["seed"]}}</td></tr>
               <tr><td>Created</td><td>{{=seedInfo["time"]}}</td></tr>
@@ -2221,7 +2224,7 @@ if seedInfo != None:
 {{        pass}}
               <tr {{=setBold("tourian")}}><td>Tourian</td><td>{{=seedParams["tourian"]}}</td></tr>
 {{    if seedParams["tourian"] == "random":}}
-              <tr><td>Tourian pool pool</td><td>{{=seedParams["tourianMultiSelect"]}}</td></tr>
+              <tr><td>Tourian pool</td><td>{{=seedParams["tourianMultiSelect"]}}</td></tr>
 {{        pass}}
             </table>
 

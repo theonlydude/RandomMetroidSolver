@@ -2,6 +2,8 @@
 
 include
 
+math pri on
+
 ;;; used to export labels towards the python side :
 ;;; %export(my_label)
 ;;;     <code...>
@@ -32,4 +34,16 @@ endmacro
 
 macro i16()
 	rep #$10
+endmacro
+
+;;; compute absolute tile offset from coords
+;;; result in !_tile_offset
+macro tileOffset(x, y)
+!_tile_offset #= 2*(<y>*$20+<x>)
+endmacro
+
+;;; ldx the result of %tileOffset
+macro ldx_tileOffset(x, y)
+%tileOffset(<x>, <y>)
+        ldx.w #!_tile_offset
 endmacro

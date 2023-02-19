@@ -281,7 +281,9 @@ boot2:
     ;; resume vanilla code
     jml $8084af
 
-warnpc $80ffbf
+print "bank 80 end: ", pc
+
+warnpc $80feff
 
 ;;; -------------------------------
 ;;; Save files management : adds timer, stats and backup features to save files

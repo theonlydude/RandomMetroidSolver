@@ -107,12 +107,19 @@ display_end:
         PLB
         phx
         LDX #$0000
-        LDA #$385A              ; draw decimal icon
-        STA $7E33E0
+        ;; draw decimal icon
+        LDA #$385A
+        %tileOffset(28, 2)      ; value for VARIA end screen
+        sta.w $7E3000+!_tile_offset
+        ;; STA $7E33E0          ; vanilla value
         LDA #$386A              ; draw percentage sign
-        STA $7E33A4
+        %tileOffset(30, 1)      ; value for VARIA end screen
+        sta.w $7E3000+!_tile_offset
+        ;; STA $7E33A4          ; vanilla value
         LDA #$387A
-        STA $7E33E4
+        %tileOffset(30, 2)      ; value for VARIA end screen
+        sta.w $7E3000+!_tile_offset
+        ;; STA $7E33E4          ; vanilla value
         LDA $12
         beq .skip_hundredths    ; if 0 don't draw hundredths digit
         JSR draw_digit_end
@@ -134,9 +141,14 @@ draw_digit_end:
         ASL A : ASL A
         TAY
         LDA $E741,y             ; tilemap values for decimal digits (top half)
-        STA $7E339A,x           ; write in bg1
+        ;; write in bg1
+        %tileOffset(25, 1)      ; value for VARIA end screen
+        STA $7E3000+!_tile_offset,x
+        ;; STA $7E339A,x          ; vanilla value
         LDA $E743,y             ; tilemap values for decimal digits (bottom half)
-        STA $7E33DA,x
+        %tileOffset(25, 2)      ; value for VARIA end screen
+        STA $7E3000+!_tile_offset,x
+        ;; STA $7E33DA,x          ; vanilla value
         inx : inx
         ply
         rts

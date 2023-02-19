@@ -6,6 +6,7 @@ lorom
 
 incsrc "sym/utils.asm"
 incsrc "sym/base.asm"
+incsrc "sym/endingtotals.asm"
 
 incsrc "macros.asm"
 
@@ -40,6 +41,11 @@ incsrc "constants.asm"
 !sprite_colon_x = #$00B4
 !sprite_second_1x = #$00BC
 !sprite_second_2x = #$00C4
+
+;; offsets to write values in RAM to draw them in credits
+!credits_tilemap_offset = $0034
+!BG1_tilemap = $7E3000
+!BG1_tilemap_7E = $3000
 
 ;;; -------------------------------
 ;; HIJACKS
@@ -94,6 +100,10 @@ org $8BF5BD
 ;;; -------------------------------
 ;;; CODE
 ;;; -------------------------------
+
+;;; $8943: X = $16 = tilemap offset for tile ([$12], [$13]) ;;;
+org $8b8943
+compute_tile_offset:
 
 ;; Load credits script data from bank $df instead of $8c
 org $8bf770
@@ -243,16 +253,16 @@ draw_full_time:
     jsl utils_div32 ;; frames in $14, rest in $16
     rep 6 : iny ;; Increment Y three positions forward to write the last value
     lda $14
-    jsr draw_two
+    jsl draw_two
     tya
     sec
     sbc #$0010
     tay     ;; Skip back 8 characters to draw the top three things
     lda $16
-    jsr draw_time
+    jsl draw_time
     plb
     plx
-    rts
+    rtl
 
 ;; Draw time as xx:yy:zz
 draw_time:
@@ -278,16 +288,16 @@ draw_time:
     lda $004216
     sta $14
     lda $004214 ;; First group (hours or minutes)
-    jsr draw_two
+    jsl draw_two
     iny : iny ;; Skip past separator
     lda $14 ;; Second group (minutes or seconds)
-    jsr draw_two
+    jsl draw_two
     iny : iny
     lda $12 ;; Last group (seconds or frames)
-    jsr draw_two
+    jsl draw_two
     plb
     plx
-    rts
+    rtl
 
 ;; Draw 5-digit value to credits tilemap
 ;; A = number to draw, Y = row address
@@ -305,13 +315,13 @@ draw_value:
     lda $004216 ;; Last two digits
     sta $12
     lda $004214 ;; Top three digits
-    jsr draw_three
+    jsl draw_three
     lda $12
-    jsr draw_two
+    jsl draw_two
 .end:
     plb
     plx
-    rts
+    rtl
 
 draw_three:
     sta $004204
@@ -325,9 +335,9 @@ draw_three:
     cmp $1a
     beq +
     lda.l numbers_top, x
-    sta $0034, y
+    sta !credits_tilemap_offset, y
     lda.l numbers_bot, x
-    sta $0074, y
+    sta !credits_tilemap_offset+!row, y
     dec $1a
 +
     iny : iny ;; Next number
@@ -345,9 +355,9 @@ draw_two:
     cmp $1a
     beq +
     lda.l numbers_top, x
-    sta $0034, y
+    sta !credits_tilemap_offset, y
     lda.l numbers_bot, x
-    sta $0074, y
+    sta !credits_tilemap_offset+!row, y
     dec $1a
 +
     lda $004216
@@ -356,13 +366,13 @@ draw_two:
     cmp $1a
     beq +
     lda.l numbers_top, x
-    sta $0036, y
+    sta !credits_tilemap_offset+2, y
     lda.l numbers_bot, x
-    sta $0076, y
+    sta !credits_tilemap_offset+!row+2, y
     dec $1a
 +
     rep 4 : iny
-    rts
+    rtl
 
 ;; Loop through stat table and update RAM with numbers representing those stats
 write_stats:
@@ -403,7 +413,7 @@ write_stats:
     tyx
     tay
     pla
-    jsr draw_value
+    jsl draw_value
     txy
     jmp .continue
 
@@ -418,7 +428,7 @@ write_stats:
     tyx
     tay
     pla
-    jsr draw_time
+    jsl draw_time
     txy
     jmp .continue
 
@@ -434,7 +444,7 @@ write_stats:
     tyx
     tay
     pla
-    jsr draw_full_time
+    jsl draw_full_time
     txy
     jmp .continue
 
@@ -1422,5 +1432,282 @@ init_sprite_second_2:
         STA $1A7D,y
         JMP $F051
 
+;;; main entry point to draw an ending screen
+post_credits:
+        phy
+        lda #$ffff : sta $1a    ; leading 0 flag on to draw numbers
+        jsr draw_final_time
+        jsr draw_percent
+        jsr draw_minors
+        jsr draw_majors
+        ply
+        rts
+
+;;; Draws a string with big font to BG1 tilemap. String has to be in CAPS, with !big table.
+;;; A: string addr in current DB
+;;; X: tile offset
+draw_string:
+        phx
+        pha
+        tay
+-
+        lda $0000,y : beq .nextrow
+        sta !BG1_tilemap,x
+        inx : inx
+        bra -
+.nextrow:
+        pla : clc : adc #!row : tax
+        pla : tay
+-
+        lda $0000,y : beq .end
+        clc : adc #$0010 : sta !BG1_tilemap,x
+        inx : inx
+        bra -
+.end:
+        rts
+
+;;; A: number
+;;; X: tile offset
+draw_number:
+        phb
+        phy
+        phx
+        pha
+        ;; DB = $7E
+        pea $7e7e : plb : plb
+        ;; Y = X - offset + BG1_tilemap
+        ;; (tweak arg for draw_two that is meant for credits and has internal !credits_tilemap_offset)
+        txa : sec : sbc #!credits_tilemap_offset : clc : adc #!BG1_tilemap_7E : tay
+        pla
+        jsl draw_two
+        plx
+        ply
+        plb
+        rts
+
+;;; tmp version that shows the same BG1 tile 4 times
+;;; A: tile index
+;;; X: tile offset
+draw_item_gfx:
+        phx
+        pha
+        sta !BG1_tilemap,x
+        inx : inx
+        sta !BG1_tilemap,x
+        txa : clc : adc !row-2 : tax
+        pla
+        sta !BG1_tilemap,x
+        inx : inx
+        sta !BG1_tilemap,x
+        rts
+
+macro drawString(str_addr, x, y)
+        %ldx_tileOffset(<x>, <y>)
+        lda.w #<str_addr>
+        jsr draw_string
+endmacro
+
+macro drawNumber(number, x, y)
+        %ldx_tileOffset(<x>, <y>)
+        lda <number>
+        jsr draw_number
+endmacro
+
+macro drawChar(char, x, y)
+        %ldx_tileOffset(<x>, <y>)
+        lda <char> : sta !BG1_tilemap, x
+endmacro
+
+draw_final_time:
+        ;; draw TIME at 1,1
+        %drawString(str_time, 1, 1)
+        ;; draw RTA at 6,1
+        %drawNumber(!igt_hours, 6, 1)
+        %drawChar(#$004A, 8, 1) ; '
+        %drawNumber(!igt_minutes, 9, 1)
+        %drawChar(#$004A, 11, 1) ; '
+        %drawNumber(!igt_seconds, 12, 1)
+        %drawChar(#$004B, 14, 1) ; "
+        %drawNumber(!igt_frames, 15, 1)
+        rts
+
+draw_percent:
+        %drawString(str_items, 19, 1)
+        ;; percent will be written by endingtotals patch
+        rts
+
+draw_minors:
+        lda #$7E7E : sta $14    ; for direct page indirect long adressing: bank pointer is 7E
+        ldy #$0000
+.loop:
+        lda minors_table, y : beq .end
+        ldx minors_table+2, y
+        jsr draw_item_gfx
+        lda minors_table+4, y : sta $12
+        lda [$12]
+        ;; now we have in A the number of collected minors, divide it by number in pack
+        sta $4204
+        %a8()
+        lda minors_table+8, y
+        sta $4206
+        %a16()
+        ldx minors_table+2, y : inx : inx : inx : stx $16
+        lda $4216
+        ;; display collected packs
+        jsr draw_number
+        ;; display /
+        inc $16 : inc $16
+        lda #$21DC : sta !BG1_tilemap, x
+        txa : clc : adc #!row : tax
+        lda #$221C : sta !BG1_tilemap, x
+        ;; display total packs
+        inc $16
+        lda minors_table+6, y
+        jsr draw_number
+        tya : clc : adc #$0009 : tay
+        bra .loop
+.end:
+        rts
+
+draw_majors:
+        lda #$7E7E : sta $14    ; for direct page indirect long adressing: bank pointer is 7E
+        ldy #$0000
+.loop:
+        lda majors_table, y : beq .end
+        lda majors_table+4, y : beq .next ; item absent from seed
+        sta $12
+        lda [$12]
+        ;; now we have in A the RAM value ready for bitmask
+        and majors_table+6, y : beq .not_collected
+        ;; show collected tile
+        lda majors_table, y
+        bra .display
+.not_collected:
+        ;; FIXME something to do with palettes instead
+        lda majors_table, y : clc : adc #$0040
+.display:
+        ldx minors_table+2, y
+        jsr draw_item_gfx
+.next:
+        tya : clc : adc #$0008 : tay
+        bra .loop
+.end:
+        rts
+
+str_time:
+        !big
+        dw "TIME "
+        dw $0000
+
+str_items:
+        !big
+        dw "ITEMS"
+        dw $0000
+
+;;; minors tables
+;;; tile ID, tile offset, collected addr (RAM), total, pack
+;;; "total" fields have to be updated by the randomizer
+;;; terminated by 0
+;;; 
+;;; FIXME tmp tile IDs for now
+
+macro itemTableEntry(category, item, tile, x, y, collected, specific)
+%export(<category>_table_entry_<item>)
+%tileOffset(<x>, <y>)
+        dw <tile>, !_tile_offset, <collected>, <specific>
+endmacro
+
+macro ammoTableEntry(item, tile, x, y, collected, total)
+%itemTableEntry(ammo, <item>, <tile>, <x>, <y>, <collected>, <total>)
+        db 5
+endmacro
+
+macro energyTableEntry(item, tile, x, y, collected, total)
+%itemTableEntry(energy, <item>, <tile>, <x>, <y>, <collected>, <total>)
+        db 100
+endmacro
+
+%export(minors_table)
+        %ammoTableEntry(missiles, $2030, 2, 5, $09C8, 33)
+        %ammoTableEntry(supers, $2031, 12, 5, $09CC, 22)
+        %ammoTableEntry(power_bombs, $2032, 22, 5, $09D0, 11)
+        %energyTableEntry(etanks, $2033, 7, 9, $09C4, 14)
+        %energyTableEntry(rtanks, $2034, 19, 9, $09D4, 4)
+        dw $0000
+
+;;; majors table
+;;; tile ID, tile offset, collected addr (RAM), mask
+;;; "collected" fields can be updated by the randomizer: if set to 0, the major is absent
+;;; terminated by 0
+;;; 
+;;; FIXME tmp tile IDs for now
+
+macro majorTableEntry(item, tile, x, y, collected, mask)
+%itemTableEntry(major, <item>, <tile>, <x>, <y>, <collected>, <mask>)
+endmacro
+
+%export(majors_table)
+        %majorTableEntry(charge, $2035, 3, 14, $09A8, $1000)
+        %majorTableEntry(ice, $2036, 7, 14, $09A8, $0002)
+        %majorTableEntry(wave, $2037, 11, 14, $09A8, $0001)
+        %majorTableEntry(spazer, $2038, 15, 14, $09A8, $0004)
+        %majorTableEntry(plasam, $2039, 19, 14, $09A8, $0008)
+        %majorTableEntry(grapple, $203A, 23, 14, $09A4, $4000)
+        %majorTableEntry(xray, $203B, 27, 14, $09A4, $8000)
+        %majorTableEntry(varia, $203C, 13, 18, $09A4, $0001)
+        %majorTableEntry(gravity, $203D, 17, 18, $09A4, $0020)
+        %majorTableEntry(morph, $203E, 3, 22, $09A4, $0004)
+        %majorTableEntry(bomb, $203F, 7, 22, $09A4, $1000)
+        %majorTableEntry(spring, $2040, 11, 22, $09A4, $0002)
+        %majorTableEntry(speed, $2041, 15, 22, $09A4, $2000)
+        %majorTableEntry(hijump, $2042, 19, 22, $09A4, $0100)
+        %majorTableEntry(space, $2043, 23, 22, $09A4, $0200)
+        %majorTableEntry(screw, $2044, 27, 22, $09A4, $0008)
+        dw $0000
+
 print "bank 8B end : ", pc
-warnpc $8bfa0f
+warnpc $8bffff
+
+org $8be780
+prepare_see_you_next_mission:
+        skip 1                  ; PHX
+        ;; skip putting spaces in BG1
+        bra .skip
+org $8be78f
+.skip:
+
+org $8b9698
+bg_obj_delete:
+
+;;; overwrite item percentage instruction list to display end screen
+org $8cdfd8
+ending_bg_obj:
+        ;; wait 128 frames
+        dw $0080
+        db $00
+        db $00
+        dw nothing
+        dw post_credits   ; don't bother with frame delays etc for now
+        dw endingtotals_display_item_count_end_game ; X,Y are adjusted in ending totals itself
+        ;; wait 128 frames
+        dw $0080
+        db $00
+        db $00
+        dw nothing
+        dw prepare_see_you_next_mission
+        dw bg_obj_delete
+
+;;; overwrite see you next mission to change Y values
+org $8CE0AF 
+see_you_bg_obj:
+        skip 6                  ; wait $40 frames
+!counter = 0
+while !counter < 20
+        skip 3
+        db 25
+        skip 2
+        !counter #= !counter+1
+endif
+
+org $8ce12f
+nothing:

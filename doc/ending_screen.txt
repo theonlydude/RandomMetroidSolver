@@ -1,0 +1,191 @@
+Original ending screen:
+
+ 0                             31
+----------------------------------
+|                                |0
+|                                |
+|                                |
+|                                |
+|                                |
+|                                |
+|                                |
+|                                |
+|                    ^           |
+|                                |
+|                                |
+|                                |
+|      SEE YOU NEXT MISSION      |
+|      SEE YOU NEXT MISSION      |
+|                                |
+|                                |
+|                                |
+|                                |
+|                                |
+|                                |
+|         YOUR RATE FOR          |
+|            ^                   |
+|      COLLECTING ITEMS IS       |
+|                                |
+|             100.0%             |
+|             100.0%             |
+|                                |
+|                                |27
+----------------------------------
+
+VARIA ending screen:
+
+ 0                             31
+----------------------------------
+|                                |0
+| TIME 01:23:45'00  ITEMS 100.0% |
+| TIME 01:23:45'00  ITEMS 100.0% |
+|                                |
+|                                |
+|  MM 12/33  SS 08/22  PB 06/11  |
+|  MM 12/33  SS 08/22  PB 06/11  |
+|                                |
+|                    ^           |
+|       EE 08/14    RR 01/04     |
+|       EE 08/14    RR 01/04     |
+|                                |
+|                                |
+|   CC  II  WW  SS  PP  GB  XX   |
+|   CC  II  WW  SS  PP  GB  XX   |
+|                                |
+|                                |
+|             VV  GG             |
+|             VV  GG             |
+|                                |
+|                                |
+|   MM  BB  S^  SP  HJ  SJ  SA   |
+|   MM  BB  SB  SP  HJ  SJ  SA   |
+|                                |
+|                                |
+|      SEE YOU NEXT MISSION      |
+|      SEE YOU NEXT MISSION      |
+|                                |27
+----------------------------------
+
+Item graphics:
+**************
+
+- they all seem to use CRE palettes
+- locate graphics : maybe necessary to do a tilemap (?) with all items
+  (either referencing them in ROM or just duplicate them)
+- have item grapics (or palette?) for collected (light) or not (dark),
+  don't show items not in the seed
+- text is in layer 1, logo in layer 2
+
+CRE graphics (ammo/energy) are compressed in bank B9
+Item PLM graphics are uncompressed in bank 89
+
+Uncompress CRE somewhere in RAM, move ammo/energy CRE graphics along
+with credits letters in BG1 tilemap RAM, then move remaining items
+directly from bank 89.
+
+RAM used by text: $7E:3000..37FF and transferred to VRAM $4800 (BG1
+tilemap, although VRAM map says BG2?)
+
+(hopefully) available VRAM space at $9000, used starts again at $C000 (?)
+
+Rendering :
+***********
+
+Try to fit in cinematic/credits object system. It might be necessary
+to add new "base functions" to use in instruction lists.
+
+Some stuff are hardcoded like vanilla instruction (TIME, ITEMS etc.),
+other stuff have to be pulled from ROM (majors present, quantities),
+and the rest from RAM (collected items, calculations on collected
+ammo/energy to find out number of packs)
+
+Two types of objects seem interesting Cinematc BG and Cinematic
+Sprite. The "Sprite" ones seem to be the one to trigger next states to
+run by sticking pointers into $1F51 in their instructions.
+
+Cinematic BG Object format:
+***************************
+
+Definition in bank 8B, like
+
+;;; $F748: Cinematic BG object definitions - ending ;;;
+{
+;                        _____________ Initialisation function
+;                       |     ________ Pre-instruction
+;                       |    |     ___ Instruction list (bank $8C)
+;                       |    |    |
+$8B:F748             dw 93D9,93D9,E0AF ; See you next mission
+$8B:F74E             dw 93D9,93D9,DFDB ; Item percentage
+
+(initialisation and pre-instruction are in bank 8B, and seem to be
+rarely used)
+
+Instruction lists:
+
+Drawing a letter points to a sub-instruction list (indirect) in bank
+8C, which in turns point to functions in bank 8B!
+
+Similar to intro: dw frame_delay,db X,db Y,dw draw_instruction
+
+Draw instruction : dw 88B7,db w,db h,dw tilemap1,... (2 tilemap for text, 4 for items)
+;;; $88B7: Indirect instruction function - draw the [[Y] + 3] x [[Y] + 2] region with tilemap values at [Y] + 4 to text tilemap ;;;
+
+
+Cinematic Sprite Object Format:
+*******************************
+
+Definition in bank 8B, like
+
+;;; $EE9D: Cinematic sprite object definitions ;;;
+{
+;                        _____________ Initialisation function
+;                       |     ________ Pre-instruction
+;                       |    |     ___ Instruction list
+;                       |    |    |
+$8B:EE9D             dw EFEA,93D9,EB0F
+
+Unlike BG objects, init and pre-instructions are various.
+
+When to load graphics:
+**********************
+
+Probably from a Cinematic Sprite Object.
+
+Find the point where samus tiles are discarded and the metroid logo is
+loaded (as well as text tiles? or maybe those are kept from credits?)
+
+Then load necessary graphics "correctly" in VRAM :
+
+- text tilemap format is without palette : might be a problem for BG1,
+  or we handcraft a palette that does everything (or use CRE palette?)
+- if it's not possible to use "text" tiles for whatever reason, it
+  should be possible to use BG2
+
+How to show item graphics:
+**************************
+
+Through Cinematic BG Objects. Use the built-in instruction used to
+display text. 
+
+
+* vanilla process:
+
+
+Decompress tiles in various RAM addresses, see $8B:DE80
+
+Credits palettes : copy $100 bytes from $8C:E9E9 to $7E:C000
+Font tiles: decompress tiles from $97:E7DE to $7F:C000
+
+State Machine
+*************
+
+function pointers in 8B, stored to $1F51
+> see you next mission = E797
+spawn see you next mission BG object, then puts a dummy (RTS) function
+as final state, and marks game completed in SRAM.
+
+> previous: $E780 (end of item% instruction list, $8C:DFDB)
+puts $7E "spaces" ($007F) in $7E35C0
+
+item% BG object is spawned in routine $8B:E58A, which first seems to
+handle screw attack symbol?

@@ -88,6 +88,17 @@
     top: 0;
     z-index: 50;
 }
+body[data-varia-logic="mirror"] .auto-tracker {
+    left: 0.5rem;
+    right: unset;
+    top: 3rem;
+}
+body[data-varia-logic="mirror"] .auto-tracker__contents > * {
+    order: 2;
+}
+body[data-varia-logic="mirror"] #logAutoTracker {
+    order: 1;
+}
 .auto-tracker__contents {
     display: flex;
     gap: 0.25vw;
@@ -169,23 +180,22 @@ function startTheTour(step=-1) {
   var tour = new Tour({
     storage: false,
     steps: [{
-      element: "#help",
+      element: ".fa.fa-question-circle",
       title: "VARIA Areas/Bosses/Items/Doors Tracker",
       content: "<h2 class=\"center\">Welcome to the VARIA Areas/Bosses/Items/Doors Tracker</h2><h4>Areas/Bosses Tracker</h4>\
-<p>The Areas and Bosses Tracker allows you to track the connections between the areas and bosses portals.<br/>To use it, click on a portal <img src=\"/solver/static/images/tracker/help/portal.png\" alt=\"Portal\" style=\"width: 20px\">, it'll highlight it, then click on a second portal, it'll draw a line between the two portals with a random color.<br/>\
-You can delete the latest added transition with the <img src=\"/solver/static/images/ui/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button and all of them with the <img src=\"/solver/static/images/ui/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.<br/>\
-You can also click on the portal <img src=\"/solver/static/images/tracker/help/portal.png\" alt=\"Portal\" style=\"width: 20px\"> of an existing transition and click on the <img src=\"/solver/static/images/ui/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button to delete it.<br/>\
+<p>The Areas and Bosses Tracker allows you to track the connections between the areas and bosses portals.<br/>To use it, click on a portal <i class=\"sm-portal\" />, it'll highlight it, then click on a second portal, it'll draw a line between the two portals with a random color.<br/>\
+You can delete all portals or undo the last portal placed by clicking on the <span class=\"btn -primary\"><i class=\"sm-portal\" /></span> menu. Depending on the area rando and boss rando settings, portals may be locked <i class=\"sm-portal -lock\" />. \
 Only the locations of connected areas/bosses are computed by the Items Tracker (as such if the ROM is not Areas/Bosses randomized the vanilla transitions will be automatically added).<br/>\
-There's three portal types that you can't mix: Area portals: <img src=\"/solver/static/images/tracker/help/portal.png\" alt=\"Portal\" style=\"width: 20px\">, Boss portals: <img src=\"/solver/static/images/tracker/help/portal_boss.png\" alt=\"Boss Portal\" style=\"width: 20px\">, Escape portals: <img src=\"/solver/static/images/tracker/help/portal_escape.png\" alt=\"Escape Portal\" style=\"width: 20px\"> (active only in Area Plandomizer).<br/>\
-The left Sand Hall door <img src=\"/solver/static/images/tracker/help/portal_maridia.png\" alt=\"Portal Maridia\" style=\"width: 20px\"> exits to below Botwoon Energy Tank room <img src=\"/solver/static/images/tracker/help/portal_maridia_area.png\" alt=\"Portal Maridia Area\" style=\"width: 20px\"> when area randomization is active (the blue door in West Sand Hall Tunnel has been greyed), it defaults to vanilla output otherwise <img src=\"/solver/static/images/tracker/help/portal_maridia_vanilla.png\" alt=\"Portal Maridia Vanilla\" style=\"width: 20px\">.</p>\
+There's three portal types that you can't mix: Area portals: <i class=\"sm-portal\" />, Boss portals: <i class=\"sm-portal -boss\" />, Escape portals: <i class=\"sm-portal -escape\" /> (active only in Area Plandomizer).<br/>\
+The left Sand Hall door <i class=\"sm-portal -sand\" /> exits to below Botwoon Energy Tank room <i class=\"sm-portal -sand\" data-content=\"A\"/> when area randomization is active (the blue door in West Sand Hall Tunnel has been greyed), it defaults to vanilla output otherwise <i class=\"sm-portal -sand\" data-content=\"V\" />.</p>\
 <h4>Items Tracker</h4>\
 <p>The Items Tracker allows you to use the Solver in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/ui/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on a location after you've collected the item of the location in the game, it'll update the next available locations.<br/>\
-The color of the icon on the available locations matchs the difficulty to reach the location:\
-<table><tr><td><img src=\"/solver/static/images/tracker/markers/marker_easy.gif\" alt=\"easy\" style=\"width: 32px; background-color: #000;\"> easy</td><td><img src=\"/solver/static/images/tracker/markers/marker_medium.gif\" alt=\"medium\" class=\"diffHelp\"> medium</td></td><td><img src=\"/solver/static/images/tracker/markers/marker_hard.gif\" alt=\"hard\" class=\"diffHelp\"> hard</td><td><img src=\"/solver/static/images/tracker/markers/marker_harder.gif\" alt=\"harder\" class=\"diffHelp\"> very hard</td><td><img src=\"/solver/static/images/tracker/markers/marker_hardcore.gif\" alt=\"hardcore\" class=\"diffHelp\"> hardcore</td><td><img src=\"/solver/static/images/tracker/markers/marker_mania.gif\" alt=\"mania\" class=\"diffHelp\"> mania</td><td colspan=\"3\"><img src=\"/solver/static/images/tracker/markers/marker_break.png\" alt=\"break\" class=\"diffHelp\"> sequence break</td></tr></table>\
+The color of the icon on the available locations matchs the difficulty to reach the location:</p>\
+<div class=\"popover-row\"><div><img src=\"/solver/static/images/tracker/markers/marker_easy.gif\" alt=\"easy\" style=\"width: 32px; background-color: #000;\"> easy</div><div><img src=\"/solver/static/images/tracker/markers/marker_medium.gif\" alt=\"medium\" class=\"diffHelp\"> medium</div><div><img src=\"/solver/static/images/tracker/markers/marker_hard.gif\" alt=\"hard\" class=\"diffHelp\"> hard</div><div><img src=\"/solver/static/images/tracker/markers/marker_harder.gif\" alt=\"harder\" class=\"diffHelp\"> very hard</div><div><img src=\"/solver/static/images/tracker/markers/marker_hardcore.gif\" alt=\"hardcore\" class=\"diffHelp\"> hardcore</div><div><img src=\"/solver/static/images/tracker/markers/marker_mania.gif\" alt=\"mania\" class=\"diffHelp\"> mania</div><div><img src=\"/solver/static/images/tracker/markers/marker_break.png\" alt=\"break\" class=\"diffHelp\"> sequence break</div></div>\
 You can uncollect the item at a location by clicking on the location again.<br/>\
 The locations not available are displayed with the Sequence Break icon, allowing you to collect them when you sequence break.<br/>When a location has been visited its icon displays the collected item: <img src=\"/solver/static/images/tracker/markers/marker_visited_easy_Gravity.png\" alt=\"Visited\" style=\"width: 32px\"> or this if no item was found: <img src=\"/solver/static/images/tracker/markers/marker_visited_easy.png\" alt=\"Visited\" style=\"width: 32px\">, one color for each difficulty.<br/>\
-The locations availability are computed from the current access point which is displayed with this icon: <img src=\"/solver/static/images/tracker/gps/gps.png\" alt=\"last access point\" style=\"width: 32px\"><br/>\
-When overing the mouse cursor on an available location a tooltip is displayed with the location's name, the techniques and items used to access it from the current access point.<br/>\
+The locations availability are computed from the current access point which is displayed with this icon: <img src=\"/solver/static/images/tracker/gps/gps.png\" alt=\"last access point\" style=\"width: 32px\">\
+<p>When overing the mouse cursor on an available location a tooltip is displayed with the location's name, the techniques and items used to access it from the current access point.<br/>\
 The second green GPS icon displayed when overing on a location is the location's nearest access point, after collecting the item at the location the current access point will be updated to it.<br/>\
 After the location has been visited only the collected item is displayed.</p>\
 <h4>Doors Tracker</h4>\
@@ -235,6 +245,7 @@ Install QUsb2snes on your computer and configure your sd2snes/snes mini/emulator
   if (typeof step === 'string') {
     step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
   }
+  window.T = tour
   // Start the tour
   if(step != -1) {
     tour.goTo(step);

@@ -415,7 +415,7 @@ def get_app_files():
     css = [k for k in data.keys() if k.endswith('.css')]
     fa = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"
     return '\n'.join([
+        f'<link href="{fa}" rel="stylesheet" />',
         *[f'<script src="{data[f]}"></script>' for f in js],
         *[f'<link href="{data[f]}" rel="stylesheet" />' for f in css],
-        f'<link href="{fa}" rel="stylesheet" />',
     ])

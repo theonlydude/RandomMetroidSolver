@@ -941,18 +941,18 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = ["noPatchesVisibility"];
-    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility"];
+      var hide = ["seedVisibility", "itemsQuantityVisibility", "minorsProportionVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility"];
     showHide(show, hide);
   }
 
   else if(name == "medium") {
-    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility", "objectivesVisibility"];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility", "noPatchesVisibility"];
+    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "itemsQuantityVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility", "objectivesVisibility"];
+    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "minorsProportionVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility", "noPatchesVisibility"];
     showHide(show, hide);
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility"];
+    var show = ["seedVisibility", "itemsQuantityVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "minorsProportionVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility"];
     var hide = ["noPatchesVisibility"];
     showHide(show, hide);
   }
@@ -2220,16 +2220,6 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
 <p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
-      element: "#strictMinorsStep",
-      title: "Strict ammo distribution",
-      content: "<p>Instead of using the Minors proportions as probabilities, enforce a strict distribution to match the proportions as exactly as possible. Use it when you want to mimick vanilla proportions (4.6/1/1).</p><p>Click on the dice button to randomly set this parameter.</p>"
-    },
-    {
-      element: "#missileQtyStep",
-      title: "Proportion of <img src=\"/solver/static/images/tracker/inventory/Missile.png\" class=\"width: 32px\"/>/<img src=\"/solver/static/images/tracker/inventory/Super.png\" class=\"width: 32px\"/>/<img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/>",
-      content: "<p>For each minor types, the higher the number the higher the probability of choosing it when placing a minor.</p><p>Click on the dice button to randomly set this parameter.</p>"
-    },
-    {
       element: "#minorQtyStep",
       title: "Percentage of minors available",
       content: "<p>From 7%: minimum number of minors required to finish the game to 100%: all minors locations contain a minor (vanilla like).</p><p>Click on the dice button to randomly set this parameter.</p>"
@@ -2239,6 +2229,18 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
       title: "Quantity of Energy/Reserve Tanks available",
       content: "<p>Choose how many Energy <img src=\"/solver/static/images/tracker/inventory/ETank.png\" class=\"width: 32px\"/> / Reserve Tanks <img src=\"/solver/static/images/tracker/inventory/Reserve.png\" class=\"width: 32px\"/> will be available, from 0-1 in ultra sparse, 4-6 in sparse, 8-12 in medium and 18 in vanilla.</p>\
 <p>In ultra sparse <a href=\"https://metroid.fandom.com/wiki/Mother_Brain\" target=\"_blank\">Mother Brain's</a> <a href=\"https://metroid.fandom.com/wiki/Laser_Brain_Attack\" target=\"_blank\">rainbow beam</a> only does 20 damage instead of 300.</p><p>Click on the dice button to randomly set this parameter.</p>"
+    },
+    {
+      element: "#missileQtyStep",
+      title: "Proportion of <img src=\"/solver/static/images/tracker/inventory/Missile.png\" class=\"width: 32px\"/>/<img src=\"/solver/static/images/tracker/inventory/Super.png\" class=\"width: 32px\"/>/<img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/>",
+      content: "<p>For each minor types, the higher the number relative to other proportions the higher the probability of choosing it when placing a minor.</p>\
+<p>For example with default proportions of <img src=\"/solver/static/images/tracker/inventory/Missile.png\" class=\"width: 32px\"/>: 3, <img src=\"/solver/static/images/tracker/inventory/Super.png\" class=\"width: 32px\"/>: 2 and <img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/>: 1 the randomizer will place a <img src=\"/solver/static/images/tracker/inventory/Missile.png\" class=\"width: 32px\"/> 3 times out of 6, a  <img src=\"/solver/static/images/tracker/inventory/Super.png\" class=\"width: 32px\"/> 2 times out of 6 and a <img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/> 1 time out of 6.</p>\
+<p>Click on the dice button to randomly set this parameter.</p>"
+    },
+    {
+      element: "#strictMinorsStep",
+      title: "Strict ammo distribution",
+      content: "<p>Instead of using the Minors proportions as probabilities, enforce a strict distribution to match the proportions as exactly as possible. Use it when you want to mimick vanilla proportions (<img src=\"/solver/static/images/tracker/inventory/Missile.png\" class=\"width: 32px\"/> 4.6 / <img src=\"/solver/static/images/tracker/inventory/Super.png\" class=\"width: 32px\"/> 1 / <img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/> 1).</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#areaRandomizationStep",
@@ -2987,31 +2989,11 @@ def displayNumber(id, min, max, default, step="1"):
                 <td id="hideItemsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
             </table>
-            <div id="ammoVisibility">
+            <div id="itemsQuantityVisibility">
               <h4>Ammo and Energy</h4>
+              <h5>Number of Ammo and Energy available</h5>
               <table class="full">
                 <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
-                <tr id="strictMinorsVisibility">
-                  <td class="small"><div class="random"><button id="strictMinorsRandom" type="button" onclick="randomize(event, 'strictMinors')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td colspan="2">{{displayCheckbox("strictMinors")}}<span id="strictMinorsText">Strict Minors distribution</span></td>
-                  <td id="strictMinorsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-                </tr>
-                <tr id="missileQtyVisibility">
-                  <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td><span id="missileQtyText">Proportion of Missiles <img src="/solver/static/images/tracker/inventory/Missile.png" class="width: 32px"/>:</span></td>
-                  <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
-                  <td id="missileQtyStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-                </tr>
-                <tr id="superQtyVisibility">
-                  <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td><span id="superQtyText">Proportion of Super Missiles <img src="/solver/static/images/tracker/inventory/Super.png" class="width: 32px"/>:</span></td>
-                  <td>{{displayNumber("superQty", "1", "9", "3", "0.1")}}</td>
-                </tr>
-                <tr id="powerBombQtyVisibility">
-                  <td class="small"><div class="random"><button id="powerBombQtyRandom" type="button" onclick="randomize(event, 'powerBombQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td><span id="powerBombQtyText">Proportion of Power Bombs <img src="/solver/static/images/tracker/inventory/PowerBomb.png" class="width: 32px"/>:</span></td>
-                  <td>{{displayNumber("powerBombQty", "1", "9", "1", "0.1")}}</td>
-                </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="minorQtyRandom" type="button" onclick="randomize(event, 'minorQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td><span id="minorQtyText">Percentage of minors (<img src="/solver/static/images/tracker/inventory/Missile.png" class="width: 32px"/>/<img src="/solver/static/images/tracker/inventory/Super.png" class="width: 32px"/>/<img src="/solver/static/images/tracker/inventory/PowerBomb.png" class="width: 32px"/>) available:</span></td>
@@ -3023,6 +3005,33 @@ def displayNumber(id, min, max, default, step="1"):
                   <td><span id="energyQtyText">Quantity of Energy <img src="/solver/static/images/tracker/inventory/ETank.png" class="width: 32px"/> / Reserve Tanks <img src="/solver/static/images/tracker/inventory/Reserve.png" class="width: 32px"/> available:</span></td>
                   <td>{{displayMultiSelect("energyQty", currentMultiValues["energyQty"], "vanilla", defaultMultiValues["energyQty"])}}</td>
                   <td id="energyQtyStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+              </table>
+            </div>
+            <div id="minorsProportionVisibility">
+              <h5>Proportion of minors</h5>
+              <table>
+                <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
+                <tr>
+                  <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="missileQtyText">Proportion of Missiles <img src="/solver/static/images/tracker/inventory/Missile.png" class="width: 32px"/>:</span></td>
+                  <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
+                  <td id="missileQtyStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr>
+                  <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="superQtyText">Proportion of Super Missiles <img src="/solver/static/images/tracker/inventory/Super.png" class="width: 32px"/>:</span></td>
+                  <td>{{displayNumber("superQty", "1", "9", "3", "0.1")}}</td>
+                </tr>
+                <tr>
+                  <td class="small"><div class="random"><button id="powerBombQtyRandom" type="button" onclick="randomize(event, 'powerBombQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="powerBombQtyText">Proportion of Power Bombs <img src="/solver/static/images/tracker/inventory/PowerBomb.png" class="width: 32px"/>:</span></td>
+                  <td>{{displayNumber("powerBombQty", "1", "9", "1", "0.1")}}</td>
+                </tr>
+                <tr id="strictMinorsVisibility">
+                  <td class="small"><div class="random"><button id="strictMinorsRandom" type="button" onclick="randomize(event, 'strictMinors')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td colspan="2">{{displayCheckbox("strictMinors")}}<span id="strictMinorsText">Strict Minors distribution</span></td>
+                  <td id="strictMinorsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
             </div>

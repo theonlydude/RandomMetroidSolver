@@ -1434,26 +1434,35 @@ init_sprite_second_2:
 
 ;;; main entry point to draw an ending screen
 post_credits:
+        php
+        %ai16()
+        phb
+        phx
         phy
+        pea $8b8b : plb : plb   ; DB = 8B to index local data tables with Y
         lda #$ffff : sta $1a    ; leading 0 flag on to draw numbers
         jsr draw_final_time
         jsr draw_percent
         jsr draw_minors
         jsr draw_majors
         ply
+        plx
+        plb
+        plp
         rts
 
 ;;; Draws a string with big font to BG1 tilemap. String has to be in CAPS, with !big table.
 ;;; A: string addr in current DB
 ;;; X: tile offset
 draw_string:
-        phx
         pha
+        phx
         tay
 -
         lda $0000,y : beq .nextrow
         sta !BG1_tilemap,x
         inx : inx
+        iny : iny
         bra -
 .nextrow:
         pla : clc : adc #!row : tax
@@ -1462,6 +1471,7 @@ draw_string:
         lda $0000,y : beq .end
         clc : adc #$0010 : sta !BG1_tilemap,x
         inx : inx
+        iny : iny
         bra -
 .end:
         rts
@@ -1489,7 +1499,6 @@ draw_number:
 ;;; A: tile index
 ;;; X: tile offset
 draw_item_gfx:
-        phx
         pha
         sta !BG1_tilemap,x
         inx : inx
@@ -1556,12 +1565,12 @@ draw_minors:
         ;; display collected packs
         jsr draw_number
         ;; display /
-        inc $16 : inc $16
+        inc $16 : inc $16 : ldx $16
         lda #$21DC : sta !BG1_tilemap, x
         txa : clc : adc #!row : tax
         lda #$221C : sta !BG1_tilemap, x
         ;; display total packs
-        inc $16
+        ldx $16 : inx
         lda minors_table+6, y
         jsr draw_number
         tya : clc : adc #$0009 : tay
@@ -1680,20 +1689,20 @@ org $8b9698
 bg_obj_delete:
 
 ;;; overwrite item percentage instruction list to display end screen
-org $8cdfd8
+org $8cdfdb
 ending_bg_obj:
         ;; wait 128 frames
         dw $0080
         db $00
         db $00
-        dw nothing
+        dw bg_obj_indirect_nothing
         dw post_credits   ; don't bother with frame delays etc for now
         dw endingtotals_display_item_count_end_game ; X,Y are adjusted in ending totals itself
         ;; wait 128 frames
         dw $0080
         db $00
         db $00
-        dw nothing
+        dw bg_obj_indirect_nothing
         dw prepare_see_you_next_mission
         dw bg_obj_delete
 
@@ -1710,4 +1719,4 @@ while !counter < 20
 endif
 
 org $8ce12f
-nothing:
+bg_obj_indirect_nothing:

@@ -4,4 +4,4 @@
 **/build/
 **/include/sym/
 db_params.py
-super-metroid/*
+web/client/*

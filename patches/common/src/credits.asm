@@ -1684,6 +1684,11 @@ prepare_see_you_next_mission:
         bra .skip
 org $8be78f
 .skip:
+        lda #see_you_next_mission
+
+;;; skip the BG1 scrolling part
+org $8BE7A6
+see_you_next_mission:
 
 org $8b9698
 bg_obj_delete:

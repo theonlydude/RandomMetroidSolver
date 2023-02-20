@@ -459,9 +459,9 @@ write_stats:
     rtl
 
 numbers_top:
-    dw $0060, $0061, $0062, $0063, $0064, $0065, $0066, $0067, $0068, $0069, $006a, $006b, $006c, $006d, $006e, $006f
+    dw $2060, $2061, $2062, $2063, $2064, $2065, $2066, $2067, $2068, $2069, $206a, $206b, $206c, $206d, $206e, $206f
 numbers_bot:
-    dw $0070, $0071, $0072, $0073, $0074, $0075, $0076, $0077, $0078, $0079, $007a, $007b, $007c, $007d, $007e, $007f
+    dw $2070, $2071, $2072, $2073, $2074, $2075, $2076, $2077, $2078, $2079, $207a, $207b, $207c, $207d, $207e, $207f
 
 print "DF code end: ", pc
 warnpc $dfd91a
@@ -1603,13 +1603,13 @@ draw_majors:
 .end:
         rts
 
+table tables/endscreen.tbl,rtl
+
 str_time:
-        !big
         dw "TIME "
         dw $0000
 
 str_items:
-        !big
         dw "ITEMS"
         dw $0000
 
@@ -1725,3 +1725,16 @@ endif
 
 org $8ce12f
 bg_obj_indirect_nothing:
+
+;;; overwrite vanilla numbers table to write them in white
+org $8BE741
+        dw $2060,$2070 ; 0
+        dw $2061,$2071 ; 1
+        dw $2062,$2072 ; 2
+        dw $2063,$2073 ; 3
+        dw $2064,$2074 ; 4
+        dw $2065,$2075 ; 5
+        dw $2066,$2076 ; 6
+        dw $2067,$2077 ; 7
+        dw $2068,$2078 ; 8
+        dw $2069,$2079 ; 9

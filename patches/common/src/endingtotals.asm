@@ -4,6 +4,8 @@
 ;Allows an uneven or random number of items (up to 255 separate item pickups)
 ;Adds a single decimal point value, to give more accurate results to random item ammounts
 
+;;; by default, will draw according to VARIA endscreen, unless "VANILLA_ENDSCREEN" is defined
+
 lorom
 arch 65816
 
@@ -107,19 +109,29 @@ display_end:
         PLB
         phx
         LDX #$0000
+if defined("VANILLA_ENDSCREEN")
         ;; draw decimal icon
         LDA #$385A
-        %tileOffset(28, 2)      ; value for VARIA end screen
-        sta.w $7E3000+!_tile_offset
-        ;; STA $7E33E0          ; vanilla value
-        LDA #$386A              ; draw percentage sign
-        %tileOffset(30, 1)      ; value for VARIA end screen
-        sta.w $7E3000+!_tile_offset
-        ;; STA $7E33A4          ; vanilla value
+        sta $7E33E0
+        ;; draw percentage sign
+        LDA #$386A
+        STA $7E33A4
         LDA #$387A
+        STA $7E33E4
+else
+        ;; draw decimal icon
+        lda #$205a
+        %tileOffset(28, 2)      ; value for VARIA end screen
+        sta $7E3000+!_tile_offset
+        ;; draw percentage sign
+        lda #$206A
+        %tileOffset(30, 1)      ; value for VARIA end screen
+        sta $7E3000+!_tile_offset
+        lda #$207a
         %tileOffset(30, 2)      ; value for VARIA end screen
-        sta.w $7E3000+!_tile_offset
-        ;; STA $7E33E4          ; vanilla value
+        sta $7E3000+!_tile_offset
+endif
+        ;; draw digits
         LDA $12
         beq .skip_hundredths    ; if 0 don't draw hundredths digit
         JSR draw_digit_end
@@ -142,13 +154,19 @@ draw_digit_end:
         TAY
         LDA $E741,y             ; tilemap values for decimal digits (top half)
         ;; write in bg1
-        %tileOffset(25, 1)      ; value for VARIA end screen
+if defined("VANILLA_ENDSCREEN")
+        STA $7E339A,x
+else
+        %tileOffset(25, 1)
         STA $7E3000+!_tile_offset,x
-        ;; STA $7E339A,x          ; vanilla value
+endif
         LDA $E743,y             ; tilemap values for decimal digits (bottom half)
+if defined("VANILLA_ENDSCREEN")
+        STA $7E33DA,x
+else
         %tileOffset(25, 2)      ; value for VARIA end screen
         STA $7E3000+!_tile_offset,x
-        ;; STA $7E33DA,x          ; vanilla value
+endif
         inx : inx
         ply
         rts

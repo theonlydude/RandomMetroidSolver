@@ -689,8 +689,8 @@ script:
     dw !draw, !blank
     dw !draw, !row*238 ;; ROTATED SUPER METROID HACKS
     dw !draw, !blank
-    dw !draw, !row*239 ;; BUGGMANN
-    dw !draw, !row*240
+    dw !draw, !row*217 ;; BUGGMANN
+    dw !draw, !row*218
     dw !draw, !blank
     dw !draw, !blank
     dw !draw, !row*139 ;; SPECIAL THANKS TO
@@ -927,15 +927,13 @@ script:
     dw !draw, !row*678
     dw !draw, !blank
 
-    ;; Last info.
+    ;; free space
     dw !draw, !blank
     dw !draw, !blank
     dw !draw, !blank
     dw !draw, !blank
-
-    dw !draw, !row*217 ;; Final Time
-    dw !draw, !row*218
-
+    dw !draw, !blank
+    dw !draw, !blank
     dw !draw, !blank
     dw !draw, !blank
     dw !draw, !blank
@@ -968,7 +966,6 @@ script:
 
 stats:
     ;; STAT ID, ADDRESS,    TYPE (1 = Number, 2 = Time, 3 = Full time), UNUSED
-    dw 0,       !row*217,  3, 0    ;; Full RTA Time
     dw 2,       !row*185,  1, 0    ;; Door transitions
     dw 3,       !row*187,  3, 0    ;; Time in doors
     dw 5,       !row*189,  2, 0    ;; Time adjusting doors
@@ -1138,8 +1135,10 @@ credits:
     dw " power bombs                  } " ;; 214
     dw " BOMBS                        0 " ;; 215
     dw " bombs                        } " ;; 216
-    dw " FINAL TIME         00'00'00^00 " ;; 217
-    dw " final time         }} }} }} }} " ;; 218
+    ;; uhh..credits..?
+    dw "           BUGGMANN             " ;; 217
+    dw "           buggmann             " ;; 218
+    ;; resume
     dw "       THANKS FOR PLAYING       " ;; 219
     dw "       thanks for playing       " ;; 220
     dw " PAUSE MENU         00'00'00^00 " ;; 221
@@ -1166,9 +1165,6 @@ credits:
     ;; credits once again
     !purple
     dw "  ROTATED SUPER METROID HACKS   " ;; 238
-    !big
-    dw "           BUGGMANN             " ;; 239
-    dw "           buggmann             " ;; 240
 
     dw $0000                              ;; End of credits tilemap
 

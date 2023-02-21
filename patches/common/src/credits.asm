@@ -1451,7 +1451,7 @@ post_credits:
         plp
         rts
 
-;;; Draws a string with big font to BG1 tilemap. String has to be in CAPS, with !big table.
+;;; Draws a string with big font to BG1 tilemap. String has to be in CAPS, with endingscreen table.
 ;;; A: string addr in current DB
 ;;; X: tile offset
 draw_string:
@@ -1503,7 +1503,7 @@ draw_item_gfx:
         sta !BG1_tilemap,x
         inx : inx
         sta !BG1_tilemap,x
-        txa : clc : adc !row-2 : tax
+        txa : clc : adc.w #!row-2 : tax
         pla
         sta !BG1_tilemap,x
         inx : inx
@@ -1560,17 +1560,17 @@ draw_minors:
         lda minors_table+8, y
         sta $4206
         %a16()
-        ldx minors_table+2, y : inx : inx : inx : stx $16
-        lda $4216
+        lda minors_table+2, y : clc : adc.w #6 : tax
+        lda $4214
         ;; display collected packs
         jsr draw_number
         ;; display /
-        inc $16 : inc $16 : ldx $16
-        lda #$21DC : sta !BG1_tilemap, x
+        lda minors_table+2, y : clc : adc.w #10 : tax
+        lda #$206B : sta !BG1_tilemap, x
         txa : clc : adc #!row : tax
-        lda #$221C : sta !BG1_tilemap, x
+        lda #$207B : sta !BG1_tilemap, x
         ;; display total packs
-        ldx $16 : inx
+        lda minors_table+2, y : clc : adc.w #12 : tax
         lda minors_table+6, y
         jsr draw_number
         tya : clc : adc #$0009 : tay
@@ -1592,10 +1592,10 @@ draw_majors:
         lda majors_table, y
         bra .display
 .not_collected:
-        ;; FIXME something to do with palettes instead
-        lda majors_table, y : clc : adc #$0040
+        ;; FIXME something to do with palettes instead of just vert flip
+        lda majors_table, y : ora #$8000
 .display:
-        ldx minors_table+2, y
+        ldx majors_table+2, y
         jsr draw_item_gfx
 .next:
         tya : clc : adc #$0008 : tay
@@ -1637,11 +1637,11 @@ macro energyTableEntry(item, tile, x, y, collected, total)
 endmacro
 
 %export(minors_table)
-        %ammoTableEntry(missiles, $2030, 2, 5, $09C8, 33)
-        %ammoTableEntry(supers, $2031, 12, 5, $09CC, 22)
-        %ammoTableEntry(power_bombs, $2032, 22, 5, $09D0, 11)
-        %energyTableEntry(etanks, $2033, 7, 9, $09C4, 14)
-        %energyTableEntry(rtanks, $2034, 19, 9, $09D4, 4)
+        %ammoTableEntry(missiles, $3800, 2, 5, $09C8, 33)
+        %ammoTableEntry(supers, $3801, 12, 5, $09CC, 22)
+        %ammoTableEntry(power_bombs, $3802, 22, 5, $09D0, 11)
+        %energyTableEntry(etanks, $3803, 7, 9, $09C4, 14)
+        %energyTableEntry(rtanks, $3804, 19, 9, $09D4, 4)
         dw $0000
 
 ;;; majors table
@@ -1656,22 +1656,22 @@ macro majorTableEntry(item, tile, x, y, collected, mask)
 endmacro
 
 %export(majors_table)
-        %majorTableEntry(charge, $2035, 3, 14, $09A8, $1000)
-        %majorTableEntry(ice, $2036, 7, 14, $09A8, $0002)
-        %majorTableEntry(wave, $2037, 11, 14, $09A8, $0001)
-        %majorTableEntry(spazer, $2038, 15, 14, $09A8, $0004)
-        %majorTableEntry(plasam, $2039, 19, 14, $09A8, $0008)
-        %majorTableEntry(grapple, $203A, 23, 14, $09A4, $4000)
-        %majorTableEntry(xray, $203B, 27, 14, $09A4, $8000)
-        %majorTableEntry(varia, $203C, 13, 18, $09A4, $0001)
-        %majorTableEntry(gravity, $203D, 17, 18, $09A4, $0020)
-        %majorTableEntry(morph, $203E, 3, 22, $09A4, $0004)
-        %majorTableEntry(bomb, $203F, 7, 22, $09A4, $1000)
-        %majorTableEntry(spring, $2040, 11, 22, $09A4, $0002)
-        %majorTableEntry(speed, $2041, 15, 22, $09A4, $2000)
-        %majorTableEntry(hijump, $2042, 19, 22, $09A4, $0100)
-        %majorTableEntry(space, $2043, 23, 22, $09A4, $0200)
-        %majorTableEntry(screw, $2044, 27, 22, $09A4, $0008)
+        %majorTableEntry(charge, $3805, 3, 13, $09A8, $1000)
+        %majorTableEntry(ice, $3806, 7, 13, $09A8, $0002)
+        %majorTableEntry(wave, $3807, 11, 13, $09A8, $0001)
+        %majorTableEntry(spazer, $3808, 15, 13, $09A8, $0004)
+        %majorTableEntry(plasam, $3809, 19, 13, $09A8, $0008)
+        %majorTableEntry(grapple, $380A, 23, 13, $09A4, $4000)
+        %majorTableEntry(xray, $380B, 27, 13, $09A4, $8000)
+        %majorTableEntry(varia, $380C, 13, 17, $09A4, $0001)
+        %majorTableEntry(gravity, $380D, 17, 17, $09A4, $0020)
+        %majorTableEntry(morph, $380E, 3, 21, $09A4, $0004)
+        %majorTableEntry(bomb, $380F, 7, 21, $09A4, $1000)
+        %majorTableEntry(spring, $3810, 11, 21, $09A4, $0002)
+        %majorTableEntry(speed, $3811, 15, 21, $09A4, $2000)
+        %majorTableEntry(hijump, $3812, 19, 21, $09A4, $0100)
+        %majorTableEntry(space, $3813, 23, 21, $09A4, $0200)
+        %majorTableEntry(screw, $3814, 27, 21, $09A4, $0008)
         dw $0000
 
 print "bank 8B end : ", pc

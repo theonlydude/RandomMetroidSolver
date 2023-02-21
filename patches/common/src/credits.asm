@@ -1428,8 +1428,11 @@ init_sprite_second_2:
         STA $1A7D,y
         JMP $F051
 
-;;; main entry point to draw an ending screen
-post_credits:
+
+;;; Ending screen: display each section separately
+
+macro postCreditsStep(step)
+post_credits_<step>:
         php
         %ai16()
         phb
@@ -1437,15 +1440,18 @@ post_credits:
         phy
         pea $8b8b : plb : plb   ; DB = 8B to index local data tables with Y
         lda #$ffff : sta $1a    ; leading 0 flag on to draw numbers
-        jsr draw_final_time
-        jsr draw_percent
-        jsr draw_minors
-        jsr draw_majors
+        jsr draw_<step>
         ply
         plx
         plb
         plp
         rts
+endmacro
+
+%postCreditsStep(final_time)
+%postCreditsStep(percent)
+%postCreditsStep(minors)
+%postCreditsStep(majors)
 
 ;;; Draws a string with big font to BG1 tilemap. String has to be in CAPS, with endingscreen table.
 ;;; A: string addr in current DB
@@ -1690,21 +1696,23 @@ see_you_next_mission:
 org $8b9698
 bg_obj_delete:
 
+macro bgObjWait(frames)
+        dw <frames>, $0000, bg_obj_indirect_nothing
+endmacro
+
 ;;; overwrite item percentage instruction list to display end screen
 org $8cdfdb
 ending_bg_obj:
-        ;; wait 128 frames
-        dw $0080
-        db $00
-        db $00
-        dw bg_obj_indirect_nothing
-        dw post_credits   ; don't bother with frame delays etc for now
+        %bgObjWait(60)
+        dw post_credits_final_time
+        %bgObjWait(90)
+        dw post_credits_percent
         dw endingtotals_display_item_count_end_game ; X,Y are adjusted in ending totals itself
-        ;; wait 128 frames
-        dw $0080
-        db $00
-        db $00
-        dw bg_obj_indirect_nothing
+        %bgObjWait(90)
+        dw post_credits_minors
+        %bgObjWait(90)
+        dw post_credits_majors
+        %bgObjWait(120)
         dw prepare_see_you_next_mission
         dw bg_obj_delete
 

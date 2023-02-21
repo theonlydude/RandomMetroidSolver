@@ -1523,8 +1523,8 @@ macro drawNumber(number, x, y)
 endmacro
 
 macro drawChar(char, x, y)
-        %ldx_tileOffset(<x>, <y>)
-        lda <char> : sta !BG1_tilemap, x
+        %tileOffset(<x>, <y>)
+        lda <char> : sta !BG1_tilemap+!_tile_offset
 endmacro
 
 draw_final_time:
@@ -1573,6 +1573,7 @@ draw_minors:
         lda minors_table+2, y : clc : adc.w #12 : tax
         lda minors_table+6, y
         jsr draw_number
+        ;; next entry
         tya : clc : adc #$0009 : tay
         bra .loop
 .end:
@@ -1627,21 +1628,21 @@ macro itemTableEntry(category, item, tile, x, y, collected, specific)
 endmacro
 
 macro ammoTableEntry(item, tile, x, y, collected, total)
-%itemTableEntry(ammo, <item>, <tile>, <x>, <y>, <collected>, <total>)
+%itemTableEntry(minors, <item>, <tile>, <x>, <y>, <collected>, <total>)
         db 5
 endmacro
 
 macro energyTableEntry(item, tile, x, y, collected, total)
-%itemTableEntry(energy, <item>, <tile>, <x>, <y>, <collected>, <total>)
+%itemTableEntry(minors, <item>, <tile>, <x>, <y>, <collected>, <total>)
         db 100
 endmacro
 
 %export(minors_table)
-        %ammoTableEntry(missiles, $3800, 2, 5, $09C8, 33)
-        %ammoTableEntry(supers, $3801, 12, 5, $09CC, 22)
-        %ammoTableEntry(power_bombs, $3802, 22, 5, $09D0, 11)
-        %energyTableEntry(etanks, $3803, 7, 9, $09C4, 14)
-        %energyTableEntry(rtanks, $3804, 19, 9, $09D4, 4)
+        %ammoTableEntry(Missile, $3800, 2, 5, $09C8, 33)
+        %ammoTableEntry(Super, $3801, 12, 5, $09CC, 22)
+        %ammoTableEntry(PowerBomb, $3802, 22, 5, $09D0, 11)
+        %energyTableEntry(ETank, $3803, 7, 9, $09C4, 14)
+        %energyTableEntry(Reserve, $3804, 19, 9, $09D4, 4)
         dw $0000
 
 ;;; majors table
@@ -1652,26 +1653,26 @@ endmacro
 ;;; FIXME tmp tile IDs for now
 
 macro majorTableEntry(item, tile, x, y, collected, mask)
-%itemTableEntry(major, <item>, <tile>, <x>, <y>, <collected>, <mask>)
+%itemTableEntry(majors, <item>, <tile>, <x>, <y>, <collected>, <mask>)
 endmacro
 
 %export(majors_table)
-        %majorTableEntry(charge, $3805, 3, 13, $09A8, $1000)
-        %majorTableEntry(ice, $3806, 7, 13, $09A8, $0002)
-        %majorTableEntry(wave, $3807, 11, 13, $09A8, $0001)
-        %majorTableEntry(spazer, $3808, 15, 13, $09A8, $0004)
-        %majorTableEntry(plasam, $3809, 19, 13, $09A8, $0008)
-        %majorTableEntry(grapple, $380A, 23, 13, $09A4, $4000)
-        %majorTableEntry(xray, $380B, 27, 13, $09A4, $8000)
-        %majorTableEntry(varia, $380C, 13, 17, $09A4, $0001)
-        %majorTableEntry(gravity, $380D, 17, 17, $09A4, $0020)
-        %majorTableEntry(morph, $380E, 3, 21, $09A4, $0004)
-        %majorTableEntry(bomb, $380F, 7, 21, $09A4, $1000)
-        %majorTableEntry(spring, $3810, 11, 21, $09A4, $0002)
-        %majorTableEntry(speed, $3811, 15, 21, $09A4, $2000)
-        %majorTableEntry(hijump, $3812, 19, 21, $09A4, $0100)
-        %majorTableEntry(space, $3813, 23, 21, $09A4, $0200)
-        %majorTableEntry(screw, $3814, 27, 21, $09A4, $0008)
+        %majorTableEntry(Charge, $3805, 3, 13, $09A8, $1000)
+        %majorTableEntry(Ice, $3806, 7, 13, $09A8, $0002)
+        %majorTableEntry(Wave, $3807, 11, 13, $09A8, $0001)
+        %majorTableEntry(Spazer, $3808, 15, 13, $09A8, $0004)
+        %majorTableEntry(Plasam, $3809, 19, 13, $09A8, $0008)
+        %majorTableEntry(Grapple, $380A, 23, 13, $09A4, $4000)
+        %majorTableEntry(XRayScope, $380B, 27, 13, $09A4, $8000)
+        %majorTableEntry(Varia, $380C, 13, 17, $09A4, $0001)
+        %majorTableEntry(Gravity, $380D, 17, 17, $09A4, $0020)
+        %majorTableEntry(Morph, $380E, 3, 21, $09A4, $0004)
+        %majorTableEntry(Bomb, $380F, 7, 21, $09A4, $1000)
+        %majorTableEntry(SpringBall, $3810, 11, 21, $09A4, $0002)
+        %majorTableEntry(SpeedBooster, $3811, 15, 21, $09A4, $2000)
+        %majorTableEntry(HiJump, $3812, 19, 21, $09A4, $0100)
+        %majorTableEntry(SpaceJump, $3813, 23, 21, $09A4, $0200)
+        %majorTableEntry(ScrewAttack, $3814, 27, 21, $09A4, $0008)
         dw $0000
 
 print "bank 8B end : ", pc

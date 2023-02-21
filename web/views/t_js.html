@@ -194,7 +194,6 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     updateRoomsVisibility(jsonData);
     updateLocations(jsonData);
     updateInventory(jsonData);
-    displayDoors(jsonData);
 
     setWSIcon("checkmark");
 
@@ -237,10 +236,6 @@ function updateTimer(jsonData) {
     } else {
         document.getElementById("timer").style.display = "none";
     }
-}
-
-function displayDoors(jsonData) {
-    console.warn("TODO doors")
 }
 
 function updateGlobal(jsonData) {

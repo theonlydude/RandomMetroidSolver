@@ -195,7 +195,6 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     updateLocations(jsonData);
     updateInventory(jsonData);
     displayDoors(jsonData);
-    displayCompletedObjectives(jsonData);
 
     setWSIcon("checkmark");
 
@@ -268,11 +267,6 @@ function updateLocations(jsonData) {
 }
 
 function updateInventory(jsonData) {
-}
-
-var hideTimeout = null;
-function displayCompletedObjectives(jsonData) {
-    console.warn('TODO completed objectives')
 }
 
 function isActive(elemId) {
@@ -533,20 +527,7 @@ window.onload = function(){
 
   $("#placeItemButton").keypress(onEnterKey);
 
-  var objectivesPopup = document.getElementById("objectivesPopup");
-  objectivesPopup.onclick = function(event) {
-      hideObjectivePopup();
-  }
-
   loaded = true;
-}
-
-function hideObjectivePopup() {
-    $("#objectivesPopup").fadeOut();
-    if(hideTimeout != null) {
-        clearTimeout(hideTimeout);
-        hideTimeout = null;
-    }
 }
 
 function onEnterKey(event) {

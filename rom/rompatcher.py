@@ -164,9 +164,13 @@ class RomPatcher:
         self.writeItemsNumber()
         if not self.settings["isPlando"]:
             self.writeSeed(self.settings["seed"]) # lol if race mode
+        # credits stuff
         self.writeSpoiler(self.settings["itemLocs"], self.settings["progItemLocs"])
         self.writeRandoSettings(self.settings["randoSettings"], self.settings["itemLocs"])
+        self.writeEndscreenTables(self.settings["itemLocs"])
+        # area connections
         self.writeDoorConnections(self.settings["doors"])
+        # door caps
         self.writeDoorsColor()
 
         self.writeVersion(self.settings["displayedVersion"])
@@ -781,6 +785,20 @@ class RomPatcher:
         address += 0x40
         line = " available ammo {:>3}% energy {:>3}%".format(ammoPct, energyPct)
         self.writeCreditsStringBig(address, line, top=False)
+
+    def writeEndscreenTables(self, itemLocs):
+        # energy/ammo: write number of packs
+        minorTypes = ItemManager.getCategoryTypes('Ammo') + ItemManager.getCategoryTypes('Energy')
+        qtyOffset = 6
+        for itemType in minorTypes:
+            addr = Addresses.getOne("credits_minors_table_entry_" + itemType) + qtyOffset
+            self.romFile.writeWord(self.getItemQty(itemLocs, itemType), addr)
+        # upgrades: if missing, write 0 as collected RAM ptr
+        missingMajors = [itemType for itemType in ItemManager.getUpgradeTypes() if not any(il.Item.Type == itemType for il in itemLocs)]
+        collectedOffset = 4
+        for itemType in missingMajors:
+            addr = Addresses.getOne("credits_majors_table_entry_" + itemType) + collectedOffset
+            self.romFile.writeWord(0, addr)
 
     def writeSpoiler(self, itemLocs, progItemLocs=None):
         # keep only majors

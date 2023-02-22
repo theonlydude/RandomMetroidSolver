@@ -1747,3 +1747,9 @@ org $8BE741
 ;;; Overwrite font3 tiles with a version containing a /
 org $97E7DE
 incbin "credits/font3.bin"      ; compressed
+
+;;; Add decompressed item graphics from CRE after item graphics in bank 89
+org $899100
+incbin "credits/CRE_Items.gfx"
+
+warnpc $899800

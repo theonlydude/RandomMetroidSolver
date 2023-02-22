@@ -1568,9 +1568,9 @@ draw_minors:
         jsr draw_number
         ;; display /
         lda minors_table+2, y : clc : adc.w #10 : tax
-        lda #$206B : sta !BG1_tilemap, x
+        lda #$204C : sta !BG1_tilemap, x
         txa : clc : adc #!row : tax
-        lda #$207B : sta !BG1_tilemap, x
+        lda #$205C : sta !BG1_tilemap, x
         ;; display total packs
         lda minors_table+2, y : clc : adc.w #12 : tax
         lda minors_table+6, y
@@ -1703,14 +1703,14 @@ endmacro
 ;;; overwrite item percentage instruction list to display end screen
 org $8cdfdb
 ending_bg_obj:
-        %bgObjWait(60)
-        dw post_credits_final_time
         %bgObjWait(90)
+        dw post_credits_final_time
+        %bgObjWait(60)
         dw post_credits_percent
         dw endingtotals_display_item_count_end_game ; X,Y are adjusted in ending totals itself
-        %bgObjWait(90)
+        %bgObjWait(60)
         dw post_credits_minors
-        %bgObjWait(90)
+        %bgObjWait(120)
         dw post_credits_majors
         %bgObjWait(120)
         dw prepare_see_you_next_mission
@@ -1743,3 +1743,7 @@ org $8BE741
         dw $2067,$2077 ; 7
         dw $2068,$2078 ; 8
         dw $2069,$2079 ; 9
+
+;;; Overwrite font3 tiles with a version containing a /
+org $97E7DE
+incbin "credits/font3.bin"      ; compressed

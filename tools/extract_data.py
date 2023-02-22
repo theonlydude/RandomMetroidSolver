@@ -19,6 +19,10 @@ try:
     display = sys.argv[4]
 except:
     display = None
+try:
+    outbin = sys.argv[5]
+except:
+    outbin = None
 
 def whex(v):
     hex_part = hex(v)[2:]
@@ -43,4 +47,8 @@ else:
     for i in range(length):
         if i % 2 == 0:
             print("{}: {}".format(hex(pc_to_snes(address+i)), whex(data[i] + (data[i+1] << 8))))
+
+with open(outbin, "wb") as out:
+    out.write(bytearray(data))
+
 romFile.close()

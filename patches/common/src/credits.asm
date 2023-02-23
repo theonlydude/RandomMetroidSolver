@@ -1677,6 +1677,15 @@ endmacro
         %majorTableEntry(ScrewAttack, $3814, 27, 21, $09A4, $0008)
         dw $0000
 
+;;; palettes
+CRE_palette:
+        dw $0000, $02df, $01d7, $00ac, $5a73, $41ad, $2d08, $1863, $0bb1, $48fb, $7fff, $0000, $7fff, $44e5, $7fff, $0000
+
+beams_palette:
+        dw $0000, $72b2, $71c7, $4d03, $5a73, $41ad, $2d08, $1863, $0bb1, $72bc, $48fb, $1816, $7fff, $0b6b, $1e63, $0000
+
+;;; TODO dark versions for uncollected
+
 print "bank 8B end : ", pc
 warnpc $8bffff
 

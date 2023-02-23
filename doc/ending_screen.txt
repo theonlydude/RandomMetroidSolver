@@ -189,3 +189,20 @@ puts $7E "spaces" ($007F) in $7E35C0
 
 item% BG object is spawned in routine $8B:E58A, which first seems to
 handle screw attack symbol?
+
+
+Palette offsets:
+
+wave    0,2,0,0
+ice     0,3,0,0
+xray    1,1,0,0 3,3,0,0
+plasma  0,1,0,0
+
+colors used by common beam items:
+0, 4, 5, 6, 7, 8, C
+
+Ice (bright) 1, 2, 3
+Wave 9, A, B
+Plasma D, E, F
+
+BG1 palettes: 7EC000 (see RAM map)

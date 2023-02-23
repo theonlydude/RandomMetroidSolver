@@ -1748,8 +1748,18 @@ org $8BE741
 org $97E7DE
 incbin "credits/font3.bin"      ; compressed
 
+warnpc $97EEFF
+
+org $898000
+vanilla_items_gfx:
+
 ;;; Add decompressed item graphics from CRE after item graphics in bank 89
 org $899100
+CRE_items_gfx:
 incbin "credits/CRE_Items.gfx"
+;;; add extra graphics for colored beam "letters" for Ice/Wave/Plasma
+;;; to work with the same unique palette
+beam_letters_gfx:
+incbin "credits/beams.gfx"
 
 warnpc $899800

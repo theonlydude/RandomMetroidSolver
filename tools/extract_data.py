@@ -48,7 +48,8 @@ else:
         if i % 2 == 0:
             print("{}: {}".format(hex(pc_to_snes(address+i)), whex(data[i] + (data[i+1] << 8))))
 
-with open(outbin, "wb") as out:
-    out.write(bytearray(data))
+if outbin is not None:
+    with open(outbin, "wb") as out:
+        out.write(bytearray(data))
 
 romFile.close()

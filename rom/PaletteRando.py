@@ -3,6 +3,7 @@ from rom.rom import pc_to_snes
 from rom.romloader import RomLoader
 from rom.palette import expand_palette
 from rando.palettes import palettes
+from utils.colors import RGB_24_to_15, RGB_15_to_24, human_luminance, adjust_hue_degree
 import utils.log
 
 #Palette Hue Shift
@@ -319,29 +320,25 @@ class PaletteRando(object):
         self.varia_palette_offsets = [0x0D9520,0x0D9920,0x0D9940,0x0D9960,0x0D9980,0x0D99A0,0x0D99C0,0x0D99E0,0x0D9A00,0x0D9D20,0x0D9D40,0x0D9D60,0x0D9D80,0x0D9DA0,0x0D9DC0,0x0D9DE0,0x0D9E00,0x0D9E20,0x0D9E40,0x0D9E60,0x0D9E80,0x0D9EA0,0x0D9EC0,0x0D9EE0,0x0D9F00,0x6DCD1, 0x6DD20, 0x6DD6F, 0x6DDBE, 0x6DE0A,0x6E692, 0x6E6B4, 0x6E6D6, 0x6E6F8, 0x6E71A, 0x6E73C, 0x6E75E, 0x6E780, 0x6E7A2, 0x6E7C4, 0x6E7E6, 0x6E808, 0x6E82A, 0x6E84C, 0x6E86E, 0x6E890,0x6DCF5,0x6DD44,0x6DD93,0x6DDE2]
         self.gravity_palette_offsets = [0x0D9540,0x0D9560,0x0D9580,0x0D95A0,0x0D95C0,0x0D95E0,0x0D9600,0x0D9620,0x0D9640,0x0D9660,0x0D9680,0x0D96A0,0x0D9780,0x0D97A0,0x0D97C0,0x0D97E0,0x0D9800,0x0D9A20,0x0D9A40,0x0D9A60,0x0D9A80,0x0D9AA0,0x0D9AC0,0x0D9AE0,0x0D9B00,0x0D9F20,0x0D9F40,0x0D9F60,0x0D9F80,0x0D9FA0,0x0D9FC0,0x0D9FE0,0x0DA000,0x0DA020,0x0DA040,0x0DA060,0x0DA080,0x0DA0A0,0x0DA0C0,0x0DA0E0,0x0DA100,0x6DE37, 0x6DE86, 0x6DED5, 0x6DF24, 0x6DF70,0x6E8BE, 0x6E8E0, 0x6E902, 0x6E924, 0x6E946, 0x6E968, 0x6E98A, 0x6E9AC, 0x6E9CE, 0x6E9F0, 0x6EA12, 0x6EA34, 0x6EA56, 0x6EA78, 0x6EA9A, 0x6EABC,0x6DE5B,0x6DEAA,0x6DEF9,0x6DF48]
 
-    def human_luminance(self, r, g, b):
-        # color green is perceived more by human eye
-        return 0.2126*r + 0.7152*g + 0.0722*b
-
     def update_hue(self, int_value_LE, degree):
         #Convert 15bit RGB to 24bit RGB
-        rgb_value_24 = self.RGB_15_to_24(int_value_LE)
+        rgb_value_24 = RGB_15_to_24(int_value_LE)
         (r, g, b) = rgb_value_24
 
         if self.adjust_luminance:
-            human_luminance_before = self.human_luminance(r, g, b)
+            human_luminance_before = human_luminance(r, g, b)
 
         #24bit RGB to HLS
         hls_col = colorsys.rgb_to_hls(r, g, b)
 
         #Generate new hue based on degree
-        new_hue = self.adjust_hue_degree(hls_col, degree)
+        new_hue = adjust_hue_degree(hls_col, degree)
 
         rgb_final = colorsys.hls_to_rgb(new_hue, hls_col[1], hls_col[2])
         (r, g, b) = rgb_final
 
         if self.adjust_luminance:
-            human_luminance_after = self.human_luminance(r, g, b)
+            human_luminance_after = human_luminance(r, g, b)
 
             # if we've lost some human luminance, put it back
             luminance_diff = human_luminance_before - human_luminance_after
@@ -353,38 +350,9 @@ class PaletteRando(object):
         #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
         rgb_final = (int(r*255), int(g*255), int(b*255))
 
-        BE_hex_color = self.RGB_24_to_15(rgb_final)
+        BE_hex_color = RGB_24_to_15(rgb_final)
 
         return BE_hex_color
-
-    def adjust_hue_degree(self, hsl_color, degree):
-        hue = hsl_color[0] * 360
-        hue_adj = (hue + degree) % 360
-        self.logger.debug("Original hue: {}".format(hue))
-        self.logger.debug("Adjusted hue: {}".format(hue_adj))
-        self.logger.debug("Degree: {}".format(degree))
-
-        return hue_adj/360.0
-
-    def RGB_24_to_15(self, color_tuple):
-        R_adj = int(color_tuple[0])//8
-        G_adj = int(color_tuple[1])//8
-        B_adj = int(color_tuple[2])//8
-
-        c = B_adj * 1024 + G_adj * 32 + R_adj
-        return (c)
-
-    def RGB_15_to_24(self, SNESColor):
-        R = ((SNESColor      ) % 32) * 8
-        G = ((SNESColor//32  ) % 32) * 8
-        B = ((SNESColor//1024) % 32) * 8
-
-        # span to 255 (limited to 248 otherwise)
-        R = R + R // 32
-        G = G + G // 32
-        B = B + B // 32
-
-        return (R/255.0, G/255.0, B/255.0)
 
     def read_word(self, address):
         return self.palettesROM.readWord(address)

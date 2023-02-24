@@ -20,13 +20,15 @@ class DB:
             return
 
         # if the pool is full try 10 times during 1s
-        for _ in range(10):
+        tries = 10
+        for i in range(tries):
             connOk = True
             try:
                 self.conn = mysql.connector.connect(pool_name="varia", **dbParams)
                 self.cursor = self.conn.cursor()
             except PoolError as e:
                 connOk = False
+                print("DB.__init__::pool error {}/{}: {}".format(i+1, tries, e))
             except Exception as e:
                 print("DB.__init__::error connect/create cursor: {}".format(e))
                 self.dbAvailable = False
@@ -259,7 +261,7 @@ where id = %s;"""
                 self.cursor.execute(sql, params)
             return self.cursor.fetchall()
         except Exception as e:
-            print("DB.execSelect::error execute \"{}\" error: {}".format(sql, e))
+            print("DB.execSelect::error: {} query: \"{}\"".format(e, sql))
             self.dbAvailable = False
 
     def getUsage(self, table, weeks):
@@ -638,7 +640,7 @@ order by init_time;"""
 
         # pivot
         sql = "SELECT "
-        sql += ", ".join(["SUM(CASE WHEN ship = '{}' THEN 1 ELSE 0 END) AS count_{}".format(ship, ship.replace('-', '_')) for ship in ships])
+        sql += ", ".join(["SUM(CASE WHEN ship = '{}' THEN 1 ELSE 0 END) AS count_{}".format(ship, ship.replace('-', '_').replace('.', '_')) for ship in ships])
         sql += " FROM ships where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK);".format(weeks)
 
         rows = self.execSelect(sql)

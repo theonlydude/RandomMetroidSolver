@@ -1485,8 +1485,8 @@ init_sprite_second_2:
 ;;; we need 4 palettes to display everything
 !palette_index_CRE = 2          ; most items
 !palette_index_CRE_dark = 3     ; most items, uncollected variant
-!palette_index_beams = 7        ; ice, plasma, wave
-!palette_index_beams_dark = 8   ; ice, plasma, wave, uncollected variant
+!palette_index_beams = 5        ; ice, plasma, wave
+!palette_index_beams_dark = 7   ; ice, plasma, wave, uncollected variant
 
 load_palettes:
         phx
@@ -1494,10 +1494,10 @@ load_palettes:
 -
         dex : dex
         beq .end
-        lda CRE_palette, x : sta 32*!palette_index_CRE+!palettes_ram, x
-        lda CRE_palette_dark, x : sta 32*!palette_index_CRE_dark+!palettes_ram, x
-        lda beams_palette, x : sta 32*!palette_index_beams+!palettes_ram, x
-        lda beams_palette_dark, x : sta 32*!palette_index_beams_dark+!palettes_ram, x
+        lda.l CRE_palette, x : sta 32*!palette_index_CRE+!palettes_ram, x
+        lda.l CRE_palette_dark, x : sta 32*!palette_index_CRE_dark+!palettes_ram, x
+        lda.l beams_palette, x : sta 32*!palette_index_beams+!palettes_ram, x
+        lda.l beams_palette_dark, x : sta 32*!palette_index_beams_dark+!palettes_ram, x
         bra -
 .end:
         plx
@@ -1505,8 +1505,6 @@ load_palettes:
 
 macro postCreditsStep(step)
 post_credits_<step>:
-        php
-        %ai16()
         phb
         phx
         phy
@@ -1516,7 +1514,6 @@ post_credits_<step>:
         ply
         plx
         plb
-        plp
         rts
 endmacro
 
@@ -1728,7 +1725,7 @@ gfx_transfer_table:
 .Grapple:
         %gfxTansferEntry(vanilla_items_gfx+$800, 4*!gfx_tile_size)
 .XRayScope:
-        %gfxTansferEntry(vanilla_items_gfx+$900, 4*!gfx_tile_size)
+        %gfxTansferEntry(vanilla_items_gfx+$980, 4*!gfx_tile_size)
 .SpeedBooster:
         %gfxTansferEntry(vanilla_items_gfx+$A00, 4*!gfx_tile_size)
 .Charge:

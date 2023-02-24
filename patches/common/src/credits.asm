@@ -15,6 +15,7 @@ incsrc "macros.asm"
 ;;; -------------------------------
 
 incsrc "constants.asm"
+incsrc "event_list.asm"
 
 ;; Defines for the script and credits data
 !speed = set_scroll
@@ -96,6 +97,10 @@ org $8BF59A
 	jsr check_samus_avg_time
 org $8BF5BD
 	jsr check_samus_avg_time
+
+;; prevent samus eyes to overwrite our gfx in the final screen
+org $8B9654
+        jsr samus_eyes
 
 ;;; -------------------------------
 ;;; CODE
@@ -1428,8 +1433,75 @@ init_sprite_second_2:
         STA $1A7D,y
         JMP $F051
 
+;;; Ending screen
+;;  0                             31
+;; ----------------------------------
+;; |                                |0
+;; | TIME 01:23:45'00  ITEMS 100.0% |
+;; | TIME 01:23:45'00  ITEMS 100.0% |
+;; |                                |
+;; |                                |
+;; |  MM 12/33  SS 08/22  PB 06/11  |
+;; |  MM 12/33  SS 08/22  PB 06/11  |
+;; |                                |
+;; |                    ^           |
+;; |       EE 08/14    RR 01/04     |
+;; |       EE 08/14    RR 01/04     |
+;; |                                |
+;; |                                |
+;; |   CC  II  WW  SS  PP  GB  XX   |
+;; |   CC  II  WW  SS  PP  GB  XX   |
+;; |                                |
+;; |                                |
+;; |             VV  GG             |
+;; |             VV  GG             |
+;; |                                |
+;; |                                |
+;; |   MM  BB  S^  SP  HJ  SJ  SA   |
+;; |   MM  BB  SB  SP  HJ  SJ  SA   |
+;; |                                |
+;; |                                |
+;; |      SEE YOU NEXT MISSION      |
+;; |      SEE YOU NEXT MISSION      |
+;; |                                |27
+;; ----------------------------------
+;;; Sections: RTA time, items %, ammo+energy collection, upgrades collections
+;;; are displayed through the BG obj instruction list ending_bg_obj, that replaces
+;;; vanille item% display sequence.
+;;; 
+;;; Time displayed is IGT, since it is synced from RTA at the end of the game
+;;; 
+;;; Item% is displayed directly through endingtotals patch, tweaked for display location
+;;; 
+;;; Item quantities and collection are obtained through minors_table and majors_table.
+;;; 
+;;; Upgrades display normal graphics if collected, darkened graphics if not, or nothing
+;;; if missing from the seed
+;;; 
+;;; We reuse item graphics in bank 89, to which we append :
+;;; - decompressed item graphics from CRE (ammo packs and E tanks)
+;;; - special graphics for beam colored tiles to be able to draw everything with fewer palettes
 
-;;; Ending screen: display each section separately
+;;; we need 4 palettes to display everything
+!palette_index_CRE = 2          ; most items
+!palette_index_CRE_dark = 3     ; most items, uncollected variant
+!palette_index_beams = 7        ; ice, plasma, wave
+!palette_index_beams_dark = 8   ; ice, plasma, wave, uncollected variant
+
+load_palettes:
+        phx
+        ldx.w #32
+-
+        dex : dex
+        beq .end
+        lda CRE_palette, x : sta 32*!palette_index_CRE+!palettes_ram, x
+        lda CRE_palette_dark, x : sta 32*!palette_index_CRE_dark+!palettes_ram, x
+        lda beams_palette, x : sta 32*!palette_index_beams+!palettes_ram, x
+        lda beams_palette_dark, x : sta 32*!palette_index_beams_dark+!palettes_ram, x
+        bra -
+.end:
+        plx
+        rts
 
 macro postCreditsStep(step)
 post_credits_<step>:
@@ -1497,19 +1569,16 @@ draw_number:
         plb
         rts
 
-;;; tmp version that shows the same BG1 tile 4 times
-;;; A: tile index
+;;; A: ptr to tile descriptor: top left, top right, bottom left, bottom right
 ;;; X: tile offset
 draw_item_gfx:
-        pha
-        sta !BG1_tilemap,x
-        inx : inx
-        sta !BG1_tilemap,x
-        txa : clc : adc.w #!row-2 : tax
-        pla
-        sta !BG1_tilemap,x
-        inx : inx
-        sta !BG1_tilemap,x
+        phy
+        tay
+        lda $0000, y : sta !BG1_tilemap, x
+        lda $0002, y : sta !BG1_tilemap+2, x
+        lda $0004, y : sta !BG1_tilemap+!row, x
+        lda $0006, y : sta !BG1_tilemap+!row+2, x
+        ply
         rts
 
 macro drawString(str_addr, x, y)
@@ -1534,11 +1603,11 @@ draw_final_time:
         %drawString(str_time, 1, 1)
         ;; draw RTA at 6,1
         %drawNumber(!igt_hours, 6, 1)
-        %drawChar(#$004A, 8, 1) ; '
+        %drawChar(#$204A, 8, 1) ; '
         %drawNumber(!igt_minutes, 9, 1)
-        %drawChar(#$004A, 11, 1) ; '
+        %drawChar(#$204A, 11, 1) ; '
         %drawNumber(!igt_seconds, 12, 1)
-        %drawChar(#$004B, 14, 1) ; "
+        %drawChar(#$204B, 14, 1) ; "
         %drawNumber(!igt_frames, 15, 1)
         rts
 
@@ -1576,7 +1645,7 @@ draw_minors:
         lda minors_table+6, y
         jsr draw_number
         ;; next entry
-        tya : clc : adc #$0009 : tay
+        tya : clc : adc.w #9 : tay
         bra .loop
 .end:
         rts
@@ -1595,96 +1664,255 @@ draw_majors:
         lda majors_table, y
         bra .display
 .not_collected:
-        ;; FIXME something to do with palettes instead of just vert flip
-        lda majors_table, y : ora #$8000
+        ;; uncollected variant is just after normal variant
+        lda majors_table, y : clc : adc.w #8
 .display:
         ldx majors_table+2, y
         jsr draw_item_gfx
 .next:
-        tya : clc : adc #$0008 : tay
+        tya : clc : adc.w #8 : tay
         bra .loop
 .end:
         rts
 
-table tables/endscreen.tbl,rtl
+samus_eyes:
+        ;; don't display samus eyes if escape event is set (it shouldn't be in the intro)
+        lda !escape_event : jsl !check_event : bcs .end
+        jsr $87d3
+.end:
+        rts
 
-str_time:
-        dw "TIME "
-        dw $0000
-
-str_items:
-        dw "ITEMS"
-        dw $0000
-
-;;; minors tables
-;;; tile ID, tile offset, collected addr (RAM), total, pack
-;;; "total" fields have to be updated by the randomizer
-;;; terminated by 0
-;;; 
-;;; FIXME tmp tile IDs for now
-
-macro itemTableEntry(category, item, tile, x, y, collected, specific)
-%export(<category>_table_entry_<item>)
-%tileOffset(<x>, <y>)
-        dw <tile>, !_tile_offset, <collected>, <specific>
+;;; create a table in the form:
+;;; size, source addr (long), 0 (unused, there to make entries 8 bytes), dest addr (VRAM)
+;;; this table will be read by function $8B:E41F (properly tweaked, see below)
+;;; to setup a VRAM transfer each frame during the white screen after samus shoots.
+macro gfxTansferEntry(source, size)
+        dw <size> : dl <source> : db $00 : dw !VRAM_ptr
+!VRAM_ptr #= !VRAM_ptr+(<size>/2) ; VRAM uses word adresses
+!n_gfx_transfers #= !n_gfx_transfers+1
 endmacro
 
-macro ammoTableEntry(item, tile, x, y, collected, total)
-%itemTableEntry(minors, <item>, <tile>, <x>, <y>, <collected>, <total>)
+!gfx_tile_size = $20
+
+gfx_transfer_table:
+.vanilla:
+        ;; vanilla entries :
+        dw $0800 : dl $7E6000 : db 00 : dw $6000
+        dw $0800 : dl $7E6800 : db 00 : dw $6400
+        dw $0800 : dl $7E7000 : db 00 : dw $6800
+        dw $0800 : dl $7E7800 : db 00 : dw $6C00
+        dw $0800 : dl $7E8000 : db 00 : dw $5400
+        ;; custom transfers. Use !VRAM_ptr as dynamic destination helper
+;; 32 tiles available at start of BG1 tiles (small alphabet)
+!VRAM_ptr #= $4000
+;; used to patch table size in vanilla code
+!n_gfx_transfers #= 5
+.Bomb:
+        %gfxTansferEntry(vanilla_items_gfx, 4*!gfx_tile_size)
+.Gravity:
+        %gfxTansferEntry(vanilla_items_gfx+$100, 4*!gfx_tile_size)
+.SpringBall:
+        %gfxTansferEntry(vanilla_items_gfx+$200, 4*!gfx_tile_size)
+.Varia:
+        %gfxTansferEntry(vanilla_items_gfx+$300, 4*!gfx_tile_size)
+.HiJump:
+        %gfxTansferEntry(vanilla_items_gfx+$400, 4*!gfx_tile_size)
+.Screw:
+        %gfxTansferEntry(vanilla_items_gfx+$500, 4*!gfx_tile_size)
+.SpaceJump:
+        %gfxTansferEntry(vanilla_items_gfx+$600, 4*!gfx_tile_size)
+.Morph:
+        %gfxTansferEntry(vanilla_items_gfx+$700, 4*!gfx_tile_size)
+;; other tiles at the end of BG1 tileset (64 available)
+!VRAM_ptr #= $4800
+.Grapple:
+        %gfxTansferEntry(vanilla_items_gfx+$800, 4*!gfx_tile_size)
+.XRayScope:
+        %gfxTansferEntry(vanilla_items_gfx+$900, 4*!gfx_tile_size)
+.SpeedBooster:
+        %gfxTansferEntry(vanilla_items_gfx+$A00, 4*!gfx_tile_size)
+.Charge:
+        %gfxTansferEntry(vanilla_items_gfx+$B00, 4*!gfx_tile_size)
+.Ice:
+        %gfxTansferEntry(vanilla_items_gfx+$C00, !gfx_tile_size)
+        %gfxTansferEntry(beam_letters_gfx, !gfx_tile_size)
+        %gfxTansferEntry(vanilla_items_gfx+$C40, 2*!gfx_tile_size)
+.Wave:
+        %gfxTansferEntry(vanilla_items_gfx+$D00, !gfx_tile_size)
+        %gfxTansferEntry(2*!gfx_tile_size+beam_letters_gfx, !gfx_tile_size)
+        %gfxTansferEntry(vanilla_items_gfx+$D40, 2*!gfx_tile_size)
+.Plasma:
+        %gfxTansferEntry(vanilla_items_gfx+$E00, !gfx_tile_size)
+        %gfxTansferEntry(5*!gfx_tile_size+beam_letters_gfx, !gfx_tile_size)
+        %gfxTansferEntry(vanilla_items_gfx+$E40, 2*!gfx_tile_size)
+.Spazer:
+        %gfxTansferEntry(vanilla_items_gfx+$F00, 4*!gfx_tile_size)
+.Reserve:
+        %gfxTansferEntry(vanilla_items_gfx+$1080, 4*!gfx_tile_size)
+.ETank:
+        %gfxTansferEntry(CRE_items_gfx+$80, 4*!gfx_tile_size)
+.Missile:
+        %gfxTansferEntry(CRE_items_gfx+$100, 4*!gfx_tile_size)
+.Super:
+        %gfxTansferEntry(CRE_items_gfx+$200, 4*!gfx_tile_size)
+.PowerBomb:
+        %gfxTansferEntry(CRE_items_gfx+$360, 3*!gfx_tile_size)
+
+;;; tiles descriptor in BG tileset:
+;;; - w top left, w top right, w bottom left, w bottom right, with normal palette
+;;; if major: same with collected palette
+
+macro itemTiles(palette)
+        %dw_BGtile(!tile_idx, !palette_index_<palette>, 1, 0, 0)
+        %dw_BGtile(!tile_idx+1, !palette_index_<palette>, 1, 0, 0)
+        %dw_BGtile(!tile_idx+2, !palette_index_<palette>, 1, 0, 0)
+        %dw_BGtile(!tile_idx+3, !palette_index_<palette>, 1, 0, 0)
+endmacro
+
+macro majorTiles(palette)
+        %itemTiles(<palette>)
+        %itemTiles(<palette>_dark)
+        !tile_idx #= !tile_idx+4
+endmacro
+
+macro minorTiles()
+        %itemTiles(CRE)
+        !tile_idx #= !tile_idx+4
+endmacro
+
+;;; the order here is important, it's the same as above (VRAM load order)
+item_tiles:
+;;; first batch of GFX
+!tile_idx #= 0
+.Bomb:
+        %majorTiles(CRE)
+.Gravity:
+        %majorTiles(CRE)
+.SpringBall:
+        %majorTiles(CRE)
+.Varia:
+        %majorTiles(CRE)
+.HiJump:
+        %majorTiles(CRE)
+.ScrewAttack:
+        %majorTiles(CRE)
+.SpaceJump:
+        %majorTiles(CRE)
+.Morph:
+        %majorTiles(CRE)
+;;; end of GFX
+!tile_idx #= $80
+.Grapple:
+        %majorTiles(CRE)
+.XRayScope:
+        %majorTiles(CRE)
+.SpeedBooster:
+        %majorTiles(CRE)
+.Charge:
+        %majorTiles(CRE)
+.Ice:
+        %majorTiles(beams)
+.Wave:
+        %majorTiles(beams)
+.Plasma:
+        %majorTiles(beams)
+.Spazer:
+        %majorTiles(CRE)
+.Reserve:
+        %minorTiles()
+.ETank:
+        %minorTiles()
+.Missile:
+        %minorTiles()
+.Super:
+        %minorTiles()
+.PowerBomb:
+        ;; PB is special, as the bottom right tile is the bottom left tile mirrored
+        %dw_BGtile(!tile_idx, !palette_index_CRE, 1, 0, 0)
+        %dw_BGtile(!tile_idx+1, !palette_index_CRE, 1, 0, 0)
+        %dw_BGtile(!tile_idx+2, !palette_index_CRE, 1, 0, 0)
+        %dw_BGtile(!tile_idx+2, !palette_index_CRE, 1, 1, 0)
+        !tile_idx #= !tile_idx+3
+
+;;; minors tables
+;;; ptr to BG tiles, display offset, collected addr (RAM), total, pack
+;;; "total" fields have to be updated by the randomizer
+;;; terminated by 0
+
+macro itemTableEntry(category, item, x, y, collected, specific)
+%export(<category>_table_entry_<item>)
+%tileOffset(<x>, <y>)
+        dw item_tiles_<item>, !_tile_offset, <collected>, <specific>
+endmacro
+
+macro ammoTableEntry(item, x, y, collected, total)
+%itemTableEntry(minors, <item>, <x>, <y>, <collected>, <total>)
         db 5
 endmacro
 
-macro energyTableEntry(item, tile, x, y, collected, total)
-%itemTableEntry(minors, <item>, <tile>, <x>, <y>, <collected>, <total>)
+macro energyTableEntry(item, x, y, collected, total)
+%itemTableEntry(minors, <item>, <x>, <y>, <collected>, <total>)
         db 100
 endmacro
 
 %export(minors_table)
-        %ammoTableEntry(Missile, $3800, 2, 5, $09C8, 33)
-        %ammoTableEntry(Super, $3801, 12, 5, $09CC, 22)
-        %ammoTableEntry(PowerBomb, $3802, 22, 5, $09D0, 11)
-        %energyTableEntry(ETank, $3803, 7, 9, $09C4, 14)
-        %energyTableEntry(Reserve, $3804, 19, 9, $09D4, 4)
+        %ammoTableEntry(Missile, 2, 5, $09C8, 33)
+        %ammoTableEntry(Super, 12, 5, $09CC, 22)
+        %ammoTableEntry(PowerBomb, 22, 5, $09D0, 11)
+        %energyTableEntry(ETank, 7, 9, $09C4, 14)
+        %energyTableEntry(Reserve, 19, 9, $09D4, 4)
         dw $0000
 
 ;;; majors table
-;;; tile ID, tile offset, collected addr (RAM), mask
+;;; ptr to BG tiles, display offset, collected addr (RAM), mask
 ;;; "collected" fields can be updated by the randomizer: if set to 0, the major is absent
 ;;; terminated by 0
-;;; 
-;;; FIXME tmp tile IDs for now
 
-macro majorTableEntry(item, tile, x, y, collected, mask)
-%itemTableEntry(majors, <item>, <tile>, <x>, <y>, <collected>, <mask>)
+macro majorTableEntry(item, x, y, collected, mask)
+%itemTableEntry(majors, <item>, <x>, <y>, <collected>, <mask>)
 endmacro
 
 %export(majors_table)
-        %majorTableEntry(Charge, $3805, 3, 13, $09A8, $1000)
-        %majorTableEntry(Ice, $3806, 7, 13, $09A8, $0002)
-        %majorTableEntry(Wave, $3807, 11, 13, $09A8, $0001)
-        %majorTableEntry(Spazer, $3808, 15, 13, $09A8, $0004)
-        %majorTableEntry(Plasam, $3809, 19, 13, $09A8, $0008)
-        %majorTableEntry(Grapple, $380A, 23, 13, $09A4, $4000)
-        %majorTableEntry(XRayScope, $380B, 27, 13, $09A4, $8000)
-        %majorTableEntry(Varia, $380C, 13, 17, $09A4, $0001)
-        %majorTableEntry(Gravity, $380D, 17, 17, $09A4, $0020)
-        %majorTableEntry(Morph, $380E, 3, 21, $09A4, $0004)
-        %majorTableEntry(Bomb, $380F, 7, 21, $09A4, $1000)
-        %majorTableEntry(SpringBall, $3810, 11, 21, $09A4, $0002)
-        %majorTableEntry(SpeedBooster, $3811, 15, 21, $09A4, $2000)
-        %majorTableEntry(HiJump, $3812, 19, 21, $09A4, $0100)
-        %majorTableEntry(SpaceJump, $3813, 23, 21, $09A4, $0200)
-        %majorTableEntry(ScrewAttack, $3814, 27, 21, $09A4, $0008)
+        %majorTableEntry(Charge, 3, 13, $09A8, $1000)
+        %majorTableEntry(Ice, 7, 13, $09A8, $0002)
+        %majorTableEntry(Wave, 11, 13, $09A8, $0001)
+        %majorTableEntry(Spazer, 15, 13, $09A8, $0004)
+        %majorTableEntry(Plasma, 19, 13, $09A8, $0008)
+        %majorTableEntry(Grapple, 23, 13, $09A4, $4000)
+        %majorTableEntry(XRayScope, 27, 13, $09A4, $8000)
+        %majorTableEntry(Varia, 13, 17, $09A4, $0001)
+        %majorTableEntry(Gravity, 17, 17, $09A4, $0020)
+        %majorTableEntry(Morph, 3, 21, $09A4, $0004)
+        %majorTableEntry(Bomb, 7, 21, $09A4, $1000)
+        %majorTableEntry(SpringBall, 11, 21, $09A4, $0002)
+        %majorTableEntry(SpeedBooster, 15, 21, $09A4, $2000)
+        %majorTableEntry(HiJump, 19, 21, $09A4, $0100)
+        %majorTableEntry(SpaceJump, 23, 21, $09A4, $0200)
+        %majorTableEntry(ScrewAttack, 27, 21, $09A4, $0008)
         dw $0000
 
 ;;; palettes
 CRE_palette:
         dw $0000, $02df, $01d7, $00ac, $5a73, $41ad, $2d08, $1863, $0bb1, $48fb, $7fff, $0000, $7fff, $44e5, $7fff, $0000
 
+CRE_palette_dark:
+        dw $0000, $00a7, $0065, $0022, $1484, $0c63, $0842, $0400, $00e4, $1026, $1ce7, $0000, $1ce7, $1021, $1ce7, $0000
+
 beams_palette:
         dw $0000, $72b2, $71c7, $4d03, $5a73, $41ad, $2d08, $1863, $0bb1, $72bc, $48fb, $1816, $7fff, $0b6b, $1e63, $0000
 
-;;; TODO dark versions for uncollected
+beams_palette_dark:
+        dw $0000, $18a4, $1861, $1040, $1484, $0c63, $0842, $0400, $00e4, $18a6, $1026, $0405, $1ce7, $00c2, $0480, $0000
+
+table tables/endscreen.tbl,rtl
+
+str_time:
+        dw "TIME"
+        dw $0000
+
+str_items:
+        dw "ITEMS"
+        dw $0000
 
 print "bank 8B end : ", pc
 warnpc $8bffff
@@ -1713,6 +1941,7 @@ endmacro
 org $8cdfdb
 ending_bg_obj:
         %bgObjWait(90)
+        dw load_palettes
         dw post_credits_final_time
         %bgObjWait(60)
         dw post_credits_percent
@@ -1752,6 +1981,19 @@ org $8BE741
         dw $2067,$2077 ; 7
         dw $2068,$2078 ; 8
         dw $2069,$2079 ; 9
+
+;;; overwrite parts of state function called during white screen after samus shoots the screen
+;;; to setup a bunch of VRAM transfers for graphics using the gfx_transfer_table defined above
+org $8BE428
+        dw !n_gfx_transfers
+org $8BE435
+        dw gfx_transfer_table
+org $8BE43C
+        dw gfx_transfer_table+2
+org $8BE445
+        dw gfx_transfer_table+4
+org $8BE44D
+        dw gfx_transfer_table+6
 
 ;;; Overwrite font3 tiles with a version containing a /
 org $97E7DE

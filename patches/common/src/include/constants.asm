@@ -43,3 +43,5 @@ include
 !area_index = $079f
 !brinstar = $0001
 !norfair = $0002
+
+!palettes_ram = $7EC000

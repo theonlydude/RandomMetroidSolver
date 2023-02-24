@@ -47,3 +47,19 @@ macro ldx_tileOffset(x, y)
 %tileOffset(<x>, <y>)
         ldx.w #!_tile_offset
 endmacro
+
+;; BG tile format
+;; vhopppcc cccccccc
+;; v/h        = Vertical/Horizontal flip this tile.
+;; o          = Tile priority.
+;; ppp        = Tile palette. The number of entries in the palette depends on the Mode and the BG.
+;; cccccccccc = Tile number.
+macro BGtile(index, palette, prio, hflip, vflip)
+!_tile #= (<index>&$3FF)|((<palette>&$7)<<12)|((<prio>&$1)<<13)|((<hflip>&$1)<<14)|((<vflip>&$1)<<15)
+print "tile = ", hex(!_tile)
+endmacro
+
+macro dw_BGtile(index, palette, prio, hflip, vflip)
+%BGtile(<index>, <palette>, <prio>, <hflip>, <vflip>)
+        dw !_tile
+endmacro

@@ -5,6 +5,7 @@ import argparse, os.path, json, sys, shutil, random
 from logic.logic import Logic
 from rom.PaletteRando import PaletteRando
 from rom.rompatcher import RomPatcher, MusicPatcher, RomTypeForMusic
+from rom.romreader import RomReader
 from utils.utils import dumpErrorMsg
 from rom.flavor import RomFlavor
 
@@ -19,7 +20,7 @@ if __name__ == "__main__":
     parser.add_argument('--output',
                         help="to choose the name of the generated json (for the webservice)",
                         dest='output', nargs='?', default=None)
-    parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="vanilla", choices=["vanilla", "rotation", "mirror"])
+    parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="vanilla", choices=["vanilla", "rotation", "mirror", "random"])
     parser.add_argument('--patch', '-c',
                         help="optional patches to add",
                         dest='patches', nargs='?', default=[], action='append',
@@ -104,7 +105,12 @@ if __name__ == "__main__":
     utils.log.init(False)
     logger = utils.log.get('Custo')
 
-    Logic.factory(args.logic)
+    logic = args.logic
+    if logic == "random":
+        # extract logic from ips
+        logic = RomReader.getLogicFromIPS(args.seedIps)
+
+    Logic.factory(logic)
     RomFlavor.factory()
 
     ctrlDict = None

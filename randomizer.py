@@ -292,7 +292,20 @@ if __name__ == "__main__":
     else:
         preset = 'default'
 
-    logger.debug("preset: {}".format(preset))
+    logger.debug("skill preset: {}".format(preset))
+
+    # initialize random seed
+    if args.seed == 0:
+        # if no seed given, choose one
+        seed = random.randrange(sys.maxsize)
+    else:
+        seed = args.seed
+    logger.debug("seed: {}".format(seed))
+
+    seed4rand = seed
+    if args.raceMagic is not None:
+        seed4rand = seed ^ args.raceMagic
+    random.seed(seed4rand)
 
     # handle random parameters with dynamic pool of values
     (_, progSpeed) = randomMulti(args.__dict__, "progressionSpeed", speeds)
@@ -309,17 +322,6 @@ if __name__ == "__main__":
     Logic.factory(args.logic)
     RomFlavor.factory()
 
-    # if no seed given, choose one
-    if args.seed == 0:
-        seed = random.randrange(sys.maxsize)
-    else:
-        seed = args.seed
-    logger.debug("seed: {}".format(seed))
-
-    seed4rand = seed
-    if args.raceMagic is not None:
-        seed4rand = seed ^ args.raceMagic
-    random.seed(seed4rand)
     # if no max diff, set it very high
     if args.maxDifficulty == 'random':
         diffs = ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania']

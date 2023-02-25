@@ -1434,7 +1434,6 @@ init_sprite_second_2:
         JMP $F051
 
 ;;; Ending screen
-;;  0                             31
 ;; ----------------------------------
 ;; |                                |0
 ;; | TIME 01:23:45'00  ITEMS 100.0% |
@@ -1445,21 +1444,21 @@ init_sprite_second_2:
 ;; |  MM 12/33  SS 08/22  PB 06/11  |
 ;; |                                |
 ;; |                    ^           |
-;; |       EE 08/14    RR 01/04     |
-;; |       EE 08/14    RR 01/04     |
+;; |  EE 08/14            RR 01/04  |
+;; |  EE 08/14            RR 01/04  |
 ;; |                                |
 ;; |                                |
-;; |   CC  II  WW  SS  PP  GB  XX   |
-;; |   CC  II  WW  SS  PP  GB  XX   |
+;; |  CC  SA                VV  GG  |
+;; |  CC  SA                VV  GG  |
 ;; |                                |
+;; |  II  WW                MM  BB  |
+;; |  II  WW                MM  BB  |
 ;; |                                |
-;; |             VV  GG             |
-;; |             VV  GG             |
-;; |                                |
-;; |                                |
-;; |   MM  BB  S^  SP  HJ  SJ  SA   |
-;; |   MM  BB  SB  SP  HJ  SJ  SA   |
-;; |                                |
+;; |  SS  PP                HJ  SP  |
+;; |  SS  PP                HJ  SP  |
+;; |            ^                   |
+;; |  GB  XX                SJ  SB  |
+;; |  GB  XX                SJ  SB  |
 ;; |                                |
 ;; |      SEE YOU NEXT MISSION      |
 ;; |      SEE YOU NEXT MISSION      |
@@ -1855,8 +1854,8 @@ endmacro
         %ammoTableEntry(Missile, 2, 5, $09C8, 33)
         %ammoTableEntry(Super, 12, 5, $09CC, 22)
         %ammoTableEntry(PowerBomb, 22, 5, $09D0, 11)
-        %energyTableEntry(ETank, 7, 9, $09C4, 14)
-        %energyTableEntry(Reserve, 19, 9, $09D4, 4)
+        %energyTableEntry(ETank, 2, 9, $09C4, 14)
+        %energyTableEntry(Reserve, 22, 9, $09D4, 4)
         dw $0000
 
 ;;; majors table
@@ -1870,21 +1869,21 @@ endmacro
 
 %export(majors_table)
         %majorTableEntry(Charge, 3, 13, $09A8, $1000)
-        %majorTableEntry(Ice, 7, 13, $09A8, $0002)
-        %majorTableEntry(Wave, 11, 13, $09A8, $0001)
-        %majorTableEntry(Spazer, 15, 13, $09A8, $0004)
-        %majorTableEntry(Plasma, 19, 13, $09A8, $0008)
-        %majorTableEntry(Grapple, 23, 13, $09A4, $4000)
-        %majorTableEntry(XRayScope, 27, 13, $09A4, $8000)
-        %majorTableEntry(Varia, 13, 17, $09A4, $0001)
-        %majorTableEntry(Gravity, 17, 17, $09A4, $0020)
-        %majorTableEntry(Morph, 3, 21, $09A4, $0004)
-        %majorTableEntry(Bomb, 7, 21, $09A4, $1000)
-        %majorTableEntry(SpringBall, 11, 21, $09A4, $0002)
-        %majorTableEntry(SpeedBooster, 15, 21, $09A4, $2000)
-        %majorTableEntry(HiJump, 19, 21, $09A4, $0100)
-        %majorTableEntry(SpaceJump, 23, 21, $09A4, $0200)
-        %majorTableEntry(ScrewAttack, 27, 21, $09A4, $0008)
+        %majorTableEntry(Ice, 3, 16, $09A8, $0002)
+        %majorTableEntry(Wave, 7, 16, $09A8, $0001)
+        %majorTableEntry(Spazer, 3, 19, $09A8, $0004)
+        %majorTableEntry(Plasma, 7, 19, $09A8, $0008)
+        %majorTableEntry(Grapple, 3, 22, $09A4, $4000)
+        %majorTableEntry(XRayScope, 7, 22, $09A4, $8000)
+        %majorTableEntry(Varia, 24, 13, $09A4, $0001)
+        %majorTableEntry(Gravity, 28, 13, $09A4, $0020)
+        %majorTableEntry(Morph, 24, 16, $09A4, $0004)
+        %majorTableEntry(Bomb, 28, 16, $09A4, $1000)
+        %majorTableEntry(SpringBall, 28, 22, $09A4, $0002)
+        %majorTableEntry(SpeedBooster, 28, 19, $09A4, $2000)
+        %majorTableEntry(HiJump, 24, 19, $09A4, $0100)
+        %majorTableEntry(SpaceJump, 24, 22, $09A4, $0200)
+        %majorTableEntry(ScrewAttack, 7, 13, $09A4, $0008)
         dw $0000
 
 ;;; palettes

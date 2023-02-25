@@ -66,6 +66,40 @@ VARIA ending screen:
 |                                |27
 ----------------------------------
 
+Alternate layout :
+
+ 0                             31
+----------------------------------
+|                                |0
+| TIME 01:23:45'00  ITEMS 100.0% |
+| TIME 01:23:45'00  ITEMS 100.0% |
+|                                |
+|                                |
+|  MM 12/33  SS 08/22  PB 06/11  |
+|  MM 12/33  SS 08/22  PB 06/11  |
+|                                |
+|                    ^           |
+|  EE 08/14            RR 01/04  |
+|  EE 08/14            RR 01/04  |
+|                                |
+|                                |
+|  CC  SA                VV  GG  |
+|  CC  SA                VV  GG  |
+|                                |
+|  II  WW                MM  BB  |
+|  II  WW                MM  BB  |
+|                                |
+|  SS  PP                HJ  SP  |
+|  SS  PP                HJ  SP  |
+|            ^                   |
+|  GB  XX                SJ  SB  |
+|  GB  XX                SJ  SB  |
+|                                |
+|      SEE YOU NEXT MISSION      |
+|      SEE YOU NEXT MISSION      |
+|                                |27
+----------------------------------
+
 Item graphics:
 **************
 

@@ -8,8 +8,8 @@
 CWD=$(dirname $0)/..
 cd ${CWD}
 CWD=$(pwd)
-[ -z "$PYTHON" ] && PYTHON=pyston3.8
-[ -z "$OLD_PYTHON" ] && OLD_PYTHON=pyston3.8
+[ -z "$PYTHON" ] && PYTHON=python3
+[ -z "$OLD_PYTHON" ] && OLD_PYTHON=python3
 
 LOG_DIR=${CWD}/logs
 mkdir -p ${LOG_DIR}
@@ -123,11 +123,13 @@ function random_select {
 function generate_rando_presets {
     local SEED="$1"
     local PRESET="$2"
-    local RANDO_PRESET=$(mktemp)
+    local RANDO_PRESET="${SEED}_${PRESET}.json"
 
     cat > ${RANDO_PRESET} <<EOF
 {
     "seed": "${SEED}",
+    "logic": "random",
+    $(generate_multi_select "logic" "vanilla" "mirror")
     "preset": "${PRESET}",
     "startLocation": "random",
     $(generate_multi_select "startLocation" "Ceres" "Landing_Site" "Gauntlet_Top" "Green_Brinstar_Elevator" "Big_Pink" "Etecoons_Supers" "Wrecked_Ship_Main" "Firefleas_Top" "Business_Center" "Bubble_Mountain" "Mama_Turtle" "Watering_Hole" "Aqueduct" "Red_Brinstar_Elevator" "Golden_Four")
@@ -212,9 +214,10 @@ function computeSeed {
 	RANDO_OUT=$(${TIME} -f "\t%E real" $OLD_PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 	if [ $? -ne 0 ]; then
 	    echo "${RANDO_OUT}" >> ${LOG}
+            cp ${RANDO_PRESET} logs/
 	else
 	    RTIME_OLD=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
-	    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}*.sfc 2>/dev/null)
+	    ROM_GEN=$(ls -1 VARIA_*X${SEED}_${PRESET}*.sfc 2>/dev/null)
 	    if [ $? -eq 0 ]; then
 		OLD_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
 	    fi
@@ -226,9 +229,10 @@ function computeSeed {
     RANDO_OUT=$(${TIME} -f "\t%E real" $PYTHON ./randomizer.py ${PARAMS} 2>&1)
     if [ $? -ne 0 ]; then
 	echo "${RANDO_OUT}" >> ${LOG}
+        cp ${RANDO_PRESET} logs/
     else
 	RTIME_NEW=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
-	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}*.sfc 2>/dev/null)
+	ROM_GEN=$(ls -1 VARIA_*X${SEED}_${PRESET}*.sfc 2>/dev/null)
 	if [ $? -eq 0 ]; then
 	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
 	fi
@@ -238,6 +242,7 @@ function computeSeed {
     MAJORSSPLIT_NEW=$(echo "${RANDO_OUT}" | grep ^majorsSplit | cut -d ':' -f 2)
     MORPH_NEW=$(echo "${RANDO_OUT}" | grep ^morphPlacement | cut -d ':' -f 2)
     OBJECTIVES=$(echo "${RANDO_OUT}" | grep ^objectives | cut -d ':' -f 2)
+    LOGIC_NEW=$(echo "${RANDO_OUT}" | grep ^logic | cut -d ':' -f 2)
 
     RANDO_PRESET_NEW="logs/${SEED}_${PRESET}_${PROGSPEED_NEW}.json"
 
@@ -258,9 +263,9 @@ function computeSeed {
     fi
 
     # solve seed
-    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}*.sfc)
+    ROM_GEN=$(ls -1 VARIA_*X${SEED}_${PRESET}*.sfc)
     if [ $? -ne 0 ]; then
-	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PRESET};${OBJECTIVES}" | tee -a ${CSV}
+	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PRESET};${LOGIC_NEW};${OBJECTIVES}" | tee -a ${CSV}
         mv ${RANDO_PRESET} ${RANDO_PRESET_NEW}
 	exit 0
     fi
@@ -271,7 +276,7 @@ function computeSeed {
     if [ ${COMPARE} -eq 0 ]; then
 	SOLVER_OUT=$(${TIME} -f "\t%E real" $OLD_PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor --runtime 10 --pickupStrategy all 2>&1)
 	if [ $? -ne 0 ]; then
-            echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PRESET};${OBJECTIVES}" | tee -a ${CSV}
+            echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PRESET};${LOGIC_NEW};${OBJECTIVES}" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
             echo "${RANDO_OUT}" >> ${LOG}
             echo "${SOLVER_OUT}" >> ${LOG}
@@ -308,7 +313,7 @@ function computeSeed {
     if [ ${DUP_NEW} -eq 0 -o ${DUP_OLD} -eq 0 ]; then
 	DUP="dup major detected"
     fi
-    echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${DUP};${PRESET};${OBJECTIVES}" | tee -a ${CSV}
+    echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${DUP};${PRESET};${LOGIC_NEW};${OBJECTIVES}" | tee -a ${CSV}
 
     if [ ${COMPARE} -eq 0 ]; then
 	DIFF=$(diff ${ROM_GEN}.old ${ROM_GEN}.new)
@@ -373,6 +378,14 @@ done
 echo "DONE"
 date >> ${LOG}
 
+echo ""
+echo "Logic"
+for LOGIC in "vanilla" "mirror"; do
+    TOTAL=$(grep ";${LOGIC};" ${CSV}  | wc -l)
+    ERROR=$(grep ";${LOGIC};" ${CSV} | grep -E '^error' | wc -l)
+    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
+    printf "%-24s" "${LOGIC}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+done
 echo ""
 echo "Start AP"
 for AP in "Ceres" "Landing Site" "Gauntlet Top" "Green Brinstar Elevator" "Big Pink" "Etecoons Supers" "Wrecked Ship Main" "Business Center" "Bubble Mountain" "Watering Hole" "Red Brinstar Elevator" "Golden Four" "Aqueduct" "Mama Turtle" "Firefleas Top"; do

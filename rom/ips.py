@@ -270,3 +270,18 @@ class IPS_Patch(object):
         def getRange(record):
             return range(record['address'], record['address']+record['size'])
         return range_union([getRange(record) for record in self.records])
+
+    # called by customizer to get logic from ips patch
+    def getValue(self, address):
+        for record in self.records:
+            if record['address'] > address:
+                continue
+            elif record['address'] + record['size'] < address:
+                continue
+
+            if 'rle_count' in record:
+                return record['data']
+            else:
+                return record['data'][address - record['address']]
+
+        return None

@@ -566,7 +566,7 @@ accessPointsDict['Morph Ball Room Left'].EntryInfo.update({
     'SamusY': 0x288
 })
 accessPointsDict['Climb Bottom Left'].EntryInfo.update({
-    'SamusX': 0x2cb,
+    'SamusX': 0x2d3,
     'SamusY': 0x888
 })
 accessPointsDict['Flyway Right'].EntryInfo.update({

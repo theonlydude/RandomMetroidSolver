@@ -70,6 +70,7 @@ patches = [
     ('open_zebetites', 0x8fdd58, None),
     # escape
     ('rando_escape_ws_fix', 0x8fCAF6, 0x8FCB22),
+    ('climb_disable_bomb_blocks', 0x8f96BA, None)
 ]
 
 for (patch, roomAddr, stateAddr) in patches:

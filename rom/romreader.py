@@ -5,6 +5,7 @@ from rom.rom import snes_to_pc
 from rom.addresses import Addresses
 from rom.rom_options import RomOptions
 from rom.flavor import RomFlavor
+from rom.ips import IPS_Patch
 from patches.patchaccess import PatchAccess
 from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas
 from logic.logic import Logic
@@ -231,6 +232,17 @@ class RomReader:
         ret[doorPtr+1] = 0
 
         return ret
+
+    @staticmethod
+    def getLogicFromIPS(ips):
+        # call by customizer to extract logic from seed ips when logic param is random
+        patch = IPS_Patch.load(ips)
+        for logic, data in RomReader.flavorPatches.items():
+            address = data['address']
+            value = patch.getValue(address)
+            if value is not None and value == data['value']:
+                return logic
+        return "vanilla"
 
     def __init__(self, romFile, magic=None):
         self.romFile = romFile

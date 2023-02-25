@@ -645,6 +645,7 @@ if __name__ == "__main__":
 
     # print some parameters for jm's stats
     if args.jm == True:
+        print("logic:{}".format(args.logic))
         print("startLocation:{}".format(args.startLocation))
         print("progressionSpeed:{}".format(progSpeed))
         print("majorsSplit:{}".format(args.majorsSplit))

@@ -56,7 +56,6 @@ endmacro
 ;; cccccccccc = Tile number.
 macro BGtile(index, palette, prio, hflip, vflip)
 !_tile #= (<index>&$3FF)|((<palette>&$7)<<10)|((<prio>&$1)<<13)|((<hflip>&$1)<<14)|((<vflip>&$1)<<15)
-print "tile = ", hex(!_tile)
 endmacro
 
 macro dw_BGtile(index, palette, prio, hflip, vflip)

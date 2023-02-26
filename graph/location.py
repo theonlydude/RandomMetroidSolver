@@ -95,6 +95,8 @@ class Location:
         ret.AccessFrom = self.AccessFrom
         ret.Available = self.Available
         ret.PostAvailable = self.PostAvailable
+        # also copy address as we update it in post load in fixLocAddresses() and the update got lost after a copy
+        ret.Address = self.Address
         ret.setClass(self.Class)
 
         return ret

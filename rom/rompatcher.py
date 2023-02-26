@@ -218,7 +218,7 @@ class RomPatcher:
         loc = itemLoc.Location
         if loc.isBoss():
             raise ValueError('Cannot write Boss location')
-        #print('write ' + itemLoc.Item.Type + ' at ' + loc.Name)
+        self.log.debug('write {} at {}@{}'.format(itemLoc.Item.Type, loc.Name, hex(pc_to_snes(loc.Address))))
         for addr in self.getLocAddresses(loc):
             self.writeItemCode(itemLoc.Item, loc.Visibility, addr)
 

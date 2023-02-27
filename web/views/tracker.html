@@ -146,11 +146,11 @@ body[data-varia-logic="mirror"] #logAutoTracker {
     z-index: 2;
     display: none;
 }
-.rtaTimerClassic {
+body[data-varia-logic="vanilla"] .rtaTimer {
     left: 48.5%;
 }
-.rtaTimerStream {
-    left: 22.5%;
+body[data-varia-logic="mirror"] .rtaTimer {
+    left: 42%;
 }
 #rtaTimer {
     text-align: center;
@@ -274,53 +274,6 @@ function switchStreamingInventory() {
         menu.style.display = "block";
         streaming.style.display = "none";
     }
-}
-
-// to switch between grid/black stream map
-var area_stream="standard";
-function switchStreamingMap() {
-    if(loaded == false || init == false) {
-        return;
-    }
-
-    // remove border of already selected AP
-    $(".addBorder").removeClass("addBorder");
-
-    var classicMap = document.getElementById("classic_map");
-    var streamMap = document.getElementById("stream_map");
-    var RTA = document.getElementById("rtaTimerDiv");
-    var smap = document.getElementById("smap");
-    if(area_stream == "standard") {
-        // switch to stream grid
-        area_stream = "grid";
-        linePrefix = "s";
-        classicMap.style.display = "none";
-        smap.src = "/solver/static/images/tracker/area_map_stream.png";
-        streamMap.style.display = "block";
-        $("#rtaTimerDiv").removeClass("rtaTimerClassic");
-        $("#rtaTimerDiv").addClass("rtaTimerStream");
-    } else if(area_stream == "grid") {
-        // switch to stream black
-        area_stream = "black";
-        linePrefix = "s";
-        classicMap.style.display = "none";
-        smap.src = "/solver/static/images/tracker/area_map_stream_black.png";
-        streamMap.style.display = "block";
-        $("#rtaTimerDiv").removeClass("rtaTimerClassic");
-        $("#rtaTimerDiv").addClass("rtaTimerStream");
-    } else {
-        // switch to standard
-        area_stream = "standard";
-        linePrefix = "";
-        classicMap.style.display = "block";
-        streamMap.style.display = "none";
-        $("#rtaTimerDiv").removeClass("rtaTimerStream");
-        $("#rtaTimerDiv").addClass("rtaTimerClassic");
-    }
-
-    // reset lines
-    switchLines();
-    firstClick = "";
 }
 
 function switchLines() {
@@ -2055,8 +2008,11 @@ function sendAutoTrackerMessage(data, newState) {
     <!-- debug canvas pink color: de3994 -->
     <canvas id="debugMap" width="512" height="256"></canvas>
 
+    <!-- samus current position on the map -->
+    <div id="samusIcon"></div>
+
     <!-- RTA timer -->
-    <div id="rtaTimerDiv" class="rtaTimerClassic">
+    <div id="rtaTimerDiv" class="rtaTimer">
       <p id="rtaTimer"></p>
     </div>
   </div>

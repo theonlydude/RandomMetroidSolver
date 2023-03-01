@@ -105,39 +105,31 @@ body[data-varia-logic="mirror"] #logAutoTracker {
 }
 #titleAutoTracker {
     color: #ffffff;
-    font-size: 1.25vw;
+    font-size: 1vw;
     font-weight: bold;
     text-align: center;
 }
 #startStopAutoTracker {
     cursor: pointer;
-    width: 2.5vw;
+    width: 1vw;
 }
 #statusAutoTracker {
-    width: 2.5vw;
+    width: 1vw;
 }
 #helpAutoTracker {
     cursor: pointer;
-    width: 2.5vw;
+    width: 1vw;
 }
 #logAutoTracker {
     background-color: #a7a7a7;
     color: black;
     width: 12vw;
-    height: 16vh;
+    height: 8vh;
     resize: none;
     font-size: 0.5vw;
+    overflow-y: scroll;
 }
 
-#debugMap {
-    position: absolute;
-    top: 20%;
-    left: 20%;
-    border: 2px solid #666666;
-    background-color: #000;
-    z-index: 5;
-    display: none;
-}
 #rtaTimerDiv {
     position: absolute;
     top: 2.5%;
@@ -146,11 +138,11 @@ body[data-varia-logic="mirror"] #logAutoTracker {
     z-index: 2;
     display: none;
 }
-.rtaTimerClassic {
+body[data-varia-logic="vanilla"] .rtaTimer {
     left: 48.5%;
 }
-.rtaTimerStream {
-    left: 22.5%;
+body[data-varia-logic="mirror"] .rtaTimer {
+    left: 42%;
 }
 #rtaTimer {
     text-align: center;
@@ -210,7 +202,11 @@ You can load a race protected seed in the tracker, it'll use it to know if the s
 <h4>Auto Save</h4>\
 <p>The tracker feature an auto save functionnality, so you can do your seed in multiple seatings.<br/>The different status icons of the auto save:<table><tr><td><img src=\"/solver/static/images/ui/refresh.svg\" style=\"width: 32px\"> Loading in progress</td><td><img src=\"/solver/static/images/ui/checkmark.svg\" style=\"width: 32px\"> Save ok</td></tr><tr><td><img src=\"/solver/static/images/ui/cloud_upload.png\" style=\"width: 32px\"> Upload in progress</td><td><img src=\"/solver/static/images/ui/cloud_download.svg\" style=\"width: 32px\"> Download in progress</td></tr><tr><td colspan=\"2\"><img src=\"/solver/static/images/ui/warning.svg\" style=\"width: 32px\"> Something wrong happened (try reloading the page)</td></tr></table></p><p>You can display this help again by clicking on the <img src=\"/solver/static/images/ui/help.svg\" alt=\"help\" style=\"width: 32px\"> button.</p>\
 <h4>Thanks to</h4>\
-<p><ul><li>Animated location icons by Djlo</li><li>Location icons from Alli_Cat's <a href='https://github.com/allibear17/Super-Metroid-Location-Tracker' target=\"_blank\">Location Tracker</a></li><li>G4 sprite from Crossproduct's <a href=\"https://www.twitch.tv/crossproduct\" target=\"_blank\">smrandohelper</a></li><li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set' target=\"_blank\">Dryicons</a></li></ul></p>"
+<p><ul>\
+<li>Tracker module by Chrisc</li>\
+<li>Animated location icons by Djlo</li>\
+<li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set' target=\"_blank\">Dryicons</a></li>\
+</ul></p>"
     }, {
       element: "#helpAutoTracker",
       title: "VARIA Areas/Bosses/Items/Doors Auto-Tracker",
@@ -274,53 +270,6 @@ function switchStreamingInventory() {
         menu.style.display = "block";
         streaming.style.display = "none";
     }
-}
-
-// to switch between grid/black stream map
-var area_stream="standard";
-function switchStreamingMap() {
-    if(loaded == false || init == false) {
-        return;
-    }
-
-    // remove border of already selected AP
-    $(".addBorder").removeClass("addBorder");
-
-    var classicMap = document.getElementById("classic_map");
-    var streamMap = document.getElementById("stream_map");
-    var RTA = document.getElementById("rtaTimerDiv");
-    var smap = document.getElementById("smap");
-    if(area_stream == "standard") {
-        // switch to stream grid
-        area_stream = "grid";
-        linePrefix = "s";
-        classicMap.style.display = "none";
-        smap.src = "/solver/static/images/tracker/area_map_stream.png";
-        streamMap.style.display = "block";
-        $("#rtaTimerDiv").removeClass("rtaTimerClassic");
-        $("#rtaTimerDiv").addClass("rtaTimerStream");
-    } else if(area_stream == "grid") {
-        // switch to stream black
-        area_stream = "black";
-        linePrefix = "s";
-        classicMap.style.display = "none";
-        smap.src = "/solver/static/images/tracker/area_map_stream_black.png";
-        streamMap.style.display = "block";
-        $("#rtaTimerDiv").removeClass("rtaTimerClassic");
-        $("#rtaTimerDiv").addClass("rtaTimerStream");
-    } else {
-        // switch to standard
-        area_stream = "standard";
-        linePrefix = "";
-        classicMap.style.display = "block";
-        streamMap.style.display = "none";
-        $("#rtaTimerDiv").removeClass("rtaTimerStream");
-        $("#rtaTimerDiv").addClass("rtaTimerClassic");
-    }
-
-    // reset lines
-    switchLines();
-    firstClick = "";
 }
 
 function switchLines() {
@@ -1158,11 +1107,6 @@ function startAutoTracker() {
     // update interface
     displayStopButton();
     setAutoTrackerIcon("statusLoad");
-
-    // debug map
-    // var debugMap = document.getElementById("debugMap")
-    // debugMap.style.display = "block";
-    // dragElement(debugMap, "debugMap");
 }
 
 function closeSocket() {
@@ -1557,8 +1501,6 @@ function handleData(data) {
                 for(var i=0; i<mapSize; i++) {
                     mapData[mapOffset+i] = curMapData[i];
                 }
-
-                //displayDebugMap(mapData, mapOffsetEnum.curMap);
             }
 
             askNextData();
@@ -1596,7 +1538,6 @@ function handleData(data) {
             byteIndex += 4;
             var bitMask = 0x80 >> (x & 7);
             console.log(`cur byteIndex: ${byteIndex} bitMask: ${bitMask} room: ${roomPointer} area: ${areaEnum[areaIndex]}`);
-            // displaySamusOnDebugMap(byteIndex, bitMask);
 
             askNextData();
         } else if(dataToAskChain[dataToAskStep] == dataEnum.items) {
@@ -1654,46 +1595,6 @@ function concatArrays(dataType) {
     }
 }
 
-function displayDebugMap(mapData, areaStart) {
-    // display the map on canvas
-    var canvas = document.getElementById('debugMap');
-    var ctx = canvas.getContext('2d');
-
-    // metroid map pink
-    ctx.fillStyle = 'rgb(222, 57, 148)';
-
-    // for each bit set in the map data display a 8x8 square on the map canvas
-    var areaSize = 0x100;
-    // 0x0: crateria ou current map
-    // 0x100: brinstar
-    // 0x200: norfair
-    // 0x300: WS
-    // 0x400: maridia
-    var areaEnd = areaStart + areaSize;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // squares we are drawing
-    var width = 8;
-    var height = 8;
-
-    for(var i=areaStart; i<areaEnd; i++) {
-        var b = mapData[i];
-        if(b == 0) {
-            continue;
-        } else {
-            var byteIndex = i - areaStart;
-            for(var j=7; j>=0; j--) {
-                if((b & 0x80) == 0x80) {
-                    var bitMask = Math.pow(2, j);
-                    var coords = getMapDisplayCoord(byteIndex, bitMask);
-                    ctx.fillRect(coords[0], coords[1], width, height);
-                }
-                b = b << 1;
-            }
-        }
-    }
-}
-
 var newAP = "";
 function getNewAP(roomPointer, x, y) {
     // when samus enters a new graph area update the current access point
@@ -1722,21 +1623,6 @@ function displaySamusOnMap(roomPointer, x, y) {
     var samusIcon = document.getElementById("samusIcon");
     samusIcon.style.display = "block";
     $(samusIcon).css({"top": top+"%", "left": left+"%"});
-}
-
-function displaySamusOnDebugMap(byteIndex, bitMask) {
-    var canvas = document.getElementById('debugMap');
-    var ctx = canvas.getContext('2d');
-
-    // samus yellow
-    ctx.fillStyle = 'rgb(255, 189, 3)';
-
-    var width = 4;
-    var height = 4;
-    var coords = getMapDisplayCoord(byteIndex, bitMask);
-
-    // add 2 to draw in the center of the map square
-    ctx.fillRect(coords[0]+2, coords[1]+2, width, height);
 }
 
 function getMapDisplayCoord(byteIndex, bitMask) {
@@ -2052,11 +1938,11 @@ function sendAutoTrackerMessage(data, newState) {
 
     </div>
 
-    <!-- debug canvas pink color: de3994 -->
-    <canvas id="debugMap" width="512" height="256"></canvas>
+    <!-- samus current position on the map -->
+    <div id="samusIcon"></div>
 
     <!-- RTA timer -->
-    <div id="rtaTimerDiv" class="rtaTimerClassic">
+    <div id="rtaTimerDiv" class="rtaTimer">
       <p id="rtaTimer"></p>
     </div>
   </div>

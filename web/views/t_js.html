@@ -190,11 +190,6 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
         updateTimer(jsonData);
     }
 
-    resetItems();
-    updateRoomsVisibility(jsonData);
-    updateLocations(jsonData);
-    updateInventory(jsonData);
-
     setWSIcon("checkmark");
 
     if(autoTrackInProgress || mode == "debug") {
@@ -221,10 +216,6 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
 
 function isSeedless(mode) {
     return mode == "seedless" || mode == "debug" || mode == "race"
-}
-
-function updateRoomsVisibility(jsonData) {
-    // DEPRECATED handled by new tracker
 }
 
 function updateTimer(jsonData) {
@@ -256,12 +247,6 @@ function updateGlobal(jsonData) {
     document.getElementById("mode").value = mode;
 
     updateGlobalHook(jsonData);
-}
-
-function updateLocations(jsonData) {
-}
-
-function updateInventory(jsonData) {
 }
 
 function isActive(elemId) {
@@ -868,14 +853,6 @@ function clearLocs(isPlando) {
         // reset the state server side
         ajaxCall({action: "clear", scope: "item"}, "upload");
     }
-}
-
-function resetItems() {
-    // DEPRECATED handled by tracker
-}
-
-function addItem(itemName) {
-    // DEPRECATED handled by tracker
 }
 
 function pad(x, n) {

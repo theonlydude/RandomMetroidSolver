@@ -669,12 +669,8 @@ function highlightAction(index, show) {
 function highlightLoc(locName, show) {
     var locName = locName.replace(/[ ,()-]/g, '');
     var loc = document.getElementById(locName);
-    if(show) {
-        mouseOver(loc);
-        $('#'+locName).tooltip('show');
-    } else {
-        mouseOut(loc);
-        $('#'+locName).tooltip('hide');
+    if (show) {
+        $tracker.$store.ui.state.hover_location = locName
     }
 }
 

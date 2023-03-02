@@ -45,3 +45,16 @@ include
 !norfair = $0002
 
 !palettes_ram = $7EC000
+
+;;; pause state
+!pause_index = $0727
+
+;;; pause index values
+!pause_index_map_screen = #$0000
+!pause_index_equipment_screen = #$0001
+!pause_index_map2equip_fading_out = #$0002
+!pause_index_map2equip_load_equip = #$0003
+!pause_index_map2equip_fading_in = #$0004
+!pause_index_equip2map_fading_out = #$0005
+!pause_index_equip2map_load_map = #$0006
+!pause_index_equip2map_fading_in = #$0007

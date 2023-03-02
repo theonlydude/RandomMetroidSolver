@@ -606,18 +606,6 @@ print "Pause stuff: ", pc
 ;;; pause menu objectives display
 ;;;
 
-;;; pause state
-!pause_index = $0727
-
-;;; pause index values
-!pause_index_map_screen = #$0000
-!pause_index_equipment_screen = #$0001
-!pause_index_map2equip_fading_out = #$0002
-!pause_index_map2equip_load_equip = #$0003
-!pause_index_map2equip_fading_in = #$0004
-!pause_index_equip2map_fading_out = #$0005
-!pause_index_equip2map_load_map = #$0006
-!pause_index_equip2map_fading_in = #$0007
 ;;; new screen:
 !pause_index_objective_screen = #$0008
 !pause_index_map2obj_fading_out = #$0009
@@ -1073,8 +1061,8 @@ completed_spritemaps:
 
 print "82 end: ", pc
 
-;;; start of percent patch
-warnpc $82ffbf
+;;; start of equipment screen patch
+warnpc $82febf
 
 ;;; keep 'MAP' left button visible on map screen by keeping palette 2 instead of palette 5 (grey one)
 org $82A820

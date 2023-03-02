@@ -62,8 +62,8 @@ class RomPatcher:
             'nothing_item_plm.ips',
             # objectives management and display
             'objectives.ips',
-            # display collected items percentage in pause inventory menu
-            'percent.ips',
+            # display collected items percentage and RTA time in pause inventory menu
+            'equipment_screen.ips',
             # new PLMs for indicating the color of the door on the other side
             'door_indicators_plms.ips'
         ],

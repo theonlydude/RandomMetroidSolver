@@ -670,7 +670,7 @@ function highlightLoc(locName, show) {
     var locName = locName.replace(/[ ,()-]/g, '');
     var loc = document.getElementById(locName);
     if (show) {
-        $tracker.$store.ui.state.hover_location = locName
+        $tracker.$store.ui.state.highlight_location = locName
     }
 }
 

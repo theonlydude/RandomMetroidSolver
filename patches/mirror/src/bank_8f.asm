@@ -4035,6 +4035,9 @@ Room_A98D_state_A99F_Header:
     dw Room_A98D_PLM ; PLM Set pointer (in freespace)
     dw $b84d ; Background pointer
     dw $91f6 ; Setup ASM pointer
+; also change PLM list for the other room state
+org $8fa9cd
+        dw Room_A98D_PLM
 org $8fa9e5
 ; room A9E5: Hi Jump Boots Room
 Room_A9E5_Header:

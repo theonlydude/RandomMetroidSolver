@@ -35,7 +35,7 @@ RUN openssl genrsa -passout pass:$CERT_PASS 2048 > web2py.key && \
 # add VARIA local source with its submodules already there, use /root as HOME
 ADD ./ /root/RandomMetroidSolver
 
-# add communitry presets
+# add community presets
 WORKDIR /root/web2py
 RUN mkdir -p /root/web2py/varia_repository
 RUN wget https://github.com/theonlydude/community_presets/archive/master.zip && unzip master.zip && mv community_presets-master community_presets && rm -f master.zip

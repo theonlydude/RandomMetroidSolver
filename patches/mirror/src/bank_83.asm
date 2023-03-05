@@ -232,7 +232,7 @@ Room_93D5_door_list_index_0_Door:
     db $03 ; X screen
     db $02 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $B981 ; Custom door ASM to execute (bank $8F)
 org $8389ca
 ; room 93FE: West Ocean
 Room_93FE_door_list_index_0_Door:
@@ -461,6 +461,18 @@ Room_95FF_door_list_index_1_Door:
     db $04 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
     dw $0000 ; Custom door ASM to execute (bank $8F)
+org $838af6
+; room 962A: [Elevator to Red Brinstar]
+Room_962A_door_list_index_0_Door:
+    dw $948C ; Destination room header pointer (bank $8F): Crateria Keyhunter Room
+    db $00 ; Bit Flag (Elevator properties)
+    db $07 ; Direction
+    db $16 ; X cap
+    db $2D ; Y cap
+    db $01 ; X screen
+    db $02 ; Y screen
+    dw $01C0 ; Distance from door to spawn Samus
+    dw $B9F1 ; Custom door ASM to execute (bank $8F)
 org $838b02
 ; room 962A: [Elevator to Red Brinstar]
 Room_962A_door_list_index_1_Door:
@@ -472,7 +484,7 @@ Room_962A_door_list_index_1_Door:
     db $02 ; X screen
     db $00 ; Y screen
     dw $0000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $BA21 ; Custom door ASM to execute (bank $8F)
 org $838b0e
 ; room 965B: Gauntlet Energy Tank Room
 Room_965B_door_list_index_0_Door:
@@ -520,7 +532,7 @@ Room_968F_door_list_index_1_Door:
     db $05 ; X screen
     db $01 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $B9CA ; Custom door ASM to execute (bank $8F)
 org $838b3e
 ; room 96BA: Climb
 Room_96BA_door_list_index_0_Door:
@@ -652,7 +664,7 @@ Room_9879_door_list_index_0_Door:
     db $01 ; X screen
     db $02 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $B9A2 ; Custom door ASM to execute (bank $8F)
 org $838bc2
 ; room 9879: Flyway
 Room_9879_door_list_index_1_Door:
@@ -832,7 +844,7 @@ Room_99F9_door_list_index_0_Door:
     db $00 ; X screen
     db $00 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $BA00 ; Custom door ASM to execute (bank $8F)
 org $838c76
 ; room 99F9: Crateria Super Room
 Room_99F9_door_list_index_1_Door:
@@ -844,7 +856,7 @@ Room_99F9_door_list_index_1_Door:
     db $00 ; X screen
     db $07 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $BA0B ; Custom door ASM to execute (bank $8F)
 org $838c82
 ; room 9A44: Final Missile Bombway
 Room_9A44_door_list_index_0_Door:
@@ -940,7 +952,7 @@ Room_9AD9_door_list_index_5_Door:
     db $06 ; X screen
     db $00 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $BD6C ; Custom door ASM to execute (bank $8F)
 org $838cee
 ; room 9AD9: Green Brinstar Main Shaft [etecoon room]
 Room_9AD9_door_list_index_6_Door:
@@ -1564,7 +1576,7 @@ Room_A07B_door_list_index_0_Door:
     db $06 ; X screen
     db $06 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $BD50 ; Custom door ASM to execute (bank $8F)
 org $838f76
 ; room A0A4: Spore Spawn Farming Room
 Room_A0A4_door_list_index_0_Door:
@@ -2008,7 +2020,7 @@ Room_A471_door_list_index_0_Door:
     db $00 ; X screen
     db $00 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $BD3F ; Custom door ASM to execute (bank $8F)
 org $83914a
 ; room A471: Warehouse Zeela Room
 Room_A471_door_list_index_1_Door:
@@ -2212,7 +2224,7 @@ Room_A641_door_list_index_0_Door:
     db $01 ; X screen
     db $00 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $BD95 ; Custom door ASM to execute (bank $8F)
 org $839216
 ; room A66A: Statues Room
 Room_A66A_door_list_index_0_Door:
@@ -2272,7 +2284,7 @@ Room_A70B_door_list_index_0_Door:
     db $00 ; X screen
     db $00 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $BDE2 ; Custom door ASM to execute (bank $8F)
 org $83926a
 ; room A734: [Caterpillar Save Room]
 Room_A734_door_list_index_0_Door:
@@ -2524,7 +2536,7 @@ Room_A890_door_list_index_0_Door:
     db $00 ; X screen
     db $01 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $C03A ; Custom door ASM to execute (bank $8F)
 org $839366
 ; room A8B9: Ice Beam Snake Room
 Room_A8B9_door_list_index_0_Door:
@@ -3712,7 +3724,7 @@ Room_B1E5_door_list_index_0_Door:
     db $01 ; X screen
     db $00 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $C089 ; Custom door ASM to execute (bank $8F)
 org $839846
 ; room B1E5: Acid Statue Room
 Room_B1E5_door_list_index_1_Door:
@@ -3988,7 +4000,7 @@ Room_B4AD_door_list_index_0_Door:
     db $00 ; X screen
     db $00 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $C10B ; Custom door ASM to execute (bank $8F)
 org $83997e
 ; room B4AD: The Worst Room In The Game
 Room_B4AD_door_list_index_1_Door:
@@ -4036,7 +4048,7 @@ Room_B4E5_door_list_index_1_Door:
     db $02 ; X screen
     db $00 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $C067 ; Custom door ASM to execute (bank $8F)
 org $8399ae
 ; room B510: Lower Norfair Spring Ball Maze Room
 Room_B510_door_list_index_0_Door:
@@ -4060,7 +4072,7 @@ Room_B510_door_list_index_1_Door:
     db $02 ; X screen
     db $00 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $C0AD ; Custom door ASM to execute (bank $8F)
 org $8399d2
 ; room B55A: Lower Norfair Escape Power Bomb Room
 Room_B55A_door_list_index_0_Door:
@@ -4288,7 +4300,7 @@ Room_B6EE_door_list_index_2_Door:
     db $02 ; X screen
     db $00 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $C0C2 ; Custom door ASM to execute (bank $8F)
 org $839ab6
 ; room B741: [Red Keyhunter Shaft Save Room]
 Room_B741_door_list_index_0_Door:
@@ -4657,7 +4669,7 @@ Room_CD13_door_list_index_0_Door:
     db $00 ; X screen
     db $00 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $E1FE ; Custom door ASM to execute (bank $8F)
 org $83a2d0
 ; room CD5C: Sponge Bath
 Room_CD5C_door_list_index_0_Door:
@@ -5077,7 +5089,7 @@ Room_D104_door_list_index_1_Door:
     db $00 ; X screen
     db $03 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $E367 ; Custom door ASM to execute (bank $8F)
 org $83a48c
 ; room D13B: Watering Hole
 Room_D13B_door_list_index_0_Door:
@@ -5701,7 +5713,7 @@ Room_D646_door_list_index_3_Door:
     db $01 ; X screen
     db $03 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $E3B9 ; Custom door ASM to execute (bank $8F)
 org $83a7b0
 ; room D69A: [Pants Room West half]
 Room_D69A_door_list_index_0_Door:
@@ -5905,7 +5917,7 @@ Room_D845_door_list_index_0_Door:
     db $00 ; X screen
     db $02 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $E318 ; Custom door ASM to execute (bank $8F)
 org $83a8ac
 ; room D898: [Botwoon Sand Fall]
 Room_D898_door_list_index_0_Door:
@@ -6109,7 +6121,7 @@ Room_DA60_door_list_index_0_Door:
     db $01 ; X screen
     db $02 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $E3D9 ; Custom door ASM to execute (bank $8F)
 org $83a978
 ; room DA60: Draygon's Room
 Room_DA60_door_list_index_1_Door:
@@ -6516,7 +6528,7 @@ Room_DEDE_door_list_index_1_Door:
     db $02 ; X screen
     db $08 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $0000 ; Custom door ASM to execute (bank $8F)
+    dw $E4CF ; Custom door ASM to execute (bank $8F)
 org $83ab40
 ; room DF1B: [Tourian First Save Room]
 Room_DF1B_door_list_index_0_Door:

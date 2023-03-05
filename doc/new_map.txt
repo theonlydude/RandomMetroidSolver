@@ -1,0 +1,155 @@
+New in-game map/tracker
+***********************
+
+Objectives
+**********
+
+Auto-track area connections and door colors in game. Have better item
+tracking than vanilla map.
+
+Area rando :
+------------
+- see portals on map once they have been traversed
+  - use sprites? allow for pixel placement, also solves the boss
+    portal potential problems, uses different part of VRAM
+  - reuse vanilla map icon system (discard debug stuff), that way
+    portal data is naturally separate from 
+- distinguish on map where the portals go
+  - use colors? or different sprites per area?
+  - use text that displays when cursor is on the portal?
+  - maybe a bit of both, sprites with small text?
+- remove false information displayed, mainly elevator connections text
+  - those are sprites (map icons)
+- switch in-game area maps
+  - bonus: selecting a portal loads the right map, at portal connection
+           point
+  - this bonus would greatly help distinguishing portals
+- in a given "vanilla area" map, see which parts are from which "graph
+area", using different colors :
+  - that means "explored" tiles should have different colors,
+    independent from loaded vanilla area, which means have
+    different palettes load when displaying a given area
+  - max graph area colors in a given vanilla area: 4 (Brinstar)
+- ideally, have in-game area reflect VARIA areas, but that seems
+  impossible, as even Subversion elected to have sub-areas inside main
+  areas
+
+Door color rando :
+------------------
+- see locked doors colors once the map tile is explored
+  - use sprites/map icons? seems to be the only way, otherwise needs
+    way too much map tiles for all combinations
+- disiguish each door type
+  - 8 colors? 3 ammo + gray door + 4 beams (don't display blue doors)
+- make door disappear when open
+
+General item tracking :
+-----------------------
+- have circle/dots for major/minor items
+
+
+How
+***
+
+Use map overhaul patch as a base.
+
+Useful features:
+- area map switching
+- more colors usable
+- better minimap with more tiles (not more colors though)
+- item tracking with circle/dots
+  - probably needs to be changed as it ought to be tied to the
+    location ID
+  - circle = item split loc? or just major upgrade in all splits?
+- overall easier customization than vanilla
+- map decorations? might be useful to display a legend, but not sure
+
+Limitations :
+- only has 4 global colors for "explored tiles", need to make this
+  depend on loaded area map
+  - bonus: adapt the glowing system as well
+- nothing special for map icons, hope that the vanilla system is
+  powerful enough
+
+VARIA compatibility :
+- rework equipment_screen patch
+  - put back vanilla "TIME", ":", "%"
+  - find room for "ITEMS"
+- rework objectives screen
+  - find room for "OBJ"
+- general compatibility with these two patches, especially objectives
+- manage free space collisions
+  - remove hex map to make lots of room
+
+Plan
+****
+
+1)
+
+Recompile "Map Overhaul example" with our build system and check the
+result on a vanilla ROM.
+=> make necessary adjustments, if any
+
+2)
+
+Adapt this example to make a base usable for VARIA without area/door
+rando, by making space and restore some vanilla-like behavior :
+      - remove hex map
+      - remove decoration tiles
+      - remove parts of the map showing when unexplored
+      - address VARIA compatibility issues above
+      - generate "itembit tile change list" from the rando
+=> a base patch integrated in the VARIA source tree
+
+3)
+
+Adapt palettes/glow system to have different colors for all 11 graph
+areas. If not possible, find the best possible compromise.
+      - change the 4 palettes loaded by vanilla area
+      - have glowing variants
+=> base patch updated
+
+4)
+
+Area/boss rando. Add sprites to the existing map icons system. This
+shall be a *separate patch*, to apply only if area/boss rando. The
+base patch might have to be changed to accomodate, and tested
+separately after modifications.
+     - comprehend vanilla map icon system
+     - replace some debug map icon stuff?
+       - entry points problem solved
+       - destination format for portals will vary from simple map
+         icons
+       - area/boss portals should go through the same system
+     - draw portal sprites/palettes
+       - figure out spritemap system
+       - figure out usable palettes by sprites
+       - find the best compromise for used sprites/used palettes wrt
+         VRAM space and palettes management
+     - replace elevator destination spritemap system with area/boss
+       portals?
+        - at the very least remove it and use its freespace with the
+          portal system
+     - add a map switch feature by pressing A when on a portal
+        - load the relevant vanilla area if necessary
+        - move cursor to destination portal
+        - make a sound?
+
+5)
+
+Door colors rando. Add sprites to existing map icons system. This
+shall be a *separate patch*, to apply only if door color rando, while
+maintaining compatibility if area/boss rando patch is applied as well.
+The base patch might have to be changed to accomodate, and tested
+separately after modifications.
+     - replace some debug map icon stuff?
+       - entry points problem solved
+       - destination format for doors will vary from simple map
+         icons
+     - draw portal sprites/palettes
+       - figure out usable palettes by sprites
+       - find the best compromise for used sprites/used palettes wrt
+         VRAM space and palettes management
+     - when pressing A on a door, do something to indicate door lock
+       - display text somehow?
+       - make a sound?

@@ -1,7 +1,7 @@
 # from SM3E
 
 import sys
-from enum import Enum
+from enum import Enum, IntFlag, auto
 import logging
 from collections import defaultdict
 import utils.log
@@ -421,11 +421,12 @@ class Room(object):
         for (start, end) in doorsSetsAddr:
             self.rom.seek(snes_to_pc(start))
             for i in range((end-start)//doorSize):
+                self.rom.seek(start + i*doorSize)
                 doorId = pc_to_snes(self.rom.tell()) & 0xffff
                 door = Door(self.rom, doorId)
-                doors[door.destRoom].append(door)
+                doors[door.destRoom & 0xffff].append(door)
 
-        self.doors = doors[self.dataAddr]
+        self.doors = doors[self.dataAddr & 0xffff]
 
         print("doors: {}".format([hex(door.doorId) for door in self.doors]))
 
@@ -709,6 +710,118 @@ class PLMDoor(PLM):
 class PLMItem(PLM):
     pass
 
+class Mode(IntFlag):
+    _16 = auto()
+    _8 = auto()
+
+# REP #$10 Sets X and Y to 16-bit mode
+# REP #$20 Sets A to 16-bit mode
+# REP #$30 Sets A, X and Y to 16-bit mode
+# SEP #$10 Sets X and Y to 8-bit mode
+# SEP #$20 Sets A to 8-bit mode
+# SEP #$30 Sets A, X and Y to 8-bit mode
+class CPUState(object):
+    def __init__(self):
+        self.mi_flag = Mode._16
+        self.ma_flag = Mode._16
+
+    def sep(self, newState):
+        if newState & 0x10:
+            self.mi_flag = Mode._8
+        if newState & 0x20:
+            self.ma_flag = Mode._8
+
+    def rep(self, newState):
+        if newState & 0x10:
+            self.mi_flag = Mode._16
+        if newState & 0x20:
+            self.ma_flag = Mode._16
+
+class Opcode(object):
+    @staticmethod
+    def factory(rom, cpuState):
+        opcode = rom.readByte()
+        if opcode == 0x08:
+            return PHP()
+        elif opcode == 0xE2:
+            newState = rom.readByte()
+            cpuState.sep(newState)
+            return SEP(newState)
+        elif opcode == 0xA9:
+            if cpuState.ma_flag == Mode._16:
+                return LDA_IMM(rom.readWord(), cpuState.ma_flag)
+            else:
+                return LDA_IMM(rom.readByte(), cpuState.ma_flag)
+        elif opcode == 0x8F:
+            return STA_LONG(rom.readLong())
+        elif opcode == 0x28:
+            return PLP()
+        elif opcode == 0x60:
+            return RTS()
+        else:
+            return UNKNOWN()
+
+class PHP(Opcode):
+    opcode = 0x08
+    def write(self, rom):
+        rom.writeByte(PHP.opcode)
+    def display(self):
+        return "PHP"
+
+class SEP(Opcode):
+    opcode = 0xE2
+    def __init__(self, value):
+        self.value = value
+    def write(self, rom):
+        rom.writeByte(SEP.opcode)
+        rom.writeByte(self.value)
+    def display(self):
+        return "SEP #${:02x}".format(self.value)
+
+class LDA_IMM(Opcode):
+    opcode = 0xA9
+    def __init__(self, value, flag):
+        self.value = value
+        self.flag = flag
+    def write(self, rom):
+        rom.writeByte(LDA_IMM.opcode)
+        if self.flag == Mode._16:
+            rom.writeWord(self.value)
+        else:
+            rom.writeByte(self.value)
+    def display(self):
+        if self.flag == Mode._16:
+            return "LDA #${:04x}".format(self.value)
+        else:
+            return "LDA #${:02x}".format(self.value)
+
+class STA_LONG(Opcode):
+    opcode = 0x8F
+    def __init__(self, value):
+        self.value = value
+    def write(self, rom):
+        rom.writeByte(STA_LONG.opcode)
+        rom.writeLong(self.value)
+    def display(self):
+        return "STA ${:06x}".format(self.value)
+
+class PLP(Opcode):
+    opcode = 0x28
+    def write(self, rom):
+        rom.writeByte(PLP.opcode)
+    def display(self):
+        return "PLP"
+
+class RTS(Opcode):
+    opcode = 0x60
+    def write(self, rom):
+        rom.writeByte(RTS.opcode)
+    def display(self):
+        return "RTS"
+
+class UNKNOWN(Opcode):
+    pass
+
 class Door(object):
     def __init__(self, rom, doorId):
         self.rom = rom
@@ -728,6 +841,27 @@ class Door(object):
         self.distanceToSpawn = self.rom.readWord()
         self.customASM = 0x8f0000 + self.rom.readWord()
 
+        if self.customASM != 0x8f0000:
+            self.loadASM()
+
+    def loadASM(self):
+        self.asm = []
+        self.rom.seek(snes_to_pc(self.customASM))
+
+        self.validASM = False
+        cpuState = CPUState()
+
+        while True:
+            self.asm.append(Opcode.factory(self.rom, cpuState))
+
+            # read until RTS
+            if type(self.asm[-1]) is RTS:
+                self.validASM = True
+                break
+            elif type(self.asm[-1]) is UNKNOWN:
+                self.validASM = False
+                break
+
     def write(self):
         self.rom.seek(snes_to_pc(self.dataAddr))
 
@@ -741,6 +875,24 @@ class Door(object):
         self.rom.writeWord(self.distanceToSpawn)
         self.rom.writeWord(self.customASM & 0xffff)
 
+        if self.customASM != 0x8f0000 and self.validASM:
+            self.writeASM()
+
+    def writeASM(self):
+        self.rom.seek(snes_to_pc(self.customASM))
+        for opcode in self.asm:
+            opcode.write(self.rom)
+
+    def displayASM(self):
+        if self.customASM != 0x8f0000 and self.validASM:
+            out = ""
+            out += "org ${:06x}\n".format(self.customASM)
+            for opcode in self.asm:
+                out += "    {}\n".format(opcode.display())
+            return (self.customASM, out)
+        else:
+            return (None, None)
+
     def transform(self, transformation, size):
         # cap unit is tiles
         width = size[0] * 16
@@ -748,6 +900,22 @@ class Door(object):
         if transformation == Transform.Mirror:
             self.screenX = size[0] - self.screenX - 1
             self.capX = width - self.capX - 1
+
+        # $7E:CD20..51: Scrolls
+        #     0: Red. Cannot scroll into this area
+        #     1: Blue. Hides the bottom 2 rows of the area
+        #     2: Green. Unrestricted
+        if self.customASM != 0x8f0000 and self.validASM:
+            scrolls_start = 0x7ECD20
+            for opcode in self.asm:
+                if type(opcode) == STA_LONG:
+                    screen = opcode.value - scrolls_start
+                    x = screen % size[0]
+                    y = screen // size[0]
+                    if transformation == Transform.Mirror:
+                        x = size[0] - x - 1
+                        screen = x + y * size[0]
+                    opcode.value = scrolls_start + screen
 
 class Scroll(object):
     def __init__(self, rom, dataAddr, size):

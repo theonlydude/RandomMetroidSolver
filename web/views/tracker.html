@@ -1117,8 +1117,7 @@ function closeSocket() {
 
     // update interface
     setAutoTrackerIcon("statusLoad");
-    var samusIcon = document.getElementById("samusIcon");
-    samusIcon.style.display = "none";
+    setSamusIcon()
 }
 
 function stopAutoTracker() {
@@ -1266,8 +1265,7 @@ function cleanup(cleanExit) {
     curState = stateEnum.closed;
     autoTrackInProgress = false;
     displayStartButton();
-    var samusIcon = document.getElementById("samusIcon");
-    samusIcon.style.display = "none";
+    setSamusIcon()
     // RTA
     document.getElementById("rtaTimerDiv").style.display = "none";
     disableRTAFake();
@@ -1517,7 +1515,7 @@ function handleData(data) {
             var roomPointer = readWord(samusData, samusEnum.roomPointer).toString(16);
             var x = Math.floor(samusX / 0x100);
             var y = Math.floor(samusY / 0x100);
-            displaySamusOnMap(roomPointer, x, y);
+            setSamusIcon(roomPointer, x, y);
 
             newAP = getNewAP(roomPointer, x, y);
 
@@ -1610,19 +1608,6 @@ function getNewAP(roomPointer, x, y) {
         }
     }
     return newAP;
-}
-
-function displaySamusOnMap(roomPointer, x, y) {
-    // size of a screen in % of the map
-    var screenX = 0.94;
-    var screenY = 2.04;
-
-    //console.log(`displaySamusOnMap roomPointer: ${roomPointer} top: ${rooms[logic][roomPointer]["top"]} left: ${rooms[logic][roomPointer]["left"]}`);
-    var left = rooms[logic][roomPointer]["left"] + x * screenX;
-    var top = rooms[logic][roomPointer]["top"] + y * screenY;
-    var samusIcon = document.getElementById("samusIcon");
-    samusIcon.style.display = "block";
-    $(samusIcon).css({"top": top+"%", "left": left+"%"});
 }
 
 function getMapDisplayCoord(byteIndex, bitMask) {
@@ -1939,7 +1924,6 @@ function sendAutoTrackerMessage(data, newState) {
     </div>
 
     <!-- samus current position on the map -->
-    <div id="samusIcon"></div>
 
     <!-- RTA timer -->
     <div id="rtaTimerDiv" class="rtaTimer">

@@ -7,6 +7,7 @@ sys.path.append(os.path.dirname(sys.path[0]))
 
 from rom.rom import RealROM, snes_to_pc, pc_to_snes
 from rom.rompatcher import MusicPatcher,RomTypeForMusic
+from rom.addresses import Addresses
 from utils.parameters import appDir
 from utils.utils import removeChars
 
@@ -16,7 +17,7 @@ rom=RealROM(seed)
 p=MusicPatcher(rom, RomTypeForMusic.VariaSeed, baseDir=baseDir)
 vanillaTracks=p.vanillaTracks
 allTracks=p.allTracks
-tableAddr=p.musicDataTableAddress-3
+tableAddr=Addresses.getOne('musicDataTable')-3
 nspcMetaPath = os.path.join(baseDir, "nspc_metadata.json")
 with open(nspcMetaPath, "r") as f:
     nspcMeta = json.load(f)
@@ -74,7 +75,7 @@ for trackName, data in vanillaTracks.items():
     addr = data['pc_addresses'][0]
     dataId = rom.readByte(addr)
     addr = snes_to_pc(rom.readLong(tableAddr+dataId))
-    #print("dataId: {} - addr: {} for song: {}".format(hex(dataId), hex(addr), trackName))
+    print("dataId: {} - addr: {} for song: {}".format(hex(dataId), hex(addr), trackName))
     tracksTable[addr] = {"trackName": trackName, "dataId": dataId}
 
 # get nspc data in rom and compute its md5 sum

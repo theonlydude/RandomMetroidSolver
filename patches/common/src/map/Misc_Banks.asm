@@ -7,10 +7,10 @@
 ORG $8095A7 : JSR NMI_MinimapHijack
 
 ORG $8098FF
-HUD_MapTileOffset: DW $005B, $005C, $005D, $005E, $005F	;row 0 of HUD map
-ORG $80993F : DW $006B, $006C, $006D, $006E, $006F		;row 1 of HUD map
-ORG $80997F : DW $007B, $007C, $007D, $007E, $007F		;row 2 of HUD map
-
+HUD_MapTileOffset: 
+;; DW $005B, $005C, $005D, $005E, $005F	;row 0 of HUD map
+;; ORG $80993F : DW $006B, $006C, $006D, $006E, $006F		;row 1 of HUD map
+;; ORG $80997F : DW $007B, $007C, $007D, $007E, $007F		;row 2 of HUD map
 
 ORG $809AF3 : STZ !SamusMapPositionMirror : NOP		;remove broken minimap update during start game
 ORG $80A153 : JSL RevertAreaNumber

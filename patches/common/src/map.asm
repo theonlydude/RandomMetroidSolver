@@ -193,6 +193,7 @@ LOROM
 	!VerticalAreaMapBits = %00000000
 }
 
+!Reserves_Tilemap_Size = $0960
 
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    MAIN                                                     |x|
@@ -221,11 +222,17 @@ INCSRC "map/Minimap.asm"
 ORG $8EB400
 incbin "map/HexMapTiles.bin"				;change hex map tiles for the palette changes
 
+org $81b14b
+incbin "map/start_tilemap.bin"
+
 ; Minimap GFX
 org !Vanilla_MinimapTiles
 incbin "map/minimap.gfx"
 ORG !Freespace_MinimapTiles
-incbin "map/minimap_extra.gfx"	;maptile storage for HUD map
+incbin "map/minimap_extra.gfx"
+
+org $80988B
+incbin "map/hud_tilemap.bin"
 
 ; Pause GFX
 org !PauseScreen_Tiles_Pointer

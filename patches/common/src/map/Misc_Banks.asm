@@ -196,10 +196,6 @@ PlanetZebesGraphMapPaletteHijack:
 ;|x|                                    BANK $??        Misc.                                    |x|
 ;---------------------------------------------------------------------------------------------------
 {
-ORG !Freespace_MinimapTiles : INCBIN "minimap.gfx"	;maptile storage for HUD map
-ORG $8EB400 : INCBIN HexMapTiles.bin				;change hex map tiles for the palette changes
-
-
 ;---------------------------------------BANK $??----------------------------------------------------
 
 ORG $90DF7F : BRA $01 : NOP	;remove STZ $0B2A

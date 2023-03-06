@@ -24,7 +24,7 @@ LOROM
 
 ;Location for maptile GFX for minimap (size: $1000)
 	!Freespace_MinimapTiles = $9AC200
-
+        !Vanilla_MinimapTiles = $9AB200
 ;Location of code to transfer tile graphics from RAM to VRAM (restricted to bank $80) (size: $97)
 	!FreespaceBank80_VRAM = $80CD8E
 
@@ -216,6 +216,16 @@ INCSRC "map/Misc_Banks.asm"
 INCSRC "map/PauseScreenRoutines.asm"
 INCSRC "map/MapConstruction.asm"
 INCSRC "map/Minimap.asm"
+
+; Hex map
+ORG $8EB400
+incbin "HexMapTiles.bin"				;change hex map tiles for the palette changes
+
+; Minimap GFX
+org !Vanilla_MinimapTiles
+incbin "minimap.gfx"
+ORG !Freespace_MinimapTiles
+incbin "minimap_extra.gfx"	;maptile storage for HUD map
 
 ; Pause GFX
 org !PauseScreen_Tiles_Pointer

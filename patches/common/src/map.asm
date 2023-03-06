@@ -219,13 +219,13 @@ INCSRC "map/Minimap.asm"
 
 ; Hex map
 ORG $8EB400
-incbin "HexMapTiles.bin"				;change hex map tiles for the palette changes
+incbin "map/HexMapTiles.bin"				;change hex map tiles for the palette changes
 
 ; Minimap GFX
 org !Vanilla_MinimapTiles
-incbin "minimap.gfx"
+incbin "map/minimap.gfx"
 ORG !Freespace_MinimapTiles
-incbin "minimap_extra.gfx"	;maptile storage for HUD map
+incbin "map/minimap_extra.gfx"	;maptile storage for HUD map
 
 ; Pause GFX
 org !PauseScreen_Tiles_Pointer

@@ -7,8 +7,8 @@ printf "${ips}:\t${src}"
 
 function add_deps() {
     incdirs="$(dirname $1) ${INCLUDE_DIRS}"
-    includes=$(grep '^incsrc' $1 | cut -f 2 -d ' ' | sed -e "s/'//g" -e 's/"//g')
-    incbins=$(grep '^incbin' $1 | cut -f 2 -d ' ' | sed -e "s/'//g" -e 's/"//g')
+    includes=$(grep -i '^incsrc' $1 | cut -f 2 -d ' ' | sed -e "s/'//g" -e 's/"//g')
+    incbins=$(grep -i '^incbin' $1 | cut -f 2 -d ' ' | sed -e "s/'//g" -e 's/"//g')
     for inc in ${incbins}; do
         for incdir in ${incdirs}; do
             incfile=${incdir}/${inc}

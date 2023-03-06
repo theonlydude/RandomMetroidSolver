@@ -9,7 +9,7 @@ LOROM
 ;;;
 ;;; VARIA adaptations :
 ;;; * change path to external files
-;;; * include minimap and pause screen gfx for VARIA
+;;; * include gfx, tilemaps, palettes, and other small modifications to match map overhaul example ips
 ;;;
 
 ;---------------------------------------------------------------------------------------------------
@@ -193,7 +193,7 @@ LOROM
 	!VerticalAreaMapBits = %00000000
 }
 
-!Reserves_Tilemap_Size = $0960
+!Reserves_Tilemap_Offset = $0960
 
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    MAIN                                                     |x|

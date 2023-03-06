@@ -80,6 +80,7 @@ VARIA compatibility :
 - general compatibility with these two patches, especially objectives
 - manage free space collisions
   - remove hex map to make lots of room
+- apply map_graphics.ips in base patches as well
 
 Plan
 ****

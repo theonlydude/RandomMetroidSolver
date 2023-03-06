@@ -64,6 +64,9 @@ RevertAreaNumber:
 	LDA !OriginAreaIndex : STA $079F : TAX		;area number
 	LDA $7ED908,x : AND #$00FF : STA $0789	 	;map station flag
 	JMP $835D		;return
+print "bank 80 end: ", pc
+
+warnpc $80CE2F
 }
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    BANK $81        Planet Zebes Map                         |x|

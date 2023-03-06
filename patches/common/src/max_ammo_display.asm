@@ -153,7 +153,7 @@ org $809C00
 ;;; parameters set by vanilla before all hijacks:
 ;;; LDA !HUD_digits_tilemap_row3
 ;;; STA $00    [$7E:0000]
-org $80CDA0
+org $80CE30
 
 ;;; parameters set before hijack:
 ;;; LDX !row3_super_index_vanilla
@@ -385,6 +385,8 @@ extract_two_digits:
 HUD_digits_tilemap_row1:
         ;;     0      1      2      3      4      5      6      7      8      9
 	dw $0045, $003C, $003D, $003E, $003F, $0040, $0041, $0042, $0043, $0044
+
+print "bank 80 end: ", pc
 
 ;;; next patch start address (msu1)
 warnpc $80D02F

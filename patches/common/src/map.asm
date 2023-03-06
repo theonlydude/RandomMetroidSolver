@@ -10,7 +10,7 @@ LOROM
 ;;; VARIA adaptations :
 ;;; * change path to external files
 ;;; * include gfx, tilemaps, palettes, and other small modifications to match map overhaul example ips
-;;;
+;;; * adapted freespace values to step around other patches
 
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    CONFIG                                                   |x|

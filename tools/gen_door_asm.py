@@ -22,7 +22,7 @@ for roomSpec in rooms:
     for door in room.doors:
         door.transform(Transform.Mirror, (room.width, room.height))
     for door in room.doors:
-        if door.customASM != 0x8f0000 and door.validASM:
+        if door.customASM != 0x8f0000:
             asmhead = ";;; Door to Room ${:04x}: {}\n".format(roomAddr & 0xffff, roomSpec["Name"])
             asmAddr, asm = door.displayASM()
             asm = asmhead + asm

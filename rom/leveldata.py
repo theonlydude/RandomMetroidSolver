@@ -759,7 +759,7 @@ class Opcode(object):
         elif opcode == 0x60:
             return RTS()
         else:
-            return UNKNOWN()
+            return UNKNOWN(opcode)
 
 class PHP(Opcode):
     opcode = 0x08
@@ -820,7 +820,10 @@ class RTS(Opcode):
         return "RTS"
 
 class UNKNOWN(Opcode):
-    pass
+    def __init__(self, opcode):
+        self.opcode = opcode
+    def display(self):
+        return "Unknown opcode: {:02x}".format(self.opcode)
 
 class Door(object):
     def __init__(self, rom, doorId):
@@ -884,7 +887,7 @@ class Door(object):
             opcode.write(self.rom)
 
     def displayASM(self):
-        if self.customASM != 0x8f0000 and self.validASM:
+        if self.customASM != 0x8f0000:
             out = ""
             out += "org ${:06x}\n".format(self.customASM)
             for opcode in self.asm:

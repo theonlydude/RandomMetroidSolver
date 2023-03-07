@@ -1,7 +1,9 @@
 ;;; Display in HUD the maximum number of ammo that samus can carry
-;;;
+;;; 
 ;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
-
+;;; 
+;;; NOTE: apply after map patch, which touches HUD tiles as well (different ones,
+;;;       but the map patch includes the whole gfx area)
 
 lorom
 arch 65816

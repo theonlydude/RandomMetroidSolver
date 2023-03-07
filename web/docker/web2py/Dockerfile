@@ -12,8 +12,7 @@ ARG GITHUB_TOKEN
 EXPOSE 443 80 8000
 
 RUN apt-get update && \
-    apt-get install wget -y && \
-    apt-get install unzip -y && \
+    apt-get install curl wget unzip jq -y && \
     apt-get -y install python3 python3-pip && \
     pip3 install gunicorn mysql-connector-python
 RUN apt-get install -y supervisor unzip git
@@ -42,10 +41,16 @@ else \
     wget https://github.com/theonlydude/RandomMetroidSolver/archive/${BRANCH}.zip && unzip ${BRANCH}.zip && mv RandomMetroidSolver-${BRANCH} RandomMetroidSolver && rm -f ${BRANCH}.zip; \
     cd RandomMetroidSolver; \
     rm -rf varia_custom_sprites && wget https://github.com/theonlydude/varia_custom_sprites/archive/main.zip && unzip main.zip && mv varia_custom_sprites-main varia_custom_sprites && rm -f main.zip; \
-    rm -rf super-metroid && wget https://github.com/chriscauley/super-metroid/archive/main.zip && unzip main.zip && mv super-metroid-main super-metroid && rm -f main.zip; \
 fi
 
+# install new tracker
+WORKDIR /root/RandomMetroidSolver/web
+RUN curl -s https://api.github.com/repos/chriscauley/super-metroid/releases/latest | jq -r '.assets[0].browser_download_url' | wget -qi - && \
+    tar zxf release.tar.gz && \
+    rm -f release.tar.gz
+
 # fetch race mode, only through github because private repo
+WORKDIR /root
 RUN if [ -n "${GITHUB_TOKEN}" ]; then git clone https://${GITHUB_TOKEN}:x-oauth-basic@github.com/theonlydude/varia-race-mode; fi
 
 # add community presets
@@ -64,21 +69,6 @@ RUN mkdir cache  controllers  cron  databases  errors  languages  models  module
 RUN mkdir -p views/solver_web && touch views/solver_web/__init__.py
 WORKDIR /root/web2py/applications/solver/static
 RUN mkdir -p js graph fonts images/sprite_sheets css
-
-
-# install yarn
-RUN apt-get install curl
-RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash -
-RUN apt install nodejs
-RUN wget https://github.com/yarnpkg/yarn/releases/download/v1.22.19/yarn_1.22.19_all.deb && \
-    apt-get remove -y cmdtest && \
-    dpkg -i yarn_1.22.19_all.deb && \
-    rm -f yarn_1.22.19_all.deb
-
-# compile new tracker
-WORKDIR /root/RandomMetroidSolver/super-metroid/client
-RUN yarn install
-RUN yarn build:varia
 
 # varia install
 RUN /root/RandomMetroidSolver/web/install.sh

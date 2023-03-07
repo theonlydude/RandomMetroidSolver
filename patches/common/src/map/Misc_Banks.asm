@@ -238,4 +238,5 @@ ORG $8F0000+!SetCollectedAreaCodePosition
 	ORA #$0001 : STA $7ED908,x : STA $0789		;set map station bit for this area
 	JSL ConstructMap							;reload active map
 + : RTS
+print "bank 8F end ", pc
 }

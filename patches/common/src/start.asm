@@ -16,7 +16,7 @@ incsrc "macros.asm"
 org $82801d
     jsl startup
 
-org $828067
+org $828063
     jsl gameplay_start
 
 ;;; This skips the intro : game state 1F instead of 1E
@@ -64,6 +64,7 @@ org $a1f220
     rtl
 
 gameplay_start:
+    jsl $809a79 ; vanilla code
     jsl base_check_new_game  : bne .end
     ;; Set doors to blue if necessary
     phx

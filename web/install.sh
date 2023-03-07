@@ -40,7 +40,6 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/views/web2py_ajax.html ] || ln -s ~/RandomMetroidSolver/web/web2py/views/web2py_ajax.html ~/web2py/applications/solver/views/web2py_ajax.html
 
 [ -L ~/web2py/applications/solver/views/solver_web/varia.css ] || ln -s ~/RandomMetroidSolver/web/views/varia.css ~/web2py/applications/solver/views/solver_web/varia.css
-[ -L ~/web2py/applications/solver/views/solver_web/inc_area_map.svg ] || ln -s ~/RandomMetroidSolver/web/views/inc_area_map.svg ~/web2py/applications/solver/views/solver_web/inc_area_map.svg
 
 # controler
 [ -L ~/web2py/applications/solver/controllers/solver_web.py ] || ln -s ~/RandomMetroidSolver/web/controllers/solver_web.py ~/web2py/applications/solver/controllers/solver_web.py
@@ -170,7 +169,6 @@ mkdir -p ~/web2py/applications/solver/static/images/help/
 [ -L ~/web2py/applications/solver/static/images/help/ceres_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/ceres_start.png ~/web2py/applications/solver/static/images/help/ceres_start.png
 [ -L ~/web2py/applications/solver/static/images/help/landing_site_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/landing_site_start.png ~/web2py/applications/solver/static/images/help/landing_site_start.png
 [ -L ~/web2py/applications/solver/static/images/help/blue_bt_blue_door.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/blue_bt_blue_door.png ~/web2py/applications/solver/static/images/help/blue_bt_blue_door.png
-[ -L ~/web2py/applications/solver/static/images/help/golden_four_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/golden_four_start.png ~/web2py/applications/solver/static/images/help/golden_four_start.png
 [ -L ~/web2py/applications/solver/static/images/help/watering_hole_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/watering_hole_start.png ~/web2py/applications/solver/static/images/help/watering_hole_start.png
 [ -L ~/web2py/applications/solver/static/images/help/big_pink_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/big_pink_start.png ~/web2py/applications/solver/static/images/help/big_pink_start.png
 [ -L ~/web2py/applications/solver/static/images/help/etecoons_supers_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/etecoons_supers_start.png ~/web2py/applications/solver/static/images/help/etecoons_supers_start.png
@@ -757,44 +755,6 @@ mkdir -p ~/web2py/applications/solver/static/images/tracker/inventory/
 [ -L ~/web2py/applications/solver/static/images/tracker/inventory/Ridley.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bosses/Ridley.png ~/web2py/applications/solver/static/images/tracker/inventory/Ridley.png
 [ -L ~/web2py/applications/solver/static/images/tracker/inventory/MotherBrain.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bosses/MotherBrain.png ~/web2py/applications/solver/static/images/tracker/inventory/MotherBrain.png
 
-# tracker - gps icons
-mkdir -p ~/web2py/applications/solver/static/images/tracker/gps/
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps.png ~/web2py/applications/solver/static/images/tracker/gps/gps.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/nextgps.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/nextgps.png ~/web2py/applications/solver/static/images/tracker/gps/nextgps.png
-
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_1.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_1.png ~/web2py/applications/solver/static/images/tracker/gps/gps_1.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_2.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_2.png ~/web2py/applications/solver/static/images/tracker/gps/gps_2.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_3.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_3.png ~/web2py/applications/solver/static/images/tracker/gps/gps_3.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_4.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_4.png ~/web2py/applications/solver/static/images/tracker/gps/gps_4.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_5.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_5.png ~/web2py/applications/solver/static/images/tracker/gps/gps_5.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_6.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_6.png ~/web2py/applications/solver/static/images/tracker/gps/gps_6.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_7.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_7.png ~/web2py/applications/solver/static/images/tracker/gps/gps_7.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_8.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_8.png ~/web2py/applications/solver/static/images/tracker/gps/gps_8.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_9.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_9.png ~/web2py/applications/solver/static/images/tracker/gps/gps_9.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_10.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_10.png ~/web2py/applications/solver/static/images/tracker/gps/gps_10.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_11.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_11.png ~/web2py/applications/solver/static/images/tracker/gps/gps_11.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_12.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_12.png ~/web2py/applications/solver/static/images/tracker/gps/gps_12.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_13.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_13.png ~/web2py/applications/solver/static/images/tracker/gps/gps_13.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_14.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_14.png ~/web2py/applications/solver/static/images/tracker/gps/gps_14.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_15.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_15.png ~/web2py/applications/solver/static/images/tracker/gps/gps_15.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_16.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_16.png ~/web2py/applications/solver/static/images/tracker/gps/gps_16.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_17.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_17.png ~/web2py/applications/solver/static/images/tracker/gps/gps_17.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_18.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_18.png ~/web2py/applications/solver/static/images/tracker/gps/gps_18.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_19.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_19.png ~/web2py/applications/solver/static/images/tracker/gps/gps_19.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_20.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_20.png ~/web2py/applications/solver/static/images/tracker/gps/gps_20.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_21.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_21.png ~/web2py/applications/solver/static/images/tracker/gps/gps_21.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_22.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_22.png ~/web2py/applications/solver/static/images/tracker/gps/gps_22.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_23.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_23.png ~/web2py/applications/solver/static/images/tracker/gps/gps_23.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_24.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_24.png ~/web2py/applications/solver/static/images/tracker/gps/gps_24.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_25.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_25.png ~/web2py/applications/solver/static/images/tracker/gps/gps_25.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_26.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_26.png ~/web2py/applications/solver/static/images/tracker/gps/gps_26.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_27.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_27.png ~/web2py/applications/solver/static/images/tracker/gps/gps_27.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_28.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_28.png ~/web2py/applications/solver/static/images/tracker/gps/gps_28.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_29.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_29.png ~/web2py/applications/solver/static/images/tracker/gps/gps_29.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_30.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_30.png ~/web2py/applications/solver/static/images/tracker/gps/gps_30.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_31.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_31.png ~/web2py/applications/solver/static/images/tracker/gps/gps_31.png
-[ -L ~/web2py/applications/solver/static/images/tracker/gps/gps_32.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_32.png ~/web2py/applications/solver/static/images/tracker/gps/gps_32.png
-
 # tracker - doors
 mkdir -p ~/web2py/applications/solver/static/images/tracker/doors/
 [ -L ~/web2py/applications/solver/static/images/tracker/doors/blue_door.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/doors/blue_door.svg ~/web2py/applications/solver/static/images/tracker/doors/blue_door.svg
@@ -824,7 +784,6 @@ mkdir -p ~/web2py/applications/solver/static/images/tracker/doors/
 # tracker - auto tracker
 mkdir -p ~/web2py/applications/solver/static/images/tracker/
 [ -L ~/web2py/applications/solver/static/images/tracker/samusIcon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/samusIcon.png ~/web2py/applications/solver/static/images/tracker/samusIcon.png
-[ -L ~/web2py/applications/solver/static/images/tracker/area_map_stream.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map_stream.png ~/web2py/applications/solver/static/images/tracker/area_map_stream.png
-[ -L ~/web2py/applications/solver/static/images/tracker/area_map_stream_black.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map_stream_black.png ~/web2py/applications/solver/static/images/tracker/area_map_stream_black.png
 
+# client files (tracker js+css+images
 [ -L ~/web2py/applications/solver/static/client ] || ln -s ~/RandomMetroidSolver/web/client/ ~/web2py/applications/solver/static/

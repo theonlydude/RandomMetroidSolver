@@ -82,62 +82,54 @@
     left: 16%;
 }
 
-#titleAutoTracker {
+.auto-tracker {
+    right: 0.5rem;
     position: absolute;
-    z-index: 2;
-    width: 15.5%;
-    height: 3.75%;
-    top: 0%;
-    left: 84.5%;
+    top: 0;
+    z-index: 50;
+}
+body[data-varia-logic="mirror"] .auto-tracker {
+    left: 0.5rem;
+    right: unset;
+    top: 3rem;
+}
+body[data-varia-logic="mirror"] .auto-tracker__contents > * {
+    order: 2;
+}
+body[data-varia-logic="mirror"] #logAutoTracker {
+    order: 1;
+}
+.auto-tracker__contents {
+    display: flex;
+    gap: 0.25vw;
+}
+#titleAutoTracker {
     color: #ffffff;
-    font-size: 1.25vw;
+    font-size: 1vw;
     font-weight: bold;
+    text-align: center;
 }
 #startStopAutoTracker {
     cursor: pointer;
-    position: absolute;
-    z-index: 2;
-    width: 2.5%;
-    height: 5%;
-    top: 4%;
-    left: 79%;
+    width: 1vw;
 }
 #statusAutoTracker {
-    position: absolute;
-    z-index: 2;
-    width: 2.5%;
-    height: 5%;
-    top: 4%;
-    left: 81.75%;
+    width: 1vw;
 }
 #helpAutoTracker {
     cursor: pointer;
-    position: absolute;
-    z-index: 2;
-    width: 2.5%;
-    height: 5%;
-    top: 4%;
-    left: 84.50%;
+    width: 1vw;
 }
 #logAutoTracker {
-    position: absolute;
-    z-index: 2;
-    width: 12%;
-    height: 16%;
-    top: 4%;
-    left: 88%;
+    background-color: #a7a7a7;
+    color: black;
+    width: 12vw;
+    height: 8vh;
     resize: none;
     font-size: 0.5vw;
+    overflow-y: scroll;
 }
-#debugMap {
-    position: absolute;
-    top: 20%;
-    left: 20%;
-    border: 2px solid #666666;
-    background-color: #000;
-    z-index: 5;
-    display: none;
-}
+
 #rtaTimerDiv {
     position: absolute;
     top: 2.5%;
@@ -146,11 +138,11 @@
     z-index: 2;
     display: none;
 }
-.rtaTimerClassic {
+body[data-varia-logic="vanilla"] .rtaTimer {
     left: 48.5%;
 }
-.rtaTimerStream {
-    left: 22.5%;
+body[data-varia-logic="mirror"] .rtaTimer {
+    left: 42%;
 }
 #rtaTimer {
     text-align: center;
@@ -180,29 +172,36 @@ function startTheTour(step=-1) {
   var tour = new Tour({
     storage: false,
     steps: [{
-      element: "#help",
+      element: ".fa.fa-question-circle",
       title: "VARIA Areas/Bosses/Items/Doors Tracker",
       content: "<h2 class=\"center\">Welcome to the VARIA Areas/Bosses/Items/Doors Tracker</h2><h4>Areas/Bosses Tracker</h4>\
-<p>The Areas and Bosses Tracker allows you to track the connections between the areas and bosses portals.<br/>To use it, click on a portal <img src=\"/solver/static/images/tracker/help/portal.png\" alt=\"Portal\" style=\"width: 20px\">, it'll highlight it, then click on a second portal, it'll draw a line between the two portals with a random color.<br/>\
-You can delete the latest added transition with the <img src=\"/solver/static/images/ui/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button and all of them with the <img src=\"/solver/static/images/ui/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.<br/>\
-You can also click on the portal <img src=\"/solver/static/images/tracker/help/portal.png\" alt=\"Portal\" style=\"width: 20px\"> of an existing transition and click on the <img src=\"/solver/static/images/ui/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button to delete it.<br/>\
+<p>The Areas and Bosses Tracker allows you to track the connections between the areas and bosses portals.<br/>To use it, click on a portal <i class=\"sm-portal\" />, it'll highlight it, then click on a second portal, it'll draw a line between the two portals with a random color.<br/>\
+You can delete all portals or undo the last portal placed by clicking on the <span class=\"btn -primary\"><i class=\"sm-portal\" /></span> menu. Depending on the area rando and boss rando settings, portals may be locked <i class=\"sm-portal -lock\" />. \
 Only the locations of connected areas/bosses are computed by the Items Tracker (as such if the ROM is not Areas/Bosses randomized the vanilla transitions will be automatically added).<br/>\
-There's three portal types that you can't mix: Area portals: <img src=\"/solver/static/images/tracker/help/portal.png\" alt=\"Portal\" style=\"width: 20px\">, Boss portals: <img src=\"/solver/static/images/tracker/help/portal_boss.png\" alt=\"Boss Portal\" style=\"width: 20px\">, Escape portals: <img src=\"/solver/static/images/tracker/help/portal_escape.png\" alt=\"Escape Portal\" style=\"width: 20px\"> (active only in Area Plandomizer).<br/>\
-The left Sand Hall door <img src=\"/solver/static/images/tracker/help/portal_maridia.png\" alt=\"Portal Maridia\" style=\"width: 20px\"> exits to below Botwoon Energy Tank room <img src=\"/solver/static/images/tracker/help/portal_maridia_area.png\" alt=\"Portal Maridia Area\" style=\"width: 20px\"> when area randomization is active (the blue door in West Sand Hall Tunnel has been greyed), it defaults to vanilla output otherwise <img src=\"/solver/static/images/tracker/help/portal_maridia_vanilla.png\" alt=\"Portal Maridia Vanilla\" style=\"width: 20px\">.</p>\
+There's three portal types that you can't mix: Area portals: <i class=\"sm-portal\" />, Boss portals: <i class=\"sm-portal -boss\" />, Escape portals: <i class=\"sm-portal -escape\" /> (active only in Area Plandomizer).<br/>\
+The left Sand Hall door <i class=\"sm-portal -sand\" /> exits to below Botwoon Energy Tank room <i class=\"sm-portal -sand\" data-content=\"A\"/> when area randomization is active (the blue door in West Sand Hall Tunnel has been greyed), it defaults to vanilla output otherwise <i class=\"sm-portal -sand\" data-content=\"V\" />.</p>\
 <h4>Items Tracker</h4>\
-<p>The Items Tracker allows you to use the Solver in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/ui/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on a location after you've collected the item of the location in the game, it'll update the next available locations.<br/>\
-The color of the icon on the available locations matchs the difficulty to reach the location:\
-<table><tr><td><img src=\"/solver/static/images/tracker/markers/marker_easy.gif\" alt=\"easy\" style=\"width: 32px; background-color: #000;\"> easy</td><td><img src=\"/solver/static/images/tracker/markers/marker_medium.gif\" alt=\"medium\" class=\"diffHelp\"> medium</td></td><td><img src=\"/solver/static/images/tracker/markers/marker_hard.gif\" alt=\"hard\" class=\"diffHelp\"> hard</td><td><img src=\"/solver/static/images/tracker/markers/marker_harder.gif\" alt=\"harder\" class=\"diffHelp\"> very hard</td><td><img src=\"/solver/static/images/tracker/markers/marker_hardcore.gif\" alt=\"hardcore\" class=\"diffHelp\"> hardcore</td><td><img src=\"/solver/static/images/tracker/markers/marker_mania.gif\" alt=\"mania\" class=\"diffHelp\"> mania</td><td colspan=\"3\"><img src=\"/solver/static/images/tracker/markers/marker_break.png\" alt=\"break\" class=\"diffHelp\"> sequence break</td></tr></table>\
+<p>The Items Tracker allows you to use the Solver in interactive mode.<br/>To use it, click on the <span class=\"btn -primary\"><i class=\"fa fa-play\" /></span> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on a location after you've collected the item of the location in the game, it'll update the next available locations.<br/>\
+The color of the icon on the available locations matchs the difficulty to reach the location:</p>\
+<div class=\"popover-row\"> \
+<div><i class=\"sm-item -empty smva-difficulty -difficulty-easy\" /> easy</div>\
+<div><i class=\"sm-item -empty smva-difficulty -difficulty-medium\" /> medium</div>\
+<div><i class=\"sm-item -empty smva-difficulty -difficulty-hard\" /> hard</div>\
+<div><i class=\"sm-item -empty smva-difficulty -difficulty-harder\" /> very hard</div>\
+<div><i class=\"sm-item -empty smva-difficulty -difficulty-hardcore\" /> hardcore</div>\
+<div><i class=\"sm-item -empty smva-difficulty -difficulty-mania\" /> mania</div>\
+<div><i class=\"sm-item -empty smva-difficulty -difficulty-break\" /> sequence break</div>\
+</div> \
 You can uncollect the item at a location by clicking on the location again.<br/>\
-The locations not available are displayed with the Sequence Break icon, allowing you to collect them when you sequence break.<br/>When a location has been visited its icon displays the collected item: <img src=\"/solver/static/images/tracker/markers/marker_visited_easy_Gravity.png\" alt=\"Visited\" style=\"width: 32px\"> or this if no item was found: <img src=\"/solver/static/images/tracker/markers/marker_visited_easy.png\" alt=\"Visited\" style=\"width: 32px\">, one color for each difficulty.<br/>\
-The locations availability are computed from the current access point which is displayed with this icon: <img src=\"/solver/static/images/tracker/gps/gps.png\" alt=\"last access point\" style=\"width: 32px\"><br/>\
-When overing the mouse cursor on an available location a tooltip is displayed with the location's name, the techniques and items used to access it from the current access point.<br/>\
+The locations not available are displayed with the Sequence Break icon, allowing you to collect them when you sequence break.<br/>When a location has been visited its icon displays the collected item: <i class=\"sm-item -gravity-suit smva-difficulty -difficulty-easy\" alt=\"Visited\" style=\"font-size: 32px\" /> or this if no item was found: <i class=\"sm-item -nothing smva-difficulty -difficulty-easy\" alt=\"Visited\" style=\"font-size: 32px\" />, one color for each difficulty.<br/>\
+The locations availability are computed from the current access point which is displayed with this icon: <i class=\"smv-gps -visible -inline\" alt=\"last access point\" style=\"font-size: 32px\" />\
+<p>When overing the mouse cursor on an available location a tooltip is displayed with the location's name, the techniques and items used to access it from the current access point.<br/>\
 The second green GPS icon displayed when overing on a location is the location's nearest access point, after collecting the item at the location the current access point will be updated to it.<br/>\
 After the location has been visited only the collected item is displayed.</p>\
 <h4>Doors Tracker</h4>\
 <p>Colored doors are displayed on the map. If the seed is doors colors randomized then doors are initially white, you have to click on them to reveal their color to allow the tracker to traverse them. If the seed is not doors colors randomized then doors can't be clicked.</p>\
 <h4>Touch screen tablette mode</h4>\
-<p>You can use the tracker on your touch screen tablette without a ROM file, aka seed less mode, to start using it leave the \"Randomized Super Metroid ROM\" input empty after clicking on the <img src=\"/solver/static/images/ui/play.svg\" alt=\"Start\" style=\"width: 32px\"> button.<br/>\
+<p>You can use the tracker on your touch screen tablette without a ROM file, aka seed less mode, to start using it leave the \"Randomized Super Metroid ROM\" input empty after clicking on the <span class=\"btn -primary\"><i class=\"fa fa-play\" /></span> button.<br/>\
 You can choose the start location to match the seed you're playing.<br/>\
 Clicking on a location will set the Nothing item on it. To tell the tracker which item you collected in-game click on the inventory screen: +/- buttons and directly on items<br/><img src=\"/solver/static/images/tracker/inventory/background_seedless.png\"><br/>\
 By default all the vanilla transitions are loaded, you can delete them with the <img src=\"/solver/static/images/ui/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.</p>\
@@ -211,7 +210,11 @@ You can load a race protected seed in the tracker, it'll use it to know if the s
 <h4>Auto Save</h4>\
 <p>The tracker feature an auto save functionnality, so you can do your seed in multiple seatings.<br/>The different status icons of the auto save:<table><tr><td><img src=\"/solver/static/images/ui/refresh.svg\" style=\"width: 32px\"> Loading in progress</td><td><img src=\"/solver/static/images/ui/checkmark.svg\" style=\"width: 32px\"> Save ok</td></tr><tr><td><img src=\"/solver/static/images/ui/cloud_upload.png\" style=\"width: 32px\"> Upload in progress</td><td><img src=\"/solver/static/images/ui/cloud_download.svg\" style=\"width: 32px\"> Download in progress</td></tr><tr><td colspan=\"2\"><img src=\"/solver/static/images/ui/warning.svg\" style=\"width: 32px\"> Something wrong happened (try reloading the page)</td></tr></table></p><p>You can display this help again by clicking on the <img src=\"/solver/static/images/ui/help.svg\" alt=\"help\" style=\"width: 32px\"> button.</p>\
 <h4>Thanks to</h4>\
-<p><ul><li>Animated location icons by Djlo</li><li>Location icons from Alli_Cat's <a href='https://github.com/allibear17/Super-Metroid-Location-Tracker' target=\"_blank\">Location Tracker</a></li><li>G4 sprite from Crossproduct's <a href=\"https://www.twitch.tv/crossproduct\" target=\"_blank\">smrandohelper</a></li><li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set' target=\"_blank\">Dryicons</a></li></ul></p>"
+<p><ul>\
+<li>Tracker module by Chrisc</li>\
+<li>Animated location icons by Djlo</li>\
+<li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set' target=\"_blank\">Dryicons</a></li>\
+</ul></p>"
     }, {
       element: "#helpAutoTracker",
       title: "VARIA Areas/Bosses/Items/Doors Auto-Tracker",
@@ -246,6 +249,7 @@ Install QUsb2snes on your computer and configure your sd2snes/snes mini/emulator
   if (typeof step === 'string') {
     step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
   }
+  window.T = tour
   // Start the tour
   if(step != -1) {
     tour.goTo(step);
@@ -274,53 +278,6 @@ function switchStreamingInventory() {
         menu.style.display = "block";
         streaming.style.display = "none";
     }
-}
-
-// to switch between grid/black stream map
-var area_stream="standard";
-function switchStreamingMap() {
-    if(loaded == false || init == false) {
-        return;
-    }
-
-    // remove border of already selected AP
-    $(".addBorder").removeClass("addBorder");
-
-    var classicMap = document.getElementById("classic_map");
-    var streamMap = document.getElementById("stream_map");
-    var RTA = document.getElementById("rtaTimerDiv");
-    var smap = document.getElementById("smap");
-    if(area_stream == "standard") {
-        // switch to stream grid
-        area_stream = "grid";
-        linePrefix = "s";
-        classicMap.style.display = "none";
-        smap.src = "/solver/static/images/tracker/area_map_stream.png";
-        streamMap.style.display = "block";
-        $("#rtaTimerDiv").removeClass("rtaTimerClassic");
-        $("#rtaTimerDiv").addClass("rtaTimerStream");
-    } else if(area_stream == "grid") {
-        // switch to stream black
-        area_stream = "black";
-        linePrefix = "s";
-        classicMap.style.display = "none";
-        smap.src = "/solver/static/images/tracker/area_map_stream_black.png";
-        streamMap.style.display = "block";
-        $("#rtaTimerDiv").removeClass("rtaTimerClassic");
-        $("#rtaTimerDiv").addClass("rtaTimerStream");
-    } else {
-        // switch to standard
-        area_stream = "standard";
-        linePrefix = "";
-        classicMap.style.display = "block";
-        streamMap.style.display = "none";
-        $("#rtaTimerDiv").removeClass("rtaTimerStream");
-        $("#rtaTimerDiv").addClass("rtaTimerClassic");
-    }
-
-    // reset lines
-    switchLines();
-    firstClick = "";
 }
 
 function switchLines() {
@@ -643,8 +600,7 @@ rooms['vanilla'] = {
     'a618': {'name': '[Red Tower Energy Charge Station]', 'left': 9, 'top': 16, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
     'a641': {'name': '[Kraid Recharge Station]', 'left': 11, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
     'a66a': {'name': 'Statues Room', 'left': 9, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'Tourian'},
-    'a6a1': {'name': 'Warehouse Entrance', 'graphArea': 'Norfair', 'nearestAP': 'MULTI', 'screens': [['warehouseEntranceLeft', 'warehouseEntranceRight', 'warehouseEntranceRight'], ['warehouseEntranceLeft', 'warehouseEntranceRight', 'wareh
-ouseEntranceRight']], 'left': 8, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'UpperNorfair'},
+    'a6a1': {'name': 'Warehouse Entrance', 'graphArea': 'Norfair', 'nearestAP': 'MULTI', 'screens': [['warehouseEntranceLeft', 'warehouseEntranceRight', 'warehouseEntranceRight'], ['warehouseEntranceLeft', 'warehouseEntranceRight', 'warehouseEntranceRight']], 'left': 8, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'UpperNorfair'},
     'a6e2': {'name': 'Varia Suit Room', 'left': 2, 'top': 1, 'vanillaArea': 'Brinstar', 'variaArea': 'Kraid'},
     'a70b': {'name': '[Kraid Save Room]', 'left': 6, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
     'a734': {'name': '[Caterpillar Save Room]', 'left': 15, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
@@ -743,8 +699,7 @@ ouseEntranceRight']], 'left': 8, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea
     'ced2': {'name': '[Glass Tunnel Save Room]', 'left': 17, 'top': 17, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
     'cefb': {'name': 'Glass Tunnel', 'graphArea': 'RedBrinstar', 'nearestAP': 'glassTunnelTop', 'left': 16, 'top': 15, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
     'cf54': {'name': 'West Tunnel', 'left': 15, 'top': 16, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
-    'cf80': {'name': 'East Tunnel', 'graphArea': 'RedBrinstar', 'nearestAP': 'MULTI', 'screens': [['eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight'], ['eastTunnelRight', 'x', 'x', 'x']], 'left': 17, '
-top': 15, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
+    'cf80': {'name': 'East Tunnel', 'graphArea': 'RedBrinstar', 'nearestAP': 'MULTI', 'screens': [['eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight'], ['eastTunnelRight', 'x', 'x', 'x']], 'left': 17, 'top': 15, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
     'cfc9': {'name': 'Main Street', 'graphArea': 'WestMaridia', 'nearestAP': 'mainStreetBottom', 'left': 0, 'top': 5, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
     'd017': {'name': 'Fish Tank', 'left': 3, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
     'd055': {'name': 'Mama Turtle Room', 'left': 7, 'top': 8, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
@@ -909,8 +864,7 @@ rooms['mirror'] = {
     'a618': {'name': '[Red Tower Energy Charge Station]', 'left': 11, 'top': 16, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
     'a641': {'name': '[Kraid Recharge Station]', 'left': 0, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
     'a66a': {'name': 'Statues Room', 'left': 1, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'Tourian'},
-    'a6a1': {'name': 'Warehouse Entrance', 'graphArea': 'Norfair', 'nearestAP': 'MULTI', 'screens': [['warehouseEntranceLeft', 'warehouseEntranceRight', 'warehouseEntranceRight'], ['warehouseEntranceLeft', 'warehouseEntranceRight', 'wareh
-ouseEntranceRight']], 'left': 25, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'UpperNorfair'},
+    'a6a1': {'name': 'Warehouse Entrance', 'graphArea': 'Norfair', 'nearestAP': 'MULTI', 'screens': [['warehouseEntranceLeft', 'warehouseEntranceRight', 'warehouseEntranceRight'], ['warehouseEntranceLeft', 'warehouseEntranceRight', 'warehouseEntranceRight']], 'left': 25, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'UpperNorfair'},
     'a6e2': {'name': 'Varia Suit Room', 'left': 0, 'top': 1, 'vanillaArea': 'Brinstar', 'variaArea': 'Kraid'},
     'a70b': {'name': '[Kraid Save Room]', 'left': 5, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
     'a734': {'name': '[Caterpillar Save Room]', 'left': 5, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
@@ -1009,8 +963,7 @@ ouseEntranceRight']], 'left': 25, 'top': 0, 'vanillaArea': 'Brinstar', 'variaAre
     'ced2': {'name': '[Glass Tunnel Save Room]', 'left': 3, 'top': 17, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
     'cefb': {'name': 'Glass Tunnel', 'graphArea': 'RedBrinstar', 'nearestAP': 'glassTunnelTop', 'left': 4, 'top': 15, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
     'cf54': {'name': 'West Tunnel', 'left': 5, 'top': 16, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
-    'cf80': {'name': 'East Tunnel', 'graphArea': 'RedBrinstar', 'nearestAP': 'MULTI', 'screens': [['eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight'], ['eastTunnelRight', 'x', 'x', 'x']], 'left': 0, 't
-op': 15, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
+    'cf80': {'name': 'East Tunnel', 'graphArea': 'RedBrinstar', 'nearestAP': 'MULTI', 'screens': [['eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight'], ['eastTunnelRight', 'x', 'x', 'x']], 'left': 0, 'top': 15, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
     'cfc9': {'name': 'Main Street', 'graphArea': 'WestMaridia', 'nearestAP': 'mainStreetBottom', 'left': 9, 'top': 5, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
     'd017': {'name': 'Fish Tank', 'left': 5, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
     'd055': {'name': 'Mama Turtle Room', 'left': 2, 'top': 8, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
@@ -1162,11 +1115,6 @@ function startAutoTracker() {
     // update interface
     displayStopButton();
     setAutoTrackerIcon("statusLoad");
-
-    // debug map
-    // var debugMap = document.getElementById("debugMap")
-    // debugMap.style.display = "block";
-    // dragElement(debugMap, "debugMap");
 }
 
 function closeSocket() {
@@ -1177,8 +1125,7 @@ function closeSocket() {
 
     // update interface
     setAutoTrackerIcon("statusLoad");
-    var samusIcon = document.getElementById("samusIcon");
-    samusIcon.style.display = "none";
+    setSamusIcon()
 }
 
 function stopAutoTracker() {
@@ -1326,8 +1273,7 @@ function cleanup(cleanExit) {
     curState = stateEnum.closed;
     autoTrackInProgress = false;
     displayStartButton();
-    var samusIcon = document.getElementById("samusIcon");
-    samusIcon.style.display = "none";
+    setSamusIcon()
     // RTA
     document.getElementById("rtaTimerDiv").style.display = "none";
     disableRTAFake();
@@ -1561,8 +1507,6 @@ function handleData(data) {
                 for(var i=0; i<mapSize; i++) {
                     mapData[mapOffset+i] = curMapData[i];
                 }
-
-                //displayDebugMap(mapData, mapOffsetEnum.curMap);
             }
 
             askNextData();
@@ -1579,7 +1523,7 @@ function handleData(data) {
             var roomPointer = readWord(samusData, samusEnum.roomPointer).toString(16);
             var x = Math.floor(samusX / 0x100);
             var y = Math.floor(samusY / 0x100);
-            displaySamusOnMap(roomPointer, x, y);
+            setSamusIcon(roomPointer, x, y);
 
             newAP = getNewAP(roomPointer, x, y);
 
@@ -1600,7 +1544,6 @@ function handleData(data) {
             byteIndex += 4;
             var bitMask = 0x80 >> (x & 7);
             console.log(`cur byteIndex: ${byteIndex} bitMask: ${bitMask} room: ${roomPointer} area: ${areaEnum[areaIndex]}`);
-            // displaySamusOnDebugMap(byteIndex, bitMask);
 
             askNextData();
         } else if(dataToAskChain[dataToAskStep] == dataEnum.items) {
@@ -1658,46 +1601,6 @@ function concatArrays(dataType) {
     }
 }
 
-function displayDebugMap(mapData, areaStart) {
-    // display the map on canvas
-    var canvas = document.getElementById('debugMap');
-    var ctx = canvas.getContext('2d');
-
-    // metroid map pink
-    ctx.fillStyle = 'rgb(222, 57, 148)';
-
-    // for each bit set in the map data display a 8x8 square on the map canvas
-    var areaSize = 0x100;
-    // 0x0: crateria ou current map
-    // 0x100: brinstar
-    // 0x200: norfair
-    // 0x300: WS
-    // 0x400: maridia
-    var areaEnd = areaStart + areaSize;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // squares we are drawing
-    var width = 8;
-    var height = 8;
-
-    for(var i=areaStart; i<areaEnd; i++) {
-        var b = mapData[i];
-        if(b == 0) {
-            continue;
-        } else {
-            var byteIndex = i - areaStart;
-            for(var j=7; j>=0; j--) {
-                if((b & 0x80) == 0x80) {
-                    var bitMask = Math.pow(2, j);
-                    var coords = getMapDisplayCoord(byteIndex, bitMask);
-                    ctx.fillRect(coords[0], coords[1], width, height);
-                }
-                b = b << 1;
-            }
-        }
-    }
-}
-
 var newAP = "";
 function getNewAP(roomPointer, x, y) {
     // when samus enters a new graph area update the current access point
@@ -1713,34 +1616,6 @@ function getNewAP(roomPointer, x, y) {
         }
     }
     return newAP;
-}
-
-function displaySamusOnMap(roomPointer, x, y) {
-    // size of a screen in % of the map
-    var screenX = 0.94;
-    var screenY = 2.04;
-
-    //console.log(`displaySamusOnMap roomPointer: ${roomPointer} top: ${rooms[logic][roomPointer]["top"]} left: ${rooms[logic][roomPointer]["left"]}`);
-    var left = rooms[logic][roomPointer]["left"] + x * screenX;
-    var top = rooms[logic][roomPointer]["top"] + y * screenY;
-    var samusIcon = document.getElementById("samusIcon");
-    samusIcon.style.display = "block";
-    $(samusIcon).css({"top": top+"%", "left": left+"%"});
-}
-
-function displaySamusOnDebugMap(byteIndex, bitMask) {
-    var canvas = document.getElementById('debugMap');
-    var ctx = canvas.getContext('2d');
-
-    // samus yellow
-    ctx.fillStyle = 'rgb(255, 189, 3)';
-
-    var width = 4;
-    var height = 4;
-    var coords = getMapDisplayCoord(byteIndex, bitMask);
-
-    // add 2 to draw in the center of the map square
-    ctx.fillRect(coords[0]+2, coords[1]+2, width, height);
 }
 
 function getMapDisplayCoord(byteIndex, bitMask) {
@@ -1893,9 +1768,6 @@ function postAjaxHook() {
     resetNextDataChain();
 }
 
-function setActiveHook(mode, majorsSplit, area, boss, escape) {
-}
-
 function updateGlobalHook(jsonData) {
     // get eventsBitMasks if preset
     if("eventsBitMasks" in jsonData) {
@@ -2037,51 +1909,36 @@ function sendAutoTrackerMessage(data, newState) {
 <div class="main">
 {{include 'solver_web/t_main.html'}}
 
-    <!-- map display switch -->
-    <div id="switchMap" class="switchMap"><img src="/solver/static/images/ui/television.svg" alt="Switch" onclick="switchStreamingMap()" data-toggle="tooltip" title="Switch to streaming map" data-placement="bottom" data-container="body" data-html="true"></div>
-
-    <!-- inventory display switch -->
-    <div id="switchInventory" class="switchInventory"><img src="/solver/static/images/ui/television.svg" alt="Switch" onclick="switchStreamingInventory()" data-toggle="tooltip" title="Switch to streaming inventory" data-placement="bottom" data-container="body" data-html="true"></div>
-
-    <!-- item tracker buttons -->
-    <div id="titleItem" class="titleItem">ITEM</div>
-    <div id="startItem" class="startItem"><img src="/solver/static/images/ui/play.svg" alt="Start" onclick="displayPopup(false)" data-toggle="tooltip" title="Start the Interactive Solver" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="repeatItem" class="repeatItem"><img src="/solver/static/images/ui/repeat.svg" alt="Cancel Last" onclick="deleteLoc(false)" data-toggle="tooltip" title="Remove last visited location" data-placement="bottom" data-container="body" data-html="true" id="repeatItemImg"></div>
-    <div id="binItem" class="binItem"><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearLocs(false)" data-toggle="tooltip" title="Remove all visited locations and doors" data-placement="bottom" data-container="body" data-html="true"></div>
-
-    <!-- tracker help -->
-    <div id="help" class="help"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the help" data-placement="bottom" data-container="body" data-html="true"></div>
-
     <!-- auto tracker -->
-    <div id="titleAutoTracker">AUTO TRACKER</div>
+    <div class="auto-tracker">
+      <div id="titleAutoTracker">AUTO TRACKER</div>
 
-    <div id="startStopAutoTracker">
-      <img id="startAutoTracker" src="/solver/static/images/ui/play.svg" alt="Start AutoTracker" onclick="startAutoTracker()" data-toggle="tooltip" title="Start the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
-      <img id="stopAutoTracker" src="/solver/static/images/ui/shut_down.svg" alt="Stop AutoTracker" style="display: none" onclick="stopAutoTracker()" data-toggle="tooltip" title="Stop the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
+      <div class="auto-tracker__contents">
+        <div id="startStopAutoTracker">
+          <img id="startAutoTracker" src="/solver/static/images/ui/play.svg" alt="Start AutoTracker" onclick="startAutoTracker()" data-toggle="tooltip" title="Start the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
+          <img id="stopAutoTracker" src="/solver/static/images/ui/shut_down.svg" alt="Stop AutoTracker" style="display: none" onclick="stopAutoTracker()" data-toggle="tooltip" title="Stop the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
+        </div>
+
+        <div id="statusAutoTracker">
+          <img id="statusKO" src="/solver/static/images/ui/record_ko.svg" alt="statusKO" style="display: none" data-toggle="tooltip" title="AutoTracker status OK" data-placement="bottom" data-container="body" data-html="true">
+          <img id="statusOK" src="/solver/static/images/ui/record_ok.svg" alt="statusOK" style="display: none" data-toggle="tooltip" title="AutoTracker status KO" data-placement="bottom" data-container="body" data-html="true">
+          <img id="statusLoad" src="/solver/static/images/ui/record_load.svg" alt="statusLoad" style="display: none" data-toggle="tooltip" title="AutoTracker status Load" data-placement="bottom" data-container="body" data-html="true">
+          <img id="statusNA" src="/solver/static/images/ui/record.svg" alt="statusNA" data-toggle="tooltip" title="AutoTracker status NA" data-placement="bottom" data-container="body" data-html="true">
+        </div>
+        <div id="helpAutoTracker"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the AutoTracker help" data-placement="bottom" data-container="body" data-html="true"></div>
+        <textarea id="logAutoTracker" disabled></textarea>
+      </div>
+
     </div>
 
-    <div id="helpAutoTracker"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the AutoTracker help" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="statusAutoTracker">
-      <img id="statusKO" src="/solver/static/images/ui/record_ko.svg" alt="statusKO" style="display: none" data-toggle="tooltip" title="AutoTracker status OK" data-placement="bottom" data-container="body" data-html="true">
-      <img id="statusOK" src="/solver/static/images/ui/record_ok.svg" alt="statusOK" style="display: none" data-toggle="tooltip" title="AutoTracker status KO" data-placement="bottom" data-container="body" data-html="true">
-      <img id="statusLoad" src="/solver/static/images/ui/record_load.svg" alt="statusLoad" style="display: none" data-toggle="tooltip" title="AutoTracker status Load" data-placement="bottom" data-container="body" data-html="true">
-      <img id="statusNA" src="/solver/static/images/ui/record.svg" alt="statusNA" data-toggle="tooltip" title="AutoTracker status NA" data-placement="bottom" data-container="body" data-html="true">
-    </div>
-
-    <textarea id="logAutoTracker" disabled></textarea>
-
-    <!-- debug canvas pink color: de3994 -->
-    <canvas id="debugMap" width="512" height="256"></canvas>
+    <!-- samus current position on the map -->
 
     <!-- RTA timer -->
-    <div id="rtaTimerDiv" class="rtaTimerClassic">
+    <div id="rtaTimerDiv" class="rtaTimer">
       <p id="rtaTimer"></p>
     </div>
   </div>
 
-  <!-- info on current loaded seed -->
-  <p class="white">Current Seed:</p>
-  <input type="text" name="cur_seed" id="cur_seed" value="n/a" readonly class="full">
-  <p class="white">Current Preset:</p>
-  <input type="text" name="cur_preset" id="cur_preset" value="n/a" readonly class="full">
 </div>
+<div id="app"></div>
+{{ response.write(app_files, escape=False) }}

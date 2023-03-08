@@ -1,6 +1,6 @@
 import zlib
 
-from web.backend.utils import raiseHttp, loadPresetsList, transition2isolver, locName4isolver, getAddressesToRead
+from web.backend.utils import raiseHttp, loadPresetsList, transition2isolver, locName4isolver, getAddressesToRead, get_app_files
 from web.backend.ws import WS
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
 from graph.vanilla.graph_access import accessPoints
@@ -71,7 +71,8 @@ class Tracker(object):
                     nothingScreens=InteractiveSolver.nothingScreens,
                     doorsScreen=InteractiveSolver.doorsScreen,
                     bossBitMasks=InteractiveSolver.bossBitMasks,
-                    apsGraphArea=apsGraphArea, flavorPatches=RomReader.flavorPatches)
+                    apsGraphArea=apsGraphArea, flavorPatches=RomReader.flavorPatches,
+                    app_files=get_app_files())
 
     def trackerWebService(self):
         # unified web service for item/area trackers

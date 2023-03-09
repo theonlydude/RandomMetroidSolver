@@ -21,6 +21,7 @@ incsrc "sym/utils.asm"
 incsrc "sym/rando_escape_common.asm"
 incsrc "sym/custom_music.asm"
 incsrc "sym/disable_screen_shake.asm"
+incsrc "sym/map.asm"
 
 !timer = !timer1
 !current_room = $079b
@@ -66,10 +67,6 @@ endmacro
 ;;; hijack main ASM call to check objectives regularly
 org $828BA8
 	jsl periodic_obj_check
-
-;;; replace pause mode code pointers list
-org $82910A
-        jsr (new_pause_actions_func_list,x)
 
 ;;; new function to check for L/R button pressed
 org $82A505
@@ -597,23 +594,31 @@ set_bowling_event:
 
 warnpc $aaf82f
 
+;;; Pause stuff
+
+;;; new pointers list
+org map_PauseRoutineIndex_objectives
+        dw func_objective_screen
+        dw func_map2obj_fading_out, func_map2obj_load_obj, func_map2obj_fading_in
+        dw func_obj2map_fading_out, $91D7, $9200
+print "after obj: ", pc
+
 ;;; continue in 82 after InfoStr in seed_display.asm
 org $82FB6D
-
-print "Pause stuff: ", pc
 
 ;;;
 ;;; pause menu objectives display
 ;;;
 
 ;;; new screen:
-!pause_index_objective_screen = #$0008
-!pause_index_map2obj_fading_out = #$0009
-!pause_index_map2obj_load_obj = #$000A
-!pause_index_map2obj_fading_in = #$000B
-!pause_index_obj2map_fading_out = #$000C
-!pause_index_obj2map_load_map = #$000D
-!pause_index_obj2map_fading_in = #$000E
+;;; (skip 3 indices used by map patch)
+!pause_index_objective_screen = #$000B
+!pause_index_map2obj_fading_out = #$000C
+!pause_index_map2obj_load_obj = #$000D
+!pause_index_map2obj_fading_in = #$000E
+!pause_index_obj2map_fading_out = #$000F
+!pause_index_obj2map_load_map = #$0010
+!pause_index_obj2map_fading_in = #$0011
 
 
 ;;; pause screen button label mode
@@ -910,16 +915,6 @@ draw_spritemap:
         PLB
         PLP
         RTS
-
-;;; new pointers list
-new_pause_actions_func_list:
-        dw $9120                ; map
-        dw $9142                ; equipment
-        dw $9156, $91AB, $9231  ; map2equip
-        dw $9186, $91D7, $9200  ; equip2map
-        dw func_objective_screen
-        dw func_map2obj_fading_out, func_map2obj_load_obj, func_map2obj_fading_in
-        dw func_obj2map_fading_out, $91D7, $9200
 
 new_pause_palettes_func_list:
         dw $A796, $A6DF, $A628, update_palette_objective_screen

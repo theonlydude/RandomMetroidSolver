@@ -21,8 +21,8 @@ incsrc "constants.asm"
 org $828F6B
         JSR display_item_count_menu
 
-org $8290FA
-        jsr display_RTA_time_frame
+org $8290F6
+        jsr display_RTA_time_frame : nop
 
 ; Free space at end of bank 82 after objectives
 org $82FEC0
@@ -33,7 +33,7 @@ display_item_count_menu:
         rts
 
 display_RTA_time_frame:
-        JSR $A92B               ; vanilla code
+        JSL $809B44             ; vanilla code
         lda !pause_index
         cmp !pause_index_equipment_screen : beq .time
         cmp !pause_index_map2equip_load_equip : beq .time

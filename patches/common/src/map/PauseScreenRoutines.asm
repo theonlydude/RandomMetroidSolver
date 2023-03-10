@@ -244,7 +244,9 @@ MaptileGlowRoutine:
 + : INY #2 : CPY.w #!MaptileGlow_PaletteAmount<<1 : BCC -
 	PLB : PLP : RTS
 
-;WARNPC $8292B0
+
+warnpc $8292B0
+
 }
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    SELECT SWITCH AREA                                       |x|
@@ -275,14 +277,7 @@ SelectButtonSprite: DW $0008	;how many OAM tiles to draw
 ;--------------------------------------- FREESPACE -------------------------------------------------
 
 ORG $8292B0
-PauseRoutineIndex:
-	DW $9120, $9142, $9156, $91AB, $9231, $9186, $91D7, $9200	;same as $9110
-	DW $9156, MapSwitchConstruct, $9200		;fade out / map construction / fade in
-.objectives:
-        ;; reserve space for objectives function list
-        skip 14
 
-print "after obj: ", pc
 CheckForSelectPress:
 	JSR $A5B7							;check for START press
 	LDA $0998 : CMP #$000F : BNE +		;check if still in game state "paused"
@@ -304,7 +299,7 @@ DrawSelectButtonSprite:
 + : JSL $82BB30 : RTS					;draw map elevator destination
 ;2 bytes left
 
-print "after: ", pc
+warnpc $829324
 
 ORG $829533
 DrawIndicatorIfInCurrentArea:
@@ -370,6 +365,16 @@ CheckIconVerticalPosition:	;draw icon depending on vertical position
 	STA $22 : TYA : AND #$FF00 : BNE +
 	LDA $22 : JSL $81891F	;if onscreen position: draw sprite
 + : RTL						;else return
+
+PauseRoutineIndex:
+	DW $9120, $9142, $9156, $91AB, $9231, $9186, $91D7, $9200	;same as $9110
+	DW $9156, MapSwitchConstruct, $9200		;fade out / map construction / fade in
+.objectives:
+        ;; reserve space for objectives function list
+        skip 14
+
+warnpc $82A09A
+
 }
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    SMOOTH MAP SCREEN CONTROLS                               |x|

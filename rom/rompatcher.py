@@ -28,6 +28,10 @@ class RomPatcher:
         'Standard': [
             # common utility routines
             'utils.ips',
+            # MFreak map patch, tweaked for VARIA
+            'map.ips',
+            # game map
+            'map_data.ips',
             # boot, save files and backup management, stats infrastructure
             'base.ips',
             # handles starting location and start blue doors
@@ -99,7 +103,7 @@ class RomPatcher:
         'Logic': {
             "vanilla": [
                 # faster MB cutscene transitions
-                'Mother_Brain_Cutscene_Edits',
+                'Mother_Brain_Cutscene_Edits'
             ],
             "mirror": ['mirrortroid.ips', 'bank_8f.ips', 'bank_83.ips', 'map_icon_data.ips',
                        'baby_room.ips', 'baby_remove_blocks.ips', 'escape_animals.ips',

@@ -55,7 +55,7 @@ LOROM
 
 {;-------------------------------------- COVER TILES -----------------------------------------------
 ;Array of tiledata to cover with if maptile is loaded but unexplored (size: $100)
-	!Freespace_CoverTiles = $B6F200
+	!Freespace_CoverTiles = $B6FA00
 }
 
 {;-------------------------------------- ITEMBIT TILECHANGE ----------------------------------------
@@ -243,7 +243,7 @@ incbin "map/pause_palettes.bin"
 ; Pause tilemaps
 org !PauseScreen_Map_Tilemap_Pointer
 incbin "map/pause_map_tilemap.bin"
-org !PauseScreen_Equipment_Tilemap_Pointer
-incbin "map/pause_equipment_tilemap.bin"
+;; org !PauseScreen_Equipment_Tilemap_Pointer
+;; incbin "map/pause_equipment_tilemap.bin"
 
 }

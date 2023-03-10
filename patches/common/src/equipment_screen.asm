@@ -15,7 +15,11 @@ incsrc "constants.asm"
 
 !BG1_tilemap = $7E3800
 !decimal_point = $0C4A
-!percent = $0C02
+%BGtile($150, 3, 0, 0, 0)
+!percent #= !_tile
+%BGtile($160, 2, 0, 0, 0)
+!digit_0 #= !_tile
+
 !semicolon = $08A3
 
 org $828F6B
@@ -109,7 +113,7 @@ draw_two_digits:
         rts
 
 draw_digit_menu:
-        CLC : ADC #$0804
+        CLC : ADC #!digit_0
         STA !BG1_tilemap,x
         rts
 
@@ -120,13 +124,17 @@ warnpc $82ffff
 
 ;;; ['items' box] in inventory menu
 org $B6E980+4
-        dw $3941,$3942,$3943,$0C1C,$0C1D,$0C1E,$7943,$3942,$3942,$7941
+        dw $3941,$3942,$3943
+        %dw_BGtile($151, 3, 0, 0, 0)
+        %dw_BGtile($152, 3, 0, 0, 0)
+        %dw_BGtile($153, 3, 0, 0, 0)
+        dw $7943,$3942,$3942,$7941
 org $B6E9C0+4
         dw $3940,$2801,$2801,$2801,$2801,$2801,$2801,$2801,$2801,$7940
 org $B6EA00+4
         dw $B941,$B942,$B942,$B942,$B942,$B942,$B942,$B942,$B942,$F941
 
-;;; ['time' box] in inventory menu (TIME tiles already exist oO)
+;;; ['time' box] in inventory menu (TIME tiles already exist oO, put back in the original spot in map patch)
 org $B6E980+40
         dw $3941,$3942,$3942,$3943,$0C93,$0C94,$0CA4,$7943,$3942,$3942,$7941
 org $B6E9C0+40
@@ -193,9 +201,10 @@ org $82C1CA
         dw $00CC,$00AC+8 ; Boots - speed booster
 
 ;;; new tiles for 'items' text
-org $b68380
-        db $77,$0,$22,$0,$22,$0,$22,$0,$22,$0,$72,$0,$0,$0,$0,$0,$ff,$77,$ff,$22,$ff,$22,$ff,$22,$ff,$22,$ff,$72,$ff,$0,$ff,$0
-org $b683a0
-        db $7a,$0,$43,$0,$73,$0,$42,$0,$42,$0,$7a,$0,$0,$0,$0,$0,$ff,$7a,$ff,$43,$ff,$73,$ff,$42,$ff,$42,$ff,$7a,$ff,$0,$ff,$0
-org $b683c0
-        db $27,$0,$68,$0,$ef,$0,$a1,$0,$21,$0,$2e,$0,$0,$0,$0,$0,$ff,$27,$ff,$68,$ff,$ef,$ff,$a1,$ff,$21,$ff,$2e,$ff,$0,$ff,$0
+;; included in map patch gfx
+;; org $b68380
+;;         db $77,$0,$22,$0,$22,$0,$22,$0,$22,$0,$72,$0,$0,$0,$0,$0,$ff,$77,$ff,$22,$ff,$22,$ff,$22,$ff,$22,$ff,$72,$ff,$0,$ff,$0
+;; org $b683a0
+;;         db $7a,$0,$43,$0,$73,$0,$42,$0,$42,$0,$7a,$0,$0,$0,$0,$0,$ff,$7a,$ff,$43,$ff,$73,$ff,$42,$ff,$42,$ff,$7a,$ff,$0,$ff,$0
+;; org $b683c0
+;;         db $27,$0,$68,$0,$ef,$0,$a1,$0,$21,$0,$2e,$0,$0,$0,$0,$0,$ff,$27,$ff,$68,$ff,$ef,$ff,$a1,$ff,$21,$ff,$2e,$ff,$0,$ff,$0

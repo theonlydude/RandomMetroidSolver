@@ -637,7 +637,7 @@ function clickLoc(elem) {
         const { visitedLocations } = $tracker.json_data
         // we put an item in boss locations which is the boss' name
 
-        if($tracker.location_type_map[locName] === 'boss') {
+        if(['boss', 'miniboss'].includes($tracker.location_type_map[locName])) {
             // clicking on a boss in plando reveals which boss it is
             // check that lock is in the available list
             if(!visitedLocations[locName]) {

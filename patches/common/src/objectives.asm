@@ -720,15 +720,16 @@ check_l_r_pressed:
         PLP
         RTS
 
-;;; load from ROM $B6F200 to VRAM $3000 (bg1)
+;;; load from ROM $B6F200 to VRAM $4800 (bg1 - modified by map patch - original is $3000)
+print "transfert_objective_bg1: ", pc
 transfert_objective_bg1:
         php
         sep #$30
 
         LDA #$00     ;\
         STA $2116    ;| VRAM Address Registers (Low) - This sets the address for $2118/9
-        LDA #$30     ;|
-        STA $2117    ;| VRAM Address Registers (High) - This sets the address for $2118/9 => $3000
+        LDA #$48     ;|
+        STA $2117    ;| VRAM Address Registers (High) - This sets the address for $2118/9 => $4800
         LDA #$80     ;|
         STA $2115    ;} Video Port Control Register - Set VRAM transfer mode to word-access, increment by 1.
                      ;    0x80 == 0b10000000 => i---ffrr => i=1 (increment when $2119 is accessed),

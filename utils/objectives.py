@@ -727,7 +727,7 @@ class Objectives(object):
             ' ': 0x00,
             '%': 0x02,
             '*': 0x03,
-            '0': 0x04,
+            '0': 0x160,
             'a': 0x30,
         }
         for i in range(1, ord('z')-ord('a')+1):

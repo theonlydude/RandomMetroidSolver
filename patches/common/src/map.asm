@@ -9,7 +9,12 @@ LOROM
 ;;;
 ;;; VARIA adaptations :
 ;;; * change path to external files
-;;; * include gfx, tilemaps, palettes, and other small modifications to match map overhaul example ips
+;;; * include gfx, tilemaps, palettes, and other small modifications to match map overhaul example ips,
+;;;   except for
+;;;     - pause screen BG base tile (put backgrid)
+;;;     - eqt screen tilemap (handled in equipment_screen patch)
+;;; * behaviour changes :
+;;;     - removed pause screen status restore
 ;;; * adapted freespace values to step around other patches
 
 ;---------------------------------------------------------------------------------------------------

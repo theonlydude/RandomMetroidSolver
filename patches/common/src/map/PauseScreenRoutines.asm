@@ -509,10 +509,11 @@ ORG $829009		;during pause screen loading
 ;1 byte left
 
 
-ORG $82A106 : BRA $01 : NOP		;delete zero $0753	(button label index)
-ORG $82A383 : BRA $01 : NOP		;delete zero $0727	(screen index)
-ORG $82A3BF : BRA $01 : NOP		;delete zero $0753	(button label index)
-ORG $82A3C2 : BRA $01 : NOP		;delete zero $0755	(equipment cursor index)
+;;; commented out for VARIA to restore vanilla pause menu behavior
+;; ORG $82A106 : BRA $01 : NOP		;delete zero $0753	(button label index)
+;; ORG $82A383 : BRA $01 : NOP		;delete zero $0727	(screen index)
+;; ORG $82A3BF : BRA $01 : NOP		;delete zero $0753	(button label index)
+;; ORG $82A3C2 : BRA $01 : NOP		;delete zero $0755	(equipment cursor index)
 
 
 ORG $82A512		;make priority button check (so pause menu index doesn't get screwed if L/R + start button get pressed together)

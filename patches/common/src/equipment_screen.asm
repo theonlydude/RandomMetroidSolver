@@ -142,6 +142,27 @@ org $B6E9C0+40
 org $B6EA00+40
         dw $B941,$B942,$B942,$B942,$B942,$B942,$B942,$B942,$B942,$B942,$F941
 
+;;; redraw reserve arrow since tile indices are changed in map patch
+org $B6E902
+        %dw_BGtile($14a, 7, 1, 0, 0)
+org $B6E942
+        %dw_BGtile($15a, 7, 1, 0, 0)
+org $B6E982
+        %dw_BGtile($15a, 7, 0, 0, 0)
+org $B6E9C2
+        %dw_BGtile($15a, 7, 0, 0, 0)
+org $B6EA02
+        %dw_BGtile($15a, 7, 0, 0, 0)
+org $B6EA42
+        %dw_BGtile($15a, 7, 0, 0, 0)
+org $B6EA82
+        %dw_BGtile($15a, 7, 0, 0, 0)
+org $B6EAC2
+        %dw_BGtile($15a, 7, 0, 0, 0)
+org $B6EB02
+        %dw_BGtile($16a, 7, 0, 0, 0)
+        %dw_BGtile($16b, 7, 1, 0, 0)
+
 ;;; move equipment boxes on the right down one tile
 org $B6EA68
         dw $3941,$3942,$3942,$3943,$28F6,$28F7,$28F8,$7943,$3942,$3942,$7941

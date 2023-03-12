@@ -23,12 +23,6 @@ ORG $828EE2 : LDA #$50			;change position for map border
 ORG $828EF3 : DL !PauseScreen_Map_Tilemap_Pointer
 ORG $828F13 : DL !PauseScreen_Map_Tilemap_Pointer+$400
 ORG $828F33 : DL !PauseScreen_Equipment_Tilemap_Pointer
-org $828fb7
-        dw !Reserves_Tilemap_Offset
-org $828fc2
-        dw !Reserves_Tilemap_Offset
-org $828fcc
-        dw !Reserves_Tilemap_Offset
 ORG $828FF8 : LDA.l !PauseScreen_Palette_Pointer,x
 ORG $82902B : JSR SetMapScrollBoundaries
 

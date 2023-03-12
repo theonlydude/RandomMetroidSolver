@@ -193,8 +193,6 @@ LOROM
 	!VerticalAreaMapBits = %00000000
 }
 
-!Reserves_Tilemap_Offset = $0960
-
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    MAIN                                                     |x|
 ;---------------------------------------------------------------------------------------------------
@@ -239,11 +237,12 @@ org !PauseScreen_Tiles_Pointer
 incbin "map/pause.gfx"
 org !PauseScreen_Palette_Pointer
 incbin "map/pause_palettes.bin"
+org !PauseScreen_Palette_Pointer+26
+        ;; put back vanilla HUD blue color when in pause
+        dw $44e5
 
 ; Pause tilemaps
 org !PauseScreen_Map_Tilemap_Pointer
 incbin "map/pause_map_tilemap.bin"
-;; org !PauseScreen_Equipment_Tilemap_Pointer
-;; incbin "map/pause_equipment_tilemap.bin"
 
 }

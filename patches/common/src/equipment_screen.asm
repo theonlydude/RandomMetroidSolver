@@ -195,6 +195,20 @@ org $B6EDA8
 org $B6EDE8
         dw $B941,$B942,$B942,$B942,$B942,$B942,$B942,$B942,$B942,$B942,$F941
 
+;;; fix reserve digit tile IDs
+org $828fb7
+        %dw_BGtile($160, 2, 0, 0, 0)
+org $828fc2
+        %dw_BGtile($160, 2, 0, 0, 0)
+org $828fcc
+        %dw_BGtile($160, 2, 0, 0, 0)
+org $82b3bc
+        %dw_BGtile($160, 2, 0, 0, 0)
+org $82b3c7
+        %dw_BGtile($160, 2, 0, 0, 0)
+org $82b3d1
+        %dw_BGtile($160, 2, 0, 0, 0)
+
 ;;; fix RAM tilemap offsets for equipment we moved
 org $82C076
         dw $3AAA ; Suit/misc - varia suit

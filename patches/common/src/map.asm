@@ -11,8 +11,9 @@ LOROM
 ;;; * change path to external files
 ;;; * include gfx, tilemaps, palettes, and other small modifications to match map overhaul example ips,
 ;;;   except for
-;;;     - pause screen BG base tile (put backgrid)
+;;;     - pause screen BG base tile (put back grid)
 ;;;     - eqt screen tilemap (handled in equipment_screen patch)
+;;; * include gfx for ITEMS, TIME, OBJ
 ;;; * behaviour changes :
 ;;;     - removed pause screen status restore
 ;;; * adapted freespace values to step around other patches
@@ -221,9 +222,8 @@ INCSRC "map/PauseScreenRoutines.asm"
 INCSRC "map/MapConstruction.asm"
 INCSRC "map/Minimap.asm"
 
-; Hex map
-ORG $8EB400
-incbin "map/HexMapTiles.bin"				;change hex map tiles for the palette changes
+; Hex map disable
+incsrc "map/NoHexMap.asm"
 
 org $81b14b
 incbin "map/start_tilemap.bin"

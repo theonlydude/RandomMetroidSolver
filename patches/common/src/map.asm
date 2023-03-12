@@ -61,18 +61,18 @@ LOROM
 
 {;-------------------------------------- COVER TILES -----------------------------------------------
 ;Array of tiledata to cover with if maptile is loaded but unexplored (size: $100)
-	!Freespace_CoverTiles = $B6FA00
+	!Freespace_CoverTiles = $89C700
 }
 
 {;-------------------------------------- ITEMBIT TILECHANGE ----------------------------------------
 ;Array of tiledata to change specific tiles in depending areas if the itembit is set (size: $400)
-	!Freespace_ItembitTilechange = $B6FC00
+	!Freespace_ItembitTilechange = $89C800
 }
 
 {;-------------------------------------- MAP DECORATION --------------------------------------------
 
 ;Location of map decoration data (original size: $C8)
-	!Freespace_MapDecoration = $89C000
+	!Freespace_MapDecoration = $89C600
 
 ;Map deco tiles only appears when map station is activated (default: !AlwaysActive)
 	!MapDecorationAppearence = !AlwaysActive
@@ -81,7 +81,7 @@ LOROM
 
 
 ;Should map decoration be considered for setting up map screen boundaries? (default: !Involve)
-	!InvolveMapDecorationForBoundary = !Involve
+	!InvolveMapDecorationForBoundary = !Ignore
 ;!Involve: map decoration contribute in map screen boundaries
 ;!Ignore : map decoration get ignored when setting map screen boundaries
 }

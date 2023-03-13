@@ -1,4 +1,5 @@
 
+from rom.rom import RealROM, snes_to_pc
 
 def RGB_24_to_15(color_tuple):
     R_adj = int(color_tuple[0])//8
@@ -29,3 +30,49 @@ def adjust_hue_degree(hsl_color, degree):
     hue_adj = (hue + degree) % 360
 
     return hue_adj/360.0
+
+class Palette(object):
+    def __init__(self, nLines=16, nColors=16):
+        self.nColors = nColors
+        self.nLines = nLines
+        self.lines = [[(0,0,0)]*nColors for i in range(nLines)]
+
+    @staticmethod
+    def load_yychr(path, lines=list(range(16)), nColors=16):
+        ret = Palette(len(lines), nColors)
+        lineSize = nColors*3
+        with open(path, "rb") as rgbPal:
+            idx = 0
+            for line in lines:
+                rgbPal.seek(line*lineSize)
+                for i in range(nColors):
+                    colorRaw = rgbPal.read(3)
+                    ret.lines[idx][i] = (int(colorRaw[0]), int(colorRaw[1]), int(colorRaw[2]))
+                idx += 1
+        return ret
+
+    def save_yychr(self, path):
+        with open(path, "wb") as outPal:
+            for line in self.lines:
+                for color in line:
+                    rgb = [color[0], color[1], color[2]]
+                    outPal.write(bytearray(rgb))
+
+    @staticmethod
+    def load_snes(path, offset=0, lines=list(range(16)), nColors=16):
+        ret = Palette(len(lines), nColors)
+        rom = RealROM(path)
+        lineSize = nColors*2
+        idx = 0
+        for line in lines:
+            rom.seek(offset + lineSize*line)
+            for i in range(nColors):
+                r, g, b = RGB_15_to_24(rom.readWord())
+                ret.lines[idx][i] = (int(r*256), int(g*256), int(b*256))
+            idx += 1
+        rom.close()
+        return ret
+
+    def print_asm(self):
+        for line in self.lines:
+            print("    dw "+', '.join(["$%04x" % RGB_24_to_15(rgb) for rgb in line]))

@@ -465,9 +465,9 @@ Room_9804_state_9835_PLM:
     ; Bomb Torizo grey door
     dw $BAF4 : db $0e : db $06 : dw $081b
     ; Bombs, chozo orb
-    dw $ef3b : db $06 : db $0a : dw $0007 
+    dw $ef3b : db $03 : db $0a : dw $0007
     ; Bomb Torizo's crumbling chozo
-    dw $d6ea : db $07 : db $0b : dw $0000 
+    dw $d6ea : db $02 : db $0b : dw $0000
     dw $0000
 org $8f8412
 ; room 9804: Bomb Torizo Room

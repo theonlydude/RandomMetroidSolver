@@ -12,8 +12,9 @@ map_data_path = sys.argv[3]
 map_offset = int(sys.argv[4], 16) if len(sys.argv) > 4 else 0
 map_data_offset = int(sys.argv[5], 16) if len(sys.argv) > 5 else 0
 
-from rom.map import AreaMap
+from rom.map import AreaMap, getTileKind
 from rom.rom import RealROM
+from graph.location import LocationMapTileKind
 
 mapRom = RealROM(map_path)
 mapDataRom = RealROM(map_data_path)
@@ -72,5 +73,8 @@ while True:
             # Output the tile description
             mapTile = areaMap.getTile(x, y)
             print("Tile clicked at (%d, %d): %s" % (x, y, str(mapTile)))
+            kind, category = getTileKind(mapTile.idx)
+            if kind != LocationMapTileKind.Unknown:
+                print("loc.MapAttrs = LocationMapAttrs(%d, %d, LocationMapTileKind.%s, hFlip=%s, vFlip=%s)" % (x, y, kind.name, str(mapTile.hFlip), str(mapTile.vFlip)))
     # Update the display
     pygame.display.flip()

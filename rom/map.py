@@ -1,5 +1,6 @@
 
 from rom.rom import RealROM
+from graph.location import LocationMapTileKind, LocationMapAttrs
 
 class BGtile(object):
     def __init__(self, idx, pal, prio=False, hFlip=False, vFlip=False):
@@ -19,6 +20,32 @@ class BGtile(object):
 
     def __str__(self):
         return "BGtile[i=$%02x p=$%x %s%s%s%s]" % (self.idx, self.pal, "P" if self.prio else "", "H" if self.hFlip else "", "V" if self.vFlip else "", "X" if self.present else "")
+
+
+# "hidden" unused in VARIA (or even replaced), but referencing them is useful for the helper tool
+kindToIndex = {
+    LocationMapTileKind.FourWallsOneDoor: {"double":0x3, "minor":0x4, "nothing":0x5, "hidden": 0x6, "major":0x7},
+    LocationMapTileKind.ThreeWallsOpenBottom: {"double":0x8, "minor":0x9, "nothing":0xa, "major":0xb},
+    LocationMapTileKind.ThreeWallsOpenRight: {"double":0x13, "minor":0x14, "nothing":0x15, "hidden": 0x16, "major":0x17},
+    LocationMapTileKind.ThreeWallsOneDoorOpenRight: {"minor": 0x1c, "nothing":0x1d, "major": 0x1e},
+    LocationMapTileKind.TwoWallsCornerWithPixel: {"minor": 0x20, "nothing": 0x21},
+    LocationMapTileKind.TwoWallsCorner: {"double":0x23, "minor":0x24, "nothing":0x25, "hidden": 0x26, "major":0x27},
+    LocationMapTileKind.TwoWallsCornerWithHorizontalDoor: {"minor":0x28, "nothing": 0x29, "major":0x2a},
+    LocationMapTileKind.TwoWallsCornerWithVerticalDoor: {"minor": 0x2b, "nothing": 0x2c},
+    LocationMapTileKind.FourWallsCorridor: {"minor":0x4c, "nothing":0x4d, "major":0x4e},
+    LocationMapTileKind.TwoWallsCorridor: {"minor":0x51, "nothing":0x52, "major":0x53},
+    LocationMapTileKind.SingleWallHorizontal: {"minor":0x61, "nothing":0x62, "major":0x63},
+    LocationMapTileKind.FourWallsTwoDoors: {"minor": 0x6b, "nothing": 0x6c},
+    LocationMapTileKind.SingleWallVertical: {"minor":0x71, "nothing":0x72, "major":0x73},
+    LocationMapTileKind.ThreeWallsOneDoorOpenBottom: {"nothing":0x90, "minor":0x91, "major":0x92}
+}
+
+def getTileKind(tileIndex):
+    for kind, indices in kindToIndex.items():
+        for category, index in indices.items():
+            if index == tileIndex:
+                return (kind, category)
+    return (LocationMapTileKind.Unknown, "nothing")
 
 nPages = 2
 pageSize = 32

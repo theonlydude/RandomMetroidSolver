@@ -1,5 +1,6 @@
 from utils.parameters import infinity
 import copy
+from enum import Enum
 
 class Location:
     graph_slots = (
@@ -102,6 +103,32 @@ class Location:
     def __eq__(self, other):
         return self.Name == other.Name
 
+class LocationMapTileKind(Enum):
+    Unknown = 0
+    FourWallsOneDoor = 1
+    ThreeWallsOpenBottom = 2
+    ThreeWallsOpenRight = 3
+    ThreeWallsOneDoorOpenRight = 4
+    TwoWallsCornerWithPixel = 5
+    TwoWallsCorner = 6
+    TwoWallsCornerWithHorizontalDoor = 7
+    TwoWallsCornerWithVerticalDoor = 8
+    FourWallsCorridor = 9
+    TwoWallsCorridor = 10
+    SingleWallHorizontal = 11
+    FourWallsTwoDoors = 12
+    SingleWallVertical = 13
+    ThreeWallsOneDoorOpenBottom = 14
+
+class LocationMapAttrs(object):
+    def __init__(self, x, y, kind, hFlip=False, vFlip=False, palette=0x3):
+        self.X = x
+        self.Y = y
+        self.TileKind = kind
+        self.hFlip = hFlip
+        self.vFlip = vFlip
+        self.palette = palette
+
 def define_location(
         Area, GraphArea, SolveArea, Name, Class, CanHidden, Address, Id,
         Visibility, Room, VanillaItemType=None, BossItemType=None, AccessFrom=None, Available=None, PostAvailable=None, HUD=None):
@@ -123,6 +150,7 @@ def define_location(
         'AccessFrom': AccessFrom,
         'Available': Available,
         'PostAvailable': PostAvailable,
+        'MapAttrs': None,
         '_isMajor': 'Major' in Class,
         '_isChozo': 'Chozo' in Class,
         '_isMinor': 'Minor' in Class,

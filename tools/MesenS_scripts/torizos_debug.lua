@@ -102,7 +102,7 @@ local function printEnemys()
 
      -- compare with last one, log if different
      if(ai ~= enemys_history_ai[offset] or il ~= enemys_history_il[offset] or sm ~= enemys_history_sm[offset] or state ~= enemys_history_state[offset]) then
-        emu.log(string.format("%x: ai: %x il: %x sm: %x state: %x substate: %x", offset, ai, il, sm, state, substate))
+        emu.log(string.format("%x: ai: %x il: %x sm: %x state: %x", offset, ai, il, sm, state))
         enemys_history_ai[offset] = ai
         enemys_history_il[offset] = il
         enemys_history_sm[offset] = sm

@@ -104,7 +104,7 @@ class Ship(object):
         self.spritemap = Spritemap(self.rom, self.getShipAddr(self.spritemapAddr), self.center)
 
 class Spritemap(object):
-    def __init__(self, rom, dataAddr, center):
+    def __init__(self, rom, dataAddr, center=None):
         self.rom = rom
         print("load spritemap at {}".format(hex(dataAddr)))
         self.dataAddr = dataAddr
@@ -126,12 +126,32 @@ class Spritemap(object):
 
         self.boundingRect = self.getBoundingRect()
 
+    def write(self):
+        print("write spritemap ${:06x}".format(self.dataAddr))
+        self.rom.seek(snes_to_pc(self.dataAddr))
+        self.rom.writeWord(self.oamCount)
+        for oam in self.oams:
+            oam.write()
+
     def getBoundingRect(self):
         r = BoundingRect()
         for oam in self.oams:
             r.add(oam.realX, oam.realY)
         #r.debug()
         return r
+
+    def transform(self, transformation):
+        if transformation == Transform.Mirror:
+            for oam in self.oams:
+                oam.transform(transformation)
+
+    def displayASM(self):
+        out = ""
+        out += "org ${:06x}\n".format(self.dataAddr)
+        out += "    dw ${:04x} : ".format(self.oamCount)
+        out += " : ".join([oam.displayASM() for oam in self.oams])
+        out += "\n"
+        return (self.dataAddr, out)
 
 class BoundingRect(object):
     def __init__(self):
@@ -177,11 +197,65 @@ class BoundingRect(object):
     def start(self):
         return (int(self.x1/16), int(self.y1/16)+1)
 
+class Int2(object):
+    # 2 complement integer
+    def __init__(self, encValue, mask):
+        self.encValue = encValue
+        self.mask = mask
+        if self._isEncNeg(self.encValue):
+            self.value = - self._getEncInv(self.encValue)
+        else:
+            self.value = self.encValue
+
+    def _isEncNeg(self, encValue):
+        return ((self.mask+1)>>1) & encValue != 0
+
+    def _getEncInv(self, encValue):
+        return ((~encValue)+1) & self.mask
+
+    def _getEnc(self):
+        if self.value >= 0:
+            return self.value
+        else:
+            return self._getEncInv(-self.value)
+
+    def _post(self):
+        if self.value >= 0:
+            self.value = self.value % (self.mask >> 1)
+        else:
+            self.value = self.value % -(self.mask >> 1)
+        self.encValue = self._getEnc()
+
+    def add(self, n):
+        self.value += n
+        self._post()
+
+    def sub(self, n):
+        self.value -= n
+        self._post()
+
+    def mul(self, n):
+        self.value *= n
+        self._post()
+
+    def get(self):
+        return self.encValue
+
 class OAM(object):
-    # an oam entry is made of five bytes: (s000000 xxxxxxxxx) (yyyyyyyy) (YXppPPPt tttttttt)
+    # an oam entry is made of five bytes: (s000000 x xxxxxxxx) (yyyyyyyy) (YXppPPPt tttttttt)
+    #  s = size bit
+    #      0: 8x8
+    #      1: 16x16
+    #  x = X offset of sprite from centre
+    #  y = Y offset of sprite from centre
+    #  Y = Y flip
+    #  X = X flip
+    #  p = priority (relative to background)
+    #  t = tile number
+
     size = 5
 
-    def __init__(self, rom, dataAddr, center):
+    def __init__(self, rom, dataAddr, center=None):
         self.rom = rom
         self.dataAddr = dataAddr
         # (x, y) position in the displayed screen
@@ -190,6 +264,9 @@ class OAM(object):
         self.load()
 
     def fixX(self, lowerX, highX):
+        if self.center is None:
+            return 0
+
         if highX == 0:
             # after center
             return lowerX + self.center[0]
@@ -198,6 +275,8 @@ class OAM(object):
             return (lowerX + self.center[0]) & 0xFF
 
     def fixY(self, y):
+        if self.center is None:
+            return 0
         return (y + self.center[1]) & 0xFF
 
     def load(self):
@@ -217,9 +296,37 @@ class OAM(object):
         self.yFlip = w2 >> 15
         self.priority = (w2 >> 12) & 0b11
         self.palette = (w2 >> 9) & 0b111
-        self.tile = w2 & 0xFF
+        self.tile = w2 & 0x1FF
 
         self.raw = "{} {} {}".format(hex(w1), hex(b), hex(w2))
+
+    def getRaw(self):
+        w1 = (self.size << 15) | (self.unknown << 9) | self.lowerX
+        b = self.y
+        w2 = (self.yFlip << 15) | (self.xFlip << 14) | (self.priority << 12) | (self.palette << 9) | self.tile
+
+        return (w1, b, w2)
+
+    def write(self):
+        self.rom.seek(snes_to_pc(self.dataAddr))
+        w1, b, w2 = self.getRaw()
+        self.rom.writeWord(w1)
+        self.rom.writeByte(b)
+        self.rom.writeWord(w2)
+
+    def transform(self, transformation):
+        width = 8 if self.size == 0 else 16
+        if transformation == Transform.Mirror:
+            self.xFlip = 1 - self.xFlip
+            x = Int2(self.lowerX, 0x1FF)
+            x.mul(-1)
+            x.sub(width)
+            self.lowerX = x.get()
+            self.highX = (self.lowerX & 0x100) >> 8
+
+    def displayASM(self):
+        w1, b, w2 = self.getRaw()
+        return "dw ${:04x} : db ${:02x} : dw ${:04x}".format(w1, b, w2)
 
     def debug(self):
         print("OAM at {} size: {} x: {:3} y: {:3} Xflip: {} Yflip: {} priority: {} palette: {} tile: {:3} raw: {}".format(self.dataAddr, self.size, self.realX, self.realY, self.xFlip, self.yFlip, self.priority, self.palette, self.tile, self.raw))

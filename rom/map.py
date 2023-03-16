@@ -105,3 +105,20 @@ class AreaMap(object):
         tile = self.getTile(x, y)
         addr = self.getOffset(mapRom, x, y, mapStart)        
         mapRom.writeWord(tile.toWord(), addr)
+
+    def save(self, rom, offset=0):
+        rom.seek(offset)
+        for page in self.pages:
+            for i in range(pageSize*pageSize):
+                rom.writeWord(page[i].toWord())
+
+    def savePresence(self, rom, offset=0):
+        rom.seek(offset)
+        for page in self.pages:
+            for i in range((pageSize*pageSize) // 8):
+                b = 0
+                for s in range(8):
+                    tile = page[i*8 + s]
+                    if tile.present:
+                        b |= 1 << (7 - s)
+                rom.writeByte(b)

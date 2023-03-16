@@ -1,6 +1,7 @@
 lorom
+arch 65816
 
-incrsrc "macros.asm"
+incsrc "macros.asm"
 
 org $b58000
 
@@ -21,17 +22,11 @@ incbin "map/ceres.bin"
 
 org $829727
 
-%export(crateria_screens)
+screens:
 incbin "map/crateria_data.bin"
-%export(brinstar_screens)
 incbin "map/brinstar_data.bin"
-%export(norfair_screens)
 incbin "map/norfair_data.bin"
-%export(wrecked_ship_screens)
 incbin "map/wrecked_ship_data.bin"
-%export(maridia_screens)
 incbin "map/maridia_data.bin"
-%export(tourian_screens)
 incbin "map/tourian_data.bin"
-%export(ceres_screens)
 incbin "map/ceres_data.bin"

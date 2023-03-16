@@ -16,7 +16,7 @@ org $82eb8b
     jsl add_plms
 
 ;;; DATA in bank 8F free space
-org $8fe9b8
+org $8FE9BF
 ;;; additional zero-terminated PLM lists go here (written at ROM generation)
 print "downwards plm_lists table start: ", pc
 %export(plm_lists)

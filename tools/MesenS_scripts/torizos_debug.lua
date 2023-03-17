@@ -2,6 +2,35 @@ local function readWord(ramAddr)
   return emu.readWord(ramAddr, emu.memType.workRam)
 end
 
+
+local function snes_to_pc(B)
+      local B_1 = B >> 16
+      local B_2 = B & 0xFFFF
+      -- return 0 if invalid LoROM address
+      if(B_1 < 0x80 or B_1 > 0xFFFFFF or B_2 < 0x8000) then
+         return 0
+      end
+      local A_1 = (B_1 - 0x80) >> 1
+      -- if B_1 is even, remove most significant bit
+      local A_2 = B_2
+      if( (B_1 & 1) == 0 ) then
+         A_2 = B_2 & 0x7FFF
+      end
+      --emu.log(string.format("b: %x b1: %x b2: %x a1: %x a2: %x", B, B_1, B_2, A_1, A_2))
+      return (A_1 << 16) | A_2
+end
+
+local function readROMWord(romAddr)
+   -- readWord for prgRom is bugged
+   local addr = snes_to_pc(romAddr)
+   local l = emu.read(addr, emu.memType.prgRom)
+   local h = emu.read(addr+1, emu.memType.prgRom)
+   return l + (h << 8)
+end
+local function readROMByte(romAddr)
+   return emu.read(snes_to_pc(romAddr), emu.memType.prgRom)
+end
+
 --        $0F78: ID
 --        $0F7A: X position
 --        $0F7C: X subposition
@@ -121,4 +150,67 @@ local function printEnemys()
   end
 end
 
+ext_colors = {}
+ext_colors[0] = 0xC0FF40FF
+ext_colors[1] = 0xC040FF40
+ext_colors[2] = 0xC04040FF
+ext_colors[3] = 0xC0FFFF40
+
+local function complement(value, mask)
+   -- convert 2 complement negative int to negative int
+   test_mask = (mask+1)>>1
+   comp_mask = mask
+
+   -- test if negative value
+   if(value & test_mask ~= 0) then
+      return -(((~value)+1) & comp_mask)
+   else
+      return value
+   end
+end
+
+local function drawSpriteMaps()
+   local torizo_x = readWord(0x0F7A)
+   local torizo_y = readWord(0x0F7E)
+
+   -- camera
+   local layer1x = readWord(0x0911)
+   local layer1y = readWord(0x0915)
+
+   -- torizos use extended spritemaps
+   local extsm = readWord(0x0F8E) + 0xAA0000
+   local num_ext = readROMWord(extsm)
+   --emu.log(string.format("extsm: %x with %x parts", extsm, num_ext))
+
+   for i=0,num_ext-1 do
+      local x_ext = complement(readROMWord(extsm + 2 + i*8), 0xffff)
+      local y_ext = complement(readROMWord(extsm + 2 + i*8 + 2), 0xffff)
+      local sm = readROMWord(extsm + 2 + i*8 + 4) + 0xAA0000
+
+      local num = readROMWord(sm)
+
+      --emu.log(string.format("sm %d: %x with %x parts", i, sm, num))
+      local color = ext_colors[i]
+      emu.drawString(6*4*i, 200, string.format("%x", sm & 0xFFFF), color, BG, 1)
+
+      for j=0,num-1 do
+         local w1 = readROMWord(sm + 2 + j*5)
+         local b = readROMByte(sm + 2 + j*5 + 2)
+         local w2 = readROMWord(sm + 2 + j*5 + 3)
+
+         local x = complement(w1 & 0x1FF, 0x1ff)
+         local y = complement(b, 0xff)
+         local size = (w1 & 0x8000) >> 15
+         if(size == 0) then
+            size = 8
+         else
+            size = 16
+         end
+         --emu.log(string.format("%x %x %x: x: %d y: %d size: %d", w1, b, w2, x, y, size))
+         emu.drawRectangle(torizo_x-layer1x+x_ext+x, torizo_y-layer1y+y_ext+y+8, size, size, color, false)
+      end
+   end
+end
+
 emu.addEventCallback(printEnemys, emu.eventType.endFrame)
+emu.addEventCallback(drawSpriteMaps, emu.eventType.endFrame)

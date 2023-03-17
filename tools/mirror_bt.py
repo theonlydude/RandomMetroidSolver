@@ -21,11 +21,8 @@ spritemaps = [
     0xAA8CB7,
     0xAA8D3B,
     0xAA8DC4,
-    0xAA9380,
     0xAA8E43,
-    0xAA939B,
     0xAA8EC2,
-    0xAA939B,
     0xAA8F46,
 
     # bt statue breaking

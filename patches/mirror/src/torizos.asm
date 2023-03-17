@@ -163,6 +163,17 @@ org $AAAA4C+2
         dw $0005
 org $AAAA5E+2
         dw $0005
+;;; change spritemap of the arm which is used in regular spritemaps
+;;; 9380: arm pointing left
+;;; A0C5: arm pointing right
+org $AAAA3A+6
+        dw $A0C5
+;;; 939B: arm pointing left
+;;; A0FB: arm pointing right
+org $AAAA4C+6
+        dw $A0FB
+org $AAAA5E+6
+        dw $A0FB
 
 ;;; bomb torizo: switch to part of the instruction list going to the right instead
 ;                        80ED,B9B6               ; Go to $B9B6
@@ -197,9 +208,3 @@ org $aa8ec2
 
 org $aa8f46
     dw $001c : dw $01fb : db $d5 : dw $63cb : dw $0003 : db $d5 : dw $63ca : dw $800b : db $e5 : dw $63e8 : dw $800b : db $d5 : dw $63c8 : dw $01de : db $28 : dw $6362 : dw $01e6 : db $28 : dw $6361 : dw $01ee : db $28 : dw $6360 : dw $01fb : db $10 : dw $23ae : dw $01f3 : db $10 : dw $23ad : dw $81f3 : db $00 : dw $23a6 : dw $81e1 : db $1c : dw $638a : dw $81e9 : db $14 : dw $6379 : dw $000d : db $28 : dw $6562 : dw $0015 : db $28 : dw $6561 : dw $001d : db $28 : dw $6560 : dw $81f9 : db $fe : dw $65a9 : dw $0001 : db $0e : dw $65bb : dw $0009 : db $0e : dw $65af : dw $8001 : db $fe : dw $65a8 : dw $0009 : db $22 : dw $6594 : dw $0011 : db $22 : dw $6593 : dw $8009 : db $12 : dw $6573 : dw $81f2 : db $f9 : dw $6342 : dw $8002 : db $f9 : dw $6340 : dw $81f2 : db $e9 : dw $6322 : dw $8002 : db $e9 : dw $6320 : dw $81f2 : db $d9 : dw $6302 : dw $8002 : db $d9 : dw $6300
-
-org $aa9380
-    dw $0005 : dw $8000 : db $28 : dw $636c : dw $01ff : db $24 : dw $2366 : dw $81f7 : db $14 : dw $2345 : dw $81f4 : db $05 : dw $6308 : dw $81f8 : db $f8 : dw $2328
-
-org $aa939b
-    dw $0005 : dw $8009 : db $24 : dw $636c : dw $81f8 : db $06 : dw $6306 : dw $8004 : db $1b : dw $2358 : dw $81fc : db $13 : dw $2347 : dw $81f8 : db $f8 : dw $6326

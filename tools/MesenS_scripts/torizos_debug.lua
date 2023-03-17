@@ -31,6 +31,19 @@ local function readROMByte(romAddr)
    return emu.read(snes_to_pc(romAddr), emu.memType.prgRom)
 end
 
+local function complement2int(value, mask)
+   -- convert 2 complement negative int to negative int
+   test_mask = (mask+1)>>1
+   comp_mask = mask
+
+   -- test if negative value
+   if(value & test_mask ~= 0) then
+      return -(((~value)+1) & comp_mask)
+   else
+      return value
+   end
+end
+
 --        $0F78: ID
 --        $0F7A: X position
 --        $0F7C: X subposition
@@ -123,17 +136,58 @@ local function printEnemys()
      end
      y = y+(Y_OFF*2)
 
+     -- gt ass attack
+     -- ;;; $D3A7:  ;;;
+     -- $AA:D3A7 BD 7A 0F    LDA $0F7A,x[$7E:0F7A]
+     -- $AA:D3AA 38          SEC
+     -- $AA:D3AB ED F6 0A    SBC $0AF6  [$7E:0AF6]
+     -- $AA:D3AE 5D B4 0F    EOR $0FB4,x[$7E:0FB4]
+     -- $AA:D3B1 60          RTS
+     local gt_x = readWord(0x0f7a)
+     local samus_x = readWord(0x0af6)
+     local state = readWord(0xfb4)
+     local d3a7 = ((gt_x - samus_x) ~ state) & 0xffff
+     local d3a7_ok = d3a7 & 0x8000 ~= 0
+
+     -- emu.log(string.format("gt_x - samus_x: %x state: %x", gt_x - samus_x, state))
+
+     local samus_pose = readWord(0x0A1C)
+     local morph_poses = {0x1D, 0x1E, 0x1F, 0x79, 0x7A, 0x7B, 0x7C}
+
+     local is_morph = false
+     for index, value in ipairs(morph_poses) do
+        if value == samus_pose then
+           is_morph = true
+        end
+     end
+
+     local distance = math.abs(samus_x - gt_x)
+     local distance_ok = false
+     if distance >= 0x4 and distance <= 0x28 then
+        distance_ok = true
+     end
+
+     local can_ass_attack = d3a7_ok and is_morph and distance_ok
+
+     --emu.log(string.format("d3a7: %x d3a7: %s morph: %s distance: %x distance: %s canAssAttack: %s", d3a7, d3a7_ok, is_morph, distance, distance_ok, can_ass_attack))
+
+     if can_ass_attack then
+        emu.drawRectangle(230, 200, 16, 16, 0x0040FF40, true)
+     else
+        emu.drawRectangle(230, 200, 16, 16, 0x00FF4040, true)
+     end
+
      -- get ai
      local ai = readWord(0x0FB2+offset)
-     local il = readWord(0x0F92+offset)
+     --local il = readWord(0x0F92+offset)
      local sm = readWord(0x0F8E+offset)
      local state = readWord(0x0FB4+offset)
 
      -- compare with last one, log if different
-     if(ai ~= enemys_history_ai[offset] or il ~= enemys_history_il[offset] or sm ~= enemys_history_sm[offset] or state ~= enemys_history_state[offset]) then
-        emu.log(string.format("%x: ai: %x il: %x sm: %x state: %x", offset, ai, il, sm, state))
+     if(ai ~= enemys_history_ai[offset] or sm ~= enemys_history_sm[offset] or state ~= enemys_history_state[offset]) then
+        emu.log(string.format("%x: ai: %x sm: %x state: %x", offset, ai, sm, state))
         enemys_history_ai[offset] = ai
-        enemys_history_il[offset] = il
+        --enemys_history_il[offset] = il
         enemys_history_sm[offset] = sm
         enemys_history_state[offset] = state
      end
@@ -156,19 +210,6 @@ ext_colors[1] = 0xC040FF40
 ext_colors[2] = 0xC04040FF
 ext_colors[3] = 0xC0FFFF40
 
-local function complement(value, mask)
-   -- convert 2 complement negative int to negative int
-   test_mask = (mask+1)>>1
-   comp_mask = mask
-
-   -- test if negative value
-   if(value & test_mask ~= 0) then
-      return -(((~value)+1) & comp_mask)
-   else
-      return value
-   end
-end
-
 local function drawSpriteMaps()
    local torizo_x = readWord(0x0F7A)
    local torizo_y = readWord(0x0F7E)
@@ -183,23 +224,23 @@ local function drawSpriteMaps()
    --emu.log(string.format("extsm: %x with %x parts", extsm, num_ext))
 
    for i=0,num_ext-1 do
-      local x_ext = complement(readROMWord(extsm + 2 + i*8), 0xffff)
-      local y_ext = complement(readROMWord(extsm + 2 + i*8 + 2), 0xffff)
+      local x_ext = complement2int(readROMWord(extsm + 2 + i*8), 0xffff)
+      local y_ext = complement2int(readROMWord(extsm + 2 + i*8 + 2), 0xffff)
       local sm = readROMWord(extsm + 2 + i*8 + 4) + 0xAA0000
 
       local num = readROMWord(sm)
 
       --emu.log(string.format("sm %d: %x with %x parts", i, sm, num))
       local color = ext_colors[i]
-      emu.drawString(6*4*i, 200, string.format("%x", sm & 0xFFFF), color, BG, 1)
+      emu.drawString(6*4*i, 200, string.format("%x", sm & 0xFFFF), color & 0x00FFFFFF, BG, 1)
 
       for j=0,num-1 do
          local w1 = readROMWord(sm + 2 + j*5)
          local b = readROMByte(sm + 2 + j*5 + 2)
          local w2 = readROMWord(sm + 2 + j*5 + 3)
 
-         local x = complement(w1 & 0x1FF, 0x1ff)
-         local y = complement(b, 0xff)
+         local x = complement2int(w1 & 0x1FF, 0x1ff)
+         local y = complement2int(b, 0xff)
          local size = (w1 & 0x8000) >> 15
          if(size == 0) then
             size = 8

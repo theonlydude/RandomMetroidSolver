@@ -491,7 +491,7 @@ class Room(object):
                 plmId = self.rom.readWord()
                 if plmId == 0x0000:
                     break
-                self.plms[state.plmSetPtr].append(PLM(self.rom, plmId))
+                self.plms[state.plmSetPtr].append(PLM.factory(self.rom, plmId))
 
         for setPtr, plms in self.plms.items():
             print("plms in set {}: {}".format(hex(setPtr), [hex(plm.plmId) for plm in plms]))
@@ -806,7 +806,7 @@ class PLMDoor(PLM):
 
         if transformation == Transform.Mirror:
             # also change facing
-            facing = plmFacing(self.plmId)
+            facing = plmFacing[self.plmId]
             if facing in (Facing.Left, Facing.Right):
                 facing = indicatorsDirection[facing]
 
@@ -1365,12 +1365,29 @@ class LevelData(object):
 
         return (tile) | (hflip << 10) | (vflip << 11) | (btsType << 12)
 
+    def transformBts(self, transformation, bts):
+        blue_left = 0x40
+        blue_right = 0x41
+        blue_top = 0x42
+        blue_bottom = 0x43
+        if transformation == Transform.Mirror:
+            # handle blue doors bts
+            if bts == blue_left:
+                return blue_right
+            elif bts == blue_right:
+                return blue_left
+            else:
+                return bts
+
     def transform(self, transformation, size):
         # layout unit is tiles
         width = size[0] * 16
         height = size[1] * 16
+
         if transformation == Transform.Mirror:
             transLayer1 = [0]*len(self.layer1)
+            if self.layer2Size != 0:
+                transLayer2 = [0]*len(self.layer2)
             transBts = [0]*len(self.bts)
 
             for sx in range(size[0]):
@@ -1378,16 +1395,23 @@ class LevelData(object):
                     for y in range(16):
                         for x in range(16):
                             addr = self.getTileAddr((sx, sy), x, y)
-                            tile = self.layer1[addr]
-                            bts = self.bts[addr]
+                            tile1 = self.layer1[addr]
+                            if self.layer2Size != 0:
+                                tile2 = self.layer2[addr]
+                            bts = self.transformBts(transformation, self.bts[addr])
                             msx, msy, mx, my = self.transformPos(transformation, sx, sy, x, y, size)
                             newAddr = self.getTileAddr((msx, msy), mx, my)
-                            newTile = self.transformTile(transformation, tile)
-
+                            newTile1 = self.transformTile(transformation, tile1)
+                            if self.layer2Size != 0:
+                                newTile2 = self.transformTile(transformation, tile2)
                             #print("{}: sx: {} sy: {} x: {} y: {} - {}: msx: {} msy: {} mx: {} my: {}".format(addr, sx, sy, x, y, newAddr, msx, msy, mx, my))
 
-                            transLayer1[newAddr] = newTile
+                            transLayer1[newAddr] = newTile1
                             transBts[newAddr] = bts
+                            if self.layer2Size != 0:
+                                transLayer2[newAddr] = newTile2
 
             self.layer1 = transLayer1
             self.bts = transBts
+            if self.layer2Size != 0:
+                self.layer2 = transLayer2

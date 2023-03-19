@@ -5659,10 +5659,10 @@ org $83a774
 Room_D617_door_list_index_1_Door:
     dw $d95e ; Destination room header pointer (bank $8F): Botwoon's Room
     db $00 ; Bit Flag (Elevator properties)
-    db $01 ; Direction
-    db $0e ; X cap
+    db $05 ; Direction
+    db $1e ; X cap
     db $06 ; Y cap
-    db $00 ; X screen
+    db $01 ; X screen
     db $00 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
     dw $0000 ; Custom door ASM to execute (bank $8F)

@@ -5,19 +5,19 @@ incsrc "macros.asm"
 
 org $b58000
 
-%export(brinstar)
+%export(Brinstar)
 incbin "map/brinstar.bin"
-%export(crateria)
+%export(Crateria)
 incbin "map/crateria.bin"
-%export(norfair)
+%export(Norfair)
 incbin "map/norfair.bin"
-%export(wrecked_ship)
+%export(WreckedShip)
 incbin "map/wrecked_ship.bin"
-%export(maridia)
+%export(Maridia)
 incbin "map/maridia.bin"
-%export(tourian)
+%export(Tourian)
 incbin "map/tourian.bin"
-%export(ceres)
+%export(Ceres)
 incbin "map/ceres.bin"
 
 org $829727

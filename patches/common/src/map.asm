@@ -18,6 +18,8 @@ LOROM
 ;;;     - removed pause screen status restore
 ;;; * adapted freespace values to step around other patches
 
+incsrc "macros.asm"
+
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    CONFIG                                                   |x|
 ;---------------------------------------------------------------------------------------------------

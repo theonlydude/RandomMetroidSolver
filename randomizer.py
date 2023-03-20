@@ -753,6 +753,7 @@ if __name__ == "__main__":
             "displayedVersion": displayedVersion,
             "itemLocs": itemLocs,
             "progItemLocs": progItemLocs,
+            "revealMap": False, # TODO add actual option
             "debug": args.debug
         }
 

@@ -14,6 +14,7 @@ from rom.addresses import Addresses
 from rom.rom_patches import RomPatches
 from rom.rom_options import RomOptions
 from rom.flavor import RomFlavor
+from rom.map import AreaMap, getTileIndex
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir
 import utils.log
@@ -99,6 +100,8 @@ class RomPatcher:
         'MinimizerTourian': ['minimizer_tourian_common.ips', 'minimizer_tourian.ips', 'open_zebetites.ips'],
         # patches for door color rando
         'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips'],
+        # patches on top of map patch to always reveal the whole map
+        'MapReveal': ['reveal_map.ips', 'reveal_map_data.ips'],
         # patches for each "logic" to convert vanilla ROM to "logic" base ROM
         'Logic': {
             "vanilla": [
@@ -165,6 +168,7 @@ class RomPatcher:
         self.writeObjectives(self.settings["itemLocs"], self.settings["tourian"])
         self.writeItemsLocs(self.settings["itemLocs"])
         self.writeSplitLocs(self.settings["majorsSplit"], self.settings["itemLocs"], self.settings["progItemLocs"])
+#        self.writeItemMapTiles(self.settings["majorsSplit"], self.settings["itemLocs"])
         self.writeItemsNumber()
         if not self.settings["isPlando"]:
             self.writeSeed(self.settings["seed"]) # lol if race mode
@@ -270,6 +274,21 @@ class RomPatcher:
             # fill remaining list with 0xFFFF to avoid issue with plandomizer having less items than in the base seed
             for i in range(18-len(progItemLocs)):
                 self.romFile.writeWord(0xffff)
+
+    def writeItemMapTiles(self, split, itemLocs):
+        areaMap = AreaMap() # TODO use vertical flags for rotation flavor?
+        itemMaskOffset = Addresses.getOne("map_ItemTileCheckList")
+        for il in itemLocs:
+            if il.Location.isBoss():
+                continue
+#            print("loc %s, area %s" % (il.Location.Name, il.Location.Area))
+            mapOffset = Addresses.getOne("map_data_" + il.Location.Area)
+            areaMap.writeItemTile(self.romFile, mapOffset, itemMaskOffset, il, split)
+        if self.settings['revealMap'] == True:
+            # reveal item tiles
+            self.romFile.seek(Addresses.getOne("map_CoverTileList"))
+            for b in range(0xff):
+                self.romFile.writeByte(b)
 
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball
@@ -438,6 +457,11 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
                 # animals and timer
                 self.applyEscapeAttributes(self.settings["escapeAttr"], plms)
+
+            # map reveal
+            if self.settings['revealMap'] == True:
+                for patchName in RomPatcher.IPSPatches['MapReveal']:
+                    self.applyIPSPatch(patchName)
 
             # apply area patches
             if self.settings["area"] == True:

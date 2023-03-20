@@ -473,7 +473,7 @@ define_location(
 ),
     "Ridley":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Ridley Boss",
     Name="Ridley",
@@ -489,7 +489,7 @@ define_location(
 ),
     "Energy Tank, Ridley":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Ridley Boss",
     Name="Energy Tank, Ridley",
@@ -502,7 +502,7 @@ define_location(
 ),
     "Screw Attack":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Screw Attack",
     Name="Screw Attack",
@@ -517,7 +517,7 @@ define_location(
 ),
     "Energy Tank, Firefleas":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair After Amphitheater",
     Name="Energy Tank, Firefleas",
@@ -752,7 +752,7 @@ define_location(
 ),
     "Golden Torizo":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Screw Attack",
     Name="Golden Torizo",
@@ -1326,7 +1326,7 @@ define_location(
 ),
     "Missile (Gold Torizo)":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Screw Attack",
     Name="Missile (Gold Torizo)",
@@ -1339,7 +1339,7 @@ define_location(
 ),
     "Super Missile (Gold Torizo)":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Screw Attack",
     Name="Super Missile (Gold Torizo)",
@@ -1352,7 +1352,7 @@ define_location(
 ),
     "Missile (Mickey Mouse room)":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Before Amphitheater",
     Name="Missile (Mickey Mouse room)",
@@ -1365,7 +1365,7 @@ define_location(
 ),
     "Missile (lower Norfair above fire flea room)":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair After Amphitheater",
     Name="Missile (lower Norfair above fire flea room)",
@@ -1378,7 +1378,7 @@ define_location(
 ),
     "Power Bomb (lower Norfair above fire flea room)":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair After Amphitheater",
     Name="Power Bomb (lower Norfair above fire flea room)",
@@ -1391,7 +1391,7 @@ define_location(
 ),
     "Power Bomb (Power Bombs of shame)":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair After Amphitheater",
     Name="Power Bomb (Power Bombs of shame)",
@@ -1404,7 +1404,7 @@ define_location(
 ),
     "Missile (lower Norfair near Wave Beam)":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair After Amphitheater",
     Name="Missile (lower Norfair near Wave Beam)",

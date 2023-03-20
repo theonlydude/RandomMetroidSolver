@@ -17,7 +17,7 @@
 ; Setting it to $0000 will not change any tile.
 ; Tile overwrites in the same position are stackable!
 ORG !Freespace_ItembitTilechange
-ItemTileCheckList:
+%export(ItemTileCheckList)
 	DW $8441, $84C6, $0427, $8466, $84A4, $8071, $8274, $40F9, $80EC, $808B, $808B, $8158, $8110, $890C, $8958, $88AB	;Item $000 - $00F
 	DW $888A, $88AD, $88AE, $88AE, $0000, $8911, $8971, $0991, $892F, $8996, $4979, $8977, $8D60, $097F, $8966, $8965	;Item $010 - $01F
 	DW $0000, $89C8, $899C, $8935, $893D, $893D, $4A17, $8D23, $8D83, $8D82, $4E46, $0E8B, $0E6F, $0000, $0000, $0000	;Item $020 - $02F

@@ -18,7 +18,10 @@ LOROM
 ;;;     - removed pause screen status restore
 ;;; * adapted freespace values to step around other patches
 
-incsrc "macros.asm"
+incsrc "macros.asm"             ; for export macro
+
+;; original patch relies on weird old xkas math
+math pri off
 
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    CONFIG                                                   |x|

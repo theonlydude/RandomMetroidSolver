@@ -168,7 +168,7 @@ class RomPatcher:
         self.writeObjectives(self.settings["itemLocs"], self.settings["tourian"])
         self.writeItemsLocs(self.settings["itemLocs"])
         self.writeSplitLocs(self.settings["majorsSplit"], self.settings["itemLocs"], self.settings["progItemLocs"])
-#        self.writeItemMapTiles(self.settings["majorsSplit"], self.settings["itemLocs"])
+        self.writeItemMapTiles(self.settings["majorsSplit"], self.settings["itemLocs"])
         self.writeItemsNumber()
         if not self.settings["isPlando"]:
             self.writeSeed(self.settings["seed"]) # lol if race mode

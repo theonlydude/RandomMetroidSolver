@@ -476,7 +476,7 @@ org $8fd1fa
 org $8fd239
 	db $09
 org $8fd26f
-	db $0a
+	db $09
 org $8fd29b
 	db $0a
 org $8fd2c7

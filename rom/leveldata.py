@@ -1,7 +1,7 @@
 # from SM3E
 
 import sys
-from enum import Enum
+from enum import Enum, IntFlag, auto
 import logging
 from collections import defaultdict
 import utils.log
@@ -104,7 +104,7 @@ class Ship(object):
         self.spritemap = Spritemap(self.rom, self.getShipAddr(self.spritemapAddr), self.center)
 
 class Spritemap(object):
-    def __init__(self, rom, dataAddr, center):
+    def __init__(self, rom, dataAddr, center=None):
         self.rom = rom
         print("load spritemap at {}".format(hex(dataAddr)))
         self.dataAddr = dataAddr
@@ -126,12 +126,32 @@ class Spritemap(object):
 
         self.boundingRect = self.getBoundingRect()
 
+    def write(self):
+        print("write spritemap ${:06x}".format(self.dataAddr))
+        self.rom.seek(snes_to_pc(self.dataAddr))
+        self.rom.writeWord(self.oamCount)
+        for oam in self.oams:
+            oam.write()
+
     def getBoundingRect(self):
         r = BoundingRect()
         for oam in self.oams:
             r.add(oam.realX, oam.realY)
         #r.debug()
         return r
+
+    def transform(self, transformation):
+        if transformation == Transform.Mirror:
+            for oam in self.oams:
+                oam.transform(transformation)
+
+    def displayASM(self):
+        out = ""
+        out += "org ${:06x}\n".format(self.dataAddr)
+        out += "    dw ${:04x} : ".format(self.oamCount)
+        out += " : ".join([oam.displayASM() for oam in self.oams])
+        out += "\n"
+        return (self.dataAddr, out)
 
 class BoundingRect(object):
     def __init__(self):
@@ -177,11 +197,65 @@ class BoundingRect(object):
     def start(self):
         return (int(self.x1/16), int(self.y1/16)+1)
 
+class Int2(object):
+    # 2 complement integer
+    def __init__(self, encValue, mask):
+        self.encValue = encValue
+        self.mask = mask
+        if self._isEncNeg(self.encValue):
+            self.value = - self._getEncInv(self.encValue)
+        else:
+            self.value = self.encValue
+
+    def _isEncNeg(self, encValue):
+        return ((self.mask+1)>>1) & encValue != 0
+
+    def _getEncInv(self, encValue):
+        return ((~encValue)+1) & self.mask
+
+    def _getEnc(self):
+        if self.value >= 0:
+            return self.value
+        else:
+            return self._getEncInv(-self.value)
+
+    def _post(self):
+        if self.value >= 0:
+            self.value = self.value % (self.mask >> 1)
+        else:
+            self.value = self.value % -(self.mask >> 1)
+        self.encValue = self._getEnc()
+
+    def add(self, n):
+        self.value += n
+        self._post()
+
+    def sub(self, n):
+        self.value -= n
+        self._post()
+
+    def mul(self, n):
+        self.value *= n
+        self._post()
+
+    def get(self):
+        return self.encValue
+
 class OAM(object):
-    # an oam entry is made of five bytes: (s000000 xxxxxxxxx) (yyyyyyyy) (YXppPPPt tttttttt)
+    # an oam entry is made of five bytes: (s000000 x xxxxxxxx) (yyyyyyyy) (YXppPPPt tttttttt)
+    #  s = size bit
+    #      0: 8x8
+    #      1: 16x16
+    #  x = X offset of sprite from centre
+    #  y = Y offset of sprite from centre
+    #  Y = Y flip
+    #  X = X flip
+    #  p = priority (relative to background)
+    #  t = tile number
+
     size = 5
 
-    def __init__(self, rom, dataAddr, center):
+    def __init__(self, rom, dataAddr, center=None):
         self.rom = rom
         self.dataAddr = dataAddr
         # (x, y) position in the displayed screen
@@ -190,6 +264,9 @@ class OAM(object):
         self.load()
 
     def fixX(self, lowerX, highX):
+        if self.center is None:
+            return 0
+
         if highX == 0:
             # after center
             return lowerX + self.center[0]
@@ -198,6 +275,8 @@ class OAM(object):
             return (lowerX + self.center[0]) & 0xFF
 
     def fixY(self, y):
+        if self.center is None:
+            return 0
         return (y + self.center[1]) & 0xFF
 
     def load(self):
@@ -217,9 +296,37 @@ class OAM(object):
         self.yFlip = w2 >> 15
         self.priority = (w2 >> 12) & 0b11
         self.palette = (w2 >> 9) & 0b111
-        self.tile = w2 & 0xFF
+        self.tile = w2 & 0x1FF
 
         self.raw = "{} {} {}".format(hex(w1), hex(b), hex(w2))
+
+    def getRaw(self):
+        w1 = (self.size << 15) | (self.unknown << 9) | self.lowerX
+        b = self.y
+        w2 = (self.yFlip << 15) | (self.xFlip << 14) | (self.priority << 12) | (self.palette << 9) | self.tile
+
+        return (w1, b, w2)
+
+    def write(self):
+        self.rom.seek(snes_to_pc(self.dataAddr))
+        w1, b, w2 = self.getRaw()
+        self.rom.writeWord(w1)
+        self.rom.writeByte(b)
+        self.rom.writeWord(w2)
+
+    def transform(self, transformation):
+        width = 8 if self.size == 0 else 16
+        if transformation == Transform.Mirror:
+            self.xFlip = 1 - self.xFlip
+            x = Int2(self.lowerX, 0x1FF)
+            x.mul(-1)
+            x.sub(width)
+            self.lowerX = x.get()
+            self.highX = (self.lowerX & 0x100) >> 8
+
+    def displayASM(self):
+        w1, b, w2 = self.getRaw()
+        return "dw ${:04x} : db ${:02x} : dw ${:04x}".format(w1, b, w2)
 
     def debug(self):
         print("OAM at {} size: {} x: {:3} y: {:3} Xflip: {} Yflip: {} priority: {} palette: {} tile: {:3} raw: {}".format(self.dataAddr, self.size, self.realX, self.realY, self.xFlip, self.yFlip, self.priority, self.palette, self.tile, self.raw))
@@ -384,7 +491,7 @@ class Room(object):
                 plmId = self.rom.readWord()
                 if plmId == 0x0000:
                     break
-                self.plms[state.plmSetPtr].append(PLM(self.rom, plmId))
+                self.plms[state.plmSetPtr].append(PLM.factory(self.rom, plmId))
 
         for setPtr, plms in self.plms.items():
             print("plms in set {}: {}".format(hex(setPtr), [hex(plm.plmId) for plm in plms]))
@@ -421,11 +528,12 @@ class Room(object):
         for (start, end) in doorsSetsAddr:
             self.rom.seek(snes_to_pc(start))
             for i in range((end-start)//doorSize):
+                self.rom.seek(start + i*doorSize)
                 doorId = pc_to_snes(self.rom.tell()) & 0xffff
                 door = Door(self.rom, doorId)
-                doors[door.destRoom].append(door)
+                doors[door.destRoom & 0xffff].append(door)
 
-        self.doors = doors[self.dataAddr]
+        self.doors = doors[self.dataAddr & 0xffff]
 
         print("doors: {}".format([hex(door.doorId) for door in self.doors]))
 
@@ -698,7 +806,7 @@ class PLMDoor(PLM):
 
         if transformation == Transform.Mirror:
             # also change facing
-            facing = plmFacing(self.plmId)
+            facing = plmFacing[self.plmId]
             if facing in (Facing.Left, Facing.Right):
                 facing = indicatorsDirection[facing]
 
@@ -708,6 +816,121 @@ class PLMDoor(PLM):
 
 class PLMItem(PLM):
     pass
+
+class Mode(IntFlag):
+    _16 = auto()
+    _8 = auto()
+
+# REP #$10 Sets X and Y to 16-bit mode
+# REP #$20 Sets A to 16-bit mode
+# REP #$30 Sets A, X and Y to 16-bit mode
+# SEP #$10 Sets X and Y to 8-bit mode
+# SEP #$20 Sets A to 8-bit mode
+# SEP #$30 Sets A, X and Y to 8-bit mode
+class CPUState(object):
+    def __init__(self):
+        self.mi_flag = Mode._16
+        self.ma_flag = Mode._16
+
+    def sep(self, newState):
+        if newState & 0x10:
+            self.mi_flag = Mode._8
+        if newState & 0x20:
+            self.ma_flag = Mode._8
+
+    def rep(self, newState):
+        if newState & 0x10:
+            self.mi_flag = Mode._16
+        if newState & 0x20:
+            self.ma_flag = Mode._16
+
+class Opcode(object):
+    @staticmethod
+    def factory(rom, cpuState):
+        opcode = rom.readByte()
+        if opcode == 0x08:
+            return PHP()
+        elif opcode == 0xE2:
+            newState = rom.readByte()
+            cpuState.sep(newState)
+            return SEP(newState)
+        elif opcode == 0xA9:
+            if cpuState.ma_flag == Mode._16:
+                return LDA_IMM(rom.readWord(), cpuState.ma_flag)
+            else:
+                return LDA_IMM(rom.readByte(), cpuState.ma_flag)
+        elif opcode == 0x8F:
+            return STA_LONG(rom.readLong())
+        elif opcode == 0x28:
+            return PLP()
+        elif opcode == 0x60:
+            return RTS()
+        else:
+            return UNKNOWN(opcode)
+
+class PHP(Opcode):
+    opcode = 0x08
+    def write(self, rom):
+        rom.writeByte(PHP.opcode)
+    def display(self):
+        return "PHP"
+
+class SEP(Opcode):
+    opcode = 0xE2
+    def __init__(self, value):
+        self.value = value
+    def write(self, rom):
+        rom.writeByte(SEP.opcode)
+        rom.writeByte(self.value)
+    def display(self):
+        return "SEP #${:02x}".format(self.value)
+
+class LDA_IMM(Opcode):
+    opcode = 0xA9
+    def __init__(self, value, flag):
+        self.value = value
+        self.flag = flag
+    def write(self, rom):
+        rom.writeByte(LDA_IMM.opcode)
+        if self.flag == Mode._16:
+            rom.writeWord(self.value)
+        else:
+            rom.writeByte(self.value)
+    def display(self):
+        if self.flag == Mode._16:
+            return "LDA #${:04x}".format(self.value)
+        else:
+            return "LDA #${:02x}".format(self.value)
+
+class STA_LONG(Opcode):
+    opcode = 0x8F
+    def __init__(self, value):
+        self.value = value
+    def write(self, rom):
+        rom.writeByte(STA_LONG.opcode)
+        rom.writeLong(self.value)
+    def display(self):
+        return "STA ${:06x}".format(self.value)
+
+class PLP(Opcode):
+    opcode = 0x28
+    def write(self, rom):
+        rom.writeByte(PLP.opcode)
+    def display(self):
+        return "PLP"
+
+class RTS(Opcode):
+    opcode = 0x60
+    def write(self, rom):
+        rom.writeByte(RTS.opcode)
+    def display(self):
+        return "RTS"
+
+class UNKNOWN(Opcode):
+    def __init__(self, opcode):
+        self.opcode = opcode
+    def display(self):
+        return "Unknown opcode: {:02x}".format(self.opcode)
 
 class Door(object):
     def __init__(self, rom, doorId):
@@ -728,6 +951,27 @@ class Door(object):
         self.distanceToSpawn = self.rom.readWord()
         self.customASM = 0x8f0000 + self.rom.readWord()
 
+        if self.customASM != 0x8f0000:
+            self.loadASM()
+
+    def loadASM(self):
+        self.asm = []
+        self.rom.seek(snes_to_pc(self.customASM))
+
+        self.validASM = False
+        cpuState = CPUState()
+
+        while True:
+            self.asm.append(Opcode.factory(self.rom, cpuState))
+
+            # read until RTS
+            if type(self.asm[-1]) is RTS:
+                self.validASM = True
+                break
+            elif type(self.asm[-1]) is UNKNOWN:
+                self.validASM = False
+                break
+
     def write(self):
         self.rom.seek(snes_to_pc(self.dataAddr))
 
@@ -741,6 +985,24 @@ class Door(object):
         self.rom.writeWord(self.distanceToSpawn)
         self.rom.writeWord(self.customASM & 0xffff)
 
+        if self.customASM != 0x8f0000 and self.validASM:
+            self.writeASM()
+
+    def writeASM(self):
+        self.rom.seek(snes_to_pc(self.customASM))
+        for opcode in self.asm:
+            opcode.write(self.rom)
+
+    def displayASM(self):
+        if self.customASM != 0x8f0000:
+            out = ""
+            out += "org ${:06x}\n".format(self.customASM)
+            for opcode in self.asm:
+                out += "    {}\n".format(opcode.display())
+            return (self.customASM, out)
+        else:
+            return (None, None)
+
     def transform(self, transformation, size):
         # cap unit is tiles
         width = size[0] * 16
@@ -748,6 +1010,22 @@ class Door(object):
         if transformation == Transform.Mirror:
             self.screenX = size[0] - self.screenX - 1
             self.capX = width - self.capX - 1
+
+        # $7E:CD20..51: Scrolls
+        #     0: Red. Cannot scroll into this area
+        #     1: Blue. Hides the bottom 2 rows of the area
+        #     2: Green. Unrestricted
+        if self.customASM != 0x8f0000 and self.validASM:
+            scrolls_start = 0x7ECD20
+            for opcode in self.asm:
+                if type(opcode) == STA_LONG:
+                    screen = opcode.value - scrolls_start
+                    x = screen % size[0]
+                    y = screen // size[0]
+                    if transformation == Transform.Mirror:
+                        x = size[0] - x - 1
+                        screen = x + y * size[0]
+                    opcode.value = scrolls_start + screen
 
 class Scroll(object):
     def __init__(self, rom, dataAddr, size):
@@ -1087,12 +1365,29 @@ class LevelData(object):
 
         return (tile) | (hflip << 10) | (vflip << 11) | (btsType << 12)
 
+    def transformBts(self, transformation, bts):
+        blue_left = 0x40
+        blue_right = 0x41
+        blue_top = 0x42
+        blue_bottom = 0x43
+        if transformation == Transform.Mirror:
+            # handle blue doors bts
+            if bts == blue_left:
+                return blue_right
+            elif bts == blue_right:
+                return blue_left
+            else:
+                return bts
+
     def transform(self, transformation, size):
         # layout unit is tiles
         width = size[0] * 16
         height = size[1] * 16
+
         if transformation == Transform.Mirror:
             transLayer1 = [0]*len(self.layer1)
+            if self.layer2Size != 0:
+                transLayer2 = [0]*len(self.layer2)
             transBts = [0]*len(self.bts)
 
             for sx in range(size[0]):
@@ -1100,16 +1395,23 @@ class LevelData(object):
                     for y in range(16):
                         for x in range(16):
                             addr = self.getTileAddr((sx, sy), x, y)
-                            tile = self.layer1[addr]
-                            bts = self.bts[addr]
+                            tile1 = self.layer1[addr]
+                            if self.layer2Size != 0:
+                                tile2 = self.layer2[addr]
+                            bts = self.transformBts(transformation, self.bts[addr])
                             msx, msy, mx, my = self.transformPos(transformation, sx, sy, x, y, size)
                             newAddr = self.getTileAddr((msx, msy), mx, my)
-                            newTile = self.transformTile(transformation, tile)
-
+                            newTile1 = self.transformTile(transformation, tile1)
+                            if self.layer2Size != 0:
+                                newTile2 = self.transformTile(transformation, tile2)
                             #print("{}: sx: {} sy: {} x: {} y: {} - {}: msx: {} msy: {} mx: {} my: {}".format(addr, sx, sy, x, y, newAddr, msx, msy, mx, my))
 
-                            transLayer1[newAddr] = newTile
+                            transLayer1[newAddr] = newTile1
                             transBts[newAddr] = bts
+                            if self.layer2Size != 0:
+                                transLayer2[newAddr] = newTile2
 
             self.layer1 = transLayer1
             self.bts = transBts
+            if self.layer2Size != 0:
+                self.layer2 = transLayer2

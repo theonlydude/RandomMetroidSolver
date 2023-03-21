@@ -291,6 +291,10 @@ if (hs.registerOverlay) {
 #areaRandomizationText {
   flex-grow: 1;
 }
+.rando_button {
+    cursor: pointer;
+    width: 2em;
+}
 </style>
 
 <script type="text/javascript">
@@ -941,18 +945,18 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = ["noPatchesVisibility"];
-      var hide = ["seedVisibility", "itemsQuantityVisibility", "minorsProportionVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility"];
+      var hide = ["seedVisibility", "itemsQuantityVisibility", "minorsProportionVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility", "saveLoadRandoPresetVisibility"];
     showHide(show, hide);
   }
 
   else if(name == "medium") {
     var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "itemsQuantityVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility", "objectivesVisibility"];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "minorsProportionVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility", "noPatchesVisibility"];
+    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "minorsProportionVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility", "noPatchesVisibility", "saveLoadRandoPresetVisibility"];
     showHide(show, hide);
   }
 
   else {
-    var show = ["seedVisibility", "itemsQuantityVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "minorsProportionVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility"];
+    var show = ["seedVisibility", "itemsQuantityVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "minorsProportionVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility", "saveLoadRandoPresetVisibility"];
     var hide = ["noPatchesVisibility"];
     showHide(show, hide);
   }
@@ -979,24 +983,25 @@ function showHide(show, hide) {
   }
 }
 
-var globalSwitchs = {};
+function getRandomizerParameters(setDisabledToOff) {
+    var dataDict = {};
 
-function AjaxPresetCallCompleted(data) {
-    console.log("AjaxPresetCallCompleted");
-
-    var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
-    var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian", "objective", "areaRandomization"];
+    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "tourian", "areaRandomization"];
     var imgPickers = ["logic"];
 
     for(var i=0; i<elems.length; i++) {
-        // if element is disabled set it to off
-        var elem = document.getElementById(elems[i]);
-        if(elem.disabled == true) {
-            dataDict[elems[i]] = "off";
+        if(setDisabledToOff) {
+            // if element is disabled set it to off
+            var elem = document.getElementById(elems[i]);
+            if(elem.disabled == true) {
+                dataDict[elems[i]] = "off";
+            } else {
+                dataDict[elems[i]] = elem.value;
+            }
         } else {
-            dataDict[elems[i]] = elem.value;
+            dataDict[elems[i]] = document.getElementById(elems[i]).value;
         }
     }
     for(var i=0; i<randomElems.length; i++) {
@@ -1031,6 +1036,16 @@ function AjaxPresetCallCompleted(data) {
     }
 
     getSpecialValues(dataDict);
+
+    return dataDict;
+}
+
+function AjaxPresetCallCompleted(data) {
+    console.log("AjaxPresetCallCompleted");
+
+    var dataDict = getRandomizerParameters(true);
+    dataDict["complexity"] = getComplexity();
+    dataDict["paramsFileTarget"] = data;
 
     // if production server randomly use one of the two redirect webapps
     var prodUrls = ["varia.run", "www.varia.run"];
@@ -1202,47 +1217,8 @@ function AjaxRandomizerCallCompleted(data) {
     // set backup button text to Randomize
     document.getElementById("submitBtn").data = "Randomize";
 
-    var dataDict = {"complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
-    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "tourian", "areaRandomization"];
-    var imgPickers = ["logic"];
-
-    for(var i=0; i<elems.length; i++) {
-       dataDict[elems[i]] = document.getElementById(elems[i]).value;
-    }
-    for(var i=0; i<randomElems.length; i++) {
-       // check if random dice is checked
-       if(isElemIdRandom(randomElems[i])) {
-         dataDict[randomElems[i]] = "random";
-       } else {
-         dataDict[randomElems[i]] = document.getElementById(randomElems[i]).value;
-       }
-    }
-    for(var i=0; i<multiElems.length; i++) {
-       // check if random dice is checked
-       var elemId = multiElems[i];
-       if(isElemIdRandom(elemId)) {
-         dataDict[elemId] = "random";
-         multiElemId = elemId+"MultiSelect";
-         dataDict[multiElemId] = $("#"+multiElemId).val().join();
-       } else {
-         dataDict[elemId] = document.getElementById(elemId).value;
-       }
-    }
-    for(var i=0; i<imgPickers.length; i++) {
-       // check if random dice is checked
-       var elemId = imgPickers[i];
-       if(isElemIdRandom(elemId)) {
-         dataDict[elemId] = "random";
-         multiElemId = elemId+"MultiSelect";
-           dataDict[multiElemId] = $("#"+elemId).data('picker').selected_values().join();
-       } else {
-         dataDict[elemId] = document.getElementById(elemId).value;
-       }
-    }
-
-    getSpecialValues(dataDict);
+    var dataDict = getRandomizerParameters(false);
+    dataDict["complexity"] = getComplexity();
 
     // call webservice to update the session
     var request = $.ajax({
@@ -1389,6 +1365,7 @@ var tips = [
 
 var myTimer = null;
 var curLoadingTips = 0;
+var globalSwitchs = {};
 
 function loadTip(first = true) {
     if(first == true) {
@@ -1814,6 +1791,19 @@ function setSwitchToOff(elem) {
     }
 }
 
+function saveRandoPresetLocal() {
+    // ask user for preset name
+    var filename = prompt("What is your randomizer preset name?");
+    if(filename == null) {
+        return false;
+    }
+
+    var data = getRandomizerParameters(false);
+
+    var blob = new Blob([JSON.stringify(data, null, 2)], {type: "text/plain"});
+    saveAs(blob, filename+'.json');
+}
+
 function loadRandoPreset() {
   console.log("loadRandoPreset: "+document.getElementById("randoPreset").value);
 
@@ -1831,15 +1821,40 @@ function loadRandoPreset() {
   request.fail(ajaxFail);
 }
 
+function loadRandoPresetLocal() {
+    var fileSelector = $('<input type="file" onchange="loadRandoPresetLocalCallbak(event)">');
+    fileSelector.click();
+}
+function loadRandoPresetLocalCallbak(e) {
+    var file = e.target.files[0];
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = function(readerEvent) {
+        var content = readerEvent.target.result;
+        (async function () {
+            const response = await fetch(content);
+            const data = await response.json();
+            loadRandoPresetOK(data);
+        })();
+    }
+}
+
 function loadRandoPresetOK(data) {
     // instead of reloading the page which remove the sm ROM, update all fields manually
     for(var key in data) {
-        if(key == "objective" || key == "objectiveMultiSelect") {
+        if(key == "objective" || key == "objectiveMultiSelect" || key == "randoPreset") {
             continue;
         }
         value = data[key];
         // console.log("loadRandoPresetOK "+key+": "+value);
+
         var elem = document.getElementById(key);
+        if(elem == null) {
+            // in case there's unknown parameter in the json file
+            console.log("error loading elem: "+key);
+            continue;
+        }
 
         var elemRandom = document.getElementById(key+"Random");
         if(value == "random") {
@@ -1947,6 +1962,11 @@ Click on the dice button to randomly set this parameter.</p>"
     response.write('</ul>\\\n', escape=False)
     pass
 }}"
+    },
+    {
+      element: "#saveLoadRandoPresetStep",
+      title: "Save and Load custom Randomizer presets",
+      content: "<p>Use the save and load buttons to save your favorite Randomizer parameters on your computer and keep them for later use.</p>"
     },
     {
       element: "#raceStep",
@@ -2876,6 +2896,12 @@ def displayNumber(id, min, max, default, step="1"):
                 </select>
                 </td>
                 <td id="randoPresetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+              </tr>
+              <tr id="saveLoadRandoPresetVisibility">
+                <td class="small"></td>
+                <td><img class="rando_button" id="save" src="/solver/static/images/ui/save.svg" title="Save" alt="Save" onclick="saveRandoPresetLocal()"> Save Randomizer parameters</td>
+                <td><img class="rando_button" id="load" src="/solver/static/images/ui/cloud_upload.png" title="Load" alt="Load" onclick="loadRandoPresetLocal()"> Load Randomizer parameters</td>
+                <td id="saveLoadRandoPresetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr id="raceModeVisibility">
                 <td class="small"></td>

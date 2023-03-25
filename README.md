@@ -192,3 +192,22 @@ $ ./web/docker/start.sh
 # Remove
 $ ./web/docker/rm.sh
 ```
+
+# Front end client
+
+```sh
+# checkout latest copy of front end client
+$ git submodule update
+
+# cd into client
+$ cd super-metroid/client
+
+# install node dependencies
+$ yarn install
+
+# build client files (destination is RandomMetroidSolver/web/client)
+$ yarn build:varia
+
+# if you want to make changes to the client, run in watch mode
+$ yarn watch:varia
+```

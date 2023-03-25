@@ -1,4 +1,4 @@
-from web.backend.utils import loadPresetsList, transition2isolver, getAddressesToRead
+from web.backend.utils import loadPresetsList, transition2isolver, getAddressesToRead, get_app_files
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
 from logic.logic import Logic
 from rom.flavor import RomFlavor
@@ -62,4 +62,5 @@ class Plando(object):
         return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                     vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
                     curSession=self.session.plando, addresses=addresses, startAPs=startAPs,
-                    version=displayedVersion, flavorPatches=RomReader.flavorPatches)
+                    version=displayedVersion, flavorPatches=RomReader.flavorPatches,
+                    app_files=get_app_files())

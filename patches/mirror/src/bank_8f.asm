@@ -465,9 +465,9 @@ Room_9804_state_9835_PLM:
     ; Bomb Torizo grey door
     dw $BAF4 : db $0e : db $06 : dw $081b
     ; Bombs, chozo orb
-    dw $ef3b : db $06 : db $0a : dw $0007 
+    dw $ef3b : db $03 : db $0a : dw $0007
     ; Bomb Torizo's crumbling chozo
-    dw $d6ea : db $07 : db $0b : dw $0000 
+    dw $d6ea : db $02 : db $0b : dw $0000
     dw $0000
 org $8f8412
 ; room 9804: Bomb Torizo Room
@@ -5910,8 +5910,8 @@ org $8fc79f
 ; room D95E: Botwoon's Room
 Room_D95E_state_D98A_PLM:
 %export(Door_9D_Room_D95E_PLM_C848)
-    ; Door. Grey door facing right
-    dw $c848 : db $01 : db $06 : dw $049d 
+    ; Door. Grey door facing left
+    dw $c842 : db $1e : db $06 : dw $049d
     dw $0000
 org $8fc7a7
 ; room D9AA: Space Jump Room
@@ -7398,6 +7398,10 @@ Room_D95E_Header:
     db $02 ; event
     dw $d98a ; room state pointer
     dw $e5e6 ; room state standard
+; room D95E: Botwoon's Room
+Room_D95E_state_D98A_Scroll:
+org $8FD9A8
+        db $00, $01
 org $8fd9aa
 ; room D9AA: Space Jump Room
 Room_D9AA_Header:

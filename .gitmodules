@@ -3,3 +3,6 @@
 	url = https://github.com/theonlydude/varia_custom_sprites
 	update = merge
 	branch = main
+[submodule "super-metroid"]
+	path = super-metroid
+	url = git@github.com:chriscauley/super-metroid.git

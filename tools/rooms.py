@@ -196,7 +196,7 @@ rooms = [
 {"Address": 0x07D1A3, "DoorCount": 3, "Name": "Crab Shaft","GraphArea":"WestMaridia"},
 {"Address": 0x07D1DD, "DoorCount": 3, "Name": "Pseudo Plasma Spark Room","GraphArea":"WestMaridia"},
 {"Address": 0x07D21C, "DoorCount": 4, "Name": "Crab Hole","GraphArea":"WestMaridia"},
-{"Address": 0x07D252, "DoorCount": 2, "Name": "[Tunnel to West Sand Hall]","GraphArea":"EastMaridia"},
+{"Address": 0x07D252, "DoorCount": 2, "Name": "[Tunnel to West Sand Hall]","GraphArea":"WestMaridia"},
 {"Address": 0x07D27E, "DoorCount": 2, "Name": "Plasma Tutorial Room","GraphArea":"EastMaridia"},
 {"Address": 0x07D2AA, "DoorCount": 1, "Name": "Plasma Room","GraphArea":"EastMaridia"},
 {"Address": 0x07D2D9, "DoorCount": 2, "Name": "Thread The Needle Room","GraphArea":"EastMaridia"},

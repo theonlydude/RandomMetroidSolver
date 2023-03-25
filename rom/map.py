@@ -78,20 +78,19 @@ class AreaMap(object):
 
     @staticmethod
     def load(mapRom, presenceRom=None, mapOffset=0, presenceOffset=0, vertical=False):
-        if presenceRom is None:
-            presenceRom = mapRom
         ret = AreaMap(vertical)
         mapRom.seek(mapOffset)
         for page in ret.pages:
             for i in range(pageSize*pageSize):
                 page[i] = BGtile.fromWord(mapRom.readWord())
-        presenceRom.seek(presenceOffset)
-        for page in ret.pages:
-            for i in range((pageSize*pageSize) // 8):
-                b = presenceRom.readByte()
-                for s in range(8):
-                    tile = page[i*8 + s]
-                    tile.present = bool(b & (1 << (7 - s)))
+        if presenceRom is not None:
+            presenceRom.seek(presenceOffset)
+            for page in ret.pages:
+                for i in range((pageSize*pageSize) // 8):
+                    b = presenceRom.readByte()
+                    for s in range(8):
+                        tile = page[i*8 + s]
+                        tile.present = bool(b & (1 << (7 - s)))
         return ret
 
     def save(self, rom, offset=0):

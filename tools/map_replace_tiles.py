@@ -17,6 +17,7 @@ def replaceTile(areaMap, rom):
         for y in range(areaMap.height):
             tile = areaMap.getTile(x, y)
             if tile.idx == tile_to_replace:
+                print("$%02x to $%02x at (%d, %d)" % (tile_to_replace, tile_replacement, x, y))
                 tile.idx = tile_replacement
                 areaMap.writeBGtile(rom, x, y)
 
@@ -25,3 +26,4 @@ for m in maps:
     rom = RealROM(m)
     areaMap = AreaMap.load(rom)
     replaceTile(areaMap, rom)
+    rom.close()

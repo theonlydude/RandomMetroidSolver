@@ -35,7 +35,7 @@ math pri off
 
 ;Location for maptile GFX for minimap (size: $1000)
 	!Freespace_MinimapTiles = $9AC200
-        !Vanilla_MinimapTiles = $9AB200
+        !Vanilla_HUD_Tiles = $9AB200
 ;Location of code to transfer tile graphics from RAM to VRAM (restricted to bank $80) (size: $97)
 	!FreespaceBank80_VRAM = $80CD8E
 
@@ -234,13 +234,12 @@ org $81b14b
 incbin "map/start_tilemap.bin"
 
 ; Minimap GFX
-org !Vanilla_MinimapTiles
-incbin "map/minimap.gfx"
+org !Vanilla_HUD_Tiles
+incbin "map/hud.gfx"
 ORG !Freespace_MinimapTiles
-incbin "map/minimap_extra.gfx"
+incbin "map/minimap.gfx"
 
-org $80988B
-incbin "map/hud_tilemap.bin"
+incsrc "map/hud_tilemap.asm"
 
 ; Pause GFX
 org !PauseScreen_Tiles_Pointer

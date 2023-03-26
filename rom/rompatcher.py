@@ -2,6 +2,7 @@ import os, random, re, json
 
 from math import ceil
 from enum import IntFlag
+from collections import defaultdict
 from rando.Items import ItemManager
 from rom.compression import Compressor
 from rom.ips import IPS_Patch
@@ -276,14 +277,16 @@ class RomPatcher:
                 self.romFile.writeWord(0xffff)
 
     def writeItemMapTiles(self, split, itemLocs):
-        areaMap = AreaMap() # TODO use vertical flags for rotation flavor?
-        itemMaskOffset = Addresses.getOne("map_ItemTileCheckList")
+        areaMaps = defaultdict(AreaMap)
         for il in itemLocs:
             if il.Location.isBoss():
                 continue
 #            print("loc %s, area %s" % (il.Location.Name, il.Location.Area))
-            mapOffset = Addresses.getOne("map_data_" + il.Location.Area)
-            areaMap.writeItemTile(self.romFile, mapOffset, itemMaskOffset, il, split)
+            areaMaps[il.Location.Area].setItemLoc(il, split)
+        itemMaskOffset = Addresses.getOne("map_ItemTileCheckList")
+        for area, areaMap in areaMaps.items():
+            mapOffset = Addresses.getOne("map_data_" + area)
+            areaMap.writeItemTiles(self.romFile, mapOffset, itemMaskOffset)
         if self.settings['revealMap'] == True:
             # reveal item tiles
             self.romFile.seek(Addresses.getOne("map_CoverTileList"))

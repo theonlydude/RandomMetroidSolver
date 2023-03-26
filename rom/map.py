@@ -1,4 +1,5 @@
 
+from collections import defaultdict
 from rom.rom import RealROM
 from graph.location import LocationMapTileKind, LocationMapAttrs
 
@@ -61,6 +62,9 @@ class AreaMap(object):
         self.height = pageSize if not vertical else nPages * pageSize
         self.pages = [[None]*pageSize*pageSize for i in range(nPages)]
         self.vertical = vertical
+        # (x,y) => [(loc, tileClass), ...]
+        # in practice the list will be one or two entries
+        self.items = defaultdict(list)
 
     def getPage(self, x, y):
         return x // pageSize if not self.vertical else y // pageSize
@@ -127,29 +131,81 @@ class AreaMap(object):
         addr = self.getOffset(rom, x, y, mapOffset)
         self.setTile(BGtile.fromWord(rom.readWord(addr)))
 
-    def writeItemTile(self, rom, mapOffset, itemMaskOffset, itemLoc, split):
+    def setItemLoc(self, itemLoc, split):
+        item, loc = itemLoc.Item, itemLoc.Location
+        attrs = loc.MapAttrs
         # determine tile class
         tileClass = "minor"
-        item, loc = itemLoc.Item, itemLoc.Location
         if not split.startswith("Full") and loc.isClass(split):
             tileClass = "major"
         if item.Category == "Nothing":
             tileClass = "nothing"
-        # write map tile
-        attrs = loc.MapAttrs
-        tile = BGtile(getTileIndex(attrs.TileKind, tileClass), attrs.palette, hFlip=attrs.hFlip, vFlip=attrs.vFlip)
-        tile.present = True
-        self.setTile(attrs.X, attrs.Y, tile)
-        self.writeBGtile(rom, attrs.X, attrs.Y, mapOffset)
-        # write item tile change collection info
-        if tileClass != "nothing":
-            # see map/ItembitTileChangeList.asm for explanations
-            tileMasks = {-1: 0b00, -2: 0b01, 1: 0b10, 2: 0b11}
-            areaMasks = {"Crateria": 0b000, "Brinstar": 0b001, "Norfair": 0b010, "WreckedShip": 0b011, "Maridia":0b100}
-            tileCollectionOffset = kindToIndex[attrs.TileKind]["nothing"] - tile.idx
-            page = self.getPage(attrs.X, attrs.Y)
-            x, y = attrs.X % pageSize, attrs.Y % pageSize
-            w = (x & 0x1f) | ((y & 0x1f) << 5) | (page << 10) | (areaMasks[loc.Area] << 11) | (tileMasks[tileCollectionOffset] << 14)
-        else:
-            w = 0
-        rom.writeWord(w, itemMaskOffset + loc.Id * 2)
+        self.items[(attrs.X, attrs.Y)].append((loc, tileClass))
+
+    def writeItemTiles(self, rom, mapOffset, itemMaskOffset):
+        # write map tiles, taking care of double items:
+        # - if one of the two is a nothing, only draw the relevant tile
+        # - if both are minors, draw the double map tile, and set the same mask for the two locs
+        # - write a single major tile in the case of major+minor or major+major on the same spot
+        #   (we can only do double -> minor -> nothing tile cover transition):
+        #      -> "elect" one of the two tiles, and ignore the other (act as 'nothing') to avoid double
+        #          item pickup issue when not using the double tile
+        selectClass = lambda itemEntry, tileClass: [item for item in itemEntry if item[1] == tileClass]
+        def drawTile(itemEntry, tileClassOverride=None):
+            loc, tileClass = itemEntry
+            attrs = loc.MapAttrs
+            if tileClassOverride is not None:
+                tileClass = tileClassOverride
+            tile = BGtile(getTileIndex(attrs.TileKind, tileClass), attrs.palette, hFlip=attrs.hFlip, vFlip=attrs.vFlip)
+            self.setTile(attrs.X, attrs.Y, tile)
+            self.writeBGtile(rom, attrs.X, attrs.Y, mapOffset)
+        # see map/ItembitTileChangeList.asm for explanations
+        tileMasks = {-1: 0b00, -2: 0b01, 1: 0b10, 2: 0b11}
+        areaMasks = {"Crateria": 0b000, "Brinstar": 0b001, "Norfair": 0b010, "WreckedShip": 0b011, "Maridia":0b100}
+        def setItemMask(itemEntry, tileClassOverride=None):
+            loc, tileClass = itemEntry
+            attrs = loc.MapAttrs
+            if tileClassOverride is not None:
+                tileClass = tileClassOverride
+            # write item tile change collection info
+            if tileClass != "nothing":
+                tile = self.getTile(attrs.X, attrs.Y)
+                tileCollectionOffset = getTileIndex(attrs.TileKind, "nothing") - tile.idx if tileClass != "double" else 1
+                page = self.getPage(attrs.X, attrs.Y)
+                x, y = attrs.X % pageSize, attrs.Y % pageSize
+                w = (x & 0x1f) | ((y & 0x1f) << 5) | (page << 10) | (areaMasks[loc.Area] << 11) | (tileMasks[tileCollectionOffset] << 14)
+            else:
+                w = 0
+            rom.writeWord(w, itemMaskOffset + loc.Id * 2)
+        for _, itemEntry in self.items.items():
+            if len(itemEntry) == 1:
+                drawTile(itemEntry[0])
+                setItemMask(itemEntry[0])
+            elif len(itemEntry) == 2:
+                nothings = selectClass(itemEntry, "nothing")
+                minors = selectClass(itemEntry, "minor")
+                majors = selectClass(itemEntry, "major")
+                if len(majors) > 0:
+                    major = majors[0]
+                    other = itemEntry[(itemEntry.index(major)+1) % 2]
+                    drawTile(major)
+                    setItemMask(major)
+                    setItemMask(other, "nothing")
+                elif len(nothings) == 1:
+                    nothing = nothings[0]
+                    other = itemEntry[(itemEntry.index(nothing)+1) % 2]
+                    drawTile(other)
+                    setItemMask(other)
+                    setItemMask(nothing)
+                elif len(nothings) == 2:
+                    drawTile(itemEntry[0])
+                    setItemMask(itemEntry[0])
+                    setItemMask(itemEntry[1])
+                elif len(minors) == 2:
+                    drawTile(itemEntry[0], "double")
+                    setItemMask(itemEntry[0], "double")
+                    setItemMask(itemEntry[1], "double")
+                else:
+                    raise RuntimeError("Invalid item entry list at "+str(coords))
+            else:
+                raise RuntimeError("Invalid item entry list at "+str(coords))

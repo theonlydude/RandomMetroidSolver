@@ -131,8 +131,6 @@ while True:
                         if (x, y) not in r:
                             r.append((x, y))
             elif event.button == pygame.BUTTON_RIGHT and mode == "graph_area":
-                if curMap is not None:
-                    print(str(curMap))
                 if curRoomList is not None:
                     if curRoom is None:
                         try:
@@ -140,11 +138,14 @@ while True:
                         except StopIteration:
                             curRoomList = None
                     if curRoom is not None:
-                        ans = input(curRoom["Name"] + " finished (Y/[N]/R)?")
+                        ans = input(curRoom["Name"] + " finished (Y/[N]/R/A)?")
                         if ans.lower() == "y":
                             curRoom = None
                         elif ans.lower() == "r":
                             if curRoom["Name"] in curMap[curArea]:
                                 del curMap[curArea][curRoom["Name"]]
+                        elif ans.lower() == "a":
+                            curRoomList = None
+                                
     # Update the display
     pygame.display.flip()

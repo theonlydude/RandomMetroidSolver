@@ -331,6 +331,8 @@ def loadRandoPreset(randoPreset, args):
         args.gravityBehaviour = randoParams["gravityBehaviour"]
     if randoParams.get("nerfedCharge", "off") == "on":
         args.nerfedCharge = True
+    if randoParams.get("revealMap", "off") == "on":
+        args.revealMap = True
 
     args.areaRandomization = randoParams["areaRandomization"]
     if args.areaRandomization == "on":
@@ -496,6 +498,7 @@ def getRandomizerDefaultParameters():
     defaultParams['gravityBehaviour'] = "Balanced"
     defaultParams['gravityBehaviourMultiSelect'] = defaultMultiValues['gravityBehaviour']
     defaultParams['nerfedCharge'] = "off"
+    defaultParams['revealMap'] = "off"
     defaultParams['relaxed_round_robin_cf'] = "off"
     defaultParams['itemsounds'] = "on"
     defaultParams['elevators_speed'] = "on"

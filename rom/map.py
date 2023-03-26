@@ -177,7 +177,7 @@ class AreaMap(object):
             else:
                 w = 0
             rom.writeWord(w, itemMaskOffset + loc.Id * 2)
-        for _, itemEntry in self.items.items():
+        for coords, itemEntry in self.items.items():
             if len(itemEntry) == 1:
                 drawTile(itemEntry[0])
                 setItemMask(itemEntry[0])

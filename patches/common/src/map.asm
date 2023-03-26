@@ -114,9 +114,9 @@ math pri off
 	!MinimapPalette1 = $04
 	!MinimapPalette2 = $03
 	!MinimapPalette3 = $02
-	!MinimapPalette4 = $03
+	!MinimapPalette4 = $02
 	!MinimapPalette5 = $02
-	!MinimapPalette6 = $03
+	!MinimapPalette6 = $02
 	!MinimapPalette7 = $02
 
 ;Which minimap palette should empty tiles have? (vanilla: $03) (range: $00 - $07)
@@ -244,14 +244,12 @@ incsrc "map/hud_tilemap.asm"
 ; Pause GFX
 org !PauseScreen_Tiles_Pointer
 incbin "map/pause.gfx"
-org !PauseScreen_Palette_Pointer
-incbin "map/pause_palettes.bin"
-org !PauseScreen_Palette_Pointer+26
-        ;; put back vanilla HUD blue color when in pause
-        dw $44e5
 
 ; Pause tilemaps
 org !PauseScreen_Map_Tilemap_Pointer
 incbin "map/pause_map_tilemap.bin"
+
+; Pause palettes (addrs in asm file, consistent with !PauseScreen_Palette_Pointer)
+incsrc "map/pause_palettes.asm"
 
 }

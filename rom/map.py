@@ -144,12 +144,12 @@ class AreaMap(object):
         # write item tile change collection info
         if tileClass != "nothing":
             # see map/ItembitTileChangeList.asm for explanations
-            tileMasks = {-1: 0b0, -2: 0b1, 1: 0b10, 2: 0b11}
-            areaMasks = {"Crateria": 0b0, "Brinstar": 0b1, "Norfair": 0b10, "WreckedShip": 0b11, "Maridia":0b100}
+            tileMasks = {-1: 0b00, -2: 0b01, 1: 0b10, 2: 0b11}
+            areaMasks = {"Crateria": 0b000, "Brinstar": 0b001, "Norfair": 0b010, "WreckedShip": 0b011, "Maridia":0b100}
             tileCollectionOffset = kindToIndex[attrs.TileKind]["nothing"] - tile.idx
             page = self.getPage(attrs.X, attrs.Y)
             x, y = attrs.X % pageSize, attrs.Y % pageSize
-            w = (x & 0x1f) | ((y & 0x1f << 5)) | (page << 10) | (areaMasks[loc.Area] << 11) | (tileMasks[tileCollectionOffset] << 14)
+            w = (x & 0x1f) | ((y & 0x1f) << 5) | (page << 10) | (areaMasks[loc.Area] << 11) | (tileMasks[tileCollectionOffset] << 14)
         else:
             w = 0
         rom.writeWord(w, itemMaskOffset + loc.Id * 2)

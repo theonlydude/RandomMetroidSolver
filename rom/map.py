@@ -22,6 +22,18 @@ class BGtile(object):
     def __str__(self):
         return "BGtile[i=$%02x p=$%x %s%s%s%s]" % (self.idx, self.pal, "P" if self.prio else "", "H" if self.hFlip else "", "V" if self.vFlip else "", "X" if self.present else "")
 
+# area map => {graph area=>palette}
+palettesByArea = {
+    "Ceres": {"Ceres": 3},
+    "Tourian": {"Tourian": 3},
+    # there are single tiles for RedBrinstar and GreenPinkBrinstar but not enough palettes...
+    # "fixed" by having map icons on top of tiles when the portal is taken once
+    "Crateria": {"Crateria": 3, "WreckedShip": 5, "Tourian": 7, "EastMaridia": 4, "GreenPinkBrinstar": 3, "RedBrinstar": 3},
+    "Brinstar": {"GreenPinkBrinstar": 4, "RedBrinstar": 3, "Crateria": 7, "Kraid": 6, "Norfair": 5},
+    "Norfair": {"Norfair": 5, "LowerNorfair": 6, "Crocomire": 3},
+    "Maridia": {"RedBrinstar": 3, "WestMaridia": 5, "EastMaridia": 6},
+    "WreckedShip": {"WreckedShip": 3}
+}
 
 # "hidden" unused in VARIA (or even replaced), but referencing them is useful for the helper tool
 kindToIndex = {

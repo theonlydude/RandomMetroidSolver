@@ -262,10 +262,6 @@
             [
                 34,
                 7
-            ],
-            [
-                34,
-                8
             ]
         ],
         "Crateria Tube": [
@@ -491,10 +487,6 @@
             ],
             [
                 10,
-                9
-            ],
-            [
-                6,
                 9
             ]
         ],
@@ -888,14 +880,6 @@
             [
                 53,
                 10
-            ],
-            [
-                52,
-                10
-            ],
-            [
-                52,
-                11
             ]
         ]
     },
@@ -930,6 +914,36 @@
             [
                 17,
                 10
+            ]
+        ]
+    },
+    "EastMaridia": {
+        "[Crab Maze to Elevator]": [
+            [
+                52,
+                10
+            ]
+        ],
+        "[Elevator to Maridia]": [
+            [
+                52,
+                11
+            ]
+        ]
+    },
+    "RedBrinstar": {
+        "[Elevator to Red Brinstar]": [
+            [
+                34,
+                8
+            ]
+        ]
+    },
+    "GreenPinkBrinstar": {
+        "[Elevator to Green Brinstar]": [
+            [
+                6,
+                9
             ]
         ]
     }

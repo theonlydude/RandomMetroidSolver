@@ -126,21 +126,18 @@ class AreaMap(object):
                         b |= 1 << (7 - s)
                 rom.writeByte(b)
 
-    def getOffset(self, rom, x, y, mapOffset=None):
-        if mapOffset is not None:
-            rom.seek(mapOffset)
-        addr = rom.tell()
+    def getOffset(self, x, y, mapOffset=0):
         page, idx = self.getPage(x, y), self.getIndex(x, y)
-        addr += pageSize*pageSize*2*page + idx*2
-        return addr
+        addr = pageSize*pageSize*2*page + idx*2
+        return mapOffset + addr
 
     def writeBGtile(self, rom, x, y, mapOffset=0):
         tile = self.getTile(x, y)
-        addr = self.getOffset(rom, x, y, mapOffset)
+        addr = self.getOffset(x, y, mapOffset)
         rom.writeWord(tile.toWord(), addr)
 
     def readBGtile(self, rom, x, y, mapOffset=None):
-        addr = self.getOffset(rom, x, y, mapOffset)
+        addr = self.getOffset(x, y, mapOffset)
         self.setTile(BGtile.fromWord(rom.readWord(addr)))
 
     def setItemLoc(self, itemLoc, split):

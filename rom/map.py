@@ -165,7 +165,8 @@ class AreaMap(object):
             attrs = loc.MapAttrs
             if tileClassOverride is not None:
                 tileClass = tileClassOverride
-            tile = BGtile(getTileIndex(attrs.TileKind, tileClass), attrs.palette, hFlip=attrs.hFlip, vFlip=attrs.vFlip)
+            pal = palettesByArea[loc.Area][loc.GraphArea]
+            tile = BGtile(getTileIndex(attrs.TileKind, tileClass), pal, hFlip=attrs.hFlip, vFlip=attrs.vFlip)
             self.setTile(attrs.X, attrs.Y, tile)
             self.writeBGtile(rom, attrs.X, attrs.Y, mapOffset)
         # see map/ItembitTileChangeList.asm for explanations

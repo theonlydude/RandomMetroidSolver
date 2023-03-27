@@ -34,6 +34,8 @@ class RomPatcher:
             'map.ips',
             # game map
             'map_data.ips',
+            # game map palettes for graph areas
+            'map_data_area.ips',
             # boot, save files and backup management, stats infrastructure
             'base.ips',
             # handles starting location and start blue doors
@@ -475,6 +477,7 @@ class RomPatcher:
                         self.applyIPSPatch(patchName)
             else:
                 self.applyIPSPatch('area_ids_alt.ips')
+                self.applyIPSPatch('map_data_area_alt.ips')
             if self.settings["boss"] == True:
                 for patchName in RomPatcher.IPSPatches['Bosses']:
                     self.applyIPSPatch(patchName)

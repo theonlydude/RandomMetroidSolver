@@ -121,13 +121,12 @@ class LocationMapTileKind(Enum):
     ThreeWallsOneDoorOpenBottom = 14
 
 class LocationMapAttrs(object):
-    def __init__(self, x, y, kind, hFlip=False, vFlip=False, palette=0x3):
+    def __init__(self, x, y, kind, hFlip=False, vFlip=False):
         self.X = x
         self.Y = y
         self.TileKind = kind
         self.hFlip = hFlip
         self.vFlip = vFlip
-        self.palette = palette
 
 def define_location(
         Area, GraphArea, SolveArea, Name, Class, CanHidden, Address, Id,

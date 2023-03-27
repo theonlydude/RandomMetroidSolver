@@ -5,6 +5,7 @@ incsrc "macros.asm"
 
 org $b58000
 
+;;; write base map from map patch example
 %export(Brinstar)
 incbin "map/brinstar.bin"
 %export(Crateria)

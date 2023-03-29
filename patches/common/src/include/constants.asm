@@ -45,6 +45,7 @@ include
 !norfair = $0002
 
 !palettes_ram = $7EC000
+!palette_size = 32              ; usual size of a palette is 16 colors (1 word per color)
 
 ;;; pause state
 !pause_index = $0727

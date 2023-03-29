@@ -7,9 +7,26 @@
 !AlwaysActive = ""
 !MapStationActive = "LDA $0789 : BNE + : LDA #$0300 : STA $2E"	;check if mapstation is active in current area
 
+!AreaPalettes_RAM = !palettes_ram+(!AreaPalettes_BaseIndex*!palette_size)+(2*!AreaPalettes_ExploredColorIndex)
+
 ORG !Freespace_MapConstruction
 LoadMapFromPause:
 	PHP : REP #$30 : STZ $2E
+
+        ;; overwrite explored tile color in palettes based on area
+        phb
+        pea.w !PauseScreen_AreaPalettes_Pointer>>8 : plb : plb
+        lda !area_index : asl : tax
+        ldy.w !PauseScreen_AreaPalettes_Pointer, x
+        lda.w #!AreaPalettes_Amount-1 : sta $12
+-
+        lda $12 : asl #5 : tax  ; multiply by palette_size (32) with 5 ASL
+        lda $0000, y
+        sta.l !AreaPalettes_RAM, x
+        iny : iny
+        dec $12 : bpl -
+        plb
+
 	!MapDecorationAppearence		;config: draw map deco depending on mapstation setting
 + : LDA #$4000 : JSR MainMapConstruction		;construct map in this RAM location
 	INC !Update_Minimap_VRAM_Flag	;set bit for transfer to VRAM

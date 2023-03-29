@@ -14,11 +14,13 @@ LOROM
 ;;;     - pause screen BG base tile (put back grid)
 ;;;     - eqt screen tilemap (handled in equipment_screen patch)
 ;;; * include gfx for ITEMS, TIME, OBJ
+;;; * change/add some tile gfx for items (discard "hidden items" tiles)
 ;;; * behaviour changes :
 ;;;     - removed pause screen status restore
 ;;; * adapted freespace values to step around other patches
 
 incsrc "macros.asm"             ; for export macro
+incsrc "constants.asm"
 
 ;; original patch relies on weird old xkas math
 math pri off
@@ -162,6 +164,10 @@ math pri off
 	!PauseScreen_Map_Tilemap_Pointer = $B6E000       ;(vanilla: $B6E000 (PC: $1B6000) ;size: $800)
 	!PauseScreen_Equipment_Tilemap_Pointer = $B6E800 ;(vanilla: $B6E800 (PC: $1B6800) ;size: $800)
 	!PauseScreen_Palette_Pointer = $B6F000           ;(vanilla: $B6F000 (PC: $1B7000) ;size: $200)
+        !PauseScreen_AreaPalettes_Pointer = $B6FF60
+        !AreaPalettes_Amount = 5 ; number of changed palettes by area
+        !AreaPalettes_BaseIndex = 3 ; from this index
+        !AreaPalettes_ExploredColorIndex = 1
 }
 
 {;-------------------------------------- SELECT SWITCH AREA ----------------------------------------
@@ -215,11 +221,12 @@ INCSRC "map/config/MaptileGlow.asm"
 INCSRC "map/config/MapDecoration.asm"
 
 ;Clean up
-ORG $82925D : PADBYTE $FF : PAD $829324		;delete original map scrolling code ($C7)
-ORG $82943D : PADBYTE $FF : PAD $829628		;delete original map construction code ($1EB)
-ORG $829E27 : PADBYTE $FF : PAD $82A09A		;delete redundant map scroll setup/original scroll boundary set routines ($273)
+;;; commented out for VARIA to reduce IPS size
+;; ORG $82925D : PADBYTE $FF : PAD $829324		;delete original map scrolling code ($C7)
+;; ORG $82943D : PADBYTE $FF : PAD $829628		;delete original map construction code ($1EB)
+;; ORG $829E27 : PADBYTE $FF : PAD $82A09A		;delete redundant map scroll setup/original scroll boundary set routines ($273)
 
-ORG $90A8EF : PADBYTE $FF : PAD $90AC04		;delete original minimap code ($315)
+;; ORG $90A8EF : PADBYTE $FF : PAD $90AC04		;delete original minimap code ($315)
 
 ;Code files
 INCSRC "map/Misc_Banks.asm"

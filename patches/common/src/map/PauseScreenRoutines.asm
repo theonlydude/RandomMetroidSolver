@@ -212,9 +212,9 @@ ORG $82902E
 ;|x|                                    MAPTILE GLOW                                             |x|
 ;---------------------------------------------------------------------------------------------------
 {
-;Hijacks
-ORG $8290FA : JSR MaptileGlowRoutine
-ORG $82B6E2 : JSR MaptileGlowRoutine
+;Hijacks FIXME disabled for now in VARIA
+;; ORG $8290FA : JSR MaptileGlowRoutine
+;; ORG $82B6E2 : JSR MaptileGlowRoutine
 
 
 !MaptileGlowTimer = !MaptileGlowRAM

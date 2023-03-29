@@ -8,16 +8,16 @@
 
 ;--------------------------------------- BANK $81 --------------------------------------------------
 
-ORG $819E3E : PADBYTE $FF : PAD $819E92		;delete main file select map
-ORG $81A32A : PADBYTE $FF : PAD $81B2CB		;delete all file select map routines
-ORG $81B71A : PADBYTE $FF : PAD $81EF1A		;clear area select tilemaps
-
+;;; commented out for VARIA to reduce IPS size, and possibly reuse free space for other things
+;; ORG $819E3E : PADBYTE $FF : PAD $819E92		;delete main file select map
+;; ORG $81A32A : PADBYTE $FF : PAD $81B2CB		;delete all file select map routines
+;; ORG $81B71A : PADBYTE $FF : PAD $81EF1A		;clear area select tilemaps
 
 ;--------------------------------------- BANK $82 --------------------------------------------------
 
 ORG $82898B : DW $8000						;if game state is 5: go to "load game data" anyway
-ORG $8289EA : FILLBYTE $FF : FILL $5
-ORG $82D9B8 : PADBYTE $FF : PAD $82DA02		;delete gradual colour change for hex map
+;; ORG $8289EA : FILLBYTE $FF : FILL $5
+;; ORG $82D9B8 : PADBYTE $FF : PAD $82DA02		;delete gradual colour change for hex map
 
 
 ;--------------------------------------- BANK $A2 --------------------------------------------------

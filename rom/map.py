@@ -25,14 +25,14 @@ class BGtile(object):
 # area map => {graph area=>palette}
 palettesByArea = {
     "Ceres": {"Ceres": 3},
-    "Tourian": {"Tourian": 3},
+    "Tourian": {"Tourian": 7},
     # there are single tiles for RedBrinstar and GreenPinkBrinstar but not enough palettes...
-    # "fixed" by having map icons on top of tiles when the portal is taken once
-    "Crateria": {"Crateria": 3, "WreckedShip": 5, "Tourian": 7, "EastMaridia": 4, "GreenPinkBrinstar": 3, "RedBrinstar": 3},
-    "Brinstar": {"GreenPinkBrinstar": 4, "RedBrinstar": 3, "Crateria": 7, "Kraid": 6, "Norfair": 5},
-    "Norfair": {"Norfair": 5, "LowerNorfair": 6, "Crocomire": 3},
-    "Maridia": {"RedBrinstar": 3, "WestMaridia": 5, "EastMaridia": 6},
-    "WreckedShip": {"WreckedShip": 3}
+    # "fixed" by having map icons on top of tiles when the portal is taken once, and using the "undefined" color
+    "Crateria": {"Crateria": 7, "WreckedShip": 6, "Tourian": 5, "EastMaridia": 4, "GreenPinkBrinstar": 3, "RedBrinstar": 3},
+    "Brinstar": {"GreenPinkBrinstar": 7, "RedBrinstar": 6, "Crateria": 5, "Kraid": 4, "Norfair": 3},
+    "Norfair": {"Norfair": 7, "LowerNorfair": 6, "Crocomire": 5},
+    "Maridia": {"RedBrinstar": 7, "WestMaridia": 6, "EastMaridia": 5},
+    "WreckedShip": {"WreckedShip": 7}
 }
 
 # "hidden" unused in VARIA (or even replaced), but referencing them is useful for the helper tool

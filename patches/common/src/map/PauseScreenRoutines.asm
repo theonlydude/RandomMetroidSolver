@@ -238,8 +238,31 @@ MaptileGlowRoutine:
 + : INY #2 : CPY.w #!MaptileGlow_PaletteAmount<<1 : BCC -
 	PLB : PLP : RTS
 
-
 warnpc $8292B0
+
+org !Freespace_AreaPalettes
+;;; area-specific map palettes
+!AreaPalettes_RAM = !palettes_ram+(!AreaPalettes_BaseIndex*!palette_size)+(2*!AreaPalettes_ExploredColorIndex)
+load_area_palettes:
+        ;; overwrite explored tile color in palettes based on area
+        phx
+        phy
+        phb
+        pea.w !PauseScreen_AreaPalettes_Pointer>>8 : plb : plb
+        lda !area_index : asl : tax
+        ldy.w !PauseScreen_AreaPalettes_Pointer, x
+        lda.w #!AreaPalettes_Amount-1 : sta $12
+-
+        lda $12 : asl #5 : tax  ; multiply by palette_size (32) with 5 ASL
+        lda $0000, y
+        sta.l !AreaPalettes_RAM, x
+        iny : iny
+        dec $12 : bpl -
+        plb
+        ply
+        plx
+        rtl
+
 
 }
 ;---------------------------------------------------------------------------------------------------
@@ -393,7 +416,11 @@ ORG $81AF1F : PADBYTE $FF : PAD $81AF32
 
 ORG $82912C : JSL MapScrollMain
 ORG $82B91F : LDA $05FB : ORA $0006,x : STA $05FB : RTL
-;9 bytes left
+
+pause_loading_end:
+        jsl load_area_palettes : PLP : RTS
+;3 bytes left
+
 
 ORG $82B981 : BMI $07
 ORG $82B98D : PADBYTE $FF : PAD $82B9A0
@@ -505,8 +532,9 @@ ORG $829009		;during pause screen loading
 	LDA $0727 : BEQ +	;return if in map screen
 	JSR $AB47	;set screen position for equipment section
 	JSR $B1E0	;equipment screen VRAM transfer
-+ : PLP : RTS
-;1 byte left
++
+        jmp pause_loading_end
+;0 byte left!
 
 
 ;;; commented out for VARIA to restore vanilla pause menu behavior

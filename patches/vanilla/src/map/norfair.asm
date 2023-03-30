@@ -5,779 +5,779 @@ include
 ;;; tiles for room "Ice Beam Acid Room"
 
 org map_data_Norfair+$10a  ; (5, 4)
-     dw $541d  ; BGtile[i=$1d p=$5 HX]
+     dw $5c1d  ; BGtile[i=$1d p=$7 HX]
 
 org map_data_Norfair+$108  ; (4, 4)
-     dw $141d  ; BGtile[i=$1d p=$5 X]
+     dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 ;;; tiles for room "Cathedral"
 
 org map_data_Norfair+$11c  ; (14, 4)
-     dw $1429  ; BGtile[i=$29 p=$5 X]
+     dw $1c29  ; BGtile[i=$29 p=$7 X]
 
 org map_data_Norfair+$15c  ; (14, 5)
-     dw $9425  ; BGtile[i=$25 p=$5 VX]
+     dw $9c25  ; BGtile[i=$25 p=$7 VX]
 
 org map_data_Norfair+$15e  ; (15, 5)
-     dw $9462  ; BGtile[i=$62 p=$5 VX]
+     dw $9c62  ; BGtile[i=$62 p=$7 VX]
 
 org map_data_Norfair+$11e  ; (15, 4)
-     dw $1462  ; BGtile[i=$62 p=$5 X]
+     dw $1c62  ; BGtile[i=$62 p=$7 X]
 
 org map_data_Norfair+$160  ; (16, 5)
-     dw $d42a  ; BGtile[i=$2a p=$5 HVX]
+     dw $dc2a  ; BGtile[i=$2a p=$7 HVX]
 
 org map_data_Norfair+$120  ; (16, 4)
-     dw $5425  ; BGtile[i=$25 p=$5 HX]
+     dw $5c25  ; BGtile[i=$25 p=$7 HX]
 
 ;;; tiles for room "Cathedral Entrance"
 
 org map_data_Norfair+$116  ; (11, 4)
-     dw $1429  ; BGtile[i=$29 p=$5 X]
+     dw $1c29  ; BGtile[i=$29 p=$7 X]
 
 org map_data_Norfair+$156  ; (11, 5)
-     dw $9425  ; BGtile[i=$25 p=$5 VX]
+     dw $9c25  ; BGtile[i=$25 p=$7 VX]
 
 org map_data_Norfair+$158  ; (12, 5)
-     dw $9462  ; BGtile[i=$62 p=$5 VX]
+     dw $9c62  ; BGtile[i=$62 p=$7 VX]
 
 org map_data_Norfair+$118  ; (12, 4)
-     dw $1462  ; BGtile[i=$62 p=$5 X]
+     dw $1c62  ; BGtile[i=$62 p=$7 X]
 
 org map_data_Norfair+$11a  ; (13, 4)
-     dw $5429  ; BGtile[i=$29 p=$5 HX]
+     dw $5c29  ; BGtile[i=$29 p=$7 HX]
 
 org map_data_Norfair+$15a  ; (13, 5)
-     dw $d425  ; BGtile[i=$25 p=$5 HVX]
+     dw $dc25  ; BGtile[i=$25 p=$7 HVX]
 
 ;;; tiles for room "Business Center"
 
 org map_data_Norfair+$d4  ; (10, 3)
-     dw $146e  ; BGtile[i=$6e p=$5 X]
+     dw $1c6e  ; BGtile[i=$6e p=$7 X]
 
 org map_data_Norfair+$114  ; (10, 4)
-     dw $1418  ; BGtile[i=$18 p=$5 X]
+     dw $1c18  ; BGtile[i=$18 p=$7 X]
 
 org map_data_Norfair+$154  ; (10, 5)
-     dw $1419  ; BGtile[i=$19 p=$5 X]
+     dw $1c19  ; BGtile[i=$19 p=$7 X]
 
 org map_data_Norfair+$194  ; (10, 6)
-     dw $1418  ; BGtile[i=$18 p=$5 X]
+     dw $1c18  ; BGtile[i=$18 p=$7 X]
 
 org map_data_Norfair+$1d4  ; (10, 7)
-     dw $d490  ; BGtile[i=$90 p=$5 HVX]
+     dw $dc90  ; BGtile[i=$90 p=$7 HVX]
 
 ;;; tiles for room "Ice Beam Gate Room"
 
 org map_data_Norfair+$146  ; (3, 5)
-     dw $141d  ; BGtile[i=$1d p=$5 X]
+     dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 org map_data_Norfair+$148  ; (4, 5)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$14a  ; (5, 5)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$14c  ; (6, 5)
-     dw $d457  ; BGtile[i=$57 p=$5 HVX]
+     dw $dc57  ; BGtile[i=$57 p=$7 HVX]
 
 org map_data_Norfair+$10c  ; (6, 4)
-     dw $9422  ; BGtile[i=$22 p=$5 VX]
+     dw $9c22  ; BGtile[i=$22 p=$7 VX]
 
 org map_data_Norfair+$cc  ; (6, 3)
-     dw $141a  ; BGtile[i=$1a p=$5 X]
+     dw $1c1a  ; BGtile[i=$1a p=$7 X]
 
 org map_data_Norfair+$8c  ; (6, 2)
-     dw $1490  ; BGtile[i=$90 p=$5 X]
+     dw $1c90  ; BGtile[i=$90 p=$7 X]
 
 org map_data_Norfair+$10e  ; (7, 4)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$112  ; (9, 4)
-     dw $541d  ; BGtile[i=$1d p=$5 HX]
+     dw $5c1d  ; BGtile[i=$1d p=$7 HX]
 
 org map_data_Norfair+$110  ; (8, 4)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 ;;; tiles for room "Ice Beam Tutorial Room"
 
 org map_data_Norfair+$88  ; (4, 2)
-     dw $141d  ; BGtile[i=$1d p=$5 X]
+     dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 org map_data_Norfair+$8a  ; (5, 2)
-     dw $541d  ; BGtile[i=$1d p=$5 HX]
+     dw $5c1d  ; BGtile[i=$1d p=$7 HX]
 
 ;;; tiles for room "Ice Beam Room"
 
 org map_data_Norfair+$ca  ; (5, 3)
-     dw $5407  ; BGtile[i=$07 p=$5 HX]
+     dw $5c07  ; BGtile[i=$07 p=$7 HX]
 
 ;;; tiles for room "Ice Beam Snake Room"
 
 org map_data_Norfair+$106  ; (3, 4)
-     dw $d490  ; BGtile[i=$90 p=$5 HVX]
+     dw $dc90  ; BGtile[i=$90 p=$7 HVX]
 
 org map_data_Norfair+$c6  ; (3, 3)
-     dw $141a  ; BGtile[i=$1a p=$5 X]
+     dw $1c1a  ; BGtile[i=$1a p=$7 X]
 
 org map_data_Norfair+$c8  ; (4, 3)
-     dw $541d  ; BGtile[i=$1d p=$5 HX]
+     dw $5c1d  ; BGtile[i=$1d p=$7 HX]
 
 org map_data_Norfair+$86  ; (3, 2)
-     dw $5490  ; BGtile[i=$90 p=$5 HX]
+     dw $5c90  ; BGtile[i=$90 p=$7 HX]
 
 ;;; tiles for room "Crumble Shaft"
 
 org map_data_Norfair+$144  ; (2, 5)
-     dw $5491  ; BGtile[i=$91 p=$5 HX]
+     dw $5c91  ; BGtile[i=$91 p=$7 HX]
 
 org map_data_Norfair+$1c4  ; (2, 7)
-     dw $141a  ; BGtile[i=$1a p=$5 X]
+     dw $1c1a  ; BGtile[i=$1a p=$7 X]
 
 org map_data_Norfair+$204  ; (2, 8)
-     dw $d490  ; BGtile[i=$90 p=$5 HVX]
+     dw $dc90  ; BGtile[i=$90 p=$7 HVX]
 
 org map_data_Norfair+$184  ; (2, 6)
-     dw $141a  ; BGtile[i=$1a p=$5 X]
+     dw $1c1a  ; BGtile[i=$1a p=$7 X]
 
 ;;; tiles for room "Crocomire Speedway"
 
 org map_data_Norfair+$206  ; (3, 8)
-     dw $141d  ; BGtile[i=$1d p=$5 X]
+     dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 org map_data_Norfair+$208  ; (4, 8)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$20a  ; (5, 8)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$20c  ; (6, 8)
-     dw $5411  ; BGtile[i=$11 p=$5 HX]
+     dw $5c11  ; BGtile[i=$11 p=$7 HX]
 
 org map_data_Norfair+$24c  ; (6, 9)
-     dw $9410  ; BGtile[i=$10 p=$5 VX]
+     dw $9c10  ; BGtile[i=$10 p=$7 VX]
 
 org map_data_Norfair+$24e  ; (7, 9)
-     dw $9411  ; BGtile[i=$11 p=$5 VX]
+     dw $9c11  ; BGtile[i=$11 p=$7 VX]
 
 org map_data_Norfair+$20e  ; (7, 8)
-     dw $5410  ; BGtile[i=$10 p=$5 HX]
+     dw $5c10  ; BGtile[i=$10 p=$7 HX]
 
 org map_data_Norfair+$250  ; (8, 9)
-     dw $5411  ; BGtile[i=$11 p=$5 HX]
+     dw $5c11  ; BGtile[i=$11 p=$7 HX]
 
 org map_data_Norfair+$290  ; (8, 10)
-     dw $9410  ; BGtile[i=$10 p=$5 VX]
+     dw $9c10  ; BGtile[i=$10 p=$7 VX]
 
 org map_data_Norfair+$252  ; (9, 9)
-     dw $5410  ; BGtile[i=$10 p=$5 HX]
+     dw $5c10  ; BGtile[i=$10 p=$7 HX]
 
 org map_data_Norfair+$292  ; (9, 10)
-     dw $9411  ; BGtile[i=$11 p=$5 VX]
+     dw $9c11  ; BGtile[i=$11 p=$7 VX]
 
 org map_data_Norfair+$294  ; (10, 10)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$296  ; (11, 10)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$298  ; (12, 10)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$29a  ; (13, 10)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$29c  ; (14, 10)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$29e  ; (15, 10)
-     dw $d42d  ; BGtile[i=$2d p=$5 HVX]
+     dw $dc2d  ; BGtile[i=$2d p=$7 HVX]
 
 org map_data_Norfair+$25e  ; (15, 9)
-     dw $5419  ; BGtile[i=$19 p=$5 HX]
+     dw $5c19  ; BGtile[i=$19 p=$7 HX]
 
 org map_data_Norfair+$21e  ; (15, 8)
-     dw $1490  ; BGtile[i=$90 p=$5 X]
+     dw $1c90  ; BGtile[i=$90 p=$7 X]
 
 ;;; tiles for room "Hi Jump Boots Room"
 
 org map_data_Norfair+$1ce  ; (7, 7)
-     dw $1407  ; BGtile[i=$07 p=$5 X]
+     dw $1c07  ; BGtile[i=$07 p=$7 X]
 
 ;;; tiles for room "Crocomire Escape"
 
 org map_data_Norfair+$1d6  ; (11, 7)
-     dw $1428  ; BGtile[i=$28 p=$5 X]
+     dw $1c28  ; BGtile[i=$28 p=$7 X]
 
 org map_data_Norfair+$216  ; (11, 8)
-     dw $9425  ; BGtile[i=$25 p=$5 VX]
+     dw $9c25  ; BGtile[i=$25 p=$7 VX]
 
 org map_data_Norfair+$218  ; (12, 8)
-     dw $9462  ; BGtile[i=$62 p=$5 VX]
+     dw $9c62  ; BGtile[i=$62 p=$7 VX]
 
 org map_data_Norfair+$1d8  ; (12, 7)
-     dw $1462  ; BGtile[i=$62 p=$5 X]
+     dw $1c62  ; BGtile[i=$62 p=$7 X]
 
 org map_data_Norfair+$1da  ; (13, 7)
-     dw $1462  ; BGtile[i=$62 p=$5 X]
+     dw $1c62  ; BGtile[i=$62 p=$7 X]
 
 org map_data_Norfair+$21a  ; (13, 8)
-     dw $9462  ; BGtile[i=$62 p=$5 VX]
+     dw $9c62  ; BGtile[i=$62 p=$7 VX]
 
 org map_data_Norfair+$1dc  ; (14, 7)
-     dw $5425  ; BGtile[i=$25 p=$5 HX]
+     dw $5c25  ; BGtile[i=$25 p=$7 HX]
 
 org map_data_Norfair+$21c  ; (14, 8)
-     dw $d429  ; BGtile[i=$29 p=$5 HVX]
+     dw $dc29  ; BGtile[i=$29 p=$7 HVX]
 
 ;;; tiles for room "Hi Jump Energy Tank Room"
 
 org map_data_Norfair+$192  ; (9, 6)
-     dw $1404  ; BGtile[i=$04 p=$5 X]
+     dw $1c04  ; BGtile[i=$04 p=$7 X]
 
 org map_data_Norfair+$190  ; (8, 6)
-     dw $1456  ; BGtile[i=$56 p=$5 X]
+     dw $1c56  ; BGtile[i=$56 p=$7 X]
 
 org map_data_Norfair+$1d0  ; (8, 7)
-     dw $9490  ; BGtile[i=$90 p=$5 VX]
+     dw $9c90  ; BGtile[i=$90 p=$7 VX]
 
 ;;; tiles for room "Norfair Reserve Tank Room"
 
 org map_data_Norfair+$e4  ; (18, 3)
-     dw $1413  ; BGtile[i=$13 p=$5 X]
+     dw $1c13  ; BGtile[i=$13 p=$7 X]
 
 org map_data_Norfair+$e6  ; (19, 3)
-     dw $541d  ; BGtile[i=$1d p=$5 HX]
+     dw $5c1d  ; BGtile[i=$1d p=$7 HX]
 
 ;;; tiles for room "Green Bubbles Missile Room"
 
 org map_data_Norfair+$e8  ; (20, 3)
-     dw $141d  ; BGtile[i=$1d p=$5 X]
+     dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 org map_data_Norfair+$ea  ; (21, 3)
-     dw $1404  ; BGtile[i=$04 p=$5 X]
+     dw $1c04  ; BGtile[i=$04 p=$7 X]
 
 ;;; tiles for room "Bubble Mountain"
 
 org map_data_Norfair+$ee  ; (23, 3)
-     dw $5429  ; BGtile[i=$29 p=$5 HX]
+     dw $5c29  ; BGtile[i=$29 p=$7 HX]
 
 org map_data_Norfair+$12e  ; (23, 4)
-     dw $5470  ; BGtile[i=$70 p=$5 HX]
+     dw $5c70  ; BGtile[i=$70 p=$7 HX]
 
 org map_data_Norfair+$12c  ; (22, 4)
-     dw $1470  ; BGtile[i=$70 p=$5 X]
+     dw $1c70  ; BGtile[i=$70 p=$7 X]
 
 org map_data_Norfair+$16c  ; (22, 5)
-     dw $9429  ; BGtile[i=$29 p=$5 VX]
+     dw $9c29  ; BGtile[i=$29 p=$7 VX]
 
 org map_data_Norfair+$1ae  ; (23, 6)
-     dw $d424  ; BGtile[i=$24 p=$5 HVX]
+     dw $dc24  ; BGtile[i=$24 p=$7 HVX]
 
 org map_data_Norfair+$1ac  ; (22, 6)
-     dw $946d  ; BGtile[i=$6d p=$5 VX]
+     dw $9c6d  ; BGtile[i=$6d p=$7 VX]
 
 org map_data_Norfair+$16e  ; (23, 5)
-     dw $d425  ; BGtile[i=$25 p=$5 HVX]
+     dw $dc25  ; BGtile[i=$25 p=$7 HVX]
 
 ;;; tiles for room "Speed Booster Hall"
 
 org map_data_Norfair+$b2  ; (25, 2)
-     dw $141d  ; BGtile[i=$1d p=$5 X]
+     dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 org map_data_Norfair+$b4  ; (26, 2)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$b6  ; (27, 2)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$b8  ; (28, 2)
-     dw $1474  ; BGtile[i=$74 p=$5 X]
+     dw $1c74  ; BGtile[i=$74 p=$7 X]
 
 org map_data_Norfair+$f8  ; (28, 3)
-     dw $9425  ; BGtile[i=$25 p=$5 VX]
+     dw $9c25  ; BGtile[i=$25 p=$7 VX]
 
 org map_data_Norfair+$fa  ; (29, 3)
-     dw $9462  ; BGtile[i=$62 p=$5 VX]
+     dw $9c62  ; BGtile[i=$62 p=$7 VX]
 
 org map_data_Norfair+$ba  ; (29, 2)
-     dw $1462  ; BGtile[i=$62 p=$5 X]
+     dw $1c62  ; BGtile[i=$62 p=$7 X]
 
 org map_data_Norfair+$bc  ; (30, 2)
-     dw $5425  ; BGtile[i=$25 p=$5 HX]
+     dw $5c25  ; BGtile[i=$25 p=$7 HX]
 
 org map_data_Norfair+$fc  ; (30, 3)
-     dw $d474  ; BGtile[i=$74 p=$5 HVX]
+     dw $dc74  ; BGtile[i=$74 p=$7 HVX]
 
 org map_data_Norfair+$fe  ; (31, 3)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$8c0  ; (32, 3)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$8c2  ; (33, 3)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$8c4  ; (34, 3)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$8c6  ; (35, 3)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$8c8  ; (36, 3)
-     dw $541e  ; BGtile[i=$1e p=$5 HX]
+     dw $5c1e  ; BGtile[i=$1e p=$7 HX]
 
 ;;; tiles for room "Speed Booster Room"
 
 org map_data_Norfair+$8ca  ; (37, 3)
-     dw $5407  ; BGtile[i=$07 p=$5 HX]
+     dw $5c07  ; BGtile[i=$07 p=$7 HX]
 
 ;;; tiles for room "Single Chamber"
 
 org map_data_Norfair+$130  ; (24, 4)
-     dw $1490  ; BGtile[i=$90 p=$5 X]
+     dw $1c90  ; BGtile[i=$90 p=$7 X]
 
 org map_data_Norfair+$132  ; (25, 4)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$134  ; (26, 4)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$136  ; (27, 4)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$138  ; (28, 4)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$13a  ; (29, 4)
-     dw $541d  ; BGtile[i=$1d p=$5 HX]
+     dw $5c1d  ; BGtile[i=$1d p=$7 HX]
 
 org map_data_Norfair+$170  ; (24, 5)
-     dw $5419  ; BGtile[i=$19 p=$5 HX]
+     dw $5c19  ; BGtile[i=$19 p=$7 HX]
 
 org map_data_Norfair+$1b0  ; (24, 6)
-     dw $5419  ; BGtile[i=$19 p=$5 HX]
+     dw $5c19  ; BGtile[i=$19 p=$7 HX]
 
 org map_data_Norfair+$1f0  ; (24, 7)
-     dw $d490  ; BGtile[i=$90 p=$5 HVX]
+     dw $dc90  ; BGtile[i=$90 p=$7 HVX]
 
 ;;; tiles for room "Double Chamber"
 
 org map_data_Norfair+$172  ; (25, 5)
-     dw $1429  ; BGtile[i=$29 p=$5 X]
+     dw $1c29  ; BGtile[i=$29 p=$7 X]
 
 org map_data_Norfair+$1b2  ; (25, 6)
-     dw $9429  ; BGtile[i=$29 p=$5 VX]
+     dw $9c29  ; BGtile[i=$29 p=$7 VX]
 
 org map_data_Norfair+$1b4  ; (26, 6)
-     dw $9462  ; BGtile[i=$62 p=$5 VX]
+     dw $9c62  ; BGtile[i=$62 p=$7 VX]
 
 org map_data_Norfair+$174  ; (26, 5)
-     dw $1461  ; BGtile[i=$61 p=$5 X]
+     dw $1c61  ; BGtile[i=$61 p=$7 X]
 
 org map_data_Norfair+$176  ; (27, 5)
-     dw $1462  ; BGtile[i=$62 p=$5 X]
+     dw $1c62  ; BGtile[i=$62 p=$7 X]
 
 org map_data_Norfair+$1b6  ; (27, 6)
-     dw $9462  ; BGtile[i=$62 p=$5 VX]
+     dw $9c62  ; BGtile[i=$62 p=$7 VX]
 
 org map_data_Norfair+$1b8  ; (28, 6)
-     dw $d425  ; BGtile[i=$25 p=$5 HVX]
+     dw $dc25  ; BGtile[i=$25 p=$7 HVX]
 
 org map_data_Norfair+$178  ; (28, 5)
-     dw $5429  ; BGtile[i=$29 p=$5 HX]
+     dw $5c29  ; BGtile[i=$29 p=$7 HX]
 
 ;;; tiles for room "Wave Beam Room"
 
 org map_data_Norfair+$17a  ; (29, 5)
-     dw $5407  ; BGtile[i=$07 p=$5 HX]
+     dw $5c07  ; BGtile[i=$07 p=$7 HX]
 
 ;;; tiles for room "Spiky Platforms Tunnel"
 
 org map_data_Norfair+$1f2  ; (25, 7)
-     dw $141d  ; BGtile[i=$1d p=$5 X]
+     dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 org map_data_Norfair+$1f4  ; (26, 7)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$1f6  ; (27, 7)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$1f8  ; (28, 7)
-     dw $541d  ; BGtile[i=$1d p=$5 HX]
+     dw $5c1d  ; BGtile[i=$1d p=$7 HX]
 
 ;;; tiles for room "Volcano Room"
 
 org map_data_Norfair+$1fa  ; (29, 7)
-     dw $1490  ; BGtile[i=$90 p=$5 X]
+     dw $1c90  ; BGtile[i=$90 p=$7 X]
 
 org map_data_Norfair+$23a  ; (29, 8)
-     dw $141a  ; BGtile[i=$1a p=$5 X]
+     dw $1c1a  ; BGtile[i=$1a p=$7 X]
 
 org map_data_Norfair+$27a  ; (29, 9)
-     dw $d457  ; BGtile[i=$57 p=$5 HVX]
+     dw $dc57  ; BGtile[i=$57 p=$7 HVX]
 
 org map_data_Norfair+$278  ; (28, 9)
-     dw $5415  ; BGtile[i=$15 p=$5 HX]
+     dw $5c15  ; BGtile[i=$15 p=$7 HX]
 
 org map_data_Norfair+$276  ; (27, 9)
-     dw $141d  ; BGtile[i=$1d p=$5 X]
+     dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 ;;; tiles for room "Kronic Boost Room"
 
 org map_data_Norfair+$274  ; (26, 9)
-     dw $142f  ; BGtile[i=$2f p=$5 X]
+     dw $1c2f  ; BGtile[i=$2f p=$7 X]
 
 org map_data_Norfair+$2b4  ; (26, 10)
-     dw $141a  ; BGtile[i=$1a p=$5 X]
+     dw $1c1a  ; BGtile[i=$1a p=$7 X]
 
 org map_data_Norfair+$2f4  ; (26, 11)
-     dw $9490  ; BGtile[i=$90 p=$5 VX]
+     dw $9c90  ; BGtile[i=$90 p=$7 VX]
 
 ;;; tiles for room "Magdollite Tunnel"
 
 org map_data_Norfair+$272  ; (25, 9)
-     dw $541d  ; BGtile[i=$1d p=$5 HX]
+     dw $5c1d  ; BGtile[i=$1d p=$7 HX]
 
 org map_data_Norfair+$270  ; (24, 9)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$26e  ; (23, 9)
-     dw $141d  ; BGtile[i=$1d p=$5 X]
+     dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 ;;; tiles for room "Purple Shaft"
 
 org map_data_Norfair+$26c  ; (22, 9)
-     dw $d490  ; BGtile[i=$90 p=$5 HVX]
+     dw $dc90  ; BGtile[i=$90 p=$7 HVX]
 
 org map_data_Norfair+$22c  ; (22, 8)
-     dw $5419  ; BGtile[i=$19 p=$5 HX]
+     dw $5c19  ; BGtile[i=$19 p=$7 HX]
 
 org map_data_Norfair+$1ec  ; (22, 7)
-     dw $142e  ; BGtile[i=$2e p=$5 X]
+     dw $1c2e  ; BGtile[i=$2e p=$7 X]
 
 ;;; tiles for room "Upper Norfair Farming Room"
 
 org map_data_Norfair+$1a8  ; (20, 6)
-     dw $1429  ; BGtile[i=$29 p=$5 X]
+     dw $1c29  ; BGtile[i=$29 p=$7 X]
 
 org map_data_Norfair+$1aa  ; (21, 6)
-     dw $5429  ; BGtile[i=$29 p=$5 HX]
+     dw $5c29  ; BGtile[i=$29 p=$7 HX]
 
 org map_data_Norfair+$1ea  ; (21, 7)
-     dw $d425  ; BGtile[i=$25 p=$5 HVX]
+     dw $dc25  ; BGtile[i=$25 p=$7 HVX]
 
 org map_data_Norfair+$1e8  ; (20, 7)
-     dw $9429  ; BGtile[i=$29 p=$5 VX]
+     dw $9c29  ; BGtile[i=$29 p=$7 VX]
 
 ;;; tiles for room "Rising Tide"
 
 org map_data_Norfair+$162  ; (17, 5)
-     dw $141d  ; BGtile[i=$1d p=$5 X]
+     dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 org map_data_Norfair+$166  ; (19, 5)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$168  ; (20, 5)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$16a  ; (21, 5)
-     dw $541d  ; BGtile[i=$1d p=$5 HX]
+     dw $5c1d  ; BGtile[i=$1d p=$7 HX]
 
 org map_data_Norfair+$164  ; (18, 5)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 ;;; tiles for room "Acid Snakes Tunnel"
 
 org map_data_Norfair+$2a0  ; (16, 10)
-     dw $141d  ; BGtile[i=$1d p=$5 X]
+     dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 org map_data_Norfair+$2a2  ; (17, 10)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$2a6  ; (19, 10)
-     dw $540d  ; BGtile[i=$0d p=$5 HX]
+     dw $5c0d  ; BGtile[i=$0d p=$7 HX]
 
 ;;; tiles for room "Spiky Acid Snakes Tunnel"
 
 org map_data_Norfair+$2aa  ; (21, 10)
-     dw $141d  ; BGtile[i=$1d p=$5 X]
+     dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 org map_data_Norfair+$2ac  ; (22, 10)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$2ae  ; (23, 10)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$2b0  ; (24, 10)
-     dw $541d  ; BGtile[i=$1d p=$5 HX]
+     dw $5c1d  ; BGtile[i=$1d p=$7 HX]
 
 org map_data_Norfair+$2b2  ; (25, 10)
-     dw $141d  ; BGtile[i=$1d p=$5 X]
+     dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 ;;; tiles for room "[Crocomire Recharge Room]"
 
 org map_data_Norfair+$2a8  ; (20, 10)
-     dw $14c6  ; BGtile[i=$c6 p=$5 X]
+     dw $1cc6  ; BGtile[i=$c6 p=$7 X]
 
 ;;; tiles for room "Purple Farming Room"
 
 org map_data_Norfair+$22e  ; (23, 8)
-     dw $5405  ; BGtile[i=$05 p=$5 HX]
+     dw $5c05  ; BGtile[i=$05 p=$7 HX]
 
 ;;; tiles for room "Bat Cave"
 
 org map_data_Norfair+$b0  ; (24, 2)
-     dw $5490  ; BGtile[i=$90 p=$5 HX]
+     dw $5c90  ; BGtile[i=$90 p=$7 HX]
 
 org map_data_Norfair+$f0  ; (24, 3)
-     dw $9490  ; BGtile[i=$90 p=$5 VX]
+     dw $9c90  ; BGtile[i=$90 p=$7 VX]
 
 ;;; tiles for room "Norfair Map Room"
 
 org map_data_Norfair+$194  ; (10, 6)
-     dw $1418  ; BGtile[i=$18 p=$5 X]
+     dw $1c18  ; BGtile[i=$18 p=$7 X]
 
 ;;; tiles for room "[Bubble Mountain Save Room]"
 
 org map_data_Norfair+$12a  ; (21, 4)
-     dw $14b5  ; BGtile[i=$b5 p=$5 X]
+     dw $1cb5  ; BGtile[i=$b5 p=$7 X]
 
 ;;; tiles for room "Frog Speedway"
 
 org map_data_Norfair+$198  ; (12, 6)
-     dw $141d  ; BGtile[i=$1d p=$5 X]
+     dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 org map_data_Norfair+$19a  ; (13, 6)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$19c  ; (14, 6)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$19e  ; (15, 6)
-     dw $1450  ; BGtile[i=$50 p=$5 X]
+     dw $1c50  ; BGtile[i=$50 p=$7 X]
 
 org map_data_Norfair+$1a0  ; (16, 6)
-     dw $1450  ; BGtile[i=$50 p=$5 X]
+     dw $1c50  ; BGtile[i=$50 p=$7 X]
 
 org map_data_Norfair+$1a2  ; (17, 6)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$1a4  ; (18, 6)
-     dw $1452  ; BGtile[i=$52 p=$5 X]
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$1a6  ; (19, 6)
-     dw $541d  ; BGtile[i=$1d p=$5 HX]
+     dw $5c1d  ; BGtile[i=$1d p=$7 HX]
 
 ;;; tiles for room "Red Pirate Shaft"
 
 org map_data_Norfair+$1e6  ; (19, 7)
-     dw $5490  ; BGtile[i=$90 p=$5 HX]
+     dw $5c90  ; BGtile[i=$90 p=$7 HX]
 
 org map_data_Norfair+$226  ; (19, 8)
-     dw $141a  ; BGtile[i=$1a p=$5 X]
+     dw $1c1a  ; BGtile[i=$1a p=$7 X]
 
 org map_data_Norfair+$266  ; (19, 9)
-     dw $942e  ; BGtile[i=$2e p=$5 VX]
+     dw $9c2e  ; BGtile[i=$2e p=$7 VX]
 
 ;;; tiles for room "[Business Center Save Room]"
 
 org map_data_Norfair+$196  ; (11, 6)
-     dw $14b6  ; BGtile[i=$b6 p=$5 X]
+     dw $1cb6  ; BGtile[i=$b6 p=$7 X]
 
 ;;; tiles for room "[Crocomire Save Room]"
 
 org map_data_Norfair+$260  ; (16, 9)
-     dw $14b7  ; BGtile[i=$b7 p=$5 X]
+     dw $1cb7  ; BGtile[i=$b7 p=$7 X]
 
 ;;; tiles for graph area Crocomire
 
 ;;; tiles for room "Crocomire's Room"
 
 org map_data_Norfair+$2e6  ; (19, 11)
-     dw $4c14  ; BGtile[i=$14 p=$3 HX]
+     dw $5414  ; BGtile[i=$14 p=$5 HX]
 
 org map_data_Norfair+$2e4  ; (18, 11)
-     dw $0c52  ; BGtile[i=$52 p=$3 X]
+     dw $1452  ; BGtile[i=$52 p=$5 X]
 
 org map_data_Norfair+$2e2  ; (17, 11)
-     dw $0c52  ; BGtile[i=$52 p=$3 X]
+     dw $1452  ; BGtile[i=$52 p=$5 X]
 
 org map_data_Norfair+$2e0  ; (16, 11)
-     dw $0c52  ; BGtile[i=$52 p=$3 X]
+     dw $1452  ; BGtile[i=$52 p=$5 X]
 
 org map_data_Norfair+$2de  ; (15, 11)
-     dw $0c1b  ; BGtile[i=$1b p=$3 X]
+     dw $141b  ; BGtile[i=$1b p=$5 X]
 
 org map_data_Norfair+$2dc  ; (14, 11)
-     dw $0c15  ; BGtile[i=$15 p=$3 X]
+     dw $1415  ; BGtile[i=$15 p=$5 X]
 
 org map_data_Norfair+$2da  ; (13, 11)
-     dw $0c52  ; BGtile[i=$52 p=$3 X]
+     dw $1452  ; BGtile[i=$52 p=$5 X]
 
 org map_data_Norfair+$2d8  ; (12, 11)
-     dw $0c1d  ; BGtile[i=$1d p=$3 X]
+     dw $141d  ; BGtile[i=$1d p=$5 X]
 
 ;;; tiles for room "Post Crocomire Farming Room"
 
 org map_data_Norfair+$2d4  ; (10, 11)
-     dw $0c29  ; BGtile[i=$29 p=$3 X]
+     dw $1429  ; BGtile[i=$29 p=$5 X]
 
 org map_data_Norfair+$2d6  ; (11, 11)
-     dw $4c29  ; BGtile[i=$29 p=$3 HX]
+     dw $5429  ; BGtile[i=$29 p=$5 HX]
 
 org map_data_Norfair+$316  ; (11, 12)
-     dw $cc29  ; BGtile[i=$29 p=$3 HVX]
+     dw $d429  ; BGtile[i=$29 p=$5 HVX]
 
 org map_data_Norfair+$314  ; (10, 12)
-     dw $8c2c  ; BGtile[i=$2c p=$3 VX]
+     dw $942c  ; BGtile[i=$2c p=$5 VX]
 
 ;;; tiles for room "[Post Crocomire Save Room]"
 
 org map_data_Norfair+$318  ; (12, 12)
-     dw $0cb7  ; BGtile[i=$b7 p=$3 X]
+     dw $14b7  ; BGtile[i=$b7 p=$5 X]
 
 ;;; tiles for room "Post Crocomire Power Bomb Room"
 
 org map_data_Norfair+$2d2  ; (9, 11)
-     dw $0c04  ; BGtile[i=$04 p=$3 X]
+     dw $1404  ; BGtile[i=$04 p=$5 X]
 
 ;;; tiles for room "Post Crocomire Shaft"
 
 org map_data_Norfair+$354  ; (10, 13)
-     dw $0c2d  ; BGtile[i=$2d p=$3 X]
+     dw $142d  ; BGtile[i=$2d p=$5 X]
 
 org map_data_Norfair+$394  ; (10, 14)
-     dw $0c1a  ; BGtile[i=$1a p=$3 X]
+     dw $141a  ; BGtile[i=$1a p=$5 X]
 
 org map_data_Norfair+$3d4  ; (10, 15)
-     dw $0c1a  ; BGtile[i=$1a p=$3 X]
+     dw $141a  ; BGtile[i=$1a p=$5 X]
 
 org map_data_Norfair+$414  ; (10, 16)
-     dw $4c19  ; BGtile[i=$19 p=$3 HX]
+     dw $5419  ; BGtile[i=$19 p=$5 HX]
 
 org map_data_Norfair+$454  ; (10, 17)
-     dw $8c2e  ; BGtile[i=$2e p=$3 VX]
+     dw $942e  ; BGtile[i=$2e p=$5 VX]
 
 ;;; tiles for room "Post Crocomire Missile Room"
 
 org map_data_Norfair+$416  ; (11, 16)
-     dw $0c1d  ; BGtile[i=$1d p=$3 X]
+     dw $141d  ; BGtile[i=$1d p=$5 X]
 
 org map_data_Norfair+$418  ; (12, 16)
-     dw $0c52  ; BGtile[i=$52 p=$3 X]
+     dw $1452  ; BGtile[i=$52 p=$5 X]
 
 org map_data_Norfair+$41a  ; (13, 16)
-     dw $0c52  ; BGtile[i=$52 p=$3 X]
+     dw $1452  ; BGtile[i=$52 p=$5 X]
 
 org map_data_Norfair+$41c  ; (14, 16)
-     dw $4c14  ; BGtile[i=$14 p=$3 HX]
+     dw $5414  ; BGtile[i=$14 p=$5 HX]
 
 ;;; tiles for room "Grapple Tutorial Room 3"
 
 org map_data_Norfair+$34e  ; (7, 13)
-     dw $0c29  ; BGtile[i=$29 p=$3 X]
+     dw $1429  ; BGtile[i=$29 p=$5 X]
 
 org map_data_Norfair+$350  ; (8, 13)
-     dw $0c62  ; BGtile[i=$62 p=$3 X]
+     dw $1462  ; BGtile[i=$62 p=$5 X]
 
 org map_data_Norfair+$352  ; (9, 13)
-     dw $4c29  ; BGtile[i=$29 p=$3 HX]
+     dw $5429  ; BGtile[i=$29 p=$5 HX]
 
 org map_data_Norfair+$392  ; (9, 14)
-     dw $cc25  ; BGtile[i=$25 p=$3 HVX]
+     dw $d425  ; BGtile[i=$25 p=$5 HVX]
 
 org map_data_Norfair+$390  ; (8, 14)
-     dw $8c62  ; BGtile[i=$62 p=$3 VX]
+     dw $9462  ; BGtile[i=$62 p=$5 VX]
 
 org map_data_Norfair+$38e  ; (7, 14)
-     dw $8c25  ; BGtile[i=$25 p=$3 VX]
+     dw $9425  ; BGtile[i=$25 p=$5 VX]
 
 ;;; tiles for room "Post Crocomire Jump Room"
 
 org map_data_Norfair+$496  ; (11, 18)
-     dw $4c15  ; BGtile[i=$15 p=$3 HX]
+     dw $5415  ; BGtile[i=$15 p=$5 HX]
 
 org map_data_Norfair+$494  ; (10, 18)
-     dw $0c1b  ; BGtile[i=$1b p=$3 X]
+     dw $141b  ; BGtile[i=$1b p=$5 X]
 
 org map_data_Norfair+$492  ; (9, 18)
-     dw $0c52  ; BGtile[i=$52 p=$3 X]
+     dw $1452  ; BGtile[i=$52 p=$5 X]
 
 org map_data_Norfair+$490  ; (8, 18)
-     dw $cc74  ; BGtile[i=$74 p=$3 HVX]
+     dw $d474  ; BGtile[i=$74 p=$5 HVX]
 
 org map_data_Norfair+$450  ; (8, 17)
-     dw $4c25  ; BGtile[i=$25 p=$3 HX]
+     dw $5425  ; BGtile[i=$25 p=$5 HX]
 
 org map_data_Norfair+$410  ; (8, 16)
-     dw $4c24  ; BGtile[i=$24 p=$3 HX]
+     dw $5424  ; BGtile[i=$24 p=$5 HX]
 
 org map_data_Norfair+$40e  ; (7, 16)
-     dw $4c25  ; BGtile[i=$25 p=$3 HX]
+     dw $5425  ; BGtile[i=$25 p=$5 HX]
 
 org map_data_Norfair+$44e  ; (7, 17)
-     dw $4c5a  ; BGtile[i=$5a p=$3 HX]
+     dw $545a  ; BGtile[i=$5a p=$5 HX]
 
 org map_data_Norfair+$48e  ; (7, 18)
-     dw $8c62  ; BGtile[i=$62 p=$3 VX]
+     dw $9462  ; BGtile[i=$62 p=$5 VX]
 
 org map_data_Norfair+$48c  ; (6, 18)
-     dw $8c62  ; BGtile[i=$62 p=$3 VX]
+     dw $9462  ; BGtile[i=$62 p=$5 VX]
 
 org map_data_Norfair+$44c  ; (6, 17)
-     dw $4c6a  ; BGtile[i=$6a p=$3 HX]
+     dw $546a  ; BGtile[i=$6a p=$5 HX]
 
 org map_data_Norfair+$40c  ; (6, 16)
-     dw $0c62  ; BGtile[i=$62 p=$3 X]
+     dw $1462  ; BGtile[i=$62 p=$5 X]
 
 org map_data_Norfair+$40a  ; (5, 16)
-     dw $0c62  ; BGtile[i=$62 p=$3 X]
+     dw $1462  ; BGtile[i=$62 p=$5 X]
 
 org map_data_Norfair+$44a  ; (5, 17)
-     dw $4c6a  ; BGtile[i=$6a p=$3 HX]
+     dw $546a  ; BGtile[i=$6a p=$5 HX]
 
 org map_data_Norfair+$48a  ; (5, 18)
-     dw $8c62  ; BGtile[i=$62 p=$3 VX]
+     dw $9462  ; BGtile[i=$62 p=$5 VX]
 
 org map_data_Norfair+$408  ; (4, 16)
-     dw $0c25  ; BGtile[i=$25 p=$3 X]
+     dw $1425  ; BGtile[i=$25 p=$5 X]
 
 org map_data_Norfair+$488  ; (4, 18)
-     dw $8c25  ; BGtile[i=$25 p=$3 VX]
+     dw $9425  ; BGtile[i=$25 p=$5 VX]
 
 org map_data_Norfair+$448  ; (4, 17)
-     dw $0c70  ; BGtile[i=$70 p=$3 X]
+     dw $1470  ; BGtile[i=$70 p=$5 X]
 
 ;;; tiles for room "Grapple Tutorial Room 2"
 
 org map_data_Norfair+$34c  ; (6, 13)
-     dw $4c90  ; BGtile[i=$90 p=$3 HX]
+     dw $5490  ; BGtile[i=$90 p=$5 HX]
 
 org map_data_Norfair+$3cc  ; (6, 15)
-     dw $8c90  ; BGtile[i=$90 p=$3 VX]
+     dw $9490  ; BGtile[i=$90 p=$5 VX]
 
 org map_data_Norfair+$38c  ; (6, 14)
-     dw $0c1a  ; BGtile[i=$1a p=$3 X]
+     dw $141a  ; BGtile[i=$1a p=$5 X]
 
 ;;; tiles for room "Grapple Tutorial Room 1"
 
 org map_data_Norfair+$3c8  ; (4, 15)
-     dw $0c1d  ; BGtile[i=$1d p=$3 X]
+     dw $141d  ; BGtile[i=$1d p=$5 X]
 
 org map_data_Norfair+$3ca  ; (5, 15)
-     dw $4c1d  ; BGtile[i=$1d p=$3 HX]
+     dw $541d  ; BGtile[i=$1d p=$5 HX]
 
 ;;; tiles for room "Grapple Beam Room"
 
 org map_data_Norfair+$3c6  ; (3, 15)
-     dw $4c90  ; BGtile[i=$90 p=$3 HX]
+     dw $5490  ; BGtile[i=$90 p=$5 HX]
 
 org map_data_Norfair+$446  ; (3, 17)
-     dw $cc92  ; BGtile[i=$92 p=$3 HVX]
+     dw $d492  ; BGtile[i=$92 p=$5 HVX]
 
 org map_data_Norfair+$406  ; (3, 16)
-     dw $0c1a  ; BGtile[i=$1a p=$3 X]
+     dw $141a  ; BGtile[i=$1a p=$5 X]
 
 ;;; tiles for graph area LowerNorfair
 

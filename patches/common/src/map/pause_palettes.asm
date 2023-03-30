@@ -35,12 +35,6 @@ org $b6f1e0
 	dw $3800, $2fe0, $1a80, $0120, $6b37, $4588, $2d05, $1062, $37ff, $1e3f, $047f, $0456, $004c, $0023, $7fff, $0000
 
 ;;; additional colors by area to be able to draw graph areas with a consistent palette
-!Pink = $48fb
-!Green = $1ea9
-!Yellow = $02df
-!Orange = $0e3f
-!Gray = $4631
-
 org !PauseScreen_AreaPalettes_Pointer
 ;;; replace 2nd color of palette lines $03 to $07, indexed by area
 area_palettes:
@@ -48,41 +42,41 @@ area_palettes:
         dw .Crateria, .Brinstar, .Norfair, .WreckedShip, .Maridia, .Tourian
         ;; color lists in reverse order (palette index 7 to 3)
 .Crateria:
-        dw !Gray
-        dw !Green
-        dw !Pink
-        dw !Yellow
-        dw !Orange
+        dw !AreaColor_Crateria
+        dw !AreaColor_WreckedShip
+        dw !AreaColor_Tourian
+        dw !AreaColor_EastMaridia
+        dw !AreaColor_Undefined ; used for one tile of GreenPinkBrinstar and one of RedBrinstar (area rando only)
 .Brinstar:
-        dw !Yellow
-        dw !Pink
-        dw !Orange
-        dw !Gray
-        dw !Green
+        dw !AreaColor_GreenPinkBrinstar
+        dw !AreaColor_RedBrinstar
+        dw !AreaColor_Crateria
+        dw !AreaColor_Kraid
+        dw !AreaColor_Norfair
 .Norfair:
-        dw !Green
-        dw !Pink
-        dw !Orange
-        dw !Gray
-        dw !Yellow
+        dw !AreaColor_Norfair
+        dw !AreaColor_LowerNorfair
+        dw !AreaColor_Crocomire
+        dw !AreaColor_Undefined
+        dw !AreaColor_Undefined
 .WreckedShip:
-        dw !Orange
-        dw !Pink
-        dw !Yellow
-        dw !Gray
-        dw !Green
+        dw !AreaColor_WreckedShip
+        dw !AreaColor_Undefined
+        dw !AreaColor_Undefined
+        dw !AreaColor_Undefined
+        dw !AreaColor_Undefined
 .Maridia:
-        dw !Pink
-        dw !Yellow
-        dw !Gray
-        dw !Green
-        dw !Orange
+        dw !AreaColor_RedBrinstar
+        dw !AreaColor_WestMaridia
+        dw !AreaColor_EastMaridia
+        dw !AreaColor_Undefined
+        dw !AreaColor_Undefined
 .Tourian:
-        dw !Orange
-        dw !Green
-        dw !Gray
-        dw !Yellow
-        dw !Pink
+        dw !AreaColor_Tourian
+        dw !AreaColor_Undefined
+        dw !AreaColor_Undefined
+        dw !AreaColor_Undefined
+        dw !AreaColor_Undefined
 
 print "B6 end: ", pc
 

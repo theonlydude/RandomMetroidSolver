@@ -168,6 +168,7 @@ math pri off
         !AreaPalettes_Amount = 5 ; number of changed palettes by area
         !AreaPalettes_BaseIndex = 3 ; from this index
         !AreaPalettes_ExploredColorIndex = 1
+        !Freespace_AreaPalettes = $85e000
 }
 
 {;-------------------------------------- SELECT SWITCH AREA ----------------------------------------
@@ -219,6 +220,7 @@ INCSRC "map/config/CoverTileList.asm"
 INCSRC "map/config/ItembitTilechangeList.asm"
 INCSRC "map/config/MaptileGlow.asm"
 INCSRC "map/config/MapDecoration.asm"
+incsrc "map/config/area_colors.asm"
 
 ;Clean up
 ;;; commented out for VARIA to reduce IPS size

@@ -24,7 +24,15 @@ room.transform(Transform.Mirror)
 room.write()
 mirrorRom.close()
 
-#  pyston ./tools/mirror_room.py ~/metroid/SuperMetroid.sfc 0x8fD95E
-#  ./tools/make_ips.py ~/metroid/SuperMetroid.sfc mirror_SuperMetroid.sfc botwoon.ips
+# pyston ./tools/mirror_room.py ~/metroid/SuperMetroid.sfc 0x8fA98D
+# ./tools/make_ips.py ~/metroid/SuperMetroid.sfc mirror_SuperMetroid.sfc croc.ips
+# cp ~/metroid/SuperMetroid.sfc croc.sfc
+# ./tools/strip_ips.py croc.ips 0x808000 0xa28000 replace
+# ./tools/strip_ips.py patches/mirror/ips/mirrortroid.ips 0xC79D71  0xC7A035 replace
+# cp ~/metroid/SuperMetroid.sfc .
+# ./tools/apply_ips.py patches/mirror/ips/mirrortroid.ips SuperMetroid.sfc 
+# ./tools/apply_ips.py croc.ips SuperMetroid.sfc 
+# ./tools/make_ips.py ~/metroid/SuperMetroid.sfc SuperMetroid.sfc patches/mirror/ips/mirrortroid.ips 
+
 #  (cd patches/mirror; make); pyston ./randomizer.py -r ~/metroid/SuperMetroid.sfc --randoPreset mirrortroid.json -d |tail -1
-#  ./tools/apply_ips.py botwoon.ips VARIA_Mirrortroid_FX1312835629424366472_regular_medium.sfc
+#  ./tools/apply_ips.py croc.ips VARIA_Mirrortroid_FX1312835629424366472_regular_medium.sfc

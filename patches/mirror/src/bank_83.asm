@@ -2645,6 +2645,18 @@ Room_A923_door_list_index_3_Door:
     db $00 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
     dw $0000 ; Custom door ASM to execute (bank $8F)
+org $8393d2
+; room A923: Crocomire Speedway
+Room_A923_door_list_index_4_Door:
+    dw $a98d ; Destination room header pointer (bank $8F): Crocomire's Room
+    db $00 ; Bit Flag (Elevator properties)
+    db $06 ; Direction
+    db $46 ; X cap
+    db $02 ; Y cap
+    db $04 ; X screen
+    db $00 ; Y screen
+    dw $8000 ; Distance from door to spawn Samus
+    dw $0000 ; Custom door ASM to execute (bank $8F)
 org $8393de
 ; room A98D: Crocomire's Room
 Room_A98D_door_list_index_0_Door:

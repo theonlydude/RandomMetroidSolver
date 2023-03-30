@@ -1437,8 +1437,10 @@ Room_A923_state_A930_PLM:
 org $8f8b9e
 ; room A98D: Crocomire's Room
 Room_A98D_state_A9B9_PLM:
+%export(Door_4F_Room_A98D_PLM_C854)
     ; Door. Grey door facing down
-    dw $c854 : db $36 : db $02 : dw $044f 
+    dw $c854 : db $46 : db $02 : dw $044f
+%export(Energy_Tank_Crocomire)
     ; Energy tank
     dw $eed7 : db $02 : db $06 : dw $0034 
     dw $0000
@@ -4032,12 +4034,13 @@ Room_A98D_state_A99F_Header:
     dw $a9d7 ; Room Scrolls pointer
     dw $0000 ; Unused pointer
     dw $e8cd ; Main ASM pointer
-    dw Room_A98D_PLM ; PLM Set pointer (in freespace)
+    dw $8b9e ; PLM Set pointer
     dw $b84d ; Background pointer
     dw $91f6 ; Setup ASM pointer
-; also change PLM list for the other room state
-org $8fa9cd
-        dw Room_A98D_PLM
+org $8fa9d7
+; room A98D: Crocomire's Room
+Room_A98D_state_A99F_Scroll:
+        db $01, $01, $01, $01, $01, $01, $00, $00
 org $8fa9e5
 ; room A9E5: Hi Jump Boots Room
 Room_A9E5_Header:
@@ -8011,20 +8014,6 @@ Room_D8C5_PLM_scroll_data_FS:
 Room_96BA_PLM_scroll_data_FS:
     ; Scroll data
     db $00,$00,$02,$00,$19,$00,$80
-
-; room A98D: Crocomire's Room
-Room_A98D_PLM:
-    ; PLM Set
-%export(Door_4F_Room_A98D_PLM_C854)
-    ; Door. Grey door facing down
-    dw $c854 : db $36 : db $02 : dw $044f 
-%export(Energy_Tank_Crocomire)
-    ; Energy tank
-    dw $eed7 : db $02 : db $06 : dw $0034 
-%export(Door_EE_Room_A98D_PLM_C842)
-    ; Door. Grey door facing left
-    dw $c842 : db $7e : db $06 : dw $04ee 
-    dw $0000
 
 print "end bank8f freespace", pc
 End_FreeSpace_8F:

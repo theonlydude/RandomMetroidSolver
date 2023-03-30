@@ -1,7 +1,7 @@
 # from SM3E
 
 import sys
-from enum import Enum, IntFlag, auto
+from enum import Enum, IntFlag, auto, IntEnum
 import logging
 from collections import defaultdict
 import utils.log
@@ -151,6 +151,91 @@ class Spritemap(object):
         out += "    dw ${:04x} : ".format(self.oamCount)
         out += " : ".join([oam.displayASM() for oam in self.oams])
         out += "\n"
+        return (self.dataAddr, out)
+
+class Tilemap(object):
+    def __init__(self, rom, dataAddr, size, rowSize):
+        self.rom = rom
+        print("load tilemap at {}".format(hex(dataAddr)))
+        self.dataAddr = dataAddr
+
+        # (width, height) in bytes of the complete tilemap of the boss.
+        # for example crocomire tilemap is 24 bytes x 14 bytes 
+        self.size = size
+        # in bytes, length of a hardware tilemap row (usually 0x40 bytes)
+        self.rowSize = rowSize
+
+        self.load()
+
+    def load(self):
+        self.rom.seek(snes_to_pc(self.dataAddr))
+        fffe = self.rom.readWord()
+        if fffe != 0xfffe:
+            raise Exception("at {:x} tilemap doesn't start with FFFF".format(self.dataAddr))
+
+        self.destAddr = []
+        self.tileCount = []
+        self.tiles = []
+
+        cur = 0
+        while True:
+            destAddr = self.rom.readWord()
+            if destAddr == 0xFFFF:
+                break
+            self.destAddr.append(destAddr)
+            self.tileCount.append(self.rom.readWord())
+            baseAddr = pc_to_snes(self.rom.tell())
+            if self.tileCount[cur] > 0x100:
+                raise Exception("at {} tilemap tile count is too high: {}".format(hex(self.dataAddr), hex(self.tileCount)))
+            print("load tilemap at {} with {} tiles".format(hex(baseAddr), self.tileCount[cur]))
+            self.tiles.append([])
+            for i in range(self.tileCount[cur]):
+                tile = self.rom.readWord()
+                self.tiles[cur].append(tile)
+            cur += 1
+
+    def write(self):
+        print("write tilemap ${:06x}".format(self.dataAddr))
+        self.rom.seek(snes_to_pc(self.dataAddr))
+        self.rom.writeWord(0xFFFE)
+        for i in range(len(self.destAddr)):
+            self.rom.writeWord(self.destAddr[i])
+            self.rom.writeWord(self.tileCount[i])
+            for tile in self.tiles[i]:
+                self.rom.writeWord(tile)
+        self.rom.writeWord(0xFFFF)
+
+    def transform(self, transformation):
+        if transformation == Transform.Mirror:
+            newTiles = []
+            newDestAddr = []
+
+            for i, destAddr in enumerate(self.destAddr):
+                # compute new start address
+                baseAddr = destAddr & (((~self.rowSize)+1) & 0xffff)
+                pos = destAddr % self.rowSize
+                newAddr = baseAddr + self.size[0] - pos - self.tileCount[i]*2 # - 2 # a tile is two bytes
+                newDestAddr.append(newAddr)
+
+                newTiles.append([])
+                for t in reversed(self.tiles[i]):
+                    vflip = (t >> 14) & 1
+                    vflip = 1 - vflip
+                    t = (t & 0xbfff) | (vflip << 14)
+                    newTiles[-1].append(t)
+
+            self.destAddr = newDestAddr
+            self.tiles = newTiles
+
+    def displayASM(self):
+        out = ""
+        out += "org ${:06x}\n".format(self.dataAddr)
+        out += "    dw $FFFE\n"
+        for i in range(len(self.destAddr)):
+            out += "    dw ${:04x},${:04x}, ".format(self.destAddr[i], self.tileCount[i])
+            out += ",".join("${:04x}".format(t) for t in self.tiles[i])
+            out += "\n"
+        out += "    dw $FFFF\n"
         return (self.dataAddr, out)
 
 class BoundingRect(object):
@@ -785,6 +870,7 @@ class PLM(object):
         self.Xpos = self.rom.readByte()
         self.Ypos = self.rom.readByte()
         self.plmParam = self.rom.readWord()
+        self.width = 1
 
     def write(self):
         # offset in rom is already set to plm start
@@ -798,15 +884,19 @@ class PLM(object):
         width = size[0] * 16
         height = size[1] * 16
         if transformation == Transform.Mirror:
-            self.Xpos = width - self.Xpos - 1
+            self.Xpos = width - self.Xpos - self.width
 
 class PLMDoor(PLM):
     def transform(self, transformation, size):
+        # up/down doors are wider
+        facing = plmFacing[self.plmId]
+        if facing in (Facing.Top, Facing.Bottom):
+            self.width = 4
+
         super().transform(transformation, size)
 
         if transformation == Transform.Mirror:
             # also change facing
-            facing = plmFacing[self.plmId]
             if facing in (Facing.Left, Facing.Right):
                 facing = indicatorsDirection[facing]
 
@@ -932,6 +1022,16 @@ class UNKNOWN(Opcode):
     def display(self):
         return "Unknown opcode: {:02x}".format(self.opcode)
 
+class Orientation(IntEnum):
+    Right_open = 0x00
+    Right_close = 0x04
+    Left_open = 0x01
+    Left_close = 0x05
+    Down_open = 0x02
+    Down_close = 0x06
+    Up_open = 0x03
+    Up_close = 0x07
+
 class Door(object):
     def __init__(self, rom, doorId):
         self.rom = rom
@@ -950,6 +1050,12 @@ class Door(object):
         self.screenY = self.rom.readByte()
         self.distanceToSpawn = self.rom.readWord()
         self.customASM = 0x8f0000 + self.rom.readWord()
+
+        if self.orientation in (Orientation.Down_open, Orientation.Down_close,
+                                Orientation.Up_open, Orientation.Up_close):
+            self.width = 4
+        else:
+            self.width = 1
 
         if self.customASM != 0x8f0000:
             self.loadASM()
@@ -1009,7 +1115,7 @@ class Door(object):
         height = size[1] * 16
         if transformation == Transform.Mirror:
             self.screenX = size[0] - self.screenX - 1
-            self.capX = width - self.capX - 1
+            self.capX = width - self.capX - self.width
 
         # $7E:CD20..51: Scrolls
         #     0: Red. Cannot scroll into this area
@@ -1365,19 +1471,36 @@ class LevelData(object):
 
         return (tile) | (hflip << 10) | (vflip << 11) | (btsType << 12)
 
-    def transformBts(self, transformation, bts):
+    def transformBts(self, transformation, addr):
         blue_left = 0x40
         blue_right = 0x41
         blue_top = 0x42
         blue_bottom = 0x43
+        bts = self.bts[addr]
         if transformation == Transform.Mirror:
             # handle blue doors bts
             if bts == blue_left:
                 return blue_right
             elif bts == blue_right:
                 return blue_left
-            else:
-                return bts
+
+            # handle horizontal blue doors
+            if bts == 0xFD:
+                door = self.bts[addr-3]
+                if door in [blue_bottom, blue_top]:
+                    return door
+            elif bts == 0xFE:
+                door = self.bts[addr-2]
+                if door in [blue_bottom, blue_top]:
+                    return 0xFF
+            elif bts == 0xFF:
+                door = self.bts[addr-1]
+                if door in [blue_bottom, blue_top]:
+                    return 0xFE
+            elif bts in [blue_top, blue_bottom]:
+                return 0xFD
+
+            return bts
 
     def transform(self, transformation, size):
         # layout unit is tiles
@@ -1398,7 +1521,7 @@ class LevelData(object):
                             tile1 = self.layer1[addr]
                             if self.layer2Size != 0:
                                 tile2 = self.layer2[addr]
-                            bts = self.transformBts(transformation, self.bts[addr])
+                            bts = self.transformBts(transformation, addr)
                             msx, msy, mx, my = self.transformPos(transformation, sx, sy, x, y, size)
                             newAddr = self.getTileAddr((msx, msy), mx, my)
                             newTile1 = self.transformTile(transformation, tile1)

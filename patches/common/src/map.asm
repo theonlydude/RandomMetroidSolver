@@ -17,6 +17,7 @@ LOROM
 ;;; * change/add some tile gfx for items (discard "hidden items" tiles)
 ;;; * behaviour changes :
 ;;;     - removed pause screen status restore
+;;;     - display a consistent color for graph areas inside all areas: change palettes per-area
 ;;; * adapted freespace values to step around other patches
 
 incsrc "macros.asm"             ; for export macro

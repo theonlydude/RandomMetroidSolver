@@ -240,8 +240,16 @@ MaptileGlowRoutine:
 
 warnpc $8292B0
 
-org !Freespace_AreaPalettes
+;---------------------------------------------------------------------------------------------------
 ;;; area-specific map palettes
+;---------------------------------------------------------------------------------------------------
+
+org $828D25
+        ;; invert the two vanilla calls to "load map" and "backup palettes", since we change palettes when loading the map
+        JSR $8FD4
+        JSL $8293C3
+
+org !Freespace_AreaPalettes
 !AreaPalettes_RAM = !palettes_ram+(!AreaPalettes_BaseIndex*!palette_size)+(2*!AreaPalettes_ExploredColorIndex)
 load_area_palettes:
         ;; overwrite explored tile color in palettes based on area

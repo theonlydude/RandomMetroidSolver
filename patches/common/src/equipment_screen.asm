@@ -15,7 +15,7 @@ incsrc "constants.asm"
 
 !BG1_tilemap = $7E3800
 !decimal_point = $0C4A
-%BGtile($150, 3, 0, 0, 0)
+%BGtile($150, 2, 0, 0, 0)
 !percent #= !_tile
 %BGtile($160, 2, 0, 0, 0)
 !digit_0 #= !_tile

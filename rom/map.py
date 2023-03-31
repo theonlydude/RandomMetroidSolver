@@ -84,6 +84,18 @@ class AreaMap(object):
     def getIndex(self, x, y):
         return pageSize*(y % pageSize) + (x % pageSize)
 
+    def getCoords(self, index):
+        page = index // (pageSize*pageSize)
+        pageIdx = index % (pageSize*pageSize)
+        if not self.vertical:
+            return page * pageSize + (pageIdx % pageSize), pageIdx // pageSize
+        else:
+            return pageIdx % pageSize, page * pageSize + pageIdx // pageSize
+
+    def getCoordsByte(self, byteIndex, bitMask):
+        index = byteIndex*8 + 8 - bitMask.bit_length()
+        return self.getCoords(index)
+
     def getTile(self, x, y):
         page = self.pages[self.getPage(x, y)]
         return page[self.getIndex(x, y)]

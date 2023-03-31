@@ -212,9 +212,9 @@ ORG $82902E
 ;|x|                                    MAPTILE GLOW                                             |x|
 ;---------------------------------------------------------------------------------------------------
 {
-;Hijacks FIXME disabled for now in VARIA
-;; ORG $8290FA : JSR MaptileGlowRoutine
-;; ORG $82B6E2 : JSR MaptileGlowRoutine
+;Hijacks
+ORG $8290FA : JSR MaptileGlowRoutine
+ORG $82B6E2 : JSR MaptileGlowRoutine
 
 
 !MaptileGlowTimer = !MaptileGlowRAM
@@ -232,13 +232,15 @@ MaptileGlowRoutine:
 ++ : PHB : PEA.w !Freespace_MaptileGlow>>8 : PLB : PLB			;set bank to where maptile glow data is
 	LDX !MaptileGlowIndex : LDA.w MaptileGlow_GlobalTimer,x		;load timer data by next index
 	INC : STA.w !MaptileGlowTimer : LDY #$00 : REP #$30			;set timer, prepare loop
-;[X] = pointer of current maptile glow data + index*2
-- : LDA.w !MaptileGlowIndex : AND #$00FF : ASL : CLC : ADC.w MaptileGlow_PalettePointer,y : TAX
+;[X] = pointer of current maptile glow data + index*2 + area index*glow table size
+-
+        lda !area_index : asl #6 : sta $12 ; works because !MaptileGlow_TimerAmount is 8, so glow table size is 64
+        LDA.w !MaptileGlowIndex : AND #$00FF : ASL : CLC : ADC.w MaptileGlow_PalettePointer,y : adc $12 : TAX
 	LDA $0000,x : LDX.w MaptileGlow_PaletteOffset,y : STA $7EC000,x		;set palette
 + : INY #2 : CPY.w #!MaptileGlow_PaletteAmount<<1 : BCC -
 	PLB : PLP : RTS
 
-warnpc $8292B0
+warnpc $8292BD
 
 ;---------------------------------------------------------------------------------------------------
 ;;; area-specific map palettes
@@ -301,7 +303,7 @@ SelectButtonSprite: DW $0008	;how many OAM tiles to draw
 
 ;--------------------------------------- FREESPACE -------------------------------------------------
 
-ORG $8292B0
+ORG $8292BD
 
 CheckForSelectPress:
 	JSR $A5B7							;check for START press
@@ -322,7 +324,6 @@ DrawSelectButtonSprite:
 	DEC $0729 : STZ $03
 	LDY #$00D0 : LDX #$0070 : LDA #$000C : JSL $81891F	;draw sprite; [A] = sprite index; [X] = sprite X position; [Y] = sprite Y position
 + : JSL $82BB30 : RTS					;draw map elevator destination
-;2 bytes left
 
 warnpc $829324
 

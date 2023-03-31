@@ -233,8 +233,8 @@ MaptileGlowRoutine:
 	LDX !MaptileGlowIndex : LDA.w MaptileGlow_GlobalTimer,x		;load timer data by next index
 	INC : STA.w !MaptileGlowTimer : LDY #$00 : REP #$30			;set timer, prepare loop
 ;[X] = pointer of current maptile glow data + index*2 + area index*glow table size
--
         lda !area_index : asl #6 : sta $12 ; works because !MaptileGlow_TimerAmount is 8, so glow table size is 64
+-
         LDA.w !MaptileGlowIndex : AND #$00FF : ASL : CLC : ADC.w MaptileGlow_PalettePointer,y : adc $12 : TAX
 	LDA $0000,x : LDX.w MaptileGlow_PaletteOffset,y : STA $7EC000,x		;set palette
 + : INY #2 : CPY.w #!MaptileGlow_PaletteAmount<<1 : BCC -

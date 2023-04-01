@@ -161,4 +161,5 @@ LoadMapFromGameMenuBeforeStart:
 	RTL
 }
 
-warnpc $85dfff
+print "b85 end: ", pc	
+warnpc $85c2ff

@@ -248,10 +248,11 @@ warnpc $8292BD
 
 org $828D25
         ;; invert the two vanilla calls to "load map" and "backup palettes", since we change palettes when loading the map
+	;; also, use this as hijack to load VARIA extra gfx
         JSR $8FD4
-        JSL $8293C3
+        JSL load_extra_gfx
 
-org !Freespace_AreaPalettes
+org !Freespace_VARIA_features
 !AreaPalettes_RAM = !palettes_ram+(!AreaPalettes_BaseIndex*!palette_size)+(2*!AreaPalettes_ExploredColorIndex)
 load_area_palettes:
         ;; overwrite explored tile color in palettes based on area
@@ -273,8 +274,35 @@ load_area_palettes:
         plx
         rtl
 
-
 }
+
+;;; custom map icons
+!extra_gfx_size = $200
+
+load_extra_gfx:
+	JSL $8293C3		; hijacked code
+	;; DMA transfer from extra_gfx to VRAM:2D00
+	php
+	%ai8()
+	LDA #$00
+	STA $2116
+	LDA #$2D
+	STA $2117
+	LDA #$80
+	STA $2115
+	JSL $8091A9
+	db $01,$01,$18
+	dl extra_gfx
+	dw !extra_gfx_size
+	LDA #$02
+	STA $420B
+	plp
+	rtl
+
+;; extra sprites, overwrite some unused sprite VRAM in pause
+extra_gfx:
+incbin "pause_extra.gfx"
+
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    SELECT SWITCH AREA                                       |x|
 ;---------------------------------------------------------------------------------------------------

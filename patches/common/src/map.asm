@@ -169,7 +169,7 @@ math pri off
         !AreaPalettes_Amount = 5 ; number of changed palettes by area
         !AreaPalettes_BaseIndex = 3 ; from this index
         !AreaPalettes_ExploredColorIndex = 1
-        !Freespace_AreaPalettes = $85e000
+        !Freespace_VARIA_features = $85c300
 }
 
 {;-------------------------------------- SELECT SWITCH AREA ----------------------------------------

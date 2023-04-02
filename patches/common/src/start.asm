@@ -7,6 +7,7 @@ lorom
 
 incsrc "sym/base.asm"
 incsrc "macros.asm"
+incsrc "constants.asm"	
 
 ;;; CONSTANTS
 !GameStartState = $7ED914
@@ -73,9 +74,9 @@ gameplay_start:
     lda.l opt_doors,x : and #$00ff
     beq .save			; end list
     phx
-    jsl $80818e		    ; call bit index function, returns X=byte index, $05e7=bitmask
+    jsl !bitindex_routine
     ;; Set door in bitfield
-    lda $7ED8B0,x : ora $05E7 : sta $7ED8B0,x
+    lda !doors_bitfield, x : ora !bitindex_mask : sta !doors_bitfield, x
     plx
     inx : bra -		    ; next
 .save:

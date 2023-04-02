@@ -243,7 +243,7 @@ MaptileGlowRoutine:
 warnpc $8292BD
 
 ;---------------------------------------------------------------------------------------------------
-;;; area-specific map palettes
+;;; VARIA features: area-specific map palettes, door map icons
 ;---------------------------------------------------------------------------------------------------
 
 org $828D25
@@ -251,6 +251,29 @@ org $828D25
 	;; also, use this as hijack to load VARIA extra gfx
         JSR $8FD4
         JSL load_extra_gfx
+
+;; overwrite debug save station icon drawing stuff to draw VARIA icons 
+org $82B6AE
+	jsl draw_door_icons
+	bra .continue
+warnpc $82B6BC
+org $82B6BC
+.continue:
+
+;;; some freespace obtained by overwriting debug save icons draw function
+;;; (since we skip the call to it anyway)
+org $82B7D1
+;; export is_explored(X, Y) function to other banks.
+;; Parameters:
+;;     X: X position on map (in pixels)
+;;     Y: Y position on map (in pixels)
+;; Returns:
+;;     Zero: Clear if map square is explored, else set	
+is_explored:
+	jsr $B855
+	rtl
+
+warnpc $82B7EB
 
 org !Freespace_VARIA_features
 !AreaPalettes_RAM = !palettes_ram+(!AreaPalettes_BaseIndex*!palette_size)+(2*!AreaPalettes_ExploredColorIndex)
@@ -274,10 +297,9 @@ load_area_palettes:
         plx
         rtl
 
-}
-
 ;;; custom map icons
 !extra_gfx_size = $200
+!draw_spritemap_routine = $808A5F
 
 load_extra_gfx:
 	JSL $8293C3		; hijacked code
@@ -299,10 +321,59 @@ load_extra_gfx:
 	plp
 	rtl
 
+draw_door_icons:
+	phb : phk : plb		; DB=current bank
+	lda !area_index : asl : tax
+	lda doors_mapicons_by_area, x : tax
+	lda.w #1 : sta $18	; $18=1 (number of entries argument for add spritemap routine)
+.loop:
+	lda $0000, x : cmp #$ffff : beq .end ; table terminator
+	;; $14 = X coord, $12 = Y coord
+	sta $14
+	lda $0002, x : sta $12
+	stx $16			; backup X in $16
+	;; skip entry if tile unexplored
+	ldx $14 : ldy $12
+	jsl is_explored : beq .next
+	;; now check if the door is opened :
+	;; get byte index/bitmask from door id
+	ldx $16 : lda $0005, x : and #$00ff : jsl !bitindex_routine
+	;; if door is opened, skip entry
+	lda !doors_bitfield, x : bit !bitindex_mask : bne .next
+	;; here, we need to actually draw the map icon, if it is on screen
+	lda $12 : sec : sbc $b3 : sta $12	 ; $12 = Y coord - BG1 Y scroll
+	bit #$FF00 : bne .next ; off-screen (same check as CheckIconVerticalPosition
+	lda $14 : sec : sbc $b1 : sta $14	 ; $14 = X coord - BG1 X scroll
+	;; Y = pointer to spritemap entry
+	ldx $16 : lda $0004, x : and #$00ff : asl : tax : lda doors_mapicons_sprite_table, x : tay
+	;; add door sprite to OAM
+	jsl !draw_spritemap_routine
+.next:
+	lda $16 : clc : adc.w #6 : tax : bra .loop	; continue loop
+.end:
+	plb
+	rtl
+
 ;; extra sprites, overwrite some unused sprite VRAM in pause
 extra_gfx:
 incbin "pause_extra.gfx"
 
+; add doors_mapicons_sprite_table
+incsrc "door_sprites.asm"
+
+;;; written by randomizer (depends on doors+target rom flavor)
+;;; table format:
+;;; dw X, Y
+;;; db sprite_index, door_id
+;;; sprite_index is index in doors_mapicons_sprite_table (has to be doubled to get actual index)
+;;; door_id is door PLM argument (tells whether door has been opened)
+;;; terminator $FFFF
+%export(doors_mapicons_by_area):
+	;; pointers to table of above format. don't bother with Ceres, Debug
+	dw $0000, $0000, $0000, $0000, $0000, $0000
+
+warnpc $85ffff
+}
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    SELECT SWITCH AREA                                       |x|
 ;---------------------------------------------------------------------------------------------------

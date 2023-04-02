@@ -479,3 +479,63 @@ class DoorsManager():
         hiddenDoors = set([door.name for door in DoorsManager.doors.values() if door.hidden])
         revealedDoor = set([door.name for door in DoorsManager.doors.values() if (not door.hidden) and door.canHide()])
         return (hiddenDoors, revealedDoor)
+
+class DoorMapIcon(object):
+    def __init__(self, index, hFlip=False, vFlip=False, x=1, y=0, prio=True):
+        self.index = index
+        self.hFlip = hFlip
+        self.vFlip = vFlip
+        self.X = x
+        self.Y = y
+        self.prio = prio
+        self.table_index = None
+
+    def toSpriteAsm(self):
+        tileWord = (int(self.hFlip) << 15) | (int(self.vFlip) << 14) | (int(self.prio) << 13) | self.index
+        return f"    dw ${self.X:0>4x} : db ${self.Y:0>2x} : dw ${tileWord:0>4x}"
+
+doors_mapicons = {
+    ('red', Facing.Left): DoorMapIcon(0xD0),
+    ('green', Facing.Left): DoorMapIcon(0xD1),
+    ('yellow', Facing.Left): DoorMapIcon(0xD2),
+    ('grey', Facing.Left): DoorMapIcon(0xD3),
+    ('wave', Facing.Left): DoorMapIcon(0xD4),
+    ('plasma', Facing.Left): DoorMapIcon(0xD5),
+    ('spazer', Facing.Left): DoorMapIcon(0xD6),
+    ('ice', Facing.Left): DoorMapIcon(0xD7),
+    
+    ('red', Facing.Top): DoorMapIcon(0xD8),
+    ('green', Facing.Top): DoorMapIcon(0xD9),
+    ('yellow', Facing.Top): DoorMapIcon(0xDA),
+    ('grey', Facing.Top): DoorMapIcon(0xDB),
+    ('wave', Facing.Top): DoorMapIcon(0xDC),
+    ('plasma', Facing.Top): DoorMapIcon(0xDD),
+    ('spazer', Facing.Top): DoorMapIcon(0xDE),
+    ('ice', Facing.Top): DoorMapIcon(0xDF),
+
+    ('red', Facing.Right): DoorMapIcon(0xD0, hFlip=True),
+    ('green', Facing.Right): DoorMapIcon(0xD1, hFlip=True),
+    ('yellow', Facing.Right): DoorMapIcon(0xD2, hFlip=True),
+    ('grey', Facing.Right): DoorMapIcon(0xD3, hFlip=True),
+    ('wave', Facing.Right): DoorMapIcon(0xD4, hFlip=True),
+    ('plasma', Facing.Right): DoorMapIcon(0xD5, hFlip=True),
+    ('spazer', Facing.Right): DoorMapIcon(0xD6, hFlip=True),
+    ('ice', Facing.Right): DoorMapIcon(0xD7, hFlip=True),
+
+    ('red', Facing.Bottom): DoorMapIcon(0xD8, vFlip=True),
+    ('green', Facing.Bottom): DoorMapIcon(0xD9, vFlip=True),
+    ('yellow', Facing.Bottom): DoorMapIcon(0xDA, vFlip=True),
+    ('grey', Facing.Bottom): DoorMapIcon(0xDB, vFlip=True),
+    ('wave', Facing.Bottom): DoorMapIcon(0xDC, vFlip=True),
+    ('plasma', Facing.Bottom): DoorMapIcon(0xDD, vFlip=True),
+    ('spazer', Facing.Bottom): DoorMapIcon(0xDE, vFlip=True),
+    ('ice', Facing.Bottom): DoorMapIcon(0xDF, vFlip=True),
+}
+
+def assignMapIconSpriteTableIndices():
+    i = 0
+    for icon in doors_mapicons.values():
+        icon.table_index = i
+        i += 1
+
+assignMapIconSpriteTableIndices()

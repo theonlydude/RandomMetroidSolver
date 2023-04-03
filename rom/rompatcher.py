@@ -151,6 +151,8 @@ class RomPatcher:
             # get out of croc room: reload CRE
             0x93ea: self.forceRoomCRE
         }
+        # TODO create vertical maps for rotation
+        self.areaMaps = defaultdict(AreaMap)
 
     def patchRom(self):
         # apply patches first
@@ -183,6 +185,7 @@ class RomPatcher:
         self.writeDoorConnections(self.settings["doors"])
         # door caps
         self.writeDoorsColor()
+        self.writeDoorsMapIcons()
 
         self.writeVersion(self.settings["displayedVersion"])
         if self.settings["ctrlDict"] is not None:
@@ -279,14 +282,13 @@ class RomPatcher:
                 self.romFile.writeWord(0xffff)
 
     def writeItemMapTiles(self, split, itemLocs):
-        areaMaps = defaultdict(AreaMap)
         for il in itemLocs:
             if il.Location.isBoss():
                 continue
 #            print("loc %s, area %s" % (il.Location.Name, il.Location.Area))
-            areaMaps[il.Location.Area].setItemLoc(il, split)
+            self.areaMaps[il.Location.Area].setItemLoc(il, split)
         itemMaskOffset = Addresses.getOne("map_ItemTileCheckList")
-        for area, areaMap in areaMaps.items():
+        for area, areaMap in self.areaMaps.items():
             mapOffset = Addresses.getOne("map_data_" + area)
             areaMap.writeItemTiles(self.romFile, mapOffset, itemMaskOffset)
         if self.settings['revealMap'] == True:
@@ -1261,9 +1263,26 @@ class RomPatcher:
 
     def writeDoorsColor(self):
         if self.race is None:
-            DoorsManager().writeDoorsColor(self.romFile, self.romFile.writeWord)
+            DoorsManager.writeDoorsColor(self.romFile, self.romFile.writeWord)
         else:
-            DoorsManager().writeDoorsColor(self.romFile, self.writePlmWord)
+            DoorsManager.writeDoorsColor(self.romFile, self.writePlmWord)
+
+    def writeDoorsMapIcons(self):
+        # TODO handle race mode
+        assert len(self.areaMaps) > 0, "call writeDoorsMapIcons when areaMaps are built"
+        # write area door tables
+        self.romFile.seek(Addresses.getOne("map_doors_mapicons_table"))
+        mapicon_ptrs = {}
+        for area, areaMap in self.areaMaps.items():
+            mapicon_ptrs[area] = self.romFile.tell()
+            DoorsManager.writeDoorsMapIcons(self.romFile, area, areaMap)
+        assert self.romFile.tell() < 0x30000, "Map icon table overflow"
+        # write pointer table to index above tables by area
+        for idx, area in enumerate(['Crateria', 'Brinstar', 'Norfair', 'WreckedShip', 'Maridia', 'Tourian']): # ignore Ceres and Debug
+            if area not in mapicon_ptrs:
+                continue
+            addr = Addresses.getOne("map_doors_mapicons_by_area") + idx*2
+            self.romFile.writeWord(pc_to_snes(mapicon_ptrs[area]) & 0xffff, addr)
 
     def writeDoorIndicators(self, plms, area, door):
         indicatorFlags = IndicatorFlag.Standard | (IndicatorFlag.AreaRando if area else 0) | (IndicatorFlag.DoorRando if door else 0)

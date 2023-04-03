@@ -231,3 +231,31 @@ class AreaMap(object):
                     raise RuntimeError("Invalid item entry list at "+str(coords))
             else:
                 raise RuntimeError("Invalid item entry list at "+str(coords))
+
+# actually map icons 1 tile-sized
+class MapIcon(BGtile):
+    def __init__(self, index, palette=0, prio=True, hFlip=False, vFlip=False, x=0, y=0):
+        super().__init__(index, palette, prio=prio, hFlip=hFlip, vFlip=vFlip)
+        self.X = int(x) & 0x1ff # 9 bits
+        self.Y = int(y) & 0xff # 8 bits
+        self.table_index = None
+
+    #     s000000xxxxxxxxx yyyyyyyy YXppPPPttttttttt
+    # Where:
+    #     s = size bit
+    #     x = X offset of sprite from centre
+    #     y = Y offset of sprite from centre
+    #     Y = Y flip
+    #     X = X flip
+    #     P = palette
+    #     p = priority (relative to background)
+    #     t = tile number
+    def toWord(self):
+        return (self.idx & 0x3FF)|((self.pal & 0x7) << 9)|(int(self.prio) << 13)|(int(self.hFlip) << 14)|(int(self.vFlip) << 15)
+
+    def toSpriteAsm(self):
+        return f"    dw ${self.X:0>4x} : db ${self.Y:0>2x} : dw ${self.toWord():0>4x}"
+
+class DoorMapIcon(MapIcon):
+    def __init__(self, index, hFlip=False, vFlip=False, x=0, y=0):
+        super().__init__(index, palette=5, hFlip=hFlip, vFlip=vFlip, x=x, y=y)

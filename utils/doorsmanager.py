@@ -435,6 +435,7 @@ class DoorsManager():
                 continue
             x, y = areaMap.getCoordsByte(tileEntry['byteIndex'], tileEntry['bitMask'])
             door = DoorsManager.doors[doorName]
+            # *8 to convert tile coords to pixel coords
             door.writeMapIcon(rom, x*8, y*8)
         rom.writeWord(0xffff) # terminator
 
@@ -512,14 +513,14 @@ doors_mapicons = {
     ('spazer', Facing.Left): DoorMapIcon(0xD6, x=-1, y=-1),
     ('ice', Facing.Left): DoorMapIcon(0xD7, x=-1, y=-1),
 
-    ('red', Facing.Top): DoorMapIcon(0xD8, y=1),
-    ('green', Facing.Top): DoorMapIcon(0xD9, y=1),
-    ('yellow', Facing.Top): DoorMapIcon(0xDA, y=1),
-    ('grey', Facing.Top): DoorMapIcon(0xDB, y=1),
-    ('wave', Facing.Top): DoorMapIcon(0xDC, y=1),
-    ('plasma', Facing.Top): DoorMapIcon(0xDD, y=1),
-    ('spazer', Facing.Top): DoorMapIcon(0xDE, y=1),
-    ('ice', Facing.Top): DoorMapIcon(0xDF, y=1),
+    ('red', Facing.Bottom): DoorMapIcon(0xD8, y=1),
+    ('green', Facing.Bottom): DoorMapIcon(0xD9, y=1),
+    ('yellow', Facing.Bottom): DoorMapIcon(0xDA, y=1),
+    ('grey', Facing.Bottom): DoorMapIcon(0xDB, y=1),
+    ('wave', Facing.Bottom): DoorMapIcon(0xDC, y=1),
+    ('plasma', Facing.Bottom): DoorMapIcon(0xDD, y=1),
+    ('spazer', Facing.Bottom): DoorMapIcon(0xDE, y=1),
+    ('ice', Facing.Bottom): DoorMapIcon(0xDF, y=1),
 
     ('red', Facing.Right): DoorMapIcon(0xD0, hFlip=True, x=1, y=-1),
     ('green', Facing.Right): DoorMapIcon(0xD1, hFlip=True, x=1, y=-1),
@@ -530,14 +531,14 @@ doors_mapicons = {
     ('spazer', Facing.Right): DoorMapIcon(0xD6, hFlip=True, x=1, y=-1),
     ('ice', Facing.Right): DoorMapIcon(0xD7, hFlip=True, x=1, y=-1),
 
-    ('red', Facing.Bottom): DoorMapIcon(0xD8, vFlip=True, y=-1),
-    ('green', Facing.Bottom): DoorMapIcon(0xD9, vFlip=True, y=-1),
-    ('yellow', Facing.Bottom): DoorMapIcon(0xDA, vFlip=True, y=-1),
-    ('grey', Facing.Bottom): DoorMapIcon(0xDB, vFlip=True, y=-1),
-    ('wave', Facing.Bottom): DoorMapIcon(0xDC, vFlip=True, y=-1),
-    ('plasma', Facing.Bottom): DoorMapIcon(0xDD, vFlip=True, y=-1),
-    ('spazer', Facing.Bottom): DoorMapIcon(0xDE, vFlip=True, y=-1),
-    ('ice', Facing.Bottom): DoorMapIcon(0xDF, vFlip=True, y=-1),
+    ('red', Facing.Top): DoorMapIcon(0xD8, vFlip=True, y=-1),
+    ('green', Facing.Top): DoorMapIcon(0xD9, vFlip=True, y=-1),
+    ('yellow', Facing.Top): DoorMapIcon(0xDA, vFlip=True, y=-1),
+    ('grey', Facing.Top): DoorMapIcon(0xDB, vFlip=True, y=-1),
+    ('wave', Facing.Top): DoorMapIcon(0xDC, vFlip=True, y=-1),
+    ('plasma', Facing.Top): DoorMapIcon(0xDD, vFlip=True, y=-1),
+    ('spazer', Facing.Top): DoorMapIcon(0xDE, vFlip=True, y=-1),
+    ('ice', Facing.Top): DoorMapIcon(0xDF, vFlip=True, y=-1),
 }
 
 def assignMapIconSpriteTableIndices():

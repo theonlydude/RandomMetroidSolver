@@ -270,7 +270,14 @@ org $82B7D1
 ;; Returns:
 ;;     Zero: Clear if map square is explored, else set	
 is_explored:
+        phb : phk : plb         ; called function reads a table in bank 82
 	jsr $B855
+        beq .z
+        plb                     ; clears Z flag
+        rtl
+.z:
+        plb
+        lda #$0000
 	rtl
 
 warnpc $82B7EB
@@ -349,7 +356,7 @@ draw_door_icons:
 	;; add door sprite to OAM
 	lda.w #1 : sta $18	; $18=1 (number of entries argument for add spritemap routine)
         ;; stack manip to compensate for plb at end of routine:
-        ;; we reuse parf of a projectile spritemap draw, which according to PJ, is
+        ;; we reuse part of a projectile spritemap draw, which according to PJ, is
         ;; "the most sanely coded out of all of the spritemap loading routines"
         phk : pea.w .next-1    ; push return address
         phb                     ; push B, as it is pulled at end of routine

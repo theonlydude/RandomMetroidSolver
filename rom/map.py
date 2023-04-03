@@ -81,7 +81,7 @@ class AreaMap(object):
     def getPage(self, x, y):
         return x // pageSize if not self.vertical else y // pageSize
 
-    def getIndex(self, x, y):
+    def getIndexInPage(self, x, y):
         return pageSize*(y % pageSize) + (x % pageSize)
 
     def getCoords(self, index):
@@ -98,11 +98,11 @@ class AreaMap(object):
 
     def getTile(self, x, y):
         page = self.pages[self.getPage(x, y)]
-        return page[self.getIndex(x, y)]
+        return page[self.getIndexInPage(x, y)]
 
     def setTile(self, x, y, tile):
         page = self.pages[self.getPage(x, y)]
-        page[self.getIndex(x, y)] = tile
+        page[self.getIndexInPage(x, y)] = tile
 
     @staticmethod
     def load(mapRom, presenceRom=None, mapOffset=0, presenceOffset=0, vertical=False):
@@ -139,7 +139,7 @@ class AreaMap(object):
                 rom.writeByte(b)
 
     def getOffset(self, x, y, mapOffset=0):
-        page, idx = self.getPage(x, y), self.getIndex(x, y)
+        page, idx = self.getPage(x, y), self.getIndexInPage(x, y)
         addr = pageSize*pageSize*2*page + idx*2
         return mapOffset + addr
 

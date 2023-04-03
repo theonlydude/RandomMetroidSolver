@@ -9,7 +9,7 @@ from utils.colors import RGB_15_to_24, RGB_24_to_15
 
 areaColors = {
     "Crateria":0x35e9,
-    "GreenPinkBrinstar":0x06e1,
+    "GreenPinkBrinstar":0x26a9,
     "RedBrinstar":0x0515,
     "WreckedShip":0x3ad6,
     "Kraid":0x1dc0,
@@ -37,5 +37,6 @@ def shiftColor(c, i):
     return RGB_24_to_15(color2bytes(hsv2rgb(*bytes2color(applyOffset(i, *color2bytes(rgb2hsv(*RGB_15_to_24(c))))))))
 
 for area, snesColor in areaColors.items():
+    print("!AreaColor_%s = $%04x" % (area, snesColor))
     shiftedColors = [shiftColor(snesColor, i) for i in range(len(s_offsets))]
     print("!Glow_%s = %s" % (area, ','.join(["$%04x" % c for c in shiftedColors])))

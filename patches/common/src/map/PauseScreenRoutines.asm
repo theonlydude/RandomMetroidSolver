@@ -243,7 +243,7 @@ MaptileGlowRoutine:
 warnpc $8292BD
 }
 ;---------------------------------------------------------------------------------------------------
-;;; VARIA features: area-specific map palettes, door map icons
+;;; VARIA features: area-specific map palettes, door map icons, portal map icons
 ;---------------------------------------------------------------------------------------------------
 {
 org $828D25

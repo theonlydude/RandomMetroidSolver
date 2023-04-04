@@ -261,8 +261,8 @@ class DoorMapIcon(MapIcon):
         super().__init__(index, palette=5, hFlip=hFlip, vFlip=vFlip, x=x, y=y)
 
 class PortalMapIcon(MapIcon):
-    def __init__(self, index, hFlip=False, vFlip=False, x=0, y=0):
-        super().__init__(index, palette=4, hFlip=hFlip, vFlip=vFlip, x=x, y=y)
+    def __init__(self, index):
+        super().__init__(index, palette=4, y=-1)
 
 portal_mapicons = {
     "Crateria": PortalMapIcon(0xE0),

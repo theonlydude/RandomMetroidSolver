@@ -69,27 +69,27 @@ doors_mapicons_sprite_table:
 	dw door_red_Left,door_green_Left,door_yellow_Left,door_grey_Left,door_wave_Left,door_plasma_Left,door_spazer_Left,door_ice_Left,door_red_Bottom,door_green_Bottom,door_yellow_Bottom,door_grey_Bottom,door_wave_Bottom,door_plasma_Bottom,door_spazer_Bottom,door_ice_Bottom,door_red_Right,door_green_Right,door_yellow_Right,door_grey_Right,door_wave_Right,door_plasma_Right,door_spazer_Right,door_ice_Right,door_red_Top,door_green_Top,door_yellow_Top,door_grey_Top,door_wave_Top,door_plasma_Top,door_spazer_Top,door_ice_Top
 
 portal_Crateria:
-	    dw $0000 : db $00 : dw $28e0
+	    dw $0000 : db $ff : dw $28e0
 portal_GreenPinkBrinstar:
-	    dw $0000 : db $00 : dw $28e1
+	    dw $0000 : db $ff : dw $28e1
 portal_RedBrinstar:
-	    dw $0000 : db $00 : dw $28e2
+	    dw $0000 : db $ff : dw $28e2
 portal_WreckedShip:
-	    dw $0000 : db $00 : dw $28e3
+	    dw $0000 : db $ff : dw $28e3
 portal_Kraid:
-	    dw $0000 : db $00 : dw $28e4
+	    dw $0000 : db $ff : dw $28e4
 portal_Norfair:
-	    dw $0000 : db $00 : dw $28e5
+	    dw $0000 : db $ff : dw $28e5
 portal_Crocomire:
-	    dw $0000 : db $00 : dw $28e6
+	    dw $0000 : db $ff : dw $28e6
 portal_LowerNorfair:
-	    dw $0000 : db $00 : dw $28e7
+	    dw $0000 : db $ff : dw $28e7
 portal_WestMaridia:
-	    dw $0000 : db $00 : dw $28e8
+	    dw $0000 : db $ff : dw $28e8
 portal_EastMaridia:
-	    dw $0000 : db $00 : dw $28e9
+	    dw $0000 : db $ff : dw $28e9
 portal_Tourian:
-	    dw $0000 : db $00 : dw $28ea
+	    dw $0000 : db $ff : dw $28ea
 
 portals_mapicons_sprite_table:
 	dw portal_Crateria,portal_GreenPinkBrinstar,portal_RedBrinstar,portal_WreckedShip,portal_Kraid,portal_Norfair,portal_Crocomire,portal_LowerNorfair,portal_WestMaridia,portal_EastMaridia,portal_Tourian

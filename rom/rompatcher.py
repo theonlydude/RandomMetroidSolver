@@ -1138,9 +1138,16 @@ class RomPatcher:
         exploredBaseRam = 0xCD52
         exploredAreaSize = 0x100
         exploredRam = [exploredBaseRam + i*exploredAreaSize for i in range(6)] # by area index from Crateria to Tourian
+        def getMapInfo(apName):
+            if apName in Logic.map_tiles.areaAccessPoints:
+                return Logic.map_tiles.areaAccessPoints[apName]
+            elif apName in Logic.map_tiles.bossAccessPoints:
+                return Logic.map_tiles.bossAccessPoints[apName]
+            else:
+                raise ValueError("Invalid AP name "+apName)
         for conn in doorConnections:
             src, dst = conn['transition']
-            srcMapInfo, dstMapInfo = Logic.map_tiles.areaAccessPoints[src.Name], Logic.map_tiles.areaAccessPoints[dst.Name]
+            srcMapInfo, dstMapInfo = getMapInfo(src.Name), getMapInfo(dst.Name)
             if srcMapInfo['area'] != area:
                 continue
             x, y = areaMap.getCoordsByte(srcMapInfo['byteIndex'], srcMapInfo['bitMask'])

@@ -248,9 +248,9 @@ warnpc $8292BD
 {
 org $828D25
         ;; invert the two vanilla calls to "load map" and "backup palettes", since we change palettes when loading the map
-	;; also, use this as hijack to load VARIA extra gfx
+	;; also, use this as hijack to init VARIA features
         JSR $8FD4
-        JSL load_extra_gfx
+        JSL VARIA_init
 
 ;; overwrite debug save station icon drawing stuff to draw VARIA icons 
 org $82B6AE
@@ -309,8 +309,10 @@ load_area_palettes:
 !extra_gfx_size = $400
 !draw_spritemap_routine = $818A5F
 
-load_extra_gfx:
+VARIA_init:
+        ;; construct map
 	JSL $8293C3		; hijacked code
+        ;; Load extra gfx for VARIA map icons
 	;; DMA transfer from extra_gfx to VRAM:2D00
 	php
 	%ai8()
@@ -327,6 +329,8 @@ load_extra_gfx:
 	LDA #$02
 	STA $420B
 	plp
+        ;; mirror map explored for area portals inside the same map to work
+        jsl $8085c6
 	rtl
 
 draw_door_icons:

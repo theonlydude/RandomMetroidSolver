@@ -241,11 +241,11 @@ MaptileGlowRoutine:
 	PLB : PLP : RTS
 
 warnpc $8292BD
-
+}
 ;---------------------------------------------------------------------------------------------------
 ;;; VARIA features: area-specific map palettes, door map icons
 ;---------------------------------------------------------------------------------------------------
-
+{
 org $828D25
         ;; invert the two vanilla calls to "load map" and "backup palettes", since we change palettes when loading the map
 	;; also, use this as hijack to load VARIA extra gfx
@@ -255,6 +255,7 @@ org $828D25
 ;; overwrite debug save station icon drawing stuff to draw VARIA icons 
 org $82B6AE
 	jsl draw_door_icons
+        jsl draw_portal_icons
 	bra .continue
 warnpc $82B6BC
 org $82B6BC
@@ -305,7 +306,7 @@ load_area_palettes:
         rtl
 
 ;;; custom map icons
-!extra_gfx_size = $200
+!extra_gfx_size = $400
 !draw_spritemap_routine = $818A5F
 
 load_extra_gfx:
@@ -359,21 +360,57 @@ draw_door_icons:
         ;; we reuse part of a projectile spritemap draw, which according to PJ, is
         ;; "the most sanely coded out of all of the spritemap loading routines"
         phk : pea.w .next-1    ; push return address
-        phb                     ; push B, as it is pulled at end of routine
+        phb                    ; push B, as it is pulled at end of routine
         jml !draw_spritemap_routine ; the rtl at end of routine will now return properly
 .next:
 	lda $04 : clc : adc.w #6 : tax : bra .loop	; continue loop
 .end:
 	plb
 	rtl
-}
+
+draw_portal_icons:
+	phb : phk : plb		; DB=current bank
+	lda !area_index : asl : tax
+        ;; X = pointer to area door list, do nothing if ptr is 0
+	lda portals_mapicons_by_area, x : beq .end : tax
+.loop:
+	lda $0000, x : cmp #$ffff : beq .end ; table terminator
+	;; $14 = X coord, $18 = Y coord
+	sta $14
+	lda $0002, x : sta $18
+	stx $04			; backup X in $04
+	;; skip entry if tile unexplored
+	ldx $14 : ldy $18
+	jsl is_explored : beq .next
+        ;; check if the other end of the portal is explored
+        ldy $04 : lda $0006, y : tax
+        lda.l $7E0000, x : and $0008, y : beq .next
+        ;; here, we need to actually draw the map icon, if it is on screen
+	lda $18 : sec : sbc $b3 : sta $12	 ; $12 = Y coord - BG1 Y scroll
+	bit #$FF00 : bne .next ; off-screen (same check as CheckIconVerticalPosition
+	lda $14 : sec : sbc $b1 : sta $14	 ; $14 = X coord - BG1 X scroll
+	;; Y = pointer to spritemap entry
+	ldx $04 : lda $0004, x : asl : tax : lda portals_mapicons_sprite_table, x : tay
+	;; add door sprite to OAM
+	lda.w #1 : sta $18	; $18=1 (number of entries argument for add spritemap routine)
+        ;; stack manip to compensate for plb at end of routine:
+        ;; we reuse part of a projectile spritemap draw, which according to PJ, is
+        ;; "the most sanely coded out of all of the spritemap loading routines"
+        phk : pea.w .next-1    ; push return address
+        phb                    ; push B, as it is pulled at end of routine
+        jml !draw_spritemap_routine ; the rtl at end of routine will now return properly
+.next:
+	lda $04 : clc : adc.w #10 : tax : bra .loop	; continue loop
+.end:
+	plb
+	rtl
 
 ;; extra sprites, overwrite some unused sprite VRAM in pause
 extra_gfx:
 incbin "pause_extra.gfx"
 
-; add doors_mapicons_sprite_table
-incsrc "door_sprites.asm"
+; add doors_mapicons_sprite_table, portals_mapicons_sprite_table
+incsrc "mapicon_sprites.asm"
 
 ;;; written by randomizer (depends on doors+target rom flavor)
 ;;; table format:
@@ -386,9 +423,20 @@ incsrc "door_sprites.asm"
 	;; pointers to table of above format. don't bother with Ceres, Debug
 	dw $0000, $0000, $0000, $0000, $0000, $0000
 
-%export(doors_mapicons_table)
+;;; written by randomizer (depends on area connections+target rom flavor)
+;;; table format:
+;;; dw X, Y ; portal coords in map
+;;; dw sprite_index ; portal sprite
+;;; dw RAM addr, bitmask ; ram addr + bitmask to check if other side of portal is explored
+;;; sprite_index is index in portals_mapicons_sprite_table (has to be doubled to get actual index)
+;;; terminator $FFFF
+%export(portals_mapicons_by_area)
+	;; pointers to table of above format. don't bother with Ceres, Debug
+	dw $0000, $0000, $0000, $0000, $0000, $0000
 
+%export(mapicons_tables)
 
+print "b85 end: ", pc
 warnpc $85ffff
 }
 ;---------------------------------------------------------------------------------------------------

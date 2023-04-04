@@ -26,7 +26,22 @@ org $b6f140
 org $b6f160
 	dw $3800, $200d, $000a, $2c02, $4e73, $7fff, $039f, $001f, $0000, $559d, $001d, $039f, $7fff, $0000, $0000, $023f
 org $b6f180
-	dw $3800, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000
+	;; custom VARIA palette for area map icons
+	dw $3800
+        dw !AreaColor_GreenPinkBrinstar
+        dw !AreaColor_RedBrinstar
+        dw !AreaColor_WreckedShip
+        dw !AreaColor_Kraid
+        dw !AreaColor_Norfair
+        dw !AreaColor_Crocomire
+        dw !AreaColor_LowerNorfair
+        dw !AreaColor_WestMaridia
+        dw !AreaColor_EastMaridia
+        dw !AreaColor_Tourian
+        dw !AreaColor_Undefined
+        dw $38e0
+        dw !AreaColor_Crateria
+        dw $0000, $0000
 org $b6f1a0
 	;; custom VARIA palette for door map icons
 	dw $3800, $6e7b, $44b9, $02be, $01b6, $0790, $1a88, $3992, $250d, $4d03, $71c7, $0000, $0000, $0000, $0000, $0000

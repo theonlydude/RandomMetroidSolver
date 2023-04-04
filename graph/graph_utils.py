@@ -539,6 +539,7 @@ class GraphUtils:
             if 'song' in dst.EntryInfo:
                 conn['song'] = dst.EntryInfo['song']
                 conn['songs'] = dst.RoomInfo['songs']
+            conn['transition'] = (src, dst)
             connections.append(conn)
         return connections
 

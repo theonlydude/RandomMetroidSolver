@@ -15,7 +15,7 @@ from rom.addresses import Addresses
 from rom.rom_patches import RomPatches
 from rom.rom_options import RomOptions
 from rom.flavor import RomFlavor
-from rom.map import AreaMap, getTileIndex
+from rom.map import AreaMap, getTileIndex, portal_mapicons
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir
 import utils.log
@@ -182,7 +182,9 @@ class RomPatcher:
         self.writeRandoSettings(self.settings["randoSettings"], self.settings["itemLocs"])
         self.writeEndscreenTables(self.settings["itemLocs"])
         # area connections
+        self._mapIconTableAddr = Addresses.getOne("map_mapicons_tables")
         self.writeDoorConnections(self.settings["doors"])
+        self.writeDoorConnectionsMapIcons(self.settings["doors"])
         # door caps
         self.writeDoorsColor()
         self.writeDoorsMapIcons()
@@ -1132,6 +1134,36 @@ class RomPatcher:
                     self.romFile.writeByte(conn['song'])
                     self.romFile.writeByte(0x5)
 
+    def _writePortalIcons(self, doorConnections, area, areaMap):
+        exploredBaseRam = 0xCD52
+        exploredAreaSize = 0x100
+        exploredRam = [exploredBaseRam + i*exploredAreaSize for i in range(6)] # by area index from Crateria to Tourian
+        for conn in doorConnections:
+            src, dst = conn['transition']
+            srcMapInfo, dstMapInfo = Logic.map_tiles.areaAccessPoints[src.Name], Logic.map_tiles.areaAccessPoints[dst.Name]
+            if srcMapInfo['area'] != area:
+                continue
+            x, y = areaMap.getCoordsByte(srcMapInfo['byteIndex'], srcMapInfo['bitMask'])
+            self.romFile.writeWord(x*8)
+            self.romFile.writeWord(y*8)
+            self.romFile.writeWord(portal_mapicons[dst.GraphArea].table_index)
+            self.romFile.writeWord(exploredRam[dst.RoomInfo['area']] + dstMapInfo['byteIndex'])
+            self.romFile.writeWord(dstMapInfo['bitMask'])
+        self.romFile.writeWord(0xffff) # terminator
+
+    def writeDoorConnectionsMapIcons(self, doorConnections):
+        assert len(self.areaMaps) > 0, "call writeDoorConnectionsMapIcons when areaMaps are built"
+        # TODO handle race mode
+        # write area portal tables
+        self.romFile.seek(self._mapIconTableAddr)
+        mapicon_ptrs = {}
+        for area, areaMap in self.areaMaps.items():
+            mapicon_ptrs[area] = self.romFile.tell()
+            self._writePortalIcons(doorConnections, area, areaMap)
+        self._mapIconTableAddr = self.romFile.tell()
+        assert self._mapIconTableAddr < 0x30000, "Map icon table overflow"
+        self._writeMapIconTable(mapicon_ptrs, Addresses.getOne("map_portals_mapicons_by_area"))
+
     # change BG table to avoid scrolling sky bug when transitioning to west ocean
     def patchWestOcean(self, doorPtr):
         self.romFile.writeWord(doorPtr, Addresses.getOne('westOceanScrollingSky'))
@@ -1267,22 +1299,26 @@ class RomPatcher:
         else:
             DoorsManager.writeDoorsColor(self.romFile, self.writePlmWord)
 
-    def writeDoorsMapIcons(self):
-        # TODO handle race mode
-        assert len(self.areaMaps) > 0, "call writeDoorsMapIcons when areaMaps are built"
-        # write area door tables
-        self.romFile.seek(Addresses.getOne("map_doors_mapicons_table"))
-        mapicon_ptrs = {}
-        for area, areaMap in self.areaMaps.items():
-            mapicon_ptrs[area] = self.romFile.tell()
-            DoorsManager.writeDoorsMapIcons(self.romFile, area, areaMap)
-        assert self.romFile.tell() < 0x30000, "Map icon table overflow"
+    def _writeMapIconTable(self, mapicon_ptrs, baseAddr):
         # write pointer table to index above tables by area
         for idx, area in enumerate(['Crateria', 'Brinstar', 'Norfair', 'WreckedShip', 'Maridia', 'Tourian']): # ignore Ceres and Debug
             if area not in mapicon_ptrs:
                 continue
-            addr = Addresses.getOne("map_doors_mapicons_by_area") + idx*2
+            addr = baseAddr + idx*2
             self.romFile.writeWord(pc_to_snes(mapicon_ptrs[area]) & 0xffff, addr)
+
+    def writeDoorsMapIcons(self):
+        # TODO handle race mode
+        assert len(self.areaMaps) > 0, "call writeDoorsMapIcons when areaMaps are built"
+        # write area door tables
+        self.romFile.seek(self._mapIconTableAddr)
+        mapicon_ptrs = {}
+        for area, areaMap in self.areaMaps.items():
+            mapicon_ptrs[area] = self.romFile.tell()
+            DoorsManager.writeDoorsMapIcons(self.romFile, area, areaMap)
+        self._mapIconTableAddr = self.romFile.tell()
+        assert self._mapIconTableAddr < 0x30000, "Map icon table overflow"
+        self._writeMapIconTable(mapicon_ptrs, Addresses.getOne("map_doors_mapicons_by_area"))
 
     def writeDoorIndicators(self, plms, area, door):
         indicatorFlags = IndicatorFlag.Standard | (IndicatorFlag.AreaRando if area else 0) | (IndicatorFlag.DoorRando if door else 0)

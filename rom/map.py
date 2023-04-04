@@ -259,3 +259,29 @@ class MapIcon(BGtile):
 class DoorMapIcon(MapIcon):
     def __init__(self, index, hFlip=False, vFlip=False, x=0, y=0):
         super().__init__(index, palette=5, hFlip=hFlip, vFlip=vFlip, x=x, y=y)
+
+class PortalMapIcon(MapIcon):
+    def __init__(self, index, hFlip=False, vFlip=False, x=0, y=0):
+        super().__init__(index, palette=4, hFlip=hFlip, vFlip=vFlip, x=x, y=y)
+
+portal_mapicons = {
+    "Crateria": PortalMapIcon(0xE0),
+    "GreenPinkBrinstar": PortalMapIcon(0xE1),
+    "RedBrinstar": PortalMapIcon(0xE2),
+    "WreckedShip": PortalMapIcon(0xE3),
+    "Kraid": PortalMapIcon(0xE4),
+    "Norfair": PortalMapIcon(0xE5),
+    "Crocomire": PortalMapIcon(0xE6),
+    "LowerNorfair": PortalMapIcon(0xE7),
+    "WestMaridia": PortalMapIcon(0xE8),
+    "EastMaridia": PortalMapIcon(0xE9),
+    "Tourian": PortalMapIcon(0xEA)
+}
+
+def assignMapIconSpriteTableIndices():
+    i = 0
+    for icon in portal_mapicons.values():
+        icon.table_index = i
+        i += 1
+
+assignMapIconSpriteTableIndices()

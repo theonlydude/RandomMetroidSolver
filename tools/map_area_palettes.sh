@@ -1,8 +1,8 @@
 #!/bin/sh
 
 pal_tool=tools/map_area_palettes.py
-json_dir=tools/map/graph_area
-map_dir=patches/vanilla/src/map
+[ -z "$json_dir" ] && json_dir=tools/map/graph_area
+[ -z "$map_dir" ] && map_dir=patches/vanilla/src/map
 
 ${pal_tool} ${json_dir}/normal_crateria.json ${map_dir}/crateria.bin ${map_dir}/crateria_data_reveal.bin ${map_dir}/crateria.asm Crateria
 ${pal_tool} ${json_dir}/alt_crateria.json ${map_dir}/crateria.bin ${map_dir}/crateria_data_reveal.bin ${map_dir}/crateria_alt.asm Crateria

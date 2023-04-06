@@ -36,6 +36,10 @@ vanilla_presence_rom.close()
 mirrorMap = AreaMap()
 
 EMPTY_TILE = 0x1f
+S_TILES = [0xB5, 0xB6, 0xB7]
+R_TILES = [0xC5, 0xC6, 0xC7]
+
+S_R_MIRROR_IDX = {0: 2, 1: 1, 2:0}
 
 w = vanillaMap.width
 offset = getOffsetFromFilePath(vanilla_map_path)
@@ -46,8 +50,15 @@ for x in range(vanillaMap.width):
         tile = vanillaMap.getTile(x, y)
         if tile.idx == EMPTY_TILE:
             mirrorTile = tile
+        elif tile.idx in S_TILES:
+            i = S_TILES.index(tile.idx)
+            mirrorTile = BGtile(S_TILES[S_R_MIRROR_IDX[i]], tile.pal, prio=tile.prio, hFlip=tile.hFlip, vFlip=tile.vFlip)
+        elif tile.idx in R_TILES:
+            i = R_TILES.index(tile.idx)
+            mirrorTile = BGtile(R_TILES[S_R_MIRROR_IDX[i]], tile.pal, prio=tile.prio, hFlip=tile.hFlip, vFlip=tile.vFlip)
         else:
             mirrorTile = BGtile(tile.idx, tile.pal, prio=tile.prio, hFlip=not tile.hFlip, vFlip=tile.vFlip)
+        mirrorTile.present = tile.present
         mirrorMap.setTile(mirrorX(x), y, mirrorTile)
 
 mirrorMap.save(mirror_map_rom)

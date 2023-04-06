@@ -134,7 +134,7 @@ org map_data_Maridia+$852  ; (41, 1)
 ;;; tiles for room "[Maridia Elevator Save Room]"
 
 org map_data_Maridia+$17e  ; (31, 5)
-     dw $54b7  ; BGtile[i=$b7 p=$5 HX]
+     dw $14b5  ; BGtile[i=$b5 p=$5 X]
 
 ;;; tiles for room "[Vertical Tube]"
 
@@ -423,7 +423,7 @@ org map_data_Maridia+$1fc  ; (30, 7)
 ;;; tiles for room "[Aqueduct Save Room]"
 
 org map_data_Maridia+$b1e  ; (47, 12)
-     dw $54b5  ; BGtile[i=$b5 p=$5 HX]
+     dw $14b7  ; BGtile[i=$b7 p=$5 X]
 
 ;;; tiles for room "The Precious Room"
 
@@ -462,12 +462,12 @@ org map_data_Maridia+$a44  ; (34, 9)
 ;;; tiles for room "[Colosseum Save Room]"
 
 org map_data_Maridia+$1f2  ; (25, 7)
-     dw $54b6  ; BGtile[i=$b6 p=$5 HX]
+     dw $14b6  ; BGtile[i=$b6 p=$5 X]
 
 ;;; tiles for room "[Halfie Climb Missile Station]"
 
 org map_data_Maridia+$278  ; (28, 9)
-     dw $54c7  ; BGtile[i=$c7 p=$5 HX]
+     dw $14c5  ; BGtile[i=$c5 p=$5 X]
 
 ;;; tiles for room "[Bug Sand Fall]"
 
@@ -521,7 +521,7 @@ org map_data_Maridia+$2f8  ; (28, 11)
 ;;; tiles for room "[Colosseum Energy Charge Room]"
 
 org map_data_Maridia+$1f0  ; (24, 7)
-     dw $54c7  ; BGtile[i=$c7 p=$5 HX]
+     dw $14c5  ; BGtile[i=$c5 p=$5 X]
 
 ;;; tiles for room "Cactus Alley [West]"
 
@@ -596,7 +596,7 @@ org map_data_Maridia+$c06  ; (35, 16)
 ;;; tiles for room "[Glass Tunnel Save Room]"
 
 org map_data_Maridia+$d2c  ; (54, 20)
-     dw $5cb7  ; BGtile[i=$b7 p=$7 HX]
+     dw $1cb5  ; BGtile[i=$b5 p=$7 X]
 
 ;;; tiles for room "Glass Tunnel"
 

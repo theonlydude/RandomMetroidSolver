@@ -518,7 +518,7 @@ org map_data_Norfair+$a8a  ; (37, 10)
 ;;; tiles for room "[Crocomire Recharge Room]"
 
 org map_data_Norfair+$a94  ; (42, 10)
-     dw $5cc6  ; BGtile[i=$c6 p=$7 HX]
+     dw $1cc6  ; BGtile[i=$c6 p=$7 X]
 
 ;;; tiles for room "Purple Farming Room"
 
@@ -541,7 +541,7 @@ org map_data_Norfair+$9a8  ; (52, 6)
 ;;; tiles for room "[Bubble Mountain Save Room]"
 
 org map_data_Norfair+$912  ; (41, 4)
-     dw $5cb5  ; BGtile[i=$b5 p=$7 HX]
+     dw $1cb7  ; BGtile[i=$b7 p=$7 X]
 
 ;;; tiles for room "Frog Speedway"
 
@@ -583,12 +583,12 @@ org map_data_Norfair+$a56  ; (43, 9)
 ;;; tiles for room "[Business Center Save Room]"
 
 org map_data_Norfair+$9a6  ; (51, 6)
-     dw $5cb6  ; BGtile[i=$b6 p=$7 HX]
+     dw $1cb6  ; BGtile[i=$b6 p=$7 X]
 
 ;;; tiles for room "[Crocomire Save Room]"
 
 org map_data_Norfair+$a5c  ; (46, 9)
-     dw $5cb7  ; BGtile[i=$b7 p=$7 HX]
+     dw $1cb5  ; BGtile[i=$b5 p=$7 X]
 
 ;;; tiles for graph area Crocomire
 
@@ -635,7 +635,7 @@ org map_data_Norfair+$b28  ; (52, 12)
 ;;; tiles for room "[Post Crocomire Save Room]"
 
 org map_data_Norfair+$b24  ; (50, 12)
-     dw $54b7  ; BGtile[i=$b7 p=$5 HX]
+     dw $14b5  ; BGtile[i=$b5 p=$5 X]
 
 ;;; tiles for room "Post Crocomire Power Bomb Room"
 
@@ -818,7 +818,7 @@ org map_data_Norfair+$ad2  ; (41, 11)
 ;;; tiles for room "[Elevator Save Room]"
 
 org map_data_Norfair+$ad4  ; (42, 11)
-     dw $58b5  ; BGtile[i=$b5 p=$6 HX]
+     dw $18b7  ; BGtile[i=$b7 p=$6 X]
 
 ;;; tiles for room "Acid Statue Room"
 
@@ -900,7 +900,7 @@ org map_data_Norfair+$bcc  ; (38, 15)
 ;;; tiles for room "[Screw Attack Energy Charge Room]"
 
 org map_data_Norfair+$c12  ; (41, 16)
-     dw $58c7  ; BGtile[i=$c7 p=$6 HX]
+     dw $18c5  ; BGtile[i=$c5 p=$6 X]
 
 ;;; tiles for room "Ridley's Room"
 

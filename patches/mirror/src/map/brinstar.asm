@@ -243,12 +243,12 @@ org map_data_Brinstar+$4b2  ; (25, 18)
 ;;; tiles for room "[Red Tower Energy Charge Station]"
 
 org map_data_Brinstar+$4fe  ; (31, 19)
-     dw $58c5  ; BGtile[i=$c5 p=$6 HX]
+     dw $18c7  ; BGtile[i=$c7 p=$6 X]
 
 ;;; tiles for room "[Caterpillar Save Room]"
 
 org map_data_Brinstar+$272  ; (25, 9)
-     dw $58b7  ; BGtile[i=$b7 p=$6 HX]
+     dw $18b5  ; BGtile[i=$b5 p=$6 X]
 
 ;;; tiles for graph area GreenPinkBrinstar
 
@@ -401,7 +401,7 @@ org map_data_Brinstar+$a32  ; (57, 8)
 ;;; tiles for room "[Green Brinstar Missile Station]"
 
 org map_data_Brinstar+$a34  ; (58, 8)
-     dw $5cc5  ; BGtile[i=$c5 p=$7 HX]
+     dw $1cc7  ; BGtile[i=$c7 p=$7 X]
 
 ;;; tiles for room "Dachora Room"
 
@@ -660,7 +660,7 @@ org map_data_Brinstar+$af4  ; (58, 11)
 ;;; tiles for room "[Dachora Room Energy Charge Station]"
 
 org map_data_Brinstar+$b6c  ; (54, 13)
-     dw $5cc5  ; BGtile[i=$c5 p=$7 HX]
+     dw $1cc7  ; BGtile[i=$c7 p=$7 X]
 
 ;;; tiles for room "Spore Spawn Farming Room"
 
@@ -718,17 +718,17 @@ org map_data_Brinstar+$a54  ; (42, 9)
 ;;; tiles for room "[Spore Spawn Save Room]"
 
 org map_data_Brinstar+$960  ; (48, 5)
-     dw $5cb5  ; BGtile[i=$b5 p=$7 HX]
+     dw $1cb7  ; BGtile[i=$b7 p=$7 X]
 
 ;;; tiles for room "[Green Brinstar Main Shaft Save Room]"
 
 org map_data_Brinstar+$9ae  ; (55, 6)
-     dw $5cb5  ; BGtile[i=$b5 p=$7 HX]
+     dw $1cb7  ; BGtile[i=$b7 p=$7 X]
 
 ;;; tiles for room "[Etecoon Save Room]"
 
 org map_data_Brinstar+$b34  ; (58, 12)
-     dw $5cb5  ; BGtile[i=$b5 p=$7 HX]
+     dw $1cb7  ; BGtile[i=$b7 p=$7 X]
 
 ;;; tiles for graph area Kraid
 
@@ -813,7 +813,7 @@ org map_data_Brinstar+$510  ; (8, 20)
 ;;; tiles for room "[Kraid Recharge Station]"
 
 org map_data_Brinstar+$4d2  ; (9, 19)
-     dw $50c7  ; BGtile[i=$c7 p=$4 HX]
+     dw $10c5  ; BGtile[i=$c5 p=$4 X]
 
 ;;; tiles for room "Varia Suit Room"
 
@@ -823,7 +823,7 @@ org map_data_Brinstar+$50c  ; (6, 20)
 ;;; tiles for room "[Kraid Save Room]"
 
 org map_data_Brinstar+$4dc  ; (14, 19)
-     dw $50b7  ; BGtile[i=$b7 p=$4 HX]
+     dw $10b5  ; BGtile[i=$b5 p=$4 X]
 
 ;;; tiles for graph area Norfair
 

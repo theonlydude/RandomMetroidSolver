@@ -39,4 +39,4 @@ org map_data_Norfair+$ad2  ; (41, 11)
 ;;; tiles for room "[Elevator Save Room]"
 
 org map_data_Norfair+$ad4  ; (42, 11)
-     dw $5cb5  ; BGtile[i=$b5 p=$7 HX]
+     dw $1cb7  ; BGtile[i=$b7 p=$7 X]

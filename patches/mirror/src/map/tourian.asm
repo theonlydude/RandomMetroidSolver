@@ -113,7 +113,7 @@ org map_data_Tourian+$c66  ; (51, 17)
 ;;; tiles for room "Tourian Recharge Room"
 
 org map_data_Tourian+$c68  ; (52, 17)
-     dw $5cc5  ; BGtile[i=$c5 p=$7 HX]
+     dw $1cc7  ; BGtile[i=$c7 p=$7 X]
 
 ;;; tiles for room "Mother Brain Room"
 
@@ -157,7 +157,7 @@ org map_data_Tourian+$cdc  ; (46, 19)
 ;;; tiles for room "[Mother Brain Save Room]"
 
 org map_data_Tourian+$c9e  ; (47, 18)
-     dw $5cb5  ; BGtile[i=$b5 p=$7 HX]
+     dw $1cb7  ; BGtile[i=$b7 p=$7 X]
 
 ;;; tiles for room "Tourian Escape Room 1"
 
@@ -272,4 +272,4 @@ org map_data_Tourian+$c56  ; (43, 17)
 ;;; tiles for room "[Tourian First Save Room]"
 
 org map_data_Tourian+$b54  ; (42, 13)
-     dw $5cb7  ; BGtile[i=$b7 p=$7 HX]
+     dw $1cb5  ; BGtile[i=$b5 p=$7 X]

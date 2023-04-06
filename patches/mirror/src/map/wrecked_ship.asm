@@ -239,4 +239,4 @@ org map_data_WreckedShip+$b98  ; (44, 14)
 ;;; tiles for room "[Wrecked Ship Save Room]"
 
 org map_data_WreckedShip+$bca  ; (37, 15)
-     dw $5cb7  ; BGtile[i=$b7 p=$7 HX]
+     dw $1cb5  ; BGtile[i=$b5 p=$7 X]

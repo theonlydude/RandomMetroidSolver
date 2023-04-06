@@ -184,7 +184,7 @@ org map_data_Crateria+$ba  ; (29, 2)
 ;;; tiles for room "[Parlor Save Room]"
 
 org map_data_Crateria+$9d8  ; (44, 7)
-     dw $5cb5  ; BGtile[i=$b5 p=$7 HX]
+     dw $1cb7  ; BGtile[i=$b7 p=$7 X]
 
 ;;; tiles for room "Crateria Keyhunter Room"
 

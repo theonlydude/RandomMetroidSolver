@@ -78,7 +78,7 @@
     "Door_4C_Room_A7DE_PLM_C85A": 9407238,
     "Door_4D_Room_A7DE_PLM_C88A": 9407244,
     "Door_4E_Room_A923_PLM_C87E": 9407382,
-    "Door_4F_Room_A98D_PLM_C854": 9436646,
+    "Door_4F_Room_A98D_PLM_C854": 9407390,
     "Door_50_Room_AA41_PLM_C848": 9407456,
     "Door_51_Room_AA82_PLM_C88A": 9407476,
     "Door_52_Room_AB07_PLM_C890": 9407500,
@@ -141,8 +141,7 @@
     "Door_AA_Room_DE7A_PLM_C854": 9422991,
     "Door_AB_Room_DEA7_PLM_C842": 9423005,
     "Door_AC_Room_DEDE_PLM_C842": 9423019,
-    "Door_EE_Room_A98D_PLM_C842": 9436658,
-    "Energy_Tank_Crocomire": 9436652,
+    "Energy_Tank_Crocomire": 9407396,
     "PhantoonRoomOut_DoorAsmPtr": 9436785,
     "Room_C98E_Missile": 9436563,
     "Room_C98E_Reserve": 9436557

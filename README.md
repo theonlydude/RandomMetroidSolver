@@ -195,6 +195,8 @@ $ ./web/docker/rm.sh
 
 # Front end client
 
+## For development of the tracker client
+
 ```sh
 # checkout latest copy of front end client
 $ git submodule update
@@ -210,4 +212,12 @@ $ yarn build:varia
 
 # if you want to make changes to the client, run in watch mode
 $ yarn watch:varia
+```
+
+## For usage of the tracker client
+
+```sh
+$ cd web
+$ curl -s https://api.github.com/repos/chriscauley/super-metroid/releases/latest | jq -r '.assets[0].browser_download_url' | wget -qi - && tar zxf release.tar.gz && rm -f release.tar.gz
+$ ./install.sh
 ```

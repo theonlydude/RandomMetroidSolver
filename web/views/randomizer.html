@@ -986,7 +986,7 @@ function showHide(show, hide) {
 function getRandomizerParameters(setDisabledToOff) {
     var dataDict = {};
 
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "tourian", "areaRandomization"];
     var imgPickers = ["logic"];
@@ -2679,6 +2679,13 @@ This patch is automatically enabled when using Full Countdown item split, or Maj
       placement: "auto left"
     },
     {
+      element: "#revealMapStep",
+      title: "Reveal Map",
+      content: "<p>Reveals the whole in game map on start, showing item locations and class depending on item split. This will also reveal which item spots are empty. Map areas are available as soon as you step in them once.</p>\
+<p>Patch developed by Flo</p>",
+      placement: "auto left"
+    },
+    {
       element: "#animalsStep",
       title: "Animals surprise",
       content: "<p>Replace saving the animals in the escape sequence by a random surprise.<br/>\
@@ -3247,8 +3254,11 @@ def displayNumber(id, min, max, default, step="1"):
                      VARIA HUD
                   </td>
                   <td><button type="button" onclick="startTheTour(event)">?</button></td>
-                  <td></td>
-                  <td></td>
+                  <td id="revealMapStep" class="half">
+                    {{displayCheckbox("revealMap")}}
+                     Reveal the whole map on start
+                  </td>
+                  <td><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
               <table class="full">

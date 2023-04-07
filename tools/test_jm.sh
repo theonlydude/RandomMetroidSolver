@@ -183,6 +183,7 @@ function generate_rando_presets {
     "Infinite_Space_Jump": "$(random_switch)",
     "refill_before_save": "$(random_switch)",
     "hud": "$(random_switch)",
+    "revealMap": "$(random_switch)",
     "animals": "$(random_switch)",
     "No_Music": "$(random_switch)",
     "random_music": "$(random_switch)"

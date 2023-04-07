@@ -377,6 +377,9 @@ def loadRandoPreset(randoPreset, args):
     if randoParams.get("hud", "off") == "on":
         args.hud = True
 
+    if randoParams.get("revealMap", "off") == "on":
+        args.revealMap = True
+
     if "morphPlacement" in randoParams:
         args.morphPlacement = randoParams["morphPlacement"]
     if "majorsSplit" in randoParams:
@@ -508,6 +511,7 @@ def getRandomizerDefaultParameters():
     defaultParams['Infinite_Space_Jump'] = "off"
     defaultParams['refill_before_save'] = "off"
     defaultParams['hud'] = "off"
+    defaultParams['revealMap'] = "off"
     defaultParams['animals'] = "off"
     defaultParams['No_Music'] = "off"
     defaultParams['random_music'] = "off"

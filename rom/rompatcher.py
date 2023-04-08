@@ -68,7 +68,10 @@ class RomPatcher:
             'door_indicators_plms.ips'
         ],
         # VARIA tweaks
-        'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
+        'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable',
+                         'ln_chozo_platform.ips', 'bomb_torizo.ips',
+                         # faster MB cutscene transitions
+                         'Mother_Brain_Cutscene_Edits'],
         # anti-softlock/game opening layout patches
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips',
@@ -98,8 +101,6 @@ class RomPatcher:
         # patches for each "logic" to convert vanilla ROM to "logic" base ROM
         'Logic': {
             "vanilla": [
-                # faster MB cutscene transitions
-                'Mother_Brain_Cutscene_Edits',
             ],
             "mirror": ['mirrortroid.ips', 'bank_8f.ips', 'bank_83.ips', 'map_icon_data.ips',
                        'baby_room.ips', 'baby_remove_blocks.ips', 'escape_animals.ips',

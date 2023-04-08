@@ -950,8 +950,8 @@ function changeComplexity(evt, name) {
   }
 
   else if(name == "medium") {
-    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "itemsQuantityVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility", "objectivesVisibility"];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "minorsProportionVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility", "noPatchesVisibility", "saveLoadRandoPresetVisibility"];
+    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "itemsQuantityVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility", "objectivesVisibility", "helperPatchesVisibility"];
+    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "minorsProportionVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "noPatchesVisibility", "saveLoadRandoPresetVisibility"];
     showHide(show, hide);
   }
 
@@ -3199,29 +3199,31 @@ def displayNumber(id, min, max, default, step="1"):
                   <td><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
-              <table class="full">
-                <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
-                <tr><td colspan="2"><h5 class="center"><b>Game comfort</b></h5></td><td></td></tr>
-              </table>
-              <table class="full">
+              <table class="full" id="helperPatchesVisibility">
+                <colgroup><col class="half" /><col class="small"/><col class="half" /><col class="small"/></colgroup>
+                <tr><td colspan="4"><h5 class="center"><b>Game comfort</b></h5></td></tr>
                 <tr>
-                  <td id="itemsoundsStep" class="half">
+                  <td id="itemsoundsStep">
                     {{displayCheckbox("itemsounds")}}
                     Remove fanfare when picking up an item
                   </td>
                   <td><button type="button" onclick="startTheTour(event)">?</button></td>
-                  <td id="ElevatorDoorsStep" class="quarter">
-                    {{displayCheckbox("fast_doors")}}
-                    Accelerate doors
-                  </td>
-                  <td class="quarter">
-                    {{displayCheckbox("elevators_speed")}}
-                    Accelerate elevators
+                  <td>
+                    <table class="full">
+                      <tr>
+                        <td id="ElevatorDoorsStep" class="half innertd">
+                          {{displayCheckbox("fast_doors")}}
+                          Accelerate doors
+                        </td>
+                        <td class="half innertd">
+                          {{displayCheckbox("elevators_speed")}}
+                          Accelerate elevators
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                   <td><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-              </table>
-              <table class="full">
                 <tr>
                   <td id="spinjumprestartStep" class="half">
                     {{displayCheckbox("spinjumprestart")}}
@@ -3234,8 +3236,6 @@ def displayNumber(id, min, max, default, step="1"):
                   </td>
                   <td><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-              </table>
-              <table class="full" id="helperPatchesVisibility">
                 <tr>
                   <td id="Infinite_Space_JumpStep" class="half">
                     {{displayCheckbox("Infinite_Space_Jump")}}

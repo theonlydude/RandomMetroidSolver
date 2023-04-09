@@ -2736,11 +2736,13 @@ This patch is automatically enabled when using Full Countdown item split, or Maj
         step = parent.id
     }
   }
+    console.log("startTheTour step is " + step);
   if (typeof step === 'string') {
     step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
   }
   // Start the tour
   if(step != -1) {
+    console.log("startTheTour final step is " + step);
     tour.goTo(step);
   }
   tour.start();
@@ -3169,11 +3171,14 @@ def displayNumber(id, min, max, default, step="1"):
               </table>
             </div>
             <div id="noPatchesVisibility">
-              <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour(event)">?</button></span></h4>
+              <h4 id="patchesStep">Patches</h4>
+              <span class="rightStep"><button type="button" onclick="startTheTour(event)">?</button></span>
               <p>Some patches are always applied, check out the '?' button to see them. Other optional patches are applied by default, use 'advanced' tab to see them.</p>
             </div>
             <div id="patchesVisibility">
-              <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour(event)">?</button></span></h4>
+              <h4 id="patchesStep">Patches</h4>
+              <span class="rightStep"><button type="button" onclick="startTheTour(event)">?</button></span>
+              <p>Some patches are always applied, check out the '?' button to see them. Other optional patches are applied by default, use 'advanced' tab to see them.</p>
               <table class="full">
                 <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
                 <tr><td colspan="2"><h5 class="center"><b>Randomizer adaptations (logic impact)</b></h5></td><td></td></tr>

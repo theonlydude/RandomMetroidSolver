@@ -154,6 +154,9 @@ mkdir -p ~/web2py/applications/solver/static/images/help/
 [ -L ~/web2py/applications/solver/static/images/help/crab_shaft_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/crab_shaft_save.png ~/web2py/applications/solver/static/images/help/crab_shaft_save.png
 [ -L ~/web2py/applications/solver/static/images/help/objectives.png ] || ln -s ~/RandomMetroidSolver/web/static/help/objectives.png ~/web2py/applications/solver/static/images/help/objectives.png
 [ -L ~/web2py/applications/solver/static/images/help/aqueduct_bomb_blocks.png ] || ln -s ~/RandomMetroidSolver/web/static/help/aqueduct_bomb_blocks.png ~/web2py/applications/solver/static/images/help/aqueduct_bomb_blocks.png
+[ -L ~/web2py/applications/solver/static/images/help/map.png ] || ln -s ~/RandomMetroidSolver/web/static/help/map.png ~/web2py/applications/solver/static/images/help/map.png
+[ -L ~/web2py/applications/solver/static/images/help/inventory.png ] || ln -s ~/RandomMetroidSolver/web/static/help/inventory.png ~/web2py/applications/solver/static/images/help/inventory.png
+[ -L ~/web2py/applications/solver/static/images/help/reveal_map.png ] || ln -s ~/RandomMetroidSolver/web/static/help/reveal_map.png ~/web2py/applications/solver/static/images/help/reveal_map.png
 
 # rando - maps
 [ -L ~/web2py/applications/solver/static/images/help/minimizer_example.png ] || ln -s ~/RandomMetroidSolver/web/static/help/minimizer_example.png ~/web2py/applications/solver/static/images/help/minimizer_example.png

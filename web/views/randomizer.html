@@ -945,7 +945,7 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = ["noPatchesVisibility"];
-      var hide = ["seedVisibility", "itemsQuantityVisibility", "minorsProportionVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility", "saveLoadRandoPresetVisibility"];
+    var hide = ["seedVisibility", "itemsQuantityVisibility", "minorsProportionVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility", "saveLoadRandoPresetVisibility"];
     showHide(show, hide);
   }
 
@@ -2494,12 +2494,25 @@ Click on the dice button to randomly set this parameter.",
     {
       element: "#patchesStep",
       title: "Default Patches",
-      content: "Patches also included by default:\
+      content: "Patches always applied:\
 <ul>\
 <li>Allows the aim buttons to be assigned to any button (by Kejardon)</li>\
 <li>Max Ammo Display (by Personitis)</li>\
 <li>Play music with <a href=\"https://www.zeldix.net/t1607-msu1-getting-started-guide\" target=\"_blank\">MSU1 chip</a> on <a href=\"https://www.retrorgb.com/fxpakpro.html\" target=\"_blank\">SD2SNES/FXPak</a> and compatible emulators (by DarkShock)</li>\
-<li><a href=\"https://wiki.supermetroid.run/Red_Brinstar_Elevator_Room\" target=\"_blank\">Red Brinstar elevator</a> door is blue (by Flo)</li>\
+<li>Disable <a href=\"https://wiki.supermetroid.run/Golden_Torizo_Code\" target=\"_blank\">GT Code</a> and <a href=\"https://wiki.supermetroid.run/Weapon_Techniques#Glitched_Beams\" target=\"_blank\">gliched beams</a>, also fixes to some vanilla bugs</li>\
+<li>When doors are colored on one side and blue on the other, the blue side blinks to indicate the color of the other side</li>\
+<li>Display collected items percentage and RTA time in pause inventory menu :</li>\
+<img src=\"/solver/static/images/help/inventory.png\" alt=\"inventory.png\" title=\"Inventory menu\" class=\"third center_img\"/>\
+<li>Integrate Map Overhaul patch by MFreak, with VARIA adaptations:</li>\
+<ul>\
+<li>In-game map is now easier to read (room connections are clearly shown), and the mini-map is drawn the same way as the main map (except colors and map icons)</li>\
+<li>Use the select button to switch between visited areas</li>\
+<li>Depending on item splits, major item locations (if applicable) will have a distinct icon</li>\
+<li>Each area in the VARIA sense (Green/Pink Brinstar, Crocomire, Wrecked Ship etc.) has its own distinct color inside the original game maps</li>\
+<li>The map automatically tracks door colors when they have been seen by the player</li>\
+<li>In area randomizer, portals are automatically tracked as well when they have been taken once, as the map adds portal icons with the color of the destination area</li>\
+<img src=\"/solver/static/images/help/map.png\" alt=\"map.png\" title=\"Brinstar map example\" class=\"third center_img\"/>\
+</ul>\
 </ul>",
       placement: "auto left"
     },
@@ -2682,6 +2695,7 @@ This patch is automatically enabled when using Full Countdown item split, or Maj
       element: "#revealMapStep",
       title: "Reveal Map",
       content: "<p>Reveals the whole in game map on start, showing item locations and class depending on item split. This will also reveal which item spots are empty. Map areas are available as soon as you step in them once.</p>\
+<img src=\"/solver/static/images/help/reveal_map.png\" alt=\"reveal_map.png\" title=\"Brinstar map with the reveal patch\" class=\"third center_img\"/>\
 <p>Patch developed by Flo</p>",
       placement: "auto left"
     },
@@ -3155,14 +3169,11 @@ def displayNumber(id, min, max, default, step="1"):
               </table>
             </div>
             <div id="noPatchesVisibility">
-              <h4>Patches</h4>
-              <p>Some patches are applied by default, use the 'advanced' tab to see them.</p>
+              <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour('patchesStep')">?</button></span></h4>
+              <p>Some patches are always applied, check out the '?' button to see them. Other optional patches are applied by default, use 'advanced' tab to see them.</p>
             </div>
             <div id="patchesVisibility">
               <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour('patchesStep')">?</button></span></h4>
-              <p id="mainPatchesTextVisibility">
-                The bug fix <a href="https://itemrando.supermetroid.run/information" target="_blank">patches</a> from Total Item Randomizer are included by default.
-              </p>
               <table class="full">
                 <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
                 <tr><td colspan="2"><h5 class="center"><b>Randomizer adaptations (logic impact)</b></h5></td><td></td></tr>

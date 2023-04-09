@@ -1152,8 +1152,8 @@ credits:
     dw "     PLAY THIS RANDOMIZER AT    " ;; 223
     !big
     ;; how about some more credits
-    dw "    ARTHEAU   MIKE TRETHEWEY    " ;; 224
-    dw "    artheau   mike trethewey    " ;; 225
+    dw "   ARTHEAU   MINNIE TRETHEWEY   " ;; 224
+    dw "   artheau   minnie trethewey   " ;; 225
     ;; now some more stats
     dw " UPPER NORFAIR      00'00'00^00 " ;; 226
     dw " upper norfair      }} }} }} }} " ;; 227

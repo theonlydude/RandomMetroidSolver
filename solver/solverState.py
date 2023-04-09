@@ -97,6 +97,7 @@ class SolverState(object):
         self.state["tourian"] = solver.tourian
         # custom objectives
         self.state["objectives"] = solver.objectives.getState()
+        self.state["totalItemsCount"] = solver.objectives.getTotalItemsCount()
         self.state["newlyCompletedObjectives"] = solver.newlyCompletedObjectives
         self.state["majorUpgrades"] = solver.majorUpgrades
         self.state["splitLocsByArea"] = solver.splitLocsByArea
@@ -138,6 +139,7 @@ class SolverState(object):
         solver.plandoScavengerOrder = self.state["plandoScavengerOrder"]
         solver.tourian = self.state["tourian"]
         solver.objectives.setState(self.state["objectives"])
+        solver.objectives.setTotalItemsCount(self.state["totalItemsCount"])
         solver.majorUpgrades = self.state["majorUpgrades"]
         solver.splitLocsByArea = self.state["splitLocsByArea"]
         solver.eventsBitMasks = self.state["eventsBitMasks"]

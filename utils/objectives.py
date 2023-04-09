@@ -671,9 +671,15 @@ class Objectives(object):
     def getState(self):
         return {goal.name: goal.completed for goal in Objectives.activeGoals}
 
+    def getTotalItemsCount(self):
+        return Objectives.totalItemsCount
+
     def setState(self, state):
         for goalName, completed in state.items():
             self.addGoal(goalName, completed)
+
+    def setTotalItemsCount(self, totalItemsCount):
+        Objectives.totalItemsCount = totalItemsCount
 
     def resetGoals(self):
         for goal in Objectives.activeGoals:

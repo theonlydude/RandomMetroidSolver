@@ -1144,12 +1144,11 @@ class RomPatcher:
                 return Logic.map_tiles.areaAccessPoints[apName]
             elif apName in Logic.map_tiles.bossAccessPoints:
                 return Logic.map_tiles.bossAccessPoints[apName]
-            else:
-                raise ValueError("Invalid AP name "+apName)
+            return None
         for conn in doorConnections:
             src, dst = conn['transition']
             srcMapInfo, dstMapInfo = getMapInfo(src.Name), getMapInfo(dst.Name)
-            if srcMapInfo['area'] != area:
+            if srcMapInfo is None or dstMapInfo is None or srcMapInfo['area'] != area:
                 continue
             x, y = areaMap.getCoordsByte(srcMapInfo['byteIndex'], srcMapInfo['bitMask'])
             self.romFile.writeWord(x*8)

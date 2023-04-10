@@ -265,6 +265,9 @@ org map_data_Norfair+$ee  ; (23, 3)
 org map_data_Norfair+$12e  ; (23, 4)
      dw $5c70  ; BGtile[i=$70 p=$7 HX]
 
+org map_data_Norfair+$ec  ; (22, 3)
+     dw $1c29  ; BGtile[i=$29 p=$7 X]
+
 org map_data_Norfair+$12c  ; (22, 4)
      dw $1c70  ; BGtile[i=$70 p=$7 X]
 
@@ -493,6 +496,9 @@ org map_data_Norfair+$2a0  ; (16, 10)
      dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 org map_data_Norfair+$2a2  ; (17, 10)
+     dw $1c52  ; BGtile[i=$52 p=$7 X]
+
+org map_data_Norfair+$2a4  ; (18, 10)
      dw $1c52  ; BGtile[i=$52 p=$7 X]
 
 org map_data_Norfair+$2a6  ; (19, 10)

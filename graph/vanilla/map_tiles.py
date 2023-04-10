@@ -35,6 +35,15 @@ areaAccessPoints = {
     "Golden Four": {"byteIndex": 37, "bitMask": 8, "room": 0xa5ed, "area": "Crateria"}
 }
 
+# additional info for in-game tracker for "top of elevator" APs to show on a more intuitive map
+areaAccessPointsInGameDisplay = {
+    "Green Brinstar Elevator": {"area": "Brinstar", "coords": (9, 1)},
+    "Red Brinstar Elevator": {"area": "Brinstar", "coords": (37, 4)},
+    "Le Coude Right": {"area": "Maridia", "coords": (34, 1)},
+    "Warehouse Entrance Left": {"area": "Norfair", "coords": (9, 1)},
+    "Warehouse Entrance Right": {"area": "Norfair", "coords": (11, 1)}
+}
+
 bossAccessPoints = {
     "PhantoonRoomOut": {"byteIndex": 82, "bitMask": 32, "room": 0xcc6f, "area": "WreckedShip"},
     "PhantoonRoomIn": {"byteIndex": 82, "bitMask": 16, "room": 0xcd13, "area": "WreckedShip"},

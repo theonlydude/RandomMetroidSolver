@@ -1036,6 +1036,7 @@ class RomPatcher:
     #   property shall point to this custom ASM.
     # * if not, just write doorAsmPtr as the door property directly.
     def writeDoorConnections(self, doorConnections):
+        assert len(self.areaMaps) > 0, "Build area maps before calling writeDoorConnections"
         asmAddress = Addresses.getOne('customDoorsAsm')
         def getWordBytes(addr):
             w = getWord(addr & 0xffff)
@@ -1114,6 +1115,26 @@ class RomPatcher:
             else:
                 # still give I-frames
                 asmPatch += [ 0x20 ] + giveiframes        # JSR giveiframes
+            # for special access points display on map, artificially explore the tile where 
+            # the portal is drawn, since it's not the same as the actual map tile checked to
+            # see if the portal is taken
+            src, dst = conn['transition']
+            def writeExploreMapAsm(ap):
+                nonlocal asmPatch
+                apInfo = Logic.map_tiles.areaAccessPointsInGameDisplay.get(ap.Name)
+                if apInfo is not None:
+                    areaMap = self.areaMaps[apInfo['area']]
+                    byteIndex, bitMask = areaMap.getByteIndexMask(*apInfo['coords'])
+                    ramAddr = getWordBytes(self._getExploredMapRam(apInfo['area'], byteIndex)) + [ 0x7E ]
+                    # LDA.l $7E[map tile byte index]
+                    asmPatch += [ 0xAF ] + ramAddr
+                    # ORA.w #[map tile mask]
+                    asmPatch += [ 0x09 ] + getWordBytes(bitMask)
+                    # STA.l $7E[map tile byte index]
+                    asmPatch += [ 0x8F ] + ramAddr
+            writeExploreMapAsm(src)
+            if src != dst:
+                writeExploreMapAsm(dst)
             # return
             asmPatch += [ 0x60 ]   # RTS
             self.romFile.writeWord(asmAddress & 0xFFFF)
@@ -1135,26 +1156,35 @@ class RomPatcher:
                     self.romFile.writeByte(conn['song'])
                     self.romFile.writeByte(0x5)
 
-    def _writePortalIcons(self, doorConnections, area, areaMap):
+    def _getExploredMapRam(self, area, index=0):
+        if isinstance(area, str):
+            area = ['Crateria', 'Brinstar', 'Norfair', 'WreckedShip', 'Maridia', 'Tourian'].index(area)
         exploredBaseRam = 0xCD52
         exploredAreaSize = 0x100
-        exploredRam = [exploredBaseRam + i*exploredAreaSize for i in range(6)] # by area index from Crateria to Tourian
-        def getMapInfo(apName):
-            if apName in Logic.map_tiles.areaAccessPoints:
+        return exploredBaseRam + area*exploredAreaSize + index
+
+    def _writePortalIcons(self, doorConnections, area, areaMap):
+        def getMapInfo(apName, isSrc):
+            if isSrc and apName in Logic.map_tiles.areaAccessPointsInGameDisplay:
+                return Logic.map_tiles.areaAccessPointsInGameDisplay[apName]
+            elif apName in Logic.map_tiles.areaAccessPoints:
                 return Logic.map_tiles.areaAccessPoints[apName]
             elif apName in Logic.map_tiles.bossAccessPoints:
                 return Logic.map_tiles.bossAccessPoints[apName]
             return None
         for conn in doorConnections:
             src, dst = conn['transition']
-            srcMapInfo, dstMapInfo = getMapInfo(src.Name), getMapInfo(dst.Name)
+            srcMapInfo, dstMapInfo = getMapInfo(src.Name, True), getMapInfo(dst.Name, False)
             if srcMapInfo is None or dstMapInfo is None or srcMapInfo['area'] != area:
                 continue
-            x, y = areaMap.getCoordsByte(srcMapInfo['byteIndex'], srcMapInfo['bitMask'])
+            if "coords" in srcMapInfo:
+                x, y = srcMapInfo['coords']
+            else:
+                x, y = areaMap.getCoordsByte(srcMapInfo['byteIndex'], srcMapInfo['bitMask'])
             self.romFile.writeWord(x*8)
             self.romFile.writeWord(y*8)
             self.romFile.writeWord(portal_mapicons[dst.GraphArea].table_index)
-            self.romFile.writeWord(exploredRam[dst.RoomInfo['area']] + dstMapInfo['byteIndex'])
+            self.romFile.writeWord(self._getExploredMapRam(dst.RoomInfo['area'], dstMapInfo['byteIndex']))
             self.romFile.writeWord(dstMapInfo['bitMask'])
         self.romFile.writeWord(0xffff) # terminator
 

@@ -96,6 +96,11 @@ class AreaMap(object):
         index = byteIndex*8 + 8 - bitMask.bit_length()
         return self.getCoords(index)
 
+    def getByteIndexMask(self, x, y):
+        page, idx = self.getPage(x, y), self.getIndexInPage(x, y)
+        idx += page*pageSize*pageSize
+        return idx // 8, 1 << (7 - (idx % 8))
+
     def getTile(self, x, y):
         page = self.pages[self.getPage(x, y)]
         return page[self.getIndexInPage(x, y)]

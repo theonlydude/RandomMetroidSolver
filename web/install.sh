@@ -63,6 +63,17 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/js/leader-line.min.js ] || ln -s ~/RandomMetroidSolver/web/static/leader-line.min.js ~/web2py/applications/solver/static/js/leader-line.min.js
 [ -L ~/web2py/applications/solver/static/js/jquery.redirect.js ] || ln -s ~/RandomMetroidSolver/web/static/jquery.redirect.js ~/web2py/applications/solver/static/js/jquery.redirect.js
 [ -L ~/web2py/applications/solver/static/js/crc32.js ] || ln -s ~/RandomMetroidSolver/web/static/crc32.js ~/web2py/applications/solver/static/js/crc32.js
+[ -L ~/web2py/applications/solver/static/css/bootstrap.min.css ] || ln -s ~/RandomMetroidSolver/web/web2py/static/css/bootstrap.min.css ~/web2py/applications/solver/static/css/bootstrap.min.css
+[ -L ~/web2py/applications/solver/static/css/calendar.css ] || ln -s ~/RandomMetroidSolver/web/web2py/static/css/calendar.css ~/web2py/applications/solver/static/css/calendar.css
+[ -L ~/web2py/applications/solver/static/css/web2py-bootstrap3.css ] || ln -s ~/RandomMetroidSolver/web/web2py/static/css/web2py-bootstrap3.css ~/web2py/applications/solver/static/css/web2py-bootstrap3.css
+[ -L ~/web2py/applications/solver/static/css/web2py.css ] || ln -s ~/RandomMetroidSolver/web/web2py/static/css/web2py.css ~/web2py/applications/solver/static/css/web2py.css
+[ -L ~/web2py/applications/solver/static/js/bootstrap.min.js ] || ln -s ~/RandomMetroidSolver/web/web2py/static/js/bootstrap.min.js ~/web2py/applications/solver/static/js/bootstrap.min.js
+[ -L ~/web2py/applications/solver/static/js/calendar.js ] || ln -s ~/RandomMetroidSolver/web/web2py/static/js/calendar.js ~/web2py/applications/solver/static/js/calendar.js
+[ -L ~/web2py/applications/solver/static/js/jquery.js ] || ln -s ~/RandomMetroidSolver/web/web2py/static/js/jquery.js ~/web2py/applications/solver/static/js/jquery.js
+[ -L ~/web2py/applications/solver/static/js/modernizr-2.8.3.min.js ] || ln -s ~/RandomMetroidSolver/web/web2py/static/js/modernizr-2.8.3.min.js ~/web2py/applications/solver/static/js/modernizr-2.8.3.min.js
+[ -L ~/web2py/applications/solver/static/js/share.js ] || ln -s ~/RandomMetroidSolver/web/web2py/static/js/share.js ~/web2py/applications/solver/static/js/share.js
+[ -L ~/web2py/applications/solver/static/js/web2py-bootstrap3.js ] || ln -s ~/RandomMetroidSolver/web/web2py/static/js/web2py-bootstrap3.js ~/web2py/applications/solver/static/js/web2py-bootstrap3.js
+[ -L ~/web2py/applications/solver/static/js/web2py.js ] || ln -s ~/RandomMetroidSolver/web/web2py/static/js/web2py.js ~/web2py/applications/solver/static/js/web2py.js
 [ -L ~/web2py/applications/solver/static/image-picker ] || ln -s ~/RandomMetroidSolver/web/static/image-picker ~/web2py/applications/solver/static/image-picker
 [ -L ~/web2py/applications/solver/static/js/localforage.nopromises.min.js ] || ln -s ~/RandomMetroidSolver/web/static/localforage.nopromises.min.js ~/web2py/applications/solver/static/js/localforage.nopromises.min.js
 [ -L ~/web2py/applications/solver/static/js/spc_snes.js ] || ln -s ~/RandomMetroidSolver/web/static/spc_js/spc_snes.js ~/web2py/applications/solver/static/js/spc_snes.js

@@ -5,7 +5,7 @@
 my_dir=$(dirname $(readlink -f $0))
 
 # use thedopefish's asar which can generated an ips: https://github.com/thedopefish/asar/releases
-[ -z "$ASAR" ] && ASAR=asar.exe
+[ -z "$ASAR" ] && ASAR=asar
 [ -z "$ASAR_OPTS" ] && ASAR_OPTS=--fix-checksum=off
 
 [ $# -lt 1 ] && {

@@ -983,7 +983,7 @@ function showHide(show, hide) {
   }
 }
 
-function getRandomizerParameters(setDisabledToOff) {
+function getRandomizerParameters(setDisabledToOff, trueJson) {
     var dataDict = {};
 
     var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf"];
@@ -1018,7 +1018,11 @@ function getRandomizerParameters(setDisabledToOff) {
        if(isElemIdRandom(elemId)) {
          dataDict[elemId] = "random";
          multiElemId = elemId+"MultiSelect";
-         dataDict[multiElemId] = $("#"+multiElemId).val().join();
+         if(trueJson) {
+             dataDict[multiElemId] = $("#"+multiElemId).val();
+         } else {
+             dataDict[multiElemId] = $("#"+multiElemId).val().join();
+         }
        } else {
          dataDict[elemId] = document.getElementById(elemId).value;
        }
@@ -1029,13 +1033,17 @@ function getRandomizerParameters(setDisabledToOff) {
        if(isElemIdRandom(elemId)) {
          dataDict[elemId] = "random";
          multiElemId = elemId+"MultiSelect";
-           dataDict[multiElemId] = $("#"+elemId).data('picker').selected_values().join();
+         if(trueJson) {
+             dataDict[multiElemId] = $("#"+elemId).data('picker').selected_values();
+         } else {
+             dataDict[multiElemId] = $("#"+elemId).data('picker').selected_values().join();
+         }
        } else {
          dataDict[elemId] = document.getElementById(elemId).value;
        }
     }
 
-    getSpecialValues(dataDict);
+    getSpecialValues(dataDict, trueJson);
 
     return dataDict;
 }
@@ -1043,7 +1051,7 @@ function getRandomizerParameters(setDisabledToOff) {
 function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
-    var dataDict = getRandomizerParameters(true);
+    var dataDict = getRandomizerParameters(true, false);
     dataDict["complexity"] = getComplexity();
     dataDict["paramsFileTarget"] = data;
 
@@ -1217,7 +1225,7 @@ function AjaxRandomizerCallCompleted(data) {
     // set backup button text to Randomize
     document.getElementById("submitBtn").data = "Randomize";
 
-    var dataDict = getRandomizerParameters(false);
+    var dataDict = getRandomizerParameters(false, false);
     dataDict["complexity"] = getComplexity();
 
     // call webservice to update the session
@@ -1231,12 +1239,16 @@ function AjaxRandomizerCallCompleted(data) {
     request.fail(ajaxFail);
 }
 
-function getSpecialValues(dataDict) {
+function getSpecialValues(dataDict, trueJson) {
     dataDict["objectiveRandom"] = isElemIdRandom("objective")
 
     // Note both objective and objectiveMultiSelect are passed via dataDict.objective
     // The backend decides to use this for one or the other
-    var values = $("#objectiveMultiSelect").val().join(",");
+    if(trueJson) {
+        var values = $("#objectiveMultiSelect").val();
+    } else {
+        var values = $("#objectiveMultiSelect").val().join(",");
+    }
     dataDict["objective"] = values ? values : "nothing"
 
     if (isElemIdRandom("nbObjective")) {
@@ -1798,7 +1810,7 @@ function saveRandoPresetLocal() {
         return false;
     }
 
-    var data = getRandomizerParameters(false);
+    var data = getRandomizerParameters(false, true);
 
     var blob = new Blob([JSON.stringify(data, null, 2)], {type: "text/plain"});
     saveAs(blob, filename+'.json');

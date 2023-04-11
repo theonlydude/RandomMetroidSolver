@@ -642,6 +642,9 @@ org map_data_Crateria+$19a  ; (13, 6)
 org map_data_Crateria+$14c  ; (6, 5)
      dw $5890  ; BGtile[i=$90 p=$6 HX]
 
+org map_data_Crateria+$18c  ; (6, 6)
+     dw $581a  ; BGtile[i=$1a p=$6 HX]
+
 org map_data_Crateria+$1cc  ; (6, 7)
      dw $581a  ; BGtile[i=$1a p=$6 HX]
 
@@ -658,6 +661,9 @@ org map_data_Crateria+$250  ; (8, 9)
 
 org map_data_Crateria+$24e  ; (7, 9)
      dw $5862  ; BGtile[i=$62 p=$6 HX]
+
+org map_data_Crateria+$24c  ; (6, 9)
+     dw $182c  ; BGtile[i=$2c p=$6 X]
 
 org map_data_Crateria+$28c  ; (6, 10)
      dw $9825  ; BGtile[i=$25 p=$6 VX]

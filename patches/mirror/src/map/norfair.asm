@@ -259,6 +259,9 @@ org map_data_Norfair+$8d2  ; (41, 3)
 
 ;;; tiles for room "Bubble Mountain"
 
+org map_data_Norfair+$8d0  ; (40, 3)
+     dw $5c29  ; BGtile[i=$29 p=$7 HX]
+
 org map_data_Norfair+$8ce  ; (39, 3)
      dw $1c29  ; BGtile[i=$29 p=$7 X]
 
@@ -541,8 +544,8 @@ org map_data_Norfair+$8cc  ; (38, 3)
 
 ;;; tiles for room "Norfair Map Room"
 
-org map_data_Norfair+$9a8  ; (52, 6)
-     dw $5c18  ; BGtile[i=$18 p=$7 HX]
+org map_data_Norfair+$96a  ; (53, 5)
+     dw $5c05  ; BGtile[i=$05 p=$7 HX]
 
 ;;; tiles for room "[Bubble Mountain Save Room]"
 
@@ -1223,5 +1226,5 @@ org map_data_Norfair+$332  ; (25, 12)
 
 ;;; tiles for room "[Red Keyhunter Shaft Save Room]"
 
-org map_data_Norfair+$3f2  ; (25, 15)
-     dw $585d  ; BGtile[i=$5d p=$6 HX]
+org map_data_Norfair+$374  ; (26, 13)
+     dw $18b5  ; BGtile[i=$b5 p=$6 X]

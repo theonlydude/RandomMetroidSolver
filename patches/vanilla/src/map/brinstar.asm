@@ -36,9 +36,6 @@ org map_data_Brinstar+$2fa  ; (29, 11)
 org map_data_Brinstar+$33a  ; (29, 12)
      dw $9490  ; BGtile[i=$90 p=$5 VX]
 
-org map_data_Brinstar+$338  ; (28, 12)
-     dw $1404  ; BGtile[i=$04 p=$5 X]
-
 ;;; tiles for room "Blue Brinstar Energy Tank Room"
 
 org map_data_Brinstar+$2fc  ; (30, 11)

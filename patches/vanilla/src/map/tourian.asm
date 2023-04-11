@@ -69,6 +69,9 @@ org map_data_Tourian+$3a6  ; (19, 14)
 
 ;;; tiles for room "Metroid Room 4"
 
+org map_data_Tourian+$3a8  ; (20, 14)
+     dw $1c90  ; BGtile[i=$90 p=$7 X]
+
 org map_data_Tourian+$3e8  ; (20, 15)
      dw $9c2e  ; BGtile[i=$2e p=$7 VX]
 

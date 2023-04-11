@@ -170,8 +170,8 @@ org map_data_Maridia+$bd8  ; (44, 15)
 
 ;;; tiles for room "Bug Sand Hole"
 
-org map_data_Maridia+$9ce  ; (39, 7)
-     dw $1490  ; BGtile[i=$90 p=$5 X]
+org map_data_Maridia+$990  ; (40, 6)
+     dw $544d  ; BGtile[i=$4d p=$5 HX]
 
 ;;; tiles for room "West Sand Hall"
 
@@ -187,8 +187,8 @@ org map_data_Maridia+$c5c  ; (46, 17)
 org map_data_Maridia+$c5a  ; (45, 17)
      dw $141d  ; BGtile[i=$1d p=$5 X]
 
-org map_data_Maridia+$c58  ; (44, 17)
-     dw $544d  ; BGtile[i=$4d p=$5 HX]
+org map_data_Maridia+$bd4  ; (42, 15)
+     dw $1425  ; BGtile[i=$25 p=$5 X]
 
 ;;; tiles for room "Oasis"
 
@@ -510,8 +510,8 @@ org map_data_Maridia+$27a  ; (29, 9)
 org map_data_Maridia+$a54  ; (42, 9)
      dw $1405  ; BGtile[i=$05 p=$5 X]
 
-org map_data_Maridia+$a8c  ; (38, 10)
-     dw $54af  ; BGtile[i=$af p=$5 HX]
+org map_data_Maridia+$a52  ; (41, 9)
+     dw $141d  ; BGtile[i=$1d p=$5 X]
 
 ;;; tiles for room "Space Jump Room"
 
@@ -560,8 +560,8 @@ org map_data_Maridia+$a0a  ; (37, 8)
 org map_data_Maridia+$a0c  ; (38, 8)
      dw $d425  ; BGtile[i=$25 p=$5 HVX]
 
-org map_data_Maridia+$a4c  ; (38, 9)
-     dw $5452  ; BGtile[i=$52 p=$5 HX]
+org map_data_Maridia+$9c4  ; (34, 7)
+     dw $1425  ; BGtile[i=$25 p=$5 X]
 
 ;;; tiles for room "Draygon's Room"
 
@@ -857,8 +857,8 @@ org map_data_Maridia+$9ac  ; (54, 6)
 org map_data_Maridia+$96c  ; (54, 5)
      dw $5857  ; BGtile[i=$57 p=$6 HX]
 
-org map_data_Maridia+$9a8  ; (52, 6)
-     dw $d857  ; BGtile[i=$57 p=$6 HVX]
+org map_data_Maridia+$96a  ; (53, 5)
+     dw $181d  ; BGtile[i=$1d p=$6 X]
 
 ;;; tiles for room "Northwest Maridia Bug Room"
 

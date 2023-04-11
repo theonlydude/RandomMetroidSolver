@@ -332,6 +332,10 @@
         ],
         "Bubble Mountain": [
             [
+                22,
+                3
+            ],
+            [
                 23,
                 3
             ],
@@ -696,8 +700,8 @@
         ],
         "Norfair Map Room": [
             [
-                10,
-                6
+                9,
+                5
             ]
         ],
         "[Bubble Mountain Save Room]": [
@@ -1576,8 +1580,8 @@
         ],
         "[Red Keyhunter Shaft Save Room]": [
             [
-                37,
-                15
+                36,
+                13
             ]
         ]
     }

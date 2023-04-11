@@ -1190,7 +1190,8 @@ class RomPatcher:
 
     def writeDoorConnectionsMapIcons(self, doorConnections):
         assert len(self.areaMaps) > 0, "call writeDoorConnectionsMapIcons when areaMaps are built"
-        # TODO handle race mode
+        if self.race is not None:
+            return
         # write area portal tables
         self.romFile.seek(self._mapIconTableAddr)
         mapicon_ptrs = {}
@@ -1345,8 +1346,9 @@ class RomPatcher:
             self.romFile.writeWord(pc_to_snes(mapicon_ptrs[area]) & 0xffff, addr)
 
     def writeDoorsMapIcons(self):
-        # TODO handle race mode
         assert len(self.areaMaps) > 0, "call writeDoorsMapIcons when areaMaps are built"
+        if self.race is not None:
+            return
         # write area door tables
         self.romFile.seek(self._mapIconTableAddr)
         mapicon_ptrs = {}

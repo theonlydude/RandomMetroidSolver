@@ -1300,6 +1300,10 @@ function cleanup(cleanExit) {
     } else {
         // use the device variable to know if we were connected to a device before
         device = undefined;
+
+        // as autotracker now read inventory from memory we've lost the ordering of collecting items with
+        // the locations so unvisite all locations
+        ajaxCall({action: "clear", scope: "item"}, "upload");
     }
 }
 

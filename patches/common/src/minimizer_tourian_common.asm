@@ -39,7 +39,7 @@ org $839218
 	db $40
 
 
-org $848a59                     ; unused instruction
+org $848a67                     ; unused instruction
 ;;; alternative door hit instruction that skips hit counter check
 alt_door_hit:
         ;; test if current room is Tourian Door Room
@@ -48,6 +48,8 @@ alt_door_hit:
         bne .vanilla_door_hit
 	clc
 	bra .skip_check		; resume original routine
+
+print "min 84 end: ", pc
 
 warnpc $848a72
 

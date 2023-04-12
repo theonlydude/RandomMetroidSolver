@@ -201,14 +201,14 @@ class ItemManager:
         'Nothing': Item(
             Category='Nothing',
             Class='Minor',
-            Code=0xbae9, # new nothing plm
+            Code=0xbad1, # new nothing plm
             Name="Nothing",
             Type='Nothing',
         ),
         'NoEnergy': Item(
             Category='Nothing',
             Class='Major',
-            Code=0xbae9, # see above
+            Code=0xbad1, # see above
             Name="No Energy",
             Type='NoEnergy',
         ),

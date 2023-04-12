@@ -157,14 +157,14 @@ class AreaMap(object):
         addr = self.getOffset(x, y, mapOffset)
         self.setTile(BGtile.fromWord(rom.readWord(addr)))
 
-    def setItemLoc(self, itemLoc, split):
+    def setItemLoc(self, itemLoc, split, revealNothing=False):
         item, loc = itemLoc.Item, itemLoc.Location
         attrs = loc.MapAttrs
         # determine tile class
         tileClass = "minor"
         if not split.startswith("Full") and loc.isClass(split):
             tileClass = "major"
-        if item.Category == "Nothing":
+        if revealNothing == True and item.Category == "Nothing":
             tileClass = "nothing"
         self.items[(attrs.X, attrs.Y)].append((loc, tileClass))
 

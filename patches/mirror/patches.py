@@ -131,7 +131,7 @@ patches = {
     },
     'Blinking[Crocomire Room Top]': {
         # door Door_4F_Room_A98D_PLM_ x/y updated
-        "bank_8f_Door_4F_Room_A98D_PLM_C854": [0x54, 0xc8, 0x36, 0x02, 0x4f, 0x8c],
+        "bank_8f_Door_4F_Room_A98D_PLM_C854": [0x54, 0xc8, 0x46, 0x02, 0x4f, 0x8c],
         snes_to_pc(0xa1bb30): [0x0],
     },
     'Blinking[Below Botwoon Energy Tank Right]': {

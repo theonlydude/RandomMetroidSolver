@@ -350,7 +350,7 @@ accessPointsDict['Crocomire Speedway Bottom'].ExitInfo.update({
     'direction': 0x06,
     'cap': (0x36, 0x02),
     'bitFlag': 0x00,
-    'screen': (0x03, 0x00),
+    'screen': (0x04, 0x00),
     'distanceToSpawn': 0x8000,
     'doorAsmPtr': 0x0000
 })
@@ -679,7 +679,7 @@ accessPointsDict['Norfair Map Room'].EntryInfo.update({
     'SamusY': 0xffff
 })
 accessPointsDict['Crocomire Room Top'].EntryInfo.update({
-    'SamusX': 0x383,
+    'SamusX': 0x47d,
     'SamusY': 0x98
 })
 accessPointsDict['Main Street Bottom'].EntryInfo.update({

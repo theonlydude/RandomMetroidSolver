@@ -11,3 +11,7 @@ PhantoonMarkMaptileOffset:
 CrocomireMarkMaptileOffset:	;this covers from the spike wall all the way to the freestanding item
 	DW $0000, $0000, $0100, $0000, $0200, $0000, $0300, $0000, $0400, $0000, $0500, $0000, $FFFF
 ;6 bytes left
+
+;;; fix croc save map icon (croc area map is off by one tile to the right in mirrortroid)
+org $82C923
+        dw $0190, $0060

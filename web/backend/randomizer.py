@@ -77,6 +77,9 @@ class Randomizer(object):
             "RLS4W4": "Rando League Season 4 week 4",
             "RLS4W5": "Rando League Season 4 week 5",
             "RLS4W7": "Rando League Season 4 week 7",
+            "RLS4GS": "Rando League Season 4 playoff GS",
+            "RLS4P1": "Rando League Season 4 playoff 1",
+            "RLS4P2": "Rando League Season 4 playoff 2",
         }
 
         randoPresetsCategories = {
@@ -89,7 +92,7 @@ class Randomizer(object):
             "Objectives": ["objectives_all_bosses", "objectives_clear_areas", "objectives_memes", "objectives_short", "objectives_long", "objectives_robots_notweaks"],
             "Hard": ["hardway2hell", "highway2hell", "stupid_hard", "objectives_hard_heat", "objectives_hard_water"],
             "Random": ["all_random", "quite_random", "surprise"],
-            "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "RLS4W2", "RLS4W3", "RLS4W4", "RLS4W5", "RLS4W7", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2", "SGLive2022_Game_1", "SGLive2022_Game_2", "SGLive2022_Game_3", "Boyz_League_SM_Rando"]
+            "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "RLS4W2", "RLS4W3", "RLS4W4", "RLS4W5", "RLS4W7", "RLS4GS", "RLS4P1", "RLS4P2", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2", "SGLive2022_Game_1", "SGLive2022_Game_2", "SGLive2022_Game_3", "Boyz_League_SM_Rando"]
         }
 
         startAPs = GraphUtils.getStartAccessPointNamesCategory()
@@ -211,7 +214,7 @@ class Randomizer(object):
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
                    'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
-                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized",
+                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "revealMap", "scavRandomized",
                    'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
@@ -396,7 +399,7 @@ class Randomizer(object):
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
                    'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
-                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized",
+                   'Infinite_Space_Jump', 'refill_before_save', 'hud', 'revealMap', "scavRandomized",
                    'relaxed_round_robin_cf']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
@@ -449,6 +452,7 @@ class Randomizer(object):
         self.session.randomizer['Infinite_Space_Jump'] = self.vars.Infinite_Space_Jump
         self.session.randomizer['refill_before_save'] = self.vars.refill_before_save
         self.session.randomizer['hud'] = self.vars.hud
+        self.session.randomizer['revealMap'] = self.vars.revealMap
         self.session.randomizer['scavNumLocs'] = self.vars.scavNumLocs
         self.session.randomizer['scavRandomized'] = self.vars.scavRandomized
         self.session.randomizer['tourian'] = self.vars.tourian

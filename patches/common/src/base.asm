@@ -536,7 +536,7 @@ backup_save:
 	sta [$4a],y
 	iny
 	iny
-	cpy #$065c
+	cpy #!regular_save_size
 	bmi -
 	;; copy checksum
 	lda !current_save_slot

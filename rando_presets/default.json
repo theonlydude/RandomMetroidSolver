@@ -45,6 +45,7 @@
     "refill_before_save": "off",
     "relaxed_round_robin_cf": "off",
     "hud": "off",
+    "revealMap": "on",
     "animals": "off",
     "No_Music": "off",
     "random_music": "off"

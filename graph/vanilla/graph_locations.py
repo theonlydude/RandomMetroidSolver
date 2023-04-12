@@ -2,61 +2,85 @@ from logic.helpers import Bosses
 from utils.parameters import Settings
 from rom.rom_patches import RomPatches
 from logic.smbool import SMBool
-from graph.location import locationsDict
+from graph.location import locationsDict, LocationMapAttrs, LocationMapTileKind
 
-locationsDict["Energy Tank, Gauntlet"].AccessFrom = {
+loc = locationsDict["Energy Tank, Gauntlet"]
+loc.AccessFrom = {
     'Landing Site': lambda sm: SMBool(True)
 }
-locationsDict["Energy Tank, Gauntlet"].Available = (
+loc.Available = (
     lambda sm: sm.wor(sm.canEnterAndLeaveGauntlet(),
                       sm.wand(sm.canShortCharge(),
                               sm.canEnterAndLeaveGauntletQty(1, 0)), # thanks ponk! https://youtu.be/jil5zTBCF1s
                       sm.canDoLowGauntlet())
 )
-locationsDict["Bomb"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(17, 3, LocationMapTileKind.FourWallsOneDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Bomb"]
+loc.AccessFrom = {
     'Landing Site': lambda sm: SMBool(True)
 }
-locationsDict["Bomb"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.haveItem('Morph'),
                        sm.traverse('FlywayRight'))
 )
-locationsDict["Bomb"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.wor(sm.knowsAlcatrazEscape(),
                       sm.canPassBombPassages())
 )
-locationsDict["Energy Tank, Terminator"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(25, 7, LocationMapTileKind.FourWallsOneDoor, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Energy Tank, Terminator"]
+loc.AccessFrom = {
     'Landing Site': lambda sm: sm.canPassTerminatorBombWall(),
     'Lower Mushrooms Left': lambda sm: sm.canPassCrateriaGreenPirates(),
     'Gauntlet Top': lambda sm: sm.haveItem('Morph')
 }
-locationsDict["Energy Tank, Terminator"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Reserve Tank, Brinstar"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(12, 7, LocationMapTileKind.ThreeWallsOneDoorOpenRight, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Reserve Tank, Brinstar"]
+loc.AccessFrom = {
     'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.traverse('MainShaftRight'))
 }
-locationsDict["Reserve Tank, Brinstar"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.wor(sm.canMockball(),
                               sm.haveItem('SpeedBooster')),
                        sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.traverse('EarlySupersRight')))
 )
-locationsDict["Charge Beam"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(13, 5, LocationMapTileKind.FourWallsOneDoor, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Charge Beam"]
+loc.AccessFrom = {
     'Big Pink': lambda sm: SMBool(True)
 }
-locationsDict["Charge Beam"].Available = (
+loc.Available = (
     lambda sm: sm.canPassBombPassages()
 )
-locationsDict["Morphing Ball"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(17, 12, LocationMapTileKind.ThreeWallsOpenBottom, hFlip=False, vFlip=True)
+
+
+loc = locationsDict["Morphing Ball"]
+loc.AccessFrom = {
     'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
 }
-locationsDict["Morphing Ball"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Energy Tank, Brinstar Ceiling"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(25, 11, LocationMapTileKind.ThreeWallsOpenRight, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Energy Tank, Brinstar Ceiling"]
+loc.AccessFrom = {
     'Blue Brinstar Elevator Bottom': lambda sm: sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor), sm.traverse('ConstructionZoneRight'))
 }
-locationsDict["Energy Tank, Brinstar Ceiling"].Available = (
-
+loc.Available = (
     lambda sm: sm.wor(sm.knowsCeilingDBoost(),
                       sm.canFly(),
                       sm.wor(sm.haveItem('HiJump'),
@@ -65,26 +89,38 @@ locationsDict["Energy Tank, Brinstar Ceiling"].Available = (
                                      sm.haveItem('SpeedBooster')),
                              sm.canSimpleShortCharge()))
 )
-locationsDict["Energy Tank, Etecoons"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(31, 11, LocationMapTileKind.TwoWallsCorridor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Energy Tank, Etecoons"]
+loc.AccessFrom = {
     'Etecoons Bottom': lambda sm: SMBool(True)
 }
-locationsDict["Energy Tank, Etecoons"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Energy Tank, Waterway"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(6, 11, LocationMapTileKind.ThreeWallsOneDoorOpenRight, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Energy Tank, Waterway"]
+loc.AccessFrom = {
     'Big Pink': lambda sm: SMBool(True)
 }
-locationsDict["Energy Tank, Waterway"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.canUsePowerBombs(),
                        sm.traverse('BigPinkBottomLeft'),
                        sm.haveItem('SpeedBooster'),
                        sm.wor(sm.haveItem('Gravity'),
                               sm.canSimpleShortCharge())) # from the blocks above the water
 )
-locationsDict["Energy Tank, Brinstar Gate"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(8, 14, LocationMapTileKind.ThreeWallsOpenRight, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Energy Tank, Brinstar Gate"]
+loc.AccessFrom = {
     'Big Pink': lambda sm: SMBool(True)
 }
-locationsDict["Energy Tank, Brinstar Gate"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.traverse('BigPinkRight'),
                        sm.wor(sm.haveItem('Wave'),
                               sm.wand(sm.haveItem('Super'),
@@ -93,10 +129,14 @@ locationsDict["Energy Tank, Brinstar Gate"].Available = (
                               sm.wand(sm.haveItem('Super'),
                                       sm.knowsReverseGateGlitchHiJumpLess())))
 )
-locationsDict["X-Ray Scope"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(21, 9, LocationMapTileKind.FourWallsOneDoor, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["X-Ray Scope"]
+loc.AccessFrom = {
     'Red Tower Top Left': lambda sm: SMBool(True)
 }
-locationsDict["X-Ray Scope"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.canUsePowerBombs(),
                        sm.traverse('RedTowerLeft'),
                        sm.traverse('RedBrinstarFirefleaLeft'),
@@ -111,39 +151,58 @@ locationsDict["X-Ray Scope"].Available = (
                                                      sm.wor(sm.haveItem('SpeedBooster'),
                                                             sm.canSpringBallJump()))))))
 )
-locationsDict["Spazer"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(23, 16, LocationMapTileKind.ThreeWallsOpenRight, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Spazer"]
+loc.AccessFrom = {
     'East Tunnel Right': lambda sm: SMBool(True)
 }
-locationsDict["Spazer"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.traverse('BelowSpazerTopRight'),
                        sm.wor(sm.canPassBombPassages(),
                               sm.wand(sm.haveItem('Morph'),
                                       RomPatches.has(RomPatches.SpazerShotBlock))))
 )
-locationsDict["Energy Tank, Kraid"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(38, 18, LocationMapTileKind.FourWallsOneDoor, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Energy Tank, Kraid"]
+loc.AccessFrom = {
     'Warehouse Zeela Room Left': lambda sm: SMBool(True)
 }
-locationsDict["Energy Tank, Kraid"].Available = (
+loc.Available = (
     lambda sm: sm.wand(Bosses.bossDead(sm, 'Kraid'),
                        # kill the beetoms to unlock the door to get out
                        sm.canKillBeetoms())
 )
-locationsDict["Kraid"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(43, 20, LocationMapTileKind.FourWallsOneDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Kraid"]
+loc.AccessFrom = {
     'KraidRoomIn': lambda sm: SMBool(True)
 }
-locationsDict["Kraid"].Available = (
+loc.Available = (
     lambda sm: sm.enoughStuffsKraid()
 )
-locationsDict["Varia Suit"].AccessFrom = {
+
+
+loc = locationsDict["Varia Suit"]
+loc.AccessFrom = {
     'KraidRoomIn': lambda sm: SMBool(True)
 }
-locationsDict["Varia Suit"].Available = (
+loc.Available = (
     lambda sm: Bosses.bossDead(sm, 'Kraid')
 )
-locationsDict["Ice Beam"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(57, 20, LocationMapTileKind.FourWallsOneDoor, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Ice Beam"]
+loc.AccessFrom = {
     'Business Center': lambda sm: sm.traverse('BusinessCenterTopLeft')
 }
-locationsDict["Ice Beam"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Ice Beam']),
                        sm.wor(sm.canPassBombPassages(), # to exit, or if you fail entrance
                               sm.wand(sm.haveItem('Ice'), # harder strat
@@ -153,29 +212,41 @@ locationsDict["Ice Beam"].Available = (
                                       sm.knowsMockball()),
                               sm.haveItem('SpeedBooster')))
 )
-locationsDict["Energy Tank, Crocomire"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(5, 3, LocationMapTileKind.FourWallsOneDoor, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Energy Tank, Crocomire"]
+loc.AccessFrom = {
     'Crocomire Room Top': lambda sm: SMBool(True)
 }
-locationsDict["Energy Tank, Crocomire"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.haveItem('Crocomire'),
                        sm.wor(sm.haveItem('Grapple'),
                               sm.haveItem('SpaceJump'),
                               sm.energyReserveCountOk(3/sm.getDmgReduction()[0])))
 )
-locationsDict["Hi-Jump Boots"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(19, 11, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Hi-Jump Boots"]
+loc.AccessFrom = {
     'Business Center': lambda sm: sm.wor(RomPatches.has(RomPatches.HiJumpAreaBlueDoor), sm.traverse('BusinessCenterBottomLeft'))
 }
-locationsDict["Hi-Jump Boots"].Available = (
+loc.Available = (
     lambda sm: sm.haveItem('Morph')
 )
-locationsDict["Hi-Jump Boots"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.wor(sm.canPassBombPassages(),
                       sm.wand(sm.haveItem('Morph'), RomPatches.has(RomPatches.HiJumpShotBlock)))
 )
-locationsDict["Grapple Beam"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(7, 7, LocationMapTileKind.FourWallsOneDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Grapple Beam"]
+loc.AccessFrom = {
     'Crocomire Room Top': lambda sm: SMBool(True)
 }
-locationsDict["Grapple Beam"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.haveItem('Crocomire'),
                        sm.wor(sm.wand(sm.haveItem('Morph'),
                                       sm.canFly()),
@@ -188,7 +259,7 @@ locationsDict["Grapple Beam"].Available = (
                                       sm.haveItem('HiJump')), # jump from the yellow plateform ennemy
                               sm.canGreenGateGlitch()))
 )
-locationsDict["Grapple Beam"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.wor(sm.haveItem('Morph'), # regular exit
                       sm.wand(sm.haveItem('Super'), # grapple escape reverse
                               sm.wor(sm.canFly(), # Grapple Tutorial Room 2
@@ -198,102 +269,152 @@ locationsDict["Grapple Beam"].PostAvailable = (
                                      sm.haveItem('SpaceJump'),
                                      sm.haveItem('Grapple'))))
 )
-locationsDict["Reserve Tank, Norfair"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(3, 17, LocationMapTileKind.ThreeWallsOneDoorOpenBottom, hFlip=True, vFlip=True)
+
+
+loc = locationsDict["Reserve Tank, Norfair"]
+loc.AccessFrom = {
     'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
     'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop(),
 }
-locationsDict["Reserve Tank, Norfair"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
 )
-locationsDict["Speed Booster"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(18, 3, LocationMapTileKind.ThreeWallsOpenRight, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Speed Booster"]
+loc.AccessFrom = {
     'Bubble Mountain Top': lambda sm: sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoors),
                                              sm.wand(sm.traverse('BubbleMountainTopRight'),
                                                      sm.traverse('SpeedBoosterHallRight')))
 }
-locationsDict["Speed Booster"].Available = (
+loc.Available = (
     lambda sm: sm.canHellRunToSpeedBooster()
 )
-locationsDict["Wave Beam"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(37, 3, LocationMapTileKind.FourWallsOneDoor, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Wave Beam"]
+loc.AccessFrom = {
     'Bubble Mountain Top': lambda sm: sm.canAccessDoubleChamberItems()
 }
-locationsDict["Wave Beam"].Available = (
+loc.Available = (
     lambda sm: sm.traverse('DoubleChamberRight')
 )
-locationsDict["Wave Beam"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.canExitWaveBeam()
 )
-locationsDict["Ridley"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(29, 5, LocationMapTileKind.FourWallsOneDoor, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Ridley"]
+loc.AccessFrom = {
     'RidleyRoomIn': lambda sm: SMBool(True)
 }
-locationsDict["Ridley"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffsRidley())
 )
-locationsDict["Energy Tank, Ridley"].AccessFrom = {
+
+
+loc = locationsDict["Energy Tank, Ridley"]
+loc.AccessFrom = {
     'RidleyRoomIn': lambda sm: sm.wand(sm.haveItem('Ridley'), sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']))
 }
-locationsDict["Energy Tank, Ridley"].Available = (
+loc.Available = (
     lambda sm: sm.haveItem('Morph')
 )
-locationsDict["Screw Attack"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(22, 18, LocationMapTileKind.FourWallsOneDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Screw Attack"]
+loc.AccessFrom = {
     'Screw Attack Bottom': lambda sm: SMBool(True)
 }
-locationsDict["Screw Attack"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Screw Attack"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.canExitScrewAttackArea()
 )
-locationsDict["Energy Tank, Firefleas"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(20, 17, LocationMapTileKind.ThreeWallsOneDoorOpenBottom, hFlip=False, vFlip=True)
+
+
+loc = locationsDict["Energy Tank, Firefleas"]
+loc.AccessFrom = {
     'Firefleas': lambda sm: SMBool(True)
 }
-locationsDict["Energy Tank, Firefleas"].Available = (
+loc.Available = (
     lambda sm: sm.wor(RomPatches.has(RomPatches.FirefleasRemoveFune),
                       # get past the fune
                                      sm.haveItem('Super'),
                       sm.canPassBombPassages(),
                       sm.canUseSpringBall())
 )
-locationsDict["Energy Tank, Firefleas"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.wor(sm.knowsFirefleasWalljump(),
                       sm.wor(sm.haveItem('Ice'),
                              sm.haveItem('HiJump'),
                              sm.canFly(),
                              sm.canSpringBallJump()))
 )
-locationsDict["Reserve Tank, Wrecked Ship"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(37, 12, LocationMapTileKind.TwoWallsCorner, hFlip=True, vFlip=True)
+
+
+loc = locationsDict["Reserve Tank, Wrecked Ship"]
+loc.AccessFrom = {
     'Bowling': lambda sm: SMBool(True)
 }
-locationsDict["Reserve Tank, Wrecked Ship"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.canUsePowerBombs(),
                        sm.haveItem('SpeedBooster'))
 )
-locationsDict["Energy Tank, Wrecked Ship"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(15, 12, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Energy Tank, Wrecked Ship"]
+loc.AccessFrom = {
     'Wrecked Ship Back': lambda sm: sm.wor(RomPatches.has(RomPatches.WsEtankBlueDoor),
                                            sm.traverse('ElectricDeathRoomTopLeft'))
 }
-locationsDict["Energy Tank, Wrecked Ship"].Available = (
+loc.Available = (
     lambda sm: sm.wor(Bosses.bossDead(sm, 'Phantoon'),
                       RomPatches.has(RomPatches.WsEtankPhantoonAlive))
 )
-locationsDict["Phantoon"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(18, 14, LocationMapTileKind.TwoWallsCorner, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Phantoon"]
+loc.AccessFrom = {
     'PhantoonRoomIn': lambda sm: SMBool(True)
 }
-locationsDict["Phantoon"].Available = (
+loc.Available = (
     lambda sm: sm.enoughStuffsPhantoon()
 )
-locationsDict["Right Super, Wrecked Ship"].AccessFrom = {
+
+
+loc = locationsDict["Right Super, Wrecked Ship"]
+loc.AccessFrom = {
     'Wrecked Ship Main': lambda sm: Bosses.bossDead(sm, 'Phantoon')
 }
-locationsDict["Right Super, Wrecked Ship"].Available = (
+loc.Available = (
     lambda sm: sm.canPassBombPassages()
 )
-locationsDict["Gravity Suit"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(21, 18, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Gravity Suit"]
+loc.AccessFrom = {
     'Bowling': lambda sm: SMBool(True)
 }
-locationsDict["Gravity Suit"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Energy Tank, Mama turtle"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(10, 14, LocationMapTileKind.FourWallsCorridor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Energy Tank, Mama turtle"]
+loc.AccessFrom = {
     'Main Street Bottom': lambda sm: sm.wand(sm.canDoOuterMaridia(),
                                              sm.wor(sm.traverse('FishTankRight'),
                                                     RomPatches.has(RomPatches.MamaTurtleBlueDoor)),
@@ -310,16 +431,20 @@ locationsDict["Energy Tank, Mama turtle"].AccessFrom = {
                                                            sm.haveItem('Grapple')))),
     'Mama Turtle': lambda sm: SMBool(True)
 }
-locationsDict["Energy Tank, Mama turtle"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Plasma Beam"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(18, 13, LocationMapTileKind.TwoWallsCorner, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Plasma Beam"]
+loc.AccessFrom = {
     'Toilet Top': lambda sm: SMBool(True)
 }
-locationsDict["Plasma Beam"].Available = (
+loc.Available = (
     lambda sm: Bosses.bossDead(sm, 'Draygon')
 )
-locationsDict["Plasma Beam"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.wand(sm.wor(sm.wand(sm.canShortCharge(),
                                       sm.knowsKillPlasmaPiratesWithSpark()),
                               sm.wand(sm.canFireChargedShots(),
@@ -338,175 +463,257 @@ locationsDict["Plasma Beam"].PostAvailable = (
                               sm.wand(sm.canSpringBallJump(),
                                       sm.knowsSpringBallJumpFromWall())))
 )
-locationsDict["Reserve Tank, Maridia"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(28, 3, LocationMapTileKind.TwoWallsCorner, hFlip=True, vFlip=True)
+
+
+loc = locationsDict["Reserve Tank, Maridia"]
+loc.AccessFrom = {
     'Left Sandpit': lambda sm: sm.canClimbWestSandHole()
 }
-locationsDict["Reserve Tank, Maridia"].Available = (
+loc.Available = (
     lambda sm: sm.canAccessItemsInWestSandHole()
 )
-locationsDict["Spring Ball"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(20, 15, LocationMapTileKind.TwoWallsCorner, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Spring Ball"]
+loc.AccessFrom = {
     'Oasis Bottom': lambda sm: sm.canTraverseSandPits()
 }
-locationsDict["Spring Ball"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.canAccessShaktoolFromPantsRoom(),
                        sm.canUsePowerBombs(), # in Shaktool room to let Shaktool access the sand blocks
                        sm.wor(sm.haveItem('Gravity'), sm.canUseSpringBall())) # acess the item in spring ball room
 )
-locationsDict["Spring Ball"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.wor(sm.wand(sm.haveItem('Gravity'),
                               sm.wor(sm.haveItem('HiJump'),
                                      sm.canFly(),
                                      sm.knowsMaridiaWallJumps())),
                       sm.canSpringBallJump())
 )
-locationsDict["Energy Tank, Botwoon"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(33, 17, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Energy Tank, Botwoon"]
+loc.AccessFrom = {
     'Post Botwoon': lambda sm: sm.canJumpUnderwater()
 }
-locationsDict["Energy Tank, Botwoon"].Available = (
+loc.Available = (
     lambda sm: sm.haveItem('Morph')
 )
-locationsDict["Draygon"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(29, 9, LocationMapTileKind.TwoWallsCorridor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Draygon"]
+loc.AccessFrom = {
     'Draygon Room Bottom': lambda sm: SMBool(True)
 }
-locationsDict["Draygon"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Space Jump"].AccessFrom = {
+
+
+loc = locationsDict["Space Jump"]
+loc.AccessFrom = {
     'Draygon Room Bottom': lambda sm: SMBool(True)
 }
-locationsDict["Space Jump"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Space Jump"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: Bosses.bossDead(sm, 'Draygon')
 )
-locationsDict["Mother Brain"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(38, 11, LocationMapTileKind.FourWallsOneDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Mother Brain"]
+loc.AccessFrom = {
     'Golden Four': lambda sm: sm.canPassG4()
 }
-locationsDict["Mother Brain"].Available = (
+loc.Available = (
     lambda sm: sm.wor(RomPatches.has(RomPatches.NoTourian),
                       sm.enoughStuffTourian())
 )
-locationsDict["Spore Spawn"].AccessFrom = {
+
+
+loc = locationsDict["Spore Spawn"]
+loc.AccessFrom = {
     'Big Pink': lambda sm: SMBool(True)
 }
-locationsDict["Spore Spawn"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.traverse('BigPinkTopRight'),
                        sm.enoughStuffSporeSpawn())
 )
-locationsDict["Botwoon"].AccessFrom = {
+
+
+loc = locationsDict["Botwoon"]
+loc.AccessFrom = {
     'Aqueduct Bottom': lambda sm: sm.canJumpUnderwater()
 }
-locationsDict["Botwoon"].Available = (
+loc.Available = (
     # includes botwoon hallway conditions
     lambda sm: sm.canDefeatBotwoon()
 )
-locationsDict["Crocomire"].AccessFrom = {
+
+
+loc = locationsDict["Crocomire"]
+loc.AccessFrom = {
     'Crocomire Room Top': lambda sm: SMBool(True)
 }
-locationsDict["Crocomire"].Available = (
+loc.Available = (
     lambda sm: sm.enoughStuffCroc()
 )
-locationsDict["Golden Torizo"].AccessFrom = {
+
+
+loc = locationsDict["Golden Torizo"]
+loc.AccessFrom = {
     'Screw Attack Bottom': lambda sm: SMBool(True)
 }
-locationsDict["Golden Torizo"].Available = (
+loc.Available = (
     lambda sm: sm.enoughStuffGT()
 )
-locationsDict["Power Bomb (Crateria surface)"].AccessFrom = {
+
+
+loc = locationsDict["Power Bomb (Crateria surface)"]
+loc.AccessFrom = {
     'Landing Site': lambda sm: SMBool(True)
 }
-locationsDict["Power Bomb (Crateria surface)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.traverse('LandingSiteTopRight'),
                        sm.wor(sm.haveItem('SpeedBooster'),
                               sm.canFly()))
 )
-locationsDict["Missile (outside Wrecked Ship bottom)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(33, 2, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Missile (outside Wrecked Ship bottom)"]
+loc.AccessFrom = {
     'West Ocean Left': lambda sm: SMBool(True)
 }
-locationsDict["Missile (outside Wrecked Ship bottom)"].Available = (
+loc.Available = (
     lambda sm: sm.haveItem('Morph')
 )
-locationsDict["Missile (outside Wrecked Ship bottom)"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.canPassBombPassages()
 )
-locationsDict["Missile (outside Wrecked Ship top)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(38, 6, LocationMapTileKind.ThreeWallsOpenRight, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (outside Wrecked Ship top)"]
+loc.AccessFrom = {
     'Wrecked Ship Main': lambda sm: SMBool(True)
 }
-locationsDict["Missile (outside Wrecked Ship top)"].Available = (
+loc.Available = (
     lambda sm: Bosses.bossDead(sm, 'Phantoon')
 )
-locationsDict["Missile (outside Wrecked Ship middle)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(39, 1, LocationMapTileKind.SingleWallHorizontal, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (outside Wrecked Ship middle)"]
+loc.AccessFrom = {
     'Wrecked Ship Main': lambda sm: SMBool(True)
 }
-locationsDict["Missile (outside Wrecked Ship middle)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.haveItem('Super'), sm.haveItem('Morph'), Bosses.bossDead(sm, 'Phantoon'))
 )
-locationsDict["Missile (Crateria moat)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(38, 3, LocationMapTileKind.SingleWallVertical, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (Crateria moat)"]
+loc.AccessFrom = {
     'Moat Left': lambda sm: SMBool(True)
 }
-locationsDict["Missile (Crateria moat)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (Crateria bottom)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(36, 5, LocationMapTileKind.TwoWallsCornerWithHorizontalDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (Crateria bottom)"]
+loc.AccessFrom = {
     'Landing Site': lambda sm: SMBool(True)
 }
-locationsDict["Missile (Crateria bottom)"].Available = (
+loc.Available = (
     lambda sm: sm.wor(sm.canDestroyBombWalls(),
                       sm.wand(sm.haveItem('SpeedBooster'),
                               sm.knowsOldMBWithSpeed()))
 )
-locationsDict["Missile (Crateria gauntlet right)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(20, 19, LocationMapTileKind.ThreeWallsOpenBottom, hFlip=False, vFlip=True)
+
+
+loc = locationsDict["Missile (Crateria gauntlet right)"]
+loc.AccessFrom = {
     'Landing Site': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
                                               sm.canPassBombPassages()),
                                       sm.canDoLowGauntlet()),
     'Gauntlet Top': lambda sm: SMBool(True)
 }
-locationsDict["Missile (Crateria gauntlet right)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (Crateria gauntlet left)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(11, 4, LocationMapTileKind.ThreeWallsOpenBottom, hFlip=False, vFlip=True)
+
+
+loc = locationsDict["Missile (Crateria gauntlet left)"]
+loc.AccessFrom = {
     'Landing Site': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
                                               sm.canPassBombPassages()),
                                       sm.canDoLowGauntlet()),
     'Gauntlet Top': lambda sm: SMBool(True)
 }
-locationsDict["Missile (Crateria gauntlet left)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Super Missile (Crateria)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(11, 4, LocationMapTileKind.ThreeWallsOpenBottom, hFlip=False, vFlip=True)
+
+
+loc = locationsDict["Super Missile (Crateria)"]
+loc.AccessFrom = {
     'Landing Site': lambda sm: SMBool(True)
 }
-locationsDict["Super Missile (Crateria)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.canPassBombPassages(),
                        sm.traverse("ClimbRight"),
                        sm.haveItem('SpeedBooster'),
                        # reserves are hard to trigger midspark when not having ETanks
-                                      sm.wor(sm.wand(sm.energyReserveCountOk(2), sm.itemCountOk('ETank', 1)), # need energy to get out
-                                             sm.wand(sm.itemCountOk('ETank', 1),
-                                                     sm.wor(sm.haveItem('Grapple'), # use grapple/space or dmg protection to get out
-                                                            sm.haveItem('SpaceJump'),
-                                                            sm.heatProof()))),
+                       sm.wor(sm.wand(sm.energyReserveCountOk(2), sm.itemCountOk('ETank', 1)), # need energy to get out
+                              sm.wand(sm.itemCountOk('ETank', 1),
+                                      sm.wor(sm.haveItem('Grapple'), # use grapple/space or dmg protection to get out
+                                             sm.haveItem('SpaceJump'),
+                                             sm.heatProof()))),
                        sm.wor(sm.haveItem('Ice'),
                               sm.wand(sm.canSimpleShortCharge(), sm.canUsePowerBombs()))) # there's also a dboost involved in simple short charge or you have to kill the yellow enemies with some power bombs
 )
-locationsDict["Missile (Crateria middle)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(24, 10, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Missile (Crateria middle)"]
+loc.AccessFrom = {
     'Landing Site': lambda sm: SMBool(True)
 }
-locationsDict["Missile (Crateria middle)"].Available = (
+loc.Available = (
     lambda sm: sm.canPassBombPassages()
 )
-locationsDict["Power Bomb (green Brinstar bottom)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(16, 8, LocationMapTileKind.FourWallsOneDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Power Bomb (green Brinstar bottom)"]
+loc.AccessFrom = {
     'Etecoons Bottom': lambda sm: SMBool(True)
 }
-locationsDict["Power Bomb (green Brinstar bottom)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.haveItem('Morph'),
                        sm.canKillBeetoms())
 )
-locationsDict["Super Missile (pink Brinstar)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(12, 8, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Super Missile (pink Brinstar)"]
+loc.AccessFrom = {
     'Big Pink': lambda sm: SMBool(True)
 }
-locationsDict["Super Missile (pink Brinstar)"].Available = (
+loc.Available = (
     lambda sm: sm.wor(sm.wand(sm.traverse('BigPinkTopRight'),
                               sm.haveItem('SporeSpawn')),
                       # back way into spore spawn
@@ -514,30 +721,42 @@ locationsDict["Super Missile (pink Brinstar)"].Available = (
                               sm.canOpenGreenDoors(),
                               sm.canPassBombPassages()))
 )
-locationsDict["Super Missile (pink Brinstar)"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.wand(sm.canOpenGreenDoors(),
                        sm.canPassBombPassages())
 )
-locationsDict["Missile (green Brinstar below super missile)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(24, 10, LocationMapTileKind.TwoWallsCornerWithPixel, hFlip=True, vFlip=True)
+
+
+loc = locationsDict["Missile (green Brinstar below super missile)"]
+loc.AccessFrom = {
     'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.traverse('MainShaftRight'))
 }
-locationsDict["Missile (green Brinstar below super missile)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (green Brinstar below super missile)"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.wor(RomPatches.has(RomPatches.EarlySupersShotBlock), sm.canPassBombPassages())
 )
-locationsDict["Super Missile (green Brinstar top)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(11, 5, LocationMapTileKind.TwoWallsCorridor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Super Missile (green Brinstar top)"]
+loc.AccessFrom = {
     'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.traverse('MainShaftRight'))
 }
-locationsDict["Super Missile (green Brinstar top)"].Available = (
+loc.Available = (
     lambda sm: sm.wor(sm.canMockball(),
                       sm.haveItem('SpeedBooster'))
 )
-locationsDict["Missile (green Brinstar behind missile)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(10, 4, LocationMapTileKind.ThreeWallsOpenRight, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (green Brinstar behind missile)"]
+loc.AccessFrom = {
     'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.traverse('MainShaftRight'))
 }
-locationsDict["Missile (green Brinstar behind missile)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.haveItem('Morph'),
                        sm.wor(sm.canMockball(),
                               sm.haveItem('SpeedBooster')),
@@ -546,113 +765,181 @@ locationsDict["Missile (green Brinstar behind missile)"].Available = (
                               sm.wand(sm.knowsRonPopeilScrew(),
                                       sm.haveItem('ScrewAttack'))))
 )
-locationsDict["Missile (green Brinstar behind reserve tank)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(14, 5, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Missile (green Brinstar behind reserve tank)"]
+loc.AccessFrom = {
     'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.traverse('MainShaftRight'))
 }
-locationsDict["Missile (green Brinstar behind reserve tank)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.traverse('EarlySupersRight'),
                        sm.haveItem('Morph'),
                        sm.wor(sm.canMockball(),
                               sm.haveItem('SpeedBooster')))
 )
-locationsDict["Missile (pink Brinstar top)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(14, 5, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Missile (pink Brinstar top)"]
+loc.AccessFrom = {
     'Big Pink': lambda sm: SMBool(True)
 }
-locationsDict["Missile (pink Brinstar top)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (pink Brinstar bottom)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(17, 8, LocationMapTileKind.SingleWallVertical, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (pink Brinstar bottom)"]
+loc.AccessFrom = {
     'Big Pink': lambda sm: SMBool(True)
 }
-locationsDict["Missile (pink Brinstar bottom)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Power Bomb (pink Brinstar)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(17, 11, LocationMapTileKind.TwoWallsCorner, hFlip=False, vFlip=True)
+
+
+loc = locationsDict["Power Bomb (pink Brinstar)"]
+loc.AccessFrom = {
     'Big Pink': lambda sm: SMBool(True)
 }
-locationsDict["Power Bomb (pink Brinstar)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.canUsePowerBombs(),
                        sm.haveItem('Super'))
 )
-locationsDict["Missile (green Brinstar pipe)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(15, 9, LocationMapTileKind.TwoWallsCornerWithPixel, hFlip=False, vFlip=True)
+
+
+loc = locationsDict["Missile (green Brinstar pipe)"]
+loc.AccessFrom = {
     'Green Hill Zone Top Right': lambda sm: SMBool(True)
 }
-locationsDict["Missile (green Brinstar pipe)"].Available = (
+loc.Available = (
     lambda sm: sm.haveItem('Morph')
 )
-locationsDict["Power Bomb (blue Brinstar)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(22, 12, LocationMapTileKind.TwoWallsCorner, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Power Bomb (blue Brinstar)"]
+loc.AccessFrom = {
     'Blue Brinstar Elevator Bottom': lambda sm: sm.canUsePowerBombs(),
     'Morph Ball Room Left': lambda sm: sm.wor(sm.canPassBombPassages(),
                                               sm.wand(sm.haveItem('Morph'),
                                                       sm.canShortCharge())) # speedball
 }
-locationsDict["Power Bomb (blue Brinstar)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (blue Brinstar middle)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(23, 11, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Missile (blue Brinstar middle)"]
+loc.AccessFrom = {
     'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
 }
-locationsDict["Missile (blue Brinstar middle)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.wor(RomPatches.has(RomPatches.BlueBrinstarMissile), sm.haveItem('Morph')),
                        sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor), sm.traverse('ConstructionZoneRight')))
 )
-locationsDict["Super Missile (green Brinstar bottom)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(32, 11, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Super Missile (green Brinstar bottom)"]
+loc.AccessFrom = {
     'Etecoons Supers': lambda sm: SMBool(True)
 }
-locationsDict["Super Missile (green Brinstar bottom)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (blue Brinstar bottom)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(5, 11, LocationMapTileKind.FourWallsOneDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (blue Brinstar bottom)"]
+loc.AccessFrom = {
     'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
 }
-locationsDict["Missile (blue Brinstar bottom)"].Available = (
+loc.Available = (
     lambda sm: sm.haveItem('Morph')
 )
-locationsDict["Missile (blue Brinstar top)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(28, 12, LocationMapTileKind.FourWallsOneDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (blue Brinstar top)"]
+loc.AccessFrom = {
     'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
 }
-locationsDict["Missile (blue Brinstar top)"].Available = (
+loc.Available = (
     lambda sm: sm.canAccessBillyMays()
 )
-locationsDict["Missile (blue Brinstar behind missile)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(29, 9, LocationMapTileKind.FourWallsOneDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (blue Brinstar behind missile)"]
+loc.AccessFrom = {
     'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
 }
-locationsDict["Missile (blue Brinstar behind missile)"].Available = (
+loc.Available = (
     lambda sm: sm.canAccessBillyMays()
 )
-locationsDict["Power Bomb (red Brinstar sidehopper room)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(29, 9, LocationMapTileKind.FourWallsOneDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Power Bomb (red Brinstar sidehopper room)"]
+loc.AccessFrom = {
     'Red Brinstar Elevator': lambda sm: SMBool(True)
 }
-locationsDict["Power Bomb (red Brinstar sidehopper room)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.traverse('RedTowerElevatorTopLeft'),
                        sm.canUsePowerBombs())
 )
-locationsDict["Power Bomb (red Brinstar spike room)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(35, 9, LocationMapTileKind.ThreeWallsOpenBottom, hFlip=False, vFlip=True)
+
+
+loc = locationsDict["Power Bomb (red Brinstar spike room)"]
+loc.AccessFrom = {
     'Red Brinstar Elevator': lambda sm: SMBool(True)
 }
-locationsDict["Power Bomb (red Brinstar spike room)"].Available = (
+loc.Available = (
     lambda sm: sm.traverse('RedTowerElevatorBottomLeft')
 )
-locationsDict["Missile (red Brinstar spike room)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(35, 12, LocationMapTileKind.ThreeWallsOpenRight, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (red Brinstar spike room)"]
+loc.AccessFrom = {
     'Red Brinstar Elevator': lambda sm: SMBool(True)
 }
-locationsDict["Missile (red Brinstar spike room)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.traverse('RedTowerElevatorBottomLeft'),
                        sm.canUsePowerBombs())
 )
-locationsDict["Missile (Kraid)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(34, 12, LocationMapTileKind.ThreeWallsOpenRight, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (Kraid)"]
+loc.AccessFrom = {
     'Warehouse Zeela Room Left': lambda sm: SMBool(True)
 }
-locationsDict["Missile (Kraid)"].Available = (
+loc.Available = (
     lambda sm: sm.canUsePowerBombs()
 )
-locationsDict["Missile (lava room)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(47, 19, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Missile (lava room)"]
+loc.AccessFrom = {
     'Cathedral': lambda sm: SMBool(True)
 }
-locationsDict["Missile (lava room)"].Available = (
+loc.Available = (
     lambda sm: sm.haveItem('Morph')
 )
-locationsDict["Missile (below Ice Beam)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(16, 5, LocationMapTileKind.TwoWallsCornerWithHorizontalDoor, hFlip=True, vFlip=True)
+
+
+loc = locationsDict["Missile (below Ice Beam)"]
+loc.AccessFrom = {
     'Business Center': lambda sm: sm.wand(sm.traverse('BusinessCenterTopLeft'),
                                           sm.canUsePowerBombs(),
                                           sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Ice Beam']),
@@ -664,35 +951,51 @@ locationsDict["Missile (below Ice Beam)"].AccessFrom = {
                                                     sm.haveItem('SpeedBooster'),
                                                     sm.knowsIceMissileFromCroc())
 }
-locationsDict["Missile (below Ice Beam)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (above Crocomire)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(2, 5, LocationMapTileKind.ThreeWallsOneDoorOpenBottom, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Missile (above Crocomire)"]
+loc.AccessFrom = {
     'Grapple Escape': lambda sm: SMBool(True)
 }
-locationsDict["Missile (above Crocomire)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (Hi-Jump Boots)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(11, 7, LocationMapTileKind.TwoWallsCornerWithHorizontalDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (Hi-Jump Boots)"]
+loc.AccessFrom = {
     'Business Center': lambda sm: sm.wor(RomPatches.has(RomPatches.HiJumpAreaBlueDoor), sm.traverse('BusinessCenterBottomLeft'))
 }
-locationsDict["Missile (Hi-Jump Boots)"].Available = (
+loc.Available = (
     lambda sm: sm.haveItem('Morph')
 )
-locationsDict["Missile (Hi-Jump Boots)"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.wor(sm.canPassBombPassages(),
                       sm.wand(RomPatches.has(RomPatches.HiJumpShotBlock), sm.haveItem('Morph')))
 )
-locationsDict["Energy Tank (Hi-Jump Boots)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(8, 6, LocationMapTileKind.TwoWallsCornerWithPixel, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Energy Tank (Hi-Jump Boots)"]
+loc.AccessFrom = {
     'Business Center': lambda sm: sm.wor(RomPatches.has(RomPatches.HiJumpAreaBlueDoor), sm.traverse('BusinessCenterBottomLeft'))
 }
-locationsDict["Energy Tank (Hi-Jump Boots)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Power Bomb (Crocomire)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(9, 6, LocationMapTileKind.FourWallsOneDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Power Bomb (Crocomire)"]
+loc.AccessFrom = {
     'Crocomire Room Top': lambda sm: SMBool(True)
 }
-locationsDict["Power Bomb (Crocomire)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.traverse('PostCrocomireUpperLeft'),
                        sm.haveItem('Crocomire'),
                        sm.wor(sm.wor(sm.canFly(),
@@ -705,16 +1008,24 @@ locationsDict["Power Bomb (Crocomire)"].Available = (
                                              sm.knowsCrocPBsIce()),
                                      sm.knowsCrocPBsDBoost())))
 )
-locationsDict["Missile (below Crocomire)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(9, 11, LocationMapTileKind.FourWallsOneDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (below Crocomire)"]
+loc.AccessFrom = {
     'Crocomire Room Top': lambda sm: SMBool(True)
 }
-locationsDict["Missile (below Crocomire)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.traverse('PostCrocomireShaftRight'), sm.haveItem('Crocomire'), sm.haveItem('Morph'))
 )
-locationsDict["Missile (Grapple Beam)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(14, 16, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Missile (Grapple Beam)"]
+loc.AccessFrom = {
     'Crocomire Room Top': lambda sm: SMBool(True)
 }
-locationsDict["Missile (Grapple Beam)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.haveItem('Crocomire'),
                        sm.wor(sm.wor(sm.wand(sm.haveItem('Morph'), # from below
                                              sm.canFly()),
@@ -724,126 +1035,194 @@ locationsDict["Missile (Grapple Beam)"].Available = (
                               sm.wand(sm.canGreenGateGlitch(), # from grapple room
                                       sm.canFly()))) # TODO::test if accessible with a spark (short charge), and how many etanks required
 )
-locationsDict["Missile (Grapple Beam)"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.wor(sm.haveItem('Morph'), # normal exit
                       sm.wand(sm.haveItem('Super'), # go back to grapple room
                               sm.wor(sm.haveItem('SpaceJump'),
                                      sm.wand(sm.haveItem('SpeedBooster'), sm.haveItem('HiJump'))))) # jump from the yellow plateform ennemy
 )
-locationsDict["Missile (Norfair Reserve Tank)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(8, 16, LocationMapTileKind.TwoWallsCorner, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Missile (Norfair Reserve Tank)"]
+loc.AccessFrom = {
     'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
     'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop()
 }
-locationsDict["Missile (Norfair Reserve Tank)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
 )
-locationsDict["Missile (bubble Norfair green door)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(18, 3, LocationMapTileKind.ThreeWallsOpenRight, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (bubble Norfair green door)"]
+loc.AccessFrom = {
     'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
     'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop()
 }
-locationsDict["Missile (bubble Norfair green door)"].Available = (
+loc.Available = (
     lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve Missiles'])
 )
-locationsDict["Missile (bubble Norfair)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(21, 3, LocationMapTileKind.FourWallsOneDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (bubble Norfair)"]
+loc.AccessFrom = {
     'Bubble Mountain': lambda sm: SMBool(True)
 }
-locationsDict["Missile (bubble Norfair)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (Speed Booster)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(23, 6, LocationMapTileKind.TwoWallsCorner, hFlip=True, vFlip=True)
+
+
+loc = locationsDict["Missile (Speed Booster)"]
+loc.AccessFrom = {
     'Bubble Mountain Top': lambda sm: sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoors),
                                              sm.traverse('BubbleMountainTopRight'))
 }
-locationsDict["Missile (Speed Booster)"].Available = (
+loc.Available = (
     lambda sm: sm.canHellRunToSpeedBooster()
 )
-locationsDict["Missile (Speed Booster)"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.canHellRunBackFromSpeedBoosterMissile()
 )
-locationsDict["Missile (Wave Beam)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(36, 3, LocationMapTileKind.ThreeWallsOneDoorOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Missile (Wave Beam)"]
+loc.AccessFrom = {
     'Bubble Mountain Top': lambda sm: sm.canAccessDoubleChamberItems()
 }
-locationsDict["Missile (Wave Beam)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (Gold Torizo)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(26, 5, LocationMapTileKind.SingleWallHorizontal, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (Gold Torizo)"]
+loc.AccessFrom = {
     'LN Above GT': lambda sm: SMBool(True)
 }
-locationsDict["Missile (Gold Torizo)"].Available = (
+loc.Available = (
     lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
 )
-locationsDict["Missile (Gold Torizo)"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.enoughStuffGT()
 )
-locationsDict["Super Missile (Gold Torizo)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(18, 16, LocationMapTileKind.FourWallsOneDoor, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Super Missile (Gold Torizo)"]
+loc.AccessFrom = {
     'Screw Attack Bottom': lambda sm: SMBool(True)
 }
-locationsDict["Super Missile (Gold Torizo)"].Available = (
+loc.Available = (
     lambda sm: sm.canDestroyBombWalls()
 )
-locationsDict["Super Missile (Gold Torizo)"].PostAvailable = (
+loc.PostAvailable = (
     lambda sm: sm.enoughStuffGT()
 )
-locationsDict["Missile (Mickey Mouse room)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(19, 16, LocationMapTileKind.TwoWallsCorner, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Missile (Mickey Mouse room)"]
+loc.AccessFrom = {
     'LN Entrance': lambda sm: sm.wand(sm.canUsePowerBombs(), sm.canPassWorstRoom()),
 }
-locationsDict["Missile (Mickey Mouse room)"].Available = (
+loc.Available = (
     lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
 )
-locationsDict["Missile (lower Norfair above fire flea room)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(28, 11, LocationMapTileKind.ThreeWallsOpenRight, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (lower Norfair above fire flea room)"]
+loc.AccessFrom = {
     'Firefleas': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
 }
-locationsDict["Missile (lower Norfair above fire flea room)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Power Bomb (lower Norfair above fire flea room)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(35, 6, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Power Bomb (lower Norfair above fire flea room)"]
+loc.AccessFrom = {
     'Firefleas Top': lambda sm: SMBool(True)
 }
-locationsDict["Power Bomb (lower Norfair above fire flea room)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Power Bomb (Power Bombs of shame)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(37, 7, LocationMapTileKind.FourWallsTwoDoors, hFlip=True, vFlip=True)
+
+
+loc = locationsDict["Power Bomb (Power Bombs of shame)"]
+loc.AccessFrom = {
     'Wasteland': lambda sm: sm.canUsePowerBombs()
 }
-locationsDict["Power Bomb (Power Bombs of shame)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (lower Norfair near Wave Beam)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(32, 15, LocationMapTileKind.ThreeWallsOpenRight, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (lower Norfair near Wave Beam)"]
+loc.AccessFrom = {
     'Firefleas': lambda sm: SMBool(True)
 }
-locationsDict["Missile (lower Norfair near Wave Beam)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                        sm.canDestroyBombWalls(),
                        sm.haveItem('Morph'))
 )
-locationsDict["Missile (Wrecked Ship middle)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(29, 6, LocationMapTileKind.ThreeWallsOpenRight, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (Wrecked Ship middle)"]
+loc.AccessFrom = {
     'Wrecked Ship Main': lambda sm: SMBool(True)
 }
-locationsDict["Missile (Wrecked Ship middle)"].Available = (
+loc.Available = (
     lambda sm: sm.canPassBombPassages()
 )
-locationsDict["Missile (Gravity Suit)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(12, 17, LocationMapTileKind.ThreeWallsOpenRight, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (Gravity Suit)"]
+loc.AccessFrom = {
     'Bowling': lambda sm: SMBool(True)
 }
-locationsDict["Missile (Gravity Suit)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (Wrecked Ship top)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(13, 14, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Missile (Wrecked Ship top)"]
+loc.AccessFrom = {
     'Wrecked Ship Main': lambda sm: SMBool(True)
 }
-locationsDict["Missile (Wrecked Ship top)"].Available = (
+loc.Available = (
     lambda sm: Bosses.bossDead(sm, 'Phantoon')
 )
-locationsDict["Super Missile (Wrecked Ship left)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(21, 11, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Super Missile (Wrecked Ship left)"]
+loc.AccessFrom = {
     'Wrecked Ship Main': lambda sm: SMBool(True)
 }
-locationsDict["Super Missile (Wrecked Ship left)"].Available = (
+loc.Available = (
     lambda sm: Bosses.bossDead(sm, 'Phantoon')
 )
-locationsDict["Missile (green Maridia shinespark)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(15, 18, LocationMapTileKind.FourWallsOneDoor, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (green Maridia shinespark)"]
+loc.AccessFrom = {
     'Main Street Bottom': lambda sm: SMBool(True)
 }
-locationsDict["Missile (green Maridia shinespark)"].Available = (
+loc.Available = (
     lambda sm: sm.wand(sm.haveItem('Gravity'),
                        sm.haveItem('SpeedBooster'),
                        sm.wor(sm.wand(sm.traverse('MainStreetBottomRight'), # run from room on the right
@@ -852,80 +1231,125 @@ locationsDict["Missile (green Maridia shinespark)"].Available = (
                                       sm.itemCountOk('ETank', 1)), # etank for the spark since sparking from low ground
                               sm.canSimpleShortCharge())) # run from above
 )
-locationsDict["Super Missile (green Maridia)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(10, 13, LocationMapTileKind.SingleWallVertical, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Super Missile (green Maridia)"]
+loc.AccessFrom = {
     'Main Street Bottom': lambda sm: sm.canDoOuterMaridia()
 }
-locationsDict["Super Missile (green Maridia)"].Available = (
+loc.Available = (
     lambda sm: sm.haveItem('Morph')
 )
-locationsDict["Missile (green Maridia tatori)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(11, 12, LocationMapTileKind.SingleWallVertical, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Missile (green Maridia tatori)"]
+loc.AccessFrom = {
     'Main Street Bottom': lambda sm: sm.wand(sm.wor(sm.traverse('FishTankRight'),
                                                     RomPatches.has(RomPatches.MamaTurtleBlueDoor)),
                                              sm.canDoOuterMaridia()),
     'Mama Turtle': lambda sm: SMBool(True)
 }
-locationsDict["Missile (green Maridia tatori)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Super Missile (yellow Maridia)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(19, 14, LocationMapTileKind.SingleWallVertical, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Super Missile (yellow Maridia)"]
+loc.AccessFrom = {
     'Watering Hole Bottom': lambda sm: SMBool(True)
 }
-locationsDict["Super Missile (yellow Maridia)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (yellow Maridia super missile)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(12, 7, LocationMapTileKind.ThreeWallsOpenBottom, hFlip=False, vFlip=True)
+
+
+loc = locationsDict["Missile (yellow Maridia super missile)"]
+loc.AccessFrom = {
     'Watering Hole Bottom': lambda sm: SMBool(True)
 }
-locationsDict["Missile (yellow Maridia super missile)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (yellow Maridia false wall)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(12, 7, LocationMapTileKind.ThreeWallsOpenBottom, hFlip=False, vFlip=True)
+
+
+loc = locationsDict["Missile (yellow Maridia false wall)"]
+loc.AccessFrom = {
     'Beach': lambda sm: SMBool(True)
 }
-locationsDict["Missile (yellow Maridia false wall)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (left Maridia sand pit room)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(20, 7, LocationMapTileKind.TwoWallsCorner, hFlip=True, vFlip=True)
+
+
+loc = locationsDict["Missile (left Maridia sand pit room)"]
+loc.AccessFrom = {
     'Left Sandpit': lambda sm: sm.canClimbWestSandHole()
 }
-locationsDict["Missile (left Maridia sand pit room)"].Available = (
+loc.Available = (
     lambda sm: sm.canAccessItemsInWestSandHole()
 )
-locationsDict["Missile (right Maridia sand pit room)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(20, 15, LocationMapTileKind.TwoWallsCorner, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Missile (right Maridia sand pit room)"]
+loc.AccessFrom = {
     'Right Sandpit': lambda sm: SMBool(True)
 }
-locationsDict["Missile (right Maridia sand pit room)"].Available = (
+loc.Available = (
     lambda sm: sm.wor(sm.haveItem('Gravity'),
                       sm.wand(sm.haveItem('HiJump'),
                               sm.knowsGravLessLevel3()))
 )
-locationsDict["Power Bomb (right Maridia sand pit room)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(23, 15, LocationMapTileKind.TwoWallsCorner, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Power Bomb (right Maridia sand pit room)"]
+loc.AccessFrom = {
     'Right Sandpit': lambda sm: sm.haveItem('Morph')
 }
-locationsDict["Power Bomb (right Maridia sand pit room)"].Available = (
+loc.Available = (
     lambda sm: sm.wor(sm.haveItem('Gravity'),
                       sm.wand(sm.knowsGravLessLevel3(),
                               sm.haveItem('HiJump'),
                               sm.canSpringBallJump())) # https://www.youtube.com/watch?v=7LYYxphRRT0
 )
-locationsDict["Missile (pink Maridia)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(24, 16, LocationMapTileKind.TwoWallsCornerWithVerticalDoor, hFlip=True, vFlip=True)
+
+
+loc = locationsDict["Missile (pink Maridia)"]
+loc.AccessFrom = {
     'Aqueduct': lambda sm: SMBool(True)
 }
-locationsDict["Missile (pink Maridia)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Super Missile (pink Maridia)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(24, 10, LocationMapTileKind.SingleWallHorizontal, hFlip=False, vFlip=False)
+
+
+loc = locationsDict["Super Missile (pink Maridia)"]
+loc.AccessFrom = {
     'Aqueduct': lambda sm: SMBool(True)
 }
-locationsDict["Super Missile (pink Maridia)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
-locationsDict["Missile (Draygon)"].AccessFrom = {
+type(loc).MapAttrs = LocationMapAttrs(25, 10, LocationMapTileKind.TwoWallsCorner, hFlip=True, vFlip=False)
+
+
+loc = locationsDict["Missile (Draygon)"]
+loc.AccessFrom = {
     'Precious Room Top': lambda sm: SMBool(True)
 }
-locationsDict["Missile (Draygon)"].Available = (
+loc.Available = (
     lambda sm: SMBool(True)
 )
+type(loc).MapAttrs = LocationMapAttrs(42, 8, LocationMapTileKind.ThreeWallsOpenRight, hFlip=True, vFlip=False)
 
 # TODO::use the dict in solver/randomizer
 # create the list that the solver/randomizer use

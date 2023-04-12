@@ -30,5 +30,6 @@
   "nerfedCharge": "off",
   "variaTweaks": "off",
   "rando_speed": "off",
-  "doorsColorsRando": "off"
+  "doorsColorsRando": "off",
+  "revealMap": "off"
 }

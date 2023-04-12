@@ -1,5 +1,6 @@
 from utils.parameters import infinity
 import copy
+from enum import Enum
 
 class Location:
     graph_slots = (
@@ -102,6 +103,31 @@ class Location:
     def __eq__(self, other):
         return self.Name == other.Name
 
+class LocationMapTileKind(Enum):
+    Unknown = 0
+    FourWallsOneDoor = 1
+    ThreeWallsOpenBottom = 2
+    ThreeWallsOpenRight = 3
+    ThreeWallsOneDoorOpenRight = 4
+    TwoWallsCornerWithPixel = 5
+    TwoWallsCorner = 6
+    TwoWallsCornerWithHorizontalDoor = 7
+    TwoWallsCornerWithVerticalDoor = 8
+    FourWallsCorridor = 9
+    TwoWallsCorridor = 10
+    SingleWallHorizontal = 11
+    FourWallsTwoDoors = 12
+    SingleWallVertical = 13
+    ThreeWallsOneDoorOpenBottom = 14
+
+class LocationMapAttrs(object):
+    def __init__(self, x, y, kind, hFlip=False, vFlip=False):
+        self.X = x
+        self.Y = y
+        self.TileKind = kind
+        self.hFlip = hFlip
+        self.vFlip = vFlip
+
 def define_location(
         Area, GraphArea, SolveArea, Name, Class, CanHidden, Address, Id,
         Visibility, Room, VanillaItemType=None, BossItemType=None, AccessFrom=None, Available=None, PostAvailable=None, HUD=None):
@@ -123,6 +149,7 @@ def define_location(
         'AccessFrom': AccessFrom,
         'Available': Available,
         'PostAvailable': PostAvailable,
+        'MapAttrs': None,
         '_isMajor': 'Major' in Class,
         '_isChozo': 'Chozo' in Class,
         '_isMinor': 'Minor' in Class,
@@ -445,7 +472,7 @@ define_location(
 ),
     "Ridley":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Ridley Boss",
     Name="Ridley",
@@ -461,7 +488,7 @@ define_location(
 ),
     "Energy Tank, Ridley":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Ridley Boss",
     Name="Energy Tank, Ridley",
@@ -474,7 +501,7 @@ define_location(
 ),
     "Screw Attack":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Screw Attack",
     Name="Screw Attack",
@@ -489,7 +516,7 @@ define_location(
 ),
     "Energy Tank, Firefleas":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair After Amphitheater",
     Name="Energy Tank, Firefleas",
@@ -724,7 +751,7 @@ define_location(
 ),
     "Golden Torizo":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Screw Attack",
     Name="Golden Torizo",
@@ -1298,7 +1325,7 @@ define_location(
 ),
     "Missile (Gold Torizo)":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Screw Attack",
     Name="Missile (Gold Torizo)",
@@ -1311,7 +1338,7 @@ define_location(
 ),
     "Super Missile (Gold Torizo)":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Screw Attack",
     Name="Super Missile (Gold Torizo)",
@@ -1324,7 +1351,7 @@ define_location(
 ),
     "Missile (Mickey Mouse room)":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair Before Amphitheater",
     Name="Missile (Mickey Mouse room)",
@@ -1337,7 +1364,7 @@ define_location(
 ),
     "Missile (lower Norfair above fire flea room)":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair After Amphitheater",
     Name="Missile (lower Norfair above fire flea room)",
@@ -1350,7 +1377,7 @@ define_location(
 ),
     "Power Bomb (lower Norfair above fire flea room)":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair After Amphitheater",
     Name="Power Bomb (lower Norfair above fire flea room)",
@@ -1363,7 +1390,7 @@ define_location(
 ),
     "Power Bomb (Power Bombs of shame)":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair After Amphitheater",
     Name="Power Bomb (Power Bombs of shame)",
@@ -1376,7 +1403,7 @@ define_location(
 ),
     "Missile (lower Norfair near Wave Beam)":
 define_location(
-    Area="LowerNorfair",
+    Area="Norfair",
     GraphArea="LowerNorfair",
     SolveArea="Lower Norfair After Amphitheater",
     Name="Missile (lower Norfair near Wave Beam)",

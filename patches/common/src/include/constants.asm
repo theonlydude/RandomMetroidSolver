@@ -23,6 +23,12 @@ include
 !stats_ram = $7f!_stats_ram
 !stats_timer = !stats_ram
 
+;; bitfields
+; arg: A=bit index. returns: X=byte index, !bitindex_mask=bitmask
+!bitindex_routine = $80818e
+!bitindex_mask = $05e7
+!doors_bitfield = $7ED8B0
+
 ;; tracked stats (see tracking.txt)
 !stat_nb_door_transitions = #$0002
 !stat_rta_door_transitions = #$0003
@@ -45,6 +51,7 @@ include
 !norfair = $0002
 
 !palettes_ram = $7EC000
+!palette_size = 32              ; usual size of a palette is 16 colors (1 word per color)
 
 ;;; pause state
 !pause_index = $0727

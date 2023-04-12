@@ -22,5 +22,6 @@
   "funSuits": "on",
   "nerfedCharge": "off",
   "variaTweaks": "on",
-  "rando_speed": "off"
+  "rando_speed": "off",
+  "revealMap": "off"
 }

@@ -5,24 +5,29 @@ import sys, os
 dir_path = os.path.dirname(sys.path[0])
 sys.path.append(dir_path)
 
-# convert a yy-chr RGB palette line to asm
-from utils.colors import RGB_24_to_15
+from utils.colors import Palette
 
 pal = sys.argv[1]
-line = int(sys.argv[2], 16)
 
-nColors = 16
-lineSize = nColors*3
+def yychr2asm(args):
+    line = int(args[0], 16)
+    Palette.load_yychr(pal, lines=[line]).print_asm()
 
-asm = "dw "
+def bin2yychr(args):
+    nLines = int(args[0])
+    outFile = args[1]
+    offset = int(args[2], 16) if len(args) > 2 else 0
+    Palette.load_snes(pal, offset=offset, lines=list(range(nLines))).save_yychr(outFile)
 
-with open(pal, "rb") as rgbPal:
-    rgbPal.seek(line*lineSize)
-    for i in range(nColors):
-        colorRaw = rgbPal.read(3)
-        rgb = RGB_24_to_15((int(colorRaw[0]), int(colorRaw[1]), int(colorRaw[2])))
-        if i > 0:
-            asm += ", "
-        asm += "$%04x" % rgb
+modes = {
+    ".pal": yychr2asm,
+    ".bin": bin2yychr,
+    ".sfc": bin2yychr
+}
 
-print(asm)
+_, ext = os.path.splitext(pal)
+mode = modes.get(ext)
+if mode is None:
+    raise RuntimeError("Unknown palette extension: "+str(ext))
+
+mode(sys.argv[2:])

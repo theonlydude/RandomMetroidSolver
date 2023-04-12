@@ -196,6 +196,9 @@ if __name__ == "__main__":
                         dest='gravityBehaviour', nargs='?', default='Balanced', choices=gravityBehaviours+['random'])
     parser.add_argument('--gravityBehaviourList', help="list to choose from when random",
                         dest='gravityBehaviourList', nargs='?', default=None)
+    parser.add_argument('--revealMap',
+                        help="reveal all map at game start",
+                        dest='revealMap', action='store_true', default=False)
     parser.add_argument('--nerfedCharge',
                         help="apply nerfed charge patch",
                         dest='nerfedCharge', action='store_true', default=False)
@@ -753,6 +756,7 @@ if __name__ == "__main__":
             "displayedVersion": displayedVersion,
             "itemLocs": itemLocs,
             "progItemLocs": progItemLocs,
+            "revealMap": args.revealMap,
             "debug": args.debug
         }
 

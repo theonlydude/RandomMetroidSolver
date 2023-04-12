@@ -21,6 +21,7 @@ incsrc "sym/utils.asm"
 incsrc "sym/rando_escape_common.asm"
 incsrc "sym/custom_music.asm"
 incsrc "sym/disable_screen_shake.asm"
+incsrc "sym/map.asm"
 
 !timer = !timer1
 !current_room = $079b
@@ -66,10 +67,6 @@ endmacro
 ;;; hijack main ASM call to check objectives regularly
 org $828BA8
 	jsl periodic_obj_check
-
-;;; replace pause mode code pointers list
-org $82910A
-        jsr (new_pause_actions_func_list,x)
 
 ;;; new function to check for L/R button pressed
 org $82A505
@@ -597,23 +594,31 @@ set_bowling_event:
 
 warnpc $aaf82f
 
+;;; Pause stuff
+
+;;; new pointers list
+org map_PauseRoutineIndex_objectives
+        dw func_objective_screen
+        dw func_map2obj_fading_out, func_map2obj_load_obj, func_map2obj_fading_in
+        dw func_obj2map_fading_out, $91D7, $9200
+print "after obj: ", pc
+
 ;;; continue in 82 after InfoStr in seed_display.asm
 org $82FB6D
-
-print "Pause stuff: ", pc
 
 ;;;
 ;;; pause menu objectives display
 ;;;
 
 ;;; new screen:
-!pause_index_objective_screen = #$0008
-!pause_index_map2obj_fading_out = #$0009
-!pause_index_map2obj_load_obj = #$000A
-!pause_index_map2obj_fading_in = #$000B
-!pause_index_obj2map_fading_out = #$000C
-!pause_index_obj2map_load_map = #$000D
-!pause_index_obj2map_fading_in = #$000E
+;;; (skip 3 indices used by map patch)
+!pause_index_objective_screen = #$000B
+!pause_index_map2obj_fading_out = #$000C
+!pause_index_map2obj_load_obj = #$000D
+!pause_index_map2obj_fading_in = #$000E
+!pause_index_obj2map_fading_out = #$000F
+!pause_index_obj2map_load_map = #$0010
+!pause_index_obj2map_fading_in = #$0011
 
 
 ;;; pause screen button label mode
@@ -715,15 +720,16 @@ check_l_r_pressed:
         PLP
         RTS
 
-;;; load from ROM $B6F200 to VRAM $3000 (bg1)
+;;; load from ROM $B6F200 to VRAM $4800 (bg1 - modified by map patch - original is $3000)
+print "transfert_objective_bg1: ", pc
 transfert_objective_bg1:
         php
         sep #$30
 
         LDA #$00     ;\
         STA $2116    ;| VRAM Address Registers (Low) - This sets the address for $2118/9
-        LDA #$30     ;|
-        STA $2117    ;| VRAM Address Registers (High) - This sets the address for $2118/9 => $3000
+        LDA #$48     ;|
+        STA $2117    ;| VRAM Address Registers (High) - This sets the address for $2118/9 => $4800
         LDA #$80     ;|
         STA $2115    ;} Video Port Control Register - Set VRAM transfer mode to word-access, increment by 1.
                      ;    0x80 == 0b10000000 => i---ffrr => i=1 (increment when $2119 is accessed),
@@ -853,10 +859,10 @@ set_bg2_objective_screen:
 
 ;;; obj/map/samus buttons tiles
 obj_top:
-        dw $2899, $2888, $289E, $289F, $289D
+        dw $2899, $2896, $2897, $2898, $289D
 
 obj_bottom:
-        dw $28A9, $2898, $28AE, $28AF, $28AD
+        dw $28A9, $28a6, $28a7, $28a8, $28AD
 
 map_top:
         dw $2899, $289A, $289B, $289C, $289D
@@ -910,16 +916,6 @@ draw_spritemap:
         PLB
         PLP
         RTS
-
-;;; new pointers list
-new_pause_actions_func_list:
-        dw $9120                ; map
-        dw $9142                ; equipment
-        dw $9156, $91AB, $9231  ; map2equip
-        dw $9186, $91D7, $9200  ; equip2map
-        dw func_objective_screen
-        dw func_map2obj_fading_out, func_map2obj_load_obj, func_map2obj_fading_in
-        dw func_obj2map_fading_out, $91D7, $9200
 
 new_pause_palettes_func_list:
         dw $A796, $A6DF, $A628, update_palette_objective_screen
@@ -1084,19 +1080,19 @@ org $82932B
 org $82C1E6
         dw glowing_LR_animation
 
-;;; new tiles for 'OBJ' button in unused tiles
-org $B69100
-        db $00,$ff,$00,$00,$ff,$ff,$ff,$ff,$f8,$f8,$f0,$f0,$f2,$f2,$f2,$f2,$ff,$ff,$ff,$ff,$00,$ff,$00,$ff,$07,$f8,$0f,$f0,$0d,$f2,$0d,$f2
-org $B69300
-        db $f2,$f2,$f2,$f2,$f0,$f0,$f8,$f8,$ff,$ff,$00,$ff,$00,$00,$00,$ff,$0d,$f2,$0d,$f2,$0f,$f0,$07,$f8,$00,$ff,$ff,$00,$ff,$ff,$ff,$ff
-org $B693C0
-        db $00,$ff,$00,$00,$ff,$ff,$ff,$ff,$c1,$c1,$4c,$4c,$4c,$4c,$41,$41,$ff,$ff,$ff,$ff,$00,$ff,$00,$ff,$3e,$c1,$b3,$4c,$b3,$4c,$be,$41
-org $B693E0
-        db $00,$ff,$00,$00,$ff,$ff,$ff,$ff,$f3,$f3,$f3,$f3,$f3,$f3,$f3,$f3,$ff,$ff,$ff,$ff,$00,$ff,$00,$ff,$0c,$f3,$0c,$f3,$0c,$f3,$0c,$f3
-org $B695C0
-        db $41,$41,$4c,$4c,$4c,$4c,$c1,$c1,$ff,$ff,$00,$ff,$00,$00,$00,$ff,$be,$41,$b3,$4c,$b3,$4c,$3e,$c1,$00,$ff,$ff,$00,$ff,$ff,$ff,$ff
-org $B695E0
-        db $93,$93,$93,$93,$83,$83,$c7,$c7,$ff,$ff,$00,$ff,$00,$00,$00,$ff,$6c,$93,$6c,$93,$7c,$83,$38,$c7,$00,$ff,$ff,$00,$ff,$ff,$ff,$ff
+;;; new tiles for 'OBJ' button in unused tiles : included in map patch gfx
+;; org $B69100
+;;         db $00,$ff,$00,$00,$ff,$ff,$ff,$ff,$f8,$f8,$f0,$f0,$f2,$f2,$f2,$f2,$ff,$ff,$ff,$ff,$00,$ff,$00,$ff,$07,$f8,$0f,$f0,$0d,$f2,$0d,$f2
+;; org $B69300
+;;         db $f2,$f2,$f2,$f2,$f0,$f0,$f8,$f8,$ff,$ff,$00,$ff,$00,$00,$00,$ff,$0d,$f2,$0d,$f2,$0f,$f0,$07,$f8,$00,$ff,$ff,$00,$ff,$ff,$ff,$ff
+;; org $B693C0
+;;         db $00,$ff,$00,$00,$ff,$ff,$ff,$ff,$c1,$c1,$4c,$4c,$4c,$4c,$41,$41,$ff,$ff,$ff,$ff,$00,$ff,$00,$ff,$3e,$c1,$b3,$4c,$b3,$4c,$be,$41
+;; org $B693E0
+;;         db $00,$ff,$00,$00,$ff,$ff,$ff,$ff,$f3,$f3,$f3,$f3,$f3,$f3,$f3,$f3,$ff,$ff,$ff,$ff,$00,$ff,$00,$ff,$0c,$f3,$0c,$f3,$0c,$f3,$0c,$f3
+;; org $B695C0
+;;         db $41,$41,$4c,$4c,$4c,$4c,$c1,$c1,$ff,$ff,$00,$ff,$00,$00,$00,$ff,$be,$41,$b3,$4c,$b3,$4c,$3e,$c1,$00,$ff,$ff,$00,$ff,$ff,$ff,$ff
+;; org $B695E0
+;;         db $93,$93,$93,$93,$83,$83,$c7,$c7,$ff,$ff,$00,$ff,$00,$00,$00,$ff,$6c,$93,$6c,$93,$7c,$83,$38,$c7,$00,$ff,$ff,$00,$ff,$ff,$ff,$ff
 
 ;;; blank objective screen from B6F200 to B6FA00
 org $B6F200
@@ -1134,3 +1130,6 @@ org $B6F200
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
         dw $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+
+print "B6 end: ", pc
+

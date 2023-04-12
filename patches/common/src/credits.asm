@@ -698,6 +698,12 @@ script:
     dw !draw, !row*218
     dw !draw, !blank
     dw !draw, !blank
+    dw !draw, !row*239 ;; MAP OVERHAUL PATCH
+    dw !draw, !blank
+    dw !draw, !row*240 ;; MFREAK
+    dw !draw, !row*241
+    dw !draw, !blank
+    dw !draw, !blank
     dw !draw, !row*139 ;; SPECIAL THANKS TO
     dw !draw, !blank
     dw !draw, !row*140 ;; SMILEY SUKU
@@ -938,12 +944,6 @@ script:
     dw !draw, !blank
     dw !draw, !blank
     dw !draw, !blank
-    dw !draw, !blank
-    dw !draw, !blank
-    dw !draw, !blank
-    dw !draw, !blank
-    dw !draw, !blank
-    dw !draw, !blank
 
     dw !draw, !row*219 ;; Thanks
     dw !draw, !row*220
@@ -1170,7 +1170,10 @@ credits:
     ;; credits once again
     !purple
     dw "  ROTATED SUPER METROID HACKS   " ;; 238
-
+    dw "       MAP OVERHAUL PATCH       " ;; 239
+    !big
+    dw "            MFREAK              " ;; 240
+    dw "            mfreak              " ;; 241
     dw $0000                              ;; End of credits tilemap
 
 warnpc $ceffff

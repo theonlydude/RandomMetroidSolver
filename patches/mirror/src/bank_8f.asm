@@ -4008,7 +4008,7 @@ org $8fa98d
 Room_A98D_Header:
     db $0a ; room index
     db $02 ; area
-    db $2c ; map X
+    db $2b ; map X
     db $0a ; map Y
     db $08 ; width
     db $01 ; height
@@ -4108,7 +4108,7 @@ org $8faa82
 RoomPtr_AA82:
     db $0e ; room index
     db $02 ; area
-    db $34 ; map X
+    db $33 ; map X
     db $0a ; map Y
     db $02 ; width
     db $02 ; height
@@ -4122,7 +4122,7 @@ org $8faab5
 RoomPtr_AAB5:
     db $0f ; room index
     db $02 ; area
-    db $33 ; map X
+    db $32 ; map X
     db $0b ; map Y
     db $01 ; width
     db $01 ; height
@@ -4136,7 +4136,7 @@ org $8faade
 Room_AADE_Header:
     db $10 ; room index
     db $02 ; area
-    db $36 ; map X
+    db $35 ; map X
     db $0a ; map Y
     db $01 ; width
     db $01 ; height
@@ -4150,7 +4150,7 @@ org $8fab07
 Room_AB07_Header:
     db $11 ; room index
     db $02 ; area
-    db $35 ; map X
+    db $34 ; map X
     db $0c ; map Y
     db $01 ; width
     db $05 ; height
@@ -4164,7 +4164,7 @@ org $8fab3b
 Room_AB3B_Header:
     db $12 ; room index
     db $02 ; area
-    db $31 ; map X
+    db $30 ; map X
     db $0f ; map Y
     db $04 ; width
     db $01 ; height
@@ -4178,7 +4178,7 @@ org $8fab64
 Room_AB64_Header:
     db $13 ; room index
     db $02 ; area
-    db $36 ; map X
+    db $35 ; map X
     db $0c ; map Y
     db $03 ; width
     db $02 ; height
@@ -4192,7 +4192,7 @@ org $8fab8f
 Room_AB8F_Header:
     db $14 ; room index
     db $02 ; area
-    db $34 ; map X
+    db $33 ; map X
     db $0f ; map Y
     db $08 ; width
     db $03 ; height
@@ -4210,7 +4210,7 @@ org $8fabd2
 Room_ABD2_Header:
     db $15 ; room index
     db $02 ; area
-    db $39 ; map X
+    db $38 ; map X
     db $0c ; map Y
     db $01 ; width
     db $03 ; height
@@ -4224,7 +4224,7 @@ org $8fac00
 Room_AC00_Header:
     db $16 ; room index
     db $02 ; area
-    db $3a ; map X
+    db $39 ; map X
     db $0e ; map Y
     db $02 ; width
     db $01 ; height
@@ -4238,7 +4238,7 @@ org $8fac2b
 Room_AC2B_Header:
     db $17 ; room index
     db $02 ; area
-    db $3c ; map X
+    db $3b ; map X
     db $0e ; map Y
     db $01 ; width
     db $04 ; height

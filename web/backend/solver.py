@@ -238,6 +238,9 @@ class Solver(object):
             _class = "imageItems"
         else:
             _class = "imageItem"
+        # autotracker compatibility with multiworld uses no energy items for items from other worlds
+        if item == 'NoEnergy':
+            item = 'Nothing'
         itemImg = """<img alt="{}" class="{}" src="/solver/static/images/tracker/inventory/{}.png" title="{}" />""".format(item, _class, item.replace(' ', ''), item)
 
         if location is not None and len(scavengerOrder) > 0 and location in scavengerOrder:

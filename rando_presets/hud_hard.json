@@ -7,6 +7,5 @@
   "hud": "on",
   "funMovement": "random",
   "funCombat": "random",
-  "funSuits": "random",
-  "revealMap": "off"
+  "funSuits": "random"
 }

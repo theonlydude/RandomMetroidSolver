@@ -57,11 +57,13 @@ preinstr_check_screen:
         ;; $12 = PLM X screen
         lda !plm_x_block : lsr #4 : sta $12
         ;; if X screen is different, return
-        lda !samus_x : lsr #8 : cmp $12 : bne .ret
+        lda !samus_x : and #$ff00 : xba : cmp $12 : bne .ret
         ;; $12 = PLM Y screen
         lda !plm_y_block : lsr #4 : sta $12
         ;; if Y screen is different, return
-        lda !samus_y : lsr #8 : cmp $12 : bne .ret
+        lda !samus_y : and #$ff00 : xba : cmp $12 : bne .ret
+        ;; PLM timer = 1
+        lda.w #1 : sta $7EDE1C,x
         jmp wake_plm
 .ret:
         rts
@@ -87,12 +89,6 @@ instr_list_visible_block:
 .end:
         dw instr_goto, instr_list_empty_item
 
-;;; Wake PLM and clear pre-instruction
-wake_plm:
-        ;; PLM timer = 1
-        lda.w #1 : sta $7EDE1C,x
-        jmp wake_plm_end
-
 ;;; end of free space
 warnpc $84BAF3
 
@@ -101,19 +97,16 @@ org $848a40
 ;;; instruction list for nothing shot block
 instr_list_shot_block:
 .start:                         ; don't behave as a shot block yet if tile is unexplored for simpler implementation
-        dw instr_check_item, .shot_block
-        dw instr_set_preinstr, preinstr_check_screen
-        dw instr_sleep
+        dw instr_call, instr_list_item_shot_block
+        dw instr_check_item, .end
 .collect:
         dw instr_set_item
-.shot_block:
-        dw instr_call, instr_list_item_shot_block
-        dw instr_goto, .end
 .end:
         dw instr_call, instr_list_item_shot_block_reconcealing
-        dw instr_goto, .shot_block
+        dw instr_goto, .start
 
-wake_plm_end:
+;;; Wake PLM and clear pre-instruction
+wake_plm:
         ;; PLM instruction list pointer += 2
         INC $1D27,x
         INC $1D27,x

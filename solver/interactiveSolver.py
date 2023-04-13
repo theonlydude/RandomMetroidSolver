@@ -565,7 +565,7 @@ class InteractiveSolver(CommonSolver):
                 return loc
         raise Exception("Location '{}' not found".format(locName))
 
-    def pickItemAt(self, locName):
+    def pickItemAt(self, locName, autotracker=False):
         # collect new item at newLoc
         loc = self.getWebLoc(locName)
 
@@ -580,7 +580,7 @@ class InteractiveSolver(CommonSolver):
         if loc.accessPoint is None:
             # take first ap of the loc
             loc.accessPoint = list(loc.AccessFrom)[0]
-        self.collectMajor(loc)
+        self.collectMajor(loc, autotracker=autotracker)
 
     def setItemAt(self, locName, itemName, hide):
         # set itemName at locName
@@ -606,7 +606,7 @@ class InteractiveSolver(CommonSolver):
             loc.Visibility = 'Hidden'
 
         if loc in self.majorLocations:
-            self.collectMajor(loc, itemName)
+            self.collectMajor(loc, itemName=itemName)
 
     def replaceItemAt(self, locName, itemName, hide):
         # replace itemName at locName
@@ -864,6 +864,7 @@ class InteractiveSolver(CommonSolver):
 
         currentState = dumpData["currentState"]
         self.locDelta = 0
+        bosses = []
 
         for dataType, offset in dumpData["stateDataOffsets"].items():
             if dataType == dataEnum["items"]:
@@ -880,30 +881,38 @@ class InteractiveSolver(CommonSolver):
                     bitMask = 0x01 << (loc.Id & 7)
                     if currentState[offset + byteIndex] & bitMask != 0:
                         if loc not in self.visitedLocations:
-                            self.pickItemAt(self.locNameInternal2Web(loc.Name))
+                            self.pickItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
                             self.locDelta += 1
                     else:
                         if loc in self.visitedLocations:
-                            self.removeItemAt(self.locNameInternal2Web(loc.Name))
+                            self.removeItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
             elif dataType == dataEnum["boss"]:
                 for boss, bossData in self.bossBitMasks.items():
                     byteIndex = bossData["byteIndex"]
                     bitMask = bossData["bitMask"]
                     loc = self.getLoc(boss)
                     if currentState[offset + byteIndex] & bitMask != 0:
+                        # as we clear collected items we have to add bosses back
+                        bosses.append(boss)
+
                         # in tourian disabled mother brain is not available, but it gets auto killed during escape
                         if loc not in self.visitedLocations and loc in self.majorLocations:
-                            self.pickItemAt(self.locNameInternal2Web(loc.Name))
+                            self.pickItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
                             self.locDelta += 1
                     else:
                         if loc in self.visitedLocations:
-                            self.removeItemAt(self.locNameInternal2Web(loc.Name))
+                            self.removeItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
 
             # Inventory
             elif dataType == dataEnum["inventory"]:
                 # Clear collected items if loading from game state.
                 self.collectedItems.clear()
                 self.smbm.resetItems()
+
+                # put back bosses
+                for boss in bosses:
+                    self.collectedItems.append(boss)
+                    self.smbm.addItem(boss)
 
                 for item, itemData in self.inventoryBitMasks.items():
                     if item not in Conf.itemsForbidden:

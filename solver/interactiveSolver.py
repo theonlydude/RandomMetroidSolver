@@ -892,8 +892,9 @@ class InteractiveSolver(CommonSolver):
                     bitMask = bossData["bitMask"]
                     loc = self.getLoc(boss)
                     if currentState[offset + byteIndex] & bitMask != 0:
-                        # as we clear collected items we have to add bosses back
-                        bosses.append(boss)
+                        # as we clear collected items we have to add bosses back.
+                        # some bosses have a space in their names, remove it.
+                        bosses.append(boss.replace(' ', ''))
 
                         # in tourian disabled mother brain is not available, but it gets auto killed during escape
                         if loc not in self.visitedLocations and loc in self.majorLocations:

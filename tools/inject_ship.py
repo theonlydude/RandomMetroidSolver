@@ -49,6 +49,9 @@ def isEmpty(img, box):
     for x in range(box[0], box[2]):
         for y in range(box[1], box[3]):
             r, g, b, a = img.getpixel((x, y))
+            # use the alpha channel first
+            if a == 0:
+                continue
             if r != 0 or g != 0 or b != 0:
                 return False
     return True

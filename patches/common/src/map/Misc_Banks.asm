@@ -205,6 +205,10 @@ ORG $90DF7F : BRA $01 : NOP	;remove STZ $0B2A
 ORG $91F1D9 : BRA $01 : NOP	;remove STZ $0B2A
 ORG $9BCA00 : BRA $01 : NOP	;remove STZ $0B2A
 
+;;; copy the whole HUD tile sheet in Kraid unpause hook when Kraid is dead
+;;; instead of just half
+org $A7C244
+        dw $1000
 
 ;---------------------------------------BANK $84----------------------------------------------------
 ORG $848CA6

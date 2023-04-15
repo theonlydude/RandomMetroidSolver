@@ -92,7 +92,10 @@ class RomPatcher:
         'AreaComfortSet': [
             'area_rando_gate_crab_tunnel.ips', 'area_rando_gate_greenhillzone.ips',
             'area_layout_greenhillzone.ips', 'area_layout_crabe_tunnel.ips',
-            'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'aqueduct_bomb_blocks.ips'
+            'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'aqueduct_bomb_blocks.ips',
+            # TODO make those work in mirror, they seem to be included in one of the other patches??
+            # 'area_layout_east_tunnel.ips', 'area_layout_caterpillar.ips',
+            # 'area_layout_single_chamber.ips'
         ],
         # patches for boss rando
         'Bosses': ['door_transition.ips', 'no_demo.ips'],

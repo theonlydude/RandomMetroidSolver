@@ -83,19 +83,51 @@ class RomPatcher:
                    'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips'],
         # base patchset for area rando
         'AreaBaseSet': [
-            'area_rando_gate_caterpillar.ips', 'area_rando_gate_east_tunnel.ips',
-            'area_layout_caterpillar.ips', 'area_layout_ln_exit.ips', 'area_layout_east_tunnel.ips',
-            'door_transition.ips', 'area_rando_doors.ips', 'area_rando_warp_door.ips',
-            'area_door_west_sand_hall.ips', 'crab_shaft.ips', 'Save_Crab_Shaft', 'Save_Main_Street', 'no_demo.ips'
+            # remove maridia red fish exit green gate (move plm in room A322: Caterpillar Room - flavor)
+            'area_rando_gate_caterpillar.ips',
+            # remove maridia tube exit green gate (move plm in room CF80: East Tunnel - common)
+            'area_rando_gate_east_tunnel.ips',
+            # remove lower norfair exit crumble blocks (change layout in room AD5E: Single Chamber - flavor)
+            'area_layout_ln_exit.ips',
+            # additionnal save at crab shaft (change layout in room D1A3: Crab Shaft - flavor)
+            'crab_shaft.ips',
+            'Save_Crab_Shaft',
+            # additionnal save at main street
+            'Save_Main_Street',
+            # make incompatible door transitions work
+            'door_transition.ips',
+            # east maridia looping doors (common)
+            'area_rando_doors.ips',
+            # change door connection in bank 83 (room D461: West Sand Hall - flavor)
+            'area_door_west_sand_hall.ips',
+            # change layout (room D6FD: Sand falls sand pit - flavor)
+            'area_rando_warp_door.ips',
+            # disable demo at title screen to avoid crashes
+            'no_demo.ips'
         ],
         # optional layout for area rando
         'AreaComfortSet': [
-            'area_rando_gate_crab_tunnel.ips', 'area_rando_gate_greenhillzone.ips',
-            'area_layout_greenhillzone.ips', 'area_layout_crabe_tunnel.ips',
-            'Sponge_Bath_Blinking_Door', 'east_ocean.ips', 'aqueduct_bomb_blocks.ips',
-            # TODO make those work in mirror, they seem to be included in one of the other patches??
-            # 'area_layout_east_tunnel.ips', 'area_layout_caterpillar.ips',
-            # 'area_layout_single_chamber.ips'
+            # remove crab geen gate in maridia (move plm in room D08A: Crab Tunnel - common)
+            'area_rando_gate_crab_tunnel.ips',
+            # update ceiling on top on the gate (change layout in room D08A: Crab Tunnel - flavor)
+            'area_layout_crabe_tunnel.ips',
+            # remove blue gate in green hill zone (move plm in room 9E52: Green Hill Zone - flavor)
+            'area_rando_gate_greenhillzone.ips',
+            # access transition door in green hill zone (change layout in room 9E52: Green Hill Zone - flavor)
+            'area_layout_greenhillzone.ips',
+            # set sponge bath door to blue in wreckedship
+            'Sponge_Bath_Blinking_Door',
+            # add platforms to traverse forgotten hiway both ways (change layout in room 94FD: east ocean - flavor)
+            'east_ocean.ips',
+            # aqueduct entrance pb blocks changed to bomb blocks (change layout in room D5A7: aqueduct - flavor)
+            'aqueduct_bomb_blocks.ips',
+            # reveal opening to portal (change layout in room CF80: east tunnel - flavor)
+            'area_layout_east_tunnel.ips',
+            # reveal opening to portal (change layout in room A322: Caterpillar Room - flavor)
+            'area_layout_caterpillar.ips',
+            # reveal opening to portal (change layout in room AD5E: Single Chamber - flavor)
+            # to be applied on top of patch area_layout_ln_exit.ips
+            'area_layout_single_chamber.ips'
         ],
         # patches for boss rando
         'Bosses': ['door_transition.ips', 'no_demo.ips'],

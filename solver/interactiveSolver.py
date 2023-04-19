@@ -565,7 +565,7 @@ class InteractiveSolver(CommonSolver):
                 return loc
         raise Exception("Location '{}' not found".format(locName))
 
-    def pickItemAt(self, locName):
+    def pickItemAt(self, locName, autotracker=False):
         # collect new item at newLoc
         loc = self.getWebLoc(locName)
 
@@ -580,7 +580,7 @@ class InteractiveSolver(CommonSolver):
         if loc.accessPoint is None:
             # take first ap of the loc
             loc.accessPoint = list(loc.AccessFrom)[0]
-        self.collectMajor(loc)
+        self.collectMajor(loc, autotracker=autotracker)
 
     def setItemAt(self, locName, itemName, hide):
         # set itemName at locName
@@ -606,7 +606,7 @@ class InteractiveSolver(CommonSolver):
             loc.Visibility = 'Hidden'
 
         if loc in self.majorLocations:
-            self.collectMajor(loc, itemName)
+            self.collectMajor(loc, itemName=itemName)
 
     def replaceItemAt(self, locName, itemName, hide):
         # replace itemName at locName
@@ -784,6 +784,30 @@ class InteractiveSolver(CommonSolver):
 
     eventsBitMasks = {}
 
+    inventoryBitMasks = {
+        'Varia': {"byteIndex": 0x0, "bitMask": 0x1},
+        'SpringBall': {"byteIndex": 0x0, "bitMask": 0x2},
+        'Morph': {"byteIndex": 0x0, "bitMask": 0x4},
+        'ScrewAttack': {"byteIndex": 0x0, "bitMask": 0x8},
+        'Gravity': {"byteIndex": 0x0, "bitMask": 0x20},
+        'HiJump': {"byteIndex": 0x1, "bitMask": 0x1},
+        'SpaceJump': {"byteIndex": 0x1, "bitMask": 0x2 },
+        'Bomb': {"byteIndex": 0x1, "bitMask": 0x10},
+        'SpeedBooster': {"byteIndex": 0x1, "bitMask": 0x20},
+        'Grapple': {"byteIndex": 0x1, "bitMask": 0x40},
+        'XRayScope': {"byteIndex": 0x1, "bitMask": 0x80},
+        'Wave': {"byteIndex": 0x4, "bitMask": 0x1},
+        'Ice': {"byteIndex": 0x4, "bitMask": 0x2},
+        'Spazer': {"byteIndex": 0x4, "bitMask": 0x4},
+        'Plasma': {"byteIndex": 0x4, "bitMask": 0x8},
+        'Charge': {"byteIndex": 0x5, "bitMask": 0x10},
+        'ETank': {"byteIndex": 0x6},
+        'Missile': {"byteIndex": 0xA},
+        'Super': {"byteIndex": 0xE},
+        'PowerBomb': {"byteIndex": 0x12},
+        'Reserve': {"byteIndex": 0x16},
+    }
+
     areaAccessPoints = {
         "vanilla": vanilla_areaAccessPoints,
         "mirror": mirror_areaAccessPoints
@@ -834,11 +858,13 @@ class InteractiveSolver(CommonSolver):
             "samus": '4',
             "items": '5',
             "boss": '6',
-            "events": '7'
+            "events": '7',
+            "inventory": '8',
         }
 
         currentState = dumpData["currentState"]
         self.locDelta = 0
+        bosses = []
 
         for dataType, offset in dumpData["stateDataOffsets"].items():
             if dataType == dataEnum["items"]:
@@ -855,24 +881,71 @@ class InteractiveSolver(CommonSolver):
                     bitMask = 0x01 << (loc.Id & 7)
                     if currentState[offset + byteIndex] & bitMask != 0:
                         if loc not in self.visitedLocations:
-                            self.pickItemAt(self.locNameInternal2Web(loc.Name))
+                            self.pickItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
                             self.locDelta += 1
                     else:
                         if loc in self.visitedLocations:
-                            self.removeItemAt(self.locNameInternal2Web(loc.Name))
+                            self.removeItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
             elif dataType == dataEnum["boss"]:
                 for boss, bossData in self.bossBitMasks.items():
                     byteIndex = bossData["byteIndex"]
                     bitMask = bossData["bitMask"]
                     loc = self.getLoc(boss)
                     if currentState[offset + byteIndex] & bitMask != 0:
+                        # as we clear collected items we have to add bosses back.
+                        # some bosses have a space in their names, remove it.
+                        bosses.append(boss.replace(' ', ''))
+
                         # in tourian disabled mother brain is not available, but it gets auto killed during escape
                         if loc not in self.visitedLocations and loc in self.majorLocations:
-                            self.pickItemAt(self.locNameInternal2Web(loc.Name))
+                            self.pickItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
                             self.locDelta += 1
                     else:
                         if loc in self.visitedLocations:
-                            self.removeItemAt(self.locNameInternal2Web(loc.Name))
+                            self.removeItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
+
+            # Inventory
+            elif dataType == dataEnum["inventory"]:
+                # Clear collected items if loading from game state.
+                self.collectedItems.clear()
+                self.smbm.resetItems()
+
+                # put back bosses
+                for boss in bosses:
+                    self.collectedItems.append(boss)
+                    self.smbm.addItem(boss)
+
+                for item, itemData in self.inventoryBitMasks.items():
+                    if item not in Conf.itemsForbidden:
+                        byteIndex = itemData["byteIndex"]
+                        loc = offset + byteIndex
+                        # For two byte values, read little endian value.
+                        if item in ("ETank", "Reserve", "Missile", "Super", "PowerBomb"):
+                            val = currentState[loc] + (currentState[loc + 1] * 256)
+                        else:
+                            val = currentState[loc]
+
+                        if item == "ETank":
+                            tanks = int((val - 99) / 100)
+                            for _ in range(tanks):
+                                self.collectedItems.append(item)
+                                self.smbm.addItem(item)
+                        elif item == "Reserve":
+                            tanks = int(val / 100)
+                            for _ in range(tanks):
+                                self.collectedItems.append(item)
+                                self.smbm.addItem(item)
+                        elif item in ("Missile", "Super", "PowerBomb"):
+                            packs = int(val / 5)
+                            for _ in range(packs):
+                                self.collectedItems.append(item)
+                                self.smbm.addItem(item)
+                        else:
+                            bitMask = itemData["bitMask"]
+                            if val & bitMask != 0:
+                                self.collectedItems.append(item)
+                                self.smbm.addItem(item)
+
             elif dataType == dataEnum["map"]:
                 if self.areaRando or self.bossRando or self.escapeRando:
                     availAPs = set()

@@ -204,10 +204,12 @@ class CommonSolver(object):
                     print("                                          smbool: {}".format(loc.difficulty))
                     print("                                            path: {}".format([ap.Name for ap in loc.path]))
 
-    def collectMajor(self, loc, itemName=None):
+    def collectMajor(self, loc, itemName=None, autotracker=False):
         self.majorLocations.remove(loc)
         self.visitedLocations.append(loc)
-        self.collectItem(loc, itemName)
+        # in autotracker items are read from memory
+        if not autotracker:
+            self.collectItem(loc, itemName)
         return loc
 
     def collectMinor(self, loc):
@@ -260,7 +262,7 @@ class CommonSolver(object):
             if loc.Name == locName:
                 return i
 
-    def removeItemAt(self, locNameWeb):
+    def removeItemAt(self, locNameWeb, autotracker=False):
         locName = self.locNameWeb2Internal(locNameWeb)
         locIndex = self.getLocIndex(locName)
         if locIndex is None:
@@ -288,6 +290,10 @@ class CommonSolver(object):
             loc.accessPoint = None
         if loc.path is not None:
             loc.path = None
+
+        # in autotracker items are read from memory
+        if autotracker:
+            return
 
         # item
         item = loc.itemName

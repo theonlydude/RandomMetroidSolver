@@ -69,9 +69,7 @@ class RomPatcher:
         ],
         # VARIA tweaks
         'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable',
-                         'ln_chozo_platform.ips', 'bomb_torizo.ips',
-                         # faster MB cutscene transitions
-                         'Mother_Brain_Cutscene_Edits'],
+                         'ln_chozo_platform.ips', 'bomb_torizo.ips'],
         # anti-softlock/game opening layout patches
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips',

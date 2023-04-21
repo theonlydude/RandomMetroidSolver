@@ -615,16 +615,81 @@ org $A9B791
 org $A9B798
         bmi $1D
 
+;;; $DE00: Calculate Mother Brain rainbow beam HDMA tables ;;;
+; $AD:DE23 18          CLC                    ;|
+; $AD:DE24 69 00 0E    ADC #$0E00             ;} Mother Brain rainbow beam right edge origin X position = ([Mother Brain's brain X position] + Eh) * 100h
+org $ADDE24
+        adc #$f200
+
+;;; $BA5E: Mother Brain's body function - second phase - firing rainbow beam - finish firing rainbow beam ;;;
+; $A9:BA82 A9 00 FF    LDA #$FF00             ;\
+; $A9:BA85 8D B4 0F    STA $0FB4  [$7E:0FB4]  ;} Custom Samus X velocity = -100h
+;;; samus x velocity when falling from wall after rainbow beam
+org $A9BA82
+        lda #$0100
+
+;;; $BB82: Aim Mother Brain rainbow beam ;;;
+; $A9:BB82 AD F6 0A    LDA $0AF6  [$7E:0AF6]  ;\
+; $A9:BB85 38          SEC                    ;|
+; $A9:BB86 ED BA 0F    SBC $0FBA  [$7E:0FBA]  ;|
+; $A9:BB89 38          SEC                    ;} $12 = [Samus X position] - [Mother Brain's brain X position] - 10h
+; $A9:BB8A E9 10 00    SBC #$0010             ;|
+; $A9:BB8D 85 12       STA $12    [$7E:0012]  ;/
+; $A9:BB8F AD FA 0A    LDA $0AFA  [$7E:0AFA]  ;\
+; $A9:BB92 38          SEC                    ;|
+; $A9:BB93 ED BE 0F    SBC $0FBE  [$7E:0FBE]  ;|
+; $A9:BB96 38          SEC                    ;} $14 = [Samus Y position] - [Mother Brain's brain Y position] - 4
+; $A9:BB97 E9 04 00    SBC #$0004             ;|
+; $A9:BB9A 85 14       STA $14    [$7E:0014]  ;/
+; $A9:BB9C 22 AE C0 A0 JSL $A0C0AE[$A0:C0AE]  ; A = angle of ([$12], [$14]) offset
+; $A9:BBA0 38          SEC                    ;\
+; $A9:BBA1 E9 80 00    SBC #$0080             ;|
+; $A9:BBA4 49 FF FF    EOR #$FFFF             ;|
+; $A9:BBA7 1A          INC A                  ;} Mother Brain rainbow beam angle = 80h - [A] & FFh (Y flip)
+; $A9:BBA8 29 FF 00    AND #$00FF             ;|
+; $A9:BBAB 8F 22 80 7E STA $7E8022[$7E:8022]  ;/
+org $A9BB89
+        clc
+        adc #$0010
+
+;;; $BBE1: Move Samus for falling after rainbow beam ;;;
+;; Returns:
+;;     Carry: Set if reached floor (not in Y position range 30h..BFh), clear otherwise
+; $A9:BBE1 AD B4 0F    LDA $0FB4  [$7E:0FB4]  ;\
+; $A9:BBE4 18          CLC                    ;|
+; $A9:BBE5 69 02 00    ADC #$0002             ;|
+; $A9:BBE8 30 03       BMI $03    [$BBED]     ;} Custom Samus X velocity = min(0, [custom Samus X velocity] + 2)
+; $A9:BBEA A9 00 00    LDA #$0000             ;|
+;                                             ;|
+; $A9:BBED 8D B4 0F    STA $0FB4  [$7E:0FB4]  ;/
+; $A9:BBF0 20 3F BC    JSR $BC3F  [$A9:BC3F]  ; Move Samus [custom Samus X velocity] / 100h px horizontally towards wall
+;;; vanilla x velocity is -0x100, we've put 0x100, do inverse its decrease
+org $A9BBE4
+        SEC
+        SBC #$0002
+        BPL $03
+
 ;;; $BC3F: Move Samus horizontally towards wall ;;;
 ;;     Carry: Set if reached wall (X position EBh), clear otherwise
+; $A9:BC51 10 03       BPL $03    [$BC56]
+; $A9:BC53 09 00 FF    ORA #$FF00
+; $A9:BC56 6D F6 0A    ADC $0AF6  [$7E:0AF6]
 ; $A9:BC59 C9 EB 00    CMP #$00EB
-org $A9BC59
-	CMP #$0315
+; $A9:BC5C 10 07       BPL $07    [$BC65]
+org $A9BC51
+        ;; invert x delta to apply to samus X position
+        eor #$ffff
+        inc A
+        adc $0AF6
+        CMP #$0315
+        bmi samus_hits_the_wall
+        ;; cmp will set the carry if samus position is bigger than left wall at 0x0315 so we have to clear it as it's used as return from this function
+        clc
 ; $A9:BC65 A9 EB 00    LDA #$00EB
 org $A9BC65
+samus_hits_the_wall:
 	LDA #$0315
 
-;;; TODO::all the baby part
 ;;; $BE1B: Spawn Shitroid in cutscene ;;;
 ; ;                        ____________________________________ Enemy ID
 ; ;                       |     _______________________________ X position
@@ -638,43 +703,43 @@ org $A9BC65
 ; $A9:BE28             dw ECBF,0180,0040,CFA2,2800,0000,0000,0000
 ; $A0:ECBF             dx 0000, F8E6, 0C80, 0028, 0024, 0024, A9, 00, 0000, 0000, C710, 0001, 0000, C779, 800F, 804C, 8041, 0000, 0000, 00000000, 0000, 0000, 00000000, CF03, 804C, 0000, B18400, 02, F4A0, EC1C, 0000
 org $A9BE28+2
-        dw $0480
+        dw $0280
 
 ;;; $BF41: Mother Brain's body function - drained by Shitroid - move to back of room ;;;
 ; $A9:BF41 A9 28 00    LDA #$0028             ;\
 ; $A9:BF44 20 47 C6    JSR $C647  [$A9:C647]  ;} Make Mother Brain walk backwards towards X position 28h with animation delay [Y]
 org $A9BF41
-       LDA #$0328 
+       LDA #$03d8
 
 ;;; $BFD0: Mother Brain painful walking function - walk forwards  ;;;
 ; $A9:BFD5 A9 48 00    LDA #$0048             ;} Make Mother Brain walk forwards towards X position 48h with animation delay [$7E:784E]
 ; $A9:BFD8 20 01 C6    JSR $C601  [$A9:C601]  ;/
 org $A9BFD5
-        LDA #$0348
+        LDA #$03b8
 
 ;;; $C004: Mother Brain painful walking function - walk backwards ;;;
 ; $A9:C009 A9 28 00    LDA #$0028             ;} Make Mother Brain walk backwards towards X position 28h with animation delay [$7E:784E]
 ; $A9:C00C 20 47 C6    JSR $C647  [$A9:C647]  ;/
 org $A9C009
-        LDA #$0328
+        LDA #$03d8
 
 ;;; $C0FB: Mother Brain's body function - second phase - revive self - walk up to Shitroid ;;;
 ; $A9:C103 A9 50 00    LDA #$0050             ;} Make Mother Brain walk forwards fast towards X position 50h
 ; $A9:C106 20 01 C6    JSR $C601  [$A9:C601]  ;/
 org $A9C103
-        LDA #$0350
+        LDA #$03b0
 
 ;;; $C147: Mother Brain's body function - second phase - revive self - finish preparing for Shitroid murder ;;;
 ; $A9:C156 A9 50 00    LDA #$0050             ;} Make Mother Brain walk forwards really slow towards X position 50h
 ; $A9:C159 20 01 C6    JSR $C601  [$A9:C601]  ;/
 org $A9C156
-        LDA #$0350
+        LDA #$03b0
 
 ;;; $C18E: Mother Brain's body function - second phase - prepare for final Shitroid attack ;;;
 ; $A9:C194 A9 40 00    LDA #$0040             ;} Make Mother Brain walk backwards fast towards X position 40h
 ; $A9:C197 4C 47 C6    JMP $C647  [$A9:C647]  ;/
 org $A9C194
-        LDA #$0340
+        LDA #$03c0
 
 ;;; $C26A: Mother Brain walking function - try to inch forward ;;;
 ; $A9:C27D AD 7A 0F    LDA $0F7A  [$7E:0F7A]  ;\
@@ -783,7 +848,44 @@ org $A9C6FF
 ; $A9:C741 A9 40 01    LDA #$0140             ;\
 ; $A9:C744 9D 7A 0F    STA $0F7A,x[$7E:0FFA]  ;} Enemy X position = 140h
 org $A9C741
-	LDA #$0440 
+	LDA #$02c0 
+
+;;; update baby path when dashing toward mb head
+;;; $C7CC: Shitroid function - dash onto screen ;;;
+; $A9:C7D2 A9 00 D8    LDA #$D800             ;\
+; $A9:C7D5 9F 14 78 7E STA $7E7814,x[$7E:7894];} Enemy angle = -2800h : -40
+; $A9:C7D9 A9 00 0A    LDA #$0A00             ;\
+; $A9:C7DC 9F 16 78 7E STA $7E7816,x[$7E:7896];} Enemy speed = A00h
+; $A9:C7E0 A9 EC C7    LDA #$C7EC             ;\
+; $A9:C7E3 9D A8 0F    STA $0FA8,x[$7E:1028]  ;} Enemy function = $C7EC
+org $A9C7D2
+	lda #$2800
+
+;;; $C7EC: Shitroid function - curve towards Mother Brain's brain ;;;
+; $A9:C7EC A9 80 FE    LDA #$FE80             ;\
+; $A9:C7EF 85 12       STA $12    [$7E:0012]  ;} $12 = -180h (angle delta) : -1.5
+; $A9:C7F1 A9 00 B0    LDA #$B000             ;\
+; $A9:C7F4 85 14       STA $14    [$7E:0014]  ;} $14 = -5000h (target angle) : -80
+; $A9:C7F6 A9 00 0A    LDA #$0A00             ;\
+; $A9:C7F9 85 16       STA $16    [$7E:0016]  ;} $16 = A00h (target speed)
+; $A9:C7FB 20 31 CF    JSR $CF31  [$A9:CF31]  ; Update Shitroid speed and angle
+org $A9C7EC
+        lda #$0180
+org $A9C7F1
+        lda #$5000
+
+;;; $C811: Shitroid function - get right up in Mother Brain's face ;;;
+; $A9:C811 A9 00 FA    LDA #$FA00             ;\
+; $A9:C814 85 12       STA $12    [$7E:0012]  ;} $12 = -500h (angle delta) : -5
+; $A9:C816 A9 00 82    LDA #$8200             ;\
+; $A9:C819 85 14       STA $14    [$7E:0014]  ;} $14 = -7800h (target angle) : -120
+; $A9:C81B A9 00 0E    LDA #$0E00             ;\
+; $A9:C81E 85 16       STA $16    [$7E:0016]  ;} $16 = E00h (target speed)
+; $A9:C820 20 31 CF    JSR $CF31  [$A9:CF31]  ; Update Shitroid speed and angle
+org $A9C811
+        lda #$0500
+org $A9C816
+        lda #$7800
 
 ;;; $CA24: Shitroid movement table - ceiling -> Samus ;;;
 ; ; $F45F: Gradually accelerate towards point - $1A = 8
@@ -804,39 +906,39 @@ org $A9C741
 ;                         00CB,00B0,0000,F45F,
 ;                         CA66
 org $A9CA24
-        dw $03A0
+        dw $0360
 org $A9CA24+8
-        dw $0430
+        dw $02d0
 org $A9CA24+16
-        dw $03B0
+        dw $0340
 org $A9CA24+24
-        dw $03B0
+        dw $0340
 org $A9CA24+32
-        dw $03D0
+        dw $0320
 org $A9CA24+40
-        dw $03BD
+        dw $0333
 org $A9CA24+48
-        dw $03BC
+        dw $0334
 org $A9CA24+56
-        dw $03BB
+        dw $0335
 
 ;;; $CB56: Shitroid function - fly off-screen ;;;
 ; $A9:CB56 A9 10 01    LDA #$0110             ;\
 ; $A9:CB59 85 12       STA $12    [$7E:0012]  ;} $12 = 110h
 org $A9CB56
-	LDA #$0410
+	LDA #$02f0
 
 ;;; $CB7B: Shitroid function - move to final charge start position ;;;
 ; $A9:CB7B A9 31 01    LDA #$0131             ;\
 ; $A9:CB7E 85 12       STA $12    [$7E:0012]  ;} $12 = 131h
 org $A9CB7B
-	LDA #$0431
+	LDA #$02cf
 
 ;;; $CBB3: Shitroid function - initiate final charge ;;;
 ; $A9:CBB3 A9 22 01    LDA #$0122             ;\
 ; $A9:CBB6 85 12       STA $12    [$7E:0012]  ;} $12 = 122h
 org $A9CBB3
-        LDA #$0422
+        LDA #$02de
 
 ;;; plm closing the wall
 ; $AD:E3BE 22 D7 83 84 JSL $8483D7[$84:83D7]  ;\
@@ -958,6 +1060,71 @@ org $86C992
 org $86C9B2
 	dw $fb00,$FE00, $fb00,$FF00, $fb00,$FF00, $fb00,$FF80, $fb00,$FF80, $fb00,$0080, $fb00,$FF00, $fb00,$0200
 
+;;; $E09B: Handle letting Samus up from being drained ;;;
+; $90:E09B AD 1C 0A    LDA $0A1C  [$7E:0A1C]  ;\
+; $90:E09E C9 E9 00    CMP #$00E9             ;} If [Samus pose] != E9h (facing left - Samus drained - crouching): return
+org $90E09E
+        cmp #$00E8              ; facing right
+
+;;; $E0C5: Handle letting Samus fail to stand up from being drained ;;;
+;;; the pose when samus fails to stand up is not available when facing right, so disable the possibility to try to stand
+org $90E0C5
+        rts
+
+;;; $F394: Set up Samus for being drained ;;;
+; $90:F394 A9 54 00    LDA #$0054             ;\
+; $90:F397 8D 1C 0A    STA $0A1C  [$7E:0A1C]  ;} Samus pose = facing left - knockback
+org $90F394
+        lda #$0053              ; samus pose: facing right - knockback
+
+;;; $F3FB: $F084 - A = 19h: freeze drained Samus animation ;;;
+; $90:F3FB A9 01 00    LDA #$0001             ;\
+; $90:F3FE 8D 94 0A    STA $0A94  [$7E:0A94]  ;} Samus animation frame timer = 1
+; $90:F401 A9 1C 00    LDA #$001C             ;\
+; $90:F404 8D 96 0A    STA $0A96  [$7E:0A96]  ;} Samus animation frame = 1Ch
+; $90:F407 38          SEC                    ;\
+; $90:F408 60          RTS                    ;} Return carry set
+;;; the animation frame 0x1C is too far for drained samus facing right,
+;;; there's 15 animations when facing right
+;;; there's 32 animations when facing left
+;;; so reuse the same animation as when before
+org $90F401
+        lda #$0008
+
+;;; $DEBA:  ;;;
+; $90:DEBA AD 1C 0A    LDA $0A1C  [$7E:0A1C]
+; $90:DEBD C9 E8 00    CMP #$00E8
+; $90:DEC0 F0 07       BEQ $07    [$DEC9]
+; $90:DEC2 C9 E9 00    CMP #$00E9
+; $90:DEC5 F0 02       BEQ $02    [$DEC9]
+; $90:DEC7 80 0C       BRA $0C    [$DED5]
+; 
+; $90:DEC9 A9 11 00    LDA #$0011
+; $90:DECC 8D 94 0A    STA $0A94  [$7E:0A94]
+; $90:DECF A9 1A 00    LDA #$001A               ; this animation frame doesn't exist with samus facing left
+; $90:DED2 8D 96 0A    STA $0A96  [$7E:0A96]
+; 
+; $90:DED5 9C 30 0A    STZ $0A30  [$7E:0A30]  ; $0A30 = 0
+; $90:DED8 9C 52 0A    STZ $0A52  [$7E:0A52]
+; $90:DEDB 18          CLC
+; $90:DEDC 60          RTS
+;;; fix issue when samus is hit while drained before final rainbow beam
+org $90DECF
+	lda #$0008
+
+;;; in bank 92 in the spritemap table the entry for the bottom of samus sprite with movement type 0x1B
+;;; and pose E8 (Facing right - Samus drained - crouching/falling) point to 0000.
+;;; with spritesomething custom sprites the table is rewritten and don't have the 0000 issue.
+; ; Bottom half - E8: Facing right - Samus drained - crouching
+;                         0000 ; 06D5
+;                         0000 ; 06D6
+;                         0000 ; 06D7 <- this one
+;                         B0AF ; 06D8
+;                         B0AF ; 06D9
+;                         B0AF ; 06DA
+org $928e3b
+        dw $B0AF
+
 ;;; $FB72: Initialisation AI - enemy $E27F (zebetites) ;;;
 ; $A6:FC1B             dw 0338,0278,01B8,00F8 ; X position
 org $A6FC1B
@@ -1045,8 +1212,139 @@ invert_samus_X_displacement:
         ;; vanilla
         sta $0B58
 	rts
-
 warnpc $A9C302
+
+;;; fix rainbow beam when aiming up left
+;;; $E124: Calculate Mother Brain rainbow beam HDMA data table - beam is aimed upwards - beam is aimed up-left ;;;
+; $AD:E191 C9 FF FF    CMP #$FFFF             ;\
+; $AD:E194 D0 03       BNE $03    [$E199]     ;} If [[X]] = FFh, FFh:
+; $AD:E196 A9 FF 00    LDA #$00FF             ; [X] = FFh, 00h
+org $ADE191
+	;; we need to put the filler if (0, 0), not (ff, ff) as the beam is aiming left
+	nop : nop : nop
+
+;;; add function to handle when rainbow beam is aiming left
+org $ADDE5F+22
+        dw compute_mb_rainbow_beam_hdma_table_aimed_left
+
+;;; compute missing compute of mother brain rainbow beam hdma tables when beam is aimed left
+;;; freespace
+org $ADF444
+compute_mb_rainbow_beam_hdma_table_aimed_left:
+    ;; reuse the aimed right function ($DE7F) but change the call to the subroutine which fill the hdma table
+    LDA.l $7E8038                           ; \
+    STA.b $16                               ; } $16 = [Mother Brain rainbow beam right edge origin X position]
+    LDA.l $7E803C                           ; \
+    STA.b $18                               ; } $18 = [Mother Brain rainbow beam left edge origin X position]
+    JSR.w compute_mb_rainbow_beam_hdma_table_data_aimed_left
+    LDA.w #$0010                            ; \
+    STA.l $7E9C00                           ; |
+    LDA.w #$9C00                            ; |
+    STA.l $7E9C01                           ; |
+    LDA.w #$0010                            ; |
+    STA.l $7E9C03                           ; |
+    LDA.w #$9C03                            ; |
+    STA.l $7E9C04                           ; |
+    LDA.w #$00F0                            ; |
+    STA.l $7E9C06                           ; } $7E:9C00..0D = 10h,$9C00, 10h,$9C03, F0h,$9D04, F4h,$9DEC, 00h,00h
+    LDA.w #$9D04                            ; |
+    STA.l $7E9C07                           ; |
+    LDA.w #$00F4                            ; |
+    STA.l $7E9C09                           ; |
+    LDA.w #$9DEC                            ; |
+    STA.l $7E9C0A                           ; |
+    LDA.w #$0000                            ; |
+    STA.l $7E9C0C                           ; /
+    RTS                                     ; 
+
+compute_mb_rainbow_beam_hdma_table_data_aimed_left:
+;; Parameters:
+;;     $16: [$7E:8038] (right edge origin X position)
+;;     $18: [$7E:803C] (left edge origin X position)
+    PHB
+    PEA $7E7E              ;\
+    PLB                    ;} DB = $7E
+    PLB                    ;/
+    LDA #$00FF             ;\
+    STA $9D00              ;} $9D00 = FFh, 00h
+    STA $9D02              ; $9D02 = FFh, 00h
+    LDA $8034              ;\
+    EOR #$FFFF
+    INC A
+    AND #$00FF             ;|
+    ASL A                  ;|
+    TAX                    ;} $12 = |tan(-[Mother Brain rainbow beam right edge angle] * pi / 80h)| * 100h (right edge gradient)
+    LDA $91C9D4,x          ;|
+    STA $12                ;/
+    LDA $8036              ;\
+    EOR #$FFFF
+    INC A
+    AND #$00FF             ;|
+    ASL A                  ;|
+    TAX                    ;} $14 = |tan(-[Mother Brain rainbow beam left edge angle] * pi / 80h)| * 100h (left edge gradient)
+    LDA $91C9D4,x          ;|
+    STA $14                ;/
+    LDA $803E              ;\
+    TAY                    ;} Y = [Mother Brain rainbow beam origin Y position]
+    SEC                    ;\
+    SBC #$0020             ;|
+    ASL A                  ;|
+    CLC                    ;} X = $9D02 + ([Y] - 20h) * 2
+    ADC #$9D02             ;|
+    TAX                    ;/
+    LDA #$0000             ;\
+    STA $0002,x            ;} [X] + 2 = 00h, 00h
+    STA $0004,x            ; [X] + 4 = 00h, 00h
+    PHX                    ; Push X
+
+.LOOP_RIGHT_EDGE
+    LDA $16                ;\
+    SEC                    ;|
+    SBC $12                ;} $16 = max(0, [$16] - [$12])
+    BCS .POSITIVE_RIGHT    ;/
+    LDA #$0000
+.POSITIVE_RIGHT
+    STA $16                ; $16 -= [$12]
+    AND #$FF00
+    BNE .NOT_FILLER_RIGHT
+    LDA #$00FF               ; filler
+.NOT_FILLER_RIGHT          ;} [X] = [$16] / 100h, 00h
+    STA $0000,x            ;/
+    DEX
+    DEX
+    DEY
+    CPY #$0020
+    BNE .LOOP_RIGHT_EDGE
+
+    PLX                    ;\
+    INX                    ;} X = $9D04 + ([Mother Brain rainbow beam origin Y position] - 20h) * 2
+    INX                    ;/
+    LDA $803E              ;\
+    TAY                    ;} Y = [Mother Brain rainbow beam origin Y position]
+
+.LOOP_LEFT_EDGE
+    LDA $18                ;\
+    SEC                    ;|
+    SBC $14                ;} $18 = max(0, [$18] - [$14])
+    BCS .POSITIVE_LEFT     ;/
+    LDA #$0000
+.POSITIVE_LEFT
+    STA $18                ; $18 -= [$14]
+    AND #$FF00             ;|
+    BNE .NOT_FILLER_LEFT
+    LDA #$00FF
+.NOT_FILLER_LEFT           ;} [X] = 00h, [$18] / 100h
+    STA $0000,x            ;/
+    INX
+    INX
+    INY
+    CPY #$00E8
+    BNE .LOOP_LEFT_EDGE
+    PLB
+    RTS
+
+warnpc $ADFFFF
+
 
 ;;; spritemaps, extended spritemaps, tilemaps, hitboxes
 org $a99fa2

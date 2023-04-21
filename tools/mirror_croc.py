@@ -1,14 +1,12 @@
 #!/usr/bin/python3
 
 import sys, os
-from shutil import copyfile
 
 # we're in directory 'tools/' we have to update sys.path
 sys.path.append(os.path.dirname(sys.path[0]))
 
 from rom.rom import RealROM, snes_to_pc, pc_to_snes
 from rom.leveldata import Spritemap, Tilemap, Transform
-from rom.ips import IPS_Patch
 
 romName = sys.argv[1]
 rom = RealROM(romName)

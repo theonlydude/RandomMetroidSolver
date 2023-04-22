@@ -120,6 +120,8 @@ draw_digit_menu:
 print "End of items percent: ", pc
 warnpc $82ffff
 
+;;; needed additional tiles are in pause screen gfx included by map patch
+
 ;;; BG1 tilemap alterations for equipment screen
 
 ;;; ['items' box] in inventory menu
@@ -234,12 +236,3 @@ org $82C1CA
         dw $00CC,$009C+8 ; Boots - hi-jump boots
         dw $00CC,$00A4+8 ; Boots - space jump
         dw $00CC,$00AC+8 ; Boots - speed booster
-
-;;; new tiles for 'items' text
-;; included in map patch gfx
-;; org $b68380
-;;         db $77,$0,$22,$0,$22,$0,$22,$0,$22,$0,$72,$0,$0,$0,$0,$0,$ff,$77,$ff,$22,$ff,$22,$ff,$22,$ff,$22,$ff,$72,$ff,$0,$ff,$0
-;; org $b683a0
-;;         db $7a,$0,$43,$0,$73,$0,$42,$0,$42,$0,$7a,$0,$0,$0,$0,$0,$ff,$7a,$ff,$43,$ff,$73,$ff,$42,$ff,$42,$ff,$7a,$ff,$0,$ff,$0
-;; org $b683c0
-;;         db $27,$0,$68,$0,$ef,$0,$a1,$0,$21,$0,$2e,$0,$0,$0,$0,$0,$ff,$27,$ff,$68,$ff,$ef,$ff,$a1,$ff,$21,$ff,$2e,$ff,$0,$ff,$0

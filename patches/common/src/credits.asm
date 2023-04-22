@@ -186,6 +186,7 @@ copy:
     ldx #$0000
 -
     lda.l itemlocations, x
+.n
     rep 4 : nop
     cmp #$0000
     beq +

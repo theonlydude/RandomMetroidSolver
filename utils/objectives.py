@@ -718,6 +718,7 @@ class Objectives(object):
 
     # call from rando
     def writeGoals(self, romFile):
+        return # FIXME tmp disable
         # write check functions
         romFile.seek(Addresses.getOne('objectivesList'))
         for goal in Objectives.activeGoals:
@@ -728,11 +729,9 @@ class Objectives(object):
         # compute chars
         char2tile = {
             '.': 0x4A,
-            '?': 0x4B,
-            '!': 0x4C,
+            '/': 0x4B,
             ' ': 0x00,
-            '%': 0x02,
-            '*': 0x03,
+            '%': 0x150,
             '0': 0x160,
             'a': 0x30,
         }

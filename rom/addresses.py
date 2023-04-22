@@ -60,8 +60,9 @@ class Addresses(object):
             'objectiveEventsArray': ValueRange(symbols.getAddress('objectives', 'objective_events'), length=2*5),
             'itemsMask': ValueSingle(symbols.getAddress('objectives', 'all_items_mask')),
             'beamsMask': ValueSingle(symbols.getAddress('objectives', 'all_beams_mask')),
-            'objectivesSpritesOAM': ValueSingle(symbols.getAddress('objectives', 'completed_spritemaps_start')),
-            'objectivesText': ValueSingle(symbols.getAddress('objectives', 'objectivesText')),
+# FIXME tmp disable
+#            'objectivesSpritesOAM': ValueSingle(symbols.getAddress('objectives', 'completed_spritemaps_start')),
+#            'objectivesText': ValueSingle(symbols.getAddress('objectives', 'objectivesText')),
             'totalItemsPercent': ValueList([symbols.getAddress('objectives', 'collect_%d_items_pct' % pct) for pct in [25,50,75,100]])
         })
 

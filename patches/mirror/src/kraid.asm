@@ -1,5 +1,6 @@
 ;;; compile with thedopefish asar
 ;;; fix kraid camera
+;;; fix clearing spikes on floor after kraid death
 
 arch 65816
 lorom
@@ -53,3 +54,20 @@ org $909643
         dw $00B0
 org $90964B
         dw $00C0
+
+;;; fix floor spikes
+;;; $ABD6: Instruction - move PLM right one block ;;;
+; $84:ABD6 FE 87 1C    INC $1C87,x[$7E:1CD1]
+; $84:ABD9 FE 87 1C    INC $1C87,x[$7E:1CD1]
+; $84:ABDC 60          RTS
+;;; move it left instead
+org $84ABD6
+        dec $1C87,x
+        dec $1C87,x
+
+;;; $C360: Kraid death - initialise death ;;;
+; $A7:C3F0 22 D7 83 84 JSL $8483D7[$84:83D7]  ;\
+; $A7:C3F4             dx 05, 1B, B7BF        ;} Spawn PLM to crumble spike floor
+;;; update plm x position
+org $A7C3F4
+        db $1a

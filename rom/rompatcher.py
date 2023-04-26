@@ -1423,7 +1423,7 @@ class RomPatcher:
 
     def writeObjectives(self, itemLocs, tourian):
         objectives = Objectives()
-        objectives.writeGoals(self.romFile)
+        objectives.writeGoals(self.romFile, tourian)
         objectives.writeIntroObjectives(self.romFile, tourian)
         self.writeItemsMasks(itemLocs)
         # change etecoons/dachora map tiles depending on ROM flavor

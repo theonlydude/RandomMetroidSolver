@@ -8,9 +8,12 @@ class Addresses(object):
     def get(key):
         value = Addresses.addresses.get(key)
         if value is None:
-            value = ValueSingle(Addresses.symbols.getAddress(key))
-            Addresses.addresses[key] = value
-
+            addr = Addresses.symbols.getAddress(key)
+            if addr is not None:
+                value = ValueSingle(addr)
+                Addresses.addresses[key] = value
+        if value is None:
+            raise ValueError("Unknown address '%s'" % key)
         return value
 
     @staticmethod
@@ -60,9 +63,6 @@ class Addresses(object):
             'objectiveEventsArray': ValueRange(symbols.getAddress('objectives', 'objective_events'), length=2*5),
             'itemsMask': ValueSingle(symbols.getAddress('objectives', 'all_items_mask')),
             'beamsMask': ValueSingle(symbols.getAddress('objectives', 'all_beams_mask')),
-# FIXME tmp disable
-#            'objectivesSpritesOAM': ValueSingle(symbols.getAddress('objectives', 'completed_spritemaps_start')),
-#            'objectivesText': ValueSingle(symbols.getAddress('objectives', 'objectivesText')),
             'totalItemsPercent': ValueList([symbols.getAddress('objectives', 'collect_%d_items_pct' % pct) for pct in [25,50,75,100]])
         })
 

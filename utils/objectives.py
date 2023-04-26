@@ -717,8 +717,7 @@ class Objectives(object):
         LOG.debug("tourianRequired: {}".format(self.tourianRequired))
 
     # call from rando
-    def writeGoals(self, romFile):
-        return # FIXME tmp disable
+    def writeGoals(self, romFile, tourian):
         # write check functions
         romFile.seek(Addresses.getOne('objectivesList'))
         for goal in Objectives.activeGoals:
@@ -739,33 +738,27 @@ class Objectives(object):
             char2tile[chr(ord('a')+i)] = char2tile['a']+i
         for i in range(1, ord('9')-ord('0')+1):
             char2tile[chr(ord('0')+i)] = char2tile['0']+i
-
-        # write text
-        tileSize = 2
-        lineLength = 32 * tileSize
-        firstChar = 3 * tileSize
-        # start at 8th line
-        baseAddr = Addresses.getOne('objectivesText') + lineLength * 8 + firstChar
-        # space between two lines of text
-        space = 3 if Objectives.nbActiveGoals == 5 else 4
-        for i, goal in enumerate(Objectives.activeGoals):
-            addr = baseAddr + i * lineLength * space
-            text = goal.getText()
-            romFile.seek(addr)
+        def writeString(text, addr=None):
+            text = text.lower()
+            if addr is not None:
+                romFile.seek(addr)
             for c in text:
                 if c not in char2tile:
                     continue
-                romFile.writeWord(0x3800 + char2tile[c])
-
-        # write goal completed positions y in sprites OAM
-        baseY = 0x40
-        addr = Addresses.getOne('objectivesSpritesOAM')
-        spritemapSize = 5 + 2
+                romFile.writeWord(0x2800 + char2tile[c])
+        # write Tourian status
+        writeString(tourian[:8], Addresses.getOne('objectives_obj_bg1_tilemap_tourian'))
+        # write objectives text
+        romFile.seek(Addresses.getOne('objectives_objs_txt'))
+        addrs = []
         for i, goal in enumerate(Objectives.activeGoals):
-            y = baseY + i * space * 8
-            # sprite center is at 128
-            y = (y - 128) & 0xFF
-            romFile.writeByte(y, addr+4 + i*spritemapSize)
+            addrs.append(romFile.tell())
+            writeString("%d. %s" % (i+1, goal.getText()))
+            romFile.writeWord(0xffff) # string terminator
+            assert romFile.tell() < Addresses.getOne("objectives_objs_txt_limit"), "Objective text too long"
+        romFile.seek(Addresses.getOne("objectives_obj_txt_ptrs"))
+        for addr in addrs:
+            romFile.writeWord(pc_to_snes(addr) & 0xffff)
 
     def writeIntroObjectives(self, rom, tourian):
         if self.isVanilla() and tourian == "Vanilla":

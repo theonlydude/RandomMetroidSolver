@@ -28,6 +28,8 @@ incsrc "sym/map.asm"
 !samus_x = $0AF6
 !samus_y = $0AFA
 !temp = $0743
+;;; counted by main obj routine, read by pause menu routine
+!n_objs_left = $7fff46
 
 ;;; external routines
 !song_routine = $808fc1
@@ -121,25 +123,35 @@ objectives_completed:
 	;; don't check anything if objectives are already completed
 	lda !objectives_completed_event : jsl !check_event : bcs .end
 	stz !temp
+        lda.w #0 : sta.l !n_objs_left
         ldx #$0000
 .loop:
         lda.l objective_funcs, x
         beq .end_loop      ; checkers function list end
+        lda.l !n_objs_left : inc : sta.l !n_objs_left
 	;; check objective if not already completed
 	lda.l objective_events, x : jsl !check_event
-	bcs .next
+	bcs .completed
         jsr (objective_funcs, x)
 	bcc .next
 	;; objective completed
 	lda.l objective_events, x : jsl !mark_event
-	;; store a non-zero value in temp if an obj is completed
-	inc !temp
+        inc !temp               ; puts non-zero value here to optionally play sfx
+.completed:
+        lda.l !n_objs_left : dec : sta.l !n_objs_left
 .next:
         inx : inx
         cpx.w !max_objectives*2
         bne .loop
 .end_loop:
-	jsr check_objectives_events
+        ;; n_objs_left = total_objs - completed_objs
+        lda !n_objs_left : bne .check_sfx
+        ;; all objectives are completed
+        lda !objectives_completed_event : jsl !mark_event
+	lda.l escape_option : and #$00ff : beq .check_sfx
+	jsr trigger_escape
+	stz !temp		; disable notification sfx
+.check_sfx:
 	;; check if we should play an sfx upon objective completion
 	lda !temp : beq .end 	; do nothing anyway if no obj completed
 	lda.l objectives_options_mask : bit #$0080 : beq .end
@@ -149,24 +161,6 @@ objectives_completed:
 .end:
         plx
         rts
-
-;;; check if all objectives events are set, sets objectives_completed_event if so
-;;; (subroutine of objectives_completed)
-;;; input X : last loop index in objective check event, gives objective list size
-check_objectives_events:
-.loop:
-	dex : dex
-	bmi .completed
-	lda.l objective_events,x
-	jsl !check_event : bcc .end
-	bra .loop
-.completed:
-        lda !objectives_completed_event : jsl !mark_event
-	lda.l escape_option : and #$00ff : beq .end
-	jsr trigger_escape
-	stz !temp		; disable notification sfx
-.end:
-	rts
 
 %export(objective_events)
 %objectivesCompletedEventArray()
@@ -447,8 +441,9 @@ endmacro
 
 %eventChecker(king_cac_dead, !king_cac_event)
 
-print "A1 end: ", pc
-;; warnpc $a1faff
+obj_a1_end:
+print "obj A1 end: ", pc
+
 
 ;;; only sink the ground in G4 room if objectives are completed.
 ;;; otherwise you'd just have to beat G4 and go to statues room
@@ -601,14 +596,12 @@ org map_PauseRoutineIndex_objectives
         dw func_objective_screen
         dw func_map2obj_fading_out, func_map2obj_load_obj, func_map2obj_fading_in
         dw func_obj2map_fading_out, $91D7, $9200
-print "after obj: ", pc
-
-;;; continue in 82 after InfoStr in seed_display.asm
-org $82FB6D
 
 ;;;
 ;;; pause menu objectives display
 ;;;
+
+table "tables/pause.tbl",rtl
 
 ;;; new screen:
 ;;; (skip 3 indices used by map patch)
@@ -648,8 +641,146 @@ org $82FB6D
 
 ;; dynamic objective text: BG1 tilemap in RAM
 !BG1_tilemap = $7E3000
-;; only viewable display
-!BG1_tilemap_size = $480
+;; rows [5, 23] of screen
+!BG1_tilemap_size = $4c0
+
+!line_size #= 32*2
+;; relative to tilemap
+!obj_1st_line #= 5
+!obj_last_line #= 18
+%tileOffset(2, !obj_last_line)
+!draw_obj_tile_limit #= !_tile_offset
+
+print "draw_obj_tile_limit ", hex(!draw_obj_tile_limit)
+
+%BGtile($160, 2, 1, 0, 0)
+!digit_0 #= !_tile
+
+;; box tiles
+!box_top_left = $3941
+!box_top = $3942
+!box_top_right = $7941
+!box_left = $3940
+!box_right = $7940
+!box_bottom_left = $B941
+!box_bottom = $B942
+!box_bottom_right = $F941
+
+;; obj completion tiles
+%BGtile($176, 1, 1, 0, 0)
+!completed_tick #= !_tile
+%BGtile($177, 1, 1, 0, 0)
+!in_progress_dots #= !_tile
+
+;; scroll arrows tiles
+%BGtile($1B8, 1, 1, 0, 0)
+!scroll_up_left #= !_tile
+%BGtile($1B8, 1, 1, 1, 0)
+!scroll_up_right #= !_tile
+%BGtile($1B8, 1, 1, 0, 1)
+!scroll_down_left #= !_tile
+%BGtile($1B8, 1, 1, 1, 1)
+!scroll_down_right #= !_tile
+
+;; RAM
+;; current first objective displayed
+!obj_index = $073d
+
+;;; digit to draw in A
+;;; x, y are relative to viewable area
+macro drawDigit(x, y)
+%tileOffset(<x>, <y>)
+        clc : adc.w #!digit_0
+        sta.l !BG1_tilemap+!_tile_offset
+endmacro
+
+;;; continue in bank A1 for obj screen management code
+org obj_a1_end
+;;; load base screen tilemap from ROM to RAM
+load_obj_tilemap:
+        %loadRamDMA(obj_bg1_tilemap, !BG1_tilemap, obj_txt_ptrs-obj_bg1_tilemap)
+        ;; update number of objectives left to complete in RAM tilemap
+        lda !n_objs_left
+        %drawDigit(2, 2)
+        rtl
+
+;;; update RAM tilemap with objectives text, line by line
+!tmp_tile_offset = $12
+!tmp_obj_idx = $14
+
+update_objs:
+        ;; TODO draw scroll up arrow if !obj_index > 0
+        lda.w #((!obj_1st_line+1)*!line_size)+4 : sta.b !tmp_tile_offset
+        lda !obj_index : sta !tmp_obj_idx
+.draw_obj_loop:
+        ;; draw objective line
+        ;; check if completed
+        lda !tmp_obj_idx : asl : tax : lda.l objective_events, x
+        jsl !check_event
+        ldx !tmp_tile_offset
+        bcc .not_completed
+        lda #!completed_tick
+        ;; TODO handle in progress
+        bra .compl_end
+.not_completed:
+        lda.w #0
+.compl_end:
+        sta !BG1_tilemap, x
+        inx : inx : stx !tmp_tile_offset
+.draw_obj_text:
+        ;; objective string
+        lda !tmp_obj_idx : asl : tax
+        lda.l obj_txt_ptrs, x
+        tax
+.obj_txt_loop:
+        lda.l $B60000, x
+        cmp #$ffff : beq .obj_txt_loop_end
+        phx
+        ldx !tmp_tile_offset : sta.l !BG1_tilemap, x
+        inx : inx : stx !tmp_tile_offset
+        plx
+        inx : inx
+        bra .obj_txt_loop
+.obj_txt_loop_end:
+        ;; TODO handle "(i/n)" in-progress display
+        ;; pad with 0 to the end of line
+        ldx !tmp_tile_offset
+        jsr pad_0
+.obj_pad_loop_end:
+        ;; draw empty line
+        jsr pad_0
+        ;; check if no more space to draw to or no more obj to draw
+        cpx.w #!draw_obj_tile_limit : bpl .draw_obj_loop_end
+        lda !tmp_obj_idx : inc : sta !tmp_obj_idx
+        cmp.l n_objectives : bne .draw_obj_loop
+.last_pad:
+        jsr pad_0
+        cpx.w #!draw_obj_tile_limit : bmi .last_pad
+.draw_obj_loop_end:
+        ;; TODO after, check if objs left to draw and draw down arrow if necessary
+        rtl
+
+;; pad with 0s until end of line, and skip to start of next line
+pad_0:
+.loop:
+        txa : inc #4 : and #$003f : beq .end
+        lda #$0000 : sta.l !BG1_tilemap,x
+        inx : inx
+        bra .loop
+.end:
+        inx #8
+        stx !tmp_tile_offset
+        rts
+
+;;; direct DMA of BG1 tilemap to VRAM
+blit_objs:
+        %gfxDMA(!BG1_tilemap, $48A0, !BG1_tilemap_size)
+        rtl
+
+print "pause A1 end: ", pc
+
+;;; main pause menu interaction in 82 after InfoStr in seed_display.asm
+org $82FB6D
 
 ;;; check for L or R input and update pause_index && pause_screen_button_mode
 check_l_r_pressed:
@@ -724,14 +855,6 @@ check_l_r_pressed:
 .end:
         PLP
         RTS
-
-;;; write "OBJECTIVES" as map page title in BG2,
-draw_obj_bg2:
-        %gfxDMA(obj_title, $50AA, $18)
-        rts
-
-;;; 
-load_objs:
 
 ;;; unpause
 display_unpause:
@@ -923,6 +1046,7 @@ func_map2obj_fading_out:
 .end:
         RTS
 
+
 func_map2obj_load_obj:
         REP #$30
         ;; backup map's scroll
@@ -933,9 +1057,11 @@ func_map2obj_load_obj:
         ;; no scroll
         STZ $B1      ; BG1 X scroll = 0
         STZ $B3      ; BG1 Y scroll = 0
-
-        JSR draw_obj_bg2
-        jsr load_objs
+        
+        stz !obj_index
+        jsl load_obj_tilemap
+        jsl update_objs
+        jsl blit_objs
         LDA !pause_screen_mode_obj   ;\
         STA !pause_screen_mode       ;} Pause screen mode = objective screen
         JSR $A615    ; Set pause screen button label palettes
@@ -1009,25 +1135,50 @@ org $82C1E6
 
 ;;; new tiles for 'OBJ' button in unused tiles : included in map patch gfx
 
-;;; objectives strings
+;;; obj screen tilemap, obj text and some handy constants
 org $B6F200
+;;; total possible objectives
+%export(n_objectives)
+        dw $0004
 
-table "tables/pause.tbl",rtl
-
-obj_title:
+%export(obj_bg1_tilemap)
+        ;; line 0 : pause "window title"
+        fillbyte $00 : fill 20
         dw " OBJECTIVES "
-
-%export(objectives_text_ptrs)
-!obj_idx = 0
-while !obj_idx < !max_objectives
-        dw $0000
-	!obj_idx #= !obj_idx+1
+        fillbyte $00 : fill 20
+        ;; line 1 : top line of obj left/tourian boxes
+        dw $0000, !box_top_left, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top_right
+        dw !box_top_left, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top_right, $0000
+        ;; line 2 : obj left/tourian text
+        dw $0000, !box_left
+        dw "  OBJ LEFT"
+        dw !box_right, !box_left
+        dw "TOURIAN:"
+%export(obj_bg1_tilemap_tourian)
+        fillbyte $00 : fill 16
+        dw !box_right, $0000
+        ;; line 3 : bottom line of obj left/tourian boxes
+        dw $0000, !box_bottom_left, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom_right
+        dw !box_bottom_left, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom_right, $0000
+        ;; line 4 : top line of objectives text box
+        dw $0000, !box_top_left, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top_right, $0000
+        ;; lines 5-17 : objectives text borders
+!_line_idx = 5
+while !_line_idx < 18
+        dw $0000, !box_left, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, !box_right, $0000
+	!_line_idx #= !_line_idx+1
 endif
-        dw $0000
+        ;; line 18 : bottom line of objectives text box
+        dw $0000, !box_bottom_left, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom_right, $0000
 
-%export(objectives_text)
-        ;; strings written by randomizer
 
+%export(obj_txt_ptrs)
+        skip !max_objectives*2
+
+%export(objs_txt)
+;; strings written by randomizer
 print "B6 end: ", pc
 
 warnpc $B6FA00
+org $B6FA00
+%export(objs_txt_limit)

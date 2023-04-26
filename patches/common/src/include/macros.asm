@@ -39,7 +39,7 @@ endmacro
 ;;; compute absolute tile offset from coords
 ;;; result in !_tile_offset
 macro tileOffset(x, y)
-!_tile_offset #= 2*(<y>*$20+<x>)
+!_tile_offset #= 2*((<y>*$20)+<x>)
 endmacro
 
 ;;; ldx the result of %tileOffset
@@ -79,5 +79,23 @@ macro gfxDMA(src, dstVRAM, size)
         dl <src>
         dw <size>
         LDA.b #$02 : STA $420B   ; start transfer
+        plp
+endmacro
+
+;;; helper to DMA load from static long address (*not RAM*) to static long address (RAM)
+macro loadRamDMA(src, dstRAMl, size)
+        php
+        %ai8()
+        ;; write RAM address to proper registers
+        LDA.b #(<dstRAMl>&$ff) : STA $2181
+        LDA.b #((<dstRAMl>&$ff00)>>8) : STA $2182
+        LDA.b #(<dstRAMl>>>16) : STA $2183
+        ;; set up DMA transfer
+        JSL $8091A9
+        db $01,$00          ; hard-coded channel 1, options = $00
+        db $80              ; DMA target = WRAM
+        dl <src>
+        dw <size>
+        LDA #$02 : STA $420B   ; start transfer
         plp
 endmacro

@@ -803,6 +803,17 @@ class CommonSolver(object):
 
             self.comeBack.cleanNoComeBack(self.getAllLocs(self.majorLocations, self.minorLocations))
 
+        if self.objectives.tourianRequired and not self.aborted and self.escapeTransition:
+            # add gunship location to display escape in the spoiler log
+            gunship = self.getGunship()
+            self.majorLocations.append(gunship)
+            # change current AP to escape AP
+            self.lastAP = self.escapeTransition[0][1]
+            self.computeLocationsDifficulty(self.majorLocations)
+            majorsAvailable = [loc for loc in self.majorLocations if loc.difficulty is not None and loc.difficulty.bool == True]
+            if gunship in majorsAvailable:
+                self.collectMajor(gunship)
+
         # compute difficulty value
         (difficulty, itemsOk) = self.computeDifficultyValue()
 

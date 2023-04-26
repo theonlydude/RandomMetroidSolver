@@ -148,7 +148,7 @@ class RomPatcher:
                        'baby_room.ips', 'baby_remove_blocks.ips', 'escape_animals.ips',
                        'snails.ips', 'boulders.ips', 'rinkas.ips', 'etecoons.ips', 'crab_main_street.ips',
                        'crab_mt_everest.ips', 'mother_brain.ips', 'kraid.ips', 'torizos.ips', 'botwoon.ips',
-                       'crocomire.ips']
+                       'crocomire.ips', 'ridley.ips']
         },
         # add debug tools
         'Debug': ['Debug_Full.ips', 'Disable_Clear_Save_Boot']

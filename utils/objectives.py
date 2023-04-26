@@ -753,7 +753,7 @@ class Objectives(object):
         addrs = []
         for i, goal in enumerate(Objectives.activeGoals):
             addrs.append(romFile.tell())
-            writeString("%d. %s" % (i+1, goal.getText()))
+            writeString(goal.getText())
             romFile.writeWord(0xffff) # string terminator
             assert romFile.tell() < Addresses.getOne("objectives_objs_txt_limit"), "Objective text too long"
         romFile.seek(Addresses.getOne("objectives_obj_txt_ptrs"))

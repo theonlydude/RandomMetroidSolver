@@ -40,7 +40,7 @@ done
 tools/make_ips.py ${VANILLA} ${tmp_sfc} backport_mirrortroid.ips
 
 # apply varia fixes to mirrortroid
-for patch in 'mirrortroid.ips' 'bank_8f.ips' 'bank_83.ips' 'baby_room.ips' 'baby_remove_blocks.ips' 'escape_animals.ips' 'snails.ips' 'boulders.ips' 'rinkas.ips' 'etecoons.ips' 'crab_main_street.ips' 'crab_mt_everest.ips' 'mother_brain.ips' 'kraid.ips' 'torizos.ips' 'botwoon.ips' 'crocomire.ips'; do
+for patch in 'mirrortroid.ips' 'bank_8f.ips' 'bank_83.ips' 'baby_room.ips' 'baby_remove_blocks.ips' 'escape_animals.ips' 'snails.ips' 'boulders.ips' 'rinkas.ips' 'etecoons.ips' 'crab_main_street.ips' 'crab_mt_everest.ips' 'mother_brain.ips' 'kraid.ips' 'torizos.ips' 'botwoon.ips' 'crocomire.ips' 'ridley.ips'; do
     tools/apply_ips.py patches/mirror/ips/${patch} ${tmp_sfc}
 done
 

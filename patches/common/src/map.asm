@@ -164,7 +164,6 @@ math pri off
 ;(When moving pause screen related data, some patches related to this may break!)
         !PauseScreen_Tiles_Pointer = $B68000       ;(vanilla: $B68000 (PC: $1B0000) ;size: $6000)
 	!PauseScreen_Map_Tilemap_Pointer = $B6E000       ;(vanilla: $B6E000 (PC: $1B6000) ;size: $800)
-	!PauseScreen_Equipment_Tilemap_Pointer = $B6E800 ;(vanilla: $B6E800 (PC: $1B6800) ;size: $800)
 	!PauseScreen_Palette_Pointer = $B6F000           ;(vanilla: $B6F000 (PC: $1B7000) ;size: $200)
         !PauseScreen_AreaPalettes_Pointer = $B6FF60
         !AreaPalettes_Amount = 5 ; number of changed palettes by area

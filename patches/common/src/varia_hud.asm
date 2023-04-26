@@ -592,6 +592,7 @@ scav_list_check:
 	rts
 
 found_next_scav:
+        lda !hunt_started_event : jsl !mark_event
 	lda !scav_idx : inc : sta !scav_idx
 	asl : tax
 	lda.l scav_order,x : and #$00ff
@@ -687,7 +688,7 @@ item_post_collect:
 compute_n_items:
 	phx
 	phy
-	lda #$0000 : sta !n_items ; temporarily used to count collected items in current area
+	lda #$0000 : sta $12 ; temporarily used to count collected items in current area
 	ldy #$0000		; Y will be used to store number of items in current area
 	;; go through loc id list for current area, counting collected items
 	;; determine current graph area
@@ -701,17 +702,25 @@ compute_n_items:
 	jsl !bit_index
 	lda !item_bit_array,x : and $05e7
 	beq .next
-	lda !n_items : inc : sta !n_items
+        inc $12
 .next:
 	plx
 	iny
 	inx
 	bra .count_loop
 .end:
-	;; here, n_items contain collected items, and Y number of items
-	;; make it so, n_items contains remaining items:
-	;; n_items = max(0, Y - n_items) ; handle < 0 for some restricted locs cases
-	tya : sec : sbc !n_items
+	;; here, $12 contain collected items, and Y number of items
+        lda $12 : bne .collected_event
+        tya : bra .store        ; no items collected; skip substraction
+.collected_event:
+	;; at least an item collected, trigger appropriate event : current graph area idx+area_clear_start_event_base
+	ldx $07bb : lda $8f0010,x
+	clc : adc !area_clear_start_event_base
+	jsl !mark_event
+.rem:
+	;; make it so n_items contains remaining items:
+	;; n_items = max(0, Y - $12) ; handle < 0 for some restricted locs cases
+	tya : sec : sbc $12
         bpl .store
         lda #$0000
 .store:

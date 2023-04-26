@@ -54,6 +54,7 @@ math pri on
 
 ;; scavenger hunt completion
 !hunt_over_event = !VARIA_event_base+1
+!hunt_started_event = !VARIA_event_base+19
 
 ;; clear area events : events based on area index, from 1 (crateria) to 10 (east maridia),
 !area_clear_event_base = !VARIA_event_base+4 ; has to be unused, will be set as ceres cleared if ceres start
@@ -69,16 +70,31 @@ math pri on
 !east_maridia_cleared_event = !VARIA_event_base+14
 !tourian_cleared_event = !VARIA_event_base+15 ; not useful, here as a placeholder bc it will be set entering tourian
 
+;; clear area started event, for in progress indicator in pause menu
+!area_clear_start_event_base = !VARIA_event_base+19
+!crateria_clear_start_event = !VARIA_event_base+20
+!green_brin_clear_start_event = !VARIA_event_base+21
+!red_brin_clear_start_event = !VARIA_event_base+22
+!ws_clear_start_event = !VARIA_event_base+23
+!kraid_clear_start_event = !VARIA_event_base+24
+!upper_norfair_clear_start_event = !VARIA_event_base+25
+!croc_clear_start_event = !VARIA_event_base+26
+!lower_norfair_clear_start_event = !VARIA_event_base+27
+!west_maridia_clear_start_event = !VARIA_event_base+28
+!east_maridia_clear_start_event = !VARIA_event_base+29
+
 ;; memes
 !fish_tickled_event = !VARIA_event_base+2
 !orange_geemer_event = !VARIA_event_base+3
 !shak_dead_event = !VARIA_event_base+16
 !bowling_chozo_event = !VARIA_event_base+17
 !king_cac_event = !VARIA_event_base+18
+!etecoons_event = !VARIA_event_base+30
+!dachora_event = !VARIA_event_base+31
 
 ;;; Keep these macros at the end as they depend on current event index:
 !max_objectives = 5
-!objectives_event_base = !VARIA_event_base+19
+!objectives_event_base = !VARIA_event_base+32
 
 ;; declare an array with all the "objective completed" events
 macro objectivesCompletedEventArray()

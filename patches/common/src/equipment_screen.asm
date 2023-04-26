@@ -22,22 +22,23 @@ incsrc "constants.asm"
 
 !semicolon = $08A3
 
-org $828F6B
-        JSR display_item_count_menu
 
 org $8290F6
-        jsr display_RTA_time_frame : nop
+        jsr display_time : nop
 
 ; Free space at end of bank 82 after objectives
 org $82FEC0
+display_time:
+        JSL $809B44             ; vanilla code
+        jsr display_RTA_time_frame
+        rts
+
 display_item_count_menu:
         jsl endingtotals_compute_percent
         jsr display_percent
-        JSR $8F70               ; vanilla code
         rts
 
 display_RTA_time_frame:
-        JSL $809B44             ; vanilla code
         lda !pause_index
         cmp !pause_index_equipment_screen : beq .time
         cmp !pause_index_map2equip_load_equip : beq .time

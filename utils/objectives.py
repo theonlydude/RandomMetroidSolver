@@ -22,19 +22,22 @@ class Synonyms(object):
         "wreck",
         "smash",
         "crush",
-        "end"
+        "end",
+        "kill"
     ]
     alreadyUsed = []
     @staticmethod
-    def getVerb(): 
-        verb = random.choice(Synonyms.killSynonyms)
-        while verb in Synonyms.alreadyUsed:
+    def getVerb(maxLen):
+        possibleVerbs = [syn for syn in Synonyms.killSynonyms if len(syn) <= maxLen]
+        assert len(possibleVerbs) > 0, "could not find short enough synonym"
+        verb = random.choice(possibleVerbs)
+        while len(possibleVerbs) == len(Synonyms.killSynonyms) and verb in Synonyms.alreadyUsed:
             verb = random.choice(Synonyms.killSynonyms)
         Synonyms.alreadyUsed.append(verb)
         return verb
 
 class Goal(object):
-    def __init__(self, name, gtype, logicClearFunc, romClearFunc,
+    def __init__(self, name, gtype, logicClearFunc, romClearFunc, romInProgressFunc=None,
                  escapeAccessPoints=None, objCompletedFuncAPs=lambda ap: [ap],
                  exclusion=None, items=None, text=None, introText=None,
                  available=True, expandableList=None, category=None, area=None,
@@ -44,6 +47,9 @@ class Goal(object):
         self.clearFunc = logicClearFunc
         self.objCompletedFuncAPs = objCompletedFuncAPs
         self.symbol = "objectives_%s" % romClearFunc
+        self.inProgressSymbol = None
+        if romInProgressFunc is not None:
+            self.inProgressSymbol = "objectives_%s" % romInProgressFunc
         self.escapeAccessPoints = escapeAccessPoints
         if self.escapeAccessPoints is None:
             self.escapeAccessPoints = (1, [])
@@ -67,7 +73,7 @@ class Goal(object):
             self.items = []
         self.text = name if text is None else text
         self.introText = introText
-        self.useSynonym = text is not None
+        self.useSynonym = text is not None and '{}' in text
         self.expandableList = expandableList
         if self.expandableList is None:
             self.expandableList = []
@@ -82,6 +88,12 @@ class Goal(object):
     def checkAddr(self):
         return pc_to_snes(Addresses.getOne(self.symbol)) & 0xffff
 
+    @property
+    def inProgressAddr(self):
+        if self.inProgressSymbol is None:
+            return 0
+        return pc_to_snes(Addresses.getOne(self.inProgressSymbol)) & 0xffff
+
     def setRank(self, rank):
         self.rank = rank
 
@@ -90,14 +102,22 @@ class Goal(object):
         return self.clearFunc(smbm, ap)
 
     def getText(self):
-        out = "{}. ".format(self.rank)
-        if self.useSynonym:
-            out += self.text.format(Synonyms.getVerb())
-        else:
-            out += self.text
-        assert len(out) <= 28, "Goal text '{}' is too long: {}, max 28".format(out, len(out))
+        idxTxt = "{}.".format(self.rank).ljust(3, ' ')
+        out = idxTxt
+        outLen = 0
+        maxLen = 27
+        try:
+            if self.useSynonym:
+                out += self.text.format(Synonyms.getVerb(maxLen - len(out) - len(self.text) + 2)) # 2 for the "{}"
+            else:
+                out += self.text
+            outLen = len(out)
+        except AssertionError:
+            outLen = maxLen + 1
+        assert outLen <= maxLen, "Goal '{}' text is too long: '{}'".format(self.name, out)
+        out = out.rstrip()
         if self.introText is not None:
-            self.introText = "%d. %s" % (self.rank, self.introText)
+            self.introText = idxTxt + self.introText
         else:
             self.introText = out
         return out
@@ -155,27 +175,30 @@ _goalsList = [
                              "kill all G4", "kill two G4", "kill three G4"],
                     "type": "boss",
                     "limit": 0},
-         text="{} one golden4",
+         text="{} one g4",
          category="Bosses"),
-    Goal("kill two G4", "other", lambda sm, ap: Bosses.xBossesDead(sm, 2), "boss_2_killed",
+    Goal("kill two G4", "other", lambda sm, ap: Bosses.xBossesDead(sm, 2),
+         "boss_2_killed", romInProgressFunc="in_progress_boss_2_killed",
          escapeAccessPoints=getG4EscapeAccessPoints(2),
          exclusion={"list": ["kill all G4", "kill one G4", "kill three G4"],
                     "type": "boss",
                     "limit": 1},
-         text="{} two golden4",
+         text="{} two g4      ",
          category="Bosses"),
-    Goal("kill three G4", "other", lambda sm, ap: Bosses.xBossesDead(sm, 3), "boss_3_killed",
+    Goal("kill three G4", "other", lambda sm, ap: Bosses.xBossesDead(sm, 3),
+         "boss_3_killed", romInProgressFunc="in_progress_boss_3_killed",
          escapeAccessPoints=getG4EscapeAccessPoints(3),
          exclusion={"list": ["kill all G4", "kill one G4", "kill two G4"],
                     "type": "boss",
                     "limit": 2},
-         text="{} three golden4",
+         text="{} three g4      ",
          category="Bosses"),
-    Goal("kill all G4", "other", lambda sm, ap: Bosses.allBossesDead(sm), "all_g4_dead",
+    Goal("kill all G4", "other", lambda sm, ap: Bosses.allBossesDead(sm),
+         "all_g4_dead", romInProgressFunc="in_progress_boss_4_killed",
          escapeAccessPoints=getG4EscapeAccessPoints(4),
          exclusion={"list": ["kill kraid", "kill phantoon", "kill draygon", "kill ridley", "kill one G4", "kill two G4", "kill three G4"]},
          items=["Kraid", "Phantoon", "Draygon", "Ridley"],
-         text="{} all golden4",
+         text="{} all g4      ",
          expandableList=["kill kraid", "kill phantoon", "kill draygon", "kill ridley"],
          category="Bosses"),
     Goal("kill spore spawn", "miniboss", lambda sm, ap: Bosses.bossDead(sm, 'SporeSpawn'), "spore_spawn_is_dead",
@@ -211,80 +234,99 @@ _goalsList = [
                     "limit": 0},
          text="{} one miniboss",
          category="Minibosses"),
-    Goal("kill two minibosses", "other", lambda sm, ap: Bosses.xMiniBossesDead(sm, 2), "miniboss_2_killed",
+    Goal("kill two minibosses", "other", lambda sm, ap: Bosses.xMiniBossesDead(sm, 2),
+         "miniboss_2_killed", romInProgressFunc="in_progress_miniboss_2_killed",
          escapeAccessPoints=getMiniBossesEscapeAccessPoints(2),
          exclusion={"list": ["kill all mini bosses", "kill one miniboss", "kill three minibosses"],
                     "type": "miniboss",
                     "limit": 1},
-         text="{} two minibosses",
+         text="{} two minibosses      ",
          category="Minibosses"),
-    Goal("kill three minibosses", "other", lambda sm, ap: Bosses.xMiniBossesDead(sm, 3), "miniboss_3_killed",
+    Goal("kill three minibosses", "other", lambda sm, ap: Bosses.xMiniBossesDead(sm, 3),
+         "miniboss_3_killed", romInProgressFunc="in_progress_miniboss_3_killed",
          escapeAccessPoints=getMiniBossesEscapeAccessPoints(3),
          exclusion={"list": ["kill all mini bosses", "kill one miniboss", "kill two minibosses"],
                     "type": "miniboss",
                     "limit": 2},
-         text="{} three minibosses",
+         text="{} 3 minibosses      ",
          category="Minibosses"),
-    Goal("kill all mini bosses", "other", lambda sm, ap: Bosses.allMiniBossesDead(sm), "all_mini_bosses_dead",
+    Goal("kill all mini bosses", "other", lambda sm, ap: Bosses.allMiniBossesDead(sm),
+         "all_mini_bosses_dead", romInProgressFunc="in_progress_miniboss_4_killed",
          escapeAccessPoints=getMiniBossesEscapeAccessPoints(4),
          exclusion={"list": ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo",
                              "kill one miniboss", "kill two minibosses", "kill three minibosses"]},
          items=["SporeSpawn", "Botwoon", "Crocomire", "GoldenTorizo"],
-         text="{} all mini bosses",
+         text="{} all minibosses      ",
          expandableList=["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo"],
          category="Minibosses",
          conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))),
-    Goal("finish scavenger hunt", "other", lambda sm, ap: SMBool(True), "scavenger_hunt_completed",
+    Goal("finish scavenger hunt", "other", lambda sm, ap: SMBool(True),
+         "scavenger_hunt_completed", romInProgressFunc="scav_started",
          exclusion={"list": []}, # will be auto-completed
          available=False),
     Goal("nothing", "other", lambda sm, ap: Objectives.canAccess(sm, ap, "Landing Site"), "nothing_objective",
          escapeAccessPoints=(1, ["Landing Site"])), # with no objectives at all, escape auto triggers only in crateria
-    Goal("collect 25% items", "items", lambda sm, ap: SMBool(True), "collect_25_items",
+    Goal("collect 25% items", "items", lambda sm, ap: SMBool(True),
+         "collect_25_items", romInProgressFunc="items_collected",
          exclusion={"list": ["collect 50% items", "collect 75% items", "collect 100% items"]},
          category="Items",
          introText="collect 25 percent of items"),
-    Goal("collect 50% items", "items", lambda sm, ap: SMBool(True), "collect_50_items",
-         exclusion={"list": ["collect 25% items", "collect 75% items", "collect 100% items"]},
+    Goal("collect 50% items", "items", lambda sm, ap: SMBool(True),
+         "collect_50_items", romInProgressFunc="items_collected",
+         exclusion={"list": ["collect 25% items", "collect 75% items","collect 100% items"]},
          category="Items",
          introText="collect 50 percent of items"),
-    Goal("collect 75% items", "items", lambda sm, ap: SMBool(True), "collect_75_items",
+    Goal("collect 75% items", "items", lambda sm, ap: SMBool(True),
+         "collect_75_items", romInProgressFunc="items_collected",
          exclusion={"list": ["collect 25% items", "collect 50% items", "collect 100% items"]},
          category="Items",
          introText="collect 75 percent of items"),
-    Goal("collect 100% items", "items", lambda sm, ap: SMBool(True), "collect_100_items",
+    Goal("collect 100% items", "items", lambda sm, ap: SMBool(True),
+         "collect_100_items", romInProgressFunc="items_collected",
          exclusion={"list": ["collect 25% items", "collect 50% items", "collect 75% items", "collect all upgrades"]},
          category="Items",
          introText="collect all items"),
-    Goal("collect all upgrades", "items", lambda sm, ap: SMBool(True), "all_major_items",
+    Goal("collect all upgrades", "items", lambda sm, ap: SMBool(True),
+         "all_major_items", romInProgressFunc="upgrade_collected",
          category="Items"),
-    Goal("clear crateria", "items", lambda sm, ap: SMBool(True), "crateria_cleared",
+    Goal("clear crateria", "items", lambda sm, ap: SMBool(True),
+         "crateria_cleared", romInProgressFunc="crateria_clear_started",
          category="Items",
          area="Crateria"),
-    Goal("clear green brinstar", "items", lambda sm, ap: SMBool(True), "green_brin_cleared",
+    Goal("clear green brinstar", "items", lambda sm, ap: SMBool(True),
+         "green_brin_cleared", romInProgressFunc="green_brin_clear_started",
          category="Items",
          area="GreenPinkBrinstar"),
-    Goal("clear red brinstar", "items", lambda sm, ap: SMBool(True), "red_brin_cleared",
+    Goal("clear red brinstar", "items", lambda sm, ap: SMBool(True),
+         "red_brin_cleared", romInProgressFunc="red_brin_clear_started",
          category="Items",
          area="RedBrinstar"),
-    Goal("clear wrecked ship", "items", lambda sm, ap: SMBool(True), "ws_cleared",
+    Goal("clear wrecked ship", "items", lambda sm, ap: SMBool(True),
+         "ws_cleared", romInProgressFunc="ws_clear_started",
          category="Items",
          area="WreckedShip"),
-    Goal("clear kraid's lair", "items", lambda sm, ap: SMBool(True), "kraid_cleared",
+    Goal("clear kraid's lair", "items", lambda sm, ap: SMBool(True),
+         "kraid_cleared", romInProgressFunc="kraid_clear_started",
          category="Items",
          area="Kraid"),
-    Goal("clear upper norfair", "items", lambda sm, ap: SMBool(True), "upper_norfair_cleared",
+    Goal("clear upper norfair", "items", lambda sm, ap: SMBool(True),
+         "upper_norfair_cleared", romInProgressFunc="upper_norfair_clear_started",
          category="Items",
          area="Norfair"),
-    Goal("clear croc's lair", "items", lambda sm, ap: SMBool(True), "croc_cleared",
+    Goal("clear croc's lair", "items", lambda sm, ap: SMBool(True),
+         "croc_cleared", romInProgressFunc="croc_clear_started",
          category="Items",
          area="Crocomire"),
-    Goal("clear lower norfair", "items", lambda sm, ap: SMBool(True), "lower_norfair_cleared",
+    Goal("clear lower norfair", "items", lambda sm, ap: SMBool(True),
+         "lower_norfair_cleared", romInProgressFunc="lower_norfair_clear_started",
          category="Items",
          area="LowerNorfair"),
-    Goal("clear west maridia", "items", lambda sm, ap: SMBool(True), "west_maridia_cleared",
+    Goal("clear west maridia", "items", lambda sm, ap: SMBool(True),
+         "west_maridia_cleared", romInProgressFunc="west_maridia_clear_started",
          category="Items",
          area="WestMaridia"),
-    Goal("clear east maridia", "items", lambda sm, ap: SMBool(True), "east_maridia_cleared",
+    Goal("clear east maridia", "items", lambda sm, ap: SMBool(True),
+         "east_maridia_cleared", romInProgressFunc="east_maridia_clear_started",
          category="Items",
          area="EastMaridia"),
     Goal("tickle the red fish", "other",
@@ -314,15 +356,17 @@ _goalsList = [
                                                                   Objectives.canAccessLocation(sm, ap, "Gravity Suit"),
                                                                   sm.haveItem("GoldenTorizo"),
                                                                   sm.canPassLowerNorfairChozo()), # graph access implied by GT loc
-         "all_chozo_robots",
+         "all_chozo_robots", romInProgressFunc="in_progress_chozo_robots",
          category="Memes",
+         text="trigger chozo bots      ",
          escapeAccessPoints=(3, ["Landing Site", "Screw Attack Bottom", "Bowling"]),
          objCompletedFuncAPs=lambda ap: ["Landing Site", "Screw Attack Bottom", "Bowling"],
          exclusion={"list": ["kill golden torizo"]},
          conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))),
     Goal("visit the animals", "other", lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Big Pink"), sm.haveItem("SpeedBooster"), # dachora
                                                               Objectives.canAccess(sm, ap, "Etecoons Bottom")), # Etecoons
-         "visited_animals",
+         "visited_animals", romInProgressFunc="in_progress_animals",
+         text="visit the animals      ",
          category="Memes",
          escapeAccessPoints=(2, ["Big Pink", "Etecoons Bottom"]),
          objCompletedFuncAPs=lambda ap: ["Big Pink", "Etecoons Bottom"]),
@@ -724,6 +768,15 @@ class Objectives(object):
             romFile.writeWord(goal.checkAddr)
         # list terminator
         romFile.writeWord(0x0000)
+        # write "in progress" check functions
+        romFile.seek(Addresses.getOne('objectives_in_progress_funcs'))
+        for goal in Objectives.activeGoals:
+            romFile.writeWord(goal.inProgressAddr)
+
+        # write number of objectives
+        romFile.writeWord(len(Objectives.activeGoals), Addresses.getOne('objectives_n_objectives'))
+        # TODO actually handle total/required
+        romFile.writeWord(len(Objectives.activeGoals), Addresses.getOne('objectives_n_objectives_required'))
 
         # compute chars
         char2tile = {
@@ -747,7 +800,7 @@ class Objectives(object):
                     continue
                 romFile.writeWord(0x2800 + char2tile[c])
         # write Tourian status
-        writeString(tourian[:8], Addresses.getOne('objectives_obj_bg1_tilemap_tourian'))
+        writeString(tourian[:8].rjust(8, ' '), Addresses.getOne('objectives_obj_bg1_tilemap_tourian'))
         # write objectives text
         romFile.seek(Addresses.getOne('objectives_objs_txt'))
         addrs = []
@@ -755,7 +808,7 @@ class Objectives(object):
             addrs.append(romFile.tell())
             writeString(goal.getText())
             romFile.writeWord(0xffff) # string terminator
-            assert romFile.tell() < Addresses.getOne("objectives_objs_txt_limit"), "Objective text too long"
+            assert romFile.tell() < Addresses.getOne("objectives_objs_txt_limit"), "Objectives text too long"
         romFile.seek(Addresses.getOne("objectives_obj_txt_ptrs"))
         for addr in addrs:
             romFile.writeWord(pc_to_snes(addr) & 0xffff)

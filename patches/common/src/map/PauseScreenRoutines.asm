@@ -22,7 +22,6 @@ ORG $828ED1 : DW $1000			;half size of HUD graphic tiles loading
 ORG $828EE2 : LDA #$50			;change position for map border
 ORG $828EF3 : DL !PauseScreen_Map_Tilemap_Pointer
 ORG $828F13 : DL !PauseScreen_Map_Tilemap_Pointer+$400
-ORG $828F33 : DL !PauseScreen_Equipment_Tilemap_Pointer
 ORG $828FF8 : LDA.l !PauseScreen_Palette_Pointer,x
 ORG $82902B : JSR SetMapScrollBoundaries
 
@@ -441,7 +440,7 @@ incsrc "mapicon_sprites.asm"
 %export(mapicons_tables)
 
 print "b85 end: ", pc
-warnpc $85ffff
+warnpc $85cfff
 }
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    SELECT SWITCH AREA                                       |x|

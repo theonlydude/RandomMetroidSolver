@@ -22,12 +22,16 @@ incsrc "sym/rando_escape_common.asm"
 incsrc "sym/custom_music.asm"
 incsrc "sym/disable_screen_shake.asm"
 incsrc "sym/map.asm"
+incsrc "sym/equipment_screen.asm"
 
 !timer = !timer1
 !current_room = $079b
 !samus_x = $0AF6
 !samus_y = $0AFA
 !temp = $0743
+!tmp_in_progress_done = $16
+!tmp_in_progress_total = $18
+
 ;;; counted by main obj routine, read by pause menu routine
 !n_objs_left = $7fff46
 
@@ -95,18 +99,42 @@ org $A6C5ED
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; CODE
-org $a1fa80
-print "A1 start: ", pc
+org $85d000
+print "85 start: ", pc
+
+;;; total possible objectives
+%export(n_objectives)
+        dw $0004
+
+;;; total required objectives
+%export(n_objectives_required)
+        dw $0004
+
 ;;; checks for objectives periodically
-;;; seed objectives checker functions pointers, max 5, list ends with $0000
-print " --- objectives checker functions: ", pc, " ---"
+;;; seed objectives checker functions pointers, list ends with $0000
+;;; objective checker returns carry set if obj completed, clear if not
 %export(objective_funcs)
         dw kraid_is_dead
         dw phantoon_is_dead
         dw draygon_is_dead
         dw ridley_is_dead
+!_obj_idx #= 4
+while !_obj_idx < !max_objectives
         dw $0000
+        !_obj_idx #= !_obj_idx+1
+endif
         dw $0000
+
+;;; "in progress" objective checkers. optional, set to 0 if not applicable for given objective
+;;; called only when objective is not completed yet, returns carry set if obj in progress, clear if not
+;;; also sets: $16, $18 as progress indicators, ie $16 "sub-objectives", completed out of $18.
+;;; Sets $18 to 0 if the "sub-objective" concept is not applicable
+%export(in_progress_funcs)
+!_obj_idx #= 0
+while !_obj_idx < !max_objectives
+        dw $0000
+        !_obj_idx #= !_obj_idx+1
+endif
 
 periodic_obj_check:
 	lda !timer : and !obj_check_period-1
@@ -123,12 +151,11 @@ objectives_completed:
 	;; don't check anything if objectives are already completed
 	lda !objectives_completed_event : jsl !check_event : bcs .end
 	stz !temp
-        lda.w #0 : sta.l !n_objs_left
+        lda.l n_objectives_required : sta.l !n_objs_left
         ldx #$0000
 .loop:
         lda.l objective_funcs, x
         beq .end_loop      ; checkers function list end
-        lda.l !n_objs_left : inc : sta.l !n_objs_left
 	;; check objective if not already completed
 	lda.l objective_events, x : jsl !check_event
 	bcs .completed
@@ -144,8 +171,11 @@ objectives_completed:
         cpx.w !max_objectives*2
         bne .loop
 .end_loop:
-        ;; n_objs_left = total_objs - completed_objs
-        lda !n_objs_left : bne .check_sfx
+        ;; n_objs_left = required_objs - completed_objs, so
+        ;; objectives are all completed if n_objs_left is <= 0
+        lda !n_objs_left : bmi .all_completed : beq .all_completed : bra .check_sfx
+.all_completed:
+        lda.w #0 : sta !n_objs_left ; reset to 0 in case it's negative, as it's displayed in pause menu
         ;; all objectives are completed
         lda !objectives_completed_event : jsl !mark_event
 	lda.l escape_option : and #$00ff : beq .check_sfx
@@ -428,8 +458,12 @@ endmacro
 %export(visited_animals)
         phx
 	lda !area_index : cmp #!brinstar : bne .not
-        %checkMapTile(etecoons) : beq .not
+        %checkMapTile(etecoons) : beq .dachora
+        lda !etecoons_event : jsl !mark_event
+.dachora:
         %checkMapTile(dachora) : beq .not
+        lda !dachora_event : jsl !mark_event
+        lda !etecoons_event : jsl !check_event : bcc .not
 .ok:
         sec
         bra .end
@@ -441,9 +475,111 @@ endmacro
 
 %eventChecker(king_cac_dead, !king_cac_event)
 
-obj_a1_end:
-print "obj A1 end: ", pc
+;;; "in progress" objective checkers
 
+macro inProgressBossChecker(n, bossType)
+%export(in_progress_<bossType>_<n>_killed)
+        lda.w #<n> : sta.b !tmp_in_progress_total
+	phx
+        jsr nb_killed_<bossType>es : stx.b !tmp_in_progress_done
+        lda.b !tmp_in_progress_done : beq .no_progress
+        sec
+        bra .end
+.no_progress:
+        clc
+.end:
+        plx
+        rts
+endmacro
+
+%inProgressBossChecker(2,boss)
+%inProgressBossChecker(3,boss)
+%inProgressBossChecker(4,boss)
+
+%inProgressBossChecker(2,miniboss)
+%inProgressBossChecker(3,miniboss)
+%inProgressBossChecker(4,miniboss)
+
+%export(items_collected)
+        lda.l !CollectedItems : beq .no_progress
+        sec
+        bra .end
+.no_progress:
+        clc
+.end:
+        rts
+
+%export(upgrade_collected)
+	lda $09A4 : bne .progress
+	lda $09A8 : bne .progress
+	clc
+	bra .end
+.progress:
+	sec
+.end:
+	rts
+
+%eventChecker(scav_started, !hunt_started_event)
+%eventChecker(crateria_clear_started, !crateria_clear_start_event)
+%eventChecker(green_brin_clear_started, !green_brin_clear_start_event)
+%eventChecker(red_brin_clear_started, !red_brin_clear_start_event)
+%eventChecker(ws_clear_started, !ws_clear_start_event)
+%eventChecker(kraid_clear_started, !kraid_clear_start_event)
+%eventChecker(upper_norfair_clear_started, !upper_norfair_clear_start_event)
+%eventChecker(croc_clear_started, !croc_clear_start_event)
+%eventChecker(lower_norfair_clear_started, !lower_norfair_clear_start_event)
+%eventChecker(west_maridia_clear_started, !west_maridia_clear_start_event)
+%eventChecker(east_maridia_clear_started, !east_maridia_clear_start_event)
+
+%export(in_progress_chozo_robots)
+        lda.w #4 : sta.b !tmp_in_progress_total
+        phx
+	jsr golden_torizo_is_dead : bcc .bt
+        inx
+.bt:
+	lda !BT_event : jsl !check_event : bcc .bowl
+        inx
+.bowl:
+	lda !bowling_chozo_event : jsl !check_event : bcc .ln
+        inx
+.ln:
+	lda !LN_chozo_lowered_acid_event : jsl !check_event : bcc .done
+        inx
+.done:
+        txa : sta.b !tmp_in_progress_done
+        bne .progress
+        clc
+        bra .end
+.progress:
+        sec
+.end:
+        plx
+	rts
+
+%export(in_progress_animals)
+        lda.w #2 : sta.b !tmp_in_progress_total
+        phx
+.etecoons:
+	lda !etecoons_event : jsl !check_event : bcc .dachora
+        inx
+.dachora:
+	lda !dachora_event : jsl !check_event : bcc .done
+        inx
+.done:
+        txa : sta.b !tmp_in_progress_done
+        bne .progress
+        clc
+        bra .end
+.progress:
+        sec
+.end:
+        plx
+	rts
+
+
+warnpc $85ffff
+obj_85_end:
+print "obj 85 end: ", pc
 
 ;;; only sink the ground in G4 room if objectives are completed.
 ;;; otherwise you'd just have to beat G4 and go to statues room
@@ -591,11 +727,41 @@ warnpc $aaf82f
 
 ;;; Pause stuff
 
-;;; new pointers list
-org map_PauseRoutineIndex_objectives
+;;; new map state functions pointers list
+org map_PauseRoutineIndex_objectives ; map patch already add some functions, and makes some room for our pointers in the patch
         dw func_objective_screen
         dw func_map2obj_fading_out, func_map2obj_load_obj, func_map2obj_fading_in
         dw func_obj2map_fading_out, $91D7, $9200
+
+;; we share obj screen tilemap address with equipment screen. skip load of base tilemap when loading pause menu,
+;; do it when switching to equipment screen only
+org $828F1D
+load_eqt_screen_base_tilemap:
+        bra .skip
+.hijack_end:
+        ;; completely skip useless dummy samus wireframe tilemap copy to the wrong place to make some free space
+org $828F6E
+.skip:
+
+;;; hijack load equipment screen to load base tilemap there
+org $8291B1
+        jsr load_eqt_screen_base_tilemap_rewrite
+
+;;; reuse free space above to load equipment screen base tilemap
+org load_eqt_screen_base_tilemap_hijack_end
+load_eqt_screen_base_tilemap_rewrite:
+        ;; load base tilemap
+        %loadRamDMA($B6E800, $7E3800, $800)
+        JSR $B20C       ; Write Samus wireframe tilemap
+        JSR $8F70       ; Load equipment screen reserve health tilemap
+        jsr $A12B       ; refresh equipment tilemap
+        ;; write items and time as soon as the tilemap is setup to avoid weird effect when fading in
+        jsr equipment_screen_display_item_count_menu
+        jsr equipment_screen_display_RTA_time_frame
+        JSR $AB47               ; hijacked code
+        rts
+
+warnpc load_eqt_screen_base_tilemap_skip
 
 ;;;
 ;;; pause menu objectives display
@@ -640,7 +806,7 @@ table "tables/pause.tbl",rtl
 !light_up_r_button  = #$0002
 
 ;; dynamic objective text: BG1 tilemap in RAM
-!BG1_tilemap = $7E3000
+!BG1_tilemap = $7E3800
 ;; rows [5, 23] of screen
 !BG1_tilemap_size = $4c0
 
@@ -650,11 +816,6 @@ table "tables/pause.tbl",rtl
 !obj_last_line #= 18
 %tileOffset(2, !obj_last_line)
 !draw_obj_tile_limit #= !_tile_offset
-
-print "draw_obj_tile_limit ", hex(!draw_obj_tile_limit)
-
-%BGtile($160, 2, 1, 0, 0)
-!digit_0 #= !_tile
 
 ;; box tiles
 !box_top_left = $3941
@@ -673,13 +834,13 @@ print "draw_obj_tile_limit ", hex(!draw_obj_tile_limit)
 !in_progress_dots #= !_tile
 
 ;; scroll arrows tiles
-%BGtile($1B8, 1, 1, 0, 0)
+%BGtile($1B8, 6, 1, 0, 0)
 !scroll_up_left #= !_tile
-%BGtile($1B8, 1, 1, 1, 0)
+%BGtile($1B8, 6, 1, 1, 0)
 !scroll_up_right #= !_tile
-%BGtile($1B8, 1, 1, 0, 1)
+%BGtile($1B8, 6, 1, 0, 1)
 !scroll_down_left #= !_tile
-%BGtile($1B8, 1, 1, 1, 1)
+%BGtile($1B8, 6, 1, 1, 1)
 !scroll_down_right #= !_tile
 
 ;; RAM
@@ -690,12 +851,17 @@ print "draw_obj_tile_limit ", hex(!draw_obj_tile_limit)
 ;;; x, y are relative to viewable area
 macro drawDigit(x, y)
 %tileOffset(<x>, <y>)
-        clc : adc.w #!digit_0
+        clc : adc.w #'0'
         sta.l !BG1_tilemap+!_tile_offset
 endmacro
 
-;;; continue in bank A1 for obj screen management code
-org obj_a1_end
+macro drawTile(tile, x, y)
+        %tileOffset(<x>, <y>)
+        lda.w #<tile> : sta.l !BG1_tilemap+!_tile_offset
+endmacro
+
+;;; continue in bank 85 for obj screen management code
+org obj_85_end
 ;;; load base screen tilemap from ROM to RAM
 load_obj_tilemap:
         %loadRamDMA(obj_bg1_tilemap, !BG1_tilemap, obj_txt_ptrs-obj_bg1_tilemap)
@@ -709,22 +875,34 @@ load_obj_tilemap:
 !tmp_obj_idx = $14
 
 update_objs:
-        ;; TODO draw scroll up arrow if !obj_index > 0
+        ;; draw scroll up arrow if !obj_index > 0
+        lda !obj_index : beq .start
+        %drawTile(!scroll_up_left, 15, !obj_1st_line)
+        %drawTile(!scroll_up_right, 16, !obj_1st_line)
+.start:
+        ;; init: place tile index at beggining of 1st obj line
         lda.w #((!obj_1st_line+1)*!line_size)+4 : sta.b !tmp_tile_offset
         lda !obj_index : sta !tmp_obj_idx
 .draw_obj_loop:
         ;; draw objective line
+        ;; reset "in progress" tmp vars
+        stz !tmp_in_progress_done : stz !tmp_in_progress_total
         ;; check if completed
         lda !tmp_obj_idx : asl : tax : lda.l objective_events, x
         jsl !check_event
-        ldx !tmp_tile_offset
         bcc .not_completed
         lda #!completed_tick
-        ;; TODO handle in progress
         bra .compl_end
 .not_completed:
+        ;; handle "in progress" status
+        lda !tmp_obj_idx : asl : tax
+        lda.l in_progress_funcs, x : beq .not_in_progress
+        jsr (in_progress_funcs, x) : bcc .not_in_progress
+        lda.w #!in_progress_dots : bra .compl_end
+.not_in_progress:
         lda.w #0
 .compl_end:
+        ldx !tmp_tile_offset
         sta !BG1_tilemap, x
         inx : inx : stx !tmp_tile_offset
 .draw_obj_text:
@@ -742,7 +920,21 @@ update_objs:
         inx : inx
         bra .obj_txt_loop
 .obj_txt_loop_end:
-        ;; TODO handle "(i/n)" in-progress display
+        ;; handle "(i/n)" in-progress display
+        lda !tmp_in_progress_total : beq .pad
+        ldx !tmp_tile_offset : inx : inx
+        lda.w #'(' : sta.l !BG1_tilemap, x
+        inx : inx
+        lda !tmp_in_progress_done : clc : adc.w #'0' : sta.l !BG1_tilemap, x
+        inx : inx
+        lda.w #'/' : sta.l !BG1_tilemap, x
+        inx : inx
+        lda !tmp_in_progress_total : clc : adc.w #'0' : sta.l !BG1_tilemap, x
+        inx : inx
+        lda.w #')' : sta.l !BG1_tilemap, x
+        inx : inx
+        stx !tmp_tile_offset
+.pad:
         ;; pad with 0 to the end of line
         ldx !tmp_tile_offset
         jsr pad_0
@@ -752,12 +944,18 @@ update_objs:
         ;; check if no more space to draw to or no more obj to draw
         cpx.w #!draw_obj_tile_limit : bpl .draw_obj_loop_end
         lda !tmp_obj_idx : inc : sta !tmp_obj_idx
-        cmp.l n_objectives : bne .draw_obj_loop
+        cmp.l n_objectives : beq .last_pad
+        jmp .draw_obj_loop
 .last_pad:
         jsr pad_0
         cpx.w #!draw_obj_tile_limit : bmi .last_pad
 .draw_obj_loop_end:
-        ;; TODO after, check if objs left to draw and draw down arrow if necessary
+        ;; check if objs left to draw and draw down arrow if necessary
+        lda !tmp_obj_idx : cmp.l n_objectives : bpl .end
+        !_obj_last_line #= !obj_last_line-1
+        %drawTile(!scroll_down_left, 15, !_obj_last_line)
+        %drawTile(!scroll_down_right, 16, !_obj_last_line)
+.end:
         rtl
 
 ;; pad with 0s until end of line, and skip to start of next line
@@ -777,7 +975,8 @@ blit_objs:
         %gfxDMA(!BG1_tilemap, $48A0, !BG1_tilemap_size)
         rtl
 
-print "pause A1 end: ", pc
+warnpc $85ffff
+print "pause 85 end: ", pc
 
 ;;; main pause menu interaction in 82 after InfoStr in seed_display.asm
 org $82FB6D
@@ -1137,10 +1336,6 @@ org $82C1E6
 
 ;;; obj screen tilemap, obj text and some handy constants
 org $B6F200
-;;; total possible objectives
-%export(n_objectives)
-        dw $0004
-
 %export(obj_bg1_tilemap)
         ;; line 0 : pause "window title"
         fillbyte $00 : fill 20

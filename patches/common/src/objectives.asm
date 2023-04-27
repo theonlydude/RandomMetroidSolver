@@ -937,7 +937,7 @@ update_objs:
 .draw_obj_loop_end:
         ;; check if objs left to draw and draw down arrow if necessary
         !_obj_last_line #= !obj_last_line-1
-        lda !last_obj_index : cmp.l n_objectives : bpl .clear_down_arrow
+        lda !last_obj_index : inc : cmp.l n_objectives : bpl .clear_down_arrow
         %drawTile(!scroll_down_left, 15, !_obj_last_line)
         %drawTile(!scroll_down_right, 16, !_obj_last_line)
         bra .end
@@ -981,7 +981,7 @@ obj_scroll:
         dec !obj_index
         bra .click
 .down:
-        lda !last_obj_index : cmp.l n_objectives : bpl .blocked
+        lda !last_obj_index : inc : cmp.l n_objectives : bpl .blocked
         inc !obj_index
 .click:
         lda.w #!click_sfx : jsl !play_sfx_lib1

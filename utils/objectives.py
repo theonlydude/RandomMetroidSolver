@@ -519,7 +519,7 @@ class Objectives(object):
         # kill G4 and/or scav hunt
         if len(Objectives.activeGoals) == 1:
             for goal in Objectives.activeGoals:
-                if goal.name not in Objectives.scavHuntGoal:
+                if goal.name not in Objectives.scavHuntGoal + ["kill all g4"]:
                     return False
             return True
         elif len(Objectives.activeGoals) == 4:
@@ -799,13 +799,13 @@ class Objectives(object):
         # objectives or tourian are not vanilla, prepare intro text
         # two \n for an actual newline
         nActive, nReq = Objectives.nbActiveGoals, Objectives.nbRequiredGoals
-        maxDisplay = 5
+        maxDisplay = 6
         if nActive == nReq:
             text = "MISSION OBJECTIVES\n"
         else:
             text = "COMPLETE %d OUT OF\n" % nReq
         for i, goal in enumerate(Objectives.activeGoals):
-            if i == maxDisplay and Objectives.nbActiveGoals > maxDisplay+1:
+            if i == maxDisplay-1 and Objectives.nbActiveGoals > maxDisplay:
                 text += "\n\n... %d MORE ..." % (nActive - maxDisplay)
                 break
             text += "\n\n%s" % goal.getIntroText()

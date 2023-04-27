@@ -510,7 +510,7 @@ press_xy:
 	dw $0000
 
 objective_completed:
-	dw "OBJ OK!"
+	dw "OBJ OK! "
 	dw $0000
 
 all_objectives_completed:

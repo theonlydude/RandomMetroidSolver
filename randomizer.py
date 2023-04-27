@@ -238,7 +238,10 @@ if __name__ == "__main__":
     parser.add_argument('--objective',
                         help="objectives to open G4",
                         dest='objective', nargs='?', default=[], action='append',
-                        choices=Objectives.getAllGoals()+["random"]+[str(i) for i in range(6)])
+                        choices=Objectives.getAllGoals()+["random"]+[str(i) for i in range(Objectives.maxActiveGoals+1)])
+    parser.add_argument('--nbObjectivesRequired',
+                        help="Maximum required objectives. Set to 0 for random between 1 and total number of objectives.",
+                        dest='nbObjectivesRequired', nargs='?', default=None, type=int)
     parser.add_argument('--objectiveList', help="list to choose from when random",
                         dest='objectiveList', nargs='?', default=None)
     parser.add_argument('--tourian', help="Tourian mode",
@@ -632,7 +635,10 @@ if __name__ == "__main__":
                     args.objective = args.objective[0:maxActiveGoals]
                 for goal in args.objective:
                     objectivesManager.addGoal(goal)
-            objectivesManager.expandGoals()
+            if args.nbObjectivesRequired is not None:
+                if args.nbObjectivesRequired == 0:
+                    args.nbObjectivesRequired = random.randint(1, min(Objectives.nbActiveGoals, Objectives.maxRequiredGoals))
+                objectivesManager.setNbRequiredGoals(args.nbObjectivesRequired)
         else:
             if not (args.majorsSplit == "Scavenger" and args.tourian == 'Disabled'):
                 objectivesManager.setVanilla()

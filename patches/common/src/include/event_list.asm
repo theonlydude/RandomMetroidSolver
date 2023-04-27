@@ -93,7 +93,7 @@ math pri on
 !dachora_event = !VARIA_event_base+31
 
 ;;; Keep these macros at the end as they depend on current event index:
-!max_objectives = 5
+!max_objectives = 18
 !objectives_event_base = !VARIA_event_base+32
 
 ;; declare an array with all the "objective completed" events

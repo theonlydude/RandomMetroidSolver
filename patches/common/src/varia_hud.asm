@@ -26,6 +26,8 @@ incsrc "constants.asm"
 incsrc "macros.asm"
 incsrc "event_list.asm"
 
+incsrc "sym/objectives.asm"
+
 !game_state = $0998		; used to check pause/unpause
 
 !hudposition = #$0006
@@ -235,7 +237,7 @@ draw_info:
 	ldy #objective_completed-hud_text
 	jsr draw_text
 	;; draw objective index
-	lda !hud_special : and #$00ff : inc : jsr draw_one
+	lda !hud_special : and #$00ff : inc : jsr draw_two
 	jmp .end
 .draw_all_objectives_ok:
 	ldy #all_objectives_completed-hud_text
@@ -508,7 +510,7 @@ press_xy:
 	dw $0000
 
 objective_completed:
-	dw " OBJ OK!  "
+	dw "OBJ OK!"
 	dw $0000
 
 all_objectives_completed:
@@ -781,7 +783,7 @@ check_objectives:
 	bra .notify
 	;; check individual objectives
 .check_indiv:
-	ldx.w #!max_objectives*2
+        lda.l objectives_n_objectives : asl : tax
 .loop:
 	dex : dex
 	bmi .end

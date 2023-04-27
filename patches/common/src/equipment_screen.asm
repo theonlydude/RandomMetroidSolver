@@ -22,6 +22,36 @@ incsrc "constants.asm"
 
 !semicolon = $08A3
 
+;; skip load of base tilemap when loading pause menu, do it when switching to equipment screen only.
+;; this enables reusing the RAM tilemap for other purposes in other map screens
+org $828F1D
+load_eqt_screen_base_tilemap:
+        bra .skip
+.hijack_end:
+        ;; completely skip useless dummy samus wireframe tilemap copy to the wrong place to make some free space
+org $828F6E
+.skip:
+
+;;; hijack load equipment screen to load base tilemap there
+org $8291B1
+        jsr load_eqt_screen_base_tilemap_rewrite
+
+;;; reuse free space above to load equipment screen base tilemap
+org load_eqt_screen_base_tilemap_hijack_end
+load_eqt_screen_base_tilemap_rewrite:
+        ;; load base tilemap
+        %loadRamDMA($B6E800, $7E3800, $800)
+        JSR $B20C       ; Write Samus wireframe tilemap
+        JSR $8F70       ; Load equipment screen reserve health tilemap
+        jsr $A12B       ; refresh equipment tilemap
+        ;; write items and time as soon as the tilemap is setup to avoid weird effect when fading in
+        jsr display_item_count_menu
+        jsr display_RTA_time
+        JSR $AB47               ; hijacked code
+        rts
+
+warnpc load_eqt_screen_base_tilemap_skip
+
 
 org $8290F6
         jsr display_time : nop

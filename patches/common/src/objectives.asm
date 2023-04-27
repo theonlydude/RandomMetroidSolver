@@ -22,7 +22,6 @@ incsrc "sym/rando_escape_common.asm"
 incsrc "sym/custom_music.asm"
 incsrc "sym/disable_screen_shake.asm"
 incsrc "sym/map.asm"
-incsrc "sym/equipment_screen.asm"
 
 !timer = !timer1
 !current_room = $079b
@@ -127,8 +126,7 @@ endif
 
 ;;; "in progress" objective checkers. optional, set to 0 if not applicable for given objective
 ;;; called only when objective is not completed yet, returns carry set if obj in progress, clear if not
-;;; also sets: $16, $18 as progress indicators, ie $16 "sub-objectives", completed out of $18.
-;;; Sets $18 to 0 if the "sub-objective" concept is not applicable
+;;; can optionally set ($16, $18) as progress indicator, ie $16 "sub-objectives" completed out of $18.
 %export(in_progress_funcs)
 !_obj_idx #= 0
 while !_obj_idx < !max_objectives
@@ -534,6 +532,7 @@ endmacro
 %export(in_progress_chozo_robots)
         lda.w #4 : sta.b !tmp_in_progress_total
         phx
+        ldx.w #0
 	jsr golden_torizo_is_dead : bcc .bt
         inx
 .bt:
@@ -559,6 +558,7 @@ endmacro
 %export(in_progress_animals)
         lda.w #2 : sta.b !tmp_in_progress_total
         phx
+        ldx.w #0
 .etecoons:
 	lda !etecoons_event : jsl !check_event : bcc .dachora
         inx
@@ -732,36 +732,6 @@ org map_PauseRoutineIndex_objectives ; map patch already add some functions, and
         dw func_objective_screen
         dw func_map2obj_fading_out, func_map2obj_load_obj, func_map2obj_fading_in
         dw func_obj2map_fading_out, $91D7, $9200
-
-;; we share obj screen tilemap address with equipment screen. skip load of base tilemap when loading pause menu,
-;; do it when switching to equipment screen only
-org $828F1D
-load_eqt_screen_base_tilemap:
-        bra .skip
-.hijack_end:
-        ;; completely skip useless dummy samus wireframe tilemap copy to the wrong place to make some free space
-org $828F6E
-.skip:
-
-;;; hijack load equipment screen to load base tilemap there
-org $8291B1
-        jsr load_eqt_screen_base_tilemap_rewrite
-
-;;; reuse free space above to load equipment screen base tilemap
-org load_eqt_screen_base_tilemap_hijack_end
-load_eqt_screen_base_tilemap_rewrite:
-        ;; load base tilemap
-        %loadRamDMA($B6E800, $7E3800, $800)
-        JSR $B20C       ; Write Samus wireframe tilemap
-        JSR $8F70       ; Load equipment screen reserve health tilemap
-        jsr $A12B       ; refresh equipment tilemap
-        ;; write items and time as soon as the tilemap is setup to avoid weird effect when fading in
-        jsr equipment_screen_display_item_count_menu
-        jsr equipment_screen_display_RTA_time_frame
-        JSR $AB47               ; hijacked code
-        rts
-
-warnpc load_eqt_screen_base_tilemap_skip
 
 ;;;
 ;;; pause menu objectives display
@@ -1334,7 +1304,7 @@ org $82C1E6
 
 ;;; new tiles for 'OBJ' button in unused tiles : included in map patch gfx
 
-;;; obj screen tilemap, obj text and some handy constants
+;;; obj screen tilemap, obj text
 org $B6F200
 %export(obj_bg1_tilemap)
         ;; line 0 : pause "window title"

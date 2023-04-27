@@ -769,8 +769,11 @@ table "tables/pause.tbl",rtl
 
 
 !held_buttons = $05E1
+!newly_pressed_buttons = $8F
 !l_button = #$0020
 !r_button = #$0010
+!up_button = #$0800
+!down_button = #$0400
 !light_up_no_button = #$0000
 !light_up_l_button  = #$0001
 !light_up_r_button  = #$0002
@@ -813,9 +816,15 @@ table "tables/pause.tbl",rtl
 %BGtile($1B8, 6, 1, 1, 1)
 !scroll_down_right #= !_tile
 
+!click_sfx = $37
+!scroll_blocked_sfx = $36
+!play_sfx_lib1 = $809049
+
 ;; RAM
 ;; current first objective displayed
 !obj_index = $073d
+;; last objective displayed
+!last_obj_index = $0731
 
 ;;; digit to draw in A
 ;;; x, y are relative to viewable area
@@ -842,30 +851,34 @@ load_obj_tilemap:
 
 ;;; update RAM tilemap with objectives text, line by line
 !tmp_tile_offset = $12
-!tmp_obj_idx = $14
 
 update_objs:
         ;; draw scroll up arrow if !obj_index > 0
-        lda !obj_index : beq .start
+        lda !obj_index : beq .clear_up_arrow
         %drawTile(!scroll_up_left, 15, !obj_1st_line)
         %drawTile(!scroll_up_right, 16, !obj_1st_line)
+        bra .start
+.clear_up_arrow:
+        ;; clear any previously drawn up arrow
+        %drawTile(0, 15, !obj_1st_line)
+        %drawTile(0, 16, !obj_1st_line)
 .start:
         ;; init: place tile index at beggining of 1st obj line
         lda.w #((!obj_1st_line+1)*!line_size)+4 : sta.b !tmp_tile_offset
-        lda !obj_index : sta !tmp_obj_idx
+        lda !obj_index : sta !last_obj_index
 .draw_obj_loop:
         ;; draw objective line
         ;; reset "in progress" tmp vars
         stz !tmp_in_progress_done : stz !tmp_in_progress_total
         ;; check if completed
-        lda !tmp_obj_idx : asl : tax : lda.l objective_events, x
+        lda !last_obj_index : asl : tax : lda.l objective_events, x
         jsl !check_event
         bcc .not_completed
         lda #!completed_tick
         bra .compl_end
 .not_completed:
         ;; handle "in progress" status
-        lda !tmp_obj_idx : asl : tax
+        lda !last_obj_index : asl : tax
         lda.l in_progress_funcs, x : beq .not_in_progress
         jsr (in_progress_funcs, x) : bcc .not_in_progress
         lda.w #!in_progress_dots : bra .compl_end
@@ -877,7 +890,7 @@ update_objs:
         inx : inx : stx !tmp_tile_offset
 .draw_obj_text:
         ;; objective string
-        lda !tmp_obj_idx : asl : tax
+        lda !last_obj_index : asl : tax
         lda.l obj_txt_ptrs, x
         tax
 .obj_txt_loop:
@@ -892,7 +905,9 @@ update_objs:
 .obj_txt_loop_end:
         ;; handle "(i/n)" in-progress display
         lda !tmp_in_progress_total : beq .pad
-        ldx !tmp_tile_offset : inx : inx
+        ldx !tmp_tile_offset
+        lda.w #0 : sta.l !BG1_tilemap, x
+        inx : inx
         lda.w #'(' : sta.l !BG1_tilemap, x
         inx : inx
         lda !tmp_in_progress_done : clc : adc.w #'0' : sta.l !BG1_tilemap, x
@@ -913,7 +928,7 @@ update_objs:
         jsr pad_0
         ;; check if no more space to draw to or no more obj to draw
         cpx.w #!draw_obj_tile_limit : bpl .draw_obj_loop_end
-        lda !tmp_obj_idx : inc : sta !tmp_obj_idx
+        lda !last_obj_index : inc : sta !last_obj_index
         cmp.l n_objectives : beq .last_pad
         jmp .draw_obj_loop
 .last_pad:
@@ -921,10 +936,15 @@ update_objs:
         cpx.w #!draw_obj_tile_limit : bmi .last_pad
 .draw_obj_loop_end:
         ;; check if objs left to draw and draw down arrow if necessary
-        lda !tmp_obj_idx : cmp.l n_objectives : bpl .end
         !_obj_last_line #= !obj_last_line-1
+        lda !last_obj_index : cmp.l n_objectives : bpl .clear_down_arrow
         %drawTile(!scroll_down_left, 15, !_obj_last_line)
         %drawTile(!scroll_down_right, 16, !_obj_last_line)
+        bra .end
+.clear_down_arrow:
+        ;; clear any previously drawn down arrow
+        %drawTile(0, 15, !_obj_last_line)
+        %drawTile(0, 16, !_obj_last_line)
 .end:
         rtl
 
@@ -943,6 +963,32 @@ pad_0:
 ;;; direct DMA of BG1 tilemap to VRAM
 blit_objs:
         %gfxDMA(!BG1_tilemap, $48A0, !BG1_tilemap_size)
+        rtl
+
+;;; DMA tilemap each frame
+queue_obj_tilemap:
+        %queueGfxDMA(!BG1_tilemap, $48A0, !BG1_tilemap_size)
+        rtl
+
+;;; check if up/down press, and if applicable, scroll (play sfx for scroll ok/ko)
+obj_scroll:
+        lda !newly_pressed_buttons
+        bit !up_button : bne .up
+        bit !down_button : bne .down
+        bra .end
+.up:
+        lda !obj_index : beq .blocked
+        dec !obj_index
+        bra .click
+.down:
+        lda !last_obj_index : cmp.l n_objectives : bpl .blocked
+        inc !obj_index
+.click:
+        lda.w #!click_sfx : jsl !play_sfx_lib1
+        bra .end
+.blocked:
+        lda.w #!scroll_blocked_sfx : jsl !play_sfx_lib1
+.end:
         rtl
 
 warnpc $85ffff
@@ -1193,6 +1239,9 @@ update_palette_objective_screen:
 func_objective_screen:
         JSR $A505    ; Checks for L or R input during pause screens
         JSR $A5B7    ; Checks for start input during pause screen
+        jsl obj_scroll
+        jsl update_objs
+        jsl queue_obj_tilemap
         LDA !pause_screen_mode_obj ;\
         STA !pause_screen_mode     ;} Pause screen mode = objective screen
         RTS

@@ -63,7 +63,7 @@ macro dw_BGtile(index, palette, prio, hflip, vflip)
         dw !_tile
 endmacro
 
-;;; simple helper to instant DMA gfx from a static source address to VRAM
+;;; simple helper to instant DMA gfx from a static long source address to VRAM
 ;;; usable during blank screen only
 macro gfxDMA(src, dstVRAM, size)
         php
@@ -98,4 +98,21 @@ macro loadRamDMA(src, dstRAMl, size)
         dw <size>
         LDA #$02 : STA $420B   ; start transfer
         plp
+endmacro
+
+;;; simple helper to queue DMA gfx from a static long source address to VRAM
+;;; usable at any time, uses X
+macro queueGfxDMA(src, dstVRAM, size)
+        LDX $0330
+        LDA.w #<size> : STA.b $D0,x
+        INX : INX
+        LDA.W #(<src>&$ffff) : STA.b $D0,x
+        INX : INX
+        %a8()
+        LDA.b #(<src>>>16) : STA.b $D0,x
+        %a16()
+        INX
+        LDA.w #<dstVRAM> : STA.b $D0,x
+        INX : INX
+        STX $0330
 endmacro

@@ -50,6 +50,7 @@ class RandoSolver(StandardSolver):
         self.startLocation = startLocation
         self.startArea = getAccessPoint(startLocation).Start['solveArea']
         self.areaGraph = areaGraph
+        self.escapeTransition = []
 
         self.objectives = Objectives()
 

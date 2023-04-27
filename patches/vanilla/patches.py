@@ -1,4 +1,13 @@
 patches = {
+    "Escape_Animals_Open_Brinstar": {
+        0x784BD: [0x10]
+    },
+    "Escape_Animals_Open_Norfair": {
+        0x78B0B: [0x10]
+    },
+    "Escape_Animals_Open_Maridia": {
+        0x7C54C: [0x10]
+    },
     # blinking doors for area APs
     'Blinking[Keyhunter Room Bottom]': {
         0x78228: [0x4e, 0xc8, 0x16, 0x2d, 0x0e, 0x8c],

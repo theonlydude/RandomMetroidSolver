@@ -1,6 +1,18 @@
 from rom.rom import snes_to_pc
 
 patches = {
+    "Escape_Animals_Open_Brinstar": {
+        # door Door_20_Room_9AD9_PLM_C88A + 5
+        "bank_8f_Door_20_Room_9AD9_PLM_C88A_Param_high": [0x10]
+    },
+    "Escape_Animals_Open_Norfair": {
+        # door Door_4C_Room_A7DE_PLM_C85A + 5
+        "bank_8f_Door_4C_Room_A7DE_PLM_C85A_Param_high": [0x10]
+    },
+    "Escape_Animals_Open_Maridia": {
+        # door Door_90_Room_D21C_PLM_C890 + 5
+        "bank_8f_Door_90_Room_D21C_PLM_C890_Param_high": [0x10]
+    },
     'Blinking[Keyhunter Room Bottom]': {
         # door Door_0E_Room_948C_PLM_ x/y updated
         snes_to_pc(0x8f8228): [0x4e, 0xc8, 0x16, 0x2d, 0xe, 0x8c],

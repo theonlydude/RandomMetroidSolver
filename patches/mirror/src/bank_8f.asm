@@ -583,7 +583,9 @@ Room_9AD9_state_9AE6_PLM:
     dw $c890 : db $31 : db $46 : dw $0021
 %export(Door_20_Room_9AD9_PLM_C88A)
     ; Door. Red door facing left
-    dw $c88a : db $3e : db $46 : dw $0020
+    dw $c88a : db $3e : db $46 : db $20
+%export(Door_20_Room_9AD9_PLM_C88A_Param_high)
+    db $00
 %export(Door_23_Room_9AD9_PLM_C88A)
     ; Door. Red door facing left
     dw $c88a : db $3e : db $66 : dw $0023
@@ -1362,7 +1364,9 @@ Room_A7DE_state_A7EB_PLM:
     dw $c872 : db $0e : db $36 : dw $004b 
 %export(Door_4C_Room_A7DE_PLM_C85A)
     ; Door. Yellow door facing left
-    dw $c85a : db $0e : db $46 : dw $004c 
+    dw $c85a : db $0e : db $46 : db $4c 
+%export(Door_4C_Room_A7DE_PLM_C85A_Param_high)
+    db $00
 %export(Door_4D_Room_A7DE_PLM_C88A)
     ; Door. Red door facing left
     dw $c88a : db $0e : db $56 : dw $004d 
@@ -5581,7 +5585,9 @@ Room_D21C_state_D229_PLM:
     dw $b703 : db $07 : db $11 : dw $d24d 
 %export(Door_90_Room_D21C_PLM_C890)
     ; Door. Red door facing right
-    dw $c890 : db $01 : db $16 : dw $0090 
+    dw $c890 : db $01 : db $16 : db $90
+%export(Door_90_Room_D21C_PLM_C890_Param_high)
+    db $00
     dw $0000
 org $8fc54f
 ; room D252: [Tunnel to West Sand Hall]

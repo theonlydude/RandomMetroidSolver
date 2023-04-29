@@ -49,8 +49,9 @@ math pri on
 ;; - is it completed?
 ;; - if completed, was the user notified in the HUD?
 ;;   (can never be set if HUD is disabled)
-!objectives_completed_event = !tourian_open_event ; reuse tourian entrance event
+!objectives_completed_event = !tourian_open_event ; reuse tourian entrance event for "required objectives completed"
 !objectives_completed_event_notified = !VARIA_event_base+0
+!all_objectives_completed_event = !VARIA_event_base+32 ; internal event to stop checking for objectives when they're all completed
 
 ;; scavenger hunt completion
 !hunt_over_event = !VARIA_event_base+1
@@ -94,7 +95,7 @@ math pri on
 
 ;;; Keep these macros at the end as they depend on current event index:
 !max_objectives = 18
-!objectives_event_base = !VARIA_event_base+32
+!objectives_event_base = !VARIA_event_base+33
 
 ;; declare an array with all the "objective completed" events
 macro objectivesCompletedEventArray()

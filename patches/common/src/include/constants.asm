@@ -6,7 +6,8 @@ include
 !disabled_tourian_escape_flag = $a1f5fe
 
 ;; shared constants
-!obj_check_period = #$0020	; unit:frames, works only in powers of 2
+;; RAM to store current obj check index
+!obj_check_index = $7fff46
 
 ;;; IGT vanilla RAM
 !igt_frames = $7E09DA

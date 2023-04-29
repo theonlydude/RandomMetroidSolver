@@ -755,48 +755,43 @@ check_objectives:
 .ret:
 	rtl
 .stop_draw:
-	;; clear both draw flags, as "all objectives" has priority
-	lda #~!objective_global_mask : and !hud_special : sta !hud_special
 	;; reset previous value to trigger redraw
 	lda #$ffff : sta !previous
-	lda !objectives_completed_event : jsl !check_event : bcs .all_notified
+        ;; check if we were drawing "all objs"
+        lda #!all_objectives_hud_mask : and !hud_special : beq .indiv_notified
+        lda !objectives_completed_event_notified : jsl !mark_event
+        bra .clear_draw
+.indiv_notified:
 	;; it was an individual objective, get index and set notification event
 	lda !hud_special : and #$00ff : asl : tax
 	lda.l objective_notified_events,x : jsl !mark_event
-	bra .end
-.all_notified:
-	lda !objectives_completed_event_notified : jsl !mark_event
-	bra .end
-	;; check objectives
+.clear_draw:
+	;; clear both draw flags
+	lda #~!objective_global_mask : and !hud_special : sta !hud_special
+        bra .end
 .check:
+	;; check objectives :
 	;; when in pause, don't check anything
 	lda !game_state : cmp #$000f : beq .end
-	;; align check period with objectives (check one frame later)
-	lda !timer : and !obj_check_period-1
-	bne .end
-.check_all:
-	;; check if all objectives are completed and if we should notify
-	lda !objectives_completed_event_notified : jsl !check_event : bcs .end
-	lda !objectives_completed_event : jsl !check_event : bcc .check_indiv
-	;; notify all objectives completed
-	lda #!all_objectives_hud_mask : ora !hud_special : sta !hud_special
-	bra .notify
-	;; check individual objectives
-.check_indiv:
-        lda.l objectives_n_objectives : asl : tax
-.loop:
-	dex : dex
-	bmi .end
+	;; check same objective as the main check routine
+        lda !obj_check_index : asl : tax
 	lda.l objective_notified_events,x : jsl !check_event
-	bcs .loop
+	bcs .check_all_required
 	;; objective not notified, check completion
 	lda.l objective_completed_events,x : jsl !check_event
-	bcc .loop
+	bcc .check_all_required
 	;; notify objective completed but not displayed yet
 	lda #$ff00 : and !hud_special : sta !hud_special
 	txa : lsr : ora !hud_special
 	;; display mask in hi byte, objective number in low byte
 	ora #!objective_hud_mask : sta !hud_special
+        bra .notify
+.check_all_required:
+	;; check if all required objectives are completed and if we should notify it
+	lda !objectives_completed_event_notified : jsl !check_event : bcs .end
+	lda !objectives_completed_event : jsl !check_event : bcc .end
+	;; notify all required objectives completed
+	lda #!all_objectives_hud_mask : ora !hud_special : sta !hud_special
 .notify:
 	lda !notification_display_frames : sta !hud_special_timer
 .end:

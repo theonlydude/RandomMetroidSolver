@@ -27,12 +27,16 @@ incsrc "sym/map.asm"
 !current_room = $079b
 !samus_x = $0AF6
 !samus_y = $0AFA
-!temp = $0743
+
+;; RAM to store amount of objectives completed
+!obj_completed_count = $7fff48
+!obj_sfx_flag = $7fff4a
+
 !tmp_in_progress_done = $16
 !tmp_in_progress_total = $18
 
 ;;; counted by main obj routine, read by pause menu routine
-!n_objs_left = $7fff46
+!n_objs_left = $7fff4c
 
 ;;; external routines
 !song_routine = $808fc1
@@ -71,7 +75,7 @@ endmacro
 ;;; HIJACKS
 ;;; hijack main ASM call to check objectives regularly
 org $828BA8
-	jsl periodic_obj_check
+	jsl obj_check
 
 ;;; new function to check for L/R button pressed
 org $82A505
@@ -122,7 +126,6 @@ while !_obj_idx < !max_objectives
         dw $0000
         !_obj_idx #= !_obj_idx+1
 endif
-        dw $0000
 
 ;;; "in progress" objective checkers. optional, set to 0 if not applicable for given objective
 ;;; called only when objective is not completed yet, returns carry set if obj in progress, clear if not
@@ -134,9 +137,7 @@ while !_obj_idx < !max_objectives
         !_obj_idx #= !_obj_idx+1
 endif
 
-periodic_obj_check:
-	lda !timer : and !obj_check_period-1
-	cmp !obj_check_period-1 : bne .end
+obj_check:
 	jsr objectives_completed
 .end:
 	JSL $8FE8BD		; hijacked code
@@ -145,47 +146,57 @@ periodic_obj_check:
 ;;; checks for all individual objectives and sets their events if completed
 ;;; if all are completed, sets objectives_completed_event
 objectives_completed:
+	;; don't check anything if all objectives are already completed
+	lda !all_objectives_completed_event : jsl !check_event : bcc .check_objectives
+        rts
+.check_objectives:
         phx
-	;; don't check anything if objectives are already completed
-	lda !objectives_completed_event : jsl !check_event : bcs .end
-	stz !temp
-        lda.l n_objectives_required : sta.l !n_objs_left
-        ldx #$0000
-.loop:
+        lda !obj_check_index : asl : tax
         lda.l objective_funcs, x
-        beq .end_loop      ; checkers function list end
+        beq .end_list      ; checkers function list end
 	;; check objective if not already completed
 	lda.l objective_events, x : jsl !check_event
 	bcs .completed
         jsr (objective_funcs, x)
-	bcc .next
+        bcc .next
 	;; objective completed
-	lda.l objective_events, x : jsl !mark_event
-        inc !temp               ; puts non-zero value here to optionally play sfx
+	lda.l objective_events, x
+        sta !obj_sfx_flag       ; non-zero value
+        jsl !mark_event
 .completed:
-        lda.l !n_objs_left : dec : sta.l !n_objs_left
+        lda !obj_completed_count : inc : sta !obj_completed_count
 .next:
-        inx : inx
-        cpx.w !max_objectives*2
-        bne .loop
-.end_loop:
-        ;; n_objs_left = required_objs - completed_objs, so
-        ;; objectives are all completed if n_objs_left is <= 0
-        lda !n_objs_left : bmi .all_completed : beq .all_completed : bra .check_sfx
-.all_completed:
+        lda !obj_check_index : inc : cmp.l n_objectives : beq .end_list
+        sta !obj_check_index
+        bra .end
+.end_list:
+        ;; check if all objectives are completed to avoid further useless checks
+        lda !obj_completed_count : cmp.l n_objectives : bmi .check_required
+        lda !all_objectives_completed_event : jsl !mark_event
+.check_required:
+        lda !objectives_completed_event : jsl !check_event : bcs .reset
+        ;; n_objs_left = required_objs - completed_objs
+        lda.l n_objectives_required : sec : sbc !obj_completed_count : sta !n_objs_left
+        ;; required objectives are completed if n_objs_left is <= 0
+        bmi .all_required_completed : beq .all_required_completed : bra .check_sfx
+.all_required_completed:
         lda.w #0 : sta !n_objs_left ; reset to 0 in case it's negative, as it's displayed in pause menu
-        ;; all objectives are completed
         lda !objectives_completed_event : jsl !mark_event
 	lda.l escape_option : and #$00ff : beq .check_sfx
 	jsr trigger_escape
-	stz !temp		; disable notification sfx
+        bra .reset
 .check_sfx:
 	;; check if we should play an sfx upon objective completion
-	lda !temp : beq .end 	; do nothing anyway if no obj completed
-	lda.l objectives_options_mask : bit #$0080 : beq .end
+	lda !obj_sfx_flag : beq .reset
+	lda.l objectives_options_mask : bit #$0080 : beq .reset
 .sfx:
-	;; play G4 particle sfx
+	;; play G4 particle sfx and reset flag
 	lda #$0019 : jsl $8090A3
+.reset:
+        lda.w #0
+        sta !obj_sfx_flag
+        sta !obj_check_index
+        sta !obj_completed_count
 .end:
         plx
         rts

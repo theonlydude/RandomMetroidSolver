@@ -805,8 +805,8 @@ class Objectives(object):
         else:
             text = "COMPLETE %d OUT OF\n" % nReq
         for i, goal in enumerate(Objectives.activeGoals):
-            if i == maxDisplay-1 and Objectives.nbActiveGoals > maxDisplay:
-                text += "\n\n... %d MORE ..." % (nActive - maxDisplay)
+            if i + 1 == maxDisplay and Objectives.nbActiveGoals > maxDisplay:
+                text += "\n\n... %d MORE ..." % (nActive - maxDisplay + 1)
                 break
             text += "\n\n%s" % goal.getIntroText()
         text += "\n\n\nTOURIAN IS %s\n\n\n" % tourian

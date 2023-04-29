@@ -639,6 +639,8 @@ if __name__ == "__main__":
                 if args.nbObjectivesRequired == 0:
                     args.nbObjectivesRequired = random.randint(1, min(Objectives.nbActiveGoals, Objectives.maxRequiredGoals))
                 objectivesManager.setNbRequiredGoals(args.nbObjectivesRequired)
+            else:
+                objectivesManager.expandGoals()
         else:
             if not (args.majorsSplit == "Scavenger" and args.tourian == 'Disabled'):
                 objectivesManager.setVanilla()

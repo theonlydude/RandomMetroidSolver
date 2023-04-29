@@ -40,7 +40,7 @@ class Goal(object):
     def __init__(self, name, gtype, logicClearFunc, romClearFunc, romInProgressFunc=None,
                  escapeAccessPoints=None, objCompletedFuncAPs=lambda ap: [ap],
                  exclusion=None, items=None, text=None, introText=None,
-                 available=True, category=None, area=None,
+                 available=True, expandableList=None, category=None, area=None,
                  conflictFunc=None):
         self.name = name
         self.available = available
@@ -74,6 +74,10 @@ class Goal(object):
         self.text = name if text is None else text
         self.introText = introText
         self.useSynonym = text is not None and '{}' in text
+        self.expandableList = expandableList
+        if self.expandableList is None:
+            self.expandableList = []
+        self.expandable = len(self.expandableList) > 0
         self.category = category
         self.area = area
         self.conflictFunc = conflictFunc
@@ -195,6 +199,7 @@ _goalsList = [
          exclusion={"list": ["kill kraid", "kill phantoon", "kill draygon", "kill ridley", "kill one G4", "kill two G4", "kill three G4"]},
          items=["Kraid", "Phantoon", "Draygon", "Ridley"],
          text="{} all g4      ",
+         expandableList=["kill kraid", "kill phantoon", "kill draygon", "kill ridley"],
          category="Bosses"),
     Goal("kill spore spawn", "miniboss", lambda sm, ap: Bosses.bossDead(sm, 'SporeSpawn'), "spore_spawn_is_dead",
          escapeAccessPoints=getBossEscapeAccessPoint("SporeSpawn"),
@@ -252,6 +257,7 @@ _goalsList = [
                              "kill one miniboss", "kill two minibosses", "kill three minibosses"]},
          items=["SporeSpawn", "Botwoon", "Crocomire", "GoldenTorizo"],
          text="{} all minibosses      ",
+         expandableList=["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo"],
          category="Minibosses",
          conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))),
     Goal("finish scavenger hunt", "other", lambda sm, ap: SMBool(True),
@@ -517,17 +523,17 @@ class Objectives(object):
 
     def isVanilla(self):
         # kill G4 and/or scav hunt
-        if len(Objectives.activeGoals) == 1:
+        if Objectives.nbActiveGoals == 1:
             for goal in Objectives.activeGoals:
                 if goal.name not in Objectives.scavHuntGoal + ["kill all g4"]:
                     return False
             return True
-        elif len(Objectives.activeGoals) == 4:
+        elif Objectives.nbActiveGoals == 4:
             for goal in Objectives.activeGoals:
                 if goal.name not in Objectives.vanillaGoals:
                     return False
             return True
-        elif len(Objectives.activeGoals) == 5:
+        elif Objectives.nbActiveGoals == 5:
             for goal in Objectives.activeGoals:
                 if goal.name not in Objectives.vanillaGoals + Objectives.scavHuntGoal:
                     return False
@@ -589,6 +595,31 @@ class Objectives(object):
                 return SMBool(all(locName in visitedLocs for locName in solver.splitLocsByArea[area]))
             return f
         self.setAreaFuncs({area:getObjAreaFunc(area) for area in solver.splitLocsByArea})
+
+    def expandGoals(self):
+        LOG.debug("Active goals:"+str(Objectives.activeGoals))
+        # try to replace 'kill all G4' with the four associated objectives.
+        # we need at least 3 empty objectives out of the max (-1 +4)
+        if Objectives.maxActiveGoals - Objectives.nbActiveGoals < 3:
+            return
+
+        expandable = None
+        for goal in Objectives.activeGoals:
+            if goal.expandable:
+                expandable = goal
+                break
+
+        if expandable is None:
+            return
+
+        LOG.debug("replace {} with {}".format(expandable.name, expandable.expandableList))
+        self.removeGoal(expandable)
+        for name in expandable.expandableList:
+            self.addGoal(name)
+
+        # rebuild ranks
+        for i, goal in enumerate(Objectives.activeGoals, 1):
+            goal.rank = i
 
     # call from logic
     @staticmethod
@@ -792,13 +823,14 @@ class Objectives(object):
         romFile.seek(Addresses.getOne("objectives_obj_txt_ptrs"))
         for addr in addrs:
             romFile.writeWord(pc_to_snes(addr) & 0xffff)
+        self.writeIntroObjectives(romFile, tourian)
 
     def writeIntroObjectives(self, rom, tourian):
-        if self.isVanilla() and tourian == "Vanilla":
+        nActive, nReq = Objectives.nbActiveGoals, Objectives.nbRequiredGoals
+        if self.isVanilla() and tourian == "Vanilla" and nActive == nReq:
             return
         # objectives or tourian are not vanilla, prepare intro text
         # two \n for an actual newline
-        nActive, nReq = Objectives.nbActiveGoals, Objectives.nbRequiredGoals
         maxDisplay = 6
         if nActive == nReq:
             text = "MISSION OBJECTIVES\n"

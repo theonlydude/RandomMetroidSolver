@@ -113,7 +113,6 @@ print "85 start: ", pc
 %export(n_objectives_required)
         dw $0004
 
-;;; checks for objectives periodically
 ;;; seed objectives checker functions pointers, list ends with $0000
 ;;; objective checker returns carry set if obj completed, clear if not
 %export(objective_funcs)
@@ -143,13 +142,16 @@ obj_check:
 	JSL $8FE8BD		; hijacked code
 	rtl
 
-;;; checks for all individual objectives and sets their events if completed
-;;; if all are completed, sets objectives_completed_event
+;;; Checks for individual objectives and sets their events if completed.
+;;; If all required are completed, sets objectives_completed_event.
+;;; If all are completed, sets all_objectives_completed_event.
+;;; Progressively checks objectives, one at a time.
+;;; That way, exec time is constant, and does not depend on number of objectives.
 objectives_completed:
 	;; don't check anything if all objectives are already completed
-	lda !all_objectives_completed_event : jsl !check_event : bcc .check_objectives
+	lda !all_objectives_completed_event : jsl !check_event : bcc .check_objective
         rts
-.check_objectives:
+.check_objective:
         phx
         lda !obj_check_index : asl : tax
         lda.l objective_funcs, x

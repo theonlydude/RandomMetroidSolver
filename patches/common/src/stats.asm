@@ -115,6 +115,12 @@ org $a2ab0d
 	nop
 	nop
 
+;; skip lag count during message box display
+org $858086
+        JSR SetMessageBoxFlag
+org $8580B7
+        JSR UnsetMessageBoxFlag
+
 ;; -------------------------------
 ;; CODE (using bank A1 free space)
 ;; -------------------------------
@@ -219,7 +225,7 @@ door_entered:
     sta !door_timer_tmp
     ;; Run hijacked code and return
     plp
-    inc $0998
+    inc !game_state
     jml $82e1b7
 
 update_region_time:
@@ -246,7 +252,7 @@ door_exited:
 
     ;; Run hijacked code and return
     lda #$0008
-    sta $0998
+    sta !game_state
     jml $82e76a
 
 ;; Door adjust start
@@ -276,7 +282,7 @@ death:
     jsr count_death
     ;; hijacked code
     stz $18aa
-    inc $0998
+    inc !game_state
     rtl
 
 ;; timer is up (equivalent to death)
@@ -284,7 +290,7 @@ time_up:
     jsr count_death
     ;; hijacked code
     lda #$0024
-    sta $0998
+    sta !game_state
     rtl
 
 count_death:
@@ -387,7 +393,7 @@ pausing:
     ;; don't count time spent in pause in region counters
     jsr update_region_time
     ;; run hijacked code and return
-    inc $0998
+    inc !game_state
     jml $828ced
 
 ;; start fading in, game state about to change to 12h
@@ -403,7 +409,7 @@ resuming:
     ;; save last stats to resist power cycle
     jsl base_save_last_stats
     ;; run hijacked code and return
-    inc $0998
+    inc !game_state
     jml $82939f
 
 ;; correctly count Ceres and Crateria timers
@@ -436,9 +442,23 @@ game_end:
     lda #$0001
     jsl base_save_stats
 
+    ;; don't count lag during takeoff
+    inc !skip_lag_count_flag
+
     ;; hijacked code
     stz $0df2
     lda #$000a
     rtl
 
 warnpc $a1efff
+
+org $85cf00
+SetMessageBoxFlag:
+        STA.w $1C1F ; What we wrote over
+        INC.w !skip_lag_count_flag
+        RTS
+
+UnsetMessageBoxFlag:
+        JSR.w $80FA ; What we wrote over
+        STZ.w !skip_lag_count_flag
+        RTS

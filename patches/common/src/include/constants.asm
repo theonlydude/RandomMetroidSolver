@@ -15,9 +15,15 @@ include
 !igt_minutes = $7E09DE
 !igt_hours = $7E09E0
 
+;; game state
+!game_state = $0998
+
 ;; RTA timer RAM updated during NMI
 !timer1 = $05b8
 !timer2 = $05ba
+;; lag counter helpers
+!skip_lag_count_flag = $033c
+!timer_lag = $033a
 
 ;; stats RAM
 !_stats_ram = fc00
@@ -45,6 +51,8 @@ include
 !stat_rta_menu = #$0026
 !stat_deaths = #$0028
 !stat_resets = #$0029
+!stat_rta_lag = $2A
+!stat_rta_lag_ram #= !stats_ram+(2*!stat_rta_lag)
 
 ;; vanilla area check
 !area_index = $079f

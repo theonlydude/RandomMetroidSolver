@@ -1,3 +1,5 @@
+from rom.rom import snes_to_pc
+
 patches = {
     "Removes_Gravity_Suit_heat_protection": {
         0x06e37d: [0x01],
@@ -15,7 +17,7 @@ patches = {
     },
     # for development/quickmet: disable clear save files on 1st boot
     "Disable_Clear_Save_Boot": {
-        0x7E39: [0x4c, 0x7c, 0xfe]
+        snes_to_pc(0x80FE1D): [0x4c, 0x64, 0xfe]
     },
     # vanilla data to restore setup asm for plandos
     "Escape_Animals_Disable": {

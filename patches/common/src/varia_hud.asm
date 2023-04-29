@@ -28,8 +28,6 @@ incsrc "event_list.asm"
 
 incsrc "sym/objectives.asm"
 
-!game_state = $0998		; used to check pause/unpause
-
 !hudposition = #$0006
 ;;; RAM used to store previous values to see whether we must draw
 ;;; area/item counter or next scav display

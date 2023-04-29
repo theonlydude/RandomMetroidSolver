@@ -807,6 +807,9 @@ script:
     dw !draw, !row*189 ;; TIME ADJUSTING DOOR
     dw !draw, !row*190
     dw !draw, !blank
+    dw !draw, !row*242 ;; LAG TIME
+    dw !draw, !row*243
+    dw !draw, !blank
     dw !draw, !blank
     dw !draw, !row*191 ;; TIME SPENT
     dw !draw, !blank
@@ -942,9 +945,6 @@ script:
     ;; free space
     dw !draw, !blank
     dw !draw, !blank
-    dw !draw, !blank
-    dw !draw, !blank
-    dw !draw, !blank
 
     dw !draw, !row*219 ;; Thanks
     dw !draw, !row*220
@@ -997,6 +997,7 @@ stats:
     dw 38,      !row*221,  3, 0    ;; Time in pause
     dw 40,      !row*172,  1, 0    ;; deaths
     dw 41,      !row*174,  1, 0    ;; resets
+    dw 42,      !row*242,  2, 0    ;; lag time
     dw 0,               0,  0, 0    ;; end of table
 
 print "bank DF end : ", pc
@@ -1175,6 +1176,8 @@ credits:
     !big
     dw "            MFREAK              " ;; 240
     dw "            mfreak              " ;; 241
+    dw " LAG TIME              00'00^00 " ;; 242
+    dw " lag time              }} }} }} " ;; 243
     dw $0000                              ;; End of credits tilemap
 
 warnpc $ceffff

@@ -57,7 +57,7 @@ incsrc "constants.asm"
 !timer_backup1 = $7fffe2
 !timer_backup2 = !timer_backup1+2
 ;; timer integrity protection
-!timer_xor = $7eff00
+!timer_xor = $033e
 
 ;;; temp ram used
 !tmp_area_sz = #$00df
@@ -148,13 +148,22 @@ nmi:
     inx
     stx $05b5
     inc $05b6
+.nolag:
+    rep #$30
     jmp .inc
-org $809602 ;; overwrite lag handling to count lag in global counter
-    jmp .inc
+warnpc $809602
+org $809602 ; lag handling: increment lag stat in main gameplay
+    lda !game_state : cmp.w #8 : bne .nolag
+    lda !skip_lag_count_flag : bne .nolag
+    rep #$30
+    jmp .lag
+warnpc $809616
     ;; handle 32 bit counter :
 org $808FA3 ;; overwrite unused routine
+.lag:
+    ;; don't count lag on 32 bits, as 18+ minutes of it seems unlikely
+    inc !timer_lag
 .inc:
-    rep #$30
     ;; actually increment 32-bit timer
     inc !timer1
     bne .end
@@ -171,7 +180,7 @@ org $808FA3 ;; overwrite unused routine
     plb
     rti
 
-warnpc $808FC2 ;; next used routine start
+warnpc $808FC1 ;; next used routine start
 
 ;;; -------------------------------
 ;;; Boot
@@ -190,6 +199,7 @@ boot1:
     sta !timer_backup1
     sta !timer_backup2
     ;; check if first boot ever by checking magic 32-bit value in SRAM
+print "first boot check: ", pc
     lda !was_started_flag32
     cmp seed_display_seed_value
     bne .first
@@ -220,6 +230,7 @@ boot1:
     ;; skip soft reset check, since it's the 1st boot
     bra .cont
 .check_reset:
+print "soft reset check: ", pc
     ;; check if soft reset, if so, restore RAM timer
     lda !softreset
     cmp !reset_flag
@@ -614,10 +625,9 @@ patch_save:                     ; called from saveload patch
 	;; handle timer/stats after backup
 .stats:
 	;; copy RTA timer to RAM stats and IGT RAM
-	lda !timer1
-	sta !stats_timer
-	lda !timer2
-	sta !stats_timer+2
+	lda !timer1 : sta !stats_timer
+	lda !timer2 : sta !stats_timer+2
+        lda !timer_lag : sta !stat_rta_lag_ram
 	jsl update_igt
 .save_stats:
 	;; save all stats
@@ -668,10 +678,9 @@ patch_load:
 	jsl save_index
 	jsl load_stats_at
 	;; update live timer
-	lda !stats_timer
-	sta !timer1
-	lda !stats_timer+2
-	sta !timer2
+	lda !stats_timer : sta !timer1
+	lda !stats_timer+2 : sta !timer2
+        lda !stat_rta_lag_ram : sta !timer_lag
 .load_backup_end:
 	;; update current save slot in SRAM, and set player flag
 	plx
@@ -700,10 +709,9 @@ patch_load:
     ;; load stats from SRAM
     jsl load_stats
     ;; update live timer
-    lda !stats_timer
-    sta !timer1
-    lda !stats_timer+2
-    sta !timer2
+    lda !stats_timer : sta !timer1
+    lda !stats_timer+2 : sta !timer2
+    lda !stat_rta_lag_ram : sta !timer_lag
 .end_ok:
     ;; place marker for resets
     lda !reset_flag
@@ -1222,10 +1230,9 @@ inc_stat:
 ;; keeps all registers intact
 save_last_stats:
     pha
-    lda !timer1
-    sta !stats_timer
-    lda !timer2
-    sta !stats_timer+2
+    lda !timer1 : sta !stats_timer
+    lda !timer2 : sta !stats_timer+2
+    lda !timer_lag : sta !stat_rta_lag_ram
     lda #$0000
     jsl save_stats
     pla

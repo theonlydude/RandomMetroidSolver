@@ -440,7 +440,7 @@ incsrc "mapicon_sprites.asm"
 %export(mapicons_tables)
 
 print "b85 end: ", pc
-warnpc $85cfff
+warnpc $85ceff
 }
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    SELECT SWITCH AREA                                       |x|

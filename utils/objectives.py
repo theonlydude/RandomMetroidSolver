@@ -797,6 +797,10 @@ class Objectives(object):
             '%': 0x150,
             '0': 0x160,
             'a': 0x30,
+            '?': 0x1ab,
+            "'": 0x1b9,
+            "!": 0x1ba,
+            ",": 0x1bb
         }
         for i in range(1, ord('z')-ord('a')+1):
             char2tile[chr(ord('a')+i)] = char2tile['a']+i

@@ -56,10 +56,15 @@ org !disabled_tourian_escape_flag
 ;;; if non-zero trigger escape as soon as objectives are completed
 %export(escape_option)
 	db $00
-;;; low bit: with nothing objective, trigger escape only in crateria
-;;; high bit: play sfx on objective completion (don't use for vanilla objectives)
-%export(objectives_options_mask)
+;;; low bit (0): with nothing objective, trigger escape only in crateria
+;;; high bit (7): play sfx on objective completion (don't use for vanilla objectives)
+;;; bit 1: if set, objectives will be hidden in pause menu until a room is visited (usually G4)
+%export(objectives_options)
 	db $01
+
+!option_nothing_trigger_escape_crateria_mask = $01
+!option_play_sfx_on_completion_mask = $80
+!option_hidden_objectives_mask = $02
 
 ;;; Change G4 SFX priority to 1, because we play it on obj completion (when non-vanilla objectives)
 !SPC_Engine_Base = $CF6C08
@@ -190,7 +195,7 @@ objectives_completed:
 .check_sfx:
 	;; check if we should play an sfx upon objective completion
 	lda !obj_sfx_flag : beq .reset
-	lda.l objectives_options_mask : bit #$0080 : beq .reset
+	lda.l objectives_options : bit.w #!option_play_sfx_on_completion_mask : beq .reset
 .sfx:
 	;; play G4 particle sfx and reset flag
 	lda #$0019 : jsl $8090A3
@@ -397,7 +402,7 @@ endmacro
 	;; crateria/blue brin, in case we trigger escape immediately
 	;; and we have custom start location.
 	lda.l escape_option : and #$00ff : beq .ok
-	lda.l objectives_options_mask : and #$0001 : beq .ok
+	lda.l objectives_options : and.w #!option_nothing_trigger_escape_crateria_mask : beq .ok
 	;; determine current graph area in special byte in room state header
 	phx
 	ldx $07bb
@@ -866,6 +871,11 @@ load_obj_tilemap:
 !tmp_tile_offset = $12
 
 update_objs:
+        ;; don't do anything if objectives are hidden
+        lda.l objectives_options : bit.w #!option_hidden_objectives_mask : beq +
+        lda !objectives_revealed_event : jsl !check_event : bcs +
+        rtl
++
         ;; draw scroll up arrow if !obj_index > 0
         lda !obj_index : beq .clear_up_arrow
         %drawTile(!scroll_up_left, 15, !obj_1st_line)
@@ -1389,8 +1399,25 @@ org $B6F200
         dw !box_bottom_left, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom, !box_bottom_right, $0000
         ;; line 4 : top line of objectives text box
         dw $0000, !box_top_left, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top_right, $0000
-        ;; lines 5-17 : objectives text borders
+        ;; lines 5-9 : objectives text borders
 !_line_idx = 5
+while !_line_idx < 10
+        dw $0000, !box_left, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, !box_right, $0000
+	!_line_idx #= !_line_idx+1
+endif
+        ;; line 10 : text for hidden objectives
+        dw $0000, !box_left
+        dw "TO REVEAL OBJECTIVES LIST,"
+        dw $0000, $0000, !box_right, $0000
+        ;; line 11 : objectives text borders
+        dw $0000, !box_left, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, !box_right, $0000
+        ;; line 12 : text for hidden objectives
+        dw $0000, !box_left
+        dw "VISIT"
+%export(obj_bg1_tilemap_reveal_room)
+        dw $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, !box_right, $0000
+        ;; lines 13-17 : objectives text borders
+!_line_idx = 13
 while !_line_idx < 18
         dw $0000, !box_left, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, !box_right, $0000
 	!_line_idx #= !_line_idx+1
@@ -1409,3 +1436,15 @@ print "B6 end: ", pc
 warnpc $B6FA00
 org $B6FA00
 %export(objs_txt_limit)
+
+;;; function to use as door asm when entering the room that reveals objectives
+org $8ffe80
+%export(reveal_objectives)
+        lda !objectives_revealed_event : jsl !mark_event
+        rts
+
+;;; hardcode here the rooms for vanilla tourian (and disabled tourian with Tourian still in the graph)
+;;; in case Tourian is not in the graph, the door asm will be added to the transition leading to climb
+;;; if Tourian is fast, reveal_objectives will be called from minimizer_tourian_common patch
+org $8391FC                     ; Statues Hallway door to Statues Room
+        dw reveal_objectives

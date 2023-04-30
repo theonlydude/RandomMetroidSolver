@@ -52,6 +52,7 @@ math pri on
 !objectives_completed_event = !tourian_open_event ; reuse tourian entrance event for "required objectives completed"
 !objectives_completed_event_notified = !VARIA_event_base+0
 !all_objectives_completed_event = !VARIA_event_base+32 ; internal event to stop checking for objectives when they're all completed
+!objectives_revealed_event = !VARIA_event_base+33
 
 ;; scavenger hunt completion
 !hunt_over_event = !VARIA_event_base+1
@@ -95,7 +96,7 @@ math pri on
 
 ;;; Keep these macros at the end as they depend on current event index:
 !max_objectives = 18
-!objectives_event_base = !VARIA_event_base+33
+!objectives_event_base = !VARIA_event_base+34
 
 ;; declare an array with all the "objective completed" events
 macro objectivesCompletedEventArray()

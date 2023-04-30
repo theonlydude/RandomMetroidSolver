@@ -199,6 +199,7 @@ class RomPatcher:
         self.romOptions.write('escapeTriggerCrateria', int(not self.settings['isPlando']))
         self.romOptions.write('escapeRandoRemoveEnemies', int(self.settings['escapeRandoRemoveEnemies']))
         self.romOptions.write('objectivesSFX', 0 if self.settings['vanillaObjectives'] else 0x80)
+        self.romOptions.write("objectivesHidden", 0 if not Objectives.hidden else 0x2)
         backupSaves = self.settings["area"] == True or self.settings["doorsColorsRando"] == True or not GraphUtils.isStandardStart(self.settings["startLocation"])
         self.romOptions.write("backupSaves", int(backupSaves))
         if self.settings["tourian"] == "Fast" and self.settings["area"] == False:
@@ -1076,14 +1077,15 @@ class RomPatcher:
         def getWordBytes(addr):
             w = getWord(addr & 0xffff)
             return [w[0], w[1]]
-        def loadDoorTransitionShortPtrBytes(label):
-            ptr = self.symbols.getAddress('door_transition', label)
+        def loadDoorTransitionShortPtrBytes(label, patch='door_transition'):
+            ptr = self.symbols.getAddress(patch, label)
             return getWordBytes(ptr)
         def symbolWordBytes(symbol):
             ptr = self.symbols.getAddress(symbol)
             return getWordBytes(ptr)
         incompatible_doors = loadDoorTransitionShortPtrBytes("incompatible_doors")
         giveiframes = loadDoorTransitionShortPtrBytes("giveiframes")
+        reveal_objectives = loadDoorTransitionShortPtrBytes("reveal_objectives", patch="objectives")
         for conn in doorConnections:
             # write door ASM for transition doors (code and pointers)
             if 'DoorPtrSym' not in conn:
@@ -1170,6 +1172,9 @@ class RomPatcher:
             writeExploreMapAsm(src)
             if src != dst:
                 writeExploreMapAsm(dst)
+            # if crateria-less minimizer, append reveal_objectives function to door asm leading to climb
+            if dst.Name == "Climb Bottom Left":
+                asmPatch += [ 0x20 ] + reveal_objectives
             # return
             asmPatch += [ 0x60 ]   # RTS
             self.romFile.writeWord(asmAddress & 0xFFFF)

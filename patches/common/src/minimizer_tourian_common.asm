@@ -24,6 +24,7 @@ lorom
 !tourian_eye_door_room = #$ddc4
 
 incsrc "event_list.asm"
+incsrc "sym/objectives.asm"
 
 ;;; connect Statues Hallway to Tourian Eye Door Room...
 org $8fa616
@@ -90,6 +91,8 @@ tourian_door:
 
 ;;; statues door asm leading to gadora room
 pre_tourian_door:
+        ;; reveal objectives if they're hidden
+        jsr objectives_reveal_objectives
 	;; check if objectives are completed
 	lda !objectives_completed_event : jsl !check_event
         bcc .end

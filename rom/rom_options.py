@@ -18,8 +18,9 @@ class RomOptions(object):
         self.addOption("escapeRandoRemoveEnemies", "rando_escape_common", "opt_remove_enemies")
         self.addOption("backupSaves", "base", "opt_backup")
         self.addOption("escapeTrigger", "objectives", "escape_option")
-        self.addOption("escapeTriggerCrateria", "objectives", "objectives_options_mask", mask=0x1)
-        self.addOption("objectivesSFX", "objectives", "objectives_options_mask", mask=0x80)
+        self.addOption("escapeTriggerCrateria", "objectives", "objectives_options", mask=0x1)
+        self.addOption("objectivesSFX", "objectives", "objectives_options", mask=0x80)
+        self.addOption("objectivesHidden", "objectives", "objectives_options", mask=0x2)
         self.addOption("fastTourianSkipRefill", "area_rando_doors", "full_refill")
 
     def _getAddress(self, namespace, label):

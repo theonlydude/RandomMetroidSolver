@@ -406,6 +406,7 @@ class Objectives(object):
     goals = _goals
     graph = None
     _tourianRequired = None
+    hidden = False
     vanillaGoals = ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"]
     scavHuntGoal = ["finish scavenger hunt"]
 
@@ -827,7 +828,22 @@ class Objectives(object):
         romFile.seek(Addresses.getOne("objectives_obj_txt_ptrs"))
         for addr in addrs:
             romFile.writeWord(pc_to_snes(addr) & 0xffff)
+        # if objectives are hidden, write the name of the room to visit
+        roomName = self._getHiddenObjRoomName(tourian)
+        if roomName is not None:
+            writeString(" %s." % roomName, Addresses.getOne("objectives_obj_bg1_tilemap_reveal_room"))
         self.writeIntroObjectives(romFile, tourian)
+
+    def _getHiddenObjRoomName(self, tourian):
+        roomName = None
+        if Objectives.hidden == True:
+            roomName = "golden statues room"
+            if tourian == "Fast":
+                roomName = "tourian eye door room"
+            noTourian = Objectives.graph.accessPoints["Golden Four"].ConnectedTo == "Golden Four"
+            if noTourian:
+                roomName = "climb escape room"
+        return roomName
 
     def writeIntroObjectives(self, rom, tourian):
         nActive, nReq = Objectives.nbActiveGoals, Objectives.nbRequiredGoals
@@ -835,16 +851,24 @@ class Objectives(object):
             return
         # objectives or tourian are not vanilla, prepare intro text
         # two \n for an actual newline
-        maxDisplay = 6
-        if nActive == nReq:
-            text = "MISSION OBJECTIVES\n"
+        roomName = self._getHiddenObjRoomName(tourian)
+        if roomName is None:
+            maxDisplay = 6
+            if nActive == nReq:
+                text = "MISSION OBJECTIVES\n"
+            else:
+                text = "COMPLETE %d OUT OF\n" % nReq
+            for i, goal in enumerate(Objectives.activeGoals):
+                if i + 1 == maxDisplay and Objectives.nbActiveGoals > maxDisplay:
+                    text += "\n\n... %d MORE ..." % (nActive - maxDisplay + 1)
+                    break
+                text += "\n\n%s" % goal.getIntroText()
         else:
-            text = "COMPLETE %d OUT OF\n" % nReq
-        for i, goal in enumerate(Objectives.activeGoals):
-            if i + 1 == maxDisplay and Objectives.nbActiveGoals > maxDisplay:
-                text += "\n\n... %d MORE ..." % (nActive - maxDisplay + 1)
-                break
-            text += "\n\n%s" % goal.getIntroText()
+            if nActive == nReq:
+                text = "COMPLETE %d OBJECTIVE%s\n" % (nActive, "S" if nActive > 1 else "")
+            else:
+                text = "COMPLETE %d OUT OF %d POSSIBLE\n\nOBJECTIVES.\n" % (nReq, nActive)
+            text += "\n\nTO REVEAL %s YOU MUST VISIT\n\n%s." % ("THEM" if nActive > 1 else "IT", roomName)
         text += "\n\n\nTOURIAN IS %s\n\n\n" % tourian
         text += "CHECK OBJECTIVES STATUS IN\n\n"
         text += "THE PAUSE SCREEN"

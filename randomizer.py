@@ -242,6 +242,8 @@ if __name__ == "__main__":
     parser.add_argument('--nbObjectivesRequired',
                         help="Maximum required objectives. Set to 0 for random between 1 and total number of objectives.",
                         dest='nbObjectivesRequired', nargs='?', default=None, type=int)
+    parser.add_argument('--hiddenObjectives', help="don't reveal objectives until reaching a particular room depending on tourian setting", dest='hiddenObjectives',
+                        nargs='?', const=True, default=False)
     parser.add_argument('--objectiveList', help="list to choose from when random",
                         dest='objectiveList', nargs='?', default=None)
     parser.add_argument('--tourian', help="Tourian mode",
@@ -641,6 +643,7 @@ if __name__ == "__main__":
                 objectivesManager.setNbRequiredGoals(args.nbObjectivesRequired)
             else:
                 objectivesManager.expandGoals()
+            Objectives.hidden = args.hiddenObjectives
         else:
             if not (args.majorsSplit == "Scavenger" and args.tourian == 'Disabled'):
                 objectivesManager.setVanilla()

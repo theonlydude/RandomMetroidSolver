@@ -1097,6 +1097,7 @@ function startAutoTracker() {
         return;
     }
 
+    $tracker.setVaria({ inventory: null });
     // in case a snes classic retry was in progress
     if(retryTimeout != undefined) {
         clearTimeout(retryTimeout);
@@ -1138,6 +1139,7 @@ function stopAutoTracker() {
         return;
     }
 
+    $tracker.setVaria({ inventory: null });
     appendLog("\u2026 Stopping Auto Tracker");
     closeSocket();
 

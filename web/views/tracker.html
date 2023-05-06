@@ -1092,10 +1092,6 @@ function startAutoTracker() {
         return;
     }
 
-    if(mode == 'seedless') {
-        alert("Auto Tracker is incompatible with seedless mode, please load the seed to track first");
-        return;
-    }
     if(mode == 'race') {
         alert("Auto Tracker is disabled with race protected seeds");
         return;
@@ -1841,6 +1837,35 @@ function askNextData() {
     }
 }
 
+function reportInventory() {
+    const offset = stateDataOffsets[dataEnum.inventory];
+    const inventory = {}
+
+    Object.entries(inventoryBitMasks).forEach(([item, {byteIndex, bitMask}]) => {
+        const loc = offset + byteIndex
+        let val
+        if (["ETank", "Reserve", "Missile", "Super", "PowerBomb"].includes(item)) {
+            val = currentState[loc] + (currentState[loc + 1] * 256)
+        } else {
+            val = currentState[loc]
+        }
+
+        if (item === "ETank") {
+            inventory.ETank = parseInt((val - 99) / 100)
+        } else if (item === "Reserve") {
+            inventory.Reserve = parseInt(val / 100)
+        } else if (["Missile", "Super", "PowerBomb"].includes(item)) {
+            inventory[item] = parseInt(val / 5)
+        } else {
+            if (val && val & bitMask) {
+                item === 'SpringBall'
+                inventory[item] = true
+            }
+        }
+    });
+     $tracker.setVaria({ inventory })
+}
+
 function checkCollectedData() {
     // populate state
     populateCurrentState();
@@ -1851,6 +1876,11 @@ function checkCollectedData() {
     crc32.update(currentState);
     var newStateChksum = crc32.digest();
     console.log(`State Checksum: ${newStateChksum}`);
+
+    if (seed === 'seedless') {
+        reportInventory();
+        return true;
+    }
 
     if(newStateChksum == previousStateChksum && newAP == lastAP) {
         appendLog("\u2705 State is the same");

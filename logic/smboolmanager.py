@@ -212,8 +212,8 @@ class SMBoolManager(object):
         else:
             return smboolFalse
 
-    def energyReserveCountOk(self, count, difficulty=0):
-        if self.energyReserveCount() >= count:
+    def energyReserveCountOk(self, count, difficulty=0, reserveRestriction=False):
+        if self.energyReserveCount(reserveRestriction) >= count:
             nEtank = self.itemCount('ETank')
             if nEtank > count:
                 nEtank = int(count)

@@ -638,6 +638,7 @@ if __name__ == "__main__":
                 for goal in args.objective:
                     objectivesManager.addGoal(goal)
             if args.nbObjectivesRequired is not None:
+                args.nbObjectivesRequired = int(args.nbObjectivesRequired)
                 if args.nbObjectivesRequired == 0:
                     args.nbObjectivesRequired = random.randint(1, min(Objectives.nbActiveGoals, Objectives.maxRequiredGoals))
                 objectivesManager.setNbRequiredGoals(args.nbObjectivesRequired)

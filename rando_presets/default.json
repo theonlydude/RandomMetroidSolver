@@ -19,6 +19,8 @@
     "objective": ["kill all G4"],
     "objectiveRandom": "false",
     "nbObjective": 4,
+    "nbObjectivesRequired": "off",
+    "hiddenObjectives": "off",
     "areaRandomization": "off",
     "areaLayout": "on",
     "doorsColorsRando": "off",

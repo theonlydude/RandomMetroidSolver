@@ -632,7 +632,7 @@ scav_ridley_dead:
 	;; dead: see if it was the scav location, and advance
 	phx
 	jsl scav_mode_check
-	bcc .dead
+	bcc .dead_end
 	and #$ff00 : xba
 	cmp !ridley_id : bne .dead
 	;; Ridley was indeed the next scav location
@@ -642,6 +642,7 @@ scav_ridley_dead:
 	jml ridley_still_dying
 .dead:
 	lda !ridley_event : jsl !mark_event
+.dead_end:
 	plx
 	jml ridley_dead
 

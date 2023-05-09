@@ -426,7 +426,10 @@ def loadRandoPreset(randoPreset, args):
     elif "objective" in randoParams:
         args.objective = randoParams["objective"]
     if randoParams.get("nbObjectivesRequired", "off") != "off":
-        args.nbObjectivesRequired = randoParams["nbObjectivesRequired"]
+        if randoParams["nbObjectivesRequired"] == "random":
+            args.nbObjectivesRequired = 0
+        else:
+            args.nbObjectivesRequired = randoParams["nbObjectivesRequired"]
     args.hiddenObjectives = convertParam(randoParams, "hiddenObjectives")
 
     if "tourian" in randoParams:

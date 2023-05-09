@@ -215,12 +215,12 @@ class Randomizer(object):
                    'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
                    'Infinite_Space_Jump', 'refill_before_save', 'hud', "revealMap", "scavRandomized",
-                   'relaxed_round_robin_cf']
+                   'relaxed_round_robin_cf', 'hiddenObjectives']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
                   'areaRandomization', 'logic']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective']
+        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'nbObjectivesRequired']
         validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize
@@ -400,12 +400,12 @@ class Randomizer(object):
                    'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
                    'Infinite_Space_Jump', 'refill_before_save', 'hud', 'revealMap', "scavRandomized",
-                   'relaxed_round_robin_cf']
+                   'relaxed_round_robin_cf', 'hiddenObjectives']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
                   'areaRandomization', 'logic']
-        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective']
+        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective', 'nbObjectivesRequired']
         validateWebServiceParams(self.request, switchs, quantities, multis, others)
 
         if self.session.randomizer is None:
@@ -456,6 +456,8 @@ class Randomizer(object):
         self.session.randomizer['scavNumLocs'] = self.vars.scavNumLocs
         self.session.randomizer['scavRandomized'] = self.vars.scavRandomized
         self.session.randomizer['tourian'] = self.vars.tourian
+        self.session.randomizer['nbObjectivesRequired'] = self.vars.nbObjectivesRequired
+        self.session.randomizer['hiddenObjectives'] = self.vars.hiddenObjectives
 
         # objective is a special multi select
         self.session.randomizer['objectiveRandom'] = self.vars.objectiveRandom

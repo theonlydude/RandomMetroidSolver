@@ -776,7 +776,7 @@ check_objectives:
 	lda.l objective_notified_events,x : jsl !check_event
 	bcs .check_all_required
 	;; objective not notified, check completion
-	lda.l objective_completed_events,x : jsl !check_event
+	lda.l objectives_objective_events,x : jsl !check_event
 	bcc .check_all_required
 	;; notify objective completed but not displayed yet
 	lda #$ff00 : and !hud_special : sta !hud_special
@@ -794,9 +794,6 @@ check_objectives:
 	lda !notification_display_frames : sta !hud_special_timer
 .end:
 	rtl
-
-objective_completed_events:
-%objectivesCompletedEventArray()
 
 objective_notified_events:
 %objectivesNotifiedEventArray()

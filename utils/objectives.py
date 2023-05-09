@@ -1,5 +1,5 @@
 import random
-from rom.addresses import Addresses
+from rom.addresses import Addresses, MAX_OBJECTIVES
 from rom.rom import pc_to_snes
 from logic.helpers import Bosses
 from logic.smbool import SMBool
@@ -401,7 +401,7 @@ class Objectives(object):
     nbActiveGoals = 0
     nbRequiredGoals = 0
     maxRequiredGoals = 9
-    maxActiveGoals = 18
+    maxActiveGoals = MAX_OBJECTIVES
     totalItemsCount = 100
     goals = _goals
     graph = None
@@ -649,11 +649,9 @@ class Objectives(object):
                 return
         assert False, "Can't set goal {} completion to {}, goal not active".format(goalName, completed)
 
-    def allGoalsCompleted(self):
-        for goal in Objectives.activeGoals:
-            if goal.completed is False:
-                return False
-        return True
+    def enoughGoalsCompleted(self):
+        nCompleted = len([goal for goal in Objectives.activeGoals if goal.completed])
+        return nCompleted >= Objectives.nbRequiredGoals
 
     def getGoalFromCheckFunction(self, checkFunction):
         for name, goal in Objectives.goals.items():
@@ -668,10 +666,13 @@ class Objectives(object):
     # call from web
     @staticmethod
     def getAddressesToRead():
-        terminator = 1
         objectiveSize = 2
-        bytesToRead = (Objectives.maxActiveGoals + terminator) * objectiveSize
-        return [Addresses.getOne('objectivesList')+i for i in range(0, bytesToRead+1)] + Addresses.getWeb('totalItems') + Addresses.getWeb("itemsMask") + Addresses.getWeb("beamsMask")
+        bytesToRead = Objectives.maxActiveGoals * objectiveSize
+        otherAddrs = ['totalItems', 'itemsMask', 'beamsMask', 'objectives_n_objectives', 'objectives_n_objectives_required']
+        ret = [Addresses.getOne('objectivesList')+i for i in range(0, bytesToRead+1)]
+        for addr in otherAddrs:
+            ret += Addresses.getWeb(addr)
+        return ret
 
     @staticmethod
     def getExclusions():
@@ -767,6 +768,12 @@ class Objectives(object):
 
         Objectives._tourianRequired = not bool(romReader.romOptions.read('escapeTrigger'))
         LOG.debug("tourianRequired: {}".format(self.tourianRequired))
+
+        # read objective quantities
+        Objectives.nbActiveGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives'))
+        assert Objectives.nbActiveGoals == len(Objectives.activeGoals), "Objectives list inconsistent in ROM"
+        Objectives.nbRequiredGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives_required'))
+        LOG.debug(f"nbActiveGoals: {Objectives.nbActiveGoals}, nbRequiredGoals: {Objectives.nbRequiredGoals}")
 
     # call from rando
     def writeGoals(self, romFile, tourian):

@@ -324,6 +324,10 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         if IS_LENGTH(maxsize=36, minsize=36)(request.vars.seedKey)[1] is not None:
             raiseHttp(400, "Seed key must be 36 chars long", isJson)
 
+    if 'nbObjectivesRequired' in others:
+        if request.vars.nbObjectivesRequired not in ("off", "random", range(1, 32)):
+            raiseHttp(400, "Wrong value for nbObjectivesRequired", isJson)
+
 def getCustomMapping(controlMapping):
     if len(controlMapping) == 0:
         return (False, None)

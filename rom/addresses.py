@@ -2,6 +2,8 @@ from rom.addressTypes import ValueList, ValueSingle, ValueRange, Byte, Word, Lon
 
 # TODO::add patches
 
+MAX_OBJECTIVES = 18
+
 class Addresses(object):
     # load symbol on the fly when needed
     @staticmethod
@@ -60,7 +62,7 @@ class Addresses(object):
             'BTtweaksHack2': ValueSingle(symbols.getAddress('bomb_torizo', 'bt_instr_nops')),
             'introText': ValueSingle(symbols.getAddress('intro_text', 'page1_text')),
             'objectivesList': ValueSingle(symbols.getAddress('objectives', 'objective_funcs')),
-            'objectiveEventsArray': ValueRange(symbols.getAddress('objectives', 'objective_events'), length=2*5),
+            'objectiveEventsArray': ValueRange(symbols.getAddress('objectives', 'objective_events'), length=2*MAX_OBJECTIVES),
             'itemsMask': ValueSingle(symbols.getAddress('objectives', 'all_items_mask')),
             'beamsMask': ValueSingle(symbols.getAddress('objectives', 'all_beams_mask')),
             'totalItemsPercent': ValueList([symbols.getAddress('objectives', 'collect_%d_items_pct' % pct) for pct in [25,50,75,100]])

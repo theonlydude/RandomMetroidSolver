@@ -632,7 +632,7 @@ scav_ridley_dead:
 	;; dead: see if it was the scav location, and advance
 	phx
 	jsl scav_mode_check
-	bcc .dead
+	bcc .dead_end
 	and #$ff00 : xba
 	cmp !ridley_id : bne .dead
 	;; Ridley was indeed the next scav location
@@ -642,6 +642,7 @@ scav_ridley_dead:
 	jml ridley_still_dying
 .dead:
 	lda !ridley_event : jsl !mark_event
+.dead_end:
 	plx
 	jml ridley_dead
 
@@ -776,7 +777,7 @@ check_objectives:
 	lda.l objective_notified_events,x : jsl !check_event
 	bcs .check_all_required
 	;; objective not notified, check completion
-	lda.l objective_completed_events,x : jsl !check_event
+	lda.l objectives_objective_events,x : jsl !check_event
 	bcc .check_all_required
 	;; notify objective completed but not displayed yet
 	lda #$ff00 : and !hud_special : sta !hud_special
@@ -794,9 +795,6 @@ check_objectives:
 	lda !notification_display_frames : sta !hud_special_timer
 .end:
 	rtl
-
-objective_completed_events:
-%objectivesCompletedEventArray()
 
 objective_notified_events:
 %objectivesNotifiedEventArray()

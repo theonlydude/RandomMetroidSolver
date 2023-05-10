@@ -2222,6 +2222,8 @@ if seedInfo != None:
 {{    else:}}
                 <td>{{=seedParams["objective"]}}</td></tr>
 {{        pass}}
+              <tr {{=setBold("nbObjectivesRequired")}}><td>Number of required objectives</td><td>{{=seedParams["nbObjectivesRequired"]}}</td></tr>
+              <tr {{=setBold("hiddenObjectives")}}><td>Hidden objectives</td><td>{{=seedParams["hiddenObjectives"]}}</td></tr>
               <tr {{=setBold("tourian")}}><td>Tourian</td><td>{{=seedParams["tourian"]}}</td></tr>
 {{    if seedParams["tourian"] == "random":}}
               <tr><td>Tourian pool</td><td>{{=seedParams["tourianMultiSelect"]}}</td></tr>

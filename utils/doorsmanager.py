@@ -134,18 +134,18 @@ class Door(object):
     def canRandomize(self):
         return not self.forced and self.canRandom
 
-    def filterColorList(self, colorsList):
-        if self.forbiddenColors is None:
-            return colorsList
-        else:
-            return [color for color in colorsList if color not in self.forbiddenColors]
+    def filterColorList(self, colorsList, forbiddenColors):
+        forb = []
+        if self.forbiddenColors is not None:
+            forb += self.forbiddenColors
+        if forbiddenColors is not None:
+            forb += forbiddenColors
+        return colorsList if len(forb) == 0 else [color for color in colorsList if color not in forb]
 
-    def randomize(self, allowGreyDoors):
+    def randomize(self, allowGreyDoors, forbiddenColors=None):
         if self.canRandomize():
-            if self.canGrey and allowGreyDoors:
-                self.setColor(random.choice(self.filterColorList(colorsListGrey)))
-            else:
-                self.setColor(random.choice(self.filterColorList(colorsList)))
+            colList = colorsListGrey if self.canGrey and allowGreyDoors else colorsList
+            self.setColor(random.choice(self.filterColorList(colList, forbiddenColors)))
 
     def traverse(self, smbm):
         if self.hidden or self.color == 'grey':
@@ -378,9 +378,9 @@ class DoorsManager():
             DoorsManager.doors['CrabShaftRight'].forceBlue()
 
     @staticmethod
-    def randomize(allowGreyDoors):
+    def randomize(allowGreyDoors, forbiddenColors=None):
         for door in DoorsManager.doors.values():
-            door.randomize(allowGreyDoors)
+            door.randomize(allowGreyDoors, forbiddenColors)
         # set both ends of toilet to the same color to avoid soft locking in area rando
         toiletTop = DoorsManager.doors['PlasmaSparkBottom']
         toiletBottom = DoorsManager.doors['OasisTop']

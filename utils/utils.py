@@ -425,6 +425,12 @@ def loadRandoPreset(randoPreset, args):
         args.objective = [nbObjective]
     elif "objective" in randoParams:
         args.objective = randoParams["objective"]
+    if randoParams.get("nbObjectivesRequired", "off") != "off":
+        if randoParams["nbObjectivesRequired"] == "random":
+            args.nbObjectivesRequired = 0
+        else:
+            args.nbObjectivesRequired = randoParams["nbObjectivesRequired"]
+    args.hiddenObjectives = convertParam(randoParams, "hiddenObjectives")
 
     if "tourian" in randoParams:
         args.tourian = randoParams["tourian"]
@@ -478,6 +484,8 @@ def getRandomizerDefaultParameters():
     defaultParams['nbObjective'] = "4"
     defaultParams['objective'] = ["kill all G4"]
     defaultParams['objectiveMultiSelect'] = defaultMultiValues['objective']
+    defaultParams['nbObjectivesRequired'] = "off"
+    defaultParams['hiddenObjectives'] = "off"
     defaultParams['tourian'] = "Vanilla"
     defaultParams['tourianMultiSelect'] = defaultMultiValues['tourian']
     defaultParams['areaRandomization'] = "off"

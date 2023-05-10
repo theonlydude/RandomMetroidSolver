@@ -71,7 +71,8 @@ class RandoExec(object):
         while container is None and i < attempts and now <= endDate:
             self.restrictions = Restrictions(self.randoSettings)
             if self.graphSettings.doorsColorsRando == True:
-                DoorsManager.randomize(self.graphSettings.allowGreyDoors)
+                forbiddenColors = None if 'Combat' not in self.randoSettings.superFun else ['plasma']
+                DoorsManager.randomize(self.graphSettings.allowGreyDoors, forbiddenColors=forbiddenColors)
             self.areaGraph = graphBuilder.createGraph(self.randoSettings.maxDiff)
             services = RandoServices(self.areaGraph, self.restrictions)
             setup = RandoSetup(self.graphSettings, Logic.locations, services)

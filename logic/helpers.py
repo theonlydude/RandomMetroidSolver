@@ -17,16 +17,17 @@ class Helpers(object):
         return self.smbm.itemCount(item) >= count
 
     # return integer
-    @Cache.decorator
-    def energyReserveCount(self):
-        return self.smbm.itemCount('ETank') + self.smbm.itemCount('Reserve')
+    def energyReserveCount(self, reserveRestriction=False):
+        nE = self.smbm.itemCount('ETank')
+        nR = self.smbm.itemCount('Reserve') if reserveRestriction == False else min(self.smbm.itemCount('Reserve'), nE + 1)
+        return nE + nR
 
-    def energyReserveCountOkDiff(self, difficulties, mult=1.0):
+    def energyReserveCountOkDiff(self, difficulties, mult=1.0, reserveRestriction=False):
         if difficulties is None or len(difficulties) == 0:
             return smboolFalse
 
         def f(difficulty):
-            return self.smbm.energyReserveCountOk(normalizeRounding(difficulty[0] / mult), difficulty=difficulty[1])
+            return self.smbm.energyReserveCountOk(normalizeRounding(difficulty[0] / mult), difficulty=difficulty[1], reserveRestriction=reserveRestriction)
 
         result = f(difficulties[0])
         for difficulty in difficulties[1:]:
@@ -35,7 +36,7 @@ class Helpers(object):
 
     def energyReserveCountOkHellRun(self, hellRunName, mult=1.0):
         difficulties = Settings.hellRuns[hellRunName]
-        result = self.energyReserveCountOkDiff(difficulties, mult)
+        result = self.energyReserveCountOkDiff(difficulties, mult, reserveRestriction=True)
 
         if result == True:
             result.knows = [hellRunName+'HellRun']

@@ -620,7 +620,7 @@ class CommonSolver(object):
         def GunshipAccess(sm):
             nonlocal solver
 
-            return SMBool(solver.objectives.allGoalsCompleted())
+            return SMBool(solver.objectives.enoughGoalsCompleted())
 
         def GunshipAvailable(_, sm):
             nonlocal solver
@@ -666,7 +666,7 @@ class CommonSolver(object):
             def MotherBrainAccess(sm):
                 nonlocal solver
 
-                return SMBool(solver.objectives.allGoalsCompleted())
+                return SMBool(solver.objectives.enoughGoalsCompleted())
 
             def MotherBrainAvailable(sm):
                 nonlocal solver

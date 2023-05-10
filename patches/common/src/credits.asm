@@ -206,6 +206,14 @@ copy:
 
 warnpc $8bf88f
 
+;;; tweak the list for DMA transfers of mode 7 samus beam :
+;;; the last few entries are supposed to transfer zeroes from $7FA000 through $7FC000,
+;;; part of which is used by item locations spoiler, ending up as "rotating garbage"
+;;; as samus fires her beam.
+;;; Since it's all zeroes, just use the last entry repeated 4 times
+org $8bf6d0
+        dw $b800, $b800, $b800, $b800
+
 ;; configurable hh:mm values for samus animations at the end
 org $8bf900
 samus_times:

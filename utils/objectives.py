@@ -869,9 +869,9 @@ class Objectives(object):
             else:
                 text = "COMPLETE %d OUT OF %d POSSIBLE\n\nOBJECTIVES.\n" % (nReq, nActive)
             text += "\n\nTO REVEAL %s YOU MUST VISIT\n\n%s." % ("THEM" if nActive > 1 else "IT", roomName)
-        text += "\n\n\nTOURIAN IS %s\n\n\n" % tourian
+        text += "\n\n\nTOURIAN IS %s.\n\n\n" % tourian
         text += "CHECK OBJECTIVES STATUS IN\n\n"
-        text += "THE PAUSE SCREEN"
+        text += "THE PAUSE SCREEN."
         # actually write text in ROM
         self._writeIntroText(rom, text.upper())
 

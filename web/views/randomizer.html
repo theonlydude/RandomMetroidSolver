@@ -359,7 +359,7 @@ function randomize(evt, elemId) {
     evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
     isActive = false;
 
-    defaultValues = {"missileQty": 3, "superQty": 2, "powerBombQty": 1, "minorQty": 100, "scavNumLocs": 10, "nbObjective": 4};
+    defaultValues = {"missileQty": 3, "superQty": 2, "powerBombQty": 1, "minorQty": 100, "scavNumLocs": 10, "nbObjective": 4, "nbObjectivesRequired": 18};
 
     if(e.value.length == 0 && elemId in defaultValues) {
       e.value = defaultValues[elemId];
@@ -735,7 +735,7 @@ function objective_change(e, params, force) {
     sort_objectives_and_add_optgroups();
 }
 
-var max_objectives = 5;
+var max_objectives = 18;
 function setMaxObjective(isRandom) {
     if(isRandom) {
         // no limit
@@ -911,6 +911,7 @@ function setObjective() {
     // at start all objectives are displayed as selected even though they're not...
     var objective_random = "{{response.write(session.randomizer.get("objectiveRandom"))}}" == "true"
     var objective_number = "{{response.write(session.randomizer.get("nbObjective", 4))}}"
+    var objective_required = "{{response.write(session.randomizer.get("nbObjectivesRequired", 4))}}"
 
     var selected_objectives = objectiveBackup[objective_random]
     if (objective_random) {
@@ -925,6 +926,12 @@ function setObjective() {
         document.getElementById('nbObjectiveRandom').click()
     } else {
         document.getElementById('nbObjective').value = objective_number
+    }
+
+    if (['0', 'random'].includes(objective_required)) {
+        document.getElementById('nbObjectivesRequiredRandom').click()
+    } else {
+        document.getElementById('nbObjectivesRequired').value = objective_number
     }
 
     $("#objectiveMultiSelect").val(selected_objectives).trigger("chosen:updated");
@@ -986,7 +993,7 @@ function showHide(show, hide) {
 function getRandomizerParameters(setDisabledToOff, trueJson) {
     var dataDict = {};
 
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf", "hiddenObjectives"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "tourian", "areaRandomization"];
     var imgPickers = ["logic"];
@@ -1255,6 +1262,11 @@ function getSpecialValues(dataDict, trueJson) {
         dataDict["nbObjective"] = "random"
     } else {
         dataDict["nbObjective"] = document.getElementById("nbObjective").value
+    }
+    if (isElemIdRandom("nbObjectivesRequired")) {
+        dataDict["nbObjectivesRequired"] = "random"
+    } else {
+        dataDict["nbObjectivesRequired"] = document.getElementById("nbObjectivesRequired").value
     }
 }
 
@@ -1695,12 +1707,12 @@ window.onload = function(){
             setSwitchToOn(hud);
 
             // update maximum number of allowed custom objectives
-            max_objectives = 4;
+            max_objectives = 17;
         } else {
             scavengerParams.style.display = "none";
 
             // update maximum number of allowed custom objectives
-            max_objectives = 5;
+            max_objectives = 18;
         }
         // tell chosen about new maximum
         if(!isElemRandom(document.getElementById("objectiveRandom"))) {
@@ -2021,6 +2033,16 @@ Click on the dice button to randomly set this parameter.</p>"
       element: "#nbObjectiveStep",
       title: "Number of Objectives to access Tourian",
       content: "<p>By default you need to complete 4 objectives from the list to access Tourian. You can choose 1-5 or enter 0 to make the number random.</p>",
+    },
+    {
+      element: "#nbObjectivesRequiredStep",
+      title: "Number of required objectives",
+      content: "<p></p>",
+    },
+    {
+      element: "#hiddenObjectivesStep",
+      title: "Hidden Objectives",
+      content: "<p></p>",
     },
     {
       element: "#objectiveStep",
@@ -2972,9 +2994,20 @@ def displayNumber(id, min, max, default, step="1"):
               <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
               <tr id="nbObjectiveVisiblity">
                 <td class="small"><div class="random"><button id="nbObjectiveRandom" type="button" onclick="randomize(event, 'nbObjective')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="nbObjectiveText">Number of objectives:</span></td>
-                <td>{{displayNumber("nbObjective", "1", "5", "4", "1")}}</td>
+                <td><span id="nbObjectiveText">Number of possible objectives:</span></td>
+                <td>{{displayNumber("nbObjective", "1", "18", "4", "1")}}</td>
                 <td id="nbObjectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+              </tr>
+              <tr id="nbObjectivesRequiredVisiblity">
+                <td class="small"><div class="random"><button id="nbObjectivesRequiredRandom" type="button" onclick="randomize(event, 'nbObjectivesRequired')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td><span id="nbObjectivesRequiredText">Number of required objectives:</span></td>
+                <td>{{displayNumber("nbObjectivesRequired", "1", "9", "4", "1")}}</td>
+                <td id="nbObjectivesRequiredStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+              </tr>
+              <tr id="hiddenObjectivesVisibility">
+                <td class="small"></td>
+                <td colspan="2">{{displayCheckbox("hiddenObjectives")}}<span id="hiddenObjectivesText">Hidden Objectives</span></td>
+                <td id="hiddenObjectivesStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>

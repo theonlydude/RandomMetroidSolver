@@ -253,13 +253,13 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         if request.vars.objectiveRandom == 'true':
             nbObjective = request.vars.nbObjective
             if nbObjective.isdigit():
-                if not int(nbObjective) in range(6):
-                    raiseHttp(400, "Number of objectives must be 0-5", isJson)
+                if not int(nbObjective) in range(19):
+                    raiseHttp(400, "Number of objectives must be 0-18", isJson)
             elif nbObjective != "random":
-                raiseHttp(400, "Number of objectives must be 0-5 or \"random\"", isJson)
+                raiseHttp(400, "Number of objectives must be 0-18 or \"random\"", isJson)
         else:
-            if len(objective) > 5:
-                raiseHttp(400, "You cannot choose more than 5 objectives", isJson)
+            if len(objective) > 18:
+                raiseHttp(400, "You cannot choose more than 18 objectives", isJson)
 
 
     if 'minDegree' in others:
@@ -325,8 +325,10 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
             raiseHttp(400, "Seed key must be 36 chars long", isJson)
 
     if 'nbObjectivesRequired' in others:
-        if request.vars.nbObjectivesRequired not in ("off", "random", range(1, 32)):
-            raiseHttp(400, "Wrong value for nbObjectivesRequired", isJson)
+        numbers = [str(number) for number in range(1, 32)]
+        value = request.vars.nbObjectivesRequired
+        if value not in ("off", "random", *numbers):
+            raiseHttp(400, f"Wrong value for nbObjectivesRequired {value}", isJson)
 
 def getCustomMapping(controlMapping):
     if len(controlMapping) == 0:

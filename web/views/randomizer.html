@@ -743,7 +743,7 @@ function setMaxObjective(isRandom) {
         $("#objectiveMultiSelect").chosen({max_selected_options: Infinity, width: '100%'})
         $("#nbObjectiveVisiblity").show();
     } else {
-        // limit to 5 objectives (4 in scav hunt)
+        // limit to 18 objectives (12 in scav hunt)
         $("#objectiveMultiSelect").chosen("destroy");
         $("#objectiveMultiSelect").chosen({max_selected_options: max_objectives, width: '100%'})
         $("#nbObjectiveVisiblity").hide();
@@ -1282,9 +1282,9 @@ function validateObjectives() {
             return false;
         }
     } else {
-        // if not randomized, check that there's max 5 objectives in the list (4 in scav hunt)
+        // if not randomized, check that there's max 18 objectives in the list (12 in scav hunt)
         if(values.length > max_objectives) {
-            alert("You can have maximum five objectives (four if major split is Scavenger Hunt)");
+            alert("You can have maximum 18 objectives (12 if major split is Scavenger Hunt)");
             return false
         }
     }
@@ -1707,7 +1707,7 @@ window.onload = function(){
             setSwitchToOn(hud);
 
             // update maximum number of allowed custom objectives
-            max_objectives = 17;
+            max_objectives = 12;
         } else {
             scavengerParams.style.display = "none";
 
@@ -2048,7 +2048,7 @@ Click on the dice button to randomly set this parameter.</p>"
       element: "#objectiveStep",
       title: "Custom Objectives",
       content: "<p>Choose which objectives are required to sink the <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statue</a> and to open access to <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a>.</p>\
-<p>You can choose from 0 to 5 objectives (4 if Majors Split is Scavenger Hunt):\
+<p>You can choose from 0 to 18 objectives (12 if Majors Split is Scavenger Hunt):\
 <p><b>Bosses:</b>\
 <ul>\
 <li>Kill Kraid: kill boss <a href=\"https://metroid.fandom.com/wiki/Kraid\" target=\"_blank\">Kraid</a> (vanilla)</li>\
@@ -2093,7 +2093,7 @@ Click on the dice button to randomly set this parameter.</p>"
 <b>Note:</b> Current percentage of collected items is displayed in the inventory pause menu.<br/>\
 <b>Note:</b> Collect 100% items is excluded by default when randomizing the objectives list as it requires you to complete all the objectives.\
 </p>\
-<p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 5 objectives from the list (between 1 and 4 if Scavenger Hunt). To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
+<p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 18 objectives from the list (between 1 and 12 if Scavenger Hunt). To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
     },
     {
       element: "#StartLocationStep",

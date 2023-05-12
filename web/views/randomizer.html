@@ -931,7 +931,7 @@ function setObjective() {
     if (['0', 'random'].includes(objective_required)) {
         document.getElementById('nbObjectivesRequiredRandom').click()
     } else {
-        document.getElementById('nbObjectivesRequired').value = objective_number
+        document.getElementById('nbObjectivesRequired').value = objective_required
     }
 
     $("#objectiveMultiSelect").val(selected_objectives).trigger("chosen:updated");

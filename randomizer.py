@@ -61,7 +61,7 @@ def restricted_float(x):
     return x
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
+    parser = argparse.ArgumentParser(description="VARIA Randomizer")
     parser.add_argument('--param', '-p', help="the input parameters",
                         default=None, dest='paramsFileName')
     parser.add_argument('--dir',
@@ -280,7 +280,6 @@ if __name__ == "__main__":
         if argDict[arg] not in okValues:
             argDict[arg] = value
             forcedArgs[webArg if webArg is not None else arg] = webValue if webValue is not None else value
-            print(msg)
             optErrMsgs.append(msg)
 
     # if rando preset given, load it first
@@ -630,6 +629,8 @@ if __name__ == "__main__":
                 if nbObjectives == 0:
                     nbObjectives = random.randint(1, min(Objectives.maxActiveGoals, len(availableObjectives)))
                 objectivesManager.setRandom(nbObjectives, availableObjectives)
+                if Objectives.nbActiveGoals < nbObjectives:
+                    optErrMsgs.append(f"Could not reach {nbObjectives} objectives: only {Objectives.nbActiveGoals} available")
             else:
                 maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
                 if len(args.objective) > maxActiveGoals:

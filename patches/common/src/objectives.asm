@@ -22,6 +22,7 @@ incsrc "sym/rando_escape_common.asm"
 incsrc "sym/custom_music.asm"
 incsrc "sym/disable_screen_shake.asm"
 incsrc "sym/map.asm"
+incsrc "sym/endingtotals.asm"
 
 !timer = !timer1
 !current_room = $079b
@@ -34,6 +35,7 @@ incsrc "sym/map.asm"
 
 !tmp_in_progress_done = $16
 !tmp_in_progress_total = $18
+!tmp_in_progress_pct_marker = $ffff
 
 ;;; counted by main obj routine, read by pause menu routine
 !n_objs_left = $7fff4c
@@ -46,9 +48,6 @@ incsrc "sym/map.asm"
 
 ;;; no screen shake patch detection for escape music trigger
 !disable_earthquake_id = #$0060
-
-;;; for items % objectives
-!CollectedItems  = $7ED86E
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; ROM OPTIONS
@@ -426,8 +425,8 @@ endmacro
 %export(all_beams_mask)
 	dw $100f
 %export(all_major_items)
-	lda $09A4 : cmp.l all_items_mask : bne .not
-	lda $09A8 : cmp.l all_beams_mask : bne .not
+	lda !collected_items_mask : cmp.l all_items_mask : bne .not
+	lda !collected_beams_mask : cmp.l all_beams_mask : bne .not
 	sec
 	bra .end
 .not:
@@ -516,23 +515,53 @@ endmacro
 %inProgressBossChecker(3,miniboss)
 %inProgressBossChecker(4,miniboss)
 
-%export(items_collected)
-        lda.l !CollectedItems : beq .no_progress
+%export(items_percent)
+        ;; item% = (CollectedItems*100)/total_items
+        %a8()
+        lda.l !CollectedItems : sta $4202
+        lda.b #100 : sta $4203
+        pha : pla : xba : xba
+        %a16()
+        lda $4216 : sta $4204
+        %a8()
+        lda.l endingtotals_total_items : sta $4206
+        pha : pla : xba : xba
+        %a16()
+        lda $4214 : sta !tmp_in_progress_done
+        lda #!tmp_in_progress_pct_marker : sta !tmp_in_progress_total
+        rts
+
+count_upgrades:
+        pha
+        ldx.w #16
+.loop:
+        dex : bmi .end
+        lsr $14 : bcc .loop
+        inc !tmp_in_progress_total
+        pla : lsr : bcc .next
+        inc !tmp_in_progress_done
+.next:
+        pha : bra .loop
+.end:
+        pla
+        rts
+
+%export(upgrades_collected)
+        phx
+        stz !tmp_in_progress_done : stz !tmp_in_progress_total
+        lda.l all_items_mask : sta $14
+        lda !collected_items_mask
+        jsr count_upgrades
+        lda.l all_beams_mask : sta $14
+        lda !collected_beams_mask
+        jsr count_upgrades
+        lda !tmp_in_progress_done : beq .no_progress
         sec
         bra .end
 .no_progress:
         clc
 .end:
-        rts
-
-%export(upgrade_collected)
-	lda $09A4 : bne .progress
-	lda $09A8 : bne .progress
-	clc
-	bra .end
-.progress:
-	sec
-.end:
+        plx
 	rts
 
 %eventChecker(scav_started, !hunt_started_event)
@@ -847,14 +876,28 @@ table "tables/pause.tbl",rtl
 ;;; digit to draw in A
 ;;; x, y are relative to viewable area
 macro drawDigit(x, y)
-%tileOffset(<x>, <y>)
+        %tileOffset(<x>, <y>)
         clc : adc.w #'0'
         sta.l !BG1_tilemap+!_tile_offset
 endmacro
 
+;;; digit to draw in A
+;;; tile offset in X (updated)
+macro drawDigitOffset()
+        clc : adc.w #'0' : sta.l !BG1_tilemap, x
+        inx : inx
+endmacro
+
+;;; x, y are relative to viewable area
 macro drawTile(tile, x, y)
         %tileOffset(<x>, <y>)
         lda.w #<tile> : sta.l !BG1_tilemap+!_tile_offset
+endmacro
+
+;;; tile offset in X (updated)
+macro drawTileOffset(tile)
+        lda.w #<tile> : sta.l !BG1_tilemap, x
+        inx : inx
 endmacro
 
 ;;; continue in bank 85 for obj screen management code
@@ -926,21 +969,22 @@ update_objs:
         inx : inx
         bra .obj_txt_loop
 .obj_txt_loop_end:
-        ;; handle "(i/n)" in-progress display
+        ;; handle in-progress display
         lda !tmp_in_progress_total : beq .pad
         ldx !tmp_tile_offset
-        lda.w #0 : sta.l !BG1_tilemap, x
-        inx : inx
-        lda.w #'(' : sta.l !BG1_tilemap, x
-        inx : inx
-        lda !tmp_in_progress_done : clc : adc.w #'0' : sta.l !BG1_tilemap, x
-        inx : inx
-        lda.w #'/' : sta.l !BG1_tilemap, x
-        inx : inx
-        lda !tmp_in_progress_total : clc : adc.w #'0' : sta.l !BG1_tilemap, x
-        inx : inx
-        lda.w #')' : sta.l !BG1_tilemap, x
-        inx : inx
+        %drawTileOffset(0)
+        %drawTileOffset('(')
+        lda !tmp_in_progress_done : jsr draw_number
+        lda !tmp_in_progress_total : cmp.w #!tmp_in_progress_pct_marker : beq .progress_percent
+        ;; "i/n"
+        %drawTileOffset('/')
+        lda !tmp_in_progress_total : jsr draw_number
+        bra .end_in_progress
+.progress_percent:
+        ;; "i%"
+        %drawTileOffset('%')
+.end_in_progress:
+        %drawTileOffset(')')
         stx !tmp_tile_offset
 .pad:
         ;; pad with 0 to the end of line
@@ -981,6 +1025,22 @@ pad_0:
 .end:
         inx #8
         stx !tmp_tile_offset
+        rts
+
+;;; draw number < 100
+draw_number:
+        cmp.w #10 : bmi .digit
+        ;; draw tenth
+        sta $4204
+        %a8()
+        lda.b #10 : sta $4206
+        pha : pla : xba : xba
+        %a16()
+        lda $4214
+        %drawDigitOffset()
+        lda $4216
+.digit:
+        %drawDigitOffset()
         rts
 
 ;;; direct DMA of BG1 tilemap to VRAM

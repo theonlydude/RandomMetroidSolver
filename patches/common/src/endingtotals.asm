@@ -10,8 +10,7 @@ lorom
 arch 65816
 
 incsrc "macros.asm"
-
-!CollectedItems  = $7ED86E
+incsrc "constants.asm"
 
 org $84889F
         JSL COLLECTTANK

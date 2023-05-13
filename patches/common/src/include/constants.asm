@@ -30,6 +30,12 @@ include
 !stats_ram = $7f!_stats_ram
 !stats_timer = !stats_ram
 
+
+;;; collected items
+!CollectedItems  = $7ED86E
+!collected_beams_mask = $09A8
+!collected_items_mask = $09A4
+
 ;; bitfields
 ; arg: A=bit index. returns: X=byte index, !bitindex_mask=bitmask
 !bitindex_routine = $80818e

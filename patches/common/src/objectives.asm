@@ -532,18 +532,19 @@ endmacro
         rts
 
 count_upgrades:
-        pha
         ldx.w #16
 .loop:
         dex : bmi .end
-        lsr $14 : bcc .loop
+        lsr $14 : bcs .item
+        lsr
+        bra .loop
+.item:
         inc !tmp_in_progress_total
-        pla : lsr : bcc .next
+        lsr : bcc .next
         inc !tmp_in_progress_done
 .next:
-        pha : bra .loop
+        bra .loop
 .end:
-        pla
         rts
 
 %export(upgrades_collected)

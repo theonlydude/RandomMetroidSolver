@@ -630,7 +630,7 @@ if __name__ == "__main__":
                     nbObjectives = random.randint(1, min(Objectives.maxActiveGoals, len(availableObjectives)))
                 objectivesManager.setRandom(nbObjectives, availableObjectives)
                 if Objectives.nbActiveGoals < nbObjectives:
-                    optErrMsgs.append(f"Could not reach {nbObjectives} objectives: only {Objectives.nbActiveGoals} available")
+                    optErrMsgs.append(f"Could not reach {nbObjectives} possible objectives: only {Objectives.nbActiveGoals} available")
             else:
                 maxActiveGoals = Objectives.maxActiveGoals - addedObjectives
                 if len(args.objective) > maxActiveGoals:
@@ -645,6 +645,8 @@ if __name__ == "__main__":
                 if args.nbObjectivesRequired == 0:
                     args.nbObjectivesRequired = random.randint(1, min(Objectives.nbActiveGoals, Objectives.maxRequiredGoals))
                 objectivesManager.setNbRequiredGoals(args.nbObjectivesRequired)
+                if Objectives.nbRequiredGoals < args.nbObjectivesRequired:
+                    optErrMsgs.append(f"Required objectives limited to {Objectives.nbRequiredGoals} instead of {args.nbObjectivesRequired}")
             else:
                 objectivesManager.expandGoals()
             Objectives.hidden = args.hiddenObjectives

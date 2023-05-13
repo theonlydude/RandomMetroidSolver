@@ -490,9 +490,10 @@ class Objectives(object):
         Objectives.nbRequiredGoals = 0
         Objectives.activeGoals.clear()
 
+    # call after objective list is built
     @staticmethod
     def setNbRequiredGoals(n):
-        Objectives.nbRequiredGoals = max(0, min(n, Objectives.maxRequiredGoals))
+        Objectives.nbRequiredGoals = min(Objectives.nbActiveGoals, max(0, min(n, Objectives.maxRequiredGoals)))
 
     @staticmethod
     def isGoalActive(goalName):

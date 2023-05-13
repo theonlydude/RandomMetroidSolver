@@ -204,10 +204,12 @@ class CommonSolver(object):
                     print("                                          smbool: {}".format(loc.difficulty))
                     print("                                            path: {}".format([ap.Name for ap in loc.path]))
 
-    def collectMajor(self, loc, itemName=None):
+    def collectMajor(self, loc, itemName=None, autotracker=False):
         self.majorLocations.remove(loc)
         self.visitedLocations.append(loc)
-        self.collectItem(loc, itemName)
+        # in autotracker items are read from memory
+        if not autotracker:
+            self.collectItem(loc, itemName)
         return loc
 
     def collectMinor(self, loc):
@@ -260,7 +262,7 @@ class CommonSolver(object):
             if loc.Name == locName:
                 return i
 
-    def removeItemAt(self, locNameWeb):
+    def removeItemAt(self, locNameWeb, autotracker=False):
         locName = self.locNameWeb2Internal(locNameWeb)
         locIndex = self.getLocIndex(locName)
         if locIndex is None:
@@ -288,6 +290,10 @@ class CommonSolver(object):
             loc.accessPoint = None
         if loc.path is not None:
             loc.path = None
+
+        # in autotracker items are read from memory
+        if autotracker:
+            return
 
         # item
         item = loc.itemName
@@ -796,6 +802,17 @@ class CommonSolver(object):
             self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold)
 
             self.comeBack.cleanNoComeBack(self.getAllLocs(self.majorLocations, self.minorLocations))
+
+        if self.objectives.tourianRequired and not self.aborted and self.escapeTransition:
+            # add gunship location to display escape in the spoiler log
+            gunship = self.getGunship()
+            self.majorLocations.append(gunship)
+            # change current AP to escape AP
+            self.lastAP = self.escapeTransition[0][1]
+            self.computeLocationsDifficulty(self.majorLocations)
+            majorsAvailable = [loc for loc in self.majorLocations if loc.difficulty is not None and loc.difficulty.bool == True]
+            if gunship in majorsAvailable:
+                self.collectMajor(gunship)
 
         # compute difficulty value
         (difficulty, itemsOk) = self.computeDifficultyValue()

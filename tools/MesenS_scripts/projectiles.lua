@@ -7,24 +7,26 @@ end
 
 local projectileData = {
       {"1A4B Xpos", addr=0x1A4B, len=2},
-      {"1A4B Xpos1", addr=0x1A4B, len=1},
-      {"1A4C Xpos2", addr=0x1A4C, len=1},
+--      {"1A4B Xpos1", addr=0x1A4B, len=1},
+--      {"1A4C Xpos2", addr=0x1A4C, len=1},
 
-      {"1AB7 Xspe", addr=0x1AB7, len=2},
-      {"1AB7 Xspe1", addr=0x1AB7, len=1},
-      {"1AB8 Xspe2", addr=0x1AB8, len=1},
+--      {"1AB7 Xspe", addr=0x1AB7, len=2},
+--      {"1AB7 Xspe1", addr=0x1AB7, len=1},
+--      {"1AB8 Xspe2", addr=0x1AB8, len=1},
 
-      {"1AFF Xacc", addr=0x1AFF, len=2},
-      {"1AFF Xacc1", addr=0x1AFF, len=1},
-      {"1B00 Xacc2", addr=0x1B00, len=1},
-
-      {"1A28 Xacc3", addr=0x1A28, len=1},
+--      {"1AFF Xacc", addr=0x1AFF, len=2},
+--      {"1AFF Xacc1", addr=0x1AFF, len=1},
+--      {"1B00 Xacc2", addr=0x1B00, len=1},
+--
+--      {"1A28 Xacc3", addr=0x1A28, len=1},
 
       {"1A93 Ypos", addr=0x1A93, len=2},
-      {"1B6F Ysubp", addr=0x1B6F, len=2},
-      {"1B23 Yacc1", addr=0x1B23, len=2},
-      {"1ADB Yspe", addr=0x1ADB, len=2},
+--      {"1B6F Ysubp", addr=0x1B6F, len=2},
+--      {"1B23 Yacc1", addr=0x1B23, len=2},
+--      {"1ADB Yspe", addr=0x1ADB, len=2},
 
+      -- $1B6B..8E: Enemy projectile spritemap pointers
+      {"1B6B sprite", addr=0x1B6B, len=2},
 }
 
 projectileData_history = {}
@@ -33,14 +35,17 @@ for i,info in pairs(projectileData) do
 end
 
 colors = {}
-colors[0x22] = 0x00FF4040
-colors[0x20] = 0x4040FF40
-colors[0x1e] = 0x404040FF
-colors[0x1c] = 0x40FFFF40
-colors[0x1a] = 0x40FF4040
-colors[0x18] = 0x4040FFFF
-colors[0x16] = 0x40404088
-colors[0x14] = 0x40888840
+colors[0x0] = 0x00FF4040
+colors[0x2] = 0x4040FF40
+colors[0x4] = 0x404040FF
+colors[0x6] = 0x40FFFF40
+colors[0x8] = 0x40FF4040
+colors[0xa] = 0x4040FFFF
+colors[0xc] = 0x40404088
+colors[0xe] = 0x40888840
+colors[0x1] = 0x00FF4040
+colors[0x10] = 0x4040FF40
+colors[0x12] = 0x404040FF
 
 local X_OFF = 85
 local Y_OFF = 9
@@ -59,7 +64,7 @@ local function printProjectiles()
   end
 
   output = ""
-  for _, offset in ipairs({0x22}) do --, 0x20, 0x1e, 0x1c, 0x1a, 0x18, 0x16, 0x14}) do
+  for _, offset in ipairs({0x0, 0x2, 0x4, 0x6, 0x8, 0xa, 0xc, 0xe, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1a, 0x1c, 0x1e, 0x20, 0x22}) do
      x = 0
      local color = colors[offset]
      for i,info in pairs(projectileData) do
@@ -71,16 +76,16 @@ local function printProjectiles()
            value = readWord(info.addr+offset)
         end
         printVar(var, value, color)
-        if value ~= projectileData_history[i] then
-           local diff = value - projectileData_history[i]
-           if diff > 0 then
-              emu.log(string.format("%s: old: %x new: %x diff: %x", var, projectileData_history[i], value, diff))
-           else
-              diff = -diff
-              emu.log(string.format("%s: old: %x new: %x diff: -%x", var, projectileData_history[i], value, diff))
-           end
-        end
-        projectileData_history[i] = value
+--        if value ~= projectileData_history[i] then
+--           local diff = value - projectileData_history[i]
+--           if diff > 0 then
+--              emu.log(string.format("%s: old: %x new: %x diff: %x", var, projectileData_history[i], value, diff))
+--           else
+--              diff = -diff
+--              emu.log(string.format("%s: old: %x new: %x diff: -%x", var, projectileData_history[i], value, diff))
+--           end
+--        end
+--        projectileData_history[i] = value
         if i % 3 == 1 then
            x = X_OFF
         elseif i % 3 == 2 then
@@ -90,7 +95,7 @@ local function printProjectiles()
            y = y + Y_OFF
         end
      end
-     y = y+Y_OFF+2
+     --y = y+Y_OFF+2
 
      if output ~= history_output then
         emu.log(output)

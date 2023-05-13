@@ -72,6 +72,7 @@ class Tracker(object):
                     doorsScreen=InteractiveSolver.doorsScreen,
                     bossBitMasks=InteractiveSolver.bossBitMasks,
                     apsGraphArea=apsGraphArea, flavorPatches=RomReader.flavorPatches,
+                    inventoryBitMasks=InteractiveSolver.inventoryBitMasks,
                     app_files=get_app_files())
 
     def trackerWebService(self):

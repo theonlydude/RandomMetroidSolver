@@ -125,7 +125,7 @@ mkdir -p ~/web2py/applications/solver/static/images/help/
 [ -L ~/web2py/applications/solver/static/images/help/tube_access.png ] || ln -s ~/RandomMetroidSolver/web/static/help/tube_access.png ~/web2py/applications/solver/static/images/help/tube_access.png
 [ -L ~/web2py/applications/solver/static/images/help/tube_gate.png ] || ln -s ~/RandomMetroidSolver/web/static/help/tube_gate.png ~/web2py/applications/solver/static/images/help/tube_gate.png
 [ -L ~/web2py/applications/solver/static/images/help/crab_gate.png ] || ln -s ~/RandomMetroidSolver/web/static/help/crab_gate.png ~/web2py/applications/solver/static/images/help/crab_gate.png
-[ -L ~/web2py/applications/solver/static/images/help/greenhill_platform.png ] || ln -s ~/RandomMetroidSolver/web/static/help/greenhill_platform.png ~/web2py/applications/solver/static/images/help/greenhill_platform.png
+[ -L ~/web2py/applications/solver/static/images/help/greenhill_walljump.png ] || ln -s ~/RandomMetroidSolver/web/static/help/greenhill_walljump.png ~/web2py/applications/solver/static/images/help/greenhill_walljump.png
 [ -L ~/web2py/applications/solver/static/images/help/greenhill_gate.png ] || ln -s ~/RandomMetroidSolver/web/static/help/greenhill_gate.png ~/web2py/applications/solver/static/images/help/greenhill_gate.png
 [ -L ~/web2py/applications/solver/static/images/help/ws_etank.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ws_etank.png ~/web2py/applications/solver/static/images/help/ws_etank.png
 [ -L ~/web2py/applications/solver/static/images/help/ln_chozo.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ln_chozo.png ~/web2py/applications/solver/static/images/help/ln_chozo.png

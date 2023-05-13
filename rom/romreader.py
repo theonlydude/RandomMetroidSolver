@@ -183,7 +183,6 @@ class RomReader:
         'Removes_Gravity_Suit_heat_protection': {'address': 0x0869dd, 'value': 0x01, 'vanillaValue': 0x20},
         'progressive_suits': {'address': 0x869df, 'value': 0xF0, 'vanillaValue': 0xd0},
         'nerfed_charge': {'address': 0x83821, 'value': 0x80, 'vanillaValue': 0xd0},
-        'Mother_Brain_Cutscene_Edits': {'address': 0x148824, 'value': 0x01, 'vanillaValue': 0x40},
         'Suit_acquisition_animation_skip': {'address': 0x020717, 'value': 0xea, 'vanillaValue': 0x22},
         'Fix_Morph_and_Missiles_Room_State': {'address': 0x07e655, 'value': 0xea, 'vanillaValue': 0x89},
         'Fix_heat_damage_speed_echoes_bug': {'address': 0x08b629, 'value': 0x01, 'vanillaValue': 0x00},
@@ -338,7 +337,7 @@ class RomReader:
                 loc.itemName = self.items[item]["name"]
             except:
                 # race seeds
-                loc.itemName = "SpringBall"
+                loc.itemName = "NoEnergy"
                 item = '0x0'
 
         return (majorsSplit if majorsSplit != 'FullWithHUD' else 'Full', majorsSplit)

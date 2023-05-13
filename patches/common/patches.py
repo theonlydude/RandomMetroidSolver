@@ -6,15 +6,6 @@ patches = {
         0x0869dd: [0x01]},
     "No_Music":{
         0x278413: [0x6f]},
-    "Escape_Animals_Open_Brinstar": {
-        0x784BD: [0x10]
-    },
-    "Escape_Animals_Open_Norfair": {
-        0x78B0B: [0x10]
-    },
-    "Escape_Animals_Open_Maridia": {
-        0x7C54C: [0x10]
-    },
     # for development/quickmet: disable clear save files on 1st boot
     "Disable_Clear_Save_Boot": {
         snes_to_pc(0x80FE1D): [0x4c, 0x64, 0xfe]

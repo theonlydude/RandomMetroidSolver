@@ -76,7 +76,8 @@ class RomPatcher:
             'door_indicators_plms.ips'
         ],
         # VARIA tweaks
-        'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
+        'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable',
+                         'ln_chozo_platform.ips', 'bomb_torizo.ips'],
         # anti-softlock/game opening layout patches
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips',
@@ -142,15 +143,12 @@ class RomPatcher:
         'MapReveal': ['reveal_map.ips', 'reveal_map_data.ips'],
         # patches for each "logic" to convert vanilla ROM to "logic" base ROM
         'Logic': {
-            "vanilla": [
-                # faster MB cutscene transitions
-                'Mother_Brain_Cutscene_Edits'
-            ],
+            "vanilla": [],
             "mirror": ['mirrortroid.ips', 'bank_8f.ips', 'bank_83.ips', 'map_icon_data.ips',
                        'baby_room.ips', 'baby_remove_blocks.ips', 'escape_animals.ips',
                        'snails.ips', 'boulders.ips', 'rinkas.ips', 'etecoons.ips', 'crab_main_street.ips',
                        'crab_mt_everest.ips', 'mother_brain.ips', 'kraid.ips', 'torizos.ips', 'botwoon.ips',
-                       'crocomire.ips']
+                       'crocomire.ips', 'ridley.ips']
         },
         # add debug tools
         'Debug': ['Debug_Full.ips', 'Disable_Clear_Save_Boot']

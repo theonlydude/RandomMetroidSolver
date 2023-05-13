@@ -27,24 +27,17 @@ incsrc "macros.asm"
 incsrc "event_list.asm"
 
 incsrc "sym/objectives.asm"
+incsrc "sym/seed_display.asm"
 
 !hudposition = #$0006
 ;;; RAM used to store previous values to see whether we must draw
 ;;; area/item counter or next scav display
 !previous = $7fff3c		; hi: area/00, lo: remaining items/next scav loc
-;;; RAM for remaining items in current area
-!n_items = $7fff3e
 ;;; RAM for current index in scav list order in scavenger
 !scav_idx = $7ed86a		; saved to SRAM automatically
 !scav_tmp  = $7fff40		; temp RAM used for a lot of stuff in scavenger
 !hud_special = $7fff42		; temp RAM used to draw temporary stuff in the HUD (prompt, notification)
 !hud_special_timer = $7fff44	; and associated timer
-;;; item split written by randomizer
-!seed_type = $82fb6c
-;;; vanilla bit array to keep track of collected items
-!item_bit_array = $7ed870
-;;; bit index to byte index/bitmask routine
-!bit_index = $80818e
 ;;; RAM area to write to for split/locs in HUD
 !split_locs_hud = $7ec618
 
@@ -373,7 +366,7 @@ draw_info:
 	lda !n_items : cmp !previous+1
 	beq .end
 	sta !previous+1
-	lda !seed_type
+	lda.l seed_display_InfoStr
 	rep #$20
 	and #$00ff
 	cmp #$005a		; 'Z'
@@ -521,9 +514,7 @@ print "b80 end: ", pc
 
 warnpc $80d5ff
 
-org $a1f550
-
-incsrc "locs_by_areas.asm"
+org $a1f560
 
 ;;; used only in scavenger hunt mode, written to by rando
 ;;; have a word for each location of required order in scavenger mode:
@@ -532,11 +523,6 @@ incsrc "locs_by_areas.asm"
 ;;; #$ffff=scav list terminator
 %export(scav_order)
 	fillbyte $ff : fill 38	; (17 max scav locs+"HUNT OVER"+terminator)*2
-
-;;; ROM option for auto escape trigger when objectives are completed (see objectives.asm)
-print "escape_option: ", pc
-escape_option:
-	skip 2			; value written in objectives.asm
 
 load_state:
 	lda #$ffff
@@ -689,29 +675,12 @@ item_post_collect:
 compute_n_items:
 	phx
 	phy
-	lda #$0000 : sta $12 ; temporarily used to count collected items in current area
-	ldy #$0000		; Y will be used to store number of items in current area
 	;; go through loc id list for current area, counting collected items
 	;; determine current graph area
 	ldx $07bb : lda $8f0010,x
-	;; get loc id list index in bank A1 in X
-	asl : tax : lda.l locs_by_areas,x : tax
-.count_loop:
-	lda $a10000,x : and #$00ff
-	cmp #$00ff : beq .end
-	phx
-	jsl !bit_index
-	lda !item_bit_array,x : and $05e7
-	beq .next
-        inc $12
-.next:
-	plx
-	iny
-	inx
-	bra .count_loop
-.end:
-	;; here, $12 contain collected items, and Y number of items
-        lda $12 : bne .collected_event
+        jsl objectives_count_items_in_area
+	;; here, $16 contain collected items, and Y number of items
+        lda $16 : bne .collected_event
         tya : bra .store        ; no items collected; skip substraction
 .collected_event:
 	;; at least an item collected, trigger appropriate event : current graph area idx+area_clear_start_event_base
@@ -720,8 +689,8 @@ compute_n_items:
 	jsl !mark_event
 .rem:
 	;; make it so n_items contains remaining items:
-	;; n_items = max(0, Y - $12) ; handle < 0 for some restricted locs cases
-	tya : sec : sbc $12
+	;; n_items = max(0, Y - $16) ; handle < 0 for some restricted locs cases
+	tya : sec : sbc $16
         bpl .store
         lda #$0000
 .store:

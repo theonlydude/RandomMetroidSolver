@@ -304,7 +304,7 @@ class RomPatcher:
             locs = [il.Location for il in itemLocs if itemLocCheck(il) and il.Location.GraphArea == area and not il.Location.restricted]
             self.log.debug("writeSplitLocs. area="+area)
             self.log.debug(str([loc.Name for loc in locs]))
-            addr = Addresses.getOne('varia_hud_locs_'+area)
+            addr = Addresses.getOne('objectives_locs_'+area)
             self.romFile.seek(addr)
             for loc in locs:
                 self.romFile.writeByte(loc.Id)

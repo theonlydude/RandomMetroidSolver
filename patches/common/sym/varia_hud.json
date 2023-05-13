@@ -1,18 +1,3 @@
 {
-    "locs_Ceres": 10614120,
-    "locs_Crateria": 10614121,
-    "locs_Crocomire": 10614194,
-    "locs_EastMaridia": 10614219,
-    "locs_GreenPinkBrinstar": 10614139,
-    "locs_Kraid": 10614174,
-    "locs_LowerNorfair": 10614200,
-    "locs_Norfair": 10614178,
-    "locs_RedBrinstar": 10614156,
-    "locs_Tourian": 10614231,
-    "locs_WestMaridia": 10614211,
-    "locs_WreckedShip": 10614162,
-    "locs_by_areas": 10614096,
-    "locs_end": 10614232,
-    "locs_start": 10614120,
-    "scav_order": 10614232
+    "scav_order": 10614112
 }

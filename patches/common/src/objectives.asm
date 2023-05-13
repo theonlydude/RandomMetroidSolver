@@ -566,16 +566,59 @@ count_upgrades:
 	rts
 
 %eventChecker(scav_started, !hunt_started_event)
-%eventChecker(crateria_clear_started, !crateria_clear_start_event)
-%eventChecker(green_brin_clear_started, !green_brin_clear_start_event)
-%eventChecker(red_brin_clear_started, !red_brin_clear_start_event)
-%eventChecker(ws_clear_started, !ws_clear_start_event)
-%eventChecker(kraid_clear_started, !kraid_clear_start_event)
-%eventChecker(upper_norfair_clear_started, !upper_norfair_clear_start_event)
-%eventChecker(croc_clear_started, !croc_clear_start_event)
-%eventChecker(lower_norfair_clear_started, !lower_norfair_clear_start_event)
-%eventChecker(west_maridia_clear_started, !west_maridia_clear_start_event)
-%eventChecker(east_maridia_clear_started, !east_maridia_clear_start_event)
+
+incsrc "locs_by_areas.asm"
+
+;;; A: VARIA area index
+;;; returns: total number of items in area in Y, collected in $16
+;;; (X and A also modified)
+count_items_in_area:
+        stz !tmp_in_progress_done
+        ldy.w #0		; Y will be used to store number of items in current area
+        ;; get loc id list index in X
+        asl : tax : lda.l locs_by_areas,x : tax
+.count_loop:
+        lda $850000,x : and #$00ff
+        cmp #$00ff : beq .end
+        phx
+        jsl !bit_index
+        lda !item_bit_array,x : and $05e7
+        beq .next
+        inc !tmp_in_progress_done
+.next:
+        plx
+        iny
+        inx
+        bra .count_loop
+.end:
+        rtl
+
+macro clearAreaProgress(area, index)
+%export(<area>_clear_progress)
+        phx : phy
+        lda !<area>_clear_start_event : jsl !check_event
+        bcc .no_progress
+        lda.w #<index> : jsl count_items_in_area
+        sty !tmp_in_progress_total
+        sec
+        bra .end
+.no_progress:
+        clc
+.end:
+        ply : plx
+        rts
+endmacro
+
+%clearAreaProgress(crateria, 1)
+%clearAreaProgress(green_brin, 2)
+%clearAreaProgress(red_brin, 3)
+%clearAreaProgress(ws, 4)
+%clearAreaProgress(kraid, 5)
+%clearAreaProgress(upper_norfair, 6)
+%clearAreaProgress(croc, 7)
+%clearAreaProgress(lower_norfair, 8)
+%clearAreaProgress(west_maridia, 9)
+%clearAreaProgress(east_maridia, 10)
 
 %export(in_progress_chozo_robots)
         lda.w #4 : sta.b !tmp_in_progress_total

@@ -3,11 +3,17 @@
 include
 
 ;; shared ROM options addresses
-!disabled_tourian_escape_flag = $a1f5fe
+!disabled_tourian_escape_flag = $a1f550
 
 ;; shared constants
 ;; RAM to store current obj check index
 !obj_check_index = $7fff46
+;;; RAM for remaining items in current area
+!n_items = $7fff3e
+;;; vanilla bit array to keep track of collected items
+!item_bit_array = $7ed870
+;;; bit index to byte index/bitmask routine
+!bit_index = $80818e
 
 ;;; IGT vanilla RAM
 !igt_frames = $7E09DA

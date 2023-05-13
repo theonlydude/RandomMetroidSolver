@@ -1434,12 +1434,12 @@ class RomPatcher:
         if objectives.isGoalActive("visit the animals"):
             animals = {
                 'vanilla': {
-                    'dachora': (0x082C, 0x10),
-                    'etecoons': (0x0828, 0x20)
+                    'dachora': (0x082C, 0x20),
+                    'etecoons': (0x0828, 0x10)
                 },
                 'mirror': {
-                    'dachora': (0x08AD,0x4),
-                    'etecoons': (0x08A9,0x8)
+                    'dachora': (0x08AD, 0x4),
+                    'etecoons': (0x08A9, 0x8)
                 }
             }
             for animal,entry in animals[RomFlavor.flavor].items():

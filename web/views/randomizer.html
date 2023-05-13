@@ -359,7 +359,7 @@ function randomize(evt, elemId) {
     evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
     isActive = false;
 
-    defaultValues = {"missileQty": 3, "superQty": 2, "powerBombQty": 1, "minorQty": 100, "scavNumLocs": 10, "nbObjective": 4};
+    defaultValues = {"missileQty": 3, "superQty": 2, "powerBombQty": 1, "minorQty": 100, "scavNumLocs": 10, "nbObjective": 4, "nbObjectivesRequired": 9};
 
     if(e.value.length == 0 && elemId in defaultValues) {
       e.value = defaultValues[elemId];
@@ -735,7 +735,7 @@ function objective_change(e, params, force) {
     sort_objectives_and_add_optgroups();
 }
 
-var max_objectives = 5;
+var max_objectives = 18;
 function setMaxObjective(isRandom) {
     if(isRandom) {
         // no limit
@@ -743,7 +743,7 @@ function setMaxObjective(isRandom) {
         $("#objectiveMultiSelect").chosen({max_selected_options: Infinity, width: '100%'})
         $("#nbObjectiveVisiblity").show();
     } else {
-        // limit to 5 objectives (4 in scav hunt)
+        // limit to 18 objectives (17 in scav hunt)
         $("#objectiveMultiSelect").chosen("destroy");
         $("#objectiveMultiSelect").chosen({max_selected_options: max_objectives, width: '100%'})
         $("#nbObjectiveVisiblity").hide();
@@ -911,6 +911,7 @@ function setObjective() {
     // at start all objectives are displayed as selected even though they're not...
     var objective_random = "{{response.write(session.randomizer.get("objectiveRandom"))}}" == "true"
     var objective_number = "{{response.write(session.randomizer.get("nbObjective", 4))}}"
+    var objective_required = "{{response.write(session.randomizer.get("nbObjectivesRequired", 9))}}"
 
     var selected_objectives = objectiveBackup[objective_random]
     if (objective_random) {
@@ -925,6 +926,12 @@ function setObjective() {
         document.getElementById('nbObjectiveRandom').click()
     } else {
         document.getElementById('nbObjective').value = objective_number
+    }
+
+    if (['0', 'random'].includes(objective_required)) {
+        document.getElementById('nbObjectivesRequiredRandom').click()
+    } else {
+        document.getElementById('nbObjectivesRequired').value = objective_required
     }
 
     $("#objectiveMultiSelect").val(selected_objectives).trigger("chosen:updated");
@@ -986,7 +993,7 @@ function showHide(show, hide) {
 function getRandomizerParameters(setDisabledToOff, trueJson) {
     var dataDict = {};
 
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf", "hiddenObjectives"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "tourian", "areaRandomization"];
     var imgPickers = ["logic"];
@@ -1256,6 +1263,11 @@ function getSpecialValues(dataDict, trueJson) {
     } else {
         dataDict["nbObjective"] = document.getElementById("nbObjective").value
     }
+    if (isElemIdRandom("nbObjectivesRequired")) {
+        dataDict["nbObjectivesRequired"] = "random"
+    } else {
+        dataDict["nbObjectivesRequired"] = document.getElementById("nbObjectivesRequired").value
+    }
 }
 
 function validateObjectives() {
@@ -1270,9 +1282,9 @@ function validateObjectives() {
             return false;
         }
     } else {
-        // if not randomized, check that there's max 5 objectives in the list (4 in scav hunt)
+        // if not randomized, check that there's max 18 objectives in the list (17 in scav hunt)
         if(values.length > max_objectives) {
-            alert("You can have maximum five objectives (four if major split is Scavenger Hunt)");
+            alert("You can have maximum 18 objectives (17 if major split is Scavenger Hunt)");
             return false
         }
     }
@@ -1695,12 +1707,12 @@ window.onload = function(){
             setSwitchToOn(hud);
 
             // update maximum number of allowed custom objectives
-            max_objectives = 4;
+            max_objectives = 17;
         } else {
             scavengerParams.style.display = "none";
 
             // update maximum number of allowed custom objectives
-            max_objectives = 5;
+            max_objectives = 18;
         }
         // tell chosen about new maximum
         if(!isElemRandom(document.getElementById("objectiveRandom"))) {
@@ -2023,10 +2035,20 @@ Click on the dice button to randomly set this parameter.</p>"
       content: "<p>By default you need to complete 4 objectives from the list to access Tourian. You can choose 1-5 or enter 0 to make the number random.</p>",
     },
     {
+      element: "#nbObjectivesRequiredStep",
+      title: "Number of required objectives",
+      content: "<p></p>",
+    },
+    {
+      element: "#hiddenObjectivesStep",
+      title: "Hidden Objectives",
+      content: "<p></p>",
+    },
+    {
       element: "#objectiveStep",
       title: "Custom Objectives",
       content: "<p>Choose which objectives are required to sink the <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statue</a> and to open access to <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a>.</p>\
-<p>You can choose from 0 to 5 objectives (4 if Majors Split is Scavenger Hunt):\
+<p>You can choose from 0 to 18 objectives (17 if Majors Split is Scavenger Hunt):\
 <p><b>Bosses:</b>\
 <ul>\
 <li>Kill Kraid: kill boss <a href=\"https://metroid.fandom.com/wiki/Kraid\" target=\"_blank\">Kraid</a> (vanilla)</li>\
@@ -2071,7 +2093,7 @@ Click on the dice button to randomly set this parameter.</p>"
 <b>Note:</b> Current percentage of collected items is displayed in the inventory pause menu.<br/>\
 <b>Note:</b> Collect 100% items is excluded by default when randomizing the objectives list as it requires you to complete all the objectives.\
 </p>\
-<p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 5 objectives from the list (between 1 and 4 if Scavenger Hunt). To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
+<p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 18 objectives from the list (between 1 and 17 if Scavenger Hunt). To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
     },
     {
       element: "#StartLocationStep",
@@ -2972,9 +2994,20 @@ def displayNumber(id, min, max, default, step="1"):
               <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
               <tr id="nbObjectiveVisiblity">
                 <td class="small"><div class="random"><button id="nbObjectiveRandom" type="button" onclick="randomize(event, 'nbObjective')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="nbObjectiveText">Number of objectives:</span></td>
-                <td>{{displayNumber("nbObjective", "1", "5", "4", "1")}}</td>
+                <td><span id="nbObjectiveText">Number of possible objectives:</span></td>
+                <td>{{displayNumber("nbObjective", "1", "18", "4", "1")}}</td>
                 <td id="nbObjectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+              </tr>
+              <tr id="nbObjectivesRequiredVisiblity">
+                <td class="small"><div class="random"><button id="nbObjectivesRequiredRandom" type="button" onclick="randomize(event, 'nbObjectivesRequired')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td><span id="nbObjectivesRequiredText">Number of required objectives:</span></td>
+                <td>{{displayNumber("nbObjectivesRequired", "1", "9", "9", "1")}}</td>
+                <td id="nbObjectivesRequiredStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+              </tr>
+              <tr id="hiddenObjectivesVisibility">
+                <td class="small"></td>
+                <td colspan="2">{{displayCheckbox("hiddenObjectives")}}<span id="hiddenObjectivesText">Hidden Objectives</span></td>
+                <td id="hiddenObjectivesStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>

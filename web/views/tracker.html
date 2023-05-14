@@ -127,29 +127,6 @@ body[data-item-tracker-position="top-right"] #logAutoTracker {
     font-size: 0.5vw;
     overflow-y: scroll;
 }
-
-#rtaTimerDiv {
-    position: absolute;
-    top: 2.5%;
-    border: 2px solid white;
-    background-color: #000;
-    z-index: 2;
-    display: none;
-}
-body[data-varia-logic="vanilla"] .rtaTimer {
-    left: 48.5%;
-}
-body[data-varia-logic="mirror"] .rtaTimer {
-    left: 42%;
-}
-#rtaTimer {
-    text-align: center;
-    font-family: 'Courier New (monospace)';
-    font-size: 1.5vw;
-    background-color: black;
-    color: white;
-    margin: 0em;
-}
 </style>
 
 <script type="text/javascript">
@@ -879,13 +856,6 @@ rooms['mirror'] = {
         <textarea id="logAutoTracker" disabled></textarea>
       </div>
 
-    </div>
-
-    <!-- samus current position on the map -->
-
-    <!-- RTA timer -->
-    <div id="rtaTimerDiv" class="rtaTimer">
-      <p id="rtaTimer"></p>
     </div>
   </div>
 

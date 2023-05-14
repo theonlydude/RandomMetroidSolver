@@ -12,12 +12,6 @@ var retryTimeout;
 var timeout;
 // timeout duration in ms
 var waitingTime = 1000;
-// timeout to increment RTA
-var incrRTA;
-// time when the timeout has been set
-var incrRTAstart = 0;
-var rawTimeFrames = 0;
-var RTAwaitingTime = 50;
 
 // first you open the socket,
 // then you list the available devices,
@@ -392,10 +386,6 @@ function socketOnInitMessage(event) {
         // ask socket to return an arraybuffer instead of a blob
         socket.binaryType = "arraybuffer";
 
-        // display initial time
-        document.getElementById("rtaTimer").innerHTML = "00'00'00''00";
-        document.getElementById("rtaTimerDiv").style.display = "block";
-
         // first data retrieval
         initDataChain();
         askForData();
@@ -443,7 +433,6 @@ function cleanup(cleanExit) {
     displayStartButton();
     setSamusIcon()
     // RTA
-    document.getElementById("rtaTimerDiv").style.display = "none";
     disableRTAFake();
 
     // if the device is an SNES Classic try to reconnect in 1s,
@@ -550,48 +539,13 @@ function getGameStateName(gameStateCode) {
     }
 }
 
-function displayRTA(frames) {
-    // 60 frame per second
-    var timeSeconds = Math.floor(frames / 60);
-    var remainFrames = frames % 60;
-    var hours   = Math.floor(timeSeconds / 3600);
-    var minutes = Math.floor((timeSeconds - (hours * 3600)) / 60);
-    var seconds = timeSeconds - (hours * 3600) - (minutes * 60);
-
-    if (hours   < 10) {hours   = "0"+hours;}
-    if (minutes < 10) {minutes = "0"+minutes;}
-    if (seconds < 10) {seconds = "0"+seconds;}
-    if (remainFrames < 10) {remainFrames = "0"+remainFrames;}
-
-    document.getElementById("rtaTimer").innerHTML = `${hours}'${minutes}'${seconds}''${remainFrames}`;
-}
-
 function disableRTAFake() {
-    if(incrRTA != undefined) {
-        clearTimeout(incrRTA);
-        incrRTA = undefined;
-    }
-}
-
-function updateRTAFake() {
-    var diffms = new Date() - incrRTAstart;
-    // 60 frames per seconds
-    rawTimeFrames += Math.floor(diffms / (1000/60));
-    displayRTA(rawTimeFrames);
-    incrRTAstart = new Date();
-    incrRTA = setTimeout(updateRTAFake, RTAwaitingTime);
+    // stops the auto tracker
+    window.$timer.pause()
 }
 
 function updateRTA(frames, armFakeTimer) {
-    displayRTA(frames);
-    disableRTAFake();
-
-    if(armFakeTimer) {
-        // arm a timer to increase displayed RTA between two data retrieval
-        rawTimeFrames = frames;
-        incrRTAstart = new Date();
-        incrRTA = setTimeout(updateRTAFake, RTAwaitingTime);
-    }
+    window.$timer.set(frames, armFakeTimer);
 }
 
 // managed data returned by qusb
@@ -637,10 +591,11 @@ function handleData(data) {
                     var w0 = readWord(stateData, offset);
                     var w1 = readWord(stateData, offset+2);
                     var rawTimeFrames = w1 << 16 | w0;
-                    updateRTA(rawTimeFrames, false);
+                  console.warn(w0, w1, rawTimeFrames)
+                    updateRTA(null, false);
                 } else {
                     // if the user reset, stop incrementing the RTA
-                    disableRTAFake();
+                    updateRTA(null, false)
                 }
 
                 if(gameState == mainGameplayState) {

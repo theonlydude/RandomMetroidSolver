@@ -26,6 +26,7 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/views/solver_web/infos.html ] || ln -s ~/RandomMetroidSolver/web/views/infos.html ~/web2py/applications/solver/views/solver_web/infos.html
 [ -L ~/web2py/applications/solver/views/solver_web/stats.html ] || ln -s ~/RandomMetroidSolver/web/views/stats.html ~/web2py/applications/solver/views/solver_web/stats.html
 [ -L ~/web2py/applications/solver/views/solver_web/tracker.html ] || ln -s ~/RandomMetroidSolver/web/views/tracker.html ~/web2py/applications/solver/views/solver_web/tracker.html
+[ -L ~/web2py/applications/solver/views/solver_web/_autotracker.js ] || ln -s ~/RandomMetroidSolver/web/views/_autotracker.js ~/web2py/applications/solver/views/solver_web/_autotracker.js
 [ -L ~/web2py/applications/solver/views/solver_web/t_includes.html ] || ln -s ~/RandomMetroidSolver/web/views/t_includes.html ~/web2py/applications/solver/views/solver_web/t_includes.html
 [ -L ~/web2py/applications/solver/views/solver_web/t_js.html ] || ln -s ~/RandomMetroidSolver/web/views/t_js.html ~/web2py/applications/solver/views/solver_web/t_js.html
 [ -L ~/web2py/applications/solver/views/solver_web/t_main.html ] || ln -s ~/RandomMetroidSolver/web/views/t_main.html ~/web2py/applications/solver/views/solver_web/t_main.html

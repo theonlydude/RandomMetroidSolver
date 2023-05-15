@@ -273,7 +273,6 @@ def getDefaultMultiValues():
         'objective': Objectives.getAllGoals(removeNothing=True),
         'tourian': ['Vanilla', 'Fast', 'Disabled'],
         'logic': ['vanilla', 'mirror'],
-        'nbObjectivesRequired': ['off', *[str(i) for i in range(1,10)]],
     }
     return defaultMultiValues
 

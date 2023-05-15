@@ -52,6 +52,9 @@ org map_data_Maridia+$982  ; (33, 6)
 
 ;;; tiles for room "Maridia Elevator Room"
 
+org map_data_Maridia+$884  ; (34, 2)
+     dw $147e  ; BGtile[i=$7e p=$5 X]
+
 org map_data_Maridia+$8c4  ; (34, 3)
      dw $146e  ; BGtile[i=$6e p=$5 X]
 
@@ -440,6 +443,9 @@ org map_data_Maridia+$a92  ; (41, 10)
      dw $9490  ; BGtile[i=$90 p=$5 VX]
 
 ;;; tiles for room "Botwoon Energy Tank Room"
+
+org map_data_Maridia+$274  ; (26, 9)
+     dw $141d  ; BGtile[i=$1d p=$5 X]
 
 org map_data_Maridia+$276  ; (27, 9)
      dw $1452  ; BGtile[i=$52 p=$5 X]

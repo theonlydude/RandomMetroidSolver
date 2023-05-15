@@ -4,9 +4,6 @@ include
 
 ;;; tiles for room "Tourian First Room"
 
-org map_data_Tourian+$268  ; (20, 9)
-     dw $9c7f  ; BGtile[i=$7f p=$7 VX]
-
 org map_data_Tourian+$2a8  ; (20, 10)
      dw $1c7e  ; BGtile[i=$7e p=$7 X]
 

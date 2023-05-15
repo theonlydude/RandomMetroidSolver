@@ -52,6 +52,9 @@ org map_data_Norfair+$962  ; (49, 5)
 
 ;;; tiles for room "Business Center"
 
+org map_data_Norfair+$8a8  ; (52, 2)
+     dw $5c7e  ; BGtile[i=$7e p=$7 HX]
+
 org map_data_Norfair+$8e8  ; (52, 3)
      dw $5c6e  ; BGtile[i=$6e p=$7 HX]
 
@@ -866,6 +869,12 @@ org map_data_Norfair+$b96  ; (43, 14)
 org map_data_Norfair+$b94  ; (42, 14)
      dw $5852  ; BGtile[i=$52 p=$6 HX]
 
+org map_data_Norfair+$b12  ; (41, 12)
+     dw $587e  ; BGtile[i=$7e p=$6 HX]
+
+org map_data_Norfair+$b52  ; (41, 13)
+     dw $587e  ; BGtile[i=$7e p=$6 HX]
+
 org map_data_Norfair+$b92  ; (41, 14)
      dw $586f  ; BGtile[i=$6f p=$6 HX]
 
@@ -1166,6 +1175,9 @@ org map_data_Norfair+$900  ; (32, 4)
 
 org map_data_Norfair+$940  ; (32, 5)
      dw $581a  ; BGtile[i=$1a p=$6 HX]
+
+org map_data_Norfair+$982  ; (33, 6)
+     dw $5814  ; BGtile[i=$14 p=$6 HX]
 
 org map_data_Norfair+$980  ; (32, 6)
      dw $d857  ; BGtile[i=$57 p=$6 HVX]

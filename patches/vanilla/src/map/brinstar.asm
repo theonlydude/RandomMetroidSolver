@@ -19,6 +19,12 @@ org map_data_Brinstar+$2f0  ; (24, 11)
 org map_data_Brinstar+$2f2  ; (25, 11)
      dw $1417  ; BGtile[i=$17 p=$5 X]
 
+org map_data_Brinstar+$274  ; (26, 9)
+     dw $147e  ; BGtile[i=$7e p=$5 X]
+
+org map_data_Brinstar+$2b4  ; (26, 10)
+     dw $147e  ; BGtile[i=$7e p=$5 X]
+
 org map_data_Brinstar+$2f4  ; (26, 11)
      dw $146f  ; BGtile[i=$6f p=$5 X]
 
@@ -164,6 +170,12 @@ org map_data_Brinstar+$a88  ; (36, 10)
 
 ;;; tiles for room "Caterpillar Room"
 
+org map_data_Brinstar+$94a  ; (37, 5)
+     dw $187e  ; BGtile[i=$7e p=$6 X]
+
+org map_data_Brinstar+$98a  ; (37, 6)
+     dw $187e  ; BGtile[i=$7e p=$6 X]
+
 org map_data_Brinstar+$9ca  ; (37, 7)
      dw $186e  ; BGtile[i=$6e p=$6 X]
 
@@ -250,6 +262,12 @@ org map_data_Brinstar+$a4c  ; (38, 9)
 ;;; tiles for graph area GreenPinkBrinstar
 
 ;;; tiles for room "Green Brinstar Main Shaft [etecoon room]"
+
+org map_data_Brinstar+$52  ; (9, 1)
+     dw $1c7e  ; BGtile[i=$7e p=$7 X]
+
+org map_data_Brinstar+$92  ; (9, 2)
+     dw $1c7e  ; BGtile[i=$7e p=$7 X]
 
 org map_data_Brinstar+$d2  ; (9, 3)
      dw $1c6e  ; BGtile[i=$6e p=$7 X]

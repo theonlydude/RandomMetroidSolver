@@ -4,15 +4,6 @@ include
 
 ;;; tiles for room "[Ceres Elevator Room]"
 
-org map_data_Ceres+$2d8  ; (12, 11)
-     dw $8c7f  ; BGtile[i=$7f p=$3 VX]
-
-org map_data_Ceres+$318  ; (12, 12)
-     dw $0c7e  ; BGtile[i=$7e p=$3 X]
-
-org map_data_Ceres+$358  ; (12, 13)
-     dw $0c7e  ; BGtile[i=$7e p=$3 X]
-
 org map_data_Ceres+$398  ; (12, 14)
      dw $0c6e  ; BGtile[i=$6e p=$3 X]
 

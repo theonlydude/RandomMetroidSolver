@@ -742,11 +742,13 @@ function setMaxObjective(isRandom) {
         $("#objectiveMultiSelect").chosen("destroy");
         $("#objectiveMultiSelect").chosen({max_selected_options: Infinity, width: '100%'})
         $("#nbObjectiveVisiblity").show();
+        $("#hiddenObjectivesVisibility").show();
     } else {
         // limit to 18 objectives (17 in scav hunt)
         $("#objectiveMultiSelect").chosen("destroy");
         $("#objectiveMultiSelect").chosen({max_selected_options: max_objectives, width: '100%'})
         $("#nbObjectiveVisiblity").hide();
+        $("#hiddenObjectivesVisibility").hide();
     }
 }
 
@@ -2992,17 +2994,17 @@ def displayNumber(id, min, max, default, step="1"):
               </tr>
             <table class="full" id="objectivesVisibility">
               <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
-              <tr id="nbObjectiveVisiblity">
-                <td class="small"><div class="random"><button id="nbObjectiveRandom" type="button" onclick="randomize(event, 'nbObjective')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="nbObjectiveText">Number of possible objectives:</span></td>
-                <td>{{displayNumber("nbObjective", "1", "18", "4", "1")}}</td>
-                <td id="nbObjectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-              </tr>
               <tr id="nbObjectivesRequiredVisiblity">
                 <td class="small"><div class="random"><button id="nbObjectivesRequiredRandom" type="button" onclick="randomize(event, 'nbObjectivesRequired')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="nbObjectivesRequiredText">Number of required objectives:</span></td>
                 <td>{{displayMultiSelect("nbObjectivesRequired", currentMultiValues["nbObjectivesRequired"], "off", defaultMultiValues["nbObjectivesRequired"])}}</td>
                 <td id="nbObjectivesRequiredStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+              </tr>
+              <tr id="nbObjectiveVisiblity">
+                <td class="small"><div class="random"><button id="nbObjectiveRandom" type="button" onclick="randomize(event, 'nbObjective')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td><span id="nbObjectiveText">Number of possible objectives:</span></td>
+                <td>{{displayNumber("nbObjective", "1", "18", "4", "1")}}</td>
+                <td id="nbObjectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr id="hiddenObjectivesVisibility">
                 <td class="small"></td>

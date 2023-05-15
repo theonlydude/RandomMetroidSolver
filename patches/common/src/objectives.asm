@@ -527,8 +527,14 @@ endmacro
         lda.l endingtotals_total_items : sta $4206
         pha : pla : xba : xba
         %a16()
-        lda $4214 : sta !tmp_in_progress_done
         lda #!tmp_in_progress_pct_marker : sta !tmp_in_progress_total
+        lda $4214 : sta !tmp_in_progress_done
+        beq .no_progress
+        sec
+        bra .end
+.no_progress:
+        clc
+.end:
         rts
 
 count_upgrades:

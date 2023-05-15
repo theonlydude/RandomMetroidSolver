@@ -640,14 +640,15 @@ if __name__ == "__main__":
                 # ignore this setting if objectives are not randomized
                 args.hiddenObjectives = False
             if args.nbObjectivesRequired is not None:
-                args.nbObjectivesRequired = int(args.nbObjectivesRequired)
-                if args.nbObjectivesRequired == 0:
-                    args.nbObjectivesRequired = random.randint(1, min(Objectives.nbActiveGoals, Objectives.maxRequiredGoals))
-                objectivesManager.setNbRequiredGoals(args.nbObjectivesRequired)
-                if Objectives.nbRequiredGoals < args.nbObjectivesRequired:
-                    optErrMsgs.append(f"Required objectives limited to {Objectives.nbRequiredGoals} instead of {args.nbObjectivesRequired}")
+                nbReq = int(args.nbObjectivesRequired)
+                if nbReq == 0:
+                    nbReq = random.randint(1, min(Objectives.nbActiveGoals, Objectives.maxRequiredGoals))
             else:
                 objectivesManager.expandGoals()
+                nbReq = Objectives.nbActiveGoals
+            objectivesManager.setNbRequiredGoals(nbReq)
+            if Objectives.nbRequiredGoals < nbReq:
+                optErrMsgs.append(f"Required objectives limited to {Objectives.nbRequiredGoals} instead of {nbReq}")
             Objectives.hidden = args.hiddenObjectives
         else:
             if not (args.majorsSplit == "Scavenger" and args.tourian == 'Disabled'):

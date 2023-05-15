@@ -199,7 +199,7 @@ $ ./web/docker/rm.sh
 
 ```sh
 # checkout latest copy of front end client
-$ git submodule update
+$ git clone git@github.com:chriscauley/super-metroid
 
 # cd into client
 $ cd super-metroid/client

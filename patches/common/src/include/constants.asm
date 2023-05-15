@@ -42,6 +42,10 @@ include
 !collected_beams_mask = $09A8
 !collected_items_mask = $09A4
 
+;;; collected map tiles (11 bytes)
+!map_tilecounts_table = $7fff50
+!map_total_tilecount = $7fff5b
+
 ;; bitfields
 ; arg: A=bit index. returns: X=byte index, !bitindex_mask=bitmask
 !bitindex_routine = $80818e

@@ -18,13 +18,15 @@ MinimapASM:
 	LDA $05F7 : BNE .return				;minimap disabled
 	LDA $0AF7 : CMP $07A9 : BCS +++
 	LDA $0AFB : CMP $07AB : BCS +++		;is samus still in room
-	LDA $0AF7 : CLC : ADC $07A1 : STA $12	;samus X map coord
-	LDA $0AFB : CLC : ADC $07A3 : INC		;samus Y map coord
+	LDA $0AF7 : CLC : ADC $07A1 : STA $12	;$12: samus X map coord
+	LDA $0AFB : CLC : ADC $07A3 : INC	;$16: samus Y map coord
 	STA $16 : CMP.w !SamusMapPositionMirror+1 : BNE ++
 	LDA $12 : CMP.w !SamusMapPositionMirror : BEQ +++		;check if samus map coord has changed
-	STA.w !SamusMapPositionMirror : BRA +					;save mirror and update minimap
-++ : STA.w !SamusMapPositionMirror+1 : + : JSR UpdateMinimapTileset
-+++ : LDA $7EC681 : AND #$E3 : TAX								;filter out palette from samus minimap position
+	STA.w !SamusMapPositionMirror : BRA +				;save mirror and update minimap
+++ : STA.w !SamusMapPositionMirror+1
++
+        JSR UpdateMinimapTileset
++++ : LDA $7EC681 : AND #$E3 : TAX					;filter out palette from samus minimap position
 	LDA $05B5 : BIT.b #$01<<!SamusMinimapPositionTimer : BNE +	;check global time for palette change
 	AND.b #$01<<!SamusMinimapPositionTimer-1 : BNE .return		;check if palette has to be reverted back to origin
 	TXA : ORA !MinimapIndicatorPalette : BRA ++		;set palette back to origin
@@ -75,9 +77,11 @@ UpdateMinimapTileset:
 	CLC : ADC #$07C0 : TAY		;set offset to right page
 + : DEC $12 : BNE - : BRA ApplyTileGFXtoRAM	;setting minimap tiles done?
 
-;[A] = explored bits of samus current position
+;;; A = explored bits of samus current position
+;;; Y = byte offset in current area map
 UpdateActiveMapWithExplored:
 	BIT $AC04,x : BNE ++		;check if tilebit has been set already
+        jsr update_area_tilecount
 	ORA $AC04,x : STA $07F7,y	;save bit
 	STX $20 : REP #$30
 	JSL LoadSourceMapData		;[$00] = long pointer to current area map data
@@ -85,7 +89,6 @@ UpdateActiveMapWithExplored:
 	LDA [$00],y : STA !RAM_ActiveMap,x				;save origin tile to RAM minimap
 ++ : RTS
 
-ORG $90AA8A
 ApplyTileGFXtoRAM:
 	PHB : PEA $7E00 : PLB : PLB						;bank $7E
 	STZ $12 : LDA $12 : LDY.w #!RAM_Minimap_GFX		;prepare loop ;[Y] maptile GFX transfer target
@@ -102,6 +105,31 @@ ApplyTileGFXtoRAM:
 	LDA $7EC681 : AND #$1C : STA !MinimapIndicatorPalette	;set origin palette for samus position indicator
 	RTS
 
+;;; VARIA addition: maintain a RAM table of explored map tile count 
+update_area_tilecount:
+        phx
+        php
+        %ai8()
+	;; determine current graph area in special byte in room state header
+	ldx $07bb
+	lda $8f0010,x : tax
+        lda.l !map_tilecounts_table, x : inc : sta.l !map_tilecounts_table, x
+        %a16()
+        lda.l !map_total_tilecount : inc : sta.l !map_total_tilecount
+        plp
+	plx
+        rts
+
+;;; quantities of tiles, per graph area. to be filled by randomizer based on flavor
+area_tiles:
+        skip 2*11
+
+;;; total number of map tiles in the seed, to be filled by randomizer based on present areas
+total_tiles:
+        skip 2
+
+print "main minimap end: ", pc
+warnpc $90AC04
 
 ORG $90AC0C
 MinimapTilePaletteTable:

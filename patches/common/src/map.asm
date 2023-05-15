@@ -13,12 +13,13 @@ LOROM
 ;;;   except for
 ;;;     - pause screen BG base tile (put back grid)
 ;;;     - eqt screen tilemap (handled in equipment_screen patch)
-;;; * include gfx for ITEMS, TIME, OBJ
-;;; * change/add some tile gfx for items (discard "hidden items" tiles)
+;;; * include gfx for ITEMS, TIME, OBJ, change text font, add special characters and objective tiles
+;;; * change/add some map tile gfx for items (discard "hidden items" tiles)
 ;;; * behaviour changes :
 ;;;     - removed pause screen status restore
 ;;;     - display a consistent color for graph areas inside all areas: change palettes per-area (including glow support)
 ;;;     - display map icons for door/area/boss tracking: add extra sprite gfx and palettes, use custom map icon tables
+;;;     - maintain explored map tile count per VARIA area in RAM
 ;;; * adapted freespace values to step around other patches
 
 incsrc "macros.asm"             ; for export macro

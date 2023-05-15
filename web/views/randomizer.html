@@ -2999,7 +2999,21 @@ def displayNumber(id, min, max, default, step="1"):
               <tr id="nbObjectivesRequiredVisiblity">
                 <td class="small"><div class="random"><button id="nbObjectivesRequiredRandom" type="button" onclick="randomize(event, 'nbObjectivesRequired')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="nbObjectivesRequiredText">Number of required objectives:</span></td>
-                <td>{{displayMultiSelect("nbObjectivesRequired", currentMultiValues["nbObjectivesRequired"], "off", defaultMultiValues["nbObjectivesRequired"])}}</td>
+                <td>
+                  <select class="full" id="nbObjectivesRequired" name="nbObjectivesRequired" style="display: block;" value="{{response.write(session.randomizer.get('nbObjectivesRequired', 'off'))}}">
+                    <option selected="selected" value="off">off</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                  </select>
+                </td>
+
                 <td id="nbObjectivesRequiredStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr id="nbObjectiveVisiblity">

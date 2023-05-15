@@ -637,8 +637,7 @@ if __name__ == "__main__":
                     args.objective = args.objective[0:maxActiveGoals]
                 for goal in args.objective:
                     objectivesManager.addGoal(goal)
-                # ignore these settings if objectives are not randomized
-                args.nbObjectivesRequired = None
+                # ignore this setting if objectives are not randomized
                 args.hiddenObjectives = False
             if args.nbObjectivesRequired is not None:
                 args.nbObjectivesRequired = int(args.nbObjectivesRequired)

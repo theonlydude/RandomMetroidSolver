@@ -10,9 +10,11 @@ bmp_dir = sys.argv[1]
 map_path = sys.argv[2]
 map_data_path = sys.argv[3]
 mode = sys.argv[4] if len(sys.argv) > 4 else "attrs"
-map_offset = int(sys.argv[5], 16) if len(sys.argv) > 5 else 0
-map_data_offset = int(sys.argv[6], 16) if len(sys.argv) > 6 else 0
-
+if mode != "rect":
+    map_offset = int(sys.argv[5], 16) if len(sys.argv) > 5 else 0
+    map_data_offset = int(sys.argv[6], 16) if len(sys.argv) > 6 else 0
+else:
+    mapDataPaths = sys.argv[5:]
 from rom.map import AreaMap, getTileKind
 from rom.rom import RealROM
 from graph.location import LocationMapTileKind
@@ -26,6 +28,24 @@ areaMap = AreaMap.load(mapRom, mapDataRom)
 
 mapRom.close()
 mapDataRom.close()
+
+mapName, _ = os.path.splitext(os.path.basename(map_path))
+
+if mode == "rect":
+    # use a map to store areas instead of tiles
+    regionMap = AreaMap()
+    for mapDataPath in mapDataPaths:
+        with open(mapDataPath, "r") as fp:
+            mapData = json.load(fp)
+        for graphArea, rooms in mapData.items():
+            for room, coords in rooms.items():
+                for c in coords:
+                    x, y = c[0], c[1]
+                    regionMap.setTile(x, y, graphArea)
+    palIdx = 3
+    palettes = {}
+    regionRectangles = defaultdict(list)
+    rx, ry, rw, rh = None, None, None, None
 
 TILE_SIZE = 8
 TILE_ROW = 16
@@ -51,6 +71,15 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 for x in range(areaMap.width):
     for y in range(areaMap.height):
         mapTile = areaMap.getTile(x, y)
+        if mode == "rect":
+            graphArea = regionMap.getTile(x, y)
+            if graphArea is not None:
+                if graphArea not in palettes:
+                    palettes[graphArea] = palIdx
+                    palIdx = (palIdx + 1) % 8
+                mapTile.pal = palettes[graphArea]
+            else:
+                mapTile.pal = 2
         sheet = map_images[mapTile.pal]
         rect = pygame.Rect((mapTile.idx % TILE_ROW) * TILE_SIZE, (mapTile.idx // TILE_ROW) * TILE_SIZE, TILE_SIZE, TILE_SIZE)
         tile = zoom(sheet.subsurface(rect))
@@ -73,7 +102,35 @@ if mode == "graph_area":
     curRoomList = None
     curMap = None
     roomDictsIter = iter(roomDicts)
-    mapName, _ = os.path.splitext(os.path.basename(map_path))
+elif mode == "rect":
+    def findGraphArea():
+        ret = None
+        for x in range(rx, rx+rw):
+            for y in range(ry, ry+rh):
+                region = regionMap.getTile(x, y)
+                if region is not None:
+                    if ret is not None and ret != region:
+                        print(f"Region conflict! {ret} and {region}")
+                        return None
+                    ret = region
+        print(f"Region: {ret}")
+        return ret
+    def everythingMapped():
+        tilesLeft = 0
+        for x in range(regionMap.width):
+            for y in range(regionMap.height):
+                region = regionMap.getTile(x, y)
+                if region is None:
+                    continue
+                found = False
+                for rect in regionRectangles[region]:
+                    found = (rect["x"] <= x < rect["x"]+rect["width"] and rect["y"] <= y < rect["y"]+rect["height"])
+                    if found:
+                        break
+                if not found:
+                    tilesLeft += 1
+        print(f"{tilesLeft} tiles left")
+        return tilesLeft == 0
 # Main loop
 while True:
     # process special modes
@@ -130,6 +187,25 @@ while True:
                         r = curMap[curArea][curRoom["Name"]]
                         if (x, y) not in r:
                             r.append((x, y))
+                elif mode == "rect":
+                    if rx is None:
+                        rx, ry = x, y
+                    else:
+                        assert rw is None
+                        rw, rh = x - rx + 1, y - ry + 1
+                        if rw > 0 and rh > 0:
+                            graphArea = findGraphArea()
+                            if graphArea is not None:
+                                regionRectangles[graphArea].append({"x":rx, "y":ry, "width":rw, "height": rh})
+                                r = pygame.Rect(rx * DISP_TILE_SIZE, ry * DISP_TILE_SIZE, rw * DISP_TILE_SIZE, rh * DISP_TILE_SIZE)
+                                pygame.draw.rect(screen, pygame.Color(0, 0, 255), r, 3)
+                                if everythingMapped():
+                                    fName = f"{mapName}_rectangles.json"
+                                    print("Writing "+fName)
+                                    with open(fName, "w") as fp:
+                                        json.dump(regionRectangles, fp, indent=4)
+                                    sys.exit(0)
+                        rx, ry, rw, rh = None, None, None, None
             elif event.button == pygame.BUTTON_RIGHT and mode == "graph_area":
                 if curRoomList is not None:
                     if curRoom is None:

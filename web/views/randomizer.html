@@ -359,7 +359,7 @@ function randomize(evt, elemId) {
     evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
     isActive = false;
 
-    defaultValues = {"missileQty": 3, "superQty": 2, "powerBombQty": 1, "minorQty": 100, "scavNumLocs": 10, "nbObjective": 4, "nbObjectivesRequired": 9};
+    defaultValues = {"missileQty": 3, "superQty": 2, "powerBombQty": 1, "minorQty": 100, "scavNumLocs": 10, "nbObjective": 4, "nbObjectivesRequired": "off"};
 
     if(e.value.length == 0 && elemId in defaultValues) {
       e.value = defaultValues[elemId];
@@ -911,7 +911,7 @@ function setObjective() {
     // at start all objectives are displayed as selected even though they're not...
     var objective_random = "{{response.write(session.randomizer.get("objectiveRandom"))}}" == "true"
     var objective_number = "{{response.write(session.randomizer.get("nbObjective", 4))}}"
-    var objective_required = "{{response.write(session.randomizer.get("nbObjectivesRequired", 9))}}"
+    var objective_required = "{{response.write(session.randomizer.get("nbObjectivesRequired", "off"))}}"
 
     var selected_objectives = objectiveBackup[objective_random]
     if (objective_random) {
@@ -3001,7 +3001,7 @@ def displayNumber(id, min, max, default, step="1"):
               <tr id="nbObjectivesRequiredVisiblity">
                 <td class="small"><div class="random"><button id="nbObjectivesRequiredRandom" type="button" onclick="randomize(event, 'nbObjectivesRequired')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="nbObjectivesRequiredText">Number of required objectives:</span></td>
-                <td>{{displayNumber("nbObjectivesRequired", "1", "9", "9", "1")}}</td>
+                <td>{{displayMultiSelect("nbObjectivesRequired", currentMultiValues["nbObjectivesRequired"], "off", defaultMultiValues["nbObjectivesRequired"])}}</td>
                 <td id="nbObjectivesRequiredStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr id="hiddenObjectivesVisibility">

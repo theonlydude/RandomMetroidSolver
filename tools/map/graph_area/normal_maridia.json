@@ -65,6 +65,10 @@
         "Maridia Elevator Room": [
             [
                 34,
+                2
+            ],
+            [
+                34,
                 3
             ],
             [
@@ -567,6 +571,10 @@
             ]
         ],
         "Botwoon Energy Tank Room": [
+            [
+                26,
+                9
+            ],
             [
                 27,
                 9

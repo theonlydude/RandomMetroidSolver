@@ -81,9 +81,9 @@ UpdateMinimapTileset:
 ;;; Y = byte offset in current area map
 UpdateActiveMapWithExplored:
 	BIT $AC04,x : BNE ++		;check if tilebit has been set already
-        jsr update_area_tilecount
 	ORA $AC04,x : STA $07F7,y	;save bit
 	STX $20 : REP #$30
+        jsr update_area_tilecount
 	JSL LoadSourceMapData		;[$00] = long pointer to current area map data
 	TYA : ASL #3 : CLC : ADC $20 : ASL : TAX : TAY	;offset of maptile
 	LDA [$00],y : STA !RAM_ActiveMap,x				;save origin tile to RAM minimap
@@ -109,10 +109,11 @@ ApplyTileGFXtoRAM:
 update_area_tilecount:
         phx
         php
-        %ai8()
+        %a8()
 	;; determine current graph area in special byte in room state header
 	ldx $07bb
 	lda $8f0010,x : tax
+        ;; we can afford counting tiles on a single byte (max is 177, upper norfair in area rando)
         lda.l !map_tilecounts_table, x : inc : sta.l !map_tilecounts_table, x
         %a16()
         lda.l !map_total_tilecount : inc : sta.l !map_total_tilecount
@@ -122,7 +123,7 @@ update_area_tilecount:
 
 ;;; quantities of tiles, per graph area. to be filled by randomizer based on flavor
 area_tiles:
-        skip 2*11
+        skip 2*12
 
 ;;; total number of map tiles in the seed, to be filled by randomizer based on present areas
 total_tiles:

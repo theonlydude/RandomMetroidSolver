@@ -44,7 +44,7 @@ include
 
 ;;; collected map tiles (11 bytes)
 !map_tilecounts_table = $7fff50
-!map_total_tilecount = $7fff5b
+!map_total_tilecount = $7fff5c
 
 ;; bitfields
 ; arg: A=bit index. returns: X=byte index, !bitindex_mask=bitmask

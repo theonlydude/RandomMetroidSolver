@@ -158,8 +158,6 @@ objectives_completed:
 .check_objective:
         phx
         lda !obj_check_index : asl : tax
-        lda.l objective_funcs, x
-        beq .end_list      ; checkers function list end
 	;; check objective if not already completed
 	lda.l objective_events, x : jsl !check_event
 	bcs .completed
@@ -518,16 +516,16 @@ endmacro
 %export(items_percent)
         ;; item% = (CollectedItems*100)/total_items
         %a8()
-        lda.l !CollectedItems : sta $4202
-        lda.b #100 : sta $4203
+        lda.l !CollectedItems : sta !mul_u8
+        lda.b #100 : sta !mul_u8_do
         pha : pla : xba : xba
         %a16()
-        lda $4216 : sta $4204
+        lda !mul_u16_result : sta !div_u16
         %a8()
-        lda.l endingtotals_total_items : sta $4206
+        lda.l endingtotals_total_items : sta !div_u16_do
         pha : pla : xba : xba
         %a16()
-        lda $4214 : sta !tmp_in_progress_done
+        lda !div_u16_result_quotient : sta !tmp_in_progress_done
         lda #!tmp_in_progress_pct_marker : sta !tmp_in_progress_total
         rts
 

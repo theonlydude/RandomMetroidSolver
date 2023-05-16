@@ -1,7 +1,9 @@
 {
     "CoverTileList": 9029376,
     "ItemTileCheckList": 9029632,
+    "area_tiles": 9480939,
     "doors_mapicons_by_area": 8767855,
     "mapicons_tables": 8767879,
-    "portals_mapicons_by_area": 8767867
+    "portals_mapicons_by_area": 8767867,
+    "total_tiles": 9480951
 }

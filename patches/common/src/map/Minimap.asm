@@ -122,12 +122,12 @@ update_area_tilecount:
         rts
 
 ;;; quantities of tiles, per graph area. to be filled by randomizer based on flavor
-area_tiles:
-        skip 2*12
+%export(area_tiles)
+        fillbyte 0 : fill !nb_areas
 
 ;;; total number of map tiles in the seed, to be filled by randomizer based on present areas
-total_tiles:
-        skip 2
+%export(total_tiles)
+        dw 0
 
 print "main minimap end: ", pc
 warnpc $90AC04

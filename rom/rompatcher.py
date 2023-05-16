@@ -223,6 +223,8 @@ class RomPatcher:
         # door caps
         self.writeDoorsColor()
         self.writeDoorsMapIcons()
+        # map tile count
+        self.writeMapTileCount(self.settings["itemLocs"], self.settings["area"])
 
         self.writeVersion(self.settings["displayedVersion"])
         if self.settings["ctrlDict"] is not None:
@@ -1423,6 +1425,34 @@ class RomPatcher:
                 plms.append(plmName)
             else:
                 self.applyIPSPatch(plmName)
+
+    def writeMapTileCount(self, itemLocs, isArea):
+        # minimizer complicates things here...
+        # areas with items
+        graphAreasWithItems = {il.Location.GraphArea for il in itemLocs if not il.Location.isBoss() and not il.Location.restricted}
+        # always there
+        bossTiles = {
+            "Kraid": 5,
+            "WreckedShip": 1,
+            "EastMaridia": 5,
+            "LowerNorfair": 3
+        }
+        # write individual areas tile count
+        tilecount = Logic.map_tilecount["area_rando" if isArea else "vanilla_layout"]
+        total = 0
+        addr = Addresses.getOne("map_area_tiles")
+        for area in graphAreas:
+            if area in graphAreasWithItems:
+                count = tilecount[area]
+                self.log.debug(f"writeMapTileCount. area {area} count {count}")
+                total += count
+                self.romFile.writeByte(count, addr)
+            elif area in bossTiles:
+                self.log.debug(f"writeMapTileCount. area {area} boss only")
+                total += bossTiles[area]
+            addr += 1
+        # write total tile count
+        self.romFile.writeWord(total, Addresses.getOne("map_total_tiles"))
 
     def writeObjectives(self, itemLocs, tourian):
         objectives = Objectives()

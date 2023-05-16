@@ -69,4 +69,5 @@ assert areaSum == vanillaSum, f"Total tile count discrepency! area: {areaSum}, v
 
 print("Writing "+outPath)
 with open(outPath, "w") as fp:
+    fp.write("tilecount = ")
     json.dump(outData, fp, indent=4)

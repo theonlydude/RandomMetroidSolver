@@ -9,7 +9,9 @@ class Logic(object):
             from graph.vanilla.graph_locations import locations
             from graph.vanilla.graph_locations import LocationsHelper
             import graph.vanilla.map_tiles
+            import graph.vanilla.map_tilecount
             Logic.map_tiles = graph.vanilla.map_tiles
+            Logic.map_tilecount = graph.vanilla.map_tilecount.tilecount
             Logic.locations = locations
             Logic.accessPoints = accessPoints
             Logic.HelpersGraph = HelpersGraph
@@ -31,7 +33,9 @@ class Logic(object):
             from graph.mirror.graph_access import accessPoints
             from graph.mirror.graph_locations import locations, LocationsHelper, fixLocAddresses
             import graph.mirror.map_tiles
+            import graph.mirror.map_tilecount
             Logic.map_tiles = graph.mirror.map_tiles
+            Logic.map_tilecount = graph.mirror.map_tilecount.tilecount
             Logic.locations = locations
             Logic.accessPoints = accessPoints
             Logic.HelpersGraph = HelpersGraph

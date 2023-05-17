@@ -488,6 +488,29 @@ endmacro
 
 %eventChecker(king_cac_dead, !king_cac_event)
 
+%export(explored_all_map)
+        lda.l !map_total_tilecount : cmp.l map_total_tiles ; carry set if >=
+        rts
+
+macro exploredAreaChecker(area, index)
+%export(explored_<area>)
+        %a8()
+        lda.l !map_tilecounts_table+<index> : cmp.l map_area_tiles+<index> ; carry set if >=
+        %a16()
+        rts
+endmacro
+
+%exploredAreaChecker(crateria, 1)
+%exploredAreaChecker(green_brin, 2)
+%exploredAreaChecker(red_brin, 3)
+%exploredAreaChecker(ws, 4)
+%exploredAreaChecker(kraid, 5)
+%exploredAreaChecker(upper_norfair, 6)
+%exploredAreaChecker(croc, 7)
+%exploredAreaChecker(lower_norfair, 8)
+%exploredAreaChecker(west_maridia, 9)
+%exploredAreaChecker(east_maridia, 10)
+
 ;;; "in progress" objective checkers
 
 macro inProgressBossChecker(n, bossType)
@@ -522,11 +545,17 @@ endmacro
         %a16()
         lda !mul_u16_result : sta !div_u16
         %a8()
-        lda.l endingtotals_total_items : sta !div_u16_do
+        lda.l endingtotals_total_items : sta !div_u8_do
         pha : pla : xba : xba
         %a16()
+        lda #!tmp_in_progress_pct_marker : sta !tmp_in_progress_total   ; mark result as percent
         lda !div_u16_result_quotient : sta !tmp_in_progress_done
-        lda #!tmp_in_progress_pct_marker : sta !tmp_in_progress_total
+        beq .no_progress
+        sec
+        bra .end
+.no_progress:
+        clc
+.end:
         rts
 
 count_upgrades:
@@ -646,25 +675,85 @@ endmacro
 
 %export(in_progress_animals)
         lda.w #2 : sta.b !tmp_in_progress_total
-        phx
-        ldx.w #0
+        stz !tmp_in_progress_done
 .etecoons:
 	lda !etecoons_event : jsl !check_event : bcc .dachora
-        inx
+        inc !tmp_in_progress_done
 .dachora:
 	lda !dachora_event : jsl !check_event : bcc .done
-        inx
+        inc !tmp_in_progress_done
 .done:
-        txa : sta.b !tmp_in_progress_done
+        lda !tmp_in_progress_done
         bne .progress
         clc
         bra .end
 .progress:
         sec
 .end:
-        plx
 	rts
 
+%export(explored_all_map_percent)
+        ;; map% = (explored_tiles/8)*100/(total_tiles/8)
+        ;; (accomodate for divisor being 8 bits, and total map tiles in 1024-2048 range
+        lda !map_total_tilecount
+        beq .no_progress
+        lsr #3
+        %a8()
+        sta.b !mul_u8
+        lda.b #100 : sta.b !mul_u8_do
+        pha : pla : xba : xba
+        %a16()
+        lda.w !mul_u16_result : sta.w !div_u16
+        lda.l map_total_tiles : lsr #3
+        %a8()
+        sta.b !div_u8_do
+        pha : pla : xba : xba
+        %a16()
+        lda.w !div_u16_result_quotient : sta.w !tmp_in_progress_done
+        sec
+        bra .end
+.no_progress:
+        clc
+.end:
+        lda.w #!tmp_in_progress_pct_marker : sta.w !tmp_in_progress_total   ; mark result as percent
+        rts
+
+macro exploredAreaPercent(area, index)
+%export(explored_<area>_percent)
+        %a8()
+        lda.l !map_tilecounts_table+<index> : bne .compute
+        %a16()
+        clc                     ; no progress
+        bra .end
+.compute:
+        ;; map% = explored_tiles*100/total_tiles
+        sta.b !mul_u8
+        lda.b #100 : sta.b !mul_u8_do
+        pha : pla : xba : xba
+        %a16()
+        lda.w !mul_u16_result : sta.w !div_u16
+        %a8()
+        lda.l map_area_tiles+<index> : sta.b !div_u8_do
+        pha : pla : xba : xba
+        %a16()
+        lda.w !div_u16_result_quotient : sta.w !tmp_in_progress_done
+        sec
+        bra .end
+.end:
+        lda.w #!tmp_in_progress_pct_marker : sta.w !tmp_in_progress_total   ; mark result as percent
+        rts
+endmacro
+
+%exploredAreaPercent(crateria, 1)
+%exploredAreaPercent(green_brin, 2)
+%exploredAreaPercent(red_brin, 3)
+%exploredAreaPercent(ws, 4)
+%exploredAreaPercent(kraid, 5)
+%exploredAreaPercent(upper_norfair, 6)
+%exploredAreaPercent(croc, 7)
+%exploredAreaPercent(lower_norfair, 8)
+%exploredAreaPercent(west_maridia, 9)
+%exploredAreaPercent(east_maridia, 10)
 
 warnpc $85ffff
 obj_85_end:

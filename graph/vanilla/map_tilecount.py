@@ -1,7 +1,7 @@
 tilecount = {
     "vanilla_layout": {
         "GreenPinkBrinstar": 144,
-        "Crateria": 167,
+        "Crateria": 166,
         "RedBrinstar": 66,
         "Kraid": 25,
         "Ceres": 12,

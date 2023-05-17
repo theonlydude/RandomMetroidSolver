@@ -18,6 +18,7 @@ from rom.flavor import RomFlavor
 from rom.map import AreaMap, getTileIndex, portal_mapicons
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir
+from logic.helpers import Bosses
 import utils.log
 
 def getWord(w):
@@ -1427,10 +1428,15 @@ class RomPatcher:
                 self.applyIPSPatch(plmName)
 
     def writeMapTileCount(self, itemLocs, isArea):
-        # minimizer complicates things here...
-        # areas with items
-        graphAreasWithItems = {il.Location.GraphArea for il in itemLocs if not il.Location.isBoss() and not il.Location.restricted}
-        # always there
+        # filter areas : exclude Tourian and Ceres, and filter excluded areas in minimizer
+        #
+        # special boss check to avoid varia/space jump/ridley E locs in minimizer and get only graph
+        # areas entirely in layout :
+        bossSolveAreeas = [b + " Boss" for b in Bosses.Golden4()]
+        bossChk = lambda loc: loc.isBoss() or loc.SolveArea in bossSolveAreeas
+        accessibleAreasNoBoss = {il.Location.GraphArea for il in itemLocs if not bossChk(il.Location) and not il.Location.restricted}
+        self.log.debug(f"writeMapTileCount. accessibleareas: {accessibleAreasNoBoss}")
+        # G4 are always there, even when their area is not in minimizer layout
         bossTiles = {
             "Kraid": 5,
             "WreckedShip": 1,
@@ -1440,17 +1446,19 @@ class RomPatcher:
         # write individual areas tile count
         tilecount = Logic.map_tilecount["area_rando" if isArea else "vanilla_layout"]
         total = 0
-        addr = Addresses.getOne("map_area_tiles")
+        self.romFile.seek(Addresses.getOne("map_area_tiles"))
         for area in graphAreas:
-            if area in graphAreasWithItems:
+            if area in accessibleAreasNoBoss:
+                # count all tiles
                 count = tilecount[area]
-                self.log.debug(f"writeMapTileCount. area {area} count {count}")
-                total += count
-                self.romFile.writeByte(count, addr)
             elif area in bossTiles:
-                self.log.debug(f"writeMapTileCount. area {area} boss only")
-                total += bossTiles[area]
-            addr += 1
+                # only boss tiles
+                count = bossTiles[area]
+            else:
+                # disable tile counting for this area
+                count = 0
+            total += count
+            self.romFile.writeByte(count)
         # write total tile count
         self.romFile.writeWord(total, Addresses.getOne("map_total_tiles"))
 

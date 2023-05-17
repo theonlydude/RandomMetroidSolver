@@ -113,10 +113,13 @@ update_area_tilecount:
 	;; determine current graph area in special byte in room state header
 	ldx $07bb
 	lda $8f0010,x : tax
+        ;; if total tile count for this area is 0, don't count the tiles
+        lda area_tiles, x : beq .end
         ;; we can afford counting tiles on a single byte (max is 177, upper norfair in area rando)
         lda.l !map_tilecounts_table, x : inc : sta.l !map_tilecounts_table, x
         %a16()
         lda.l !map_total_tilecount : inc : sta.l !map_total_tilecount
+.end:
         plp
 	plx
         rts

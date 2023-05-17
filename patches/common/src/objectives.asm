@@ -649,33 +649,29 @@ endmacro
 
 %export(in_progress_chozo_robots)
         lda.w #4 : sta.b !tmp_in_progress_total
-        phx
-        ldx.w #0
 	jsr golden_torizo_is_dead : bcc .bt
-        inx
+        inc !tmp_in_progress_done
 .bt:
 	lda !BT_event : jsl !check_event : bcc .bowl
-        inx
+        inc !tmp_in_progress_done
 .bowl:
 	lda !bowling_chozo_event : jsl !check_event : bcc .ln
-        inx
+        inc !tmp_in_progress_done
 .ln:
 	lda !LN_chozo_lowered_acid_event : jsl !check_event : bcc .done
-        inx
+        inc !tmp_in_progress_done
 .done:
-        txa : sta.b !tmp_in_progress_done
+        lda !tmp_in_progress_done
         bne .progress
         clc
         bra .end
 .progress:
         sec
 .end:
-        plx
 	rts
 
 %export(in_progress_animals)
         lda.w #2 : sta.b !tmp_in_progress_total
-        stz !tmp_in_progress_done
 .etecoons:
 	lda !etecoons_event : jsl !check_event : bcc .dachora
         inc !tmp_in_progress_done

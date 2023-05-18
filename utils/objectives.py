@@ -55,8 +55,10 @@ class Goal(object):
             self.escapeAccessPoints = (1, [])
         self.rank = -1
         # possible values:
+        #  - items
         #  - boss
         #  - miniboss
+        #  - map
         #  - other
         self.gtype = gtype
         # example for kill three g4
@@ -145,6 +147,7 @@ def getAreaEscapeAccessPoints(area):
     return (1, list({list(loc.AccessFrom.keys())[0] for loc in Logic.locations if loc.GraphArea == area}))
 
 _goalsList = [
+    # bosses
     Goal("kill kraid", "boss", lambda sm, ap: Bosses.bossDead(sm, 'Kraid'), "kraid_is_dead",
          escapeAccessPoints=getBossEscapeAccessPoint("Kraid"),
          exclusion={"list": ["kill all G4", "kill one G4"]},
@@ -201,6 +204,7 @@ _goalsList = [
          text="{} all g4      ",
          expandableList=["kill kraid", "kill phantoon", "kill draygon", "kill ridley"],
          category="Bosses"),
+    # minibosses
     Goal("kill spore spawn", "miniboss", lambda sm, ap: Bosses.bossDead(sm, 'SporeSpawn'), "spore_spawn_is_dead",
          escapeAccessPoints=getBossEscapeAccessPoint("SporeSpawn"),
          exclusion={"list": ["kill all mini bosses", "kill one miniboss"]},
@@ -260,12 +264,14 @@ _goalsList = [
          expandableList=["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo"],
          category="Minibosses",
          conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))),
+    # other
     Goal("finish scavenger hunt", "other", lambda sm, ap: SMBool(True),
          "scavenger_hunt_completed", romInProgressFunc="scav_started",
          exclusion={"list": []}, # will be auto-completed
          available=False),
     Goal("nothing", "other", lambda sm, ap: Objectives.canAccess(sm, ap, "Landing Site"), "nothing_objective",
          escapeAccessPoints=(1, ["Landing Site"])), # with no objectives at all, escape auto triggers only in crateria
+    # items
     Goal("collect 25% items", "items", lambda sm, ap: SMBool(True),
          "collect_25_items", romInProgressFunc="items_percent",
          exclusion={"list": ["collect 50% items", "collect 75% items", "collect 100% items"]},
@@ -341,6 +347,69 @@ _goalsList = [
          introText="clear east maridia",
          category="Items",
          area="EastMaridia"),
+    # map TODO logic functions. base: access all APs and locs in all areas. additional checks?
+    Goal("explore all the map", "map", lambda sm, ap: SMBool(True),
+         "explored_all_map", romInProgressFunc="explored_all_map_percent",
+         category="Map"),
+    Goal("explore crateria", "map", lambda sm, ap: SMBool(True),
+         "crateria_explored", romInProgressFunc="crateria_explored_percent",
+         category="Map",
+         area="Crateria"),
+    Goal("explore green brinstar", "map", lambda sm, ap: SMBool(True),
+         "green_brin_explored", romInProgressFunc="green_brin_explored_percent",
+         text="explore green brin",
+         introText="explore green brinstar",
+         category="Map",
+         area="GreenPinkBrinstar"),
+    Goal("explore red brinstar", "map", lambda sm, ap: SMBool(True),
+         "red_brin_explored", romInProgressFunc="red_brin_explored_percent",
+         text="explore red brin",
+         introText="explore red brinstar",
+         category="Map",
+         area="RedBrinstar"),
+    Goal("explore wrecked ship", "map", lambda sm, ap: SMBool(True),
+         "ws_explored", romInProgressFunc="ws_explored_percent",
+         text="explore wreck ship",
+         introText="explore wrecked ship",
+         category="Map",
+         area="WreckedShip"),
+    Goal("explore kraid's lair", "map", lambda sm, ap: SMBool(True),
+         "kraid_explored", romInProgressFunc="kraid_explored_percent",
+         text="explore kraid lair",
+         introText="explore kraid's lair",
+         category="Map",
+         area="Kraid"),
+    Goal("explore upper norfair", "map", lambda sm, ap: SMBool(True),
+         "upper_norfair_explored", romInProgressFunc="upper_norfair_explored_percent",
+         text="explore up norfair",
+         introText="explore upper norfair",
+         category="Map",
+         area="Norfair"),
+    Goal("explore croc's lair", "map", lambda sm, ap: SMBool(True),
+         "croc_explored", romInProgressFunc="croc_explored_percent",
+         text="explore croc lair",
+         introText="explore croc's lair",
+         category="Map",
+         area="Crocomire"),
+    Goal("explore lower norfair", "map", lambda sm, ap: SMBool(True),
+         "lower_norfair_explored", romInProgressFunc="lower_norfair_explored_percent",
+         text="explore lower norf",
+         introText="explore lower norfair",
+         category="Map",
+         area="LowerNorfair"),
+    Goal("explore west maridia", "map", lambda sm, ap: SMBool(True),
+         "west_maridia_explored", romInProgressFunc="west_maridia_explored_percent",
+         text="explore west marid",
+         introText="explore west maridia",
+         category="Map",
+         area="WestMaridia"),
+    Goal("explore east maridia", "map", lambda sm, ap: SMBool(True),
+         "east_maridia_explored", romInProgressFunc="east_maridia_explored_percent",
+         text="explore east marid",
+         introText="explore east maridia",
+         category="Map",
+         area="EastMaridia"),
+    # memes
     Goal("tickle the red fish", "other",
          lambda sm, ap: sm.wand(sm.haveItem('Grapple'), Objectives.canAccess(sm, ap, "Red Fish Room Bottom")),
          "fish_tickled",
@@ -396,15 +465,19 @@ _goals = {goal.name:goal for goal in _goalsList}
 def completeGoalData():
     # "nothing" is incompatible with everything
     _goals["nothing"].exclusion["list"] = [goal.name for goal in _goalsList]
-    areaGoals = [goal.name for goal in _goalsList if goal.area is not None]
+    areaGoals = [goal for goal in _goalsList if goal.area is not None]
+    itemAreaGoals = [goal.name for goal in areaGoals if goal.gtype == "items"]
     # if we need 100% items, don't require "clear area", as it covers those
-    _goals["collect 100% items"].exclusion["list"] += areaGoals[:]
+    _goals["collect 100% items"].exclusion["list"] += itemAreaGoals[:]
     # if we have scav hunt, don't require "clear area" (HUD behaviour incompatibility)
-    _goals["finish scavenger hunt"].exclusion["list"] += areaGoals[:]
+    _goals["finish scavenger hunt"].exclusion["list"] += itemAreaGoals[:]
     # remove clear area goals if disabled tourian, as escape can trigger as soon as an area is cleared,
     # even if ship is not currently reachable
-    for goal in areaGoals:
+    for goal in itemAreaGoals:
         _goals[goal].exclusion['tourian'] = "Disabled"
+    mapAreaGoals = [goal.name for goal in areaGoals if goal.gtype == "map"]
+    # if we need 100% map, don't require "explore area", as it covers those
+    _goals["explore all the map"].exclusion["list"] += mapAreaGoals[:]
 
 completeGoalData()
 

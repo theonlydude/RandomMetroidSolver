@@ -493,7 +493,7 @@ endmacro
         rts
 
 macro exploredAreaChecker(area, index)
-%export(explored_<area>)
+%export(<area>_explored)
         %a8()
         lda.l !map_tilecounts_table+<index> : cmp.l map_area_tiles+<index> ; carry set if >=
         %a16()
@@ -695,27 +695,27 @@ endmacro
         beq .no_progress
         lsr #3
         %a8()
-        sta.b !mul_u8
-        lda.b #100 : sta.b !mul_u8_do
+        sta !mul_u8
+        lda.b #100 : sta !mul_u8_do
         pha : pla : xba : xba
         %a16()
-        lda.w !mul_u16_result : sta.w !div_u16
+        lda !mul_u16_result : sta !div_u16
         lda.l map_total_tiles : lsr #3
         %a8()
-        sta.b !div_u8_do
+        sta !div_u8_do
         pha : pla : xba : xba
         %a16()
-        lda.w !div_u16_result_quotient : sta.w !tmp_in_progress_done
+        lda !div_u16_result_quotient : sta !tmp_in_progress_done
         sec
         bra .end
 .no_progress:
         clc
 .end:
-        lda.w #!tmp_in_progress_pct_marker : sta.w !tmp_in_progress_total   ; mark result as percent
+        lda.w #!tmp_in_progress_pct_marker : sta !tmp_in_progress_total   ; mark result as percent
         rts
 
 macro exploredAreaPercent(area, index)
-%export(explored_<area>_percent)
+%export(<area>_explored_percent)
         %a8()
         lda.l !map_tilecounts_table+<index> : bne .compute
         %a16()
@@ -723,20 +723,20 @@ macro exploredAreaPercent(area, index)
         bra .end
 .compute:
         ;; map% = explored_tiles*100/total_tiles
-        sta.b !mul_u8
-        lda.b #100 : sta.b !mul_u8_do
+        sta !mul_u8
+        lda.b #100 : sta !mul_u8_do
         pha : pla : xba : xba
         %a16()
-        lda.w !mul_u16_result : sta.w !div_u16
+        lda !mul_u16_result : sta !div_u16
         %a8()
-        lda.l map_area_tiles+<index> : sta.b !div_u8_do
+        lda.l map_area_tiles+<index> : sta !div_u8_do
         pha : pla : xba : xba
         %a16()
-        lda.w !div_u16_result_quotient : sta.w !tmp_in_progress_done
+        lda !div_u16_result_quotient : sta !tmp_in_progress_done
         sec
         bra .end
 .end:
-        lda.w #!tmp_in_progress_pct_marker : sta.w !tmp_in_progress_total   ; mark result as percent
+        lda.w #!tmp_in_progress_pct_marker : sta !tmp_in_progress_total   ; mark result as percent
         rts
 endmacro
 

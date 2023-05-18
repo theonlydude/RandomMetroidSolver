@@ -52,6 +52,9 @@ org map_data_Maridia+$982  ; (33, 6)
 
 ;;; tiles for room "Maridia Elevator Room"
 
+org map_data_Maridia+$844  ; (34, 1)
+     dw $947f  ; BGtile[i=$7f p=$5 VX]
+
 org map_data_Maridia+$884  ; (34, 2)
      dw $147e  ; BGtile[i=$7e p=$5 X]
 

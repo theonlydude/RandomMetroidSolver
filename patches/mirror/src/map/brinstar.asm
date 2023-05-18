@@ -847,6 +847,9 @@ org map_data_Brinstar+$4dc  ; (14, 19)
 org map_data_Brinstar+$4ec  ; (22, 19)
      dw $0c5e  ; BGtile[i=$5e p=$3 X]
 
+org map_data_Brinstar+$52c  ; (22, 20)
+     dw $4c7e  ; BGtile[i=$7e p=$3 HX]
+
 org map_data_Brinstar+$4ea  ; (21, 19)
      dw $4c75  ; BGtile[i=$75 p=$3 HX]
 

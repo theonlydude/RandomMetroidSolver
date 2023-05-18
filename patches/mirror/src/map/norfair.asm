@@ -52,6 +52,9 @@ org map_data_Norfair+$962  ; (49, 5)
 
 ;;; tiles for room "Business Center"
 
+org map_data_Norfair+$868  ; (52, 1)
+     dw $dc7f  ; BGtile[i=$7f p=$7 HVX]
+
 org map_data_Norfair+$8a8  ; (52, 2)
      dw $5c7e  ; BGtile[i=$7e p=$7 HX]
 

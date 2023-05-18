@@ -7,6 +7,9 @@ include
 org map_data_Brinstar+$cd2  ; (41, 19)
      dw $585e  ; BGtile[i=$5e p=$6 HX]
 
+org map_data_Brinstar+$d12  ; (41, 20)
+     dw $187e  ; BGtile[i=$7e p=$6 X]
+
 org map_data_Brinstar+$cd4  ; (42, 19)
      dw $1875  ; BGtile[i=$75 p=$6 X]
 

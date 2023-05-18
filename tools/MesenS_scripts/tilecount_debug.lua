@@ -1,4 +1,4 @@
-
+﻿
 local function readWord(ramAddr)
   return emu.readWord(ramAddr, emu.memType.workRam)
 end
@@ -10,7 +10,7 @@ end
 local statsRamAddr = 0xd850
 
 local tileCountData = {
-  {"Total", addr=statsRamAddr+12, region=false},
+  {"Total", addr=statsRamAddr+12, region=false, word=true},
   {"Ceres", addr=statsRamAddr},
   {"Crateria", addr=statsRamAddr+1},
   {"Green Brin", addr=statsRamAddr+2},
@@ -39,7 +39,12 @@ local function printMapCompletion()
   local regionTotal=0
   for i,info in pairs(tileCountData) do
      local area = info[1]
-     local count = readByte(info.addr)
+     local count
+     if info.word then
+       count = readWord(info.addr)
+     else
+       count = readByte(info.addr)
+     end
      printTileCount(area, count)
      if i % 2 == 1 then
        x = X_OFF

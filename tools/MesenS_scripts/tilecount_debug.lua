@@ -1,4 +1,4 @@
-﻿
+
 local function readWord(ramAddr)
   return emu.readWord(ramAddr, emu.memType.workRam)
 end

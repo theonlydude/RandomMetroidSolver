@@ -572,7 +572,7 @@ class RomReader:
     def getLocationsIds(self):
         ret = defaultdict(list)
         for area in graphAreas:
-            addr = Addresses.getOne('varia_hud_locs_'+area)
+            addr = Addresses.getOne('objectives_locs_'+area)
             self.romFile.seek(addr)
             while True:
                idByte = self.romFile.readByte()

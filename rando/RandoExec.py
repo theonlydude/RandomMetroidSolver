@@ -15,6 +15,7 @@ from rando.Items import ItemManager
 from rando.ItemLocContainer import ItemLocation
 from utils.vcr import VCR
 from utils.doorsmanager import DoorsManager
+from utils.objectives import Objectives
 
 # entry point for rando execution ("randomize" method)
 class RandoExec(object):
@@ -98,7 +99,10 @@ class RandoExec(object):
         self.areaGraph.printGraph()
         filler = self.createFiller(container, endDate)
         self.log.debug("ItemLocContainer dump before filling:\n"+container.dump())
+        # see comment on Objectives.permissive field
+        Objectives.permissive = True
         ret = filler.generateItems(vcr=vcr)
+        Objectives.permissive = False
         if not ret[0]:
             itemLocs, progItemLocs = (ret[1], ret[2])
             escapeTrigger = (itemLocs, progItemLocs, split) if self.randoSettings.restrictions["EscapeTrigger"] else None

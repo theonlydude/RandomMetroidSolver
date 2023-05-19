@@ -365,12 +365,7 @@ class RandoServices(object):
         self.log.debug("onlyBossesLeft? " +str(ret))
         return ret
 
-    def canEndGame(self, container):
-        return not any(loc.Name == 'Mother Brain' for loc in container.unusedLocations)
-
     def can100percent(self, ap, container):
-        if not self.canEndGame(container):
-            return False
         curLocs = self.currentLocations(ap, container, post=True)
         return len(curLocs) == len(container.unusedLocations)
 

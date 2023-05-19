@@ -510,6 +510,10 @@ class Objectives(object):
     graph = None
     _tourianRequired = None
     hidden = False
+    # objectives are really needed when initiliazing rando, computing escape for disabled Tourian, and solver/tracker
+    # we don't need them when placing items since the seed has to be completable 100% if generated, and objectives are
+    # checked with 100% items during rando setup.
+    permissive = False
     vanillaGoals = ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"]
     scavHuntGoal = ["finish scavenger hunt"]
 
@@ -778,6 +782,8 @@ class Objectives(object):
     @staticmethod
     def canClearGoals(smbm, ap):
         result = SMBool(True)
+        if Objectives.permissive == True:
+            return result
         for goal in Objectives.activeGoals:
             result = smbm.wand(result, goal.canClearGoal(smbm, ap))
         return result

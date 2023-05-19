@@ -653,10 +653,13 @@ if __name__ == "__main__":
         else:
             if not (args.majorsSplit == "Scavenger" and args.tourian == 'Disabled'):
                 objectivesManager.setVanilla()
-        if len(Objectives.activeGoals) == 0:
+        goals = Objectives.activeGoals
+        if len(goals) == 0:
             objectivesManager.addGoal('nothing')
-        if any(goal for goal in Objectives.activeGoals if goal.area is not None):
+        if any(goal for goal in goals if goal.area is not None and goal.gtype == "items"):
             forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
+        if any(goal for goal in goals if goal.gtype == "map"):
+            forceArg('revealMap', True, "'Reveal Map' forced to on", webValue='on')
     else:
         args.tourian = plandoRando["tourian"]
         objectivesManager = Objectives(args.tourian != 'Disabled')

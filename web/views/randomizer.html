@@ -2082,6 +2082,13 @@ Click on the dice button to randomly set this parameter.</p>"
 <li>Collect all upgrades: collect all available suit upgrades (all items but energy/ammo)</li>\
 <li>Clear 'area': collect all available items <b>of the current major split</b> in 'area'. Forces VARIA HUD on to see how many are left in each area. <b>Incompatible with Scavenger Hunt and Disabled Tourian.</b></li>\
 </ul></p>\
+<p><b>Map:</b><ul>\
+<li>Explore 25% map: explore 25% of available map tiles</li>\
+<li>Explore 50% map: explore 50% of available map tiles</li>\
+<li>Explore 75% map: explore 75% of available map tiles</li>\
+<li>Explore 100% map: explore 100% of available map tiles</li>\
+<li>Explore 'area': explore all map tiles in 'area'. Forces Reveal Map on to see how many are left in each area.</li>\
+</ul></p>\
 <p><b>Memes:</b><ul>\
 <li>Tickle the Red Fish: use grapple on the <a href=\"https://wiki.supermetroid.run/Red_Fish_Room\" target=\"_blank\">Red Fish</a></li>\
 <li>Kill the orange Geemer: kill the orange Geemer that follows you on the little bridge before <a href=\"https://wiki.supermetroid.run/Bowling_Alley\">Bowling Alley</a></li>\
@@ -2095,7 +2102,7 @@ Click on the dice button to randomly set this parameter.</p>"
 <b>Note:</b> See the Tourian parameter to enable fast Tourian or trigger the escape when all objectives are completed.<br/>\
 <b>Note:</b> With Scavenger Hunt majors split only up to four objectives can be set as one mandatory objective is added: finish the Scavenger Hunt.<br/>\
 <b>Note:</b> Current percentage of collected items is displayed in the inventory pause menu.<br/>\
-<b>Note:</b> Collect 100% items is excluded by default when randomizing the objectives list as it requires you to complete all the objectives.\
+<b>Note:</b> 100% items and 100% map are excluded by default when randomizing the objectives list as they cover too much of the other objectives.\
 </p>\
 <p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 18 objectives from the list (between 1 and 17 if Scavenger Hunt). To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
     },
@@ -2730,7 +2737,7 @@ This patch is automatically enabled when using Full Countdown item split, or Maj
     {
       element: "#revealMapStep",
       title: "Reveal Map",
-      content: "<p>Reveals the whole in game map on start, showing item locations and class depending on item split. This will also reveal which item spots are empty. Map areas are available as soon as you step in them once.</p>\
+      content: "<p>Reveals the whole in game map on start, showing item locations and class depending on item split. Map areas are available as soon as you step in them once.</p>\
 <img src=\"/solver/static/images/help/reveal_map.png\" alt=\"reveal_map.png\" title=\"Brinstar map with the reveal patch\" class=\"third center_img\"/>\
 <p>Patch developed by Flo</p>",
       placement: "auto left"

@@ -757,19 +757,18 @@ class Objectives(object):
         if Objectives.maxActiveGoals - Objectives.nbActiveGoals < 3:
             return
 
-        expandable = None
-        for goal in Objectives.activeGoals:
-            if goal.expandable:
-                expandable = goal
-                break
+        expandables = [goal for goal in Objectives.activeGoals if goal.expandableList]
 
-        if expandable is None:
+        if len(expandables) == 0:
             return
 
-        LOG.debug("replace {} with {}".format(expandable.name, expandable.expandableList))
-        self.removeGoal(expandable)
-        for name in expandable.expandableList:
-            self.addGoal(name)
+        for expandable in expandables:
+            if Objectives.nbActiveGoals + len(expandable.expandableList) > Objectives.maxRequiredGoals:
+                continue
+            LOG.debug("replace {} with {}".format(expandable.name, expandable.expandableList))
+            self.removeGoal(expandable)
+            for name in expandable.expandableList:
+                self.addGoal(name)
 
         # rebuild ranks
         for i, goal in enumerate(Objectives.activeGoals, 1):

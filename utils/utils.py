@@ -272,7 +272,7 @@ def getDefaultMultiValues():
         'areaRandomization': ['off', 'full', 'light'],
         'objective': Objectives.getAllGoals(removeNothing=True),
         'tourian': ['Vanilla', 'Fast', 'Disabled'],
-        'logic': ['vanilla', 'mirror']
+        'logic': ['vanilla', 'mirror'],
     }
     return defaultMultiValues
 

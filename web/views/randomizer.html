@@ -359,7 +359,7 @@ function randomize(evt, elemId) {
     evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
     isActive = false;
 
-    defaultValues = {"missileQty": 3, "superQty": 2, "powerBombQty": 1, "minorQty": 100, "scavNumLocs": 10, "nbObjective": 4, "nbObjectivesRequired": 9};
+    defaultValues = {"missileQty": 3, "superQty": 2, "powerBombQty": 1, "minorQty": 100, "scavNumLocs": 10, "nbObjective": 4, "nbObjectivesRequired": "off"};
 
     if(e.value.length == 0 && elemId in defaultValues) {
       e.value = defaultValues[elemId];
@@ -742,11 +742,13 @@ function setMaxObjective(isRandom) {
         $("#objectiveMultiSelect").chosen("destroy");
         $("#objectiveMultiSelect").chosen({max_selected_options: Infinity, width: '100%'})
         $("#nbObjectiveVisiblity").show();
+        $("#hiddenObjectivesVisibility").show();
     } else {
         // limit to 18 objectives (17 in scav hunt)
         $("#objectiveMultiSelect").chosen("destroy");
         $("#objectiveMultiSelect").chosen({max_selected_options: max_objectives, width: '100%'})
         $("#nbObjectiveVisiblity").hide();
+        $("#hiddenObjectivesVisibility").hide();
     }
 }
 
@@ -911,7 +913,7 @@ function setObjective() {
     // at start all objectives are displayed as selected even though they're not...
     var objective_random = "{{response.write(session.randomizer.get("objectiveRandom"))}}" == "true"
     var objective_number = "{{response.write(session.randomizer.get("nbObjective", 4))}}"
-    var objective_required = "{{response.write(session.randomizer.get("nbObjectivesRequired", 9))}}"
+    var objective_required = "{{response.write(session.randomizer.get("nbObjectivesRequired", "off"))}}"
 
     var selected_objectives = objectiveBackup[objective_random]
     if (objective_random) {
@@ -2031,18 +2033,20 @@ Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#nbObjectiveStep",
-      title: "Number of Objectives to access Tourian",
-      content: "<p>By default you need to complete 4 objectives from the list to access Tourian. You can choose 1-5 or enter 0 to make the number random.</p>",
+      title: "Number of possible objectives",
+      content: "<p>When objectives are randomized, determine the size of the objective list in game. See 'Number of required objectives' setting help for more information. Maximum possible number is 18.<br><b>Note: </b>The actual number can be lower than requested, due to conflict with other settings.</p>\
+<p>Click on the dice button to randomly set this parameter.</p>",
     },
     {
       element: "#nbObjectivesRequiredStep",
       title: "Number of required objectives",
-      content: "<p></p>",
+      content: "<p>Number of objectives to complete from the objectives list. When 'off' (default), it will try to match the size of the complete objective list, with a maximum of 9 objectives required.</p>\
+<p>Click on the dice button to randomly set this parameter.</p>",
     },
     {
       element: "#hiddenObjectivesStep",
       title: "Hidden Objectives",
-      content: "<p></p>",
+      content: "<p>When objectives are randomized, the objective list is hidden in game until you reach the <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Statues</a> (or equivalent, depending on Tourian setting).<br>Mostly interesting with area randomization or custom start location settings.</p>",
     },
     {
       element: "#objectiveStep",
@@ -2992,17 +2996,31 @@ def displayNumber(id, min, max, default, step="1"):
               </tr>
             <table class="full" id="objectivesVisibility">
               <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
+              <tr id="nbObjectivesRequiredVisiblity">
+                <td class="small"><div class="random"><button id="nbObjectivesRequiredRandom" type="button" onclick="randomize(event, 'nbObjectivesRequired')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td><span id="nbObjectivesRequiredText">Number of required objectives:</span></td>
+                <td>
+                  <select class="full" id="nbObjectivesRequired" name="nbObjectivesRequired" style="display: block;" value="{{response.write(session.randomizer.get('nbObjectivesRequired', 'off'))}}">
+                    <option selected="selected" value="off">off</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                  </select>
+                </td>
+
+                <td id="nbObjectivesRequiredStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+              </tr>
               <tr id="nbObjectiveVisiblity">
                 <td class="small"><div class="random"><button id="nbObjectiveRandom" type="button" onclick="randomize(event, 'nbObjective')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="nbObjectiveText">Number of possible objectives:</span></td>
                 <td>{{displayNumber("nbObjective", "1", "18", "4", "1")}}</td>
                 <td id="nbObjectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-              </tr>
-              <tr id="nbObjectivesRequiredVisiblity">
-                <td class="small"><div class="random"><button id="nbObjectivesRequiredRandom" type="button" onclick="randomize(event, 'nbObjectivesRequired')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="nbObjectivesRequiredText">Number of required objectives:</span></td>
-                <td>{{displayNumber("nbObjectivesRequired", "1", "9", "9", "1")}}</td>
-                <td id="nbObjectivesRequiredStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr id="hiddenObjectivesVisibility">
                 <td class="small"></td>

@@ -197,7 +197,7 @@ load_state:
     ;; Store (region*2) + stats_regions to region_tmp.(region == graph area, found in state header)
     lda $7e07bb
     tax
-    lda $8f0010,x
+    lda $8f0010,x : and #$00ff
     asl
     clc
     adc !stat_rta_regions

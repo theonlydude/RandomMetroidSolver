@@ -815,7 +815,7 @@ function randomizeObjective(evt) {
             backup_values = all_objectives
         }
         if (backup_values.length >= all_objectives.length) {
-            backup_values = backup_values.filter(s => s !== 'collect 100% items');
+            backup_values = backup_values.filter(s => s !== 'collect 100% items' && s !== "explore 100% map");
         }
         $("#objectiveMultiSelect").val(backup_values).trigger("chosen:updated");
     }
@@ -832,7 +832,7 @@ function getAllObjectives() {
     for(var i=0; i<defaultMultiValues["objective"].length; i++) {
         var toAdd = defaultMultiValues["objective"][i];
         // don't add 'collect 100% items' to the random list as it's a special objective
-        if(toAdd == "collect 100% items") {
+        if(toAdd == "collect 100% items" || toAdd == "explore 100% map") {
             continue;
         }
         if(!notSelectedArray.includes(toAdd) && !selectedArray.includes(toAdd)) {
@@ -841,6 +841,10 @@ function getAllObjectives() {
     }
     var all_objectives = Array.from(defaultMultiValues["objective"]);
     var index = all_objectives.indexOf("collect 100% items");
+    if(index > -1) {
+        all_objectives.splice(index, 1);
+    }
+    index = all_objectives.indexOf("explore 100% map");
     if(index > -1) {
         all_objectives.splice(index, 1);
     }

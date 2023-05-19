@@ -62,7 +62,7 @@ class AccessPoint(object):
         return "[" + self.GraphArea + "] " + self.Name
 
     def __repr__(self):
-        return self.Name
+        return "AP " + self.Name
 
     def sortTransitions(self, transitions=None):
         # sort transitions before the loop in getNewAvailNodes.

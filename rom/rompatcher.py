@@ -225,7 +225,7 @@ class RomPatcher:
         self.writeDoorsColor()
         self.writeDoorsMapIcons()
         # map tile count
-        self.writeMapTileCount(self.settings["itemLocs"], self.settings["area"])
+        self.writeMapTileCount(self.settings["itemLocs"], self.settings["area"], self.settings["escapeAttr"] is not None)
 
         self.writeVersion(self.settings["displayedVersion"])
         if self.settings["ctrlDict"] is not None:
@@ -1427,7 +1427,7 @@ class RomPatcher:
             else:
                 self.applyIPSPatch(plmName)
 
-    def writeMapTileCount(self, itemLocs, isArea):
+    def writeMapTileCount(self, itemLocs, isArea, isEscape):
         # filter areas : exclude Tourian and Ceres, and filter excluded areas in minimizer
         #
         # special boss check to avoid varia/space jump/ridley E locs in minimizer and get only graph
@@ -1443,6 +1443,13 @@ class RomPatcher:
             "EastMaridia": 5,
             "LowerNorfair": 3
         }
+        # tile count offsets for when escape rando is on (maps stations sealed off)
+        escapeRandoOffsets = {
+            "GreenPinkBrinstar": -4,
+            "Norfair": -1,
+            "WreckedShip": -1,
+            "WestMaridia": -1
+        }
         # write individual areas tile count
         tilecount = Logic.map_tilecount["area_rando" if isArea else "vanilla_layout"]
         total = 0
@@ -1450,7 +1457,8 @@ class RomPatcher:
         for area in graphAreas:
             if area in accessibleAreasNoBoss:
                 # count all tiles
-                count = tilecount[area]
+                offset = 0 if not isEscape else escapeRandoOffsets.get(area, 0)
+                count = tilecount[area] + offset
             elif area in bossTiles:
                 # only boss tiles
                 count = bossTiles[area]
@@ -1459,8 +1467,12 @@ class RomPatcher:
                 count = 0
             total += count
             self.romFile.writeByte(count)
-        # write total tile count
+        # write total tile count in map patch
         self.romFile.writeWord(total, Addresses.getOne("map_total_tiles"))
+        # for X% map explored objectives, precompute values and write them in objectives functions
+        for percent in [25, 50, 75, 100]:
+            addr = Addresses.getOne("objectives_explored_map_%d_pct" % percent)
+            self.romFile.writeWord(ceil((total * percent)/100), addr)
 
     def writeObjectives(self, itemLocs, tourian):
         objectives = Objectives()

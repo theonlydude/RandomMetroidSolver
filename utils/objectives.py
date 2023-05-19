@@ -146,6 +146,7 @@ def getMiniBossesEscapeAccessPoints(n):
 def getAreaEscapeAccessPoints(area):
     return (1, list({list(loc.AccessFrom.keys())[0] for loc in Logic.locations if loc.GraphArea == area}))
 
+
 _goalsList = [
     # bosses
     Goal("kill kraid", "boss", lambda sm, ap: Bosses.bossDead(sm, 'Kraid'), "kraid_is_dead",
@@ -271,7 +272,7 @@ _goalsList = [
          available=False),
     Goal("nothing", "other", lambda sm, ap: Objectives.canAccess(sm, ap, "Landing Site"), "nothing_objective",
          escapeAccessPoints=(1, ["Landing Site"])), # with no objectives at all, escape auto triggers only in crateria
-    # items
+    # items. no logic function because all items are placed by the rando. the functions are properly set for solver only.
     Goal("collect 25% items", "items", lambda sm, ap: SMBool(True),
          "collect_25_items", romInProgressFunc="items_percent",
          exclusion={"list": ["collect 50% items", "collect 75% items", "collect 100% items"]},
@@ -347,63 +348,80 @@ _goalsList = [
          introText="clear east maridia",
          category="Items",
          area="EastMaridia"),
-    # map TODO logic functions. base: access all APs and locs in all areas. additional checks?
-    Goal("explore all the map", "map", lambda sm, ap: SMBool(True),
-         "explored_all_map", romInProgressFunc="explored_all_map_percent",
+    # map
+    Goal("explore 25% map", "map", lambda sm, ap: Objectives.canExploreMapPercent(sm, ap, 25), # assume this will always be possible, even with super fun
+         "explored_map_25", romInProgressFunc="explored_all_map_percent",
+         exclusion={"list": ["explore 50% map", "explore 75% map",  "explore 100% map"]},
+         introText="explore 25 percent of map",
          category="Map"),
-    Goal("explore crateria", "map", lambda sm, ap: SMBool(True),
+    Goal("explore 50% map", "map", lambda sm, ap: Objectives.canExploreMapPercent(sm, ap, 50), # assume this will always be possible, even with super fun
+         "explored_map_50", romInProgressFunc="explored_all_map_percent",
+         exclusion={"list": ["explore 25% map", "explore 75% map",  "explore 100% map"]},
+         introText="explore 50 percent of map",
+         category="Map"),
+    Goal("explore 75% map", "map", lambda sm, ap: Objectives.canExploreMapPercent(sm, ap, 75), # assume this will always be possible, even with super fun
+         "explored_map_75", romInProgressFunc="explored_all_map_percent",
+         exclusion={"list": ["explore 50% map", "explore 25% map",  "explore 100% map"]},
+         introText="explore 75 percent of map",
+         category="Map"),
+    Goal("explore 100% map", "map", lambda sm, ap: Objectives.canExploreMap(sm, ap),
+         "explored_map_100", romInProgressFunc="explored_all_map_percent",
+         exclusion={"list": ["explore 50% map", "explore 75% map",  "explore 25% map"]},
+         introText="explore the entire map",
+         category="Map"),
+    Goal("explore crateria", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Crateria"),
          "crateria_explored", romInProgressFunc="crateria_explored_percent",
          category="Map",
          area="Crateria"),
-    Goal("explore green brinstar", "map", lambda sm, ap: SMBool(True),
+    Goal("explore green brinstar", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "GreenPinkBrinstar"),
          "green_brin_explored", romInProgressFunc="green_brin_explored_percent",
          text="explore green brin",
          introText="explore green brinstar",
          category="Map",
          area="GreenPinkBrinstar"),
-    Goal("explore red brinstar", "map", lambda sm, ap: SMBool(True),
+    Goal("explore red brinstar", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "RedBrinstar"),
          "red_brin_explored", romInProgressFunc="red_brin_explored_percent",
          text="explore red brin",
          introText="explore red brinstar",
          category="Map",
          area="RedBrinstar"),
-    Goal("explore wrecked ship", "map", lambda sm, ap: SMBool(True),
+    Goal("explore wrecked ship", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "WreckedShip"),
          "ws_explored", romInProgressFunc="ws_explored_percent",
          text="explore wreck ship",
          introText="explore wrecked ship",
          category="Map",
          area="WreckedShip"),
-    Goal("explore kraid's lair", "map", lambda sm, ap: SMBool(True),
+    Goal("explore kraid's lair", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Kraid"),
          "kraid_explored", romInProgressFunc="kraid_explored_percent",
          text="explore kraid lair",
          introText="explore kraid's lair",
          category="Map",
          area="Kraid"),
-    Goal("explore upper norfair", "map", lambda sm, ap: SMBool(True),
+    Goal("explore upper norfair", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Norfair"),
          "upper_norfair_explored", romInProgressFunc="upper_norfair_explored_percent",
          text="explore up norfair",
          introText="explore upper norfair",
          category="Map",
          area="Norfair"),
-    Goal("explore croc's lair", "map", lambda sm, ap: SMBool(True),
+    Goal("explore croc's lair", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Crocomire"),
          "croc_explored", romInProgressFunc="croc_explored_percent",
          text="explore croc lair",
          introText="explore croc's lair",
          category="Map",
          area="Crocomire"),
-    Goal("explore lower norfair", "map", lambda sm, ap: SMBool(True),
+    Goal("explore lower norfair", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "LowerNorfair"),
          "lower_norfair_explored", romInProgressFunc="lower_norfair_explored_percent",
          text="explore lower norf",
          introText="explore lower norfair",
          category="Map",
          area="LowerNorfair"),
-    Goal("explore west maridia", "map", lambda sm, ap: SMBool(True),
+    Goal("explore west maridia", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "WestMaridia"),
          "west_maridia_explored", romInProgressFunc="west_maridia_explored_percent",
          text="explore west marid",
          introText="explore west maridia",
          category="Map",
          area="WestMaridia"),
-    Goal("explore east maridia", "map", lambda sm, ap: SMBool(True),
+    Goal("explore east maridia", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "EastMaridia"),
          "east_maridia_explored", romInProgressFunc="east_maridia_explored_percent",
          text="explore east marid",
          introText="explore east maridia",
@@ -475,9 +493,9 @@ def completeGoalData():
     # even if ship is not currently reachable
     for goal in itemAreaGoals:
         _goals[goal].exclusion['tourian'] = "Disabled"
-    mapAreaGoals = [goal.name for goal in areaGoals if goal.gtype == "map"]
     # if we need 100% map, don't require "explore area", as it covers those
-    _goals["explore all the map"].exclusion["list"] += mapAreaGoals[:]
+    mapAreaGoals = [goal.name for goal in areaGoals if goal.gtype == "map"]
+    _goals["explore 100% map"].exclusion["list"] += mapAreaGoals[:]
 
 completeGoalData()
 
@@ -603,6 +621,55 @@ class Objectives(object):
         loc = locationsDict[locName]
         availLocs = Objectives.graph.getAvailableLocations([loc], sm, Objectives.maxDiff, ap)
         return SMBool(loc in availLocs)
+
+    # XXX consider "explore map" equivalent to "access all locations and APs"
+
+    @staticmethod
+    def canExploreArea(sm, rootApName, area):
+        graph, maxDiff = Objectives.graph, Objectives.maxDiff
+
+        accessibleAPs = graph.getAccessibleAccessPoints(rootApName)
+        availAPs = graph.getAvailableAccessPoints(graph.accessPoints[rootApName], sm, maxDiff)
+        areaAPs = [ap for ap in accessibleAPs if ap.GraphArea == area]
+        for ap in areaAPs:
+            if ap not in availAPs:
+                return SMBool(False)
+
+        accessibeLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
+        areaLocs = [loc for loc in accessibeLocs if loc.GraphArea == area]
+        availLocs = graph.getAvailableLocations(areaLocs, sm, maxDiff, rootApName)
+        if len(availLocs) != len(areaLocs):
+            return SMBool(False)
+
+        return SMBool(True)
+
+    @staticmethod
+    def canExploreMap(sm, rootApName):
+        graph, maxDiff = Objectives.graph, Objectives.maxDiff
+        accessibleAPs = graph.getAccessibleAccessPoints(rootApName)
+        allAPs = [ap for ap in accessibleAPs if ap.GraphArea != "Tourian" and ap.GraphArea != "Ceres"]
+        availAPs = graph.getAvailableAccessPoints(graph.accessPoints[rootApName], sm, maxDiff)
+        for ap in allAPs:
+            if ap not in availAPs:
+                return SMBool(False)
+
+        accessibeLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
+        allLocs = [loc for loc in accessibeLocs if loc.GraphArea != "Tourian"]
+        availLocs = graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName)
+        if len(availLocs) != len(allLocs):
+            return SMBool(False)
+
+        return SMBool(True)
+
+    @staticmethod
+    def canExploreMapPercent(sm, rootApName, percent):
+        graph, maxDiff = Objectives.graph, Objectives.maxDiff
+        # questionable heuristic: consider "access x% items" equivalent to "can reach x% locations"
+        accessibeLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
+        allLocs = [loc for loc in accessibeLocs if loc.GraphArea != "Tourian"]
+        availLocs = graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName)
+        pct = 100*float(len(availLocs)) / float(len(allLocs))
+        return SMBool(pct >= percent)
 
     def setVanilla(self):
         for goal in Objectives.vanillaGoals:
@@ -839,12 +906,15 @@ class Objectives(object):
     # call from solver
     def readGoals(self, romReader):
         self.resetGoals()
+        # read objective quantities
+        Objectives.nbActiveGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives'))
+        Objectives.nbRequiredGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives_required'))
+        # read objectives list
         romReader.romFile.seek(Addresses.getOne('objectivesList'))
-        checkFunction = romReader.romFile.readWord()
-        while checkFunction != 0x0000:
+        for i in range(Objectives.nbActiveGoals):
+            checkFunction = romReader.romFile.readWord()
             goal = self.getGoalFromCheckFunction(checkFunction)
             Objectives.activeGoals.append(goal)
-            checkFunction = romReader.romFile.readWord()
 
         # read number of available items for items % objectives
         Objectives.totalItemsCount = romReader.romFile.readByte(Addresses.getOne('totalItems'))
@@ -855,10 +925,6 @@ class Objectives(object):
         Objectives._tourianRequired = not bool(romReader.romOptions.read('escapeTrigger'))
         LOG.debug("tourianRequired: {}".format(self.tourianRequired))
 
-        # read objective quantities
-        Objectives.nbActiveGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives'))
-        assert Objectives.nbActiveGoals == len(Objectives.activeGoals), "Objectives list inconsistent in ROM"
-        Objectives.nbRequiredGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives_required'))
         LOG.debug(f"nbActiveGoals: {Objectives.nbActiveGoals}, nbRequiredGoals: {Objectives.nbRequiredGoals}")
 
     # call from rando

@@ -320,6 +320,15 @@ class RandoSetup(object):
                     self.errorMsgs.append(msg)
                     ret = False
                     break
+        # check that objectives are completable (ignore bosses/minibosses, checked below)
+        if ret:
+            checkedGoals = [goal for goal in Objectives.activeGoals if goal.category != "Bosses" and goal.category != "Minibosses"]
+            for goal in checkedGoals:
+                if not goal.canClearGoal(self.sm, 'Golden Four'):
+                    msg = f"Goal {goal} is not completable"
+                    self.log.debug('checkPool. {}'.format(msg))
+                    self.errorMsgs.append(msg)
+                    break
         # check if all inter-area APs can reach each other
         if ret:
             interAPs = [ap for ap in self.areaGraph.getAccessibleAccessPoints(self.startAP) if not ap.isInternal() and not ap.isLoop()]
@@ -374,7 +383,6 @@ class RandoSetup(object):
                     self.log.debug('checkPool. {}'.format(msg))
                     self.errorMsgs.append(msg)
                 self.log.debug('checkPool. boss access sanity check: '+str(ret))
-
         if self.restrictions.isChozo() or self.restrictions.isScavenger():
             # in chozo or scavenger, we cannot put other items than NoEnergy in the restricted locations,
             # we would be forced to put majors in there, which can make seed generation fail:

@@ -488,9 +488,18 @@ endmacro
 
 %eventChecker(king_cac_dead, !king_cac_event)
 
-%export(explored_all_map)
-        lda.l !map_total_tilecount : cmp.l map_total_tiles ; carry set if >=
+macro mapPercentChecker(percent)
+%export(explored_map_<percent>)
+        lda.l !map_total_tilecount : cmp.l .pct ; carry set if >=
         rts
+%export(explored_map_<percent>_pct)
+        skip 2
+endmacro
+
+%mapPercentChecker(25)
+%mapPercentChecker(50)
+%mapPercentChecker(75)
+%mapPercentChecker(100)
 
 macro exploredAreaChecker(area, index)
 %export(<area>_explored)

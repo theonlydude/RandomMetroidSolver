@@ -11,9 +11,9 @@ class RomFlavor(object):
     manager = None
 
     @staticmethod
-    def factory():
+    def factory(baseDir=None):
         RomFlavor.flavor = Logic.implementation
-        RomFlavor.patchAccess = PatchAccess()
+        RomFlavor.patchAccess = PatchAccess(baseDir)
         RomFlavor.symbols = Symbols(RomFlavor.patchAccess)
         RomFlavor.symbols.loadAllSymbols()
         Addresses.updateFromSymbols(RomFlavor.symbols)

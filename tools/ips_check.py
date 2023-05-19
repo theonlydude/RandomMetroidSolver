@@ -9,14 +9,14 @@ sys.path.append(mainDir)
 from rom.ips import IPS_Patch
 from rom.rom import pc_to_snes
 from logic.logic import Logic
-from patches.patchaccess import PatchAccess
+from rom.flavor import RomFlavor
 
 logic = sys.argv[1]
 Logic.factory(logic)
+RomFlavor.factory(mainDir)
 
 patchNameFilter = os.getenv("IPS_CHECK_FILTER")
 
-patchAccess = None
 ips_ranges = []
 
 def addRanges(name, patch):
@@ -24,19 +24,20 @@ def addRanges(name, patch):
         ips_ranges.append({'name':name, 'range':r})
 
 def loadPatchPy():
-    patchAccess = PatchAccess(mainDir)
-    patches_py = patchAccess.getDictPatches()
+    patches_py = RomFlavor.patchAccess.getDictPatches()
     for name,patch in patches_py.items():
         if patchNameFilter is None or not re.match(patchNameFilter, name):
             addRanges(name, IPS_Patch(patch))
+
+patchPyLoaded = False
 
 for patch in sys.argv[2:]:
     if os.path.getsize(patch) == 0:
         continue
     baseName = os.path.basename(patch)
-    if baseName == "patches.py":
-        if patchAccess is None:
-            loadPatchPy()
+    if baseName == "patches.py" and not patchPyLoaded:
+        loadPatchPy()
+        patchPyLoaded = True
     elif patchNameFilter is None or not re.match(patchNameFilter, baseName) :
         addRanges(baseName, IPS_Patch.load(patch))
 

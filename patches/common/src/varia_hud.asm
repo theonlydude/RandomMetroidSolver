@@ -30,6 +30,7 @@ incsrc "sym/objectives.asm"
 incsrc "sym/seed_display.asm"
 
 !hudposition = #$0006
+!digit_0 = #$0C10               ; new font in modified HUD gfx included in map patch
 ;;; RAM used to store previous values to see whether we must draw
 ;;; area/item counter or next scav display
 !previous = $7fff3c		; hi: area/00, lo: remaining items/next scav loc
@@ -228,7 +229,7 @@ draw_info:
 	ldy #objective_completed-hud_text
 	jsr draw_text
 	;; draw objective index
-	lda !hud_special : and #$00ff : inc : jsr draw_two
+	lda !hud_special : and #$00ff : inc : jsr draw_number
 	jmp .end
 .draw_all_objectives_ok:
 	ldy #all_objectives_completed-hud_text
@@ -249,7 +250,7 @@ draw_info:
 	lda !previous : cmp.w !hunt_over_hud : beq .scav_setup_next
 	;; show current index in required scav list
 	lda #$2C0F : sta !split_locs_hud-2 ; blank before numbers for cleanup
-	lda !scav_idx : inc : jsr draw_two
+	lda !scav_idx : inc : jsr draw_number
 .scav_setup_next:
 	lda !previous : cmp.w !hunt_over_hud : bne .game_state_check
 	jmp .end
@@ -374,7 +375,7 @@ draw_info:
 	cmp #$004d		; 'M'
 	beq .draw_major
 	;; default to full split: draw remaining item count on 2 digits
-	lda !n_items : jsr draw_two
+	lda !n_items : jsr draw_number
 	bra .end
 .draw_chozo:
 	lda #$0CF9 : sta !split_locs_hud ; blue 'Z'
@@ -391,6 +392,13 @@ draw_info:
 	lda $09C2 ;original code that was hijacked
 	rts
 
+; A=remaining items (1 or 2 digits)
+draw_number:
+        cmp.w #10 : bpl draw_two
+        clc : adc !digit_0
+	sta !split_locs_hud
+        lda #$2C0F : sta !split_locs_hud+2
+        rts
 ; A=remaining items (2 digits)
 draw_two:
 	sta $4204
@@ -398,19 +406,14 @@ draw_two:
 	lda #$0a
 	sta $4206
 	pha : pla : pha : pla : rep #$20
-	lda $4214 : asl : tay
-	lda NumberGFXTable, y
+	lda $4214 : clc : adc !digit_0
 	sta !split_locs_hud
 	lda $4216
-draw_one:			; A=remaining items (1 digit)
-	asl : tay
-	lda NumberGFXTable, y
+; A=remaining items (1 digit)
+draw_one:
+        clc : adc !digit_0
 	sta !split_locs_hud+2
 	rts
-
-;; Normal numbers (like energy/ammo)
-NumberGFXTable:
-	DW #$0C09,#$0C00,#$0C01,#$0C02,#$0C03,#$0C04,#$0C05,#$0C06,#$0C07,#$0C08
 
 ;;; Y ptr to string, relative to hud_text
 draw_text:

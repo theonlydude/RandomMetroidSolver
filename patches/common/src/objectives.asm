@@ -714,7 +714,11 @@ endmacro
         sta !div_u8_do
         pha : pla : xba : xba
         %a16()
-        lda !div_u16_result_quotient : sta !tmp_in_progress_done
+        lda !div_u16_result_quotient
+        cmp.w #100 : bmi +
+        lda.w #99               ; with the loss of precision above we can have a wrong 100%
++
+        sta !tmp_in_progress_done
         sec
         bra .end
 .no_progress:

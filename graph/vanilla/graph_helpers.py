@@ -864,3 +864,9 @@ class HelpersGraph(Helpers):
                                      sm.wand(sm.haveItem('SpaceJump'), sm.knowsAccessSpringBallWithFlatley()))),
                       sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb()), # XRay climb
                       sm.canCrystalFlashClip())
+
+    # only used for map completion objectives
+    @Cache.decorator
+    def canExploreAmphitheater(self):
+        sm = self.smbm
+        return sm.wand(sm.canPassAmphitheaterReverse(), sm.haveItem('SpaceJump'))

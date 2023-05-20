@@ -227,3 +227,31 @@ doors = {
     "DraygonSaveRefillStation": {"byteIndex": 31, "bitMask": 32, "room": 0xd72a, "area": "Maridia"},
     "ColosseumBottomRight": {"byteIndex": 35, "bitMask": 32, "room": 0xd72a, "area": "Maridia"}
 }
+
+from graph.vanilla.map_tiles import objectives as vanillaObjectives
+import copy
+
+objectives = copy.copy(vanillaObjectives)
+
+# brinstar
+objectives["Kraid"]["map_coords_px"] = (60, 156)
+objectives["SporeSpawn"]["map_coords_px"] = (328, 24)
+objectives["Etecoons"]["map_coords_px"] = (416, 96)
+objectives["Dachora"]["map_coords_px"] = (424, 104)
+# wrecked ship
+objectives["Phantoon"]["map_coords_px"] = (280, 160)
+objectives["WreckedShipChozo"]["map_coords_px"] = (320, 104)
+# draygon
+objectives["Draygon"]["map_coords_px"] = (212, 84)
+objectives["Botwoon"]["map_coords_px"] = (336, 72)
+objectives["RedFish"]["map_coords_px"] = (416, 72)
+objectives["Shaktool"]["map_coords_px"] = (304, 128)
+# crateria
+objectives["OrangeGeemer"]["map_coords_px"] = (152, 24)
+objectives["BombTorizo"]["map_coords_px"] = (296, 56)
+# norfair
+objectives["Ridley"]["map_coords_px"] = (312, 140)
+objectives["Crocomire"]["map_coords_px"] = (364, 88)
+objectives["GoldenTorizo"]["map_coords_px"] = (344, 132)
+objectives["LowerNorfairChozo"]["map_coords_px"] = (376, 112)
+objectives["KingCacatac"]["map_coords_px"] = (324, 24)

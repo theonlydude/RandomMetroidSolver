@@ -161,5 +161,5 @@ LoadMapFromGameMenuBeforeStart:
 	RTL
 }
 
-print "b85 end: ", pc	
+print "MapConstruction b85 end: ", pc
 warnpc $85c2ff

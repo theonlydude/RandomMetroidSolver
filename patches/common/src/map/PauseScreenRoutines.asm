@@ -242,7 +242,7 @@ MaptileGlowRoutine:
 warnpc $8292BD
 }
 ;---------------------------------------------------------------------------------------------------
-;;; VARIA features: area-specific map palettes, door map icons, portal map icons
+;;; VARIA features: area-specific map palettes, door map icons, portal map icons, objective map icons
 ;---------------------------------------------------------------------------------------------------
 {
 org $828D25
@@ -251,8 +251,18 @@ org $828D25
         JSR $8FD4
         JSL VARIA_init
 
+;;; skip drawing boss icons:
+;;; we draw objective numbers instead if they're required + the big red box overwrites portals in boss rando
+org $82B677
+draw_map_icons:
+        bra .skip
+org $82B680
+.skip:
+
 ;; overwrite debug save station icon drawing stuff to draw VARIA icons 
 org $82B6AE
+draw_debug_icons:
+        jsl draw_objective_icons
 	jsl draw_door_icons
         jsl draw_portal_icons
 	bra .continue
@@ -305,33 +315,37 @@ load_area_palettes:
         rtl
 
 ;;; custom map icons
-!extra_gfx_size = $400
+!extra_gfx_size = $600
 !draw_spritemap_routine = $818A5F
 
 VARIA_init:
         ;; construct map
 	JSL $8293C3		; hijacked code
         ;; Load extra gfx for VARIA map icons
-	;; DMA transfer from extra_gfx to VRAM:2D00
-	php
-	%ai8()
-	LDA #$00
-	STA $2116
-	LDA #$2D
-	STA $2117
-	LDA #$80
-	STA $2115
-	JSL $8091A9
-	db $01,$01,$18
-	dl extra_gfx
-	dw !extra_gfx_size
-	LDA #$02
-	STA $420B
-	plp
+        %gfxDMA(extra_gfx, $2D00, !extra_gfx_size) 	; DMA transfer from extra_gfx to VRAM:2D00
         ;; mirror map explored for area portals inside the same map to work
         jsl $8085c6
 	rtl
 
+;;; Y: pointer to spritemap entry
+;;; $14: X coord
+;;; $18: Y coord
+;;; .next: return label
+macro drawMapIcon()
+	lda $18 : sec : sbc $b3 : sta $12	 ; $12 = Y coord - BG1 Y scroll
+	bit #$FF00 : bne .next ; off-screen (same check as CheckIconVerticalPosition
+	lda $14 : sec : sbc $b1 : sta $14	 ; $14 = X coord - BG1 X scroll
+	;; add sprite to OAM
+	lda.w #1 : sta $18	; $18=1 (number of entries argument for add spritemap routine)
+        ;; stack manip to compensate for plb at end of routine:
+        ;; we reuse part of a projectile spritemap draw, which according to PJ, is
+        ;; "the most sanely coded out of all of the spritemap loading routines"
+        phk : pea.w .next-1    ; push return address
+        phb                    ; push B, as it is pulled at end of routine
+        jml !draw_spritemap_routine ; the rtl at end of routine will now return properly
+endmacro
+
+;;; draw door icons matching doot color on map, if their tile is explored and door is still closed
 draw_door_icons:
 	phb : phk : plb		; DB=current bank
 	lda !area_index : asl : tax
@@ -352,25 +366,18 @@ draw_door_icons:
 	;; if door is opened, skip entry
 	lda !doors_bitfield, x : bit !bitindex_mask : bne .next
 	;; here, we need to actually draw the map icon, if it is on screen
-	lda $18 : sec : sbc $b3 : sta $12	 ; $12 = Y coord - BG1 Y scroll
-	bit #$FF00 : bne .next ; off-screen (same check as CheckIconVerticalPosition
-	lda $14 : sec : sbc $b1 : sta $14	 ; $14 = X coord - BG1 X scroll
 	;; Y = pointer to spritemap entry
-	ldx $04 : lda $0004, x : and #$00ff : asl : tax : lda doors_mapicons_sprite_table, x : tay
-	;; add door sprite to OAM
-	lda.w #1 : sta $18	; $18=1 (number of entries argument for add spritemap routine)
-        ;; stack manip to compensate for plb at end of routine:
-        ;; we reuse part of a projectile spritemap draw, which according to PJ, is
-        ;; "the most sanely coded out of all of the spritemap loading routines"
-        phk : pea.w .next-1    ; push return address
-        phb                    ; push B, as it is pulled at end of routine
-        jml !draw_spritemap_routine ; the rtl at end of routine will now return properly
+	ldx $04 : lda $0004, x : and #$00ff : asl : tax
+        ldy doors_mapicons_sprite_table, x
+        %drawMapIcon()
 .next:
 	lda $04 : clc : adc.w #6 : tax : bra .loop	; continue loop
 .end:
 	plb
 	rtl
 
+;;; draw area connectors on map, based on area color.
+;;; Drawn if tile is explored, and portal has been taken once (deduced from explored map tiles)
 draw_portal_icons:
 	phb : phk : plb		; DB=current bank
 	lda !area_index : asl : tax
@@ -389,30 +396,49 @@ draw_portal_icons:
         ldy $04 : lda $0006, y : tax
         lda.l $7E0000, x : and $0008, y : beq .next
         ;; here, we need to actually draw the map icon, if it is on screen
-	lda $18 : sec : sbc $b3 : sta $12	 ; $12 = Y coord - BG1 Y scroll
-	bit #$FF00 : bne .next ; off-screen (same check as CheckIconVerticalPosition
-	lda $14 : sec : sbc $b1 : sta $14	 ; $14 = X coord - BG1 X scroll
 	;; Y = pointer to spritemap entry
-	ldx $04 : lda $0004, x : asl : tax : lda portals_mapicons_sprite_table, x : tay
-	;; add door sprite to OAM
-	lda.w #1 : sta $18	; $18=1 (number of entries argument for add spritemap routine)
-        ;; stack manip to compensate for plb at end of routine:
-        ;; we reuse part of a projectile spritemap draw, which according to PJ, is
-        ;; "the most sanely coded out of all of the spritemap loading routines"
-        phk : pea.w .next-1    ; push return address
-        phb                    ; push B, as it is pulled at end of routine
-        jml !draw_spritemap_routine ; the rtl at end of routine will now return properly
+	ldx $04 : lda $0004, x : asl : tax
+        ldy portals_mapicons_sprite_table, x
+        %drawMapIcon()
 .next:
 	lda $04 : clc : adc.w #10 : tax : bra .loop	; continue loop
 .end:
 	plb
 	rtl
 
+;;; draw objective icons on map, if not completed yet (general, or "sub-objective")
+draw_objective_icons:
+	phb : phk : plb		; DB=current bank
+	lda !area_index : asl : tax
+        ;; X = pointer to area door list, do nothing if ptr is 0
+	lda objectives_mapicons_by_area, x : beq .end : tax
+.loop:
+	lda $0000, x : cmp #$ffff : beq .end ; table terminator
+        phx
+        ;; check if sub-objective is completed
+        lda $0006, x
+        jsl !check_event : bcs .next
+.draw:
+	;; not completed: actually draw the map icon, if it is on screen
+        lda $0000, x : sta $14
+        lda $0002, x : sta $18
+	;; Y = pointer to spritemap entry
+	lda $0004, x : asl : tax
+        ldy objectives_mapicons_sprite_table, x
+        %drawMapIcon()
+.next:
+	;; continue loop
+        pla : clc : adc.w #8 : tax
+        bra .loop
+.end:
+        plb
+        rtl
+
 ;; extra sprites, overwrite some unused sprite VRAM in pause
 extra_gfx:
 incbin "pause_extra.gfx"
 
-; add doors_mapicons_sprite_table, portals_mapicons_sprite_table
+; add doors_mapicons_sprite_table, portals_mapicons_sprite_table, objectives_mapicons_sprite_table
 incsrc "mapicon_sprites.asm"
 
 ;;; written by randomizer (depends on doors+target rom flavor)
@@ -437,10 +463,27 @@ incsrc "mapicon_sprites.asm"
 	;; pointers to table of above format. don't bother with Ceres, Debug
 	dw $0000, $0000, $0000, $0000, $0000, $0000
 
-%export(mapicons_tables)
+;;; written by randomizer (depends on doors+target rom flavor)
+;;; table format:
+;;; dw X, Y
+;;; dw sprite_index
+;;; dw obj_subevent
+;;; sprite_index is index in objectives_mapicons_sprite_table (has to be doubled to get actual index)
+;;; obj_subevent is event ID for this particular icon
+;;; terminator $FFFF
+%export(objectives_mapicons_by_area)
+	;; pointers to table of above format. don't bother with Ceres, Debug
+	dw $0000, $0000, $0000, $0000, $0000, $0000
 
-print "b85 end: ", pc
-warnpc $85ceff
+print "VARIA gfx/code b85 end: ", pc
+
+!mapicons_tables_limit = $85ceff
+
+%export(mapicons_tables)
+        padbyte $ca : pad !mapicons_tables_limit ; reserve space
+warnpc !mapicons_tables_limit
+org !mapicons_tables_limit
+%export(mapicons_tables_limit)
 }
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    SELECT SWITCH AREA                                       |x|

@@ -269,6 +269,11 @@ class PortalMapIcon(MapIcon):
     def __init__(self, index):
         super().__init__(index, palette=4, y=-1)
 
+class ObjectiveMapIcon(MapIcon):
+    def __init__(self, objIdx):
+        super().__init__(0xEB + objIdx, palette=7, x=1, y=-1)
+        self.table_index = objIdx
+
 portal_mapicons = {
     "Crateria": PortalMapIcon(0xE0),
     "GreenPinkBrinstar": PortalMapIcon(0xE1),

@@ -190,6 +190,7 @@ class RomPatcher:
         self.areaMaps = defaultdict(AreaMap)
 
     def patchRom(self):
+        self._mapIconTableAddr = Addresses.getOne("map_mapicons_tables")
         # apply patches first
         self.applyIPSPatches()
         self.commitIPS()
@@ -206,19 +207,17 @@ class RomPatcher:
             # (we actually overwrite code, so we actually decide the condition before writing this time)
             self.romOptions.write("fastTourianSkipRefill", 0x60) # RTS
         # write seed data
-        self.writeObjectives(self.settings["itemLocs"], self.settings["tourian"])
+        if not self.settings["isPlando"]:
+            self.writeSeed(self.settings["seed"]) # lol if race mode
+        # items/locs
         self.writeItemsLocs(self.settings["itemLocs"])
         self.writeSplitLocs(self.settings["majorsSplit"], self.settings["itemLocs"], self.settings["progItemLocs"])
         self.writeItemMapTiles(self.settings["majorsSplit"], self.settings["itemLocs"])
         self.writeItemsNumber()
-        if not self.settings["isPlando"]:
-            self.writeSeed(self.settings["seed"]) # lol if race mode
-        # credits stuff
-        self.writeSpoiler(self.settings["itemLocs"], self.settings["progItemLocs"])
-        self.writeRandoSettings(self.settings["randoSettings"], self.settings["itemLocs"])
-        self.writeEndscreenTables(self.settings["itemLocs"])
+        # objectives
+        self.writeObjectives(self.settings["itemLocs"], self.settings["tourian"])
+        self.writeObjectivesMapIcons()
         # area connections
-        self._mapIconTableAddr = Addresses.getOne("map_mapicons_tables")
         self.writeDoorConnections(self.settings["doors"])
         self.writeDoorConnectionsMapIcons(self.settings["doors"])
         # door caps
@@ -226,6 +225,11 @@ class RomPatcher:
         self.writeDoorsMapIcons()
         # map tile count
         self.writeMapTileCount(self.settings["itemLocs"], self.settings["area"], self.settings["escapeAttr"] is not None)
+        # credits stuff
+        self.writeSpoiler(self.settings["itemLocs"], self.settings["progItemLocs"])
+        self.writeRandoSettings(self.settings["randoSettings"], self.settings["itemLocs"])
+        self.writeEndscreenTables(self.settings["itemLocs"])
+        assert self._mapIconTableAddr <= Addresses.getOne("map_mapicons_tables_limit"), "Map icons table overflow"
 
         self.writeVersion(self.settings["displayedVersion"])
         if self.settings["ctrlDict"] is not None:
@@ -1240,7 +1244,6 @@ class RomPatcher:
             mapicon_ptrs[area] = self.romFile.tell()
             self._writePortalIcons(doorConnections, area, areaMap)
         self._mapIconTableAddr = self.romFile.tell()
-        assert self._mapIconTableAddr < 0x30000, "Map icon table overflow"
         self._writeMapIconTable(mapicon_ptrs, Addresses.getOne("map_portals_mapicons_by_area"))
 
     # change BG table to avoid scrolling sky bug when transitioning to west ocean
@@ -1372,12 +1375,6 @@ class RomPatcher:
             for (i, char) in enumerate('rotation'):
                 self.setOamTile(i, rotationMiddle, char2tile[char], y=0x8e)
 
-    def writeDoorsColor(self):
-        if self.race is None:
-            DoorsManager.writeDoorsColor(self.romFile, self.romFile.writeWord)
-        else:
-            DoorsManager.writeDoorsColor(self.romFile, self.writePlmWord)
-
     def _writeMapIconTable(self, mapicon_ptrs, baseAddr):
         # write pointer table to index above tables by area
         for idx, area in enumerate(['Crateria', 'Brinstar', 'Norfair', 'WreckedShip', 'Maridia', 'Tourian']): # ignore Ceres and Debug
@@ -1385,6 +1382,12 @@ class RomPatcher:
                 continue
             addr = baseAddr + idx*2
             self.romFile.writeWord(pc_to_snes(mapicon_ptrs[area]) & 0xffff, addr)
+
+    def writeDoorsColor(self):
+        if self.race is None:
+            DoorsManager.writeDoorsColor(self.romFile, self.romFile.writeWord)
+        else:
+            DoorsManager.writeDoorsColor(self.romFile, self.writePlmWord)
 
     def writeDoorsMapIcons(self):
         assert len(self.areaMaps) > 0, "call writeDoorsMapIcons when areaMaps are built"
@@ -1397,7 +1400,6 @@ class RomPatcher:
             mapicon_ptrs[area] = self.romFile.tell()
             DoorsManager.writeDoorsMapIcons(self.romFile, area, areaMap)
         self._mapIconTableAddr = self.romFile.tell()
-        assert self._mapIconTableAddr < 0x30000, "Map icon table overflow"
         self._writeMapIconTable(mapicon_ptrs, Addresses.getOne("map_doors_mapicons_by_area"))
 
     def writeDoorIndicators(self, plms, area, door):
@@ -1516,6 +1518,43 @@ class RomPatcher:
                 beamsMask |= item.BeamBits
         self.romFile.writeWord(itemsMask, Addresses.getOne('itemsMask'))
         self.romFile.writeWord(beamsMask, Addresses.getOne('beamsMask'))
+
+    def writeObjectivesMapIcons(self):
+        assert len(self.areaMaps) > 0, "call writeObjectivesMapIcons when areaMaps are built"
+        # create a dict area => {(x, y) => (obj, mapIcon)}
+        objByArea = defaultdict(dict)
+        objTiles = Logic.map_tiles.objectives
+        for goal in Objectives.activeGoals:
+            for mapIcon in goal.mapIcons:
+                coords = objTiles[mapIcon]["map_coords_px"]
+                area = objTiles[mapIcon]["area"]
+                addIcon = coords not in objByArea[area]
+                if not addIcon:
+                    # icon coords conflict, choose one
+                    otherGoal, _ = objByArea[area][coords]
+                    # prioritize icons of objectives of same categories with short icons list:
+                    # we prefer to show a unique boss obj than the list obj when both are present
+                    # prioritize Memes over other categories, as it is more obscure
+                    addIcon = (otherGoal.category == goal.category and len(otherGoal.mapIcons) > len(goal.mapIcons))\
+                           or (otherGoal.category != goal.category and goal.category == "Memes")
+                if addIcon:
+                    objByArea[area][coords] = (goal, mapIcon)
+        # write icon tables
+        self.romFile.seek(self._mapIconTableAddr)
+        mapicon_ptrs = {}
+        for area, objs in objByArea.items():
+            mapicon_ptrs[area] = self.romFile.tell()
+            for coords, objData in objs.items():
+                goalIdx, mapIcon = objData[0].rank - 1, objTiles[objData[1]]
+                assert coords == mapIcon["map_coords_px"]
+                x, y = coords
+                self.romFile.writeWord(x)
+                self.romFile.writeWord(y)
+                self.romFile.writeWord(goalIdx)
+                self.romFile.writeWord(mapIcon["event"])
+            self.romFile.writeWord(0xffff) # terminator
+        self._mapIconTableAddr = self.romFile.tell()
+        self._writeMapIconTable(mapicon_ptrs, Addresses.getOne("map_objectives_mapicons_by_area"))
 
     def removeAnimalsHunt(self):
         # remove custom door asm ptr used by animals hunt as their target is overwritten by door_transition patch

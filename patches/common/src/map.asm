@@ -24,6 +24,7 @@ LOROM
 
 incsrc "macros.asm"             ; for export macro
 incsrc "constants.asm"
+incsrc "event_list.asm"
 
 ;; original patch relies on weird old xkas math
 math pri off
@@ -35,8 +36,7 @@ math pri off
 {;-------------------------------------- GENERAL ---------------------------------------------------
 
 ;Location of map construction code for anything which require a map (minimap, pause screen, file select)
-;Can be moved anywhere (size: $236)
-	!Freespace_MapConstruction = $85C000
+	!Freespace_MapConstruction = $85B000
 
 ;Location for maptile GFX for minimap (size: $1000)
 	!Freespace_MinimapTiles = $9AC200
@@ -170,7 +170,7 @@ math pri off
         !AreaPalettes_Amount = 5 ; number of changed palettes by area
         !AreaPalettes_BaseIndex = 3 ; from this index
         !AreaPalettes_ExploredColorIndex = 1
-        !Freespace_VARIA_features = $85c300
+        !Freespace_VARIA_features = $85B260
 }
 
 {;-------------------------------------- SELECT SWITCH AREA ----------------------------------------

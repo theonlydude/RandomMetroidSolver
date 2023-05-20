@@ -2,8 +2,10 @@
     "CoverTileList": 9029376,
     "ItemTileCheckList": 9029632,
     "area_tiles": 9480944,
-    "doors_mapicons_by_area": 8767855,
-    "mapicons_tables": 8767879,
-    "portals_mapicons_by_area": 8767867,
+    "doors_mapicons_by_area": 8764328,
+    "mapicons_tables": 8764364,
+    "mapicons_tables_limit": 8769279,
+    "objectives_mapicons_by_area": 8764352,
+    "portals_mapicons_by_area": 8764340,
     "total_tiles": 9480956
 }

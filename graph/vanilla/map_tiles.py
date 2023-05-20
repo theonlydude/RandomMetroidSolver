@@ -230,3 +230,31 @@ doors = {
     'PlasmaSparkBottom': {"byteIndex": 22, "bitMask": 2, "room": 0xd340, "area": "Maridia"},
     'OasisTop': {"byteIndex": 66, "bitMask": 2, "room": 0xd48e, "area": "Maridia"}
 }
+
+# see event_list.asm for event IDs
+VARIA_event_base = 0x80
+
+objectives = {
+    # brinstar
+    "Kraid": {"area": "Brinstar", "map_coords_px": (444, 156), "event": 0x48},
+    "SporeSpawn": {"area": "Brinstar", "map_coords_px": (176, 24), "event": 0x49},
+    "Etecoons": {"area": "Brinstar", "map_coords_px": (88, 96), "event": VARIA_event_base+30},
+    "Dachora": {"area": "Brinstar", "map_coords_px": (80, 104), "event": VARIA_event_base+31},
+    # wrecked ship
+    "Phantoon": {"area": "WreckedShip", "map_coords_px": (152, 160), "event": 0x58},
+    "WreckedShipChozo": {"area": "WreckedShip", "map_coords_px": (112, 104), "event": VARIA_event_base+17},
+    # maridia
+    "Draygon": {"area": "Maridia", "map_coords_px": (316, 84), "event": 0x60},
+    "Botwoon": {"area": "Maridia", "map_coords_px": (192, 72), "event": 0x61},
+    "RedFish": {"area": "Maridia", "map_coords_px": (112, 72), "event": VARIA_event_base+2},
+    "Shaktool": {"area": "Maridia", "map_coords_px": (224, 128), "event": VARIA_event_base+16},
+    # crateria
+    "OrangeGeemer": {"area": "Crateria", "map_coords_px": (344, 24), "event": VARIA_event_base+3},
+    "BombTorizo": {"area": "Crateria", "map_coords_px": (200, 56), "event": 0x42},
+    # norfair
+    "Ridley": {"area": "Norfair", "map_coords_px": (184, 140), "event": 0x50},
+    "Crocomire": {"area": "Norfair", "map_coords_px": (132, 88), "event": 0x51},
+    "GoldenTorizo": {"area": "Norfair", "map_coords_px": (152, 132), "event": 0x52},
+    "LowerNorfairChozo": {"area": "Norfair", "map_coords_px": (120, 112), "event": 0xc},
+    "KingCacatac": {"area": "Norfair", "map_coords_px": (180, 24), "event": VARIA_event_base+18}
+}

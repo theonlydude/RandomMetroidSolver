@@ -1,6 +1,7 @@
 import random
 from rom.addresses import Addresses, MAX_OBJECTIVES
 from rom.rom import pc_to_snes
+from rom.map import ObjectiveMapIcon
 from logic.helpers import Bosses
 from logic.smbool import SMBool
 from logic.logic import Logic
@@ -39,7 +40,7 @@ class Synonyms(object):
 class Goal(object):
     def __init__(self, name, gtype, logicClearFunc, romClearFunc, romInProgressFunc=None,
                  escapeAccessPoints=None, objCompletedFuncAPs=lambda ap: [ap],
-                 exclusion=None, items=None, text=None, introText=None,
+                 exclusion=None, items=None, text=None, introText=None, mapIcons=None,
                  available=True, expandableList=None, category=None, area=None,
                  conflictFunc=None):
         self.name = name
@@ -83,6 +84,9 @@ class Goal(object):
         self.category = category
         self.area = area
         self.conflictFunc = conflictFunc
+        self.mapIcons = mapIcons
+        if self.mapIcons == None:
+            self.mapIcons = []
         # used by solver/isolver to know if a goal has been completed
         self.completed = False
 
@@ -146,7 +150,6 @@ def getMiniBossesEscapeAccessPoints(n):
 def getAreaEscapeAccessPoints(area):
     return (1, list({list(loc.AccessFrom.keys())[0] for loc in Logic.locations if loc.GraphArea == area}))
 
-
 _goalsList = [
     # bosses
     Goal("kill kraid", "boss", lambda sm, ap: Bosses.bossDead(sm, 'Kraid'), "kraid_is_dead",
@@ -154,24 +157,28 @@ _goalsList = [
          exclusion={"list": ["kill all G4", "kill one G4"]},
          items=["Kraid"],
          text="{} kraid",
+         mapIcons=["Kraid"],
          category="Bosses"),
     Goal("kill phantoon", "boss", lambda sm, ap: Bosses.bossDead(sm, 'Phantoon'), "phantoon_is_dead",
          escapeAccessPoints=getBossEscapeAccessPoint("Phantoon"),
          exclusion={"list": ["kill all G4", "kill one G4"]},
          items=["Phantoon"],
          text="{} phantoon",
+         mapIcons=["Phantoon"],
          category="Bosses"),
     Goal("kill draygon", "boss", lambda sm, ap: Bosses.bossDead(sm, 'Draygon'), "draygon_is_dead",
          escapeAccessPoints=getBossEscapeAccessPoint("Draygon"),
          exclusion={"list": ["kill all G4", "kill one G4"]},
          items=["Draygon"],
          text="{} draygon",
+         mapIcons=["Draygon"],
          category="Bosses"),
     Goal("kill ridley", "boss", lambda sm, ap: Bosses.bossDead(sm, 'Ridley'), "ridley_is_dead",
          escapeAccessPoints=getBossEscapeAccessPoint("Ridley"),
          exclusion={"list": ["kill all G4", "kill one G4"]},
          items=["Ridley"],
          text="{} ridley",
+         mapIcons=["Ridley"],
          category="Bosses"),
     Goal("kill one G4", "other", lambda sm, ap: Bosses.xBossesDead(sm, 1), "boss_1_killed",
          escapeAccessPoints=getG4EscapeAccessPoints(1),
@@ -180,6 +187,7 @@ _goalsList = [
                     "type": "boss",
                     "limit": 0},
          text="{} one g4",
+         mapIcons=Bosses.Golden4(),
          category="Bosses"),
     Goal("kill two G4", "other", lambda sm, ap: Bosses.xBossesDead(sm, 2),
          "boss_2_killed", romInProgressFunc="in_progress_boss_2_killed",
@@ -188,6 +196,7 @@ _goalsList = [
                     "type": "boss",
                     "limit": 1},
          text="{} two g4      ",
+         mapIcons=Bosses.Golden4(),
          category="Bosses"),
     Goal("kill three G4", "other", lambda sm, ap: Bosses.xBossesDead(sm, 3),
          "boss_3_killed", romInProgressFunc="in_progress_boss_3_killed",
@@ -196,6 +205,7 @@ _goalsList = [
                     "type": "boss",
                     "limit": 2},
          text="{} three g4      ",
+         mapIcons=Bosses.Golden4(),
          category="Bosses"),
     Goal("kill all G4", "other", lambda sm, ap: Bosses.allBossesDead(sm),
          "all_g4_dead", romInProgressFunc="in_progress_boss_4_killed",
@@ -204,6 +214,7 @@ _goalsList = [
          items=["Kraid", "Phantoon", "Draygon", "Ridley"],
          text="{} all g4      ",
          expandableList=["kill kraid", "kill phantoon", "kill draygon", "kill ridley"],
+         mapIcons=Bosses.Golden4(),
          category="Bosses"),
     # minibosses
     Goal("kill spore spawn", "miniboss", lambda sm, ap: Bosses.bossDead(sm, 'SporeSpawn'), "spore_spawn_is_dead",
@@ -211,24 +222,28 @@ _goalsList = [
          exclusion={"list": ["kill all mini bosses", "kill one miniboss"]},
          items=["SporeSpawn"],
          text="{} spore spawn",
+         mapIcons=["SporeSpawn"],
          category="Minibosses"),
     Goal("kill botwoon", "miniboss", lambda sm, ap: Bosses.bossDead(sm, 'Botwoon'), "botwoon_is_dead",
          escapeAccessPoints=getBossEscapeAccessPoint("Botwoon"),
          exclusion={"list": ["kill all mini bosses", "kill one miniboss"]},
          items=["Botwoon"],
          text="{} botwoon",
+         mapIcons=["Botwoon"],
          category="Minibosses"),
     Goal("kill crocomire", "miniboss", lambda sm, ap: Bosses.bossDead(sm, 'Crocomire'), "crocomire_is_dead",
          escapeAccessPoints=getBossEscapeAccessPoint("Crocomire"),
          exclusion={"list": ["kill all mini bosses", "kill one miniboss"]},
          items=["Crocomire"],
          text="{} crocomire",
+         mapIcons=["Crocomire"],
          category="Minibosses"),
     Goal("kill golden torizo", "miniboss", lambda sm, ap: Bosses.bossDead(sm, 'GoldenTorizo'), "golden_torizo_is_dead",
          escapeAccessPoints=getBossEscapeAccessPoint("GoldenTorizo"),
          exclusion={"list": ["kill all mini bosses", "kill one miniboss"]},
          items=["GoldenTorizo"],
          text="{} golden torizo",
+         mapIcons=["GoldenTorizo"],
          category="Minibosses",
          conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))),
     Goal("kill one miniboss", "other", lambda sm, ap: Bosses.xMiniBossesDead(sm, 1), "miniboss_1_killed",
@@ -238,6 +253,7 @@ _goalsList = [
                     "type": "miniboss",
                     "limit": 0},
          text="{} one miniboss",
+         mapIcons=Bosses.miniBosses(),
          category="Minibosses"),
     Goal("kill two minibosses", "other", lambda sm, ap: Bosses.xMiniBossesDead(sm, 2),
          "miniboss_2_killed", romInProgressFunc="in_progress_miniboss_2_killed",
@@ -246,6 +262,7 @@ _goalsList = [
                     "type": "miniboss",
                     "limit": 1},
          text="{} two minibosses      ",
+         mapIcons=Bosses.miniBosses(),
          category="Minibosses"),
     Goal("kill three minibosses", "other", lambda sm, ap: Bosses.xMiniBossesDead(sm, 3),
          "miniboss_3_killed", romInProgressFunc="in_progress_miniboss_3_killed",
@@ -254,6 +271,7 @@ _goalsList = [
                     "type": "miniboss",
                     "limit": 2},
          text="{} 3 minibosses      ",
+         mapIcons=Bosses.miniBosses(),
          category="Minibosses"),
     Goal("kill all mini bosses", "other", lambda sm, ap: Bosses.allMiniBossesDead(sm),
          "all_mini_bosses_dead", romInProgressFunc="in_progress_miniboss_4_killed",
@@ -263,6 +281,7 @@ _goalsList = [
          items=["SporeSpawn", "Botwoon", "Crocomire", "GoldenTorizo"],
          text="{} all minibosses      ",
          expandableList=["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo"],
+         mapIcons=Bosses.miniBosses(),
          category="Minibosses",
          conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))),
     # other
@@ -436,6 +455,7 @@ _goalsList = [
          "fish_tickled",
          escapeAccessPoints=(1, ["Red Fish Room Bottom"]),
          objCompletedFuncAPs=lambda ap: ["Red Fish Room Bottom"],
+         mapIcons=["RedFish"],
          category="Memes"),
     Goal("kill the orange geemer", "other",
          lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Bowling"), # XXX this unnecessarily adds canPassBowling as requirement
@@ -444,6 +464,7 @@ _goalsList = [
          escapeAccessPoints=(1, ["Bowling"]),
          objCompletedFuncAPs=lambda ap: ["Bowling"],
          text="{} orange geemer",
+         mapIcons=["OrangeGeemer"],
          category="Memes"),
     Goal("kill shaktool", "other",
          lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Oasis Bottom"),
@@ -453,6 +474,7 @@ _goalsList = [
          escapeAccessPoints=(1, ["Oasis Bottom"]),
          objCompletedFuncAPs=lambda ap: ["Oasis Bottom"],
          text="{} shaktool",
+         mapIcons=["Shaktool"],
          category="Memes"),
     Goal("activate chozo robots", "other", lambda sm, ap: sm.wand(Objectives.canAccessLocation(sm, ap, "Bomb"),
                                                                   Objectives.canAccessLocation(sm, ap, "Gravity Suit"),
@@ -461,6 +483,7 @@ _goalsList = [
          "all_chozo_robots", romInProgressFunc="in_progress_chozo_robots",
          category="Memes",
          text="trigger chozo bots      ",
+         mapIcons=["BombTorizo", "GoldenTorizo", "WreckedShipChozo", "LowerNorfairChozo"],
          escapeAccessPoints=(3, ["Landing Site", "Screw Attack Bottom", "Bowling"]),
          objCompletedFuncAPs=lambda ap: ["Landing Site", "Screw Attack Bottom", "Bowling"],
          exclusion={"list": ["kill golden torizo"]},
@@ -469,12 +492,14 @@ _goalsList = [
                                                               Objectives.canAccess(sm, ap, "Etecoons Bottom")), # Etecoons
          "visited_animals", romInProgressFunc="in_progress_animals",
          text="visit the animals      ",
+         mapIcons=["Etecoons", "Dachora"],
          category="Memes",
          escapeAccessPoints=(2, ["Big Pink", "Etecoons Bottom"]),
          objCompletedFuncAPs=lambda ap: ["Big Pink", "Etecoons Bottom"]),
     Goal("kill king cacatac", "other",
          lambda sm, ap: Objectives.canAccess(sm, ap, 'Bubble Mountain Top'),
          "king_cac_dead",
+         mapIcons=["KingCacatac"],
          category="Memes",
          escapeAccessPoints=(1, ['Bubble Mountain Top']),
          objCompletedFuncAPs=lambda ap: ['Bubble Mountain Top'])
@@ -1079,3 +1104,5 @@ class Objectives(object):
         # write trailer, see intro_text.asm
         rom.writeWord(0xAE5B)
         rom.writeWord(0x9698)
+
+objective_mapicons = [ObjectiveMapIcon(i) for i in range(Objectives.maxActiveGoals)]

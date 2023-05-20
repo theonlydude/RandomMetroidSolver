@@ -94,3 +94,43 @@ portal_Tourian:
 portals_mapicons_sprite_table:
 	dw portal_Crateria,portal_GreenPinkBrinstar,portal_RedBrinstar,portal_WreckedShip,portal_Kraid,portal_Norfair,portal_Crocomire,portal_LowerNorfair,portal_WestMaridia,portal_EastMaridia,portal_Tourian
 
+objective_1:
+	    dw $0001 : db $ff : dw $2eeb
+objective_2:
+	    dw $0001 : db $ff : dw $2eec
+objective_3:
+	    dw $0001 : db $ff : dw $2eed
+objective_4:
+	    dw $0001 : db $ff : dw $2eee
+objective_5:
+	    dw $0001 : db $ff : dw $2eef
+objective_6:
+	    dw $0001 : db $ff : dw $2ef0
+objective_7:
+	    dw $0001 : db $ff : dw $2ef1
+objective_8:
+	    dw $0001 : db $ff : dw $2ef2
+objective_9:
+	    dw $0001 : db $ff : dw $2ef3
+objective_10:
+	    dw $0001 : db $ff : dw $2ef4
+objective_11:
+	    dw $0001 : db $ff : dw $2ef5
+objective_12:
+	    dw $0001 : db $ff : dw $2ef6
+objective_13:
+	    dw $0001 : db $ff : dw $2ef7
+objective_14:
+	    dw $0001 : db $ff : dw $2ef8
+objective_15:
+	    dw $0001 : db $ff : dw $2ef9
+objective_16:
+	    dw $0001 : db $ff : dw $2efa
+objective_17:
+	    dw $0001 : db $ff : dw $2efb
+objective_18:
+	    dw $0001 : db $ff : dw $2efc
+
+objectives_mapicons_sprite_table:
+	dw objective_1,objective_2,objective_3,objective_4,objective_5,objective_6,objective_7,objective_8,objective_9,objective_10,objective_11,objective_12,objective_13,objective_14,objective_15,objective_16,objective_17,objective_18
+

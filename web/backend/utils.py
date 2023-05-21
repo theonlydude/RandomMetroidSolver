@@ -111,6 +111,8 @@ def getAddressesToRead(cache):
     addresses["misc"] += Addresses.getWeb('escapeTimer')
     # start ap
     addresses["misc"] += Addresses.getWeb('startAP')
+    # ROM options
+    addresses["misc"] += Addresses.getWeb("objectives_escape_option")
     # objectives
     addresses["misc"] += Objectives.getAddressesToRead()
 

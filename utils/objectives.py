@@ -843,7 +843,7 @@ class Objectives(object):
         for name, goal in Objectives.goals.items():
             if goal.checkAddr == checkFunction:
                 return goal
-        assert True, "Goal with check function {} not found".format(hex(checkFunction))
+        assert False, "Goal with check function {} not found".format(hex(checkFunction))
 
     @staticmethod
     def getTotalItemsCount():

@@ -50,7 +50,7 @@ kindToIndex = {
     LocationMapTileKind.FourWallsCorridor: {"minor":0x4c, "nothing":0x4d, "major":0x4e},
     LocationMapTileKind.TwoWallsCorridor: {"minor":0x51, "nothing":0x52, "major":0x53},
     LocationMapTileKind.SingleWallHorizontal: {"minor":0x61, "nothing":0x62, "major":0x63},
-    LocationMapTileKind.FourWallsTwoDoors: {"minor": 0x6b, "nothing": 0x6c},
+    LocationMapTileKind.FourWallsTwoDoors: {"minor": 0x66, "nothing": 0x67, "major": 0x68},
     LocationMapTileKind.SingleWallVertical: {"minor":0x71, "nothing":0x72, "major":0x73},
     LocationMapTileKind.ThreeWallsOneDoorOpenBottom: {"nothing":0x90, "minor":0x91, "major":0x92}
 }
@@ -63,7 +63,11 @@ def getTileKind(tileIndex):
     return (LocationMapTileKind.Unknown, "nothing")
 
 def getTileIndex(kind, tileClass):
-    return kindToIndex[kind][tileClass]
+    idxEntry = kindToIndex[kind]
+    if tileClass in idxEntry:
+        return idxEntry[tileClass]
+    else:
+        raise ValueError(f"No '{tileClass}' entry for tile kind {kind}")
 
 nPages = 2
 pageSize = 32

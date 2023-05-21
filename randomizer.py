@@ -368,6 +368,7 @@ if __name__ == "__main__":
             forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full. Use 100 locations on your minimizer to use a non-Full split.", altValue='FullWithHUD')
     else:
         minimizerN = None
+    logger.debug(f"majorsSplit: {args.majorsSplit}")
 
     doorsColorsRandom = False
     if args.doorsColorsRando == 'random':

@@ -542,9 +542,6 @@ if __name__ == "__main__":
         if args.energyQtyList is not None:
             energyQties = args.energyQtyList.split(',')
         energyQty = random.choice(energyQties)
-    if energyQty == 'ultra sparse':
-        # add nerfed rainbow beam patch
-        RomPatches.ActivePatches.append(RomPatches.NerfedRainbowBeam)
     qty = {'energy': energyQty,
            'minors': minorQty,
            'ammo': { 'Missile': missileQty,
@@ -661,14 +658,21 @@ if __name__ == "__main__":
             forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
         if any(goal for goal in goals if goal.gtype == "map"):
             forceArg('revealMap', True, "'Reveal Map' forced to on", webValue='on')
+            if energyQty == "ultra sparse":
+                forceArg("energyQty", "sparse", "Enegy quantity forced to 'sparse' instead of 'ultra sparse' because of exploration objectives")
+                energyQty = "sparse"
     else:
         args.tourian = plandoRando["tourian"]
         objectivesManager = Objectives(args.tourian != 'Disabled')
         for goal in plandoRando["objectives"]:
             objectivesManager.addGoal(goal)
 
+    if energyQty == 'ultra sparse':
+        # add nerfed rainbow beam patch
+        RomPatches.ActivePatches.append(RomPatches.NerfedRainbowBeam)
+
     # print some parameters for jm's stats
-    if args.jm == True:
+    if args.jm == True or args.debug == True:
         print("logic:{}".format(args.logic))
         print("startLocation:{}".format(args.startLocation))
         print("progressionSpeed:{}".format(progSpeed))

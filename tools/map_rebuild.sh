@@ -2,6 +2,8 @@
 
 # automate every step to rebuild all maps. run from VARIA source root dir
 
+set -e
+
 tools/map_tilecount.py tools/map/graph_area graph/vanilla/map_tilecount.py
 tools/map_tilecount.py tools/map/graph_area_mirror graph/mirror/map_tilecount.py
 

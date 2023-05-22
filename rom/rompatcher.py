@@ -224,7 +224,8 @@ class RomPatcher:
         self.writeDoorsColor()
         self.writeDoorsMapIcons()
         # map tile count
-        self.writeMapTileCount(self.settings["itemLocs"], self.settings["area"], self.settings["escapeAttr"] is not None)
+        self.writeMapTileCount(self.settings["itemLocs"], self.settings["area"],
+                               self.settings["escapeAttr"] is not None, self.settings["tourian"])
         # credits stuff
         self.writeSpoiler(self.settings["itemLocs"], self.settings["progItemLocs"])
         self.writeRandoSettings(self.settings["randoSettings"], self.settings["itemLocs"])
@@ -1429,7 +1430,7 @@ class RomPatcher:
             else:
                 self.applyIPSPatch(plmName)
 
-    def writeMapTileCount(self, itemLocs, isArea, isEscape):
+    def writeMapTileCount(self, itemLocs, isArea, isEscape, tourian):
         # filter areas : exclude Tourian and Ceres, and filter excluded areas in minimizer
         #
         # special boss check to avoid varia/space jump/ridley E locs in minimizer and get only graph
@@ -1460,6 +1461,9 @@ class RomPatcher:
             if area in accessibleAreasNoBoss:
                 # count all tiles
                 offset = 0 if not isEscape else escapeRandoOffsets.get(area, 0)
+                if area == "Crateria" and not isArea and tourian == "Fast":
+                    # remove G4 room for count (only one tile, as the one below elevator is already removed)
+                    offset -= 1
                 count = tilecount[area] + offset
             elif area in bossTiles:
                 # only boss tiles

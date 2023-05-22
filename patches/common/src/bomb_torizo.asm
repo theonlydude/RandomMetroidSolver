@@ -37,6 +37,7 @@ btcheck:
     cmp !PickedUp
     rts
 
+print "b84 end: ", pc
 warnpc $84f860
 
 ;;; overwrite BT grey door PLM instruction (bomb check)

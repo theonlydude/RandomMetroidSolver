@@ -94,9 +94,10 @@ warnpc $84BAF3
 
 ;;; other freespace
 org $848a40
-;;; instruction list for nothing shot block
+;;; instruction list for nothing shot block:
+;;; collect nothing when block is shot
 instr_list_shot_block:
-.start:                         ; don't behave as a shot block yet if tile is unexplored for simpler implementation
+.start:
         dw instr_call, instr_list_item_shot_block
         dw instr_check_item, .end
 .collect:

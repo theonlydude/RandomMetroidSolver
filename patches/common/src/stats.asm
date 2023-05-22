@@ -462,3 +462,6 @@ UnsetMessageBoxFlag:
         JSR.w $80FA ; What we wrote over
         STZ.w !skip_lag_count_flag
         RTS
+
+print "b85 end: ", pc
+warnpc $85cf0f

@@ -12,18 +12,26 @@ arch 65816
 incsrc "macros.asm"
 incsrc "constants.asm"
 
+incsrc "sym/nothing_item_plm.asm"
+
 org $84889F
         JSL COLLECTTANK
-org $84F830                     ; FLO: changed original adress to avoid conflict with other patches
+
+org $85CF10                     ; FLO: changed original adress to avoid conflict with other patches
 COLLECTTANK:
+        ;; don't increment collected item counter when "collecting" a nothing
+        cpy.w #nothing_item_plm_instr_list_visible_block_end : beq .end
+        cpy.w #nothing_item_plm_instr_list_shot_block_end : beq .end
         PHA
         LDA !CollectedItems
         INC A
         STA !CollectedItems
         PLA
-        JSL $80818E
+.end:
+        JSL $80818E             ; hijacked code
         RTL
-warnpc $84f840
+
+warnpc $85cf2f
 
 org $8BE627
 display_item_count_end_game:

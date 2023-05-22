@@ -240,7 +240,8 @@ class RandoSetup(object):
     # in door color rando, determine mandatory beams
     def checkDoorBeams(self):
         if self.restrictions.isLateDoors():
-            doorBeams = ['Wave','Ice','Spazer','Plasma']
+            doorBeams = [beam for beam in ['Wave','Ice','Spazer','Plasma'] if beam not in self.forbiddenItems]
+            self.log.debug("checkDoorBeams. checking for "+str(doorBeams))
             self.restrictions.mandatoryBeams = [beam for beam in doorBeams if not self.checkPool(forbidden=[beam])]
             self.log.debug("checkDoorBeams. mandatoryBeams="+str(self.restrictions.mandatoryBeams))
 

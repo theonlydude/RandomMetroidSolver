@@ -666,12 +666,15 @@ class Objectives(object):
         areaAPs = [ap for ap in accessibleAPs if ap.GraphArea == area]
         for ap in areaAPs:
             if ap not in availAPs:
+                LOG.debug(f"canExploreArea {area} {ap} not available")
                 return SMBool(False)
 
         accessibeLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
         areaLocs = [loc for loc in accessibeLocs if loc.GraphArea == area]
         availLocs = graph.getAvailableLocations(areaLocs, sm, maxDiff, rootApName)
         if len(availLocs) != len(areaLocs):
+            missingLocs = [loc for loc in areaLocs if loc not in availLocs]
+            LOG.debug(f"canExploreArea {area}, cannot access locs: {str(missingLocs)}")
             return SMBool(False)
 
         return SMBool(True)
@@ -684,12 +687,15 @@ class Objectives(object):
         availAPs = graph.getAvailableAccessPoints(graph.accessPoints[rootApName], sm, maxDiff)
         for ap in allAPs:
             if ap not in availAPs:
+                LOG.debug(f"canExploreMap {ap} not available")
                 return SMBool(False)
 
         accessibeLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
         allLocs = [loc for loc in accessibeLocs if loc.GraphArea != "Tourian"]
         availLocs = graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName)
         if len(availLocs) != len(allLocs):
+            missingLocs = [loc for loc in allLocs if loc not in availLocs]
+            LOG.debug(f"canExploreMap, cannot access locs: {str(missingLocs)}")
             return SMBool(False)
 
         return SMBool(True)

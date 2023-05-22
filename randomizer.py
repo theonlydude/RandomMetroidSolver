@@ -662,6 +662,7 @@ if __name__ == "__main__":
             if energyQty == "ultra sparse":
                 forceArg("energyQty", "sparse", "Enegy quantity forced to 'sparse' instead of 'ultra sparse' because of exploration objectives")
                 energyQty = "sparse"
+                qty["energy"] = energyQty
     else:
         args.tourian = plandoRando["tourian"]
         objectivesManager = Objectives(args.tourian != 'Disabled')

@@ -309,27 +309,26 @@ class RandoSetup(object):
             escAPs = [ap for ap in aps if ap in availAPs]
             self.log.debug("escAPs="+str(escAPs))
             if len(escAPs) < n:
+                ret = False
                 msg = "goal '{}' impossible to complete due to area layout".format(goal.name)
                 self.log.debug("checkPool. {}".format(msg))
                 self.errorMsgs.append(msg)
-                ret = False
                 continue
             for ap in escAPs:
                 if not self.areaGraph.canAccess(self.sm, ap, "Golden Four", self.settings.maxDiff):
+                    ret = False
                     msg = "goal '{}' impossible to complete due to area layout".format(goal.name)
                     self.log.debug("checkPool. {}".format(msg))
                     self.errorMsgs.append(msg)
-                    ret = False
-                    break
         # check that objectives are completable (ignore bosses/minibosses, checked below)
         if ret:
             checkedGoals = [goal for goal in Objectives.activeGoals if goal.category != "Bosses" and goal.category != "Minibosses"]
             for goal in checkedGoals:
                 if not goal.canClearGoal(self.sm, 'Golden Four'):
+                    ret = False
                     msg = f"Goal {goal} is not completable"
                     self.log.debug('checkPool. {}'.format(msg))
                     self.errorMsgs.append(msg)
-                    break
         # check if all inter-area APs can reach each other
         if ret:
             interAPs = [ap for ap in self.areaGraph.getAccessibleAccessPoints(self.startAP) if not ap.isInternal() and not ap.isLoop()]

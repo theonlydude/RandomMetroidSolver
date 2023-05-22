@@ -429,7 +429,10 @@ if __name__ == "__main__":
     if not GraphUtils.isStandardStart(args.startLocation) and args.plandoRando is None:
         if args.majorsSplit in ['Major', "Chozo"]:
             forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
+        forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", webValue='on')
+        forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", webValue='on')
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
+        forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", webValue='on')
         possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(areaRandomization, maxDifficulty, args.morphPlacement)
         if args.startLocation == 'random':
             if args.startLocationList is not None:
@@ -447,8 +450,6 @@ if __name__ == "__main__":
             optErrMsgs.append('Possible start locations with these settings: {}'.format(possibleStartAPs))
             dumpErrorMsgs(args.output, optErrMsgs)
             sys.exit(-1)
-        if args.startLocation == 'Wrecked Ship Main':
-            forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on for custom start location", webValue='on')
     ap = getAccessPoint(args.startLocation)
     if 'forcedEarlyMorph' in ap.Start and ap.Start['forcedEarlyMorph'] == True:
         forceArg('morphPlacement', 'early', "'Morph Placement' forced to early for custom start location")

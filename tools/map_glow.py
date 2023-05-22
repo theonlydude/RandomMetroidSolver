@@ -36,6 +36,8 @@ bytes2color = lambda c: tuple(float(i)/256 for i in c)
 def shiftColor(c, i):
     return RGB_24_to_15(color2bytes(hsv2rgb(*bytes2color(applyOffset(i, *color2bytes(rgb2hsv(*RGB_15_to_24(c))))))))
 
+print("include\n")
+
 for area, snesColor in areaColors.items():
     print("!AreaColor_%s = $%04x" % (area, snesColor))
     shiftedColors = [shiftColor(snesColor, i) for i in range(len(s_offsets))]

@@ -1109,7 +1109,7 @@ org map_data_Norfair+$1b2  ; (25, 6)
 ;;; tiles for room "Lower Norfair Escape Power Bomb Room"
 
 org map_data_Norfair+$1f2  ; (25, 7)
-     dw $986b  ; BGtile[i=$6b p=$6 VX]
+     dw $9866  ; BGtile[i=$66 p=$6 VX]
 
 ;;; tiles for room "Red Keyhunter Shaft"
 

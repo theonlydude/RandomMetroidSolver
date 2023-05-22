@@ -5,7 +5,7 @@ include
 ;;; tiles for room "[Crab Maze to Elevator]"
 
 org map_data_Crateria+$aa8  ; (52, 10)
-     dw $186c  ; BGtile[i=$6c p=$6 X]
+     dw $1867  ; BGtile[i=$67 p=$6 X]
 
 ;;; tiles for room "[Elevator to Maridia]"
 

@@ -709,7 +709,7 @@ org map_data_Crateria+$a9a  ; (45, 10)
 ;;; tiles for room "[Crab Maze to Elevator]"
 
 org map_data_Crateria+$294  ; (10, 10)
-     dw $506c  ; BGtile[i=$6c p=$4 HX]
+     dw $5067  ; BGtile[i=$67 p=$4 HX]
 
 ;;; tiles for room "[Elevator to Maridia]"
 

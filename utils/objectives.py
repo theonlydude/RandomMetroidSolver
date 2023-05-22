@@ -384,7 +384,7 @@ _goalsList = [
          introText="explore 75 percent of map",
          category="Map"),
     Goal("explore 100% map", "map", lambda sm, ap: sm.wand(Objectives.canExploreMap(sm, ap),
-                                                           sm.canExploreAmphitheater(),
+                                                           sm.canExploreAmphitheater(), # requires SJ, so covers Croc 
                                                            sm.canGoUpMtEverest(),
                                                            sm.canPassCacatacAlley()),
          "explored_map_100", romInProgressFunc="explored_all_map_percent",
@@ -425,7 +425,8 @@ _goalsList = [
          introText="explore upper norfair",
          category="Map",
          area="Norfair"),
-    Goal("explore croc's lair", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Crocomire"),
+    Goal("explore croc's lair", "map", lambda sm, ap: sm.wand(Objectives.canExploreArea(sm, ap, "Crocomire"),
+                                                              sm.wor(sm.haveItem("SpeedBooster"), sm.haveItem("SpaceJump"))), # don't explore Post-Croc Jump Room w/ Bombs...
          "croc_explored", romInProgressFunc="croc_explored_percent",
          text="explore croc lair",
          introText="explore croc's lair",
@@ -743,6 +744,8 @@ class Objectives(object):
     def updateItemPercentEscapeAccess(self, collectedLocsAccessPoints):
         for pct in [25,50,75,100]:
             goal = 'collect %d%% items' % pct
+            self._replaceEscapeAccessPoints(goal, collectedLocsAccessPoints)
+            goal = 'explore %d%% map' % pct
             self._replaceEscapeAccessPoints(goal, collectedLocsAccessPoints)
         # not exactly accurate, but player has all upgrades to escape
         self._replaceEscapeAccessPoints("collect all upgrades", collectedLocsAccessPoints)

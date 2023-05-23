@@ -537,7 +537,7 @@ class Objectives(object):
     totalItemsCount = 100
     goals = _goals
     graph = None
-    _tourianRequired = None
+    tourianRequired = None
     hidden = False
     # objectives are really needed when initiliazing rando, computing escape for disabled Tourian, and solver/tracker
     # we don't need them when placing items since the seed has to be completable 100% if generated, and objectives are
@@ -547,14 +547,14 @@ class Objectives(object):
     scavHuntGoal = ["finish scavenger hunt"]
 
     def __init__(self, tourianRequired=True, randoSettings=None):
-        if Objectives._tourianRequired is None:
-            Objectives._tourianRequired = tourianRequired
+        if Objectives.tourianRequired is None:
+            Objectives.tourianRequired = tourianRequired
         self.randoSettings = randoSettings
 
     @property
     def tourianRequired(self):
-        assert Objectives._tourianRequired is not None
-        return Objectives._tourianRequired
+        assert Objectives.tourianRequired is not None
+        return Objectives.tourianRequired
 
     def resetGoals(self):
         Objectives.activeGoals = []
@@ -964,7 +964,7 @@ class Objectives(object):
         for goal in Objectives.activeGoals:
             LOG.debug("active goal: {}".format(goal.name))
 
-        Objectives._tourianRequired = not bool(romReader.romOptions.read('escapeTrigger'))
+        Objectives.tourianRequired = not bool(romReader.romOptions.read('escapeTrigger'))
         LOG.debug("tourianRequired: {}".format(self.tourianRequired))
 
         LOG.debug(f"nbActiveGoals: {Objectives.nbActiveGoals}, nbRequiredGoals: {Objectives.nbRequiredGoals}")

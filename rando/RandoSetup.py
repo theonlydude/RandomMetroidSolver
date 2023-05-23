@@ -369,11 +369,12 @@ class RandoSetup(object):
                     self.log.debug("checkPool. mandatoryBosses: {}".format(mandatoryBosses))
                     ret = mandatoryBosses.issubset(set(beatableBosses)) and Objectives.checkLimitObjectives(beatableBosses)
                     if ret:
-                        # check that we can then kill mother brain
-                        self.sm.addItems(Bosses.Golden4() + Bosses.miniBosses())
-                        beatableMotherBrain = [loc.Name for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if loc.Name == 'Mother Brain']
-                        ret = len(beatableMotherBrain) > 0
-                        self.log.debug("checkPool. beatable Mother Brain={}".format(ret))
+                        if Objectives.tourianRequired == True:
+                            # check that we can then kill mother brain
+                            self.sm.addItems(Bosses.Golden4() + Bosses.miniBosses())
+                            beatableMotherBrain = [loc.Name for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if loc.Name == 'Mother Brain']
+                            ret = len(beatableMotherBrain) > 0
+                            self.log.debug("checkPool. beatable Mother Brain={}".format(ret))
                     else:
                         msg = "can't kill all mandatory bosses/minibosses: {}".format(', '.join(list(mandatoryBosses - set(beatableBosses))))
                         self.log.debug("checkPool. {}".format(msg))

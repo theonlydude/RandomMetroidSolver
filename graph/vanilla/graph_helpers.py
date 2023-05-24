@@ -279,7 +279,8 @@ class HelpersGraph(Helpers):
                                              sm.canBlueGateGlitch(),
                                              # if missiles were required to open the door, require two packs as no farming around
                                              sm.wor(sm.wnot(SMBool('Missile' in sm.traverse('DoubleChamberRight').items)),
-                                                    sm.itemCountOk("Missile", 2))))))
+                                                    sm.itemCountOk("Missile", 2),
+                                                    sm.wand(sm.itemCountOk('Missile', 1), sm.itemCountOk('Super', 1)))))))
 
     def canExitCathedral(self, hellRun):
         # from top: can use bomb/powerbomb jumps

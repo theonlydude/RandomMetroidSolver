@@ -301,28 +301,27 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canGrappleEscape(self):
         sm = self.smbm
-        access = sm.wor(sm.wor(sm.haveItem('SpaceJump'),
-                               sm.wand(sm.canInfiniteBombJump(), # IBJ from lava...either have grav or freeze the enemy there if hellrunning (otherwise single DBJ at the end)
-                                       sm.wor(sm.heatProof(),
-                                              sm.haveItem('Gravity'),
-                                              sm.haveItem('Ice')))),
-                        sm.haveItem('Grapple'),
-                        sm.wand(sm.haveItem('SpeedBooster'),
-                                sm.wor(sm.haveItem('HiJump'), # jump from the blocks below
-                                       sm.knowsShortCharge())), # spark from across the grapple blocks
-                        sm.wand(sm.haveItem('HiJump'), sm.canSpringBallJump())) # jump from the blocks below
         hellrun = 'MainUpperNorfair'
         tbl = Settings.hellRunsTable[hellrun]['Croc -> Norfair Entrance']
         mult = tbl['mult']
         minE = tbl['minE']
-        if 'InfiniteBombJump' in access.knows or 'ShortCharge' in access.knows:
-            mult *= 0.7
-        elif 'SpaceJump' in access.items:
-            mult *= 1.5
-        elif 'Grapple' in access.items:
-            mult *= 1.25
-        return sm.wand(access,
-                       sm.canHellRun(hellrun, mult, minE))
+        if sm.haveItem('SpaceJump'):
+            return sm.wand(sm.haveItem('SpaceJump'), sm.canHellRun(hellrun, mult*1.5, minE))
+        if sm.haveItem('Grapple'):
+            return sm.wand(sm.haveItem('Grapple'), sm.canHellRun(hellrun, mult*1.25, minE))
+        speedHj = sm.wand(sm.haveItem('SpeedBooster'), sm.haveItem('HiJump')) # jump from the blocks below
+        if speedHj:
+            return sm.wand(speedHj, sm.canHellRun(hellrun, mult, minE))
+        sbj = sm.wand(sm.haveItem('HiJump'), sm.canSpringBallJump()) # jump from the blocks below
+        if sbj:
+            return sm.wand(sbj, sm.canHellRun(hellrun, mult, minE))
+        return sm.wand(sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
+                                      sm.knowsShortCharge()),
+                              sm.wand(sm.canInfiniteBombJump(), # IBJ from lava...either have grav or freeze the enemy there if hellrunning (otherwise single DBJ at the end)
+                                      sm.wor(sm.heatProof(),
+                                             sm.haveItem('Gravity'),
+                                             sm.haveItem('Ice')))),
+                       sm.canHellRun(hellrun, mult*0.7, minE))
 
     @Cache.decorator
     def canHellRunBackFromGrappleEscape(self):

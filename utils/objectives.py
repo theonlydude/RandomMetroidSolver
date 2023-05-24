@@ -90,6 +90,10 @@ class Goal(object):
         # used by solver/isolver to know if a goal has been completed
         self.completed = False
 
+    def setClearFunc(self, value):
+#        print(f"SET {self.name}: {value}")
+        self.clearFunc = value
+
     @property
     def checkAddr(self):
         return pc_to_snes(Addresses.getOne(self.symbol)) & 0xffff
@@ -104,6 +108,7 @@ class Goal(object):
         self.rank = rank
 
     def canClearGoal(self, smbm, ap=None):
+#        print(f"CALL {self.name}: {self.clearFunc}")
         # not all objectives require an ap (like limit objectives)
         return self.clearFunc(smbm, ap)
 
@@ -757,7 +762,7 @@ class Objectives(object):
         self._replaceEscapeAccessPoints("collect all upgrades", collectedLocsAccessPoints)
 
     def setScavengerHuntFunc(self, scavClearFunc):
-        Objectives.goals["finish scavenger hunt"].clearFunc = scavClearFunc
+        Objectives.goals["finish scavenger hunt"].setClearFunc(scavClearFunc)
 
     def setItemPercentFuncs(self, totalItemsCount=None, allUpgradeTypes=None):
         def getPctFunc(pct, totalItemsCount):
@@ -768,15 +773,15 @@ class Objectives(object):
 
         for pct in [25,50,75,100]:
             goal = 'collect %d%% items' % pct
-            Objectives.goals[goal].clearFunc = getPctFunc(pct, totalItemsCount)
+            Objectives.goals[goal].setClearFunc(getPctFunc(pct, totalItemsCount))
         if allUpgradeTypes is not None:
-            Objectives.goals["collect all upgrades"].clearFunc = lambda sm, ap: sm.haveItems(allUpgradeTypes)
+            Objectives.goals["collect all upgrades"].setClearFunc(lambda sm, ap: sm.haveItems(allUpgradeTypes))
 
     def setAreaFuncs(self, funcsByArea):
-        goalsByArea = {goal.area:goal for goalName, goal in Objectives.goals.items()}
+        goalsByArea = {goal.area:goal for goalName, goal in Objectives.goals.items() if goal.area is not None and goal.gtype == "items"}
         for area, func in funcsByArea.items():
             if area in goalsByArea:
-                goalsByArea[area].clearFunc = func
+                goalsByArea[area].setClearFunc(func)
 
     def setSolverMode(self, solver):
         self.setScavengerHuntFunc(solver.scavengerHuntComplete)

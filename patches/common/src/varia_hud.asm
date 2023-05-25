@@ -688,7 +688,7 @@ compute_n_items:
 .collected_event:
 	;; at least an item collected, trigger appropriate event : current graph area idx+area_clear_start_event_base
 	ldx $07bb : lda $8f0010,x : and #$00ff
-	clc : adc #!area_clear_start_event_base
+	clc : adc.w #!area_clear_start_event_base
 	jsl !mark_event
 .rem:
 	;; make it so n_items contains remaining items:
@@ -701,7 +701,7 @@ compute_n_items:
 	bne .ret
 	;; 0 items left, trigger appropriate event : current graph area idx+area_clear_event_base
 	ldx $07bb : lda $8f0010,x : and #$00ff
-	clc : adc #!area_clear_event_base
+	clc : adc.w #!area_clear_event_base
 	jsl !mark_event
 .ret:
 	ply
@@ -759,8 +759,10 @@ check_objectives:
         bra .notify
 .check_all_required:
 	;; check if all required objectives are completed and if we should notify it
-	lda !objectives_completed_event_notified : jsl !check_event : bcs .end
-	lda !objectives_completed_event : jsl !check_event : bcc .end
+	%checkEvent(!objectives_completed_event_notified)
+        bcs .end
+	%checkEvent(!objectives_completed_event)
+        bcc .end
 	;; notify all required objectives completed
 	lda #!all_objectives_hud_mask : ora !hud_special : sta !hud_special
 .notify:

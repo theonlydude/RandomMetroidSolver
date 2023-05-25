@@ -581,13 +581,13 @@ scav_list_check:
 	rts
 
 found_next_scav:
-        lda !hunt_started_event : jsl !mark_event
+        %markEvent(!hunt_started_event)
 	lda !scav_idx : inc : sta !scav_idx
 	asl : tax
 	lda.l scav_order,x : and #$00ff
 	cmp.w !hunt_over_hud : bne .end
 	;; last item pickup : set scav hunt event
-	lda !hunt_over_event : jsl !mark_event
+        %markEvent(!hunt_over_event)
 	bra .end
 .end:
 	lda #$ffff : sta !scav_tmp
@@ -630,7 +630,7 @@ scav_ridley_dead:
 .not_dead:
 	jml ridley_still_dying
 .dead:
-	lda !ridley_event : jsl !mark_event
+        %markEvent(!ridley_event)
 .dead_end:
 	plx
 	jml ridley_dead
@@ -730,7 +730,7 @@ check_objectives:
 	lda #$ffff : sta !previous
         ;; check if we were drawing "all objs"
         lda #!all_objectives_hud_mask : and !hud_special : beq .indiv_notified
-        lda !objectives_completed_event_notified : jsl !mark_event
+        %markEvent(!objectives_completed_event_notified)
         bra .clear_draw
 .indiv_notified:
 	;; it was an individual objective, get index and set notification event

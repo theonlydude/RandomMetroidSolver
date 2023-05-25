@@ -6,12 +6,20 @@ math pri on
 !mark_event = $8081FA
 !check_event = $808233
 
+macro checkEvent(event)
+        lda.w #<event> : jsl !check_event
+endmacro
+
+macro markEvent(event)
+        lda.w #<event> : jsl !mark_event
+endmacro
+
 ;;; vanilla main events
-!tourian_open_event = #$000a
-!escape_event = #$000e
-!maridia_tube_open = #$000b
-!LN_chozo_lowered_acid_event = #$000c
-!shaktool_cleared_path = $000d
+!tourian_open_event #= $000a
+!escape_event #= $000e
+!maridia_tube_open #= $000b
+!LN_chozo_lowered_acid_event #= $000c
+!shaktool_cleared_path #= $000d
 
 ;;; vanilla boss events
 ; $7E:D828..2F: Boss bits. Indexed by area
@@ -31,76 +39,76 @@ math pri on
 
 ; event bytes start at $7ED820
 ; event code is: (byte index << 3) + ln(boss bit), with byte index == area index + 8
-!kraid_event = #$0048
-!phantoon_event = #$0058
-!draygon_event = #$0060
-!ridley_event = #$0050
-!spospo_event = #$0049
-!botwoon_event = #$0061
-!croc_event = #$0051
-!GT_event = #$0052
-!BT_event = #$0042
+!kraid_event #= $0048
+!phantoon_event #= $0058
+!draygon_event #= $0060
+!ridley_event #= $0050
+!spospo_event #= $0049
+!botwoon_event #= $0061
+!croc_event #= $0051
+!GT_event #= $0052
+!BT_event #= $0042
 
 ;;; VARIA events
-!VARIA_event_base = #$0080
+!VARIA_event_base #= $0080
 
 ;; objectives events : a global objectives completed event for endgame
 ;; and individual events for each objective :
 ;; - is it completed?
 ;; - if completed, was the user notified in the HUD?
 ;;   (can never be set if HUD is disabled)
-!objectives_completed_event = !tourian_open_event ; reuse tourian entrance event for "required objectives completed"
-!objectives_completed_event_notified = !VARIA_event_base+0
-!all_objectives_completed_event = !VARIA_event_base+32 ; internal event to stop checking for objectives when they're all completed
-!objectives_revealed_event = !VARIA_event_base+33
+!objectives_completed_event #= !tourian_open_event ; reuse tourian entrance event for "required objectives completed"
+!objectives_completed_event_notified #= !VARIA_event_base
+!all_objectives_completed_event #= !VARIA_event_base+32 ; internal event to stop checking for objectives when they're all completed
+!objectives_revealed_event #= !VARIA_event_base+33
 
 ;; scavenger hunt completion
-!hunt_over_event = !VARIA_event_base+1
-!hunt_started_event = !VARIA_event_base+19
+!hunt_over_event #= !VARIA_event_base+1
+!hunt_started_event #= !VARIA_event_base+19
 
 ;; clear area events : events based on area index, from 1 (crateria) to 10 (east maridia),
-!area_clear_event_base = !VARIA_event_base+4 ; has to be unused, will be set as ceres cleared if ceres start
-!crateria_cleared_event = !VARIA_event_base+5
-!green_brin_cleared_event = !VARIA_event_base+6
-!red_brin_cleared_event = !VARIA_event_base+7
-!ws_cleared_event = !VARIA_event_base+8
-!kraid_cleared_event = !VARIA_event_base+9
-!upper_norfair_cleared_event = !VARIA_event_base+10
-!croc_cleared_event = !VARIA_event_base+11
-!lower_norfair_cleared_event = !VARIA_event_base+12
-!west_maridia_cleared_event = !VARIA_event_base+13
-!east_maridia_cleared_event = !VARIA_event_base+14
-!tourian_cleared_event = !VARIA_event_base+15 ; not useful, here as a placeholder bc it will be set entering tourian
+!area_clear_event_base #= !VARIA_event_base+4 ; has to be unused, will be set as ceres cleared if ceres start
+!crateria_cleared_event #= !VARIA_event_base+5
+!green_brin_cleared_event #= !VARIA_event_base+6
+!red_brin_cleared_event #= !VARIA_event_base+7
+!ws_cleared_event #= !VARIA_event_base+8
+!kraid_cleared_event #= !VARIA_event_base+9
+!upper_norfair_cleared_event #= !VARIA_event_base+10
+!croc_cleared_event #= !VARIA_event_base+11
+!lower_norfair_cleared_event #= !VARIA_event_base+12
+!west_maridia_cleared_event #= !VARIA_event_base+13
+!east_maridia_cleared_event #= !VARIA_event_base+14
+!tourian_cleared_event #= !VARIA_event_base+15 ; not useful, here as a placeholder bc it will be set entering tourian
 
 ;; clear area started event, for in progress indicator in pause menu
-!area_clear_start_event_base = !VARIA_event_base+19
-!crateria_clear_start_event = !VARIA_event_base+20
-!green_brin_clear_start_event = !VARIA_event_base+21
-!red_brin_clear_start_event = !VARIA_event_base+22
-!ws_clear_start_event = !VARIA_event_base+23
-!kraid_clear_start_event = !VARIA_event_base+24
-!upper_norfair_clear_start_event = !VARIA_event_base+25
-!croc_clear_start_event = !VARIA_event_base+26
-!lower_norfair_clear_start_event = !VARIA_event_base+27
-!west_maridia_clear_start_event = !VARIA_event_base+28
-!east_maridia_clear_start_event = !VARIA_event_base+29
+!area_clear_start_event_base #= !VARIA_event_base+19
+!crateria_clear_start_event #= !VARIA_event_base+20
+!green_brin_clear_start_event #= !VARIA_event_base+21
+!red_brin_clear_start_event #= !VARIA_event_base+22
+!ws_clear_start_event #= !VARIA_event_base+23
+!kraid_clear_start_event #= !VARIA_event_base+24
+!upper_norfair_clear_start_event #= !VARIA_event_base+25
+!croc_clear_start_event #= !VARIA_event_base+26
+!lower_norfair_clear_start_event #= !VARIA_event_base+27
+!west_maridia_clear_start_event #= !VARIA_event_base+28
+!east_maridia_clear_start_event #= !VARIA_event_base+29
 
 ;; memes
-!fish_tickled_event = !VARIA_event_base+2
-!orange_geemer_event = !VARIA_event_base+3
-!shak_dead_event = !VARIA_event_base+16
-!bowling_chozo_event = !VARIA_event_base+17
-!king_cac_event = !VARIA_event_base+18
-!etecoons_event = !VARIA_event_base+30
-!dachora_event = !VARIA_event_base+31
+!fish_tickled_event #= !VARIA_event_base+2
+!orange_geemer_event #= !VARIA_event_base+3
+!shak_dead_event #= !VARIA_event_base+16
+!bowling_chozo_event #= !VARIA_event_base+17
+!king_cac_event #= !VARIA_event_base+18
+!etecoons_event #= !VARIA_event_base+30
+!dachora_event #= !VARIA_event_base+31
 
 ;;; Keep these macros at the end as they depend on current event index:
-!max_objectives = 18
-!objectives_event_base = !VARIA_event_base+34
+!max_objectives #= 18
+!objectives_event_base #= !VARIA_event_base+34
 
 ;; declare an array with all the "objective completed" events
 macro objectivesCompletedEventArray()
-!obj_idx = 0
+!obj_idx #= 0
 while !obj_idx < !max_objectives
 	dw !objectives_event_base+2*!obj_idx
 	!obj_idx #= !obj_idx+1

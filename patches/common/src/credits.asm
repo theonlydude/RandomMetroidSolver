@@ -1687,7 +1687,8 @@ draw_majors:
 
 samus_eyes:
         ;; don't display samus eyes if escape event is set (it shouldn't be in the intro)
-        lda !escape_event : jsl !check_event : bcs .end
+        %checkEvent(!escape_event)
+        bcs .end
         jsr $87d3
 .end:
         rts

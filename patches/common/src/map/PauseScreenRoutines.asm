@@ -415,11 +415,14 @@ draw_objective_icons:
 .loop:
 	lda $0000, x : cmp #$ffff : beq .end ; table terminator
         phx
-        ;; check if sub-objective is completed
-        lda $0006, x
+        ;; check if objective is completed: obj event is event_base+2*obj_index, and obj_index is equal to sprite index
+        lda $0004, x : asl : clc : adc #!objectives_event_base
+        jsl !check_event : bcs .next
+        ;; check if sub-objective is completed (if set)
+        lda $0006, x : beq .next
         jsl !check_event : bcs .next
 .draw:
-	;; not completed: actually draw the map icon, if it is on screen
+	;; none completed: actually draw the map icon, if it is on screen
         lda $0000, x : sta $14
         lda $0002, x : sta $18
 	;; Y = pointer to spritemap entry

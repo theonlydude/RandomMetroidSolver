@@ -153,7 +153,8 @@ obj_check:
 ;;; That way, exec time is constant, and does not depend on number of objectives.
 objectives_completed:
 	;; don't check anything if all objectives are already completed
-	lda !all_objectives_completed_event : jsl !check_event : bcc .check_objective
+        %checkEvent(!all_objectives_completed_event)
+        bcc .check_objective
         rts
 .check_objective:
         phx
@@ -176,16 +177,17 @@ objectives_completed:
 .end_list:
         ;; check if all objectives are completed to avoid further useless checks
         lda !obj_completed_count : cmp.l n_objectives : bmi .check_required
-        lda !all_objectives_completed_event : jsl !mark_event
+        %markEvent(!all_objectives_completed_event)
 .check_required:
-        lda !objectives_completed_event : jsl !check_event : bcs .reset
+        %checkEvent(!objectives_completed_event)
+        bcs .reset
         ;; n_objs_left = required_objs - completed_objs
         lda.l n_objectives_required : sec : sbc !obj_completed_count : sta !n_objs_left
         ;; required objectives are completed if n_objs_left is <= 0
         bmi .all_required_completed : beq .all_required_completed : bra .check_sfx
 .all_required_completed:
         lda.w #0 : sta !n_objs_left ; reset to 0 in case it's negative, as it's displayed in pause menu
-        lda !objectives_completed_event : jsl !mark_event
+        %markEvent(!objectives_completed_event)
 	lda.l escape_option : and #$00ff : beq .check_sfx
 	jsr trigger_escape
         bra .reset
@@ -247,7 +249,7 @@ trigger_escape:
 	lda #$0002 : sta $0943	 ; set timer state to 2 (MB timer start)
 	jsr clear_music_queue
 	jsr trigger_escape_music
-	lda !escape_event : jsl !mark_event ; timebomb set event
+        %markEvent(!escape_event) ; timebomb set event
 	ply : plx
 	rts
 
@@ -266,7 +268,7 @@ trigger_escape_music:
 
 ;;; when escape is trigerred, avoid changing music when boss drops appear
 boss_drops:
-	lda !escape_event : jsl !check_event ;if escape flag is off:
+        %checkEvent(!escape_event)  ;if escape flag is off:
 	bcs .end
 	lda #$0003 : jsl $808FC1 	     ;  Queue elevator music track
 .end:				 	     ;else do nothing
@@ -276,7 +278,7 @@ boss_drops:
 ;;; helper macro to autodef simple event checker functions
 macro eventChecker(func_name, event)
 %export(<func_name>)
-	lda <event> : jsl !check_event
+        %checkEvent(<event>)
 	rts
 endmacro
 
@@ -445,9 +447,11 @@ endmacro
 
 %export(all_chozo_robots)
 	jsr golden_torizo_is_dead : bcc .end
-	lda !BT_event : jsl !check_event : bcc .end
-	lda !bowling_chozo_event : jsl !check_event : bcc .end
-	lda !LN_chozo_lowered_acid_event : jsl !check_event
+        %checkEvent(!BT_event)
+        bcc .end
+        %checkEvent(!bowling_chozo_event)
+        bcc .end
+        %checkEvent(!LN_chozo_lowered_acid_event)
 .end:
 	rts
 
@@ -472,11 +476,12 @@ endmacro
         phx
 	lda !area_index : cmp #!brinstar : bne .not
         %checkMapTile(etecoons) : beq .dachora
-        lda !etecoons_event : jsl !mark_event
+        %markEvent(!etecoons_event)
 .dachora:
         %checkMapTile(dachora) : beq .not
-        lda !dachora_event : jsl !mark_event
-        lda !etecoons_event : jsl !check_event : bcc .not
+        %markEvent(!dachora_event)
+        %checkEvent(!etecoons_event)
+        bcc .not
 .ok:
         sec
         bra .end
@@ -632,7 +637,7 @@ count_items_in_area:
 macro clearAreaProgress(area, index)
 %export(<area>_clear_progress)
         phx : phy
-        lda !<area>_clear_start_event : jsl !check_event
+        %checkEvent(!<area>_clear_start_event)
         bcc .no_progress
         lda.w #<index> : jsl count_items_in_area
         sty !tmp_in_progress_total
@@ -661,13 +666,16 @@ endmacro
 	jsr golden_torizo_is_dead : bcc .bt
         inc !tmp_in_progress_done
 .bt:
-	lda !BT_event : jsl !check_event : bcc .bowl
+        %checkEvent(!BT_event)
+        bcc .bowl
         inc !tmp_in_progress_done
 .bowl:
-	lda !bowling_chozo_event : jsl !check_event : bcc .ln
+        %checkEvent(!bowling_chozo_event)
+        bcc .ln
         inc !tmp_in_progress_done
 .ln:
-	lda !LN_chozo_lowered_acid_event : jsl !check_event : bcc .done
+        %checkEvent(!LN_chozo_lowered_acid_event)
+        bcc .done
         inc !tmp_in_progress_done
 .done:
         lda !tmp_in_progress_done
@@ -682,10 +690,12 @@ endmacro
 %export(in_progress_animals)
         lda.w #2 : sta.b !tmp_in_progress_total
 .etecoons:
-	lda !etecoons_event : jsl !check_event : bcc .dachora
+        %checkEvent(!etecoons_event)
+        bcc .dachora
         inc !tmp_in_progress_done
 .dachora:
-	lda !dachora_event : jsl !check_event : bcc .done
+        %checkEvent(!dachora_event)
+        bcc .done
         inc !tmp_in_progress_done
 .done:
         lda !tmp_in_progress_done
@@ -787,7 +797,7 @@ org $87d000
 ;;; alternate instruction for statues objects:
 ;;; set event in argument only if objectives are completed
 alt_set_event:
-	lda !objectives_completed_event : jsl !check_event
+        %checkEvent(!objectives_completed_event)
 	bcc .end
 .set_event:
 	lda $0000,y : jsl !mark_event
@@ -847,7 +857,7 @@ check_cac:
 	;; we're in bubble mountain, check for cac death
 	lda $0F8C,x : bne .end	; if current enemy health is positive, do nothing
 	;; king cac is dead
-	lda !king_cac_event : jsl !mark_event
+        %markEvent(!king_cac_event)
 .end:
 	rtl
 
@@ -855,7 +865,7 @@ org $a3f350
 check_red_fish_tickle:
 	lda !current_room : cmp #$d104 : bne .end
 	;; we're using grapple on a fish, in red fish room:
-	lda !fish_tickled_event : jsl !mark_event
+        %markEvent(!fish_tickled_event)
 .end:
 	jmp $8000 		; original AI
 
@@ -878,7 +888,7 @@ check_orange_geemer_grapple:
 check_orange_geemer:
 	lda $0F8C : bne .end	; if enemy 0 health is positive, do nothing
 	;; we killed orange geemer
-	lda !orange_geemer_event : jsl !mark_event
+        %markEvent(!orange_geemer_event)
 .end:
 	rtl
 
@@ -901,12 +911,12 @@ check_shak_touch:
 check_shak:
 	lda $0F8C,x : bne .end	; if current enemy health is positive, do nothing
 	;; we killed shak
-	lda !shak_dead_event : jsl !mark_event
+        %markEvent(!shak_dead_event)
 .end:
 	rtl
 
 set_bowling_event:
-	lda !bowling_chozo_event : jsl !mark_event
+        %markEvent(!bowling_chozo_event)
 	LDA #$0001		; hijacked code
 	rts
 
@@ -1056,7 +1066,8 @@ load_obj_tilemap:
 update_objs:
         ;; don't do anything if objectives are hidden
         lda.l objectives_options : bit.w #!option_hidden_objectives_mask : beq +
-        lda !objectives_revealed_event : jsl !check_event : bcs +
+        %checkEvent(!objectives_revealed_event)
+        bcs +
         rtl
 +
         ;; draw scroll up arrow if !obj_index > 0
@@ -1640,7 +1651,7 @@ org $B6FA00
 ;;; function to use as door asm when entering the room that reveals objectives
 org $8ffe80
 %export(reveal_objectives)
-        lda !objectives_revealed_event : jsl !mark_event
+        %markEvent(!objectives_revealed_event)
         rts
 
 ;;; hardcode here the rooms for vanilla tourian (and disabled tourian with Tourian still in the graph)

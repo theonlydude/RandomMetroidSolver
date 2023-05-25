@@ -94,7 +94,7 @@ pre_tourian_door:
         ;; reveal objectives if they're hidden
         jsr objectives_reveal_objectives
 	;; check if objectives are completed
-	lda !objectives_completed_event : jsl !check_event
+        %checkEvent(!objectives_completed_event)
         bcc .end
 	;; if they are completed, set door open for gadora
 print "test pre_tourian_door: ", pc

@@ -15,7 +15,7 @@ incsrc "macros.asm"
 
 ;;; carry set if escape flag on, carry clear if off
 macro checkEscape()
-    lda !escape_event : jsl !check_event
+    %checkEvent(!escape_event)
 endmacro
 
 ;;; where we are in current escapes cycle (for animals)
@@ -202,7 +202,7 @@ escape_setup_l:
     cpx #$0008
     bcc -
     ;; open Maridia Tube
-    lda !maridia_tube_open : jsl !mark_event
+    %markEvent(!maridia_tube_open)
 .end:
     rtl
 

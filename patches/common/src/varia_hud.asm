@@ -29,8 +29,8 @@ incsrc "event_list.asm"
 incsrc "sym/objectives.asm"
 incsrc "sym/seed_display.asm"
 
-!hudposition = #$0006
-!digit_0 = #$0C10               ; new font in modified HUD gfx included in map patch
+!hudposition = $0006
+!digit_0 = $0C10               ; new font in modified HUD gfx included in map patch
 ;;; RAM used to store previous values to see whether we must draw
 ;;; area/item counter or next scav display
 !previous = $7fff3c		; hi: area/00, lo: remaining items/next scav loc
@@ -49,14 +49,14 @@ incsrc "sym/seed_display.asm"
 
 ;;; objectives notifications display
 !objective_global_mask = (!all_objectives_hud_mask|!objective_hud_mask)
-!notification_display_frames = #300 ; 5 seconds
+!notification_display_frames #= 5*60 ; 5 seconds
 !timer = !timer1
 
 ;;; scavenger stuff
-!hunt_over_hud = #$11		; HUD ID of the fake loc 'HUNT OVER'
-!ridley_id = #$00aa
+!hunt_over_hud = $11		; HUD ID of the fake loc 'HUNT OVER'
+!ridley_id = $00aa
 !ridley_timer = $0FB2
-!scav_next_found = #$aaaa
+!scav_next_found = $aaaa
 
 ;;; hijack the start of health handling in the HUD to draw area or
 ;;; remaining items if necessary
@@ -247,12 +247,12 @@ draw_info:
 	jsr draw_text
 .draw_scav_index:
 	;; don't show index if showing special stuff
-	lda !previous : cmp.w !hunt_over_hud : beq .scav_setup_next
+	lda !previous : cmp.w #!hunt_over_hud : beq .scav_setup_next
 	;; show current index in required scav list
 	lda #$2C0F : sta !split_locs_hud-2 ; blank before numbers for cleanup
 	lda !scav_idx : inc : jsr draw_number
 .scav_setup_next:
-	lda !previous : cmp.w !hunt_over_hud : bne .game_state_check
+	lda !previous : cmp.w #!hunt_over_hud : bne .game_state_check
 	jmp .end
 
 	;; Scavenger pause:
@@ -323,7 +323,7 @@ draw_info:
 	cmp !scav_tmp : bmi .pause_first_scav_store
 	asl : tax
 	lda.l scav_order,x
-	cmp.b !hunt_over_hud : beq .pause_end_list
+	cmp.b #!hunt_over_hud : beq .pause_end_list
 	bra .pause_next_scav_end
 .pause_end_list:
 	lda !scav_idx : dec : sta !scav_idx
@@ -395,7 +395,7 @@ draw_info:
 ; A=remaining items (1 or 2 digits)
 draw_number:
         cmp.w #10 : bpl draw_two
-        clc : adc !digit_0
+        clc : adc #!digit_0
 	sta !split_locs_hud
         lda #$2C0F : sta !split_locs_hud+2
         rts
@@ -406,18 +406,18 @@ draw_two:
 	lda #$0a
 	sta $4206
 	pha : pla : pha : pla : rep #$20
-	lda $4214 : clc : adc !digit_0
+	lda $4214 : clc : adc #!digit_0
 	sta !split_locs_hud
 	lda $4216
 ; A=remaining items (1 digit)
 draw_one:
-        clc : adc !digit_0
+        clc : adc #!digit_0
 	sta !split_locs_hud+2
 	rts
 
 ;;; Y ptr to string, relative to hud_text
 draw_text:
-	ldx !hudposition
+	ldx #!hudposition
 .loop:
 	lda hud_text,y
 	beq .end
@@ -571,7 +571,7 @@ scav_list_check:
 	tya : cmp !scav_tmp : beq .deny
 	bra .scav_list_check_loop
 .found_next_scav:
-	lda !scav_next_found : sta !scav_tmp
+	lda #!scav_next_found : sta !scav_tmp
 .allow:
 	sec
 	bra .end
@@ -585,7 +585,7 @@ found_next_scav:
 	lda !scav_idx : inc : sta !scav_idx
 	asl : tax
 	lda.l scav_order,x : and #$00ff
-	cmp.w !hunt_over_hud : bne .end
+	cmp.w #!hunt_over_hud : bne .end
 	;; last item pickup : set scav hunt event
         %markEvent(!hunt_over_event)
 	bra .end
@@ -603,7 +603,7 @@ scav_ridley_check:
 	bcc .show				   ; not in scav mode
 	;; scav_tmp = loc ID to check against
 	and #$ff00 : xba : sta !scav_tmp
-	ldy !ridley_id
+	ldy #!ridley_id
 	jsr scav_list_check
 	lda #$ffff : sta !scav_tmp
 	bcs .show
@@ -623,7 +623,7 @@ scav_ridley_dead:
 	jsl scav_mode_check
 	bcc .dead_end
 	and #$ff00 : xba
-	cmp !ridley_id : bne .dead
+	cmp #!ridley_id : bne .dead
 	;; Ridley was indeed the next scav location
 	jsr found_next_scav
 	bra .dead
@@ -651,7 +651,7 @@ item_pickup:
 	jsr scav_list_check
 	bcc .nopickup_end
 .pickup_end:
-	lda !scav_tmp : cmp !scav_next_found : beq .found_next_scav
+	lda !scav_tmp : cmp #!scav_next_found : beq .found_next_scav
 	lda #$ffff : sta !scav_tmp
 	bra .pickup_end_return
 .found_next_scav:
@@ -688,7 +688,7 @@ compute_n_items:
 .collected_event:
 	;; at least an item collected, trigger appropriate event : current graph area idx+area_clear_start_event_base
 	ldx $07bb : lda $8f0010,x : and #$00ff
-	clc : adc !area_clear_start_event_base
+	clc : adc #!area_clear_start_event_base
 	jsl !mark_event
 .rem:
 	;; make it so n_items contains remaining items:
@@ -701,7 +701,7 @@ compute_n_items:
 	bne .ret
 	;; 0 items left, trigger appropriate event : current graph area idx+area_clear_event_base
 	ldx $07bb : lda $8f0010,x : and #$00ff
-	clc : adc !area_clear_event_base
+	clc : adc #!area_clear_event_base
 	jsl !mark_event
 .ret:
 	ply
@@ -764,7 +764,7 @@ check_objectives:
 	;; notify all required objectives completed
 	lda #!all_objectives_hud_mask : ora !hud_special : sta !hud_special
 .notify:
-	lda !notification_display_frames : sta !hud_special_timer
+	lda #!notification_display_frames : sta !hud_special_timer
 .end:
 	rtl
 

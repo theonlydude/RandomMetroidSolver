@@ -492,7 +492,6 @@ _goalsList = [
          mapIcons=["BombTorizo", "GoldenTorizo", "WreckedShipChozo", "LowerNorfairChozo"],
          escapeAccessPoints=(3, ["Landing Site", "Screw Attack Bottom", "Bowling"]),
          objCompletedFuncAPs=lambda ap: ["Landing Site", "Screw Attack Bottom", "Bowling"],
-         exclusion={"list": ["kill golden torizo"]},
          conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))),
     Goal("visit the animals", "other", lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Big Pink"), sm.haveItem("SpeedBooster"), # dachora
                                                               Objectives.canAccess(sm, ap, "Etecoons Bottom")), # Etecoons

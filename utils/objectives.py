@@ -155,6 +155,10 @@ def getMiniBossesEscapeAccessPoints(n):
 def getAreaEscapeAccessPoints(area):
     return (1, list({list(loc.AccessFrom.keys())[0] for loc in Logic.locations if loc.GraphArea == area}))
 
+GTsettingsConflict = lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))
+
+exploreSettingsConflict = lambda settings: settings.qty['energy'] == 'ultra sparse'
+
 _goalsList = [
     # bosses
     Goal("kill kraid", "boss", lambda sm, ap: Bosses.bossDead(sm, 'Kraid'), "kraid_is_dead",
@@ -250,7 +254,7 @@ _goalsList = [
          text="{} golden torizo",
          mapIcons=["GoldenTorizo"],
          category="Minibosses",
-         conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))),
+         conflictFunc=GTsettingsConflict),
     Goal("kill one miniboss", "other", lambda sm, ap: Bosses.xMiniBossesDead(sm, 1), "miniboss_1_killed",
          escapeAccessPoints=getMiniBossesEscapeAccessPoints(1),
          exclusion={"list": ["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo",
@@ -288,7 +292,7 @@ _goalsList = [
          expandableList=["kill spore spawn", "kill botwoon", "kill crocomire", "kill golden torizo"],
          mapIcons=Bosses.miniBosses(),
          category="Minibosses",
-         conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))),
+         conflictFunc=GTsettingsConflict),
     # other
     Goal("finish scavenger hunt", "other", lambda sm, ap: SMBool(True),
          "scavenger_hunt_completed", romInProgressFunc="scav_started",
@@ -395,9 +399,11 @@ _goalsList = [
          "explored_map_100", romInProgressFunc="explored_all_map_percent",
          exclusion={"list": ["explore 50% map", "explore 75% map",  "explore 25% map"]},
          introText="explore the entire map",
+         conflictFunc=exploreSettingsConflict,
          category="Map"),
     Goal("explore crateria", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Crateria"),
          "crateria_explored", romInProgressFunc="crateria_explored_percent",
+         conflictFunc=exploreSettingsConflict,
          category="Map",
          area="Crateria"),
     Goal("explore green brinstar", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "GreenPinkBrinstar"),
@@ -441,6 +447,7 @@ _goalsList = [
          "lower_norfair_explored", romInProgressFunc="lower_norfair_explored_percent",
          text="explore lower norf",
          introText="explore lower norfair",
+         conflictFunc=exploreSettingsConflict,
          category="Map",
          area="LowerNorfair"),
     Goal("explore west maridia", "map", lambda sm, ap: sm.wand(Objectives.canExploreArea(sm, ap, "WestMaridia"), sm.canGoUpMtEverest()),
@@ -492,7 +499,7 @@ _goalsList = [
          mapIcons=["BombTorizo", "GoldenTorizo", "WreckedShipChozo", "LowerNorfairChozo"],
          escapeAccessPoints=(3, ["Landing Site", "Screw Attack Bottom", "Bowling"]),
          objCompletedFuncAPs=lambda ap: ["Landing Site", "Screw Attack Bottom", "Bowling"],
-         conflictFunc=lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))),
+         conflictFunc=GTsettingsConflict),
     Goal("visit the animals", "other", lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Big Pink"), sm.haveItem("SpeedBooster"), # dachora
                                                               Objectives.canAccess(sm, ap, "Etecoons Bottom")), # Etecoons
          "visited_animals", romInProgressFunc="in_progress_animals",

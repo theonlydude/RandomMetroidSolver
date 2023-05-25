@@ -551,6 +551,10 @@ if __name__ == "__main__":
            'strictMinors' : args.strictMinors }
     logger.debug("quantities: {}".format(qty))
 
+    if energyQty == 'ultra sparse':
+        # add nerfed rainbow beam patch
+        RomPatches.ActivePatches.append(RomPatches.NerfedRainbowBeam)
+
     if len(args.superFun) > 0:
         superFun = []
         for fun in args.superFun:
@@ -659,19 +663,11 @@ if __name__ == "__main__":
             forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
         if any(goal for goal in goals if goal.gtype == "map"):
             forceArg('revealMap', True, "'Reveal Map' forced to on", webValue='on')
-            if energyQty == "ultra sparse":
-                forceArg("energyQty", "sparse", "Enegy quantity forced to 'sparse' instead of 'ultra sparse' because of exploration objectives")
-                energyQty = "sparse"
-                qty["energy"] = energyQty
     else:
         args.tourian = plandoRando["tourian"]
         objectivesManager = Objectives(args.tourian != 'Disabled')
         for goal in plandoRando["objectives"]:
             objectivesManager.addGoal(goal)
-
-    if energyQty == 'ultra sparse':
-        # add nerfed rainbow beam patch
-        RomPatches.ActivePatches.append(RomPatches.NerfedRainbowBeam)
 
     # print some parameters for jm's stats
     if args.jm == True or args.debug == True:

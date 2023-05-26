@@ -416,7 +416,7 @@ draw_objective_icons:
 	lda $0000, x : cmp #$ffff : beq .end ; table terminator
         phx
         ;; check if objective is completed: obj event is event_base+2*obj_index, and obj_index is equal to sprite index
-        lda $0004, x : asl : clc : adc #!objectives_event_base
+        lda $0004, x : asl : clc : adc.w #!objectives_event_base
         jsl !check_event : bcs .next
         ;; check if sub-objective is completed (if set)
         lda $0006, x : beq .next

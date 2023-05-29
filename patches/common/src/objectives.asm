@@ -50,11 +50,6 @@ incsrc "sym/objectives_options.asm"
 ;;; no screen shake patch detection for escape music trigger
 !disable_earthquake_id = $0060
 
-;;; masks for settings flags (see objectives_options patch)
-!option_nothing_trigger_escape_crateria_mask = $01
-!option_play_sfx_on_completion_mask = $80
-!option_hidden_objectives_mask = $02
-
 ;;; Change G4 SFX priority to 1, because we play it on obj completion (when non-vanilla objectives)
 !SPC_Engine_Base = $CF6C08
 

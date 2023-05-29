@@ -97,3 +97,8 @@ include
 !pause_index_equip2map_fading_out = #$0005
 !pause_index_equip2map_load_map = #$0006
 !pause_index_equip2map_fading_in = #$0007
+
+;;; masks for settings flags (see objectives_options patch)
+!option_nothing_trigger_escape_crateria_mask = $01
+!option_play_sfx_on_completion_mask = $80
+!option_hidden_objectives_mask = $02

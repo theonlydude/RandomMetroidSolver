@@ -408,6 +408,14 @@ draw_portal_icons:
 
 ;;; draw objective icons on map, if not completed yet (general, or "sub-objective")
 draw_objective_icons:
+        lda.l objectives_options_settings_flags
+        bit.w #!option_hidden_objectives_mask : beq .start
+        ;; hidden obj option is on: check if they are revealed yet
+        %checkEvent(!objectives_revealed_event)
+        bcs .start
+        ;; not revealed, exit
+        rtl
+.start:
 	phb : phk : plb		; DB=current bank
 	lda !area_index : asl : tax
         ;; X = pointer to area door list, do nothing if ptr is 0

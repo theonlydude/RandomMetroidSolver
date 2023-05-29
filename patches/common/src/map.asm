@@ -26,6 +26,8 @@ incsrc "macros.asm"             ; for export macro
 incsrc "constants.asm"
 incsrc "event_list.asm"
 
+incsrc "sym/objectives_options.asm"
+
 ;; original patch relies on weird old xkas math
 math pri off
 

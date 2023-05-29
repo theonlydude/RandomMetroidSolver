@@ -23,6 +23,7 @@ incsrc "sym/custom_music.asm"
 incsrc "sym/disable_screen_shake.asm"
 incsrc "sym/map.asm"
 incsrc "sym/endingtotals.asm"
+incsrc "sym/objectives_options.asm"
 
 !timer = !timer1
 !current_room = $079b
@@ -44,23 +45,12 @@ incsrc "sym/endingtotals.asm"
 !song_routine = $808fc1
 
 ;;; custom music patch detection for escape music trigger
-!custom_music_id = #$caca
+!custom_music_id = $caca
 
 ;;; no screen shake patch detection for escape music trigger
-!disable_earthquake_id = #$0060
+!disable_earthquake_id = $0060
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; ROM OPTIONS
-org !disabled_tourian_escape_flag
-;;; if non-zero trigger escape as soon as objectives are completed
-%export(escape_option)
-	db $00
-;;; low bit (0): with nothing objective, trigger escape only in crateria
-;;; high bit (7): play sfx on objective completion (don't use for vanilla objectives)
-;;; bit 1: if set, objectives will be hidden in pause menu until a room is visited (usually G4)
-%export(objectives_options)
-	db $01
-
+;;; masks for settings flags (see objectives_options patch)
 !option_nothing_trigger_escape_crateria_mask = $01
 !option_play_sfx_on_completion_mask = $80
 !option_hidden_objectives_mask = $02
@@ -188,13 +178,13 @@ objectives_completed:
 .all_required_completed:
         lda.w #0 : sta !n_objs_left ; reset to 0 in case it's negative, as it's displayed in pause menu
         %markEvent(!objectives_completed_event)
-	lda.l escape_option : and #$00ff : beq .check_sfx
+	lda.l objectives_options_escape_flag : and #$00ff : beq .check_sfx
 	jsr trigger_escape
         bra .reset
 .check_sfx:
 	;; check if we should play an sfx upon objective completion
 	lda !obj_sfx_flag : beq .reset
-	lda.l objectives_options : bit.w #!option_play_sfx_on_completion_mask : beq .reset
+	lda.l objectives_options_settings_flags : bit.w #!option_play_sfx_on_completion_mask : beq .reset
 .sfx:
 	;; play G4 particle sfx and reset flag
 	lda #$0019 : jsl $8090A3
@@ -231,7 +221,7 @@ clear_music_queue:
 room_earthquake:
         ;; don't trigger if no screen shake patch if detected
         lda.l disable_screen_shake_marker : and #$00ff
-        cmp !disable_earthquake_id : beq .end
+        cmp #!disable_earthquake_id : beq .end
 	LDA #$0018             ;\
 	STA $183E              ;} Earthquake type = BG1, BG2 and enemies; 3 pixel displacement, horizontal
 	LDA #$FFFF
@@ -256,7 +246,7 @@ trigger_escape:
 trigger_escape_music:
 	lda #$0000 : jsl !song_routine ; stop current music
 	lda.l custom_music_marker
-	cmp !custom_music_id : beq .custom_music
+	cmp #!custom_music_id : beq .custom_music
 	lda #$ff24 : jsl !song_routine ; load boss 1 music data
 	lda #$0007 : jsl !song_routine ; load music track 2
 	bra .end
@@ -400,8 +390,8 @@ endmacro
 	;; if option enabled, complete objective only when in
 	;; crateria/blue brin, in case we trigger escape immediately
 	;; and we have custom start location.
-	lda.l escape_option : and #$00ff : beq .ok
-	lda.l objectives_options : and.w #!option_nothing_trigger_escape_crateria_mask : beq .ok
+	lda.l objectives_options_escape_flag : and #$00ff : beq .ok
+	lda.l objectives_options_settings_flags : and.w #!option_nothing_trigger_escape_crateria_mask : beq .ok
 	;; determine current graph area in special byte in room state header
 	phx
 	ldx $07bb
@@ -1065,7 +1055,7 @@ load_obj_tilemap:
 
 update_objs:
         ;; don't do anything if objectives are hidden
-        lda.l objectives_options : bit.w #!option_hidden_objectives_mask : beq +
+        lda.l objectives_options_settings_flags : bit.w #!option_hidden_objectives_mask : beq +
         %checkEvent(!objectives_revealed_event)
         bcs +
         rtl

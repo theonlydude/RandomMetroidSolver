@@ -11,9 +11,6 @@ include
 !div_u16_result_quotient = $4214
 !div_u16_result_remainder = $4216
 
-;; shared ROM options addresses
-!disabled_tourian_escape_flag = $a1f550
-
 ;; shared constants
 ;; RAM to store current obj check index
 !obj_check_index = $7fff46

@@ -8,6 +8,7 @@ arch 65816
 
 incsrc "sym/random_music.asm"
 incsrc "sym/utils.asm"
+incsrc "sym/objectives_options.asm"
 
 incsrc "event_list.asm"
 incsrc "constants.asm"
@@ -95,7 +96,7 @@ escape_hyper_check:
     bit #$0008                  ; check for plasma (hyper = wave+plasma)
     beq .nohit
     ;; avoid having actual plasma beam destroy blocks in Disabled Tourian escape
-    lda !disabled_tourian_escape_flag : and #$00ff
+    lda.l objectives_options_escape_flag : and #$00ff
     cmp #$0001 : beq .nohit
     lda #$0000                  ; set zero flag
     bra .end

@@ -17,10 +17,10 @@ class RomOptions(object):
         self._symbols = symbols
         self.addOption("escapeRandoRemoveEnemies", "rando_escape_common", "opt_remove_enemies")
         self.addOption("backupSaves", "base", "opt_backup")
-        self.addOption("escapeTrigger", "objectives", "escape_option")
-        self.addOption("escapeTriggerCrateria", "objectives", "objectives_options", mask=0x1)
-        self.addOption("objectivesSFX", "objectives", "objectives_options", mask=0x80)
-        self.addOption("objectivesHidden", "objectives", "objectives_options", mask=0x2)
+        self.addOption("escapeTrigger", "objectives_options", "escape_flag")
+        self.addOption("escapeTriggerCrateria", "objectives_options", "settings_flags", mask=0x1)
+        self.addOption("objectivesSFX", "objectives_options", "settings_flags", mask=0x80)
+        self.addOption("objectivesHidden", "objectives_options", "settings_flags", mask=0x2)
         self.addOption("fastTourianSkipRefill", "area_rando_doors", "full_refill")
 
     def _getAddress(self, namespace, label):

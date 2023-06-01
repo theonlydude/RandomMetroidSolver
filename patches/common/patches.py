@@ -6,10 +6,6 @@ patches = {
         0x0869dd: [0x01]},
     "No_Music":{
         0x278413: [0x6f]},
-    # for development/quickmet: disable clear save files on 1st boot
-    "Disable_Clear_Save_Boot": {
-        snes_to_pc(0x80FE1D): [0x4c, 0x64, 0xfe]
-    },
     # vanilla data to restore setup asm for plandos
     "Escape_Animals_Disable": {
         0x79867: [0xb2, 0x91],

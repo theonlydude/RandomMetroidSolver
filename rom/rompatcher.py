@@ -154,7 +154,7 @@ class RomPatcher:
                        'crocomire.ips', 'ridley.ips']
         },
         # add debug tools
-        'Debug': ['Debug_Full.ips', 'Disable_Clear_Save_Boot']
+        'Debug': ['Debug_Full.ips']
     }
 
     def __init__(self, settings=None, romFileName=None, magic=None):

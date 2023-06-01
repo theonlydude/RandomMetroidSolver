@@ -634,7 +634,7 @@ accessPointsDict['RidleyRoomOut'].EntryInfo.update({
     'SamusY': 0x98
 })
 accessPointsDict['RidleyRoomIn'].EntryInfo.update({
-    'SamusX': 0xb0,
+    'SamusX': 0x50,
     'SamusY': 0x198
 })
 accessPointsDict['Warehouse Zeela Room Left'].EntryInfo.update({

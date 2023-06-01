@@ -9,6 +9,7 @@ from utils.parameters import Knows, isKnows, Controller, isButton
 from utils.objectives import Objectives
 from logic.logic import Logic
 from rom.flavor import RomFlavor
+from rom.rom_options import RomOptions
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import HTTP
@@ -77,6 +78,7 @@ def getAddressesToRead(cache):
     for logic in ['vanilla', 'mirror']:
         Logic.factory(logic)
         RomFlavor.factory()
+        options = RomOptions(None, RomFlavor.symbols)
 
         # locations
         for loc in Logic.locations:
@@ -84,6 +86,9 @@ def getAddressesToRead(cache):
 
         # doors
         addresses["misc"] += DoorsManager.getAddressesToRead()
+
+        # options
+        addresses["misc"] += options.getAddressesToRead()
 
         # transitions
         for ap in Logic.accessPoints:
@@ -111,8 +116,6 @@ def getAddressesToRead(cache):
     addresses["misc"] += Addresses.getWeb('escapeTimer')
     # start ap
     addresses["misc"] += Addresses.getWeb('startAP')
-    # ROM options
-    addresses["misc"] += Addresses.getWeb("objectives_escape_option")
     # objectives
     addresses["misc"] += Objectives.getAddressesToRead()
 

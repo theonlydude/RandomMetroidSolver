@@ -42,3 +42,7 @@ class RomOptions(object):
         val = self._values[opt.addr] | (value & opt.mask)
         self._values[opt.addr] = val
         self._rom.writeByte(val, opt.addr)
+
+    def getAddressesToRead(self):
+        # call from web front
+        return [opt.addr for opt in self._options.values()]

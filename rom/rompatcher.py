@@ -501,10 +501,6 @@ class RomPatcher:
                 # ridley as scav loc
                 self.applyIPSPatch("Blinking[RidleyRoomIn]")
 
-            # apply optional patches
-            for patchName in self.settings["optionalPatches"]:
-                self.applyIPSPatch(patchName)
-
             # random escape
             if self.settings["escapeAttr"] is not None:
                 for patchName in RomPatcher.IPSPatches['Escape']:
@@ -544,6 +540,10 @@ class RomPatcher:
                 self.writeDoorIndicators(plms, self.settings["area"], self.settings["doorsColorsRando"])
             self.applyStartAP(self.settings["startLocation"], plms, doors)
             self.applyPLMs(plms)
+
+            # apply optional patches
+            for patchName in self.settings["optionalPatches"]:
+                self.applyIPSPatch(patchName)
 
             # debug tools
             if self.settings["debug"]:

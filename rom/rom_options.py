@@ -34,6 +34,9 @@ class RomOptions(object):
     def read(self, name):
         opt = self._options[name]
         val = self._rom.readByte(opt.addr)
+        # compatibility with previous releases
+        if val == 0xff:
+            val = 0
         self._values[opt.addr] = val
         return val & opt.mask
 

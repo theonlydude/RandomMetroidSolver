@@ -863,7 +863,8 @@ class Objectives(object):
         for name, goal in Objectives.goals.items():
             if goal.checkAddr == checkFunction:
                 return goal
-        assert False, "Goal with check function {} not found".format(hex(checkFunction))
+        LOG.debug("Goal with check function {} not found".format(hex(checkFunction)))
+        raise Exception("Goal not found")
 
     @staticmethod
     def getTotalItemsCount():
@@ -962,15 +963,32 @@ class Objectives(object):
         # read objective quantities
         Objectives.nbActiveGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives'))
         Objectives.nbRequiredGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives_required'))
+        # in previous releases this info wasn't present in ROM, freespace default to 0xff
+        if Objectives.nbActiveGoals == 0xff:
+            Objectives.nbActiveGoals = 0
+
         # read objectives list
-        romReader.romFile.seek(Addresses.getOne('objectivesList'))
-        for i in range(Objectives.nbActiveGoals):
-            checkFunction = romReader.romFile.readWord()
-            goal = self.getGoalFromCheckFunction(checkFunction)
-            Objectives.activeGoals.append(goal)
+        try:
+            romReader.romFile.seek(Addresses.getOne('objectivesList'))
+            # loop until list terminator which will raise an exception
+            while True:
+                checkFunction = romReader.romFile.readWord()
+                goal = self.getGoalFromCheckFunction(checkFunction)
+                Objectives.activeGoals.append(goal)
+        except:
+            # if no objective found set it to default G4
+            # (for previous versions with objectives data located elsewhere in ROM)
+            if not Objectives.activeGoals:
+                self.setVanilla()
+
+        # compatibility with previous releases
+        if Objectives.nbRequiredGoals == 0xff:
+            Objectives.nbRequiredGoals = len(Objectives.activeGoals)
 
         # read number of available items for items % objectives
-        Objectives.totalItemsCount = romReader.romFile.readByte(Addresses.getOne('totalItems'))
+        totalItems = romReader.romFile.readByte(Addresses.getOne('totalItems'))
+        # compatibility with previous releases
+        Objectives.totalItemsCount = 100 if totalItems in [0x00, 0xff] else totalItems
 
         for goal in Objectives.activeGoals:
             LOG.debug("active goal: {}".format(goal.name))

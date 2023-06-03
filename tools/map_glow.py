@@ -7,18 +7,19 @@ sys.path.append(os.path.dirname(sys.path[0]))
 
 from utils.colors import RGB_15_to_24, RGB_24_to_15
 
+# colors in R, G, B bytes (0-255 range)
 areaColors = {
-    "Crateria":0x35e9,
-    "GreenPinkBrinstar":0x26a9,
-    "RedBrinstar":0x0515,
-    "WreckedShip":0x3ad6,
-    "Kraid":0x1dc0,
-    "Norfair":0x023f,
-    "Crocomire":0x2497,
-    "LowerNorfair":0x00df,
-    "WestMaridia":0x7e20,
-    "EastMaridia": 0x6e3c,
-    "Tourian":0x5297
+    'Crateria': (74, 123, 107),
+    'GreenPinkBrinstar': (74, 173, 74),
+    'RedBrinstar': (173, 66, 8),
+    'WreckedShip': (145, 145, 93),
+    'Kraid': (205, 216, 0),
+    'Norfair': (255, 140, 0),
+    'Crocomire': (99, 21, 50),
+    'LowerNorfair': (255, 49, 0),
+    'WestMaridia': (0, 140, 255),
+    'EastMaridia': (231, 140, 222),
+    'Tourian': (189, 165, 165)
 }
 
 rgb2hsv = colorsys.rgb_to_hsv
@@ -34,11 +35,12 @@ color2bytes = lambda c: tuple(int(i*256) for i in c)
 bytes2color = lambda c: tuple(float(i)/256 for i in c)
 
 def shiftColor(c, i):
-    return RGB_24_to_15(color2bytes(hsv2rgb(*bytes2color(applyOffset(i, *color2bytes(rgb2hsv(*RGB_15_to_24(c))))))))
+    return RGB_24_to_15(color2bytes(hsv2rgb(*bytes2color(applyOffset(i, *color2bytes(rgb2hsv(*bytes2color(c))))))))
 
-print("include\n")
+print("include")
 
-for area, snesColor in areaColors.items():
-    print("!AreaColor_%s = $%04x" % (area, snesColor))
-    shiftedColors = [shiftColor(snesColor, i) for i in range(len(s_offsets))]
+for area, color in areaColors.items():
+    print("\n;; %s : RGB %s / Hex RGB $%06x" % (area, str(color), color[0] << 16 | color[1] << 8 | color[2]))
+    print("!AreaColor_%s = $%04x" % (area,  RGB_24_to_15(color)))
+    shiftedColors = [shiftColor(color, i) for i in range(len(s_offsets))]
     print("!Glow_%s = %s" % (area, ','.join(["$%04x" % c for c in shiftedColors])))

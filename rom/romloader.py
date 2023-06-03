@@ -114,7 +114,7 @@ class RomLoader(object):
         if self.hasPatch("minimizer_tourian"):
             RomPatches.ActivePatches.append(RomPatches.TourianSpeedup)
             tourian = 'Fast'
-        if bool(self.readOption("escapeTrigger")):
+        if self.isEscapeTrigger():
             RomPatches.ActivePatches.append(RomPatches.NoTourian)
             tourian = 'Disabled'
 
@@ -149,6 +149,9 @@ class RomLoader(object):
 
     def getROM(self):
         return self.romReader.romFile
+
+    def isEscapeTrigger(self):
+        return self.romReader.isEscapeTrigger()
 
     def isBoss(self):
         romFile = self.getROM()

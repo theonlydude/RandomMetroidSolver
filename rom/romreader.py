@@ -257,6 +257,13 @@ class RomReader:
         self.symbols = RomFlavor.symbols
         self.romOptions = RomOptions(self.romFile, self.symbols)
 
+    def isEscapeTrigger(self):
+        val = self.romOptions.read('escapeTrigger')
+        # compatibility with previous releases
+        if val == 0xff:
+            val = 0
+        return bool(val)
+
     def readPlmWord(self, address):
         if self.race is None:
             return self.romFile.readWord(address)

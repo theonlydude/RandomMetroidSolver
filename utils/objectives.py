@@ -993,7 +993,7 @@ class Objectives(object):
         for goal in Objectives.activeGoals:
             LOG.debug("active goal: {}".format(goal.name))
 
-        Objectives.tourianRequired = not bool(romReader.romOptions.read('escapeTrigger'))
+        Objectives.tourianRequired = not romReader.isEscapeTrigger()
         LOG.debug("tourianRequired: {}".format(self.tourianRequired))
 
         LOG.debug(f"nbActiveGoals: {Objectives.nbActiveGoals}, nbRequiredGoals: {Objectives.nbRequiredGoals}")

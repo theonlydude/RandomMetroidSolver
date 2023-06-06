@@ -21,6 +21,7 @@ class RomOptions(object):
         self.addOption("escapeTriggerCrateria", "objectives_options", "settings_flags", mask=0x1)
         self.addOption("objectivesSFX", "objectives_options", "settings_flags", mask=0x80)
         self.addOption("objectivesHidden", "objectives_options", "settings_flags", mask=0x2)
+        self.addOption("BTsleep", "objectives_options", "settings_flags", mask=0x4)
         self.addOption("fastTourianSkipRefill", "area_rando_doors", "full_refill")
 
     def _getAddress(self, namespace, label):

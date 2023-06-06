@@ -1504,14 +1504,11 @@ class RomPatcher:
                 self.romFile.writeWord(offset, addr)
                 addr = Addresses.getOne("objectives_map_tile_%s_mask" % animal)
                 self.romFile.writeWord(mask, addr)
-        # hack bomb_torizo.ips to wake BT in all cases if necessary, ie chozo bots objective is on, and nothing at bombs
-        if objectives.isGoalActive("activate chozo robots") and RomPatches.has(RomPatches.BombTorizoWake):
+        # handle VARIA tweaks BT behavior ROM option here. wake BT if there is an item there or activate chozo robots obj is on
+        if RomPatches.has(RomPatches.BombTorizoWake):
             bomb = next((il for il in itemLocs if il.Location.Name == "Bomb"), None)
-            if bomb is not None and bomb.Item.Category == "Nothing":
-                for addrName in ["BTtweaksHack1", "BTtweaksHack2"]:
-                    self.romFile.seek(Addresses.getOne(addrName))
-                    for b in [0xA9,0x00,0x00]: # LDA #$0000 ; set zero flag to wake BT
-                        self.romFile.writeByte(b)
+            if (bomb is not None and bomb.Item.Category == "Nothing") and not objectives.isGoalActive("activate chozo robots"):
+                self.romOptions.write('BTsleep', 0x4)
 
     def writeItemsMasks(self, itemLocs):
         # write items/beams masks for "collect all major" objective

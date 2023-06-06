@@ -12,5 +12,6 @@ org $a1f550
 ;;; low bit (0): with nothing objective, trigger escape only in crateria
 ;;; high bit (7): play sfx on objective completion (don't use for vanilla objectives)
 ;;; bit 1: if set, objectives will be hidden in pause menu until a room is visited (usually G4)
+;;; bit 2: don't wake up BT on item collection. set to 1 if nothing item and no "trigger chozo bots" objective
 %export(settings_flags)
-	db $01
+	db %00000001

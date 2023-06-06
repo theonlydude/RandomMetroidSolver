@@ -102,3 +102,4 @@ include
 !option_nothing_trigger_escape_crateria_mask = $01
 !option_play_sfx_on_completion_mask = $80
 !option_hidden_objectives_mask = $02
+!option_BT_sleep_mask = $04

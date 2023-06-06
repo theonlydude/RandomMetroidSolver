@@ -1,57 +1,47 @@
-
-;;; makes it so that BT will wake up only once you picked up
-;;; the item he's holding, whatever it is
+;;; Fix bomb torizo awakening, wakes up on item acquisition instead of bombs collected
+;;; original patch by PJBoy, adapted for VARIA
 
 lorom
 arch 65816
 
-incsrc "macros.asm"
+incsrc "constants.asm"
 
-!CurrentRoom = $7e079b
-!BTRoom      = #$9804
-!BTRoomFlag  = $7ed86c		; some free RAM for the flag
-!PickedUp    = #$bbbb
+incsrc "sym/objectives_options.asm"
 
-;;; hijack item collection routine (different hijack point than endingtotals.asm)
-org $8488a7
-    jsr btflagset
+; Grey door
+org $84BA6F ; Instruction - go to [[Y]] if Samus doesn't have bombs
+	; Check if PLM 1 (vanilla bombs PLM) has been deleted instead
+        jsr btcheck : BNE +
+	INY : INY
+        RTS
++
+	LDA $0000,y : TAY
+        RTS
+
+warnpc $84ba7f
+
+; Statue
+org $84D33B ; Pre-instruction - wake PLM if Samus has bombs
+	; Check if PLM 1 (vanilla bombs PLM) has been deleted instead
+	jsr btcheck : BNE +
+        ;; vanilla code to wake plm
+	LDA #$0001 : STA $7EDE1C,x
+	INC $1D27,x : INC $1D27,x
+	LDA #$D356 : STA $1CD7,x
++
+	RTS
+
+warnpc $84D357
 
 org $84f840
-btflagset:
-    pha			; save A to perform original ORA afterwards
-    ;; check if we're in BT room
-    lda !CurrentRoom
-    cmp !BTRoom
-    bne .end
-    ;; set flag "picked up BT's item"
-    lda !PickedUp
-    sta !BTRoomFlag
-.end:
-    pla
-    ora $05e7 		; original hijacked code
-    rts
-
-;;; check if we picked up BT's item, zero flag set if we do
 btcheck:
-    lda !BTRoomFlag
-    cmp !PickedUp
-    rts
+        ;; check if BT should never wake up
+        lda.l objectives_options_settings_flags
+        bit.w #!option_BT_sleep_mask : bne .end
+        ;; PLM 1
+        LDA $1C83
+.end:
+        rts
 
 print "b84 end: ", pc
 warnpc $84f860
-
-;;; overwrite BT grey door PLM instruction (bomb check)
-org $84ba6f
-bt_grey_door_instr:
-    jsr btcheck
-%export(bt_grey_door_instr_nops)
-    nop : nop : nop
-    bne $03	                ; orig: BEQ $03    ; return if no bombs
-
-;;; overwrite BT PLM pre-instruction (bomb check)
-org $84d33b
-bt_instr:
-    jsr btcheck
-%export(bt_instr_nops)
-    nop : nop : nop
-    bne $13			; orig: BEQ $13    ; return if no bombs

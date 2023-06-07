@@ -199,7 +199,8 @@ class RomPatcher:
         # apply ROM options on top of patches
         self.romOptions.write('escapeTrigger', int(self.settings["tourian"] == "Disabled"))
         self.romOptions.write('escapeTriggerCrateria', int(not self.settings['isPlando']))
-        self.romOptions.write('escapeRandoRemoveEnemies', int(self.settings['escapeRandoRemoveEnemies']))
+        if self.settings['escapeRandoRemoveEnemies'] is not None:
+            self.romOptions.write('escapeRandoRemoveEnemies', int(self.settings['escapeRandoRemoveEnemies']))
         self.romOptions.write('objectivesSFX', 0 if self.settings['vanillaObjectives'] else 0x80)
         self.romOptions.write("objectivesHidden", 0 if not Objectives.hidden else 0x2)
         backupSaves = self.settings["area"] == True or self.settings["doorsColorsRando"] == True or not GraphUtils.isStandardStart(self.settings["startLocation"])

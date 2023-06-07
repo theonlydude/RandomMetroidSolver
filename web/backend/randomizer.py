@@ -80,6 +80,7 @@ class Randomizer(object):
             "RLS4GS": "Rando League Season 4 playoff GS",
             "RLS4P1": "Rando League Season 4 playoff 1",
             "RLS4P2": "Rando League Season 4 playoff 2",
+            "SGL23Online": "SpeedGaming Live 2023 Online tournament"
         }
 
         randoPresetsCategories = {
@@ -92,7 +93,7 @@ class Randomizer(object):
             "Objectives": ["objectives_all_bosses", "objectives_clear_areas", "objectives_memes", "objectives_short", "objectives_long", "objectives_robots_notweaks"],
             "Hard": ["hardway2hell", "highway2hell", "stupid_hard", "objectives_hard_heat", "objectives_hard_water"],
             "Random": ["all_random", "quite_random", "surprise"],
-            "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "RLS4W2", "RLS4W3", "RLS4W4", "RLS4W5", "RLS4W7", "RLS4GS", "RLS4P1", "RLS4P2", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2", "SGLive2022_Game_1", "SGLive2022_Game_2", "SGLive2022_Game_3", "Boyz_League_SM_Rando"]
+            "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "SGL23Online", "RLS4W2", "RLS4W3", "RLS4W4", "RLS4W5", "RLS4W7", "RLS4GS", "RLS4P1", "RLS4P2", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2", "SGLive2022_Game_1", "SGLive2022_Game_2", "SGLive2022_Game_3", "Boyz_League_SM_Rando"]
         }
 
         startAPs = GraphUtils.getStartAccessPointNamesCategory()

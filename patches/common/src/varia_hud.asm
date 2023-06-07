@@ -378,10 +378,12 @@ draw_info:
 	lda !n_items : jsr draw_number
 	bra .end
 .draw_chozo:
-	lda #$0CF9 : sta !split_locs_hud ; blue 'Z'
+%BGtile($f9, 2, 0, 0, 0)
+	lda.w #!_tile : sta !split_locs_hud ; pink 'Z'
 	bra .draw_items
 .draw_major:
-	lda #$0CEC : sta !split_locs_hud ; blue 'M'
+%BGtile($ec, 2, 0, 0, 0)
+	lda.w #!_tile : sta !split_locs_hud ; pink 'M'
 .draw_items:
 	lda !n_items : jsr draw_one
 

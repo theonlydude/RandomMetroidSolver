@@ -135,7 +135,7 @@ org $81A149
 
 ;//FREE SPACE
 ;------------
-org $81FA0A 		;//[00FA00] ($42 bytes)
+org $81FB00
 DisplayDifficulty:
 	STA $7E3642,x	;[$7E:379E]	;//moved (x=#$015C)
 	PHX

@@ -352,26 +352,30 @@ draw_door_icons:
         ;; X = pointer to area door list, do nothing if ptr is 0
 	lda doors_mapicons_by_area, x : beq .end : tax
 .loop:
-	lda $0000, x : cmp #$ffff : beq .end ; table terminator
+	lda $0000, x : jsr load_icon
+        cmp #$ffff : beq .end ; table terminator
 	;; $14 = X coord, $18 = Y coord
 	sta $14
-	lda $0002, x : sta $18
+	lda $0002, x : jsr load_icon
+        sta $18
 	stx $04			; backup X in $04
 	;; skip entry if tile unexplored
 	ldx $14 : ldy $18
 	jsl is_explored : beq .next
 	;; now check if the door is opened :
 	;; get byte index/bitmask from door id
-	ldx $04 : lda $0005, x : and #$00ff : jsl !bitindex_routine
+	ldx $04 : lda $0006, x : jsr load_icon
+        jsl !bitindex_routine
 	;; if door is opened, skip entry
 	lda !doors_bitfield, x : bit !bitindex_mask : bne .next
 	;; here, we need to actually draw the map icon, if it is on screen
 	;; Y = pointer to spritemap entry
-	ldx $04 : lda $0004, x : and #$00ff : asl : tax
+	ldx $04 : lda $0004, x : jsr load_icon
+        asl : tax
         ldy doors_mapicons_sprite_table, x
         %drawMapIcon()
 .next:
-	lda $04 : clc : adc.w #6 : tax : bra .loop	; continue loop
+	lda $04 : clc : adc.w #8 : tax : bra .loop	; continue loop
 .end:
 	plb
 	rtl
@@ -384,20 +388,25 @@ draw_portal_icons:
         ;; X = pointer to area door list, do nothing if ptr is 0
 	lda portals_mapicons_by_area, x : beq .end : tax
 .loop:
-	lda $0000, x : cmp #$ffff : beq .end ; table terminator
+	lda $0000, x : jsr load_icon
+        cmp #$ffff : beq .end ; table terminator
 	;; $14 = X coord, $18 = Y coord
 	sta $14
-	lda $0002, x : sta $18
+	lda $0002, x : jsr load_icon
+        sta $18
 	stx $04			; backup X in $04
 	;; skip entry if tile unexplored
 	ldx $14 : ldy $18
 	jsl is_explored : beq .next
         ;; check if the other end of the portal is explored
-        ldy $04 : lda $0006, y : tax
+        ldy $04 : lda $0006, y : jsr load_icon
+        tax
         lda.l $7E0000, x : and $0008, y : beq .next
         ;; here, we need to actually draw the map icon, if it is on screen
 	;; Y = pointer to spritemap entry
-	ldx $04 : lda $0004, x : asl : tax
+	ldx $04
+        lda $0004, x : jsr load_icon
+        asl : tax
         ldy portals_mapicons_sprite_table, x
         %drawMapIcon()
 .next:
@@ -445,6 +454,10 @@ draw_objective_icons:
         plb
         rtl
 
+load_icon:
+        nop #4
+        rts
+
 ;; extra sprites, overwrite some unused sprite VRAM in pause
 extra_gfx:
 incbin "pause_extra.gfx"
@@ -455,7 +468,7 @@ incsrc "mapicon_sprites.asm"
 ;;; written by randomizer (depends on doors+target rom flavor)
 ;;; table format:
 ;;; dw X, Y
-;;; db sprite_index, door_id
+;;; dw sprite_index, door_id
 ;;; sprite_index is index in doors_mapicons_sprite_table (has to be doubled to get actual index)
 ;;; door_id is door PLM argument (tells whether door has been opened)
 ;;; terminator $FFFF
@@ -492,9 +505,9 @@ print "VARIA gfx/code b85 end: ", pc
 
 %export(mapicons_tables)
         padbyte $ca : pad !mapicons_tables_limit ; reserve space
-warnpc !mapicons_tables_limit
 org !mapicons_tables_limit
 %export(mapicons_tables_limit)
+warnpc !mapicons_tables_limit
 }
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    SELECT SWITCH AREA                                       |x|

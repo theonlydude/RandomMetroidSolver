@@ -184,14 +184,14 @@ class Door(object):
             rom.writeByte(0x90, snes_to_pc(self.address+5))
 
     # assumes rom is positioned correctly in table
-    def writeMapIcon(self, rom, x, y):
+    def writeMapIcon(self, x, y, writeWordFunc):
         if self.isBlue() or self.isRefillSave():
             return
-        rom.writeWord(x)
-        rom.writeWord(y)
+        writeWordFunc(x)
+        writeWordFunc(y)
         icon = doors_mapicons[(self.color, self.facing)]
-        rom.writeByte(icon.table_index)
-        rom.writeByte(self.id)
+        writeWordFunc(icon.table_index)
+        writeWordFunc(self.id)
 
     def readColor(self, rom, readWordFunc):
         if self.forced or self.isRefillSave():
@@ -428,7 +428,7 @@ class DoorsManager():
 
     @staticmethod
     # assumes rom is positioned correctly to start of door table
-    def writeDoorsMapIcons(rom, area, areaMap):
+    def writeDoorsMapIcons(area, areaMap, writeWordFunc):
         mapIconData = Logic.map_tiles.doors
         for doorName, tileEntry in mapIconData.items():
             if tileEntry['area'] != area:
@@ -436,8 +436,8 @@ class DoorsManager():
             x, y = areaMap.getCoordsByte(tileEntry['byteIndex'], tileEntry['bitMask'])
             door = DoorsManager.doors[doorName]
             # *8 to convert tile coords to pixel coords
-            door.writeMapIcon(rom, x*8, y*8)
-        rom.writeWord(0xffff) # terminator
+            door.writeMapIcon(x*8, y*8, writeWordFunc)
+        writeWordFunc(0xffff) # terminator
 
     @staticmethod
     def getBlueDoors(doors):

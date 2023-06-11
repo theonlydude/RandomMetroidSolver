@@ -264,11 +264,17 @@ class RomPatcher:
         itemCode = ItemManager.getItemTypeCode(item, visibility)
         self.writePlmWord(itemCode, address)
 
-    def writePlmWord(self, word, address):
+    def writePlmWord(self, word, address=None):
         if self.race is None:
             self.romFile.writeWord(word, address)
         else:
             self.race.writePlmWord(word, address)
+
+    def writeWordMagic(self, word, address=None):
+        if self.race is None:
+            self.romFile.writeWord(word, address)
+        else:
+            self.race.writeWordMagic(word, address)
 
     def getLocAddresses(self, loc):
         ret = [loc.Address]
@@ -1059,10 +1065,7 @@ class RomPatcher:
     def patchBytes(self, address, array, isRace=False):
         self.romFile.seek(address)
         for w in array:
-            if not isRace:
-                self.romFile.writeWord(w)
-            else:
-                self.race.writeWordMagic(w)
+            self.writeWordMagic(w)
 
     def writeDoorTransition(self, roomPtr):
         if self.race is None:
@@ -1230,17 +1233,15 @@ class RomPatcher:
                 x, y = srcMapInfo['coords']
             else:
                 x, y = areaMap.getCoordsByte(srcMapInfo['byteIndex'], srcMapInfo['bitMask'])
-            self.romFile.writeWord(x*8)
-            self.romFile.writeWord(y*8)
-            self.romFile.writeWord(portal_mapicons[dst.GraphArea].table_index)
-            self.romFile.writeWord(self._getExploredMapRam(dst.RoomInfo['area'], dstMapInfo['byteIndex']))
+            self.writeWordMagic(x*8)
+            self.writeWordMagic(y*8)
+            self.writeWordMagic(portal_mapicons[dst.GraphArea].table_index)
+            self.writeWordMagic(self._getExploredMapRam(dst.RoomInfo['area'], dstMapInfo['byteIndex']))
             self.romFile.writeWord(dstMapInfo['bitMask'])
-        self.romFile.writeWord(0xffff) # terminator
+        self.writeWordMagic(0xffff) # terminator
 
     def writeDoorConnectionsMapIcons(self, doorConnections):
         assert len(self.areaMaps) > 0, "call writeDoorConnectionsMapIcons when areaMaps are built"
-        if self.race is not None:
-            return
         # write area portal tables
         self.romFile.seek(self._mapIconTableAddr)
         mapicon_ptrs = {}
@@ -1388,21 +1389,16 @@ class RomPatcher:
             self.romFile.writeWord(pc_to_snes(mapicon_ptrs[area]) & 0xffff, addr)
 
     def writeDoorsColor(self):
-        if self.race is None:
-            DoorsManager.writeDoorsColor(self.romFile, self.romFile.writeWord)
-        else:
-            DoorsManager.writeDoorsColor(self.romFile, self.writePlmWord)
+        DoorsManager.writeDoorsColor(self.romFile, self.writePlmWord)
 
     def writeDoorsMapIcons(self):
         assert len(self.areaMaps) > 0, "call writeDoorsMapIcons when areaMaps are built"
-        if self.race is not None:
-            return
         # write area door tables
         self.romFile.seek(self._mapIconTableAddr)
         mapicon_ptrs = {}
         for area, areaMap in self.areaMaps.items():
             mapicon_ptrs[area] = self.romFile.tell()
-            DoorsManager.writeDoorsMapIcons(self.romFile, area, areaMap)
+            DoorsManager.writeDoorsMapIcons(area, areaMap, self.writeWordMagic)
         self._mapIconTableAddr = self.romFile.tell()
         self._writeMapIconTable(mapicon_ptrs, Addresses.getOne("map_doors_mapicons_by_area"))
 

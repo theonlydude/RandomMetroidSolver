@@ -204,6 +204,11 @@ escape_setup_l:
     bcc -
     ;; open Maridia Tube
     %markEvent(!maridia_tube_open)
+    ;; mark all objectives as cleared to disable checking:
+    ;; since we kill all bosses/minibosses, it can trigger a lot
+    ;; of objectives notifications if the HUD is enabled
+    ;; (and more possible objectives than required ofc)
+    %markEvent(!all_objectives_completed_event)
 .end:
     rtl
 

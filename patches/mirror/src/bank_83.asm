@@ -5929,7 +5929,8 @@ Room_D845_door_list_index_0_Door:
     db $00 ; X screen
     db $02 ; Y screen
     dw $8000 ; Distance from door to spawn Samus
-    dw $E318 ; Custom door ASM to execute (bank $8F)
+    ;; remove door asm which sets the screen scrolls as they are incompatible with current scroll plms
+    dw $0000 ; Custom door ASM to execute (bank $8F)
 org $83a8ac
 ; room D898: [Botwoon Sand Fall]
 Room_D898_door_list_index_0_Door:

@@ -9,24 +9,32 @@ sys.path.append(os.path.dirname(sys.path[0]))
 
 from rom.ips import IPS_Patch
 
-patched1 = sys.argv[1]
-patched2 = sys.argv[2]
-output = sys.argv[3]
+vanilla = sys.argv[1]
+patched1 = sys.argv[2]
+patched2 = sys.argv[3]
+output = sys.argv[4]
 
 sz = os.path.getsize(patched1)
 
 assert sz == os.path.getsize(patched2), "Files must have the same size"
 
+vanilla_sz = os.path.getsize(vanilla)
+
 with open(patched1, "rb") as fp:
     data1 = fp.read()
 with open(patched2, "rb") as fp:
     data2 = fp.read()
+with open(vanilla, "rb") as fp:
+    vanilla_data = fp.read()
 
-patchDict = {offset:[data1[offset]] for offset in range(sz) if data1[offset] == data2[offset]}
+patchDict = {offset:[data1[offset]] for offset in range(sz) if data1[offset] == data2[offset] and (offset >= vanilla_sz or data1[offset] != vanilla_data[offset])}
 
 base_off = -100
 prev_off = -100
-for offset in patchDict:
+
+offsets = list(patchDict.keys())
+
+for offset in offsets:
     if prev_off == offset - 1:
         patchDict[base_off] += patchDict[offset]
         del patchDict[offset]

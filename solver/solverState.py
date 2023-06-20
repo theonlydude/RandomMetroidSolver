@@ -102,6 +102,7 @@ class SolverState(object):
         self.state["majorUpgrades"] = solver.majorUpgrades
         self.state["splitLocsByArea"] = solver.splitLocsByArea
         self.state["eventsBitMasks"] = solver.eventsBitMasks
+        self.state["objectivesHidden"] = solver.objectivesHidden
         # scav hunt locations
         self.state["scavengerOrder"] = self.getScavengerOrder(solver)
         self.state["additionalETanks"] = solver.additionalETanks
@@ -143,6 +144,7 @@ class SolverState(object):
         solver.majorUpgrades = self.state["majorUpgrades"]
         solver.splitLocsByArea = self.state["splitLocsByArea"]
         solver.eventsBitMasks = self.state["eventsBitMasks"]
+        solver.objectivesHidden = self.state["objectivesHidden"]
         solver.scavengerOrder = self.setScavengerOrder(solver, self.state["scavengerOrder"])
         solver.additionalETanks = self.state["additionalETanks"]
 

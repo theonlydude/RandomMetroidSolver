@@ -966,6 +966,9 @@ class Objectives(object):
         # in previous releases this info wasn't present in ROM, freespace default to 0xff
         if Objectives.nbActiveGoals == 0xff:
             Objectives.nbActiveGoals = 0
+            Objectives.previousReleaseFallback = True
+        else:
+            Objectives.previousReleaseFallback = False
 
         # read objectives list
         try:

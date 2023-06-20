@@ -21,6 +21,7 @@ class CommonSolver(object):
         self.scavengerOrder = []
         self.plandoScavengerOrder = []
         self.additionalETanks = 0
+        self.objectivesHidden = False
         # startLocation param is only use for seedless
         if rom is None:
             # TODO::add a --logic parameter for seedless
@@ -78,6 +79,9 @@ class CommonSolver(object):
                 if interactive:
                     # load event bit masks for auto tracker
                     self.eventsBitMasks = self.romLoader.loadEventBitMasks()
+                    # this option wasn't available in previous release
+                    if not Objectives.previousReleaseFallback:
+                        self.objectivesHidden = bool(self.romLoader.readOption("objectivesHidden"))
             else:
                 if self.majorsSplit == "Scavenger":
                     # add scav hunt

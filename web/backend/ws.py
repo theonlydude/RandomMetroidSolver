@@ -135,7 +135,8 @@ class WS(object):
                 # completed objectives
                 "newlyCompletedObjectives": state["newlyCompletedObjectives"],
                 "eventsBitMasks": state["eventsBitMasks"],
-                "objectives": state["objectives"]
+                "objectives": state["objectives"],
+                "objectivesHidden": state["objectivesHidden"]
             })
         else:
             raiseHttp(200, "OK", True)

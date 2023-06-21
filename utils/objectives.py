@@ -1007,8 +1007,6 @@ class Objectives(object):
         romFile.seek(Addresses.getOne('objectivesList'))
         for goal in Objectives.activeGoals:
             romFile.writeWord(goal.checkAddr)
-        # list terminator
-        romFile.writeWord(0x0000)
         # write "in progress" check functions
         romFile.seek(Addresses.getOne('objectives_in_progress_funcs'))
         for goal in Objectives.activeGoals:

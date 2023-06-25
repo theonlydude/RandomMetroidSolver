@@ -929,14 +929,20 @@ class Objectives(object):
 
     # call from interactivesolver
     def getState(self):
-        return {goal.name: goal.completed for goal in Objectives.activeGoals}
+        return {
+            "goals": {goal.name: goal.completed for goal in Objectives.activeGoals},
+            "nbActiveGoals": Objectives.nbActiveGoals,
+            "nbRequiredGoals": Objectives.nbRequiredGoals
+        }
 
     def getTotalItemsCount(self):
         return Objectives.totalItemsCount
 
     def setState(self, state):
-        for goalName, completed in state.items():
+        for goalName, completed in state["goals"].items():
             self.addGoal(goalName, completed)
+        Objectives.nbActiveGoals = state["nbActiveGoals"]
+        Objectives.nbRequiredGoals = state["nbRequiredGoals"]
 
     def setTotalItemsCount(self, totalItemsCount):
         Objectives.totalItemsCount = totalItemsCount

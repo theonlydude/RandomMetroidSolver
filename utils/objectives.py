@@ -970,29 +970,19 @@ class Objectives(object):
         Objectives.nbActiveGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives'))
         Objectives.nbRequiredGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives_required'))
         # in previous releases this info wasn't present in ROM, freespace default to 0xff
-        if Objectives.nbActiveGoals == 0xff:
-            Objectives.nbActiveGoals = 0
-            Objectives.previousReleaseFallback = True
-        else:
-            Objectives.previousReleaseFallback = False
+        Objectives.previousReleaseFallback = Objectives.nbActiveGoals == 0xff
 
-        # read objectives list
-        try:
+        if Objectives.previousReleaseFallback:
+            self.setVanilla()
+            Objectives.nbActiveGoals = len(Objectives.activeGoals)
+            Objectives.nbRequiredGoals = len(Objectives.activeGoals)
+        else:
+            # read objectives list
             romReader.romFile.seek(Addresses.getOne('objectivesList'))
-            # loop until list terminator which will raise an exception
-            while True:
+            for i in range(Objectives.nbActiveGoals):
                 checkFunction = romReader.romFile.readWord()
                 goal = self.getGoalFromCheckFunction(checkFunction)
                 Objectives.activeGoals.append(goal)
-        except:
-            # if no objective found set it to default G4
-            # (for previous versions with objectives data located elsewhere in ROM)
-            if not Objectives.activeGoals:
-                self.setVanilla()
-
-        # compatibility with previous releases
-        if Objectives.nbRequiredGoals == 0xff:
-            Objectives.nbRequiredGoals = len(Objectives.activeGoals)
 
         # read number of available items for items % objectives
         totalItems = romReader.romFile.readByte(Addresses.getOne('totalItems'))

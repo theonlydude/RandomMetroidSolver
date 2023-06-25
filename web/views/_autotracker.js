@@ -896,6 +896,12 @@ function computeStateBitMasks() {
             for(var event in eventsBitMasks) {
                 stateBitMasks[curOffset + eventsBitMasks[event]["byteIndex"]] |= eventsBitMasks[event]["bitMask"];
             }
+            // add objectives revealed event
+            var VARIA_event_base = 0x80;
+            var objectives_revealed_event = VARIA_event_base+33;
+            var byteIndex = objectives_revealed_event >> 3;
+            var bitMask = 1 << (objectives_revealed_event & 7);
+            stateBitMasks[curOffset + byteIndex] |= bitMask;
         } else if(dataToAskChain[i] === dataEnum.inventory) {
             let curOffset = stateDataOffsets[dataEnum.inventory];
             for(let item in inventoryBitMasks) {

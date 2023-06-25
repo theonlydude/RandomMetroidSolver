@@ -1059,6 +1059,16 @@ class InteractiveSolver(CommonSolver):
                         if goalCompleted:
                             self.objectives.setGoalCompleted(goalName, False)
 
+                if self.objectivesHiddenOption:
+                    # also check objectives revealed event
+                    # !VARIA_event_base #= $0080
+                    # !objectives_revealed_event #= !VARIA_event_base+33
+                    VARIA_event_base = 0x80
+                    objectives_revealed_event = VARIA_event_base+33
+                    byteIndex = objectives_revealed_event >> 3
+                    bitMask = 1 << (objectives_revealed_event & 7)
+                    self.objectivesHidden = not bool(currentState[offset + byteIndex] & bitMask)
+
     def isElemAvailable(self, currentState, offset, apData):
         byteIndex = apData["byteIndex"]
         bitMask = apData["bitMask"]

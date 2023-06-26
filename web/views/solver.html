@@ -967,7 +967,7 @@ if result is not None and result["difficulty"] != -1:
 
         <div class="row">
           <div class="column">
-            <h4 style="padding-left: 0.5em;">Seed objectives:</h4>
+            <h4 style="padding-left: 0.5em;">Seed objectives required {{=result["nbRequiredGoals"]}}/{{=result["nbActiveGoals"]}}:</h4>
             <ul>
 {{
     for objective in result["objectives"]:

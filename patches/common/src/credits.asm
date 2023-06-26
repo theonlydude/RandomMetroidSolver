@@ -1055,33 +1055,33 @@ credits:
     !big
     ;; item distribution data start
 %export(credits_items_distrib)
-    dw " ITEM LOCATIONS              XX " ;; 146
-    dw " item locations............. xx " ;; 147
-    dw "  MAJ XX EN XX AMMO XX BLANK XX " ;; 148
-    dw "  maj xx en xx ammo XX blank XX " ;; 149
-    dw " AMMO PACKS  MI XX SUP XX PB XX " ;; 150
-    dw " ammo packs  mi XX sup XX pb XX " ;; 151
-    dw " HEALTH TANKS         E XX R XX " ;; 152
-    dw " health tanks ......  e.xx.r xx " ;; 153
+    dw " ITEM LOCATIONS             100 " ;; 146
+    dw " item locations             !}} " ;; 147
+    dw "  MAJ 16 EN 18 AMMO 66 BLANK  0 " ;; 148
+    dw "  maj !& en !( ammo && blank  } " ;; 149
+    dw " AMMO PACKS  MI 46 SUP 10 PB 10 " ;; 150
+    dw " ammo packs  mi $& sup !} pb !} " ;; 151
+    dw " HEALTH TANKS         E 14 R  4 " ;; 152
+    dw " health tanks         e !$ r  $ " ;; 153
     dw "   ALL SUPER METROID HACKERS    " ;; 154 : credits
     ;; params data start
     !yellow
-    dw " PROGRESSION SPEED .... XXXXXXX " ;; 155
-    dw " PROGRESSION DIFFICULTY XXXXXXX " ;; 156
+    dw " PROGRESSION SPEED ....      NA " ;; 155
+    dw " PROGRESSION DIFFICULTY      NA " ;; 156
     ;; item distrib title
     !purple
     dw "       ITEMS DISTRIBUTION       " ;; 157
     ;; params data end
     !yellow
-    dw " SUITS RESTRICTION ........ XXX " ;; 158
-    dw " MORPH PLACEMENT ....... XXXXXX " ;; 159
-    dw " SUPER FUN COMBAT ......... XXX " ;; 160
-    dw " SUPER FUN MOVEMENT ....... XXX " ;; 161
-    dw " SUPER FUN SUITS .......... XXX " ;; 162
+    dw " SUITS RESTRICTION ........  NA " ;; 158
+    dw " MORPH PLACEMENT .......     NA " ;; 159
+    dw " SUPER FUN COMBAT .........  NA " ;; 160
+    dw " SUPER FUN MOVEMENT .......  NA " ;; 161
+    dw " SUPER FUN SUITS ..........  NA " ;; 162
     ;; item distrib data end
     !big
-    dw " AMMO DISTRIBUTION  X X X X X X " ;; 163
-    dw " ammo distribution  x.x x.x x.x " ;; 164
+    dw " AMMO DISTRIBUTION  4 6 1 0 1 0 " ;; 163
+    dw " ammo distribution  $.& !.} !.} " ;; 164
     ;; credits continued
     !yellow
     dw "   SUPER METROID DISASSEMBLY    " ;; 165
@@ -1090,8 +1090,8 @@ credits:
     dw "        pjboy    kejardon       " ;; 167
 %export(credits_items_distrib_continued)
 ;; stats continued
-    dw " AVAILABLE AMMO XXX% ENERGY XXX%" ;; 168
-    dw " available ammo xxx> energy xxx>" ;; 169
+    dw " AVAILABLE AMMO 100% ENERGY 100%" ;; 168
+    dw " available ammo !}}> energy !}}>" ;; 169
     dw " UNCHARGED SHOTS              0 " ;; 170
     dw " uncharged shots              } " ;; 171
     dw " DEATHS                       0 " ;; 172
@@ -1867,9 +1867,9 @@ macro energyTableEntry(item, x, y, collected, total)
 endmacro
 
 %export(minors_table)
-        %ammoTableEntry(Missile, 2, 5, $09C8, 33)
-        %ammoTableEntry(Super, 12, 5, $09CC, 22)
-        %ammoTableEntry(PowerBomb, 22, 5, $09D0, 11)
+        %ammoTableEntry(Missile, 2, 5, $09C8, 46)
+        %ammoTableEntry(Super, 12, 5, $09CC, 10)
+        %ammoTableEntry(PowerBomb, 22, 5, $09D0, 10)
         %energyTableEntry(ETank, 2, 9, $09C4, 14)
         %energyTableEntry(Reserve, 22, 9, $09D4, 4)
         dw $0000

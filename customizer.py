@@ -83,6 +83,7 @@ if __name__ == "__main__":
                         dest='hellrunRate', default=100, type=int)
     parser.add_argument('--etanks', help="Additional ETanks, between 0 (default) and 18",
                         dest='additionalEtanks', default=0, type=int)
+    parser.add_argument('--base', help="Add VARIA base patches on a vanilla ROM", dest='base', action='store_true', default=False)
 
     # parse args
     args = parser.parse_args()
@@ -109,6 +110,9 @@ if __name__ == "__main__":
     if logic == "random":
         # extract logic from ips
         logic = RomReader.getLogicFromIPS(args.seedIps)
+
+    if args.base:
+        args.patches += ["utils.ips", "base.ips", "stats.ips", "credits.ips", "endingtotals.ips", "area_ids.ips", "area_ids_alt.ips"]
 
     Logic.factory(logic)
     RomFlavor.factory()

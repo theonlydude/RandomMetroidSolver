@@ -167,52 +167,6 @@ HardSprites:				;//mode:hff
 	NOP				;//to know where the data ends
 
 ;--------------------------------------------------------------
-
-;==============================================================
-;//Save & Load (for everything not starting at ceres elevator)
-;==============================================================
-org $A2A9B5		;//part of samus arrival routine
-	JSR SaveMode			;//lda $0952
-
-org $8283E0		;//part of the ceres routine
-	NOP : NOP : NOP			;//lda $0952
-
-;//FREE SPACE
-;------------
-org $A2FFE0		;//[117FE0] ($16 bytes) End of bank
-SaveMode:
-	LDA $7E09EA
-	;CMP #$0000
-	BNE +
-	LDA #$0000
-	BRA ++
-+
-	LDA #$0001
-++
-	STA $7ED808
-	LDA $0952			;//moved
-	RTS
-
-org $80858F
-	JSR LoadMode
-
-;//FREE SPACE
-;------------
-org $80FFA0		;//[007FA0] ($16 bytes) End of bank b4 rom info
-LoadMode:
-	LDA $7ED808
-	;CMP #$0000			;//check normal flag
-	BNE +				;//if not normal
-	LDA #$0000			;//else normal mode
-	BRA ++
-+
-	LDA #$0001			;//hard
-++
-	STA $7E09EA
-	LDA $079F			;//moved
-	RTS
-;--------------------------------------------------------------
-
 org $8DFFF0
         db $ff
 

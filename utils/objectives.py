@@ -1,4 +1,4 @@
-import random
+import random, copy
 from rom.addresses import Addresses, MAX_OBJECTIVES
 from rom.rom import pc_to_snes
 from rom.map import ObjectiveMapIcon
@@ -680,12 +680,14 @@ class Objectives(object):
                 LOG.debug(f"canExploreArea {area} {ap} not available")
                 return SMBool(False)
 
-        accessibeLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
-        areaLocs = [loc for loc in accessibeLocs if loc.GraphArea == area]
+        accessibleLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
+        # in solver we don't want to recompute already visited locations difficulty, so copy them first
+        areaLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea == area]
         availLocs = graph.getAvailableLocations(areaLocs, sm, maxDiff, rootApName)
         if len(availLocs) != len(areaLocs):
-            missingLocs = [loc for loc in areaLocs if loc not in availLocs]
-            LOG.debug(f"canExploreArea {area}, cannot access locs: {str(missingLocs)}")
+            if LOG.getEffectiveLevel() == logging.DEBUG:
+                missingLocs = [loc for loc in areaLocs if loc not in availLocs]
+                LOG.debug(f"canExploreArea {area}, cannot access locs: {str(missingLocs)}")
             return SMBool(False)
 
         return SMBool(True)
@@ -701,12 +703,13 @@ class Objectives(object):
                 LOG.debug(f"canExploreMap {ap} not available")
                 return SMBool(False)
 
-        accessibeLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
-        allLocs = [loc for loc in accessibeLocs if loc.GraphArea != "Tourian"]
+        accessibleLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
+        allLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea != "Tourian"]
         availLocs = graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName)
         if len(availLocs) != len(allLocs):
-            missingLocs = [loc for loc in allLocs if loc not in availLocs]
-            LOG.debug(f"canExploreMap, cannot access locs: {str(missingLocs)}")
+            if LOG.getEffectiveLevel() == logging.DEBUG:
+                missingLocs = [loc for loc in allLocs if loc not in availLocs]
+                LOG.debug(f"canExploreMap, cannot access locs: {str(missingLocs)}")
             return SMBool(False)
 
         return SMBool(True)
@@ -715,8 +718,8 @@ class Objectives(object):
     def canExploreMapPercent(sm, rootApName, percent):
         graph, maxDiff = Objectives.graph, Objectives.maxDiff
         # questionable heuristic: consider "access x% items" equivalent to "can reach x% locations"
-        accessibeLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
-        allLocs = [loc for loc in accessibeLocs if loc.GraphArea != "Tourian"]
+        accessibleLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
+        allLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea != "Tourian"]
         availLocs = graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName)
         pct = 100*float(len(availLocs)) / float(len(allLocs))
         return SMBool(pct >= percent)

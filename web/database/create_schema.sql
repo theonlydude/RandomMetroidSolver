@@ -41,14 +41,6 @@ create table if not exists solver_result (
   foreign key (solver_id) references solver(id)
 );
 
-create table if not exists solver_collected_items (
-  solver_id int unsigned not null,
-  item varchar(255) not null,
-  count tinyint not null,
-  primary key (solver_id, item),
-  foreign key (solver_id) references solver(id)
-);
-
 -- randomizer
 create table if not exists randomizer (
   id int unsigned not null auto_increment,

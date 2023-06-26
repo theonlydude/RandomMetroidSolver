@@ -215,3 +215,7 @@ LoadMode:
 
 org $8DFFF0
         db $ff
+
+;;; enable hard mode by default
+org $81B360
+        STA $09EA

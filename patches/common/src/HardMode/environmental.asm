@@ -43,4 +43,3 @@ Hotstuff:
 	RTS
 
 namespace off
-

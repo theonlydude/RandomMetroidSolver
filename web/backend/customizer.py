@@ -59,11 +59,15 @@ class Customizer(object):
                     info = {}
                     seedParams = {}
                     infoKeys = ['time', 'filename', 'preset', 'runtime', 'complexity', 'upload_status', 'seed', 'raceMode']
+                    noReplaceKeys = ['progressionDifficulty', 'progressionDifficultyMultiSelect']
                     for (k, value) in seedInfo:
                         if k in infoKeys:
                             info[k] = value
                         else:
-                            seedParams[k] = updateParameterDisplay(value)
+                            if k in noReplaceKeys:
+                                seedParams[k] = value
+                            else:
+                                seedParams[k] = updateParameterDisplay(value)
                     seedInfo = info
                     seedInfo['key'] = key
 

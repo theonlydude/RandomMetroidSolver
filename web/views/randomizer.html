@@ -2814,17 +2814,25 @@ def displayCheckbox(id, defaultTrue=False):
   {{pass}}
 
 {{
-def displaySelect(id, values, default):
+def displaySelect(id, values, default, replace=True):
   value = session.randomizer.get(id, default)
+  if replace:
 }}
   {{
-   =SELECT(*[OPTION(displayNames.get(value, value), _value=value) for value in values],
-           **dict(_id=id, _name=id, value=value, _class="full"))
+     =SELECT(*[OPTION(displayNames.get(value, value), _value=value) for value in values],
+             **dict(_id=id, _name=id, value=value, _class="full"))
   }}
+{{
+  else:
+}}
+  {{
+     =SELECT(*values, **dict(_id=id, _name=id, value=value, _class="full"))
+  }}
+    {{pass}}
 {{pass}}
 
 {{
-def displayMultiSelect(id, selectedValues, default, multipleValues):
+def displayMultiSelect(id, selectedValues, default, multipleValues, replace=True):
   # values for objective are stored differently
   if id == "objective":
     if session.randomizer.get("objectiveRandom") == 'true':
@@ -2833,12 +2841,16 @@ def displayMultiSelect(id, selectedValues, default, multipleValues):
       selectedValues = session.randomizer["objective"] or ["kill all g4"]
       pass
     pass
-  displaySelect(id, multipleValues, default)
+  displaySelect(id, multipleValues, default, replace)
 
   response.write("<div id=\"{}MultiSelectDiv\" style=\"display:none\">".format(id), escape=False)
   response.write("<select id=\"{}MultiSelect\" class=\"chzn-select\" multiple>".format(id), escape=False)
   for value in multipleValues:
-    displayValue = displayNames.get(value, value)
+    if replace:
+      displayValue = displayNames.get(value, value)
+    else:
+      displayValue = value
+      pass
     if value in selectedValues:
       response.write("  <option value=\"{}\" selected=\"selected\">{}</option>".format(value, displayValue), escape=False)
     else:
@@ -3092,7 +3104,7 @@ def displayNumber(id, min, max, default, step="1"):
               <tr id="progDiffVisibility">
                 <td class="small"><div class="random"><button id="progressionDifficultyRandom" type="button" onclick="randomize(event, 'progressionDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half"><span id="progressionDifficultyText">Progression difficulty:</span></td>
-                <td class="half">{{displayMultiSelect("progressionDifficulty", currentMultiValues["progressionDifficulty"], "normal", defaultMultiValues["progressionDifficulty"])}}</td>
+                <td class="half">{{displayMultiSelect("progressionDifficulty", currentMultiValues["progressionDifficulty"], "normal", defaultMultiValues["progressionDifficulty"], replace=False)}}</td>
                 <td id="progDiffStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr id="morphPlacementVisibility">

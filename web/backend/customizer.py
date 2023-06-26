@@ -141,6 +141,7 @@ class Customizer(object):
             self.session.customizer['hell'] = "off"
             self.session.customizer['hellrun_rate'] = 100
             self.session.customizer['etanks'] = 0
+            self.session.customizer['hard_mode'] = "off"
             self.session.customizer['music'] = "Don't touch"
             self.session.customizer['color_blind'] = "off"
             self.session.customizer['disable_screen_shake'] = "off"
@@ -168,7 +169,7 @@ class Customizer(object):
                    'remove_rando_speed', 'remove_spinjumprestart', 'gamepadMapping', 'widescreen',
                    'hell', 'lava_acid_physics', 'colorsRandomization', 'suitsPalettes', 'beamsPalettes',
                    'tilesPalettes', 'enemiesPalettes', 'bossesPalettes', 'invert',
-                   'color_blind', 'disable_screen_shake', 'noflashing']
+                   'color_blind', 'disable_screen_shake', 'noflashing', 'hard_mode']
         others = ['minDegree', 'maxDegree', 'hellrun_rate', 'etanks', 'logic']
         validateWebServiceParams(self.request, switchs, [], [], others, isJson=True)
         if self.vars.customSpriteEnable == 'on':
@@ -241,6 +242,7 @@ class Customizer(object):
         self.session.customizer['hell'] = self.vars.hell
         self.session.customizer['hellrun_rate'] = self.vars.hellrun_rate
         self.session.customizer['etanks'] = self.vars.etanks
+        self.session.customizer['hard_mode'] = self.vars.hard_mode
         self.session.customizer['music'] = self.vars.music
         self.session.customizer['color_blind'] = self.vars.color_blind
         self.session.customizer['disable_screen_shake'] = self.vars.disable_screen_shake
@@ -307,6 +309,8 @@ class Customizer(object):
             params += ['--hellrun', self.vars.hellrun_rate]
         if self.vars.etanks != 'off':
             params += ['--etanks', self.vars.etanks]
+        if self.vars.hard_mode != 'off':
+            params += ['-c', 'hard_mode.ips']
         if self.vars.color_blind == 'on':
             params += ['-c', 'color_blind.ips']
         if self.vars.disable_screen_shake == 'on':

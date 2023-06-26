@@ -419,7 +419,7 @@ function doSubmit() {
 
         var dataDict = {};
         dataDict["logic"] = logic;
-        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "color_blind", "disable_screen_shake", "noflashing"];
+        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "hard_mode", "color_blind", "disable_screen_shake", "noflashing"];
 
         for(var i=0; i<elems.length; i++) {
             var elem = document.getElementById(elems[i]);
@@ -832,7 +832,7 @@ if seedInfo != None:
 }}
 
 function greyOutPatches(isRace, isVARIA, isVanilla) {
-    var buttons = ["itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save", "widescreen", "lava_acid_physics", "hell", "hellrun_rate", "etanks"];
+    var buttons = ["itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save", "widescreen", "lava_acid_physics", "hell", "hellrun_rate", "etanks", "hard_mode"];
     for(var i=0; i<buttons.length; i++) {
         disableElement(buttons[i], isRace);
     }
@@ -1616,6 +1616,12 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
 <p>Set the number of Etanks available from start. Between 0 and 14. Useful with permanent hellrun but can be used independently for easier seeds.</p>"
     },
     {
+      element: "#hard_modeStep",
+      title: "Challenges options",
+      content: "<p>Hard mode by Sirkura</p>\
+<p>TODO: describe what hard mode patch do</p>"
+    },
+    {
       element: "#widescreenStep",
       title: "Widescreen support",
       content: "<p>Add support for widescreen on <a href=\"https://github.com/DerKoun/bsnes-hd/releases\" target=\"_blank\">bsnes-hd emulator</a>. A bso file containing emulator configuration is downloaded after the ROM file, you have to leave it in the same folder as the ROM file for bsnes-hd to work properly.</p>\
@@ -2039,6 +2045,14 @@ for name, values in musics["_dropdown"].items():
                     {{displayNumber("etanks", "0", "14", "0", "1")}}
                   </td>
                   <td id="hellOptionsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    {{displayCheckbox("hard_mode")}}
+                    <span id="hard_modeText">Hard mode</span>
+                  </td>
+                  <td colspan="2"></td>
+                  <td id="hard_modeStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
 

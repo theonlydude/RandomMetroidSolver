@@ -21,6 +21,7 @@ class CommonSolver(object):
         self.scavengerOrder = []
         self.plandoScavengerOrder = []
         self.additionalETanks = 0
+        self.escapeRandoRemoveEnemies = True
         self.objectivesHidden = False
         self.objectivesHiddenOption = False
         # startLocation param is only use for seedless
@@ -100,6 +101,7 @@ class CommonSolver(object):
             self.objectives.setSolverMode(self)
             if self.mode == 'plando':
                 self.additionalETanks = self.romLoader.getAdditionalEtanks()
+                self.escapeRandoRemoveEnemies = bool(self.romLoader.readOption("escapeRandoRemoveEnemies"))
 
             if interactive == False:
                 print("ROM {}\nmajors: {} area: {} boss: {} escape: {}\npatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches())))

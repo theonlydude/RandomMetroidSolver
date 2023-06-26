@@ -508,7 +508,7 @@ class InteractiveSolver(CommonSolver):
             "nerfedCharge": False,
             "nerfedRainbowBeam": False,
             "revealMap": False,
-            "escapeRandoRemoveEnemies": None,
+            "escapeRandoRemoveEnemies": self.escapeRandoRemoveEnemies,
             "ctrlDict": None,
             "moonWalk": False,
             "debug": False,

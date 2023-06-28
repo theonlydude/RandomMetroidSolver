@@ -2,11 +2,7 @@
   "elevators_speed": "off",
   "fast_doors": "off",
   "majorsSplit": "Major",
-  "progressionSpeed": "random",
-  "progressionSpeedMultiSelect": [
-    "basic",
-    "speedrun"
-  ],
+  "progressionSpeed": "speedrun",
   "areaRandomization": "full",
   "areaLayout": "on",
   "bossRandomization": "on",

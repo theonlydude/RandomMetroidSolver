@@ -135,6 +135,7 @@ class Customizer(object):
             self.session.customizer['AimAnyButton'] = "off"
             self.session.customizer['max_ammo_display'] = "off"
             self.session.customizer['supermetroid_msu1'] = "off"
+            self.session.customizer['base'] = "off"
             self.session.customizer['remove_itemsounds'] = "off"
             self.session.customizer['remove_spinjumprestart'] = "off"
             self.session.customizer['remove_elevators_speed'] = "off"
@@ -167,7 +168,8 @@ class Customizer(object):
 
         # check validity of all parameters
         switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_speed', 'fast_doors',
-                   'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save',
+                   'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'base',
+                   'Infinite_Space_Jump', 'refill_before_save',
                    'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
                    'remove_elevators_speed', 'remove_fast_doors', 'remove_Infinite_Space_Jump',
                    'remove_rando_speed', 'remove_spinjumprestart', 'gamepadMapping', 'widescreen',
@@ -236,6 +238,7 @@ class Customizer(object):
         self.session.customizer['AimAnyButton'] = self.vars.AimAnyButton
         self.session.customizer['max_ammo_display'] = self.vars.max_ammo_display
         self.session.customizer['supermetroid_msu1'] = self.vars.supermetroid_msu1
+        self.session.customizer['base'] = self.vars.base
         self.session.customizer['remove_itemsounds'] = self.vars.remove_itemsounds
         self.session.customizer['remove_elevators_speed'] = self.vars.remove_elevators_speed
         self.session.customizer['remove_fast_doors'] = self.vars.remove_fast_doors
@@ -281,6 +284,8 @@ class Customizer(object):
             params += ['-c', 'max_ammo_display.ips']
         if self.vars.supermetroid_msu1 == 'on':
             params += ['-c', 'supermetroid_msu1.ips']
+        if self.vars.base == 'on':
+            params += ['--base']
         if self.vars.Infinite_Space_Jump == 'on':
             params += ['-c', 'Infinite_Space_Jump']
         if self.vars.refill_before_save == 'on':

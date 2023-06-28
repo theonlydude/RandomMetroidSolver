@@ -419,7 +419,7 @@ function doSubmit() {
 
         var dataDict = {};
         dataDict["logic"] = logic;
-        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "hard_mode", "color_blind", "disable_screen_shake", "noflashing"];
+        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "base", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "hard_mode", "color_blind", "disable_screen_shake", "noflashing"];
 
         for(var i=0; i<elems.length; i++) {
             var elem = document.getElementById(elems[i]);
@@ -837,7 +837,7 @@ function greyOutPatches(isRace, isVARIA, isVanilla) {
         disableElement(buttons[i], isRace);
     }
 
-    var buttons = ["AimAnyButton", "max_ammo_display", "supermetroid_msu1"];
+    var buttons = ["AimAnyButton", "max_ammo_display", "supermetroid_msu1", "base"];
     for(var i=0; i<buttons.length; i++) {
         disableElement(buttons[i], isVARIA);
     }
@@ -1652,6 +1652,12 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
 <p>Patch developed by DarkShock.</p>"
     },
     {
+      element: "#baseStep",
+      title: "VARIA base patches",
+      content: "<p>Apply VARIA base patches to a vanilla ROM (already applied by default on VARIA seeds)</p>\
+<p>Patch developed by Flo.</p>"
+    },
+    {
       element: "#remove_itemsoundsStep",
       title: "Restore Vanilla 1/3",
       content: "<p>Restore vanilla fanfare played when picking up an item.</p><p>Restore vanilla Space Jump behaviour.</p>"
@@ -2093,6 +2099,13 @@ for name, values in musics["_dropdown"].items():
                     <span id="supermetroid_msu1Text">Play music with MSU1 chip on SD2SNES</span>
                   </td>
                   <td id="supermetroid_msu1Step"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    {{displayCheckbox("base")}}
+                    <span id="baseText">Apply VARIA base patches</span>
+                  </td>
+                  <td id="baseStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
 

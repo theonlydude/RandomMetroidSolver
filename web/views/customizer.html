@@ -1653,9 +1653,9 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
     },
     {
       element: "#baseStep",
-      title: "VARIA base patches",
+      title: "VARIA RTA timer, stats and credits",
       content: "<p>Apply VARIA base patches to a vanilla ROM (already applied by default on VARIA seeds)</p>\
-<p>Patch developed by Flo.</p>"
+<p>Replace in-game time with real time, and display gameplay stats in the credits</p>"
     },
     {
       element: "#remove_itemsoundsStep",
@@ -2103,7 +2103,7 @@ for name, values in musics["_dropdown"].items():
                 <tr>
                   <td colspan="2">
                     {{displayCheckbox("base")}}
-                    <span id="baseText">Apply VARIA base patches</span>
+                    <span id="baseText">VARIA RTA timer, stats and credits</span>
                   </td>
                   <td id="baseStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>

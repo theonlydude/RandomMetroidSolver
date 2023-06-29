@@ -40,10 +40,17 @@ for sheet in $sheets; do
     echo "****** $sprite ******"
     cp $zero_rom $tmp_zero_rom
     cp $ff_rom $tmp_ff_rom
+    echo "*** Injecting into zero ROM ..."
     runSpriteSomething $sheet $tmp_zero_rom
+    echo "*** Injecting into FF ROM ..."
     runSpriteSomething $sheet $tmp_ff_rom
     ips=${SPRITE_PATCHES}/${sprite}.ips
+    echo "*** Generating IPS ..."
     tools/complete_ips.py $VANILLA $tmp_zero_rom $tmp_ff_rom $ips
     tools/clean_sprite_ips.py $ips
+    ln -s ${tmp_zero_rom} ${sprite}.sfc
+    echo "*** Generating palettes ..."
+    tools/gen_sprite_palettes.sh ${sprite}.sfc
+    unlink ${sprite}.sfc
     rm -f ${tmp_zero_rom} ${tmp_ff_rom}
 done

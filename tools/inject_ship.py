@@ -1017,11 +1017,11 @@ if not args.no_layout:
     print("insert ship slopes into landing site layout")
 
 
-    landingSiteAddr = snes_to_pc(0x8F91F8)
+    landingSiteAddr = 0x8F91F8
     vLandingSite = Room(vanillaRom, landingSiteAddr)
     vLevelDataAddr = vLandingSite.defaultRoomState.levelDataPtr
     vRoomScreenSize = (vLandingSite.width, vLandingSite.height)
-    vlevelData = LevelData(vanillaRom, snes_to_pc(vLevelDataAddr), vRoomScreenSize)
+    vlevelData = LevelData(vanillaRom, vLevelDataAddr, vRoomScreenSize)
 
     boundingRect = BoundingRect()
     boundingRect.x1 = 17

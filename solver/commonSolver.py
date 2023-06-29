@@ -26,8 +26,6 @@ class CommonSolver(object):
         self.objectivesHiddenOption = False
         # startLocation param is only use for seedless
         if rom is None:
-            # TODO::add a --logic parameter for seedless
-            Logic.factory('vanilla')
             self.romFileName = 'seedless'
             self.majorsSplit = 'Full'
             self.masterMajorsSplit = 'Full'

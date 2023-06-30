@@ -349,6 +349,7 @@ class RandoSetup(object):
         # check if we can reach/beat all bosses
         if ret:
             # always add G4 to mandatory bosses, even if not required by objectives
+            mandatoryBosses = set(Objectives.getMandatoryBosses() + Bosses.Golden4())
             for loc in self.lastRestricted:
                 if loc.Name in self.bossesLocs:
                     ret = False
@@ -366,7 +367,8 @@ class RandoSetup(object):
                     allBosses = [loc for loc in totalAvailLocs if loc.isBoss() and loc.Name != "Mother Brain"]
                     availLocs = self.services.currentLocations(self.startAP, container, diff=infinity)
                     beatableBosses = [loc for loc in availLocs if loc in allBosses]
-                    ret = len(beatableBosses) == len(allBosses)
+                    beatableBossNames = [loc.BossItemType for loc in beatableBosses]
+                    ret = mandatoryBosses.issubset(set(beatableBossNames)) and Objectives.checkLimitObjectives(beatableBossNames)
                     if ret:
                         # check that we can then kill mother brain if needed
                         if Objectives.tourianRequired == True:
@@ -383,7 +385,7 @@ class RandoSetup(object):
                                 diff = loc.difficulty.difficulty
                                 loc.difficulty.difficulty = getDiffThreshold(diff)
                     else:
-                        msg = "can't kill all mandatory bosses/minibosses: {}".format(', '.join([loc.Name for loc in allBosses if loc not in beatableBosses]))
+                        msg = "can't kill all mandatory bosses/minibosses"
                         self.log.debug("checkPool. {}".format(msg))
                         self.errorMsgs.append(msg)
                 else:

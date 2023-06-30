@@ -1159,7 +1159,7 @@ define_location(
 define_location(
     Area="Norfair",
     GraphArea="Norfair",
-    SolveArea="Norfair Entrance",
+    SolveArea="Norfair Cathedral",
     Name="Missile (lava room)",
     Class=["Minor"],
     CanHidden=False,

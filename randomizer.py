@@ -726,6 +726,8 @@ if __name__ == "__main__":
     for itemLoc in itemLocs:
         locName = itemLoc.Location.Name
         itemType = itemLoc.Item.Type
+        if args.debug == True:
+            print("%s\t@%s\t%s" % (itemType, locName, str(itemLoc.Location.difficulty)))
         if itemType in ['Missile', 'Super', 'PowerBomb']:
             continue
         locsItems[locName] = itemType

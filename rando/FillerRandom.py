@@ -156,8 +156,9 @@ class FrontFillerKickstart(FrontFiller):
 
 # actual random filler will real solver on top of mini
 class FillerRandomSpeedrun(FillerRandom):
-    def __init__(self, graphSettings, graph, restrictions, container, endDate=infinity, diffSteps=0):
+    def __init__(self, graphSettings, graph, restrictions, container, endDate=infinity, diffSteps=0, bossDiffs=None):
         super(FillerRandomSpeedrun, self).__init__(graphSettings.startAP, graph, restrictions, container, endDate)
+        self.bossDiffs = bossDiffs
         self.nFrontFillSteps = Logic.LocationsHelper.getRandomFillHelp(graphSettings.startAP)
         # based on runtime limit, help the random fill with up to three front fill steps
         limit_s = endDate - time.process_time()
@@ -210,22 +211,22 @@ class FillerRandomSpeedrun(FillerRandom):
         if diff < minDiff: # minDiff is 0 if unspecified: that covers "unsolvable" (-1)
             self._failedAttempt()
             return False
-        if diff > maxDiff:
-            # check that it is a "only bosses left" case
-            print("Above MAX DIFF")
-            locsAboveMaxDiff = [il.Location for il in self.container.itemLocations if il.Location.difficulty.difficulty > maxDiff]
-            print("locsAboveMaxDiff: "+getLocListStr(locsAboveMaxDiff))
-            hasNoBossLocs = any(loc for loc in locsAboveMaxDiff if not loc.isBoss())
-            if hasNoBossLocs:
-                print("not only bosses, fail")
-                self._failedAttempt()
-                return False
-            print("Only bosses left")
-        now = time.process_time()
-        RandoServices.printProgress('S({}/{}ms)'.format(self.nSteps+1, int((now-self.startDate)*1000)))
-
         # order item locations with the order used by the solver
         self.orderItemLocationsUpdateDifficulty(solver)
+        if diff > maxDiff:
+            # check that it is a "only bosses left" case
+            locsAboveMaxDiff = [il.Location for il in self.container.itemLocations if il.Location.difficulty.difficulty > maxDiff]
+            bossLocNames = [loc.Name for loc in self.bossDiffs]
+            if any(loc.Name not in bossLocNames for loc in locsAboveMaxDiff):
+                self._failedAttempt()
+                return False
+            for loc in locsAboveMaxDiff:
+                bossLoc = next(b for b in self.bossDiffs if b.Name == loc.Name)
+                if loc.difficulty.difficulty > bossLoc.difficulty.difficulty:
+                    self._failedAttempt()
+                    return False
+        now = time.process_time()
+        RandoServices.printProgress('S({}/{}ms)'.format(self.nSteps+1, int((now-self.startDate)*1000)))
 
         return True
 

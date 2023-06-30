@@ -59,6 +59,21 @@ def diff4solver(difficulty):
     else:
         return ("mania", "mania")
 
+def getDiffThreshold(target):
+    threshold = target
+    epsilon = 0.001
+    if target <= easy:
+        threshold = medium - epsilon
+    elif target <= medium:
+        threshold = hard - epsilon
+    elif target <= hard:
+        threshold = harder - epsilon
+    elif target <= harder:
+        threshold = hardcore - epsilon
+    elif target <= hardcore:
+        threshold = mania - epsilon
+    return threshold
+
 # allow multiple local repo
 appDir = sys.path[0]
 

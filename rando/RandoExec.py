@@ -27,20 +27,20 @@ class RandoExec(object):
         self.graphSettings = graphSettings
         self.log = utils.log.get('RandoExec')
 
-    def getFillerFactory(self, progSpeed, endDate):
+    def getFillerFactory(self, progSpeed, endDate, setup):
         if self.restrictions.split != "Scavenger":
             if progSpeed == "basic":
                 return lambda cont: FrontFiller(self.graphSettings.startAP, self.areaGraph, self.restrictions, cont, endDate)
             elif progSpeed == "speedrun":
-                return lambda cont: FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, cont, endDate)
+                return lambda cont: FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, cont, endDate, bossDiffs=setup.bossesWithDifficulty)
             else:
                 return lambda cont: FillerProgSpeed(self.graphSettings, self.areaGraph, self.restrictions, cont, endDate)
         else:
             return lambda cont: FillerScavenger(self.graphSettings.startAP, self.areaGraph, self.restrictions, cont, endDate)
 
-    def createFiller(self, container, endDate):
+    def createFiller(self, container, endDate, setup):
         progSpeed = self.randoSettings.progSpeed
-        fact = self.getFillerFactory(progSpeed, endDate)
+        fact = self.getFillerFactory(progSpeed, endDate, setup)
         if self.randoSettings.restrictions['MajorMinor'] != "Chozo":
             return fact(container)
         else:
@@ -96,8 +96,9 @@ class RandoExec(object):
             if self.errorMsg == "":
                 self.errorMsg += "Unable to process settings; "
             return (True, [], [])
+        assert setup.bossesWithDifficulty is not None
         self.areaGraph.printGraph()
-        filler = self.createFiller(container, endDate)
+        filler = self.createFiller(container, endDate, setup)
         self.log.debug("ItemLocContainer dump before filling:\n"+container.dump())
         # see comment on Objectives.permissive field
         Objectives.permissive = True

@@ -7,7 +7,7 @@ from solver.conf import Conf
 from solver.out import Out
 from solver.comeback import ComeBack
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
-from utils.parameters import Knows, isKnows, Settings
+from utils.parameters import Knows, isKnows, Settings, getDiffThreshold
 from logic.logic import Logic
 from utils.objectives import Objectives
 import utils.log
@@ -155,23 +155,9 @@ class StandardSolver(CommonSolver):
     def getUnavailMajors(self):
         return [loc for loc in self.majorLocations if loc.difficulty.bool == False and loc.itemName not in ['Nothing', 'NoEnergy']]
 
-
     def getDiffThreshold(self):
         target = Conf.difficultyTarget
-        threshold = target
-        epsilon = 0.001
-        if target <= easy:
-            threshold = medium - epsilon
-        elif target <= medium:
-            threshold = hard - epsilon
-        elif target <= hard:
-            threshold = harder - epsilon
-        elif target <= harder:
-            threshold = hardcore - epsilon
-        elif target <= hardcore:
-            threshold = mania - epsilon
-
-        return threshold
+        return getDiffThreshold(target)
 
     def getKnowsUsed(self):
         knowsUsed = []

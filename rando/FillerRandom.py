@@ -207,7 +207,6 @@ class FillerRandomSpeedrun(FillerRandom):
         split = self.restrictions.split if self.restrictions.split != 'Scavenger' else 'Full'
         solver = RandoSolver(split, self.startAP, self.graph, graphLocations, self.vcr)
         diff = solver.solveRom()
-        self.container.cleanLocsAfterSolver()
         if diff < minDiff: # minDiff is 0 if unspecified: that covers "unsolvable" (-1)
             self._failedAttempt()
             return False
@@ -226,14 +225,16 @@ class FillerRandomSpeedrun(FillerRandom):
         RandoServices.printProgress('S({}/{}ms)'.format(self.nSteps+1, int((now-self.startDate)*1000)))
 
         # order item locations with the order used by the solver
-        self.orderItemLocations(solver)
+        self.orderItemLocationsUpdateDifficulty(solver)
 
         return True
 
     def getProgressionItemLocations(self):
         return self.progressionItemLocs
 
-    def orderItemLocations(self, solver):
+    def orderItemLocationsUpdateDifficulty(self, solver):
+        # order itemlocs like in the solver.
+        # update locs difficulty with the one computed by the solver (as they are distinct locs in the solver)
         orderedItemLocations = []
         # keep only first minors
         firstMinors = {"Missile": False, "Super": False, "PowerBomb": False}
@@ -241,6 +242,11 @@ class FillerRandomSpeedrun(FillerRandom):
             if loc.itemName == "Gunship":
                 continue
             itemLoc = self.container.getItemLoc(loc)
+
+            # update difficulty for non restricted locations
+            if not itemLoc.Location.restricted:
+                itemLoc.Location.difficulty = loc.difficulty
+
             if itemLoc.Item.Category in ['Boss', 'MiniBoss', 'Nothing', 'Energy']:
                 continue
             if loc.itemName in firstMinors:

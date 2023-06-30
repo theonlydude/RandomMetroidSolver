@@ -70,8 +70,9 @@ class Location:
 
     def evalComeBack(self, smbm, areaGraph, ap):
         if self.difficulty.bool == True:
-            # check if we can come back to given ap from the location
-            self.comeBack = areaGraph.canAccess(smbm, self.accessPoint, ap, infinity, self.itemName)
+            # check if we can come back to given ap from the location,
+            # don't add the item at the location as we're not supposed to know it beforehand
+            self.comeBack = areaGraph.canAccess(smbm, self.accessPoint, ap, infinity)
 
     def json(self):
         # to return after plando rando

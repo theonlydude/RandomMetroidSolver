@@ -182,7 +182,7 @@ class RandoSetup(object):
             # finally, actually do the randomization using a speedrun filler (stepLimit attempts heuristic)
             stepLimit = 50
             self.restrictions.setPlacementRestrictions(restr)
-            filler = FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, self.container, endDate=endDate, diffSteps=stepLimit)
+            filler = FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, self.container, endDate=endDate, diffSteps=stepLimit, bossDiffs=self.bossesWithDifficulty)
             stepCond = filler.createStepCountCondition(stepLimit)
             filler.generateItems(condition=lambda: filler.itemPoolCondition() and stepCond(), vcr=vcr)
             if not filler.itemPoolCondition():

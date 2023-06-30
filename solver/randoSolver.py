@@ -60,3 +60,15 @@ class RandoSolver(StandardSolver):
         # limit to a few seconds to avoid cases with a lot of rewinds which could last for minutes
         self.runtimeLimit_s = 5
         self.startTime = time.process_time()
+
+    def propagateDifficulties(self, container):
+        # as the rando solver works on a copy of the rando locations we have to propagate
+        # locations difficulties computed by the solver back to the rando
+        for loc in self.visitedLocations:
+            if loc.itemName == "Gunship":
+                continue
+            itemLoc = container.getItemLoc(loc)
+
+            # update difficulty for non restricted locations
+            if not itemLoc.Location.restricted:
+                itemLoc.Location.difficulty = loc.difficulty

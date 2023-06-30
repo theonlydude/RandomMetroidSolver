@@ -212,7 +212,8 @@ class FillerRandomSpeedrun(FillerRandom):
             self._failedAttempt()
             return False
         # order item locations with the order used by the solver
-        self.orderItemLocationsUpdateDifficulty(solver)
+        self.orderItemLocations(solver)
+        solver.propagateDifficulties(self.container)
         if diff > maxDiff:
             # check that it is a "only bosses left" case
             locsAboveMaxDiff = [il.Location for il in self.container.itemLocations if il.Location.difficulty.difficulty > maxDiff]
@@ -233,9 +234,8 @@ class FillerRandomSpeedrun(FillerRandom):
     def getProgressionItemLocations(self):
         return self.progressionItemLocs
 
-    def orderItemLocationsUpdateDifficulty(self, solver):
+    def orderItemLocations(self, solver):
         # order itemlocs like in the solver.
-        # update locs difficulty with the one computed by the solver (as they are distinct locs in the solver)
         orderedItemLocations = []
         # keep only first minors
         firstMinors = {"Missile": False, "Super": False, "PowerBomb": False}
@@ -243,10 +243,6 @@ class FillerRandomSpeedrun(FillerRandom):
             if loc.itemName == "Gunship":
                 continue
             itemLoc = self.container.getItemLoc(loc)
-
-            # update difficulty for non restricted locations
-            if not itemLoc.Location.restricted:
-                itemLoc.Location.difficulty = loc.difficulty
 
             if itemLoc.Item.Category in ['Boss', 'MiniBoss', 'Nothing', 'Energy']:
                 continue

@@ -4,7 +4,7 @@ import random, sys, copy, logging, time
 from rando.Filler import Filler, FrontFiller
 from rando.Choice import ItemThenLocChoice
 from rando.MiniSolver import MiniSolver
-from rando.ItemLocContainer import ContainerSoftBackup, ItemLocation, getItemLocationsStr
+from rando.ItemLocContainer import ContainerSoftBackup, ItemLocation, getItemLocationsStr, getLocListStr
 from rando.RandoServices import ComebackCheckType, RandoServices
 from solver.randoSolver import RandoSolver
 from utils.parameters import infinity
@@ -189,6 +189,12 @@ class FillerRandomSpeedrun(FillerRandom):
     def getLocations(self, item):
         return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocationFast(item.Type, loc.Name, self.container)]
 
+    def _failedAttempt(self):
+        RandoServices.printProgress('X')
+        # remove vcr data
+        if self.vcr is not None:
+            self.vcr.empty()
+
     def isBeatable(self, maxDiff=None):
         miniOk = self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)
         if miniOk == False:
@@ -203,13 +209,19 @@ class FillerRandomSpeedrun(FillerRandom):
         diff = solver.solveRom()
         self.container.cleanLocsAfterSolver()
         if diff < minDiff: # minDiff is 0 if unspecified: that covers "unsolvable" (-1)
-            RandoServices.printProgress('X')
-
-            # remove vcr data
-            if self.vcr is not None:
-                self.vcr.empty()
-
+            self._failedAttempt()
             return False
+        if diff > maxDiff:
+            # check that it is a "only bosses left" case
+            print("Above MAX DIFF")
+            locsAboveMaxDiff = [il.Location for il in self.container.itemLocations if il.Location.difficulty.difficulty > maxDiff]
+            print("locsAboveMaxDiff: "+getLocListStr(locsAboveMaxDiff))
+            hasNoBossLocs = any(loc for loc in locsAboveMaxDiff if not loc.isBoss())
+            if hasNoBossLocs:
+                print("not only bosses, fail")
+                self._failedAttempt()
+                return False
+            print("Only bosses left")
         now = time.process_time()
         RandoServices.printProgress('S({}/{}ms)'.format(self.nSteps+1, int((now-self.startDate)*1000)))
 

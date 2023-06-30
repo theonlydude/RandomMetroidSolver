@@ -235,14 +235,6 @@ class ItemLocContainer(object):
             locs.append(loc)
         return locs
 
-    def cleanLocsAfterSolver(self):
-        # restricted locs can have their difficulty set, which can cause them to be reported in the
-        # post randomization warning message about locs with diff > max diff.
-        for il in self.itemLocations:
-            loc = il.Location
-            if loc.restricted and loc.difficulty == True:
-                loc.difficulty = smboolFalse
-
     def getDistinctItems(self):
         itemTypes = {item.Type for item in self.itemPool}
         return [self.getNextItemInPool(itemType) for itemType in itemTypes]

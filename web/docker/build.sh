@@ -49,7 +49,7 @@ fi
 cp ../database/*.sql mysql/
 
 # mysql image build
-docker build --tag varia-mysql -f mysql/Dockerfile mysql/ &&
+docker build --tag varia-mysql -f mysql/Dockerfile mysql/
 
 # web2py + varia image build
 if [ -n "${GITHUB_TOKEN}" ]; then

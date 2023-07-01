@@ -54,3 +54,5 @@ for sheet in $sheets; do
     unlink ${sprite}.sfc
     rm -f ${tmp_zero_rom} ${tmp_ff_rom}
 done
+
+rm -f ${zero_rom} ${ff_rom}

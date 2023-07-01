@@ -338,6 +338,7 @@ mkdir -p ~/web2py/applications/solver/static/images/rooms
 [ -L ~/web2py/applications/solver/static/images/rooms/MaridiaPinkTop.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/MaridiaPinkTop.png ~/web2py/applications/solver/static/images/rooms/MaridiaPinkTop.png
 [ -L ~/web2py/applications/solver/static/images/rooms/MaridiaSandpits.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/MaridiaSandpits.png ~/web2py/applications/solver/static/images/rooms/MaridiaSandpits.png
 [ -L ~/web2py/applications/solver/static/images/rooms/NorfairEntrance.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/NorfairEntrance.png ~/web2py/applications/solver/static/images/rooms/NorfairEntrance.png
+[ -L ~/web2py/applications/solver/static/images/rooms/NorfairCathedral.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/NorfairCathedral.png ~/web2py/applications/solver/static/images/rooms/NorfairCathedral.png
 [ -L ~/web2py/applications/solver/static/images/rooms/NorfairGrappleEscape.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/NorfairGrappleEscape.png ~/web2py/applications/solver/static/images/rooms/NorfairGrappleEscape.png
 [ -L ~/web2py/applications/solver/static/images/rooms/NorfairIce.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/NorfairIce.png ~/web2py/applications/solver/static/images/rooms/NorfairIce.png
 [ -L ~/web2py/applications/solver/static/images/rooms/PinkBrinstar.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/PinkBrinstar.png ~/web2py/applications/solver/static/images/rooms/PinkBrinstar.png

@@ -1128,7 +1128,7 @@ type(loc).MapAttrs = LocationMapAttrs(19, 16, LocationMapTileKind.TwoWallsCorner
 
 loc = locationsDict["Missile (Mickey Mouse room)"]
 loc.AccessFrom = {
-    'LN Entrance': lambda sm: sm.wand(sm.canUsePowerBombs(), sm.canPassWorstRoom()),
+    'Worst Room Top': lambda sm: sm.canPassBombPassages()
 }
 loc.Available = (
     lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])

@@ -244,9 +244,9 @@ accessPoints = [
                                                               sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                               sm.canGreenGateGlitch(),
                                                               sm.canDestroyBombWalls())),
-        'Firefleas': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
-                                                    sm.canPassWorstRoom(),
-                                                    sm.canUsePowerBombs()))
+        'Worst Room Top': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+                                                         sm.canPassWorstRoom(),
+                                                         sm.canUsePowerBombs()))
     }, internal=True),
     AccessPoint('LN Above GT', 'LowerNorfair', {
         'LN Entrance': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
@@ -260,11 +260,15 @@ accessPoints = [
                                                       sm.haveItem('Super'),
                                                       sm.canUsePowerBombs()))
     }, internal=True),
-    AccessPoint('Firefleas', 'LowerNorfair', {
+    AccessPoint('Worst Room Top', 'LowerNorfair', {
+        'Firefleas': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
         'LN Entrance': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
-                                                      sm.canPassAmphitheaterReverse(),
                                                       sm.canPassWorstRoomPirates(),
-                                                      sm.canUsePowerBombs())),
+                                                      sm.canUsePowerBombs()))
+    }, internal=True),
+    AccessPoint('Firefleas', 'LowerNorfair', {
+        'Worst Room Top': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
+                                                         sm.canPassAmphitheaterReverse())),
         'Three Muskateers Room Left': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                                      sm.haveItem('Morph'),
                                                                      # check for only 3 ki hunters this way

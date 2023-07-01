@@ -239,14 +239,17 @@ class Tilemap(object):
         return (self.dataAddr, out)
 
 class BoundingRect(object):
-    def __init__(self):
-        # top left corner, y=0 is top, x=0 is left
-        self.x1 = sys.maxsize
-        self.y1 = sys.maxsize
+    def __init__(self, initial=None):
+        if initial is None:
+            # top left corner, y=0 is top, x=0 is left
+            self.x1 = sys.maxsize
+            self.y1 = sys.maxsize
 
-        # bottom right corner
-        self.x2 = 0
-        self.y2 = 0
+            # bottom right corner
+            self.x2 = 0
+            self.y2 = 0
+        else:
+            self.x1, self.y1, self.x2, self.y2 = initial
 
         # 16x16 pixels
         self.size = 16
@@ -274,13 +277,13 @@ class BoundingRect(object):
         print("           {:3} {:3}".format(self.x2, self.y2))
 
     def width(self):
-        return int((self.x2 - self.x1)/16)
+        return (self.x2 - self.x1)//16
 
     def height(self):
-        return int((self.y2 - self.y1)/16)
+        return (self.y2 - self.y1)//16
 
     def start(self):
-        return (int(self.x1/16), int(self.y1/16)+1)
+        return (self.x1//16, self.y1//16)
 
 class Int2(object):
     # 2 complement integer

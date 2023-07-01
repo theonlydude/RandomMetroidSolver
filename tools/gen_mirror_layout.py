@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import sys, os
 from shutil import copyfile
 

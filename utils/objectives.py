@@ -623,7 +623,7 @@ class Objectives(object):
         if self.conflict(goal):
             return
         Objectives.nbActiveGoals += 1
-        assert Objectives.nbActiveGoals <= Objectives.maxActiveGoals, "Too many active goals"
+        assert Objectives.nbActiveGoals <= Objectives.maxActiveGoals, "Too many active goals. active: {} max: {}".format(Objectives.nbActiveGoals, Objectives.maxActiveGoals)
         goal.setRank(Objectives.nbActiveGoals)
         goal.completed = completed
         Objectives.activeGoals.append(goal)
@@ -976,6 +976,8 @@ class Objectives(object):
         Objectives.previousReleaseFallback = Objectives.nbActiveGoals == 0xff
 
         if Objectives.previousReleaseFallback:
+            Objectives.nbActiveGoals = 0
+            Objectives.nbRequiredGoals = 0
             self.setVanilla()
             Objectives.nbActiveGoals = len(Objectives.activeGoals)
             Objectives.nbRequiredGoals = len(Objectives.activeGoals)

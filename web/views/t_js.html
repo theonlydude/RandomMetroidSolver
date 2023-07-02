@@ -494,6 +494,7 @@ window.onload = function(){
 
         document.getElementById("startLocationVisibility").style.display = "none";
         document.getElementById("logicVisibility").style.display = "none";
+        document.getElementById("doorsRandoVisibility").style.display = "none";
     }
   
     reader.readAsArrayBuffer(file);
@@ -619,6 +620,7 @@ function initSolver() {
             fileName: document.getElementById("fileName").value,
             fill: document.getElementById("fillPlando").checked,
             startLocation: document.getElementById("startLocation").value,
+            doorsRando: document.getElementById("doorsRando").checked,
             mode: mode, logic: logic}, "download");
 
   hidePopup();
@@ -777,6 +779,7 @@ function clearInputSeed() {
   document.getElementById("fileName").value = "";
   if(mode != "plando") {
     document.getElementById("startLocationVisibility").style.display = "table-row";
+    document.getElementById("doorsRandoVisibility").style.display = "table-row";
     document.getElementById("logicVisibility").style.display = "table-row";
   }
 }

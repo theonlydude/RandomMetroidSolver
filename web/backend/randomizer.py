@@ -492,6 +492,16 @@ class Randomizer(object):
     def loadRandoPreset(self, presetFullPath):
         with open(presetFullPath) as jsonFile:
             randoPreset = json.load(jsonFile)
+        # for settings with "random" selected and no "MultiSelect", generate MultiSelect list with all possible values
+        multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "areaRandomization", "logic"]
+        defaultMultiValues = getDefaultMultiValues()
+        for multiElem in multiElems:
+            multiSelect = multiElem + "MultiSelect"
+            if randoPreset.get(multiElem) == "random" and multiSelect not in randoPreset:
+                randoPreset[multiSelect] = defaultMultiValues[multiElem]
+        # objective special case
+        if randoPreset.get("objectiveRandom") == "true" and "objectiveMultiSelect" not in randoPreset:
+            randoPreset['objectiveMultiSelect'] = defaultMultiValues["objective"]
         return randoPreset
 
     def randoPresetWebService(self):

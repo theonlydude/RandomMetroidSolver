@@ -958,9 +958,11 @@ class Objectives(object):
             goal.completed = False
 
     # call from rando
+    # exclude: excludes nothing, 100% map, and 100% items from the list (suitable to get "user friendly" objectives list)
     @staticmethod
-    def getAllGoals(removeNothing=False):
-        return [goal.name for goal in Objectives.goals.values() if goal.available and (not removeNothing or goal.name != "nothing")]
+    def getAllGoals(exclude=False):
+        excludeList = [] if not exclude else ["nothing", "collect 100% items", "explore 100% map"]
+        return [goal.name for goal in Objectives.goals.values() if goal.available and goal.name not in excludeList]
 
     # call from rando
     def setRandom(self, nbGoals, availableGoals):

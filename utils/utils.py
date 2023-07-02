@@ -270,7 +270,7 @@ def getDefaultMultiValues():
         'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla'],
         'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive'],
         'areaRandomization': ['off', 'full', 'light'],
-        'objective': Objectives.getAllGoals(removeNothing=True),
+        'objective': Objectives.getAllGoals(exclude=True),
         'tourian': ['Vanilla', 'Fast', 'Disabled'],
         'logic': ['vanilla', 'mirror'],
     }

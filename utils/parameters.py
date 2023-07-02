@@ -769,7 +769,7 @@ class Knows:
              'title': 'Suitless Draygon Exit'},
             {'knows': ['WestSandHoleSuitlessWallJumps', 'DoubleSpringBallJump', 'TediousMountEverest',
                        'BotwoonToDraygonWithIce', 'SuitlessCrystalFlashClip',
-                       'CacAlleyUWJ', 'EastSandHallSpringBallJump', 'WestSandHoleSuitlessWallJumps',
+                       'CacAlleyUWJ', 'EastSandHallSpringBallJump', 'WestSandHallInsaneBombJump',
                        'SuitlessPuyoClip'],
              'title': 'Obscure suitless stuff'}
         ],

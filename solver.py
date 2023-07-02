@@ -192,7 +192,7 @@ if __name__ == "__main__":
     parser.add_argument('--fill', help="in plando load all the source seed locations/transitions as a base (used in interactive mode)",
                         dest="fill", action='store_true')
     parser.add_argument('--startLocation', help="in plando/seedless: the start location", dest="startLocation", default="Landing Site")
-    parser.add_argument('--doorsRando', help="in seedless: door randomization", dest="doorsRando", action=argparse.BooleanOptionalAction)
+    parser.add_argument('--doorsRando', help="in seedless: door randomization", dest="doorsRando", action='store_true')
     parser.add_argument('--minorQty', help="rando plando  (used in interactive mode)",
                         dest="minorQty", nargs="?", default=None, choices=[str(i) for i in range(0,101)])
     parser.add_argument('--energyQty', help="rando plando  (used in interactive mode)",

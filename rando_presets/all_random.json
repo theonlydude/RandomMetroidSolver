@@ -1,4 +1,5 @@
 {
+  "logic": "random",
   "progressionDifficulty": "random",
   "funMovement": "random",
   "startLocation": "random",
@@ -13,6 +14,7 @@
   "objective": "random",
   "objectiveRandom": "true",
   "nbObjective": "random",
+  "nbObjectivesRequired": "random",
   "areaRandomization": "random",
   "bossRandomization": "random",
   "maxDifficulty": "hardcore",

@@ -1,0 +1,7 @@
+{
+    "objectiveRandom": "true",
+    "nbObjective": 5,
+    "objectiveMultiSelect": ["explore crateria", "explore green brinstar", "explore red brinstar", "explore wrecked ship", "explore kraid's lair", "explore upper norfair", "explore croc's lair", "explore lower norfair", "explore west maridia", "explore east maridia"],
+    "tourian": "Fast",
+    "hud": "on"
+}

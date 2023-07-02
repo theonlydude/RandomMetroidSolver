@@ -1,0 +1,10 @@
+{
+    "startLocation": "Landing Site",
+    "majorsSplit": "Scavenger",
+    "hud": "on",
+    "progressionSpeed":"speedrun",
+    "scavNumLocs": "7",
+    "scavRandomized": "off",
+    "objective": ["collect all upgrades"],
+    "tourian": "Disabled"
+}

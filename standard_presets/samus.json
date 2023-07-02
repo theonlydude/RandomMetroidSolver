@@ -375,7 +375,23 @@
     "SporeSpawnBackDoor": [
       true,
       1
-    ]
+    ],
+      "MamaTurtleWallJumpBombBoost": [
+          true,
+          1
+      ],
+      "CacAlleyUWJ": [
+          true,
+          1
+      ],
+      "EastSandHallSpringBallJump": [
+          true,
+          1
+      ],
+      "WestSandHoleSuitlessWallJumps": [
+          true,
+          1
+      ]
   },
   "Settings": {
     "Kraid": "Quick Kill",

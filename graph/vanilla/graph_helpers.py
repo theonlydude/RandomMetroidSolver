@@ -195,12 +195,18 @@ class HelpersGraph(Helpers):
         return sm.wor(sm.haveItem('Gravity'),
                       sm.wand(sm.knowsGravLessLevel3(),
                               sm.haveItem('HiJump'),
-                              sm.haveItem('Ice')))
+                              sm.wor(sm.haveItem('Ice'),
+                                     sm.wand(sm.canSpringBallJump(),
+                                             sm.knowsEastSandHallSpringBallJump()))))
 
     @Cache.decorator
     def canTraverseWestSandHallLeftToRight(self):
         sm = self.smbm
-        return sm.haveItem('Gravity') # FIXME find suitless condition
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.knowsGravLessLevel3(),
+                              sm.haveItem('HiJump'),
+                              sm.canUseBombs(),
+                              sm.knowsWestSandHallInsaneBombJump()))
 
     @Cache.decorator
     def canPassMaridiaToRedTowerNode(self):
@@ -565,7 +571,8 @@ class HelpersGraph(Helpers):
                                              sm.wor(sm.haveItem('HiJump'),
                                                     sm.knowsMtEverestGravJump())))),
                       sm.wand(sm.canDoSuitlessOuterMaridia(),
-                              sm.haveItem('Grapple')))
+                              sm.wor(sm.haveItem('Grapple'),
+                                     sm.canDoubleSpringBallJump())))
 
     @Cache.decorator
     def canPassMtEverest(self):
@@ -636,7 +643,7 @@ class HelpersGraph(Helpers):
                                      sm.canDoubleSpringBallJump())))
 
     @Cache.decorator
-    def canPassCacatacAlley(self):
+    def canPassCacatacAlleyEastToWest(self):
         sm = self.smbm
         return sm.wand(Bosses.bossDead(sm, 'Draygon'),
                        sm.haveItem('Morph'),
@@ -644,6 +651,17 @@ class HelpersGraph(Helpers):
                               sm.wand(sm.knowsGravLessLevel2(),
                                       sm.haveItem('HiJump'),
                                       sm.haveItem('SpaceJump'))))
+
+    @Cache.decorator
+    def canPassCacatacAlleyWestToEast(self):
+        sm = self.smbm
+        return sm.wand(Bosses.bossDead(sm, 'Draygon'),
+                       sm.haveItem('Morph'),
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.wand(sm.knowsGravLessLevel2(),
+                                      sm.haveItem('HiJump'),
+                                      sm.haveItem('SpaceJump'),
+                                      sm.knowsCacAlleyUWJ())))
 
     @Cache.decorator
     def canGoThroughColosseumSuitless(self):

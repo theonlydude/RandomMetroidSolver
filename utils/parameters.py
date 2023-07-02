@@ -261,6 +261,12 @@ class Knows:
                                 'href': 'https://www.youtube.com/watch?v=1DINqLnINc8',
                                 'rooms': ['Mama Turtle Room']}
 
+    MamaTurtleWallJumpBombBoost = SMBool(False, 0, ['MamaTurtleWallJumpBombBoost'])
+    desc['MamaTurtleWallJumpBombBoost'] = {'display': 'Mama Turtle Wall Jump Bomb Boost',
+                                           'title': 'Access Mama Turtle E-Tank by accurately placing a bomb or Power Bomb in mid-air following a wall jump, then using that bomb explosion to propel Samus forward. There is a timing component where the bomb is placed while rising then hit while falling, and a momentum component for maximizing horizontal distance.',
+                                           'href': 'https://www.youtube.com/watch?v=Epd_aaRgTvg',
+                                           'rooms': ['Mama Turtle Room']}
+
     MaridiaWallJumps = SMBool(True, medium, ['MaridiaWallJumps'])
     desc['MaridiaWallJumps'] = {'display': 'Various Maridia wall jumps',
                                 'title': 'Kinda tricky wall jumps to: access items in West Sand Hole without Spring Ball or Bombs, exit Spring Ball area without Hi Jump, exit Crab Hole with Gravity+Hi-Jump',
@@ -577,6 +583,24 @@ class Knows:
                                      'href': 'https://www.youtube.com/watch?v=Fn2z0ByOcj4',
                                      'rooms': ['West Sand Hole']}
 
+    EastSandHallSpringBallJump = SMBool(False, 0, ['EastSandHallSpringBallJump'])
+    desc['EastSandHallSpringBallJump'] = {'display': 'East Sand Hall Spring Ball jump',
+                                          'title': 'Cross East Sand Hall left to right with Hi-Jump and Spring Ball. On the left side of the raised platform, jump for max height. Lateral Midair Morph for horizontal momentum, and perform the springball jump the moment before touching the sandfall. Pause again to disable springball as soon as possible.',
+                                          'href': 'https://www.youtube.com/watch?v=bUBYtoz7wMk',
+                                          'rooms': ['East Sand Hall']}
+
+    WestSandHallInsaneBombJump = SMBool(False, 0, ['WestSandHallInsaneBombJump'])
+    desc['WestSandHallInsaneBombJump'] = {'display': 'West Sand Hall Insane Bomb Jump',
+                                          'title': 'Time a bomb to hit Samus when she is morphed, 1 pixel into the sand, inside a sandfall, and moving horizontally. There is a setup using a sand IBJ to get the right timing, and another setup using a very fast jump morph.',
+                                          'href': 'https://www.youtube.com/watch?v=q-ROSTETPqE',
+                                          'rooms': ['West Sand Hall']}
+
+    CacAlleyUWJ = SMBool(False, 0, ['CacAlleyUWJ'])
+    desc['CacAlleyUWJ'] = {'display': 'Cacatac Alley Underwater Wall Jump',
+                           'title': 'Traverse East Cactus Alley Room left to right suitless, using space jump and an underwater wall jump',
+                           'href': 'https://streamable.com/qaqh81',
+                           'rooms': ['East Cactus Alley Room']}
+
     # Suitless Draygon
     DraygonRoomGrappleExit = SMBool(False, 0, ['DraygonRoomGrappleExit'])
     desc['DraygonRoomGrappleExit'] = {'display': 'Exit Draygon room with the Grapple',
@@ -733,7 +757,7 @@ class Knows:
              'title': 'Clips'},
             {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
              'title': 'Plasma Room'},
-            {'knows': ['HiJumpMamaTurtle', 'MaridiaWallJumps', 'MtEverestGravJump'],
+            {'knows': ['HiJumpMamaTurtle', 'MaridiaWallJumps', 'MtEverestGravJump', 'MamaTurtleWallJumpBombBoost'],
              'title': 'Jumps'}
         ],
         'Maridia 2/2': [
@@ -745,6 +769,7 @@ class Knows:
              'title': 'Suitless Draygon Exit'},
             {'knows': ['WestSandHoleSuitlessWallJumps', 'DoubleSpringBallJump', 'TediousMountEverest',
                        'BotwoonToDraygonWithIce', 'SuitlessCrystalFlashClip',
+                       'CacAlleyUWJ', 'EastSandHallSpringBallJump', 'WestSandHoleSuitlessWallJumps',
                        'SuitlessPuyoClip'],
              'title': 'Obscure suitless stuff'}
         ],

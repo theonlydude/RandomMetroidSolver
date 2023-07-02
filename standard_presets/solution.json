@@ -363,7 +363,27 @@
     "DoubleChamberWallJump": [
       true,
       1
-    ]
+    ],
+    "SporeSpawnBackDoor": [
+      true,
+      1
+    ],
+      "MamaTurtleWallJumpBombBoost": [
+          true,
+          100
+      ],
+      "CacAlleyUWJ": [
+          true,
+          100
+      ],
+      "EastSandHallSpringBallJump": [
+          true,
+          100
+      ],
+      "WestSandHoleSuitlessWallJumps": [
+          true,
+          100
+      ]
   },
   "Settings": {
     "Kraid": "Default",

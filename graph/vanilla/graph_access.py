@@ -636,7 +636,7 @@ accessPoints = [
                                                                  sm.haveItem('SpeedBooster')))),
         'Colosseum Top Right': lambda sm: sm.canBotwoonExitToColosseum(),
         'Toilet Top': Cache.ldeco(lambda sm: sm.wand(sm.canReachCacatacAlleyFromBotowoon(),
-                                                     sm.canPassCacatacAlley()))
+                                                     sm.canPassCacatacAlleyEastToWest()))
     }, internal=True),
     AccessPoint('West Sand Hall Left', 'EastMaridia', {
         # XXX there might be some tech to do this suitless, but HJ+ice is not enough
@@ -671,10 +671,7 @@ accessPoints = [
     AccessPoint('Toilet Top', 'EastMaridia', {
         'Oasis Bottom': Cache.ldeco(lambda sm: sm.wand(sm.traverse('PlasmaSparkBottom'), sm.canDestroyBombWallsUnderwater())),
         'Le Coude Right': lambda sm: SMBool(True),
-        'Colosseum Top Right': Cache.ldeco(lambda sm: sm.wand(Bosses.bossDead(sm, 'Draygon'),
-                                                              # suitless could be possible with this but unreasonable: https://youtu.be/rtLwytH-u8o
-                                                              sm.haveItem('Gravity'),
-                                                              sm.haveItem('Morph')))
+        'Post Botwoon': lambda sm: sm.canPassCacatacAlleyWestToEast()
     }, internal=True),
     AccessPoint('Colosseum Top Right', 'EastMaridia', {
         'Post Botwoon': lambda sm: sm.canColosseumToBotwoonExit(),

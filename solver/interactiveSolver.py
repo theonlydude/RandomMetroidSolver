@@ -77,7 +77,7 @@ class InteractiveSolver(CommonSolver):
         self.shm.writeMsgJson(state.get())
         self.shm.finish(False)
 
-    def initialize(self, mode, rom, presetFileName, magic, fill, startLocation):
+    def initialize(self, mode, rom, presetFileName, magic, fill, extraSettings):
         # load rom and preset, return first state
         self.debug = mode == "debug"
         self.mode = mode
@@ -91,7 +91,7 @@ class InteractiveSolver(CommonSolver):
         self.presetFileName = presetFileName
         self.loadPreset(self.presetFileName)
 
-        self.loadRom(rom, interactive=True, magic=magic, startLocation=startLocation)
+        self.loadRom(rom, interactive=True, magic=magic, extraSettings=extraSettings)
         # in plando/tracker always consider that we're doing full
         self.majorsSplit = 'Full'
 

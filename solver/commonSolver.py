@@ -17,7 +17,7 @@ from rom.flavor import RomFlavor
 from graph.location import define_location
 
 class CommonSolver(object):
-    def loadRom(self, rom, interactive=False, magic=None, startLocation=None):
+    def loadRom(self, rom, interactive=False, magic=None, extraSettings=None):
         self.scavengerOrder = []
         self.plandoScavengerOrder = []
         self.additionalETanks = 0
@@ -33,9 +33,9 @@ class CommonSolver(object):
             self.bossRando = True
             self.escapeRando = False
             self.escapeTimer = "03:00"
-            self.startLocation = startLocation
-            RomPatches.setDefaultPatches(startLocation)
-            self.startArea = getAccessPoint(startLocation).Start['solveArea']
+            self.startLocation = extraSettings.get('startLocation')
+            RomPatches.setDefaultPatches(self.startLocation)
+            self.startArea = getAccessPoint(self.startLocation).Start['solveArea']
             # in seedless load all the vanilla transitions
             self.areaTransitions = vanillaTransitions[:]
             self.bossTransitions = vanillaBossesTransitions[:]
@@ -47,8 +47,8 @@ class CommonSolver(object):
             for loc in self.locations:
                 loc.itemName = 'Nothing'
             # set doors related to default patches
-            DoorsManager.setDoorsColor()
-            self.doorsRando = False
+            self.doorsRando = extraSettings.get('doorsRando')
+            DoorsManager.setDoorsColor(seedless=self.doorsRando)
             self.hasNothing = False
             self.objectives.setVanilla()
             self.tourian = 'Vanilla'

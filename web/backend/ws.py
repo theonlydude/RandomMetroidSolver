@@ -324,6 +324,7 @@ class WS_common_init(WS):
 
         preset = self.vars.preset
         presetFileName = '{}/{}.json'.format(getPresetDir(preset), preset)
+        doorsRando = self.vars.doorsRando == 'true'
 
         self.session["logic"] = logic
         self.session["seed"] = seed
@@ -333,9 +334,9 @@ class WS_common_init(WS):
 
         fill = self.vars.fill == "true"
 
-        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, logic, mode, fill, startLocation)
+        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, logic, mode, fill, startLocation, doorsRando)
 
-    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, logic, mode, fill, startLocation):
+    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, logic, mode, fill, startLocation, doorsRando):
         shm = SHM()
         params = [
             getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
@@ -356,6 +357,8 @@ class WS_common_init(WS):
 
         if startLocation != None:
             params += ['--startLocation', startLocation]
+        if doorsRando:
+            params.append('--doorsRando')
 
         print("before calling isolver: {}".format(params))
         start = datetime.now()
@@ -601,7 +604,7 @@ class WS_door_replace(WS):
         if self.doorName not in DoorsManager.doors.keys():
             raiseHttp(400, "Wrong value for doorName", True)
         self.newColor = self.vars.newColor
-        if self.newColor not in ["red", "green", "yellow", "grey", "wave", "spazer", "plasma", "ice"]:
+        if self.newColor not in ["red", "green", "yellow", "grey", "wave", "spazer", "plasma", "ice", "blue"]:
             raiseHttp(400, "Wrong value for newColor", True)
 
     def action(self):

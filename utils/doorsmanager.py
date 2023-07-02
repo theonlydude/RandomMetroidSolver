@@ -115,6 +115,7 @@ class Door(object):
         # custom start location, area, patches can force doors to blue
         self.setColor('blue')
         self.forced = True
+        self.hidden = False
 
     def setColor(self, color):
         self.color = color
@@ -337,7 +338,10 @@ class DoorsManager():
         return DoorsManager.doors[doorName].traverse(smbm)
 
     @staticmethod
-    def setDoorsColor():
+    def setDoorsColor(seedless=False):
+        if seedless:
+            for door in DoorsManager.doors.values():
+                door.hide()
         # depending on loaded patches, force some doors to blue, excluding them from randomization
         if RomPatches.has(RomPatches.BlueBrinstarBlueDoor):
             DoorsManager.doors['ConstructionZoneRight'].forceBlue()

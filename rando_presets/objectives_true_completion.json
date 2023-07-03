@@ -1,5 +1,5 @@
 {
-    "objective": ["collect 100% items", "explore 100% map", "kill all G4", "kill all minibosses", "tickle the red fish", "kill the orange geemer", "kill shaktool", "visit the animals", "kill king cacatac", "activate chozo robots"],
+    "objective": ["collect 100% items", "explore 100% map", "kill all G4", "kill all mini bosses", "tickle the red fish", "kill the orange geemer", "kill shaktool", "visit the animals", "kill king cacatac", "activate chozo robots"],
     "progressionSpeed": "random",
     "progressionSpeedMultiSelect": [
 	"slow",

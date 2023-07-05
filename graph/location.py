@@ -1393,7 +1393,7 @@ define_location(
 define_location(
     Area="Norfair",
     GraphArea="LowerNorfair",
-    SolveArea="Lower Norfair After Amphitheater",
+    SolveArea="Lower Norfair Wasteland",
     Name="Power Bomb (Power Bombs of shame)",
     Class=["Minor"],
     CanHidden=True,

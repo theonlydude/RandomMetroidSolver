@@ -137,6 +137,11 @@ class InteractiveSolver(CommonSolver):
         state.toSolver(self)
         self.objectives.setSolverMode(self)
 
+        # set mother brain access func for solver
+        if self.tourian != 'Disabled':
+            mbLoc = self.getLoc('Mother Brain')
+            mbLoc.AccessFrom['Golden Four'] = self.getMotherBrainAccess()
+
         # save current AP
         previousAP = self.lastAP
 

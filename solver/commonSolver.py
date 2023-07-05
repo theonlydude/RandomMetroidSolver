@@ -665,6 +665,31 @@ class CommonSolver(object):
         gunship.itemName = 'Gunship'
         return gunship
 
+    def getMotherBrainAccess(self):
+        solver = self
+        def MotherBrainAccess(sm):
+            nonlocal solver
+
+            return SMBool(solver.objectives.enoughGoalsCompleted())
+        return MotherBrainAccess
+
+    def getMotherBrainAvailable(self):
+        solver = self
+        def MotherBrainAvailable(sm):
+            nonlocal solver
+
+            tourian = sm.enoughStuffTourian()
+
+            # can't check all locations
+            if solver.relaxedEndCheck:
+                return tourian
+            else:
+                hasEnoughMinors = solver.pickup.enoughMinors(sm, solver.minorLocations)
+                hasEnoughMajors = solver.pickup.enoughMajors(sm, solver.majorLocations)
+                hasEnoughItems = hasEnoughMajors and hasEnoughMinors
+                return sm.wand(tourian, SMBool(hasEnoughItems))
+        return MotherBrainAvailable
+
     def computeDifficulty(self):
         # loop on the available locations depending on the collected items.
         # before getting a new item, loop on all of them and get their difficulty,
@@ -674,28 +699,8 @@ class CommonSolver(object):
         mbLoc = self.getLoc('Mother Brain')
         if self.objectives.tourianRequired:
             # update mother brain to handle all end game conditions, allow MB loc to access solver data
-            solver = self
-            def MotherBrainAccess(sm):
-                nonlocal solver
-
-                return SMBool(solver.objectives.enoughGoalsCompleted())
-
-            def MotherBrainAvailable(sm):
-                nonlocal solver
-
-                tourian = sm.enoughStuffTourian()
-
-                # can't check all locations
-                if solver.relaxedEndCheck:
-                    return tourian
-                else:
-                    hasEnoughMinors = solver.pickup.enoughMinors(sm, solver.minorLocations)
-                    hasEnoughMajors = solver.pickup.enoughMajors(sm, solver.majorLocations)
-                    hasEnoughItems = hasEnoughMajors and hasEnoughMinors
-                    return sm.wand(tourian, SMBool(hasEnoughItems))
-
-            mbLoc.AccessFrom['Golden Four'] = MotherBrainAccess
-            mbLoc.Available = MotherBrainAvailable
+            mbLoc.AccessFrom['Golden Four'] = self.getMotherBrainAccess()
+            mbLoc.Available = self.getMotherBrainAvailable()
             self.endGameLoc = mbLoc
             self.escapeLocName = 'Mother Brain'
         else:

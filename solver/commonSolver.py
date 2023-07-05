@@ -813,6 +813,8 @@ class CommonSolver(object):
             # add gunship location to display escape in the spoiler log
             gunship = self.getGunship()
             self.majorLocations.append(gunship)
+            # ignore items requirements now that mother brain is dead
+            self.relaxedEndCheck = True
             # change current AP to escape AP
             self.lastAP = self.escapeTransition[0][1]
             self.computeLocationsDifficulty(self.majorLocations)

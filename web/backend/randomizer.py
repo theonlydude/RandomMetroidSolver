@@ -83,7 +83,7 @@ class Randomizer(object):
             "Minimizer": ["minimizer", "minimizer_hardcore", "minimizer_maximizer"],
             "Objectives": ["objectives_all_bosses", "objectives_memes", "objectives_clear_areas", "objectives_explore_areas", "objectives_true_completion", "objectives_bingo", "objectives_blind_bingo", "objectives_short", "objectives_long", "objectives_robots_notweaks"],
             "Hud": ["hud", "hud_start"],
-            "Scavenger": ["scavenger_random", "scavenger_speedrun", "scavenger_vanilla_but_not"],
+            "Scavenger": ["scavenger_random", "scavenger_speedrun", "scavenger_vanilla_but_not", "scavenger_visit"],
             "Hard": ["hardway2hell", "highway2hell", "stupid_hard", "objectives_hard_heat", "objectives_hard_water", "hud_hard", "scavenger_hard"],
             "Random": ["all_random", "quite_random", "surprise"],
             "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "SGL23Online", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2"]

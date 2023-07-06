@@ -1052,6 +1052,9 @@ class InteractiveSolver(CommonSolver):
                         continue
                     byteIndex = eventData["byteIndex"]
                     bitMask = eventData["bitMask"]
+                    # Check for bad offset/byte index.
+                    if offset + byteIndex >= len(currentState):
+                        continue
                     goalName = goalsList[i]
                     goalCompleted = goalsCompleted[i]
                     if currentState[offset + byteIndex] & bitMask != 0:

@@ -501,7 +501,8 @@ class Randomizer(object):
                 randoPreset[multiSelect] = defaultMultiValues[multiElem]
         # objective special case
         if randoPreset.get("objectiveRandom") == "true" and "objectiveMultiSelect" not in randoPreset:
-            randoPreset['objectiveMultiSelect'] = defaultMultiValues["objective"]
+            objExclude = ["collect 100% items", "explore 100% map"]
+            randoPreset['objectiveMultiSelect'] = [obj for obj in defaultMultiValues["objective"] if obj not in objExclude]
         return randoPreset
 
     def randoPresetWebService(self):

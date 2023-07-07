@@ -77,12 +77,14 @@ class CommonSolver(object):
             if hasObjectives:
                 self.romLoader.loadObjectives(self.objectives)
                 if interactive:
-                    # load event bit masks for auto tracker
-                    self.eventsBitMasks = self.romLoader.loadEventBitMasks()
                     # this option wasn't available in previous release
                     if not Objectives.previousReleaseFallback:
                         self.objectivesHiddenOption = bool(self.romLoader.readOption("objectivesHidden"))
                         self.objectivesHidden = self.objectivesHiddenOption
+                        # load event bit masks for auto tracker
+                        self.eventsBitMasks = self.romLoader.loadEventBitMasks()
+                    else:
+                        self.eventsBitMasks = {}
             else:
                 if self.majorsSplit == "Scavenger":
                     # add scav hunt

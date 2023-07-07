@@ -4,24 +4,34 @@
 ;Allows an uneven or random number of items (up to 255 separate item pickups)
 ;Adds a single decimal point value, to give more accurate results to random item ammounts
 
-!CollectedItems  = $7ED86E
-!TotalItems      = #$64 ;TOTAL number if items in the game. This includes ALL items: missiles, upgrades, etc
+;;; by default, will draw according to VARIA endscreen, unless "VANILLA_ENDSCREEN" is defined
 
 lorom
-arch snes.cpu
+arch 65816
+
+incsrc "macros.asm"
+incsrc "constants.asm"
+
+incsrc "sym/nothing_item_plm.asm"
 
 org $84889F
         JSL COLLECTTANK
-org $84F830                     ; FLO: changed original adress to avoid conflict with other patches
+
+org $85CF10                     ; FLO: changed original adress to avoid conflict with other patches
 COLLECTTANK:
+        ;; don't increment collected item counter when "collecting" a nothing
+        cpy.w #nothing_item_plm_instr_list_visible_block_end : beq .end
+        cpy.w #nothing_item_plm_instr_list_shot_block_end : beq .end
         PHA
         LDA !CollectedItems
         INC A
         STA !CollectedItems
         PLA
-        JSL $80818E
+.end:
+        JSL $80818E             ; hijacked code
         RTL
-warnpc $84f840
+
+warnpc $85cf2f
 
 org $8BE627
 display_item_count_end_game:
@@ -51,9 +61,8 @@ compute_percent:
         LDA $4216                                       ;Load number of (collected items * 100)
         STA $4204                                       ;Store to devisor A
         SEP #$20
-print "1st TotaItems (add 1) : ", pc
-        LDA !TotalItems                                 ;Load total number of game items ; FLO: this has to be changed at ROM patch phase
-        STA $4206                                       ;Store to devisor B
+        LDA.l total_items
+        STA $4206                                      ;Store to devisor B
         PHA : PLA : XBA : XBA
         REP #$20
         LDA $4214                                       ;Load ((collected items * 100)/Total items) ie Item percent
@@ -88,8 +97,7 @@ print "1st TotaItems (add 1) : ", pc
         LDA $4216                                       ;Load (remainder * 10) and use it to divide by number of items
         STA $4204
         SEP #$20
-print "2nd TotaItems (add 1) : ", pc
-        LDA !TotalItems                                 ; FLO : patch this value to have accurate decimal point
+        LDA.l total_items
         STA $4206
         PHA : PLA : XBA : XBA                           ;Divide remainder*10 by number of items
         REP #$20
@@ -108,12 +116,29 @@ display_end:
         PLB
         phx
         LDX #$0000
-        LDA #$385A              ; draw decimal icon
-        STA $7E33E0
-        LDA #$386A              ; draw percentage sign
+if defined("VANILLA_ENDSCREEN")
+        ;; draw decimal icon
+        LDA #$385A
+        sta $7E33E0
+        ;; draw percentage sign
+        LDA #$386A
         STA $7E33A4
         LDA #$387A
         STA $7E33E4
+else
+        ;; draw decimal icon
+        lda #$205a
+        %tileOffset(28, 2)      ; value for VARIA end screen
+        sta $7E3000+!_tile_offset
+        ;; draw percentage sign
+        lda #$206A
+        %tileOffset(30, 1)      ; value for VARIA end screen
+        sta $7E3000+!_tile_offset
+        lda #$207a
+        %tileOffset(30, 2)      ; value for VARIA end screen
+        sta $7E3000+!_tile_offset
+endif
+        ;; draw digits
         LDA $12
         beq .skip_hundredths    ; if 0 don't draw hundredths digit
         JSR draw_digit_end
@@ -135,12 +160,27 @@ draw_digit_end:
         ASL A : ASL A
         TAY
         LDA $E741,y             ; tilemap values for decimal digits (top half)
-        STA $7E339A,x           ; write in bg1
+        ;; write in bg1
+if defined("VANILLA_ENDSCREEN")
+        STA $7E339A,x
+else
+        %tileOffset(25, 1)
+        STA $7E3000+!_tile_offset,x
+endif
         LDA $E743,y             ; tilemap values for decimal digits (bottom half)
+if defined("VANILLA_ENDSCREEN")
         STA $7E33DA,x
+else
+        %tileOffset(25, 2)      ; value for VARIA end screen
+        STA $7E3000+!_tile_offset,x
+endif
         inx : inx
         ply
         rts
+
+;write TOTAL number if items in the game here
+%export(total_items)
+        db 100
 
 print "End of endingtotals: ", pc
 warnpc $8be740

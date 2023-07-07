@@ -201,14 +201,14 @@ class ItemManager:
         'Nothing': Item(
             Category='Nothing',
             Class='Minor',
-            Code=0xbae9, # new nothing plm
+            Code=0xbad1, # new nothing plm
             Name="Nothing",
             Type='Nothing',
         ),
         'NoEnergy': Item(
             Category='Nothing',
             Class='Major',
-            Code=0xbae9, # see above
+            Code=0xbad1, # see above
             Name="No Energy",
             Type='NoEnergy',
         ),
@@ -268,7 +268,7 @@ class ItemManager:
         ),
         # used only during escape path check
         'Hyper': Item(
-            Category='Beam',
+            Category='Fake',
             Class='Major',
             Code=0xffff,
             Name="Hyper Beam",
@@ -352,13 +352,21 @@ class ItemManager:
         else:
             return ItemManager.Items[itemType].withClass(itemClass)
 
+    @staticmethod
+    def getCategoryTypes(itemCategory):
+        return [itemType for itemType, item in ItemManager.Items.items() if item.Category == itemCategory]
+
     def createItemPool(self, exclude=None):
         itemPoolGenerator = ItemPoolGenerator.factory(self.majorsSplit, self, self.qty, self.sm, exclude, self.nLocs, self.maxDiff)
         self.itemPool = itemPoolGenerator.getItemPool()
 
     @staticmethod
     def getProgTypes():
-        return [item for item in ItemManager.Items if ItemManager.Items[item].Category == 'Progression']
+        return ItemManager.getCategoryTypes('Progression')
+
+    @staticmethod
+    def getUpgradeTypes():
+        return ItemManager.getProgTypes() + ItemManager.getCategoryTypes("Beam") + ItemManager.getCategoryTypes("Misc")
 
     def hasItemInPoolCount(self, itemName, count):
         return len([item for item in self.itemPool if item.Type == itemName]) >= count

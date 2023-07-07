@@ -34,7 +34,7 @@ class GraphBuilder(object):
                 if self.graphSettings.startAP == "Golden Four" and self.graphSettings.tourian == "Disabled":
                     forcedAreas.add('Crateria')
                 # force areas required by objectives
-                # 1st the 'clear area' ones
+                # 1st the 'clear/explore area' ones
                 forcedAreas = forcedAreas.union({goal.area for goal in Objectives.activeGoals if goal.area is not None})
                 # for the rest, base ourselves on escapeAccessPoints :
                 # - if only "1 of n" pick an area, preferably one already forced
@@ -276,3 +276,4 @@ class GraphBuilder(object):
                 if area not in timerValues:
                     # area not in graph most probably, still write a 10 minute "ultra failsafe" value
                     timerValues[area] = 600
+            self.log.debug("escapeTimer. final table: "+str(timerValues))

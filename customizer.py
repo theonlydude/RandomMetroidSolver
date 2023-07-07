@@ -5,20 +5,12 @@ import argparse, os.path, json, sys, shutil, random
 from logic.logic import Logic
 from rom.PaletteRando import PaletteRando
 from rom.rompatcher import RomPatcher, MusicPatcher, RomTypeForMusic
+from rom.romreader import RomReader
 from utils.utils import dumpErrorMsg
+from rom.flavor import RomFlavor
 
 import utils.log
 import utils.db as db
-
-# we need to know the logic before doing anything else
-def getLogic():
-    # check if --logic is there
-    logic = 'vanilla'
-    for i, param in enumerate(sys.argv):
-        if param == '--logic' and i+1 < len(sys.argv):
-            logic = sys.argv[i+1]
-    return logic
-Logic.factory(getLogic())
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
@@ -28,7 +20,7 @@ if __name__ == "__main__":
     parser.add_argument('--output',
                         help="to choose the name of the generated json (for the webservice)",
                         dest='output', nargs='?', default=None)
-    parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="varia", choices=["varia", "rotation"])
+    parser.add_argument('--logic', help='logic to use', dest='logic', nargs='?', default="vanilla", choices=["vanilla", "rotation", "mirror", "random"])
     parser.add_argument('--patch', '-c',
                         help="optional patches to add",
                         dest='patches', nargs='?', default=[], action='append',
@@ -41,7 +33,7 @@ if __name__ == "__main__":
                                  'remove_rando_speed.ips', 'remove_spinjumprestart.ips',
                                  'remove_itemsounds.ips', 'vanilla_music.ips', 'custom_ship.ips',
                                  'Ship_Takeoff_Disable_Hide_Samus', 'widescreen.ips',
-                                 'hell.ips', 'lava_acid_physics.ips',
+                                 'hell.ips', 'lava_acid_physics.ips', 'hard_mode.ips',
                                  'color_blind.ips', 'disable_screen_shake.ips', 'noflashing.ips'])
     parser.add_argument('--controls',
                         help="specify controls, comma-separated, in that order: Shoot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
@@ -91,6 +83,8 @@ if __name__ == "__main__":
                         dest='hellrunRate', default=100, type=int)
     parser.add_argument('--etanks', help="Additional ETanks, between 0 (default) and 18",
                         dest='additionalEtanks', default=0, type=int)
+    parser.add_argument('--base', help="Add VARIA base patches on a vanilla ROM", dest='base', action='store_true', default=False)
+
     # parse args
     args = parser.parse_args()
 
@@ -111,6 +105,17 @@ if __name__ == "__main__":
 
     utils.log.init(False)
     logger = utils.log.get('Custo')
+
+    logic = args.logic
+    if logic == "random":
+        # extract logic from ips
+        logic = RomReader.getLogicFromIPS(args.seedIps)
+
+    if args.base:
+        args.patches += ["utils.ips", "base.ips", "stats.ips", "credits.ips", "endingtotals.ips", "area_ids.ips", "area_ids_alt.ips"]
+
+    Logic.factory(logic)
+    RomFlavor.factory()
 
     ctrlDict = None
     if args.controls:
@@ -136,7 +141,7 @@ if __name__ == "__main__":
             romFile = os.path.basename(inFileName)
             outFileName = os.path.join(romDir, 'Custom_' + romFile)
             shutil.copyfile(inFileName, outFileName)
-            romPatcher = RomPatcher(outFileName)
+            romPatcher = RomPatcher(romFileName=outFileName)
         else:
             # web mode
             outFileName = args.output
@@ -214,6 +219,7 @@ if __name__ == "__main__":
             musicPatcher.replace(musicMapping,
                                  updateReferences=musicParams.get('room_states', True),
                                  output=musicParams.get("output", None))
+
         romPatcher.end()
 
         if args.rom is None:

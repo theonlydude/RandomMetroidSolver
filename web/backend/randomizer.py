@@ -1,4 +1,4 @@
-import sys, os, urllib, tempfile, random, subprocess, base64, json, uuid
+import sys, os, urllib, tempfile, random, subprocess, base64, json, uuid, lzma
 from datetime import datetime
 
 from web.backend.utils import loadPresetsList, loadRandoPresetsList, displayNames
@@ -45,18 +45,23 @@ class Randomizer(object):
             "minimizer_hardcore":"Have fun 'rushing' bosses with no equipment on a tiny map",
             "minimizer_maximizer":"No longer a boss rush",
             "objectives_all_bosses":"Kill all bosses/minibosses",
-            "objectives_clear_areas":"Clear 5 random areas and end with fast Tourian",
+            "objectives_clear_areas": "Clear 5 random areas and end with fast Tourian",
             "objectives_hard_heat":"All Norfair-related objectives, possibly without a suit",
             "objectives_hard_water":"All Maridia-related objectives, possibly without a suit",
-            "objectives_long": "5 random long objectives and Vanilla Tourian",
+            "objectives_long": "6 out of 9 random long objectives and Vanilla Tourian",
             "objectives_memes":"Do all the memes and rush to the ship",
             "objectives_robots_notweaks":"Collect Bomb and Space Jump to activate the robots, then rush to the ship",
-            "objectives_short": "3 random short objectives and Disabled Tourian",
+            "objectives_short": "3 out of 5 random short objectives and Disabled Tourian",
+            "objectives_explore_areas": "Explore 5 random areas and end with fast Tourian",
+            "objectives_true_completion": "100% items and map completion, kill all bosses/minibosses, do all the memes",
+            "objectives_bingo": "Complete 5 out of 10 random objectives and rush to the ship",
+            "objectives_blind_bingo": "objectives_bingo with area randomization and hidden objectives",
             "quite_random": "randomizes a few significant settings to have various seeds",
             "scavenger_hard":"Pretty hostile Scavenger mode",
             "scavenger_random":"Randomize everything within Scavenger mode",
             "scavenger_speedrun":"Quickest Scavenger settings",
             "scavenger_vanilla_but_not":"Items are vanilla, but area and bosses are not",
+            "scavenger_visit": "Only 7 locations in the Scavenger list, but you have to get all upgrades",
             "stupid_hard": "hardest possible settings",
             "surprise": "quite_random with Area/Boss/Doors/Start settings randomized",
             "vanilla": "closest possible to vanilla Super Metroid",
@@ -66,34 +71,22 @@ class Randomizer(object):
             "Season_Races": "rando league races (Majors/Minors split)",
             "Torneio_SGPT3_stage1": "SG Português Tournament 2022 group stage",
             "Torneio_SGPT3_stage2": "SG Português Tournament 2022 playoff stage",
-            "SGLive2022_Game_1": "SGLive 2022 Randomizer Tournament race 1",
-            "SGLive2022_Game_2": "SGLive 2022 Randomizer Tournament race 2",
-            "SGLive2022_Game_3": "SGLive 2022 Randomizer Tournament race 3",
             "SMRAT2021": "Randomizer Accessible Tournament 2021",
             "VARIA_Weekly": "Casual logic community races",
-            "Boyz_League_SM_Rando": "Boyz League Tournament",
-            "RLS4W2": "Rando League Season 4 week 2",
-            "RLS4W3": "Rando League Season 4 week 3",
-            "RLS4W4": "Rando League Season 4 week 4",
-            "RLS4W5": "Rando League Season 4 week 5",
-            "RLS4W7": "Rando League Season 4 week 7",
-            "RLS4GS": "Rando League Season 4 playoff GS",
-            "RLS4P1": "Rando League Season 4 playoff 1",
-            "RLS4P2": "Rando League Season 4 playoff 2",
             "SGL23Online": "SpeedGaming Live 2023 Online tournament"
         }
 
         randoPresetsCategories = {
             "Standard": ["", "default", "Chozo_Speedrun", "free", "haste", "vanilla"],
-            "Hud": ["hud", "hud_hard", "hud_start"],
-            "Scavenger": ["scavenger_hard", "scavenger_random", "scavenger_speedrun", "scavenger_vanilla_but_not"],
             "Area": ["way_of_chozo", "where_am_i", "where_is_morph"],
             "Doors": ["doors_long", "doors_short"],
             "Minimizer": ["minimizer", "minimizer_hardcore", "minimizer_maximizer"],
-            "Objectives": ["objectives_all_bosses", "objectives_clear_areas", "objectives_memes", "objectives_short", "objectives_long", "objectives_robots_notweaks"],
-            "Hard": ["hardway2hell", "highway2hell", "stupid_hard", "objectives_hard_heat", "objectives_hard_water"],
+            "Objectives": ["objectives_all_bosses", "objectives_memes", "objectives_clear_areas", "objectives_explore_areas", "objectives_true_completion", "objectives_bingo", "objectives_blind_bingo", "objectives_short", "objectives_long", "objectives_robots_notweaks"],
+            "Hud": ["hud", "hud_start"],
+            "Scavenger": ["scavenger_random", "scavenger_speedrun", "scavenger_vanilla_but_not", "scavenger_visit"],
+            "Hard": ["hardway2hell", "highway2hell", "stupid_hard", "objectives_hard_heat", "objectives_hard_water", "hud_hard", "scavenger_hard"],
             "Random": ["all_random", "quite_random", "surprise"],
-            "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "SGL23Online", "RLS4W2", "RLS4W3", "RLS4W4", "RLS4W5", "RLS4W7", "RLS4GS", "RLS4P1", "RLS4P2", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2", "SGLive2022_Game_1", "SGLive2022_Game_2", "SGLive2022_Game_3", "Boyz_League_SM_Rando"]
+            "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "SGL23Online", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2"]
         }
 
         startAPs = GraphUtils.getStartAccessPointNamesCategory()
@@ -150,12 +143,17 @@ class Randomizer(object):
                             elif key in self.session.randomizer and 'MultiSelect' not in key:
                                 self.session.randomizer[key] = value
 
+        logics = [
+            ("vanilla", "Super Metroid"),
+            ("mirror", "Super Mirrortroid")
+        ]
+
         return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                     randoPresetsDesc=randoPresetsDesc, randoPresetsCategories=randoPresetsCategories,
                     startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues,
                     maxsize=sys.maxsize, displayNames=displayNames, objectivesExclusions=objectivesExclusions,
                     objectivesTypes=objectivesTypes, objectivesSort=objectivesSort,
-                    objectivesCategories=objectivesCategories)
+                    objectivesCategories=objectivesCategories, logics=logics)
 
     def initRandomizerSession(self):
         if self.session.randomizer is None:
@@ -190,7 +188,7 @@ class Randomizer(object):
             # write ips as key/fileName.ips
             ipsFileName = fileName.replace('sfc', 'ips')
             ipsLocal = os.path.join(ipsDir, ipsFileName)
-            with open(ipsLocal, 'wb') as f:
+            with lzma.LZMAFile(ipsLocal, 'wb') as f:
                 f.write(ips)
 
             return True
@@ -210,13 +208,13 @@ class Randomizer(object):
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
                    'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
-                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized",
-                   'relaxed_round_robin_cf']
+                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "revealMap", "scavRandomized",
+                   'relaxed_round_robin_cf', 'hiddenObjectives']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
-                  'areaRandomization']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective']
+                  'areaRandomization', 'logic']
+        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'nbObjectivesRequired']
         validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize
@@ -250,7 +248,8 @@ class Randomizer(object):
                   '--runtime', '20',
                   '--output', jsonFileName,
                   '--param', presetFileName,
-                  '--preset', preset]
+                  '--preset', preset,
+                  '--logic', self.vars.logic]
 
         if useRace == True:
             params += ['--race', str(magic)]
@@ -394,13 +393,13 @@ class Randomizer(object):
                    'layoutPatches', 'variaTweaks', 'nerfedCharge',
                    'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
-                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "scavRandomized",
-                   'relaxed_round_robin_cf']
+                   'Infinite_Space_Jump', 'refill_before_save', 'hud', 'revealMap', "scavRandomized",
+                   'relaxed_round_robin_cf', 'hiddenObjectives']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
-                  'areaRandomization']
-        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective']
+                  'areaRandomization', 'logic']
+        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective', 'nbObjectivesRequired']
         validateWebServiceParams(self.request, switchs, quantities, multis, others)
 
         if self.session.randomizer is None:
@@ -447,9 +446,12 @@ class Randomizer(object):
         self.session.randomizer['Infinite_Space_Jump'] = self.vars.Infinite_Space_Jump
         self.session.randomizer['refill_before_save'] = self.vars.refill_before_save
         self.session.randomizer['hud'] = self.vars.hud
+        self.session.randomizer['revealMap'] = self.vars.revealMap
         self.session.randomizer['scavNumLocs'] = self.vars.scavNumLocs
         self.session.randomizer['scavRandomized'] = self.vars.scavRandomized
         self.session.randomizer['tourian'] = self.vars.tourian
+        self.session.randomizer['nbObjectivesRequired'] = self.vars.nbObjectivesRequired
+        self.session.randomizer['hiddenObjectives'] = self.vars.hiddenObjectives
 
         # objective is a special multi select
         self.session.randomizer['objectiveRandom'] = self.vars.objectiveRandom
@@ -490,6 +492,17 @@ class Randomizer(object):
     def loadRandoPreset(self, presetFullPath):
         with open(presetFullPath) as jsonFile:
             randoPreset = json.load(jsonFile)
+        # for settings with "random" selected and no "MultiSelect", generate MultiSelect list with all possible values
+        multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "areaRandomization", "logic"]
+        defaultMultiValues = getDefaultMultiValues()
+        for multiElem in multiElems:
+            multiSelect = multiElem + "MultiSelect"
+            if randoPreset.get(multiElem) == "random" and multiSelect not in randoPreset:
+                randoPreset[multiSelect] = defaultMultiValues[multiElem]
+        # objective special case
+        if randoPreset.get("objectiveRandom") == "true" and "objectiveMultiSelect" not in randoPreset:
+            objExclude = ["collect 100% items", "explore 100% map"]
+            randoPreset['objectiveMultiSelect'] = [obj for obj in defaultMultiValues["objective"] if obj not in objExclude]
         return randoPreset
 
     def randoPresetWebService(self):

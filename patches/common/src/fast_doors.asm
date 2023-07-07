@@ -1,8 +1,8 @@
 
-arch snes.cpu
+arch 65816
 lorom
 
-;; incsrc "decompression.asm"
+incsrc "decompression.asm"
 
 ;;; Door Transition Speed by kazuto + extra code to fix samus initial position
 ;;; just double the speed, discard configurability due to the extra code

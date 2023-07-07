@@ -29,7 +29,7 @@ docker run --network varia-network --link varia-mysql:varia-mysql --name varia-m
 if [ ${LOCAL} -eq 1 ]; then
     docker run --network varia-network --link varia-${BRANCH}:varia-${BRANCH} -d --publish 0.0.0.0:8000:8000 --name varia-${BRANCH} varia-${BRANCH}
 else
-    docker run -v $(get_dir):/root/RandomMetroidSolver --network varia-network --link varia-${BRANCH}:varia-${BRANCH} -d --publish 0.0.0.0:8000:8000 --name varia-${BRANCH} varia-${BRANCH}
+    docker run -v $(get_dir):/root/RandomMetroidSolver --network varia-network --link varia-local:varia-local -d --publish 0.0.0.0:8000:8000 --name varia-local varia-local
 fi
 
 # to check web2py logs:

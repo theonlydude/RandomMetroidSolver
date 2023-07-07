@@ -195,12 +195,18 @@ class HelpersGraph(Helpers):
         return sm.wor(sm.haveItem('Gravity'),
                       sm.wand(sm.knowsGravLessLevel3(),
                               sm.haveItem('HiJump'),
-                              sm.haveItem('Ice')))
+                              sm.wor(sm.haveItem('Ice'),
+                                     sm.wand(sm.canSpringBallJump(),
+                                             sm.knowsEastSandHallSpringBallJump()))))
 
     @Cache.decorator
     def canTraverseWestSandHallLeftToRight(self):
         sm = self.smbm
-        return sm.haveItem('Gravity') # FIXME find suitless condition
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.knowsGravLessLevel3(),
+                              sm.haveItem('HiJump'),
+                              sm.canUseBombs(),
+                              sm.knowsWestSandHallInsaneBombJump()))
 
     @Cache.decorator
     def canPassMaridiaToRedTowerNode(self):
@@ -279,7 +285,8 @@ class HelpersGraph(Helpers):
                                              sm.canBlueGateGlitch(),
                                              # if missiles were required to open the door, require two packs as no farming around
                                              sm.wor(sm.wnot(SMBool('Missile' in sm.traverse('DoubleChamberRight').items)),
-                                                    sm.itemCountOk("Missile", 2))))))
+                                                    sm.itemCountOk("Missile", 2),
+                                                    sm.wand(sm.itemCountOk('Missile', 1), sm.itemCountOk('Super', 1)))))))
 
     def canExitCathedral(self, hellRun):
         # from top: can use bomb/powerbomb jumps
@@ -300,28 +307,27 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canGrappleEscape(self):
         sm = self.smbm
-        access = sm.wor(sm.wor(sm.haveItem('SpaceJump'),
-                               sm.wand(sm.canInfiniteBombJump(), # IBJ from lava...either have grav or freeze the enemy there if hellrunning (otherwise single DBJ at the end)
-                                       sm.wor(sm.heatProof(),
-                                              sm.haveItem('Gravity'),
-                                              sm.haveItem('Ice')))),
-                        sm.haveItem('Grapple'),
-                        sm.wand(sm.haveItem('SpeedBooster'),
-                                sm.wor(sm.haveItem('HiJump'), # jump from the blocks below
-                                       sm.knowsShortCharge())), # spark from across the grapple blocks
-                        sm.wand(sm.haveItem('HiJump'), sm.canSpringBallJump())) # jump from the blocks below
         hellrun = 'MainUpperNorfair'
         tbl = Settings.hellRunsTable[hellrun]['Croc -> Norfair Entrance']
         mult = tbl['mult']
         minE = tbl['minE']
-        if 'InfiniteBombJump' in access.knows or 'ShortCharge' in access.knows:
-            mult *= 0.7
-        elif 'SpaceJump' in access.items:
-            mult *= 1.5
-        elif 'Grapple' in access.items:
-            mult *= 1.25
-        return sm.wand(access,
-                       sm.canHellRun(hellrun, mult, minE))
+        if sm.haveItem('SpaceJump'):
+            return sm.wand(sm.haveItem('SpaceJump'), sm.canHellRun(hellrun, mult*1.5, minE))
+        if sm.haveItem('Grapple'):
+            return sm.wand(sm.haveItem('Grapple'), sm.canHellRun(hellrun, mult*1.25, minE))
+        speedHj = sm.wand(sm.haveItem('SpeedBooster'), sm.haveItem('HiJump')) # jump from the blocks below
+        if speedHj:
+            return sm.wand(speedHj, sm.canHellRun(hellrun, mult, minE))
+        sbj = sm.wand(sm.haveItem('HiJump'), sm.canSpringBallJump()) # jump from the blocks below
+        if sbj:
+            return sm.wand(sbj, sm.canHellRun(hellrun, mult, minE))
+        return sm.wand(sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
+                                      sm.knowsShortCharge()),
+                              sm.wand(sm.canInfiniteBombJump(), # IBJ from lava...either have grav or freeze the enemy there if hellrunning (otherwise single DBJ at the end)
+                                      sm.wor(sm.heatProof(),
+                                             sm.haveItem('Gravity'),
+                                             sm.haveItem('Ice')))),
+                       sm.canHellRun(hellrun, mult*0.7, minE))
 
     @Cache.decorator
     def canHellRunBackFromGrappleEscape(self):
@@ -342,6 +348,11 @@ class HelpersGraph(Helpers):
                               sm.haveItem('Wave'),
                               sm.wor(sm.haveItem('Spazer'),
                                      sm.haveItem('Plasma'))))
+
+    @Cache.decorator
+    def canPassFrogSpeedwayLeftToRight(self):
+        sm = self.smbm
+        return sm.haveItem('SpeedBooster')
 
     @Cache.decorator
     def canEnterNorfairReserveAreaFromBubbleMoutain(self):
@@ -560,7 +571,8 @@ class HelpersGraph(Helpers):
                                              sm.wor(sm.haveItem('HiJump'),
                                                     sm.knowsMtEverestGravJump())))),
                       sm.wand(sm.canDoSuitlessOuterMaridia(),
-                              sm.haveItem('Grapple')))
+                              sm.wor(sm.haveItem('Grapple'),
+                                     sm.canDoubleSpringBallJump())))
 
     @Cache.decorator
     def canPassMtEverest(self):
@@ -631,7 +643,7 @@ class HelpersGraph(Helpers):
                                      sm.canDoubleSpringBallJump())))
 
     @Cache.decorator
-    def canPassCacatacAlley(self):
+    def canPassCacatacAlleyEastToWest(self):
         sm = self.smbm
         return sm.wand(Bosses.bossDead(sm, 'Draygon'),
                        sm.haveItem('Morph'),
@@ -639,6 +651,17 @@ class HelpersGraph(Helpers):
                               sm.wand(sm.knowsGravLessLevel2(),
                                       sm.haveItem('HiJump'),
                                       sm.haveItem('SpaceJump'))))
+
+    @Cache.decorator
+    def canPassCacatacAlleyWestToEast(self):
+        sm = self.smbm
+        return sm.wand(Bosses.bossDead(sm, 'Draygon'),
+                       sm.haveItem('Morph'),
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.wand(sm.knowsGravLessLevel2(),
+                                      sm.haveItem('HiJump'),
+                                      sm.haveItem('SpaceJump'),
+                                      sm.knowsCacAlleyUWJ())))
 
     @Cache.decorator
     def canGoThroughColosseumSuitless(self):
@@ -859,3 +882,9 @@ class HelpersGraph(Helpers):
                                      sm.wand(sm.haveItem('SpaceJump'), sm.knowsAccessSpringBallWithFlatley()))),
                       sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb()), # XRay climb
                       sm.canCrystalFlashClip())
+
+    # only used for map completion objectives
+    @Cache.decorator
+    def canExploreAmphitheater(self):
+        sm = self.smbm
+        return sm.wand(sm.canPassAmphitheaterReverse(), sm.haveItem('SpaceJump'))

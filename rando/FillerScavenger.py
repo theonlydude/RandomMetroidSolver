@@ -146,7 +146,7 @@ class FillerScavenger(Filler):
 
     def step(self):
         self.solver.solveRom()
-        self.container.cleanLocsAfterSolver()
+        self.solver.propagateDifficulties(self.container)
         if self.itemPoolCondition():
             return False
         # reorder item/locs in container to follow pickup order

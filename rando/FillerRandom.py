@@ -4,7 +4,7 @@ import random, sys, copy, logging, time
 from rando.Filler import Filler, FrontFiller
 from rando.Choice import ItemThenLocChoice
 from rando.MiniSolver import MiniSolver
-from rando.ItemLocContainer import ContainerSoftBackup, ItemLocation, getItemLocationsStr
+from rando.ItemLocContainer import ContainerSoftBackup, ItemLocation, getItemLocationsStr, getLocListStr
 from rando.RandoServices import ComebackCheckType, RandoServices
 from solver.randoSolver import RandoSolver
 from utils.parameters import infinity
@@ -156,8 +156,9 @@ class FrontFillerKickstart(FrontFiller):
 
 # actual random filler will real solver on top of mini
 class FillerRandomSpeedrun(FillerRandom):
-    def __init__(self, graphSettings, graph, restrictions, container, endDate=infinity, diffSteps=0):
+    def __init__(self, graphSettings, graph, restrictions, container, endDate=infinity, diffSteps=0, bossDiffs=None):
         super(FillerRandomSpeedrun, self).__init__(graphSettings.startAP, graph, restrictions, container, endDate)
+        self.bossDiffs = bossDiffs
         self.nFrontFillSteps = Logic.LocationsHelper.getRandomFillHelp(graphSettings.startAP)
         # based on runtime limit, help the random fill with up to three front fill steps
         limit_s = endDate - time.process_time()
@@ -189,6 +190,12 @@ class FillerRandomSpeedrun(FillerRandom):
     def getLocations(self, item):
         return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocationFast(item.Type, loc.Name, self.container)]
 
+    def _failedAttempt(self):
+        RandoServices.printProgress('X')
+        # remove vcr data
+        if self.vcr is not None:
+            self.vcr.empty()
+
     def isBeatable(self, maxDiff=None):
         miniOk = self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)
         if miniOk == False:
@@ -201,20 +208,26 @@ class FillerRandomSpeedrun(FillerRandom):
         split = self.restrictions.split if self.restrictions.split != 'Scavenger' else 'Full'
         solver = RandoSolver(split, self.startAP, self.graph, graphLocations, self.vcr)
         diff = solver.solveRom()
-        self.container.cleanLocsAfterSolver()
         if diff < minDiff: # minDiff is 0 if unspecified: that covers "unsolvable" (-1)
-            RandoServices.printProgress('X')
-
-            # remove vcr data
-            if self.vcr is not None:
-                self.vcr.empty()
-
+            self._failedAttempt()
             return False
-        now = time.process_time()
-        RandoServices.printProgress('S({}/{}ms)'.format(self.nSteps+1, int((now-self.startDate)*1000)))
-
         # order item locations with the order used by the solver
         self.orderItemLocations(solver)
+        solver.propagateDifficulties(self.container)
+        if diff > maxDiff:
+            # check that it is a "only bosses left" case
+            locsAboveMaxDiff = [il.Location for il in self.container.itemLocations if il.Location.difficulty.difficulty > maxDiff]
+            bossLocNames = [loc.Name for loc in self.bossDiffs]
+            if any(loc.Name not in bossLocNames for loc in locsAboveMaxDiff):
+                self._failedAttempt()
+                return False
+            for loc in locsAboveMaxDiff:
+                bossLoc = next(b for b in self.bossDiffs if b.Name == loc.Name)
+                if loc.difficulty.difficulty > bossLoc.difficulty.difficulty:
+                    self._failedAttempt()
+                    return False
+        now = time.process_time()
+        RandoServices.printProgress('S({}/{}ms)'.format(self.nSteps+1, int((now-self.startDate)*1000)))
 
         return True
 
@@ -222,6 +235,7 @@ class FillerRandomSpeedrun(FillerRandom):
         return self.progressionItemLocs
 
     def orderItemLocations(self, solver):
+        # order itemlocs like in the solver.
         orderedItemLocations = []
         # keep only first minors
         firstMinors = {"Missile": False, "Super": False, "PowerBomb": False}
@@ -229,6 +243,7 @@ class FillerRandomSpeedrun(FillerRandom):
             if loc.itemName == "Gunship":
                 continue
             itemLoc = self.container.getItemLoc(loc)
+
             if itemLoc.Item.Category in ['Boss', 'MiniBoss', 'Nothing', 'Energy']:
                 continue
             if loc.itemName in firstMinors:

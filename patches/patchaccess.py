@@ -2,15 +2,21 @@ import os, importlib
 from logic.logic import Logic
 from patches.common.patches import patches, additional_PLMs
 from utils.parameters import appDir
+from rom.addresses import Addresses
 
 class PatchAccess(object):
-    def __init__(self):
+    def __init__(self, baseDir = None):
         # load all ips patches
         self.patchesPath = {}
-        commonDir = os.path.join(appDir, 'patches/common/ips/')
+        self.symbolsDirs = []
+        if baseDir is None:
+            baseDir = appDir
+        commonDir = os.path.join(baseDir, 'patches/common/ips/')
+        self.symbolsDirs.append(os.path.join(baseDir, 'patches/common/sym/'))
         for patch in os.listdir(commonDir):
             self.patchesPath[patch] = commonDir
-        logicDir = os.path.join(appDir, 'patches/{}/ips/'.format(Logic.patches))
+        logicDir = os.path.join(baseDir, 'patches/{}/ips/'.format(Logic.patches))
+        self.symbolsDirs.append(os.path.join(baseDir, 'patches/{}/sym/'.format(Logic.patches)))
         for patch in os.listdir(logicDir):
             self.patchesPath[patch] = logicDir
 
@@ -40,3 +46,14 @@ class PatchAccess(object):
 
     def getAdditionalPLMs(self):
         return self.additionalPLMs
+
+    def postSymbolsLoad(self):
+        # allow patches to have a label instead of an address
+        replacements = {}
+        for name, patches in self.dictPatches.items():
+            for symbol, values in patches.items():
+                if type(symbol) == str:
+                    replacements[name] = [symbol, Addresses.getOne(symbol)]
+        for name, replace in replacements.items():
+            self.dictPatches[name][replace[1]] = self.dictPatches[name][replace[0]]
+            del self.dictPatches[name][replace[0]]

@@ -1,0 +1,9 @@
+{
+    "objectiveRandom": "true",
+    "nbObjectivesRequired": 5,
+    "nbObjective": 10,
+    "progressionSpeed": "speedrun",
+    "tourian": "Disabled",
+    "areaRandomization": "full",
+    "hiddenObjectives": "on"
+}

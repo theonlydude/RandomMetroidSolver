@@ -17,27 +17,28 @@
 
 ;;; Includes etank bar combine by lioran
 
-;;; Compile with "asar" (https://github.com/RPGHacker/asar/releases)
+;;; Compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
-!game_state = $0998		; used to check pause/unpause
+lorom
+arch 65816
 
-!hudposition = #$0006
+incsrc "constants.asm"
+incsrc "macros.asm"
+incsrc "event_list.asm"
+
+incsrc "sym/objectives.asm"
+incsrc "sym/seed_display.asm"
+
+!hudposition = $0006
+!digit_0 = $0C10               ; new font in modified HUD gfx included in map patch
 ;;; RAM used to store previous values to see whether we must draw
 ;;; area/item counter or next scav display
 !previous = $7fff3c		; hi: area/00, lo: remaining items/next scav loc
-;;; RAM for remaining items in current area
-!n_items = $7fff3e
 ;;; RAM for current index in scav list order in scavenger
 !scav_idx = $7ed86a		; saved to SRAM automatically
 !scav_tmp  = $7fff40		; temp RAM used for a lot of stuff in scavenger
 !hud_special = $7fff42		; temp RAM used to draw temporary stuff in the HUD (prompt, notification)
 !hud_special_timer = $7fff44	; and associated timer
-;;; item split written by randomizer
-!seed_type = $82fb6c
-;;; vanilla bit array to keep track of collected items
-!item_bit_array = $7ed870
-;;; bit index to byte index/bitmask routine
-!bit_index = $80818e
 ;;; RAM area to write to for split/locs in HUD
 !split_locs_hud = $7ec618
 
@@ -48,21 +49,14 @@
 
 ;;; objectives notifications display
 !objective_global_mask = (!all_objectives_hud_mask|!objective_hud_mask)
-!notification_display_frames = #300 ; 5 seconds
-!timer = $05b8
-!obj_check_period = #$0020	; unit:frames, works only in powers of 2
+!notification_display_frames #= 5*60 ; 5 seconds
+!timer = !timer1
 
 ;;; scavenger stuff
-!hunt_over_hud = #$11		; HUD ID of the fake loc 'HUNT OVER'
-!ridley_id = #$00aa
-!area_index = $079f
-!norfair = #$0002
+!hunt_over_hud = $11		; HUD ID of the fake loc 'HUNT OVER'
+!ridley_id = $00aa
 !ridley_timer = $0FB2
-!scav_next_found = #$aaaa
-
-incsrc "event_list.asm"
-
-lorom
+!scav_next_found = $aaaa
 
 ;;; hijack the start of health handling in the HUD to draw area or
 ;;; remaining items if necessary
@@ -235,7 +229,7 @@ draw_info:
 	ldy #objective_completed-hud_text
 	jsr draw_text
 	;; draw objective index
-	lda !hud_special : and #$00ff : inc : jsr draw_one
+	lda !hud_special : and #$00ff : inc : jsr draw_number
 	jmp .end
 .draw_all_objectives_ok:
 	ldy #all_objectives_completed-hud_text
@@ -253,12 +247,12 @@ draw_info:
 	jsr draw_text
 .draw_scav_index:
 	;; don't show index if showing special stuff
-	lda !previous : cmp.w !hunt_over_hud : beq .scav_setup_next
+	lda !previous : cmp.w #!hunt_over_hud : beq .scav_setup_next
 	;; show current index in required scav list
 	lda #$2C0F : sta !split_locs_hud-2 ; blank before numbers for cleanup
-	lda !scav_idx : inc : jsr draw_two
+	lda !scav_idx : inc : jsr draw_number
 .scav_setup_next:
-	lda !previous : cmp.w !hunt_over_hud : bne .game_state_check
+	lda !previous : cmp.w #!hunt_over_hud : bne .game_state_check
 	jmp .end
 
 	;; Scavenger pause:
@@ -329,7 +323,7 @@ draw_info:
 	cmp !scav_tmp : bmi .pause_first_scav_store
 	asl : tax
 	lda.l scav_order,x
-	cmp.b !hunt_over_hud : beq .pause_end_list
+	cmp.b #!hunt_over_hud : beq .pause_end_list
 	bra .pause_next_scav_end
 .pause_end_list:
 	lda !scav_idx : dec : sta !scav_idx
@@ -373,7 +367,7 @@ draw_info:
 	lda !n_items : cmp !previous+1
 	beq .end
 	sta !previous+1
-	lda !seed_type
+	lda.l seed_display_InfoStr
 	rep #$20
 	and #$00ff
 	cmp #$005a		; 'Z'
@@ -381,13 +375,15 @@ draw_info:
 	cmp #$004d		; 'M'
 	beq .draw_major
 	;; default to full split: draw remaining item count on 2 digits
-	lda !n_items : jsr draw_two
+	lda !n_items : jsr draw_number
 	bra .end
 .draw_chozo:
-	lda #$0CF9 : sta !split_locs_hud ; blue 'Z'
+%BGtile($f9, 2, 0, 0, 0)
+	lda.w #!_tile : sta !split_locs_hud ; pink 'Z'
 	bra .draw_items
 .draw_major:
-	lda #$0CEC : sta !split_locs_hud ; blue 'M'
+%BGtile($ec, 2, 0, 0, 0)
+	lda.w #!_tile : sta !split_locs_hud ; pink 'M'
 .draw_items:
 	lda !n_items : jsr draw_one
 
@@ -398,6 +394,13 @@ draw_info:
 	lda $09C2 ;original code that was hijacked
 	rts
 
+; A=remaining items (1 or 2 digits)
+draw_number:
+        cmp.w #10 : bpl draw_two
+        clc : adc #!digit_0
+	sta !split_locs_hud
+        lda #$2C0F : sta !split_locs_hud+2
+        rts
 ; A=remaining items (2 digits)
 draw_two:
 	sta $4204
@@ -405,23 +408,18 @@ draw_two:
 	lda #$0a
 	sta $4206
 	pha : pla : pha : pla : rep #$20
-	lda $4214 : asl : tay
-	lda NumberGFXTable, y
+	lda $4214 : clc : adc #!digit_0
 	sta !split_locs_hud
 	lda $4216
-draw_one:			; A=remaining items (1 digit)
-	asl : tay
-	lda NumberGFXTable, y
+; A=remaining items (1 digit)
+draw_one:
+        clc : adc #!digit_0
 	sta !split_locs_hud+2
 	rts
 
-;; Normal numbers (like energy/ammo)
-NumberGFXTable:
-	DW #$0C09,#$0C00,#$0C01,#$0C02,#$0C03,#$0C04,#$0C05,#$0C06,#$0C07,#$0C08
-
 ;;; Y ptr to string, relative to hud_text
 draw_text:
-	ldx !hudposition
+	ldx #!hudposition
 .loop:
 	lda hud_text,y
 	beq .end
@@ -508,7 +506,7 @@ press_xy:
 	dw $0000
 
 objective_completed:
-	dw " OBJ OK!  "
+	dw "OBJ OK! "
 	dw $0000
 
 all_objectives_completed:
@@ -521,22 +519,15 @@ print "b80 end: ", pc
 
 warnpc $80d5ff
 
-org $a1f550
-
-incsrc "locs_by_areas.asm"
+org $a1f560
 
 ;;; used only in scavenger hunt mode, written to by rando
 ;;; have a word for each location of required order in scavenger mode:
 ;;; hi byte: location ID as in item bit array (same IDs used in locs_by_areas)
 ;;; lo byte: item/location index in scav_names list for HUD display
 ;;; #$ffff=scav list terminator
-scav_order:
+%export(scav_order)
 	fillbyte $ff : fill 38	; (17 max scav locs+"HUNT OVER"+terminator)*2
-
-;;; ROM option for auto escape trigger when objectives are completed (see objectives.asm)
-print "escape_option: ", pc
-escape_option:
-	skip 2			; value written in objectives.asm
 
 load_state:
 	lda #$ffff
@@ -582,7 +573,7 @@ scav_list_check:
 	tya : cmp !scav_tmp : beq .deny
 	bra .scav_list_check_loop
 .found_next_scav:
-	lda !scav_next_found : sta !scav_tmp
+	lda #!scav_next_found : sta !scav_tmp
 .allow:
 	sec
 	bra .end
@@ -592,12 +583,13 @@ scav_list_check:
 	rts
 
 found_next_scav:
+        %markEvent(!hunt_started_event)
 	lda !scav_idx : inc : sta !scav_idx
 	asl : tax
 	lda.l scav_order,x : and #$00ff
-	cmp.w !hunt_over_hud : bne .end
+	cmp.w #!hunt_over_hud : bne .end
 	;; last item pickup : set scav hunt event
-	lda !hunt_over_event : jsl !mark_event
+        %markEvent(!hunt_over_event)
 	bra .end
 .end:
 	lda #$ffff : sta !scav_tmp
@@ -608,12 +600,12 @@ scav_ridley_check:
 	dec !ridley_timer
 	bne .continue
 	;; here, Ridley is supposed to show up
-	lda !area_index : cmp !norfair : bne .show ; don't check Ceres Ridley
+	lda !area_index : cmp #!norfair : bne .show ; don't check Ceres Ridley
 	jsl scav_mode_check
 	bcc .show				   ; not in scav mode
 	;; scav_tmp = loc ID to check against
 	and #$ff00 : xba : sta !scav_tmp
-	ldy !ridley_id
+	ldy #!ridley_id
 	jsr scav_list_check
 	lda #$ffff : sta !scav_tmp
 	bcs .show
@@ -631,16 +623,17 @@ scav_ridley_dead:
 	;; dead: see if it was the scav location, and advance
 	phx
 	jsl scav_mode_check
-	bcc .dead
+	bcc .dead_end
 	and #$ff00 : xba
-	cmp !ridley_id : bne .dead
+	cmp #!ridley_id : bne .dead
 	;; Ridley was indeed the next scav location
 	jsr found_next_scav
 	bra .dead
 .not_dead:
 	jml ridley_still_dying
 .dead:
-	lda !ridley_event : jsl !mark_event
+        %markEvent(!ridley_event)
+.dead_end:
 	plx
 	jml ridley_dead
 
@@ -660,7 +653,7 @@ item_pickup:
 	jsr scav_list_check
 	bcc .nopickup_end
 .pickup_end:
-	lda !scav_tmp : cmp !scav_next_found : beq .found_next_scav
+	lda !scav_tmp : cmp #!scav_next_found : beq .found_next_scav
 	lda #$ffff : sta !scav_tmp
 	bra .pickup_end_return
 .found_next_scav:
@@ -687,39 +680,30 @@ item_post_collect:
 compute_n_items:
 	phx
 	phy
-	lda #$0000 : sta !n_items ; temporarily used to count collected items in current area
-	ldy #$0000		; Y will be used to store number of items in current area
 	;; go through loc id list for current area, counting collected items
 	;; determine current graph area
-	ldx $07bb : lda $8f0010,x
-	;; get loc id list index in bank A1 in X
-	asl : tax : lda.l locs_by_areas,x : tax
-.count_loop:
-	lda $a10000,x : and #$00ff
-	cmp #$00ff : beq .end
-	phx
-	jsl !bit_index
-	lda !item_bit_array,x : and $05e7
-	beq .next
-	lda !n_items : inc : sta !n_items
-.next:
-	plx
-	iny
-	inx
-	bra .count_loop
-.end:
-	;; here, n_items contain collected items, and Y number of items
-	;; make it so, n_items contains remaining items:
-	;; n_items = max(0, Y - n_items) ; handle < 0 for some restricted locs cases
-	tya : sec : sbc !n_items
+	ldx $07bb : lda $8f0010,x : and #$00ff
+        jsl objectives_count_items_in_area
+	;; here, $16 contain collected items, and Y number of items
+        lda $16 : bne .collected_event
+        tya : bra .store        ; no items collected; skip substraction
+.collected_event:
+	;; at least an item collected, trigger appropriate event : current graph area idx+area_clear_start_event_base
+	ldx $07bb : lda $8f0010,x : and #$00ff
+	clc : adc.w #!area_clear_start_event_base
+	jsl !mark_event
+.rem:
+	;; make it so n_items contains remaining items:
+	;; n_items = max(0, Y - $16) ; handle < 0 for some restricted locs cases
+	tya : sec : sbc $16
         bpl .store
         lda #$0000
 .store:
         sta !n_items
 	bne .ret
 	;; 0 items left, trigger appropriate event : current graph area idx+area_clear_event_base
-	ldx $07bb : lda $8f0010,x
-	clc : adc !area_clear_event_base
+	ldx $07bb : lda $8f0010,x : and #$00ff
+	clc : adc.w #!area_clear_event_base
 	jsl !mark_event
 .ret:
 	ply
@@ -744,55 +728,49 @@ check_objectives:
 .ret:
 	rtl
 .stop_draw:
-	;; clear both draw flags, as "all objectives" has priority
-	lda #~!objective_global_mask : and !hud_special : sta !hud_special
 	;; reset previous value to trigger redraw
 	lda #$ffff : sta !previous
-	lda !objectives_completed_event : jsl !check_event : bcs .all_notified
+        ;; check if we were drawing "all objs"
+        lda #!all_objectives_hud_mask : and !hud_special : beq .indiv_notified
+        %markEvent(!objectives_completed_event_notified)
+        bra .clear_draw
+.indiv_notified:
 	;; it was an individual objective, get index and set notification event
 	lda !hud_special : and #$00ff : asl : tax
 	lda.l objective_notified_events,x : jsl !mark_event
-	bra .end
-.all_notified:
-	lda !objectives_completed_event_notified : jsl !mark_event
-	bra .end
-	;; check objectives
+.clear_draw:
+	;; clear both draw flags
+	lda #~!objective_global_mask : and !hud_special : sta !hud_special
+        bra .end
 .check:
+	;; check objectives :
 	;; when in pause, don't check anything
 	lda !game_state : cmp #$000f : beq .end
-	;; align check prequency with objectives (check one frame later)
-	lda !timer : and !obj_check_period-1
-	bne .end
-.check_all:
-	;; check if all objectives are completed and if we should notify
-	lda !objectives_completed_event_notified : jsl !check_event : bcs .end
-	lda !objectives_completed_event : jsl !check_event : bcc .check_indiv
-	;; notify all objectives completed
-	lda #!all_objectives_hud_mask : ora !hud_special : sta !hud_special
-	bra .notify
-	;; check individual objectives
-.check_indiv:
-	ldx.w #!max_objectives*2
-.loop:
-	dex : dex
-	bmi .end
+	;; check same objective as the main check routine
+        lda !obj_check_index : asl : tax
 	lda.l objective_notified_events,x : jsl !check_event
-	bcs .loop
+	bcs .check_all_required
 	;; objective not notified, check completion
-	lda.l objective_completed_events,x : jsl !check_event
-	bcc .loop
+	lda.l objectives_objective_events,x : jsl !check_event
+	bcc .check_all_required
 	;; notify objective completed but not displayed yet
 	lda #$ff00 : and !hud_special : sta !hud_special
 	txa : lsr : ora !hud_special
 	;; display mask in hi byte, objective number in low byte
 	ora #!objective_hud_mask : sta !hud_special
+        bra .notify
+.check_all_required:
+	;; check if all required objectives are completed and if we should notify it
+	%checkEvent(!objectives_completed_event_notified)
+        bcs .end
+	%checkEvent(!objectives_completed_event)
+        bcc .end
+	;; notify all required objectives completed
+	lda #!all_objectives_hud_mask : ora !hud_special : sta !hud_special
 .notify:
-	lda !notification_display_frames : sta !hud_special_timer
+	lda #!notification_display_frames : sta !hud_special_timer
 .end:
 	rtl
-
-objective_completed_events:
-%objectivesCompletedEventArray()
 
 objective_notified_events:
 %objectivesNotifiedEventArray()

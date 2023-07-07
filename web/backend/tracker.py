@@ -1,11 +1,13 @@
 import zlib
 
-from web.backend.utils import raiseHttp, loadPresetsList, transition2isolver, locName4isolver, getAddressesToRead
+from web.backend.utils import raiseHttp, loadPresetsList, transition2isolver, locName4isolver, getAddressesToRead, get_app_files
 from web.backend.ws import WS
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
 from graph.vanilla.graph_access import accessPoints
 from solver.interactiveSolver import InteractiveSolver
 from logic.logic import Logic
+from rom.flavor import RomFlavor
+from rom.romreader import RomReader
 
 from gluon.html import OPTGROUP
 
@@ -16,7 +18,10 @@ class Tracker(object):
         self.cache = cache
         self.response = response
         # required for GraphUtils access to access points
-        Logic.factory('vanilla')
+        # TODO will have to be changed when handling mirror/rotation etc
+        flavor = "vanilla"
+        Logic.factory(flavor)
+        RomFlavor.factory()
 
     def run(self):
         # init session
@@ -26,6 +31,7 @@ class Tracker(object):
                 "preset": "regular",
                 "seed": None,
                 "startLocation": "Landing Site",
+                "logic": "vanilla",
                 # set to False in tracker.html
                 "firstTime": True
             }
@@ -47,8 +53,7 @@ class Tracker(object):
             escapeAPs += [transition2isolver(src), transition2isolver(dest)]
 
         # generate list of addresses to read in the ROM
-        addresses = getAddressesToRead()
-
+        addresses = getAddressesToRead(self.cache)
         startAPs = GraphUtils.getStartAccessPointNamesCategory()
         startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),
                     OPTGROUP(_label="Custom", *startAPs["custom"]),
@@ -66,7 +71,9 @@ class Tracker(object):
                     nothingScreens=InteractiveSolver.nothingScreens,
                     doorsScreen=InteractiveSolver.doorsScreen,
                     bossBitMasks=InteractiveSolver.bossBitMasks,
-                    apsGraphArea=apsGraphArea)
+                    apsGraphArea=apsGraphArea, flavorPatches=RomReader.flavorPatches,
+                    inventoryBitMasks=InteractiveSolver.inventoryBitMasks,
+                    app_files=get_app_files())
 
     def trackerWebService(self):
         # unified web service for item/area trackers

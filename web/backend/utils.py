@@ -1,7 +1,5 @@
 import sys, os, json
 
-from graph.vanilla.graph_locations import locations
-from graph.vanilla.graph_access import accessPoints
 from rom.rom import snes_to_pc
 from rom.romreader import RomReader
 from rom.addresses import Addresses
@@ -9,6 +7,9 @@ from utils.doorsmanager import DoorsManager
 from utils.utils import getDefaultMultiValues, getPresetDir, removeChars
 from utils.parameters import Knows, isKnows, Controller, isButton
 from utils.objectives import Objectives
+from logic.logic import Logic
+from rom.flavor import RomFlavor
+from rom.rom_options import RomOptions
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import HTTP
@@ -40,10 +41,8 @@ def loadPresetsList(cache, emptyFirst=False):
 def loadRandoPresetsList(cache, filter=False):
     presets = cache.ram('randoPresets', lambda:dict(), time_expire=None)
     if not presets:
-        tourPresets = ['Season_Races', 'SMRAT2021', 'VARIA_Weekly',
-                       'RLS4W2', 'RLS4W3', 'RLS4W4', 'RLS4W5', 'RLS4W7',
-                       'Torneio_SGPT3_stage1', 'Torneio_SGPT3_stage2',
-                       'SGLive2022_Game_1', 'SGLive2022_Game_2', 'SGLive2022_Game_3', 'Boyz_League_SM_Rando']
+        tourPresets = ['Season_Races', 'SMRAT2021', 'VARIA_Weekly', 'SGL23Online',
+                       'Torneio_SGPT3_stage1', 'Torneio_SGPT3_stage2']
         files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
         randoPresets = [os.path.splitext(file)[0] for file in files]
         randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
@@ -63,22 +62,50 @@ def loadRandoPresetsList(cache, filter=False):
 
     return (randoPresets, tourPresets)
 
-def getAddressesToRead(plando=False):
-    addresses = {"locations": [], "patches": [], "transitions": [], "misc": [], "ranges": []}
+def getAddressesToRead(cache):
+    addresses = cache.ram('addresses', lambda:dict(), time_expire=None)
+    if addresses:
+        return addresses
 
-    # locations
-    for loc in locations:
-        addresses["locations"].append(loc.Address)
+    addresses["locations"] = []
+    addresses["patches"] = []
+    addresses["transitions"] = []
+    addresses["misc"] = []
+    addresses["ranges"] = []
+
+    for logic in ['vanilla', 'mirror']:
+        Logic.factory(logic)
+        RomFlavor.factory()
+        options = RomOptions(None, RomFlavor.symbols)
+
+        # locations
+        for loc in Logic.locations:
+            addresses["locations"].append(loc.Address)
+
+        # doors
+        addresses["misc"] += DoorsManager.getAddressesToRead()
+
+        # options
+        addresses["misc"] += options.getAddressesToRead()
+
+        # transitions
+        for ap in Logic.accessPoints:
+            if ap.Internal == True:
+                continue
+            addresses["transitions"].append(0x10000 | ap.ExitInfo['DoorPtr'])
+
+        maxDoorAsmPatchLen = 22
+        customDoorsAsm = Addresses.getOne('customDoorsAsm')
+        addresses["ranges"] += [customDoorsAsm, customDoorsAsm+(maxDoorAsmPatchLen * len([ap for ap in Logic.accessPoints if ap.Internal == False]))]
 
     # patches
-    for (patch, values) in RomReader.patches.items():
-        addresses["patches"].append(values["address"])
+    for (_class, patches) in RomReader.patches.items():
+        for patch, values in patches.items():
+            addresses["patches"].append(values["address"])
 
-    # transitions
-    for ap in accessPoints:
-        if ap.Internal == True:
-            continue
-        addresses["transitions"].append(0x10000 | ap.ExitInfo['DoorPtr'])
+    # flavor patches
+    for patch, values in RomReader.flavorPatches.items():
+        addresses["patches"].append(values["address"])
 
     # misc
     # majors split
@@ -87,28 +114,22 @@ def getAddressesToRead(plando=False):
     addresses["misc"] += Addresses.getWeb('escapeTimer')
     # start ap
     addresses["misc"] += Addresses.getWeb('startAP')
-    # random doors
-    addresses["misc"] += DoorsManager.getAddressesToRead()
     # objectives
     addresses["misc"] += Objectives.getAddressesToRead()
 
     # ranges [low, high]
     ## old doorasm for old seeds
     addresses["ranges"] += [snes_to_pc(0x8feb00), snes_to_pc(0x8fee60)]
-    maxDoorAsmPatchLen = 22
-    customDoorsAsm = Addresses.getOne('customDoorsAsm')
-    addresses["ranges"] += [customDoorsAsm, customDoorsAsm+(maxDoorAsmPatchLen * len([ap for ap in accessPoints if ap.Internal == False]))]
     # split locs
     addresses["ranges"] += Addresses.getRange('locIdsByArea')
     addresses["ranges"] += Addresses.getRange('scavengerOrder')
-    if plando == True:
-        # plando addresses
-        addresses["ranges"] += Addresses.getRange('plandoAddresses')
-        # plando transitions (4 bytes per transitions, ap#/2 transitions)
-        plandoTransitions = Addresses.getOne('plandoTransitions')
-        addresses["ranges"] += [plandoTransitions, plandoTransitions+((len(addresses["transitions"])/2) * 4)]
-        # starting etanks added in the customizer
-        addresses["misc"] += Addresses.getWeb('additionalETanks')
+    # plando addresses
+    addresses["ranges"] += Addresses.getRange('plandoAddresses')
+    # plando transitions (4 bytes per transitions, ap#/2 transitions)
+    plandoTransitions = Addresses.getOne('plandoTransitions')
+    addresses["ranges"] += [plandoTransitions, plandoTransitions+((len(addresses["transitions"])/2) * 4)]
+    # starting etanks added in the customizer
+    addresses["misc"] += Addresses.getWeb('additionalETanks')
     # events array for autotracker
     addresses["ranges"] += Addresses.getRange('objectiveEventsArray')
 
@@ -235,13 +256,13 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         if request.vars.objectiveRandom == 'true':
             nbObjective = request.vars.nbObjective
             if nbObjective.isdigit():
-                if not int(nbObjective) in range(6):
-                    raiseHttp(400, "Number of objectives must be 0-5", isJson)
+                if not int(nbObjective) in range(19):
+                    raiseHttp(400, "Number of objectives must be 0-18", isJson)
             elif nbObjective != "random":
-                raiseHttp(400, "Number of objectives must be 0-5 or \"random\"", isJson)
+                raiseHttp(400, "Number of objectives must be 0-18 or \"random\"", isJson)
         else:
-            if len(objective) > 5:
-                raiseHttp(400, "You cannot choose more than 5 objectives", isJson)
+            if len(objective) > 18:
+                raiseHttp(400, "You cannot choose more than 18 objectives", isJson)
 
 
     if 'minDegree' in others:
@@ -306,6 +327,12 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         if IS_LENGTH(maxsize=36, minsize=36)(request.vars.seedKey)[1] is not None:
             raiseHttp(400, "Seed key must be 36 chars long", isJson)
 
+    if 'nbObjectivesRequired' in others:
+        numbers = [str(number) for number in range(1, 32)]
+        value = request.vars.nbObjectivesRequired
+        if value not in ("off", "random", *numbers):
+            raiseHttp(400, f"Wrong value for nbObjectivesRequired {value}", isJson)
+
 def getCustomMapping(controlMapping):
     if len(controlMapping) == 0:
         return (False, None)
@@ -321,7 +348,7 @@ def completePreset(params):
     for know in Knows.__dict__:
         if isKnows(know):
             if know not in params['Knows'].keys():
-                params['Knows'][know] = Knows.__dict__[know]
+                params['Knows'][know] = Knows.__dict__[know].toPreset()
 
     # add missing settings
     for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
@@ -389,3 +416,15 @@ def generateJsonROM(romJsonStr):
         json.dump(tempRomJson, jsonFile)
 
     return (base, jsonRomFileName)
+
+def get_app_files():
+    with open('applications/solver/static/client/manifest.json', 'r') as manifest:
+        data = json.loads(manifest.read())
+    js = [k for k in data.keys() if k.endswith('.js')]
+    css = [k for k in data.keys() if k.endswith('.css')]
+    fa = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"
+    return '\n'.join([
+        f'<link href="{fa}" rel="stylesheet" />',
+        *[f'<script src="{data[f]}"></script>' for f in js],
+        *[f'<link href="{data[f]}" rel="stylesheet" />' for f in css],
+    ])

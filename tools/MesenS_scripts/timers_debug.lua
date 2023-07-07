@@ -26,6 +26,8 @@ local timerData = {
   {"East Mar", addr=statsRamAddr+27*2},
   {"Tourian", addr=statsRamAddr+29*2},
   {"Pause", addr=statsRamAddr+38*2},
+  {"RTA Lag", addr=0x033a,region=false},
+  {"Lag", addr=statsRamAddr+42*2,region=false},
   {"IGT",addr=readIGT,region=false}
 }
 

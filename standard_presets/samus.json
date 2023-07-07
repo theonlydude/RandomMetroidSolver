@@ -204,6 +204,10 @@
       true,
       1
     ],
+    "WaveGateGlitchMirror": [
+      true,
+      1
+    ],
     "DraygonRoomCrystalFlash": [
       true,
       1
@@ -367,7 +371,27 @@
     "DoubleChamberWallJump": [
       true,
       1
-    ]
+    ],
+    "SporeSpawnBackDoor": [
+      true,
+      1
+    ],
+      "MamaTurtleWallJumpBombBoost": [
+          true,
+          1
+      ],
+      "CacAlleyUWJ": [
+          true,
+          1
+      ],
+      "EastSandHallSpringBallJump": [
+          true,
+          1
+      ],
+      "WestSandHoleSuitlessWallJumps": [
+          true,
+          1
+      ]
   },
   "Settings": {
     "Kraid": "Quick Kill",

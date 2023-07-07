@@ -1,10 +1,12 @@
 ;;; Spawns additional PLMs into rooms without needing to repoint anything
 ;;;
-;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
-;;; or a variant of xkas that supports arch directive
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
-arch snes.cpu
+
+arch 65816
 lorom
+
+incsrc "macros.asm"
 
 ;;; HIJACKS (room load routines in bank 82)
 org $82e8d5
@@ -14,10 +16,10 @@ org $82eb8b
     jsl add_plms
 
 ;;; DATA in bank 8F free space
-org $8fe9a0
+org $8FE9BF
 ;;; additional zero-terminated PLM lists go here (written at ROM generation)
 print "downwards plm_lists table start: ", pc
-plm_lists:
+%export(plm_lists)
 
 ;;; TEST
     ;; dw $B76F
@@ -34,6 +36,7 @@ plm_lists:
     
     dw  $0000                   ; PLM list 1 terminator
     ;; ...
+.continued:
 
 ;;; *** Non-overlap in this space has to be handled at ROM generation ***
 
@@ -53,10 +56,10 @@ room_plms:
 ;; room_plms:
 ;;     dw  $99bd, $99ca, $8b1a, plm_lists
 ;;; 
-room_plms_upwards:
+%export(room_plms_upwards)
 
 ;;; fill plm table with placeholder data to detect colisions with other patches
-org plm_lists
+org plm_lists_continued
     padbyte $CA : pad room_plms_upwards
 
 ;;; CODE in bank 8F

@@ -7,6 +7,8 @@ from utils.parameters import easy, medium, hard, harder, hardcore, mania
 from utils.utils import getPresetDir, getPythonExec
 from utils.db import DB
 from solver.conf import Conf
+from logic.logic import Logic
+from rom.flavor import RomFlavor
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import redirect
@@ -17,7 +19,11 @@ class Solver(object):
         self.session = session
         self.request = request
         self.cache = cache
-
+        # required for symbols
+        # TODO will have to be changed when handling mirror/rotation etc
+        flavor = "vanilla"
+        Logic.factory(flavor)
+        RomFlavor.factory()
         self.vars = self.request.vars
 
     def run(self):
@@ -83,7 +89,7 @@ class Solver(object):
         (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
 
         # generate list of addresses to read in the ROM
-        addresses = getAddressesToRead()
+        addresses = getAddressesToRead(self.cache)
 
         # send values to view
         return dict(desc=Knows.desc, stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets, roms=ROMs,
@@ -232,6 +238,9 @@ class Solver(object):
             _class = "imageItems"
         else:
             _class = "imageItem"
+        # autotracker compatibility with multiworld uses no energy items for items from other worlds
+        if item == 'NoEnergy':
+            item = 'Nothing'
         itemImg = """<img alt="{}" class="{}" src="/solver/static/images/tracker/inventory/{}.png" title="{}" />""".format(item, _class, item.replace(' ', ''), item)
 
         if location is not None and len(scavengerOrder) > 0 and location in scavengerOrder:

@@ -1,12 +1,13 @@
 ;;; This patch handles the specifics for area rando doors;;; 
 ;;; - refill at Tourian elevator
-;;; - maridia sand warp
 ;;; - croc area exit bugfix
 ;;;
-;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 lorom
-arch snes.cpu
+arch 65816
+
+incsrc "macros.asm"
 
 ;;; For refill
 !samus_health          = $09c2
@@ -24,7 +25,7 @@ arch snes.cpu
 
 org $8ff700
 ;;; "ship refill" for tourian elevator
-full_refill:
+%export(full_refill)
 	lda !samus_max_health
 	sta !samus_health
 	lda !samus_max_reserve
@@ -50,12 +51,6 @@ warnpc $8ff7ff
 ;;; add door in room below botwoon etank (room header update)
 org $8FD706
     dw below_botwoon_doors
-
-;; update left sand hall left door to lead to it
-org $83a63c
-	dw $D6FD
-	db $00,$05,$3E,$06,$03,$00
-	dw $8000,$0000
 
 ;;; Tourian Elevator door ASM ptr
 org $83922c

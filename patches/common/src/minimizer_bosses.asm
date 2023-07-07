@@ -1,9 +1,9 @@
 ;;; allows to leave boss rooms as soon as the boss is dead
 ;;; instead of having to wait for the drops
 ;;;
-;;; Compiles with asar
+;;; Compiles with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
-arch snes.cpu
+arch 65816
 lorom
 
 !mark_boss = $8081a6

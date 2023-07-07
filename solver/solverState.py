@@ -14,6 +14,8 @@ class SolverState(object):
     def fromSolver(self, solver):
         self.state = {}
         # string
+        self.state["logic"] = solver.logic
+        # string
         self.state["majorsSplit"] = solver.majorsSplit
         # string
         self.state["masterMajorsSplit"] = solver.masterMajorsSplit
@@ -95,15 +97,20 @@ class SolverState(object):
         self.state["tourian"] = solver.tourian
         # custom objectives
         self.state["objectives"] = solver.objectives.getState()
+        self.state["totalItemsCount"] = solver.objectives.getTotalItemsCount()
         self.state["newlyCompletedObjectives"] = solver.newlyCompletedObjectives
         self.state["majorUpgrades"] = solver.majorUpgrades
         self.state["splitLocsByArea"] = solver.splitLocsByArea
         self.state["eventsBitMasks"] = solver.eventsBitMasks
+        self.state["objectivesHidden"] = solver.objectivesHidden
+        self.state["objectivesHiddenOption"] = solver.objectivesHiddenOption
         # scav hunt locations
         self.state["scavengerOrder"] = self.getScavengerOrder(solver)
         self.state["additionalETanks"] = solver.additionalETanks
+        self.state["escapeRandoRemoveEnemies"] = solver.escapeRandoRemoveEnemies
 
     def toSolver(self, solver):
+        solver.logic = self.state["logic"]
         solver.majorsSplit = self.state["majorsSplit"]
         solver.masterMajorsSplit = self.state["masterMajorsSplit"]
         solver.areaRando = self.state["areaRando"]
@@ -135,11 +142,15 @@ class SolverState(object):
         solver.plandoScavengerOrder = self.state["plandoScavengerOrder"]
         solver.tourian = self.state["tourian"]
         solver.objectives.setState(self.state["objectives"])
+        solver.objectives.setTotalItemsCount(self.state["totalItemsCount"])
         solver.majorUpgrades = self.state["majorUpgrades"]
         solver.splitLocsByArea = self.state["splitLocsByArea"]
         solver.eventsBitMasks = self.state["eventsBitMasks"]
+        solver.objectivesHidden = self.state["objectivesHidden"]
+        solver.objectivesHiddenOption = self.state["objectivesHiddenOption"]
         solver.scavengerOrder = self.setScavengerOrder(solver, self.state["scavengerOrder"])
         solver.additionalETanks = self.state["additionalETanks"]
+        solver.escapeRandoRemoveEnemies = self.state["escapeRandoRemoveEnemies"]
 
     def getRoomsVisibility(self, solver, areaGraph, sm):
         # add graph access points

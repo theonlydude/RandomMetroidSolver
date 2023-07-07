@@ -3,9 +3,9 @@
 # start with title_log_sm.bmp, 184x64 pixels, 256 colors but only 16 used (15 colors + 1 transparency (first pixel is transparent)) (with gimp, add magenta background, resize to 184x64 without interpolation, export to bmp 16 bits x1 r5 g5 b5)
 # use SnesGFX to convert title_log_sm.bmp to gfx title_logo_sm.bin and palette title_logo_sm.pal
 #    format: 4bpp snes, tilemap: no tilemap output, colors: 16, palette: YY-CHR Palette
-# export sm_0A80D8.GFX from vanilla rom using SMILE (Tileset Editor -> Special GFX -> Title 2 -> Export Graphics)
+# export sm_0A80D8.GFX from vanilla rom using SMILE 3.0.94 (Tileset Editor -> Special GFX -> Title 2 -> Export Graphics)
 # ./genLogo.py title_logo_sm.bin sm_0A80D8.GFX title_logo_sm.pal sm.sfc
-# import sm_0A80D8.GFX into sm.sfc using SMILE (Tileset Editor -> Special GFX -> Title 2 -> Import Graphics)
+# import sm_0A80D8.GFX into sm.sfc using SMILE 3.0.94 (Tileset Editor -> Special GFX -> Title 2 -> Import Graphics)
 # generate ips
 
 # we're in directory 'tools/', update sys.path

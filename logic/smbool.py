@@ -64,11 +64,16 @@ class SMBool:
             return self.bool
 
     def __copy__(self):
+        # no need to copy the logic list, it's just used for knows definitions
         return SMBool(self.bool, self.difficulty, self._knows, self._items)
 
     def json(self):
         # as we have slots instead of dict
         return {'bool': self.bool, 'difficulty': self.difficulty, 'knows': self.knows, 'items': self.items}
+
+    def toPreset(self):
+        # when completing a preset for missing knows
+        return [self.bool, self.difficulty]
 
     def wand(*args):
         # looping here is faster than using "if ... in" construct

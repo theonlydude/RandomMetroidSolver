@@ -4,8 +4,6 @@
 
 <title>Super Metroid VARIA Randomizer Tracker</title>
 
-<script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
-
 <style>
 {{include 'solver_web/t_style.html'}}
 
@@ -82,83 +80,52 @@
     left: 16%;
 }
 
-#titleAutoTracker {
+.auto-tracker {
+    right: 0.5rem;
     position: absolute;
-    z-index: 2;
-    width: 15.5%;
-    height: 3.75%;
-    top: 0%;
-    left: 84.5%;
+    top: 0;
+    z-index: 50;
+}
+body[data-item-tracker-position="top-right"] .auto-tracker {
+    left: 0.5rem;
+    right: unset;
+    top: 3rem;
+}
+body[data-item-tracker-position="top-right"] .auto-tracker__contents > * {
+    order: 2;
+}
+body[data-item-tracker-position="top-right"] #logAutoTracker {
+    order: 1;
+}
+.auto-tracker__contents {
+    display: flex;
+    gap: 0.25vw;
+}
+#titleAutoTracker {
     color: #ffffff;
-    font-size: 1.25vw;
+    font-size: 1vw;
     font-weight: bold;
+    text-align: center;
 }
 #startStopAutoTracker {
     cursor: pointer;
-    position: absolute;
-    z-index: 2;
-    width: 2.5%;
-    height: 5%;
-    top: 4%;
-    left: 79%;
+    width: 1vw;
 }
 #statusAutoTracker {
-    position: absolute;
-    z-index: 2;
-    width: 2.5%;
-    height: 5%;
-    top: 4%;
-    left: 81.75%;
+    width: 1vw;
 }
 #helpAutoTracker {
     cursor: pointer;
-    position: absolute;
-    z-index: 2;
-    width: 2.5%;
-    height: 5%;
-    top: 4%;
-    left: 84.50%;
+    width: 1vw;
 }
 #logAutoTracker {
-    position: absolute;
-    z-index: 2;
-    width: 12%;
-    height: 16%;
-    top: 4%;
-    left: 88%;
+    background-color: #a7a7a7;
+    color: black;
+    width: 12vw;
+    height: 8vh;
     resize: none;
     font-size: 0.5vw;
-}
-#debugMap {
-    position: absolute;
-    top: 20%;
-    left: 20%;
-    border: 2px solid #666666;
-    background-color: #000;
-    z-index: 5;
-    display: none;
-}
-#rtaTimerDiv {
-    position: absolute;
-    top: 2.5%;
-    border: 2px solid white;
-    background-color: #000;
-    z-index: 2;
-    display: none;
-}
-.rtaTimerClassic {
-    left: 48.5%;
-}
-.rtaTimerStream {
-    left: 22.5%;
-}
-#rtaTimer {
-    text-align: center;
-    font-family: 'Courier New (monospace)';
-    font-size: 1.5vw;
-    background-color: black;
-    color: white;
-    margin: 0em;
+    overflow-y: scroll;
 }
 </style>
 
@@ -180,29 +147,36 @@ function startTheTour(step=-1) {
   var tour = new Tour({
     storage: false,
     steps: [{
-      element: "#help",
+      element: ".fa.fa-question-circle",
       title: "VARIA Areas/Bosses/Items/Doors Tracker",
       content: "<h2 class=\"center\">Welcome to the VARIA Areas/Bosses/Items/Doors Tracker</h2><h4>Areas/Bosses Tracker</h4>\
-<p>The Areas and Bosses Tracker allows you to track the connections between the areas and bosses portals.<br/>To use it, click on a portal <img src=\"/solver/static/images/tracker/help/portal.png\" alt=\"Portal\" style=\"width: 20px\">, it'll highlight it, then click on a second portal, it'll draw a line between the two portals with a random color.<br/>\
-You can delete the latest added transition with the <img src=\"/solver/static/images/ui/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button and all of them with the <img src=\"/solver/static/images/ui/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.<br/>\
-You can also click on the portal <img src=\"/solver/static/images/tracker/help/portal.png\" alt=\"Portal\" style=\"width: 20px\"> of an existing transition and click on the <img src=\"/solver/static/images/ui/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button to delete it.<br/>\
+<p>The Areas and Bosses Tracker allows you to track the connections between the areas and bosses portals.<br/>To use it, click on a portal <i class=\"sm-portal\" />, it'll highlight it, then click on a second portal, it'll draw a line between the two portals with a random color.<br/>\
+You can delete all portals or undo the last portal placed by clicking on the <span class=\"btn -primary\"><i class=\"sm-portal\" /></span> menu. Depending on the area rando and boss rando settings, portals may be locked <i class=\"sm-portal -lock\" />. \
 Only the locations of connected areas/bosses are computed by the Items Tracker (as such if the ROM is not Areas/Bosses randomized the vanilla transitions will be automatically added).<br/>\
-There's three portal types that you can't mix: Area portals: <img src=\"/solver/static/images/tracker/help/portal.png\" alt=\"Portal\" style=\"width: 20px\">, Boss portals: <img src=\"/solver/static/images/tracker/help/portal_boss.png\" alt=\"Boss Portal\" style=\"width: 20px\">, Escape portals: <img src=\"/solver/static/images/tracker/help/portal_escape.png\" alt=\"Escape Portal\" style=\"width: 20px\"> (active only in Area Plandomizer).<br/>\
-The left Sand Hall door <img src=\"/solver/static/images/tracker/help/portal_maridia.png\" alt=\"Portal Maridia\" style=\"width: 20px\"> exits to below Botwoon Energy Tank room <img src=\"/solver/static/images/tracker/help/portal_maridia_area.png\" alt=\"Portal Maridia Area\" style=\"width: 20px\"> when area randomization is active (the blue door in West Sand Hall Tunnel has been greyed), it defaults to vanilla output otherwise <img src=\"/solver/static/images/tracker/help/portal_maridia_vanilla.png\" alt=\"Portal Maridia Vanilla\" style=\"width: 20px\">.</p>\
+There's three portal types that you can't mix: Area portals: <i class=\"sm-portal\" />, Boss portals: <i class=\"sm-portal -boss\" />, Escape portals: <i class=\"sm-portal -escape\" /> (active only in Area Plandomizer).<br/>\
+The left Sand Hall door <i class=\"sm-portal -sand\" /> exits to below Botwoon Energy Tank room <i class=\"sm-portal -sand\" data-content=\"A\"/> when area randomization is active (the blue door in West Sand Hall Tunnel has been greyed), it defaults to vanilla output otherwise <i class=\"sm-portal -sand\" data-content=\"V\" />.</p>\
 <h4>Items Tracker</h4>\
-<p>The Items Tracker allows you to use the Solver in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/ui/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on a location after you've collected the item of the location in the game, it'll update the next available locations.<br/>\
-The color of the icon on the available locations matchs the difficulty to reach the location:\
-<table><tr><td><img src=\"/solver/static/images/tracker/markers/marker_easy.gif\" alt=\"easy\" style=\"width: 32px; background-color: #000;\"> easy</td><td><img src=\"/solver/static/images/tracker/markers/marker_medium.gif\" alt=\"medium\" class=\"diffHelp\"> medium</td></td><td><img src=\"/solver/static/images/tracker/markers/marker_hard.gif\" alt=\"hard\" class=\"diffHelp\"> hard</td><td><img src=\"/solver/static/images/tracker/markers/marker_harder.gif\" alt=\"harder\" class=\"diffHelp\"> very hard</td><td><img src=\"/solver/static/images/tracker/markers/marker_hardcore.gif\" alt=\"hardcore\" class=\"diffHelp\"> hardcore</td><td><img src=\"/solver/static/images/tracker/markers/marker_mania.gif\" alt=\"mania\" class=\"diffHelp\"> mania</td><td colspan=\"3\"><img src=\"/solver/static/images/tracker/markers/marker_break.png\" alt=\"break\" class=\"diffHelp\"> sequence break</td></tr></table>\
+<p>The Items Tracker allows you to use the Solver in interactive mode.<br/>To use it, click on the <span class=\"btn -primary\"><i class=\"fa fa-play\" /></span> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on a location after you've collected the item of the location in the game, it'll update the next available locations.<br/>\
+The color of the icon on the available locations matchs the difficulty to reach the location:</p>\
+<div class=\"popover-row\"> \
+<div><i class=\"sm-item -empty smva-difficulty -difficulty-easy\" /> easy</div>\
+<div><i class=\"sm-item -empty smva-difficulty -difficulty-medium\" /> medium</div>\
+<div><i class=\"sm-item -empty smva-difficulty -difficulty-hard\" /> hard</div>\
+<div><i class=\"sm-item -empty smva-difficulty -difficulty-harder\" /> very hard</div>\
+<div><i class=\"sm-item -empty smva-difficulty -difficulty-hardcore\" /> hardcore</div>\
+<div><i class=\"sm-item -empty smva-difficulty -difficulty-mania\" /> mania</div>\
+<div><i class=\"sm-item -empty smva-difficulty -difficulty-break\" /> sequence break</div>\
+</div> \
 You can uncollect the item at a location by clicking on the location again.<br/>\
-The locations not available are displayed with the Sequence Break icon, allowing you to collect them when you sequence break.<br/>When a location has been visited its icon displays the collected item: <img src=\"/solver/static/images/tracker/markers/marker_visited_easy_Gravity.png\" alt=\"Visited\" style=\"width: 32px\"> or this if no item was found: <img src=\"/solver/static/images/tracker/markers/marker_visited_easy.png\" alt=\"Visited\" style=\"width: 32px\">, one color for each difficulty.<br/>\
-The locations availability are computed from the current access point which is displayed with this icon: <img src=\"/solver/static/images/tracker/gps/gps.png\" alt=\"last access point\" style=\"width: 32px\"><br/>\
-When overing the mouse cursor on an available location a tooltip is displayed with the location's name, the techniques and items used to access it from the current access point.<br/>\
+The locations not available are displayed with the Sequence Break icon, allowing you to collect them when you sequence break.<br/>When a location has been visited its icon displays the collected item: <i class=\"sm-item -gravity-suit smva-difficulty -difficulty-easy\" alt=\"Visited\" style=\"font-size: 32px\" /> or this if no item was found: <i class=\"sm-item -nothing smva-difficulty -difficulty-easy\" alt=\"Visited\" style=\"font-size: 32px\" />, one color for each difficulty.<br/>\
+The locations availability are computed from the current access point which is displayed with this icon: <i class=\"smv-gps -visible -inline\" alt=\"last access point\" style=\"font-size: 32px\" />\
+<p>When overing the mouse cursor on an available location a tooltip is displayed with the location's name, the techniques and items used to access it from the current access point.<br/>\
 The second green GPS icon displayed when overing on a location is the location's nearest access point, after collecting the item at the location the current access point will be updated to it.<br/>\
 After the location has been visited only the collected item is displayed.</p>\
 <h4>Doors Tracker</h4>\
 <p>Colored doors are displayed on the map. If the seed is doors colors randomized then doors are initially white, you have to click on them to reveal their color to allow the tracker to traverse them. If the seed is not doors colors randomized then doors can't be clicked.</p>\
 <h4>Touch screen tablette mode</h4>\
-<p>You can use the tracker on your touch screen tablette without a ROM file, aka seed less mode, to start using it leave the \"Randomized Super Metroid ROM\" input empty after clicking on the <img src=\"/solver/static/images/ui/play.svg\" alt=\"Start\" style=\"width: 32px\"> button.<br/>\
+<p>You can use the tracker on your touch screen tablette without a ROM file, aka seed less mode, to start using it leave the \"Randomized Super Metroid ROM\" input empty after clicking on the <span class=\"btn -primary\"><i class=\"fa fa-play\" /></span> button.<br/>\
 You can choose the start location to match the seed you're playing.<br/>\
 Clicking on a location will set the Nothing item on it. To tell the tracker which item you collected in-game click on the inventory screen: +/- buttons and directly on items<br/><img src=\"/solver/static/images/tracker/inventory/background_seedless.png\"><br/>\
 By default all the vanilla transitions are loaded, you can delete them with the <img src=\"/solver/static/images/ui/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.</p>\
@@ -211,7 +185,12 @@ You can load a race protected seed in the tracker, it'll use it to know if the s
 <h4>Auto Save</h4>\
 <p>The tracker feature an auto save functionnality, so you can do your seed in multiple seatings.<br/>The different status icons of the auto save:<table><tr><td><img src=\"/solver/static/images/ui/refresh.svg\" style=\"width: 32px\"> Loading in progress</td><td><img src=\"/solver/static/images/ui/checkmark.svg\" style=\"width: 32px\"> Save ok</td></tr><tr><td><img src=\"/solver/static/images/ui/cloud_upload.png\" style=\"width: 32px\"> Upload in progress</td><td><img src=\"/solver/static/images/ui/cloud_download.svg\" style=\"width: 32px\"> Download in progress</td></tr><tr><td colspan=\"2\"><img src=\"/solver/static/images/ui/warning.svg\" style=\"width: 32px\"> Something wrong happened (try reloading the page)</td></tr></table></p><p>You can display this help again by clicking on the <img src=\"/solver/static/images/ui/help.svg\" alt=\"help\" style=\"width: 32px\"> button.</p>\
 <h4>Thanks to</h4>\
-<p><ul><li>Animated location icons by Djlo</li><li>Location icons from Alli_Cat's <a href='https://github.com/allibear17/Super-Metroid-Location-Tracker' target=\"_blank\">Location Tracker</a></li><li>G4 sprite from Crossproduct's <a href=\"https://www.twitch.tv/crossproduct\" target=\"_blank\">smrandohelper</a></li><li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set' target=\"_blank\">Dryicons</a></li></ul></p>"
+<p><ul>\
+<li>Tracker module by Chrisc</li>\
+<li>Animated location icons by Djlo</li>\
+<li>Map background by <a href='http://www.nordub.ca/Maps/SuperMetroid.png' target=\"_blank\">Nordub</a></li>\
+<li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set' target=\"_blank\">Dryicons</a></li>\
+</ul></p>"
     }, {
       element: "#helpAutoTracker",
       title: "VARIA Areas/Bosses/Items/Doors Auto-Tracker",
@@ -246,6 +225,7 @@ Install QUsb2snes on your computer and configure your sd2snes/snes mini/emulator
   if (typeof step === 'string') {
     step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
   }
+  window.T = tour
   // Start the tour
   if(step != -1) {
     tour.goTo(step);
@@ -276,53 +256,6 @@ function switchStreamingInventory() {
     }
 }
 
-// to switch between grid/black stream map
-var area_stream="standard";
-function switchStreamingMap() {
-    if(loaded == false || init == false) {
-        return;
-    }
-
-    // remove border of already selected AP
-    $(".addBorder").removeClass("addBorder");
-
-    var classicMap = document.getElementById("classic_map");
-    var streamMap = document.getElementById("stream_map");
-    var RTA = document.getElementById("rtaTimerDiv");
-    var smap = document.getElementById("smap");
-    if(area_stream == "standard") {
-        // switch to stream grid
-        area_stream = "grid";
-        linePrefix = "s";
-        classicMap.style.display = "none";
-        smap.src = "/solver/static/images/tracker/area_map_stream.png";
-        streamMap.style.display = "block";
-        $("#rtaTimerDiv").removeClass("rtaTimerClassic");
-        $("#rtaTimerDiv").addClass("rtaTimerStream");
-    } else if(area_stream == "grid") {
-        // switch to stream black
-        area_stream = "black";
-        linePrefix = "s";
-        classicMap.style.display = "none";
-        smap.src = "/solver/static/images/tracker/area_map_stream_black.png";
-        streamMap.style.display = "block";
-        $("#rtaTimerDiv").removeClass("rtaTimerClassic");
-        $("#rtaTimerDiv").addClass("rtaTimerStream");
-    } else {
-        // switch to standard
-        area_stream = "standard";
-        linePrefix = "";
-        classicMap.style.display = "block";
-        streamMap.style.display = "none";
-        $("#rtaTimerDiv").removeClass("rtaTimerStream");
-        $("#rtaTimerDiv").addClass("rtaTimerClassic");
-    }
-
-    // reset lines
-    switchLines();
-    firstClick = "";
-}
-
 function switchLines() {
     // loop on leader lines and remove/create them
     currentLines = [];
@@ -339,214 +272,6 @@ function switchLines() {
     }
 }
 
-// auto tracker
-var socket;
-// device type
-var device;
-// try to reconnect for snes classic
-var reconnectInProgress = false;
-var retryCount = 0;
-var retryMax = 30;
-// timeout to restart the auto tracker
-var retryTimeout;
-// timeout to peek data
-var timeout;
-// timeout duration in ms
-var waitingTime = 1000;
-// timeout to increment RTA
-var incrRTA;
-// time when the timeout has been set
-var incrRTAstart = 0;
-var rawTimeFrames = 0;
-var RTAwaitingTime = 50;
-
-// first you open the socket,
-// then you list the available devices,
-// then you attach to the device and ask info to confirm attachment,
-// then you can ask for data (main loop)
-var stateEnum = {
-    "opening": 1,
-    "listing": 2,
-    "infoing": 3,
-    "looping": 4
-}
-var curState = 0;
-
-// handle fragmented data reception
-var askedDataSize = 0;
-var receivedDataSize = 0;
-var receivedData = [];
-var transfertStart = 0;
-
-// current and previous step data, uint8array
-var stateArraySize = 0;
-var currentState = undefined;
-// data offsets in the state
-var stateDataOffsets = {};
-// to know if something changed
-var previousStateChksum = 0;
-// bit masks to apply on state to extract data we use
-var stateBitMasks = undefined;
-
-// array for each data we get
-var itemsData = undefined;
-var bossData = undefined;
-var mapData = undefined;
-var samusData = undefined;
-
-// different data that we ask
-var dataEnum = {
-    "state": 1,
-    "map": 2,
-    "curMap": 3,
-    "samus": 4,
-    "items": 5,
-    "boss": 6,
-    "events": 7
-}
-// 1. state:
-// $0998: Game state
-// $05D1: Debug. Debug mode. Set to [$80:8004] during boot / soft reset
-// in-game timer:
-// $05B8: NMI counter (RTA timer)
-// $05BA: Lag counter (RTA timer)
-// SRAM timer after game's end:
-// define current_save_slot    $7e0952
-// define stats_sram_slot0     $701400
-// define stats_sram_slot1     $701700
-// define stats_sram_slot2     $701a00
-
-// 2. map:
-// used for area/boss transitions - doors - nothing
-// CD52 -> D351: map tiles for: Crateria + Brinstar + Norfair + Wrecked Ship + Maridia + Tourian
-
-// 3. curmap:
-// 07F7..08F6: map tiles for current area
-
-// 4. samus:
-// $0AF6: Samus X position (inside current screen)
-// $0AFA: Samus Y position (inside current screen)
-// 
-// $079B: Room pointer
-// $079F: Area index
-// $07A1: Room X co-ordinate (on map)
-// $07A3: Room Y co-ordinate (on map)
-
-// 5. items
-// $7E:D870..AF: Item bit array. $90h..AF are unused. See "Item PLMs.asm"
-// loc id is used to index in it
-
-// 6. boss
-// $7E:D828..2F: Boss bits. Indexed by area
-//     1: Area boss (Kraid, Phantoon, Draygon, both Ridleys)
-//     2: Area mini-boss (Spore Spawn, Botwoon, Crocomire, Mother Brain)
-//     4: Area torizo (Bomb Torizo, Golden Torizo)
-// Area index
-//     0: Crateria
-//     1: Brinstar
-//     2: Norfair
-//     3: Wrecked Ship
-//     4: Maridia
-//     5: Tourian
-//     6: Ceres
-//     7: Debug
-
-// 7. events
-// $7E:D820..39
-var dataToAsk = {
-    1: [{"address": "F50998", "size": 0x2},
-        {"address": "F505D1", "size": 0x2},
-        {"address": "F505B8", "size": 0x4},
-        {"address": "F50952", "size": 0x2},
-        {"address": "E01400", "size": 0x4},
-        {"address": "E01700", "size": 0x4},
-        {"address": "E01A00", "size": 0x4}],
-    2: [{"address": "F5CD52", "size": 0x600}],
-    3: [{"address": "F507F7", "size": 0x100}],
-    4: [{"address": "F50AF6", "size": 0x2},
-        {"address": "F50AFA", "size": 0x2},
-        {"address": "F5079B", "size": 0x0a}],
-    5: [{"address": "F5D870", "size": 0x20}],
-    6: [{"address": "F5D828", "size": 0x8}],
-    7: [{"address": "F5D820", "size": 0x20}]
-}
-// use an array listing the data to retrieve, the chain is init at auto tracker start
-var dataToAskChain = [];
-// the current position in the chain
-var dataToAskStep = 0;
-
-// state
-var stateDataEnum = {
-    "state": 0,
-    "debug": 2,
-    "rta1": 4,
-    "rta2": 6,
-    "saveSlot": 8,
-    "sramStats": 0xa
-}
-
-// maps
-var mapOffsetEnum = {
-    "curMap": 0,
-    "Crateria": 0,
-    "Brinstar": 0x100,
-    "Norfair": 0x200,
-    "WreckedShip": 0x300,
-    "Maridia": 0x400,
-    "Tourian": 0x500
-}
-
-// samus
-var samusEnum = {
-    "x": 0,
-    "y": 2,
-    "roomPointer": 4,
-    "roomIndex": 6,
-    "areaIndex": 8,
-    "roomX": 10,
-    "roomY": 12
-}
-
-// areas
-var areaEnum = {
-    0: "Crateria",
-    1: "Brinstar",
-    2: "Norfair",
-    3: "WreckedShip",
-    4: "Maridia",
-    5: "Tourian",
-    6: "Ceres",
-    7: "Debug"
-}
-
-// bit masks for all datas
-var areaAccessPoints = {{response.write(areaAccessPoints, escape=False)}};
-var bossAccessPoints = {{response.write(bossAccessPoints, escape=False)}};
-var escapeAccessPoints = {{response.write(escapeAccessPoints, escape=False)}};
-var bossBitMasks = {{response.write(bossBitMasks, escape=False)}};
-var nothingScreens = {{response.write(nothingScreens, escape=False)}};
-var doorsScreen = {{response.write(doorsScreen, escape=False)}};
-var eventsBitMasks = {};
-
-// in js dict keys are strings
-var itemsBitMasks = {
-    0x00: 0xFF,
-    0x01: 0xFF,
-    0x02: 0xFF,
-    0x03: 0xFF,
-    0x04: 0xFF,
-    0x05: 0xFF,
-    0x06: 0xFF,
-    0x07: 0xFF,
-    0x08: 0xFF,
-    0x09: 0xFF,
-    0x0A: 0xFF,
-    0x10: 0xFF,
-    0x11: 0xFF,
-    0x12: 0xFF,
-    0x13: 0xFF
-}
-
 // aps grapharea
 var apsGraphArea = { {{
     response.write(", ".join(["'{}': '{}'".format(str(ap), str(grapharea)) for ap, grapharea in apsGraphArea.items()]), escape=False)
@@ -556,1197 +281,537 @@ var apsGraphArea = { {{
 var multipleAPs = 'MULTI';
 
 // rooms positions on the map
-var rooms = {
-    '91f8': {'name': 'Landing Site', 'top': 3.06, 'left': 35.16},
-    '92b3': {'name': 'Gauntlet Entrance', 'top': 6.97, 'left': 30.36},
-    '92fd': {'name': 'Parlor and Alcatraz', 'top': 11.09, 'left': 30.31},
-    '93aa': {'name': 'Crateria Power Bomb Room', 'top': 4.96, 'left': 43.66},
-    '93d5': {'name': '[Parlor Save Room]', 'top': 14.99, 'left': 30.31},
-    '93fe': {'name': 'West Ocean', 'top': 3.48, 'left': 61.30, 'graphArea': 'WreckedShip', 'nearestAP': 'westOceanLeft'},
-    '9461': {'name': 'Bowling Alley Path', 'top': 7.39, 'left': 64.10},
-    '948c': {'name': 'Crateria Keyhunter Room', 'top': 11.09, 'left': 44.67, 'graphArea': 'Crateria', 'nearestAP': 'keyhunterRoomBottom'},
-    '94cc': {'name': '[Elevator to Maridia]', 'top': 25.66, 'left': 91.24},
-    // top: 11.51%, but room starts 4 screens before on Y: -> 3.35
-    '94fd': {'name': 'East Ocean', 'top': 3.35, 'left': 78.41},
-    '9552': {'name': 'Forgotten Highway Kago Room', 'top': 11.51, 'left': 85.01},
-    '957d': {'name': 'Crab Maze', 'top': 19.64, 'left': 82.26, 'graphArea': 'WreckedShip', 'nearestAP': 'crabMazeLeft'},
-    '95a8': {'name': '[Crab Maze to Elevator]', 'top': 23.65, 'left': 91.18, 'graphArea': 'EastMaridia', 'nearestAP': 'leCoudeRight'},
-    '95d4': {'name': 'Crateria Tube', 'top': 11.09, 'left': 43.61},
-    '95ff': {'name': 'The Moat', 'top': 11.09, 'left': 47.52, 'graphArea': 'Crateria', 'nearestAP': 'moatRight'},
-    '962a': {'name': '[Elevator to Red Brinstar]', 'top': 29.67, 'left': 56.07, 'graphArea': 'RedBrinstar', 'nearestAP': 'redBrinstarElevator'},
-    '965b': {'name': 'Gauntlet Energy Tank Room', 'top': 7.07, 'left': 24.66},
-    '968f': {'name': '[West Ocean Geemer Corridor]', 'top': 7.39, 'left': 66},
-    '96ba': {'name': 'Climb', 'top': 21.12, 'left': 30.31},
-    '975c': {'name': 'Pit Room [Old Mother Brain Room]', 'top': 37.38, 'left': 32.26},
-    '97b5': {'name': '[Elevator to Blue Brinstar]', 'top': 37.38, 'left': 35.06},
-    '9804': {'name': 'Bomb Torizo Room', 'top': 14.99, 'left': 37.01},
-    '9879': {'name': 'Flyway', 'top': 14.99, 'left': 34.11},
-    '98e2': {'name': 'Pre-Map Flyway', 'top': 17, 'left': 32.26},
-    '990d': {'name': 'Terminator Room', 'top': 11.09, 'left': 24.71},
-    '9938': {'name': '[Elevator to Green Brinstar]', 'top': 39.92, 'left': 4.22, 'graphArea': 'GreenPinkBrinstar', 'nearestAP': 'greenBrinstarElevator'},
-    '9969': {'name': 'Lower Mushrooms', 'top': 19.11, 'left': 20.01, 'graphArea': 'Crateria', 'nearestAP': 'lowerMushroomsLeft'},
-    '9994': {'name': 'Crateria Map Room', 'top': 17, 'left': 35.06},
-    '99bd': {'name': 'Green Pirates Shaft', 'top': 7.07, 'left': 23.65, 'graphArea': 'Crateria', 'nearestAP': 'greenPiratesShaftBottomRight'},
-    '99f9': {'name': 'Crateria Super Room', 'top': 21.12, 'left': 33.21},
-    '9a44': {'name': 'Final Missile Bombway', 'top': 17, 'left': 29.41},
-    '9a90': {'name': 'The Final Missile', 'top': 17, 'left': 28.41},
-    '9ad9': {'name': 'Green Brinstar Main Shaft [etecoon room]', 'top': 49.22, 'left': 4.28},
-    '9b5b': {'name': 'Spore Spawn Super Room', 'top': 51.32, 'left': 17.63},
-    '9b9d': {'name': 'Brinstar Pre-Map Room', 'top': 57.44, 'left': 1.48},
-    '9bc8': {'name': 'Early Supers Room', 'top': 55.44, 'left': 5.23},
-    '9c07': {'name': 'Brinstar Reserve Tank Room', 'top': 57.34, 'left': 8.03},
-    '9c35': {'name': 'Brinstar Map Room', 'top': 57.44, 'left': 0.48},
-    '9c5e': {'name': 'Green Brinstar Fireflea Room', 'top': 61.56, 'left': 1.43},
-    '9c89': {'name': '[Green Brinstar Missile Station]', 'top': 63.67, 'left': 0.48},
-    '9cb3': {'name': 'Dachora Room', 'top': 61.56, 'left': 5.23},
-    '9d19': {'name': 'Big Pink', 'top': 57.44, 'left': 9.98},
-    '9d9c': {'name': 'Spore Spawn Keyhunter Room', 'top': 57.44, 'left': 13.83},
-    '9dc7': {'name': 'Spore Spawn Room', 'top': 51.32, 'left': 16.63},
-    '9e11': {'name': 'Pink Brinstar Power Bomb Room', 'top': 63.57, 'left': 10.03},
-    '9e52': {'name': 'Green Hill Zone', 'top': 69.69, 'left': 13.89, 'graphArea': 'GreenPinkBrinstar', 'nearestAP': 'greenHillZoneTopRight'},
-    '9e9f': {'name': 'Morph Ball Room', 'top': 61.79, 'left': 30.33, 'graphArea': 'Crateria', 'nearestAP': 'morphBallRoomLeft'},
-    '9f11': {'name': 'Construction Zone', 'top': 65.89, 'left': 37.91},
-    '9f64': {'name': 'Blue Brinstar Energy Tank Room', 'top': 61.79, 'left': 38.91},
-    '9fba': {'name': 'Noob Bridge', 'top': 75.71, 'left': 21.49, 'graphArea': 'GreenPinkBrinstar', 'nearestAP': 'noobBridgeRight'},
-    '9fe5': {'name': 'Green Brinstar Beetom Room', 'top': 69.8, 'left': 3.33},
-    'a011': {'name': 'Etecoon Energy Tank Room', 'top': 69.8, 'left': 1.53},
-    'a051': {'name': 'Etecoon Super Room', 'top': 69.66, 'left': 0.26},
-    'a07b': {'name': '[Dachora Room Energy Charge Station]', 'top': 73.81, 'left': 4.28},
-    'a0a4': {'name': 'Spore Spawn Farming Room', 'top': 67.69, 'left': 14.84},
-    'a0d2': {'name': 'Waterway Energy Tank Room', 'top': 75.82, 'left': 3.33},
-    'a107': {'name': 'First Missile Room', 'top': 67.9, 'left': 36.96},
-    'a130': {'name': 'Pink Brinstar Hopper Room', 'top': 63.67, 'left': 13.83},
-    'a15b': {'name': 'Hopper Energy Tank Room', 'top': 65.68, 'left': 15.73},
-    'a184': {'name': '[Spore Spawn Save Room]', 'top': 57.34, 'left': 9.98},
-    'a1ad': {'name': 'Blue Brinstar Boulder Room', 'top': 61.77, 'left': 38.91},
-    'a1d8': {'name': 'Blue Brinstar Double Missile Room', 'top': 61.77, 'left': 37.91},
-    'a201': {'name': '[Green Brinstar Main Shaft Save Room]', 'top': 59.56, 'left': 3.33},
-    'a22a': {'name': '[Etecoon Save Room]', 'top': 71.7, 'left': 0.48},
-    'a253': {'name': 'Red Tower', 'top': 42.45, 'left': 52.27, 'graphArea': 'RedBrinstar', 'nearestAP': 'redTowerTopLeft'},
-    'a293': {'name': 'Red Brinstar Fireflea Room', 'top': 54.59, 'left': 44.72},
-    'a2ce': {'name': 'X-Ray Scope Room', 'top': 54.59, 'left': 42.71},
-    'a2f7': {'name': 'Hellway', 'top': 42.45, 'left': 53.22},
-    'a322': {'name': 'Caterpillar Room', 'top': 32.43, 'left': 56.07, 'graphArea': 'RedBrinstar', 'nearestAP': 'caterpillarRoomTopRight'},
-    'a37c': {'name': 'Beta Power Bomb Room', 'top': 38.44, 'left': 54.17},
-    'a3ae': {'name': 'Alpha Power Bomb Room', 'top': 46.57, 'left': 53.22},
-    'a3dd': {'name': 'Bat Room', 'top': 60.72, 'left': 53.27},
-    'a408': {'name': 'Below Spazer', 'top': 58.71, 'left': 55.12},
-    'a447': {'name': 'Spazer Room', 'top': 58.71, 'left': 57.02},
-    'a471': {'name': 'Warehouse Zeela Room', 'top': 66.43, 'left': 51.74, 'graphArea': 'Kraid', 'nearestAP': 'warehouseZeelaRoomLeft'},
-    'a4b1': {'name': 'Warehouse Energy Tank Room', 'top': 68.39, 'left': 50.61},
-    'a4da': {'name': 'Warehouse Keyhunter Room', 'top': 66.42, 'left': 52.69},
-    'a521': {'name': 'Baby Kraid Room', 'top': 68.43, 'left': 54.65},
-    'a56b': {'name': 'Kraid Eye Door Room', 'top': 66.42, 'left': 60.35, 'graphArea': 'Kraid', 'nearestAP': 'kraidRoomOut'},
-    'a59f': {'name': 'Kraid Room', 'top': 67.9, 'left': 65.63},
-    'a5ed': {'name': 'Statues Hallway', 'top': 23.76, 'left': 23.86, 'graphArea': 'Tourian', 'nearestAP': 'goldenFour'},
-    'a618': {'name': '[Red Tower Energy Charge Station]', 'top': 60.72, 'left': 51.32},
-    'a641': {'name': '[Kraid Recharge Station]', 'top': 66.42, 'left': 61.19},
-    'a66a': {'name': 'Statues Room', 'top': 23.76, 'left': 28.51},
-    'a6a1': {'name': 'Warehouse Entrance', 'top': 71.28, 'left': 43.24, 'graphArea': 'Norfair', 'nearestAP': multipleAPs,
-             'screens': [['warehouseEntranceLeft', 'warehouseEntranceRight', 'warehouseEntranceRight'],
-                         ['warehouseEntranceLeft', 'warehouseEntranceRight', 'warehouseEntranceRight']]},
-    'a6e2': {'name': 'Varia Suit Room', 'top': 69.8, 'left': 67.48},
-    'a70b': {'name': '[Kraid Save Room]', 'top': 66.42, 'left': 56.49},
-    'a734': {'name': '[Caterpillar Save Room]', 'top': 40.44, 'left': 57.07},
-    'a75d': {'name': 'Ice Beam Acid Room', 'top': 81.52, 'left': 37.59},
-    'a788': {'name': 'Cathedral', 'top': 81.52, 'left': 47.1},
-    'a7b3': {'name': 'Cathedral Entrance', 'top': 81.52, 'left': 44.3},
-    'a7de': {'name': 'Business Center', 'top': 75.18, 'left': 43.24},
-    'a815': {'name': 'Ice Beam Gate Room', 'top': 77.4, 'left': 36.59},
-    'a865': {'name': 'Ice Beam Tutorial Room', 'top': 77.4, 'left': 37.59},
-    'a890': {'name': 'Ice Beam Room', 'top': 79.41, 'left': 38.44},
-    'a8b9': {'name': 'Ice Beam Snake Room', 'top': 77.4, 'left': 36.59},
-    'a8f8': {'name': 'Crumble Shaft', 'top': 83.42, 'left': 35.64},
-    'a923': {'name': 'Crocomire Speedway', 'top': 89.55, 'left': 36.69, 'graphArea': 'Norfair', 'nearestAP': 'crocomireSpeedwayBottom'},
-    'a98d': {'name': 'Crocomire Room', 'top': 82.68, 'left': 19.22, 'graphArea': 'Crocomire', 'nearestAP': 'crocomireRoomTop'},
-    'a9e5': {'name': 'Hi Jump Boots Room', 'top': 87.54, 'left': 40.39},
-    'aa0e': {'name': 'Crocomire Escape', 'top': 87.65, 'left': 44.3},
-    'aa41': {'name': 'Hi Jump Energy Tank Room', 'top': 85.53, 'left': 41.34},
-    'aa82': {'name': 'Post Crocomire Farming Room', 'top': 82.68, 'left': 17.32},
-    'aab5': {'name': '[Post Crocomire Save Room]', 'top': 84.69, 'left': 19.17},
-    'aade': {'name': 'Post Crocomire Power Bomb Room', 'top': 82.68, 'left': 16.31},
-    'ab07': {'name': 'Post Crocomire Shaft', 'top': 86.8, 'left': 17.27},
-    'ab3b': {'name': 'Post Crocomire Missile Room', 'top': 92.82, 'left': 18.32},
-    'ab64': {'name': 'Grapple Tutorial Room 3', 'top': 86.8, 'left': 14.47},
-    'ab8f': {'name': 'Post Crocomire Jump Room', 'top': 92.82, 'left': 11.62},
-    'abd2': {'name': 'Grapple Tutorial Room 2', 'top': 86.80, 'left': 13.46},
-    'ac00': {'name': 'Grapple Tutorial Room 1', 'top': 90.81, 'left': 11.62},
-    'ac2b': {'name': 'Grapple Beam Room', 'top': 90.92, 'left': 10.61},
-    'ac5a': {'name': 'Norfair Reserve Tank Room', 'top': 79.41, 'left': 50.9},
-    'ac83': {'name': 'Green Bubbles Missile Room', 'top': 79.51, 'left': 52.8},
-    'acb3': {'name': 'Bubble Mountain', 'top': 79.51, 'left': 54.75},
-    'acf0': {'name': 'Speed Booster Hall', 'top': 77.3, 'left': 57.6},
-    'ad1b': {'name': 'Speed Booster Room', 'top': 79.3, 'left': 69.01},
-    'ad5e': {'name': 'Single Chamber', 'top': 81.52, 'left': 56.55, 'graphArea': 'Norfair', 'nearestAP': 'singleChamberTopRight'},
-    'adad': {'name': 'Double Chamber', 'top': 83.63, 'left': 57.6},
-    'adde': {'name': 'Wave Beam Room', 'top': 83.53, 'left': 61.4},
-    'ae07': {'name': 'Spiky Platforms Tunnel', 'top': 87.54, 'left': 57.66},
-    'ae32': {'name': 'Volcano Room', 'top': 87.54, 'left': 59.54},
-    'ae74': {'name': 'Kronic Boost Room', 'top': 91.66, 'left': 57.5, 'graphArea': 'Norfair', 'nearestAP': 'kronicBoostRoomBottomLeft'},
-    'aeb4': {'name': 'Magdollite Tunnel', 'top': 91.66, 'left': 55.62},
-    'aedf': {'name': 'Purple Shaft', 'top': 87.54, 'left': 54.7},
-    'af14': {'name': 'Lava Dive Room', 'top': 78.46, 'left': 78.3, 'graphArea': 'LowerNorfair', 'nearestAP': 'lavaDiveRight'},
-    'af3f': {'name': '[Elevator to Lower Norfair]', 'top': 78.46, 'left': 77.35},
-    'af72': {'name': 'Upper Norfair Farming Room', 'top': 85.43, 'left': 52.85},
-    'afa3': {'name': 'Rising Tide', 'top': 83.42, 'left': 49.95},
-    'afce': {'name': 'Acid Snakes Tunnel', 'top': 93.66, 'left': 49.05},
-    'affb': {'name': 'Spiky Acid Snakes Tunnel', 'top': 93.56, 'left': 53.8},
-    'b026': {'name': '[Crocomire Recharge Room]', 'top': 93.56, 'left': 52.8},
-    'b051': {'name': 'Purple Farming Room', 'top': 89.55, 'left': 55.6},
-    'b07a': {'name': 'Bat Cave', 'top': 77.51, 'left': 56.6},
-    'b0b4': {'name': 'Norfair Map Room', 'top': 83.63, 'left': 42.4},
-    'b0dd': {'name': '[Bubble Mountain Save Room]', 'top': 81.41, 'left': 53.7},
-    'b106': {'name': 'Frog Speedway', 'top': 85.53, 'left': 45.25},
-    'b139': {'name': 'Red Pirate Shaft', 'top': 87.65, 'left': 51.8},
-    'b167': {'name': '[Business Center Save Room]', 'top': 85.53, 'left': 44.19},
-    'b192': {'name': '[Crocomire Save Room]', 'top': 91.65, 'left': 48.92},
-    'b1bb': {'name': '[Elevator Save Room]', 'top': 78.46, 'left': 76.29},
-    'b1e5': {'name': 'Acid Statue Room', 'top': 84.58, 'left': 71.59},
-    'b236': {'name': 'Main Hall', 'top': 80.4, 'left': 73.55},
-    'b283': {'name': 'Golden Torizo Room', 'top': 88.6, 'left': 74.45},
-    'b2da': {'name': 'Fast Ripper Room', 'top': 86.48, 'left': 77.3},
-    'b305': {'name': '[Screw Attack Energy Charge Room]', 'top': 88.49, 'left': 77.3},
-    'b32e': {'name': 'Ridley Room', 'top': 94.19, 'left': 76.5},
-    'b37a': {'name': 'Lower Norfair Farming Room', 'top': 90.6, 'left': 80.23, 'graphArea': 'LowerNorfair', 'nearestAP': 'ridleyRoomOut'},
-    'b3a5': {'name': 'Fast Pillars Setup Room', 'top': 82.47, 'left': 81.05},
-    'b40a': {'name': 'Mickey Mouse Room', 'top': 76.45, 'left': 82.07},
-    'b457': {'name': 'Pillar Room', 'top': 86.59, 'left': 82.1},
-    'b482': {'name': 'Plowerhouse Room', 'top': 90.6, 'left': 83.05},
-    'b4ad': {'name': 'The Worst Room In The Game', 'top': 76.45, 'left': 85.85},
-    'b4e5': {'name': 'Amphitheatre', 'top': 76.56, 'left': 86.8},
-    'b510': {'name': 'Lower Norfair Spring Ball Maze Room', 'top': 68.32, 'left': 88.75},
-    'b55a': {'name': 'Lower Norfair Escape Power Bomb Room', 'top': 70.33, 'left': 92.45},
-    'b585': {'name': 'Red Keyhunter Shaft', 'top': 76.45, 'left': 90.6},
-    'b5d5': {'name': 'Wasteland', 'top': 86.48, 'left': 87.75},
-    'b62b': {'name': 'Metal Pirates Room', 'top': 90.6, 'left': 85.9},
-    'b656': {'name': 'Three Muskateers Room', 'top': 64.31, 'left': 84.95, 'graphArea': 'LowerNorfair', 'nearestAP': 'threeMuskateersRoomLeft'},
-    'b698': {'name': 'Ridley Tank Room', 'top': 96.3, 'left': 75.57},
-    'b6c1': {'name': 'Screw Attack Room', 'top': 86.59, 'left': 76.35},
-    'b6ee': {'name': 'Lower Norfair Fireflea Room', 'top': 70.33, 'left': 90.6},
-    'b741': {'name': '[Red Keyhunter Shaft Save Room]', 'top': 82.58, 'left': 91.61},
-    'c98e': {'name': 'Bowling Alley', 'top': 5.28, 'left': 67},
-    'ca08': {'name': 'Wrecked Ship Entrance', 'top': 11.4, 'left': 68.9},
-    'ca52': {'name': 'Attic', 'top': 3.38, 'left': 68.9},
-    'caae': {'name': 'Wrecked Ship East Missile Room', 'top': 3.38, 'left': 75.55},
-    'caf6': {'name': 'Wrecked Ship Main Shaft', 'top': 5.39, 'left': 68.9},
-    'cb8b': {'name': 'Spiky Death Room', 'top': 13.52, 'left': 75.61},
-    'cbd5': {'name': 'Electric Death Room', 'top': 9.5, 'left': 77.4},
-    'cc27': {'name': 'Wrecked Ship Energy Tank Room', 'top': 9.5, 'left': 74.66},
-    'cc6f': {'name': 'Basement', 'top': 21.54, 'left': 70.75, 'graphArea': 'WreckedShip', 'nearestAP': 'phantoonRoomOut'},
-    'cccb': {'name': 'Wrecked Ship Map Room', 'top': 21.54, 'left': 69.8},
-    'cd13': {'name': 'Phantoon Room', 'top': 21.65, 'left': 78.62},
-    'cd5c': {'name': 'Sponge Bath', 'top': 13.52, 'left': 73.65},
-    'cda8': {'name': 'Wrecked Ship West Super Room', 'top': 17.55, 'left': 71.71},
-    'cdf1': {'name': 'Wrecked Ship East Super Room', 'top': 17.53, 'left': 74.6},
-    'ce40': {'name': 'Gravity Suit Room', 'top': 9.4, 'left': 66.95},
-    'ce8a': {'name': '[Wrecked Ship Save Room]', 'top': 11.4, 'left': 73.6},
-    'ced2': {'name': '[Glass Tunnel Save Room]', 'top': 62.72, 'left': 58.98},
-    'cefb': {'name': 'Glass Tunnel', 'top': 58.61, 'left': 57.97, 'graphArea': 'RedBrinstar', 'nearestAP': 'glassTunnelTop'},
-    'cf54': {'name': 'West Tunnel', 'top': 60.61, 'left': 57.07},
-    'cf80': {'name': 'East Tunnel', 'top': 58.61, 'left': 58.98, 'graphArea': 'RedBrinstar', 'nearestAP': multipleAPs,
-             'screens': [['eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight'],
-                         ['eastTunnelRight']]},
-    'cfc9': {'name': 'Main Street', 'top': 44.98, 'left': 65.95, 'graphArea': 'WestMaridia', 'nearestAP': 'mainStreetBottom'},
-    'd017': {'name': 'Fish Tank', 'top': 53.01, 'left': 68.8},
-    'd055': {'name': 'Mama Turtle Room', 'top': 50.74, 'left': 72.66},
-    'd08a': {'name': 'Crab Tunnel', 'top': 59.13, 'left': 67.85},
-    'd0b9': {'name': 'Mt. Everest', 'top': 44.98, 'left': 67.85},
-    'd104': {'name': 'Red Fish Room', 'top': 40.87, 'left': 67.69, 'graphArea': 'WestMaridia', 'nearestAP': 'redFishRoomLeft'},
-    'd13b': {'name': 'Watering Hole', 'top': 34.74, 'left': 67.79},
-    'd16d': {'name': 'Northwest Maridia Bug Room', 'top': 34.74, 'left': 69.69},
-    'd1a3': {'name': 'Crab Shaft', 'top': 40.87, 'left': 73.5, 'graphArea': 'WestMaridia', 'nearestAP': 'crabShaftRight'},
-    'd1dd': {'name': 'Pseudo Plasma Spark Room', 'top': 34.85, 'left': 73.55},
-    'd21c': {'name': 'Crab Hole', 'top': 59.13, 'left': 71.65, 'graphArea': 'WestMaridia', 'nearestAP': 'crabHoleBottomLeft'},
-    'd252': {'name': '[Tunnel to West Sand Hall]', 'top': 59.24, 'left': 72.65},
-    'd27e': {'name': 'Plasma Tutorial Room', 'top': 26.72, 'left': 83.63},
-    'd2aa': {'name': 'Plasma Room', 'top': 26.72, 'left': 84.58},
-    'd2d9': {'name': 'Thread The Needle Room', 'top': 36.85, 'left': 84.58},
-    'd30b': {'name': 'Maridia Elevator Room', 'top': 26.73, 'left': 91.18},
-    'd340': {'name': 'Plasma Spark Room', 'top': 30.73, 'left': 79.88},
-    'd387': {'name': 'Plasma Climb', 'top': 26.72, 'left': 82.58},
-    'd3b6': {'name': 'Maridia Map Room', 'top': 60.93, 'left': 72.65},
-    'd3df': {'name': '[Maridia Elevator Save Room]', 'top': 34.74, 'left': 92.08},
-    'd408': {'name': '[Vertical Tube]', 'top': 36.75, 'left': 79.78},
-    'd433': {'name': 'Bug Sand Hole', 'top': 36.85, 'left': 83.63},
-    'd461': {'name': 'West Sand Hall', 'top': 59.13, 'left': 75.96},
-    'd48e': {'name': 'Oasis', 'top': 57.13, 'left': 79.78},
-    'd4c2': {'name': 'East Sand Hall', 'top': 59.13, 'left': 80.78},
-    'd4ef': {'name': 'West Sand Hole', 'top': 54.97, 'left': 77.93},
-    'd51e': {'name': 'East Sand Hole', 'top': 55.23, 'left': 80.78},
-    'd54d': {'name': '[West Sand Fall]', 'top': 51, 'left': 78.78},
-    'd57a': {'name': '[East Sand Fall]', 'top': 51, 'left': 80.73},
-    'd5a7': {'name': 'Aqueduct', 'top': 45.09, 'left': 77.93, 'graphArea': 'EastMaridia', 'nearestAP': 'aqueductTopLeft'},
-    'd5ec': {'name': 'Butterfly Room', 'top': 40.87, 'left': 83.63},
-    'd617': {'name': 'Botwoon Hallway', 'top': 42.98, 'left': 77.93},
-    'd646': {'name': 'Pants Room', 'top': 53.22, 'left': 83.58},
-    'd69a': {'name': '[Pants Room West half]', 'top': 55.23, 'left': 84.48},
-    'd6d0': {'name': 'Spring Ball Room', 'top': 57.13, 'left': 89.28},
-    'd6fd': {'name': 'Below Botwoon Energy Tank', 'top': 46.99, 'left': 83.63},
-    'd72a': {'name': 'Colosseum', 'top': 38.97, 'left': 91.18},
-    'd765': {'name': '[Aqueduct Save Room]', 'top': 49, 'left': 76.89},
-    'd78f': {'name': 'The Precious Room', 'top': 40.97, 'left': 97.89, 'graphArea': 'EastMaridia', 'nearestAP': 'draygonRoomOut'},
-    'd7e4': {'name': 'Botwoon Energy Tank Room', 'top': 42.98, 'left': 83.63},
-    'd81a': {'name': '[Colosseum Save Room]', 'top': 38.86, 'left': 97.89},
-    'd845': {'name': '[Halfie Climb Missile Station]', 'top': 42.92, 'left': 94.98},
-    'd86e': {'name': '[Bug Sand Fall]', 'top': 38.86, 'left': 83.58},
-    'd898': {'name': '[Botwoon Sand Fall]', 'top': 44.98, 'left': 85.59},
-    'd8c5': {'name': 'Shaktool Room', 'top': 57.13, 'left': 85.41},
-    'd913': {'name': 'Halfie Climb Room', 'top': 38.97, 'left': 90.23},
-    'd95e': {'name': 'Botwoon Room', 'top': 42.98, 'left': 81.68},
-    'd9aa': {'name': 'Space Jump Room', 'top': 49.52, 'left': 92.24},
-    'd9d4': {'name': '[Colosseum Energy Charge Room]', 'top': 38.86, 'left': 98.79},
-    'd9fe': {'name': 'Cactus Alley [West]', 'top': 38.97, 'left': 84.53},
-    'da2b': {'name': 'Cactus Alley [East]', 'top': 38.97, 'left': 85.59},
-    'da60': {'name': 'Draygon Room', 'top': 47.62, 'left': 93.29},
-    'daae': {'name': 'Tourian First Room', 'top': 25.87, 'left': 28.51},
-    'dae1': {'name': 'Metroid Room 1', 'top': 31.89, 'left': 22.91},
-    'db31': {'name': 'Metroid Room 2', 'top': 31.89, 'left': 21.86},
-    'db7d': {'name': 'Metroid Room 3', 'top': 33.9, 'left': 22.86},
-    'dbcd': {'name': 'Metroid Room 4', 'top': 33.9, 'left': 28.46},
-    'dc19': {'name': 'Blue Hopper Room', 'top': 38.01, 'left': 27.61},
-    'dc65': {'name': 'Dust Torizo Room', 'top': 37.91, 'left': 25.77},
-    'dcb1': {'name': 'Big Boy Room', 'top': 38.01, 'left': 21.96},
-    'dcff': {'name': 'Seaweed Room', 'top': 38.01, 'left': 20.91},
-    'dd2e': {'name': 'Tourian Recharge Room', 'top': 40.02, 'left': 19.96},
-    'dd58': {'name': 'Mother Brain Room', 'top': 44.14, 'left': 21.91},
-    'ddc4': {'name': 'Tourian Eye Door Room', 'top': 40.02, 'left': 21.91},
-    'ddf3': {'name': 'Rinka Shaft', 'top': 40.02, 'left': 25.66},
-    'de23': {'name': '[Mother Brain Save Room]', 'top': 41.92, 'left': 24.71},
-    'de4d': {'name': 'Tourian Escape Room 1', 'top': 44.03, 'left': 20.01},
-    'de7a': {'name': 'Tourian Escape Room 2', 'top': 46.04, 'left': 19.96},
-    'dea7': {'name': 'Tourian Escape Room 3', 'top': 46.15, 'left': 20.96},
-    'dede': {'name': 'Tourian Escape Room 4', 'top': 40.02, 'left': 26.72},
-    'df1b': {'name': '[Tourian First Save Room]', 'top': 31.89, 'left': 29.46},
-    'df45': {'name': '[Ceres Elevator Room]', 'top': -100, 'left': -100},
-    'df8d': {'name': '[Ceres Jump Tutorial Room]', 'top': -100, 'left': -100},
-    'dfd7': {'name': '[Ceres Staircase Room]', 'top': -100, 'left': -100},
-    'e021': {'name': '[Ceres Dead Scientists Room]', 'top': -100, 'left': -100},
-    'e06b': {'name': '[Ceres Last Corridor]', 'top': -100, 'left': -100},
-    'e0b5': {'name': '[Ceres Ridley Room]', 'top': -100, 'left': -100},
-}
-
-function resetLog() {
-    document.getElementById("logAutoTracker").value = "";
-}
-
-function appendLog(msg) {
-    console.log(msg);
-    var txtArea = document.getElementById("logAutoTracker");
-    txtArea.value +=  msg + '\r\n';
-
-    // auto scroll to bottom
-    txtArea.scrollTop = txtArea.scrollHeight;
-}
-
-function setAutoTrackerIcon(icon) {
-  var names = ["statusOK", "statusKO", "statusLoad", "statusNA"];
-  for(var i=0; i<names.length; i++) {
-    if(names[i] == icon){
-      document.getElementById(names[i]).style.display = "block";
-    } else {
-      document.getElementById(names[i]).style.display = "none";
-    }
-  }
-}
-
-function displayStopButton() {
-    document.getElementById("stopAutoTracker").style.display = "block";
-    document.getElementById("startAutoTracker").style.display = "none";
-}
-
-function displayStartButton() {
-    document.getElementById("startAutoTracker").style.display = "block";
-    document.getElementById("stopAutoTracker").style.display = "none";
-}
-
-function startAutoTracker() {
-    if(interfaceIsFrozen()) {
-        return;
-    }
-
-    if(mode == 'seedless') {
-        alert("Auto Tracker is incompatible with seedless mode, please load the seed to track first");
-        return;
-    }
-    if(mode == 'race') {
-        alert("Auto Tracker is disabled with race protected seeds");
-        return;
-    }
-
-    // in case a snes classic retry was in progress
-    if(retryTimeout != undefined) {
-        clearTimeout(retryTimeout);
-        retryTimeout = undefined;
-    }
-
-    resetLog();
-    appendLog("\r\n\u2026 Starting Auto Tracker");
-    // open websocket
-    var url = 'ws://localhost:8080';
-    socket = new WebSocket(url);
-    socket.onopen = socketOnOpen;
-    socket.onmessage = socketOnMessage;
-    socket.onclose = socketOnClose;
-    socket.onerror = socketOnError;
-
-    // update state
-    curState = stateEnum.opening;
-    autoTrackInProgress = true;
-
-    // update interface
-    displayStopButton();
-    setAutoTrackerIcon("statusLoad");
-
-    // debug map
-    // var debugMap = document.getElementById("debugMap")
-    // debugMap.style.display = "block";
-    // dragElement(debugMap, "debugMap");
-}
-
-function closeSocket() {
-    socket.close(1000);
-
-    // update state
-    curState = stateEnum.closing;
-
-    // update interface
-    setAutoTrackerIcon("statusLoad");
-    var samusIcon = document.getElementById("samusIcon");
-    samusIcon.style.display = "none";
-}
-
-function stopAutoTracker() {
-    if(loaded == false || webServInProgress == true || init == false || autoTrackInProgress == false) {
-        return;
-    }
-
-    appendLog("\u2026 Stopping Auto Tracker");
-    closeSocket();
-
-    // update interface
-    displayStartButton();
-}
-
-function socketOnOpen(e) {
-    appendLog("\u2705 Connection established");
-    // appendLog(" bufferedAmount: "+socket.bufferedAmount);
-// Constant 	Value
-// WebSocket.CONNECTING 	0
-// WebSocket.OPEN 	1
-// WebSocket.CLOSING 	2
-// WebSocket.CLOSED 	3
-    // appendLog(" readyState: "+socket.readyState);
-
-    appendLog("\u2026 Asking Device List");
-    sendAutoTrackerMessage({
-        "Opcode" : "DeviceList",
-        "Space" : "SNES"
-    }, stateEnum.listing);
-}
-
-function socketOnMessage(event) {
-    if(curState == stateEnum.looping) {
-        socketOnLoopMessage(event);
-    } else {
-        socketOnInitMessage(event);
-    }
-}
-
-function socketOnInitMessage(event) {
-    console.log(`event.data: ${event.data}`);
-    var data = JSON.parse(event.data);
-    var results = data["Results"];
-    // appendLog(`Data received: ${results}`);
-    setAutoTrackerIcon("statusOK");
-
-    if(curState == stateEnum.listing) {
-        if(results.length == 0) {
-            appendLog("\u274C no device found");
-            closeSocket();
-        } else if(results.length > 1) {
-            appendLog("\u274C too many devices found, please connect only one");
-            closeSocket();
-        } else {
-            var deviceToAttach = results;
-            appendLog(`\u2705 device found: ${deviceToAttach}`);
-
-            appendLog("\u2026 Attaching to Device");
-            sendAutoTrackerMessage({
-                "Opcode" : "Attach",
-                "Space" : "SNES",
-                "Operands" : deviceToAttach
-            }, stateEnum.infoing);
-
-            // tell qusb our app name
-            appendLog("\u2026 Send VARIA app name");
-            sendAutoTrackerMessage({
-                "Opcode" : "Name",
-                "Space" : "SNES",
-                "Operands": ["VARIA Tracker"]
-            }, stateEnum.infoing);
-
-            // send info command to validate attaching, we can send it right away as there's a queue in qusb
-            appendLog("\u2026 Getting Device Info");
-            sendAutoTrackerMessage({
-                "Opcode" : "Info",
-                "Space" : "SNES"
-            }, stateEnum.infoing);
-
-        }
-    } else if(curState == stateEnum.infoing) {
-        appendLog(`\u2705 info received: ${results}`);
-        appendLog(`\u2705 device attached`);
-
-        // keep device type, results is an array, device type is in 2nd position
-        device = results[1];
-        console.log(`device: [${device}]`);
-
-        // reset snes classic retries
-        retryCount = 0;
-        reconnectInProgress = false;
-
-        // start loop, update state
-        curState = stateEnum.looping;
-
-        // ask socket to return an arraybuffer instead of a blob
-        socket.binaryType = "arraybuffer";
-
-        // display initial time
-        document.getElementById("rtaTimer").innerHTML = "00'00'00''00";
-        document.getElementById("rtaTimerDiv").style.display = "block";
-
-        // first data retrieval
-        initDataChain();
-        askForData();
-    } else {
-        appendLog(`\u274C unknown receiving state ${curState}`);
-        closeSocket();
-    }
-}
-
-function socketOnLoopMessage(event) {
-    setAutoTrackerIcon("statusOK");
-    handleData(event.data);
-}
-
-function socketOnClose(event) {
-    if(event.wasClean) {
-        appendLog(`\u2705 Connection closed cleanly`);
-        console.log(`socketOnClose clean: code=${event.code} reason=${event.reason}`);
-    } else {
-        // e.g. server process killed or network down
-        // event.code is usually 1006 in this case
-        appendLog('\u274C Connection died');
-        console.log(`socketOnClose not clean: code=${event.code} reason=${event.reason}`);
-    }
-    setAutoTrackerIcon("statusNA");
-    cleanup(event.wasClean);
-}
-
-function socketOnError(error) {
-    appendLog("\u274C Connection error");
-
-    // update state & interface
-    setAutoTrackerIcon("statusKO");
-    cleanup(false);
-}
-
-function cleanup(cleanExit) {
-    // stop running timeout
-    clearTimeout(timeout);
-
-    // update state & interface
-    cleanupBuffer();
-    curState = stateEnum.closed;
-    autoTrackInProgress = false;
-    displayStartButton();
-    var samusIcon = document.getElementById("samusIcon");
-    samusIcon.style.display = "none";
-    // RTA
-    document.getElementById("rtaTimerDiv").style.display = "none";
-    disableRTAFake();
-
-    // if the device is an SNES Classic try to reconnect in 1s,
-    // as reseting the game on it will close the connection to the auto tracker
-    if(reconnectInProgress == true || (cleanExit == false && retryCount < retryMax && device == "SNES Classic")) {
-        reconnectInProgress = true;
-        // sometimes socketOnClose and socketOnError are called, just arm the retry timer once
-        if(retryTimeout == undefined) {
-            appendLog(`will try to reconnect to SNES Classic in 1s ${retryCount}/${retryMax}`);
-            retryTimeout = setTimeout(startAutoTracker, waitingTime);
-            retryCount += 1;
-        }
-    } else {
-        // use the device variable to know if we were connected to a device before
-        device = undefined;
-    }
-}
-
-// called to request datas from qusb
-function askForData() {
-    // check current state
-    if(curState != stateEnum.looping) {
-        appendLog(`\u274C Wrong state: ${curState}`);
-        closeSocket();
-    } else {
-        var metadata = dataToAsk[dataToAskChain[dataToAskStep]];
-        askedDataSize = 0;
-        var ranges = [];
-
-        for(var i=0; i<metadata.length; i++) {
-            askedDataSize += metadata[i].size;
-            ranges.push(metadata[i].address);
-            ranges.push(metadata[i].size.toString(16));
-        }
-
-        console.log(`\u2026 Asking ${askedDataSize} bytes of Data`);
-
-        transfertStart = Date.now();
-        sendAutoTrackerMessage({
-            "Opcode" : "GetAddress",
-            "Space" : "SNES",
-            "Operands": ranges
-        }, stateEnum.looping);
-        setAutoTrackerIcon("statusLoad");
-    }
-}
-
-function readWord(array, addr) {
-    return (array[addr+1]<<8) + array[addr];
-}
-
-function getGameStateName(gameStateCode) {
-    switch(gameStateCode) {
-        case '0': return "Reset/start";
-        case '1': return "Opening. Cinematic";
-        case '2': return "Game options menu";
-        case '3': return "Nothing (RTS)";
-        case '4': return "Save game menus";
-        case '5': return "Loading game map view";
-        case '6': return "Loading game data";
-        case '7': return "Setting game up after loading the game";
-        case '8': return "Main gameplay";
-        case '9': return "Hit a door block";
-        case 'a': return "Loading next room";
-        case 'b': return "Loading next room";
-        case 'c': return "Pausing, normal gameplay but darkening";
-        case 'd': return "Pausing, loading pause screen";
-        case 'e': return "Paused, loading pause screen";
-        case 'f': return "Paused, map and item screens";
-        case '10': return "Unpausing, loading normal gameplay";
-        case '11': return "Unpausing, loading normal gameplay";
-        case '12': return "Unpausing, normal gameplay but brightening";
-        case '13': return "Samus ran out of health";
-        case '14': return "Samus ran out of health, black out surroundings";
-        case '15': return "Samus ran out of health, black out surroundings";
-        case '16': return "Samus ran out of health, starting death animation";
-        case '17': return "Samus ran out of health, flashing";
-        case '18': return "Samus ran out of health, explosion";
-        case '19': return "Samus ran out of health, black out (also cut to by time up death)";
-        case '1a': return "Game over screen";
-        case '1b': return "Reserve tanks auto";
-        case '1c': return "Unused. Does JMP ($0DEA) ($0DEA is never set to a pointer)";
-        case '1d': return "Debug game over menu (end/continue)";
-        case '1e': return "Intro. Cinematic. Set up entirely new game with cutscenes";
-        case '1f': return "Set up new game. Post-intro";
-        case '20': return "Made it to Ceres elevator";
-        case '21': return "Blackout from Ceres";
-        case '22': return "Ceres goes boom, Samus goes to Zebes. Cinematic";
-        case '23': return "Time up";
-        case '24': return "Whiting out from time up";
-        case '25': return "Ceres goes boom with Samus. Cinematic";
-        case '26': return "Samus escapes from Zebes. Transition from main gameplay to ending and credits";
-        case '27': return "Ending and credits. Cinematic";
-        case '28': return "Transition to demo";
-        case '29': return "Transition to demo";
-        case '2a': return "Playing demo";
-        case '2b': return "Transition from demo";
-        case '2c': return "Transition from demo";
-        default: return `Unkown game state (${gameStateCode})`;
-    }
-}
-
-function displayRTA(frames) {
-    // 60 frame per second
-    var timeSeconds = Math.floor(frames / 60);
-    var remainFrames = frames % 60;
-    var hours   = Math.floor(timeSeconds / 3600);
-    var minutes = Math.floor((timeSeconds - (hours * 3600)) / 60);
-    var seconds = timeSeconds - (hours * 3600) - (minutes * 60);
-
-    if (hours   < 10) {hours   = "0"+hours;}
-    if (minutes < 10) {minutes = "0"+minutes;}
-    if (seconds < 10) {seconds = "0"+seconds;}
-    if (remainFrames < 10) {remainFrames = "0"+remainFrames;}
-
-    document.getElementById("rtaTimer").innerHTML = `${hours}'${minutes}'${seconds}''${remainFrames}`;
-}
-
-function disableRTAFake() {
-    if(incrRTA != undefined) {
-        clearTimeout(incrRTA);
-        incrRTA = undefined;
-    }
-}
-
-function updateRTAFake() {
-    var diffms = new Date() - incrRTAstart;
-    // 60 frames per seconds
-    rawTimeFrames += Math.floor(diffms / (1000/60));
-    displayRTA(rawTimeFrames);
-    incrRTAstart = new Date();
-    incrRTA = setTimeout(updateRTAFake, RTAwaitingTime);
-}
-
-function updateRTA(frames, armFakeTimer) {
-    displayRTA(frames);
-    disableRTAFake();
-
-    if(armFakeTimer) {
-        // arm a timer to increase displayed RTA between two data retrieval
-        rawTimeFrames = frames;
-        incrRTAstart = new Date();
-        incrRTA = setTimeout(updateRTAFake, RTAwaitingTime);
-    }
-}
-
-// managed data returned by qusb
-function handleData(data) {
-    var chunk = new Uint8Array(data);
-    var chunkSize = chunk.length
-    receivedDataSize += chunkSize;
-    receivedData.push(chunk);
-    console.log(`\u2026 get: ${chunkSize} (${receivedDataSize}/${askedDataSize})`);
-
-    if(receivedDataSize >= askedDataSize) {
-        if(dataToAskChain[dataToAskStep] == dataEnum.state) {
-            var duration = Date.now() - transfertStart;
-            console.log(`\u2705 State data received in ${duration}ms`);
-
-            var stateData = concatArrays(dataEnum.state);
-
-            // biggest valid game state
-            var maxGameState = 0x2c;
-            var mainGameplayState = 0x08;
-            var gameOverState = 0x1a;
-            var creditState = 0x27;
-
-            var gameState = readWord(stateData, stateDataEnum.state);
-            var gameStateName = getGameStateName(gameState.toString(16));
-            // appendLog(`\u2026 Game state: ${gameStateName}`);
-
-            var debugMode = readWord(stateData, stateDataEnum.debug);
-            // appendLog(`\u2026 Debug Mode: ${debugMode}`);
-
-            // check if game is running and is metroid
-            if(debugMode == 0 && gameState <= maxGameState) {
-                // handle RTA
-                if(gameState >= mainGameplayState && gameState <= gameOverState) {
-                    var w0 = readWord(stateData, stateDataEnum.rta1);
-                    var w1 = readWord(stateData, stateDataEnum.rta2);
-                    var rawTimeFrames = w1 << 16 | w0;
-                    updateRTA(rawTimeFrames, true);
-                } else if(gameState == creditState) {
-                    // during the credits the last RTA has been copied to SRAM
-                    var save = readWord(stateData, stateDataEnum.saveSlot);
-                    var offset = stateDataEnum.sramStats + save * 0x4;
-                    var w0 = readWord(stateData, offset);
-                    var w1 = readWord(stateData, offset+2);
-                    var rawTimeFrames = w1 << 16 | w0;
-                    updateRTA(rawTimeFrames, false);
-                } else {
-                    // if the user reset, stop incrementing the RTA
-                    disableRTAFake();
-                }
-
-                if(gameState == mainGameplayState) {
-                    appendLog(`\u2705 Gameplay state: ${gameStateName}`);
-                    askNextData();
-                } else {
-                    appendLog(`\u231B State: ${gameStateName}`);
-                    resetNextDataChain();
-                }
-            } else {
-                appendLog("\u231B Super Metroid is not running");
-                resetNextDataChain();
-            }
-        } else if(dataToAskChain[dataToAskStep] == dataEnum.map) {
-            var duration = Date.now() - transfertStart;
-            console.log(`\u2705 Map data received in ${duration}ms`);
-
-            // concatenate all arrays
-            mapData = concatArrays(dataEnum.map);
-
-            askNextData();
-        } else if(dataToAskChain[dataToAskStep] == dataEnum.curMap) {
-            var duration = Date.now() - transfertStart;
-            console.log(`\u2705 Current Map data received in ${duration}ms`);
-
-            // concatenate all arrays
-            var curMapData = concatArrays(dataEnum.curMap);
-
-            // replace current map data in map data
-            var areaIndex = readWord(samusData, samusEnum.areaIndex);
-            var tourianAreaIndex = 5;
-            if(areaIndex <= tourianAreaIndex) {
-                var mapOffset = mapOffsetEnum[areaEnum[areaIndex]];
-                var mapSize = 0x100;
-
-                for(var i=0; i<mapSize; i++) {
-                    mapData[mapOffset+i] = curMapData[i];
-                }
-
-                //displayDebugMap(mapData, mapOffsetEnum.curMap);
-            }
-
-            askNextData();
-        } else if(dataToAskChain[dataToAskStep] == dataEnum.samus) {
-            var duration = Date.now() - transfertStart;
-            console.log(`\u2705 Samus data received in ${duration}ms`);
-
-            // concatenate all arrays
-            samusData = concatArrays(dataEnum.samus);
-
-            // extract data we need
-            var samusX = readWord(samusData, samusEnum.x);
-            var samusY = readWord(samusData, samusEnum.y);
-            var roomPointer = readWord(samusData, samusEnum.roomPointer).toString(16);
-            var x = Math.floor(samusX / 0x100);
-            var y = Math.floor(samusY / 0x100);
-            displaySamusOnMap(roomPointer, x, y);
-
-            newAP = getNewAP(roomPointer, x, y);
-
-            // uncomment to display current samus position in map in console
-            // // compute (byte, bit) index in map data for current samus screen
-            // // Let
-            // //     x = [room X co-ordinate] + [$12] / 100h
-            // //     y = [room Y co-ordinate] + [$18] / 100h
-            // // Then
-            // //     $07FB + (y + (x & 20h)) * 4 + (x & 1Fh) / 8 |= 80h >> (x & 7)
-            // var areaIndex = readWord(samusData, samusEnum.areaIndex);
-            // var roomX = readWord(samusData, samusEnum.roomX);
-            // var roomY = readWord(samusData, samusEnum.roomY);
-            // var x = roomX + Math.floor(samusX / 0x100);
-            // var y = roomY + Math.floor(samusY / 0x100);
-            // var byteIndex = (y + (x & 0x20)) * 4 + Math.floor((x & 0x1F) / 8);
-            // // first line of map is unused, so add 4 to ignore it (8 bytes per lines, but 4 in each page)
-            // byteIndex += 4;
-            // var bitMask = 0x80 >> (x & 7);
-            // console.log(`cur byteIndex: ${byteIndex} bitMask: ${bitMask} room: ${roomPointer} area: ${areaEnum[areaIndex]}`);
-            // displaySamusOnDebugMap(byteIndex, bitMask);
-
-            askNextData();
-        } else if(dataToAskChain[dataToAskStep] == dataEnum.items) {
-            var duration = Date.now() - transfertStart;
-            console.log(`\u2705 Items data received in ${duration}ms`);
-
-            // concatenate all arrays
-            itemsData = concatArrays(dataEnum.items);
-
-            askNextData();
-        } else if(dataToAskChain[dataToAskStep] == dataEnum.boss) {
-            var duration = Date.now() - transfertStart;
-            console.log(`\u2705 Boss data received in ${duration}ms`);
-
-            // concatenate all arrays
-            bossData = concatArrays(dataEnum.boss);
-
-            askNextData();
-        } else if(dataToAskChain[dataToAskStep] == dataEnum.events) {
-            var duration = Date.now() - transfertStart;
-            console.log(`\u2705 Events data received in ${duration}ms`);
-
-            // concatenate all arrays
-            eventsData = concatArrays(dataEnum.events);
-
-            askNextData();
-        }
-    }
-}
-
-function getDataSize(dataType) {
-    var metadata = dataToAsk[dataType];
-    var dataSize = 0;
-    for(var i=0; i<metadata.length; i++) {
-        dataSize += metadata[i].size;
-    }
-    return dataSize;
-}
-
-function concatArrays(dataType) {
-    if(receivedData.length == 1) {
-        return receivedData[0];
-    } else {
-        dataSize = getDataSize(dataType);
-
-        var data = new Uint8Array(dataSize);
-        var curPos = 0;
-
-        for(var i=0; i<receivedData.length; i++) {
-            data.set(receivedData[i], curPos);
-            curPos += receivedData[i].length;
-        }
-
-        return data;
-    }
-}
-
-function displayDebugMap(mapData, areaStart) {
-    // display the map on canvas
-    var canvas = document.getElementById('debugMap');
-    var ctx = canvas.getContext('2d');
-
-    // metroid map pink
-    ctx.fillStyle = 'rgb(222, 57, 148)';
-
-    // for each bit set in the map data display a 8x8 square on the map canvas
-    var areaSize = 0x100;
-    // 0x0: crateria ou current map
-    // 0x100: brinstar
-    // 0x200: norfair
-    // 0x300: WS
-    // 0x400: maridia
-    var areaEnd = areaStart + areaSize;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // squares we are drawing
-    var width = 8;
-    var height = 8;
-
-    for(var i=areaStart; i<areaEnd; i++) {
-        var b = mapData[i];
-        if(b == 0) {
-            continue;
-        } else {
-            var byteIndex = i - areaStart;
-            for(var j=7; j>=0; j--) {
-                if((b & 0x80) == 0x80) {
-                    var bitMask = Math.pow(2, j);
-                    var coords = getMapDisplayCoord(byteIndex, bitMask);
-                    ctx.fillRect(coords[0], coords[1], width, height);
-                }
-                b = b << 1;
-            }
-        }
-    }
-}
-
-var newAP = "";
-function getNewAP(roomPointer, x, y) {
-    // when samus enters a new graph area update the current access point
-    newAP = lastAP;
-    if(roomPointer in rooms && 'graphArea' in rooms[roomPointer]) {
-        var curGraphArea = apsGraphArea[lastAP];
-        if(curGraphArea != rooms[roomPointer]['graphArea']) {
-            newAP = rooms[roomPointer]['nearestAP'];
-            if(newAP == multipleAPs) {
-                // there's multiple APs in the room, choose the nearest one from samus position
-                newAP = rooms[roomPointer]['screens'][y][x];
-            }
-        }
-    }
-    return newAP;
-}
-
-function displaySamusOnMap(roomPointer, x, y) {
-    // size of a screen in % of the map
-    var screenX = 0.94;
-    var screenY = 2.04;
-
-    //console.log(`displaySamusOnMap roomPointer: ${roomPointer} top: ${rooms[roomPointer]["top"]} left: ${rooms[roomPointer]["left"]}`);
-    var left = rooms[roomPointer]["left"] + x * screenX;
-    var top = rooms[roomPointer]["top"] + y * screenY;
-    var samusIcon = document.getElementById("samusIcon");
-    samusIcon.style.display = "block";
-    $(samusIcon).css({"top": top+"%", "left": left+"%"});
-}
-
-function displaySamusOnDebugMap(byteIndex, bitMask) {
-    var canvas = document.getElementById('debugMap');
-    var ctx = canvas.getContext('2d');
-
-    // samus yellow
-    ctx.fillStyle = 'rgb(255, 189, 3)';
-
-    var width = 4;
-    var height = 4;
-    var coords = getMapDisplayCoord(byteIndex, bitMask);
-
-    // add 2 to draw in the center of the map square
-    ctx.fillRect(coords[0]+2, coords[1]+2, width, height);
-}
-
-function getMapDisplayCoord(byteIndex, bitMask) {
-    // http://patrickjohnston.org/bank/90#fA8A6
-    //
-    // Map tiles explored (for current area). One bit per room.
-    // Laid out like a 64x32 1bpp VRAM tilemap:
-    //   2x1 pages of 32x32 map tiles (80h bytes per page, 4 bytes per row, 1 bit per tile),
-    //   each byte is 8 map tiles where the most significant bit is the leftmost tile.
-    //
-    // Let
-    //     x = [room X co-ordinate] + [$12] / 100h
-    //     y = [room Y co-ordinate] + [$18] / 100h
-    // Then
-    //     $07FB + (y + (x & 20h)) * 4 + (x & 1Fh) / 8 |= 80h >> (x & 7)
-    // are we in the first or second page
-
-    // squares we are drawing
-    var width = 8;
-    var height = 8;
-
-    var y = (byteIndex < 128) ? byteIndex : byteIndex - 128;
-    // each line in a page is 4 bytes.
-    // our squares are 8 pixels high.
-    y = (y >> 2) * height;
-    // are we in the first or second page
-    var baseX = (byteIndex < 128) ? 0 : 4;
-    // each bit is a square on the map, so 8 squares per byte
-    baseX = (baseX + (byteIndex % 4)) * 8 * width;
-    var j = Math.log2(bitMask);
-    var x = baseX + (7 - j) * width;
-
-    return [x, y];
-}
-
-function cleanupBuffer() {
-    askedDataSize = 0;
-    receivedDataSize = 0;
-    receivedData = [];
-}
-
-function initDataChain() {
-    // always ask for game state first
-    dataToAskChain = [dataEnum.state];
-
-    stateDataOffsets = {};
-    var curOffset = 0;
-
-    // ask item locs & boss
-    dataToAskChain.push(dataEnum.items);
-    stateDataOffsets[dataEnum.items] = curOffset;
-    curOffset += getDataSize(dataEnum.items);
-
-    dataToAskChain.push(dataEnum.boss);
-    stateDataOffsets[dataEnum.boss] = curOffset;
-    curOffset += getDataSize(dataEnum.boss);
-
-    // ask samus position to know the current map area
-    dataToAskChain.push(dataEnum.samus);
-
-    // ask for events
-    dataToAskChain.push(dataEnum.events);
-    stateDataOffsets[dataEnum.events] = curOffset;
-    curOffset += getDataSize(dataEnum.events);
-
-    // ask optional map data
-    if(area || boss || doorsRando || hasNothing || escapeRando) {
-        dataToAskChain.push(dataEnum.map);
-        stateDataOffsets[dataEnum.map] = curOffset;
-        curOffset += getDataSize(dataEnum.map);
-
-        dataToAskChain.push(dataEnum.curMap);
-    }
-
-    // start at the beginning of the chain
-    dataToAskStep = 0;
-
-    // instantiate state/mask arrays (arrays are initialized with zeros)
-    stateArraySize = curOffset;
-    currentState = new Uint8Array(stateArraySize);
-    stateBitMasks = new Uint8Array(stateArraySize);
-    previousStateChksum = 0;
-    computeStateBitMasks();
-}
-
-function computeStateBitMasks() {
-    var curOffset = 0;
-
-    for(var i=0; i<dataToAskChain.length; i++) {
-        if(dataToAskChain[i] == dataEnum.items) {
-            var curOffset = stateDataOffsets[dataEnum.items];
-            for(var byteIndex in itemsBitMasks) {
-                // in js dict keys are strings
-                byteIndexInt = parseInt(byteIndex);
-                stateBitMasks[curOffset + byteIndexInt] |= itemsBitMasks[byteIndex];
-            }
-        } else if(dataToAskChain[i] == dataEnum.boss) {
-            var curOffset = stateDataOffsets[dataEnum.boss];
-            for(var bossName in bossBitMasks) {
-                stateBitMasks[curOffset + bossBitMasks[bossName]["byteIndex"]] |= bossBitMasks[bossName]["bitMask"];
-            }
-        } else if(dataToAskChain[i] == dataEnum.map) {
-            var curOffset = stateDataOffsets[dataEnum.map];
-            if(area) {
-                // loop on areaAccessPoints
-                for(var apName in areaAccessPoints) {
-                    var apData = areaAccessPoints[apName];
-                    stateBitMasks[curOffset + apData["byteIndex"] + mapOffsetEnum[apData["area"]]] |= apData["bitMask"];
-                }
-            }
-            if(boss) {
-                // loop on bossAccessPoints
-                for(var apName in bossAccessPoints) {
-                    var apData = bossAccessPoints[apName];
-                    stateBitMasks[curOffset + apData["byteIndex"] + mapOffsetEnum[apData["area"]]] |= apData["bitMask"];
-                }
-            }
-            if(doorsRando) {
-                for(var doorName in doorsScreen) {
-                    var doorData = doorsScreen[doorName];
-                    stateBitMasks[curOffset + doorData["byteIndex"] + mapOffsetEnum[doorData["area"]]] |= doorData["bitMask"];
-                }
-            }
-            if(hasNothing) {
-                for(var locName in nothingScreens) {
-                    var locData = nothingScreens[locName];
-                    stateBitMasks[curOffset + locData["byteIndex"] + mapOffsetEnum[locData["area"]]] |= locData["bitMask"];
-                }
-            }
-            if(escapeRando) {
-                for(var apName in escapeAccessPoints) {
-                    var apData = escapeAccessPoints[apName];
-                    stateBitMasks[curOffset + apData["byteIndex"] + mapOffsetEnum[apData["area"]]] |= apData["bitMask"];
-                }
-            }
-        } else if(dataToAskChain[i] == dataEnum.events) {
-            var curOffset = stateDataOffsets[dataEnum.events];
-            for(var event in eventsBitMasks) {
-                stateBitMasks[curOffset + eventsBitMasks[event]["byteIndex"]] |= eventsBitMasks[event]["bitMask"];
-            }
-        }
-    }
-}
-
-// called after a state upload to rearm the timer
-function postAjaxHook() {
-    var duration = Date.now() - transfertStart;
-    appendLog(`\u2705 Backend updated in ${duration}ms`);
-
-    resetNextDataChain();
-}
-
-function setActiveHook(mode, majorsSplit, area, boss, escape) {
-}
-
-function updateGlobalHook(jsonData) {
-    // get eventsBitMasks if preset
-    if("eventsBitMasks" in jsonData) {
-        eventsBitMasks = jsonData["eventsBitMasks"];
-    }
-}
-
-function resetNextDataChain() {
-    cleanupBuffer();
-    // start at the beginning of the chain
-    dataToAskStep = 0;
-    // rearm timer
-    timeout = setTimeout(askForData, waitingTime);
-}
-
-function askNextData() {
-    // reset data vars
-    cleanupBuffer();
-
-    dataToAskStep++;
-
-    if(dataToAskStep < dataToAskChain.length) {
-        // next step
-        askForData();
-    } else {
-        // we've collected all the required data, check if there's a state change,
-        // return true if no state change, so we can rearm the timer
-        if(checkCollectedData()) {
-            // restart chain
-            resetNextDataChain();
-        }
-    }
-}
-
-function checkCollectedData() {
-    // populate state
-    populateCurrentState();
-
-    // compute crc32
-    // TODO::check if we can reuse the same crc32 instance
-    var crc32 = new Crc32();
-    crc32.update(currentState);
-    var newStateChksum = crc32.digest();
-    console.log(`State Checksum: ${newStateChksum}`);
-
-    if(newStateChksum == previousStateChksum && newAP == lastAP) {
-        appendLog("\u2705 State is the same");
-
-        // rearm the timer for next data retrieval
-        return true;
-    } else {
-        appendLog("\u2705 New state detected");
-
-        previousStateChksum = newStateChksum;
-
-        transfertStart = Date.now();
-
-        // send state to backend
-        ajaxCall({action: "import",
-                  scope: "dump",
-                  stateDataOffsets: JSON.stringify(stateDataOffsets),
-                  currentState: jsonArray(currentState),
-                  newAP: newAP}, "upload");
-
-        return false;
-    }
-}
-
-function jsonArray(array) {
-    // json.stringify on a uint8array changes it to a dict...
-    var ret = '['+array[0];
-    for(var i=1; i<array.length; i++) {
-        ret += ', '+array[i];
-    }
-    ret += ']';
-    return ret;
-}
-
-function populateCurrentState() {
-    // reset current state
-    currentState.fill(0);
-
-    // add data to state
-    for(var j=0; j<dataToAskChain.length; j++) {
-        if(dataToAskChain[j] == dataEnum.items) {
-            var curOffset = stateDataOffsets[dataToAskChain[j]];
-            for(var i=0; i<itemsData.length; i++) {
-                currentState[curOffset + i] = itemsData[i] & stateBitMasks[curOffset + i];
-            }
-        } else if(dataToAskChain[j] == dataEnum.boss) {
-            var curOffset = stateDataOffsets[dataEnum.boss];
-            for(var i=0; i<bossData.length; i++) {
-                currentState[curOffset + i] = bossData[i] & stateBitMasks[curOffset + i];
-            }
-        } else if(dataToAskChain[j] == dataEnum.map) {
-            var curOffset = stateDataOffsets[dataEnum.map];
-            for(var i=0; i<mapData.length; i++) {
-                currentState[curOffset + i] = mapData[i] & stateBitMasks[curOffset + i];
-            }
-        } else if(dataToAskChain[j] == dataEnum.events) {
-            var curOffset = stateDataOffsets[dataEnum.events];
-            for(var i=0; i<eventsData.length; i++) {
-                currentState[curOffset + i] = eventsData[i] & stateBitMasks[curOffset + i];
-            }
-        }
-    }
-}
-
-function sendAutoTrackerMessage(data, newState) {
-    socket.send(JSON.stringify(data));
-
-    // update state
-    curState = newState;
-
-    // update interface
-    setAutoTrackerIcon("statusLoad");
-}
+var rooms = {};
+
+rooms['vanilla'] = {
+    '91f8': {'name': 'Landing Site', 'left': 16, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '92b3': {'name': 'Gauntlet Entrance', 'left': 11, 'top': 2, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '92fd': {'name': 'Parlor and Alcatraz', 'left': 11, 'top': 4, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '93aa': {'name': 'Crateria Power Bomb Room', 'left': 25, 'top': 1, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '93d5': {'name': '[Parlor Save Room]', 'left': 11, 'top': 6, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '93fe': {'name': 'West Ocean', 'graphArea': 'WreckedShip', 'nearestAP': 'westOceanLeft', 'left': 0, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'WreckedShip'},
+    '9461': {'name': 'Bowling Alley Path', 'left': 10, 'top': 2, 'vanillaArea': 'Crateria', 'variaArea': 'WreckedShip'},
+    '948c': {'name': 'Crateria Keyhunter Room', 'graphArea': 'Crateria', 'nearestAP': 'keyhunterRoomBottom', 'left': 26, 'top': 4, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '94cc': {'name': '[Elevator to Maridia]', 'left': 16, 'top': 1, 'vanillaArea': 'Crateria', 'variaArea': 'EastMaridia'},
+    '94fd': {'name': 'East Ocean', 'left': 18, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'WreckedShip'},
+    '9552': {'name': 'Forgotten Highway Kago Room', 'left': 25, 'top': 4, 'vanillaArea': 'Crateria', 'variaArea': 'WreckedShip'},
+    '957d': {'name': 'Crab Maze', 'graphArea': 'WreckedShip', 'nearestAP': 'crabMazeLeft', 'left': 22, 'top': 8, 'vanillaArea': 'Crateria', 'variaArea': 'WreckedShip'},
+    '95a8': {'name': '[Crab Maze to Elevator]', 'graphArea': 'EastMaridia', 'nearestAP': 'leCoudeRight', 'left': 16, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'EastMaridia'},
+    '95d4': {'name': 'Crateria Tube', 'left': 25, 'top': 4, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '95ff': {'name': 'The Moat', 'graphArea': 'Crateria', 'nearestAP': 'moatRight', 'left': 29, 'top': 4, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '962a': {'name': '[Elevator to Red Brinstar]', 'graphArea': 'RedBrinstar', 'nearestAP': 'redBrinstarElevator', 'left': 14, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'RedBrinstar'},
+    '965b': {'name': 'Gauntlet Energy Tank Room', 'left': 5, 'top': 2, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '968f': {'name': '[West Ocean Geemer Corridor]', 'left': 12, 'top': 2, 'vanillaArea': 'Crateria', 'variaArea': 'WreckedShip'},
+    '96ba': {'name': 'Climb', 'left': 11, 'top': 9, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '975c': {'name': 'Pit Room [Old Mother Brain Room]', 'left': 13, 'top': 17, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '97b5': {'name': '[Elevator to Blue Brinstar]', 'left': 16, 'top': 17, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '9804': {'name': 'Bomb Torizo Room', 'left': 18, 'top': 6, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '9879': {'name': 'Flyway', 'left': 15, 'top': 6, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '98e2': {'name': 'Pre-Map Flyway', 'left': 13, 'top': 7, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '990d': {'name': 'Terminator Room', 'left': 5, 'top': 4, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '9938': {'name': '[Elevator to Green Brinstar]', 'graphArea': 'GreenPinkBrinstar', 'nearestAP': 'greenBrinstarElevator', 'left': 4, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'GreenBrinstar'},
+    '9969': {'name': 'Lower Mushrooms', 'graphArea': 'Crateria', 'nearestAP': 'lowerMushroomsLeft', 'left': 0, 'top': 8, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '9994': {'name': 'Crateria Map Room', 'left': 16, 'top': 7, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '99bd': {'name': 'Green Pirates Shaft', 'graphArea': 'Crateria', 'nearestAP': 'greenPiratesShaftBottomRight', 'left': 4, 'top': 2, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '99f9': {'name': 'Crateria Super Room', 'left': 14, 'top': 9, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '9a44': {'name': 'Final Missile Bombway', 'left': 10, 'top': 7, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '9a90': {'name': 'The Final Missile', 'left': 9, 'top': 7, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '9ad9': {'name': 'Green Brinstar Main Shaft [etecoon room]', 'left': 4, 'top': 2, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9b5b': {'name': 'Spore Spawn Super Room', 'left': 18, 'top': 3, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9b9d': {'name': 'Brinstar Pre-Map Room', 'left': 1, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9bc8': {'name': 'Early Supers Room', 'left': 5, 'top': 5, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9c07': {'name': 'Brinstar Reserve Tank Room', 'left': 8, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9c35': {'name': 'Brinstar Map Room', 'left': 0, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9c5e': {'name': 'Green Brinstar Fireflea Room', 'left': 1, 'top': 8, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9c89': {'name': '[Green Brinstar Missile Station]', 'left': 0, 'top': 9, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9cb3': {'name': 'Dachora Room', 'left': 5, 'top': 8, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9d19': {'name': 'Big Pink', 'left': 10, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9d9c': {'name': 'Spore Spawn Keyhunter Room', 'left': 14, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9dc7': {'name': 'Spore Spawn Room', 'left': 17, 'top': 3, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9e11': {'name': 'Pink Brinstar Power Bomb Room', 'left': 10, 'top': 9, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9e52': {'name': 'Green Hill Zone', 'graphArea': 'GreenPinkBrinstar', 'nearestAP': 'greenHillZoneTopRight', 'left': 14, 'top': 12, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9e9f': {'name': 'Morph Ball Room', 'graphArea': 'Crateria', 'nearestAP': 'morphBallRoomLeft', 'left': 11, 'top': 27, 'vanillaArea': 'Brinstar', 'variaArea': 'Crateria'},
+    '9f11': {'name': 'Construction Zone', 'left': 19, 'top': 29, 'vanillaArea': 'Brinstar', 'variaArea': 'Crateria'},
+    '9f64': {'name': 'Blue Brinstar Energy Tank Room', 'left': 20, 'top': 27, 'vanillaArea': 'Brinstar', 'variaArea': 'Crateria'},
+    '9fba': {'name': 'Noob Bridge', 'graphArea': 'GreenPinkBrinstar', 'nearestAP': 'noobBridgeRight', 'left': 22, 'top': 15, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9fe5': {'name': 'Green Brinstar Beetom Room', 'left': 3, 'top': 12, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a011': {'name': 'Etecoon Energy Tank Room', 'left': 1, 'top': 12, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a051': {'name': 'Etecoon Super Room', 'left': 0, 'top': 12, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a07b': {'name': '[Dachora Room Energy Charge Station]', 'left': 4, 'top': 14, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a0a4': {'name': 'Spore Spawn Farming Room', 'left': 15, 'top': 11, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a0d2': {'name': 'Waterway Energy Tank Room', 'left': 3, 'top': 15, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a107': {'name': 'First Missile Room', 'left': 18, 'top': 30, 'vanillaArea': 'Brinstar', 'variaArea': 'Crateria'},
+    'a130': {'name': 'Pink Brinstar Hopper Room', 'left': 14, 'top': 9, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a15b': {'name': 'Hopper Energy Tank Room', 'left': 16, 'top': 10, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a184': {'name': '[Spore Spawn Save Room]', 'left': 10, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a1ad': {'name': 'Blue Brinstar Boulder Room', 'left': 20, 'top': 27, 'vanillaArea': 'Brinstar', 'variaArea': 'Crateria'},
+    'a1d8': {'name': 'Blue Brinstar Double Missile Room', 'left': 19, 'top': 27, 'vanillaArea': 'Brinstar', 'variaArea': 'Crateria'},
+    'a201': {'name': '[Green Brinstar Main Shaft Save Room]', 'left': 3, 'top': 7, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a22a': {'name': '[Etecoon Save Room]', 'left': 0, 'top': 13, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a253': {'name': 'Red Tower', 'graphArea': 'RedBrinstar', 'nearestAP': 'redTowerTopLeft', 'left': 10, 'top': 7, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a293': {'name': 'Red Brinstar Fireflea Room', 'left': 2, 'top': 13, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a2ce': {'name': 'X-Ray Scope Room', 'left': 0, 'top': 13, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a2f7': {'name': 'Hellway', 'left': 11, 'top': 7, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a322': {'name': 'Caterpillar Room', 'graphArea': 'RedBrinstar', 'nearestAP': 'caterpillarRoomTopRight', 'left': 14, 'top': 2, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a37c': {'name': 'Beta Power Bomb Room', 'left': 12, 'top': 5, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a3ae': {'name': 'Alpha Power Bomb Room', 'left': 11, 'top': 9, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a3dd': {'name': 'Bat Room', 'left': 11, 'top': 16, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a408': {'name': 'Below Spazer', 'left': 13, 'top': 15, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a447': {'name': 'Spazer Room', 'left': 15, 'top': 15, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a471': {'name': 'Warehouse Zeela Room', 'graphArea': 'Kraid', 'nearestAP': 'warehouseZeelaRoomLeft', 'left': 1, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
+    'a4b1': {'name': 'Warehouse Energy Tank Room', 'left': 0, 'top': 1, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
+    'a4da': {'name': 'Warehouse Keyhunter Room', 'left': 2, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
+    'a521': {'name': 'Baby Kraid Room', 'left': 4, 'top': 1, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
+    'a56b': {'name': 'Kraid Eye Door Room', 'graphArea': 'Kraid', 'nearestAP': 'kraidRoomOut', 'left': 10, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
+    'a59f': {'name': 'Kraid Room', 'left': 0, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'Kraid'},
+    'a5ed': {'name': 'Statues Hallway', 'graphArea': 'Tourian', 'nearestAP': 'goldenFour', 'left': 4, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'Tourian'},
+    'a618': {'name': '[Red Tower Energy Charge Station]', 'left': 9, 'top': 16, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a641': {'name': '[Kraid Recharge Station]', 'left': 11, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
+    'a66a': {'name': 'Statues Room', 'left': 9, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'Tourian'},
+    'a6a1': {'name': 'Warehouse Entrance', 'graphArea': 'Norfair', 'nearestAP': 'MULTI', 'screens': [['warehouseEntranceLeft', 'warehouseEntranceRight', 'warehouseEntranceRight'], ['warehouseEntranceLeft', 'warehouseEntranceRight', 'warehouseEntranceRight']], 'left': 8, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'UpperNorfair'},
+    'a6e2': {'name': 'Varia Suit Room', 'left': 2, 'top': 1, 'vanillaArea': 'Brinstar', 'variaArea': 'Kraid'},
+    'a70b': {'name': '[Kraid Save Room]', 'left': 6, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
+    'a734': {'name': '[Caterpillar Save Room]', 'left': 15, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a75d': {'name': 'Ice Beam Acid Room', 'left': 2, 'top': 5, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a788': {'name': 'Cathedral', 'left': 12, 'top': 5, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a7b3': {'name': 'Cathedral Entrance', 'left': 9, 'top': 5, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a7de': {'name': 'Business Center', 'left': 8, 'top': 2, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a815': {'name': 'Ice Beam Gate Room', 'left': 1, 'top': 3, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a865': {'name': 'Ice Beam Tutorial Room', 'left': 2, 'top': 3, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a890': {'name': 'Ice Beam Room', 'left': 3, 'top': 4, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a8b9': {'name': 'Ice Beam Snake Room', 'left': 1, 'top': 3, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a8f8': {'name': 'Crumble Shaft', 'left': 0, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a923': {'name': 'Crocomire Speedway', 'graphArea': 'Norfair', 'nearestAP': 'crocomireSpeedwayBottom', 'left': 1, 'top': 9, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a98d': {'name': 'Crocomire Room', 'graphArea': 'Crocomire', 'nearestAP': 'crocomireRoomTop', 'left': 9, 'top': 0, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'a9e5': {'name': 'Hi Jump Boots Room', 'left': 5, 'top': 8, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'aa0e': {'name': 'Crocomire Escape', 'left': 9, 'top': 8, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'aa41': {'name': 'Hi Jump Energy Tank Room', 'left': 6, 'top': 7, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'aa82': {'name': 'Post Crocomire Farming Room', 'left': 7, 'top': 0, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'aab5': {'name': '[Post Crocomire Save Room]', 'left': 9, 'top': 1, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'aade': {'name': 'Post Crocomire Power Bomb Room', 'left': 6, 'top': 0, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'ab07': {'name': 'Post Crocomire Shaft', 'left': 7, 'top': 2, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'ab3b': {'name': 'Post Crocomire Missile Room', 'left': 8, 'top': 5, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'ab64': {'name': 'Grapple Tutorial Room 3', 'left': 4, 'top': 2, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'ab8f': {'name': 'Post Crocomire Jump Room', 'left': 1, 'top': 5, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'abd2': {'name': 'Grapple Tutorial Room 2', 'left': 3, 'top': 2, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'ac00': {'name': 'Grapple Tutorial Room 1', 'left': 1, 'top': 4, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'ac2b': {'name': 'Grapple Beam Room', 'left': 0, 'top': 4, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'ac5a': {'name': 'Norfair Reserve Tank Room', 'left': 16, 'top': 4, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'ac83': {'name': 'Green Bubbles Missile Room', 'left': 18, 'top': 4, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'acb3': {'name': 'Bubble Mountain', 'left': 20, 'top': 4, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'acf0': {'name': 'Speed Booster Hall', 'left': 23, 'top': 3, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'ad1b': {'name': 'Speed Booster Room', 'left': 35, 'top': 4, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'ad5e': {'name': 'Single Chamber', 'graphArea': 'Norfair', 'nearestAP': 'singleChamberTopRight', 'left': 22, 'top': 5, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'adad': {'name': 'Double Chamber', 'left': 23, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'adde': {'name': 'Wave Beam Room', 'left': 27, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'ae07': {'name': 'Spiky Platforms Tunnel', 'left': 23, 'top': 8, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'ae32': {'name': 'Volcano Room', 'left': 25, 'top': 8, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'ae74': {'name': 'Kronic Boost Room', 'graphArea': 'Norfair', 'nearestAP': 'kronicBoostRoomBottomLeft', 'left': 23, 'top': 10, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'aeb4': {'name': 'Magdollite Tunnel', 'left': 21, 'top': 10, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'aedf': {'name': 'Purple Shaft', 'left': 20, 'top': 8, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'af14': {'name': 'Lava Dive Room', 'graphArea': 'LowerNorfair', 'nearestAP': 'lavaDiveRight', 'left': 7, 'top': 7, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'af3f': {'name': '[Elevator to Lower Norfair]', 'left': 6, 'top': 7, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'af72': {'name': 'Upper Norfair Farming Room', 'left': 18, 'top': 7, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'afa3': {'name': 'Rising Tide', 'left': 15, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'afce': {'name': 'Acid Snakes Tunnel', 'left': 14, 'top': 11, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'affb': {'name': 'Spiky Acid Snakes Tunnel', 'left': 19, 'top': 11, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b026': {'name': '[Crocomire Recharge Room]', 'left': 18, 'top': 11, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b051': {'name': 'Purple Farming Room', 'left': 21, 'top': 9, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b07a': {'name': 'Bat Cave', 'left': 22, 'top': 3, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b0b4': {'name': 'Norfair Map Room', 'left': 7, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b0dd': {'name': '[Bubble Mountain Save Room]', 'left': 19, 'top': 5, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b106': {'name': 'Frog Speedway', 'left': 10, 'top': 7, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b139': {'name': 'Red Pirate Shaft', 'left': 17, 'top': 8, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b167': {'name': '[Business Center Save Room]', 'left': 9, 'top': 7, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b192': {'name': '[Crocomire Save Room]', 'left': 14, 'top': 10, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b1bb': {'name': '[Elevator Save Room]', 'left': 5, 'top': 7, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b1e5': {'name': 'Acid Statue Room', 'left': 0, 'top': 10, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b236': {'name': 'Main Hall', 'left': 2, 'top': 8, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b283': {'name': 'Golden Torizo Room', 'left': 3, 'top': 12, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b2da': {'name': 'Fast Ripper Room', 'left': 6, 'top': 11, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b305': {'name': '[Screw Attack Energy Charge Room]', 'left': 6, 'top': 12, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b32e': {'name': 'Ridley Room', 'left': 1, 'top': 0, 'vanillaArea': 'Norfair', 'variaArea': 'Ridley'},
+    'b37a': {'name': 'Lower Norfair Farming Room', 'graphArea': 'LowerNorfair', 'nearestAP': 'ridleyRoomOut', 'left': 9, 'top': 13, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b3a5': {'name': 'Fast Pillars Setup Room', 'left': 10, 'top': 9, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b40a': {'name': 'Mickey Mouse Room', 'left': 11, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b457': {'name': 'Pillar Room', 'left': 11, 'top': 11, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b482': {'name': 'Plowerhouse Room', 'left': 12, 'top': 13, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b4ad': {'name': 'The Worst Room In The Game', 'left': 15, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b4e5': {'name': 'Amphitheatre', 'left': 16, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b510': {'name': 'Lower Norfair Spring Ball Maze Room', 'left': 18, 'top': 2, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b55a': {'name': 'Lower Norfair Escape Power Bomb Room', 'left': 22, 'top': 3, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b585': {'name': 'Red Keyhunter Shaft', 'left': 20, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b5d5': {'name': 'Wasteland', 'left': 17, 'top': 11, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b62b': {'name': 'Metal Pirates Room', 'left': 15, 'top': 13, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b656': {'name': 'Three Muskateers Room', 'graphArea': 'LowerNorfair', 'nearestAP': 'threeMuskateersRoomLeft', 'left': 14, 'top': 0, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b698': {'name': 'Ridley Tank Room', 'left': 0, 'top': 1, 'vanillaArea': 'Norfair', 'variaArea': 'Ridley'},
+    'b6c1': {'name': 'Screw Attack Room', 'left': 5, 'top': 11, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b6ee': {'name': 'Lower Norfair Fireflea Room', 'left': 20, 'top': 3, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b741': {'name': '[Red Keyhunter Shaft Save Room]', 'left': 21, 'top': 9, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'c98e': {'name': 'Bowling Alley', 'left': 6, 'top': 1, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'ca08': {'name': 'Wrecked Ship Entrance', 'left': 8, 'top': 4, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'ca52': {'name': 'Attic', 'left': 8, 'top': 0, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'caae': {'name': 'Wrecked Ship East Missile Room', 'left': 15, 'top': 0, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'caf6': {'name': 'Wrecked Ship Main Shaft', 'left': 8, 'top': 1, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cb8b': {'name': 'Spiky Death Room', 'left': 15, 'top': 5, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cbd5': {'name': 'Electric Death Room', 'left': 17, 'top': 3, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cc27': {'name': 'Wrecked Ship Energy Tank Room', 'left': 14, 'top': 3, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cc6f': {'name': 'Basement', 'graphArea': 'WreckedShip', 'nearestAP': 'phantoonRoomOut', 'left': 10, 'top': 9, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cccb': {'name': 'Wrecked Ship Map Room', 'left': 9, 'top': 9, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cd13': {'name': 'Phantoon Room', 'left': 0, 'top': 0, 'vanillaArea': 'WreckedShip', 'variaArea': 'Phantoon'},
+    'cd5c': {'name': 'Sponge Bath', 'left': 13, 'top': 5, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cda8': {'name': 'Wrecked Ship West Super Room', 'left': 11, 'top': 7, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cdf1': {'name': 'Wrecked Ship East Super Room', 'left': 14, 'top': 7, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'ce40': {'name': 'Gravity Suit Room', 'left': 6, 'top': 3, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'ce8a': {'name': '[Wrecked Ship Save Room]', 'left': 13, 'top': 4, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'ced2': {'name': '[Glass Tunnel Save Room]', 'left': 17, 'top': 17, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
+    'cefb': {'name': 'Glass Tunnel', 'graphArea': 'RedBrinstar', 'nearestAP': 'glassTunnelTop', 'left': 16, 'top': 15, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
+    'cf54': {'name': 'West Tunnel', 'left': 15, 'top': 16, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
+    'cf80': {'name': 'East Tunnel', 'graphArea': 'RedBrinstar', 'nearestAP': 'MULTI', 'screens': [['eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight'], ['eastTunnelRight', 'x', 'x', 'x']], 'left': 17, 'top': 15, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
+    'cfc9': {'name': 'Main Street', 'graphArea': 'WestMaridia', 'nearestAP': 'mainStreetBottom', 'left': 0, 'top': 5, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd017': {'name': 'Fish Tank', 'left': 3, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd055': {'name': 'Mama Turtle Room', 'left': 7, 'top': 8, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd08a': {'name': 'Crab Tunnel', 'left': 2, 'top': 12, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd0b9': {'name': 'Mt. Everest', 'left': 2, 'top': 5, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd104': {'name': 'Red Fish Room', 'graphArea': 'WestMaridia', 'nearestAP': 'redFishRoomLeft', 'left': 2, 'top': 3, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd13b': {'name': 'Watering Hole', 'left': 2, 'top': 0, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd16d': {'name': 'Northwest Maridia Bug Room', 'left': 4, 'top': 0, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd1a3': {'name': 'Crab Shaft', 'graphArea': 'WestMaridia', 'nearestAP': 'crabShaftRight', 'left': 8, 'top': 3, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd1dd': {'name': 'Pseudo Plasma Spark Room', 'left': 8, 'top': 0, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd21c': {'name': 'Crab Hole', 'graphArea': 'WestMaridia', 'nearestAP': 'crabHoleBottomLeft', 'left': 6, 'top': 12, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd252': {'name': '[Tunnel to West Sand Hall]', 'left': -1, 'top': 19, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd27e': {'name': 'Plasma Tutorial Room', 'left': 8, 'top': 3, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd2aa': {'name': 'Plasma Room', 'left': 9, 'top': 3, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd2d9': {'name': 'Thread The Needle Room', 'left': 9, 'top': 8, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd30b': {'name': 'Maridia Elevator Room', 'left': 16, 'top': 3, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd340': {'name': 'Plasma Spark Room', 'left': 4, 'top': 5, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd387': {'name': 'Plasma Climb', 'left': 7, 'top': 3, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd3b6': {'name': 'Maridia Map Room', 'left': 7, 'top': 13, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd3df': {'name': '[Maridia Elevator Save Room]', 'left': 17, 'top': 7, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd408': {'name': '[Vertical Tube]', 'left': 4, 'top': 8, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd433': {'name': 'Bug Sand Hole', 'left': 8, 'top': 8, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd461': {'name': 'West Sand Hall', 'left': 0, 'top': 19, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd48e': {'name': 'Oasis', 'left': 4, 'top': 18, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd4c2': {'name': 'East Sand Hall', 'left': 5, 'top': 19, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd4ef': {'name': 'West Sand Hole', 'left': 2, 'top': 17, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd51e': {'name': 'East Sand Hole', 'left': 5, 'top': 17, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd54d': {'name': '[West Sand Fall]', 'left': 3, 'top': 15, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd57a': {'name': '[East Sand Fall]', 'left': 5, 'top': 15, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd5a7': {'name': 'Aqueduct', 'graphArea': 'EastMaridia', 'nearestAP': 'aqueductTopLeft', 'left': 2, 'top': 12, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd5ec': {'name': 'Butterfly Room', 'left': 8, 'top': 10, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd617': {'name': 'Botwoon Hallway', 'left': 2, 'top': 11, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd646': {'name': 'Pants Room', 'left': 8, 'top': 16, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd69a': {'name': '[Pants Room West half]', 'left': 9, 'top': 17, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd6d0': {'name': 'Spring Ball Room', 'left': 14, 'top': 18, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd6fd': {'name': 'Below Botwoon Energy Tank', 'left': 8, 'top': 13, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd72a': {'name': 'Colosseum', 'left': 16, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd765': {'name': '[Aqueduct Save Room]', 'left': 1, 'top': 14, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd78f': {'name': 'The Precious Room', 'graphArea': 'EastMaridia', 'nearestAP': 'draygonRoomOut', 'left': 23, 'top': 10, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd7e4': {'name': 'Botwoon Energy Tank Room', 'left': 8, 'top': 11, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd81a': {'name': '[Colosseum Save Room]', 'left': 23, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd845': {'name': '[Halfie Climb Missile Station]', 'left': 20, 'top': 11, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd86e': {'name': '[Bug Sand Fall]', 'left': 8, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd898': {'name': '[Botwoon Sand Fall]', 'left': 10, 'top': 12, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd8c5': {'name': 'Shaktool Room', 'left': 10, 'top': 18, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd913': {'name': 'Halfie Climb Room', 'left': 15, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd95e': {'name': 'Botwoon Room', 'left': 6, 'top': 11, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd9aa': {'name': 'Space Jump Room', 'left': 0, 'top': 1, 'vanillaArea': 'Maridia', 'variaArea': 'Draygon'},
+    'd9d4': {'name': '[Colosseum Energy Charge Room]', 'left': 24, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd9fe': {'name': 'Cactus Alley [West]', 'left': 9, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'da2b': {'name': 'Cactus Alley [East]', 'left': 10, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'da60': {'name': 'Draygon Room', 'left': 1, 'top': 0, 'vanillaArea': 'Maridia', 'variaArea': 'Draygon'},
+    'daae': {'name': 'Tourian First Room', 'left': 9, 'top': 1, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dae1': {'name': 'Metroid Room 1', 'left': 3, 'top': 4, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'db31': {'name': 'Metroid Room 2', 'left': 2, 'top': 4, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'db7d': {'name': 'Metroid Room 3', 'left': 3, 'top': 5, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dbcd': {'name': 'Metroid Room 4', 'left': 9, 'top': 5, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dc19': {'name': 'Blue Hopper Room', 'left': 8, 'top': 7, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dc65': {'name': 'Dust Torizo Room', 'left': 6, 'top': 7, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dcb1': {'name': 'Big Boy Room', 'left': 2, 'top': 7, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dcff': {'name': 'Seaweed Room', 'left': 1, 'top': 7, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dd2e': {'name': 'Tourian Recharge Room', 'left': 0, 'top': 8, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dd58': {'name': 'Mother Brain Room', 'left': 2, 'top': 10, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'ddc4': {'name': 'Tourian Eye Door Room', 'left': 2, 'top': 8, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'ddf3': {'name': 'Rinka Shaft', 'left': 6, 'top': 8, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'de23': {'name': '[Mother Brain Save Room]', 'left': 5, 'top': 9, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'de4d': {'name': 'Tourian Escape Room 1', 'left': 0, 'top': 10, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'de7a': {'name': 'Tourian Escape Room 2', 'left': 0, 'top': 11, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dea7': {'name': 'Tourian Escape Room 3', 'left': 1, 'top': 11, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dede': {'name': 'Tourian Escape Room 4', 'left': 7, 'top': 8, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'df1b': {'name': '[Tourian First Save Room]', 'left': 10, 'top': 4, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'df45': {'name': '[Ceres Elevator Room]', 'left': 12, 'top': 13, 'vanillaArea': 'Ceres', 'variaArea': 'Ceres'},
+    'df8d': {'name': '[Ceres Jump Tutorial Room]', 'left': 13, 'top': 15, 'vanillaArea': 'Ceres', 'variaArea': 'Ceres'},
+    'dfd7': {'name': '[Ceres Staircase Room]', 'left': 15, 'top': 15, 'vanillaArea': 'Ceres', 'variaArea': 'Ceres'},
+    'e021': {'name': '[Ceres Dead Scientists Room]', 'left': 16, 'top': 16, 'vanillaArea': 'Ceres', 'variaArea': 'Ceres'},
+    'e06b': {'name': '[Ceres Last Corridor]', 'left': 18, 'top': 16, 'vanillaArea': 'Ceres', 'variaArea': 'Ceres'},
+    'e0b5': {'name': '[Ceres Ridley Room]', 'left': 20, 'top': 16, 'vanillaArea': 'Ceres', 'variaArea': 'Ceres'},
+};
+
+rooms['mirror'] = {
+    '91f8': {'name': 'Landing Site', 'left': 6, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '92b3': {'name': 'Gauntlet Entrance', 'left': 15, 'top': 2, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '92fd': {'name': 'Parlor and Alcatraz', 'left': 15, 'top': 4, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '93aa': {'name': 'Crateria Power Bomb Room', 'left': 4, 'top': 1, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '93d5': {'name': '[Parlor Save Room]', 'left': 19, 'top': 6, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '93fe': {'name': 'West Ocean', 'graphArea': 'WreckedShip', 'nearestAP': 'westOceanLeft', 'left': 18, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'WreckedShip'},
+    '9461': {'name': 'Bowling Alley Path', 'left': 14, 'top': 2, 'vanillaArea': 'Crateria', 'variaArea': 'WreckedShip'},
+    '948c': {'name': 'Crateria Keyhunter Room', 'graphArea': 'Crateria', 'nearestAP': 'keyhunterRoomBottom', 'left': 2, 'top': 4, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '94cc': {'name': '[Elevator to Maridia]', 'left': 8, 'top': 1, 'vanillaArea': 'Crateria', 'variaArea': 'EastMaridia'},
+    '94fd': {'name': 'East Ocean', 'left': 1, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'WreckedShip'},
+    '9552': {'name': 'Forgotten Highway Kago Room', 'left': 0, 'top': 4, 'vanillaArea': 'Crateria', 'variaArea': 'WreckedShip'},
+    '957d': {'name': 'Crab Maze', 'graphArea': 'WreckedShip', 'nearestAP': 'crabMazeLeft', 'left': 0, 'top': 8, 'vanillaArea': 'Crateria', 'variaArea': 'WreckedShip'},
+    '95a8': {'name': '[Crab Maze to Elevator]', 'graphArea': 'EastMaridia', 'nearestAP': 'leCoudeRight', 'left': 8, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'EastMaridia'},
+    '95d4': {'name': 'Crateria Tube', 'left': 5, 'top': 4, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '95ff': {'name': 'The Moat', 'graphArea': 'Crateria', 'nearestAP': 'moatRight', 'left': 0, 'top': 4, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '962a': {'name': '[Elevator to Red Brinstar]', 'graphArea': 'RedBrinstar', 'nearestAP': 'redBrinstarElevator', 'left': 6, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'RedBrinstar'},
+    '965b': {'name': 'Gauntlet Energy Tank Room', 'left': 20, 'top': 2, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '968f': {'name': '[West Ocean Geemer Corridor]', 'left': 13, 'top': 2, 'vanillaArea': 'Crateria', 'variaArea': 'WreckedShip'},
+    '96ba': {'name': 'Climb', 'left': 17, 'top': 9, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '975c': {'name': 'Pit Room [Old Mother Brain Room]', 'left': 15, 'top': 17, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '97b5': {'name': '[Elevator to Blue Brinstar]', 'left': 14, 'top': 17, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '9804': {'name': 'Bomb Torizo Room', 'left': 12, 'top': 6, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '9879': {'name': 'Flyway', 'left': 13, 'top': 6, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '98e2': {'name': 'Pre-Map Flyway', 'left': 15, 'top': 7, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '990d': {'name': 'Terminator Room', 'left': 20, 'top': 4, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '9938': {'name': '[Elevator to Green Brinstar]', 'graphArea': 'GreenPinkBrinstar', 'nearestAP': 'greenBrinstarElevator', 'left': 23, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'GreenBrinstar'},
+    '9969': {'name': 'Lower Mushrooms', 'graphArea': 'Crateria', 'nearestAP': 'lowerMushroomsLeft', 'left': 27, 'top': 8, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '9994': {'name': 'Crateria Map Room', 'left': 14, 'top': 7, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '99bd': {'name': 'Green Pirates Shaft', 'graphArea': 'Crateria', 'nearestAP': 'greenPiratesShaftBottomRight', 'left': 26, 'top': 2, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '99f9': {'name': 'Crateria Super Room', 'left': 13, 'top': 9, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '9a44': {'name': 'Final Missile Bombway', 'left': 19, 'top': 7, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '9a90': {'name': 'The Final Missile', 'left': 21, 'top': 7, 'vanillaArea': 'Crateria', 'variaArea': 'Crateria'},
+    '9ad9': {'name': 'Green Brinstar Main Shaft [etecoon room]', 'left': 20, 'top': 2, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9b5b': {'name': 'Spore Spawn Super Room', 'left': 8, 'top': 3, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9b9d': {'name': 'Brinstar Pre-Map Room', 'left': 24, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9bc8': {'name': 'Early Supers Room', 'left': 20, 'top': 5, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9c07': {'name': 'Brinstar Reserve Tank Room', 'left': 18, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9c35': {'name': 'Brinstar Map Room', 'left': 27, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9c5e': {'name': 'Green Brinstar Fireflea Room', 'left': 24, 'top': 8, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9c89': {'name': '[Green Brinstar Missile Station]', 'left': 27, 'top': 9, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9cb3': {'name': 'Dachora Room', 'left': 16, 'top': 8, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9d19': {'name': 'Big Pink', 'left': 13, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9d9c': {'name': 'Spore Spawn Keyhunter Room', 'left': 10, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9dc7': {'name': 'Spore Spawn Room', 'left': 10, 'top': 3, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9e11': {'name': 'Pink Brinstar Power Bomb Room', 'left': 16, 'top': 9, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9e52': {'name': 'Green Hill Zone', 'graphArea': 'GreenPinkBrinstar', 'nearestAP': 'greenHillZoneTopRight', 'left': 6, 'top': 12, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9e9f': {'name': 'Morph Ball Room', 'graphArea': 'Crateria', 'nearestAP': 'morphBallRoomLeft', 'left': 12, 'top': 27, 'vanillaArea': 'Brinstar', 'variaArea': 'Crateria'},
+    '9f11': {'name': 'Construction Zone', 'left': 11, 'top': 29, 'vanillaArea': 'Brinstar', 'variaArea': 'Crateria'},
+    '9f64': {'name': 'Blue Brinstar Energy Tank Room', 'left': 8, 'top': 27, 'vanillaArea': 'Brinstar', 'variaArea': 'Crateria'},
+    '9fba': {'name': 'Noob Bridge', 'graphArea': 'GreenPinkBrinstar', 'nearestAP': 'noobBridgeRight', 'left': 0, 'top': 15, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    '9fe5': {'name': 'Green Brinstar Beetom Room', 'left': 24, 'top': 12, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a011': {'name': 'Etecoon Energy Tank Room', 'left': 22, 'top': 12, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a051': {'name': 'Etecoon Super Room', 'left': 27, 'top': 12, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a07b': {'name': '[Dachora Room Energy Charge Station]', 'left': 23, 'top': 14, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a0a4': {'name': 'Spore Spawn Farming Room', 'left': 10, 'top': 11, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a0d2': {'name': 'Waterway Energy Tank Room', 'left': 18, 'top': 15, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a107': {'name': 'First Missile Room', 'left': 12, 'top': 30, 'vanillaArea': 'Brinstar', 'variaArea': 'Crateria'},
+    'a130': {'name': 'Pink Brinstar Hopper Room', 'left': 12, 'top': 9, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a15b': {'name': 'Hopper Energy Tank Room', 'left': 11, 'top': 10, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a184': {'name': '[Spore Spawn Save Room]', 'left': 17, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a1ad': {'name': 'Blue Brinstar Boulder Room', 'left': 9, 'top': 27, 'vanillaArea': 'Brinstar', 'variaArea': 'Crateria'},
+    'a1d8': {'name': 'Blue Brinstar Double Missile Room', 'left': 11, 'top': 27, 'vanillaArea': 'Brinstar', 'variaArea': 'Crateria'},
+    'a201': {'name': '[Green Brinstar Main Shaft Save Room]', 'left': 24, 'top': 7, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a22a': {'name': '[Etecoon Save Room]', 'left': 27, 'top': 13, 'vanillaArea': 'Brinstar', 'variaArea': 'GreenBrinstar'},
+    'a253': {'name': 'Red Tower', 'graphArea': 'RedBrinstar', 'nearestAP': 'redTowerTopLeft', 'left': 10, 'top': 7, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a293': {'name': 'Red Brinstar Fireflea Room', 'left': 11, 'top': 13, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a2ce': {'name': 'X-Ray Scope Room', 'left': 19, 'top': 13, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a2f7': {'name': 'Hellway', 'left': 7, 'top': 7, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a322': {'name': 'Caterpillar Room', 'graphArea': 'RedBrinstar', 'nearestAP': 'caterpillarRoomTopRight', 'left': 4, 'top': 2, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a37c': {'name': 'Beta Power Bomb Room', 'left': 7, 'top': 5, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a3ae': {'name': 'Alpha Power Bomb Room', 'left': 7, 'top': 9, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a3dd': {'name': 'Bat Room', 'left': 8, 'top': 16, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a408': {'name': 'Below Spazer', 'left': 6, 'top': 15, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a447': {'name': 'Spazer Room', 'left': 5, 'top': 15, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a471': {'name': 'Warehouse Zeela Room', 'graphArea': 'Kraid', 'nearestAP': 'warehouseZeelaRoomLeft', 'left': 9, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
+    'a4b1': {'name': 'Warehouse Energy Tank Room', 'left': 11, 'top': 1, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
+    'a4da': {'name': 'Warehouse Keyhunter Room', 'left': 6, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
+    'a521': {'name': 'Baby Kraid Room', 'left': 2, 'top': 1, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
+    'a56b': {'name': 'Kraid Eye Door Room', 'graphArea': 'Kraid', 'nearestAP': 'kraidRoomOut', 'left': 0, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
+    'a59f': {'name': 'Kraid Room', 'left': 1, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'Kraid'},
+    'a5ed': {'name': 'Statues Hallway', 'graphArea': 'Tourian', 'nearestAP': 'goldenFour', 'left': 2, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'Tourian'},
+    'a618': {'name': '[Red Tower Energy Charge Station]', 'left': 11, 'top': 16, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a641': {'name': '[Kraid Recharge Station]', 'left': 0, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
+    'a66a': {'name': 'Statues Room', 'left': 1, 'top': 0, 'vanillaArea': 'Crateria', 'variaArea': 'Tourian'},
+    'a6a1': {'name': 'Warehouse Entrance', 'graphArea': 'Norfair', 'nearestAP': 'MULTI', 'screens': [['warehouseEntranceLeft', 'warehouseEntranceRight', 'warehouseEntranceRight'], ['warehouseEntranceLeft', 'warehouseEntranceRight', 'warehouseEntranceRight']], 'left': 25, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'UpperNorfair'},
+    'a6e2': {'name': 'Varia Suit Room', 'left': 0, 'top': 1, 'vanillaArea': 'Brinstar', 'variaArea': 'Kraid'},
+    'a70b': {'name': '[Kraid Save Room]', 'left': 5, 'top': 0, 'vanillaArea': 'Brinstar', 'variaArea': 'KraidLair'},
+    'a734': {'name': '[Caterpillar Save Room]', 'left': 5, 'top': 6, 'vanillaArea': 'Brinstar', 'variaArea': 'RedBrinstar'},
+    'a75d': {'name': 'Ice Beam Acid Room', 'left': 32, 'top': 5, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a788': {'name': 'Cathedral', 'left': 21, 'top': 5, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a7b3': {'name': 'Cathedral Entrance', 'left': 24, 'top': 5, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a7de': {'name': 'Business Center', 'left': 27, 'top': 2, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a815': {'name': 'Ice Beam Gate Room', 'left': 28, 'top': 3, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a865': {'name': 'Ice Beam Tutorial Room', 'left': 32, 'top': 3, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a890': {'name': 'Ice Beam Room', 'left': 32, 'top': 4, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a8b9': {'name': 'Ice Beam Snake Room', 'left': 33, 'top': 3, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a8f8': {'name': 'Crumble Shaft', 'left': 35, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a923': {'name': 'Crocomire Speedway', 'graphArea': 'Norfair', 'nearestAP': 'crocomireSpeedwayBottom', 'left': 22, 'top': 9, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'a98d': {'name': 'Crocomire Room', 'graphArea': 'Crocomire', 'nearestAP': 'crocomireRoomTop', 'left': 0, 'top': 0, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'a9e5': {'name': 'Hi Jump Boots Room', 'left': 30, 'top': 8, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'aa0e': {'name': 'Crocomire Escape', 'left': 23, 'top': 8, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'aa41': {'name': 'Hi Jump Energy Tank Room', 'left': 28, 'top': 7, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'aa82': {'name': 'Post Crocomire Farming Room', 'left': 8, 'top': 0, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'aab5': {'name': '[Post Crocomire Save Room]', 'left': 7, 'top': 1, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'aade': {'name': 'Post Crocomire Power Bomb Room', 'left': 10, 'top': 0, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'ab07': {'name': 'Post Crocomire Shaft', 'left': 9, 'top': 2, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'ab3b': {'name': 'Post Crocomire Missile Room', 'left': 5, 'top': 5, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'ab64': {'name': 'Grapple Tutorial Room 3', 'left': 10, 'top': 2, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'ab8f': {'name': 'Post Crocomire Jump Room', 'left': 8, 'top': 5, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'abd2': {'name': 'Grapple Tutorial Room 2', 'left': 13, 'top': 2, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'ac00': {'name': 'Grapple Tutorial Room 1', 'left': 14, 'top': 4, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'ac2b': {'name': 'Grapple Beam Room', 'left': 16, 'top': 4, 'vanillaArea': 'Norfair', 'variaArea': 'Crocomire'},
+    'ac5a': {'name': 'Norfair Reserve Tank Room', 'left': 18, 'top': 4, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'ac83': {'name': 'Green Bubbles Missile Room', 'left': 16, 'top': 4, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'acb3': {'name': 'Bubble Mountain', 'left': 14, 'top': 4, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'acf0': {'name': 'Speed Booster Hall', 'left': 1, 'top': 3, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'ad1b': {'name': 'Speed Booster Room', 'left': 0, 'top': 4, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'ad5e': {'name': 'Single Chamber', 'graphArea': 'Norfair', 'nearestAP': 'singleChamberTopRight', 'left': 8, 'top': 5, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'adad': {'name': 'Double Chamber', 'left': 9, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'adde': {'name': 'Wave Beam Room', 'left': 8, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'ae07': {'name': 'Spiky Platforms Tunnel', 'left': 9, 'top': 8, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'ae32': {'name': 'Volcano Room', 'left': 8, 'top': 8, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'ae74': {'name': 'Kronic Boost Room', 'graphArea': 'Norfair', 'nearestAP': 'kronicBoostRoomBottomLeft', 'left': 11, 'top': 10, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'aeb4': {'name': 'Magdollite Tunnel', 'left': 12, 'top': 10, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'aedf': {'name': 'Purple Shaft', 'left': 15, 'top': 8, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'af14': {'name': 'Lava Dive Room', 'graphArea': 'LowerNorfair', 'nearestAP': 'lavaDiveRight', 'left': 12, 'top': 7, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'af3f': {'name': '[Elevator to Lower Norfair]', 'left': 16, 'top': 7, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'af72': {'name': 'Upper Norfair Farming Room', 'left': 16, 'top': 7, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'afa3': {'name': 'Rising Tide', 'left': 16, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'afce': {'name': 'Acid Snakes Tunnel', 'left': 18, 'top': 11, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'affb': {'name': 'Spiky Acid Snakes Tunnel', 'left': 13, 'top': 11, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b026': {'name': '[Crocomire Recharge Room]', 'left': 17, 'top': 11, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b051': {'name': 'Purple Farming Room', 'left': 14, 'top': 9, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b07a': {'name': 'Bat Cave', 'left': 13, 'top': 3, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b0b4': {'name': 'Norfair Map Room', 'left': 28, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b0dd': {'name': '[Bubble Mountain Save Room]', 'left': 16, 'top': 5, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b106': {'name': 'Frog Speedway', 'left': 18, 'top': 7, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b139': {'name': 'Red Pirate Shaft', 'left': 18, 'top': 8, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b167': {'name': '[Business Center Save Room]', 'left': 26, 'top': 7, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b192': {'name': '[Crocomire Save Room]', 'left': 21, 'top': 10, 'vanillaArea': 'Norfair', 'variaArea': 'UpperNorfair'},
+    'b1bb': {'name': '[Elevator Save Room]', 'left': 17, 'top': 7, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b1e5': {'name': 'Acid Statue Room', 'left': 20, 'top': 10, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b236': {'name': 'Main Hall', 'left': 13, 'top': 8, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b283': {'name': 'Golden Torizo Room', 'left': 18, 'top': 12, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b2da': {'name': 'Fast Ripper Room', 'left': 13, 'top': 11, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b305': {'name': '[Screw Attack Energy Charge Room]', 'left': 16, 'top': 12, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b32e': {'name': 'Ridley Room', 'left': 0, 'top': 0, 'vanillaArea': 'Norfair', 'variaArea': 'Ridley'},
+    'b37a': {'name': 'Lower Norfair Farming Room', 'graphArea': 'LowerNorfair', 'nearestAP': 'ridleyRoomOut', 'left': 11, 'top': 13, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b3a5': {'name': 'Fast Pillars Setup Room', 'left': 12, 'top': 9, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b40a': {'name': 'Mickey Mouse Room', 'left': 8, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b457': {'name': 'Pillar Room', 'left': 8, 'top': 11, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b482': {'name': 'Plowerhouse Room', 'left': 8, 'top': 13, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b4ad': {'name': 'The Worst Room In The Game', 'left': 7, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b4e5': {'name': 'Amphitheatre', 'left': 3, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b510': {'name': 'Lower Norfair Spring Ball Maze Room', 'left': 0, 'top': 2, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b55a': {'name': 'Lower Norfair Escape Power Bomb Room', 'left': 0, 'top': 3, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b585': {'name': 'Red Keyhunter Shaft', 'left': 0, 'top': 6, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b5d5': {'name': 'Wasteland', 'left': 0, 'top': 11, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b62b': {'name': 'Metal Pirates Room', 'left': 5, 'top': 13, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b656': {'name': 'Three Muskateers Room', 'graphArea': 'LowerNorfair', 'nearestAP': 'threeMuskateersRoomLeft', 'left': 5, 'top': 0, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b698': {'name': 'Ridley Tank Room', 'left': 1, 'top': 1, 'vanillaArea': 'Norfair', 'variaArea': 'Ridley'},
+    'b6c1': {'name': 'Screw Attack Room', 'left': 17, 'top': 11, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b6ee': {'name': 'Lower Norfair Fireflea Room', 'left': 0, 'top': 3, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'b741': {'name': '[Red Keyhunter Shaft Save Room]', 'left': 1, 'top': 9, 'vanillaArea': 'Norfair', 'variaArea': 'LowerNorfair'},
+    'c98e': {'name': 'Bowling Alley', 'left': 14, 'top': 1, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'ca08': {'name': 'Wrecked Ship Entrance', 'left': 14, 'top': 4, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'ca52': {'name': 'Attic', 'left': 11, 'top': 0, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'caae': {'name': 'Wrecked Ship East Missile Room', 'left': 8, 'top': 0, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'caf6': {'name': 'Wrecked Ship Main Shaft', 'left': 12, 'top': 1, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cb8b': {'name': 'Spiky Death Room', 'left': 9, 'top': 5, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cbd5': {'name': 'Electric Death Room', 'left': 8, 'top': 3, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cc27': {'name': 'Wrecked Ship Energy Tank Room', 'left': 9, 'top': 3, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cc6f': {'name': 'Basement', 'graphArea': 'WreckedShip', 'nearestAP': 'phantoonRoomOut', 'left': 11, 'top': 9, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cccb': {'name': 'Wrecked Ship Map Room', 'left': 16, 'top': 9, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cd13': {'name': 'Phantoon Room', 'left': 0, 'top': 0, 'vanillaArea': 'WreckedShip', 'variaArea': 'Phantoon'},
+    'cd5c': {'name': 'Sponge Bath', 'left': 11, 'top': 5, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cda8': {'name': 'Wrecked Ship West Super Room', 'left': 14, 'top': 7, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'cdf1': {'name': 'Wrecked Ship East Super Room', 'left': 8, 'top': 7, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'ce40': {'name': 'Gravity Suit Room', 'left': 19, 'top': 3, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'ce8a': {'name': '[Wrecked Ship Save Room]', 'left': 12, 'top': 4, 'vanillaArea': 'WreckedShip', 'variaArea': 'WreckedShip'},
+    'ced2': {'name': '[Glass Tunnel Save Room]', 'left': 3, 'top': 17, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
+    'cefb': {'name': 'Glass Tunnel', 'graphArea': 'RedBrinstar', 'nearestAP': 'glassTunnelTop', 'left': 4, 'top': 15, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
+    'cf54': {'name': 'West Tunnel', 'left': 5, 'top': 16, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
+    'cf80': {'name': 'East Tunnel', 'graphArea': 'RedBrinstar', 'nearestAP': 'MULTI', 'screens': [['eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight', 'eastTunnelTopRight'], ['eastTunnelRight', 'x', 'x', 'x']], 'left': 0, 'top': 15, 'vanillaArea': 'Maridia', 'variaArea': 'RedBrinstar'},
+    'cfc9': {'name': 'Main Street', 'graphArea': 'WestMaridia', 'nearestAP': 'mainStreetBottom', 'left': 9, 'top': 5, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd017': {'name': 'Fish Tank', 'left': 5, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd055': {'name': 'Mama Turtle Room', 'left': 2, 'top': 8, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd08a': {'name': 'Crab Tunnel', 'left': 6, 'top': 12, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd0b9': {'name': 'Mt. Everest', 'left': 4, 'top': 5, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd104': {'name': 'Red Fish Room', 'graphArea': 'WestMaridia', 'nearestAP': 'redFishRoomLeft', 'left': 7, 'top': 3, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd13b': {'name': 'Watering Hole', 'left': 8, 'top': 0, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd16d': {'name': 'Northwest Maridia Bug Room', 'left': 4, 'top': 0, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd1a3': {'name': 'Crab Shaft', 'graphArea': 'WestMaridia', 'nearestAP': 'crabShaftRight', 'left': 2, 'top': 3, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd1dd': {'name': 'Pseudo Plasma Spark Room', 'left': 0, 'top': 0, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd21c': {'name': 'Crab Hole', 'graphArea': 'WestMaridia', 'nearestAP': 'crabHoleBottomLeft', 'left': 5, 'top': 12, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd252': {'name': '[Tunnel to West Sand Hall]', 'left': 25, 'top': 19, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd27e': {'name': 'Plasma Tutorial Room', 'left': 16, 'top': 3, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd2aa': {'name': 'Plasma Room', 'left': 14, 'top': 3, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd2d9': {'name': 'Thread The Needle Room', 'left': 9, 'top': 8, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd30b': {'name': 'Maridia Elevator Room', 'left': 8, 'top': 3, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd340': {'name': 'Plasma Spark Room', 'left': 17, 'top': 5, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd387': {'name': 'Plasma Climb', 'left': 17, 'top': 3, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd3b6': {'name': 'Maridia Map Room', 'left': 4, 'top': 13, 'vanillaArea': 'Maridia', 'variaArea': 'WestMaridia'},
+    'd3df': {'name': '[Maridia Elevator Save Room]', 'left': 7, 'top': 7, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd408': {'name': '[Vertical Tube]', 'left': 20, 'top': 8, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd433': {'name': 'Bug Sand Hole', 'left': 16, 'top': 8, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd461': {'name': 'West Sand Hall', 'left': 21, 'top': 19, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd48e': {'name': 'Oasis', 'left': 20, 'top': 18, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd4c2': {'name': 'East Sand Hall', 'left': 17, 'top': 19, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd4ef': {'name': 'West Sand Hole', 'left': 21, 'top': 17, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd51e': {'name': 'East Sand Hole', 'left': 18, 'top': 17, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd54d': {'name': '[West Sand Fall]', 'left': 21, 'top': 15, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd57a': {'name': '[East Sand Fall]', 'left': 19, 'top': 15, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd5a7': {'name': 'Aqueduct', 'graphArea': 'EastMaridia', 'nearestAP': 'aqueductTopLeft', 'left': 17, 'top': 12, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd5ec': {'name': 'Butterfly Room', 'left': 16, 'top': 10, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd617': {'name': 'Botwoon Hallway', 'left': 19, 'top': 11, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd646': {'name': 'Pants Room', 'left': 15, 'top': 16, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd69a': {'name': '[Pants Room West half]', 'left': 15, 'top': 17, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd6d0': {'name': 'Spring Ball Room', 'left': 9, 'top': 18, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd6fd': {'name': 'Below Botwoon Energy Tank', 'left': 13, 'top': 13, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd72a': {'name': 'Colosseum', 'left': 2, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd765': {'name': '[Aqueduct Save Room]', 'left': 23, 'top': 14, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd78f': {'name': 'The Precious Room', 'graphArea': 'EastMaridia', 'nearestAP': 'draygonRoomOut', 'left': 0, 'top': 10, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd7e4': {'name': 'Botwoon Energy Tank Room', 'left': 10, 'top': 11, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd81a': {'name': '[Colosseum Save Room]', 'left': 1, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd845': {'name': '[Halfie Climb Missile Station]', 'left': 4, 'top': 11, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd86e': {'name': '[Bug Sand Fall]', 'left': 16, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd898': {'name': '[Botwoon Sand Fall]', 'left': 13, 'top': 12, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd8c5': {'name': 'Shaktool Room', 'left': 11, 'top': 18, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd913': {'name': 'Halfie Climb Room', 'left': 5, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd95e': {'name': 'Botwoon Room', 'left': 17, 'top': 11, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd9aa': {'name': 'Space Jump Room', 'left': 1, 'top': 1, 'vanillaArea': 'Maridia', 'variaArea': 'Draygon'},
+    'd9d4': {'name': '[Colosseum Energy Charge Room]', 'left': 0, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'd9fe': {'name': 'Cactus Alley [West]', 'left': 15, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'da2b': {'name': 'Cactus Alley [East]', 'left': 10, 'top': 9, 'vanillaArea': 'Maridia', 'variaArea': 'EastMaridia'},
+    'da60': {'name': 'Draygon Room', 'left': -1, 'top': 0, 'vanillaArea': 'Maridia', 'variaArea': 'Draygon'},
+    'daae': {'name': 'Tourian First Room', 'left': 1, 'top': 1, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dae1': {'name': 'Metroid Room 1', 'left': 2, 'top': 4, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'db31': {'name': 'Metroid Room 2', 'left': 8, 'top': 4, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'db7d': {'name': 'Metroid Room 3', 'left': 2, 'top': 5, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dbcd': {'name': 'Metroid Room 4', 'left': 1, 'top': 5, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dc19': {'name': 'Blue Hopper Room', 'left': 1, 'top': 7, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dc65': {'name': 'Dust Torizo Room', 'left': 3, 'top': 7, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dcb1': {'name': 'Big Boy Room', 'left': 3, 'top': 7, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dcff': {'name': 'Seaweed Room', 'left': 9, 'top': 7, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dd2e': {'name': 'Tourian Recharge Room', 'left': 10, 'top': 8, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dd58': {'name': 'Mother Brain Room', 'left': 4, 'top': 10, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'ddc4': {'name': 'Tourian Eye Door Room', 'left': 5, 'top': 8, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'ddf3': {'name': 'Rinka Shaft', 'left': 4, 'top': 8, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'de23': {'name': '[Mother Brain Save Room]', 'left': 5, 'top': 9, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'de4d': {'name': 'Tourian Escape Room 1', 'left': 9, 'top': 10, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'de7a': {'name': 'Tourian Escape Room 2', 'left': 10, 'top': 11, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dea7': {'name': 'Tourian Escape Room 3', 'left': 4, 'top': 11, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'dede': {'name': 'Tourian Escape Room 4', 'left': 1, 'top': 8, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'df1b': {'name': '[Tourian First Save Room]', 'left': 0, 'top': 4, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+    'df45': {'name': '[Ceres Elevator Room]', 'left': 28, 'top': 13, 'vanillaArea': 'Ceres', 'variaArea': 'Ceres'},
+    'df8d': {'name': '[Ceres Jump Tutorial Room]', 'left': 26, 'top': 15, 'vanillaArea': 'Ceres', 'variaArea': 'Ceres'},
+    'dfd7': {'name': '[Ceres Staircase Room]', 'left': 25, 'top': 15, 'vanillaArea': 'Ceres', 'variaArea': 'Ceres'},
+    'e021': {'name': '[Ceres Dead Scientists Room]', 'left': 23, 'top': 16, 'vanillaArea': 'Ceres', 'variaArea': 'Ceres'},
+    'e06b': {'name': '[Ceres Last Corridor]', 'left': 21, 'top': 16, 'vanillaArea': 'Ceres', 'variaArea': 'Ceres'},
+    'e0b5': {'name': '[Ceres Ridley Room]', 'left': 20, 'top': 16, 'vanillaArea': 'Ceres', 'variaArea': 'Ceres'},
+    'fd40': {'name': 'Mirrortroid Mother Brain Room', 'left': 8, 'top': 10, 'vanillaArea': 'Tourian', 'variaArea': 'Tourian'},
+};
+{{include 'solver_web/_autotracker.js'}}
 </script>
 
 <div class="fixed">
@@ -1771,51 +836,29 @@ function sendAutoTrackerMessage(data, newState) {
 <div class="main">
 {{include 'solver_web/t_main.html'}}
 
-    <!-- map display switch -->
-    <div id="switchMap" class="switchMap"><img src="/solver/static/images/ui/television.svg" alt="Switch" onclick="switchStreamingMap()" data-toggle="tooltip" title="Switch to streaming map" data-placement="bottom" data-container="body" data-html="true"></div>
-
-    <!-- inventory display switch -->
-    <div id="switchInventory" class="switchInventory"><img src="/solver/static/images/ui/television.svg" alt="Switch" onclick="switchStreamingInventory()" data-toggle="tooltip" title="Switch to streaming inventory" data-placement="bottom" data-container="body" data-html="true"></div>
-
-    <!-- item tracker buttons -->
-    <div id="titleItem" class="titleItem">ITEM</div>
-    <div id="startItem" class="startItem"><img src="/solver/static/images/ui/play.svg" alt="Start" onclick="displayPopup(false)" data-toggle="tooltip" title="Start the Interactive Solver" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="repeatItem" class="repeatItem"><img src="/solver/static/images/ui/repeat.svg" alt="Cancel Last" onclick="deleteLoc(false)" data-toggle="tooltip" title="Remove last visited location" data-placement="bottom" data-container="body" data-html="true" id="repeatItemImg"></div>
-    <div id="binItem" class="binItem"><img src="/solver/static/images/ui/bin.svg" alt="Clear" onclick="clearLocs(false)" data-toggle="tooltip" title="Remove all visited locations and doors" data-placement="bottom" data-container="body" data-html="true"></div>
-
-    <!-- tracker help -->
-    <div id="help" class="help"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the help" data-placement="bottom" data-container="body" data-html="true"></div>
-
     <!-- auto tracker -->
-    <div id="titleAutoTracker">AUTO TRACKER</div>
+    <div class="auto-tracker">
+      <div id="titleAutoTracker">AUTO TRACKER</div>
 
-    <div id="startStopAutoTracker">
-      <img id="startAutoTracker" src="/solver/static/images/ui/play.svg" alt="Start AutoTracker" onclick="startAutoTracker()" data-toggle="tooltip" title="Start the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
-      <img id="stopAutoTracker" src="/solver/static/images/ui/shut_down.svg" alt="Stop AutoTracker" style="display: none" onclick="stopAutoTracker()" data-toggle="tooltip" title="Stop the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
-    </div>
+      <div class="auto-tracker__contents">
+        <div id="startStopAutoTracker">
+          <img id="startAutoTracker" src="/solver/static/images/ui/play.svg" alt="Start AutoTracker" onclick="startAutoTracker()" data-toggle="tooltip" title="Start the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
+          <img id="stopAutoTracker" src="/solver/static/images/ui/shut_down.svg" alt="Stop AutoTracker" style="display: none" onclick="stopAutoTracker()" data-toggle="tooltip" title="Stop the Auto Tracker" data-placement="bottom" data-container="body" data-html="true">
+        </div>
 
-    <div id="helpAutoTracker"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the AutoTracker help" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="statusAutoTracker">
-      <img id="statusKO" src="/solver/static/images/ui/record_ko.svg" alt="statusKO" style="display: none" data-toggle="tooltip" title="AutoTracker status OK" data-placement="bottom" data-container="body" data-html="true">
-      <img id="statusOK" src="/solver/static/images/ui/record_ok.svg" alt="statusOK" style="display: none" data-toggle="tooltip" title="AutoTracker status KO" data-placement="bottom" data-container="body" data-html="true">
-      <img id="statusLoad" src="/solver/static/images/ui/record_load.svg" alt="statusLoad" style="display: none" data-toggle="tooltip" title="AutoTracker status Load" data-placement="bottom" data-container="body" data-html="true">
-      <img id="statusNA" src="/solver/static/images/ui/record.svg" alt="statusNA" data-toggle="tooltip" title="AutoTracker status NA" data-placement="bottom" data-container="body" data-html="true">
-    </div>
+        <div id="statusAutoTracker">
+          <img id="statusKO" src="/solver/static/images/ui/record_ko.svg" alt="statusKO" style="display: none" data-toggle="tooltip" title="AutoTracker status OK" data-placement="bottom" data-container="body" data-html="true">
+          <img id="statusOK" src="/solver/static/images/ui/record_ok.svg" alt="statusOK" style="display: none" data-toggle="tooltip" title="AutoTracker status KO" data-placement="bottom" data-container="body" data-html="true">
+          <img id="statusLoad" src="/solver/static/images/ui/record_load.svg" alt="statusLoad" style="display: none" data-toggle="tooltip" title="AutoTracker status Load" data-placement="bottom" data-container="body" data-html="true">
+          <img id="statusNA" src="/solver/static/images/ui/record.svg" alt="statusNA" data-toggle="tooltip" title="AutoTracker status NA" data-placement="bottom" data-container="body" data-html="true">
+        </div>
+        <div id="helpAutoTracker"><img src="/solver/static/images/ui/help.svg" alt="Help" onclick="startTheTour(event)" data-toggle="tooltip" title="Display the AutoTracker help" data-placement="bottom" data-container="body" data-html="true"></div>
+        <textarea id="logAutoTracker" disabled></textarea>
+      </div>
 
-    <textarea id="logAutoTracker" disabled></textarea>
-
-    <!-- debug canvas pink color: de3994 -->
-    <canvas id="debugMap" width="512" height="256"></canvas>
-
-    <!-- RTA timer -->
-    <div id="rtaTimerDiv" class="rtaTimerClassic">
-      <p id="rtaTimer"></p>
     </div>
   </div>
 
-  <!-- info on current loaded seed -->
-  <p class="white">Current Seed:</p>
-  <input type="text" name="cur_seed" id="cur_seed" value="n/a" readonly class="full">
-  <p class="white">Current Preset:</p>
-  <input type="text" name="cur_preset" id="cur_preset" value="n/a" readonly class="full">
 </div>
+<div id="app"></div>
+{{ response.write(app_files, escape=False) }}

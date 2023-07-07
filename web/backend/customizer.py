@@ -8,6 +8,7 @@ from urllib.parse import urlparse, parse_qs
 from utils.utils import getRandomizerDefaultParameters, removeChars, getPresetDir, PresetLoader, getPythonExec
 from utils.db import DB
 from logic.logic import Logic
+from rom.romreader import RomReader
 # custom sprites data
 from varia_custom_sprites.custom_sprites import customSprites, customSpritesOrder
 from varia_custom_sprites.custom_ships import customShips, customShipsOrder
@@ -58,11 +59,15 @@ class Customizer(object):
                     info = {}
                     seedParams = {}
                     infoKeys = ['time', 'filename', 'preset', 'runtime', 'complexity', 'upload_status', 'seed', 'raceMode']
+                    noReplaceKeys = ['progressionDifficulty', 'progressionDifficultyMultiSelect']
                     for (k, value) in seedInfo:
                         if k in infoKeys:
                             info[k] = value
                         else:
-                            seedParams[k] = updateParameterDisplay(value)
+                            if k in noReplaceKeys:
+                                seedParams[k] = value
+                            else:
+                                seedParams[k] = updateParameterDisplay(value)
                     seedInfo = info
                     seedInfo['key'] = key
 
@@ -91,12 +96,14 @@ class Customizer(object):
             msg = query_msg + msg
 
         return dict(customSprites=customSprites, customShips=customShips, musics=musics, comPresets=comPresets,
-                    seedInfo=seedInfo, seedParams=seedParams, msg=msg, defaultParams=defaultParams)
+                    seedInfo=seedInfo, seedParams=seedParams, msg=msg, defaultParams=defaultParams,
+                    flavorPatches=RomReader.flavorPatches)
 
     def initCustomizerSession(self):
         if self.session.customizer is None:
             self.session.customizer = {}
 
+            self.session.customizer['logic'] = "vanilla"
             self.session.customizer['colorsRandomization'] = "off"
             self.session.customizer['suitsPalettes'] = "on"
             self.session.customizer['beamsPalettes'] = "on"
@@ -128,6 +135,7 @@ class Customizer(object):
             self.session.customizer['AimAnyButton'] = "off"
             self.session.customizer['max_ammo_display'] = "off"
             self.session.customizer['supermetroid_msu1'] = "off"
+            self.session.customizer['base'] = "off"
             self.session.customizer['remove_itemsounds'] = "off"
             self.session.customizer['remove_spinjumprestart'] = "off"
             self.session.customizer['remove_elevators_speed'] = "off"
@@ -138,6 +146,7 @@ class Customizer(object):
             self.session.customizer['hell'] = "off"
             self.session.customizer['hellrun_rate'] = 100
             self.session.customizer['etanks'] = 0
+            self.session.customizer['hard_mode'] = "off"
             self.session.customizer['music'] = "Don't touch"
             self.session.customizer['color_blind'] = "off"
             self.session.customizer['disable_screen_shake'] = "off"
@@ -159,14 +168,15 @@ class Customizer(object):
 
         # check validity of all parameters
         switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_speed', 'fast_doors',
-                   'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save',
+                   'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'base',
+                   'Infinite_Space_Jump', 'refill_before_save',
                    'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
                    'remove_elevators_speed', 'remove_fast_doors', 'remove_Infinite_Space_Jump',
                    'remove_rando_speed', 'remove_spinjumprestart', 'gamepadMapping', 'widescreen',
                    'hell', 'lava_acid_physics', 'colorsRandomization', 'suitsPalettes', 'beamsPalettes',
                    'tilesPalettes', 'enemiesPalettes', 'bossesPalettes', 'invert',
-                   'color_blind', 'disable_screen_shake', 'noflashing']
-        others = ['minDegree', 'maxDegree', 'hellrun_rate', 'etanks']
+                   'color_blind', 'disable_screen_shake', 'noflashing', 'hard_mode']
+        others = ['minDegree', 'maxDegree', 'hellrun_rate', 'etanks', 'logic']
         validateWebServiceParams(self.request, switchs, [], [], others, isJson=True)
         if self.vars.customSpriteEnable == 'on':
             if self.vars.customSprite == 'random':
@@ -186,10 +196,14 @@ class Customizer(object):
         if self.vars.music not in ["Don't touch", "Disable", "Randomize", "Customize", "Restore"]:
             raiseHttp(400, "Wrong value for music", True)
 
-        if self.session.customizer == None:
+        if self.vars.logic is None:
+            raiseHttp(400, "Missing logic parameter", True)
+
+        if self.session.customizer is None:
             self.session.customizer = {}
 
         # update session
+        self.session.customizer['logic'] = self.vars.logic
         self.session.customizer['colorsRandomization'] = self.vars.colorsRandomization
         self.session.customizer['suitsPalettes'] = self.vars.suitsPalettes
         self.session.customizer['beamsPalettes'] = self.vars.beamsPalettes
@@ -224,6 +238,7 @@ class Customizer(object):
         self.session.customizer['AimAnyButton'] = self.vars.AimAnyButton
         self.session.customizer['max_ammo_display'] = self.vars.max_ammo_display
         self.session.customizer['supermetroid_msu1'] = self.vars.supermetroid_msu1
+        self.session.customizer['base'] = self.vars.base
         self.session.customizer['remove_itemsounds'] = self.vars.remove_itemsounds
         self.session.customizer['remove_elevators_speed'] = self.vars.remove_elevators_speed
         self.session.customizer['remove_fast_doors'] = self.vars.remove_fast_doors
@@ -234,6 +249,7 @@ class Customizer(object):
         self.session.customizer['hell'] = self.vars.hell
         self.session.customizer['hellrun_rate'] = self.vars.hellrun_rate
         self.session.customizer['etanks'] = self.vars.etanks
+        self.session.customizer['hard_mode'] = self.vars.hard_mode
         self.session.customizer['music'] = self.vars.music
         self.session.customizer['color_blind'] = self.vars.color_blind
         self.session.customizer['disable_screen_shake'] = self.vars.disable_screen_shake
@@ -250,7 +266,7 @@ class Customizer(object):
         # call the randomizer
         (fd, jsonFileName) = tempfile.mkstemp()
         params = [getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/customizer.py"),
-                  '--output', jsonFileName]
+                  '--output', jsonFileName, '--logic' , self.vars.logic]
 
         if self.vars.itemsounds == 'on':
             params += ['-c', 'itemsounds.ips']
@@ -268,6 +284,8 @@ class Customizer(object):
             params += ['-c', 'max_ammo_display.ips']
         if self.vars.supermetroid_msu1 == 'on':
             params += ['-c', 'supermetroid_msu1.ips']
+        if self.vars.base == 'on':
+            params += ['--base']
         if self.vars.Infinite_Space_Jump == 'on':
             params += ['-c', 'Infinite_Space_Jump']
         if self.vars.refill_before_save == 'on':
@@ -300,6 +318,8 @@ class Customizer(object):
             params += ['--hellrun', self.vars.hellrun_rate]
         if self.vars.etanks != 'off':
             params += ['--etanks', self.vars.etanks]
+        if self.vars.hard_mode != 'off':
+            params += ['-c', 'hard_mode.ips']
         if self.vars.color_blind == 'on':
             params += ['-c', 'color_blind.ips']
         if self.vars.disable_screen_shake == 'on':

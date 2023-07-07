@@ -22,7 +22,11 @@ def interactiveSolver(args):
             sys.exit(1)
 
         solver = InteractiveSolver(args.shm, args.logic)
-        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, fill=args.fill, startLocation=args.startLocation)
+        extraSettings = {
+            'startLocation': args.startLocation,
+            'doorsRando': args.doorsRando,
+        }
+        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, fill=args.fill, extraSettings=extraSettings)
     else:
         # iterate
         params = {}
@@ -188,6 +192,7 @@ if __name__ == "__main__":
     parser.add_argument('--fill', help="in plando load all the source seed locations/transitions as a base (used in interactive mode)",
                         dest="fill", action='store_true')
     parser.add_argument('--startLocation', help="in plando/seedless: the start location", dest="startLocation", default="Landing Site")
+    parser.add_argument('--doorsRando', help="in seedless: door randomization", dest="doorsRando", action='store_true')
     parser.add_argument('--minorQty', help="rando plando  (used in interactive mode)",
                         dest="minorQty", nargs="?", default=None, choices=[str(i) for i in range(0,101)])
     parser.add_argument('--energyQty', help="rando plando  (used in interactive mode)",
@@ -198,7 +203,7 @@ if __name__ == "__main__":
                         dest="doorName", nargs="?", default=None)
     parser.add_argument('--newColor', help="new color for door (used in interactive mode)",
                         dest="newColor", nargs="?", default=None)
-    parser.add_argument('--logic', help='logic to use (used in interactive mode)', dest='logic', nargs='?', default="vanilla", choices=["vanilla", "rotation"])
+    parser.add_argument('--logic', help='logic to use (used in interactive mode)', dest='logic', nargs='?', default="vanilla", choices=["vanilla", "rotation", "mirror"])
     parser.add_argument('--runtime',
                         help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit.",
                         dest='runtimeLimit_s', nargs='?', default=0, type=int)

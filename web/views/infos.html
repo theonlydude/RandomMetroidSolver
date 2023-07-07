@@ -57,7 +57,7 @@
     Web hosting was sponsored in 2019 by the <a href="https://www.twitch.tv/randomizerleague" target="_blank">Super Metroid Item Randomizer League</a>. Since then, web hosting is sponsored by generous people donations.
   </p>
   <p>
-    Huge thanks to the people who developped Super Metroid, the previous Super Metroid Randomizers, Super Metroid patches, <a href="http://www.metroidconstruction.com/" target="_blank">Metroid Construction</a>, Super Metroid Discords.
+    Huge thanks to the people who developed Super Metroid, the previous Super Metroid Randomizers, Super Metroid patches, <a href="http://www.metroidconstruction.com/" target="_blank">Metroid Construction</a>, Super Metroid Discords.
   </p>
   <h2>Statistics</h2>
   <p>
@@ -69,6 +69,61 @@
   <a name="latest"></a>
   <h2>Change Log</h2>
   <ul>
+    <li>
+      <h4>2023/07/07</h4>
+      <p>Hello @randomizer,</p>
+      <p>We've released a new version of the VARIA Randomizer, Solver, Tracker, Plandomizer and Customizer (http://varia.run/).</p>
+      <p>🪞 You can now play the game horizontally mirrored! This has been made possible by integrating the Super Mirrortroid hack by @BuggMann (https://metroidconstruction.com/hack.php?id=622). In mirror flavor all rooms, including bosses/mini-bosses are mirrored. All VARIA features are available in both vanilla and mirror flavors.</p>
+      <p>🗒️ The recently introduced objective system has been extended. There is now a distinction between "possible objectives" (the objective list in the seed) and "required objectives" (the actual number of objectives to complete from this list). This allows for more strategic play, by completing objectives that work well together. For this to be interesting, we had to expand the maximum number of objectives (9 max required, 18 max possible). Try it out with the "objectives_bingo" settings preset!</p>
+      <p>🗺️ The in game map has been enhanced as well, using the awesome Map Overhaul patch by @MFreak as a base. The room connections are visible, as well as major/minor item locations adapted to the seed's item split. Each VARIA area has its own color, consistent across the vanilla area maps. The door colors and area/boss portals are dynamically tracked and shown as map icons. When applicable, objectives are visible on the map.</p>
+      <p>▶️ Speaking of map, the tracker/plandomizer user interface has been remade by @chrisc! On top of mirror support it features seamless change of map style, smooth resizing, different item trackers, an improved seedless mode etc. </p>
+      <p>Other new stuff:</p>
+      <h4>rando:</h4>
+      <ul>
+        <li>objectives:  new map completion based objectives</li>
+        <li>objectives:  new "Hidden objectives" option for random objectives: the objective list is hidden until you reach G4 (or equivalent)</li>
+        <li>rom: improved objective screen with detailed progress display</li>
+        <li>rom: new ending screen showing RTA time, item%, and item collection details</li>
+        <li>rom: show RTA timer in the pause menu</li>
+        <li>rom: new HUD/message boxes/pause screen font</li>
+        <li>rom: restored vanilla Mother Brain cutscenes</li>
+        <li>doors: no plasma doors when super fun combat is on</li>
+        <li>presets: save/load rando presets to/from disk</li>
+        <li>layout: in area rando, removed the platform in green hill zone (reduced the above overhang instead)</li>
+      </ul>
+      <h4>logic:</h4>
+      <ul>
+        <li>hellruns: only account for a maximum of (number of ETanks+1) Reserve tanks</li>
+        <li>New techniques :</li>
+        <ul>
+          <li>Spore Spawn backdoor (enabled by default in existing presets, disabled in newbie)</li>
+          <li>Mirrored Wave Gate Glitch: GGG from a wall jump at Wave Gate in Mirrortroid (veteran+)</li>
+          <li>Mama Turtle wall jump bomb boost (expert+)</li>
+          <li>East Sand Hall Spring Ball Jump (master)</li>
+          <li>West Sand Hall Insane Bomb Jump (master)</li>
+          <li>Cacatac Alley Underwater Wall Jump (master)</li>
+        </ul>
+      </ul>
+      <h4>solver/tracker:</h4>
+      <ul>
+        <li>escape path is shown in solver spoiler log</li>
+        <li>auto-tracker support for multiworld seeds (thanks @Dorkmaster Flek for the PR)</li>
+      </ul>
+      <h4>customizer:</h4>
+      <ul>
+        <li>added a LOT of new sprites and ships</li>
+        <li>improved palette randomization of levels, by adapting to human perceived luminance</li>
+        <li>option for Hard Mode by @Sirkura, @Devaliah, @Quote and @Phosphodile</li>
+        <li>option to add VARIA RTA timer/stats/credits to a vanilla ROM</li>
+      </ul>
+      <h4>bugfixes:</h4>
+      <ul>
+        <li>rando: prevented speedrun progression speed from generating seeds above max required difficulty when it was not necessary</li>
+        <li>patches: don’t open Ridley door when he’s dead when HUD is on in non-Scavenger seeds</li>
+        <li>logic: added missing access to Mickey Mouse missiles from Firefleas (was previously only in logic from LN entrance)</li>
+        <li>and more...</li>
+      </ul>
+    </li>
     <li>
       <h4>2022/11/01</h4>
       <p>Hello @randomizer,</p>

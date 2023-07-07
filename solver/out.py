@@ -60,7 +60,9 @@ class OutWeb(Out):
                       pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
                       remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
                       skippedMajors=skippedMajors, unavailMajors=unavailMajors, collectedItems=collectedItems,
-                      scavengerOrder=scavengerOrder, objectives=Objectives.getGoalsList(), tourian=tourian)
+                      scavengerOrder=scavengerOrder, objectives=Objectives.getGoalsList(),
+                      nbActiveGoals=Objectives.nbActiveGoals, nbRequiredGoals=Objectives.nbRequiredGoals,
+                      tourian=tourian)
 
         with open(s.outputFileName, 'w') as jsonFile:
             json.dump(result, jsonFile)
@@ -247,6 +249,7 @@ class OutConsole(Out):
 
         print("all patches: {}".format(s.romLoader.getAllPatches()))
         print("objectives: {}".format(Objectives.getGoalsList()))
+        print("objectives required: {}/{}".format(Objectives.nbRequiredGoals, Objectives.nbActiveGoals))
         print("tourian: {}".format(s.tourian))
 
         # print generated path

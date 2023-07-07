@@ -35,6 +35,7 @@ while(1)
     $address = ord(substr($data,0,1))*256*256 +
 	ord(substr($data,1,1))*256 +
 	ord(substr($data,2,1));
+    $address = ((($address<<1)&0x7F0000)|($address&0x7FFF)|0x8000)|0x800000;
 
     read PAT, $data, 2 or die "Read error";
     $length = ord(substr($data,0,1))*256 + ord(substr($data,1,1));

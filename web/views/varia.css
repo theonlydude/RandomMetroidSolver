@@ -21,6 +21,9 @@ label {
     width: 12%;
     white-space: nowrap;
 }
+.logic {
+    width: 5%;
+}
 .desc {
     width: 33%;
 }

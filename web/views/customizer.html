@@ -418,7 +418,8 @@ function doSubmit() {
         }
 
         var dataDict = {};
-        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "color_blind", "disable_screen_shake", "noflashing"];
+        dataDict["logic"] = logic;
+        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "base", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "hard_mode", "color_blind", "disable_screen_shake", "noflashing"];
 
         for(var i=0; i<elems.length; i++) {
             var elem = document.getElementById(elems[i]);
@@ -818,6 +819,7 @@ var seedKey = null;
 var isVARIA = false;
 var isArea = false;
 var isBoss = false;
+var logic = "vanilla";
 {{
 if seedInfo != None:
     response.write("permalink = true;", escape=False)
@@ -825,16 +827,17 @@ if seedInfo != None:
     response.write("isVARIA = true;", escape=False)
     response.write("isArea = {};".format("true" if seedParams["areaRandomization"] in ["full", "light", "random"] else "false"), escape=False)
     response.write("isBoss = {};".format("true" if seedParams["bossRandomization"] in ["on", "random"] else "false"), escape=False)
+    response.write("logic = '{}';".format(seedParams.get("logic", "vanilla")), escape=False)
     pass
 }}
 
 function greyOutPatches(isRace, isVARIA, isVanilla) {
-    var buttons = ["itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save", "widescreen", "lava_acid_physics", "hell", "hellrun_rate", "etanks"];
+    var buttons = ["itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save", "widescreen", "lava_acid_physics", "hell", "hellrun_rate", "etanks", "hard_mode"];
     for(var i=0; i<buttons.length; i++) {
         disableElement(buttons[i], isRace);
     }
 
-    var buttons = ["AimAnyButton", "max_ammo_display", "supermetroid_msu1"];
+    var buttons = ["AimAnyButton", "max_ammo_display", "supermetroid_msu1", "base"];
     for(var i=0; i<buttons.length; i++) {
         disableElement(buttons[i], isVARIA);
     }
@@ -1009,7 +1012,14 @@ window.onload = function(){
                     // detect Phantoon_Eye_Door patch
                     isBoss = bytes[0x7ccaf] == 0x91;
 
-                    console.log("isArea: "+isArea+" isBoss: "+isBoss+" isVARIA: "+isVARIA+" isRace: "+isRace);
+                    // detect logic
+                    logic = "vanilla";
+{{
+    for logic, values in flavorPatches.items():
+        response.write("                    if(bytes["+str(values['address'])+"] == "+str(values['value'])+") { logic = '"+logic+"'; }\n", escape=False)
+        pass
+}}
+                    console.log("isArea: "+isArea+" isBoss: "+isBoss+" isVARIA: "+isVARIA+" isRace: "+isRace+" logic: "+logic);
 
                     greyOutPatches(isRace, isVARIA, isVanilla);
                 }
@@ -1485,7 +1495,7 @@ function startTheTour(step=-1) {
     {
       element: "#customSpriteStep",
       title: "Custom Sprites",
-      content: "<p>The sprites have been created using <a href=\"https://github.com/Artheau/SpriteSomething\" target=\"_blank\">Sprite Something</a> by Artheau and MikeTrethewey.</p>\
+      content: "<p>The sprites have been created using <a href=\"https://github.com/Artheau/SpriteSomething\" target=\"_blank\">Sprite Something</a> by Artheau and Minnie Trethewey.</p>\
 <table>\
   <th>Sprite</th><th>Author</th><th>Description</th>\
 {{
@@ -1606,6 +1616,16 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
 <p>Set the number of Etanks available from start. Between 0 and 14. Useful with permanent hellrun but can be used independently for easier seeds.</p>"
     },
     {
+      element: "#hard_modeStep",
+      title: "Hard mode",
+      content: "<p>Adds optional hard mode (enabled by default), with the following modifications:\
+<ul>\
+<li>Halves damage made by Samus</li>\
+<li>Doubles damage made by enemies, spikes, acid/lava</li>\
+<li>Halves missile/health drop values</li>\
+</ul></p><p>Patch developed by Sirkura, Devaliah, Quote, Phosphodile</p>"
+    },
+    {
       element: "#widescreenStep",
       title: "Widescreen support",
       content: "<p>Add support for widescreen on <a href=\"https://github.com/DerKoun/bsnes-hd/releases\" target=\"_blank\">bsnes-hd emulator</a>. A bso file containing emulator configuration is downloaded after the ROM file, you have to leave it in the same folder as the ROM file for bsnes-hd to work properly.</p>\
@@ -1630,6 +1650,12 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
       title: "MSU1",
       content: "<p>Play music with MSU1 chip on SD2SNES (already applied by default on VARIA seeds).</p>\
 <p>Patch developed by DarkShock.</p>"
+    },
+    {
+      element: "#baseStep",
+      title: "VARIA RTA timer, stats and credits",
+      content: "<p>Apply VARIA base patches to a vanilla ROM (already applied by default on VARIA seeds)</p>\
+<p>Replace in-game time with real time, and display gameplay stats in the credits</p>"
     },
     {
       element: "#remove_itemsoundsStep",
@@ -2030,6 +2056,14 @@ for name, values in musics["_dropdown"].items():
                   </td>
                   <td id="hellOptionsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
+                <tr>
+                  <td colspan="2">
+                    {{displayCheckbox("hard_mode")}}
+                    <span id="hard_modeText">Hard mode</span>
+                  </td>
+                  <td colspan="2"></td>
+                  <td id="hard_modeStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
               </table>
 
               <table class="full">
@@ -2065,6 +2099,13 @@ for name, values in musics["_dropdown"].items():
                     <span id="supermetroid_msu1Text">Play music with MSU1 chip on SD2SNES</span>
                   </td>
                   <td id="supermetroid_msu1Step"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    {{displayCheckbox("base")}}
+                    <span id="baseText">VARIA RTA timer, stats and credits</span>
+                  </td>
+                  <td id="baseStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
 
@@ -2146,6 +2187,10 @@ if seedInfo != None:
             <h4>Game Details</h4>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
+              <tr><td>Logic</td><td>{{=seedParams.get("logic", "vanilla")}}</td></tr>
+{{    if seedParams["logic"] == "random":}}
+              <tr><td>Logic pool</td><td>{{=seedParams["logicMultiSelect"]}}</td></tr>
+{{        pass}}
               <tr><td>Skills preset</td><td>{{=seedInfo["preset"]}}</td></tr>
               <tr><td>Seed</td><td>{{=seedInfo["seed"]}}</td></tr>
               <tr><td>Created</td><td>{{=seedInfo["time"]}}</td></tr>
@@ -2208,9 +2253,11 @@ if seedInfo != None:
 {{    else:}}
                 <td>{{=seedParams["objective"]}}</td></tr>
 {{        pass}}
+              <tr {{=setBold("nbObjectivesRequired")}}><td>Number of required objectives</td><td>{{=seedParams["nbObjectivesRequired"]}}</td></tr>
+              <tr {{=setBold("hiddenObjectives")}}><td>Hidden objectives</td><td>{{=seedParams["hiddenObjectives"]}}</td></tr>
               <tr {{=setBold("tourian")}}><td>Tourian</td><td>{{=seedParams["tourian"]}}</td></tr>
 {{    if seedParams["tourian"] == "random":}}
-              <tr><td>Tourian pool pool</td><td>{{=seedParams["tourianMultiSelect"]}}</td></tr>
+              <tr><td>Tourian pool</td><td>{{=seedParams["tourianMultiSelect"]}}</td></tr>
 {{        pass}}
             </table>
 
@@ -2260,6 +2307,7 @@ if seedInfo != None:
               <tr {{=setBold("Infinite_Space_Jump")}}><td>Infinite Space Jump</td><td>{{=seedParams["Infinite_Space_Jump"]}}</td></tr>
               <tr {{=setBold("refill_before_save")}}><td>Refill before save</td><td>{{=seedParams["refill_before_save"]}}</td></tr>
               <tr {{=setBold("hud")}}><td>Display items count in the HUD</td><td>{{=seedParams["hud"]}}</td></tr>
+              <tr {{=setBold("revealMap")}}><td>Reveal the whole map on start</td><td>{{=seedParams.get("revealMap", "off")}}</td></tr>
               <tr {{=setBold("animals")}}><td>Save the animals surprise</td><td>{{=seedParams["animals"]}}</td></tr>
               <tr {{=setBold("No_Music")}}><td>Disable background music</td><td>{{=seedParams["No_Music"]}}</td></tr>
               <tr {{=setBold("random_music")}}><td>Randomize background music</td><td>{{=seedParams["random_music"]}}</td></tr>

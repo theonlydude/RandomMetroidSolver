@@ -1,0 +1,62 @@
+{
+    "WreckedShip": {
+        "[Crab Maze to Elevator]": [
+            [
+                52,
+                10
+            ]
+        ],
+        "[Elevator to Maridia]": [
+            [
+                52,
+                11
+            ]
+        ]
+    },
+    "Crateria": {
+        "[Elevator to Red Brinstar]": [
+            [
+                34,
+                8
+            ]
+        ],
+        "[Elevator to Green Brinstar]": [
+            [
+                6,
+                9
+            ]
+        ],
+        "Statues Hallway": [
+            [
+                12,
+                9
+            ],
+            [
+                13,
+                9
+            ],
+            [
+                14,
+                9
+            ],
+            [
+                15,
+                9
+            ],
+            [
+                16,
+                9
+            ]
+        ],
+        "Statues Room": [
+            [
+                17,
+                9
+            ],
+            [
+                17,
+                10
+            ]
+        ]
+    }
+}

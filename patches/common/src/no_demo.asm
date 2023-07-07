@@ -1,8 +1,8 @@
 ;;; disable demos to avoid crash in area rando
-;;; compile with asar
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
 lorom
-arch snes.cpu
+arch 65816
 	
 ;;; original code, timer in $1F53:
 ;;; $8B:9F29 CE 53 1F    DEC $1F53  [$7E:1F53]

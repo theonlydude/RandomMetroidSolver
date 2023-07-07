@@ -8,8 +8,8 @@
 CWD=$(dirname $0)/..
 cd ${CWD}
 CWD=$(pwd)
-[ -z "$PYTHON" ] && PYTHON=pyston3.8
-[ -z "$OLD_PYTHON" ] && OLD_PYTHON=pyston3.8
+[ -z "$PYTHON" ] && PYTHON=python3
+[ -z "$OLD_PYTHON" ] && OLD_PYTHON=python3
 
 LOG_DIR=${CWD}/logs
 mkdir -p ${LOG_DIR}
@@ -24,17 +24,28 @@ if [ $# -ne 2 -a $# -ne 3 ]; then
 fi
 
 ROM=$1
+LOOPS=$2
+COMPARE=1
 if [ -n "$3" ]; then
-    # add more loops as we filter them out afterward
-    FILTER_HEAD=32
-    FILTER_TAIL=16
-    let LOOPS=$2+${FILTER_HEAD}+${FILTER_TAIL}
-    COMPARE=0
-else
-    FILTER_HEAD=0
-    FILTER_TAIL=0
-    LOOPS=$2
-    COMPARE=1
+    if [ -f "$3" ]; then
+        randoPreset="${3}"
+    else
+        COMPARE=0
+    fi
+fi
+
+# use values in the rando preset instead of random ones
+if [ -n "${randoPreset}" ]; then
+    # use temp file to avoid sub process for the while as we set an env var in it
+    tmp=$(mktemp)
+    jq -r '. | keys[] as $k | "\($k):\(.[$k])"' "${randoPreset}" > ${tmp}
+
+    while IFS=':' read var value; do
+        echo "Fix value of ${var} to: ${value}"
+        printf -v "${var}" '%s' "${value}"
+    done < ${tmp}
+
+    rm -f ${tmp}
 fi
 
 HAVE_URAND=1
@@ -106,13 +117,36 @@ function generate_params {
 }
 
 function random_switch {
-    if [ ${RANDOM} -ge 16384 ]; then
-        echo -en "on"
+    fixed_value="${1}"
+    if [ -n "${fixed_value}" ]; then
+        echo -en "${fixed_value}"
     else
-        echo -en "off"
+        if [ ${RANDOM} -ge 16384 ]; then
+            echo -en "on"
+        else
+            echo -en "off"
+        fi
     fi
 }
-
+function random {
+    random_value="${1}"
+    fixed_value="${2}"
+    if [ -n "${fixed_value}" ]; then
+        echo -en "${fixed_value}"
+    else
+        echo -en "${random_value}"
+    fi
+}
+function random_range {
+    start="${1}"
+    end="${2}"
+    fixed_value="${3}"
+    if [ -n "${fixed_value}" ]; then
+        echo -en "${fixed_value}"
+    else
+        shuf -i ${start}-${end} -n 1
+    fi
+}
 function random_select {
     local MIN=1
     local MAX=$#
@@ -123,67 +157,72 @@ function random_select {
 function generate_rando_presets {
     local SEED="$1"
     local PRESET="$2"
-    local RANDO_PRESET=$(mktemp)
+    local RANDO_PRESET="${SEED}_${PRESET}.json"
 
     cat > ${RANDO_PRESET} <<EOF
 {
     "seed": "${SEED}",
+    "logic": "$(random "random" ${logic})",
+    $(generate_multi_select "logic" "vanilla" "mirror")
     "preset": "${PRESET}",
-    "startLocation": "random",
+    "startLocation": "$(random "random" ${startLocation})",
     $(generate_multi_select "startLocation" "Ceres" "Landing_Site" "Gauntlet_Top" "Green_Brinstar_Elevator" "Big_Pink" "Etecoons_Supers" "Wrecked_Ship_Main" "Firefleas_Top" "Business_Center" "Bubble_Mountain" "Mama_Turtle" "Watering_Hole" "Aqueduct" "Red_Brinstar_Elevator" "Golden_Four")
-    "majorsSplit": "random",
+    "majorsSplit": "$(random "random" ${majorsSplit})",
     $(generate_multi_select "majorsSplit" 'Full' 'Major' 'Chozo' 'FullWithHUD' 'Scavenger')
-    "scavNumLocs": "$(shuf -i 4-10 -n 1)",
-    "scavRandomized": "$(random_switch)",
-    "maxDifficulty": "random",
-    "progressionSpeed": "random",
+    "scavNumLocs": "$(random_range 4 10 ${scavNumLocs})",
+    "scavRandomized": "$(random_switch ${scavRandomized})",
+    "maxDifficulty": "$(random "random" ${maxDifficulty})",
+    "progressionSpeed": "$(random "random" ${progressionSpeed})",
     $(generate_multi_select "progressionSpeed" 'slowest' 'slow' 'medium' 'fast' 'fastest' 'VARIAble' 'speedrun')
-    "progressionDifficulty": "random",
+    "progressionDifficulty": "$(random "random" ${progressionDifficulty})",
     $(generate_multi_select "progressionDifficulty" 'easier' 'normal' 'harder')
-    "morphPlacement": "random",
+    "morphPlacement": "$(random "random" ${morphPlacement})",
     $(generate_multi_select "morphPlacement" 'early' 'late' 'normal')
-    "suitsRestriction": "$(random_switch)",
-    "hideItems": "$(random_switch)",
-    "strictMinors": "$(random_switch)",
-    "missileQty": "0",
-    "superQty": "0",
-    "powerBombQty": "0",
-    "minorQty": "0",
-    "energyQty": "random",
+    "suitsRestriction": "$(random_switch ${suitsRestriction})",
+    "hideItems": "$(random_switch ${hideItems})",
+    "strictMinors": "$(random_switch ${strictMinors})",
+    "missileQty": "$(random "0" ${missileQty})",
+    "superQty": "$(random "0" ${superQty})",
+    "powerBombQty": "$(random "0" ${powerBombQty})",
+    "minorQty": "$(random "0" ${minorQty})",
+    "energyQty": "$(random "random" ${energyQty})",
     $(generate_multi_select "energyQty" 'ultra_sparse' 'sparse' 'medium' 'vanilla')
-    "objective": "random",
-    $(generate_multi_select "objective" "kill_kraid" "kill_phantoon" "kill_draygon" "kill_ridley" "kill_one_G4" "kill_two_G4" "kill_three_G4" "kill_all_G4" "kill_spore_spawn" "kill_botwoon" "kill_crocomire" "kill_golden_torizo" "kill_one_miniboss" "kill_two_minibosses" "kill_three_minibosses" "kill_all_mini_bosses" "nothing" "collect_25%_items" "collect_50%_items" "collect_75%_items" "collect_100%_items" "collect_all_upgrades" "clear_crateria" "clear_green_brinstar" "clear_red_brinstar" "clear_wrecked_ship" "clear_kraid's_lair" "clear_upper_norfair" "clear_croc's_lair" "clear_lower_norfair" "clear_west_maridia" "clear_east_maridia" "tickle_the_red_fish" "kill_the_orange_geemer" "kill_shaktool" "activate_chozo_robots" "visit_the_animals" "kill_king_cacatac")
-    "areaRandomization": "random",
-    "areaLayout": "$(random_switch)",
-    "doorsColorsRando": "$(random_switch)",
-    "allowGreyDoors": "$(random_switch)",
-    "bossRandomization": "$(random_switch)",
-    "minimizer": "$(random_switch)",
-    "minimizerQty": "$(shuf -i 35-100 -n 1)",
-    "tourian": "random",
+    "objective": "$(random "random" ${objective})",
+    $(generate_multi_select "objective" "kill_kraid" "kill_phantoon" "kill_draygon" "kill_ridley" "kill_one_G4" "kill_two_G4" "kill_three_G4" "kill_all_G4" "kill_spore_spawn" "kill_botwoon" "kill_crocomire" "kill_golden_torizo" "kill_one_miniboss" "kill_two_minibosses" "kill_three_minibosses" "kill_all_mini_bosses" "nothing" "collect_25%_items" "collect_50%_items" "collect_75%_items" "collect_100%_items" "collect_all_upgrades" "clear_crateria" "clear_green_brinstar" "clear_red_brinstar" "clear_wrecked_ship" "clear_kraid's_lair" "clear_upper_norfair" "clear_croc's_lair" "clear_lower_norfair" "clear_west_maridia" "clear_east_maridia" "tickle_the_red_fish" "kill_the_orange_geemer" "kill_shaktool" "activate_chozo_robots" "visit_the_animals" "kill_king_cacatac" "explore_25%_map" "explore_50%_map" "explore_75%_map" "explore_100%_map" "explore_crateria" "explore_green_brinstar" "explore_red_brinstar" "explore_wrecked_ship" "explore_kraid's_lair" "explore_upper_norfair" "explore_croc's_lair" "explore_lower_norfair" "explore_west_maridia" "explore_east_maridia")
+    "areaRandomization": "$(random "random" ${areaRandomization})",
+    "nbObjectivesRequired": "$(random "0" ${nbObjectivesRequired})",
+    "hiddenObjectives": "$(random_switch ${hiddenObjectives})",
+    "areaLayout": "$(random_switch ${areaLayout})",
+    "doorsColorsRando": "$(random_switch ${doorsColorsRando})",
+    "allowGreyDoors": "$(random_switch ${allowGreyDoors})",
+    "bossRandomization": "$(random_switch ${bossRandomization})",
+    "minimizer": "$(random_switch ${minimizer})",
+    "minimizerQty": "$(random_range 35 100 ${minimizerQty})",
+    "tourian": "$(random "random" ${tourian})",
     $(generate_multi_select "tourian" "Vanilla" "Fast" "Disabled")
-    "escapeRando": "$(random_switch)",
-    "removeEscapeEnemies": "$(random_switch)",
-    "funCombat": "$(random_switch)",
-    "funMovement": "$(random_switch)",
-    "funSuits": "$(random_switch)",
-    "layoutPatches": "$(random_switch)",
-    "variaTweaks": "$(random_switch)",
-    "nerfedCharge": "$(random_switch)",
-    "relaxed_round_robin_cf": "$(random_switch)",
-    "gravityBehaviour":  "random",
+    "escapeRando": "$(random_switch ${escapeRando})",
+    "removeEscapeEnemies": "$(random_switch ${removeEscapeEnemies})",
+    "funCombat": "$(random_switch ${funCombat})",
+    "funMovement": "$(random_switch ${funMovement})",
+    "funSuits": "$(random_switch ${funSuits})",
+    "layoutPatches": "$(random_switch ${layoutPatches})",
+    "variaTweaks": "$(random_switch ${variaTweaks})",
+    "nerfedCharge": "$(random_switch ${nerfedCharge})",
+    "relaxed_round_robin_cf": "$(random_switch ${relaxed_round_robin_cf})",
+    "gravityBehaviour":  "$(random "random" ${gravityBehaviour})",
     $(generate_multi_select "gravityBehaviour" 'Vanilla' 'Balanced' 'Progressive')
-    "itemsounds": "$(random_switch)",
-    "elevators_speed": "$(random_switch)",
-    "fast_doors": "$(random_switch)",
-    "spinjumprestart": "$(random_switch)",
-    "rando_speed": "$(random_switch)",
-    "Infinite_Space_Jump": "$(random_switch)",
-    "refill_before_save": "$(random_switch)",
-    "hud": "$(random_switch)",
-    "animals": "$(random_switch)",
-    "No_Music": "$(random_switch)",
-    "random_music": "$(random_switch)"
+    "itemsounds": "$(random_switch ${itemsounds})",
+    "elevators_speed": "$(random_switch ${elevators_speed})",
+    "fast_doors": "$(random_switch ${fast_doors})",
+    "spinjumprestart": "$(random_switch ${spinjumprestart})",
+    "rando_speed": "$(random_switch ${rando_speed})",
+    "Infinite_Space_Jump": "$(random_switch ${Infinite_Space_Jump})",
+    "refill_before_save": "$(random_switch ${refill_before_save})",
+    "hud": "$(random_switch ${hud})",
+    "revealMap": "$(random_switch ${revealMap})",
+    "animals": "$(random_switch ${animals})",
+    "No_Music": "$(random_switch ${No_Music})",
+    "random_music": "$(random_switch ${random_music})"
 }
 EOF
 
@@ -214,7 +253,7 @@ function computeSeed {
 	    echo "${RANDO_OUT}" >> ${LOG}
 	else
 	    RTIME_OLD=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
-	    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}*.sfc 2>/dev/null)
+	    ROM_GEN=$(ls -1 VARIA_*X${SEED}_${PRESET}*.sfc 2>/dev/null)
 	    if [ $? -eq 0 ]; then
 		OLD_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
 	    fi
@@ -228,7 +267,7 @@ function computeSeed {
 	echo "${RANDO_OUT}" >> ${LOG}
     else
 	RTIME_NEW=$(echo "${RANDO_OUT}" | grep real | awk '{print $1}')
-	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}*.sfc 2>/dev/null)
+	ROM_GEN=$(ls -1 VARIA_*X${SEED}_${PRESET}*.sfc 2>/dev/null)
 	if [ $? -eq 0 ]; then
 	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
 	fi
@@ -238,6 +277,7 @@ function computeSeed {
     MAJORSSPLIT_NEW=$(echo "${RANDO_OUT}" | grep ^majorsSplit | cut -d ':' -f 2)
     MORPH_NEW=$(echo "${RANDO_OUT}" | grep ^morphPlacement | cut -d ':' -f 2)
     OBJECTIVES=$(echo "${RANDO_OUT}" | grep ^objectives | cut -d ':' -f 2)
+    LOGIC_NEW=$(echo "${RANDO_OUT}" | grep ^logic | cut -d ':' -f 2)
 
     RANDO_PRESET_NEW="logs/${SEED}_${PRESET}_${PROGSPEED_NEW}.json"
 
@@ -258,9 +298,9 @@ function computeSeed {
     fi
 
     # solve seed
-    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}*.sfc)
+    ROM_GEN=$(ls -1 VARIA_*X${SEED}_${PRESET}*.sfc)
     if [ $? -ne 0 ]; then
-	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PRESET};${OBJECTIVES}" | tee -a ${CSV}
+	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PRESET};${LOGIC_NEW};${OBJECTIVES}" | tee -a ${CSV}
         mv ${RANDO_PRESET} ${RANDO_PRESET_NEW}
 	exit 0
     fi
@@ -271,7 +311,7 @@ function computeSeed {
     if [ ${COMPARE} -eq 0 ]; then
 	SOLVER_OUT=$(${TIME} -f "\t%E real" $OLD_PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor --runtime 10 --pickupStrategy all 2>&1)
 	if [ $? -ne 0 ]; then
-            echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PRESET};${OBJECTIVES}" | tee -a ${CSV}
+            echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PRESET};${LOGIC_NEW};${OBJECTIVES}" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
             echo "${RANDO_OUT}" >> ${LOG}
             echo "${SOLVER_OUT}" >> ${LOG}
@@ -308,7 +348,7 @@ function computeSeed {
     if [ ${DUP_NEW} -eq 0 -o ${DUP_OLD} -eq 0 ]; then
 	DUP="dup major detected"
     fi
-    echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${DUP};${PRESET};${OBJECTIVES}" | tee -a ${CSV}
+    echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${DUP};${PRESET};${LOGIC_NEW};${OBJECTIVES}" | tee -a ${CSV}
 
     if [ ${COMPARE} -eq 0 ]; then
 	DIFF=$(diff ${ROM_GEN}.old ${ROM_GEN}.new)
@@ -374,6 +414,14 @@ echo "DONE"
 date >> ${LOG}
 
 echo ""
+echo "Logic"
+for LOGIC in "vanilla" "mirror"; do
+    TOTAL=$(grep ";${LOGIC};" ${CSV}  | wc -l)
+    ERROR=$(grep ";${LOGIC};" ${CSV} | grep -E '^error' | wc -l)
+    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
+    printf "%-24s" "${LOGIC}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+done
+echo ""
 echo "Start AP"
 for AP in "Ceres" "Landing Site" "Gauntlet Top" "Green Brinstar Elevator" "Big Pink" "Etecoons Supers" "Wrecked Ship Main" "Business Center" "Bubble Mountain" "Watering Hole" "Red Brinstar Elevator" "Golden Four" "Aqueduct" "Mama Turtle" "Firefleas Top"; do
     TOTAL=$(grep ";${AP};" ${CSV}  | wc -l)
@@ -407,7 +455,7 @@ for MORPH in "early" "normal" "late"; do
 done
 echo ""
 echo "Objectives"
-for OBJ in "kill kraid" "kill phantoon" "kill draygon" "kill ridley" "kill one G4" "kill two G4" "kill three G4" "kill all G4" "kill spore spawn" "kill botwoon" "kill crocomire" "kill golden torizo" "kill one miniboss" "kill two minibosses" "kill three minibosses" "kill all mini bosses" "collect 25% items" "collect 50% items" "collect 75% items" "collect 100% items" "collect all upgrades" "clear crateria" "clear green brinstar" "clear red brinstar" "clear wrecked ship" "clear kraid's lair" "clear upper norfair" "clear croc's lair" "clear lower norfair" "clear west maridia" "clear east maridia" "tickle the red fish" "kill the orange geemer" "kill shaktool" "activate chozo robots" "visit the animals" "kill king cacatac"; do
+for OBJ in "kill kraid" "kill phantoon" "kill draygon" "kill ridley" "kill one G4" "kill two G4" "kill three G4" "kill all G4" "kill spore spawn" "kill botwoon" "kill crocomire" "kill golden torizo" "kill one miniboss" "kill two minibosses" "kill three minibosses" "kill all mini bosses" "collect 25% items" "collect 50% items" "collect 75% items" "collect 100% items" "collect all upgrades" "clear crateria" "clear green brinstar" "clear red brinstar" "clear wrecked ship" "clear kraid's lair" "clear upper norfair" "clear croc's lair" "clear lower norfair" "clear west maridia" "clear east maridia" "tickle the red fish" "kill the orange geemer" "kill shaktool" "activate chozo robots" "visit the animals" "kill king cacatac" "explore 25% map" "explore 50% map" "explore 75% map" "explore 100% map" "explore crateria" "explore green brinstar" "explore red brinstar" "explore wrecked ship" "explore kraid's lair" "explore upper norfair" "explore croc's lair" "explore lower norfair" "explore west maridia" "explore east maridia"; do
     TOTAL=$(grep "${OBJ}" ${CSV}  | wc -l)
     ERROR=$(grep "${OBJ}" ${CSV} | grep -E '^error' | wc -l)
     [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
@@ -464,7 +512,7 @@ function getTime {
         GREP_V="-v"
     fi
 
-    grep -v SOLVER ${CSV} | tail -n +${FILTER_HEAD} | head -n -${FILTER_TAIL} | grep -v -E "^error${SPEEDRUN}" | grep ${GREP_V} '^[0-9]*;;;' | cut -d ';' -f ${COLUMN} | sed -e 's+0:++g' | awk -F';' '{sum+=$1;} END{print sum}'
+    grep -v SOLVER ${CSV} | grep -v -E "^error${SPEEDRUN}" | grep ${GREP_V} '^[0-9]*;;;' | cut -d ';' -f ${COLUMN} | sed -e 's+0:++g' | awk -F';' '{sum+=$1;} END{print sum}'
 }
 
 if [ ${COMPARE} -eq 0 ]; then

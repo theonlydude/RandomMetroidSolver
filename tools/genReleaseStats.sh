@@ -53,20 +53,12 @@ echo "${SQL}" | mysql -h ${host} -u ${user} -p${password} -P${port} ${database}
 ${CWD}/tools/genExtStats.sh ${ROM} 100
 
 # 900 seeds pour les skill/settings presets de tournoi
-${CWD}/tools/genExtStats.sh ${ROM} 900 Boyz_League_SM_Rando Season_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Season_Races Season_Races
-${CWD}/tools/genExtStats.sh ${ROM} 900 SGLive2022_Game_1 Season_Races
-${CWD}/tools/genExtStats.sh ${ROM} 900 SGLive2022_Game_2 Season_Races
-${CWD}/tools/genExtStats.sh ${ROM} 900 SGLive2022_Game_3 Season_Races
-${CWD}/tools/genExtStats.sh ${ROM} 900 RLS4W2.json Season_Races
-${CWD}/tools/genExtStats.sh ${ROM} 900 RLS4W3.json Season_Races
-${CWD}/tools/genExtStats.sh ${ROM} 900 RLS4W4.json Season_Races
-${CWD}/tools/genExtStats.sh ${ROM} 900 RLS4W5.json Season_Races
-${CWD}/tools/genExtStats.sh ${ROM} 900 RLS4W7.json Season_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 SMRAT2021 SMRAT2021
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Torneio_SGPT3_stage1 Torneio_SGPT3
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Torneio_SGPT3_stage2 Torneio_SGPT3
 ${CWD}/tools/genExtStats.sh ${ROM} 900 VARIA_Weekly casual
+${CWD}/tools/genExtStats.sh ${ROM} 900 SGL23Online Season_Races
 
 # 900 seeds pour les skill preset inclus dans les rando presets
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Chozo_Speedrun regular
@@ -81,7 +73,6 @@ ${CWD}/tools/genExtStats.sh ${ROM} 900 objectives_hard_water expert
 ${CWD}/tools/genExtStats.sh ${ROM} 900 scavenger_hard expert
 ${CWD}/tools/genExtStats.sh ${ROM} 900 stupid_hard master
 ${CWD}/tools/genExtStats.sh ${ROM} 900 way_of_chozo regular
-${CWD}/tools/genExtStats.sh ${ROM} 900 VARIA_Weekly casual
 
 # 100 seeds pour une selection de settings presets random
 ${CWD}/tools/genExtStats.sh ${ROM} 100 where_am_i regular

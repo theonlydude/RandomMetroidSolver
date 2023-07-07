@@ -1,0 +1,64 @@
+{
+    "Ceres": {
+        "[Ceres Elevator Room]": [
+            [
+                28,
+                14
+            ],
+            [
+                28,
+                15
+            ],
+            [
+                28,
+                16
+            ]
+        ],
+        "[Ceres Jump Tutorial Room]": [
+            [
+                27,
+                16
+            ],
+            [
+                26,
+                16
+            ]
+        ],
+        "[Ceres Staircase Room]": [
+            [
+                25,
+                16
+            ],
+            [
+                25,
+                17
+            ]
+        ],
+        "[Ceres Dead Scientists Room]": [
+            [
+                24,
+                17
+            ],
+            [
+                23,
+                17
+            ]
+        ],
+        "[Ceres Last Corridor]": [
+            [
+                22,
+                17
+            ],
+            [
+                21,
+                17
+            ]
+        ],
+        "[Ceres Ridley Room]": [
+            [
+                20,
+                17
+            ]
+        ]
+    }
+}

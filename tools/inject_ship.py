@@ -49,6 +49,9 @@ def isEmpty(img, box):
     for x in range(box[0], box[2]):
         for y in range(box[1], box[3]):
             r, g, b, a = img.getpixel((x, y))
+            # use the alpha channel first
+            if a == 0:
+                continue
             if r != 0 or g != 0 or b != 0:
                 return False
     return True
@@ -80,7 +83,7 @@ def get_single_raw_tile(image):
     # Here transpose() is used because otherwise we get column-major
     #  format in getdata(), which is not helpful
     return convert_indexed_tile_to_bitplanes(
-        image.transpose(Image.TRANSPOSE).getdata()
+        image.transpose(Image.Transpose.TRANSPOSE).getdata()
     )
 
 # from sprite something
@@ -364,26 +367,27 @@ mode7shipImg = baseImg.crop(mode7shipBox)
 slopesOverideBox = (240, 16, 352, 96)
 slopesOverideImg = baseImg.crop(slopesOverideBox)
 
+
+# check how many tiles in the ship image are not empty.
+# ship image in the template is 7 x 5 tiles.
+width = 7
+height = 5
+emptyMatrix = [ [ True for x in range(width) ] for y in range(height) ]
+
+for tileX in range(width):
+    for tileY in range(height):
+        emptyMatrix[tileY][tileX] = isEmpty(shipImg, (tileX*16, tileY*16, (tileX+1)*16, (tileY+1)*16))
+
+#print("matrix:")
+#for row in emptyMatrix:
+#    print(row)
+
+# max 26 tiles can be non empty, as vanilla has 52 oam for the ship
+maxTiles = 26
+nonEmptyCount = sum([row.count(False) for row in emptyMatrix])
+assert nonEmptyCount <= maxTiles, "Too many tiles in the ship: {}, max authorized is {}".format(nonEmptyCount, maxTiles)
+
 if not args.no_ship:
-    # check how many tiles in the ship image are not empty.
-    # ship image in the template is 7 x 5 tiles.
-    width = 7
-    height = 5
-    emptyMatrix = [ [ True for x in range(width) ] for y in range(height) ]
-
-    for tileX in range(width):
-        for tileY in range(height):
-            emptyMatrix[tileY][tileX] = isEmpty(shipImg, (tileX*16, tileY*16, (tileX+1)*16, (tileY+1)*16))
-
-    #print("matrix:")
-    #for row in emptyMatrix:
-    #    print(row)
-
-    # max 26 tiles can be non empty, as vanilla has 52 oam for the ship
-    maxTiles = 26
-    nonEmptyCount = sum([row.count(False) for row in emptyMatrix])
-    assert nonEmptyCount <= maxTiles, "Too many tiles in the ship: {}, max authorized is {}".format(nonEmptyCount, maxTiles)
-
     # convert hatch tiles with new colors
     if enableHatch:
         for origColor, newColor in zip(hatchOrigPalette, hatchNewPalette):
@@ -681,7 +685,7 @@ enableMode7 = not isEmpty(mode7shipImg, (0, 0, width, height))
 if enableMode7 and not args.no_mode7:
     wholeMode7ShipImg = Image.new("RGBA", (width*2, height))
     wholeMode7ShipImg.paste(mode7shipImg, (0, 0))
-    wholeMode7ShipImg.paste(mode7shipImg.transpose(Image.FLIP_LEFT_RIGHT), (width, 0))
+    wholeMode7ShipImg.paste(mode7shipImg.transpose(Image.Transpose.FLIP_LEFT_RIGHT), (width, 0))
 
     # get non empty 8x8 tiles in the image
     width, height = (16, 6)
@@ -890,14 +894,14 @@ if not args.no_layout:
 
         # generated flipped images
         if data["flipX"]:
-            slopes[0x100+slope]["reg"] = slopeImg.transpose(Image.FLIP_LEFT_RIGHT).convert('1')
-            slopes[0x100+slope]["inv"] = slopeImgi.transpose(Image.FLIP_LEFT_RIGHT).convert('1')
+            slopes[0x100+slope]["reg"] = slopeImg.transpose(Image.Transpose.FLIP_LEFT_RIGHT).convert('1')
+            slopes[0x100+slope]["inv"] = slopeImgi.transpose(Image.Transpose.FLIP_LEFT_RIGHT).convert('1')
         if data["flipY"]:
-            slopes[0x200+slope]["reg"] = slopeImg.transpose(Image.FLIP_TOP_BOTTOM).convert('1')
-            slopes[0x200+slope]["inv"] = slopeImgi.transpose(Image.FLIP_TOP_BOTTOM).convert('1')
+            slopes[0x200+slope]["reg"] = slopeImg.transpose(Image.Transpose.FLIP_TOP_BOTTOM).convert('1')
+            slopes[0x200+slope]["inv"] = slopeImgi.transpose(Image.Transpose.FLIP_TOP_BOTTOM).convert('1')
         if data["flipX"] and data["flipY"]:
-            slopes[0x300+slope]["reg"] = slopeImg.transpose(Image.ROTATE_180).convert('1')
-            slopes[0x300+slope]["inv"] = slopeImgi.transpose(Image.ROTATE_180).convert('1')
+            slopes[0x300+slope]["reg"] = slopeImg.transpose(Image.Transpose.ROTATE_180).convert('1')
+            slopes[0x300+slope]["inv"] = slopeImgi.transpose(Image.Transpose.ROTATE_180).convert('1')
 
     # extract slopes overide
     width = 7
@@ -1013,11 +1017,11 @@ if not args.no_layout:
     print("insert ship slopes into landing site layout")
 
 
-    landingSiteAddr = snes_to_pc(0x8F91F8)
+    landingSiteAddr = 0x8F91F8
     vLandingSite = Room(vanillaRom, landingSiteAddr)
     vLevelDataAddr = vLandingSite.defaultRoomState.levelDataPtr
     vRoomScreenSize = (vLandingSite.width, vLandingSite.height)
-    vlevelData = LevelData(vanillaRom, snes_to_pc(vLevelDataAddr), vRoomScreenSize)
+    vlevelData = LevelData(vanillaRom, vLevelDataAddr, vRoomScreenSize)
 
     boundingRect = BoundingRect()
     boundingRect.x1 = 17
@@ -1075,6 +1079,7 @@ if not args.no_layout:
     #vlevelData.displaySubScreen(vShipScreen, boundingRect)
 
     print("compress landing site layout")
-    vlevelData.write()
+    vanillaLayoutSize = 5165
+    vlevelData.write(vanillaLayoutSize)
 
 vanillaRom.close()

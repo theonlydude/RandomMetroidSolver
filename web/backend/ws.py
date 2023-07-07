@@ -26,13 +26,18 @@ class WS(object):
         if mode not in ["standard", "seedless", "plando", "race", "debug"]:
             raiseHttp(400, "Unknown mode, must be standard/seedless/plando/race/debug", True)
 
+        logic = caller.request.vars.logic
+        if logic not in ["vanilla", "mirror"]:
+            raiseHttp(400, "Unknown logic, must be vanilla/mirror", True)
+
         try:
             WSClass = globals()["WS_{}_{}".format(scope, action)]
-            return WSClass(mode, caller)
+            return WSClass(logic, mode, caller)
         except Exception as e:
             raiseHttp(400, "{}".format(e.body if "body" in e.__dict__ else e).replace('"', ''), True)
 
-    def __init__(self, mode, caller):
+    def __init__(self, logic, mode, caller):
+        self.logic = logic
         self.mode = mode
         self.caller = caller
         self.vars = self.caller.request.vars
@@ -101,6 +106,7 @@ class WS(object):
                 "roomsVisibility": state["roomsVisibility"],
 
                 # infos on seed
+                "logic": state["logic"],
                 "mode": state["mode"],
                 "majorsSplit": state["masterMajorsSplit"],
                 "areaRando": state["areaRando"],
@@ -128,7 +134,9 @@ class WS(object):
 
                 # completed objectives
                 "newlyCompletedObjectives": state["newlyCompletedObjectives"],
-                "eventsBitMasks": state["eventsBitMasks"]
+                "eventsBitMasks": state["eventsBitMasks"],
+                "objectives": state["objectives"],
+                "objectivesHidden": state["objectivesHidden"]
             })
         else:
             raiseHttp(200, "OK", True)
@@ -146,7 +154,8 @@ class WS(object):
             '--shm',  shm.name(),
             '--action', action,
             '--mode', self.mode,
-            '--scope', scope
+            '--scope', scope,
+            '--logic', self.logic
         ]
         if action in ['add', 'replace']:
             if scope == 'item':
@@ -300,6 +309,7 @@ class WS_common_init(WS):
 
     def action(self):
         mode = self.vars.mode
+        logic = self.vars.logic
         if mode != 'seedless':
             try:
                 (base, jsonRomFileName) = generateJsonROM(self.vars.romJson)
@@ -314,7 +324,9 @@ class WS_common_init(WS):
 
         preset = self.vars.preset
         presetFileName = '{}/{}.json'.format(getPresetDir(preset), preset)
+        doorsRando = self.vars.doorsRando == 'true'
 
+        self.session["logic"] = logic
         self.session["seed"] = seed
         self.session["preset"] = preset
         self.session["mode"] = mode
@@ -322,9 +334,9 @@ class WS_common_init(WS):
 
         fill = self.vars.fill == "true"
 
-        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, fill, startLocation)
+        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, logic, mode, fill, startLocation, doorsRando)
 
-    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, fill, startLocation):
+    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, logic, mode, fill, startLocation, doorsRando):
         shm = SHM()
         params = [
             getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
@@ -332,6 +344,7 @@ class WS_common_init(WS):
             '--shm', shm.name(),
             '--action', "init",
             '--interactive',
+            '--logic', logic,
             '--mode', mode,
             '--scope', 'common'
         ]
@@ -344,6 +357,8 @@ class WS_common_init(WS):
 
         if startLocation != None:
             params += ['--startLocation', startLocation]
+        if doorsRando:
+            params.append('--doorsRando')
 
         print("before calling isolver: {}".format(params))
         start = datetime.now()
@@ -589,7 +604,7 @@ class WS_door_replace(WS):
         if self.doorName not in DoorsManager.doors.keys():
             raiseHttp(400, "Wrong value for doorName", True)
         self.newColor = self.vars.newColor
-        if self.newColor not in ["red", "green", "yellow", "grey", "wave", "spazer", "plasma", "ice"]:
+        if self.newColor not in ["red", "green", "yellow", "grey", "wave", "spazer", "plasma", "ice", "blue"]:
             raiseHttp(400, "Wrong value for newColor", True)
 
     def action(self):
@@ -627,7 +642,7 @@ class WS_dump_import(WS):
         jsonData = {"stateDataOffsets": json.loads(self.vars.stateDataOffsets),
                     "currentState": json.loads(self.vars.currentState),
                     "newAP": webAPs[newAP]}
-        if len(jsonData["currentState"]) > 1608 or len(jsonData["stateDataOffsets"]) > 4:
+        if len(jsonData["currentState"]) > 1632 or len(jsonData["stateDataOffsets"]) > 5:
             raiseHttp(400, "Wrong state size", True)
         for key, value in jsonData["stateDataOffsets"].items():
             if len(key) > 1 or type(value) != int:

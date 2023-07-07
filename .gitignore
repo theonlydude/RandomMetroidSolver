@@ -1,1 +1,10 @@
 *.py[oc]
+*~
+*.log
+**/build/
+**/include/sym/
+db_params.py
+
+# client repo and files
+super-metroid
+web/client/*

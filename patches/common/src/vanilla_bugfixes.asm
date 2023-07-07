@@ -1,7 +1,7 @@
 ;;; Some vanilla bugfixes included in all VARIA seeds
-;;; compile with asar
+;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
 
-arch snes.cpu
+arch 65816
 lorom
 
 ;;; Fix the crash that occurs when you kill an eye door whilst a eye door projectile is alive
@@ -152,7 +152,7 @@ warnpc $8485b2
 ;;; drawinging routine.
 
 ;;; other unused bank 84 space
-org $8486D1
+org $848258
 drawPlmSafe:
 	lda.w $05B4 : pha ; Back up NMI ready flag
 	stz.w $05B4 ; Not ready for NMI
@@ -161,7 +161,7 @@ drawPlmSafe:
 	rts
 
 ;;; end of unused space
-warnpc $84870B
+warnpc $848270
 
 ; Patch calls to draw PLM
 org $84861a ; End of PLM processing. Probably the only particularly important one to patch

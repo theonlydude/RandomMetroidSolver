@@ -1,6 +1,8 @@
-from web.backend.utils import loadPresetsList, transition2isolver, getAddressesToRead
+from web.backend.utils import loadPresetsList, transition2isolver, getAddressesToRead, get_app_files
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
 from logic.logic import Logic
+from rom.flavor import RomFlavor
+from rom.romreader import RomReader
 from utils.version import displayedVersion
 
 from gluon.html import OPTGROUP
@@ -11,7 +13,10 @@ class Plando(object):
         self.request = request
         self.cache = cache
         # required for GraphUtils access to access points
-        Logic.factory('vanilla')
+        # TODO will have to be changed when handling mirror/rotation etc
+        flavor = "vanilla"
+        Logic.factory(flavor)
+        RomFlavor.factory()
 
     def run(self):
         # init session
@@ -21,6 +26,7 @@ class Plando(object):
                 "preset": "regular",
                 "seed": None,
                 "startLocation": "Landing Site",
+                "logic": "vanilla",
 
                 # rando params
                 "rando": {},
@@ -46,7 +52,7 @@ class Plando(object):
             escapeAPs += [transition2isolver(src), transition2isolver(dest)]
 
         # generate list of addresses to read in the ROM
-        addresses = getAddressesToRead(plando=True)
+        addresses = getAddressesToRead(self.cache)
 
         startAPs = GraphUtils.getStartAccessPointNamesCategory()
         startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),
@@ -56,4 +62,5 @@ class Plando(object):
         return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                     vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
                     curSession=self.session.plando, addresses=addresses, startAPs=startAPs,
-                    version=displayedVersion)
+                    version=displayedVersion, flavorPatches=RomReader.flavorPatches,
+                    app_files=get_app_files())

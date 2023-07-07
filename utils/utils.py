@@ -270,8 +270,9 @@ def getDefaultMultiValues():
         'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla'],
         'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive'],
         'areaRandomization': ['off', 'full', 'light'],
-        'objective': Objectives.getAllGoals(removeNothing=True),
-        'tourian': ['Vanilla', 'Fast', 'Disabled']
+        'objective': Objectives.getAllGoals(exclude=True),
+        'tourian': ['Vanilla', 'Fast', 'Disabled'],
+        'logic': ['vanilla', 'mirror'],
     }
     return defaultMultiValues
 
@@ -296,7 +297,10 @@ def loadRandoPreset(randoPreset, args):
     defaultParams.update(randoParams)
     randoParams = defaultParams
 
-    if randoParams.get("seed") != None:
+    if randoParams.get("logic") is not None:
+        args.logic = randoParams["logic"]
+
+    if randoParams.get("seed") is not None:
         args.seed = int(randoParams["seed"])
 
     if randoParams.get("animals", "off") == "on":
@@ -327,6 +331,8 @@ def loadRandoPreset(randoPreset, args):
         args.gravityBehaviour = randoParams["gravityBehaviour"]
     if randoParams.get("nerfedCharge", "off") == "on":
         args.nerfedCharge = True
+    if randoParams.get("revealMap", "on") == "on":
+        args.revealMap = True
 
     args.areaRandomization = randoParams["areaRandomization"]
     if args.areaRandomization == "on":
@@ -419,6 +425,12 @@ def loadRandoPreset(randoPreset, args):
         args.objective = [nbObjective]
     elif "objective" in randoParams:
         args.objective = randoParams["objective"]
+    if randoParams.get("nbObjectivesRequired", "off") != "off":
+        if randoParams["nbObjectivesRequired"] == "random":
+            args.nbObjectivesRequired = 0
+        else:
+            args.nbObjectivesRequired = randoParams["nbObjectivesRequired"]
+    args.hiddenObjectives = convertParam(randoParams, "hiddenObjectives")
 
     if "tourian" in randoParams:
         args.tourian = randoParams["tourian"]
@@ -427,7 +439,7 @@ def loadRandoPreset(randoPreset, args):
         args.minimizerN = randoParams["minimizerQty"]
 
     defaultMultiValues = getDefaultMultiValues()
-    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "areaRandomization"]
+    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "areaRandomization", "logic"]
     for multiElem in multiElems:
         if multiElem+'MultiSelect' in randoParams:
             setattr(args, multiElem+'List', ','.join(randoParams[multiElem+'MultiSelect']))
@@ -440,6 +452,8 @@ def getRandomizerDefaultParameters():
     defaultParams = {}
     defaultMultiValues = getDefaultMultiValues()
 
+    defaultParams['logic'] = "vanilla"
+    defaultParams['logicMultiSelect'] = defaultMultiValues['logic']
     defaultParams['complexity'] = "simple"
     defaultParams['preset'] = 'regular'
     defaultParams['randoPreset'] = ""
@@ -470,6 +484,8 @@ def getRandomizerDefaultParameters():
     defaultParams['nbObjective'] = "4"
     defaultParams['objective'] = ["kill all G4"]
     defaultParams['objectiveMultiSelect'] = defaultMultiValues['objective']
+    defaultParams['nbObjectivesRequired'] = "off"
+    defaultParams['hiddenObjectives'] = "off"
     defaultParams['tourian'] = "Vanilla"
     defaultParams['tourianMultiSelect'] = defaultMultiValues['tourian']
     defaultParams['areaRandomization'] = "off"
@@ -490,6 +506,7 @@ def getRandomizerDefaultParameters():
     defaultParams['gravityBehaviour'] = "Balanced"
     defaultParams['gravityBehaviourMultiSelect'] = defaultMultiValues['gravityBehaviour']
     defaultParams['nerfedCharge'] = "off"
+    defaultParams['revealMap'] = "on"
     defaultParams['relaxed_round_robin_cf'] = "off"
     defaultParams['itemsounds'] = "on"
     defaultParams['elevators_speed'] = "on"

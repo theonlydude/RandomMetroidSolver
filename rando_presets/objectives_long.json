@@ -1,7 +1,8 @@
 {
     "objectiveRandom": "true",
-    "nbObjective": 5,
-    "objectiveMultiSelect": ["kill three G4", "kill all G4", "kill three minibosses", "kill all mini bosses", "collect 75% items", "collect 100% items", "collect all upgrades", "kill shaktool", "activate chozo robots"],
+    "nbObjectivesRequired": 6,
+    "nbObjective": 9,
+    "objectiveMultiSelect": ["kill three G4", "kill all G4", "kill three minibosses", "kill all mini bosses", "collect 75% items", "collect 100% items", "collect all upgrades", "kill shaktool", "activate chozo robots", "explore 100% map", "explore 75% map"],
     "progressionSpeed": "random",
     "progressionSpeedMultiSelect": [
 	"slow",

@@ -59,6 +59,21 @@ def diff4solver(difficulty):
     else:
         return ("mania", "mania")
 
+def getDiffThreshold(target):
+    threshold = target
+    epsilon = 0.001
+    if target <= easy:
+        threshold = medium - epsilon
+    elif target <= medium:
+        threshold = hard - epsilon
+    elif target <= hard:
+        threshold = harder - epsilon
+    elif target <= harder:
+        threshold = hardcore - epsilon
+    elif target <= hardcore:
+        threshold = mania - epsilon
+    return threshold
+
 # allow multiple local repo
 appDir = sys.path[0]
 
@@ -246,6 +261,12 @@ class Knows:
                                 'href': 'https://www.youtube.com/watch?v=1DINqLnINc8',
                                 'rooms': ['Mama Turtle Room']}
 
+    MamaTurtleWallJumpBombBoost = SMBool(False, 0, ['MamaTurtleWallJumpBombBoost'])
+    desc['MamaTurtleWallJumpBombBoost'] = {'display': 'Mama Turtle Wall Jump Bomb Boost',
+                                           'title': 'Access Mama Turtle E-Tank by accurately placing a bomb or Power Bomb in mid-air following a wall jump, then using that bomb explosion to propel Samus forward. There is a timing component where the bomb is placed while rising then hit while falling, and a momentum component for maximizing horizontal distance.',
+                                           'href': 'https://www.youtube.com/watch?v=Epd_aaRgTvg',
+                                           'rooms': ['Mama Turtle Room']}
+
     MaridiaWallJumps = SMBool(True, medium, ['MaridiaWallJumps'])
     desc['MaridiaWallJumps'] = {'display': 'Various Maridia wall jumps',
                                 'title': 'Kinda tricky wall jumps to: access items in West Sand Hole without Spring Ball or Bombs, exit Spring Ball area without Hi Jump, exit Crab Hole with Gravity+Hi-Jump',
@@ -261,7 +282,7 @@ class Knows:
     # underwater grav-less
     GravLessLevel1 = SMBool(True, hardcore, ['GravLessLevel1'])
     desc['GravLessLevel1'] = {'display': 'Level 1',
-                              'title': 'Make your way underwater with Hi-Jump and Ice, freezing crabs and fishes. Access Botwoon with grapple.',
+                              'title': 'Make your way underwater with Hi-Jump, and Ice for freezing crabs and fishes or Spring Ball for spring ball jumps. Access Botwoon with grapple.',
                               'href': 'https://www.youtube.com/watch?v=G5bB03j5GZc',
                               'rooms': ['Main Street', 'Mt. Everest', 'Crab Shaft', 'Pseudo Plasma Spark Room',
                                         'Aqueduct', 'Botwoon Hallway', "Botwoon's Room", 'Botwoon Energy Tank Room',
@@ -301,17 +322,32 @@ class Knows:
                               'href': 'https://www.youtube.com/watch?v=XSBeLJJafjY',
                               'rooms': ['Parlor and Alcatraz']}
 
+    SporeSpawnBackDoor = SMBool(True, medium, ['SporeSpawnBackDoor'])
+    desc['SporeSpawnBackDoor'] = {'display': 'Backdoor to Spore Spawn item',
+                                  'title': 'Break the Spore Spawn exit super block from Big Pink to access the item',
+                                  'href': 'https://www.youtube.com/watch?v=4sxzkz4AAts',
+                                  'rooms': ['Big Pink']}
+
     ReverseGateGlitch = SMBool(True, medium, ['ReverseGateGlitch'])
     desc['ReverseGateGlitch'] = {'display': 'Reverse Gate Glitch',
                                  'title': 'Open wave gate in Pink Brinstar from bottom left corner with Hi-Jump',
                                  'href': 'https://wiki.supermetroid.run/Pink_Brinstar_Hopper_Room',
-                                 'rooms': ['Pink Brinstar Hopper Room']}
+                                 'rooms': ['Pink Brinstar Hopper Room'],
+                                 'logics': ['vanilla']}
 
     ReverseGateGlitchHiJumpLess = SMBool(False, 0, ['ReverseGateGlitchHiJumpLess'])
     desc['ReverseGateGlitchHiJumpLess'] = {'display': 'Reverse Gate Glitch w/o Hi-Jump',
                                            'title': 'Open wave gate in Pink Brinstar from bottom left corner without Hi-Jump',
                                            'href': 'https://wiki.supermetroid.run/Pink_Brinstar_Hopper_Room',
-                                           'rooms': ['Pink Brinstar Hopper Room']}
+                                           'rooms': ['Pink Brinstar Hopper Room'],
+                                           'logics': ['vanilla']}
+
+    WaveGateGlitchMirror = SMBool(False, 0, ['WaveGateGlitchMirror'])
+    desc['WaveGateGlitchMirror'] = {'display': 'Mirrored Wave Gate Glitch',
+                                    'title': 'Open wave gate in Pink Brinstar by doing a GGG out of a wall jump',
+                                    'href': 'https://youtu.be/CZK5tyDI87A',
+                                    'rooms': ['Pink Brinstar Hopper Room'],
+                                    'logics': ['mirror']}
 
     EarlyKraid = SMBool(True, easy, ['EarlyKraid'])
     desc['EarlyKraid'] = {'display': 'Early Kraid',
@@ -432,7 +468,8 @@ class Knows:
     desc['FrogSpeedwayWithoutSpeed'] = {'display': 'Frog speedway without speed',
                                         'title': 'Traverse frog speedway from right to left, without Speed Booster, but with Wave and either Spazer or Plasma',
                                         'href': 'https://puu.sh/CvsCT/7757bb4f62.mp4',
-                                        'rooms': ['Frog Speedway']}
+                                        'rooms': ['Frog Speedway'],
+                                        'logics': ['vanilla']}
 
     LavaDive = SMBool(True, harder, ['LavaDive'])
     desc['LavaDive'] = {'display': 'Lava Dive',
@@ -545,6 +582,24 @@ class Knows:
                                      'title': 'Access items in West Sand Hole (aka Left Sand Pit) with just Hi-Jump',
                                      'href': 'https://www.youtube.com/watch?v=Fn2z0ByOcj4',
                                      'rooms': ['West Sand Hole']}
+
+    EastSandHallSpringBallJump = SMBool(False, 0, ['EastSandHallSpringBallJump'])
+    desc['EastSandHallSpringBallJump'] = {'display': 'East Sand Hall Spring Ball jump',
+                                          'title': 'Cross East Sand Hall left to right with Hi-Jump and Spring Ball. On the left side of the raised platform, jump for max height. Lateral Midair Morph for horizontal momentum, and perform the springball jump the moment before touching the sandfall. Pause again to disable springball as soon as possible.',
+                                          'href': 'https://www.youtube.com/watch?v=bUBYtoz7wMk',
+                                          'rooms': ['East Sand Hall']}
+
+    WestSandHallInsaneBombJump = SMBool(False, 0, ['WestSandHallInsaneBombJump'])
+    desc['WestSandHallInsaneBombJump'] = {'display': 'West Sand Hall Insane Bomb Jump',
+                                          'title': 'Time a bomb to hit Samus when she is morphed, 1 pixel into the sand, inside a sandfall, and moving horizontally. There is a setup using a sand IBJ to get the right timing, and another setup using a very fast jump morph.',
+                                          'href': 'https://www.youtube.com/watch?v=q-ROSTETPqE',
+                                          'rooms': ['West Sand Hall']}
+
+    CacAlleyUWJ = SMBool(False, 0, ['CacAlleyUWJ'])
+    desc['CacAlleyUWJ'] = {'display': 'Cacatac Alley Underwater Wall Jump',
+                           'title': 'Traverse East Cactus Alley Room left to right suitless, using space jump and an underwater wall jump',
+                           'href': 'https://streamable.com/qaqh81',
+                           'rooms': ['East Cactus Alley Room']}
 
     # Suitless Draygon
     DraygonRoomGrappleExit = SMBool(False, 0, ['DraygonRoomGrappleExit'])
@@ -683,7 +738,7 @@ class Knows:
             {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess', 'LowGauntlet', 'OldMBWithSpeed'],
              'title': 'Crateria'},
             {'knows': ['CeilingDBoost', 'BillyMays', 'EarlyKraid',
-                       'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess',
+                       'SporeSpawnBackDoor', 'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 'WaveGateGlitchMirror',
                        'RedTowerClimb', 'XrayDboost', 'XrayIce',
                        'RonPopeilScrew', 'Moondance'],
              'title': 'Brinstar'}
@@ -702,7 +757,7 @@ class Knows:
              'title': 'Clips'},
             {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
              'title': 'Plasma Room'},
-            {'knows': ['HiJumpMamaTurtle', 'MaridiaWallJumps', 'MtEverestGravJump'],
+            {'knows': ['HiJumpMamaTurtle', 'MaridiaWallJumps', 'MtEverestGravJump', 'MamaTurtleWallJumpBombBoost'],
              'title': 'Jumps'}
         ],
         'Maridia 2/2': [
@@ -714,6 +769,7 @@ class Knows:
              'title': 'Suitless Draygon Exit'},
             {'knows': ['WestSandHoleSuitlessWallJumps', 'DoubleSpringBallJump', 'TediousMountEverest',
                        'BotwoonToDraygonWithIce', 'SuitlessCrystalFlashClip',
+                       'CacAlleyUWJ', 'EastSandHallSpringBallJump', 'WestSandHallInsaneBombJump',
                        'SuitlessPuyoClip'],
              'title': 'Obscure suitless stuff'}
         ],

@@ -11,7 +11,7 @@ from rando.ItemLocContainer import ItemLocContainer, getLocListStr, ItemLocation
 from rando.Chozo import isChozoItem
 from rando.Restrictions import Restrictions
 from utils.objectives import Objectives
-from utils.parameters import infinity
+from utils.parameters import infinity, getDiffThreshold
 from rom.rom_patches import RomPatches
 
 # checks init conditions for the randomizer: processes super fun settings, graph, start location, special restrictions
@@ -56,6 +56,7 @@ class RandoSetup(object):
         self.itemManager.createItemPool(exclude)
         self.basePool = self.itemManager.getItemPool()[:]
         self.log = utils.log.get('RandoSetup')
+        self.bossesWithDifficulty = None
         if len(locations) != len(self.locations):
             self.log.debug("inaccessible locations :"+getLocListStr([loc for loc in locations if loc not in self.locations]))
 
@@ -181,7 +182,7 @@ class RandoSetup(object):
             # finally, actually do the randomization using a speedrun filler (stepLimit attempts heuristic)
             stepLimit = 50
             self.restrictions.setPlacementRestrictions(restr)
-            filler = FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, self.container, endDate=endDate, diffSteps=stepLimit)
+            filler = FillerRandomSpeedrun(self.graphSettings, self.areaGraph, self.restrictions, self.container, endDate=endDate, diffSteps=stepLimit, bossDiffs=self.bossesWithDifficulty)
             stepCond = filler.createStepCountCondition(stepLimit)
             filler.generateItems(condition=lambda: filler.itemPoolCondition() and stepCond(), vcr=vcr)
             if not filler.itemPoolCondition():
@@ -240,7 +241,8 @@ class RandoSetup(object):
     # in door color rando, determine mandatory beams
     def checkDoorBeams(self):
         if self.restrictions.isLateDoors():
-            doorBeams = ['Wave','Ice','Spazer','Plasma']
+            doorBeams = [beam for beam in ['Wave','Ice','Spazer','Plasma'] if beam not in self.forbiddenItems]
+            self.log.debug("checkDoorBeams. checking for "+str(doorBeams))
             self.restrictions.mandatoryBeams = [beam for beam in doorBeams if not self.checkPool(forbidden=[beam])]
             self.log.debug("checkDoorBeams. mandatoryBeams="+str(self.restrictions.mandatoryBeams))
 
@@ -308,18 +310,26 @@ class RandoSetup(object):
             escAPs = [ap for ap in aps if ap in availAPs]
             self.log.debug("escAPs="+str(escAPs))
             if len(escAPs) < n:
-                msg = "goal '{}' impossible to complete due to area layout".format(goal.name)
+                ret = False
+                msg = "Objective '{}' impossible to complete".format(goal.name)
                 self.log.debug("checkPool. {}".format(msg))
                 self.errorMsgs.append(msg)
-                ret = False
                 continue
             for ap in escAPs:
                 if not self.areaGraph.canAccess(self.sm, ap, "Golden Four", self.settings.maxDiff):
-                    msg = "goal '{}' impossible to complete due to area layout".format(goal.name)
+                    ret = False
+                    msg = "Objective '{}' impossible to complete".format(goal.name)
                     self.log.debug("checkPool. {}".format(msg))
                     self.errorMsgs.append(msg)
+        # check that objectives are completable (ignore bosses/minibosses, checked below)
+        if ret:
+            checkedGoals = [goal for goal in Objectives.activeGoals if goal.category != "Bosses" and goal.category != "Minibosses"]
+            for goal in checkedGoals:
+                if not goal.canClearGoal(self.sm, 'Golden Four'):
                     ret = False
-                    break
+                    msg = f"Objective {goal} is not completable"
+                    self.log.debug('checkPool. {}'.format(msg))
+                    self.errorMsgs.append(msg)
         # check if all inter-area APs can reach each other
         if ret:
             interAPs = [ap for ap in self.areaGraph.getAccessibleAccessPoints(self.startAP) if not ap.isInternal() and not ap.isLoop()]
@@ -340,7 +350,6 @@ class RandoSetup(object):
         if ret:
             # always add G4 to mandatory bosses, even if not required by objectives
             mandatoryBosses = set(Objectives.getMandatoryBosses() + Bosses.Golden4())
-
             for loc in self.lastRestricted:
                 if loc.Name in self.bossesLocs:
                     ret = False
@@ -355,18 +364,28 @@ class RandoSetup(object):
                       and self.areaGraph.canAccess(self.sm, self.startAP, 'DraygonRoomIn', maxDiff)
                 if ret:
                     # see if we can beat bosses with this equipment (infinity as max diff for a "onlyBossesLeft" type check
-                    beatableBosses = sorted([loc.BossItemType for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if loc.isBoss()])
-                    self.log.debug("checkPool. beatableBosses="+str(beatableBosses))
-                    self.log.debug("checkPool. mandatoryBosses: {}".format(mandatoryBosses))
-                    ret = mandatoryBosses.issubset(set(beatableBosses)) and Objectives.checkLimitObjectives(beatableBosses)
+                    allBosses = [loc for loc in totalAvailLocs if loc.isBoss() and loc.Name != "Mother Brain"]
+                    availLocs = self.services.currentLocations(self.startAP, container, diff=infinity)
+                    beatableBosses = [loc for loc in availLocs if loc in allBosses]
+                    beatableBossNames = [loc.BossItemType for loc in beatableBosses]
+                    ret = mandatoryBosses.issubset(set(beatableBossNames)) and Objectives.checkLimitObjectives(beatableBossNames)
                     if ret:
-                        # check that we can then kill mother brain
-                        self.sm.addItems(Bosses.Golden4() + Bosses.miniBosses())
-                        beatableMotherBrain = [loc.Name for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if loc.Name == 'Mother Brain']
-                        ret = len(beatableMotherBrain) > 0
-                        self.log.debug("checkPool. beatable Mother Brain={}".format(ret))
+                        # check that we can then kill mother brain if needed
+                        if Objectives.tourianRequired == True:
+                            self.sm.addItems(Bosses.Golden4() + Bosses.miniBosses())
+                            beatableMotherBrain = [loc for loc in self.services.currentLocations(self.startAP, container, diff=infnity) if loc.Name == 'Mother Brain']
+                            ret = len(beatableMotherBrain) > 0
+                            self.log.debug("checkPool. beatable Mother Brain={}".format(ret))
+                            if ret:
+                                beatableBosses.append(beatableMotherBrain.pop())
+                        # useful to get actual max diff for bosses
+                        if ret:
+                            self.bossesWithDifficulty = copy.deepcopy(beatableBosses)
+                            for loc in self.bossesWithDifficulty:
+                                diff = loc.difficulty.difficulty
+                                loc.difficulty.difficulty = getDiffThreshold(diff)
                     else:
-                        msg = "can't kill all mandatory bosses/minibosses: {}".format(', '.join(list(mandatoryBosses - set(beatableBosses))))
+                        msg = "can't kill all mandatory bosses/minibosses"
                         self.log.debug("checkPool. {}".format(msg))
                         self.errorMsgs.append(msg)
                 else:
@@ -374,7 +393,6 @@ class RandoSetup(object):
                     self.log.debug('checkPool. {}'.format(msg))
                     self.errorMsgs.append(msg)
                 self.log.debug('checkPool. boss access sanity check: '+str(ret))
-
         if self.restrictions.isChozo() or self.restrictions.isScavenger():
             # in chozo or scavenger, we cannot put other items than NoEnergy in the restricted locations,
             # we would be forced to put majors in there, which can make seed generation fail:

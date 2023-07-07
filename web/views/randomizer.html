@@ -12,6 +12,9 @@ extend 'layout.html'
 <link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
 <script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
 
+<link rel="stylesheet" type="text/css" href="{{=URL('static','image-picker/image-picker.css')}}">
+<script src="{{=URL('static', 'image-picker/image-picker.js')}}" type="text/javascript"></script>
+
 <script type="text/javascript" src="{{=URL('static', '/highslide/highslide.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "/highslide/highslide.css")}} />
 <script type="text/javascript">
@@ -288,6 +291,10 @@ if (hs.registerOverlay) {
 #areaRandomizationText {
   flex-grow: 1;
 }
+.rando_button {
+    cursor: pointer;
+    width: 2em;
+}
 </style>
 
 <script type="text/javascript">
@@ -300,6 +307,8 @@ $(document).ready(function(){
 var chosenElements = ["preset", "startLocationMultiSelect", "majorsSplitMultiSelect", "progressionSpeedMultiSelect", "progressionDifficultyMultiSelect", "morphPlacementMultiSelect", "energyQtyMultiSelect", "gravityBehaviourMultiSelect", "tourianMultiSelect", "areaRandomizationMultiSelect"];
 var currentMultiValues = {{response.write(currentMultiValues, escape=False)}};
 var defaultMultiValues = {{response.write(defaultMultiValues, escape=False)}};
+// not a regular multi select
+var logicMultiSelect = {{response.write(currentMultiValues["logic"], escape=False)}};
 
 function resizeChosen() {
    $(".chosen-container").each(function() {
@@ -315,6 +324,33 @@ function isElemIdRandom(elemId) {
     return isElemRandom(document.getElementById(elemId+"Random"));
 }
 
+function randomizeTarget(evt, elemId) {
+    var e = document.getElementById(elemId);
+
+    var isActive;
+    if(isElemRandom(evt.currentTarget)) {
+        evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
+        isActive = false;
+
+        // store multiple selected values for next time the dice is pressed
+        logicMultiSelect = $('#'+elemId).data('picker').selected_values();
+        // go back to single selection
+        $('#'+elemId).prop('multiple', false);
+    } else {
+        evt.currentTarget.className += " active";
+        isActive = true;
+        $('#'+elemId).prop('multiple', true);
+
+        // set selected values, default to all selected
+        $('#'+elemId).val(logicMultiSelect);
+    }
+
+    // recreate select with updated multiple
+    $('#'+elemId).data('picker').destroy();
+    var params = {show_label: true};
+    $('#'+elemId).imagepicker(params);
+}
+
 function randomize(evt, elemId) {
   var e = document.getElementById(elemId);
 
@@ -323,7 +359,7 @@ function randomize(evt, elemId) {
     evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
     isActive = false;
 
-    defaultValues = {"missileQty": 3, "superQty": 2, "powerBombQty": 1, "minorQty": 100, "scavNumLocs": 10, "nbObjective": 4};
+    defaultValues = {"missileQty": 3, "superQty": 2, "powerBombQty": 1, "minorQty": 100, "scavNumLocs": 10, "nbObjective": 4, "nbObjectivesRequired": "off"};
 
     if(e.value.length == 0 && elemId in defaultValues) {
       e.value = defaultValues[elemId];
@@ -699,18 +735,20 @@ function objective_change(e, params, force) {
     sort_objectives_and_add_optgroups();
 }
 
-var max_objectives = 5;
+var max_objectives = 18;
 function setMaxObjective(isRandom) {
     if(isRandom) {
         // no limit
         $("#objectiveMultiSelect").chosen("destroy");
         $("#objectiveMultiSelect").chosen({max_selected_options: Infinity, width: '100%'})
         $("#nbObjectiveVisiblity").show();
+        $("#hiddenObjectivesVisibility").show();
     } else {
-        // limit to 5 objectives (4 in scav hunt)
+        // limit to 18 objectives (17 in scav hunt)
         $("#objectiveMultiSelect").chosen("destroy");
         $("#objectiveMultiSelect").chosen({max_selected_options: max_objectives, width: '100%'})
         $("#nbObjectiveVisiblity").hide();
+        $("#hiddenObjectivesVisibility").hide();
     }
 }
 
@@ -777,7 +815,7 @@ function randomizeObjective(evt) {
             backup_values = all_objectives
         }
         if (backup_values.length >= all_objectives.length) {
-            backup_values = backup_values.filter(s => s !== 'collect 100% items');
+            backup_values = backup_values.filter(s => s !== 'collect 100% items' && s !== "explore 100% map");
         }
         $("#objectiveMultiSelect").val(backup_values).trigger("chosen:updated");
     }
@@ -794,7 +832,7 @@ function getAllObjectives() {
     for(var i=0; i<defaultMultiValues["objective"].length; i++) {
         var toAdd = defaultMultiValues["objective"][i];
         // don't add 'collect 100% items' to the random list as it's a special objective
-        if(toAdd == "collect 100% items") {
+        if(toAdd == "collect 100% items" || toAdd == "explore 100% map") {
             continue;
         }
         if(!notSelectedArray.includes(toAdd) && !selectedArray.includes(toAdd)) {
@@ -803,6 +841,10 @@ function getAllObjectives() {
     }
     var all_objectives = Array.from(defaultMultiValues["objective"]);
     var index = all_objectives.indexOf("collect 100% items");
+    if(index > -1) {
+        all_objectives.splice(index, 1);
+    }
+    index = all_objectives.indexOf("explore 100% map");
     if(index > -1) {
         all_objectives.splice(index, 1);
     }
@@ -849,6 +891,16 @@ function setRandom() {
           pass
         pass
       pass
+
+    for id in ["logic"]:
+      if id in session.randomizer and session.randomizer[id] == "random":
+        response.write("  document.getElementById(\"{}Random\").click();\n".format(id), escape=False)
+        if "{}MultiSelect".format(id) in session.randomizer:
+          response.write("  $(\"#{}MultiSelect\").val({});\n".format(id, session.randomizer["{}MultiSelect".format(id)]), escape=False)
+          pass
+        pass
+      pass
+
 }}
 }
 
@@ -865,6 +917,7 @@ function setObjective() {
     // at start all objectives are displayed as selected even though they're not...
     var objective_random = "{{response.write(session.randomizer.get("objectiveRandom"))}}" == "true"
     var objective_number = "{{response.write(session.randomizer.get("nbObjective", 4))}}"
+    var objective_required = "{{response.write(session.randomizer.get("nbObjectivesRequired", "off"))}}"
 
     var selected_objectives = objectiveBackup[objective_random]
     if (objective_random) {
@@ -879,6 +932,12 @@ function setObjective() {
         document.getElementById('nbObjectiveRandom').click()
     } else {
         document.getElementById('nbObjective').value = objective_number
+    }
+
+    if (['0', 'random'].includes(objective_required)) {
+        document.getElementById('nbObjectivesRequiredRandom').click()
+    } else {
+        document.getElementById('nbObjectivesRequired').value = objective_required
     }
 
     $("#objectiveMultiSelect").val(selected_objectives).trigger("chosen:updated");
@@ -899,18 +958,18 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = ["noPatchesVisibility"];
-    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility"];
+    var hide = ["seedVisibility", "itemsQuantityVisibility", "minorsProportionVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility", "saveLoadRandoPresetVisibility"];
     showHide(show, hide);
   }
 
   else if(name == "medium") {
-    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility", "objectivesVisibility"];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility", "noPatchesVisibility"];
+    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "itemsQuantityVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility", "objectivesVisibility", "helperPatchesVisibility"];
+    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "minorsProportionVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "noPatchesVisibility", "saveLoadRandoPresetVisibility"];
     showHide(show, hide);
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility"];
+    var show = ["seedVisibility", "itemsQuantityVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "minorsProportionVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility", "saveLoadRandoPresetVisibility"];
     var hide = ["noPatchesVisibility"];
     showHide(show, hide);
   }
@@ -937,23 +996,25 @@ function showHide(show, hide) {
   }
 }
 
-var globalSwitchs = {};
+function getRandomizerParameters(setDisabledToOff, trueJson) {
+    var dataDict = {};
 
-function AjaxPresetCallCompleted(data) {
-    console.log("AjaxPresetCallCompleted");
-
-    var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf", "hiddenObjectives"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
-    var multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian", "objective", "areaRandomization"];
+    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "tourian", "areaRandomization"];
+    var imgPickers = ["logic"];
 
     for(var i=0; i<elems.length; i++) {
-        // if element is disabled set it to off
-        var elem = document.getElementById(elems[i]);
-        if(elem.disabled == true) {
-            dataDict[elems[i]] = "off";
+        if(setDisabledToOff) {
+            // if element is disabled set it to off
+            var elem = document.getElementById(elems[i]);
+            if(elem.disabled == true) {
+                dataDict[elems[i]] = "off";
+            } else {
+                dataDict[elems[i]] = elem.value;
+            }
         } else {
-            dataDict[elems[i]] = elem.value;
+            dataDict[elems[i]] = document.getElementById(elems[i]).value;
         }
     }
     for(var i=0; i<randomElems.length; i++) {
@@ -970,13 +1031,42 @@ function AjaxPresetCallCompleted(data) {
        if(isElemIdRandom(elemId)) {
          dataDict[elemId] = "random";
          multiElemId = elemId+"MultiSelect";
-         dataDict[multiElemId] = $("#"+multiElemId).val().join();
+         if(trueJson) {
+             dataDict[multiElemId] = $("#"+multiElemId).val();
+         } else {
+             dataDict[multiElemId] = $("#"+multiElemId).val().join();
+         }
+       } else {
+         dataDict[elemId] = document.getElementById(elemId).value;
+       }
+    }
+    for(var i=0; i<imgPickers.length; i++) {
+       // check if random dice is checked
+       var elemId = imgPickers[i];
+       if(isElemIdRandom(elemId)) {
+         dataDict[elemId] = "random";
+         multiElemId = elemId+"MultiSelect";
+         if(trueJson) {
+             dataDict[multiElemId] = $("#"+elemId).data('picker').selected_values();
+         } else {
+             dataDict[multiElemId] = $("#"+elemId).data('picker').selected_values().join();
+         }
        } else {
          dataDict[elemId] = document.getElementById(elemId).value;
        }
     }
 
-    getSpecialValues(dataDict);
+    getSpecialValues(dataDict, trueJson);
+
+    return dataDict;
+}
+
+function AjaxPresetCallCompleted(data) {
+    console.log("AjaxPresetCallCompleted");
+
+    var dataDict = getRandomizerParameters(true, false);
+    dataDict["complexity"] = getComplexity();
+    dataDict["paramsFileTarget"] = data;
 
     // if production server randomly use one of the two redirect webapps
     var prodUrls = ["varia.run", "www.varia.run"];
@@ -1148,35 +1238,8 @@ function AjaxRandomizerCallCompleted(data) {
     // set backup button text to Randomize
     document.getElementById("submitBtn").data = "Randomize";
 
-    var dataDict = {"complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "scavRandomized", "relaxed_round_robin_cf"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
-    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "tourian", "areaRandomization"];
-
-    for(var i=0; i<elems.length; i++) {
-       dataDict[elems[i]] = document.getElementById(elems[i]).value;
-    }
-    for(var i=0; i<randomElems.length; i++) {
-       // check if random dice is checked
-       if(isElemIdRandom(randomElems[i])) {
-         dataDict[randomElems[i]] = "random";
-       } else {
-         dataDict[randomElems[i]] = document.getElementById(randomElems[i]).value;
-       }
-    }
-    for(var i=0; i<multiElems.length; i++) {
-       // check if random dice is checked
-       var elemId = multiElems[i];
-       if(isElemIdRandom(elemId)) {
-         dataDict[elemId] = "random";
-         multiElemId = elemId+"MultiSelect";
-         dataDict[multiElemId] = $("#"+multiElemId).val().join();
-       } else {
-         dataDict[elemId] = document.getElementById(elemId).value;
-       }
-    }
-
-    getSpecialValues(dataDict);
+    var dataDict = getRandomizerParameters(false, false);
+    dataDict["complexity"] = getComplexity();
 
     // call webservice to update the session
     var request = $.ajax({
@@ -1189,18 +1252,27 @@ function AjaxRandomizerCallCompleted(data) {
     request.fail(ajaxFail);
 }
 
-function getSpecialValues(dataDict) {
+function getSpecialValues(dataDict, trueJson) {
     dataDict["objectiveRandom"] = isElemIdRandom("objective")
 
     // Note both objective and objectiveMultiSelect are passed via dataDict.objective
     // The backend decides to use this for one or the other
-    var values = $("#objectiveMultiSelect").val().join(",");
+    if(trueJson) {
+        var values = $("#objectiveMultiSelect").val();
+    } else {
+        var values = $("#objectiveMultiSelect").val().join(",");
+    }
     dataDict["objective"] = values ? values : "nothing"
 
     if (isElemIdRandom("nbObjective")) {
         dataDict["nbObjective"] = "random"
     } else {
         dataDict["nbObjective"] = document.getElementById("nbObjective").value
+    }
+    if (isElemIdRandom("nbObjectivesRequired")) {
+        dataDict["nbObjectivesRequired"] = "random"
+    } else {
+        dataDict["nbObjectivesRequired"] = document.getElementById("nbObjectivesRequired").value
     }
 }
 
@@ -1216,9 +1288,9 @@ function validateObjectives() {
             return false;
         }
     } else {
-        // if not randomized, check that there's max 5 objectives in the list (4 in scav hunt)
+        // if not randomized, check that there's max 18 objectives in the list (17 in scav hunt)
         if(values.length > max_objectives) {
-            alert("You can have maximum five objectives (four if major split is Scavenger Hunt)");
+            alert("You can have maximum 18 objectives (17 if major split is Scavenger Hunt)");
             return false
         }
     }
@@ -1323,6 +1395,7 @@ var tips = [
 
 var myTimer = null;
 var curLoadingTips = 0;
+var globalSwitchs = {};
 
 function loadTip(first = true) {
     if(first == true) {
@@ -1640,12 +1713,12 @@ window.onload = function(){
             setSwitchToOn(hud);
 
             // update maximum number of allowed custom objectives
-            max_objectives = 4;
+            max_objectives = 17;
         } else {
             scavengerParams.style.display = "none";
 
             // update maximum number of allowed custom objectives
-            max_objectives = 5;
+            max_objectives = 18;
         }
         // tell chosen about new maximum
         if(!isElemRandom(document.getElementById("objectiveRandom"))) {
@@ -1698,6 +1771,9 @@ window.onload = function(){
             }
         }
     });
+
+    $("#logic").imagepicker({show_label: true});
+
     appIsReady = true;
 }
 
@@ -1745,6 +1821,19 @@ function setSwitchToOff(elem) {
     }
 }
 
+function saveRandoPresetLocal() {
+    // ask user for preset name
+    var filename = prompt("What is your randomizer preset name?");
+    if(filename == null) {
+        return false;
+    }
+
+    var data = getRandomizerParameters(false, true);
+
+    var blob = new Blob([JSON.stringify(data, null, 2)], {type: "text/plain"});
+    saveAs(blob, filename+'.json');
+}
+
 function loadRandoPreset() {
   console.log("loadRandoPreset: "+document.getElementById("randoPreset").value);
 
@@ -1762,15 +1851,40 @@ function loadRandoPreset() {
   request.fail(ajaxFail);
 }
 
+function loadRandoPresetLocal() {
+    var fileSelector = $('<input type="file" onchange="loadRandoPresetLocalCallbak(event)">');
+    fileSelector.click();
+}
+function loadRandoPresetLocalCallbak(e) {
+    var file = e.target.files[0];
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = function(readerEvent) {
+        var content = readerEvent.target.result;
+        (async function () {
+            const response = await fetch(content);
+            const data = await response.json();
+            loadRandoPresetOK(data);
+        })();
+    }
+}
+
 function loadRandoPresetOK(data) {
     // instead of reloading the page which remove the sm ROM, update all fields manually
     for(var key in data) {
-        if(key == "objective" || key == "objectiveMultiSelect") {
+        if(key == "objective" || key == "objectiveMultiSelect" || key == "randoPreset") {
             continue;
         }
         value = data[key];
         // console.log("loadRandoPresetOK "+key+": "+value);
+
         var elem = document.getElementById(key);
+        if(elem == null) {
+            // in case there's unknown parameter in the json file
+            console.log("error loading elem: "+key);
+            continue;
+        }
 
         var elemRandom = document.getElementById(key+"Random");
         if(value == "random") {
@@ -1847,6 +1961,20 @@ function startTheTour(step=-1) {
       content: "<p>Use an American/Japan ROM of Super Metroid.<br/>\
 The vanilla ROM is stored in the browser local storage and is never sent to our server, all the patching is done locally in the browser.</p>"
     },
+
+    {
+      element: "#logicStep",
+      title: "Flavor",
+      content: "<p>Choose which flavor of Super Metroid you want to randomize:\
+<ul>\
+<li>Super Metroid: The original vanilla Super Metroid game</li>\
+<li>Super Mirrortroid: The map and rooms are mirrored horizontally</li>\
+</ul>\
+You still provide the vanilla Super Metroid ROM, VARIA handles patching it to the desired flavor.\
+</p><p>\
+Flavor hacks by BuggMann.</p><p>\
+Click on the dice button to randomly set this parameter.</p>"
+    },
     {
       element: "#randoPresetStep",
       title: "Settings Preset",
@@ -1864,6 +1992,11 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
     response.write('</ul>\\\n', escape=False)
     pass
 }}"
+    },
+    {
+      element: "#saveLoadRandoPresetStep",
+      title: "Save and Load custom Randomizer presets",
+      content: "<p>Use the save and load buttons to save your favorite Randomizer parameters on your computer and keep them for later use.</p>"
     },
     {
       element: "#raceStep",
@@ -1903,15 +2036,27 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
 <p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
+      element: "#nbObjectivesRequiredStep",
+      title: "Number of required objectives",
+      content: "<p>Number of objectives to complete from the objectives list. When 'off' (default), it will try to match the size of the complete objective list, with a maximum of 9 objectives required.</p>\
+<p>Click on the dice button to randomly set this parameter.</p>",
+    },
+    {
       element: "#nbObjectiveStep",
-      title: "Number of Objectives to access Tourian",
-      content: "<p>By default you need to complete 4 objectives from the list to access Tourian. You can choose 1-5 or enter 0 to make the number random.</p>",
+      title: "Number of possible objectives",
+      content: "<p>When objectives are randomized, determine the size of the objective list in game. See 'Number of required objectives' setting help for more information. Maximum possible number is 18.<br><b>Note: </b>The actual number can be lower than requested, due to conflict with other settings.</p>\
+<p>Click on the dice button to randomly set this parameter.</p>",
+    },
+    {
+      element: "#hiddenObjectivesStep",
+      title: "Hidden Objectives",
+      content: "<p>When objectives are randomized, the objective list is hidden in game until you reach the <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Statues</a> (or equivalent, depending on Tourian setting).<br>Mostly interesting with area randomization or custom start location settings.</p>",
     },
     {
       element: "#objectiveStep",
       title: "Custom Objectives",
       content: "<p>Choose which objectives are required to sink the <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statue</a> and to open access to <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a>.</p>\
-<p>You can choose from 0 to 5 objectives (4 if Majors Split is Scavenger Hunt):\
+<p>You can choose from 0 to 18 objectives (17 if Majors Split is Scavenger Hunt):\
 <p><b>Bosses:</b>\
 <ul>\
 <li>Kill Kraid: kill boss <a href=\"https://metroid.fandom.com/wiki/Kraid\" target=\"_blank\">Kraid</a> (vanilla)</li>\
@@ -1939,8 +2084,15 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
 <li>Collect 75% items: collect 75% of available items</li>\
 <li>Collect 100% items: collect 100% of available items</li>\
 <li>Collect all upgrades: collect all available suit upgrades (all items but energy/ammo)</li>\
-<li>Clear 'area': collect all available items <b>of the current major split</b> in 'area'. Forces VARIA HUD on to see how many are left in each area. <b>Incompatible with Scavenger Hunt and Disabled Tourian.</b></li>\
+<li>Clear 'area': collect all available items <b>of the current major split</b> in 'area'. Forces 'VARIA HUD' on to see how many are left in each area. <b>Incompatible with Scavenger Hunt and Disabled Tourian.</b></li>\
 </ul></p>\
+<p><b>Map:</b><ul>\
+<li>Explore 25% map: explore 25% of available map tiles</li>\
+<li>Explore 50% map: explore 50% of available map tiles</li>\
+<li>Explore 75% map: explore 75% of available map tiles</li>\
+<li>Explore 100% map: explore 100% of available map tiles</li>\
+<li>Explore 'area': explore all map tiles in 'area'.</li>\
+</ul>Forces 'Reveal Map' on to see how many are left in each area.</p>\
 <p><b>Memes:</b><ul>\
 <li>Tickle the Red Fish: use grapple on the <a href=\"https://wiki.supermetroid.run/Red_Fish_Room\" target=\"_blank\">Red Fish</a></li>\
 <li>Kill the orange Geemer: kill the orange Geemer that follows you on the little bridge before <a href=\"https://wiki.supermetroid.run/Bowling_Alley\">Bowling Alley</a></li>\
@@ -1952,11 +2104,10 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
 </p><p>\
 <b>Note:</b> If you leave the list empty no objective is required to access Tourian, ie. it's open.<br/>\
 <b>Note:</b> See the Tourian parameter to enable fast Tourian or trigger the escape when all objectives are completed.<br/>\
-<b>Note:</b> With Scavenger Hunt majors split only up to four objectives can be set as one mandatory objective is added: finish the Scavenger Hunt.<br/>\
 <b>Note:</b> Current percentage of collected items is displayed in the inventory pause menu.<br/>\
-<b>Note:</b> Collect 100% items is excluded by default when randomizing the objectives list as it requires you to complete all the objectives.\
+<b>Note:</b> 100% items and 100% map are excluded by default when randomizing the objectives list as they cover too much of the other objectives.\
 </p>\
-<p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 5 objectives from the list (between 1 and 4 if Scavenger Hunt). To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
+<p>Click on the dice button to randomize custom objectives. You can choose which objectives are available for the randomizer to choose from. The randomizer will choose between 1 and 18 objectives from the list (between 1 and 17 if Scavenger Hunt). To know the list of randomized objectives in-game a new pause screen has been added:<br/><img src=\"/solver/static/images/help/objectives.png\" alt=\"objectives.png\" title=\"objectives.png\"/></p>"
     },
     {
       element: "#StartLocationStep",
@@ -2137,25 +2288,27 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
 <p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
-      element: "#strictMinorsStep",
-      title: "Strict ammo distribution",
-      content: "<p>Instead of using the Minors proportions as probabilities, enforce a strict distribution to match the proportions as exactly as possible. Use it when you want to mimick vanilla proportions (4.6/1/1).</p><p>Click on the dice button to randomly set this parameter.</p>"
-    },
-    {
-      element: "#missileQtyStep",
-      title: "Proportion of <img src=\"/solver/static/images/tracker/inventory/Missile.png\" class=\"width: 32px\"/>/<img src=\"/solver/static/images/tracker/inventory/Super.png\" class=\"width: 32px\"/>/<img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/>",
-      content: "<p>For each minor types, the higher the number the higher the probability of choosing it when placing a minor.</p><p>Click on the dice button to randomly set this parameter.</p>"
-    },
-    {
       element: "#minorQtyStep",
-      title: "Percentage of minors available",
-      content: "<p>From 7%: minimum number of minors required to finish the game to 100%: all minors locations contain a minor (vanilla like).</p><p>Click on the dice button to randomly set this parameter.</p>"
+      title: "Percentage of Ammunition available",
+      content: "<p>From 7%: minimum number of ammunition required to finish the game to 100%: all ammunition locations contain an ammo (vanilla like).</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#energyQtyStep",
       title: "Quantity of Energy/Reserve Tanks available",
       content: "<p>Choose how many Energy <img src=\"/solver/static/images/tracker/inventory/ETank.png\" class=\"width: 32px\"/> / Reserve Tanks <img src=\"/solver/static/images/tracker/inventory/Reserve.png\" class=\"width: 32px\"/> will be available, from 0-1 in ultra sparse, 4-6 in sparse, 8-12 in medium and 18 in vanilla.</p>\
 <p>In ultra sparse <a href=\"https://metroid.fandom.com/wiki/Mother_Brain\" target=\"_blank\">Mother Brain's</a> <a href=\"https://metroid.fandom.com/wiki/Laser_Brain_Attack\" target=\"_blank\">rainbow beam</a> only does 20 damage instead of 300.</p><p>Click on the dice button to randomly set this parameter.</p>"
+    },
+    {
+      element: "#missileQtyStep",
+      title: "Distribution of <img src=\"/solver/static/images/tracker/inventory/Missile.png\" class=\"width: 32px\"/>/<img src=\"/solver/static/images/tracker/inventory/Super.png\" class=\"width: 32px\"/>/<img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/>",
+      content: "<p>For each ammo types, the higher the number relative to other proportions the higher the probability of choosing it when placing an ammo.</p>\
+<p>For example with default distribution of <img src=\"/solver/static/images/tracker/inventory/Missile.png\" class=\"width: 32px\"/>: 3, <img src=\"/solver/static/images/tracker/inventory/Super.png\" class=\"width: 32px\"/>: 2 and <img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/>: 1 the randomizer will place a <img src=\"/solver/static/images/tracker/inventory/Missile.png\" class=\"width: 32px\"/> 3 times out of 6, a  <img src=\"/solver/static/images/tracker/inventory/Super.png\" class=\"width: 32px\"/> 2 times out of 6 and a <img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/> 1 time out of 6.</p>\
+<p>Click on the dice button to randomly set this parameter.</p>"
+    },
+    {
+      element: "#strictMinorsStep",
+      title: "Strict Ammunition distribution",
+      content: "<p>Instead of using ammunition proportions as probabilities, enforce a strict distribution to match the proportions as exactly as possible. Use it when you want to mimick vanilla distribution (<img src=\"/solver/static/images/tracker/inventory/Missile.png\" class=\"width: 32px\"/> 4.6 / <img src=\"/solver/static/images/tracker/inventory/Super.png\" class=\"width: 32px\"/> 1 / <img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/> 1).</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#areaRandomizationStep",
@@ -2228,12 +2381,12 @@ Click on the dice button to randomly set this parameter.",
 <tr>\
 <td class=\"quarter\"><p class=\"top\">Remove <a href=\"https://wiki.supermetroid.run/Crab_Tunnel\" target=\"_blank\">Crab</a> green gate in <a href=\"https://metroid.fandom.com/wiki/Maridia\" target=\"_blank\">Marida</a>:</p></td>\
 <td class=\"quarter\"><p class=\"top\">Remove blue gate in <a href=\"https://wiki.supermetroid.run/Green_Hill_Zone\" target=\"_blank\">Green Hill Zone</a>:</p></td>\
-<td class=\"quarter\"><p class=\"top\">New platform in <a href=\"https://wiki.supermetroid.run/Green_Hill_Zone\" target=\"_blank\">Green Hill Zone</a> to access transition door:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Easier wall jump in <a href=\"https://wiki.supermetroid.run/Green_Hill_Zone\" target=\"_blank\">Green Hill Zone</a> to access transition door:</p></td>\
 </tr>\
 <tr>\
 <td class=\"quarter\"><img src=\"/solver/static/images/help/crab_gate.png\" alt=\"crab_gate\" title=\"crab_gate\" class=\"full\"/></td>\
 <td class=\"quarter\"><img src=\"/solver/static/images/help/greenhill_gate.png\" alt=\"greenhill_gate\" title=\"greenhill_gate\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/help/greenhill_platform.png\" alt=\"greenhill_platform\" title=\"greenhill_platform\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/help/greenhill_walljump.png\" alt=\"greenhill_walljump\" title=\"greenhill_walljump\" class=\"full\"/></td>\
 </tr>\
 <tr>\
 <td class=\"quarter\"><p class=\"top\">Access <a href=\"https://wiki.supermetroid.run/Red_Tower_Elevator_Room\" target=\"_blank\">Maridia red fish exit</a>:</p></td>\
@@ -2389,12 +2542,26 @@ Click on the dice button to randomly set this parameter.",
     {
       element: "#patchesStep",
       title: "Default Patches",
-      content: "Patches also included by default:\
+      content: "Patches always applied:\
 <ul>\
 <li>Allows the aim buttons to be assigned to any button (by Kejardon)</li>\
 <li>Max Ammo Display (by Personitis)</li>\
 <li>Play music with <a href=\"https://www.zeldix.net/t1607-msu1-getting-started-guide\" target=\"_blank\">MSU1 chip</a> on <a href=\"https://www.retrorgb.com/fxpakpro.html\" target=\"_blank\">SD2SNES/FXPak</a> and compatible emulators (by DarkShock)</li>\
-<li><a href=\"https://wiki.supermetroid.run/Red_Brinstar_Elevator_Room\" target=\"_blank\">Red Brinstar elevator</a> door is blue (by Flo)</li>\
+<li>Disable <a href=\"https://wiki.supermetroid.run/Golden_Torizo_Code\" target=\"_blank\">GT Code</a> and <a href=\"https://wiki.supermetroid.run/Weapon_Techniques#Glitched_Beams\" target=\"_blank\">gliched beams</a>, also fixes to some vanilla bugs</li>\
+<li>When doors are colored on one side and blue on the other, the blue side blinks to indicate the color of the other side</li>\
+<li>Change in-game font for HUD, Message boxes and pause menu with <a href=\"https://damieng.com/typography/zx-origins/distanttears\" target=\"_blank\">Distant Tears by damieng</a></li>\
+<li>Display collected items percentage and RTA time in pause inventory menu :</li>\
+<img src=\"/solver/static/images/help/inventory.png\" alt=\"inventory.png\" title=\"Inventory menu\" class=\"third center_img\"/>\
+<li>Integrate Map Overhaul patch by MFreak, with VARIA adaptations:</li>\
+<ul>\
+<li>In-game map is now easier to read (room connections are clearly shown), and the mini-map is drawn the same way as the main map (except colors and map icons)</li>\
+<li>Use the select button to switch between visited areas</li>\
+<li>Depending on item splits, major item locations (if applicable) will have a distinct icon</li>\
+<li>Each area in the VARIA sense (Green/Pink Brinstar, Crocomire, Wrecked Ship etc.) has its own distinct color inside the original game maps</li>\
+<li>The map automatically tracks door colors when they have been seen by the player</li>\
+<li>In area randomizer, portals are automatically tracked as well when they have been taken once, as the map adds portal icons with the color of the destination area</li>\
+<img src=\"/solver/static/images/help/map.png\" alt=\"map.png\" title=\"Brinstar map example\" class=\"third center_img\"/>\
+</ul>\
 </ul>",
       placement: "auto left"
     },
@@ -2574,9 +2741,19 @@ This patch is automatically enabled when using Full Countdown item split, or Maj
       placement: "auto left"
     },
     {
+      element: "#revealMapStep",
+      title: "Reveal Map",
+      content: "<p>Reveals the whole in game map on start, showing item locations and class depending on item split. Map areas are available as soon as you step in them once.</p>\
+<img src=\"/solver/static/images/help/reveal_map.png\" alt=\"reveal_map.png\" title=\"Brinstar map with the reveal patch\" class=\"third center_img\"/>\
+<p>Patch developed by Flo</p>",
+      placement: "auto left"
+    },
+    {
       element: "#animalsStep",
       title: "Animals surprise",
-      content: "<p>Replace saving the animals in the escape sequence by a random surprise.<br/><b>Note:</b> This setting is not available when Escape Randomization is enabled, as it is replaced by Animals Challenges (see Escape Randomization help for more information).</p>\
+      content: "<p>Replace saving the animals in the escape sequence by a random surprise.<br/>\
+<b>Note:</b> This setting is not available when Escape Randomization is enabled, as it is replaced by Animals Challenges (see Escape Randomization help for more information).<br/>\
+<b>Note:</b> This setting is not available when using non vanilla flavor like Super Mirrortroid.</p>\
 <p>Patch developed by Foosda.</p>",
       placement: "auto left"
     },
@@ -2608,11 +2785,13 @@ This patch is automatically enabled when using Full Countdown item split, or Maj
         step = parent.id
     }
   }
+    console.log("startTheTour step is " + step);
   if (typeof step === 'string') {
     step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
   }
   // Start the tour
   if(step != -1) {
+    console.log("startTheTour final step is " + step);
     tour.goTo(step);
   }
   tour.start();
@@ -2635,17 +2814,25 @@ def displayCheckbox(id, defaultTrue=False):
   {{pass}}
 
 {{
-def displaySelect(id, values, default):
+def displaySelect(id, values, default, replace=True):
   value = session.randomizer.get(id, default)
+  if replace:
 }}
   {{
-   =SELECT(*[OPTION(displayNames.get(value, value), _value=value) for value in values],
-           **dict(_id=id, _name=id, value=value, _class="full"))
+     =SELECT(*[OPTION(displayNames.get(value, value), _value=value) for value in values],
+             **dict(_id=id, _name=id, value=value, _class="full"))
   }}
+{{
+  else:
+}}
+  {{
+     =SELECT(*values, **dict(_id=id, _name=id, value=value, _class="full"))
+  }}
+    {{pass}}
 {{pass}}
 
 {{
-def displayMultiSelect(id, selectedValues, default, multipleValues):
+def displayMultiSelect(id, selectedValues, default, multipleValues, replace=True):
   # values for objective are stored differently
   if id == "objective":
     if session.randomizer.get("objectiveRandom") == 'true':
@@ -2654,12 +2841,16 @@ def displayMultiSelect(id, selectedValues, default, multipleValues):
       selectedValues = session.randomizer["objective"] or ["kill all g4"]
       pass
     pass
-  displaySelect(id, multipleValues, default)
+  displaySelect(id, multipleValues, default, replace)
 
   response.write("<div id=\"{}MultiSelectDiv\" style=\"display:none\">".format(id), escape=False)
   response.write("<select id=\"{}MultiSelect\" class=\"chzn-select\" multiple>".format(id), escape=False)
   for value in multipleValues:
-    displayValue = displayNames.get(value, value)
+    if replace:
+      displayValue = displayNames.get(value, value)
+    else:
+      displayValue = value
+      pass
     if value in selectedValues:
       response.write("  <option value=\"{}\" selected=\"selected\">{}</option>".format(value, displayValue), escape=False)
     else:
@@ -2734,11 +2925,13 @@ def displayNumber(id, min, max, default, step="1"):
           <div class="column">
             <p>The Very Adaptive Randomizer of Items and Area (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset.</p>
             <table class="full">
-              <colgroup><col class="half" /><col class="half" /></colgroup>
+              <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
               <tr>
-              <td>Last generated seed permalink:</td><td><span id="permalink"></span></td><td id="permalinkStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                <td class="small"></td>
+                <td>Last generated seed permalink:</td><td><span id="permalink"></span></td><td id="permalinkStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr>
+                <td class="small"></td>
                 <td>Vanilla Super Metroid ROM:</td>
                 <td>
                    <div id="uploadFileVisibility">
@@ -2751,6 +2944,24 @@ def displayNumber(id, min, max, default, step="1"):
                 <td id="romStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr>
+                <td class="small"><div class="random"><button id="logicRandom" type="button" onclick="randomizeTarget(event, 'logic')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td><span id="logicText">Flavor:</span></td>
+                <td>
+                    <div class="border">
+                      <select class="filldropdown" id="logic" name="logic">
+{{
+  for (logic, name) in logics:
+    response.write("  <option data-img-src=\"/solver/static/images/rando/{}.png\" data-img-label=\"{}\" value=\"{}\" {}>{}</option>\n".format(logic, name, logic, 'selected="selected"' if logic == session.randomizer['logic'] else "", name), escape=False)
+    pass
+}}
+                        </optgroup>
+                      </select>
+                    </div>
+                </td>
+                <td id="logicStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+              </tr>
+              <tr>
+                <td class="small"></td>
                 <td>Settings Preset:</td>
                 <td>
                   <select class="chzn-select" id="randoPreset" name="randoPreset" onchange="loadRandoPreset()">
@@ -2770,7 +2981,14 @@ def displayNumber(id, min, max, default, step="1"):
                 </td>
                 <td id="randoPresetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
+              <tr id="saveLoadRandoPresetVisibility">
+                <td class="small"></td>
+                <td><img class="rando_button" id="save" src="/solver/static/images/ui/save.svg" title="Save" alt="Save" onclick="saveRandoPresetLocal()"> Save Randomizer parameters</td>
+                <td><img class="rando_button" id="load" src="/solver/static/images/ui/cloud_upload.png" title="Load" alt="Load" onclick="loadRandoPresetLocal()"> Load Randomizer parameters</td>
+                <td id="saveLoadRandoPresetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+              </tr>
               <tr id="raceModeVisibility">
+                <td class="small"></td>
                 <td>{{displayCheckbox("raceMode")}}<span id="raceModeText">Race Mode</span></td>
                 <td></td>
                 <td id="raceStep"><button type="button" onclick="startTheTour(event)">?</button></td>
@@ -2803,11 +3021,36 @@ def displayNumber(id, min, max, default, step="1"):
               </tr>
             <table class="full" id="objectivesVisibility">
               <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
+              <tr id="nbObjectivesRequiredVisiblity">
+                <td class="small"><div class="random"><button id="nbObjectivesRequiredRandom" type="button" onclick="randomize(event, 'nbObjectivesRequired')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td><span id="nbObjectivesRequiredText">Number of required objectives:</span></td>
+                <td>
+                  <select class="full" id="nbObjectivesRequired" name="nbObjectivesRequired" style="display: block;" value="{{response.write(session.randomizer.get('nbObjectivesRequired', 'off'))}}">
+                    <option selected="selected" value="off">off</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                  </select>
+                </td>
+
+                <td id="nbObjectivesRequiredStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+              </tr>
               <tr id="nbObjectiveVisiblity">
                 <td class="small"><div class="random"><button id="nbObjectiveRandom" type="button" onclick="randomize(event, 'nbObjective')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="nbObjectiveText">Number of objectives:</span></td>
-                <td>{{displayNumber("nbObjective", "1", "5", "4", "1")}}</td>
+                <td><span id="nbObjectiveText">Number of possible objectives:</span></td>
+                <td>{{displayNumber("nbObjective", "1", "18", "4", "1")}}</td>
                 <td id="nbObjectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+              </tr>
+              <tr id="hiddenObjectivesVisibility">
+                <td class="small"></td>
+                <td colspan="2">{{displayCheckbox("hiddenObjectives")}}<span id="hiddenObjectivesText">Hidden Objectives</span></td>
+                <td id="hiddenObjectivesStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -2861,7 +3104,7 @@ def displayNumber(id, min, max, default, step="1"):
               <tr id="progDiffVisibility">
                 <td class="small"><div class="random"><button id="progressionDifficultyRandom" type="button" onclick="randomize(event, 'progressionDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half"><span id="progressionDifficultyText">Progression difficulty:</span></td>
-                <td class="half">{{displayMultiSelect("progressionDifficulty", currentMultiValues["progressionDifficulty"], "normal", defaultMultiValues["progressionDifficulty"])}}</td>
+                <td class="half">{{displayMultiSelect("progressionDifficulty", currentMultiValues["progressionDifficulty"], "normal", defaultMultiValues["progressionDifficulty"], replace=False)}}</td>
                 <td id="progDiffStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr id="morphPlacementVisibility">
@@ -2881,34 +3124,14 @@ def displayNumber(id, min, max, default, step="1"):
                 <td id="hideItemsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
             </table>
-            <div id="ammoVisibility">
-              <h4>Ammo and Energy</h4>
+            <div id="itemsQuantityVisibility">
+              <h4>Ammunition and Energy</h4>
+              <h5>Quantity of Ammunition and Energy available</h5>
               <table class="full">
                 <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
-                <tr id="strictMinorsVisibility">
-                  <td class="small"><div class="random"><button id="strictMinorsRandom" type="button" onclick="randomize(event, 'strictMinors')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td colspan="2">{{displayCheckbox("strictMinors")}}<span id="strictMinorsText">Strict Minors distribution</span></td>
-                  <td id="strictMinorsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-                </tr>
-                <tr id="missileQtyVisibility">
-                  <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td><span id="missileQtyText">Proportion of Missiles <img src="/solver/static/images/tracker/inventory/Missile.png" class="width: 32px"/>:</span></td>
-                  <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
-                  <td id="missileQtyStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-                </tr>
-                <tr id="superQtyVisibility">
-                  <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td><span id="superQtyText">Proportion of Super Missiles <img src="/solver/static/images/tracker/inventory/Super.png" class="width: 32px"/>:</span></td>
-                  <td>{{displayNumber("superQty", "1", "9", "3", "0.1")}}</td>
-                </tr>
-                <tr id="powerBombQtyVisibility">
-                  <td class="small"><div class="random"><button id="powerBombQtyRandom" type="button" onclick="randomize(event, 'powerBombQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td><span id="powerBombQtyText">Proportion of Power Bombs <img src="/solver/static/images/tracker/inventory/PowerBomb.png" class="width: 32px"/>:</span></td>
-                  <td>{{displayNumber("powerBombQty", "1", "9", "1", "0.1")}}</td>
-                </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="minorQtyRandom" type="button" onclick="randomize(event, 'minorQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td><span id="minorQtyText">Percentage of minors (<img src="/solver/static/images/tracker/inventory/Missile.png" class="width: 32px"/>/<img src="/solver/static/images/tracker/inventory/Super.png" class="width: 32px"/>/<img src="/solver/static/images/tracker/inventory/PowerBomb.png" class="width: 32px"/>) available:</span></td>
+                  <td><span id="minorQtyText">Percentage of Ammunition (<img src="/solver/static/images/tracker/inventory/Missile.png" class="width: 32px"/>/<img src="/solver/static/images/tracker/inventory/Super.png" class="width: 32px"/>/<img src="/solver/static/images/tracker/inventory/PowerBomb.png" class="width: 32px"/>) available:</span></td>
                   <td>{{displayNumber("minorQty", "7", "100", "100")}}</td>
                   <td id="minorQtyStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
@@ -2917,6 +3140,33 @@ def displayNumber(id, min, max, default, step="1"):
                   <td><span id="energyQtyText">Quantity of Energy <img src="/solver/static/images/tracker/inventory/ETank.png" class="width: 32px"/> / Reserve Tanks <img src="/solver/static/images/tracker/inventory/Reserve.png" class="width: 32px"/> available:</span></td>
                   <td>{{displayMultiSelect("energyQty", currentMultiValues["energyQty"], "vanilla", defaultMultiValues["energyQty"])}}</td>
                   <td id="energyQtyStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+              </table>
+            </div>
+            <div id="minorsProportionVisibility">
+              <h5>Ammunition distribution</h5>
+              <table>
+                <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
+                <tr>
+                  <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="missileQtyText">Missiles <img src="/solver/static/images/tracker/inventory/Missile.png" class="width: 32px"/> proportion:</span></td>
+                  <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
+                  <td id="missileQtyStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr>
+                  <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="superQtyText">Super Missiles <img src="/solver/static/images/tracker/inventory/Super.png" class="width: 32px"/> proportion:</span></td>
+                  <td>{{displayNumber("superQty", "1", "9", "3", "0.1")}}</td>
+                </tr>
+                <tr>
+                  <td class="small"><div class="random"><button id="powerBombQtyRandom" type="button" onclick="randomize(event, 'powerBombQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="powerBombQtyText">Power Bombs <img src="/solver/static/images/tracker/inventory/PowerBomb.png" class="width: 32px"/> proportion:</span></td>
+                  <td>{{displayNumber("powerBombQty", "1", "9", "1", "0.1")}}</td>
+                </tr>
+                <tr id="strictMinorsVisibility">
+                  <td class="small"><div class="random"><button id="strictMinorsRandom" type="button" onclick="randomize(event, 'strictMinors')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td colspan="2">{{displayCheckbox("strictMinors")}}<span id="strictMinorsText">Strict Ammunition distribution</span></td>
+                  <td id="strictMinorsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
             </div>
@@ -3006,15 +3256,15 @@ def displayNumber(id, min, max, default, step="1"):
                 </tr>
               </table>
             </div>
+            <div>
+              <h4 id="patchesStep">Patches</h4>
+              <span class="rightStep"><button type="button" onclick="startTheTour(event)">?</button></span>
+            </div>
             <div id="noPatchesVisibility">
-              <h4>Patches</h4>
-              <p>Some patches are applied by default, use the 'advanced' tab to see them.</p>
+              <p>Some patches are always applied, check out the '?' button to see them. Other optional patches are applied by default, use 'advanced' tab to see them.</p>
             </div>
             <div id="patchesVisibility">
-              <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour('patchesStep')">?</button></span></h4>
-              <p id="mainPatchesTextVisibility">
-                The bug fix <a href="https://itemrando.supermetroid.run/information" target="_blank">patches</a> from Total Item Randomizer are included by default.
-              </p>
+              <p>Some patches are always applied, check out the '?' button to see them. Other optional patches are applied by default, use 'advanced' tab to see them.</p>
               <table class="full">
                 <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
                 <tr><td colspan="2"><h5 class="center"><b>Randomizer adaptations (logic impact)</b></h5></td><td></td></tr>
@@ -3051,29 +3301,31 @@ def displayNumber(id, min, max, default, step="1"):
                   <td><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
-              <table class="full">
-                <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
-                <tr><td colspan="2"><h5 class="center"><b>Game comfort</b></h5></td><td></td></tr>
-              </table>
-              <table class="full">
+              <table class="full" id="helperPatchesVisibility">
+                <colgroup><col class="half" /><col class="small"/><col class="half" /><col class="small"/></colgroup>
+                <tr><td colspan="4"><h5 class="center"><b>Game comfort</b></h5></td></tr>
                 <tr>
-                  <td id="itemsoundsStep" class="half">
+                  <td id="itemsoundsStep">
                     {{displayCheckbox("itemsounds")}}
                     Remove fanfare when picking up an item
                   </td>
                   <td><button type="button" onclick="startTheTour(event)">?</button></td>
-                  <td id="ElevatorDoorsStep" class="quarter">
-                    {{displayCheckbox("fast_doors")}}
-                    Accelerate doors
-                  </td>
-                  <td class="quarter">
-                    {{displayCheckbox("elevators_speed")}}
-                    Accelerate elevators
+                  <td>
+                    <table class="full">
+                      <tr>
+                        <td id="ElevatorDoorsStep" class="half innertd">
+                          {{displayCheckbox("fast_doors")}}
+                          Accelerate doors
+                        </td>
+                        <td class="half innertd">
+                          {{displayCheckbox("elevators_speed")}}
+                          Accelerate elevators
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                   <td><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-              </table>
-              <table class="full">
                 <tr>
                   <td id="spinjumprestartStep" class="half">
                     {{displayCheckbox("spinjumprestart")}}
@@ -3086,8 +3338,6 @@ def displayNumber(id, min, max, default, step="1"):
                   </td>
                   <td><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
-              </table>
-              <table class="full" id="helperPatchesVisibility">
                 <tr>
                   <td id="Infinite_Space_JumpStep" class="half">
                     {{displayCheckbox("Infinite_Space_Jump")}}
@@ -3106,8 +3356,11 @@ def displayNumber(id, min, max, default, step="1"):
                      VARIA HUD
                   </td>
                   <td><button type="button" onclick="startTheTour(event)">?</button></td>
-                  <td></td>
-                  <td></td>
+                  <td id="revealMapStep" class="half">
+                    {{displayCheckbox("revealMap")}}
+                     Reveal the whole map on start
+                  </td>
+                  <td><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
               <table class="full">

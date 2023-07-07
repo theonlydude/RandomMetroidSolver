@@ -33,7 +33,7 @@ info "Start loading extended stats"
 
 for SQL in $(ls -1 ${SQL_DIR}/extStatsOut_*.sql); do
     info "start ${SQL}"
-    echo "begin transaction;
+    echo "start transaction;
 source ${SQL};
 commit;" | mysql -h ${host} -u ${user} -p${password} -P${port} ${database} > ${LOG_DIR}/$(basename ${SQL}).log
 done

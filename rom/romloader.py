@@ -22,6 +22,9 @@ class RomLoader(object):
         elif type(rom) is dict:
             return RomLoaderDict(rom, magic)
 
+    def loadSymbols(self):
+        self.romReader.loadSymbols()
+
     def assignItems(self, locations):
         return self.romReader.loadItems(locations)
 
@@ -30,6 +33,9 @@ class RomLoader(object):
 
     def hasPatch(self, patchName):
         return self.romReader.patchPresent(patchName)
+
+    def readOption(self, name):
+        return self.romReader.romOptions.read(name)
 
     def loadPatches(self):
         RomPatches.ActivePatches = []
@@ -72,12 +78,11 @@ class RomLoader(object):
         if self.hasPatch("area"):
             RomPatches.ActivePatches += [RomPatches.SingleChamberNoCrumble,
                                          RomPatches.AreaRandoGatesBase,
-                                         RomPatches.AreaRandoBlueDoors]
-            if self.hasPatch("newGame"):
-                RomPatches.ActivePatches.append(RomPatches.AreaRandoMoreBlueDoors)
-            # use croc patch for separate croc and maridia split in two
-            if self.hasPatch("croc_area"):
-                RomPatches.ActivePatches += [RomPatches.CrocBlueDoors, RomPatches.CrabShaftBlueDoor, RomPatches.MaridiaSandWarp]
+                                         RomPatches.AreaRandoBlueDoors,
+                                         RomPatches.CrocBlueDoors,
+                                         RomPatches.CrabShaftBlueDoor,
+                                         RomPatches.MaridiaSandWarp,
+                                         RomPatches.AreaRandoMoreBlueDoors]
             isArea = True
 
         # check area layout
@@ -109,7 +114,7 @@ class RomLoader(object):
         if self.hasPatch("minimizer_tourian"):
             RomPatches.ActivePatches.append(RomPatches.TourianSpeedup)
             tourian = 'Fast'
-        if self.hasPatch("Escape_Trigger"):
+        if self.isEscapeTrigger():
             RomPatches.ActivePatches.append(RomPatches.NoTourian)
             tourian = 'Disabled'
 
@@ -145,6 +150,9 @@ class RomLoader(object):
     def getROM(self):
         return self.romReader.romFile
 
+    def isEscapeTrigger(self):
+        return self.romReader.isEscapeTrigger()
+
     def isBoss(self):
         romFile = self.getROM()
         phOut = getAccessPoint('PhantoonRoomOut')
@@ -162,9 +170,9 @@ class RomLoader(object):
     def loadDoorsColor(self):
         rom = self.getROM()
         if self.romReader.race is None:
-            return DoorsManager.loadDoorsColor(rom, rom.readWord)
+            return DoorsManager().loadDoorsColor(rom, rom.readWord)
         else:
-            return DoorsManager.loadDoorsColor(rom, self.romReader.readPlmWord)
+            return DoorsManager().loadDoorsColor(rom, self.romReader.readPlmWord)
 
     def readLogic(self):
         return self.romReader.readLogic()

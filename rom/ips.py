@@ -1,4 +1,4 @@
-import itertools, math
+import itertools, math, lzma
 
 from utils.utils import range_union
 
@@ -33,7 +33,16 @@ class IPS_Patch(object):
         with open(filename, 'rb') as file:
             header = file.read(5)
             if header != b'PATCH':
-                raise Exception('Not a valid IPS patch file!')
+                # check if file is xz compressed
+                if header == b'\xfd7zXZ':
+                    # reopen file as a lzma compressed file
+                    file.close()
+                    file = lzma.LZMAFile(filename, 'rb')
+                    header = file.read(5)
+                    if header != b'PATCH':
+                        raise Exception('Not a valid compressed IPS patch file!')
+                else:
+                    raise Exception('Not a valid IPS patch file!')
             while True:
                 address_bytes = file.read(3)
                 if address_bytes == b'EOF':
@@ -63,8 +72,10 @@ class IPS_Patch(object):
         patch = IPS_Patch()
 
         run_in_progress = False
+        run_between_in_progress = False
         current_run_start = 0
         current_run_data = bytearray()
+        current_between_run_data = bytearray()
 
         runs = []
 
@@ -80,13 +91,25 @@ class IPS_Patch(object):
         for index, (original, patched) in enumerate(zip(original_data, patched_data)):
             if not run_in_progress:
                 if original != patched:
+                    # not worth creating a new run, concat to previous run and continue it
+                    if run_between_in_progress and len(current_between_run_data) <= 5:
+                        previous_run = runs.pop()
+                        current_run_start = previous_run[0]
+                        current_between_run_data.append(patched)
+                        current_run_data = previous_run[1] + current_between_run_data
+                    else:
+                        current_run_start = index
+                        current_run_data = bytearray([patched])
                     run_in_progress = True
-                    current_run_start = index
-                    current_run_data = bytearray([patched])
+                    run_between_in_progress = False
+                elif run_between_in_progress:
+                    current_between_run_data.append(patched)
             else:
                 if original == patched:
                     runs.append((current_run_start, current_run_data))
                     run_in_progress = False
+                    run_between_in_progress = True
+                    current_between_run_data = bytearray([patched])
                 else:
                     current_run_data.append(patched)
         if run_in_progress:
@@ -247,3 +270,18 @@ class IPS_Patch(object):
         def getRange(record):
             return range(record['address'], record['address']+record['size'])
         return range_union([getRange(record) for record in self.records])
+
+    # called by customizer to get logic from ips patch
+    def getValue(self, address):
+        for record in self.records:
+            if record['address'] > address:
+                continue
+            elif record['address'] + record['size'] < address:
+                continue
+
+            if 'rle_count' in record:
+                return record['data']
+            else:
+                return record['data'][address - record['address']]
+
+        return None

@@ -13,17 +13,19 @@ from utils.parameters import easy, medium, hard, harder, hardcore, mania, infini
 from utils.doorsmanager import DoorsManager
 from utils.objectives import Objectives
 from logic.logic import Logic
+from rom.flavor import RomFlavor
 from graph.location import define_location
 
 class CommonSolver(object):
-    def loadRom(self, rom, interactive=False, magic=None, startLocation=None):
+    def loadRom(self, rom, interactive=False, magic=None, extraSettings=None):
         self.scavengerOrder = []
         self.plandoScavengerOrder = []
         self.additionalETanks = 0
+        self.escapeRandoRemoveEnemies = True
+        self.objectivesHidden = False
+        self.objectivesHiddenOption = False
         # startLocation param is only use for seedless
         if rom is None:
-            # TODO::add a --logic parameter for seedless
-            Logic.factory('vanilla')
             self.romFileName = 'seedless'
             self.majorsSplit = 'Full'
             self.masterMajorsSplit = 'Full'
@@ -31,9 +33,9 @@ class CommonSolver(object):
             self.bossRando = True
             self.escapeRando = False
             self.escapeTimer = "03:00"
-            self.startLocation = startLocation
-            RomPatches.setDefaultPatches(startLocation)
-            self.startArea = getAccessPoint(startLocation).Start['solveArea']
+            self.startLocation = extraSettings.get('startLocation')
+            RomPatches.setDefaultPatches(self.startLocation)
+            self.startArea = getAccessPoint(self.startLocation).Start['solveArea']
             # in seedless load all the vanilla transitions
             self.areaTransitions = vanillaTransitions[:]
             self.bossTransitions = vanillaBossesTransitions[:]
@@ -45,8 +47,8 @@ class CommonSolver(object):
             for loc in self.locations:
                 loc.itemName = 'Nothing'
             # set doors related to default patches
-            DoorsManager.setDoorsColor()
-            self.doorsRando = False
+            self.doorsRando = extraSettings.get('doorsRando')
+            DoorsManager.setDoorsColor(seedless=self.doorsRando)
             self.hasNothing = False
             self.objectives.setVanilla()
             self.tourian = 'Vanilla'
@@ -56,6 +58,9 @@ class CommonSolver(object):
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
             Logic.factory(self.romLoader.readLogic())
+            if not interactive:
+                RomFlavor.factory()
+            self.romLoader.loadSymbols()
             self.locations = Logic.locations
             (self.majorsSplit, self.masterMajorsSplit) = self.romLoader.assignItems(self.locations)
             (self.startLocation, self.startArea, startPatches) = self.romLoader.getStartAP()
@@ -72,13 +77,19 @@ class CommonSolver(object):
             if hasObjectives:
                 self.romLoader.loadObjectives(self.objectives)
                 if interactive:
-                    # load event bit masks for auto tracker
-                    self.eventsBitMasks = self.romLoader.loadEventBitMasks()
+                    # this option wasn't available in previous release
+                    if not Objectives.previousReleaseFallback:
+                        self.objectivesHiddenOption = bool(self.romLoader.readOption("objectivesHidden"))
+                        self.objectivesHidden = self.objectivesHiddenOption
+                        # load event bit masks for auto tracker
+                        self.eventsBitMasks = self.romLoader.loadEventBitMasks()
+                    else:
+                        self.eventsBitMasks = {}
             else:
                 if self.majorsSplit == "Scavenger":
                     # add scav hunt
                     self.objectives.setScavengerHunt()
-                    self.objectives.tourianRequired = not self.romLoader.hasPatch('Escape_Trigger')
+                    self.objectives.tourianRequired = not self.romLoader.isEscapeTrigger()
                     if self.objectives.tourianRequired:
                         # add G4 on top of scav hunt
                         self.objectives.setVanilla()
@@ -90,6 +101,7 @@ class CommonSolver(object):
             self.objectives.setSolverMode(self)
             if self.mode == 'plando':
                 self.additionalETanks = self.romLoader.getAdditionalEtanks()
+                self.escapeRandoRemoveEnemies = bool(self.romLoader.readOption("escapeRandoRemoveEnemies"))
 
             if interactive == False:
                 print("ROM {}\nmajors: {} area: {} boss: {} escape: {}\npatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches())))
@@ -97,6 +109,10 @@ class CommonSolver(object):
                 print("majors: {} area: {} boss: {} escape: {}".format(self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando))
 
             (self.areaTransitions, self.bossTransitions, self.escapeTransition, self.hasMixedTransitions) = self.romLoader.getTransitions(self.tourian)
+            self.log.debug("area transitions: {}".format(self.areaTransitions))
+            self.log.debug("boss transitions: {}".format(self.bossTransitions))
+            self.log.debug("escape transitions: {}".format(self.escapeTransition))
+
             if interactive == True and self.debug == False:
                 # in interactive area mode we build the graph as we play along
                 if self.areaRando == True and self.bossRando == True:
@@ -196,10 +212,12 @@ class CommonSolver(object):
                     print("                                          smbool: {}".format(loc.difficulty))
                     print("                                            path: {}".format([ap.Name for ap in loc.path]))
 
-    def collectMajor(self, loc, itemName=None):
+    def collectMajor(self, loc, itemName=None, autotracker=False):
         self.majorLocations.remove(loc)
         self.visitedLocations.append(loc)
-        self.collectItem(loc, itemName)
+        # in autotracker items are read from memory
+        if not autotracker:
+            self.collectItem(loc, itemName)
         return loc
 
     def collectMinor(self, loc):
@@ -252,7 +270,7 @@ class CommonSolver(object):
             if loc.Name == locName:
                 return i
 
-    def removeItemAt(self, locNameWeb):
+    def removeItemAt(self, locNameWeb, autotracker=False):
         locName = self.locNameWeb2Internal(locNameWeb)
         locIndex = self.getLocIndex(locName)
         if locIndex is None:
@@ -280,6 +298,10 @@ class CommonSolver(object):
             loc.accessPoint = None
         if loc.path is not None:
             loc.path = None
+
+        # in autotracker items are read from memory
+        if autotracker:
+            return
 
         # item
         item = loc.itemName
@@ -612,7 +634,7 @@ class CommonSolver(object):
         def GunshipAccess(sm):
             nonlocal solver
 
-            return SMBool(solver.objectives.allGoalsCompleted())
+            return SMBool(solver.objectives.enoughGoalsCompleted())
 
         def GunshipAvailable(_, sm):
             nonlocal solver
@@ -645,6 +667,31 @@ class CommonSolver(object):
         gunship.itemName = 'Gunship'
         return gunship
 
+    def getMotherBrainAccess(self):
+        solver = self
+        def MotherBrainAccess(sm):
+            nonlocal solver
+
+            return SMBool(solver.objectives.enoughGoalsCompleted())
+        return MotherBrainAccess
+
+    def getMotherBrainAvailable(self):
+        solver = self
+        def MotherBrainAvailable(sm):
+            nonlocal solver
+
+            tourian = sm.enoughStuffTourian()
+
+            # can't check all locations
+            if solver.relaxedEndCheck:
+                return tourian
+            else:
+                hasEnoughMinors = solver.pickup.enoughMinors(sm, solver.minorLocations)
+                hasEnoughMajors = solver.pickup.enoughMajors(sm, solver.majorLocations)
+                hasEnoughItems = hasEnoughMajors and hasEnoughMinors
+                return sm.wand(tourian, SMBool(hasEnoughItems))
+        return MotherBrainAvailable
+
     def computeDifficulty(self):
         # loop on the available locations depending on the collected items.
         # before getting a new item, loop on all of them and get their difficulty,
@@ -654,28 +701,8 @@ class CommonSolver(object):
         mbLoc = self.getLoc('Mother Brain')
         if self.objectives.tourianRequired:
             # update mother brain to handle all end game conditions, allow MB loc to access solver data
-            solver = self
-            def MotherBrainAccess(sm):
-                nonlocal solver
-
-                return SMBool(solver.objectives.allGoalsCompleted())
-
-            def MotherBrainAvailable(sm):
-                nonlocal solver
-
-                tourian = sm.enoughStuffTourian()
-
-                # can't check all locations
-                if solver.relaxedEndCheck:
-                    return tourian
-                else:
-                    hasEnoughMinors = solver.pickup.enoughMinors(sm, solver.minorLocations)
-                    hasEnoughMajors = solver.pickup.enoughMajors(sm, solver.majorLocations)
-                    hasEnoughItems = hasEnoughMajors and hasEnoughMinors
-                    return sm.wand(tourian, SMBool(hasEnoughItems))
-
-            mbLoc.AccessFrom['Golden Four'] = MotherBrainAccess
-            mbLoc.Available = MotherBrainAvailable
+            mbLoc.AccessFrom['Golden Four'] = self.getMotherBrainAccess()
+            mbLoc.Available = self.getMotherBrainAvailable()
             self.endGameLoc = mbLoc
             self.escapeLocName = 'Mother Brain'
         else:
@@ -788,6 +815,19 @@ class CommonSolver(object):
             self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold)
 
             self.comeBack.cleanNoComeBack(self.getAllLocs(self.majorLocations, self.minorLocations))
+
+        if self.objectives.tourianRequired and not self.aborted and self.escapeTransition:
+            # add gunship location to display escape in the spoiler log
+            gunship = self.getGunship()
+            self.majorLocations.append(gunship)
+            # ignore items requirements now that mother brain is dead
+            self.relaxedEndCheck = True
+            # change current AP to escape AP
+            self.lastAP = self.escapeTransition[0][1]
+            self.computeLocationsDifficulty(self.majorLocations)
+            majorsAvailable = [loc for loc in self.majorLocations if loc.difficulty is not None and loc.difficulty.bool == True]
+            if gunship in majorsAvailable:
+                self.collectMajor(gunship)
 
         # compute difficulty value
         (difficulty, itemsOk) = self.computeDifficultyValue()

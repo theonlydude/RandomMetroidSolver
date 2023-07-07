@@ -1,14 +1,22 @@
 #!/usr/bin/python3
 
-import sys, os
+import sys, os, re
 
 # now that we're in directory 'tools/' we have to update sys.path
-sys.path.append(os.path.dirname(sys.path[0]))
+mainDir = os.path.dirname(sys.path[0])
+sys.path.append(mainDir)
 
 from rom.ips import IPS_Patch
 from rom.rom import pc_to_snes
+from logic.logic import Logic
+from rom.flavor import RomFlavor
 
-vanilla=sys.argv[1]
+logic = sys.argv[1]
+Logic.factory(logic)
+RomFlavor.factory(mainDir)
+
+patchNameFilter = os.getenv("IPS_CHECK_FILTER")
+
 ips_ranges = []
 
 def addRanges(name, patch):
@@ -16,15 +24,21 @@ def addRanges(name, patch):
         ips_ranges.append({'name':name, 'range':r})
 
 def loadPatchPy():
-    from patches.common.patches import patches as patches_py
+    patches_py = RomFlavor.patchAccess.getDictPatches()
     for name,patch in patches_py.items():
-        addRanges(name, IPS_Patch(patch))
+        if patchNameFilter is None or not re.match(patchNameFilter, name):
+            addRanges(name, IPS_Patch(patch))
+
+patchPyLoaded = False
 
 for patch in sys.argv[2:]:
+    if os.path.getsize(patch) == 0:
+        continue
     baseName = os.path.basename(patch)
-    if baseName == "patches.py":
+    if baseName == "patches.py" and not patchPyLoaded:
         loadPatchPy()
-    else:
+        patchPyLoaded = True
+    elif patchNameFilter is None or not re.match(patchNameFilter, baseName) :
         addRanges(baseName, IPS_Patch.load(patch))
 
 overlaps = {}
@@ -40,6 +54,6 @@ for rg in sorted(ips_ranges, key=lambda r:r['range'].start):
     lstop = last['range'].stop
 
 for k,v in overlaps.items():
-    pc_addresses = ["(0x%x, 0x%x)" % a for a in v]
-    snes_addresses = ["($%06x, $%06x)" % (pc_to_snes(a[0]), pc_to_snes(a[1])) for a in v]
+    pc_addresses = ["(0x%x, 0x%x)" % (a[1], a[0]) for a in v]
+    snes_addresses = ["($%06x, $%06x)" % (pc_to_snes(a[1]), pc_to_snes(a[0])) for a in v]
     print("%s and %s overlap!\n\tPC:\t%s\n\tSNES:\t%s" % (k[0], k[1], pc_addresses, snes_addresses))

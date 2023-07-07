@@ -1,13 +1,15 @@
 # check if a stats db is available
 try:
-    # python3.7 -m pip install pip
-    # pip3.7 install mysql-connector-python --user
+    # python3 -m pip install pip
+    # pip3 install mysql-connector-python --user
     import mysql.connector
+    from mysql.connector.errors import PoolError
     from db_params import dbParams
     dbAvailable = True
 except:
     dbAvailable = False
 
+import time
 from utils.parameters import medium, hard, harder, hardcore, mania
 from utils.utils import removeChars
 
@@ -17,11 +19,29 @@ class DB:
         if self.dbAvailable == False:
             return
 
-        try:
-            self.conn = mysql.connector.connect(**dbParams)
-            self.cursor = self.conn.cursor()
-        except Exception as e:
-            print("DB.__init__::error connect/create cursor: {}".format(e))
+        # if the pool is full try 10 times during 1s
+        tries = 10
+        for i in range(tries):
+            connOk = True
+            try:
+                self.conn = mysql.connector.connect(pool_name="varia", **dbParams)
+                self.cursor = self.conn.cursor()
+            except PoolError as e:
+                connOk = False
+                print("DB.__init__::pool error {}/{}: {}".format(i+1, tries, e))
+            except Exception as e:
+                print("DB.__init__::error connect/create cursor: {}".format(e))
+                self.dbAvailable = False
+                return
+
+            if connOk:
+                break
+
+            # wait 1/10s
+            time.sleep(0.1)
+
+        if not connOk:
+            print("DB.__init__::error can't get connection from pool")
             self.dbAvailable = False
 
     def close(self):
@@ -91,11 +111,6 @@ class DB:
 
         try:
             if returnCode == 0:
-                sql = "insert into solver_collected_items values (%s, %s, %s);"
-                for item, count in result['collectedItems'].items():
-                    if count > 0:
-                        self.cursor.execute(sql, (id, item, count))
-
                 sql = "insert into solver_result values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
                 self.cursor.execute(sql, (id, returnCode, duration, result['difficulty'], result['knowsUsed'][0], result['knowsUsed'][1], result['itemsOk'], lenNone(result['remainTry']), lenNone(result['remainMajors']), lenNone(result['remainMinors']), lenNone(result['skippedMajors']), lenNone(result['unavailMajors'])))
             else:
@@ -241,7 +256,7 @@ where id = %s;"""
                 self.cursor.execute(sql, params)
             return self.cursor.fetchall()
         except Exception as e:
-            print("DB.execSelect::error execute \"{}\" error: {}".format(sql, e))
+            print("DB.execSelect::error: {} query: \"{}\"".format(e, sql))
             self.dbAvailable = False
 
     def getUsage(self, table, weeks):
@@ -326,18 +341,16 @@ where id = %s;"""
         sql = """select sr.return_code, s.id, s.action_time,
 sp.romFileName, sp.preset, sp.difficultyTarget, sp.pickupStrategy,
 sr.return_code, lpad(round(sr.duration, 2), 5, '0'), sr.difficulty, sr.knows_used, sr.knows_known, sr.items_ok, sr.len_remainTry, sr.len_remainMajors, sr.len_remainMinors, sr.len_skippedMajors, sr.len_unavailMajors,
-group_concat("(", sci.item, ", ", sci.count, ")" order by sci.item),
 sif.forbidden_items
 from solver s
   left join solver_params sp on s.id = sp.solver_id
   left join solver_result sr on s.id = sr.solver_id
-  left join solver_collected_items sci on s.id = sci.solver_id
   left join (select solver_id, group_concat(item order by item) as forbidden_items from solver_items_forbidden group by solver_id) sif on s.id = sif.solver_id
 where s.action_time > DATE_SUB(CURDATE(), INTERVAL %s WEEK)
 group by s.id
 order by s.id;"""
 
-        header = ["id", "actionTime", "romFileName", "preset", "difficultyTarget", "pickupStrategy", "returnCode", "duration", "difficulty", "knowsUsed", "knowsKnown", "itemsOk", "remainTry", "remainMajors", "remainMinors", "skippedMajors", "unavailMajors", "collectedItems", "forbiddenItems"]
+        header = ["id", "actionTime", "romFileName", "preset", "difficultyTarget", "pickupStrategy", "returnCode", "duration", "difficulty", "knowsUsed", "knowsKnown", "itemsOk", "remainTry", "remainMajors", "remainMinors", "skippedMajors", "unavailMajors", "forbiddenItems"]
         return (header, self.execSelect(sql, (weeks,)))
 
     def getRandomizerData(self, weeks):
@@ -391,7 +404,7 @@ order by r.id;"""
 
         # custom sort of the params
         paramsHead = []
-        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'majorsSplit', 'majorsSplitMultiSelect', 'scavNumLocs', 'scavRandomized', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'objective', 'objectiveMultiSelect', 'tourian', 'tourianMultiSelect', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
+        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'majorsSplit', 'majorsSplitMultiSelect', 'scavNumLocs', 'scavRandomized', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'objective', 'objectiveMultiSelect', 'nbObjectivesRequired', 'hiddenObjectives', 'tourian', 'tourianMultiSelect', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
             if param in paramsSet:
                 paramsHead.append(param)
                 paramsSet.remove(param)
@@ -418,10 +431,10 @@ order by 1,2;"""
         #     (param1, count1, count2, 0, ...)
         #     (param2, 0, 0, count3, ...)]
         groups = {
-            'Randomizer parameters': ['preset', 'startLocation', 'majorsSplit', 'scavNumLocs', 'scavRandomized', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'progressionDifficulty', 'suitsRestriction', 'hideItems', 'objective', 'tourian'],
+            'Randomizer parameters': ['preset', 'startLocation', 'majorsSplit', 'scavNumLocs', 'scavRandomized', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'progressionDifficulty', 'suitsRestriction', 'hideItems', 'objective', 'nbObjectivesRequired', 'hiddenObjectives', 'tourian'],
             'Ammo and Energy': ['minorQty', 'energyQty', 'strictMinors', 'missileQty', 'superQty', 'powerBombQty'],
             'Areas and Fun': ['areaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits'],
-            'Patches': ['layoutPatches', 'variaTweaks', 'nerfedCharge', 'gravityBehaviour', 'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart', 'rando_speed', 'Infinite_Space_Jump', 'refill_before_save', 'hud', 'animals', 'No_Music', 'random_music', 'relaxed_round_robin_cf']
+            'Patches': ['layoutPatches', 'variaTweaks', 'nerfedCharge', 'gravityBehaviour', 'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart', 'rando_speed', 'Infinite_Space_Jump', 'refill_before_save', 'hud', 'revealMap', 'animals', 'No_Music', 'random_music', 'relaxed_round_robin_cf']
         }
 
         result = {}
@@ -620,7 +633,7 @@ order by init_time;"""
 
         # pivot
         sql = "SELECT "
-        sql += ", ".join(["SUM(CASE WHEN ship = '{}' THEN 1 ELSE 0 END) AS count_{}".format(ship, ship.replace('-', '_')) for ship in ships])
+        sql += ", ".join(["SUM(CASE WHEN ship = '{}' THEN 1 ELSE 0 END) AS count_{}".format(ship, ship.replace('-', '_').replace('.', '_')) for ship in ships])
         sql += " FROM ships where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK);".format(weeks)
 
         rows = self.execSelect(sql)

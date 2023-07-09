@@ -1062,10 +1062,14 @@ class RomPatcher:
 
         return ib
 
+    # isRace can be False even if self.race is not None
     def patchBytes(self, address, array, isRace=False):
         self.romFile.seek(address)
         for w in array:
-            self.writeWordMagic(w)
+            if isRace:
+                self.writeWordMagic(w)
+            else:
+                self.romFile.writeWord(w)
 
     def writeDoorTransition(self, roomPtr):
         if self.race is None:

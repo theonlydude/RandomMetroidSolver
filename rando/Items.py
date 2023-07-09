@@ -33,6 +33,15 @@ class Item:
         # as we have slots instead of dict
         return {key : getattr(self, key, None) for key in self.__slots__}
 
+    def makeNothing(self):
+        nothing = ItemManager.getItem("Nothing")
+        self.Category = nothing.Category
+        self.Code = nothing.Code
+        self.Type = nothing.Type
+        self.Name = nothing.Name
+        self.ItemBits = nothing.ItemBits
+        self.BeamBits = nothing.BeamBits
+
 class ItemManager:
     Items = {
         'ETank': Item(
@@ -277,8 +286,8 @@ class ItemManager:
     }
 
     for itemType, item in Items.items():
-      if item.Type != itemType:
-        raise RuntimeError("Wrong item type for {} (expected {})".format(item, itemType))
+        if item.Type != itemType:
+            raise RuntimeError("Wrong item type for {} (expected {})".format(item, itemType))
 
     @staticmethod
     def isBeam(item):

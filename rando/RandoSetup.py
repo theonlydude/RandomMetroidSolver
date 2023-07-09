@@ -216,6 +216,10 @@ class RandoSetup(object):
                 itemLocation.Item = self.container.getNextItemInPoolMatching(getPred('ETank', loc))
             else:
                 raise RuntimeError("Cannot fill restricted locations")
+            self.log.debug(f"fillRestrictedLocations. Selected {itemLocation.Item.Type} for {itemLocation.Location.Name}")
+            if itemLocation.Item.Category != "Nothing":
+                self.log.debug("replacing with Nothing")
+                itemLocation.Item.makeNothing()
             self.log.debug("Fill: {}/{} at {}".format(itemLocation.Item.Type, itemLocation.Item.Class, itemLocation.Location.Name))
             self.container.collect(itemLocation, False)
 

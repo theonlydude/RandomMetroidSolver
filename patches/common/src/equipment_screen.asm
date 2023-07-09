@@ -119,7 +119,11 @@ display_percent:
         JSR draw_digit_menu
 .tenth:
         inx : inx
-        LDA $14 : beq .units
+        LDA $14 : bne .draw
+        ;; don't draw tenth 0 if < 100%
+        lda $12 : beq .units
+        lda $14
+.draw:
         JSR draw_digit_menu
 .units:
         inx : inx

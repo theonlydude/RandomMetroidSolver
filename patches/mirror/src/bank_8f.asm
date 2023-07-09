@@ -8006,6 +8006,8 @@ Room_D8C5_PLM:
     dw $b703 : db $3d : db $0a : dw Room_D8C5_PLM_scroll_data_FS
     dw $0000
 
+print "end bank 8f PLM population: ", pc
+
 ; room 9CB3: Dachora Room
 Room_9CB3_PLM_scroll_data_FS:
     ; Scroll data

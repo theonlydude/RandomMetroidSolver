@@ -1044,7 +1044,8 @@ class InteractiveSolver(CommonSolver):
             elif dataType == dataEnum["events"]:
                 self.newlyCompletedObjectives = []
                 goalsList = self.objectives.getGoalsList()
-                goalsCompleted = self.objectives.getState()
+                objectivesState = self.objectives.getState()
+                goalsCompleted = objectivesState["goals"]
                 goalsCompleted = list(goalsCompleted.values())
                 for i, (event, eventData) in enumerate(self.eventsBitMasks.items()):
                     assert str(i) == event, "{}th event has code {} instead of {}".format(i, event, i)

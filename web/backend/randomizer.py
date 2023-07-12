@@ -215,7 +215,7 @@ class Randomizer(object):
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
                   'areaRandomization', 'logic']
         others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'nbObjectivesRequired']
-        validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
+        errors = validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize
         db = DB()
@@ -301,13 +301,12 @@ class Randomizer(object):
             with open(jsonFileName) as jsonFile:
                 locsItems = json.load(jsonFile)
 
-            # check if an info message has been returned
-            msg = ''
-            if len(locsItems['errorMsg']) > 0:
-                msg = locsItems['errorMsg']
-                if msg[0] == '\n':
-                    msg = msg[1:]
-                locsItems['errorMsg'] = msg.replace('\n', '<br/>')
+            # update errorMsg with additional errors from default params
+            errors = errors + locsItems['errorMsg'].split('\n')
+            errors = [e for e in errors if e] # remove empty strings
+
+            msg = '\n'.join(errors)
+            locsItems['errorMsg'] = msg.replace('\n', '<br/>')
 
             db.addRandoResult(id, ret, duration, msg)
 

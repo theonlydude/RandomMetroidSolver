@@ -4,7 +4,7 @@ from rom.rom import snes_to_pc
 from rom.romreader import RomReader
 from rom.addresses import Addresses
 from utils.doorsmanager import DoorsManager
-from utils.utils import getDefaultMultiValues, getPresetDir, removeChars
+from utils.utils import getDefaultMultiValues, getPresetDir, removeChars, getRandomizerDefaultParameters
 from utils.parameters import Knows, isKnows, Controller, isButton
 from utils.objectives import Objectives
 from logic.logic import Logic
@@ -169,10 +169,13 @@ def getFloat(request, param, isJson=False):
 
 def validateWebServiceParams(request, switchs, quantities, multis, others, isJson=False):
     parameters = switchs + quantities + multis + others
+    defaultParameters = getRandomizerDefaultParameters()
+    errors = []
 
     for param in parameters:
         if request.vars[param] is None:
-            raiseHttp(400, "Missing parameter: {}".format(param), isJson)
+            request.vars[param] = defaultParameters[param]
+            errors.append(f'Missing param set: {param}={defaultParameters[param]}')
 
     # switchs
     for switch in switchs:
@@ -332,6 +335,8 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         value = request.vars.nbObjectivesRequired
         if value not in ("off", "random", *numbers):
             raiseHttp(400, f"Wrong value for nbObjectivesRequired {value}", isJson)
+
+    return errors
 
 def getCustomMapping(controlMapping):
     if len(controlMapping) == 0:

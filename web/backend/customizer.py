@@ -71,11 +71,11 @@ class Customizer(object):
                     seedInfo = info
                     seedInfo['key'] = key
 
-                    # if new parameters have been added since the seed creation, add them with value "n/a"
+                    # if new parameters have been added since the seed creation, add them with default value
                     defaultParams = getRandomizerDefaultParameters()
-                    for k in defaultParams:
+                    for k,defaultValue in defaultParams.items():
                         if k not in infoKeys and k not in seedParams:
-                            seedParams[k] = "n/a"
+                            seedParams[k] = defaultValue
 
                     # check that the seed ips is available
                     if seedInfo["upload_status"] not in ['pending', 'uploaded', 'local']:

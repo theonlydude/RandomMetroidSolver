@@ -983,10 +983,12 @@ class Objectives(object):
 
     # call from rando
     def setRandom(self, nbGoals, availableGoals):
+        LOG.debug(f"obj random, {len(availableGoals)} available goals: {str(availableGoals)}")
         while Objectives.nbActiveGoals < nbGoals and availableGoals:
             goalName = random.choice(availableGoals)
             self.addGoal(goalName)
             availableGoals.remove(goalName)
+            LOG.debug(f"obj random {Objectives.nbActiveGoals}/{nbGoals}")
 
     # call from solver
     def readGoals(self, romReader):

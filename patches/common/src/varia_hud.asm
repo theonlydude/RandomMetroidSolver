@@ -378,11 +378,11 @@ draw_info:
 	lda !n_items : jsr draw_number
 	bra .end
 .draw_chozo:
-%BGtile($f9, 2, 0, 0, 0)
+%BGtile($78, 2, 0, 0, 0)
 	lda.w #!_tile : sta !split_locs_hud ; pink 'Z'
 	bra .draw_items
 .draw_major:
-%BGtile($ec, 2, 0, 0, 0)
+%BGtile($66, 2, 0, 0, 0)
 	lda.w #!_tile : sta !split_locs_hud ; pink 'M'
 .draw_items:
 	lda !n_items : jsr draw_one
@@ -430,87 +430,84 @@ draw_text:
 .end:
 	rts
 
-;; ;; Inverse video numbers
-;; NumberGFXTable:
-;; 	DW #$0C45,#$0C3C,#$0C3D,#$0C3E,#$0C3F,#$0C40,#$0C41,#$0C42,#$0C43,#$0C44
 
 table "tables/hud_chars.txt"
 hud_text:
 area_names:
-	dw " CERES "
+	dw " Ceres "
 	dw $0000
-	dw " CRATER"
+	dw " Crater"
 	dw $0000
-	dw "GR BRIN"
+	dw "Gr Brin"
 	dw $0000
-	dw "RED BRI"
+	dw "Red Bri"
 	dw $0000
-	dw " W SHIP"
+	dw " W Ship"
 	dw $0000
-	dw " KRAID "
+	dw " Kraid "
 	dw $0000
-	dw "UP NORF"
+	dw "Up Norf"
 	dw $0000
-	dw " CROC  "
+	dw " Croc  "
 	dw $0000
-	dw "LO NORF"
+	dw "Lo Norf"
 	dw $0000
-	dw "W MARID"
+	dw "W Marid"
 	dw $0000
-	dw "E MARID"
+	dw "E Marid"
 	dw $0000
-	dw "TOURIAN"
+	dw "Tourian"
 	dw $0000
 
 scav_names:
-	dw " MORPH "
+	dw " Morph "
 	dw $0000
-	dw " BOMB  "
+	dw " Bomb  "
 	dw $0000
-	dw " CHARGE"
+	dw " Charge"
 	dw $0000
-	dw " SPAZER"
+	dw " Spazer"
 	dw $0000
-	dw " VARIA "
+	dw " Varia "
 	dw $0000
-	dw "HI-JUMP"
+	dw "Hi-Jump"
 	dw $0000
-	dw "  ICE  "
+	dw "  Ice  "
 	dw $0000
-	dw " SPEED "
+	dw " Speed "
 	dw $0000
-	dw "  WAVE "
+	dw "  Wave "
 	dw $0000
-	dw "GRAPPLE"
+	dw "Grapple"
 	dw $0000
-	dw " X-RAY "
+	dw " X-Ray "
 	dw $0000
-	dw "GRAVITY"
+	dw "Gravity"
 	dw $0000
-	dw " SPACE "
+	dw " Space "
 	dw $0000
-	dw " SPRING"
+	dw " Spring"
 	dw $0000
-	dw " PLASMA"
+	dw " Plasma"
 	dw $0000
-	dw " SCREW "
+	dw " Screw "
 	dw $0000
-	dw " RIDLEY"
+	dw " Ridley"
 	dw $0000
-	dw "HUNT OVER "
+	dw "Hunt over "
 	dw $0000
 
 ;; special values
 press_xy:
-	dw "PRESS X-Y "
+	dw "Press X-Y "
 	dw $0000
 
 objective_completed:
-	dw "OBJ OK! "
+	dw "Obj OK! "
 	dw $0000
 
 all_objectives_completed:
-	dw " OBJS OK! "
+	dw " Objs OK! "
 	dw $0000
 
 cleartable

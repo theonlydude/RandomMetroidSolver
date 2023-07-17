@@ -1584,9 +1584,9 @@ org $B6F200
         dw !box_top_left, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top, !box_top_right, $0000
         ;; line 2 : obj left/tourian text
         dw $0000, !box_left
-        dw "  OBJ LEFT"
+        dw "  Obj left"
         dw !box_right, !box_left
-        dw "TOURIAN:"
+        dw "Tourian:"
 %export(obj_bg1_tilemap_tourian)
         fillbyte $00 : fill 16
         dw !box_right, $0000
@@ -1603,13 +1603,13 @@ while !_line_idx < 10
 endif
         ;; line 10 : text for hidden objectives
         dw $0000, !box_left
-        dw "TO REVEAL OBJECTIVES LIST,"
+        dw "To reveal objectives list,"
         dw $0000, $0000, !box_right, $0000
         ;; line 11 : objectives text borders
         dw $0000, !box_left, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, !box_right, $0000
         ;; line 12 : text for hidden objectives
         dw $0000, !box_left
-        dw "VISIT"
+        dw "visit"
 %export(obj_bg1_tilemap_reveal_room)
         dw $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, !box_right, $0000
         ;; lines 13-17 : objectives text borders

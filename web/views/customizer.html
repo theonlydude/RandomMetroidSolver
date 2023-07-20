@@ -1905,7 +1905,7 @@ def displayNumber(id, min, max, default, step="1"):
 for name, values in musics["_dropdown"].items():
   response.write('<tr><td class="align_center darker">{}</td></tr>\n'.format(name), escape=False)
   for value in values:
-    response.write('<tr><td class="song_in_list" onclick="loadNewSong(\'{}\')" draggable="true" ondragstart="drag(event)">{}</td></tr>\n'.format(value, value), escape=False)
+    response.write('<tr><td class="song_in_list" onclick="loadNewSong(\'{}\')" draggable="true" ondragstart="drag(event)">{}</td></tr>\n'.format(value.replace("'", r"\'"), value), escape=False)
     pass
   pass
 }}
@@ -1915,7 +1915,7 @@ for name, values in musics["_dropdown"].items():
                 </td></tr>
 {{
   for (song, songId) in musics["_list"]:
-    response.write('<tr><td title="Click to listen" onclick="loadNewSong(\'{}\')">{}</td></tr>\n'.format(song, song), escape=False)
+    response.write('<tr><td title="Click to listen" onclick="loadNewSong(\'{}\')">{}</td></tr>\n'.format(song.replace("'", r"\'"), song), escape=False)
     response.write('<tr><td id="{}" ondrop="drop(event)" ondragover="allowDrop(event)" onclick="loadNewSongFromId(\'{}\')" class="align_right drop_target lighter" title="Drag & drop songs from player to customize">{}</td></tr>\n'.format(songId, songId, session.customizer.get(songId, song)), escape=False)
     pass
 }}

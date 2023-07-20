@@ -484,7 +484,7 @@ class Customizer(object):
         songName = self.vars.songName
         if IS_NOT_EMPTY()(songName)[1] is not None:
             raiseHttp(400, "Song is empty")
-        if IS_MATCH('[a-zA-Z0-9_\.() ,\-/]*', strict=True)(songName)[1] is not None:
+        if IS_MATCH('[a-zA-Z0-9_\.() ,\-/\']*', strict=True)(songName)[1] is not None:
             raiseHttp(400, "Invalid char in song name")
         if IS_LENGTH(64)(songName)[1] is not None:
             raiseHttp(400, "Song must be max 64 chars")

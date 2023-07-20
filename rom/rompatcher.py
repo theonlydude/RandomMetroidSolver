@@ -76,7 +76,9 @@ class RomPatcher:
             # display collected items percentage and RTA time in pause inventory menu
             'equipment_screen.ips',
             # new PLMs for indicating the color of the door on the other side
-            'door_indicators_plms.ips'
+            'door_indicators_plms.ips',
+            # always disable demos as it causes crashes in area, hud and mirrortroid
+            'no_demo.ips'
         ],
         # VARIA tweaks
         'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable',
@@ -105,9 +107,7 @@ class RomPatcher:
             # change door connection in bank 83 (room D461: West Sand Hall - flavor)
             'area_door_west_sand_hall.ips',
             # change layout (room D6FD: Sand falls sand pit - flavor)
-            'area_rando_warp_door.ips',
-            # disable demo at title screen to avoid crashes
-            'no_demo.ips'
+            'area_rando_warp_door.ips'
         ],
         # optional layout for area rando
         'AreaComfortSet': [
@@ -134,7 +134,7 @@ class RomPatcher:
             'area_layout_single_chamber.ips'
         ],
         # patches for boss rando
-        'Bosses': ['door_transition.ips', 'no_demo.ips'],
+        'Bosses': ['door_transition.ips'],
         # patches for escape rando
         'Escape' : ['rando_escape_common.ips', 'rando_escape.ips',
                     'rando_escape_ws_fix.ips', 'door_transition.ips'],
@@ -485,9 +485,6 @@ class RomPatcher:
                 plms.append('WS_Save_Blinking_Door')
             if self.settings["boss"] == True:
                 stdPatches.append("Phantoon_Eye_Door")
-            if 'varia_hud.ips' in self.settings["optionalPatches"]:
-                # varia hud can make demos glitch out
-                self.applyIPSPatch("no_demo.ips")
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
             # show objectives and Tourian status in a shortened intro sequence

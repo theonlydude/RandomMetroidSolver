@@ -747,6 +747,8 @@ class Objectives(object):
     def setVanilla(self):
         for goal in Objectives.vanillaGoals:
             self.addGoal(goal)
+        Objectives.nbActiveGoals = len(Objectives.activeGoals)
+        Objectives.nbRequiredGoals = len(Objectives.activeGoals)
 
     def isVanilla(self):
         # kill G4 and/or scav hunt
@@ -1003,8 +1005,6 @@ class Objectives(object):
             Objectives.nbActiveGoals = 0
             Objectives.nbRequiredGoals = 0
             self.setVanilla()
-            Objectives.nbActiveGoals = len(Objectives.activeGoals)
-            Objectives.nbRequiredGoals = len(Objectives.activeGoals)
         else:
             # read objectives list
             romReader.romFile.seek(Addresses.getOne('objectivesList'))

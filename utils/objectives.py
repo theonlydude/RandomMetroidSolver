@@ -1075,7 +1075,7 @@ class Objectives(object):
             "o": 0x12d,
             "p": 0x12e,
             "q": 0x144,
-            "r": 0x145,
+            "r": 0x1bf,
             "s": 0x14f,
             "t": 0x15f,
             "u": 0x1d8,

@@ -172,8 +172,9 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
     defaultParameters = getRandomizerDefaultParameters()
     errors = []
 
+    # add default value for missing parameters to avoid breaking breaking bots when a new release is out with new params
     for param in parameters:
-        if request.vars[param] is None:
+        if request.vars[param] is None and param in defaultParameters:
             request.vars[param] = defaultParameters[param]
             errors.append(f'Missing param set: {param}={defaultParameters[param]}')
 

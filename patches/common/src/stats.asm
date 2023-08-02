@@ -424,23 +424,13 @@ touched_ceres_elevator:
 game_end:
     ;; update region time (will be slightly off, but avoids dealing with negative substraction result, see below)
     jsl update_and_store_region_time
-    ;; Subtract frames from pressing down at ship to this code running
-    lda !timer1
-    sec
-    sbc #$013d
-    sta !timer1
-    lda #$0000  ;; if carry clear this will subtract one from the high byte of timer
-    sbc !timer2
-
-    ;; save timer in stats
-    lda !timer1
-    sta !stats_timer
-    lda !timer2
-    sta !stats_timer+2
+    ;; Subtract frames from pressing down at ship to this code running, and store in stats timer
+    lda !timer1 : sec : sbc #$013d : sta !stats_timer
+    ;; if carry clear (i.e previous substraction result is negative) this will subtract one from the high word of timer
+    lda !timer2 : sbc.w #0 : sta !stats_timer+2
 
     ;; save stats to SRAM
-    lda #$0001
-    jsl base_save_stats
+    lda #$0001 : jsl base_save_stats
 
     ;; don't count lag during takeoff
     inc !skip_lag_count_flag

@@ -66,11 +66,11 @@ var dataEnum = {
 // in-game timer:
 // $05B8: NMI counter (RTA timer)
 // $05BA: Lag counter (RTA timer)
-// SRAM timer after game's end:
-// define current_save_slot    $7e0952
-// define stats_sram_slot0     $701400
-// define stats_sram_slot1     $701700
-// define stats_sram_slot2     $701a00
+// timer after game's end:
+// $09DA: Game time, frames
+// $09DC: Game time, seconds
+// $09DE: Game time, minutes
+// $09E0: Game time, hours (capped at 99:59:59.59)
 
 // 2. map:
 // used for area/boss transitions - doors - nothing
@@ -117,10 +117,7 @@ var dataToAsk = {
     1: [{"address": "F50998", "size": 0x2},
         {"address": "F505D1", "size": 0x2},
         {"address": "F505B8", "size": 0x4},
-        {"address": "F50952", "size": 0x2},
-        {"address": "E01400", "size": 0x4},
-        {"address": "E01700", "size": 0x4},
-        {"address": "E01A00", "size": 0x4}],
+        {"address": "F509DA", "size": 0x8}],
     2: [{"address": "F5CD52", "size": 0x600}],
     3: [{"address": "F507F7", "size": 0x100}],
     4: [{"address": "F50AF6", "size": 0x2},
@@ -143,8 +140,10 @@ var stateDataEnum = {
     "debug": 2,
     "rta1": 4,
     "rta2": 6,
-    "saveSlot": 8,
-    "sramStats": 0xa
+    "igtFrames": 8,
+    "igtSeconds": 0xa,
+    "igtMinutes": 0xc,
+    "igtHours": 0xe,
 }
 
 // maps
@@ -585,14 +584,13 @@ function handleData(data) {
                     var rawTimeFrames = w1 << 16 | w0;
                     updateRTA(rawTimeFrames, true);
                 } else if(gameState == creditState) {
-                    // during the credits the last RTA has been copied to SRAM
-                    var save = readWord(stateData, stateDataEnum.saveSlot);
-                    var offset = stateDataEnum.sramStats + save * 0x4;
-                    var w0 = readWord(stateData, offset);
-                    var w1 = readWord(stateData, offset+2);
-                    var rawTimeFrames = w1 << 16 | w0;
-                  console.warn(w0, w1, rawTimeFrames)
-                    updateRTA(null, false);
+                    // during the credits the last RTA has been copied in IGT RAM
+                    var frames = readWord(stateData, stateDataEnum.igtFrames);
+                    var seconds = readWord(stateData, stateDataEnum.igtSeconds);
+                    var minutes = readWord(stateData, stateDataEnum.igtMinutes);
+                    var hours = readWord(stateData, stateDataEnum.igtHours);
+                    var rawTimeFrames = frames + (seconds * 60) + (minutes * 60*60) + (hours * 60*60*60);
+                    updateRTA(rawTimeFrames, false);
                 } else {
                     // if the user reset, stop incrementing the RTA
                     updateRTA(null, false)

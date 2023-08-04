@@ -17,11 +17,6 @@ class Tracker(object):
         self.request = request
         self.cache = cache
         self.response = response
-        # required for GraphUtils access to access points
-        # TODO will have to be changed when handling mirror/rotation etc
-        flavor = "vanilla"
-        Logic.factory(flavor)
-        RomFlavor.factory()
 
     def run(self):
         # init session

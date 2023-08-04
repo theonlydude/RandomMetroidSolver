@@ -30,6 +30,9 @@ include
 ;; game state
 !game_state = $0998
 
+;; current save slot
+!current_save_slot = $0952
+
 ;; RTA timer RAM updated during NMI
 !timer1 = $05b8
 !timer2 = $05ba
@@ -41,7 +44,6 @@ include
 !_stats_ram = fc00
 !stats_ram = $7f!_stats_ram
 !stats_timer = !stats_ram
-
 
 ;;; collected items
 !CollectedItems  = $7ED86E

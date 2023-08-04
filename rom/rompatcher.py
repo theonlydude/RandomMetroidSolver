@@ -39,6 +39,8 @@ class RomPatcher:
             'map_data_area.ips',
             # boot, save files and backup management, stats infrastructure
             'base.ips',
+            # quick reset hook
+            'reset.ips',
             # handles starting location and start blue doors
             'start.ips',
             # generic PLM spawner used for extra saves, blinking doors etc.

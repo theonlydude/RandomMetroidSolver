@@ -256,8 +256,6 @@ class RomLoaderJson(RomLoaderDict):
     def __init__(self, jsonFileName, magic=None):
         with open(jsonFileName) as jsonFile:
             tmpDictROM = json.load(jsonFile)
-            dictROM = {}
             # in json keys are strings
-            for address in tmpDictROM:
-                dictROM[int(address)] = tmpDictROM[address]
+            dictROM = {int(address): data for address, data in tmpDictROM.items()}
             super(RomLoaderJson, self).__init__(dictROM, magic)

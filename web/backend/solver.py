@@ -7,8 +7,6 @@ from utils.parameters import easy, medium, hard, harder, hardcore, mania
 from utils.utils import getPresetDir, getPythonExec
 from utils.db import DB
 from solver.conf import Conf
-from logic.logic import Logic
-from rom.flavor import RomFlavor
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import redirect
@@ -19,11 +17,6 @@ class Solver(object):
         self.session = session
         self.request = request
         self.cache = cache
-        # required for symbols
-        # TODO will have to be changed when handling mirror/rotation etc
-        flavor = "vanilla"
-        Logic.factory(flavor)
-        RomFlavor.factory()
         self.vars = self.request.vars
 
     def run(self):
@@ -382,8 +375,8 @@ class Solver(object):
         start = datetime.now()
         ret = subprocess.call(params)
         end = datetime.now()
-        duration = (end - start).total_seconds()
-        print("ret: {}, duration: {}s".format(ret, duration))
+        duration = (end - start).total_seconds() * 1000
+        print("ret: {}, duration: {}ms".format(ret, duration))
 
         if ret == 0:
             with open(jsonFileName) as jsonFile:

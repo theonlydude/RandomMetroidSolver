@@ -18,8 +18,6 @@ class Randomizer(object):
         self.request = request
         self.response = response
         self.cache = cache
-        # required for GraphUtils access to access points
-        Logic.factory('vanilla')
 
         self.vars = self.request.vars
 
@@ -89,7 +87,7 @@ class Randomizer(object):
             "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "SGL23Online", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2"]
         }
 
-        startAPs = GraphUtils.getStartAccessPointNamesCategory()
+        startAPs = GraphUtils.getStartAccessPointNamesCategory('vanilla')
         startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),
                     OPTGROUP(_label="Custom", *startAPs["custom"]),
                     OPTGROUP(_label="Custom (Area rando only)", *startAPs["area"])]

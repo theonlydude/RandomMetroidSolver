@@ -21,7 +21,9 @@ var stateEnum = {
     "opening": 1,
     "listing": 2,
     "infoing": 3,
-    "looping": 4
+    "looping": 4,
+    "closing": 5,
+    "closed": 6
 }
 var curState = 0;
 
@@ -303,14 +305,6 @@ function stopAutoTracker() {
 
 function socketOnOpen(e) {
     appendLog("\u2705 Connection established");
-    // appendLog(" bufferedAmount: "+socket.bufferedAmount);
-// Constant 	Value
-// WebSocket.CONNECTING 	0
-// WebSocket.OPEN 	1
-// WebSocket.CLOSING 	2
-// WebSocket.CLOSED 	3
-    // appendLog(" readyState: "+socket.readyState);
-
     appendLog("\u2026 Asking Device List");
     sendAutoTrackerMessage({
         "Opcode" : "DeviceList",
@@ -330,7 +324,6 @@ function socketOnInitMessage(event) {
     console.log(`event.data: ${event.data}`);
     var data = JSON.parse(event.data);
     var results = data["Results"];
-    // appendLog(`Data received: ${results}`);
     setAutoTrackerIcon("statusOK");
 
     if(curState == stateEnum.listing) {

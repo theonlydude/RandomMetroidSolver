@@ -377,7 +377,7 @@ class RandoSetup(object):
                         # check that we can then kill mother brain if needed
                         if Objectives.tourianRequired == True:
                             self.sm.addItems(Bosses.Golden4() + Bosses.miniBosses())
-                            beatableMotherBrain = [loc for loc in self.services.currentLocations(self.startAP, container, diff=infnity) if loc.Name == 'Mother Brain']
+                            beatableMotherBrain = [loc for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if loc.Name == 'Mother Brain']
                             ret = len(beatableMotherBrain) > 0
                             self.log.debug("checkPool. beatable Mother Brain={}".format(ret))
                             if ret:

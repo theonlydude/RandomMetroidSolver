@@ -1,7 +1,10 @@
-from graph.vanilla.graph_access import accessPointsDict
+from graph.vanilla.graph_access import accessPointsDict as vanillaAPDict
 from logic.cache import Cache
 from rom.rom_patches import RomPatches
 from utils.parameters import Settings
+import copy
+
+accessPointsDict = copy.deepcopy(vanillaAPDict)
 
 # can now ggg
 accessPointsDict['Business Center'].connectInternal(

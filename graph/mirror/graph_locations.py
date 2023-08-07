@@ -1,7 +1,11 @@
-from graph.vanilla.graph_locations import locationsDict
+from graph.vanilla.graph_locations import locationsDict as vanillaLocDict
+# reuse the one from vanilla which is loaded by logic
 from graph.vanilla.graph_locations import LocationsHelper
 from rom.addresses import Addresses
 from graph.location import LocationMapAttrs, LocationMapTileKind
+import copy
+
+locationsDict = copy.deepcopy(vanillaLocDict)
 
 # regular gate glitchs no longer available,
 # but now avaible for the previously unavailable ones.

@@ -577,10 +577,12 @@ class Objectives(object):
     vanillaGoals = ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"]
     scavHuntGoal = ["finish scavenger hunt"]
 
-    def __init__(self, tourianRequired=True, randoSettings=None):
-        if Objectives.tourianRequired is None:
+    def __init__(self, tourianRequired=None, randoSettings=None, reset=False):
+        if tourianRequired is not None:
             Objectives.tourianRequired = tourianRequired
         self.randoSettings = randoSettings
+        if reset:
+            self.resetGoals()
 
     @property
     def tourianRequired(self):
@@ -590,6 +592,8 @@ class Objectives(object):
     def resetGoals(self):
         Objectives.activeGoals = []
         Objectives.nbActiveGoals = 0
+        for goal in Objectives.goals.values():
+            goal.completed = False
 
     def conflict(self, newGoal):
         if newGoal.exclusion.get('tourian') == "Disabled" and self.tourianRequired == False:
@@ -695,6 +699,11 @@ class Objectives(object):
         accessibleAPs = graph.getAccessibleAccessPoints(rootApName)
         availAPs = graph.getAvailableAccessPoints(graph.accessPoints[rootApName], sm, maxDiff)
         areaAPs = [ap for ap in accessibleAPs if ap.GraphArea == area]
+
+        if not areaAPs:
+            LOG.debug(f"canExploreArea {area} no ap available")
+            return SMBool(False)
+
         for ap in areaAPs:
             if ap not in availAPs:
                 LOG.debug(f"canExploreArea {area} {ap} not available")
@@ -704,6 +713,10 @@ class Objectives(object):
         # in solver we don't want to recompute already visited locations difficulty, so copy them first
         areaLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea == area]
         availLocs = graph.getAvailableLocations(areaLocs, sm, maxDiff, rootApName)
+        if not areaLocs:
+            LOG.debug(f"canExploreArea {area} no loc available")
+            return SMBool(False)
+
         if len(availLocs) != len(areaLocs):
             if LOG.getEffectiveLevel() == logging.DEBUG:
                 missingLocs = [loc for loc in areaLocs if loc not in availLocs]
@@ -963,16 +976,22 @@ class Objectives(object):
     def getTotalItemsCount(self):
         return Objectives.totalItemsCount
 
-    def setState(self, state):
+    def setState(self, state, tourianRequired):
+        rank = 1
         for goalName, completed in state["goals"].items():
-            self.addGoal(goalName, completed)
+            goal = Objectives.goals[goalName]
+            goal.completed = completed
+            goal.rank = rank
+            Objectives.activeGoals.append(goal)
+            rank += 1
         Objectives.nbActiveGoals = state["nbActiveGoals"]
         Objectives.nbRequiredGoals = state["nbRequiredGoals"]
+        Objectives.tourianRequired = tourianRequired
 
     def setTotalItemsCount(self, totalItemsCount):
         Objectives.totalItemsCount = totalItemsCount
 
-    def resetGoals(self):
+    def resetCompletedGoals(self):
         for goal in Objectives.activeGoals:
             goal.completed = False
 

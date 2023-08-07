@@ -6,8 +6,7 @@ class Logic(object):
         if implementation == 'vanilla':
             from graph.vanilla.graph_helpers import HelpersGraph
             from graph.vanilla.graph_access import accessPoints
-            from graph.vanilla.graph_locations import locations
-            from graph.vanilla.graph_locations import LocationsHelper
+            from graph.vanilla.graph_locations import locations, LocationsHelper
             import graph.vanilla.map_tiles
             import graph.vanilla.map_tilecount
             Logic.map_tiles = graph.vanilla.map_tiles
@@ -45,3 +44,7 @@ class Logic(object):
         else:
             raise ValueError("Unknown logic type : "+str(implementation))
         Logic.implementation = implementation
+
+    @staticmethod
+    def list():
+        return ['vanilla', 'mirror']

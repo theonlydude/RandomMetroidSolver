@@ -141,7 +141,7 @@ class SolverState(object):
         solver.doorsRando = self.state["doorsRando"]
         solver.plandoScavengerOrder = self.state["plandoScavengerOrder"]
         solver.tourian = self.state["tourian"]
-        solver.objectives.setState(self.state["objectives"])
+        solver.objectives.setState(self.state["objectives"], tourianRequired=self.state["tourian"] != 'Disabled')
         solver.objectives.setTotalItemsCount(self.state["totalItemsCount"])
         solver.majorUpgrades = self.state["majorUpgrades"]
         solver.splitLocsByArea = self.state["splitLocsByArea"]

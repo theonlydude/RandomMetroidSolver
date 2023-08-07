@@ -1,4 +1,4 @@
-import logging, time
+import logging, time, copy
 
 from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
 from logic.smbool import SMBool, smboolFalse
@@ -17,16 +17,16 @@ from rom.flavor import RomFlavor
 from graph.location import define_location
 
 class CommonSolver(object):
-    def loadRom(self, rom, interactive=False, magic=None, extraSettings=None):
+    def loadRom(self, rom, romName, interactive=False, magic=None, extraSettings=None):
         self.scavengerOrder = []
         self.plandoScavengerOrder = []
         self.additionalETanks = 0
         self.escapeRandoRemoveEnemies = True
         self.objectivesHidden = False
         self.objectivesHiddenOption = False
+        self.romFileName = romName
         # startLocation param is only use for seedless
         if rom is None:
-            self.romFileName = 'seedless'
             self.majorsSplit = 'Full'
             self.masterMajorsSplit = 'Full'
             self.areaRando = True
@@ -43,7 +43,10 @@ class CommonSolver(object):
             # in seedless we allow mixing of area and boss transitions
             self.hasMixedTransitions = True
             self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
-            self.locations = Logic.locations
+            if interactive:
+                self.locations = copy.deepcopy(Logic.locations)
+            else:
+                self.locations = Logic.locations
             for loc in self.locations:
                 loc.itemName = 'Nothing'
             # set doors related to default patches
@@ -55,13 +58,15 @@ class CommonSolver(object):
             self.majorUpgrades = []
             self.splitLocsByArea = {}
         else:
-            self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
             Logic.factory(self.romLoader.readLogic())
             if not interactive:
                 RomFlavor.factory()
             self.romLoader.loadSymbols()
-            self.locations = Logic.locations
+            if interactive:
+                self.locations = copy.deepcopy(Logic.locations)
+            else:
+                self.locations = Logic.locations
             (self.majorsSplit, self.masterMajorsSplit) = self.romLoader.assignItems(self.locations)
             (self.startLocation, self.startArea, startPatches) = self.romLoader.getStartAP()
             if not GraphUtils.isStandardStart(self.startLocation) and self.majorsSplit != 'Full':

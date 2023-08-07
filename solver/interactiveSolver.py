@@ -1,4 +1,4 @@
-import sys, json, os, tempfile
+import sys, json, os, tempfile, copy
 
 from solver.commonSolver import CommonSolver
 from logic.smbool import SMBool
@@ -11,7 +11,6 @@ from graph.graph import AccessGraphSolver as AccessGraph
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
 from graph.location import define_location
 from utils.utils import removeChars
-from solver.conf import Conf
 from utils.parameters import hard, infinity
 from solver.solverState import SolverState
 from solver.comeback import ComeBack
@@ -24,29 +23,23 @@ from graph.mirror.map_tiles import areaAccessPoints as mirror_areaAccessPoints, 
 import utils.log
 
 class InteractiveSolver(CommonSolver):
-    def __init__(self, shm, logic):
+    def __init__(self, logic):
         self.interactive = True
         self.errorMsg = ""
         self.checkDuplicateMajor = False
         self.vcr = None
         self.log = utils.log.get('Solver')
 
-        # only available since python 3.8, so import it here to keep >= 3.6 compatibility for CLI
-        from utils.shm import SHM
-        self.shm = SHM(shm)
         self.firstLogFile = None
 
         self.logic = logic
         Logic.factory(self.logic)
         RomFlavor.factory()
-        self.locations = Logic.locations
 
         (self.locsAddressName, self.locsWeb2Internal) = self.initLocsAddressName()
         self.transWeb2Internal = self.initTransitionsName()
 
-        Conf.difficultyTarget = infinity
-
-        self.objectives = Objectives()
+        self.objectives = Objectives(reset=True)
 
         # no time limitation
         self.runtimeLimit_s = 0
@@ -73,31 +66,25 @@ class InteractiveSolver(CommonSolver):
     def dumpState(self):
         state = SolverState(self.debug)
         state.fromSolver(self)
+        return state.get()
 
-        self.shm.writeMsgJson(state.get())
-        self.shm.finish(False)
-
-    def initialize(self, mode, rom, presetFileName, magic, fill, extraSettings):
+    def initialize(self, mode, romData, romFileName, presetFileName, fill, extraSettings):
         # load rom and preset, return first state
         self.debug = mode == "debug"
         self.mode = mode
-        if self.mode != "seedless":
-            self.seed = os.path.basename(os.path.splitext(rom)[0])+'.sfc'
-        else:
-            self.seed = "seedless"
+        self.seed = romFileName
 
         self.smbm = SMBoolManager()
 
         self.presetFileName = presetFileName
         self.loadPreset(self.presetFileName)
 
-        self.loadRom(rom, interactive=True, magic=magic, extraSettings=extraSettings)
+        self.loadRom(romData, romFileName, interactive=True, extraSettings=extraSettings)
         # in plando/tracker always consider that we're doing full
         self.majorsSplit = 'Full'
 
         # hide doors
-        if self.doorsRando and mode in ['standard', 'race']:
-            DoorsManager.initTracker()
+        DoorsManager.initTracker(self.doorsRando and mode in ['standard', 'race'])
 
         self.clearItems()
 
@@ -120,20 +107,22 @@ class InteractiveSolver(CommonSolver):
         # if tourian is disabled remove mother brain location
         if self.tourian == 'Disabled':
             mbLoc = self.getLoc('Mother Brain')
+            assert mbLoc is not None, "Mother Brain loc is None !"
             self.locations.remove(mbLoc)
 
         # compute new available locations
         self.computeLocationsDifficulty(self.majorLocations)
         self.checkGoals()
 
-        self.dumpState()
+        return self.dumpState()
 
-    def iterate(self, scope, action, params):
+    def iterate(self, instate, scope, action, params):
         self.debug = params["debug"]
         self.smbm = SMBoolManager()
+        self.locations = copy.deepcopy(Logic.locations)
 
         state = SolverState()
-        state.set(self.shm.readMsgJson())
+        state.set(instate)
         state.toSolver(self)
         self.objectives.setSolverMode(self)
 
@@ -156,7 +145,7 @@ class InteractiveSolver(CommonSolver):
             else:
                 if action == 'add':
                     if self.mode in ['plando', 'seedless', 'race', 'debug']:
-                        if params['loc'] != None:
+                        if 'loc' in params:
                             if self.mode == 'plando':
                                 self.setItemAt(params['loc'], params['item'], params['hide'])
                             else:
@@ -234,7 +223,7 @@ class InteractiveSolver(CommonSolver):
                     # else it may set loc diff to easy
                     if (loc.difficulty.difficulty == -1 and
                         loc.accessPoint is not None and
-                        self.areaGraph.canAccess(self.smbm, previousAP, loc.accessPoint, Conf.difficultyTarget)):
+                        self.areaGraph.canAccess(self.smbm, previousAP, loc.accessPoint, infinity)):
                         lastVisitedLocs.append(loc)
 
             for loc in lastVisitedLocs:
@@ -280,7 +269,7 @@ class InteractiveSolver(CommonSolver):
             self.checkGoals()
 
         # return them
-        self.dumpState()
+        return self.dumpState()
 
     def checkGoals(self):
         # check if objectives can be completed
@@ -370,7 +359,7 @@ class InteractiveSolver(CommonSolver):
             "transitions": self.fillGraph(),
             "patches": RomPatches.ActivePatches,
             "doors": DoorsManager.serialize(),
-            "forbiddenItems": parameters["forbiddenItems"],
+            "forbiddenItems": parameters.get("forbiddenItems", []),
             "objectives": self.objectives.getGoalsList(),
             "tourian": self.tourian
         }
@@ -554,8 +543,7 @@ class InteractiveSolver(CommonSolver):
         # error msg in json to be displayed by the web site
         data["errorMsg"] = errorMsg
 
-        self.shm.writeMsgJson(data)
-        self.shm.finish(False)
+        return data
 
     def locNameInternal2Web(self, locName):
         return removeChars(locName, " ,()-")
@@ -677,7 +665,7 @@ class InteractiveSolver(CommonSolver):
             for loc in self.majorLocations:
                 loc.difficulty = None
         self.smbm.resetItems()
-        self.objectives.resetGoals()
+        self.objectives.resetCompletedGoals()
 
     def updatePlandoScavengerOrder(self, plandoScavengerOrder):
         self.plandoScavengerOrder = plandoScavengerOrder
@@ -850,12 +838,7 @@ class InteractiveSolver(CommonSolver):
         "Tourian": 0x500
     }
 
-    def importDump(self, shmName):
-        from utils.shm import SHM
-        shm = SHM(shmName)
-        dumpData = shm.readMsgJson()
-        shm.finish(False)
-
+    def importDump(self, dumpData):
         # first update current access point
         self.lastAP = dumpData["newAP"]
 
@@ -924,35 +907,34 @@ class InteractiveSolver(CommonSolver):
                     self.smbm.addItem(boss)
 
                 for item, itemData in self.inventoryBitMasks.items():
-                    if item not in Conf.itemsForbidden:
-                        byteIndex = itemData["byteIndex"]
-                        loc = offset + byteIndex
-                        # For two byte values, read little endian value.
-                        if item in ("ETank", "Reserve", "Missile", "Super", "PowerBomb"):
-                            val = currentState[loc] + (currentState[loc + 1] * 256)
-                        else:
-                            val = currentState[loc]
+                    byteIndex = itemData["byteIndex"]
+                    loc = offset + byteIndex
+                    # For two byte values, read little endian value.
+                    if item in ("ETank", "Reserve", "Missile", "Super", "PowerBomb"):
+                        val = currentState[loc] + (currentState[loc + 1] * 256)
+                    else:
+                        val = currentState[loc]
 
-                        if item == "ETank":
-                            tanks = int((val - 99) / 100)
-                            for _ in range(tanks):
-                                self.collectedItems.append(item)
-                                self.smbm.addItem(item)
-                        elif item == "Reserve":
-                            tanks = int(val / 100)
-                            for _ in range(tanks):
-                                self.collectedItems.append(item)
-                                self.smbm.addItem(item)
-                        elif item in ("Missile", "Super", "PowerBomb"):
-                            packs = int(val / 5)
-                            for _ in range(packs):
-                                self.collectedItems.append(item)
-                                self.smbm.addItem(item)
-                        else:
-                            bitMask = itemData["bitMask"]
-                            if val & bitMask != 0:
-                                self.collectedItems.append(item)
-                                self.smbm.addItem(item)
+                    if item == "ETank":
+                        tanks = int((val - 99) / 100)
+                        for _ in range(tanks):
+                            self.collectedItems.append(item)
+                            self.smbm.addItem(item)
+                    elif item == "Reserve":
+                        tanks = int(val / 100)
+                        for _ in range(tanks):
+                            self.collectedItems.append(item)
+                            self.smbm.addItem(item)
+                    elif item in ("Missile", "Super", "PowerBomb"):
+                        packs = int(val / 5)
+                        for _ in range(packs):
+                            self.collectedItems.append(item)
+                            self.smbm.addItem(item)
+                    else:
+                        bitMask = itemData["bitMask"]
+                        if val & bitMask != 0:
+                            self.collectedItems.append(item)
+                            self.smbm.addItem(item)
 
             elif dataType == dataEnum["map"]:
                 if self.areaRando or self.bossRando or self.escapeRando:
@@ -1048,7 +1030,7 @@ class InteractiveSolver(CommonSolver):
                 goalsCompleted = objectivesState["goals"]
                 goalsCompleted = list(goalsCompleted.values())
                 for i, (event, eventData) in enumerate(self.eventsBitMasks.items()):
-                    assert str(i) == event, "{}th event has code {} instead of {}".format(i, event, i)
+                    assert i == event, "{}th event has code {} instead of {}".format(i, event, i)
                     if i >= len(goalsList):
                         continue
                     byteIndex = eventData["byteIndex"]

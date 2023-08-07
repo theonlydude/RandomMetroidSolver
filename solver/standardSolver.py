@@ -48,7 +48,7 @@ class StandardSolver(CommonSolver):
 
         self.objectives = Objectives()
 
-        self.loadRom(rom, magic=magic)
+        self.loadRom(rom, rom, magic=magic)
 
         # if tourian is disabled force item pickup to any%
         if self.tourian == 'Disabled':

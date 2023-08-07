@@ -105,7 +105,14 @@ class OutWeb(Out):
             'PowerBomb': 29
         }
         key = lambda item: order[item[item.find('-')+1:]] if '-' in item else order[item]
-        for step, loc in enumerate(locations, start=1):
+        for step, loc in enumerate(locations):
+            if objectives is not None:
+                for objStep, objName in objectives:
+                    if objStep == step:
+                        out.append(["Objective completed: {}".format(objName), None, None, None,
+                                    None, None, None, None, None, None, None,
+                                    "objective"])
+
             if loc.locDifficulty is not None:
                 # draygon fight is in it's path
                 if loc.Name == 'Draygon':
@@ -134,13 +141,6 @@ class OutWeb(Out):
                             '0.00', [], [],
                             [ap.Name for ap in loc.path] if loc.path is not None else None,
                             loc.Class])
-
-            if objectives is not None:
-                for objStep, objName in objectives:
-                    if objStep == step:
-                        out.append(["Objective completed: {}".format(objName), None, None, None,
-                                    None, None, None, None, None, None, None,
-                                    "objective"])
 
         return out
 
@@ -194,7 +194,12 @@ class OutConsole(Out):
         print('{} {:>48} {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format("Z", "Location Name", "Area", "Sub Area", "Distance", "Item", "Difficulty", "Knows used", "Items used"))
         print('-'*150)
         lastAP = None
-        for step, loc in enumerate(locations, start=1):
+        for step, loc in enumerate(locations):
+            if objectives is not None:
+                for objStep, objName in objectives:
+                    if objStep == step:
+                        print(" Objective completed: {} ".format(objName).center(160, '='))
+
             if displayAPs == True and loc.path is not None:
                 path = [ap.Name for ap in loc.path]
                 lastAP = path[-1]
@@ -238,11 +243,6 @@ class OutConsole(Out):
                                   'nc',
                                   'nc',
                                   'nc'))
-
-            if objectives is not None:
-                for objStep, objName in objectives:
-                    if objStep == step:
-                        print(" Objective completed: {} ".format(objName).center(160, '='))
 
     def displayOutput(self):
         s = self.solver

@@ -1,13 +1,14 @@
 import os, uuid, json, subprocess, tempfile, re
 from datetime import datetime
 
-from web.backend.utils import raiseHttp, locName4isolver, generateJsonROM, getInt
+from web.backend.utils import raiseHttp, locName4isolver, getInt
 from graph.vanilla.graph_access import accessPoints
 from graph.graph_utils import GraphUtils
 from utils.utils import removeChars, getPresetDir, getPythonExec
 from utils.doorsmanager import DoorsManager
 from utils.db import DB
-from utils.shm import SHM
+from solver.interactiveSolver import InteractiveSolver
+from logic.logic import Logic
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_NOT_EMPTY
 
@@ -27,7 +28,7 @@ class WS(object):
             raiseHttp(400, "Unknown mode, must be standard/seedless/plando/race/debug", True)
 
         logic = caller.request.vars.logic
-        if logic not in ["vanilla", "mirror"]:
+        if logic not in Logic.list():
             raiseHttp(400, "Unknown logic, must be vanilla/mirror", True)
 
         try:
@@ -87,10 +88,8 @@ class WS(object):
         pass
 
     def returnState(self):
-        if len(self.session["state"]) > 0:
+        if self.session["state"]:
             state = self.session["state"]
-            #print("state returned to frontend: availWeb {}, visWeb {}".format(state["availableLocationsWeb"], state["visitedLocationsWeb"]))
-
             return json.dumps({
                 # item tracker
                 "availableLocations": state["availableLocationsWeb"],
@@ -146,115 +145,54 @@ class WS(object):
         if "state" not in self.session:
             raiseHttp(400, "Missing Solver state in the session", True)
 
-        # use shared memory to communicate with backend as creating files on pythonanywhere is super slow
-        shm = SHM()
-        params = [
-            getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
-            '--interactive',
-            '--shm',  shm.name(),
-            '--action', action,
-            '--mode', self.mode,
-            '--scope', scope,
-            '--logic', self.logic
-        ]
-        if action in ['add', 'replace']:
-            if scope == 'item':
-                if 'loc' in parameters:
-                    params += ['--loc', parameters["loc"]]
-                if self.mode != 'standard':
-                    params += ['--item', parameters["item"]]
-                    if parameters['hide'] == True:
-                        params.append('--hide')
-            elif scope == 'area':
-                params += ['--startPoint', parameters["startPoint"],
-                           '--endPoint', parameters["endPoint"]]
-            elif scope == 'door':
-                params += ['--doorName', parameters["doorName"],
-                           '--newColor', parameters["newColor"]]
-        elif action == 'remove' and scope == 'item':
-            if 'loc' in parameters:
-                params += ['--loc', parameters["loc"]]
-            elif 'count' in parameters:
-                params += ['--count', str(parameters["count"])]
-            else:
-                params += ['--item', str(parameters["item"])]
-        elif action == 'toggle':
-            if scope == 'item':
-                params += ['--item', parameters['item']]
-            elif scope == 'door':
-                params += ['--doorName', parameters["doorName"]]
-        elif action == 'remove' and scope == 'area' and "startPoint" in parameters:
-            params += ['--startPoint', parameters["startPoint"]]
-        elif action == 'save' and scope == 'common':
-            if parameters['lock'] == True:
-                params.append('--lock')
-            if 'escapeTimer' in parameters:
-                params += ['--escapeTimer', parameters['escapeTimer']]
-        elif action == 'randomize':
-            params += ['--minorQty', parameters["minorQty"],
-                       '--energyQty', parameters["energyQty"]
-            ]
-            if "forbiddenItems" in parameters:
-                params += ['--forbiddenItems', parameters["forbiddenItems"]]
-        elif action == 'import':
-            params += ['--dump', parameters["dump"]]
-        elif action == 'upload_scav' and 'plandoScavengerOrder' in parameters:
-            params += ['--plandoScavengerOrder', ','.join(parameters['plandoScavengerOrder'])]
+        parameters["debug"] = self.mode == 'debug'
 
-        # dump state as input
-        shm.writeMsgJson(self.session["state"])
-
-        print("before calling isolver: {}".format(params))
+        print("before calling isolver: {}".format(parameters))
         start = datetime.now()
-        output = subprocess.run(params, capture_output=True)
-        end = datetime.now()
-        duration = (end - start).total_seconds() * 1000
-        print("ret: {}, subprocess duration: {}ms".format(output.returncode, duration))
-        print(output.stdout.decode("utf-8"))
 
-        state = shm.readMsgJson()
-        shm.finish(True)
-
-        if output.returncode == 0:
-            if action == 'save':
-                return json.dumps(state)
-            else:
-                if action == 'randomize':
-                    with DB() as db:
-                        db.addPlandoRando(output.returncode, duration, state.get("errorMsg", ""))
-
-                # save the escape timer at every step to avoid loosing its value
-                if self.vars.escapeTimer is not None:
-                    state["escapeTimer"] = self.vars.escapeTimer
-
-                self.session["state"] = state
-                ret = self.returnState()
-
-                return ret
-        else:
-            msg = "Something wrong happened while iteratively solving the ROM"
-            print(output.stderr.decode("utf-8"))
-            try:
-                self.addError(params, output.stderr.decode("utf-8"))
-                if "errorMsg" in state and state["errorMsg"]:
-                    msg = state["errorMsg"]
-            except Exception as e:
-                # happen when jsonOutFileName is empty
-                pass
+        try:
+            solver = InteractiveSolver(self.logic)
+            state = solver.iterate(self.session["state"], scope, action, parameters)
+        except Exception as e:
+            msg = "Something wrong happened while iteratively solving the ROM: {}".format(e)
+            print(msg)
+            self.addError(parameters, msg)
 
             if action == 'randomize':
                 with DB() as db:
-                    db.addPlandoRando(output.returncode, duration, msg)
+                    end = datetime.now()
+                    duration = (end - start).total_seconds() * 1000
+                    db.addPlandoRando(-1, duration, msg)
 
             raiseHttp(400, msg, True)
+
+        end = datetime.now()
+        duration = (end - start).total_seconds() * 1000
+        print("isolver duration: {}ms".format(duration))
+
+        if action == 'save':
+            return json.dumps(state)
+        else:
+            if action == 'randomize':
+                with DB() as db:
+                    db.addPlandoRando(0, duration, state.get("errorMsg", ""))
+
+            # save the escape timer at every step to avoid loosing its value
+            if self.vars.escapeTimer is not None:
+                state["escapeTimer"] = self.vars.escapeTimer
+
+            self.session["state"] = state
+            return self.returnState()
 
     def addError(self, params, errContent):
         errDir = os.path.expanduser("~/web2py/applications/solver/errors")
         if os.path.isdir(errDir):
+            import traceback
             errFile = '{}.{}.{}'.format(self.caller.request.client,
                                         datetime.now().strftime('%Y-%m-%d.%H-%M-%S'),
                                         str(uuid.uuid4()))
             errFile = os.path.join(errDir, errFile)
+            errContent += "\n" + traceback.format_exc()
             with open(errFile, 'w') as f:
                 f.write(str(params)+'\n')
                 f.write(errContent)
@@ -294,32 +232,24 @@ class WS_common_init(WS):
             except:
                 raiseHttp(400, "Wrong value for romJson, must be a JSON string")
 
-            # ROM file name
-            uploadFile = self.vars.fileName
-            if uploadFile is None:
-                raiseHttp(400, "Missing ROM file name", True)
-            if IS_NOT_EMPTY()(uploadFile)[1] is not None:
-                raiseHttp(400, "File name is empty", True)
-            if IS_LENGTH(maxsize=255, minsize=1)(uploadFile)[1] is not None:
-                raiseHttp(400, "Wrong length for ROM file name, name must be between 1 and 255 characters", True)
-
-        if self.vars.startLocation != None:
-            if self.vars.startLocation not in GraphUtils.getStartAccessPointNames():
+        if self.vars.startLocation is not None:
+            if self.vars.startLocation not in GraphUtils.getStartAccessPointNames(self.logic):
                 raiseHttp(400, "Wrong value for startLocation", True)
 
     def action(self):
         mode = self.vars.mode
         logic = self.vars.logic
         if mode != 'seedless':
-            try:
-                (base, jsonRomFileName) = generateJsonROM(self.vars.romJson)
-            except Exception as e:
-                raiseHttp(400, "Can't load JSON ROM: {}".format(e), True)
-            seed = base + '.sfc'
+            tmpRomData = json.loads(self.vars.romJson)
+            seed = tmpRomData["romFileName"]
+            del tmpRomData["romFileName"]
+            # in json keys are strings
+            romData = {int(address): data for address, data in tmpRomData.items()}
+            romData["romFileName"] = seed
             startLocation = None
         else:
             seed = 'seedless'
-            jsonRomFileName = None
+            romData = None
             startLocation = self.vars.startLocation
 
         preset = self.vars.preset
@@ -334,50 +264,37 @@ class WS_common_init(WS):
 
         fill = self.vars.fill == "true"
 
-        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, logic, mode, fill, startLocation, doorsRando)
+        return self.callSolverInit(romData, presetFileName, preset, seed, logic, mode, fill, startLocation, doorsRando)
 
-    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, logic, mode, fill, startLocation, doorsRando):
-        shm = SHM()
-        params = [
-            getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
-            '--preset', presetFileName,
-            '--shm', shm.name(),
-            '--action', "init",
-            '--interactive',
-            '--logic', logic,
-            '--mode', mode,
-            '--scope', 'common'
-        ]
+    def callSolverInit(self, romData, presetFileName, preset, romFileName, logic, mode, fill, startLocation, doorsRando):
 
-        if mode != "seedless":
-            params += ['-r', str(jsonRomFileName)]
+        extraSettings = {
+            'startLocation': startLocation,
+            'doorsRando': doorsRando,
+        }
 
-        if fill == True:
-            params.append('--fill')
-
-        if startLocation != None:
-            params += ['--startLocation', startLocation]
-        if doorsRando:
-            params.append('--doorsRando')
-
-        print("before calling isolver: {}".format(params))
+        printParams = {"mode": mode, "logic": logic, "preset": preset, "rom": romFileName}
+        print("before init isolver: {}".format(printParams))
         start = datetime.now()
-        ret = subprocess.call(params)
+
+        try:
+            solver = InteractiveSolver(self.logic)
+            state = solver.initialize(mode, romData, romFileName, presetFileName, fill, extraSettings)
+        except Exception as e:
+            msg = "Something wrong happened during isolver init: {}".format(e)
+            print(msg)
+            self.addError(printParams, msg)
+            raiseHttp(400, msg, True)
+
         end = datetime.now()
-        duration = (end - start).total_seconds()
-        print("ret: {}, duration: {}s".format(ret, duration))
+        duration = (end - start).total_seconds() * 1000
+        print("isolver init duration: {}ms".format(duration))
 
-        if ret == 0:
-            with DB() as db:
-                db.addISolver(preset, 'plando' if mode == 'plando' else 'tracker', romFileName)
+        with DB() as db:
+            db.addISolver(preset, 'plando' if mode == 'plando' else 'tracker', romFileName)
 
-            state = shm.readMsgJson()
-            shm.finish(True)
-            self.session["state"] = state
-            return self.returnState()
-        else:
-            shm.finish(True)
-            raiseHttp(400, "Something wrong happened while initializing the ISolver", True)
+        self.session["state"] = state
+        return self.returnState()
 
 class WS_common_get(WS):
     def validate(self):
@@ -430,7 +347,7 @@ class WS_common_randomize(WS):
         for elem in "minorQty", "energyQty":
             params[elem] = self.vars[elem]
         if self.vars.forbiddenItems != '':
-            params["forbiddenItems"] = self.vars.forbiddenItems
+            params["forbiddenItems"] = self.vars.forbiddenItems.split(',')
 
         self.session["rando"] = params
 
@@ -637,22 +554,17 @@ class WS_dump_import(WS):
         if newAP not in webAPs:
             raiseHttp(400, "Wrong AP", True)
 
-        self.shm = SHM()
-
-        jsonData = {"stateDataOffsets": json.loads(self.vars.stateDataOffsets),
-                    "currentState": json.loads(self.vars.currentState),
-                    "newAP": webAPs[newAP]}
-        if len(jsonData["currentState"]) > 1632 or len(jsonData["stateDataOffsets"]) > 5:
+        self.jsonData = {"stateDataOffsets": json.loads(self.vars.stateDataOffsets),
+                         "currentState": json.loads(self.vars.currentState),
+                         "newAP": webAPs[newAP]}
+        if len(self.jsonData["currentState"]) > 1632 or len(self.jsonData["stateDataOffsets"]) > 5:
             raiseHttp(400, "Wrong state size", True)
-        for key, value in jsonData["stateDataOffsets"].items():
+        for key, value in self.jsonData["stateDataOffsets"].items():
             if len(key) > 1 or type(value) != int:
                 raiseHttp(400, "Wrong state type", True)
-        if any([d for d in jsonData["currentState"] if type(d) != int]):
+        if any([d for d in self.jsonData["currentState"] if type(d) != int]):
             raiseHttp(400, "Wrong cur state type", True)
 
-        self.shm.writeMsgJson(jsonData)
-
     def action(self):
-        ret = self.callSolverAction("dump", "import", {"dump": self.shm.name()})
-        self.shm.finish(True)
+        ret = self.callSolverAction("dump", "import", {"dump": self.jsonData})
         return ret

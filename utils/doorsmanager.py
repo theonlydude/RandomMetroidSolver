@@ -243,13 +243,15 @@ class Door(object):
         else:
             self.hide()
 
-    # to send/receive state to tracker/plando
+    # to send/receive state to tracker/plando.
+    # having Facing object in the state makes web2py create a new session with it restarts,
+    # so serialize to integer.
     def serialize(self):
-        return (self.color, self.facing, self.hidden)
+        return (self.color, int(self.facing), self.hidden)
 
     def unserialize(self, data):
         self.setColor(data[0])
-        self.facing = data[1]
+        self.facing = Facing(data[1])
         self.hidden = data[2]
 
 class DoorsManager():
@@ -484,9 +486,13 @@ class DoorsManager():
 
     # when using the tracker, first set all colored doors to grey until the user clicks on it
     @staticmethod
-    def initTracker():
-        for door in DoorsManager.doors.values():
-            door.hide()
+    def initTracker(hide):
+        if hide:
+            for door in DoorsManager.doors.values():
+                door.hide()
+        else:
+            for door in DoorsManager.doors.values():
+                door.reveal()
 
     # when the user clicks on a door in the tracker
     @staticmethod

@@ -334,7 +334,6 @@ window.onload = function(){
         var base = re.exec(file.name)[1];
   
         var outFileName = file.name.replace(/\.[^/.]+$/, ".json");
-        document.getElementById("fileName").value = file.name;
 
         var fileSize = file.size;
         crc32.update(e.target.result);
@@ -617,7 +616,6 @@ function initSolver() {
             scope: "common",
             romJson: romJsonValue,
             preset: document.getElementById("preset").value,
-            fileName: document.getElementById("fileName").value,
             fill: document.getElementById("fillPlando").checked,
             startLocation: document.getElementById("startLocation").value,
             doorsRando: document.getElementById("doorsRando").checked,
@@ -776,7 +774,6 @@ $(window).scroll(function(){
 function clearInputSeed() {
   document.getElementById("uploadFile").value = "";
   document.getElementById("romJson").value = "";
-  document.getElementById("fileName").value = "";
   if(mode != "plando") {
     document.getElementById("startLocationVisibility").style.display = "table-row";
     document.getElementById("doorsRandoVisibility").style.display = "table-row";

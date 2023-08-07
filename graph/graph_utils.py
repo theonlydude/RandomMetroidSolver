@@ -75,10 +75,13 @@ def getAccessPoint(apName, apList=None):
 class GraphUtils:
     log = utils.log.get('GraphUtils')
 
-    def getStartAccessPointNames():
+    def getStartAccessPointNames(logic=None):
+        if logic is not None:
+            Logic.factory(logic)
         return [ap.Name for ap in Logic.accessPoints if ap.Start is not None]
 
-    def getStartAccessPointNamesCategory():
+    def getStartAccessPointNamesCategory(logic):
+        Logic.factory(logic)
         ret = {'regular': [], 'custom': [], 'area': []}
         for ap in Logic.accessPoints:
             if ap.Start == None:

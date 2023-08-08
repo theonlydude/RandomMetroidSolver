@@ -1444,7 +1444,6 @@ Room_A98D_state_A9B9_PLM:
 %export(Door_4F_Room_A98D_PLM_C854)
     ; Door. Grey door facing down
     dw $c854 : db $46 : db $02 : dw $044f
-%export(Energy_Tank_Crocomire)
     ; Energy tank
     dw $eed7 : db $02 : db $06 : dw $0034 
     dw $0000

@@ -125,7 +125,7 @@ class AccessGraph(object):
             'Timer': None,
             'Animals': None
         }
-        for ap in accessPointList:
+        for ap in copy.deepcopy(accessPointList):
             self.addAccessPoint(ap)
         for srcName, dstName in transitions:
             self.addTransition(srcName, dstName)

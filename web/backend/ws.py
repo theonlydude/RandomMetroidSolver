@@ -318,8 +318,7 @@ class WS_common_save(WS):
             raiseHttp(400, "Save can only be use in plando mode", True)
 
         params = {'lock': self.vars.lock == "lock"}
-        if self.vars.escapeTimer != None:
-            params['escapeTimer'] = self.vars.escapeTimer
+        params['escapeTimer'] = self.vars.escapeTimer if self.vars.escapeTimer is not None else '03:00'
 
         return self.callSolverAction("common", "save", params)
 

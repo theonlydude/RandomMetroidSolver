@@ -406,7 +406,7 @@ class AccessGraph(object):
         rootAp = self.accessPoints[rootNode]
         inBossChk = lambda ap: ap.Boss and ap.Name.endswith("In")
         allAreas = {dst.GraphArea for (src, dst) in self.InterAreaTransitions if not inBossChk(dst) and not dst.isLoop()}
-        self.log.debug("allAreas="+str(allAreas))
+        self.log.debug("allAreas="+str(sorted(allAreas)))
         nonBossAPs = [ap for ap in self.getAvailableAccessPoints(rootAp, None, 0) if ap.GraphArea in allAreas]
         bossesAPs = [self.accessPoints[boss+'RoomIn'] for boss in Bosses.Golden4()] + [self.accessPoints['Draygon Room Bottom']]
         return nonBossAPs + bossesAPs

@@ -6,7 +6,7 @@ class Logic(object):
         if implementation == 'vanilla':
             from graph.vanilla.graph_helpers import HelpersGraph
             from graph.vanilla.graph_access import accessPoints
-            from graph.vanilla.graph_locations import locations, LocationsHelper
+            from graph.vanilla.graph_locations import locations, LocationsHelper, postLoad
             import graph.vanilla.map_tiles
             import graph.vanilla.map_tilecount
             Logic.map_tiles = graph.vanilla.map_tiles
@@ -16,7 +16,7 @@ class Logic(object):
             Logic.HelpersGraph = HelpersGraph
             Logic.patches = implementation
             Logic.LocationsHelper = LocationsHelper
-            Logic.postSymbolsLoad = lambda: None
+            Logic.postSymbolsLoad = postLoad
         elif implementation == 'rotation':
             from graph.rotation.graph_helpers import HelpersGraph
             from graph.rotation.graph_access import accessPoints
@@ -30,7 +30,7 @@ class Logic(object):
         elif implementation == 'mirror':
             from graph.mirror.graph_helpers import HelpersGraphMirror as HelpersGraph
             from graph.mirror.graph_access import accessPoints
-            from graph.mirror.graph_locations import locations, LocationsHelper, fixLocAddresses
+            from graph.mirror.graph_locations import locations, LocationsHelper, postLoad
             import graph.mirror.map_tiles
             import graph.mirror.map_tilecount
             Logic.map_tiles = graph.mirror.map_tiles
@@ -40,7 +40,7 @@ class Logic(object):
             Logic.HelpersGraph = HelpersGraph
             Logic.patches = implementation
             Logic.LocationsHelper = LocationsHelper
-            Logic.postSymbolsLoad = fixLocAddresses
+            Logic.postSymbolsLoad = postLoad
         else:
             raise ValueError("Unknown logic type : "+str(implementation))
         Logic.implementation = implementation

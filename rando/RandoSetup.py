@@ -312,7 +312,7 @@ class RandoSetup(object):
             if len(aps) == 0:
                 continue
             escAPs = [ap for ap in aps if ap in availAPs]
-            self.log.debug("escAPs="+str(escAPs))
+            self.log.debug("escAPs="+str(sorted(escAPs)))
             if len(escAPs) < n:
                 ret = False
                 msg = "Objective '{}' impossible to complete".format(goal.name)

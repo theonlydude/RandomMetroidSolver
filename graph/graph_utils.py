@@ -2,7 +2,6 @@ import copy
 import random
 from logic.logic import Logic
 from utils.parameters import Knows
-from graph.location import locationsDict
 import utils.log
 
 # order expected by ROM patches
@@ -124,7 +123,7 @@ class GraphUtils:
         return ret, refused
 
     def updateLocClassesStart(startGraphArea, split, possibleMajLocs, preserveMajLocs, nLocs):
-        locs = locationsDict
+        locs = {loc.Name: loc for loc in Logic.locations}
         preserveMajLocs = [locs[locName] for locName in preserveMajLocs if locs[locName].isClass(split)]
         possLocs = [locs[locName] for locName in possibleMajLocs][:nLocs]
         GraphUtils.log.debug("possLocs="+str([loc.Name for loc in possLocs]))

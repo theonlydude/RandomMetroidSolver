@@ -79,7 +79,7 @@ def getAddressesToRead(cache):
         options = RomOptions(None, RomFlavor.symbols)
 
         # locations
-        for loc in Logic.locations:
+        for loc in Logic.locations():
             addresses["locations"].append(loc.Address)
 
         # doors
@@ -89,14 +89,14 @@ def getAddressesToRead(cache):
         addresses["misc"] += options.getAddressesToRead()
 
         # transitions
-        for ap in Logic.accessPoints:
+        for ap in Logic.accessPoints():
             if ap.Internal == True:
                 continue
             addresses["transitions"].append(0x10000 | ap.ExitInfo['DoorPtr'])
 
         maxDoorAsmPatchLen = 22
         customDoorsAsm = Addresses.getOne('customDoorsAsm')
-        addresses["ranges"] += [customDoorsAsm, customDoorsAsm+(maxDoorAsmPatchLen * len([ap for ap in Logic.accessPoints if ap.Internal == False]))]
+        addresses["ranges"] += [customDoorsAsm, customDoorsAsm+(maxDoorAsmPatchLen * len([ap for ap in Logic.accessPoints() if ap.Internal == False]))]
 
     # patches
     for (_class, patches) in RomReader.patches.items():

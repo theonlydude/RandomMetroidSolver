@@ -261,6 +261,9 @@ class PresetLoaderDict(PresetLoader):
 def getDefaultMultiValues():
     from graph.graph_utils import GraphUtils
     from utils.objectives import Objectives
+    from logic.logic import Logic
+    # assume vanilla logic for default multi values
+    Logic.factory('vanilla')
     defaultMultiValues = {
         'startLocation': GraphUtils.getStartAccessPointNames(),
         'majorsSplit': ['Full', 'FullWithHUD', 'Major', 'Chozo', 'Scavenger'],

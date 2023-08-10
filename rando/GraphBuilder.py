@@ -61,7 +61,7 @@ class GraphBuilder(object):
                     transitions += vanillaTransitions
                 else:
                     transitions += GraphUtils.createAreaTransitions(self.graphSettings.lightAreaRando)
-        ret = AccessGraph(Logic.accessPoints, transitions, self.graphSettings.dotFile)
+        ret = AccessGraph(Logic.accessPoints(), transitions, self.graphSettings.dotFile)
         Objectives.setGraph(ret, maxDiff)
         return ret
 

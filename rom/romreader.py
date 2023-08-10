@@ -378,7 +378,7 @@ class RomReader:
         rooms = GraphUtils.getRooms()
         bossTransitions = {}
         areaTransitions = {}
-        for accessPoint in Logic.accessPoints:
+        for accessPoint in Logic.accessPoints():
             if accessPoint.isInternal() == True:
                 continue
             key = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
@@ -565,7 +565,7 @@ class RomReader:
         startLocation = 'Landing Site'
         startArea = 'Crateria Landing Site'
         startPatches = []
-        for ap in Logic.accessPoints:
+        for ap in Logic.accessPoints():
             if ap.Start is not None and 'spawn' in ap.Start and ap.Start['spawn'] == value:
                 startLocation = ap.Name
                 startArea = ap.Start['solveArea']

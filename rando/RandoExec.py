@@ -76,7 +76,7 @@ class RandoExec(object):
                 DoorsManager.randomize(self.graphSettings.allowGreyDoors, forbiddenColors=forbiddenColors)
             self.areaGraph = graphBuilder.createGraph(self.randoSettings.maxDiff)
             services = RandoServices(self.areaGraph, self.restrictions)
-            setup = RandoSetup(self.graphSettings, Logic.locations, services)
+            setup = RandoSetup(self.graphSettings, Logic.locations(), services)
             container = setup.createItemLocContainer(endDate, vcr)
             if container is None:
                 sys.stdout.write('*')
@@ -137,7 +137,7 @@ class RandoExec(object):
                         loc.Visibility = 'Hidden'
         # put nothing in unfilled locations
         filledLocNames = [il.Location.Name for il in itemLocs]
-        unfilledLocs = [loc for loc in Logic.locations if loc.Name not in filledLocNames]
+        unfilledLocs = [loc for loc in Logic.locations() if loc.Name not in filledLocNames]
         nothing = ItemManager.getItem('Nothing')
         for loc in unfilledLocs:
             loc.restricted = True

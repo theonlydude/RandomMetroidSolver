@@ -5,7 +5,6 @@ from rom.map import ObjectiveMapIcon
 from logic.helpers import Bosses
 from logic.smbool import SMBool
 from logic.logic import Logic
-from graph.location import locationsDict
 from utils.parameters import Knows
 import utils.log, logging
 
@@ -153,7 +152,7 @@ def getMiniBossesEscapeAccessPoints(n):
     return (n, [Bosses.accessPoints[boss] for boss in Bosses.miniBosses()])
 
 def getAreaEscapeAccessPoints(area):
-    return (1, list({list(loc.AccessFrom.keys())[0] for loc in Logic.locations if loc.GraphArea == area}))
+    return (1, list({list(loc.AccessFrom.keys())[0] for loc in Logic.locations() if loc.GraphArea == area}))
 
 GTsettingsConflict = lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))
 
@@ -686,7 +685,7 @@ class Objectives(object):
 
     @staticmethod
     def canAccessLocation(sm, ap, locName):
-        loc = locationsDict[locName]
+        loc = Logic.locationsDict()[locName]
         availLocs = Objectives.graph.getAvailableLocations([loc], sm, Objectives.maxDiff, ap)
         return SMBool(loc in availLocs)
 
@@ -709,7 +708,7 @@ class Objectives(object):
                 LOG.debug(f"canExploreArea {area} {ap} not available")
                 return SMBool(False)
 
-        accessibleLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
+        accessibleLocs = graph.getAccessibleLocations(Logic.locationsDict().values(), rootApName)
         # in solver we don't want to recompute already visited locations difficulty, so copy them first
         areaLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea == area]
         availLocs = graph.getAvailableLocations(areaLocs, sm, maxDiff, rootApName)
@@ -736,7 +735,7 @@ class Objectives(object):
                 LOG.debug(f"canExploreMap {ap} not available")
                 return SMBool(False)
 
-        accessibleLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
+        accessibleLocs = graph.getAccessibleLocations(Logic.locationsDict().values(), rootApName)
         allLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea != "Tourian"]
         availLocs = graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName)
         if len(availLocs) != len(allLocs):
@@ -751,7 +750,7 @@ class Objectives(object):
     def canExploreMapPercent(sm, rootApName, percent):
         graph, maxDiff = Objectives.graph, Objectives.maxDiff
         # questionable heuristic: consider "access x% items" equivalent to "can reach x% locations"
-        accessibleLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
+        accessibleLocs = graph.getAccessibleLocations(Logic.locationsDict().values(), rootApName)
         allLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea != "Tourian"]
         availLocs = graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName)
         pct = 100*float(len(availLocs)) / float(len(allLocs))

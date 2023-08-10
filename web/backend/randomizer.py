@@ -6,7 +6,6 @@ from web.backend.utils import validateWebServiceParams, getCustomMapping, localI
 from utils.utils import getRandomizerDefaultParameters, getDefaultMultiValues, PresetLoader, getPresetDir, getPythonExec
 from graph.graph_utils import GraphUtils
 from utils.db import DB
-from logic.logic import Logic
 from utils.objectives import Objectives
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH

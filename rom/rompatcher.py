@@ -582,7 +582,7 @@ class RomPatcher:
                 plms.append(key)
         if area == True:
             plms += ['Maridia Sand Hall Seal', "Save_Main_Street", "Save_Crab_Shaft"]
-            for accessPoint in Logic.accessPoints:
+            for accessPoint in Logic.accessPoints():
                 if accessPoint.Internal == True or accessPoint.Boss == True:
                     continue
                 addBlinking(accessPoint.Name)
@@ -590,7 +590,7 @@ class RomPatcher:
             addBlinking("Below Botwoon Energy Tank Right")
         if minimizerN is not None:
             # add blinking doors inside and outside boss rooms
-            for accessPoint in Logic.accessPoints:
+            for accessPoint in Logic.accessPoints():
                 if accessPoint.Boss == True:
                     addBlinking(accessPoint.Name)
         return doors

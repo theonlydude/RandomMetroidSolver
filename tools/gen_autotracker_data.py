@@ -24,11 +24,11 @@ logic = sys.argv[2]
 
 Logic.factory(logic)
 RomFlavor.factory()
-locations = Logic.locations
+locations = Logic.locations()
 
 locationsDict = {pc_to_snes(loc.Address): loc for loc in locations}
 locationsName = set([loc.Name for loc in locations])
-accessPoints = Logic.accessPoints
+accessPoints = Logic.accessPoints()
 patchDict = RomFlavor.patchAccess.getDictPatches()
 additionalPLMs = RomFlavor.patchAccess.getAdditionalPLMs()
 

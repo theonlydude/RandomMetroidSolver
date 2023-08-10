@@ -1,4 +1,4 @@
-import sys, json, os, tempfile, copy
+import sys, json, os, tempfile
 
 from solver.commonSolver import CommonSolver
 from logic.smbool import SMBool
@@ -33,7 +33,7 @@ class InteractiveSolver(CommonSolver):
         self.firstLogFile = None
 
         self.logic = logic
-        Logic.factory(self.logic)
+        Logic.factory(self.logic, new=True)
         RomFlavor.factory()
 
         (self.locsAddressName, self.locsWeb2Internal) = self.initLocsAddressName()
@@ -50,7 +50,7 @@ class InteractiveSolver(CommonSolver):
     def initLocsAddressName(self):
         addressName = {}
         web2Internal = {}
-        for loc in Logic.locations:
+        for loc in Logic.locations():
             webName = self.locNameInternal2Web(loc.Name)
             addressName[loc.Address % 0x10000] = webName
             web2Internal[webName] = loc.Name
@@ -119,7 +119,7 @@ class InteractiveSolver(CommonSolver):
     def iterate(self, instate, scope, action, params):
         self.debug = params["debug"]
         self.smbm = SMBoolManager()
-        self.locations = copy.deepcopy(Logic.locations)
+        self.locations = Logic.locations()
 
         state = SolverState()
         state.set(instate)
@@ -129,6 +129,7 @@ class InteractiveSolver(CommonSolver):
         # set mother brain access func for solver
         if self.tourian != 'Disabled':
             mbLoc = self.getLoc('Mother Brain')
+            assert mbLoc is not None, "Mother Brain loc is None !"
             mbLoc.AccessFrom['Golden Four'] = self.getMotherBrainAccess()
 
         # save current AP
@@ -332,7 +333,7 @@ class InteractiveSolver(CommonSolver):
             usedAPs[dst] = True
 
         singleAPs = []
-        for ap in Logic.accessPoints:
+        for ap in Logic.accessPoints():
             if ap.isInternal() == True:
                 continue
 
@@ -481,7 +482,7 @@ class InteractiveSolver(CommonSolver):
 
         patches = ["Escape_Animals_Disable"]
 
-        doors = GraphUtils.getDoorConnections(AccessGraph(Logic.accessPoints, self.fillGraph()), self.areaRando,
+        doors = GraphUtils.getDoorConnections(AccessGraph(Logic.accessPoints(), self.fillGraph()), self.areaRando,
                                               self.bossRando, self.escapeRando, False)
 
         from utils.version import displayedVersion

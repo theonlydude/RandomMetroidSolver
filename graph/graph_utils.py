@@ -68,7 +68,7 @@ escapeTargets = ['Green Brinstar Main Shaft Top Left', 'Basement Left', 'Busines
 
 def getAccessPoint(apName, apList=None):
     if apList is None:
-        apList = Logic.accessPoints
+        apList = Logic.accessPoints()
     return next(ap for ap in apList if ap.Name == apName)
 
 class GraphUtils:
@@ -77,12 +77,12 @@ class GraphUtils:
     def getStartAccessPointNames(logic=None):
         if logic is not None:
             Logic.factory(logic)
-        return [ap.Name for ap in Logic.accessPoints if ap.Start is not None]
+        return [ap.Name for ap in Logic.accessPoints() if ap.Start is not None]
 
     def getStartAccessPointNamesCategory(logic):
         Logic.factory(logic)
         ret = {'regular': [], 'custom': [], 'area': []}
-        for ap in Logic.accessPoints:
+        for ap in Logic.accessPoints():
             if ap.Start == None:
                 continue
             elif 'areaMode' in ap.Start and ap.Start['areaMode'] == True:
@@ -123,7 +123,7 @@ class GraphUtils:
         return ret, refused
 
     def updateLocClassesStart(startGraphArea, split, possibleMajLocs, preserveMajLocs, nLocs):
-        locs = {loc.Name: loc for loc in Logic.locations}
+        locs = Logic.locationsDict()
         preserveMajLocs = [locs[locName] for locName in preserveMajLocs if locs[locName].isClass(split)]
         possLocs = [locs[locName] for locName in possibleMajLocs][:nLocs]
         GraphUtils.log.debug("possLocs="+str([loc.Name for loc in possLocs]))
@@ -174,7 +174,7 @@ class GraphUtils:
 
     def createRegularAreaTransitions(apList=None, apPred=None):
         if apList is None:
-            apList = Logic.accessPoints
+            apList = Logic.accessPoints()
         if apPred is None:
             apPred = lambda ap: ap.isArea()
         tFrom = []
@@ -210,12 +210,12 @@ class GraphUtils:
 
     def getAPs(apPredicate, apList=None):
         if apList is None:
-            apList = Logic.accessPoints
+            apList = Logic.accessPoints()
         return [ap for ap in apList if apPredicate(ap) == True]
 
     def loopUnusedTransitions(transitions, apList=None):
         if apList is None:
-            apList = Logic.accessPoints
+            apList = Logic.accessPoints()
         usedAPs = set()
         for (src,dst) in transitions:
             usedAPs.add(getAccessPoint(src, apList))
@@ -233,10 +233,10 @@ class GraphUtils:
         startAp = getAccessPoint(startApName)
         def getNLocs(locsPredicate, locList=None):
             if locList is None:
-                locList = Logic.locations
+                locList = Logic.locations()
             # leave out bosses and count post boss locs systematically
             return len([loc for loc in locList if locsPredicate(loc) == True and not loc.SolveArea.endswith(" Boss") and not loc.isBoss()])
-        availAreas = list(sorted({ap.GraphArea for ap in Logic.accessPoints if ap.GraphArea != startAp.GraphArea and getNLocs(lambda loc: loc.GraphArea == ap.GraphArea) > 0}))
+        availAreas = list(sorted({ap.GraphArea for ap in Logic.accessPoints() if ap.GraphArea != startAp.GraphArea and getNLocs(lambda loc: loc.GraphArea == ap.GraphArea) > 0}))
         areas = [startAp.GraphArea]
         if startAp.GraphArea in forcedAreas:
             forcedAreas.remove(startAp.GraphArea)
@@ -306,7 +306,7 @@ class GraphUtils:
         # group APs by area
         aps = {}
         totalCount = 0
-        for ap in Logic.accessPoints:
+        for ap in Logic.accessPoints():
             if not ap.isArea():
                 continue
             if not ap.GraphArea in aps:
@@ -368,7 +368,7 @@ class GraphUtils:
     # (RoomPtr, (vanilla entry screen X, vanilla entry screen Y)): AP
     def getRooms():
         rooms = {}
-        for ap in Logic.accessPoints:
+        for ap in Logic.accessPoints():
             if ap.Internal == True:
                 continue
             # special ap for random escape animals surprise
@@ -547,7 +547,7 @@ class GraphUtils:
 
     def getDoorsPtrs2Aps():
         ret = {}
-        for ap in Logic.accessPoints:
+        for ap in Logic.accessPoints():
             if ap.Internal == True:
                 continue
             ret[ap.ExitInfo["DoorPtr"]] = ap.Name
@@ -555,7 +555,7 @@ class GraphUtils:
 
     def getAps2DoorsPtrs():
         ret = {}
-        for ap in Logic.accessPoints:
+        for ap in Logic.accessPoints():
             if ap.Internal == True:
                 continue
             ret[ap.Name] = ap.ExitInfo["DoorPtr"]

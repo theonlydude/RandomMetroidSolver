@@ -1,4 +1,4 @@
-import logging, time, copy
+import logging, time
 
 from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
 from logic.smbool import SMBool, smboolFalse
@@ -43,10 +43,7 @@ class CommonSolver(object):
             # in seedless we allow mixing of area and boss transitions
             self.hasMixedTransitions = True
             self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
-            if interactive:
-                self.locations = copy.deepcopy(Logic.locations)
-            else:
-                self.locations = Logic.locations
+            self.locations = Logic.locations()
             for loc in self.locations:
                 loc.itemName = 'Nothing'
             # set doors related to default patches
@@ -63,10 +60,7 @@ class CommonSolver(object):
             if not interactive:
                 RomFlavor.factory()
             self.romLoader.loadSymbols()
-            if interactive:
-                self.locations = copy.deepcopy(Logic.locations)
-            else:
-                self.locations = Logic.locations
+            self.locations = Logic.locations()
             (self.majorsSplit, self.masterMajorsSplit) = self.romLoader.assignItems(self.locations)
             (self.startLocation, self.startArea, startPatches) = self.romLoader.getStartAP()
             if not GraphUtils.isStandardStart(self.startLocation) and self.majorsSplit != 'Full':
@@ -145,7 +139,7 @@ class CommonSolver(object):
                 self.log.debug('{:>50}: {:>16}'.format(loc.Name, loc.itemName))
 
     def buildGraph(self):
-        self.areaGraph = AccessGraph(Logic.accessPoints, self.curGraphTransitions)
+        self.areaGraph = AccessGraph(Logic.accessPoints(), self.curGraphTransitions)
         Objectives.setGraph(self.areaGraph, infinity)
 
     def loadPreset(self, presetFileName):

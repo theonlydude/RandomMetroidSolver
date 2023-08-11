@@ -1300,7 +1300,7 @@ display_unpause:
 .map:
         JSL $82BB30  ; Display map elevator destinations
         JSL $82B672  ; Draw map icons
-        JMP $B9C8    ; Map screen - draw Samus position indicator
+        JMP map_DrawIndicatorIfInCurrentArea    ; Map screen - draw Samus position indicator
 .equip:
         JSR $B267    ; Draw item selector
         JSR $B2A2    ; Display reserve tank amount

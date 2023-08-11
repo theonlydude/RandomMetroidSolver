@@ -235,7 +235,7 @@ doors = {
 from graph.vanilla.map_tiles import objectives as vanillaObjectives
 import copy
 
-objectives = copy.copy(vanillaObjectives)
+objectives = copy.deepcopy(vanillaObjectives)
 
 # brinstar
 objectives["Kraid"]["map_coords_px"] = (60, 156)

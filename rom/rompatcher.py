@@ -1108,7 +1108,7 @@ class RomPatcher:
             else:
                 doorPtr = self.symbols.getAddress(conn['DoorPtrSym']) & 0xffff
             roomPtr = conn['RoomPtr']
-#            print('Writing door connection ' + conn['ID'] + ". doorPtr="+hex(doorPtr))
+            print('Writing door connection ' + conn['ID'] + ". doorPtr="+hex(doorPtr))
             if doorPtr in self.doorConnectionSpecific:
                 self.doorConnectionSpecific[doorPtr](roomPtr)
             if roomPtr in self.roomConnectionSpecific:
@@ -1171,10 +1171,11 @@ class RomPatcher:
             # the portal is drawn, since it's not the same as the actual map tile checked to
             # see if the portal is taken
             src, dst = conn['transition']
-            def writeExploreMapAsm(ap):
+            def writeExploreMapAsm(ap, matching):
                 nonlocal asmPatch
                 apInfo = Logic.map_tiles.areaAccessPointsInGameDisplay.get(ap.Name)
                 if apInfo is not None:
+                    print("writeExploreMapAsm for "+ap.Name)
                     areaMap = self.areaMaps[apInfo['area']]
                     byteIndex, bitMask = areaMap.getByteIndexMask(*apInfo['coords'])
                     ramAddr = getWordBytes(self._getExploredMapRam(apInfo['area'], byteIndex)) + [ 0x7E ]
@@ -1184,9 +1185,17 @@ class RomPatcher:
                     asmPatch += [ 0x09 ] + getWordBytes(bitMask)
                     # STA.l $7E[map tile byte index]
                     asmPatch += [ 0x8F ] + ramAddr
-            writeExploreMapAsm(src)
+                    # for index
+                    areas = ["Crateria", "Brinstar", "Norfair", "WreckedShip", "Maridia"]
+                    print(f"apInfo={apInfo['area']}, roominfo={areas[matching.RoomInfo['area']]}")
+                    if apInfo['area'] == areas[matching.RoomInfo['area']]:
+                        # JSL $80858C ; Load mirror of current area's map explored
+                        # (needed for current area explored tiles to be synced)
+                        print("SPECIAL")
+                        asmPatch += [ 0x22, 0x8C, 0x85, 0x80 ]
+            writeExploreMapAsm(src, dst)
             if src != dst:
-                writeExploreMapAsm(dst)
+                writeExploreMapAsm(dst, src)
             # if crateria-less minimizer, append reveal_objectives function to door asm leading to climb
             if dst.Name == "Climb Bottom Left":
                 asmPatch += [ 0x20 ] + reveal_objectives
@@ -1197,7 +1206,7 @@ class RomPatcher:
             self.romFile.seek(asmAddress)
             for byte in asmPatch:
                 self.romFile.writeByte(byte)
-            # print("asmAddress=%x" % asmAddress)
+            print("asmAddress=%x" % asmAddress)
             # print("asmPatch=" + str(["%02x" % b for b in asmPatch]))
 
             asmAddress += len(asmPatch)

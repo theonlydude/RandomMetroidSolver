@@ -315,14 +315,14 @@ load_area_palettes:
         rtl
 
 ;;; custom map icons
-!extra_gfx_size = $600
+!extra_gfx_size = $6A0
 !draw_spritemap_routine = $818A5F
 
 VARIA_init:
         ;; construct map
 	JSL $8293C3		; hijacked code
         ;; Load extra gfx for VARIA map icons
-        %gfxDMA(extra_gfx, $2D00, !extra_gfx_size) 	; DMA transfer from extra_gfx to VRAM:2D00
+        %gfxDMA(extra_gfx, $2CB0, !extra_gfx_size) 	; DMA transfer from extra_gfx to VRAM:2CB0
         ;; mirror map explored for area portals inside the same map to work
         jsl $8085c6
 	rtl

@@ -275,21 +275,21 @@ class PortalMapIcon(MapIcon):
 
 class ObjectiveMapIcon(MapIcon):
     def __init__(self, objIdx):
-        super().__init__(0xEB + objIdx, palette=7, x=1, y=-1)
+        super().__init__(0xE6 + objIdx, palette=7, x=1, y=-1)
         self.table_index = objIdx
 
 portal_mapicons = {
-    "Crateria": PortalMapIcon(0xE0),
-    "GreenPinkBrinstar": PortalMapIcon(0xE1),
-    "RedBrinstar": PortalMapIcon(0xE2),
-    "WreckedShip": PortalMapIcon(0xE3),
-    "Kraid": PortalMapIcon(0xE4),
-    "Norfair": PortalMapIcon(0xE5),
-    "Crocomire": PortalMapIcon(0xE6),
-    "LowerNorfair": PortalMapIcon(0xE7),
-    "WestMaridia": PortalMapIcon(0xE8),
-    "EastMaridia": PortalMapIcon(0xE9),
-    "Tourian": PortalMapIcon(0xEA)
+    "Crateria": PortalMapIcon(0xDB),
+    "GreenPinkBrinstar": PortalMapIcon(0xDC),
+    "RedBrinstar": PortalMapIcon(0xDD),
+    "WreckedShip": PortalMapIcon(0xDE),
+    "Kraid": PortalMapIcon(0xDF),
+    "Norfair": PortalMapIcon(0xE0),
+    "Crocomire": PortalMapIcon(0xE1),
+    "LowerNorfair": PortalMapIcon(0xE2),
+    "WestMaridia": PortalMapIcon(0xE3),
+    "EastMaridia": PortalMapIcon(0xE4),
+    "Tourian": PortalMapIcon(0xE5)
 }
 
 def assignMapIconSpriteTableIndices():

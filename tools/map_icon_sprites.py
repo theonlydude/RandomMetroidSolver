@@ -12,7 +12,7 @@ from utils.objectives import objective_mapicons
 asmPath = sys.argv[1]
 
 def getDoorLabel(color, facing):
-    return "door_%s_%s" % (color, str(facing).split('.')[1])
+    return "door_%s_%s" % (color, facing.name)
 
 def getPortalLabel(area):
     return "portal_%s" % area

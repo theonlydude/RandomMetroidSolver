@@ -20,6 +20,16 @@ graphAreas = [
     "Tourian"
 ]
 
+# in-game areas in ROM order
+gameAreas = [
+    "Crateria",
+    "Brinstar",
+    "Norfair",
+    "WreckedShip",
+    "Maridia",
+    "Tourian"
+]
+
 vanillaTransitions = [
     ('Lower Mushrooms Left', 'Green Brinstar Elevator'),
     ('Morph Ball Room Left', 'Green Hill Zone Top Right'),

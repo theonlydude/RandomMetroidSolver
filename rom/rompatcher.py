@@ -8,7 +8,7 @@ from rom.compression import Compressor
 from rom.ips import IPS_Patch
 from utils.doorsmanager import DoorsManager, IndicatorFlag
 from utils.objectives import Objectives
-from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas
+from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas, gameAreas
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
 from rom.addresses import Addresses
@@ -1108,7 +1108,7 @@ class RomPatcher:
             else:
                 doorPtr = self.symbols.getAddress(conn['DoorPtrSym']) & 0xffff
             roomPtr = conn['RoomPtr']
-            print('Writing door connection ' + conn['ID'] + ". doorPtr="+hex(doorPtr))
+#            print('Writing door connection ' + conn['ID'] + ". doorPtr="+hex(doorPtr))
             if doorPtr in self.doorConnectionSpecific:
                 self.doorConnectionSpecific[doorPtr](roomPtr)
             if roomPtr in self.roomConnectionSpecific:
@@ -1175,7 +1175,6 @@ class RomPatcher:
                 nonlocal asmPatch
                 apInfo = Logic.map_tiles.areaAccessPointsInGameDisplay.get(ap.Name)
                 if apInfo is not None:
-                    print("writeExploreMapAsm for "+ap.Name)
                     areaMap = self.areaMaps[apInfo['area']]
                     byteIndex, bitMask = areaMap.getByteIndexMask(*apInfo['coords'])
                     ramAddr = getWordBytes(self._getExploredMapRam(apInfo['area'], byteIndex)) + [ 0x7E ]
@@ -1186,12 +1185,9 @@ class RomPatcher:
                     # STA.l $7E[map tile byte index]
                     asmPatch += [ 0x8F ] + ramAddr
                     # for index
-                    areas = ["Crateria", "Brinstar", "Norfair", "WreckedShip", "Maridia"]
-                    print(f"apInfo={apInfo['area']}, roominfo={areas[matching.RoomInfo['area']]}")
-                    if apInfo['area'] == areas[matching.RoomInfo['area']]:
+                    if apInfo['area'] == gameAreas[matching.RoomInfo['area']]:
                         # JSL $80858C ; Load mirror of current area's map explored
                         # (needed for current area explored tiles to be synced)
-                        print("SPECIAL")
                         asmPatch += [ 0x22, 0x8C, 0x85, 0x80 ]
             writeExploreMapAsm(src, dst)
             if src != dst:

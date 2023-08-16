@@ -6,6 +6,7 @@ from logic.helpers import Bosses
 from logic.smbool import SMBool
 from logic.logic import Logic
 from utils.parameters import Knows
+from graph.graph_utils import graphAreas
 import utils.log, logging
 
 LOG = utils.log.get('Objectives')
@@ -689,6 +690,12 @@ class Objectives(object):
         availLocs = Objectives.graph.getAvailableLocations([loc], sm, Objectives.maxDiff, ap)
         return SMBool(loc in availLocs)
 
+    @staticmethod
+    def canReachArea(sm, rootApName, area):
+        graph, maxDiff = Objectives.graph, Objectives.maxDiff
+        availAPs = graph.getAvailableAccessPoints(graph.accessPoints[rootApName], sm, maxDiff)
+        return SMBool(any(ap.GraphArea == area for ap in availAPs))
+
     # XXX consider "explore map" equivalent to "access all locations and APs"
 
     @staticmethod
@@ -835,9 +842,10 @@ class Objectives(object):
             def f(sm, ap):
                 nonlocal solver, area
                 visitedLocs = set([loc.Name for loc in solver.visitedLocations])
-                return SMBool(all(locName in visitedLocs for locName in solver.splitLocsByArea[area]))
+                allVisited = SMBool(all(locName in visitedLocs for locName in solver.splitLocsByArea[area]))
+                return sm.wand(Objectives.canReachArea(sm, ap, area), allVisited)
             return f
-        self.setAreaFuncs({area:getObjAreaFunc(area) for area in solver.splitLocsByArea})
+        self.setAreaFuncs({area:getObjAreaFunc(area) for area in graphAreas})
 
     def expandGoals(self):
         LOG.debug("Active goals:"+str(Objectives.activeGoals))

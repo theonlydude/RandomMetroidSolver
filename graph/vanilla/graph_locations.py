@@ -563,7 +563,8 @@ loc.Available = (
     lambda sm: sm.haveItem('Morph')
 )
 loc.PostAvailable = (
-    lambda sm: sm.canPassBombPassages()
+    lambda sm: sm.wor(sm.knowsSporeSpawnBackDoor(), # skill barrier for camera manip without creating a specific knows
+                      sm.canPassBombPassages())
 )
 
 

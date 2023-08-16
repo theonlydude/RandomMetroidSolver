@@ -108,6 +108,7 @@ class SolverState(object):
         self.state["scavengerOrder"] = self.getScavengerOrder(solver)
         self.state["additionalETanks"] = solver.additionalETanks
         self.state["escapeRandoRemoveEnemies"] = solver.escapeRandoRemoveEnemies
+        self.state["revealMap"] = solver.revealMap
 
     def toSolver(self, solver):
         solver.logic = self.state["logic"]
@@ -151,6 +152,7 @@ class SolverState(object):
         solver.scavengerOrder = self.setScavengerOrder(solver, self.state["scavengerOrder"])
         solver.additionalETanks = self.state["additionalETanks"]
         solver.escapeRandoRemoveEnemies = self.state["escapeRandoRemoveEnemies"]
+        solver.revealMap = self.state["revealMap"]
 
     def getRoomsVisibility(self, solver, areaGraph, sm):
         # add graph access points

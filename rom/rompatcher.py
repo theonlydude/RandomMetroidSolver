@@ -1218,7 +1218,7 @@ class RomPatcher:
 
     def _getExploredMapRam(self, area, index=0):
         if isinstance(area, str):
-            area = ['Crateria', 'Brinstar', 'Norfair', 'WreckedShip', 'Maridia', 'Tourian'].index(area)
+            area = gameAreas.index(area)
         exploredBaseRam = 0xCD52
         exploredAreaSize = 0x100
         return exploredBaseRam + area*exploredAreaSize + index
@@ -1232,6 +1232,12 @@ class RomPatcher:
             elif apName in Logic.map_tiles.bossAccessPoints:
                 return Logic.map_tiles.bossAccessPoints[apName]
             return None
+        graphAreaOverride = {
+            "KraidRoomIn": "KraidBoss",
+            "PhantoonRoomIn": "PhantoonBoss",
+            "DraygonRoomIn": "DraygonBoss",
+            "RidleyRoomIn": "RidleyBoss"
+        }
         for conn in doorConnections:
             src, dst = conn['transition']
             srcMapInfo, dstMapInfo = getMapInfo(src.Name, True), getMapInfo(dst.Name, False)
@@ -1243,7 +1249,8 @@ class RomPatcher:
                 x, y = areaMap.getCoordsByte(srcMapInfo['byteIndex'], srcMapInfo['bitMask'])
             self.writeWordMagic(x*8)
             self.writeWordMagic(y*8)
-            self.writeWordMagic(portal_mapicons[dst.GraphArea].table_index)
+            graphArea = graphAreaOverride.get(dst.Name, dst.GraphArea)
+            self.writeWordMagic(portal_mapicons[graphArea].table_index)
             self.writeWordMagic(self._getExploredMapRam(dst.RoomInfo['area'], dstMapInfo['byteIndex']))
             self.romFile.writeWord(dstMapInfo['bitMask'])
         self.writeWordMagic(0xffff) # terminator

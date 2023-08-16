@@ -289,7 +289,11 @@ portal_mapicons = {
     "LowerNorfair": PortalMapIcon(0xE2),
     "WestMaridia": PortalMapIcon(0xE3),
     "EastMaridia": PortalMapIcon(0xE4),
-    "Tourian": PortalMapIcon(0xE5)
+    "Tourian": PortalMapIcon(0xE5),
+    "KraidBoss": PortalMapIcon(0xF8),
+    "PhantoonBoss": PortalMapIcon(0xF9),
+    "DraygonBoss": PortalMapIcon(0xFA),
+    "RidleyBoss": PortalMapIcon(0xFB)
 }
 
 def assignMapIconSpriteTableIndices():

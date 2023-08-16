@@ -23,6 +23,8 @@ class RomPatches:
     HellwayBlueDoor           = 25
     # etecoon supers blue door
     EtecoonSupersBlueDoor     = 26
+    # red tower top Super door to alpha PBs
+    AlphaPowerBombBlueDoor    = 27
     # shot block to exit hi jump area
     HiJumpShotBlock           = 30
     # access main upper norfair without anything

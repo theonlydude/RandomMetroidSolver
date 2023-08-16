@@ -844,7 +844,8 @@ loc.AccessFrom = {
     'Red Brinstar Elevator': lambda sm: SMBool(True)
 }
 loc.Available = (
-    lambda sm: sm.traverse('RedTowerElevatorBottomLeft')
+    lambda sm: sm.wor(RomPatches.has(RomPatches.AlphaPowerBombBlueDoor),
+                      sm.traverse('RedTowerElevatorBottomLeft'))
 )
 
 

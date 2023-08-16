@@ -733,7 +733,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x8af6, 'direction': 0x7, "cap": (0x16, 0x2d), "bitFlag": 0x0,
                    "screen": (0x1, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0xb9f1},
        entryInfo = {'SamusX':0x80, 'SamusY':0x58},
-       start={'spawn':0x010a, 'doors':[0x3c], 'patches':[RomPatches.HellwayBlueDoor], 'solveArea': "Red Brinstar Top", 'areaMode':True},
+       start={'spawn':0x010a, 'doors':[0x3c, 0x3d], 'patches':[RomPatches.HellwayBlueDoor, RomPatches.AlphaPowerBombBlueDoor], 'solveArea': "Red Brinstar Top", 'areaMode':True},
        dotOrientation = 'n'),
     AccessPoint('East Tunnel Right', 'RedBrinstar', {
         'East Tunnel Top Right': lambda sm: SMBool(True), # handled by room traverse function

@@ -116,6 +116,7 @@ mkdir -p ~/web2py/applications/solver/static/images/help/
 [ -L ~/web2py/applications/solver/static/images/help/dachora.png ] || ln -s ~/RandomMetroidSolver/web/static/help/dachora.png ~/web2py/applications/solver/static/images/help/dachora.png
 [ -L ~/web2py/applications/solver/static/images/help/early_super.png ] || ln -s ~/RandomMetroidSolver/web/static/help/early_super.png ~/web2py/applications/solver/static/images/help/early_super.png
 [ -L ~/web2py/applications/solver/static/images/help/high_jump.png ] || ln -s ~/RandomMetroidSolver/web/static/help/high_jump.png ~/web2py/applications/solver/static/images/help/high_jump.png
+[ -L ~/web2py/applications/solver/static/images/help/climb_supers.png ] || ln -s ~/RandomMetroidSolver/web/static/help/climb_supers.png ~/web2py/applications/solver/static/images/help/climb_supers.png
 [ -L ~/web2py/applications/solver/static/images/help/moat.png ] || ln -s ~/RandomMetroidSolver/web/static/help/moat.png ~/web2py/applications/solver/static/images/help/moat.png
 [ -L ~/web2py/applications/solver/static/images/help/red_tower.png ] || ln -s ~/RandomMetroidSolver/web/static/help/red_tower.png ~/web2py/applications/solver/static/images/help/red_tower.png
 [ -L ~/web2py/applications/solver/static/images/help/spazer_block.png ] || ln -s ~/RandomMetroidSolver/web/static/help/spazer_block.png ~/web2py/applications/solver/static/images/help/spazer_block.png

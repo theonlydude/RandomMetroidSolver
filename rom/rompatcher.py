@@ -87,7 +87,7 @@ class RomPatcher:
                          'ln_chozo_platform.ips', 'bomb_torizo.ips'],
         # anti-softlock/game opening layout patches
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
-                   'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips',
+                   'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'climb_supers.ips',
                    'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips'],
         # base patchset for area rando
         'AreaBaseSet': [

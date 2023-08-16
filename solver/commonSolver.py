@@ -22,6 +22,7 @@ class CommonSolver(object):
         self.plandoScavengerOrder = []
         self.additionalETanks = 0
         self.escapeRandoRemoveEnemies = True
+        self.revealMap = False
         self.objectivesHidden = False
         self.objectivesHiddenOption = False
         self.romFileName = romName
@@ -101,7 +102,7 @@ class CommonSolver(object):
             if self.mode == 'plando':
                 self.additionalETanks = self.romLoader.getAdditionalEtanks()
                 self.escapeRandoRemoveEnemies = bool(self.romLoader.readOption("escapeRandoRemoveEnemies"))
-
+                self.revealMap = self.romLoader.hasPatch('revealMap')
             if interactive == False:
                 print("ROM {}\nmajors: {} area: {} boss: {} escape: {}\npatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches())))
             else:

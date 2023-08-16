@@ -107,7 +107,8 @@ class RomReader:
             'beam_doors': {'address': snes_to_pc(0x84a6e5), 'value': 0x0D, 'desc': "Beam doors"},
             'red_doors': {'address': snes_to_pc(0x84c32c), 'value':0x01, 'desc': "Red doors open with one Missile and do not react to Super"},
             'objectives': {'address': snes_to_pc(0x82a822), 'value': 0x08, 'desc': "Objectives displayed in pause"},
-            'round_robin_cf': {'address': snes_to_pc(0x90d5d6), 'value': 0x0, 'desc': "Round robin Crystal Flash"}
+            'round_robin_cf': {'address': snes_to_pc(0x90d5d6), 'value': 0x0, 'desc': "Round robin Crystal Flash"},
+            'revealMap': {'address': snes_to_pc(0x8FE893), 'value': 0x20, 'desc': "Map revealed from the start"}
         },
         'vanilla': {
             'layout': {'address': snes_to_pc(0xc3bd80), 'value': 0xD5, 'desc': "Anti soft lock layout modifications"},

@@ -1202,7 +1202,7 @@ class RomPatcher:
             self.romFile.seek(asmAddress)
             for byte in asmPatch:
                 self.romFile.writeByte(byte)
-            print("asmAddress=%x" % asmAddress)
+            # print("asmAddress=%x" % asmAddress)
             # print("asmPatch=" + str(["%02x" % b for b in asmPatch]))
 
             asmAddress += len(asmPatch)

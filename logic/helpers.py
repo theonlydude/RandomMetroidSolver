@@ -82,7 +82,7 @@ class Helpers(object):
         difficulties = Settings.hardRooms[roomName]
         (dmgRed, items) = self.getDmgReduction()
         mult *= dmgRed
-        result = self.energyReserveCountOkDiff(difficulties, mult)
+        result = self.energyReserveCountOkDiff(difficulties, mult, reserveRestriction=True)
 
         if result == True:
             result.knows = ['HardRoom-'+roomName]

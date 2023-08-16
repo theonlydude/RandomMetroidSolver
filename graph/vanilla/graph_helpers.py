@@ -527,8 +527,8 @@ class HelpersGraph(Helpers):
         nTanksGrav = 4 * 4/dmgRed
         nTanksNoGrav = 6 * 4/dmgRed
         return sm.wor(sm.wand(sm.haveItem('Gravity'),
-                              sm.energyReserveCountOk(nTanksGrav)),
-                      sm.wand(sm.energyReserveCountOk(nTanksNoGrav),
+                              sm.energyReserveCountOk(nTanksGrav, reserveRestriction=True)),
+                      sm.wand(sm.energyReserveCountOk(nTanksNoGrav, reserveRestriction=True),
                               sm.knowsLavaDive())) # should be a good enough skill filter for acid wall jumps with no grav...
 
     @Cache.decorator

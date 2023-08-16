@@ -547,9 +547,25 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canClimbRedTower(self):
         sm = self.smbm
-        return sm.wor(sm.knowsRedTowerClimb(),
-                      sm.haveItem('Ice'),
-                      sm.haveItem('SpaceJump'))
+        knowsRedTower = sm.knowsRedTowerClimb()
+        # adjusted smbool depending on equipment
+        adjustedKnows = SMBool(knowsRedTower.bool, knowsRedTower.difficulty, knowsRedTower.knows)
+        # destroy rippers
+        if sm.haveItem('ScrewAttack'):
+            adjustedKnows.items = ['ScrewAttack']
+            adjustedKnows.difficulty *= 0.16
+        elif sm.canUsePowerBombs():
+            adjustedKnows.items = ['PowerBomb']
+            adjustedKnows.difficulty *= 0.16
+        elif sm.haveItem('Super'):
+            adjustedKnows.items = ['Super']
+            adjustedKnows.difficulty *= 0.33
+        # space jump for the last part
+        if sm.haveItem('SpaceJump'):
+            adjustedKnows.items = ['SpaceJump']
+            adjustedKnows.difficulty *= 0.5
+        return sm.wor(adjustedKnows,
+                      sm.haveItem('Ice'))
 
     @Cache.decorator
     def canClimbBottomRedTower(self):

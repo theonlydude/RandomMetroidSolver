@@ -369,7 +369,7 @@ class Knows:
 
     RedTowerClimb = SMBool(True, harder, ['RedTowerClimb'])
     desc['RedTowerClimb'] = {'display': 'Red Tower Climb',
-                             'title': 'Climb Red Tower without Ice or Space-Jump',
+                             'title': 'Climb Red Tower without Ice Beam',
                              'href': 'https://www.youtube.com/watch?v=g3goe6PZ4o0',
                              'rooms': ['Red Tower']}
 

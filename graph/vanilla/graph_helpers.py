@@ -551,19 +551,21 @@ class HelpersGraph(Helpers):
         # adjusted smbool depending on equipment
         adjustedKnows = SMBool(knowsRedTower.bool, knowsRedTower.difficulty, knowsRedTower.knows)
         # destroy rippers
+        items = []
         if sm.haveItem('ScrewAttack'):
-            adjustedKnows.items = ['ScrewAttack']
+            items.append('ScrewAttack')
             adjustedKnows.difficulty *= 0.16
         elif sm.canUsePowerBombs():
-            adjustedKnows.items = ['PowerBomb']
+            items.append('PowerBomb')
             adjustedKnows.difficulty *= 0.16
         elif sm.haveItem('Super'):
-            adjustedKnows.items = ['Super']
+            items.append('Super')
             adjustedKnows.difficulty *= 0.33
         # space jump for the last part
         if sm.haveItem('SpaceJump'):
-            adjustedKnows.items = ['SpaceJump']
+            items.append('SpaceJump')
             adjustedKnows.difficulty *= 0.5
+        adjustedKnows.items = items
         return sm.wor(adjustedKnows,
                       sm.haveItem('Ice'))
 

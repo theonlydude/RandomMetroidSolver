@@ -53,6 +53,7 @@ patches = {
     'spazer': (0x8fa408, None),
     'kraid_save': (0x8fA4DA, None),
     'mission_impossible': (0x8f9e11, None),
+    'climb_supers': (0x8f96ba, None),
     # VARIA tweaks
     'ln_chozo_platform': (0x8fb1e5, None),
     # area layout

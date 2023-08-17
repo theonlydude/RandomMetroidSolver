@@ -22,8 +22,6 @@ org $828BB3
 org $81fa80
 hook_main:
 	jsl $A09169  ; run hi-jacked instruction
-	bra check_reload
-
 check_reload:
 	php
 	%ai16()
@@ -56,4 +54,4 @@ check_reload:
 	plp
 	rtl
 
-warnpc $81faff
+warnpc $81facf

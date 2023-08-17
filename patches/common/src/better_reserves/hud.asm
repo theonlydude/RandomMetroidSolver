@@ -39,7 +39,9 @@ HandleAutoReserveTilemap:
 
 ; Empty Auto Reserve Tilemap
 Data:
-	;; DW $2C33, $2C46
+.full:
+	DW $2C33, $2C46
+.half:
 	DW $2C47, $2C48
 	DW $AC33, $AC46
 
@@ -74,7 +76,7 @@ org $80998B ; overwrite now-unused vanilla reserve HUD tilemaps
             ; Transfers one word from ROM,y to RAM,x.
             ; This is where the XOR operation happens.
 TransferNextVal: ; Also increments X and Y
-	LDA Data,y : EOR $14
+	LDA Data_half,y : EOR $14
 .store:
         STA $7EC658,x
 	INY : INY : INX : INX : RTL

@@ -7,13 +7,11 @@ lorom
 
 incsrc "sym/better_reserves.asm"
 
-org better_reserves_Data
-	DW $2C33, $2C46
-	DW $2C47, $2C48
-	DW $AC33, $AC46
-
 org better_reserves_HandleAutoReserveTilemap_write
         JSL better_reserves_WriteTilemap_full
+
+org better_reserves_TransferNextVal
+        LDA better_reserves_Data_full, y
 
 org better_reserves_TransferNextVal_store
         STA $7EC618,x

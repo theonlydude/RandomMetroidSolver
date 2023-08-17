@@ -16,7 +16,7 @@ tools/apply_ips.py patches/mirror/ips/mirrortroid.ips ${MIRROR} || die "patch mi
 tools/apply_ips.py patches/mirror/ips/bank_8f.ips ${MIRROR} || die "patch 8f"
 tools/apply_ips.py patches/mirror/ips/bank_83.ips ${MIRROR} || die "patch 83"
 
-for patch in area_rando_warp_door crab_shaft area_layout_ln_exit area_layout_caterpillar area_layout_east_tunnel area_layout_greenhillzone area_layout_crabe_tunnel east_ocean aqueduct_bomb_blocks; do
+for patch in dachora early_super_bridge high_jump moat spospo_save nova_boost_platform red_tower spazer kraid_save mission_impossible climb_supers ln_chozo_platform area_rando_warp_door crab_shaft area_layout_ln_exit area_layout_caterpillar area_layout_east_tunnel area_layout_greenhillzone area_layout_crabe_tunnel east_ocean aqueduct_bomb_blocks; do
     VARIA_PATCH=${patch}_${VANILLA}
     MIRROR_PATCH=${patch}_${MIRROR}
     cp ${VANILLA} ${VARIA_PATCH}

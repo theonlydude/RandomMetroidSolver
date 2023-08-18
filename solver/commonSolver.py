@@ -172,8 +172,11 @@ class CommonSolver(object):
         # for the auto tracker, need to know if we have to track nothing items
         return any(loc.itemName == "Nothing" for loc in self.locations)
 
-    def computeLocationsDifficulty(self, locations, phase="major"):
-        difficultyTarget = Conf.difficultyTarget
+    def computeLocationsDifficulty(self, locations, phase="major", startDiff=None):
+        if startDiff is None:
+            difficultyTarget = Conf.difficultyTarget
+        else:
+            difficultyTarget = startDiff
         nextLocations = locations
 
         # before looping on all diff targets, get only the available locations with diff target infinity

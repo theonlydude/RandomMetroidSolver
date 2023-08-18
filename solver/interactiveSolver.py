@@ -11,7 +11,7 @@ from graph.graph import AccessGraphSolver as AccessGraph
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
 from graph.location import define_location
 from utils.utils import removeChars
-from utils.parameters import hard, infinity
+from utils.parameters import easy, hard, infinity
 from solver.solverState import SolverState
 from solver.comeback import ComeBack
 from rando.ItemLocContainer import ItemLocation
@@ -111,7 +111,7 @@ class InteractiveSolver(CommonSolver):
             self.locations.remove(mbLoc)
 
         # compute new available locations
-        self.computeLocationsDifficulty(self.majorLocations)
+        self.computeLocationsDifficulty(self.majorLocations, startDiff=easy)
         self.checkGoals()
 
         return self.dumpState()
@@ -233,7 +233,7 @@ class InteractiveSolver(CommonSolver):
 
         # compute new available locations
         self.clearLocs(self.majorLocations)
-        self.computeLocationsDifficulty(self.majorLocations)
+        self.computeLocationsDifficulty(self.majorLocations, startDiff=easy)
 
         while True:
             remainLocs = []
@@ -263,7 +263,7 @@ class InteractiveSolver(CommonSolver):
 
             # compute again
             self.clearLocs(self.majorLocations)
-            self.computeLocationsDifficulty(self.majorLocations)
+            self.computeLocationsDifficulty(self.majorLocations, startDiff=easy)
 
         # autotracker handles objectives
         if not (scope == 'dump' and action == 'import'):

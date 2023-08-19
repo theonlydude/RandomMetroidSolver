@@ -133,7 +133,10 @@ class RomPatcher:
             'area_layout_caterpillar.ips',
             # reveal opening to portal (change layout in room AD5E: Single Chamber - flavor)
             # to be applied on top of patch area_layout_ln_exit.ips
-            'area_layout_single_chamber.ips'
+            'area_layout_single_chamber.ips',
+            # make it possible to climb back up crab hole with no items
+            'area_layout_crab_hole_lvl.ips',
+            'area_layout_crab_hole_plms_enemies.ips'
         ],
         # patches for boss rando
         'Bosses': ['door_transition.ips'],

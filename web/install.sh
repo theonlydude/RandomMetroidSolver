@@ -142,6 +142,7 @@ mkdir -p ~/web2py/applications/solver/static/images/help/
 [ -L ~/web2py/applications/solver/static/images/help/backup_saves.png ] || ln -s ~/RandomMetroidSolver/web/static/help/backup_saves.png ~/web2py/applications/solver/static/images/help/backup_saves.png
 [ -L ~/web2py/applications/solver/static/images/help/mission_impossible.png ] || ln -s ~/RandomMetroidSolver/web/static/help/mission_impossible.png ~/web2py/applications/solver/static/images/help/mission_impossible.png
 [ -L ~/web2py/applications/solver/static/images/help/forgotten_all_the_way.png ] || ln -s ~/RandomMetroidSolver/web/static/help/forgotten_all_the_way.png ~/web2py/applications/solver/static/images/help/forgotten_all_the_way.png
+[ -L ~/web2py/applications/solver/static/images/help/crab_hole.png ] || ln -s ~/RandomMetroidSolver/web/static/help/crab_hole.png ~/web2py/applications/solver/static/images/help/crab_hole.png
 [ -L ~/web2py/applications/solver/static/images/help/ice_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ice_door.png ~/web2py/applications/solver/static/images/help/ice_door.png
 [ -L ~/web2py/applications/solver/static/images/help/missile_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/missile_door.png ~/web2py/applications/solver/static/images/help/missile_door.png
 [ -L ~/web2py/applications/solver/static/images/help/plasma_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/plasma_door.png ~/web2py/applications/solver/static/images/help/plasma_door.png

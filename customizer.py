@@ -34,7 +34,7 @@ if __name__ == "__main__":
                                  'remove_itemsounds.ips', 'vanilla_music.ips', 'custom_ship.ips',
                                  'Ship_Takeoff_Disable_Hide_Samus', 'widescreen.ips',
                                  'hell.ips', 'lava_acid_physics.ips', 'hard_mode.ips',
-                                 'color_blind.ips', 'disable_screen_shake.ips', 'noflashing.ips'])
+                                 'color_blind.ips', 'disable_screen_shake.ips', 'noflashing.ips', 'better_reserves.ips'])
     parser.add_argument('--controls',
                         help="specify controls, comma-separated, in that order: Shoot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
                         dest='controls')

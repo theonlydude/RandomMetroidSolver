@@ -121,7 +121,7 @@ if __name__ == "__main__":
                                  'fast_doors.ips', 'elevators_speed.ips',
                                  'spinjumprestart.ips', 'rando_speed.ips', 'No_Music', 'AimAnyButton.ips',
                                  'max_ammo_display.ips', 'supermetroid_msu1.ips', 'Infinite_Space_Jump',
-                                 'refill_before_save.ips', 'relaxed_round_robin_cf.ips'])
+                                 'refill_before_save.ips', 'relaxed_round_robin_cf.ips', 'better_reserves.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -752,7 +752,8 @@ if __name__ == "__main__":
 
     try:
         if args.hud == True or args.majorsSplit == "FullWithHUD":
-            args.patches.append("varia_hud.ips")
+            # prepend varia_hud since it has to be applied before better_reserves comfort patch
+            args.patches = ["varia_hud.ips"] + args.patches
 
         patcherSettings = {
             "isPlando": False,

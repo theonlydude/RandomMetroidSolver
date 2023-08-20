@@ -26,6 +26,18 @@ for patch in dachora early_super_bridge high_jump moat spospo_save nova_boost_pl
     rm -f ${VARIA_PATCH} ${MIRROR_PATCH}
 done
 
+# special case for area_layout_crab_hole which is split in two
+patch=area_layout_crab_hole_lvl
+VARIA_PATCH=${patch}_${VANILLA}
+MIRROR_PATCH=${patch}_${MIRROR}
+cp ${VANILLA} ${VARIA_PATCH}
+cp ${MIRROR} ${MIRROR_PATCH}
+${PYTHON} tools/apply_ips.py patches/vanilla/ips/area_layout_crab_hole_plms_enemies.ips ${VARIA_PATCH} || die "patch special"
+${PYTHON} tools/apply_ips.py patches/mirror/ips/area_layout_crab_hole_plms_enemies.ips ${MIRROR_PATCH} || die "patch special"
+${PYTHON} tools/apply_ips.py patches/vanilla/ips/${patch}.ips ${VARIA_PATCH} || die "patch ${patch}"
+${PYTHON} tools/gen_mirror_layout.py ${VANILLA} ${MIRROR_PATCH} ${VARIA_PATCH} patches/mirror/ips ${patch} || die "mirror patch ${patch}"
+rm -f ${VARIA_PATCH} ${MIRROR_PATCH}
+
 # special case for area_layout_single_chamber which is applied on top of area_layout_ln_exit.ips
 patch=area_layout_single_chamber
 VARIA_PATCH=${patch}_${VANILLA}

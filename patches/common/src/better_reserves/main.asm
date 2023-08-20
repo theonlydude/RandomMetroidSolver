@@ -58,16 +58,31 @@ org $82AC52 : JSR CheckIfReservesSelected;HIJACK
 ;--------------------------------------
 ;Reserve tanks come full	
 org $848986
+full_rtank:
 ;Instruction - collect [[Y]] health reserve tank
 	LDA !SamusMaxReserveHealthRam
 	CLC : ADC $0000,y
 	STA !SamusMaxReserveHealthRam
 	STA !SamusReserveHealthRam      ;makes reserves come full
 	LDA !ReserveHealthMode : BNE + : INC !ReserveHealthMode
-+	LDA #$0168 : JSL $82E118
++
+        jmp .cont
+warnpc $8489A9
+
+org $848c22                     ; squeeze end of routine in tiny 84 free space
+.cont:
+        %hasVARIAhud() : bne .nohud
+.hud:
+        jsl varia_hud_item_post_collect
+        bra .end
+.nohud:
+        LDA #$0168 : JSL $82E118
+.end:
 	LDA #$0019 : JMP DisplayMsgAndReturn
 
-warnpc $8489AA
+print "84 freespace end: ", pc
+
+warnpc $848c46
 
 ;--------------------------------------
 ;Prevents heat damage while reserves are refilling, and prevents loss of invincibility frames too

@@ -1,8 +1,6 @@
 include
 
 ;;; Full Reserve Tank HUD Indicator By NoDever2 (https://metroidconstruction.com/resource.php?id=418)
-;;; 
-;;; * VARIA notes: added some code to adapt dynamically to VARIA HUD presence
 
 ;This code adds a new feature to the game where when reserve tanks are full on auto mode, the HUD icon
 ;turns pink (or more accurately, to the same color as full etanks).
@@ -13,12 +11,6 @@ include
 ;Thanks to PJBoy's bank logs as always. Also tilemap format is as follows:
 ;tilemap format is yxpPPPtttttttttt
 ;where PPP are the palette bits
-
-;;; z flag set if VARIA HUD patch is present
-macro hasVARIAhud()
-        ;; detect hijack
-        lda.l $809B8B : cmp #$0020 ; JSR opcode
-endmacro
 
 org $809B4E
 	LDA $09C0 : DEC : BNE BRANCH_NOT_AUTO_RESERVES ;small optimization of vanilla code

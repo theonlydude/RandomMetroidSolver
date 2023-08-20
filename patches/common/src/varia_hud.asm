@@ -61,15 +61,19 @@ incsrc "sym/seed_display.asm"
 ;;; hijack the start of health handling in the HUD to draw area or
 ;;; remaining items if necessary
 org $809B8B
+hijack:
+.health_draw:
 	JSR draw_info
 
 ;;; hijack load room state, to init remaining items counter
 org $82def7
+.load_room_state:
 	jml load_state
 
 ;;; yet another item pickup hijack, different from the ones in endingtotals and bomb_torizo
 ;;; this one is used to count remaining items in current area, and handle scavenger hunt
 org $848899
+.item_pickup:
 	jml item_pickup
 org $84889D
 item_resume_pickup:

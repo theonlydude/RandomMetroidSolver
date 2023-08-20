@@ -179,14 +179,17 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canExitCrabHole(self):
         sm = self.smbm
-        return sm.wand(sm.haveItem('Morph'), # morph to exit the hole
-                       sm.wor(sm.wand(sm.haveItem('Gravity'), # even with gravity you need some way to climb...
-                                      sm.wor(sm.haveItem('Ice'), # ...on crabs...
-                                             sm.wand(sm.haveItem('HiJump'), sm.knowsMaridiaWallJumps()), # ...or by jumping
-                                             sm.knowsGravityJump(),
-                                             sm.canFly())),
-                              sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia()), # climbing crabs
-                              sm.canDoubleSpringBallJump()))
+        return sm.wor(sm.wand(RomPatches.has(RomPatches.CrabHoleClimb),
+                              sm.wor(sm.haveItem('Gravity'),
+                                     sm.knowsGravLessLevel1())), # not really required but acts as skill barrier
+                      sm.wand(sm.haveItem('Morph'), # morph to exit the hole
+                              sm.wor(sm.wand(sm.haveItem('Gravity'), # even with gravity you need some way to climb...
+                                             sm.wor(sm.haveItem('Ice'), # ...on crabs...
+                                                    sm.wand(sm.haveItem('HiJump'), sm.knowsMaridiaWallJumps()), # ...or by jumping
+                                                    sm.knowsGravityJump(),
+                                                    sm.canFly())),
+                                     sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia()), # climbing crabs
+                                     sm.canDoubleSpringBallJump())))
 
     # bottom sandpits with the evirs except west sand hall left to right
     @Cache.decorator

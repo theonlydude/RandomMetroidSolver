@@ -65,6 +65,8 @@ class RomPatches:
     MaridiaSandWarp           = 108
     # Replace PB blocks at Aqueduct entrance with bomb blocks
     AqueductBombBlocks        = 109
+    # climb back up crab hole without items
+    CrabHoleClimb             = 110
     ## Minimizer Patches
     NoGadoras                 = 200
     TourianSpeedup            = 201
@@ -113,7 +115,8 @@ class RomPatches:
     AreaBaseSet = [ SingleChamberNoCrumble, AreaRandoGatesBase,
                     AreaRandoBlueDoors, AreaRandoMoreBlueDoors,
                     CrocBlueDoors, CrabShaftBlueDoor, MaridiaSandWarp ]
-    AreaComfortSet = [ AreaRandoGatesOther, SpongeBathBlueDoor, EastOceanPlatforms, AqueductBombBlocks ]
+    AreaComfortSet = [ AreaRandoGatesOther, SpongeBathBlueDoor, EastOceanPlatforms,
+                       AqueductBombBlocks, CrabHoleClimb ]
     AreaSet = AreaBaseSet + AreaComfortSet
 
     # VARIA specific patch set

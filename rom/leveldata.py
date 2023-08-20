@@ -596,7 +596,7 @@ class Room(object):
             if state.levelDataPtr in self.levelData:
                 continue
             print("level data set: {}".format(hex(state.levelDataPtr)))
-            self.levelData[state.levelDataPtr] = LevelData(self.rom, state.levelDataPtr, (self.width, self.height))
+            self.levelData[state.levelDataPtr] = LevelData(self.rom, state.levelDataPtr, (self.width, self.height), self.plms)
 
     def loadScrolls(self):
         self.scrolls = {}
@@ -1168,12 +1168,13 @@ class Scroll(object):
             self.screens = transScreens
 
 class LevelData(object):
-    def __init__(self, rom, dataAddr, size):
+    def __init__(self, rom, dataAddr, size, plms=None):
         self.log = utils.log.get('LevelData')
         self.rom = rom
         self.dataAddr = dataAddr
         # [width, height] in screens
         self.size = size
+        self.plms = plms
         self.screenCount = 0
 
         self.layer1 = []
@@ -1541,3 +1542,35 @@ class LevelData(object):
             self.bts = transBts
             if self.layer2Size != 0:
                 self.layer2 = transLayer2
+
+        self.updateScrollBts(transformation)
+
+    def updateScrollBts(self, transformation):
+        if self.plms is not None:
+            scrollPlmId = 0xb703
+            # look for scroll plms to update bts around them
+            for plmSet, plms in self.plms.items():
+                for plm in plms:
+                    if plm.plmId == scrollPlmId:
+                        if transformation == Transform.Mirror:
+                            screen = (plm.Xpos // 16, plm.Ypos // 16)
+                            x = plm.Xpos % 16
+                            y = plm.Ypos % 16
+
+                            # look for scroll bts on the right of the plm, only in same screen
+                            for i in range(1, 16 - x - 1):
+                                addr = self.getTileAddr(screen, x+i, y)
+                                # bts x pos has been mirrored, so it's from 01 to ff and we want it from ff to 01
+                                if self.bts[addr] == i:
+                                    print("*** update bts of the right {}".format(i))
+                                    self.bts[addr] = 0x100 - i
+                                else:
+                                    break
+
+                            for i in range(1, x + 1):
+                                addr = self.getTileAddr(screen, x-i, y)
+                                if self.bts[addr] == 0x100 - i:
+                                    print("*** update bts of the left -{}".format(i))
+                                    self.bts[addr] = i
+                                else:
+                                    break

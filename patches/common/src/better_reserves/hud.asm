@@ -2,9 +2,7 @@ include
 
 ;;; Full Reserve Tank HUD Indicator By NoDever2 (https://metroidconstruction.com/resource.php?id=418)
 ;;; 
-;;; * VARIA notes:
-;;; Used compatibility version, with code commented out/modified for VARIA HUD compatibilty.
-;;; Modifications for full HUD in better_reserves_full_hud patch.
+;;; * VARIA notes: added some code to adapt dynamically to VARIA HUD presence
 
 ;This code adds a new feature to the game where when reserve tanks are full on auto mode, the HUD icon
 ;turns pink (or more accurately, to the same color as full etanks).
@@ -15,6 +13,12 @@ include
 ;Thanks to PJBoy's bank logs as always. Also tilemap format is as follows:
 ;tilemap format is yxpPPPtttttttttt
 ;where PPP are the palette bits
+
+;;; z flag set if VARIA HUD patch is present
+macro hasVARIAhud()
+        ;; detect hijack
+        lda.l $809B8B : cmp #$0020 ; JSR opcode
+endmacro
 
 org $809B4E
 	LDA $09C0 : DEC : BNE BRANCH_NOT_AUTO_RESERVES ;small optimization of vanilla code
@@ -34,7 +38,7 @@ HandleAutoReserveTilemap:
 	LDA #$0400 ; Reserves are full, display pink icon.
 +	STA $14 : LDA #$0000 : TAY : TAX
 .write
-	JSL WriteTilemap_half
+	JSL WriteTilemap
 	BRA BRANCH_NOT_AUTO_RESERVES
 
 ; Empty Auto Reserve Tilemap
@@ -51,39 +55,44 @@ warnpc $809B8C
 org $809B8B ; vanilla branch destination
 BRANCH_NOT_AUTO_RESERVES:	
 
-org $81fad0
+org $81fb80
+
+macro nextRowX()
+        TXA : CLC : ADC #$003C : TAX
+endmacro
 
 WriteTilemap:
 ;print "freespace usage start: ", pc ; DEBUG
 	; Y is index into reserve tilemap in ROM to transfer
 	; X is index into reserve tilemap destination in RAM
+        %hasVARIAhud() : bne .full
+        ;; set up half draw: X+=$40, Y+=4
+        iny #4
+        txa : clc : adc #$0040 : tax
+        bra .half
 .full:
 	JSL TransferNextVal					; stores to 7EC618
 	JSL TransferNextVal					; stores to 7EC61A
-	JSL NextRowX
+        %nextRowX()
 .half:
 	JSL TransferNextVal					; stores to 7EC658
 	JSL TransferNextVal					; stores to 7EC65A
-	JSL NextRowX
+        %nextRowX()
 	JSL TransferNextVal					; stores to 7EC698
 	JSL TransferNextVal					; stores to 7EC69A
 	RTL
 
-warnpc $81faff
+warnpc $81fbff
 ;print "freespace usage end:   ", pc ; DEBUG
 
 org $80998B ; overwrite now-unused vanilla reserve HUD tilemaps
             ; Transfers one word from ROM,y to RAM,x.
             ; This is where the XOR operation happens.
 TransferNextVal: ; Also increments X and Y
-	LDA Data_half,y : EOR $14
+	LDA Data,y : EOR $14
 .store:
-        STA $7EC658,x
+        STA $7EC618,x
 	INY : INY : INX : INX : RTL
-
-; Adjust X (register) for writing to next vertical line on HUD
-NextRowX:
-	TXA : CLC : ADC #$003C : TAX : RTL
 
 ;print "auto reserve tilemap overwrite end: ", pc, " (vanilla data resumes at $8099A3)" ; DEBUG
 warnpc $8099A4

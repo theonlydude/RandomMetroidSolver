@@ -145,6 +145,59 @@ class RomPatches:
         from graph.graph_utils import GraphUtils
         RomPatches.ActivePatches = [RomPatches.RedTowerBlueDoors] + RomPatches.TotalLayout + GraphUtils.getGraphPatches(startLocation) + [RomPatches.NoGravityEnvProtection]
 
+_layoutIPS = ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
+              'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'climb_supers.ips',
+              'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips']
+
+_layoutArea = [
+    # remove maridia red fish exit green gate (move plm in room A322: Caterpillar Room - flavor)
+    'area_rando_gate_caterpillar.ips',
+    # remove maridia tube exit green gate (move plm in room CF80: East Tunnel - common)
+    'area_rando_gate_east_tunnel.ips',
+    # remove lower norfair exit crumble blocks (change layout in room AD5E: Single Chamber - flavor)
+    'area_layout_ln_exit.ips',
+    # additionnal save at crab shaft (change layout in room D1A3: Crab Shaft - flavor)
+    'crab_shaft.ips',
+    'Save_Crab_Shaft',
+    # additionnal save at main street
+    'Save_Main_Street',
+    # make incompatible door transitions work
+    'door_transition.ips',
+    # east maridia looping doors (common)
+    'area_rando_doors.ips',
+    # change door connection in bank 83 (room D461: West Sand Hall - flavor)
+    'area_door_west_sand_hall.ips',
+    # change layout (room D6FD: Sand falls sand pit - flavor)
+    'area_rando_warp_door.ips'
+]
+
+_layoutAreaComfort = [
+    # remove crab geen gate in maridia (move plm in room D08A: Crab Tunnel - common)
+    'area_rando_gate_crab_tunnel.ips',
+    # update ceiling on top on the gate (change layout in room D08A: Crab Tunnel - flavor)
+    'area_layout_crabe_tunnel.ips',
+    # remove blue gate in green hill zone (move plm in room 9E52: Green Hill Zone - flavor)
+    'area_rando_gate_greenhillzone.ips',
+    # access transition door in green hill zone (change layout in room 9E52: Green Hill Zone - flavor)
+    'area_layout_greenhillzone.ips',
+    # set sponge bath door to blue in wreckedship
+    'Sponge_Bath_Blinking_Door',
+    # add platforms to traverse forgotten hiway both ways (change layout in room 94FD: east ocean - flavor)
+    'east_ocean.ips',
+    # aqueduct entrance pb blocks changed to bomb blocks (change layout in room D5A7: aqueduct - flavor)
+    'aqueduct_bomb_blocks.ips',
+    # reveal opening to portal (change layout in room CF80: east tunnel - flavor)
+    'area_layout_east_tunnel.ips',
+    # reveal opening to portal (change layout in room A322: Caterpillar Room - flavor)
+    'area_layout_caterpillar.ips',
+    # reveal opening to portal (change layout in room AD5E: Single Chamber - flavor)
+    # to be applied on top of patch area_layout_ln_exit.ips
+    'area_layout_single_chamber.ips',
+    # make it possible to climb back up crab hole with no items
+    'area_layout_crab_hole_lvl.ips',
+    'area_layout_crab_hole_plms_enemies.ips'
+]
+
 # Patches definition tables: 'common' + a table for each flavor
 # each table has patch names associated to entries as follows:
 # 'desc': patch description
@@ -257,71 +310,20 @@ definitions = {
         'layout': {
             'address': snes_to_pc(0xc3bd80), 'value': 0xD5,
             'desc': "Anti soft lock layout modifications",
-            'ips': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
-                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'climb_supers.ips',
-                    'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips'],
+            'ips': _layoutIPS,
             'logic': RomPatches.TotalLayout
         },
         'area': {
             'address': snes_to_pc(0x8f88a0), 'value': 0x2B,
             'desc': "Area layout modifications",
-            'ips': [
-                # remove maridia red fish exit green gate (move plm in room A322: Caterpillar Room - flavor)
-                'area_rando_gate_caterpillar.ips',
-                # remove maridia tube exit green gate (move plm in room CF80: East Tunnel - common)
-                'area_rando_gate_east_tunnel.ips',
-                # remove lower norfair exit crumble blocks (change layout in room AD5E: Single Chamber - flavor)
-                'area_layout_ln_exit.ips',
-                # additionnal save at crab shaft (change layout in room D1A3: Crab Shaft - flavor)
-                'crab_shaft.ips',
-                'Save_Crab_Shaft',
-                # additionnal save at main street
-                'Save_Main_Street',
-                # make incompatible door transitions work
-                'door_transition.ips',
-                # east maridia looping doors (common)
-                'area_rando_doors.ips',
-                # change door connection in bank 83 (room D461: West Sand Hall - flavor)
-                'area_door_west_sand_hall.ips',
-                # change layout (room D6FD: Sand falls sand pit - flavor)
-                'area_rando_warp_door.ips'
-            ],
+            'ips': _layoutArea,
             'logic': RomPatches.AreaBaseSet
         },
         'areaLayout': {
             'address': snes_to_pc(0xcaafa7), 'value': 0xF8,
             'desc': "Area layout additional modifications",
-            'ips': [
-                # remove crab geen gate in maridia (move plm in room D08A: Crab Tunnel - common)
-                'area_rando_gate_crab_tunnel.ips',
-                # update ceiling on top on the gate (change layout in room D08A: Crab Tunnel - flavor)
-                'area_layout_crabe_tunnel.ips',
-                # remove blue gate in green hill zone (move plm in room 9E52: Green Hill Zone - flavor)
-                'area_rando_gate_greenhillzone.ips',
-                # access transition door in green hill zone (change layout in room 9E52: Green Hill Zone - flavor)
-                'area_layout_greenhillzone.ips',
-                # set sponge bath door to blue in wreckedship
-                'Sponge_Bath_Blinking_Door',
-                # add platforms to traverse forgotten hiway both ways (change layout in room 94FD: east ocean - flavor)
-                'east_ocean.ips',
-                # aqueduct entrance pb blocks changed to bomb blocks (change layout in room D5A7: aqueduct - flavor)
-                'aqueduct_bomb_blocks.ips',
-                # reveal opening to portal (change layout in room CF80: east tunnel - flavor)
-                'area_layout_east_tunnel.ips',
-                # reveal opening to portal (change layout in room A322: Caterpillar Room - flavor)
-                'area_layout_caterpillar.ips',
-                # reveal opening to portal (change layout in room AD5E: Single Chamber - flavor)
-                # to be applied on top of patch area_layout_ln_exit.ips
-                'area_layout_single_chamber.ips',
-                # make it possible to climb back up crab hole with no items
-                'area_layout_crab_hole_lvl.ips',
-                'area_layout_crab_hole_plms_enemies.ips'
-            ],
-            'logic': [RomPatches.AreaRandoGatesOther,
-                      RomPatches.EastOceanPlatforms,
-                      RomPatches.AqueductBombBlocks,
-                      RomPatches.CrabHoleClimb,
-                      RomPatches.SpongeBathBlueDoor]
+            'ips': _layoutAreaComfort,
+            'logic': RomPatches.AreaComfortSet
         },
         'traverseWreckedShip': {
             'address': snes_to_pc(0xc39dbf), 'value': 0xFB,
@@ -340,72 +342,21 @@ definitions = {
         'layout': {
             'address': snes_to_pc(0xc3bd80),
             'value': 0x32, 'desc': "Anti soft lock layout modifications",
-            'ips': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
-                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'climb_supers.ips',
-                    'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips'],
+            'ips': _layoutIPS,
             'logic': RomPatches.TotalLayout
         },
         'area': {
             'address': snes_to_pc(0x8f88a0), 'value': 0x04,
             'desc': "Area layout modifications",
-            'ips': [
-                # remove maridia red fish exit green gate (move plm in room A322: Caterpillar Room - flavor)
-                'area_rando_gate_caterpillar.ips',
-                # remove maridia tube exit green gate (move plm in room CF80: East Tunnel - common)
-                'area_rando_gate_east_tunnel.ips',
-                # remove lower norfair exit crumble blocks (change layout in room AD5E: Single Chamber - flavor)
-                'area_layout_ln_exit.ips',
-                # additionnal save at crab shaft (change layout in room D1A3: Crab Shaft - flavor)
-                'crab_shaft.ips',
-                'Save_Crab_Shaft',
-                # additionnal save at main street
-                'Save_Main_Street',
-                # make incompatible door transitions work
-                'door_transition.ips',
-                # east maridia looping doors (common)
-                'area_rando_doors.ips',
-                # change door connection in bank 83 (room D461: West Sand Hall - flavor)
-                'area_door_west_sand_hall.ips',
-                # change layout (room D6FD: Sand falls sand pit - flavor)
-                'area_rando_warp_door.ips'
-            ],
+            'ips': _layoutArea,
             'logic': RomPatches.AreaBaseSet
         },
         'areaLayout': {
             'address': snes_to_pc(0xcaafa7),
             'value': 0x03,
             'desc': "Area layout additional modifications",
-            'ips': [
-                # remove crab geen gate in maridia (move plm in room D08A: Crab Tunnel - common)
-                'area_rando_gate_crab_tunnel.ips',
-                # update ceiling on top on the gate (change layout in room D08A: Crab Tunnel - flavor)
-                'area_layout_crabe_tunnel.ips',
-                # remove blue gate in green hill zone (move plm in room 9E52: Green Hill Zone - flavor)
-                'area_rando_gate_greenhillzone.ips',
-                # access transition door in green hill zone (change layout in room 9E52: Green Hill Zone - flavor)
-                'area_layout_greenhillzone.ips',
-                # set sponge bath door to blue in wreckedship
-                'Sponge_Bath_Blinking_Door',
-                # add platforms to traverse forgotten hiway both ways (change layout in room 94FD: east ocean - flavor)
-                'east_ocean.ips',
-                # aqueduct entrance pb blocks changed to bomb blocks (change layout in room D5A7: aqueduct - flavor)
-                'aqueduct_bomb_blocks.ips',
-                # reveal opening to portal (change layout in room CF80: east tunnel - flavor)
-                'area_layout_east_tunnel.ips',
-                # reveal opening to portal (change layout in room A322: Caterpillar Room - flavor)
-                'area_layout_caterpillar.ips',
-                # reveal opening to portal (change layout in room AD5E: Single Chamber - flavor)
-                # to be applied on top of patch area_layout_ln_exit.ips
-                'area_layout_single_chamber.ips',
-                # make it possible to climb back up crab hole with no items
-                'area_layout_crab_hole_lvl.ips',
-                'area_layout_crab_hole_plms_enemies.ips'
-            ],
-            'logic': [RomPatches.AreaRandoGatesOther,
-                      RomPatches.EastOceanPlatforms,
-                      RomPatches.AqueductBombBlocks,
-                      RomPatches.CrabHoleClimb,
-                      RomPatches.SpongeBathBlueDoor]
+            'ips': _layoutAreaComfort,
+            'logic': RomPatches.AreaComfortSet
         },
         'traverseWreckedShip': {
             'address': snes_to_pc(0xc39df6), 'value': 0x84,

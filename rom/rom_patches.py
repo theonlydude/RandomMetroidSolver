@@ -145,11 +145,72 @@ class RomPatches:
         from graph.graph_utils import GraphUtils
         RomPatches.ActivePatches = [RomPatches.RedTowerBlueDoors] + RomPatches.TotalLayout + GraphUtils.getGraphPatches(startLocation) + [RomPatches.NoGravityEnvProtection]
 
-_layoutIPS = ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
-              'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'climb_supers.ips',
-              'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips']
+_baseIPS = [
+    # common utility routines
+    'utils.ips',
+    # MFreak map patch, tweaked for VARIA
+    'map.ips',
+    # game map
+    'map_data.ips',
+    # game map palettes for graph areas
+    'map_data_area.ips',
+    # boot, save files and backup management, stats infrastructure
+    'base.ips',
+    # quick reset hook
+    'reset.ips',
+    # handles starting location and start blue doors
+    'start.ips',
+    # generic PLM spawner used for extra saves, blinking doors etc.
+    'plm_spawn.ips',
+    # needed fixes for VARIA
+    'vanilla_bugfixes.ips',
+    # use a byte in a unused room state header field to store area ID in the VARIA sense
+    'area_ids.ips',
+    # custom credits
+    'credits.ips',
+    # actual game hijacks to update tracking stats
+    'stats.ips',
+    # enemy names in menu for seed ID
+    'seed_display.ips',
+    # door ASM to wake zebes early in blue brinstar
+    'wake_zebes.ips',
+    # use any button for angle up/down
+    'AimAnyButton.ips',
+    # credits item% based on actual number of items in the game
+    'endingtotals.ips',
+    # MSU-1 patch
+    'supermetroid_msu1.ips',
+    # displays max ammo 
+    'max_ammo_display.ips',
+    # VARIA logo on startup screen
+    'varia_logo.ips',
+    # new nothing plm
+    'nothing_item_plm.ips',
+    # objectives management and display
+    'objectives.ips',
+    # objectives ROM options
+    'objectives_options.ips',
+    # display collected items percentage and RTA time in pause inventory menu
+    'equipment_screen.ips',
+    # always disable demos as it causes crashes in area, hud and mirrortroid
+    'no_demo.ips'
+]
+
+_layoutIPS = [
+    # new PLMs for indicating the color of the door on the other side
+    'door_indicators_plms.ips',
+    # layout patches
+    'dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
+    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'climb_supers.ips',
+    'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips'
+]
 
 _layoutArea = [
+    "WS_Main_Open_Grey", "WS_Save_Active",
+    # make incompatible door transitions work
+    'door_transition.ips',
+    # east maridia looping doors (common)
+    'area_rando_doors.ips',
     # remove maridia red fish exit green gate (move plm in room A322: Caterpillar Room - flavor)
     'area_rando_gate_caterpillar.ips',
     # remove maridia tube exit green gate (move plm in room CF80: East Tunnel - common)
@@ -161,10 +222,6 @@ _layoutArea = [
     'Save_Crab_Shaft',
     # additionnal save at main street
     'Save_Main_Street',
-    # make incompatible door transitions work
-    'door_transition.ips',
-    # east maridia looping doors (common)
-    'area_rando_doors.ips',
     # change door connection in bank 83 (room D461: West Sand Hall - flavor)
     'area_door_west_sand_hall.ips',
     # change layout (room D6FD: Sand falls sand pit - flavor)
@@ -249,15 +306,26 @@ definitions = {
                     'ln_chozo_platform.ips', 'bomb_torizo.ips'],
             'logic': RomPatches.VariaTweaks
         },
+        'boss': {
+            # TODO? addr/value?
+            'desc': "Bosses randomization",
+            'ips': [
+                'door_transition.ips',
+                'Phantoon_Eye_Door',
+                "WS_Main_Open_Grey",
+                "WS_Save_Active"
+            ]
+        },
         'areaEscape': {
             'address': snes_to_pc(0x848c91), 'value': 0x4C,
             'desc': "Area escape randomization",
             'ips': ['rando_escape_common.ips', 'rando_escape.ips',
                     'rando_escape_ws_fix.ips', 'door_transition.ips']
         },
-        'newGame': {
+        'base': {
             'address': snes_to_pc(0x82801d), 'value': 0x22,
-            'desc': "Custom new game",
+            'desc': "VARIA base patches",
+            'ips': _baseIPS,
             'logic': [RomPatches.RedTowerBlueDoors]
         },
         'nerfedRainbowBeam': {
@@ -272,21 +340,16 @@ definitions = {
             'ips': ['minimizer_bosses.ips'],
             'logic': [RomPatches.NoGadoras]
         },
-        'minimizer_tourian': {
+        'fast_tourian': {
             'address': snes_to_pc(0xa9b90e), 'value': 0xCF,
             'desc': "Fast Tourian",
             'ips': ['minimizer_tourian_common.ips', 'minimizer_tourian.ips', 'open_zebetites.ips'],
             'logic': [RomPatches.TourianSpeedup, RomPatches.OpenZebetites]
         },
-        'beam_doors': {
+        'doorsColorsRando': {
             'address': snes_to_pc(0x84a6e5), 'value': 0x0D,
-            'desc': "Beam doors",
-            'ips': ['beam_doors_plms.ips', 'beam_doors_gfx.ips']
-        },
-        'red_doors': {
-            'address': snes_to_pc(0x84c32c), 'value':0x01,
-            'desc': "Red doors open with one Missile and do not react to Super",
-            'ips': ['red_doors.ips'],
+            'desc': "Door color rando",
+            'ips': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips'],
             'logic': [RomPatches.RedDoorsMissileOnly]
         },
         'objectives': {
@@ -304,9 +367,22 @@ definitions = {
             'address': snes_to_pc(0x8FE893), 'value': 0x20,
             'desc': "Map revealed from the start",
             'ips': ['reveal_map.ips', 'reveal_map_data.ips']
+        },
+        'hud': {
+            'address': snes_to_pc(0x809B8B), 'value': 0x20,
+            'desc': "VARIA HUD",
+            'ips': ['varia_hud.ips']
+        },
+        'debug': {
+            'address': snes_to_pc(0xb5ffed), 'value': 0x0,
+            'desc': "Debug Hack",
+            'ips': ['Debug_Full.ips']
         }
     },
     'vanilla': {
+        'logic': {
+            'ips': []
+        },
         'layout': {
             'address': snes_to_pc(0xc3bd80), 'value': 0xD5,
             'desc': "Anti soft lock layout modifications",
@@ -339,6 +415,15 @@ definitions = {
         }
     },
     'mirror': {
+        'logic': {
+            'address': snes_to_pc(0x84d650), 'value': 0x29,
+            'desc': "MirrorTroid hack",
+            'ips': ['mirrortroid.ips', 'bank_8f.ips', 'bank_83.ips', 'map_icon_data.ips',
+                    'baby_room.ips', 'baby_remove_blocks.ips', 'escape_animals.ips',
+                    'snails.ips', 'boulders.ips', 'rinkas.ips', 'etecoons.ips', 'crab_main_street.ips',
+                    'crab_mt_everest.ips', 'mother_brain.ips', 'kraid.ips', 'torizos.ips', 'botwoon.ips',
+                    'crocomire.ips', 'ridley.ips', 'ws_treadmill.ips']
+        },
         'layout': {
             'address': snes_to_pc(0xc3bd80),
             'value': 0x32, 'desc': "Anti soft lock layout modifications",
@@ -372,3 +457,12 @@ definitions = {
         }
     }
 }
+
+def getPatchSet(setName, flavor=None):
+    if setName in definitions['common']:
+        patchSet = definitions['common'][setName]
+    elif flavor is not None and setName in definitions[flavor]:
+        patchSet = definitions[flavor][setName]
+    else:
+        raise ValueError(f"Invalid patch set {setName}")
+    return patchSet

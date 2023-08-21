@@ -56,7 +56,7 @@ class RomLoader(object):
         isEscape = self.hasPatch("areaEscape")
         # Tourian
         tourian = 'Vanilla'
-        if self.hasPatch("minimizer_tourian"):
+        if self.hasPatch("fast_tourian"):
             tourian = 'Fast'
         if self.isEscapeTrigger():
             RomPatches.ActivePatches.append(RomPatches.NoTourian)

@@ -92,7 +92,7 @@ class RomReader:
     patches = patches_definitions
 
     flavorPatches = {
-        'mirror': {'address': snes_to_pc(0x84d650), 'value': 0x29, 'desc': "MirrorTroid hack"}
+        'mirror': patches_definitions["mirror"]["logic"]
     }
 
     # FIXME use symbols/names addresses here?

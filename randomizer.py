@@ -751,10 +751,6 @@ if __name__ == "__main__":
             db.DB.dumpExtStatsItems(skillPreset, randoPreset, locsItems, extStatsFile)
 
     try:
-        if args.hud == True or args.majorsSplit == "FullWithHUD":
-            # prepend varia_hud since it has to be applied before better_reserves comfort patch
-            args.patches = ["varia_hud.ips"] + args.patches
-
         patcherSettings = {
             "isPlando": False,
             "majorsSplit": args.majorsSplit,
@@ -783,6 +779,7 @@ if __name__ == "__main__":
             "itemLocs": itemLocs,
             "progItemLocs": progItemLocs,
             "revealMap": args.revealMap,
+            "hud": args.hud == True or args.majorsSplit == "FullWithHUD",
             "debug": args.debug
         }
 

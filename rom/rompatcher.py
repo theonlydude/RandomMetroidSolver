@@ -12,7 +12,7 @@ from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas, gameAreas
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
 from rom.addresses import Addresses
-from rom.rom_patches import RomPatches
+from rom.rom_patches import RomPatches, getPatchSet
 from rom.rom_options import RomOptions
 from rom.flavor import RomFlavor
 from rom.map import AreaMap, getTileIndex, portal_mapicons
@@ -25,143 +25,6 @@ def getWord(w):
     return (w & 0x00FF, (w & 0xFF00) >> 8)
 
 class RomPatcher:
-    # possible patches. see patches asm source if applicable and available for more information
-    IPSPatches = {
-        # applied on all seeds
-        'Standard': [
-            # common utility routines
-            'utils.ips',
-            # MFreak map patch, tweaked for VARIA
-            'map.ips',
-            # game map
-            'map_data.ips',
-            # game map palettes for graph areas
-            'map_data_area.ips',
-            # boot, save files and backup management, stats infrastructure
-            'base.ips',
-            # quick reset hook
-            'reset.ips',
-            # handles starting location and start blue doors
-            'start.ips',
-            # generic PLM spawner used for extra saves, blinking doors etc.
-            'plm_spawn.ips',
-            # needed fixes for VARIA
-            'vanilla_bugfixes.ips',
-            # use a byte in a unused room state header field to store area ID in the VARIA sense
-            'area_ids.ips',
-            # custom credits
-            'credits.ips',
-            # actual game hijacks to update tracking stats
-            'stats.ips',
-            # enemy names in menu for seed ID
-            'seed_display.ips',
-            # door ASM to wake zebes early in blue brinstar
-            'wake_zebes.ips',
-            # "Balanced" suit mode
-            'Removes_Gravity_Suit_heat_protection',
-            # use any button for angle up/down
-            'AimAnyButton.ips',
-            # credits item% based on actual number of items in the game
-            'endingtotals.ips',
-            # MSU-1 patch
-            'supermetroid_msu1.ips',
-            # displays max ammo 
-            'max_ammo_display.ips',
-            # VARIA logo on startup screen
-            'varia_logo.ips',
-            # new nothing plm
-            'nothing_item_plm.ips',
-            # objectives management and display
-            'objectives.ips',
-            # objectives ROM options
-            'objectives_options.ips',
-            # display collected items percentage and RTA time in pause inventory menu
-            'equipment_screen.ips',
-            # new PLMs for indicating the color of the door on the other side
-            'door_indicators_plms.ips',
-            # always disable demos as it causes crashes in area, hud and mirrortroid
-            'no_demo.ips'
-        ],
-        # VARIA tweaks
-        'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable',
-                         'ln_chozo_platform.ips', 'bomb_torizo.ips'],
-        # anti-softlock/game opening layout patches
-        'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
-                   'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'climb_supers.ips',
-                   'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips'],
-        # base patchset for area rando
-        'AreaBaseSet': [
-            # remove maridia red fish exit green gate (move plm in room A322: Caterpillar Room - flavor)
-            'area_rando_gate_caterpillar.ips',
-            # remove maridia tube exit green gate (move plm in room CF80: East Tunnel - common)
-            'area_rando_gate_east_tunnel.ips',
-            # remove lower norfair exit crumble blocks (change layout in room AD5E: Single Chamber - flavor)
-            'area_layout_ln_exit.ips',
-            # additionnal save at crab shaft (change layout in room D1A3: Crab Shaft - flavor)
-            'crab_shaft.ips',
-            'Save_Crab_Shaft',
-            # additionnal save at main street
-            'Save_Main_Street',
-            # make incompatible door transitions work
-            'door_transition.ips',
-            # east maridia looping doors (common)
-            'area_rando_doors.ips',
-            # change door connection in bank 83 (room D461: West Sand Hall - flavor)
-            'area_door_west_sand_hall.ips',
-            # change layout (room D6FD: Sand falls sand pit - flavor)
-            'area_rando_warp_door.ips'
-        ],
-        # optional layout for area rando
-        'AreaComfortSet': [
-            # remove crab geen gate in maridia (move plm in room D08A: Crab Tunnel - common)
-            'area_rando_gate_crab_tunnel.ips',
-            # update ceiling on top on the gate (change layout in room D08A: Crab Tunnel - flavor)
-            'area_layout_crabe_tunnel.ips',
-            # remove blue gate in green hill zone (move plm in room 9E52: Green Hill Zone - flavor)
-            'area_rando_gate_greenhillzone.ips',
-            # access transition door in green hill zone (change layout in room 9E52: Green Hill Zone - flavor)
-            'area_layout_greenhillzone.ips',
-            # set sponge bath door to blue in wreckedship
-            'Sponge_Bath_Blinking_Door',
-            # add platforms to traverse forgotten hiway both ways (change layout in room 94FD: east ocean - flavor)
-            'east_ocean.ips',
-            # aqueduct entrance pb blocks changed to bomb blocks (change layout in room D5A7: aqueduct - flavor)
-            'aqueduct_bomb_blocks.ips',
-            # reveal opening to portal (change layout in room CF80: east tunnel - flavor)
-            'area_layout_east_tunnel.ips',
-            # reveal opening to portal (change layout in room A322: Caterpillar Room - flavor)
-            'area_layout_caterpillar.ips',
-            # reveal opening to portal (change layout in room AD5E: Single Chamber - flavor)
-            # to be applied on top of patch area_layout_ln_exit.ips
-            'area_layout_single_chamber.ips',
-            # make it possible to climb back up crab hole with no items
-            'area_layout_crab_hole_lvl.ips',
-            'area_layout_crab_hole_plms_enemies.ips'
-        ],
-        # patches for boss rando
-        'Bosses': ['door_transition.ips'],
-        # patches for escape rando
-        'Escape' : ['rando_escape_common.ips', 'rando_escape.ips',
-                    'rando_escape_ws_fix.ips', 'door_transition.ips'],
-        # patches for minimizer with fast Tourian
-        'MinimizerTourian': ['minimizer_tourian_common.ips', 'minimizer_tourian.ips', 'open_zebetites.ips'],
-        # patches for door color rando
-        'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips'],
-        # patches on top of map patch to always reveal the whole map
-        'MapReveal': ['reveal_map.ips', 'reveal_map_data.ips'],
-        # patches for each "logic" to convert vanilla ROM to "logic" base ROM
-        'Logic': {
-            "vanilla": [],
-            "mirror": ['mirrortroid.ips', 'bank_8f.ips', 'bank_83.ips', 'map_icon_data.ips',
-                       'baby_room.ips', 'baby_remove_blocks.ips', 'escape_animals.ips',
-                       'snails.ips', 'boulders.ips', 'rinkas.ips', 'etecoons.ips', 'crab_main_street.ips',
-                       'crab_mt_everest.ips', 'mother_brain.ips', 'kraid.ips', 'torizos.ips', 'botwoon.ips',
-                       'crocomire.ips', 'ridley.ips', 'ws_treadmill.ips']
-        },
-        # add debug tools
-        'Debug': ['Debug_Full.ips']
-    }
-
     def __init__(self, settings=None, romFileName=None, magic=None):
         self.log = utils.log.get('RomPatcher')
         self.settings = settings
@@ -466,98 +329,80 @@ class RomPatcher:
             for (messageKey, newMessage) in messageBoxes[sprite].items():
                 messageBox.updateMessage(messageKey, newMessage, doVFlip, doHFlip)
 
+    def getPatchSetsFromSettings(self):
+        patchSets = ["logic", "base"]
+        boolSettings = [
+            "layout",
+            "nerfedCharge",
+            "nerfedRainbowBeam",
+            "variaTweaks",
+            "area",
+            "areaLayout",
+            "boss",
+            "doorsColorsRando",
+            "hud",
+            "revealMap",
+            "debug"
+        ]
+        patchSets += [k for k in boolSettings if self.settings.get(k) == True]
+        if self.settings["suitsMode"] == "Balanced":
+            patchSets.append("gravityNoHeatProtection")
+        elif self.settings["suitsMode" ] == "Progressive":
+            patchSets.append("progressiveSuits")
+        if self.settings["escapeAttr"] is not None:
+            patchSets.append("areaEscape")
+        if self.settings["minimizerN"] is not None:
+            patchSets.append("minimizer_bosses")
+        if self.settings["tourian"] == "Fast":
+            patchSets.append("fast_tourian")
+        return patchSets
+
+    def applyPatchSet(self, patchSet):
+        ipsPatches = getPatchSet(patchSet, RomFlavor.flavor).get('ips', [])
+        for ips in ipsPatches:
+            self.applyIPSPatch(ips)
+
     def applyIPSPatches(self):
         try:
-            # apply standard patches
-            stdPatches = RomPatcher.IPSPatches['Logic'][Logic.implementation][:]
+            ## apply base patches, then special patches, PLMs and other modifications, then optional patches
             plms = []
-            stdPatches += RomPatcher.IPSPatches['Standard'][:]
-            if not self.settings["layout"]:
-                # when disabling anti softlock protection also disable doors indicators
-                stdPatches.remove('door_indicators_plms.ips')
+            patchSets = self.getPatchSetsFromSettings()
+            for patchSet in patchSets:
+                self.applyPatchSet(patchSet)
+            # special patches
             if self.race is not None:
-                stdPatches.append('race_mode_post.ips')
-            if self.settings["suitsMode"] != "Balanced":
-                stdPatches.remove('Removes_Gravity_Suit_heat_protection')
-            if self.settings["suitsMode"] == "Progressive":
-                stdPatches.append('progressive_suits.ips')
-            if self.settings["nerfedCharge"] == True:
-                stdPatches.append('nerfed_charge.ips')
-            if self.settings["nerfedRainbowBeam"] == True:
-                stdPatches.append('nerfed_rainbow_beam.ips')
-            if self.settings["boss"] == True or self.settings["area"] == True:
-                stdPatches += ["WS_Main_Open_Grey", "WS_Save_Active"]
-                plms.append('WS_Save_Blinking_Door')
-            if self.settings["boss"] == True:
-                stdPatches.append("Phantoon_Eye_Door")
-            for patchName in stdPatches:
-                self.applyIPSPatch(patchName)
+                self.applyIPSPatch('race_mode_post.ips')
             # show objectives and Tourian status in a shortened intro sequence
             # if not full vanilla objectives+tourian
             if not self.settings["vanillaObjectives"] or self.settings["tourian"] != "Vanilla":
                 self.applyIPSPatch("Restore_Intro") # important to apply this after start.ips
                 self.applyIPSPatch("intro_text.ips")
-            if self.settings["layout"]:
-                # apply layout patches
-                for patchName in RomPatcher.IPSPatches['Layout']:
-                    self.applyIPSPatch(patchName)
-            if self.settings["variaTweaks"]:
-                # VARIA tweaks
-                for patchName in RomPatcher.IPSPatches['VariaTweaks']:
-                    self.applyIPSPatch(patchName)
             if (self.settings["majorsSplit"] == 'Scavenger'
                 and any(il for il in self.settings["progItemLocs"] if il.Location.Name == "Ridley")):
                 # ridley as scav loc
                 self.applyIPSPatch("Blinking[RidleyRoomIn]")
-
             # random escape
             if self.settings["escapeAttr"] is not None:
-                for patchName in RomPatcher.IPSPatches['Escape']:
-                    self.applyIPSPatch(patchName)
                 # animals and timer
                 self.applyEscapeAttributes(self.settings["escapeAttr"], plms)
-
-            # map reveal
-            if self.settings['revealMap'] == True:
-                for patchName in RomPatcher.IPSPatches['MapReveal']:
-                    self.applyIPSPatch(patchName)
-
-            # apply area patches
-            if self.settings["area"] == True:
-                for patchName in RomPatcher.IPSPatches['AreaBaseSet']:
-                    self.applyIPSPatch(patchName)
-                if self.settings["areaLayout"]:
-                    for patchName in RomPatcher.IPSPatches['AreaComfortSet']:
-                        self.applyIPSPatch(patchName)
-            else:
+            # VARIA area modifications for vanilla layout
+            if self.settings["area"] == False:
                 self.applyIPSPatch('area_ids_alt.ips')
                 self.applyIPSPatch('map_data_area_alt.ips')
-            if self.settings["boss"] == True:
-                for patchName in RomPatcher.IPSPatches['Bosses']:
-                    self.applyIPSPatch(patchName)
-            if self.settings["minimizerN"] is not None:
-                self.applyIPSPatch('minimizer_bosses.ips')
-            if self.settings["tourian"] == "Fast":
-                for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
-                    self.applyIPSPatch(patchName)
+            # blue doors
             doors = self.getStartDoors(plms, self.settings["area"], self.settings["minimizerN"])
-            if self.settings["doorsColorsRando"] == True:
-                for patchName in RomPatcher.IPSPatches['DoorsColors']:
-                    self.applyIPSPatch(patchName)
             DoorsManager.getBlueDoors(doors)
+            # door indicators
             if self.settings["layout"]:
                 self.writeDoorIndicators(plms, self.settings["area"], self.settings["doorsColorsRando"])
+            # starting locations
             self.applyStartAP(self.settings["startLocation"], plms, doors)
+            # patch PLMs
             self.applyPLMs(plms)
 
             # apply optional patches
             for patchName in self.settings["optionalPatches"]:
                 self.applyIPSPatch(patchName)
-
-            # debug tools
-            if self.settings["debug"]:
-                for patchName in RomPatcher.IPSPatches['Debug']:
-                    self.applyIPSPatch(patchName)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 

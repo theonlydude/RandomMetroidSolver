@@ -676,7 +676,7 @@ class Objectives(object):
     def setGraph(graph, maxDiff):
         Objectives.graph = graph
         Objectives.maxDiff = maxDiff
-        for goalName, goal in Objectives.goals.items():
+        for goal in Objectives.goals.values():
             if goal.area is not None:
                 goal.escapeAccessPoints = getAreaEscapeAccessPoints(goal.area)
 
@@ -905,7 +905,7 @@ class Objectives(object):
         return nCompleted >= Objectives.nbRequiredGoals
 
     def getGoalFromCheckFunction(self, checkFunction):
-        for name, goal in Objectives.goals.items():
+        for goal in Objectives.goals.values():
             if goal.checkAddr == checkFunction:
                 return goal
         LOG.debug("Goal with check function {} not found".format(hex(checkFunction)))
@@ -979,9 +979,6 @@ class Objectives(object):
             "nbActiveGoals": Objectives.nbActiveGoals,
             "nbRequiredGoals": Objectives.nbRequiredGoals
         }
-
-    def getTotalItemsCount(self):
-        return Objectives.totalItemsCount
 
     def setState(self, state, tourianRequired):
         rank = 1

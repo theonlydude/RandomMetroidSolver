@@ -260,7 +260,7 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         if request.vars.objectiveRandom == 'true':
             nbObjective = request.vars.nbObjective
             if nbObjective.isdigit():
-                if not int(nbObjective) in range(19):
+                if int(nbObjective) not in range(19):
                     raiseHttp(400, "Number of objectives must be 0-18", isJson)
             elif nbObjective != "random":
                 raiseHttp(400, "Number of objectives must be 0-18 or \"random\"", isJson)

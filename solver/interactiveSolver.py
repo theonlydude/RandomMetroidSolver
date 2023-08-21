@@ -613,7 +613,7 @@ class InteractiveSolver(CommonSolver):
         # replace item at the old item spot in collectedItems
         try:
             index = next(i for i, vloc in enumerate(self.visitedLocations) if vloc.Name == loc.Name)
-        except Exception as e:
+        except:
             self.errorMsg = "Empty location {}".format(locName)
             return
 

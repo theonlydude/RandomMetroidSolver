@@ -686,6 +686,8 @@ if __name__ == "__main__":
     patchSets = [getPatchSet(patchSetName, RomFlavor.flavor) for patchSetName in getPatchSetsFromPatcherSettings(patcherSettings)]
     for patchSet in [p for p in patchSets if 'logic' in p]:
         RomPatches.ActivePatches += patchSet['logic']
+    # these are dynamic
+    RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startLocation)
 
     # print some parameters for jm's stats
     if args.jm == True or args.debug == True:

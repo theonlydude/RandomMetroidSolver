@@ -55,11 +55,10 @@ class WS(object):
         if self.session is None:
             raiseHttp(400, "No session found for the Tracker", True)
 
-        if self.vars.action == None:
+        if self.vars.action is None:
             raiseHttp(400, "Missing parameter action", True)
-        action = self.vars.action
 
-        if self.vars.escapeTimer != None:
+        if self.vars.escapeTimer is not None:
             if re.match("[0-9][0-9]:[0-9][0-9]", self.vars.escapeTimer) == None:
                 raiseHttp(400, "Wrong escape timer value")
 

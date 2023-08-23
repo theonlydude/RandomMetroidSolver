@@ -572,7 +572,6 @@ class Room(object):
 
             self.plms[state.plmSetPtr] = []
 
-            plmSize = 6
             self.rom.seek(snes_to_pc(state.plmSetPtr))
             plmId = 0
             for i in range(40):
@@ -666,7 +665,7 @@ class Room(object):
             state.write()
 
     def writeEnemies(self):
-        for enemySetPtr, enemies in self.enemies.items():
+        for enemies in self.enemies.values():
             for enemy in enemies:
                 enemy.write()
 

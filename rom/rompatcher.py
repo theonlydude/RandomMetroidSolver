@@ -12,7 +12,7 @@ from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas, gameAreas
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
 from rom.addresses import Addresses
-from rom.rom_patches import RomPatches, getPatchSet
+from rom.rom_patches import RomPatches, getPatchSet, getPatchSetsFromPatcherSettings
 from rom.rom_options import RomOptions
 from rom.flavor import RomFlavor
 from rom.map import AreaMap, getTileIndex, portal_mapicons
@@ -330,32 +330,7 @@ class RomPatcher:
                 messageBox.updateMessage(messageKey, newMessage, doVFlip, doHFlip)
 
     def getPatchSetsFromSettings(self):
-        patchSets = ["logic", "base"]
-        boolSettings = [
-            "layout",
-            "nerfedCharge",
-            "nerfedRainbowBeam",
-            "variaTweaks",
-            "area",
-            "areaLayout",
-            "boss",
-            "doorsColorsRando",
-            "hud",
-            "revealMap",
-            "debug"
-        ]
-        patchSets += [k for k in boolSettings if self.settings.get(k) == True]
-        if self.settings["suitsMode"] == "Balanced":
-            patchSets.append("gravityNoHeatProtection")
-        elif self.settings["suitsMode" ] == "Progressive":
-            patchSets.append("progressiveSuits")
-        if self.settings["escapeAttr"] is not None:
-            patchSets.append("areaEscape")
-        if self.settings["minimizerN"] is not None:
-            patchSets.append("minimizer_bosses")
-        if self.settings["tourian"] == "Fast":
-            patchSets.append("fast_tourian")
-        return patchSets
+        return getPatchSetsFromPatcherSettings(self.settings)
 
     def applyPatchSet(self, patchSet):
         ipsPatches = getPatchSet(patchSet, RomFlavor.flavor).get('ips', [])

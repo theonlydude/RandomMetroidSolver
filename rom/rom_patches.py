@@ -466,3 +466,32 @@ def getPatchSet(setName, flavor=None):
     else:
         raise ValueError(f"Invalid patch set {setName}")
     return patchSet
+
+def getPatchSetsFromPatcherSettings(patcherSettings):
+    patchSets = ["logic", "base"]
+    boolSettings = [
+        "layout",
+        "nerfedCharge",
+        "nerfedRainbowBeam",
+        "variaTweaks",
+        "area",
+        "areaLayout",
+        "boss",
+        "doorsColorsRando",
+        "hud",
+        "revealMap",
+        "round_robin_cf",
+        "debug"
+    ]
+    patchSets += [k for k in boolSettings if patcherSettings.get(k) == True]
+    if patcherSettings["suitsMode"] == "Balanced":
+        patchSets.append("gravityNoHeatProtection")
+    elif patcherSettings["suitsMode" ] == "Progressive":
+        patchSets.append("progressiveSuits")
+    if patcherSettings["escapeAttr"] is not None:
+        patchSets.append("areaEscape")
+    if patcherSettings["minimizerN"] is not None:
+        patchSets.append("minimizer_bosses")
+    if patcherSettings["tourian"] == "Fast":
+        patchSets.append("fast_tourian")
+    return patchSets

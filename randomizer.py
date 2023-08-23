@@ -582,9 +582,6 @@ if __name__ == "__main__":
                                   plandoRando["transitions"] if plandoSettings is not None else None)
 
     if plandoSettings is None:
-        DoorsManager.setDoorsColor()
-
-    if plandoSettings is None:
         objectivesManager = Objectives(args.tourian != 'Disabled', randoSettings)
         addedObjectives = 0
         if args.majorsSplit == "Scavenger":
@@ -689,6 +686,10 @@ if __name__ == "__main__":
     # these are dynamic
     RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startLocation)
 
+    # this operation needs logic patches
+    if plandoSettings is None:
+        DoorsManager.setDoorsColor()
+
     # print some parameters for jm's stats
     if args.jm == True or args.debug == True:
         print("logic:{}".format(args.logic))
@@ -703,6 +704,7 @@ if __name__ == "__main__":
         print("energyQty:{}".format(energyQty))
 
     try:
+        print("logic patches: "+str(sorted(RomPatches.ActivePatches)))
         randoExec = RandoExec(seedName, args.vcr, randoSettings, graphSettings)
         (stuck, itemLocs, progItemLocs) = randoExec.randomize()
         patcherSettings['itemLocs'], patcherSettings['progItemLocs'] = itemLocs, progItemLocs

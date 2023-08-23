@@ -332,10 +332,12 @@ class RomPatcher:
     def getPatchSetsFromSettings(self):
         return getPatchSetsFromPatcherSettings(self.settings)
 
-    def applyPatchSet(self, patchSet):
-        ipsPatches = getPatchSet(patchSet, RomFlavor.flavor).get('ips', [])
+    def applyPatchSet(self, patchSetName, plms):
+        patchSet = getPatchSet(patchSetName, RomFlavor.flavor)
+        ipsPatches = patchSet.get('ips', [])
         for ips in ipsPatches:
             self.applyIPSPatch(ips)
+        plms += patchSet.get('plms', [])
 
     def applyIPSPatches(self):
         try:
@@ -343,7 +345,7 @@ class RomPatcher:
             plms = []
             patchSets = self.getPatchSetsFromSettings()
             for patchSet in patchSets:
-                self.applyPatchSet(patchSet)
+                self.applyPatchSet(patchSet, plms)
             # special patches
             if self.race is not None:
                 self.applyIPSPatch('race_mode_post.ips')

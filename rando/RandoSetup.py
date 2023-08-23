@@ -114,8 +114,8 @@ class RandoSetup(object):
         return self.container
 
     def getRestrictionsDict(self):
-        itemTypes = {item.Type for item in self.container.itemPool if item.Category not in Restrictions.NoCheckCat}
-        allAreas = {loc.GraphArea for loc in self.locations}
+        itemTypes = sorted({item.Type for item in self.container.itemPool if item.Category not in Restrictions.NoCheckCat})
+        allAreas = sorted({loc.GraphArea for loc in self.locations})
         items = [self.container.getNextItemInPool(itemType) for itemType in itemTypes]
         restrictionDict = {}
         for area in allAreas:

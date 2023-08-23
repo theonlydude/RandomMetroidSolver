@@ -260,6 +260,7 @@ _layoutAreaComfort = [
 # 'desc': patch description
 # 'address'/'value': detection byte
 # 'ips': (optional) ROM patch list to apply
+# 'plms': (optional) dynamic PLMs to add
 # 'logic': (optional) logic patch list to apply
 definitions = {
     'common': {
@@ -314,7 +315,8 @@ definitions = {
                 'Phantoon_Eye_Door',
                 "WS_Main_Open_Grey",
                 "WS_Save_Active"
-            ]
+            ],
+            'plms': ["WS_Save_Blinking_Door"]
         },
         'areaEscape': {
             'address': snes_to_pc(0x848c91), 'value': 0x4C,
@@ -393,7 +395,8 @@ definitions = {
             'address': snes_to_pc(0x8f88a0), 'value': 0x2B,
             'desc': "Area layout modifications",
             'ips': _layoutArea,
-            'logic': RomPatches.AreaBaseSet
+            'logic': RomPatches.AreaBaseSet,
+            'plms': ["WS_Save_Blinking_Door"]
         },
         'areaLayout': {
             'address': snes_to_pc(0xcaafa7), 'value': 0xF8,

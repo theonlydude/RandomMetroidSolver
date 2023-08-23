@@ -358,6 +358,7 @@ if __name__ == "__main__":
     else:
         minDifficulty = 0
 
+    # minimizer
     if areaRandomization == True and args.bosses == True and args.minimizerN is not None:
         if args.minimizerN == "random":
             minimizerN = random.randint(30, 60)
@@ -370,22 +371,26 @@ if __name__ == "__main__":
         minimizerN = None
     logger.debug(f"majorsSplit: {args.majorsSplit}")
 
+    # door color rando
     doorsColorsRandom = False
     if args.doorsColorsRando == 'random':
         doorsColorsRandom = True
         args.doorsColorsRando = bool(random.getrandbits(1))
     logger.debug("doorsColorsRando: {}".format(args.doorsColorsRando))
 
+    # boss rando
     bossesRandom = False
     if args.bosses == 'random':
         bossesRandom = True
         args.bosses = bool(random.getrandbits(1))
     logger.debug("bosses: {}".format(args.bosses))
 
+    # escape rando
     if args.escapeRando == 'random':
         args.escapeRando = bool(random.getrandbits(1))
     logger.debug("escapeRando: {}".format(args.escapeRando))
 
+    # settings constraints
     if args.suitsRestriction != False and minimizerN is not None:
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
 
@@ -473,6 +478,8 @@ if __name__ == "__main__":
             scavNumLocs = random.randint(4,16)
         restrictions["ScavengerParams"] = {'numLocs':scavNumLocs, 'vanillaItems':not args.scavRandomized}
     restrictions["EscapeTrigger"] = args.tourian == 'Disabled'
+
+    # determine output file name
     seedCode = 'X'
     if majorsSplitRandom == False:
         if restrictions['MajorMinor'] == 'Full':
@@ -504,6 +511,8 @@ if __name__ == "__main__":
     seedName = fileName
     if args.directory != '.':
         fileName = args.directory + '/' + fileName
+
+    # settings processing
     missileQty = float(args.missileQty)
     superQty = float(args.superQty)
     powerBombQty = float(args.powerBombQty)
@@ -540,6 +549,7 @@ if __name__ == "__main__":
         args.superFun = superFun
     logger.debug("superFun: {}".format(args.superFun))
 
+    # controls
     ctrlDict = None
     if args.controls:
         ctrlList = args.controls.split(',')
@@ -556,6 +566,7 @@ if __name__ == "__main__":
             else:
                 raise ValueError("Invalid button name : " + str(b))
 
+    # plando rando
     plandoSettings = None
     if args.plandoRando is not None:
         plandoRando = json.loads(args.plandoRando)
@@ -572,6 +583,7 @@ if __name__ == "__main__":
                                   restrictions, args.superFun, args.runtimeLimit_s,
                                   plandoSettings, minDifficulty)
 
+    # area rando
     dotFile = None
     if areaRandomization == True:
         if args.dot == True:
@@ -581,6 +593,7 @@ if __name__ == "__main__":
                                   args.doorsColorsRando, args.allowGreyDoors, args.tourian,
                                   plandoRando["transitions"] if plandoSettings is not None else None)
 
+    # objectives
     if plandoSettings is None:
         objectivesManager = Objectives(args.tourian != 'Disabled', randoSettings)
         addedObjectives = 0
@@ -702,9 +715,9 @@ if __name__ == "__main__":
         print("tourian:{}".format(args.tourian))
         print("objectives:{}".format([g.name for g in Objectives.activeGoals]))
         print("energyQty:{}".format(energyQty))
+        print("logic patches: "+str(sorted(RomPatches.ActivePatches)))
 
     try:
-        print("logic patches: "+str(sorted(RomPatches.ActivePatches)))
         randoExec = RandoExec(seedName, args.vcr, randoSettings, graphSettings)
         (stuck, itemLocs, progItemLocs) = randoExec.randomize()
         patcherSettings['itemLocs'], patcherSettings['progItemLocs'] = itemLocs, progItemLocs

@@ -760,7 +760,7 @@ if __name__ == "__main__":
             "suitsMode": gravityBehaviour,
             "area": areaRandomization,
             "boss": args.bosses,
-            "areaLayout": not args.areaLayoutBase,
+            "areaLayout": areaRandomization == True and not args.areaLayoutBase,
             "variaTweaks": not args.noVariaTweaks,
             "nerfedCharge": args.nerfedCharge,
             "nerfedRainbowBeam": energyQty == 'ultra sparse',

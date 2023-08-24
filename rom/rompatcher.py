@@ -337,7 +337,8 @@ class RomPatcher:
         ipsPatches = patchSet.get('ips', [])
         for ips in ipsPatches:
             self.applyIPSPatch(ips)
-        plms += patchSet.get('plms', [])
+        plmList = patchSet.get('plms', [])
+        plms += [plm for plm in plmList if plm not in plms]
 
     def applyIPSPatches(self):
         try:

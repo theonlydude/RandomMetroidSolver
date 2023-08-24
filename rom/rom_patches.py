@@ -437,7 +437,8 @@ definitions = {
             'address': snes_to_pc(0x8f88a0), 'value': 0x04,
             'desc': "Area layout modifications",
             'ips': _layoutArea,
-            'logic': RomPatches.AreaBaseSet
+            'logic': RomPatches.AreaBaseSet,
+            'plms': ["WS_Save_Blinking_Door"]
         },
         'areaLayout': {
             'address': snes_to_pc(0xcaafa7),

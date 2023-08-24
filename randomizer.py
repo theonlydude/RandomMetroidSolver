@@ -698,6 +698,9 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += patchSet['logic']
     # these are dynamic
     RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startLocation)
+    # this one isn't a simple patch but a ROM option
+    if args.tourian == "Disabled":
+        RomPatches.ActivePatches.append(RomPatches.NoTourian)
 
     # this operation needs logic patches
     if plandoSettings is None:

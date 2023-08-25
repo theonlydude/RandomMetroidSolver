@@ -50,6 +50,63 @@ if (hs.registerOverlay) {
 
 <style>
 {{include 'solver_web/varia.css'}}
+.modal.-objective-selector {
+    display: flex;
+}
+.modal.-objective-selector [type=checkbox] {
+    cursor: pointer;
+}
+.modal.-objective-selector .modal-dialog {
+    width: unset;
+}
+.modal.-objective-selector .modal-header {
+    position: relative;
+}
+.modal.-objective-selector .close {
+    color: #000;
+    cursor: pointer;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1;
+    filter: alpha(opacity=20);
+    opacity: .2;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    text-shadow: 0 1px 0 #fff;
+    transform: translate(0, -50%);
+}
+.modal.-objective-selector .-partial [type=checkbox] {
+    filter: grayscale(1);
+    opacity: 0.5;
+}
+.modal.-objective-selector .-disabled {
+    opacity: 0.4;
+}
+.modal.-objective-selector .-disabled [type=checkbox] {
+    pointer-events: none;
+    filter: invert(0.5);
+}
+.objective-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+#objectivePortal ._flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+#objectivePortal .btn-xs {
+    line-height: 1;
+    padding: 5px;
+    margin: 0;
+}
+#objectivePortal .btn-danger { order: 1 }
+#objectivePortal .btn-warning { order: 2 }
+#objectivePortal .btn-primary { order: 3 }
+#objectivePortal .btn-success { order: 4 }
+#objectivePortal .btn-info { order: 5 }
 .innertd {
     padding-left: 5px;
     padding-right: 5px;
@@ -653,7 +710,7 @@ function must_remove_from_unselected(toRemove) {
 }
 function sort_objectives_and_add_optgroups() {
     var my_options = $("#objectiveMultiSelect option");
-    var selected = $("#objectiveMultiSelect").val();
+    var selected = get_selected_objectives();
 
     my_options.sort(function(a, b) {
         var index_a = objectives_sort.indexOf(a.value);
@@ -689,8 +746,11 @@ function sort_objectives_and_add_optgroups() {
         $("#objectiveMultiSelect").append(current_group);
     }
 
-    $("#objectiveMultiSelect").val(selected);
+    setObjectives(selected);
+}
 
+function setObjectives(selected) {
+    $("#objectiveMultiSelect").val(selected);
     $("#objectiveMultiSelect").trigger("chosen:updated");
 }
 
@@ -792,7 +852,7 @@ function randomizeObjective(evt) {
         if (backup_values.length === 0) {
             backup_values = ['kill all g4']
         }
-        $("#objectiveMultiSelect").val(backup_values).trigger("chosen:updated");
+        setObjectives(backup_values);
         removed_objectives = [];
 
         // handle exclusions for currently selected values
@@ -817,7 +877,7 @@ function randomizeObjective(evt) {
         if (backup_values.length >= all_objectives.length) {
             backup_values = backup_values.filter(s => s !== 'collect 100% items' && s !== "explore 100% map");
         }
-        $("#objectiveMultiSelect").val(backup_values).trigger("chosen:updated");
+        setObjectives(backup_values);
     }
 
     sort_objectives_and_add_optgroups();
@@ -940,7 +1000,7 @@ function setObjective() {
         document.getElementById('nbObjectivesRequired').value = objective_required
     }
 
-    $("#objectiveMultiSelect").val(selected_objectives).trigger("chosen:updated");
+    setObjectives(selected_objectives)
     $("#objectiveMultiSelect").on('change', objective_change);
     objective_change(undefined, {selected: {}})
 }
@@ -1258,9 +1318,9 @@ function getSpecialValues(dataDict, trueJson) {
     // Note both objective and objectiveMultiSelect are passed via dataDict.objective
     // The backend decides to use this for one or the other
     if(trueJson) {
-        var values = $("#objectiveMultiSelect").val();
+        var values = get_selected_objectives();
     } else {
-        var values = $("#objectiveMultiSelect").val().join(",");
+        var values = get_selected_objectives().join(",");
     }
     dataDict["objective"] = values ? values : "nothing"
 
@@ -1279,7 +1339,7 @@ function getSpecialValues(dataDict, trueJson) {
 function validateObjectives() {
     //var objectives = document.getElementById("objectiveMultiSelect");
     //console.log("objectiveMultiSelect: "+objectives.value);
-    var values = $("#objectiveMultiSelect").val();
+    var values = get_selected_objectives();
 
     if(isElemIdRandom("objective")) {
         // if objectives are randomized, check that there's at least one in the list
@@ -1937,13 +1997,13 @@ function loadRandoPresetOK(data) {
             randomizeObjective({currentTarget: objectiveRandom});
         }
         if("objectiveMultiSelect" in data) {
-            $("#objectiveMultiSelect").val(data["objectiveMultiSelect"]).trigger("chosen:updated");
+            setObjectives(data["objectiveMultiSelect"]);
         }
     } else {
         if(isElemRandom(objectiveRandom)) {
             randomizeObjective({currentTarget: objectiveRandom});
         }
-        $("#objectiveMultiSelect").val(data["objective"]).trigger("chosen:updated");
+        setObjectives(data["objectiveMultiSelect"]);
     }
     objective_change(null, { deselected: true, selected: true });
     $("select").data('picker').sync_picker_with_select(); // syncs the logic image picker
@@ -3073,7 +3133,10 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="objectiveText">Objectives to access Tourian:</span></td>
-                <td>{{displayMultiSelect("objective", "objective is special!", "", defaultMultiValues["objective"])}}</td>
+                <td>
+                  {{displayMultiSelect("objective", "objective is special!", "", defaultMultiValues["objective"])}}
+                  <div id="objectivePortal" />
+                </td>
                 <td id="objectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
             </table>
@@ -3420,4 +3483,6 @@ def displayNumber(id, min, max, default, step="1"):
         {{=INPUT(_type="submit", _value="Randomize + Customize", _id="customizeBtn", _class="btn btn-default buttonRandom")}}
     </form>
   </div>
+  <div id="app" />
 </body>
+{{ response.write(app_files, escape=False) }}

@@ -423,14 +423,16 @@ def generateJsonROM(romJsonStr):
 
     return (base, jsonRomFileName)
 
-def get_app_files():
+def get_app_files(include_css=True):
     with open('applications/solver/static/client/manifest.json', 'r') as manifest:
         data = json.loads(manifest.read())
     js = [k for k in data.keys() if k.endswith('.js')]
     css = [k for k in data.keys() if k.endswith('.css')]
     fa = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"
-    return '\n'.join([
+    files = [
         f'<link href="{fa}" rel="stylesheet" />',
         *[f'<script src="{data[f]}"></script>' for f in js],
-        *[f'<link href="{data[f]}" rel="stylesheet" />' for f in css],
-    ])
+    ]
+    if include_css:
+        files += [f'<link href="{data[f]}" rel="stylesheet" />' for f in css]
+    return '\n'.join(files)

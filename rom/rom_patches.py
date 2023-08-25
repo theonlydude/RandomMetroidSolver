@@ -258,7 +258,7 @@ _layoutAreaComfort = [
 # Patches definition tables: 'common' + a table for each flavor
 # each table has patch names associated to entries as follows:
 # 'desc': patch description
-# 'address'/'value': detection byte
+# 'address'/'value': (optional) detection byte
 # 'ips': (optional) ROM patch list to apply
 # 'plms': (optional) dynamic PLMs to add
 # 'logic': (optional) logic patch list to apply

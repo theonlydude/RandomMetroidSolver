@@ -428,8 +428,11 @@ class RomReader:
     def _patchPresent(self, patchName, patchDict):
         if patchName not in patchDict:
             return False
-        value = self.romFile.readByte(patchDict[patchName]['address'])
-        return value == patchDict[patchName]['value']
+        addr, val = patchDict[patchName].get('address'), patchDict[patchName].get('value')
+        if addr is None or val is None:
+            return False
+        value = self.romFile.readByte(addr)
+        return value == val
 
     def patchPresent(self, patchName):
         return self._patchPresent(patchName, self.patches['common']) or self._patchPresent(patchName, self.patches[RomFlavor.flavor])

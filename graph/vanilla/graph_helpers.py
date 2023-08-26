@@ -878,7 +878,7 @@ class HelpersGraph(Helpers):
         sm = self.smbm
         return sm.wand(sm.traverse('MainStreetBottomRight'),
                        sm.wor(sm.haveItem('Super'),
-                              RomPatches.has(RomPatches.AreaRandoGatesOther)))
+                              RomPatches.has(RomPatches.CrabTunnelGreenGateRemoved)))
 
     @Cache.decorator
     def canAccessShaktoolFromPantsRoom(self):

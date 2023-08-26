@@ -124,8 +124,8 @@ accessPoints = [
        dotOrientation = 'e'),
     AccessPoint('Noob Bridge Right', 'GreenPinkBrinstar', {
         'Green Hill Zone Top Right': Cache.ldeco(lambda sm: sm.wor(sm.haveItem('Wave'),
-                                                                   sm.wor(sm.canBlueGateGlitch(),
-                                                                          RomPatches.has(RomPatches.AreaRandoGatesOther))))
+                                                                   sm.wor(RomPatches.has(RomPatches.GreenHillsGateRemoved),
+                                                                          sm.canBlueGateGlitch())))
     }, traverse=Cache.ldeco(lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.traverse('NoobBridgeRight'))),
        roomInfo = {'RoomPtr':0x9fba, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8f0a, 'direction': 0x4, "cap": (0x1, 0x46), "bitFlag": 0x0,
@@ -512,8 +512,8 @@ accessPoints = [
         # this transition leads to EastMaridia directly
         'Oasis Bottom': Cache.ldeco(lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
                                                        sm.traverse('MainStreetBottomRight'),
-                                                       sm.wor(sm.haveItem('Super'),
-                                                              RomPatches.has(RomPatches.AreaRandoGatesOther)),
+                                                       sm.wor(RomPatches.has(RomPatches.CrabTunnelGreenGateRemoved),
+                                                              sm.haveItem('Super')),
                                                        sm.canTraverseWestSandHallLeftToRight())),
         'Crab Shaft Left': lambda sm: sm.canPassMtEverest()
     }, roomInfo = {'RoomPtr':0xcfc9, "area": 0x4},
@@ -530,8 +530,8 @@ accessPoints = [
                 'rom_patches':['mama_save.ips'], 'doors': [0x8e]}),
     AccessPoint('Crab Hole Bottom Left', 'WestMaridia', {
         'Main Street Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canExitCrabHole(),
-                                                             sm.wor(sm.canGreenGateGlitch(),
-                                                                    RomPatches.has(RomPatches.AreaRandoGatesOther)))),
+                                                             sm.wor(RomPatches.has(RomPatches.CrabTunnelGreenGateRemoved),
+                                                                    sm.canGreenGateGlitch()))),
         # this transition leads to EastMaridia directly
         'Oasis Bottom': Cache.ldeco(lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
                                                        sm.canExitCrabHole(),
@@ -644,8 +644,8 @@ accessPoints = [
         'Aqueduct Bottom': Cache.ldeco(lambda sm: RomPatches.has(RomPatches.MaridiaSandWarp)),
         # this goes directly to WestMaridia
         'Main Street Bottom': Cache.ldeco(lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
-                                                             sm.wor(sm.canGreenGateGlitch(),
-                                                                    RomPatches.has(RomPatches.AreaRandoGatesOther)))),
+                                                             sm.wor(RomPatches.has(RomPatches.CrabTunnelGreenGateRemoved),
+                                                                    sm.canGreenGateGlitch()))),
         # this goes directly to WestMaridia
         'Crab Hole Bottom Left': Cache.ldeco(lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
                                                                 sm.haveItem('Morph')))

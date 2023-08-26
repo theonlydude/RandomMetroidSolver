@@ -486,22 +486,39 @@ class InteractiveSolver(CommonSolver):
                                               self.bossRando, self.escapeRando, False)
 
         from utils.version import displayedVersion
+        from rom_patches import groups
 
+        # individual layout/tweak patch handling
+        layoutCustom = []
+        areaLayoutCustom = []
+        variaTweaksCustom = []
+        def fillCustom(grp, custom):
+            # FIXME would be better if we actually read patches from ROM? or access read patches?
+            # because here we could miss individual layout patches with no logic impact
+            for patchSet in groups[grp]:
+                if all(rp in RomPatches.ActivePatches for rp in patchSet.get('logic', [])):
+                    custom.append(patchSet)
+        fillCustom('layout', layoutCustom)
+        fillCustom('areaLayout', areaLayoutCustom)
+        fillCustom('variaTweaks', variaTweaksCustom)
         patcherSettings = {
             "isPlando": True,
             "majorsSplit": majorsSplit,
             "startLocation": self.startLocation,
             "optionalPatches": patches,
-            "layout": RomPatches.MoatShotBlock in RomPatches.ActivePatches,
+            "layout": len(layoutCustom) > 0,
+            "layoutCustom": layoutCustom,
             "suitsMode": suitsMode,
             "area": self.areaRando,
             "boss": self.bossRando,
-            "areaLayout": RomPatches.AreaRandoGatesOther in RomPatches.ActivePatches,
+            "areaLayout": len(areaLayoutCustom) > 0,
+            "areaLayoutCustom": areaLayoutCustom,
             "escapeAttr": escapeAttr,
+            "variaTweaks": len(variaTweaksCustom) > 0,
+            "variaTweaksCustom": variaTweaksCustom,
+            "nerfedCharge": RomPatches.Nerfedcharge in RomPatches.ActivePatches,
+            "nerfedRainbowBeam": RomPatches.NerfedRainbowBeam in RomPatches.ActivePatches,
             # these settings are kept to False or None to keep what's in base ROM
-            "variaTweaks": False,
-            "nerfedCharge": False,
-            "nerfedRainbowBeam": False,
             "ctrlDict": None,
             "moonWalk": False,
             "debug": False,

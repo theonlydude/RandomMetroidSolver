@@ -50,7 +50,7 @@ accessPointsDict['Bubble Mountain Bottom'].connectInternal(
 accessPointsDict['Noob Bridge Right'].connectInternal(
     'Green Hill Zone Top Right',
     Cache.ldeco(lambda sm: sm.wor(sm.haveItem('Wave'),
-                                  RomPatches.has(RomPatches.AreaRandoGatesOther))
+                                  RomPatches.has(RomPatches.GreenHillsGateRemoved))
     )
 )
 # can no longer ggg
@@ -60,7 +60,7 @@ accessPointsDict['Crab Hole Bottom Left'].connectInternal(
     'Main Street Bottom',
     Cache.ldeco(lambda sm: sm.wand(
         sm.canExitCrabHole(),
-        RomPatches.has(RomPatches.AreaRandoGatesOther))
+        RomPatches.has(RomPatches.GreenHillsGateRemoved))
     )
 )
 accessPointsDict['West Sand Hall Left'].connectInternal(

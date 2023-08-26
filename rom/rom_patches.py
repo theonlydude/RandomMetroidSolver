@@ -54,8 +54,6 @@ class RomPatches:
     SingleChamberNoCrumble    = 101
     # remove green gates for reverse maridia access
     AreaRandoGatesBase        = 102
-    # remove crab green gate in maridia and blue gate in green brinstar
-    AreaRandoGatesOther       = 103
     # disable Green Hill Yellow, Noob Bridge Green, Coude Yellow, and Kronic Boost yellow doors
     AreaRandoBlueDoors        = 104
     # crateria key hunter yellow, green pirates shaft red
@@ -70,6 +68,11 @@ class RomPatches:
     AqueductBombBlocks        = 109
     # climb back up crab hole without items
     CrabHoleClimb             = 110
+    # remove crab green gate in maridia
+    CrabTunnelGreenGateRemoved = 111
+    # remove blue gate in green hill zone maridia
+    GreenHillsGateRemoved      = 112
+
     ## Minimizer Patches
     NoGadoras                 = 200
     TourianSpeedup            = 201
@@ -118,15 +121,6 @@ class RomPatches:
     AreaBaseSet = [ SingleChamberNoCrumble, AreaRandoGatesBase,
                     AreaRandoBlueDoors, AreaRandoMoreBlueDoors,
                     CrocBlueDoors, CrabShaftBlueDoor, MaridiaSandWarp ]
-    AreaComfortSet = [ AreaRandoGatesOther, SpongeBathBlueDoor, EastOceanPlatforms,
-                       AqueductBombBlocks, CrabHoleClimb ]
-    AreaSet = AreaBaseSet + AreaComfortSet
-
-    # VARIA specific patch set
-    VariaTweaks = [ WsEtankPhantoonAlive, LNChozoSJCheckDisabled, BombTorizoWake ]
-
-    # Tourian speedup in minimizer mode
-    MinimizerTourian = [ TourianSpeedup, OpenZebetites ]
 
     # dessyreqt randomizer
     Dessy = []
@@ -300,13 +294,6 @@ definitions = {
             'ips': ['nerfed_charge.ips'],
             'logic': [RomPatches.NerfedCharge]
         },
-        'variaTweaks': {
-            'address': snes_to_pc(0x8fcc4d), 'value': 0x37,
-            'desc': "VARIA tweaks",
-            'ips': ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable',
-                    'ln_chozo_platform.ips', 'bomb_torizo.ips'],
-            'logic': RomPatches.VariaTweaks
-        },
         'boss': {
             # TODO? addr/value?
             'desc': "Bosses randomization",
@@ -375,6 +362,35 @@ definitions = {
             'desc': "VARIA HUD",
             'ips': ['varia_hud.ips']
         },
+        'door_indicators_plms': {
+            'address': 0x27900, 'value': 0x2,
+            'desc': 'Blinking doors, showing the color of the door on the other side',
+            'ips': ['door_indicators_plms.ips'],
+            'plms': [],
+            'logic': []
+        },
+        # VARIA Tweaks
+        'WS_Etank': {
+            'address': 0x7cc4d, 'value': 0x37,
+            'desc': 'Access item at Wrecked Ship Etank location without killing Phantoon',
+            'ips': ['WS_Etank'],
+            'plms': [],
+            'logic': [RomPatches.WsEtankPhantoonAlive]
+        },
+        'LN_Chozo': {
+            'address': 0x2518f, 'value': 0xea,
+            'desc': 'Activate Lower Norfair Chozo (left of entrance) without Space Jump',
+            'ips': ['LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips'],
+            'plms': [],
+            'logic': [RomPatches.LNChozoSJCheckDisabled]
+        },
+        'bomb_torizo': {
+            'address': 0x23a6f, 'value': 0x20,
+            'desc': "Bomb Torizo fight is triggered when picking up the item he's holding, not by having Bomb",
+            'ips': ['bomb_torizo.ips'],
+            'plms': [],
+            'logic': [RomPatches.BombTorizoWake]
+        },
         'debug': {
             'address': snes_to_pc(0xb5ffed), 'value': 0x0,
             'desc': "Debug Hack",
@@ -385,12 +401,6 @@ definitions = {
         'logic': {
             'ips': []
         },
-        'layout': {
-            'address': snes_to_pc(0xc3bd80), 'value': 0xD5,
-            'desc': "Anti soft lock layout modifications",
-            'ips': _layoutIPS,
-            'logic': RomPatches.TotalLayout
-        },
         'area': {
             'address': snes_to_pc(0x8f88a0), 'value': 0x2B,
             'desc': "Area layout modifications",
@@ -398,23 +408,147 @@ definitions = {
             'logic': RomPatches.AreaBaseSet,
             'plms': ["WS_Save_Blinking_Door"]
         },
-        'areaLayout': {
-            'address': snes_to_pc(0xcaafa7), 'value': 0xF8,
-            'desc': "Area layout additional modifications",
-            'ips': _layoutAreaComfort,
-            'logic': RomPatches.AreaComfortSet
+        # Anti-softlock layout patches
+        'dachora': {
+            'address': 0x22a173, 'value': 0xc9,
+            'desc': 'Disable respawning blocks at Dachora Pit',
+            'ips': ['dachora.ips'],
+            'plms': [],
+            'logic': []
         },
-        'traverseWreckedShip': {
-            'address': snes_to_pc(0xc39dbf), 'value': 0xFB,
-            'desc': "Area layout additional access to east Wrecked Ship"
+        'early_super_bridge': {
+            'address': 0x22976b, 'value': 0xc7,
+            'desc': 'Escape from below early Super bridge without Bombs',
+            'ips': ['early_super_bridge.ips'],
+            'plms': [],
+            'logic': [RomPatches.EarlySupersShotBlock]
         },
-        'aqueductBombBlocks': {
-            'address': snes_to_pc(0xcc82d6), 'value': 0x44,
-            'desc': "Aqueduct entrance bomb blocks instead of power bombs"
+        'high_jump': {
+            'address': 0x23aa77, 'value': 0x4,
+            'desc': 'Replace bomb blocks with shot blocks before Hi-Jump',
+            'ips': ['high_jump.ips'],
+            'plms': [],
+            'logic': [RomPatches.HiJumpShotBlock]
         },
-        'open_zebetites': {
-            'address': snes_to_pc(0xcddf22), 'value': 0xc3,
-            'desc': "Zebetites without morph"
+        'moat': {
+            'address': 0x1085dd, 'value': 0xff,
+            'desc': 'Replace bomb blocks with shot blocks at Moat',
+            'ips': ['moat.ips'],
+            'plms': [],
+            'logic': [RomPatches.MoatShotBlock]
+        },
+        'spospo_save': {
+            'address': 0x785fc, 'value': 0x3b,
+            'desc': 'Spore Spawn save station is always available',
+            'ips': ['spospo_save.ips'],
+            'plms': [],
+            'logic': []
+        },
+        'nova_boost_platform': {
+            'address': 0x236cc3, 'value': 0xdf,
+            'desc': 'First heated Norfair room without High-Jump',
+            'ips': ['nova_boost_platform.ips'],
+            'plms': [],
+            'logic': [RomPatches.CathedralEntranceWallJump]
+        },
+        'red_tower': {
+            'address': 0x2304f7, 'value': 0xc4,
+            'desc': 'Always be able to get back up from bottom Red Tower',
+            'ips': ['red_tower.ips'],
+            'plms': [],
+            'logic': [RomPatches.RedTowerLeftPassage]
+        },
+        'spazer': {
+            'address': 0x23392b, 'value': 0xc5,
+            'desc': '',
+            'ips': ['spazer.ips'],
+            'plms': [],
+            'logic': [RomPatches.SpazerShotBlock]
+        },
+        'climb_supers': {
+            'address': 0x21c9b1, 'value': 0xc6,
+            'desc': 'Replace Climb Supers exit bomb block with a shot block',
+            'ips': ['climb_supers.ips'],
+            'plms': [],
+            'logic': []
+        },
+        'brinstar_map_room': {
+            'address': 0x784ec, 'value': 0x3b,
+            'desc': 'Remove grey door at Brinstar map station',
+            'ips': ['brinstar_map_room.ips'],
+            'plms': [],
+            'logic': []
+        },
+        'kraid_save': {
+            'address': 0x234642, 'value': 0xf8,
+            'desc': 'Replace bomb blocks with shot blocks before Kraid save',
+            'ips': ['kraid_save.ips'],
+            'plms': [],
+            'logic': []
+        },
+        'mission_impossible': {
+            'address': 0x22d1a0, 'value': 0x25,
+            'desc': 'Replace bomb blocks with shot blocks at Pink Brinstar Power Bomb Room',
+            'ips': ['mission_impossible.ips'],
+            'plms': [],
+            'logic': []
+        },
+        # Area rando comfort layout patches
+        'area_layout_crabe_tunnel': {
+            'address': 0x252fa7, 'value': 0xf8,
+            'desc': 'Remove Crab green gate in Marida',
+            'ips': ['area_layout_crabe_tunnel.ips'],
+            'plms': [],
+            'logic': [RomPatches.CrabTunnelGreenGateRemoved]
+        },
+        'area_rando_gate_greenhillzone': {
+            'address': 0x78666, 'value': 0x62,
+            'desc': 'Remove blue gate in Green Hill Zone',
+            'ips': ['area_rando_gate_greenhillzone.ips', 'area_layout_greenhillzone.ips'],
+            'plms': [],
+            'logic': [RomPatches.GreenHillsGateRemoved]
+        },
+        'east_ocean': {
+            'address': 0x219dbf, 'value': 0xfb,
+            'desc': 'Sponge Bath door is set to blue to avoid softlocking and two new platforms are added to traverse Forgotten Highway both ways with only High-Jump boots and Level 1 underwater movement in preset',
+            'ips': ['east_ocean.ips', 'Sponge_Bath_Blinking_Door'],
+            'plms': [],
+            'logic': [RomPatches.SpongeBathBlueDoor, RomPatches.EastOceanPlatforms]
+        },
+        'aqueduct_bomb_blocks': {
+            'address': 0x2602d6, 'value': 0x44,
+            'desc': 'Aqueduct left entrance Power Bomb blocks are changed to Bomb blocks to allow traversing both ways with the same item set',
+            'ips': ['aqueduct_bomb_blocks.ips'],
+            'plms': [],
+            'logic': [RomPatches.AqueductBombBlocks]
+        },
+        'area_layout_east_tunnel': {
+            'address': 0x24e816, 'value': 0xf8,
+            'desc': 'Access Maridia tube exit',
+            'ips': ['area_layout_east_tunnel.ips'],
+            'plms': [],
+            'logic': []
+        },
+        'area_layout_caterpillar': {
+            'address': 0x231f62, 'value': 0xc7,
+            'desc': 'Access Maridia red fish exit',
+            'ips': ['area_layout_caterpillar.ips'],
+            'plms': [],
+            'logic': []
+        },
+        'area_layout_single_chamber': {
+            'address': 0x23ec11, 'value': 0xc6,
+            'desc': 'Access Lower Norfair exit',
+            'ips': ['area_layout_single_chamber.ips'],
+            'plms': [],
+            'logic': []
+        },
+        'area_layout_crab_hole': {
+            'address': 0x2583ef, 'value': 0xd1,
+            'desc': 'Blocks are moved around in Crab Hole to be able to climb it with no items and Level 1 underwater movement in preset',
+            'ips': ['area_layout_crab_hole_lvl.ips', 'area_layout_crab_hole_plms_enemies.ips'],
+            'plms': [],
+            'logic': [RomPatches.CrabHoleClimb]
         }
     },
     'mirror': {
@@ -427,40 +561,92 @@ definitions = {
                     'crab_mt_everest.ips', 'mother_brain.ips', 'kraid.ips', 'torizos.ips', 'botwoon.ips',
                     'crocomire.ips', 'ridley.ips', 'ws_treadmill.ips']
         },
-        'layout': {
-            'address': snes_to_pc(0xc3bd80),
-            'value': 0x32, 'desc': "Anti soft lock layout modifications",
-            'ips': _layoutIPS,
-            'logic': RomPatches.TotalLayout
-        },
         'area': {
-            'address': snes_to_pc(0x8f88a0), 'value': 0x04,
-            'desc': "Area layout modifications",
-            'ips': _layoutArea,
-            'logic': RomPatches.AreaBaseSet,
-            'plms': ["WS_Save_Blinking_Door"]
+            'address': snes_to_pc(0x8f88a0), 'value': 0x04
         },
-        'areaLayout': {
-            'address': snes_to_pc(0xcaafa7),
-            'value': 0x03,
-            'desc': "Area layout additional modifications",
-            'ips': _layoutAreaComfort,
-            'logic': RomPatches.AreaComfortSet
+        # Anti-softlock layout patches
+        'dachora': {
+            'address': 0x22a186, 'value': 0x43,
         },
-        'traverseWreckedShip': {
-            'address': snes_to_pc(0xc39df6), 'value': 0x84,
-            'desc': "Area layout additional access to east Wrecked Ship"
+        'early_super_bridge': {
+            'address': 0x229777, 'value': 0xe8,
         },
-        'aqueductBombBlocks': {
-            'address': snes_to_pc(0xcc82d6), 'value': 0x6c,
-            'desc': "Aqueduct entrance bomb blocks instead of power bombs"
+        'high_jump': {
+            'address': 0x23aa80, 'value': 0x8d,
         },
-        'open_zebetites': {
-            'address': snes_to_pc(0xcddf22), 'value': 0x48,
-            'desc': "Zebetites without morph"
+        'moat': {
+            'address': 0x21bd99, 'value': 0x7,
+        },
+        'spospo_save': {
+            'address': 0x22b56d, 'value': 0xf0,
+        },
+        'nova_boost_platform': {
+            'address': 0x236cc9, 'value': 0x46,
+        },
+        'red_tower': {
+            'address': 0x230506, 'value': 0x44,
+        },
+        'spazer': {
+            'address': 0x233936, 'value': 0x53,
+        },
+        'climb_supers': {
+            'address': 0x21c998, 'value': 0x9,
+        },
+        'brinstar_map_room': {
+            'address': 0x784ec, 'value': 0x0,
+        },
+        'kraid_save': {
+            'address': 0x234645, 'value': 0x4f,
+        },
+        'mission_impossible': {
+            'address': 0x22d1be, 'value': 0x1c,
+        },
+        # Area rando comfort layout patches
+        'area_layout_crabe_tunnel': {
+            'address': 0x252fc6, 'value': 0x6,
+        },
+        'area_rando_gate_greenhillzone': {
+            'address': 0x78666, 'value': 0x1d,
+        },
+        'east_ocean': {
+            'address': 0x219df6, 'value': 0x84,
+        },
+        'aqueduct_bomb_blocks': {
+            'address': 0x2602c5, 'value': 0x2,
+        },
+        'area_layout_east_tunnel': {
+            'address': 0x24e81b, 'value': 0x91,
+        },
+        'area_layout_caterpillar': {
+            'address': 0x231f66, 'value': 0x47,
+        },
+        'area_layout_single_chamber': {
+            'address': 0x23ee0c, 'value': 0x41,
+        },
+        'area_layout_crab_hole': {
+            'address': 0x2583fe, 'value': 0x45,
         }
     }
 }
+
+### Groups for optional patches
+groups = {
+    'layout': ['door_indicators_plms', 'dachora', 'early_super_bridge', 'high_jump', 'moat', 'spospo_save', 'nova_boost_platform', 'red_tower', 'spazer', 'climb_supers', 'brinstar_map_room', 'kraid_save', 'mission_impossible'],
+    'areaLayout': ['area_rando_gate_crab_tunnel', 'area_layout_crabe_tunnel', 'area_rando_gate_greenhillzone', 'Sponge_Bath_Blinking_Door', 'east_ocean', 'aqueduct_bomb_blocks', 'area_layout_east_tunnel', 'area_layout_caterpillar', 'area_layout_single_chamber', 'area_layout_crab_hole'],
+    'variaTweaks': ['WS_Etank', 'LN_Chozo', 'bomb_torizo']
+}
+
+def _updateFlavorPatchesWithVanilla(flavor):
+    keys = ['desc', 'ips', 'logic', 'plms']
+    for patch, entry in definitions[flavor].items():
+        vanillaPatch = definitions["vanilla"].get(patch)
+        if vanillaPatch is None:
+            continue
+        for k in keys:
+            if k not in entry and k in vanillaPatch:
+                entry[k] = vanillaPatch[k]
+
+_updateFlavorPatchesWithVanilla("mirror")
 
 def getPatchSet(setName, flavor=None):
     if setName in definitions['common']:
@@ -472,22 +658,32 @@ def getPatchSet(setName, flavor=None):
     return patchSet
 
 def getPatchSetsFromPatcherSettings(patcherSettings):
+    # always applied
     patchSets = ["logic", "base"]
+    # patcher settings flags matching patch set names
     boolSettings = [
-        "layout",
         "nerfedCharge",
         "nerfedRainbowBeam",
-        "variaTweaks",
         "area",
-        "areaLayout",
         "boss",
         "doorsColorsRando",
         "hud",
         "revealMap",
         "round_robin_cf",
         "debug"
-    ]
+    ] 
     patchSets += [k for k in boolSettings if patcherSettings.get(k) == True]
+    # patcher settings flags matching patch set group names
+    for grp, patchList in groups.items():
+        if patcherSettings[grp] == True:
+            # handle customization
+            custom = patcherSettings.get(grp + "Custom")
+            if custom is None:
+                patchSets += patchList
+            else:
+                patchSets += [p for p in custom if p in patchList]
+    if patcherSettings['layout'] == True:
+        patchSets.append('door_indicators_plms')
     if patcherSettings["suitsMode"] == "Balanced":
         patchSets.append("gravityNoHeatProtection")
     elif patcherSettings["suitsMode" ] == "Progressive":

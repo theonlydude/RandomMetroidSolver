@@ -310,6 +310,11 @@ def loadRandoPreset(randoPreset, args):
         args.animals = True
     if randoParams.get("variaTweaks", "on") == "off":
         args.noVariaTweaks = True
+    variaTweaksCustom = randoParams.get("variaTweaksCustom")
+    if variaTweaksCustom is None or len(variaTweaksCustom) == 0:
+        args.variaTweaksCustom = None
+    else:
+        args.variaTweaksCustom = ','.join(variaTweaksCustom)
     if randoParams.get("maxDifficulty", "infinity") != "infinity":
         args.maxDifficulty = randoParams["maxDifficulty"]
     if randoParams.get("suitsRestriction", "off") != "off":
@@ -330,6 +335,11 @@ def loadRandoPreset(randoPreset, args):
 
     if randoParams.get("layoutPatches", "on") == "off":
         args.noLayout = True
+    layoutCustom = randoParams.get("layoutCustom")
+    if layoutCustom is None or len(layoutCustom) == 0:
+        args.layoutCustom = None
+    else:
+        args.layoutCustom = ','.join(layoutCustom)
     if "gravityBehaviour" in randoParams:
         args.gravityBehaviour = randoParams["gravityBehaviour"]
     if randoParams.get("nerfedCharge", "off") == "on":
@@ -343,6 +353,11 @@ def loadRandoPreset(randoPreset, args):
         args.areaRandomization == "full"
     if args.areaRandomization != "off":
         args.areaLayoutBase = convertParam(randoParams, "areaLayout", inverse=True)
+    areaLayoutCustom = randoParams.get("areaLayoutCustom")
+    if areaLayoutCustom is None or len(areaLayoutCustom) == 0:
+        args.areaLayoutCustom = None
+    else:
+        args.areaLayoutCustom = ','.join(areaLayoutCustom)
     args.escapeRando = convertParam(randoParams, "escapeRando")
     if args.escapeRando == True:
         args.noRemoveEscapeEnemies = convertParam(randoParams, "removeEscapeEnemies", inverse=True)
@@ -494,6 +509,7 @@ def getRandomizerDefaultParameters():
     defaultParams['areaRandomization'] = "off"
     defaultParams['areaRandomizationMultiSelect'] = defaultMultiValues['areaRandomization']
     defaultParams['areaLayout'] = "off"
+    defaultParams['areaLayoutCustom'] = []
     defaultParams['doorsColorsRando'] = "off"
     defaultParams['allowGreyDoors'] = "off"
     defaultParams['escapeRando'] = "off"
@@ -505,7 +521,9 @@ def getRandomizerDefaultParameters():
     defaultParams['funMovement'] = "off"
     defaultParams['funSuits'] = "off"
     defaultParams['layoutPatches'] = "on"
+    defaultParams['layoutCustom'] = []
     defaultParams['variaTweaks'] = "on"
+    defaultParams['variaTweaksCustom'] = []
     defaultParams['gravityBehaviour'] = "Balanced"
     defaultParams['gravityBehaviourMultiSelect'] = defaultMultiValues['gravityBehaviour']
     defaultParams['nerfedCharge'] = "off"

@@ -20,7 +20,7 @@ def getAddrAndValue(flavor, ips):
         patchDict = commonPatchDict[ips]
     else:
         patchPath = f"patches/{flavor}/ips/{ips}"
-        if os.path.exists(patchPath):            
+        if os.path.exists(patchPath):
             patchDict = IPS_Patch.load(patchPath).toDict()
         else:
             return 0, 0
@@ -35,13 +35,16 @@ def getAddrAndValue(flavor, ips):
             address += 1
     assert False, "Could not find addr/val for %s in flavor %s" % (ips, flavor)
 
+def getPatchName(ips):
+    return os.path.splitext(ips)[0]
+
 def printPatchDefs(grp, patches, flavor):
     print(f"# {grp}, {flavor}")
     for ips in patches:
         addr, val = getAddrAndValue(flavor, ips)
         if addr == 0:
             continue
-        print("'%s': {" % os.path.splitext(ips)[0])
+        print("'%s': {" % getPatchName(ips))
         print("    'address': 0x%x, 'value': 0x%x," % (addr, val))
         print("    'desc': '',")
         print("    'ips': ['%s']," % ips)
@@ -51,12 +54,18 @@ def printPatchDefs(grp, patches, flavor):
     print("\n")
 
 categories = {
-    'Anti-softlock layout patches': (["common", "vanilla", "mirror"], _layoutIPS),
-    'Area comfort patches': (["vanilla", "mirror"], _layoutAreaComfort),
-    'VARIA Tweaks': (["common"], variaTweaks)
+    'layout': (["common", "vanilla", "mirror"], _layoutIPS),
+    'areaLayout': (["vanilla", "mirror"], _layoutAreaComfort),
+    'variaTweaks': (["common"], variaTweaks)
 }
 
 for cat, entry in categories.items():
     flavors, patches = entry
     for flavor in flavors:
         printPatchDefs(cat, patches, flavor)
+
+print("### Groups\ngroups = {")
+for cat, entry in categories.items():
+    _, patches = entry
+    print("    '%s': %s," % (cat, str([getPatchName(ips) for ips in patches])))
+print("}")

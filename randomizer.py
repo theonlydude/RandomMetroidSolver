@@ -77,6 +77,9 @@ if __name__ == "__main__":
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)
+    parser.add_argument('--areaLayoutCustom',
+                        help="Customize area layout patches. Comma-separated values of patch IDs",
+                        nargs='?', dest='areaLayoutCustom', default=None)
     parser.add_argument('--escapeRando',
                         help="Randomize the escape sequence",
                         dest='escapeRando', nargs='?', const=True, default=False)
@@ -191,6 +194,9 @@ if __name__ == "__main__":
     parser.add_argument('--nolayout',
                         help="do not include total randomizer layout patches",
                         dest='noLayout', action='store_true', default=False)
+    parser.add_argument('--layoutCustom',
+                        help="Customize anti-softlock layout patches. Comma-separated values of patch IDs",
+                        nargs='?', dest='layoutCustom', default=None)
     parser.add_argument('--gravityBehaviour',
                         help="varia/gravity suits behaviour",
                         dest='gravityBehaviour', nargs='?', default='Balanced', choices=gravityBehaviours+['random'])
@@ -205,6 +211,9 @@ if __name__ == "__main__":
     parser.add_argument('--novariatweaks',
                         help="do not include VARIA randomizer tweaks",
                         dest='noVariaTweaks', action='store_true', default=False)
+    parser.add_argument('--variaTweaksCustom',
+                        help="Customize VARIA tweaks patches. Comma-separated values of patch IDs",
+                        nargs='?', dest='variaTweaksCustom', default=None)
     parser.add_argument('--controls',
                         help="specify controls, comma-separated, in that order: Shoot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
                         dest='controls')
@@ -435,9 +444,12 @@ if __name__ == "__main__":
         if args.majorsSplit in ['Major', "Chozo"]:
             forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
         forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", webValue='on')
+        forceArg('variaTweaksCustom', None, "Disabled VARIA tweaks customization")
         forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", webValue='on')
+        forceArg("layoutCustom", None, "Disabled 'Anti-softlock layout patches' customization")
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
         forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", webValue='on')
+        forceArg('areaLayoutCustom', None, "Disabled 'Additional layout patches for easier navigation' customization", webValue='on')
         possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(areaRandomization, maxDifficulty, args.morphPlacement)
         if args.startLocation == 'random':
             if args.startLocationList is not None:
@@ -670,11 +682,14 @@ if __name__ == "__main__":
         "startLocation": args.startLocation,
         "optionalPatches": args.patches,
         "layout": not args.noLayout,
+        "layoutCustom": None if args.layoutCustom is None else args.layoutCustom.split(','),
         "suitsMode": gravityBehaviour,
         "area": areaRandomization,
         "boss": args.bosses,
         "areaLayout": areaRandomization == True and not args.areaLayoutBase,
+        "areaLayoutCustom": None if args.areaLayoutCustom is None else args.areaLayoutCustom.split(','),
         "variaTweaks": not args.noVariaTweaks,
+        "variaTweaksCustom": None if args.variaTweaksCustom is None else args.variaTweaksCustom.split(','),
         "nerfedCharge": args.nerfedCharge,
         "nerfedRainbowBeam": energyQty == 'ultra sparse',
         "escapeAttr": None if args.escapeRando == False else True, # tmp value before actual attrs after randomization

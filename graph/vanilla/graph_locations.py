@@ -1143,7 +1143,7 @@ loc.Available = (
     lambda sm: sm.wand(sm.haveItem('Gravity'),
                        sm.haveItem('SpeedBooster'),
                        sm.wor(sm.wand(sm.traverse('MainStreetBottomRight'), # run from room on the right
-                                      sm.wor(RomPatches.has(RomPatches.AreaRandoGatesOther),
+                                      sm.wor(RomPatches.has(RomPatches.CrabTunnelGreenGateRemoved),
                                              sm.haveItem('Super')),
                                       sm.itemCountOk('ETank', 1)), # etank for the spark since sparking from low ground
                               sm.canSimpleShortCharge())) # run from above

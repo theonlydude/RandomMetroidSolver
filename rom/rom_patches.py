@@ -460,7 +460,7 @@ definitions = {
         },
         'spazer': {
             'address': 0x23392b, 'value': 0xc5,
-            'desc': 'Replace bomb blocks with shot blocks before Spaze',
+            'desc': 'Replace bomb blocks with shot blocks before Spazer',
             'ips': ['spazer.ips'],
             'plms': [],
             'logic': [RomPatches.SpazerShotBlock]
@@ -677,8 +677,8 @@ def getPatchSetsFromPatcherSettings(patcherSettings):
     for grp, patchList in groups.items():
         if patcherSettings[grp] == True:
             # handle customization
-            custom = patcherSettings.get(grp + "Custom")
-            if custom is None:
+            custom = patcherSettings.get(grp + "Custom", [])
+            if len(custom) == 0:
                 patchSets += patchList
             else:
                 patchSets += [p for p in custom if p in patchList]

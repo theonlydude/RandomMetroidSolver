@@ -494,10 +494,10 @@ definitions = {
             'logic': []
         },
         # Area rando comfort layout patches
-        'area_layout_crabe_tunnel': {
+        'area_rando_gate_crab_tunnel': {
             'address': 0x252fa7, 'value': 0xf8,
             'desc': 'Remove Crab green gate in Marida',
-            'ips': ['area_layout_crabe_tunnel.ips'],
+            'ips': ['area_layout_crabe_tunnel.ips', 'area_rando_gate_crab_tunnel.ips'],
             'plms': [],
             'logic': [RomPatches.CrabTunnelGreenGateRemoved]
         },
@@ -602,7 +602,7 @@ definitions = {
             'address': 0x22d1be, 'value': 0x1c,
         },
         # Area rando comfort layout patches
-        'area_layout_crabe_tunnel': {
+        'area_rando_gate_crab_tunnel': {
             'address': 0x252fc6, 'value': 0x6,
         },
         'area_rando_gate_greenhillzone': {
@@ -632,7 +632,7 @@ definitions = {
 ### Groups for optional patches
 groups = {
     'layout': ['door_indicators_plms', 'dachora', 'early_super_bridge', 'high_jump', 'moat', 'spospo_save', 'nova_boost_platform', 'red_tower', 'spazer', 'climb_supers', 'brinstar_map_room', 'kraid_save', 'mission_impossible'],
-    'areaLayout': ['area_rando_gate_crab_tunnel', 'area_layout_crabe_tunnel', 'area_rando_gate_greenhillzone', 'Sponge_Bath_Blinking_Door', 'east_ocean', 'aqueduct_bomb_blocks', 'area_layout_east_tunnel', 'area_layout_caterpillar', 'area_layout_single_chamber', 'area_layout_crab_hole'],
+    'areaLayout': ['area_rando_gate_crab_tunnel', 'area_rando_gate_greenhillzone', 'east_ocean', 'aqueduct_bomb_blocks', 'area_layout_east_tunnel', 'area_layout_caterpillar', 'area_layout_single_chamber', 'area_layout_crab_hole'],
     'variaTweaks': ['WS_Etank', 'LN_Chozo', 'bomb_torizo']
 }
 
@@ -677,8 +677,8 @@ def getPatchSetsFromPatcherSettings(patcherSettings):
     for grp, patchList in groups.items():
         if patcherSettings[grp] == True:
             # handle customization
-            custom = patcherSettings.get(grp + "Custom", [])
-            if len(custom) == 0:
+            custom = patcherSettings.get(grp + "Custom")
+            if not custom: # covers None and []
                 patchSets += patchList
             else:
                 patchSets += [p for p in custom if p in patchList]

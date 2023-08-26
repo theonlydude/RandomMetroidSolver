@@ -460,7 +460,7 @@ definitions = {
         },
         'spazer': {
             'address': 0x23392b, 'value': 0xc5,
-            'desc': '',
+            'desc': 'Replace bomb blocks with shot blocks before Spaze',
             'ips': ['spazer.ips'],
             'plms': [],
             'logic': [RomPatches.SpazerShotBlock]

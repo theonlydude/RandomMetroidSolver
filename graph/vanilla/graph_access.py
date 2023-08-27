@@ -571,9 +571,12 @@ accessPoints = [
     }, internal=True),
     AccessPoint('Beach', 'WestMaridia', {
         'Crab Shaft Left': lambda sm: SMBool(True), # fall down
-        'Watering Hole': Cache.ldeco(lambda sm: sm.wand(sm.wor(sm.canPassBombPassages(),
-                                                               sm.canUseSpringBall()),
-                                                        sm.canDoOuterMaridia()))
+        'Watering Hole': Cache.ldeco(lambda sm: sm.wor(sm.wand(sm.wor(sm.canPassBombPassages(),
+                                                                      sm.canUseSpringBall()),
+                                                               sm.canDoOuterMaridia()),
+                                                       sm.wand(sm.haveItem('Gravity'),
+                                                               sm.haveItem('Morph'),
+                                                               sm.knowsBomblessWateringHoleAccess())))
     }, internal=True),
     AccessPoint('Crab Shaft Right', 'WestMaridia', {
         'Crab Shaft Left': lambda sm: sm.canJumpUnderwater()
@@ -739,7 +742,8 @@ accessPoints = [
         'East Tunnel Top Right': lambda sm: SMBool(True), # handled by room traverse function
         'Glass Tunnel Top': Cache.ldeco(lambda sm: sm.wand(sm.canUsePowerBombs(),
                                                            sm.wor(sm.haveItem('Gravity'),
-                                                                  sm.haveItem('HiJump')))),
+                                                                  sm.haveItem('HiJump'),
+                                                                  sm.knowsTubeGravityJump()))),
         'Red Tower Top Left': lambda sm: sm.canClimbBottomRedTower()
     }, roomInfo = {'RoomPtr':0xcf80, "area": 0x4},
        exitInfo = {'DoorPtr':0xa384, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x40,
@@ -757,7 +761,9 @@ accessPoints = [
        dotOrientation = 'e'),
     AccessPoint('Glass Tunnel Top', 'RedBrinstar', {
         'East Tunnel Right': Cache.ldeco(lambda sm: sm.wor(RomPatches.has(RomPatches.MaridiaTubeOpened),
-                                                           sm.canUsePowerBombs()))
+                                                           sm.canUsePowerBombs(),
+                                                           sm.wand(sm.haveItem('Morph'),
+                                                                   sm.knowsTubeClip())))
     }, traverse=Cache.ldeco(lambda sm: sm.wand(sm.wor(sm.haveItem('Gravity'),
                                                       sm.haveItem('HiJump')),
                                                sm.wor(RomPatches.has(RomPatches.MaridiaTubeOpened),

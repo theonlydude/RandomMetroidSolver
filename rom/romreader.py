@@ -12,7 +12,7 @@ from logic.logic import Logic
 from collections import defaultdict
 from utils.objectives import Objectives
 from utils.doorsmanager import DoorsManager
-from rom.rom_patches import definitions as patches_definitions
+from rom.rom_patches import definitions as patches_definitions, getPatchSet
 
 class RomReader:
     nothings = ['0xbae9', '0xbaed']
@@ -437,18 +437,19 @@ class RomReader:
     def patchPresent(self, patchName):
         return self._patchPresent(patchName, self.patches['common']) or self._patchPresent(patchName, self.patches[RomFlavor.flavor])
 
-    def getPatches(self):
-        # for display in the solver
+    def getPatchIds(self):
         result = []
         def getPatchesFromDict(patchDict):
             nonlocal result
-            for patch, patchEntry in patchDict.items():
-                if self._patchPresent(patch, patchDict) == True:
-                    result.append(patchEntry['desc'])
+            result += [patch for patch in patchDict if self._patchPresent(patch, patchDict) == True]
         getPatchesFromDict(self.flavorPatches)
         getPatchesFromDict(self.patches['common'])
         getPatchesFromDict(self.patches[RomFlavor.flavor])
         return result
+
+    def getPatches(self):
+        # for display in the solver
+        return [patchEntry['desc'] for patchEntry in [getPatchSet(p, RomFlavor.flavor) for p in self.getPatchIds()]]
 
     def getRawPatches(self):
         # for interactive solver

@@ -431,7 +431,7 @@ definitions = {
             'logic': [RomPatches.HiJumpShotBlock]
         },
         'moat': {
-            'address': 0x1085dd, 'value': 0xff,
+            'address': 0x21bd80, 'value': 0xd5,
             'desc': 'Replace bomb blocks with shot blocks at Moat',
             'ips': ['moat.ips'],
             'plms': [],
@@ -636,6 +636,12 @@ groups = {
     'variaTweaks': ['WS_Etank', 'LN_Chozo', 'bomb_torizo']
 }
 
+groups_descriptions = {
+    'layout': "Anti-softlock layout patches",
+    'areaLayout': "Area randomization comfort patches",
+    'variaTweaks': "VARIA Tweaks"
+}
+
 def _updateFlavorPatchesWithVanilla(flavor):
     keys = ['desc', 'ips', 'logic', 'plms']
     for patch, entry in definitions[flavor].items():
@@ -695,3 +701,27 @@ def getPatchSetsFromPatcherSettings(patcherSettings):
     if patcherSettings["tourian"] == "Fast":
         patchSets.append("fast_tourian")
     return patchSets
+
+def getPatchDescriptionsByGroup(patchList, flavor):
+    ret = {}
+    for patch in patchList:
+        found = False
+        for grp, grpPatches in groups.items():
+            grpDesc = groups_descriptions[grp]
+            found = patch in grpPatches
+            if found:
+                if grpDesc not in ret:
+                    ret[grpDesc] = []
+                desc = getPatchSet(patch, flavor)['desc']
+                ret[grpDesc].append(desc)
+                break
+        if not found:
+            if "Other" not in ret:
+                ret["Other"] = []
+            desc = getPatchSet(patch, flavor)['desc']
+            ret["Other"].append(desc)
+    for grp, grpPatches in groups.items():
+        grpDesc = groups_descriptions[grp]
+        if grpDesc in ret and len(grpPatches) == len(ret[grpDesc]):
+            ret[grpDesc] = "All"
+    return ret

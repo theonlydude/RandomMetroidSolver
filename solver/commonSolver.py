@@ -4,7 +4,7 @@ from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
 from logic.smbool import SMBool, smboolFalse
 from logic.helpers import Bosses
 from rom.romloader import RomLoader
-from rom.rom_patches import RomPatches
+from rom.rom_patches import RomPatches, getPatchDescriptionsByGroup
 from graph.graph import AccessGraphSolver as AccessGraph
 from utils.utils import PresetLoader
 from solver.conf import Conf
@@ -104,7 +104,7 @@ class CommonSolver(object):
                 self.escapeRandoRemoveEnemies = bool(self.romLoader.readOption("escapeRandoRemoveEnemies"))
                 self.revealMap = self.romLoader.hasPatch('revealMap')
             if interactive == False:
-                print("ROM {}\nmajors: {} area: {} boss: {} escape: {}\npatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches())))
+                print("ROM {}\nmajors: {} area: {} boss: {} escape: {}\npatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, getPatchDescriptionsByGroup(sorted(self.romLoader.getPatchIds()), RomFlavor.flavor)))
             else:
                 print("majors: {} area: {} boss: {} escape: {}".format(self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando))
 

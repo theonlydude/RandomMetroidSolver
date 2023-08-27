@@ -66,6 +66,9 @@ class RomLoader(object):
 
         return (isArea, isBoss, isEscape, hasObjectives, tourian)
 
+    def getPatchIds(self):
+        return self.romReader.getPatchIds()
+
     def getPatches(self):
         return self.romReader.getPatches()
 

@@ -10,7 +10,7 @@ from rom.ips import IPS_Patch
 from patches.common.patches import patches as commonPatchDict
 from collections import defaultdict
 
-variaTweaks = definitions["common"]["variaTweaks"]['ips']
+variaTweaks = [] # FIXME
 vanilla = RealROM("vanilla.sfc")
 
 used = defaultdict(list)
@@ -27,7 +27,7 @@ def getAddrAndValue(flavor, ips):
     for addr, bytez in patchDict.items():
         address = addr
         for b in bytez:
-            if b != vanilla.readByte(address):
+            if b != 0xff and b != vanilla.readByte(address):
                 if address in used and b in used[address]:
                     continue
                 used[address].append(b)

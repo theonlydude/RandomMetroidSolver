@@ -384,15 +384,15 @@
           true,
           100
       ],
-      'TubeClip': [
+      "TubeClip": [
           true,
           10
       ],
-      'TubeGravityJump': [
+      "TubeGravityJump": [
           true,
           25
       ],
-      'BomblessWateringHoleAccess': [
+      "BomblessWateringHoleAccess": [
           true,
           25
       ]

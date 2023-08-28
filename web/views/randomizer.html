@@ -605,7 +605,6 @@ function randomizeObjective(evt) {
     var selectedArray = get_selected_objectives();
 
     window.$randomizer.objective.setRandom(!wasRandom)
-
     if(wasRandom) {
         evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
 
@@ -1708,7 +1707,6 @@ function loadRandoPresetOK(data) {
         }
         setObjectives(data["objectiveMultiSelect"] || data["objective"]);
     }
-    objective_change(null, { deselected: true, selected: true });
     $("select").data('picker').sync_picker_with_select(); // syncs the logic image picker
 }
 

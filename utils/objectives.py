@@ -7,6 +7,7 @@ from logic.smbool import SMBool
 from logic.logic import Logic
 from utils.parameters import Knows
 from graph.graph_utils import graphAreas
+from utils.utils import randGaussBounds
 import utils.log, logging
 
 LOG = utils.log.get('Objectives')
@@ -669,6 +670,18 @@ class Objectives(object):
     @staticmethod
     def isGoalActive(goalName):
         return Objectives.goals[goalName] in Objectives.activeGoals
+
+    @staticmethod
+    def getNbRandomObjectives(nbAvailObj):
+        maxObj = min(Objectives.maxActiveGoals, nbAvailObj)
+        # make extreme values less likely
+        return 1 + randGaussBounds(maxObj - 1, slope=3.5)
+
+    @staticmethod
+    def getNbRandomRequiredObjectives():
+        # skewed towards more than half of the obj
+        maxObj = min(Objectives.nbActiveGoals, Objectives.maxRequiredGoals)
+        return min(1 + randGaussBounds(maxObj*1.25, slope=4.5), maxObj)
 
     # having graph as a global sucks but Objectives instances are all over the place,
     # goals must access it, and it doesn't change often

@@ -630,7 +630,7 @@ if __name__ == "__main__":
             if nbObjectives is not None:
                 availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
                 if nbObjectives == 0:
-                    nbObjectives = random.randint(1, min(Objectives.maxActiveGoals, len(availableObjectives)))
+                    nbObjectives = Objectives.getNbRandomObjectives(len(availableObjectives))
                 objectivesManager.setRandom(nbObjectives, availableObjectives)
                 if Objectives.nbActiveGoals < nbObjectives:
                     optErrMsgs.append(f"Could not reach {nbObjectives} possible objectives: only {Objectives.nbActiveGoals} available")
@@ -645,7 +645,7 @@ if __name__ == "__main__":
             if args.nbObjectivesRequired is not None:
                 nbReq = int(args.nbObjectivesRequired)
                 if nbReq == 0:
-                    nbReq = random.randint(1, min(Objectives.nbActiveGoals, Objectives.maxRequiredGoals))
+                    nbReq = Objectives.getNbRandomRequiredObjectives()
             else:
                 objectivesManager.expandGoals()
                 nbReq = Objectives.nbActiveGoals

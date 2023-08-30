@@ -101,7 +101,8 @@ def getAddressesToRead(cache):
     # patches
     for (_class, patches) in RomReader.patches.items():
         for patch, values in patches.items():
-            addresses["patches"].append(values["address"])
+            if "address" in values:
+                addresses["patches"].append(values["address"])
 
     # flavor patches
     for patch, values in RomReader.flavorPatches.items():

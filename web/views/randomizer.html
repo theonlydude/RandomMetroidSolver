@@ -1034,7 +1034,6 @@ function getSpecialValues(dataDict, trueJson) {
 }
 
 function validateObjectives() {
-    //console.log("objectiveMultiSelect: "+objectives.value);
     var values = get_selected_objectives();
 
     if(isElemIdRandom("objective")) {
@@ -2597,14 +2596,6 @@ def displaySelect(id, values, default, replace=True):
 
 {{
 def displayMultiSelect(id, selectedValues, default, multipleValues, replace=True):
-  # values for objective are stored differently
-  if id == "objective":
-    if session.randomizer.get("objectiveRandom") == 'true':
-      selectedValues = session.randomizer["objectiveMultiSelect"]
-    else:
-      selectedValues = session.randomizer["objective"] or ["kill all g4"]
-      pass
-    pass
   displaySelect(id, multipleValues, default, replace)
 
   response.write("<div id=\"{}MultiSelectDiv\" style=\"display:none\">".format(id), escape=False)

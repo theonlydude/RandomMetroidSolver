@@ -1946,6 +1946,7 @@ function loadRandoPresetOK(data) {
         $("#objectiveMultiSelect").val(data["objective"]).trigger("chosen:updated");
     }
     objective_change(null, { deselected: true, selected: true });
+    $("select").data('picker').sync_picker_with_select(); // syncs the logic image picker
 }
 
 function startTheTour(step=-1) {

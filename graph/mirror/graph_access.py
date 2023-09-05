@@ -60,14 +60,14 @@ accessPointsDict['Crab Hole Bottom Left'].connectInternal(
     'Main Street Bottom',
     Cache.ldeco(lambda sm: sm.wand(
         sm.canExitCrabHole(),
-        RomPatches.has(RomPatches.GreenHillsGateRemoved))
+        RomPatches.has(RomPatches.CrabTunnelGreenGateRemoved))
     )
 )
 accessPointsDict['West Sand Hall Left'].connectInternal(
     'Main Street Bottom',
     Cache.ldeco(lambda sm: sm.wand(
         sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
-        RomPatches.has(RomPatches.AreaRandoGatesOther))
+        RomPatches.has(RomPatches.CrabTunnelGreenGateRemoved))
     )
 )
 

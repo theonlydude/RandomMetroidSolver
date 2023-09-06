@@ -659,6 +659,8 @@ def getPatchSet(setName, flavor=None):
         patchSet = definitions['common'][setName]
     elif flavor is not None and setName in definitions[flavor]:
         patchSet = definitions[flavor][setName]
+    elif setName == flavor and 'logic' in definitions[flavor]:
+        patchSet = definitions[flavor]['logic']
     else:
         raise ValueError(f"Invalid patch set {setName}")
     return patchSet

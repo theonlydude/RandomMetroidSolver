@@ -361,6 +361,10 @@ if (hs.registerOverlay) {
     cursor: pointer;
     width: 2em;
 }
+.btn.btn-default[disabled] {
+    background: inherit;
+    opacity: 0.25;
+}
 </style>
 
 <script type="text/javascript">
@@ -581,7 +585,6 @@ var objectiveBackup = {
     false: {{ writeObjectiveList('objective') }},
 }
 var appIsReady = false;
-var takeBackup = false;
 
 function randomizeObjective(evt) {
     var isActive;
@@ -590,19 +593,13 @@ function randomizeObjective(evt) {
 
     window.$randomizer.objective.setRandom(!wasRandom)
 
-    // backup current value
-    if (takeBackup) {
-        objectiveBackup[wasRandom] = get_selected_objectives()
-    }
-
-    takeBackup = true;
     if(wasRandom) {
         evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
 
         // restore previous value
         var backup_values = objectiveBackup.false
         if (backup_values.length === 0) {
-            backup_values = ['kill all g4']
+            backup_values = ['kill all G4']
         }
         setObjectives(backup_values);
     } else {
@@ -1024,7 +1021,9 @@ function getSpecialValues(dataDict, trueJson) {
         var values = get_selected_objectives().join(",");
     }
     dataDict["objective"] = values ? values : "nothing"
-    dataDict["objectiveMultiSelect"] = values
+    if (dataDict["objectiveRandom"]) {
+        dataDict["objectiveMultiSelect"] = values
+    }
     if (isElemIdRandom("nbObjective")) {
         dataDict["nbObjective"] = "random"
     } else {
@@ -2853,7 +2852,7 @@ def displayNumber(id, min, max, default, step="1"):
                   <td><span id="nbObjectivesRequiredText">Number of required objectives:</span></td>
                   <td>
                     <select class="full" id="nbObjectivesRequired" name="nbObjectivesRequired" style="display: block;" value="{{response.write(session.randomizer.get('nbObjectivesRequired', 'off'))}}">
-                      <option selected="selected" value="off">off</option>
+                      <option selected="selected" value="off">all</option>
                       <option value="1">1</option>
                       <option value="2">2</option>
                       <option value="3">3</option>
@@ -2872,7 +2871,7 @@ def displayNumber(id, min, max, default, step="1"):
                   <td><span id="nbObjectiveText">Number of possible objectives:</span></td>
                   <td>{{displayNumber("nbObjective", "1", "18", "4", "1")}}</td>
                   <td id="nbObjectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-              </tr>
+                </tr>
                 <tr id="hiddenObjectivesVisibility">
                   <td class="small"></td>
                   <td colspan="2">{{displayCheckbox("hiddenObjectives")}}<span id="hiddenObjectivesText">Hidden Objectives</span></td>

@@ -23,6 +23,7 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/views/solver_web/presets.html ] || ln -s ~/RandomMetroidSolver/web/views/presets.html ~/web2py/applications/solver/views/solver_web/presets.html
 [ -L ~/web2py/applications/solver/views/solver_web/solver.html ] || ln -s ~/RandomMetroidSolver/web/views/solver.html ~/web2py/applications/solver/views/solver_web/solver.html
 [ -L ~/web2py/applications/solver/views/solver_web/randomizer.html ] || ln -s ~/RandomMetroidSolver/web/views/randomizer.html ~/web2py/applications/solver/views/solver_web/randomizer.html
+[ -L ~/web2py/applications/solver/views/solver_web/_randomizer_tour.js ] || ln -s ~/RandomMetroidSolver/web/views/_randomizer_tour.js ~/web2py/applications/solver/views/solver_web/_randomizer_tour.js
 [ -L ~/web2py/applications/solver/views/solver_web/infos.html ] || ln -s ~/RandomMetroidSolver/web/views/infos.html ~/web2py/applications/solver/views/solver_web/infos.html
 [ -L ~/web2py/applications/solver/views/solver_web/stats.html ] || ln -s ~/RandomMetroidSolver/web/views/stats.html ~/web2py/applications/solver/views/solver_web/stats.html
 [ -L ~/web2py/applications/solver/views/solver_web/tracker.html ] || ln -s ~/RandomMetroidSolver/web/views/tracker.html ~/web2py/applications/solver/views/solver_web/tracker.html
@@ -102,72 +103,12 @@ mkdir -p ~/web2py/applications/solver/static/images/rando/
 [ -L ~/web2py/applications/solver/static/images/rando/vanilla.png ] || ln -s ~/RandomMetroidSolver/web/static/vanilla.png ~/web2py/applications/solver/static/images/rando/vanilla.png
 [ -L ~/web2py/applications/solver/static/images/rando/mirror.png ] || ln -s ~/RandomMetroidSolver/web/static/mirror.png ~/web2py/applications/solver/static/images/rando/mirror.png
 
-# rando - help
+# randomizer - help images
 mkdir -p ~/web2py/applications/solver/static/images/help/
-[ -L ~/web2py/applications/solver/static/images/help/area_map_thumbnail.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map_thumbnail.png ~/web2py/applications/solver/static/images/help/area_map_thumbnail.png
-[ -L ~/web2py/applications/solver/static/images/help/hud_full.png ] || ln -s ~/RandomMetroidSolver/web/static/help/hud_full.png ~/web2py/applications/solver/static/images/help/hud_full.png
-[ -L ~/web2py/applications/solver/static/images/help/hud_chozo_start.png ] || ln -s ~/RandomMetroidSolver/web/static/help/hud_chozo_start.png ~/web2py/applications/solver/static/images/help/hud_chozo_start.png
-[ -L ~/web2py/applications/solver/static/images/help/hud_major_energy.png ] || ln -s ~/RandomMetroidSolver/web/static/help/hud_major_energy.png ~/web2py/applications/solver/static/images/help/hud_major_energy.png
-[ -L ~/web2py/applications/solver/static/images/help/hud_scav.png ] || ln -s ~/RandomMetroidSolver/web/static/help/hud_scav.png ~/web2py/applications/solver/static/images/help/hud_scav.png
-[ -L ~/web2py/applications/solver/static/images/help/hud_scav_over.png ] || ln -s ~/RandomMetroidSolver/web/static/help/hud_scav_over.png ~/web2py/applications/solver/static/images/help/hud_scav_over.png
-[ -L ~/web2py/applications/solver/static/images/help/hud_scav_pause.png ] || ln -s ~/RandomMetroidSolver/web/static/help/hud_scav_pause.png ~/web2py/applications/solver/static/images/help/hud_scav_pause.png
-[ -L ~/web2py/applications/solver/static/images/help/bt_map.png ] || ln -s ~/RandomMetroidSolver/web/static/help/bt_map.png ~/web2py/applications/solver/static/images/help/bt_map.png
-[ -L ~/web2py/applications/solver/static/images/help/cathedral.png ] || ln -s ~/RandomMetroidSolver/web/static/help/cathedral.png ~/web2py/applications/solver/static/images/help/cathedral.png
-[ -L ~/web2py/applications/solver/static/images/help/dachora.png ] || ln -s ~/RandomMetroidSolver/web/static/help/dachora.png ~/web2py/applications/solver/static/images/help/dachora.png
-[ -L ~/web2py/applications/solver/static/images/help/early_super.png ] || ln -s ~/RandomMetroidSolver/web/static/help/early_super.png ~/web2py/applications/solver/static/images/help/early_super.png
-[ -L ~/web2py/applications/solver/static/images/help/high_jump.png ] || ln -s ~/RandomMetroidSolver/web/static/help/high_jump.png ~/web2py/applications/solver/static/images/help/high_jump.png
-[ -L ~/web2py/applications/solver/static/images/help/climb_supers.png ] || ln -s ~/RandomMetroidSolver/web/static/help/climb_supers.png ~/web2py/applications/solver/static/images/help/climb_supers.png
-[ -L ~/web2py/applications/solver/static/images/help/moat.png ] || ln -s ~/RandomMetroidSolver/web/static/help/moat.png ~/web2py/applications/solver/static/images/help/moat.png
-[ -L ~/web2py/applications/solver/static/images/help/red_tower.png ] || ln -s ~/RandomMetroidSolver/web/static/help/red_tower.png ~/web2py/applications/solver/static/images/help/red_tower.png
-[ -L ~/web2py/applications/solver/static/images/help/spazer_block.png ] || ln -s ~/RandomMetroidSolver/web/static/help/spazer_block.png ~/web2py/applications/solver/static/images/help/spazer_block.png
-[ -L ~/web2py/applications/solver/static/images/help/ln_access.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ln_access.png ~/web2py/applications/solver/static/images/help/ln_access.png
-[ -L ~/web2py/applications/solver/static/images/help/ln_gate.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ln_gate.png ~/web2py/applications/solver/static/images/help/ln_gate.png
-[ -L ~/web2py/applications/solver/static/images/help/fish_access.png ] || ln -s ~/RandomMetroidSolver/web/static/help/fish_access.png ~/web2py/applications/solver/static/images/help/fish_access.png
-[ -L ~/web2py/applications/solver/static/images/help/fish_gate.png ] || ln -s ~/RandomMetroidSolver/web/static/help/fish_gate.png ~/web2py/applications/solver/static/images/help/fish_gate.png
-[ -L ~/web2py/applications/solver/static/images/help/tube_access.png ] || ln -s ~/RandomMetroidSolver/web/static/help/tube_access.png ~/web2py/applications/solver/static/images/help/tube_access.png
-[ -L ~/web2py/applications/solver/static/images/help/tube_gate.png ] || ln -s ~/RandomMetroidSolver/web/static/help/tube_gate.png ~/web2py/applications/solver/static/images/help/tube_gate.png
-[ -L ~/web2py/applications/solver/static/images/help/crab_gate.png ] || ln -s ~/RandomMetroidSolver/web/static/help/crab_gate.png ~/web2py/applications/solver/static/images/help/crab_gate.png
-[ -L ~/web2py/applications/solver/static/images/help/greenhill_walljump.png ] || ln -s ~/RandomMetroidSolver/web/static/help/greenhill_walljump.png ~/web2py/applications/solver/static/images/help/greenhill_walljump.png
-[ -L ~/web2py/applications/solver/static/images/help/greenhill_gate.png ] || ln -s ~/RandomMetroidSolver/web/static/help/greenhill_gate.png ~/web2py/applications/solver/static/images/help/greenhill_gate.png
-[ -L ~/web2py/applications/solver/static/images/help/ws_etank.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ws_etank.png ~/web2py/applications/solver/static/images/help/ws_etank.png
-[ -L ~/web2py/applications/solver/static/images/help/ln_chozo.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ln_chozo.png ~/web2py/applications/solver/static/images/help/ln_chozo.png
-[ -L ~/web2py/applications/solver/static/images/help/bomb_torizo.png ] || ln -s ~/RandomMetroidSolver/web/static/help/bomb_torizo.png ~/web2py/applications/solver/static/images/help/bomb_torizo.png
-[ -L ~/web2py/applications/solver/static/images/help/rando_popup.png ] || ln -s ~/RandomMetroidSolver/web/static/help/rando_popup.png ~/web2py/applications/solver/static/images/help/rando_popup.png
-[ -L ~/web2py/applications/solver/static/images/help/item_popup.png ] || ln -s ~/RandomMetroidSolver/web/static/help/item_popup.png ~/web2py/applications/solver/static/images/help/item_popup.png
-[ -L ~/web2py/applications/solver/static/images/help/load_popup.png ] || ln -s ~/RandomMetroidSolver/web/static/help/load_popup.png ~/web2py/applications/solver/static/images/help/load_popup.png
-[ -L ~/web2py/applications/solver/static/images/help/spore_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/spore_save.png ~/web2py/applications/solver/static/images/help/spore_save.png
-[ -L ~/web2py/applications/solver/static/images/help/ws_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ws_save.png ~/web2py/applications/solver/static/images/help/ws_save.png
-[ -L ~/web2py/applications/solver/static/images/help/early_super_bis.png ] || ln -s ~/RandomMetroidSolver/web/static/help/early_super_bis.png ~/web2py/applications/solver/static/images/help/early_super_bis.png
-[ -L ~/web2py/applications/solver/static/images/help/kraid_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/kraid_save.png ~/web2py/applications/solver/static/images/help/kraid_save.png
-[ -L ~/web2py/applications/solver/static/images/help/backup_locks.png ] || ln -s ~/RandomMetroidSolver/web/static/help/backup_locks.png ~/web2py/applications/solver/static/images/help/backup_locks.png
-[ -L ~/web2py/applications/solver/static/images/help/backup_copy.png ] || ln -s ~/RandomMetroidSolver/web/static/help/backup_copy.png ~/web2py/applications/solver/static/images/help/backup_copy.png
-[ -L ~/web2py/applications/solver/static/images/help/backup_no_slots.png ] || ln -s ~/RandomMetroidSolver/web/static/help/backup_no_slots.png ~/web2py/applications/solver/static/images/help/backup_no_slots.png
-[ -L ~/web2py/applications/solver/static/images/help/mission_impossible.png ] || ln -s ~/RandomMetroidSolver/web/static/help/mission_impossible.png ~/web2py/applications/solver/static/images/help/mission_impossible.png
-[ -L ~/web2py/applications/solver/static/images/help/forgotten_all_the_way.png ] || ln -s ~/RandomMetroidSolver/web/static/help/forgotten_all_the_way.png ~/web2py/applications/solver/static/images/help/forgotten_all_the_way.png
-[ -L ~/web2py/applications/solver/static/images/help/crab_hole.png ] || ln -s ~/RandomMetroidSolver/web/static/help/crab_hole.png ~/web2py/applications/solver/static/images/help/crab_hole.png
-[ -L ~/web2py/applications/solver/static/images/help/ice_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ice_door.png ~/web2py/applications/solver/static/images/help/ice_door.png
-[ -L ~/web2py/applications/solver/static/images/help/missile_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/missile_door.png ~/web2py/applications/solver/static/images/help/missile_door.png
-[ -L ~/web2py/applications/solver/static/images/help/plasma_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/plasma_door.png ~/web2py/applications/solver/static/images/help/plasma_door.png
-[ -L ~/web2py/applications/solver/static/images/help/powerbomb_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/powerbomb_door.png ~/web2py/applications/solver/static/images/help/powerbomb_door.png
-[ -L ~/web2py/applications/solver/static/images/help/spazer_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/spazer_door.png ~/web2py/applications/solver/static/images/help/spazer_door.png
-[ -L ~/web2py/applications/solver/static/images/help/super_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/super_door.png ~/web2py/applications/solver/static/images/help/super_door.png
-[ -L ~/web2py/applications/solver/static/images/help/wave_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/wave_door.png ~/web2py/applications/solver/static/images/help/wave_door.png
-[ -L ~/web2py/applications/solver/static/images/help/below_botwoon_etank.png ] || ln -s ~/RandomMetroidSolver/web/static/help/below_botwoon_etank.png ~/web2py/applications/solver/static/images/help/below_botwoon_etank.png
-[ -L ~/web2py/applications/solver/static/images/help/west_sand_hall_tunnel.png ] || ln -s ~/RandomMetroidSolver/web/static/help/west_sand_hall_tunnel.png ~/web2py/applications/solver/static/images/help/west_sand_hall_tunnel.png
-[ -L ~/web2py/applications/solver/static/images/help/west_sand_hall.png ] || ln -s ~/RandomMetroidSolver/web/static/help/west_sand_hall.png ~/web2py/applications/solver/static/images/help/west_sand_hall.png
-[ -L ~/web2py/applications/solver/static/images/help/main_street_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/main_street_save.png ~/web2py/applications/solver/static/images/help/main_street_save.png
-[ -L ~/web2py/applications/solver/static/images/help/crab_shaft_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/crab_shaft_save.png ~/web2py/applications/solver/static/images/help/crab_shaft_save.png
-[ -L ~/web2py/applications/solver/static/images/help/objectives.png ] || ln -s ~/RandomMetroidSolver/web/static/help/objectives.png ~/web2py/applications/solver/static/images/help/objectives.png
-[ -L ~/web2py/applications/solver/static/images/help/aqueduct_bomb_blocks.png ] || ln -s ~/RandomMetroidSolver/web/static/help/aqueduct_bomb_blocks.png ~/web2py/applications/solver/static/images/help/aqueduct_bomb_blocks.png
-[ -L ~/web2py/applications/solver/static/images/help/map.png ] || ln -s ~/RandomMetroidSolver/web/static/help/map.png ~/web2py/applications/solver/static/images/help/map.png
-[ -L ~/web2py/applications/solver/static/images/help/inventory.png ] || ln -s ~/RandomMetroidSolver/web/static/help/inventory.png ~/web2py/applications/solver/static/images/help/inventory.png
-[ -L ~/web2py/applications/solver/static/images/help/reveal_map.png ] || ln -s ~/RandomMetroidSolver/web/static/help/reveal_map.png ~/web2py/applications/solver/static/images/help/reveal_map.png
-
-# rando - maps
-[ -L ~/web2py/applications/solver/static/images/help/minimizer_example.png ] || ln -s ~/RandomMetroidSolver/web/static/help/minimizer_example.png ~/web2py/applications/solver/static/images/help/minimizer_example.png
-[ -L ~/web2py/applications/solver/static/images/help/minimizer_example_thumbnail.png ] || ln -s ~/RandomMetroidSolver/web/static/help/minimizer_example_thumbnail.png ~/web2py/applications/solver/static/images/help/minimizer_example_thumbnail.png
-[ -L ~/web2py/applications/solver/static/images/help/chozo_map_thumbnail.png ] || ln -s ~/RandomMetroidSolver/web/static/help/chozo_map_thumbnail.png ~/web2py/applications/solver/static/images/help/chozo_map_thumbnail.png
-[ -L ~/web2py/applications/solver/static/images/help/chozo_map.png ] || ln -s ~/RandomMetroidSolver/web/static/help/chozo_map.png ~/web2py/applications/solver/static/images/help/chozo_map.png
+for IMG in `ls ~/RandomMetroidSolver/web/static/help/|grep png`;
+do
+    [ -L ~/web2py/applications/solver/static/images/help/$IMG ] || ln -s ~/RandomMetroidSolver/web/static/help/$IMG ~/web2py/applications/solver/static/images/help/$IMG
+done
 
 # rando - start locations
 [ -L ~/web2py/applications/solver/static/images/help/gauntlet_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/gauntlet_start.png ~/web2py/applications/solver/static/images/help/gauntlet_start.png

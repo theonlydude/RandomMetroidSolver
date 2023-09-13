@@ -476,3 +476,40 @@ body {
 .hidden {
     display: none;
 }
+.patch-card__wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.patch-card {
+    border: 2px solid #aaa;
+    border-radius: 4px;
+    padding: 4px;
+    width: calc(256px + 8px + 4px); /* image width, padding, and border */
+}
+
+.patch-card.-width-2 {
+    width: calc(512px + 16px + 8px + 8px); /* image width, padding, border, card gap */
+}
+
+.patch-card__images {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.patch-card__images img {
+    margin-bottom: 4px;
+    width: 256px;
+}
+
+.patch-card__image.-on,
+.patch-card__wrapper.-patch-on .patch-card__image.-off {
+    display: block;
+}
+.patch-card__image.-off,
+.patch-card__wrapper.-patch-on .patch-card__image.-on {
+    display: none;
+}

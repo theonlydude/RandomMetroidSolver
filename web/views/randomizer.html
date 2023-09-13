@@ -34,6 +34,7 @@ if (hs.registerOverlay) {
 }
 </script>
 
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet" />
 <script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
 
@@ -53,19 +54,27 @@ if (hs.registerOverlay) {
 .image_picker_selector .thumbnail {
     cursor: pointer;
 }
-.modal.-objective-selector {
+.bootstrap-modal .modal {
     display: flex;
 }
-.modal.-objective-selector [type=checkbox] {
+.bootstrap-modal [type=checkbox] {
     cursor: pointer;
 }
-.modal.-objective-selector .modal-dialog {
+.bootstrap-modal .modal-dialog {
     width: unset;
 }
-.modal.-objective-selector .modal-header {
+.bootstrap-modal .modal-content {
+    background: #fafafa;
+    max-width: calc(100vw - 120px);
+}
+.bootstrap-modal .modal-header {
     position: relative;
 }
-.modal.-objective-selector .close {
+.bootstrap-modal .modal-body {
+    max-height: calc(100vh - 2 * 30px - 60px - 60px); /* screen - margin - header - footer */
+    overflow: auto;
+}
+.bootstrap-modal .close {
     color: #000;
     cursor: pointer;
     font-size: 21px;
@@ -79,14 +88,14 @@ if (hs.registerOverlay) {
     text-shadow: 0 1px 0 #fff;
     transform: translate(0, -50%);
 }
-.modal.-objective-selector .-partial [type=checkbox] {
+.bootstrap-modal .-partial [type=checkbox] {
     filter: grayscale(1);
     opacity: 0.5;
 }
-.modal.-objective-selector .-disabled {
+.bootstrap-modal .-disabled {
     opacity: 0.4;
 }
-.modal.-objective-selector .-disabled [type=checkbox] {
+.bootstrap-modal .-disabled [type=checkbox] {
     pointer-events: none;
     filter: invert(0.5);
 }
@@ -95,15 +104,15 @@ if (hs.registerOverlay) {
     flex-wrap: wrap;
     gap: 16px;
 }
-.modal.-objective-selector .modal-footer__text {
+.bootstrap-modal .modal-footer__text {
     padding-right: 8px;
 }
-.modal.-objective-selector .modal-footer .alert {
+.bootstrap-modal .modal-footer .alert {
     float: left;
     margin-bottom: 0;
     padding: 5px 10px;
 }
-#objectivePortal .selected-objectives {
+.vue-app .button-list {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
@@ -115,7 +124,7 @@ if (hs.registerOverlay) {
     gap: 4px;
     padding: 4px 0;
 }
-#objectivePortal .btn-xs {
+.vue-app .btn-xs {
     line-height: 1;
     padding: 5px;
     margin: 0;
@@ -499,6 +508,8 @@ function randomize(evt, elemId) {
   }
 
   if (e.id === 'areaRandomization') {
+    const value = isActive
+    $randomizer.set('areaRando', value)
      if (isActive) {
         $("#areaRandomizationMultiSelect").change();
      } else {
@@ -688,32 +699,39 @@ function setRandom() {
 }}
 }
 
-function setObjective() {
-    // called once when page loads to load objective values into form
+function initializeState() {
+    /* called once when page loads to load values into vue client
+       currently handles:
+       - objective
+       - objectiveRandom
+       - tourian
+       - majorsSplit
+    */
+    const data = {{response.write(session.randomizer,escape=False)}}
+    Object.entries(data).forEach(([key, value]) => {
+      if (value === 'off') {
+        data[key] = false
+      } else if (value === 'on') {
+        data[key] = true
+      }
+    })
+    $randomizer.init(data);
 
-    // at start all objectives are displayed as selected even though they're not...
-    var objective_random = "{{response.write(session.randomizer.get("objectiveRandom"))}}" == "true"
-    var objective_number = "{{response.write(session.randomizer.get("nbObjective", 4))}}"
-    var objective_required = "{{response.write(session.randomizer.get("nbObjectivesRequired", "off"))}}"
-
-    var selected_objectives = objectiveBackup[objective_random]
-    if (objective_random) {
+    if (data.objectiveRandom) {
         document.getElementById('objectiveRandom').click()
     }
 
-    if (['0', 'random'].includes(objective_number)) {
+    if (['0', 'random'].includes(data.nbObjective)) {
         document.getElementById('nbObjectiveRandom').click()
     } else {
-        document.getElementById('nbObjective').value = objective_number
+        document.getElementById('nbObjective').value = data.nbObjective
     }
 
-    if (['0', 'random'].includes(objective_required)) {
+    if (['0', 'random'].includes(data.nbObjectivesRequired)) {
         document.getElementById('nbObjectivesRequiredRandom').click()
     } else {
-        document.getElementById('nbObjectivesRequired').value = objective_required
+        document.getElementById('nbObjectivesRequired').value = data.nbObjectivesRequired
     }
-
-    setObjectives(selected_objectives)
 }
 
 function setComplexity() {
@@ -1511,7 +1529,8 @@ window.onload = function(){
 
     setRandom();
 
-    setObjective();
+    initializeState();
+
     // in case we're in nothing objectives
 
     $("#preset").chosen({ width: '100%' });
@@ -2878,7 +2897,7 @@ def displayNumber(id, min, max, default, step="1"):
                   <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td><span id="objectiveText">Objectives to access Tourian:</span></td>
                   <td>
-                    <div id="objectivePortal" />
+                    <div id="objectivePortal" class="vue-app" />
                   </td>
                   <td id="objectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
@@ -2961,7 +2980,7 @@ def displayNumber(id, min, max, default, step="1"):
                     <span id="areaLayout"></span>
                     <span id="areaLayoutText">Area Randomization Patches</span>
                 </td>
-                <td class="half" id="areaLayoutPatchesPortal"></td>
+                <td class="half vue-app" id="areaLayoutPatchesPortal"></td>
                 <td class="small"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
             </table>
@@ -3182,5 +3201,4 @@ def displayNumber(id, min, max, default, step="1"):
     </form>
   </div>
   <div id="app" />
-</body>
 {{ response.write(app_files, escape=False) }}

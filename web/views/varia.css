@@ -476,7 +476,11 @@ body {
 .hidden {
     display: none;
 }
-.patch-card__wrapper {
+.patch-selector__cards {
+    --p-image-width: 200px;
+    --p-gap: 12px;
+    --p-padding: 8px;
+    --p-border: 1px;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -484,25 +488,32 @@ body {
 }
 
 .patch-card {
-    border: 2px solid #aaa;
+    background: white;
+    border: 1px solid #aaa;
     border-radius: 4px;
-    padding: 4px;
-    width: calc(256px + 8px + 4px); /* image width, padding, and border */
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    padding: var(--p-padding);
+    width: calc(var(--p-image-width) + 2 * var(--p-padding) + 2 * var(--p-border));
 }
 
 .patch-card.-width-2 {
-    width: calc(512px + 16px + 8px + 8px); /* image width, padding, border, card gap */
+    width: calc(2 * var(--p-image-width) + 4 * var(--p-padding) + 4 * var(--p-border) + 1 * var(--p-gap));
+}
+
+.patch-card__title {
+    font-weight: bold;
+    font-size: 1.1em;
 }
 
 .patch-card__images {
     display: flex;
-    gap: 8px;
+    gap: var(--p-gap);
     justify-content: center;
 }
 
 .patch-card__images img {
-    margin-bottom: 4px;
-    width: 256px;
+    margin-bottom: var(--p-padding);
+    width: var(--p-image-width);
 }
 
 .patch-card__image.-on,

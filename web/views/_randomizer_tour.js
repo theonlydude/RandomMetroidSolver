@@ -1,4 +1,4 @@
-const AREA_PATCHES = {
+window.AREA_PATCHES = {
   crab_gate: {
     description: 'Remove green gate in [[Crab Tunnel]]',
   },
@@ -19,16 +19,16 @@ const AREA_PATCHES = {
   },
   fish_access: {
     description: 'Remove green gate in [[Red Tower Elevator Room]] and makes the access point more visible.',
-    images: ['fish_access_wall', 'fish_access_gate',],
+    images: ['fish_access_gate', 'fish_access_wall',],
   },
   tube_access: {
     description: 'Remove green gate in [[East Tunnel]] and unhides the ceilling access.',
-    images: ['tube_access_ceiling', 'tube_access_gate'],
+    images: ['tube_access_gate', 'tube_access_ceiling'],
   },
   ln_access: {
     description: 'Remove crumble blocks in [[Single Chambler]] and makes the hidden LN entrance more visible',
     title: 'LN Access',
-    images: ['ln_access_wall', 'ln_access_crumble'],
+    images: ['ln_access_crumble', 'ln_access_wall'],
   },
   east_ocean: {
     description: 'Open door to [[Sponge Bath]] and add two platforms to [[East Ocean]] (allows access only hi-jump boots)',

@@ -104,7 +104,7 @@ class CommonSolver(object):
                 self.escapeRandoRemoveEnemies = bool(self.romLoader.readOption("escapeRandoRemoveEnemies"))
                 self.revealMap = self.romLoader.hasPatch('revealMap')
             if interactive == False:
-                print("ROM {}\nmajors: {} area: {} boss: {} escape: {}\npatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, getPatchDescriptionsByGroup(sorted(self.romLoader.getPatchIds()), RomFlavor.flavor)))
+                print("ROM {}\nmajors: {} area: {} boss: {} escape: {}\npatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, self.getPatchDescriptionsByGroup()))
             else:
                 print("majors: {} area: {} boss: {} escape: {}".format(self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando))
 
@@ -138,6 +138,9 @@ class CommonSolver(object):
             self.log.debug("Display items at locations:")
             for loc in self.locations:
                 self.log.debug('{:>50}: {:>16}'.format(loc.Name, loc.itemName))
+
+    def getPatchDescriptionsByGroup(self):
+        return getPatchDescriptionsByGroup(sorted(self.romLoader.getPatchIds()), RomFlavor.flavor)
 
     def buildGraph(self):
         self.areaGraph = AccessGraph(Logic.accessPoints(), self.curGraphTransitions)

@@ -446,10 +446,6 @@ class RomReader:
         getPatchesFromDict(self.patches[RomFlavor.flavor])
         return result
 
-    def getPatches(self):
-        # for display in the solver
-        return [patchEntry['desc'] for patchEntry in [getPatchSet(p, RomFlavor.flavor) for p in self.getPatchIds()]]
-
     def getRawPatches(self):
         # for interactive solver
         result = {}

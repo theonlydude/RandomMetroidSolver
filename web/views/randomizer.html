@@ -50,6 +50,75 @@ if (hs.registerOverlay) {
 
 <style>
 {{include 'solver_web/varia.css'}}
+.image_picker_selector .thumbnail {
+    cursor: pointer;
+}
+.modal.-objective-selector {
+    display: flex;
+}
+.modal.-objective-selector [type=checkbox] {
+    cursor: pointer;
+}
+.modal.-objective-selector .modal-dialog {
+    width: unset;
+}
+.modal.-objective-selector .modal-header {
+    position: relative;
+}
+.modal.-objective-selector .close {
+    color: #000;
+    cursor: pointer;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1;
+    filter: alpha(opacity=20);
+    opacity: .2;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    text-shadow: 0 1px 0 #fff;
+    transform: translate(0, -50%);
+}
+.modal.-objective-selector .-partial [type=checkbox] {
+    filter: grayscale(1);
+    opacity: 0.5;
+}
+.modal.-objective-selector .-disabled {
+    opacity: 0.4;
+}
+.modal.-objective-selector .-disabled [type=checkbox] {
+    pointer-events: none;
+    filter: invert(0.5);
+}
+.objective-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.modal.-objective-selector .modal-footer__text {
+    padding-right: 8px;
+}
+.modal.-objective-selector .modal-footer .alert {
+    float: left;
+    margin-bottom: 0;
+    padding: 5px 10px;
+}
+#objectivePortal .selected-objectives {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px 0;
+}
+#objectivePortal .btn-xs {
+    line-height: 1;
+    padding: 5px;
+    margin: 0;
+}
+#objectivePortal .btn-danger { order: 1 }
+#objectivePortal .btn-warning { order: 2 }
+#objectivePortal .btn-primary { order: 3 }
+#objectivePortal .btn-success { order: 4 }
+#objectivePortal .btn-info { order: 5 }
 .innertd {
     padding-left: 5px;
     padding-right: 5px;
@@ -295,6 +364,10 @@ if (hs.registerOverlay) {
     cursor: pointer;
     width: 2em;
 }
+.btn.btn-default[disabled] {
+    background: inherit;
+    opacity: 0.25;
+}
 </style>
 
 <script type="text/javascript">
@@ -444,28 +517,9 @@ function randomizeMinimizer(evt) {
   }
 }
 
-function get_unselected_objectives() {
-    return $("#objectiveMultiSelect").find('option').not(':selected').map(function () { return this.value; }).get();
-}
-
 function get_selected_objectives() {
-    return $("#objectiveMultiSelect").val();
-}
-function remove_objective_from_unselected(objective) {
-    if( ! removed_objectives.includes(objective)) {
-        console.log("        !! remove objective from unselected: "+objective);
-        $('#objectiveMultiSelect option[value="'+objective+'"]').remove();
-        removed_objectives.push(objective);
-    }
-}
-function add_objective_to_unselected(objective) {
-    // check if not already present
-    if(removed_objectives.includes(objective)) {
-        console.log("        !! add objective to unselected: "+objective);
-        $("#objectiveMultiSelect").append("<option value=\""+objective+"\">"+objective+"</option>");
-        var index = removed_objectives.indexOf(objective);
-        removed_objectives.splice(index, 1);
-    }
+    // return a copy of selected objectives
+    return $randomizer.state.objective.slice()
 }
 function is_limit_objective(objective) {
     return "type" in objectives_exclusions[objective];
@@ -497,9 +551,7 @@ function is_objective_of_type(objective, type) {
 function get_objectives_count(type, list) {
     var count = 0;
     for(var i=0; i<list.length; i++) {
-        console.log("        get_objectives_count: type: "+type+" check obj: "+list[i]);
         if(is_objective_of_type(list[i], type)) {
-            console.log("        get_objectives_count: type: "+type+" checked obj: "+list[i]+" is of same type");
             count++;
         }
     }
@@ -508,190 +560,9 @@ function get_objectives_count(type, list) {
 function is_clear_area_objective(objective) {
     return "tourian" in objectives_exclusions[objective];
 }
-function can_add_to_unselected(toAdd) {
-    // 1. check if toAdd is in an exclusion list of the selected objectives
-    // 2. if toAdd is a limit objective
-    //    check count objectives already selected and if toAdd limit is not reached
-    // 3. if toAdd is a count objective
-    //    check limit objectives already selected and if toAdd would reach theirs limit
-    // 4. if toAdd is a clear area objective
-    //    check if Tourian is not set to disabled and majors split is not set to scavenger
-
-    var selectedArray = get_selected_objectives();
-    var tourian = document.getElementById("tourian");
-    var majorsSplit = document.getElementById("majorsSplit");
-
-    // 1.
-    console.log("      test if "+toAdd+" is in the exclusion list of an already selected objective");
-    for(var i=0; i<selectedArray.length; i++) {
-        var objective = selectedArray[i];
-        var exclusion_list = objectives_exclusions[objective]["list"];
-        if(exclusion_list.includes(toAdd)) {
-            console.log("        can't add "+toAdd+" it's in the exclusion list of "+objective);
-            return false;
-        }
-    }
-
-    // 2.
-    if(is_limit_objective(toAdd)) {
-        console.log("      "+toAdd+" is a limit objective, test its limit");
-        var type = get_limit_objective_type(toAdd);
-        var count = get_objectives_count(type, selectedArray);
-        var limit = get_limit_objective_limit(toAdd);
-        if(count > limit) {
-            console.log("        can't add "+toAdd+" it's a limit objective with limit "+limit+" and there's already "+count+" objectives of type "+type+" selected");
-            return false;
-        } else {
-            console.log("        can add "+toAdd+" it's a limit objective with limit "+limit+" and there's only "+count+" objectives of type "+type+" selected");
-        }
-
-    // 3.
-    } else if(is_count_objective(toAdd)) {
-        var type = get_count_objective_type(toAdd);
-        var count = get_objectives_count(type, selectedArray);
-        console.log("      "+toAdd+" is a count objective of type "+type+", check limit objectives already selected");
-        for(var i=0; i<selectedArray.length; i++) {
-            var toTest = selectedArray[i];
-            console.log("        test selected objective: "+toTest);
-            if(is_limit_objective(toTest)) {
-                console.log("        selected objective: "+toTest+" is a limit objective");
-                if(get_limit_objective_type(toTest) == type) {
-                    var limit = get_limit_objective_limit(toTest);
-                    console.log("        selected objective: "+toTest+" is a limit objective of type: "+type+" with a limit: "+limit);
-                    if(count >= limit) {
-                        console.log("        selected objective: "+toTest+" limit is reached, can't add "+toAdd);
-                        return false;
-                    }
-                }
-            }
-        }
-    } else if(is_clear_area_objective(toAdd)) {
-        if(tourian.value == "Disabled") {
-            console.log("        can't add "+toAdd+" it's a clear area objective and tourian is Disabled");
-            return false;
-        }
-        if(majorsSplit.value == "Scavenger") {
-            console.log("        can't add "+toAdd+" it's a clear area objective and majors split is scav");
-            return false;
-        }
-    }
-
-    console.log("    we can add "+toAdd);
-    return true;
-}
-function must_remove_from_unselected(toRemove) {
-    // 1. check if toRemove is in the exclusion list of the selected objectives
-    // 2. if toRemove is a limit objective
-    //    check count objectives already selected and if toRemove limit is reached
-    // 3. if toRemove is a count objective
-    //    check limit objectives already selected and if toRemove reach theirs limit
-    // 4. if toRemove is a clear area objective
-    //    remove from list if Tourian is set to disabled or majors split is set to scavenger
-
-    var selectedArray = get_selected_objectives();
-    var tourian = document.getElementById("tourian");
-    var majorsSplit = document.getElementById("majorsSplit");
-
-    // 1.
-    console.log("      test if "+toRemove+" is in the exclusion list of an already selected objective");
-    for(var i=0; i<selectedArray.length; i++) {
-        var objective = selectedArray[i];
-        var exclusion_list = objectives_exclusions[objective]["list"];
-        if(exclusion_list.includes(toRemove)) {
-            console.log("        must remove "+toRemove+" it's in the exclusion list of "+objective);
-            return true;
-        }
-    }
-
-    // 2.
-    if(is_limit_objective(toRemove)) {
-        console.log("      "+toRemove+" is a limit objective, test its limit");
-        var type = get_limit_objective_type(toRemove);
-        var count = get_objectives_count(type, selectedArray);
-        var limit = get_limit_objective_limit(toRemove);
-        if(count > limit) {
-            console.log("        must remove "+toRemove+" it's a limit objective with limit "+limit+" and there's already "+count+" objectives of type "+type+" selected");
-            return true;
-        } else {
-            console.log("        can keep "+toRemove+" it's a limit objective with limit "+limit+" and there's already "+count+" objectives of type "+type+" selected");
-        }
-
-    // 3.
-    } else if(is_count_objective(toRemove)) {
-        var type = get_count_objective_type(toRemove);
-        var count = get_objectives_count(type, selectedArray);
-        console.log("      "+toRemove+" is a count objective of type "+type+", check limit objectives already selected");
-        for(var i=0; i<selectedArray.length; i++) {
-            var toTest = selectedArray[i];
-            console.log("        test selected objective: "+toTest);
-            if(is_limit_objective(toTest)) {
-                console.log("        selected objective: "+toTest+" is a limit objective");
-                if(get_limit_objective_type(toTest) == type) {
-                    var limit = get_limit_objective_limit(toTest);
-                    console.log("        selected objective: "+toTest+" is a limit objective of type: "+type+" with a limit: "+limit);
-                    if(count >= limit) {
-                        console.log("        selected objective: "+toTest+" limit is reached, must remove "+toRemove);
-                        return true;
-                    }
-                }
-            }
-        }
-    // 4.
-    } else if(is_clear_area_objective(toRemove)) {
-        if(tourian.value == "Disabled") {
-            console.log("        must remove "+toRemove+" it's a clear area objective and tourian is disabled");
-            return true;
-        }
-        if(majorsSplit.value == "Scavenger") {
-            console.log("        must remove "+toRemove+" it's a clear area objective and majors split is scav");
-            return true;
-        }
-    }
-
-    console.log("    we don't have to remove "+toRemove);
-    return false;
-}
-function sort_objectives_and_add_optgroups() {
-    var my_options = $("#objectiveMultiSelect option");
-    var selected = $("#objectiveMultiSelect").val();
-
-    my_options.sort(function(a, b) {
-        var index_a = objectives_sort.indexOf(a.value);
-        var index_b = objectives_sort.indexOf(b.value);
-        if (index_a > index_b) return 1;
-        if (index_a < index_b) return -1;
-        return 0
-    })
-
-    $("#objectiveMultiSelect").empty()
-
-    var current_group_name = undefined;
-    var current_group = undefined;
-    for(var i=0; i<my_options.length; i++) {
-        var option = my_options[i];
-        var option_group_name = objectives_categories[option.value];
-
-        if(current_group_name == undefined) {
-            current_group_name = option_group_name;
-            current_group = document.createElement("optgroup");
-            current_group.setAttribute("label", current_group_name);
-        } else if(current_group_name != option_group_name) {
-            $("#objectiveMultiSelect").append(current_group);
-
-            current_group_name = option_group_name;
-            current_group = document.createElement("optgroup");
-            current_group.setAttribute("label", current_group_name);
-        }
-
-        current_group.appendChild(option);
-    }
-    if(current_group != undefined) {
-        $("#objectiveMultiSelect").append(current_group);
-    }
-
-    $("#objectiveMultiSelect").val(selected);
-
-    $("#objectiveMultiSelect").trigger("chosen:updated");
+function setObjectives(objectives) {
+    // This will be undefined when loading most preset
+    $randomizer.set('objective', objectives || ['kill all G4']);
 }
 
 var objectives_exclusions = {{response.write(objectivesExclusions, escape=False)}};
@@ -699,58 +570,7 @@ var objectives_types = {{response.write(objectivesTypes, escape=False)}};
 var objectives_sort = {{response.write(objectivesSort, escape=False)}};
 var objectives_categories = {{response.write(objectivesCategories, escape=False)}};
 var removed_objectives = [];
-console.log("objectives_types: boss: "+objectives_types['boss']);
-console.log("objectives_types: miniboss: "+objectives_types['miniboss']);
 
-function objective_change(e, params, force) {
-    // if random is set do nothing
-    // force is used when the objective is changed to random and we need to unselect everything
-    if(isElemIdRandom("objective") && !force) {
-        return;
-    }
-
-    if(params.selected) {
-        console.log("* new objective selected: "+params.selected);
-        var unselected_objectives = get_unselected_objectives();
-        for(var j=0; j<unselected_objectives.length; j++) {
-            var toRemove = unselected_objectives[j];
-            console.log("  check to remove obj "+toRemove+" from unselected objectives");
-            if(must_remove_from_unselected(toRemove)) {
-                remove_objective_from_unselected(toRemove);
-            }
-        }
-    }
-    if(params.deselected) {
-        console.log("* new objective deselected: "+params.deselected);
-        var copy_removed_objectives = removed_objectives.slice();
-        for(var j=0; j<copy_removed_objectives.length; j++) {
-            var toAdd = copy_removed_objectives[j];
-            console.log("  check to add obj "+toAdd+" from removed objectives");
-            if(can_add_to_unselected(toAdd) || force) {
-                add_objective_to_unselected(toAdd);
-            }
-        }
-    }
-
-    sort_objectives_and_add_optgroups();
-}
-
-var max_objectives = 18;
-function setMaxObjective(isRandom) {
-    if(isRandom) {
-        // no limit
-        $("#objectiveMultiSelect").chosen("destroy");
-        $("#objectiveMultiSelect").chosen({max_selected_options: Infinity, width: '100%'})
-        $("#nbObjectiveVisiblity").show();
-        $("#hiddenObjectivesVisibility").show();
-    } else {
-        // limit to 18 objectives (17 in scav hunt)
-        $("#objectiveMultiSelect").chosen("destroy");
-        $("#objectiveMultiSelect").chosen({max_selected_options: max_objectives, width: '100%'})
-        $("#nbObjectiveVisiblity").hide();
-        $("#hiddenObjectivesVisibility").hide();
-    }
-}
 
 {{
 def writeObjectiveList(key):
@@ -768,87 +588,41 @@ var objectiveBackup = {
     false: {{ writeObjectiveList('objective') }},
 }
 var appIsReady = false;
-var takeBackup = false;
 
 function randomizeObjective(evt) {
     var isActive;
     var wasRandom = isElemRandom(evt.currentTarget)
-
-    // backup current value
-    if (takeBackup) {
-        objectiveBackup[wasRandom] = get_selected_objectives()
-    }
-
-    takeBackup = true;
     var selectedArray = get_selected_objectives();
+
+    window.$randomizer.objective.setRandom(!wasRandom)
+
     if(wasRandom) {
         evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
-        isActive = false;
-
-        setMaxObjective(false);
 
         // restore previous value
         var backup_values = objectiveBackup.false
         if (backup_values.length === 0) {
-            backup_values = ['kill all g4']
+            backup_values = ['kill all G4']
         }
-        $("#objectiveMultiSelect").val(backup_values).trigger("chosen:updated");
-        removed_objectives = [];
-
-        // handle exclusions for currently selected values
-        for(var i=0; i<selectedArray.length; i++) {
-            objective_change(null, {selected: selectedArray[i]});
-        }
+        setObjectives(backup_values);
     } else {
         evt.currentTarget.className += " active";
-        isActive = true;
-        setMaxObjective(true);
         var backup_values = objectiveBackup.true
 
-        // undo exclusions since random allows for all objectives
-        for(var i=0; i<selectedArray.length; i++) {
-            objective_change(null, {deselected: selectedArray[i]}, true);
+        function removeHundreds(array) {
+            return array.filter(s => s !== 'collect 100% items' && s !== "explore 100% map");
         }
 
-        var all_objectives = getAllObjectives();
+        var all_objectives = defaultMultiValues.objective.slice();
+        all_objectives = removeHundreds(all_objectives)
         if (backup_values.length === 0) {
             backup_values = all_objectives
         }
         if (backup_values.length >= all_objectives.length) {
-            backup_values = backup_values.filter(s => s !== 'collect 100% items' && s !== "explore 100% map");
+            backup_values = removeHundreds(backup_values)
         }
-        $("#objectiveMultiSelect").val(backup_values).trigger("chosen:updated");
+        setObjectives(backup_values);
     }
-
-    sort_objectives_and_add_optgroups();
-
-    disableElement("objective", isActive);
-}
-
-function getAllObjectives() {
-    // add all objectives for randomization, as we may have removed some of them from the dropdown list
-    var notSelectedArray = get_unselected_objectives();
-    var selectedArray = get_selected_objectives();
-    for(var i=0; i<defaultMultiValues["objective"].length; i++) {
-        var toAdd = defaultMultiValues["objective"][i];
-        // don't add 'collect 100% items' to the random list as it's a special objective
-        if(toAdd == "collect 100% items" || toAdd == "explore 100% map") {
-            continue;
-        }
-        if(!notSelectedArray.includes(toAdd) && !selectedArray.includes(toAdd)) {
-            $("#objectiveMultiSelect").append("<option value=\""+toAdd+"\">"+toAdd+"</option>");
-        }
-    }
-    var all_objectives = Array.from(defaultMultiValues["objective"]);
-    var index = all_objectives.indexOf("collect 100% items");
-    if(index > -1) {
-        all_objectives.splice(index, 1);
-    }
-    index = all_objectives.indexOf("explore 100% map");
-    if(index > -1) {
-        all_objectives.splice(index, 1);
-    }
-    return all_objectives
 }
 
 function disableElement(id, disable) {
@@ -906,13 +680,6 @@ function setRandom() {
 
 function setObjective() {
     // called once when page loads to load objective values into form
-    // always display objectives multi select
-    var select = document.getElementById("objective");
-    var multi = document.getElementById("objectiveMultiSelectDiv");
-
-    select.style.display = "none";
-    multi.style.display = "block";
-    setMaxObjective(isElemRandom(document.getElementById("objectiveRandom")));
 
     // at start all objectives are displayed as selected even though they're not...
     var objective_random = "{{response.write(session.randomizer.get("objectiveRandom"))}}" == "true"
@@ -921,11 +688,7 @@ function setObjective() {
 
     var selected_objectives = objectiveBackup[objective_random]
     if (objective_random) {
-        // handle exclusions for currently selected values
         document.getElementById('objectiveRandom').click()
-        for(var i=0; i<selected_objectives.length; i++) {
-            objective_change(null, {selected: selected_objectives[i]});
-        }
     }
 
     if (['0', 'random'].includes(objective_number)) {
@@ -940,9 +703,7 @@ function setObjective() {
         document.getElementById('nbObjectivesRequired').value = objective_required
     }
 
-    $("#objectiveMultiSelect").val(selected_objectives).trigger("chosen:updated");
-    $("#objectiveMultiSelect").on('change', objective_change);
-    objective_change(undefined, {selected: {}})
+    setObjectives(selected_objectives)
 }
 
 function setComplexity() {
@@ -1000,8 +761,8 @@ function getRandomizerParameters(setDisabledToOff, trueJson) {
     var dataDict = {};
 
     var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf", "hiddenObjectives"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
-    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "tourian", "areaRandomization"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
+    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian", "areaRandomization"];
     var imgPickers = ["logic"];
 
     for(var i=0; i<elems.length; i++) {
@@ -1258,12 +1019,14 @@ function getSpecialValues(dataDict, trueJson) {
     // Note both objective and objectiveMultiSelect are passed via dataDict.objective
     // The backend decides to use this for one or the other
     if(trueJson) {
-        var values = $("#objectiveMultiSelect").val();
+        var values = get_selected_objectives();
     } else {
-        var values = $("#objectiveMultiSelect").val().join(",");
+        var values = get_selected_objectives().join(",");
     }
     dataDict["objective"] = values ? values : "nothing"
-
+    if (dataDict["objectiveRandom"]) {
+        dataDict["objectiveMultiSelect"] = values
+    }
     if (isElemIdRandom("nbObjective")) {
         dataDict["nbObjective"] = "random"
     } else {
@@ -1277,9 +1040,7 @@ function getSpecialValues(dataDict, trueJson) {
 }
 
 function validateObjectives() {
-    //var objectives = document.getElementById("objectiveMultiSelect");
-    //console.log("objectiveMultiSelect: "+objectives.value);
-    var values = $("#objectiveMultiSelect").val();
+    var values = get_selected_objectives();
 
     if(isElemIdRandom("objective")) {
         // if objectives are randomized, check that there's at least one in the list
@@ -1289,8 +1050,11 @@ function validateObjectives() {
         }
     } else {
         // if not randomized, check that there's max 18 objectives in the list (17 in scav hunt)
-        if(values.length > max_objectives) {
-            alert("You can have maximum 18 objectives (17 if major split is Scavenger Hunt)");
+        const max = $randomizer.objective.getMax();
+        const count = values.length;
+        const splits = document.getElementById('majorsSplit').value
+        if(values.length > max) {
+            alert(`You can only have ${max} objectives for ${splits} (${count} currently selected)`);
             return false
         }
     }
@@ -1309,7 +1073,7 @@ function doSubmit() {
             return false;
         }
 
-        if(! validateObjectives()) {
+        if(!validateObjectives()) {
             return false;
         }
 
@@ -1692,12 +1456,13 @@ window.onload = function(){
 
     var tourian = document.getElementById("tourian");
     tourian.onchange = function() {
-        // update available objectives
-        objective_change(undefined, {selected: {}, deselected: {}})
+        $randomizer.set('tourian', tourian.value)
     }
+    tourian.onchange();
 
     var majorsSplit = document.getElementById("majorsSplit");
     majorsSplit.onchange = function() {
+        $randomizer.set('majorsSplit', majorsSplit.value);
         var scavengerParams = document.getElementById("scavengerParams");
         if(majorsSplit.value == "Scavenger") {
             scavengerParams.style.display = "block";
@@ -1715,21 +1480,9 @@ window.onload = function(){
             }
             var hud = document.getElementById("hud");
             setSwitchToOn(hud);
-
-            // update maximum number of allowed custom objectives
-            max_objectives = 17;
         } else {
             scavengerParams.style.display = "none";
-
-            // update maximum number of allowed custom objectives
-            max_objectives = 18;
         }
-        // tell chosen about new maximum
-        if(!isElemRandom(document.getElementById("objectiveRandom"))) {
-            setMaxObjective(false);
-        }
-        // update available objectives
-        objective_change(undefined, {selected: {}, deselected: {}})
     }
     majorsSplit.onchange();
 
@@ -1750,7 +1503,6 @@ window.onload = function(){
 
     setObjective();
     // in case we're in nothing objectives
-    sort_objectives_and_add_optgroups();
 
     $("#preset").chosen({ width: '100%' });
     $("#randoPreset").chosen({ width: '100%' });
@@ -1937,15 +1689,15 @@ function loadRandoPresetOK(data) {
             randomizeObjective({currentTarget: objectiveRandom});
         }
         if("objectiveMultiSelect" in data) {
-            $("#objectiveMultiSelect").val(data["objectiveMultiSelect"]).trigger("chosen:updated");
+            setObjectives(data["objectiveMultiSelect"]);
         }
     } else {
         if(isElemRandom(objectiveRandom)) {
             randomizeObjective({currentTarget: objectiveRandom});
         }
-        $("#objectiveMultiSelect").val(data["objective"]).trigger("chosen:updated");
+        setObjectives(data["objectiveMultiSelect"] || data["objective"]);
     }
-    objective_change(null, { deselected: true, selected: true });
+    $("select").data('picker').sync_picker_with_select(); // syncs the logic image picker
 }
 
 function startTheTour(step=-1) {
@@ -2850,14 +2602,6 @@ def displaySelect(id, values, default, replace=True):
 
 {{
 def displayMultiSelect(id, selectedValues, default, multipleValues, replace=True):
-  # values for objective are stored differently
-  if id == "objective":
-    if session.randomizer.get("objectiveRandom") == 'true':
-      selectedValues = session.randomizer["objectiveMultiSelect"]
-    else:
-      selectedValues = session.randomizer["objective"] or ["kill all g4"]
-      pass
-    pass
   displaySelect(id, multipleValues, default, replace)
 
   response.write("<div id=\"{}MultiSelectDiv\" style=\"display:none\">".format(id), escape=False)
@@ -3036,45 +2780,6 @@ def displayNumber(id, min, max, default, step="1"):
                 <td>{{displayMultiSelect("tourian", currentMultiValues["tourian"], "Vanilla", defaultMultiValues["tourian"])}}</td>
                 <td id="tourianStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
-            <table class="full" id="objectivesVisibility">
-              <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
-              <tr id="nbObjectivesRequiredVisiblity">
-                <td class="small"><div class="random"><button id="nbObjectivesRequiredRandom" type="button" onclick="randomize(event, 'nbObjectivesRequired')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="nbObjectivesRequiredText">Number of required objectives:</span></td>
-                <td>
-                  <select class="full" id="nbObjectivesRequired" name="nbObjectivesRequired" style="display: block;" value="{{response.write(session.randomizer.get('nbObjectivesRequired', 'off'))}}">
-                    <option selected="selected" value="off">off</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                  </select>
-                </td>
-
-                <td id="nbObjectivesRequiredStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-              </tr>
-              <tr id="nbObjectiveVisiblity">
-                <td class="small"><div class="random"><button id="nbObjectiveRandom" type="button" onclick="randomize(event, 'nbObjective')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="nbObjectiveText">Number of possible objectives:</span></td>
-                <td>{{displayNumber("nbObjective", "1", "18", "4", "1")}}</td>
-                <td id="nbObjectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-              </tr>
-              <tr id="hiddenObjectivesVisibility">
-                <td class="small"></td>
-                <td colspan="2">{{displayCheckbox("hiddenObjectives")}}<span id="hiddenObjectivesText">Hidden Objectives</span></td>
-                <td id="hiddenObjectivesStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-              </tr>
-              <tr>
-                <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="objectiveText">Objectives to access Tourian:</span></td>
-                <td>{{displayMultiSelect("objective", "objective is special!", "", defaultMultiValues["objective"])}}</td>
-                <td id="objectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-              </tr>
             </table>
             <table class="full">
               <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
@@ -3141,6 +2846,50 @@ def displayNumber(id, min, max, default, step="1"):
                 <td id="hideItemsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
             </table>
+            <div id="objectivesVisibility">
+              <h4>Objectives to Access Tourian</h4>
+              <table class="full">
+                <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
+                <tr id="nbObjectivesRequiredVisiblity">
+                  <td class="small"><div class="random"><button id="nbObjectivesRequiredRandom" type="button" onclick="randomize(event, 'nbObjectivesRequired')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="nbObjectivesRequiredText">Number of required objectives:</span></td>
+                  <td>
+                    <select class="full" id="nbObjectivesRequired" name="nbObjectivesRequired" style="display: block;" value="{{response.write(session.randomizer.get('nbObjectivesRequired', 'off'))}}">
+                      <option selected="selected" value="off">all</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                      <option value="7">7</option>
+                      <option value="8">8</option>
+                      <option value="9">9</option>
+                    </select>
+                  </td>
+                  <td id="nbObjectivesRequiredStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr id="nbObjectiveVisiblity">
+                  <td class="small"><div class="random"><button id="nbObjectiveRandom" type="button" onclick="randomize(event, 'nbObjective')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="nbObjectiveText">Number of possible objectives:</span></td>
+                  <td>{{displayNumber("nbObjective", "1", "18", "4", "1")}}</td>
+                  <td id="nbObjectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr id="hiddenObjectivesVisibility">
+                  <td class="small"></td>
+                  <td colspan="2">{{displayCheckbox("hiddenObjectives")}}<span id="hiddenObjectivesText">Hidden Objectives</span></td>
+                  <td id="hiddenObjectivesStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr>
+                  <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="objectiveText">Objectives to access Tourian:</span></td>
+                  <td>
+                    <div id="objectivePortal" />
+                  </td>
+                  <td id="objectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+              </table>
+            </div>
             <div id="itemsQuantityVisibility">
               <h4>Ammunition and Energy</h4>
               <h5>Quantity of Ammunition and Energy available</h5>
@@ -3419,4 +3168,6 @@ def displayNumber(id, min, max, default, step="1"):
         {{=INPUT(_type="submit", _value="Randomize + Customize", _id="customizeBtn", _class="btn btn-default buttonRandom")}}
     </form>
   </div>
+  <div id="app" />
 </body>
+{{ response.write(app_files, escape=False) }}

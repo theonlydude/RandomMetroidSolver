@@ -254,7 +254,7 @@ class Knows:
                             'title': 'Skip the Zebetites with a shinespark',
                             'href': 'https://www.youtube.com/watch?v=jEAgdWQ9kLQ',
                             'rooms': ['Mother Brain Room']}
-    # maridia WJs
+    # maridia jumps
     HiJumpMamaTurtle = SMBool(False, 0, ['HiJumpMamaTurtle'])
     desc['HiJumpMamaTurtle'] = {'display': 'Mama Turtle E-Tank with High-Jump+Speed',
                                 'title': 'Access Mama Turtle E-Tank with High-Jump and Speed Booster (and Morph or X-Ray to turn around without moving)',
@@ -278,6 +278,12 @@ class Knows:
                                 'title': 'Access Mount Everest top door by doing a crouch+gravity jump in the last couple frames possible',
                                 'href': 'https://www.youtube.com/watch?v=sZLEzdTgJbI',
                                 'rooms': ['Mt. Everest']}
+
+    BomblessWateringHoleAccess = SMBool(False, 0, ['BomblessWateringHoleAccess'])
+    desc['BomblessWateringHoleAccess'] = {'display': 'Access Watering Hole with Gravity and Morph',
+                                          'title': 'Wait for the Owtch to go under the sand, then do a quick run and jump into morph in the hole',
+                                          'href': 'https://youtu.be/tVjCBi8kKWo',
+                                          'rooms': ['Northwest Maridia Bug Room']}
 
     # underwater grav-less
     GravLessLevel1 = SMBool(True, hardcore, ['GravLessLevel1'])
@@ -372,6 +378,18 @@ class Knows:
                              'title': 'Climb Red Tower without Ice Beam',
                              'href': 'https://www.youtube.com/watch?v=g3goe6PZ4o0',
                              'rooms': ['Red Tower']}
+
+    TubeClip = SMBool(False, 0, ['TubeClip'])
+    desc['TubeClip'] = {'display': 'Clip into the Tube with Morph',
+                        'title': 'Clip through the Maridia tube with unmorphing and wiggling. Mostly useful in area rando.',
+                        'href': 'https://youtu.be/npM3EpE-wUg',
+                        'rooms': ['Glass Tunnel']}
+
+    TubeGravityJump = SMBool(False, 0, ['TubeGravityJump'])
+    desc['TubeGravityJump'] = {'display': 'Tube exit Gravity jump',
+                               'title': 'Exit through the already broken tube with no items by gravity jumping from an adjacent room. Adjust direction just as you enter the tube room. Mostly useful in area rando.',
+                               'href': 'https://youtu.be/kZ0-SDYcNrc',
+                               'rooms': ['Glass Tunnel']}
 
     RonPopeilScrew = SMBool(False, 0, ['RonPopeilScrew'])
     desc['RonPopeilScrew'] = {'display': 'Bomb-less Ron Popeil Missiles',
@@ -739,7 +757,7 @@ class Knows:
              'title': 'Crateria'},
             {'knows': ['CeilingDBoost', 'BillyMays', 'EarlyKraid',
                        'SporeSpawnBackDoor', 'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 'WaveGateGlitchMirror',
-                       'RedTowerClimb', 'XrayDboost', 'XrayIce',
+                       'RedTowerClimb', 'XrayDboost', 'XrayIce', 'TubeClip', 'TubeGravityJump',
                        'RonPopeilScrew', 'Moondance'],
              'title': 'Brinstar'}
         ],
@@ -757,7 +775,7 @@ class Knows:
              'title': 'Clips'},
             {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
              'title': 'Plasma Room'},
-            {'knows': ['HiJumpMamaTurtle', 'MaridiaWallJumps', 'MtEverestGravJump', 'MamaTurtleWallJumpBombBoost'],
+            {'knows': ['HiJumpMamaTurtle', 'MaridiaWallJumps', 'MtEverestGravJump', 'BomblessWateringHoleAccess', 'MamaTurtleWallJumpBombBoost'],
              'title': 'Jumps'}
         ],
         'Maridia 2/2': [

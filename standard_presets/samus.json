@@ -391,6 +391,18 @@
       "WestSandHoleSuitlessWallJumps": [
           true,
           1
+      ],
+      "TubeClip": [
+          true,
+          1
+      ],
+      "TubeGravityJump": [
+          true,
+          1
+      ],
+      "BomblessWateringHoleAccess": [
+          true,
+          1
       ]
   },
   "Settings": {

@@ -442,7 +442,6 @@ class RomReader:
         def getPatchesFromDict(patchDict):
             nonlocal result
             result += [patch for patch in patchDict if self._patchPresent(patch, patchDict) == True]
-        getPatchesFromDict(self.flavorPatches)
         getPatchesFromDict(self.patches['common'])
         getPatchesFromDict(self.patches[RomFlavor.flavor])
         return result

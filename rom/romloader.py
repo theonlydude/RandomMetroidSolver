@@ -69,9 +69,6 @@ class RomLoader(object):
     def getPatchIds(self):
         return self.romReader.getPatchIds()
 
-    def getPatches(self):
-        return self.romReader.getPatches()
-
     def getRawPatches(self):
         # used in interactive solver
         return self.romReader.getRawPatches()

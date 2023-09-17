@@ -37,16 +37,7 @@ macro i16()
 endmacro
 
 ;;; compute absolute tile offset from coords
-;;; result in !_tile_offset
-macro tileOffset(x, y)
-!_tile_offset #= 2*((<y>*$20)+<x>)
-endmacro
-
-;;; ldx the result of %tileOffset
-macro ldx_tileOffset(x, y)
-%tileOffset(<x>, <y>)
-        ldx.w #!_tile_offset
-endmacro
+function tileOffset(x, y) = 2*((y*$20)+x)
 
 ;; BG tile format
 ;; vhopppcc cccccccc
@@ -54,14 +45,7 @@ endmacro
 ;; o          = Tile priority.
 ;; ppp        = Tile palette. The number of entries in the palette depends on the Mode and the BG.
 ;; cccccccccc = Tile number.
-macro BGtile(index, palette, prio, hflip, vflip)
-!_tile #= (<index>&$3FF)|((<palette>&$7)<<10)|((<prio>&$1)<<13)|((<hflip>&$1)<<14)|((<vflip>&$1)<<15)
-endmacro
-
-macro dw_BGtile(index, palette, prio, hflip, vflip)
-%BGtile(<index>, <palette>, <prio>, <hflip>, <vflip>)
-        dw !_tile
-endmacro
+function BGtile(index, palette, prio, hflip, vflip) = (index&$3FF)|((palette&$7)<<10)|((prio&$1)<<13)|((hflip&$1)<<14)|((vflip&$1)<<15)
 
 ;;; simple helper to instant DMA gfx from a static long source address to VRAM
 ;;; usable during blank screen only

@@ -1,16 +1,11 @@
 
 include
 
-%BGtile($1E, 3, 1, 1, 0)
-!vert_bar_left #= !_tile
-%BGtile($1E, 3, 1, 0, 0)
-!vert_bar_right #= !_tile
-%BGtile($1D, 3, 1, 0, 0)
-!horiz_bar_bottom #= !_tile
-%BGtile($1C, 3, 1, 1, 0)
-!corner_top_left #= !_tile
-%BGtile($1C, 3, 1, 0, 0)
-!corner_top_right #= !_tile
+!vert_bar_left #= BGtile($1E, 3, 1, 1, 0)
+!vert_bar_right #= BGtile($1E, 3, 1, 0, 0)
+!horiz_bar_bottom #= BGtile($1D, 3, 1, 0, 0)
+!corner_top_left #= BGtile($1C, 3, 1, 1, 0)
+!corner_top_right #= BGtile($1C, 3, 1, 0, 0)
 
 org $80988b
 	dw $2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,$2c0f,!horiz_bar_bottom,!horiz_bar_bottom,!horiz_bar_bottom,!horiz_bar_bottom,!horiz_bar_bottom,!corner_top_right

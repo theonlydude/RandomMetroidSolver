@@ -1593,20 +1593,19 @@ draw_item_gfx:
         rts
 
 macro drawString(str_addr, x, y)
-        %ldx_tileOffset(<x>, <y>)
+        ldx.w #tileOffset(<x>, <y>)
         lda.w #<str_addr>
         jsr draw_string
 endmacro
 
 macro drawNumber(number, x, y)
-        %ldx_tileOffset(<x>, <y>)
+        ldx.w #tileOffset(<x>, <y>)
         lda <number>
         jsr draw_number
 endmacro
 
 macro drawChar(char, x, y)
-        %tileOffset(<x>, <y>)
-        lda <char> : sta !BG1_tilemap+!_tile_offset
+        lda <char> : sta !BG1_tilemap+tileOffset(<x>, <y>)
 endmacro
 
 draw_final_time:
@@ -1774,10 +1773,10 @@ gfx_transfer_table:
 ;;; if major: same with collected palette
 
 macro itemTiles(palette)
-        %dw_BGtile(!tile_idx, !palette_index_<palette>, 1, 0, 0)
-        %dw_BGtile(!tile_idx+1, !palette_index_<palette>, 1, 0, 0)
-        %dw_BGtile(!tile_idx+2, !palette_index_<palette>, 1, 0, 0)
-        %dw_BGtile(!tile_idx+3, !palette_index_<palette>, 1, 0, 0)
+        dw BGtile(!tile_idx, !palette_index_<palette>, 1, 0, 0)
+        dw BGtile(!tile_idx+1, !palette_index_<palette>, 1, 0, 0)
+        dw BGtile(!tile_idx+2, !palette_index_<palette>, 1, 0, 0)
+        dw BGtile(!tile_idx+3, !palette_index_<palette>, 1, 0, 0)
 endmacro
 
 macro majorTiles(palette)
@@ -1839,10 +1838,10 @@ item_tiles:
         %minorTiles()
 .PowerBomb:
         ;; PB is special, as the bottom right tile is the bottom left tile mirrored
-        %dw_BGtile(!tile_idx, !palette_index_CRE, 1, 0, 0)
-        %dw_BGtile(!tile_idx+1, !palette_index_CRE, 1, 0, 0)
-        %dw_BGtile(!tile_idx+2, !palette_index_CRE, 1, 0, 0)
-        %dw_BGtile(!tile_idx+2, !palette_index_CRE, 1, 1, 0)
+        dw BGtile(!tile_idx, !palette_index_CRE, 1, 0, 0)
+        dw BGtile(!tile_idx+1, !palette_index_CRE, 1, 0, 0)
+        dw BGtile(!tile_idx+2, !palette_index_CRE, 1, 0, 0)
+        dw BGtile(!tile_idx+2, !palette_index_CRE, 1, 1, 0)
         !tile_idx #= !tile_idx+3
 
 ;;; minors tables
@@ -1852,8 +1851,7 @@ item_tiles:
 
 macro itemTableEntry(category, item, x, y, collected, specific)
 %export(<category>_table_entry_<item>)
-%tileOffset(<x>, <y>)
-        dw item_tiles_<item>, !_tile_offset, <collected>, <specific>
+        dw item_tiles_<item>, tileOffset(<x>, <y>), <collected>, <specific>
 endmacro
 
 macro ammoTableEntry(item, x, y, collected, total)

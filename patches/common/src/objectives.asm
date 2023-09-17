@@ -969,8 +969,7 @@ table "tables/pause.tbl",rtl
 ;; relative to tilemap
 !obj_1st_line #= 5
 !obj_last_line #= 18
-%tileOffset(2, !obj_last_line)
-!draw_obj_tile_limit #= !_tile_offset
+!draw_obj_tile_limit #= tileOffset(2, !obj_last_line)
 
 ;; box tiles
 !box_top_left = $3941
@@ -983,20 +982,14 @@ table "tables/pause.tbl",rtl
 !box_bottom_right = $F941
 
 ;; obj completion tiles
-%BGtile($176, 1, 1, 0, 0)
-!completed_tick #= !_tile
-%BGtile($177, 1, 1, 0, 0)
-!in_progress_dots #= !_tile
+!completed_tick #= BGtile($176, 1, 1, 0, 0)
+!in_progress_dots #= BGtile($177, 1, 1, 0, 0)
 
 ;; scroll arrows tiles
-%BGtile($1B8, 6, 1, 0, 0)
-!scroll_up_left #= !_tile
-%BGtile($1B8, 6, 1, 1, 0)
-!scroll_up_right #= !_tile
-%BGtile($1B8, 6, 1, 0, 1)
-!scroll_down_left #= !_tile
-%BGtile($1B8, 6, 1, 1, 1)
-!scroll_down_right #= !_tile
+!scroll_up_left #= BGtile($1B8, 6, 1, 0, 0)
+!scroll_up_right #= BGtile($1B8, 6, 1, 1, 0)
+!scroll_down_left #= BGtile($1B8, 6, 1, 0, 1)
+!scroll_down_right #= BGtile($1B8, 6, 1, 1, 1)
 
 !click_sfx = $37
 !scroll_blocked_sfx = $36
@@ -1011,9 +1004,8 @@ table "tables/pause.tbl",rtl
 ;;; digit to draw in A
 ;;; x, y are relative to viewable area
 macro drawDigit(x, y)
-        %tileOffset(<x>, <y>)
         clc : adc.w #'0'
-        sta.l !BG1_tilemap+!_tile_offset
+        sta.l !BG1_tilemap+tileOffset(<x>, <y>)
 endmacro
 
 ;;; digit to draw in A
@@ -1025,8 +1017,7 @@ endmacro
 
 ;;; x, y are relative to viewable area
 macro drawTile(tile, x, y)
-        %tileOffset(<x>, <y>)
-        lda.w #<tile> : sta.l !BG1_tilemap+!_tile_offset
+        lda.w #<tile> : sta.l !BG1_tilemap+tileOffset(<x>, <y>)
 endmacro
 
 ;;; tile offset in X (updated)

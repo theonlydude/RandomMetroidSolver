@@ -419,7 +419,7 @@ function doSubmit() {
 
         var dataDict = {};
         dataDict["logic"] = logic;
-        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "base", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "hard_mode", "color_blind", "disable_screen_shake", "noflashing"];
+        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "better_reserves", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "base", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "hard_mode", "color_blind", "disable_screen_shake", "noflashing"];
 
         for(var i=0; i<elems.length; i++) {
             var elem = document.getElementById(elems[i]);
@@ -832,7 +832,7 @@ if seedInfo != None:
 }}
 
 function greyOutPatches(isRace, isVARIA, isVanilla) {
-    var buttons = ["itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save", "widescreen", "lava_acid_physics", "hell", "hellrun_rate", "etanks", "hard_mode"];
+    var buttons = ["itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save", "better_reserves", "widescreen", "lava_acid_physics", "hell", "hellrun_rate", "etanks", "hard_mode"];
     for(var i=0; i<buttons.length; i++) {
         disableElement(buttons[i], isRace);
     }
@@ -1588,6 +1588,20 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
 <p>This patch was developed by Adam.</p>"
     },
     {
+      element: "#better_reservesStep",
+      title: "Better Reserves",
+      content: "<p>This patch does a few things:<ul>\
+<li>Prevents the loss of invincibility frames when auto reserves activate (no more getting hit twice!)</li>\
+<li>Prevents heat damage when auto reserves activate</li>\
+<li>Prevents a crash when pausing while auto reserves are active.</li>\
+<li>Makes reserve tanks come filled up.</li>\
+<li>Makes reserve tanks not empty if samus is fully healed when they are used in auto or manual mode.</li>\
+<li>Fix jank where deselecting and reselecting refill button during manual refill causes it to resume.</li>\
+<li>Can also press A during manual refill at any time to stop refilling.</li>\
+</ul></p>\
+<p>Patch developed by NoDever2</p>"
+    },
+    {
       element: "#color_blindStep",
       title: "Color blind friendly colors for doors / Disable screen shake",
       content: "<p>Color blind friendly colors for Missile, Super and Power Bomb doors.</p>\
@@ -1995,6 +2009,13 @@ for name, values in musics["_dropdown"].items():
                      <span id="refill_before_saveText">Refill energy and ammo when saving</span>
                   </td>
                   <td id="refill_before_saveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    {{displayCheckbox("better_reserves")}}
+                     <span id="better_reservesText">Better Reserves <img src="/solver/static/images/tracker/inventory/Reserve.png" class="width: 32px"/></span>
+                  </td>
+                  <td id="better_reservesStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>
 

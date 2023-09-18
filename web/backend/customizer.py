@@ -131,6 +131,7 @@ class Customizer(object):
             self.session.customizer['fast_doors'] = "off"
             self.session.customizer['Infinite_Space_Jump'] = "off"
             self.session.customizer['refill_before_save'] = "off"
+            self.session.customizer['better_reserves'] = "off"
             self.session.customizer['widescreen'] = "off"
             self.session.customizer['AimAnyButton'] = "off"
             self.session.customizer['max_ammo_display'] = "off"
@@ -169,7 +170,7 @@ class Customizer(object):
         # check validity of all parameters
         switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_speed', 'fast_doors',
                    'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'base',
-                   'Infinite_Space_Jump', 'refill_before_save',
+                   'Infinite_Space_Jump', 'refill_before_save', 'better_reserves',
                    'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
                    'remove_elevators_speed', 'remove_fast_doors', 'remove_Infinite_Space_Jump',
                    'remove_rando_speed', 'remove_spinjumprestart', 'gamepadMapping', 'widescreen',
@@ -234,6 +235,7 @@ class Customizer(object):
         self.session.customizer['fast_doors'] = self.vars.fast_doors
         self.session.customizer['Infinite_Space_Jump'] = self.vars.Infinite_Space_Jump
         self.session.customizer['refill_before_save'] = self.vars.refill_before_save
+        self.session.customizer['better_reserves'] = self.vars.better_reserves
         self.session.customizer['widescreen'] = self.vars.widescreen
         self.session.customizer['AimAnyButton'] = self.vars.AimAnyButton
         self.session.customizer['max_ammo_display'] = self.vars.max_ammo_display
@@ -290,6 +292,8 @@ class Customizer(object):
             params += ['-c', 'Infinite_Space_Jump']
         if self.vars.refill_before_save == 'on':
             params += ['-c', 'refill_before_save.ips']
+        if self.vars.better_reserves == 'on':
+            params += ['-c', 'better_reserves.ips']
         if self.vars.widescreen == 'on':
             params += ['-c', 'widescreen.ips']
         if self.vars.remove_itemsounds == 'on':

@@ -319,10 +319,6 @@ org $81ef20
 ;;	- ignore save files with player flag set (was loaded once)
 ;;	- ignore backup files from different slots
 
-;; make optional to auto backup save, set this flag to non-zero in ROM to enable the feature
-%export(opt_backup)
-	dw $0000
-
 ;;; zero flag set if we're starting a new game
 check_new_game:
     ;; Make sure game mode is 1f
@@ -342,9 +338,6 @@ new_save:
 	;; call save routine
 	lda !current_save_slot
 	jsl $818000
-	;; if backup saves are disabled, return
-	lda.l opt_backup
-	beq .end
 	;; set current save slot as used in SRAM bitmask
 	lda !current_save_slot
 	asl
@@ -615,9 +608,6 @@ patch_save:                     ; called from saveload patch
 	;; backup saves management:
 	jsl check_new_game
 	beq .save_stats
-	lda.l opt_backup
-	beq .stats
-	;; we have backup saves enabled, and it is not the 1st save:
 	;; check if we shall backup the save
 	jsr is_backup_needed
 	bcc .stats
@@ -648,18 +638,11 @@ patch_load:
     ;; skip to end if new file or SRAM corrupt
     jmp .end
 .backup_check:
-	lda.l opt_backup
-	beq .check
 	;; if backup saves are enabled:
 	;; check if we load a backup save, and if so, get stats
 	;; from original save slot, and mark this slot as non-backup
 	lda !current_save_slot
-	asl
-	asl
-	asl
-	tax
-	lda.l slots_data+4,x
-	tax
+	asl #3 : tax : lda.l slots_data+4,x : tax
 	lda $700002,x
 	bmi .check
 .load_backup:
@@ -788,11 +771,6 @@ files_tilemaps:
 load_menu_file:
 	phx
 	pha
-	lda.l opt_backup
-	beq .nochange
-.check_slot:
-	pla
-	pha
 	asl
 	tax
 	lda.l slots_bitmasks,x	;; bitmask index table in ROM
@@ -837,8 +815,6 @@ load_menu_3rd_file:
 
 ;;; show save area and station instead of energy when backup saves are enabled
 menu_show_save_data:
-	lda.l opt_backup
-	beq .energy
 	;; draw save area: find station in table
 	ldx #$0000
 .loop:

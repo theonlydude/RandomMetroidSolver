@@ -213,11 +213,6 @@ class RomPatcher:
         for area, areaMap in self.areaMaps.items():
             mapOffset = Addresses.getOne("map_data_" + area)
             areaMap.writeItemTiles(self.romFile, mapOffset, itemMaskOffset)
-        if self.settings['revealMap'] == True:
-            # reveal item tiles
-            self.romFile.seek(Addresses.getOne("map_CoverTileList"))
-            for b in range(0xff):
-                self.romFile.writeByte(b)
 
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball

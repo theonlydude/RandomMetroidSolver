@@ -46,6 +46,7 @@
     "Infinite_Space_Jump": "off",
     "refill_before_save": "off",
     "relaxed_round_robin_cf": "off",
+    "better_reserves": "off",
     "hud": "off",
     "revealMap": "on",
     "animals": "off",

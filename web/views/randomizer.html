@@ -760,7 +760,7 @@ function showHide(show, hide) {
 function getRandomizerParameters(setDisabledToOff, trueJson) {
     var dataDict = {};
 
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf", "hiddenObjectives"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf", "hiddenObjectives", "better_reserves"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian", "areaRandomization"];
     var imgPickers = ["logic"];
@@ -2518,6 +2518,21 @@ This patch is automatically enabled when using Full Countdown item split, or Maj
       placement: "auto left"
     },
     {
+      element: "#better_reservesStep",
+      title: "Better Reserves",
+      content: "<p>This patch does a few things:<ul>\
+<li>Prevents the loss of invincibility frames when auto reserves activate (no more getting hit twice!)</li>\
+<li>Prevents heat damage when auto reserves activate</li>\
+<li>Prevents a crash when pausing while auto reserves are active.</li>\
+<li>Makes reserve tanks come filled up.</li>\
+<li>Makes reserve tanks not empty if samus is fully healed when they are used in auto or manual mode.</li>\
+<li>Fix jank where deselecting and reselecting refill button during manual refill causes it to resume.</li>\
+<li>Can also press A during manual refill at any time to stop refilling.</li>\
+</ul></p>\
+<p>Patch developed by NoDever2</p>",
+      placement: "auto left"
+    },
+    {
       element: "#animalsStep",
       title: "Animals surprise",
       content: "<p>Replace saving the animals in the escape sequence by a random surprise.<br/>\
@@ -3127,6 +3142,14 @@ def displayNumber(id, min, max, default, step="1"):
                      Reveal the whole map on start
                   </td>
                   <td><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr>
+                  <td id="better_reservesStep" class="half">
+                    {{displayCheckbox("better_reserves")}}
+                     Better Reserves <img src="/solver/static/images/tracker/inventory/Reserve.png" class="width: 32px"/>
+                  </td>
+                  <td><button type="button" onclick="startTheTour(event)">?</button></td>
+                  <td class="half"></td><td></td>
                 </tr>
               </table>
               <table class="full">

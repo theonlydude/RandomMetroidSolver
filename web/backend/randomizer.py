@@ -207,7 +207,7 @@ class Randomizer(object):
                    'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
                    'Infinite_Space_Jump', 'refill_before_save', 'hud', "revealMap", "scavRandomized",
-                   'relaxed_round_robin_cf', 'hiddenObjectives']
+                   'relaxed_round_robin_cf', 'hiddenObjectives', 'better_reserves']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
@@ -391,7 +391,7 @@ class Randomizer(object):
                    'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
                    'Infinite_Space_Jump', 'refill_before_save', 'hud', 'revealMap', "scavRandomized",
-                   'relaxed_round_robin_cf', 'hiddenObjectives']
+                   'relaxed_round_robin_cf', 'hiddenObjectives', 'better_reserves']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
@@ -432,6 +432,7 @@ class Randomizer(object):
         self.session.randomizer['variaTweaks'] = self.vars.variaTweaks
         self.session.randomizer['nerfedCharge'] = self.vars.nerfedCharge
         self.session.randomizer['relaxed_round_robin_cf'] = self.vars.relaxed_round_robin_cf
+        self.session.randomizer['better_reserves'] = self.vars.better_reserves
         self.session.randomizer['itemsounds'] = self.vars.itemsounds
         self.session.randomizer['elevators_speed'] = self.vars.elevators_speed
         self.session.randomizer['fast_doors'] = self.vars.fast_doors

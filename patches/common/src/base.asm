@@ -395,11 +395,7 @@ is_backup_needed:
 	phx
 	phy
 	;; first, check if current save station is different from last save
-	lda !current_save_slot
-	asl
-	asl
-	asl
-	tay
+	lda !current_save_slot : asl #3 : tay
 	ldx slots_data+6,y
 	lda $700000,x
 	cmp !load_station_index
@@ -598,7 +594,7 @@ patch_load:
     lda $700000,x : cmp !last_saveslot
     sta !last_saveslot
     bne .load
-    ;; we're loading the same save that's played last
+    ;; we're loading the same timeline that's played last
     lda !softreset
     cmp #!reset_flag
     beq .end_ok     ;; soft reset, use stats and timer from RAM
@@ -889,35 +885,39 @@ igt_end:
 ;; load RTA in IGT
 update_igt:
         php
-        %ai16()
+        rep #$30
 	;; divide total frames in 32 bits by 3600 to have 16bits minutes and remaining frames,
         ;; to correctly handle times up to 99:59:59.59 like vanilla
-	lda !stats_timer : sta $16
-	lda !stats_timer+2 : sta $14
-	lda #3600 : sta $12
+	lda !stats_timer
+	sta $16
+	lda !stats_timer+2
+	sta $14
+	lda #3600
+	sta $12
 	jsl utils_div32
-	lda $14 : sta !igt_frames ;; store remainder to igt frames
-        ;; divide RTA in minutes by 60 to get hours
-	lda $16 : sta !div_u16
-        %a8()
-	lda.b #60 : sta !div_u8_do
-	pha : pla :  pha : pla
-        %a16()
-	lda !div_u16_result_remainder ;; rta minutes
+	lda $14
+	sta !igt_frames ;; store remainder to igt frames
+	lda $16  ;; RTA in minutes
+	sta $004204 ;; divide by 60 to get hours
+	sep #$20
+	lda #$3c
+	sta $004206
+	pha : pla :  pha : pla : rep #$20
+	lda $004216 ;; rta minutes
 	sta !igt_minutes ;; replace igt minutes
-	lda !div_u16_result_quotient ;; hours
+	lda $004214 ;; hours
         sta !igt_hours ;; replace igt hours
-        cmp.w #100 : bpl .overflow ;; if < 100 hours, continue
+        cmp #$0064 ;; if < 100 hours, continue
+        bpl .overflow
         lda !igt_frames ;; frames remainder after initial division to get minutes
-        ;; divide by 60 to get seconds and frames
-	sta !div_u16
-        %a8()
-	lda.b #60 : sta !div_u8_do
-	pha : pla :  pha : pla
-        %a16()
-	lda !div_u16_result_remainder ;; rta frames
+	sta $004204 ;; divide by 60 to get seconds and frames
+	sep #$20
+	lda #$3c
+	sta $004206
+	pha : pla :  pha : pla : rep #$20
+	lda $004216 ;; rta frames
 	sta !igt_frames ;; replace igt frames
-	lda !div_u16_result_quotient ;; rta seconds
+	lda $004214 ;; rta seconds
         sta !igt_seconds ;; replace igt seconds
         bra .end
 .overflow: ;; IGT = 99:59:59.59

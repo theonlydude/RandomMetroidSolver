@@ -10,6 +10,7 @@ from utils.objectives import Objectives
 from logic.logic import Logic
 from rom.flavor import RomFlavor
 from rom.rom_options import RomOptions
+from rom.rom_patches import groups as patch_groups
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import HTTP
@@ -167,6 +168,16 @@ def getFloat(request, param, isJson=False):
         return float(request.vars[param])
     except:
         raiseHttp(400, "Wrong value for {}, must be a float".format(param), isJson)
+
+def validatePatches(group_name, values):
+    if values is None:
+        return
+    extra = []
+    for value in values.split(','):
+        if not value in patch_groups[group_name]:
+            extra.append(value)
+    if extra:
+        raiseHttp(400, f"Unknown values for {group_name}Custom: {','.join(extra)}")
 
 def validateWebServiceParams(request, switchs, quantities, multis, others, isJson=False):
     parameters = switchs + quantities + multis + others
@@ -337,6 +348,9 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         value = request.vars.nbObjectivesRequired
         if value not in ("off", "random", *numbers):
             raiseHttp(400, f"Wrong value for nbObjectivesRequired {value}", isJson)
+
+    if 'areaLayoutCustom' in others:
+        validatePatches('areaLayout', request.vars.areaLayoutCustom)
 
     return errors
 

@@ -212,7 +212,7 @@ class Randomizer(object):
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
                   'areaRandomization', 'logic']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'nbObjectivesRequired']
+        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'nbObjectivesRequired', 'areaLayoutCustom']
         errors = validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize
@@ -273,7 +273,7 @@ class Randomizer(object):
         randoPresetDict = {var: self.vars[var] for var in self.vars if var != 'paramsFileTarget'}
         # set multi select as list as expected in a rando preset
         for var, value in randoPresetDict.items():
-            if 'MultiSelect' in var:
+            if 'MultiSelect' in var or 'Custom' in var:
                 randoPresetDict[var] = value.split(',')
 
         if self.vars.objectiveRandom == 'true':
@@ -396,7 +396,7 @@ class Randomizer(object):
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
                   'areaRandomization', 'logic']
-        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective', 'nbObjectivesRequired']
+        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective', 'nbObjectivesRequired', 'areaLayoutCustom']
         validateWebServiceParams(self.request, switchs, quantities, multis, others)
 
         if self.session.randomizer is None:
@@ -464,6 +464,11 @@ class Randomizer(object):
             if self.vars[multi] == 'random':
                 self.session.randomizer[multi+"MultiSelect"] = self.vars[multi+"MultiSelect"].split(',')
 
+        for group in ['layout', 'areaLayout', 'variaTweaks']:
+            key = group + 'Custom'
+            value = getattr(self.vars, key)
+            if value:
+                self.session.randomizer[key] = value.split(',')
         # to create a new rando preset, uncomment next lines
         #with open('rando_presets/new.json', 'w') as jsonFile:
         #    json.dump(self.session.randomizer, jsonFile)

@@ -508,13 +508,12 @@ function randomize(evt, elemId) {
   }
 
   if (e.id === 'areaRandomization') {
-    const value = isActive
-    $randomizer.set('areaRando', value)
-     if (isActive) {
-        $("#areaRandomizationMultiSelect").change();
-     } else {
-        e.onchange();
-     }
+    if (isActive) {
+      $("#areaRandomizationMultiSelect").change();
+      window.$randomizer.set('areaRandomization', 'random');
+    } else {
+      e.onchange();
+    }
   }
 }
 
@@ -708,16 +707,9 @@ function initializeState() {
        - majorsSplit
     */
     const data = {{response.write(session.randomizer,escape=False)}}
-    Object.entries(data).forEach(([key, value]) => {
-      if (value === 'off') {
-        data[key] = false
-      } else if (value === 'on') {
-        data[key] = true
-      }
-    })
     $randomizer.init(data);
 
-    if (data.objectiveRandom) {
+    if (['0', 'random'].includes(data.objectiveRandom)) {
         document.getElementById('objectiveRandom').click()
     }
 
@@ -1065,6 +1057,15 @@ function getSpecialValues(dataDict, trueJson) {
     } else {
         dataDict["nbObjectivesRequired"] = document.getElementById("nbObjectivesRequired").value
     }
+
+    dataDict.areaLayout = 'off'
+    if (window.$randomizer.isPatchGroupAllowed('areaLayout')) {
+        dataDict.areaLayout = 'on'
+        dataDict['areaLayoutCustom'] = window.$randomizer.state.areaLayoutCustom || []
+        if (!trueJson) {
+            dataDict.areaLayoutCustom = dataDict.areaLayoutCustom.join(',')
+        }
+    }
 }
 
 function validateObjectives() {
@@ -1292,9 +1293,9 @@ window.onload = function(){
         var escapeRando = document.getElementById("escapeRando");
 
         if(is_on){
+            window.$randomizer.state.areaLayoutCustom = window.PATCHES.areaLayout.map(p => p.id)
             disableElement("areaLayout", false);
 
-            setSwitchToOn(patches);
             setSwitchToOn(escapeRando);
 
             // uncheck suits restrictions when late morph + area
@@ -1302,7 +1303,7 @@ window.onload = function(){
                 setSwitchToOff(suits);
             }
         } else {
-            setSwitchToOff(patches);
+            window.$randomizer.state.areaLayoutCustom = []
             setSwitchToOff(escapeRando);
             var minimizer = document.getElementById("minimizer");
             setSwitchToOff(minimizer);
@@ -1316,12 +1317,14 @@ window.onload = function(){
         var area = document.getElementById("areaRandomization");
         var is_on = ['light', 'full'].includes(area.value);
         triggerArea(is_on);
+        window.$randomizer.set('areaRandomization', area.value);
     };
 
     area.onchange()
 
     $('#areaRandomizationMultiSelect').change(e => {
         var values = $('#areaRandomizationMultiSelect').val();
+        window.$randomizer.set('areaRandomizationMultiSelect', values);
         var is_on = values.includes('full') || values.includes('light');
         triggerArea(is_on);
     })
@@ -2162,7 +2165,7 @@ Click on the dice button to randomly set this parameter.",
     {
       element: "#areaLayoutStep",
       title: "Areas randomization additional layout modifications",
-      content: "These patches minimize soft-locks and increase the variation of the area randomizer. Some additional cosmetic changes may not be shown. Using Area randomization and a non-standard or randomized start location will force this setting on. (TODO: ask discord if this last sentance is still true)" + AREA_PATCH_CARDS,
+      content: "These patches minimize soft-locks and increase the variation of the area randomizer. Some additional cosmetic changes may not be shown. Using Area randomization and a non-standard or randomized start location will force this setting on. (TODO: ask discord if this last sentance is still true)" + PATCHES_HELP.areaLayout,
       placement: "auto left"
     },
     {
@@ -2974,14 +2977,16 @@ def displayNumber(id, min, max, default, step="1"):
                   <button type="button" onclick="startTheTour('areaRandomizationStep')">?</button>
                 </td>
               </tr>
-              <tr>
+              <tr id="areaLayoutStep">
                 <td class="small"></td>
                 <td class="half">
                     <span id="areaLayout"></span>
                     <span id="areaLayoutText">Area Randomization Patches</span>
                 </td>
-                <td class="half vue-app" id="areaLayoutPatchesPortal"></td>
-                <td class="small"><button type="button" onclick="startTheTour(event)">?</button></td>
+                <td class="half vue-app"></td>
+                <td class="small">
+                  <button type="button" onclick="startTheTour('areaLayoutStep')">?</button>
+                </td>
               </tr>
             </table>
 

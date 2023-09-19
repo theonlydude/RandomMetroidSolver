@@ -1684,7 +1684,8 @@ function loadRandoPresetOK(data) {
 
     // objectives is special
     var objectiveRandom = document.getElementById("objectiveRandom");
-    if(data["objectiveRandom"] == "true") {
+    // the json creator saves objective random as a boolean. For now this hack will do
+    if(String(data["objectiveRandom"]) == "true") {
         if(! isElemRandom(objectiveRandom)) {
             randomizeObjective({currentTarget: objectiveRandom});
         }

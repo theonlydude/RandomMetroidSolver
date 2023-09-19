@@ -100,9 +100,10 @@ org $818085
 org $81A24A
     jsl patch_load ;; patch load from menu only
 
-;; patch copy routine to copy SRAM stats, and fix save slot size
+;; hijack copy routine to copy stats
 org $819A66
     jsr copy_stats
+;; fix save slot size in copy routine
 org $819A62
         dw !regular_save_size
 
@@ -498,15 +499,8 @@ check_slot:
 backup_save:
 	;; increment backup counter in our save file
 	lda !current_save_slot
-	asl
-	asl
-	asl
-	tax
-	lda.l slots_data+4,x
-	tax
-	lda $700002,x
-	inc
-	sta $700002,x
+        %backupIndex()
+	lda $700002,x : inc : sta $700002,x
 
 	;; direct page indirect addressing copy :
 	;; reuse $47/$4A used in decompression routine (according to RAM map)
@@ -519,15 +513,11 @@ backup_save:
 	sta $49
 	sta $4c	
 	;; source slot is current one
-	lda !current_save_slot
-	asl
-	tax
+	lda !current_save_slot : asl : tax
 	lda.l slots_sram_offsets,x ;; get SRAM offset in bank 70 for slot
 	sta $47
 	;; destination slot is in backup_candidate
-	lda !backup_candidate
-	asl
-	tax
+	lda !backup_candidate : asl : tax
 	lda.l slots_sram_offsets,x ;; get SRAM offset in bank 70 for slot
 	sta $4a
 	;; copy save file
@@ -535,64 +525,31 @@ backup_save:
 -
 	lda [$47],y
 	sta [$4a],y
-	iny
-	iny
+	iny : iny
 	cpy #!regular_save_size
 	bmi -
 	;; copy checksum
+	lda !current_save_slot : asl : tax
+	lda $701ff0,x : pha
+	lda $701ff8,x : pha
+	lda $700000,x : pha
+	lda $700008,x : pha
+	lda !backup_candidate : asl : tax
+	pla : sta $700008,x
+	pla : sta $700000,x
+	pla : sta $701ff8,x
+	pla : sta $701ff0,x
+	;; copy timeline ID and backup counter (stats will be automatically up to date since we save them to all necessary slots)
 	lda !current_save_slot
-	asl
-	tax
-	lda $701ff0,x
-	pha
-	lda $701ff8,x
-	pha
-	lda $700000,x
-	pha
-	lda $700008,x
-	pha
-	lda !backup_candidate
-	asl
-	tax
-	pla
-	sta $700008,x
-	pla
-	sta $700000,x
-	pla
-	sta $701ff8,x
-	pla
-	sta $701ff0,x
-	;; copy stats (includes backup data)
-	lda !current_save_slot
-	asl
-	tax
-	lda.l stats_sram_offsets,x
-	sta $47
-	lda !backup_candidate
-	asl
-	tax
-	lda.l stats_sram_offsets,x
-	sta $4a
-	ldy #$0000
--
-	lda [$47],y
-	sta [$4a],y
-	iny
-	iny
-	cpy.w #!full_stats_area_sz_b
-	bcc -
-	;; clear player flag in backup data area
-	lda $4a		;; still has destination slot SRAM offset
-	clc
-	adc.w #!backup_save_data_off
-	tax
-	lda $700002,x
-	and #$7fff
-	sta $700002,x
+        %backupIndex()
+        lda.l $700002, x : pha
+        lda.l $700000, x : pha
+        lda !backup_candidate
+        %backupIndex()
+        pla : sta.l $700000, x
+        pla : and #$7fff : sta.l $700002, x  ; clear player flag in the backup
 	;; mark backup slot as used in bitmask
-	lda !backup_candidate
-	asl
-	tax
+	lda !backup_candidate : asl : tax
 	lda !used_slots_mask
 	ora.l slots_bitmasks,x	;; bitmask index table in ROM
 	sta !used_slots_mask
@@ -631,10 +588,7 @@ patch_load:
     plb
     ;; call load routine
     jsl LoadGame
-    bcc .backup
-    ;; skip to end if new file or SRAM corrupt
-    jmp .end
-.backup:
+    bcs .end     ; skip to end if new file or SRAM corrupt
     ;; mark this slot as non-backup
     lda !current_save_slot
     %backupIndex()
@@ -814,6 +768,7 @@ set_last_save_ok_flag:
 ;; arg X = index of where to save stats in bank $70
 save_stats_at:
     phx
+    phy
     phb
     pea $7f7f
     plb
@@ -829,6 +784,7 @@ save_stats_at:
     cpy #!stats_sram_sz_b
     bcc .loop
     plb
+    ply
     plx
     rts
 
@@ -838,17 +794,31 @@ save_stats_at:
 save_stats:
         phx
         phy
-        beq .last   ;; skip standard save if A=0        
-        lda !current_save_slot
         pha
+        ;; find all slots concerning our "timeline" (last_saveslot), and save stats everywhere
+        ldy.w #3
+.loop:
+        dey : bmi .end
+        tya : asl : tax
+        lda !used_slots_mask : ora.l slots_bitmasks, x
+        beq .loop
+        tya
+        %backupIndex()
+        lda $700000, x : cmp !last_saveslot : bne .loop
+        pla : pha
+        beq .last
+        tya
         %statsIndex()
         jsr save_stats_at
 .last:
         lda.w #0 : jsr set_last_save_ok_flag
-        pla
+        tya
         %lastStatsIndex()
         jsr save_stats_at
         lda.w #!magic_flag : jsr set_last_save_ok_flag
+        bra .loop
+.end:
+        pla
         ply
         plx
         rtl

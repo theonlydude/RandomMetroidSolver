@@ -354,9 +354,6 @@ check_new_game:
 
 ;; a save will always be performed when starting a new game (see start.asm)
 new_save:
-	;; call save routine
-	lda !current_save_slot
-	jsl $818000
 	;; set current save slot as used in SRAM bitmask
 	lda !current_save_slot
 	asl
@@ -374,6 +371,11 @@ new_save:
 	;; store 0 + high bit set (player flag) as backup counter
 	lda #$8000
 	sta $700002,x        
+
+	;; call save routine
+	lda !current_save_slot
+	jsl $818000
+
 .end:
 	rtl
 
@@ -597,7 +599,10 @@ patch_load:
     ;; we're loading the same timeline that's played last
     lda !softreset
     cmp #!reset_flag
-    beq .end_ok     ;; soft reset, use stats and timer from RAM
+    bne .load
+    ;; soft reset, use stats and timer from RAM
+    lda !stat_rta_lag_ram : sta !timer_lag ; restore lag timer, as it gets cleared on boot
+    bra .end_ok
     ;; TODO add menu time to pause stat and make it a general menus stat?
 .load:
     ;; load stats from SRAM
@@ -796,7 +801,7 @@ save_stats:
 .loop:
         dey : bmi .end
         tya : asl : tax
-        lda !used_slots_mask : ora.l slots_bitmasks, x
+        lda !used_slots_mask : and.l slots_bitmasks, x
         beq .loop
         tya
         %backupIndex()

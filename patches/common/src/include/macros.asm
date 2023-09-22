@@ -47,6 +47,21 @@ function tileOffset(x, y) = 2*((y*$20)+x)
 ;; cccccccccc = Tile number.
 function BGtile(index, palette, prio, hflip, vflip) = (index&$3FF)|((palette&$7)<<10)|((prio&$1)<<13)|((hflip&$1)<<14)|((vflip&$1)<<15)
 
+;; an oam entry is made of five bytes: (s000000 x xxxxxxxx) (yyyyyyyy) (YXppPPPt tttttttt)
+;;  s = size bit
+;;      0: 8x8
+;;      1: 16x16
+;;  x = X offset of sprite from centre
+;;  y = Y offset of sprite from centre
+;;  Y = Y flip
+;;  X = X flip
+;;  p = priority (relative to background)
+;;  t = tile number
+macro sprite(index, x, y, hflip, vflip, prio, large)
+        dw (<large><<15)|(<x>&$1ff) : db <y>
+        dw (<vflip><<15)|(<hflip><<14)|(<prio><<13)|<index>
+endmacro
+
 ;;; simple helper to instant DMA gfx from a static long source address to VRAM
 ;;; usable during blank screen only
 macro gfxDMA(src, dstVRAM, size)

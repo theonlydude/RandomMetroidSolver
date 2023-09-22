@@ -125,6 +125,10 @@ org $82805f
 org $8284D3
         jsl igt_end
 
+;;; draw locked file status on top of samus helmet
+org $819e25
+        jsl draw_lock
+
 ;;; -------------------------------
 ;;; CODE ;;;
 ;;; -------------------------------
@@ -1128,6 +1132,32 @@ table "tables/menu.tbl",rtl
 	dw " ENTRANCE"
 	dw $ffff
 
+;;; if "player flag" is set in the slot, draw a lock on top of samus helmet
+;;; (drawing the sprite before puts it on top)
+draw_lock:
+        pha : phx : phy
+        lda !current_save_slot
+        %backupIndex()
+        lda $700002, x
+        bpl .end
+.lock:
+        ply : plx : phx : phy
+        lda #$0069 : jsl $81891F        
+.end:
+        ply : plx : pla
+        jsl $81891F
+        rtl
+
 print "b81 end: ", pc
 
-warnpc $81fa7f
+;; warnpc $81fa7f; FIXME
+
+;;; Spritemap pointers table end. It can be expanded, since we spill over unused data
+org $82c639
+        dw spritemap_lock       ; entry $69
+
+spritemap_lock:
+        dw $0001
+        %sprite($38, $1f4, $f4, 0, 0, %11, 0)
+
+warnpc $82c749 ; useful data resumes here

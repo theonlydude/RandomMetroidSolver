@@ -759,7 +759,7 @@ endmacro
 %exploredAreaPercent(west_maridia, 9)
 %exploredAreaPercent(east_maridia, 10)
 
-warnpc $85ffff
+warnpc $85f7ff
 obj_85_end:
 print "obj 85 end: ", pc
 
@@ -1201,7 +1201,7 @@ obj_scroll:
 .end:
         rtl
 
-warnpc $85ffff
+warnpc $85f7ff
 print "pause 85 end: ", pc
 
 ;;; main pause menu interaction in 82 after InfoStr in seed_display.asm

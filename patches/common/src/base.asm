@@ -403,6 +403,8 @@ is_backup_needed:
 	;; save X and Y as they will be used
 	phx
 	phy
+        ;; init backup candidate with special value meaning we did no check yet
+        lda #$8000 : sta !backup_candidate
 	;; first, check if current save station is different from last save
 	lda !current_save_slot : asl #3 : tay
 	ldx slots_data+6,y
@@ -415,9 +417,7 @@ is_backup_needed:
 .check_needed:
 	;; find out our backup counter, and save it in backup_counter
 	ldx slots_data+4,y
-	lda $700002,x
-	and #$7fff
-	sta !backup_counter
+	lda $700002,x : and #$7fff : sta !backup_counter
 	;; backup_candidate will be used to store the backup slot candidate
 	;; and various info as follows:
 	;;
@@ -430,19 +430,14 @@ is_backup_needed:
 	lda #$0003	;; 3 is used as invalid value marker, as slots are 0 to 2
 	sta !backup_candidate
 	;; check all slots
-	ldy #slot0_data
-	jsr check_slot
-	ldy #slot1_data
-	jsr check_slot
-	ldy #slot2_data
-	jsr check_slot
+	ldy #slot0_data : jsr check_slot
+	ldy #slot1_data : jsr check_slot
+	ldy #slot2_data : jsr check_slot
 	;; clear all our work flags from backup_candidate
-	lda !backup_candidate
-	and #$0003
+	lda !backup_candidate : and #$0003 : sta !backup_candidate
 	;; check that we can actually backup somewhere
-	cmp #$0003
-	beq .no_backup
-	sta !backup_candidate
+	cmp #$0003 : beq .no_backup
+.backup:
 	sec
 	bra .end
 .no_backup:
@@ -1191,7 +1186,7 @@ draw_lock:
         rtl
 
 ;;; when in load menu, check if left, right, X or Y are pressed, if so, change
-;;; selected lock file status
+;;; selected file lock status
 control_lock:
         jsr $9DE4               ; hijacked code
         lda $8f                 ; read newly pressed buttons
@@ -1207,7 +1202,7 @@ control_lock:
 
 print "b81 end: ", pc
 
-;; warnpc $81fa7f; FIXME
+warnpc $81fa7f
 
 ;;; Spritemap pointers table end. It can be expanded, since we spill over unused data
 org $82c639
@@ -1218,3 +1213,88 @@ spritemap_lock:
         %sprite($8A, 0, 492, 244, 0, %11, 0, 0)
 
 warnpc $82c749 ; useful data resumes here
+
+;;; when saving, inform the player in the "SAVE COMPLETED" message box of the backup status
+
+org $8580CE
+        dw $001d                ; ship point to new save completed box
+
+org $84B027
+        dw $001d                ; save station point to new save completed box
+
+;;; first, some fixes to message box handling to add our own without touching the vanilla tables and tilemaps
+;;; code based on MessageBoxesV5 by Kejardon, JAM, Nodever2 (https://metroidconstruction.com/resource.php?id=334)
+!n_vanilla_entries #= $1C
+
+org $85869B
+msgbox_vanilla_entries:
+        skip !n_vanilla_entries*6
+.end:
+
+org $85824B
+        JSR FixMessageDefOffset
+org $8582ED
+        JSR FixMessageDefOffset
+
+org $8580D6
+        jsr ship_actually_save
+
+
+org $859643
+FixMessageDefOffset:
+    CLC : ADC $34               ; hijacked code
+    CMP.w #!n_vanilla_entries*6 : BMI + ; if we are reading from before the end of message box 1C data, return
+    ;; adjust table offset for entries >= 1D
+    STA $34 : LDA #(msgbox_new_entries-msgbox_vanilla_entries_end) : CLC : ADC $34
++   RTS
+
+;;; vanilla code is a bit of a troll by actually saving once Samus
+;;; gets out of ship, we need to actually save before displaying the
+;;; save completed msg box
+ship_actually_save:
+        php
+        %ai16()
+        ;; pasted from gunship code, will be ran again afterwards but who cares
+        LDA $7ED8F8
+        ORA #$0001             ;} Set Crateria save station 0
+        STA $7ED8F8            ;/
+        STZ $078B              ; Load station index = 0
+        LDA $0952              ;\
+        JSL $818000            ;} Save current save slot to SRAM
+        plp
+        ;; Play saving sound effect (hijacked code)
+        JSR $8119
+        rts
+
+;;; start at index 1D
+msgbox_new_entries:
+        dw save_completed_custom, $825A, tilemap_save_completed
+        dw $8436, $8289, tilemap_terminator
+
+save_completed_custom:
+        ;; TODO : add modification function adding relevant lines
+        jsr $8441
+        rts
+
+;;; tilemap definitions
+table "tables/msgbox.tbl"
+
+!msg_box_border = $000e, $000e, $000e
+
+tilemap_save_completed:
+        dw !msg_box_border : dw "     SAVE COMPLETED.      " : dw !msg_box_border
+        dw !msg_box_border : dw "                          " : dw !msg_box_border
+        dw !msg_box_border : dw "                          " : dw !msg_box_border
+
+tilemap_terminator:
+
+tilemap_backup_failed:
+        dw " NO SLOT LEFT FOR BACKUP! "
+
+tilemap_backup_done:
+        dw " PREVIOUS SAVE TO SLOT X. "
+
+tilemap_backup_not_needed:
+        dw "   BACKUP NOT NECESSARY.  "
+
+warnpc $85afff

@@ -32,12 +32,11 @@ org $a1f200
     ;; otherwise hi byte is area and low is save index.
     ;; (use FFFE as Ceres special value because FFFF can be mistaken
     ;; for free space by solver/tracker)
-    dw $0000			; defaults to landing site
+    dw $fffe			; defaults to Ceres
 %export(opt_doors)
     ;; optional doors to open.
     ;; door ID is low byte PLM argument when editing doors in SMILE
     ;; terminate with $00
-    db $10,$32			; defaults to red tower top+construction zone
     db $00
 
 ;;; CODE in bank A1

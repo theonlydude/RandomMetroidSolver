@@ -48,6 +48,8 @@ incsrc "constants.asm"
 !used_slots_mask #= !last_saveslot+2
 ;; SRAM magic set to seed ID to check if we ever booted the seed
 !was_started_flag32 #= !last_saveslot+4
+;; bitmask of which saves are locked (to know when to play the lock/unlock sound)
+!locked_slots_mask #= !last_saveslot+8
 ;; special value here to check on boot if console was just reset
 !softreset = $7fffe6
 !reset_flag = $babe
@@ -125,9 +127,13 @@ org $82805f
 org $8284D3
         jsl igt_end
 
-;;; draw locked file status on top of samus helmet
+;;; draw locked file status on top of samus helmet in load menu
 org $819e25
         jsl draw_lock
+
+;;; control selected save locked status
+org $81A1DB
+        jsr control_lock
 
 ;;; -------------------------------
 ;;; CODE ;;;
@@ -205,9 +211,10 @@ print "first boot check: ", pc
     beq .check_reset
 .first:
     ;; no game was ever saved:
-    ;; init used save slots bitmask
+    ;; init used save slots bitmasks
     lda #$0000
     sta !used_slots_mask
+    sta !locked_slots_mask
     ;; clear all save files by corrupting checksums
     ldx	#$0005
     lda #!magic_flag
@@ -359,13 +366,9 @@ check_new_game:
 ;; a save will always be performed when starting a new game (see start.asm)
 new_save:
 	;; set current save slot as used in SRAM bitmask
-	lda !current_save_slot
-	asl
-	tax
-	lda !used_slots_mask
-	ora.l slots_bitmasks,x	;; bitmask index table in ROM
-	sta !used_slots_mask
-
+	lda !current_save_slot : asl : tax
+	lda !used_slots_mask : ora.l slots_bitmasks,x : sta !used_slots_mask
+	lda !locked_slots_mask : ora.l slots_bitmasks,x : sta !locked_slots_mask
 	;; init backup save data :
         lda !current_save_slot
         pha
@@ -659,6 +662,9 @@ copy_stats:
     lda $19b9
     %backupIndex()
     lda $700002,x : ora #$8000 : sta $700002,x
+    ;; set locked status
+    lda $19b9 : asl : tax
+    lda !locked_slots_mask : ora.l slots_bitmasks, x : sta !locked_slots_mask
 .end:
     lda $19B7   ;; hijacked code
     rts
@@ -1148,23 +1154,56 @@ draw_lock:
         ;; check if the save is actually used
         asl : tax
         lda !used_slots_mask : and.l slots_bitmasks, x
-        beq .end
+        beq .draw_helmet
         ;; check for locked status in SRAM
         lda !temp
         %backupIndex()
         lda $700002, x
-        bpl .end
-.lock:
-        ;; draw lock sprite
+        bpl .unlocked
+.locked:
+        ;; check if previous status was unlocked
+        lda !temp : asl : tax
+        lda !locked_slots_mask : and.l slots_bitmasks, x
+        bne .draw_lock               ; already locked, just draw lock sprite
+        ;; set locked status
+        lda !locked_slots_mask : ora.l slots_bitmasks, x : sta !locked_slots_mask
+        ;; play "moved cursor" sound
+        lda #$0037 : JSL $809049
+        bra .draw_lock
+.unlocked:
+        ;; check if previous status was unlocked
+        lda !temp : asl : tax
+        lda !locked_slots_mask : and.l slots_bitmasks, x
+        beq .draw_helmet               ; already unlocked
+        ;; clear locked status
+        lda.l slots_bitmasks, x : eor #$ffff : and.l !locked_slots_mask : sta !locked_slots_mask
+        ;; play "moved cursor" sound
+        lda #$0037 : JSL $809049
+        bra .draw_helmet
+.draw_lock:
         ply : plx : phx : phy
         lda #$0a00 : sta $03    ; set palette to 5
         lda #$0068 : jsl $81891F
-.end:
-        ;; draw samus helmet
+.draw_helmet:
         ply : plx
         lda #$0e00 : sta $03    ; set palette to 7
         pla : jsl $81891F
         rtl
+
+;;; when in load menu, check if left, right, X or Y are pressed, if so, change
+;;; selected lock file status
+control_lock:
+        jsr $9DE4               ; hijacked code
+        lda $8f                 ; read newly pressed buttons
+        bit #$1c80 : bne .end ; if A, B, start, up or down pressed, do nothing
+        bit #$4340 : beq .end ; check for left, right, X or Y
+        ;; check that we're actually selecting a slot
+        lda !current_save_slot : cmp.w #3 : bpl .end
+        ;; actually toggle lock
+        %backupIndex()
+        lda $700002, x : eor #$8000 : sta $700002, x
+.end:
+        rts
 
 print "b81 end: ", pc
 

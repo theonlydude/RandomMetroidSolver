@@ -1132,20 +1132,36 @@ table "tables/menu.tbl",rtl
 	dw " ENTRANCE"
 	dw $ffff
 
+!temp = $0743
+
 ;;; if "player flag" is set in the slot, draw a lock on top of samus helmet
 ;;; (drawing the sprite before puts it on top)
 draw_lock:
         pha : phx : phy
-        lda !current_save_slot
+        ;; infer the drawn save slot from context
+        ;; retrieve X register pushed at the start of calling routine
+        lda 11,s
+        ;; possible values are 4, 6, 8, apply x: ((x - 1) >> 1) - 1 to get 0, 1, 2
+        dec : lsr : dec
+        ;; save value
+        sta !temp
+        ;; check if the save is actually used
+        asl : tax
+        lda !used_slots_mask : and.l slots_bitmasks, x
+        beq .end
+        ;; check for locked status in SRAM
+        lda !temp
         %backupIndex()
         lda $700002, x
         bpl .end
 .lock:
+        ;; draw lock sprite
         ply : plx : phx : phy
-        lda #$0069 : jsl $81891F        
+        lda #$0068 : jsl $81891F
 .end:
-        ply : plx : pla
-        jsl $81891F
+        ;; draw samus helmet
+        ply : plx
+        pla : jsl $81891F
         rtl
 
 print "b81 end: ", pc
@@ -1154,10 +1170,10 @@ print "b81 end: ", pc
 
 ;;; Spritemap pointers table end. It can be expanded, since we spill over unused data
 org $82c639
-        dw spritemap_lock       ; entry $69
+        dw spritemap_lock       ; entry $68
 
 spritemap_lock:
         dw $0001
-        %sprite($38, $1f4, $f4, 0, 0, %11, 0)
+        %sprite($98, 0, 492, 244, 0, 3, 0, 0)
 
 warnpc $82c749 ; useful data resumes here

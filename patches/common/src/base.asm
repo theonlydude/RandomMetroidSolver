@@ -1141,7 +1141,7 @@ draw_lock:
         ;; infer the drawn save slot from context
         ;; retrieve X register pushed at the start of calling routine
         lda 11,s
-        ;; possible values are 4, 6, 8, apply x: ((x - 1) >> 1) - 1 to get 0, 1, 2
+        ;; possible values are 4, 6, 8, apply x -> ((x - 1) >> 1) - 1 to get 0, 1, 2
         dec : lsr : dec
         ;; save value
         sta !temp
@@ -1157,10 +1157,12 @@ draw_lock:
 .lock:
         ;; draw lock sprite
         ply : plx : phx : phy
+        lda #$0a00 : sta $03    ; set palette to 5
         lda #$0068 : jsl $81891F
 .end:
         ;; draw samus helmet
         ply : plx
+        lda #$0e00 : sta $03    ; set palette to 7
         pla : jsl $81891F
         rtl
 
@@ -1174,6 +1176,6 @@ org $82c639
 
 spritemap_lock:
         dw $0001
-        %sprite($98, 0, 492, 244, 0, 3, 0, 0)
+        %sprite($8A, 0, 492, 244, 0, %11, 0, 0)
 
 warnpc $82c749 ; useful data resumes here

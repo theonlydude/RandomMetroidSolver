@@ -340,13 +340,21 @@ class RomReader:
     def loadTransitions(self, tourian):
         # return the transitions
         rooms = GraphUtils.getRooms()
+        def getTransition(doorPtr):
+            nonlocal rooms
+            key = self._getTransition(doorPtr)
+            if key not in rooms:
+                key = self._getTransition(doorPtr, oldFormat=True)
+            if key not in rooms:
+                return None
+            return key
         bossTransitions = {}
         areaTransitions = {}
         for accessPoint in Logic.accessPoints():
             if accessPoint.isInternal() == True:
                 continue
-            key = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
-            if key not in rooms:
+            key = getTransition(accessPoint.ExitInfo['DoorPtr'])
+            if key is None:
                 # can happen with race mode seeds
                 continue
             destAP = rooms[key]
@@ -373,9 +381,9 @@ class RomReader:
             escapeSrcAP = getAccessPoint('Climb Bottom Left')
         else:
             escapeSrcAP = getAccessPoint('Tourian Escape Room 4 Top Right')
-        key = self.getTransition(escapeSrcAP.ExitInfo['DoorPtr'])
+        key = getTransition(escapeSrcAP.ExitInfo['DoorPtr'])
         # may not be set in plandomizer
-        if key in rooms:
+        if key is not None:
             escapeDstAP = rooms[key]
             escapeTransition = [(escapeSrcAP.Name, escapeDstAP.Name)]
         else:
@@ -392,7 +400,7 @@ class RomReader:
         else:
             return self.race.readDoorTransition(address)
 
-    def getTransition(self, doorPtr):
+    def _getTransition(self, doorPtr, oldFormat=False):
         # room ptr is in two bytes
         roomPtr = self.readRoomPtr(0x10000 | doorPtr)
 
@@ -408,18 +416,22 @@ class RomReader:
             # as incompatible transition change the value of direction
             asmAddress = 0x70000 | self.romFile.readWord()
 
-            offset = 0
-            b = self.romFile.readByte(asmAddress+3)
-            if b == 0x20:
-                # ignore original door asm ptr call
-                offset += 3
-            b = self.romFile.readByte(asmAddress+6)
-            if b == 0x20:
-                # ignore exit asm ptr call
-                offset += 3
+            if not oldFormat:
+                x = self.romFile.readWord(asmAddress+1)
+                y = self.romFile.readWord(asmAddress+7)
+            else:
+                offset = 0
+                b = self.romFile.readByte(asmAddress+1)
+                if b == 0x20:
+                    # ignore original door asm ptr call
+                    offset += 3
+                b = self.romFile.readByte(asmAddress+6)
+                if b == 0x20:
+                    # ignore exit asm ptr call
+                    offset += 3
 
-            x = self.romFile.readWord(asmAddress+4+offset)
-            y = self.romFile.readWord(asmAddress+10+offset)
+                x = self.romFile.readWord(asmAddress+4+offset)
+                y = self.romFile.readWord(asmAddress+10+offset)
 
             return (roomPtr, (sx, sy), (x, y))
         else:

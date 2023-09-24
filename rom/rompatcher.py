@@ -980,11 +980,11 @@ class RomPatcher:
                 SamusX = getWordBytes(conn['SamusX'])
                 SamusY = getWordBytes(conn['SamusY'])
                 # force samus position
-                asmPatch += [ 0x20 ] + incompatible_doors # JSR incompatible_doors
                 asmPatch += [ 0xA9 ] + SamusX             # LDA #$SamusX        ; fixed Samus X position
                 asmPatch += [ 0x8D, 0xF6, 0x0A ]          # STA $0AF6           ; update Samus X position in memory
                 asmPatch += [ 0xA9 ] + SamusY             # LDA #$SamusY        ; fixed Samus Y position
                 asmPatch += [ 0x8D, 0xFA, 0x0A ]          # STA $0AFA           ; update Samus Y position in memory
+                asmPatch += [ 0x20 ] + incompatible_doors # JSR incompatible_doors
             else:
                 # still give I-frames
                 asmPatch += [ 0x20 ] + giveiframes        # JSR giveiframes

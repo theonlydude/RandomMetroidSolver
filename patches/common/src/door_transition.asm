@@ -76,9 +76,16 @@ print pc
 	;; set cancel spark flag if a spark is active
 	lda !contact_dmg_idx
 	cmp #$0002		; contact damage is 2 if samus is sparking
-	bne .end
-	lda !MAGIC
-	sta !spark_flag
+	bne +
+	lda !MAGIC : sta !spark_flag
++
+        ;; reset contact damage index
+        stz !contact_dmg_idx
+        ;; set samus previous position with current position
+        lda $0AF6 : sta $0B10   ; X px
+        lda $0AF8 : sta $0B12   ; X subpx
+        lda $0AFA : sta $0B14   ; Y px
+        lda $0AFC : sta $0B16   ; Y subpx
 .end:
 print "giveiframes:"
 print pc

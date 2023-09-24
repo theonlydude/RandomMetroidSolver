@@ -464,12 +464,12 @@ check_slot:
 	sta !backup_candidate
 	bra .end
 .not_empty:
-	;; if not our save slot, skip
+	;; if not our timeline, skip
 	ldx $0004,y
 	lda $700000,x
-	cmp !current_save_slot
+	cmp.l !last_saveslot
 	bne .end
-	;; if not a backup save, skip
+	;; if locked save, skip
 	lda $700002,x
 	bmi .end
 	;; if backup counter is different:
@@ -1215,17 +1215,24 @@ spritemap_lock:
 warnpc $82c749 ; useful data resumes here
 
 ;;; when saving, inform the player in the "SAVE COMPLETED" message box of the backup status
+!n_vanilla_entries #= $1C
+!new_save_completed_msg_box #= $1d
+!line_strlen #= 26
+!msgbox_ram_tilemap = $7E3200
+!full_line_size #= $40
+!third_line_addr #= 3*!full_line_size+!msgbox_ram_tilemap+6
 
 org $8580CE
-        dw $001d                ; ship point to new save completed box
+        dw !new_save_completed_msg_box ; ship point to new save completed box
 
 org $84B027
-        dw $001d                ; save station point to new save completed box
+        dw !new_save_completed_msg_box ; save station point to new save completed box
 
-;;; first, some fixes to message box handling to add our own without touching the vanilla tables and tilemaps
+org $85848D
+        db !new_save_completed_msg_box ; special case in handle msg box interaction routine
+
+;;; some fixes to message box handling to add our own without touching the vanilla tables and tilemaps
 ;;; code based on MessageBoxesV5 by Kejardon, JAM, Nodever2 (https://metroidconstruction.com/resource.php?id=334)
-!n_vanilla_entries #= $1C
-
 org $85869B
 msgbox_vanilla_entries:
         skip !n_vanilla_entries*6
@@ -1271,9 +1278,39 @@ msgbox_new_entries:
         dw save_completed_custom, $825A, tilemap_save_completed
         dw $8436, $8289, tilemap_terminator
 
+;;; write info about last backup in save completed msg box
 save_completed_custom:
-        ;; TODO : add modification function adding relevant lines
+        php
+        %ai16()
+        lda.l !backup_candidate
+        bmi .backup_not_necessary
+        and #$0003
+        cmp.w #3 : beq .backup_failed
+.backup_done:
+        pha
+        ldy #tilemap_backup_done : jsr replace_3rd_line
+        pla : clc : adc #$28e0  ; get pink letter for slot
+        sta.l 2*23+!third_line_addr
+        bra .end
+.backup_not_necessary:
+        ldy #tilemap_backup_not_needed : jsr replace_3rd_line
+        bra .end
+.backup_failed:
+        ldy #tilemap_backup_failed : jsr replace_3rd_line
+.end:
+        plp
         jsr $8441
+        rts
+
+;;; rewrite 3rd line of large message box in RAM tilemap
+;;; Y: offset of line string in bank 85
+replace_3rd_line:
+        ldx.w #0
+.loop:
+        lda $0000, y
+        sta.l !third_line_addr, x
+        iny : iny : inx : inx
+        cpx.w #(2*!line_strlen) : bmi .loop
         rts
 
 ;;; tilemap definitions

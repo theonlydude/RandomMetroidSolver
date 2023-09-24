@@ -32,18 +32,17 @@ org $a1f200
     ;; otherwise hi byte is area and low is save index.
     ;; (use FFFE as Ceres special value because FFFF can be mistaken
     ;; for free space by solver/tracker)
-    dw $0000			; defaults to landing site
+    dw $fffe			; defaults to Ceres
 %export(opt_doors)
     ;; optional doors to open.
     ;; door ID is low byte PLM argument when editing doors in SMILE
     ;; terminate with $00
-    db $10,$32			; defaults to red tower top+construction zone
     db $00
 
 ;;; CODE in bank A1
 org $a1f220
 %export(startup)
-    jsl base_check_new_game : bne .end
+    lda !new_game_flag : beq .end
     lda.l start_location
     cmp #$fffe : beq .ceres
     ;; start point on Zebes
@@ -66,7 +65,7 @@ org $a1f220
 
 gameplay_start:
     jsl $809a79 ; vanilla code
-    jsl base_check_new_game  : bne .end
+    lda !new_game_flag : beq .end
     ;; Set doors to blue if necessary
     phx
     ldx #$0000

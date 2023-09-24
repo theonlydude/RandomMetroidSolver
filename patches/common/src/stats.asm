@@ -121,6 +121,25 @@ org $858086
 org $8580B7
         JSR UnsetMessageBoxFlag
 
+;; increment reset count when starting a not new game
+org $82eeb7                     ; just overwrite debug mode handling code
+start_game_pressed:
+        lda !new_game_flag : bne .cont
+        bra .inc_reset
+warnpc $82EEC3
+org $82EEC3
+.cont:
+
+org $82EEF6                     ; overwrite more debug mode code
+.inc_reset:
+        ;; increment reset count
+        lda !stat_resets
+        jsl base_inc_stat
+        jsl base_save_last_stats
+        bra .cont
+
+warnpc $82EF18
+
 ;; -------------------------------
 ;; CODE (using bank A1 free space)
 ;; -------------------------------

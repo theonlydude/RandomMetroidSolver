@@ -16,6 +16,9 @@ include
 !obj_check_index = $7fff46
 ;;; RAM for remaining items in current area
 !n_items = $7fff3e
+;;; RAM flag set to non-0 if we loaded a new game
+!new_game_flag = $7fff38
+
 ;;; vanilla bit array to keep track of collected items
 !item_bit_array = $7ed870
 ;;; bit index to byte index/bitmask routine

@@ -111,8 +111,8 @@ if __name__ == "__main__":
         # extract logic from ips
         logic = RomReader.getLogicFromIPS(args.seedIps)
 
-    if args.base:
-        args.patches += ["utils.ips", "base.ips", "stats.ips", "credits.ips", "endingtotals.ips", "area_ids.ips", "area_ids_alt.ips"]
+    if args.base:        
+        args.patches += ["utils.ips", "base.ips", "start.ips", "stats.ips", "credits.ips", "endingtotals.ips", "area_ids.ips", "area_ids_alt.ips"]
 
     Logic.factory(logic)
     RomFlavor.factory()

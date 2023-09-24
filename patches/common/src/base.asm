@@ -369,6 +369,8 @@ new_save:
 	lda !current_save_slot
 	jsl $818000
 
+        ;; clear new game flag
+        lda.w #0 : sta !new_game_flag
 .end:
 	rtl
 

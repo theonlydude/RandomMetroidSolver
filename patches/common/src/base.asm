@@ -30,8 +30,8 @@ incsrc "constants.asm"
 !regular_save_sram_slot2 #= !regular_save_sram+!regular_save_size*2
 !sram_station_info_offset = $0156 ; offset in a save file where current save station and area are stored
 ;;; stats SRAM
-!stats_sram_sz_b = $0080
-!stats_sram_sz_w = !stats_sram_sz_b/2
+!stats_sram_sz_b #= $0080
+!stats_sram_sz_w #= !stats_sram_sz_b/2
 !full_stats_area_sz_b #= 2*!stats_sram_sz_b+$20   ; twice the size of stats to account for last stats + $20 extra SRAM
 !stats_sram_slot0 #= !regular_save_sram+!regular_save_size*3
 !stats_sram_slot1 #= !stats_sram_slot0+!full_stats_area_sz_b
@@ -576,6 +576,8 @@ patch_load:
     bcc .lock
     ;; new save or SRAM corrupt, place flag for new game
     lda.w #1 : sta !new_game_flag
+    ;; save current timeline
+    lda !current_save_slot : sta !last_saveslot
     bra .end
 .lock:
     ;; mark this slot as non-backup
@@ -679,7 +681,7 @@ clear_values:
 -
     jsl store_stat
     inx
-    cpx #!stats_sram_sz_w
+    cpx.w #!stats_sram_sz_w
     bne -
 
     ;; Clear RTA Timer
@@ -725,7 +727,7 @@ load_stats_at:
     iny
     inx
     inx
-    cpy #!stats_sram_sz_b
+    cpy.w #!stats_sram_sz_b
     bcc .loop
     plb
     rts
@@ -773,7 +775,7 @@ save_stats_at:
     iny
     inx
     inx
-    cpy #!stats_sram_sz_b
+    cpy.w #!stats_sram_sz_b
     bcc .loop
     plb
     ply

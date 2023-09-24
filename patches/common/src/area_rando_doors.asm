@@ -24,6 +24,8 @@ incsrc "macros.asm"
 !samus_max_reserve     = $09d4
 
 org $8ff700
+        db $ca                  ; marker to detect we have area rando
+
 ;;; "ship refill" for tourian elevator
 %export(full_refill)
 	lda !samus_max_health
@@ -39,14 +41,11 @@ org $8ff700
 .end:
 	rts
 
-warnpc $8ff72f
-
 ;;; door pointers for room below botwoon
 below_botwoon_doors:
 	dw $a7d4,$a534
 
-;;; stop before generated door asm routines start
-warnpc $8ff7ff
+warnpc $8ff72f
 
 ;;; add door in room below botwoon etank (room header update)
 org $8FD706

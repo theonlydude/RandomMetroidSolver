@@ -52,8 +52,8 @@ class RomPatches:
     ## Area rando patches
     # remove crumble block for reverse lower norfair door access
     SingleChamberNoCrumble    = 101
-    # remove green gates for reverse maridia access
-    AreaRandoGatesBase        = 102
+    # remove green gate for reverse maridia access
+    CaterpillarGreenGateRemoved = 102
     # disable Green Hill Yellow, Noob Bridge Green, Coude Yellow, and Kronic Boost yellow doors
     AreaRandoBlueDoors        = 104
     # crateria key hunter yellow, green pirates shaft red
@@ -72,6 +72,8 @@ class RomPatches:
     CrabTunnelGreenGateRemoved = 111
     # remove blue gate in green hill zone maridia
     GreenHillsGateRemoved      = 112
+    # remove green gate for reverse maridia access
+    EastTunnelGreenGateRemoved = 113
 
     ## Minimizer Patches
     NoGadoras                 = 200
@@ -118,8 +120,7 @@ class RomPatches:
     TotalCasual = [ BlueBrinstarMissile ] + Total
 
     # area rando patch set
-    AreaBaseSet = [ SingleChamberNoCrumble, AreaRandoGatesBase,
-                    AreaRandoBlueDoors, AreaRandoMoreBlueDoors,
+    AreaBaseSet = [ AreaRandoBlueDoors, AreaRandoMoreBlueDoors,
                     CrocBlueDoors, CrabShaftBlueDoor, MaridiaSandWarp ]
 
     # dessyreqt randomizer
@@ -199,22 +200,16 @@ _layoutIPS = [
     'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips'
 ]
 
-_layoutArea = [
+_area = [
     "WS_Main_Open_Grey", "WS_Save_Active",
     # make incompatible door transitions work
     'door_transition.ips',
     # east maridia looping doors (common)
     'area_rando_doors.ips',
-    # remove maridia red fish exit green gate (move plm in room A322: Caterpillar Room - flavor)
-    'area_rando_gate_caterpillar.ips',
-    # remove maridia tube exit green gate (move plm in room CF80: East Tunnel - common)
-    'area_rando_gate_east_tunnel.ips',
-    # remove lower norfair exit crumble blocks (change layout in room AD5E: Single Chamber - flavor)
-    'area_layout_ln_exit.ips',
     # additionnal save at crab shaft (change layout in room D1A3: Crab Shaft - flavor)
     'crab_shaft.ips',
     'Save_Crab_Shaft',
-    # additionnal save at main street
+    # additionnal save at main street (flavor)
     'Save_Main_Street',
     # change door connection in bank 83 (room D461: West Sand Hall - flavor)
     'area_door_west_sand_hall.ips',
@@ -222,7 +217,13 @@ _layoutArea = [
     'area_rando_warp_door.ips'
 ]
 
-_layoutAreaComfort = [
+_layoutArea = [
+    # remove maridia red fish exit green gate (move plm in room A322: Caterpillar Room - flavor)
+    'area_rando_gate_caterpillar.ips',
+    # remove maridia tube exit green gate (move plm in room CF80: East Tunnel - common)
+    'area_rando_gate_east_tunnel.ips',
+    # remove lower norfair exit crumble blocks (change layout in room AD5E: Single Chamber - flavor)
+    'area_layout_ln_exit.ips',
     # remove crab geen gate in maridia (move plm in room D08A: Crab Tunnel - common)
     'area_rando_gate_crab_tunnel.ips',
     # update ceiling on top on the gate (change layout in room D08A: Crab Tunnel - flavor)
@@ -293,6 +294,13 @@ definitions = {
             'desc': "Nerfed charge beam from the start of the game",
             'ips': ['nerfed_charge.ips'],
             'logic': [RomPatches.NerfedCharge]
+        },
+        'area': {
+            'address': snes_to_pc(0x8ff700), 'value': 0xCA,
+            'desc': "Area Randomization",
+            'ips': _area,
+            'logic': RomPatches.AreaBaseSet,
+            'plms': ["WS_Save_Blinking_Door"]
         },
         'boss': {
             # TODO? addr/value?
@@ -395,18 +403,19 @@ definitions = {
             'address': snes_to_pc(0xb5ffed), 'value': 0x0,
             'desc': "Debug Hack",
             'ips': ['Debug_Full.ips']
+        },
+        # area rando layout
+        'area_rando_gate_east_tunnel': {
+            'address': 0x7c41d, 'value': 0x0,
+            'desc': 'Remove Green gate in East Tunnel',
+            'ips': ['area_rando_gate_east_tunnel.ips'],
+            'plms': [],
+            'logic': [RomPatches.EastTunnelGreenGateRemoved]
         }
     },
     'vanilla': {
         'logic': {
             'ips': []
-        },
-        'area': {
-            'address': snes_to_pc(0x8f88a0), 'value': 0x2B,
-            'desc': "Area layout modifications",
-            'ips': _layoutArea,
-            'logic': RomPatches.AreaBaseSet,
-            'plms': ["WS_Save_Blinking_Door"]
         },
         # Anti-softlock layout patches
         'dachora': {
@@ -493,7 +502,21 @@ definitions = {
             'plms': [],
             'logic': []
         },
-        # Area rando comfort layout patches
+        # Area rando layout patches
+        'area_rando_gate_caterpillar': {
+            'address': 0x788a0, 'value': 0x2b,
+            'desc': 'Green gate removed in Caterpillar Room',
+            'ips': ['area_rando_gate_caterpillar.ips'],
+            'plms': [],
+            'logic': [RomPatches.CaterpillarGreenGateRemoved]
+        },
+        'area_layout_ln_exit': {
+            'address': 0x23ec11, 'value': 0xc6,
+            'desc': 'Remove crumble blocks in Single Chamber',
+            'ips': ['area_layout_ln_exit.ips'],
+            'plms': [],
+            'logic': [RomPatches.SingleChamberNoCrumble]
+        },
         'area_rando_gate_crab_tunnel': {
             'address': 0x252fa7, 'value': 0xf8,
             'desc': 'Remove Crab green gate in Marida',
@@ -537,11 +560,13 @@ definitions = {
             'logic': []
         },
         'area_layout_single_chamber': {
+            # this one auto enables LN exit crumble removed because they're in the same room and data is compressed
+            # FIXME detection byte duplicate with area_layout_ln_exit
             'address': 0x23ec11, 'value': 0xc6,
             'desc': 'Access Lower Norfair exit',
-            'ips': ['area_layout_single_chamber.ips'],
             'plms': [],
-            'logic': []
+            'ips': ['area_layout_ln_exit.ips', 'area_layout_single_chamber.ips'],
+            'logic': [RomPatches.SingleChamberNoCrumble]
         },
         'area_layout_crab_hole': {
             'address': 0x2583ef, 'value': 0xd1,
@@ -560,9 +585,6 @@ definitions = {
                     'snails.ips', 'boulders.ips', 'rinkas.ips', 'etecoons.ips', 'crab_main_street.ips',
                     'crab_mt_everest.ips', 'mother_brain.ips', 'kraid.ips', 'torizos.ips', 'botwoon.ips',
                     'crocomire.ips', 'ridley.ips', 'ws_treadmill.ips']
-        },
-        'area': {
-            'address': snes_to_pc(0x8f88a0), 'value': 0x04
         },
         # Anti-softlock layout patches
         'dachora': {
@@ -602,6 +624,12 @@ definitions = {
             'address': 0x22d1be, 'value': 0x1c,
         },
         # Area rando comfort layout patches
+        'area_rando_gate_caterpillar': {
+            'address': 0x788a0, 'value': 0x4,
+        },
+        'area_layout_ln_exit': {
+            'address': 0x23ec09, 'value': 0x4,
+        },
         'area_rando_gate_crab_tunnel': {
             'address': 0x252fc6, 'value': 0x6,
         },
@@ -632,13 +660,13 @@ definitions = {
 ### Groups for optional patches
 groups = {
     'layout': ['door_indicators_plms', 'dachora', 'early_super_bridge', 'high_jump', 'moat', 'spospo_save', 'nova_boost_platform', 'red_tower', 'spazer', 'climb_supers', 'brinstar_map_room', 'kraid_save', 'mission_impossible'],
-    'areaLayout': ['area_rando_gate_crab_tunnel', 'area_rando_gate_greenhillzone', 'east_ocean', 'aqueduct_bomb_blocks', 'area_layout_east_tunnel', 'area_layout_caterpillar', 'area_layout_single_chamber', 'area_layout_crab_hole'],
+    'areaLayout': ['area_rando_gate_caterpillar', 'area_rando_gate_east_tunnel', 'area_layout_ln_exit', 'area_rando_gate_crab_tunnel', 'area_rando_gate_greenhillzone', 'east_ocean', 'aqueduct_bomb_blocks', 'area_layout_east_tunnel', 'area_layout_caterpillar', 'area_layout_single_chamber', 'area_layout_crab_hole'],
     'variaTweaks': ['WS_Etank', 'LN_Chozo', 'bomb_torizo']
 }
 
 groups_descriptions = {
     'layout': "Anti-softlock layout patches",
-    'areaLayout': "Area randomization comfort patches",
+    'areaLayout': "Area randomization layout patches",
     'variaTweaks': "VARIA Tweaks"
 }
 

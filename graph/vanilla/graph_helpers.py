@@ -215,14 +215,14 @@ class HelpersGraph(Helpers):
     def canPassMaridiaToRedTowerNode(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'),
-                       sm.wor(RomPatches.has(RomPatches.AreaRandoGatesBase),
+                       sm.wor(RomPatches.has(RomPatches.CaterpillarGreenGateRemoved),
                               sm.haveItem('Super')))
 
     @Cache.decorator
     def canPassRedTowerToMaridiaNode(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'),
-                       RomPatches.has(RomPatches.AreaRandoGatesBase))
+                       RomPatches.has(RomPatches.CaterpillarGreenGateRemoved))
 
     def canEnterCathedral(self, mult=1.0):
         sm = self.smbm

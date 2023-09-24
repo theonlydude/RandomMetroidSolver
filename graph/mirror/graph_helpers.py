@@ -11,7 +11,7 @@ class HelpersGraphMirror(HelpersGraph):
     def canPassRedTowerToMaridiaNode(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'),
-                       sm.wor(RomPatches.has(RomPatches.AreaRandoGatesBase),
+                       sm.wor(RomPatches.has(RomPatches.CaterpillarGreenGateRemoved),
                               sm.canGreenGateGlitch()))
 
     @Cache.decorator

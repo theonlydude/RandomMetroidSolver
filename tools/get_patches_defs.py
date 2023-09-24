@@ -4,7 +4,7 @@ import sys, os
 
 sys.path.append(os.path.dirname(sys.path[0]))
 
-from rom.rom_patches import _layoutIPS, _layoutAreaComfort, definitions
+from rom.rom_patches import _layoutIPS, _layoutArea, definitions
 from rom.rom import RealROM, snes_to_pc, pc_to_snes
 from rom.ips import IPS_Patch
 from patches.common.patches import patches as commonPatchDict
@@ -55,7 +55,7 @@ def printPatchDefs(grp, patches, flavor):
 
 categories = {
     'layout': (["common", "vanilla", "mirror"], _layoutIPS),
-    'areaLayout': (["vanilla", "mirror"], _layoutAreaComfort),
+    'areaLayout': (["common", "vanilla", "mirror"], _layoutArea),
     'variaTweaks': (["common"], variaTweaks)
 }
 

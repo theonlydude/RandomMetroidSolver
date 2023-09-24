@@ -15,7 +15,7 @@ accessPointsDict['Business Center'].connectInternal(
     )
 )
 accessPointsDict['East Tunnel Top Right'].traverse = Cache.ldeco(lambda sm: sm.wor(
-    RomPatches.has(RomPatches.AreaRandoGatesBase),
+    RomPatches.has(RomPatches.EastTunnelGreenGateRemoved),
     sm.canGreenGateGlitch())
 )
 # can no longer bgg

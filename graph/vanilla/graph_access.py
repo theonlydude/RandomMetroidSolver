@@ -751,9 +751,9 @@ accessPoints = [
        entryInfo = {'SamusX':0xce, 'SamusY':0x188},
        dotOrientation = 'se'),
     AccessPoint('East Tunnel Top Right', 'RedBrinstar', {
-        'East Tunnel Right': Cache.ldeco(lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoGatesBase),
+        'East Tunnel Right': Cache.ldeco(lambda sm: sm.wor(RomPatches.has(RomPatches.EastTunnelGreenGateRemoved),
                                                            sm.haveItem('Super')))
-    }, traverse=Cache.ldeco(lambda sm: RomPatches.has(RomPatches.AreaRandoGatesBase)),
+    }, traverse=Cache.ldeco(lambda sm: RomPatches.has(RomPatches.EastTunnelGreenGateRemoved)),
        roomInfo = {'RoomPtr':0xcf80, "area": 0x4},
        exitInfo = {'DoorPtr':0xa390, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe356},

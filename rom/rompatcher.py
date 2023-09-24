@@ -959,6 +959,19 @@ class RomPatcher:
 
             # write door asm
             asmPatch = []
+            # incompatible transition
+            if 'SamusX' in conn:
+                SamusX = getWordBytes(conn['SamusX'])
+                SamusY = getWordBytes(conn['SamusY'])
+                # force samus position
+                asmPatch += [ 0xA9 ] + SamusX             # LDA #$SamusX        ; fixed Samus X position
+                asmPatch += [ 0x8D, 0xF6, 0x0A ]          # STA $0AF6           ; update Samus X position in memory
+                asmPatch += [ 0xA9 ] + SamusY             # LDA #$SamusY        ; fixed Samus Y position
+                asmPatch += [ 0x8D, 0xFA, 0x0A ]          # STA $0AFA           ; update Samus Y position in memory
+                asmPatch += [ 0x20 ] + incompatible_doors # JSR incompatible_doors
+            else:
+                # still give I-frames
+                asmPatch += [ 0x20 ] + giveiframes        # JSR giveiframes
             # call original door asm ptr if needed
             if conn['doorAsmPtr'] != 0x0000:
                 # may be a symbol
@@ -973,19 +986,6 @@ class RomPatcher:
                 # endian convert
                 exitAsm = symbolWordBytes(conn['exitAsm'])
                 asmPatch += [ 0x20 ] + exitAsm            # JSR exitAsm
-            # incompatible transition
-            if 'SamusX' in conn:
-                SamusX = getWordBytes(conn['SamusX'])
-                SamusY = getWordBytes(conn['SamusY'])
-                # force samus position
-                asmPatch += [ 0xA9 ] + SamusX             # LDA #$SamusX        ; fixed Samus X position
-                asmPatch += [ 0x8D, 0xF6, 0x0A ]          # STA $0AF6           ; update Samus X position in memory
-                asmPatch += [ 0xA9 ] + SamusY             # LDA #$SamusY        ; fixed Samus Y position
-                asmPatch += [ 0x8D, 0xFA, 0x0A ]          # STA $0AFA           ; update Samus Y position in memory
-                asmPatch += [ 0x20 ] + incompatible_doors # JSR incompatible_doors
-            else:
-                # still give I-frames
-                asmPatch += [ 0x20 ] + giveiframes        # JSR giveiframes
             # for special access points display on map, artificially explore the tile where 
             # the portal is drawn, since it's not the same as the actual map tile checked to
             # see if the portal is taken

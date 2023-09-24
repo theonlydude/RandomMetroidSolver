@@ -42,7 +42,7 @@ org $a1f200
 ;;; CODE in bank A1
 org $a1f220
 %export(startup)
-    jsl base_check_new_game : bne .end
+    lda !new_game_flag : beq .end
     lda.l start_location
     cmp #$fffe : beq .ceres
     ;; start point on Zebes
@@ -65,7 +65,7 @@ org $a1f220
 
 gameplay_start:
     jsl $809a79 ; vanilla code
-    jsl base_check_new_game  : bne .end
+    lda !new_game_flag : beq .end
     ;; Set doors to blue if necessary
     phx
     ldx #$0000

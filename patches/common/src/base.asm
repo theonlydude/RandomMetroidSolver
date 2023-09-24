@@ -18,6 +18,10 @@ incsrc "macros.asm"
 
 incsrc "constants.asm"
 
+;;; temp ram used
+!tmp_area_sz = $00df
+!temp = $0743                   ; general temp var in menus
+
 ;;; normal game SRAM
 !regular_save_size = $0900      ; expanded by saveload patch (modified, A00 in original patch)
 !regular_save_sram = $0010      ; after checksum
@@ -39,7 +43,7 @@ incsrc "constants.asm"
 !backup_sram_slot0 #= !stats_sram_slot0+!backup_save_data_off
 !backup_sram_slot1 #= !stats_sram_slot1+!backup_save_data_off
 !backup_sram_slot2 #= !stats_sram_slot2+!backup_save_data_off
-!backup_counter = $7fff38
+!backup_counter = !temp
 !backup_candidate = $7fff3a
 
 ;;; boot and RTA timer
@@ -60,9 +64,6 @@ incsrc "constants.asm"
 !timer_backup2 = !timer_backup1+2
 ;; timer integrity protection
 !timer_xor = $033e
-
-;;; temp ram used
-!tmp_area_sz = $00df
 
 ;;; save-related vanilla RAM
 !area_index = $079f
@@ -348,21 +349,6 @@ macro backupIndex()
     asl #3 : tax : lda.l slots_data+4,x : tax
 endmacro
 
-
-;;; zero flag set if we're starting a new game
-check_new_game:
-    ;; Make sure game mode is 1f
-    lda $7e0998
-    cmp #$001f : bne .end
-    ;; check that Game time and frames is equal zero for new game
-    lda $09DA
-    and #$fffe                  ; consider 1 IGT frame as 0 (workaround for start game with intro text)
-    ora $09DC
-    ora $09DE
-    ora $09E0
-.end:
-    rtl
-
 ;; a save will always be performed when starting a new game (see start.asm)
 new_save:
 	;; set current save slot as used in SRAM bitmask
@@ -430,9 +416,9 @@ is_backup_needed:
 	lda #$0003	;; 3 is used as invalid value marker, as slots are 0 to 2
 	sta !backup_candidate
 	;; check all slots
-	ldy #slot0_data : jsr check_slot
-	ldy #slot1_data : jsr check_slot
 	ldy #slot2_data : jsr check_slot
+	ldy #slot1_data : jsr check_slot
+	ldy #slot0_data : jsr check_slot
 	;; clear all our work flags from backup_candidate
 	lda !backup_candidate : and #$0003 : sta !backup_candidate
 	;; check that we can actually backup somewhere
@@ -560,8 +546,7 @@ incsrc "saveload.asm"
 ;; Patch load and save routines
 patch_save:                     ; called from saveload patch
 	;; backup saves management:
-	jsl check_new_game
-	beq .save_stats
+	lda !new_game_flag : bne .save_stats
 	;; check if we shall backup the save
 	jsr is_backup_needed
 	bcc .stats
@@ -588,7 +573,11 @@ patch_load:
     plb
     ;; call load routine
     jsl LoadGame
-    bcs .end     ; skip to end if new file or SRAM corrupt
+    bcc .lock
+    ;; new save or SRAM corrupt, place flag for new game
+    lda.w #1 : sta !new_game_flag
+    bra .end
+.lock:
     ;; mark this slot as non-backup
     lda !current_save_slot
     %backupIndex()
@@ -617,10 +606,8 @@ patch_load:
     ;; place marker for resets
     lda #!reset_flag
     sta !softreset
-    ;; increment reset count
-    lda !stat_resets
-    jsl inc_stat
-    jsl save_last_stats
+    ;; clear new game flag
+    lda.w #0 : sta !new_game_flag
     ;; return carry clear
     clc
 .end:
@@ -685,8 +672,7 @@ patch_clear:
 clear_values:
     php
     rep #$30
-    jsl check_new_game
-    bne .ret
+    lda !new_game_flag : beq .ret
 
     ldx #$0000
     lda #$0000
@@ -1132,8 +1118,6 @@ table "tables/menu.tbl",rtl
 .entrance:
 	dw " ENTRANCE"
 	dw $ffff
-
-!temp = $0743
 
 ;;; if "player flag" is set in the slot, draw a lock on top of samus helmet
 ;;; (drawing the sprite before puts it on top)

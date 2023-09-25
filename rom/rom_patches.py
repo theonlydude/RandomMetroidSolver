@@ -561,11 +561,10 @@ definitions = {
         },
         'area_layout_single_chamber': {
             # this one auto enables LN exit crumble removed because they're in the same room and data is compressed
-            # FIXME detection byte duplicate with area_layout_ln_exit
-            'address': 0x23ec11, 'value': 0xc6,
+            'address': 0x23ec11, 'value': 0x6,
             'desc': 'Access Lower Norfair exit',
             'plms': [],
-            'ips': ['area_layout_ln_exit.ips', 'area_layout_single_chamber.ips'],
+            'ips': ['area_layout_single_chamber.ips'],
             'logic': [RomPatches.SingleChamberNoCrumble]
         },
         'area_layout_crab_hole': {

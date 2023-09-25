@@ -28,9 +28,10 @@ def getAddrAndValue(flavor, ips):
         address = addr
         for b in bytez:
             if b != 0xff and b != vanilla.readByte(address):
-                if address in used and b in used[address]:
-                    continue
-                used[address].append(b)
+                if address in used:
+                    if "common" in used[address] or flavor == "common" or flavor in used[address]:
+                        continue
+                used[address].append(flavor)
                 return address, b
             address += 1
     assert False, "Could not find addr/val for %s in flavor %s" % (ips, flavor)

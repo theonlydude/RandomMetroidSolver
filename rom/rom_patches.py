@@ -561,7 +561,7 @@ definitions = {
         },
         'area_layout_single_chamber': {
             # this one auto enables LN exit crumble removed because they're in the same room and data is compressed
-            'address': 0x23ec11, 'value': 0x6,
+            'address': 0x23f4b2, 'value': 0xff,
             'desc': 'Access Lower Norfair exit',
             'plms': [],
             'ips': ['area_layout_single_chamber.ips'],

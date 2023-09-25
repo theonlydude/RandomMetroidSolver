@@ -106,13 +106,18 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x8bfe, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0xcc, 'SamusY':0x88},
-       start = {'spawn': 0x0108, 'doors':[0x1f, 0x21, 0x26], 'patches':[RomPatches.BrinReserveBlueDoors], 'solveArea': "Green Brinstar"}, # XXX test if it would be better in brin reserve room with custom save
+       start = {
+           'spawn': 0x0108, 'doors':[0x1f, 0x21, 0x26],
+           'patches':[RomPatches.BrinReserveBlueDoors],
+           'layout': ['early_super_bridge'],
+           'solveArea': "Green Brinstar"
+       },
        dotOrientation = 'ne'),
     AccessPoint('Big Pink', 'GreenPinkBrinstar', {
         'Green Hill Zone Top Right': Cache.ldeco(lambda sm: sm.wand(sm.haveItem('Morph'),
                                                                     sm.traverse('BigPinkBottomRight'))),
         'Green Brinstar Elevator': lambda sm: sm.canPassDachoraRoom()
-    }, internal=True, start={'spawn': 0x0100, 'solveArea': "Pink Brinstar"}),
+    }, internal=True, start={'spawn': 0x0100, 'layout': ['spospo_save'], 'solveArea': "Pink Brinstar"}),
     AccessPoint('Green Hill Zone Top Right', 'GreenPinkBrinstar', {
         'Noob Bridge Right': lambda sm: SMBool(True),
         'Big Pink': Cache.ldeco(lambda sm: sm.haveItem('Morph'))
@@ -178,6 +183,7 @@ accessPoints = [
     }, internal=True,
        start={'spawn':0x0300,
               'doors':[0x83,0x8b], 'patches':[RomPatches.SpongeBathBlueDoor, RomPatches.WsEtankBlueDoor],
+              'variaTweaks': ['WS_Etank'],
               'solveArea': "WreckedShip Main",
               'needsPreRando':True}),
     AccessPoint('Wrecked Ship Back', 'WreckedShip', {
@@ -404,7 +410,13 @@ accessPoints = [
                                                                            sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Croc via Ice'])))),
         'Warehouse Entrance Left': lambda sm: SMBool(True)
     }, internal=True,
-       start={'spawn':0x0208, 'doors':[0x4d], 'patches':[RomPatches.HiJumpAreaBlueDoor], 'solveArea': "Norfair Entrance", 'needsPreRando':True}),
+       start={
+           'spawn':0x0208, 'doors':[0x4d],
+           'patches':[RomPatches.HiJumpAreaBlueDoor],
+           'layout': ['high_jump', 'nova_boost_platform'],
+           'solveArea': "Norfair Entrance", 'needsPreRando':True
+       }
+    ),
     AccessPoint('Single Chamber Top Right', 'Norfair', {
         'Bubble Mountain Top': Cache.ldeco(lambda sm: sm.wand(sm.canDestroyBombWalls(),
                                                               sm.haveItem('Morph'),
@@ -455,7 +467,15 @@ accessPoints = [
         'Cathedral': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles'])),
         'Bubble Mountain Bottom': lambda sm: sm.canPassBombPassages()
     }, internal=True,
-       start={'spawn':0x0201, 'doors':[0x54,0x55], 'patches':[RomPatches.SpeedAreaBlueDoors], 'knows':['BubbleMountainWallJump'], 'solveArea': "Bubble Norfair Bottom"}),
+       start={
+           'spawn':0x0201, 'doors':[0x54,0x55],
+           'patches':[RomPatches.SpeedAreaBlueDoors],
+           'knows':['BubbleMountainWallJump'],
+           'layout': ['nova_boost_platform'],
+           'areaLayout': ['area_layout_ln_exit'],
+           'solveArea': "Bubble Norfair Bottom"
+       }
+    ),
     AccessPoint('Bubble Mountain Top', 'Norfair', {
         'Kronic Boost Room Bottom Left': Cache.ldeco(# go all the way around
                                                      lambda sm: sm.wand(sm.haveItem('Morph'),
@@ -527,6 +547,7 @@ accessPoints = [
        start = {'spawn': 0x0406, 'solveArea': "Maridia Green",
                 'save':"Save_Mama", 'needsPreRando':True,
                 'patches':[RomPatches.MamaTurtleBlueDoor],
+                'areaLayout': ['area_layout_crab_hole', 'area_rando_gate_crab_tunnel'],
                 'rom_patches':['mama_save.ips'], 'doors': [0x8e]}),
     AccessPoint('Crab Hole Bottom Left', 'WestMaridia', {
         'Main Street Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canExitCrabHole(),
@@ -565,6 +586,7 @@ accessPoints = [
     }, internal=True,
        start = {'spawn': 0x0407, 'solveArea': "Maridia Pink Bottom", 'save':"Save_Watering_Hole",
                 'patches':[RomPatches.MaridiaTubeOpened], 'rom_patches':['wh_open_tube.ips'],
+                'areaLayout': ['area_layout_crab_hole', 'area_rando_gate_crab_tunnel'],
                 'forcedEarlyMorph':True}),
     AccessPoint('Watering Hole Bottom', 'WestMaridia', {
         'Watering Hole': lambda sm: sm.canJumpUnderwater()
@@ -631,6 +653,7 @@ accessPoints = [
     }, internal=True,
        start = {'spawn': 0x0405, 'solveArea': "Maridia Pink Bottom",
                 'save':"Save_Aqueduct", 'needsPreRando':True,
+                'areaLayout': ['aqueduct_bomb_blocks'],
                 'doors': [0x96]}),
     AccessPoint('Post Botwoon', 'EastMaridia', {
         'Aqueduct Bottom': Cache.ldeco(lambda sm: sm.wor(sm.wand(sm.canJumpUnderwater(), # can't access the sand pits from the right side of the room
@@ -736,7 +759,13 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x8af6, 'direction': 0x7, "cap": (0x16, 0x2d), "bitFlag": 0x0,
                    "screen": (0x1, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0xb9f1},
        entryInfo = {'SamusX':0x80, 'SamusY':0x58},
-       start={'spawn':0x010a, 'doors':[0x3c, 0x3d], 'patches':[RomPatches.HellwayBlueDoor, RomPatches.AlphaPowerBombBlueDoor], 'solveArea': "Red Brinstar Top", 'areaMode':True},
+       start={
+           'spawn':0x010a, 'doors':[0x3c, 0x3d],
+           'patches':[RomPatches.HellwayBlueDoor, RomPatches.AlphaPowerBombBlueDoor],
+           'areaLayout': ['area_rando_gate_caterpillar', 'area_rando_gate_east_tunnel'],
+           'layout': ['red_tower'],
+           'solveArea': "Red Brinstar Top", 'areaMode':True
+       },
        dotOrientation = 'n'),
     AccessPoint('East Tunnel Right', 'RedBrinstar', {
         'East Tunnel Top Right': lambda sm: SMBool(True), # handled by room traverse function

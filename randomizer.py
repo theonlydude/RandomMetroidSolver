@@ -6,7 +6,7 @@ from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from graph.graph_utils import GraphUtils, getAccessPoint
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity, text2diff, appDir
-from rom.rom_patches import RomPatches, getPatchSet, getPatchSetsFromPatcherSettings
+from rom.rom_patches import RomPatches, getPatchSet, getPatchSetsFromPatcherSettings, getPatchDescriptions
 from rom.rompatcher import RomPatcher
 from rom.flavor import RomFlavor
 from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir
@@ -291,6 +291,30 @@ if __name__ == "__main__":
             forcedArgs[webArg if webArg is not None else arg] = webValue if webValue is not None else value
             optErrMsgs.append(msg)
 
+    def forceLayoutArgs(forcedLayout):
+        def mergeCustomLayout(arg, forced):
+            if arg is None:
+                return forced, forced
+            p = arg.split(',')
+            return sorted(list(set(p + forced))), sorted(list(set(forced) - set(p)))
+        def getForcedText(forced):
+            return ', '.join(getPatchDescriptions(forced, RomFlavor.flavor))
+        if forcedLayout['layout'] and (args.noLayout or args.layoutCustom is not None):
+            forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", webValue='on')
+            forced = forcedLayout['layout']
+            custom, actuallyForced = mergeCustomLayout(args.layoutCustom, forced)
+            forceArg("layoutCustom", ','.join(custom), f"Forced layout patches: {getForcedText(forced)}", webValue=custom)
+        if args.areaRandomization != 'off' and forcedLayout['areaLayout'] and (args.areaLayoutBase or args.areaLayoutCustom is not None):
+            forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", webValue='on')
+            forced = forcedLayout['areaLayout']
+            custom, actuallyForced = mergeCustomLayout(args.areaLayoutCustom, forced)
+            forceArg("areaLayoutCustom", ','.join(custom), f"Forced area layout patches: {getForcedText(forced)}", webValue=custom)
+        if forcedLayout['variaTweaks'] and (args.noVariaTweaks or args.variaTweaksCustom is not None):
+            forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", webValue='on')
+            forced = forcedLayout['variaTweaks']
+            custom, actuallyForced = mergeCustomLayout(args.variaTweaksCustom, forced)
+            forceArg('variaTweaksCustom', ','.join(custom), f"Forced VARIA tweaks: {getForcedText(forced)}", webValue=custom)
+
     # if rando preset given, load it first
     if args.randoPreset is not None:
         preset = loadRandoPreset(args.randoPreset, args)
@@ -443,13 +467,7 @@ if __name__ == "__main__":
     if not GraphUtils.isStandardStart(args.startLocation) and args.plandoRando is None:
         if args.majorsSplit in ['Major', "Chozo"]:
             forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
-        forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", webValue='on')
-        forceArg('variaTweaksCustom', None, "Disabled VARIA tweaks customization")
-        forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", webValue='on')
-        forceArg("layoutCustom", None, "Disabled 'Anti-softlock layout patches' customization")
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
-        forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", webValue='on')
-        forceArg('areaLayoutCustom', None, "Disabled 'Additional layout patches for easier navigation' customization", webValue='on')
         possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(areaRandomization, maxDifficulty, args.morphPlacement)
         if args.startLocation == 'random':
             if args.startLocationList is not None:
@@ -467,6 +485,9 @@ if __name__ == "__main__":
             optErrMsgs.append('Possible start locations with these settings: {}'.format(possibleStartAPs))
             dumpErrorMsgs(args.output, optErrMsgs)
             sys.exit(-1)
+        forcedLayout = GraphUtils.getForcedLayoutPatches(args.startLocation)
+        forceLayoutArgs(forcedLayout)
+
     ap = getAccessPoint(args.startLocation)
     if 'forcedEarlyMorph' in ap.Start and ap.Start['forcedEarlyMorph'] == True:
         forceArg('morphPlacement', 'early', "'Morph Placement' forced to early for custom start location")

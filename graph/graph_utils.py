@@ -156,6 +156,14 @@ class GraphUtils:
         ap = getAccessPoint(startApName)
         return ap.Start['patches'] if 'patches' in ap.Start else []
 
+    def getForcedLayoutPatches(startApName):
+        ap = getAccessPoint(startApName)
+        return {
+            'layout': ap.Start.get('layout', []),
+            'areaLayout': ap.Start.get('areaLayout', []),
+            'variaTweaks': ap.Start.get('variaTweaks', [])
+        }
+
     def createBossesTransitions():
         transitions = vanillaBossesTransitions
         def isVanilla():

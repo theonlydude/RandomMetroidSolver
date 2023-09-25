@@ -754,3 +754,6 @@ def getPatchDescriptionsByGroup(patchList, flavor):
         if grpDesc in ret and len(grpPatches) == len(ret[grpDesc]):
             ret[grpDesc] = "All"
     return ret
+
+def getPatchDescriptions(patchList, flavor):
+    return [getPatchSet(patch, flavor)['desc'] for patch in patchList]

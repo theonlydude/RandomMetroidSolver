@@ -1,5 +1,5 @@
 window.PATCHES = {
-  layoutPatches: [
+  layout: [
     {
       id: 'door_indicators_plms',
       title: 'Flashing Doors',

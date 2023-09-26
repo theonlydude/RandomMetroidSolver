@@ -349,8 +349,10 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         if value not in ("off", "random", *numbers):
             raiseHttp(400, f"Wrong value for nbObjectivesRequired {value}", isJson)
 
-    if 'areaLayoutCustom' in others:
-        validatePatches('areaLayout', request.vars.areaLayoutCustom)
+    for key in patch_groups.keys():
+        custom_key = key + 'Custom'
+        if custom_key in others:
+            validatePatches(key, getattrs(request.vars, custom_key))
 
     return errors
 

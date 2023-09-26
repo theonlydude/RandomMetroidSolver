@@ -212,7 +212,7 @@ class Randomizer(object):
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
                   'areaRandomization', 'logic']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'nbObjectivesRequired', 'areaLayoutCustom']
+        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'nbObjectivesRequired', 'areaLayoutCustom', 'variaTweaksCustom', 'layoutCustom']
         errors = validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize
@@ -396,7 +396,7 @@ class Randomizer(object):
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
                   'areaRandomization', 'logic']
-        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective', 'nbObjectivesRequired', 'areaLayoutCustom']
+        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective', 'nbObjectivesRequired', 'areaLayoutCustom', 'variaTweaksCustom', 'layoutCustom']
         validateWebServiceParams(self.request, switchs, quantities, multis, others)
 
         if self.session.randomizer is None:

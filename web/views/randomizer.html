@@ -1058,14 +1058,17 @@ function getSpecialValues(dataDict, trueJson) {
         dataDict["nbObjectivesRequired"] = document.getElementById("nbObjectivesRequired").value
     }
 
-    dataDict.areaLayout = 'off'
-    if (window.$randomizer.isPatchGroupAllowed('areaLayout')) {
-        dataDict.areaLayout = 'on'
-        dataDict['areaLayoutCustom'] = window.$randomizer.state.areaLayoutCustom || []
-        if (!trueJson) {
-            dataDict.areaLayoutCustom = dataDict.areaLayoutCustom.join(',')
+    Object.keys(window.PATCHES).forEach(group_key => {
+        const custom_key = group_key + 'Custom'
+        dataDict[group_key] = 'off'
+        if (window.$randomizer.isPatchGroupAllowed(group_key)) {
+            dataDict[group_key] = 'on'
+            dataDict[custom_key] = window.$randomizer.state[custom_key] || []
+            if (!trueJson) {
+                dataDict[custom_key] = dataDict[custom_key].join(',')
+            }
         }
-    }
+    })
 }
 
 function validateObjectives() {
@@ -3065,10 +3068,24 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr><td colspan="2"><h5 class="center"><b>Randomizer adaptations (logic impact)</b></h5></td><td></td></tr>
               </table>
               <table class="full" id="mainPatchesVisibility">
-                <tr>
-                  <td id="layoutPatchesStep" class="half">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches</td>
+                <tr id="layoutStep">
+                  <td colspan="2" class="full">
+                    <span id="layoutPatches"></span><!-- TODO remove these dummy elements? -->
+                    <div class="flex-row">
+                      <div class="flex-row__text">Anti-softlock layout patches</div>
+                      <div class="vue-app"></div>
+                    </div>
+                  </td>
                   <td><button type="button" onclick="startTheTour(event)">?</button></td>
-                  <td id="variaTweaksStep" class="half">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks</td>
+                </tr>
+                <tr id="variaTweaksStep">
+                  <td colspan="2" class="full">
+                    <span id="variaTweaks"></span><!-- TODO remove these dummy elements? -->
+                    <div class="flex-row">
+                      <div class="flex-row__text">VARIA tweaks</div>
+                      <div class="vue-app"></div>
+                    </div>
+                  </td>
                   <td><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
               </table>

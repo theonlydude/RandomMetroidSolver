@@ -532,5 +532,17 @@ body {
 }
 
 .patch-card__content {
-  padding: 8px;
+    padding: 8px;
+}
+
+.flex-row {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    width: 100%;
+}
+
+.flex-row__text {
+    text-wrap: nowrap;
+    width: 175px;
 }

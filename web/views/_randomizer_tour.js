@@ -89,10 +89,22 @@ window.PATCHES = {
       title: 'Aqueduct Blocks',
     },
     {
+      id: 'area_rando_gate_caterpillar',
+      description: 'Remove the green gate in the [[Caterpillar Room]]',
+      title: 'Red Tower Gate',
+      images: ['fish_access_gate.png'],
+    },
+    {
       id: 'area_layout_caterpillar',
-      description: 'Access maridia red fish entrance',
+      description: 'Access maridia red fish entrance from the [[Caterpillar Room]]',
       images: ['fish_access_wall.png',],
-      title: 'Red Tower',
+      title: 'Red Tower Access',
+    },
+    {
+      id: 'area_rando_gate_east_tunnel',
+      description: 'Remove green gate in [[East Tunnel]]',
+      title: 'East Tunnel Gate',
+      images: ['tube_gate.png'],
     },
     {
       id: 'area_layout_east_tunnel',
@@ -101,8 +113,14 @@ window.PATCHES = {
       title: 'East Tunnel',
     },
     {
+      id: 'area_layout_ln_exit',
+      description: 'Remove crumble blocks in [[Single Chamber]]',
+      title: 'LN Crumbles',
+      images: ['ln_gate.png'],
+    },
+    {
       id: 'area_layout_single_chamber',
-      description: 'Makes the hidden LN entrance more accessible',
+      description: 'Makes the hidden LN entrance in [[Single Chamber]] more accessible',
       title: 'LN Access',
       images: ['ln_access_wall.png'],
     },

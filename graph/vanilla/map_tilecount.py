@@ -1,6 +1,6 @@
 tilecount = {
     "vanilla_layout": {
-        "GreenPinkBrinstar": 144,
+        "GreenPinkBrinstar": 145,
         "Crateria": 166,
         "RedBrinstar": 67,
         "Kraid": 25,
@@ -14,7 +14,7 @@ tilecount = {
         "Tourian": 78
     },
     "area_rando": {
-        "GreenPinkBrinstar": 145,
+        "GreenPinkBrinstar": 146,
         "Crateria": 158,
         "RedBrinstar": 63,
         "Norfair": 179,

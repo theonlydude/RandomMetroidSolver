@@ -83,10 +83,10 @@ UpdateActiveMapWithExplored:
 	BIT $AC04,x : BNE ++		;check if tilebit has been set already
 	ORA $AC04,x : STA $07F7,y	;save bit
 	STX $20 : REP #$30
-        jsr update_area_tilecount
 	JSL LoadSourceMapData		;[$00] = long pointer to current area map data
 	TYA : ASL #3 : CLC : ADC $20 : ASL : TAX : TAY	;offset of maptile
 	LDA [$00],y : STA !RAM_ActiveMap,x				;save origin tile to RAM minimap
+        jsr update_area_tilecount
 ++ : RTS
 
 ApplyTileGFXtoRAM:
@@ -106,7 +106,11 @@ ApplyTileGFXtoRAM:
 	RTS
 
 ;;; VARIA addition: maintain a RAM table of explored map tile count 
+;;; A: exlored tile
 update_area_tilecount:
+        and #$03FF : cmp.w #!EmptyTile : bne .count ; don't count empty tiles you could reach with X-Ray climb etc.
+        rts
+.count:
         phx
         php
         %a8()

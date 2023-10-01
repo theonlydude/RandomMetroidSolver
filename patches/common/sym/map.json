@@ -1,10 +1,10 @@
 {
     "ItemTileCheckList": 9029632,
-    "area_tiles": 9480944,
+    "area_tiles": 9480953,
     "doors_mapicons_by_area": 8764574,
     "mapicons_tables": 8764610,
     "mapicons_tables_limit": 8769279,
     "objectives_mapicons_by_area": 8764598,
     "portals_mapicons_by_area": 8764586,
-    "total_tiles": 9480956
+    "total_tiles": 9480965
 }

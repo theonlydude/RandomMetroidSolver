@@ -62,8 +62,8 @@ preinstr_check_screen:
         lda !plm_y_block : lsr #4 : sta $12
         ;; if Y screen is different, return
         lda !samus_y : and #$ff00 : xba : cmp $12 : bne .ret
-        ;; PLM timer = 1
-        lda.w #1 : sta $7EDE1C,x
+        ;; PLM timer = 2 (wait an extra frame to avoid race condition with map exploration code)
+        lda.w #2 : sta $7EDE1C,x
         jmp wake_plm
 .ret:
         rts

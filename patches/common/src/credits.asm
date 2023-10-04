@@ -734,6 +734,11 @@ script:
     dw !draw, !row*166
     dw !draw, !row*167
     dw !draw, !blank
+    dw !draw, !row*244 ;; DEBUG TOOLS
+    dw !draw, !blank
+    dw !draw, !row*245
+    dw !draw, !row*246
+    dw !draw, !blank
     dw !draw, !row*184 ;; SpriteSomething
     dw !draw, !blank
     dw !draw, !row*224
@@ -1184,8 +1189,15 @@ credits:
     !big
     dw "            MFREAK              " ;; 240
     dw "            mfreak              " ;; 241
+    ;; more stats
     dw " LAG TIME              00'00^00 " ;; 242
     dw " lag time              }} }} }} " ;; 243
+    ;; more credits
+    !yellow
+    dw "          DEBUG TOOLS           " ;; 244
+    !big
+    dw "         INSANEFIREBAT          " ;; 245
+    dw "         insanefirebat          " ;; 246
     dw $0000                              ;; End of credits tilemap
 
 warnpc $ceffff

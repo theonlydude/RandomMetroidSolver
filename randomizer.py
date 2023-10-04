@@ -253,6 +253,8 @@ if __name__ == "__main__":
                         dest='nbObjectivesRequired', nargs='?', default=None, type=int)
     parser.add_argument('--hiddenObjectives', help="don't reveal objectives until reaching a particular room depending on tourian setting", dest='hiddenObjectives',
                         nargs='?', const=True, default=False)
+    parser.add_argument('--distributeObjectives', help="Distribute random objectives evenly across categories", dest='distributeObjectives',
+                        nargs='?', const=True, default=False)
     parser.add_argument('--objectiveList', help="list to choose from when random",
                         dest='objectiveList', nargs='?', default=None)
     parser.add_argument('--tourian', help="Tourian mode",
@@ -643,7 +645,7 @@ if __name__ == "__main__":
                 availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
                 if nbObjectives == 0:
                     nbObjectives = Objectives.getNbRandomObjectives(len(availableObjectives))
-                objectivesManager.setRandom(nbObjectives, availableObjectives)
+                objectivesManager.setRandom(nbObjectives, availableObjectives, distribute=args.distributeObjectives)
                 if Objectives.nbActiveGoals < nbObjectives:
                     optErrMsgs.append(f"Could not reach {nbObjectives} possible objectives: only {Objectives.nbActiveGoals} available")
             else:
@@ -652,8 +654,9 @@ if __name__ == "__main__":
                     args.objective = args.objective[0:maxActiveGoals]
                 for goal in args.objective:
                     objectivesManager.addGoal(goal)
-                # ignore this setting if objectives are not randomized
+                # ignore these settings if objectives are not randomized
                 args.hiddenObjectives = False
+                args.distributeObjectives = False
             if args.nbObjectivesRequired is not None:
                 nbReq = int(args.nbObjectivesRequired)
                 if nbReq == 0:

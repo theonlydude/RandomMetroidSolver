@@ -21,6 +21,7 @@
     "nbObjective": 4,
     "nbObjectivesRequired": "off",
     "hiddenObjectives": "off",
+    "distributeObjectives": "off",
     "areaRandomization": "off",
     "areaLayout": "on",
     "doorsColorsRando": "off",

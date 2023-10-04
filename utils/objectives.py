@@ -541,6 +541,8 @@ _goalsList = [
 
 _goals = {goal.name:goal for goal in _goalsList}
 
+goalCategories = sorted(list({obj.category for obj in _goalsList if obj.category is not None}))
+
 def completeGoalData():
     # "nothing" is incompatible with everything
     _goals["nothing"].exclusion["list"] = [goal.name for goal in _goalsList]
@@ -1020,13 +1022,38 @@ class Objectives(object):
         return [goal.name for goal in Objectives.goals.values() if goal.available and goal.name not in excludeList]
 
     # call from rando
-    def setRandom(self, nbGoals, availableGoals):
+    def setRandom(self, nbGoals, availableGoals, distribute=False):
         LOG.debug(f"obj random, {len(availableGoals)} available goals: {str(availableGoals)}")
-        while Objectives.nbActiveGoals < nbGoals and availableGoals:
-            goalName = random.choice(availableGoals)
-            self.addGoal(goalName)
-            availableGoals.remove(goalName)
-            LOG.debug(f"obj random {Objectives.nbActiveGoals}/{nbGoals}")
+        def pickFromAll():
+            while Objectives.nbActiveGoals < nbGoals and availableGoals:
+                goalName = random.choice(availableGoals)
+                self.addGoal(goalName)
+                availableGoals.remove(goalName)
+                LOG.debug(f"obj random {Objectives.nbActiveGoals}/{nbGoals}")
+        def pickDistributed():
+            availableGoalsObj = [Objectives.goals[goalName] for goalName in availableGoals]
+            goalsByCategory = {cat:[obj.name for obj in availableGoalsObj if obj.category == cat] for cat in goalCategories}
+            remainingGoals = len(availableGoalsObj)
+            catList = []
+            while Objectives.nbActiveGoals < nbGoals and remainingGoals > 0:
+                if not catList:
+                    catList = goalCategories[:]
+                    random.shuffle(catList)
+                category = None
+                while category is None and catList:
+                    category = catList.pop()
+                    objList = goalsByCategory[category]
+                    if objList:
+                        goalName = random.choice(objList)
+                        self.addGoal(goalName)
+                        objList.remove(goalName)
+                        remainingGoals -= 1
+                        LOG.debug(f"obj random {Objectives.nbActiveGoals}/{nbGoals}")
+                        break
+        if distribute:
+            pickDistributed()
+        else:
+            pickFromAll()
 
     # call from solver
     def readGoals(self, romReader):

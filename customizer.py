@@ -42,6 +42,7 @@ if __name__ == "__main__":
                         help="Enables moonwalk by default",
                         dest='moonWalk', action='store_true', default=False)
     parser.add_argument('--palette', help="Randomize the palettes", dest='palette', action='store_true')
+    parser.add_argument('--grayscale', help="Turn the palettes to grayscale", dest='grayscale', action='store_true')
     parser.add_argument('--individual_suit_shift', help="palette param", action='store_true',
                         dest='individual_suit_shift', default=False)
     parser.add_argument('--individual_tileset_shift', help="palette param", action='store_true',
@@ -210,7 +211,8 @@ if __name__ == "__main__":
                 "min_degree": None,
                 "max_degree": None,
                 "invert": None,
-                "no_blue_door_palette": None
+                "no_blue_door_palette": None,
+                "grayscale": None
             }
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)

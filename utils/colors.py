@@ -19,7 +19,7 @@ def RGB_15_to_24(SNESColor):
     G = G + G // 32
     B = B + B // 32
 
-    return (R/256.0, G/256.0, B/256.0)
+    return (R/255.0, G/255.0, B/255.0)
 
 def human_luminance(r, g, b):
     # color green is perceived more by human eye

@@ -419,8 +419,6 @@ class PaletteRando(object):
             copy_offset_list = (offset_list+self.bluedoor_bytes)
         else:
             copy_offset_list = offset_list
-
-        copy_offset_list = offset_list
         for offset in copy_offset_list:
             #Convert from LE to BE
             int_value_LE = self.get_word(data, offset)

@@ -2080,8 +2080,8 @@ This mode can be use as an introduction before doing full Area Randomization or 
 <hr />\
 <h3>Area Randomization Details</h3>\
 <a href=\"/solver/static/images/common/area_map_20200112.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/help/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a>\
-<p>It is recommended to use the <a href=\"/solver/solver_web/tracker\" target=\"_blank\">Area Tracker</a> to find your way more easily.</p>\
 <p>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).</p>\
+<p>To find your way more easily, you can use in-game map area tracking (see Patches section help for more details), or the <a href=\"/solver/solver_web/tracker\" target=\"_blank\">Area Tracker</a> to have the exact transitions.</p>\
 <p>By default, the escape sequence will spawn you outside a random map station, and you have to find your way to the ship. See Escape Randomization section (in medium/advanced tab) for more information.</p>\
 <p> All portal doors has been turn to blinking blue doors. You can go through all portals and back, even those where you can't do that in vanilla, so some layout tweaks have been made:\
 <table class=\"full\">\
@@ -2126,7 +2126,7 @@ To have a self contained <a href=\"https://metroid.fandom.com/wiki/Maridia\" tar
 </tr>\
 </table>\
 </p>\
-<p>Even with all layout modifications, it is still possible to softlock in some occurrences. To avoid softlocking your save file, an automatic rolling backup save system is enabled. See doors colors randomization option help for more details.</p>\
+<p>Even with all layout modifications, it is still possible to softlock in some occurrences. To avoid softlocking your save file, an automatic rolling backup save system is enabled. See Patches section help for more details.</p>\
 Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
@@ -2198,14 +2198,12 @@ Colored doors to save stations / refills / map stations are excluded from random
 Colored doors to save / refill stations are forced to blue.<br/>\
 Blue doors with a colored door on the other side will blink in the matching color (you can disable it by disabling 'Anti-softlock layout patches').<br/>\
 The fill algorithm will be more trolly about ammo/beam if you use slower progression speed.</p>\
-<p>In this mode there are seven distinct door keys, and sometimes (especially with non standard starting location or area rando), if you go through a blue door you can end up locked on the other side if you don't have or find the item required to come back. If you save in that situation, your save file will be hardlocked. To avoid this, a rolling backup save system is enabled. When you save at a different save station than the last time, a backup of your previous save is done, using an empty save, or an older backup of the same game. You can identify backups in the load menu, as they will have the same slot letter as the original save :</p>\
-<img src=\"/solver/static/images/help/backup_saves.png\" alt=\"backup_saves.png\" title=\"Backup Saves menu example\" class=\"third center_img\"/>\
-<p>As soon as you load a backup save from the menu, it becomes its own slot. In the example above, if you load your most recent backup (with 0:06 time), it will become 'Samus C'. When playing this new slot C game, when you save, it won't be able to backup, since other slots are taken by the original A slot and an older backup of the A slot. So if you hardlock a save file, be sure to clear it for it to be reused as a backup afterwards.</p>\
+<p>In this mode there are seven distinct door keys, and sometimes (especially with non standard starting location or area rando), if you go through a blue door you can end up locked on the other side if you don't have or find the item required to come back. If you save in that situation, your save file will be hardlocked. To avoid this, a rolling backup save system is enabled. See Patches section help for more defails.</p>\
 <p>Click on the dice button to randomly set this parameter.</p>\
 Beams doors patch by Mettyk25jigsaw.<br/>\
 Beams doors gfx by prankard.<br/>\
 CRE gfx fix by Sirkura.<br/>\
-Rolling backup and Missile doors patches by Flo.",
+Missile doors patchby Flo.",
       placement: "auto left"
     },
     {
@@ -2313,6 +2311,17 @@ Click on the dice button to randomly set this parameter.",
 <li>Play music with <a href=\"https://www.zeldix.net/t1607-msu1-getting-started-guide\" target=\"_blank\">MSU1 chip</a> on <a href=\"https://www.retrorgb.com/fxpakpro.html\" target=\"_blank\">SD2SNES/FXPak</a> and compatible emulators (by DarkShock)</li>\
 <li>Disable <a href=\"https://wiki.supermetroid.run/Golden_Torizo_Code\" target=\"_blank\">GT Code</a> and <a href=\"https://wiki.supermetroid.run/Weapon_Techniques#Glitched_Beams\" target=\"_blank\">gliched beams</a>, also fixes to some vanilla bugs</li>\
 <li>When doors are colored on one side and blue on the other, the blue side blinks to indicate the color of the other side</li>\
+<li>When your save point is different from the last one, an automatic backup is done in an available spot: a cleared or unlocked save file. A file is locked when you start/load a game from it. Files can be unlocked in the load menu by pressing left, right, X or Y.</li>\
+<tr>\
+<td class=\"knowsUsed\"><p class=\"top\">Load menu with file A and C locked:</td>\
+<td class=\"knowsUsed\"><p class=\"top\">When saving, file copy is notified:</td>\
+<td class=\"knowsUsed\"><p class=\"top\">Unlock files with left, right, X or Y in the laod menu if no more slots available:</td>\
+</tr>\
+<tr>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/backup_locks.png\" alt=\"backup_locks.png\" title=\"backup_locks.png\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/backup_copy.png\" alt=\"backup_copy.png\" title=\"backup_copy.png\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/no_slots.png\" alt=\"no_slots.png\" title=\"no_slots.png\" class=\"full\"/></td>\
+</tr>\
 <li>Change in-game font for HUD and pause menu with <a href=\"https://damieng.com/typography/zx-origins/zx-eurostile/\" target=\"_blank\">ZX Eurostile by damieng</a></li>\
 <li>Display collected items percentage and RTA time in pause inventory menu :</li>\
 <img src=\"/solver/static/images/help/inventory.png\" alt=\"inventory.png\" title=\"Inventory menu\" class=\"third center_img\"/>\

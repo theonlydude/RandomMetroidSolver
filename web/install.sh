@@ -139,7 +139,9 @@ mkdir -p ~/web2py/applications/solver/static/images/help/
 [ -L ~/web2py/applications/solver/static/images/help/ws_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ws_save.png ~/web2py/applications/solver/static/images/help/ws_save.png
 [ -L ~/web2py/applications/solver/static/images/help/early_super_bis.png ] || ln -s ~/RandomMetroidSolver/web/static/help/early_super_bis.png ~/web2py/applications/solver/static/images/help/early_super_bis.png
 [ -L ~/web2py/applications/solver/static/images/help/kraid_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/kraid_save.png ~/web2py/applications/solver/static/images/help/kraid_save.png
-[ -L ~/web2py/applications/solver/static/images/help/backup_saves.png ] || ln -s ~/RandomMetroidSolver/web/static/help/backup_saves.png ~/web2py/applications/solver/static/images/help/backup_saves.png
+[ -L ~/web2py/applications/solver/static/images/help/backup_locks.png ] || ln -s ~/RandomMetroidSolver/web/static/help/backup_locks.png ~/web2py/applications/solver/static/images/help/backup_locks.png
+[ -L ~/web2py/applications/solver/static/images/help/backup_copy.png ] || ln -s ~/RandomMetroidSolver/web/static/help/backup_copy.png ~/web2py/applications/solver/static/images/help/backup_copy.png
+[ -L ~/web2py/applications/solver/static/images/help/backup_no_slots.png ] || ln -s ~/RandomMetroidSolver/web/static/help/backup_no_slots.png ~/web2py/applications/solver/static/images/help/backup_no_slots.png
 [ -L ~/web2py/applications/solver/static/images/help/mission_impossible.png ] || ln -s ~/RandomMetroidSolver/web/static/help/mission_impossible.png ~/web2py/applications/solver/static/images/help/mission_impossible.png
 [ -L ~/web2py/applications/solver/static/images/help/forgotten_all_the_way.png ] || ln -s ~/RandomMetroidSolver/web/static/help/forgotten_all_the_way.png ~/web2py/applications/solver/static/images/help/forgotten_all_the_way.png
 [ -L ~/web2py/applications/solver/static/images/help/crab_hole.png ] || ln -s ~/RandomMetroidSolver/web/static/help/crab_hole.png ~/web2py/applications/solver/static/images/help/crab_hole.png

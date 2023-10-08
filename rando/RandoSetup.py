@@ -368,6 +368,7 @@ class RandoSetup(object):
                       and self.areaGraph.canAccess(self.sm, self.startAP, 'DraygonRoomIn', maxDiff)
                 if ret:
                     # see if we can beat bosses with this equipment (infinity as max diff for a "onlyBossesLeft" type check
+                    Objectives.maxDiff = infinity
                     allBosses = [loc for loc in totalAvailLocs if loc.isBoss() and loc.Name != "Mother Brain"]
                     availLocs = self.services.currentLocations(self.startAP, container, diff=infinity)
                     beatableBosses = [loc for loc in availLocs if loc in allBosses]
@@ -392,6 +393,7 @@ class RandoSetup(object):
                         msg = "can't kill all mandatory bosses/minibosses"
                         self.log.debug("checkPool. {}".format(msg))
                         self.errorMsgs.append(msg)
+                    Objectives.maxDiff = maxDiff
                 else:
                     msg = "locked by Phantoon or Draygon"
                     self.log.debug('checkPool. {}'.format(msg))

@@ -757,7 +757,7 @@ if __name__ == "__main__":
         print("tourian:{}".format(args.tourian))
         print("objectives:{}".format([g.name for g in Objectives.activeGoals]))
         print("energyQty:{}".format(energyQty))
-        print("logic patches: "+str(sorted(RomPatches.ActivePatches)))
+        print("rom_patches: "+str(sorted(RomPatches.ActivePatches)))
 
     try:
         randoExec = RandoExec(seedName, args.vcr, randoSettings, graphSettings)

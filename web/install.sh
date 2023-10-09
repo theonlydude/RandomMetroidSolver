@@ -105,7 +105,7 @@ mkdir -p ~/web2py/applications/solver/static/images/rando/
 
 # randomizer - help images
 mkdir -p ~/web2py/applications/solver/static/images/help/
-for IMG in `ls ~/RandomMetroidSolver/web/static/help/|grep png`;
+for IMG in `ls ~/RandomMetroidSolver/web/static/help/|grep '\.png\|\.gif'`;
 do
     [ -L ~/web2py/applications/solver/static/images/help/$IMG ] || ln -s ~/RandomMetroidSolver/web/static/help/$IMG ~/web2py/applications/solver/static/images/help/$IMG
 done

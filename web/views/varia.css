@@ -205,11 +205,21 @@ p {
 .btn {
     padding: 0.2em 1.5em;
 }
-.popover-content {
+.popover.tour-tour {
+    display: flex !important;
+    flex-direction: column;
+    overflow-y: unset;
+}
+.popover.tour-tour .popover-content {
+    height: 100%;
+    overflow-y: auto;
     text-align: left;
 }
 .popover-title {
     text-align: center;
+}
+.popover-navigation {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 }
 .popover {
     max-width: 350px;
@@ -495,13 +505,12 @@ body {
     width: calc(var(--p-image-width) + 2px);
 }
 
-.patch-card.-width-2 {
-    width: calc(2 * var(--p-image-width) + 2px);
+.patch-card a {
+    text-decoration: underline;
 }
 
-.patch-card__title {
-    font-weight: bold;
-    font-size: 1.1em;
+.patch-card.-width-2 {
+    width: calc(2 * var(--p-image-width) + 2px);
 }
 
 .patch-card__images {
@@ -511,14 +520,6 @@ body {
 
 .patch-card__images img {
     width: var(--p-image-width);
-}
-
-.patch-card.-active {
-    background: #ccF;
-}
-
-.patch-card.-inactive img {
-    filter: grayscale(0.5);
 }
 
 .patch-card__image.-on,
@@ -538,30 +539,40 @@ body {
 .flex-row {
     align-items: center;
     display: flex;
-    gap: 16px;
+    gap: 32px;
+    justify-content: space-between;
     width: 100%;
 }
 
 .flex-row__text {
     text-wrap: nowrap;
-    width: 175px;
+    width: 200px;
 }
 
 .btn-group > .btn {
-  border-radius: 5px;
-  margin-right: 0;
+    border-radius: 5px;
+    margin-right: 0;
+    padding: 0.2 1em;
 }
 
 .btn-group > .btn:focus {
-  outline: 0;
+    outline: 0;
 }
 
 .expand-patches {
     color: SteelBlue;
     cursor: pointer;
     font-size: 11px;
-    height: 26px;
-    line-height: 26px;
-    padding: 0 8px;
     text-decoration: underline;
+}
+
+.vue-app .btn {
+    font-size: 12px;
+    text-transform: unset;
+}
+
+.btn .fa {
+    display: inline-block;
+    text-align: center;
+    width: 1em;
 }

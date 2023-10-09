@@ -352,7 +352,7 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
     for key in patch_groups.keys():
         custom_key = key + 'Custom'
         if custom_key in others:
-            validatePatches(key, getattrs(request.vars, custom_key))
+            validatePatches(key, getattr(request.vars, custom_key))
 
     return errors
 

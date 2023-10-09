@@ -1061,9 +1061,12 @@ function getSpecialValues(dataDict, trueJson) {
 
     Object.keys(window.PATCHES).forEach(group_key => {
         const custom_key = group_key + 'Custom'
-        dataDict[group_key] = 'off'
+        // this is an inconsistency in variable name that should be fixed (if possible)
+        const backend_key = group_key === 'layout' ? 'layoutPatches' : group_key
+        dataDict[backend_key] = 'off'
+        dataDict[custom_key] = ''
         if (window.$randomizer.isPatchGroupAllowed(group_key)) {
-            dataDict[group_key] = 'on'
+            dataDict[backend_key] = 'on'
             dataDict[custom_key] = window.$randomizer.state[custom_key] || []
             if (!trueJson) {
                 dataDict[custom_key] = dataDict[custom_key].join(',')
@@ -2168,7 +2171,7 @@ Click on the dice button to randomly set this parameter.",
       element: "#areaLayoutStep",
       title: "Areas randomization additional layout modifications",
       content: "These patches minimize soft-locks and increase the variation of the area randomizer. Some additional cosmetic changes may not be shown. Using Area randomization and a non-standard or randomized start location will force this setting on. (TODO: ask discord if this last sentance is still true) <div id='tourPortal'></div>",
-      onShown: () => window.$randomizer.mountHelp('areaLayout', tour),
+      onShown: () => window.$randomizer.mountHelp('areaLayout'),
       placement: "auto right",
     },
     {
@@ -2338,7 +2341,7 @@ Click on the dice button to randomly set this parameter.",
       title: "Anti-softlock Layout patches",
       content: "Include the anti-softlock layout patches. Disable at your own softlocking risk!<br/>\
 Disabling it will also disable blinking blue doors with a color door on the other side (see Doors Colors Randomization). <div id='tourPortal'></div>",
-      onShown: () => window.$randomizer.mountHelp('layout', tour),
+      onShown: () => window.$randomizer.mountHelp('layout'),
       placement: "auto right",
     },
     {
@@ -2346,7 +2349,7 @@ Disabling it will also disable blinking blue doors with a color door on the othe
       title: "VARIA Tweaks",
       content: "<p>Include minor tweaks for the game to behave 'as it should' in a randomizer context:</p>\
 <table class=\"full\"> <div id='tourPortal'></div>",
-      onShown: () => window.$randomizer.mountHelp('variaTweaks', tour),
+      onShown: () => window.$randomizer.mountHelp('variaTweaks'),
       placement: "auto right",
     },
     {

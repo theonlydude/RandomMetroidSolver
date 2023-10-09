@@ -273,7 +273,7 @@ class Randomizer(object):
         randoPresetDict = {var: self.vars[var] for var in self.vars if var != 'paramsFileTarget'}
         # set multi select as list as expected in a rando preset
         for var, value in randoPresetDict.items():
-            if 'MultiSelect' in var or 'Custom' in var:
+            if 'MultiSelect' in var:
                 randoPresetDict[var] = value.split(',')
 
         if self.vars.objectiveRandom == 'true':

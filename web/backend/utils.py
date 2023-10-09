@@ -173,7 +173,11 @@ def validatePatches(group_name, values):
     if values is None:
         return
     extra = []
-    for value in values.split(','):
+    if values == '':
+        values = []
+    elif type(values) == str:
+        values = values.split(',')
+    for value in values:
         if not value in patch_groups[group_name]:
             extra.append(value)
     if extra:

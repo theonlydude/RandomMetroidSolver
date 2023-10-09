@@ -1,11 +1,11 @@
 window.PATCHES = {
   layout: [
-    {
-      id: 'door_indicators_plms',
-      title: 'Flashing Doors',
-      description: 'Show the color of a locked door from the other side.',
-      images: ['flashing_doors.gif'],
-    },
+    // {
+    //   id: 'door_indicators_plms',
+    //   title: 'Flashing Doors',
+    //   description: 'Show the color of a locked door from the other side.',
+    //   images: ['flashing_doors.gif'],
+    // },
     {
       id: 'dachora',
       title: 'Dachora',
@@ -125,9 +125,9 @@ window.PATCHES = {
     },
     {
       id: 'area_layout_single_chamber',
-      description: 'Makes the hidden LN entrance in [[Single Chamber]] more accessible',
+      description: 'Makes the hidden LN entrance in [[Single Chamber]] more accessible. Also removes crumble blocks.',
       title: 'LN Access',
-      images: ['ln_access_wall.png'],
+      images: ['ln_access_wall.png', 'ln_access_crumble.png'],
     },
     {
       id: 'east_ocean',

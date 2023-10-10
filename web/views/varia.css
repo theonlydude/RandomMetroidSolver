@@ -563,6 +563,7 @@ body {
     color: SteelBlue;
     cursor: pointer;
     font-size: 11px;
+    font-weight: normal;
     text-decoration: underline;
 }
 
@@ -575,4 +576,91 @@ body {
     display: inline-block;
     text-align: center;
     width: 1em;
+}
+
+.bootstrap-modal .modal {
+    display: flex;
+}
+.bootstrap-modal [type=checkbox] {
+    cursor: pointer;
+}
+.bootstrap-modal .modal-dialog {
+    width: unset;
+}
+.bootstrap-modal .modal-content {
+    background: #fafafa;
+    max-width: calc(100vw - 120px);
+}
+.bootstrap-modal .modal-header {
+    position: relative;
+}
+.bootstrap-modal .modal-body {
+    max-height: calc(100vh - 2 * 30px - 60px - 60px); /* screen - margin - header - footer */
+    overflow: auto;
+}
+.bootstrap-modal .close {
+    color: #000;
+    cursor: pointer;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1;
+    filter: alpha(opacity=20);
+    opacity: .2;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    text-shadow: 0 1px 0 #fff;
+    transform: translate(0, -50%);
+}
+.bootstrap-modal .-partial [type=checkbox] {
+    filter: grayscale(1);
+    opacity: 0.5;
+}
+.bootstrap-modal .-disabled {
+    opacity: 0.4;
+}
+.bootstrap-modal .-disabled [type=checkbox] {
+    pointer-events: none;
+    filter: invert(0.5);
+}
+.objective-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.bootstrap-modal .modal-footer__text {
+    padding-right: 8px;
+}
+.bootstrap-modal .modal-footer .alert {
+    float: left;
+    margin-bottom: 0;
+    padding: 5px 10px;
+}
+.vue-app .button-list {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px 0;
+}
+#objectivePortal ._flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px 0;
+}
+.vue-app .btn-xs {
+    line-height: 1;
+    padding: 4px 5px;
+    margin: 0;
+}
+#objectivePortal .btn-danger { order: 1 }
+#objectivePortal .btn-warning { order: 2 }
+#objectivePortal .btn-primary { order: 3 }
+#objectivePortal .btn-success { order: 4 }
+#objectivePortal .btn-info { order: 5 }
+
+/* readonly mode */
+#seedInfoVisibility .patch-toggler .btn {
+    pointer-events: none;
 }

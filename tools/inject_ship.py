@@ -1024,10 +1024,10 @@ if not args.no_layout:
     vlevelData = LevelData(vanillaRom, vLevelDataAddr, vRoomScreenSize)
 
     boundingRect = BoundingRect()
-    boundingRect.x1 = 17
-    boundingRect.y1 = 78
-    boundingRect.x2 = 241
-    boundingRect.y2 = 158
+    boundingRect.x1 = 16
+    boundingRect.y1 = 80
+    boundingRect.x2 = 240
+    boundingRect.y2 = 160
     vShipScreen = (4,4)
 
     #vlevelData.displaySubScreen(vShipScreen, boundingRect)

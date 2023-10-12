@@ -2039,21 +2039,8 @@ This mode can be use as an introduction before doing full Area Randomization or 
 <p>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).</p>\
 <p>To find your way more easily, you can use in-game map area tracking (see Patches section help for more details), or the <a href=\"/solver/solver_web/tracker\" target=\"_blank\">Area Tracker</a> to have the exact transitions.</p>\
 <p>By default, the escape sequence will spawn you outside a random map station, and you have to find your way to the ship. See Escape Randomization section (in medium/advanced tab) for more information.</p>\
-<p> All portal doors has been turn to blinking blue doors. You can go through all portals and back, even those where you can't do that in vanilla, so some layout tweaks have been made:\
-<table class=\"full\">\
-<tr>\
-<td class=\"knowsUsed\"><p class=\"top\">Remove <a href=\"https://wiki.supermetroid.run/Red_Tower_Elevator_Room\" target=\"_blank\">Maridia red fish exit</a> green gate:</td>\
-<td class=\"knowsUsed\"><p class=\"top\">Remove <a href=\"https://wiki.supermetroid.run/East_Tunnel\" target=\"_blank\">Maridia tube exit</a> green gate:</td>\
-<td class=\"knowsUsed\"><p class=\"top\">Remove <a href=\"https://wiki.supermetroid.run/Single_Chamber\" target=\"_blank\">Lower Norfair exit</a> crumble blocks:</td>\
-</tr>\
-<tr>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/fish_gate.png\" alt=\"fish_gate.png\" title=\"fish_gate.png\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/tube_gate.png\" alt=\"tube_gate.png\" title=\"tube_gate.png\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/ln_gate.png\" alt=\"ln_gate.png\" title=\"ln_gate.png\" class=\"full\"/></td>\
-</tr>\
-</table>\
-</p>\
-<p>In order to have usable save stations in all areas, some have been added or modified:\
+<p> All portal doors has been turn to blinking blue doors.</p>\
+<p>In order to have usable save stations in all areas, some have been added or modified:</p>\
 <table class=\"full\">\
 <tr>\
 <td class=\"knowsUsed\"><p class=\"top\">New save station at <a href=\"https://wiki.supermetroid.run/Main_Street\" target=\"_blank\">Main Street</a>:</td>\
@@ -2089,7 +2076,7 @@ Click on the dice button to randomly set this parameter.",
     {
       element: "#areaLayoutStep",
       title: "Areas randomization additional layout modifications",
-      content: "These patches minimize soft-locks and increase the variation of the area randomizer. Some additional cosmetic changes may not be shown. Using Area randomization and a non-standard or randomized start location will force this setting on. (TODO: ask discord if this last sentance is still true) <div id='tourPortal'></div>",
+      content: "<p>These patches minimize soft-locks and increase the variation of the area randomizer. Some additional cosmetic changes may not be shown. These patches are only available when full or light area randomization is enabled. </p><div id='tourPortal'></div>",
       onShown: () => window.$randomizer.mountHelp('areaLayout'),
       placement: "auto right",
     },

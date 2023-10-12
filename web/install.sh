@@ -109,8 +109,10 @@ for IMG in `ls ~/RandomMetroidSolver/web/static/help/|grep '\.png\|\.gif'`;
 do
     [ -L ~/web2py/applications/solver/static/images/help/$IMG ] || ln -s ~/RandomMetroidSolver/web/static/help/$IMG ~/web2py/applications/solver/static/images/help/$IMG
 done
+[ -L ~/web2py/applications/solver/static/images/help/area_map_thumbnail.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map_thumbnail.png ~/web2py/applications/solver/static/images/help/area_map_thumbnail.png
 
 # rando - start locations
+[ -L ~/web2py/applications/solver/static/images/help/golden_four_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/golden_four_start.png ~/web2py/applications/solver/static/images/help/golden_four_start.png
 [ -L ~/web2py/applications/solver/static/images/help/gauntlet_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/gauntlet_start.png ~/web2py/applications/solver/static/images/help/gauntlet_start.png
 [ -L ~/web2py/applications/solver/static/images/help/green_bt_elevator_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/green_bt_elevator_start.png ~/web2py/applications/solver/static/images/help/green_bt_elevator_start.png
 [ -L ~/web2py/applications/solver/static/images/help/bt_reserve_blue_door1.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/bt_reserve_blue_door1.png ~/web2py/applications/solver/static/images/help/bt_reserve_blue_door1.png

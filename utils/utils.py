@@ -290,6 +290,11 @@ def convertParam(randoParams, param, inverse=False):
         return "random"
     raise Exception("invalid value for parameter {}".format(param))
 
+def to_comma_string(value):
+    if isinstance(value, list):
+        return ','.join(value)
+    return value
+
 def loadRandoPreset(randoPreset, args):
     # load the rando preset json file and add the parameters inside it to the args parser
     with open(randoPreset) as randoPresetFile:
@@ -314,7 +319,7 @@ def loadRandoPreset(randoPreset, args):
     if variaTweaksCustom is None or len(variaTweaksCustom) == 0:
         args.variaTweaksCustom = None
     else:
-        args.variaTweaksCustom = ','.join(variaTweaksCustom)
+        args.variaTweaksCustom = to_comma_string(variaTweaksCustom)
     if randoParams.get("maxDifficulty", "infinity") != "infinity":
         args.maxDifficulty = randoParams["maxDifficulty"]
     if randoParams.get("suitsRestriction", "off") != "off":
@@ -339,7 +344,7 @@ def loadRandoPreset(randoPreset, args):
     if layoutCustom is None or len(layoutCustom) == 0:
         args.layoutCustom = None
     else:
-        args.layoutCustom = ','.join(layoutCustom)
+        args.layoutCustom = to_comma_string(layoutCustom)
     if "gravityBehaviour" in randoParams:
         args.gravityBehaviour = randoParams["gravityBehaviour"]
     if randoParams.get("nerfedCharge", "off") == "on":
@@ -357,7 +362,7 @@ def loadRandoPreset(randoPreset, args):
     if areaLayoutCustom is None or len(areaLayoutCustom) == 0:
         args.areaLayoutCustom = None
     else:
-        args.areaLayoutCustom = ','.join(areaLayoutCustom)
+        args.areaLayoutCustom = to_comma_string(areaLayoutCustom)
     args.escapeRando = convertParam(randoParams, "escapeRando")
     if args.escapeRando == True:
         args.noRemoveEscapeEnemies = convertParam(randoParams, "removeEscapeEnemies", inverse=True)

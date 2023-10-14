@@ -177,6 +177,9 @@ There's other scripts to start/stop the containers: start.sh / stop.sh, delete t
 To run your local code in a Docker container for development, you will need to pass the `-l` argument in the Docker `build` and `run` scripts to enable local mode. When using local mode, you do not need to rebuild the containers for any HTML, CSS or Javascript changes. Any changes to the Python code will require you to stop and restart. Any changes to the database will require a full rebuild of the container.
 
 ```sh
+# Set db_params.py to the docker container
+echo "dbParams = dict(host='varia-mysql', user='varia', database='varia', password='varia', port=3306)" > db_params.py
+
 # Build the local containers
 $ ./web/docker/build.sh -l
 

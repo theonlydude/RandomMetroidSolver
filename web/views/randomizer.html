@@ -2581,9 +2581,11 @@ def displayNumber(id, min, max, default, step="1"):
               </tr>
               <tr>
                 <td class="small"></td>
-                <td>Settings Preset:</td>
-                <td>
-                  <select class="chzn-select" id="randoPreset" name="randoPreset" onchange="loadRandoPreset()">
+                <td colspan="2" class="full">
+                  <div class="flex-row">
+                    <span>Settings Preset:</span>
+                    <div>
+                      <select class="chzn-select" id="randoPreset" name="randoPreset" onchange="loadRandoPreset()">
 {{
   for categorie, presets in randoPresetsCategories.items():
     response.write('<optgroup label="{} presets">'.format(categorie), escape=False)
@@ -2596,7 +2598,9 @@ def displayNumber(id, min, max, default, step="1"):
       pass
     pass
 }}
-                </select>
+                      </select>
+                    </div>
+                  </div>
                 </td>
                 <td id="randoPresetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>

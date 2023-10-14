@@ -1593,6 +1593,7 @@ function loadRandoPresetOK(data) {
         var elem = document.getElementById(key);
         if(elem == null) {
             // in case there's unknown parameter in the json file
+            // TODO distributeObjective
             console.log("error loading elem: "+key);
             continue;
         }
@@ -1637,24 +1638,8 @@ function loadRandoPresetOK(data) {
         }
     }
 
-    // objectives is special
-    var objectiveRandom = document.getElementById("objectiveRandom");
-    // the json creator saves objective random as a boolean. For now this hack will do
-    if(String(data["objectiveRandom"]) == "true") {
-        if(! isElemRandom(objectiveRandom)) {
-            randomizeObjective({currentTarget: objectiveRandom});
-        }
-        if("objectiveMultiSelect" in data) {
-            setObjectives(data["objectiveMultiSelect"]);
-        }
-    } else {
-        if(isElemRandom(objectiveRandom)) {
-            randomizeObjective({currentTarget: objectiveRandom});
-        }
-        setObjectives(data["objectiveMultiSelect"] || data["objective"]);
-    }
-    $("select").data('picker').sync_picker_with_select(); // syncs the logic image picker
     window.$randomizer.init(data)
+    $("select").data('picker').sync_picker_with_select(); // syncs the logic image picker
 }
 
 function startTheTour(step=-1) {

@@ -303,7 +303,6 @@ definitions = {
             'plms': ["WS_Save_Blinking_Door"]
         },
         'boss': {
-            # TODO? addr/value?
             'desc': "Bosses randomization",
             'ips': [
                 'door_transition.ips',
@@ -717,8 +716,6 @@ def getPatchSetsFromPatcherSettings(patcherSettings):
                 patchSets += patchList
             else:
                 patchSets += [p for p in custom if p in patchList]
-    if patcherSettings['layout'] == True:
-        patchSets.append('door_indicators_plms')
     if patcherSettings["suitsMode"] == "Balanced":
         patchSets.append("gravityNoHeatProtection")
     elif patcherSettings["suitsMode" ] == "Progressive":

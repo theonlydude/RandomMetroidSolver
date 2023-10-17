@@ -364,7 +364,7 @@ class RomPatcher:
             doors = self.getStartDoors(plms, self.settings["area"], self.settings["minimizerN"])
             DoorsManager.getBlueDoors(doors)
             # door indicators
-            if self.settings["layout"]:
+            if "door_indicators_plms" in patchSets:
                 self.writeDoorIndicators(plms, self.settings["area"], self.settings["doorsColorsRando"])
             # starting locations
             self.applyStartAP(self.settings["startLocation"], plms, doors)

@@ -1,11 +1,11 @@
 window.PATCHES = {
   layout: [
-    // {
-    //   id: 'door_indicators_plms',
-    //   title: 'Flashing Doors',
-    //   description: 'Show the color of a locked door from the other side.',
-    //   images: ['flashing_doors.gif'],
-    // },
+    {
+      id: 'door_indicators_plms',
+      title: 'Flashing Doors',
+      description: 'Show the color of a locked door from the other side.',
+      images: ['flashing_doors.gif'],
+    },
     {
       id: 'dachora',
       title: 'Dachora',

@@ -808,7 +808,12 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x91e6, 'direction': 0x5, "cap": (0xe, 0x66), "bitFlag": 0x0,
                    "screen": (0x0, 0x6), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x34, 'SamusY':0x88},
-       start={'spawn':0x0007, 'solveArea': "Tourian", "save": "Save_G4", 'areaMode':True},
+       start={
+           'spawn':0x0007,
+           'solveArea': "Tourian", "save": "Save_G4", 'areaMode':True,
+           'layout': ['red_tower'],
+           'areaLayout': ['area_rando_gate_caterpillar', 'area_rando_gate_east_tunnel']
+       },
        dotOrientation = 'w'),
     AccessPoint('Tourian Escape Room 4 Top Right', 'Tourian', {},
        roomInfo = {'RoomPtr':0xdede, "area": 0x5},

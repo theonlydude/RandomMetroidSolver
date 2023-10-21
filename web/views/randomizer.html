@@ -700,7 +700,7 @@ function showHide(show, hide) {
 function getRandomizerParameters(setDisabledToOff, trueJson) {
     var dataDict = {};
 
-    var elems = ["seed", "preset", "raceMode", "removeEscapeEnemies", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf", "hiddenObjectives", "better_reserves"];
+    var elems = ["seed", "preset", "raceMode", "removeEscapeEnemies", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf", "hiddenObjectives", "distributeObjectives", "better_reserves"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian", "areaRandomization"];
     var imgPickers = ["logic"];
@@ -1750,6 +1750,11 @@ Click on the dice button to randomly set this parameter.</p>"
       content: "<p>When objectives are randomized, the objective list is hidden in game until you reach the <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Statues</a> (or equivalent, depending on Tourian setting).<br>Mostly interesting with area randomization or custom start location settings.</p>",
     },
     {
+      element: "#distributeObjectivesStep",
+      title: "Distributed Objectives",
+      content: "<p>When objectives are randomized, distribute random objectives evenly across categories.</p>",
+    },
+    {
       element: "#objectiveStep",
       title: "Custom Objectives",
       content: "<p>Choose which objectives are required to sink the <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Four statue</a> and to open access to <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a>.</p>\
@@ -2738,6 +2743,11 @@ def displayNumber(id, min, max, default, step="1"):
                   <td class="small"></td>
                   <td colspan="2">{{displayCheckbox("hiddenObjectives")}}<span id="hiddenObjectivesText">Hidden Objectives</span></td>
                   <td id="hiddenObjectivesStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr id="distributeObjectivesVisibility">
+                  <td class="small"></td>
+                  <td colspan="2">{{displayCheckbox("distributeObjectives")}}<span id="distributeObjectivesText">Distribute random objectives evenly across categories</span></td>
+                  <td id="distributeObjectivesStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>

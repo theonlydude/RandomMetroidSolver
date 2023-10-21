@@ -113,6 +113,7 @@ class Customizer(object):
             self.session.customizer['minDegree'] = -15
             self.session.customizer['maxDegree'] = 15
             self.session.customizer['invert'] = "on"
+            self.session.customizer['grayscale'] = "off"
             self.session.customizer['globalShift'] = "on"
             self.session.customizer['customSpriteEnable'] = "off"
             self.session.customizer['customSprite'] = "samus"
@@ -214,6 +215,7 @@ class Customizer(object):
         self.session.customizer['minDegree'] = self.vars.minDegree
         self.session.customizer['maxDegree'] = self.vars.maxDegree
         self.session.customizer['invert'] = self.vars.invert
+        self.session.customizer['grayscale'] = self.vars.grayscale
         self.session.customizer['globalShift'] = self.vars.globalShift
         self.session.customizer['customSpriteEnable'] = self.vars.customSpriteEnable
         self.session.customizer['customSprite'] = self.vars.customSprite
@@ -333,6 +335,8 @@ class Customizer(object):
 
         if self.vars.colorsRandomization == 'on':
             params.append('--palette')
+            if self.vars.grayscale == 'on':
+                params.append('--grayscale')
             if self.vars.suitsPalettes == 'off':
                 params.append('--no_shift_suit_palettes')
             if self.vars.beamsPalettes == 'off':

@@ -2741,13 +2741,32 @@ def displayNumber(id, min, max, default, step="1"):
                 </tr>
                 <tr id="hiddenObjectivesVisibility">
                   <td class="small"></td>
-                  <td colspan="2">{{displayCheckbox("hiddenObjectives")}}<span id="hiddenObjectivesText">Hidden Objectives</span></td>
-                  <td id="hiddenObjectivesStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-                </tr>
-                <tr id="distributeObjectivesVisibility">
-                  <td class="small"></td>
-                  <td colspan="2">{{displayCheckbox("distributeObjectives")}}<span id="distributeObjectivesText">Distribute random objectives evenly across categories</span></td>
-                  <td id="distributeObjectivesStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                  <td>
+                    <div class="flex-row gap-2">
+                      {{displayCheckbox("hiddenObjectives")}}
+                      <div class="flex-grow">
+                        <span id="hiddenObjectivesText">Hidden Objectives</span>
+                      </div>
+                      <div id="hiddenObjectivesStep">
+                        <button type="button" onclick="startTheTour(event)">?</button>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex-row gap-2">
+                      {{displayCheckbox("distributeObjectives")}}
+                      <div class="flex-grow">
+                        <span id="distributeObjectivesText">
+                          Distribute random objectives evenly across categories
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <div id="distributeObjectivesStep">
+                        <button type="button" onclick="startTheTour(event)">?</button>
+                      </div>
+                    </div>
+                  </td>
                 </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>

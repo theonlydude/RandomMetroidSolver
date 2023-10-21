@@ -659,18 +659,18 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = ["noPatchesVisibility"];
-    var hide = ["seedVisibility", "itemsQuantityVisibility", "minorsProportionVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility", "saveLoadRandoPresetVisibility"];
+    var hide = ["seedVisibility", "itemsQuantityVisibility", "minorsProportionVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility", "saveLoadRandoPresetVisibility", "areaLayoutStep"];
     showHide(show, hide);
   }
 
   else if(name == "medium") {
     var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "itemsQuantityVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility", "objectivesVisibility", "helperPatchesVisibility"];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "minorsProportionVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "noPatchesVisibility", "saveLoadRandoPresetVisibility"];
+    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "minorsProportionVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "noPatchesVisibility", "saveLoadRandoPresetVisibility", "areaLayoutStep"];
     showHide(show, hide);
   }
 
   else {
-    var show = ["seedVisibility", "itemsQuantityVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "minorsProportionVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility", "saveLoadRandoPresetVisibility"];
+    var show = ["seedVisibility", "itemsQuantityVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "minorsProportionVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility", "saveLoadRandoPresetVisibility", "areaLayoutStep"];
     var hide = ["noPatchesVisibility"];
     showHide(show, hide);
   }
@@ -2586,7 +2586,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <td colspan="2" class="full">
                   <div class="flex-row">
                     <span>Settings Preset:</span>
-                    <div>
+                    <div class="preset-select-div">
                       <select class="chzn-select" id="randoPreset" name="randoPreset" onchange="loadRandoPreset()">
 {{
   for categorie, presets in randoPresetsCategories.items():

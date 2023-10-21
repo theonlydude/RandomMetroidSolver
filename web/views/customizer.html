@@ -2337,7 +2337,7 @@ if seedInfo != None:
               <tr><td>Area Randomization pool</td><td>{{=seedParams.get("areaRandomizationMultiSelect", "off, full")}}</td></tr>
 {{        pass}}
 
-              <tr {{=setBold("areaLayout")}} id="areaLayoutStep"><td>Area Randomization Patches</td><td><div class="vue-app"></div></td></tr>
+              <tr id="areaLayoutStep"><td>Area Randomization Patches</td><td><div class="vue-app"></div></td></tr>
               <tr {{=setBold("doorsColorsRando")}}><td>Doors Colors randomization</td><td>{{=seedParams["doorsColorsRando"]}}</td></tr>
               <tr {{=setBold("allowGreyDoors")}}><td>Allow some doors to be grey</td><td>{{=seedParams["allowGreyDoors"]}}</td></tr>
               <tr {{=setBold("bossRandomization")}}><td>Bosses randomization</td><td>{{=seedParams["bossRandomization"]}}</td></tr>
@@ -2358,8 +2358,8 @@ if seedInfo != None:
             <h4>Patches</h4>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
-              <tr {{=setBold("layoutPatches")}} id="layoutPatchesStep"><td>Anti-softlock layout patches</td><td><div class="vue-app"></div></td></tr>
-              <tr {{=setBold("variaTweaks")}} id="variaTweaksStep"><td>VARIA tweaks</td><td><div class="vue-app"></div></td></tr>
+              <tr id="layoutPatchesStep"><td>Anti-softlock layout patches</td><td><div class="vue-app"></div></td></tr>
+              <tr id="variaTweaksStep"><td>VARIA tweaks</td><td><div class="vue-app"></div></td></tr>
               <tr {{=setBold("nerfedCharge")}}><td>Nerfed Charge Beam available from the start</td><td>{{=seedParams["nerfedCharge"]}}</td></tr>
               <tr {{=setBold("relaxed_round_robin_cf")}}><td>Relaxed Round Robin Crytal Flash</td><td>{{=seedParams["relaxed_round_robin_cf"]}}</td></tr>
               <tr {{=setBold("gravityBehaviour")}}><td>Suits properties</td><td>{{=seedParams["gravityBehaviour"]}}</td></tr>

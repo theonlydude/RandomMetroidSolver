@@ -329,10 +329,10 @@ class Randomizer(object):
             os.remove(jsonRandoPreset)
 
             locsItems["status"] = "OK"
-            if True:
-                locsItems["params"] = params
-                locsItems["presetFile"] = self.vars.paramsFileTarget
-                locsItems["randoPresetDict"] = randoPresetDict
+            # Sending these are useful for debugging the front end
+            # locsItems["params"] = params
+            # locsItems["presetFile"] = self.vars.paramsFileTarget
+            # locsItems["randoPresetDict"] = randoPresetDict
             return json.dumps(locsItems)
         else:
             # extract error from json

@@ -1,4 +1,5 @@
 import sys, os, urllib, tempfile, random, subprocess, base64, json, uuid, lzma
+import functools, traceback
 from datetime import datetime
 
 from web.backend.utils import loadPresetsList, loadRandoPresetsList, displayNames, get_app_files
@@ -11,6 +12,16 @@ from utils.objectives import Objectives
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.html import OPTGROUP
 
+def simple_view(f):
+    @functools.wraps(f)
+    def wrapped(self):
+        try:
+            return f(self)
+        except Exception as error:
+            err = ''.join(traceback.format_exception(None, error, error.__traceback__))
+            return f"<pre>{err}</pre>"
+    return wrapped
+
 class Randomizer(object):
     def __init__(self, session, request, response, cache):
         self.session = session
@@ -19,6 +30,42 @@ class Randomizer(object):
         self.cache = cache
 
         self.vars = self.request.vars
+
+    @simple_view
+    def randomizerData(self):
+        types = Objectives.getObjectivesTypes()
+        categories = Objectives.getObjectivesCategories()
+        exclusions = Objectives.getExclusions()
+        objective_by_id = {}
+        for id in Objectives.getObjectivesSort():
+            o_exclusions = exclusions.get(id, {})
+            objective = objective_by_id[id] = {
+                'id': id,
+                'category': categories.get(id, '').lower(),
+            }
+
+            # on the front end we're using objective.name.startsWith('clear ')
+            # remove this?
+            if o_exclusions.get('tourian') == 'Disabled':
+                objective['disable_tourian'] = True
+
+            if o_exclusions.get('limit') is not None:
+                # o_exclusions also has 'type' but it's always objective['category']
+                objective['category_limit'] = o_exclusions['limit']
+            if o_exclusions.get('list'):
+                objective['exclusions'] = o_exclusions['list']
+            otype = objective['category'].replace('bosses', 'boss')
+            if objective['id'] in types.get(otype, []):
+                objective['is_count'] = True
+        # These don't actually appear in the dropdown
+        objective_by_id.pop('nothing')
+        objective_by_id.pop('finish scavenger hunt')
+        out = dict(
+            objective_by_id=objective_by_id,
+        )
+        if self.request.extension == 'html':
+            return f'<pre>{json.dumps(out, indent=2)}</pre>'
+        return json.dumps(out)
 
     def run(self):
         self.initRandomizerSession()

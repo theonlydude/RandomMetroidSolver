@@ -2315,9 +2315,9 @@ if seedInfo != None:
 {{    if seedParams["objectiveRandom"] == "true":}}
                 <td>random</td></tr>
               <tr {{=setBold("nbObjective")}}><td>Number of Objectives</td><td>{{=seedParams["nbObjective"]}}</td></tr>
-              <tr><td>Objectives pool</td><td>{{=seedParams["objectiveMultiSelect"]}}</td></tr>
+              <tr><td>Objectives pool</td><td><div id="objectivePortal" class="vue-app"></div></td></tr>
 {{    else:}}
-                <td>{{=seedParams["objective"]}}</td></tr>
+                <td><div id="objectivePortal" class="vue-app"></div></td></tr>
 {{        pass}}
               <tr {{=setBold("nbObjectivesRequired")}}><td>Number of required objectives</td><td>{{=seedParams["nbObjectivesRequired"]}}</td></tr>
               <tr {{=setBold("hiddenObjectives")}}><td>Hidden objectives</td><td>{{=seedParams["hiddenObjectives"]}}</td></tr>

@@ -196,6 +196,28 @@ $ ./web/docker/start.sh
 $ ./web/docker/rm.sh
 ```
 
+Other useful commands can be run with `./run.sh COMMAND`
+
+* `rebuild` - stops, deletes, and rebuilds local docker
+* `prune` - wipe unused docker containers (this can free up dozens of gigabytes)
+* `log` - watch stdout and stderr for the web2py server
+* `bash` - open a prompt in docker
+* `extra` - install a few more packages (emacs, ps... mostly for @chrisc)
+
+```sh
+# watch web2py error and logs
+# change to web2py-stderr for error and web2py-stdout for logs
+$ docker exec -it varia-local sh -c "tail -f /var/log/supervisor/web2py-std*"
+
+# copy web2py errors to a local directory
+CONTAINER_ID=`docker container ps |grep varia-local|awk '{print $1}'`
+rm -rf errors/;
+docker cp $CONTAINER_ID:/root/web2py/applications/solver/errors .
+
+# restart web2py (used when python changes don't appear on server)
+docker exec -it supervisorctl restart web2py
+```
+
 # Front end client
 
 ## For development of the tracker client

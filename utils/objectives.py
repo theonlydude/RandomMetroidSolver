@@ -1033,16 +1033,18 @@ class Objectives(object):
         def pickDistributed():
             availableGoalsObj = [Objectives.goals[goalName] for goalName in availableGoals]
             goalsByCategory = {cat:[obj.name for obj in availableGoalsObj if obj.category == cat] for cat in goalCategories}
-            remainingGoals = len(availableGoalsObj)
             catList = []
+            remainingGoals = sum(len(goals) for goals in goalsByCategory.values())
             while Objectives.nbActiveGoals < nbGoals and remainingGoals > 0:
                 if not catList:
                     catList = goalCategories[:]
                     random.shuffle(catList)
+                    LOG.debug(f"new catList: {catList}")
                 category = None
                 while category is None and catList:
                     category = catList.pop()
                     objList = goalsByCategory[category]
+                    LOG.debug(f"goals for cat {category}: {objList}")
                     if objList:
                         goalName = random.choice(objList)
                         self.addGoal(goalName)

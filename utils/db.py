@@ -404,7 +404,7 @@ order by r.id;"""
 
         # custom sort of the params
         paramsHead = []
-        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'majorsSplit', 'majorsSplitMultiSelect', 'scavNumLocs', 'scavRandomized', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'objective', 'objectiveMultiSelect', 'nbObjectivesRequired', 'hiddenObjectives', 'tourian', 'tourianMultiSelect', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
+        for param in ['seed', 'preset', 'startLocation', 'startLocationMultiSelect', 'areaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'majorsSplit', 'majorsSplitMultiSelect', 'scavNumLocs', 'scavRandomized', 'progressionSpeed', 'progressionSpeedMultiSelect', 'maxDifficulty', 'morphPlacement', 'morphPlacementMultiSelect', 'suitsRestriction', 'energyQty', 'energyQtyMultiSelect', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty', 'progressionDifficultyMultiSelect', 'escapeRando', 'removeEscapeEnemies', 'objective', 'objectiveMultiSelect', 'nbObjectivesRequired', 'hiddenObjectives', 'distributeObjectives', 'tourian', 'tourianMultiSelect', 'funCombat', 'funMovement', 'funSuits', 'hideItems', 'strictMinors']:
             if param in paramsSet:
                 paramsHead.append(param)
                 paramsSet.remove(param)
@@ -431,7 +431,7 @@ order by 1,2;"""
         #     (param1, count1, count2, 0, ...)
         #     (param2, 0, 0, count3, ...)]
         groups = {
-            'Randomizer parameters': ['logic', 'preset', 'startLocation', 'majorsSplit', 'scavNumLocs', 'scavRandomized', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'progressionDifficulty', 'suitsRestriction', 'hideItems', 'objective', 'nbObjective', 'nbObjectivesRequired', 'hiddenObjectives', 'tourian'],
+            'Randomizer parameters': ['logic', 'preset', 'startLocation', 'majorsSplit', 'scavNumLocs', 'scavRandomized', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'progressionDifficulty', 'suitsRestriction', 'hideItems', 'objective', 'nbObjective', 'nbObjectivesRequired', 'hiddenObjectives', 'distributeObjectives', 'tourian'],
             'Ammo and Energy': ['minorQty', 'energyQty', 'strictMinors', 'missileQty', 'superQty', 'powerBombQty'],
             'Areas and Fun': ['areaRandomization', 'areaLayout', 'doorsColorsRando', 'allowGreyDoors', 'bossRandomization', 'minimizer', 'minimizerQty', 'escapeRando', 'removeEscapeEnemies', 'funCombat', 'funMovement', 'funSuits'],
             'Patches': ['layoutPatches', 'variaTweaks', 'nerfedCharge', 'gravityBehaviour', 'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart', 'rando_speed', 'Infinite_Space_Jump', 'refill_before_save', 'hud', 'revealMap', 'animals', 'No_Music', 'random_music', 'relaxed_round_robin_cf']

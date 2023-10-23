@@ -544,6 +544,22 @@ body {
     width: 100%;
 }
 
+.flex-row .switchery {
+    min-width: 35px;
+}
+
+.gap-2 {
+    gap: 8px;
+}
+
+.flex-grow {
+    flex-grow: 1;
+}
+
+.preset-select-div {
+  min-width: 50%;
+}
+
 .flex-row__text {
     text-wrap: nowrap;
     width: 200px;

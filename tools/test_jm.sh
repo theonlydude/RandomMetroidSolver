@@ -192,6 +192,7 @@ function generate_rando_presets {
     "areaRandomization": "$(random "random" ${areaRandomization})",
     "nbObjectivesRequired": "$(random "0" ${nbObjectivesRequired})",
     "hiddenObjectives": "$(random_switch ${hiddenObjectives})",
+    "distributeObjectives": "$(random_switch ${distributeObjectives})",
     "areaLayout": "$(random_switch ${areaLayout})",
     "doorsColorsRando": "$(random_switch ${doorsColorsRando})",
     "allowGreyDoors": "$(random_switch ${allowGreyDoors})",

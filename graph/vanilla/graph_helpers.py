@@ -746,8 +746,15 @@ class HelpersGraph(Helpers):
                       sm.wand(sm.haveItem('SpaceJump'), # alternate strat with possible double bomb jump but no difficult wj
                               sm.wor(sm.canUseSpringBall(),
                                      sm.canUseBombs())),
-                      sm.wand(sm.canPassBombPassages(), # wjs and/or 3 tile mid air morph
-                              sm.knowsMaridiaWallJumps()))
+                      sm.wand(sm.knowsMaridiaWallJumps(), # wjs and/or 3 tile mid air morph
+                              sm.wor(sm.canUseSpringBall(),
+                                     sm.canPassBombPassages(),
+                                     sm.knowsWestSandHoleMorphOnlyItemAccess())))
+
+    @Cache.decorator
+    def canAccessMaridiaReserveFromTopWestSandHole(self):
+        sm = self.smbm
+        return sm.canAccessItemsInWestSandHole()
 
     @Cache.decorator
     def getDraygonConnection(self):

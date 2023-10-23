@@ -444,7 +444,7 @@ loc.AccessFrom = {
     'Left Sandpit': lambda sm: sm.canClimbWestSandHole()
 }
 loc.Available = (
-    lambda sm: sm.canAccessItemsInWestSandHole()
+    lambda sm: sm.canAccessMaridiaReserveFromTopWestSandHole()
 )
 
 

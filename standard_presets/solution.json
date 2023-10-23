@@ -395,6 +395,10 @@
       "BomblessWateringHoleAccess": [
           true,
           25
+      ],
+      "WestSandHoleMorphOnlyItemAccess": [
+          true,
+          25
       ]
   },
   "Settings": {

@@ -273,6 +273,12 @@ class Knows:
                                 'href': 'https://youtu.be/F3xAJem6VlA',
                                 'rooms': ['West Sand Hole', 'Spring Ball Room', 'Crab Hole']}
 
+    WestSandHoleMorphOnlyItemAccess = SMBool(False, 0, ['WestSandHoleMorphOnlyItemAccess'])
+    desc['WestSandHoleMorphOnlyItemAccess'] = {'display': 'West Sand Hole Items with Morph',
+                                               'title': 'Once at the top of West Sand Hole, collect items without Spring Ball or Bombs/Power Bombs by performing some wiggling (turn-around cancel with angle) and tricky Alcatraz-like wall jumps. <b>Note:</b> in Mirrortroid flavor, the wiggling to access the Reserve location is not possible, thus will not be required.',
+                                               'href': 'https://youtu.be/wQ5EpUyVwfc',
+                                               'rooms': ['West Sand Hole']}
+
     MtEverestGravJump = SMBool(False, 0, ['MtEverestGravJump'])
     desc['MtEverestGravJump'] = {'display': 'Mount Everest Gravity Jump',
                                 'title': 'Access Mount Everest top door by doing a crouch+gravity jump in the last couple frames possible',
@@ -775,7 +781,7 @@ class Knows:
              'title': 'Clips'},
             {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
              'title': 'Plasma Room'},
-            {'knows': ['HiJumpMamaTurtle', 'MaridiaWallJumps', 'MtEverestGravJump', 'BomblessWateringHoleAccess', 'MamaTurtleWallJumpBombBoost'],
+            {'knows': ['HiJumpMamaTurtle', 'MaridiaWallJumps', 'MtEverestGravJump', 'BomblessWateringHoleAccess', 'WestSandHoleMorphOnlyItemAccess', 'MamaTurtleWallJumpBombBoost'],
              'title': 'Jumps'}
         ],
         'Maridia 2/2': [

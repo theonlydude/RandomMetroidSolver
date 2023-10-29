@@ -499,7 +499,7 @@ if skillBarData is not None:
   lower = 100 + skillBarData["standards"]["newbie"]*mult
   upper = 100 + skillBarData["standards"]["samus"]*mult
 
-  previousStdScore = lower
+  previousStdScore = min(lower, score)
   previousPreset = 'newbie'
   stop = False
   for preset in ['casual', 'regular', 'veteran', 'expert', 'master', 'samus']:

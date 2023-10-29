@@ -212,11 +212,11 @@ class PresetLoader(object):
         # knows
         for know in Knows.__dict__:
             if isKnows(know):
-                if know in self.params['Knows']:
+                if know in self.params['Knows'] and not Knows.desc[know].get('readonly') == True:
                     if self.params['Knows'][know][0] == True:
                         score += diff2score[self.params['Knows'][know][1]]
                 else:
-                    # if old preset with not all the knows, use default values for the know
+                    # if old preset with not all the knows or readonly tech, use default values
                     if Knows.__dict__[know].bool == True:
                         score += diff2score[Knows.__dict__[know].difficulty]
 

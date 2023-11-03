@@ -196,13 +196,24 @@ $ ./web/docker/start.sh
 $ ./web/docker/rm.sh
 ```
 
-Other useful commands can be run with `./run.sh COMMAND`
+Other useful commands for local docker development
 
-* `rebuild` - stops, deletes, and rebuilds local docker
-* `prune` - wipe unused docker containers (this can free up dozens of gigabytes)
-* `log` - watch stdout and stderr for the web2py server
-* `bash` - open a prompt in docker
-* `extra` - install a few more packages (emacs, ps... mostly for @chrisc)
+```
+# All the following commands must be run from docker folder
+cd ./web/docker/
+
+# connect to docker bash container
+docker exec -it varia-local bash
+
+# watch logs from server
+docker exec -it varia-local sh -c "tail -f /var/log/supervisor/web2py*"
+
+# tear down and rebuild everything
+./stop.sh && ./rm.sh && ./build.sh -l && ./run.sh -l
+
+# delete all unused docker containers
+docker system prune -a
+```
 
 ```sh
 # watch web2py error and logs

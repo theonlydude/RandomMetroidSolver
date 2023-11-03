@@ -580,6 +580,9 @@ function initSolver() {
 
   console.log("initSolver");
 
+  // clear local storage in tracker
+  $tracker.$store.seed.save({});
+
   // seedless debug plando race standard
   var mode = "seedless";
   var romJson = document.getElementById("romJson");

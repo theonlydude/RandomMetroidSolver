@@ -2065,8 +2065,8 @@ Click on the dice button to randomly set this parameter.",
     {
       element: "#areaLayoutStep",
       title: "Areas randomization additional layout modifications",
-      content: "<p>These patches minimize soft-locks and increase the variation of the area randomizer. Some additional cosmetic changes may not be shown. These patches are only available when full or light area randomization is enabled. </p><div id='tourPortal'></div>",
-      onShown: () => window.$randomizer.mountHelp('areaLayout'),
+      content: "<p>These patches minimize soft-locks and increase the variation of the area randomizer. Some additional cosmetic changes may not be shown. These patches are only available when full or light area randomization is enabled. </p><div id='tourPortal' data-tag-name='patch-selector' data-patch_group='areaLayout'></div>",
+      onShown: () => window.updateTourPortal(),
       placement: "auto right",
     },
     {
@@ -2232,17 +2232,15 @@ Click on the dice button to randomly set this parameter.",
     {
       element: "#layoutPatchesStep",
       title: "Anti-softlock Layout patches",
-      content: "Include the anti-softlock layout patches. Disable at your own softlocking risk!<br/>\
-<div id='tourPortal'></div>",
-      onShown: () => window.$randomizer.mountHelp('layout'),
+      content: "Include the anti-softlock layout patches. Disable at your own softlocking risk!<br/><div id='tourPortal' data-tag-name='patch-selector' data-patch_group='layout'></div>",
+      onShown: () => window.updateTourPortal(),
       placement: "auto right",
     },
     {
       element: "#variaTweaksStep",
       title: "VARIA Tweaks",
-      content: "<p>Include minor tweaks for the game to behave 'as it should' in a randomizer context:</p>\
-<table class=\"full\"> <div id='tourPortal'></div>",
-      onShown: () => window.$randomizer.mountHelp('variaTweaks'),
+      content: "<p>Include minor tweaks for the game to behave 'as it should' in a randomizer context:</p><div id='tourPortal' data-tag-name='patch-selector' data-patch_group='variaTweaks'></div>",
+      onShown: () => window.updateTourPortal(),
       placement: "auto right",
     },
     {

@@ -639,10 +639,26 @@ body {
     pointer-events: none;
     filter: invert(0.5);
 }
-.objective-selector {
+.objective-selector,
+.objective-help {
     display: flex;
     flex-wrap: wrap;
+    gap: 24px;
+}
+.objective-help .smv-objective {
+    font-size: 24px
+}
+.objective-help__list {
+    display: flex;
     gap: 16px;
+}
+.objective-help__item {
+    align-items: center;
+    display: flex;
+    height: 29px;
+    gap: 8px;
+}
+.objective-help__title {
 }
 .bootstrap-modal .modal-footer__text {
     padding-right: 8px;

@@ -146,8 +146,10 @@ function startTheTour(step=-1) {
   // the tour tutorial
   var tour = new Tour({
     storage: false,
+    onShow: () => document.body.classList.add('-tour-open'),
+    onHide: () => document.body.classList.remove('-tour-open'),
     steps: [{
-      element: ".fa.fa-question-circle",
+      element: "#welcomeHelp",
       title: "VARIA Areas/Bosses/Items/Doors Tracker",
       content: "<h2 class=\"center\">Welcome to the VARIA Areas/Bosses/Items/Doors Tracker</h2><h4>Areas/Bosses Tracker</h4>\
 <p>The Areas and Bosses Tracker allows you to track the connections between the areas and bosses portals.<br/>To use it, click on a portal <i class=\"sm-portal\" />, it'll highlight it, then click on a second portal, it'll draw a line between the two portals with a random color.<br/>\
@@ -207,6 +209,11 @@ Install QUsb2snes on your computer and configure your sd2snes/snes mini/emulator
 <p>When you're done click on the shutdown button <img src=\"/solver/static/images/ui/shut_down.svg\" alt=\"Shutdown\" style=\"width: 32px\"> to stop the Auto-Tracker.</p>\
 <h4>SNES Classic</h4>\
 <p>You can press start+select+L+R for a few seconds to reset the game, it won't stop the Auto-Tracker.<br/>When accessing the SNES Classic menu the Auto-Tracker will stop, it'll try to reconnect automatically for 30 seconds.</p>"
+    }, {
+      element: "#helpItemTracker",
+      title: "VARIA Item Tracker",
+      placement: "auto right",
+      content: () => $tracker.$refs.help_item_tracker.$el.outerHTML
     }]
   });
 
@@ -225,7 +232,7 @@ Install QUsb2snes on your computer and configure your sd2snes/snes mini/emulator
   if (typeof step === 'string') {
     step = tour._options.steps.findIndex((tour_step) => tour_step.element === `#${step}`)
   }
-  window.T = tour
+  window.theTour = tour
   // Start the tour
   if(step != -1) {
     tour.goTo(step);

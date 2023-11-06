@@ -215,6 +215,16 @@ p {
     overflow-y: auto;
     text-align: left;
 }
+.popover.tour-tour h3 {
+    margin: 0 0 12px;
+}
+.popover.tour-tour hr {
+    margin: 20px 0;
+}
+.popover.tour-tour ul.browser-default li {
+    list-style-position: outside;
+    margin-left: 20px;
+}
 .popover-title {
     text-align: center;
 }
@@ -643,7 +653,7 @@ body {
 .objective-help {
     display: flex;
     flex-wrap: wrap;
-    gap: 24px;
+    gap: 0 24px;
 }
 .objective-help .smv-objective {
     font-size: 24px
@@ -657,8 +667,6 @@ body {
     display: flex;
     height: 29px;
     gap: 8px;
-}
-.objective-help__title {
 }
 .bootstrap-modal .modal-footer__text {
     padding-right: 8px;

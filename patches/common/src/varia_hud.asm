@@ -35,7 +35,7 @@ incsrc "sym/seed_display.asm"
 ;;; area/item counter or next scav display
 !previous = $7fff3c		; hi: area/00, lo: remaining items/next scav loc
 ;;; RAM for current index in scav list order in scavenger
-!scav_idx = $7ed86a		; saved to SRAM automatically
+!scav_idx = $7ed8f4		; saved to SRAM automatically
 !scav_tmp  = $7fff40		; temp RAM used for a lot of stuff in scavenger
 !hud_special = $7fff42		; temp RAM used to draw temporary stuff in the HUD (prompt, notification)
 !hud_special_timer = $7fff44	; and associated timer

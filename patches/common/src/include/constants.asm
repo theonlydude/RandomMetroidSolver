@@ -49,13 +49,13 @@ include
 !stats_timer = !stats_ram
 
 ;;; collected items
-!CollectedItems  = $7ED86E
+!CollectedItems  = $7ED8F6
 !collected_beams_mask = $09A8
 !collected_items_mask = $09A4
 
 ;;; collected map tiles ($e bytes)
 !nb_areas = 12
-!map_tilecounts_table = $7ED850 ; saved to SRAM automatically
+!map_tilecounts_table = $7ED8E0 ; saved to SRAM automatically
 !map_total_tilecount = !map_tilecounts_table+!nb_areas
 
 ;; bitfields

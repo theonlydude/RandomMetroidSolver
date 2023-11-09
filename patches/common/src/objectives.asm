@@ -217,8 +217,8 @@ room_earthquake:
         ;; don't trigger if no screen shake patch if detected
         lda.l disable_screen_shake_marker : and #$00ff
         cmp #!disable_earthquake_id : beq .end
-	LDA #$0018             ;\
-	STA $183E              ;} Earthquake type = BG1, BG2 and enemies; 3 pixel displacement, horizontal
+	LDA #$0015             ;\
+	STA $183E              ;} Earthquake type = BG1, BG2 and enemies; 2 pixel displacement, horizontal
 	LDA #$FFFF
 	STA $1840
 .end:

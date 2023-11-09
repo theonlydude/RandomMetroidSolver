@@ -25,7 +25,7 @@ endmacro
 !door_list_ptr       = $07b5
 ;;; number of areas to define Disabled Tourian escape timer table size
 !nb_areas = 10 			; (count out Ceres and Tourian)
-
+!timer_half_value = $7fff4e
 
 org $809E21
 %export(timer_value)
@@ -225,13 +225,24 @@ room_setup:
     phb                         ; do vanilla setup to call room asm
     phk
     plb
-    jsr $919c                   ; sets up room shaking
+    jsr setup_room_shaking
     plb
     jsl utils_fix_timer_gfx
 .end:
     ;; goes back to vanilla setup asm call
     lda $0018,x
     rts
+
+;; 3 pixels displacement if timer is < half value, else 2
+setup_room_shaking:
+        lda $0946 : cmp.l !timer_half_value : bcc +
+        lda #$0015 : bra .set
++
+        lda #$0018
+.set:
+        sta $183e
+        lda #$ffff : sta $1840
+        rts
 
 room_main:
     jsl check_ext_escape : bcc .end
@@ -364,6 +375,12 @@ print "timer_values_by_area_id: ", pc
 %export(timer_values_by_area_id)
 	skip !nb_areas*2
 
+%export(timer_half_values_by_area_id)
+	skip !nb_areas*2
+
+%export(timer_half_value)
+        dw $0130
+
 ;;; CODE (in bank A1 free space)
 
 ;;; checks the need for "extended escape" setup
@@ -456,12 +473,19 @@ music_and_enemies:
 ;;; set escape timer from an area-id indexed table if value is set to 0 in ROM
 ;;; (Disabled Tourian escape from anywhere)
 set_timer_value:
-	bne .end
+	beq .area_table
+        ;; static timer
+        pha
+        lda.l timer_half_value : sta !timer_half_value
+        pla
+        bra .end
+.area_table:
 	;; get current area id
 	ldx $07bb
 	lda $8f0010,x : and #$00ff
 	dec			; first area (Crateria) has ID 1 because Ceres is 0
 	asl : tax
+	lda.l timer_half_values_by_area_id, x : sta !timer_half_value
 	lda.l timer_values_by_area_id, x
 .end:
 	JSL $809E8C		; hijacked code: set timer to value in A

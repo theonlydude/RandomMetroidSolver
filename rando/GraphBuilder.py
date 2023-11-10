@@ -253,10 +253,10 @@ class GraphBuilder(object):
             else:
                 escapeTargetsTimer = {
                     'Climb Bottom Left': None, # vanilla
-                    'Green Brinstar Main Shaft Top Left': 240, # brinstar
-                    'Basement Left': 240, # wrecked ship
-                    'Business Center Mid Left': 300, # norfair
-                    'Crab Hole Bottom Right': 300 # maridia
+                    'Green Brinstar Main Shaft Top Left': 210, # brinstar
+                    'Basement Left': 210, # wrecked ship
+                    'Business Center Mid Left': 270, # norfair
+                    'Crab Hole Bottom Right': 270 # maridia
                 }
                 t = escapeTargetsTimer[path[0].Name]
             self.log.debug("escapeTimer. t="+str(t))

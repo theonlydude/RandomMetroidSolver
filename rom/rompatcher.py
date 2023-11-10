@@ -456,14 +456,18 @@ class RomPatcher:
                 return [second, minute]
             if 'TimerTable' not in escapeAttr:
                 timerPatch[Addresses.getOne('escapeTimer')] = getTimerBytes(escapeTimer)
+                timerPatch[Addresses.getOne("rando_escape_common_timer_half_value")] = getTimerBytes(escapeTimer/2)
             else:
                 # timer table for Disabled Tourian escape: write 0 time as marker to use the table
                 timerPatch[Addresses.getOne('escapeTimer')] = [0,0]
                 tableBytes = []
+                halfTableBytes = []
                 timerPatch[Addresses.getOne('escapeTimerTable')] = tableBytes
+                timerPatch[Addresses.getOne('rando_escape_common_timer_half_values_by_area_id')] = halfTableBytes
                 for area in graphAreas[1:-1]: # no Ceres or Tourian
                     t = escapeAttr['TimerTable'][area]
                     tableBytes += getTimerBytes(t)
+                    halfTableBytes += getTimerBytes(t//2)
             self.applyIPSPatch('Escape_Timer', patchDict)
         # animals door to open
         if escapeAttr['Animals'] is not None:

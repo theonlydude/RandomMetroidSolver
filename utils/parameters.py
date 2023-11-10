@@ -1182,16 +1182,6 @@ class Settings:
         'Gauntlet' : hardRoomsPresets['Gauntlet']['Default']
     }
 
-    # multiplier for escape rando computed time
-    escapeRandoTimePresets = {
-        "Should be plenty": 1,
-        "Don't get lost": 1/1.5,
-        "Gotta go fast!": 1/2,
-        "RIP animals": 1/2.5
-    }
-
-    escapeRandoTimeMultiplier = escapeRandoTimePresets["Should be plenty"]
-
     # various settings used in difficulty computation
     algoSettings = {
         # Boss Fights

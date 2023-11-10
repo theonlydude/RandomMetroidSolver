@@ -111,24 +111,19 @@ class PresetLoader(object):
                                              ['{}'.format(param)]))
         # Settings
         ## hard rooms
-        for hardRoom in Settings.hardRooms:
+        for hardRoom in ['X-Ray', 'Gauntlet']:
             if hardRoom in self.params['Settings']:
                 Settings.hardRooms[hardRoom] = Settings.hardRoomsPresets[hardRoom][self.params['Settings'][hardRoom]]
 
         ## bosses
-        for boss in Settings.bossesDifficulty:
+        for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
             if boss in self.params['Settings']:
                 Settings.bossesDifficulty[boss] = Settings.bossesDifficultyPresets[boss][self.params['Settings'][boss]]
 
         ## hellruns
-        for hellRun in Settings.hellRuns:
+        for hellRun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
             if hellRun in self.params['Settings']:
                 Settings.hellRuns[hellRun] = Settings.hellRunPresets[hellRun][self.params['Settings'][hellRun]]
-
-        ## escape
-        escapeRandoTimeMultiplier = self.params['Settings'].get('escapeRandoTimeMultiplier')
-        if escapeRandoTimeMultiplier is not None:
-            Settings.escapeRandoTimeMultiplier = Settings.escapeRandoTimePresets[escapeRandoTimeMultiplier]
 
         # Controller
         for button in self.params['Controller']:

@@ -17,7 +17,7 @@ from rom.rom_options import RomOptions
 from rom.flavor import RomFlavor
 from rom.map import AreaMap, getTileIndex, portal_mapicons
 from patches.patchaccess import PatchAccess
-from utils.parameters import appDir, Settings
+from utils.parameters import appDir
 from logic.helpers import Bosses
 import utils.log
 
@@ -449,7 +449,6 @@ class RomPatcher:
             patchDict = { 'Escape_Timer': {} }
             timerPatch = patchDict["Escape_Timer"]
             def getTimerBytes(t):
-                t = int(t * Settings.escapeRandoTimeMultiplier)
                 minute = int(t / 60)
                 second = t % 60
                 minute = int(minute / 10) * 16 + minute % 10
@@ -457,18 +456,14 @@ class RomPatcher:
                 return [second, minute]
             if 'TimerTable' not in escapeAttr:
                 timerPatch[Addresses.getOne('escapeTimer')] = getTimerBytes(escapeTimer)
-                timerPatch[Addresses.getOne("rando_escape_common_timer_half_value")] = getTimerBytes(escapeTimer/2)
             else:
                 # timer table for Disabled Tourian escape: write 0 time as marker to use the table
                 timerPatch[Addresses.getOne('escapeTimer')] = [0,0]
                 tableBytes = []
-                halfTableBytes = []
                 timerPatch[Addresses.getOne('escapeTimerTable')] = tableBytes
-                timerPatch[Addresses.getOne('rando_escape_common_timer_half_values_by_area_id')] = halfTableBytes
                 for area in graphAreas[1:-1]: # no Ceres or Tourian
                     t = escapeAttr['TimerTable'][area]
                     tableBytes += getTimerBytes(t)
-                    halfTableBytes += getTimerBytes(t//2)
             self.applyIPSPatch('Escape_Timer', patchDict)
         # animals door to open
         if escapeAttr['Animals'] is not None:

@@ -450,7 +450,7 @@ class RomPatcher:
             timerPatch = patchDict["Escape_Timer"]
             def getTimerBytes(t):
                 minute = int(t / 60)
-                second = t % 60
+                second = int(t % 60)
                 minute = int(minute / 10) * 16 + minute % 10
                 second = int(second / 10) * 16 + second % 10
                 return [second, minute]
@@ -467,7 +467,7 @@ class RomPatcher:
                 for area in graphAreas[1:-1]: # no Ceres or Tourian
                     t = escapeAttr['TimerTable'][area]
                     tableBytes += getTimerBytes(t)
-                    halfTableBytes += getTimerBytes(t//2)
+                    halfTableBytes += getTimerBytes(t/2)
             self.applyIPSPatch('Escape_Timer', patchDict)
         # animals door to open
         if escapeAttr['Animals'] is not None:

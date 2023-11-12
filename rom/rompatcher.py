@@ -17,7 +17,7 @@ from rom.rom_options import RomOptions
 from rom.flavor import RomFlavor
 from rom.map import AreaMap, getTileIndex, portal_mapicons
 from patches.patchaccess import PatchAccess
-from utils.parameters import appDir
+from utils.parameters import appDir, Settings
 from logic.helpers import Bosses
 import utils.log
 
@@ -454,9 +454,16 @@ class RomPatcher:
                 minute = int(minute / 10) * 16 + minute % 10
                 second = int(second / 10) * 16 + second % 10
                 return [second, minute]
+            def calcTimer(t):
+                a, b = Settings.algoSettings['escapeRandoTimeComputeParams']
+                div = a * Settings.skillScore + b
+                t = t / div
+                return 5 * ceil(t / 5)
             if 'TimerTable' not in escapeAttr:
-                timerPatch[Addresses.getOne('escapeTimer')] = getTimerBytes(escapeTimer)
-                timerPatch[Addresses.getOne("rando_escape_common_timer_half_value")] = getTimerBytes(escapeTimer/2)
+                t = calcTimer(escapeTimer)
+                print(f"escapeTimer = {escapeTimer}, t = {t}")
+                timerPatch[Addresses.getOne('escapeTimer')] = getTimerBytes(t)
+                timerPatch[Addresses.getOne("rando_escape_common_timer_half_value")] = getTimerBytes(t/2)
             else:
                 # timer table for Disabled Tourian escape: write 0 time as marker to use the table
                 timerPatch[Addresses.getOne('escapeTimer')] = [0,0]
@@ -465,7 +472,7 @@ class RomPatcher:
                 timerPatch[Addresses.getOne('escapeTimerTable')] = tableBytes
                 timerPatch[Addresses.getOne('rando_escape_common_timer_half_values_by_area_id')] = halfTableBytes
                 for area in graphAreas[1:-1]: # no Ceres or Tourian
-                    t = escapeAttr['TimerTable'][area]
+                    t = calcTimer(escapeAttr['TimerTable'][area])
                     tableBytes += getTimerBytes(t)
                     halfTableBytes += getTimerBytes(t/2)
             self.applyIPSPatch('Escape_Timer', patchDict)

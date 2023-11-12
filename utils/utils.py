@@ -99,6 +99,7 @@ class PresetLoader(object):
         if 'Controller' not in self.params:
             self.params['Controller'] = {}
         self.params['score'] = self.computeScore()
+        Settings.skillScore = self.params['score']
 
     def load(self):
         # update the parameters in the parameters classes: Knows, Settings

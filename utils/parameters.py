@@ -1221,8 +1221,13 @@ class Settings:
         # Varia (2) is considered "standard" dmg reduction.
         # this is to take into account the impact of health drops
         # relative to how hard the boss hits
-        'dmgReductionDifficultyFactor' : 1.5
+        'dmgReductionDifficultyFactor' : 1.5,
+        # for escape rando time based on skill score
+        "escapeRandoTimeComputeParams" : (0.002486073, 0.898552128)
     }
+
+    # arbitrary. to update on preset load
+    skillScore = 200
 
 def isButton(button):
     return button[0:len('__')] != '__'

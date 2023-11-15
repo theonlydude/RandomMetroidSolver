@@ -636,17 +636,17 @@ accessPoints = [
        entryInfo = {'SamusX':0x34, 'SamusY':0x188},
        dotOrientation = 'w'),
     AccessPoint('Aqueduct Bottom', 'EastMaridia', {
-        'Aqueduct Top Left': Cache.ldeco(lambda sm: sm.wand(sm.canDestroyBombWallsUnderwater(), # top left bomb blocks
-                                                            sm.canJumpUnderwater())),
+        'Aqueduct Top Left': Cache.ldeco(lambda sm: sm.wor(sm.wand(sm.canDestroyBombWallsUnderwater(), # top left bomb blocks
+                                                                   sm.canJumpUnderwater()),
+                                                           # same requirements as aq items: spark from bottom or snail clip
+                                                           sm.wand(RomPatches.has(RomPatches.AqueductBombBlocks),
+                                                                   sm.canAccessAqueductItemsFromBottom()))),
         'Post Botwoon': Cache.ldeco(lambda sm: sm.wand(sm.canJumpUnderwater(),
                                                        sm.canPassBotwoonHallway(),
                                                        sm.haveItem('Botwoon'))),
         'Left Sandpit': lambda sm: sm.canAccessSandPits(),
         'Right Sandpit': lambda sm: sm.canAccessSandPits(),
-        'Aqueduct': Cache.ldeco(lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
-                                                          sm.wand(sm.knowsSnailClip(),
-                                                                  sm.haveItem('Morph'))),
-                                                   sm.haveItem('Gravity')))
+        'Aqueduct': lambda sm: sm.canAccessAqueductItemsFromBottom()
     }, internal=True),
     AccessPoint('Aqueduct', 'EastMaridia', {
         'Aqueduct Bottom': lambda sm: SMBool(True) # go down

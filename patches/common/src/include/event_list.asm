@@ -123,3 +123,5 @@ while !obj_idx < !max_objectives
 	!obj_idx #= !obj_idx+1
 endif
 endmacro
+
+!enemies_event_base #= 2*!max_objectives+!objectives_event_base

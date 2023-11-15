@@ -1,6 +1,6 @@
 For objective: use low byte of Special enemy properties ($0F86,x in enemy RAM)
 => make it an index in a table with extra data :
-killed_event, enemy_type_ptr, room_enemies_ptr, ???
+killed_event, enemy_type_ptr, room_enemies_ptr, [unused]
 
 - killed_event is to be set when this enemy is killed.
 
@@ -32,6 +32,3 @@ other 7 are used as an index if we hook generic enemy death
 that.
 
 Hook generic enemy death: $A0A3AF ?
-
-
-

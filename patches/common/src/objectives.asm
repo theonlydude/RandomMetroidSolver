@@ -74,6 +74,14 @@ org $82A505
 org $82A61D
         jsr (new_pause_palettes_func_list,x)
 
+org $a0a3b9
+enemy_death_hook:
+        jml enemy_death
+org $A0A3C1
+.grapple:
+org $A0A3C7
+.nograpple:
+
 ;;; For minimizer or scavenger with ridley as last loc, disable
 ;;; elevator music change when boss drops appear if escape is
 ;;; triggered.
@@ -758,6 +766,28 @@ endmacro
 %exploredAreaPercent(lower_norfair, 8)
 %exploredAreaPercent(west_maridia, 9)
 %exploredAreaPercent(east_maridia, 10)
+
+;;; "kill all" enemies objectives
+!enemies_props = $0F86
+!enemy_index = $0e54
+!enemy_count_flag #= $80
+!enemy_count_index_mask #= $7F
+
+enemy_death:
+        phx
+        ldx !enemy_index
+        lda !enemies_props, x : bit.w #!enemy_count_flag : beq .end
+        and.w #!enemy_count_index_mask
+        ;; TODO see doc/enemies.txt
+.end:
+        plx
+        ;; vanilla code
+        LDA $0F8A,x : cmp.w #1 : beq .grapple
+        jml enemy_death_hook_nograpple
+.grapple:
+        jml enemy_death_hook_grapple
+
+incsrc "objectives/enemies.asm"
 
 warnpc $85f7ff
 obj_85_end:

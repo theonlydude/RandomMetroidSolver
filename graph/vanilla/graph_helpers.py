@@ -916,3 +916,11 @@ class HelpersGraph(Helpers):
     def canExploreAmphitheater(self):
         sm = self.smbm
         return sm.wand(sm.canPassAmphitheaterReverse(), sm.haveItem('SpaceJump'))
+
+    @Cache.decorator
+    def canAccessAqueductItemsFromBottom(self):
+        sm = self.smbm
+        return sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
+                              sm.wand(sm.knowsSnailClip(),
+                                      sm.haveItem('Morph'))),
+                       sm.haveItem('Gravity'))

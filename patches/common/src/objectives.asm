@@ -784,6 +784,8 @@ enemy_death:
         ;; get enemy entry in table
         and.w #!enemy_count_index_mask
         asl : asl : asl : tax
+        lda.w enemies_table, x : jsl !check_event
+        bcs .nmy_end            ; do nothing if enemy already killed
         lda.w enemies_table, x : jsl !mark_event
         ;; enemies in room
         ldy enemies_table+4, x : sty $12
@@ -805,9 +807,9 @@ enemy_death:
         lda.l !enemy_counters, x : inc : sta.l !enemy_counters, x
         cmp $0000, y
         %a16()
-        bcc +
+        bcc .nmy_end
         lda $0003, y : jsl !mark_event
-+
+.nmy_end:
         plb
         ply
 .end:

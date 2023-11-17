@@ -5,10 +5,10 @@ killed_event, enemy_type_ptr, room_enemies_ptr, [unused]
 - killed_event is to be set when this enemy is killed.
 
 - enemy_type_ptr leads to data relative to enemy *type* :
-total_enemies, killed_ram_addr, all_killed_event
+total_enemies, killed_ram_table_index, all_killed_event
 
 total_enemies: total number of this enemy type to kill
-killed_ram_addr: RAM ptr to counter of enemies killed of this type so
+killed_ram_table_index: RAM ptr to counter of enemies killed of this type so
 far => increase counter only when setting killed_event
 all_killed_event: event to set when all enemies of this type have been
 killed.

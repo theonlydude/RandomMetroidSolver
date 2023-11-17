@@ -772,13 +772,44 @@ endmacro
 !enemy_index = $0e54
 !enemy_count_flag #= $80
 !enemy_count_index_mask #= $7F
+!enemy_counters = $7ed8d0
 
 enemy_death:
         phx
         ldx !enemy_index
         lda !enemies_props, x : bit.w #!enemy_count_flag : beq .end
+        ;; change data bank to current
+        phy
+        phb : phk : plb
+        ;; get enemy entry in table
         and.w #!enemy_count_index_mask
-        ;; TODO see doc/enemies.txt
+        asl : asl : asl : tax
+        lda.w enemies_table, x : jsl !mark_event
+        ;; enemies in room
+        ldy enemies_table+4, x : sty $12
+        lda $0000, y : sta $14
+        ldy.w #2
+.loop:
+        lda ($12), y
+        jsl !check_event : bcc .cont
+        iny : iny
+        cpy $14
+        bcc .loop
+.all:
+        lda ($12), y : jsl !mark_event
+.cont:
+        ;; enemy type
+        ldy enemies_table+2, x
+        ldx $0001, y
+        %a8()
+        lda.l !enemy_counters, x : inc : sta.l !enemy_counters, x
+        cmp $0000, y
+        %a16()
+        bcc +
+        lda $0003, y : jsl !mark_event
++
+        plb
+        ply
 .end:
         plx
         ;; vanilla code

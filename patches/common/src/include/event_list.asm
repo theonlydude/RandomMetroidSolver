@@ -125,3 +125,5 @@ endif
 endmacro
 
 !enemies_event_base #= 2*!max_objectives+!objectives_event_base
+
+incsrc "enemies_events.asm"

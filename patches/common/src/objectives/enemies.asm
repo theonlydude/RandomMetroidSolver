@@ -16,12 +16,14 @@ space_pirates:
 
 green_pirates_shaft:
         dw 12
+
         dw !space_pirates_green_pirates_shaft_0_event
         dw !space_pirates_green_pirates_shaft_1_event
         dw !space_pirates_green_pirates_shaft_2_event
         dw !space_pirates_green_pirates_shaft_3_event
         dw !space_pirates_green_pirates_shaft_4_event
-        dw !space_pirates_all_event
+
+        dw !space_pirates_green_pirates_shaft_all_event
 
 pushpc
 

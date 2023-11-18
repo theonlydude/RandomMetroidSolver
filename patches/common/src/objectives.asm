@@ -768,22 +768,23 @@ endmacro
 %exploredAreaPercent(east_maridia, 10)
 
 ;;; "kill all" enemies objectives
-!enemies_props = $0F86
+!enemies_extra_props = $0F88
 !enemy_index = $0e54
-!enemy_count_flag #= $80
-!enemy_count_index_mask #= $7F
+!enemy_count_flag #= %0100000000000000
+!enemy_count_index_mask #= %0011111111111000
 !enemy_counters = $7ed8d0
 
 enemy_death:
         phx
         ldx !enemy_index
-        lda !enemies_props, x : bit.w #!enemy_count_flag : beq .end
+        lda !enemies_extra_props, x : bit.w #!enemy_count_flag : beq .end
         ;; change data bank to current
         phy
         phb : phk : plb
-        ;; get enemy entry in table
-        and.w #!enemy_count_index_mask
-        asl : asl : asl : tax
+        ;; get enemy entry in table :
+        ;; to get index number we should >> 3, but actual offset is
+        ;; index << 3, so we can use this directly
+        and.w #!enemy_count_index_mask : tax
         lda.w enemies_table, x : jsl !check_event
         bcs .nmy_end            ; do nothing if enemy already killed
         lda.w enemies_table, x : jsl !mark_event

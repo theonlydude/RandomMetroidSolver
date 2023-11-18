@@ -27,16 +27,16 @@ green_pirates_shaft:
 
 pushpc
 
-org $a18508
-        dw $2080
-org $a18518
-        dw $2081
-org $a18528
-        dw $2082
-org $a18538
-        dw $2083
-org $a18548
-        dw $2084
+org $a1850a
+        dw $4004
+org $a1851a
+        dw $400c
+org $a1852a
+        dw $4014
+org $a1853a
+        dw $401c
+org $a1854a
+        dw $4024
 
 pullpc
 

@@ -16,6 +16,7 @@ from rom.rom_patches import RomPatches, getPatchSet, getPatchSetsFromPatcherSett
 from rom.rom_options import RomOptions
 from rom.flavor import RomFlavor
 from rom.map import AreaMap, getTileIndex, portal_mapicons
+from rom.enemies_objectives_data import enemies_objectives_data
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir, Settings
 from logic.helpers import Bosses
@@ -1274,14 +1275,17 @@ class RomPatcher:
             else:
                 self.applyIPSPatch(plmName)
 
-    def writeMapTileCount(self, itemLocs, isArea, isEscape, tourian):
+    def _getAccessibleAreasNoBoss(self, itemLocs):
         # filter areas : exclude Tourian and Ceres, and filter excluded areas in minimizer
         #
         # special boss check to avoid varia/space jump/ridley E locs in minimizer and get only graph
         # areas entirely in layout :
         bossSolveAreeas = [b + " Boss" for b in Bosses.Golden4()]
         bossChk = lambda loc: loc.isBoss() or loc.SolveArea in bossSolveAreeas
-        accessibleAreasNoBoss = {il.Location.GraphArea for il in itemLocs if not bossChk(il.Location) and not il.Location.restricted}
+        return {il.Location.GraphArea for il in itemLocs if not bossChk(il.Location) and not il.Location.restricted}
+
+    def writeMapTileCount(self, itemLocs, isArea, isEscape, tourian):
+        accessibleAreasNoBoss = self._getAccessibleAreasNoBoss(itemLocs)
         self.log.debug(f"writeMapTileCount. accessibleareas: {accessibleAreasNoBoss}")
         # G4 are always there, even when their area is not in minimizer layout
         bossTiles = {
@@ -1324,10 +1328,18 @@ class RomPatcher:
             addr = Addresses.getOne("objectives_explored_map_%d_pct" % percent)
             self.romFile.writeWord(ceil((total * percent)/100), addr)
 
+    def writeEnemiesTotals(self, itemLocs):
+        accessibleAreasNoBoss = self._getAccessibleAreasNoBoss(itemLocs)
+        for nmyType, nmyEntry in enemies_objectives_data.items():
+            areaCounts = nmyEntry["area_count"]
+            total = sum(areaCounts[area] for area in areaCounts if area in accessibleAreasNoBoss)
+            self.romFile.writeByte(total, Addresses.getOne(nmyEntry["total_sym"]))
+
     def writeObjectives(self, itemLocs, tourian):
         objectives = Objectives()
         objectives.writeGoals(self.romFile, tourian)
         self.writeItemsMasks(itemLocs)
+        self.writeEnemiesTotals(itemLocs)
         # change etecoons/dachora map tiles depending on ROM flavor
         if objectives.isGoalActive("visit the animals"):
             animals = {

@@ -5,8 +5,9 @@ from rom.map import ObjectiveMapIcon
 from logic.helpers import Bosses
 from logic.smbool import SMBool
 from logic.logic import Logic
-from utils.parameters import Knows
+from utils.parameters import Knows, Settings
 from graph.graph_utils import graphAreas
+from graph.vanilla.map_tiles import objectives as map_icons
 from utils.utils import randGaussBounds
 import utils.log, logging
 
@@ -61,6 +62,7 @@ class Goal(object):
         #  - boss
         #  - miniboss
         #  - map
+        #  - enemies
         #  - other
         self.gtype = gtype
         # example for kill three g4
@@ -155,6 +157,60 @@ def getMiniBossesEscapeAccessPoints(n):
 
 def getAreaEscapeAccessPoints(area):
     return (1, list({list(loc.AccessFrom.keys())[0] for loc in Logic.locations() if loc.GraphArea == area}))
+
+def getEnemiesMapIcons(enemy):
+    return [name for name in map_icons if name.startswith(enemy)]
+
+_crocViaIceHellRun = Settings.hellRunsTable['Ice']['Norfair Entrance -> Croc via Ice']
+
+enemiesLogic = {
+    "Space Pirates": {
+        "Blue Brinstar Elevator Bottom": None,
+        "Green Pirates Shaft Bottom Right": lambda sm: sm.canPassCrateriaGreenPirates(),
+        "KraidRoomOut": lambda sm: sm.canPassCrateriaGreenPirates(),
+        "Business Center": lambda sm: sm.wand(sm.traverse('BusinessCenterTopLeft'),
+                                              sm.canUsePowerBombs(),
+                                              sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
+                                                             sm.canHellRun(**_crocViaIceHellRun)),
+                                                     sm.wand(sm.canHellRun('Ice', _crocViaIceHellRun["mult"]/3, 3),
+                                                             sm.canKillRedPirates()))),
+        "Crocomire Speedway Bottom": lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Bubble Mountain']),
+                                                        sm.canKillRedPirates()),
+        "LN Entrance": lambda sm: sm.canKillWorstRoomPirates(),
+        "Worst Room Top": lambda sm: sm.canKillWorstRoomPirates(),
+        "Ridley Zone": lambda sm: sm.canPassNinjaPirates(),
+        "Main Street Bottom": lambda sm: sm.wand(sm.canDoOuterMaridia(),
+                                                 sm.canKillPlasmaPirates()),
+        "Toilet Top": lambda sm: sm.wand(Bosses.bossDead(sm, "Draygon"),
+                                         sm.canKillPlasmaPirates())
+    },
+    "Ki Hunters": {
+        "Keyhunter Room Bottom": None,
+        "Big Pink": lambda sm: sm.traverse("BigPinkTopRight"),
+        "KraidRoomOut": None,
+        "Firefleas": lambda sm: sm.canKillRedKiHunters(3),
+        "Three Muskateers Room Left": lambda sm: sm.canKillRedKiHunters(3),
+        "Wrecked Ship Main": lambda sm: Bosses.bossDead(sm, "Phantoon")
+    },
+    "Beetoms": {
+        "Gauntlet Top": lambda sm: sm.canKillBeetoms(),
+        'Etecoons Bottom': lambda sm: sm.canKillBeetoms(),
+        'Red Tower Top Left': lambda sm: sm.canKillBeetoms(),
+        'Warehouse Zeela Room Left': lambda sm: sm.wand(Bosses.bossDead(sm, "Kraid"),
+                                                        sm.canKillBeetoms()),
+        "Business Center": lambda sm: sm.wand(sm.canPassFrogSpeedwayLeftToRight(),
+                                              sm.canKillBeetoms()) # FIXME other side
+    },
+    "Cacatacs": {
+        # TODO
+    },
+    "Kagos": {
+        # TODO
+    },
+    "Yapping Maws": {
+        # TODO
+    }
+}
 
 GTsettingsConflict = lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))
 
@@ -535,7 +591,15 @@ _goalsList = [
          mapIcons=["KingCacatac"],
          category="Memes",
          escapeAccessPoints=(1, ['Bubble Mountain Top']),
-         objCompletedFuncAPs=lambda ap: ['Bubble Mountain Top'])
+         objCompletedFuncAPs=lambda ap: ['Bubble Mountain Top']),
+    Goal("kill all space pirates", "enemies",
+         lambda sm, ap: SMBool(False), # TODO
+         "kill_all_space_pirates",
+         text="{} all Space Pirates       ",
+         mapIcons=getEnemiesMapIcons("SpacePirates"),
+         category="Enemies",
+         escapeAccessPoints=(1, ['Bubble Mountain Top']),
+         objCompletedFuncAPs=lambda ap: ['Bubble Mountain Top']),
 ]
 
 
@@ -689,6 +753,7 @@ class Objectives(object):
     # goals must access it, and it doesn't change often
     @staticmethod
     def setGraph(graph, maxDiff):
+        # TODO add start AP and compute accessible APs right away
         Objectives.graph = graph
         Objectives.maxDiff = maxDiff
         for goal in Objectives.goals.values():

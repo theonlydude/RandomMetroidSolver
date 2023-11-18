@@ -17,7 +17,10 @@ accessPoints = [
         'Lower Mushrooms Left': Cache.ldeco(lambda sm: sm.wand(sm.canPassTerminatorBombWall(),
                                                                sm.canPassCrateriaGreenPirates())),
         'Keyhunter Room Bottom': Cache.ldeco(lambda sm: sm.traverse('LandingSiteRight')),
-        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
+        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True),
+        'Gauntlet Top': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
+                                                  sm.canPassBombPassages()),
+                                          sm.canDoLowGauntlet())
     }, internal=True,
        start={'spawn': 0x0000, 'doors':[0x32], 'patches':[RomPatches.BlueBrinstarBlueDoor], 'solveArea': "Crateria Landing Site"}),
     AccessPoint('Blue Brinstar Elevator Bottom', 'Crateria', {

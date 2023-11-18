@@ -9,9 +9,11 @@ with open("enemies_objectives_data.json", "r") as fp:
 
 with open("patches/common/src/include/enemies_events.asm", "w") as fp:
     fp.write("include\n\n")
+    typeIdx = 0
     for nmyType, nmyData in nmyObjData.items():
         nmyName = nameRegex.sub('_', nmyType.lower())
-        fp.write("!%s_all_event #= !enemies_event_base+%d\n\n" % (nmyName, nmyData['event']))        
+        fp.write(f"!{nmyName}_type_index #= {typeIdx}\n")
+        fp.write("!%s_all_event #= !enemies_event_base+%d\n\n" % (nmyName, nmyData['event']))
         for _, areaData in nmyData["areas"].items():
             for room, event in areaData["room_events"].items():
                 roomName = nameRegex.sub('_', room.lower())
@@ -23,6 +25,7 @@ with open("patches/common/src/include/enemies_events.asm", "w") as fp:
                     fp.write("!%s_%s_%d_event #= !enemies_event_base+%d\n" % (nmyName, roomName, i, nmy["event"]))
                 fp.write("\n")
             fp.write("\n")
+        typeIdx += 1
 
 with open("patches/common/src/objectives/enemies.asm", "w") as fp:
     fp.write("include\n\nenemies_table:\n")
@@ -44,7 +47,7 @@ with open("patches/common/src/objectives/enemies.asm", "w") as fp:
     for nmyType, nmyData in nmyObjData.items():
         nmyName = nameRegex.sub('_', nmyType.lower())
         fp.write(f"%export({nmyName}_type)\n")
-        fp.write("\tdb $00 ; to be filled by randomizer\n")
+        fp.write("\tskip 1 ; to be filled by randomizer\n")
         fp.write("\tdw $%02x\n" % typeIdx)
         fp.write(f"\tdw !{nmyName}_all_event\n")
         fp.write("\n")

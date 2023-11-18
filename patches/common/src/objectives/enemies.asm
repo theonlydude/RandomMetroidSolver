@@ -728,7 +728,7 @@ org $a1df58
 pullpc
 
 %export(space_pirates_type)
-	db $00 ; to be filled by randomizer
+	skip 1 ; to be filled by randomizer
 	dw $00
 	dw !space_pirates_all_event
 
@@ -867,7 +867,7 @@ space_pirates_plasma_room_events:
 	dw !space_pirates_plasma_room_all_event
 
 %export(ki_hunters_type)
-	db $00 ; to be filled by randomizer
+	skip 1 ; to be filled by randomizer
 	dw $01
 	dw !ki_hunters_all_event
 
@@ -927,7 +927,7 @@ ki_hunters_attic_events:
 	dw !ki_hunters_attic_all_event
 
 %export(beetoms_type)
-	db $00 ; to be filled by randomizer
+	skip 1 ; to be filled by randomizer
 	dw $02
 	dw !beetoms_all_event
 
@@ -990,7 +990,7 @@ beetoms_frog_speedway_events:
 	dw !beetoms_frog_speedway_all_event
 
 %export(cacatacs_type)
-	db $00 ; to be filled by randomizer
+	skip 1 ; to be filled by randomizer
 	dw $03
 	dw !cacatacs_all_event
 
@@ -1057,7 +1057,7 @@ cacatacs_cactus_alley__east__events:
 	dw !cacatacs_cactus_alley__east__all_event
 
 %export(kagos_type)
-	db $00 ; to be filled by randomizer
+	skip 1 ; to be filled by randomizer
 	dw $04
 	dw !kagos_all_event
 
@@ -1085,7 +1085,7 @@ kagos_double_chamber_events:
 	dw !kagos_double_chamber_all_event
 
 %export(yapping_maws_type)
-	db $00 ; to be filled by randomizer
+	skip 1 ; to be filled by randomizer
 	dw $05
 	dw !yapping_maws_all_event
 

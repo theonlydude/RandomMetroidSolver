@@ -1,5 +1,6 @@
 include
 
+!space_pirates_type_index #= 0
 !space_pirates_all_event #= !enemies_event_base+0
 
 !space_pirates_climb_all_event #= !enemies_event_base+19
@@ -100,6 +101,7 @@ include
 !space_pirates_plasma_room_5_event #= !enemies_event_base+176
 
 
+!ki_hunters_type_index #= 1
 !ki_hunters_all_event #= !enemies_event_base+1
 
 !ki_hunters_crateria_keyhunter_room_all_event #= !enemies_event_base+11
@@ -143,6 +145,7 @@ include
 !ki_hunters_attic_3_event #= !enemies_event_base+164
 
 
+!beetoms_type_index #= 2
 !beetoms_all_event #= !enemies_event_base+2
 
 !beetoms_green_pirates_shaft_all_event #= !enemies_event_base+46
@@ -189,6 +192,7 @@ include
 !beetoms_frog_speedway_5_event #= !enemies_event_base+123
 
 
+!cacatacs_type_index #= 3
 !cacatacs_all_event #= !enemies_event_base+3
 
 !cacatacs_noob_bridge_all_event #= !enemies_event_base+53
@@ -233,6 +237,7 @@ include
 !cacatacs_cactus_alley__east__5_event #= !enemies_event_base+191
 
 
+!kagos_type_index #= 4
 !kagos_all_event #= !enemies_event_base+4
 
 !kagos_forgotten_highway_kago_room_all_event #= !enemies_event_base+14
@@ -252,6 +257,7 @@ include
 !kagos_double_chamber_0_event #= !enemies_event_base+112
 
 
+!yapping_maws_type_index #= 5
 !yapping_maws_all_event #= !enemies_event_base+5
 
 !yapping_maws_gauntlet_entrance_all_event #= !enemies_event_base+6

@@ -25,3 +25,6 @@ done
 
 # generate area palette map asm data for mirror
 json_dir=${mirror_area_json_dir} map_dir=${mirror_dir} tools/map_area_palettes.sh
+
+# generate map icons mirror coords
+tools/map_mirror_icons.py

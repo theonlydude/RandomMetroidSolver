@@ -204,12 +204,12 @@ h1 {
 
 <script type="text/javascript">
 {{include 'solver_web/_randomizer_data.js'}}
-const seedInfo = {{ response.write(seedParams or "null", escape=False); }};
+const seedParams = {{ response.write(seedParams or "null", escape=False); }};
 $(document).ready(function(){
    jQuery(window).on('resize', resizeElements);
-   if (seedInfo) {
-       seedInfo.readonly = true;
-       window.$randomizer.init(seedInfo, true);
+   if (seedParams) {
+       seedParams.readonly = true;
+       window.$randomizer.init(seedParams, true);
    }
 });
 

@@ -122,20 +122,12 @@ if (hs.registerOverlay) {
     cursor: pointer; /* Add a pointer on hover */
 }
 #loadingGIF {
-    position: absolute;
-    left: 5%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 3;
     display:none;
-}
-@media (max-height: 800px) {
-    .loadingGIF {
-         top: 20%;
-    }
-}
-@media (min-height: 800px) {
-    .loadingGIF {
-         top: 40%;
-    }
 }
 .loadingTips {
     position: fixed;

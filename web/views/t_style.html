@@ -53,13 +53,15 @@
     right: 0;
     bottom: 0;
     background-color: rgba(0,0,0,0.5); /* Black background with opacity */
-    z-index: 6; /* Specify a stack order in case you're using a different order for other elements */
+    z-index: 200; /* Specify a stack order in case you're using a different order for other elements */
     cursor: pointer; /* Add a pointer on hover */
 }
 #loadingGIF {
-    position: absolute;
-    left: 5%;
-    z-index: 5;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 201;
     display:none;
 }
 

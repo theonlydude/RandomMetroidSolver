@@ -518,6 +518,14 @@ endmacro
 %exploredAreaChecker(west_maridia, 9)
 %exploredAreaChecker(east_maridia, 10)
 
+;; kill all <enemy> objectives
+%eventChecker(kill_all_space_pirates, !space_pirates_all_event)
+%eventChecker(kill_all_ki_hunters, !ki_hunters_all_event)
+%eventChecker(kill_all_beetoms, !beetoms_all_event)
+%eventChecker(kill_all_cacatacs, !cacatacs_all_event)
+%eventChecker(kill_all_kagos, !kagos_all_event)
+%eventChecker(kill_all_yapping_maws, !yapping_maws_all_event)
+
 ;;; "in progress" objective checkers
 
 macro inProgressBossChecker(n, bossType)
@@ -767,12 +775,38 @@ endmacro
 %exploredAreaPercent(west_maridia, 9)
 %exploredAreaPercent(east_maridia, 10)
 
-;;; "kill all" enemies objectives
+
+!enemy_counters = $7ed8d0
+
+macro inProgressEnemy(enemy)
+%export(kill_all_<enemy>_progress)
+        %a8()
+        lda.l !enemy_counters+!<enemy>_type_index
+        bne .progress
+        clc
+        bra .end
+.progress:
+        sta !tmp_in_progress_done
+        lda.l <enemy>_type : sta !tmp_in_progress_total
+        sec
+.end:
+        %a16()
+        rts
+endmacro
+
+%inProgressEnemy(space_pirates)
+%inProgressEnemy(ki_hunters)
+%inProgressEnemy(beetoms)
+%inProgressEnemy(cacatacs)
+%inProgressEnemy(kagos)
+%inProgressEnemy(yapping_maws)
+
+
+;;; "kill all" enemies objectives events handling :
 !enemies_extra_props = $0F88
 !enemy_index = $0e54
 !enemy_count_flag #= %0100000000000000
 !enemy_count_index_mask #= %0011111111111000
-!enemy_counters = $7ed8d0
 
 enemy_death:
         phx

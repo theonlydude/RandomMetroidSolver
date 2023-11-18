@@ -5,10 +5,12 @@
     "all_items_mask": 8770342,
     "all_major_items": 8770346,
     "all_mini_bosses_dead": 8770094,
+    "beetoms_type": 8773747,
     "boss_1_killed": 8770180,
     "boss_2_killed": 8770189,
     "boss_3_killed": 8770198,
     "botwoon_is_dead": 8770070,
+    "cacatacs_type": 8773820,
     "collect_100_items": 8770267,
     "collect_100_items_pct": 8770276,
     "collect_25_items": 8770234,
@@ -56,6 +58,8 @@
     "in_progress_miniboss_3_killed": 8770820,
     "in_progress_miniboss_4_killed": 8770841,
     "items_percent": 8770862,
+    "kagos_type": 8773893,
+    "ki_hunters_type": 8773680,
     "king_cac_dead": 8770554,
     "kraid_clear_progress": 8771280,
     "kraid_cleared": 8770401,
@@ -112,6 +116,7 @@
     "scav_started": 8770982,
     "scavenger_hunt_completed": 8770116,
     "shak_dead": 8770334,
+    "space_pirates_type": 8773503,
     "spore_spawn_is_dead": 8770062,
     "upgrades_collected": 8770943,
     "upper_norfair_clear_progress": 8771307,
@@ -126,5 +131,6 @@
     "ws_clear_progress": 8771253,
     "ws_cleared": 8770393,
     "ws_explored": 8770645,
-    "ws_explored_percent": 8771790
+    "ws_explored_percent": 8771790,
+    "yapping_maws_type": 8773920
 }

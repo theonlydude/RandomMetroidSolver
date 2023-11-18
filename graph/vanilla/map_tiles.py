@@ -1,3 +1,4 @@
+from rom.enemies_objectives_data import enemies_objectives_data
 
 # useful for autotracker and in-game tracking
 areaAccessPoints = {
@@ -238,27 +239,72 @@ doors = {
 # see event_list.asm for event IDs
 VARIA_event_base = 0x80
 
+def getEnemiesRoomEvent(enemy, room):
+    enemies_event_base = VARIA_event_base+70
+    return enemies_event_base + enemies_objectives_data[enemy]["room_events"][room]
+
 objectives = {
     # brinstar
     "Kraid": {"area": "Brinstar", "map_coords_px": (444, 156), "event": 0x48},
     "SporeSpawn": {"area": "Brinstar", "map_coords_px": (176, 24), "event": 0x49},
     "Etecoons": {"area": "Brinstar", "map_coords_px": (88, 96), "event": VARIA_event_base+30},
     "Dachora": {"area": "Brinstar", "map_coords_px": (80, 104), "event": VARIA_event_base+31},
+    "SpacePiratesBabyKraid": {"area": "Brinstar", "map_coords_px": (49*8+4, 20*8), "event": getEnemiesRoomEvent("Space Pirates", "Baby Kraid Room")},
+    "KiHuntersSporeSpawn": {"area": "Brinstar", "map_coords_px": (20*8, 5*8), "event": getEnemiesRoomEvent("Ki Hunters", "Spore Spawn Keyhunter Room")},
+    "KiHuntersWarehouse": {"area": "Brinstar", "map_coords_px": (46*8, 19*8), "event": getEnemiesRoomEvent("Ki Hunters", "Warehouse Keyhunter Room")},
+    "BeetomsGreenBrinstar": {"area": "Brinstar", "map_coords_px": (8*8, 11*8), "event": getEnemiesRoomEvent("Beetoms", "Green Brinstar Beetom Room")},
+    "BeetomsEtecoons": {"area": "Brinstar", "map_coords_px": (9*8, 12*8), "event": getEnemiesRoomEvent("Beetoms", "Etecoon Energy Tank Room")},
+    "BeetomsRedTower": {"area": "Brinstar", "map_coords_px": (33*8, 14*8), "event": getEnemiesRoomEvent("Beetoms", "Red Tower")},
+    "BeetomsWarehouse": {"area": "Brinstar", "map_coords_px": (43*8, 20*8), "event": getEnemiesRoomEvent("Beetoms", "Warehouse Energy Tank Room")},
+    "CacatacsNoobBridge": {"area": "Brinstar", "map_coords_px": (29*8, 14*8), "event": getEnemiesRoomEvent("Cacatacs", "Noob Bridge")},
+    "CacatacsCaterpillar": {"area": "Brinstar", "map_coords_px": (37*8, 9*8), "event": getEnemiesRoomEvent("Cacatacs", "Caterpillar Room")},
+    "CacatacsSpazer": {"area": "Brinstar", "map_coords_px": (37*8, 19*8), "event": getEnemiesRoomEvent("Cacatacs", "Below Spazer")},
+    "YappingMawsXRay": {"area": "Brinstar", "map_coords_px": (27*8, 16*8), "event": getEnemiesRoomEvent("Yapping Maws", "Red Brinstar Fireflea Room")},
+    "YappingMawsBetaPowerBomb": {"area": "Brinstar", "map_coords_px": (36*8, 8*8), "event": getEnemiesRoomEvent("Yapping Maws", "Beta Power Bomb Room")},
+    "YappingMawsSpazer": {"area": "Brinstar", "map_coords_px": (36*8, 19*8), "event": getEnemiesRoomEvent("Yapping Maws", "Below Spazer")},
     # wrecked ship
     "Phantoon": {"area": "WreckedShip", "map_coords_px": (152, 160), "event": 0x58},
     "WreckedShipChozo": {"area": "WreckedShip", "map_coords_px": (112, 104), "event": VARIA_event_base+17},
+    "KiHuntersAttic": {"area": "WreckedShip", "map_coords_px": (15*8, 11*8), "event": getEnemiesRoomEvent("Ki Hunters", "Attic")},
     # maridia
     "Draygon": {"area": "Maridia", "map_coords_px": (316, 84), "event": 0x60},
     "Botwoon": {"area": "Maridia", "map_coords_px": (192, 72), "event": 0x61},
     "RedFish": {"area": "Maridia", "map_coords_px": (112, 72), "event": VARIA_event_base+2},
     "Shaktool": {"area": "Maridia", "map_coords_px": (224, 128), "event": VARIA_event_base+16},
+    "SpacePiratesFishTank": {"area": "Maridia", "map_coords_px": (14*8+4, 15*8), "event": getEnemiesRoomEvent("Space Pirates", "Fish Tank")},
+    "SpacePiratesPlasma": {"area": "Maridia", "map_coords_px": (27*8, 2*8), "event": getEnemiesRoomEvent("Space Pirates", "Plasma Room")},
+    "CacatacsAlleyWest": {"area": "Maridia", "map_coords_px": (27*8, 7*8+4), "event": getEnemiesRoomEvent("Cacatacs", "Cactus Alley [West]")},
+    "CacatacsAlleyEast": {"area": "Maridia", "map_coords_px": (30*8, 7*8+4), "event": getEnemiesRoomEvent("Cacatacs", "Cactus Alley [East]")},
+    "YappingMawsBugSandHole": {"area": "Maridia", "map_coords_px": (26*8, 6*8), "event": getEnemiesRoomEvent("Yapping Maws", "Bug Sand Hole")},
     # crateria
     "OrangeGeemer": {"area": "Crateria", "map_coords_px": (344, 24), "event": VARIA_event_base+3},
     "BombTorizo": {"area": "Crateria", "map_coords_px": (200, 56), "event": 0x42},
+    "SpacePiratesClimb": {"area": "Crateria", "map_coords_px": (19*8, 13*8), "event": getEnemiesRoomEvent("Space Pirates", "Climb")},
+    "SpacePiratesPitRoom": {"area": "Crateria", "map_coords_px": (21*8, 18*8), "event": getEnemiesRoomEvent("Space Pirates", "Pit Room [Old Mother Brain Room]")},
+    "SpacePiratesGreenPiratesShaft": {"area": "Crateria", "map_coords_px": (11*8, 8*8), "event": getEnemiesRoomEvent("Space Pirates", "Green Pirates Shaft")},
+    "KiHuntersCrateria": {"area": "Crateria", "map_coords_px": (34*8, 5*8), "event": getEnemiesRoomEvent("Ki Hunters", "Crateria Keyhunter Room")},
+    "BeetomsGreenPiratesShaft": {"area": "Crateria", "map_coords_px": (11*8, 6*8), "event": getEnemiesRoomEvent("Beetoms", "Green Pirates Shaft")},
+    "KagosForgottenHighway": {"area": "Crateria", "map_coords_px": (56*8, 7*8), "event": getEnemiesRoomEvent("Kagos", "Forgotten Highway Kago Room")},
+    "KagosLowerMushrooms": {"area": "Crateria", "map_coords_px": (8*8, 9*8), "event": getEnemiesRoomEvent("Kagos", "Lower Mushrooms")},
+    "YappingMawsGauntletEntrance": {"area": "Crateria", "map_coords_px": (20*8, 3*8), "event": getEnemiesRoomEvent("Yapping Maws", "Gauntlet Entrance")},
+    "YappingMawsGauntletExit": {"area": "Crateria", "map_coords_px": (12*8, 3*8), "event": getEnemiesRoomEvent("Yapping Maws", "Gauntlet Energy Tank Room")},
     # norfair
     "Ridley": {"area": "Norfair", "map_coords_px": (184, 140), "event": 0x50},
     "Crocomire": {"area": "Norfair", "map_coords_px": (132, 88), "event": 0x51},
     "GoldenTorizo": {"area": "Norfair", "map_coords_px": (152, 132), "event": 0x52},
     "LowerNorfairChozo": {"area": "Norfair", "map_coords_px": (120, 112), "event": 0xc},
-    "KingCacatac": {"area": "Norfair", "map_coords_px": (180, 24), "event": VARIA_event_base+18}
+    "KingCacatac": {"area": "Norfair", "map_coords_px": (180, 24), "event": VARIA_event_base+18},
+    "SpacePiratesCrocomireSpeedway": {"area": "Norfair", "map_coords_px": (7*8, 9*8), "event": getEnemiesRoomEvent("Space Pirates", "Crocomire Speedway")},
+    "SpacePiratesRedPirateShaft": {"area": "Norfair", "map_coords_px": (19*8, 8*8), "event": getEnemiesRoomEvent("Space Pirates", "Red Pirate Shaft")},
+    "SpacePiratesFastPillars": {"area": "Norfair", "map_coords_px": (25*8, 14*8), "event": getEnemiesRoomEvent("Space Pirates", "Fast Pillars Setup Room")},
+    "SpacePiratesWorstRoom": {"area": "Norfair", "map_coords_px": (30*8, 12*8), "event": getEnemiesRoomEvent("Space Pirates", "The Worst Room In The Game")},
+    "SpacePiratesAmphitheatre": {"area": "Norfair", "map_coords_px": (33*8, 12*8), "event": getEnemiesRoomEvent("Space Pirates", "Amphitheatre")},
+    "SpacePiratesMetalPirates": {"area": "Norfair", "map_coords_px": (31*8, 17*8), "event": getEnemiesRoomEvent("Space Pirates", "Metal Pirates Room")},
+    "KiHuntersRedKeyhunterShaft": {"area": "Norfair", "map_coords_px": (35*8, 12*8), "event": getEnemiesRoomEvent("Ki Hunters", "Red Keyhunter Shaft")},
+    "KiHuntersThreeMuskateers": {"area": "Norfair", "map_coords_px": (30*8, 5*8), "event": getEnemiesRoomEvent("Ki Hunters", "Three Muskateers' Room")},
+    "BeetomsFrogSpeedway": {"area": "Norfair", "map_coords_px": (15*8, 6*8), "event": getEnemiesRoomEvent("Beetoms", "Frog Speedway")},
+    "CacatacsBubbleMountain": {"area": "Norfair", "map_coords_px": (180, 24), "event": getEnemiesRoomEvent("Cacatacs", "Bubble Mountain")},
+    "CacatacsCrocomireSpeedway": {"area": "Norfair", "map_coords_px": (15*8, 9*8), "event": getEnemiesRoomEvent("Cacatacs", "Crocomire Speedway")},
+    "KagosDoubleChamber": {"area": "Norfair", "map_coords_px": (27*8, 6*8), "event": getEnemiesRoomEvent("Kagos", "Double Chamber")},
+    "YappingMawsAcidSnakes": {"area": "Norfair", "map_coords_px": (23*8, 10*8), "event": getEnemiesRoomEvent("Yapping Maws", "Spiky Acid Snakes Tunnel")},
 }

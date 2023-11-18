@@ -57,3 +57,17 @@ with open("patches/common/src/objectives/enemies.asm", "w") as fp:
                     fp.write(f"\tdw !{nmyName}_{roomName}_{i}_event\n")
                 fp.write(f"\n\tdw !{nmyName}_{roomName}_all_event\n\n")
         typeIdx += 1
+
+# output a simplified dict to have only the necessary data for rando
+simplifiedNmyData = {}
+for nmyType, nmyData in nmyObjData.items():
+    nmyName = nameRegex.sub('_', nmyType.lower())
+    nmyEntry = { "total_sym": f"objectives_{nmyName}_type", "area_count": {}, "room_events": {} }
+    simplifiedNmyData[nmyType] = nmyEntry
+    for area, areaData in nmyData["areas"].items():
+        nmyEntry["area_count"][area] = areaData["count"]
+        for room, event in areaData["room_events"].items():
+            nmyEntry["room_events"][room] = event
+
+with open("rom/enemies_objectives_data.json", "w") as fp:
+    json.dump(simplifiedNmyData, fp, indent=4)

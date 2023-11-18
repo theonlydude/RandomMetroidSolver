@@ -72,5 +72,6 @@ for nmyType, nmyData in nmyObjData.items():
         for room, event in areaData["room_events"].items():
             nmyEntry["room_events"][room] = event
 
-with open("rom/enemies_objectives_data.json", "w") as fp:
+with open("rom/enemies_objectives_data.py", "w") as fp:
+    fp.write("enemies_objectives_data = ")
     json.dump(simplifiedNmyData, fp, indent=4)

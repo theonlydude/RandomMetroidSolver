@@ -126,7 +126,8 @@ class Goal(object):
             else:
                 out += self.text
             outLen = len(out)
-        except AssertionError:
+        except AssertionError as e:
+            print(e)
             outLen = maxLen + 1
         assert outLen <= maxLen, "Goal '{}' text is too long: '{}'".format(self.name, out)
         out = out.rstrip()        
@@ -647,7 +648,8 @@ _goalsList = [
     Goal("kill all space pirates", "enemies",
          getEnemiesLogicFunc("Space Pirates"),
          "kill_all_space_pirates", romInProgressFunc="kill_all_space_pirates_progress",
-         text="{} all Space Pirates        ",
+         text="{} SpacePirates        ",
+         introText="kill all space pirates",
          mapIcons=getEnemiesMapIcons("SpacePirates"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Space Pirates"),
@@ -655,7 +657,8 @@ _goalsList = [
     Goal("kill all ki hunters", "enemies",
          getEnemiesLogicFunc("Ki Hunters"),
          "kill_all_ki_hunters", romInProgressFunc="kill_all_ki_hunters_progress",
-         text="{} all Ki Hunters        ",
+         text="{} Ki Hunters        ",
+         introText="kill all ki hunters",
          mapIcons=getEnemiesMapIcons("KiHunters"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Ki Hunters"),
@@ -687,8 +690,9 @@ _goalsList = [
     Goal("kill all yapping maws", "enemies",
          getEnemiesLogicFunc("Yapping Maws"),
          "kill_all_yapping_maws", romInProgressFunc="kill_all_yapping_maws_progress",
-         text="{} all Yapping Maws        ",
-         mapIcons=getEnemiesMapIcons("Yapping Maws"),
+         text="{} Yapping Maws        ",
+         introText="kill all yapping maws",
+         mapIcons=getEnemiesMapIcons("YappingMaws"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Yapping Maws"),
          objCompletedFuncAPs=lambda ap: getEnemiesAccessPoints("Yapping Maws"))

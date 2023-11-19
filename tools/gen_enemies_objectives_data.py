@@ -72,7 +72,7 @@ for roomDef in rooms:
         areaData = nmyObjData[nmyType]['areas'][area]
         areaData["room_events"][roomDef["Name"]] = EnemyCounter.getEvent()
         for nmy in enemies:
-            entry = {"event": EnemyCounter.getEvent(), "props_snes_addr": nmy.dataAddr+8, "props": nmy.extraProperties}
+            entry = {"event": EnemyCounter.getEvent(), "props_snes_addr": nmy.dataAddr+10, "props": nmy.extraProperties}
             areaData["enemies"][roomDef["Name"]].append(entry)
             EnemyCounter.countEnemy(nmyType)
             areaData["count"] += 1

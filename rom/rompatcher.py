@@ -461,7 +461,7 @@ class RomPatcher:
                 return 5 * ceil(t / 5)
             if 'TimerTable' not in escapeAttr:
                 t = calcTimer(escapeTimer)
-                print(f"escapeTimer = {escapeTimer}, t = {t}")
+#                print(f"escapeTimer = {escapeTimer}, t = {t}")
                 timerPatch[Addresses.getOne('escapeTimer')] = getTimerBytes(t)
                 timerPatch[Addresses.getOne("rando_escape_common_timer_half_value")] = getTimerBytes(t/2)
             else:

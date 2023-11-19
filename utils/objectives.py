@@ -240,16 +240,16 @@ enemiesLogic = {
 def getEnemiesLogicFunc(nmyType):
     nmyEntry = enemiesLogic[nmyType]
     def f(sm, ap):
-        nonlocal nmyEntry
+        nonlocal nmyEntry, nmyType
         ret = SMBool(True)
         for apDict in nmyEntry:
             nmy = None
-            for apName, logicFunc in apDict.items():
-                if apName not in Objectives.accessibleAPs:
+            for nmyApName, logicFunc in apDict.items():
+                if not any(apObj.Name == nmyApName for apObj in Objectives.accessibleAPs):
                     continue
                 if nmy is None:
                     nmy = SMBool(False)
-                nmy = sm.wor(nmy, sm.wand(Objectives.canAccess(sm, ap, apName), logicFunc(sm)))
+                nmy = sm.wor(nmy, sm.wand(Objectives.canAccess(sm, ap, nmyApName), logicFunc(sm)))
             if nmy is not None:
                 ret = sm.wand(ret, nmy)
         return ret

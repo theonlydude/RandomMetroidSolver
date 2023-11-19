@@ -1323,3 +1323,12 @@ tilemap_backup_not_needed:
         dw "   BACKUP NOT NECESSARY.  "
 
 warnpc $85afff
+
+;;; Disable special X-Ray handler for animals room during escape, as
+;;; this otherwise unused state header field is used to hold VARIA
+;;; area for the room
+org $84836A
+handle_special_xray:
+        bra .skip
+org $848398
+.skip:

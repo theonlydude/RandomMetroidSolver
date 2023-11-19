@@ -62,7 +62,7 @@ class GraphBuilder(object):
                 else:
                     transitions += GraphUtils.createAreaTransitions(self.graphSettings.lightAreaRando)
         ret = AccessGraph(Logic.accessPoints(), transitions, self.graphSettings.dotFile)
-        Objectives.setGraph(ret, maxDiff)
+        Objectives.setGraph(ret, self.graphSettings.startAP, maxDiff)
         return ret
 
     # fills in escape transitions if escape rando is enabled

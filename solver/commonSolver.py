@@ -144,7 +144,7 @@ class CommonSolver(object):
 
     def buildGraph(self):
         self.areaGraph = AccessGraph(Logic.accessPoints(), self.curGraphTransitions)
-        Objectives.setGraph(self.areaGraph, infinity)
+        Objectives.setGraph(self.areaGraph, self.startLocation, infinity)
 
     def loadPreset(self, presetFileName):
         presetLoader = PresetLoader.factory(presetFileName)

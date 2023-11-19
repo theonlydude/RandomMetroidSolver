@@ -128,19 +128,8 @@ loc.AccessFrom = {
     'Red Tower Top Left': lambda sm: SMBool(True)
 }
 loc.Available = (
-    lambda sm: sm.wand(sm.canUsePowerBombs(),
-                       sm.traverse('RedTowerLeft'),
-                       sm.traverse('RedBrinstarFirefleaLeft'),
-                       sm.wor(sm.haveItem('Grapple'),
-                              sm.haveItem('SpaceJump'),
-                              sm.wand(sm.energyReserveCountOkHardRoom('X-Ray'),
-                                      sm.wor(sm.knowsXrayDboost(),
-                                             sm.wand(sm.haveItem('Ice'),
-                                                     sm.wor(sm.haveItem('HiJump'), sm.knowsXrayIce())),
-                                             sm.canInfiniteBombJump(),
-                                             sm.wand(sm.haveItem('HiJump'),
-                                                     sm.wor(sm.haveItem('SpeedBooster'),
-                                                            sm.canSpringBallJump()))))))
+    lambda sm: sm.wand(sm.canAccessXRayFromRedTower(),
+                       sm.traverse('RedBrinstarFirefleaLeft'))
 )
 
 

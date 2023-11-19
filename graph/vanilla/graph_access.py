@@ -18,9 +18,7 @@ accessPoints = [
                                                                sm.canPassCrateriaGreenPirates())),
         'Keyhunter Room Bottom': Cache.ldeco(lambda sm: sm.traverse('LandingSiteRight')),
         'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True),
-        'Gauntlet Top': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
-                                                  sm.canPassBombPassages()),
-                                          sm.canDoLowGauntlet())
+        'Gauntlet Top': lambda sm: sm.canDoGauntletFromLandingSite()
     }, internal=True,
        start={'spawn': 0x0000, 'doors':[0x32], 'patches':[RomPatches.BlueBrinstarBlueDoor], 'solveArea': "Crateria Landing Site"}),
     AccessPoint('Blue Brinstar Elevator Bottom', 'Crateria', {
@@ -191,13 +189,13 @@ accessPoints = [
               'needsPreRando':True}),
     AccessPoint('Wrecked Ship Back', 'WreckedShip', {
         'Wrecked Ship Main': lambda sm: SMBool(True),
-        'Crab Maze Left': Cache.ldeco(lambda sm: sm.canPassForgottenHighway(True))
+        'Crab Maze Left': Cache.ldeco(lambda sm: sm.wand(sm.canPassForgottenHighway(True), sm.haveItem('Morph')))
     }, internal=True),
     AccessPoint('Bowling', 'WreckedShip', {
         'West Ocean Left': lambda sm: SMBool(True)
     }, internal=True),
     AccessPoint('Crab Maze Left', 'WreckedShip', {
-        'Wrecked Ship Back': Cache.ldeco(lambda sm: sm.canPassForgottenHighway(False))
+        'Wrecked Ship Back': Cache.ldeco(lambda sm: sm.wand(sm.canPassForgottenHighway(False), sm.haveItem('Morph')))
     }, traverse=Cache.ldeco(lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors),
                                               sm.traverse('LeCoudeBottom'))), # it is not exactly coude's door
                                                                               # but it's equivalent in vanilla anyway

@@ -45,6 +45,13 @@ class HelpersGraph(Helpers):
                               sm.canEnterAndLeaveGauntletQty(2, 2)),
                       sm.canEnterAndLeaveGauntletQty(2, 3))
 
+    @Cache.decorator
+    def canDoGauntletFromLandingSite(self):
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
+                              sm.canPassBombPassages()),
+                      sm.canDoLowGauntlet())
+
     def canPassTerminatorBombWall(self, fromLandingSite=True):
         sm = self.smbm
         return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
@@ -195,9 +202,8 @@ class HelpersGraph(Helpers):
                                sm.wor(sm.canSpringBallJump(), # two sbj on the far right
                                       # to break water line and go through the door on the right
                                       sm.haveItem('SpaceJump')))
-        return sm.wand(sm.wor(sm.haveItem('Gravity'),
-                              suitless),
-                       sm.haveItem('Morph')) # for crab maze
+        return sm.wor(sm.haveItem('Gravity'),
+                      suitless)
 
     @Cache.decorator
     def canExitCrabHole(self):
@@ -956,3 +962,19 @@ class HelpersGraph(Helpers):
                               sm.wand(sm.knowsSnailClip(),
                                       sm.haveItem('Morph'))),
                        sm.haveItem('Gravity'))
+
+    @Cache.decorator
+    def canAccessXRayFromRedTower(self):
+        sm = self.smbm
+        return sm.wand(sm.canUsePowerBombs(),
+                       sm.traverse('RedTowerLeft'),
+                       sm.wor(sm.haveItem('Grapple'),
+                              sm.haveItem('SpaceJump'),
+                              sm.wand(sm.energyReserveCountOkHardRoom('X-Ray'),
+                                      sm.wor(sm.knowsXrayDboost(),
+                                             sm.wand(sm.haveItem('Ice'),
+                                                     sm.wor(sm.haveItem('HiJump'), sm.knowsXrayIce())),
+                                             sm.canInfiniteBombJump(),
+                                             sm.wand(sm.haveItem('HiJump'),
+                                                     sm.wor(sm.haveItem('SpeedBooster'),
+                                                            sm.canSpringBallJump()))))))

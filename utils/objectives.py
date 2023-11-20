@@ -186,7 +186,7 @@ enemiesLogic = {
                                                                  sm.wor(sm.haveItem('ScrewAttack'),
                                                                         sm.canPseudoScrewPinkPirates(1)))))},
         {"Toilet Top": lambda sm: sm.wand(Bosses.bossDead(sm, "Draygon"),
-                                          sm.canKillPlasmaPirates())}
+                                          sm.canExitPlasmaRoom())}
     ],
     "Ki Hunters": [
         {"Keyhunter Room Bottom": lambda sm: SMBool(True)},

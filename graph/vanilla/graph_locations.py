@@ -408,13 +408,7 @@ loc.Available = (
     lambda sm: Bosses.bossDead(sm, 'Draygon')
 )
 loc.PostAvailable = (
-    lambda sm: sm.wand(sm.canKillPlasmaPirates(),
-                       sm.wor(sm.canFly(),
-                              sm.wand(sm.haveItem('HiJump'),
-                                      sm.knowsGetAroundWallJump()),
-                              sm.canShortCharge(),
-                              sm.wand(sm.canSpringBallJump(),
-                                      sm.knowsSpringBallJumpFromWall())))
+    lambda sm: sm.canExitPlasmaRoom()
 )
 
 

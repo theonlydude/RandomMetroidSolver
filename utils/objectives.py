@@ -245,6 +245,7 @@ def getEnemiesLogicFunc(nmyType):
     def f(sm, ap):
         nonlocal nmyEntry, nmyType
         ret = SMBool(True)
+        found = False
         for apDict in nmyEntry:
             nmy = None
             for nmyApName, logicFunc in apDict.items():
@@ -254,7 +255,10 @@ def getEnemiesLogicFunc(nmyType):
                     nmy = SMBool(False)
                 nmy = sm.wor(nmy, sm.wand(Objectives.canAccess(sm, ap, nmyApName), logicFunc(sm)))
             if nmy is not None:
+                found = True
                 ret = sm.wand(ret, nmy)
+        if not found:
+            ret = SMBool(False)
         return ret
     return f
 

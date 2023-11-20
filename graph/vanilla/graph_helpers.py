@@ -76,18 +76,19 @@ class HelpersGraph(Helpers):
                       sm.haveItem('Plasma'),
                       sm.haveItem('ScrewAttack'))
 
+    def canPseudoScrewPinkPirates(self, nPirates):
+        sm = self.smbm
+        # 160/80/40 dmg per ground plasma pirate + margin for getting hit
+        return sm.wand(sm.canFireChargedShots(),
+                       sm.knowsKillPlasmaPiratesWithCharge(),
+                       sm.energyReserveCountOk(int(2.5 * nPirates * sm.getPiratesPseudoScrewCoeff()/sm.getDmgReduction(False)[0])))
+
     @Cache.decorator
     def canKillPlasmaPirates(self):
         sm = self.smbm
         return sm.wor(sm.wand(sm.canShortCharge(),
                               sm.knowsKillPlasmaPiratesWithSpark()),
-                      sm.wand(sm.canFireChargedShots(),
-                              sm.knowsKillPlasmaPiratesWithCharge(),
-                              # 160/80/40 dmg * 4 ground plasma pirates
-                              # => 640/320/160 damage take required
-                              # check below is 1099/599/299 (give margin for taking dmg a bit)
-                              # (* 4 for nerfed charge, since you need to take hits 4 times instead of one)
-                              sm.energyReserveCountOk(int(10.0 * sm.getPiratesPseudoScrewCoeff()/sm.getDmgReduction(False)[0]))),
+                      sm.canPseudoScrewPinkPirates(4),
                       sm.haveItem('ScrewAttack'),
                       sm.haveItem('Plasma'))
 

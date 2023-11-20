@@ -181,7 +181,10 @@ enemiesLogic = {
         {"Worst Room Top": lambda sm: sm.canKillWorstRoomPirates()},
         {"Ridley Zone": lambda sm: sm.canPassNinjaPirates()},
         {"Main Street Bottom": lambda sm: sm.wand(sm.canDoOuterMaridia(),
-                                                  sm.canKillPlasmaPirates())},
+                                                  sm.wor(sm.haveItem('Plasma'),
+                                                         sm.wand(sm.haveItem('Gravity'),
+                                                                 sm.wor(sm.haveItem('ScrewAttack'),
+                                                                        sm.canPseudoScrewPinkPirates(1)))))},
         {"Toilet Top": lambda sm: sm.wand(Bosses.bossDead(sm, "Draygon"),
                                           sm.canKillPlasmaPirates())}
     ],

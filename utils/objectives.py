@@ -259,10 +259,10 @@ def getEnemiesLogicFunc(nmyType):
     return f
 
 def getEnemiesAccessPoints(nmyType):
-    allAPs = set()
+    allAPs = []
     for apDict in enemiesLogic[nmyType]:
-        allAPs.union(set(apDict.keys()))
-    return list(allAPs)
+        allAPs += list(apDict.keys())
+    return list(set(allAPs))
 
 def getEnemiesEscapeAccessPoints(nmyType):
     return (1, getEnemiesAccessPoints(nmyType))

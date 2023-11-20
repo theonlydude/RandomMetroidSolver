@@ -169,6 +169,7 @@ class GraphBuilder(object):
         possiblePaths = []
         for goal in Objectives.activeGoals:
             n, possibleAccessPoints = goal.escapeAccessPoints
+            assert n <= len(possibleAccessPoints), f"Bad objective definition for '{goal}': {n} required out of {len(possibleAccessPoints)} possible"
             count = 0
             for ap in possibleAccessPoints:
                 self.log.debug("escapeTrigger. testing AP " + ap)

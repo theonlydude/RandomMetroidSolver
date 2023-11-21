@@ -2,6 +2,7 @@ import random, copy
 from rom.addresses import Addresses, MAX_OBJECTIVES
 from rom.rom import pc_to_snes
 from rom.map import ObjectiveMapIcon
+from rom.enemies_objectives_data import enemies_objectives_data
 from logic.helpers import Bosses
 from logic.smbool import SMBool
 from logic.logic import Logic
@@ -245,7 +246,7 @@ def getEnemiesLogicFunc(nmyType):
     def f(sm, ap):
         nonlocal nmyEntry, nmyType
         ret = SMBool(True)
-        found = False
+        foundAreas = set() if Objectives.totalEnemies is not None else None
         for apDict in nmyEntry:
             nmy = None
             for nmyApName, logicFunc in apDict.items():
@@ -253,12 +254,19 @@ def getEnemiesLogicFunc(nmyType):
                     continue
                 if nmy is None:
                     nmy = SMBool(False)
+                if foundAreas is not None:
+                    nmyAp = Objectives.graph.accessPoints[nmyApName]
+                    foundAreas.add(nmyAp.GraphArea)
                 nmy = sm.wor(nmy, sm.wand(Objectives.canAccess(sm, ap, nmyApName), logicFunc(sm)))
             if nmy is not None:
-                found = True
                 ret = sm.wand(ret, nmy)
-        if not found:
-            ret = SMBool(False)
+        # those area checks are here to handle being called from the tracker when the graph is not complete,
+        # which conflicts with the logic above to ignore inaccessible APs to properly handle minimizer seeds
+        if foundAreas is not None:
+            maxPossibleEnemies = sum(c for area, c in enemies_objectives_data[nmyType]["area_count"].items() if area in foundAreas)
+            total = Objectives.totalEnemies[nmyType]
+            if maxPossibleEnemies < total:
+                ret = SMBool(False)
         return ret
     return f
 
@@ -740,6 +748,7 @@ class Objectives(object):
     tourianRequired = None
     hidden = False
     accessibleAPs = []
+    totalEnemies = None
     # objectives are really needed when initiliazing rando, computing escape for disabled Tourian, and solver/tracker
     # we don't need them when placing items since the seed has to be completable 100% if generated, and objectives are
     # checked with 100% items during rando setup.
@@ -1101,7 +1110,13 @@ class Objectives(object):
     def getAddressesToRead():
         objectiveSize = 2
         bytesToRead = Objectives.maxActiveGoals * objectiveSize
-        otherAddrs = ['totalItems', 'itemsMask', 'beamsMask', 'objectives_n_objectives', 'objectives_n_objectives_required']
+        otherAddrs = [
+            'totalItems', 'itemsMask', 'beamsMask',
+            'objectives_n_objectives', 'objectives_n_objectives_required',
+            'objectives_space_pirates_type', 'objectives_ki_hunters_type',
+            'objectives_beetoms_type', 'objectives_cacatacs_type',
+            'objectives_kagos_type', 'objectives_yapping_maws_type'
+        ]
         ret = [Addresses.getOne('objectivesList')+i for i in range(0, bytesToRead+1)]
         for addr in otherAddrs:
             ret += Addresses.getWeb(addr)
@@ -1229,6 +1244,15 @@ class Objectives(object):
         # read objective quantities
         Objectives.nbActiveGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives'))
         Objectives.nbRequiredGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives_required'))
+        # read total enemies to help with logic functions
+        Objectives.totalEnemies = {
+            "Space Pirates": romReader.romFile.readByte(Addresses.getOne('objectives_space_pirates_type')),
+            "Ki Hunters": romReader.romFile.readByte(Addresses.getOne('objectives_ki_hunters_type')),
+            "Beetoms": romReader.romFile.readByte(Addresses.getOne('objectives_beetoms_type')),
+            "Cacatacs": romReader.romFile.readByte(Addresses.getOne('objectives_cacatacs_type')),
+            "Kagos": romReader.romFile.readByte(Addresses.getOne('objectives_kagos_type')),
+            "Yapping Maws": romReader.romFile.readByte(Addresses.getOne('objectives_yapping_maws_type'))
+        }
         # in previous releases this info wasn't present in ROM, freespace default to 0xff
         Objectives.previousReleaseFallback = Objectives.nbActiveGoals == 0xff
 

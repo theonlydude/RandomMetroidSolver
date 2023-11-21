@@ -124,7 +124,7 @@ mb_room_main:
 .end:
 	rts
 
-warnpc $8ff7ef
+warnpc $8ff79f
 
 ;;; change MB2 main AI script pointer to MB3 death instead
 ;;; of triggering rainbow beam, baby cutscene etc

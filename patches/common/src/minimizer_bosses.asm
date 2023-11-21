@@ -6,6 +6,8 @@
 arch 65816
 lorom
 
+incsrc "sym/door_transition.asm"
+
 !mark_boss = $8081a6
 
 org $A7AFAD
@@ -19,6 +21,10 @@ org $A5927B
 
 org $A6C590
 	jsl ridley_death	; (actually after some explosions instead of 0 HP check)
+
+;;; Varia suit room door asm
+org $8391E4
+        dw door_transition_kraid_exit_fix
 
 org $a1f500
 kraid_death:

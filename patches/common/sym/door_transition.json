@@ -1,7 +1,8 @@
 {
-    "boss_exit_fix": 9435120,
+    "boss_exit_fix": 9435057,
     "generated_door_asm": 9435136,
     "generated_door_asm_end": 9436415,
     "giveiframes": 9434715,
-    "incompatible_doors": 9434624
+    "incompatible_doors": 9434624,
+    "kraid_exit_fix": 9435040
 }

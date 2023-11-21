@@ -374,7 +374,8 @@ accessPoints = [
        boss = True,
        roomInfo = {'RoomPtr':0xa59f, "area": 0x1},
        exitInfo = {'DoorPtr':0x91ce, 'direction': 0x5, "cap": (0x1e, 0x16), "bitFlag": 0x0,
-                   "screen": (0x1, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
+                   "screen": (0x1, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0,
+                   "exitAsm": "door_transition_kraid_exit_fix"},
        entryInfo = {'SamusX':0x34, 'SamusY':0x188},
        dotOrientation = 'e'),
     ### Norfair

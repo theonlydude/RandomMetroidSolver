@@ -98,6 +98,17 @@ print pc
 
 warnpc $8ff6ff
 
+org $8ff7a0
+
+;;; if exiting the room when Kraid is alive, call some vanilla functions to restore BG3 tiles
+%export(kraid_exit_fix)
+        jsl $a7c77d
+        jsl $a7c7a3
+        jsl $a7c7c9
+        jsl $a7c7ef
+.end:
+        rts
+
 ;;; use this as exit door asm for croc, phantoon, draygon :
 ;;; bosses draw their tilemap on BG2, and a routine to draw enemy
 ;;; BG2 ($A0:9726) is also ran and at the end of every
@@ -105,7 +116,6 @@ warnpc $8ff6ff
 ;;; has to be done. If we exit during croc fight, the value can be
 ;;; non-0 and some garbage resulting from room tiles decompression
 ;;; of door transition is copied to BG2 tilemap in the next room.
-org $8ff7f0
 %export(boss_exit_fix)
     stz $0e1e	; clear the flag to disable enemy BG2 tilemap routine
     rts

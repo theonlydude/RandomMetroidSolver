@@ -2,7 +2,7 @@ import sys, os, urllib, tempfile, random, subprocess, base64, json, uuid, lzma
 import functools, traceback
 from datetime import datetime
 
-from web.backend.utils import loadPresetsList, loadRandoPresetsList, displayNames, get_app_files
+from web.backend.utils import loadPresetsList, loadRandoPresetsList, displayNames, get_client_files
 from web.backend.utils import validateWebServiceParams, getCustomMapping, localIpsDir, raiseHttp, getInt
 from utils.utils import getRandomizerDefaultParameters, getDefaultMultiValues, PresetLoader, getPresetDir, getPythonExec
 from graph.graph_utils import GraphUtils
@@ -198,7 +198,7 @@ class Randomizer(object):
                     maxsize=sys.maxsize, displayNames=displayNames, objectivesExclusions=objectivesExclusions,
                     objectivesTypes=objectivesTypes, objectivesSort=objectivesSort,
                     objectivesCategories=objectivesCategories, logics=logics,
-                    app_files=get_app_files(include_css=False))
+                    client_files=get_client_files(include_css=False))
 
     def initRandomizerSession(self):
         if self.session.randomizer is None:

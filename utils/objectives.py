@@ -2,11 +2,13 @@ import random, copy
 from rom.addresses import Addresses, MAX_OBJECTIVES
 from rom.rom import pc_to_snes
 from rom.map import ObjectiveMapIcon
+from rom.enemies_objectives_data import enemies_objectives_data
 from logic.helpers import Bosses
 from logic.smbool import SMBool
 from logic.logic import Logic
-from utils.parameters import Knows
+from utils.parameters import Knows, Settings
 from graph.graph_utils import graphAreas
+from graph.vanilla.map_tiles import objectives as map_icons
 from utils.utils import randGaussBounds
 import utils.log, logging
 
@@ -61,6 +63,7 @@ class Goal(object):
         #  - boss
         #  - miniboss
         #  - map
+        #  - enemies
         #  - other
         self.gtype = gtype
         # example for kill three g4
@@ -124,7 +127,8 @@ class Goal(object):
             else:
                 out += self.text
             outLen = len(out)
-        except AssertionError:
+        except AssertionError as e:
+            print(e)
             outLen = maxLen + 1
         assert outLen <= maxLen, "Goal '{}' text is too long: '{}'".format(self.name, out)
         out = out.rstrip()        
@@ -155,6 +159,125 @@ def getMiniBossesEscapeAccessPoints(n):
 
 def getAreaEscapeAccessPoints(area):
     return (1, list({list(loc.AccessFrom.keys())[0] for loc in Logic.locations() if loc.GraphArea == area}))
+
+def getEnemiesMapIcons(enemy):
+    return [name for name in map_icons if name.startswith(enemy)]
+
+_crocViaIceHellRun = Settings.hellRunsTable['Ice']['Norfair Entrance -> Croc via Ice']
+
+enemiesLogic = {
+    "Space Pirates": [
+        {"Blue Brinstar Elevator Bottom": lambda sm: SMBool(True)},
+        {"Green Pirates Shaft Bottom Right": lambda sm: sm.canPassCrateriaGreenPirates()},
+        {"KraidRoomOut": lambda sm: sm.canPassCrateriaGreenPirates()},
+        {"Business Center": lambda sm: sm.wand(sm.traverse('BusinessCenterTopLeft'),
+                                               sm.canUsePowerBombs(),
+                                               sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
+                                                              sm.canHellRun(**_crocViaIceHellRun)),
+                                                      sm.wand(sm.canHellRun('Ice', _crocViaIceHellRun["mult"]/3, 3),
+                                                              sm.canKillRedPirates())))},
+        {"Crocomire Speedway Bottom": lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Bubble Mountain']),
+                                                         sm.canKillRedPirates())},
+        {"LN Entrance": lambda sm: sm.canKillWorstRoomPirates()},
+        {"Worst Room Top": lambda sm: sm.canKillWorstRoomPirates()},
+        {"Ridley Zone": lambda sm: sm.canPassNinjaPirates()},
+        {"Main Street Bottom": lambda sm: sm.wand(sm.canDoOuterMaridia(),
+                                                  sm.wor(sm.haveItem('Plasma'),
+                                                         sm.wand(sm.haveItem('Gravity'),
+                                                                 sm.wor(sm.haveItem('ScrewAttack'),
+                                                                        sm.canPseudoScrewPinkPirates(1)))))},
+        {"Toilet Top": lambda sm: sm.wand(Bosses.bossDead(sm, "Draygon"),
+                                          sm.canExitPlasmaRoom())}
+    ],
+    "Ki Hunters": [
+        {"Keyhunter Room Bottom": lambda sm: SMBool(True)},
+        {"Big Pink": lambda sm: sm.traverse("BigPinkTopRight")},
+        {"KraidRoomOut": lambda sm: SMBool(True)},
+        {"Firefleas": lambda sm: sm.canKillRedKiHunters(3)},
+        {"Three Muskateers Room Left": lambda sm: sm.canKillRedKiHunters(3)},
+        {"Wrecked Ship Main": lambda sm: Bosses.bossDead(sm, "Phantoon")}
+    ],
+    "Beetoms": [
+        {"Gauntlet Top": lambda sm: sm.canKillBeetoms()},
+        {'Etecoons Bottom': lambda sm: sm.canKillBeetoms()},
+        {'Red Tower Top Left': lambda sm: sm.canKillBeetoms()},
+        {'Warehouse Zeela Room Left': lambda sm: sm.wand(Bosses.bossDead(sm, "Kraid"),
+                                                         sm.canKillBeetoms())},
+        {
+            "Business Center": lambda sm: sm.wand(sm.canPassFrogSpeedwayLeftToRight(),
+                                                  sm.canKillBeetoms()),
+            "Bubble Mountain Bottom": lambda sm: sm.wand(sm.canPassFrogSpeedwayRightToLeft(),
+                                                         sm.canKillBeetoms())
+        }
+    ],
+    "Cacatacs": [
+        {"Noob Bridge Right": lambda sm: SMBool(True)},
+        {"Red Brinstar Elevator": lambda sm: SMBool(True)},
+        {"East Tunnel Right": lambda sm: SMBool(True)},
+        {"Crocomire Speedway Bottom": lambda sm: SMBool(True)},
+        {"Bubble Mountain Top": lambda sm: SMBool(True)},
+        {"Post Botwoon": lambda sm: sm.wand(sm.canReachCacatacAlleyFromBotowoon(),
+                                            sm.canPassCacatacAlleyEastToWest())}
+    ],
+    "Kagos": [
+        {
+            "Wrecked Ship Back": lambda sm: sm.canPassForgottenHighway(True),
+            "Crab Maze Left": lambda sm: sm.haveItem("Morph")
+        },
+        {"Lower Mushrooms Left": lambda sm: SMBool(True)},
+        {"Bubble Mountain Top": lambda sm: sm.wand(sm.haveItem("Morph"),
+                                                   sm.canAccessDoubleChamberItems())}
+    ],
+    "Yapping Maws": [
+        {"Landing Site": lambda sm: sm.wand(sm.canDoGauntletFromLandingSite(),
+                                            sm.haveItem("Super"))},
+        {"Red Tower Top Left": lambda sm: sm.wand(sm.canAccessXRayFromRedTower(),
+                                                  sm.haveItem("Super"))},
+        {"Red Brinstar Elevator": lambda sm: sm.wand(sm.traverse('RedTowerElevatorTopLeft'),
+                                                     sm.canUsePowerBombs(),
+                                                     sm.haveItem("Super"))},
+        {'Crocomire Speedway Bottom': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
+                                                         sm.haveItem("Super"))}
+    ]
+}
+
+def getEnemiesLogicFunc(nmyType):
+    nmyEntry = enemiesLogic[nmyType]
+    def f(sm, ap):
+        nonlocal nmyEntry, nmyType
+        ret = SMBool(True)
+        foundAreas = set() if Objectives.totalEnemies is not None else None
+        for apDict in nmyEntry:
+            nmy = None
+            for nmyApName, logicFunc in apDict.items():
+                if not any(apObj.Name == nmyApName for apObj in Objectives.accessibleAPs):
+                    continue
+                if nmy is None:
+                    nmy = SMBool(False)
+                if foundAreas is not None:
+                    nmyAp = Objectives.graph.accessPoints[nmyApName]
+                    foundAreas.add(nmyAp.GraphArea)
+                nmy = sm.wor(nmy, sm.wand(Objectives.canAccess(sm, ap, nmyApName), logicFunc(sm)))
+            if nmy is not None:
+                ret = sm.wand(ret, nmy)
+        # those area checks are here to handle being called from the tracker when the graph is not complete,
+        # which conflicts with the logic above to ignore inaccessible APs to properly handle minimizer seeds
+        if foundAreas is not None:
+            maxPossibleEnemies = sum(c for area, c in enemies_objectives_data[nmyType]["area_count"].items() if area in foundAreas)
+            total = Objectives.totalEnemies[nmyType]
+            if maxPossibleEnemies < total:
+                ret = SMBool(False)
+        return ret
+    return f
+
+def getEnemiesAccessPoints(nmyType):
+    allAPs = []
+    for apDict in enemiesLogic[nmyType]:
+        allAPs += list(apDict.keys())
+    return list(set(allAPs))
+
+def getEnemiesEscapeAccessPoints(nmyType):
+    return (1, getEnemiesAccessPoints(nmyType))
 
 GTsettingsConflict = lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))
 
@@ -535,9 +658,60 @@ _goalsList = [
          mapIcons=["KingCacatac"],
          category="Memes",
          escapeAccessPoints=(1, ['Bubble Mountain Top']),
-         objCompletedFuncAPs=lambda ap: ['Bubble Mountain Top'])
+         objCompletedFuncAPs=lambda ap: ['Bubble Mountain Top']),
+    # "kill all <enemy>" objectives
+    Goal("kill all space pirates", "enemies",
+         getEnemiesLogicFunc("Space Pirates"),
+         "kill_all_space_pirates", romInProgressFunc="kill_all_space_pirates_progress",
+         text="{} SpacePirates        ",
+         introText="kill all space pirates",
+         mapIcons=getEnemiesMapIcons("SpacePirates"),
+         category="Enemies",
+         escapeAccessPoints=getEnemiesEscapeAccessPoints("Space Pirates"),
+         objCompletedFuncAPs=lambda ap: getEnemiesAccessPoints("Space Pirates")),
+    Goal("kill all ki hunters", "enemies",
+         getEnemiesLogicFunc("Ki Hunters"),
+         "kill_all_ki_hunters", romInProgressFunc="kill_all_ki_hunters_progress",
+         text="{} Ki Hunters        ",
+         introText="kill all ki hunters",
+         mapIcons=getEnemiesMapIcons("KiHunters"),
+         category="Enemies",
+         escapeAccessPoints=getEnemiesEscapeAccessPoints("Ki Hunters"),
+         objCompletedFuncAPs=lambda ap: getEnemiesAccessPoints("Ki Hunters")),
+    Goal("kill all beetoms", "enemies",
+         getEnemiesLogicFunc("Beetoms"),
+         "kill_all_beetoms", romInProgressFunc="kill_all_beetoms_progress",
+         text="{} all Beetoms        ",
+         mapIcons=getEnemiesMapIcons("Beetoms"),
+         category="Enemies",
+         escapeAccessPoints=getEnemiesEscapeAccessPoints("Beetoms"),
+         objCompletedFuncAPs=lambda ap: getEnemiesAccessPoints("Beetoms")),
+    Goal("kill all cacatacs", "enemies",
+         getEnemiesLogicFunc("Cacatacs"),
+         "kill_all_cacatacs", romInProgressFunc="kill_all_cacatacs_progress",
+         text="{} all Cacatacs        ",
+         mapIcons=getEnemiesMapIcons("Cacatacs"),
+         category="Enemies",
+         escapeAccessPoints=getEnemiesEscapeAccessPoints("Cacatacs"),
+         objCompletedFuncAPs=lambda ap: getEnemiesAccessPoints("Cacatacs")),
+    Goal("kill all kagos", "enemies",
+         getEnemiesLogicFunc("Kagos"),
+         "kill_all_kagos", romInProgressFunc="kill_all_kagos_progress",
+         text="{} all Kagos      ",
+         mapIcons=getEnemiesMapIcons("Kagos"),
+         category="Enemies",
+         escapeAccessPoints=getEnemiesEscapeAccessPoints("Kagos"),
+         objCompletedFuncAPs=lambda ap: getEnemiesAccessPoints("Kagos")),
+    Goal("kill all yapping maws", "enemies",
+         getEnemiesLogicFunc("Yapping Maws"),
+         "kill_all_yapping_maws", romInProgressFunc="kill_all_yapping_maws_progress",
+         text="{} Yapping Maws        ",
+         introText="kill all yapping maws",
+         mapIcons=getEnemiesMapIcons("YappingMaws"),
+         category="Enemies",
+         escapeAccessPoints=getEnemiesEscapeAccessPoints("Yapping Maws"),
+         objCompletedFuncAPs=lambda ap: getEnemiesAccessPoints("Yapping Maws"))
 ]
-
 
 _goals = {goal.name:goal for goal in _goalsList}
 
@@ -573,6 +747,8 @@ class Objectives(object):
     graph = None
     tourianRequired = None
     hidden = False
+    accessibleAPs = []
+    totalEnemies = None
     # objectives are really needed when initiliazing rando, computing escape for disabled Tourian, and solver/tracker
     # we don't need them when placing items since the seed has to be completable 100% if generated, and objectives are
     # checked with 100% items during rando setup.
@@ -688,7 +864,8 @@ class Objectives(object):
     # having graph as a global sucks but Objectives instances are all over the place,
     # goals must access it, and it doesn't change often
     @staticmethod
-    def setGraph(graph, maxDiff):
+    def setGraph(graph, startAP, maxDiff):
+        Objectives.accessibleAPs = graph.getAccessibleAccessPoints(startAP)
         Objectives.graph = graph
         Objectives.maxDiff = maxDiff
         for goal in Objectives.goals.values():
@@ -717,9 +894,8 @@ class Objectives(object):
     def canExploreArea(sm, rootApName, area):
         graph, maxDiff = Objectives.graph, Objectives.maxDiff
 
-        accessibleAPs = graph.getAccessibleAccessPoints(rootApName)
         availAPs = graph.getAvailableAccessPoints(graph.accessPoints[rootApName], sm, maxDiff)
-        areaAPs = [ap for ap in accessibleAPs if ap.GraphArea == area]
+        areaAPs = [ap for ap in Objectives.accessibleAPs if ap.GraphArea == area]
 
         if not areaAPs:
             LOG.debug(f"canExploreArea {area} no ap available")
@@ -749,8 +925,7 @@ class Objectives(object):
     @staticmethod
     def canExploreMap(sm, rootApName):
         graph, maxDiff = Objectives.graph, Objectives.maxDiff
-        accessibleAPs = graph.getAccessibleAccessPoints(rootApName)
-        allAPs = [ap for ap in accessibleAPs if ap.GraphArea != "Tourian" and ap.GraphArea != "Ceres"]
+        allAPs = [ap for ap in Objectives.accessibleAPs if ap.GraphArea != "Tourian" and ap.GraphArea != "Ceres"]
         availAPs = graph.getAvailableAccessPoints(graph.accessPoints[rootApName], sm, maxDiff)
         for ap in allAPs:
             if ap not in availAPs:
@@ -935,7 +1110,13 @@ class Objectives(object):
     def getAddressesToRead():
         objectiveSize = 2
         bytesToRead = Objectives.maxActiveGoals * objectiveSize
-        otherAddrs = ['totalItems', 'itemsMask', 'beamsMask', 'objectives_n_objectives', 'objectives_n_objectives_required']
+        otherAddrs = [
+            'totalItems', 'itemsMask', 'beamsMask',
+            'objectives_n_objectives', 'objectives_n_objectives_required',
+            'objectives_space_pirates_type', 'objectives_ki_hunters_type',
+            'objectives_beetoms_type', 'objectives_cacatacs_type',
+            'objectives_kagos_type', 'objectives_yapping_maws_type'
+        ]
         ret = [Addresses.getOne('objectivesList')+i for i in range(0, bytesToRead+1)]
         for addr in otherAddrs:
             ret += Addresses.getWeb(addr)
@@ -1063,6 +1244,15 @@ class Objectives(object):
         # read objective quantities
         Objectives.nbActiveGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives'))
         Objectives.nbRequiredGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives_required'))
+        # read total enemies to help with logic functions
+        Objectives.totalEnemies = {
+            "Space Pirates": romReader.romFile.readByte(Addresses.getOne('objectives_space_pirates_type')),
+            "Ki Hunters": romReader.romFile.readByte(Addresses.getOne('objectives_ki_hunters_type')),
+            "Beetoms": romReader.romFile.readByte(Addresses.getOne('objectives_beetoms_type')),
+            "Cacatacs": romReader.romFile.readByte(Addresses.getOne('objectives_cacatacs_type')),
+            "Kagos": romReader.romFile.readByte(Addresses.getOne('objectives_kagos_type')),
+            "Yapping Maws": romReader.romFile.readByte(Addresses.getOne('objectives_yapping_maws_type'))
+        }
         # in previous releases this info wasn't present in ROM, freespace default to 0xff
         Objectives.previousReleaseFallback = Objectives.nbActiveGoals == 0xff
 

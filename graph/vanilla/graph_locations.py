@@ -128,19 +128,8 @@ loc.AccessFrom = {
     'Red Tower Top Left': lambda sm: SMBool(True)
 }
 loc.Available = (
-    lambda sm: sm.wand(sm.canUsePowerBombs(),
-                       sm.traverse('RedTowerLeft'),
-                       sm.traverse('RedBrinstarFirefleaLeft'),
-                       sm.wor(sm.haveItem('Grapple'),
-                              sm.haveItem('SpaceJump'),
-                              sm.wand(sm.energyReserveCountOkHardRoom('X-Ray'),
-                                      sm.wor(sm.knowsXrayDboost(),
-                                             sm.wand(sm.haveItem('Ice'),
-                                                     sm.wor(sm.haveItem('HiJump'), sm.knowsXrayIce())),
-                                             sm.canInfiniteBombJump(),
-                                             sm.wand(sm.haveItem('HiJump'),
-                                                     sm.wor(sm.haveItem('SpeedBooster'),
-                                                            sm.canSpringBallJump()))))))
+    lambda sm: sm.wand(sm.canAccessXRayFromRedTower(),
+                       sm.traverse('RedBrinstarFirefleaLeft'))
 )
 
 
@@ -419,23 +408,7 @@ loc.Available = (
     lambda sm: Bosses.bossDead(sm, 'Draygon')
 )
 loc.PostAvailable = (
-    lambda sm: sm.wand(sm.wor(sm.wand(sm.canShortCharge(),
-                                      sm.knowsKillPlasmaPiratesWithSpark()),
-                              sm.wand(sm.canFireChargedShots(),
-                                      sm.knowsKillPlasmaPiratesWithCharge(),
-                                      # 160/80/40 dmg * 4 ground plasma pirates
-                                      # => 640/320/160 damage take required
-                                      # check below is 1099/599/299 (give margin for taking dmg a bit)
-                                      # (* 4 for nerfed charge, since you need to take hits 4 times instead of one)
-                                                       sm.energyReserveCountOk(int(10.0 * sm.getPiratesPseudoScrewCoeff()/sm.getDmgReduction(False)[0]))),
-                              sm.haveItem('ScrewAttack'),
-                              sm.haveItem('Plasma')),
-                       sm.wor(sm.canFly(),
-                              sm.wand(sm.haveItem('HiJump'),
-                                      sm.knowsGetAroundWallJump()),
-                              sm.canShortCharge(),
-                              sm.wand(sm.canSpringBallJump(),
-                                      sm.knowsSpringBallJumpFromWall())))
+    lambda sm: sm.canExitPlasmaRoom()
 )
 
 
@@ -608,9 +581,6 @@ loc.Available = (
 
 loc = locationsDict["Missile (Crateria gauntlet right)"]
 loc.AccessFrom = {
-    'Landing Site': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
-                                              sm.canPassBombPassages()),
-                                      sm.canDoLowGauntlet()),
     'Gauntlet Top': lambda sm: SMBool(True)
 }
 loc.Available = (
@@ -620,9 +590,6 @@ loc.Available = (
 
 loc = locationsDict["Missile (Crateria gauntlet left)"]
 loc.AccessFrom = {
-    'Landing Site': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
-                                              sm.canPassBombPassages()),
-                                      sm.canDoLowGauntlet()),
     'Gauntlet Top': lambda sm: SMBool(True)
 }
 loc.Available = (

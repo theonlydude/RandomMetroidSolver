@@ -45,6 +45,13 @@ class HelpersGraph(Helpers):
                               sm.canEnterAndLeaveGauntletQty(2, 2)),
                       sm.canEnterAndLeaveGauntletQty(2, 3))
 
+    @Cache.decorator
+    def canDoGauntletFromLandingSite(self):
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
+                              sm.canPassBombPassages()),
+                      sm.canDoLowGauntlet())
+
     def canPassTerminatorBombWall(self, fromLandingSite=True):
         sm = self.smbm
         return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
@@ -54,15 +61,36 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassCrateriaGreenPirates(self):
         sm = self.smbm
-        return sm.wor(sm.canPassBombPassages(),
-                      sm.haveMissileOrSuper(),
-                      sm.energyReserveCountOk(1),
-                      sm.wor(sm.haveItem('Charge'),
-                             sm.haveItem('Ice'),
-                             sm.haveItem('Wave'),
-                             sm.wor(sm.haveItem('Spazer'),
-                                    sm.haveItem('Plasma'),
-                                    sm.haveItem('ScrewAttack'))))
+        return sm.wor(sm.canKillRedPirates(),
+                      sm.canPassBombPassages(),
+                      sm.energyReserveCountOk(1))
+
+    @Cache.decorator
+    def canKillRedPirates(self):
+        sm = self.smbm
+        return sm.wor(sm.haveMissileOrSuper(),
+                      sm.canFireChargedShots(),
+                      sm.haveItem('Ice'),
+                      sm.haveItem('Wave'),
+                      sm.haveItem('Spazer'),
+                      sm.haveItem('Plasma'),
+                      sm.haveItem('ScrewAttack'))
+
+    def canPseudoScrewPinkPirates(self, nPirates):
+        sm = self.smbm
+        # 160/80/40 dmg per ground plasma pirate + margin for getting hit
+        return sm.wand(sm.canFireChargedShots(),
+                       sm.knowsKillPlasmaPiratesWithCharge(),
+                       sm.energyReserveCountOk(int(2.5 * nPirates * sm.getPiratesPseudoScrewCoeff()/sm.getDmgReduction(False)[0])))
+
+    @Cache.decorator
+    def canKillPlasmaPirates(self):
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.canShortCharge(),
+                              sm.knowsKillPlasmaPiratesWithSpark()),
+                      sm.canPseudoScrewPinkPirates(4),
+                      sm.haveItem('ScrewAttack'),
+                      sm.haveItem('Plasma'))
 
     # from blue brin elevator
     @Cache.decorator
@@ -160,8 +188,11 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canKillBeetoms(self):
         sm = self.smbm
-        # can technically be killed with bomb, but it's harder
-        return sm.wor(sm.haveMissileOrSuper(), sm.canUsePowerBombs(), sm.haveItem('ScrewAttack'))
+        return sm.wor(sm.haveMissileOrSuper(),
+                      sm.canUsePowerBombs(),
+                      sm.haveItem('ScrewAttack'),
+                      sm.wand(sm.canUseBombs(),
+                              sm.energyReserveCountOk(1)))
 
     # the water zone east of WS
     def canPassForgottenHighway(self, fromWs):
@@ -172,9 +203,8 @@ class HelpersGraph(Helpers):
                                sm.wor(sm.canSpringBallJump(), # two sbj on the far right
                                       # to break water line and go through the door on the right
                                       sm.haveItem('SpaceJump')))
-        return sm.wand(sm.wor(sm.haveItem('Gravity'),
-                              suitless),
-                       sm.haveItem('Morph')) # for crab maze
+        return sm.wor(sm.haveItem('Gravity'),
+                      suitless)
 
     @Cache.decorator
     def canExitCrabHole(self):
@@ -462,7 +492,7 @@ class HelpersGraph(Helpers):
                 return canCF
         return sm.knowsDodgeLowerNorfairEnemies()
 
-    def canPassRedKiHunters(self, n):
+    def canKillRedKiHunters(self, n):
         sm = self.smbm
         return sm.wor(sm.haveItem('Plasma'),
                       sm.haveItem('ScrewAttack'),
@@ -470,7 +500,11 @@ class HelpersGraph(Helpers):
                               sm.wor(sm.haveItem('Spazer'),
                                      sm.haveItem('Ice'),
                                      sm.wand(sm.haveItem('Charge'),
-                                             sm.haveItem('Wave')))),
+                                             sm.haveItem('Wave')))))
+
+    def canPassRedKiHunters(self, n):
+        sm = self.smbm
+        return sm.wor(sm.canKillRedKiHunters(n),
                       sm.canGoThroughLowerNorfairEnemy(1800.0, float(n), 200.0))
 
     @Cache.decorator
@@ -509,7 +543,7 @@ class HelpersGraph(Helpers):
                       sm.canShortCharge()) # echoes kill
 
     @Cache.decorator
-    def canPassWorstRoomPirates(self):
+    def canKillWorstRoomPirates(self):
         sm = self.smbm
         return sm.wor(sm.haveItem('ScrewAttack'),
                       sm.itemCountOk('Missile', 6),
@@ -519,7 +553,12 @@ class HelpersGraph(Helpers):
                                      sm.wand(sm.heatProof(), # do not require suitless long charged shot fights
                                              sm.wor(sm.haveItem('Spazer'),
                                                     sm.haveItem('Wave'),
-                                                    sm.haveItem('Ice'))))),
+                                                    sm.haveItem('Ice'))))))
+
+    @Cache.decorator
+    def canPassWorstRoomPirates(self):
+        sm = self.smbm
+        return sm.wor(sm.canKillWorstRoomPirates(),
                       sm.knowsDodgeLowerNorfairEnemies())
 
     # go though the pirates room filled with acid
@@ -924,3 +963,30 @@ class HelpersGraph(Helpers):
                               sm.wand(sm.knowsSnailClip(),
                                       sm.haveItem('Morph'))),
                        sm.haveItem('Gravity'))
+
+    @Cache.decorator
+    def canAccessXRayFromRedTower(self):
+        sm = self.smbm
+        return sm.wand(sm.canUsePowerBombs(),
+                       sm.traverse('RedTowerLeft'),
+                       sm.wor(sm.haveItem('Grapple'),
+                              sm.haveItem('SpaceJump'),
+                              sm.wand(sm.energyReserveCountOkHardRoom('X-Ray'),
+                                      sm.wor(sm.knowsXrayDboost(),
+                                             sm.wand(sm.haveItem('Ice'),
+                                                     sm.wor(sm.haveItem('HiJump'), sm.knowsXrayIce())),
+                                             sm.canInfiniteBombJump(),
+                                             sm.wand(sm.haveItem('HiJump'),
+                                                     sm.wor(sm.haveItem('SpeedBooster'),
+                                                            sm.canSpringBallJump()))))))
+
+    @Cache.decorator
+    def canExitPlasmaRoom(self):
+        sm = self.smbm
+        return sm.wand(sm.canKillPlasmaPirates(),
+                       sm.wor(sm.canFly(),
+                              sm.wand(sm.haveItem('HiJump'),
+                                      sm.knowsGetAroundWallJump()),
+                              sm.canShortCharge(),
+                              sm.wand(sm.canSpringBallJump(),
+                                      sm.knowsSpringBallJumpFromWall())))

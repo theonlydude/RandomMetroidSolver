@@ -62,7 +62,7 @@ class GraphBuilder(object):
                 else:
                     transitions += GraphUtils.createAreaTransitions(self.graphSettings.lightAreaRando)
         ret = AccessGraph(Logic.accessPoints(), transitions, self.graphSettings.dotFile)
-        Objectives.setGraph(ret, maxDiff)
+        Objectives.setGraph(ret, self.graphSettings.startAP, maxDiff)
         return ret
 
     # fills in escape transitions if escape rando is enabled
@@ -169,6 +169,7 @@ class GraphBuilder(object):
         possiblePaths = []
         for goal in Objectives.activeGoals:
             n, possibleAccessPoints = goal.escapeAccessPoints
+            assert n <= len(possibleAccessPoints), f"Bad objective definition for '{goal}': {n} required out of {len(possibleAccessPoints)} possible"
             count = 0
             for ap in possibleAccessPoints:
                 self.log.debug("escapeTrigger. testing AP " + ap)

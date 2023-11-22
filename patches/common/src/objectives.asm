@@ -74,6 +74,14 @@ org $82A505
 org $82A61D
         jsr (new_pause_palettes_func_list,x)
 
+org $a0a3b9
+enemy_death_hook:
+        jml enemy_death
+org $A0A3C1
+.grapple:
+org $A0A3C7
+.nograpple:
+
 ;;; For minimizer or scavenger with ridley as last loc, disable
 ;;; elevator music change when boss drops appear if escape is
 ;;; triggered.
@@ -510,6 +518,14 @@ endmacro
 %exploredAreaChecker(west_maridia, 9)
 %exploredAreaChecker(east_maridia, 10)
 
+;; kill all <enemy> objectives
+%eventChecker(kill_all_space_pirates, !space_pirates_all_event)
+%eventChecker(kill_all_ki_hunters, !ki_hunters_all_event)
+%eventChecker(kill_all_beetoms, !beetoms_all_event)
+%eventChecker(kill_all_cacatacs, !cacatacs_all_event)
+%eventChecker(kill_all_kagos, !kagos_all_event)
+%eventChecker(kill_all_yapping_maws, !yapping_maws_all_event)
+
 ;;; "in progress" objective checkers
 
 macro inProgressBossChecker(n, bossType)
@@ -758,6 +774,88 @@ endmacro
 %exploredAreaPercent(lower_norfair, 8)
 %exploredAreaPercent(west_maridia, 9)
 %exploredAreaPercent(east_maridia, 10)
+
+
+!enemy_counters = $7ed8d0
+
+macro inProgressEnemy(enemy)
+%export(kill_all_<enemy>_progress)
+        %a8()
+        lda.l !enemy_counters+!<enemy>_type_index
+        bne .progress
+        clc
+        bra .end
+.progress:
+        sta !tmp_in_progress_done
+        lda.l <enemy>_type : sta !tmp_in_progress_total
+        sec
+.end:
+        %a16()
+        rts
+endmacro
+
+%inProgressEnemy(space_pirates)
+%inProgressEnemy(ki_hunters)
+%inProgressEnemy(beetoms)
+%inProgressEnemy(cacatacs)
+%inProgressEnemy(kagos)
+%inProgressEnemy(yapping_maws)
+
+
+;;; "kill all" enemies objectives events handling :
+!enemies_extra_props = $0F88
+!enemy_index = $0e54
+!enemy_count_flag #= %0100000000000000
+!enemy_count_index_mask #= %0011111111111000
+
+enemy_death:
+        phx
+        ldx !enemy_index
+        lda !enemies_extra_props, x : bit.w #!enemy_count_flag : beq .end
+        ;; change data bank to current
+        phy
+        phb : phk : plb
+        ;; get enemy entry in table :
+        ;; to get index number we should >> 3, but actual offset is
+        ;; index << 3, so we can use this directly
+        and.w #!enemy_count_index_mask : tax
+        lda.w enemies_table, x : jsl !check_event
+        bcs .nmy_end            ; do nothing if enemy already killed
+        lda.w enemies_table, x : jsl !mark_event
+        ;; enemies in room
+        ldy enemies_table+4, x : sty $12
+        lda $0000, y : sta $14
+        ldy.w #2
+.loop:
+        lda ($12), y
+        jsl !check_event : bcc .cont
+        iny : iny
+        cpy $14
+        bcc .loop
+.all:
+        lda ($12), y : jsl !mark_event
+.cont:
+        ;; enemy type
+        ldy enemies_table+2, x
+        ldx $0001, y
+        %a8()
+        lda.l !enemy_counters, x : inc : sta.l !enemy_counters, x
+        cmp $0000, y
+        %a16()
+        bcc .nmy_end
+        lda $0003, y : jsl !mark_event
+.nmy_end:
+        plb
+        ply
+.end:
+        plx
+        ;; vanilla code
+        LDA $0F8A,x : cmp.w #1 : beq .grapple
+        jml enemy_death_hook_nograpple
+.grapple:
+        jml enemy_death_hook_grapple
+
+incsrc "objectives/enemies.asm"
 
 warnpc $85f7ff
 obj_85_end:

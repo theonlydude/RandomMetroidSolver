@@ -26,7 +26,7 @@ extend 'layout.html'
 
 <script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet" />
+{{ response.write(client_files['css'], escape=False) }}
 <title>Super Metroid VARIA Customizer</title>
 
 <style>
@@ -2388,4 +2388,4 @@ if seedInfo != None:
     </form>
   </div>
   <div id="app" />
-  {{ response.write(app_files, escape=False) }}
+  {{ response.write(client_files['js'], escape=False) }}

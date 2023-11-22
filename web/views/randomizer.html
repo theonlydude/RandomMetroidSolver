@@ -34,10 +34,8 @@ if (hs.registerOverlay) {
 }
 </script>
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet" />
 <script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
-
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
@@ -46,6 +44,7 @@ if (hs.registerOverlay) {
 <script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
 
 <script type="text/javascript" src="{{=URL('static', 'js/localforage.nopromises.min.js')}}"></script>
+{{ response.write(client_files['css'], escape=False) }}
 
 <title>Super Metroid VARIA Randomizer</title>
 
@@ -2760,9 +2759,15 @@ def displayNumber(id, min, max, default, step="1"):
                 </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td><span id="objectiveText">Objectives to access Tourian:</span></td>
-                  <td>
-                    <div id="objectivePortal" class="vue-app" />
+                  <td colspan="2">
+                    <div style="display: flex; justify-content: space-between;gap: 20px; align-items: center;">
+                      <div id="objectiveText" style="text-wrap: no-wrap">
+                        Objectives to access Tourian:
+                      </div>
+                      <div style="min-width: 50%;">
+                        <div id="objectivePortal" class="vue-app" />
+                      </div>
+                    </div>
                   </td>
                   <td id="objectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
@@ -3090,4 +3095,4 @@ def displayNumber(id, min, max, default, step="1"):
     </form>
   </div>
   <div id="app" />
-{{ response.write(app_files, escape=False) }}
+{{ response.write(client_files['js'], escape=False) }}

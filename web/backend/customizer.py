@@ -2,7 +2,7 @@ import os, json, urllib, tempfile, subprocess, base64, random
 from datetime import datetime
 from collections import defaultdict
 
-from web.backend.utils import raiseHttp, loadPresetsList, updateParameterDisplay, get_app_files
+from web.backend.utils import raiseHttp, loadPresetsList, updateParameterDisplay, get_client_files
 from web.backend.utils import validateWebServiceParams, localIpsDir, getCustomMapping
 from urllib.parse import urlparse, parse_qs
 from utils.utils import getRandomizerDefaultParameters, removeChars, getPresetDir, PresetLoader, getPythonExec
@@ -97,7 +97,7 @@ class Customizer(object):
 
         return dict(customSprites=customSprites, customShips=customShips, musics=musics, comPresets=comPresets,
                     seedInfo=seedInfo, seedParams=seedParams, msg=msg, defaultParams=defaultParams,
-                    flavorPatches=RomReader.flavorPatches, app_files=get_app_files(include_css=False))
+                    flavorPatches=RomReader.flavorPatches, client_files=get_client_files(include_css=False))
 
     def initCustomizerSession(self):
         if self.session.customizer is None:

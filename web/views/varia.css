@@ -593,11 +593,6 @@ body {
     text-decoration: underline;
 }
 
-.vue-app .btn {
-    font-size: 12px;
-    text-transform: unset;
-}
-
 .btn .fa {
     display: inline-block;
     text-align: center;
@@ -642,14 +637,6 @@ body {
     filter: grayscale(1);
     opacity: 0.5;
 }
-.bootstrap-modal .-disabled {
-    opacity: 0.4;
-}
-.bootstrap-modal .-disabled [type=checkbox] {
-    pointer-events: none;
-    filter: invert(0.5);
-}
-.objective-selector,
 .objective-help {
     display: flex;
     flex-wrap: wrap;
@@ -690,16 +677,15 @@ body {
     padding: 4px 0;
 }
 .vue-app .btn-xs {
-    line-height: 1;
-    padding: 4px 5px;
-    margin: 0;
+
 }
 #objectivePortal .btn-danger { order: 1 }
 #objectivePortal .btn-warning { order: 2 }
 #objectivePortal .btn-primary { order: 3 }
 #objectivePortal .btn-success { order: 4 }
 #objectivePortal .btn-info { order: 5 }
-#objectivePortal .faux-link { order: 6; }
+#objectivePortal .btn-default { order: 6 }
+#objectivePortal .faux-link { order: 7; }
 
 /* readonly mode */
 #seedInfoVisibility .patch-toggler .btn {

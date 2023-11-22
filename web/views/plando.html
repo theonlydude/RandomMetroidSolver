@@ -97,7 +97,7 @@
     margin-right: 0.75em;
 }
 </style>
-
+{{ response.write(client_files['css'], escape=False) }}
 <script type="text/javascript">
 var globalPlando = true;
 
@@ -1132,4 +1132,4 @@ def displayNumber(id, min, max, default, step="1"):
 </div>
 
 <div id="app"></div>
-{{ response.write(app_files, escape=False) }}
+{{ response.write(client_files['js'], escape=False) }}

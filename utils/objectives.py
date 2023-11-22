@@ -237,7 +237,8 @@ enemiesLogic = {
                                                      sm.canUsePowerBombs(),
                                                      sm.haveItem("Super"))},
         {'Crocomire Speedway Bottom': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
-                                                         sm.haveItem("Super"))}
+                                                         sm.haveItem("Super"))},
+        {"Toilet Top": lambda sm: sm.haveItem("Super")}
     ]
 }
 

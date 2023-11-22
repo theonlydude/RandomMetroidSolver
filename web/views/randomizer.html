@@ -36,7 +36,6 @@ if (hs.registerOverlay) {
 
 <script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
-
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
@@ -45,6 +44,7 @@ if (hs.registerOverlay) {
 <script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
 
 <script type="text/javascript" src="{{=URL('static', 'js/localforage.nopromises.min.js')}}"></script>
+{{ response.write(client_files['css'], escape=False) }}
 
 <title>Super Metroid VARIA Randomizer</title>
 
@@ -3407,4 +3407,5 @@ def displayNumber(id, min, max, default, step="1"):
         {{=INPUT(_type="submit", _value="Randomize + Customize", _id="customizeBtn", _class="btn btn-default buttonRandom")}}
     </form>
   </div>
-</body>
+  <div id="app" />
+{{ response.write(client_files['js'], escape=False) }}

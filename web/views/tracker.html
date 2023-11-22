@@ -128,6 +128,7 @@ body[data-item-tracker-position="top-right"] #logAutoTracker {
     overflow-y: scroll;
 }
 </style>
+{{ response.write(client_files['css'], escape=False) }}
 
 <script type="text/javascript">
 var globalPlando = false;
@@ -868,4 +869,4 @@ rooms['mirror'] = {
 
 </div>
 <div id="app"></div>
-{{ response.write(app_files, escape=False) }}
+{{ response.write(client_files['js'], escape=False) }}

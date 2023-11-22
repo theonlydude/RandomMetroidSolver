@@ -26,6 +26,7 @@ extend 'layout.html'
 
 <script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
+{{ response.write(client_files['css'], escape=False) }}
 
 <title>Super Metroid VARIA Customizer</title>
 
@@ -2320,4 +2321,5 @@ if seedInfo != None:
         {{=INPUT(_type="submit", _value="customize", _id="submitBtn", _class="btn btn-default buttonRandom")}}
     </form>
   </div>
-</body>
+  <div id="app" />
+  {{ response.write(client_files['js'], escape=False) }}

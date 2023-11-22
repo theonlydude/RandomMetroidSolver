@@ -1,5 +1,5 @@
 # base dockerfile from git@github.com:cabildocl/web2py-docker.git
-FROM nginx:latest
+FROM nginx:1.24.0
 MAINTAINER VARIA "varia@varia.run"
 
 ENV CERT_PASS web2py

@@ -2759,9 +2759,15 @@ def displayNumber(id, min, max, default, step="1"):
                 </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td><span id="objectiveText">Objectives to access Tourian:</span></td>
-                  <td>
-                    <div id="objectivePortal" class="vue-app" />
+                  <td colspan="2">
+                    <div style="display: flex; justify-content: space-between;gap: 20px; align-items: center;">
+                      <div id="objectiveText" style="text-wrap: no-wrap">
+                        Objectives to access Tourian:
+                      </div>
+                      <div style="min-width: 50%;">
+                        <div id="objectivePortal" class="vue-app" />
+                      </div>
+                    </div>
                   </td>
                   <td id="objectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>

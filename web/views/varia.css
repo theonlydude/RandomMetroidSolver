@@ -574,7 +574,15 @@ body {
     text-wrap: nowrap;
     width: 200px;
 }
-
+.vue-app .btn {
+    font-size: 12px;
+    text-transform: unset;
+}
+.vue-app .btn-xs {
+    line-height: 1;
+    padding: 4px 5px;
+    margin: 0;
+}
 .btn-group > .btn {
     border-radius: 5px;
     margin-right: 0;
@@ -690,4 +698,12 @@ body {
 /* readonly mode */
 #seedInfoVisibility .patch-toggler .btn {
     pointer-events: none;
+}
+
+.false-half-td {
+  display: flex;
+  justify-content:
+    space-between;
+  gap: 20px;
+  align-items: center;
 }

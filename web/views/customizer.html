@@ -2315,10 +2315,21 @@ if seedInfo != None:
 {{    if seedParams["objectiveRandom"] == "true":}}
                 <td>random</td></tr>
               <tr {{=setBold("nbObjective")}}><td>Number of Objectives</td><td>{{=seedParams["nbObjective"]}}</td></tr>
-              <tr><td>Objectives pool</td><td><div id="objectivePortal" class="vue-app"></div></td></tr>
-{{    else:}}
-                <td><div id="objectivePortal" class="vue-app"></div></td></tr>
-{{        pass}}
+{{        pass }}
+              <tr>
+                <td colspan="2">
+                  <div class="false-half-td">
+                    <span>
+                    {{ if seedParams["objectiveRandom"] == "true": }}
+                    Objectives pool
+                    {{ else: }}
+                    Objectives
+                    {{ pass }}
+                    </span>
+                    <div id="objectivePortal" class="vue-app" style="min-width: 50%"></div>
+                  </div>
+                </td>
+              </tr>
               <tr {{=setBold("nbObjectivesRequired")}}><td>Number of required objectives</td><td>{{=seedParams["nbObjectivesRequired"]}}</td></tr>
               <tr {{=setBold("hiddenObjectives")}}><td>Hidden objectives</td><td>{{=seedParams["hiddenObjectives"]}}</td></tr>
               <tr {{=setBold("distributeObjectives")}}><td>Distribute objectives</td><td>{{=seedParams["distributeObjectives"]}}</td></tr>

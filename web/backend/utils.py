@@ -448,16 +448,17 @@ def get_client_files(include_css=True):
     with open('applications/solver/static/client/manifest.json', 'r') as manifest:
         data = json.loads(manifest.read())
     js = [v for k, v in data.items() if k.endswith('.js')]
-    css = [
+    css = []
+    if include_css:
+        # The tracker contains some css that doesn't play nice with the randomizer/customizer
+        # Until those pages are redesigned, these are tracker-only
+        css += [v for k, v in data.items() if k.endswith('.css')]
+    css += [
         "/solver/static/client/icons/super-metroid.css",
         "/solver/static/client/icons/inventory.css",
         "/solver/static/client/icons/varia.css",
         "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css",
     ]
-    if include_css:
-        # The tracker contains some css that doesn't play nice with the randomizer/customizer
-        # Until those pages are redesigned, these are tracker-only
-        css += [v for k, v in data.items() if k.endswith('.css')]
     js_tags = [f'<script src="{url}"></script>' for url in js]
     css_tags =  [f'<link href="{url}" rel="stylesheet" />' for url in css]
     return {

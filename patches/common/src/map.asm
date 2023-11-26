@@ -227,6 +227,7 @@ INCSRC "map/config/MaptileGlow.asm"
 INCSRC "map/config/MapDecoration.asm"
 
 !unexplored_gray = $318c
+!vanilla_etank_color = $48fb
 
 ;Clean up
 ;;; commented out for VARIA to reduce IPS size

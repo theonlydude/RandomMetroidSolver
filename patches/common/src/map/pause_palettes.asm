@@ -4,7 +4,7 @@ include
 org $b6f000
 	dw $0000, $02df, $01d7, $00ac, $5ebb, $3db3, $292e, $1486, $6318, $48fb, $7fff, $0000, $6318, !unexplored_gray, $7fff, $0000
 org $b6f020
-	dw $2003, $0bb1, $1ea9, $0145, $0000, $3db3, $292e, $1486, $6318, $5ef7, $0000, $0000, $6318, $02df, $7fff, $0000
+	dw $2003, $0bb1, $1ea9, $0145, $0000, $3db3, $292e, $1486, $6318, $5ef7, $0000, $0000, $6318, $02df, !vanilla_etank_color, $7fff
 org $b6f040
         ;; modified "unexplored" palette to be less dark
         dw $2003, !unexplored_gray, $6b5a, $4e73, $0000, $7fff, $0156, $001f, $2413, $559d, $0000, $02df, $4408, $7fff, $5ef7, $318c

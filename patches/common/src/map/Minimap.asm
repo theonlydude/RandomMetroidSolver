@@ -225,6 +225,8 @@ org $808764
 !pal6_idx = 25
 ;; palette 0 (acid)
 !pal0_idx = 1
+;; palette 7 red flashing color
+!pal7_idx = 30
 
 ;; CGRAM access registers
 !CGADD = $2121
@@ -460,6 +462,7 @@ load_target_palette:
 
 target_pal:
         lda 2*!pal3_idx+!palettes_ram : sta 2*!pal3_idx+!palettes_ram+$200
+        lda 2*!pal7_idx+!palettes_ram : sta 2*!pal7_idx+!palettes_ram+$200
         rts
 
 door_transition:
@@ -477,6 +480,7 @@ load_tileset_palette:
 
 set_hud_map_colors:
         lda #!unexplored_gray : sta 2*!pal3_idx+!palettes_ram
+        lda #!vanilla_etank_color : sta 2*!pal7_idx+!palettes_ram
         ;; FIXME hardcode for now
         lda #!AreaColor_Crateria : sta !explored_0
         lda #!AreaColor_WreckedShip : sta !explored_1

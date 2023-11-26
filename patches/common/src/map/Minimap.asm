@@ -208,7 +208,7 @@ org $8097D3
         ldy.w #!vcounter_target
         jmp begin_hud
 
-;; raide HUD one pixel to have an extra scanline to change colors
+;; raise HUD one pixel to have an extra scanline to change colors
 org $888338
         jsl raise_hud
 
@@ -230,6 +230,7 @@ org $88838B
 !CGADD = $2121
 !CGDATA = $2122
 
+;; explored colors definitions
 !explored_0_index = !pal2_idx
 !explored_0 = $0362
 !explored_0_backup #= !explored_0_index*2+!palettes_ram
@@ -244,7 +245,6 @@ org $88838B
 
 ;; to raise HUD during door transitions and message boxes
 !NMI_BG3_scroll = $bb
-!NMI_BG3_scroll_backup = $0368
 !BG3VOFS = $2112
 
 macro setNextColor(addr)
@@ -454,10 +454,13 @@ raise_hud_door_transition:
         rtl
 
 org $858199
+;; replace BG3 Y scroll value at the top of the screen in HDMA RAM table
 raise_hud_msg_boxes:
-        ;; ;; take advantage of vanilla useless code
-        ;; lda.b #!hud_draw_offset
-        ;; sta.w !BG3VOFS
-        ;; nop
-
+        lda.b #!hud_draw_offset
+        sta.w !BG3VOFS
+        nop
+org $8581A7
+        lda.w #!hud_draw_offset
+org $8582D7
+        lda.w #!hud_draw_offset
 }

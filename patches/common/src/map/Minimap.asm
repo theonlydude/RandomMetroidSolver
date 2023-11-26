@@ -247,6 +247,10 @@ org $88838B
 !NMI_BG3_scroll = $bb
 !BG3VOFS = $2112
 
+;; F-Blank management
+!NMI_INIDISP = $51
+!INIDISP = $2100
+
 macro setNextColor(addr)
         lda <addr> : sta.w !CGDATA
         lda <addr>+1 : sta.w !CGDATA
@@ -261,27 +265,38 @@ macro addWhite()
         lda.b #$ff : sta.w !CGDATA : sta.w !CGDATA
 endmacro
 
+macro beginFBlank()
+        lda.b !NMI_INIDISP : ora.b #$80 : sta.w !INIDISP
+endmacro
+
+macro endFBlank()
+        lda.b !NMI_INIDISP : sta.w !INIDISP
+endmacro
 
 org $80d600
 begin_hud:
         ldx.w #!hcounter_target
         %a8()
         pha
+        %beginFBlank()
         %setColor(!explored_0_index, !explored_0)
         %setColor(!explored_1_index, !explored_1)
         %addWhite()
         %setColor(!explored_2_index, !explored_2)
         %addWhite()
+        %endFBlank()
         pla
         %a16()
         rts
 
 macro endHudColors()
+        %beginFBlank()
         %setColor(!explored_2_index, !explored_2_backup)
         %setNextColor(!explored_2_backup+2)
         %setColor(!explored_1_index, !explored_1_backup)
         %setNextColor(!explored_1_backup+2)
         %setColor(!explored_0_index, !explored_0_backup)
+        %endFBlank()
 endmacro
 
 macro mainGameplayStart()

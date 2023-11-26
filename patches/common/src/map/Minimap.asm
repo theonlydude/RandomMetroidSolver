@@ -161,9 +161,6 @@ org $82E4A2
 org $82e75a
         jsl door_transition
 
-;; org $82E221
-;;         jsl palette_clear : nop : nop
-
 org $82E7C9
         jsl load_tileset_palette : nop : nop : nop
 
@@ -183,7 +180,7 @@ org $80962e     ; horizontal transition
 
 ;; Hook into begin/end HUD drawing IRQs to switch colors
 !vcounter_target = $1e          ; since we raise the HUD, trigger IRQ 1 line early
-!hcounter_target = 264          ; change IRQ fire in scanline to restore display at the proper time
+!hcounter_target = 220          ; change IRQ fire in scanline to restore display at the proper time
 !hud_draw_offset = 1
 
 org $8096A2
@@ -216,6 +213,9 @@ org $82E304
         jsl raise_hud_door_transition : nop
 org $88838B
         nop : nop
+
+org $808764
+        jsr enable_hcounter
 
 ;; normal explored color
 !pal2_idx = 9
@@ -250,6 +250,10 @@ org $88838B
 ;; F-Blank management
 !NMI_INIDISP = $51
 !INIDISP = $2100
+!OPHCT = $213C
+!STAT78 = $213F
+!WRIO = $4201
+!hcounter_begin_hud = $0368
 
 macro setNextColor(addr)
         lda <addr> : sta.w !CGDATA
@@ -273,20 +277,43 @@ macro endFBlank()
         lda.b !NMI_INIDISP : sta.w !INIDISP
 endmacro
 
+
 org $80d600
 begin_hud:
-        ldx.w #!hcounter_target
-        %a8()
         pha
+        %a8()
         %beginFBlank()
         %setColor(!explored_0_index, !explored_0)
         %setColor(!explored_1_index, !explored_1)
         %addWhite()
         %setColor(!explored_2_index, !explored_2)
         %addWhite()
-        %endFBlank()
-        pla
+        ;; save hcounter (beam position) to determine next IRQ hcounter target
+        ;; indeed, depending on active HDMA the time taken by the IRQ handler varies
+        ;; see https://problemkaputt.de/fullsnes.htm#snespictureprocessingunitppu
+        ;; section "SNES PPU Timers and Status" for details
+        stz.w !WRIO : lda.b #$80 : sta.w !WRIO
+        lda.w !OPHCT : sta.w !hcounter_begin_hud
+        lda.w !OPHCT : and.b #$01 : sta.w !hcounter_begin_hud+1
+        lda.w !STAT78
         %a16()
+        ;; some heuristics based on hcounter value
+        ;; whatever works, we can't afford fancy calculations in an IRQ handler
+        lda.w !hcounter_begin_hud
+        cmp.w #165 : bcc .low
+        cmp.w #180 : bcc .high
+        ldx.w #!hcounter_target
+        bra .end
+.high:
+        ldx.w #!hcounter_target-20
+        bra .end
+.low:
+        ldx.w #!hcounter_target+20
+.end:
+        %a8()
+        %endFBlank()
+        %a16()
+        pla
         rts
 
 macro endHudColors()
@@ -296,7 +323,6 @@ macro endHudColors()
         %setColor(!explored_1_index, !explored_1_backup)
         %setNextColor(!explored_1_backup+2)
         %setColor(!explored_0_index, !explored_0_backup)
-        %endFBlank()
 endmacro
 
 macro mainGameplayStart()
@@ -318,6 +344,7 @@ end_hud_main_gameplay:
 	LDA.b $6a      ;| 8096BA | 80 | \
 	STA.w $212C                      ;| 8096BC | 80 | } Main screen layers = [gameplay main screen layers]
 .end:
+        %endFBlank()
         %a16()
         pla
         rts
@@ -340,6 +367,7 @@ end_hud_transition_start:
 .BRA_809703:
         STA.w $212C                      ;| 809703 | 80 | 
 .end:
+        %endFBlank()
         %a16()
         pla
         rts
@@ -350,6 +378,7 @@ end_hud_draygon:
         %a8()
         %endHudColors()
         %mainGameplayStart()
+        %endFBlank()
 .end:
         %a16()
         pla
@@ -381,9 +410,12 @@ end_hud_irq_vertical_transition:
         BMI .BRA_80979F                          ;| 809799 | 80 | } If door transition has not finished scrolling:
         JSL.l $80AE4E              ;| 80979B | 80 |  Follow door transition
 .BRA_80979F:
-        LDA.w #$0014                            ;| 80979F | 80 |  Interrupt command = 14h
         LDY.w #$00D8                            ;| 8097A2 | 80 |  IRQ v-counter target = D8h
         ldx.w #$0098
+        %a8()
+        %endFBlank()
+        %a16()
+        LDA.w #$0014                            ;| 80979F | 80 |  Interrupt command = 14h
 .end:
         rts
 
@@ -409,9 +441,12 @@ end_hud_irq_horizontal_transition:
         BMI .BRA_809800                          ;| 8097FA | 80 | } If door transition has not finished scrolling:
         JSL.l $80AE4E              ;| 8097FC | 80 |  Follow door transition
 .BRA_809800:
-        LDA.w #$001A                            ;| 809800 | 80 |  Interrupt command = 1Ah
         LDY.w #$00A0                            ;| 809803 | 80 |  IRQ v-counter target = A0h (bottom of door)
         ldx.w #$0098
+        %a8()
+        %endFBlank()
+        %a16()
+        LDA.w #$001A                            ;| 809800 | 80 |  Interrupt command = 1Ah
 .end:
         rts
 
@@ -431,11 +466,6 @@ door_transition:
         JSL $848270             ; hijacked code
         jsr set_hud_map_colors
         rtl
-
-;; palette_clear:
-;;         ;; TODO
-;;         lda $c012 : sta $c212   ; hijacked code
-;;         rtl
 
 load_tileset_palette:
         ;; vanilla code: Decompress [tileset palette pointer] to $7E:C200
@@ -467,6 +497,10 @@ raise_hud_door_transition:
         LDA #$0008
         STA $A7
         rtl
+
+enable_hcounter:
+        lda.b #$80 : sta.w !WRIO
+        rts
 
 org $858199
 ;; replace BG3 Y scroll value at the top of the screen in HDMA RAM table

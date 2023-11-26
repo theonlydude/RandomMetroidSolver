@@ -150,4 +150,314 @@ ORG $90E801 : JSL MinimapASM
 ORG $90E873 : JSL MinimapASM
 ORG $90E8E5 : JSL MinimapASM
 ORG $90E8F8 : JSL MinimapASM
+
+
+;;; VARIA addition: display custom area colors in minimap
+
+;; hook some palettes management
+org $82E4A2
+        jsl load_target_palette : nop : nop
+
+org $82e75a
+        jsl door_transition
+
+;; org $82E221
+;;         jsl palette_clear : nop : nop
+
+org $82E7C9
+        jsl load_tileset_palette : nop : nop : nop
+
+
+;; change "end HUD drawing" IRQ handlers to skip registers update so we
+;; can do it ourselves
+org $80961c     ; main gameplay
+        dw $96c1
+org $809620     ; start of door transition
+        dw $9708
+org $809624     ; draygon's room
+        dw $9746
+org $809628     ; vertical transition
+        dw end_hud_irq_vertical_transition
+org $80962e     ; horizontal transition
+        dw end_hud_irq_horizontal_transition
+
+;; Hook into begin/end HUD drawing IRQs to switch colors
+!vcounter_target = $1e          ; since we raise the HUD, trigger IRQ 1 line early
+!hcounter_target = 264          ; change IRQ fire in scanline to restore display at the proper time
+!hud_draw_offset = 1
+
+org $8096A2
+        ldy.w #!vcounter_target
+        jmp begin_hud
+org $8096CF
+        jmp end_hud_main_gameplay
+org $8096EA
+        ldy.w #!vcounter_target
+        jmp begin_hud
+org $809716
+        jmp end_hud_transition_start
+org $80972C
+        ldy.w #!vcounter_target
+        jmp begin_hud
+org $809754
+        jmp end_hud_draygon
+org $80976A
+        ldy.w #!vcounter_target
+        jmp begin_hud
+org $8097D3
+        ldy.w #!vcounter_target
+        jmp begin_hud
+
+;; raide HUD one pixel to have an extra scanline to change colors
+org $888338
+        jsl raise_hud
+
+org $82E304
+        jsl raise_hud_door_transition : nop
+org $88838B
+        nop : nop
+
+;; normal explored color
+!pal2_idx = 9
+;; normal unexplored color
+!pal3_idx = 13
+;; palette 6 (used for color math)
+!pal6_idx = 25
+;; palette 0 (acid)
+!pal0_idx = 1
+
+;; CGRAM access registers
+!CGADD = $2121
+!CGDATA = $2122
+
+!explored_0_index = !pal2_idx
+!explored_0 = $0362
+!explored_0_backup #= !explored_0_index*2+!palettes_ram
+
+!explored_1_index = !pal0_idx
+!explored_1 = $0364
+!explored_1_backup #= !explored_1_index*2+!palettes_ram
+
+!explored_2_index = !pal6_idx
+!explored_2 = $0366
+!explored_2_backup #= !explored_2_index*2+!palettes_ram
+
+;; to raise HUD during door transitions and message boxes
+!NMI_BG3_scroll = $bb
+!NMI_BG3_scroll_backup = $0368
+!BG3VOFS = $2112
+
+macro setNextColor(addr)
+        lda <addr> : sta.w !CGDATA
+        lda <addr>+1 : sta.w !CGDATA
+endmacro
+
+macro setColor(index, addr)
+        lda.b #<index> : sta.w !CGADD
+        %setNextColor(<addr>)
+endmacro
+
+macro addWhite()
+        lda.b #$ff : sta.w !CGDATA : sta.w !CGDATA
+endmacro
+
+
+org $80d600
+begin_hud:
+        ldx.w #!hcounter_target
+        %a8()
+        pha
+        %setColor(!explored_0_index, !explored_0)
+        %setColor(!explored_1_index, !explored_1)
+        %addWhite()
+        %setColor(!explored_2_index, !explored_2)
+        %addWhite()
+        pla
+        %a16()
+        rts
+
+macro endHudColors()
+        %setColor(!explored_2_index, !explored_2_backup)
+        %setNextColor(!explored_2_backup+2)
+        %setColor(!explored_1_index, !explored_1_backup)
+        %setNextColor(!explored_1_backup+2)
+        %setColor(!explored_0_index, !explored_0_backup)
+endmacro
+
+macro mainGameplayStart()
+	LDA.b $70;| 8096AB | 80 | \
+	STA.w $2130                      ;| 8096AD | 80 | } Colour math control register A = [gameplay colour math control register A]
+	LDA.b $73;| 8096B0 | 80 | \
+	STA.w $2131                      ;| 8096B2 | 80 | } Colour math control register B = [gameplay colour math control register B]
+	LDA.b $5b;| 8096B5 | 80 | \
+	STA.w $2109                      ;| 8096B7 | 80 | } BG3 tilemap base address and size = [gameplay BG3 tilemap base address and size]
+endmacro
+
+end_hud_main_gameplay:
+        ldx.w #$0098              ; hijacked code
+        pha
+        %a8()
+        %endHudColors()
+        ;; vanilla code
+        %mainGameplayStart()
+	LDA.b $6a      ;| 8096BA | 80 | \
+	STA.w $212C                      ;| 8096BC | 80 | } Main screen layers = [gameplay main screen layers]
+.end:
+        %a16()
+        pla
+        rts
+
+end_hud_transition_start:
+        ldx.w #$0098              ; hijacked code
+        pha
+        %a8()
+        %endHudColors()
+        ;; vanilla code
+        LDA.w $07b3                         ;| 8096F3 | 80 | \
+        ORA.w $07b1                 ;| 8096F6 | 80 | |
+        BIT.b #$01                              ;| 8096F9 | 80 | } If ([CRE bitset] | [previous CRE bitset]) & 1 != 0:
+        BEQ .BRA_809701                          ;| 8096FB | 80 | /
+        LDA.b #$10                              ;| 8096FD | 80 | \
+        BRA .BRA_809703                          ;| 8096FF | 80 | } Main screen layers = sprites
+; Else (([CRE bitset] | [previous CRE bitset]) & 1 = 0):
+.BRA_809701:
+        LDA.b #$11                              ;| 809701 | 80 |  Main screen layers = BG1/sprites
+.BRA_809703:
+        STA.w $212C                      ;| 809703 | 80 | 
+.end:
+        %a16()
+        pla
+        rts
+
+end_hud_draygon:
+        ldx.w #$0098              ; hijacked code
+        pha
+        %a8()
+        %endHudColors()
+        %mainGameplayStart()
+.end:
+        %a16()
+        pla
+        rts
+
+end_hud_irq_vertical_transition:
+        %a8()
+        %endHudColors()
+        ;; vanilla code
+        LDA.w $07b3                         ;| 8096F3 | 80 | \
+        ORA.w $07b1                 ;| 8096F6 | 80 | |
+        BIT.b #$01                              ;| 8096F9 | 80 | } If ([CRE bitset] | [previous CRE bitset]) & 1 != 0:
+        BEQ .BRA_809781                          ;| 80977B | 80 | /
+        LDA.b #$10                              ;| 80977D | 80 | \
+        BRA .BRA_809783                          ;| 80977F | 80 | } Main screen layers = sprites
+; Else (([CRE bitset] | [previous CRE bitset]) & 1 = 0):
+.BRA_809781:
+        LDA.b #$11                              ;| 809781 | 80 |  Main screen layers = BG1/sprites
+.BRA_809783:
+        STA.w $212C                      ;| 809783 | 80 | 
+        STZ.w $2130                      ;| 809786 | 80 | \
+        STZ.w $2131                      ;| 809789 | 80 | } Disable colour math
+        REP.b #$20                              ;| 80978C | 80 | 
+        LDX.w $05bc      ;| 80978E | 80 | \
+        BPL .BRA_809796                          ;| 809791 | 80 | } If door transition VRAM update:
+        JSR.w $9632   ;| 809793 | 80 |  Execute door transition VRAM update
+.BRA_809796:
+        LDA.w $0931                       ;| 809796 | 80 | \
+        BMI .BRA_80979F                          ;| 809799 | 80 | } If door transition has not finished scrolling:
+        JSL.l $80AE4E              ;| 80979B | 80 |  Follow door transition
+.BRA_80979F:
+        LDA.w #$0014                            ;| 80979F | 80 |  Interrupt command = 14h
+        LDY.w #$00D8                            ;| 8097A2 | 80 |  IRQ v-counter target = D8h
+        ldx.w #$0098
+.end:
+        rts
+
+end_hud_irq_horizontal_transition:
+        %a8()
+        %endHudColors()
+        ;; vanilla code
+        LDA.w $07b3                         ;| 8096F3 | 80 | \
+        ORA.w $07b1                 ;| 8096F6 | 80 | |
+        BIT.b #$01                              ;| 8096F9 | 80 | } If ([CRE bitset] | [previous CRE bitset]) & 1 != 0:
+        BEQ .BRA_8097EA                          ;| 8097E4 | 80 | /
+        LDA.b #$10                              ;| 8097E6 | 80 | \
+        BRA .BRA_8097EC                          ;| 8097E8 | 80 | } Main screen layers = sprites
+; Else (([CRE bitset] | [previous CRE bitset]) & 1 = 0):
+.BRA_8097EA:
+        LDA.b #$11                              ;| 8097EA | 80 |  Main screen layers = BG1/sprites
+.BRA_8097EC:
+        STA.w $212C                      ;| 8097EC | 80 | 
+        STZ.w $2130                      ;| 8097EF | 80 | \
+        STZ.w $2131                      ;| 8097F2 | 80 | } Disable colour math
+        REP.b #$20                              ;| 8097F5 | 80 | 
+        LDA.w $0931                       ;| 8097F7 | 80 | \
+        BMI .BRA_809800                          ;| 8097FA | 80 | } If door transition has not finished scrolling:
+        JSL.l $80AE4E              ;| 8097FC | 80 |  Follow door transition
+.BRA_809800:
+        LDA.w #$001A                            ;| 809800 | 80 |  Interrupt command = 1Ah
+        LDY.w #$00A0                            ;| 809803 | 80 |  IRQ v-counter target = A0h (bottom of door)
+        ldx.w #$0098
+.end:
+        rts
+
+load_target_palette:
+        ;; Prevent HUD map colors from gradually changing (e.g. to blue/pink) during door transition
+        jsr target_pal
+        ;; hijacked code
+        LDA #$E4A9
+        STA $099C
+        rtl
+
+target_pal:
+        lda 2*!pal3_idx+!palettes_ram : sta 2*!pal3_idx+!palettes_ram+$200
+        rts
+
+door_transition:
+        JSL $848270             ; hijacked code
+        jsr set_hud_map_colors
+        rtl
+
+;; palette_clear:
+;;         ;; TODO
+;;         lda $c012 : sta $c212   ; hijacked code
+;;         rtl
+
+load_tileset_palette:
+        ;; vanilla code: Decompress [tileset palette pointer] to $7E:C200
+        JSL $80B0FF
+        dl $7EC200
+        jsr set_hud_map_colors
+        jsr target_pal
+        rtl
+
+set_hud_map_colors:
+        lda #!unexplored_gray : sta 2*!pal3_idx+!palettes_ram
+        ;; FIXME hardcode for now
+        lda #!AreaColor_Crateria : sta !explored_0
+        lda #!AreaColor_WreckedShip : sta !explored_1
+        lda #!AreaColor_Tourian : sta !explored_2
+        rts
+
+;; affects the BG3 scroll HDMA object, active during main gameplay
+raise_hud:
+        lda.w #!hud_draw_offset : sta $7ECADA
+        lda.w #0
+        rtl
+
+;; as BG3 scroll HDMA object is inactive during door transitions,
+;; we set it via the NMI routine
+raise_hud_door_transition:
+        lda.w #!hud_draw_offset : sta.b !NMI_BG3_scroll
+        ;; hijacked code
+        LDA #$0008
+        STA $A7
+        rtl
+
+org $858199
+raise_hud_msg_boxes:
+        ;; ;; take advantage of vanilla useless code
+        ;; lda.b #!hud_draw_offset
+        ;; sta.w !BG3VOFS
+        ;; nop
+
 }

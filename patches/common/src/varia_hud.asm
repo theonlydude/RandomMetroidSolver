@@ -182,7 +182,7 @@ org $809B99
 	BRA ++
 	+
 	CMP $14 : BCC +
-	LDA #$2831
+	LDA #BGtile($30, 7, 1, 0, 0)
 	BRA ++
 	+
 	LDA #$3430

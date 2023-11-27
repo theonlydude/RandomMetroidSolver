@@ -164,6 +164,9 @@ org $82e75a
 org $82E7C9
         jsl load_tileset_palette : nop : nop : nop
 
+org $82E21B
+        jsl preserve_etank_color : nop : nop
+
 
 ;; change "end HUD drawing" IRQ handlers to skip registers update so we
 ;; can do it ourselves
@@ -180,7 +183,7 @@ org $80962e     ; horizontal transition
 
 ;; Hook into begin/end HUD drawing IRQs to switch colors
 !vcounter_target = $1e          ; since we raise the HUD, trigger IRQ 1 line early
-!hcounter_target = 220          ; change IRQ fire in scanline to restore display at the proper time
+!hcounter_target = 210          ; change IRQ fire in scanline to restore display at the proper time
 !hud_draw_offset = 1
 
 org $8096A2
@@ -214,8 +217,18 @@ org $82E304
 org $88838B
         nop : nop
 
+org $828DF7
+        jsl raise_hud_pause : nop
+org $82A104
+        nop : nop
+
 org $808764
         jsr enable_hcounter
+
+;; replace etank tile with a custom one using palette 7,
+;; so etanks don't change color with minimap
+org $809BDC
+        ldx.w #BGtile($30, 7, 1, 0, 0)
 
 ;; normal explored color
 !pal2_idx = 9
@@ -290,6 +303,8 @@ begin_hud:
         %addWhite()
         %setColor(!explored_2_index, !explored_2)
         %addWhite()
+        lda.b #!pal7_idx+1 : sta.w !CGADD
+        %addWhite()
         ;; save hcounter (beam position) to determine next IRQ hcounter target
         ;; indeed, depending on active HDMA the time taken by the IRQ handler varies
         ;; see https://problemkaputt.de/fullsnes.htm#snespictureprocessingunitppu
@@ -302,8 +317,8 @@ begin_hud:
         ;; some heuristics based on hcounter value
         ;; whatever works, we can't afford fancy calculations in an IRQ handler
         lda.w !hcounter_begin_hud
-        cmp.w #165 : bcc .low
-        cmp.w #180 : bcc .high
+        cmp.w #180 : bcc .low
+        cmp.w #195 : bcc .high
         ldx.w #!hcounter_target
         bra .end
 .high:
@@ -320,6 +335,8 @@ begin_hud:
 
 macro endHudColors()
         %beginFBlank()
+        lda.b #!pal7_idx+1 : sta.w !CGADD
+        stz.w !CGDATA : stz.w !CGDATA
         %setColor(!explored_2_index, !explored_2_backup)
         %setNextColor(!explored_2_backup+2)
         %setColor(!explored_1_index, !explored_1_backup)
@@ -463,6 +480,7 @@ load_target_palette:
 target_pal:
         lda 2*!pal3_idx+!palettes_ram : sta 2*!pal3_idx+!palettes_ram+$200
         lda 2*!pal7_idx+!palettes_ram : sta 2*!pal7_idx+!palettes_ram+$200
+        ;; lda 2*(!pal7_idx+1)+!palettes_ram : sta 2*(!pal7_idx+1)+!palettes_ram+$200
         rts
 
 door_transition:
@@ -481,6 +499,7 @@ load_tileset_palette:
 set_hud_map_colors:
         lda #!unexplored_gray : sta 2*!pal3_idx+!palettes_ram
         lda #!vanilla_etank_color : sta 2*!pal7_idx+!palettes_ram
+        ;; lda #$7FFF : sta 2*(!pal7_idx+1)+!palettes_ram
         ;; FIXME hardcode for now
         lda #!AreaColor_Crateria : sta !explored_0
         lda #!AreaColor_WreckedShip : sta !explored_1
@@ -502,9 +521,19 @@ raise_hud_door_transition:
         STA $A7
         rtl
 
+raise_hud_pause:
+        lda.b !NMI_BG3_scroll : sta.w $0770 ; hijacked code
+        lda.b #!hud_draw_offset : sta.b !NMI_BG3_scroll
+        rtl
+
 enable_hcounter:
         lda.b #$80 : sta.w !WRIO
         rts
+
+preserve_etank_color:
+        LDA $C03A : STA $C23A   ; hijacked code
+        LDA $C03C : STA $C23C
+        rtl
 
 org $858199
 ;; replace BG3 Y scroll value at the top of the screen in HDMA RAM table
